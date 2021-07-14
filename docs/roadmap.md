@@ -25,7 +25,7 @@ We plan to focus on this to ensure that only 'interesting' traces are ingested. 
 
 We are primarily focused on metrics & traces at the moment and a seamless experience between them.
 
-However, we do have log aggregation in our roadmap. But we are waiting for opentelemetry logs to get mature ( it is in alpha at the moment) and plan to support it, as we have native support for opentelemetry the other pieces
+However, we do have log aggregation in our roadmap. But we are waiting for OpenTelemetry logs to get mature (it is in alpha currently) and plan to support it, as we have native support for OpenTelemetry.
 
 ### Anomaly detection framework
 
