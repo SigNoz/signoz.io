@@ -27,6 +27,7 @@ We are primarily focused on metrics & traces at the moment and a seamless experi
 
 However, we do have log management in our roadmap. But we are waiting for OpenTelemetry logs to get mature (it is in alpha currently) and plan to support it, as we have native support for OpenTelemetry.
 
+
 ### Anomaly detection framework
 
 A framework to provide dynamic thresholding capabilities to enable better Signal to Noise in alerts. One of the projects we are closely following in this space is LinkedIn's [Third Eye](https://engineering.linkedin.com/blog/2019/01/introducing-thirdeye--linkedins-business-wide-monitoring-platfor) If you know of any other good frameworks, please share in [Github Discussions](https://github.com/SigNoz/signoz/discussions)
