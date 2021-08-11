@@ -18,7 +18,6 @@ This package includes the instrumentation agent as well as instrumentations for 
 
 Enable the instrumentation agent using the -javaagent flag to the JVM.
 
-  
 <p>&nbsp;</p>
 
 ### For Java applications packages as JAR files
@@ -60,15 +59,14 @@ _<access_token>_ can be found in your settings page as shown in below image
 </TabItem>
 
 </Tabs> -->
-  
+
 <p>&nbsp;</p>
 
 ### Tomcat Instrumentation
 
-For Tomcat application, you need to make sure the following environment variables set up.
+For Tomcat application, you need to make sure the following environment variables are set up.
 
 If you run your `.war` package by putting in `webapps` folder, just add `setenv.sh` in your Tomcat `bin` folder.
-  
 
 This should set these environment variables and start sending telemetry data to SigNoz backend specified in the IP
 
@@ -80,9 +78,10 @@ export OTEL_EXPORTER_OTLP_ENDPOINT=<IP of SigNoz Backend>:4317
 export OTEL_RESOURCE_ATTRIBUTES=service.name=<app_name>
 
 ```
+
 where `app_name` is the name you want to set for your application
 and `IP of SigNoz Backend` is the IP where SigNoz backend is accessible
-  
+
 <p>&nbsp;</p>
 
 ### Troubleshooting your installation
