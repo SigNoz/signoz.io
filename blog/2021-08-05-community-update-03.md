@@ -7,10 +7,16 @@ author: Ankit Anand
 author_title: SigNoz Team
 author_url: https://github.com/ankit01-oss
 author_image_url: https://avatars.githubusercontent.com/u/83692067?v=4
-
+description: It's time for monthly product updates aka Signal 03. Let's see what humans at SigNoz have been upto 🙌
+image: /img/blog/2021/08/signal_03_cover.jpeg
 ---
-It's time for monthly product updates aka Signal #03. This month's release hit  a major milestones with PRs from 10+ contributors. Let's see what humans of SigNoz have been upto 🙌
+
+![You can use regex patterns for filtering traces](/img/blog/2021/08/signal_03_cover.jpeg)
+
+It's time for monthly product updates aka Signal #03. This month's release hit a major milestones with PRs from 10+ contributors. Let's see what humans of SigNoz have been upto 🙌
+
 <!--truncate-->
+
 Welcome to Signal #03!
 
 It's that time of the month when we update our community to what we've been up to recently. This month, we left behind a trail of squashed bugs, tiny but mighty product improvements, and onboarded new contributors for our journey ahead.
@@ -27,16 +33,19 @@ Some of our users wanted to see 4xx errors quickly. So we have enabled regex pat
 
 [Link to issue](https://github.com/SigNoz/signoz/pull/249)
 ![You can use regex patterns for filtering traces](/img/blog/2021/08/regex_pattern_hc.png)Apply regex operations on trace filters
+
 ### Frontend Improvements
 
 Flamegraphs and Gantt charts make a champion combo for debugging latency issues on our dashboard. We improved the experience slightly, where selecting a trace in the flamegraph highlights the corresponding span in the Gantt chart view.
 ![Selecting a trace in the flamegraph highlights the corresponding span in the gantt charts](/img/blog/2021/08/gantt_charts_hc.png)When you select a trace in the flamegraph, corresponding span in the Gantt chart gets highlighted
+
 ### Readme.md translation to Chinese
 
 We recently conducted a [deep dive](/blog/getting-to-know-our-4000-plus-stargazers-on-github/) into our stargazers and found out that the top 5 countries where our stargazers belong are from US, India, Brazil, China, and Germany.
 
 To make our GitHub repo more accessible, we raised requests for getting our [readme.md](https://github.com/SigNoz/signoz/blob/main/README.md) translated to different languages. [Tony Qu](https://github.com/tonyqus), a 15+ year .NET veteran, helped translate our [Readme](https://github.com/SigNoz/signoz/blob/main/README.zh-cn.md) to Chinese, and we couldn't be happier. 🤓
 ![Countries from which our stargazers belong](/img/blog/2021/08/stargazers_countries_hc.png)SigNoz's stargazers belong to nations worldwide
+
 ## Featured Issue
 
 ### Charts for 4xx status codes
