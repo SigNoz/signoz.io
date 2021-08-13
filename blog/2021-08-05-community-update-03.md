@@ -41,6 +41,7 @@ Some of our users wanted to see 4xx errors quickly. So we have enabled regex pat
 
 <!--- Apply regex operations on trace filters --->
 
+
 ### Frontend Improvements
 
 Flamegraphs and Gantt charts make a champion combo for debugging latency issues on our dashboard. We improved the experience slightly, where selecting a trace in the flamegraph highlights the corresponding span in the Gantt chart view.
@@ -48,6 +49,7 @@ Flamegraphs and Gantt charts make a champion combo for debugging latency issues 
 ![Selecting a trace in the flamegraph highlights the corresponding span in the gantt charts](/img/blog/2021/08/gantt_charts_hc.png)
 
 <!--- When you select a trace in the flamegraph, corresponding span in the Gantt chart gets highlighted --->
+
 
 ### Readme.md translation to Chinese
 
@@ -58,6 +60,7 @@ To make our GitHub repo more accessible, we raised requests for getting our [rea
 ![Countries from which our stargazers belong](/img/blog/2021/08/stargazers_countries_hc.png)
 
 <!--- SigNoz's stargazers belong to nations worldwide --->
+
 
 ## Featured Issue
 

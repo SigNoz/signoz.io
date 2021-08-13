@@ -49,6 +49,7 @@ The application list shown in the dashboard is from a sample app called HOT R.O.
 
 <!--- SigNoz dashboard --->
 
+
 ## Installing sample Spring Boot app
 
 For this tutorial, we will use a sample Spring Boot application built using Maven. You can find the code for the application at its [GitHub repo](https://github.com/spring-projects/spring-petclinic).
@@ -61,6 +62,7 @@ Steps to get the app set up and running:
    git clone https://github.com/spring-projects/spring-petclinic.git
    cd spring-petclinic
    ```
+
 
 2. Update port
    This app runs on port `8080` by default. But port `8080` is used by SigNoz for its query service, so let's update the port number to something else.
@@ -116,6 +118,7 @@ Also, update the port number in [petclinic_test_plan.jmx](https://github.com/Sig
 java -jar target/*.jar
 ```
 
+
 You can now access the application UI here: [http://localhost:8090/](http://localhost:8080/)
 
 ![Spring PetClinic app accessed at port:8090](/img/blog/2021/08/spring_petclinic_hc.png)
@@ -145,6 +148,7 @@ Check out the Spring Pet Clinic app at: [http://localhost:8090/](http://localhos
 
 Below you can find your `javaApp` in the list of applications being monitored.
 
+
 ![`Javaapp` appears in the list of applications monitored through SigNoz](/img/blog/2021/08/javaapp_boxed_hc.png)
 
 <!--- `javaApp` in the list of applications monitored --->
@@ -159,9 +163,11 @@ SigNoz comes with out of box RED metrics charts and visualization. RED metrics s
 - Error rate of requests
 - Duration taken by requests
 
+
 ![SigNoz dashboard showing application latency, requests per sec, error percentage and top endpoints](/img/blog/2021/08/signoz_charts_hc.png)
 
 Measure things like application latency, requests per sec, error percentage and see your top endpoints with SiGnoz.
+
 
 You can then choose a particular timestamp where latency is high to drill down to traces around that timestamp.
 
@@ -174,6 +180,7 @@ You can use flamegraphs to exactly identify the issue causing the latency.
 ![Flamegraphs and gantt charts to visualize time taken by requests](/img/blog/2021/08/signoz_flamegraphs_hc.png)
 
 <!--- Flamegraphs showing exact duration taken by each spans - a concept of distributed tracing --->
+
 
 ## Conclusion
 
