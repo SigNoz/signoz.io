@@ -7,10 +7,18 @@ author: Pranay Prateek
 author_title: SigNoz Team
 author_url: https://github.com/pranay01
 author_image_url: https://avatars.githubusercontent.com/u/504541?v=4
+description: Prometheus is a popular monitoring tool for kubernetes. Kube-state metrics and node exporters send a lot of metrics. But visualization of the metrics in charts is still painful. In this article, let's see how we can have some out of box visualizations with Prometheus.
+image: /img/blog/2019/11/prometheus_application_monitoring_hc.jpeg
+keywords:
+  - Prometheus
+  - Grafana
+  - kubernetes
+  - Application Monitoring
 ---
-PromCon is one of the premier conference on Prometheus and related tools like Grafana. This is held every year where developers from around the world gather to learn the latest in monitoring technologies
-<!--truncate-->
 
+PromCon is one of the premier conference on Prometheus and related tools like Grafana. This is held every year where developers from around the world gather to learn the latest in monitoring technologies
+
+<!--truncate-->
 
 [PromCon](https://promcon.io/) is one of the premier conferences on Prometheus and related tools like Grafana. This is held every year where developers from around the world gather to learn the latest in monitoring technologies
 
@@ -21,32 +29,32 @@ The conference featured lots of talks - from detailed guidelines from practition
 Here's the schedule from Day 1. As you can see, it features a good mix from different type of people - from devs to project maintainers to vendor representatives.
 ![](/img/blog/2019/11/Screen-Shot-2019-11-19-at-11.49.35-AM.jpg)PromCon 2019 - Day 1 Schedule
 
-We recently open-sourced our observability platform on Github 
+We recently open-sourced our observability platform on Github
 [ Check it here ](https://github.com/SigNoz/signoz)
 
 ## Here are my top 7 key takeaways from the sessions presented in PromCon 2019
 
 1. **Managing Grafana Dashboards with git**
 
-Adam Wolfe from Digital Ocean gave a great talk on how Grafana dashboards can be created and managed using git, rather than manually editing the dashboards. He is a developer in the storage team and they use Grafana to monitor their metrics.  His team had the problem of maintaining consistencies across dashboards and understanding who changed what. 
+Adam Wolfe from Digital Ocean gave a great talk on how Grafana dashboards can be created and managed using git, rather than manually editing the dashboards. He is a developer in the storage team and they use Grafana to monitor their metrics.  His team had the problem of maintaining consistencies across dashboards and understanding who changed what.
 
-Also, to deploy many dashboards - as they do, for monitoring different components - it becomes a time-consuming task to configure the dashboards manually. 
+Also, to deploy many dashboards - as they do, for monitoring different components - it becomes a time-consuming task to configure the dashboards manually.
 
 To solve this, they used Grafonnet, which is a grafana jsonnet library to configure the dashboards. They would maintain the dashboards configuration as code which can then be easily tracked over git.
 
 They also used Grafana snapshot API to create a point in time copy of the dashboard and use this to understand what was the performance of the system at any point in time.
-Talk by Adam Wolfe from Digital Ocean![](/img/blog/2019/11/Screen-Shot-2019-11-08-at-10.39.15-PM.jpg)Figure 1 - Managing Grafana dashboards with grafonnet and git. 
+Talk by Adam Wolfe from Digital Ocean![](/img/blog/2019/11/Screen-Shot-2019-11-08-at-10.39.15-PM.jpg)Figure 1 - Managing Grafana dashboards with grafonnet and git.
 **2. Validate and test alert definitions before making them live**
 
-[Simon Pasquier](https://twitter.com/simonhiker) from Red Hat gave a great talk on details of alert manager, how to configure and validate them before making live in production environments. He is the maintainer for *Alertmanager* and* consul_exporter  *projects*, * so what he says carries some weight.
+[Simon Pasquier](https://twitter.com/simonhiker) from Red Hat gave a great talk on details of alert manager, how to configure and validate them before making live in production environments. He is the maintainer for _Alertmanager_ and* consul_exporter  *projects*, * so what he says carries some weight.
 ![](/img/blog/2019/11/Screen-Shot-2019-11-10-at-8.46.17-PM-1.jpg)Fig.2 - Sample alert definition
-*Some guidelines on creating an alert definition*
+_Some guidelines on creating an alert definition_
 
 1. Think about which labels to propagate
 2. "Complex" alerts can be harmful
 3. It's useful to spend time in learning the template language
 4. Differentiate between alerts that are urgent and those that can wait
-5. Alert should be tested and gone through some software validation - As any software is tested before shipping to production, alerts should also be tested before making live. This can be done by writing simple .yml test cases in tools  [promtool](https://github.com/prometheus/prometheus/tree/master/cmd/promtool) as shown in Fig.3 
+5. Alert should be tested and gone through some software validation - As any software is tested before shipping to production, alerts should also be tested before making live. This can be done by writing simple .yml test cases in tools  [promtool](https://github.com/prometheus/prometheus/tree/master/cmd/promtool) as shown in Fig.3
 6. Description can be implemented using variables which would give more informative annotations to the alert.
 
 ![](/img/blog/2019/11/Screen-Shot-2019-11-10-at-8.54.24-PM.jpg)Fig. 3 - Tests can be written for alerts - as shown above
@@ -73,16 +81,17 @@ Here are some guidelines from Simon's talk on how should your alerts be routed.
 - Silences are used to not get alerted when an outage is known
 - Inhibitions - If service B is down, then service A, which uses Service B, would also be down. In this case, the alert from Service A being down should be inhibited - as we already know the cause of it going down.
 
-*How do you ensure High Availability of alert manager *
+_How do you ensure High Availability of alert manager _
 
 - Prefer notification to be sent twice, rather than not sending at all if the cluster is down or split (network partition)
 - Use gossip protocol to replicate all the information in the alert manager cluster- Based on the [hashicorp/memberlist](https://github.com/hashicorp/memberlist) library
 
-		- Broadcast silences and notification logs via gossip protocol so  that duplicate                notifications are avoided
+      - Broadcast silences and notification logs via gossip protocol so  that duplicate                notifications are avoided
 
-		-  Requires a dedicated TCP/UDP port 
-		      1. UDP for small messages (<= 700 bytes) 
-              2. TCP otherwise
+      -  Requires a dedicated TCP/UDP port
+            1. UDP for small messages (<= 700 bytes)
+
+  2. TCP otherwise
 
 **5. Capacity Planning Using Prometheus**
 
@@ -99,14 +108,15 @@ Saturation Measurement Recording Rules
 
 > Setup a recording rule with two fixed dimensions (labels)
 > service_component:saturation:ratio
-> 
+>
 > Two fixed dimensions/label
-> * "service" - the service reporting the resource - e.g. web, postgres
-> * "component" dimension - the component resource we are measuring - e.g. memory, cpu
-> 
+>
+> - "service" - the service reporting the resource - e.g. web, postgres
+> - "component" dimension - the component resource we are measuring - e.g. memory, cpu
+>
 > All series report a ratio between 0 and 1.  0 is (good) - 1 = 100% Saturated (bad)
 
-Below is a graph on measuring saturation : 
+Below is a graph on measuring saturation :
 ![](/img/blog/2019/11/Screen-Shot-2019-11-10-at-10.21.38-PM.jpg)Figure 6 - Modelling Saturation
 
 These metrics can be used to predict the saturation level of resources. Generally, we just need to monitor only the worst case prediction. Below is a PromQL query showing how this could be done.
@@ -114,15 +124,15 @@ These metrics can be used to predict the saturation level of resources. Generall
 Worst-Case Predictions in PromQL
 
 > record: service_component:stauration:ratio:predict_linear_2w
-> 
+>
 > expr: >
-> 
+>
 > predict_liner(
-> 
+>
 > service_component:saturation:ratio:avg_over_time_1w[1w],
-> 
-> 86400 * 14  #14 days in seconds
-> 
+>
+> 86400 \* 14 #14 days in seconds
+>
 > )
 
 Video for the talk  below.
@@ -153,6 +163,6 @@ Overall, I think it was a great conference with lots of interesting discussions 
 
 ---
 
-Do let me know what did you like or not like in the above blog post? 
+Do let me know what did you like or not like in the above blog post?
 
-At [SigNoz](https://signoz.io), we are building a next-gen platform for APM for k8s with zero instrumentation. Interested? Drop me a note at *pranay+blog@signoz.io* and I will write back to you with more details. 
+At [SigNoz](https://signoz.io), we are building a next-gen platform for APM for k8s with zero instrumentation. Interested? Drop me a note at *pranay+blog@signoz.io* and I will write back to you with more details.

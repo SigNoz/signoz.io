@@ -2,16 +2,26 @@
 title: Our first community update - Signal #01
 slug: community-update-01
 date: 2021-06-02
-tags: [community]
+tags: [product-updates, community]
 author: Ankit Anand
 author_title: SigNoz Team
 author_url: https://github.com/ankit01-oss
 author_image_url: https://avatars.githubusercontent.com/u/83692067?v=4
-
-
+description: Excited to launch our first newsletter. We are delighted to have crossed 1.6k stars on GitHub, growing more than 30% last month. Catch up on what we're upto at SigNoz!
+image: /img/blog/2021/06/signal_01_cover_hc.jpeg
+keywords:
+  - SigNoz Product Update
+  - Open Source community
+  - OSS
+  - SigNoz
+  - DataDog alternative
 ---
+
 Excited to launch our first newsletter. We are delighted to have crossed 1.6k stars on GitHub, growing more than 30% last month. Catch up on what we're upto at SigNoz!
+
 <!--truncate-->
+
+![Cover Image](/img/blog/2021/06/signal_01_cover_hc.jpeg)
 
 We are pleased to release the first issue of our newsletter. With this newsletter, we aim to let our community know what we've been upto. A roundup of major releases, issues, comments as well as some interesting stuff from our blog section. So without further ado, let's get down to it!
 
@@ -20,31 +30,47 @@ We are pleased to release the first issue of our newsletter. With this newslette
 In the last few weeks, 2 of our major releases include service maps and external API monitoring.
 
 **Service Maps**
+
 Service maps is one of the coolest feature of the SigNoz dashboard. With just a glance, you can figure out the services that needs your attention.
-![](/img/blog/2021/05/ezgif.com-gif-maker.gif)Service Maps on SigNoz dashboard
+
+![Service maps on SigNoz dashboard](/img/blog/2021/05/ezgif.com-gif-maker.gif)
+
+<!--- Service Maps on SigNoz dashboard --->
+
 **External API Monitoring**
+
 External API monitoring provides you a separate dashboard for seeing metrics for any external API you may be calling e.g. Paypal, Twillio, etc.
 
 This helps you quickly isolate if the issue is due to internal services or on any external dependencies.
-![](/img/blog/2021/05/external_api.png)Separate dashboards for External API calls
+
+![External API calls](/img/blog/2021/05/external_api.png)
+
+<!--- Separate dashboards for External API calls --->
+
 ## Featured Issue
 
 **Alerts as Code which can be version controlled for teams to look back!**
+
 One of our favorite issue to work on is building an alert manager. Alerting is an important feature of any APM tool and at SigNoz we want to build an alert manager that helps you create actionable alerts with high signal-to-noise ratio.
 
-As we design the details of this, would love to hear from you what features would you want to see in the alert manager and what you find missing in current tools. Do add your comments in this [issue](https://signoz.us6.list-manage.com/track/click?u=eff7cdfa1bc1f3234ef2b97f7&amp;id=4b5194297f&amp;e=de89f4dbaa).
+As we design the details of this, would love to hear from you what features would you want to see in the alert manager and what you find missing in current tools. Do add your comments in this [issue](https://signoz.us6.list-manage.com/track/click?u=eff7cdfa1bc1f3234ef2b97f7&id=4b5194297f&e=de89f4dbaa).
 
 ## What's upcoming?
 
 **Clickhouse support**
-We had lots of interest from the community in adding [support for Clickhouse ](https://signoz.us6.list-manage.com/track/click?u=eff7cdfa1bc1f3234ef2b97f7&amp;id=46980fd8c4&amp;e=de89f4dbaa)which would make SigNoz less resource intensive compared to current architecture based on Kafka & Druid.
+
+We had lots of interest from the community in adding [support for Clickhouse ](https://signoz.us6.list-manage.com/track/click?u=eff7cdfa1bc1f3234ef2b97f7&id=46980fd8c4&e=de89f4dbaa)which would make SigNoz less resource intensive compared to current architecture based on Kafka & Druid.
 
 We heard you and have already started exploring design details for Clickhouse support. Watch out for more updates in the coming newsletters 🤓
 
 ## SigNoz News
 
 We are delighted to have crossed 1.6k stars on GitHub, growing more than 30% last month 🎉. We can't thank you all enough for this! 👏
-![](/img/blog/2021/05/screenzy-1622043034078-2.png)We reached 1.6K Github stars in May
+
+![1.6k stars on GitHub](/img/blog/2021/05/screenzy-1622043034078-2.png)
+
+<!--- We reached 1.6K Github stars in May --->
+
 ## From our blog
 
 As this is our first edition, we want to share with you why we decided to build a full stack open source observability platform and how we are going about building it.

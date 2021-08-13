@@ -1,21 +1,25 @@
 ---
-title: A major release, tons of bug fixes and amazing new contributors - Signal #03
+title: A major release, tons of bug fixes and amazing new contributors - Signal 03
 slug: community-update-03
 date: 2021-08-05
-tags: [product, community]
+tags: [product-updates, community]
 author: Ankit Anand
 author_title: SigNoz Team
 author_url: https://github.com/ankit01-oss
 author_image_url: https://avatars.githubusercontent.com/u/83692067?v=4
-description: It's time for monthly product updates aka Signal 03. Let's see what humans at SigNoz have been upto 🙌
-image: /img/blog/2021/08/signal_03_cover.jpeg
+hide_table_of_contents: true
+description: It's time for the monthly product update of SigNoz - a full-stack open-source and observability tool. Find out what we've been upto at SigNoz during July, 2021.
+image: /img/blog/2021/08/signal_03_cover_hc.jpeg
+keywords:
+  - SigNoz Product Update
+  - GitHub contributors
 ---
-
-![You can use regex patterns for filtering traces](/img/blog/2021/08/signal_03_cover.jpeg)
 
 It's time for monthly product updates aka Signal #03. This month's release hit a major milestones with PRs from 10+ contributors. Let's see what humans of SigNoz have been upto 🙌
 
 <!--truncate-->
+
+![Cover Image](/img/blog/2021/08/signal_03_cover_hc.jpeg)
 
 Welcome to Signal #03!
 
@@ -32,19 +36,28 @@ This month, we are excited to announce that our latest release had contributions
 Some of our users wanted to see 4xx errors quickly. So we have enabled regex pattern matching in our trace filters. Now users can apply generic regex operations to any of their tags.
 
 [Link to issue](https://github.com/SigNoz/signoz/pull/249)
-![You can use regex patterns for filtering traces](/img/blog/2021/08/regex_pattern_hc.png)Apply regex operations on trace filters
+
+![You can use regex patterns for filtering traces](/img/blog/2021/08/regex_pattern_hc.png)
+
+<!--- Apply regex operations on trace filters --->
 
 ### Frontend Improvements
 
 Flamegraphs and Gantt charts make a champion combo for debugging latency issues on our dashboard. We improved the experience slightly, where selecting a trace in the flamegraph highlights the corresponding span in the Gantt chart view.
-![Selecting a trace in the flamegraph highlights the corresponding span in the gantt charts](/img/blog/2021/08/gantt_charts_hc.png)When you select a trace in the flamegraph, corresponding span in the Gantt chart gets highlighted
+
+![Selecting a trace in the flamegraph highlights the corresponding span in the gantt charts](/img/blog/2021/08/gantt_charts_hc.png)
+
+<!--- When you select a trace in the flamegraph, corresponding span in the Gantt chart gets highlighted --->
 
 ### Readme.md translation to Chinese
 
 We recently conducted a [deep dive](/blog/getting-to-know-our-4000-plus-stargazers-on-github/) into our stargazers and found out that the top 5 countries where our stargazers belong are from US, India, Brazil, China, and Germany.
 
 To make our GitHub repo more accessible, we raised requests for getting our [readme.md](https://github.com/SigNoz/signoz/blob/main/README.md) translated to different languages. [Tony Qu](https://github.com/tonyqus), a 15+ year .NET veteran, helped translate our [Readme](https://github.com/SigNoz/signoz/blob/main/README.zh-cn.md) to Chinese, and we couldn't be happier. 🤓
-![Countries from which our stargazers belong](/img/blog/2021/08/stargazers_countries_hc.png)SigNoz's stargazers belong to nations worldwide
+
+![Countries from which our stargazers belong](/img/blog/2021/08/stargazers_countries_hc.png)
+
+<!--- SigNoz's stargazers belong to nations worldwide --->
 
 ## Featured Issue
 
@@ -58,7 +71,7 @@ We still have many languages to cover for our readme.md translation. If any of y
 
 ### Cypress Framework for E2E testing
 
-Cypress is a Javascript-based end-to-end testing framework that provides users with a fast and reliable test framework. We are looking forward to implementing it as our front-end testing framework. If you have any thoughts around it, please consider commenting on the  [issue](https://github.com/SigNoz/signoz/issues/226).
+Cypress is a Javascript-based end-to-end testing framework that provides users with a fast and reliable test framework. We are looking forward to implementing it as our front-end testing framework. If you have any thoughts around it, please consider commenting on the [issue](https://github.com/SigNoz/signoz/issues/226).
 
 ## What's upcoming?
 

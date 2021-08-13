@@ -2,13 +2,15 @@
 title: Setting up HA Prometheus with Cortex and Cassandra
 slug: ha-prometheus-cortex-cassandra
 date_published: 2019-11-30
-tags: [High Availability, Prometheus, Cassandra, Cortex]
+tags: [prometheus, cassandra, cortex]
 author: Ankit Nayan
 author_title: SigNoz Team
 author_url: https://github.com/ankitnayan
 author_image_url: https://avatars.githubusercontent.com/u/12460410?v=4
 ---
+
 In this blog, we explain how we enable high availability Prometheus using Cortex and Cassandra. This provides a single pane of view across multiple clusters - which enables visualising all monitoring metrics in one go.
+
 <!--truncate-->
 
 ## Why need Cortex?
@@ -27,8 +29,11 @@ SigNoz helps developers monitor their applications & troubleshoot problems, an o
 
 ![](https://repository-images.githubusercontent.com/326404870/e961a900-63c9-11eb-83f6-02913cf1b477)
 ](https://github.com/signoz/signoz)⭐️ SigNoz is open source now. Check it out & if you like it give us a star on GitHub! ⭐️
+
 ## Architecture of Cortex
+
 ![](/img/blog/2019/11/cortex-architecture.png)Architecture of Cortex
+
 ## Must know about Ingester
 
 The **ingester** service is responsible for writing sample data to long-term storage backends (DynamoDB, S3, Cassandra, etc.).
@@ -41,7 +46,7 @@ A [hand-over process](https://github.com/cortexproject/cortex/blob/master/docs/i
 
 #### Write de-amplification
 
-Ingesters store the last 12 hours worth of samples in order to perform **write de-amplification**, i.e. batching and compressing samples for the same series and flushing them out to the [chunk store](https://github.com/cortexproject/cortex/blob/master/docs/architecture.md#chunk-store). Under normal operations, there should be *many* orders of magnitude fewer operations per second (OPS) worth of writes to the chunk store than to the ingesters.
+Ingesters store the last 12 hours worth of samples in order to perform **write de-amplification**, i.e. batching and compressing samples for the same series and flushing them out to the [chunk store](https://github.com/cortexproject/cortex/blob/master/docs/architecture.md#chunk-store). Under normal operations, there should be _many_ orders of magnitude fewer operations per second (OPS) worth of writes to the chunk store than to the ingesters.
 
 Write de-amplification is the main source of Cortex's low total cost of ownership (TCO).
 
@@ -49,7 +54,7 @@ Write de-amplification is the main source of Cortex's low total cost of ownershi
 
 ## Features of Cortex
 
-- **Horizontal Scalability****– **Cortex can be split into multiple microservices, each of which can be horizontally scaled independently. For example, if a lot of Prometheus instances are sending data to Cortex, you can scale up the Ingester microservice. If there are a lot of queries to cortex, you can scale up the Querier or Query Frontend microservices.
+- **Horizontal Scalability\*\***– \*\*Cortex can be split into multiple microservices, each of which can be horizontally scaled independently. For example, if a lot of Prometheus instances are sending data to Cortex, you can scale up the Ingester microservice. If there are a lot of queries to cortex, you can scale up the Querier or Query Frontend microservices.
 - **High Availability – **Cortex can replicate data between instances. This prevents data loss and avoids gaps in metric data even with machine failures and/or pod evictions.
 - **Multi-Tenancy – **Multiple untrusted parties can share the same cluster. Cortex provides isolation of data throughout the entire lifecycle, from ingestion to querying. This is really useful for a large organization storing data for multiple units or applications or for someone running a SaaS service.
 - **Long term storage – **Cortex stores data in chunks and generates an index for them. Cortex can be configured to store this in either self-hosted or cloud provider backed databases or object storage.
@@ -60,13 +65,11 @@ Setup Cassandra in a cluster (3 replicas for the Cassandra):
 
     helm repo add incubator https://kubernetes-charts-incubator.storage.googleapis.com/
     helm install --wait --name=cassie incubator/cassandra
-    
 
 Setup Cortex in a cluster:
 
     git clone https://github.com/kanuahs/cortex-demo.git
     cd cortex-demo/
-    
 
 `kubectl apply -f k8s-cassandra/` - this will deploy various components of Cortex to your cluster.
 
@@ -85,7 +88,6 @@ Setup another cluster that runs an application (not necessarily) and set up prom
     --set serverFiles."prometheus\.yml".remote_write[0].url=xx/api/prom/push \
     --set serverFiles."prometheus\.yml".remote_write[0].basic_auth.username=xx \
     --set serverFiles."prometheus\.yml".remote_write[0].basic_auth.password=xx \
-    
 
 - Cluster label adds cluster as a label to be used for single pane of view in Grafana
 - Replica label is used for HA Prometheus setup and de-duplication. Multiple Prometheus setups having the same cluster label but different replica labels will be de-duplicated before ingestion in Cortex.
@@ -101,7 +103,6 @@ We also need to enable ha-tracker mode in distributor of Cortex. Open `k8s-cassa
             - -distributor.ha-tracker.cluster=cluster
             - -distributor.ha-tracker.consul.hostname=consul:8500
             - -distributor.ha-tracker.replica=replica
-    
 
 ## Authentication using reverse-proxy
 
@@ -109,27 +110,25 @@ We shall use `apache2-utils` to add authentication to NGINX. I shall demonstrate
 
     apt-get update
     apt-get install apache2-utils
-    
 
 You can try the above commands in your local machine.
 
     # create htpasswd_file with user:password
     $ htpasswd -cb htpasswd_file user password
     Adding password for user user
-    
+
     # add user:password
     $ htpasswd -b htpasswd_file user password
     Adding password for user user
-    
+
     # verify password for user
     $ htpasswd -vb htpasswd_file user wrongpassword
     password verification failed
-    
+
     $ htpasswd -vb htpasswd_file user password
     Password for user user correct.
-    
 
-Create a file *nginx-config-auth.yaml* in `k8s-cassandra` folder. Paste below contents and username: password generated by above command.
+Create a file _nginx-config-auth.yaml_ in `k8s-cassandra` folder. Paste below contents and username: password generated by above command.
 
     apiVersion: v1
     kind: ConfigMap
@@ -138,15 +137,13 @@ Create a file *nginx-config-auth.yaml* in `k8s-cassandra` folder. Paste below co
     data:
       htpasswd: |
         ankit:xxxxxxxxxxxxxxxxxxx
-    
 
 Also, change *nginx-config.yaml *to enable authentication using htpasswd file. Add below line to server block there.
 
             auth_basic "Restricted Access";
             auth_basic_user_file /etc/serviceproxy/htpasswd;
-    
 
-Now change the *k8s-cassandra/nginx-dep.yaml* to mount htpasswd file with username and password.
+Now change the _k8s-cassandra/nginx-dep.yaml_ to mount htpasswd file with username and password.
 
     ---
     apiVersion: extensions/v1beta1
@@ -184,8 +181,6 @@ Now change the *k8s-cassandra/nginx-dep.yaml* to mount htpasswd file with userna
                 items:
                 - key: htpasswd
                   path: htpasswd
-    
-    
 
 > Scope of improvement -> add config reloader to dynamically add users
 
@@ -195,7 +190,7 @@ Cortex identifies tenant by header** X-Scope-OrgID. **Add the below config in *k
 
 `proxy_set_header X-Scope-OrgID $remote_user;`
 
-This will identify tenants with a username. This is not full-proof. 
+This will identify tenants with a username. This is not full-proof.
 
 > Ideally you should have a DB and authentication server from where you get the orgId when you pass the username and password of the user
 
@@ -212,16 +207,16 @@ SigNoz helps developers monitor their applications & troubleshoot problems, an o
 
 ![](https://repository-images.githubusercontent.com/326404870/e961a900-63c9-11eb-83f6-02913cf1b477)
 ](https://github.com/signoz/signoz)⭐️ SigNoz is open source now. Check it out & if you like it give us a star on GitHub! ⭐️
+
 ## Provisioning Grafana dashboards for Cortex
 
-We can monitor read and write metrics of Cortex in Grafana. Cortex runs a deployment named *retrieval *which is a Prometheus server. To enable Prometheus to write into Cortex add authentication details in *k8s-cassandra/retrieval-config.yaml. *
+We can monitor read and write metrics of Cortex in Grafana. Cortex runs a deployment named *retrieval *which is a Prometheus server. To enable Prometheus to write into Cortex add authentication details in _k8s-cassandra/retrieval-config.yaml. _
 
         remote_write:
           - url: http://nginx.default.svc.cluster.local:80/api/prom/push
             basic_auth:
               username: xxx
               password: xxx
-    
 
 Now install Grafana using command:
 
@@ -238,7 +233,6 @@ Now install Grafana using command:
     --set datasources."datasources\.yaml".datasources[0].basicAuthUser=xxx \
     --set datasources."datasources\.yaml".datasources[0].basicAuthPassword=xxx \
     --set service.type=LoadBalancer
-    
 
 > If you are installing Grafana into a different cluster than the one in which Cortex is running, replace the url with a correct endpoint. The DNS used is for intra-cluster communication.
 
@@ -274,6 +268,7 @@ SigNoz helps developers monitor their applications & troubleshoot problems, an o
 
 ![](https://repository-images.githubusercontent.com/326404870/e961a900-63c9-11eb-83f6-02913cf1b477)
 ](https://github.com/signoz/signoz)⭐️ SigNoz is open source now. Check it out & if you like it give us a star on GitHub! ⭐️
+
 ---
 
 ## **How can I try out remote write in Prometheus?**

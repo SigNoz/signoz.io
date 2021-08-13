@@ -7,10 +7,19 @@ author: Ankit Anand
 author_title: SigNoz Team
 author_url: https://github.com/ankit01-oss
 author_image_url: https://avatars.githubusercontent.com/u/83692067?v=4
-
+description: SigNoz crossed 4000+ stars recently. In this article, we dig deep to find out about our GitHub stargazers using a tool called Stargazers.
+image: /img/blog/2021/08/stargazers_cover_hc.jpeg
+keywords:
+  - github stargazers
+  - stargazers analysis
+  - SigNoz
 ---
+
 In a little over 4 months, we have crossed 4k+ stars on our GitHub repo. In this article, we explore what we can learn from our GitHub stars.
+
 <!--truncate-->
+
+![Cover Image](/img/blog/2021/08/stargazers_cover_hc.jpeg)
 
 As the maintainers of an active open source project, we have often wondered what do our stars mean? According to GitHub docs, starring is a way for people to keep track of projects they find interesting. GitHub uses this data to recommend relevant content to its users.
 
@@ -29,7 +38,11 @@ The success of an open-source project is largely dependent on its community. As 
 Posting about our project on subreddits related to our space helps in driving traffic to our GitHub repo. Creating helpful content is our only go-to-market strategy when it comes to creating awareness about SigNoz. Our [blog](/blog/) series on setting up SigNoz to monitor applications written in Nodejs, Go, and Python did well in getting users interested.
 
 The massive bump in our GitHub stargazers came from trending across all programming languages on GitHub. You can consider the trending page as a front-page for developers active on GitHub worldwide, and to be featured there certainly helped us a lot.
-![](/img/blog/2021/07/stargazers_rise-1.png)We were trending on GitHub at #1 across all programming languages.
+
+![](/img/blog/2021/07/stargazers_rise-1.png)
+
+<!--- We were trending on GitHub at #1 across all programming languages. --->
+
 ## Where are our stargazers from?
 
 We are building a full-stack monitoring & observability tool to help developers keep their applications in fine health. The shift of application architecture from monolithic to microservices architecture makes it more difficult for developers to track their application's performance.
@@ -37,13 +50,19 @@ We are building a full-stack monitoring & observability tool to help developers 
 Given the universal nature of the problem we are solving, our tool should be helpful for devs across the globe. But even then, we were pleasantly surprised to find that our stargazers belonged to 110 different countries!
 
 Here's a distribution of our stargazers from the top 25 countries.
-![](/img/blog/2021/07/countries-1.png)SigNoz's stargazers belong to nations worldwide with the largest number from United States
+
+![Chart showing countries where SigNoz stargazers are from](/img/blog/2021/07/countries-1.png)
+
+<!--- SigNoz's stargazers belong to nations worldwide with the largest number from United States --->
+
 This puts an extra responsibility on us to build a truly global product. We are also working on making our community more diverse. So wherever you are reading this from, come and get involved with our GitHub repo. 😊
 
 ## What else does our stargazers like?
 
 One of the coolest things about Spencer's code was that we could see what other GitHub repositories seemed interesting to our stargazers. Of course, we understand that starring a repo is relatively easy, and GitHub users can star many repos. Still, this data gives us a general sense of what's interesting to our stargazers.
-![](/img/blog/2021/07/correlated-repos-1.png)
+
+![Correlated repos to SigNoz](/img/blog/2021/07/correlated-repos-1.png)
+
 In the list, we can find some interesting developer tools. NocoDB is an open-source alternative to a popular SaaS product called Airtable. We have other developer tools on the list like Supabase, Authelia, and Dolt. This makes sense as SigNoz is also a developer tool. We are an open-source alternative to APM tools like DataDog, New relic, etc. Our stargazers also seem to be interested in open-source alternatives of popular closed SaaS products.
 
 ## How active are our stargazers?
@@ -53,15 +72,20 @@ In the list, we can find some interesting developer tools. NocoDB is an open-sou
 This shows that the developers who are starring our repo are active developers actively exploring new tools.
 
 Here are the commit stats of our top 20 stargazers.
-![](/img/blog/2021/07/commit-stats-1.png)
+
+![Commit stats for our top 20 stargazers](/img/blog/2021/07/commit-stats-1.png)
+
 ## Are our stargazers connected among each other?
 
 On other social platforms like Facebook and Instagram, it's normal to expect a high degree of interconnectedness in networks of friends and family. But can we expect such behavior to play out on a developer platform like GitHub? In short, we wanted to know does our stargazers follow each other!
 
- 2239 stargazers of SigNoz had a total followers count of 119k GitHub users, out of which they shared 47k followers. Developers want to connect! And what better platform than GitHub. Removing users with less than 10 followers, we plotted a histogram for the percentage of shared followers of our stargazers. 45.5% of our stargazers have an overlap of atleast 50% in their followers with other stargazers of SigNoz.
+2239 stargazers of SigNoz had a total followers count of 119k GitHub users, out of which they shared 47k followers. Developers want to connect! And what better platform than GitHub. Removing users with less than 10 followers, we plotted a histogram for the percentage of shared followers of our stargazers. 45.5% of our stargazers have an overlap of atleast 50% in their followers with other stargazers of SigNoz.
 
 And as we have been starred from 110 different countries, we can be certain that this is a platform-wide phenomenon not specific to a particular location.
-![](/img/blog/2021/07/shared-followers---2.png)Histogram of % shared followers for stargazers of SigNoz
+
+![Distribution of shared followers of SigNoz's Stargazers](/img/blog/2021/07/shared-followers---2.png)
+Histogram of % shared followers for stargazers of SigNoz
+
 ## What's next?
 
 It feels good to have 4k+ stars on our GitHub repo, and we are definitely hoping to grow more on that front. At the same time, we are working on being more helpful to our community. Creating more helpful content, keeping our docs and FAQs updated, giving more demos, etc.

@@ -2,13 +2,22 @@
 title: Why are we building SigNoz?
 slug: why-are-we-building-signoz
 date: 2020-01-15
-tags: [founders-post, observability]
+tags: [microservices, observability]
 author: Pranay Prateek
 author_title: SigNoz Team
 author_url: https://github.com/pranay01
 author_image_url: https://avatars.githubusercontent.com/u/504541?v=4
+description: In the world of microservices, who takes care of failures? How do you solve availability and performance issues quickly in your production environment. For a modern-day distributed system, observability needs to be built within the system. And, SigNoz attempts to bring you the best open-source observability stack for your distributed system.
+image: /img/blog/2020/01/Why-1.png
+keywords:
+  - Microservices
+  - Distributed Tracing
+  - Cloud native
+  - Debugging
 ---
-I am sure most of you have come across this situation. You liked something on the Internet, decided to buy it and made the payment at the payment gateway. After that you expect to come to the original website and see a confirmation message. Something of the sort 👇
+
+![Cover Image](/img/blog/2020/01/Why-1.png)
+
 <!--truncate-->
 
 I am sure most of you have come across this situation.
@@ -29,7 +38,7 @@ Recently, this happened to me when I was purchasing a mutual fund from an AMC we
 
 ---
 
-Welcome to the world of software failures! 
+Welcome to the world of software failures!
 
 We all enjoy the benefits of a well-designed, functioning software. You enjoy HD streaming video of the latest movies on your laptop. You press a button and a cab comes to pick you up. At the tap of a button, food from your favorite restaurant is delivered to your room. It's wonderful ain't it?
 
@@ -43,17 +52,17 @@ I used to spend a lot of time debugging these issues in my previous role as a pr
 
 My co-founder also had his share of hard times trying to debug which service in their micro-services application is causing the issue.
 
-The fact is this: 
+The fact is this:
 
 > If you have to become a great company in this day and age, you have to provide a glitch-free customer experience. Period.
 
 Customers are getting more and more demanding. They expect great service with sleek performing apps and huge discounts. And if you don't provide it they will take their business somewhere else. So, ensuring an error-free, fast, performant app is not just a good to have - but table stakes today.
 
-But you can't start digging the well when you are thirsty. You need to prepare for it. 
+But you can't start digging the well when you are thirsty. You need to prepare for it.
 
 Hence, monitoring and observability tools become critical.
 
-At  [SigNoz](https://signoz.io), we are broadly targeting the domain of ***observability for microservice applications. ***
+At  [SigNoz](https://signoz.io), we are broadly targeting the domain of **_observability for microservice applications. _**
 
 What does that mean, you ask?
 
@@ -64,16 +73,17 @@ It means that
 - And, if some issue still creeps in, then you should be able to debug them in a matter of minutes
 
 Of course, there are other players in this space, but we believe that there is a paradigm shift happening in how people run their software on the cloud. Cloud-native technologies like Kubernetes and Serverless are getting rapid adoption and they bring with them their own set of challenges and unique opportunities.
-![](/img/blog/2020/01/KubeConCNCAttendance2019.png)*KubeCon (leading k8s conference) attendance went from 500 to 23000 in 5 yrs*
-In this new world, monitoring can't be an afterthought but built into when you start building your systems. Any how-to guide on Kubernetes today also includes instruction on how to set up monitoring. 
+![](/img/blog/2020/01/KubeConCNCAttendance2019.png)_KubeCon (leading k8s conference) attendance went from 500 to 23000 in 5 yrs_
+In this new world, monitoring can't be an afterthought but built into when you start building your systems. Any how-to guide on Kubernetes today also includes instruction on how to set up monitoring.
 [Checkout SigNoz - Lightweight APM for Kubernetes](https://signoz.io)
-    a.button {
-    -webkit-appearance: button;
-    -moz-appearance: button;
-    appearance: button;
+a.button {
+-webkit-appearance: button;
+-moz-appearance: button;
+appearance: button;
 
     text-decoration: none;
     color: initial;
+
 }
 
 ## A peep into the Future
@@ -92,4 +102,4 @@ This is what we believe SigNoz can help achieve. Making cloud systems become rel
 
 ---
 
-We will keep you updated on our journey. Happy to listen to any thoughts/comments you may have. Please share them by commenting below or writing to me at ***pranay at signoz dot io***
+We will keep you updated on our journey. Happy to listen to any thoughts/comments you may have. Please share them by commenting below or writing to me at **_pranay at signoz dot io_**

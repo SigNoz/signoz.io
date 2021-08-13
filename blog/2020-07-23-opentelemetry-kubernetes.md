@@ -2,13 +2,25 @@
 title: Getting started with OpenTelemetry on Kubernetes
 slug: opentelemetry-kubernetes
 date: 2020-07-23
-tags: [OpenTelemetry, Kubernetes, Distributed Tracing]
+tags: [opentelemetry, kubernetes, distributed-tracing]
 author: Joy Bhattacharjee
 author_url: https://twitter.com/hashfyre
 author_image_url: https://pbs.twimg.com/profile_images/1298796024664743937/5ZPWaLTu_400x400.jpg
+description: OpenTelemetry is an instrumentation standard for application monitoring - both for monitoring metrics & distributed tracing. In this blog, we take you through a hands on guide on how to run this on Kubernetes.
+image: /img/blog/2021/07/SigNoz-OpenTelemetry-k8s.png
+keywords:
+  - OpenTelemetry
+  - Kubernetes
+  - Distributed Tracing
+  - Open Source
+  - OTLP
 ---
+
 OpenTelemetry is an instrumentation standard for application monitoring - both for monitoring metrics & distributed tracing. In this blog, we take you through a hands on guide on how to run this on Kubernetes.
+
 <!--truncate-->
+
+![Cover Image](/img/blog/2021/07/SigNoz-OpenTelemetry-k8s.png)
 
 At [SigNoz](https://signoz.io), we support OpenTelemetry as an instrumentation standard - and provide an easy way to accomplish application monitoring leveraging the same. As a first step, we are sharing a detailed guide for developers/devops/SRE folks who want to get started with OpenTelemetry stack on Kubernetes.
 
@@ -37,6 +49,7 @@ Google open sourced it’s internal Census tool as OpenCensus circa 2018, this o
 In March 2019, Ben Sigelman announced that OpenTracing and OpenCensus projects had decided to merge to further their common goals of an open standards based interoperability and vendor neutral observability ecosystem.
 
 ![](https://lh3.googleusercontent.com/efnww3EnuCcBNLGjsUWoPmt5Whl23R1Je4potAduy8oxAtN_bYaOm1fnHtQDKySWx__4Fl142CfWfPYmK1If-p9uOgfjmw3xgYnLYY0x45EFBhkN86LljkRTWsk-k8ESyFd6e8EO)Fig 1. A short graphical history of the open-telemetry project
+
 # Architecture
 
 OpenTelemetry offers standard vendor neutral APIs for collecting metrics and traces from applications and libraries to convert most existing data formats to another.
@@ -55,7 +68,7 @@ A **Pipeline **defines a combination of various metric and trace receivers, a se
 ![](https://lh5.googleusercontent.com/mRc_j2ZiBvrIxHL0NCH7_aVROB8P8vSJ36vxrygh65uAshupJ2aepeQq949wQSuN2ZC2HrnaNUfUjAJqVPANdo8_waeC3UytWzI0fW6foMD3oISajNNvs5kWNhIS71qMuC_kk1q7)Fig 3. OpenTelemetry Receivers, Processors and Exporters : Core components in green, contrib components in Red
 The core receivers, processors and exporters live on the [https://github.com/open-telemetry/opentelemetry-collector](https://github.com/open-telemetry/opentelemetry-collector) repo. However, many other community contributed ones can be found on the official contrib repo at [https://github.com/open-telemetry/opentelemetry-collector-contrib](https://github.com/open-telemetry/opentelemetry-collector-contrib).
 
- Fig. 3 provides a snapshot view of available components as of now.
+Fig. 3 provides a snapshot view of available components as of now.
 
 Please note that the above lists and diagrams are not exhaustive and only indicative, new receivers and exporters are constantly being added by the community.
 
@@ -78,8 +91,9 @@ Generates synthetic operational load (traces, metrics, logs, events) simulating 
 
 ![](https://github.githubassets.com/favicons/favicon.svg)OmnitionGitHub
 
-![](https://avatars0.githubusercontent.com/u/39106559?s&#x3D;400&amp;v&#x3D;4)
+![](https://avatars0.githubusercontent.com/u/39106559?s=400&v=4)
 ](https://github.com/Omnition/synthetic-load-generator)
+
 - Jaeger traces
 - Zipkin traces
 - Freshtracks.io’s prometheus metrics load generator - Avalanche
@@ -92,7 +106,7 @@ Prometheus/OpenMetrics endpoint series generator for load testing. - open-fresh/
 
 ![](https://github.githubassets.com/favicons/favicon.svg)open-freshGitHub
 
-![](https://avatars3.githubusercontent.com/u/43547772?s&#x3D;400&amp;v&#x3D;4)
+![](https://avatars3.githubusercontent.com/u/43547772?s=400&v=4)
 ](https://github.com/open-fresh/avalanche)
 For each of the above data sources, we configure a corresponding receiver in opentelmetry agent which runs as a daemonset. While the opencensus, jaeger and zipkin receivers are push based, with the app having to push traces and metrics to a pre-configured endpoint; the prometheus receiver is pull based, one just needs to write standard prometheus scrape-configs on the sources /metrics endpoint in order to receive the metrics.
 
@@ -123,11 +137,12 @@ openelemetry-kubernetes setup with load-generators - Hashfyre/otel-k8s
 
 ![](https://github.githubassets.com/favicons/favicon.svg)HashfyreGitHub
 
-![](https://avatars1.githubusercontent.com/u/581287?s&#x3D;400&amp;v&#x3D;4)
+![](https://avatars1.githubusercontent.com/u/581287?s=400&v=4)
 ](https://github.com/Hashfyre/otel-k8s)
 Given the scope and expanse of the Opentelemetry project, we barely scratched the surface of the possibilities, and even important aspects like tail-sampling. That said, following this post should get one bootstrapped easily with a running OpenTelemetry stack on your own cluster.
 
 ---
+
 [
 
 SigNoz/signoz
@@ -146,7 +161,7 @@ If you want to learn more about Open telemetry or how we are using it at SigNoz,
 
 # References
 
-- [Google Dapper paper ]( https://storage.googleapis.com/pub-tools-public-publication-data/pdf/36356.pdf)
+- [Google Dapper paper ](https://storage.googleapis.com/pub-tools-public-publication-data/pdf/36356.pdf)
 - [OpenCensus: A Stats Collection and Distributed Tracing Framework](https://opensource.googleblog.com/2018/01/opencensus.html)
 - [Distributed Systems Tracing with Zipkin](https://blog.twitter.com/engineering/en_us/a/2012/distributed-systems-tracing-with-zipkin.html)
 - [Evolving Distributed Tracing at Uber Engineering](https://eng.uber.com/distributed-tracing/)
