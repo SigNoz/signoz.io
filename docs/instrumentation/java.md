@@ -40,6 +40,16 @@ OTEL_METRICS_EXPORTER=none OTEL_EXPORTER_OTLP_ENDPOINT="http://<IP of SigNoz Bac
 
 where <app_name> is the name you want to set for your application
 
+You can also specify environment variables in the following way
+
+```bash
+java -javaagent:/path/to/opentelemetry-javaagent-all.jar \
+    -Dotel.metrics.exporter=none \
+    -Dotel.exporter.otlp.endpoint=http://<IP of SigNoz Backend>:4317 \
+    -Dotel.resource.attributes="service.name=<app_name>" \
+    -jar <myapp>.jar
+```
+
 :::note
 Remember to allow incoming requests to port 4317 of machine where SigNoz backend is hosted
 :::

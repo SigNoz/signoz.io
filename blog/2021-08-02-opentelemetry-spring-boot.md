@@ -186,16 +186,28 @@ You can use flamegraphs to exactly identify the issue causing the latency.
 
 OpenTelemetry makes it very convenient to instrument your Spring Boot application. You can then use an open-source APM tool like SigNoz to analyze the performance of your app. As SigNoz offers a full-stack observability tool, you don't have to use multiple tools for your monitoring needs.
 
+<div class="text--center">
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/YxZb17_LYwQ" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+</div>
+
+import Screenshot from "@theme/Screenshot"
+
+<Screenshot
+  alt="Prometheus monitoring server metrics from a QuestDB instance"
+  height={415}
+  src="/img/blog/2021/08/signoz_flamegraphs_hc.png"
+  title="Basic counter for number of SQL queries executed"
+  width={650}
+/>
+
+[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/YxZb17_LYwQ/0.jpg)](https://www.youtube.com/watch?v=YxZb17_LYwQ)
+
 You can try out SigNoz by visiting its GitHub repo 👇
-[
 
-SigNoz/signoz
 
-SigNoz helps developers monitor their applications & troubleshoot problems, an open-source alternative to DataDog, NewRelic, etc. 🔥 🖥 - SigNoz/signoz
-
-![](https://github.githubassets.com/favicons/favicon.svg)SigNozGitHub
-
-![](https://repository-images.githubusercontent.com/326404870/e961a900-63c9-11eb-83f6-02913cf1b477)
+[![](https://repository-images.githubusercontent.com/326404870/e961a900-63c9-11eb-83f6-02913cf1b477)
 ](https://github.com/signoz/signoz)⭐️ SigNoz is open source now. Check it out & if you like it give us a star on GitHub! ⭐️
 If you are someone who understands more from video, then you can watch the tutorial on how to use OpenTelemetry for Spring Boot application here 👇
 

@@ -12,6 +12,15 @@ import TabItem from "@theme/TabItem";
 2. Instrument your application as instructed in [Instructions Page](/docs/instrumentation/overview)
 <br></br>
 
+<br></br>
+
+You can install SigNoz backend in following 2 ways:
+1. Using Install Script
+2. Using Docker Compose
+
+We have explained each of these way in the following sections
+<br></br>
+
 ### 1. Using Install Script
 
 If you are on Mac or any of the following linux distributions, using our install script should be the easiest way to get started:
@@ -23,7 +32,9 @@ If you are on Mac or any of the following linux distributions, using our install
 - RedHat
 - Amazon Linux
 
-If you are not on one of the above distributions or on Mac, please install directly using [Docker Compose](#2-using-docker-compose)
+If you are neither on any of the above distributions nor on Mac, please install directly using [Docker Compose](#2-using-docker-compose)
+
+Here's a [quick guide](https://docs.docker.com/compose/install/) to install Docker Compose if you don't have it set up already
 
 <br></br>
 
