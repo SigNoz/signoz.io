@@ -17,10 +17,6 @@ keywords:
   - signoz
 ---
 
-<head>
-  <title>OpenTelemetry Collector | Complete Guide</title>
-</head>
-
 OpenTelemetry Collector is a crucial component of OpenTelemetry architecture. It reduces overhead on your application to collect and manage telemetry data. Let's do a deep dive on OpenTelemetry Collectors to understand how it works.
 
 <!--truncate-->
