@@ -252,7 +252,7 @@ Kubecost can be used to gain visibility into current and historical Kubernetes s
 
 KubeDB is used to run production grade databases on Kubernetes. It simplifies and automates routine database tasks such as provisioning, patching, backup, recovery, failure detection and repair for various popular databases on private and public clouds.
 
-[![KubeDB](/img/blog/2021/11/kubeDB.webp)](https://github.com/kubedb)
+[![KubeDB](/img/blog/2021/11/kubedb.webp)](https://github.com/kubedb)
 
 ### Skaffold
 
