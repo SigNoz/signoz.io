@@ -16,15 +16,15 @@ Here is a comprehensive list of all of them. However, for general use, you most 
 
 ### Query Service
 
-<APITable>
+import APITable from "@site/src/components/APITable";
 
+<APITable>
 | Environment Variable | Description | Default Value |
 | -------- | ----------- | ------------- |
 | `STORAGE` | Database for the storage (one of `clickhouse` or `druid`(deprecated) | `clickhouse` |
 | `GODEBUG` | Go runtime name resolver (one of `netdns=go` or `netdns=cgo`). [More info](https://pkg.go.dev/net#hdr-Name_Resolution). | `netdns=go` |
 | `ALERTMANAGER_API_PREFIX` | Endpoint of alertmanager with API prefix. | `http://alertmanager:9093/api/` |
 | `ClickHouseUrl`| ClickHouse database endpoint with TCP port | `tcp://localhost:9000` |
-
 </APITable>
 
 ### Otel Collector
