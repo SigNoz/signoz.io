@@ -1,6 +1,6 @@
 ---
 id: nodejs
-title: OpenTelemetry NodeJS Instrumentation
+title: NodeJS
 description: Send events from your NodeJS application to SigNoz
 
 ---

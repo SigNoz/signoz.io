@@ -32,10 +32,22 @@ module.exports = {
       },
       items: [
         'instrumentation/overview',
-        'instrumentation/python',
-        'instrumentation/fastapi',
-        'instrumentation/nodejs',
-        'instrumentation/nestjs',
+        {
+          type: 'category',
+          label: 'Python',
+          items: [
+            'instrumentation/fastapi',
+            'instrumentation/python',
+          ],
+        },
+        {
+          type: 'category',
+          label: 'JavaScript',
+          items: [
+            'instrumentation/nodejs',
+            'instrumentation/nestjs',
+          ],
+        },
         'instrumentation/java',
         'instrumentation/golang',   
         'instrumentation/dotnet',

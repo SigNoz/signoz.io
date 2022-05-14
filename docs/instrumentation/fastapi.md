@@ -1,6 +1,6 @@
 ---
 id: fastapi
-title: OpenTelemetry FastAPI Instrumentation
+title: FastAPI
 description: Send events from your FastAPI application to SigNoz
 
 ---

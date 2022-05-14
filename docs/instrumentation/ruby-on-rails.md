@@ -1,6 +1,6 @@
 ---
 id: ruby-on-rails
-title: OpenTelemetry Ruby on Rails Instrumentation
+title: Ruby on Rails 
 description: Send events from your RoR application to SigNoz
 
 ---

@@ -1,6 +1,6 @@
 ---
 id: golang
-title: OpenTelemetry Go Instrumentation
+title: Go
 description: Send events from your Go application to SigNoz
 
 ---
@@ -22,46 +22,39 @@ OpenTelemetry can help you jumpstart your way to observability by providing auto
 
 #### Automatic instrumentation with request routers
 
-**If you are using gin/gonic: **
+Add one line to your import() stanza depending upon your request router, and then inject OpenTelemetry middleware.
 
-```bash
-# Add one line to your import() stanza depending upon your request router:
-middleware "go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
-```
 
-and then inject OpenTelemetry middleware
+<Tabs
+  defaultValue="gin-gonic"
+  values={[
+    {label: 'Gin/Gonic', value: 'gin-gonic'},
+    {label: 'gorillamux', value: 'gorillamux'},
+    {label: 'Echo', value: 'echo'},
+  ]}>
+  <TabItem value="gin-gonic">
 
-```bash
-router.Use(middleware.Middleware(serviceName))
-```
+    middleware "go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
+    router.Use(middleware.Middleware(serviceName))
 
-_serviceName is found from the env variable. If this line is in main.go then it is already there_
+  </TabItem>
+  <TabItem value="gorillamux">
 
-**If you are using gorillamux: **
+    middleware "go.opentelemetry.io/contrib/instrumentation/github.com/gorilla/mux/otelmux"
+    router.Use(middleware.Middleware(serviceName))
+    
+  </TabItem>
+  <TabItem value="echo">
 
-```bash
-# Add one line to your import() stanza depending upon your request router:
-middleware "go.opentelemetry.io/contrib/instrumentation/github.com/gorilla/mux/otelmux"
-```
+    middleware "go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/otelecho"
+    router.Use(middleware.Middleware(serviceName))
 
-and then inject OpenTelemetry middleware
+  </TabItem>
 
-```bash
-router.Use(middleware.Middleware(serviceName))
-```
+</Tabs>
 
-**If you are using echo: **
+_serviceName_ is found from the env variable. If this line is in `main.go` then it is already there
 
-```bash
-# Add one line to your import() stanza depending upon your request router:
-middleware "go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/otelecho"
-```
-
-and then inject OpenTelemetry middleware
-
-```bash
-router.Use(middleware.Middleware(serviceName))
-```
 
 ### Run Command
 

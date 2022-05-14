@@ -1,6 +1,6 @@
 ---
 id: python
-title: OpenTelemetry Python Instrumentation
+title: Django
 description: Send events from your Python application to SigNoz
 
 ---

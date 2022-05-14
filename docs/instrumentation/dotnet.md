@@ -1,6 +1,6 @@
 ---
 id: dotnet
-title: OpenTelemetry .NET Instrumentation
+title: .NET
 description: Send events from your .NET application to SigNoz
 
 ---

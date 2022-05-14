@@ -1,6 +1,6 @@
 ---
 id: nestjs
-title: OpenTelemetry NestJS Instrumentation
+title: NestJS
 description: Send events from your NestJS application to SigNoz
 
 ---

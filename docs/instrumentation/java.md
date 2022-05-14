@@ -1,6 +1,6 @@
 ---
 id: java
-title: OpenTelemetry Java Instrumentation
+title: Java
 description: Send events from your Java application to SigNoz
 
 ---
