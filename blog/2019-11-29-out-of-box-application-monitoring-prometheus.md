@@ -13,13 +13,13 @@ keywords:
   - Application Monitoring
 ---
 
-Prometheus is undoubtedly growing as the native monitoring tool for Kubernetes. We have been using Prometheus to collect metrics about our infrastructure for a long, but setting it of the box is still painful
+Prometheus is undoubtedly growing as the native monitoring tool for Kubernetes. We have been using Prometheus to collect metrics about our infrastructure for a long, but setting it of the box is still painful and there are plenty of dashboards available to get the dashboards up fast.
 
 <!--truncate-->
 
 ![Cover Image](/img/blog/2019/11/prometheus_application_monitoring_hc.webp)
 
-Prometheus is undoubtedly growing as the native monitoring tool for Kubernetes. We have been using Prometheus to collect metrics about our infrastructure for a long time and there are plenty of dashboards available to get the dashboards up fast. For some time, I have been wondering why there aren't out of box application metrics, something like node-exporter for infrastructure metrics.
+For some time, I have been wondering why there aren't out of box application metrics, something like node-exporter for infrastructure metrics.
 
 Let me explain you with an example. Installing kube-state metrics and node-exporter in your instance sends a lot of metrics about that instance to Prometheus. If the metric labels are consistent then you can get the dashboard by using publicly available Grafana dashboards, such as **[Kubernetes Capacity Planning](https://grafana.com/grafana/dashboards/5499).**
 
