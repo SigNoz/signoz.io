@@ -32,41 +32,41 @@ Note that the past data will not be visible on the new application until you run
 ### Docker
 
 ```bash
-docker run --name signoz_migrate --network clickhouse-setup_default \
+docker run --name signoz-migrate --network clickhouse-setup_default \
   -it -d signoz/migrate:0.8 -host=clickhouse -port=9000
 ```
 
 Steps to check logs:
 
 ```bash
-docker logs -f signoz_migrate
+docker logs -f signoz-migrate
 ```
 
 In case of failure and have to run again, make sure to cleanup the container before running the migration script again.
 
 ```bash
-docker stop signoz_migrate
+docker stop signoz-migrate
 
-docker rm signoz_migrate
+docker rm signoz-migrate
 ```
 
 ### Kubernetes
 
 ```bash
-kubectl -n platform run -i -t signoz_migrate --image=signoz/migrate:0.8 \
+kubectl -n platform run -i -t signoz-migrate --image=signoz/migrate:0.8 \
   -- -host=my-release-clickhouse -port=9000 -userName=admin -password=27ff0399-0d3a-4bd8-919d-17c2181e6fb9
 ```
 
 Steps to check logs:
 
 ```bash
-kubectl -n platform logs -f signoz_migrate
+kubectl -n platform logs -f signoz-migrate
 ```
 
 In case of failure and have to run again, make sure to cleanup the pod before running the migration script again.
 
 ```bash
-kubectl -n platform delete pod signoz_migrate
+kubectl -n platform delete pod signoz-migrate
 ```
 
 There are some custom flags which can be enabled based on different usecases.
