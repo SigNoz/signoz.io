@@ -41,7 +41,7 @@ docker run --name signoz-migrate-sqlite --network clickhouse-setup_default -it -
 #### ClickHouse
 
 ```bash
-kubectl -n platform run -i -t signoz-migrate-clickhouse --image=signoz/migrate:0.9-clickhouse \
+kubectl -n platform run -i -t signoz-migrate-clickhouse --image=signoz/migrate:0.9-clickhouse --restart='Never' \
   -- -host=my-release-clickhouse -port=9000 -userName=admin -password=27ff0399-0d3a-4bd8-919d-17c2181e6fb9
 ```
 

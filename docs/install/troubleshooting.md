@@ -61,7 +61,7 @@ Let's spin up a pod in Kubernetes with `platform` namespace to check if `otel co
 
 ```bash
 kubectl -n platform run troubleshoot --image=signoz/troubleshoot \
-  --restart='OnFailure' -i --tty --rm --command -- ./troubleshoot checkEndpoint \
+  --restart='Never' -i --tty --rm --command -- ./troubleshoot checkEndpoint \
   --endpoint=my-release-signoz-otel-collector.platform.svc.cluster.local:4317
 ```
 
@@ -69,7 +69,7 @@ You can also spin up a pod in Kubernetes with same namespace as your application
 
 ```bash
 kubectl -n app-namespace run troubleshoot --image=signoz/troubleshoot \
-  --restart='OnFailure' -i --tty --rm --command -- ./troubleshoot checkEndpoint \
+  --restart='Never' -i --tty --rm --command -- ./troubleshoot checkEndpoint \
   --endpoint=my-release-signoz-otel-collector.platform.svc.cluster.local:4317
 ```
 
