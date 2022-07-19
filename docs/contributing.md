@@ -32,3 +32,13 @@ Please check [Contributing.md](https://github.com/SigNoz/signoz/blob/develop/CON
 - You can create a PR (Pull Request) for contributing features, bug fixes to the project.
 - If you find any bugs, please create an issue.
 - If you find anything missing in documentation, you can create an issue with label **documentation**.
+
+
+Frequently Asked Questions:
+
+#### I want to contribute to the SigNoz project, where do I start?
+
+- [General Instructions](https://github.com/SigNoz/signoz/blob/develop/CONTRIBUTING.md#1-general-instructions-)
+- [Contribute to Frontend](https://github.com/SigNoz/signoz/blob/develop/CONTRIBUTING.md#3-develop-frontend-)
+- [Contribute to Backend](https://github.com/SigNoz/signoz/blob/develop/CONTRIBUTING.md#4-contribute-to-backend-query-service-)
+- [Contribute to SigNoz Helm Chart](https://github.com/SigNoz/signoz/blob/develop/CONTRIBUTING.md#5-contribute-to-signoz-helm-chart-)
