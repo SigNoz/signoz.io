@@ -84,7 +84,7 @@ module.exports = {
           link: {
             type: 'generated-index',
             title: 'Migration Guides',
-            description: 'The following sections provide instructions to migrate SigNoz components across newer versions. Based on your need, proceed to one of the sections below.',
+            description: 'The following sections provide instructions to migrate SigNoz components across newer versions. You need to run these migration scripts step by step. For example if you are currently on `0.8.2` and want to migrate to `0.10.0` - you need to run migration script for `0.9` first and then `0.10`',
             slug: '/operate/migration',
           },
           items: [
