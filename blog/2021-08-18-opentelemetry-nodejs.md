@@ -1,7 +1,7 @@
 ---
 title: Monitor your Nodejs application with OpenTelemetry and SigNoz
 slug: opentelemetry-nodejs
-date: 2021-08-18
+date: 2022-07-27
 tags: [opentelemetry, javascript-monitoring]
 authors: ankit_anand
 description: In this article, learn how to setup application monitoring for Node.js apps with OpenTelemetry and SigNoz.
@@ -178,10 +178,11 @@ And, congratulations! You have instrumented your sample Node.js app. You can now
    You will need the following OpenTelemetry packages for this sample application.
    
    ```jsx
-   npm install --save @opentelemetry/api
-   npm install --save @opentelemetry/sdk-node
-   npm install --save @opentelemetry/auto-instrumentations-node
-   npm install --save @opentelemetry/exporter-otlp-grpc
+   npm install --save @opentelemetry/api@1.1.0
+   npm install --save @opentelemetry/sdk-node@0.29.2
+   npm install --save @opentelemetry/auto-instrumentations-node@0.31.0
+   npm install --save @opentelemetry/exporter-trace-otlp-grpc@0.29.2
+   npm install --save @grpc/grpc-js@1.3.7
    ```
 
    OpenTelemetry clients have two major components: the SDK and the API. The details of the packages used for the application are as follows:
@@ -194,7 +195,7 @@ And, congratulations! You have instrumented your sample Node.js app. You can now
    - `opentelemetry/auto-instrumentations-node`<br></br>
       A meta-package from [opentelemetry-js-contrib](https://github.com/open-telemetry/opentelemetry-js-contrib/tree/main/metapackages/auto-instrumentations-node) that provides a simple way to initialize multiple Node.js instrumentations.
 
-   - `opentelemetry/exporter-otlp-grpc`<br></br>
+   - `opentelemetry/exporter-trace-otlp-grpc`<br></br>
       Exports data via gRPC using [OTLP](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/protocol/otlp.md) format.
 
 
@@ -203,32 +204,39 @@ And, congratulations! You have instrumented your sample Node.js app. You can now
 
    ```jsx
    // tracing.js
+
    'use strict'
+
    const process = require('process');
    const opentelemetry = require('@opentelemetry/sdk-node');
    const { getNodeAutoInstrumentations } = require('@opentelemetry/auto-instrumentations-node');
-   const { OTLPTraceExporter } = require('@opentelemetry/exporter-otlp-grpc');
+   const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-grpc');
+   const grpc = require('@grpc/grpc-js');
+
    // configure the SDK to export telemetry data to the console
    // enable all auto-instrumentations from the meta package
-   const traceExporter = new OTLPTraceExporter();
+   const traceExporter = new OTLPTraceExporter({
+   credentials: grpc.credentials.createInsecure(),
+   }
+   );
    const sdk = new opentelemetry.NodeSDK({
-     traceExporter,
-     instrumentations: [getNodeAutoInstrumentations()]
-     });
-     
-     // initialize the SDK and register with the OpenTelemetry API
-     // this enables the API to record telemetry
-     sdk.start()
-     .then(() => console.log('Tracing initialized'))
-     .catch((error) => console.log('Error initializing tracing', error));
-     
-     // gracefully shut down the SDK on process exit
-     process.on('SIGTERM', () => {
-       sdk.shutdown()
-       .then(() => console.log('Tracing terminated'))
-       .catch((error) => console.log('Error terminating tracing', error))
-       .finally(() => process.exit(0));
-       });
+   traceExporter,
+   instrumentations: [getNodeAutoInstrumentations()]
+   });
+
+   // initialize the SDK and register with the OpenTelemetry API
+   // this enables the API to record telemetry
+   sdk.start()
+   .then(() => console.log('Tracing initialized'))
+   .catch((error) => console.log('Error initializing tracing', error));
+
+   // gracefully shut down the SDK on process exit
+   process.on('SIGTERM', () => {
+   sdk.shutdown()
+      .then(() => console.log('Tracing terminated'))
+      .catch((error) => console.log('Error terminating tracing', error))
+      .finally(() => process.exit(0));
+   });
   ```
 
 3. **Run the sample application with OpenTelemetry and send data to SigNoz**<br></br>
