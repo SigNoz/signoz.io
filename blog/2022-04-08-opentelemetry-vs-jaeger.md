@@ -1,5 +1,5 @@
 ---
-title: OpenTelemetry and Jaeger | Key concepts, features, and differences
+title: OpenTelemetry vs Jaeger | Key concepts, features, and differences
 slug: opentelemetry-vs-jaeger
 date: 2022-04-08
 tags: [Tools Comparison]
