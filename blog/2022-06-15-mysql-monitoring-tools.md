@@ -2,7 +2,7 @@
 title: Top 11 MYSQL monitoring tools in 2022 [open-source included]
 slug: mysql-monitoring-tools
 date: 2022-06-15
-tags: [Tech Resource]
+tags: [Tech Resources]
 authors: [ankit_anand, daniel]
 description: Top MySQL Monitoring Tools List - 1.SigNoz 2.Prometheus 3.Dynatrace 4.Sematext 5.Solar winds 6.DataDog 7.MySQL Enterprise Monitor 8.Paessler PRTG Network Monitor...
 image: /img/blog/2022/06/mysql_monitoring_tools_cover.webp

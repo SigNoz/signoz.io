@@ -1,7 +1,7 @@
 ---
 title: SigNoz - Open-source alternative to Dynatrace
 slug: dynatrace-alternative
-date: 2022-04-02
+date: 2022-07-25
 tags: [application-monitoring, apm-tools]
 authors: ankit_anand
 description: If you're looking for an open-source alternative to Dynatrace, then you're at the right place. SigNoz is a perfect open-source alternative to Dynatrace. SigNoz provides a unified UI for both metrics and traces with advanced tagging and filtering capabilities...
@@ -30,9 +30,10 @@ Dynatrace is a great SaaS tool when it comes to application performance monitori
 
 Some of the challenges with tools like Dynatrace includes:
 
-- It is cloud-only, so not suitable for companies that have concerns with sending data outside their infra
-- For any small feature, you are dependent on their roadmap. We think this is an unnecessary restriction for a product which developers use. A product used by developers should be extendible
-- Too costly. Thier full-stack monitoring plan starts at $69/month for 8GB per host. Pricing plans of enterprise tools can also sometimes leave you in a lurch with frequent changes.
+<!-- - It is cloud-only, so not suitable for companies that have concerns with sending data outside their infra -->
+- For any small feature, you are dependent on their roadmap. We think this is an unnecessary restriction for a product which developers use. A product used by developers should be extendible.
+
+- Too costly. Thier full-stack monitoring plan starts at $74/month for 8GB per host. Pricing plans of enterprise tools can also sometimes leave you in a lurch with frequent changes.
 
 A relatively newer concept in the field of application performance monitoring is observability. Making a system observable is the pursuit of achieving a state of proactiveness to solve unknown issues. Logs, metrics, and traces are usually considered the three pillars of observability.
 

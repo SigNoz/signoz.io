@@ -22,7 +22,7 @@ docker-compose -f docker/clickhouse-setup/docker-compose.yaml stop
 To start/resume the running SigNoz cluster:
 
 ```bash
-docker-compose -f docker/clickhouse-setup/docker-compose.yaml up
+docker-compose -f docker/clickhouse-setup/docker-compose.yaml up -d
 ```
 
 _*Note: The stopped SigNoz cluster should resume and mount to the existing docker volumes._

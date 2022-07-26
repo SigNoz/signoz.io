@@ -33,11 +33,8 @@ Some of the challenges with tools like Appdynamics includes:
 - **Vendor lock-in**<br></br>
 AppDynamics provides agents and controllers to collect data from your application. It is not built to natively support open-source standards. It's difficult to migrate or use different tools in such a scenario.
 
-- **Cloud-Only**<br></br>
-It is cloud-only, so not suitable for companies that have concerns with sending data outside their infra
-
 - **Product roadmap dependency**<br></br>
-For any small feature, you are dependent on their roadmap. We think this is an unnecessary restriction for a product which developers use. A product used by developers should be extendible
+For any small feature, you are dependent on their roadmap. We think this is an unnecessary restriction for a product which developers use. A product used by developers should be extendible.
 
 - **Costly and non-reliable pricing**<br></br>
 Pricing plans of enterprise tools can sometimes leave you in a lurch with frequent changes.
@@ -54,11 +51,11 @@ Some of the key features of good observability tools are:
 - Transparency in pricing
 
 
-## Why choose an open-Source alternative to AppDynamics?
+## Why choose an open source alternative to AppDynamics?
 
 APM and observability tools are critical tools in a developer's kit. These tools improve developer efficiency, save bandwidth by resolving issues quickly, and increase developer productivity.
 
-An open-source product is always a better choice for any developer tool. Some of the key advantages of open-source developer tools are:
+An open source product is always a better choice for any developer tool. Some of the key advantages of open-source developer tools are:
 
 - **Open codebase**<br></br>
 Developers can judge the quality of the code of the tool they want to choose and work with.
