@@ -2,7 +2,7 @@
 title: Open Source Single Pane of Glass Monitoring | SigNoz
 slug: single-pane-of-glass-monitoring
 date: 2022-06-30
-tags: [Product]
+tags: [SigNoz, Open Source]
 authors: [ankit_anand]
 description: Single plane of glass monitoring integrates the key aspects of monitoring an IT system to bring application and infrastructure monitoring under a single set of dashboards where it’s easy to correlate data for debugging performance issues...
 image: /img/blog/2022/06/single_pane_of_glass_monitoring_cover.webp
