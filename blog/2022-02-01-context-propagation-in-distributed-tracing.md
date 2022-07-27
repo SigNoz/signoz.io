@@ -2,7 +2,7 @@
 title: What is Context Propagation in Distributed Tracing?
 slug: context-propagation-in-distributed-tracing
 date: 2022-02-01
-tags: [distributed-tracing]
+tags: [Distributed Tracing]
 authors: [ankit_anand]
 description: Distributed tracing is built on causal metadata context propagation. Context propagation correlates events in a specific user request or transaction with the help of global identifiers and some other metadata..
 image: /img/blog/2022/02/context_propagation_distributed_tracing.webp
