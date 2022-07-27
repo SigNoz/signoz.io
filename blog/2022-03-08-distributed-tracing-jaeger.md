@@ -2,7 +2,7 @@
 title: Jaeger distributed tracing - complete guide
 slug: distributed-tracing-jaeger
 date: 2022-03-08
-tags: [jaeger, distributed-tracing]
+tags: [Distributed Tracing, Jaeger]
 authors: ankit_anand
 description: Jaeger is a popular open-source tool used for distributed tracing in a microservice architecture. See a demo ride-sharing application reporting its traces through Jaeger...
 image: /img/blog/2021/09/distributed_tracing_jaeger_cover-min.webp
