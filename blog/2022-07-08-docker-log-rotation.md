@@ -2,7 +2,7 @@
 title: Docker Log Rotation Configuration Guide | SigNoz
 slug: docker-log-rotation
 date: 2022-07-08
-tags: [Tutorial]
+tags: [Tech Tutorial]
 authors: [daniel]
 description: Docker uses the JSON-file logging driver by default, and it records all stdout and stderr output in JSON format. The logs are often stored on the Docker host, and Docker does not impose a size restriction on log files. And that’s where Docker log rotation is required...
 image: /img/blog/2022/07/docker_log_rotation_cover.webp

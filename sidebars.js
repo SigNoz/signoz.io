@@ -178,9 +178,26 @@ module.exports = {
       id: "roadmap",
       type: "doc",
     },
+    // {
+    //   id: "faq-1",
+    //   type: "doc",
+    // },
     {
-      id: "faq",
-      type: "doc",
+      label: "FAQ",
+      type: "category",
+      link: {
+        type: 'generated-index',
+        title: 'Frequently Asked Questions',
+        description: 'Find the most commonly questions about SigNoz Installation, Instrumentation, Features, Troubleshooting, and Contributing here:',
+        slug: '/faq',
+      },
+      items: [
+        'faq/product',
+        'faq/installation',
+        'faq/instrumentation',
+        'faq/features',
+        'faq/troubleshooting',
+      ],
     },
     {
       label: "Others",
