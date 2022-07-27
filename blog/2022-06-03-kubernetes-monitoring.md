@@ -2,7 +2,7 @@
 title: Kubernetes monitoring with open-source tools [OpenTelemetry and SigNoz]
 slug: kubernetes-monitoring
 date: 2022-06-03
-tags: [Tutorial]
+tags: [Tech Tutorial]
 authors: [prashant, ankit_anand]
 description: In this article, we will learn how to monitor a Kubernetes cluster using two completely free open-source tools. Kubernetes monitoring is a critical process needed for keeping your Kubernetes clusters in fine health...
 image: /img/blog/2022/06/kubernetes_monitoring_cover.webp
