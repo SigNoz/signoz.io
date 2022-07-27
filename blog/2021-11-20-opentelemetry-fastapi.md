@@ -2,7 +2,7 @@
 title: Monitoring your FastAPI application using OpenTelemetry
 slug: opentelemetry-fastapi
 date: 2021-11-20
-tags: [opentelemetry, python-monitoring]
+tags: [OpenTelemetry Instrumentation, Python]
 authors: ankit_anand
 description: OpenTelemetry is a vendor-agnostic isntrumentation library. In this article, learn how to set up monitoring for FastAPI web framework using OpenTelemetry.
 image: /img/blog/2021/11/monitor_fastAPI_cover.webp
