@@ -2,7 +2,7 @@
 title: Set up application monitoring for your Node JS app in 20 mins with open source - SigNoz
 slug: nodejs-opensource-application-monitoring
 date: 2021-05-24
-tags: [nodejs, open-source]
+tags: [OpenTelemetry Instrumentation, JavaScript]
 authors: ankit_anand
 description: In this article, learn how to setup application monitoring for Node.js apps with our open-source solution, SigNoz.
 image: /img/blog/2021/05/nodejs_with_signoz_cover.webp
