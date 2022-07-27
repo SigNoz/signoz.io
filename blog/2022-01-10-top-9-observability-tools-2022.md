@@ -2,7 +2,7 @@
 title: Top 9 observability tools in 2022 perfect for microservices
 slug: observability-tools
 date: 2022-01-10
-tags: [observability, application-monitoring]
+tags: [Tech Resources]
 authors: ankit_anand
 description: Latest top observability tools list - 1.SigNoz 2.Instana 3.Dynatrace 4.Grafana Labs 5.Honeycomb 6.Lightstep 7.New Relic 8.DataDog...
 image: /img/blog/2022/01/observability_tools_2022_cover.webp
