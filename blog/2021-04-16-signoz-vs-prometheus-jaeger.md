@@ -2,7 +2,7 @@
 title: The genesis of SigNoz - A full-stack open source observability platform
 slug: signoz-vs-prometheus-jaeger
 date: 2021-04-16
-tags: [observability, distributed-tracing]
+tags: [SigNoz, Community]
 authors: ankit_nayan
 hide_table_of_contents: true
 description: Why we felt there was a need for a full-stack open source observability platform and how we went about building it.
