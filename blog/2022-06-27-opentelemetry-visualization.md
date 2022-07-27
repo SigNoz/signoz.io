@@ -2,7 +2,7 @@
 title: Getting started with OpenTelemetry visualization
 slug: opentelemetry-visualization
 date: 2022-06-27
-tags: [opentelemetry-tutorials]
+tags: [OpenTelemetry, SigNoz]
 authors: [ankit_anand]
 description: OpenTelemetry provides language-specific client libraries to instrument application code for generating telemetry data. You can then use a backend analysis tool to visualize the collected OpenTelemetry data. In this article, we will see what types of OpenTelemetry visualizations are possible and how to use a backend analysis tool for OpenTelemetry visualization...
 image: /img/blog/2022/06/opentelemetry_visualization_cover.webp
