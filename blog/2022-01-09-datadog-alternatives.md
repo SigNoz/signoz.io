@@ -2,7 +2,7 @@
 title: Top 5 DataDog alternatives in 2022
 slug: datadog-alternatives
 date: 2022-01-09
-tags: [datadog, apm-tools]
+tags: [Tech Resources]
 authors: ankit_anand
 description: Are you looking for a DataDog alternative? Then you've come to the right place. In this article, we will explore the top 5 alternatives to DataDog. 1.SigNoz 2.New Relic 3.Dynatrace...
 image: /img/blog/2022/01/datadog_alternatives_2022_cover.webp
