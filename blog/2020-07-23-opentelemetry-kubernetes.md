@@ -2,7 +2,7 @@
 title: Getting started with OpenTelemetry on Kubernetes
 slug: opentelemetry-kubernetes
 date: 2020-07-23
-tags: [opentelemetry, kubernetes, distributed-tracing]
+tags: [OpenTelemetry]
 author: Joy Bhattacharjee
 author_url: https://twitter.com/hashfyre
 author_image_url: /img/authors/5ZPWaLTu_400x400.webp
