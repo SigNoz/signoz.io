@@ -2,7 +2,7 @@
 title: SigNoz - Open-source alternative to New Relic
 slug: open-source-newrelic-alternative
 date: 2022-04-07
-tags: [application-monitoring, new-relic, apm-tools]
+tags: [SigNoz, Open Source]
 authors: ankit_anand
 description: If you're looking for an open-source alternative to New Relic, then you're at the right place. SigNoz is a perfect open-source alternative to New Relic. SigNoz provides a unified UI for both metrics and traces with advanced tagging and filtering capabilities...
 image: /img/blog/2021/09/new_relic_alternative_cover-min.webp
