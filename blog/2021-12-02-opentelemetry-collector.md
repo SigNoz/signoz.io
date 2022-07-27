@@ -2,7 +2,7 @@
 title: OpenTelemetry Collector - architecture and configuration guide
 slug: opentelemetry-collector-complete-guide
 date: 2021-12-02
-tags: [opentelemetry]
+tags: [OpenTelemetry]
 authors: ankit_anand
 description: OpenTelemetry collector provides a vendor-neutral way to collect, process, and export your telemetry data to an analysis backend of your choice. Learn how to configure..
 image: /img/blog/2021/08/opentelemetry_collector_cover-min.webp

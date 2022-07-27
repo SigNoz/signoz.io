@@ -2,7 +2,7 @@
 title: Monitoring Django application performance with OpenTelemetry
 slug: opentelemetry-django
 date: 2022-01-13
-tags: [opentelemetry, python-monitoring]
+tags: [OpenTelemetry Instrumentation, Python]
 authors: [ankit_anand, ankit_nayan]
 description: OpenTelemetry provides an open-source standard with a consistent collection mechanism and data format. In this article, learn how to set up monitoring for a Django application using OpenTelemetry.
 image: /img/blog/2022/01/opentelemetry_django_cover.webp

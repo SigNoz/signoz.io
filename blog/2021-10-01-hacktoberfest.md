@@ -2,7 +2,7 @@
 title: SigNoz is taking part in Hacktoberfest!
 slug: hacktoberfest
 date: 2021-10-01
-tags: [open-source]
+tags: [SigNoz, Open Source]
 authors: ankit_anand
 description: As an open-source project, we are excited to announce that SigNoz is participating in Hacktoberfest!..
 image: /img/blog/2021/10/hacktoberfest_signoz_new-min.webp

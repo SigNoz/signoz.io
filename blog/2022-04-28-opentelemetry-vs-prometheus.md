@@ -2,7 +2,7 @@
 title: OpenTelemetry vs Prometheus - differences, use-cases and alternatives
 slug: opentelemetry-vs-prometheus
 date: 2022-04-28
-tags: [opentelemetry, prometheus, apm-tools]
+tags: [Tools Comparison]
 authors: ankit_anand
 description: OpenTelemetry and Prometheus are both open-source projects under Cloud Native Computing Foundation. One is used for managing telemetry data and the other is a metrics monitoring tool..
 image: /img/blog/2021/09/opentelemetry_vs_prometheus_cover-min.webp

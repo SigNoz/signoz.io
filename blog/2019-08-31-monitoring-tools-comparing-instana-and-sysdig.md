@@ -2,7 +2,7 @@
 title: "Monitoring Tools: Comparing Instana and Sysdig"
 slug: monitoring-tools-comparing-instana-and-sysdig
 date: 2019-08-30
-tags: [application-monitoring, apm-tools]
+tags: [Tools Comparison]
 authors: ankit_nayan
 description: In this blog, we compare Instana and Sysdig - two popular monitoring tools which claim to show APM metrics without need to instrument code.
 image: /img/blog/2019/08/Instana-Sysdig-2.webp

@@ -177,6 +177,8 @@ You need to make two changes to enable OpenTelemetry Collector to receive Redis 
 
 You can have a look at the `otel-collector-metrics-config.yaml` file on our [GitHub repo](https://github.com/SigNoz/signoz/blob/develop/deploy/docker/clickhouse-setup/otel-collector-metrics-config.yaml). The final config file along with Redis receiver looks like below:
 
+Note: We have configured the `redis endpoint` for Mac for this demo. You will need to update the endpoint based on your environment.
+
 ```bash
 receivers:
   otlp:
@@ -323,6 +325,13 @@ Once you click on `+ Add panel` , you will have access to a DIY metrics query bu
 You can also use native ClickHouse queries or PromQL for creating the charts, but the query builder provides the easiest experience.
 
 Once you are done building your charts, you can save the layout and start monitoring your Redis instance.
+
+<figure data-zoomable align='center'>
+    <img src="/img/blog/2022/07/redis_dashboard_signoz.webp" alt="Redis monitoring dashboard in SigNoz"/>
+    <figcaption><i>Redis monitoring dashboard in SigNoz</i></figcaption>
+</figure>
+
+<br></br>
 
 ## Full-stack APM experience for Redis
 

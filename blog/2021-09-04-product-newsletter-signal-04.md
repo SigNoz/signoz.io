@@ -2,7 +2,7 @@
 title: Metrics first look, more robust frontend and much more - Signal 04
 slug: community-update-04
 date: 2021-09-06
-tags: [product-updates, community]
+tags: [Product Updates]
 authors: ankit_anand
 hide_table_of_contents: true
 description: It's time for the monthly product update of SigNoz - a full-stack open-source and observability tool. Find out what we've been upto at SigNoz during August, 2021.
