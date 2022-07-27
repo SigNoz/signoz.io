@@ -2,7 +2,7 @@
 title: Top 13 open source APM tools in 2022
 slug: open-source-apm-tools
 date: 2021-12-28
-tags: [application-monitoring, open-source, apm-tools]
+tags: [Tech Resources]
 authors: ankit_anand
 description: Latest top open source APM tool list - 1.SigNoz 2.Graphite 3.Pinpoint 4.Prometheus 5.JavaMelody 6.StageMonitor 7.Scouter 8.Zipkin 9.Jaeger 10.Skywalking...
 image: /img/blog/2021/12/open_source_apm_2022.webp
