@@ -2,7 +2,7 @@
 title: An open source OpenTelemetry APM | SigNoz
 slug: opentelemetry-apm
 date: 2022-06-29
-tags: [opentelemetry-tutorials]
+tags: [OpenTelemetry, SigNoz]
 authors: [ankit_anand]
 description: SigNoz is an open source APM built to support OpenTelemetry natively. In this article, we will talk about things to be kept in mind while selecting an OpenTelemetry APM. We will also see how SigNoz can help you in setting up full-stack observability....
 image: /img/blog/2022/06/opentelemetry_apm_cover.webp
