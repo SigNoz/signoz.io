@@ -104,7 +104,8 @@ module.exports = {
             slug: '/operate/clickhouse',
           },
           items: [
-            'operate/clickhouse/increase-clickhouse-pv'
+            'operate/clickhouse/increase-clickhouse-pv',
+            'operate/clickhouse/connect-to-clickhouse'
           ]
         },
       ],
