@@ -2,7 +2,7 @@
 title: Implementing OpenTelemetry in React applications
 slug: opentelemetry-react
 date: 2022-05-17
-tags: [opentelemetry-tutorials]
+tags: [OpenTelemetry Instrumentation, JavaScript]
 authors: [palash, ankit_anand]
 description: It is essential to monitor your React frontend apps for performance issues. OpenTelemetry can help instrument React apps and provide you with frontend monitoring. In this guide, we will demonstrate how to implement the OpenTelemetry Web library.....
 image: /img/blog/2022/05/opentelemetry_react_cover.webp

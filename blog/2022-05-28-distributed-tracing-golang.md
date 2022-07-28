@@ -2,7 +2,7 @@
 title: Implementing Distributed Tracing in a Golang application
 slug: distributed-tracing-golang
 date: 2022-05-28
-tags: [distributed-tracing]
+tags: [OpenTelemetry Instrumentation, Go / Golang]
 authors: [naman]
 description: Distributed tracing provides insights into how a particular service is performing as part of the whole in a distributed system. In this article, we will implement distributed tracing for a Golang application based on microservices architecture with OpenTelemetry, and visualize the collected data with SigNoz...
 image: /img/blog/2022/05/distributed_tracing_golang_cover.webp

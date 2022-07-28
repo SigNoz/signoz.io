@@ -2,7 +2,7 @@
 title: Bringing out of the box application monitoring to Prometheus
 slug: out-of-box-application-monitoring-prometheus
 date: 2019-11-29
-tags: [prometheus, grafana, application-monitoring, kubernetes, observability]
+tags: [APM, OpenTelemetry, SigNoz]
 authors: ankit_nayan
 description: Prometheus is a popular monitoring tool for kubernetes. Kube-state metrics and node exporters send a lot of metrics. But visualization of the metrics in charts is still painful. In this article, let's see how we can have some out of box visualizations with Prometheus.
 image: /img/blog/2019/11/prometheus_application_monitoring_hc.webp

@@ -90,10 +90,12 @@ const config = {
           position: "left",
         },
         {
-          href: "https://github.com/SigNoz/signoz",
-          label: "GitHub",
+          to: "case-study/instasafe/",
+          activeBasePath: "case-study/instasafe/",
+          label: "Case Study",
           position: "right",
         },
+      
         {
           href: "https://join.slack.com/t/signoz-community/shared_invite/zt-lrjknbbp-J_mI13rlw8pGF4EWBnorJA",
           label: "Slack",
