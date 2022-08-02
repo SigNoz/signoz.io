@@ -17,7 +17,7 @@ keywords:
   <link rel="canonical" href="https://signoz.io/blog/kubernetes-audit-logs/"/>
 </head>
 
-[Kubernetes](https://kubernetes.io) is the de facto leader of container orchestration tools. With the growing popularity of micro-service-based development, Kubernetes emerged as the go-to tool to deploy and manage large-scale enterprise applications. However, with the plethora of features offered by Kubernetes, it is a complex tool to manage and operate. This article will focus on how to configure Kubernetes Audit Logs so that you can have the records of events happening in your cluster.
+Kubernetes is the de facto leader of container orchestration tools. With the growing popularity of micro-service-based development, Kubernetes emerged as the go-to tool to deploy and manage large-scale enterprise applications. However, with the plethora of features offered by Kubernetes, it is a complex tool to manage and operate. This article will focus on how to configure Kubernetes Audit Logs so that you can have the records of events happening in your cluster.
 
 
 <!--truncate-->
@@ -28,7 +28,7 @@ keywords:
 
 If you have working experience with Kubernetes, then you must be aware that all the communications between Kubernetes components and the commands executed by the users are REST API calls. Kubernetes API Server is the component that processes all these requests. So whenever you execute a kubectl command, it is basically a wrapper for the API call made to the API Server.
 
-[Kubernetes Audit Logs](https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/) record all these API calls made to the API Server. This includes the API calls by different users and the ones made by different components of Kubernetes itself. These logs provide a lot of information related to the API request, like the time of the request, source IP and the user who made the request, what kind of the request it was, and the response sent by API Server.
+<a href = "https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/" rel="noopener noreferrer nofollow" target="_blank">Kubernetes Audit Logs</a> record all these API calls made to the API Server. This includes the API calls by different users and the ones made by different components of Kubernetes itself. These logs provide a lot of information related to the API request, like the time of the request, source IP and the user who made the request, what kind of the request it was, and the response sent by API Server.
 
 ## Why Should You Configure Kubernetes Audit Logs?
 
@@ -58,7 +58,7 @@ The information captured for an event depends upon the audit level configured. Y
 Now is the time to see Kubernetes Auditing in action. In a self-hosted cluster, auditing is not enabled out of the box. If you are using a managed Kubernetes cluster, you may go through your vendor's documentation to check whether auditing is enabled by default or if you need to enable it.
 The cluster used here has one control-plane instance and one node instance, and you can use the same steps for a minikube cluster or any other bare-metal Kubernetes cluster.
 
-### Step 1:
+### Step 1: Connect to control-plane
 
 Connect to the control-plane node and create a directory to host the audit policy as well as audit logs.
 
@@ -66,7 +66,7 @@ Connect to the control-plane node and create a directory to host the audit polic
 mkdir /etc/kubernetes/audit
 ```
 
-### Step 2:
+### Step 2: Create an audit policy
 
 Create an audit policy file named `/etc/kubernetes/audit/policy.yaml` with the following data: 
 
@@ -97,7 +97,7 @@ rules:
 - level: RequestResponse
 ```
 
-### Step 3:
+### Step 3: Add required entries
 
 Add following entries in `/etc/kubernetes/manifests/kube-apiserver.yaml`:
 
@@ -124,7 +124,7 @@ Now mount this volume by adding the following data under the volumeMounts sectio
   name: audit
 ```
 
-That’s all you need to do in order to configure audit logging. Since you have modified the kube-apiserver manifest, your kube-apiserver pod will be recreated. Once the pod is up and running, execute the following command to create a [service account](https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/).
+That’s all you need to do in order to configure audit logging. Since you have modified the kube-apiserver manifest, your kube-apiserver pod will be recreated. Once the pod is up and running, execute the following command to create a <a href = "https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/" rel="noopener noreferrer nofollow" target="_blank">service account</a>.
 
 ```bash
 kubectl create sa test
@@ -306,14 +306,16 @@ tail -f  /etc/kubernetes/audit/audit.log   | jq '.| select(.user.username | cont
 In a production environment, you need to consider some best practices for Kubernetes Auditing. This includes:
 
 - Create a comprehensive auditing policy based on your logging requirements
-- Use [webhook backends](https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/#webhook-backend) to send audit data to remote endpoints instead of storing logs on disk
+- Use <a href = "https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/#webhook-backend" rel="noopener noreferrer nofollow" target="_blank">webhook backends</a> to send audit data to remote endpoints instead of storing logs on disk
 - Control access to audit data so that it can’t be tampered with
 - Configure alerts and visualization based on the audit logs so that you get informed about important events, like deletion of secrets etcetera
 
 ## Final Thoughts
 
 Auditing is a very important part of Kubernetes cluster security which gives you visibility about the events happening in your cluster and helps run a properly configured and secure cluster. In this article, you've learned about what Kubernetes Auditing is, why it is important, and how to configure it.
+
 Security is a never-ending process, and there is always scope for further optimization and improvement. The information presented in this article sets you out on a journey towards securing your Kubernetes Cluster for you to explore it further.
+
 If you want to stay ahead of issues in your Kubernetes cluster, you need to monitor it. SigNoz, an open source APM can monitor metrics, traces, and logs of your Kubernetes cluster. It is built to support OpenTelemetry natively, the open source standard for instrumenting cloud-native applications.
 
 You can check out SigNoz GitHub repo here:
