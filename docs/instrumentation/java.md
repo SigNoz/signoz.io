@@ -57,7 +57,7 @@ You can also specify environment variables in the following way
 java -javaagent:/path/opentelemetry-javaagent.jar \
     -Dotel.metrics.exporter=none \
     -Dotel.exporter.otlp.endpoint=http://<IP of SigNoz Backend>:4317 \
-    -Dotel.resource.attributes="service.name=<app_name>" \
+    -Dotel.resource.attributes=service.name=<app_name> \
     -jar <myapp>.jar
 ```
 

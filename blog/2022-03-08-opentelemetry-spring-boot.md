@@ -171,11 +171,11 @@ For instrumenting Java applications, OpenTelemetry has a very handy Java JAR age
 
    You can also use `-D` option to install the java agent.
 
-   ```
+   ```bash
    java -javaagent:/path/opentelemetry-javaagent.jar \
     -Dotel.metrics.exporter=none \
     -Dotel.exporter.otlp.endpoint=http://<IP of SigNoz>:4317 \
-    -Dotel.resource.attributes="service.name=<service_name>" \
+    -Dotel.resource.attributes=service.name=<service_name> \
     -jar target/*.jar
    ```
 
