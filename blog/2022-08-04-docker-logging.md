@@ -78,7 +78,7 @@ Hello there!
 This message shows that everything seems to be working correctly.
 ```
 
-Here are a few `[options](https://docs.docker.com/engine/reference/commandline/logs/#options)` in the command that you can use to modify the output of your log:
+Here are a few [options](https://docs.docker.com/engine/reference/commandline/logs/#options) in the command that you can use to modify the output of your log:
 
 ```docker
 docker logs [OPTIONS] <container-id>
