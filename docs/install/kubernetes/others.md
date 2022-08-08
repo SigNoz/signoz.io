@@ -32,6 +32,16 @@ DEFAULT_STORAGE_CLASS=$(kubectl get storageclass -o=jsonpath='{.items[?(@.metada
 kubectl patch storageclass "$DEFAULT_STORAGE_CLASS" -p '{"allowVolumeExpansion": true}'
 ```
 
+:::info
+In case you would like to use your own storage class, you can set `storageClass` configuration.
+To list storage class in your Kubernetes cluster: `kubectl get storageclass`.
+:::
+
+## Chart configuration
+
+You can find an overview of the parameters that can be configured during installation under
+[chart configuration](https://github.com/SigNoz/charts/tree/main/charts/signoz#configuration).
+
 ## Install SigNoz on Kubernetes with Helm
 
 <InstallSigNozPart1 />

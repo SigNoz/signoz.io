@@ -11,6 +11,7 @@ import InstallSigNozPart2 from '../../shared/install-signoz-k8s-part-2.md'
 import VerifyInstallation from '../../shared/k8s-verify-installation.md'
 import K8sHotrod from '../../shared/k8s-hotrod.md'
 import NextSteps from '../../shared/next-steps.md'
+import StorageClass from '../../shared/k8s-storageclass.md'
 
 First, we need to set up a Kubernetes cluster (see the
 [official AWS documentation](https://docs.aws.amazon.com/eks/latest/userguide/getting-started-eksctl.html)
@@ -32,12 +33,15 @@ an overview of the parameters that can be configured during installation under
 [chart configuration](https://github.com/SigNoz/charts/tree/main/charts/signoz#configuration).
 
 ```yaml
+global:
+  storageClass: gp2-resizable
+
 clickhouse:
   cloud: aws
   installCustomStorageClass: true
-  persistence:
-    storageClass: gp2-resizable
 ```
+
+<StorageClass />
 
 ## Install SigNoz on Kubernetes with Helm
 
