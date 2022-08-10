@@ -56,7 +56,7 @@ module.exports = {
         'instrumentation/nestjs',
         'instrumentation/java',
         'instrumentation/golang',
-        'instrumentation/php',   
+        'instrumentation/php',
         'instrumentation/dotnet',
         'instrumentation/ruby-on-rails',
         'instrumentation/elixir',
@@ -144,7 +144,18 @@ module.exports = {
         'userguide/alerts-management',
         'userguide/authentication',
         'userguide/retention-period',
-        'userguide/service-map'
+        'userguide/service-map',
+        {
+          type: 'category',
+          label: 'Logs',
+          link: {
+            type: 'doc',
+            id: 'userguide/logs',
+          },
+          items: [
+            'userguide/fluentbit_to_signoz', 'userguide/fluentd_to_signoz', 'userguide/logstash_to_signoz'
+          ]
+        }
       ],
     },
     {
