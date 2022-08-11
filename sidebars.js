@@ -131,23 +131,7 @@ module.exports = {
         },
         {
           type: 'category',
-          label: 'Manage Dashboards and Panels',
-          link: {
-            type: 'doc',
-            id: 'userguide/manage-dashboards-and-panels',
-          },
-          items: [
-            'userguide/manage-dashboards', 'userguide/manage-panels', 'userguide/create-a-custom-query'
-          ]
-        },
-        'userguide/exceptions',
-        'userguide/alerts-management',
-        'userguide/authentication',
-        'userguide/retention-period',
-        'userguide/service-map',
-        {
-          type: 'category',
-          label: 'Logs',
+          label: 'Logs (WIP)',
           link: {
             type: 'doc',
             id: 'userguide/logs',
@@ -170,7 +154,23 @@ module.exports = {
               ]
             }
           ]
-        }
+        },
+        {
+          type: 'category',
+          label: 'Manage Dashboards and Panels',
+          link: {
+            type: 'doc',
+            id: 'userguide/manage-dashboards-and-panels',
+          },
+          items: [
+            'userguide/manage-dashboards', 'userguide/manage-panels', 'userguide/create-a-custom-query'
+          ]
+        },
+        'userguide/exceptions',
+        'userguide/alerts-management',
+        'userguide/authentication',
+        'userguide/retention-period',
+        'userguide/service-map',
       ],
     },
     {
