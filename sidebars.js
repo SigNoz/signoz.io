@@ -154,6 +154,7 @@ module.exports = {
           },
           items: [
             'userguide/logs_query_builder',
+            'userguide/logs_fields',
             {
               type: 'category',
               label: 'Existing Collectors to SigNoz',
