@@ -153,7 +153,14 @@ module.exports = {
             id: 'userguide/logs',
           },
           items: [
-            'userguide/fluentbit_to_signoz', 'userguide/fluentd_to_signoz', 'userguide/logstash_to_signoz'
+            'userguide/logs_query_builder',
+            {
+              type: 'category',
+              label: 'Existing Collectors to SigNoz',
+              items: [
+                'userguide/fluentbit_to_signoz', 'userguide/fluentd_to_signoz', 'userguide/logstash_to_signoz'
+              ]
+            }
           ]
         }
       ],
