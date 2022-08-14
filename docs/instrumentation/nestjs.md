@@ -30,13 +30,14 @@ Let us see how to instrument your application with OpenTelemetry, so that you ca
 
 ### Instrumenting a sample Nestjs application with OpenTelemetry
 
-1. **Install below dependencies**
+1. **Install below dependencies**<br></br>
+
    ```jsx
-    "@opentelemetry/api": "^1.1.0",
-    "@opentelemetry/auto-instrumentations-node": "^0.31.0",
-    "@opentelemetry/exporter-trace-otlp-grpc": "^0.29.2",
-    "@opentelemetry/sdk-node": "^0.29.2",
-    "@grpc/grpc-js": "^1.3.7",
+   npm install --save @opentelemetry/api
+   npm install --save @opentelemetry/sdk-node
+   npm install --save @opentelemetry/auto-instrumentations-node
+   npm install --save @opentelemetry/exporter-trace-otlp-grpc
+   npm install --save @grpc/grpc-js
    ```
 
 2. **Create a `tracer.ts` file**<br></br>

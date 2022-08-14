@@ -77,11 +77,11 @@ For instrumenting a Nestjs application with OpenTelemetry, you need to install t
 1. **Install below dependencies<br></br>**
 
 ```jsx
-npm install --save @opentelemetry/api@1.1.0
-npm install --save @opentelemetry/sdk-node@0.29.2
-npm install --save @opentelemetry/auto-instrumentations-node@0.31.0
-npm install --save @opentelemetry/exporter-trace-otlp-grpc@0.29.2
-npm install --save @grpc/grpc-js@1.3.7
+npm install --save @opentelemetry/api
+npm install --save @opentelemetry/sdk-node
+npm install --save @opentelemetry/auto-instrumentations-node
+npm install --save @opentelemetry/exporter-trace-otlp-grpc
+npm install --save @grpc/grpc-js
 ```
 
 <br></br>

@@ -117,7 +117,7 @@ pnpm create next-app
 
 Start the development server.
 
-```go
+```bash
 npm run dev
 //or
 yarn dev
