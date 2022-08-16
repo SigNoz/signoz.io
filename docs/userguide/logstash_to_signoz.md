@@ -24,42 +24,26 @@ At SigNoz we use opentelemetry collector to recieve logs which supports the TCP 
     Here we have used port 2255 for listing in TCP protocol, but you can change it to a port you want.
     You can read more about tcplog reciver [here](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/tcplogreceiver).
 
-* Uncomment the exporter and pipleline for logs and make the following change in `otel-collector-config.yaml`
+* Update the pipleline for logs and make the following change in `otel-collector-config.yaml`
     ```
-    exporters:
-        ...
-        
-        clickhouselogsexporter:
-        dsn: tcp://clickhouse:9000/
-        timeout: 5s
-        sending_queue:
-            queue_size: 100
-        retry_on_failure:
-            enabled: true
-            initial_interval: 5s
-            max_interval: 30s
-            max_elapsed_time: 300s
-        
-        ...
-
     service:
-        ...
+      ...
 
-        logs:
-            receivers: [ tcplog/logstash ]
-            processors: [ batch ]
-            exporters: [  clickhouselogsexporter ]
+      logs:
+        receivers: [ oltp, tcplog/logstash ]
+        processors: [ batch ]
+        exporters: [  clickhouselogsexporter ]
     ```
     Here we are adding our clickhouse exporter and creating a pipeline which will collect logs from `tcplog/logstash` receiver, processing it using batch processor and export it to clickhouse.
 
 * Change the logstash config to forward the logs to otel collector.
     ```
     output {
-        tcp {
-            codec => json_lines # this is required otherwise it will send eveything in a single line
-            host => "otel-collector-host"
-            port => 2255
-        }
+      tcp {
+        codec => json_lines # this is required otherwise it will send eveything in a single line
+        host => "otel-collector-host"
+        port => 2255
+      }
     }
     ```
     In this example we are generating sample logs and then forwarding them to the otel collector which is listening on  port 2255.
