@@ -8,14 +8,16 @@ id: collect_docker_logs
 With SigNoz you can collect all your docker container logs and perform different queries on top of it.
 Below are the steps to collect docker container logs.
 
+This guide assumes that signoz is running in the same host where your docker containers are running.
+
 ## Steps
-* Modify the `docker-compose.yaml` file present inside `deploy/docker/clickhouse-setup` to run the OTEL collector as root user and mount the docker container directory.
-    ```
+* Modify the `docker-compose.yaml` file present inside `deploy/docker/clickhouse-setup` to run the OTEL collector as root user and mount the docker container directory as highlighted below.
+    ```yaml {5,8}
     ...
     otel-collector:
         image: signoz/signoz-otel-collector:0.55.0-rc.3
         command: ["--config=/etc/otel-collector-config.yaml"]
-        user: root # required for reading docker container logs
+        user: "root" # required for reading docker container logs
         volumes:
         - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml
         - /var/lib/docker/containers:/var/lib/docker/containers:ro
@@ -23,7 +25,7 @@ Below are the steps to collect docker container logs.
     ```
 
 * Add the filelog reciever to `otel-collector-config.yaml` which is present inside `deploy/docker/clickhouse-setup`
-    ```
+    ```yaml {2-31}
     receivers:
       filelog/containers:
         include: [  "/var/lib/docker/containers/*/*.log" ]
@@ -61,7 +63,7 @@ Below are the steps to collect docker container logs.
     You can read more about operators [here](./logs.md#operators-for-parsing-and-manipulating-logs)
 
 * Next we will modify our pipeline inside `otel-collector-config.yaml` to include the receiver we have created above.
-    ```
+    ```yaml {4}
     service:
         ....
         logs:

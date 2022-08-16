@@ -144,6 +144,7 @@ module.exports = {
               label: 'Collecting Logs',
               items: [
                 'userguide/collect_docker_logs',
+                'userguide/collecting_syslogs'
               ]
             },
             {
