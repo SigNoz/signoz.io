@@ -22,50 +22,45 @@ Below are the steps to collect docker container logs.
     ...
     ```
 
-* Add a filelog reciever to `otel-collector-config.yaml` which is present inside `deploy/docker/clickhouse-setup`
+* Add the filelog reciever to `otel-collector-config.yaml` which is present inside `deploy/docker/clickhouse-setup`
     ```
     receivers:
-        filelog/containers:
-            include: [  "/var/lib/docker/containers/*/*.log" ]
-            start_at: end
-            include_file_path: true
-            include_file_name: false
-            operators:
-            # Find out which format is used by docker
-            - type: router
-                id: get-format
-                routes:
-                - output: parser-docker
-                    expr: 'body matches "^\\{"'
-            # Parse Docker format
-            - type: json_parser
-                id: parser-docker
-                output: extract_metadata_from_filepath
-                timestamp:
-                parse_from: attributes.time
-                layout: '%Y-%m-%dT%H:%M:%S.%LZ'
-
-            # Extract metadata from file path
-            - type: regex_parser
-                id: extract_metadata_from_filepath
-                regex: '^.*containers/(?P<container_id>[^_]+)/.*log$'
-                parse_from: attributes["log.file.path"]
-                output: parse_body
-            - type: move
-                id: parse_body
-                from: attributes.log
-                to: body
-                output: add_source
-            - type: add
-                id: add_source
-                field: resource["source"]
-                value: "docker"
+      filelog/containers:
+        include: [  "/var/lib/docker/containers/*/*.log" ]
+        start_at: end
+        include_file_path: true
+        include_file_name: false
+        operators:
+        - type: json_parser
+          id: parser-docker
+          output: extract_metadata_from_filepath
+          timestamp:
+          parse_from: attributes.time
+          layout: '%Y-%m-%dT%H:%M:%S.%LZ'
+        # Extract metadata from file path
+        - type: regex_parser
+          id: extract_metadata_from_filepath
+          regex: '^.*containers/(?P<container_id>[^_]+)/.*log$'
+          parse_from: attributes["log.file.path"]
+          output: parse_body
+        - type: move
+          id: parse_body
+          from: attributes.log
+          to: body
+          output: add_source
+        - type: add
+          id: add_source
+          field: resource["source"]
+          value: "docker"
+        - type: remove
+          id: time
+          field: attributes.time
     ...
     ```
-    Here we are parsing the logs and extracting different values like container_id, timestamp etc using different operators that are available.
+    Here we are parsing the logs and extracting different values like timestamp, body and removing duplicate fields using different operators that are available.
     You can read more about operators [here](./logs.md#operators-for-parsing-and-manipulating-logs)
 
-* Next we will modify our `clickhouselogsexporter` inside `otel-collector-config.yaml` to include the receiver we have created above.
+* Next we will modify our pipeline inside `otel-collector-config.yaml` to include the receiver we have created above.
     ```
     service:
         ....
@@ -75,4 +70,4 @@ Below are the steps to collect docker container logs.
             exporters: [clickhouselogsexporter]
     ```
 
-* Now we can restart the otel collector so that new changes are applied and the docker container logs will be visible in SigNoz.
+* Now we can restart the otel collector container so that new changes are applied and the docker container logs will be visible in SigNoz.
