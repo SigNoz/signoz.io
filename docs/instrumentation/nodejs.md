@@ -54,7 +54,7 @@ The instrumentation automatically identifies the following within your applicati
 <br></br>
 
 
-**Steps to auto-instrument Nodejs application**
+#### Steps to auto-instrument Nodejs application
 
 1. Install the dependencies<br></br>
    We start by installing the relevant dependencies.
@@ -128,7 +128,28 @@ The instrumentation automatically identifies the following within your applicati
     OTEL_RESOURCE_ATTRIBUTES=service.name=node_app \
     node -r ./tracing.js app.js
     ```
-    
+
+
+#### Validating instrumentation by checking for traces
+
+With your application running, you can verify that you’ve instrumented your application with OpenTelemetry correctly by confirming that tracing data is being reported to SigNoz.
+
+To do this, you need to ensure that your application generates some data. Applications will not produce traces unless they are being interacted with, and OpenTelemetry will often buffer data before sending. So you need to interact with your application and wait for some time to see your tracing data in SigNoz.
+
+Validate your traces in SigNoz:
+
+1. Trigger an action in your app that generates a web request. Hit the endpoint a number of times to generate some data.
+2. In SigNoz, open the `Services` tab. Hit the `Refresh` button on the top right corner, and your application should appear in the list of `Applications`.
+3. Go to the `Traces` tab, and apply relevant filters to see your application’s traces.
+
+You might see other dummy applications if you’re using SigNoz for the first time. You can remove it by following the docs [here](https://signoz.io/docs/operate/docker-standalone/#remove-the-sample-application).
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/nodejs_in_services_list.webp" alt="Node Application in the list of services being monitored in SigNoz"/>
+    <figcaption><i>Node Application in the list of services being monitored in SigNoz</i></figcaption>
+</figure>
+
+<br></br>  
 
 <!-- ### Instrumenting a sample Express application
 
@@ -270,8 +291,10 @@ If you are using Express, the instrumentation relies on HTTP calls to also be in
     const traceExporter = new OTLPTraceExporter();
     const sdk = new opentelemetry.NodeSDK({
       traceExporter,
-      instrumentations: [new ExpressInstrumentation(), new MongoDBInstrumentation(), new HttpInstrumentation()]
-      });
+      instrumentations: [new ExpressInstrumentation(),
+                         new MongoDBInstrumentation(),
+                         new HttpInstrumentation()]
+                         });
       
       // initialize the SDK and register with the OpenTelemetry API
       // this enables the API to record telemetry
@@ -312,6 +335,7 @@ If you are using Express, the instrumentation relies on HTTP calls to also be in
     ```
     
 
+With your application running, you can verify that you’ve instrumented your application with OpenTelemetry correctly by [validating](#validating-instrumentation-by-checking-for-traces) if your traces are being to SigNoz.
 
 ## Troubleshooting your installation
 
