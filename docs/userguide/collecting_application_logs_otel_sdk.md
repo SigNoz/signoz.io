@@ -88,7 +88,7 @@ For this sample application we will be using Python but if the SDKs are availabl
   ```
   OTLPLogExporter(endpoint="0.0.0.0:4317")
   ```
-  Here we are using `0.0.0.0` as our host since we are running this application in the same machine where SigNoz is host, for other configuration please check the 
+  Here we are using `0.0.0.0` as our host since we are running this application in the same machine where SigNoz is running, for other configurations please check the 
  [troubleshooting](../install/troubleshooting.md#signoz-otel-collector-address-grid) guide.
 
 * Now you can run your python script by running `python3 example.py`

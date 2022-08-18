@@ -5,7 +5,7 @@ id: collect_logs_from_file
 # Collecting application Logs from Log file
 
 With SigNoz you can collect your application logs from a log file and push it to SigNoz and perform different actions on your data.
-In this blog we will create a simple application that will create a log file and we will configure otel-collector to read those logs and push them.
+In this blog we will create a simple application that will create a log file and we will configure otel-collector to read those logs from the file and push them.
 
 For this sample application we will be using Python but the same idea can be extended to any application that can write logs to a file.
 
