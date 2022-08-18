@@ -144,7 +144,9 @@ module.exports = {
               label: 'Collecting Logs',
               items: [
                 'userguide/collect_docker_logs',
-                'userguide/collecting_syslogs'
+                'userguide/collecting_syslogs',
+                'userguide/collect_logs_from_file',
+                'userguide/collecting_application_logs_otel_sdk'
               ]
             },
             {
