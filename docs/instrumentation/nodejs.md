@@ -74,21 +74,32 @@ The instrumentation automatically identifies the following within your applicati
     `@opentelemetry/exporter-trace-otlp-http` - This module provides the exporter to be used with OTLP (`http/json`) compatible receivers.<br></br>
     
 2. **Create a `tracing.js` file**<br></br>
-  The `tracing.js` file will contain the tracing setup code. 
+  The `tracing.js` file will contain the tracing setup code. Notice, that we have set some environment variables in the code(highlighted). You can update these variables based on your environment.
     
-    ```jsx
+  ```jsx
     // tracing.js
     'use strict'
     const process = require('process');
-    //OpenTelemetry
     const opentelemetry = require('@opentelemetry/sdk-node');
     const { getNodeAutoInstrumentations } = require('@opentelemetry/auto-instrumentations-node');
     const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-http');
+    const { Resource } = require('@opentelemetry/resources');
+    const { SemanticResourceAttributes } = require('@opentelemetry/semantic-conventions');
     
-    const traceExporter = new OTLPTraceExporter();
+    const exporterOptions = {
+      // highlight-next-line
+      url: 'http://localhost:4318/v1/traces'
+    }
+    
+    const traceExporter = new OTLPTraceExporter(exporterOptions);
     const sdk = new opentelemetry.NodeSDK({
       traceExporter,
-      instrumentations: [getNodeAutoInstrumentations()]
+      instrumentations: [getNodeAutoInstrumentations()],
+      // highlight-start
+      resource: new Resource({
+        [SemanticResourceAttributes.SERVICE_NAME]: 'node_app'
+      })
+      // highlight-end
       });
       
       // initialize the SDK and register with the OpenTelemetry API
@@ -105,29 +116,24 @@ The instrumentation automatically identifies the following within your applicati
         .finally(() => process.exit(0));
         });
     ```
-    
+
+    OpenTelemetry Node SDK currently does not detect the `OTEL_RESOURCE_ATTRIBUTES` from `.env` files as of today. That’s why we need to include the variables in the `tracing.js` file itself.
+
+    About environment variables:<br></br>
+    `service_name` : node_app (you can give whatever name that suits you)
+
+    `http://localhost:4318/v1/traces` is the default url for sending your tracing data. We are assuming you have installed SigNoz on your `localhost`. Based on your environment, you can update it accordingly. It should be in the following format:
+
+    `http://<IP of SigNoz backend>:4318/v1/traces`
+
+  
 3. **Run the application**<br></br>
   The tracing configuration should be run before your application code. We will use the [`-r, —require module`](https://nodejs.org/api/cli.html#cli_r_require_module) flag for that.<br></br>
-    
-    ```jsx
-    OTEL_EXPORTER_OTLP_ENDPOINT="<IP of SigNoz>:4318" \
-    OTEL_RESOURCE_ATTRIBUTES=service.name=<service_name> \
+
+  ```jsx
     node -r ./tracing.js app.js
     ```
     
-    Replacing the placeholders in the above command for local host:
-    
-    `IP of SigNoz Backend`: localhost (If you are running SigNoz on your local host)
-    
-    `service_name` : node_app (you can give whatever name that suits you)
-    
-    So the final command becomes:
-    
-    ```jsx
-    OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318" \
-    OTEL_RESOURCE_ATTRIBUTES=service.name=node_app \
-    node -r ./tracing.js app.js
-    ```
 
 
 #### Validating instrumentation by checking for traces
@@ -310,6 +316,16 @@ If you are using Express, the instrumentation relies on HTTP calls to also be in
         .finally(() => process.exit(0));
         });
     ```
+
+    OpenTelemetry Node SDK currently does not detect the `OTEL_RESOURCE_ATTRIBUTES` from `.env` files as of today. That’s why we need to include the variables in the `tracing.js` file itself.
+    
+    About environment variables:
+    
+    `service_name` : node_app (you can give whatever name that suits you)
+    
+    `http://localhost:4318/v1/traces` is the default url for sending your tracing data. We are assuming you have installed SigNoz on your `localhost`. Based on your environment, you can update it accordingly. It should be in the following format:
+    
+    `http://<IP of SigNoz backend>:4318/v1/traces`
     
 3. **Run the application**<br></br>
      The tracing configuration should be run before your application code. We will use the [`-r, —require module`](https://nodejs.org/api/cli.html#cli_r_require_module) flag for that.<br></br>
@@ -336,6 +352,183 @@ If you are using Express, the instrumentation relies on HTTP calls to also be in
     
 
 With your application running, you can verify that you’ve instrumented your application with OpenTelemetry correctly by [validating](#validating-instrumentation-by-checking-for-traces) if your traces are being to SigNoz.
+
+## Instrumentation Modules for Javascript Frameworks
+
+The `@opentelemetry/auto-instrumentations-node` can inititialize instrumentation for many frameworks, databases, and network protocols. Hence it’s recommended to [get started](https://www.notion.so/New-JS-Doc-88febbff9cd942839239bdbe61be4557) with it.
+
+### Nestjs Instrumentation
+
+OpenTelemetry Nest instrumentation allows the user to automatically collect trace data from nestjs application. The `opentelemetry/auto-instrumentations-node` can be used to initialize automatic instrumentation for Nest framework.
+
+**Supported Versions**
+
+- `>=4.0.0`
+
+1. Create a `tracer.ts` file
+    
+    ```jsx
+    'use strict'
+    const process = require('process');
+    //OpenTelemetry
+    const opentelemetry = require('@opentelemetry/sdk-node');
+    const { getNodeAutoInstrumentations } = require('@opentelemetry/auto-instrumentations-node');
+    const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-http');
+    const {Resource} = require('@opentelemetry/resources');
+    const {SemanticResourceAttributes} = require('@opentelemetry/semantic-conventions');
+    
+    const exporterOptions = {
+        url: 'http://localhost:4318/v1/traces'
+      }
+    
+    const traceExporter = new OTLPTraceExporter(exporterOptions);
+    const sdk = new opentelemetry.NodeSDK({
+      traceExporter,
+      instrumentations: [getNodeAutoInstrumentations()],
+      resource: new Resource({
+        [SemanticResourceAttributes.SERVICE_NAME]: 'sampleNestjsApplication'
+      })
+      });
+      
+      // initialize the SDK and register with the OpenTelemetry API
+      // this enables the API to record telemetry
+      sdk.start()
+      .then(() => console.log('Tracing initialized'))
+      .catch((error) => console.log('Error initializing tracing', error));
+      
+      // gracefully shut down the SDK on process exit
+      process.on('SIGTERM', () => {
+        sdk.shutdown()
+        .then(() => console.log('Tracing terminated'))
+        .catch((error) => console.log('Error terminating tracing', error))
+        .finally(() => process.exit(0));
+        });
+    ```
+    
+
+2. Import the tracer module where your app starts
+    
+    ```jsx
+    const tracer = require('./tracer')
+    ```
+    
+
+3. Start the tracer<br></br>
+   In the `async function boostrap` section of the application code, initialize the tracer as follows: 
+    
+    ```jsx
+    const tracer = require('./tracer')
+    
+    import { NestFactory } from '@nestjs/core';
+    import { AppModule } from './app.module';
+      // All of your application code and any imports that should leverage
+      // OpenTelemetry automatic instrumentation must go here.
+    
+    async function bootstrap() {
+        await tracer.start();
+        const app = await NestFactory.create(AppModule);
+        await app.listen(3001);
+      }
+      bootstrap();
+    ```
+    
+
+But if you want to instrument only your Nestjs framework, then you need to use the following package:
+
+```jsx
+npm install --save @opentelemetry/instrumentation-nestjs-core
+```
+
+Note that in the above case, you will have to install packages for all the components that you want to instrument with OpenTelemetry individually.
+
+### Express Instrumentation
+
+**Supported Versions**
+
+- `^4.0.0`
+
+For Express instrumentation, you can use the [all-in-one auto-instrumentation](#using-the-all-in-one-auto-instrumentation-library) package to get started easily.
+
+But if want to instrument only your Express module, you can do so. The instrumentation for express module depends on HTTP calls to also be instrumented. So you need to install and enable packages for both.
+
+```jsx
+npm install --save @opentelemetry/instrumentation-http @opentelemetry/instrumentation-express
+```
+
+### Fastify Instrumentation
+
+**Supported Versions**
+
+- `^3.0.0`
+
+For Express instrumentation, you can use the [all-in-one auto-instrumentation](#using-the-all-in-one-auto-instrumentation-library) package to get started easily.
+
+But if want to instrument only your Fastify module, you can do so. The instrumentation for fastify module depends on HTTP calls to also be instrumented. So you need to install and enable packages for both.
+
+```jsx
+npm install --save @opentelemetry/instrumentation-http @opentelemetry/instrumentation-fastify
+```
+
+## Instrumentation Modules for Databases
+
+The `@opentelemetry/auto-instrumentations-node` can inititialize instrumentation for popular databases. Hence it’s recommended to [get started](#using-the-all-in-one-auto-instrumentation-library) with it.
+
+But if you are using [specific auto-instrumentation packages](#using-a-specific-auto-instrumentation-library), here’s a list of packages for popular databases.
+
+### MongoDB instrumentation
+
+Note if you’re using `@opentelemetry/auto-instrumentations-node`, you don’t need to install specific modules for your database.
+
+**Supported Versions**
+
+• `>=3.3 <5`
+
+Module that provides automatic instrumentation for MongoDB:
+
+```jsx
+npm install --save @opentelemetry/instrumentation-mongodb
+```
+
+### Redis Instrumentation
+
+Note if you’re using `@opentelemetry/auto-instrumentations-node`, you don’t need to install specific modules for your database.
+
+**Supported Versions**
+
+This package supports `redis@^2.6.0` and `redis@^3.0.0`
+For version `redis@^4.0.0`, please use `@opentelemetry/instrumentation-redis-4`
+
+```jsx
+npm install --save @opentelemetry/instrumentation-redis
+```
+
+### MySQL Instrumentation
+
+Note if you’re using `@opentelemetry/auto-instrumentations-node`, you don’t need to install specific modules for your database.
+
+**Supported Versions**
+
+• `2.x`
+
+Module that provides automatic instrumentation for MySQL:
+
+```jsx
+npm install --save @opentelemetry/instrumentation-mysql
+```
+
+### Memcached Instrumentation
+
+Note if you’re using `@opentelemetry/auto-instrumentations-node`, you don’t need to install specific modules for your database.
+
+**Supported Versions**
+
+- `>=2.2`
+
+Module that provides automatic instrumentation for Memcached:
+
+```jsx
+npm install --save @opentelemetry/instrumentation-memcached
+```
 
 ## Troubleshooting your installation
 
