@@ -24,15 +24,14 @@ SigNoz currently provides simple ways to instrument NodeJS, Java, Python and Gol
 
 1. [OpenTelemetry Python Instrumentation](/docs/instrumentation/python/)
 2. [OpenTelemetry FastAPI Instrumentation](/docs/instrumentation/fastapi/)
-3. [OpenTelemetry NodeJS Instrumentation](/docs/instrumentation/nodejs/)
-4. [OpenTelemetry NestJS Instrumentation](/docs/instrumentation/nestjs/)
-5. [OpenTelemetry Java Instrumentation](/docs/instrumentation/java/)
-6. [OpenTelemetry Go Instrumentation](/docs/instrumentation/golang/)
-7. [OpenTelemetry PHP Instrumentation](/docs/instrumentation/php/)
-8. [OpenTelemetry .NET Instrumentation](/docs/instrumentation/dotnet/)
-9. [OpenTelemetry Ruby on Rails Instrumentation](/docs/instrumentation/ruby-on-rails/)
-10. [OpenTelemetry Elixir Instrumentation](/docs/instrumentation/elixir/)
-11. [OpenTelemetry Rust Instrumentation](/docs/instrumentation/rust/)
+3. [OpenTelemetry Javascript Instrumentation](/docs/instrumentation/javascript/)
+4. [OpenTelemetry Java Instrumentation](/docs/instrumentation/java/)
+5. [OpenTelemetry Go Instrumentation](/docs/instrumentation/golang/)
+6. [OpenTelemetry PHP Instrumentation](/docs/instrumentation/php/)
+7. [OpenTelemetry .NET Instrumentation](/docs/instrumentation/dotnet/)
+8. [OpenTelemetry Ruby on Rails Instrumentation](/docs/instrumentation/ruby-on-rails/)
+9. [OpenTelemetry Elixir Instrumentation](/docs/instrumentation/elixir/)
+10. [OpenTelemetry Rust Instrumentation](/docs/instrumentation/rust/)
 
 
 
