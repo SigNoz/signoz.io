@@ -1,7 +1,7 @@
 ---
-id: nodejs
-title: NodeJS OpenTelemetry Instrumentation
-description: Send events from your NodeJS application to SigNoz
+id: javascript
+title: Javascript OpenTelemetry Instrumentation
+description: Send events from your Javascript application to SigNoz
 
 ---
 
@@ -9,20 +9,16 @@ import Tabs from "@theme/Tabs";
 import TabItem from "@theme/TabItem";
 import InstrumentationFAQ from '../shared/instrumentation-faq.md'
 
-<p align="center">
 
-[![Book meeting](/img/docs/ZoomCTA1.png)](https://calendly.com/pranay-signoz/instrumentation-office-hrs)
+This document contains OpenTelemetry instrumentation instructions for Javascript backend frameworks and modules based on Nodejs.
 
-</p>
 
+## Traces
 
 **Requirements**
 
 - Node.js version 14 or newer ([See here](https://github.com/open-telemetry/opentelemetry-js#supported-runtimes))<br></br>
   <!-- Previous versions of node may work, but they are not tested by OpenTelemetry and they are not guaranteed to work. Please note that versions of Node.JS v8 prior to `v8.12.0` will NOT work, because OpenTelemetry Node depends on the perf_hooks module introduced in v8.5.0 and performance.timeOrigin that is set correctly starting in `v8.12.0`. -->
-
-
-## Traces
 
 You can use OpenTelemetry Nodejs client libraries to send your traces directly to SigNoz. You have two choices for instrumenting your Nodejs application with OpenTelemetry.
 
@@ -116,15 +112,20 @@ The instrumentation automatically identifies the following within your applicati
         .finally(() => process.exit(0));
         });
     ```
-
+    
     OpenTelemetry Node SDK currently does not detect the `OTEL_RESOURCE_ATTRIBUTES` from `.env` files as of today. That’s why we need to include the variables in the `tracing.js` file itself.
-
-    About environment variables:<br></br>
+    
+    About environment variables:
+    
     `service_name` : node_app (you can give whatever name that suits you)
-
+    
     `http://localhost:4318/v1/traces` is the default url for sending your tracing data. We are assuming you have installed SigNoz on your `localhost`. Based on your environment, you can update it accordingly. It should be in the following format:
-
+    
     `http://<IP of SigNoz backend>:4318/v1/traces`
+
+  :::note
+    Remember to allow incoming requests to port 4318 of machine where SigNoz backend is hosted.
+    
 
   
 3. **Run the application**<br></br>
@@ -155,99 +156,12 @@ You might see other dummy applications if you’re using SigNoz for the first ti
     <figcaption><i>Node Application in the list of services being monitored in SigNoz</i></figcaption>
 </figure>
 
-<br></br>  
-
-<!-- ### Instrumenting a sample Express application
-
-For this tutorial, we’re going to create a very simple application: an express service that responds at `http://localhost:9090/hello` with "Hello World".
- 
-Steps to create a sample Express application:
-
-
-1. **Git clone the sample app repo and change directory**<br></br>
-   
-   Sample nodejs application repo on <a href = "https://github.com/SigNoz/sample-nodejs-app" rel="noopener noreferrer nofollow" target="_blank" >GitHub</a>.
-
-   ```jsx
-   git clone https://github.com/SigNoz/sample-nodejs-app.git
-   cd sample-nodejs-app
-   ```
-
-2. **Install the dependencies**<br></br>
-   The required OpenTelemetry packages will get installed using this command. OpenTelemetry clients have two major components: the SDK and the API. Following are the OpenTelemetry packages used for the sample application:
-
-   - `@opentelemetry/api`
-   - `@opentelemetry/auto-instrumentations-node`
-   - `@opentelemetry/exporter-otlp-grpc`
-   - `@opentelemetry/sdk-node`
-   
-   <br></br>
-
-   ```jsx
-   npm i
-   ```
-
-   Note: `auto-instrumentations-node` is a meta-package from <a href = "https://github.com/open-telemetry/opentelemetry-js-contrib/tree/main/metapackages/auto-instrumentations-node" rel="noopener noreferrer nofollow" target="_blank" >opentelemetry-js-contrib</a> that provides a simple way to initialize multiple Node.js instrumentation. 
-
-
-3. **Start the Node application and start sending data to SigNoz**<br></br>
-
-    The `tracing.js` file takes care of instantiating tracing for the application. You can have look at its <a href = "https://github.com/SigNoz/sample-nodejs-app/blob/master/tracing.js" rel="noopener noreferrer nofollow" target="_blank" >content</a> in the GitHub repo.
-   
-    Now you need to run your application with some environment variables for OpenTelemetry. Environment variables that need to be configured:
-
-    a. `IP of SigNoz backend` - IP of the machine where SigNoz is installed. In case you have installed SigNoz on your local machine, you can use `localhost`
-
-    b. `service_name` - the service you are monitoring (you can name it anything)
-    :::note
-      Node SDK doesn't automatically detect the `OTEL_RESOURCE_ATTRIBUTES` as of today. Please edit the
-      `tracing.js` to include the service name.
-      ```js
-      const sdk = new opentelemetry.NodeSDK({
-        resource: new Resource({
-          [SemanticResourceAttributes.SERVICE_NAME]: 'my-service',
-        }),
-        traceExporter,
-        instrumentations: [getNodeAutoInstrumentations()]
-      });
-      ```
-
-    :::
-   
-   
-    You need to put these environment variables in the below command and run it at your terminal.
-  
-    ```jsx
-    OTEL_EXPORTER_OTLP_ENDPOINT="<IP of SigNoz>:4317" \
-    node -r ./tracing.js index.js
-    ```
-
-    If you're running SigNoz on `localhost`, and want to name your service as `node_app`, the final command will be as follows:
-
-    ```jsx
-    OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4317" \
-    node -r ./tracing.js index.js
-    ```
-    <br></br>
-
-:::note
-
-Remember to allow incoming requests to port **4317** of machine where SigNoz backend is hosted
-
-:::
-
-   You can check your application running at [http://localhost:9090/hello](http://localhost:9090/hello). You need to generate some load in order to see data reported on SigNoz dashboard. Refresh the endpoint for 10-20 times, and wait for 2-3 mins. 
-   
-   You should see your service `node_app` in the list of applications monitored on SigNoz dashboard as shown below.
-
-   ![nodejs-app-instrumentation](../../static/img/docs/nodejs_app_instrumentation.gif)
-
-You can also refer to the blog titled [Monitoring your Express application using OpenTelemetry](https://signoz.io/blog/opentelemetry-express/) for further reading on the same.  -->
+<br></br>
 
 
 ### Using a specific auto-instrumentation library
 
-If total installation size is not constrained, it is recommended to use the `@opentelemetry/auto-instrumentations-node`bundle with `@opentelemetry/sdk-node` for the most seamless instrumentation experience.
+If total installation size is not constrained, it is recommended to use the `@opentelemetry/auto-instrumentations-node` bundle with `@opentelemetry/sdk-node` for the most seamless instrumentation experience.
 
 But you can also install specific auto-instrumenation packages for the components used by your application.
 
@@ -294,13 +208,21 @@ If you are using Express, the instrumentation relies on HTTP calls to also be in
     const { MongoDBInstrumentation } = require("@opentelemetry/instrumentation-mongodb");
     const { HttpInstrumentation } = require("@opentelemetry/instrumentation-http");
     
-    const traceExporter = new OTLPTraceExporter();
+    const { Resource } = require('@opentelemetry/resources');
+    const { SemanticResourceAttributes } = require('@opentelemetry/semantic-conventions');
+    
+    const exporterOptions = {
+      url: 'http://localhost:4318/v1/traces'
+    }
+    
+    const traceExporter = new OTLPTraceExporter(exporterOptions);
     const sdk = new opentelemetry.NodeSDK({
       traceExporter,
-      instrumentations: [new ExpressInstrumentation(),
-                         new MongoDBInstrumentation(),
-                         new HttpInstrumentation()]
-                         });
+      instrumentations: [new ExpressInstrumentation(), new MongoDBInstrumentation(), new HttpInstrumentation()],
+      resource: new Resource({
+        [SemanticResourceAttributes.SERVICE_NAME]: 'node_app'
+      })
+    });
       
       // initialize the SDK and register with the OpenTelemetry API
       // this enables the API to record telemetry
@@ -326,27 +248,15 @@ If you are using Express, the instrumentation relies on HTTP calls to also be in
     `http://localhost:4318/v1/traces` is the default url for sending your tracing data. We are assuming you have installed SigNoz on your `localhost`. Based on your environment, you can update it accordingly. It should be in the following format:
     
     `http://<IP of SigNoz backend>:4318/v1/traces`
+
+    :::note
+    Remember to allow incoming requests to port 4318 of machine where SigNoz backend is hosted.
+    :::
     
 3. **Run the application**<br></br>
-     The tracing configuration should be run before your application code. We will use the [`-r, —require module`](https://nodejs.org/api/cli.html#cli_r_require_module) flag for that.<br></br>
-    
-    ```jsx
-    OTEL_EXPORTER_OTLP_ENDPOINT="<IP of SigNoz>:4318" \
-    OTEL_RESOURCE_ATTRIBUTES=service.name=<service_name> \
-    node -r ./tracing.js app.js
-    ```
-    
-    Replacing the placeholders in the above command for local host:
-    
-    `IP of SigNoz Backend`: localhost (If you are running SigNoz on your local host)
-    
-    `service_name` : node_app (you can give whatever name that suits you)
-    
-    So the final command becomes:
-    
-    ```jsx
-    OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318" \
-    OTEL_RESOURCE_ATTRIBUTES=service.name=node_app \
+  The tracing configuration should be run before your application code. We will use the [`-r, —require module`](https://nodejs.org/api/cli.html#cli_r_require_module) flag for that.<br></br>
+
+  ```jsx
     node -r ./tracing.js app.js
     ```
     
@@ -365,7 +275,16 @@ OpenTelemetry Nest instrumentation allows the user to automatically collect trac
 
 - `>=4.0.0`
 
-1. Create a `tracer.ts` file
+1. Install the dependencies<br></br>
+   We start by installing the relevant dependencies.
+    
+    ```bash
+    npm install --save @opentelemetry/sdk-node
+    npm install --save @opentelemetry/auto-instrumentations-node
+    npm install --save @opentelemetry/exporter-trace-otlp-http
+    ```
+
+2. Create a `tracer.ts` file
     
     ```jsx
     'use strict'
@@ -406,14 +325,14 @@ OpenTelemetry Nest instrumentation allows the user to automatically collect trac
     ```
     
 
-2. Import the tracer module where your app starts
+3. Import the tracer module where your app starts
     
     ```jsx
     const tracer = require('./tracer')
     ```
     
 
-3. Start the tracer<br></br>
+4. Start the tracer<br></br>
    In the `async function boostrap` section of the application code, initialize the tracer as follows: 
     
     ```jsx
@@ -425,12 +344,16 @@ OpenTelemetry Nest instrumentation allows the user to automatically collect trac
       // OpenTelemetry automatic instrumentation must go here.
     
     async function bootstrap() {
+        // highlight-start
         await tracer.start();
+        //highlight-end
         const app = await NestFactory.create(AppModule);
         await app.listen(3001);
       }
       bootstrap();
     ```
+
+    You can now run your Nestjs application. The data captured with OpenTelemetry from your application should start showing on the SigNoz dashboard.
     
 
 But if you want to instrument only your Nestjs framework, then you need to use the following package:
@@ -461,7 +384,7 @@ npm install --save @opentelemetry/instrumentation-http @opentelemetry/instrument
 
 - `^3.0.0`
 
-For Express instrumentation, you can use the [all-in-one auto-instrumentation](#using-the-all-in-one-auto-instrumentation-library) package to get started easily.
+For Fastify instrumentation, you can use the [all-in-one auto-instrumentation](#using-the-all-in-one-auto-instrumentation-library) package to get started easily.
 
 But if want to instrument only your Fastify module, you can do so. The instrumentation for fastify module depends on HTTP calls to also be instrumented. So you need to install and enable packages for both.
 
