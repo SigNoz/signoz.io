@@ -10,13 +10,6 @@ import TabItem from "@theme/TabItem";
 import InstrumentationFAQ from '../shared/instrumentation-faq.md'
 
 
-<p align="center">
-
-[![Book meeting](/img/docs/ZoomCTA1.png)](https://calendly.com/pranay-signoz/instrumentation-office-hrs)
-
-</p>
-
-
 Get up and running with OpenTelemetry in just a few quick steps! 
 
 The setup process consists of two phases:
