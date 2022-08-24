@@ -43,9 +43,16 @@ source instrumentation_env/bin/activate
 
 ```bash
 pip install opentelemetry-distro
-pip install opentelemetry-exporter-otlp-proto-http
+pip install opentelemetry-exporter-otlp
 ```
 
+:::note
+The `opentelemetry-exporter-otlp` is a convenient way to install all supported OpenTelemetry exporters. Currently it installs:
+- opentelemetry-exporter-otlp-proto-http
+- opentelemetry-exporter-otlp-proto-grpc
+
+We recommend using the http exporter for sending data to SigNoz.
+:::
 
 The below command inspects the Python dependencies of your application and installs the instrumentation packages relevant for your Python application.
 
@@ -68,7 +75,13 @@ opentelemetry-bootstrap --action=install
 >
 <TabItem value="self-hosted"> -->
 
-Finally, to start sending data to SigNoz, use the following command:
+In the final run command, you can configure environment variables and flags. Flags for exporters:
+- HTTP: `otlp_proto_http`
+- gRPC: `otlp_proto_grpc`
+
+We recommend using the `otlp_proto_http` exporter.
+
+To start sending data to SigNoz, use the following run command:
 
 ```bash
 OTEL_RESOURCE_ATTRIBUTES=service.name=<service_name> OTEL_EXPORTER_OTLP_ENDPOINT="http://<IP of SigNoz Backend>:4318"  opentelemetry-instrument --traces_exporter otlp_proto_http <your run command>
