@@ -2,7 +2,7 @@
 title: Not 3 pillars but a single whole to help customers solve issues faster
 slug: observability-net
 date: 2022-07-30
-tags: [observability]
+tags: [Observability]
 authors: [pranay]
 description: Not 3 pillars but a single whole to help customers solve issues faster
 image: /img/blog/2022/07/o11y-net-trans.png
