@@ -10,13 +10,6 @@ import TabItem from "@theme/TabItem";
 import InstrumentationFAQ from '../shared/instrumentation-faq.md'
 
 
-<p align="center">
-
-[![Book meeting](/img/docs/ZoomCTA1.png)](https://calendly.com/pranay-signoz/instrumentation-office-hrs)
-
-</p>
-
-
 ### Automatically create traces/spans on HTTP requests
 
 OpenTelemetry can help you jumpstart your way to observability by providing automatic instrumentation for HTTP requests. You have your choice of request routers in OpenTelemetry or you can use the standard HTTP handler. You should pick the mux that’s right for your framework.

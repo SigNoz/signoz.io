@@ -10,12 +10,6 @@ import TabItem from "@theme/TabItem";
 import InstrumentationFAQ from '../shared/instrumentation-faq.md'
 
 
-<p align="center">
-
-[![Book meeting](/img/docs/ZoomCTA1.png)](https://calendly.com/pranay-signoz/instrumentation-office-hrs)
-
-</p>
-
 ### Introduction to SigNoz for FastAPI
 
 SigNoz can help you monitor your FastAPI applications for application related metrics like latency, request per second, error rates, etc. It can also monitor infrastructure metrics like CPU utilization and memory usage.

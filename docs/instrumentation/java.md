@@ -10,12 +10,6 @@ import TabItem from "@theme/TabItem";
 import { LiteYoutubeEmbed } from "react-lite-yt-embed";
 import InstrumentationFAQ from '../shared/instrumentation-faq.md'
 
-<p align="center">
-
-[![Book meeting](/img/docs/ZoomCTA1.png)](https://calendly.com/pranay-signoz/instrumentation-office-hrs)
-
-</p>
-
 
 Get up and running with OpenTelemetry in just a few quick steps! The setup process consists of two phases--getting OpenTelemetry installed and configured, and then validating that configuration to ensure that data is being sent as expected. This guide explains how to download, install, and run OpenTelemetry in Java.
 
