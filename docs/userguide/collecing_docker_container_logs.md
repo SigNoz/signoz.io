@@ -46,8 +46,7 @@ If you want to exclude some containers you can exclude them based the container 
   ....
     operators:
       - type: filter
-        expr: 'body.message matches "^LOG: .* END$"'
-        output: my_output
+        expr: 'body matches "^LOG: .* END$"'
         drop_ratio: 1.0
   ....
   ```

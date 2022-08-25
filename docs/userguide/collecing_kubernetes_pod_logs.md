@@ -40,8 +40,7 @@ When you deploy SigNoz to your kubernetes cluster it will automatically start co
   ....
     operators:
       - type: filter
-        expr: 'body.message matches "^LOG: .* END$"'
-        output: my_output
+        expr: 'body matches "^LOG: .* END$"'
         drop_ratio: 1.0
   ....
   ```
