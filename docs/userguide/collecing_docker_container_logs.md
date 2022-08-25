@@ -9,67 +9,49 @@ With SigNoz you can collect all your docker container logs and perform different
 Below are the steps to collect docker container logs.
 
 ##  Steps for collecting logs if SigNoz is running on the same host.
+Once you deploy SigNoz in docker, it will automatically start collecting logs of all the docker containers. 
 
-* Modify the `docker-compose.yaml` file present inside `deploy/docker/clickhouse-setup` to run the OTEL collector as root user and mount the docker container directory as highlighted below.
-    ```yaml {5,8}
-    ...
-    otel-collector:
-        image: signoz/signoz-otel-collector:0.55.0-rc.3
-        command: ["--config=/etc/otel-collector-config.yaml"]
-        user: "root" # required for reading docker container logs
-        volumes:
-        - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml
-        - /var/lib/docker/containers:/var/lib/docker/containers:ro
-    ...
-    ```
+### Disable automatic container log collection.
+You can disable automatic container logs collection by modifying the `otel-collector-config.yaml` file which is present inside `deploy/docker/clickhouse-setup`
 
-* Add the filelog reciever to `otel-collector-config.yaml` which is present inside `deploy/docker/clickhouse-setup`
-    ```yaml {2-31}
-    receivers:
-      filelog/containers:
-        include: [  "/var/lib/docker/containers/*/*.log" ]
-        start_at: end
-        include_file_path: true
-        include_file_name: false
-        operators:
-        - type: json_parser
-          id: parser-docker
-          output: extract_metadata_from_filepath
-          timestamp:
-            parse_from: attributes.time
-            layout: '%Y-%m-%dT%H:%M:%S.%LZ'
-        # Extract metadata from file path
-        - type: regex_parser
-          id: extract_metadata_from_filepath
-          regex: '^.*containers/(?P<container_id>[^_]+)/.*log$'
-          parse_from: attributes["log.file.path"]
-          output: parse_body
-        - type: move
-          id: parse_body
-          from: attributes.log
-          to: body
-          output: add_source
-        - type: add
-          id: add_source
-          field: resource["source"]
-          value: "docker"
-        - type: remove
-          id: time
-          field: attributes.time
-    ...
-    ```
-    Here we are parsing the logs and extracting different values like timestamp, body and removing duplicate fields using different operators that are available.
-    You can read more about operators [here](./logs.md#operators-for-parsing-and-manipulating-logs)
+  ```yaml {5}
+  ...
+  service:
+    pipelines:
+      logs:
+        receivers: [otlp]
+        processors: [batch]
+        exporters: [clickhouselogsexporter]
+  ...
+  ```
+  Here we have modified the value of recerivers from `[otlp, filelog/dockercontainers]` to `[otlp]`.
+  Now you can restart SigNoz and the changes will be applied.
 
-* Next we will modify our pipeline inside `otel-collector-config.yaml` to include the receiver we have created above.
-    ```yaml {4}
-    service:
-        ....
-        logs:
-            receivers: [otlp, filelog/containers]
-            processors: [batch]
-            exporters: [clickhouselogsexporter]
-    ```
+### Filter/Exclude logs
+If you want to exclude some containers you can exclude them based the container id or using a filter operator.
+
+* **Using exclude key in filelog receiver** : We will modify the filelog reciever in `otel-collector-config.yaml` file which is present inside `deploy/docker/clickhouse-setup`
+  ```yaml {4}
+  receivers:
+    filelog/dockercontainers:
+      include: [  "/var/lib/docker/containers/*/*.log" ]
+      exclude: [ "/var/lib/docker/containers/*/<container_id>.log" ]
+      start_at: end
+  ...
+  ```
+  Here we are using exclude key in the filelog config to exclude logs of a certain container.
+
+* **Using filter operator in filelog receiver** : You can also use the filter operator to filter out logs
+  ```yaml {3-6}
+  ....
+    operators:
+      - type: filter
+        expr: 'body.message matches "^LOG: .* END$"'
+        output: my_output
+        drop_ratio: 1.0
+  ....
+  ```
+  Here we are matching logs using an expression and dropping the entire log by setting `drop_ratio: 1.0` . You can read more about the filter operator [here](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/pkg/stanza/docs/operators/filter.md)
 
 * Now we can restart the otel collector container so that new changes are applied and the docker container logs will be visible in SigNoz.
 

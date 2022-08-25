@@ -142,6 +142,7 @@ module.exports = {
               type: 'category',
               label: 'Collecting Logs',
               items: [
+                'userguide/collect_kubernetes_pod_logs',
                 'userguide/collect_docker_logs',
                 'userguide/collecting_syslogs',
                 'userguide/collect_logs_from_file',
