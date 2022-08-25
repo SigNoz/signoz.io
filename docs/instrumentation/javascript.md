@@ -145,7 +145,7 @@ To do this, you need to ensure that your application generates some data. Applic
 
 Validate your traces in SigNoz:
 
-1. Trigger an action in your app that generates a web request. Hit the endpoint a number of times to generate some data.
+1. Trigger an action in your app that generates a web request. Hit the endpoint a number of times to generate some data. Then, wait for some time.
 2. In SigNoz, open the `Services` tab. Hit the `Refresh` button on the top right corner, and your application should appear in the list of `Applications`.
 3. Go to the `Traces` tab, and apply relevant filters to see your application’s traces.
 
