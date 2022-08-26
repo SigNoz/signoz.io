@@ -37,7 +37,7 @@ Let’s understand how to download, install, and run OpenTelemetry in Python.
 
 You can use OpenTelemetry Python to send your traces directly to SigNoz. OpenTelemetry provides a handy distro in Python that can help you get started with automatic instrumentation. We recommend using it to get started quickly.
 
-### Steps to instrument Python app for traces
+### Steps to auto-instrument Python app for traces
 
 1. **Create a virtual environment**<br></br>
     
@@ -130,29 +130,68 @@ You might see other dummy applications if you’re using SigNoz for the first ti
     <figcaption><i>Python Application in the list of services being monitored in SigNoz</i></figcaption></figure>
 <br></br>
 
-## Instrumenting a sample Flask application
+## Instrumenting different Python Frameworks
 
-We have included a sample flask application with `README.md` at https://github.com/SigNoz/sample-flask-app.
+The `opentelemetry-distro` package can initialize instrumentation for a lot of popular Python frameworks. You can find a complete list [here](https://github.com/open-telemetry/opentelemetry-python-contrib/tree/main/instrumentation). For popular Python frameworks too, the distro provides a quick way to get started with automatic instrumentation.
 
-Feel free to use this repo to test out OpenTelemetry instrumentation and how to send telemetry data to SigNoz.
+### Django Instrumentation
 
-<p>&nbsp;</p>
+It is recommended to use the [opentelemetry distro](#steps-to-auto-instrument-python-app-for-traces) for instrumenting Django applications. Though for Django, you must define `DJANGO_SETTINGS_MODULE`correctly. If your project is called `mysite`, something like following should work:
 
-## Instrumenting Django Applications
-
-For instrumenting Django applications, the instructions are same as for a Flask app as mentioned above. 
-
-Though for Django, you must define `DJANGO_SETTINGS_MODULE` correctly. If your project is called `mysite`, something like following should work
-
-```
+```jsx
 export DJANGO_SETTINGS_MODULE=mysite.settings
 ```
 
-Please refer the official [Django docs](https://docs.djangoproject.com/en/1.10/topics/settings/#designating-the-settings) for more details.
+Please refer the official [Django docs](https://docs.djangoproject.com/en/1.10/topics/settings/#designating-the-settings) for more details.
 
-You can also read this [blog](https://signoz.io/blog/opentelemetry-django/) to see how OpenTelemetry is implemented in a Django application.
+### Flask Instrumentation
 
-<p>&nbsp;</p>
+It is recommended to use the [opentelemetry distro](#steps-to-auto-instrument-python-app-for-traces) for instrumenting Flask applications.
+
+### FastAPI Instrumentation
+
+It is recommended to use the [opentelemetry distro](#steps-to-auto-instrument-python-app-for-traces) for instrumenting FastAPI applications.
+
+### Falcon Instrumentation
+
+It is recommended to use the [opentelemetry distro](#steps-to-auto-instrument-python-app-for-traces) for instrumenting Falcon applications.
+
+## Database Instrumentation
+
+Make sure that the DB client library you are using has the corresponding instrumentation library, and the version of the DB client library is supported by OpenTelemetry.
+
+### MongoDB
+
+You can use  `opentelemetry-distro` to initialize instrumentation for your MongoDB database calls. You need to ensure that the version of your DB client library is supported by OpenTelemetry. For MongoDB, the instrumentation library is `opentelemetry-instrumentation-pymongo`.
+
+You can check the supported versions [here](https://github.com/open-telemetry/opentelemetry-python-contrib/tree/main/instrumentation).
+
+### Redis
+
+You can use  `opentelemetry-distro` to initialize instrumentation for your Redis database calls. You need to ensure that the version of your DB client library is supported by OpenTelemetry. For Redis, the instrumentation library is `opentelemetry-instrumentation-redis`.
+
+You can check the supported versions [here](https://github.com/open-telemetry/opentelemetry-python-contrib/tree/main/instrumentation).
+
+### MySQL
+
+You can use  `opentelemetry-distro` to initialize instrumentation for your MySQL database calls. You need to ensure that the version of your DB client library is supported by OpenTelemetry. For MySQL, we have two isntrumentation libraries:
+
+- opentelemetry-instrumentation-mysql
+- opentelemetry-instrumentation-pymysql
+
+You can check the supported versions [here](https://github.com/open-telemetry/opentelemetry-python-contrib/tree/main/instrumentation).
+
+### Postgres
+
+You can use  `opentelemetry-distro` to initialize instrumentation for your PostgreSQL database calls. You need to ensure that the version of your DB client library is supported by OpenTelemetry. For Postgres, the instrumentation library is `opentelemetry-instrumentation-psycopg2`.
+
+You can check the supported versions [here](https://github.com/open-telemetry/opentelemetry-python-contrib/tree/main/instrumentation).
+
+:::note
+
+`psycopg2-binary` is not supported by opentelemetry auto instrumentation libraries as it is not recommended for production use. Please use `psycopg2` to see DB calls also in your trace data in SigNoz
+
+:::
 
 ## Running applications with Gunicorn, uWSGI
 
@@ -163,12 +202,6 @@ Check this [documentation](https://opentelemetry-python.readthedocs.io/en/latest
 [Here's](https://github.com/SigNoz/opentelemetry-python/tree/main/docs/examples/fork-process-model) a working example where we have configured a gunicorn server with `post_fork` hook.
   
 <p>&nbsp;</p>
-
-:::note
-
-`psycopg2-binary` is not supported by opentelemetry auto instrumentation libraries as it is not recommended for production use. Please use `psycopg2` to see DB calls also in your trace data in SigNoz
-
-:::
 
 
 ## Troubleshooting your installation
@@ -208,14 +241,14 @@ If spans are not being reported to SigNoz, try enabling debug exporter which wri
 
 <p>&nbsp;</p>
 
-#### If DB Calls are not reported in spans
+<!-- #### If DB Calls are not reported in spans
 
 Ensure you have the correct opentelemetry instrumentations:
 
 - [opentelemetry-instrumentation-psycopg2](https://pypi.org/project/opentelemetry-instrumentation-psycopg2/) for Postgres
 - [opentelemetry-instrumentation-pymysql](https://pypi.org/project/opentelemetry-instrumentation-pymysql/) for MySQL
 - [opentelemetry-instrumentation-sqlite3](https://pypi.org/project/opentelemetry-instrumentation-sqlite3/) for SQLite3
-- Complete list [here](https://github.com/open-telemetry/opentelemetry-python-contrib/tree/main/instrumentation)
+- Complete list [here](https://github.com/open-telemetry/opentelemetry-python-contrib/tree/main/instrumentation) -->
 
 
 <InstrumentationFAQ />

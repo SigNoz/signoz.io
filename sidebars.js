@@ -51,7 +51,6 @@ module.exports = {
       items: [
         'instrumentation/overview',
         'instrumentation/python',
-        'instrumentation/fastapi',
         'instrumentation/javascript',
         'instrumentation/java',
         'instrumentation/golang',
