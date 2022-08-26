@@ -23,15 +23,14 @@ For instrumenting your code, you can use the instruction provided by OpenTelemet
 SigNoz currently provides simple ways to instrument NodeJS, Java, Python and Golang applications using OpenTelemetry. Please follow the below guides.
 
 1. [OpenTelemetry Python Instrumentation](/docs/instrumentation/python/)
-2. [OpenTelemetry FastAPI Instrumentation](/docs/instrumentation/fastapi/)
-3. [OpenTelemetry Javascript Instrumentation](/docs/instrumentation/javascript/)
-4. [OpenTelemetry Java Instrumentation](/docs/instrumentation/java/)
-5. [OpenTelemetry Go Instrumentation](/docs/instrumentation/golang/)
-6. [OpenTelemetry PHP Instrumentation](/docs/instrumentation/php/)
-7. [OpenTelemetry .NET Instrumentation](/docs/instrumentation/dotnet/)
-8. [OpenTelemetry Ruby on Rails Instrumentation](/docs/instrumentation/ruby-on-rails/)
-9. [OpenTelemetry Elixir Instrumentation](/docs/instrumentation/elixir/)
-10. [OpenTelemetry Rust Instrumentation](/docs/instrumentation/rust/)
+2. [OpenTelemetry Javascript Instrumentation](/docs/instrumentation/javascript/)
+3. [OpenTelemetry Java Instrumentation](/docs/instrumentation/java/)
+4. [OpenTelemetry Go Instrumentation](/docs/instrumentation/golang/)
+5. [OpenTelemetry PHP Instrumentation](/docs/instrumentation/php/)
+6. [OpenTelemetry .NET Instrumentation](/docs/instrumentation/dotnet/)
+7. [OpenTelemetry Ruby on Rails Instrumentation](/docs/instrumentation/ruby-on-rails/)
+8. [OpenTelemetry Elixir Instrumentation](/docs/instrumentation/elixir/)
+9. [OpenTelemetry Rust Instrumentation](/docs/instrumentation/rust/)
 
 
 
