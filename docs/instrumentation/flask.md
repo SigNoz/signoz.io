@@ -1,7 +1,7 @@
 ---
-id: python
-title: Python OpenTelemetry Instrumentation
-description: Send events from your Python application to SigNoz
+id: flask
+title: Flask OpenTelemetry Instrumentation
+description: Instrument your Flask application with OpenTelemetry and send data to SigNoz
 
 ---
 
@@ -10,13 +10,13 @@ import TabItem from "@theme/TabItem";
 import InstrumentationFAQ from '../shared/instrumentation-faq.md'
 
 
-This document contains instructions on how to set up OpenTelemetry instrumentation in your Python applications. OpenTelemetry, also known as OTel for short, is an open source observability framework that can help you generate and collect telemetry data - traces, metrics, and logs from your Python application.
+This document contains instructions on how to set up OpenTelemetry instrumentation in your Flask applications. OpenTelemetry, also known as OTel for short, is an open source observability framework that can help you generate and collect telemetry data - traces, metrics, and logs from your Flask application.
 
 Once the telemetry data is collected, you can configure an exporter to send the data to SigNoz.
 
 There are three major steps to using OpenTelemetry:
 
-- Instrumenting your Python application with OpenTelemetry
+- Instrumenting your Flask application with OpenTelemetry
 - Configuring exporter to send data to SigNoz
 - Validating that configuration to ensure that data is being sent as expected.
 
@@ -27,7 +27,7 @@ There are three major steps to using OpenTelemetry:
 
 <br></br>
 
-Let’s understand how to download, install, and run OpenTelemetry in Python.
+Let’s understand how to download, install, and run OpenTelemetry in Flask.
 
 ## Requirements
 
@@ -35,9 +35,9 @@ Let’s understand how to download, install, and run OpenTelemetry in Python.
 
 ## Traces
 
-You can use OpenTelemetry Python to send your traces directly to SigNoz. OpenTelemetry provides a handy distro in Python that can help you get started with automatic instrumentation. We recommend using it to get started quickly.
+You can use OpenTelemetry to send your traces directly to SigNoz. OpenTelemetry provides a handy distro in Python that can help you get started with automatic instrumentation. We recommend using it to get started quickly.
 
-### Steps to auto-instrument Python app for traces
+### Steps to auto-instrument Flask app for traces
 
 1. **Create a virtual environment**<br></br>
     
@@ -61,15 +61,20 @@ You can use OpenTelemetry Python to send your traces directly to SigNoz. OpenTel
     
     :::note
     💡 The `opentelemetry-exporter-otlp` is a convenient way to install all supported OpenTelemetry exporters. Currently it installs:
-    
     - opentelemetry-exporter-otlp-proto-http
     - opentelemetry-exporter-otlp-proto-grpc
     
     We recommend using the http exporter for sending data to SigNoz.
     :::
+
+    If it hangs while installing grpcio during pip3 install opentelemetry-exporter-otlp then follow below steps as suggested in this [stackoverflow link](https://stackoverflow.com/questions/56357794/unable-to-install-grpcio-using-pip-install-grpcio/62500932#62500932).
+
+    - pip3 install --upgrade pip
+    - python3 -m pip install --upgrade setuptools
+    - pip3 install --no-cache-dir --force-reinstall -Iv grpcio
     
 3. **Add automatic instrumentation**<br></br>
-     The below command inspects the dependencies of your application and installs the instrumentation packages relevant for your Python application.
+     The below command inspects the dependencies of your application and installs the instrumentation packages relevant for your Flask application.
     
     ```bash
     opentelemetry-bootstrap --action=install
@@ -83,10 +88,13 @@ You can use OpenTelemetry Python to send your traces directly to SigNoz. OpenTel
 
      We recommend using the `otlp_proto_http` exporter.
      
+     For running your application, there are a few things that you need to keep in mind. Below are the notes:
     :::note
-     Don’t run app in reloader/hot-reload mode as it breaks instrumentation. For example, if you use `export FLASK_ENV=development`, it enables the reloader mode which breaks OpenTelemetry isntrumentation.
+     Don’t run app in reloader/hot-reload mode as it breaks instrumentation. For example, if you use `export Flask_ENV=development`, it enables the reloader mode which breaks OpenTelemetry isntrumentation.
     :::
-     
+
+    
+    For running applications with application servers which are based on [pre fork model](#running-applications-with-gunicorn-uwsgi), like Gunicorn, uWSGI you have to add a post_fork hook or a @postfork decorator in your configuration.
      
      To start sending data to SigNoz, use the following run command:
 
@@ -99,12 +107,6 @@ You can use OpenTelemetry Python to send your traces directly to SigNoz. OpenTel
      *<your_run_command>* can be `python3 app.py` or `flask run`
 
      `IP of SigNoz backend` is the IP of the machine where you installed SigNoz. If you have installed SigNoz on `localhost`, the endpoint will be `http://localhost:4318`.
-
-     Replacing these environment variables, a sample final run command will look like this:
-
-     ```bash
-     OTEL_RESOURCE_ATTRIBUTES=service.name=python_app OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318"  opentelemetry-instrument --traces_exporter otlp_proto_http python3 app.py
-     ```
      
     :::note
      The port numbers are 4317 and 4318 for the gRPC and HTTP exporters respectively. Remember to allow incoming requests to port **4317**/**4318** of machine where SigNoz backend is hosted.
@@ -129,32 +131,6 @@ You might see other dummy applications if you’re using SigNoz for the first ti
     <img src="/img/docs/opentelemetry_python_app_instrumented.webp" alt="Python Application in the list of services being monitored in SigNoz"/>
     <figcaption><i>Python Application in the list of services being monitored in SigNoz</i></figcaption></figure>
 <br></br>
-
-## Instrumenting different Python Frameworks
-
-The `opentelemetry-distro` package can initialize instrumentation for a lot of popular Python frameworks. You can find a complete list [here](https://github.com/open-telemetry/opentelemetry-python-contrib/tree/main/instrumentation). For popular Python frameworks too, the distro provides a quick way to get started with automatic instrumentation.
-
-### Django Instrumentation
-
-It is recommended to use the [opentelemetry distro](#steps-to-auto-instrument-python-app-for-traces) for instrumenting Django applications. Though for Django, you must define `DJANGO_SETTINGS_MODULE`correctly. If your project is called `mysite`, something like following should work:
-
-```jsx
-export DJANGO_SETTINGS_MODULE=mysite.settings
-```
-
-Please refer the official [Django docs](https://docs.djangoproject.com/en/1.10/topics/settings/#designating-the-settings) for more details.
-
-### Flask Instrumentation
-
-It is recommended to use the [opentelemetry distro](#steps-to-auto-instrument-python-app-for-traces) for instrumenting Flask applications.
-
-### FastAPI Instrumentation
-
-It is recommended to use the [opentelemetry distro](#steps-to-auto-instrument-python-app-for-traces) for instrumenting FastAPI applications.
-
-### Falcon Instrumentation
-
-It is recommended to use the [opentelemetry distro](#steps-to-auto-instrument-python-app-for-traces) for instrumenting Falcon applications.
 
 ## Database Instrumentation
 
@@ -192,6 +168,9 @@ You can check the supported versions [here](https://github.com/open-telemetry/op
 `psycopg2-binary` is not supported by opentelemetry auto instrumentation libraries as it is not recommended for production use. Please use `psycopg2` to see DB calls also in your trace data in SigNoz
 
 :::
+
+
+<p>&nbsp;</p>
 
 ## Running applications with Gunicorn, uWSGI
 

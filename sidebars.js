@@ -50,7 +50,22 @@ module.exports = {
       },
       items: [
         'instrumentation/overview',
-        'instrumentation/python',
+        {
+          type: 'category',
+          label: 'Python',
+          link: {
+            type: 'doc',
+            id: 'instrumentation/python'
+            // title: 'Python',
+            // description: 'Learn how to instrument Python applications with OpenTelemetry',
+            // slug: 'instrumentation/python',
+          },
+          items: [
+            'instrumentation/django',
+            'instrumentation/fastapi',
+            'instrumentation/flask',
+            'instrumentation/falcon']
+        },
         'instrumentation/javascript',
         'instrumentation/java',
         'instrumentation/golang',
