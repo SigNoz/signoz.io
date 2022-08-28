@@ -84,7 +84,7 @@ You can use OpenTelemetry to send your traces directly to SigNoz. OpenTelemetry 
      
      For running your application, there are a few things that you need to keep in mind. Below are the notes:
     :::note
-     Don’t run app in reloader/hot-reload mode as it breaks instrumentation. For example, if you use `export FastAPI_ENV=development`, it enables the reloader mode which breaks OpenTelemetry isntrumentation.
+     Don’t run app in reloader/hot-reload mode as it breaks instrumentation. For example, if you use `export FLASK_ENV=development`, it enables the reloader mode which breaks OpenTelemetry isntrumentation.
     :::
 
     
