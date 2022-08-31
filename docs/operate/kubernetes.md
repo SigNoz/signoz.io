@@ -65,11 +65,11 @@ signoz/clickhouse  	23.4.0       	22.4.5     	A Helm chart for ClickHouse
 signoz/clickhouse  	23.3.3       	22.4.5     	A Helm chart for ClickHouse
 ```
 
-2. Run the following command to install the chart version `0.0.8` running SigNoz
-version `0.6.2` with the release name `my-release` and namespace `platform`:
+2. Run the following command to install the chart version `0.2.5` running SigNoz
+version `0.10.2` with the release name `my-release` and namespace `platform`:
 
 ```bash
-helm -n platform upgrade my-release signoz/signoz --version 0.0.8
+helm -n platform upgrade my-release signoz/signoz --version 0.2.5
 ```
 
 <UpgradeWarning/>
@@ -91,14 +91,15 @@ with the chart and deletes the release except for ClickHouse CRD resources due t
 To delete resources accociated to `ClickHouseInstallations` instance:
 
 ```bash
-kubectl -n platform patch clickhouseinstallations.clickhouse.altinity.com/signoz \
+kubectl -n platform patch \
+  clickhouseinstallations.clickhouse.altinity.com/my-release-clickhouse \
   -p '{"metadata":{"finalizers":[]}}' --type=merge
 ```
 
 Deletion of the StatefulSet doesn't cascade to deleting associated PVCs. To delete them:
 
 ```bash
-kubectl -n platform delete pvc --all
+kubectl -n platform delete pvc -l app.kubernetes.io/instance=my-release
 ```
 
 At last, clean up the namespace:
@@ -106,6 +107,11 @@ At last, clean up the namespace:
 ```bash
 kubectl delete namespace platform
 ```
+
+:::info
+Replace `my-release` and `platform` from above instructions with appropriate
+release name and SigNoz namespace respectively.
+:::
 
 ## Remove the Sample Application
 
