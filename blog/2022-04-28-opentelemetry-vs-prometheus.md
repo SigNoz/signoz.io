@@ -125,7 +125,7 @@ OpenTelemetry is becoming the world standard for instrumenting application code 
 
 And that's where [SigNoz](https://signoz.io/?utm_source=blog&utm_medium=opentelemetry_vs_prometheus) comes into the picture. SigNoz is built to support OpenTelemetry natively. Once you instrument your application with OpenTelemetry libraries, you can send the collected data to SigNoz.
 
-SigNoz comes with out of box visualization of things like RED metrics. There is a unified UI of metrics and traces, unlike Prometheus, so that you can easily identify the root cause of issues causing things like latency in your apps.
+SigNoz comes with out of box visualization of things like RED metrics. There is a unified UI of metrics and traces, unlike Prometheus, so that you can easily identify the root cause of issues causing things like latency in your apps. 
 
 <!-- <Screenshot
     alt="SigNoz UI"
@@ -139,6 +139,14 @@ SigNoz comes with out of box visualization of things like RED metrics. There is 
     <img src="/img/blog/common/signoz_flamegraphs.webp" alt="Detailed Flamegraphs & Gantt charts"/>
     <figcaption><i>Spans of a trace visualized with the help of flamegraphs and gantt charts in SigNoz dashboard</i></figcaption>
 </figure>
+
+SigNoz also provides log management. Using logs, you can dive deeper into your application issues. Logs can also be intelligently correlated to other telemetry signals like traces and metrics.
+
+<figure data-zoomable align='center'>
+    <img src="/img/blog/common/signoz_logs.webp" alt="Logs management in SigNoz"/>
+    <figcaption><i>Logs Management in SigNoz</i></figcaption>
+</figure>
+
 
 ## Getting started with SigNoz
 
