@@ -21,7 +21,7 @@ Distributed tracing has become critical for application performance monitoring i
 
 <!--truncate-->
 
-![Cover Image](/img/blog/2021/09/distributed_tracing_jaeger_cover-min.webp)
+![Cover Image](/img/blog/2022/09/jaeger_distributed_tracing.webp)
 
 ## What is Jaeger?
 
