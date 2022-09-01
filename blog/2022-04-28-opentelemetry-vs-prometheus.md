@@ -1,7 +1,7 @@
 ---
 title: OpenTelemetry vs Prometheus - differences, use-cases and alternatives
 slug: opentelemetry-vs-prometheus
-date: 2022-04-28
+date: 2022-08-16
 tags: [Tools Comparison, Prometheus]
 authors: ankit_anand
 description: OpenTelemetry and Prometheus are both open-source projects under Cloud Native Computing Foundation. One is used for managing telemetry data and the other is a metrics monitoring tool..
@@ -28,7 +28,7 @@ OpenTelemetry and Prometheus are both open-source projects under Cloud Native Co
 
 ![Cover Image](/img/blog/2021/09/opentelemetry_vs_prometheus_cover-min.webp)
 
-OpenTelemetry is a vendor-agnostic instrumentation library. It provides a set of tools, APIs, and SDKs to create and manage telemetry data(logs, metrics, and traces).
+OpenTelemetry is a vendor-agnostic instrumentation library. It provides a set of tools, APIs, and SDKs to create and manage telemetry data(logs, metrics, and traces). OpenTelemetry follows a specification driven development and has implementations in all major programming languages.
 
 Prometheus is a time-series metrics monitoring tool. Prometheus enables you to capture time-series data as metrics. These metrics can be aggregated to give insights into the behavior of your systems.
 
@@ -38,9 +38,9 @@ Prometheus is a time-series metrics monitoring tool. Prometheus enables you to c
 
 ## What is OpenTelemetry?
 
-OpenTelemetry is a set of API, SDKs, libraries, and integrations that is aiming to standardize the generation, collection, and management of telemetry data(logs, metrics, and traces). OpenTelemetry is a Cloud Native Computing Foundation project created after the merger of OpenCensus(from Google) and OpenTracing(from Uber).
+OpenTelemetry is a set of API, SDKs, libraries, and integrations that aims to standardize the generation, collection, and management of telemetry data(logs, metrics, and traces). OpenTelemetry is a Cloud Native Computing Foundation project created after the merger of OpenCensus(from Google) and OpenTracing(from Uber). [CNCF](https://www.cncf.io/) is the same foundation which incubated Kubernetes too.
 
-The data you collect with OpenTelemetry is vendor-agnostic and can be exported in many formats. Telemetry data has become critical to observe the state of distributed systems. With microservices and polyglot architectures, there was a need to have a global standard. OpenTelemetry aims to fill that space and is doing a great job at it thus far.
+OpenTelemetry provides a vendor-agnostic method of collecting telemetry data. Telemetry data has become critical to observe the state of distributed systems. With microservices and polyglot architectures, there was a need to have a global standard. OpenTelemetry aims to fill that space and is doing a great job at it thus far.
 
 <figure data-zoomable align='center'>
     <img src="/img/blog/2021/08/opentelemetry_architecture-min.webp" alt="OpenTelemetry Architecture"/>
@@ -59,12 +59,13 @@ Some of the key advantages of using OpenTelemetry are:
 - Provides OpenTelemetry Collector, which can receive, process, and export data in multiple formats
 - Backed by technology giants like Google, Microsoft, and other big cloud vendors.
 - Freedom to switch to new backend analysis tools by using relevant exporters
+- Instrumentation support for new frameworks and technologies
 
 ### Disadvantages of OpenTelemetry
 
 Some of the key disadvantages of using OpenTelemetry are:
 
-- Project is not mature in some languages
+- Project has a lot of scope in improving documentation and support
 - It does not provide backend storage and a visualization layer
 
 But OpenTelemetry project is intentional about not providing a backend analysis tool as it aims to be vendor-neutral. You can use a tool like [SigNoz](https://signoz.io/?utm_source=blog&utm_medium=opentelemetry_vs_prometheus) to send your telemetry data. [SigNoz](https://signoz.io/?utm_source=blog&utm_medium=opentelemetry_vs_prometheus) is a full-stack open-source application monitoring and observability platform which comes with a great out of box visualization layer. It is also an open-source project.
@@ -109,17 +110,20 @@ Prometheus is a great metrics monitoring tool, but that's it. It is not a full-s
 From the above description, you might have a good idea about the differences between OpenTelemetry and Prometheus. Let us summarize the key differences between OpenTelemetry and Prometheus below:
 
 - OpenTelemetry helps you to instrument code to generate telemetry data. In comparison, Prometheus is a metrics monitoring tool. Both Prometheus and OpenTelemetry provide client libraries to instrument your code, but OpenTelemetry client libraries provide a one-stop solution to generate logs, metrics, and traces. Prometheus can only generate metrics.
+
 - Prometheus comes with a visualization layer, although basic. OpenTelemetry does not aim to provide a visualization layer, and the data collected with OpenTelemetry can be sent to any backend analysis tool like SigNoz.
+
 - OpenTelemetry provides the fundamental layer to build your observability practices, which is now critical for microservices-based architecture. If you use Prometheus in your observability stack, you will have to select other tools for traces and logs.
-- Prometheus provides short-term storage, and users can use solutions like Cortex or Thanos for long-term data storage. OpenTelemetry does not provide any storage solution. It provides exporters who can be configured to send data to the backend analysis tool of your choice.
+
+- Prometheus provides short-term storage, and users can use solutions like Cortex or Thanos for long-term data storage. OpenTelemetry does not provide any storage solution. It provides exporters which can be configured to send data to a backend analysis tool of your choice.
 
 ## OpenTelemetry and SigNoz - the combo fit to replace Prometheus
 
-With Prometheus, you can monitor metrics. But your engineering teams will never be able to identify the root cause of issues in your application using just metrics. For that, you need distributed tracing.
+With Prometheus, you can monitor metrics. But your engineering teams will never be able to identify the root cause of issues in your application using just metrics. For that, you also need distributed tracing and logs.
 
 OpenTelemetry is becoming the world standard for instrumenting application code due to its multi-language support and ease of use. But OpenTelemetry helps only to generate and collect telemetry data. You need to export the telemetry data to a backend analysis tool so that your teams can store, query, and visualize the collected data.
 
-And that's where [SigNoz](https://signoz.io/?utm_source=blog&utm_medium=opentelemetry_vs_prometheus) comes into the picture. SigNoz uses OpenTelemetry natively to instrument application codes. OpenTelemetry collector then sends the data to the SigNoz backend, where users can query and visualize their data with ease.
+And that's where [SigNoz](https://signoz.io/?utm_source=blog&utm_medium=opentelemetry_vs_prometheus) comes into the picture. SigNoz is built to support OpenTelemetry natively. Once you instrument your application with OpenTelemetry libraries, you can send the collected data to SigNoz.
 
 SigNoz comes with out of box visualization of things like RED metrics. There is a unified UI of metrics and traces, unlike Prometheus, so that you can easily identify the root cause of issues causing things like latency in your apps.
 
