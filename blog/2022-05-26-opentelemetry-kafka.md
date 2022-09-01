@@ -1,8 +1,8 @@
 ---
 title: Complete Guide to tracing Kafka clients with OpenTelemetry in Go
 slug: opentelemetry-kafka
-date: 2022-05-30
-tags: [OpenTelemetry Instrumentation, Go / Golang]
+date: 2022-09-01
+tags: [OpenTelemetry Instrumentation, Golang]
 authors: [nitya, ankit_anand]
 description: In this tutorial, we will learn how to use OpenTelemtry for Kafka-based applications. OpenTelemetry can help instrument Kafka clients and provide an end-to-end tracing. In this guide, we will demonstrate how to instrument a Go application that uses Kafka with OpenTelemetry...
 image: /img/blog/2022/05/opentelemetry_kafka_cover.webp
@@ -55,7 +55,7 @@ OpenTelemetry is the bedrock for setting up an observability framework. It also 
 
 In this article, we will use SigNoz as our backend analysis tool. SigNoz is a full-stack open-source APM tool that can be used for storing and visualizing the telemetry data collected with OpenTelemetry. It is built natively on OpenTelemetry and works on the OTLP data formats.
 
-SigNoz provides query and visualization capabilities for the end-user and comes with out-of-box charts for application metrics and traces.
+SigNoz provides query and visualization capabilities for the end-user and comes with out-of-box charts for application metrics and traces. It also provides logs management. With logs, metrics, and traces under a single dashboard, SigNoz is a open-stop open source observability platform.
 
 Now let’s get down to implementing OpenTelemetry libraries for tracing Kafka clients.
 
