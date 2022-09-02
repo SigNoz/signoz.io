@@ -1,7 +1,7 @@
 ---
 title: SigNoz - Open-source alternative to Dynatrace
 slug: dynatrace-alternative
-date: 2022-07-25
+date: 2022-08-10
 tags: [SigNoz, Open Source]
 authors: ankit_anand
 description: If you're looking for an open-source alternative to Dynatrace, then you're at the right place. SigNoz is a perfect open-source alternative to Dynatrace. SigNoz provides a unified UI for both metrics and traces with advanced tagging and filtering capabilities...
@@ -39,6 +39,7 @@ A relatively newer concept in the field of application performance monitoring is
 
 Some of the key features of good observability tools are:
 
+- Logs, metrics, and traces under a single pane of glass
 - Out of the box application metrics
 - Way to go from metrics to traces to find why some issues are happening
 - Seamless flow between metrics, traces & logs — the three pillars of observability
@@ -75,12 +76,15 @@ And that's where SigNoz shines. It is very simple to get started, supports multi
 
 Some of our key features which makes SigNoz vastly superior to current open-source products and a great alternative to Dynatrace are:
 
+- Metrics, traces, and logs under a single pane of glass
+- Correlation of telemetry signals
 - Out of the box application metrics
 - Seamless flow between metrics & traces
 - Filtering based on tags
 - Custom aggregates on filtered traces
 - Detailed Flamegraphs & Gantt charts
-- Natively built to support OpenTelemetry
+- Infrastructure dashboards
+- Exceptions monitoring
 - Transparent usage Data
 
 ### Out of box application metrics
@@ -141,6 +145,17 @@ Detailed flamegraph & Gantt charts to find the exact cause of the issue and whic
     <img src="/img/blog/common/signoz_flamegraphs.webp" alt="Detailed Flamegraphs & Gantt charts"/>
     <figcaption><i>Spans of a trace visualized with the help of flamegraphs and gantt charts in SigNoz dashboard</i></figcaption>
 </figure>
+
+
+### Logs Management with advanced log query builder and live tailing
+
+SigNoz provides Logs management with advanced log query builder. You can also monitor your logs in real-time using live tailing. 
+
+<figure data-zoomable align='center'>
+    <img src="/img/blog/common/signoz_logs.webp" alt="Logs tab in SigNoz"/>
+    <figcaption><i>Logs tab in SigNoz comes equipped with advanced logs query builder and live tailing</i></figcaption>
+</figure>
+
 
 ### Transparent usage Data
 
