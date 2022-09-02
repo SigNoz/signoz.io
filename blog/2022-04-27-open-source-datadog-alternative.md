@@ -60,17 +60,16 @@ To fill this gap we built [SigNoz](https://signoz.io/), an open-source alternati
 
 Some of our key features which makes SigNoz vastly superior to current open-source products and a great alternative to DataDog are:
 
-
 - Metrics, traces, and logs under a single pane of glass
 - Correlation of telemetry signals
 - Out of the box application metrics
 - Seamless flow between metrics & traces
 - Filtering based on tags
 - Custom aggregates on filtered traces
+- Detailed Flamegraphs & Gantt charts
 - Infrastructure dashboards
 - Exceptions monitoring
 - Transparent usage Data
-- Detailed Flamegraphs & Gantt charts
 
 ### Out of the box application metrics
 

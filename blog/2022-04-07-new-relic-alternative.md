@@ -1,7 +1,7 @@
 ---
 title: SigNoz - Open-source alternative to New Relic
 slug: open-source-newrelic-alternative
-date: 2022-04-07
+date: 2022-08-22
 tags: [SigNoz, Open Source]
 authors: ankit_anand
 description: If you're looking for an open-source alternative to New Relic, then you're at the right place. SigNoz is a perfect open-source alternative to New Relic. SigNoz provides a unified UI for both metrics and traces with advanced tagging and filtering capabilities...
@@ -39,7 +39,7 @@ Some of the challenges with tools like New Relic includes:
 import Screenshot from "@theme/Screenshot"
 
 <Screenshot
-    alt="SigNoz dashboard showing popular RED metrics"
+    alt="Reddit post discussing issues about pricing model of New Relic"
     height={500}
     src="/img/blog/2021/09/issue_with_newrelic-min.webp"
     title="What's the catch with New Relic? (Source: Reddit)"
@@ -51,6 +51,7 @@ A relatively newer concept in the field of application performance monitoring is
 
 Some of the key features of good observability tools are:
 
+- Logs, metrics, and traces under a single pane of glass
 - Out of the box application metrics
 - Way to go from metrics to traces to find why some issues are happening
 - Seamless flow between metrics, traces & logs — the three pillars of observability
@@ -70,7 +71,7 @@ Developers can judge the quality of the code of the tool they want to choose and
 If an extra feature or customization is required, developers can build on top of the open-source tool without waiting for the enterprise support team to include their request in the next product cycle.
 
 - **Community support**<br></br>
-One of the best parts about open-source projects is the community. An example is <a href = "https://opentelemetry.io/" rel="noopener noreferrer nofollow" target="_blank" ><b>OpenTelemetry</b></a>, which is becoming the world standard for generating and managing telemetry data in distributed systems.
+One of the best parts about open-source projects is the community. An example is <a href = "https://opentelemetry.io/" rel="noopener noreferrer nofollow" target="_blank" ><b>OpenTelemetry</b></a>, which is becoming the world standard for generating and managing telemetry data in cloud-native applications.
 
 - **Transparency**<br></br>
 With open-source projects, you know what you're dealing with. There is no black box.
@@ -86,13 +87,17 @@ And that's where SigNoz shines. It is very simple to get started, supports multi
 
 Some of our key features which makes SigNoz vastly superior to current open-source products and a great alternative to New Relic are:
 
+- Metrics, traces, and logs under a single pane of glass
+- Correlation of telemetry signals
 - Out of the box application metrics
 - Seamless flow between metrics & traces
 - Filtering based on tags
 - Custom aggregates on filtered traces
 - Detailed Flamegraphs & Gantt charts
-- Natively built to support OpenTelemetry
+- Infrastructure dashboards
+- Exceptions monitoring
 - Transparent usage Data
+
 
 ### Out of box application metrics
 
@@ -159,6 +164,15 @@ Detailed flamegraph & Gantt charts to find the exact cause of the issue and whic
 <figure data-zoomable align='center'>
     <img src="/img/blog/common/signoz_flamegraphs.webp" alt="Detailed Flamegraphs & Gantt charts"/>
     <figcaption><i>Spans of a trace visualized with the help of flamegraphs and gantt charts in SigNoz dashboard</i></figcaption>
+</figure>
+
+### Logs Management with advanced log query builder and live tailing
+
+SigNoz provides Logs management with advanced log query builder. You can also monitor your logs in real-time using live tailing. 
+
+<figure data-zoomable align='center'>
+    <img src="/img/blog/common/signoz_logs.webp" alt="Logs tab in SigNoz"/>
+    <figcaption><i>Logs tab in SigNoz comes equipped with advanced logs query builder and live tailing</i></figcaption>
 </figure>
 
 ### Transparent usage Data
