@@ -1,7 +1,7 @@
 ---
 title: Monitor your Spring Boot application with OpenTelemetry and SigNoz
 slug: opentelemetry-spring-boot
-date: 2022-03-06
+date: 2022-09-01
 tags: [OpenTelemetry Instrumentation, Java]
 authors: ankit_anand
 description: End-to-end performance monitoring of Spring Boot application with OpenTelemetry. Get your telemetry data visualized with SigNoz.
@@ -44,15 +44,12 @@ If you want more application-specific data, OpenTelemetry SDK provides you with 
 
 For Spring Boot applications, we can use the OpenTelemetry Java Jar agent. We just need to download the latest version of the Java Jar agent and run the application with it.
 
-import Screenshot from "@theme/Screenshot"
+<figure data-zoomable>
+    <img src="/img/blog/2022/03/opentelemetry_springboot.webp" alt="Spring Boot application with OpenTelemetry"/>
+    <figcaption><i>OpenTelemetry provides a Java Jar agent that can auto-instrument Spring Boot applications</i></figcaption>
+</figure>
 
-<Screenshot
-   alt="Spring Boot application with OpenTelemetry"
-   height={500}
-   src="/img/blog/2022/03/opentelemetry_springboot.webp"
-   title="OpenTelemetry provides a Java Jar agent that can auto-instrument Spring Boot applications"
-   width={700}
-/>
+<br></br>
 
 OpenTelemetry does not provide storage and visualization layer for the collected data. The advantage of using OpenTelemetry is that it can export the collected data in many different formats. So you're free to choose your telemetry backend. Natively, OpenTelemetry supports a wire protocol known as `OTLP`. This protocol sends the data to OpenTelemetry Collector as shown in the diagram above.
 
@@ -82,13 +79,12 @@ You can visit our documentation for instructions on how to install SigNoz using 
 
 When you are done installing SigNoz, you can access the UI at [http://localhost:3301](http://localhost:3301/application)
 
-<Screenshot
-   alt="SigNoz dashboard"
-   height={500}
-   src="/img/blog/2022/02/signoz_dashboard.webp"
-   title="SigNoz dashboard - It shows services from a sample app that comes bundled with the application"
-   width={700}
-/>
+<figure data-zoomable>
+    <img src="/img/blog/2022/02/signoz_dashboard.webp" alt="SigNoz dashboard"/>
+    <figcaption><i>SigNoz dashboard - It shows services from a sample app that comes bundled with the application</i></figcaption>
+</figure>
+
+<br></br>
 
 <!-- You can get started with SigNoz using just three commands at your terminal.
 
@@ -132,13 +128,12 @@ Steps to get the app set up and running:
 
    You can now access the application UI here: [http://localhost:8090/](http://localhost:8090/)
 
-<Screenshot
-   alt="Spring PetClinic app accessed at port:8090"
-   height={500}
-   src="/img/blog/2022/03/spring_boot_app.webp"
-   title="Sample Spring Boot application running in your local host."
-   width={700}
-/>
+<figure data-zoomable>
+    <img src="/img/blog/2022/03/spring_boot_app.webp" alt="Spring PetClinic app accessed at port:8090"/>
+    <figcaption><i>Sample Spring Boot application running in your local host.</i></figcaption>
+</figure>
+
+<br></br>
 
 Once you ensure that your application runs fine, stop it with `ctrl + c` on mac, as we will be launching the application with the Java agent downloaded from OpenTelemetry.
 
@@ -181,15 +176,14 @@ For instrumenting Java applications, OpenTelemetry has a very handy Java JAR age
 
 Check out the Spring Pet Clinic app at: [http://localhost:8090/](http://localhost:8090/) and play around with it to generate some load. You can try refreshing the endpoint multiple times to generate load. It might take 1-2 minutes before it starts showing up in the SigNoz dashboard.
 
-Below you can find your `javaApp` in the list of applications being monitored.
+Below you can find your javaApp in the list of applications being monitored.
 
-<Screenshot
-   alt="`Javaapp` appears in the list of applications monitored through SigNoz"
-   height={500}
-   src="/img/blog/2022/03/java_app_signoz_dashboard.webp"
-   title="`javaApp` in the list of applications monitored"
-   width={700}
-/>
+<figure data-zoomable>
+    <img src="/img/blog/2022/03/java_app_signoz_dashboard.webp" alt="`Javaapp` appears in the list of applications monitored through SigNoz"/>
+    <figcaption><i>javaApp in the list of applications monitored</i></figcaption>
+</figure>
+
+<br></br>
 
 ## Metrics and Traces of the Spring Boot application
 
@@ -200,42 +194,40 @@ SigNoz comes with out of box RED metrics charts and visualization. RED metrics s
 - Rate of requests
 - Error rate of requests
 - Duration taken by requests
-  <Screenshot
-       alt="SigNoz dashboard showing application latency, requests per sec, error percentage and top endpoints"
-       height={500}
-       src="/img/blog/common/signoz_charts_application_metrics.webp"
-       title="Measure things like application latency, requests per sec, error percentage and see your top endpoints with SigNoz."
-       width={700}
-  />
+
+<figure data-zoomable>
+    <img src="/img/blog/common/signoz_charts_application_metrics.webp" alt="SigNoz dashboard showing application latency, requests per sec, error percentage and top endpoints"/>
+    <figcaption><i>Measure things like application latency, requests per sec, error percentage and see your top endpoints with SigNoz.</i></figcaption>
+</figure>
+
+<br></br>
 
 You can then choose a particular timestamp where latency is high to drill down to traces around that timestamp.
-<Screenshot
-     alt="List of traces shown on SigNoz dashboard"
-     height={500}
-     src="/img/blog/common/signoz_list_of_traces_hc.webp"
-     title="View of traces at a particular timestamp"
-     width={700}
-/>
+
+<figure data-zoomable>
+    <img src="/img/blog/common/signoz_list_of_traces_hc.webp" alt="List of traces shown on SigNoz dashboard"/>
+    <figcaption><i>View of traces at a particular timestamp</i></figcaption>
+</figure>
+
+<br></br>
 
 You can use flamegraphs to exactly identify the issue causing the latency.
 
-<Screenshot
-     alt="Flamegraphs and gantt charts to visualize time taken by requests"
-     height={500}
-     src="/img/blog/common/signoz_flamegraphs.webp"
-     title="Flamegraphs showing exact duration taken by each spans - a concept of distributed tracing"
-     width={700}
-/>
+<figure data-zoomable>
+    <img src="/img/blog/common/signoz_flamegraphs.webp" alt="Flamegraphs and gantt charts to visualize time taken by requests"/>
+    <figcaption><i>Flamegraphs showing exact duration taken by each spans - a concept of distributed tracing</i></figcaption>
+</figure>
+
+<br></br>
 
 You can also build custom metrics dashboard for your infrastructure.
 
-<Screenshot
-    alt="SigNoz custom metrics dashboard"
-    height={500}
-    src="/img/blog/common/signoz_custom_dashboard-min.webp"
-    title="You can also build a custom metrics dashboard for your infrastructure"
-    width={700}
-/>
+<figure data-zoomable>
+    <img src="/img/blog/common/signoz_custom_dashboard-min.webp" alt="SigNoz custom metrics dashboard"/>
+    <figcaption><i>You can also build a custom metrics dashboard for your infrastructure/i></figcaption>
+</figure>
+
+<br></br>
 
 ## Conclusion
 
