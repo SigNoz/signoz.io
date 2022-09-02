@@ -35,7 +35,7 @@ We discussed the data architecture and our move from Druid towards ClickHouse, w
 
 *Find the conversation transcript below👇.*
 
-*****Jonah:*****
+***Jonah:***
 
 Hey everyone, welcome to another open observability talks podcast my name is Jonah Kowall, the CTO at [Logz.io](http://logz.io/), and I'm excited to chat with Pranay Prateek, the Co-founder, and creator of [SigNoz.io](https://signoz.io/)
 
@@ -219,9 +219,7 @@ Yeah so as a business model we're following an open core business model so I thi
 
 So most of the code will be open source and like permissive licenses, but we'll have some parts of the code that may be in a folder that will be under more protective licenses.
 
-That will be part of the paid offering and we also plan to offer a SaaS service on top of that but that's probably the idea that keeps the bulk of the core code open source and
-
-then for the commercial parts and the paid offerings, we can keep it at a more productive price.
+That will be part of the paid offering and we also plan to offer a SaaS service on top of that but that's probably the idea that keeps the bulk of the core code open source and then for the commercial parts and the paid offerings, we can keep it at a more productive price.
 
 ***Jonah:***
 Yeah and so what's your timing on some of those other things that you want to do with the company? Is it like next year sometime or what's your kind of timeline around that?
@@ -297,7 +295,7 @@ I think that's needed and that's the basic thing that people expect but the way 
 
 From a logging perspective, one is aggregation and much better slicing-enticing, because the key problem is finding the right log, it's not about *“Can you see the details of the log*?” that's a trivial problem. 
 
-The main problem is: “How can you plot the charts?”  For example, you want to see from that *“hey this is my service name, what is the number of counts by service name coming from this Kubernetes cluster*?”, “What are the log lines which you are seeing?”
+The main problem is: *“How can you plot the charts*?”  For example, you want to see from that *“hey this is my service name, what is the number of counts by service name coming from this Kubernetes cluster*?”, “What are the log lines which you are seeing?”
 
 Because we use Clickhouse as our data store, that is the superpower of Clickhouse like aggregation, etc is much much faster, so that's where we'll focus on logs perspective, which can give you do much stronger filtering, and much stronger visualization on top of that to find the logs which matter to you.
 
@@ -326,7 +324,9 @@ So, on the Prometheus side super popular data stores like Elasticsearch and
 
 Asaf Mesika is asking:
 
-*“How does it compare with horizontally scalable databases like Cortex*?” and obviously, the cortex is fully Prometheus compatible, Clickhouse itself, although there is victoria metrics that are built on top of Clickhouse, it doesn't necessarily have Prometheus compatibility so what are you doing  in SigNoz to create compatibility for those that maybe we are using really popular tools like Prometheus?
+> *“How does it compare with horizontally scalable databases like Cortex*?” 
+> 
+and obviously, the cortex is fully Prometheus compatible, Clickhouse itself, although there is victoria metrics that are built on top of Clickhouse, it doesn't necessarily have Prometheus compatibility so what are you doing  in SigNoz to create compatibility for those that maybe we are using really popular tools like Prometheus?
 
 ***Pranay:***
 Yeah, so the data store is still Clickhouse so we don't use anything like cortex, and Clickhouse itself is horizontally scalable so it can scale as much as you want. 
@@ -580,7 +580,7 @@ So you can see Pranay at KubeCon. Do you have a booth this time or are you just 
 No, I'm just showing up, you can ping me on my slack and we can chat.
 
 ***Jonah:***
-Yes slack or LinkedIn Pranay’s always around and there are lots of great discussions going on at KubeCon and around KubeCon not just for sponsors obviously, I'll be there,  [logz.io](http://logz.io/) will be there and there'll be lots of other great open sources companies at the event. 
+Yes slack or LinkedIn Pranay’s always around and there are lots of great discussions going on at KubeCon and around KubeCon not just for sponsors obviously, I'll be there, [logz.io](http://logz.io/) will be there and there'll be lots of other great open sources companies at the event. 
 
 So super looking forward to that I did also want to mention in November, for those who are unaware there's another open source conference in Germany called OSMC, which I've never been to but I'm going to be speaking there as well and so will dalton, who's the other co-host of this podcast so definitely check out this conference.
 
