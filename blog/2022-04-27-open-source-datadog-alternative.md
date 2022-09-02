@@ -1,7 +1,7 @@
 ---
 title: SigNoz - Open-source alternative to DataDog
 slug: open-source-datadog-alternative
-date: 2022-04-27
+date: 2022-09-02
 tags: [SigNoz, Open Source]
 authors: pranay
 description: DataDog is a popular APM tool. But it is very expensive and opaque about its billing practices. What if you could get a SaaS like experience from an open-source APM tool....
@@ -60,10 +60,15 @@ To fill this gap we built [SigNoz](https://signoz.io/), an open-source alternati
 
 Some of our key features which makes SigNoz vastly superior to current open-source products and a great alternative to DataDog are:
 
+
+- Metrics, traces, and logs under a single pane of glass
+- Correlation of telemetry signals
 - Out of the box application metrics
 - Seamless flow between metrics & traces
 - Filtering based on tags
 - Custom aggregates on filtered traces
+- Infrastructure dashboards
+- Exceptions monitoring
 - Transparent usage Data
 - Detailed Flamegraphs & Gantt charts
 
@@ -105,14 +110,7 @@ Create custom metrics from filtered traces to find metrics of any type of reques
     <figcaption><i>Find custom aggregates on filtered traces</i></figcaption>
 </figure>
 
-### Transparent usage Data
 
-You can drill down details of how many events is each application sending or at what granularity, so that you can adjust your sampling rate as needed and not get a shock at the end of the month ( case with SaaS vendors many a times)
-
-<figure data-zoomable align='center'>
-    <img src="/img/blog/2022/04/transparent_usage_data.webp" alt="Transparent usage data"/>
-    <figcaption><i>SigNoz provides usage explorer so that you are always informed about your usage</i></figcaption>
-</figure>
 
 ### Detailed Flamegraphs & Gantt charts
 
@@ -121,6 +119,25 @@ Detailed flamegraph & Gantt charts to find the exact cause of the issue and whic
 <figure data-zoomable align='center'>
     <img src="/img/blog/common/signoz_flamegraphs.webp" alt="Detailed Flamegraphs & Gantt charts"/>
     <figcaption><i>Spans of a trace visualized with the help of flamegraphs and gantt charts in SigNoz dashboard</i></figcaption>
+</figure>
+
+### Logs Management with advanced log query builder and live tailing
+
+SigNoz provides Logs management with advanced log query builder. You can also monitor your logs in real-time using live tailing. 
+
+<figure data-zoomable align='center'>
+    <img src="/img/blog/common/signoz_logs.webp" alt="Logs tab in SigNoz"/>
+    <figcaption><i>Logs tab in SigNoz comes equipped with advanced logs query builder and live tailing</i></figcaption>
+</figure>
+
+
+### Transparent usage Data
+
+You can drill down details of how many events is each application sending or at what granularity, so that you can adjust your sampling rate as needed and not get a shock at the end of the month ( case with SaaS vendors many a times)
+
+<figure data-zoomable align='center'>
+    <img src="/img/blog/2022/04/transparent_usage_data.webp" alt="Transparent usage data"/>
+    <figcaption><i>SigNoz provides usage explorer so that you are always informed about your usage</i></figcaption>
 </figure>
 
 ---
