@@ -224,7 +224,7 @@ You can also build custom metrics dashboard for your infrastructure.
 
 <figure data-zoomable>
     <img src="/img/blog/common/signoz_custom_dashboard-min.webp" alt="SigNoz custom metrics dashboard"/>
-    <figcaption><i>You can also build a custom metrics dashboard for your infrastructure/i></figcaption>
+    <figcaption><i>You can also build a custom metrics dashboard for your infrastructure</i></figcaption>
 </figure>
 
 <br></br>
