@@ -30,7 +30,7 @@ He discussed SigNoz's data architecture, move from Druid towards ClickHouse and 
 
 Below is the recording and an edited transcript of the conversation.
 
-
+<!--truncate-->
 
 <LiteYoutubeEmbed id="Vhvxv9B8HDE" mute={false} />
 
