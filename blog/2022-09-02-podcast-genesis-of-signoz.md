@@ -1,11 +1,11 @@
 ---
 title: Building a one-stop Open Source Observability Platform | OpenObservability Podcast
-slug: podcast-genesis-of-signoz
+slug: genesis-of-signoz
 date: 2022-09-02
 tags: [Talks]
 authors: priyansh
 description: In this blog, we are excited to announce Pranay Prateek, the co-founder and creator of SigNoz, was invited as a guest speaker with Jonah Kowall, on this episode of OpenObservability Talks...
-image: /img/blog/2022/08/office_hours_red_metrics.webp
+image: /img/blog/2022/09/open_observability_platform_cover.webp
 keywords:
   - opentelemetry
   - podcast
@@ -16,7 +16,7 @@ keywords:
 import { LiteYoutubeEmbed } from "react-lite-yt-embed";
 
 <head>
-  <link rel="canonical" href="https://signoz.io/blog/podcast-genesis-of-signoz/"/>
+  <link rel="canonical" href="https://signoz.io/blog/genesis-of-signoz/"/>
 </head>
 
 <a href="https://twitter.com/pranay01" rel="nofollow">Pranay</a>, one of the the co-founders at <b>SigNoz</b> , was recently invited as a guest speaker by <a href="https://twitter.com/jkowall" rel="nofollow">Jonah Kowall</a>, CTO at Logz.io on his <b>OpenObservability Podcast</b>.
@@ -24,9 +24,9 @@ import { LiteYoutubeEmbed } from "react-lite-yt-embed";
 <br />
 <br />
 
-He discusses about the mission behind SigNoz of unifying tracing, metrics and logging in a single platform and interface. Evolution of SigNoz from its inception until today, along with the adoption of the technology and contribution from the community. 
+In the podcast, Pranay talks about the mission behind SigNoz -  unifying traces, metrics, and logs in a single platform and interface. He also shared anecdotes about the evolution of SigNoz since its inception, the community adoption, and its contribution to SigNoz.
 
-He discussed SigNoz's data architecture, move from Druid towards ClickHouse and upcoming roadmap of the project and how people can contribute.
+Pranay shared insights around simplifying product decisions for an open-source project, why SigNoz moved from Druid to ClickHouse, and what the upcoming roadmap of SigNoz looks like.
 
 Below is the recording and an edited transcript of the conversation.
 
@@ -36,7 +36,7 @@ Below is the recording and an edited transcript of the conversation.
 
 <p>&nbsp;</p>
 
-*Find the conversation transcript below👇.*
+*Find the conversation transcript below.👇*
 
 ***Jonah:***
 
@@ -54,33 +54,33 @@ Also, I invite everyone else to join, those of you that are listening to audio o
 
 So, with that, I want to invite Pranay to the stage with me,  Pranay, Welcome! Where do you join us from today?
 
-***Pranay:***
+***Pranay:***<br></br>
 Hey Jonah, thanks for inviting me! I am currently in Bangalore, pretty cool weather here.
 
-***Jonah:***
+***Jonah:***<br></br>
 Nice! Great! Awesome to see. 
 
 I've spent quite a bit of time in your city over the years but it's been a little while. I'm sure it's continuing to boom with the tech explosion going on…
 
-***Pranay:***
+***Pranay:***<br></br>
 Oh yeah, interesting when were you here in Bangalore?
 
-***Jonah:***
+***Jonah:***<br></br>
 Yeah, I mean I had a team there quite some time ago when I was at Thompson-Reuters and then also at App Dynamics, we have had a pretty big presence over there. 
 
 So I have watched the change over the years from the early parts of the tech boom into the new modern stuff and a lot of innovators like yourselves that are building new startups in Bangalore.
 
 It's a very hot area for tech so it's great to see that.
 
-***Pranay:***
+***Pranay:***<br></br>
 Yeah, so we are also seeing lots of new companies coming up and I think we are, as the ecosystem matures taking a lot of inspiration from the silicon valley ecosystem, and I'm seeing new startups in new areas. 
 
 Earlier we didn't have startups, for example in dev-infra but now, we have dev tools and all, now we're seeing more and more startups in those areas, us being one of them, so pretty exciting times.
 
-***Jonah:***
+***Jonah:***<br></br>
 Awesome man! So can you give us a little intro on yourself and what your journey was like bringing getting up to the SigNoz creation?
 
-***Pranay:***
+***Pranay:***<br></br>
 I am one of the co-founders at **SigNoz**, primarily an engineer by heart ❤️ 
 
 I and my co-founder both are electrical engineers, and that's why we worry a lot about signals and noise, so that is the origin of the name SigNoz, signals versus noise.
@@ -97,25 +97,25 @@ That's where I understood the problem statement that if you're running things in
 
 In that company, we were running a basic version of Elasticsearch but it was difficult to maintain at scale. Elasticsearch becomes difficult to maintain and then we were not able to find talent to run Prometheus or Grafana because running such systems is complex and you need a specialized talent who can set the systems up for you and get that running.
 
-***Jonah:***
+***Jonah:***<br></br>
 Were you doing any tracing at the time as I wear my Jaeger shirt?
 
-***Pranay:***
+***Pranay:***<br></br>
 No. Not actually. 
 
-***Jonah:***
+***Jonah:***<br></br>
 Just logging…?
 
-***Pranay:***
+***Pranay:***<br></br>
 Yeah so at that time I think all the companies mostly I see started with logs as the first signal that they want to capture and then we tried to also capture metrics.
 
 We only had logs as the signal and we didn't have set up Prometheus and Grafana systems.
 
-***Jonah:***
+***Jonah:***<br></br>
 Yeah got it.
 
 
-***Pranay:***
+***Pranay:***<br></br>
 I think I got introduced to this space that *“Hey like this is a very important problem which is gonna be more and more important as more things in a company become software-driven*"
 
 So you would run systems in production you'd want to understand how it's going and if you see today, most of the real IPs (Intellectual Property) of the company is in software, even if it's a delivery company, the core IP is in the software and that's where the edge of the company resides.
@@ -128,13 +128,13 @@ We had a Prometheus-Grafana ecosystem but in Prometheus you primarily get metric
 
 And so that's where the genesis of SigNoz is, that can we build something in one single app which does both all of metric traces and logs and is in open source.
 
-***Jonah:***
+***Jonah:***<br></br>
 Yep makes sense. So when did you start working on the project and then when did you launch it? 
 
 I guess because I've been following you since the beginning. After all, I was interested in the project and the idea of what you were trying to build so maybe a little timeline on when you founded the company and then when you launched it and how long has it been in the works for now?
 
 
-***Pranay:***
+***Pranay:***<br></br>
 Yeah, I think the company came much later. We founded the company in **Jan of 2021** but we started working on this project on October 2020, which is when we started writing for this, and initially, we were thinking of building something on top of Prometheus-Grafana that can you get application metrics on top of that but what we realized was that it's very difficult to get that one-click through experience in Prometheus that is similar to what you have in Datadog or Newrelic. 
 
 So, there's a huge gap between where these products are currently. 
@@ -143,13 +143,13 @@ At that time open source products were there and the current SaaS products were 
 
 We didn't want to have a different UI for one and then the second, even setting up this difference is a tricky system.
 
-***Jonah:***
+***Jonah:***<br></br>
 Definitely.
 
-***Pranay:***
+***Pranay:***<br></br>
 And also the team needs to learn where and how to set things up.
 
-***Jonah:***
+***Jonah:***<br></br>
 I don't think anyone's figured out the unified data store.
 
 I mean even when you look under the covers and most of the commercial tools they end up using different backends for the different data types because I think a lot of the databases haven't evolved well in dealing with time series and event-based data like logs and trace.  
@@ -161,7 +161,7 @@ I know that's kind of complicated to manage and scale and so I was watching and 
 So, maybe you can talk a little bit about it because I'm always fascinated by databases and data stores like how your evolution went because I know you didn't want to have multiple data stores that were one of your goals in the project, and then so how did you go from the Druid, to where you ended up I'm just curious about that.
 
 
-***Pranay:***
+***Pranay:***<br></br>
 Yeah, I think that's been a very interesting journey even for us, so we were deciding way back in October 2020 on which database to choose, we probably had three main candidates:
 
 1. We had DRUID which was more established, we had bigger companies using it.
@@ -176,12 +176,12 @@ All those were right because we saw many people trying to run Druid, it's a grea
 
 This is the thing or the insight which we didn't have earlier that hey if you want to open source something and like first people would want to try it in a laptop preferably or at max, a single small machine they would not want to set up a Kubernetes cluster. 
 
-***Jonah:***
+***Jonah:***<br></br>
 Yeah I mean the most popular artifact for Jaeger was the all-in-one docker container where people can just start using it instantly with a single download. 
 
 So that's advisable. Did you have to run Kafka with Druid all the time or only at scale?
 
-***Pranay:***
+***Pranay:***<br></br>
 Yeah so in our architecture by default we had Kafka and Kafka is another beast to manage, so I think it's a good architecture for companies that are using it at scale. 
 
 But for an open source project which was at a very early stage, people would not invest so much in running that scale, so it needs to be very easy to run it in a single laptop environment or a single VM environment, and then as people get confidence in that, they can mature to dedicate more resources and more engineers so that's what we have seen. 
@@ -192,18 +192,18 @@ The beauty about Clickhouse is that it starts very quickly, you can start with a
 
 People can get confident that this database works and this can handle scale and then we can get into like running it in bigger machines or running it in Kubernetes clusters, but that was important for us and that drove adoption for our project, as a lot that it was very easy to install.
 
-***Jonah:***
+***Jonah:***<br></br>
 Do you still have to run Kafka in front of it when it scales or is not required?
 
-***Pranay:***
+***Pranay:***<br></br>
 As of now, we don't have Kafka in our architecture but I think we will need to introduce it because we are seeing customers or users using us at a much higher scale. Today, you can just run with Clickhouse and it's able to scale decently well. Now we have also introduced logs so we'll need to include Kafka in front of it but now this time it will be an optional component at least that's the learning from our last foray into this.
 
-***Jonah:***
+***Jonah:***<br></br>
 Yep makes sense.
 
 So I wanted to ask a little bit about how the project's going, I always take a look and see all the contributions and stars on your GitHub, so maybe you can tell us how the users and adoption have been?
 
-***Pranay:***
+***Pranay:***<br></br>
 Yeah sure so I think adoption has been great for us especially after we moved to Clickhouse.
 
 We are currently at something around 7200+ Github stars, we have more than 70 plus contributors from across the globe and US, and Europe and I think we have 1200 plus members in our slack community. 
@@ -212,34 +212,34 @@ So we are having a very active slack community where people are trying to help e
 
 It was very interesting for us because it shows that like people from all over the globe are adopting the project and liking the project.
 
-***Jonah:***
+***Jonah:***<br></br>
 So how do you license it today it's under an Open Source license and I'm assuming you're going to try to keep it that way but I'm assuming that maybe you want to build a SaaS service over time. 
 
 I mean what's the goal for the company as a commercial entity?
 
-***Pranay:***
+***Pranay:***<br></br>
 Yeah so as a business model we're following an open core business model so I think we'll be going down a path similar to our GitLab, HashiCorp has gone. 
 
 So most of the code will be open source and like permissive licenses, but we'll have some parts of the code that may be in a folder that will be under more protective licenses.
 
 That will be part of the paid offering and we also plan to offer a SaaS service on top of that but that's probably the idea that keeps the bulk of the core code open source and then for the commercial parts and the paid offerings, we can keep it at a more productive price.
 
-***Jonah:***
+***Jonah:***<br></br>
 Yeah and so what's your timing on some of those other things that you want to do with the company? Is it like next year sometime or what's your kind of timeline around that?
 
-***Pranay:***
+***Pranay:***<br></br>
 Yeah, so we plan to launch the paid versions of SigNoz by end of the year.
 
-***Jonah:***
+***Jonah:***<br></br>
 Okay! cool.
 
-***Pranay:***
+***Pranay:***<br></br>
 In three-four months, we'll have some more paid plans on the product and well post that will also have SaaS offerings based on that.
 
-***Jonah:***
+***Jonah:***<br></br>
 Very nice. So aside from commercial offering and support which I'm sure some users would love to have, what else is on the roadmap that we can kind of talk about? what's coming next?
 
-***Pranay:***
+***Pranay:***<br></br>
 Yeah so we recently released logs, so now we have all the three signals: metric traces, and logs, in one piece which has always been the goal of the project, but now the next step is to make it very easy for people to add their data sources and build integrations on top of SigNoz.
 
 So that would be one of the key focuses that hey like how can people for example start getting data from the Redis instance to SigNoz, how can they get data from their Kafka instances to SigNoz? 
@@ -260,7 +260,7 @@ I think doing more proactive insights rather than reactive insights would be mu
 
 So, this goes into the domain of machine learning or regression analysis, but where we want to go as a project, these ideas should be much easier and much more upfront, rather than just a dashboard-based approach.
 
-***Jonah:***
+***Jonah:***<br></br>
 Yep, so two questions for you, one is on the integrations that you mentioned. 
 
 Are you going to have a way to package content?
@@ -269,13 +269,13 @@ For example like let's say I have a Redis server and I want to get all the signa
 
 Does the data collection package occur together? How are you going to know do those integrations and make it easier for users? What's the vision there?
 
-***Pranay:***
+***Pranay:***<br></br>
 Yes, as of now, we have not defined it in more detail, but the idea is that if you have the latest instance in SigNoz, you can create an integration where you specify the URL, you specify the port credentials and then this should be able to pull in or push data and then the Redis instance should be able to push data to SigNoz Collector.
 
-***Jonah:***
+***Jonah:***<br></br>
 So it's more about data collection than the visualization and the rest of the other pieces?
 
-***Pranay:***
+***Pranay:***<br></br>
 So two pieces, First, you want to get data from your Redis clusters very quickly into SigNoz and the second piece is whether can you visualize these metrics. 
 
 Even today, we have a concept of dashboards in SigNoz where you can plot any types of metrics and for that dashboard piece, we can create a folder for Redis dashboards that will have all the standard panels for monitoring Redis clusters.
@@ -286,12 +286,12 @@ So these are two independent concepts. One is dashboards based which are indepen
 
 Essentially one of the key things is alerts, like how do you send to Slack?, How do you send to Opsgenie? those are also key areas where people should be able to create integrations on top. 
 
-***Jonah:***
+***Jonah:***<br></br>
 Yep makes sense, so I know that logging is the newest signal for you and that is the same for OpenTelemetry, it's also the newest signal for OpenTelemetry but since you're looking at it and building a new UI when you look at all the logging tools out there, all kind of look the same right? They do the same thing, they have the same timeline, the view, you know. 
 
 It's like here are the fields and are you rethinking that at all in terms of what you're doing with logging because I feel you know everyone just kind of does logging the same and it's okay but it's not particularly well integrated with the other signals so how are you kind of look at it from a unified perspective?
 
-***Pranay:***
+***Pranay:***<br></br>
 So the current version which you have launched is of basic v1 version that does the basic job like you have the log lines and the timeline.
 
 I think that's needed and that's the basic thing that people expect but the way we are thinking about it going forward is the two sorts of areas where you want to focus on. 
@@ -316,7 +316,7 @@ So much easier filtering and correlation between logs, traces, and then metrics,
 
 I think even Uber, over there was a recent blog by Uber Engineering folks and then they mentioned that 60 to 70 percent of their logs queries are aggregations query and that's where the main bandwidth or the main effort of the team and that's why they switched to Clickhouse and I'm guessing that would be the case for most of the bigger companies that are finding that the right log is more important than diving into that.
 
-***Jonah:***
+***Jonah:***<br></br>
 Yeah, the challenge is if you do aggregation, it's much harder to do a free-form search. 
 
 One of the biggest challenges in observability is trying to deal with the “unknown-unknowns” and that's oftentimes where logging is particularly useful, and why you need to have a decent full-text search is because sometimes you're looking at a problem that you don't know that isn't an aggregated query where you're trying to actually, analyze a particular instance of a problem and that's why some of the open source tools that always start with a metric before you go to a log, are problematic and oftentimes you want to start with a trace or you want to start with a log and then you want to look at metrics related to that so oftentimes the troubleshooting workflow changes.
@@ -331,25 +331,25 @@ Asaf Mesika is asking:
 > 
 and obviously, the cortex is fully Prometheus compatible, Clickhouse itself, although there is victoria metrics that are built on top of Clickhouse, it doesn't necessarily have Prometheus compatibility so what are you doing  in SigNoz to create compatibility for those that maybe we are using really popular tools like Prometheus?
 
-***Pranay:***
+***Pranay:***<br></br>
 Yeah, so the data store is still Clickhouse so we don't use anything like cortex, and Clickhouse itself is horizontally scalable so it can scale as much as you want. 
 
 We allow support for PromQL which is a query language.
 
-***Jonah:***
+***Jonah:***<br></br>
 How are you doing it? 
 
-***Pranay:***
+***Pranay:***<br></br>
 Yeah so we allow support for PromQL but underlying, we convert that PromQL to a Clickhouse query and then run it natively on that so that's the approach we are taking.  
 
 We do not support cortex as a database as fundamentally we are using columnar databases as the storage layer first.
 
-***Jonah:***
+***Jonah:***<br></br>
 Have you tested the PromQL compatibility because this is also a big thing that people are now testing, victoria metrics, although it provides PromQL support, is not very compatible with Prometheus. 
 
 It turns out that they don't pass all the tests particularly well.
 
-***Pranay:***
+***Pranay:***<br></br>
 Yeah so the way we are thinking about this is that many of our users want to just create metrics, so say for 80% of the users, we have provided a query-builder which is like you can use UI to create metrics, you can filter based on different things like you can filter based on group by query.
 
 So for the 80% of the users, I think query builder will suffice, which they can use to write metrics, etc, and then we support PromQL and Clickhouse native queries. 
@@ -358,21 +358,21 @@ So PromQL will be there and it's for people who are more comfortable with that 
 
 Clickhouse natively queries in SQL format so many people should be able to write queries based on that, that's the direction that we are taking from a query language perspective because we found many people are not even comfortable like even PromQL, so if somebody wants to write an advanced query it's not very easy, and not many people are very comfortable writing advanced queries.
 
-***Jonah:***
+***Jonah:***<br></br>
 Yeah, it was very true how do you deal with metric roll-ups, for example, like do you have the ability to roll up metrics to trend them over time is that user configurable?
 
 That's one of the things that databases like cortex and other time series databases handle, is when I take a metric over time and I want to roll it up a certain way, it provides the scalability if you're collecting a lot of data so, like do you do roll-ups today and SigNoz for metrics is that part of the plan to do something like that?
 
-***Pranay:***
+***Pranay:***<br></br>
 Are you saying that if I have say, one-hour granularity data you want to roll up to one week? Sure.
 
-***Jonah:***
+***Jonah:***<br></br>
 It's usually one minute and then you may be on a move to one hour, you know after a certain number of weeks or months, just to deal with scalability?
 
-***Pranay:***
+***Pranay:***<br></br>
 Yeah, so currently we don't have roll-ups enabled but in Clickhouse we have a concept of materialized views, which is essentially doing the same thing. It aggregates based on time intervals and stores it in a different table. So that increases the storage requirement but because you are just having so little number of hours or number of days, that like doesn't blow up so that's the place where we will go to support metalized columns to support roll-ups but as of now, we don't have anything.
 
-***Jonah:***
+***Jonah:***<br></br>
 Got it. So another question that Asaf asked:
 
 > “Comparison with Elasticsearch and Loki!”
@@ -385,7 +385,7 @@ I just wanted to chime in on that one.
 
 Did you have anything else to add to that question around the elastic search?
 
-***Pranay:***
+***Pranay:***<br></br>
 Yeah, so we have compared and we're still like in the early stages of comparing. 
 
 We will maybe soon publish benchmarks on that but what we have seen is that Elastic is very heavy in terms of ingestion so if you want to ingest data, it requires lots of CPU memory requirements and that's where many times it fails. 
@@ -398,23 +398,23 @@ That's like a huge scale, so ingestion is much more efficient in SigNoz with Cl
 
 So I think where we stand in terms of Elasticsearch versus Loki is a middle ground where ingestion performance is decent, not very resource intensive and you can also do some full-text search, of course, we also allow you to specify which fields you want to index so that like if you are always squaring on those fields you can index it and get much faster performance but even with full-text search the performance is much better compared to Loki.
 
-***Jonah:***
+***Jonah:***<br></br>
 Yeah and I just posted in the comments the talk from Monitorama this year that you were referencing, the team at Cloudflare put together for Clickhouse so definitely worth checking out if you're interested. 
 
 I think we need a nice UI and maybe SigNoz has the nice UI for querying log data that people are looking for. 
 
 It's a lot more efficient and cost-effective than running Elasticsearch, the challenge with Loki is as you said the full-text search which it does not handle but that makes it super cheap because the data is just on S3 and that's a pretty nice solution.
 
-***Pranay:***
+***Pranay:***<br></br>
 Yeah, so as I mentioned in the Elastic to Loki spectra we are somewhere in between.
 
-***Jonah:***
+***Jonah:***<br></br>
 Yeah so that's it again we're working as you know, there's an open-search, which is the open source version of Elasticsearch and we're working on an S3 storage system for open-search that'll make it a lot more efficient in terms of long-term storage but it does not solve the ingestion challenge that you were mentioning Pranay because dealing with ingestion on Elasticsearch or open search requires Kafka and a bunch of other things to deal with, back pressure and queuing that is just kind of part of the challenges with that database.
 
-***Pranay:***
+***Pranay:***<br></br>
 Does Elasticsearch not have an S3 long-term storage capability?
 
-***Jonah:***
+***Jonah:***<br></br>
 So they have searchable snapshots in the commercial version of elastic, which gives you some of that. 
 
 In the open source, doesn't exist but we're working on it and the concept over time is to actually decouple.
@@ -425,31 +425,31 @@ So over time, the idea is to become all decoupled microservices, you have shared
 
 They're just querying and you scale them independently, they're querying or writing or aggregating and so the idea is instead of running a cluster and dealing with all of the challenges, how do we build something that's more stateless and that I think is kind of where we want the open search to be in a year or two years and you'll see some of that coming out.
 
-***Pranay:***
+***Pranay:***<br></br>
 So is today like ingestion and reading coupled with elastic?
 
-***Jonah:***
+***Jonah:***<br></br>
 Yes, it's a cluster. 
 
 So you're running shared communication between the different nodes, the data is replicated between the different nodes, and the queries are striped across the nodes. 
 
 So it's a stateful database that runs in clusters, it's not decoupled by any stretch today.
 
-***Pranay:***
+***Pranay:***<br></br>
 One problem we saw with Loki was that like when you're querying, they bring all data to the ingester or like they bring all data to memory and then their own query, because they don't have an underlying DB how do you plan what's the plan for addressing that problem or are you thinking about that?
 
-***Jonah:***
+***Jonah:***<br></br>
 So there are things you can do like pre-fetching and various other pieces and you can store quite a bit of data in memory as well and I think Loki now has a bunch of different caching layers that enable some of those use cases to make it faster but obviously, you can't predict what all the queries are going to be and you can't fetch all the data before the query being run so I think there's always going to be some of those challenges inherent with that design so we'll see.
 
-***Pranay:***
+***Pranay:***<br></br>
 Well so the way we are trying to handle this is through Loki and Elastic is trying to handle this through better caching.
 
-***Jonah:***
+***Jonah:***<br></br>
 Yeah, same. Cortex does the same type of thing because it also uses S3.
 
 Cool, so I wanted to ask a little bit about the project itself and I'm going to just put the road map up on the chat so that people know kind of what's going on with the project and then they also have a link to the GitHub but I did want to ask about how people can get involved, how they can contribute to it as well. So maybe you could share a little bit about that?
 
-***Pranay:***
+***Pranay:***<br></br>
 Yeah sure so I think we have got lots of contributions, from contributors in SigNoz already but I think a couple of key areas where we are actively looking for contribution, is testing SigNoz in different languages and frameworks and reporting that and like maybe sharing documentation on what that is because as you know like the surface area of the product is very big, like OpenTelemetry itself supports so many languages and then even in those languages, there are so many frameworks and by adding another small team. 
 
 We can't create blocks for everything, so if people are trying different languages and frameworks or if people can create talks or try for that language with which they're comfortable, and then share docs with us, that would be very helpful.
@@ -460,61 +460,61 @@ The third piece would be the integrations things which we are planning on, it's 
 
 But I think integration may be a great area for contributing there are lots of integrations that can be enabled on SigNoz on sending different types of alerts, and on integrating different types of data sources which can come in and be integrated into SigNoz. 
 
-***Jonah:***
+***Jonah:***<br></br>
 So we didn't talk much about OpenTelemetry, you mentioned it two or three times in the last couple of minutes but I'm quite sure that you have support for OpenTelemetry protocol - OTLP in the product or do you use an exporter today?
 
-***Pranay:***
+***Pranay:***<br></br>
 Are you talking about like how we send data to SigNoz?
 
-***Jonah:***
+***Jonah:***<br></br>
 Yeah, how does it (SigNoz) work with OpenTelemetry?
 
-***Pranay:***
+***Pranay:***<br></br>
 Yeah, we support OpenTelemetry instrumentation, you can use OpenTelemetry libraries to instrument your applications and start sending data to SigNoz.
 
 That's like one of the bases of SigNoz that you can instrument with OpenTelemetry. 
 
 We are native to OpenTelemetry, we started the project with OpenTelemetry in mind so you can send data from OpenTelemetry libraries to us.
 
-***Jonah:***
+***Jonah:***<br></br>
 Got it yeah so you support OTLP which means you don't need an exporter, you can just send native OpenTelemetry format data directly to the back-end of SigNoz which is a nice design for sure, and obviously, you support logs metrics, and traces from OpenTelemetry but do you support other ways of getting data into the platform? like is their support for Prometheus natively to get metrics in? 
 
 Is there support for other types of standards that people are using?
 
-***Pranay:***
+***Pranay:***<br></br>
 Yeah so I think the OpenTelemetry collector itself provides Prometheus receivers, so you can enable Prometheus receivers in your OpenTelemetry Collector and send data from your Prometheus exporters directly to us. 
 
 So for example you can send data from node exporters to SigNoz and start plotting those metrics.
 
-***Jonah:***
+***Jonah:***<br></br>
 So your goal is all OpenTelemetry in terms of getting data into the platform not supporting other formats as we do at here Logz.io. 
 
 We have to support fluency and fluent bid and we give a customer a huge list of things they can use to send us data which is nice but also the customers say which one should I use and we have to say, use what you know.
 
-***Pranay:***
+***Pranay:***<br></br>
 Yes, we are taking the route of default OpenTelemetry support, and we are seeing that's like serving like 80 percent of the use cases or customers and that's fine for us as of now because being a small team we don't want to integrate different libraries and builds exporters for all of those.
 
 So as of now, we are supporting OpenTelemetry and I think even OpenTelemetry allows you to send through Fluentbit, the OTel collector allows you to send through Fluentbit.
 
 So, of course, there may be many protocols that we don't support but we'll take an 80-20 approach.
 
-***Jonah:***
+***Jonah:***<br></br>
 Yeah it makes sense, it saves you a lot of time because all these companies have to build agents, and a big engineering team is required to do that and it gets very expensive and a lot of it's not that differentiated so focusing on OpenTelemetry is the way to go especially as a startup. 
 
 One of the things I'm kind of starting to think about speaking of OpenTelemetry, I just wanted to run it by you because we've got a few minutes left, so I noticed in your documentation that you use it is we built a span metric processor that takes the traces and it makes metrics out of them. 
 
 I'd like us to do the same with logging where you take a bunch of logs and then you can pre-aggregate it in the collector, without just sending all the logs you could send a metric that summarizes logs.
 
-***Pranay:***
+***Pranay:***<br></br>
 Yeah, I think that's a very interesting idea because I think many people want to see metrics from logs and you can create them.
 
-***Jonah:***
+***Jonah:***<br></br>
 Yeah, we have some features that do this in our product but having it in the collector would be great. I think it also has its advantages in terms of not having to send all the logs to the service, you can just summarize it.
 
-***Pranay:***
+***Pranay:***<br></br>
 So what would be the use cases for that? Will people not want to send logs and that saves the network layer and but then you lose the ability to query it. 
 
-***Jonah:***
+***Jonah:***<br></br>
 You do, but like when you think about a great use case like an access log, access logs are all the same. 
 
 Sure it is what it is but it also has the error code, what's the response time, what if I could just take that handful of metrics that are in an access log and send them as metrics, and then I don't have to send any of the access logs to get the operational data.
@@ -525,64 +525,64 @@ The trace processor lets you get that data and then you can sample the traces an
 
 So you could do all kinds of nice things to reduce data vault.
 
-***Pranay:***
+***Pranay:***<br></br>
 Have you seen many people trying to sample logs I've seen people sampling traces, which is very common but I've not seen many people trying to sample logs.
 
-***Jonah:***
+***Jonah:***<br></br>
 Yeah if you're busy, you have to sample logs, and where it's even more common is in flow, so like network flow analytics which is also logs. 
 
 So we have customers that can't send all the flows, they want to send a sample set of flows from the network, so they'll configure sampling for flows and sampling for logs.
 
-***Pranay:***
+***Pranay:***<br></br>
 And this is more on network monitoring through logs rather than a kind of core DevOps type logs?
 
-***Jonah:***
+***Jonah:***<br></br>
 Network Monitoring, Security Monitoring, yeah not so much for application logs but for other things, that are very verbose or a very high volume, you have to look at the risk-reward thing.
 
 If I'm going to collect all of this data that shows something is okay and fine, Why am I going to spend all that money and time doing that? doesn't make sense! you want to collect what is going to be useful versus what you may or may not use at some point in the future so yeah, it's worth it.
 
-***Pranay:***
+***Pranay:***<br></br>
 Yeah, it makes a lot of sense, we have not thought about that. We are primarily focused on application metrics but now that you are telling me, I see…
 
-***Jonah:***
+***Jonah:***<br></br>
 But as you go and I know some of your examples like monitoring Redis or monitoring MongoDB or Clickhouse, for example, now you're moving more into infrastructure where you know some of those logs may not be useful. 
 
 I mean Redis generates huge volumes of access log type data but you want some of it, you want metrics from it but you don't need all of the 200, 500 millisecond response time. That's fine I don't need that you know so yeah definitely. 
 
 Cool so just before we wrap up are there any other things that you wanted to chat about today before I kind of cover a couple of news items?
 
-***Pranay:***
+***Pranay:***<br></br>
 No, I think we covered almost all of them I think just a shoutout like, Hey, take a look at SigNoz, and we have a very active slack community. 
 
 So have a look at that if you have any questions about observability, and how we are doing it in a single app, feel free to join the slack community, and we’ll be happy to chat.
 
-***Jonah:***
+***Jonah:***<br></br>
 Very cool and I didn't realize, now you have paid support which is fantastic to see, so folks in companies who want support can pay you for great support, and the slack community is linked on the site but I'm also going to put it in the chat and I think that that's probably it.
 
 So, before we cover a couple of news items I just wanted to thank you for joining us, super  useful discussion. 
 
 You can stick around I'm just gonna talk about a couple of news items going on around observability but I did want to thank you for joining us and best of luck on the project. 
 
-***Pranay:***
+***Pranay:***<br></br>
 Thank you for like inviting me and I think I learned a lot from *Logz.io* io and should chat more about what we're doing there.
 
-***Jonah:***
+***Jonah:***<br></br>
 Yeah, I'm sure we'll be in touch. 
 
 One of the things I did want to mention that's part of the news is that KubeCon US is coming up in about two months I will be there I'm doing the Jaeger maintainer talk with one of the other maintainers at jager, which will be great. 
 
 Are you going to be at KubeCon this time?
 
-***Pranay:***
+***Pranay:***<br></br>
 Yeah, will be there at KubeCon.
 
-***Jonah:***
+***Jonah:***<br></br>
 So you can see Pranay at KubeCon. Do you have a booth this time or are you just showing up?
 
-***Pranay:***
+***Pranay:***<br></br>
 No, I'm just showing up, you can ping me on my slack and we can chat.
 
-***Jonah:***
+***Jonah:***<br></br>
 Yes slack or LinkedIn Pranay’s always around and there are lots of great discussions going on at KubeCon and around KubeCon not just for sponsors obviously, I'll be there, *Logz.io* will be there and there'll be lots of other great open sources companies at the event. 
 
 So super looking forward to that I did also want to mention in November, for those who are unaware there's another open source conference in Germany called OSMC, which I've never been to but I'm going to be speaking there as well and so will dalton, who's the other co-host of this podcast so definitely check out this conference.
@@ -601,14 +601,19 @@ Looking forward to our episode next month which will be a great one and with tha
 
 Have a good evening and good morning to those in the US.
 
-***Pranay:***
+***Pranay:***<br></br>
 Thanks, Jonah, and thanks everybody for joining in.
 
-***Jonah:***
+***Jonah:***<br></br>
 Thank you appreciate it have a good day.
 
-***Pranay:***
+***Pranay:***<br></br>
 Okay bye bye
 
-***Jonah:***
+***Jonah:***<br></br>
 Bye
+
+---
+If you want to know more about SigNoz, read the following blog:
+
+[SigNoz - an open source alternative to DataDog](https://signoz.io/blog/open-source-datadog-alternative/)
