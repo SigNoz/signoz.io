@@ -199,7 +199,7 @@ kubectl port-forward ${POD_NAME} 8080:8080
 ```
 
 Now, let's use Pet Clinic UI for a while in browser to generate telemetry
-data: [http://localhost:8080](http://localhost:8080).
+data: [http://localhost:8080][6].
 
 ![Spring Pet Clinic metrics page](/img/docs/otel-operator-spring-pet-clinic.png)
 ---
@@ -467,8 +467,8 @@ EOF
 ---
 
 [1]: https://github.com/open-telemetry/opentelemetry-operator
-[2]: https://cert-manager.io/docs/
-[3]: https://pkg.go.dev/github.com/open-telemetry/opentelemetry-collector-contrib/tracegen#section-readme
-[4]: /docs/install/
+[2]: /docs/install
+[3]: https://cert-manager.io/docs/
+[4]: https://pkg.go.dev/github.com/open-telemetry/opentelemetry-collector-contrib/tracegen#section-readme
 [5]: https://github.com/SigNoz/signoz-otel-collector
 [6]: http://localhost:8080
