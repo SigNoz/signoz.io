@@ -4,7 +4,7 @@ To obtain name of the Pet Clinic pod:
 export POD_NAME=$(kubectl get pod -l app=spring-petclinic -o jsonpath="{.items[0].metadata.name}")
 ```
 
-To forward port of the Pet Clinic pod:
+To forward port `8080` of the Pet Clinic pod:
 
 ```bash
 kubectl port-forward ${POD_NAME} 8080:8080
