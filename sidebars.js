@@ -211,7 +211,8 @@ module.exports = {
         'tutorial/kubernetes-infra-metrics',
         'tutorial/mongodb-metrics',
         'tutorial/instrumenting-angular-frontend',
-        'tutorial/s3-integration-iam-role-eks'
+        'tutorial/s3-integration-iam-role-eks',
+        'tutorial/opentelemetry-operator-usage'
       ],
     },
     {
