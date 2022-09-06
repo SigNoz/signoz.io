@@ -14,12 +14,12 @@ import OtelOperatorCleanUp from '../shared/otel-operator-cleanup.md'
 In this tutorial, we would like to introduce [OpenTelemetry Operator][1] which makes
 it very easy to set up Collector and instrument workloads deployed on Kubernetes.
 
-In general, OpenTelemetry deployments and instrumentations is known to be a tedious
-process. An application can be instrumented either automatically or manually.
+In general, OpenTelemetry collector deployments and instrumentations are known to
+be a tedious process. There are various ways to deploy OpenTelemetry Collector.
+An application can be instrumented either automatically or manually.
 
-[OpenTelemetry Operator][1] significantly helps a lot in managing OpenTelemetry
-collectors. There are three modes to deploy OpenTelemetry Collector: Deployment,
-DaemonSet and Sidecar.
+[OpenTelemetry Operator][1] helps a lot in managing OpenTelemetry
+collectors and auto-instrumentation.
 
 ## Prerequisite
 
@@ -131,7 +131,7 @@ is or updated as per the need.
 and node monitoring daemons.
 :::
 
-### Sidecar Injection 
+### Sidecar Injection
 
 A sidecar with the OpenTelemetry Collector can be injected into pod-based workloads
 by setting the pod annotation `sidecar.opentelemetry.io/inject` to either `"true"`,
@@ -184,25 +184,6 @@ spec:
         protocol: TCP
 EOF
 ```
-
----
-To obtain name of the Pet Clinic pod:
-
-```bash
-export POD_NAME=$(kubectl get pod -l app=spring-petclinic -o jsonpath="{.items[0].metadata.name}")
-```
-
-To forward port of the Pet Clinic pod:
-
-```bash
-kubectl port-forward ${POD_NAME} 8080:8080
-```
-
-Now, let's use Pet Clinic UI for a while in browser to generate telemetry
-data: [http://localhost:8080][6].
-
-![Spring Pet Clinic metrics page](/img/docs/otel-operator-spring-pet-clinic.png)
----
 
 To forward port of the `myapp` pod:
 
@@ -265,18 +246,19 @@ The possible values for the annotation can be:
  - `"false"` - do not inject.
 
 :::info
-Support for `DotNet` will be bundled in near future after [signoz-otel-collector][5]
-is synced with OpenTelemetry Collector `v0.57.2` or above.
+Support for `DotNet` is out, however it can be used only after
+[signoz-otel-collector][5] is synced with OpenTelemetry Collector
+`v0.57.2` or above in near future.
 :::
 
 Before using auto-instrumentation, we would need to configure an `Instrumentation`
 resource with the configuration for the SDK and instrumentation.
 
-Instrumentation` consists of following properties:
+`Instrumentation` consists of following properties:
 
  - `exporter.endpoint` - (optional) The address where telemetry data is to be sent
  in OTLP format.
- 
+
  - `propagators` - Enables all data sources to share an underlying context mechanism
  for storing state and accessing data across the lifespan of a transaction.
 
@@ -362,7 +344,7 @@ it to SigNoz collector.
 Here is an example of pet clinic with auto-instrumentation:
 
 ```bash {16-17}
-kubectl apply -f - <<EOF                                    
+kubectl apply -f - <<EOF
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -435,7 +417,7 @@ to `"true"` for our Java Springboot workload deployed in K8s.
 Here is an example of pet clinic with auto-instrumentation:
 
 ```bash {16}
-kubectl apply -f - <<EOF                                    
+kubectl apply -f - <<EOF
 apiVersion: apps/v1
 kind: Deployment
 metadata:
