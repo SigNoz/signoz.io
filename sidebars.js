@@ -246,7 +246,7 @@ module.exports = {
         slug: '/faq',
       },
       items: [
-        'product',
+        'faq/product',
       ],
     },
 
