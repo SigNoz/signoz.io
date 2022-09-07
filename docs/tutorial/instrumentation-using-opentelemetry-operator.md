@@ -14,11 +14,11 @@ import OtelOperatorCleanUp from '../shared/otel-operator-cleanup.md'
 In this tutorial, we would like to introduce [OpenTelemetry Operator][1] which makes
 it very easy to set up Collector and instrument workloads deployed on Kubernetes.
 
-In general, OpenTelemetry collector deployments and instrumentations are known to
-be a tedious process. There are various ways to deploy OpenTelemetry Collector.
+Using **OpenTelemetry Operator** will make instrumentation much easier.
+There are various ways to deploy OpenTelemetry Collector.
 An application can be instrumented either automatically or manually.
 
-[OpenTelemetry Operator][1] helps a lot in managing OpenTelemetry
+**OpenTelemetry Operator** helps a lot in managing OpenTelemetry
 collectors and auto-instrumentation.
 
 ## Prerequisite
