@@ -231,10 +231,10 @@ module.exports = {
       id: "roadmap",
       type: "doc",
     },
-    {
-      id: "faq",
-      type: "doc",
-    },
+    // {
+    //   id: "faq",
+    //   type: "doc",
+    // },
 
     {
       label: "FAQ",
@@ -246,7 +246,7 @@ module.exports = {
         slug: '/faq',
       },
       items: [
-        'faq/product',
+        'product',
       ],
     },
 

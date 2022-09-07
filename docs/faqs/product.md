@@ -1,6 +1,8 @@
 ---
 id: product
-title: Product FAQs
+title: Product - FAQs
+description: Frequently Asked Question About SigNoz
+
 ---
 
 ### I am looking for an application monitoring tool, is SigNoz an APM?
