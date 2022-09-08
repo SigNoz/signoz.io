@@ -40,7 +40,12 @@ In this article, let's dig deeper into why we decided to introduce support for C
 
 As an open-source software, we build what our community wants. We listened to [demands](https://github.com/SigNoz/signoz/issues/22) from our community for supporting ClickHouse as a storage backend.
 
-![Issue raised on our GitHub repo demanding ClicHouse support](/img/blog/2021/06/ClickHouse_community_demands_hc.webp)
+<figure data-zoomable align='center'>
+    <img src="/img/blog/2021/06/Clickhouse_community_demands_hc.webp" alt="Community demands for ClickHouse support"/>
+    <figcaption><i>Issue raised on our GitHub repo demanding ClicHouse support</i></figcaption>
+</figure>
+
+<br></br>
 
 As a storage backend, ClickHouse is less resource-intensive than using Kafka + Druid. It makes getting started with SigNoz much quicker, and users can now try out SigNoz on their local machine easily as the entire setup takes **less than 1.5GB of memory space.**
 
