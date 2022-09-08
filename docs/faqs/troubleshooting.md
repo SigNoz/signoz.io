@@ -5,10 +5,6 @@ description: Frequently Asked Questions About Troubleshooting
 
 ---
 
-### 1. My services are not showing up in the Service Map section (but present in the services and traces tab), what should I do?
-
-You might need to zoom out a bit to see your service. Also, if you’re getting started the service map shows services from the sample hotrod application. Since your services are not connected to the hotrod application, it will appear isolated.
-
 ### How to run SigNoz in debug mode?
 
 You might want to follow our troubleshooting docs.
@@ -39,3 +35,8 @@ We don't support Microsoft Windows as of now.
 
 We rely on the semantic conventions provided by OpenTelemetry. Every unique `service.name`
  configured and received is part of the service list. You can read more about it from our [docs](https://signoz.io/docs/userguide/metrics/#open-the-services-section).
+
+
+### My services are not showing up in the Service Map section (but present in the services and traces tab), what should I do?
+
+You might need to zoom out a bit to see your service. Also, if you’re getting started the service map shows services from the sample hotrod application. Since your services are not connected to the hotrod application, it will appear isolated.
