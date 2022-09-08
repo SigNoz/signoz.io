@@ -19,13 +19,28 @@ Moreover, it’s not trivial to get application metrics with Prometheus. SigNoz 
 
 Our goal is to provide an integrated UI between all telemetry signals - metrics, traces, and logs - similar to what SaaS vendors like Datadog provide.
 
+### How does SigNoz compare to Grafana stack ( Prometheus, Loki, Tempo)?
+
+The advantages of SigNoz are powered by the choice of columnar database underlying it. Running aggregates on traces and logs would be much more efficient when doing in a columnar db. So, if you use Tempo you won't be able to get sum/rate/count/percentile on spans filtered by tags/labels. Similarly, for Loki if you look into their open issues on performance, you will find issues in running fast aggregations on millions of log lines.
+Moreover, running 3 stacks for metrics, traces and logs would prove to be more cumbersome for millions of events.
+
+Using a single underlying datastore helps us in switching context from metrics to traces. Say, you see a spike in latency or error % of external calls or db calls from a service, SigNoz can take you to relevant traces on the click of a button which may not be as simple in Grafana (as far as we know).
+
+
+#### To Summarise
+
+- Underlying distributed columnar db to power analytical queries, Uber mentioned 80% of the queries over logs data were analytical and hence they shifted to clickhouse from elk. Here's the [blog link](https://www.uber.com/en-IN/blog/logging/)
+- Ability to handle high cardinality traces as these types of databases support wide columns
+- Single app vs combining different products for metrics, traces and logs
+- UI streamlined for APM use cases
+
 ### Is Prometheus included in SigNoz?
 
 We support PromQL and Prometheus remote read for users to shift seamlessly from Prometheus to SigNoz as their metrics monitoring tool. We also support PromQL for configuring alerts.
 
 SigNoz supports all the exporters that are listed on the [Exporters and Integrations](https://prometheus.io/docs/instrumenting/exporters/) page of the Prometheus documentation. If you have a running Prometheus instance and you expose metrics in Prometheus, then you can scrape them in SigNoz by [configuring Prometheus receivers](https://signoz.io/docs/userguide/send-metrics/#enable-a-prometheus-receiver).
 
-### I am using Jaeger, can I use SigNoz?
+### I am using Jaeger, can I use SigNoz? How does it differ from Jager?
 
 Yes, you can. SigNoz provides better distributed tracing capabilities than Jaeger. The traces tab of SigNoz provides advanced filtering based on different attributes. Moreover, you can also run aggregates on filtered traces. For example, you can get the p99 latency of spans with a tag of premium_customers.
 
@@ -45,7 +60,7 @@ Trace data is also visualized with Flamegraphs and Gantt charts.
 
 <br></br>
 
-
+With SigNoz, you get metrics, traces and logs in a single application unlike Jaeger which primarily focuses on distributed tracing.
 
 ### What will be your paid plan like?
 
@@ -62,6 +77,16 @@ SigNoz is full-stack open source APM and observability tool. Some key aspects th
 - SigNoz provides metrics, traces, and logs under a single pane of glass. Rather than running different projects like Prometheus for metrics and Jaeger for traces and stitching them together, you can use SigNoz as your one-stop observability solution.
 
 - SigNoz uses columnar datastores, which makes aggregating queries very fast. It also helps in slicing and dicing the data using `Group BY` and aggregates. You can identify the root cause of performance issues quickly.
+
+### How do you compare with Honeycomb feature-wise?
+
+The last we checked Honeycomb (August 2022), they were primarily focused on traces and support for metrics in their pro plan.
+
+We do have support for metrics, traces and also logs. So you can get all the 3 signals in a single app. You get out of the box dashboards for services with metrics like latency, etc. We have good support for trace aggregates and filters based on trace attributes, with a trace detail page with attributes. You can check more details in [our docs](https://signoz.io/docs/userguide/overview/)
+
+Though Honeycomb does have some features like Bubble up and correlation which we don't have currently, but we have some advanced correlation based features in our roadmap.
+
+So, it depends on the use cases you are trying to solve - whether SigNoz will fit your needs today or not.
 
 
 ### Can I run SigNoz as a service in AWS?

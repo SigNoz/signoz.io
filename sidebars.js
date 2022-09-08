@@ -109,11 +109,11 @@ module.exports = {
         },
         {
           type: 'category',
-          label: 'Clickhouse',
+          label: 'ClickHouse',
           link: {
             type: 'generated-index',
-            title: 'Clickhouse',
-            description: 'The following sections provide instructions to operate Clickhouse. Based on your environment, proceed to one of the sections below.',
+            title: 'ClickHouse',
+            description: 'The following sections provide instructions to operate ClickHouse. Based on your environment, proceed to one of the sections below.',
             slug: '/operate/clickhouse',
           },
           items: [

@@ -114,7 +114,7 @@ import Screenshot from "@theme/Screenshot"
 
    You will be asked to select one of the 2 ways to proceed:
 
-   1. Clickhouse as database (default)
+   1. ClickHouse as database (default)
    2. Kafka + Druid setup to handle scale (recommended for production use)
 
    Trying out SigNoz with ClickHouse database takes less than 1.5GB of memory and for this tutorial, we will use that option.

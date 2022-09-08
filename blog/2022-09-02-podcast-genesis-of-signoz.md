@@ -166,7 +166,7 @@ Yeah, I think that's been a very interesting journey even for us, so we were dec
 
 1. We had DRUID which was more established, we had bigger companies using it.
 2. We had Apache Pinot which had a small upcoming and then, 
-3. We had Clickhouse. We were not very expert in databases, we didn't have many sorts of prior experience working with them so we went with the database which was most well adopted in bigger companies. 
+3. We had ClickHouse. We were not very expert in databases, we didn't have many sorts of prior experience working with them so we went with the database which was most well adopted in bigger companies. 
 
 So, that's why Druid. 
 
@@ -186,9 +186,9 @@ Yeah so in our architecture by default we had Kafka and Kafka is another beast t
 
 But for an open source project which was at a very early stage, people would not invest so much in running that scale, so it needs to be very easy to run it in a single laptop environment or a single VM environment, and then as people get confidence in that, they can mature to dedicate more resources and more engineers so that's what we have seen. 
 
-I think after June or July of 2021, let's say four-five months down the line, we decided that hey like Druid may be very complex for our project, and hence we shifted to Clickhouse and Clickhouse has been much better at performance.
+I think after June or July of 2021, let's say four-five months down the line, we decided that hey like Druid may be very complex for our project, and hence we shifted to ClickHouse and ClickHouse has been much better at performance.
 
-The beauty about Clickhouse is that it starts very quickly, you can start with a single binary and get started very quickly with minimal resources, you don't need multiple components and even if you run Clickhouse in a full CPU machine, it's able to handle a decent amount of scale.
+The beauty about ClickHouse is that it starts very quickly, you can start with a single binary and get started very quickly with minimal resources, you don't need multiple components and even if you run ClickHouse in a full CPU machine, it's able to handle a decent amount of scale.
 
 People can get confident that this database works and this can handle scale and then we can get into like running it in bigger machines or running it in Kubernetes clusters, but that was important for us and that drove adoption for our project, as a lot that it was very easy to install.
 
@@ -196,7 +196,7 @@ People can get confident that this database works and this can handle scale and 
 Do you still have to run Kafka in front of it when it scales or is not required?
 
 ***Pranay:***<br></br>
-As of now, we don't have Kafka in our architecture but I think we will need to introduce it because we are seeing customers or users using us at a much higher scale. Today, you can just run with Clickhouse and it's able to scale decently well. Now we have also introduced logs so we'll need to include Kafka in front of it but now this time it will be an optional component at least that's the learning from our last foray into this.
+As of now, we don't have Kafka in our architecture but I think we will need to introduce it because we are seeing customers or users using us at a much higher scale. Today, you can just run with ClickHouse and it's able to scale decently well. Now we have also introduced logs so we'll need to include Kafka in front of it but now this time it will be an optional component at least that's the learning from our last foray into this.
 
 ***Jonah:***<br></br>
 Yep makes sense.
@@ -204,7 +204,7 @@ Yep makes sense.
 So I wanted to ask a little bit about how the project's going, I always take a look and see all the contributions and stars on your GitHub, so maybe you can tell us how the users and adoption have been?
 
 ***Pranay:***<br></br>
-Yeah sure so I think adoption has been great for us especially after we moved to Clickhouse.
+Yeah sure so I think adoption has been great for us especially after we moved to ClickHouse.
 
 We are currently at something around 7200+ Github stars, we have more than 70 plus contributors from across the globe and US, and Europe and I think we have 1200 plus members in our slack community. 
 
@@ -300,11 +300,11 @@ From a logging perspective, one is aggregation and much better slicing-enticing,
 
 The main problem is: *“How can you plot the charts*?”  For example, you want to see from that *“hey this is my service name, what is the number of counts by service name coming from this Kubernetes cluster*?”, “What are the log lines which you are seeing?”
 
-Because we use Clickhouse as our data store, that is the superpower of Clickhouse like aggregation, etc is much much faster, so that's where we'll focus on logs perspective, which can give you do much stronger filtering, and much stronger visualization on top of that to find the logs which matter to you.
+Because we use ClickHouse as our data store, that is the superpower of ClickHouse like aggregation, etc is much much faster, so that's where we'll focus on logs perspective, which can give you do much stronger filtering, and much stronger visualization on top of that to find the logs which matter to you.
 
 And then you can just get the details of that and to find what problems are there.
 
-So that's one, much better aggregation is a much easier group-by than that much faster on SigNoz because underlying we are using a columnar database and we have to benchmark this against elastic for aggregation operation, Clickhouse is much faster so we'll surface that much on top.
+So that's one, much better aggregation is a much easier group-by than that much faster on SigNoz because underlying we are using a columnar database and we have to benchmark this against elastic for aggregation operation, ClickHouse is much faster so we'll surface that much on top.
 
 The second thing is the point you mentioned, which is integrating traces, logs, and metrics. 
 
@@ -314,7 +314,7 @@ You have trace attributes, if you click that trace attribute, it just goes direc
 
 So much easier filtering and correlation between logs, traces, and then metrics, so these are the two key areas.
 
-I think even Uber, over there was a recent blog by Uber Engineering folks and then they mentioned that 60 to 70 percent of their logs queries are aggregations query and that's where the main bandwidth or the main effort of the team and that's why they switched to Clickhouse and I'm guessing that would be the case for most of the bigger companies that are finding that the right log is more important than diving into that.
+I think even Uber, over there was a recent blog by Uber Engineering folks and then they mentioned that 60 to 70 percent of their logs queries are aggregations query and that's where the main bandwidth or the main effort of the team and that's why they switched to ClickHouse and I'm guessing that would be the case for most of the bigger companies that are finding that the right log is more important than diving into that.
 
 ***Jonah:***<br></br>
 Yeah, the challenge is if you do aggregation, it's much harder to do a free-form search. 
@@ -329,10 +329,10 @@ Asaf Mesika is asking:
 
 > *“How does it compare with horizontally scalable databases like Cortex*?” 
 > 
-and obviously, the cortex is fully Prometheus compatible, Clickhouse itself, although there is victoria metrics that are built on top of Clickhouse, it doesn't necessarily have Prometheus compatibility so what are you doing  in SigNoz to create compatibility for those that maybe we are using really popular tools like Prometheus?
+and obviously, the cortex is fully Prometheus compatible, ClickHouse itself, although there is victoria metrics that are built on top of ClickHouse, it doesn't necessarily have Prometheus compatibility so what are you doing  in SigNoz to create compatibility for those that maybe we are using really popular tools like Prometheus?
 
 ***Pranay:***<br></br>
-Yeah, so the data store is still Clickhouse so we don't use anything like cortex, and Clickhouse itself is horizontally scalable so it can scale as much as you want. 
+Yeah, so the data store is still ClickHouse so we don't use anything like cortex, and ClickHouse itself is horizontally scalable so it can scale as much as you want. 
 
 We allow support for PromQL which is a query language.
 
@@ -340,7 +340,7 @@ We allow support for PromQL which is a query language.
 How are you doing it? 
 
 ***Pranay:***<br></br>
-Yeah so we allow support for PromQL but underlying, we convert that PromQL to a Clickhouse query and then run it natively on that so that's the approach we are taking.  
+Yeah so we allow support for PromQL but underlying, we convert that PromQL to a ClickHouse query and then run it natively on that so that's the approach we are taking.  
 
 We do not support cortex as a database as fundamentally we are using columnar databases as the storage layer first.
 
@@ -352,11 +352,11 @@ It turns out that they don't pass all the tests particularly well.
 ***Pranay:***<br></br>
 Yeah so the way we are thinking about this is that many of our users want to just create metrics, so say for 80% of the users, we have provided a query-builder which is like you can use UI to create metrics, you can filter based on different things like you can filter based on group by query.
 
-So for the 80% of the users, I think query builder will suffice, which they can use to write metrics, etc, and then we support PromQL and Clickhouse native queries. 
+So for the 80% of the users, I think query builder will suffice, which they can use to write metrics, etc, and then we support PromQL and ClickHouse native queries. 
 
-So PromQL will be there and it's for people who are more comfortable with that but we are focusing more on making the users write native Clickhouse queries much easier. 
+So PromQL will be there and it's for people who are more comfortable with that but we are focusing more on making the users write native ClickHouse queries much easier. 
 
-Clickhouse natively queries in SQL format so many people should be able to write queries based on that, that's the direction that we are taking from a query language perspective because we found many people are not even comfortable like even PromQL, so if somebody wants to write an advanced query it's not very easy, and not many people are very comfortable writing advanced queries.
+ClickHouse natively queries in SQL format so many people should be able to write queries based on that, that's the direction that we are taking from a query language perspective because we found many people are not even comfortable like even PromQL, so if somebody wants to write an advanced query it's not very easy, and not many people are very comfortable writing advanced queries.
 
 ***Jonah:***<br></br>
 Yeah, it was very true how do you deal with metric roll-ups, for example, like do you have the ability to roll up metrics to trend them over time is that user configurable?
@@ -370,16 +370,16 @@ Are you saying that if I have say, one-hour granularity data you want to roll u
 It's usually one minute and then you may be on a move to one hour, you know after a certain number of weeks or months, just to deal with scalability?
 
 ***Pranay:***<br></br>
-Yeah, so currently we don't have roll-ups enabled but in Clickhouse we have a concept of materialized views, which is essentially doing the same thing. It aggregates based on time intervals and stores it in a different table. So that increases the storage requirement but because you are just having so little number of hours or number of days, that like doesn't blow up so that's the place where we will go to support metalized columns to support roll-ups but as of now, we don't have anything.
+Yeah, so currently we don't have roll-ups enabled but in ClickHouse we have a concept of materialized views, which is essentially doing the same thing. It aggregates based on time intervals and stores it in a different table. So that increases the storage requirement but because you are just having so little number of hours or number of days, that like doesn't blow up so that's the place where we will go to support metalized columns to support roll-ups but as of now, we don't have anything.
 
 ***Jonah:***<br></br>
 Got it. So another question that Asaf asked:
 
 > “Comparison with Elasticsearch and Loki!”
 
-Elasticsearch is super popular for logging. I did want to mention that one of the things early on in my work on the Jaeger project and working with the team at Uber, was that they used to be big elastic search ELK users, but they moved actually to Clickhouse for logging because just because of the scale and cost of managing the elastic search. 
+Elasticsearch is super popular for logging. I did want to mention that one of the things early on in my work on the Jaeger project and working with the team at Uber, was that they used to be big elastic search ELK users, but they moved actually to ClickHouse for logging because just because of the scale and cost of managing the elastic search. 
 
-The downside is that they had to build a lot of UIs and capabilities on top of Clickhouse because there's no Kabana for Clickhouse and you know they built a translation layer for some time and that had its own set of issues because the APIs keep changing. 
+The downside is that they had to build a lot of UIs and capabilities on top of ClickHouse because there's no Kabana for ClickHouse and you know they built a translation layer for some time and that had its own set of issues because the APIs keep changing. 
 
 I just wanted to chime in on that one. 
 
@@ -390,16 +390,16 @@ Yeah, so we have compared and we're still like in the early stages of comparing
 
 We will maybe soon publish benchmarks on that but what we have seen is that Elastic is very heavy in terms of ingestion so if you want to ingest data, it requires lots of CPU memory requirements and that's where many times it fails. 
 
-Clickhouse is much better in our experiment at least, it's like half or one-third of what elastic would require in terms of injections and that's also because like in Elastic, by default you index everything, and in Clickhouse, you can specify what you want to index and creating index for that. 
+ClickHouse is much better in our experiment at least, it's like half or one-third of what elastic would require in terms of injections and that's also because like in Elastic, by default you index everything, and in ClickHouse, you can specify what you want to index and creating index for that. 
 
-I think Cloudflare also recently published in Monitorama that they were making the presentation that they have moved from Elastic to Clickhouse and their ingestion-like resource requirement has reduced 8x.
+I think Cloudflare also recently published in Monitorama that they were making the presentation that they have moved from Elastic to ClickHouse and their ingestion-like resource requirement has reduced 8x.
 
-That's like a huge scale, so ingestion is much more efficient in SigNoz with Clickhouse in terms of Loki, I think Loki is at par or maybe even better but Loki doesn't allow you full-text search like there's a minimal amount of full-text search you can do.
+That's like a huge scale, so ingestion is much more efficient in SigNoz with ClickHouse in terms of Loki, I think Loki is at par or maybe even better but Loki doesn't allow you full-text search like there's a minimal amount of full-text search you can do.
 
 So I think where we stand in terms of Elasticsearch versus Loki is a middle ground where ingestion performance is decent, not very resource intensive and you can also do some full-text search, of course, we also allow you to specify which fields you want to index so that like if you are always squaring on those fields you can index it and get much faster performance but even with full-text search the performance is much better compared to Loki.
 
 ***Jonah:***<br></br>
-Yeah and I just posted in the comments the talk from Monitorama this year that you were referencing, the team at Cloudflare put together for Clickhouse so definitely worth checking out if you're interested. 
+Yeah and I just posted in the comments the talk from Monitorama this year that you were referencing, the team at Cloudflare put together for ClickHouse so definitely worth checking out if you're interested. 
 
 I think we need a nice UI and maybe SigNoz has the nice UI for querying log data that people are looking for. 
 
@@ -545,7 +545,7 @@ If I'm going to collect all of this data that shows something is okay and fine, 
 Yeah, it makes a lot of sense, we have not thought about that. We are primarily focused on application metrics but now that you are telling me, I see…
 
 ***Jonah:***<br></br>
-But as you go and I know some of your examples like monitoring Redis or monitoring MongoDB or Clickhouse, for example, now you're moving more into infrastructure where you know some of those logs may not be useful. 
+But as you go and I know some of your examples like monitoring Redis or monitoring MongoDB or ClickHouse, for example, now you're moving more into infrastructure where you know some of those logs may not be useful. 
 
 I mean Redis generates huge volumes of access log type data but you want some of it, you want metrics from it but you don't need all of the 200, 500 millisecond response time. That's fine I don't need that you know so yeah definitely. 
 

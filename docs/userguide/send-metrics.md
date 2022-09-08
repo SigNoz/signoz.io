@@ -158,7 +158,7 @@ You can connect to SigNoz'a clickhouse instance and find the metrics SigNoz is s
 
 You can follow the below steps
 
-1. [Install Clickhouse client](https://clickhouse.com/docs/en/getting-started/install/)
+1. [Install ClickHouse client](https://clickhouse.com/docs/en/getting-started/install/)
 
 2. Connect to the ClickHouse container
   ````

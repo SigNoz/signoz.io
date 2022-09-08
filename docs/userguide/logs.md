@@ -80,11 +80,11 @@ SigNoz has developed its own distro of OpenTelemetry collector which has a custo
 
 This brings a requirement that the final collector should be SigNoz OTEL collector i.e
 
-- If you have N number of OpenTelemetry collectors running in different places then they should process and send data to SigNoz OTEL collector using OTLP for it to be able to store in Clickhouse.
+- If you have N number of OpenTelemetry collectors running in different places then they should process and send data to SigNoz OTEL collector using OTLP for it to be able to store in ClickHouse.
     
     ![notelcollectors.png](../../static/img/logs/n_collectors.png)
     
-- The other way is to use SigNoz OTEL collector everywhere which can directly write to Clickhouse.
+- The other way is to use SigNoz OTEL collector everywhere which can directly write to ClickHouse.
     
     
 

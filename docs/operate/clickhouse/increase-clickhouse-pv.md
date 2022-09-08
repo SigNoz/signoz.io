@@ -1,7 +1,7 @@
 ---
 id: increase-clickhouse-pv
 title: Increase the ClickHouse Persistent Volume Size
-sidebar_label: Increase Clickhouse PV
+sidebar_label: Increase ClickHouse PV
 ---
 
 import UpgradeInfo from '../../shared/helm-upgrade-info.md'
