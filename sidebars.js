@@ -66,6 +66,20 @@ module.exports = {
             'instrumentation/flask',
             'instrumentation/falcon']
         },
+        {
+          type: 'category',
+          label: 'Java',
+          link: {
+            type: 'doc',
+            id: 'instrumentation/java'
+            // title: 'Python',
+            // description: 'Learn how to instrument Python applications with OpenTelemetry',
+            // slug: 'instrumentation/python',
+          },
+          items: [
+            'instrumentation/springboot',
+          ]
+        },
         'instrumentation/javascript',
         'instrumentation/java',
         'instrumentation/golang',
