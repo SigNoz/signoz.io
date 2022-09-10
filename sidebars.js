@@ -78,10 +78,10 @@ module.exports = {
           },
           items: [
             'instrumentation/springboot',
+            'instrumentation/tomcat'
           ]
         },
         'instrumentation/javascript',
-        'instrumentation/java',
         'instrumentation/golang',
         'instrumentation/php',
         'instrumentation/dotnet',

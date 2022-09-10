@@ -1,8 +1,7 @@
 ---
-id: java
-title: Java OpenTelemetry Instrumentation
-description: Send events from your Java application to SigNoz
-
+id: tomcat
+title: Tomcat OpenTelemetry Instrumentation
+description: Instrument your Tomcat application with OpenTelemetry and send data to SigNoz
 ---
 
 import Tabs from "@theme/Tabs";
@@ -11,32 +10,34 @@ import { LiteYoutubeEmbed } from "react-lite-yt-embed";
 import InstrumentationFAQ from '../shared/instrumentation-faq.md'
 
 
-This document contains instructions on how to set up OpenTelemetry instrumentation in your Java applications. OpenTelemetry, also known as OTel for short, is an open source observability framework that can help you generate and collect telemetry data - traces, metrics, and logs from your Java application.
+This document contains instructions on how to set up OpenTelemetry instrumentation in your Tomcat applications. OpenTelemetry, also known as OTel for short, is an open source observability framework that can help you generate and collect telemetry data - traces, metrics, and logs from your Tomcat application.
 
-OpenTelemetry Java is the language-specific implementation of OpenTelemetry in Java.
+OpenTelemetry Java is the language-specific implementation of OpenTelemetry in Java that can be used to instrument Tomcat applications.
 
 Once the telemetry data is collected, you can configure an exporter to send the data to SigNoz.
 
 There are three major steps to using OpenTelemetry:
 
-- Instrumenting your Java application with OpenTelemetry
+- Instrumenting your Tomcat application with OpenTelemetry
 - Configuring exporter to send data to SigNoz
 - Validating that configuration to ensure that data is being sent as expected.
 
+
 <figure data-zoomable align='center'>
     <img src="/img/docs/opentelemetry_java_instrument.webp" alt="OpenTelemetry helps to generate and collect telemetry data from your application which is then sent to an observability backend like SigNoz"/>
-    <figcaption><i>OpenTelemetry helps generate and collect telemetry data from Java applications which can then be sent to SigNoz for storage, visualization, and analysis.</i></figcaption></figure>
+    <figcaption><i>OpenTelemetry helps generate and collect telemetry data from Tomcat applications which can then be sent to SigNoz for storage, visualization, and analysis.</i></figcaption></figure>
 <br></br>
 
 There are two types of application instrumentation:
 
 - **Auto Instrumentation**<br></br>
-A completely automatic and out of box experience, with minimal code changes. For your Java application, we recommend getting started with auto instrumentation.
+A completely automatic and out of box experience, with minimal code changes. For your Tomcat application, we recommend getting started with auto instrumentation.
 
 - **Manual Instrumentation**<br></br>
-It involves writing instrumentation using OpenTelemetry SDK and API manually. You would need to get a handle to an instance of the `OpenTelemetry` interface, acquire a tracer, and create spans manually. Manual isntrumentation might also be used along with auto instrumentation.
+It involves writing instrumentation using OpenTelemetry SDK and API manually. You would need to get a handle to an instance of the `OpenTelemetry` interface, acquire a tracer, and create spans manually.
 
-Let’s understand how to download, install, and run OpenTelemetry in Java.
+Let’s understand how to download, install, and run OpenTelemetry in a Tomcat application.
+
 
 ## Requirements
 
@@ -46,7 +47,7 @@ Java 8 or higher
 
 You can use OpenTelemetry Java to send your traces directly to SigNoz. OpenTelemetry provides a **handy Java JAR agent** that can be attached to any Java 8+ application and dynamically injects bytecode to capture telemetry from a number of popular libraries and frameworks. 
 
-### Steps to auto-instrument Java applications for traces
+### Steps to auto-instrument Tomcat applications for traces
 
 OpenTelemetry Java auto-instrumentation supports collecting telemetry data from a huge number of libraries and frameworks. You can check out the full list [here](https://github.com/open-telemetry/opentelemetry-java-instrumentation/blob/main/docs/supported-libraries.md).
 
@@ -59,44 +60,50 @@ OpenTelemetry Java auto-instrumentation supports collecting telemetry data from 
     
 
 2. **Enable the instrumentation agent and run your application**<br></br>
-   If you run your Java application as a JAR file, run your application using the following command:
-    
-    ```bash
-    OTEL_EXPORTER_OTLP_ENDPOINT="http://<IP of SigNoz Backend>:4317" OTEL_RESOURCE_ATTRIBUTES=service.name=<app_name> java -javaagent:/path/to/opentelemetry-javaagent.jar -jar  <myapp>.jar
-    ```
-    
-    where <app_name> is the name you want to set for your application. `path` should be updated to the path of the downloaded Java JAR agent.<br></br>
-    
-    
-    In the above command, we are configuring the exporter to send data to SigNoz backend. By default, OpenTelemetry Java agent uses [OTLP exporter](https://github.com/open-telemetry/opentelemetry-java/tree/main/exporters/otlp) configured to send data.<br></br>
-    
-    Two things to note about the command:<br></br>
+   If you run your `.war` package by putting in `webapps` folder, just add `setenv.sh` in your Tomcat `bin` folder.
+   
+   This should set these environment variables and start sending telemetry data to SigNoz backend specified in the IP
+   
+   ```bash
+   export CATALINA_OPTS="$CATALINA_OPTS -javaagent:/path/to/opentelemetry-javaagent.jar"
+   export OTEL_EXPORTER_OTLP_ENDPOINT=http://<IP of SigNoz Backend>:4317
+   export OTEL_RESOURCE_ATTRIBUTES=service.name=<app_name>
+   ```
+   
+   where `app_name` is the name you want to set for your application and `IP of SigNoz Backend` is the IP where SigNoz backend is accessible.
 
-    `OTEL_EXPORTER_OTLP_ENDPOINT` - This is the endpoint of the machine where SigNoz is installed.
+  
+    
+With the above environment variables, we are configuring the exporter to send data to SigNoz backend. By default, OpenTelemetry Java agent uses [OTLP exporter](https://github.com/open-telemetry/opentelemetry-java/tree/main/exporters/otlp) configured to send data.<br></br>
 
-    `path/to` -  Update it to the path of your downloaded Java JAR agent.<br></br>
+Two things to note about the environment variables:<br></br>
+
+`OTEL_EXPORTER_OTLP_ENDPOINT` - This is the endpoint of the machine where SigNoz is installed.
+
+`path/to` -  Update it to the path of your downloaded Java JAR agent.<br></br>
     
-    If you have installed SigNoz on your `localhost` and your Java JAR agent is saved at `/Users/john/Downloads/`, then the final command looks like:<br></br>
+If you have installed SigNoz on a machine with IP `http://40.76.59.122` and your Java JAR agent is saved at `/Users/john/Downloads/`, then the final command looks like:<br></br>
+
+```bash
+export CATALINA_OPTS="$CATALINA_OPTS -javaagent:/Users/john/Downloads/opentelemetry-javaagent.jar"
+export OTEL_EXPORTER_OTLP_ENDPOINT=http://40.76.59.122:4317
+export OTEL_RESOURCE_ATTRIBUTES=service.name=Tomcat-SigNoz
+```
     
-    ```bash
-    OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4317" OTEL_RESOURCE_ATTRIBUTES=service.name=javaApp java -javaagent:/Users/john/Downloads/opentelemetry-javaagent.jar -jar target/*.jar
-    ```
-    
-    Here’s a handy [grid](https://signoz.io/docs/instrumentation/troubleshoot-instrumentation/) to figure out which address to use to send data to SigNoz.
-    
-    You can also specify environment variables in the following way:
-    
-    ```bash
-    java -javaagent:/path/opentelemetry-javaagent.jar \
-        -Dotel.exporter.otlp.endpoint=http://<IP of SigNoz Backend>:4317 \
-        -Dotel.resource.attributes=service.name=<app_name> \
-        -jar <myapp>.jar
-    ```
+Here’s a handy [grid](https://signoz.io/docs/instrumentation/troubleshoot-instrumentation/) to figure out which address to use to send data to SigNoz.
     
 
 :::note
 💡 Remember to allow incoming requests to port 4317 of the machine where SigNoz backend is hosted.
 :::
+
+Here's a video on how to instrument Tomcat applications with SigNoz and a [blog](https://signoz.io/opentelemetry/tomcat/) with step by step instructions.
+
+<p>&nbsp;</p>
+
+<LiteYoutubeEmbed id="4obQilMqU4E" mute={false} />
+
+<p>&nbsp;</p>
 
 ### Validating instrumentation by checking for traces
 
@@ -177,35 +184,6 @@ Remember to allow incoming requests to port 4317 of machine where SigNoz backend
 If you want to try out SigNoz with a sample Java application, visit this [GitHub repo](https://github.com/SigNoz/spring-petclinic).
 
  -->
-
-<!-- ## Tomcat Instrumentation
-
-For Tomcat application, you need to make sure the following environment variables are set up.
-
-If you run your `.war` package by putting in `webapps` folder, just add `setenv.sh` in your Tomcat `bin` folder.
-
-This should set these environment variables and start sending telemetry data to SigNoz backend specified in the IP
-
-```bash
-
-export CATALINA_OPTS="$CATALINA_OPTS -javaagent:/path/to/opentelemetry-javaagent.jar"
-export OTEL_METRICS_EXPORTER=none
-export OTEL_EXPORTER_OTLP_ENDPOINT=http://<IP of SigNoz Backend>:4317
-export OTEL_RESOURCE_ATTRIBUTES=service.name=<app_name>
-
-```
-
-where `app_name` is the name you want to set for your application
-and `IP of SigNoz Backend` is the IP where SigNoz backend is accessible
-
-<p>&nbsp;</p>
-
-
-Here's a video on how to instrument Tomcat applications with SigNoz and a [blog](https://signoz.io/opentelemetry/tomcat/) with step by step instructions.
-
-<LiteYoutubeEmbed id="4obQilMqU4E" mute={false} />
-
-<p>&nbsp;</p> -->
 
 ## Troubleshooting your installation
 
