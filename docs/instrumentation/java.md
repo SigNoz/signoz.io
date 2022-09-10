@@ -23,6 +23,11 @@ There are three major steps to using OpenTelemetry:
 - Configuring exporter to send data to SigNoz
 - Validating that configuration to ensure that data is being sent as expected.
 
+<figure data-zoomable align='center'>
+    <img src="/img/docs/opentelemetry_java_instrument.webp" alt="OpenTelemetry helps to generate and collect telemetry data from your application which is then sent to an observability backend like SigNoz"/>
+    <figcaption><i>OpenTelemetry helps generate and collect telemetry data from Java applications which can then be sent to SigNoz for storage, visualization, and analysis.</i></figcaption></figure>
+<br></br>
+
 There are two types of application instrumentation:
 
 - **Auto Instrumentation**<br></br>
