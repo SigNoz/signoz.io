@@ -149,7 +149,7 @@ For instrumenting Java applications, OpenTelemetry has a very handy Java JAR age
 
 2. Now you need to enable the instrumentation agent as well as run your sample application. You can do so by the following command:
    ```
-   OTEL_METRICS_EXPORTER=none OTEL_EXPORTER_OTLP_ENDPOINT="http://<IP of SigNoz>:4317" OTEL_RESOURCE_ATTRIBUTES=service.name=javaApp java -javaagent:/path/opentelemetry-javaagent.jar -jar target/*.jar
+   OTEL_EXPORTER_OTLP_ENDPOINT="http://<IP of SigNoz>:4317" OTEL_RESOURCE_ATTRIBUTES=service.name=javaApp java -javaagent:/path/opentelemetry-javaagent.jar -jar target/*.jar
    ```
 
    <br></br>As you are running this on your local host, you need to replace `IP of SigNoz` with `localhost`. You will also need to update the path for your downloaded Java JAR agent. You will replace following two things:
@@ -159,7 +159,7 @@ For instrumenting Java applications, OpenTelemetry has a very handy Java JAR age
    
    Your final command will look like this:
    ```
-   OTEL_METRICS_EXPORTER=none OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4317" OTEL_RESOURCE_ATTRIBUTES=service.name=javaApp java -javaagent:/Users/cruxaki/Downloads/opentelemetry-javaagent.jar -jar target/*.jar
+   OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4317" OTEL_RESOURCE_ATTRIBUTES=service.name=javaApp java -javaagent:/Users/cruxaki/Downloads/opentelemetry-javaagent.jar -jar target/*.jar
    ```
 
    <br></br>Note the path is updated for my local environment. If you are using a virtual machine, you need to update the IP accordingly. You also need to have the Java JAR agent on the same machine.
@@ -168,7 +168,6 @@ For instrumenting Java applications, OpenTelemetry has a very handy Java JAR age
 
    ```bash
    java -javaagent:/path/opentelemetry-javaagent.jar \
-    -Dotel.metrics.exporter=none \
     -Dotel.exporter.otlp.endpoint=http://<IP of SigNoz>:4317 \
     -Dotel.resource.attributes=service.name=<service_name> \
     -jar target/*.jar
