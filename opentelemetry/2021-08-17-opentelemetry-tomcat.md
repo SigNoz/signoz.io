@@ -1,7 +1,7 @@
 ---
 title: Monitor Tomcat Java application with OpenTelemetry and SigNoz
 slug: tomcat
-date: 2021-08-17
+date: 2022-08-17
 tags: [java-monitoring]
 author: Ankit Anand
 author_title: SigNoz Team
@@ -105,7 +105,6 @@ OpenTelemetry has a very handy Java JAR agent that can be attached to any Java 8
 
    ```
    export CATALINA_OPTS="$CATALINA_OPTS -javaagent:/path/opentelemetry-javaagent.jar"
-   export OTEL_METRICS_EXPORTER=none
    export OTEL_EXPORTER_OTLP_ENDPOINT=<IP of SigNoz Backend>:4317
    export OTEL_RESOURCE_ATTRIBUTES=service.name=<app_name>
    ```
@@ -118,7 +117,6 @@ OpenTelemetry has a very handy Java JAR agent that can be attached to any Java 8
 
    ```
    export CATALINA_OPTS="$CATALINA_OPTS -javaagent:/Users/cruxaki/Downloads/opentelemetry-javaagent.jar"
-   export OTEL_METRICS_EXPORTER=none
    export OTEL_EXPORTER_OTLP_ENDPOINT=http://40.76.59.122:4317
    export OTEL_RESOURCE_ATTRIBUTES=service.name=Tomcat-SigNoz
    ```
