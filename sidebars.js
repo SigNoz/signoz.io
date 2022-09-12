@@ -262,7 +262,8 @@ module.exports = {
       items: [
         'faqs/product',
         'faqs/troubleshooting',
-        'faqs/instrumentation'
+        'faqs/instrumentation',
+        'faqs/installation',
       ],
     },
 
