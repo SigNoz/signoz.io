@@ -12,8 +12,8 @@ You might want to follow our troubleshooting docs.
 Refer here:
 
 - [SigNoz Troubleshooting Docs](https://signoz.io/docs/install/troubleshooting/)
-- [SigNoz Troubleshoot Github Repository](https://github.com/SigNoz/troubleshoot)
-- [SigNoz YouTube Video on Troubleshooting](https://www.youtube.com/watch?v=Y7OkvmuTRQ8)
+- <a href="https://github.com/SigNoz/troubleshoot" rel="noopener noreferrer nofollow" target="_blank">SigNoz Troubleshoot Github Repository</a>
+- <a href="https://www.youtube.com/watch?v=Y7OkvmuTRQ8" rel="noopener noreferrer nofollow" target="_blank">SigNoz YouTube Video on Troubleshooting</a>
 
 ### How do I know if SigNoz is accessible from my Application?
 
@@ -24,8 +24,8 @@ Set `OTEL_TRACES_EXPORTER=console` and observe. If it doesn’t output the tra
 Refer here:
 
 - [SigNoz Troubleshooting Docs](https://signoz.io/docs/install/troubleshooting/#kubernetes)
-- [SigNoz Troubleshoot Github Repository](https://github.com/SigNoz/troubleshoot)
-- [SigNoz YouTube Video on Troubleshooting](https://www.youtube.com/watch?v=Y7OkvmuTRQ8)
+- <a href="https://github.com/SigNoz/troubleshoot" rel="noopener noreferrer nofollow" target="_blank">SigNoz Troubleshoot Github Repository</a>
+- <a href="https://www.youtube.com/watch?v=Y7OkvmuTRQ8" rel="noopener noreferrer nofollow" target="_blank">SigNoz YouTube Video on Troubleshooting</a>
 
 ### I have installed SigNoz on Windows Kubernetes, but I can't make it work.
 

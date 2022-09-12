@@ -28,7 +28,7 @@ Find the documentation for them here - [https://signoz.io/docs/instrumentation/]
 
 OpenTelemetry and thus SigNoz, currently supports JavaScript, Java, Ruby, .NET, and Python modules for auto instrumentation.
 
-Refer here: [https://opentelemetry.io](https://opentelemetry.io/)
+Refer here: <a href="https://opentelemetry.io" rel="noopener noreferrer nofollow" target="_blank">https://opentelemetry.io/</a>
 
 If your module is auto-instrumentation is supported, you don't need code level changes but just need to add some more libraries in your application.
 
@@ -56,4 +56,4 @@ You can also refer to this [grid](https://signoz.io/docs/instrumentation/trouble
 
 You need to use OpenTelemetry Collector in your application servers to send host metrics data to SigNoz.
 
-Refer here: [https://github.com/SigNoz/benchmark/tree/main/docker#binary](https://github.com/SigNoz/benchmark/tree/main/docker#binary)
+Refer here: <a href="https://github.com/SigNoz/benchmark/tree/main/docker#binary" rel="noopener noreferrer nofollow" target="_blank">https://github.com/SigNoz/benchmark/tree/main/docker#binary</a>

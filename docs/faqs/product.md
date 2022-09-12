@@ -29,7 +29,7 @@ Using a single underlying datastore helps us in switching context from metrics t
 
 #### To Summarise
 
-- Underlying distributed columnar db to power analytical queries, Uber mentioned 80% of the queries over logs data were analytical and hence they shifted to clickhouse from elk. Here's the [blog link](https://www.uber.com/en-IN/blog/logging/)
+- Underlying distributed columnar db to power analytical queries, Uber mentioned 80% of the queries over logs data were analytical and hence they shifted to clickhouse from elk. Here's the <a href="https://www.uber.com/en-IN/blog/logging/" rel="noopener noreferrer nofollow" target="_blank">blog link</a>.
 - Ability to handle high cardinality traces as these types of databases support wide columns
 - Single app vs combining different products for metrics, traces and logs
 - UI streamlined for APM use cases
@@ -38,7 +38,7 @@ Using a single underlying datastore helps us in switching context from metrics t
 
 We support PromQL and Prometheus remote read for users to shift seamlessly from Prometheus to SigNoz as their metrics monitoring tool. We also support PromQL for configuring alerts.
 
-SigNoz supports all the exporters that are listed on the [Exporters and Integrations](https://prometheus.io/docs/instrumenting/exporters/) page of the Prometheus documentation. If you have a running Prometheus instance and you expose metrics in Prometheus, then you can scrape them in SigNoz by [configuring Prometheus receivers](https://signoz.io/docs/userguide/send-metrics/#enable-a-prometheus-receiver).
+SigNoz supports all the exporters that are listed on the <a href="https://prometheus.io/docs/instrumenting/exporters/" rel="noopener noreferrer nofollow" target="_blank">Exporters and Integrations</a> page of the Prometheus documentation. If you have a running Prometheus instance and you expose metrics in Prometheus, then you can scrape them in SigNoz by [configuring Prometheus receivers](https://signoz.io/docs/userguide/send-metrics/#enable-a-prometheus-receiver).
 
 ### I am using Jaeger, can I use SigNoz? How does it differ from Jager?
 
@@ -128,7 +128,7 @@ Yes, SigNoz can monitor resource utilization metrics at the node and pod level f
 
 We currently working on supporting custom baseURL to support that.
 
-You can track it here: [https://github.com/SigNoz/signoz/pull/1115](https://github.com/SigNoz/signoz/pull/1115)
+You can track it here: [https://github.com/SigNoz/signoz/pull/1115](https://github.com/SigNoz/signoz/pull/1115)<a href="https://www.uber.com/en-IN/blog/logging/" rel="noopener noreferrer nofollow" target="_blank">blog link</a>
 
 
 ### Is there anything I need to do after upgrading SigNoz to a version with some breaking changes?
@@ -138,7 +138,7 @@ You need to follow our [migration guides](https://signoz.io/docs/operate/migrati
 
 ### Is the frontend SigNoz level user data stored in ClickHouse DB?
 
-No, it’s stored in SQLite. But we are planning to move to PostgreSQL. You can track the GitHub issue [here](https://github.com/SigNoz/signoz/issues/941).
+No, it’s stored in SQLite. But we are planning to move to PostgreSQL. You can track the GitHub issue <a href="https://github.com/SigNoz/signoz/issues/941" rel="noopener noreferrer nofollow" target="_blank">here</a>.
 
 
 

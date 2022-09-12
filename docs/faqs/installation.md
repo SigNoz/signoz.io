@@ -6,14 +6,14 @@ description: Frequently Asked Questions About Installation
 
 ### Where can I get the SigNoz Docker images?
 
-Find the SigNoz Docker images here: [https://hub.docker.com/u/signoz](https://hub.docker.com/u/signoz)
+Find the SigNoz Docker images here: <a href="https://hub.docker.com/u/signoz" rel="noopener noreferrer nofollow" target="_blank">https://hub.docker.com/u/signoz</a>
 
 
 ### Can I install SigNoz without Docker?
 
 No, it is not supported as of today.
 
-There's an existing issue on this [https://github.com/SigNoz/signoz/issues/392](https://github.com/SigNoz/signoz/issues/392)
+There's an existing issue on this <a href="https://github.com/SigNoz/signoz/issues/392" rel="noopener noreferrer nofollow" target="_blank">https://github.com/SigNoz/signoz/issues/392</a>
 
 Please add your use case on the issue so that we can understand how much community demand there is for this.
 
@@ -55,7 +55,7 @@ Follow the guide below to increase the ClickHouse persistent volume size:
 
 ### I want to monitor different AWS services like RDS, APIGateway, and Lambda for my serverless application. How can that be achieved?
 
-You can use AWS metric receivers available [here](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver) and send data to the SigNoz OTel collector. You can then visualize your metrics in SigNoz dashboards.
+You can use AWS metric receivers available <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver" rel="noopener noreferrer nofollow" target="_blank">here</a> and send data to the SigNoz OTel collector. You can then visualize your metrics in SigNoz dashboards.
 
 Check this [section](https://signoz.io/docs/userguide/send-metrics/#enable-a-specific-metric-receiver) in the docs for more information.
 
@@ -71,8 +71,8 @@ You can install SigNoz in AWS / GCP / Azure with Helm charts if you are using Ku
 
 It can be caused by insufficient resources on your machine. It can also be caused by unhealthy ClickHouse POD. Other possible causes could be:
 - insufficient resource
-- K8s cluster IP range out of the ClickHouse IP whitelisting
-[https://github.com/SigNoz/charts/blob/main/charts/signoz/values.yaml#L120-L126](https://github.com/SigNoz/charts/blob/main/charts/signoz/values.yaml#L120-L126)
+- K8s cluster IP range out of the ClickHouse IP whitelisting:
+<a href="https://github.com/SigNoz/charts/blob/main/charts/signoz/values.yaml#L120-L126" rel="noopener noreferrer nofollow" target="_blank">https://github.com/SigNoz/charts/blob/main/charts/signoz/values.yaml#L120-L126</a>
 - sometimes, data ambiguity issues caused by signoz-otel-collector
 
 
