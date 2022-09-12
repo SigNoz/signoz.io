@@ -22,7 +22,7 @@ Please add your use case on the issue so that we can understand how much communi
 
 No, you do not have to install SigNoz on every server. Just configure the application in server-A(say) to send data to SigNoz running in server-B (say). Make sure the network settings are taken care of.
 
-SigNoz should ideally run in a VM or Kubernetes Cluster where other applications are hosted. You need to point the applications to the `IP of the SigNoz machine` to send the telemetry data. You can get started [here](https://signoz.io/docs/install/).
+It is recommended to install SigNoz in an independent VM or K8s cluster apart from that where the application is hosted. You need to point the applications to the `IP of the SigNoz machine` to send the telemetry data. You can get started [here](https://signoz.io/docs/install/).
 
 
 ### I am not seeing my Old Data after migrating to a newer version, what am I doing wrong?
