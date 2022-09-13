@@ -151,8 +151,11 @@ You can find detailed information about these processors and more in <a href = "
 
 In this sample code, we have created two exporters.
 
-1. kafka/tracesThis forwards collected traces to write to a kafka topic named as `otlp_spans`.
-2. kafka/metricsThis forwards collected metrics to write to a kafka topic named as `otlp_metrics`.
+1. **kafka/traces**<br></br>
+This forwards collected traces to write to a kafka topic named as `otlp_spans`.
+
+2. **kafka/metrics**<br></br>
+This forwards collected metrics to write to a kafka topic named as `otlp_metrics`.
 
 ```bash
 exporters:
