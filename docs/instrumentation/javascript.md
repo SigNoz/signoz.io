@@ -271,7 +271,7 @@ If you are using Express, the instrumentation relies on HTTP calls to also be in
 
 With your application running, you can verify that you’ve instrumented your application with OpenTelemetry correctly by [validating](#validating-instrumentation-by-checking-for-traces) if your traces are being to SigNoz.
 
-## Instrumentation Modules for Javascript Frameworks
+<!-- ## Instrumentation Modules for Javascript Frameworks
 
 The `@opentelemetry/auto-instrumentations-node` can inititialize instrumentation for many frameworks, databases, and network protocols. Hence it’s recommended to [get started](https://www.notion.so/New-JS-Doc-88febbff9cd942839239bdbe61be4557) with it.
 
@@ -400,7 +400,7 @@ But if want to instrument only your Fastify module, you can do so. The instrumen
 
 ```jsx
 npm install --save @opentelemetry/instrumentation-http @opentelemetry/instrumentation-fastify
-```
+``` -->
 
 ## Instrumentation Modules for Databases
 
