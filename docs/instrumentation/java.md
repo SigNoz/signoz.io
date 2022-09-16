@@ -123,6 +123,8 @@ You might see other dummy applications if you’re using SigNoz for the first ti
     <figcaption><i>Java Application in the list of services being monitored in SigNoz</i></figcaption></figure>
 <br></br>
 
+If you don't see your application reported in the list of services, try our [troubleshooting](https://signoz.io/docs/install/troubleshooting/) guide.
+
 ### Configuring the agent
 
 The agent is highly configurable. You can check out all the configuration options available [here](https://opentelemetry.io/docs/instrumentation/java/automatic/agent-config/).

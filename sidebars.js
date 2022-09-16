@@ -82,7 +82,20 @@ module.exports = {
             'instrumentation/jboss'
           ]
         },
-        'instrumentation/javascript',
+        {
+          type: 'category',
+          label: 'Javascript',
+          link: {
+            type: 'doc',
+            id: 'instrumentation/javascript'
+            // title: 'Python',
+            // description: 'Learn how to instrument Python applications with OpenTelemetry',
+            // slug: 'instrumentation/python',
+          },
+          items: [
+            'instrumentation/nestjs',
+          ]
+        },
         'instrumentation/golang',
         'instrumentation/php',
         'instrumentation/dotnet',

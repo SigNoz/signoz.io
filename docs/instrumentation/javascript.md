@@ -27,7 +27,7 @@ The auto-instrumentation library of OpenTelemetry is a meta package that provide
 
 :::info
 
-  If you are on K8s, you should checkout [opentelemetry operators](/docs/tutorial/opentelemetry-operator-usage/#opentelemetry-auto-instrumentation-injection) which enable auto instrumenting Java applications very easily.
+  If you are on K8s, you should checkout [opentelemetry operators](/docs/tutorial/opentelemetry-operator-usage/#opentelemetry-auto-instrumentation-injection) which enable auto instrumenting Javascript applications very easily.
 
 :::
 
@@ -164,6 +164,8 @@ You might see other dummy applications if you’re using SigNoz for the first ti
 
 <br></br>
 
+If you don't see your application reported in the list of services, try our [troubleshooting](https://signoz.io/docs/install/troubleshooting/) guide.
+
 
 ### Using a specific auto-instrumentation library
 
@@ -275,7 +277,7 @@ The `@opentelemetry/auto-instrumentations-node` can inititialize instrumentation
 
 ### Nestjs Instrumentation
 
-OpenTelemetry Nest instrumentation allows the user to automatically collect trace data from nestjs application. The `opentelemetry/auto-instrumentations-node` can be used to initialize automatic instrumentation for Nest framework.
+OpenTelemetry Nestjs instrumentation allows the user to automatically collect trace data from nestjs application. The `opentelemetry/auto-instrumentations-node` can be used to initialize automatic instrumentation for Nestjs framework.
 
 **Supported Versions**
 
