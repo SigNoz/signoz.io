@@ -93,6 +93,7 @@ module.exports = {
             // slug: 'instrumentation/python',
           },
           items: [
+            'instrumentation/express',
             'instrumentation/nestjs',
           ]
         },

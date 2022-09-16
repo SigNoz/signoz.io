@@ -1,8 +1,7 @@
 ---
-id: nestjs
-title: Nestjs OpenTelemetry Instrumentation
-description: Send events from your Nestjs application to SigNoz
-
+id: express
+title: Express OpenTelemetry Instrumentation
+description: Send events from your Express application to SigNoz
 ---
 
 import Tabs from "@theme/Tabs";
@@ -10,23 +9,23 @@ import TabItem from "@theme/TabItem";
 import InstrumentationFAQ from '../shared/instrumentation-faq.md'
 
 
-This document contains instructions on how to set up OpenTelemetry instrumentation in your Nestjs applications. OpenTelemetry, also known as OTel for short, is an open source observability framework that can help you generate and collect telemetry data - traces, metrics, and logs from your Nestjs application.
+This document contains instructions on how to set up OpenTelemetry instrumentation in your Express applications. OpenTelemetry, also known as OTel for short, is an open source observability framework that can help you generate and collect telemetry data - traces, metrics, and logs from your Express application.
 
 
 Once the telemetry data is collected, you can configure an exporter to send the data to SigNoz.
 
 There are three major steps to using OpenTelemetry:
 
-- Instrumenting your Nestjs application with OpenTelemetry
+- Instrumenting your Express application with OpenTelemetry
 - Configuring exporter to send data to SigNoz
 - Validating that configuration to ensure that data is being sent as expected.
 
 <figure data-zoomable align='center'>
-    <img src="/img/docs/nestjs_instrumentation.webp" alt="All in one auto instrumentation library - identifies and instruments packages used by your NestJS application"/>
-    <figcaption><i>All in one auto instrumentation library - identifies and instruments packages used by your NestJS application</i></figcaption></figure>
+    <img src="/img/docs/express_instrumentation.webp" alt="All in one auto instrumentation library - identifies and instruments packages used by your NestJS application"/>
+    <figcaption><i>All in one auto instrumentation library - identifies and instruments packages used by your Express application</i></figcaption></figure>
 <br></br>
 
-You have two choices for instrumenting your NestJS application with OpenTelemetry.
+You have two choices for instrumenting your Express application with OpenTelemetry.
 
 - **[Use the all-in-one auto-instrumentation library(Recommended)](#using-the-all-in-one-auto-instrumentation-library)**<br></br>
 The auto-instrumentation library of OpenTelemetry is a meta package that provides a simple way to initialize multiple Nodejs instrumnetations.
@@ -38,25 +37,25 @@ The auto-instrumentation library of OpenTelemetry is a meta package that provide
 :::
 
 - **[Use a specific auto-instrumentation library](#using-a-specific-auto-instrumentation-library)**<br></br>
-You can use individual auto-instrumentation libraries too for a specific component of your application. For example, you can use `@opentelemetry/instrumentation-nestjs-core` for instrumenting the Nestjs web framework.
+You can use individual auto-instrumentation libraries too for a specific component of your application. For example, you can use `@opentelemetry/instrumentation-express` for instrumenting the Express web framework.
 
-Let's see how to instrument your Nestjs application with OpenTelemetry.
+Let's see how to instrument your Express application with OpenTelemetry.
 
 ## Requirements
 
-**Supported Versions**
+Supported Versions
 
-- `>=4.0.0`
+^4.0.0
 
 ## Traces
 
 ### Using the all-in-one auto-instrumentation library
 
-The recommended way to instrument your Nestjs application is to use the all-in-one auto-instrumentation library -  `@opentelemetry/auto-instrumentations-node`. It provides a simple way to initialize multiple Nodejs instrumentations.
+The recommended way to instrument your Express application is to use the all-in-one auto-instrumentation library -  `@opentelemetry/auto-instrumentations-node`. It provides a simple way to initialize multiple Nodejs instrumentations.
 
 Internally, it calls the specific auto-instrumentation library for components used in the application. You can see the complete list [here](https://github.com/open-telemetry/opentelemetry-js-contrib/tree/main/metapackages/auto-instrumentations-node#supported-instrumentations).
 
-#### Steps to auto-instrument Nestjs application
+#### Steps to auto-instrument Express application
 
 1. Install the dependencies<br></br>
    We start by installing the relevant dependencies.
@@ -66,30 +65,42 @@ Internally, it calls the specific auto-instrumentation library for components us
     npm install --save @opentelemetry/auto-instrumentations-node
     npm install --save @opentelemetry/exporter-trace-otlp-http
     ```
-
-2. Create a `tracer.ts` file
     
-    ```jsx
+    The dependencies included are briefly explained below:<br></br>
+
+    `@opentelemetry/sdk-node` - This package provides the full OpenTelemetry SDK for Node.js including tracing and metrics.<br></br>
+    
+    `@opentelemetry/auto-instrumentations-node` - This module provides a simple way to initialize multiple Node instrumentations.<br></br>
+    
+    `@opentelemetry/exporter-trace-otlp-http` - This module provides the exporter to be used with OTLP (`http/json`) compatible receivers.<br></br>
+    
+2. **Create a `tracing.js` file**<br></br>
+  The `tracing.js` file will contain the tracing setup code. Notice, that we have set some environment variables in the code(highlighted). You can update these variables based on your environment.
+    
+  ```jsx
+    // tracing.js
     'use strict'
     const process = require('process');
-    //OpenTelemetry
     const opentelemetry = require('@opentelemetry/sdk-node');
     const { getNodeAutoInstrumentations } = require('@opentelemetry/auto-instrumentations-node');
     const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-http');
-    const {Resource} = require('@opentelemetry/resources');
-    const {SemanticResourceAttributes} = require('@opentelemetry/semantic-conventions');
+    const { Resource } = require('@opentelemetry/resources');
+    const { SemanticResourceAttributes } = require('@opentelemetry/semantic-conventions');
     
     const exporterOptions = {
-        url: 'http://localhost:4318/v1/traces'
-      }
+      // highlight-next-line
+      url: 'http://localhost:4318/v1/traces'
+    }
     
     const traceExporter = new OTLPTraceExporter(exporterOptions);
     const sdk = new opentelemetry.NodeSDK({
       traceExporter,
       instrumentations: [getNodeAutoInstrumentations()],
+      // highlight-start
       resource: new Resource({
-        [SemanticResourceAttributes.SERVICE_NAME]: 'sampleNestjsApplication'
+        [SemanticResourceAttributes.SERVICE_NAME]: 'node_app'
       })
+      // highlight-end
       });
       
       // initialize the SDK and register with the OpenTelemetry API
@@ -105,40 +116,31 @@ Internally, it calls the specific auto-instrumentation library for components us
         .catch((error) => console.log('Error terminating tracing', error))
         .finally(() => process.exit(0));
         });
-        
-      module.exports = sdk
     ```
     
-
-3. Import the tracer module where your app starts
+    OpenTelemetry Node SDK currently does not detect the `OTEL_RESOURCE_ATTRIBUTES` from `.env` files as of today. That’s why we need to include the variables in the `tracing.js` file itself.
     
-    ```jsx
-    const tracer = require('./tracer')
+    About environment variables:
+    
+    `service_name` : node_app (you can give whatever name that suits you)
+    
+    `http://localhost:4318/v1/traces` is the default url for sending your tracing data. We are assuming you have installed SigNoz on your `localhost`. Based on your environment, you can update it accordingly. It should be in the following format:
+    
+    `http://<IP of SigNoz backend>:4318/v1/traces`
+
+    Here’s a handy [grid](https://signoz.io/docs/instrumentation/troubleshoot-instrumentation/) to figure out which address to use to send data to SigNoz.
+
+  :::note
+    Remember to allow incoming requests to port 4318 of machine where SigNoz backend is hosted.
+    
+
+  
+3. **Run the application**<br></br>
+  The tracing configuration should be run before your application code. We will use the [`-r, —require module`](https://nodejs.org/api/cli.html#cli_r_require_module) flag for that.<br></br>
+
+  ```jsx
+    node -r ./tracing.js app.js
     ```
-    
-
-4. Start the tracer<br></br>
-   In the `async function boostrap` section of the application code, initialize the tracer as follows: 
-    
-    ```jsx
-    const tracer = require('./tracer')
-    
-    import { NestFactory } from '@nestjs/core';
-    import { AppModule } from './app.module';
-      // All of your application code and any imports that should leverage
-      // OpenTelemetry automatic instrumentation must go here.
-    
-    async function bootstrap() {
-        // highlight-start
-        await tracer.start();
-        //highlight-end
-        const app = await NestFactory.create(AppModule);
-        await app.listen(3001);
-      }
-      bootstrap();
-    ```
-
-    You can now run your Nestjs application. The data captured with OpenTelemetry from your application should start showing on the SigNoz dashboard.
     
 
 ### Validating instrumentation by checking for traces
@@ -156,8 +158,8 @@ Validate your traces in SigNoz:
 You might see other dummy applications if you’re using SigNoz for the first time. You can remove it by following the docs [here](https://signoz.io/docs/operate/docker-standalone/#remove-the-sample-application).
 
 <figure data-zoomable align='center'>
-    <img src="/img/docs/nestjs_application_instrumented.webp" alt="Nestjs Application in the list of services being monitored in SigNoz"/>
-    <figcaption><i>Nestjs Application in the list of services being monitored in SigNoz</i></figcaption>
+    <img src="/img/docs/express_application_services_list.webp" alt="Nestjs Application in the list of services being monitored in SigNoz"/>
+    <figcaption><i>Express Application in the list of services being monitored in SigNoz</i></figcaption>
 </figure>
 
 <br></br>
@@ -167,10 +169,10 @@ If you don't see your application reported in the list of services, try our [tro
 
 ### Using a specific auto-instrumentation library
 
-If you want to instrument only your Nestjs framework, then you need to use the following package:
+If you want to instrument only your Express framework, then you need to use the following package:
 
 ```jsx
-npm install --save @opentelemetry/instrumentation-nestjs-core
+npm install --save @opentelemetry/instrumentation-express
 ```
 
 Note that in the above case, you will have to install packages for all the components that you want to instrument with OpenTelemetry individually. You can find detailed instructions [here](https://signoz.io/docs/instrumentation/javascript/#using-a-specific-auto-instrumentation-library).
@@ -300,7 +302,3 @@ opentelemetry.trace.getTracer('your_tracer_name').getActiveSpanProcessor().shutd
 
 
 <InstrumentationFAQ />
-
-
-
-
