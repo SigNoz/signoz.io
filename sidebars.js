@@ -95,6 +95,7 @@ module.exports = {
           items: [
             'instrumentation/express',
             'instrumentation/nestjs',
+            'instrumentation/angular'
           ]
         },
         'instrumentation/golang',
