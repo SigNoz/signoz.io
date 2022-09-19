@@ -97,9 +97,10 @@ You need to configure the three components of the OpenTelemetry collector descri
 
 In the sample code shown below, we have two receivers:
 
-1. OTLP
+1. OTLP<br></br>
 Default OpenTelemetry protocol to transfer telemetry data. SigNoz receives telemetry data in OTLP format.
-2. Jaeger
+
+2. Jaeger<br></br>
 You can also receive traces data in Jaeger format, which is a popular distributed tracing tool.
 
 ```bash
