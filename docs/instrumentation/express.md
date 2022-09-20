@@ -141,6 +141,8 @@ Internally, it calls the specific auto-instrumentation library for components us
   ```jsx
     node -r ./tracing.js app.js
     ```
+
+  If you don't want to use the `-require` flag, you can also import `tracing.js` in your main application. The `import ./tracing.js` should be the first line of your application code and initialize it before any other function. Here's the [sample GitHub repo](https://github.com/SigNoz/sample-nodejs-app/blob/feat/pm2-cluster-support/index.js) which shows the implementation.
     
 
 ### Validating instrumentation by checking for traces

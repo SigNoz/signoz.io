@@ -140,6 +140,8 @@ The instrumentation automatically identifies the following within your applicati
   ```jsx
     node -r ./tracing.js app.js
     ```
+
+  If you don't want to use the `-require` flag, you can also import `tracing.js` in your main application. The `import ./tracing.js` should be the first line of your application code and initialize it before any other function. Here's the [sample GitHub repo](https://github.com/SigNoz/sample-nodejs-app/blob/feat/pm2-cluster-support/index.js) which shows the implementation.
     
 
 
@@ -267,6 +269,8 @@ If you are using Express, the instrumentation relies on HTTP calls to also be in
   ```jsx
     node -r ./tracing.js app.js
     ```
+
+  If you don't want to use the `-require` flag, you can also import `tracing.js` in your main application. The `import ./tracing.js` should be the first line of your application code and initialize it before any other function. Here's the [sample GitHub repo](https://github.com/SigNoz/sample-nodejs-app/blob/feat/pm2-cluster-support/index.js) which shows the implementation.
     
 
 With your application running, you can verify that you’ve instrumented your application with OpenTelemetry correctly by [validating](#validating-instrumentation-by-checking-for-traces) if your traces are being to SigNoz.
