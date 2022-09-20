@@ -11,4 +11,4 @@ A dashboard is a set of one or more panels. A panel is the basic visualization e
 In this section:
  - [Manage dashboards](/docs/userguide/manage-dashboards)
  - [Manage panels](/docs/userguide/manage-panels)
-
+ - [Manage variables](/docs/userguide/manage-variables)

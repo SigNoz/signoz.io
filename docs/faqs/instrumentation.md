@@ -1,0 +1,59 @@
+---
+id: instrumentation
+title: Instrumentation - FAQs
+description: Frequently Asked Questions About Instrumentation
+---
+
+For instrumentation instructions, follow our docs [here](https://signoz.io/docs/instrumentation/).
+
+### What are all the ports that will be used by a running instance of SigNoz and its associated dependencies so that I can check with my application ports to avoid conflicts.
+
+Ensure that the ports `8080,` `3301`, `4317`and `4318`are open on the machine where you install SigNoz.
+
+### Do I still use OpenTelemetry SDKs to instrument ourselves and just use SigNoz as an analysis backend? Do I have to use SigNoz for instrumentation too?
+
+You have to instrument your application using OpenTelemetry SDKs.
+
+Link for Instrumentation using SigNoz - [https://signoz.io/docs/instrumentation](https://signoz.io/docs/instrumentation)
+
+Once your application is instrumented, you can point your OpenTelemetry exporter to send data to SigNoz installation. By defualt, SigNoz listens on port `4317` and `4318` for incoming telemetry data.
+
+### Which all languages/tech stack is currently supported with SigNoz for instrumentation?
+
+Python, JavaScript, Java, .NET, Ruby, Rust, Go, Elixir/Erlang, PHP.
+
+Find the documentation for them here - [https://signoz.io/docs/instrumentation/](https://signoz.io/docs/instrumentation/)
+
+### Can I use auto instrumentation for my application(s)?
+
+OpenTelemetry and thus SigNoz, currently supports JavaScript, Java, Ruby, .NET, and Python modules for auto instrumentation.
+
+Refer here: <a href="https://opentelemetry.io" rel="noopener noreferrer nofollow" target="_blank">https://opentelemetry.io/</a>
+
+If your module is auto-instrumentation is supported, you don't need code level changes but just need to add some more libraries in your application.
+
+### I am confused about `<IP of SigNoz>` can you provide some examples?
+
+IP of SigNoz means the host IP OR the IP of the instance where you have installed SigNoz, it could be either your local machine, the cloud providers, or VMs.
+
+- IP is `localhost` or `127.0.0.1` - If it's installed on your local machine
+- IP is `xxx.xx.xx.xx`, where x is the public IP address of your AWS, Azure, GCP, or other cloud providers.
+- IP is`http://example.com` if SigNoz is hosted on your custom domain.
+
+So, to summarize, the `OTEL_EXPORTER_OTLP_ENDPOINT` would look something like this.
+
+`OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4317"`
+
+`OTEL_EXPORTER_OTLP_ENDPOINT="http://127.0.0.1:4317"`
+
+`OTEL_EXPORTER_OTLP_ENDPOINT="http://netflix.com:4317"`
+
+`OTEL_EXPORTER_OTLP_ENDPOINT="http://xxx.xx.xx.xx:4317"`
+
+You can also refer to this [grid](https://signoz.io/docs/instrumentation/troubleshoot-instrumentation/) for help.
+
+### Does SigNoz have some agents for other servers from where I might want to collect data?
+
+You need to use OpenTelemetry Collector in your application servers to send host metrics data to SigNoz.
+
+Refer here: <a href="https://github.com/SigNoz/benchmark/tree/main/docker#binary" rel="noopener noreferrer nofollow" target="_blank">https://github.com/SigNoz/benchmark/tree/main/docker#binary</a>

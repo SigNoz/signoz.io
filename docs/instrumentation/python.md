@@ -39,6 +39,13 @@ You can use OpenTelemetry Python to send your traces directly to SigNoz. OpenTel
 
 ### Steps to auto-instrument Python app for traces
 
+
+:::info
+
+  If you are on K8s, you should checkout [opentelemetry operators](/docs/tutorial/opentelemetry-operator-usage/#opentelemetry-auto-instrumentation-injection) which enable auto instrumenting Python applications very easily.
+
+:::
+
 1. **Create a virtual environment**<br></br>
     
     ```bash

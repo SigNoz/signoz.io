@@ -66,8 +66,38 @@ module.exports = {
             'instrumentation/flask',
             'instrumentation/falcon']
         },
-        'instrumentation/javascript',
-        'instrumentation/java',
+        {
+          type: 'category',
+          label: 'Java',
+          link: {
+            type: 'doc',
+            id: 'instrumentation/java'
+            // title: 'Python',
+            // description: 'Learn how to instrument Python applications with OpenTelemetry',
+            // slug: 'instrumentation/python',
+          },
+          items: [
+            'instrumentation/springboot',
+            'instrumentation/tomcat',
+            'instrumentation/jboss'
+          ]
+        },
+        {
+          type: 'category',
+          label: 'Javascript',
+          link: {
+            type: 'doc',
+            id: 'instrumentation/javascript'
+            // title: 'Python',
+            // description: 'Learn how to instrument Python applications with OpenTelemetry',
+            // slug: 'instrumentation/python',
+          },
+          items: [
+            'instrumentation/express',
+            'instrumentation/nestjs',
+            'instrumentation/angular'
+          ]
+        },
         'instrumentation/golang',
         'instrumentation/php',
         'instrumentation/dotnet',
@@ -109,11 +139,11 @@ module.exports = {
         },
         {
           type: 'category',
-          label: 'Clickhouse',
+          label: 'ClickHouse',
           link: {
             type: 'generated-index',
-            title: 'Clickhouse',
-            description: 'The following sections provide instructions to operate Clickhouse. Based on your environment, proceed to one of the sections below.',
+            title: 'ClickHouse',
+            description: 'The following sections provide instructions to operate ClickHouse. Based on your environment, proceed to one of the sections below.',
             slug: '/operate/clickhouse',
           },
           items: [
@@ -188,7 +218,7 @@ module.exports = {
             id: 'userguide/manage-dashboards-and-panels',
           },
           items: [
-            'userguide/manage-dashboards', 'userguide/manage-panels', 'userguide/create-a-custom-query'
+            'userguide/manage-dashboards', 'userguide/manage-panels', 'userguide/manage-variables', 'userguide/create-a-custom-query'
           ]
         },
         'userguide/exceptions',
@@ -212,7 +242,8 @@ module.exports = {
         'tutorial/kubernetes-infra-metrics',
         'tutorial/mongodb-metrics',
         'tutorial/instrumenting-angular-frontend',
-        'tutorial/s3-integration-iam-role-eks'
+        'tutorial/s3-integration-iam-role-eks',
+        'tutorial/opentelemetry-operator-usage'
       ],
     },
     {
@@ -231,10 +262,28 @@ module.exports = {
       id: "roadmap",
       type: "doc",
     },
+    // {
+    //   id: "faq",
+    //   type: "doc",
+    // },
+
     {
-      id: "faq",
-      type: "doc",
+      label: "FAQ",
+      type: "category",
+      link: {
+        type: 'generated-index',
+        title: 'Frequently Asked Questions',
+        description: 'Find the most commonly questions about SigNoz Installation, Instrumentation, Features, Troubleshooting, and Contributing here:',
+        slug: '/faq',
+      },
+      items: [
+        'faqs/product',
+        'faqs/troubleshooting',
+        'faqs/instrumentation',
+        'faqs/installation',
+      ],
     },
+
     {
       label: "Others",
       type: "category",

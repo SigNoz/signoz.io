@@ -1,7 +1,7 @@
 ---
 title: Implementing OpenTelemetry in Angular application
 slug: opentelemetry-angular
-date: 2022-04-15
+date: 2022-08-19
 tags: [OpenTelemetry Instrumentation, JavaScript]
 authors: [pranshu, ankit_anand]
 description: It is essential to monitor your Angular frontend apps. OpenTelemetry can help instrument Angular apps and provide you with end-to-end tracing. In this guide, we will demonstrate how to implement the OpenTelemetry Angular library.....
@@ -59,7 +59,7 @@ OpenTelemetry is the bedrock for setting up an observability framework. It also 
 
 In this article, we will use [SigNoz](https://signoz.io/) as our backend analysis tool. SigNoz is a full-stack open-source APM tool that can be used for storing and visualizing the telemetry data collected with OpenTelemetry. It is built natively on OpenTelemetry and supports OTLP data formats.
 
-SigNoz provides query and visualization capabilities for the end-user and comes with out-of-box charts for application metrics and traces.
+SigNoz provides query and visualization capabilities for the end-user and comes with out-of-box charts for application metrics and traces. SigNoz also provides logs management with advanced logs query builder and live tailing. With metrics, traces, and logs under a single pane of glass, SigNoz can be a one-stop open source observability platform.
 
 Now let’s get down to how to implement OpenTelemetry Angular libraries and then visualize the collected data in SigNoz.
 

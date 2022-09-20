@@ -25,6 +25,12 @@ You can use OpenTelemetry Nodejs client libraries to send your traces directly t
 - **[Use the all-in-one auto-instrumentation library(Recommended)](#using-the-all-in-one-auto-instrumentation-library)**<br></br>
 The auto-instrumentation library of OpenTelemetry is a meta package that provides a simple way to initialize multiple Nodejs instrumnetations.
 
+:::info
+
+  If you are on K8s, you should checkout [opentelemetry operators](/docs/tutorial/opentelemetry-operator-usage/#opentelemetry-auto-instrumentation-injection) which enable auto instrumenting Javascript applications very easily.
+
+:::
+
 - **[Use a specific auto-instrumentation library](#using-a-specific-auto-instrumentation-library)**<br></br>
 You can use individual auto-instrumentation libraries too for a specific component of your application. For example, you can use `@opentelemetry/instrumentation-express` for instrumenting the Express web framework.
 
@@ -158,6 +164,8 @@ You might see other dummy applications if you’re using SigNoz for the first ti
 
 <br></br>
 
+If you don't see your application reported in the list of services, try our [troubleshooting](https://signoz.io/docs/install/troubleshooting/) guide.
+
 
 ### Using a specific auto-instrumentation library
 
@@ -263,13 +271,13 @@ If you are using Express, the instrumentation relies on HTTP calls to also be in
 
 With your application running, you can verify that you’ve instrumented your application with OpenTelemetry correctly by [validating](#validating-instrumentation-by-checking-for-traces) if your traces are being to SigNoz.
 
-## Instrumentation Modules for Javascript Frameworks
+<!-- ## Instrumentation Modules for Javascript Frameworks
 
 The `@opentelemetry/auto-instrumentations-node` can inititialize instrumentation for many frameworks, databases, and network protocols. Hence it’s recommended to [get started](https://www.notion.so/New-JS-Doc-88febbff9cd942839239bdbe61be4557) with it.
 
 ### Nestjs Instrumentation
 
-OpenTelemetry Nest instrumentation allows the user to automatically collect trace data from nestjs application. The `opentelemetry/auto-instrumentations-node` can be used to initialize automatic instrumentation for Nest framework.
+OpenTelemetry Nestjs instrumentation allows the user to automatically collect trace data from nestjs application. The `opentelemetry/auto-instrumentations-node` can be used to initialize automatic instrumentation for Nestjs framework.
 
 **Supported Versions**
 
@@ -322,6 +330,8 @@ OpenTelemetry Nest instrumentation allows the user to automatically collect trac
         .catch((error) => console.log('Error terminating tracing', error))
         .finally(() => process.exit(0));
         });
+        
+      module.exports = sdk
     ```
     
 
@@ -390,7 +400,7 @@ But if want to instrument only your Fastify module, you can do so. The instrumen
 
 ```jsx
 npm install --save @opentelemetry/instrumentation-http @opentelemetry/instrumentation-fastify
-```
+``` -->
 
 ## Instrumentation Modules for Databases
 
