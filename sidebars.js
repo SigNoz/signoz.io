@@ -160,6 +160,7 @@ module.exports = {
                 'userguide/collect_docker_logs',
                 'userguide/collecting_syslogs',
                 'userguide/collect_logs_from_file',
+                'userguide/collecting_nodejs_winston_logs',
                 {
                   type: 'category',
                   label: 'Collecting Application Logs Using OTEL SDK',
