@@ -193,6 +193,7 @@ func main() {
 **Step 7: Set environment variables and run your Go Gin application**
 
 Now that you have instrumented your Go Gin application with OpenTelemetry, you need to set some environment variables to send data to SigNoz backend:
+
 `SERVICE_NAME`: goGinApp (you can name it whatever you want)
 
 `OTEL_EXPORTER_OTLP_ENDPOINT`: localhost:4317
