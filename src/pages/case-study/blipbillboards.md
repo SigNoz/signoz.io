@@ -1,5 +1,5 @@
 ---
-title:  How BlipBillBoards uses SigNoz to improve their issue resolution time by 14x
+title:  How Blip uses SigNoz to improve their issue resolution time by 14x
 slug: blipbillboards
 image: /img/case_study/BlipBillBoards.webp
 authors: [pranay]
@@ -8,7 +8,8 @@ hide_table_of_contents: true
 ---
 import { LiteYoutubeEmbed } from "react-lite-yt-embed";
 
-# How BlipBillBoards uses SigNoz to improve their issue resolution time by 14x
+# How Blip uses SigNoz to improve their issue resolution time by 14x
+
 
 <div class="avatar">
   <a
@@ -29,57 +30,69 @@ import { LiteYoutubeEmbed } from "react-lite-yt-embed";
 <br />
 <br />
 
+## About Blip
+Blip provides self-service subscription-based digital ad space across 1000’s of digital billboards in the US and Canada. Many small and medium-sized businesses use Blip services to reach their audience anytime, anywhere they want. 
 
 
-*I sat down with Nate, Senior DevOps engineer at [BlipBillBoards](https://www.blipbillboards.com/) to understand how they use SigNoz at BlipBillBoards. Here’s a few snippets from our conversation (edited for legibility)*
+
+<!-- *I sat down with Nate, Senior DevOps engineer at [BlipBillBoards](https://www.blipbillboards.com/) to understand how they use SigNoz at BlipBillBoards. Here’s a few snippets from our conversation (edited for legibility)* -->
 
 ![BlipBillBoards](/img/case_study/BlipBillBoards.webp)
 
-### *Introduction*
+Blip used SigNoz to improve their issue resolution time by 14x. We sat down with Nate Bohman, Senior DevOps Engineer at Blip, to understand how they are using SigNoz to improve their observability. Some of the key points that the team liked about SigNoz:
 
-My name is Nate. I work for Blip billboards. I'm a senior DevOps engineer at the company.  I love everything technical. I love all kind of maker  stuff. 
+- Helped detect issues in DB queries quickly
+- Scaled robustly to 40mn spans/hr with 32 GB RAM
+- Much more resource efficient compared to Jaeger + Elastic combo
+- By tracing each request with distributed tracing, the team ensured they figured slow response times and detected issues quickly in production.
 
-For the company, I actually do a lot of integration with various platforms, with various services. 
+Read on to find out how Blip uses SigNoz as their observability backend.
 
-We put different services in different places to kind of monitor things, to kind of keep an eye on what's going on, get an idea of how our environments are responding, trying to get a good balance of performance for the application because too much monitoring can slow it down, but then also, like, a good balance of insight into how our application is running.
 
-And so my whole goal is to try and optimize the application or to tell the developers where the application is suffering and then help them fix the issue.
+### *Tell us a bit about yourself.*
 
-### *What does BlipBillBoards do?*
+My name is Nate, and I work as a senior DevOps engineer at Blip. I love everything technical and love to build things.
+
+At Blip, I do a lot of integration with various platforms and services. For monitoring, we use different services in different places to keep an eye on what’s going on and understand how our environments respond. We also don’t want to slow down things with too much monitoring but have enough to get insights into application performance.
+
+So, my primary goal is to try and optimize the application and keep our developers informed about where the application is having issues. It’s also my job to help them fix the issue.
+
+<!-- ### *What does BlipBillBoards do?*
 
 BlipBillBoards is an advertising agency. They don't advertise themselves, but they connect advertisers to sign owners. 
 
 So we have digital billboards here in the US. On the sides of freeways and on the sides of buildings. And these billboard owners don't have any way other than direct marketing to advertisers to display things on their signs.
 
-And so we kind of stepped in in the middle there and said, hey, there's this advertiser that would like to play an ad on your sign at this time or this time period, this time frame. So we  coordinate the backend of getting the advertisers connected with the sign owners and then putting them together.
+And so we kind of stepped in in the middle there and said, hey, there's this advertiser that would like to play an ad on your sign at this time or this time period, this time frame. So we  coordinate the backend of getting the advertisers connected with the sign owners and then putting them together. -->
 
-### *What were the business problem you're trying to solve with SigNoz? Any details you can share on your current scale with SigNoz*
 
+
+### *What were the business problems you're trying to solve with SigNoz? Any details you can share on your current scale with SigNoz?*
 
 <LiteYoutubeEmbed id="ISPfqGmJGYE" mute={false} />
 
 <p>&nbsp;</p>
 
+Yes, absolutely! With SigNoz, we are currently doing about 13 million to 40 million spans per hour which varies with the time of the day. The number goes up during the day quite a bit, up to ~40mn spans/hr, and it's like 13 million spans or so during the night. We have primarily instrumented our backend services.
 
-Sure, absolutely. So with SigNoz we're doing about 13 million to 40 million spans per hour depending on time of day. The number goes up during the day quite a bit to ~40mn spans/hr, but during the night it's like 13 million spans or so. This is when, primarily backend services are instrumented 
+We use SigNoz to trace requests step by step, and that kind of stuff is invaluable. Before SigNoz, we tried Jaeger to try and trace through the code. We ran Jaeger with Elasticsearch.
 
-We use SigNoz to trace requests step by step.  That kind of stuff is invaluable. Before SigNoz, we tried jaeger same thing to try and trace through the code and trying to run it with Elasticsearch.
+Elastic search kept wanting to die, like, all the time. It ran into all sorts of issues when we tried to scale it. Running a tine Elasticsearch cluster is perfect. It has no issues at all. But scaling that up takes an entire team's effort just to run it. And I, as one person, is not capable of doing that.
 
-Elastic search kept wanting to die, like, all the time. It was just having all sorts of issues, when you try to scale it. When you're running a tiny little elastic search cluster, it's perfect. It has no issues at all. But trying to scale that thing up, it takes an entire team just to run it. And myself as one person is not capable of doing that.
+SigNoz choosing ClickHouse is a very good idea because I had no issues other than when I gave it very few resources at the beginning. So here's a tip to anyone else coming down the line, make sure you give it enough resources by default. But other than that, it's been like, rock solid.
 
-SigNoz choosing ClickHouse is a very good idea because I have had no issues other than I gave it a few too few resources at the beginning. So tip to anyone else coming along down the line, make sure you give it enough resources by default. But other than that, it's been like, rock solid.
+I've had no issues with it. It showed me exactly what's going on, how the code is flowing, where it's going, what logic it's using to determine what response it will give, and everything else going along with that.
 
-I've had no issues with it. It showed me exactly what's going on, how the code is flowing, where it's going, what logic it's using to determine what response it's going to give, and everything else going along with that.
 
-### *Can you share any specific business use case you solved with SigNoz?*
+### *Can you share any specific business use cases you solved with SigNoz?*
 
-We actually had this use case where a few months before I implemented, SigNoz. We had an endpoint that we call checklist.
+A few months ago, before I implemented SigNoz, we were having an issue. We had an endpoint that we called `checklist`.
 
-And it's basically the checklist to make sure that an ad is ready to plan a sign. So if the ad has to go through, it has to get approved. It has to have the right tags on it. It has to be approved by the sign owner.
+And it's a checklist to ensure an ad is ready to plan a sign. If an ad has to go through, it has to get approved. It has to have the right tags on it. It has to be approved by the sign owner.
 
-It has to go through all the checklists. And so it was a very slow endpoint. And we knew it was kind of slow, given the response times from the router, depending on what campaign it was, what organization it was that was trying to play those things.
+Going through all the checklists made it a very slow endpoint. And we knew it was slow, given the response times from the router, depending on what campaign it was, what organization it was that was trying to play those things.
 
-But it was kind of nebulous because it was like, I took 20 seconds to render this, and I was like, well, so what did you do during that 20 seconds?
+But what happened behind the scenes was nebulous. For example, we knew it was taking 20 seconds to get rendered, but we had no idea of what exactly happened during those 20 seconds.
 
 <figure data-zoomable align='center'>
     <img src="/img/case_study/trace-filter.webp" alt="SigNoz trace filter page "/>
@@ -89,29 +102,27 @@ But it was kind of nebulous because it was like, I took 20 seconds to render thi
 <p>&nbsp;</p>
 
 
-### *Logs were not helpful in this*
 
-You could try and run a couple of queries to try and see, okay, what queries are being run? What's going on? But trying to correlate that to a specific end point is next to impossible with logs. So an outage that occurred because of that. This endpoint started getting so large and running so many queries that started taking down the site for everybody, not just for the person accessing that particular endpoint.
+### *Logs did not solve the problem.*
 
-And I spent about two weeks diagnosing and finding the cause and then another two weeks fixing the cause because we didn't have any distributed tracing in place at that time when we were trying to debug this.
+You can try and run a couple of queries to check what queries are being run and what's going on. But correlating that to a specific endpoint is next to impossible with logs. We had an outage that occurred because of that. The endpoint started getting so large and running so many queries that it took down the website for everyone, not just the person accessing that particular endpoint.
 
-We were trying to do this by adding logs to different parts. But we were not getting a sense of how  a  request is flowing through different parts.
+I spent about two weeks diagnosing the cause and then another two weeks fixing it because we didn't have any distributed tracing in place. We were trying to do this by adding logs to different parts. But we were not getting a sense of how a request flowed through different parts.
 
-I had to add a log statement and then run a query and then add the log statement and run a query or like, add a couple of log statements and then run it again and try to see where it would go. And I was trying to reproduce it.
+I had to add a log statement and then run a query. Then add another log statement, and run a query to see where the request would go. This is how I was trying to reproduce it.
 
-### *Many a times staging environment doesn’t reflect issues which come up in production*
+### *Many a time staging environment doesn’t reflect issues that come up in production.*
 
- 
+The staging environment doesn't have the same data as the production environment, and it's not nearly as full-featured. So when we were trying to run queries in staging, the request was completed in seconds. But when we ran it in production, we were suddenly getting these timings out, taking down the whole website and the entire back end.
 
-The staging environment doesn't have the exact same date as the production environment, and it's not nearly as full featured. So when we were trying to run it in staging, the request was running and completing in seconds. And when we ran it in production, all of a sudden we were getting these timings out, and it was taking down the whole site and so the whole back end.
+So we had to go through it bit by bit, trying to figure out the cause. Can we reproduce this in testing? Can we replicate this in a staging environment? Can we do anything else like that? And it was just a couple of tedious weeks of sitting there and digging through.
 
-So we had to go through it bit by bit, trying to figure out, okay, what are the causes of this? Can we reproduce this in testing? Can we reproduce this in a staging environment? Can we do anything else like that? And it was just a couple of tedious weeks of just sitting there and digging through.
+It was awful. And so I did finally fix it. So we got that push, and now the backend has no issues with the checklist stuff.
 
-It was awful. And so I did finally fix it. We got that pushed out, and now the backend doesn't have any issues with the checklist stuff.
+But now we know how to avoid such things. For example, an endpoint came up just the other day, and with SigNoz in place, it took me just an hour to figure out why, how, and exactly what was going wrong.
 
-But now know. An endpoint came up just the other day. Now that we have SigNoz in place it took me 1 hour to figure out exactly why, how, and exactly what was going wrong.
 
-### *N+1 query issue*
+### *N+1 query issue.*
 
 <figure data-zoomable align='center'>
     <img src="/img/case_study/Nplus1.webp" alt="N+1 query "/>
@@ -120,53 +131,55 @@ But now know. An endpoint came up just the other day. Now that we have SigNoz in
 
 <p>&nbsp;</p>
 
+SigNoz showed me that if someone hits this particular endpoint with a particular campaign with a specific amount of data, it leads to 100 SQL queries in a single request. So if you do a `select` query on all of the rows you're looking for in the database in one go, it creates one SQL query. It takes like 5 seconds to complete, which is not great, but it's not terrible.
 
-And it showed me that is someone hit this particular endpoint with this campaign and this amount of data and it created all of these sequel queries, literally 100 SQL queries in a single request.  If you do a select on all of the rows you're looking for in the database at one go, it creates one SQL query.
-It's a little bit big, not terrible. It takes like 5 seconds to complete, which is not great, but it's not terrible. 
+Data is right there in memory, and you're able to iterate through it and do whatever you need to do. Before that, it was going out and wouldn't cache this data. It would be selecting a single row at a time. And because of that, it took over three minutes to complete a single request.
 
-Data is right there in memory, and you're able to iterate through it and do whatever you need to do. Before that, it was going out and it wouldn't cache this data. It would be selecting a single row at a time time. And because of that, it was taking over three minutes to complete the single request.
+And by seeing the trace details in SigNoz, I showed the developers what exactly was going on. I showed them the data that was being passed in. And now, instead of three minutes, it takes 2 seconds to complete the exact same request.
 
-And by seeing the trace details in SigNoz, I showed the developers exactly what was going on. I showed them the data that was being passed in. And now,  instead of three minutes  it takes 2 seconds to complete the exact same request.
 
-### ***What made you choose SigNoz over other solutions. What were the solutions you were trying, and then what made you choose SigNoz?***
+### What made you choose SigNoz over other solutions? What solutions were you trying, and then what made you choose SigNoz?
 
 <LiteYoutubeEmbed id="8b3rutiPnTc" mute={false} />
 
 <p>&nbsp;</p>
 
-Sure, we tried jaeger before, and that one thing that happened is that I think the open telemetry packages were a little bit forked at that time or something.
+Sure, we tried Jaeger before, but I think the OpenTelemetry packages were a little bit forked at that time or something.
 
-Basically, it caused performance issues, so we had to roll that one back. But on top of that, trying to keep jaeger up with an elastic search back end, the Elasticsearch just didn't want to scale very well.
+Basically, it caused performance issues, so we had to roll that one back. But on top of that, trying to keep Jaeger up with an Elasticsearch backend was tough. Elasticsearch just couldn’t scale very well.
 
-It was fine for tiny little bits of data, but as soon as you went and tried to scale it up to the level that SigNoz is capable of handling, the Elasticsearch cluster fall over.
+It was fine for small amounts of data, but as soon as you went and tried to scale it up to the level that SigNoz is capable of handling, the Elasticsearch cluster fell over.
 
-And I know it could be fixed with tuning. I know it could be fixed with like throwing more resources at it, throwing more elastic search nodes at it, but it just wasn't cost effective.
+And I know it could be fixed with tuning. I know it could be fixed by throwing more resources at it and adding more elastic search nodes, but it wasn't cost-effective.
 
-We started getting to the point that it was thousands of dollars per month just to on the Jaeger service and that's just not worth it.
+We started getting to the point that it was thousands of dollars per month just to run the Jaeger service, and that's just not worth it.
 
-A little bit of money is expected because developer time is very valuable, but also at a certain point you hit that tip over point where developer time is worth less than trying to keep up that  cluster.
+A little bit of money is expected because developer time is very valuable, but at a certain point, you hit that tip-over point where developer time is worth less than trying to keep up that cluster.
 
-And so it just wasn't very effective. It slowed down the site, it had all sorts of issues. This time we're still using the same open telemetry packages, but I think something has been fixed or improved along the way.
+And so it just wasn't very effective. It slowed down the site, it had all sorts of issues. We're still using the same OpenTelemetry packages this time, but I think something has been fixed or improved along the way.
 
-So we didn't have any of those issues this time with rolling out open telemetry into the code base. But also SigNoz is way more performant and way more resource efficient. So we don't need to throw nearly as many nodes at it. We don't need to throw nearly as much compute or RAM at it.
+So we didn't have any of those issues with rolling out OpenTelemetry into the code base this time. Also, SigNoz is way more performant and way more resource efficient. We don't need to throw nearly as many nodes at it or as much compute or RAM.
 
-It just runs and it runs very efficiently for what it's doing. 
+It just runs and runs very efficiently for what it's doing.
 
-### *How much resources SigNoz needed to handle your scale?*
 
-So we did have to upsize our Kubernetes cluster we were using. Using `t3large` before, and now we had to go up to `t3xlarge` because the amount of memory and CPU that was available on the `t3large` wasn't enough to run the ClickHouse database.
+### *How much resource did SigNoz need to handle your scale?*
 
-So the `t3xlarge`, as soon as we have created that, we basically dedicate one entire node to just the Click house database, and it's okay with that.
+So we did have to upsize the Kubernetes cluster we were using. We were using `t3large` before, and now we had to go up to `t3xlarge` because the amount of memory and CPU that was available on the `t3large` wasn't enough to run the ClickHouse database.
 
-And then we also did auto scaling for the otel collectors to be able to collect that data accurately. We tell it as soon as one of those nodes hit 50% Ram or CPU, go ahead and bump it up a little bit, and then bump it back down when you don't need it.
+So the `t3xlarge`, as soon as we have created that, we basically dedicate one entire node to just the ClickHouse database, and it's okay with that.
 
-And on average, we go between about, I want to say three otel collectors, up to about probably nine most I've seen in there for very short periods where there's little bursts and things like that. Altogether, if I remember right, it was about 32GB of RAM on average for everything altogether, including the ClickHouse and otel collector, including everything inside of the signals names. 32GB RAM for 40 mn spans per hour.
+And then, we also did auto-scaling for the OTel collectors to be able to collect the data accurately. As soon as one of the nodes hits 50% Ram or CPU, go ahead and bump it up a little bit, and then bump it back down when you don’t need it.
 
-### ***What features do you use the most in SigNoz?***
+And on average, we go between about three OTel Collectors up to about nine. I have seen scaling up to nine for very short periods when there are little bursts or things like that.
 
-That's the big thing we use the most is traces. We go and we look through the trace, we look at the spans, we look at the attributes that are set, look at the events that are thrown during that we have all those kind of things that are all showing exactly how that runs and that's incredibly helpful.
+Altogether, if I remember right, it was about 32GB of RAM on average for everything, including the ClickHouse and OTel collector. So, broadly 32GB RAM is sufficient for 40 mn spans per hour.
 
-The second thing that I would say that we do the most with is the services which kind of show metrics like the P95, P99 as far as response times for different endpoints and looking at those, it's just nice to review and say hey look, this endpoint is taking a lot longer than these other endpoints.
+### *What features do you use the most in SigNoz?*
+
+We use distributed tracing a lot. We use all the features of distributed tracing, individual spans, attributes, and events associated with each span. With all the features combined, distributed tracing shows exactly how things are running, and that’s incredibly helpful.
+
+The second feature that we use the most is the application metrics page which shows latency like p95, p99, and response times for different endpoints. At a glance, we can review which endpoints are taking longer and investigate them.
 
 <figure data-zoomable align='center'>
     <img src="/img/case_study/ServiceMap.webp" alt="Service Map "/>
@@ -175,13 +188,14 @@ The second thing that I would say that we do the most with is the services which
 
 <p>&nbsp;</p>
 
-### *Any advice you would have have for teams trying to set up their observability systems?*
 
-Use automatic instrumentation. Absolutely wonderful. Make sure you follow that for whatever language it is. Say it allows different libraries in to automatically instrument things like your database calls, your various http calls, all those kind of things. Don't worry about instrumenting yourself, just use the auto instrumenting. Get something set up, get something going because it is so insightful to just see things like laid out.
+### *Any advice for teams trying to set up their observability systems?*
 
-The second thing I would say is like if you have an endpoint or if you have a place where there's a common endpoint that comes in to your application, wrap that in a span. Because all of those different things are automatically instrumented aren't necessarily tied together with a single request. By default you're.
+I would suggest teams use the automatic instrumentation provided by OpenTelemetry libraries. It's good to automatically instrument things like your database calls, and your various HTTP calls, among other things. You don't need to worry about instrumenting applications yourself initially. It's great to get something up and going because it is so insightful to just see things laid out.
 
-Instrument one place, make sure you instrument the place where everything enters your system. So if there's like, a routing handling system, if there's some kind of a piece of code that handles requests coming in, if there's some place that handles that, you basically can wrap that in a single span, and then all of those database calls get tied together, and it's wonderful.
+The second thing I would suggest is that if you have a place where there's a common endpoint that comes in your application, wrap that in a span because all of the different things are automatically instrumented and aren't necessarily tied together with a single request by default.
+
+If you have to instrument one place, make sure you instrument the place where everything enters your system. So if there's a routing handling system, or if there's a piece of code that handles requests, you can wrap that in a single span, and then all of those database calls get tied together, and it's wonderful.
 
 
 ----
