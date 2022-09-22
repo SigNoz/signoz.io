@@ -1,11 +1,11 @@
 ---
-title: The future of OpenTelemetry | Q&A
-slug: future-of-opentelemetry
+title: Current state of OpenTelemetry and how it fits in the DevOps ecosystem | Q&A
+slug: current-state-of-opentelemetry
 date: 2022-09-21
 tags: [Talks]
 authors: [ankit_anand]
 description: OpenTelemetry is quietly becoming the world standard for instrumenting cloud-native applications.To understand complex distributed systems, DevOps engineers need to implement a robust observability & monitoring framework. OpenTelemetry provides vendor-neutral open source observability framework...
-image: /img/blog/2022/09/future_of_opentelemetry_cover.webp
+image: /img/blog/2022/09/current_state_of_opentelemetry_cover.webp
 keywords:
   - kubernetes
   - kubernetes metrics server
@@ -14,7 +14,7 @@ keywords:
 ---
 
 <head>
-  <link rel="canonical" href="https://signoz.io/blog/future-of-opentelemetry/"/>
+  <link rel="canonical" href="https://signoz.io/blog/current-state-of-opentelemetry/"/>
 </head>
 
 OpenTelemetry is an open-source project under the Cloud Native Computing Foundation(<a href="https://www.cncf.io/" rel="nofollow">CNCF</a>) that aims to standardize the generation and collection of telemetry data. The telemetry data helps developer, DevOps and IT teams to keep a check on their application health.
@@ -23,11 +23,11 @@ The telemetry data collected by OpenTelemetry consist of logs, metrics, and trac
 
 <!--truncate-->
 
-![Cover Image](/img/blog/2022/09/future_of_opentelemetry_cover.webp)
+![Cover Image](/img/blog/2022/09/current_state_of_opentelemetry_cover.webp)
 
 At SigNoz, we are building an OpenTelemetry native APM. We believe in the mission of ubiquitous observability with OpenTelemetry. Managing distributed systems at scale is a pain, and OpenTelemetry aims to solve a lot of pain points for developers and devops folks.
 
-I sat down with <a href="https://www.linkedin.com/in/pranay01/" rel="nofollow">Pranay</a>, the CEO and co-founder at SigNoz to discuss the future of OpenTelemetry and its ecosystem. 
+I sat down with <a href="https://www.linkedin.com/in/pranay01/" rel="nofollow">Pranay</a>, the CEO and co-founder at SigNoz to discuss the current state of OpenTelemetry and how it fits in the DevOps ecosystem. 
 
 
 ### Do you think OpenTelemetry is (or will be) important to IT Ops/DevOps, and why?
