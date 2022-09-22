@@ -145,6 +145,28 @@ This document contains instructions on how to set up OpenTelemetry instrumentati
     ```bash
     SERVICE_NAME=goGinApp INSECURE_MODE=true OTEL_EXPORTER_OTLP_ENDPOINT=localhost:4317 go run main.go
     ```
+
+
+## Validating instrumentation by checking for traces
+
+With your application running, you can verify that you’ve instrumented your application with OpenTelemetry correctly by confirming that tracing data is being reported to SigNoz.
+
+To do this, you need to ensure that your application generates some data. Applications will not produce traces unless they are being interacted with, and OpenTelemetry will often buffer data before sending. So you need to interact with your application and wait for some time to see your tracing data in SigNoz.
+
+Validate your traces in SigNoz:
+
+1. Trigger an action in your app that generates a web request. Hit the endpoint a number of times to generate some data. Then, wait for some time.
+2. In SigNoz, open the `Services` tab. Hit the `Refresh` button on the top right corner, and your application should appear in the list of `Applications`.
+3. Go to the `Traces` tab, and apply relevant filters to see your application’s traces.
+
+You might see other dummy applications if you’re using SigNoz for the first time. You can remove it by following the docs [here](https://signoz.io/docs/operate/docker-standalone/#remove-the-sample-application).
+
+<figure data-zoomable align='center'>
+    <img src="/img/blog/2022/04/goginapp_signoz_dashboard.webp" alt="Go Application in the list of services being monitored in SigNoz"/>
+    <figcaption><i>Go Application in the list of services being monitored in SigNoz</i></figcaption></figure>
+<br></br>
+
+If you don't see your application reported in the list of services, try our [troubleshooting](https://signoz.io/docs/install/troubleshooting/) guide.
     
 
 ## Request Routers
@@ -280,33 +302,28 @@ func main() {
 ```
 We have a blog [Monitor gRPC calls with OpenTelemetry - explained with a Golang example](https://signoz.io/blog/opentelemetry-grpc-golang/), do refer to that in case you need a helping hand to work with gRPC server.
 
+## Recording Errors and Exceptions
+
+```go
+import "go.opentelemetry.io/otel/codes"
+
+// Get the current span from the tracer
+span := trace.SpanFromContext(ctx)
+
+// RecordError converts an error into a span event.
+span.RecordError(err)
+
+// Mark span as failed.
+span.SetStatus(codes.Error, "internal error")
+```
+
+
+
 ## Sample Golang application
 
 We have included a sample gin/gonic application with `README.md` at https://github.com/SigNoz/sample-golang-app.
 
 Feel free to use this repo to test out OpenTelemetry instrumentation and how to send telemetry data to SigNoz.
-
-
-## Validating instrumentation by checking for traces
-
-With your application running, you can verify that you’ve instrumented your application with OpenTelemetry correctly by confirming that tracing data is being reported to SigNoz.
-
-To do this, you need to ensure that your application generates some data. Applications will not produce traces unless they are being interacted with, and OpenTelemetry will often buffer data before sending. So you need to interact with your application and wait for some time to see your tracing data in SigNoz.
-
-Validate your traces in SigNoz:
-
-1. Trigger an action in your app that generates a web request. Hit the endpoint a number of times to generate some data. Then, wait for some time.
-2. In SigNoz, open the `Services` tab. Hit the `Refresh` button on the top right corner, and your application should appear in the list of `Applications`.
-3. Go to the `Traces` tab, and apply relevant filters to see your application’s traces.
-
-You might see other dummy applications if you’re using SigNoz for the first time. You can remove it by following the docs [here](https://signoz.io/docs/operate/docker-standalone/#remove-the-sample-application).
-
-<figure data-zoomable align='center'>
-    <img src="/img/blog/2022/04/goginapp_signoz_dashboard.webp" alt="Go Application in the list of services being monitored in SigNoz"/>
-    <figcaption><i>Go Application in the list of services being monitored in SigNoz</i></figcaption></figure>
-<br></br>
-
-If you don't see your application reported in the list of services, try our [troubleshooting](https://signoz.io/docs/install/troubleshooting/) guide.
 
 
 ## Library and framework support
@@ -316,6 +333,8 @@ Besides OpenTelemetry core modules, it is important to install instrumentation p
 OpenTelemetry automatically provides instrumentation for a large number of libraries and frameworks, right out of the box.
 
 The full list of supported instrumentation can be found in the [README](https://github.com/open-telemetry/opentelemetry-go-contrib/tree/master/instrumentation).
+
+You can also find libraries, plugins, integrations, and other useful tools for extending OpenTelemetry from the OpenTelemetry [registry](https://opentelemetry.io/registry/?language=go).
 
 
 
