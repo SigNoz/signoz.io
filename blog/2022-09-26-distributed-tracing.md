@@ -1,8 +1,9 @@
 ---
-title: Distributed Tracing - A Complete Guide
+title: What is Distributed Tracing and How to implement it with Open Source?
 slug: distributed-tracing
 description: Distributed tracing helps you track requests across microservices and understand issues affecting your application performance. It enables developers to understand how different components of a distributed system interact to process a user request.
-image: /img/blog/2022/03/distributed_tracing_guide.webp
+image: /img/blog/2022/09/distributed_tracing_cover.webp
+hide_table_of_contents: false
 keywords:
   - distributed tracing
   - distributed request tracing
@@ -15,18 +16,17 @@ keywords:
 ---
 
 <head>
-  <link rel="canonical" href="https://signoz.io/distributed-tracing/"/>
+  <link rel="canonical" href="https://signoz.io/blog/distributed-tracing/"/>
   <meta property="og:image" content="https://signoz.io/img/blog/2022/03/distributed_tracing_guide.webp"/>
   <meta name ="twitter:image" content="https://signoz.io/img/blog/2022/03/distributed_tracing_guide.webp"/>
-
 </head>
 
 
-# Distributed Tracing: A complete guide
-
 Distributed tracing helps you track requests across services and understand issues affecting your application performance. In distributed cloud architecture, debugging performance issues is complicated. Distributed tracing gives visibility to teams on how a user request performs across different services, protocols, and cloud infrastructure.
 
-![Cover Image](/img/blog/2022/03/distributed_tracing_guide.webp)
+<!--truncate-->
+
+![Cover Image](/img/blog/2022/09/distributed_tracing_cover.webp)
 
 
 Let’s start with a brief overview of distributed tracing.
@@ -72,25 +72,21 @@ A trace relates all the spans involved in the request in a sequential relationsh
 
 A trace is usually visualized as Flamegraphs or Gantt charts. Below is a snapshot from the traces dashboard of [SigNoz](https://signoz.io/). In the trace diagram below, the root span spawns two child spans which call more inner processes.
 
-import Screenshot from "@theme/Screenshot"
+<figure data-zoomable align='center'>
+    <img src="/img/blog/2022/03/understanding_a_trace_dark_mode.webp" alt="Components of a trace"/>
+    <figcaption><i>Understanding the components of a trace - spans, duration & the sequential flow of the request</i></figcaption>
+</figure>
 
-<Screenshot
-   alt="Components of a trace"
-   height={500}
-   src="/img/blog/2022/03/understanding_a_trace_dark_mode.webp"
-   title="Understanding the components of a trace - spans, duration & the sequential flow of the request"
-   width={700}
-/>
+<br></br>
 
 You can also add tags and span attributes to provide more context for your spans. Span attributes are key-value pairs that can be used to provide additional context on a span about the specific operation it tracks.
 
-<Screenshot
-   alt="Tags and attributes attached with a span"
-   height={500}
-   src="/img/blog/2022/03/distributed_tracing_tags_dark.webp"
-   title="Tags provide you with additional context on spans. Details associated with a span captured by SigNoz."
-   width={700}
-/>
+<figure data-zoomable align='center'>
+    <img src="/img/blog/2022/03/distributed_tracing_tags_dark.webp" alt="Tags and attributes attached with a span"/>
+    <figcaption><i>Tags provide you with additional context on spans. Details associated with a span captured by SigNoz.</i></figcaption>
+</figure>
+
+<br></br>
 
 
 ## Deriving value from Distributed Tracing
@@ -105,28 +101,24 @@ Tracing data can be visualized in the form of Flamegraphs and Gantt Charts to re
 [SigNoz](https://signoz.io/) shows Flamegraphs and Gantt charts both to make visualizing trace data easier. In the dashboard below, you can see the data for a single trace that consists of 50 spans.
 
 
-<Screenshot
-alt="Flamegraphs and Gantt charts visualizing a single trace data"
-height={500}
-src="/img/blog/2022/03/flamegraphs_gantt_charts_dark_mode.webp"
-title="Flamegraphs and Gantt Charts visualizing the journey of a user request from a single trace data (SigNoz Dashboard)"
-width={700}/>
+<figure data-zoomable align='center'>
+    <img src="/img/blog/2022/03/flamegraphs_gantt_charts_dark_mode.webp" alt="Flamegraphs and Gantt charts visualizing a single trace data"/>
+    <figcaption><i>Flamegraphs and Gantt Charts visualizing the journey of a user request from a single trace data (SigNoz Dashboard)</i></figcaption>
+</figure>
+
+<br></br>
     
 
 ### Aggregated Trace Data
 Using tags and tracing data, you can run aggregates to get relevant business metrics from the behavior of your distributed systems. For example, with SigNoz, you can get the error rate and 99th percentile latency of `customer_type: gold` or `deployment_version: v2`. This enables quick analysis of services affecting a particular user group or type of requests.
 
-<Screenshot
-alt="Aggregates on trace data"
-height={500}
-src="/img/blog/2022/03/aggregates_on_trace_data.webp"
-title="SigNoz allows you to run aggregates on your tracing data and visualize them by important dimensions like service-type, operation, HTTP status code, etc."
-width={700}
-  />
-    
-SigNoz allows you to run aggregates on your tracing data and visualize them by important dimensions like service-type, operation, HTTP status code, etc.
-    
+<figure data-zoomable align='center'>
+    <img src="/img/blog/2022/03/aggregates_on_trace_data.webp" alt="Aggregates on trace data"/>
+    <figcaption><i>SigNoz allows you to run aggregates on your tracing data and visualize them by important dimensions like service-type, operation, HTTP status code, etc.</i></figcaption>
+</figure>
 
+<br></br>
+    
 Distributed tracing can also serve as a knowledge base for your engineering team. It can act as a central overview dashboard that enables anyone to quickly get familiar with the application architecture.
 
 ## Distributed Tracing with OpenTelemetry
@@ -149,7 +141,7 @@ A huge community is working on OpenTelemetry to make it the standard way of coll
 - **Ability to monitor emerging technologies**<br></br>
 OpenTelemetry has a wide number of libraries and SDKs for instrumenting code in various programming languages. If you decide to use any new technology, OpenTelemetry can readily be used to instrument it, and you don’t have to depend on propriety monitoring tools to extend that capability.
 
-## Getting started with Distributed Tracing
+## Getting started with Open Source Distributed Tracing
 
 SigNoz is an open-source APM tool that provides distributed tracing as one of its main capabilities. It is built to natively support OpenTelemetry so that you can build your entire monitoring stack with open source tools.
 
@@ -157,25 +149,22 @@ It provides both metrics monitoring and distributed tracing with an ability to c
 
 For example, you can view traces at a particular timestamp where metrics like application latency are poor, and then you can dig deeper with traces generated around that timestamp.
 
-<Screenshot
-   alt="Metrics monitoring with SigNoz"
-   height={400}
-   src="/img/blog/2022/03/metrics_monitoring_signoz.webp"
-   title="Metrics monitoring with SigNoz"
-   width={600}
-/>
+
+<figure data-zoomable align='center'>
+    <img src="/img/blog/2022/03/metrics_monitoring_signoz.webp" alt="Metrics monitoring with SigNoz"/>
+    <figcaption><i>Metrics monitoring with SigNoz</i></figcaption>
+</figure>
+
+<br></br>
 
 SigNoz comes with out of box visualizations for your tracing data. The `Traces` dashboard of SigNoz provides you with powerful filters that can be used to analyze your tracing data.
 
-<Screenshot
-   alt="Traces tab of SigNoz"
-   height={500}
-   src="/img/blog/2022/03/signoz_traces_tab.webp"
-   title="The Traces tab of SigNoz provides powerful filters like service name, status, HTTP status code, operation, etc. to analyze your traces data quickly"
-   width={700}
-/>
+<figure data-zoomable align='center'>
+    <img src="/img/blog/2022/03/signoz_traces_tab.webp" alt="Traces tab of SigNoz"/>
+    <figcaption><i>The Traces tab of SigNoz provides powerful filters like service name, status, HTTP status code, operation, etc. to analyze your traces data quickly</i></figcaption>
+</figure>
 
-The traces tab of SigNoz provides powerful filters like service name, status, HTTP status code, operation, etc. to analyze your traces data quickly
+<br></br>
 
 You can see all the spans based on selected filters and the chosen time period. And you can also visualize how a particular span performed as part of an entire user request with Flamegraphs and Gantt Charts.
 

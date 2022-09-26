@@ -7,10 +7,9 @@ authors: [ankit_anand]
 description: OpenTelemetry is quietly becoming the world standard for instrumenting cloud-native applications.To understand complex distributed systems, DevOps engineers need to implement a robust observability & monitoring framework. OpenTelemetry provides vendor-neutral open source observability framework...
 image: /img/blog/2022/09/current_state_of_opentelemetry_cover.webp
 keywords:
-  - kubernetes
-  - kubernetes metrics server
-  - Kubernetes metrics
-  - kubernetes audit policy
+  - opentelemetry
+  - devops
+  - instrumentation
 ---
 
 <head>
