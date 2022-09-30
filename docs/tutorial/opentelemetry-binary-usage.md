@@ -5,7 +5,6 @@ description: Using OpenTelemetry binary usage and monitor the virtual machine (V
 ---
 
 import HostMetrics from '../shared/hostmetrics-list.md'
-import OtelBinary from '../shared/opentelemetry-binary-download.md'
 
 ### Overview
 
@@ -40,7 +39,15 @@ default configuration prepopulated at `/etc/otelcol-contrib` path. This method
 would be preferable in case you want the OpenTelemetry collector to always be
 running in the background.
 
-<OtelBinary name="deb" version="0.55.0" />
+To download `deb` file of release version `0.55.0`:
+
+```bash
+wget https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.55.0/otelcol-contrib_0.55.0_linux_amd64.deb
+```
+
+:::info
+In case of different OpenTelemetry collector version, replace `0.55.0` with respective version.
+:::
 
 To install `otelcol` as `systemd` using `dpkg`:
 
@@ -54,7 +61,15 @@ Using `tar.gz` release asset, we can extract the OpenTelemetry collector binary
 and default configuration at our desired path. We can run the binary directly
 with flags either use `tmux
 
-<OtelBinary name="tar.gz" version="0.55.0" />
+To download `tar.gz` file of release version `0.55.0`:
+
+```bash
+wget https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.55.0/otelcol-contrib_0.55.0_linux_amd64.tar.gz
+```
+
+:::info
+In case of different OpenTelemetry collector version, replace `0.55.0` with respective version.
+:::
 
 To create `otelcol` folder and extract files from `tar.gz` to newly created folder:
 
