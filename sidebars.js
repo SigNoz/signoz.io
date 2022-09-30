@@ -243,7 +243,8 @@ module.exports = {
         'tutorial/mongodb-metrics',
         'tutorial/instrumenting-angular-frontend',
         'tutorial/s3-integration-iam-role-eks',
-        'tutorial/opentelemetry-operator-usage'
+        'tutorial/opentelemetry-operator-usage',
+        'tutorial/opentelemetry-binary-usage-in-virtual-machine'
       ],
     },
     {
