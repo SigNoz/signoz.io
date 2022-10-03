@@ -1,10 +1,10 @@
 ---
-title: SigNoz is taking part in Hacktoberfest!
+title: SigNoz is taking part in Hacktoberfest - 2022!
 slug: hacktoberfest
-date: 2021-10-01
+date: 2022-10-03
 tags: [SigNoz, Open Source]
 authors: ankit_anand
-description: As an open-source project, we are excited to announce that SigNoz is participating in Hacktoberfest!..
+description: As an open-source project, we are excited to announce that SigNoz is participating in Hacktoberfest 2022!..
 image: /img/blog/2021/10/hacktoberfest_signoz_new-min.webp
 keywords:
   - hacktoberfest
@@ -25,15 +25,12 @@ Have you been waiting to start making open-source contributions? There can never
 
 Do you want your GitHub profile to look like this👇
 
-import Screenshot from "@theme/Screenshot"
+<figure data-zoomable>
+    <img src="/img/blog/2021/10/github_contributions-min.webp" alt="GitHub contributions"/>
+    <figcaption><i>Do you want your GitHub profile full of these green dots?</i></figcaption>
+</figure>
 
-<Screenshot
-  alt="GitHub contributions"
-  height={500}
-  src="/img/blog/2021/10/github_contributions-min.webp"
-  title="Do you want your GitHub profile full of these green dots?"
-  width={700}
-/>
+<br></br>
 
 >Open-source is changing the world, one contribution at a time.
 
@@ -44,11 +41,11 @@ As an open-source project, we are excited to announce that **SigNoz is participa
 ## Steps to participate in Hacktoberfest
 Here are the steps that you need to follow in order to participate in hacktoberfest:
 
-- Sign up on the official **[Hacktoberfest website](https://hacktoberfest.digitalocean.com/)** for your pull requests to count.
+- Sign up on the official **[Hacktoberfest website](https://hacktoberfest.com/)** for your pull requests to count.
 - Pull requests can be made in any participating GitHub or GitLab hosted project. Projects having `hacktoberfest` in its topic are participating.
-- Make four approved PRs in opted-in projects between October 1-31 in any time zone.
+- Make four approved PRs in opted-in projects between October 1 and October 31 in any time zone to complete the Hacktoberfest.
 
-Hurry up! Only the first 50,000 participants can earn a T-shirt.
+The first 40,000 participants who complete the challenge successfully can elect to receive one of two prizes: a tree planted in their name, or the Hacktoberfest 2022 t-shirt.
 
 ## Why choose SigNoz for participating in Hacktoberfest??
 Well, we have tons of issues to be taken care and we will be glad to have your helping hand. We also have a vibrant **[slack community](https://signoz.io/slack)** where you can seek out help in order to make your PRs. Just join our community and tell us you're there for Hacktoberfest!
@@ -71,13 +68,13 @@ Here are a few benefits of contributing to open-source:
 
 At SigNoz, we believe that the future of software is open-source. SigNoz is a full-stack **application performance monitoring tool** with which we hope to empower developers to solve issues in production quickly. We believe a **developer-first** and **community-driven approach** would be best suited for a product that is used by developers day in and day out.
 
-We have a vibrant community of **more than 250 developers** collaborating together to build the next-gen open-source monitoring solution to keep your systems in fine health. The best thing about open-source is its community where you get to meet a diverse set of people coming together to solve some challenging problems.
+We have a vibrant community of **more than 1400 developers** collaborating together to build the next-gen open-source monitoring solution to keep your systems in fine health. The best thing about open-source is its community where you get to meet a diverse set of people coming together to solve some challenging problems.
 
 We're looking forward to help you take your first steps in the world of open-source. We would also love to host folks who want to learn more about performance monitoring software.
 
 So, let's not wait to create those pull requests and get some green dots on your GitHub profile 🥳🎉
 
-## List of good first issues in SigNoz
+<!-- ## List of good first issues in SigNoz
 Here's a list of some good first issues that you can take up for SigNoz:
 
 [Integrate bundlephobia as GitHub CI/CD actions](https://github.com/SigNoz/signoz/issues/319)
@@ -88,7 +85,7 @@ Here's a list of some good first issues that you can take up for SigNoz:
 
 [Flamegraph - Sort children by startTime](https://github.com/SigNoz/signoz/issues/178)
 
-[Configure eslint and Prettier github actions](https://github.com/SigNoz/signoz/issues/280)
+[Configure eslint and Prettier github actions](https://github.com/SigNoz/signoz/issues/280) -->
 
 Visit to our GitHub repo now, and start hacking 👇
 

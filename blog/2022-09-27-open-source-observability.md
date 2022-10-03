@@ -20,8 +20,6 @@ keywords:
   <link rel="canonical" href="https://signoz.io/blog/open-source-observability/"/>
 </head>
 
-# 
-
 Cloud computing and containerization have brought many benefits to IT systems, like speed to market and on-demand scaling. But it has also increased operational complexity. Applications built on dynamic and distributed infrastructure are challenging to operate and maintain. A robust observability framework can help application owners stay on top of their software systems.
 
 <!--truncate-->
