@@ -6,7 +6,7 @@ id: collecting_syslogs
 # Collecting Syslogs
 
 With SigNoz you can collect your syslogs logs and perform different queries on top of it.
-In this blog we will configure `rsyslog` to forward our system logs to tcp endpoint of otel-collector and use `syslog` receiver in otel-collector to receive and parse the logs.
+In this example we will configure `rsyslog` to forward our system logs to tcp endpoint of otel-collector and use `syslog` receiver in otel-collector to receive and parse the logs.
 Below are the steps to collect syslogs.
 
 ## Steps
