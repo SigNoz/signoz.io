@@ -265,7 +265,7 @@ In this example, we will configure `rsyslog` to forward our system logs to tcp e
 
     So that you have retires and queue in place to de-couple the sending from the other logging action.
 
-    The value of `target` might vary depending on where SigNoz is deployed, since it is deployed on the same host I am using `0.0.0.0` for more help you can visit [here](../install/troubleshooting.md#signoz-otel-collector-address-grid)
+    The value of `target` might vary depending on where SigNoz is deployed, since it is deployed on the same host I am using `0.0.0.0` for more help you can visit [here](https://signoz.io/docs/install/troubleshooting/#signoz-otel-collector-address-grid)
 
 * Now restart your rsyslog service by running `sudo systemctl restart rsyslog.service`
 * You can check the status of service by running `sudo systemctl status rsyslog.service`
