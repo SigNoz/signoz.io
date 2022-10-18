@@ -245,7 +245,8 @@ module.exports = {
         'tutorial/s3-integration-iam-role-eks',
         'tutorial/opentelemetry-operator-usage',
         'tutorial/opentelemetry-binary-usage-in-virtual-machine',
-        'tutorial/setting-up-tls-for-signoz'
+        'tutorial/setting-up-tls-for-signoz',
+        'tutorial/setting-up-sso-saml-with-keycloak'
       ],
     },
     {
