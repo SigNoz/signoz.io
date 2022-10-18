@@ -47,7 +47,7 @@ before proceeding further.
 
 Let's assume `https://signoz.domain.com` as the endpoint where SigNoz is
 publicly accessible whereas `https://signoz-keycloak.domain.com` being
-the secured endponit of **Keycloak**.
+the secured endpoint of **Keycloak**.
 
 1. Go to the Keycloak Admin console UI and sign in as an administrator
 
@@ -69,7 +69,8 @@ the secured endponit of **Keycloak**.
 
   ![Client access settings](/img/docs/keycloak-saml/client-access-settings.png)
 
-5. Add predefined mappers in SigNoz client: *role list*, *X500 email*, and *X500 given name* 
+5. Go to Clients > Client scopes, and select `signoz.domain.com-dedicated` and
+  add predefined mappers in SigNoz client: *role list*, *X500 email*, and *X500 given name* 
 
   ![Predefined mappers](/img/docs/keycloak-saml/add-predefined-mappers.png)
 
@@ -90,13 +91,14 @@ the secured endponit of **Keycloak**.
 
   ![New user credentials](/img/docs/keycloak-saml/new-user-credentials.png)
 
-10. Go to Realm settings > General, open **SAML 2.0 Identity Provider Metadata**
-    endpoint and make note of the following:
-     - SAML location URL with the `/protocol/saml` suffix which is SAML ACS URL
-     - SAML entity id
-     - SAML X.509 certificate
+10. Go to Realm settings > General, open **SAML 2.0 Identity Provider Metadata** endpoint
 
   ![SAML 2.0 identity provider metadata](/img/docs/keycloak-saml/realm-setting-saml.png)
+
+  From the XML file, make note of the followings:
+   - SAML location URL with the `/protocol/saml` suffix which is SAML ACS URL
+   - SAML entity id
+   - SAML X.509 certificate
 
 11. In SigNoz UI, go to Settings > Organization Settings > Authenticated Domains
 
@@ -106,17 +108,17 @@ the secured endponit of **Keycloak**.
   ![Add authenticated domain](/img/docs/keycloak-saml/add-domain.png)
 
 12. SAML configurations from **Step 10** is set in SigNoz and enable the
-    **Enforce SSO** toggle
+  **Enforce SSO** toggle
 
   ![SigNoz SAML configuration](/img/docs/keycloak-saml/signoz-saml-configuration.png)
 
 13. Open your browser with incognito (or private) mode, and open your SigNoz
-    URL and click **Login** followed by **SSO Login**
+  URL and click **Login** followed by **SSO Login**
 
   ![SSO Login](/img/docs/keycloak-saml/sso-login.png)
 
 14. You will be redirected to Keycloak user login page, enter Keycloak user
-    credentials from **Step 8** and **Step 9**
+  credentials from **Step 8** and **Step 9**
 
   ![Keycloak user login](/img/docs/keycloak-saml/keycloak-user-login.png)
 
@@ -136,7 +138,7 @@ keycloak:
 
   auth:
     adminUser: admin
-    adminPassowrd: adminpass123
+    adminPassword: adminpass123
 
   postgresql:
     auth:
