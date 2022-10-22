@@ -1,5 +1,5 @@
 ---
-title: Top 14 ELK alternatives[Open Source included] in 2022
+title: Top 14 ELK alternatives [open source included] in 2022
 slug: elk-alternatives
 date: 2022-10-13
 tags: [Tech Resources]
