@@ -37,11 +37,10 @@ Let's include it in the existing `override-values.yaml` file, create one if not 
 cert-manager:
   enabled: true
   installCRDs: true
-  namespace: security
 ```
 
-Now, let's create a namespace called `security` where the `cert-manager` will be installed
-instead of the Helm release namespace.
+(Optional) You can also include `namespace: security` in above YAML configuration to
+install `cert-manager` in `security` namespace instead of the Helm release namespace.
 
 ```bash
 kubectl create namespace security
@@ -114,30 +113,30 @@ that can generate signed certificates by honoring certificate signing requests.
 All cert-manager certificates require a referenced issuer that is in a ready condition
 to attempt to honour the request.
 
-To create `ClusterIssuer` with name `letsencrypt-prod`:
+Let's include the following configuration in the existing `override-values.yaml` file:
 
-```
-kubectl apply -n platform -f - <<EOF 
-apiVersion: cert-manager.io/v1
-kind: ClusterIssuer
-metadata: 
-  name: letsencrypt-prod
-spec: 
-  acme: 
-    privateKeySecretRef:
-      name: letsencrypt-prod
-    server: https://acme-v02.api.letsencrypt.org/directory
-    email: prashant@domain.com
-    solvers:
-      - http01:
-          ingress:
-            class: nginx
-EOF
+```yaml
+cert-manager:
+  enabled: true
+  installCRDs: false
+
+  letsencrypt: true
+  ingressClassName: nginx
+  email: prashant@domain.com
 ```
 
 :::info
 Replace `prashant@domain.com` with your company email id.
 :::
+
+To upgrade SigNoz release with the updated configurations in `override-values.yaml`:
+
+```bash
+helm -n platform upgrade \
+    --create-namespace --install \
+    my-release signoz/signoz \
+    -f override-values.yaml
+```
 
 ### Enable SigNoz Ingress
 
