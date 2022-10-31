@@ -224,7 +224,7 @@ Steps to get the app set up and running:
 
 
 3. **Update `index.js` to initialize OpenTelemetry**<br></br>
-   You need to initialize OpenTelemetry before the app runs. You can do so by calling `tracing.js` from your main application file. For our example, we can do so by following code:
+   You need to initialize OpenTelemetry before the app runs. You can do so by calling `tracing.js` from your main application file. Importing and `init` of `tracing.js` must be the first line in your application code. For our example, we can do so by following code:
 
    ```jsx
    const { init } = require('./tracing')
