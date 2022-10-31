@@ -9,7 +9,7 @@ import clsx from "clsx";
 import Link from "@docusaurus/Link";
 import { useThemeConfig } from "@docusaurus/theme-common";
 import useBaseUrl from "@docusaurus/useBaseUrl";
-import styles from "./styles.module.css";
+import { isValidEmail } from "./isValidEmail";
 
 function FooterLink({ to, href, label, prependBaseUrlToHref, ...props }) {
   const toUrl = useBaseUrl(to);
@@ -42,25 +42,23 @@ const FooterLogo = ({ url, alt }) => (
 function NewsletterSignup() {
   const [email, setEmail] = useState("");
 
-  const onSubscribe = () => {
-    if (email.length < 4) {
-      setEmail("Please enter correct email");
-    } else {
-      fetch(
-        `https://hook.integromat.com/cyoxzygiy8klhr1fxe4r5x58mlkxi1vu?email=${email}`
-      )
-        .then(() => {
-          setEmail("Subscribed successfully.");
-        })
-        .catch((e) => {
-          setEmail("Some error occurred. Please try again.");
-        });
-    }
+  const onSubscribe = (event) => {
+    event.preventDefault();
+    fetch(
+      `https://api.telegram.org/bot1641579317:AAGHqzQKOT9R3Wcxx7ZgHZcI0Vi6CzjmncY/sendMessage?chat_id=521831111&text=Email subscription - ${email}`
+    )
+      .then(() => {
+        setEmail("Subscribed successfully.");
+      })
+      .catch((e) => {
+        setEmail("Some error occurred. Please try again.");
+      });
   };
+
   return (
     <div>
       Signup to receive updates
-      <div>
+      <form onSubmit={onSubscribe}>
         <input
           placeholder="mike@netflix.com"
           className={"footer-newsletter-modal"}
@@ -68,17 +66,20 @@ function NewsletterSignup() {
           onChange={(e) => {
             setEmail(e.target.value);
           }}
+          type="email"
+          required
         />
         <div>
           <button
-            className={"button button--primary "}
+            className={"button button--primary"}
             style={{ marginBottom: 20 }}
-            onClick={onSubscribe}
+            type="submit"
+            disabled={!isValidEmail(email)}
           >
             Subscribe
           </button>
         </div>
-      </div>
+      </form>
     </div>
   );
 }
@@ -86,7 +87,6 @@ function NewsletterSignup() {
 function Footer() {
   const { footer } = useThemeConfig();
   const { copyright, links = [], logo = {} } = footer || {};
-  const logoUrl = useBaseUrl(logo.src);
 
   if (!footer) {
     return null;
