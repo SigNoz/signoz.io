@@ -1,7 +1,7 @@
 ---
 title: Monitor your Nodejs application with OpenTelemetry and SigNoz
 slug: nodejs
-date: 2021-08-18
+date: 2022-10-31
 tags: [javascript-monitoring]
 author: Ankit Anand
 author_title: SigNoz Team
