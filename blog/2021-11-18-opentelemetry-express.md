@@ -1,7 +1,7 @@
 ---
 title: Monitoring your Express application using OpenTelemetry
 slug: opentelemetry-express
-date: 2021-11-18
+date: 2022-10-20
 tags: [OpenTelemetry Instrumentation, JavaScript]
 authors: ankit_anand
 description: OpenTelemetry is a vendor-agnostic isntrumentation library. In this article, learn how to set up monitoring for an Express application using OpenTelemetry.
@@ -68,34 +68,50 @@ import Screenshot from "@theme/Screenshot"
 />
 
 ### Creating a sample express application
-You need to ensure that you have Node.js version 12 or newer.
 
-<a href = "https://nodejs.org/en/download/" rel="noopener noreferrer nofollow" target="_blank" >Download latest version of Nodejs</a>.
+You need to ensure that you have **Node.js version 12 or newer**. You can download the latest version of Node.js [here](https://nodejs.org/en/download/). For the sample application, let's create a basic 'hello world' express.js application.
 
-For the sample application, let's create a basic 'hello world' express.js application.
+If you do not want to follow these steps manually, you can directly check out the <a href="https://github.com/SigNoz/sample-nodejs-app" rel="noopener noreferrer nofollow" target="_blank">GitHub repo</a> of the sample application. You can run the app directly after cloning it and start sending data to SigNoz. The code is already instrumented with OpenTelemetry libraries.
+
+But, it would be better if you follow these steps to understand what's happening.
+
+Check if node is installed on your machine by using the below command:
+
+```jsx
+node -v
+```
 
 Steps to get the app set up and running:
 
 1. **Make a directory and install express**<br></br>
-
    Make a directory for your sample app on your machine. Then open up the terminal, navigate to the directory path and install express with the following command:
-   ```jsx
+   ```
    npm i express
    ```
-2. **Setup index.js**<br></br>
-   Create a file called `index.js` in your directory and with any text editor setup your `Hello World` file with the code below:
+
+2. **Create index.js**<br></br>
+   Create a file called `index.js` in your directory and with any text editor setup your 'Hello World' file with the code below:
+
    ```jsx
-   const express = require('express');
-
+   const express = require("express");
+   const cors = require('cors')
+   const PORT = process.env.PORT || "5555";
    const app = express();
-
-   app.get('/hello', (req, res) => {
-
-   res.status(200).send('Hello World');
-
-   });
-
-   app.listen(9090);
+   
+   app.use(cors());
+   app.use(express.json())
+   
+   app.all("/", (req, res) => {
+    res.json({ method: req.method, message: "Hello World", ...req.body });
+    });
+    
+    app.get('/404', (req, res) => {
+    res.sendStatus(404);
+    })
+    
+    app.listen(parseInt(PORT, 10), () => {
+    console.log(`Listening for requests on http://localhost:${PORT}`);
+    })
    ```
 
 3. **Check if your application is working**<br></br>
@@ -105,87 +121,28 @@ Steps to get the app set up and running:
    node index.js
    ```
 
-   You can check if your app is working by visiting: [http://localhost:9090/hello](http://localhost:9090/hello)
+   You can check if your app is working by visiting: [http://localhost:5555/](http://localhost:5555/)
 
-<Screenshot
-    alt="Express App"
-    height={500}
-    src="/img/blog/2021/11/express_app.webp"
-    title="Express app running on local host"
-    width={700}
-/>
+   Once you are finished checking, exit the application by using `Ctrl + C` on your terminal.
 
-Once you are finished checking, exit the application by using `Ctrl + C` on your terminal.
-
-### Instrumenting the express application with OpenTelemetry
-<!-- 1. **Install OpenTelemetry launcher package**<br></br>
-   In the same directory path at the terminal, install the OpenTelemetry launcher package with this command:
-   ```jsx
-   npm install lightstep-opentelemetry-launcher-node
-   ```
-   The OpenTelemetry launcher makes getting started with OpenTelemetry easier by reducing configuration boilerplate. -->
+## Set up OpenTelemetry and send data to SigNoz
 
 1. **Install OpenTelemetry packages**<br></br>
    You will need the following OpenTelemetry packages for this sample application.
    
    ```jsx
-   npm install --save @opentelemetry/api
    npm install --save @opentelemetry/sdk-node
    npm install --save @opentelemetry/auto-instrumentations-node
-   npm install --save @opentelemetry/exporter-otlp-grpc
+   npm install --save @opentelemetry/exporter-trace-otlp-http
    ```
 
-   OpenTelemetry clients have two major components: the SDK and the API. The details of the packages used for the application are as follows:
-   - `opentelemetry/api`<br></br>
-      Defines data types and operations for generating and correlating tracing, metrics, and logging data. The API is what you use to instrument your code.
+   The dependencies included are briefly explained below:<br></br>
 
-   - `opentelemetry/sdk-node`<br></br>
-      Provides automated instrumentation and tracing for Node.js applications.
-
-   - `opentelemetry/auto-instrumentations-node`<br></br>
-      A meta-package from [opentelemetry-js-contrib](https://github.com/open-telemetry/opentelemetry-js-contrib/tree/main/metapackages/auto-instrumentations-node) that provides a simple way to initialize multiple Node.js instrumentations.
-
-   - `opentelemetry/exporter-otlp-grpc`<br></br>
-      Exports data via gRPC using [OTLP](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/protocol/otlp.md) format.
-
-<!-- 2. **Using OpenTelemetry SDK**<br></br>
-   To use OpenTelemetry, you need to start the OpenTelemetry SDK before loading your application. By initializing OpenTelemetry first, we enable OpenTelemetry to apply available instrumentation and auto-detect packages before the application starts to run. To do that, go to your directory and create a new file named, "server_init.js". This will act as the new entry point for your app. Paste the following code in the file:
-
-   ```jsx
-   const {
-
-  lightstep,
-
-  opentelemetry,
-
-  } = require('lightstep-opentelemetry-launcher-node');
-
-  const sdk = lightstep.configureOpenTelemetry();
-
-  sdk.start().then(() => {
-
-  require('./server');
-
-  });
-
-  function shutdown() {
-
-  sdk.shutdown().then(
-
-  () => console.log("SDK shut down successfully"),
-
-  (err) => console.log("Error shutting down SDK", err),
-
-  ).finally(() => process.exit(0))
-
-  };
-
-  process.on('exit', shutdown);
-
-  process.on('SIGINT', shutdown);
-
-  process.on('SIGTERM', shutdown);
-  ``` -->
+    `@opentelemetry/sdk-node` - This package provides the full OpenTelemetry SDK for Node.js including tracing and metrics.<br></br>
+    
+    `@opentelemetry/auto-instrumentations-node` - This module provides a simple way to initialize multiple Node instrumentations.<br></br>
+    
+    `@opentelemetry/exporter-trace-otlp-http` - This module provides the exporter to be used with OTLP (`http/json`) compatible receivers.<br></br>
 
 
 2. **Create `tracing.js` file**<br></br>
@@ -194,60 +151,115 @@ Once you are finished checking, exit the application by using `Ctrl + C` on your
    ```jsx
    // tracing.js
    'use strict'
-   const process = require('process');
-   const opentelemetry = require('@opentelemetry/sdk-node');
-   const { getNodeAutoInstrumentations } = require('@opentelemetry/auto-instrumentations-node');
-   const { OTLPTraceExporter } = require('@opentelemetry/exporter-otlp-grpc');
-   // configure the SDK to export telemetry data to the console
-   // enable all auto-instrumentations from the meta package
-   const traceExporter = new OTLPTraceExporter();
-   const sdk = new opentelemetry.NodeSDK({
-     traceExporter,
-     instrumentations: [getNodeAutoInstrumentations()]
-     });
-     
-     // initialize the SDK and register with the OpenTelemetry API
-     // this enables the API to record telemetry
-     sdk.start()
-     .then(() => console.log('Tracing initialized'))
-     .catch((error) => console.log('Error initializing tracing', error));
-     
-     // gracefully shut down the SDK on process exit
-     process.on('SIGTERM', () => {
-       sdk.shutdown()
-       .then(() => console.log('Tracing terminated'))
-       .catch((error) => console.log('Error terminating tracing', error))
-       .finally(() => process.exit(0));
-       });
-  ```
+   const {
+      // ConsoleSpanExporter,
+      BatchSpanProcessor,
+      } = require('@opentelemetry/tracing')
+      const { Resource } = require('@opentelemetry/resources')
+      const { SemanticResourceAttributes } = require('@opentelemetry/semantic-conventions')
+      const { registerInstrumentations } = require('@opentelemetry/instrumentation')
+      const { getNodeAutoInstrumentations } = require('@opentelemetry/auto-instrumentations-node')
+      const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-http')
+      const { NodeTracerProvider } = require('@opentelemetry/sdk-trace-node')
+      
+      const hostName = process.env.OTEL_TRACE_HOST || 'localhost'
+      
+      const init = (serviceName, environment) => {
+         
+         // use OTLP exporter to send traces to the collector
+         const exporter = new OTLPTraceExporter({
+            // optional - url default value is http://localhost:4318/v1/traces
+            url: `http://${hostName}:4318/v1/traces`,
+            // optional - collection of custom headers to be sent with each request, empty by default
+            headers: {},
+            });
+            
+         const provider = new NodeTracerProvider({
+            resource: new Resource({
+               [SemanticResourceAttributes.SERVICE_NAME]: serviceName, // Service name that should be listed in SigNoz UI
+               [SemanticResourceAttributes.DEPLOYMENT_ENVIRONMENT]: environment,
+               }),
+               })
+               
+         // Use the BatchSpanProcessor to export spans in batches in order to more efficiently use resources.
+         provider.addSpanProcessor(new BatchSpanProcessor(exporter))
+         
+         // Enable to see the spans printed in the console by the ConsoleSpanExporter
+         // provider.addSpanProcessor(new BatchSpanProcessor(new ConsoleSpanExporter()))
+         
+         provider.register()
+         
+         console.log('tracing initialized')
+         
+         registerInstrumentations({
+            instrumentations: [new getNodeAutoInstrumentations()],
+            })
+            
+         const tracer = provider.getTracer(serviceName)
+         return { tracer }
+      }
+         
+      module.exports = {
+         init: init,
+         }
+      ```
+   
+   OpenTelemetry Node SDK currently does not detect the `OTEL_RESOURCE_ATTRIBUTES` from `.env` files as of today. That’s why we need to include the variables in the `tracing.js` file itself.
 
-3. **Pass the necessary environment variable**<br></br>
-   Once the file is created, you only need to run one last command at your terminal, which passes the necessary environment variables. Here, you also set SigNoz as your backend analysis tool.
+   About environment variables:
+
+   `service_name`: name of the service you want to monitor
+
+   `environment`: dev, prod, staging, etc.
+
+   `http://localhost:4318/v1/traces` is the default url for sending your tracing data. We are assuming you have installed SigNoz on your `localhost`. Based on your environment, you can update it accordingly. It should be in the following format:
+      
+   `http://<IP of SigNoz backend>:4318/v1/traces`
+
+   :::note
+   Remember to allow incoming requests to port 4318 of machine where SigNoz backend is hosted.
+   :::
+
+
+3. **Update `index.js` to initialize OpenTelemetry**<br></br>
+   You need to initialize OpenTelemetry before the app runs. You can do so by calling `tracing.js` from your main application file. Importing and `init` of `tracing.js` must be the first line in your application code. For our example, we can do so by following code:
 
    ```jsx
-   OTEL_EXPORTER_OTLP_ENDPOINT="<IP of SigNoz>:4317" \
-   OTEL_RESOURCE_ATTRIBUTES=service.name=<service_name> \
-   node -r ./tracing.js index.js
+   const { init } = require('./tracing')
+   const api = require('@opentelemetry/api')
+   init('demo-node-service', 'development')
+   
+   const express = require("express");
+   const cors = require('cors')
+   const PORT = process.env.PORT || "5555";
+   const app = express();
+   
+   app.use(cors());
+   app.use(express.json())
+   
+   app.all("/", (req, res) => {
+    res.json({ method: req.method, message: "Hello World", ...req.body });
+    });
+    
+    app.get('/404', (req, res) => {
+    res.sendStatus(404);
+    })
+    
+    app.listen(parseInt(PORT, 10), () => {
+    console.log(`Listening for requests on http://localhost:${PORT}`);
+    });
    ```
 
-   Replacing the placeholders in the above command for local host:
-
-   `IP of SigNoz Backend`: localhost (since we are running SigNoz on our local host)
-
-   `service_name` : express_app (you can give whatever name that suits you)
-
-   So the final command is:
+4. **Run your application**<br></br>
+   Now when you run your application, OpenTelemetry captures telemetry data from it and send it to SigNoz.
 
    ```jsx
-   OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4317" \
-   OTEL_RESOURCE_ATTRIBUTES=service.name=express_app \
-   node -r ./tracing.js index.js
+   node index.js
    ```
 
-And congratulations! You have now instrumented your express application with OpenTelemetry.
+   You can check your application running at [http://localhost:5555/](http://localhost:5555/). You need to generate some load in order to see data reported on SigNoz dashboard. Refresh the endpoint for 10-20 times, and wait for 2-3 mins.
 
-Below you can find your `express_app` in the list of applications being monitored. You might have to hit the endpoint at [http://localhost:9090/hello](http://localhost:9090/hello) multiple times to generate some load before you see your app on the SigNoz dashboard.
-
+And, congratulations! You have instrumented your sample Node.js app. You can now access the SigNoz dashboard at [http://localhost:3301](http://localhost:3301) to monitor your app for performance metrics.
 
 <Screenshot
     alt="Express app in the list of applications"

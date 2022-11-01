@@ -204,7 +204,9 @@ Steps to get the app set up and running:
 
    About environment variables:
 
-   `service_name` : node_app (you can give whatever name that suits you)
+   `service_name`: name of the service you want to monitor
+
+   `environment`: dev, prod, staging, etc.
 
    `http://localhost:4318/v1/traces` is the default url for sending your tracing data. We are assuming you have installed SigNoz on your `localhost`. Based on your environment, you can update it accordingly. It should be in the following format:
       
