@@ -1,7 +1,7 @@
 ---
 title: MEVN stack tutorial | Build a CRUD app using Vue 3, Node, Express & MongoDB
 slug: mevn-stack-tutorial
-date: 2022-06-07
+date: 2022-10-07
 tags: [Tech Tutorial]
 authors: [sai_deepesh]
 description: In this beginner-friendly tutorial, we will create a simple CRUD To Do application using the popular MEVN stack. Users can use the end application to create, read, update, and delete data...
@@ -631,10 +631,14 @@ Once you build your application and deploy it to production, monitoring it for p
 
 A full-stack Application Performance Monitoring solution like [SigNoz](https://signoz.io/) can help you monitor your MEVN applications for performance and troubleshooting. In order to monitor your application, you need to generate telemetry data out of it. 
 
+You can learn how to set up monitoring for the above application from the blog [here](https://signoz.io/blog/nodejs-performance-monitoring/). 
+
 SigNoz uses OpenTelemetry - an open-source project aimed at creating an open standard for instrumentation - to instrument applications for generating telemetry data. SigNoz is open-source, so you can try it out directly from its GitHub repo:
 
 [![SigNoz GitHub repo](/img/blog/common/signoz_github.webp)](https://github.com/SigNoz/signoz)
 
 ## Further Reading:
+
+[Monitoring your MEVN application with SigNoz](https://signoz.io/blog/nodejs-performance-monitoring/)
 
 [SigNoz - an open-source alternative to DataDog](https://signoz.io/blog/open-source-datadog-alternative/)

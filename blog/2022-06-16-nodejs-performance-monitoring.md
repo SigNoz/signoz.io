@@ -1,7 +1,7 @@
 ---
 title: Nodejs Performance Monitoring | Monitor a full-stack Nodejs application with open-source tools
 slug: nodejs-performance-monitoring
-date: 2022-06-16
+date: 2022-10-20
 tags: [OpenTelemetry Instrumentation, JavaScript]
 authors: [ankit_anand, sai_deepesh]
 description: Nodejs performance monitoring can give you actionable insights into the performance of your Nodejs application. In this tutorial, we will use two open-source tools - SigNoz and OpenTelemetry to monitor a full-stack nodejs application...
@@ -339,10 +339,9 @@ Now, get into `/server` and follow the below steps
 **Step1:** **Install** **OpenTelemetry** **packages**:
 
 ```jsx
-npm install --save @opentelemetry/api
 npm install --save @opentelemetry/sdk-node
 npm install --save @opentelemetry/auto-instrumentations-node
-npm install --save @opentelemetry/exporter-otlp-grpc
+npm install --save @opentelemetry/exporter-trace-otlp-http
 ```
 
 **Step 2: Create `tracing.js` file**
@@ -355,28 +354,29 @@ Instantiate tracing by creating a `tracing.js` file and using the below code:
 const process = require('process');
 const opentelemetry = require('@opentelemetry/sdk-node');
 const { getNodeAutoInstrumentations } = require('@opentelemetry/auto-instrumentations-node');
-const { OTLPTraceExporter } = require('@opentelemetry/exporter-otlp-grpc');
+const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-http');
+
 // configure the SDK to export telemetry data to the console
 // enable all auto-instrumentations from the meta package
 const traceExporter = new OTLPTraceExporter();
 const sdk = new opentelemetry.NodeSDK({
-  traceExporter,
-  instrumentations: [getNodeAutoInstrumentations()]
-  });
-  
-  // initialize the SDK and register with the OpenTelemetry API
-  // this enables the API to record telemetry
-  sdk.start()
-  .then(() => console.log('Tracing initialized'))
-  .catch((error) => console.log('Error initializing tracing', error));
-  
-  // gracefully shut down the SDK on process exit
-  process.on('SIGTERM', () => {
+    traceExporter,
+    instrumentations: [getNodeAutoInstrumentations()],
+});
+
+// initialize the SDK and register with the OpenTelemetry API
+// this enables the API to record telemetry
+sdk.start()
+    .then(() => console.log('Tracing initialized'))
+    .catch((error) => console.log('Error initializing tracing', error));
+
+// gracefully shut down the SDK on process exit
+process.on('SIGTERM', () => {
     sdk.shutdown()
-    .then(() => console.log('Tracing terminated'))
-    .catch((error) => console.log('Error terminating tracing', error))
-    .finally(() => process.exit(0));
-    });
+        .then(() => console.log('Tracing terminated'))
+        .catch((error) => console.log('Error terminating tracing', error))
+        .finally(() => process.exit(0));
+});
 ```
 
 **Pass the necessary environment variable**
@@ -384,7 +384,7 @@ const sdk = new opentelemetry.NodeSDK({
 Once the file is created, you only need to run one last command at your terminal, which passes the necessary environment variables. Here, you also set SigNoz as your backend analysis tool.
 
 ```jsx
-export OTEL_EXPORTER_OTLP_ENDPOINT="<IP of SigNoz>:4317"
+export OTEL_EXPORTER_OTLP_ENDPOINT="<IP of SigNoz>:4318"
 export OTEL_RESOURCE_ATTRIBUTES=service.name=<service_name> \
 ```
 
@@ -397,7 +397,7 @@ Replacing the placeholders in the above command for localhost:
 So the final command is:
 
 ```jsx
-export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4317"
+export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318"
 export OTEL_RESOURCE_ATTRIBUTES=service.name=mevn-signoz
 ```
 
