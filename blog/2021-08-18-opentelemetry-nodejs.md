@@ -155,58 +155,42 @@ Steps to get the app set up and running:
    ```jsx
    // tracing.js
    'use strict'
-   const {
-      // ConsoleSpanExporter,
-      BatchSpanProcessor,
-      } = require('@opentelemetry/tracing')
-      const { Resource } = require('@opentelemetry/resources')
-      const { SemanticResourceAttributes } = require('@opentelemetry/semantic-conventions')
-      const { registerInstrumentations } = require('@opentelemetry/instrumentation')
-      const { getNodeAutoInstrumentations } = require('@opentelemetry/auto-instrumentations-node')
-      const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-http')
-      const { NodeTracerProvider } = require('@opentelemetry/sdk-trace-node')
-      
-      const hostName = process.env.OTEL_TRACE_HOST || 'localhost'
-      
-      const init = (serviceName, environment) => {
-         
-         // use OTLP exporter to send traces to the collector
-         const exporter = new OTLPTraceExporter({
-            // optional - url default value is http://localhost:4318/v1/traces
-            url: `http://${hostName}:4318/v1/traces`,
-            // optional - collection of custom headers to be sent with each request, empty by default
-            headers: {},
-            });
-            
-         const provider = new NodeTracerProvider({
-            resource: new Resource({
-               [SemanticResourceAttributes.SERVICE_NAME]: serviceName, // Service name that should be listed in SigNoz UI
-               [SemanticResourceAttributes.DEPLOYMENT_ENVIRONMENT]: environment,
-               }),
-               })
-               
-         // Use the BatchSpanProcessor to export spans in batches in order to more efficiently use resources.
-         provider.addSpanProcessor(new BatchSpanProcessor(exporter))
-         
-         // Enable to see the spans printed in the console by the ConsoleSpanExporter
-         // provider.addSpanProcessor(new BatchSpanProcessor(new ConsoleSpanExporter()))
-         
-         provider.register()
-         
-         console.log('tracing initialized')
-         
-         registerInstrumentations({
-            instrumentations: [new getNodeAutoInstrumentations()],
-            })
-            
-         const tracer = provider.getTracer(serviceName)
-         return { tracer }
+   const process = require('process');
+   const opentelemetry = require('@opentelemetry/sdk-node');
+   const { getNodeAutoInstrumentations } = require('@opentelemetry/auto-instrumentations-node');
+   const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-http');
+   const { Resource } = require('@opentelemetry/resources');
+   const { SemanticResourceAttributes } = require('@opentelemetry/semantic-conventions');
+   
+   const exporterOptions = {
+      url: 'http://localhost:4318/v1/traces'
       }
-         
-      module.exports = {
-         init: init,
-         }
-      ```
+      
+   const traceExporter = new OTLPTraceExporter(exporterOptions);
+   const sdk = new opentelemetry.NodeSDK({
+      traceExporter,
+      instrumentations: [getNodeAutoInstrumentations()],
+      resource: new Resource({
+         [SemanticResourceAttributes.SERVICE_NAME]: 'node_app'
+         })
+   });
+   
+   // initialize the SDK and register with the OpenTelemetry API
+   // this enables the API to record telemetry
+   
+   sdk.start()
+   .then(() => console.log('Tracing initialized'))
+   .catch((error) => console.log('Error initializing tracing', error));
+   
+   // gracefully shut down the SDK on process exit
+   process.on('SIGTERM', () => {
+      sdk.shutdown()
+    .then(() => console.log('Tracing terminated'))
+    .catch((error) => console.log('Error terminating tracing', error))
+    .finally(() => process.exit(0));
+    });
+   
+   ```
    
    OpenTelemetry Node SDK currently does not detect the `OTEL_RESOURCE_ATTRIBUTES` from `.env` files as of today. That’s why we need to include the variables in the `tracing.js` file itself.
 
@@ -225,40 +209,11 @@ Steps to get the app set up and running:
    :::
 
 
-3. **Update `index.js` to initialize OpenTelemetry**<br></br>
-   You need to initialize OpenTelemetry before the app runs. You can do so by calling `tracing.js` from your main application file. Importing and `init` of `tracing.js` must be the first line in your application code. For our example, we can do so by following code:
-
-   ```jsx
-   const { init } = require('./tracing')
-   const api = require('@opentelemetry/api')
-   init('demo-node-service', 'development')
-   
-   const express = require("express");
-   const cors = require('cors')
-   const PORT = process.env.PORT || "5555";
-   const app = express();
-   
-   app.use(cors());
-   app.use(express.json())
-   
-   app.all("/", (req, res) => {
-    res.json({ method: req.method, message: "Hello World", ...req.body });
-    });
-    
-    app.get('/404', (req, res) => {
-    res.sendStatus(404);
-    })
-    
-    app.listen(parseInt(PORT, 10), () => {
-    console.log(`Listening for requests on http://localhost:${PORT}`);
-    });
-   ```
-
-4. **Run your application**<br></br>
+3. **Run your application**<br></br>
    Now when you run your application, OpenTelemetry captures telemetry data from it and send it to SigNoz.
 
    ```jsx
-   node index.js
+   node -r ./tracing.js index.js
    ```
 
    You can check your application running at [http://localhost:5555/](http://localhost:5555/). You need to generate some load in order to see data reported on SigNoz dashboard. Refresh the endpoint for 10-20 times, and wait for 2-3 mins.
