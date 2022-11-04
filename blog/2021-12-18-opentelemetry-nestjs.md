@@ -1,7 +1,7 @@
 ---
 title: Monitoring your Nestjs application using OpenTelemetry
 slug: opentelemetry-nestjs
-date: 2022-06-26
+date: 2022-10-15
 tags: [OpenTelemetry Instrumentation, JavaScript]
 authors: [ankit_anand, vishal]
 description: OpenTelemetry is a vendor-agnostic isntrumentation library. In this article, learn how to set up monitoring for a Nestjs application using OpenTelemetry.
@@ -77,11 +77,11 @@ For instrumenting a Nestjs application with OpenTelemetry, you need to install t
 1. **Install below dependencies<br></br>**
 
 ```jsx
-npm install --save @opentelemetry/api
-npm install --save @opentelemetry/sdk-node
 npm install --save @opentelemetry/auto-instrumentations-node
-npm install --save @opentelemetry/exporter-trace-otlp-grpc
-npm install --save @grpc/grpc-js
+npm install --save @opentelemetry/exporter-trace-otlp-http
+npm install --save @opentelemetry/resources
+npm install --save @opentelemetry/sdk-node
+npm install --save @opentelemetry/semantic-conventions
 ```
 
 <br></br>
@@ -92,66 +92,100 @@ npm install --save @grpc/grpc-js
 The `IP of SIgNoz` will be localhost if you are running SigNoz on local.
    
 ```jsx
-'use strict'
+'use strict';
 
-const opentelemetry = require('@opentelemetry/sdk-node');
-const { getNodeAutoInstrumentations } = require('@opentelemetry/auto-instrumentations-node');
-const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-grpc');
-const { Resource } = require('@opentelemetry/resources');
-const { SemanticResourceAttributes } = require('@opentelemetry/semantic-conventions');
-const grpc = require('@grpc/grpc-js');
+import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
+import { Resource } from '@opentelemetry/resources';
+import * as opentelemetry from '@opentelemetry/sdk-node';
+import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 
-// configure the SDK to export telemetry data to the console
-// enable all auto-instrumentations from the meta package
+// Configure the SDK to export telemetry data to the console
+// Enable all auto-instrumentations from the meta package
 const exporterOptions = {
-  url: 'http://localhost:4317',
-  credentials: grpc.credentials.createInsecure(),
-}
+  url: 'http://localhost:4318/v1/traces',
+};
+
 const traceExporter = new OTLPTraceExporter(exporterOptions);
 const sdk = new opentelemetry.NodeSDK({
   traceExporter,
   instrumentations: [getNodeAutoInstrumentations()],
   resource: new Resource({
-    [SemanticResourceAttributes.SERVICE_NAME]: 'sampleNestJsApp'
+    [SemanticResourceAttributes.SERVICE_NAME]: 'sampleNestJsApp',
   }),
 });
 
 // initialize the SDK and register with the OpenTelemetry API
 // this enables the API to record telemetry
-sdk.start()
+sdk
+  .start()
   .then(() => console.log('Tracing initialized'))
   .catch((error) => console.log('Error initializing tracing', error));
 
 // gracefully shut down the SDK on process exit
 process.on('SIGTERM', () => {
-  sdk.shutdown()
+  sdk
+    .shutdown()
     .then(() => console.log('Tracing terminated'))
     .catch((error) => console.log('Error terminating tracing', error))
     .finally(() => process.exit(0));
 });
 
-module.exports = sdk
+export default sdk;
 ```
+
+OpenTelemetry Node SDK currently does not detect the `OTEL_RESOURCE_ATTRIBUTES` from `.env` files as of today. That’s why we need to include the variables in the `tracing.js` file itself.
+
+   About environment variables:
+
+   `service_name`: name of the service you want to monitor
+
+   `http://localhost:4318/v1/traces` is the default url for sending your tracing data. We are assuming you have installed SigNoz on your `localhost`. Based on your environment, you can update it accordingly. It should be in the following format:
+      
+   `http://<IP of SigNoz backend>:4318/v1/traces`
+
+   :::note
+   Remember to allow incoming requests to port 4318 of machine where SigNoz backend is hosted.
+   :::
 
 <br></br>
 
 3. **Import the tracer module where your app starts**<br></br>
-On `main.ts` file or file where your app starts import tracer using below command:
-```jsx
-const tracer = require('./tracer')
-```
+   On `main.ts` file or file where your app starts import tracer using below command. Note that this should be the first line in your main application file.
+   
+   ```jsx
+   import tracer from './tracer';
+   ```
+   
+   Here's a sample main application importing `tracer.ts`:
+   
+   ```jsx
+   import tracer from './tracer';
+   import { NestFactory } from '@nestjs/core';
+   import { AppModule } from './app.module';
+   
+   // All of your application code and any imports that should leverage
+   // OpenTelemetry automatic instrumentation must go here.
+   
+   async function bootstrap() {
+    await tracer.start();
+    
+    const app = await NestFactory.create(AppModule);
+    await app.listen(3001);
+   }
+   bootstrap();
+   ```
 
 <br></br>
 
 4. **Start the tracer**<br></br>
-```jsx
-await tracer.start();
-```
+   ```jsx
+   await tracer.start();
+   ```
 
 <br></br>
 
-
-You can now run your Nestjs application. The data captured with OpenTelemetry from your application should start showing on the SigNoz dashboard.
+You can now run your Nestjs application. The data captured with OpenTelemetry from your application should start showing on the SigNoz dashboard. You need to generate some load in order to see data reported on SigNoz dashboard. Refresh your application for 10-20 times, and wait for 2-3 mins.
 
 You can check out a sample Nestjs application already instrumented with OpenTelemetry here:
 
