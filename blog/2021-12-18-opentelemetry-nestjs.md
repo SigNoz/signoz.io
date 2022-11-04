@@ -136,17 +136,17 @@ export default sdk;
 
 OpenTelemetry Node SDK currently does not detect the `OTEL_RESOURCE_ATTRIBUTES` from `.env` files as of today. That’s why we need to include the variables in the `tracing.js` file itself.
 
-   About environment variables:
+About environment variables:
 
-   `service_name`: name of the service you want to monitor
+`service_name`: name of the service you want to monitor
 
-   `http://localhost:4318/v1/traces` is the default url for sending your tracing data. We are assuming you have installed SigNoz on your `localhost`. Based on your environment, you can update it accordingly. It should be in the following format:
-      
-   `http://<IP of SigNoz backend>:4318/v1/traces`
+`http://localhost:4318/v1/traces` is the default url for sending your tracing data. We are assuming you have installed SigNoz on your `localhost`. Based on your environment, you can update it accordingly. It should be in the following format:
 
-   :::note
-   Remember to allow incoming requests to port 4318 of machine where SigNoz backend is hosted.
-   :::
+`http://<IP of SigNoz backend>:4318/v1/traces`
+
+:::note
+Remember to allow incoming requests to port 4318 of machine where SigNoz backend is hosted.
+:::
 
 <br></br>
 
