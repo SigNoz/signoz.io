@@ -1,7 +1,7 @@
 ---
 title: Implementing Distributed Tracing in a Nodejs application
 slug: distributed-tracing-nodejs
-date: 2022-03-08
+date: 2022-10-10
 tags: [OpenTelemetry Instrumentation, JavaScript, Distributed Tracing]
 authors: [selva]
 description: Distributed tracing provides insights into how a particular service is performing as part of the whole in a distributed system. In this article, we will implement distributed tracing for a nodejs application based on microservices architecture.
@@ -147,17 +147,12 @@ Below are the steps to run the sample nodejs application with OpenTelemetry:
    ```
    
    OpenTelemetry needs the following packages to instrument the nodejs app.
-   ```jsx
-   "@opentelemetry/api": "^1.0.3",
-   "@opentelemetry/auto-instrumentations-node": "^0.25.0",
-   "@opentelemetry/exporter-collector": "0.25.0",
-   "@opentelemetry/exporter-collector-grpc": "^0.25.0",
-   "@opentelemetry/exporter-otlp-grpc": "^0.26.0",
-   "@opentelemetry/resources": "^0.24.0",
-   "@opentelemetry/sdk-trace-base": "^1.0.1",
-   "@opentelemetry/sdk-trace-node": "^1.0.1",
-   "@opentelemetry/semantic-conventions": "^0.24.0",
-   ```
+   
+   `@opentelemetry/sdk-node` - This package provides the full OpenTelemetry SDK for Node.js including tracing and metrics.<br></br>
+   
+   `@opentelemetry/auto-instrumentations-node` - This module provides a simple way to initialize multiple Node instrumentations.<br></br>
+   
+   `@opentelemetry/exporter-trace-otlp-http` - This module provides the exporter to be used with OTLP (`http/json`) compatible receivers.<br></br>
 
 
     
@@ -175,47 +170,34 @@ Below are the steps to run the sample nodejs application with OpenTelemetry:
    You can check out the code sample [here](https://github.com/SigNoz/distributed-tracing-nodejs-sample/blob/main/src/tracer.ts).
     
 4. **Setting up SigNoz as the OpenTelemetry backend**<br></br>
+   We have set up environment variables required by OpenTelemetry in the `scripts` section of `package.json`.
    To set up OpenTelemetry to collect and export telemetry data, you need to specify OTLP (OpenTelemetry Protocol) endpoint. It consists of the IP of the machine where SigNoz is installed and the port number at which SigNoz listens.
    
-   OTLP endpoint for SigNoz - `<IP of the machine>:4317`
+   OTLP endpoint for SigNoz - `<IP of the machine>:4318`
 
-   Here's the code to run a microservice along with the environment variables needed for OpenTelemetry and SigNoz:
-
+   Here's the `scripts` section to run the microservices:
    ```jsx
-   OTEL_EXPORTER_OTLP_ENDPOINT=<IP of the machine>:4317 \
-   OTEL_RESOURCE_ATTRIBUTES=service.name=UserService \
-   ts-node-dev -r ./src/tracer.ts ./src/user-service.ts
-   ```
+   "scripts": {
+    "payment": "OTEL_EXPORTER_OTLP_ENDPOINT=127.0.0.1:4318 OTEL_RESOURCE_ATTRIBUTES=service.name=PaymentService ts-node-dev -r ./src/tracer.ts ./src/payment-service.ts",
+    "users": "OTEL_EXPORTER_OTLP_ENDPOINT=127.0.0.1:4318 OTEL_RESOURCE_ATTRIBUTES=service.name=UserService ts-node-dev -r ./src/tracer.ts ./src/user-service.ts",
+    "orders": "OTEL_EXPORTER_OTLP_ENDPOINT=127.0.0.1:4318 OTEL_RESOURCE_ATTRIBUTES=service.name=OrderService ts-node-dev -r ./src/tracer.ts ./src/order-service.ts"
+    },
+    ...
+    ```
+   You can check the file [here](https://github.com/SigNoz/distributed-tracing-nodejs-sample/blob/main/package.json).
    
-   
-   If you have installed SigNoz on your local machine, then your endpoint is `127.0.0.1:4317`.
+   If you have installed SigNoz on your local machine, then your endpoint is `127.0.0.1:4318`.
 
-   If you have installed SigNoz on some domain, then your endpoint is `http://test.com:4317`
+   If you have installed SigNoz on some domain, then your endpoint is `http://test.com:4318`
    
     
 3. **Run the microservices**<br></br>
-   From the root folder of your application on your terminal, run each microservice. As we have installed SigNoz on the local host, we will be using its ip.  Run `users` service:
+   From the root folder of your application on your terminal, run each microservice. 
    
-   ```jsx
-   OTEL_EXPORTER_OTLP_ENDPOINT=127.0.0.1:4317 \
-   OTEL_RESOURCE_ATTRIBUTES=service.name=UserService \
-   ts-node-dev -r ./src/tracer.ts ./src/user-service.ts
-   ```
-   
-   Open a new tab of your terminal, and run `payment` service:
-   
-   ```jsx
-   OTEL_EXPORTER_OTLP_ENDPOINT=127.0.0.1:4317 \
-   OTEL_RESOURCE_ATTRIBUTES=service.name=PaymentService \
-   ts-node-dev -r ./src/tracer.ts ./src/payment-service.ts
-   ```
-   
-   Open a new tab of your terminal, and run `orders` service:
-   
-   ```jsx
-   OTEL_EXPORTER_OTLP_ENDPOINT=127.0.0.1:4317 \
-   OTEL_RESOURCE_ATTRIBUTES=service.name=OrderService \
-   ts-node-dev -r ./src/tracer.ts ./src/order-service.ts
+   ```bash
+   npm run users
+   npm run payment
+   npm run orders
    ```
    
    Ensure that the microservices are running on different ports. As earlier mentioned, you can set ports using the
