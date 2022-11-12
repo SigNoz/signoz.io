@@ -246,7 +246,8 @@ module.exports = {
         'tutorial/opentelemetry-operator-usage',
         'tutorial/opentelemetry-binary-usage-in-virtual-machine',
         'tutorial/setting-up-tls-for-signoz',
-        'tutorial/setting-up-sso-saml-with-keycloak'
+        'tutorial/setting-up-sso-saml-with-keycloak',
+        'tutorial/writing-clickhuse-queries-in-dashboard'
       ],
     },
     {
