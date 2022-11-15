@@ -1,7 +1,7 @@
 ---
 title: Docker Log Rotation Configuration Guide | SigNoz
 slug: docker-log-rotation
-date: 2022-07-08
+date: 2022-11-10
 tags: [Tech Tutorial, Docker]
 authors: [daniel]
 description: Docker uses the JSON-file logging driver by default, and it records all stdout and stderr output in JSON format. The logs are often stored on the Docker host, and Docker does not impose a size restriction on log files. And that’s where Docker log rotation is required...
@@ -189,6 +189,8 @@ The first step for efficient log management is log aggregation. Once the logs ar
 <br></br>
 
 SigNoz is built to support <a href = "https://opentelemetry.io/" rel="noopener noreferrer nofollow" target="_blank">OpenTelemetry</a> natively. OpenTelemetry, an open-source project backed by <a href = "https://www.cncf.io/" rel="noopener noreferrer nofollow" target="_blank">Cloud Native Computing Foundation</a>, can be used to aggregate and process logs from multiple sources. OpenTelemetry is quietly becoming the world standard for instrumenting cloud-native applications to generate telemetry data.
+
+## Getting started with SigNoz
 
 It’s easy to get started with SigNoz. It can be installed on macOS or Linux computers in just three steps by using a simple installation script.
 
