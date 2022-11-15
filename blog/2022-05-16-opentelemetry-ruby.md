@@ -1,7 +1,7 @@
 ---
 title: Tracing a Ruby application with OpenTelemetry for performance monitoring 
 slug: opentelemetry-ruby
-date: 2022-05-16
+date: 2022-11-02
 tags: [OpenTelemetry Instrumentation, Ruby]
 authors: [vishal, ankit_anand]
 description: OpenTelemetry’s Ruby client libraries can be used to trace Ruby applications for performance monitoring. In this tutorial, we will auto-instrument a sample Ruby app with OpenTelemetry to collect tracing data and then visualize it using SigNoz...
@@ -45,7 +45,7 @@ The tracing data can then be visualized using an observability tool like [SigNoz
 The telemetry data is then sent to an observability tool for storage and visualization.
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2022/04/how_opentelemetry_fits.webp" alt="How opentelemetry fits with an application"/>
+    <img src="/img/blog/2022/09/opentelemetry_architecture.webp" alt="How opentelemetry fits with an application"/>
     <figcaption><i>OpenTelemetry libraries instrument application code to generate telemetry data that is then sent to an observability tool for storage & visualization</i></figcaption>
 </figure>
 
