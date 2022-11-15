@@ -1,7 +1,7 @@
 ---
-title: Docker Logging - A Complete Guide to Logs in Docker
+title: Docker Logging Complete Guide (Configuration & Logging strategies)
 slug: docker-logging
-date: 2022-08-04
+date: 2022-11-15
 tags: [Tech Tutorial]
 authors: [muskan]
 description: In this article, we will discuss log analysis in Docker and how logging in Docker containers is different than in other applications. These logs are specific to Docker and are stored on the Docker host. We’ll thoroughly discuss the `docker logs` command and how we can configure a logging driver for containers...
@@ -199,19 +199,48 @@ Some of them are:
 
 ## Final Thoughts
 
-Containerization surely provides an easy way to deal with application portability and scalability issues but it does requires maintenance time to time. Container environments are  just like a box inside a box, with multiple layers of abstraction. So, it becomes hard to debug in such environments and if performed correctly, log-analysis can be your go-to friend to find out performance related issues. 
+Containerization surely provides an easy way to deal with application portability and scalability issues but it does requires maintenance from time to time. Container environments are  just like a box inside a box, with multiple layers of abstraction. So, it becomes hard to debug in such environments and if performed correctly, log-analysis can be your go-to friend to find out performance related issues. 
 
 In this guide, you learned how to configure the Docker logging driver for log analysis in containerized applications, how Docker logging is different from application logging hosted on a physical machine or virtual host, and in detail study of the docker logs command.
 
-There are various logging strategies that you can follow for log analysis. This blog thoroughly discussed the default logging strategy - `json-file` and the two delivery modes of log messages. Containers being stateless, doesn’t ensure data persistence, hence to prevent data loss, you can use various log management tools. 
+There are various logging strategies that you can follow for log analysis. This blog thoroughly discussed the default logging strategy - `json-file` and the two delivery modes of log messages. Containers being stateless, doesn’t ensure data persistence, hence to prevent data loss, you can use a log management tool. [SigNoz](https://signoz.io/) - an open source APM and observability tool provides an efficient log management solution.
+
+SigNoz uses a columnar database - ClickHouse, for storing logs efficiently. Big companies like <a href = "https://www.uber.com/en-IN/blog/logging/" rel="noopener noreferrer nofollow" target="_blank" >Uber</a> and <a href = "https://blog.cloudflare.com/log-analytics-using-clickhouse/" rel="noopener noreferrer nofollow" target="_blank" >Cloudflare</a> have shifted from Elasticsearch to  ClickHouse for storing their log data.
+
+<figure data-zoomable align='center'>
+    <img src="/img/blog/common/signoz_logs.webp" alt="Log Management in SigNoz"/>
+    <figcaption><i>Logs management in SigNoz</i></figcaption>
+</figure>
+
+<br></br>
+
+## Getting started with SigNoz
+
+SigNoz can be installed on macOS or Linux computers in just three steps by using a simple install script.
+
+The install script automatically installs Docker Engine on Linux. However, on macOS, you must manually install <a href = "https://docs.docker.com/engine/install/" rel="noopener noreferrer nofollow" target="_blank" >Docker Engine</a> before running the install script.
+
+```bash
+git clone -b main https://github.com/SigNoz/signoz.git
+cd signoz/deploy/
+./install.sh
+```
+
+You can visit our documentation for instructions on how to install SigNoz using Docker Swarm and Helm Charts.
+
+[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/?utm_source=blog&utm_medium=docker_logging)
+
+You can also check out the documentation for logs [here](https://signoz.io/docs/userguide/logs/).
+
 
 But logs are just one aspect of getting insights from your software systems. Modern applications are complex distributed systems. For debugging performance issues, you need to make your systems observable. Logs, when combined with metrics and traces form an observability dataset that can help you debug performance issues quickly.
 
-SigNoz, an open source APM  can help you monitor your application by collecting all types of telemetry data. It correlates all your telemetry data(logs, metrics, and traces) into a single suite of monitoring. It is built to support OpenTelemetry natively. OpenTelemetry is becoming the world standard for instrumenting cloud-native applications.
+SigNoz can help you monitor your application by collecting all types of telemetry data. It correlates all your telemetry data(logs, metrics, and traces) into a single suite of monitoring. It is built to support OpenTelemetry natively. OpenTelemetry is becoming the world standard for instrumenting cloud-native applications.
 
 You can check out SigNoz GitHub repo:
 
 [![SigNoz GitHub repo](/img/blog/common/signoz_github.webp)](https://github.com/SigNoz/signoz)
+
 
 ---
 
