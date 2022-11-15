@@ -1,7 +1,7 @@
 ---
 title: Implementing OpenTelemetry in Angular application
 slug: opentelemetry-angular
-date: 2022-08-19
+date: 2022-10-19
 tags: [OpenTelemetry Instrumentation, JavaScript]
 authors: [pranshu, ankit_anand]
 description: It is essential to monitor your Angular frontend apps. OpenTelemetry can help instrument Angular apps and provide you with end-to-end tracing. In this guide, we will demonstrate how to implement the OpenTelemetry Angular library.....
@@ -46,8 +46,8 @@ The telemetry data is then sent to an observability tool for storage and visuali
 
 <!-- ![OpenTelemetry libraries instrument application code to generate telemetry data that is then sent to an observability tool for storage & visualization](Implementi%20ebc9f/how_opentelemetry_fits.png) -->
 
-<figure data-zoomable>
-    <img src="/img/blog/2022/04/how_opentelemetry_fits.webp" alt="How opentelemetry fits with an application"/>
+<figure data-zoomable align='center'>
+    <img src="/img/blog/2022/09/opentelemetry_architecture.webp" alt="How opentelemetry fits with an application"/>
     <figcaption><i>OpenTelemetry libraries instrument application code to generate telemetry data that is then sent to an observability tool for storage & visualization</i></figcaption>
 </figure>
 
