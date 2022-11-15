@@ -1,7 +1,7 @@
 ---
 title: Top 11 MYSQL monitoring tools in 2022 [open-source included]
 slug: mysql-monitoring-tools
-date: 2022-06-15
+date: 2022-11-05
 tags: [Tech Resources]
 authors: [ankit_anand, daniel]
 description: Top MySQL Monitoring Tools List - 1.SigNoz 2.Prometheus 3.Dynatrace 4.Sematext 5.Solar winds 6.DataDog 7.MySQL Enterprise Monitor 8.Paessler PRTG Network Monitor...
@@ -77,6 +77,16 @@ SigNoz also provides distributed tracing, using which you can visualize complete
 </figure>
 
 <br></br>
+
+It's very easy to get started with SigNoz. It can be installed on macOS or Linux computers in just three steps by using a simple install script.
+
+The install script automatically installs Docker Engine on Linux. However, on macOS, you must manually install <a href = "https://docs.docker.com/engine/install/" rel="noopener noreferrer nofollow" target="_blank" >Docker Engine</a> before running the install script.
+
+```bash
+git clone -b main https://github.com/SigNoz/signoz.git
+cd signoz/deploy/
+./install.sh
+```
 
 ### Prometheus (open-source)
 
@@ -237,6 +247,22 @@ Using SigNoz, you can trace your MySQL queries and see the entire request in its
 SigNoz is open-source, you can check out the repo on GitHub:
 
 [![SigNoz GitHub repo](/img/blog/common/signoz_github.webp)](https://github.com/SigNoz/signoz)
+
+## Getting started with SigNoz
+
+SigNoz can be installed on macOS or Linux computers in just three steps by using a simple install script.
+
+The install script automatically installs Docker Engine on Linux. However, on macOS, you must manually install <a href = "https://docs.docker.com/engine/install/" rel="noopener noreferrer nofollow" target="_blank" >Docker Engine</a> before running the install script.
+
+```bash
+git clone -b main https://github.com/SigNoz/signoz.git
+cd signoz/deploy/
+./install.sh
+```
+
+You can visit our documentation for instructions on how to install SigNoz using Docker Swarm and Helm Charts.
+
+[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/?utm_source=blog&utm_medium=mysql_monitoring_tools)
 
 ## Further Reading
 
