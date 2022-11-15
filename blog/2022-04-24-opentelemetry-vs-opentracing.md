@@ -83,7 +83,7 @@ OpenTelemetry is backwards compatible with OpenTracing using software bridges. F
 
 At the moment, Jaeger OpenTelemetry libraries are experimental. <a href = "https://www.jaegertracing.io/docs/1.21/opentelemetry/" rel="noopener noreferrer nofollow" target="_blank">Jaeger official website</a> mentions that Jaeger OpenTelemetry binaries are **almost** backward compatible with the current Jaeger binaries.
 
-## SigNoz - An APM built natively for OpenTelemetry
+## SigNoz - An Open Source APM built natively for OpenTelemetry
 
 SigNoz is a full-stack open source APM built natively to support OpenTelemetry. At SigNoz, we believe that OpenTelemetry is going to be the world standard for instrumenting cloud-native applications. 
 
