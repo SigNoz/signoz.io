@@ -1,7 +1,7 @@
 ---
 title: Top 14 ELK alternatives [open source included] in 2022
 slug: elk-alternatives
-date: 2022-10-13
+date: 2022-11-07
 tags: [Tech Resources]
 authors: ankit_anand
 description: There are many ELK alternatives that you can use for logs analytics. Top 14 ELK alternatives in 2022. 1.SigNoz 2.Logz.io 3.Graylog 4.Logtail 5.Sumologic 6.Grafana Loki...
@@ -86,6 +86,16 @@ With advanced Log Query Builder, you can filter out logs quickly with a mix and 
 </figure>
 
 <br></br>
+
+It's very easy to get started with SigNoz. It can be installed on macOS or Linux computers in just three steps by using a simple install script.
+
+The install script automatically installs Docker Engine on Linux. However, on macOS, you must manually install <a href = "https://docs.docker.com/engine/install/" rel="noopener noreferrer nofollow" target="_blank" >Docker Engine</a> before running the install script.
+
+```bash
+git clone -b main https://github.com/SigNoz/signoz.git
+cd signoz/deploy/
+./install.sh
+```
 
 ## Logz.io
 
@@ -295,7 +305,7 @@ cd signoz/deploy/
 
 You can visit our documentation for instructions on how to install SigNoz using Docker Swarm and Helm Charts.
 
-[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/?utm_source=blog&utm_medium=opentelemetry_springboot)
+[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/?utm_source=blog&utm_medium=elk_alternatives)
 
 You can also check out the documentation for logs [here](https://signoz.io/docs/userguide/logs/).
 
