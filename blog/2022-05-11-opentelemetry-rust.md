@@ -1,7 +1,7 @@
 ---
 title: Implementing OpenTelemetry in a Rust application for performance monitoring 
 slug: opentelemetry-rust
-date: 2022-05-11
+date: 2022-10-11
 tags: [OpenTelemetry Instrumentation, Rust]
 authors: [srikanth]
 description: OpenTelemetry can be used to instrument Rust applications in production for performance monitoring. OpenTelemetry provides libraries, APIs, and SDKs to collect telemetry data(logs, metrics, and traces), using which you can monitor and debug your Rust application for...
@@ -37,7 +37,7 @@ Before we demonstrate how to implement the OpenTelemetry libraries, let’s have
 The telemetry data is then sent to an observability tool for storage and visualization.
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2022/04/how_opentelemetry_fits.webp" alt="How opentelemetry fits with an application"/>
+    <img src="/img/blog/2022/09/opentelemetry_architecture.webp" alt="OpenTelemetry Architecture"/>
     <figcaption><i>OpenTelemetry libraries instrument application code to generate telemetry data that is then sent to an observability tool for storage & visualization</i></figcaption>
 </figure>
 
@@ -49,7 +49,7 @@ OpenTelemetry is the bedrock for setting up an observability framework. It also 
 
 In this tutorial, we will use [SigNoz](https://signoz.io/) as our backend analysis tool. SigNoz is a full-stack open-source APM tool that can be used for storing and visualizing the telemetry data collected with OpenTelemetry. It is built natively on OpenTelemetry and works on the OTLP data formats.
 
-SigNoz provides query and visualization capabilities for the end-user and comes with out-of-box charts for application metrics and traces.
+SigNoz provides query and visualization capabilities for the end-user and comes with out-of-box charts for application metrics, logs and traces.
 
 Now let’s get down to how to implement OpenTelemetry in Rust applications and then visualize the collected data in SigNoz.
 
@@ -191,10 +191,6 @@ Using OpenTelemetry libraries, you can instrument your Rust applications for end
 
 OpenTelemetry is the future for setting up observability for cloud-native apps. It is backed by a huge community and covers a wide variety of technology and frameworks. Using OpenTelemetry, engineering teams can instrument polyglot and distributed applications with peace of mind.
 
-SigNoz is an open-source observability tool that comes with a SaaS-like experience. You can try out SigNoz by visiting its GitHub repo 👇
-
-[![SigNoz GitHub repo](/img/blog/common/signoz_github.webp)](https://github.com/SigNoz/signoz)
-
 If you are someone who understands more from video, then you can watch the below video tutorial on the same with SigNoz.
 
 <p>&nbsp;</p>
@@ -204,9 +200,21 @@ If you are someone who understands more from video, then you can watch the below
 <p>&nbsp;</p>
 
 
-If you face any issues while trying out SigNoz, you can reach out with your questions in #support channel 👇
+## Getting started with SigNoz
 
-[![SigNoz Slack community](/img/blog/common/join_slack_cta.png)](https://signoz.io/slack)
+SigNoz is an open-source observability tool that comes with a SaaS-like experience. SigNoz can be installed on macOS or Linux computers in just three steps by using a simple install script.
+
+The install script automatically installs Docker Engine on Linux. However, on macOS, you must manually install <a href = "https://docs.docker.com/engine/install/" rel="noopener noreferrer nofollow" target="_blank" >Docker Engine</a> before running the install script.
+
+```bash
+git clone -b main https://github.com/SigNoz/signoz.git
+cd signoz/deploy/
+./install.sh
+```
+
+You can visit our documentation for instructions on how to install SigNoz using Docker Swarm and Helm Charts.
+
+[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/?utm_source=blog&utm_medium=opentelemetry_rust)
 
 ---
 
