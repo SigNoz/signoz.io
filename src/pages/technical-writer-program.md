@@ -97,6 +97,7 @@ You just need to reach out to ankit.anand@signoz.io with an interesting idea and
     - We expect the draft to be sent for review in no more than 7-10 days per article
 - Where will I write the article? How is the review process?
     - We will give you access to a Notion page for writing the article. We will get back with comments within 2-3 business days on the article and will try to keep the back and forth to the minimum
+- Payment is processed after the article is published. It can take 3-7 working days to reflect in your account.
 
 
 <!-- ## FAQs on Payment
