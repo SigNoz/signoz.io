@@ -83,6 +83,7 @@ module.exports = {
             'operate/clickhouse/connect-to-clickhouse'
           ]
         },
+        'operate/feature-flags',
       ],
     },
     {
