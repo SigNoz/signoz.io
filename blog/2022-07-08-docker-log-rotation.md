@@ -179,11 +179,11 @@ Docker provides various terminal commands to interact with Docker logs. You can 
 
 The first step for efficient log management is log aggregation. Once the logs are aggregated, you need to store them and set them up for analysis. There are multiple log management solutions out there. But which solution is best suited for modern distributed cloud-native applications?
 
-[SigNoz](https://signoz.io/), a full-stack open-source APM, can help you to store, manage, and analyze logs at scale. It correlates all your telemetry data(logs, metrics, and traces) into a single suite of monitoring. Apart from logs, SigNoz can also help you monitor metrics and track the performance of user requests across services using distributed tracing.
+[SigNoz](https://signoz.io/), a full-stack open-source APM, can help you to store, manage, and analyze logs at scale. It correlates all your telemetry data(logs, metrics, and traces) into a single suite of monitoring. Apart from logs, SigNoz can also help you monitor metrics and traces.
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2022/07/log_management.webp" alt="Upcoming log Management feature in SigNoz"/>
-    <figcaption><i>Log management in SigNoz (Currently under development)</i></figcaption>
+    <img src="/img/blog/common/signoz_logs.webp" alt="Log Management in SigNoz"/>
+    <figcaption><i>Logs management in SigNoz</i></figcaption>
 </figure>
 
 <br></br>
