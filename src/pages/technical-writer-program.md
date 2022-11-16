@@ -70,7 +70,7 @@ You can also just reach out directly to ankit.anand@signoz.io with an introducti
 
 ## Why write technical content for us?
 
-This will of course be a paid engagement. We will pay out **$150 for every article** published. But that’s just one aspect. Writing technical content online has other benefits too:
+This will of course be a paid engagement. We will pay out **$150 or INR 11,000 for every article** published. But that’s just one aspect. Writing technical content online has other benefits too:
 
 - **Build an authoritative online presence.**<br></br>
 The topics that we deal with are either emerging technologies or concepts that need good technical understanding. Having published content around these topics will always act as a booster to your digital presence. We will have links to your social media handles, and short bio about you on your published articles.
@@ -90,7 +90,7 @@ You just need to reach out to ankit.anand@signoz.io with an interesting idea and
 
 ## General FAQs
 
-- We pay $150 per published article. We pay via PayPal for international transfers, and via bank accounts for Indian transfers.
+- We pay $150 or INR 11,000 per published article. We pay via PayPal for international transfers, and via bank accounts for Indian transfers.
 - How long should the article be?
     - We expect the articles to be somewhere between 1000-1500 words.
 - How long should each article take?
