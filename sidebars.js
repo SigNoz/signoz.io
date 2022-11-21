@@ -247,7 +247,6 @@ module.exports = {
    //     'userguide/overview',
         'userguide/authentication',
         'userguide/retention-period',
-        'userguide/service-map',
       ],
     },
     {
