@@ -226,6 +226,7 @@ module.exports = {
         'userguide/authentication',
         'userguide/retention-period',
         'userguide/service-map',
+        'userguide/monitor-http-endpoints'
       ],
     },
     {
