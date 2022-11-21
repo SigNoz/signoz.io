@@ -8,11 +8,15 @@ description: Learn how to use feature flags in SigNoz.
 
 `TIMESTAMP_SORT_FEATURE` and `DURATION_SORT_FEATURE` are enabled by default.
 
-- `TIMESTAMP_SORT_FEATURE`: When this feature is enabled, then SigNoz creates a materialized view table to optimize sorting spans/traces by timestamp at cost of increasing storage by 40-50% of `signoz_index_v2`
+- `TIMESTAMP_SORT_FEATURE`: When this feature is enabled, then SigNoz creates a materialized view table to optimize sorting spans/traces by timestamp at cost of increasing storage by 40-50% of `signoz_index_v2` table.
 
-- `DURATION_SORT_FEATURE`: When this feature is enabled, then SigNoz creates a projection over table to optimize sorting spans/traces by timestamp at cost of increasing storage by 40-50% of `signoz_index_v2`
+- `DURATION_SORT_FEATURE`: When this feature is enabled, then SigNoz creates a projection over table to optimize sorting spans/traces by timestamp at cost of increasing storage by 40-50% of `signoz_index_v2` table.
 
-You can disable these features by adding configs to OTel Collector and Query Service.
+
+
+:::note
+To toggle features, configs have to be added on both OTel Collector and Query Service
+:::
 
 ## Adding configs to OTel collector
 
