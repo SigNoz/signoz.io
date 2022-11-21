@@ -1,7 +1,7 @@
 ---
 title: OpenTelemetry tracing - things you need to know before implementing
 slug: opentelemetry-tracing
-date: 2021-09-04
+date: 2022-10-25
 tags: [OpenTelemetry, Distributed Tracing]
 authors: ankit_anand
 description: Thinking about using OpenTelemetry for distributed tracing? OpenTelemetry Tracing API provides options for manual as well as automated instrumentation..
@@ -27,15 +27,10 @@ Nothing can guarantee how your systems will behave in production. Things will go
 
 OpenTelemetry aims to standardize the creation and management of telemetry data. It can fit within any application's architecture and generate telemetry data with little to no overhead.
 
-import Screenshot from "@theme/Screenshot"
-
-<Screenshot
-    alt="OpenTelemetry Architecture"
-    height={500}
-    src="/img/blog/2021/08/opentelemetry_architecture-min.webp"
-    title="OpenTelemetry architecture - client libraries instrument application code to send telemetry data to a collector agent which then exports the data to a backend analysis tool."
-    width={700}
-/>
+<figure data-zoomable align='center'>
+    <img src="/img/blog/2022/09/opentelemetry_architecture.webp" alt="OpenTelemetry Architecture"/>
+    <figcaption><i>Architecture - How OpenTelemetry fits in an application architecture. OTel collector refers to OpenTelemetry Collector</i></figcaption>
+</figure>
 
 ## Why is distributed tracing needed?
 In microservices architecture, often engineering teams are responsible for just one service and it becomes a nightmare to troubleshoot issues without an overview. Correlating logs and metrics is challenging with a lot of manual effort.
@@ -48,25 +43,23 @@ That's where distributed tracing comes into the picture. User requests are broke
 
 A trace context is passed along when requests travel between services, which tracks a user request across services. You can see how a user request performs across services and identify what exactly needs your attention without manually shifting through multiple dashboards.
 
-<Screenshot
-    alt="OpenTelemetry tracing uses trace context to track user request across services"
-    height={500}
-    src="/img/blog/2021/09/opentelemetry_distributed_tracing-min.webp"
-    title="A trace context is passed when user requests pass from one service to another"
-    width={700}
-/>
+<figure data-zoomable align='center'>
+    <img src="/img/blog/2021/09/opentelemetry_distributed_tracing-min.webp" alt="OpenTelemetry tracing uses trace context to track user request across services"/>
+    <figcaption><i>A trace context is passed when user requests pass from one service to another</i></figcaption>
+</figure>
+
+<br></br>
 
 Using OpenTelemetry you can encapsulate several pieces of information with a span. Common information includes **the name of the operation, start and end timestamp, events occurring during the span**. You can also add custom attributes with key/value pairs to enable more insights if needed.
 
 In the picture below, you can see the details for the selected span. [SigNoz](https://signoz.io/?utm_source=blog&utm_medium=article) is a lightweight open-source APM tool based on OpenTelemetry, which can be used as an analysis tool.
 
-<Screenshot
-    alt="Attributes can be added to spans for more context"
-    height={500}
-    src="/img/blog/2021/09/details_span-min.webp"
-    title="SigNoz is a lightweight APM tool based on OpenTelemetry. it provides out of box visualization for traces and metrics."
-    width={700}
-/>
+<figure data-zoomable align='center'>
+    <img src="/img/blog/2021/09/details_span-min.webp" alt="Attributes can be added to spans for more context"/>
+    <figcaption><i>SigNoz is a lightweight APM tool based on OpenTelemetry. it provides out of box visualization for traces and metrics.</i></figcaption>
+</figure>
+
+<br></br>
 
 When the user request finishes operation in one of the services and travels to another one, a trace ID is passed along, unique for every request. This way, you can correlate information about your requests easily across your entire architecture.
 
@@ -96,30 +89,32 @@ OpenTelemetry provides auto-instrumentation libraries in multiple languages. Wit
 
 For example [OpenTelemetry Java JAR agent](https://signoz.io/opentelemetry/java-agent/) can detect a number of popular libraries and frameworks and instrument it right out of the box for generating telemetry data.
 
-You can also instrument your code manually to have more business specific context. Let's look at the steps involved in tracing code using OpenTelemetry API:
+You can also instrument your code manually to have more business specific context. You can check out examples in different programming language under [manual instrumentation](https://opentelemetry.io/docs/instrumentation/). Let's look at the steps involved in tracing code using OpenTelemetry in Java:
 
 1. **Get a `Tracer`** <br></br>
    The first step is to acquire a `Tracer`. The `Tracer` is responsible for creating spans.
 
-   ```jsx
+   ```java
+   import io.opentelemetry.api;
+
+   //...
+
    Tracer tracer =
-    openTelemetry.getTracer("instrumentation-library-name", "1.0.0");
+      openTelemetry.getTracer("instrumentation-library-name", "1.0.0");
    ```
 
 2. **Create a span**<br></br>
    Creating a span only involves naming it. The start and end time is managed by the OpenTelemetry SDK.
    
-   ```jsx
+   ```java
    Span span = tracer.spanBuilder("my span").startSpan();
-   // put the span into the current Context
-   try (Scope scope = span.makeCurrent()) {
-	// your use case
-	...
-   } catch (Throwable t) {
-    span.setStatus(StatusCode.ERROR, "Change it to your error message");
-   } finally {
-    span.end(); // closing the scope does not end the span, this has to be done manually
-   }
+   
+   // Make the span the current span
+   try (Scope ss = span.makeCurrent()) {
+      // In this scope, the span is the current/active span
+      } finally {
+    span.end();
+    }
    ```
 
 3. **Create nested spans**<br></br>
@@ -159,17 +154,49 @@ You can also instrument your code manually to have more business specific contex
 ## How to get started with OpenTelemetry tracing?
 OpenTelemetry is becoming the world standard for instrumenting application code due to its multi-language support and ease of use. But OpenTelemetry helps only to generate and collect telemetry data. You need to export the telemetry data to a backend analysis tool so that your teams can store, query, and visualize the collected data.
 
-And that's where [SigNoz](https://signoz.io/?utm_source=blog&utm_medium=article) comes into the picture. SigNoz uses OpenTelemetry natively to instrument application codes. OpenTelemetry collector then sends the data to the SigNoz backend, where users have the option to choose between ClickHouse or Kafka+Druid as their telemetry data storage option.
+And that's where [SigNoz](https://signoz.io/?utm_source=blog&utm_medium=article) comes into the picture. SigNoz is an open source APM and observability tool that supports logs, metrics, and traces under a single pane of glass.  
 
-SigNoz comes with out of box visualization of things like RED metrics. There is a unified UI of metrics and traces, unlike Prometheus, so that you can easily identify the root cause of issues causing things like latency in your apps.
+<figure data-zoomable>
+    <img src="/img/blog/common/signoz_charts_application_metrics.webp" alt="SigNoz dashboard showing popular RED metrics"/>
+    <figcaption><i>An OpenTelemetry backend built natively for OpenTelemetry, SigNoz provides out-of-box charts for application metrics</i></figcaption>
+</figure>
 
-<Screenshot
-    alt="SigNoz dashboard showing popular RED metrics"
-    height={500}
-    src="/img/blog/common/signoz_charts_application_metrics.webp"
-    title="SigNoz UI showing application overview metrics like RPS, 50th/90th/99th Percentile latencies, and Error Rate"
-    width={700}
-/>
+<br></br>
+
+The tracing signal from OpenTelemetry instrumentation helps you correlate events across services. With SigNoz, you can visualize your tracing data using Flamegraphs and Gantt charts. It shows you a complete breakdown of the request along with every bit of data collected with OpenTelemetry semantic conventions.
+
+<figure data-zoomable align='center'>
+    <img src="/img/blog/common/signoz_flamegraphs.webp" alt="Detailed Flamegraphs & Gantt charts"/>
+    <figcaption><i>Tracing data collected by OpenTelemetry can be visualized with the help of Flamegraphs and Gantt charts on the SigNoz dashboard</i></figcaption>
+</figure>
+
+<br></br>
+
+SigNoz also supports Log management. You can either use OpenTelemetry SDKs to collect and send logs, or use your existing logging pipelines to send logs to SigNoz.
+
+<figure data-zoomable align='center'>
+    <img src="/img/blog/common/signoz_logs.webp" alt="Log management in SigNoz"/>
+    <figcaption><i>Log management in SigNoz</i></figcaption>
+</figure>
+
+<br></br>
+
+## Getting started with SigNoz
+
+SigNoz can be installed on macOS or Linux computers in just three steps by using a simple install script.
+
+The install script automatically installs Docker Engine on Linux. However, on macOS, you must manually install <a href = "https://docs.docker.com/engine/install/" rel="noopener noreferrer nofollow" target="_blank" >Docker Engine</a> before running the install script.
+
+```bash
+git clone -b main https://github.com/SigNoz/signoz.git
+cd signoz/deploy/
+./install.sh
+```
+
+You can visit our documentation for instructions on how to install SigNoz using Docker Swarm and Helm Charts.
+
+[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/?utm_source=blog&utm_medium=opentelemetry_tracing)
+
 
 You can check out SigNoz's GitHub repo here 👇
 [![SigNoz GitHub repo](/img/blog/common/signoz_github.webp)](https://github.com/SigNoz/signoz)

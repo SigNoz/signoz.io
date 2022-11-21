@@ -1,10 +1,10 @@
 ---
 title: Top 9 observability tools in 2022 perfect for microservices
 slug: observability-tools
-date: 2022-01-10
+date: 2022-11-02
 tags: [Tech Resources]
 authors: ankit_anand
-description: Latest top observability tools list - 1.SigNoz 2.Instana 3.Dynatrace 4.Grafana Labs 5.Honeycomb 6.Lightstep 7.New Relic 8.DataDog...
+description: Top observability tools list 2022 - 1.SigNoz 2.Instana 3.Dynatrace 4.Grafana Labs 5.Honeycomb 6.Lightstep 7.New Relic 8.DataDog...
 image: /img/blog/2022/01/observability_tools_2022_cover.webp
 keywords:
   - observability
@@ -66,23 +66,36 @@ SigNoz enables a full-stack observability stack for your microservice applicatio
 
 SigNoz uses OpenTelemetry - a vendor-agnostic instrumentation library for generating telemetry data. OpenTelemetry is a project under Cloud Native Computing Foundation and is becoming the industry standard for creating portable telemetry data.
 
+Get p90, p99 latencies, RPS, Error rates and top endpoints for a service out of the box.
+
+<figure data-zoomable>
+    <img src="/img/blog/common/signoz_charts_application_metrics.webp" alt="SigNoz dashboard showing popular RED metrics"/>
+    <figcaption><i>SigNoz UI showing application overview metrics like RPS, 50th/90th/99th Percentile latencies, and Error Rate</i></figcaption>
+</figure>
+
+<br></br>
+
+Detailed flamegraph & Gantt charts to find the exact cause of the issue and which underlying requests are causing the problem.
+
+<figure data-zoomable align='center'>
+    <img src="/img/blog/common/signoz_flamegraphs.webp" alt="Detailed Flamegraphs & Gantt charts"/>
+    <figcaption><i>Spans of a trace visualized with the help of flamegraphs and gantt charts in SigNoz dashboard</i></figcaption>
+</figure>
+
+<br></br>
+
+SigNoz provides Logs management with advanced log query builder. You can also monitor your logs in real-time using live tailing. 
+
+<figure data-zoomable align='center'>
+    <img src="/img/blog/common/signoz_logs.webp" alt="Logs tab in SigNoz"/>
+    <figcaption><i>Logs tab in SigNoz comes equipped with advanced logs query builder and live tailing</i></figcaption>
+</figure>
+
+<br></br>
+
 import Screenshot from "@theme/Screenshot"
 
-<Screenshot
-  alt="SigNoz UI showing RED metrics"
-  height={500}
-  src="/img/blog/2021/08/observability_tool_signoz.webp"
-  title="SigNoz Dashboard with visualization of the popular RED metrics for your application (Number of requests, rate of error & duration)"
-  width={700}
-/>
 
-<Screenshot
-  alt="Flamegraphs & gantt charts on SigNoz dashboard"
-  height={500}
-  src="/img/blog/2021/08/observability_tool_flamegraphs_hc.webp"
-  title="SigNoz also has Flamegraphs and Gantt charts to visualize distributed tracing for your microservice application"
-  width={700}
-/>
 
 ### Instana
 

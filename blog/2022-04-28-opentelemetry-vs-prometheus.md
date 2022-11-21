@@ -1,7 +1,7 @@
 ---
 title: OpenTelemetry vs Prometheus - differences, use-cases and alternatives
 slug: opentelemetry-vs-prometheus
-date: 2022-08-16
+date: 2022-11-12
 tags: [Tools Comparison, Prometheus]
 authors: ankit_anand
 description: OpenTelemetry and Prometheus are both open-source projects under Cloud Native Computing Foundation. One is used for managing telemetry data and the other is a metrics monitoring tool..
@@ -43,9 +43,11 @@ OpenTelemetry is a set of API, SDKs, libraries, and integrations that aims to st
 OpenTelemetry provides a vendor-agnostic method of collecting telemetry data. Telemetry data has become critical to observe the state of distributed systems. With microservices and polyglot architectures, there was a need to have a global standard. OpenTelemetry aims to fill that space and is doing a great job at it thus far.
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2021/08/opentelemetry_architecture-min.webp" alt="OpenTelemetry Architecture"/>
-    <figcaption><i>OpenTelemetry architecture - client libraries instrument application code to send telemetry data to a collector agent which then exports the data to a backend analysis tool.</i></figcaption>
+    <img src="/img/blog/2022/09/opentelemetry_architecture.webp" alt="How opentelemetry fits with an application"/>
+    <figcaption><i>OpenTelemetry libraries instrument application code to generate telemetry data that is then sent to an observability tool for storage & visualization</i></figcaption>
 </figure>
+
+<br></br>
 
 ### Advantages of OpenTelemetry
 
@@ -125,7 +127,7 @@ OpenTelemetry is becoming the world standard for instrumenting application code 
 
 And that's where [SigNoz](https://signoz.io/?utm_source=blog&utm_medium=opentelemetry_vs_prometheus) comes into the picture. SigNoz is built to support OpenTelemetry natively. Once you instrument your application with OpenTelemetry libraries, you can send the collected data to SigNoz.
 
-SigNoz comes with out of box visualization of things like RED metrics. There is a unified UI of metrics and traces, unlike Prometheus, so that you can easily identify the root cause of issues causing things like latency in your apps. 
+SigNoz comes with out of box visualization of things like RED metrics. There is a unified UI of logs, metrics, and traces, unlike Prometheus, so that you can easily identify the root cause of issues causing things like latency in your apps. 
 
 <!-- <Screenshot
     alt="SigNoz UI"
@@ -134,6 +136,15 @@ SigNoz comes with out of box visualization of things like RED metrics. There is 
     title="SigNoz UI showing application overview metrics like RPS, 50th/90th/99th Percentile latencies, and Error Rate"
     width={700}
 /> -->
+
+<figure data-zoomable>
+    <img src="/img/blog/common/signoz_charts_application_metrics.webp" alt="SigNoz dashboard showing popular RED metrics"/>
+    <figcaption><i>SigNoz UI showing application overview metrics like RPS, 50th/90th/99th Percentile latencies, and Error Rate</i></figcaption>
+</figure>
+
+<br></br>
+
+
 
 <figure data-zoomable align='center'>
     <img src="/img/blog/common/signoz_flamegraphs.webp" alt="Detailed Flamegraphs & Gantt charts"/>

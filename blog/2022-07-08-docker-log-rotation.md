@@ -1,7 +1,7 @@
 ---
 title: Docker Log Rotation Configuration Guide | SigNoz
 slug: docker-log-rotation
-date: 2022-07-08
+date: 2022-11-10
 tags: [Tech Tutorial, Docker]
 authors: [daniel]
 description: Docker uses the JSON-file logging driver by default, and it records all stdout and stderr output in JSON format. The logs are often stored on the Docker host, and Docker does not impose a size restriction on log files. And that’s where Docker log rotation is required...
@@ -179,16 +179,18 @@ Docker provides various terminal commands to interact with Docker logs. You can 
 
 The first step for efficient log management is log aggregation. Once the logs are aggregated, you need to store them and set them up for analysis. There are multiple log management solutions out there. But which solution is best suited for modern distributed cloud-native applications?
 
-[SigNoz](https://signoz.io/), a full-stack open-source APM, can help you to store, manage, and analyze logs at scale. It correlates all your telemetry data(logs, metrics, and traces) into a single suite of monitoring. Apart from logs, SigNoz can also help you monitor metrics and track the performance of user requests across services using distributed tracing.
+[SigNoz](https://signoz.io/), a full-stack open-source APM, can help you to store, manage, and analyze logs at scale. It correlates all your telemetry data(logs, metrics, and traces) into a single suite of monitoring. Apart from logs, SigNoz can also help you monitor metrics and traces.
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2022/07/log_management.webp" alt="Upcoming log Management feature in SigNoz"/>
-    <figcaption><i>Log management in SigNoz (Currently under development)</i></figcaption>
+    <img src="/img/blog/common/signoz_logs.webp" alt="Log Management in SigNoz"/>
+    <figcaption><i>Logs management in SigNoz</i></figcaption>
 </figure>
 
 <br></br>
 
 SigNoz is built to support <a href = "https://opentelemetry.io/" rel="noopener noreferrer nofollow" target="_blank">OpenTelemetry</a> natively. OpenTelemetry, an open-source project backed by <a href = "https://www.cncf.io/" rel="noopener noreferrer nofollow" target="_blank">Cloud Native Computing Foundation</a>, can be used to aggregate and process logs from multiple sources. OpenTelemetry is quietly becoming the world standard for instrumenting cloud-native applications to generate telemetry data.
+
+## Getting started with SigNoz
 
 It’s easy to get started with SigNoz. It can be installed on macOS or Linux computers in just three steps by using a simple installation script.
 

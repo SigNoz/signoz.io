@@ -93,5 +93,4 @@ Go to [Docker Swarm Operate](/docs/operate/docker-swarm) section for detailed in
 ## Next Steps
 
 - [Instrument Your Application](/docs/instrumentation/overview)
-- [User Guides](/docs/userguide/overview/)
 - [Tutorials](/docs/tutorials/)

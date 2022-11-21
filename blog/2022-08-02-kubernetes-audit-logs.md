@@ -1,7 +1,7 @@
 ---
 title: Kubernetes Audit Logs - Best Practices And Configuration
 slug: kubernetes-audit-logs
-date: 2022-08-02
+date: 2022-11-14
 tags: [Tech Tutorial]
 authors: [vinayak]
 description: In this article, learn how to configure Kubernetes Audit Logs so that you can have a record of events happening in your clusters. Kubernetes audit logs are captured based on the audit policy configured...
@@ -316,9 +316,42 @@ Auditing is a very important part of Kubernetes cluster security which gives you
 
 Security is a never-ending process, and there is always scope for further optimization and improvement. The information presented in this article sets you out on a journey towards securing your Kubernetes Cluster for you to explore it further.
 
-If you want to stay ahead of issues in your Kubernetes cluster, you need to monitor it. SigNoz, an open source APM can monitor metrics, traces, and logs of your Kubernetes cluster. It is built to support OpenTelemetry natively, the open source standard for instrumenting cloud-native applications.
+If you're using Kubernetes in production, you need an effective log management tool to monitor your system's health and performance. Kubernetes provides us with a smarter way to manage our resources for scaling cloud-native applications on demand. You need to monitor your Kubernetes resources effectively. If you want to dive deeper into Kubernetes monitoring, you can check out [SigNoz](https://signoz.io/) - an open source APM and observability tool.
 
-You can check out SigNoz GitHub repo here:
+
+SigNoz uses a columnar database - ClickHouse, for storing logs efficiently. Big companies like <a href = "https://www.uber.com/en-IN/blog/logging/" rel="noopener noreferrer nofollow" target="_blank" >Uber</a> and <a href = "https://blog.cloudflare.com/log-analytics-using-clickhouse/" rel="noopener noreferrer nofollow" target="_blank" >Cloudflare</a> have shifted from Elasticsearch to  ClickHouse for storing their log data.
+
+<figure data-zoomable align='center'>
+    <img src="/img/blog/common/signoz_logs.webp" alt="Log Management in SigNoz"/>
+    <figcaption><i>Logs management in SigNoz</i></figcaption>
+</figure>
+
+<br></br>
+
+## Getting started with SigNoz
+
+SigNoz can be installed on macOS or Linux computers in just three steps by using a simple install script.
+
+The install script automatically installs Docker Engine on Linux. However, on macOS, you must manually install <a href = "https://docs.docker.com/engine/install/" rel="noopener noreferrer nofollow" target="_blank" >Docker Engine</a> before running the install script.
+
+```bash
+git clone -b main https://github.com/SigNoz/signoz.git
+cd signoz/deploy/
+./install.sh
+```
+
+You can visit our documentation for instructions on how to install SigNoz using Docker Swarm and Helm Charts.
+
+[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/?utm_source=blog&utm_medium=docker_logging)
+
+You can also check out the documentation for logs [here](https://signoz.io/docs/userguide/logs/).
+
+
+But logs are just one aspect of getting insights from your software systems. Modern applications are complex distributed systems. For debugging performance issues, you need to make your systems observable. Logs, when combined with metrics and traces form an observability dataset that can help you debug performance issues quickly.
+
+SigNoz can help you monitor your application by collecting all types of telemetry data. It correlates all your telemetry data(logs, metrics, and traces) into a single suite of monitoring. It is built to support OpenTelemetry natively. OpenTelemetry is becoming the world standard for instrumenting cloud-native applications.
+
+You can check out SigNoz GitHub repo:
 
 [![SigNoz GitHub repo](/img/blog/common/signoz_github.webp)](https://github.com/SigNoz/signoz)
 

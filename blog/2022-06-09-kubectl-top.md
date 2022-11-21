@@ -1,7 +1,7 @@
 ---
 title: Kubectl Top Pod/Node | How to get & read resource utilization metrics of K8s?
 slug: kubectl-top
-date: 2022-06-09
+date: 2022-11-12
 tags: [Tech Tutorial]
 authors: [daniel, ankit_anand]
 description: Kubectl Top command can be used to retrieve snapshots of resource utilization of pods/nodes in your Kubernetes cluster. You can even retrieve metrics information about specific pods or nodes by specifying a namespace...
@@ -146,7 +146,7 @@ Resource utilization metrics are key to understanding the health of your Kuberne
 
 Though the `kubectl top` command gives you basic metrics about resource utilization, it is very convenient to inspect your nodes and pods at any time. For example, if you see that there is a sudden spike in your resource utilization, you can check which pod is consuming the most resources.
 
-Kubernetes provides us with a smarter way to manage our resources for scaling cloud-native applications on demand. But you also need to monitor your Kubernetes resources effectively. If you want to dive deeper into Kubernetes monitoring, you can check out [SigNoz](https://signoz.io/).
+But if you're using Kubernetes in production, you can't rely on manual spot-checks to monitor your system's health and performance. Kubernetes provides us with a smarter way to manage our resources for scaling cloud-native applications on demand. You need to monitor your Kubernetes resources effectively. If you want to dive deeper into Kubernetes monitoring, you can check out [SigNoz](https://signoz.io/).
 
 
 <figure data-zoomable align='center'>
@@ -155,6 +155,30 @@ Kubernetes provides us with a smarter way to manage our resources for scaling cl
 </figure>
 
 SigNoz is a full-stack open-source APM tool that can help you monitor your Kubernetes cluster. It uses [OpenTelemetry](https://opentelemetry.io/) to collect metrics from your K8s cluster for monitoring. OpenTelemetry is becoming the world standard for instrumentation of cloud-native applications, and it is backed by [CNCF](https://www.cncf.io/) foundation, the same foundation under which Kubernetes graduated.
+
+SigNoz provides logs, metrics, and traces under a single pane of glass. It's easy to get started with SigNoz. SigNoz can be installed on macOS or Linux computers in just three steps by using a simple install script.
+
+The install script automatically installs Docker Engine on Linux. However, on macOS, you must manually install <a href = "https://docs.docker.com/engine/install/" rel="noopener noreferrer nofollow" target="_blank">Docker Engine</a> before running the install script.
+
+```bash
+git clone -b main https://github.com/SigNoz/signoz.git
+cd signoz/deploy/
+./install.sh
+```
+
+You can visit our documentation for instructions on how to install SigNoz using Docker Swarm and Helm Charts.
+
+[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/?utm_source=blog&utm_medium=kubectl_top)
+
+When you are done installing SigNoz, you can access the UI at [http://localhost:3301](http://localhost:3301/application)
+
+<figure data-zoomable>
+    <img src="/img/blog/common/signoz_dashboard_homepage.webp" alt="SigNoz dashboard"/>
+    <figcaption><i>SigNoz dashboard - It shows services from a sample app that comes bundled with the application</i></figcaption>
+</figure>
+
+<br></br>
+
 
 If you wish to learn more about how to monitor your Kubernetes cluster with OpenTelemetry and SigNoz, follow this blog:
 

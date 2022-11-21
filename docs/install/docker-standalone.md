@@ -128,6 +128,5 @@ Go to [Docker Standalone Operate](/docs/operate/docker-standalone) section for d
 ## Next Steps
 
 - [Instrument Your Application](/docs/instrumentation/overview)
-- [User Guides](/docs/userguide/overview/)
 - [Tutorials](/docs/tutorials/)
 - [Operate SigNoz on Docker Standalone](/docs/operate/docker-standalone)

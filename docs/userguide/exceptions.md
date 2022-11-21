@@ -1,7 +1,7 @@
 ---
 id: exceptions
 title: Errors and Exceptions 
-sidebar_label: Exceptions
+sidebar_label: Monitoring Exceptions
 ---
 ## Recording exceptions
 

@@ -1,7 +1,7 @@
 ---
 title: Top 11 Loki alternatives in 2022
 slug: loki-alternatives
-date: 2022-10-22
+date: 2022-10-30
 tags: [Tech Resources]
 authors: ankit_anand
 description: There are many Loki alternatives that you can use for logs analytics. Top 11 Loki alternatives in 2022. 1.SigNoz 2.Logz.io 3.Graylog 4.Logtail 5.Sumologic ...
@@ -94,6 +94,16 @@ With advanced Log Query Builder, you can filter out logs quickly with a mix and 
 </figure>
 
 <br></br>
+
+It's very easy to get started with SigNoz. It can be installed on macOS or Linux computers in just three steps by using a simple install script.
+
+The install script automatically installs Docker Engine on Linux. However, on macOS, you must manually install <a href = "https://docs.docker.com/engine/install/" rel="noopener noreferrer nofollow" target="_blank" >Docker Engine</a> before running the install script.
+
+```bash
+git clone -b main https://github.com/SigNoz/signoz.git
+cd signoz/deploy/
+./install.sh
+```
 
 
 ## Logz.io

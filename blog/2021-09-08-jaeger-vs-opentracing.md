@@ -1,7 +1,7 @@
 ---
 title: Jaeger and OpenTracing - Key concepts, use-cases and alternatives
 slug: jaeger-vs-opentracing
-date: 2021-09-08
+date: 2022-10-08
 tags: [Tools Comparison, Jaeger]
 authors: ankit_anand
 description: Jaeger and OpenTracing are both open-source projects aimed to solve pain-points of distributed tracing. But the scope of the projects are completely different. While Jaeger is an end-to-end distributed tracing tool..
@@ -97,7 +97,7 @@ As already mentioned, OpenTracing merged with OpenCensus into a single project c
 
 The data collected with OpenTelemetry can also be sent to Jaeger's backend. But Jaeger is limited in terms of its UI and does only distributed tracing. For a robust monitoring and observability framework, you need a unified UI for both metrics and traces. And that's where SigNoz is far [more suited](https://signoz.io/blog/jaeger-vs-signoz/) than Jaeger as a distributed tracing tool.
 
-SigNoz is a full-stack open-source application performance monitoring and observability tool which can be used in place of Jaeger. SigNoz is built to support OpenTelemetry natively. It provides a fast OLAP datastore, ClickHouse as the storage backend.
+SigNoz is a full-stack open-source application performance monitoring and observability tool which can be used in place of Jaeger. SigNoz is built to support OpenTelemetry natively. SigNoz provides logs, metrics, and traces under a single pane of glass. 
 
 <Screenshot
     alt="Architecture of SigNoz with OpenTelemetry and ClickHouse"
@@ -124,7 +124,23 @@ Some of the things SigNoz can help you track:
 - See exact request trace to figure out issues in downstream services, slow DB queries, call to 3rd party services like payment gateways, etc
 - Filter traces by service name, operation, latency, error, tags/annotations.
 - Run aggregates on trace data
-- Unified UI for both metrics and traces
+- Unified UI for logs, metrics, and traces
+
+## Getting started with SigNoz
+
+SigNoz can be installed on macOS or Linux computers in just three steps by using a simple install script.
+
+The install script automatically installs Docker Engine on Linux. However, on macOS, you must manually install <a href = "https://docs.docker.com/engine/install/" rel="noopener noreferrer nofollow" target="_blank" >Docker Engine</a> before running the install script.
+
+```bash
+git clone -b main https://github.com/SigNoz/signoz.git
+cd signoz/deploy/
+./install.sh
+```
+
+You can visit our documentation for instructions on how to install SigNoz using Docker Swarm and Helm Charts.
+
+[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/?utm_source=blog&utm_medium=jaeger_vs_opentracing)
 
 You can check out SigNoz's GitHub repo here 👇
 

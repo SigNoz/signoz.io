@@ -1,7 +1,7 @@
 ---
 title: OpenTelemetry vs OpenTracing - choosing one for instrumentation
 slug: opentelemetry-vs-opentracing
-date: 2022-04-24
+date: 2022-11-07
 tags: [Tools Comparison]
 authors: [ankit_anand]
 description: If you’re thinking of choosing between OpenTelemetry and OpenTracing, go for OpenTelemetry. OpenTracing is now deprecated, and users of OpenTracing are advised to migrate to OpenTelemetry...
@@ -49,9 +49,10 @@ To integrate OpenTelemetry with your application code, you can use the OpenTelem
 
 <!-- ![The architecture of OpenTelemetry. You can integrate OTel libraries with your application code](OpenTelemetry%20vs%20OpenTracing%20-%20choosing%20one%20for%20in%20665d83371fb941b1bdef6577733c75cd/opentelemetry_architecture_new.png) -->
 
-<figure data-zoomable>
-    <img src="/img/blog/2022/04/opentelemetry_architecture_new.webp" alt="How opentelemetry fits with an application"/>
-    <figcaption><i>The architecture of OpenTelemetry. You can integrate OTel libraries with your application code</i></figcaption>
+
+<figure data-zoomable align='center'>
+    <img src="/img/blog/2022/09/opentelemetry_architecture.webp" alt="OpenTelemetry Architecture"/>
+    <figcaption><i>Architecture - How OpenTelemetry fits in an application architecture. OTel collector refers to OpenTelemetry Collector</i></figcaption>
 </figure>
 
 ## What is OpenTracing?
@@ -81,3 +82,29 @@ OpenTelemetry is backwards compatible with OpenTracing using software bridges. F
 **Does Jaeger use OpenTelemetry?**
 
 At the moment, Jaeger OpenTelemetry libraries are experimental. <a href = "https://www.jaegertracing.io/docs/1.21/opentelemetry/" rel="noopener noreferrer nofollow" target="_blank">Jaeger official website</a> mentions that Jaeger OpenTelemetry binaries are **almost** backward compatible with the current Jaeger binaries.
+
+## SigNoz - An Open Source APM built natively for OpenTelemetry
+
+SigNoz is a full-stack open source APM built natively to support OpenTelemetry. At SigNoz, we believe that OpenTelemetry is going to be the world standard for instrumenting cloud-native applications. 
+
+SigNoz supports OpenTelemetry semantic conventions and provides visualization for all three distinct types of signals(log management is under active development) supported by OpenTelemetry.
+
+The steps to send telemetry data to SigNoz involves:
+
+- Instrument application code with language-specific OpenTelemetry libraries
+- Configure OpenTelemetry Exporters to send data to SigNoz
+- Visualize and analyze telemetry data using SigNoz dashboards
+
+It is easy to get started with SigNoz. It can be installed on macOS or Linux computers in just three steps by using a simple installation script.
+
+The install script automatically installs Docker Engine on Linux. However, you must manually install [Docker Engine](https://docs.docker.com/engine/install/) on macOS before running the install script.
+
+```jsx
+git clone -b main https://github.com/SigNoz/signoz.git
+cd signoz/deploy/
+./install.sh
+```
+
+You can visit our documentation for instructions on how to install SigNoz using Docker Swarm and Helm Charts.
+
+[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/?utm_source=blog&utm_medium=opentelemetry_apm)
