@@ -118,7 +118,7 @@ To follow the logs for a particular container in a pod, use the below syntax:
 kubectl logs [POD name] [-c CONTAINER name] [--follow] [flags]
 ```
 
-- You can refer to the Kubernetes [log documentation](https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands#logs) to learn more about different flags that can be used.
+- You can refer to the Kubernetes <a href = "https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands#logs" rel="noopener noreferrer nofollow" target="_blank" >log documentation</a> to learn more about different flags that can be used.
 
 To display all containers logs in a pod, use the below command
 
@@ -207,6 +207,4 @@ If you liked what you read, then check out our GitHub repo 👇
 [SigNoz - A Lightweight Open Source ELK alternative](https://signoz.io/blog/elk-alternative-open-source/)
 
 [OpenTelemetry Logs - A complete introduction](https://signoz.io/blog/opentelemetry-logs/)
-
-![Log management in SigNoz](Kubectl%20Logs%206a2fdcca2fad4a13854c7ccf6903eb43/signoz_logs.webp)
 
