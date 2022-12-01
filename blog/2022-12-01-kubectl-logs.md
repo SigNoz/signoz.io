@@ -83,7 +83,7 @@ After getting a list of all existing pods, the logs of those pods can be seen in
 ```bash
 # This returns a snapshot of the logs from the pod
 
-kubectl logs <pod name>
+kubectl logs [pod name]
 ```
 
 If you want to stream or follow the logs in a pod, you can use the below command
@@ -134,7 +134,7 @@ By adding the **-p** flag, you can obtain logs for a Pod that was previously run
 kubectl logs -p [pod-name]
 ```
 
-## Conclusion
+## Kubernetes logs in production environment
 
 As discussed, you can get logs of containers using the `kubectl log` command, this is a manual log inspection that happens mostly locally.
 
