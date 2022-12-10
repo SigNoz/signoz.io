@@ -6,6 +6,11 @@ description: Example clickhouse queries to run analytics on observability data
 
 SigNoz gives you ability to write powerful clickhouse queries to plot charts. You can run SQL queries supported by ClickHouse to extract immense value out of your distributed tracing data or logs data. 
 
+::: tips
+The distributed tables in clickhouse have been named by prefixing `distributed_` to existing single shard table names. If you want to use clickhouse queries in dashboard or alerts, you should use the distributed table names. Eg, `signoz_index_v2` now corresponds to the table of a single shard. To query all the shards, query against `distributed_signoz_index_v2`. 
+:::
+
+
 Sharing a few examples of some queries which might be helpful in building dashboards.
 
 ### GroupBy a tag/attribute in distributed tracing data
