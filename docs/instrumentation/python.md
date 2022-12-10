@@ -98,7 +98,7 @@ You can use OpenTelemetry Python to send your traces directly to SigNoz. OpenTel
      To start sending data to SigNoz, use the following run command:
 
      ```bash
-     OTEL_RESOURCE_ATTRIBUTES=service.name=<service_name> OTEL_EXPORTER_OTLP_ENDPOINT="http://<IP of SigNoz Backend>:4318"  opentelemetry-instrument --traces_exporter otlp_proto_http <your run command>
+     OTEL_RESOURCE_ATTRIBUTES=service.name=<service_name> OTEL_EXPORTER_OTLP_ENDPOINT="http://<IP of SigNoz Backend>:4318"  opentelemetry-instrument --traces_exporter otlp_proto_http --metrics_exporter otlp_proto_http <your run command>
      ```
 
      *<service_name>* is the name of service you want
@@ -110,7 +110,7 @@ You can use OpenTelemetry Python to send your traces directly to SigNoz. OpenTel
      Replacing these environment variables, a sample final run command will look like this:
 
      ```bash
-     OTEL_RESOURCE_ATTRIBUTES=service.name=python_app OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318"  opentelemetry-instrument --traces_exporter otlp_proto_http python3 app.py
+     OTEL_RESOURCE_ATTRIBUTES=service.name=python_app OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318"  opentelemetry-instrument --traces_exporter otlp_proto_http --metrics_exporter otlp_proto_http python3 app.py
      ```
      
     :::note
@@ -217,7 +217,7 @@ Check this [documentation](https://opentelemetry-python.readthedocs.io/en/latest
 
 If spans are not being reported to SigNoz, try enabling debug exporter which writes the json formatted trace data to console.
 
-`opentelemetry-instrument --traces_exporter otlp_proto_http,console <your run command>`:
+`opentelemetry-instrument --traces_exporter otlp_proto_http,console --metrics_exporter otlp_proto_http,console <your run command>`:
 
 ```json
 {
