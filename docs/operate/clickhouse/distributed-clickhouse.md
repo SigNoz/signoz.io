@@ -5,7 +5,7 @@ sidebar_label: Distributed ClickHouse
 ---
 
 :::info
-From v0.12 onwards, SigNoz introduces support for distributed clickhouse.
+In v0.12, SigNoz introduces support for distributed clickhouse.
 :::
 
 ## Prerequisites
@@ -14,13 +14,17 @@ From v0.12 onwards, SigNoz introduces support for distributed clickhouse.
 - SigNoz OtelCollector >= 0.66
 - SigNoz Chart >= 0.6.0
 - Zookeeper (or ClickHouse Keeper) is mandatory for running a distributed
-ClickHouse cluster.
-- It is recommended to use 3 nodes Zookeeper cluster for distributed ClickHouse cluster
+ClickHouse cluster
+- 3 nodes Zookeeper cluster recommended for distributed ClickHouse cluster
 with production environment, while single instance of Zookeeper should suffice for
 development environment.
 
-
 ## Distributed ClickHouse
+
+Basically, distributed clickhouse cluster consists of the following:
+- More than one clickhouse shard instances
+- All clickhouse server information included in `remote_servers` clickhouse config as shards
+- Zookeeper cluster with 1 or 3 nodes, and including it in `zookeeper` clickhouse config
 
 Follow the instructions in the respective sections below to set up distributed
 clickhouse with multiple shards for your SigNoz cluser.
