@@ -5,7 +5,7 @@ sidebar_label: Distributed ClickHouse
 ---
 
 :::info
-In v0.12, SigNoz introduces support for distributed clickhouse.
+In v0.12, SigNoz introduces support for distributed clickhouse. Multiple replicas for clickhouse shards are not supported in v0.12.0, please follow upcoming releases to check availability.
 :::
 
 ## Prerequisites
@@ -331,6 +331,10 @@ Followed by `helm upgrade` command:
 ```bash
 helm --namespace platform upgrade my-release signoz/signoz -f override-values.yaml
 ```
+
+:::info
+Multiple replicas for clickhouse shards are not supported in v0.12.0 so don't change `replicasCount` in the clickhouse config, please follow upcoming releases to check availability of replication of clickhouse shards
+:::
 
 :::info
 Replace `my-release` and `platform` from above with appropriate release name
