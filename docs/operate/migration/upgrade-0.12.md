@@ -15,4 +15,5 @@ The new distributed tables in clickhouse have been named by prefixing `distribut
 
 The old table names will continue to work for single node installations as long as you work with a single shard. We recommend changing table names at the earliest to make future upgrade to distributed setup easier. 
 
-
+For detailed instructions to include additional shards, go to
+[Distributed ClickHouse documentation page](/docs/operate/clickhouse/distributed-clickhouse/).
