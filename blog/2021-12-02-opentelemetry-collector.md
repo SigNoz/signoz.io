@@ -1,7 +1,7 @@
 ---
 title: OpenTelemetry Collector - architecture and configuration guide
 slug: opentelemetry-collector-complete-guide
-date: 2022-09-12
+date: 2022-12-06
 tags: [OpenTelemetry]
 authors: ankit_anand
 description: OpenTelemetry collector provides a vendor-neutral way to collect, process, and export your telemetry data to an analysis backend of your choice. Learn how to configure..
@@ -43,7 +43,7 @@ Before deep-diving into OpenTelemetry collectors, let's take a short detour to u
 
 ## What is OpenTelemetry?
 
-<a href = "https://opentelemetry.io/" rel="noopener noreferrer nofollow" target="_blank" >OpenTelemetry</a> is an open-source observability framework that aims to standardize the generation, collection, and management of telemetry data(Logs, metrics, and traces). It is incubated under Cloud Native Computing Foundation([CNCF](https://www.cncf.io/)), the same foundation which incubated Kubernetes.
+<a href = "https://opentelemetry.io/" rel="noopener noreferrer nofollow" target="_blank" >OpenTelemetry</a> is an open-source observability framework that aims to standardize the generation, collection, and management of telemetry data(Logs, metrics, and traces). It is incubated under Cloud Native Computing Foundation(<a href = "https://www.cncf.io/" rel="noopener noreferrer nofollow" target="_blank" >Cloud Native Computing Foundation</a>), the same foundation which incubated Kubernetes.<br></br>
 
 OpenTelemetry follows a <a href = "https://opentelemetry.io/docs/reference/specification/" rel="noopener noreferrer nofollow" target="_blank" >specification-driven</a>  development and provides client libraries to instrument applications in most programming languages. Once you have instrumented with OpenTelemetry, you should be able to collect various telemetry signals like logs, metrics, and traces from it. And that's where OpenTelemetry Collector comes into the picture.
 
