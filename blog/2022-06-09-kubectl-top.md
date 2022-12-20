@@ -179,6 +179,9 @@ When you are done installing SigNoz, you can access the UI at [http://localhost
 
 <br></br>
 
+Learn about `kubectl logs` command to get information from existing resources in Kubernetes cluster.
+
+[Using Kubectl Logs | How to view Kubernetes Pod Logs?](https://signoz.io/blog/kubectl-logs/)
 
 If you wish to learn more about how to monitor your Kubernetes cluster with OpenTelemetry and SigNoz, follow this blog:
 
