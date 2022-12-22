@@ -1,7 +1,7 @@
 ---
 title: SigNoz - Open-source alternative to DataDog
 slug: open-source-datadog-alternative
-date: 2022-09-02
+date: 2022-12-20
 tags: [SigNoz, Open Source]
 authors: pranay
 description: DataDog is a popular APM tool. But it is very expensive and opaque about its billing practices. What if you could get a SaaS like experience from an open-source APM tool....
@@ -113,7 +113,7 @@ Create custom metrics from filtered traces to find metrics of any type of reques
 
 ### Detailed Flamegraphs & Gantt charts
 
-Detailed flamegraph & Gantt charts to find the exact cause of the issue and which underlying requests are causing the problem. Is it a SQL query gone rogue or a Redis operation is causing an issue?
+Detailed flamegraph & Gantt charts to find the exact cause of the issue and which underlying requests are causing the problem. Is it a SQL query gone rogue or a Redis operation is causing an issue? Get more context on your spans with tags and events.
 
 <figure data-zoomable align='center'>
     <img src="/img/blog/common/signoz_flamegraphs.webp" alt="Detailed Flamegraphs & Gantt charts"/>
@@ -122,7 +122,7 @@ Detailed flamegraph & Gantt charts to find the exact cause of the issue and whic
 
 ### Logs Management with advanced log query builder and live tailing
 
-SigNoz provides Logs management with advanced log query builder. You can also monitor your logs in real-time using live tailing. 
+SigNoz provides Logs management with advanced log query builder. You can also monitor your logs in real-time using live tailing. SigNoz uses a columnar database ClickHouse to store logs, which is very efficient at ingesting and storing logs data. Columnar databases like ClickHouse are very effective in storing log data and making it available for analysis.
 
 <figure data-zoomable align='center'>
     <img src="/img/blog/common/signoz_logs.webp" alt="Logs tab in SigNoz"/>
