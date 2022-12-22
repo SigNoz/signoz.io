@@ -1,11 +1,11 @@
 ---
-title: Top 13 open source APM tools in 2022
+title: Top 13 open source APM tools in 2023
 slug: open-source-apm-tools
-date: 2022-08-21
+date: 2022-12-19
 tags: [Tech Resources]
 authors: ankit_anand
-description: Latest top open source APM tool list - 1.SigNoz 2.Graphite 3.Pinpoint 4.Prometheus 5.JavaMelody 6.StageMonitor 7.Scouter 8.Zipkin 9.Jaeger 10.Skywalking...
-image: /img/blog/2021/12/open_source_apm_2022.webp
+description: Looking for an open source APM tool? Latest top open source APM tool list - 1.SigNoz 2.Graphite 3.Pinpoint 4.Prometheus 5.JavaMelody 6.StageMonitor 7.Scouter 8.Zipkin 9.Jaeger 10.Skywalking...
+image: /img/blog/2022/12/open_source_apm_cover.webp
 hide_table_of_contents: true
 keywords:
   - Open Source
@@ -21,7 +21,7 @@ Choosing the right APM tool is critical. How do you know which is the right one 
 
 <!--truncate-->
 
-![Cover Image](/img/blog/2021/12/open_source_apm_2022.webp)
+![Cover Image](/img/blog/2022/12/open_source_apm_cover.webp)
 
 > **What is an open source APM tool?**<br></br>
 > APM stands for Application Performance Monitoring. APM tools help you to monitor your application for any performance issues. When you opt for an open source APM tool, you get the added advantage of having access to the tool's source code.
@@ -62,7 +62,7 @@ A few essential APM benefits in solving performance issues are as follows:
 - **Increase revenue** by protecting against downtime and user churn
 - **Saves engineering bandwidth** in debugging and troubleshooting
 
-**List of top 13 open source APM tools in 2021**
+**List of top 13 open source APM tools in 2023**
 
 - [SigNoz](#signoz)
 - [Graphite](#graphite)
@@ -137,8 +137,6 @@ You can also use logs management in SigNoz to debug application issues.
 </figure>
 
 <br></br>
-
-<!-- You can choose between industry-standard Kafka+Druid or fast OLAP database ClickHouse as the storage backend. The query service is written in GO, and the frontend is built with Typescript. -->
 
 You can get started with SigNoz by visting its documentation.
 

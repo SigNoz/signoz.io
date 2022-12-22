@@ -1,11 +1,11 @@
 ---
 title: OpenTelemetry vs Prometheus - differences, use-cases and alternatives
 slug: opentelemetry-vs-prometheus
-date: 2022-11-12
+date: 2022-12-18
 tags: [Tools Comparison, Prometheus]
 authors: ankit_anand
 description: OpenTelemetry and Prometheus are both open-source projects under Cloud Native Computing Foundation. One is used for managing telemetry data and the other is a metrics monitoring tool..
-image: /img/blog/2021/09/opentelemetry_vs_prometheus_cover-min.webp
+image: /img/blog/2022/12/opentelemetry_vs_prometheus_cover.webp
 keywords:
   - opentelemetry
   - prometheus
@@ -26,7 +26,7 @@ OpenTelemetry and Prometheus are both open-source projects under Cloud Native Co
 
 <!--truncate-->
 
-![Cover Image](/img/blog/2021/09/opentelemetry_vs_prometheus_cover-min.webp)
+![Cover Image](/img/blog/2022/12/opentelemetry_vs_prometheus_cover.webp)
 
 OpenTelemetry is a vendor-agnostic instrumentation library. It provides a set of tools, APIs, and SDKs to create and manage telemetry data(logs, metrics, and traces). OpenTelemetry follows a specification driven development and has implementations in all major programming languages.
 
@@ -38,7 +38,7 @@ Prometheus is a time-series metrics monitoring tool. Prometheus enables you to c
 
 ## What is OpenTelemetry?
 
-OpenTelemetry is a set of API, SDKs, libraries, and integrations that aims to standardize the generation, collection, and management of telemetry data(logs, metrics, and traces). OpenTelemetry is a Cloud Native Computing Foundation project created after the merger of OpenCensus(from Google) and OpenTracing(from Uber). [CNCF](https://www.cncf.io/) is the same foundation which incubated Kubernetes too.
+OpenTelemetry is a set of API, SDKs, libraries, and integrations that aims to standardize the generation, collection, and management of telemetry data(logs, metrics, and traces). OpenTelemetry is a Cloud Native Computing Foundation project created after the merger of OpenCensus(from Google) and OpenTracing(from Uber). <a href = "https://www.cncf.io/" rel="noopener noreferrer nofollow" target="_blank">CNCF</a> is the same foundation which incubated Kubernetes too.
 
 OpenTelemetry provides a vendor-agnostic method of collecting telemetry data. Telemetry data has become critical to observe the state of distributed systems. With microservices and polyglot architectures, there was a need to have a global standard. OpenTelemetry aims to fill that space and is doing a great job at it thus far.
 
@@ -48,6 +48,38 @@ OpenTelemetry provides a vendor-agnostic method of collecting telemetry data. Te
 </figure>
 
 <br></br>
+
+### What are the origins of OpenTelemetry?
+
+In early 2019, OpenTelemetry was announced as an open-source project under Cloud Native Computing Foundation (CNCF) after the merger of two open-source projects - OpenCensus and OpenTracing.
+
+> What is CNCF?<br></br>
+CNCF is a vendor-neutral foundation that works on critical cloud-native open-source technologies like Kubernetes, Prometheus, and Envoy. It is a part of the nonprofit Linux Foundation.
+>
+
+OpenCensus was an internal project at Google that was open-sourced later. It grew popular within the community as it provided libraries to generate and collect both traces and metrics.
+
+The OpenTracing project was started in 2016 and was aimed at increasing the adoption of distributed tracing. It focused on providing an API that could solve the lack of consistent quality instrumentation.
+
+Both these projects were trying to solve the same problem of monitoring and observability in cloud-native applications. But having two standards was not good for the cloud-native community, and hence it was decided to merge these projects and create a single standard for generating and managing telemetry data now known as OpenTelemetry.
+
+### The OpenTelemetry Architecture
+
+The OpenTelemetry architecture consist of following three main components:
+
+**OpenTelemetry API**
+
+The OpenTelemetry API is used to instrument libraries, frameworks, and applications.
+
+**OpenTelemetry SDK**
+
+The OpenTelemetry SDK implements the API.
+
+**OpenTelemetry Collector**
+
+The OpenTelemetry Collector or the OTel collector enables a vendor-netrual way to collect, process and export the collected telemetry data. The collector has receivers, processors and exporters to perform these functions. 
+
+[OpenTelemetry Collector - architecture and configuration guide](https://signoz.io/blog/opentelemetry-collector-complete-guide/)
 
 ### Advantages of OpenTelemetry
 

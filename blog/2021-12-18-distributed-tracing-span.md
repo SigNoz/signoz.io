@@ -1,7 +1,7 @@
 ---
 title: Spans - a key concept of distributed tracing
 slug: distributed-tracing-span
-date: 2021-12-18
+date: 2022-12-10
 tags: [Distributed Tracing]
 authors: ankit_anand
 description: Spans are fundamental blocks of distributed tracing. A single trace in distributed tracing consists of a series of tagged time intervals known as spans...
@@ -47,7 +47,7 @@ These requests are broken down into spans, and the entire request is represented
 
 ## Spans in distributed tracing
 
-### What are spans?
+### What are spans in distributed tracing?
 Each unit of work in a trace is represented by a span. A trace represents a complete process for a request - from its initiation to its completion. The picture below shows one trace which is composed of multiple spans.
 
 In the example shown below, the request is initiated from a frontend web client. The first span is the parent span which shows the total time taken by the request.
@@ -122,6 +122,7 @@ span.setAttribute("http.url", url.toString());
 ```
 
 ---
+
 Read more about OpenTelemetry:<br></br>
 [OpenTelemetry Collector: architecture and configuration guide](https://signoz.io/blog/opentelemetry-collector-complete-guide/)<br></br>
 
