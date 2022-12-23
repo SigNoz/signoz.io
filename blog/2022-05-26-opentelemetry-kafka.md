@@ -1,7 +1,7 @@
 ---
 title: Complete Guide to tracing Kafka clients with OpenTelemetry in Go
 slug: opentelemetry-kafka
-date: 2022-09-01
+date: 2022-12-07
 tags: [OpenTelemetry Instrumentation, Golang]
 authors: [nitya, ankit_anand]
 description: In this tutorial, we will learn how to use OpenTelemtry for Kafka-based applications. OpenTelemetry can help instrument Kafka clients and provide an end-to-end tracing. In this guide, we will demonstrate how to instrument a Go application that uses Kafka with OpenTelemetry...

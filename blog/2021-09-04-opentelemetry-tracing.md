@@ -1,7 +1,7 @@
 ---
-title: OpenTelemetry tracing - things you need to know before implementing
+title: OpenTelemetry Tracing - Things you need to know before implementing
 slug: opentelemetry-tracing
-date: 2022-10-25
+date: 2022-12-08
 tags: [OpenTelemetry, Distributed Tracing]
 authors: ankit_anand
 description: Thinking about using OpenTelemetry for distributed tracing? OpenTelemetry Tracing API provides options for manual as well as automated instrumentation..

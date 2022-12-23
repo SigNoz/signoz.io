@@ -1,10 +1,10 @@
 ---
 title: DataDog vs New Relic | Detailed comparison (5 key features)
 slug: datadog-vs-newrelic
-date: 2022-08-18
+date: 2022-12-05
 tags: [Tools Comparison]
 authors: ankit_anand
-description: Want to choose between DataDog and New Relic? In this article, let's go through 5 key capabilities of both the tools...
+description: DataDog and New Relic are both Application Monitoring Tools used to monitor applications for performance issues. Want to choose between DataDog and New Relic? In this article, let's go through 5 key capabilities of both the tools...
 image: /img/blog/2021/10/datadog_vs_newrelic_cover-min.webp
 hide_table_of_contents: true
 keywords:
@@ -254,10 +254,6 @@ Key architecture features:
 - **Native OpenTelemetry support**<br></br>
   SigNoz is built to support <a href = "https://opentelemetry.io/" rel="noopener noreferrer nofollow" target="_blank" ><b>OpenTelemetry</b></a> natively, which is quietly becoming the world standard to generate and manage telemetry data.
 
-
-<!-- - **Flexible and scalable Database storage**<br></br>
-  SigNoz provides users flexibility in terms of storage. You can choose between ClickHouse or Kafka + Druid as your backend storage while installing SigNoz. -->
-
   <Screenshot
     alt="Architecture of SigNoz with OpenTelemetry and ClickHouse"
     height={500}
@@ -305,6 +301,15 @@ You can also build custom metrics dashboard for your infrastructure.
     width={700}
 />
 
+The logs tab in SigNoz has advanced features like a log query builder, search across multiple fields, structured table view, JSON view, etc.
+
+<figure data-zoomable align='center'>
+    <img src="/img/blog/common/signoz_logs.webp" alt="Log management in SigNoz"/>
+    <figcaption><i>Log management in SigNoz</i></figcaption>
+</figure>
+
+<br></br>
+
 
 Some of the things SigNoz can help you track:
 
@@ -317,6 +322,8 @@ Some of the things SigNoz can help you track:
 - Exceptions monitoring
 - Service dependency graph
 - Alert setting on critical metrics
+- Logs 
+- Correlated telemetry signals
 
 
 ## Getting started with SigNoz

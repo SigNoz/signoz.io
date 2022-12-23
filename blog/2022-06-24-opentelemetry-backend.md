@@ -1,7 +1,7 @@
 ---
 title: Choosing an OpenTelemetry backend - Things to keep in mind
 slug: opentelemetry-backend
-date: 2022-06-24
+date: 2022-12-04
 tags: [OpenTelemetry]
 authors: [ankit_anand]
 description: Confused about choosing a backend analysis tool for OpenTelemetry? Here’s a guide on what factors you should consider while choosing a backend to store and visualize the telemetry data collected by OpenTelemetry...

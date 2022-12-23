@@ -1,7 +1,7 @@
 ---
 title: Redis Monitoring with OpenTelemetry and SigNoz
 slug: redis-opentelemetry
-date: 2022-07-20
+date: 2022-12-20
 tags: [Database Monitoring]
 authors: [ankit_anand]
 description: In this post, we will show you how to set up Redis monitoring with SigNoz - an open-source full-stack APM. SigNoz captures data using OpenTelemetry, which is becoming the world standard for instrumenting cloud-native applications. Apart from capturing metrics from your Redis server, you can also capture logs and traces with OpenTelemetry...
@@ -335,7 +335,7 @@ Once you are done building your charts, you can save the layout and start monito
 
 ## Full-stack APM experience for Redis
 
-SigNoz is a full-stack open source APM that can monitor application statistics like latency, error rate, and requests per second with out-of-box charts and visualization. 
+SigNoz is a full-stack open source APM that provides logs, metrics, and traces under a single pane of glass. You can use SigNoz to monitor application statistics like latency, error rate, and requests per second with out-of-box charts and visualization. 
 
 If you’re using Redis in your technology stack, SigNoz APM can capture your application interaction with Redis. SigNoz also provides distributed tracing. With Flamegraphs and Gantt charts, you can visualize Redis calls as part of the entire transaction.
 

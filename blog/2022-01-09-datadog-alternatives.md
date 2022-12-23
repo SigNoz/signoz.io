@@ -1,11 +1,11 @@
 ---
-title: Top 5 DataDog alternatives in 2022
+title: Top 6 DataDog alternatives in 2023
 slug: datadog-alternatives
-date: 2022-08-09
+date: 2022-12-05
 tags: [Tech Resources]
 authors: ankit_anand
 description: Are you looking for a DataDog alternative? Then you've come to the right place. In this article, we will explore the top 5 alternatives to DataDog. 1.SigNoz 2.New Relic 3.Dynatrace...
-image: /img/blog/2022/01/datadog_alternatives_2022_cover.webp
+image: /img/blog/2022/12/datadog_alternatives_cover.png
 keywords:
   - opentelemetry
   - opentelemetry golang
@@ -27,26 +27,22 @@ Are you looking for a DataDog alternative? Then you have come to the right place
 
 import Screenshot from "@theme/Screenshot"
 
-<Screenshot
-  alt="Monitor your Go applications with SigNoz"
-  height={500}
-  src="/img/blog/2022/01/datadog_alternatives_2022_cover.webp"
-  width={700}
-/>
+![Cover Image](/img/blog/2022/12/datadog_alternatives_cover.png)
 
-For bigger enterprises it might make sense to shell out huge monitoring bills, but it's often out of question for small and medium size enterprises.
+DataDog is a cloud monitoring software that provides an array of tools for monitoring different aspects of For bigger enterprises it might make sense to shell out huge monitoring bills, but it's often out of question for small and medium size enterprises.
 
 [![Pricing concerns for DataDog](/img/blog/2021/08/datadog_alternative_reddit.webp)](https://www.reddit.com/r/devops/comments/fp7xl7/warning_avoid_datadog_at_all_costs/)
 
 The space is highly competitive, but there are a few products that stand out. In this article we will go through the best DatDog alternatives which you can explore while selecting your vendor for application monitoring.
 
-List of top DataDog alternatives in 2022:
+List of top DataDog alternatives in 2023:
 
 - SigNoz
 - New Relic
 - Dynatrace
 - Prometheus
 - LogicMonitor
+- AppDynamics
 
 ## SigNoz
 
@@ -87,7 +83,6 @@ You can do aggregates on traces to get deeper insights from your application and
 <br></br>
 
 SigNoz also provides logs which can be intelligently correlated with traces for quick application debugging.
-
 
 <figure data-zoomable align='center'>
     <img src="/img/blog/common/signoz_logs.webp" alt="Logs in SigNoz"/>
@@ -186,6 +181,26 @@ With dynamic topology mapping, you can have an overview of your network devices 
     height={500}
     src="/img/blog/2021/08/dd_alt_logicmonitor-min.webp"
     title="LogicMonitor Dashboard (Source: LogicMonitor website)"
+    width={700}
+/>
+
+## AppDynamics
+
+<a href = "https://www.appdynamics.com/" rel="noopener noreferrer nofollow" target="_blank" ><b>AppDynamics</b></a> is an extensive SaaS tool that promises to correlate business metrics and application performance metrics. It can be used as a good DataDog alternative. Its platform includes an APM tool that provides code-level observability.
+
+Some of the key features of the AppDynamics APM tool includes:
+
+- Language support for Java, .NET, Node.js, PHP, Python, C/C++ and more
+- Troubleshoot issues like slow response times and application errors
+- Discover application topology automatically
+- An alert system to alert you to issues in the context of business transactions
+- Pricing starts at $60/month per CPU core
+
+<Screenshot
+    alt="Appdynamics dashboard"
+    height={500}
+    src="/img/blog/2021/09/apm_tools_appdynamics-min.webp"
+    title="A Sample AppDynamics targeted primarily for Development teams (Source: AppDynamics documentation)"
     width={700}
 />
 

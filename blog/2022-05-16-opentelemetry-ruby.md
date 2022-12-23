@@ -1,7 +1,7 @@
 ---
 title: Tracing a Ruby application with OpenTelemetry for performance monitoring 
 slug: opentelemetry-ruby
-date: 2022-11-02
+date: 2022-11-07
 tags: [OpenTelemetry Instrumentation, Ruby]
 authors: [vishal, ankit_anand]
 description: OpenTelemetry’s Ruby client libraries can be used to trace Ruby applications for performance monitoring. In this tutorial, we will auto-instrument a sample Ruby app with OpenTelemetry to collect tracing data and then visualize it using SigNoz...
@@ -188,6 +188,15 @@ Using Flamegraphs and Gantt charts, you can see a complete breakdown of your req
 <figure data-zoomable align='center'>
     <img src="/img/blog/2022/05/opentelemetry_ruby_flamegraphs.webp" alt="Analyze your tracing data with powerful filters"/>
     <figcaption><i>You can see the complete breakdown of your requests with details like how much time each operation took, span attributes, etc.</i></figcaption>
+</figure>
+
+<br></br>
+
+SigNoz also provides Log management. The logs tab in SigNoz has advanced features like a log query builder, search across multiple fields, structured table view, JSON view, etc.
+
+<figure data-zoomable align='center'>
+    <img src="/img/blog/common/signoz_logs.webp" alt="Log management in SigNoz"/>
+    <figcaption><i>Log management in SigNoz</i></figcaption>
 </figure>
 
 <br></br>

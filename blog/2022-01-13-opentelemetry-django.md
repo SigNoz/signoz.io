@@ -1,7 +1,7 @@
 ---
 title: Monitoring Django application performance with OpenTelemetry
 slug: opentelemetry-django
-date: 2022-01-13
+date: 2022-12-14
 tags: [OpenTelemetry Instrumentation, Python]
 authors: [ankit_anand, ankit_nayan]
 description: OpenTelemetry provides an open-source standard with a consistent collection mechanism and data format. In this article, learn how to set up monitoring for a Django application using OpenTelemetry.
@@ -260,6 +260,15 @@ You can also build custom metrics dashboard for your infrastructure.
     title="You can also build a custom metrics dashboard for your infrastructure"
     width={700}
 />
+
+SigNoz also provides Log management. The logs tab in SigNoz has advanced features like a log query builder, search across multiple fields, structured table view, JSON view, etc.
+
+<figure data-zoomable align='center'>
+    <img src="/img/blog/common/signoz_logs.webp" alt="Log management in SigNoz"/>
+    <figcaption><i>Log management in SigNoz</i></figcaption>
+</figure>
+
+<br></br>
 
 
 ## Conclusion

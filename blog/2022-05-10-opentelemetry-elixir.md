@@ -1,7 +1,7 @@
 ---
 title: Monitor your Elixir application with OpenTelemetry and SigNoz 
 slug: opentelemetry-elixir
-date: 2022-06-27
+date: 2022-12-10
 tags: [OpenTelemetry Instrumentation, Elixir / Erlang]
 authors: [ricardo]
 description:  In this tutorial, we'll show you how to monitor your Elixir application using OpenTelemetry and Signoz. OpenTelemetry can be used to instrument your Elixir applications to generate telemetry data. The telemetry data can then be visualized using an observability tool to monitor your Elixir application performance...
