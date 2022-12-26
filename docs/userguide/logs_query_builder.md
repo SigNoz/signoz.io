@@ -48,6 +48,8 @@ The fulltext key is used when we want to write freehand queries and combine them
 eg:- `id IN ('2DCVZOsKHioCeuvbObzVzzL1eZ5') AND fulltext contains 'Dispatch Successful'`
 
 In this cases we are searching `Dispatch Successful` as fulltext along with the id filter.
+
+Note:- The `fulltext` keyword can be only used with `contains` and the `ncontains` operator.
     
 
 ## Pointers to note while writing queries
