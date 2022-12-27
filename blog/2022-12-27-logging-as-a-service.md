@@ -1,5 +1,5 @@
 ---
-title: Logging as a service | Log Management with Open Source
+title: Logging as a service | Log Management with Open Source Tool
 slug: logging-as-a-service
 date: 2022-12-27
 tags: [Tech Tutorial, Log Management]
