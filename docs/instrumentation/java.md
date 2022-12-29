@@ -214,6 +214,48 @@ Here's a video on how to instrument Tomcat applications with SigNoz and a [blog]
 
 <p>&nbsp;</p> -->
 
+## Instrumentation using Otel buildpack (paketo) for Java
+
+1. **Clone OTel buildpack repo:**<br></br>
+     
+     ```bash
+     git clone https://github.com/paketo-buildpacks/opentelemetry.git
+     ```
+
+2. **Switch to config-binding branch:**<br></br>
+   
+   ```bash
+   git checkout config-binding
+   ```
+
+3. **Run the following command:**<br></br>
+   
+   ```bash
+   scripts/build.sh
+   ```
+
+4. **Now run below command to build a pack:**<br></br>
+    
+    ```bash
+    pack build paketo-demo-app \
+      --path /Users/makeavish/samples/java/maven \
+      --buildpack paketo-buildpacks/java \
+      --buildpack . \
+      --builder paketobuildpacks/builder:base \
+      --verbose --trust-builder \
+      -e BP_JVM_VERSION=17 -e BP_OPENTELEMETRY_ENABLED=true
+    ```
+    
+5. Pass environment variables to enable java agent `OTEL_JAVAAGENT_ENABLED=true` set exporter endpoint `OTEL_EXPORTER_OTLP_ENDPOINT=http://stagingapp.signoz.io:4317` and set service name `OTEL_RESOURCE_ATTRIBUTES=service.name=javaApp`
+
+6. Other otel configurations can be updated by passing more environment variables. Refer to <a href = "https://opentelemetry.io/docs/instrumentation/java/automatic/agent-config/" rel="noopener noreferrer nofollow" target="_blank" >official docs</a> for more such configurations.
+
+7. Run docker command:
+    
+    ```bash
+    docker run -d -p 8080:8080 -e PORT=8080 -e OTEL_EXPORTER_OTLP_ENDPOINT=http://stagingapp.signoz.io:4317 -e OTEL_RESOURCE_ATTRIBUTES=service.name=javaApp -e OTEL_JAVAAGENT_ENABLED=true paketo-demo-app
+    ```
+
 ## Troubleshooting your installation
 
 If spans are not being reported to SigNoz, try running in debug mode by setting `OTEL_LOG_LEVEL=debug`:
