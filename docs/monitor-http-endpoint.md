@@ -40,3 +40,26 @@ With SigNoz, you can monitor the health of the HTTP endpoints and set up an aler
 * We can restart the otel collector container so that new changes are applied and see the metrics generated for synthetic checks.
 
 * This receiver creates a metric name `httpcheck_status` with value 1 if the check resulted in status_code matching the status_class, otherwise 0. For more info on the additional metrics and attributes available, please read the documentation [here](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/httpcheckreceiver/documentation.md).
+
+* Note: If you want to monitor the health of multiple endpoints with this receiver, then you need to add one instance of receiver for each endpoint since it currently supports only one endpoint. Following is the sample config that monitors two endpoints.
+
+  ```yaml {2-10}
+  receivers:
+    httpcheck/example:
+      endpoint: http://example.com
+      method: GET
+      collection_interval: 10s
+    htppcheck/my-app:
+      endpoint: http://my-app.com
+      method: GET
+      collection_interval: 1s
+  ...
+  ...
+
+    service:
+        ....
+        metrics:
+          receivers: [otlp, httpcheck/example, htppcheck/my-app]
+          processors: [batch]
+          exporters: [clickhousemetricswrite]
+  ```
