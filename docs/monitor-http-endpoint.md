@@ -49,7 +49,7 @@ With SigNoz, you can monitor the health of the HTTP endpoints and set up an aler
       endpoint: http://example.com
       method: GET
       collection_interval: 10s
-    htppcheck/my-app:
+    httpcheck/my-app:
       endpoint: http://my-app.com
       method: GET
       collection_interval: 1s
@@ -59,7 +59,7 @@ With SigNoz, you can monitor the health of the HTTP endpoints and set up an aler
     service:
         ....
         metrics:
-          receivers: [otlp, httpcheck/example, htppcheck/my-app]
+          receivers: [otlp, httpcheck/example, httpcheck/my-app]
           processors: [batch]
           exporters: [clickhousemetricswrite]
   ```
