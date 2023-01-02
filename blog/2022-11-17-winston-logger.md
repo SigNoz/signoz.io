@@ -331,6 +331,10 @@ cd signoz/deploy/
 ./install.sh
 ```
 
+You can visit the documentation for instructions on how to install SigNoz using Docker Swarm and Helm Charts.
+
+[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/?utm_source=blog&utm_medium=winston_logger)
+
 ### Dockerising the Node app
 
 Create a `docker-compose.yaml` file and paste the following code:
@@ -430,3 +434,5 @@ SigNoz uses OpenTelemetry to collect logs. With OpenTelemetry, you can also corr
 **Related Posts**
 
 [SigNoz - a lightweight open source ELK alternative](https://signoz.io/blog/elk-alternative-open-source/)
+
+[Morgan Logger - Tutorial on how to use in an Express application](https://signoz.io/blog/morgan-logger/)
