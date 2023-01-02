@@ -153,7 +153,7 @@ http {
         keepalive_timeout 65;
         types_hash_max_size 2048;
      
-				**log_format logger-json escape=json '{"source": "nginx","message":"nginx log captured","time": $time_iso8601, "resp_body_size": $body_bytes_sent, "host": "$http_host", "address": "$remote_addr", "request_length": $request_length, "method": "$request_method", "uri": "$request_uri", "status": $status,  "user_agent": "$http_user_agent", "resp_time": $request_time, "upstream_addr": "$upstream_addr"}';**
+				log_format logger-json escape=json '{"source": "nginx","message":"nginx log captured","time": $time_iso8601, "resp_body_size": $body_bytes_sent, "host": "$http_host", "address": "$remote_addr", "request_length": $request_length, "method": "$request_method", "uri": "$request_uri", "status": $status,  "user_agent": "$http_user_agent", "resp_time": $request_time, "upstream_addr": "$upstream_addr"}';
        
         include /etc/nginx/mime.types;
         default_type application/octet-stream;
@@ -162,7 +162,7 @@ http {
         # Logging Settings
         ##
 
-        **access_log /home/user/Work/logs/access.log logger-json;**
+        access_log /home/user/Work/logs/access.log logger-json;
 }
 ```
 
@@ -311,6 +311,7 @@ otel-collector:
     volumes:
       - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      //highlight-next-line
       - ~/Work/logs/access.log:/tmp/access.log
 ```
 
@@ -321,6 +322,7 @@ Add the filelog reciever to [otel-collector-config.yaml](https://github.com/Sig
 ```jsx
 receivers:
   filelog:
+  //highlight-next-line
     include: [  "/tmp/access.log" ]
     start_at: beginning
     operators:
@@ -343,6 +345,7 @@ Next we will modify our pipeline inside [otel-collector-config.yaml](https://gi
 service:
     ....
     logs:
+    //highlight-next-line
         receivers: [otlp, filelog]
         processors: [batch]
         exporters: [clickhouselogsexporter]

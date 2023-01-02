@@ -258,7 +258,7 @@ from and the severity of that log (in this case, it's a debug message):
 
 <br></br>
 
-If you want to access all the snippet codes we discussed, you can visit [this GitHub repo](https://github.com/SigNoz/python-syslog)<a href = "https://en.wikipedia.org/wiki/Syslog" rel="noopener noreferrer nofollow" target="_blank" >message logging</a>.
+If you want to access all the snippet codes we discussed, you can visit <a href = "https://github.com/SigNoz/python-syslog" rel="noopener noreferrer nofollow" target="_blank" >this GitHub repo</a>.
 
 ---
 
