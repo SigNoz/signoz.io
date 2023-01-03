@@ -12,7 +12,7 @@ import { LiteYoutubeEmbed } from "react-lite-yt-embed";
 
 <head>
   <link rel="canonical" href="https://signoz.io/case-study/wombo/"/>
-  <meta property="og:image" content="https://signoz.io/img/case_study/wombo-banner.webp"/>
+  <meta name="image" property="og:image" content="https://signoz.io/img/case_study/wombo-banner.webp"/>
   <meta name ="twitter:image" content="https://signoz.io/img/case_study/wombo-banner.webp"/>
 </head>
 
