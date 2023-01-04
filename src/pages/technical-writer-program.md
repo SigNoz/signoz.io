@@ -30,7 +30,7 @@ We are an open-source Application Performance Monitoring (APM) tool and we’re 
        alt = "Write tech tutorials, blogs for SigNoz with its technical writer program, build your digital presence and get paid to do it"/>
 </div>
 
-> Reach out to ankit.anand@signoz.io for more details on our Technical Writer program
+> Reach out to writing@signoz.io for more details on our Technical Writer program
 
 We help developers like you to monitor applications and keep them in fine health. You can monitor application metrics like latency, requests per sec, error rates, etc. with SigNoz. There are a bunch of other things that we are good at. But that’s a story for another time! You can though check out our GitHub repo in a jiffy 👇
 
@@ -66,7 +66,7 @@ We're open to your creative ideas. Feel free to apply!
     - <a href = "https://expressjs.com/en/advanced/best-practice-performance.html" rel="noopener noreferrer nofollow" target="_blank" >Performance Best Practices Using Express in Production</a> -->
 
 
-You can also just reach out directly to ankit.anand@signoz.io with an introduction and few samples of your work. If you’re wondering why do this, then let us convince you.
+You can also just reach out directly to writing@signoz.io with an introduction and few samples of your work. If you’re wondering why do this, then let us convince you.
 
 ## Why write technical content for us?
 
@@ -85,7 +85,7 @@ Are you convinced? Even if you’re not, let’s give it a shot and see what hap
 
 ## How does the process work?
 
-You just need to reach out to ankit.anand@signoz.io with an interesting idea and a short proposal. Once your proposal is accepted, we will provide you with a Notion workspace to get started.
+You just need to reach out to writing@signoz.io with an interesting idea and a short proposal. Once your proposal is accepted, we will provide you with a Notion workspace to get started.
 
 
 ## General FAQs
@@ -116,6 +116,6 @@ You can find more guidelines on writing technical articles for us [here](https:/
 
 ## Who can apply?
 
-Everyone. Yes, even if it’s your first attempt at writing an article. The only prerequisite is that you should have a clear understanding of the topic that you have chosen. So what are you waiting for? We’re waiting to hear from you. Reach out to ankit.anand@signoz.io today.
+Everyone. Yes, even if it’s your first attempt at writing an article. The only prerequisite is that you should have a clear understanding of the topic that you have chosen. So what are you waiting for? We’re waiting to hear from you. Reach out to writing@signoz.io today.
 
 
