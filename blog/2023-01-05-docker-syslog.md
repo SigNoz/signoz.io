@@ -5,7 +5,7 @@ date: 2023-01-05
 tags: [Tech Tutorial, Docker, Log Management]
 authors: [daniel]
 description: Logs are useful for troubleshooting and identifying issues in applications, as they provide a record of events and activities. However, managing log data can be challenging due to ...
-image: /img/blog/2023/01/microservices_logging_cover.webp
+image: /img/blog/2023/01/docker_syslog_cover.webp
 keywords:
   - docker syslog
   - docker logs
