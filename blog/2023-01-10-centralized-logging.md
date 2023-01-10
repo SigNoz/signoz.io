@@ -4,8 +4,8 @@ slug: centralized-logging
 date: 2023-01-10
 tags: [Tech Tutorial, Log Management]
 authors: [muskan]
-description: Modern-day software systems emit millions of log lines per minute. Cloud computing and containerization have made it easy to have distributed systems. Distributed systems emit logs ...
-image: /img/blog/2023/01/docker_syslog_cover.webp
+description: While developers have always used logs to debug stand-alone applications, centralized logging solves the challenges of modern-day distributed software systems...
+image: /img/blog/2023/01/centralized_logging_cover.webp
 keywords:
   - logs
   - logging
