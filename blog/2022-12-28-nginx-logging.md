@@ -274,7 +274,7 @@ To configure syslog on the signoz platform, refer this [documentation](https://s
 
 ## NGINX Logging and Analysis with SigNoz
 
-SigNoz is a full-stack open source APM that can be used for analyzing NGINX logs. SigNoz provides all three telemetry signals - logs, metrics, and traces under a single pane of glass. You can easily correlate these signals to get more contextual information while debugging your application.
+SigNoz is a full stack observability platform which provides metrics, traces and logs in a single pane. You can easily correlate these signals to get more contextual information while debugging your application.
 
 SigNoz uses a columnar database ClickHouse to store logs, which is very efficient at ingesting and storing logs data. Columnar databases like ClickHouse are very effective in storing log data and making it available for analysis.
 
