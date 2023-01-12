@@ -8,23 +8,18 @@ id: collect_kubernetes_pod_logs
 When you deploy SigNoz to your kubernetes cluster it will automatically start collecting all the pod logs. It will automatically parse out different attributes from the logs like name, namespace, container name, uid etc. But if you want to parse specific attributes from certain kind of logs you can use different kinds of operators provided by opentelemetry [here](./logs.md#operators-for-parsing-and-manipulating-logs) 
 
 ### Steps to disable automatic pod logs collection
-* Modify the `values.yaml` file in [charts](https://github.com/SigNoz/charts/blob/main/charts/signoz/values.yaml)
-  ```yaml {7}
-  ...
-    service:
-      ...
-      pipelines:
-        ...
-        logs:
-          receivers: [otlp]
-          processors: [batch]
-          exporters: [clickhouselogsexporter]
+* Modify/Create the `override-values.yaml` file
+  ```yaml
+  k8s-infra:
+    presets:
+      logsCollection:
+        enabled: false
   ```
-  Here we have modified the value of receivers from `[filelog/k8s, otlp]` to `[otlp]`
+  Once the above is applied to your k8s cluster, logs collection will be disabled.
 
 ### Filter/Exclude logs
 
-* **Using exclude key in filelog receiver** : If you want to exclude logs of certain pods we can do that by modifying the filelog reciever in `values.yaml` file in [charts](https://github.com/SigNoz/charts/blob/main/charts/signoz/values.yaml).
+* **Using exclude key in filelog receiver** : If you want to exclude logs of certain pods we can do that by modifying the filelog reciever in `values.yaml` file in [charts](https://github.com/SigNoz/charts/blob/main/charts/k8s-infra/values.yaml).
   ```yaml {4}
   receivers:
     filelog/k8s:
