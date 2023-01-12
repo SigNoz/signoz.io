@@ -15,8 +15,23 @@ When you deploy SigNoz to your kubernetes cluster it will automatically start co
       logsCollection:
         enabled: false
   ```
-  Once the above is applied to your k8s cluster, logs collection will be disabled.
+  You can apply this yaml file by running the following command
+  ```
+  helm -n platform upgrade my-release signoz/signoz -f override-values.yaml
+  ```  
 
+  In case of external K8s cluster where only k8s-infra chart is installed, users can disable log collections by including the following in `override-values.yaml` :
+  ```yaml
+  presets:
+    logsCollection:
+      enabled: false
+  ```
+  You can apply this yaml file by running the following command
+  ```
+  helm -n platform upgrade my-release signoz/k8s-infra -f override-values.yaml
+  ```  
+
+  Once the above is applied to your k8s cluster, logs collection will be disabled.
 ### Filter/Exclude logs
 
 * **Using exclude key in filelog receiver** : If you want to exclude logs of certain pods we can do that by modifying the filelog reciever in `values.yaml` file in [charts](https://github.com/SigNoz/charts/blob/main/charts/k8s-infra/values.yaml).
