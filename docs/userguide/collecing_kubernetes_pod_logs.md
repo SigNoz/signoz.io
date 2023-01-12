@@ -60,7 +60,7 @@ When you deploy SigNoz to your kubernetes cluster it will automatically start co
   ```
  
 
-* **Using filter operator in filelog receiver** : You can also use the filter operator to filter out logs by chnaging the operators here [charts](https://github.com/SigNoz/charts/blob/main/charts/k8s-infra/values.yaml).
+* **Using filter operator in filelog receiver** : You can also use the filter operator to filter out logs by changing the operators here [charts](https://github.com/SigNoz/charts/blob/main/charts/k8s-infra/values.yaml).
   ```yaml {3-6}
   ....
     operators:
