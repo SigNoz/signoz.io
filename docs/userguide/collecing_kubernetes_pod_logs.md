@@ -34,18 +34,33 @@ When you deploy SigNoz to your kubernetes cluster it will automatically start co
   Once the above is applied to your k8s cluster, logs collection will be disabled.
 ### Filter/Exclude logs
 
-* **Using exclude key in filelog receiver** : If you want to exclude logs of certain pods we can do that by modifying the filelog reciever in `values.yaml` file in [charts](https://github.com/SigNoz/charts/blob/main/charts/k8s-infra/values.yaml).
-  ```yaml {4}
-  receivers:
-    filelog/k8s:
-      include: [  "/var/log/pods/*/*/*.log" ]
-      exclude: [ "/var/log/pods/*/<pod-name>/*.log" ]
-      start_at: end
-  ...
+* **Excluding certain log files** : If you want to exclude logs of certain pods/namespace you can do it using the following config in `override-values.yaml`.
+  ```yaml
+  k8s-infra:
+  presets:
+    logCollection:
+      # whether to enable log collection
+      enabled: true
+      blacklist:
+        # whether to enable blacklisting
+        enabled: true
+        # whether to exclude signoz logs
+        signozLogs: false
+        # which namespaces to exclude
+        namespaces:
+          - kube-system
+        # which pods to exclude
+        pods:
+          - hotrod
+          - locust
+        # which containers to exclude
+        containers: []
+        # additional exclude rules
+        additionalExclude: []
   ```
-  Here we are using exclude key in the filelog config to exclude logs of a certain Pod.
+ 
 
-* **Using filter operator in filelog receiver** : You can also use the filter operator to filter out logs
+* **Using filter operator in filelog receiver** : You can also use the filter operator to filter out logs by chnaging the operators here [charts](https://github.com/SigNoz/charts/blob/main/charts/k8s-infra/values.yaml).
   ```yaml {3-6}
   ....
     operators:
