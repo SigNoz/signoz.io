@@ -1,7 +1,7 @@
 ---
-title: Configuring Docker Syslog Logging Driver for Docker Dameon & Containers
+title: Configure your Docker Syslog Logging Driver
 slug: docker-syslog
-date: 2023-01-05
+date: 2023-01-10
 tags: [Tech Tutorial, Docker, Log Management]
 authors: [daniel]
 description: Logs are useful for troubleshooting and identifying issues in applications, as they provide a record of events and activities. However, managing log data can be challenging due to ...
@@ -164,7 +164,7 @@ The logs tab in SigNoz has advanced features like a log query builder, search ac
 
 <figure data-zoomable align='center'>
     <img src="/img/blog/2023/01/docker_syslog_logs_1.webp" alt="Log Query Builder."/>
-    <figcaption><i>Log Query Builder.</i></figcaption>
+    <figcaption><i>Log management in SigNoz</i></figcaption>
 </figure>
 
 
