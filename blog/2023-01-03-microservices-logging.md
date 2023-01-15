@@ -5,7 +5,7 @@ date: 2023-01-04
 tags: [Tech Tutorial, Log Management]
 authors: [vaishnavi]
 description: Microservices logging is the practice of tracking and recording the activities of specific services in a distributed microservices architecture. Logging is an important aspect of any software system, and it is more critical for a microservices architecture as there are many small, independent services interesting with each other....
-image: /img/blog/2023/01/microservices_logging_cover.webp
+image: /img/blog/2023/01/microservices_logging_cover.jpeg
 keywords:
   - microservices logging
   - logging

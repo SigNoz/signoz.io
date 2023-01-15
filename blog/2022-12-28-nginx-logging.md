@@ -5,7 +5,7 @@ date: 2022-12-28
 tags: [Tech Tutorial, Log Management]
 authors: [selva]
 description: NGINX is a prominent web server, reverse proxy server, and mail proxy utilized by many websites and applications to serve content to their users. Nginx logging refers to the process of recording events and information related to the operation of an Nginx web server. Two most important Nginx log types are error logs and access logs....
-image: /img/blog/2022/12/nginx_logging_cover.webp
+image: /img/blog/2022/12/nginx_logging_cover.jpeg
 keywords:
   - nginx logging
   - nginx
@@ -62,10 +62,19 @@ NGINX logs can be useful for various purposes, including tracking the server's p
 
 In this tutorial, we will illustrate the following:
 
-- [How to configure Nginx access logs](#configuring-nginx-to-generate-access-logs)
-- [How to configure Nginx error logs](#configuring-nginx-to-generate-error-logs)
-- [How to send Nginx logs to Syslog](#sending-nginx-logs-to-syslog)
-- [Collecting and analyzing Nginx logs with SigNoz](#nginx-logging-and-analysis-with-signoz)
+- [What are Nginx Error Logs?](#what-are-nginx-error-logs)
+- [What are Nginx Access Logs?](#what-are-nginx-access-logs)
+- [Prerequisites](#prerequisites)
+- [Installing Nginx](#installing-nginx)
+  - [Installing NGINX on Linux](#installing-nginx-on-linux)
+  - [Installing NGINX on Mac](#installing-nginx-on-mac)
+- [Configuring NGINX to generate access logs](#configuring-nginx-to-generate-access-logs)
+- [Configuring NGINX to generate error logs](#configuring-nginx-to-generate-error-logs)
+- [Sending NGINX logs to Syslog](#sending-nginx-logs-to-syslog)
+- [NGINX Logging and Analysis with SigNoz](#nginx-logging-and-analysis-with-signoz)
+- [Installing SigNoz](#installing-signoz)
+- [Steps for collecting Nginx logs into SigNoz](#steps-for-collecting-nginx-logs-into-signoz)
+- [Conclusion](#conclusion)
 
 Let's get started.
 

@@ -5,7 +5,7 @@ date: 2023-01-14
 tags: [Tech Tutorial, Log Management]
 authors: [daniel]
 description: The `kubectl logs tail` command is a tool that allows users to stream the logs of a pod in real-time while using Kubernetes. This command is particularly useful for...
-image: /img/blog/2023/01/kubectl_logs_tail_cover.jpg
+image: /img/blog/2023/01/kubectl_logs_tail_cover.jpeg
 keywords:
   - kubectl
   - kubernetes

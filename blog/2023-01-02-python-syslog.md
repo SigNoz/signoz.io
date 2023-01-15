@@ -5,7 +5,7 @@ date: 2023-01-02
 tags: [Tech Tutorial, Python, Log Management]
 authors: [ezz]
 description: Syslog is an important messaging protocol in computing systems where it is used to send system logs or event messages to a specific server. In Python, you can either use the `syslog` module or the `logging` module to collect and send syslogs to a central server....
-image: /img/blog/2023/01/python_syslog_cover.webp
+image: /img/blog/2023/01/python_syslog_cover.jpeg
 keywords:
   - python syslog
   - python logs

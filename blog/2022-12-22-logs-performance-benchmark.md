@@ -5,7 +5,7 @@ date: 2022-12-22
 tags: [SigNoz, Open Source]
 authors: [nitya, ankit_anand]
 description: We found SigNoz to be 2.5x faster than ELK. For querying benchmarks, we tested out different types of commonly used queries. While ELK was better at performing queries like COUNT, SigNoz is 13x faster than ELK for aggregate queries...
-image: /img/blog/2022/12/logs_performance_benchmark_cover.webp
+image: /img/blog/2022/12/logs_performance_benchmark_cover.jpeg
 keywords:
   - logs management
   - log analytics
