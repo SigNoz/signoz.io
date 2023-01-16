@@ -60,21 +60,8 @@ An example of access logs is shown in the picture below:
 
 NGINX logs can be useful for various purposes, including tracking the server's performance, identifying potential issues or errors, and analyzing the usage patterns of the server. However, managing logs can also be challenging, as they can quickly grow in size and become difficult to manage.
 
-In this tutorial, we will illustrate the following:
+In this tutorial, we will illustrate how to handle NGINX logs with an open source log management tool - [SigNoz](https://signoz.io/).
 
-- [What are Nginx Error Logs?](#what-are-nginx-error-logs)
-- [What are Nginx Access Logs?](#what-are-nginx-access-logs)
-- [Prerequisites](#prerequisites)
-- [Installing Nginx](#installing-nginx)
-  - [Installing NGINX on Linux](#installing-nginx-on-linux)
-  - [Installing NGINX on Mac](#installing-nginx-on-mac)
-- [Configuring NGINX to generate access logs](#configuring-nginx-to-generate-access-logs)
-- [Configuring NGINX to generate error logs](#configuring-nginx-to-generate-error-logs)
-- [Sending NGINX logs to Syslog](#sending-nginx-logs-to-syslog)
-- [NGINX Logging and Analysis with SigNoz](#nginx-logging-and-analysis-with-signoz)
-- [Installing SigNoz](#installing-signoz)
-- [Steps for collecting Nginx logs into SigNoz](#steps-for-collecting-nginx-logs-into-signoz)
-- [Conclusion](#conclusion)
 
 Let's get started.
 
@@ -82,6 +69,23 @@ Let's get started.
 
 - Docker
 - Nginx
+
+## Installing SigNoz
+
+SigNoz may be installed in three simple steps on macOS or Linux PCs using a simple install script.
+
+Docker Engine is installed automatically on Linux by the installation script. However, before running the setup script on macOS, you must manually install <a href = "https://docs.docker.com/engine/install/" rel="noopener noreferrer nofollow" target="_blank" >Docker Engine</a>.
+
+```jsx
+git clone -b main https://github.com/SigNoz/signoz.git
+cd signoz/deploy/
+./install.sh
+```
+
+You can visit the documentation for instructions on how to install SigNoz using Docker Swarm and Helm Charts.
+
+[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/?utm_source=blog&utm_medium=nginx_logging)
+
 
 ## Installing Nginx
 
@@ -290,23 +294,6 @@ SigNoz uses a columnar database ClickHouse to store logs, which is very efficien
 Using SigNoz for NGINX logs can make troubleshooting easier. SigNoz comes with an advanced log query builder, live tail logs, and the ability to filter log data across multiple fields.
 
 Let us see how to collect and analyze Nginx logs with SigNoz.
-
-## Installing SigNoz
-
-SigNoz may be installed in three simple steps on macOS or Linux PCs using a simple install script.
-
-Docker Engine is installed automatically on Linux by the installation script. However, before running the setup script on macOS, you must manually install <a href = "https://docs.docker.com/engine/install/" rel="noopener noreferrer nofollow" target="_blank" >Docker Engine</a>.
-
-```jsx
-git clone -b main https://github.com/SigNoz/signoz.git
-cd signoz/deploy/
-./install.sh
-```
-
-You can visit the documentation for instructions on how to install SigNoz using Docker Swarm and Helm Charts.
-
-[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/?utm_source=blog&utm_medium=winston_logger)
-
 
 ## Steps for collecting Nginx logs into SigNoz
 
