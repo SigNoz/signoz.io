@@ -8,6 +8,8 @@ import GetHelp from '../shared/get-help.md'
 import PrereqsInstrument from '../shared/prereqs-instrument.md'
 import UseHotRod from '../shared/use-hotrod.md'
 
+# View Traces in SigNoz
+
 This page shows how you can use distributed tracing to retrieve detailed telemetry data and see how your applications are performing. You’ll learn the following:
 
 - What is distributed tracing
@@ -64,12 +66,12 @@ There are two ways in which you can filter traces by tags:
 - You can enter plain text in the **Quick Filter** input box and then select the **Run** button at the far right. Note that text is interpreted as case-sensitive.
 - You can use the expression builder. To access the expression builder, select the **Add Tags Filter** button. Then, use the dropdown list to select a tag from the list of supported tags, specify an operator and enter a value. When you’ve finished, select the **Run Query** button.
 
-## Advanced Filtering
+## Advanced Filtering Feature
 
 You can use the **Advanced Filtering** pane that contains multiple filter criteria that you can apply to your spans:
 ![Advanced filtering](/img/advanced-filtering-v0.6.2.png)
 
-## Sort Spans
+## Sort Spans by various tags
 
 Select a column heading to sort the list by the values in that column. Select the column heading again to reverse the sort order or to cancel sorting:
 ![Sort spans](/img/sort-spans-v0.6.2.png)

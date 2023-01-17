@@ -33,7 +33,7 @@ Let’s understand how to download, install, and run OpenTelemetry in Python.
 
 - Python 3.6 or newer
 
-## Traces
+## Send Traces Directly to SigNoz
 
 You can use OpenTelemetry Python to send your traces directly to SigNoz. OpenTelemetry provides a handy distro in Python that can help you get started with automatic instrumentation. We recommend using it to get started quickly.
 
@@ -167,19 +167,19 @@ It is recommended to use the [opentelemetry distro](#steps-to-auto-instrument-py
 
 Make sure that the DB client library you are using has the corresponding instrumentation library, and the version of the DB client library is supported by OpenTelemetry.
 
-### MongoDB
+### Using MongoDB
 
 You can use  `opentelemetry-distro` to initialize instrumentation for your MongoDB database calls. You need to ensure that the version of your DB client library is supported by OpenTelemetry. For MongoDB, the instrumentation library is `opentelemetry-instrumentation-pymongo`.
 
 You can check the supported versions [here](https://github.com/open-telemetry/opentelemetry-python-contrib/tree/main/instrumentation).
 
-### Redis
+### Using Redis
 
 You can use  `opentelemetry-distro` to initialize instrumentation for your Redis database calls. You need to ensure that the version of your DB client library is supported by OpenTelemetry. For Redis, the instrumentation library is `opentelemetry-instrumentation-redis`.
 
 You can check the supported versions [here](https://github.com/open-telemetry/opentelemetry-python-contrib/tree/main/instrumentation).
 
-### MySQL
+### Using MySQL
 
 You can use  `opentelemetry-distro` to initialize instrumentation for your MySQL database calls. You need to ensure that the version of your DB client library is supported by OpenTelemetry. For MySQL, we have two isntrumentation libraries:
 
@@ -188,7 +188,7 @@ You can use  `opentelemetry-distro` to initialize instrumentation for your MySQL
 
 You can check the supported versions [here](https://github.com/open-telemetry/opentelemetry-python-contrib/tree/main/instrumentation).
 
-### Postgres
+### Using Postgres
 
 You can use  `opentelemetry-distro` to initialize instrumentation for your PostgreSQL database calls. You need to ensure that the version of your DB client library is supported by OpenTelemetry. For Postgres, the instrumentation library is `opentelemetry-instrumentation-psycopg2`.
 
@@ -211,7 +211,7 @@ Check this [documentation](https://opentelemetry-python.readthedocs.io/en/latest
 <p>&nbsp;</p>
 
 
-## Troubleshooting your installation
+## Troubleshooting your SigNoz installation
 
 #### Spans are not being reported
 
