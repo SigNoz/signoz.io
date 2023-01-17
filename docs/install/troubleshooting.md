@@ -18,7 +18,7 @@ import { LiteYoutubeEmbed } from "react-lite-yt-embed";
 
 This troubleshooting guide includes step-by-step instructions that should resolve most installation issues.
 
-## Using Troubleshooting repository
+## Using SigNoz Troubleshooting Repository
 
 You can use the [SigNoz troubleshoot](https://github.com/SigNoz/troubleshoot) to test if SigNoz otel collector
 is accessible from where you are running your applications.
@@ -91,7 +91,7 @@ Whew! That was a lot of instruction to follow. If you instead prefer to watch a 
 <!-- <LiteYoutubeEmbed id="Y7OkvmuTRQ8" mute={false} /> -->
 
 
-## Docker Standalone
+## Docker Standalone Installation of SigNoz
 
 1. Before you install SigNoz on Docker Standalone, ensure that all [prerequisites](/docs/install/docker/#prerequisites) are met.
 2. Run the `docker ps` command and ensure that the `clickhouse-setup_clickhouse` and `query-service` containers are running. If these containers are not running, increase the memory allocated to Docker.
@@ -100,7 +100,7 @@ Whew! That was a lot of instruction to follow. If you instead prefer to watch a 
 5. Follow the steps for [uninstalling SigNoz](/docs/operate/docker-standalone/#uninstall-signoz) section and then install SigNoz again by following the steps in the [Install SigNoz on Docker Standalone](/docs/install/docker) section.
 6. If you're still facing issues trying to install SigNoz, please reach out to us on [Slack](https://signoz.io/slack) 
 
-## SigNoz Otel Collector address Grid
+## SigNoz Otel Collector Address Grid
 
 You might have specific set up for your application and SigNoz cluster.
 It might not be very clear on which address to use to send data to SigNoz.

@@ -4,11 +4,11 @@ title: Upgrade to 0.10
 sidebar_label: Upgrade to 0.10
 ---
 
-# Upgrade to 0.10 from earlier versions
+# Upgrade to v0.10 from earlier versions
 
 v0.10 is a breaking release which requires data migration for errors and exceptions section, if you are upgrading from an older version then you have to run the data migration scripts to be able to see past errors and exceptions data.
 
-## First upgrade to 0.10
+## First upgrade to v0.10
 
 Follow the platform specific instructions to upgrade to 0.10 and above.
 
@@ -20,7 +20,7 @@ Note that the past exceptions/error data will not be visible on the new applicat
 
 ## Steps to run migration script:
 
-### Docker
+### For Docker
 
 ```bash
 docker run --name signoz-migrate --network clickhouse-setup_default \
@@ -41,7 +41,7 @@ docker stop signoz-migrate
 docker rm signoz-migrate
 ```
 
-### Docker Swarm
+### For Docker Swarm
 
 For Swarm, you could follow similar step to that of [Docker](#docker). However,
 you would need to expose clickhouse container ports to host machine and use
@@ -101,7 +101,7 @@ expose clickhouse ports even temporarily, you can go through following steps.
   rm migration-0.10
   ```
 
-### Kubernetes
+### For Kubernetes
 
 ```bash
 kubectl -n platform run -i -t signoz-migrate --image=signoz/migrate:0.10 --restart='Never' \
@@ -120,14 +120,14 @@ In case of failure and have to run again, make sure to cleanup the pod before ru
 kubectl -n platform delete pod signoz-migrate
 ```
 
-## In case of failure
+## In case of upgradation failure
 
 1. Note the `ServiceName: xxxxx` and `TimeNano: xxxxx` in the logs of the migration script
 2. Check the recommneded batch size section at the end of this page and use a runtime flag if needed
 3. Re-run migration command using flags `service` and `timeNano` and `batchSize` with values from above as mentioned in the `CLI Flags` section below
 4. Reach out to us at [slack](https://signoz.io/slack)
 
-## CLI Flags
+## Command-Line Interface (CLI) Flags
 
 There are some custom flags which can be enabled based on different usecases.
 All the flags below are `optional`.

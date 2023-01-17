@@ -19,7 +19,7 @@ ClickHouse cluster
 with production environment, while single instance of Zookeeper should suffice for
 development environment.
 
-## Distributed ClickHouse
+## Distributed ClickHouse Setup for SigNoz
 
 Basically, distributed clickhouse cluster consists of the following:
 - More than one clickhouse shard instances
@@ -29,7 +29,7 @@ Basically, distributed clickhouse cluster consists of the following:
 Follow the instructions in the respective sections below to set up distributed
 clickhouse with multiple shards for your SigNoz cluser.
 
-### Docker
+### Installed using Docker 
 
 For ClickHouse cluster with 3 shards, you will need to include additional
 clickhouse services in `docker-compose.yaml`. You will also need to update
@@ -172,7 +172,7 @@ Next, you will have to un-comment the following from `clickhouse-cluster.xml`:
 </clickhouse>
 ```
 
-### Docker Swarm
+### Installed using Docker Swarm
 
 To set up ClickHouse cluster with 3 shards in Docker Swarm, you will need to include additional
 clickhouse services in `docker-compose.yaml`. You will also need to update
@@ -311,7 +311,7 @@ Next, you will have to un-comment the following from `clickhouse-cluster.xml`:
 </clickhouse>
 ```
 
-### Kubernetes
+### Kubernetes Installation
 
 To set up ClickHouse cluster with **3 shards** and  **3 nodes** Zookeeper cluster,
 include the following in `override-values.yaml`:
