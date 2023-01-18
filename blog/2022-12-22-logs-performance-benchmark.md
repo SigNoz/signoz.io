@@ -5,7 +5,7 @@ date: 2023-01-17
 tags: [SigNoz, Open Source]
 authors: [nitya, ankit_anand]
 description: We found SigNoz to be 2.5x faster than ELK. For querying benchmarks, we tested out different types of commonly used queries. While ELK was better at performing queries like COUNT, SigNoz is 13x faster than ELK for aggregate queries...
-image: /img/blog/2022/12/benchmark-cover.jpg
+image: /img/blog/2022/12/benchmark-cover-min.jpg
 hide_table_of_contents: true
 keywords:
   - logs management
@@ -24,7 +24,7 @@ Logs are an integral part of any system that helps you get information about the
 
 <!--truncate-->
 
-![cover image](/img/blog/2022/12/benchmark-cover.jpg)
+![cover image](/img/blog/2022/12/benchmark-cover.webp)
 
 Though the performance benchmarks in our tests represent a very specific scenario and use cases, our results seem to directionally agree with what other observability teams have reported, especially wrt. Elastic stack. 
 
@@ -94,7 +94,7 @@ For deployment and benchmarking, we have used four VMs. Three of the VMs are use
 
 The three VMs for generating logs is **`c6a.2xlarge`** EC2 instance with 8vCPU, 16GB of RAM, and network bandwidth of up to 12.5 Gbps. While the VM used for deploying the logging solution is a **`c6a.4xlarge`** EC2 instance with 16vCPU, 32GB of RAM, and network bandwidth up to 12.5 Gbps.
 
-All the configurations used for performing the benchmark can be found in the SigNoz Logs benchmark repo
+All the configurations used for performing the benchmark can be found in the SigNoz Logs benchmark repo.
 
 [![Logs Benchmark Repo](/img/blog/2022/12/benchmark-repo-new.png)](https://github.com/SigNoz/logs-benchmark)
 
@@ -110,7 +110,7 @@ SigNoz cluster architecture for the performance benchmark looks as the following
 
 <br></br>
 
-The three VMs are generating logs and sending it to signoz-otel-collector using OTLP. The reason we are using OTEL collectors on the receiver side instead of directly writing to ClickHouse from the generator VMs is that the OTEL collectors running in the generator VM's may or maynot be the distribution from SigNoz.
+The three VMs are generating logs and sending it to signoz-otel-collector using OTLP. The reason we are using OTEL collectors on the receiver side instead of directly writing to ClickHouse from the generator VMs is that the OTEL collectors running in the generator VM's may or may not be the distribution from SigNoz.
 
 In our otel collector configuration, we have extracted all fields, and we have converted all the fields from interesting fields  to selected fields in the UI, which means they all are indexed.
 
@@ -241,7 +241,7 @@ Some terminologies on how memory is measured and what the graphs below indicate:
 
 <br></br>
 
-From the above graphs for memory usage of SigNoz, Elasticsearch and Loki we can see the memory usage to be of 20%, 60%, and 30% respectively.
+From the above graphs for memory usage of SigNoz, Elasticsearch and Loki we can see the memory usage to be 20%, 60%, and 30% respectively.
 
 For this benchmark for Elasticsearch, we kept the default recommended heap size memory of 50% of available memory (as shown in Elastic docs <a href = "https://www.elastic.co/guide/en/elasticsearch/reference/master/advanced-configuration.html#set-jvm-options" rel="noopener noreferrer nofollow" target="_blank" >here</a>). This determines caching capabilities and hence the query performance. 
 
@@ -251,9 +251,9 @@ We could have tried to tinker with the different heap sizes ( as a % of total me
 
 During ingestion, we want to measure at what speed read and write speeds are performed at the node disk.  A higher write speed means faster ingestion of data.
 
-So, as you can see from the below disk utilization graphs, SigNoz is able to utlisize more of the disk write speed
+So, as you can see from the below disk utilization graphs, SigNoz is able to utilize more of the disk write speed.
 
-Here we are using [gp2 disk](https://aws.amazon.com/ebs/volume-types/) for all the ingestion. The max throughput for gp2 is ~250 MB/s
+Here we are using <a href = "https://aws.amazon.com/ebs/volume-types/" rel="noopener noreferrer nofollow" target="_blank" >gp2 disk</a> for all the ingestion. The max throughput for gp2 is ~250 MB/s
 
 
 <figure data-zoomable align='center'>
@@ -277,18 +277,18 @@ Here we are using [gp2 disk](https://aws.amazon.com/ebs/volume-types/) for all t
 
 <br></br>
 
-From the above graphs of Disk I/O we can see that Elasticsearch has higher disk I/O than SigNoz for less number of log lines ingested per second. One of the other reasons why elasticsearch disk usage is high is because of translogs that getting writting to disk. Elasticsearch writes all insert and delete operations to a translog because of which there is extra disk usage.
+From the above graphs of Disk I/O we can see that Elasticsearch has higher disk I/O than SigNoz for less number of log lines ingested per second. One of the reasons why elasticsearch disk usage is high is because of translogs that get written to the disk. Elasticsearch writes all insert and delete operations to a translog, because of which there is extra disk usage.
 
-SigNoz uses clickhouse for storage, clickhouse provides various codecs and compression mechanism which is used by signoz for storing logs. Thus it reduces that amount of data that is getting written to disk.
+SigNoz uses ClickHouse for storage. ClickHouse provides various codecs and compression mechanism which is used by SigNoz for storing logs. Thus it reduces the amount of data that gets written to the disk.
 
-The disk usage of Loki is low because it has only four labels(indexes) and there is nothing else apart from it which is getting written to the disk.
+The disk usage of Loki is low because it has only four labels(indexes), and there is nothing else apart from it that is getting written to the disk.
 
 
 ### Note on importance of high disk utilization
 
-SigNoz and Elasticsearch are able to utilise the disk in a better way compared to Loki as they are able to process more data and write to disk
+SigNoz and Elasticsearch are able to utilize the disk in a better way compared to Loki as they are able to process more data and write to disk.
 
-This is also helpful because if your disk throughput  is low then it would keep more things in buffer and utilise more of its RAM. So, a lower disk throughput is likely to hog more of RAM and eventually lead to dropping of data
+This is also helpful because if your disk throughput is low, then it would keep more things in the buffer and utilize more of its RAM. So, a lower disk throughput is likely to hog more RAM and eventually lead to dropping of data.
 
 
 <figure data-zoomable align='center'>
@@ -319,13 +319,13 @@ We chose different types of queries to compare.
 | Get logs corresponding to a trace_id (**log corresponding to high cardinality field**) | 0.137s | 0.001s | - |
 | Get first 100 logs with method GET (**logs based on filters**) | 0.20s | 0.014s | - |
 
-At SigNoz, we believe that observability is fundamentally a data analytics problems and a lot of querying esp. for Logs happens around aggregation and slicing and dicing of data. 
+At SigNoz, we believe that observability is fundamentally a data analytics problems and a lot of querying esp. for logs happen around aggregation and slicing and dicing of data. 
 
-Companies like Uber have found that in production environment, more than <a href = "https://www.uber.com/en-IN/blog/logging/" rel="noopener noreferrer nofollow" target="_blank" >80% queries</a>  are aggregation queries, such as terms, histogram and percentile aggregations. 
+Companies like Uber have found that in production environment, more than <a href = "https://www.uber.com/en-IN/blog/logging/" rel="noopener noreferrer nofollow" target="_blank" >80% of queries</a>  are aggregation queries, such as terms, histograms and percentile aggregations. 
 
-Hence, we think that fast aggregation queries will greatly improve the user querying experience in SigNoz compared to ELK stack.
+Hence, we think that fast aggregation queries will greatly improve the user querying experience in SigNoz compared to the ELK stack.
 
-In all of our above test queries, Loki was not able to return results. This is consistent with some of the open issues in Loki community around performance with high cardinality data.
+In all of our above test queries, Loki was not able to return results. This is consistent with some of the open issues in the Loki community around performance with high cardinality data.
 
 
 [![Loki High Cardinality Issue](/img/blog/2022/12/loki-issue.png)](https://github.com/grafana/loki/issues/91)
@@ -333,9 +333,9 @@ In all of our above test queries, Loki was not able to return results. This is c
 
 ## Storage Comparison
 
-We have ingested 500GB of logs data for each of the stacks. The table below show us how much space is occupied by each of the logging solution. While Loki is taking the least amount of storage, it has also not indexed anything apart from the `method` and `protocol` keys.
+We have ingested 500GB of logs data for each of the stacks. The table below shows us how much space is occupied by each of the logging solutions. While Loki is taking the least amount of storage, it has also not indexed anything apart from the `method` and `protocol` keys.
 
-ClickHouse which is the datastore for SigNoz uses <a href = "https://clickhouse.com/docs/en/guides/improving-query-performance/skipping-indexes/#introduction-to-skipping-indexes" rel="noopener noreferrer nofollow" target="_blank" >Skip Index</a> while Elastic indexes everything, which increase the storage needed by Elastic.
+ClickHouse, which is the datastore for SigNoz, uses <a href = "https://clickhouse.com/docs/en/guides/improving-query-performance/skipping-indexes/#introduction-to-skipping-indexes" rel="noopener noreferrer nofollow" target="_blank" >Skip Index</a> while Elastic indexes everything, which increases the storage needed by Elastic.
 
 | Name | Space Used | Document Count |
 | --- | --- | --- |
