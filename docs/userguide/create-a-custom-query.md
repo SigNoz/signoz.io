@@ -68,7 +68,7 @@ SigNoz supports the following aggregation functions:
 - RATE_MIN (Rate of change on min aggregated values)
 
 
-### Metrics
+### How Metrics work in SigNoz?
 
 <MetricsDefinition />
 
@@ -94,7 +94,7 @@ You can use the `Group By` clause to divide the results of your query based on t
 Use the **Legend** text box to specify a legend name for your time series.
 
 
-## Examples
+## Sample Examples to Create Custom Query
 
 Writing PromQL or ClickHouse queries has a steep learning curve. The query builder is aimed at users who are not familiar with the Prometheus system or ClickHouse, and it allows you to write complex queries using an intuitive user interface.
 
@@ -105,7 +105,7 @@ This section walks you through the process of plotting graphs for different type
 - The sections below assume that your application is already instrumented. For details about how you can instrument your application, see the [Instrument Your Application](/docs/instrumentation/) section.
 - The sections below assume that you are familiar with the basics of monitoring applications.
 
-### Configure Host Metrics
+### Steps to Configure Host Metrics
 
 Use host metrics to monitor the resource utilization of the hosts on which your application is running. SigNoz collects metrics describing the utilization of various system resources, such as CPU, disk, and network. This allows you to correlate both performance issues and errors observed in your application to unusual host metrics.
 
@@ -200,7 +200,7 @@ Disk saturation means the disk is often accessed, and applications usually must 
 
 8. <SaveGraph />
 
-### Configure Application Metrics
+### Steps to Configure Application Metrics
 
 Use application metrics to monitor the performance of your applications and identify any potential problems. Examples of applications metrics are percentile response time, error rates, request rates, memory and cpu usage.
 

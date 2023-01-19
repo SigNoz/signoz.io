@@ -15,7 +15,7 @@ This feature is available [0.11.3](https://github.com/SigNoz/signoz/releases/tag
 
 With SigNoz, you can monitor the health of the HTTP endpoints and set up an alert in case of HTTP endpoints failure status codes.
 
-## Steps
+## Steps to monitor the health of the HTTP endpoints:
 
 * Add the httpcheck receiver to `otel-collector-config.yaml` 
   ```yaml {2-10}

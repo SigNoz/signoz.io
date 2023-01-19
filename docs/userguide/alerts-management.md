@@ -17,7 +17,7 @@ You can set Alert Rules in SigNoz in the following 3 ways:
 
 
 
-#### Alert Rules
+
 
 Navigate to Alerts page from the left panel. It has 2 tabs:
 
@@ -32,7 +32,7 @@ Alert Rules set the expression you want to evaluate to start firing alerts. The 
 ![alert-rules](../../static/img/docs/alert-rules.webp)
 
 
-#### Create Alert Rules
+### Steps to Create Alert Rules:
 
 To create new alert rules, you can click the `New Alerts` button. This would open a pane with the type of alerts. 
 
@@ -49,7 +49,7 @@ On the alert form, you can choose one of the following tabs to define source of 
 
 > Note: Presently the logs, traces and exceptions-based alerts support only Clickhouse Query based metric. 
 
-##### Query Builder
+#### 1. Query Builder
 In Query Builder, you can use the dropdowns in the dashboard to select the right metric. 
 - Then create an expression with WHERE and GROUPBY clauses which represents the expression to evaluate for alerting
 - Threshold which the value of expression should cross ( above or below) to trigger an alert.
@@ -59,7 +59,7 @@ In Query Builder, you can use the dropdowns in the dashboard to select the right
 ![alerts-query-builder](../../static/img/docs/alerts-query-builder.webp)
 
 
-##### PromQL
+#### 2. PromQL
 
 In PromQL, you can write the Prometheus expression to evaluate. 
 
@@ -70,7 +70,7 @@ In PromQL, you can write the Prometheus expression to evaluate.
 ![prometheus-alert-rules](../../static/img/docs/promql-alerts.webp)
 
 
-##### Writing Clickhouse Queries in Alert form
+#### 3. Writing Clickhouse Queries in Alert form
 On `clickhouse query` tab, you will be presented with a query editor with a default query that you can start working with. To learn more about the data-model and query format, read [this tutorial](https://signoz.io/docs/tutorial/writing-clickhouse-queries-in-dashboard/#building-alert-queries-with-clickhouse-data).  
 
 <img width="835" alt="image" src="https://user-images.githubusercontent.com/10277894/208092689-07e7edd6-2277-4cd4-9fbf-a2e13531a4a9.png" />
@@ -79,7 +79,7 @@ On `clickhouse query` tab, you will be presented with a query editor with a defa
 You can use `Run Query` to confirm your query works. Include the bind variables and mandatory column aliases as mentioned [here](https://signoz.io/docs/tutorial/writing-clickhouse-queries-in-dashboard/#building-alert-queries-with-clickhouse-data). 
 
 
-#### Triggered Alerts
+### Steps to Setup Triggered Alerts
 
 Triggered alerts show the alerts which are in `firing` or `pending` state. 
 
@@ -113,11 +113,11 @@ The alert channel tabs can be accessed from `Settings > Alert Channels` tab. Thi
 ![alert-channels](../../static/img/docs/alert-channels.webp)
 
 
-### Configure Slack Channel
-#### Prerequisite
+### 1. Configure Slack Channel
+#### a. Prerequisite
 For setting up Slack as a notification channel, you need to first configure an Incoming Webhook in Slack. The following article explains how to do that - [Sending messages to slack using Incoming Webhook](https://api.slack.com/messaging/webhooks)
 
-#### Creating a new Notification channel (Slack)
+#### b. Creating a new Notification channel (Slack)
 
 You have to provide a name, webhook URL and channel name (with # prefix) to configure a notification channel. You may use [go templates](https://prometheus.io/docs/alerting/latest/notifications/) for the title and description. 
 
@@ -125,14 +125,14 @@ You have to provide a name, webhook URL and channel name (with # prefix) to conf
 
 You can also verify the configuration by using the _Test_ button. When you click _Test_, a test alert will be sent to the configured slack channel. The purpose of this feature is to confirm that signoz alert manager can talk to your webhook URL. 
 
-#### Editing a Notification channel (Slack)
+#### c. Editing a Notification channel (Slack)
 
 You can edit slack webhook URL or other parameters except the channel name and channel type. 
 
 ![edit-notification-channel](../../static/img/docs/edit-notification-channel.webp)
 
 
-#### Receive Alert in Slack
+#### d. Receive Alert in Slack
 
 Once everything is set up correctly, you should see your alerts in the configured slack channel whenever the monitored metrics cross the threshold specified in the alert rules.
 
@@ -140,26 +140,26 @@ Now you can stay relaxed that SigNoz will promptly alert you whenever something 
 
 ![alerts-in-slack](../../static/img/docs/alerts-in-slack.webp)
 
-### Configure Webhook Channel
-#### Prerequisite
+### 2. Configure Webhook Channel
+#### a. Prerequisite
 You must have a valid webhook URL (reachable from SigNoz Alert Manager) and an application ready to accept webhook messages.
 
-#### Creating a new Webhook channel
+#### b. Creating a new Webhook channel
 Enter Webhook URL endpoint, username and password (if needed). Use _Test_ button to test the connection with your application.  
 
 ![image](https://user-images.githubusercontent.com/10277894/165084693-8034b65a-f0f4-4ff4-8a72-88fb7b8726b4.png)
 
 
-#### Editing a Webhook channel
+#### c. Editing a Webhook channel
 Similar to slack, you can edit most of the webhook parameters except the channel name and type. 
 
 ![image](https://user-images.githubusercontent.com/10277894/165084529-bf0aa817-5c4e-4f45-98bd-eeb33eb02547.png)
 
-#### Receive Alert through Webhook
+#### d. Receive Alert through Webhook
 
 ![image](https://user-images.githubusercontent.com/10277894/165078852-d3ae7571-bfa2-409a-93aa-2a870b379cb1.png)
 
-#### Sample format of a Webhook message
+#### e. Sample format of a Webhook message
 A webhook message may contain multiple alerts. By default, the SigNoz alert manager groups alerts by the alert name and delivers the grouped messages every 5 minutes. 
 
 For resolved alerts, the alert manager will send the time of resolution in _endsAt_. You can also use fingerprint property to identify and process updates sent by alert manager. 
@@ -206,10 +206,10 @@ For resolved alerts, the alert manager will send the time of resolution in _ends
    "truncatedAlerts":0
 }
 ```
-### Configure PagerDuty Channel
+### 3. Configure PagerDuty Channel
 There are two ways to integrate with PagerDuty: via global [event orchestration](https://support.pagerduty.com/docs/event-orchestration) or directly through an integration on [pagerduty service](https://support.pagerduty.com/docs/services-and-integrations). Integrating alerts with global event orchestration is beneficial if you want to automate incident creation or management. 
 
-#### Get Integration or Routing key to integrate with event orchestration
+#### a. Get Integration or Routing key to integrate with event orchestration
 1. From the **Automation** menu, select **Event Orchestration**
 2. Create a new orchestration 
 3. Click on **Global Orchestration Key**, copy your **integration key** and keep it safe for later use. 
@@ -217,7 +217,7 @@ There are two ways to integrate with PagerDuty: via global [event orchestration]
 ![image](https://user-images.githubusercontent.com/10277894/180833019-c865ecd5-f752-419f-998e-baf296daef88.png)
 
 
-#### Get Integration or Routing key to integrate with pagerduty service
+#### b. Get Integration or Routing key to integrate with pagerduty service
 1. Go to **Services > Service Directory** and select the **service** where you’d like to add the integration.
 2. Select **Integration tab** and click **Add another integration**
 3. Select **Events API V2** from the list 
@@ -228,10 +228,10 @@ For more details on PagerDuty service setup, visit [here](https://support.pagerd
 
 ![image](https://user-images.githubusercontent.com/10277894/179944431-4e7ebb09-c6ca-455f-88b5-02e0f7ccfd8a.png)
 
-#### Prerequisite
+#### c. Prerequisite
 You must have a valid Integration Key (aka Routing Key) before you setup a PagerDuty channel in SigNoz Dashboard. 
 
-#### Create a new PagerDuty channel
+#### d. Create a new PagerDuty channel
 1. Go to **Settings > Alert Channels**
 2. Click **New Channel**
 3. Enter a **name** and select **PagerDuty** as channel type
@@ -242,7 +242,7 @@ You must have a valid Integration Key (aka Routing Key) before you setup a Pager
 
 ![image](https://user-images.githubusercontent.com/10277894/179944648-a9f3b558-2687-4132-a6ce-bc5d69f59368.png)
 
-#### Test the PagerDuty channel
+#### e. Test the PagerDuty channel
 1. Let's create a simple alert rule that monitors average CPU performance for each host. Go to **Alerts** page in **your SigNoz app** and click `New Alert` button. When the new alert page opens, edit metric query as shown below. Feel free to choose any other metric, the idea is to pick a metric with sufficient data to raise an alert. 
 
    ![image](https://user-images.githubusercontent.com/10277894/179949345-f242f0da-2afb-4041-ab72-3390d645dd77.png)

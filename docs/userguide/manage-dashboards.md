@@ -6,6 +6,8 @@ sidebar_label: Manage Dashboards
 
 import GetHelp from '../shared/get-help.md'
 
+# Manage Dashboards in SigNoz
+
 This section shows how you can create, update, and remove dashboards.
 
 :::tip
@@ -14,7 +16,7 @@ We have shared some commonly used dashboard JSON files [here](https://github.com
 
 :::
 
-## Create a Custom Dashboard
+## Steps to Create a Custom Dashboard
 
 1. From the sidebar, choose **Dashboards**.
 2. Select the **New Dashboard** button.
@@ -32,7 +34,7 @@ We have shared some commonly used dashboard JSON files [here](https://github.com
 7. When you’ve finished, select the **Save Layout** button.
 
 
-## Update a Custom Dashboard
+## Steps to Update a Custom Dashboard
 
 To update the name, description and tags:
 
@@ -52,12 +54,12 @@ To change the position of a panel:
 2. When you’ve finished, select the **Save Layout** button.
 
 
-## Remove a Custom Dashboard
+## Steps to Remove a Custom Dashboard
 
 1. From the sidebar, choose **Dashboard**.
 2. Find the dashboard you wish to remove. In the **Action** column, select the **Delete** button.
 
-## Import a Grafana dashboard
+## Steps to Import a Grafana Dashboard
 
 Status: Experimental
 
