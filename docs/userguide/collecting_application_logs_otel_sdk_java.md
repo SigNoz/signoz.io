@@ -22,7 +22,7 @@ OTEL_LOGS_EXPORTER=otlp OTEL_EXPORTER_OTLP_ENDPOINT="http://<IP of SigNoz Backen
 
 In the below example we will configure a java application to send logs to SigNoz.
 
-## Steps
+## How to Collect Application Logs Using OTEL Java Agent?
 
 * Clone this [repository](https://github.com/SigNoz/spring-petclinic)
 * Build the application using `./mvnw package`

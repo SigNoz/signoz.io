@@ -280,7 +280,7 @@ span.AddEvent("This is a sample event", trace.WithAttributes(attribute.Int("pid"
 <br></br>
 
 
-## gRPC Instrumentation
+## gRPC Instrumentation with OpenTelemetry
 
 Similarly, OpenTelemetry can also help you automatically instrument gRPC requests. To instrument any gRPC servers you have, add an Interceptor to the instantiation of the server.
 

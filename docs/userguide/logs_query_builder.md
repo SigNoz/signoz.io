@@ -27,7 +27,7 @@ If you have a use case which you are not able to fullfill with the current featu
     
     ![Filtering](../../static/img/logs/logs_query_filtering.png)
         
-## Operators 
+## List of Operators supported by SigNoz:
 * Here is a list of all the operators that are supported
 
     | Operator  | Multivalued | Examples                                           | Meaning |
@@ -76,7 +76,7 @@ Note:- The `fulltext` keyword can be only used with `contains` and the `ncontain
     
     here both the statements are not equivalent of each other **i.e it is currently not supported**
 
-## Examples queries
+## Examples Log Builder Queries
 
 Here are a few examples of valid and invalid queries
 

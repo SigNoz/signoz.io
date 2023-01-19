@@ -31,7 +31,7 @@ We all are familiar with instrumenting backend services but have you ever though
 - It works in region X but not in region Y.
 - RCA on the user's complete journey inside the application. -->
 
-### Instrumenting Angular app 🛠
+### Instrumenting your Angular App with OpenTelemetry 🛠
 
 #### Pre-requisites
 

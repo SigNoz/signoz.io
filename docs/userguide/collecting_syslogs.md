@@ -9,7 +9,7 @@ With SigNoz you can collect your syslogs logs and perform different queries on t
 In this example we will configure `rsyslog` to forward our system logs to tcp endpoint of otel-collector and use `syslog` receiver in otel-collector to receive and parse the logs.
 Below are the steps to collect syslogs.
 
-## Steps
+## How to collect Syslogs in SigNoz?
 * Modify the `docker-compose.yaml` file present inside `deploy/docker/clickhouse-setup` to expose a port, in this case `54527` so that we can forward syslogs to this port.
     ```yaml {8}
     ...

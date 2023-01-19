@@ -32,7 +32,7 @@ When you deploy SigNoz to your kubernetes cluster it will automatically start co
   ```  
 
   Once the above is applied to your k8s cluster, logs collection will be disabled.
-### Filter/Exclude logs
+### Steps to Filter/Exclude logs collection
 
 * **Excluding certain log files** : If you want to exclude logs of certain pods/namespace you can do it using the following config in `override-values.yaml`.
   ```yaml

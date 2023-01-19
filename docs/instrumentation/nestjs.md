@@ -48,7 +48,7 @@ Let's see how to instrument your Nestjs application with OpenTelemetry.
 
 - `>=4.0.0`
 
-## Traces
+## Send Traces Directly to SigNoz
 
 ### Using the all-in-one auto-instrumentation library
 

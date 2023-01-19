@@ -47,7 +47,7 @@ Supported Versions
 
 ^4.0.0
 
-## Traces
+## Send Traces Directly to SigNoz
 
 ### Using the all-in-one auto-instrumentation library
 

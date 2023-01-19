@@ -15,7 +15,7 @@ There are two ways in which you can send metrics to SigNoz using OpenTelemetry:
 - [Enable a Prometheus Receiver](#enable-a-prometheus-receiver)
 - [Find Metrics available in SigNoz](#find-metrics-available-in-signoz)
   - [Metrics from Hostmetrics receiver](#metrics-from-hostmetrics-receiver)
-- [Related Videos](#related-videos)
+- [Related Videos to Metrics](#related-videos-to-metrics)
 - [Get Help](#get-help)
 
 Depending on your choice, use one of the sections below.
@@ -203,7 +203,7 @@ Metrics which are available if hostmetrics is enabled. This is enabled in SigNoz
 | `system_cpu_load_average_15m` | |
 | `system_cpu_load_average_1m` | |
 
-## Related Videos
+## Related Videos to Metrics
 
 - [How to view Prometheus Metrics in SigNoz](https://youtu.be/QGJYNYzfM9o)
 

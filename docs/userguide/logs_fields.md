@@ -8,14 +8,14 @@ A log line contains different attributes attached to it. These attributes helps 
 
 There are two kind of fields **interesting** and **selected** .
 
-## Interesting Fields
+## Interesting Log Fields
 These kind of fields are the resource and log attributes which are parsed by the otel collector but is not indexed. These fields are also not auto suggested by the query builder. But you can still use these fields for querying by writing the query manually.
 
-## Selected Fields
+## Selected Log Fields
 These are created by converting an interesting field. When a interesting field is converted to selected field, an index is added to the field so that queries for this fields are faster. In addition to that when you write a query this fields will be autosuggested. Selected fields are also displyed explicitly with each log line.
 
 
-## Creating Fields
+## Creating Log Fields
 By default whenever you receive a log from a non OTLP receivers it will be stored directly in the body and you won't be able to filter logs based on fields/attributes. Opentelemetry provides different ways to parse attributes from your logs using different [operators](./logs.md#operators-for-parsing-and-manipulating-logs) that the available. These parsed attributes are referred to as fields in signoz.
 
 Ex :- 

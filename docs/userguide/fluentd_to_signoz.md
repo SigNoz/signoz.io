@@ -9,7 +9,7 @@ If you use fluentD to collect logs in your stack with this tutotrial you will be
 
 At SigNoz we use opentelemetry collector to recieve logs which supports the fluentforward protocol. So you can forward your logs from your fluentD agent to opentelemetry collector
 
-## Steps:
+## Steps to recieve logs from FluentD:
 * Add fluentforward reciever to your `otel-collector-config.yaml` which is present inside `deploy/docker/clickhouse-setup`
     ```
     receivers:
