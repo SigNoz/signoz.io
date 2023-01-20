@@ -5,7 +5,7 @@ date: 2023-01-20
 tags: [Tech Tutorial, Databases]
 authors: [judy]
 description: Elasticsearch vs MongoDB. Elasticsearch and MongoDB are popular document-oriented databases. While Elasticsearch is known for its advanced indexing and search capabilities, MongoDB is one of the most established NoSQL databases...
-image: /img/blog/2023/01/elasticsearch_vs_mongodb_cover.jpeg
+image: /img/blog/2023/01/elasticsearch_vs_mongodb_cover-min.jpg
 hide_table_of_contents: true
 keywords:
   - mongodb
@@ -38,7 +38,7 @@ Elasticsearch and MongoDB are the two commonly used NoSQL data storage platforms
 
 Elasticsearch allows you to store, search, index, and analyze huge volumes of data easily. Also, It provides real-time search and analytics of all data types. The ability to get search responses quickly is because it searches an index instead of a text.
 
-In simple terms, with Elasticsearch, you can take data from any source and format. Then i real-time search, analyze and visualize it. It improves the search's speed and accuracy.
+In simple terms, with Elasticsearch, you can take data from any source and format. Then in real-time, you can search, analyze and visualize it. It improves the search's speed and accuracy.
 
 Data in Elasticsearch is stored in schema-less JSON and use REST APIs for storing and searching. Elasticsearch is a tool that enables you to use it simultaneously without interfering with one another.
 
