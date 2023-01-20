@@ -6,6 +6,7 @@ tags: [Tech Tutorial, Databases]
 authors: [ankit_anand]
 description: Elasticsearch vs MongoDB. Elasticsearch and MongoDB are popular document-oriented databases. While Elasticsearch is known for its advanced indexing and search capabilities, MongoDB is one of the most established NoSQL databases...
 image: /img/blog/2023/01/elasticsearch_vs_mongodb_cover.jpeg
+hide_table_of_contents: true
 keywords:
   - mongodb
   - elasticsearch
@@ -97,10 +98,10 @@ MongoDB, on the other hand, can manage <a href = "https://www.mongodb.com/json-a
 
 ### 2. Data Storage Architecture
 
-Elasticsearch is <a href = "https://en.wikipedia.org/wiki/Elasticsearch#:~:text=Elasticsearch%20is%20developed%20in%20Java,source%2Davailable)%20Elastic%20License." rel="noopener noreferrer nofollow" target="_blank" > developed in Java </a> and  <a href = "https://www.elastic.co/what-is/elasticsearch" rel="noopener noreferrer nofollow" target="_blank" > implemented on top of Apache Lucene </a> . It writes data to inverted indexes using Lucene segments. Elasticsearch maintains a transactional log for each index in order to avoid a low-level Lucene commit for each indexing operation. Transaction logs can also help in  <a href = "https://www.elastic.co/guide/en/elasticsearch/reference/current/index-modules-translog.html" rel="noopener noreferrer nofollow" target="_blank" > data recovery in the event of a crash or data corruption incident </a>
+Elasticsearch is developed in Java and implemented on top of Apache Lucene. It writes data to inverted indexes using Lucene segments. Elasticsearch maintains a transactional log for each index in order to avoid a low-level Lucene commit for each indexing operation. Transaction logs can also help in  <a href = "https://www.elastic.co/guide/en/elasticsearch/reference/current/index-modules-translog.html" rel="noopener noreferrer nofollow" target="_blank" > data recovery</a> in the event of a crash or data corruption incident.
 
 
-MongoDB data storage model is different from that of Elasticsearch. It is written in C++ and stores data in <a href = "https://www.mongodb.com/docs/manual/reference/bson-types/" rel="noopener noreferrer nofollow" target="_blank" > Binary JSON format (BSON) </a> MongoDB uses a memory-mapped files to map on-disk data files to in-memory byte <a href = "http://arrays.It" rel="noopener noreferrer nofollow" target="_blank" > arrays </a> . It manages and organizes data using a linked data structure. Documents have linked lists to each other and to any BSON-encoded data. In the event of a hard shutdown, MongoDB employs  <a href = "https://www.mongodb.com/docs/manual/core/journaling/" rel="noopener noreferrer nofollow" target="_blank" > journal logs </a> to assist with <a href = "https://www.mongodb.com/docs/v2.2/tutorial/recover-data-following-unexpected-shutdown/" rel="noopener noreferrer nofollow" target="_blank" > database recovery. </a>
+MongoDB data storage model is different from that of Elasticsearch. It is written in C++ and stores data in <a href = "https://www.mongodb.com/docs/manual/reference/bson-types/" rel="noopener noreferrer nofollow" target="_blank" > Binary JSON format (BSON) </a> MongoDB uses a memory-mapped files to map on-disk data files to in-memory byte <a href = "http://arrays.It" rel="noopener noreferrer nofollow" target="_blank" > arrays </a> . It manages and organizes data using a linked data structure. Documents have linked lists to each other and to any BSON-encoded data. In the event of a hard shutdown, MongoDB employs journal logs to assist with <a href = "https://www.mongodb.com/docs/v2.2/tutorial/recover-data-following-unexpected-shutdown/" rel="noopener noreferrer nofollow" target="_blank" > database recovery.</a>
 
 
 ### 3. Programming Language Support
@@ -117,7 +118,7 @@ Full-text search is not supported by MongoDB. It is compatible with CRUD operati
 
 ### 5. Data Recovery and Backup
 
-Elasticsearch and MongoDB offer data backup and recovery functionalities. Elasticsearch handles data backups using a snapshot. The  <a href = "https://opster.com/guides/elasticsearch/how-tos/elasticsearch-snapshot/#:~:text=An%20Elasticsearch%20snapshot%20is%20a,(unless%20it%20was%20changed)" rel="noopener noreferrer nofollow" target="_blank" > snapshots are incremental </a> . This means that Elasticsearch will not duplicate any data that has previously been backed up in an index snapshot that it has already created. Snapshots are restored using the restore API. The snapshot API does not offer a query backup. Thus Elasticsearch has been reported to lose data and is not considered a good option for data backup and recovery.
+Elasticsearch and MongoDB offer data backup and recovery functionalities. Elasticsearch handles data backups using a snapshot. The snapshots are incremental. This means that Elasticsearch will not duplicate any data that has previously been backed up in an index snapshot that it has already created. Snapshots are restored using the restore API. The snapshot API does not offer a query backup. Thus Elasticsearch has been reported to lose data and is not considered a good option for data backup and recovery.
 
 MongoDB provides a variety of backup options. The majority of DevOps employ `mongodump`, which is available. Both queryable backup and full database backup are offered by Mongodump. Due to its inability to manage incremental backups and inefficiency with large databases, the program has some drawbacks.
 
@@ -175,6 +176,8 @@ If you are looking at setting up analytics on your data, Elasticsearch can be a 
 ---
 
 Related Posts
+
+**[SigNoz - A Lightweight Open Source ELK alternative](https://signoz.io/blog/elk-alternative-open-source/)**
 
 **[OpenTelemetry Logs - A Complete Introduction & Implementation](https://signoz.io/blog/observability-net/)**
 
