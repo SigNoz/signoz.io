@@ -5,7 +5,7 @@ date: 2022-12-27
 tags: [Tech Tutorial, Log Management]
 authors: [ankit_anand]
 description: Logging as a service is a type of cloud computing service that allows organizations to store and manage their log data in a central location. This type of service typically includes features such as centralized storage, real-time analytics, and search capabilities, as well as tools for visualizing and analyzing log data...
-image: /img/blog/2022/12/logging_as_a_service_cover.webp
+image: /img/blog/2022/12/logging_as_a_service_cover.jpeg
 hide_table_of_contents: true
 keywords:
   - logging as a service

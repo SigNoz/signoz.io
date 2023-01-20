@@ -5,7 +5,7 @@ date: 2022-12-27
 tags: [Tech Tutorial, Log Management]
 authors: [ankit_anand]
 description: Syslog is a standard for message logging that allows devices such as routers, switches, and servers to send event messages to a central log server. The messages sent by these devices are known as syslog messages and include information such as the date, time, device hostname, and message content...
-image: /img/blog/2022/12/syslog_formats_cover.webp
+image: /img/blog/2022/12/syslog_formats_cover.jpeg
 keywords:
   - syslog formats
   - syslog

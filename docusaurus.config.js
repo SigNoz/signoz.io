@@ -217,9 +217,13 @@ const config = {
           changefreq: "weekly",
           priority: 0.5,
         },
+        googleAnalytics: {
+          trackingID: 'UA-152867655-1',
+        },
+        //moving current UA property to google analytics and adding GA4 id to gtag
         gtag: {
           // You can also use your "G-" Measurement ID here.
-          trackingID: "UA-152867655-1",
+          trackingID: "G-6NFJ2Y6NQN",
           // Optional fields.
           // anonymizeIP: true, // Should IPs be anonymized?
         },

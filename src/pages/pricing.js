@@ -90,12 +90,15 @@ function pricingTest() {
                         <p>
                             <li> Single Sign On support</li>
                             <li> SAML and LDAP support</li>
-                            <li> Visualise very large traces (>10k spans) with hierarchical navigation</li>
+                            {/* <li> Visualise very large traces (>10k spans) with hierarchical navigation</li> */}
                             <li> Dashboard configuration support</li>
                             <br></br>
                             <div style={{fontSize:'medium'}}>Upcoming features</div>
                             <li> Predictive Resource Optimization  </li>
-                            {/* <li> Team KPI dashboards </li> */}
+                            <li> Finer RBAC with custom roles</li>
+                            <li> Audit Logs</li>
+
+
 
                         </p>
                     </div>
