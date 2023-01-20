@@ -3,7 +3,7 @@ title: Elasticsearch vs MongoDB - A detailed comparison of Document-Oriented Dat
 slug: elasticsearch-vs-mongodb
 date: 2023-01-20
 tags: [Tech Tutorial, Databases]
-authors: [ankit_anand]
+authors: [judy]
 description: Elasticsearch vs MongoDB. Elasticsearch and MongoDB are popular document-oriented databases. While Elasticsearch is known for its advanced indexing and search capabilities, MongoDB is one of the most established NoSQL databases...
 image: /img/blog/2023/01/elasticsearch_vs_mongodb_cover.jpeg
 hide_table_of_contents: true
