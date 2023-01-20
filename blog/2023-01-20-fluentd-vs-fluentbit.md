@@ -4,7 +4,8 @@ slug: fluentd-vs-fluentbit
 date: 2023-01-20
 tags: [Tech Tutorial, Log Management]
 authors: [muskan]
-description: Fluentd and Fluent Bit. Fluentd and Fluent Bit are open-source log management tools that are designed to collect, store, and analyze log data. While FluentD is a more feature-rich tool, Fluentbit is a lightweight...
+description: Fluentd vs Fluent Bit. Fluentd and Fluent Bit are open-source log management tools that are designed to collect, store, and analyze log data. While FluentD is a more feature-rich tool, Fluentbit is a lightweight...
+hide_table_of_contents: true
 image: /img/blog/2023/01/fluentd_vs_fluentbit_cover-min.jpeg
 keywords:
   - logs
