@@ -135,7 +135,7 @@ try {
 }
 ```
 
-## How to View Exceptions in Dashboard?
+## How to View Exceptions?
 The Exceptions tab shows list of exceptions which applications encounter. 
 
 It shows the list of exceptions in the applications in a separate page so that users can access them easily. It is also linked to trace pages through which you can see where in a trace is a request facing an exception

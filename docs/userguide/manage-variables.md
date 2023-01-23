@@ -14,7 +14,7 @@ import PrereqsInstrument from '../shared/prereqs-instrument.md'
 <PrereqsInstrument />
 
 
-## What are Variables?
+## Variables
 
 Variables are now supported for the dashboard panel chart for all three query types. The widget plots can use these variables and update the charts dynamically without updating the query for each value. When the value of the variable changes, the refreshed dashboard will reflect the new value. Variables allow users to make interactive dashboards. Variables are most commonly used to avoid hard coding the values for host names, Kubernetes pods, namespaces, etc. Variables are independent for each dashboard. Variables are shown using the dropdowns at the top of the dashboard.
 

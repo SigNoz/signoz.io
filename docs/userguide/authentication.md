@@ -6,7 +6,7 @@ sidebar_label: Authentication
 
 Authentication is available in SigNoz from `v0.8.0` If you are on an earlier version, please upgrade to see this.
 
-## SigNoz Supported Roles
+## Supported Roles
 SigNoz currently supports 3 roles:
 - Admin
 - Editor

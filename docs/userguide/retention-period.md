@@ -18,7 +18,7 @@ To set retention period for metrics, traces and logs, you can navigate to the `G
 
 ## Configuring Cold Storage - Amazon S3
 
-### 1. Using Docker
+### Docker
 
 In case of docker, uncomment `storage_configuration` from `clickhouse-config.xml`. Also configure the endpoint, access key and secret.
 
@@ -49,7 +49,7 @@ In case of docker, uncomment `storage_configuration` from `clickhouse-config.xml
 </storage_configuration>
 ```
 
-### 2. Using Kubernetes
+### Kubernetes
 
 In case of helm charts, update the `clickhouse.coldStorage` in `values.yaml`.
 
