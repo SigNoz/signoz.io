@@ -5,7 +5,7 @@ date: 2022-06-22
 tags: [Tools Comparison]
 authors: [daniel, ankit_anand]
 description: The difference between Kibana and Grafana lies in their genesis. While Kibana was built on top of the Elasticsearch stack, famous for log analysis and management, Grafana was created mainly for metrics monitoring, supporting visualization for time-series databases...
-image: /img/blog/2022/06/kibana_vs_grafana.webp
+image: /img/blog/2022/06/kibana_vs_grafana.jpeg
 hide_table_of_contents: false
 keywords:
   - kibana

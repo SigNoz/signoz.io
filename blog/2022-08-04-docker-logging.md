@@ -5,7 +5,7 @@ date: 2022-12-15
 tags: [Tech Tutorial]
 authors: [muskan]
 description: In this article, we will discuss log analysis in Docker and how logging in Docker containers is different than in other applications. These logs are specific to Docker and are stored on the Docker host. We’ll thoroughly discuss the `docker logs` command and how we can configure a logging driver for containers...
-image: /img/blog/2022/08/docker_logging_cover.webp
+image: /img/blog/2022/08/docker_logging_cover.jpeg
 keywords:
   - docker logging
   - docker logs

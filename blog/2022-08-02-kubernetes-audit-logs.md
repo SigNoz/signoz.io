@@ -5,7 +5,7 @@ date: 2022-11-14
 tags: [Tech Tutorial]
 authors: [vinayak]
 description: In this article, learn how to configure Kubernetes Audit Logs so that you can have a record of events happening in your clusters. Kubernetes audit logs are captured based on the audit policy configured...
-image: /img/blog/2022/08/kubernetes_audit_logs_cover.webp
+image: /img/blog/2022/08/kubernetes_audit_logs_cover.jpeg
 keywords:
   - kubernetes
   - kubernetes audit logs

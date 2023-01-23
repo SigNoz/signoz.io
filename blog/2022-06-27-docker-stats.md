@@ -5,7 +5,7 @@ date: 2022-06-27
 tags: [Tech Tutorial, Docker]
 authors: [daniel]
 description: Understand how to use Docker stats command to monitor your Docker containers. 1.CPU % Stat 2.MEM Usage/LIMIT Stats 3.MEM% Stat 4.Block I/O Status...
-image: /img/blog/2022/06/docker_stats_cover.webp
+image: /img/blog/2022/06/docker_stats_cover.jpeg
 keywords:
   - docker
   - docker stats

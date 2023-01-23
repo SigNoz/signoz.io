@@ -5,7 +5,7 @@ date: 2022-12-18
 tags: [Tools Comparison, Prometheus]
 authors: ankit_anand
 description: OpenTelemetry and Prometheus are both open-source projects under Cloud Native Computing Foundation. One is used for managing telemetry data and the other is a metrics monitoring tool..
-image: /img/blog/2022/12/opentelemetry_vs_prometheus_cover.webp
+image: /img/blog/2022/12/opentelemetry_vs_prometheus_cover.jpeg
 keywords:
   - opentelemetry
   - prometheus

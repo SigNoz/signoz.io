@@ -5,7 +5,7 @@ date: 2022-11-09
 tags: [OpenTelemetry Instrumentation, Java]
 authors: ankit_anand
 description: End-to-end performance monitoring of Spring Boot application with OpenTelemetry. Set up distributed tracing, collect JVM metrics and logs from Spring Boot applications and visualize the collected data with open source APM - SigNoz.
-image: /img/blog/2022/03/opentelemetry_spring_boot.webp
+image: /img/blog/2022/03/opentelemetry_spring_boot.jpeg
 keywords:
   - OpenTelemetry
   - opentelemetry spring boot

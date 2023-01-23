@@ -5,7 +5,7 @@ date: 2022-12-19
 tags: [Tech Resources]
 authors: ankit_anand
 description: Looking for an open source APM tool? Latest top open source APM tool list - 1.SigNoz 2.Graphite 3.Pinpoint 4.Prometheus 5.JavaMelody 6.StageMonitor 7.Scouter 8.Zipkin 9.Jaeger 10.Skywalking...
-image: /img/blog/2022/12/open_source_apm_cover.webp
+image: /img/blog/2022/12/open_source_apm_cover.jpeg
 hide_table_of_contents: true
 keywords:
   - Open Source
@@ -64,19 +64,24 @@ A few essential APM benefits in solving performance issues are as follows:
 
 **List of top 13 open source APM tools in 2023**
 
-- [SigNoz](#signoz)
-- [Graphite](#graphite)
-- [Pinpoint](#pinpoint)
-- [Prometheus](#prometheus)
-- [Javamelody](#javamelody)
-- [Stagemonitor](#stagemonitor)
-- [Scouter](#scouter)
-- [Zipkin](#zipkin)
-- [Jaeger](#jaeger)
-- [Apache Skywalking](#apache-skywalking)
-- [Elastic APM](#elastic-apm)
-- [App Metrics](#app-metrics)
-- [Glowroot](#glowroot)
+- [What is application performance monitoring(APM)?](#what-is-application-performance-monitoringapm)
+- [Why is application performance monitoring(APM) needed?](#why-is-application-performance-monitoringapm-needed)
+- [Top Open Source APM Tools](#top-open-source-apm-tools)
+  - [SigNoz](#signoz)
+  - [Graphite](#graphite)
+  - [Pinpoint](#pinpoint)
+  - [Prometheus](#prometheus)
+  - [Javamelody](#javamelody)
+  - [Stagemonitor](#stagemonitor)
+  - [Scouter](#scouter)
+  - [Zipkin](#zipkin)
+  - [Jaeger](#jaeger)
+  - [Apache Skywalking](#apache-skywalking)
+  - [Elastic APM](#elastic-apm)
+  - [App Metrics](#app-metrics)
+  - [Glowroot](#glowroot)
+- [How to choose the right open source APM tool for you?](#how-to-choose-the-right-open-source-apm-tool-for-you)
+- [Getting started with SigNoz](#getting-started-with-signoz)
 
 ## Top Open Source APM Tools
 

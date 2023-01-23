@@ -5,7 +5,7 @@ date: 2022-05-27
 tags: [Tech Tutorial, Python]
 authors: [ezz]
 description: In this tutorial, learn how to implement a Celery worker with Flask and Redis. Celery worker is a simple and reliable task queue with a focus on real-time processing while also supporting task scheduling...
-image: /img/blog/2022/05/celery_worker_cover.webp
+image: /img/blog/2022/05/celery_worker_cover.jpeg
 keywords:
   - celery worker
   - Flask

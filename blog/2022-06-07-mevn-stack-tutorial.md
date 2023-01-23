@@ -5,7 +5,7 @@ date: 2022-10-07
 tags: [Tech Tutorial]
 authors: [sai_deepesh]
 description: In this beginner-friendly tutorial, we will create a simple CRUD To Do application using the popular MEVN stack. Users can use the end application to create, read, update, and delete data...
-image: /img/blog/2022/06/mevn_stack_tutorial_cover.webp
+image: /img/blog/2022/06/mevn_stack_tutorial_cover.jpeg
 keywords:
   - mevn
   - mevn stack

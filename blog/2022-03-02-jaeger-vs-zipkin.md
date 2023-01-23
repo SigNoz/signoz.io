@@ -5,7 +5,7 @@ date: 2022-03-02
 tags: [Tools Comparison, Jaeger]
 authors: ankit_anand
 description: Jaeger and Zipkin are two popular open-source projects used for end-to-end distributed tracing. While Zipkin is an older project and has a wider community, Jaeger has a modern, scalable architecture and supports open standards of instrumentation libraries..
-image: /img/blog/2021/09/jaeger_vs_zipkin_apm_cover-min.webp
+image: /img/blog/2021/09/jaeger_vs_zipkin_apm_cover-min.jpeg
 keywords:
   - jaeger
   - zipkin
