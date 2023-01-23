@@ -45,24 +45,19 @@ A great distributed tracing tool can improve your team's response to performance
 
 Here's the list of the top 13 distributed tracing tools we will be looking at in this article:
 
-- [What is distributed tracing?](#what-is-distributed-tracing)
-- [Top 13 distributed tracing tools](#top-13-distributed-tracing-tools)
-  - [SigNoz](#signoz)
-  - [Jaeger](#jaeger)
-  - [Zipkin](#zipkin)
-  - [Grafana Tempo](#grafana-tempo)
-  - [Serverless360](#serverless360)
-  - [Dynatrace](#dynatrace)
-  - [New Relic](#new-relic)
-  - [Honeycomb](#honeycomb)
-  - [Lightstep](#lightstep)
-  - [Instana](#instana)
-  - [DataDog](#datadog)
-  - [Elastic APM](#elastic-apm)
-  - [Splunk](#splunk)
-- [How to choose the right distributed tracing tool?](#how-to-choose-the-right-distributed-tracing-tool)
-- [Getting started with SigNoz](#getting-started-with-signoz)
-    - [**Related Content**](#related-content)
+ - [SigNoz](#signoz)
+ - [Jaeger](#jaeger)
+ - [Zipkin](#zipkin)
+ - [Grafana Tempo](#grafana-tempo)
+ - [Serverless360](#serverless360)
+ - [Dynatrace](#dynatrace)
+ - [New Relic](#new-relic)
+ - [Honeycomb](#honeycomb)
+ - [Lightstep](#lightstep)
+ - [Instana](#instana)
+ - [DataDog](#datadog)
+ - [Elastic APM](#elastic-apm)
+ - [Splunk](#splunk)
 
 Before we deep dive into each of these distributed tracing tools, let's take a short detour to understand distributed tracing.
 

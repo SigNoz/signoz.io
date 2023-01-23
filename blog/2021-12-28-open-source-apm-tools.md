@@ -64,24 +64,19 @@ A few essential APM benefits in solving performance issues are as follows:
 
 **List of top 13 open source APM tools in 2023**
 
-- [What is application performance monitoring(APM)?](#what-is-application-performance-monitoringapm)
-- [Why is application performance monitoring(APM) needed?](#why-is-application-performance-monitoringapm-needed)
-- [Top Open Source APM Tools](#top-open-source-apm-tools)
-  - [SigNoz](#signoz)
-  - [Graphite](#graphite)
-  - [Pinpoint](#pinpoint)
-  - [Prometheus](#prometheus)
-  - [Javamelody](#javamelody)
-  - [Stagemonitor](#stagemonitor)
-  - [Scouter](#scouter)
-  - [Zipkin](#zipkin)
-  - [Jaeger](#jaeger)
-  - [Apache Skywalking](#apache-skywalking)
-  - [Elastic APM](#elastic-apm)
-  - [App Metrics](#app-metrics)
-  - [Glowroot](#glowroot)
-- [How to choose the right open source APM tool for you?](#how-to-choose-the-right-open-source-apm-tool-for-you)
-- [Getting started with SigNoz](#getting-started-with-signoz)
+ - [SigNoz](#signoz)
+ - [Graphite](#graphite)
+ - [Pinpoint](#pinpoint)
+ - [Prometheus](#prometheus)
+ - [Javamelody](#javamelody)
+ - [Stagemonitor](#stagemonitor)
+ - [Scouter](#scouter)
+ - [Zipkin](#zipkin)
+ - [Jaeger](#jaeger)
+ - [Apache Skywalking](#apache-skywalking)
+ - [Elastic APM](#elastic-apm)
+ - [App Metrics](#app-metrics)
+ - [Glowroot](#glowroot)
 
 ## Top Open Source APM Tools
 
