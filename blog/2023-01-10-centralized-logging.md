@@ -5,7 +5,7 @@ date: 2023-01-10
 tags: [Tech Tutorial, Log Management]
 authors: [muskan]
 description: While developers have always used logs to debug stand-alone applications, centralized logging solves the challenges of modern-day distributed software systems...
-image: /img/blog/2023/01/centralized_logging_cover.jpeg
+image: /img/blog/2023/01/centralized_logging_cover-min.jpg
 keywords:
   - logs
   - logging
