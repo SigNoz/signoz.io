@@ -1,11 +1,11 @@
 ---
-title: Top 9 observability tools in 2022 perfect for microservices
+title: Top 9 observability tools in 2023 perfect for microservices
 slug: observability-tools
-date: 2022-11-02
+date: 2023-01-23
 tags: [Tech Resources]
 authors: ankit_anand
-description: Top observability tools list 2022 - 1.SigNoz 2.Instana 3.Dynatrace 4.Grafana Labs 5.Honeycomb 6.Lightstep 7.New Relic 8.DataDog...
-image: /img/blog/2022/01/observability_tools_2022_cover.webp
+description: Top observability tools list 2023 - 1.SigNoz 2.Instana 3.Dynatrace 4.Grafana Labs 5.Honeycomb 6.Lightstep 7.New Relic 8.DataDog...
+image: /img/blog/2023/01/observability_tools_cover-min.jpg
 keywords:
   - observability
   - observability tools
@@ -22,7 +22,7 @@ In microservices architecture, observability tools enable you to create central 
 
 <!--truncate-->
 
-![Cover Image](/img/blog/2022/01/observability_tools_2022_cover.webp)
+![Cover Image](/img/blog/2023/01/observability_tools_cover.webp)
 
 In today's digital economy, distributed architectures have become the norm. Organizations are also opting for polyglot microservices to boost developer productivity. But how do you manage the operational challenges of such systems?
 Customer experience is the key to the success of tech companies of any size, be it startups, mid or large-level enterprises. You need to proactively solve for things like availability and performance of your applications in production.
@@ -36,12 +36,11 @@ A good observability tool has many components:
 
 3. It should have a good visualization layer for your teams to consume and take action.
 
-In this article, let's explore the top 9 observability tools in 2022 which can be perfect for your microservice application.
+In this article, let's explore the top 9 observability tools in 2023 which can be perfect for your microservice application.
 
-List of Top 9 observability tools in 2022
+List of Top 9 observability tools in 2023
 
 - SigNoz
-- Instana
 - Dynatrace
 - Grafana Labs
 - Honeycomb
@@ -49,10 +48,11 @@ List of Top 9 observability tools in 2022
 - New Relic
 - Datadog
 - Splunk
+- Instana
 
-## Top observability tools in 2022
+## Top observability tools in 2023
 
-Now let's explore the top observability tools in 2022.
+Now let's explore the top observability tools in 2023.
 
 ### SigNoz
 
@@ -68,7 +68,7 @@ SigNoz uses OpenTelemetry - a vendor-agnostic instrumentation library for genera
 
 Get p90, p99 latencies, RPS, Error rates and top endpoints for a service out of the box.
 
-<figure data-zoomable>
+<figure data-zoomable align='center'>
     <img src="/img/blog/common/signoz_charts_application_metrics.webp" alt="SigNoz dashboard showing popular RED metrics"/>
     <figcaption><i>SigNoz UI showing application overview metrics like RPS, 50th/90th/99th Percentile latencies, and Error Rate</i></figcaption>
 </figure>
@@ -93,25 +93,20 @@ SigNoz provides Logs management with advanced log query builder. You can also mo
 
 <br></br>
 
-import Screenshot from "@theme/Screenshot"
+You can get started with SigNoz using just three commands at your terminal.
+
+```jsx
+git clone -b main https://github.com/SigNoz/signoz.git
+cd signoz/deploy/
+./install.sh
+```
+<br></br>
+
+For detailed instructions, you can visit SigNoz documentation.
+
+[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/?utm_source=blog&utm_medium=observability_tools)
 
 
-
-### Instana
-
-<a href = "https://www.instana.com/" rel="noopener noreferrer nofollow" target="_blank" ><b>Instana</b></a> is enterprise observability and automated application monitoring tool. It uses an agent to discover and monitor components. This agent needs to be installed on every host that is to be monitored.
-
-The agents deploy sensors crafted to capture data from different technologies. Sensors automatically collect configuration, changes, metrics, and events.
-
-Instana charges $75 per host/per month if billed annually. It also supports open standards like Prometheus, StatsD, OpenTracing, and Opencensus.
-
-<Screenshot
-  alt="Instana dashboard"
-  height={500}
-  src="/img/blog/2021/08/observability_tools_instana-min.webp"
-  title="Instana Dashboard. (Source: Instana Docs)"
-  width={700}
-/>
 
 ### Dynatrace
 
@@ -121,13 +116,12 @@ Dynatrace also provides a different solution for infrastructure monitoring, appl
 
 Full-stack monitoring, the product aimed to provide observability for apps, is priced at $69 per month for 8 GB per host if billed annually.
 
-<Screenshot
-  alt="Dynatrace dashboard"
-  height={500}
-  src="/img/blog/2021/08/observability_tools_dynatrace-min.webp"
-  title="Dynatrace dashboard (Source: Dynatrace website)"
-  width={700}
-/>
+<figure data-zoomable align='center'>
+    <img src="/img/blog/2021/08/observability_tools_dynatrace-min.webp" alt="Dynatrace dashboard"/>
+    <figcaption><i>Dynatrace dashboard (Source: Dynatrace website)</i></figcaption>
+</figure>
+
+<br></br>
 
 ### Grafana Labs
 
@@ -139,13 +133,12 @@ Grafana offers plugins, dashboards, alerts, and different user-level access for 
 
 - Grafana Enterprise stack - It provides support for metrics and logs with Grafana installed within your infrastructure. It also comes with expert support.
 
-<Screenshot
-  alt="Grafana dashboard"
-  height={500}
-  src="/img/blog/2021/08/observability_tools_grafana-min.webp"
-  title="Grafana dashboard (Source: Grafana website)"
-  width={700}
-/>
+<figure data-zoomable align='center'>
+    <img src="/img/blog/2021/08/observability_tools_grafana-min.webp" alt="Grafana dashboard"/>
+    <figcaption><i>Grafana dashboard (Source: Grafana website)</i></figcaption>
+</figure>
+
+<br></br>
 
 ### Honeycomb
 
@@ -155,13 +148,12 @@ If your code is not already instrumented, Honeycomb provides an automatic instru
 
 Honeycomb offers a free tier of service, and its pro tier starts at $100. The pricing is based on data retention and event volume captured.
 
-<Screenshot
-  alt="Honeycomb dashboard"
-  height={500}
-  src="/img/blog/2021/08/observability_tools_honeycomb-min.webp"
-  title="Snapshot of Honeycomb dashboard (Source: Honeycomb documentation)"
-  width={700}
-/>
+<figure data-zoomable align='center'>
+    <img src="/img/blog/2021/08/observability_tools_honeycomb-min.webp" alt="Honeycomb dashboard"/>
+    <figcaption><i>Snapshot of Honeycomb dashboard (Source: Honeycomb documentation)</i></figcaption>
+</figure>
+
+<br></br>
 
 ### Lightstep
 
@@ -177,13 +169,12 @@ Lightstep offers three plans of service:
 - Teams edition - Starts at $100 per month and is based on the number of monthly active services.
 - Enterprise edition - Offered to large enterprises with discounts based on volume.
 
-<Screenshot
-  alt="Lighstep dashboard"
-  height={500}
-  src="/img/blog/2021/08/observability_tools_lightstep-min.webp"
-  title="Lightstep dashboard (Source: Lightstep sandbox environment)"
-  width={700}
-/>
+<figure data-zoomable align='center'>
+    <img src="/img/blog/2021/08/observability_tools_lightstep-min.webp" alt="Lighstep dashboard"/>
+    <figcaption><i>Lightstep dashboard (Source: Lightstep sandbox environment)</i></figcaption>
+</figure>
+
+<br></br>
 
 ### New Relic
 
@@ -193,13 +184,12 @@ New Relic can connect your application performance with your infrastructure heal
 
 Standard offering includes plans for teams up to 5 full users. Their pricing depends on the amount of data ingested with 100 GB free data ingest and $0.25 per extra GB.
 
-<Screenshot
-  alt="New Relic dashboard"
-  height={500}
-  src="/img/blog/2021/08/New_relic_dashboard-min.webp"
-  title="New Relic dashboard (Source: New Relic website)"
-  width={700}
-/>
+<figure data-zoomable align='center'>
+    <img src="/img/blog/2021/08/New_relic_dashboard-min.webp" alt="New Relic dashboard"/>
+    <figcaption><i>New Relic dashboard (Source: New Relic website)</i></figcaption>
+</figure>
+
+<br></br>
 
 ### DataDog
 
@@ -212,13 +202,12 @@ With the <a href = "https://www.datadoghq.com/" rel="noopener noreferrer nofollo
 
 The pricing depends on the product you opt for. For example, the APM solution provides end-to-end distributed tracing, starts at $31 per host per month if billed annually.
 
-<Screenshot
-  alt="DataDog dashboard"
-  height={500}
-  src="/img/blog/2021/08/observability_tools_datadog-min.webp"
-  title="DataDog dashboard (Source: DataDog website)"
-  width={700}
-/>
+<figure data-zoomable align='center'>
+    <img src="/img/blog/2021/08/observability_tools_datadog-min.webp" alt="DataDog dashboard"/>
+    <figcaption><i>DataDog dashboard (Source: DataDog website)</i></figcaption>
+</figure>
+
+<br></br>
 
 ### Splunk
 
@@ -235,13 +224,28 @@ Splunk allows you to collect all traces instead of a sample set. It also provide
 
 Splunk's observability Cloud for Enterprise editions starts at $95 per host per month if billed annually.
 
-<Screenshot
-  alt="Splunk dashboard"
-  height={500}
-  src="/img/blog/2021/08/observability_tools_splunk-min.webp"
-  title="Splunk dashboard (Source: Splunk website)"
-  width={700}
-/>
+<figure data-zoomable align='center'>
+    <img src="/img/blog/2021/08/observability_tools_splunk-min.webp" alt="Splunk dashboard"/>
+    <figcaption><i>Splunk dashboard (Source: Splunk website)</i></figcaption>
+</figure>
+
+<br></br>
+
+### Instana
+
+<a href = "https://www.instana.com/" rel="noopener noreferrer nofollow" target="_blank" ><b>Instana</b></a> is enterprise observability and automated application monitoring tool. It uses an agent to discover and monitor components. This agent needs to be installed on every host that is to be monitored.
+
+The agents deploy sensors crafted to capture data from different technologies. Sensors automatically collect configuration, changes, metrics, and events.
+
+Instana charges $75 per host/per month if billed annually. It also supports open standards like Prometheus, StatsD, OpenTracing, and Opencensus.
+
+
+<figure data-zoomable align='center'>
+    <img src="/img/blog/2021/08/observability_tools_instana-min.webp" alt="Instana dashboard"/>
+    <figcaption><i>Instana Dashboard. (Source: Instana Docs)</i></figcaption>
+</figure>
+
+<br></br>
 
 ## How to choose the right observability tool?
 
