@@ -1,7 +1,7 @@
 ---
 title:  How Outplay uses SigNoz to improve their backend API response time by 35%
 slug: outplay
-image: /img/case_study/outplay-banner.webp
+image: /img/case_study/outplay-banner-min.jpg
 authors: [pranay]
 
 ---
@@ -11,8 +11,8 @@ import { LiteYoutubeEmbed } from "react-lite-yt-embed";
 
 <head>
   <link rel="canonical" href="https://signoz.io/case-study/outplay/"/>
-  <meta property="og:image" content="https://signoz.io/img/case_study/outplay-banner.webp"/>
-  <meta name ="twitter:image" content="https://signoz.io/img/case_study/outplay-banner.webp"/>
+  <meta property="og:image" content="https://signoz.io/img/case_study/outplay-banner-min.jpg"/>
+  <meta name ="twitter:image" content="https://signoz.io/img/case_study/outplay-banner-min.jpg"/>
 
 </head>
 
