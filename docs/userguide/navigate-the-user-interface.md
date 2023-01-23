@@ -6,13 +6,13 @@ sidebar_label: Navigate the User Interface
 
 The layout of the application is comprised of sections, panes, dashboards, graphs, entities, and navigation elements. The following sections describe each of these elements.
 
-## Explore 10+ Sections on SigNoz Dashboard
+## Sections
 
 A section provides access to all the functionalities you need to perform a specific activity. For example, the **Metrics** section provides an overview of all your applications. The following example screenshot shows the four applications that come with the [Hot R.O.D.](https://github.com/jaegertracing/jaeger/tree/main/examples/hotrod) demo application:
 
 ![Metrics section](/img/metrics-section-v0.6.2.png)
 
-## SigNoz Sections' Panes
+## Panes
 
 A pane is a subdivision of a section dedicated to a set of functionalities. For example, the **Application Details** section contains three separate panes:
 
@@ -22,7 +22,7 @@ A pane is a subdivision of a section dedicated to a set of functionalities. For 
 
 ![Screenshot showing three panes](/img/three-panes-v0.6.2.png)
 
-## Dashboards for Metrics, Traces and Logs
+## Dashboards
 
 A dashboard is a set of one or more graphs. In the **Dashboard** section, you can create, update, and delete dashboards:
 
@@ -60,7 +60,7 @@ This section describes the common operations that you can perform on a graph.
 
   ![View traces](/img/view-traces-v0.6.2.png)
 
-## Various Entities in SigNoz
+## Entities
 
 An entity represents a specific type of data, such as an alert. Each entity consists of a series of properties. For example, an alert is defined by a name, expression, period, and labels.
 

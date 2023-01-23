@@ -184,7 +184,7 @@ and then inject OpenTelemetry middleware:
 router.Use(middleware.Middleware(serviceName))
 ```
 
-### OpenTelemetry **gorillamux instrumentation**
+### OpenTelemetry gorillamux instrumentation
 
 ```bash
 # Add one line to your import() stanza depending upon your request router:

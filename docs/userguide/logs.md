@@ -67,7 +67,7 @@ Currently OpenTelemetry does’t define a new logging API or create new user-fac
     
 ![first_party](../../static/img/docs/first_party_collection.webp)
 
-## Storing logs in SigNoz using Clickhouse
+## Storing logs in SigNoz
 
 SigNoz has developed its own distro of OpenTelemetry collector which has a custom ClickHouse exporter. This custom version just extends the upstream collector. Everything that works with the upstream collector will work with SigNoz OTEL collector.
 
@@ -81,7 +81,7 @@ This brings a requirement that the final collector should be SigNoz OTEL collect
     
     
 
-## Log Receivers for your Instrumented Application
+## Log Receivers
 
 A log receiver is how logs data gets into the OpenTelemetry Collector.
 Different types of receivers supported by OpenTelemetry for logs:
