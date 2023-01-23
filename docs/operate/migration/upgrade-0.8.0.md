@@ -85,14 +85,14 @@ Flags:
 
 ### Steps to be taken in the browser to clear cache after upgrade
 
-### For Chrome Cache
+### For Chrome
 
 <LiteYoutubeEmbed id="PmbfbTKKxmk" mute={false} />
 
-### For Firefox Cache
+### For Firefox
 
 <LiteYoutubeEmbed id="ESivE729ZTs" mute={false} />
 
-### For Safari Cache
+### For Safari
 
 <LiteYoutubeEmbed id="T_ovOttPRhA" mute={false} />

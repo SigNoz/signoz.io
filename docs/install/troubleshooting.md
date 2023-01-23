@@ -86,12 +86,16 @@ helm upgrade --install -n platform my-release signoz/signoz \
 
 ### Troubleshooting Video
 
-Whew! That was a lot of instruction to follow. If you instead prefer to watch a video, [here](https://www.youtube.com/watch?v=Y7OkvmuTRQ8) you go 
+If you instead prefer to watch a video, check out this video:
 
-<!-- <LiteYoutubeEmbed id="Y7OkvmuTRQ8" mute={false} /> -->
+ <p>&nbsp;</p>
+
+<LiteYoutubeEmbed id="Y7OkvmuTRQ8" mute={false} />
+
+<p>&nbsp;</p>
 
 
-## Docker Standalone Installation of SigNoz
+## Troubleshooting Docker Standalone Installation of SigNoz
 
 1. Before you install SigNoz on Docker Standalone, ensure that all [prerequisites](/docs/install/docker/#prerequisites) are met.
 2. Run the `docker ps` command and ensure that the `clickhouse-setup_clickhouse` and `query-service` containers are running. If these containers are not running, increase the memory allocated to Docker.

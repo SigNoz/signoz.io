@@ -68,7 +68,7 @@ Enter the following command to uninstall SigNoz:
 docker-compose -f docker/clickhouse-setup/docker-compose.yaml down -v
 ```
 
-## Remove the Sample Application from Dashboard
+## Remove the Sample Application from SigNoz Dashboard
 
 Follow the steps in this section to remove the sample application that comes installed with SigNoz:
 
