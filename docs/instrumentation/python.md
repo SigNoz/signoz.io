@@ -167,19 +167,19 @@ It is recommended to use the [opentelemetry distro](#steps-to-auto-instrument-py
 
 Make sure that the DB client library you are using has the corresponding instrumentation library, and the version of the DB client library is supported by OpenTelemetry.
 
-### Using MongoDB
+### MongoDB
 
 You can use  `opentelemetry-distro` to initialize instrumentation for your MongoDB database calls. You need to ensure that the version of your DB client library is supported by OpenTelemetry. For MongoDB, the instrumentation library is `opentelemetry-instrumentation-pymongo`.
 
 You can check the supported versions [here](https://github.com/open-telemetry/opentelemetry-python-contrib/tree/main/instrumentation).
 
-### Using Redis
+### Redis
 
 You can use  `opentelemetry-distro` to initialize instrumentation for your Redis database calls. You need to ensure that the version of your DB client library is supported by OpenTelemetry. For Redis, the instrumentation library is `opentelemetry-instrumentation-redis`.
 
 You can check the supported versions [here](https://github.com/open-telemetry/opentelemetry-python-contrib/tree/main/instrumentation).
 
-### Using MySQL
+### MySQL
 
 You can use  `opentelemetry-distro` to initialize instrumentation for your MySQL database calls. You need to ensure that the version of your DB client library is supported by OpenTelemetry. For MySQL, we have two isntrumentation libraries:
 
@@ -188,7 +188,7 @@ You can use  `opentelemetry-distro` to initialize instrumentation for your MySQL
 
 You can check the supported versions [here](https://github.com/open-telemetry/opentelemetry-python-contrib/tree/main/instrumentation).
 
-### Using Postgres
+### Postgres
 
 You can use  `opentelemetry-distro` to initialize instrumentation for your PostgreSQL database calls. You need to ensure that the version of your DB client library is supported by OpenTelemetry. For Postgres, the instrumentation library is `opentelemetry-instrumentation-psycopg2`.
 
