@@ -1,7 +1,7 @@
 ---
 title: DataDog vs New Relic | Detailed comparison (5 key features)
 slug: datadog-vs-newrelic
-date: 2022-12-05
+date: 2023-01-05
 tags: [Tools Comparison]
 authors: ankit_anand
 description: DataDog and New Relic are both Application Monitoring Tools used to monitor applications for performance issues. Want to choose between DataDog and New Relic? In this article, let's go through 5 key capabilities of both the tools...

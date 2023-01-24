@@ -1,7 +1,7 @@
 ---
 title: OpenTelemetry vs OpenTracing - choosing one for instrumentation
 slug: opentelemetry-vs-opentracing
-date: 2022-11-07
+date: 2023-01-03
 tags: [Tools Comparison]
 authors: [ankit_anand]
 description: If you’re thinking of choosing between OpenTelemetry and OpenTracing, go for OpenTelemetry. OpenTracing is now deprecated, and users of OpenTracing are advised to migrate to OpenTelemetry...

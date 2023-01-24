@@ -1,7 +1,7 @@
 ---
 title: Jaeger and OpenTracing - Key concepts, use-cases and alternatives
 slug: jaeger-vs-opentracing
-date: 2022-10-08
+date: 2023-01-08
 tags: [Tools Comparison, Jaeger]
 authors: ankit_anand
 description: Jaeger and OpenTracing are both open-source projects aimed to solve pain-points of distributed tracing. But the scope of the projects are completely different. While Jaeger is an end-to-end distributed tracing tool..

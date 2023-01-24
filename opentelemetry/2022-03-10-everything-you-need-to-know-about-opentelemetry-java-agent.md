@@ -1,7 +1,7 @@
 ---
 title: Everything you need to know about OpenTelemetry Java agent
 slug: java-agent
-date: 2022-03-10
+date: 2022-01-10
 tags: [java-monitoring]
 author: Ankit Anand
 author_title: SigNoz Team
@@ -129,7 +129,19 @@ The OpenTelemetry Java Jar agent provides a quick and convenient way to enable y
 
 As mentioned earlier, OpenTelemetry is a vendor-agnostic instrumentation library. So the telemetry data is portable. You can configure it to export in many different formats. A tool like [SigNoz](https://signoz.io/) supports the default OTLP formats and is a perfect choice for sending your telemetry data.
 
-SigNoz is a full-stack open-source APM tool built natively for OpenTelemetry. It also comes with a visualization layer where you can visualize charts like the popular RED metrics and distributed tracing with flame graphs and Gantt charts.
+SigNoz is a full-stack open-source APM tool built natively for OpenTelemetry. It provides metrics monitoring, log management, and distributed tracing under a single pane of glass.
+
+It comes with a powerful visualization layer where you can visualize charts like the popular RED metrics and distributed tracing with flame graphs and Gantt charts.
+
+SigNoz can be installed on macOS or Linux computers in just three steps by using a simple install script.
+
+The install script automatically installs Docker Engine on Linux. However, on macOS, you must manually install <a href = "https://docs.docker.com/engine/install/" rel="noopener noreferrer nofollow" target="_blank">Docker Engine</a> before running the install script.
+
+```bash
+git clone -b main https://github.com/SigNoz/signoz.git
+cd signoz/deploy/
+./install.sh
+```
 
 [![Deployment Docs](/img/blog/common/deploy_docker_documentation.png)](https://signoz.io/docs/install/docker/?utm_source=blog&utm_medium=java_agent)
 

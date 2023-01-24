@@ -1,7 +1,7 @@
 ---
 title: Monitoring GraphQL APIs with OpenTelemetry
 slug: monitoring-graphql
-date: 2022-03-24
+date: 2023-01-04
 tags: [OpenTelemetry Instrumentation, JavaScript]
 authors: [selva]
 description: GraphQL enables frontend developers or consumers of APIs to request the exact data that they need, with no over-fetching or under-fetching. It's a popular alternative to REST, but monitoring it is challenging. In this article, let's learn how to monitor GraphQL in simple steps with...
