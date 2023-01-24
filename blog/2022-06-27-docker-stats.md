@@ -1,11 +1,12 @@
 ---
 title: Docker Stats | Understand how to monitor Docker Metrics with docker stats
 slug: docker-stats
-date: 2022-06-27
+date: 2023-01-12
 tags: [Tech Tutorial, Docker]
 authors: [daniel]
 description: Understand how to use Docker stats command to monitor your Docker containers. 1.CPU % Stat 2.MEM Usage/LIMIT Stats 3.MEM% Stat 4.Block I/O Status...
 image: /img/blog/2022/06/docker_stats_cover.jpeg
+hide_table_of_contents: true
 keywords:
   - docker
   - docker stats
@@ -41,6 +42,10 @@ Note that these are in-built features of Docker.
 > Observability for your containerized application<br></br>
 Observability is critical for modern cloud-native applications. It helps engineering teams have more confidence in their production environment. Troubleshooting performance issues is easier with a robust observability framework in place. [SigNoz](https://signoz.io/), an open-source observability tool, can help make your containerized applications observable.
 > 
+
+To get started with SigNoz, please visit the documentation.
+
+[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/?utm_source=blog&utm_medium=docker_stats)
 
 In this article, we will deep dive into the `docker stats` command that can be used to monitor Docker metrics right from the terminal.
 
@@ -185,6 +190,21 @@ Docker container monitoring is critical for running containerized applications. 
 It uses [OpenTelemetry](https://opentelemetry.io/) to collect metrics from your containers for monitoring. OpenTelemetry is becoming the world standard for instrumentation of cloud-native applications, and it is backed by [CNCF](https://www.cncf.io/) foundation, the same foundation under which Kubernetes graduated.
 
 If you want to set up a robust observability framework for your containerized application, you can use SigNoz. You can create unified views to monitor your Docker containers effectively. 
+
+It is easy to get started with SigNoz. It can be installed on macOS or Linux computers in just three steps by using a simple installation script.
+
+The install script automatically installs Docker Engine on Linux. However, you must manually install [Docker Engine](https://docs.docker.com/engine/install/) on macOS before running the install script.
+
+```jsx
+git clone -b main https://github.com/SigNoz/signoz.git
+cd signoz/deploy/
+./install.sh
+```
+
+You can visit our documentation for instructions on how to install SigNoz using Docker Swarm and Helm Charts.
+
+[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/?utm_source=blog&utm_medium=docker_stats)
+
 
 You can check out the SigNoz GitHub repo here:
 

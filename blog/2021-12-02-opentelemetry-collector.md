@@ -1,11 +1,11 @@
 ---
 title: OpenTelemetry Collector - architecture and configuration guide
 slug: opentelemetry-collector-complete-guide
-date: 2022-12-06
+date: 2023-01-10
 tags: [OpenTelemetry]
 authors: ankit_anand
 description: OpenTelemetry collector provides a vendor-neutral way to collect, process, and export your telemetry data to an analysis backend of your choice. Learn how to configure..
-image: /img/blog/2022/09/opentelemetry_collector_guide_cover.jpeg
+image: /img/blog/2023/01/opentelemetry_collector_guide_cover-min.jpg
 keywords:
   - opentelemetry
   - opentelemetry collector
@@ -23,7 +23,7 @@ OpenTelemetry Collector is a stand-alone service provided by OpenTelemetry. It c
 
 <!--truncate-->
 
-![Cover Image](/img/blog/2022/09/opentelemetry_collector_guide_cover.webp)
+![Cover Image](/img/blog/2023/01/opentelemetry_collector_guide_cover.webp)
 
 The first step in setting up observability with OpenTelemetry is instrumentation. The application code is instrumented with OpenTelemetry client libraries that help generate telemetry data like logs, metrics, and traces.
 
@@ -394,4 +394,5 @@ ___
 #### **Related Content**
 
 **[OpenTelemetry Tracing - things you need to know](https://signoz.io/blog/opentelemetry-tracing/)**<br></br>
+**[OpenTelemetry Logs - A Complete Introduction & Implementation](https://signoz.io/blog/opentelemetry-logs/)<br></br>
 **[Monitor Nodejs Application with OpenTelemetry and SigNoz](https://signoz.io/opentelemetry/nodejs/)**<br></br>

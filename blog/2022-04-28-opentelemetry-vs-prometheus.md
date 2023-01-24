@@ -1,7 +1,7 @@
 ---
 title: OpenTelemetry vs Prometheus - differences, use-cases and alternatives
 slug: opentelemetry-vs-prometheus
-date: 2022-12-18
+date: 2023-01-15
 tags: [Tools Comparison, Prometheus]
 authors: ankit_anand
 description: OpenTelemetry and Prometheus are both open-source projects under Cloud Native Computing Foundation. One is used for managing telemetry data and the other is a metrics monitoring tool..
@@ -32,8 +32,8 @@ OpenTelemetry is a vendor-agnostic instrumentation library. It provides a set of
 
 Prometheus is a time-series metrics monitoring tool. Prometheus enables you to capture time-series data as metrics. These metrics can be aggregated to give insights into the behavior of your systems.
 
-*Check out SigNoz - an open-source alternative to DataDog* 👇
-[![SigNoz GitHub repo](/img/blog/common/signoz_github.webp)](https://github.com/SigNoz/signoz?utm_source=blog&utm_medium=github_opentelemetry_vs_prometheus)
+> **An OpenTelemetry Native APM**<br></br>
+> [SigNoz](https://signoz.io/docs/?utm_source=blog&utm_medium=opentelemetry_vs_prometheus) is a full-stack open source APM built to support OpenTelemetry natively. It provides metrics monitoring, log management, and distributed tracing under a single pane of glass. You can check out SigNoz, if you're looking for a single monitoring tool for all your needs.
 
 
 ## What is OpenTelemetry?

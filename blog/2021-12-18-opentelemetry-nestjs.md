@@ -1,11 +1,11 @@
 ---
-title: Monitoring your Nestjs application using OpenTelemetry
+title: OpenTelemetry Nestjs Auto-Instrumentation Guide
 slug: opentelemetry-nestjs
-date: 2022-10-15
+date: 2023-01-24
 tags: [OpenTelemetry Instrumentation, JavaScript]
 authors: [ankit_anand, vishal]
-description: OpenTelemetry is a vendor-agnostic isntrumentation library. In this article, learn how to set up monitoring for a Nestjs application using OpenTelemetry.
-image: /img/blog/2021/12/monitor_nestjs_cover.webp
+description: Setting up OpenTelemetry instrumentation for a Nestjs application. Step 1. Install required dependencies Step 2. Create a tracer.js file Step 3. Import the tracer module Step 4. Start the tracer... 
+image: /img/blog/2023/01/opentelemetry_nestjs_cover-min.jpg
 hide_table_of_contents: true
 keywords:
   - opentelemetry
@@ -28,7 +28,7 @@ Nestjs is a Nodejs framework for building scalable server-side applications with
 
 <!--truncate-->
 
-![Cover Image](/img/blog/2021/12/monitor_nestjs_cover.webp)
+![Cover Image](/img/blog/2023/01/opentelemetry_nestjs_cover.webp)
 
 Monitoring your Nestjs application is critical for performance management. But setting up monitoring for Nestjs applications can get cumbersome requiring multiple libraries and patterns. That's where Opentelemetry comes in.
 
@@ -61,15 +61,12 @@ If you have installed SigNoz on your local host, you can access the UI at: [htt
 
 The application list shown in the dashboard is from a sample app called HOT R.O.D that comes bundled with the SigNoz installation package.
 
-import Screenshot from "@theme/Screenshot"
+<figure data-zoomable align='center'>
+    <img src="/img/blog/2022/02/signoz_dashboard.webp" alt="SigNoz dashboard"/>
+    <figcaption><i>SigNoz dashboard - It shows services from a sample app that comes bundled with the installation</i></figcaption>
+</figure>
 
-<Screenshot
-   alt="SigNoz dashboard showing application list"
-   height={500}
-   src="/img/blog/2021/08/signoz_dashboard_hc.webp"
-   title="SigNoz Dashboard"
-   width={700}
-/>
+<br></br>
 
 ### Instrumenting a sample Nestjs application with OpenTelemetry
 For instrumenting a Nestjs application with OpenTelemetry, you need to install the required OpenTelemetry packages first. Steps involved in instrumenting a Nestjs application with OpenTelemetry are as follows:
@@ -193,14 +190,12 @@ You can check out a sample Nestjs application already instrumented with OpenTele
 
 If you run this app, you can find a `SampleNestJsApp` in the list of applications monitored with SigNoz.
 
+<figure data-zoomable align='center'>
+    <img src="/img/blog/2021/12/nestjs_signoz_dashboard.webp" alt="Sample Nestjs application in the list of applications monitored by SigNoz"/>
+    <figcaption><i>Sample Nestjs application in the list of applications monitored by SigNoz</i></figcaption>
+</figure>
 
-<Screenshot
-   alt="Sample Nestjs application in the list of applications monitored by SigNoz"
-   height={500}
-   src="/img/blog/2021/12/nestjs_signoz_dashboard.webp"
-   title="Sample Nestjs application in the list of applications monitored by SigNoz"
-   width={700}
-/>
+<br></br>
 
 ## Open-source tool to visualize telemetry data
 SigNoz makes it easy to visualize metrics and traces captured through OpenTelemetry instrumentation.
@@ -211,43 +206,39 @@ SigNoz comes with out of box RED metrics charts and visualization. RED metrics s
 - Error rate of requests
 - Duration taken by requests
 
-<Screenshot
-    alt="SigNoz charts and metrics"
-    height={500}
-    src="/img/blog/common/signoz_charts_application_metrics.webp"
-    title="Measure things like application latency, requests per sec, error percentage and see your top endpoints with SigNoz."
-    width={700}
-/>
+<figure data-zoomable align='center'>
+    <img src="/img/blog/common/signoz_charts_application_metrics.webp" alt="SigNoz charts and metrics"/>
+    <figcaption><i>Measure things like application latency, requests per sec, error percentage and see your top endpoints with SigNoz.</i></figcaption>
+</figure>
+
+<br></br>
 
 You can then choose a particular timestamp where latency is high to drill down to traces around that timestamp.
 
-<Screenshot
-    alt="List of traces on SigNoz dashboard"
-    height={500}
-    src="/img/blog/common/signoz_list_of_traces_hc.webp"
-    title="View of traces at a particular timestamp"
-    width={700}
-/>
+<figure data-zoomable align='center'>
+    <img src="/img/blog/common/signoz_list_of_traces_hc.webp" alt="List of traces on SigNoz dashboard"/>
+    <figcaption><i>View of traces at a particular timestamp</i></figcaption>
+</figure>
+
+<br></br>
 
 You can use flamegraphs to exactly identify the issue causing the latency.
 
-<Screenshot
-    alt="Flamegraphs used to visualize spans of distributed tracing in SigNoz UI"
-    height={500}
-    src="/img/blog/common/signoz_flamegraphs.webp"
-    title="View of traces at a particular timestamp"
-    width={700}
-/>
+<figure data-zoomable align='center'>
+    <img src="/img/blog/common/signoz_flamegraphs.webp" alt="Flamegraphs used to visualize spans of distributed tracing in SigNoz UI"/>
+    <figcaption><i>Flamegraphs used to visualize spans of distributed tracing in SigNoz UI</i></figcaption>
+</figure>
+
+<br></br>
 
 You can also build custom metrics dashboard for your infrastructure.
 
-<Screenshot
-    alt="Custom metrics dashboard"
-    height={500}
-    src="/img/blog/common/signoz_custom_dashboard-min.webp"
-    title="You can also build a custom metrics dashboard for your infrastructure"
-    width={700}
-/>
+<figure data-zoomable align='center'>
+    <img src="/img/blog/common/signoz_custom_dashboard-min.webp" alt="Custom metrics dashboard"/>
+    <figcaption><i>You can also build a custom metrics dashboard for your infrastructure</i></figcaption>
+</figure>
+
+<br></br>
 
 
 ## Conclusion
