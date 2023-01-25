@@ -1,5 +1,5 @@
 ---
-title: A Lightweight Open Source ELK alternative | SigNoz
+title: A Lightweight Open Source ELK alternative
 slug: elk-alternative-open-source
 date: 2022-10-20
 tags: [SigNoz]
