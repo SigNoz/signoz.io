@@ -10,6 +10,15 @@ SigNoz gives you ability to write powerful clickhouse queries to plot charts. Yo
 The distributed tables in clickhouse have been named by prefixing `distributed_` to existing single shard table names. If you want to use clickhouse queries in dashboard or alerts, you should use the distributed table names. Eg, `signoz_index_v2` now corresponds to the table of a single shard. To query all the shards, query against `distributed_signoz_index_v2`. 
 :::
 
+:::warning
+
+- The tagMap column of type Map(String, String) in signoz_traces.distributed_signoz_index_v2 has been divided into stringTagMap of type Map(String, String), numberTagMap of type Map(String, Float64) and boolTagMap of type Map(String, bool).
+  - All attributes with string values will be present in stringTagMap, attributes with number values will be present in numberTagMap and attributes with boolean values will be present in boolTagMap.
+- The gRPCMethod column has been replaced by rpcMethod column.
+- The gRPCCode and httpCode column has been replaced by responseStatusCode column.
+
+The gRPCMethod, gRPCCode, httpCode and tagMap column will be deprecated in future releases so it recommended to replace dashboard queries with new columns.
+:::
 
 Sharing a few examples of some queries which might be helpful in building dashboards.
 
@@ -17,10 +26,10 @@ Sharing a few examples of some queries which might be helpful in building dashbo
 
 ```sql
 SELECT toStartOfInterval(timestamp, INTERVAL 1 MINUTE) AS interval, 
-tagMap['peer.service'] AS op_name, 
+stringTagMap['peer.service'] AS op_name, 
 toFloat64(avg(durationNano)) AS value 
 FROM signoz_traces.signoz_index_v2  
-WHERE tagMap['peer.service']!='' 
+WHERE stringTagMap['peer.service']!='' 
 AND timestamp > now() - INTERVAL 30 MINUTE  
 GROUP BY (op_name, interval) order by (op_name, interval) ASC;
 ```
