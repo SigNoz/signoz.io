@@ -1,3 +1,5 @@
+import RetentionInfo from './retention-info.md'
+
 Using the `kubectl -n platform get pods` command, monitor the SigNoz deployment process.
 Wait for all the pods to be in running state:
 
@@ -17,3 +19,5 @@ my-release-signoz-otel-collector-metrics-68bcfd5556-9tkgh   1/1     Running   0 
 my-release-signoz-query-service-0                           1/1     Running   0          8m54s
 my-release-zookeeper-0                                      1/1     Running   0          8m54s
 ```
+
+<RetentionInfo />
