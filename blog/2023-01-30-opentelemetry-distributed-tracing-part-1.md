@@ -158,4 +158,6 @@ OpenTelemetry was born from the merger of two other standards that decided to un
 
 From observability point of view, OpenTelemetry provides a level playing field for all Observability providers, **avoiding vendor lock-in** and **interoperability** with other OSS projects in the Telemetry and Observability ecosystem.
 
-We will be going more deeply into open Telemetry in our next article, where we will be learning more about OpenTelemetry and also show you a demo with a sample application.
+We will be going more deeply into open Telemetry in our [next article](https://signoz.io/blog/opentelemetry-distributed-tracing-part-2/), where we will be learning more about OpenTelemetry and also show you a demo with a sample application.
+
+[Guide to Distributed Tracing with OpenTelemetry](https://signoz.io/blog/opentelemetry-distributed-tracing-part-2/)
