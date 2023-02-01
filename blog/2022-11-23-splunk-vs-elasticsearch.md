@@ -81,7 +81,7 @@ Another benefit of Splunk Indexer is data replication. Splunk keeps multiple cop
 
 ### User Interface
 
-The main difference in the user interface is that Splunk web UI or the search head provides user management and controls whereas Kibana does not support this feature.
+In terms of user interface, Splunk's web UI or the search head provides user management and controls and the equivalent of this feature persent in Kibana is xpack Kibana. 
 
 <figure data-zoomable align='center'>
     <img src="/img/blog/2022/10/splunk_log_observer.webp" alt="Splunk Log Observer (Source: Splunk website)"/>
