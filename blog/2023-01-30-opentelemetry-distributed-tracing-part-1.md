@@ -1,5 +1,5 @@
 ---
-title: Distributed Tracing with OpenTelemetry - Part I
+title: Complete Guide to Distributed Tracing with OpenTelemetry - Part I
 slug: opentelemetry-distributed-tracing-part-1
 date: 2023-01-30
 tags: [OpenTelemetry, Distributed Tracing]
@@ -43,6 +43,8 @@ You would ask, “What are microservices?”
 Basically, **microservices are a software approach that creates applications as a loose coupling of specific services or functions rather than as a single, “monolithic” program.**
 
 As you break your single monolithic application into smaller sets of services, the number of moving components in your architecture increases. It becomes complex to track a request and its flow through the mesh of all the services. In the olden days, a single log file was enough to scan through the logs to troubleshoot an issue. 
+
+[![Get started with distributed tracing](/img/blog/common/distributed_tracing_cta.png)](https://signoz.io/docs/instrumentation/overview/?utm_source=blog&utm_medium=opentelemetry_distributed_tracing)
 
 However, in a microservice architecture, you could end up with 50-100 services, each with its logging file and separate process, with multiple instances running and distributed across multiple environments and locations. Imagine the pain of trying to understand or track a request in such a complex web of dynamic components. These requests are nearly impossible to track with traditional techniques designed for a single service application.
 
@@ -160,4 +162,4 @@ From observability point of view, OpenTelemetry provides a level playing field f
 
 We will be going more deeply into open Telemetry in our [next article](https://signoz.io/blog/opentelemetry-distributed-tracing-part-2/), where we will be learning more about OpenTelemetry and also show you a demo with a sample application.
 
-[Guide to Distributed Tracing with OpenTelemetry](https://signoz.io/blog/opentelemetry-distributed-tracing-part-2/)
+#### **[Complete Guide to Distributed Tracing with OpenTelemetry - Part II](https://signoz.io/blog/opentelemetry-distributed-tracing-part-2/)**
