@@ -1,11 +1,12 @@
 ---
-title: Grafana vs Splunk - Pros and Cons
+title: Grafana vs Splunk - Key Features and Differences
 slug: grafana-vs-splunk
 date: 2023-02-02
 tags: [Tools Comparison]
 authors: vivek_sonar
 description: Grafana and Splunk are both used as monitoring tools. But while Grafana is majorly used as a data visualization tool, Splunk is an enterprise security and observability platform. Grafana is also an open-source project...
-image: /img/blog/2023/02/grafana_vs_splunk_cover.jpeg
+image: /img/blog/2023/02/grafana_vs_splunk_cover-min.jpg
+hide_table_of_contents: true
 keywords:
   - grafana
   - splunk
@@ -117,24 +118,24 @@ Both Splunk and Grafana provide robust capabilities, but Splunk provides more ad
 
 ## Pros and Cons
 
-### **Splunk Pros:**
+### Splunk Pros:
 
 - **Data Safety:** Splunk keeps multiple copies of indexed data providing better data safety in case of technical failures.
 - **Advanced Features:** Splunk provides advanced analytics and can be used to process large data sets.
 - **Security:** Since Splunk is commercial software, the security features, including data encryption, authentication, and access control, are very robust compared to what Grafana offers.
 
-### **Splunk Cons:**
+### Splunk Cons:
 
 - **Expensive**: Splunk is commercial enterprise-grade software, and it can be expensive for many organizations to implement.
 - **Steep learning curve**: Although Splunk is a powerful tool, the learning curve for it can be very steep, and new users struggle with it.
 
-### **Grafana Pros:**
+### Grafana Pros:
 
 - **Open Source:** Grafana is open source project, which means it can be used
 - **GNU Licensing**: Organizations don't need any type of license to run Grafana which makes it a cost-effective monitoring option.
 - **Engagement:** Grafana has an active community of users and developers who talk about their experiences and help each other.
 
-### **Grafana Cons:**
+### Grafana Cons:
 
 - **Limited Storage:** Grafana on other hand has limited data storage capacity which can be a major issue for organizations that have large data sets.
 
@@ -143,8 +144,11 @@ Now coming to the most important point, **SCALABILITY!**
 Both of these monitoring solutions have different approaches when it comes to scalability:
 
 - **Splunk** is built on top of distributed architecture which means it can process large amounts of data and index it on different nodes making it highly scalable.
+
 - In terms of storage, Splunk is built in a way that it can easily handle *petabytes* of data which can also scale horizontally by adding more nodes to the cluster.
+
 - **Grafana,** on the other hand, is built on *plug-in architecture* which allows it to integrate with different types of data sources and its functionality can be extended by using plugins.
+
 - The plug-in architecture in Grafana can be scaled by adding more servers.
 
 In general, Splunk is comparatively more scalable than Grafana especially when it comes to organizations that have large amounts of data.
@@ -161,9 +165,7 @@ Grafana is an open-source data visualization & monitoring tool that works best f
 
 SigNoz is an open source APM that provides metrics, logs, and traces under a single pane of glass. It uses OpenTelemetry for application instrumentation. OpenTelemetry is quietly becoming the world standard for instrumenting cloud-native applications. SigNoz can be a great alternative to Grafana and Splunk. 
 
-It is easy to get started with SigNoz with out of box charts for key application metrics. SigNoz also provides an [enterprise version](https://signoz.io/pricing/) that can be self-hosted within your infra. 
-
-
+It is easy to get started with SigNoz with out of box charts for key application metrics. SigNoz also provides an [enterprise version](https://signoz.io/pricing/) that can be self-hosted within your infra.
 
 <figure data-zoomable align='center'>
     <img src="/img/blog/common/signoz_charts_application_metrics.png" alt="Application Metrics Dashboard in SigNoz"/>
@@ -189,7 +191,7 @@ cd signoz/deploy/
 You can visit our documentation for instructions on how to install SigNoz using Docker Swarm and Helm Charts.
 
 
-[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/?utm_source=blog&utm_medium=client_logging)
+[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/?utm_source=blog&utm_medium=grafana_vs_splunk)
 
 If you liked what you read, then check out our GitHub repo 👇
 
