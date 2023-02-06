@@ -1,5 +1,9 @@
 import React, { useEffect, useState } from "react";
 import ReactModal from "react-modal";
+
+import { Header } from "../modules/index-header"
+import { ShowCompanyLogos } from "../modules/company-logos"
+
 import clsx from "clsx";
 import Layout from "@theme/Layout";
 import Link from "@docusaurus/Link";
@@ -7,7 +11,6 @@ import useDocusaurusContext from "@docusaurus/useDocusaurusContext";
 import useBaseUrl from "@docusaurus/useBaseUrl";
 import ReactGA from "react-ga";
 import styles from "./styles.module.css";
-import { PlaySVG } from "../svgs/common";
 import { LiteYoutubeEmbed } from "react-lite-yt-embed";
 
 
@@ -252,39 +255,7 @@ function TrySignozModal(props) {
   );
 }
 
-function ShowCompanyLogos() {
-  return (
-    <section className={styles.used_by}>
-      <div
-        className="container"
-        style={{ marginTop: "0.5rem", marginBottom: "0.5rem" }}
-      >
-        {/* <p class="tagline" >Used by teams at</p> */}
-        <p className={styles.tagline}> Used by teams at </p>
-        <ul>
-          <li>
-            <img src="img/users/phenom.png" alt="phenom logo" />
-          </li>
-          <li>
-            <img src="img/users/epifi.jpeg" alt="epifi logo" />
-          </li>
-          <li>
-            <img src="img/users/Outplay.webp" alt="outplay logo" />
-          </li>
-          <li>
-            <img src="img/users/instasafe-cropped.png" alt="instasafe logo" />
-          </li>
-          <li>
-            <img
-              src="img/users/turvo-logo-white.png"
-              alt="turvo logo"
-            />
-          </li>
-        </ul>
-      </div>
-    </section>
-  );
-}
+
 
 function Home() {
   const [showTrySignozModal, setShowTrySignozModal] = useState(false);
@@ -312,113 +283,8 @@ function Home() {
           isOpen={showTrySignozModal}
           onClose={closeTrySignozModal}
         />
-        <header className="hero hero--dark">
-          <div className="container">
-            <div className="row">
-              <div className="col col--4">
-                <p className="" style={{ fontWeight: "bold", fontSize: "32px" }}>
-                Open Source Metrics, Traces and Logs in a single pane
-                  {/* Open-source application monitoring platform */}
-                </p>
-                <p className="hero__subtitle">
-                  Understand issues in your deployed applications & solve them
-                  quickly
-                </p>
-                <div style={{ margin: "1rem 0" }}>
-                  <Link
-                    style={{
-                      margin: "6px",
-                      paddingLeft: "10px",
-                      paddingRight: "10px",
-                    }}
-                    className="button button--primary "
-                    // onClick={setShowTrySignozModal.bind(this,true)}
-                    href={"/docs/install/docker"}
-                    onClick={getStartedClicked}
-                  >
-                    Get Started for free
-                  </Link>
-                  <Link
-                    style={{
-                      margin: "6px",
-                      paddingLeft: "10px",
-                      paddingRight: "10px",
-                    }}
-                    className="button button--outline button--secondary "
-                    href={"https://forms.gle/YDJ3wBFx7nhDnUbr5"}
-                    onClick={requestDemoClicked}
-                  >
-                    Request a Demo
-                  </Link>
-                </div>
-
-                {/* <p className="open-source-label">SigNoz is <strong>free</strong> and <strong>open-source</strong></p> */}
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    marginBottom: "16px",
-                  }}
-                >
-                  <img
-                    src={"/img/yc-logo-white.svg"}
-                    height={24}
-                    alt={"YCombinator"}
-                    style={{ marginRight: 16 }}
-                  />{" "}
-                  Backed by Y Combinator
-                </div>
-              </div>
-              <div className="col col--8">
-                <div className="hero__screenshot">
-                  <div style={{ width: "100%" }}>
-                    {showVideo === false ? (
-                      <div
-                        id={"demo-video-cover"}
-                        onClick={setShowVideo.bind(this, true)}
-                        style={{
-                          background: "url('/videos/demo-mar10-cover.webp')",
-                          height: 426,
-                          width: "100%",
-                        }}
-                      >
-                        <div id={"demo-overlay"}></div>
-                        <div id={"demo-content"}>
-                          <div
-                            style={{
-                              fontSize: 18,
-                              fontWeight: 600,
-                              marginBottom: 20,
-                            }}
-                          >
-                            SigNoz - Quick Intro
-                          </div>
-                          <PlaySVG />
-                        </div>
-                      </div>
-                    ) : (
-                      <div>
-                        <video
-                          width="100%"
-                          height="420"
-                          autoPlay
-                          controls
-                          id={"demo-video-player"}
-                        >
-                          <source
-                            src="https://demo-video-1.s3.us-east-2.amazonaws.com/SigNoz-Demo-Sept2-2022.mp4"
-                            type="video/mp4"
-                          />
-                          Your browser does not support the video tag.
-                        </video>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </header>
+        
+        <Header />
         <main>
           {/* <SubscribeNearFold /> */}
           <ShowCompanyLogos />

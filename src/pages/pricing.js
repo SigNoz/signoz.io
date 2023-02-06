@@ -3,6 +3,8 @@ import Layout from "@theme/Layout";
 import Link from "@docusaurus/Link";
 import FAQBody from "@site/src/components/FAQPricing";
 import ReactGA from "react-ga";
+import { ShowCompanyLogos } from "../modules/company-logos";
+
 
 
 // ReactGA.initialize("UA-152867655-1"); 
@@ -88,13 +90,15 @@ function pricingTest() {
                     </div>
                     <div class="card__body">
                         <p>
-                            <li> Single Sign On support</li>
+                            <li> Single Sign On </li>
                             <li> SAML and LDAP support</li>
                             {/* <li> Visualise very large traces (>10k spans) with hierarchical navigation</li> */}
+                            <li> AWS PrivateLink </li>
                             <li> Dashboard configuration support</li>
+
                             <br></br>
                             <div style={{fontSize:'medium'}}>Upcoming features</div>
-                            <li> Predictive Resource Optimization  </li>
+                            {/* <li> Predictive Resource Optimization  </li> */}
                             <li> Finer RBAC with custom roles</li>
                             <li> Audit Logs</li>
 
@@ -168,7 +172,7 @@ function pricingTest() {
             </div>
       </section>       */}
 
-          
+      <ShowCompanyLogos/>
 
 
       {/* FAQ section */}

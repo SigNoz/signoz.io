@@ -24,16 +24,17 @@ Let us see how to instrument your application with OpenTelemetry, so that you ca
 
 #### Install the following dependencies using `composer`
 
-- open-telemetry/opentelemetry
-- guzzlehttp/guzzle
+- open-telemetry/sdk
+- open-telemetry/exporter-otlp
+- php-http/guzzle7-adapter
 - guzzlehttp/psr7
 
 #### Import the required modules
 
 ```php
 use GuzzleHttp\Client;
-use GuzzleHttp\Psr7\HttpFactory;
-use OpenTelemetry\Contrib\OtlpHttp\Exporter as OTLPExporter;
+use OpenTelemetry\Contrib\Otlp\OtlpHttpTransportFactory;
+use OpenTelemetry\Contrib\Otlp\SpanExporter;
 use OpenTelemetry\SDK\Common\Attribute\Attributes;
 use OpenTelemetry\SDK\Trace\SpanProcessor\SimpleSpanProcessor;
 use OpenTelemetry\SDK\Trace\TracerProvider;
@@ -53,25 +54,21 @@ putenv('OTEL_SERVICE_NAME=<NAME OF YOUR SERVICE>');
 #### Initialise Exporter and Tracer module
 
 ```php
-$exporter = new OTLPExporter(
-    new Client(),
-    new HttpFactory(),
-    new HttpFactory()
-);
+$transport = (new OtlpHttpTransportFactory())->create('http://<IP of SigNoz>:4318/v1/traces', 'application/x-protobuf');
 
 $tracerProvider =  new TracerProvider(
     new SimpleSpanProcessor(
-        $exporter
+        new SpanExporter($transport)
     )
 );
-$tracer = $tracerProvider->getTracer();
+$tracer = $tracerProvider->getTracer('io.signoz.php.example');
 ```
 
 #### Create and activate root span
 
 ```php
 $root = $span = $tracer->spanBuilder('root')->startSpan();
-$span->activate();
+$scope = $span->activate();
 ```
 
 #### Start your first span, add attributes and events.
@@ -93,11 +90,12 @@ $span = $tracer->spanBuilder('loop-' . $i)->startSpan();
 
 ```
 
-#### End the spans in hierarchal order
+#### End the spans in hierarchical order
 
 ```php
 $span->end();
 $root->end();
+$scope->detach();
 ```
 
 #### Run and Visualize on SigNoz
