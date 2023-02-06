@@ -1,7 +1,7 @@
 ---
 title: Monitor your Python application with OpenTelemetry and SigNoz
 slug: python
-date: 2021-08-17
+date: 2023-02-06
 tags: [python-monitoring]
 author: Ankit Anand
 author_title: SigNoz Team
