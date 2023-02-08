@@ -213,6 +213,14 @@ Hence, the final run command looks like this:
 SERVICE_NAME=goGinApp INSECURE_MODE=true OTEL_EXPORTER_OTLP_ENDPOINT=localhost:4317 go run main.go
 ```
 
+
+:::info
+
+Do not use `http` or `https` in the IP address. For example, if the IP is `http://test.com` then the `OTEL_EXPORTER_OTLP_ENDPOINT` will be `test.com:4317`
+
+:::
+
+
 **Step 8:** **Generate some data**<br></br>
 In order to monitor your Gin application with SigNoz, you first need to generate some data.
 

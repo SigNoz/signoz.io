@@ -312,6 +312,14 @@ Hence, the final run command looks like this:
 SERVICE_NAME=goGinApp INSECURE_MODE=true OTEL_EXPORTER_OTLP_ENDPOINT=localhost:4317 go run main.go
 ```
 
+
+:::info
+
+Do not use `http` or `https` in the IP address. For example, if the IP is `http://test.com` then the `OTEL_EXPORTER_OTLP_ENDPOINT` will be `test.com:4317`
+
+:::
+
+
 And, congratulations! You have instrumented your sample Golang app.
 
 Hit the `/books` endpoint of the bookstore app at [http://localhost:8090/books](http://localhost:8090/books). Refresh it a bunch of times in order to generate load, and wait for 1-2 mins for data to appear on SigNoz dashboard.

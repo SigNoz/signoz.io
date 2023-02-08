@@ -262,7 +262,15 @@ OTLP endpoint for SigNoz - `<IP of the machine>:4317`
 
 If you have installed SigNoz on your local machine, then your endpoint is `127.0.0.1:4317`.
 
-If you have installed SigNoz on some domain, then your endpoint is `http://test.com:4317`
+If you have installed SigNoz on some domain, then your endpoint is `test.com:4317`
+
+
+:::info
+
+Do not use `http` or `https` in the IP address. 
+
+:::
+
 
 Configuration for the following can be set up in `.env`
 
@@ -282,6 +290,8 @@ SQL_DB=signoz
 OTEL_EXPORTER_OTLP_ENDPOINT=localhost:4317
 INSECURE_MODE=true
 ```
+
+
 
 **Step 2: Run the microservices**
 
