@@ -1,7 +1,7 @@
 ---
 title: Implementing OpenTelemetry in a Gin application 
 slug: opentelemetry-gin
-date: 2022-05-30
+date: 2023-02-03
 tags: [OpenTelemetry Instrumentation, Go / Golang]
 authors: [nitya, ankit_anand]
 description:  It is essential to monitor your Gin apps in Go(Golang). OpenTelemetry can help instrument Gin apps and provide you with end-to-end tracing. In this guide, we will demonstrate how to instrument your Gin app with OpenTelemetry...
