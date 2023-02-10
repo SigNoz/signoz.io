@@ -59,26 +59,20 @@ as `k8s-infra` chart is included in default SigNoz chart installation.
 
 3. **Import Dashboard with CPU and Memory Metrics**
 
-   You can import basic dashboard with CPU and Memory metrics of K8s cluster
+   You can import dashboard with CPU and Memory metrics of K8s cluster
    containers from [here][5].
 
-   After importing, you can include more widgets using other metrics from
-   the [list below][3].
+4. **Import Dashboard with K8s Metrics**
 
-4. **Generate and Import Dashboard with Node Metrics**
-   
-   To generate node metrics dashboards for each nodes of K8s cluster:
+   You can import dashboard with K8s metrics of K8s cluster from [here][6].
 
-   ```bash
-   for node in $(kubectl get nodes -o name | sed -e "s/^node\///");
-   do
-   curl -sL https://github.com/SigNoz/benchmark/raw/main/dashboards/hostmetrics/hostmetrics-import.sh \
-      | HOSTNAME="$node" DASHBOARD_TITLE="Node Metrics Dashboard for $node" bash
-   done
-   ```
+5. **Generate and Import Dashboard with Node Hostmetrics**
 
-   After importing the generated dashboards, you can include more widgets as
-   per you need using metrics from the [list below][3].
+   You can import dashboard with Node Hostmetrics of K8s cluster from
+   [here][7].
+
+In the Dashboard page of SigNoz UI, you can create your own widgets as per you
+need using metrics from the [list below][3].
 
 ---
 
@@ -86,7 +80,7 @@ as `k8s-infra` chart is included in default SigNoz chart installation.
 
 <K8sMetrics />
 
-<HostMetrics name="Node Metrics"/>
+<HostMetrics name="Node Hostmetrics"/>
 
 ---
 
@@ -94,4 +88,6 @@ as `k8s-infra` chart is included in default SigNoz chart installation.
 [2]: https://github.com/SigNoz/otel-collector-k8s/blob/main/deployment/all-in-one.yaml#L19
 [3]: #list-of-metrics
 [4]: https://signoz.io/docs/userguide/dashboards/
-[5]: https://github.com/SigNoz/benchmark/raw/main/dashboards/k8s-infra-metrics/cpu-memory-metrics.json
+[5]: https://github.com/SigNoz/dashboards/raw/main/k8s-infra-metrics/cpu-memory-metrics.json
+[6]: https://github.com/SigNoz/dashboards/raw/main/k8s-infra-metrics/kubernetes-metrics.json
+[7]: https://github.com/SigNoz/dashboards/raw/main/hostmetrics/hostmetrics-k8s.json
