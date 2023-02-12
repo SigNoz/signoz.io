@@ -114,8 +114,11 @@ OTEL_SERVICE_NAME=signoz-php-app php FILENAME.php
     <figcaption><i>Detailed view of the Trace showing attached events to spans.</i></figcaption>
 </figure>
 
-#### Testing with sample PHP application
 
-If you want to test out how SigNoz works with a sample PHP application, check out a sample PHP application at this [GitHub](https://github.com/SigNoz/sample-php-app).
+### Sample PHP application​
+
+We have included a sample PHP application with README.md at [GitHub](https://github.com/SigNoz/sample-php-app)
+
+Feel free to use this repo to test out OpenTelemetry instrumentation and how to send telemetry data to SigNoz.
 
 <InstrumentationFAQ />
