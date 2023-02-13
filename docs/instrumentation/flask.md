@@ -229,5 +229,10 @@ Ensure you have the correct opentelemetry instrumentations:
 - [opentelemetry-instrumentation-sqlite3](https://pypi.org/project/opentelemetry-instrumentation-sqlite3/) for SQLite3
 - Complete list [here](https://github.com/open-telemetry/opentelemetry-python-contrib/tree/main/instrumentation) -->
 
+## Sample Flask Application
+
+- [Working example](https://github.com/SigNoz/opentelemetry-python/tree/main/docs/examples/fork-process-model) where we have configured a gunicorn server with `post_fork` hook.
+
+- We have included a sample Flask application with README.md at [Sample Flask App Github Repo.](https://github.com/SigNoz/sample-flask-app)
 
 <InstrumentationFAQ />

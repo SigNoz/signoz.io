@@ -224,4 +224,10 @@ Ensure you have the correct opentelemetry instrumentations:
 - Complete list [here](https://github.com/open-telemetry/opentelemetry-python-contrib/tree/main/instrumentation) -->
 
 
+## Sample FastAPI Application
+
+- [Working example](https://github.com/SigNoz/opentelemetry-python/tree/main/docs/examples/fork-process-model) where we have configured a gunicorn server with `post_fork` hook.
+
+- We have included a sample FastAPI application with README.md at [Sample FastAPI App Github Repo.](https://github.com/SigNoz/sample-fastAPI-app)
+
 <InstrumentationFAQ />

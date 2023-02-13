@@ -522,6 +522,13 @@ opentelemetry.trace.getTracer('your_tracer_name').getActiveSpanProcessor().shutd
 
 <p>&nbsp;</p>
 
+## Sample Javascript App
+
+- We have included a sample applications at:
+  - [Sample React App Github Repo](https://github.com/SigNoz/sample-reactjs-app)
+  - [Sample NodeJs App Github Repo](https://github.com/SigNoz/sample-nodejs-app)
+  - [Sample Distributed Tracing NodeJs App Github Repo](https://github.com/SigNoz/distributed-tracing-nodejs-sample)
+
 ## Further Reading
 
 - [Nodejs Performance Monitoring](https://signoz.io/blog/nodejs-performance-monitoring/)

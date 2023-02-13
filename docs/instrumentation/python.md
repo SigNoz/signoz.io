@@ -258,4 +258,11 @@ Ensure you have the correct opentelemetry instrumentations:
 - Complete list [here](https://github.com/open-telemetry/opentelemetry-python-contrib/tree/main/instrumentation) -->
 
 
+## Sample Application
+
+- [Working example](https://github.com/SigNoz/opentelemetry-python/tree/main/docs/examples/fork-process-model) where we have configured a gunicorn server with `post_fork` hook.
+
+
+
+
 <InstrumentationFAQ />

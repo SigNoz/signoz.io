@@ -301,4 +301,8 @@ Span {
 
 <p>&nbsp;</p>
 
+## Sample Java Application
+
+- We have included a sample Java application with README.md at [Sample Java App Github Repo.](https://github.com/SigNoz/distributed-tracing-java-sample)
+
 <InstrumentationFAQ />

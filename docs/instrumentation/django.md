@@ -231,5 +231,10 @@ Ensure you have the correct opentelemetry instrumentations:
 - [opentelemetry-instrumentation-sqlite3](https://pypi.org/project/opentelemetry-instrumentation-sqlite3/) for SQLite3
 - Complete list [here](https://github.com/open-telemetry/opentelemetry-python-contrib/tree/main/instrumentation) -->
 
+## Sample django Application
+
+- [Working example](https://github.com/SigNoz/opentelemetry-python/tree/main/docs/examples/fork-process-model) where we have configured a gunicorn server with `post_fork` hook.
+
+- We have included a sample django application with README.md at [Sample django App Github Repo.](https://github.com/SigNoz/sample-django)
 
 <InstrumentationFAQ />

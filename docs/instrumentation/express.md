@@ -200,6 +200,8 @@ Module that provides automatic instrumentation for MongoDB:
 npm install --save @opentelemetry/instrumentation-mongodb
 ```
 
+**Note:** Refer here for sample [NodeJs express application with MongoDB.](https://github.com/SigNoz/sample-nodejs-app/tree/mongodb)
+
 ### Redis Instrumentation
 
 Note if you’re using `@opentelemetry/auto-instrumentations-node`, you don’t need to install specific modules for your database.
@@ -295,7 +297,13 @@ If your application exits quickly after startup, you may need to explicitly shut
 opentelemetry.trace.getTracer('your_tracer_name').getActiveSpanProcessor().shutdown()
 ```
 
-<p>&nbsp;</p>
+
+## Sample Express App
+
+- We have included a sample applications at:
+
+  - [Sample NodeJs App Github Repo](https://github.com/SigNoz/sample-nodejs-app)
+
 
 ## Further Reading
 
