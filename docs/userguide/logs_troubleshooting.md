@@ -21,9 +21,14 @@ If you have included any of the above to `selected` fields, and you get empty da
 when you filter using those fields then you will have to perform the following steps.
 
 - Exec into your clickhouse container
+    ```bash
+    kubectl exec -n platform -it chi-my-release-clickhouse-cluster-0-0-0 -- sh
+
+    clickhouse client
+    ```
 - Run the following queries
     
-    ```yaml
+    ```
     use signoz_logs;
     
     show create table logs;
@@ -36,7 +41,7 @@ MATERIALIZED attributes_string_value[indexOf(attributes_string_key,
 k8s_namespace_name TYPE bloom_filter(0.01) GRANULARITY 64`
 - You will have to delete the index and remove the materialized column
     
-    ```yaml
+    ```
     alter table logs drop column k8s_namespace_name;
     alter table logs drop index k8s_namespace_name_idx;
     ```
@@ -44,7 +49,7 @@ k8s_namespace_name TYPE bloom_filter(0.01) GRANULARITY 64`
 - Perform the above steps for all the k8s fields listed.
 - Once done truncate the attribute keys table
     
-    ```yaml
+    ```
     truncate table logs_atrribute_keys;
     ```
     
