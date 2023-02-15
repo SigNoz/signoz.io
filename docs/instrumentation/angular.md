@@ -95,7 +95,6 @@ Facing difficulties with instrumenting your application? Check out this video tu
 
 ## Sample Angular App
 - [Sample Angular App](https://github.com/SigNoz/sample-angular-app/) - Contains without-instrumentation branch as well as instrumented branch `main`.
-- [Sample Nodejs App](https://github.com/SigNoz/sample-nodejs-app/) - It contains a basic backend API. The backend API is also instrumented with OpenTelemetry to have end-to-end tracing.
-- [Sample Angular-GraphQL App](https://github.com/SigNoz/angular-graphql-example)
+
 
 <InstrumentationFAQ />
