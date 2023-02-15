@@ -215,7 +215,8 @@ module.exports = {
             items: [
               'userguide/fluentbit_to_signoz', 'userguide/fluentd_to_signoz', 'userguide/logstash_to_signoz'
             ]
-          }
+          },
+          'userguide/logs_troubleshooting'
         ],
     },
     {
