@@ -29,7 +29,11 @@ when you filter using those fields then you will have to perform the following s
     show create table logs;
     ```
     
-- For the corresponding field, you will find a materialized column and an index. Ex:- For `k8s_namespace_name` you will have `k8s_namespace_name String MATERIALIZED attributes_string_value[indexOf(attributes_string_key, 'k8s_namespace_name')] CODEC(LZ4)`     and index `INDEX k8s_namespace_name_idx k8s_namespace_name TYPE bloom_filter(0.01) GRANULARITY 64`
+- For the corresponding field, you will find a materialized column and an index.
+For example: `k8s_namespace_name` you will have `k8s_namespace_name String
+MATERIALIZED attributes_string_value[indexOf(attributes_string_key,
+'k8s_namespace_name')] CODEC(LZ4)` and index `INDEX k8s_namespace_name_idx
+k8s_namespace_name TYPE bloom_filter(0.01) GRANULARITY 64`
 - You will have to delete the index and remove the materialized column
     
     ```yaml
