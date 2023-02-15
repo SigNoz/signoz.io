@@ -7,13 +7,14 @@ This troubleshooting guide includes step-by-step instructions that should resolv
 
 
 ## K8s attribute filtering issue in logs.
-In the recent release some users who are using SigNoz charts(0.9.1 - 0.10.1) are facing issues querying the following selected fields.
+In the SigNoz charts releases `v0.9.1`, `v0.10.0` and `0.10.1`, some users who are facing
+issues querying the following selected fields.
 
-- k8s_container_name
-- k8s_namespace_name
-- k8s_pod_name
-- k8s_container_restart_count
-- k8s_pod_uid
+- `k8s_container_name`
+- `k8s_namespace_name`
+- `k8s_pod_name`
+- `k8s_container_restart_count`
+- `k8s_pod_uid`
 
 
 If you have converted any of the above fields to `selected` fields, and you notice that when you filter using the above fields it results in empty data then you will have to perform the following steps.
