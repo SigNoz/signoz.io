@@ -6,7 +6,8 @@ description: Instructions that should resolve most issues with logs
 This troubleshooting guide includes step-by-step instructions that should resolve most issues with logs.
 
 
-## K8s attribute filtering issue in logs.
+## K8s Attribute Filtering Issue in Logs
+
 In the SigNoz charts releases `v0.9.1`, `v0.10.0` and `0.10.1`, some users who are facing
 issues querying the following selected fields.
 
