@@ -17,7 +17,8 @@ issues querying the following selected fields.
 - `k8s_pod_uid`
 
 
-If you have converted any of the above fields to `selected` fields, and you notice that when you filter using the above fields it results in empty data then you will have to perform the following steps.
+If you have included any of the above to `selected` fields, and you get empty data
+when you filter using those fields then you will have to perform the following steps.
 
 - Exec into your clickhouse container
 - Run the following queries
