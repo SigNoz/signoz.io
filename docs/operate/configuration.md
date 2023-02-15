@@ -8,7 +8,7 @@ You can configure for SigNoz with different options.
 
 If no configuration for an option is set, then the default value as described is applied.
 
-## Environment variables
+## Environment Variables for Configuration
 
 When using SigNoz, there are various environment variables you can set to configure your SigNoz cluster.
 

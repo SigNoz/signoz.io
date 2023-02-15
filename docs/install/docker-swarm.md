@@ -7,6 +7,7 @@ slug: /install/docker-swarm
 
 import useBaseUrl from '@docusaurus/useBaseUrl';
 import CloneRepo from '../shared/clone-repo.md'
+import RetentionInfo from '../shared/retention-info.md'
 
 This section provides information on installing SigNoz on Docker Swarm.
 
@@ -89,6 +90,8 @@ docker stack services signoz
   ```
 
 Go to [Docker Swarm Operate](/docs/operate/docker-swarm) section for detailed instructions.
+
+<RetentionInfo />
 
 ## Next Steps
 

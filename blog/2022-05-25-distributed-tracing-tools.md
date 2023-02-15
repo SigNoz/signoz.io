@@ -5,7 +5,7 @@ date: 2022-08-18
 tags: [Tech Resources]
 authors: ankit_anand
 description: Latest top distributed tracing tools list in 2022 - 1.SigNoz 2.Dynatrace 3.New Relic 4.Honeycomb 5.Lightstep 6.Elastic APM 7.Jaeger 8.DataDog 9.Zipkin..
-image: /img/blog/2022/06/distributed_tracing_tools_cover.webp
+image: /img/blog/2022/06/distributed_tracing_tools_cover.jpeg
 keywords:
   - signoz
   - jaeger
@@ -45,19 +45,19 @@ A great distributed tracing tool can improve your team's response to performance
 
 Here's the list of the top 13 distributed tracing tools we will be looking at in this article:
 
-- [SigNoz](#signoz)
-- [Jaeger](#jaeger)
-- [Zipkin](#zipkin)
-- [Grafana Tempo](#grafana-tempo)
-- [Serverless360](#serverless360)
-- [Dynatrace](#dynatrace)
-- [New Relic](#new-relic)
-- [Honeycomb](#honeycomb)
-- [Lightstep](#lightstep)
-- [Instana](#instana)
-- [DataDog](#datadog)
-- [Elastic APM](#elastic-apm)
-- [Splunk](#splunk)
+ - [SigNoz](#signoz)
+ - [Jaeger](#jaeger)
+ - [Zipkin](#zipkin)
+ - [Grafana Tempo](#grafana-tempo)
+ - [Serverless360](#serverless360)
+ - [Dynatrace](#dynatrace)
+ - [New Relic](#new-relic)
+ - [Honeycomb](#honeycomb)
+ - [Lightstep](#lightstep)
+ - [Instana](#instana)
+ - [DataDog](#datadog)
+ - [Elastic APM](#elastic-apm)
+ - [Splunk](#splunk)
 
 Before we deep dive into each of these distributed tracing tools, let's take a short detour to understand distributed tracing.
 

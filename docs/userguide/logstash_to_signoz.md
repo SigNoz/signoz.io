@@ -9,7 +9,7 @@ If you use logstash to collect logs in your stack with this tutotrial you will b
 
 At SigNoz we use opentelemetry collector to recieve logs which supports the TCP protocol. So you can forward your logs from your logstash agent to opentelemetry collector
 
-## Steps:
+## Steps to recieve logs from Logstash:
 * Add fluentforward reciever to your `otel-collector-config.yaml` which is present inside `deploy/docker/clickhouse-setup`
     ```
     receivers:

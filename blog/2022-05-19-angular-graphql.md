@@ -5,7 +5,7 @@ date: 2022-05-19
 tags: [Tech Tutorial, JavaScript]
 authors: [sai_deepesh]
 description: See Angular GraphQL in action implemented in a CRUD app. Learn how to build an Angular GraphQL client with an example with detailed steps…...
-image: /img/blog/2022/05/angular_graphql_cover.webp
+image: /img/blog/2022/05/angular_graphql_cover.jpeg
 keywords:
   - angular
   - graphql

@@ -10,7 +10,7 @@ import UpgradeWarning from '../shared/upgrade-warning.md'
 Once you have successfully installed SigNoz on Kubernetes, the following sections
 provide an overview of the activities that are required to successfully operate SigNoz.
 
-## Stop/Start
+## Stop/Start SigNoz Cluster
 
 To stop the running SigNoz cluster:
 
@@ -28,7 +28,7 @@ _*Note: The newly created release aka SigNoz cluster should mount to
 the existing persistent volume as long as the *namespace* and the
 *release name* matches to the old one._
 
-## Upgrade
+## Upgrade SigNoz Cluster
 
 Use the steps below to upgrade to the latest:
 
@@ -74,7 +74,7 @@ helm -n platform upgrade my-release signoz/signoz --version 0.2.5
 
 <UpgradeWarning/>
 
-## Uninstall
+## Uninstall SigNoz Cluster
 
 To uninstall/delete the `my-release` resources:
 
@@ -113,7 +113,7 @@ Replace `my-release` and `platform` from above instructions with appropriate
 release name and SigNoz namespace respectively.
 :::
 
-## Remove the Sample Application
+## Remove the Sample Application from Dashboard
 
 Use the command below to remove the sample application:
 

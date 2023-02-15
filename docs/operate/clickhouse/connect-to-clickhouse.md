@@ -6,9 +6,9 @@ sidebar_label: Connect to ClickHouse
 
 import CHClientWithOutput from '../../shared/ch-client-with-output.md'
 
-Follow the instructions below for connecting to your clickhouse database:
+Follow the instructions below for connecting to your ClickHouse database:
 
-## Docker
+## For Docker Users
 
 1. To exec to `clickhouse` container:
 
@@ -18,7 +18,7 @@ docker exec -it clickhouse-setup_clickhouse_1 bash
 
 <CHClientWithOutput/>
 
-## Docker Swarm
+## For Docker Swarm Users
 
 To exec to `clickhouse` container:
 
@@ -28,7 +28,7 @@ docker exec -it $(docker ps -q -f name=signoz_clickhouse) bash
 
 <CHClientWithOutput/>
 
-## Kubernetes
+## For Kubernetes Users
 
 To exec to `clickhouse` pod:
 

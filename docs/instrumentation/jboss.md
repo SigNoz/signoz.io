@@ -43,7 +43,7 @@ Let’s understand how to download, install, and run OpenTelemetry in a JBoss ap
 
 Java 8 or higher
 
-## Traces
+## Send Traces Directly to SigNoz
 
 You can use OpenTelemetry Java to send your traces directly to SigNoz. OpenTelemetry provides a **handy Java JAR agent** that can be attached to any Java 8+ application and dynamically injects bytecode to capture telemetry from a number of popular libraries and frameworks. 
 

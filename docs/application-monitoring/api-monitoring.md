@@ -5,13 +5,13 @@ title: Monitoring APIs in SigNoz
 
 import { LiteYoutubeEmbed } from "react-lite-yt-embed";
 
-### Key Operations section in service page
+### Key Operations Section in Service Page
 
 Get details on API performance over time and filter based on different facets
 
 <LiteYoutubeEmbed id="mQIbBqRgTY8" mute={false} />
 
-### Create Dashboards for monitoring 
+### Create Dashboards for Monitoring your Application on SigNoz
 
 Monitor key metrics like P95, p99 latecies and number of requests made for APIs of a service over time
 

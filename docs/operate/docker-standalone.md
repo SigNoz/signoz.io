@@ -11,7 +11,7 @@ import UpgradeWarning from '../shared/upgrade-warning.md'
 
 Once you have successfully installed SigNoz on Docker Standalone, the following sections provide an overview of the activities that are required to successfully operate SigNoz.
 
-## Stop/Start
+## Stop/Start SigNoz Cluster
 
 To stop the running SigNoz cluster:
 
@@ -27,7 +27,7 @@ docker-compose -f docker/clickhouse-setup/docker-compose.yaml up -d
 
 _*Note: The stopped SigNoz cluster should resume and mount to the existing docker volumes._
 
-## Upgrade
+## Upgrade SigNoz Cluster
 
 Use the commands below to sync to the [latest](https://github.com/SigNoz/signoz/releases/latest) release.
 
@@ -60,7 +60,7 @@ cd deploy && ./install.sh
 
 <UpgradeWarning/>
 
-## Uninstall
+## Uninstall SigNoz Cluster
 
 Enter the following command to uninstall SigNoz:
 
@@ -68,7 +68,7 @@ Enter the following command to uninstall SigNoz:
 docker-compose -f docker/clickhouse-setup/docker-compose.yaml down -v
 ```
 
-## Remove the Sample Application
+## Remove the Sample Application from SigNoz Dashboard
 
 Follow the steps in this section to remove the sample application that comes installed with SigNoz:
 

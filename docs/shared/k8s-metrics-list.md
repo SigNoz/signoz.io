@@ -16,7 +16,6 @@
 - container_memory_working_set
 - k8s_container_cpu_limit
 - k8s_container_cpu_request
-- k8s_container_ephemeral_storage_request
 - k8s_container_memory_limit
 - k8s_container_memory_request
 - k8s_container_ready
@@ -27,6 +26,11 @@
 - k8s_daemonset_ready_nodes
 - k8s_deployment_available
 - k8s_deployment_desired
+- k8s_job_active_pods
+- k8s_job_desired_successful_pods
+- k8s_job_failed_pods
+- k8s_job_max_parallel_pods
+- k8s_job_successful_pods
 - k8s_namespace_phase
 - k8s_node_condition_memory_pressure
 - k8s_node_condition_ready
@@ -54,6 +58,8 @@
 - k8s_pod_memory_rss
 - k8s_pod_memory_usage
 - k8s_pod_memory_working_set
+- k8s_pod_network_errors
+- k8s_pod_network_io
 - k8s_pod_phase
 - k8s_replicaset_available
 - k8s_replicaset_desired
@@ -61,5 +67,12 @@
 - k8s_statefulset_desired_pods
 - k8s_statefulset_ready_pods
 - k8s_statefulset_updated_pods
+- k8s_volume_available
+- k8s_volume_capacity
+- k8s_volume_inodes
+- k8s_volume_inodes_free
+- k8s_volume_inodes_used
+- k8s_node_allocatable_cpu
+- k8s_node_allocatable_memory
 
 </details>

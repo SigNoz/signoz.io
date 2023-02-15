@@ -92,7 +92,7 @@ We crossed 4k GitHub stargazers in June
 
 **Slack Community 👋**
 
-Our slack community is now **100+ members strong!** 🎉💪 We are always looking for ways in which we can be more helpful to our community. So if you have some ideas, feel free to pitch in! You can join our slack community [here](https://join.slack.com/t/signoz-community/shared_invite/zt-lrjknbbp-J_mI13rlw8pGF4EWBnorJA). 🙌
+Our slack community is now **100+ members strong!** 🎉💪 We are always looking for ways in which we can be more helpful to our community. So if you have some ideas, feel free to pitch in! You can join our slack community [here](https://signoz.io/slack). 🙌
 
 **Features 📸**
 

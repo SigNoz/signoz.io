@@ -1,7 +1,7 @@
 ---
 title: Monitoring your Flask application using OpenTelemetry
 slug: opentelemetry-flask
-date: 2021-11-19
+date: 2023-01-19
 tags: [OpenTelemetry Instrumentation, Python]
 authors: ankit_anand
 description: OpenTelemetry is a vendor-agnostic isntrumentation library. In this article, learn how to set up monitoring for a Flask application using OpenTelemetry.

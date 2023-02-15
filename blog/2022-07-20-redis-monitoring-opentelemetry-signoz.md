@@ -1,7 +1,7 @@
 ---
 title: Redis Monitoring with OpenTelemetry and SigNoz
 slug: redis-opentelemetry
-date: 2022-12-20
+date: 2023-01-12
 tags: [Database Monitoring]
 authors: [ankit_anand]
 description: In this post, we will show you how to set up Redis monitoring with SigNoz - an open-source full-stack APM. SigNoz captures data using OpenTelemetry, which is becoming the world standard for instrumenting cloud-native applications. Apart from capturing metrics from your Redis server, you can also capture logs and traces with OpenTelemetry...

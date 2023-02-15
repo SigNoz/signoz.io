@@ -1,7 +1,7 @@
 ---
 title: How to set up Golang application performance monitoring with open source monitoring tool - SigNoz
 slug: monitoring-your-go-application-with-signoz
-date: 2022-05-30
+date: 2023-02-02
 tags: [OpenTelemetry Instrumentation, Go / Golang]
 authors: ankit_anand
 description: In this article, learn how to setup application monitoring for Golang apps using an open-source solution, SigNoz.
@@ -311,6 +311,14 @@ Hence, the final run command looks like this:
 ```
 SERVICE_NAME=goGinApp INSECURE_MODE=true OTEL_EXPORTER_OTLP_ENDPOINT=localhost:4317 go run main.go
 ```
+
+
+:::info
+
+Do not use `http` or `https` in the IP address. For example, if the IP is `http://test.com` then the `OTEL_EXPORTER_OTLP_ENDPOINT` will be `test.com:4317`
+
+:::
+
 
 And, congratulations! You have instrumented your sample Golang app.
 

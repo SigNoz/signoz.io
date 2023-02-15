@@ -21,7 +21,7 @@ This page walks you through the **Services** section and gets you started with m
 
 <PrereqsInstrument />
 
-## What Are Application Metrics
+## What Are Application Metrics?
 
 <MetricsDefinition />
 
@@ -94,7 +94,7 @@ The application details pane contains three panes that are explained in the foll
 
 ![Panes on the application details page](/img/docs/application-details-page-panes-v0.10.2.png)
 
-### Application Metrics
+### Application Metrics in SigNoz
 
 The application metrics pane is comprised of four graphs:
 
@@ -107,7 +107,7 @@ The application metrics pane is comprised of four graphs:
 - **Key Operations**: this list helps you find the slow operations of your application. You can select a column heading to sort the list by the values in that column. Select the column heading again to reverse the sort order or to cancel sorting.
     ![Key operations](/img/docs/key-operations-v0.10.2.png)
 
-### External Calls
+### External Calls in SigNoz
 
 The external calls pane allows you to track the external services your applications depend on.
 
@@ -135,7 +135,7 @@ The graphs in this pane provide the following information:
 - The number of external calls per second by address.
 - The average duration of your external calls by address.
 
-### Database Calls
+### Database Calls in SigNoz
 
 This pane shows details about the database calls that your application makes. The spans should have the following span attributes to be counted in this panel
 

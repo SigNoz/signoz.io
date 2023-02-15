@@ -15,7 +15,7 @@ There are two ways in which you can send metrics to SigNoz using OpenTelemetry:
 - [Enable a Prometheus Receiver](#enable-a-prometheus-receiver)
 - [Find Metrics available in SigNoz](#find-metrics-available-in-signoz)
   - [Metrics from Hostmetrics receiver](#metrics-from-hostmetrics-receiver)
-- [Related Videos](#related-videos)
+- [Related Videos to Metrics](#related-videos)
 - [Get Help](#get-help)
 
 Depending on your choice, use one of the sections below.

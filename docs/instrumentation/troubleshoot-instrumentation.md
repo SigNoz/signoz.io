@@ -7,7 +7,7 @@ description: Troubleshoot guide
 
 # Troubleshoot Instrumenting your application and sending data to SigNoz
 
-### SigNoz Otel Collector address Grid
+### SigNoz Otel Collector Address Grid
 
 You might have specific set up for your application and SigNoz cluster.
 You can use the below table to figure out which address to use to send data to SigNoz.

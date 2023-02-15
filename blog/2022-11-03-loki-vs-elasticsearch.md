@@ -5,7 +5,7 @@ date: 2022-11-03
 tags: [Tools Comparison]
 authors: ankit_anand
 description: Loki and Elastcisearch (ELK stack) are both log analytics tools. While Loki is designed to keep indexing low, Elasticsearch indexes all data in every field, and each indexed field has a dedicated, optimized data structure....
-image: /img/blog/2022/11/loki_vs_elasticsearch_cover.webp
+image: /img/blog/2022/11/loki_vs_elasticsearch_cover.jpeg
 keywords:
   - loki vs elasticsearch
   - loki

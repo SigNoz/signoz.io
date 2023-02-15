@@ -21,18 +21,15 @@ A Kubernetes operator is a method of packaging, deploying, and managing a Kubern
 - You must have a K8s cluster up and running
 - You must have `kubectl` access to your cluster
 - Make sure that [SigNoz cluster is up and running][2]
-- Make sure to install [`cert-manager`][3]:
-```bash
-kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.9.1/cert-manager.yaml
-```
-- Suggestion: Make sure [Golang](https://go.dev/doc/install) is installed for [tracegen][4]
+- Make sure to install [`cert-manager`][3]
+- Suggestion: Make sure [Golang](https://go.dev/doc/install) is installed for [telemetrygen][4]
 
 ## Set up OpenTelemetry Operator
 
 To install the operator in the existing K8s cluster:
 
 ```bash
-kubectl apply -f https://github.com/open-telemetry/opentelemetry-operator/releases/download/v0.55.0/opentelemetry-operator.yaml
+kubectl apply -f https://github.com/open-telemetry/opentelemetry-operator/releases/download/v0.66.0/opentelemetry-operator.yaml
 ```
 
 Once the `opentelemetry-operator` deployment is ready, we can proceed with creation of
@@ -85,21 +82,21 @@ The above simplest `otelcol` example receives OTLP traces data using gRPC and HT
 batches the data and logs it to the console.
 :::
 
-Follow the steps below to set up [tracegen][4] and send sample traces to
+Follow the steps below to set up [telemetrygen][4] and send sample traces to
 the sample collector:
 
-- To install `tracegen` binary:
+- To install `telemetrygen` binary:
   ```bash
-  go install github.com/open-telemetry/opentelemetry-collector-contrib/tracegen@v0.55.0
+  go install github.com/open-telemetry/opentelemetry-collector-contrib/cmd/telemetrygen@latest
   ```
 - To forward gRPC port of the OTLP service:
   ```bash
   kubectl port-forward service/simplest-collector 4317
   ```
 - In another terminal, execute the command below to send trace data
-using `tracegen`:
+using `telemetrygen`:
   ```bash
-  tracegen -traces 1 -otlp-endpoint localhost:4317 -otlp-insecure
+  telemetrygen traces --traces 1 --otlp-endpoint localhost:4317 --otlp-insecure
   ```
 
 To view logs of simplest collector:
@@ -235,6 +232,8 @@ kubectl delete pod/myapp
 The OpenTelemetry operator can inject and configure OpenTelemetry
 auto-instrumentation libraries.
 
+### Instrumentation Resource Configuration
+
 At the moment the instrumentation is supported for Java, NodeJS, and Python
 languages. The instrumentation is enabled when the following annotation is
 applied to a workload or a namespace.
@@ -242,6 +241,8 @@ applied to a workload or a namespace.
  - `instrumentation.opentelemetry.io/inject-java: "true"` — for Java
  - `instrumentation.opentelemetry.io/inject-nodejs: "true"` — for NodeJS
  - `instrumentation.opentelemetry.io/inject-python: "true"` — for Python
+ - `instrumentation.opentelemetry.io/inject-dotnet: "true"` — for DotNet
+ - `instrumentation.opentelemetry.io/inject-sdk: "true"` - for OpenTelemetry SDK environment variables only
 
 The possible values for the annotation can be:
  - `"true"` - inject and Instrumentation resource from the namespace.
@@ -249,12 +250,6 @@ The possible values for the annotation can be:
  - `"my-other-namespace/my-instrumentation"` - name and namespace of Instrumentation CR
  instance in another namespace.
  - `"false"` - do not inject.
-
-:::info
-Support for `DotNet` is out, however it can be used only after
-[signoz-otel-collector][5] is synced with OpenTelemetry Collector
-`v0.57.2` or above in near future.
-:::
 
 Before using auto-instrumentation, we would need to configure an `Instrumentation`
 resource with the configuration for the SDK and instrumentation.
@@ -271,9 +266,19 @@ resource with the configuration for the SDK and instrumentation.
  the number of samples of traces collected and sent to the backend. OpenTelemetry
  provides two types: **StaticSampler** and **TraceIDRatioBased**.
 
- - Language properties i.e. `java`, `nodejs` and `python` - custom images
+ - Language properties i.e. `java`, `nodejs`, `python` and `dotnet` - custom images
  to be used for auto-instrumentation with respect to the languages as set
  in the pod annotation.
+
+### Inject OpenTelemetry SDK Environment Variables OpenTelemetry
+
+You can configure the OpenTelemetry SDK for applications which can't currently
+be autoinstrumented by using `inject-sdk` in place of (e.g.) `inject-python` or
+`inject-java`.
+
+This will inject environment variables like `OTEL_RESOURCE_ATTRIBUTES`,
+`OTEL_TRACES_SAMPLER`, and `OTEL_EXPORTER_OTLP_ENDPOINT`, that you can configure in the
+Instrumentation, but will not actually provide the SDK.
 
 ### Using Sidecar
 
@@ -455,7 +460,7 @@ EOF
 
 [1]: https://github.com/open-telemetry/opentelemetry-operator
 [2]: /docs/install
-[3]: https://cert-manager.io/docs/
-[4]: https://pkg.go.dev/github.com/open-telemetry/opentelemetry-collector-contrib/tracegen#section-readme
+[3]: https://cert-manager.io/docs/installation
+[4]: https://pkg.go.dev/github.com/open-telemetry/opentelemetry-collector-contrib/cmd/telemetrygen#readme-installing
 [5]: https://github.com/SigNoz/signoz-otel-collector
 [6]: http://localhost:8080

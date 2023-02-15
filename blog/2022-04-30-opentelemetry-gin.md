@@ -1,7 +1,7 @@
 ---
 title: Implementing OpenTelemetry in a Gin application 
 slug: opentelemetry-gin
-date: 2022-05-30
+date: 2023-02-03
 tags: [OpenTelemetry Instrumentation, Go / Golang]
 authors: [nitya, ankit_anand]
 description:  It is essential to monitor your Gin apps in Go(Golang). OpenTelemetry can help instrument Gin apps and provide you with end-to-end tracing. In this guide, we will demonstrate how to instrument your Gin app with OpenTelemetry...
@@ -212,6 +212,14 @@ Hence, the final run command looks like this:
 ```jsx
 SERVICE_NAME=goGinApp INSECURE_MODE=true OTEL_EXPORTER_OTLP_ENDPOINT=localhost:4317 go run main.go
 ```
+
+
+:::info
+
+Do not use `http` or `https` in the IP address. For example, if the IP is `http://test.com` then the `OTEL_EXPORTER_OTLP_ENDPOINT` will be `test.com:4317`
+
+:::
+
 
 **Step 8:** **Generate some data**<br></br>
 In order to monitor your Gin application with SigNoz, you first need to generate some data.

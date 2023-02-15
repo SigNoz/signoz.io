@@ -8,6 +8,7 @@ slug: /install/docker
 import CloneRepo from '../shared/clone-repo.md'
 import Tabs from "@theme/Tabs";
 import TabItem from "@theme/TabItem";
+import RetentionInfo from '../shared/retention-info.md'
 
 SigNoz can be installed on macOS or Linux computers, and there are two ways in which you can install SigNoz:
 
@@ -25,6 +26,12 @@ SigNoz recommends you to use the [install script](#install-signoz-using-the-inst
   - SUSE Linux Enterprise Server (SLES)
 
 If you're using a different Linux distribution, see the [Install SigNoz Using Docker Compose](#install-signoz-using-docker-compose) section.
+:::
+
+:::caution
+[Update 26 Jan 2023] There's a known issue in installing SigNoz in Mac M1 laptop. If you are facing any issues please refer to this [GitHub Issue](https://github.com/SigNoz/signoz/issues/2126) for the next steps.
+
+We are working on shipping a fix for the issue soon.
 :::
 
 ## Prerequisites
@@ -100,6 +107,9 @@ You should see a page similar to the one in the image below:
 <!--
 How is this helpful? I suggest we create something similar to the Kubernetes section. Do we have a blog post to which I could link out?
 -->
+
+<RetentionInfo />
+
 :::info
 The `docker-compose.yaml` installs a sample application named [HotR.O.D](https://github.com/jaegertracing/jaeger/tree/master/examples/hotrod) that generates tracing data. You can explore the SigNoz dashboard with the data provided by the sample application. If you wish to remove the sample application, follow the steps in the [Remove the Sample Application](/docs/operate/docker-standalone/#remove-the-sample-application) section.
 :::

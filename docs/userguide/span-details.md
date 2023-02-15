@@ -43,7 +43,11 @@ Select the **Focus on selected span** button to view only the currently selected
 2. Focus on that span
 3. View all the spans again
 
-![Video showing how to focus on a span](/videos/identify-span-with-errors-v0.7.1.mp4)
+<!-- ![Video showing how to focus on a span](/videos/identify-span-with-errors-v0.7.1.mp4) -->
+
+<video width="90%" controls>
+  <source src="/videos/identify-span-with-errors-v0.7.1.mp4"/>
+</video>
 
 ## Identify Spans with Errors
 

@@ -5,23 +5,23 @@ sidebar_label: Upgrade to 0.8.0
 ---
 import { LiteYoutubeEmbed } from "react-lite-yt-embed";
 
-# Upgrade to 0.8.0 from earlier versions
+# Upgrade to v0.8.0 from earlier versions
 
 v0.8.0 is a breaking release which requires data migration, if you are upgrading from an older version then you have to run the data migration scripts to be able to see past data.
 
-## First upgrade to 0.8.0
+## First upgrade to v0.8.0
 
-Follow the platform specific instructions to upgrade to 0.8.0 and above.
+Follow the platform specific instructions to upgrade to v0.8.0 and above.
 
 Note that the past data will not be visible on the new application until you run the migration script.
 
-### Docker
+### Upgrade Docker Installation
 
 - `git clone -b main https://github.com/SigNoz/signoz.git && cd signoz/deploy/`
 - `git checkout v0.8.0`
 - `./install.sh`
 
-### Kubernetes
+### Upgrade Kubernetes Installation
 
 - `helm repo update`
 - `helm search repo signoz --versions`
@@ -29,7 +29,7 @@ Note that the past data will not be visible on the new application until you run
 
 ## Steps to run migration script:
 
-### Docker
+### For Docker
 
 ```bash
 docker run --name signoz-migrate --network clickhouse-setup_default \
@@ -50,7 +50,7 @@ docker stop signoz-migrate
 docker rm signoz-migrate
 ```
 
-### Kubernetes
+### For Kubernetes
 
 ```bash
 kubectl -n platform run -i -t signoz-migrate --image=signoz/migrate:0.8 --restart='Never' \

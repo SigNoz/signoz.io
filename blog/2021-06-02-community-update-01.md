@@ -88,6 +88,6 @@ Shout out to [Anwesh](https://github.com/anweshknayak) and [Nidhi](https://githu
 
 Thank you for taking out the time to go through our first newsletter :) If you have any feedback or want any changes with the format, create an issue [**here**](https://github.com/SigNoz/signoz).
 
-Also, come join us in our [slack](https://join.slack.com/t/signoz-community/shared_invite/zt-lrjknbbp-J_mI13rlw8pGF4EWBnorJA) community, we would love to host you there :)
+Also, come join us in our [slack](https://signoz.io/slack) community, we would love to host you there :)
 
 [![SigNoz GitHub repo](/img/blog/common/signoz_github.webp)](https://github.com/SigNoz/signoz)

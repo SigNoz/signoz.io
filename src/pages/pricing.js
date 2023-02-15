@@ -3,6 +3,8 @@ import Layout from "@theme/Layout";
 import Link from "@docusaurus/Link";
 import FAQBody from "@site/src/components/FAQPricing";
 import ReactGA from "react-ga";
+import { ShowCompanyLogos } from "../modules/company-logos";
+
 
 
 // ReactGA.initialize("UA-152867655-1"); 
@@ -26,7 +28,7 @@ function pricingTest() {
 
         <div className={"row"}>
             <div className={"col col--4 margin-vert--md"}>
-                <div class="card">
+                <div class="card" style={{height:'24rem'}}>
                     <div class="card__header">
                         <h3 style={{marginBottom:'0'}}>Community</h3>
                         <p style={{fontSize:'medium'}}>Free</p>
@@ -54,7 +56,7 @@ function pricingTest() {
                 </div>
             </div>
             <div className={"col col--4 margin-vert--md"}>
-                <div class="card">
+                <div class="card" style={{height:'24rem'}}>
                     <div class="card__header">
                         <h3 style={{marginBottom:'0'}}>SigNoz Cloud</h3>
                         <p style={{fontSize:'medium'}}>Starts from USD 200/month</p>
@@ -81,21 +83,27 @@ function pricingTest() {
                 </div>
             </div>
             <div className={"col col--4 margin-vert--md"}>
-                <div class="card">
+                <div class="card" style={{height:'24rem'}}>
                     <div class="card__header">
-                        <h3 style={{marginBottom:'0'}}>Enterprise Self Hosted</h3>
+                        <h3 style={{marginBottom:'0'}}>Enterprise </h3>
                         {/* <p style={{fontSize:'medium'}}>Open for Early access</p> */}
                     </div>
                     <div class="card__body">
                         <p>
-                            <li> Single Sign On support</li>
+                            <li> Single Sign On </li>
                             <li> SAML and LDAP support</li>
-                            <li> Visualise very large traces (>10k spans) with hierarchical navigation</li>
+                            {/* <li> Visualise very large traces (>10k spans) with hierarchical navigation</li> */}
+                            <li> AWS PrivateLink </li>
                             <li> Dashboard configuration support</li>
+                            <li> Managed in your Cloud by SigNoz</li>
+
                             <br></br>
                             <div style={{fontSize:'medium'}}>Upcoming features</div>
-                            <li> Predictive Resource Optimization  </li>
-                            {/* <li> Team KPI dashboards </li> */}
+                            {/* <li> Predictive Resource Optimization  </li> */}
+                            <li> Finer RBAC with custom roles</li>
+                            <li> Audit Logs</li>
+
+
 
                         </p>
                     </div>
@@ -165,7 +173,7 @@ function pricingTest() {
             </div>
       </section>       */}
 
-          
+      <ShowCompanyLogos/>
 
 
       {/* FAQ section */}

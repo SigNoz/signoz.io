@@ -5,17 +5,17 @@ sidebar_label: Upgrade to 0.9
 ---
 import { LiteYoutubeEmbed } from "react-lite-yt-embed";
 
-# Upgrade to 0.9 from earlier versions
+# Upgrade to v0.9 from earlier versions
 
 v0.9 is a breaking release which requires data migration, if you are upgrading from an older version then you have to run the data migration scripts to be able to see past data.
 
-## First upgrade to 0.9
+## First upgrade to v0.9
 
 Follow the platform specific instructions to upgrade to 0.9 and above.
 
 ## Steps to run migration script:
 
-### Docker
+### For Docker
 
 Change the directory to SigNoz repo and run following commands:
 
@@ -23,20 +23,20 @@ Change the directory to SigNoz repo and run following commands:
 cd deploy/docker/clickhouse-setup
 ```
 
-#### ClickHouse
+#### For ClickHouse
 
 ```bash
 docker run --name signoz-migrate-clickhouse --network clickhouse-setup_default -it signoz/migrate:0.9-clickhouse -host=clickhouse -port=9000
 ```
 
-#### SQLite
+#### For SQLite Database
 
 ```bash
 docker run --name signoz-migrate-sqlite --network clickhouse-setup_default -it -v $PWD/data/signoz/:/var/lib/signoz/ signoz/migrate:0.9-sqlite -dataSource /var/lib/signoz/signoz.db
 ```
 
 
-### Kubernetes
+### For Kubernetes
 
 #### ClickHouse
 

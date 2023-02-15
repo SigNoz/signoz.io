@@ -11,7 +11,7 @@ To manually record exceptions, we need to get the span from the tracer and then 
 
 Below are examples of how to record exceptions in different languages.
 
-### Java
+### Record Exceptions in Java:
 
 ```java
 // Get the current span from the tracer
@@ -24,7 +24,7 @@ span.recordException(new RuntimeException("Something went wrong"));
 span.setStatus(StatusCode.ERROR, "Something bad happened!");
 ```
 
-### Golang
+### Record Exceptions in Golang:
 
 ```go
 import "go.opentelemetry.io/otel/codes"
@@ -39,7 +39,7 @@ span.RecordError(err)
 span.SetStatus(codes.Error, "internal error")
 ```
 
-### Python
+### Record Exceptions in Python:
 
 ```python
 # Get the current span from the tracer
@@ -56,7 +56,7 @@ span.record_exception(exception)
 span.set_status(Status(StatusCode.ERROR, "internal error"))
 ```
 
-### JavaScript
+### Record Exceptions in JavaScript:
 
 ```javascript
 // Get the current span from the tracer
@@ -69,7 +69,7 @@ span.recordException(err);
 span.setStatus({ code: api.SpanStatusCode.ERROR, message: String(err)});
 ```
 
-### .NET
+### Record Exceptions in .NET:
 
 OpenTelemetry .NET provides several options to report Exceptions in Activity. It varies from the most basic option of setting Status, to fully recording the Exception itself to activity. Follow opentelemetry .NET [documentation](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/docs/trace/reporting-exceptions/README.md) to learn more.
 
@@ -90,7 +90,7 @@ using (var activity = MyActivitySource.StartActivity("Foo"))
 }
 ```
 
-### Ruby
+### Record Exceptions in Ruby:
 
 ```ruby
 # Get the current span from the tracer
@@ -103,7 +103,7 @@ rescue Exception => e
 end
 ```
 
-### PHP
+### Record Exceptions in PHP:
 
 ```php
 
@@ -135,7 +135,7 @@ try {
 }
 ```
 
-## Viewing Exceptions
+## How to View Exceptions?
 The Exceptions tab shows list of exceptions which applications encounter. 
 
 It shows the list of exceptions in the applications in a separate page so that users can access them easily. It is also linked to trace pages through which you can see where in a trace is a request facing an exception
@@ -151,3 +151,49 @@ Exception detail page includes the stack trace of the exception, exception attri
 By clicking `errors in the trace page` you can see the exceptions in the context of the trace request in which the exception was thrown
 
 ![exception-detail-2](../../static/img/docs/exception-detail-2.png)
+
+
+## Grouping Exceptions
+
+By default, exceptions on **Exception List page** are grouped by service name, exception type
+and exception message. This might result in high cardinality of exception groups, especially
+if exception messages contains UUIDs or randomly generated IDs.
+
+To reduce the cardinality of the exception grouping, set the `low_cardinal_exception_grouping`
+to `true` in `clickhousetraces` exporter configuration. This will result in exception grouping
+by name of service and exception type.
+
+:::info
+This new grouping strategy will only be applied to new data injected after new instance of
+`otel-collector` with updated the environment variable.
+:::
+
+### Docker Standalone and Docker Swarm
+
+To enable exception grouping, users can set `LOW_CARDINAL_EXCEPTION_GROUPING=true` as an
+environment variable for otel collector service in `docker-compose.yaml`.
+
+```yaml {4}
+services:
+  otel-collector:
+    environment:
+      - LOW_CARDINAL_EXCEPTION_GROUPING=true
+```
+
+### Kubernetes (Helm)
+
+To enable exception grouping, include the following in `override-values.yaml`:
+
+```yaml
+otelCollector:
+  lowCardinalityExceptionGrouping: true
+```
+
+To install or upgrade SigNoz release with the updated configurations in `override-values.yaml`:
+
+```yaml
+helm -n platform upgrade \
+    --create-namespace --install \
+    my-release signoz/signoz \
+    -f override-values.yaml
+```

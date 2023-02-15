@@ -9,7 +9,7 @@ If you use fluentBit to collect logs in your stack with this tutotrial you will 
 
 At SigNoz we use opentelemetry collector to recieve logs which supports the fluentforward protocol. So you can forward your logs from your fluentBit agent to opentelemetry collector using fluentforward protocol.
 
-## Steps:
+## Steps to recieve logs from FluentBit:
 * Add fluentforward reciever to your `otel-collector-config.yaml` which is present inside `deploy/docker/clickhouse-setup`
     ```
     receivers:

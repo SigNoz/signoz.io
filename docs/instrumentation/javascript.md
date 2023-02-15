@@ -13,7 +13,7 @@ import InstrumentationFAQ from '../shared/instrumentation-faq.md'
 This document contains OpenTelemetry instrumentation instructions for Javascript backend frameworks and modules based on Nodejs.
 
 
-## Traces
+## Send Traces Directly to SigNoz
 
 **Requirements**
 

@@ -13,7 +13,7 @@ This section shows how you can create, update, and remove a panel.
 
 <PrereqsInstrument />
 
-## Add a Panel to a Dashboard
+## Steps to Add a Panel to a Dashboard
 
 SigNoz supports two types of panels: time series, which displays a metric over a time interval, and value, which displays only the most recent value. To add a panel to a dashboard, follow the steps below:
 
@@ -41,7 +41,7 @@ Note the following about panels:
 - You can hide or unhide a function or formula by selecting the eye icon at its left and then selecting the **Stage & Run Query** button.
 - When you install SigNoz, only the data provided by the Hostmetric receiver is available. To enable more metric receivers, see the [Send Metrics to SigNoz](/docs/userguide/send-metrics) section.
 
-## Update a Panel
+## Steps to Update a Panel
 
 1. From the sidebar, choose **Dashboard**.
 2. Find the dashboard in which you created the panel you wish to update, and then select the pencil icon located at the top right corner of your panel.

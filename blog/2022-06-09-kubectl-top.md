@@ -5,7 +5,7 @@ date: 2022-11-12
 tags: [Tech Tutorial]
 authors: [daniel, ankit_anand]
 description: Kubectl Top command can be used to retrieve snapshots of resource utilization of pods/nodes in your Kubernetes cluster. You can even retrieve metrics information about specific pods or nodes by specifying a namespace...
-image: /img/blog/2022/06/kubectl_top_cover.webp
+image: /img/blog/2022/06/kubectl_top_cover.jpeg
 keywords:
   - kubectl
   - kubernetes

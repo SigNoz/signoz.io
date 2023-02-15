@@ -1,7 +1,7 @@
 ---
 title: Monitor your Python application with OpenTelemetry and SigNoz
 slug: python
-date: 2021-08-17
+date: 2023-02-06
 tags: [python-monitoring]
 author: Ankit Anand
 author_title: SigNoz Team
@@ -25,12 +25,13 @@ OpenTelemetry is a vendor-agnostic instrumentation library under CNCF. It can be
 
 import Screenshot from "@theme/Screenshot"
 
-<Screenshot
-  alt="Monitor Python applications with SigNoz"
-  height={500}
-  src="/img/blog/2021/08/opentelemetry_python_cover.png"
-  width={700}
-/>
+
+<figure data-zoomable align='center'>
+    <img src="/img/blog/2021/08/opentelemetry_python_cover.png" alt="Monitor Python applications with SigNoz"/>
+    <figcaption><i>Monitor Python applications with SigNoz</i></figcaption>
+</figure>
+
+<br></br>
 
 **The cost of a millisecond.**<br></br>
 TABB Group, a financial services industry research firm, <a href="https://research.tabbgroup.com/report/v06-007-value-millisecond-finding-optimal-speed-trading-infrastructure" rel="noopener noreferrer nofollow" target="_blank">estimates</a> that if a broker's electronic trading platform is 5 milliseconds behind the competition, it could cost $4 million in revenue per millisecond.
@@ -76,13 +77,12 @@ When you are done installing SigNoz, you can access the UI at: `http://localhos
 
 The application list shown in the dashboard is from a sample app called HOT R.O.D that comes bundled with the SigNoz installation package.
 
-<Screenshot
-  alt="SigNoz dashboard"
-  height={500}
-  src="/img/blog/common/signoz_dashboard_homepage.png"
-  title="SigNoz dashboard"
-  width={700}
-/>
+<figure data-zoomable align='center'>
+    <img src="/img/blog/common/signoz_dashboard_homepage.png" alt="SigNoz dashboard"/>
+    <figcaption><i>SigNoz dashboard</i></figcaption>
+</figure>
+
+<br></br>
 
 ## Installing sample Python app
 
@@ -104,13 +104,12 @@ The application list shown in the dashboard is from a sample app called HOT R.O.
 
    On MacOS the installation is done using Homebrew's brew package manager. Once the installation is done, don't forget to start MongoDB services using `brew services start mongodb/brew/mongodb-community@4.4`  on your macOS terminal.
 
-   <Screenshot
-    alt="starting mongoDB services from mac terminal"
-    height={500}
-    src="/img/blog/2021/08/opentelemetry_python_start_mongodb.png"
-    title="start mongodb services"
-    width={700}
-    />
+   <figure data-zoomable align='center'>
+       <img src="/img/blog/2021/08/opentelemetry_python_start_mongodb.png" alt="starting mongoDB services from mac terminal"/>
+      <figcaption><i>starting mongoDB services from mac terminal</i></figcaption>
+   </figure>
+
+<br></br>
 
 ### Steps to get the Python app up and running
 
@@ -127,23 +126,23 @@ The application list shown in the dashboard is from a sample app called HOT R.O.
    python3 app.py
    ```
 
-   <Screenshot
-    alt="mac terminal commands for running a python app"
-    height={500}
-    src="/img/blog/2021/08/opentelemetry_python_python_app_terminal.png"
-    title="Running Python app from terminal"
-    width={700}
-    />
+
+<figure data-zoomable align='center'>
+    <img src="/img/blog/2021/08/opentelemetry_python_python_app_terminal.png" alt="mac terminal commands for running a python app"/>
+    <figcaption><i>mac terminal commands for running a python app</i></figcaption>
+</figure>
+
+<br></br>
+
 
    You can now access the UI of the app on your local host: http://localhost:5002/
 
-   <Screenshot
-    alt="Python app UI"
-    height={500}
-    src="/img/blog/2021/08/python_app_ui.png"
-    title="Python App UI accessed on port 5002"
-    width={700}
-    />
+<figure data-zoomable align='center'>
+    <img src="/img/blog/2021/08/python_app_ui.png" alt="Python app UI"/>
+    <figcaption><i>Python app UI</i></figcaption>
+</figure>
+
+<br></br>
 
 ## Instrumentation with OpenTelemetry and sending data to SigNoz
 
@@ -193,13 +192,13 @@ The application list shown in the dashboard is from a sample app called HOT R.O.
 
    And, congratulations! You have instrumented your sample Python app. You can now access the SigNoz dashboard at [http://localhost:3301](http://localhost:3301/) to monitor your app for performance metrics.
 
-   <Screenshot
-    alt="SigNoz dashboard showing python app in its list of applications."
-    height={500}
-    src="/img/blog/2021/08/opentelemetry_python_dashboard.png"
-    title="Python app appearing in the list of applications"
-    width={700}
-    />
+
+<figure data-zoomable align='center'>
+    <img src="/img/blog/2021/08/opentelemetry_python_dashboard.png" alt="SigNoz dashboard showing python app in its list of applications"/>
+    <figcaption><i>SigNoz dashboard showing python app in its list of applications</i></figcaption>
+</figure>
+
+<br></br>
 
 ## Metrics and Traces of the Python application
 
@@ -211,33 +210,34 @@ SigNoz comes with out of box RED metrics charts and visualization. RED metrics s
 - Error rate of requests
 - Duration taken by requests
 
-<Screenshot
-      alt="SigNoz dashboard showing the popular RED metrics for application performance monitoring."
-      height={500}
-      src="/img/blog/common/signoz_charts_application_metrics.png"
-      title="Measure things like application latency, requests per sec, error percentage and see your top endpoints"
-      width={700}
-  />
+
+<figure data-zoomable align='center'>
+    <img src="/img/blog/common/signoz_charts_application_metrics.png" alt="SigNoz dashboard showing the popular RED metrics for application performance monitoring"/>
+    <figcaption><i>SigNoz dashboard showing the popular RED metrics for application performance monitoring</i></figcaption>
+</figure>
+
+<br></br>
 
 You can then choose a particular timestamp where latency is high to drill down to traces around that timestamp.
 
-<Screenshot
-      alt="See traces, and apply powerful filters on trace data"
-      height={500}
-      src="/img/blog/common/signoz_list_of_traces_hc.png"
-      title="View of traces at a particular timestamp"
-      width={700}
-/>
+
+<figure data-zoomable align='center'>
+    <img src="/img/blog/common/signoz_list_of_traces_hc.png" alt="See traces, and apply powerful filters on trace data"/>
+    <figcaption><i>View of traces at a particular timestamp</i></figcaption>
+</figure>
+
+<br></br>
+
 
 You can use flamegraphs to exactly identify the issue causing the latency.
 
-<Screenshot
-      alt="Flamegraphs for distributed tracing"
-      height={500}
-      src="/img/blog/common/signoz_flamegraphs.png"
-      title="Flamegraphs showing exact duration taken by each spans - a concept of distributed tracing"
-      width={700}
-/>
+
+<figure data-zoomable align='center'>
+    <img src="/img/blog/common/signoz_flamegraphs.png" alt="Flamegraphs for distributed tracing"/>
+    <figcaption><i>Flamegraphs showing exact duration taken by each spans - a concept of distributed tracing</i></figcaption>
+</figure>
+
+<br></br>
 
 ## Conclusion
 

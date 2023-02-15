@@ -10,7 +10,7 @@ description: Learn how to use feature flags in SigNoz.
 
 - `TIMESTAMP_SORT_FEATURE`: When this feature is enabled, then SigNoz creates a materialized view table to optimize sorting spans/traces by timestamp at cost of increasing storage by 40-50% of `signoz_index_v2` table.
 
-- `DURATION_SORT_FEATURE`: When this feature is enabled, then SigNoz creates a projection over table to optimize sorting spans/traces by timestamp at cost of increasing storage by 40-50% of `signoz_index_v2` table.
+- `DURATION_SORT_FEATURE`: When this feature is enabled, then SigNoz creates a projection over table to optimize sorting spans/traces by duration at cost of increasing storage by 40-50% of `signoz_index_v2` table. This also speeds up loading of duration trace filters by upto 90%.
 
 
 

@@ -53,7 +53,7 @@ function support() {
                   <div class="card__footer">
                   <Link
                     className="button button--secondary button--outline"
-                    href={'https://join.slack.com/t/signoz-community/shared_invite/zt-lrjknbbp-J_mI13rlw8pGF4EWBnorJA'}>
+                    href={'https://signoz.io/slack'}>
                     Slack Community
                   </Link>
   

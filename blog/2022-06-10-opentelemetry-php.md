@@ -37,7 +37,7 @@ It’s essential to monitor your PHP application for performance issues and bugs
 
 > What is application instrumentation?<br></br>
 Instrumentation is the process of enabling your application code to generate telemetry data(logs, metrics, and traces). OpenTelemetry provides both auto instrumentation libraries and APIs to manually instrument your application.
-> 
+>
 
 OpenTelemetry helps in generating and collecting the telemetry data. The collected data then needs to be sent to a backend analysis tool. OpenTelemetry provides you the freedom to select any backend tool that can help you store and visualize the telemetry data. And that’s where SigNoz comes into the picture.
 
@@ -79,7 +79,7 @@ When you are done installing SigNoz, you can access the UI at [http://localhost
 
 [Sample PHP App](https://github.com/SigNoz/sample-php-app)
 
-It contains the already instrumented sample boilerplate code. The below mentioned steps will tell us how we did it. 
+It contains the already instrumented sample boilerplate code. The below mentioned steps will tell us how we did it.
 
 
 ```
@@ -87,10 +87,10 @@ git clone git@github.com:SigNoz/sample-php-app.git
 ```
 
 
-**Step 2: Install the required dependencies from OTel PHP library:**
+**Step 2: Import the required dependencies from OTel PHP library:**
 
 ```go
-use OpenTelemetry\SDK\Trace\SpanExporter\ConsoleSpanExporter;
+use OpenTelemetry\SDK\Trace\SpanExporter\ConsoleSpanExporterFactory;
 use OpenTelemetry\SDK\Trace\SpanProcessor\SimpleSpanProcessor;
 use OpenTelemetry\SDK\Trace\TracerProvider;
 use OpenTelemetry\API\Trace\SpanKind;
@@ -103,11 +103,11 @@ File location: `src/1-getting-started-console-exporter.php`
 ```go
 $tracerProvider =  new TracerProvider(
     new SimpleSpanProcessor(
-        new ConsoleSpanExporter()
+        (new ConsoleSpanExporterFactory())->create()
     )
 );
 
-$tracer = $tracerProvider->getTracer('io.opentelemetry.contrib.php',);
+$tracer = $tracerProvider->getTracer('io.signoz.php.example');
 ```
 
 **Step 4: Creating spans**
@@ -116,14 +116,14 @@ Create root span and activate it:
 
 ```go
 $rootSpan = $tracer->spanBuilder('root')->setSpanKind(SpanKind::KIND_SERVER)->startSpan();
-$rootSpan->activate();
+$rootScope = $rootSpan->activate();
 ```
 
-Create and initiate your first span:
+Create and activate your first span:
 
 ```go
 $span1 = $tracer->spanBuilder('foo')->setSpanKind(SpanKind::KIND_SERVER)->startSpan();
-$span1->activate();
+$scope1 = $span1->activate();
 ```
 
 Create another span:
@@ -137,12 +137,14 @@ Make sure to end them:
 ```go
 $span2->end();
 $span1->end();
+$scope1->detach();
 ```
 
 Now end the root span:
 
 ```go
 $rootSpan->end();
+$rootScope->detach();
 ```
 
 Here’s how it looks when everything is assembled with a bit of error handling:
@@ -156,7 +158,7 @@ File location: `src/1-getting-started-console-exporter.php`
 declare(strict_types=1);
 require __DIR__ . '/../vendor/autoload.php';
 
-use OpenTelemetry\SDK\Trace\SpanExporter\ConsoleSpanExporter;
+use OpenTelemetry\SDK\Trace\SpanExporter\ConsoleSpanExporterFactory;
 use OpenTelemetry\SDK\Trace\SpanProcessor\SimpleSpanProcessor;
 use OpenTelemetry\SDK\Trace\TracerProvider;
 use OpenTelemetry\API\Trace\SpanKind;
@@ -165,18 +167,18 @@ echo 'Starting ConsoleSpanExporter' . PHP_EOL;
 
 $tracerProvider =  new TracerProvider(
     new SimpleSpanProcessor(
-        new ConsoleSpanExporter()
+        (new ConsoleSpanExporterFactory())->create()
     )
 );
 
-$tracer = $tracerProvider->getTracer('io.opentelemetry.contrib.php',);
+$tracer = $tracerProvider->getTracer('io.signoz.php.example',);
 
 $rootSpan = $tracer->spanBuilder('root')->setSpanKind(SpanKind::KIND_SERVER)->startSpan();
-$rootSpan->activate();
+$rootScope = $rootSpan->activate();
 
 try {
     $span1 = $tracer->spanBuilder('foo')->setSpanKind(SpanKind::KIND_SERVER)->startSpan();
-    $span1->activate();
+    $scope1 = $span1->activate();
 
     try {
         $span2 = $tracer->spanBuilder('bar')->setSpanKind(SpanKind::KIND_SERVER)->startSpan();
@@ -186,8 +188,10 @@ try {
     }
 } finally {
     $span1->end();
+    $scope1->detach();
 }
 $rootSpan->end();
+$rootScope->detach();
 ```
 
 **Step 5: Running the PHP application**
@@ -199,7 +203,7 @@ Run your PHP application with the following command: <br/>
 composer install
 ```
 
-then, 
+then,
 
 ```
 # cd into the src
@@ -349,9 +353,7 @@ Import OTel and Guzzle (for HTTP) dependencies:
 File location: `src/2-send-trace-to-collector.php`
 
 ```go
-use GuzzleHttp\Client;
-use GuzzleHttp\Psr7\HttpFactory;
-use OpenTelemetry\Contrib\OtlpHttp\Exporter as OTLPExporter;
+use OpenTelemetry\SDK\Trace\TracerProviderFactory;
 use OpenTelemetry\SDK\Common\Attribute\Attributes;
 use OpenTelemetry\SDK\Trace\SpanProcessor\SimpleSpanProcessor;
 use OpenTelemetry\SDK\Trace\TracerProvider;
@@ -364,36 +366,25 @@ OTEL_EXPORTER_OTLP_ENDPOINT - `http://localhost:4318/v1/traces`
 Define the environment variables:
 
 ```go
-putenv('OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318/v1/traces'); // SigNoz OTel collector's path
+putenv('OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318/v1/traces');  // SigNoz OTel collector's path
+putenv('OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf');
 ```
 
 Optionally you can pass the env variable while running the app.
 
-Initialize the exporter:
-
-```go
-$exporter = new OTLPExporter(
-    new Client(),
-    new HttpFactory(),
-    new HttpFactory()
-);
-```
-
-Initialize the Tracer Provider with the exporter:
+Initialize the Tracer Provider (using environment variables):
 
 ```php
-$tracerProvider =  new TracerProvider(
-    new SimpleSpanProcessor(
-        $exporter
-    )
-);
+$factory = new TracerProviderFactory();
+$tracerProvider = $factory->create();
+$tracer = $tracerProvider->getTracer('io.signoz.php.example');
 ```
 
 Create and activate your root span:
 
 ```php
 $root = $span = $tracer->spanBuilder('root')->startSpan();
-$span->activate();
+$rootScope = $span->activate();
 ```
 
 Create, initialize, set data, and end spans inside the for loop:
@@ -418,10 +409,11 @@ for ($i = 0; $i < 3; $i++) {
 }
 ```
 
-Don’t forget to end the root span:
+Don’t forget to end and deactivate the root span:
 
 ```php
 $root->end();
+$rootScope->detach();
 ```
 
 Run your PHP application:
@@ -429,10 +421,10 @@ Run your PHP application:
 ```php
 > OTEL_SERVICE_NAME=signoz-php-app php ./src/2-send-trace-to-collector.php
 ```
-Note: Make sure you are in the root dir of sample-php-app. 
+Note: Make sure you are in the root dir of sample-php-app.
 
 
-Once you run your application, you can interact with it a bit to generate some dummy monitoring data. You can run the above command a few number of times to generate the data. 
+Once you run your application, you can interact with it a bit to generate some dummy monitoring data. You can run the above command a few number of times to generate the data.
 
 Now open SigNoz UI at: [http://localhost:3301](http://localhost:3301/application), and go to the `Traces` tab, and select the span from service `signoz-php-app`.
 

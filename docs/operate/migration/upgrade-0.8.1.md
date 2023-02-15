@@ -4,13 +4,13 @@ title: Upgrade to 0.8.1
 sidebar_label: Upgrade to 0.8.1
 ---
 
-# Upgrade to 0.8.1 from earlier versions
+# Upgrade to v0.8.1 from earlier versions
 
 SigNoz `v0.8.1` requires users to run migration script for dashboard.
 
 If you had created dashboard in 0.8.0 and before, you would need to run this script to sanitise dashboard data.
 
-## First Upgrade to 0.8.1
+## First Upgrade to v0.8.1
 
 Follow the platform specific instructions to upgrade to 0.8.1 and above.
 
@@ -25,7 +25,7 @@ It could potentially cause irreversible changes to dashboard data.
 
 ## Steps to run migration script
 
-### Docker
+### For Docker
 
 `cd` to SigNoz repository and run following commands:
 
@@ -46,7 +46,7 @@ Output should be similar as below:
 2022/06/08 18:27:49 Dashboards migrated
 ```
 
-### Docker Swarm
+### For Docker Swarm
 
 `cd` to SigNoz repository and run following commands:
 
@@ -72,7 +72,7 @@ In case of multi node swarm cluster, run the above commands in the node where
 query-service is running. To find out which node: `docker service ps query-service`.
 :::
 
-### Kubernetes
+### For Kubernetes
 
 To download `migrate-dashboard` binary:
 
@@ -121,7 +121,7 @@ At last, clean up the binary:
 rm migrate-dashboard
 ```
 
-## CLI Flags
+## Command-Line Interface (CLI) Flags
 
 There are is only one flag in the `migrate-dashboard` binary:
 

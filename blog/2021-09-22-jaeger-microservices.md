@@ -1,11 +1,11 @@
 ---
 title: Using Jaeger for your microservices
 slug: jaeger-microservices
-date: 2021-09-22
+date: 2023-01-02
 tags: [Distributed Tracing, Jaeger]
 authors: ankit_anand
 description: Jaeger is a popular open-source tool used for distributed tracing in a microservice architecture. In a microservice architecture, a user request or transaction can travel across hundreds of services before serving what a user wants.
-image: /img/blog/2021/09/jaeger_microservices_cover-min.webp
+image: /img/blog/2023/01/jaeger_microservices_cover-min.jpg
 keywords:
   - jaeger
   - microservices
@@ -23,9 +23,9 @@ Jaeger is a popular open-source tool used for distributed tracing in a microserv
 
 <!--truncate-->
 
-![Cover Image](/img/blog/2021/09/jaeger_microservices_cover-min.webp)
+![Cover Image](/img/blog/2023/01/jaeger_microservices_cover.webp)
 
-> Jaeger is a fantastic open-source tool for distributed tracing. But for effective resolution of production issues, engineering teams need both metrics and traces. [SigNoz](https://signoz.io/?utm_source=blog&utm_medium=article), a full-stack open-source tool, provides a unified UI for both metrics and traces.
+> Jaeger is a fantastic open-source tool for distributed tracing. But for effective resolution of production issues, engineering teams need both metrics and traces. [SigNoz](https://signoz.io/?utm_source=blog&utm_medium=jaeger_microservices), a full-stack open-source tool, provides a unified UI for both metrics and traces.
 
 Before we deep dive into how Jaeger accomplishes distributed tracing for microservices-based architecture, let's take a short detour to understand distributed tracing.
 
@@ -193,6 +193,24 @@ Some of the things SigNoz can help you track:
 - Filter traces by service name, operation, latency, error, tags/annotations.
 - Run aggregates on trace data
 - Unified UI for both metrics and traces
+
+
+## Getting Started with SigNoz
+
+SigNoz can be installed on macOS or Linux computers in just three steps by using a simple install script.
+
+The install script automatically installs Docker Engine on Linux. However, on macOS, you must manually install <a href = "https://docs.docker.com/engine/install/" rel="noopener noreferrer nofollow" target="_blank">Docker Engine</a> before running the install script.
+
+```jsx
+git clone -b main https://github.com/SigNoz/signoz.git
+cd signoz/deploy/
+./install.sh
+```
+<br></br>
+
+For detailed instructions, you can visit our documentation.
+
+[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/?utm_source=blog&utm_medium=jaeger_microservices)
 
 You can check out SigNoz's GitHub repo here 👇
 

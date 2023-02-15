@@ -1,7 +1,7 @@
 ---
 title: Docker Container Lifecycle Tutorial | Create, Run, Pause, Stop, Kill
 slug: docker-container-lifecycle
-date: 2022-12-16
+date: 2023-01-16
 tags: [Tech Tutorial, Docker]
 authors: [muskan]
 description: In this tutorial, we will learn about Docker container lifecycle. The Docker container lifecycle has five phases - Create, Run, Pause, Stop, and Kill. Understanding the complete lifecycle of containers is key to using Docker containers correctly and efficiently...

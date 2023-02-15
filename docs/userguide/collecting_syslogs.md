@@ -9,7 +9,7 @@ With SigNoz you can collect your syslogs logs and perform different queries on t
 In this example we will configure `rsyslog` to forward our system logs to tcp endpoint of otel-collector and use `syslog` receiver in otel-collector to receive and parse the logs.
 Below are the steps to collect syslogs.
 
-## Steps
+## How to collect Syslogs in SigNoz?
 * Modify the `docker-compose.yaml` file present inside `deploy/docker/clickhouse-setup` to expose a port, in this case `54527` so that we can forward syslogs to this port.
     ```yaml {8}
     ...
@@ -56,14 +56,26 @@ Below are the steps to collect syslogs.
 
 * Modify your `rsyslog.conf` file present inside `/etc/` by running `sudo vim /etc/rsyslog.conf` and adding the this line at the end
     ```
-    *.* action(type="omfwd" target="0.0.0.0" port="54527" protocol="tcp")
+    template(
+      name="UTCTraditionalForwardFormat"
+      type="string"
+      string="<%PRI%>%TIMESTAMP:::date-utc% %HOSTNAME% %syslogtag:1:32%%msg:::sp-if-no-1st-sp%%msg%"
+    )
+
+    *.* action(type="omfwd" target="0.0.0.0" port="54527" protocol="tcp" template="UTCTraditionalForwardFormat")
     ```
 
     For production use cases it is recommended to using something like
     ```
+    template(
+      name="UTCTraditionalForwardFormat"
+      type="string"
+      string="<%PRI%>%TIMESTAMP:::date-utc% %HOSTNAME% %syslogtag:1:32%%msg:::sp-if-no-1st-sp%%msg%"
+    )
+
     *.*  action(type="omfwd" target="0.0.0.0" port="54527" protocol="tcp"
             action.resumeRetryCount="10"
-            queue.type="linkedList" queue.size="10000")
+            queue.type="linkedList" queue.size="10000" template="UTCTraditionalForwardFormat")
     ```
 
     So that you have retires and queue in place to de-couple the sending from the other logging action.
@@ -73,4 +85,5 @@ Below are the steps to collect syslogs.
 * Now restart your rsyslog service by running `sudo systemctl restart rsyslog.service`
 * You can check the status of service by running `sudo systemctl status rsyslog.service`
 * If there are no errors your logs will be visible on SigNoz UI.
+
   

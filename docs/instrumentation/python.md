@@ -33,7 +33,7 @@ Let’s understand how to download, install, and run OpenTelemetry in Python.
 
 - Python 3.6 or newer
 
-## Traces
+## Send Traces Directly to SigNoz
 
 You can use OpenTelemetry Python to send your traces directly to SigNoz. OpenTelemetry provides a handy distro in Python that can help you get started with automatic instrumentation. We recommend using it to get started quickly.
 
@@ -211,7 +211,7 @@ Check this [documentation](https://opentelemetry-python.readthedocs.io/en/latest
 <p>&nbsp;</p>
 
 
-## Troubleshooting your installation
+## Troubleshooting your SigNoz installation
 
 #### Spans are not being reported
 

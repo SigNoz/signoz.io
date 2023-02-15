@@ -1,7 +1,7 @@
 ---
 title: Monitor gRPC calls with OpenTelemetry - explained with a Golang example
 slug: opentelemetry-grpc-golang
-date: 2022-10-28
+date: 2023-02-04
 tags: [OpenTelemetry Instrumentation, Go / Golang]
 authors: vaishnavi
 description: This article demonstrates how to monitor gRPC calls with OpenTelemetry using a sample Golang application using gRPC framework. OpenTelemetry is a vendor-agnostic instrumentation library that can be used to monitor gRPC calls...
@@ -238,6 +238,14 @@ OTEL_SERVICE_NAME="go-grpc-otel-client"
 INSECURE_MODE=true
 ```
 
+:::info
+
+Do not use `http` or `https` in the IP address. For example, if the IP is `http://test.com` then the `OTEL_EXPORTER_OTLP_ENDPOINT` will be `test.com:4317`
+
+:::
+
+
+
 You can check the client env [file](https://github.com/SigNoz/distributed-tracing-go-grpc-sample/blob/main/client/.env) and server env [file](https://github.com/SigNoz/distributed-tracing-go-grpc-sample/blob/main/server/.env) in the sample GitHub repo.
 
 <!-- ![.env files loading in both *server/server.go* and *client/client.go.*](Ashu%20-%20Mon%2092dcf/Untitled%203.png) -->
@@ -258,7 +266,7 @@ You can check the client env [file](https://github.com/SigNoz/distributed-traci
   <img src="/img/blog/2022/04/grpc_mongodb_connection.webp" alt="MongoDB Data Connection" width="90%" />
 </figure>  
 
-2. Click on Databases tab → Create Database and fill in the fields like the below screenshot
+1. Click on Databases tab → Create Database and fill in the fields like the below screenshot
    <figure align="center">
   <img src="/img/blog/2022/04/grpc_create_database.webp" alt="Create Database" width="80%" />
 </figure>

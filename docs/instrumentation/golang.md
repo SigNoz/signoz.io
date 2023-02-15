@@ -138,7 +138,11 @@ This document contains instructions on how to set up OpenTelemetry instrumentati
     
     `OTEL_EXPORTER_OTLP_ENDPOINT`: localhost:4317
     
-    Since, we have installed SigNoz on our local machine, we use the above IP. If you install SigNoz on a different machine, you can update it with the relevant IP. Here’s a handy [grid](https://signoz.io/docs/instrumentation/troubleshoot-instrumentation/) to figure out which address to use to send data to SigNoz.
+    Since, we have installed SigNoz on our local machine, we use the above IP. If you install SigNoz on a different machine, you can update it with the relevant IP. 
+    
+    Do not use `http` or `https` in the IP address. For example, if the IP is `http://test.com` then the `OTEL_EXPORTER_OTLP_ENDPOINT` will be `test.com:4317`
+    
+     Here’s a handy [grid](https://signoz.io/docs/instrumentation/troubleshoot-instrumentation/) to figure out which address to use to send data to SigNoz.
     
     Hence, the final run command looks like this:
     
@@ -184,7 +188,7 @@ and then inject OpenTelemetry middleware:
 router.Use(middleware.Middleware(serviceName))
 ```
 
-### OpenTelemetry **gorillamux instrumentation**
+### OpenTelemetry gorillamux instrumentation
 
 ```bash
 # Add one line to your import() stanza depending upon your request router:
@@ -280,7 +284,7 @@ span.AddEvent("This is a sample event", trace.WithAttributes(attribute.Int("pid"
 <br></br>
 
 
-## gRPC Instrumentation
+## gRPC Instrumentation with OpenTelemetry
 
 Similarly, OpenTelemetry can also help you automatically instrument gRPC requests. To instrument any gRPC servers you have, add an Interceptor to the instantiation of the server.
 

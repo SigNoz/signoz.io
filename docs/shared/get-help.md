@@ -1,1 +1,1 @@
-If you need help with the steps in this topic, please reach out to us on [Slack](https://join.slack.com/t/signoz-community/shared_invite/zt-lrjknbbp-J_mI13rlw8pGF4EWBnorJA).
+If you need help with the steps in this topic, please reach out to us on [Slack](https://signoz.io/slack).

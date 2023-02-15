@@ -6,7 +6,7 @@ sidebar_label: Authentication
 
 Authentication is available in SigNoz from `v0.8.0` If you are on an earlier version, please upgrade to see this.
 
-## Roles
+## Supported Roles
 SigNoz currently supports 3 roles:
 - Admin
 - Editor
@@ -30,7 +30,7 @@ When new user is invited by an admin, he can be assigned a role of Admin, Editor
 
 :::
 
-## Editing Member Details
+## How to Edit Member Details?
 
 You can edit permission levels of members by going to `Settings-> Org Settings` tab and then Members table. 
 You can also generate password reset link if they have forgotten their password and it needs to be reset.
@@ -38,7 +38,7 @@ You can also generate password reset link if they have forgotten their password 
 ![edit-member](../../static/img/docs/edit-member.png)
 
 
-## Permission Matrix
+## Permission Matrix for Admin, Editor and Viewer:
 
 | Features                                        | Admin | Editor | Viewer |
 | ----------------------------------------------- | ----- | ------ | ------ |

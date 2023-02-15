@@ -9,10 +9,10 @@ Of all telemetry signals, logs have probably the biggest legacy. Most programmin
 
 OpenTelemetry logs support is added with the philosophy that it should support legacy logs and logging libraries as well as provide improvements and better integration with the rest of the observability world where possible.
 
-At SigNoz we follow OpenTelemetry approach for logs. All the features that are present with OpenTelemetry for logs is supported by SigNoz. We have done optimizations on the collector side for adding different features for logs in SigNoz. But all the documentation for OpenTelemetry logs remains valid for SigNoz
+At SigNoz we follow OpenTelemetry approach for logs. All the features that are present with OpenTelemetry for logs is supported by SigNoz. We have done optimizations on the collector side for adding different features for logs in SigNoz. **But all the documentation for OpenTelemetry logs remains valid for SigNoz.**
 
 
-## Collecting Logs
+## Collecting Logs in SigNoz using OpenTelemetry
 
 SigNoz natively supports OpenTelemetry for collecting logs. OpenTelemetry provides various receivers and processors for collecting first-party and third-party logs directly via OpenTelemetry Collector or via existing agents such as FluentBit so that minimal changes are required to move to OpenTelemetry for logs.
 
@@ -67,7 +67,7 @@ Currently OpenTelemetry does’t define a new logging API or create new user-fac
     
 ![first_party](../../static/img/docs/first_party_collection.webp)
 
-## Storing logs
+## Storing logs in SigNoz
 
 SigNoz has developed its own distro of OpenTelemetry collector which has a custom ClickHouse exporter. This custom version just extends the upstream collector. Everything that works with the upstream collector will work with SigNoz OTEL collector.
 
@@ -81,7 +81,7 @@ This brings a requirement that the final collector should be SigNoz OTEL collect
     
     
 
-## Receivers
+## Log Receivers
 
 A log receiver is how logs data gets into the OpenTelemetry Collector.
 Different types of receivers supported by OpenTelemetry for logs:
