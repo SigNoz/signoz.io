@@ -7,7 +7,7 @@ This troubleshooting guide includes step-by-step instructions that should resolv
 
 
 ## K8s attribute filtering issue in logs.
-In the recent release we had an incident where users are facing issues querying the following selected fields.
+In the recent release some users who are using SigNoz charts(0.9.1 - 0.10.1) are facing issues querying the following selected fields.
 
 - k8s_container_name
 - k8s_namespace_name
@@ -27,8 +27,8 @@ If you have converted any of the above fields to `selected` fields, and you noti
     show create table logs;
     ```
     
-- For the corresponding field, you will find a materialised column and an index. Ex:- For `k8s_namespace_name` you will have `k8s_namespace_name String MATERIALIZED attributes_string_value[indexOf(attributes_string_key, 'k8s_namespace_name')] CODEC(LZ4)`     and index `INDEX k8s_namespace_name_idx k8s_namespace_name TYPE bloom_filter(0.01) GRANULARITY 64`
-- You will have to delete the index and remove the materialised column
+- For the corresponding field, you will find a materialized column and an index. Ex:- For `k8s_namespace_name` you will have `k8s_namespace_name String MATERIALIZED attributes_string_value[indexOf(attributes_string_key, 'k8s_namespace_name')] CODEC(LZ4)`     and index `INDEX k8s_namespace_name_idx k8s_namespace_name TYPE bloom_filter(0.01) GRANULARITY 64`
+- You will have to delete the index and remove the materialized column
     
     ```yaml
     alter table logs drop column k8s_namespace_name;
