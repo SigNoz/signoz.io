@@ -21,7 +21,7 @@ for more info). Follow the "Managed nodes - Linux" guide.
 
 ## Prerequisites
 
-- Managed nodes - Linux. Faragate is not offically supported
+- Managed nodes - Linux. Fargate is not offically supported
 - You must have an EKS cluster
 
 <CommonPrerequisites />
