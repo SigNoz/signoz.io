@@ -12,6 +12,7 @@ import InstallSigNozPart2 from '../../shared/install-signoz-k8s-part-2.md'
 import VerifyInstallation from '../../shared/k8s-verify-installation.md'
 import K8sHotrod from '../../shared/k8s-hotrod.md'
 import NextSteps from '../../shared/next-steps.md'
+import StorageClass from '../../shared/k8s-storageclass.md'
 
 Follow the steps on this page for instructions to install SigNoz on other Kubernetes
 Cloud Platform and bare-metal servers with Helm. 
@@ -24,23 +25,22 @@ Cloud Platform and bare-metal servers with Helm.
 
 <CommonPrerequisites />
 
-- Suggestion: you can execute the commands below for setting `allowVolumeExpansion` to `True`
-for the default storage class definition (this enables PVC resize).
-```bash
-DEFAULT_STORAGE_CLASS=$(kubectl get storageclass -o=jsonpath='{.items[?(@.metadata.annotations.storageclass\.kubernetes\.io/is-default-class=="true")].metadata.name}')
+- Suggestion: In case you do not have any other storage class which supports volume
+  expansion, you can patch default storage class definition by setting
+  `allowVolumeExpansion` to `True` (this enables PVC resize).
 
-kubectl patch storageclass "$DEFAULT_STORAGE_CLASS" -p '{"allowVolumeExpansion": true}'
-```
+  ```bash
+  DEFAULT_STORAGE_CLASS=$(kubectl get storageclass -o=jsonpath='{.items[?(@.metadata.annotations.storageclass\.kubernetes\.io/is-default-class=="true")].metadata.name}')
 
-:::info
-In case you would like to use your own storage class, you can set `storageClass` configuration.
-To list storage class in your Kubernetes cluster: `kubectl get storageclass`.
-:::
+  kubectl patch storageclass "$DEFAULT_STORAGE_CLASS" -p '{"allowVolumeExpansion": true}'
+  ```
+
+  <StorageClass />
 
 ## Chart configuration
 
 You can find an overview of the parameters that can be configured during installation under
-[chart configuration](https://github.com/SigNoz/charts/tree/main/charts/signoz#configuration).
+[chart configuration][1]
 
 ## Install SigNoz on Kubernetes with Helm
 
@@ -63,3 +63,7 @@ helm --namespace platform install my-release signoz/signoz
 ## Next Steps
 
 <NextSteps />
+
+---
+
+[1]: https://github.com/SigNoz/charts/tree/main/charts/signoz#configuration

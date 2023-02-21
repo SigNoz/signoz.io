@@ -26,7 +26,6 @@ for more info). Follow the "Managed nodes - Linux" guide.
 
 <CommonPrerequisites />
 
-- Recommended K8s version for EKS is `1.22`.
 - In case of K8s version `1.23` and above, you must install the Amazon EBS CSI driver
   and provide relevant volume permissions to the role assigned to the Amazon EKS cluster
   IAM role. To know more, refer to the [Amazon EBS CSI migration documentation][2].

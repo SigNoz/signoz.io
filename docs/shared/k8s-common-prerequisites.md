@@ -1,4 +1,4 @@
-- Kubernetes version >= `1.21`
+- Kubernetes version >= `1.22`
 - `x86-64`/`amd64` workloads as currently `arm64` architecture is not supported
 - Helm version >= `3.8`
 - You must have `kubectl` access to your cluster

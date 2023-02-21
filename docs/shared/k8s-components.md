@@ -5,6 +5,7 @@ Kubernetes cluster:
 
 - Query Service (backend service)
 - Web UI (frontend)
-- ClickHouse (datastore)
-- OpenTelemetry collector
+- OpenTelemetry Collectors
 - Alertmanager
+- ClickHouse chart (datastore)
+- K8s-Infra chart (k8s infra metrics/logs collectors)
