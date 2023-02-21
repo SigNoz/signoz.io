@@ -31,14 +31,45 @@ Here's the minimal required `override-values.yaml` that we'll be using later. Yo
 an overview of the parameters that can be configured during installation under
 [chart configuration](https://github.com/SigNoz/charts/tree/main/charts/signoz#configuration).
 
+### GKE Standard
+
+In GKE Standard, you can either install with default configurations or make
+use of the following `override-values.yaml`:
+
 ```yaml
 global:
   storageClass: gce-resizable
+  cloud: gcp
 
 clickhouse:
-  cloud: gcp
   installCustomStorageClass: true
 ```
+
+### GKE Autopilot
+
+In GKE Autopilot, you must make set `cloud` to `gcp/autogke` as well
+as update `kubeletMetrics` to use read-only Kubelet endpoint as shown
+below in the `override-values.yaml`:
+
+```yaml
+global:
+  storageClass: gce-resizable
+  cloud: gcp/autogke
+
+clickhouse:
+  installCustomStorageClass: true
+
+k8s-infra:
+  presets:
+    kubeletMetrics:
+      authType: none
+      endpoint: ${K8S_NODE_NAME}:10255
+```
+
+In GKE Autopilot, we will see overridding of resource requests/limits of
+all `signoz` chart components as well as components from `clickhouse` and
+`k8s-infra` charts, if enabled. Therefore, make sure to have enough resource
+quota for the region where the cluster is deployed.
 
 <StorageClass />
 
