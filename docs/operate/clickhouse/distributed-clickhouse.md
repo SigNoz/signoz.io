@@ -4,6 +4,9 @@ title: Set Up Distributed ClickHouse for SigNoz
 sidebar_label: Distributed ClickHouse
 ---
 
+import MultiNodePart1 from '../../shared/distributed-ch-multinode-part-1.md'
+import MultiNodePart2 from '../../shared/distributed-ch-multinode-part-2.md'
+
 :::info
 In v0.12, SigNoz introduces support for distributed clickhouse. Multiple replicas for clickhouse shards are not supported in v0.12.0, please follow upcoming releases to check availability.
 :::
@@ -173,6 +176,26 @@ Next, you will have to un-comment the following from `clickhouse-cluster.xml`:
 </clickhouse>
 ```
 
+<MultiNodePart1/>
+
+Finally, we execute the following to apply updated `docker-compose.yaml`:
+
+```bash
+cd deploy
+
+./install.sh
+```
+
+<MultiNodePart2/>
+
+Followed by executing the commands below to apply updated `docker-compose.yaml`:
+
+```bash
+cd deploy
+
+./install.sh
+```
+
 ### Using Docker Swarm
 
 To set up ClickHouse cluster with 3 shards in Docker Swarm, you will need to include additional
@@ -310,6 +333,26 @@ Next, you will have to un-comment the following from `clickhouse-cluster.xml`:
         </cluster>
     </remote_servers>
 </clickhouse>
+```
+
+<MultiNodePart1/>
+
+Finally, we execute the following to apply updated `docker-compose.yaml`:
+
+```bash
+cd deploy
+
+docker stack deploy -c docker-swarm/clickhouse-setup/docker-compose.yaml signoz
+```
+
+<MultiNodePart2/>
+
+Followed by executing the commands below to apply updated `docker-compose.yaml`:
+
+```bash
+cd deploy
+
+docker stack deploy -c docker-swarm/clickhouse-setup/docker-compose.yaml signoz
 ```
 
 ### Kubernetes Installation
