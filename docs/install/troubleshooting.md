@@ -86,7 +86,10 @@ helm upgrade --install -n platform my-release signoz/signoz \
 
 If you instead prefer to watch a video, check out this video:
 
-<div>
+<div style={{
+  position:"relative",
+  minHeight:"40vh",
+}}>
   <LiteYoutubeEmbed id="Y7OkvmuTRQ8" mute={false} />
 </div>
 
