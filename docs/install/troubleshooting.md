@@ -86,8 +86,9 @@ helm upgrade --install -n platform my-release signoz/signoz \
 
 If you instead prefer to watch a video, check out this video:
 
-<LiteYoutubeEmbed id="Y7OkvmuTRQ8" mute={false} />
-
+<div>
+  <LiteYoutubeEmbed id="Y7OkvmuTRQ8" mute={false} />
+</div>
 
 ## Troubleshooting Docker Standalone Installation of SigNoz
 
