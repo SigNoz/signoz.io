@@ -82,23 +82,11 @@ helm upgrade --install -n platform my-release signoz/signoz \
   --set otelCollector.serviceType="<NodePort or LoadBalancer>"
 ```
 
-<p>&nbsp;</p>
-
 ### Troubleshooting Video
 
 If you instead prefer to watch a video, check out this video:
 
- <p>&nbsp;</p>
-
-<div style={{
-  maxHeight:"535px",
-  overflow:"hidden",
-  postiton:"relative"
-}}>
 <LiteYoutubeEmbed id="Y7OkvmuTRQ8" mute={false} />
-</div>
-
-<p>&nbsp;</p>
 
 
 ## Troubleshooting Docker Standalone Installation of SigNoz
