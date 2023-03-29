@@ -39,6 +39,7 @@ function selfhost() {
                     <p className="text-center form-title">Get more info on SigNoz Enterprise</p>
                     <input
                       type="text"
+                      className="text-input"
                       name="email"
                       placeholder={"Email*"}
                       value={email}
@@ -47,6 +48,7 @@ function selfhost() {
                     />
                     <input
                       type="text"
+                      className="text-input"
                       name="name"
                       placeholder={"Name"}
                       value={name}
@@ -55,6 +57,7 @@ function selfhost() {
                     />
                     <input
                       type="text"
+                      className="text-input"
                       name="company"
                       placeholder={"Company"}
                       value={company}
