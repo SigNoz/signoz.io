@@ -19,7 +19,7 @@ function selfhost() {
               <div className="card-demo margin--md">
                 <div className="card no-color">
                   <div className="card__body">
-                    <p className="" style={{fontWeight: 'bold', fontSize: '42px'}}>SigNoz <span className="highlight"> Enterprise</span></p>
+                    <p className="title">SigNoz <span className="highlight"> Enterprise</span></p>
                     <ul className="dashed">
                       <li>Managed Self-Hosted SigNoz in your premise or cloud</li>
                       <li>Single Sign-On</li>
