@@ -1,11 +1,23 @@
 import React, { useState } from "react";
 import Layout from "@theme/Layout";
 import Link from "@docusaurus/Link";
+import { useForm } from "react-hook-form";
 
-function selfhost() {
-  const [email,setEmail] = useState("");
-  const [name,setName] = useState("");
-  const [company,setCompany] = useState("");
+const SelfHost = () => {
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm({
+    name: "",
+    email: "",
+    company: "",
+  });
+
+  const onSubmit = (data) => {
+    // ! TODO : call api
+  };
 
   return (
     <Layout title="Self Host">
@@ -19,13 +31,20 @@ function selfhost() {
               <div className="card-demo margin--md">
                 <div className="card no-color">
                   <div className="card__body">
-                    <p className="title">SigNoz <span className="highlight"> Enterprise</span></p>
+                    <p className="title">
+                      SigNoz <span className="highlight"> Enterprise</span>
+                    </p>
                     <ul className="dashed">
-                      <li>Managed Self-Hosted SigNoz in your premise or cloud</li>
+                      <li>
+                        Managed Self-Hosted SigNoz in your premise or cloud
+                      </li>
                       <li>Single Sign-On</li>
                       <li>SAML and LDAP support</li>
                       <li>AWS Private Link</li>
-                      <li>Support for Dashboard configuration from expert engineers</li>
+                      <li>
+                        Support for Dashboard configuration from expert
+                        engineers
+                      </li>
                       <li>Support plan with SLAs</li>
                     </ul>
                   </div>
@@ -36,35 +55,64 @@ function selfhost() {
               <div className="card-demo margin--md">
                 <div className="card">
                   <div className="card__body">
-                    <p className="text-center form-title">Get more info on SigNoz Enterprise</p>
+                    <p className="text-center form-title">
+                      Get more info on SigNoz Enterprise
+                    </p>
                     <input
                       type="text"
                       className="text-input"
                       name="email"
                       placeholder={"Email*"}
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required={true}
+                      {...register("email", {
+                        required: true,
+                        pattern: /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g,
+                      })}
                     />
+                    {errors?.email?.type === "required" && (
+                      <p className="error">This field is required</p>
+                    )}
+                    {errors?.email?.type === "pattern" && (
+                      <p className="error">Enter valid email address</p>
+                    )}
                     <input
                       type="text"
                       className="text-input"
                       name="name"
                       placeholder={"Name"}
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      required={true}
+                      {...register("name", {
+                        required: true,
+                        pattern: /^[A-Za-z]+$/i,
+                      })}
                     />
+                    {errors?.name?.type === "required" && (
+                      <p className="error">This field is required</p>
+                    )}
+                    {errors?.name?.type === "pattern" && (
+                      <p className="error">Alphabetical characters only</p>
+                    )}
                     <input
                       type="text"
                       className="text-input"
                       name="company"
                       placeholder={"Company"}
-                      value={company}
-                      onChange={(e) => setCompany(e.target.value)}
-                      required={true}
+                      {...register("company", {
+                        required: true,
+                        pattern: /^[A-Za-z]+$/i,
+                      })}
                     />
-                    <button className="submit-btn" type="button">Submit</button>
+                    {errors?.company?.type === "required" && (
+                      <p className="error">This field is required</p>
+                    )}
+                    {errors?.company?.type === "pattern" && (
+                      <p className="error">Alphabetical characters only</p>
+                    )}
+                    <button
+                      className="submit-btn"
+                      type="button"
+                      onClick={handleSubmit(onSubmit)}
+                    >
+                      Submit
+                    </button>
                   </div>
                 </div>
               </div>
@@ -74,6 +122,6 @@ function selfhost() {
       </section>
     </Layout>
   );
-}
+};
 
-export default selfhost;
+export default SelfHost;
