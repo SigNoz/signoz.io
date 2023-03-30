@@ -5,9 +5,19 @@ title: Product Roadmap
 
 We are focused on building an integrated observability tool which can be a superior alternative to current SaaS products like DataDog
 
-You can find items on our immediate roadmap in this Github Board - [SigNoz Roadmap](https://github.com/SigNoz/signoz/projects/2)
 
 More longer term, we plan to ship the following items:
+
+#### Different retention period for different sources of logs data
+Different types of data has different retention requirements. Some applications need to store logs for 1 week, some for 1 months and some for 1 year. We will be building a solution to enable this.
+
+#### Multi-Tenancy
+One company should be able to onboard different team which have different datasets. Multi-tenancy enables users to manage multiple datasets in the same database.
+
+#### Cost Control
+- Monitoring and limiting team-wise quota
+- Check on cardinality explosion in metrics and suggestions of deletion of unused attributes in timeseries
+- Tail based sampling on latency, error or any attribute in spans and logs
 
 #### Tail based sampling
 
