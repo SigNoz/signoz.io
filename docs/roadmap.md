@@ -9,10 +9,10 @@ We are focused on building an integrated observability tool which can be a super
 More longer term, we plan to ship the following items:
 
 ## Different retention period for different sources of logs data
-Different types of data has different retention requirements. Some applications need to store logs for 1 week, some for 1 months and some for 1 year. We will be building a solution to enable this.
+Different types of data have different retention requirements. Some applications need to store logs for 1 week, some for 1 month and some for 1 year. We will be building a solution to enable this.
 
 ## Multi-Tenancy
-One company should be able to onboard different team which have different datasets. Multi-tenancy enables users to manage multiple datasets in the same database.
+One company should be able to onboard different teams which have different datasets. Multi-tenancy enables users to manage multiple datasets in the same database without doing multiple installations of SigNoz.
 
 ## Cost Control
 - Monitoring and limiting team-wise quota
