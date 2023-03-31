@@ -81,7 +81,7 @@ const SelfHost = () => {
                       placeholder={"Name"}
                       {...register("name", {
                         required: true,
-                        pattern: /^[A-Za-z]+$/i,
+                        pattern: /^[A-Za-z ]+$/i,
                       })}
                     />
                     {errors?.name?.type === "required" && (
@@ -97,7 +97,7 @@ const SelfHost = () => {
                       placeholder={"Company"}
                       {...register("company", {
                         required: true,
-                        pattern: /^[A-Za-z]+$/i,
+                        pattern: /^[A-Za-z ]+$/i,
                       })}
                     />
                     {errors?.company?.type === "required" && (
