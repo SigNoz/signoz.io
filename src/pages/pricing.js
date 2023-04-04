@@ -24,9 +24,7 @@ function pricingTest() {
           className="container"
           style={{ marginTop: "3rem", marginBottom: "4rem" }}
         >
-          <h2 className="title">
-            Transparent & Predictable Pricing
-          </h2>
+          <h2 className="title">Transparent & Predictable Pricing</h2>
           <p className="subtitle">
             OpenTelemetry-Native <span className="highlight">Metrics</span>,{" "}
             <span className="highlight">Logs</span>, and{" "}
@@ -37,14 +35,14 @@ function pricingTest() {
             <div className={"col col--6 margin-vert--md"}>
               <div class="card">
                 <div class="card__header">
-                  <h3 style={{ marginBottom: "0" }}>Team</h3>
-                  <p style={{ fontSize: "medium" }}>
-                    For teams that need high-performing applications
-                  </p>
+                  <div>
+                    <h3>Team</h3>
+                    <p>For teams that need high-performing applications</p>
+                  </div>
                   <div className="price-cta">
                     <div className="price-cta-desc">
                       <span>starts at just</span>
-                      <span className="highlight">$199/month</span>
+                      <span className="price highlight">$199/month</span>
                     </div>
                     <div>
                       <a
@@ -60,8 +58,8 @@ function pricingTest() {
                 </div>
                 <hr />
                 <div class="card__body">
-                  <div className="pricing-details">
-                    <h4>Pricing</h4>
+                  <div className="pricing-details package-detail-block">
+                    <h4 className="package-detail-title">Pricing</h4>
                     <div>
                       <span>Logs</span>
                       <span>$0.4 per GB ingested</span>
@@ -74,42 +72,52 @@ function pricingTest() {
                       <span>Metrics</span>
                       <span>$0.1 per mn ingested</span>
                     </div>
-                    <p>
+                    <p className="retention">
                       Retention: 15 days for Traces & Logs, 30 days for Metrics
                     </p>
                   </div>
-                  <div className="deployment-options">
-                    <h4>Deployment Options</h4>
+                  <div className="deployment-options package-detail-block">
+                    <h4 className="package-detail-title">Deployment Options</h4>
                     <div>
                       <span>Sass</span>
-                      <span><RightSVG/></span>
+                      <span>
+                        <RightSVG />
+                      </span>
                     </div>
                     <div>
                       <span>Managed by SigNoz in your cloud</span>
-                      <span><WrongSVG/></span>
+                      <span>
+                        <WrongSVG />
+                      </span>
                     </div>
                     <div>
                       <span>Single Tenant</span>
-                      <span><WrongSVG/></span>
+                      <span>
+                        <WrongSVG />
+                      </span>
                     </div>
                   </div>
-                  <div className="support">
-                    <h4>Support</h4>
+                  <div className="support package-detail-block">
+                    <h4 className="package-detail-title">Support</h4>
                     <div>
                       <span>Community Slack</span>
-                      <span><RightSVG/></span>
+                      <span>
+                        <RightSVG />
+                      </span>
                     </div>
                     <div>
                       <span>Email</span>
-                      <span><RightSVG/></span>
+                      <span>
+                        <RightSVG />
+                      </span>
                     </div>
                     <div>
                       <span>Dedicated Slack Channel</span>
                       <span>On spends above $999 and above</span>
                     </div>
                   </div>
-                  <div>
-                    <h4>Features</h4>
+                  <div className="package-detail-block">
+                    <h4 className="package-detail-title">Features</h4>
                     <ul className="list-icon-right">
                       <li>APM & Distributed Tracing</li>
                       <li>Log Management</li>
@@ -120,8 +128,10 @@ function pricingTest() {
                       <li>Service Dependency Visualization</li>
                       <li>Run aggregates on ingested spans</li>
                       <li>Live Tail Logging</li>
-                      <li>Explore all features</li>
                     </ul>
+                    <span>
+                      <a href="#" className="explore">Explore all features</a>
+                    </span>
                   </div>
                 </div>
                 <div class="card__footer">
@@ -139,15 +149,17 @@ function pricingTest() {
             <div className={"col col--6 margin-vert--md"}>
               <div class="card">
                 <div class="card__header">
-                  <h3 style={{ marginBottom: "0" }}>Enterprise</h3>
-                  <p style={{ fontSize: "medium" }}>
-                    With deployment options, security and compliance features
-                    and awesome support
-                  </p>
+                  <div>
+                    <h3>Enterprise</h3>
+                    <p>
+                      With deployment options, security and compliance features
+                      and awesome support
+                    </p>
+                  </div>
                   <div className="price-cta">
                     <div className="price-cta-desc">
                       <span>starts at just</span>
-                      <span className="highlight">$199/month</span>
+                      <span className="price highlight">$199/month</span>
                     </div>
                     <div>
                       <a
@@ -163,8 +175,8 @@ function pricingTest() {
                 </div>
                 <hr />
                 <div class="card__body">
-                  <div className="pricing-details">
-                    <h4>
+                  <div className="pricing-details package-detail-block">
+                    <h4 className="package-detail-title">
                       Pricing <span>(If hosted in your cloud)</span>
                     </h4>
                     <div>
@@ -179,50 +191,66 @@ function pricingTest() {
                       <span>Metrics</span>
                       <span>$0.1 per mn ingested</span>
                     </div>
-                    <p>
+                    <p className="retention">
                       Retention: 15 days for Traces & Logs, 30 days for Metrics
                     </p>
                   </div>
-                  <div className="deployment-options">
-                    <h4>Deployment Options</h4>
+                  <div className="deployment-options package-detail-block">
+                    <h4 className="package-detail-title">Deployment Options</h4>
                     <div>
                       <span>Sass</span>
-                      <span><RightSVG/></span>
+                      <span>
+                        <RightSVG />
+                      </span>
                     </div>
                     <div>
                       <span>Managed by SigNoz in your cloud</span>
-                      <span><RightSVG/></span>
+                      <span>
+                        <RightSVG />
+                      </span>
                     </div>
                     <div>
                       <span>Single Tenant</span>
-                      <span><RightSVG/></span>
+                      <span>
+                        <RightSVG />
+                      </span>
                     </div>
                   </div>
-                  <div className="support">
-                    <h4>Support</h4>
+                  <div className="support package-detail-block">
+                    <h4 className="package-detail-title">Support</h4>
                     <div>
                       <span>Community Slack</span>
-                      <span><RightSVG/></span>
+                      <span>
+                        <RightSVG />
+                      </span>
                     </div>
                     <div>
                       <span>Email</span>
-                      <span><RightSVG/></span>
+                      <span>
+                        <RightSVG />
+                      </span>
                     </div>
                     <div>
                       <span>Team Training</span>
-                      <span><RightSVG/></span>
+                      <span>
+                        <RightSVG />
+                      </span>
                     </div>
                     <div>
                       <span>Dashboard Configuration Support</span>
-                      <span><RightSVG/></span>
+                      <span>
+                        <RightSVG />
+                      </span>
                     </div>
                     <div>
                       <span>Developer Downtime Pairing with SLAs</span>
-                      <span><RightSVG/></span>
+                      <span>
+                        <RightSVG />
+                      </span>
                     </div>
                   </div>
-                  <div>
-                    <h4>Features</h4>
+                  <div className="package-detail-block">
+                    <h4 className="package-detail-title">Features</h4>
                     <p>Includes all features in Team</p>
                     <ul className="list-icon-right">
                       <li>Single Sign On</li>
@@ -230,9 +258,12 @@ function pricingTest() {
                       <li>AWS Private Link</li>
                       <li>VPC Peering</li>
                     </ul>
+                    <span>
+                      <a href="#" className="explore">Explore all features</a>
+                    </span>
                   </div>
-                  <div>
-                    <h4>Upcoming</h4>
+                  <div className="package-detail-block">
+                    <h4 className="package-detail-title">Upcoming</h4>
                     <ul className="list-icon-right">
                       <li>Finer RBAC with custom roles</li>
                       <li>Audit Logs</li>
