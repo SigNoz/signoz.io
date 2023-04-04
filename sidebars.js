@@ -254,10 +254,6 @@ module.exports = {
     },
     {
       type: 'doc',
-      id: 'otlp-http-enable-cors'
-    },
-    {
-      type: 'doc',
       id: 'userguide/exceptions',
     },
     {
@@ -268,6 +264,7 @@ module.exports = {
         'userguide/authentication',
         'userguide/sso-authentication',
         'userguide/retention-period',
+        'userguide/otlp-http-enable-cors',
       ],
     },
     {
