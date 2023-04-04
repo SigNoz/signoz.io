@@ -5,6 +5,8 @@ import FAQBody from "@site/src/components/FAQPricing";
 import ReactGA from "react-ga";
 import { ShowCompanyLogos } from "../modules/company-logos";
 import { RightSVG, WrongSVG } from "../svgs/common";
+import { TalkToExpert } from "../modules/talk-to-expert";
+import { MoreOptions } from "../modules/more-options";
 
 // ReactGA.initialize("UA-152867655-1");
 
@@ -130,7 +132,9 @@ function pricingTest() {
                       <li>Live Tail Logging</li>
                     </ul>
                     <span>
-                      <a href="#" className="explore">Explore all features</a>
+                      <a href="#" className="explore">
+                        Explore all features
+                      </a>
                     </span>
                   </div>
                 </div>
@@ -259,7 +263,9 @@ function pricingTest() {
                       <li>VPC Peering</li>
                     </ul>
                     <span>
-                      <a href="#" className="explore">Explore all features</a>
+                      <a href="#" className="explore">
+                        Explore all features
+                      </a>
                     </span>
                   </div>
                   <div className="package-detail-block">
@@ -343,10 +349,17 @@ function pricingTest() {
             </div>
       </section>       */}
 
+      {/* Companies Logo */}
       <ShowCompanyLogos />
 
+      {/* Talk To Expert */}
+      <TalkToExpert />
+
+      {/* More Options */}
+      <MoreOptions />
+
       {/* FAQ section */}
-      <section>
+      <section className="faq">
         <div
           className="container"
           style={{ marginTop: "2rem", marginBottom: "3rem" }}
@@ -359,9 +372,7 @@ function pricingTest() {
                 </div> */}
 
             <div class="col col--8 col--offset-2">
-              <p className="hero__subtitle margin--md">
-                Frequently Asked Questions
-              </p>
+              <p className="hero__subtitle margin--md title">FAQs</p>
               <div class="card-demo margin--md">
                 <FAQBody />
               </div>
