@@ -8,6 +8,8 @@
   
   
 import React, { useState } from "react";
+import clsx from "clsx";
+import styles from './styles.module.css'
 
 const INIT = "INIT";
 const SUBMITTING = "SUBMITTING";
@@ -134,13 +136,7 @@ export default function SignUpFormReact() {
             width: "100%",
           }}
         >
-          <p
-            style={{
-              fontFamily: `'${formStyles.successFont}', sans-serif`,
-              color: formStyles.successFontColor,
-              fontSize: `${formStyles.successFontSizePx}px`,
-            }}
-          >
+          <p className={styles.successMessage}>
             {formStyles.successMessage}
           </p>
         </div>
@@ -172,21 +168,10 @@ export default function SignUpFormReact() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required={true}
-              style={{
-                color: formStyles.formFontColor,
-                fontFamily: `'${formStyles.formFont}', sans-serif`,
-                fontSize: `${formStyles.formFontSizePx}px`,
-                margin: isInline ? "0px 10px 0px 0px" : "0px 0px 10px",
-                width: "100%",
-                maxWidth: "300px",
-                minWidth: "100px",
-                background: "#FFFFFF",
-                border: "1px solid #D1D5DB",
-                boxSizing: "border-box",
-                boxShadow: "rgba(0, 0, 0, 0.05) 0px 1px 2px",
-                borderRadius: "6px",
-                padding: "8px 12px",
-              }}
+              className={clsx({
+                [styles.newsletterInput] : true,
+                [styles.inputInline] : isInline
+              })}
             />
             <SignUpFormButton />
           </form>
@@ -244,28 +229,10 @@ export default function SignUpFormReact() {
     return (
       <button
         type="submit"
-        style={{
-          background: formStyles.buttonColor,
-          fontSize: `${formStyles.buttonFontSizePx}px`,
-          color: formStyles.buttonFontColor,
-          fontFamily: `'${formStyles.buttonFont}', sans-serif`,
-          width: isInline ? "min-content" : "100%",
-          maxWidth: "300px",
-          whiteSpace: isInline ? "nowrap" : "normal",
-          height: "38px",
-          alignItems: "center",
-          justifyContent: "center",
-          flexDirection: "row",
-          padding: "9px 17px",
-          boxShadow: "0px 1px 2px rgba(0, 0, 0, 0.05)",
-          borderRadius: "6px",
-          textAlign: "center",
-          fontStyle: "normal",
-          fontWeight: 500,
-          lineHeight: "20px",
-          border: "none",
-          cursor: "pointer",
-        }}
+        className={clsx({
+          [styles.submitBtn] : true,
+          [styles.btnInline] : isInline
+        })}
       >
         {formState === SUBMITTING ? "Please wait..." : formStyles.buttonText}
       </button>

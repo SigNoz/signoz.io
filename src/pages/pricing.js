@@ -7,6 +7,7 @@ import { ShowCompanyLogos } from "../modules/company-logos";
 import { RightSVG, WrongSVG } from "../svgs/common";
 import { TalkToExpert } from "../modules/talk-to-expert";
 import { MoreOptions } from "../modules/more-options";
+import { UserReview } from "../modules/user-review";
 
 // ReactGA.initialize("UA-152867655-1");
 
@@ -35,8 +36,8 @@ function pricingTest() {
           </p>
           <div className={"row"}>
             <div className={"col col--6 margin-vert--md"}>
-              <div class="card">
-                <div class="card__header">
+              <div className="card">
+                <div className="card__header">
                   <div>
                     <h3>Team</h3>
                     <p>For teams that need high-performing applications</p>
@@ -48,7 +49,7 @@ function pricingTest() {
                     </div>
                     <div>
                       <a
-                        class="button button--primary"
+                        className="button button--primary"
                         target="_blank"
                         href="https://forms.gle/yYSkntXRRPU3MHRL7"
                         onClick={() => handleClick("SigNozCloud")}
@@ -59,7 +60,7 @@ function pricingTest() {
                   </div>
                 </div>
                 <hr />
-                <div class="card__body">
+                <div className="card__body">
                   <div className="pricing-details package-detail-block">
                     <h4 className="package-detail-title">Pricing</h4>
                     <div>
@@ -138,9 +139,9 @@ function pricingTest() {
                     </span>
                   </div>
                 </div>
-                <div class="card__footer">
+                <div className="card__footer">
                   <a
-                    class="button button--primary"
+                    className="button button--primary"
                     target="_blank"
                     href="https://forms.gle/yYSkntXRRPU3MHRL7"
                     onClick={() => handleClick("SigNozCloud")}
@@ -151,8 +152,8 @@ function pricingTest() {
               </div>
             </div>
             <div className={"col col--6 margin-vert--md"}>
-              <div class="card">
-                <div class="card__header">
+              <div className="card">
+                <div className="card__header">
                   <div>
                     <h3>Enterprise</h3>
                     <p>
@@ -163,11 +164,11 @@ function pricingTest() {
                   <div className="price-cta">
                     <div className="price-cta-desc">
                       <span>starts at just</span>
-                      <span className="price highlight">$199/month</span>
+                      <span className="price highlight">$999/month</span>
                     </div>
                     <div>
                       <a
-                        class="button button--primary"
+                        className="button button--primary"
                         target="_blank"
                         href="https://forms.gle/zxCEoSbnnPv6mSX57"
                         onClick={() => handleClick("SelfHostedEnterprise")}
@@ -178,7 +179,7 @@ function pricingTest() {
                   </div>
                 </div>
                 <hr />
-                <div class="card__body">
+                <div className="card__body">
                   <div className="pricing-details package-detail-block">
                     <h4 className="package-detail-title">
                       Pricing <span>(If hosted in your cloud)</span>
@@ -255,7 +256,7 @@ function pricingTest() {
                   </div>
                   <div className="package-detail-block">
                     <h4 className="package-detail-title">Features</h4>
-                    <p>Includes all features in Team</p>
+                    <p className="feature-blur">Includes all features in Team</p>
                     <ul className="list-icon-right">
                       <li>Single Sign On</li>
                       <li>SAML and LDAP support</li>
@@ -276,9 +277,9 @@ function pricingTest() {
                     </ul>
                   </div>
                 </div>
-                <div class="card__footer">
+                <div className="card__footer">
                   <a
-                    class="button button--primary"
+                    className="button button--primary"
                     target="_blank"
                     href="https://forms.gle/zxCEoSbnnPv6mSX57"
                     onClick={() => handleClick("SelfHostedEnterprise")}
@@ -297,14 +298,14 @@ function pricingTest() {
             <div className="container" style={{ marginTop: "2rem", marginBottom: "3rem" }} >
             <h2 style={{textAlign: "center"}} className={"margin-vert--md"} >Need more help?</h2>
 
-              <div class="row">
+              <div className="row">
                 <div className={"col col--4 col--offset-2 margin-vert--md"}>
-                <div class="card">
-                    <div class="card__header">
+                <div className="card">
+                    <div className="card__header">
                         <h3 style={{marginBottom:'0'}}>Setup Support</h3>
                         <p style={{fontSize:'medium'}}>200 to 1000 USD based on scale. One time fee</p>
                     </div>
-                    <div class="card__body">
+                    <div className="card__body">
                         <p>
 
 
@@ -315,19 +316,19 @@ function pricingTest() {
 
                         </p>
                     </div>
-                    <div class="card__footer">
-                    <a class="button button--primary" href="https://forms.gle/qpoi1XndtCyYz9EQ7" onClick={() => handleClick('SetupSupport')}>Join the waitlist</a>
+                    <div className="card__footer">
+                    <a className="button button--primary" href="https://forms.gle/qpoi1XndtCyYz9EQ7" onClick={() => handleClick('SetupSupport')}>Join the waitlist</a>
                     </div>
                 </div>
                 </div> 
 
                 <div className={"col col--4 margin-vert--md"}>
-                <div class="card">
-                    <div class="card__header">
+                <div className="card">
+                    <div className="card__header">
                         <h3 style={{marginBottom:'0'}}>Enterprise Support</h3>
                         <p style={{fontSize:'medium'}}> Longer term support contracts</p>
                     </div>
-                    <div class="card__body">
+                    <div className="card__body">
                         <p>
 
 
@@ -339,8 +340,8 @@ function pricingTest() {
 
                         </p>
                     </div>
-                    <div class="card__footer">
-                    <a class="button button--primary" href="https://forms.gle/CiUe2cCSSM9eqGmg9" onClick={() => handleClick("SLASupport")}>Reach out to us</a>
+                    <div className="card__footer">
+                    <a className="button button--primary" href="https://forms.gle/CiUe2cCSSM9eqGmg9" onClick={() => handleClick("SLASupport")}>Reach out to us</a>
                     </div>
                 </div>
                 </div> 
@@ -364,22 +365,20 @@ function pricingTest() {
           className="container"
           style={{ marginTop: "2rem", marginBottom: "3rem" }}
         >
-          <div class="row">
-            {/* <div class="col col--4">
-                  <p className="faq_left_panel text--center margin--md">
-                    Open source and Free to self-host{" "}
-                  </p>
-                </div> */}
-
-            <div class="col col--8 col--offset-2">
+          <div className="row">
+            <div className="col col--8 col--offset-2">
               <p className="hero__subtitle margin--md title">FAQs</p>
-              <div class="card-demo margin--md">
+              <div className="card-demo margin--md">
                 <FAQBody />
               </div>
             </div>
           </div>
         </div>
       </section>
+
+      {/* User Review */}
+      <UserReview />
+
     </Layout>
   );
 }
