@@ -6,8 +6,10 @@ import ReactGA from "react-ga";
 import { ShowCompanyLogos } from "../modules/company-logos";
 import { RightSVG, WrongSVG } from "../svgs/common";
 import { TalkToExpert } from "../modules/talk-to-expert";
-import { MoreOptions } from "../modules/more-options";
+import { CommunityEdition } from "../modules/community-edition";
 import { UserReview } from "../modules/user-review";
+import { TrySigNozCTA } from "../modules/try-signoz-cta";
+import { DataProtection } from "../modules/data-protection";
 
 // ReactGA.initialize("UA-152867655-1");
 
@@ -75,14 +77,16 @@ function pricingTest() {
                       <span>Metrics</span>
                       <span>$0.1 per mn ingested</span>
                     </div>
-                    <p className="retention">
-                      Retention: 15 days for Traces & Logs, 30 days for Metrics
-                    </p>
                   </div>
+                  <hr />
+                  <p className="retention">
+                    Retention: 15 days for Traces & Logs, 30 days for Metrics
+                  </p>
+                  <hr />
                   <div className="deployment-options package-detail-block">
                     <h4 className="package-detail-title">Deployment Options</h4>
                     <div>
-                      <span>Sass</span>
+                      <span>SaaS</span>
                       <span>
                         <RightSVG />
                       </span>
@@ -100,6 +104,7 @@ function pricingTest() {
                       </span>
                     </div>
                   </div>
+                  <hr />
                   <div className="support package-detail-block">
                     <h4 className="package-detail-title">Support</h4>
                     <div>
@@ -119,6 +124,7 @@ function pricingTest() {
                       <span>On spends above $999 and above</span>
                     </div>
                   </div>
+                  <hr />
                   <div className="package-detail-block">
                     <h4 className="package-detail-title">Features</h4>
                     <ul className="list-icon-right">
@@ -132,11 +138,11 @@ function pricingTest() {
                       <li>Run aggregates on ingested spans</li>
                       <li>Live Tail Logging</li>
                     </ul>
-                    <span>
+                    {/* <span>
                       <a href="#" className="explore">
                         Explore all features
                       </a>
-                    </span>
+                    </span> */}
                   </div>
                 </div>
                 <div className="card__footer">
@@ -185,25 +191,19 @@ function pricingTest() {
                       Pricing <span>(If hosted in your cloud)</span>
                     </h4>
                     <div>
-                      <span>Logs</span>
-                      <span>$0.4 per GB ingested</span>
+                      <span>Custom Pricing</span>
+                      <span><RightSVG /></span>
                     </div>
                     <div>
-                      <span>Traces</span>
-                      <span>$0.4 per GB ingested</span>
+                      <span>Custom Retention</span>
+                      <span><RightSVG /></span>
                     </div>
-                    <div>
-                      <span>Metrics</span>
-                      <span>$0.1 per mn ingested</span>
-                    </div>
-                    <p className="retention">
-                      Retention: 15 days for Traces & Logs, 30 days for Metrics
-                    </p>
                   </div>
+                  <hr />
                   <div className="deployment-options package-detail-block">
                     <h4 className="package-detail-title">Deployment Options</h4>
                     <div>
-                      <span>Sass</span>
+                      <span>SaaS</span>
                       <span>
                         <RightSVG />
                       </span>
@@ -221,6 +221,7 @@ function pricingTest() {
                       </span>
                     </div>
                   </div>
+                  <hr />
                   <div className="support package-detail-block">
                     <h4 className="package-detail-title">Support</h4>
                     <div>
@@ -254,21 +255,25 @@ function pricingTest() {
                       </span>
                     </div>
                   </div>
+                  <hr />
                   <div className="package-detail-block">
                     <h4 className="package-detail-title">Features</h4>
-                    <p className="feature-blur">Includes all features in Team</p>
+                    <p className="feature-blur">
+                      Includes all features in Team
+                    </p>
                     <ul className="list-icon-right">
                       <li>Single Sign On</li>
                       <li>SAML and LDAP support</li>
                       <li>AWS Private Link</li>
                       <li>VPC Peering</li>
                     </ul>
-                    <span>
+                    {/* <span>
                       <a href="#" className="explore">
                         Explore all features
                       </a>
-                    </span>
+                    </span> */}
                   </div>
+                  <hr/>
                   <div className="package-detail-block">
                     <h4 className="package-detail-title">Upcoming</h4>
                     <ul className="list-icon-right">
@@ -356,8 +361,11 @@ function pricingTest() {
       {/* Talk To Expert */}
       <TalkToExpert />
 
+      {/* Data protection */}
+      <DataProtection />
+
       {/* More Options */}
-      <MoreOptions />
+      <CommunityEdition />
 
       {/* FAQ section */}
       <section className="faq">
@@ -379,6 +387,8 @@ function pricingTest() {
       {/* User Review */}
       <UserReview />
 
+      {/* Give a Try CTA */}
+      <TrySigNozCTA/>
     </Layout>
   );
 }

@@ -6,10 +6,7 @@ import Link from "@docusaurus/Link";
 export const TalkToExpert = () => {
   return (
     <section className={styles.expert}>
-      <div
-        className="container"
-        style={{ marginTop: "1rem", marginBottom: "0.5rem" }}
-      >
+      <div className="container">
         <p className={styles.tagline}>
           Have more specific questions about SigNoz?
         </p>
