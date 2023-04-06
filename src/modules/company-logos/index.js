@@ -1,15 +1,11 @@
 import React, { useState } from "react";
-import styles from "./styles.module.css";
 import useBaseUrl from "@docusaurus/useBaseUrl";
+import styles from "./styles.module.css";
 
 export const ShowCompanyLogos = () => {
   return (
     <section className={styles.used_by}>
-      <div
-        className="container"
-        style={{ marginTop: "0.5rem", marginBottom: "0.5rem" }}
-      >
-        {/* <p class="tagline" >Used by teams at</p> */}
+      <div className="container">
         <p className={styles.tagline}>Trusted By Teams</p>
         <ul>
           <li>

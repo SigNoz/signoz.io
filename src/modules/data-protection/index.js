@@ -1,15 +1,12 @@
 import React, { useState } from "react";
-import styles from "./styles.module.css";
-import useBaseUrl from "@docusaurus/useBaseUrl";
 import Link from "@docusaurus/Link";
+import useBaseUrl from "@docusaurus/useBaseUrl";
+import styles from "./styles.module.css";
 
 export const DataProtection = () => {
   return (
     <section className={styles.data}>
-      <div
-        className="container"
-        style={{ marginTop: "2rem", marginBottom: "0.5rem" }}
-      >
+      <div className="container">
         <h3 className={styles.title}>
           Worried about Data
           <br />

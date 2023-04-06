@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import styles from "./styles.module.css";
-import useBaseUrl from "@docusaurus/useBaseUrl";
 import Link from "@docusaurus/Link";
+import useBaseUrl from "@docusaurus/useBaseUrl";
+import styles from "./styles.module.css";
 
 export const UserReview = () => {
   return (
@@ -16,7 +16,7 @@ export const UserReview = () => {
         </p>
         <p className={styles.user}>
           - Nate Bohman
-          <br/>
+          <br />
           <span className={styles.userRole}>Senior DevOps Engineer</span>
         </p>
       </div>

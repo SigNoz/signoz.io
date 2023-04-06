@@ -60,8 +60,8 @@ function pricingTest() {
                       </a>
                     </div>
                   </div>
+                  <hr />
                 </div>
-                <hr />
                 <div className="card__body">
                   <div className="pricing-details package-detail-block">
                     <h4 className="package-detail-title">Pricing</h4>
@@ -183,8 +183,8 @@ function pricingTest() {
                       </a>
                     </div>
                   </div>
+                  <hr />
                 </div>
-                <hr />
                 <div className="card__body">
                   <div className="pricing-details package-detail-block">
                     <h4 className="package-detail-title">
@@ -192,11 +192,15 @@ function pricingTest() {
                     </h4>
                     <div>
                       <span>Custom Pricing</span>
-                      <span><RightSVG /></span>
+                      <span>
+                        <RightSVG />
+                      </span>
                     </div>
                     <div>
                       <span>Custom Retention</span>
-                      <span><RightSVG /></span>
+                      <span>
+                        <RightSVG />
+                      </span>
                     </div>
                   </div>
                   <hr />
@@ -273,7 +277,7 @@ function pricingTest() {
                       </a>
                     </span> */}
                   </div>
-                  <hr/>
+                  <hr />
                   <div className="package-detail-block">
                     <h4 className="package-detail-title">Upcoming</h4>
                     <ul className="list-icon-right">
@@ -388,7 +392,7 @@ function pricingTest() {
       <UserReview />
 
       {/* Give a Try CTA */}
-      <TrySigNozCTA/>
+      <TrySigNozCTA />
     </Layout>
   );
 }

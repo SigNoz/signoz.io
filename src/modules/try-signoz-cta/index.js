@@ -1,9 +1,15 @@
 import React, { useState } from "react";
-import styles from "./styles.module.css";
-import useBaseUrl from "@docusaurus/useBaseUrl";
 import Link from "@docusaurus/Link";
+import useBaseUrl from "@docusaurus/useBaseUrl";
+import styles from "./styles.module.css";
 
 export const TrySigNozCTA = () => {
+  const handleClick = (message) => {
+    ReactGA.event({
+      category: "User",
+      action: message,
+    });
+  };
   return (
     <section className={styles.cta}>
       <div className="container">
