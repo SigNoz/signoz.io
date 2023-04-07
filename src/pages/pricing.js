@@ -121,7 +121,7 @@ function pricingTest() {
                     </div>
                     <div>
                       <span>Dedicated Slack Channel</span>
-                      <span>On spends above $999 and above</span>
+                      <span>On spends above $999</span>
                     </div>
                   </div>
                   <hr />
@@ -187,9 +187,7 @@ function pricingTest() {
                 </div>
                 <div className="card__body">
                   <div className="pricing-details package-detail-block">
-                    <h4 className="package-detail-title">
-                      Pricing <span>(If hosted in your cloud)</span>
-                    </h4>
+                    <h4 className="package-detail-title">Pricing</h4>
                     <div>
                       <span>Custom Pricing</span>
                       <span>
@@ -229,13 +227,13 @@ function pricingTest() {
                   <div className="support package-detail-block">
                     <h4 className="package-detail-title">Support</h4>
                     <div>
-                      <span>Community Slack</span>
+                      <span>Email</span>
                       <span>
                         <RightSVG />
                       </span>
                     </div>
                     <div>
-                      <span>Email</span>
+                      <span>Dedicated Slack Channel</span>
                       <span>
                         <RightSVG />
                       </span>
@@ -248,6 +246,12 @@ function pricingTest() {
                     </div>
                     <div>
                       <span>Dashboard Configuration Support</span>
+                      <span>
+                        <RightSVG />
+                      </span>
+                    </div>
+                    <div>
+                      <span>Instrumentation Support</span>
                       <span>
                         <RightSVG />
                       </span>
@@ -362,11 +366,11 @@ function pricingTest() {
       {/* Companies Logo */}
       <ShowCompanyLogos />
 
-      {/* Talk To Expert */}
-      <TalkToExpert />
-
       {/* Data protection */}
       <DataProtection />
+
+      {/* Talk To Expert */}
+      <TalkToExpert />
 
       {/* More Options */}
       <CommunityEdition />

@@ -3,6 +3,8 @@ import Link from "@docusaurus/Link";
 import useBaseUrl from "@docusaurus/useBaseUrl";
 import styles from "./styles.module.css";
 
+const TALK_TO_EXPERT_URL = "https://calendly.com/ankit-nayan/signoz-demo";
+
 export const TalkToExpert = () => {
   return (
     <section className={styles.expert}>
@@ -21,7 +23,7 @@ export const TalkToExpert = () => {
               paddingRight: "10px !important",
             }}
             className="button button--primary"
-            href={"/pricing/"}
+            href={TALK_TO_EXPERT_URL}
           >
             Talk to an Expert
           </Link>
