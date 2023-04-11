@@ -1,17 +1,22 @@
 import React, { useEffect, useState } from "react";
 import ReactModal from "react-modal";
+
+import { Header } from "../modules/index-header"
+import { ShowCompanyLogos } from "../modules/company-logos"
+import { WhyOpenTelemetry } from "../modules/why-opentelemetry";
+import { SigNozFeatures } from "../modules/index-features";
+
 import clsx from "clsx";
 import Layout from "@theme/Layout";
 import Link from "@docusaurus/Link";
 import useDocusaurusContext from "@docusaurus/useDocusaurusContext";
 import useBaseUrl from "@docusaurus/useBaseUrl";
-import { Collapse } from "antd";
-import { CaretRightOutlined } from "@ant-design/icons";
 import ReactGA from "react-ga";
 import styles from "./styles.module.css";
-import { PlaySVG } from "../svgs/common";
+import { LiteYoutubeEmbed } from "react-lite-yt-embed";
 
-const { Panel } = Collapse;
+
+import FAQBody from "@site/src/components/FAQ";
 
 ReactGA.initialize("UA-152867655-1"); // How to make it appear only for production?
 // ReactGA.pageview("Home Page");
@@ -53,7 +58,7 @@ const WhySigNoz = () => {
     <div className="container">
       <div className="container">
         <div className="row">
-          <div className={clsx("col col--4", styles.menu__list)}>
+          <div className={clsx("col col--3", styles.menu__list)}>
             <button
               onClick={handlePricing}
               className={`button button--lg ${
@@ -63,7 +68,7 @@ const WhySigNoz = () => {
               }`}
               style={{ marginBottom: 20, marginTop: 0, whiteSpace: "normal" }}
             >
-              Integrated UI for metrics and traces
+              Integrated UI for metrics, traces and logs
             </button>
             <button
               onClick={handlePrivacy}
@@ -74,7 +79,7 @@ const WhySigNoz = () => {
               }`}
               style={{ marginBottom: 20, marginTop: 20, whiteSpace: "normal" }}
             >
-              Run business specific queries{" "}
+              Advanced traces filtering{" "}
             </button>
             <button
               onClick={handleExtendibility}
@@ -85,10 +90,10 @@ const WhySigNoz = () => {
               }`}
               style={{ marginBottom: 20, marginTop: 20, whiteSpace: "normal" }}
             >
-              Run aggregates on custom tags
+              Drill down into interesting traces 
             </button>
           </div>
-          <div className="col col--8">
+          <div className="col col--9">
             <div
               className="hero__screenshot"
               style={{ display: feature === "pricing" ? "block" : "none" }}
@@ -103,7 +108,7 @@ const WhySigNoz = () => {
               style={{ display: feature === "olap" ? "block" : "none" }}
             >
               <img
-                src={useBaseUrl("img/business-metrics-light-v2.webp")}
+                src={useBaseUrl("img/advanced-trace-filtering.webp")}
                 alt="SigNoz screenshot"
               />
             </div>
@@ -114,7 +119,7 @@ const WhySigNoz = () => {
               }}
             >
               <img
-                src={useBaseUrl("img/custom-aggregates.webp")}
+                src={useBaseUrl("img/trace-detail.webp")}
                 alt="SigNoz screenshot"
               />
             </div>
@@ -137,22 +142,20 @@ const features = [
     ),
   },
   {
-    title: "Forget HUGE SaaS bills",
+    title: "Metrics, Traces and Logs in one app",
     imageUrl: "img/Vector_2.svg",
     description: (
       <>
-        No abrupt pricing changes. No unexpected month-end bills. Get
-        transparent usage data.
+        Easily correlate from metrics, traces and logs with seamless click through from one to other
       </>
     ),
   },
   {
-    title: "Take Control",
+    title: "OpenTelemetry Native",
     imageUrl: "img/Vector_3v5.svg",
     description: (
       <>
-        No need to spend weeks in vendor slack for that one small feature.
-        Extend SigNoz to suit your needs.
+        Take advantage of rich OpenTelemetry ecosystem for instrumentation. 
       </>
     ),
   },
@@ -219,7 +222,7 @@ function TrySignozModal(props) {
           >
             <Link
               style={{ textDecoration: "none" }}
-              href={"/docs/deployment/docker"}
+              href={"/docs/install/docker"}
             >
               <ModalCard
                 title={"Open source"}
@@ -254,51 +257,7 @@ function TrySignozModal(props) {
   );
 }
 
-function ShowCompanyLogos() {
-  return (
-    <section className={styles.used_by}>
-      <div
-        className="container"
-        style={{ marginTop: "0.5rem", marginBottom: "0.5rem" }}
-      >
-        {/* <p class="tagline" >Used by teams at</p> */}
-        <p className={styles.tagline}> Used by teams at </p>
-        <ul>
-          <li>
-            <img
-              src="img/users/naver_white2_hie7gu.svg"
-              alt="naver logo"
-            />
-          </li>
-          <li>
-            <img
-              src="img/users/solve_white_njrutq.svg"
-              alt="solve logo"
-            />
-          </li>
-          <li>
-            <img
-              src="img/users/Outplay.webp"
-              alt="outplay logo"
-            />
-          </li>
-          <li>
-            <img
-              src="img/users/cafe21_1_vlrznt.svg"
-              alt="cafe24 logo"
-            />
-          </li>
-          <li>
-            <img
-              src="img/users/wpromote_white_1_njjebt.svg"
-              alt="wpromote logo"
-            />
-          </li>
-        </ul>
-      </div>
-    </section>
-  );
-}
+
 
 function Home() {
   const [showTrySignozModal, setShowTrySignozModal] = useState(false);
@@ -326,116 +285,12 @@ function Home() {
           isOpen={showTrySignozModal}
           onClose={closeTrySignozModal}
         />
-        <header className="hero hero--dark">
-          <div className="container">
-            <div className="row">
-              <div className="col col--4">
-                <p className="hero__title " style={{ fontWeight: "bold" }}>
-                  Open-source APM
-                  {/* Open-source application monitoring platform */}
-                </p>
-                <p className="hero__subtitle">
-                  Understand issues in your deployed applications & solve them
-                  quickly
-                </p>
-                <div style={{ margin: "1rem 0" }}>
-                  <Link
-                    style={{
-                      margin: "6px",
-                      paddingLeft: "10px",
-                      paddingRight: "10px",
-                    }}
-                    className="button button--primary "
-                    // onClick={setShowTrySignozModal.bind(this,true)}
-                    href={"/docs/deployment/docker"}
-                    onClick={getStartedClicked}
-                  >
-                    Get Started for free
-                  </Link>
-                  <Link
-                    style={{
-                      margin: "6px",
-                      paddingLeft: "10px",
-                      paddingRight: "10px",
-                    }}
-                    className="button button--outline button--secondary "
-                    href={"https://calendly.com/pranay-signoz/signoz-demo"}
-                    onClick={requestDemoClicked}
-                  >
-                    Book a Demo
-                  </Link>
-                </div>
-
-                {/* <p className="open-source-label">SigNoz is <strong>free</strong> and <strong>open-source</strong></p> */}
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    marginBottom: "16px",
-                  }}
-                >
-                  <img
-                    src={"/img/yc-logo-white.svg"}
-                    height={24}
-                    alt={"YCombinator"}
-                    style={{ marginRight: 16 }}
-                  />{" "}
-                  Backed by Y Combinator
-                </div>
-              </div>
-              <div className="col col--8">
-                <div className="hero__screenshot">
-                  <div style={{ width: "100%" }}>
-                    {showVideo === false ? (
-                      <div
-                        id={"demo-video-cover"}
-                        onClick={setShowVideo.bind(this, true)}
-                        style={{
-                          background: "url('/videos/demo_cover.webp')",
-                          height: 426,
-                          width: "100%",
-                        }}
-                      >
-                        <div id={"demo-overlay"}></div>
-                        <div id={"demo-content"}>
-                          <div
-                            style={{
-                              fontSize: 18,
-                              fontWeight: 600,
-                              marginBottom: 20,
-                            }}
-                          >
-                            SigNoz - Quick Intro
-                          </div>
-                          <PlaySVG />
-                        </div>
-                      </div>
-                    ) : (
-                      <div>
-                        <video
-                          width="100%"
-                          height="420"
-                          autoPlay
-                          controls
-                          id={"demo-video-player"}
-                        >
-                          <source
-                            src="https://demo-video-1.s3.us-east-2.amazonaws.com/demo.mp4"
-                            type="video/mp4"
-                          />
-                          Your browser does not support the video tag.
-                        </video>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </header>
+        
+        <Header />
         <main>
           {/* <SubscribeNearFold /> */}
           <ShowCompanyLogos />
+
 
           {features && features.length > 0 && (
             <section className={styles.features}>
@@ -454,14 +309,17 @@ function Home() {
             </section>
           )}
 
+          <SigNozFeatures />
+
+{/*
           <section>
             <div
               className="container"
               style={{ marginTop: "2rem", marginBottom: "2rem" }}
             >
               {/* <p className="hero__title ">Single pane for complete metrics and traces, no need to shift to different systems</p> */}
-              <h1 class="text--center">
-                Single pane for complete metrics and traces, no need to shift to
+ {/*}             <h1 class="text--center">
+                Single pane for metrics, traces and logs. No need to shift to
                 different systems{" "}
               </h1>
               <p className="hero__subtitle text--center">
@@ -469,8 +327,12 @@ function Home() {
               </p>
             </div>
           </section>
+*/}
 
-          <WhySigNoz />
+          {/* <WhySigNoz /> */}
+
+          <WhyOpenTelemetry />
+
 
           <section>
             <div
@@ -491,9 +353,9 @@ function Home() {
                 </div> */}
                       <div class="card__body">
                         <p>
-                          No fear of SaaS service getting hacked and your
-                          customer’s data getting compromised. Have complete
-                          control on your data.
+                          SigNoz is based natively on OpenTelemetry, a vendor neutral 
+                          open source standard for instrumentation. No fear of instrumenting 
+                          with vendor SDK and getting locked in.
                         </p>
                       </div>
                       {/* <div class="card__footer">
@@ -622,59 +484,189 @@ function Home() {
               </h1>
               {/* <h5 className="hero__subtitle text--center">Don't just take our word for it..</h5> */}
 
+              
               <div class="row">
 
                 <div class="col col--4">
+                  <div class="row">
+                    <div class="card-demo margin--md">
+                      <div class="card">
+                        <div class="card__header">
+                          <div class="avatar">
+                            <img
+                              class="avatar__photo"
+                              src="img/users/aditya-tripathi.webp"
+                              alt="aloysius"
+                            />
+                            <div class="avatar__intro">
+                              <h4 class="avatar__name" style={{ marginBottom: "0" }}>Aditya Tripathi</h4>
+                              <small class="avatar__subtitle">
+                                Backend Engineer
+                              </small>
+                            </div>
+
+                            <a
+                              class="platform-icon linkedin"
+                              href="https://www.linkedin.com/feed/update/urn:li:activity:6979486051165761536?commentUrn=urn%3Ali%3Acomment%3A%28activity%3A6979486051165761536%2C6981714434373107712%29"
+                              target="_blank"
+                              aria-label="Link to Twitter/LinkedIn mention"
+                            >
+                              <svg
+                                alt="LinkedIn icon"
+                                width="24"
+                                height="24"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                              <path d="M20.4482 20.4487H16.8921V14.8796C16.8921 13.5516 16.8684 11.8421 15.0426 11.8421C13.1905 11.8421 12.9071 13.289 12.9071 14.7829V20.4483H9.35106V8.99608H12.7649V10.5612H12.8127C13.5088 9.37094 14.8031 8.66008 16.1809 8.71122C19.7851 8.71122 20.4496 11.082 20.4496 14.1662L20.4482 20.4487ZM5.33865 7.43065C4.19895 7.43085 3.27487 6.50708 3.27466 5.36735C3.27446 4.22762 4.19821 3.30352 5.33791 3.30332C6.47762 3.30311 7.4017 4.22688 7.4019 5.36661C7.402 5.91393 7.18468 6.43887 6.79775 6.82595C6.41081 7.21303 5.88596 7.43055 5.33865 7.43065ZM7.11668 20.4487H3.55693V8.99608H7.11668V20.4487ZM22.221 0.000935081H1.77001C0.803454 -0.00997274 0.0108197 0.764276 -0.000976562 1.73084V22.2671C0.0104158 23.2341 0.802986 24.0092 1.77001 23.999H22.221C23.1899 24.011 23.9856 23.236 23.999 22.2671V1.72936C23.9852 0.760885 23.1895 -0.0133197 22.221 -0.000702441" fill="#03A9F4"/>
+
+                              </svg>
+                            </a>
+                          </div>
+                        </div>
+
+                        <div class="card__body padding--md">
+                          <p>
+                          It was a breeze working with SigNoz! The team has also been very helpful. Good product!.{" "}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="row">
+                    <div class="card-demo margin--md">
+                      <div class="card">
+                        <div class="card__header">
+                          <div class="avatar">
+                            <img
+                              class="avatar__photo"
+                              src="img/users/aloysius.webp"
+                              alt="aloysius"
+                            />
+                            <div class="avatar__intro">
+                              <h4 class="avatar__name" style={{ marginBottom: "0" }}>Aloysius Coelho</h4>
+                              <small class="avatar__subtitle">
+                                IT Infrastructure Engineer
+                              </small>
+                            </div>
+
+                            <a
+                              class="platform-icon linkedin"
+                              href="https://www.linkedin.com/posts/aloysius-coelho-%E2%98%81%EF%B8%8F-%F0%9F%91%A8%E2%80%8D%F0%9F%92%BB-bb1a741b_the-genesis-of-signoz-a-full-stack-open-activity-6798498123242205184-ZEgs"
+                              target="_blank"
+                              aria-label="Link to Twitter/LinkedIn mention"
+                            >
+                              <svg
+                                alt="LinkedIn icon"
+                                width="24"
+                                height="24"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                              <path d="M20.4482 20.4487H16.8921V14.8796C16.8921 13.5516 16.8684 11.8421 15.0426 11.8421C13.1905 11.8421 12.9071 13.289 12.9071 14.7829V20.4483H9.35106V8.99608H12.7649V10.5612H12.8127C13.5088 9.37094 14.8031 8.66008 16.1809 8.71122C19.7851 8.71122 20.4496 11.082 20.4496 14.1662L20.4482 20.4487ZM5.33865 7.43065C4.19895 7.43085 3.27487 6.50708 3.27466 5.36735C3.27446 4.22762 4.19821 3.30352 5.33791 3.30332C6.47762 3.30311 7.4017 4.22688 7.4019 5.36661C7.402 5.91393 7.18468 6.43887 6.79775 6.82595C6.41081 7.21303 5.88596 7.43055 5.33865 7.43065ZM7.11668 20.4487H3.55693V8.99608H7.11668V20.4487ZM22.221 0.000935081H1.77001C0.803454 -0.00997274 0.0108197 0.764276 -0.000976562 1.73084V22.2671C0.0104158 23.2341 0.802986 24.0092 1.77001 23.999H22.221C23.1899 24.011 23.9856 23.236 23.999 22.2671V1.72936C23.9852 0.760885 23.1895 -0.0133197 22.221 -0.000702441" fill="#03A9F4"/>
+
+                              </svg>
+                            </a>
+                          </div>
+                        </div>
+
+                        <div class="card__body padding--md">
+                          <p>
+                            SigNoz - Serious consideration over Grafana and
+                            WatchDog.{" "}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="row">
+                    <div class="card-demo margin--md">
+                      <div class="card">
+                        <div class="card__header">
+                          <div class="avatar">
+                            <img
+                              class="avatar__photo"
+                              src="img/users/pawan-outplay.webp"
+                              alt="pawan bhadauria"
+                            />
+                            <div class="avatar__intro">
+                              <h4 class="avatar__name" style={{ marginBottom: "0" }}>Pawan Bhadauria</h4>
+                              <small class="avatar__subtitle">
+                                VP - Engineering, Outplay
+                              </small>
+                            </div>
+
+                            <a
+                              class="platform-icon linkedin"
+                              href="https://www.linkedin.com/posts/pawan-bhadauria-25980b7_seed-to-scale-podcast-series-by-accel-insights-activity-6877448856892768256-Fapw"
+                              target="_blank"
+                              aria-label="Link to Twitter/LinkedIn mention"
+                            >
+                              <svg
+                                alt="LinkedIn icon"
+                                width="24"
+                                height="24"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                              <path d="M20.4482 20.4487H16.8921V14.8796C16.8921 13.5516 16.8684 11.8421 15.0426 11.8421C13.1905 11.8421 12.9071 13.289 12.9071 14.7829V20.4483H9.35106V8.99608H12.7649V10.5612H12.8127C13.5088 9.37094 14.8031 8.66008 16.1809 8.71122C19.7851 8.71122 20.4496 11.082 20.4496 14.1662L20.4482 20.4487ZM5.33865 7.43065C4.19895 7.43085 3.27487 6.50708 3.27466 5.36735C3.27446 4.22762 4.19821 3.30352 5.33791 3.30332C6.47762 3.30311 7.4017 4.22688 7.4019 5.36661C7.402 5.91393 7.18468 6.43887 6.79775 6.82595C6.41081 7.21303 5.88596 7.43055 5.33865 7.43065ZM7.11668 20.4487H3.55693V8.99608H7.11668V20.4487ZM22.221 0.000935081H1.77001C0.803454 -0.00997274 0.0108197 0.764276 -0.000976562 1.73084V22.2671C0.0104158 23.2341 0.802986 24.0092 1.77001 23.999H22.221C23.1899 24.011 23.9856 23.236 23.999 22.2671V1.72936C23.9852 0.760885 23.1895 -0.0133197 22.221 -0.000702441" fill="#03A9F4"/>
+
+                              </svg>
+                            </a>
+                          </div>
+                        </div>
+
+                        <div class="card__body padding--md">
+                          <p>
+                            We are using Signoz at Outplay & our experience has
+                            been great. It has 5.4k stars on Github.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                
+                <div class="col col--4">
+                  <div class="row">
                   <div class="card-demo margin--md">
                     <div class="card">
                       <div class="card__header">
                         <div class="avatar">
                           <img
                             class="avatar__photo"
-                            src="img/users/aloysius.webp"
+                            src="img/users/anselm.jpg"
                             alt="aloysius"
-
                           />
                           <div class="avatar__intro">
-                            <h4 class="avatar__name">Aloysius Coelho</h4>
+                            <h4 class="avatar__name" style={{ marginBottom: "0" }}>Anselm Eickhoff</h4>
                             <small class="avatar__subtitle">
-                              IT Infrastructure Engineer
+                            Software Architect
                             </small>
                           </div>
 
                           <a
-                            class="platform-icon linkedin"
-                            href="https://www.linkedin.com/posts/aloysius-coelho-%E2%98%81%EF%B8%8F-%F0%9F%91%A8%E2%80%8D%F0%9F%92%BB-bb1a741b_the-genesis-of-signoz-a-full-stack-open-activity-6798498123242205184-ZEgs"
+                            class="platform-icon twitter"
+                            href="https://twitter.com/ae_play/status/1572993932094472195?s=20&t=LWWrW5EP_k5q6_mwbFN4jQ"
                             target="_blank"
                             aria-label="Link to Twitter/LinkedIn mention"
                           >
+
                             <svg
                               alt="LinkedIn icon"
-                              width="24"
-                              height="24"
-                              viewBox="0 0 24 24"
+                              width="25"
+                              height="20"
+                              viewBox="0 0 25 20"
                               fill="none"
                               xmlns="http://www.w3.org/2000/svg"
                             >
-                              <path
-                                class="fill"
-                                d="M0 1.71921C0 0.769972 0.794024 0 1.77355 0H22.2264C23.2059 0 24 0.769972 24 1.71921V22.2808C24 23.2303 23.2059 24 22.2264 24H1.77355C0.794024 24 0 23.2303 0 22.2808V1.71921Z"
-                                fill="#c0b9c9"
-                              ></path>
-                              <path
-                                class="color"
-                                fill-rule="evenodd"
-                                clip-rule="evenodd"
-                                d="M7.27512 20.0905V9.25314H3.65014V20.0905H7.27512ZM5.46262 7.77349C6.72672 7.77349 7.51352 6.9413 7.51352 5.90131C7.48996 4.8379 6.72672 4.02881 5.4866 4.02881C4.2466 4.02881 3.43585 4.8379 3.43585 5.90131C3.43585 6.9413 4.22248 7.77349 5.43899 7.77349H5.46255H5.46262Z"
-                                fill="#ffffff"
-                              ></path>
-                              <path
-                                class="color"
-                                fill-rule="evenodd"
-                                clip-rule="evenodd"
-                                d="M9.28094 20.0905H12.9059V14.0385C12.9059 13.7146 12.9295 13.391 13.0252 13.1594C13.2872 12.5123 13.8837 11.8421 14.8851 11.8421C16.1968 11.8421 16.7215 12.8359 16.7215 14.2928V20.0905H20.3462V13.8765C20.3462 10.5478 18.5578 8.99884 16.1729 8.99884C14.2173 8.99884 13.3588 10.085 12.8818 10.8248H12.906V9.25314H9.28104C9.32861 10.27 9.28104 20.0905 9.28104 20.0905H9.28094Z"
-                                fill="#ffffff"
-                              ></path>
+                            <path d="M24.9985 2.78581C24.1166 3.17644 23.168 3.43709 22.1674 3.56041C23.1847 2.95646 23.9673 1.99321 24.3346 0.855304C23.3827 1.41326 22.3281 1.82322 21.2062 2.03921C20.3103 1.08928 19.0324 0.5 17.6165 0.5C14.8967 0.5 12.6922 2.68515 12.6922 5.37959C12.6922 5.7609 12.7369 6.1322 12.8209 6.49283C8.72922 6.28752 5.10019 4.34235 2.6724 1.39059C2.24576 2.11187 2.00578 2.95646 2.00578 3.84772C2.00578 5.54158 2.87305 7.03279 4.1956 7.91138C3.38834 7.88672 2.6284 7.66207 1.96312 7.3021C1.96312 7.31677 1.96312 7.33876 1.96312 7.35943C1.96312 9.72657 3.66098 11.6977 5.91146 12.1464C5.50016 12.259 5.06553 12.3217 4.61757 12.3217C4.29959 12.3217 3.98962 12.2857 3.68964 12.2317C4.31626 14.1662 6.13411 15.5801 8.28793 15.6221C6.60273 16.9286 4.48024 17.7112 2.17244 17.7112C1.7738 17.7112 1.38384 17.6886 0.998535 17.6419C3.17902 19.0225 5.76814 19.8317 8.54724 19.8317C17.6032 19.8317 22.5574 12.395 22.5574 5.94355C22.5574 5.73223 22.5507 5.52158 22.5407 5.3136C23.5073 4.63099 24.3406 3.76973 24.9985 2.78581Z" fill="#03A9F4"/>
                             </svg>
                           </a>
                         </div>
@@ -682,80 +674,16 @@ function Home() {
 
                       <div class="card__body padding--md">
                         <p>
-                          SigNoz - Serious consideration over Grafana and
-                          WatchDog.{" "}
+                        NewRelic: receiving OpenTelemetry at all takes me 1/2 day to grok, docs are a mess. Traces show up after 5min. I burn the free 100GB/mo in 1 day of light testing.
+
+                        @SignozHQ: can run it locally (∞GB), has a special tutorial for OpenTelemetry + Rust! Traces show up immediately.{" "}
                         </p>
                       </div>
                     </div>
                   </div>
-                </div>
-
-                <div class="col col--4">
-                  <div class="card-demo margin--md">
-                    <div class="card">
-                      <div class="card__header">
-                        <div class="avatar">
-                          <img
-                            class="avatar__photo"
-                            src="img/users/pawan-outplay.webp"
-                            alt="pawan bhadauria"
-
-                          />
-                          <div class="avatar__intro">
-                            <h4 class="avatar__name">Pawan Bhadauria</h4>
-                            <small class="avatar__subtitle">
-                              VP - Engineering, Outplay
-                            </small>
-                          </div>
-
-                          <a
-                            class="platform-icon linkedin"
-                            href="https://www.linkedin.com/posts/pawan-bhadauria-25980b7_seed-to-scale-podcast-series-by-accel-insights-activity-6877448856892768256-Fapw"
-                            target="_blank"
-                            aria-label="Link to Twitter/LinkedIn mention"
-                          >
-                            <svg
-                              alt="LinkedIn icon"
-                              width="24"
-                              height="24"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                class="fill"
-                                d="M0 1.71921C0 0.769972 0.794024 0 1.77355 0H22.2264C23.2059 0 24 0.769972 24 1.71921V22.2808C24 23.2303 23.2059 24 22.2264 24H1.77355C0.794024 24 0 23.2303 0 22.2808V1.71921Z"
-                                fill="#c0b9c9"
-                              ></path>
-                              <path
-                                class="color"
-                                fill-rule="evenodd"
-                                clip-rule="evenodd"
-                                d="M7.27512 20.0905V9.25314H3.65014V20.0905H7.27512ZM5.46262 7.77349C6.72672 7.77349 7.51352 6.9413 7.51352 5.90131C7.48996 4.8379 6.72672 4.02881 5.4866 4.02881C4.2466 4.02881 3.43585 4.8379 3.43585 5.90131C3.43585 6.9413 4.22248 7.77349 5.43899 7.77349H5.46255H5.46262Z"
-                                fill="#ffffff"
-                              ></path>
-                              <path
-                                class="color"
-                                fill-rule="evenodd"
-                                clip-rule="evenodd"
-                                d="M9.28094 20.0905H12.9059V14.0385C12.9059 13.7146 12.9295 13.391 13.0252 13.1594C13.2872 12.5123 13.8837 11.8421 14.8851 11.8421C16.1968 11.8421 16.7215 12.8359 16.7215 14.2928V20.0905H20.3462V13.8765C20.3462 10.5478 18.5578 8.99884 16.1729 8.99884C14.2173 8.99884 13.3588 10.085 12.8818 10.8248H12.906V9.25314H9.28104C9.32861 10.27 9.28104 20.0905 9.28104 20.0905H9.28094Z"
-                                fill="#ffffff"
-                              ></path>
-                            </svg>
-                          </a>
-                        </div>
-                      </div>
-
-                      <div class="card__body padding--md">
-                        <p>
-                        We are using Signoz at Outplay & our experience has been great. It has 5.4k stars on Github.
-                        </p>
-                      </div>
-                    </div>
                   </div>
-                </div>
 
-                <div class="col col--4">
+                  <div class="row">
                   <div class="card-demo margin--md">
                     <div class="card">
                       <div class="card__header">
@@ -766,7 +694,7 @@ function Home() {
                             alt="rachid"
                           />
                           <div class="avatar__intro">
-                            <h4 class="avatar__name">Rachid Zarouali</h4>
+                            <h4 class="avatar__name" style={{ marginBottom: "0" }}>Rachid Zarouali</h4>
                             <small class="avatar__subtitle">
                               Docker Captain, Microsoft Azure MVP
                             </small>
@@ -786,25 +714,8 @@ function Home() {
                               fill="none"
                               xmlns="http://www.w3.org/2000/svg"
                             >
-                              <path
-                                class="fill"
-                                d="M0 1.71921C0 0.769972 0.794024 0 1.77355 0H22.2264C23.2059 0 24 0.769972 24 1.71921V22.2808C24 23.2303 23.2059 24 22.2264 24H1.77355C0.794024 24 0 23.2303 0 22.2808V1.71921Z"
-                                fill="#c0b9c9"
-                              ></path>
-                              <path
-                                class="color"
-                                fill-rule="evenodd"
-                                clip-rule="evenodd"
-                                d="M7.27512 20.0905V9.25314H3.65014V20.0905H7.27512ZM5.46262 7.77349C6.72672 7.77349 7.51352 6.9413 7.51352 5.90131C7.48996 4.8379 6.72672 4.02881 5.4866 4.02881C4.2466 4.02881 3.43585 4.8379 3.43585 5.90131C3.43585 6.9413 4.22248 7.77349 5.43899 7.77349H5.46255H5.46262Z"
-                                fill="#ffffff"
-                              ></path>
-                              <path
-                                class="color"
-                                fill-rule="evenodd"
-                                clip-rule="evenodd"
-                                d="M9.28094 20.0905H12.9059V14.0385C12.9059 13.7146 12.9295 13.391 13.0252 13.1594C13.2872 12.5123 13.8837 11.8421 14.8851 11.8421C16.1968 11.8421 16.7215 12.8359 16.7215 14.2928V20.0905H20.3462V13.8765C20.3462 10.5478 18.5578 8.99884 16.1729 8.99884C14.2173 8.99884 13.3588 10.085 12.8818 10.8248H12.906V9.25314H9.28104C9.32861 10.27 9.28104 20.0905 9.28104 20.0905H9.28094Z"
-                                fill="#ffffff"
-                              ></path>
+                            <path d="M20.4482 20.4487H16.8921V14.8796C16.8921 13.5516 16.8684 11.8421 15.0426 11.8421C13.1905 11.8421 12.9071 13.289 12.9071 14.7829V20.4483H9.35106V8.99608H12.7649V10.5612H12.8127C13.5088 9.37094 14.8031 8.66008 16.1809 8.71122C19.7851 8.71122 20.4496 11.082 20.4496 14.1662L20.4482 20.4487ZM5.33865 7.43065C4.19895 7.43085 3.27487 6.50708 3.27466 5.36735C3.27446 4.22762 4.19821 3.30352 5.33791 3.30332C6.47762 3.30311 7.4017 4.22688 7.4019 5.36661C7.402 5.91393 7.18468 6.43887 6.79775 6.82595C6.41081 7.21303 5.88596 7.43055 5.33865 7.43065ZM7.11668 20.4487H3.55693V8.99608H7.11668V20.4487ZM22.221 0.000935081H1.77001C0.803454 -0.00997274 0.0108197 0.764276 -0.000976562 1.73084V22.2671C0.0104158 23.2341 0.802986 24.0092 1.77001 23.999H22.221C23.1899 24.011 23.9856 23.236 23.999 22.2671V1.72936C23.9852 0.760885 23.1895 -0.0133197 22.221 -0.000702441" fill="#03A9F4"/>
+
                             </svg>
                           </a>
                         </div>
@@ -816,6 +727,177 @@ function Home() {
                           alternative has born in the name of SigNoz. It could
                           offer a serious challenger to Datadog / New Relic and
                           other SaaS solutions.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  </div>
+
+                </div>
+
+                <div class="col col--4">
+                <div class="row">
+                    <div class="card-demo margin--md">
+                      <div class="card">
+                        <div class="card__header">
+                          <div class="avatar">
+                            <img
+                              class="avatar__photo"
+                              src="img/users/apoorva-kumar.webp"
+                              alt="apoorva kumar"
+                            />
+                            <div class="avatar__intro">
+                              <h4 class="avatar__name" style={{ marginBottom: "0" }}>Apoorva Kumar</h4>
+                              <small class="avatar__subtitle">
+                              Lead Backend Infra Eng, NuCash
+                              </small>
+                            </div>
+
+                            <a
+                              class="platform-icon linkedin"
+                              href="https://www.linkedin.com/posts/apoorva-kumar_its-0319-am-ist-just-deployed-signoz-activity-6988981099896967168-c7yf"
+                              target="_blank"
+                              aria-label="Link to Twitter/LinkedIn mention"
+                            >
+                              <svg
+                                alt="LinkedIn icon"
+                                width="24"
+                                height="24"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                              <path d="M20.4482 20.4487H16.8921V14.8796C16.8921 13.5516 16.8684 11.8421 15.0426 11.8421C13.1905 11.8421 12.9071 13.289 12.9071 14.7829V20.4483H9.35106V8.99608H12.7649V10.5612H12.8127C13.5088 9.37094 14.8031 8.66008 16.1809 8.71122C19.7851 8.71122 20.4496 11.082 20.4496 14.1662L20.4482 20.4487ZM5.33865 7.43065C4.19895 7.43085 3.27487 6.50708 3.27466 5.36735C3.27446 4.22762 4.19821 3.30352 5.33791 3.30332C6.47762 3.30311 7.4017 4.22688 7.4019 5.36661C7.402 5.91393 7.18468 6.43887 6.79775 6.82595C6.41081 7.21303 5.88596 7.43055 5.33865 7.43065ZM7.11668 20.4487H3.55693V8.99608H7.11668V20.4487ZM22.221 0.000935081H1.77001C0.803454 -0.00997274 0.0108197 0.764276 -0.000976562 1.73084V22.2671C0.0104158 23.2341 0.802986 24.0092 1.77001 23.999H22.221C23.1899 24.011 23.9856 23.236 23.999 22.2671V1.72936C23.9852 0.760885 23.1895 -0.0133197 22.221 -0.000702441" fill="#03A9F4"/>
+
+                              </svg>
+                            </a>
+                          </div>
+                        </div>
+
+                        <div class="card__body padding--md">
+                          <p>
+                          Just deployed SigNoz to an EKS cluster.Still can't believe this is free, everything works like a charm.
+                          I am really really impressed with the documentation and dashboard.
+                          
+                          <br/><br/>
+
+
+                          Still in awe. Sneak peek into running the product, you can easily set retention period for metrics, traces and logs with one click and set cold storage for old logs to s3 with few config changes.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+
+                  <div class="row">
+                  <div class="card-demo margin--md">
+                    <div class="card">
+                      <div class="card__header">
+                        <div class="avatar">
+                          <img
+                            class="avatar__photo"
+                            src="img/users/faris.jpeg"
+                            alt="aloysius"
+                          />
+                          <div class="avatar__intro">
+                            <h4 class="avatar__name" style={{ marginBottom: "0" }}>Faris Hassan</h4>
+                            <small class="avatar__subtitle">
+                            Lead Data Scientist 
+                            </small>
+                          </div>
+
+                          <a
+                            class="platform-icon twitter"
+                            href="https://twitter.com/Iamfarisology/status/1553787074339381249"
+                            target="_blank"
+                            aria-label="Link to Twitter/LinkedIn mention"
+                          >
+
+                            <svg
+                              alt="LinkedIn icon"
+                              width="25"
+                              height="20"
+                              viewBox="0 0 25 20"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                            <path d="M24.9985 2.78581C24.1166 3.17644 23.168 3.43709 22.1674 3.56041C23.1847 2.95646 23.9673 1.99321 24.3346 0.855304C23.3827 1.41326 22.3281 1.82322 21.2062 2.03921C20.3103 1.08928 19.0324 0.5 17.6165 0.5C14.8967 0.5 12.6922 2.68515 12.6922 5.37959C12.6922 5.7609 12.7369 6.1322 12.8209 6.49283C8.72922 6.28752 5.10019 4.34235 2.6724 1.39059C2.24576 2.11187 2.00578 2.95646 2.00578 3.84772C2.00578 5.54158 2.87305 7.03279 4.1956 7.91138C3.38834 7.88672 2.6284 7.66207 1.96312 7.3021C1.96312 7.31677 1.96312 7.33876 1.96312 7.35943C1.96312 9.72657 3.66098 11.6977 5.91146 12.1464C5.50016 12.259 5.06553 12.3217 4.61757 12.3217C4.29959 12.3217 3.98962 12.2857 3.68964 12.2317C4.31626 14.1662 6.13411 15.5801 8.28793 15.6221C6.60273 16.9286 4.48024 17.7112 2.17244 17.7112C1.7738 17.7112 1.38384 17.6886 0.998535 17.6419C3.17902 19.0225 5.76814 19.8317 8.54724 19.8317C17.6032 19.8317 22.5574 12.395 22.5574 5.94355C22.5574 5.73223 22.5507 5.52158 22.5407 5.3136C23.5073 4.63099 24.3406 3.76973 24.9985 2.78581Z" fill="#03A9F4"/>
+                            </svg>
+                          </a>
+                        </div>
+                      </div>
+
+                      <div class="card__body padding--md">
+                        <p>
+                        What's better than #datadog? Open source!
+                        I know @SignozHQ what else out there? #opensource {" "}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  </div>
+
+                </div>
+              
+              </div>
+
+            </div>
+          </section>
+
+
+
+          <section>
+            <div
+              className="container"
+              style={{ marginTop: "6rem", marginBottom: "2rem" }}
+            >
+              {/* <img src="https://res.cloudinary.com/dcv3epinx/image/upload/v1621017373/social-icons_vyaa6h.svg" alt="Twitter and LinkedIn logos" /> */}
+              <h1 class="text--center ">
+                {" "}
+                SigNoz Office Hour & Demo videos
+              </h1>
+              <p className="hero__subtitle text--center">Check our <a href={"https://www.youtube.com/channel/UC_A6j9YeM33SCDEY7BaPCBw"} target={'_blank'}> youtube channel </a> for more tutorials</p>
+
+              <div class="row">
+                <div class="col col--4">
+                  <div class="card-demo margin--sm">
+                    <div class="card">
+                   
+
+                      <div class="card__body">
+                        <p>
+                        <LiteYoutubeEmbed id="oQFMfEc9JNI" mute={false} />
+
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col col--4">
+                  <div class="card-demo margin--sm">
+                    <div class="card">
+   
+                      <div class="card__body padding--md">
+                        <p>
+                        <LiteYoutubeEmbed id="u2PiWKEdjCw" mute={false} />
+
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col col--4">
+                  <div class="card-demo margin--sm">
+                    <div class="card">
+                      
+
+                      <div class="card__body padding--md">
+                        <p>
+                        <LiteYoutubeEmbed id="CgByZJeuRZY" mute={false} />
+
                         </p>
                       </div>
                     </div>
@@ -842,78 +924,7 @@ function Home() {
                     Frequently Asked Questions
                   </p>
                   <div class="card-demo margin--md">
-                    <Collapse
-                      bordered={false}
-                      // defaultActiveKey={['1']}
-                      expandIcon={({ isActive }) => (
-                        <CaretRightOutlined rotate={isActive ? 90 : 0} />
-                      )}
-                      className="site-collapse-custom-collapse"
-                    >
-                      <Panel
-                        header=" I am looking for an application monitoring tool, is SigNoz an APM?"
-                        key="1"
-                        className="card"
-                        style={{
-                          marginTop: "1rem",
-                          marginBottom: "1rem",
-                          padding: "1rem",
-                        }}
-                      >
-                        <div class="card__body">
-                          <p>
-                            SigNoz is more than an APM. We provide all features
-                            like metrics and request traces which APMs provide.
-                            On top of that. we provide advanced filtering on
-                            trace data and custom aggregation on it
-                          </p>
-                        </div>
-                      </Panel>
-
-                      <Panel
-                        header="How does SigNoz compare to Jaeger?"
-                        key="2"
-                        className="card"
-                        style={{
-                          marginTop: "1rem",
-                          marginBottom: "1rem",
-                          padding: "1rem",
-                        }}
-                      >
-                        <div class="card__body">
-                          <p>
-                            Few ways in which SigNoz is more advanced than
-                            Jaeger : Jaeger UI doesn’t show any metrics on
-                            traces or on filtered traces, and Jaeger can’t get
-                            aggregates on filtered traces. For example,
-                            Cassandra doesn’t support Group By, Max, etc.
-                          </p>
-                        </div>
-                      </Panel>
-
-                      <Panel
-                        header="What will be your paid plan like?"
-                        key="3"
-                        className="card"
-                        style={{
-                          marginTop: "1rem",
-                          marginBottom: "1rem",
-                          padding: "1rem",
-                        }}
-                      >
-                        <div class="card__body">
-                          <p>
-                            SigNoz will be always open-source and free to be
-                            self-hosted for smaller teams. We will have role
-                            based Pricing for our enterprise edition which will
-                            have advanced features needed by bigger teams.
-                            <br></br>
-                            Though for users who want hosted version of SigNoz,
-                            we do have cloud plans.
-                          </p>
-                        </div>
-                      </Panel>
-                    </Collapse>
+                    <FAQBody />
                   </div>
                 </div>
               </div>
@@ -933,17 +944,24 @@ function Home() {
                     <Link
                       className="button button--primary margin--md "
                       //  onClick={setShowTrySignozModal.bind(this,true)}>
-                      href={"/docs/"}
+                      href={"/pricing/"}
                     >
-                      Get Started
+                      Try SigNoz Cloud
+
                     </Link>
                     <Link
-                      className="button button--secondary margin--md"
-                      href={"https://calendly.com/pranay-signoz/signoz-demo"}
-                      onClick={requestDemoClicked}
-                    >
-                      Book a Demo
-                    </Link>
+                    style={{
+                      margin: "6px",
+                      paddingLeft: "30px",
+                      paddingRight: "30px",
+                    }}
+                    className="button button--outline button--secondary "
+                    href={"/docs/install/"}
+                    onClick={requestDemoClicked}
+                  >
+                    Self Host
+
+                  </Link>
                   </div>
                 </div>
               </div>

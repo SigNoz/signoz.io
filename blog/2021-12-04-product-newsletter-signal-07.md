@@ -2,7 +2,7 @@
 title: Get alerts on metrics that matter to you with SigNoz  - SigNal 07
 slug: community-update-07
 date: 2021-12-04
-tags: [product-updates, community]
+tags: [Product Updates]
 authors: ankit_anand
 description: It's time for the monthly product update of SigNoz - a full-stack open-source APM tool. Find out what we've been upto at SigNoz during November, 2021.
 image: /img/blog/2021/12/signal_07_cover2.webp
@@ -11,6 +11,9 @@ keywords:
  - SigNoz Product Update
  - Dev community
 ---
+
+import { LiteYoutubeEmbed } from "react-lite-yt-embed";
+
 <head>
   <link rel="canonical" href="https://signoz.io/blog/community-update-07/"/>
 </head>
@@ -72,23 +75,15 @@ In the current release, we support slack as a notification channel. We will be e
 
 Here's a quick video on how to set alerts and receive notifications on Slack channels:
 
-export const YoutubeWrapper = ({children, url}) => (
-  <div 
-    style={{
-    position: 'relative', 
-    width: '100%',
-    paddingBottom: '56.25%', 
-    height: "0",
-    }} >
-    <iframe width="560" height="315" style={{ position: 'absolute', top:'0', left: '0', width: '100%', height: '100%'}} src={ url } title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-</div>
-);
+<p>&nbsp;</p>
 
-<YoutubeWrapper url="https://www.youtube.com/embed/HBLtC3UKpmA"> </YoutubeWrapper><br></br>
+<LiteYoutubeEmbed id="HBLtC3UKpmA" mute={false} />
+
+<p>&nbsp;</p>
 
 We would love to hear your feedback on alerts. Join our slack community to pass on any suggestions for improvement.
 
-[![SigNoz Slack community](/img/blog/common/join_slack_cta.png)](https://bit.ly/signoz-slack)
+[![SigNoz Slack community](/img/blog/common/join_slack_cta.png)](https://signoz.io/slack)
 
 ## Featured issue
 [Package SigNoz as a Single binary](https://github.com/SigNoz/signoz/issues/392)<br></br>

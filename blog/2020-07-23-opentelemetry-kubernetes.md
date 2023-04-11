@@ -2,7 +2,7 @@
 title: Getting started with OpenTelemetry on Kubernetes
 slug: opentelemetry-kubernetes
 date: 2020-07-23
-tags: [opentelemetry, kubernetes, distributed-tracing]
+tags: [OpenTelemetry]
 author: Joy Bhattacharjee
 author_url: https://twitter.com/hashfyre
 author_image_url: /img/authors/5ZPWaLTu_400x400.webp
@@ -68,7 +68,7 @@ Please note that the above lists and diagrams are not exhaustive and only indica
 
 # Deploying to Kubernetes
 
-We will now try and deploy a fully working example of open-telemetry collector in kubernetes. While a full-fledged docker example exists on [https://github.com/open-telemetry/opentelemetry-collector/tree/master/examples/demo](https://github.com/open-telemetry/opentelemetry-collector/tree/master/examples/demo), the same could not be said for kubernetes and this post tries to bridge that gap. We assume familiarity with kubernetes objects like Deployment, Service, Daemonset, ConfigMap etc going ahead.
+We will now try and deploy a fully working example of open-telemetry collector in kubernetes. We assume familiarity with kubernetes objects like Deployment, Service, Daemonset, ConfigMap etc going ahead.
 
 ![OpenTelemetry collector kubernetes deployment](/img/blog/2020/07/Copy-of-fig-4---otel-collector-k8s.webp)Fig 4. Opentelemetry-collector kubernetes deployment
 

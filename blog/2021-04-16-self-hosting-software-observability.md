@@ -2,7 +2,7 @@
 title: Self-hosting software & why it may be worth considering again now
 slug: self-hosting-software-observability
 date: 2021-04-16
-tags: [self-hosting, open-source, application-monitoring]
+tags: [Open Source, Product]
 authors: pranay
 description: With changing privacy laws, it's getting riskier to send your data to third party SaaS vendors. In the observability domain, traces and logs are something which you don't want to send outside. Let's find out why self-hosted software solutions are replacing SaaS providers now.
 image: /img/blog/2021/04/signoz-self-hosted-1.webp

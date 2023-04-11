@@ -2,7 +2,7 @@
 title: Crossed 5000+ GitHub stars, metrics generation from spans - SigNal 06
 slug: community-update-06
 date: 2021-11-03
-tags: [product-updates, community]
+tags: [Product Updates]
 authors: ankit_anand
 description: It's time for the monthly product update of SigNoz - a full-stack open-source and observability tool. Find out what we've been upto at SigNoz during October, 2021.
 image: /img/blog/2021/11/signal_06_cover.webp
@@ -100,7 +100,7 @@ Highlighting some key PRs by our awesome contributors:
 
 </div>
 
-We also crossed 300+ members on our [slack community](https://bit.ly/signoz-slack).🥳
+We also crossed 300+ members on our [slack community](https://signoz.io/slack).🥳
 
 ### **Crossed 5000+ GitHub stars**
 

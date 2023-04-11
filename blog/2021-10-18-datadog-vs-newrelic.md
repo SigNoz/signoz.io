@@ -1,10 +1,10 @@
 ---
 title: DataDog vs New Relic | Detailed comparison (5 key features)
 slug: datadog-vs-newrelic
-date: 2021-10-18
-tags: [datadog, apm-tools]
+date: 2023-01-05
+tags: [Tools Comparison]
 authors: ankit_anand
-description: Want to choose between DataDog and New Relic? In this article, let's go through 5 key capabilities of both the tools...
+description: DataDog and New Relic are both Application Monitoring Tools used to monitor applications for performance issues. Want to choose between DataDog and New Relic? In this article, let's go through 5 key capabilities of both the tools...
 image: /img/blog/2021/10/datadog_vs_newrelic_cover-min.webp
 hide_table_of_contents: true
 keywords:
@@ -40,7 +40,7 @@ DataDog and New Relic provide numerous products to monitor applications. Some of
 
 Let's compare DataDog and New Relic based on the features they provide in the above-mentioned categories.
 
->You can also check out [SigNoz](https://signoz.io/?utm_source=blog&utm_medium=datadog_vs_newrelic), an open-source APM tool. It is built natively for OpenTelemetry and supports multiple backend storage - ClickHouse or Kafka + Druid. Choosing an open-source APM over SaaS vendors has many benefits for developers. At the same time, [SigNoz](https://signoz.io/?utm_source=blog&utm_medium=datadog_vs_newrelic) is built to avoid the pain of maintenance that comes with most open-source tools.
+>You can also check out [SigNoz](https://signoz.io/?utm_source=blog&utm_medium=datadog_vs_newrelic), a full-stack open-source APM tool. SigNoz provides logs, metrics, and traces all under a single dashboard. It is built to support OpenTelemetry natively. Choosing an open-source APM over SaaS vendors has many benefits for developers. At the same time, [SigNoz](https://signoz.io/?utm_source=blog&utm_medium=datadog_vs_newrelic) is built to avoid the pain of maintenance that comes with most open-source tools.
 
 ## Application Performance Monitoring
 
@@ -229,12 +229,15 @@ Some of the key features of New Relic Browser Monitoring include:
 ## Issues with existing monitoring vendors
 DataDog and New Relic are great monitoring tools and provide a gamut of monitoring products that any organization can use. But these enterprise monitoring tools can have the following issues:
 
-- Crazy node-based pricing,
+- Crazy node-based pricing
 Node-based pricing doesn’t make sense in today’s micro-services architecture. Any node which is live for more than 8hrs in a month is charged. So, unsuitable for spiky workloads
+
 - Very costly
  These tools are very costly if you want to do things like sending custom metrics.
+
 - Cloud-only
 Hence,  not suitable for companies that have concerns with sending data outside their infra
+
 - Closed product roadmap
 For any small feature, you are dependent on their roadmap. We think this is an unnecessary restriction for a product which developers use. A product used by developers should be extendible
 
@@ -245,15 +248,16 @@ The other alternative can be going for an open-source alternative. But the probl
 
 Key architecture features:
 
+- **Logs, Metrics, and traces under a single dashboard**<br></br>
+    SigNoz provides logs, metrics, and traces all under a single dashboard. You can also correlate these telemetry signals to debug your application issues quickly. 
+
 - **Native OpenTelemetry support**<br></br>
   SigNoz is built to support <a href = "https://opentelemetry.io/" rel="noopener noreferrer nofollow" target="_blank" ><b>OpenTelemetry</b></a> natively, which is quietly becoming the world standard to generate and manage telemetry data.
-- **Flexible and scalable Database storage**<br></br>
-  SigNoz provides users flexibility in terms of storage. You can choose between ClickHouse or Kafka + Druid as your backend storage while installing SigNoz.
 
   <Screenshot
     alt="Architecture of SigNoz with OpenTelemetry and ClickHouse"
     height={500}
-    src="/img/blog/2021/09/SigNoz_architecture_clickhouse.webp"
+    src="/img/architecture-signoz-clickhouse.svg"
     title="Architecture of SigNoz with ClickHouse as storage backend and OpenTelemetry for code instrumentatiion"
     width={700}
 />
@@ -278,6 +282,15 @@ You can also use flamegraphs to visualize spans from your trace data. All of thi
     width={700}
 />
 
+You can use logs to dig deeper into application issues.
+
+<figure data-zoomable align='center'>
+    <img src="/img/blog/common/signoz_logs.webp" alt="Logs management in SigNoz"/>
+    <figcaption><i>Logs management in SigNoz</i></figcaption>
+</figure>
+
+<br></br>
+
 You can also build custom metrics dashboard for your infrastructure.
 
 <Screenshot
@@ -288,6 +301,15 @@ You can also build custom metrics dashboard for your infrastructure.
     width={700}
 />
 
+The logs tab in SigNoz has advanced features like a log query builder, search across multiple fields, structured table view, JSON view, etc.
+
+<figure data-zoomable align='center'>
+    <img src="/img/blog/common/signoz_logs.webp" alt="Log management in SigNoz"/>
+    <figcaption><i>Log management in SigNoz</i></figcaption>
+</figure>
+
+<br></br>
+
 
 Some of the things SigNoz can help you track:
 
@@ -297,6 +319,11 @@ Some of the things SigNoz can help you track:
 - Filter traces by service name, operation, latency, error, tags/annotations.
 - Run aggregates on trace data
 - Unified UI for both metrics and traces
+- Exceptions monitoring
+- Service dependency graph
+- Alert setting on critical metrics
+- Logs 
+- Correlated telemetry signals
 
 
 ## Getting started with SigNoz
@@ -304,7 +331,7 @@ Some of the things SigNoz can help you track:
 You can get started with SigNoz using just three commands at your terminal.
 
 ```jsx
-git clone https://github.com/SigNoz/signoz.git
+git clone -b main https://github.com/SigNoz/signoz.git
 cd signoz/deploy/
 ./install.sh
 ```
@@ -312,7 +339,7 @@ cd signoz/deploy/
 
 For detailed instructions, you can visit our documentation.
 
-[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/deployment/docker/?utm_source=blog&utm_medium=dd_vs_newrelic)
+[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/?utm_source=blog&utm_medium=dd_vs_newrelic)
 
 
 You can check out SigNoz's GitHub repo here 👇

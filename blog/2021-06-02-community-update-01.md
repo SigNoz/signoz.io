@@ -2,7 +2,7 @@
 title: Our first community update - Signal #01
 slug: community-update-01
 date: 2021-06-02
-tags: [product-updates, community]
+tags: [Product Updates]
 authors: ankit_anand
 description: Excited to launch our first newsletter. We are delighted to have crossed 1.6k stars on GitHub, growing more than 30% last month. Catch up on what we're upto at SigNoz!
 image: /img/blog/2021/06/signal_01_cover_hc.webp
@@ -54,11 +54,11 @@ As we design the details of this, would love to hear from you what features woul
 
 ## What's upcoming?
 
-**Clickhouse support**
+**ClickHouse support**
 
-We had lots of interest from the community in adding [support for Clickhouse ](https://signoz.us6.list-manage.com/track/click?u=eff7cdfa1bc1f3234ef2b97f7&id=46980fd8c4&e=de89f4dbaa)which would make SigNoz less resource intensive compared to current architecture based on Kafka & Druid.
+We had lots of interest from the community in adding [support for ClickHouse ](https://signoz.us6.list-manage.com/track/click?u=eff7cdfa1bc1f3234ef2b97f7&id=46980fd8c4&e=de89f4dbaa)which would make SigNoz less resource intensive compared to current architecture based on Kafka & Druid.
 
-We heard you and have already started exploring design details for Clickhouse support. Watch out for more updates in the coming newsletters 🤓
+We heard you and have already started exploring design details for ClickHouse support. Watch out for more updates in the coming newsletters 🤓
 
 ## SigNoz News
 
@@ -88,6 +88,6 @@ Shout out to [Anwesh](https://github.com/anweshknayak) and [Nidhi](https://githu
 
 Thank you for taking out the time to go through our first newsletter :) If you have any feedback or want any changes with the format, create an issue [**here**](https://github.com/SigNoz/signoz).
 
-Also, come join us in our [slack](https://join.slack.com/t/signoz-community/shared_invite/zt-lrjknbbp-J_mI13rlw8pGF4EWBnorJA) community, we would love to host you there :)
+Also, come join us in our [slack](https://signoz.io/slack) community, we would love to host you there :)
 
 [![SigNoz GitHub repo](/img/blog/common/signoz_github.webp)](https://github.com/SigNoz/signoz)

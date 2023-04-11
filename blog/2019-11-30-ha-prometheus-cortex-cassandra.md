@@ -2,7 +2,7 @@
 title: Setting up HA Prometheus with Cortex and Cassandra
 slug: ha-prometheus-cortex-cassandra
 date_published: 2019-11-30
-tags: [prometheus, apm-tools]
+tags: [APM, Prometheus]
 authors: ankit_nayan
 description: In this blog, we explain how we enable high availability Prometheus using Cortex and Cassandra. This provides a single pane of view across multiple clusters - which enables visualising all monitoring metrics in one go.
 image: /img/blog/2019/12/HA-Prometheus-1.webp

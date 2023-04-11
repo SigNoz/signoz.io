@@ -2,7 +2,7 @@
 title: A major release, tons of bug fixes and amazing new contributors - Signal 03
 slug: community-update-03
 date: 2021-08-05
-tags: [product-updates, community]
+tags: [Product Updates]
 authors: ankit_anand
 hide_table_of_contents: true
 description: It's time for the monthly product update of SigNoz - a full-stack open-source and observability tool. Find out what we've been upto at SigNoz during July, 2021.
@@ -100,7 +100,7 @@ Some frameworks that are used in large scale companies like Uber and Verizon wer
 
 You can watch the complete call recordings here 👇
 
-If you want to join future community calls, then you can join our [slack channel](https://bit.ly/signoz-slack). We give out all updates there.
+If you want to join future community calls, then you can join our [slack channel](https://signoz.io/slack). We give out all updates there.
 
 ## From our blog
 

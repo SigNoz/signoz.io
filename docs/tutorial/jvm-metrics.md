@@ -1,6 +1,7 @@
 ---
 id: jvm-metrics
-title: Monitoring Spring Boot JVM Metrics
+title: Spring Boot JVM Metrics 
+description: View JVM metrics from Spring Boot applications in SigNoz
 ---
 
 This tutorial shows you how you can visualise JVM metrics from Spring Boot applications in SigNoz.
@@ -85,7 +86,7 @@ You can read more on how to expose Prometheus metric from <a href = "https://doc
 
 3. **Go to SigNoz dashboard and plot metrics you want**
 
-   [Creating metrics dashboard in SigNoz](https://signoz.io/docs/userguide/metrics-dashboard/)
+   [Creating metrics dashboard in SigNoz](https://signoz.io/docs/userguide/dashboards/)
 
 
 ## Available metrics that you can monitor

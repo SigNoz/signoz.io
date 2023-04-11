@@ -2,7 +2,7 @@
 title: Jaeger vs New Relic - Key differences, use-cases and alternatives
 slug: jaeger-vs-newrelic
 date: 2021-09-09
-tags: [jaeger, apm-tools]
+tags: [Tools Comparison, Jaeger]
 authors: ankit_anand
 description: Jaeger and New Relic are tools used in the application monitoring and observability domain. While Jaeger is open-source, New Relic is a SaaS vendor. Jaeger is suited for distributed tracing and New Relic...
 image: /img/blog/2021/09/jaeger_vs_newrelic_cover-min.webp
@@ -136,7 +136,7 @@ It's no surprise that New Relic has better features than Jaeger as it's paid. Pr
 ## Alternative to Jaeger and New Relic
 Jaeger and New Relic are both established tools in the observability domain. But Jaeger fells short on providing a robust observability framework since it only does distributed tracing. SaaS vendors like New Relic come with their own set of concerns, like sending your data to a 3rd party cloud vendor.
 
-That's where [SigNoz](https://signoz.io/?utm_source=blog&utm_medium=jaeger_vs_newrelic) comes into the picture. [SigNoz](https://signoz.io/?utm_source=blog&utm_medium=jaeger_vs_newrelic) is a full-stack open-source application performance monitoring and observability tool which can be used in place of Jaeger. SigNoz is built to support OpenTelemetry natively. It also provides users flexibility in terms of storage. You can choose between ClickHouse or Kafka + Druid as your backend storage while installing SigNoz.
+That's where [SigNoz](https://signoz.io/?utm_source=blog&utm_medium=jaeger_vs_newrelic) comes into the picture. [SigNoz](https://signoz.io/?utm_source=blog&utm_medium=jaeger_vs_newrelic) is a full-stack open-source application performance monitoring and observability tool which can be used in place of Jaeger. SigNoz is built to support OpenTelemetry natively. It provides a fast OLAP datastore, ClickHouse as the storage backend.
 
 <Screenshot
     alt="Architecture of SigNoz with OpenTelemetry and ClickHouse"
@@ -170,7 +170,7 @@ Some of the things SigNoz can help you track:
 You can get started with SigNoz using just three commands at your terminal.
 
 ```jsx
-git clone https://github.com/SigNoz/signoz.git
+git clone -b main https://github.com/SigNoz/signoz.git
 cd signoz/deploy/
 ./install.sh
 ```
@@ -178,7 +178,7 @@ cd signoz/deploy/
 
 For detailed instructions, you can visit our documentation.
 
-[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/deployment/docker/?utm_source=blog&utm_medium=jaeger_vs_newrelic)
+[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/?utm_source=blog&utm_medium=jaeger_vs_newrelic)
 
 You can check out SigNoz's GitHub repo here 👇
 

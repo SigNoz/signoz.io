@@ -2,7 +2,7 @@
 title: DataDog vs Jaeger - key features, differences and alternatives
 slug: datadog-vs-jaeger
 date: 2021-09-15
-tags: [jaeger, apm-tools]
+tags: [Tools Comparison, Jaeger]
 authors: ankit_anand
 description: DataDog is an enterprise-level monitoring and security tool. On the other hand, Jaeger is an open-source tool focused on end-to-end distributed tracing for microservice architecture. DataDog is a full-stack paid APM tool, whereas Jaeger is free and open-source..
 image: /img/blog/2021/09/datadog_vs_jaeger_cover-min.webp
@@ -149,7 +149,8 @@ That's where [SigNoz](https://signoz.io/?utm_source=blog&utm_medium=dd_vs_jaeger
 ## Alternative to DataDog and Jaeger - SigNoz
 SigNoz is a full-stack open-source application performance monitoring and observability tool which can be used in place of DataDog and Jaeger. It provides advanced distributed tracing capabilities along with metrics under a single dashboard.
 
- SigNoz is built to support OpenTelemetry natively. <a href = "https://opentelemetry.io/" rel="noopener noreferrer nofollow" target="_blank" ><b>OpenTelemetry</b></a> is becoming the world standard for generating and managing telemetry data (Logs, metrics, and traces). It also provides users flexibility in terms of storage. You can choose between ClickHouse or Kafka + Druid as your backend storage while installing SigNoz.
+ SigNoz is built to support OpenTelemetry natively. <a href = "https://opentelemetry.io/" rel="noopener noreferrer nofollow" target="_blank" ><b>OpenTelemetry</b></a> is becoming the world standard for generating and managing telemetry data (Logs, metrics, and traces). It also provides a fast OLAP datastore, ClickHouse as the storage backend.
+
 
  <Screenshot
     alt="Architecture of SigNoz with OpenTelemetry and ClickHouse"

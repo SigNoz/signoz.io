@@ -2,7 +2,7 @@
 title: Jaeger vs Prometheus - Key differences, use-cases and alternatives
 slug: jaeger-vs-prometheus
 date: 2021-09-13
-tags: [jaeger, apm-tools]
+tags: [Tools Comparison, Jaeger, Prometheus]
 authors: ankit_anand
 description: Both Jaeger and Prometheus are popular open-source application performance monitoring tools. While Jaeger is an end-to-end distributed tracing tool, Prometheus is used as a time-series database for monitoring metrics. Let's dive in to explore their key features and differences.
 image: /img/blog/2021/09/jaeger_vs_prometheus_cover-min.webp
@@ -112,7 +112,7 @@ The issue with both tools is that they are limited to particular use-cases of di
 ## Alternative to Jaeger and Prometheus - SigNoz
 SigNoz is a full-stack open-source application performance monitoring and observability tool which can be used in place of Jaeger and Prometheus. It provides advanced distributed tracing capabilities along with metrics under a single dashboard.
 
-SigNoz is built to support OpenTelemetry natively. [OpenTelemetry](https://opentelemetry.io/) is becoming the world standard for generating and managing telemetry data (Logs, metrics and traces). It also provides users flexibility in terms of storage. You can choose between ClickHouse or Kafka + Druid as your backend storage while installing SigNoz.
+SigNoz is built to support OpenTelemetry natively. [OpenTelemetry](https://opentelemetry.io/) is becoming the world standard for generating and managing telemetry data (Logs, metrics and traces). It provides a fast OLAP datastore, ClickHouse as the storage backend.
 
 <Screenshot
     alt="Architecture of SigNoz with OpenTelemetry and ClickHouse"
@@ -157,7 +157,7 @@ Some of the things SigNoz can help you track:
 You can get started with SigNoz using just three commands at your terminal.
 
 ```jsx
-git clone https://github.com/SigNoz/signoz.git
+git clone -b main https://github.com/SigNoz/signoz.git
 cd signoz/deploy/
 ./install.sh
 ```
@@ -165,7 +165,7 @@ cd signoz/deploy/
 
 For detailed instructions, you can visit our documentation.
 
-[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/deployment/docker/?utm_source=blog&utm_medium=jaeger_vs_prometheus)
+[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/?utm_source=blog&utm_medium=jaeger_vs_prometheus)
 
 You can check out SigNoz's GitHub repo here 👇
 

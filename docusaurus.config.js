@@ -1,4 +1,7 @@
-module.exports = {
+// @ts-check
+
+/** @type {import('@docusaurus/types').Config} */
+const config = {
   title: "SigNoz",
   tagline: "Open source Observability platform",
   url: "https://signoz.io",
@@ -10,26 +13,50 @@ module.exports = {
   organizationName: "SigNoz", // Usually your GitHub org/user name.
   projectName: "signoz", // Usually your repo name.
   themeConfig: {
+    algolia: {
+      // The application ID provided by Algolia
+      appId: 'E88QYIQ6K4',
+
+      // Public API key: it is safe to commit it
+      apiKey: '1061c173ae001d5f5aaa4f0354e373a0',
+      indexName: 'signoz',
+    },
+    prism: {
+      // Supported languages are:
+      // https://prismjs.com/index.html#supported-languages
+      additionalLanguages: ["ruby", "csharp", "php", "java"],
+    },
+    zoom: {
+      selector: 'figure[data-zoomable] > img',
+      config: {
+        // options you can specify via https://github.com/francoischalifour/medium-zoom#usage
+        background: {
+          light: 'rgb(255, 255, 255)',
+          dark: 'rgb(50, 50, 50)'
+        }
+      }
+    },
     // googleAnalytics: {
     //   trackingID: 'UA-152867655-1',
     //   // Optional fields.
     //   // anonymizeIP: true, // Should IPs be anonymized?
     // },
 
-    announcementBar: {
-      id: "support_us", // Any value that will identify this message.
-      content:
-        '⭐️ If you like SigNoz, give it a star on <a target="_blank" rel="noopener noreferrer" href="https://github.com/SigNoz/signoz">GitHub</a>! ⭐️ ',
-      backgroundColor: "#ca4127", // #151515, #dddddd Defaults to `#fff`.
-      textColor: "#eeeeee", // Defaults to `#000`.
-      isCloseable: false, // Defaults to `true`.
-    },
+    // announcementBar: {
+    //   id: "support_us", // Any value that will identify this message.
+    //   content:
+    //     'We tweet about DevOps, DevTools and fun stuff. Let\'s be friends on <a target="_blank" rel="noopener noreferrer" href="https://bit.ly/3H7bXwd">Twitter</a> 🙋🏼‍♀️ ',
+    //   backgroundColor: "#CF2E09", // #151515, #dddddd Defaults to `#fff`.
+    //   textColor: "#eeeeee", // Defaults to `#000`.
+    //   isCloseable: false, // Defaults to `true`.
+    // },
+    
     // posthog: {
     //   apiKey: "H-htDCae7CR3RV57gUzmol6IAKtm5IMCvbcm_fwnL-w",
     //   appUrl: "https://app.posthog.com", // optional
     //   enableInDevelopment: false, // optional
     // },
-    image: "img/HeroShot-3.jpg",
+    image: "/img/signoz_website_hero_image.webp",
     colorMode: {
       // "light" | "dark"
       defaultMode: "dark",
@@ -57,21 +84,23 @@ module.exports = {
           position: "left",
         },
         {
-          to: 'opentelemetry/',
-          activeBasePath: 'opentelemetry',
-          label: 'OpenTelemetry',
-          position: 'left',
+          to: "opentelemetry/",
+          activeBasePath: "opentelemetry",
+          label: "OpenTelemetry",
+          position: "left",
         },
         {
-          href: 'https://github.com/SigNoz/signoz',
-          label: 'GitHub',
-          position: 'right',
-        },
-        {
-          href: "https://join.slack.com/t/signoz-community/shared_invite/zt-lrjknbbp-J_mI13rlw8pGF4EWBnorJA",
-          label: "Slack",
+          to: "case-study/",
+          activeBasePath: "case-study/",
+          label: "Customer Stories",
           position: "right",
         },
+      
+        // {
+        //   href: "https://signoz.io/pricing/",
+        //   label: "Try SigNoz Cloud",
+        //   position: "right",
+        // },
         // {
         //   to: 'pricing/',
         //   activeBasePath: 'pricing',
@@ -84,9 +113,10 @@ module.exports = {
         //   position: "right",
         // },
         {
-          href: "https://www.ycombinator.com/companies/signoz",
-          label: "Careers",
-          position: "right",
+          to: "pricing/",
+          activeBasePath: "pricing",
+          label: "Pricing",
+          position: "left",
         },
       ],
     },
@@ -115,7 +145,7 @@ module.exports = {
             // },
             {
               label: "Slack",
-              href: "https://join.slack.com/t/signoz-community/shared_invite/zt-lrjknbbp-J_mI13rlw8pGF4EWBnorJA",
+              href: "https://signoz.io/slack",
             },
             {
               label: "Twitter",
@@ -129,13 +159,19 @@ module.exports = {
               label: "Learn",
               to: "learn/",
             },
-
+            {
+              label: "Community Archive",
+              href: "https://community-chat.signoz.io/",
+            },
           ],
         },
         {
           title: "More",
           items: [
-            
+            {
+              label: "Technical Writer Program",
+              to: "technical-writer-program/",
+            },
             {
               label: "About",
               to: "about-us/",
@@ -147,7 +183,7 @@ module.exports = {
             {
               label: "Privacy",
               to: "privacy/",
-            }
+            },
           ],
         },
       ],
@@ -161,10 +197,10 @@ module.exports = {
         docs: {
           sidebarPath: require.resolve("./sidebars.js"),
           // Please change this to your repo.
-          editUrl: ({docPath}) => {
+          editUrl: ({ docPath }) => {
             // We want users to submit doc updates to the upstream/next version!
             // Otherwise we risk losing the update on the next release.
-            const nextVersionDocsDirPath = 'docs';
+            const nextVersionDocsDirPath = "docs";
             return `https://github.com/SigNoz/signoz.io/edit/main/${nextVersionDocsDirPath}/${docPath}`;
           },
         },
@@ -181,9 +217,13 @@ module.exports = {
           changefreq: "weekly",
           priority: 0.5,
         },
+        googleAnalytics: {
+          trackingID: 'UA-152867655-1',
+        },
+        //moving current UA property to google analytics and adding GA4 id to gtag
         gtag: {
           // You can also use your "G-" Measurement ID here.
-          trackingID: 'UA-152867655-1',
+          trackingID: "G-6NFJ2Y6NQN",
           // Optional fields.
           // anonymizeIP: true, // Should IPs be anonymized?
         },
@@ -192,6 +232,7 @@ module.exports = {
   ],
   // plugins: ["posthog-docusaurus"],
   plugins: [
+    require.resolve('docusaurus-plugin-image-zoom'),
     [
       "@docusaurus/plugin-content-blog",
       {
@@ -208,7 +249,7 @@ module.exports = {
          * Path to data on filesystem relative to site dir.
          */
         path: "./opentelemetry",
-        blogTitle: 'OpenTelemetry',
+        blogTitle: "OpenTelemetry",
       },
     ],
     [
@@ -227,33 +268,33 @@ module.exports = {
          * Path to data on filesystem relative to site dir.
          */
         path: "./learn",
-        blogTitle: 'Learn with SigNoz',
+        blogTitle: "Learn with SigNoz",
       },
     ],
     [
-      '@docusaurus/plugin-pwa',
+      "@docusaurus/plugin-pwa",
       {
         debug: true,
         offlineModeActivationStrategies: [
-          'appInstalled',
-          'standalone',
-          'queryString',
+          "appInstalled",
+          "standalone",
+          "queryString",
         ],
         pwaHead: [
           {
-            tagName: 'link',
-            rel: 'icon',
-            href: '/img/icons/icon-512x512.png',
+            tagName: "link",
+            rel: "icon",
+            href: "/img/icons/icon-512x512.png",
           },
           {
-            tagName: 'link',
-            rel: 'manifest',
-            href: '/manifest.json', // your PWA manifest
+            tagName: "link",
+            rel: "manifest",
+            href: "/manifest.json", // your PWA manifest
           },
           {
-            tagName: 'meta',
-            name: 'theme-color',
-            content: 'rgb(95, 34, 20)',
+            tagName: "meta",
+            name: "theme-color",
+            content: "rgb(95, 34, 20)",
           },
         ],
       },
@@ -275,3 +316,5 @@ module.exports = {
   //   ],
   // ],
 };
+
+module.exports = config;

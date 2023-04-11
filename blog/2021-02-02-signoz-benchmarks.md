@@ -2,7 +2,7 @@
 title: Cost benchmarking - Self hosting SigNoz vs using a SaaS vendor
 slug: signoz-benchmarks
 date: 2021-02-02
-tags: [distributed-tracing, application-monitoring]
+tags: [SigNoz, Community]
 authors: ankit_nayan
 description: With changing privacy laws, it's getting riskier to send your data to third party SaaS vendors. In the observability domain, traces and logs are something which you don't want to send outside. Let's find out why self-hosted software solutions are replacing SaaS providers now.
 image: /img/blog/2021/04/signoz-benchmarks-1.png
@@ -65,7 +65,7 @@ Disc cost for 15 day retention at 0.08 USD/GB-month"
   width={700}
 />
 
-Total SigNoz cost ~** 338 USD per montt**
+Total SigNoz cost ~** 338 USD per month**
 
 Although this setup works at less than 60% utilisation, some users may still want to have redundancy.
 

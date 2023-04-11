@@ -1,5 +1,3 @@
-import React from "react";
-
 function Conditional(props) {
     const { If, children } = props;
 

@@ -1,11 +1,11 @@
 ---
 title: Spans - a key concept of distributed tracing
 slug: distributed-tracing-span
-date: 2021-12-18
-tags: [distributed-tracing, application-monitoring]
+date: 2023-01-21
+tags: [Distributed Tracing]
 authors: ankit_anand
 description: Spans are fundamental blocks of distributed tracing. A single trace in distributed tracing consists of a series of tagged time intervals known as spans...
-image: /img/blog/2021/12/distributed_tracing_span_cover.webp
+image: /img/blog/2023/01/distributed_tracing_sapns_cover-min.jpg
 keywords:
   - distributed tracing
   - distributed tracing spans
@@ -21,7 +21,7 @@ Spans are fundamental building blocks of distributed tracing. A single trace in 
 
 <!--truncate-->
 
-![Cover Image](/img/blog/2021/12/distributed_tracing_span_cover.webp)
+![Cover Image](/img/blog/2023/01/distributed_tracing_sapns_cover.webp)
 
 Distributed tracing is critical to application performance monitoring in microservice-based architecture. Before we deep dive into spans, let's have a brief overview of distributed tracing.
 
@@ -47,7 +47,7 @@ These requests are broken down into spans, and the entire request is represented
 
 ## Spans in distributed tracing
 
-### What are spans?
+### What are spans in distributed tracing?
 Each unit of work in a trace is represented by a span. A trace represents a complete process for a request - from its initiation to its completion. The picture below shows one trace which is composed of multiple spans.
 
 In the example shown below, the request is initiated from a frontend web client. The first span is the parent span which shows the total time taken by the request.
@@ -121,7 +121,38 @@ span.setAttribute("http.method", "GET");
 span.setAttribute("http.url", url.toString());
 ```
 
+## Getting started with Distributed Tracing
+
+Distributed tracing has become a key debugging tool for applications based on microservices architecture. If you want to implement distributed tracing for your application, you can use SigNoz - a full stack open source APM. 
+
+SigNoz provides metrics monitoring, log management, and distributed tracing under a single pane of glass and is built to support OpenTelemetry natively. OpenTelemetry is quietly becoming the world standard for application instrumentation. Using OpenTelemetry, you can avoid vendor lock-in and it comes with handy client libraries which can help you get started with distributed tracing easily.
+
+SigNoz provides easy-to-use visualizations like flamegraphs and Gantt charts from tracing data collected with OpenTelemetry.
+
+<figure data-zoomable align='center'>
+    <img src="/img/blog/common/signoz_flamegraphs.webp" alt="Detailed Flamegraphs & Gantt charts"/>
+    <figcaption><i>Spans of a trace visualized with the help of flamegraphs and gantt charts in SigNoz dashboard</i></figcaption>
+</figure>
+
+<br></br>
+
+SigNoz can be installed on macOS or Linux computers in just three steps by using a simple install script.
+
+The install script automatically installs Docker Engine on Linux. However, on macOS, you must manually install <a href = "https://docs.docker.com/engine/install/" rel="noopener noreferrer nofollow" target="_blank" > Docker Engine </a> before running the install script.
+
+```
+git clone -b main https://github.com/SigNoz/signoz.git
+cd signoz/deploy/
+./install.sh
+```
+
+You can visit our documentation for instructions on how to install SigNoz using Docker Swarm and Helm Charts.
+
+
+[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/?utm_source=blog&utm_medium=distributed_tracing_span)
+
 ---
+
 Read more about OpenTelemetry:<br></br>
 [OpenTelemetry Collector: architecture and configuration guide](https://signoz.io/blog/opentelemetry-collector-complete-guide/)<br></br>
 

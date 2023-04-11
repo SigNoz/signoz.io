@@ -1,0 +1,1 @@
+This section uses the [HotR.O.D](https://github.com/jaegertracing/jaeger/tree/master/examples/hotrod) sample application that comes preinstalled with SigNoz and generates sample data that you can query. You can apply the concepts and techniques you’ll learn to monitor your own applications.

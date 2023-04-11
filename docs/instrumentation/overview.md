@@ -1,7 +1,10 @@
 ---
 id: overview
-title: Instrumentation Overview
+title: Overview
+description: Instrumentation Overview
+
 ---
+# APM and Distributed Tracing - Overview
 
 Instrumentation is the process of enabling your application code to generate telemetry data - anything that assists you in monitoring or measuring the performance and state of your application.
 
@@ -19,20 +22,21 @@ For instrumenting your code, you can use the instruction provided by OpenTelemet
 
 SigNoz currently provides simple ways to instrument NodeJS, Java, Python and Golang applications using OpenTelemetry. Please follow the below guides.
 
-1. [OpenTelemetry Python Instrumentation](/docs/instrumentation/python)
-2. [OpenTelemetry FastAPI Instrumentation](/docs/instrumentation/fastapi)
-3. [OpenTelemetry NodeJS Instrumentation](/docs/instrumentation/nodejs)
-4. [OpenTelemetry NestJS Instrumentation](/docs/instrumentation/nestjs)
-5. [OpenTelemetry Java Instrumentation](/docs/instrumentation/java)
-6. [OpenTelemetry Go Instrumentation](/docs/instrumentation/golang)
-7. [OpenTelemetry .NET Instrumentation](/docs/instrumentation/dotnet)
-8. [OpenTelemetry Ruby on Rails Instrumentation](/docs/instrumentation/ruby-on-rails/)
+1. [OpenTelemetry Python Instrumentation](/docs/instrumentation/python/)
+2. [OpenTelemetry Javascript Instrumentation](/docs/instrumentation/javascript/)
+3. [OpenTelemetry Java Instrumentation](/docs/instrumentation/java/)
+4. [OpenTelemetry Go Instrumentation](/docs/instrumentation/golang/)
+5. [OpenTelemetry PHP Instrumentation](/docs/instrumentation/php/)
+6. [OpenTelemetry .NET Instrumentation](/docs/instrumentation/dotnet/)
+7. [OpenTelemetry Ruby on Rails Instrumentation](/docs/instrumentation/ruby-on-rails/)
+8. [OpenTelemetry Elixir Instrumentation](/docs/instrumentation/elixir/)
+9. [OpenTelemetry Rust Instrumentation](/docs/instrumentation/rust/)
 
 
 
-<!-- If you need assistance instrumenting applications in other languages, please write to us at [support@signoz.io](mailto:support@signoz.io) or reach out to us on [Slack Community](https://join.slack.com/t/signoz-community/shared_invite/zt-lrjknbbp-J_mI13rlw8pGF4EWBnorJA) -->
+<!-- If you need assistance instrumenting applications in other languages, please write to us at [support@signoz.io](mailto:support@signoz.io) or reach out to us on [Slack Community](https://signoz.io/slack) -->
 
 If you have any questions or need any help in setting things up, join our slack community and ping us in `#help` channel.
 
-[![SigNoz Slack community](/img/blog/common/join_slack_cta.png)](https://bit.ly/signoz-slack)
+[![SigNoz Slack community](/img/blog/common/join_slack_cta.png)](https://signoz.io/slack)
 

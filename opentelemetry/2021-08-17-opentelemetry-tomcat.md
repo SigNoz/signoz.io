@@ -1,7 +1,7 @@
 ---
 title: Monitor Tomcat Java application with OpenTelemetry and SigNoz
 slug: tomcat
-date: 2021-08-17
+date: 2022-08-17
 tags: [java-monitoring]
 author: Ankit Anand
 author_title: SigNoz Team
@@ -17,6 +17,8 @@ keywords:
   - java auto-instrumentation
   - signoz
 ---
+
+import { LiteYoutubeEmbed } from "react-lite-yt-embed";
 
 OpenTelemetry is a vendor-agnostic instrumentation library. In this article, let's explore how to auto-instrument a Tomcat Java application using OpenTelemetry Java JAR agent.
 
@@ -38,7 +40,7 @@ Steps to get started with OpenTelemetry for Tomcat Java application:
 You can get started with SigNoz using just three commands at your terminal.
 
 ```jsx
-git clone https://github.com/SigNoz/signoz.git
+git clone -b main https://github.com/SigNoz/signoz.git
 cd signoz/deploy/
 ./install.sh
 ```
@@ -46,9 +48,9 @@ cd signoz/deploy/
 
 For detailed instructions, you can visit our documentation.
 
-[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/deployment/docker/?utm_source=blog&utm_medium=opentelemetry_tomcat)
+[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/?utm_source=blog&utm_medium=opentelemetry_tomcat)
 
-We have installed SigNoz on a Ubuntu VM in Azure cloud. You can access SigNoz UI at `http://IP_of_SigNoz:3000`. You can access SigNoz UI at port: 3000 of any host that you choose. In case of local host just use: `http://localhost:3000`
+We have installed SigNoz on a Ubuntu VM in Azure cloud. You can access SigNoz UI at `http://IP_of_SigNoz:3301`. You can access SigNoz UI at port: 3301 of any host that you choose. In case of local host just use: `http://localhost:3301`
 
 The application list shown in the dashboard is from a sample app called HOT R.O.D that comes bundled with the SigNoz installation package.
 
@@ -103,7 +105,6 @@ OpenTelemetry has a very handy Java JAR agent that can be attached to any Java 8
 
    ```
    export CATALINA_OPTS="$CATALINA_OPTS -javaagent:/path/opentelemetry-javaagent.jar"
-   export OTEL_METRICS_EXPORTER=none
    export OTEL_EXPORTER_OTLP_ENDPOINT=<IP of SigNoz Backend>:4317
    export OTEL_RESOURCE_ATTRIBUTES=service.name=<app_name>
    ```
@@ -116,7 +117,6 @@ OpenTelemetry has a very handy Java JAR agent that can be attached to any Java 8
 
    ```
    export CATALINA_OPTS="$CATALINA_OPTS -javaagent:/Users/cruxaki/Downloads/opentelemetry-javaagent.jar"
-   export OTEL_METRICS_EXPORTER=none
    export OTEL_EXPORTER_OTLP_ENDPOINT=http://40.76.59.122:4317
    export OTEL_RESOURCE_ATTRIBUTES=service.name=Tomcat-SigNoz
    ```
@@ -189,19 +189,11 @@ You can try out SigNoz by visiting its GitHub repo 👇<br></br>
 
 If you are someone who understands more from video, then you can watch the tutorial on how to monitor your Tomcat Java Application with OpenTelemetry and SigNoz below👇<br></br>
 
-export const YoutubeWrapper = ({children, url}) => (
-  <div 
-    style={{
-    position: 'relative', 
-    width: '100%',
-    paddingBottom: '56.25%', 
-    height: "0",
-    }} >
-    <iframe width="560" height="315" style={{ position: 'absolute', top:'0', left: '0', width: '100%', height: '100%'}} src={ url } title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-</div>
-);
+<p>&nbsp;</p>
 
-<YoutubeWrapper url="https://www.youtube.com/embed/4obQilMqU4E"> </YoutubeWrapper><br></br>
+<LiteYoutubeEmbed id="4obQilMqU4E" mute={false} />
+
+<p>&nbsp;</p>
 
 If you face any issues while trying out SigNoz, feel free to write to us at: support@signoz.io
 

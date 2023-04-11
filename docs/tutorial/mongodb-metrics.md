@@ -1,0 +1,83 @@
+---
+id: mongodb-metrics
+title: MongoDB Metrics 
+description: View MongoDB metrics in SigNoz
+---
+
+This tutorial shows you how you can visualise MongoDB metrics in SigNoz. We take an example of a FastAPI sample app which uses MongoDB to walk through this tutorial. 
+
+Based on how you are using MongoDB, your exact steps may be different - but this should give you an idea of how to go about it.
+
+### Install FastAPI sample app via docker
+
+1. Clone this sample [FastAPI application](https://github.com/SigNoz/sample-fastapi-with-dbs#run-using-docker-compose)
+
+Follow instructions in the README file to set up the application. Please ensure to point the FastAPI application to IP of the machine where SigNoz is installed
+
+2. Use `172.17.0.1` - if running SigNoz also in same VM as the FastAPI application
+
+```java
+http://172.17.0.1:4317
+```
+
+
+This comes with Mongo Exporter built in which exposes metrics in prometheus format at port 9216
+
+### Check that MongoDB metrics are exposed at following end point
+
+```java
+curl http://localhost:9216/metrics
+```
+
+### Update Otel Collector config file to scrape MongoDb metrics
+
+Add a job name corresponding to mongodb exporter in otel-collector-metrics config file in your SigNoz install
+
+[signoz/otel-collector-metrics-config.yaml](https://github.com/SigNoz/signoz/blob/e3c4bfce528eec2e5a6441608165baf9e1b46388/deploy/docker/clickhouse-setup/otel-collector-metrics-config.yaml#L11)
+
+```java
+- job_name: "mongo-collector"
+          scrape_interval: 30s
+          static_configs:
+            - targets: ["172.17.0.1:9216"]
+```
+
+Job names should be aligned
+
+Please ensure that the edited YAML is correctly configured. You can use tools like [http://www.yamllint.com/](http://www.yamllint.com/) to check the correctness of the updated YAML file
+
+Make changes in otel-collector-metrics file 
+
+### Restart Otel Collector metrics container
+
+`docker-compose --env-file ./docker/clickhouse-setup/env/x86_64.env -f docker/clickhouse-setup/docker-compose.yaml restart otel-collector-metrics`
+
+check that otel-collector-metrics is running by doing
+
+```java
+sudo docker ps
+```
+
+## Plotting Mongo metrics in SigNoz
+
+[Good guide on metrics you may want to monitor](https://www.mongodb.com/basics/how-to-monitor-mongodb-and-what-metrics-to-monitor)
+
+Create new panels in [Dashboard section](/docs/userguide/manage-dashboards-and-panels) of SigNoz and add the following queries for example. 
+
+```java
+PromQL query - mongodb_ss_connections
+Legend Format - {{conn_type}}
+
+PromQL query - rate(mongodb_ss_opcounters[5m])
+Legend Format - {{legacy_op_type}}
+```
+
+:::tip 
+
+You can use queries from the json files here to plot more metrics
+
+Grafana Dashboard for MongoDB exporter
+
+[https://grafana.com/grafana/dashboards/2583/revisions](https://grafana.com/grafana/dashboards/2583/revisions)
+
+:::

@@ -2,7 +2,7 @@
 title: Why are we building SigNoz?
 slug: why-are-we-building-signoz
 date: 2020-01-15
-tags: [microservices, observability]
+tags: [SigNoz, Community]
 authors: pranay
 description: In the world of microservices, who takes care of failures? How do you solve availability and performance issues quickly in your production environment. For a modern-day distributed system, observability needs to be built within the system. And, SigNoz attempts to bring you the best open-source observability stack for your distributed system.
 image: /img/blog/2020/01/Why-1.webp

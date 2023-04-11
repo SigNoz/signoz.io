@@ -2,7 +2,7 @@
 title: Metrics Dashboard, Scale testing upto 500K events/sec - Signal 05
 slug: community-update-05
 date: 2021-10-04
-tags: [product-updates, community]
+tags: [Product Updates]
 authors: ankit_anand
 description: It's time for the monthly product update of SigNoz - a full-stack open-source and observability tool. Find out what we've been upto at SigNoz during September, 2021.
 image: /img/blog/2021/10/signal_05_cover-min.webp
@@ -11,6 +11,10 @@ keywords:
  - SigNoz Product Update
  - Dev community
 ---
+
+import { LiteYoutubeEmbed } from "react-lite-yt-embed";
+
+
 <head>
   <link rel="canonical" href="https://signoz.io/blog/community-update-05/"/>
 </head>
@@ -58,7 +62,7 @@ import Screenshot from "@theme/Screenshot"
 ### [Release v0.4.1](https://github.com/SigNoz/signoz/releases/tag/v0.4.1)
 SigNoz can now scale up in Docker swarm. The community requested this, and we are glad to support it. Currently, we have tested out SigNoz for up to 500k events per second, and we are working to continue improving SigNoz for handling scale.
 
-**[Deploy SigNoz with Docker Swarm documentation](https://signoz.io/docs/deployment/docker_swarm/)**
+**[Deploy SigNoz with Docker Swarm documentation](https://signoz.io/docs/install/docker-swarm/)**
 
 We also shipped lots of improvements in our web UI with a focus on the metrics dashboard. We are working towards a great user experience when it comes to our web UI. Users can do things like saving widget layouts. We will work on more customization in the coming sprints.
 
@@ -88,20 +92,11 @@ In our monthly community call, [Ankit Nayan](https://github.com/ankitnayan) gave
 
 You can find the full recordings of the call here 👇
 
+<p>&nbsp;</p>
 
-export const YoutubeWrapper = ({children, url}) => (
-  <div 
-    style={{
-    position: 'relative', 
-    width: '100%',
-    paddingBottom: '56.25%', 
-    height: "0",
-    }} >
-    <iframe width="560" height="315" style={{ position: 'absolute', top:'0', left: '0', width: '100%', height: '100%'}} src={ url } title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-</div>
-);
+<LiteYoutubeEmbed id="fy1K5PifDDU" mute={false} />
 
-<YoutubeWrapper url="https://www.youtube.com/embed/fy1K5PifDDU"> </YoutubeWrapper>
+<p>&nbsp;</p>
 
 
 ### Features 📸
@@ -131,8 +126,11 @@ Here's a complete architecture and configuration guide on OpenTelemetry collecto
 ### Custom metrics monitoring with SigNoz
 Learn how to monitor custom metrics of your Nodejs application with OpenTelemetry and SigNoz 👇
 
+<p>&nbsp;</p>
 
-<YoutubeWrapper url="https://www.youtube.com/embed/7Ni78SajFLM"> </YoutubeWrapper>
+<LiteYoutubeEmbed id="7Ni78SajFLM" mute={false} />
+
+<p>&nbsp;</p>
 
 ---
 

@@ -2,7 +2,7 @@
 title: Metrics first look, more robust frontend and much more - Signal 04
 slug: community-update-04
 date: 2021-09-06
-tags: [product-updates, community]
+tags: [Product Updates]
 authors: ankit_anand
 hide_table_of_contents: true
 description: It's time for the monthly product update of SigNoz - a full-stack open-source and observability tool. Find out what we've been upto at SigNoz during August, 2021.
@@ -11,6 +11,8 @@ keywords:
   - SigNoz Product Update
   - Dev community
 ---
+
+import { LiteYoutubeEmbed } from "react-lite-yt-embed";
 
 <head>
   <link rel="canonical" href="https://signoz.io/blog/community-update-04/"/>
@@ -22,7 +24,7 @@ Folks! Great to have you over for our monthly product update aka Signal #04. Thi
 
 ![Cover Image](/img/blog/2021/09/signal_04_cover-min.webp)
 
-We also crossed 200+ members on our **[slack community](https://bit.ly/signoz-slack)** 🎉🎉🎉
+We also crossed 200+ members on our **[slack community](https://signoz.io/slack)** 🎉🎉🎉
 
 Let's dive in to see what humans at SigNoz have been upto!
 
@@ -112,25 +114,21 @@ We joined folks at ClickHouse for their community call to showcase how we use Cl
 
 You can also find the complete recordings of the virtual meetup here 👇
 
-export const YoutubeWrapper = ({children, url}) => (
-  <div 
-    style={{
-    position: 'relative', 
-    width: '100%',
-    paddingBottom: '56.25%', 
-    height: "0",
-    }} >
-    <iframe width="560" height="315" style={{ position: 'absolute', top:'0', left: '0', width: '100%', height: '100%'}} src={ url } title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-</div>
-);
+<p>&nbsp;</p>
 
-<YoutubeWrapper url="https://www.youtube.com/embed/aQx6ko0BFvs"> </YoutubeWrapper>
+<LiteYoutubeEmbed id="aQx6ko0BFvs" mute={false} />
+
+<p>&nbsp;</p>
 
 ### August Community Call
 
 In our monthly community call, [Ankit Nayan](https://github.com/ankitnayan) took the members through an architectural deep-dive of SigNoz where he explained the components used and the rationale behind architectural choices of SigNoz. You can find the full recordings of the call below 👇
 
-<YoutubeWrapper url="https://www.youtube.com/embed/1UEeTysHX4c"> </YoutubeWrapper>
+<p>&nbsp;</p>
+
+<LiteYoutubeEmbed id="1UEeTysHX4c" mute={false} />
+
+<p>&nbsp;</p>
 
 We are planning to conduct performance benchmarks for SigNoz. We would love to hear your suggestions on better performance testing 👇
 
@@ -141,7 +139,7 @@ We recently crossed 200+ members on our slack community. Our slack channel is a 
 
 Join us in our wonderful journey as we build the next-gen application monitoring & observability platform, the OSS way 👇
 
-**[Join SigNoz slack community](https://bit.ly/signoz-slack)**
+**[Join SigNoz slack community](https://signoz.io/slack)**
 
 ## From our blog
 

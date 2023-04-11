@@ -2,7 +2,7 @@
 title: Getting to know our 4000+ stargazers on GitHub
 slug: getting-to-know-our-4000-plus-stargazers-on-github
 date: 2021-07-10
-tags: [community]
+tags: [SigNoz, Community]
 authors: ankit_anand
 description: SigNoz crossed 4000+ stars recently. In this article, we dig deep to find out about our GitHub stargazers using a tool called Stargazers.
 image: /img/blog/2021/08/stargazers_cover_hc.webp
@@ -119,7 +119,7 @@ It feels good to have 4k+ stars on our GitHub repo, and we are definitely hoping
 
 An open-source project is only truly successful when it is built with active community participation, and we're lucky to be headed that way.
 
-If you want to drop by and say hi, here's a link to our [slack community](https://bit.ly/signoz-slack).
+If you want to drop by and say hi, here's a link to our [slack community](https://signoz.io/slack).
 
 You can try out the [Stargazers](https://github.com/spencerkimball/stargazers) tool for your repo or any repo you would like to analyze.
 

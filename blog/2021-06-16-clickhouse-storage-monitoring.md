@@ -2,12 +2,12 @@
 title: Launching support for ClickHouse as storage backend for SigNoz
 slug: clickhouse-storage-monitoring
 date: 2021-06-16
-tags: [product-updates, open-source]
+tags: [Product Updates, Database Monitoring]
 authors: ankit_anand
 description: In this article, we dig deeper into why we decided to extend support for ClickHouse as a storage backend for SigNoz and the efficiency gains we achieved using it.
 image: /img/blog/2021/06/clickhouse_support_cover_hc.webp
 keywords:
-  - Clickhouse database
+  - ClickHouse database
   - Open Source
   - Open source database
   - OLAP databases
@@ -34,17 +34,22 @@ In our [latest release](https://github.com/SigNoz/signoz) `v0.3.1` , we launched
 ![choose clickhouse](/img/blog/2021/06/clickhouse_choose_setup_hc.webp)
 
 Users can choose between ClickHouse or Kafka + Druid for their storage system of choice while installing SigNoz
-In this article, let's dig deeper into why we decided to introduce support for Clickhouse as a database storage system and how our users can benefit from it.
+In this article, let's dig deeper into why we decided to introduce support for ClickHouse as a database storage system and how our users can benefit from it.
 
 ## Community demands for ClickHouse
 
 As an open-source software, we build what our community wants. We listened to [demands](https://github.com/SigNoz/signoz/issues/22) from our community for supporting ClickHouse as a storage backend.
 
-![Issue raised on our GitHub repo demanding ClicHouse support](/img/blog/2021/06/Clickhouse_community_demands_hc.webp)
+<figure data-zoomable align='center'>
+    <img src="/img/blog/2021/06/Clickhouse_community_demands_hc.webp" alt="Community demands for ClickHouse support"/>
+    <figcaption><i>Issue raised on our GitHub repo demanding ClicHouse support</i></figcaption>
+</figure>
+
+<br></br>
 
 As a storage backend, ClickHouse is less resource-intensive than using Kafka + Druid. It makes getting started with SigNoz much quicker, and users can now try out SigNoz on their local machine easily as the entire setup takes **less than 1.5GB of memory space.**
 
-## Why Clickhouse for SigNoz?
+## Why ClickHouse for SigNoz?
 
 ### Improvements in installation time
 
@@ -54,7 +59,7 @@ As we are self-hosted and open source, you can try SigNoz out in a matter of a f
 
 You can get started with SigNoz with just three commands at your terminal:
 
-    $ git clone https://github.com/SigNoz/signoz.git
+    $ git clone -b main https://github.com/SigNoz/signoz.git
     $ cd signoz/deploy/
     $ ./install.sh
 
@@ -63,7 +68,7 @@ You can then proceed with either ClickHouse or Kafka+Druid installation set up. 
 - ClickHouse set up: _93.99 seconds_
 - Kafka + Druid set up: _269.25 seconds_
 
-So in just over a minute, you will be able to access our dashboard with the Clickhouse set up on your local host.
+So in just over a minute, you will be able to access our dashboard with the ClickHouse set up on your local host.
 
 ![Dashboard of SigNoz](/img/blog/2021/06/signoz_ui-1.webp)
 

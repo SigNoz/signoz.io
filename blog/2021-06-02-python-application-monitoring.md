@@ -2,7 +2,7 @@
 title: Monitor your Python application with full stack open source APM tool - SigNoz
 slug: python-application-monitoring
 date: 2021-06-02
-tags: [application-monitoring, python-monitoring, opentelemetry]
+tags: [OpenTelemetry Instrumentation, Python]
 authors: ankit_anand
 description: In this article, learn how to setup application monitoring for Python apps using an open-source solution, SigNoz.
 image: /img/blog/2021/06/python_application_monitoring_hc.webp
@@ -14,6 +14,8 @@ keywords:
   - python
   - distributed tracing
 ---
+
+import { LiteYoutubeEmbed } from "react-lite-yt-embed";
 
 In this article, learn how to setup application monitoring for Python apps using an open-source solution, SigNoz.
 
@@ -64,7 +66,7 @@ We have set up a [sample ToDo Python app](https://github.com/SigNoz/sample-flask
 You can get started with SigNoz using just three commands at your terminal.
 
 ```jsx
-git clone https://github.com/SigNoz/signoz.git
+git clone -b main https://github.com/SigNoz/signoz.git
 cd signoz/deploy/
 ./install.sh
 ```
@@ -72,9 +74,9 @@ cd signoz/deploy/
 
 For detailed instructions, you can visit our documentation.
 
-[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/deployment/docker/?utm_source=blog&utm_medium=opentelemetry_python)
+[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/?utm_source=blog&utm_medium=opentelemetry_python)
 
-When you are done installing SigNoz, you can access the UI at: `http://localhost:3000`
+When you are done installing SigNoz, you can access the UI at: `http://localhost:3301`
 
 The application list shown in the dashboard is from a sample app called HOT R.O.D that comes bundled with the SigNoz installation package.
 
@@ -99,7 +101,7 @@ import Screenshot from "@theme/Screenshot"
    From your terminal use the following command to clone SigNoz's GitHub repository.
 
    ```
-   git clone https://github.com/SigNoz/signoz.git
+   git clone -b main https://github.com/SigNoz/signoz.git
    ```
 
 3. **Update path to signoz/deploy and install SigNoz**<br></br>
@@ -112,7 +114,7 @@ import Screenshot from "@theme/Screenshot"
 
    You will be asked to select one of the 2 ways to proceed:
 
-   1. Clickhouse as database (default)
+   1. ClickHouse as database (default)
    2. Kafka + Druid setup to handle scale (recommended for production use)
 
    Trying out SigNoz with ClickHouse database takes less than 1.5GB of memory and for this tutorial, we will use that option.
@@ -125,7 +127,7 @@ import Screenshot from "@theme/Screenshot"
 
    Note that this setup is just for demo/testing purposes and you need to proceed with Kafka + Druid set up option in case you want to set up SigNoz for use in production.
 
-Once the installation runs successfully, the UI should be accessible at port 3000. Wait for 2-3 mins for the data to be available to frontend. 
+Once the installation runs successfully, the UI should be accessible at port 3301. Wait for 2-3 mins for the data to be available to frontend. 
 
 ![SigNoz UI](/img/blog/2021/05/screenzy-1621624012520-3.webp) -->
 
@@ -150,8 +152,6 @@ SigNoz supports [OpenTelemetry](https://opentelemetry.io/) as the primary way fo
    For Linux:
    [https://docs.mongodb.com/manual/administration/install-on-linux/](https://docs.mongodb.com/manual/administration/install-on-linux/)
 
-   For Windows:
-   [https://docs.mongodb.com/manual/tutorial/install-mongodb-on-windows/](https://docs.mongodb.com/manual/tutorial/install-mongodb-on-windows/)
 
 On MacOS the installation is done using Homebrew's brew package manager. Once the installation is done, don't forget to start MongoDB services using `brew services start mongodb/brew/mongodb-community@4.4`  on your macOS terminal.
 
@@ -218,7 +218,7 @@ On MacOS the installation is done using Homebrew's brew package manager. Once th
    :::
    
    ```jsx
-   OTEL_RESOURCE_ATTRIBUTES=service.name=<service_name> OTEL_METRICS_EXPORTER=none OTEL_EXPORTER_OTLP_ENDPOINT="http://<IP of SigNoz>:4317" opentelemetry-instrument python3 app.py
+   OTEL_RESOURCE_ATTRIBUTES=service.name=<service_name> OTEL_EXPORTER_OTLP_ENDPOINT="http://<IP of SigNoz>:4317" opentelemetry-instrument python3 app.py
    ```
 
    As we are running SigNoz on local host, `IP of SigNoz` can be replaced with `localhost` in this case. And, for `service_name` let's use `pythonApp`. Hence, the final command becomes:
@@ -226,10 +226,10 @@ On MacOS the installation is done using Homebrew's brew package manager. Once th
    **Final Command**
 
    ```
-   OTEL_RESOURCE_ATTRIBUTES=service.name=pythonApp OTEL_METRICS_EXPORTER=none OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4317" opentelemetry-instrument python3 app.py
+   OTEL_RESOURCE_ATTRIBUTES=service.name=pythonApp OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4317" opentelemetry-instrument python3 app.py
    ```
 
-And, congratulations! You have instrumented your sample Python app. You can now access the SigNoz dashboard at [http://localhost:3000](http://localhost:3000/) to monitor your app for performance metrics.
+And, congratulations! You have instrumented your sample Python app. You can now access the SigNoz dashboard at [http://localhost:3301](http://localhost:3301/) to monitor your app for performance metrics.
 
 ![Python app in the application list](/img/blog/2021/05/dashboard-1.webp)
 
@@ -261,7 +261,15 @@ In just 5 easy steps, our dashboard lets you drill down to events causing a dela
 
 If you need any help with trying out SigNoz, feel free to mail me at ankit.anand@signoz.io.
 
-Check out our [documentation](https://signoz.io/docs/deployment/docker) for more installation guides and troubleshooting instructions.
+Check out our [documentation](https://signoz.io/docs/install/docker) for more installation guides and troubleshooting instructions.
+
+If you are someone who understands more from video, then you can watch the below video tutorial on the same with SigNoz.
+
+<p>&nbsp;</p>
+
+<LiteYoutubeEmbed id="oZkFfMN57yI" mute={false} />
+
+<p>&nbsp;</p>
 
 They say, "If it's not monitored, then it's not in production." And with SigNoz you can start monitoring your applications now. Enabling your team to resolve issues quickly in production is critical to maintaining complex distributed systems in fine health.
 

@@ -3,6 +3,11 @@ id: service-map
 title: Service Map
 ---
 
-Select Service Map tab in the left navigation panel.
+Select Service Map tab in the left navigation panel to reach to the service map.
+
+- This map gives an idea of the services in your infrastructure, and how one services calls other.
+
+- The P99 latency, error rate and RPS is shown by hovering above the edge in between services.
+- If an edge service map is shown as red, it means that it is having some 4xx error or high latency.
 
 ![service-map](../../static/img/docs/service-map.webp)

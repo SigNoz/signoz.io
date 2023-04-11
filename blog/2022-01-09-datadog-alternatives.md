@@ -1,11 +1,11 @@
 ---
-title: Top 5 DataDog alternatives in 2022
+title: Top 6 DataDog alternatives in 2023
 slug: datadog-alternatives
-date: 2022-01-09
-tags: [datadog, apm-tools]
+date: 2022-12-05
+tags: [Tech Resources]
 authors: ankit_anand
 description: Are you looking for a DataDog alternative? Then you've come to the right place. In this article, we will explore the top 5 alternatives to DataDog. 1.SigNoz 2.New Relic 3.Dynatrace...
-image: /img/blog/2022/01/datadog_alternatives_2022_cover.webp
+image: /img/blog/2022/12/datadog_alternatives_cover.png
 keywords:
   - opentelemetry
   - opentelemetry golang
@@ -27,57 +27,71 @@ Are you looking for a DataDog alternative? Then you have come to the right place
 
 import Screenshot from "@theme/Screenshot"
 
-<Screenshot
-  alt="Monitor your Go applications with SigNoz"
-  height={500}
-  src="/img/blog/2022/01/datadog_alternatives_2022_cover.webp"
-  width={700}
-/>
+![Cover Image](/img/blog/2022/12/datadog_alternatives_cover.png)
 
-For bigger enterprises it might make sense to shell out huge monitoring bills, but it's often out of question for small and medium size enterprises.
+DataDog is a cloud monitoring software that provides an array of tools for monitoring different aspects of For bigger enterprises it might make sense to shell out huge monitoring bills, but it's often out of question for small and medium size enterprises.
 
 [![Pricing concerns for DataDog](/img/blog/2021/08/datadog_alternative_reddit.webp)](https://www.reddit.com/r/devops/comments/fp7xl7/warning_avoid_datadog_at_all_costs/)
 
 The space is highly competitive, but there are a few products that stand out. In this article we will go through the best DatDog alternatives which you can explore while selecting your vendor for application monitoring.
 
-List of top DataDog alternatives in 2022:
+List of top DataDog alternatives in 2023:
 
 - SigNoz
 - New Relic
 - Dynatrace
 - Prometheus
 - LogicMonitor
+- AppDynamics
 
 ## SigNoz
 
-[SigNoz](https://signoz.io/?utm_source=blog&utm_medium=article) is full-stack open-source application monitoring and observability tool which can be a great DataDog alternative. It can be hosted within your infra, and as such, you don't need to send your data to a third-party vendor. It uses distributed tracing to help developers gauge the performance of their application in production. It captures both metrics and traces with log management currently in the product roadmap.
-A few things that SigNoz can help you with as a DataDog alternative are:
+The first tool we want to discuss is, of course, SigNoz. SigNoz is a full-stack open-source APM tool, a perfect alternative for DataDog. Logs, metrics, and traces are three important signals needed to set up a robust observability stack. SigNoz provides all three signals under a single pane of glass.
 
-- Track the popular RED metrics
-  - Rate of user requests
-  - Error rate in user requests
-  - Duration taken to complete user requests
-- p99, p95 & p50 latencies for your application
-- External API calls, Database calls, and top endpoints
-- Track transactions across different microservices using distributed tracing
+One of the real challenges of using open source tools to set up an observability stack is to stitch together multiple tools like Jaeger for tracing and Prometheus for metrics. SigNoz is an open source APM that provides a SaaS-like experience. 
 
-SigNoz uses OpenTelemetry - a vendor-agnostic instrumentation library for generating telemetry data. OpenTelemetry is a project under Cloud Native Computing Foundation and is becoming the industry standard for creating portable telemetry data.
+SigNoz is built to support OpenTelemetry natively. OpenTelemetry is quietly becoming the world standard for instrumenting cloud-native applications.
 
-<Screenshot
-  alt="SigNoz showing popular RED metrics for application monitoring"
-  height={500}
-  src="/img/blog/common/signoz_charts_application_metrics.webp"
-  title="SigNoz Dashboard with visualization of the popular RED metrics for your application (Number of requests, rate of error & duration)"
-  width={700}
-/>
+Let us see some of the features of SigNoz.
 
-<Screenshot
-  alt="SigNoz flamegraphs and gantt charts"
-  height={500}
-  src="/img/blog/common/signoz_flamegraphs.webp"
-  title="SigNoz also has Flamegraphs and Gantt charts to visualize distributed tracing for your microservice application"
-  width={700}
-/>
+It comes with out-of-box charts for application metrics like p99 latency, error rates, request per second, and top endpoints.
+
+
+<figure data-zoomable align='center'>
+    <img src="/img/blog/2022/08/services_tab.webp" alt="Application metrics in SigNoz"/>
+    <figcaption><i>SigNoz UI showing application overview metrics like RPS, 50th/90th/99th Percentile latencies, and Error Rate</i></figcaption>
+</figure>
+
+<br></br>
+
+If you found something suspicious in the metric, you can seamlessly move to traces around that time to investigate further.
+
+<figure data-zoomable align='center'>
+    <img src="/img/blog/2022/08/metrics_to_traces.webp" alt="Seamless transition between metrics and traces"/>
+    <figcaption><i>Move from metrics to traces at any point of time which needs more analysis</i></figcaption>
+</figure>
+
+<br></br>
+
+You can do aggregates on traces to get deeper insights from your application and infrastructure.
+
+<figure data-zoomable align='center'>
+    <img src="/img/blog/2022/08/aggregates_on_traces.webp" alt="Custom aggregates on traces"/>
+    <figcaption><i>Run custom aggregates on traces to get deeper application performance insights</i></figcaption>
+</figure>
+
+<br></br>
+
+SigNoz also provides logs which can be intelligently correlated with traces for quick application debugging.
+
+<figure data-zoomable align='center'>
+    <img src="/img/blog/common/signoz_logs.webp" alt="Logs in SigNoz"/>
+    <figcaption><i>With log management, you have everything under a single dashboard to debug application performance issues.</i></figcaption>
+</figure>
+
+<br></br>
+
+
 
 ## New Relic
 
@@ -167,6 +181,26 @@ With dynamic topology mapping, you can have an overview of your network devices 
     height={500}
     src="/img/blog/2021/08/dd_alt_logicmonitor-min.webp"
     title="LogicMonitor Dashboard (Source: LogicMonitor website)"
+    width={700}
+/>
+
+## AppDynamics
+
+<a href = "https://www.appdynamics.com/" rel="noopener noreferrer nofollow" target="_blank" ><b>AppDynamics</b></a> is an extensive SaaS tool that promises to correlate business metrics and application performance metrics. It can be used as a good DataDog alternative. Its platform includes an APM tool that provides code-level observability.
+
+Some of the key features of the AppDynamics APM tool includes:
+
+- Language support for Java, .NET, Node.js, PHP, Python, C/C++ and more
+- Troubleshoot issues like slow response times and application errors
+- Discover application topology automatically
+- An alert system to alert you to issues in the context of business transactions
+- Pricing starts at $60/month per CPU core
+
+<Screenshot
+    alt="Appdynamics dashboard"
+    height={500}
+    src="/img/blog/2021/09/apm_tools_appdynamics-min.webp"
+    title="A Sample AppDynamics targeted primarily for Development teams (Source: AppDynamics documentation)"
     width={700}
 />
 

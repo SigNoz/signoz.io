@@ -2,7 +2,7 @@
 title: Distributed tracing using Jaeger with Cassandra
 slug: distributed-tracing-jaeger-cassandra
 date: 2020-05-01
-tags: [distributed-tracing, jaeger]
+tags: [Distributed Tracing, Jaeger]
 authors: ankit_nayan
 description: With microservices becoming popular, tracing is increasingly more important in debugging production software. In this post, we take you through a step by step guide on setting up Jaeger over Kubernetes with Cassandra storage.
 image: /img/blog/2021/05/SigNoz--Jaeger-1.webp

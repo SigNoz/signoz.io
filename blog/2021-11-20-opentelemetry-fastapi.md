@@ -1,10 +1,10 @@
 ---
-title: Monitoring your FastAPI application using OpenTelemetry
+title: OpenTelemetry FastAPI Tutorial - complete implementation guide
 slug: opentelemetry-fastapi
-date: 2021-11-20
-tags: [opentelemetry, python-monitoring]
+date: 2023-02-22
+tags: [OpenTelemetry Instrumentation, Python]
 authors: ankit_anand
-description: OpenTelemetry is a vendor-agnostic isntrumentation library. In this article, learn how to set up monitoring for FastAPI web framework using OpenTelemetry.
+description: OpenTelemetry FastAPI client libraries can help you monitor your FastAPI applications for performance issues. In this article, learn how to set up monitoring for FastAPI web framework using OpenTelemetry.
 image: /img/blog/2021/11/monitor_fastAPI_cover.webp
 keywords:
   - opentelemetry
@@ -16,6 +16,9 @@ keywords:
   - fastapi instrumentation
   - signoz
 ---
+
+import { LiteYoutubeEmbed } from "react-lite-yt-embed";
+
 <head>
   <link rel="canonical" href="https://signoz.io/blog/opentelemetry-fastapi/"/>
 </head>
@@ -47,7 +50,7 @@ OpenTelemetry is a great choice to instrument ASGI frameworks. As it is open-sou
 You can get started with SigNoz using just three commands at your terminal.
 
 ```jsx
-git clone https://github.com/SigNoz/signoz.git
+git clone -b main https://github.com/SigNoz/signoz.git
 cd signoz/deploy/
 ./install.sh
 ```
@@ -55,9 +58,9 @@ cd signoz/deploy/
 
 For detailed instructions, you can visit our documentation.
 
-[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/deployment/docker/?utm_source=blog&utm_medium=fastapi)
+[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/?utm_source=blog&utm_medium=fastapi)
 
-When you are done installing SigNoz, you can access the UI at: [http://localhost:3000](http://localhost:3000/application)
+When you are done installing SigNoz, you can access the UI at: [http://localhost:3301](http://localhost:3301/application)
 
 The application list shown in the dashboard is from a sample app called HOT R.O.D that comes bundled with the SigNoz installation package.
 
@@ -85,6 +88,10 @@ git clone https://github.com/SigNoz/sample-fastAPI-app.git
 cd sample-fastapi-app/
 cd app
 ```
+
+
+Note: We will using a virtual python environment for this sample fastAPI app. Learn how to do it [here](https://uoa-eresearch.github.io/eresearch-cookbook/recipe/2014/11/26/python-virtual-env/).
+
 <br></br>
 
 **2. Run instructions for sending data to SigNoz**<br></br>
@@ -120,6 +127,18 @@ You're almost done. In the last step, you just need to configure a few environme
 
    As we are running SigNoz on local host, `IP of SigNoz` can be replaced with `localhost` in this case. And, for `service_name` let's use `fastapiApp`. Hence, the final command becomes:
 
+   :::note
+
+    The uvicorn run command with multiple workers has yet to be supported. Alternatively, you can use gunicorn with the worker class `uvicorn.workers.Uvicorn[H11]Worker`
+
+    In that case, the final command will be
+
+    ```
+    OTEL_RESOURCE_ATTRIBUTES=service.name=fastapiApp OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4317" opentelemetry-instrument gunicorn main:app --workers 2 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000
+    ```
+   :::
+
+
    **Final Command**
 
    ```jsx
@@ -128,7 +147,7 @@ You're almost done. In the last step, you just need to configure a few environme
 
 And, congratulations! You have instrumented your sample FastAPI app. You can check if your app is running or not by hitting the endpoint at [http://localhost:5002/](http://localhost:5002/).
 
-If you have installed SigNoz on your local host, then you can access the SigNoz dashboard at [http://localhost:3000](http://localhost:3000) to monitor your app for performance metrics.
+If you have installed SigNoz on your local host, then you can access the SigNoz dashboard at [http://localhost:3301](http://localhost:3301) to monitor your app for performance metrics.
 
 You need to generate some load on your app so that there is data to be captured by OpenTelemetry. You can use locust for this load testing.
 
@@ -257,9 +276,17 @@ You can try out SigNoz by visiting its GitHub repo 👇
 
 [![SigNoz GitHub repo](/img/blog/common/signoz_github.webp)](https://github.com/SigNoz/signoz)
 
-If you have any questions or need any help in setting things up, join our slack community and ping us in `#help` channel.
+If you are someone who understands more from video, then you can watch the below video tutorial on the same with SigNoz.
 
-[![SigNoz Slack community](/img/blog/common/join_slack_cta.png)](https://bit.ly/signoz-slack)
+<p>&nbsp;</p>
+
+<LiteYoutubeEmbed id="R2VX2T1WB-I" mute={false} />
+
+<p>&nbsp;</p>
+
+If you have any questions or need any help in setting things up, join our slack community and ping us in `#support` channel.
+
+[![SigNoz Slack community](/img/blog/common/join_slack_cta.png)](https://signoz.io/slack)
 
 ---
 Read more about OpenTelemetry 👇

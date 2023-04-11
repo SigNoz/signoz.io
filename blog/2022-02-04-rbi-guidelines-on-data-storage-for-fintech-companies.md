@@ -2,7 +2,7 @@
 title: Challenges in Choosing an APM tool for Fintech Companies in India due to RBI Guidelines
 slug: challenges-in-choosing-a-monitoring-tool-for-fintech-companies-in-india
 date: 2022-02-04
-tags: [apm-tools, application-monitoring]
+tags: [APM, Security]
 authors: [ankit_anand]
 description: RBI has issued guidelines on storing payment system data of Indian users for fintech companies in India. All user data needs to be stored in India. This also applies to all third-party tools they use, including monitoring tools..
 image: /img/blog/2022/02/rbi_guideline_cover_pic.webp
@@ -199,6 +199,6 @@ You can try out SigNoz by visiting its GitHub repo 👇
 
 [![SigNoz GitHub repo](/img/blog/common/signoz_github.webp)](https://github.com/SigNoz/signoz)
 
-If you have any questions or need any help in setting things up, join our slack community and ping us in`#help` channel.
+If you have any questions or need any help in setting things up, join our slack community and ping us in`#support` channel.
 
-[![SigNoz Slack community](/img/blog/common/join_slack_cta.png)](https://bit.ly/signoz-slack)
+[![SigNoz Slack community](/img/blog/common/join_slack_cta.png)](https://signoz.io/slack)

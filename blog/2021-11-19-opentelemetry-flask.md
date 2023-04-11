@@ -1,8 +1,8 @@
 ---
 title: Monitoring your Flask application using OpenTelemetry
 slug: opentelemetry-flask
-date: 2021-11-19
-tags: [opentelemetry, python-monitoring]
+date: 2023-01-19
+tags: [OpenTelemetry Instrumentation, Python]
 authors: ankit_anand
 description: OpenTelemetry is a vendor-agnostic isntrumentation library. In this article, learn how to set up monitoring for a Flask application using OpenTelemetry.
 image: /img/blog/2021/11/monitor_flask_cover.webp
@@ -17,6 +17,9 @@ keywords:
   - flask instrumentation
   - signoz
 ---
+
+import { LiteYoutubeEmbed } from "react-lite-yt-embed";
+
 <head>
   <link rel="canonical" href="https://signoz.io/blog/opentelemetry-flask/"/>
 </head>
@@ -50,7 +53,7 @@ OpenTelemetry is a set of tools, APIs, and SDKs used to instrument applications 
 You can get started with SigNoz using just three commands at your terminal.
 
 ```jsx
-git clone https://github.com/SigNoz/signoz.git
+git clone -b main https://github.com/SigNoz/signoz.git
 cd signoz/deploy/
 ./install.sh
 ```
@@ -58,9 +61,9 @@ cd signoz/deploy/
 
 For detailed instructions, you can visit our documentation.
 
-[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/deployment/docker/?utm_source=blog&utm_medium=opentelemetry_flask)
+[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/?utm_source=blog&utm_medium=opentelemetry_flask)
 
-When you are done installing SigNoz, you can access the UI at: [http://localhost:3000](http://localhost:3000/application)
+When you are done installing SigNoz, you can access the UI at: [http://localhost:3301](http://localhost:3301/application)
 
 The application list shown in the dashboard is from a sample app called HOT R.O.D that comes bundled with the SigNoz installation package.
 
@@ -149,7 +152,7 @@ To capture data with OpenTelemetry, you need to configure some environment varia
    As we are running SigNoz on local host, `IP of SigNoz` can be replaced with `localhost` in this case. And, for `service_name` let's use `Flask_App`. Hence, the final command becomes:<br></br>
    **Final Command**
    ```jsx
-   OTEL_RESOURCE_ATTRIBUTES=service.name=Flask_App OTEL_METRICS_EXPORTER=none OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4317" opentelemetry-instrument python3 app.py
+   OTEL_RESOURCE_ATTRIBUTES=service.name=Flask_App OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4317" opentelemetry-instrument python3 app.py
    ```
 
    And congratulations! You have now instrumented your flask application with OpenTelemetry.
@@ -227,9 +230,18 @@ You can try out SigNoz by visiting its GitHub repo 👇
 
 [![SigNoz GitHub repo](/img/blog/common/signoz_github.webp)](https://github.com/SigNoz/signoz)
 
-If you have any questions or need any help in setting things up, join our slack community and ping us in `#help` channel.
+If you are someone who understands more from video, then you can watch the below video tutorial on the same with SigNoz.
 
-[![SigNoz Slack community](/img/blog/common/join_slack_cta.png)](https://bit.ly/signoz-slack)
+<p>&nbsp;</p>
+
+<LiteYoutubeEmbed id="_URJaj0dYz8" mute={false} />
+
+<p>&nbsp;</p>
+
+
+If you have any questions or need any help in setting things up, join our slack community and ping us in `#support` channel.
+
+[![SigNoz Slack community](/img/blog/common/join_slack_cta.png)](https://signoz.io/slack)
 
 ---
 

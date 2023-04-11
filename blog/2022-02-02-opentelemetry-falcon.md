@@ -2,7 +2,7 @@
 title: Monitoring apps based on Falcon Web Framework with OpenTelemetry
 slug: opentelemetry-falcon
 date: 2022-02-03
-tags: [opentelemetry, python-monitoring]
+tags: [OpenTelemetry Instrumentation, Python]
 authors: [ankit_anand, ankit_nayan]
 description: OpenTelemetry provides an open-source standard with a consistent collection mechanism and data format. In this article, learn how to set up monitoring for a Falcon based web application using OpenTelemetry.
 image: /img/blog/2022/02/opentelemetry_falcon.webp
@@ -17,6 +17,9 @@ keywords:
   - falcon instrumentation
   - signoz
 ---
+
+import { LiteYoutubeEmbed } from "react-lite-yt-embed";
+
 <head>
   <link rel="canonical" href="https://signoz.io/blog/opentelemetry-falcon/"/>
 </head>
@@ -48,16 +51,16 @@ First, you need to install SigNoz. We will use OpenTelemetry to instrument the s
 You can get started with SigNoz using just three commands at your terminal.
 
 ``` jsx
-git clone https://github.com/SigNoz/signoz.git
+git clone -b main https://github.com/SigNoz/signoz.git
 cd signoz/deploy/
 ./install.sh
 ```
 
 The above instruction is for MacOS and linux distributions. For detailed instructions, you can visit our documentation.
 
-[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/deployment/docker/?utm_source=blog&utm_medium=opentelemetry_django)
+[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/?utm_source=blog&utm_medium=opentelemetry_django)
 
-If you have installed SigNoz on your local host, you can access the UI at: [http://localhost:3000](http://localhost:3000/application)
+If you have installed SigNoz on your local host, you can access the UI at: [http://localhost:3301](http://localhost:3301/application)
 
 The application list shown in the dashboard is from a sample app called HOT R.O.D that comes bundled with the SigNoz installation package.
 
@@ -156,7 +159,7 @@ import Screenshot from "@theme/Screenshot"
    
    You need to interact with the endpoint to generate some monitoring data. Refresh the endpoint about 10-20 times and check SigNoz dashboard.
    
-   If you have installed SigNoz on your local machine, you can access the SigNoz dashboard at: [http://localhost:3000](http://localhost:3000)
+   If you have installed SigNoz on your local machine, you can access the SigNoz dashboard at: [http://localhost:3301](http://localhost:3301)
 
 <Screenshot
    alt="Falcon based application monitored on SigNoz dashboard"
@@ -219,9 +222,17 @@ OpenTelemetry makes it very convenient to instrument your Falcon application. Yo
 You can try out SigNoz by visiting its GitHub repo 👇
 [![SigNoz GitHub repo](/img/blog/common/signoz_github.webp)](https://github.com/SigNoz/signoz)
 
-If you have any questions or need any help in setting things up, join our slack community and ping us in `#help` channel.
+If you are someone who understands more from video, then you can watch the below video tutorial on the same with SigNoz.
 
-[![SigNoz Slack community](/img/blog/common/join_slack_cta.png)](https://bit.ly/signoz-slack)
+<p>&nbsp;</p>
+
+<LiteYoutubeEmbed id="ntW_3t5J34g" mute={false} />
+
+<p>&nbsp;</p>
+
+If you have any questions or need any help in setting things up, join our slack community and ping us in `#support` channel.
+
+[![SigNoz Slack community](/img/blog/common/join_slack_cta.png)](https://signoz.io/slack)
 
 ---
 

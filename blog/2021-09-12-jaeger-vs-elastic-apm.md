@@ -2,7 +2,7 @@
 title: Jaeger vs Elastic APM - key differences, features and alternatives
 slug: jaeger-vs-elastic-apm
 date: 2021-09-12
-tags: [jaeger, apm-tools]
+tags: [Tools Comparison, Jaeger]
 authors: ankit_anand
 description: Jaeger is an open-source end-to-end distributed tracing tool for microservices architecture. On the other hand, Elastic APM is an application performance monitoring system which is built on top of the ELK Stack...
 image: /img/blog/2021/09/jaeger_vs_elastic_apm_cover-min.webp
@@ -116,7 +116,7 @@ That's where [SigNoz](https://signoz.io/?utm_source=blog&utm_medium=jaeger_vs_el
 ## Alternative to Elastic APM and Jaeger - SigNoz
 SigNoz is a full-stack open-source application performance monitoring and observability tool which can be used in place of Elastic APM and Jaeger. It provides advanced distributed tracing capabilities along with metrics under a single dashboard.
 
-SigNoz is built to support OpenTelemetry natively. [OpenTelemetry](https://opentelemetry.io/) is becoming the world standard for generating and managing telemetry data (Logs, metrics and traces). It also provides users flexibility in terms of storage. You can choose between ClickHouse or Kafka + Druid as your backend storage while installing SigNoz.
+SigNoz is built to support OpenTelemetry natively. [OpenTelemetry](https://opentelemetry.io/) is becoming the world standard for generating and managing telemetry data (Logs, metrics and traces). It provides a fast OLAP datastore, ClickHouse as the storage backend.
 
 <Screenshot
     alt="Architecture of SigNoz with OpenTelemetry and ClickHouse"
@@ -160,11 +160,11 @@ Some of the things SigNoz can help you track:
 
 If you have docker installed, getting started with SigNoz just takes three easy steps at the command line:
 ```jsx
-git clone https://github.com/SigNoz/signoz.git
+git clone -b main https://github.com/SigNoz/signoz.git
 cd signoz/deploy/
 ./install.sh
 ```
-You can read more about deploying SigNoz from its [documentation](https://signoz.io/docs/deployment/docker/).
+You can read more about deploying SigNoz from its [documentation](https://signoz.io/docs/install/docker/).
 
 You can check out SigNoz's GitHub repo here 👇
 

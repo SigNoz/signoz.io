@@ -2,7 +2,7 @@
 title: Jaeger vs Tempo - key features, differences, and alternatives
 slug: jaeger-vs-tempo
 date: 2021-09-16
-tags: [jaeger, apm-tools]
+tags: [Tools Comparison, Jaeger]
 authors: ankit_anand
 description: Both Jaeger and Grafana Tempo are tools aimed at distributed tracing for microservice architecture. Tempo supports multiple open-source instrumentation standards, while Jaeger supports OpenTracing APIs..
 image: /img/blog/2021/09/jaeger_vs_tempo_cover-min.webp
@@ -180,7 +180,7 @@ That's where [SigNoz](https://signoz.io/?utm_source=blog&utm_medium=article) c
 ## Alternative to Jaeger and Grafana Tempo - SigNoz
 SigNoz is a full-stack open-source application performance monitoring and observability tool which can be used in place of Grafana Tempo and Jaeger. It provides advanced distributed tracing capabilities along with metrics under a single dashboard.
 
- SigNoz is built to support OpenTelemetry natively. <a href = "https://opentelemetry.io/" rel="noopener noreferrer nofollow" target="_blank" ><b>OpenTelemetry</b></a>  is becoming the world standard for generating and managing telemetry data (Logs, metrics, and traces). It also provides users flexibility in terms of storage. You can choose between ClickHouse or Kafka + Druid as your backend storage while installing SigNoz.
+ SigNoz is built to support OpenTelemetry natively. <a href = "https://opentelemetry.io/" rel="noopener noreferrer nofollow" target="_blank" ><b>OpenTelemetry</b></a>  is becoming the world standard for generating and managing telemetry data (Logs, metrics, and traces). It also provides a fast OLAP datastore, ClickHouse as the storage backend.
 
  <Screenshot
     alt="Architecture of SigNoz with OpenTelemetry and ClickHouse"
@@ -225,7 +225,7 @@ Some of the things SigNoz can help you track:
 You can get started with SigNoz using just three commands at your terminal.
 
 ```jsx
-git clone https://github.com/SigNoz/signoz.git
+git clone -b main https://github.com/SigNoz/signoz.git
 cd signoz/deploy/
 ./install.sh
 ```
@@ -233,7 +233,7 @@ cd signoz/deploy/
 
 For detailed instructions, you can visit our documentation.
 
-[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/deployment/docker/?utm_source=blog&utm_medium=jaeger_vs_tempo)
+[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/?utm_source=blog&utm_medium=jaeger_vs_tempo)
 
 You can check out SigNoz's GitHub repo here 👇
 

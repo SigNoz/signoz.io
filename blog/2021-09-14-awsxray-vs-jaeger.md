@@ -2,7 +2,7 @@
 title: AWS X-Ray vs Jaeger - key features, differences and alternatives
 slug: aws-xray-vs-jaeger
 date: 2021-09-14
-tags: [jaeger, apm-tools]
+tags: [Tools Comparison, Jaeger]
 authors: ankit_anand
 description: Both AWS X-Ray and Jaeger are distributed tracing tools used for performance monitoring in a microservices architecture. Jaeger was originally built by teams at Uber and then open-sourced in 2015. On the other hand, AWS X-Ray is a distributed tracing tool provided by AWS specifically focused on distributed tracing for applications using Amazon Cloud Services.
 image: /img/blog/2021/09/aws_xray_vs_jaeger_cover.webp
@@ -143,7 +143,7 @@ That's where [SigNoz](https://signoz.io/?utm_source=blog&utm_medium=aws_x_ray_vs
 ## Alternative to AWS X-Ray and Jaeger - SigNoz
 SigNoz is a full-stack open-source application performance monitoring and observability tool which can be used in place of AWS X-Ray and Jaeger. It provides advanced distributed tracing capabilities along with metrics under a single dashboard.
 
- SigNoz is built to support OpenTelemetry natively. <a href = "https://opentelemetry.io/" rel="noopener noreferrer nofollow" target="_blank" ><b>OpenTelemetry</b></a> is becoming the world standard for generating and managing telemetry data (Logs, metrics and traces). It also provides users flexibility in terms of storage. You can choose between ClickHouse or Kafka + Druid as your backend storage while installing SigNoz.
+ SigNoz is built to support OpenTelemetry natively. <a href = "https://opentelemetry.io/" rel="noopener noreferrer nofollow" target="_blank" ><b>OpenTelemetry</b></a> is becoming the world standard for generating and managing telemetry data (Logs, metrics and traces). It also provides a fast OLAP datastore, ClickHouse as the storage backend.
 
  <Screenshot
     alt="Architecture of SigNoz with OpenTelemetry and ClickHouse"
