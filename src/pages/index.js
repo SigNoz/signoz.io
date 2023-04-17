@@ -4,6 +4,7 @@ import ReactModal from "react-modal";
 import { Header } from "../modules/index-header"
 import { ShowCompanyLogos } from "../modules/company-logos"
 import { WhyOpenTelemetry } from "../modules/why-opentelemetry";
+import { DataProtection } from "../modules/data-protection";
 import { SigNozFeatures } from "../modules/index-features";
 
 import clsx from "clsx";
@@ -333,11 +334,14 @@ function Home() {
 
           <WhyOpenTelemetry />
 
+          {/* Data protection */}
+          <DataProtection />
+
 
           <section>
             <div
               className="container"
-              style={{ marginTop: "8rem", marginBottom: "4rem" }}
+              style={{ marginTop: "4rem", marginBottom: "4rem" }}
             >
               <h1 class="text--center margin-vert--lg">
                 {" "}
