@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import Link from "@docusaurus/Link";
-import useBaseUrl from "@docusaurus/useBaseUrl";
 import ReactGA from "react-ga";
 import styles from "./styles.module.css";
 
@@ -16,14 +15,12 @@ export const TrySigNozCTA = () => {
       <div className="container">
         <div className={styles.contentWrapper}>
           <h3 className={styles.tagline}>Give SigNoz a try</h3>
-          <a
+          <Link
             className={`button button--secondary ${styles.ctaBtn}`}
-            target="_blank"
-            href="https://forms.gle/yYSkntXRRPU3MHRL7"
-            onClick={() => handleClick("SigNozCloud")}
+            href="/get-cloud/"
           >
             Get Started
-          </a>
+          </Link>
         </div>
       </div>
     </section>

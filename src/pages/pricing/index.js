@@ -2,7 +2,6 @@ import React from "react";
 import Layout from "@theme/Layout";
 import Link from "@docusaurus/Link";
 import FAQBody from "@site/src/components/FAQPricing";
-import ReactGA from "react-ga";
 import { ShowCompanyLogos } from "../../modules/company-logos";
 import { RightSVG, WrongSVG } from "../../svgs/common";
 import { TalkToExpert } from "../../modules/talk-to-expert";
@@ -12,22 +11,11 @@ import { TrySigNozCTA } from "../../modules/try-signoz-cta";
 import { DataProtection } from "../../modules/data-protection";
 import styles from "./styles.module.css";
 
-ReactGA.initialize("UA-152867655-1");
-
-const handleClick = (message) => {
-  ReactGA.event({
-    category: "User",
-    action: message,
-  });
-};
-
-function pricingTest() {
+function Pricing() {
   return (
     <Layout title="SigNoz Plans">
       <section className={styles.pricing}>
-        <div
-          className={`container ${styles.pricingContainer}`}
-        >
+        <div className={`container ${styles.pricingContainer}`}>
           <h2 className={styles.title}>Transparent & Predictable Pricing</h2>
           <p className={styles.subtitle}>
             OpenTelemetry-Native <span className="highlight">Metrics</span>,{" "}
@@ -37,12 +25,8 @@ function pricingTest() {
           </p>
           <div className={"row"}>
             <div className={"col col--6 margin-vert--md"}>
-              <div
-                className={`card ${styles.card}`}
-              >
-                <div
-                  className={`card__header ${styles.card__header}`}
-                >
+              <div className={`card ${styles.card}`}>
+                <div className={`card__header ${styles.card__header}`}>
                   <div>
                     <h3>Team</h3>
                     <p>For teams that need high-performing applications</p>
@@ -50,21 +34,17 @@ function pricingTest() {
                   <div className={styles.priceCta}>
                     <div className={styles.priceCtaDesc}>
                       <span>starts at just</span>
-                      <span
-                        className={`${styles.price} highlight`}
-                      >
+                      <span className={`${styles.price} highlight`}>
                         $199/month
                       </span>
                     </div>
                     <div>
-                      <a
+                      <Link
                         className="button button--primary"
-                        target="_blank"
-                        href="https://forms.gle/yYSkntXRRPU3MHRL7"
-                        onClick={() => handleClick("SigNozCloud")}
+                        href={"/get-cloud/"}
                       >
                         Get Started
-                      </a>
+                      </Link>
                     </div>
                   </div>
                   <hr />
@@ -153,34 +133,18 @@ function pricingTest() {
                       <li>Run aggregates on ingested spans</li>
                       <li>Live Tail Logging</li>
                     </ul>
-                    {/* <span>
-                      <a href="#" className="explore">
-                        Explore all features
-                      </a>
-                    </span> */}
                   </div>
                 </div>
-                <div
-                  className={`card__footer ${styles.card__footer}`}
-                >
-                  <a
-                    className="button button--primary"
-                    target="_blank"
-                    href="https://forms.gle/yYSkntXRRPU3MHRL7"
-                    onClick={() => handleClick("SigNozCloud")}
-                  >
+                <div className={`card__footer ${styles.card__footer}`}>
+                  <Link className="button button--primary" href={"/get-cloud/"}>
                     Get Started
-                  </a>
+                  </Link>
                 </div>
               </div>
             </div>
             <div className={"col col--6 margin-vert--md"}>
-              <div
-                className={`card ${styles.card}`}
-              >
-                <div
-                  className={`card__header ${styles.card__header}`}
-                >
+              <div className={`card ${styles.card}`}>
+                <div className={`card__header ${styles.card__header}`}>
                   <div>
                     <h3>Enterprise</h3>
                     <p>
@@ -191,21 +155,17 @@ function pricingTest() {
                   <div className={styles.priceCta}>
                     <div className={styles.priceCtaDesc}>
                       <span>starts at just</span>
-                      <span
-                        className={`${styles.price} highlight`}
-                      >
+                      <span className={`${styles.price} highlight`}>
                         $999/month
                       </span>
                     </div>
                     <div>
-                      <a
+                      <Link
                         className="button button--primary"
-                        target="_blank"
-                        href="https://forms.gle/zxCEoSbnnPv6mSX57"
-                        onClick={() => handleClick("SelfHostedEnterprise")}
+                        href={"/self-hosted/"}
                       >
                         Contact Us
-                      </a>
+                      </Link>
                     </div>
                   </div>
                   <hr />
@@ -305,7 +265,10 @@ function pricingTest() {
                     <ul className="list-icon-right">
                       <li>Single Sign On</li>
                       <li>SAML and LDAP support</li>
-                      <li>Custom integration for metrics and logs (Cloudwatch, etc)</li>
+                      <li>
+                        Custom integration for metrics and logs (Cloudwatch,
+                        etc)
+                      </li>
                       <li>AWS Private Link</li>
                       <li>VPC Peering</li>
                       <li>Security tightening for on-prem installation</li>
@@ -327,17 +290,13 @@ function pricingTest() {
                     </ul>
                   </div>
                 </div>
-                <div
-                  className={`card__footer ${styles.card__footer}`}
-                >
-                  <a
+                <div className={`card__footer ${styles.card__footer}`}>
+                  <Link
                     className="button button--primary"
-                    target="_blank"
-                    href="https://forms.gle/zxCEoSbnnPv6mSX57"
-                    onClick={() => handleClick("SelfHostedEnterprise")}
+                    href={"/self-hosted/"}
                   >
                     Contact Us
-                  </a>
+                  </Link>
                 </div>
               </div>
             </div>
@@ -416,14 +375,10 @@ function pricingTest() {
 
       {/* FAQ section */}
       <section className={styles.faq}>
-        <div
-          className={`container ${styles.faqContainer}`}
-        >
+        <div className={`container ${styles.faqContainer}`}>
           <div className="row">
             <div className="col col--8 col--offset-2">
-              <p
-                className={`hero__subtitle margin--md ${styles.title}`}
-              >
+              <p className={`hero__subtitle margin--md ${styles.title}`}>
                 FAQs
               </p>
               <div className="card-demo margin--md">
@@ -443,4 +398,4 @@ function pricingTest() {
   );
 }
 
-export default pricingTest;
+export default Pricing;
