@@ -43,7 +43,7 @@ function PricingForm() {
           <p className={styles.error}>Please complete this required field.</p>
         )}
         {errors?.email?.type === "pattern" && (
-          <p className={styles.error}>Enter valid email address</p>
+          <p className={styles.error}>Enter valid email address.</p>
         )}
       </div>
 
@@ -148,7 +148,7 @@ function PricingForm() {
           <p className={styles.error}>Please complete this required field.</p>
         )}
         {errors?.otherUseCase?.type === "required" && (
-          <p className={styles.error}>Other field is required</p>
+          <p className={styles.error}>Other field is required.</p>
         )}
       </div>
 

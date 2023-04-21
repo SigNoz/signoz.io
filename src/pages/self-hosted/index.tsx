@@ -31,18 +31,13 @@ function SelfHosted() {
         <div className={`container ${styles.selfHostedContainer}`}>
           <div className={`row ${styles.selfHostedRow}`}>
             <div className={"col col--6 margin-vert--md"}>
-              <div
-                className={`card ${styles.cardTransparent} ${styles.featureCard}`}
-              >
-                <div className="card__body">
-                  {SELF_HOSTED_FEATURE_POINTS.map((feature, idx) => (
-                    <div key={idx} className={styles.featureWrapper}>
-                      <h3 className={styles.featureTitle}>{feature.title}</h3>
-                      <p className={styles.featureDesc}>{feature.desc}</p>
-                    </div>
-                  ))}
-                </div>
-                <div className="card__footer"></div>
+              <div className={styles.featuresContainer}>
+                {SELF_HOSTED_FEATURE_POINTS.map((feature, idx) => (
+                  <div key={idx} className={styles.featureWrapper}>
+                    <h3 className={styles.featureTitle}>{feature.title}</h3>
+                    <p className={styles.featureDesc}>{feature.desc}</p>
+                  </div>
+                ))}
               </div>
             </div>
             <div className={"col col--6 margin-vert--md"}>

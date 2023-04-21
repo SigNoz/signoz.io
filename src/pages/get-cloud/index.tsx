@@ -31,18 +31,13 @@ function GetCloud() {
         <div className={`container ${styles.getCloudContainer}`}>
           <div className={`row ${styles.getCloudRow}`}>
             <div className={"col col--6 margin-vert--md"}>
-              <div
-                className={`card ${styles.cardTransparent} ${styles.featureCard}`}
-              >
-                <div className="card__body">
-                  {GET_CLOUD_FEATURE_POINTS.map((feature, idx) => (
-                    <div key={idx} className={styles.featureWrapper}>
-                      <h3 className={styles.featureTitle}>{feature.title}</h3>
-                      <p className={styles.featureDesc}>{feature.desc}</p>
-                    </div>
-                  ))}
-                </div>
-                <div className="card__footer"></div>
+              <div className={styles.featuresContainer}>
+                {GET_CLOUD_FEATURE_POINTS.map((feature, idx) => (
+                  <div key={idx} className={styles.featureWrapper}>
+                    <h3 className={styles.featureTitle}>{feature.title}</h3>
+                    <p className={styles.featureDesc}>{feature.desc}</p>
+                  </div>
+                ))}
               </div>
             </div>
             <div className={"col col--6 margin-vert--md"}>

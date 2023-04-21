@@ -1,7 +1,7 @@
 import React from "react";
 import Layout from "@theme/Layout";
 import Link from "@docusaurus/Link";
-import FAQBody from "@site/src/components/FAQPricing";
+import FAQBody from "../../components/FAQPricing";
 import { ShowCompanyLogos } from "../../modules/company-logos";
 import { RightSVG, WrongSVG } from "../../svgs/common";
 import { TalkToExpert } from "../../modules/talk-to-expert";
