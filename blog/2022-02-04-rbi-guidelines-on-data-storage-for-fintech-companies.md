@@ -1,11 +1,11 @@
 ---
 title: Challenges in Choosing an APM tool for Fintech Companies in India due to RBI Guidelines
 slug: challenges-in-choosing-a-monitoring-tool-for-fintech-companies-in-india
-date: 2022-02-04
+date: 2023-04-24
 tags: [APM, Security]
 authors: [ankit_anand]
 description: RBI has issued guidelines on storing payment system data of Indian users for fintech companies in India. All user data needs to be stored in India. This also applies to all third-party tools they use, including monitoring tools..
-image: /img/blog/2022/02/rbi_guideline_cover_pic.webp
+image: /img/blog/2023/04/challenges_in_choosing_APM_tool_cover-min.jpg
 hide_table_of_contents: true
 keywords:
   - application performance monitoring
@@ -23,7 +23,7 @@ As the growth lead of an open-source APM tool, I keep interacting with developer
 
 <!--truncate-->
 
-![Cover Image](/img/blog/2022/02/rbi_guideline_cover_pic.webp)
+![Cover Image](/img/blog/2023/04/challenges_in_choosing_APM_tool_cover.webp)
 
 The reason?
 

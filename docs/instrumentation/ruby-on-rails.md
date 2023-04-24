@@ -70,7 +70,7 @@ Here's a [tutorial](https://signoz.io/blog/opentelemetry-ruby/) with step by ste
 
 Here's a <a href = "https://medium.com/@leunardus.vederis714/monitor-your-ruby-on-rails-app-using-signoz-opentelemetry-b59578f3b252" rel="noopener noreferrer nofollow" target="_blank" >detailed guide</a> published by our community member Vederis on how to monitor your Ruby on Rails application with OpenTelemetry and SigNoz.
 
-## Sample Golang application
+## Sample Ruby on Rails application
 We have included a sample Ruby on Rails application with README.md at [Sample Rails App Github Repo.](https://github.com/SigNoz/sample-rails-app)
 
 Feel free to use this repo to test out OpenTelemetry instrumentation and how to send telemetry data to SigNoz.
