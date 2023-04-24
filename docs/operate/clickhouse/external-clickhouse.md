@@ -27,7 +27,7 @@ migration files due to the limitations of `golang-migrate` library.
 1. Run at least an instance of Zookeeper.
 2. Create configuration for distributed cluster named `cluster` as described in
     [clickhouse-cluster.xml][3] and include it in `/etc/clickhouse-server/config.d/`.
-3. Include Zookeeper information in above [clickhouse.xml][3] file as well.
+3. Include Zookeeper information in above [clickhouse-cluster.xml][3] file as well.
 4. (Optional) Below steps are only required if you want to use _histogram quantile_ 
     functions using **Query Builder**.
     - Include [custom function configuration][1] in the `/etc/clickhouse-server/` directory.
