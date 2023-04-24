@@ -17,7 +17,7 @@ export const TrySigNozCTA = () => {
           <h3 className={styles.tagline}>Give SigNoz a try</h3>
           <Link
             className={`button button--secondary ${styles.ctaBtn}`}
-            href="/get-cloud/"
+            href="/team/"
           >
             Get Started
           </Link>

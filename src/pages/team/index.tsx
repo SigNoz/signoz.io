@@ -10,16 +10,16 @@ const GET_CLOUD_FEATURE_POINTS = [
     desc: "Get logs, metrics, and traces under a single pane of glass. No need for disparate tooling with too much operational overhead.",
   },
   {
-    title: "Trusted by industry leaders",
-    desc: "Teams at Zoom, NetApp, ClearTax and other industry leaders have trusted SigNoz to run their observability stack.",
+    title: "Data Residency",
+    desc: "Worried about data privacy and regulation laws? We have data centers in EU, US and India region to  help you comply with data privacy regulation.",
   },
   {
     title: "OpenTelemetry-Native",
     desc: "Future-proof your observability with OpenTelemetry. Second most active CNCF project after Kubernetes, OpenTelemetry is the future of cloud-native application monitoring.",
   },
   {
-    title: "Data Residency",
-    desc: "Worried about data privacy and regulation laws? We have data centers in EU, US and India region to  help you comply with data privacy regulation.",
+    title: "Trusted by industry leaders",
+    desc: "Teams at Zoom, NetApp, ClearTax and other industry leaders have trusted SigNoz to run their observability stack.",
   },
 ];
 

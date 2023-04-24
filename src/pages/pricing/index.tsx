@@ -41,7 +41,7 @@ function Pricing() {
                     <div>
                       <Link
                         className="button button--primary"
-                        href={"/get-cloud/"}
+                        href={"/team/"}
                       >
                         Get Started
                       </Link>
@@ -136,7 +136,7 @@ function Pricing() {
                   </div>
                 </div>
                 <div className={`card__footer ${styles.card__footer}`}>
-                  <Link className="button button--primary" href={"/get-cloud/"}>
+                  <Link className="button button--primary" href={"/team/"}>
                     Get Started
                   </Link>
                 </div>
@@ -162,7 +162,7 @@ function Pricing() {
                     <div>
                       <Link
                         className="button button--primary"
-                        href={"/self-hosted/"}
+                        href={"/enterprise/"}
                       >
                         Contact Us
                       </Link>
@@ -293,7 +293,7 @@ function Pricing() {
                 <div className={`card__footer ${styles.card__footer}`}>
                   <Link
                     className="button button--primary"
-                    href={"/self-hosted/"}
+                    href={"/enterprise/"}
                   >
                     Contact Us
                   </Link>

@@ -8,7 +8,7 @@ export const SigNozFeatures = () => {
     <section>
       <div className={`container ${styles.featureContainer}`}>
         <h1 className="text--center margin-bottom--lg">
-          <span className={styles.highlight}>Metrics, Traces, Logs</span> and
+          <span className={styles.highlight}>Metrics, Traces, Logs</span> and{" "}
           <span className={styles.highlight}>Exceptions</span> monitoring in a
           single pane
         </h1>

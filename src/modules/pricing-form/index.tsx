@@ -46,6 +46,40 @@ function PricingForm() {
           <p className={styles.error}>Enter valid email address.</p>
         )}
       </div>
+      <div className={styles.inputGroup}>
+        <label className={styles.formLabel}>
+          What is your preferred hosting setup?
+        </label>
+        <span className={styles.formRadioWrapper}>
+          <input
+            id="signoz-cloud"
+            className={styles.radioInput}
+            type="radio"
+            {...register("setup",{
+              required: true
+            })}
+            value="signoz-cloud"
+          />
+          <label htmlFor="signoz-cloud">SigNoz Cloud</label>
+        </span>
+        <span className={styles.formRadioWrapper}>
+          <input
+            id="managed-by-signoz-in-your-cloud"
+            className={styles.radioInput}
+            type="radio"
+            {...register("setup",{
+              required: true
+            })}
+            value="managed-by-signoz-in-your-cloud"
+          />
+          <label htmlFor="managed-by-signoz-in-your-cloud">
+            Managed by SigNoz in your cloud
+          </label>
+        </span>
+        {errors?.setup && (
+          <p className={styles.error}>Please complete this required field.</p>
+        )}
+      </div>
 
       <div className={styles.inputGroup}>
         <label htmlFor="scale" className={styles.formLabel}>
@@ -143,7 +177,6 @@ function PricingForm() {
             />
           </label>
         </span>
-        {console.log("###errors", errors)}
         {errors?.useCase && (
           <p className={styles.error}>Please complete this required field.</p>
         )}
