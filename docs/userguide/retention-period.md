@@ -92,6 +92,8 @@ Also configure the endpoint, access key and secret.
 For GCS, `support_batch_delete` must be set to `false` as GCS doesn't support batch delete
 and results in error messages in the logs.
 
+The type of the disk is `s3` because S3-compatible API of GCS is used.
+
 The endpoint will be `https://storage.googleapis.com/<bucket-name>/data/`.
 
 ```xml
