@@ -35,7 +35,7 @@ function pricingTest() {
             <span className="highlight">Traces</span> in{" "}
             <span className="highlight">single</span> pane of glass
           </p>
-          <div className={"row"}>
+          <div className={`row ${styles.pricingRow}`}>
             <div className={"col col--6 margin-vert--md"}>
               <div
                 className={`card ${styles.card}`}
