@@ -31,7 +31,7 @@ The reason?
 
 But what does RBI has to do with the monitoring tools of fintech firms? I was intrigued, so I dug further.
 
-The fintech space in India has been one of the leading forerunners in the story of driving innovation for new-age India. And, it is not just payments, fintech companies are innovating in every space such as credit, loan, insurance, investment, etc. Moreover, while nascent, Crypto is growing rapidly among tech-savvy young Indians. In a nutshell, all financial products and services are available at the fingertips of Indian customers.
+The fintech space in India has been one of the leading forerunners in the story of driving innovation for new-age India. And, it is not just payments, fintech companies are innovating in every space such as credit, loan, insurance, investment, etc. In a nutshell, all financial products and services are available at the fingertips of Indian customers.
 
 The user demand for simplified financial services has also skyrocketed, leading to many players in the market who are vying for customers' trust to deal with their money. Apps in this domain need to take care of critical user flows where any technical issue can **cause mistrust and anxiety**.
 

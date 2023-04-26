@@ -113,8 +113,6 @@ The instrumentation automatically identifies the following within your applicati
       // initialize the SDK and register with the OpenTelemetry API
       // this enables the API to record telemetry
       sdk.start()
-      .then(() => console.log('Tracing initialized'))
-      .catch((error) => console.log('Error initializing tracing', error));
       
       // gracefully shut down the SDK on process exit
       process.on('SIGTERM', () => {
@@ -242,8 +240,6 @@ If you are using Express, the instrumentation relies on HTTP calls to also be in
       // initialize the SDK and register with the OpenTelemetry API
       // this enables the API to record telemetry
       sdk.start()
-      .then(() => console.log('Tracing initialized'))
-      .catch((error) => console.log('Error initializing tracing', error));
       
       // gracefully shut down the SDK on process exit
       process.on('SIGTERM', () => {

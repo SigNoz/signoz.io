@@ -11,6 +11,7 @@ export const CommunityEdition = () => {
           Open source version of SigNoz to get started with observability.
         </p>
         <Link
+          id="btn-pricing-read-docs"
           className={`button button--primary ${styles.readDocsBtn}`}
           href={"/docs/"}
         >
