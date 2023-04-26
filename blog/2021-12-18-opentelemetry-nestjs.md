@@ -1,7 +1,7 @@
 ---
 title: OpenTelemetry Nestjs Auto-Instrumentation Guide
 slug: opentelemetry-nestjs
-date: 2023-01-24
+date: 2023-03-24
 tags: [OpenTelemetry Instrumentation, JavaScript]
 authors: [ankit_anand, vishal]
 description: Setting up OpenTelemetry instrumentation for a Nestjs application. Step 1. Install required dependencies Step 2. Create a tracer.js file Step 3. Import the tracer module Step 4. Start the tracer... 
@@ -19,6 +19,7 @@ keywords:
 ---
 
 import { LiteYoutubeEmbed } from "react-lite-yt-embed";
+import VersionPin from '../docs/shared/nestjs-version-pin.md'
 
 <head>
   <link rel="canonical" href="https://signoz.io/blog/opentelemetry-nestjs/"/>
@@ -80,6 +81,8 @@ npm install --save @opentelemetry/resources
 npm install --save @opentelemetry/sdk-node
 npm install --save @opentelemetry/semantic-conventions
 ```
+
+<VersionPin />
 
 <br></br>
 

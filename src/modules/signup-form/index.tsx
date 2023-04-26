@@ -6,7 +6,6 @@
 ////////////////
 
 import React, { useState } from "react";
-import clsx from "clsx";
 import styles from "./styles.module.css";
 
 const DOMAIN = "app.loops.so";
@@ -147,9 +146,7 @@ export default function SignUpFormReact() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required={true}
-              className={clsx({
-                [styles.newsletterInput]: true,
-              })}
+              className={styles.newsletterInput}
             />
             <SignUpFormButton />
           </form>
@@ -177,9 +174,7 @@ export default function SignUpFormReact() {
     return (
       <button
         type="submit"
-        className={clsx({
-          [styles.submitBtn]: true,
-        })}
+        className={styles.submitBtn}
       >
         {formState === SUBMITTING ? "Please wait..." : formStyles.buttonText}
       </button>

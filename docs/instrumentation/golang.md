@@ -129,7 +129,7 @@ This document contains instructions on how to set up OpenTelemetry instrumentati
    The run command must have some environment variables to send data to SigNoz. The run command:
     
     ```bash
-    SERVICE_NAME=<service_name> INSECURE_MODE=true OTEL_METRICS_EXPORTER=none OTEL_EXPORTER_OTLP_ENDPOINT=<IP of SigNoz backend:4317> go run main.go
+    SERVICE_NAME=<service_name> INSECURE_MODE=true OTEL_EXPORTER_OTLP_ENDPOINT=<IP of SigNoz backend:4317> go run main.go
     ```
     
     We can replace the placeholders based on our environment.

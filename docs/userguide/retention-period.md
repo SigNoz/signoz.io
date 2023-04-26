@@ -13,8 +13,9 @@ By default, retention period is set to 7 days for logs and traces, and 30 days f
 <br></br>
 
 - You can select independent retention period for metrics, traces and logs.
-- You can also set the duration after which the data will be moved to cold storage (S3) for both traces and metrics. This can be only set if Cold Storage (eg. S3) is enabled from the backend.
-- Click `Save` to update the new retention periods..
+- You can also set the duration after which the data will be moved to cold storage (S3/GCS) for traces, metrics and logs.
+This can be only set if Cold Storage (S3/GCS) is enabled from the backend.
+- Click `Save` to update the new retention periods.
 
 ## Recommendations for setting retention period
 
@@ -26,34 +27,42 @@ Updating retention period can be very long running operation with large data. So
 
 ## Configuring Cold Storage - Amazon S3
 
-### Docker
+### Docker and Docker Swarm
 
-In case of docker, uncomment `storage_configuration` from `clickhouse-config.xml`. Also configure the endpoint, access key and secret.
+In case of docker, uncomment `storage_configuration` from `clickhouse-config.xml`.
+Also configure the endpoint, access key and secret. If you have configured the AWS
+credentials in the ClickHouse environment, set `use_environment_credentials` to `true`
+and you can remove `access_key_id` and `secret_access_key` from the configuration.
+
+If region is `us-east-1`, then the endpoint will be `https://<bucket-name>.s3.amazonaws.com/data/`.
+For other regions, the endpoint will be `https://<bucket-name>.s3-<region-name>.amazonaws.com/data/`.
 
 ```xml
 <storage_configuration>
-	<disks>
-		<default>
-		</default>
- 	    <s3>
- 	      <type>s3</type>
-		  <endpoint>https://BUCKET-NAME-HERE.s3.amazonaws.com/data/</endpoint>
- 	      <access_key_id>ACCESS-KEY-ID-HERE</access_key_id>
- 	      <secret_access_key>SECRET-ACCESS-KEY-HERE</secret_access_key>
- 	    </s3>
-	</disks>
-	<policies>
-		<tiered>
-    	<volumes>
-    	  <default>
-    	    <disk>default</disk>
-    	  </default>
-    	  <s3>
-    	    <disk>s3</disk>
-    	  </s3>
-    	</volumes>
+    <disks>
+        <default>
+            <keep_free_space_bytes>10485760</keep_free_space_bytes>
+        </default>
+        <s3>
+            <type>s3</type>
+            <endpoint>https://BUCKET-NAME-HERE.s3-REGION-NAME-HERE.amazonaws.com/data/</endpoint>
+            <access_key_id>ACCESS-KEY-ID-HERE</access_key_id>
+            <secret_access_key>SECRET-ACCESS-KEY-HERE</secret_access_key>
+            <use_environment_credentials>true</use_environment_credentials>
+        </s3>
+    </disks>
+    <policies>
+        <tiered>
+            <volumes>
+                <default>
+                    <disk>default</disk>
+                </default>
+                <s3>
+                    <disk>s3</disk>
+                </s3>
+            </volumes>
         </tiered>
-	</policies>
+    </policies>
 </storage_configuration>
 ```
 
@@ -65,9 +74,69 @@ In case of helm charts, update the `clickhouse.coldStorage` in `values.yaml`.
 clickhouse:
   coldStorage:
     enabled: true
-    # Set free space size on default disk
+    # Set free space size on default disk in bytes
     defaultKeepFreeSpaceBytes: "10485760" # 10MiB
+    type: s3
     endpoint: https://<bucket-name>.s3.amazonaws.com/data/
+    accessKey: <access_key_id>
+    secretAccess: <secret_access_key>
+```
+
+## Configuring Cold Storage - Google Cloud Storage (GCS)
+
+### Docker and Docker Swarm
+
+In case of docker, uncomment `storage_configuration` from `clickhouse-config.xml`.
+Also configure the endpoint, access key and secret.
+
+For GCS, `support_batch_delete` must be set to `false` as GCS doesn't support batch delete
+and results in error messages in the logs.
+
+The type of the disk is `s3` because S3-compatible API of GCS is used.
+
+The endpoint will be `https://storage.googleapis.com/<bucket-name>/data/`.
+
+```xml
+<storage_configuration>
+    <disks>
+        <default>
+            <keep_free_space_bytes>10485760</keep_free_space_bytes>
+        </default>
+        <s3>
+            <type>s3</type>
+            <endpoint>https://storage.googleapis.com/BUCKET-NAME-HERE/data/</endpoint>
+            <access_key_id>ACCESS-KEY-ID-HERE</access_key_id>
+            <secret_access_key>SECRET-ACCESS-KEY-HERE</secret_access_key>
+            <support_batch_delete>false</support_batch_delete>
+        </s3>
+    </disks>
+    <policies>
+        <tiered>
+            <volumes>
+                <default>
+                    <disk>default</disk>
+                </default>
+                <s3>
+                    <disk>s3</disk>
+                </s3>
+            </volumes>
+        </tiered>
+    </policies>
+</storage_configuration>
+```
+
+### Kubernetes
+
+In case of helm charts, update the `clickhouse.coldStorage` in `values.yaml`.
+
+```yaml
+clickhouse:
+  coldStorage:
+    enabled: true
+    # Set free space size on default disk in bytes
+    defaultKeepFreeSpaceBytes: "10485760" # 10MiB
+    type: gcs
+    endpoint: https://storage.googleapis.com/<bucket-name>/data/
     accessKey: <access_key_id>
     secretAccess: <secret_access_key>
 ```

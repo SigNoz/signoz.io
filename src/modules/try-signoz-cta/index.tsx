@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import Link from "@docusaurus/Link";
 import useBaseUrl from "@docusaurus/useBaseUrl";
+import ReactGA from "react-ga";
 import styles from "./styles.module.css";
 
 export const TrySigNozCTA = () => {
@@ -16,7 +17,8 @@ export const TrySigNozCTA = () => {
         <div className={styles.contentWrapper}>
           <h3 className={styles.tagline}>Give SigNoz a try</h3>
           <a
-            className="button button--secondary"
+            id="btn-pricing-give-signoz-try"
+            className={`button button--secondary ${styles.ctaBtn}`}
             target="_blank"
             href="https://forms.gle/yYSkntXRRPU3MHRL7"
             onClick={() => handleClick("SigNozCloud")}

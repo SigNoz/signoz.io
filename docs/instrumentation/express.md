@@ -7,6 +7,7 @@ description: Send events from your Express application to SigNoz
 import Tabs from "@theme/Tabs";
 import TabItem from "@theme/TabItem";
 import InstrumentationFAQ from '../shared/instrumentation-faq.md'
+import VersionPin from '../shared/nodejs-version-pin.md'
 
 
 This document contains instructions on how to set up OpenTelemetry instrumentation in your Express applications. OpenTelemetry, also known as OTel for short, is an open source observability framework that can help you generate and collect telemetry data - traces, metrics, and logs from your Express application.
@@ -73,6 +74,9 @@ Internally, it calls the specific auto-instrumentation library for components us
     `@opentelemetry/auto-instrumentations-node` - This module provides a simple way to initialize multiple Node instrumentations.<br></br>
     
     `@opentelemetry/exporter-trace-otlp-http` - This module provides the exporter to be used with OTLP (`http/json`) compatible receivers.<br></br>
+
+    <VersionPin />
+
     
 2. **Create a `tracing.js` file**<br></br>
   The `tracing.js` file will contain the tracing setup code. Notice, that we have set some environment variables in the code(highlighted). You can update these variables based on your environment.
@@ -106,8 +110,6 @@ Internally, it calls the specific auto-instrumentation library for components us
       // initialize the SDK and register with the OpenTelemetry API
       // this enables the API to record telemetry
       sdk.start()
-      .then(() => console.log('Tracing initialized'))
-      .catch((error) => console.log('Error initializing tracing', error));
       
       // gracefully shut down the SDK on process exit
       process.on('SIGTERM', () => {

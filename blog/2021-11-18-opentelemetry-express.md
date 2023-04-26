@@ -1,7 +1,7 @@
 ---
 title: Monitoring your Express application using OpenTelemetry
 slug: opentelemetry-express
-date: 2022-10-20
+date: 2023-04-14
 tags: [OpenTelemetry Instrumentation, JavaScript]
 authors: ankit_anand
 description: OpenTelemetry is a vendor-agnostic isntrumentation library. In this article, learn how to set up monitoring for an Express application using OpenTelemetry.
@@ -20,7 +20,7 @@ keywords:
 
 import { LiteYoutubeEmbed } from "react-lite-yt-embed";
 
-
+import VersionPin from '../docs/shared/nodejs-version-pin.md'
 
 <head>
   <link rel="canonical" href="https://signoz.io/blog/opentelemetry-express/"/>
@@ -145,6 +145,8 @@ Steps to get the app set up and running:
     `@opentelemetry/auto-instrumentations-node` - This module provides a simple way to initialize multiple Node instrumentations.<br></br>
     
     `@opentelemetry/exporter-trace-otlp-http` - This module provides the exporter to be used with OTLP (`http/json`) compatible receivers.<br></br>
+
+      <VersionPin />
 
 
 2. **Create `tracing.js` file**<br></br>

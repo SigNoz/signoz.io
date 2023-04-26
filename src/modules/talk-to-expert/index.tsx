@@ -17,6 +17,7 @@ export const TalkToExpert = () => {
         </p>
         <div className="text-center">
           <Link
+            id="btn-pricing-talk-to-an-expert"
             style={{
               margin: "6px",
               paddingLeft: "10px !important",

@@ -13,7 +13,7 @@ function NavbarBackdrop(props) {
     <div
       role="presentation"
       {...props}
-      className={clsx('navbar-sidebar__backdrop', props.className)}
+      className={`navbar-sidebar__backdrop ${props.className}`}
     />
   );
 }

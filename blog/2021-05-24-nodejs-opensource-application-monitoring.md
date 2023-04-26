@@ -1,11 +1,11 @@
 ---
 title: Set up application monitoring for your Node JS app in 20 mins with open source - SigNoz
 slug: nodejs-opensource-application-monitoring
-date: 2022-09-24
+date: 2023-04-08
 tags: [OpenTelemetry Instrumentation, JavaScript]
 authors: ankit_anand
 description: In this article, learn how to setup application monitoring for Node.js apps with our open-source solution, SigNoz.
-image: /img/blog/2021/05/nodejs_with_signoz_cover.webp
+image: /img/blog/2023/04/nodejs_application_monitoring_cover-min.jpg
 keywords:
   - SigNoz Product Update
   - Open Source community
@@ -14,11 +14,13 @@ keywords:
   - DataDog alternative
 ---
 
+import VersionPin from '../docs/shared/nodejs-version-pin.md'
+
 In this article, learn how to setup application monitoring for Node.js apps with our open-source solution, SigNoz.
 
 <!--truncate-->
 
-![Cover Image](/img/blog/2021/05/nodejs_with_signoz_cover.webp)
+![Cover Image](/img/blog/2023/04/nodejs_application_monitoring_cover.webp)
 
 Node.js tops the list of most widely used frameworks by developers. Powered by Google's V8 javascript engine, its performance is incredible. Ryan Dahl, the creator of Node.js, wanted to create real-time websites with push capability. On Nov 8, 2009, Node.js was first demonstrated by Dahl at the inaugural European JSconf. Node.js has now become a critical component in the technology stack of large-scale enterprises. But like any technology, it has its own set of limitations.
 
@@ -139,6 +141,8 @@ Steps to get the app set up and running:
     `@opentelemetry/auto-instrumentations-node` - This module provides a simple way to initialize multiple Node instrumentations.<br></br>
     
     `@opentelemetry/exporter-trace-otlp-http` - This module provides the exporter to be used with OTLP (`http/json`) compatible receivers.<br></br>
+
+    <VersionPin />
 
 
 2. **Create `tracing.js` file**<br></br>

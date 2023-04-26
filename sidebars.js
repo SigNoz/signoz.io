@@ -83,6 +83,7 @@ module.exports = {
             'operate/clickhouse/increase-clickhouse-pv',
             'operate/clickhouse/connect-to-clickhouse',
             'operate/clickhouse/distributed-clickhouse',
+            'operate/clickhouse/external-clickhouse',
           ]
         },
         'operate/feature-flags',

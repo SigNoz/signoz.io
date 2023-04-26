@@ -1,11 +1,11 @@
 ---
 title: Implementing Distributed Tracing in a Golang application
 slug: distributed-tracing-golang
-date: 2023-02-01
+date: 2023-04-12
 tags: [OpenTelemetry Instrumentation, Go / Golang]
 authors: [naman]
 description: Distributed tracing provides insights into how a particular service is performing as part of the whole in a distributed system. In this article, we will implement distributed tracing for a Golang application based on microservices architecture with OpenTelemetry, and visualize the collected data with SigNoz...
-image: /img/blog/2022/05/distributed_tracing_golang_cover.webp
+image: /img/blog/2023/04/distributed_tracing_golang_cover-min.jpg
 hide_table_of_contents: false
 keywords:
   - distributed tracing
@@ -16,7 +16,6 @@ keywords:
   - opentelemetry golang
   - traces
   - open source
-  - signoz
 ---
 
 import { LiteYoutubeEmbed } from "react-lite-yt-embed";
@@ -29,7 +28,7 @@ In this article, we will implement distributed tracing for a Golang application 
 
 <!--truncate-->
 
-![Cover Image](/img/blog/2022/05/distributed_tracing_golang_cover.webp)
+![Cover Image](/img/blog/2023/04/distributed_tracing_golang_cover.webp)
 
 ## What is distributed tracing?
 
@@ -244,7 +243,9 @@ We can also attach attributes, events, etc. to this span. Please refer to the [d
 Database lies in the hot path for most of the applications and any insights into its performance are valuable. We instrument it with the help of [github.com/XSAM/otelsql](http://github.com/XSAM/otelsql). And while making any DB call, we pass on the context.
 
 ```go
-db, err = otelsql.Open("mysql", datasourceName(username, password, host, dbName))
+db, err = otelsql.Open("mysql", datasourceName(username, password, host, dbName), otelsql.WithAttributes(
+		semconv.DBSystemMySQL,
+	))
 ....
 ....
 res, err := stmt.ExecContext(ctx, p.Vars...)

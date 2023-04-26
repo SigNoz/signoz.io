@@ -1,7 +1,7 @@
 ---
 title: Monitor your Nodejs application with OpenTelemetry and SigNoz
 slug: opentelemetry-nodejs
-date: 2022-10-31
+date: 2023-04-14
 tags: [OpenTelemetry Instrumentation, JavaScript]
 authors: ankit_anand
 description: In this article, learn how to setup application monitoring for Node.js apps with OpenTelemetry and SigNoz.
@@ -22,6 +22,8 @@ keywords:
 </head>
 
 import SignUps from '../docs/shared/sign-ups.md'
+import VersionPin from '../docs/shared/nodejs-version-pin.md'
+
 
 OpenTelemetry can auto-instrument many common modules for a Javascript application. The telemetry data captured can then be sent to SigNoz for analysis and visualization.
 
@@ -151,6 +153,8 @@ Steps to get the app set up and running:
     `@opentelemetry/auto-instrumentations-node` - This module provides a simple way to initialize multiple Node instrumentations.<br></br>
     
     `@opentelemetry/exporter-trace-otlp-http` - This module provides the exporter to be used with OTLP (`http/json`) compatible receivers.<br></br>
+
+     <VersionPin />
 
 
 2. **Create `tracing.js` file**<br></br>

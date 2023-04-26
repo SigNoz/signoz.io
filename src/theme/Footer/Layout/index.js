@@ -1,6 +1,7 @@
 import React from 'react';
 import clsx from 'clsx';
 import SignUpForm from '../../../modules/signup-form';
+import styles from "./styles.module.css"
 
 export default function FooterLayout({style, links, logo, copyright}) {
   return (
@@ -9,7 +10,7 @@ export default function FooterLayout({style, links, logo, copyright}) {
         'footer--dark': style === 'dark',
       })}>
       <div className="container container-fluid">
-        <div style={{marginTop:'0.5rem',marginBottom:'1.5rem'}}>
+        <div className={styles.signUpFormWrapper}>
           <SignUpForm/>
         </div>
         {links}

@@ -164,13 +164,13 @@ Verify if you have Golang installed on your machine by running `$ go version` on
     You just need to run it with the necessary environment variables in order to start sending data to SigNoz. Use the following command to run and configure the app to send data to SigNoz:
 
     ```
-    SERVICE_NAME=goApp INSECURE_MODE=true OTEL_METRICS_EXPORTER=none OTEL_EXPORTER_OTLP_ENDPOINT=<IP of SigNoz backend>:4317 go run main.go
+    SERVICE_NAME=goApp INSECURE_MODE=true OTEL_EXPORTER_OTLP_ENDPOINT=<IP of SigNoz backend>:4317 go run main.go
     ```
 
     `Ip of SigNoz` can be replaced with `localhost` in this case. Hence, the final command becomes:
 
     ```
-    SERVICE_NAME=goApp INSECURE_MODE=true OTEL_METRICS_EXPORTER=none OTEL_EXPORTER_OTLP_ENDPOINT=localhost:4317 go run main.go
+    SERVICE_NAME=goApp INSECURE_MODE=true OTEL_EXPORTER_OTLP_ENDPOINT=localhost:4317 go run main.go
     ``` -->
 
 

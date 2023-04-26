@@ -255,7 +255,6 @@ Below are the steps to run the sample Java application with OpenTelemetry:
        -Xms${JAVA_XMS} \
        -Xmx${JAVA_XMX} \
        -Dapplication.name=user-service-java \
-       -Dotel.metrics.exporter=none \
        -Dotel.traces.exporter=otlp \
        -Dotel.resource.attributes=service.name=user-service-java \
        -Dotel.exporter.otlp.traces.endpoint=http://localhost:4317 \
