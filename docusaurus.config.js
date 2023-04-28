@@ -13,13 +13,18 @@ const config = {
   organizationName: "SigNoz", // Usually your GitHub org/user name.
   projectName: "signoz", // Usually your repo name.
   themeConfig: {
+    colorMode: {
+      defaultMode: "dark",
+      disableSwitch: true,
+      respectPrefersColorScheme: false,
+    },
     algolia: {
       // The application ID provided by Algolia
-      appId: 'E88QYIQ6K4',
+      appId: "E88QYIQ6K4",
 
       // Public API key: it is safe to commit it
-      apiKey: '1061c173ae001d5f5aaa4f0354e373a0',
-      indexName: 'signoz',
+      apiKey: "1061c173ae001d5f5aaa4f0354e373a0",
+      indexName: "signoz",
     },
     prism: {
       // Supported languages are:
@@ -27,14 +32,14 @@ const config = {
       additionalLanguages: ["ruby", "csharp", "php", "java"],
     },
     zoom: {
-      selector: 'figure[data-zoomable] > img',
+      selector: "figure[data-zoomable] > img",
       config: {
         // options you can specify via https://github.com/francoischalifour/medium-zoom#usage
         background: {
-          light: 'rgb(255, 255, 255)',
-          dark: 'rgb(50, 50, 50)'
-        }
-      }
+          light: "rgb(255, 255, 255)",
+          dark: "rgb(50, 50, 50)",
+        },
+      },
     },
     // googleAnalytics: {
     //   trackingID: 'UA-152867655-1',
@@ -50,17 +55,12 @@ const config = {
     //   textColor: "#eeeeee", // Defaults to `#000`.
     //   isCloseable: false, // Defaults to `true`.
     // },
-    
     // posthog: {
     //   apiKey: "H-htDCae7CR3RV57gUzmol6IAKtm5IMCvbcm_fwnL-w",
     //   appUrl: "https://app.posthog.com", // optional
     //   enableInDevelopment: false, // optional
     // },
     image: "/img/signoz_website_hero_image.webp",
-    colorMode: {
-      // "light" | "dark"
-      defaultMode: "dark",
-    },
     navbar: {
       title: "SigNoz",
       logo: {
@@ -95,7 +95,7 @@ const config = {
           label: "Customer Stories",
           position: "right",
         },
-      
+
         // {
         //   href: "https://signoz.io/pricing/",
         //   label: "Try SigNoz Cloud",
@@ -218,7 +218,7 @@ const config = {
           priority: 0.5,
         },
         googleAnalytics: {
-          trackingID: 'UA-152867655-1',
+          trackingID: "UA-152867655-1",
         },
         //moving current UA property to google analytics and adding GA4 id to gtag
         gtag: {
@@ -228,14 +228,14 @@ const config = {
           // anonymizeIP: true, // Should IPs be anonymized?
         },
         googleTagManager: {
-          containerId: 'GTM-N9B6D4H',
+          containerId: "GTM-N9B6D4H",
         },
       },
     ],
   ],
   // plugins: ["posthog-docusaurus"],
   plugins: [
-    require.resolve('docusaurus-plugin-image-zoom'),
+    require.resolve("docusaurus-plugin-image-zoom"),
     [
       "@docusaurus/plugin-content-blog",
       {
