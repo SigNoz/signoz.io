@@ -179,8 +179,6 @@ Steps to get the app set up and running:
    // this enables the API to record telemetry
    
    sdk.start()
-   .then(() => console.log('Tracing initialized'))
-   .catch((error) => console.log('Error initializing tracing', error));
    
    // gracefully shut down the SDK on process exit
    process.on('SIGTERM', () => {
