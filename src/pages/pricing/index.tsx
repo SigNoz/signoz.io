@@ -23,7 +23,7 @@ function Pricing() {
             <span className="highlight">Traces</span> in{" "}
             <span className="highlight">single</span> pane of glass
           </p>
-          <div className={"row"}>
+          <div className={`row ${styles.pricingRow}`}>
             <div className={"col col--6 margin-vert--md"}>
               <div className={`card ${styles.card}`}>
                 <div className={`card__header ${styles.card__header}`}>
@@ -41,7 +41,7 @@ function Pricing() {
                     <div>
                       <Link
                         id="btn-pricing-signoz-cloud-1"
-                        className="button button--primary"
+                        className={`button button--primary ${styles.pricingCtaBtn}`}
                         href={"/team/"}
                       >
                         Get Started
@@ -133,7 +133,7 @@ function Pricing() {
                 <div className={`card__footer ${styles.card__footer}`}>
                   <Link
                     id="btn-pricing-signoz-cloud-2"
-                    className="button button--primary"
+                    className={`button button--primary ${styles.pricingCtaBtn}`}
                     href={"/team/"}
                   >
                     Get Started
@@ -158,7 +158,7 @@ function Pricing() {
                     <div>
                       <Link
                         id="btn-pricing-signoz-enterprise-1"
-                        className="button button--primary"
+                        className={`button button--primary ${styles.pricingCtaBtn}`}
                         href={"/enterprise/"}
                       >
                         Contact Us
@@ -285,7 +285,7 @@ function Pricing() {
                 <div className={`card__footer ${styles.card__footer}`}>
                   <Link
                     id="btn-pricing-signoz-enterprise-2"
-                    className="button button--primary"
+                    className={`button button--primary ${styles.pricingCtaBtn}`}
                     href={"/enterprise/"}
                   >
                     Contact Us
