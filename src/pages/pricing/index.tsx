@@ -127,6 +127,7 @@ function Pricing() {
                       <li>Service Dependency Visualization</li>
                       <li>Run aggregates on ingested spans</li>
                       <li>Live Tail Logging</li>
+                      <li>AWS Cloudwatch Integration</li>
                     </ul>
                   </div>
                 </div>
@@ -255,15 +256,12 @@ function Pricing() {
                       Includes all features in Team
                     </p>
                     <ul className="list-icon-right">
-                      <li>Single Sign On</li>
-                      <li>SAML and LDAP support</li>
-                      <li>
-                        Custom integration for metrics and logs (Cloudwatch,
-                        etc)
-                      </li>
+                    <li>Custom integration for metrics and logs</li>
                       <li>AWS Private Link</li>
                       <li>VPC Peering</li>
                       <li>Security tightening for on-prem installation</li>
+                      <li>Monitor Health of SigNoz</li>
+                      <li>Query API Keys (access data from anywhere)</li>
                     </ul>
                     {/* <span>
                       <a href="#" className="explore">
