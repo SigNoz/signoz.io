@@ -1,8 +1,10 @@
 import React from "react";
 import Layout from "@theme/Layout";
 import styles from "./styles.module.css";
-import PricingForm from "../../modules/pricing-form";
+import Form from "../../modules/pricing-form";
 import { DiscussYourProject } from "../../modules/discuss-your-project";
+
+import { HubspotProvider } from "@aaronhayes/react-use-hubspot-form";
 
 const GET_CLOUD_FEATURE_POINTS = [
   {
@@ -23,11 +25,12 @@ const GET_CLOUD_FEATURE_POINTS = [
   },
 ];
 
-function GetCloud() {
+function Team() {
   return (
     <Layout title="Get Cloud">
       <section className={styles.getCloud}>
         <DiscussYourProject />
+        <section className="getCloudSection"></section>
         <div className={`container ${styles.getCloudContainer}`}>
           <div className={`row ${styles.getCloudRow}`}>
             <div className={"col col--6 margin-vert--md"}>
@@ -44,7 +47,9 @@ function GetCloud() {
               <div className={`card ${styles.featureCard}`}>
                 <div className="card__header"></div>
                 <div className="card__body">
-                  <PricingForm />
+                  <HubspotProvider> {/* ! Hubspot Provider */}
+                    <Form />
+                  </HubspotProvider>
                 </div>
                 <div className="card__footer"></div>
               </div>
@@ -56,4 +61,4 @@ function GetCloud() {
   );
 }
 
-export default GetCloud;
+export default Team;
