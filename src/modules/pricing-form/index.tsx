@@ -1,14 +1,22 @@
-import React from "react";
+import React, { useState } from "react";
 import styles from "./styles.module.css";
-import { useHubspotForm } from '@aaronhayes/react-use-hubspot-form';
+import { useHubspotForm } from "@aaronhayes/react-use-hubspot-form";
 
-function PricingForm(){
+function PricingForm({ portalId, formId }) {
   const { loaded, error, formCreated } = useHubspotForm({
-    portalId: '22308423',
-    formId: '30d999cc-d423-445a-a28a-6058ee6eae95',
-    target: '#my-hubspot-form'
+    portalId,
+    formId,
+    target: "#my-hubspot-form",
   });
-  return (<div id="my-hubspot-form"></div>)
+  return (
+    <>
+      <div id="my-hubspot-form">
+        {!formCreated && !error && <p className="text--center">Loading...</p>}
+        {error && <p className="text--center">Some error occurred.</p>}
+      </div>
+      {loaded && error && <p>Some error occurred.</p>}
+    </>
+  );
 }
 
 export default PricingForm;

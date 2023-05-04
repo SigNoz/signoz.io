@@ -133,7 +133,7 @@ const WhySigNoz = () => {
 const features = [
   {
     title: "Your data in your boundary",
-    imageUrl: "img/Vector_1.svg",
+    imageUrl: "svgs/icons/your-data-in-your-boundary-dark.svg",
     description: (
       <>
         No need to worry about GDPR and other data protection laws. All your
@@ -143,7 +143,7 @@ const features = [
   },
   {
     title: "Metrics, Traces and Logs in one app",
-    imageUrl: "img/Vector_2.svg",
+    imageUrl: "svgs/icons/metrics-traces-and-logs-dark.svg",
     description: (
       <>
         Easily correlate from metrics, traces and logs with seamless click through from one to other
@@ -152,7 +152,7 @@ const features = [
   },
   {
     title: "OpenTelemetry Native",
-    imageUrl: "img/Vector_3v5.svg",
+    imageUrl: "svgs/icons/open-telemetry-native-dark.svg",
     description: (
       <>
         Take advantage of rich OpenTelemetry ecosystem for instrumentation. 
