@@ -42,7 +42,7 @@ function Pricing() {
                       <Link
                         id="btn-pricing-signoz-cloud-1"
                         className={`button button--primary ${styles.pricingCtaBtn}`}
-                        href={"/team/"}
+                        href={"/teams/"}
                       >
                         Get Started
                       </Link>
@@ -135,7 +135,7 @@ function Pricing() {
                   <Link
                     id="btn-pricing-signoz-cloud-2"
                     className={`button button--primary ${styles.pricingCtaBtn}`}
-                    href={"/team/"}
+                    href={"/teams/"}
                   >
                     Get Started
                   </Link>
