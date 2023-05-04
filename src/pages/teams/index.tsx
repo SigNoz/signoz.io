@@ -28,9 +28,9 @@ const TEAM_FEATURE_POINTS = [
   },
 ];
 
-function Team() {
+function Teams() {
   return (
-    <Layout title="Team">
+    <Layout title="Teams">
       <section className={styles.team}>
         <DiscussYourProject />
         <div className={styles.teamSection}>
@@ -73,4 +73,4 @@ function Team() {
   );
 }
 
-export default Team;
+export default Teams;
