@@ -6,7 +6,7 @@ import { DiscussYourProject } from "../../modules/discuss-your-project";
 import { HubspotProvider } from "@aaronhayes/react-use-hubspot-form";
 
 const TEAMS_DATA = {
-  TITLE: "For Teams that need high-performing applications---",
+  TITLE: "For Teams that need high-performing applications",
   DESC: "Get started with observability. Our experts will connect to  give a brief demo and answer any questions.",
   PORTAL_ID: "22308423",
   FORM_ID: "30d999cc-d423-445a-a28a-6058ee6eae95",
