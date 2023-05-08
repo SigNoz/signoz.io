@@ -3,15 +3,12 @@ import Link from "@docusaurus/Link";
 import useBaseUrl from "@docusaurus/useBaseUrl";
 import styles from "./styles.module.css";
 
-export const DiscussYourProject = () => {
+export const DiscussYourProject = ({ title, desc }) => {
   return (
     <section className={styles.yourProject}>
       <div className="container">
-        <h3 className={styles.title}>Let’s discuss your project</h3>
-        <p className={styles.subTagline}>
-          One of our experts will get in touch with you to give a brief demo,
-          understand your requirements and answer any questions.
-        </p>
+        <h3 className={styles.title}>{title}</h3>
+        <p className={styles.subTagline}>{desc}</p>
       </div>
     </section>
   );
