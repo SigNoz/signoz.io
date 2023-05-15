@@ -169,6 +169,10 @@ const config = {
           title: "More",
           items: [
             {
+              label: "Careers",
+              href: "https://www.ycombinator.com/companies/signoz/jobs",
+            },
+            {
               label: "Technical Writer Program",
               to: "technical-writer-program/",
             },
@@ -221,12 +225,12 @@ const config = {
           trackingID: "UA-152867655-1",
         },
         //moving current UA property to google analytics and adding GA4 id to gtag
-        gtag: {
-          // You can also use your "G-" Measurement ID here.
-          trackingID: "G-6NFJ2Y6NQN",
-          // Optional fields.
-          // anonymizeIP: true, // Should IPs be anonymized?
-        },
+        // gtag: {
+        //   // You can also use your "G-" Measurement ID here.
+        //   trackingID: "G-6NFJ2Y6NQN",
+        //   // Optional fields.
+        //   // anonymizeIP: true, // Should IPs be anonymized?
+        // },
         googleTagManager: {
           containerId: "GTM-N9B6D4H",
         },

@@ -19,8 +19,7 @@ export const TrySigNozCTA = () => {
           <a
             id="btn-pricing-give-signoz-try"
             className={`button button--secondary ${styles.ctaBtn}`}
-            target="_blank"
-            href="https://forms.gle/yYSkntXRRPU3MHRL7"
+            href="https://signoz.io/teams/"
             onClick={() => handleClick("SigNozCloud")}
           >
             Get Started
