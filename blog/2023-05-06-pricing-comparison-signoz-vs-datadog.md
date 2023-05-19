@@ -75,7 +75,7 @@ You can find the assumptions we have taken in this <a href = "https://docs.googl
 | **Logs** <br></br>2500 GB ingested, 1560 million log events |  |  |  | $4,150 |
 | **Logs** <br></br>2500 GB ingested | $1,000 | $1,200 |  |  |
 | **Metrics** <br></br>13 million samples per infra host (1) | $65 | $124 |  |  |
-| **Traces** <br></br>43.8 GB per APM host (2) | $350 | $388 |  |  |
+| **Traces** <br></br>43.8 GB per APM host | $350 | $388 |  |  |
 | **Data Ingest** |  |  | $1,178 |  |
 | **Users** | 0 | $200 | $2,333 | 0 |
 | Total | **$1,415** | **$1,912** | **$3,511** | **$10,421** |
