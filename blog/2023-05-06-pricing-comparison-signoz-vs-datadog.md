@@ -93,7 +93,7 @@ As your business grows, the engineering team needs to scale too. Here’s a cost
 | **Logs** <br></br>10,000 GB ingested, 3000 million log events |  |  |  | $8,500 |
 | **Logs** <br></br>10,000 GB ingested | $4,000 | $4,950 |  |  |
 | **Metrics** <br></br>13 million samples per infra host (1) | $260 | $494 |  |  |
-| **Traces** <br></br>43.8 GB per APM host (2) | $2,190 | $2,688 |  |  |
+| **Traces** <br></br>43.8 GB per APM host | $2,190 | $2,688 |  |  |
 | **Data Ingest** |  |  | $5,393 |  |
 | **Users** |  |  | $9,430 |  |
 | Total | $6,450 | $8,932 | $14,823 | $30,213 |
@@ -110,7 +110,7 @@ Large businesses need observability at scale. Here’s a cost comparison for a h
 | **Logs** <br></br>20,000 GB ingested, 4,500 million log events |  |  |  | $13,250 |
 | **Logs** <br></br>20,000 GB ingested | $8,000 | $9,950 |  |  |
 | **Metrics** <br></br>13 million samples per infra host (1) | $455 | $865 |  |  |
-| **Traces** <br></br>43.8 GB per APM host (2) | $3,942 | $4,878 |  |  |
+| **Traces** <br></br>43.8 GB per APM host | $3,942 | $4,878 |  |  |
 | **Data Ingest** |  |  |  | $10,292 |
 | **Users** |  |  |  | $18,860 |
 | Total | $12,397 | $17,292 | $29,152 | $68,743 |
