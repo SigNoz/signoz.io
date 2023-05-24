@@ -6,26 +6,16 @@ sidebar_label: Upgrade to 0.19
 
 # Upgrade to v0.19 from earlier versions
 
-SigNoz `v0.19` requires users to run migration script for alerts and dashboards.
-
-If you had created any dashboards or alerts in previous versions,
-you will need to run this script to sanitise the data.
-
-## First Upgrade to v0.19
-
-Follow the platform specific instructions to upgrade to 0.19 and above.
-
-- [Docker Standalone](https://signoz.io/docs/operate/docker-standalone/#upgrade)
-- [Docker Swarm](https://signoz.io/docs/operate/docker-swarm/#upgrade)
-- [Kubernetes](https://signoz.io/docs/operate/kubernetes/#upgrade)
-
-:::warning
-After upgrading to 0.19, it is recommended to run the migration script
-before modifying any existing alerts/dashboards. Otherwise, it could
-potentially cause irreversible changes to alerts/dashboard data.
-:::
+Before upgrading to `v0.19`, you need to run the migration script
+to sanitise the alerts and dashboards data.
 
 ## Steps to run migration script
+
+### Command-Line Interface (CLI) Flags
+
+There are is only one flag in the `migrate` binary:
+
+- `--dataSource` : Data Source path. `default=signoz.db`
 
 ### For Docker
 
@@ -141,16 +131,74 @@ Data Source path:  signoz.db
 2023/05/20 15:28:22 Migrated 1 rules
 ```
 
-At last, clean up the binary and trigger a restart of the query-service pod:
+## Upgrade to v0.19
 
-```bash
-rm migrate
+Follow the platform specific instructions to upgrade to 0.19 and above.
 
-kubectl -n platform delete pod my-release-signoz-query-service-0
-```
+- [Docker Standalone](https://signoz.io/docs/operate/docker-standalone/#upgrade-signoz-cluster)
+- [Docker Swarm](https://signoz.io/docs/operate/docker-swarm/#upgrade-signoz-cluster)
+- [Kubernetes](https://signoz.io/docs/operate/kubernetes/#upgrade-signoz-cluster)
 
-## Command-Line Interface (CLI) Flags
+:::warning
+Prior to upgrading to `v0.19`, you need to run the migration script.
 
-There are is only one flag in the `migrate` binary:
+In case you upgrade and don't run the migration script, you might run into
+`query-service` pod crash loop. To solve this, follow the instructions
+in [the section below](#issue---query-service-pod-is-crashing-kubernetes).
+:::
 
-- `--dataSource` : Data Source path. `default=signoz.db`
+### Issue - `query-service` pod is crashing (Kubernetes)
+
+In case you upgraded to `v0.19` prior to running the migration script in Kubernetes,
+you will see `query-service` pod is crashing due to invalid alerts data.
+
+To solve this, you will have to use `migration` init container in
+`query-service` pod to run the migration script and then restart the pod.
+
+Follow the steps below:
+
+1. Make sure you have latest chart information from the
+    Helm repositories:
+
+    ```bash
+    helm repo update
+    ```
+
+2. Include the following in `override-values.yaml` file:
+
+    ```yaml
+    queryService:
+      initContainers:
+        migration:
+          enabled: true
+          command:
+            - sh
+            - -c
+            - |
+              echo "Running migration"
+              wget https://github.com/signoz/signoz-db-migrations/releases/download/v0.19/migrate-v0.19-linux-amd64 -O migrate
+              chmod +x migrate
+              ./migrate --dataSource /var/lib/signoz/signoz.db
+              echo "Migration completed"
+    ```
+
+3. Run the following command to upgrade the chart:
+
+    ```bash
+    helm -n platform upgrade my-release signoz/signoz -f override-values.yaml
+    ```
+
+4. Wait for the `migration` init container to complete and then restart
+    the `query-service` pod:
+
+    ```bash
+    kubectl -n platform rollout restart sts -l app.kubernetes.io/component=query-service
+    ```
+
+5. (Optional) Once the `query-service` pod is running, you can delete the `migration`
+    init container from the `override-values.yaml` file which you added in step 2,
+    followed by running the following command to upgrade the chart:
+
+    ```bash
+    helm -n platform upgrade my-release signoz/signoz -f override-values.yaml
+    ```
