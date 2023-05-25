@@ -234,9 +234,9 @@ auto-instrumentation libraries.
 
 ### Instrumentation Resource Configuration
 
-At the moment the instrumentation is supported for Java, NodeJS, and Python
-languages. The instrumentation is enabled when the following annotation is
-applied to a workload or a namespace.
+At the moment the instrumentation is supported for Java, NodeJS, Python,
+and DotNet languages. The instrumentation is enabled when the following
+annotation is applied to a workload or a namespace.
 
  - `instrumentation.opentelemetry.io/inject-java: "true"` — for Java
  - `instrumentation.opentelemetry.io/inject-nodejs: "true"` — for NodeJS
@@ -343,6 +343,8 @@ spec:
     image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-nodejs:latest
   python:
     image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python:latest
+  dotnet:
+    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-dotnet:latest
 EOF
 ```
 
@@ -416,6 +418,8 @@ spec:
     image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-nodejs:latest
   python:
     image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python:latest
+  dotnet:
+    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-dotnet:latest
 EOF
 ```
 
