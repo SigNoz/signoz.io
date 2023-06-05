@@ -16,11 +16,11 @@ function SigNozVSDataDog() {
             while providing a robust observability stack.
           </p>
           <div className={styles.ctaContainer}>
-            <button className="button button--primary" type="button">
+            <button className={`button button--primary ${styles.ctaButton}`} type="button">
               Send your bill for comparison
             </button>
             <button
-              className="button button--outline button--secondary "
+              className={`button button--outline button--secondary ${styles.ctaButton}`}
               type="button"
             >
               Sign Up for free
@@ -31,6 +31,20 @@ function SigNozVSDataDog() {
               src="/img/signoz-dsitributed-tracing.png"
               className="headerHeroImage"
             />
+          </div>
+        </div>
+        <div className={styles.svsdMigrationContainer}>
+          <div className="container">
+            <h3 className={styles.title}>
+              Migrate from Datadog to SigNoz with ease.
+            </h3>
+            <p className={styles.desc}>
+              We provide support for migrating from Datadog to SigNoz.{" "}
+              <a href="" className={`${styles.migrationCTA} highlight`}>
+                Request a migration support
+              </a>{" "}
+              from one of our experts and get started with SigNoz quickly.
+            </p>
           </div>
         </div>
       </section>
