@@ -89,7 +89,9 @@ function SigNozVSDataDog() {
                 </div>
               </div>
             </div>
-            <div className={`row ${styles.reasonRow} ${styles.shouldImageFirst}`}>
+            <div
+              className={`row ${styles.reasonRow} ${styles.shouldImageFirst}`}
+            >
               <div className={"col col--6 margin-vert--md"}>
                 <div>
                   <h4 className={styles.reasonTitle}>
@@ -129,7 +131,9 @@ function SigNozVSDataDog() {
                 </div>
               </div>
             </div>
-            <div className={`row ${styles.reasonRow} ${styles.shouldImageFirst}`}>
+            <div
+              className={`row ${styles.reasonRow} ${styles.shouldImageFirst}`}
+            >
               <div className={"col col--6 margin-vert--md"}>
                 <div>
                   <h4 className={styles.reasonTitle}>
@@ -177,7 +181,9 @@ function SigNozVSDataDog() {
                 </div>
               </div>
             </div>
-            <div className={`row ${styles.reasonRow} ${styles.shouldImageFirst}`}>
+            <div
+              className={`row ${styles.reasonRow} ${styles.shouldImageFirst}`}
+            >
               <div className={"col col--6 margin-vert--md"}>
                 <div>
                   <h4 className={styles.reasonTitle}>
@@ -201,6 +207,47 @@ function SigNozVSDataDog() {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+        <div className={styles.svsdThreadContainer}>
+          <div className="container">
+            <h3 className={styles.threadTitle}>
+              Datadog shocking bill of $65 million. Check out the{" "}
+              <a href="" className="highlight">
+                HackerNews thread.
+              </a>
+            </h3>
+          </div>
+        </div>
+        <div className="container">
+          <div className={styles.trySigNozContainer}>
+            <h3 className={styles.tagline}>
+              OpenTelemetry-Native Metrics, Logs, and Traces in a single pane of
+              glass
+            </h3>
+            <p className={styles.desc}>
+              Check out our hosted and enterprise solutions.
+            </p>
+            <a
+              className={`button button--secondary ${styles.trySigNozCtaBtn}`}
+              href="https://signoz.io/teams/"
+            >
+              Try SigNoz
+            </a>
+          </div>
+        </div>
+        <div className="container">
+          <div className={styles.migrationSupportContainer}>
+            <h4 className={styles.tagline}>
+              Migrate from Datadog to SigNoz with ease.
+            </h4>
+            <p className={styles.desc}>
+              We provide support for migrating from Datadog to SigNoz.{" "}
+              <a className="highlight" href="#">
+                Request a migration support
+              </a>{" "}
+              from one of our experts and get started with SigNoz quickly.
+            </p>
           </div>
         </div>
       </section>
