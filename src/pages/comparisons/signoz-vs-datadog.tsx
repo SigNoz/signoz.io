@@ -10,7 +10,13 @@ function SigNozVSDataDog() {
         <MigrationSupport />
 
         <TopReasons />
-        <ComparisonGrid />
+        <div>
+          <h3 className={styles.reasonHeaderTitle}>
+            Top reasons why people choose SigNoz over Datadog
+          </h3>
+          <ComparisonGrid />
+          <ComparisonGridMobile />
+        </div>
 
         <HackerNewsThread />
       </section>
@@ -80,7 +86,9 @@ const TopReasons = () => {
       </h3>
       <div className="container">
         <div className={`row ${styles.reasonRow} ${styles.reasonElonMusk}`}>
-          <div className={`col col--6 margin-vert--md ${styles.reasonImageCol}`}>
+          <div
+            className={`col col--6 margin-vert--md ${styles.reasonImageCol}`}
+          >
             <div className={styles.reasonImageContainer}>
               <img src="/img/reasons/elon-musk.png" alt="reason" />
               <div className={styles.reasonReviewContainer}>
@@ -126,14 +134,18 @@ const TopReasons = () => {
               </p>
             </div>
           </div>
-          <div className={`col col--6 margin-vert--md ${styles.reasonImageCol}`}>
+          <div
+            className={`col col--6 margin-vert--md ${styles.reasonImageCol}`}
+          >
             <div className={styles.reasonImageContainer}>
               <img src="/img/reasons/placeholder.png" alt="reason" />
             </div>
           </div>
         </div>
         <div className={`row ${styles.reasonRow}`}>
-          <div className={`col col--6 margin-vert--md ${styles.reasonImageCol}`}>
+          <div
+            className={`col col--6 margin-vert--md ${styles.reasonImageCol}`}
+          >
             <div className={styles.reasonImageContainer}>
               <img src="/img/reasons/placeholder.png" alt="reason" />
             </div>
@@ -168,14 +180,18 @@ const TopReasons = () => {
               </p>
             </div>
           </div>
-          <div className={`col col--6 margin-vert--md ${styles.reasonImageCol}`}>
+          <div
+            className={`col col--6 margin-vert--md ${styles.reasonImageCol}`}
+          >
             <div className={styles.reasonImageContainer}>
               <img src="/img/reasons/placeholder.png" alt="reason" />
             </div>
           </div>
         </div>
         <div className={`row ${styles.reasonRow}`}>
-          <div className={`col col--6 margin-vert--md ${styles.reasonImageCol}`}>
+          <div
+            className={`col col--6 margin-vert--md ${styles.reasonImageCol}`}
+          >
             <div className={styles.reasonImageContainer}>
               <img src="/img/reasons/placeholder.png" alt="reason" />
             </div>
@@ -216,7 +232,9 @@ const TopReasons = () => {
               </p>
             </div>
           </div>
-          <div className={`col col--6 margin-vert--md ${styles.reasonImageCol}`}>
+          <div
+            className={`col col--6 margin-vert--md ${styles.reasonImageCol}`}
+          >
             <div className={styles.reasonImageContainer}>
               <img src="/img/reasons/placeholder.png" alt="reason" />
             </div>
@@ -248,11 +266,11 @@ const ComparisonGrid = () => {
         </div>
         <div className={styles.tableMetricAvailability}>❌</div>
         <div className={styles.tableMetric}>Network monitoring</div>
-        <div className={styles.tableMetricAvailability}>✅</div>
         <div className={styles.tableMetricAvailability}>❌</div>
+        <div className={styles.tableMetricAvailability}>✅</div>
         <div className={styles.tableMetric}>Cloud SIEM</div>
-        <div className={styles.tableMetricAvailability}>✅</div>
         <div className={styles.tableMetricAvailability}>❌</div>
+        <div className={styles.tableMetricAvailability}>✅</div>
         <div className={styles.tableMetric}>OpenTelemetry visualization</div>
         <div className={styles.tableMetricAvailability}>
           ✅<small className={styles.tableMetricDesc}></small>
@@ -301,6 +319,176 @@ const ComparisonGrid = () => {
           <small className={styles.tableMetricDesc}>
             Transparent usage-based billing
           </small>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const ComparisonGridMobile = () => {
+  return (
+    <div className="container">
+      <div className={styles.tableGridMobile}>
+        <div className={styles.tableGridCell}>
+          <h4 className={styles.tableGridCellHeader}>Open Source</h4>
+          <div>
+            <div className={styles.tableGridCompareCell}>
+              <span className={styles.tableGridProdCell}>Signoz</span>
+              <span>✅</span>
+            </div>
+            <div className={styles.tableGridCompareCell}>
+              <span className={styles.tableGridProdCell}>Datadog</span>
+              <span>❌</span>
+            </div>
+          </div>
+        </div>
+        <div className={styles.tableGridCell}>
+          <h4 className={styles.tableGridCellHeader}>OpenTelemetry-Native</h4>
+          <div>
+            <div className={styles.tableGridCompareCell}>
+              <span className={styles.tableGridProdCell}>
+                Signoz
+                <small className={styles.tableMetricDesc}>
+                  (No vendor lock-in in instrumentation)
+                </small>
+              </span>
+              <span>✅</span>
+            </div>
+            <div className={styles.tableGridCompareCell}>
+              <span className={styles.tableGridProdCell}>Datadog</span>
+              <span>❌</span>
+            </div>
+          </div>
+        </div>
+        <div className={styles.tableGridCell}>
+          <h4 className={styles.tableGridCellHeader}>Network monitoring</h4>
+          <div>
+            <div className={styles.tableGridCompareCell}>
+              <span className={styles.tableGridProdCell}>Signoz</span>
+              <span>✅</span>
+            </div>
+            <div className={styles.tableGridCompareCell}>
+              <span className={styles.tableGridProdCell}>Datadog</span>
+              <span>❌</span>
+            </div>
+          </div>
+        </div>
+        <div className={styles.tableGridCell}>
+          <h4 className={styles.tableGridCellHeader}>Cloud SIEM</h4>
+          <div>
+            <div className={styles.tableGridCompareCell}>
+              <span className={styles.tableGridProdCell}>Signoz</span>
+              <span>✅</span>
+            </div>
+            <div className={styles.tableGridCompareCell}>
+              <span className={styles.tableGridProdCell}>Datadog</span>
+              <span>❌</span>
+            </div>
+          </div>
+        </div>
+        <div className={styles.tableGridCell}>
+          <h4 className={styles.tableGridCellHeader}>
+            OpenTelemetry visualization
+          </h4>
+          <div>
+            <div className={styles.tableGridCompareCell}>
+              <span className={styles.tableGridProdCell}>
+                Signoz
+                <small className={styles.tableMetricDesc}></small>
+              </span>
+              <span>✅</span>
+            </div>
+            <div className={styles.tableGridCompareCell}>
+              <span className={styles.tableGridProdCell}>Datadog</span>
+              <span>❌</span>
+            </div>
+          </div>
+        </div>
+        <div className={styles.tableGridCell}>
+          <h4 className={styles.tableGridCellHeader}>
+            No peak usage billing for data.
+          </h4>
+          <div>
+            <div className={styles.tableGridCompareCell}>
+              <span className={styles.tableGridProdCell}>Signoz</span>
+              <span>✅</span>
+            </div>
+            <div className={styles.tableGridCompareCell}>
+              <span className={styles.tableGridProdCell}>Datadog</span>
+              <span>❌</span>
+            </div>
+          </div>
+        </div>
+        <div className={styles.tableGridCell}>
+          <h4 className={styles.tableGridCellHeader}>
+            No outrageous pricing for custom metrics
+          </h4>
+          <div>
+            <div className={styles.tableGridCompareCell}>
+              <span className={styles.tableGridProdCell}>
+                Signoz
+                <small className={styles.tableMetricDesc}>
+                  Priced at only $0.1 per million samples.
+                </small>
+              </span>
+              <span>✅</span>
+            </div>
+            <div className={styles.tableGridCompareCell}>
+              <span className={styles.tableGridProdCell}>
+                Datadog
+                <small className={styles.tableMetricDesc}>
+                  0.05 dollar per custom metrics
+                </small>
+              </span>
+              <span>❌</span>
+            </div>
+          </div>
+        </div>
+        <div className={styles.tableGridCell}>
+          <h4 className={styles.tableGridCellHeader}>
+            Managed in your cloud options
+          </h4>
+          <div>
+            <div className={styles.tableGridCompareCell}>
+              <span className={styles.tableGridProdCell}>
+                Signoz
+                <small className={styles.tableMetricDesc}>
+                  More suited if you have data privacy and data governance
+                  requirements
+                </small>
+              </span>
+              <span>✅</span>
+            </div>
+            <div className={styles.tableGridCompareCell}>
+              <span className={styles.tableGridProdCell}>
+                Datadog
+                <small className={styles.tableMetricDesc}>
+                  No self-hosting options available
+                </small>
+              </span>
+              <span>❌</span>
+            </div>
+          </div>
+        </div>
+        <div className={styles.tableGridCell}>
+          <h4 className={styles.tableGridCellHeader}>
+            Transparent usage-based billing
+          </h4>
+          <div>
+            <div className={styles.tableGridCompareCell}>
+              <span className={styles.tableGridProdCell}>Signoz</span>
+              <span>✅</span>
+            </div>
+            <div className={styles.tableGridCompareCell}>
+              <span className={styles.tableGridProdCell}>
+                Datadog
+                <small className={styles.tableMetricDesc}>
+                  Transparent usage-based billing
+                </small>
+              </span>
+              <span>❌</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
