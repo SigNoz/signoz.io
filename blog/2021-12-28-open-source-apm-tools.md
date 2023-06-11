@@ -1,7 +1,7 @@
 ---
 title: Top 13 open source APM tools in 2023
 slug: open-source-apm-tools
-date: 2023-03-05
+date: 2023-06-05
 tags: [Tech Resources]
 authors: ankit_anand
 description: Looking for an open source APM tool? Latest top open source APM tool list - 1.SigNoz 2.Graphite 3.Pinpoint 4.Prometheus 5.JavaMelody 6.StageMonitor 7.Scouter 8.Zipkin 9.Jaeger 10.Skywalking...
@@ -17,8 +17,6 @@ keywords:
   <link rel="canonical" href="https://signoz.io/blog/open-source-apm-tools/"/>
 </head>
 
-import SignUps from '../docs/shared/sign-ups.md'
-
 Choosing the right APM tool is critical. How do you know which is the right one for you? Here are the top 13 open source application performance monitoring(APM) tools which can solve your monitoring needs.
 
 <!--truncate-->
@@ -26,15 +24,17 @@ Choosing the right APM tool is critical. How do you know which is the right one 
 ![Cover Image](/img/blog/2023/01/open_source_apm_tools_cover.webp)
 
 > **What is an open source APM tool?**<br></br>
-> APM stands for Application Performance Monitoring. APM tools help you to monitor your application for any performance issues. When you opt for an open source APM tool, you get the added advantage of having access to the tool's source code.
+> APM stands for Application Performance Monitoring. APM tools help you to monitor your application for any performance issues. When you opt for an open source APM tool, you get the added advantage of having access to the tool's source code. 
+> You can host the tool within your infra to adhere to data governance and privacy regulations.
 
-Businesses are embracing digital transformation now more than ever. In most cases, the digital channel is the primary driver of revenue and growth. Customers and end-users are going online to fulfill both their daily and long-term needs.
+<!-- Businesses are embracing digital transformation now more than ever. In most cases, the digital channel is the primary driver of revenue and growth. Customers and end-users are going online to fulfill both their daily and long-term needs.
 
 The digital shift has made the app production environment a critical piece of an organization's success. The performance of your application in production needs to be monitored to ensure high availability at all times. Not only that, but organizations also need to monitor any latency issues in serving user's requests. As they say, "**Slow is the new down**" in today's competitive digital landscape.
 
-This has led to the birth of a number of application performance monitoring tools. Open source APM tools have added benefits over their SaaS counterparts as the source code is available to your org's developers.
+This has led to the birth of a number of application performance monitoring tools. Open source APM tools have added benefits over their SaaS counterparts as the source code is available to your org's developers. -->
 
-<SignUps />
+Open source APM tools have added benefits over their SaaS counterparts. Open source tools are more transparent as you can verify its source code, and you can use it without going through the pains of taking approvals usually required for using a third-party vendor tool. 
+
 
 **Benefits of Open Source APM tool over SaaS APM tools:**
 
@@ -84,67 +84,49 @@ A few essential APM benefits in solving performance issues are as follows:
 
 ## Top Open Source APM Tools
 
-Now let's explore the top 13 open source APM tools in 2021.
+Now let's explore the top 13 open source APM tools in 2023.
 
 ### SigNoz
 
-🌐 [Website](https://signoz.io/?utm_source=blog&utm_medium=open_source_apm_tools)
+<figure data-zoomable align='center'>
+    <img src="/img/blog/common/signoz_flamegraphs.webp" alt="Flamegraphs and Gantt Charts to visualize traces"/>
+</figure>
 
-💻 [GitHub](https://github.com/SigNoz/signoz)
+<br></br>
 
-SigNoz is a full-stack open source APM and observability tool. SigNoz provides logs, metrics, and traces under a single dashboard. Logs, metrics, and traces are considered to be the three pillars of observability in modern-day distributed systems. Using SigNoz, you can track things like:
+- **Github stars:** 13k
+- **Alternative to:** Datadog, New Relic, Dynatrace
+- [SigNoz on GitHub](https://github.com/SigNoz/signoz)
 
-- User requests per second
+[SigNoz](https://signoz.io/?utm_source=blog&utm_medium=open_source_apm_tools) is a full-stack open source APM and observability tool. It provides logs, metrics, and traces under a single pane of glass. It is built to support OpenTelemetry natively, and uses Clickhouse - a powerful OLAP database for faster ingestion and aggregations. 
+
+
+<!-- - User requests per second
 - 50th, 90th, and 99th percentile latencies of microservices in your application
 - Error rate of requests to your services
 - Slow endpoints in your application
-- User requests across different microservices using distributed tracing
+- User requests across different microservices using distributed tracing -->
 
-Without distributed tracing, you can not monitor and troubleshoot user requests across multiple services. As SigNoz supports distributed tracing, you can have code-level visibility of where your user requests are failing. That's why SigNoz is most suited as an open source APM tool for microservices-based application architectures.
 
 import Screenshot from "@theme/Screenshot"
 
-<Screenshot
-   alt="SigNoz Architecture Diagram"
-   height={500}
-   src="/img/architecture-signoz-clickhouse.svg"
-   title="SigNoz Architecture with ClickHouse as storage backend"
-   width={700}
-/>
-
-SigNoz is built to support OpenTelemetry natively. OpenTelemetry is quietly becoming the world standard to instrument cloud-native applications. It provides a vendor-agnostic method to generate and collect telemetry data. Hence, you are never locked into any tool and have better control of your telemetry data.
-
-SigNoz provides out-of-box charts for application metrics, making it easier for you to get started.
-
-<Screenshot
-   alt="SigNoz Dashboard showing RED metrics"
-   height={500}
-   src="/img/blog/common/signoz_charts_application_metrics.webp"
-   title="Capture RED metrics (Rate of requests, Error rate and Duration) and visualize it with SigNoz"
-   width={700}
-/>
-
-SigNoz provides flamegraphs and gantt charts to visualize your tracing data.
-
 <figure data-zoomable align='center'>
-    <img src="/img/blog/common/signoz_flamegraphs.webp" alt="Flamegraphs and Gantt Charts to visualize traces"/>
-    <figcaption><i>Traces visualized with flamegraphs and gantt charts</i></figcaption>
+    <img src="/img/architecture-signoz-clickhouse.svg" alt="SigNoz Architecture Diagram"/>
+    <figcaption><i>SigNoz Architecture with ClickHouse as storage backend</i></figcaption>
 </figure>
 
 <br></br>
 
-You can also use logs management in SigNoz to debug application issues.
+SigNoz has most features that vendors like Datadog offers. The feature set covers capabilities across the three telemetry signals: logs, metrics, and traces. You can monitor APM metrics like user requests for each of your applications, error rate, app latencies, etc.
 
-<figure data-zoomable align='center'>
-    <img src="/img/blog/common/signoz_logs.webp" alt="Logs in SigNoz"/>
-    <figcaption><i>With log management, you have everything under a single dashboard to debug application performance issues.</i></figcaption>
-</figure>
+Using distributed tracing, you can identify the root cause of performance issues. The logs tab in SigNoz comes with advanced query builder, multiple compact views, and live tail logging. 
 
-<br></br>
+#### Open Source license and Cloud Option
 
-You can get started with SigNoz by visting its documentation.
+SigNoz Open Source is free to use. You can get started with the open source by using Docker, Docker Swarm or Kubernetes. You can find the instructions to self-host SigNoz [here](https://signoz.io/docs/install/?utm_source=blog&utm_medium=open_source_apm_tools).
 
-[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/?utm_source=blog&utm_medium=open_source_apm_tools)
+Signing up for [SigNoz cloud](https://signoz.io/teams/?utm_source=blog&utm_medium=open_source_apm_tools) gives you the most easiest way to get started with SigNoz. The cloud version gives you access to some paid-only features as well as customer support. SigNoz can help you save up to 86% of your Datadog bill. Here's a [pricing comparsion with detailed spreadsheet](https://signoz.io/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/?utm_source=blog&utm_medium=open_source_apm_tools).
+
 
 ### Graphite
 
@@ -162,23 +144,14 @@ The primary purpose of Graphite is to store numeric time-series data and render 
 
 Graphite does not do data collection. Instead, your app needs to be configured to send data to Graphite which passively listens for data using Carbon - a Twisted daemon. Carbon then sends the data to Whisper to store the time-series data to a filesystem.
 
-<Screenshot
-   alt="Graphite architecture"
-   height={500}
-   src="/img/blog/2021/07/Graphite-architecture-min.webp"
-   title="Graphite Architecture (Source: Graphite documentation)"
-   width={700}
-/>
+<figure data-zoomable align='center'>
+    <img src="/img/blog/2023/06/graphite_architecture.webp" alt="Graphite architecture"/>
+    <figcaption><i>Graphite Architecture (Source: Graphite documentation)</i></figcaption>
+</figure>
+
+<br></br>
 
 Graphite comes with an in-built UI, but that is fairly basic. Usually, for visualizations, Graphite is clubbed together with Grafana, which is an open source visualization tool.
-
-<Screenshot
-   alt="Graphite APM tool dashboard"
-   height={500}
-   src="/img/blog/2021/07/graphite_dashboard-min.webp"
-   title="Graphite's UI (Source: [Nuxeo](https://doc.nuxeo.com/nxdoc/metrics/))"
-   width={700}
-/>
 
 ### Pinpoint
 
