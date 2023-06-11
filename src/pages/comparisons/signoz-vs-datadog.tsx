@@ -151,7 +151,7 @@ const TopReasons = () => {
             </div>
           </div>
           <div className={`col col--6 margin-vert--md`}>
-            <div>
+            <div className={styles.reasonDetailContainer}>
               <h4 className={styles.reasonTitle}>SigNoz is open source</h4>
               <p className={styles.reasonDesc}>
                 We believe the decision of choosing one product over the other
@@ -172,7 +172,7 @@ const TopReasons = () => {
         </div>
         <div className={`row ${styles.reasonRow} ${styles.shouldImageFirst}`}>
           <div className={`col col--6 margin-vert--md`}>
-            <div>
+            <div className={styles.reasonDetailContainer}>
               <h4 className={styles.reasonTitle}>
                 SigNoz is OpenTelemetry native
               </h4>
@@ -203,7 +203,7 @@ const TopReasons = () => {
             </div>
           </div>
           <div className={`col col--6 margin-vert--md`}>
-            <div>
+            <div className={styles.reasonDetailContainer}>
               <h4 className={styles.reasonTitle}>
                 Use of columnar database for faster ingestion & aggregation
               </h4>
@@ -219,7 +219,7 @@ const TopReasons = () => {
         </div>
         <div className={`row ${styles.reasonRow} ${styles.shouldImageFirst}`}>
           <div className={`col col--6 margin-vert--md`}>
-            <div>
+            <div className={styles.reasonDetailContainer}>
               <h4 className={styles.reasonTitle}>
                 Save up to 86% on your Datadog bill
               </h4>
@@ -251,7 +251,7 @@ const TopReasons = () => {
             </div>
           </div>
           <div className={`col col--6 margin-vert--md`}>
-            <div>
+            <div className={styles.reasonDetailContainer}>
               <h4 className={styles.reasonTitle}>
                 No special pricing for custom metrics
               </h4>
@@ -270,7 +270,7 @@ const TopReasons = () => {
         </div>
         <div className={`row ${styles.reasonRow} ${styles.shouldImageFirst}`}>
           <div className={`col col--6 margin-vert--md`}>
-            <div>
+            <div className={styles.reasonDetailContainer}>
               <h4 className={styles.reasonTitle}>
                 We provide managed self-hosted option
               </h4>
