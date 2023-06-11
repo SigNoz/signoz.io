@@ -2,6 +2,62 @@ import React from "react";
 import Layout from "@theme/Layout";
 import styles from "./styles.module.css";
 
+const COMPARISON_GRID_DATA = [
+  {
+    sideHeader: "Open Source",
+    isAvailableInSignoz: true,
+    isAvailableInDatadog: false,
+  },
+  {
+    sideHeader: "OpenTelemetry-Native",
+    isAvailableInSignoz: true,
+    isAvailableInDatadog: false,
+    signozExtraDetail: "(No vendor lock-in in instrumentation)",
+  },
+  {
+    sideHeader: "Network monitoring",
+    isAvailableInSignoz: false,
+    isAvailableInDatadog: true,
+  },
+  {
+    sideHeader: "Cloud SIEM",
+    isAvailableInSignoz: false,
+    isAvailableInDatadog: true,
+  },
+  {
+    sideHeader: "OpenTelemetry visualization",
+    isAvailableInSignoz: true,
+    isAvailableInDatadog: false,
+    signozExtraDetail: "Best visualizations for OTel data",
+  },
+  {
+    sideHeader: "No peak usage billing for data.",
+    isAvailableInSignoz: true,
+    isAvailableInDatadog: false,
+  },
+  {
+    sideHeader: "No outrageous pricing for custom metrics",
+    isAvailableInSignoz: true,
+    isAvailableInDatadog: false,
+    signozExtraDetail: "Priced at only $0.1 per million samples.",
+    datadogExtraDetail: "0.05 dollar per custom metrics",
+  },
+  {
+    sideHeader: "Managed in your cloud options",
+    isAvailableInSignoz: true,
+    isAvailableInDatadog: false,
+    signozExtraDetail:
+      "More suited if you have data privacy and data governance requirements",
+    datadogExtraDetail: "No self-hosting options available",
+  },
+  {
+    sideHeader: "Transparent usage-based billing",
+    isAvailableInSignoz: true,
+    isAvailableInDatadog: false,
+    datadogExtraDetail: "Transparent usage-based billing",
+  },
+];
+
 function SigNozVSDataDog() {
   return (
     <Layout title="SigNoz vs Datadog">
@@ -10,14 +66,8 @@ function SigNozVSDataDog() {
         <MigrationSupport />
 
         <TopReasons />
-        <div>
-          <h3 className={styles.reasonHeaderTitle}>
-            Top reasons why people choose SigNoz over Datadog
-          </h3>
-          <ComparisonGrid />
-          <ComparisonGridMobile />
-        </div>
-
+        <ComparisonSection />
+        
         <HackerNewsThread />
       </section>
     </Layout>
@@ -31,9 +81,9 @@ const ComparisonHero = () => {
     <div className={styles.svsdHeaderContainer}>
       <h2 className={styles.headerTitle}>SigNoz vs Datadog</h2>
       <p className={styles.headerDesc}>
-        SigNoz can help you{" "}
-        <span className="highlight">save up to 86% of your Datadog bill</span>{" "}
-        while providing a robust observability stack.
+        For 20 APM and 50 infra hosts, SigNoz can save up to 86% of your Datadog
+        bill - check{" "}
+        <span className="highlight">comparison with detailed spreadsheet</span>.
       </p>
       <div className={styles.ctaContainer}>
         <button
@@ -82,7 +132,7 @@ const TopReasons = () => {
   return (
     <div className={styles.svsdReasonContainer}>
       <h3 className={styles.reasonHeaderTitle}>
-        Top reasons why people choose SigNoz over Datadog
+        Top reasons why devs choose SigNoz over Datadog
       </h3>
       <div className="container">
         <div className={`row ${styles.reasonRow} ${styles.reasonElonMusk}`}>
@@ -107,9 +157,9 @@ const TopReasons = () => {
                 We believe the decision of choosing one product over the other
                 ultimately comes down to trust - whether you trust the product
                 to fulfil all your use-cases, whether you trust it to be good
-                value for your money. Trust starts with transparency, and open
-                source is the epitome of transparency in software ecosystem.
-                Have a look at our code, test it out, and then make a decision.
+                value for your money. Trust starts with transparency. SigNoz is
+                open source - have a look at our code, test it out, and then
+                make a decision.
               </p>
               <a
                 href="https://github.com/SigNoz/signoz"
@@ -127,10 +177,12 @@ const TopReasons = () => {
                 SigNoz is OpenTelemetry native
               </h4>
               <p className={styles.reasonDesc}>
-                ​OpenTelemetry is the path forward for observability. SigNoz is
-                built to support OpenTelemetry from Day 1. Datadog does not
-                support OTel as their primary data format. It also tried to kill
-                an OTel PR!
+                ​OpenTelemetry is the second most active project in the CNCF,
+                with only Kubernetes being more active. Using an open source
+                standard like OpenTelemetry frees you from vendor lock-in.
+                SigNoz is built to support OpenTelemetry from Day 1. Datadog
+                does not support OTel as their primary data format. It also
+                tried to kill an OTel PR!
               </p>
             </div>
           </div>
@@ -153,12 +205,14 @@ const TopReasons = () => {
           <div className={`col col--6 margin-vert--md`}>
             <div>
               <h4 className={styles.reasonTitle}>
-                Use of columnar database for faster ingestion & aggregation{" "}
+                Use of columnar database for faster ingestion & aggregation
               </h4>
               <p className={styles.reasonDesc}>
-                SigNoz uses ClickHouse - a fast open source column-oriented
-                database. Ingestion and aggregation are lightening fast, while
+                SigNoz uses ClickHouse - a fast open source distributed columnar
+                database. Ingestion and aggregations are lightening fast, while
                 providing best-in-class compression for economical storage.
+                Learn <a className={`highlight ${styles.underline}`}></a>why is
+                ClickHouse so fast.
               </p>
             </div>
           </div>
@@ -199,7 +253,7 @@ const TopReasons = () => {
           <div className={`col col--6 margin-vert--md`}>
             <div>
               <h4 className={styles.reasonTitle}>
-                No special pricing for custom metrics{" "}
+                No special pricing for custom metrics
               </h4>
               <p className={styles.reasonDesc}>
                 Datadog’s custom metrics is insane. It charges $0.5 per custom
@@ -223,9 +277,10 @@ const TopReasons = () => {
               <p className={styles.reasonDesc}>
                 You can host SigNoz in your own cloud. We also provide managed
                 services. It’s perfect for customers having data privacy and
-                data governance requirements. We have data centers in EU, US and
-                India region to help you comply with data regulations. Check out
-                our{" "}
+                data governance requirements.
+                <br />
+                We have data centers in EU, US and India region to help you
+                comply with data regulations. Check out our{" "}
                 <a href="" className="highlight">
                   paid plans.
                 </a>
@@ -245,6 +300,18 @@ const TopReasons = () => {
   );
 };
 
+const ComparisonSection = () => {
+  return (
+    <div>
+      <h3 className={styles.reasonHeaderTitle}>
+        Top reasons why people choose SigNoz over Datadog
+      </h3>
+      <ComparisonGrid />
+      <ComparisonGridMobile />
+    </div>
+  );
+};
+
 const ComparisonGrid = () => {
   return (
     <div className="container">
@@ -254,72 +321,29 @@ const ComparisonGrid = () => {
         <div className={styles.tableHeader}>SigNoz</div>
         <div className={styles.tableHeader}>Datadog</div>
         {/* data */}
-        <div className={styles.tableMetric}>Open Source</div>
-        <div className={styles.tableMetricAvailability}>✅</div>
-        <div className={styles.tableMetricAvailability}>❌</div>
-        <div className={styles.tableMetric}>OpenTelemetry-Native</div>
-        <div className={styles.tableMetricAvailability}>
-          ✅
-          <small className={styles.tableMetricDesc}>
-            (No vendor lock-in in instrumentation)
-          </small>
-        </div>
-        <div className={styles.tableMetricAvailability}>❌</div>
-        <div className={styles.tableMetric}>Network monitoring</div>
-        <div className={styles.tableMetricAvailability}>❌</div>
-        <div className={styles.tableMetricAvailability}>✅</div>
-        <div className={styles.tableMetric}>Cloud SIEM</div>
-        <div className={styles.tableMetricAvailability}>❌</div>
-        <div className={styles.tableMetricAvailability}>✅</div>
-        <div className={styles.tableMetric}>OpenTelemetry visualization</div>
-        <div className={styles.tableMetricAvailability}>
-          ✅<small className={styles.tableMetricDesc}></small>
-        </div>
-        <div className={styles.tableMetricAvailability}>❌</div>
-        <div className={styles.tableMetric}>
-          No peak usage billing for data.
-        </div>
-        <div className={styles.tableMetricAvailability}>✅</div>
-        <div className={styles.tableMetricAvailability}>❌</div>
-        <div className={styles.tableMetric}>
-          No outrageous pricing for custom metrics
-        </div>
-        <div className={styles.tableMetricAvailability}>
-          ✅
-          <small className={styles.tableMetricDesc}>
-            Priced at only $0.1 per million samples.
-          </small>
-        </div>
-        <div className={styles.tableMetricAvailability}>
-          ❌
-          <small className={styles.tableMetricDesc}>
-            0.05 dollar per custom metrics
-          </small>
-        </div>
-        <div className={styles.tableMetric}>Managed in your cloud options</div>
-        <div className={styles.tableMetricAvailability}>
-          ✅
-          <small className={styles.tableMetricDesc}>
-            More suited if you have data privacy and data governance
-            requirements
-          </small>
-        </div>
-        <div className={styles.tableMetricAvailability}>
-          ❌
-          <small className={styles.tableMetricDesc}>
-            No self-hosting options available
-          </small>
-        </div>
-        <div className={styles.tableMetric}>
-          Transparent usage-based billing
-        </div>
-        <div className={styles.tableMetricAvailability}>✅</div>
-        <div className={styles.tableMetricAvailability}>
-          ❌
-          <small className={styles.tableMetricDesc}>
-            Transparent usage-based billing
-          </small>
-        </div>
+        {COMPARISON_GRID_DATA.map((row) => {
+          return (
+            <>
+              <div className={styles.tableMetric}>{row.sideHeader}</div>
+              <div className={styles.tableMetricAvailability}>
+                {row.isAvailableInSignoz ? "✅" : "❌"}
+                {row.signozExtraDetail && (
+                  <small className={styles.tableMetricDesc}>
+                    {row.signozExtraDetail}
+                  </small>
+                )}
+              </div>
+              <div className={styles.tableMetricAvailability}>
+                {row.isAvailableInDatadog ? "✅" : "❌"}
+                {row.datadogExtraDetail && (
+                  <small className={styles.tableMetricDesc}>
+                    {row.datadogExtraDetail}
+                  </small>
+                )}
+              </div>
+            </>
+          );
+        })}
       </div>
     </div>
   );
@@ -329,167 +353,37 @@ const ComparisonGridMobile = () => {
   return (
     <div className="container">
       <div className={styles.tableGridMobile}>
-        <div className={styles.tableGridCell}>
-          <h4 className={styles.tableGridCellHeader}>Open Source</h4>
-          <div>
-            <div className={styles.tableGridCompareCell}>
-              <span className={styles.tableGridProdCell}>Signoz</span>
-              <span>✅</span>
+        {COMPARISON_GRID_DATA.map((cell) => {
+          return (
+            <div className={styles.tableGridCell}>
+              <h4 className={styles.tableGridCellHeader}>{cell.sideHeader}</h4>
+              <div>
+                <div className={styles.tableGridCompareCell}>
+                  <span className={styles.tableGridProdCell}>
+                    Signoz
+                    {cell.signozExtraDetail && (
+                      <small className={styles.tableMetricDesc}>
+                        ${cell.signozExtraDetail}
+                      </small>
+                    )}
+                  </span>
+                  <span> {cell.isAvailableInSignoz ? "✅" : "❌"}</span>
+                </div>
+                <div className={styles.tableGridCompareCell}>
+                  <span className={styles.tableGridProdCell}>
+                    Datadog
+                    {cell.datadogExtraDetail && (
+                      <small className={styles.tableMetricDesc}>
+                        ${cell.datadogExtraDetail}
+                      </small>
+                    )}
+                  </span>
+                  <span> {cell.isAvailableInDatadog ? "✅" : "❌"}</span>
+                </div>
+              </div>
             </div>
-            <div className={styles.tableGridCompareCell}>
-              <span className={styles.tableGridProdCell}>Datadog</span>
-              <span>❌</span>
-            </div>
-          </div>
-        </div>
-        <div className={styles.tableGridCell}>
-          <h4 className={styles.tableGridCellHeader}>OpenTelemetry-Native</h4>
-          <div>
-            <div className={styles.tableGridCompareCell}>
-              <span className={styles.tableGridProdCell}>
-                Signoz
-                <small className={styles.tableMetricDesc}>
-                  (No vendor lock-in in instrumentation)
-                </small>
-              </span>
-              <span>✅</span>
-            </div>
-            <div className={styles.tableGridCompareCell}>
-              <span className={styles.tableGridProdCell}>Datadog</span>
-              <span>❌</span>
-            </div>
-          </div>
-        </div>
-        <div className={styles.tableGridCell}>
-          <h4 className={styles.tableGridCellHeader}>Network monitoring</h4>
-          <div>
-            <div className={styles.tableGridCompareCell}>
-              <span className={styles.tableGridProdCell}>Signoz</span>
-              <span>✅</span>
-            </div>
-            <div className={styles.tableGridCompareCell}>
-              <span className={styles.tableGridProdCell}>Datadog</span>
-              <span>❌</span>
-            </div>
-          </div>
-        </div>
-        <div className={styles.tableGridCell}>
-          <h4 className={styles.tableGridCellHeader}>Cloud SIEM</h4>
-          <div>
-            <div className={styles.tableGridCompareCell}>
-              <span className={styles.tableGridProdCell}>Signoz</span>
-              <span>✅</span>
-            </div>
-            <div className={styles.tableGridCompareCell}>
-              <span className={styles.tableGridProdCell}>Datadog</span>
-              <span>❌</span>
-            </div>
-          </div>
-        </div>
-        <div className={styles.tableGridCell}>
-          <h4 className={styles.tableGridCellHeader}>
-            OpenTelemetry visualization
-          </h4>
-          <div>
-            <div className={styles.tableGridCompareCell}>
-              <span className={styles.tableGridProdCell}>
-                Signoz
-                <small className={styles.tableMetricDesc}></small>
-              </span>
-              <span>✅</span>
-            </div>
-            <div className={styles.tableGridCompareCell}>
-              <span className={styles.tableGridProdCell}>Datadog</span>
-              <span>❌</span>
-            </div>
-          </div>
-        </div>
-        <div className={styles.tableGridCell}>
-          <h4 className={styles.tableGridCellHeader}>
-            No peak usage billing for data.
-          </h4>
-          <div>
-            <div className={styles.tableGridCompareCell}>
-              <span className={styles.tableGridProdCell}>Signoz</span>
-              <span>✅</span>
-            </div>
-            <div className={styles.tableGridCompareCell}>
-              <span className={styles.tableGridProdCell}>Datadog</span>
-              <span>❌</span>
-            </div>
-          </div>
-        </div>
-        <div className={styles.tableGridCell}>
-          <h4 className={styles.tableGridCellHeader}>
-            No outrageous pricing for custom metrics
-          </h4>
-          <div>
-            <div className={styles.tableGridCompareCell}>
-              <span className={styles.tableGridProdCell}>
-                Signoz
-                <small className={styles.tableMetricDesc}>
-                  Priced at only $0.1 per million samples.
-                </small>
-              </span>
-              <span>✅</span>
-            </div>
-            <div className={styles.tableGridCompareCell}>
-              <span className={styles.tableGridProdCell}>
-                Datadog
-                <small className={styles.tableMetricDesc}>
-                  0.05 dollar per custom metrics
-                </small>
-              </span>
-              <span>❌</span>
-            </div>
-          </div>
-        </div>
-        <div className={styles.tableGridCell}>
-          <h4 className={styles.tableGridCellHeader}>
-            Managed in your cloud options
-          </h4>
-          <div>
-            <div className={styles.tableGridCompareCell}>
-              <span className={styles.tableGridProdCell}>
-                Signoz
-                <small className={styles.tableMetricDesc}>
-                  More suited if you have data privacy and data governance
-                  requirements
-                </small>
-              </span>
-              <span>✅</span>
-            </div>
-            <div className={styles.tableGridCompareCell}>
-              <span className={styles.tableGridProdCell}>
-                Datadog
-                <small className={styles.tableMetricDesc}>
-                  No self-hosting options available
-                </small>
-              </span>
-              <span>❌</span>
-            </div>
-          </div>
-        </div>
-        <div className={styles.tableGridCell}>
-          <h4 className={styles.tableGridCellHeader}>
-            Transparent usage-based billing
-          </h4>
-          <div>
-            <div className={styles.tableGridCompareCell}>
-              <span className={styles.tableGridProdCell}>Signoz</span>
-              <span>✅</span>
-            </div>
-            <div className={styles.tableGridCompareCell}>
-              <span className={styles.tableGridProdCell}>
-                Datadog
-                <small className={styles.tableMetricDesc}>
-                  Transparent usage-based billing
-                </small>
-              </span>
-              <span>❌</span>
-            </div>
-          </div>
-        </div>
+          );
+        })}
       </div>
     </div>
   );
@@ -514,14 +408,12 @@ const HackerNewsThread = () => {
             OpenTelemetry-Native Metrics, Logs, and Traces in a single pane of
             glass
           </h3>
-          <p className={styles.desc}>
-            Check out our hosted and enterprise solutions.
-          </p>
+          <p className={styles.desc}>Sign up for SigNoz Cloud.</p>
           <a
             className={`button button--secondary ${styles.trySigNozCtaBtn}`}
             href="https://signoz.io/teams/"
           >
-            Try SigNoz
+            Get started - free
           </a>
         </div>
       </div>
