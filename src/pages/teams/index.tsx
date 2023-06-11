@@ -9,7 +9,7 @@ const TEAMS_DATA = {
   TITLE: "For Teams that need high-performing applications",
   DESC: "Get started with observability. No need to manage multiple tools - Metrics, logs, and traces under a single pane of glass.",
   PORTAL_ID: "22308423",
-  FORM_ID: "1c57ed6b-4ad8-48e4-88ba-1b2fd8fe0e83",
+  FORM_ID: "d6a11324-07d5-4dd3-8ce2-a53279b6c1db",
   FEATURE_POINTS: [
     {
       title: "Try it free for 30 days",
