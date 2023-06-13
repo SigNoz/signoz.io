@@ -67,7 +67,7 @@ function SigNozVSDataDog() {
 
         <TopReasons />
         <ComparisonSection />
-        
+
         <HackerNewsThread />
       </section>
     </Layout>
@@ -303,9 +303,7 @@ const TopReasons = () => {
 const ComparisonSection = () => {
   return (
     <div>
-      <h3 className={styles.reasonHeaderTitle}>
-        Top reasons why people choose SigNoz over Datadog
-      </h3>
+      <h3 className={styles.reasonHeaderTitle}>Side by Side Comparsion</h3>
       <ComparisonGrid />
       <ComparisonGridMobile />
     </div>
