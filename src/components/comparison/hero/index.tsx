@@ -22,10 +22,7 @@ const Hero = (props) => {
         </button>
       </div>
       <div className={styles.headerHeroImageContainer}>
-        <img
-          src="/img/signoz-dsitributed-tracing.png"
-          className="headerHeroImage"
-        />
+        <img src="/img/signoz-distributed-tracing.png" />
       </div>
     </div>
   );

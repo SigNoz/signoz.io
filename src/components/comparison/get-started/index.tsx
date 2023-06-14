@@ -2,34 +2,46 @@ import React from "react";
 import styles from "./styles.module.css";
 
 const GetStarted = (props) => {
+  const { withHackerNews, data } = props;
   return (
     <>
-      <HackerNewsThread />
-      <GetStartedSection />
-      <MigrationSupport />
+      <HackerNewsThread
+        withHackerNews={withHackerNews}
+        title={data.HACKER_THREAD_TITLE}
+      />
+      <GetStartedSection withHackerNews={withHackerNews} />
+      <MigrationSupport
+        withHackerNews={withHackerNews}
+        title={data.TITLE}
+        desc={data.DESC}
+      />
     </>
   );
 };
 
-const HackerNewsThread = () => {
+const HackerNewsThread = (props) => {
+  const { withHackerNews, title } = props;
+  if (!withHackerNews) {
+    return null;
+  }
   return (
     <div className={styles.svsdThreadContainer}>
       <div className="container">
-        <h3 className={styles.threadTitle}>
-          Datadog shocking bill of $65 million. Check out the{" "}
-          <a href="" className={`${styles.underline} highlight`}>
-            HackerNews thread.
-          </a>
-        </h3>
+        <h3 className={styles.threadTitle}>{title}</h3>
       </div>
     </div>
   );
 };
 
-const GetStartedSection = () => {
+const GetStartedSection = (props) => {
+  const { withHackerNews } = props;
   return (
     <div className="container">
-      <div className={styles.trySigNozContainer}>
+      <div
+        className={`${styles.trySigNozContainer} ${
+          !withHackerNews && styles.withoutHackerNews
+        }`}
+      >
         <h3 className={styles.tagline}>
           OpenTelemetry-Native Metrics, Logs, and Traces in a single pane of
           glass
@@ -46,20 +58,17 @@ const GetStartedSection = () => {
   );
 };
 
-const MigrationSupport = () => {
+const MigrationSupport = (props) => {
+  const { withHackerNews, title, desc } = props;
   return (
     <div className="container">
-      <div className={styles.migrationSupportContainer}>
-        <h4 className={styles.tagline}>
-          Migrate from Datadog to SigNoz with ease.
-        </h4>
-        <p className={styles.desc}>
-          We provide support for migrating from Datadog to SigNoz.{" "}
-          <a className={`${styles.underline} highlight`} href="#">
-            Request a migration support
-          </a>{" "}
-          from one of our experts and get started with SigNoz quickly.
-        </p>
+      <div
+        className={`${styles.migrationSupportContainer} ${
+          !withHackerNews && styles.withoutHackerNews
+        }`}
+      >
+        <h4 className={styles.tagline}>{title}</h4>
+        <p className={styles.desc}>{desc}</p>
       </div>
     </div>
   );

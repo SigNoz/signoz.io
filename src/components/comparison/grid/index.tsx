@@ -37,10 +37,10 @@ const ComparisonGridDesktop = (props) => {
                 )}
               </div>
               <div className={styles.tableMetricAvailability}>
-                {row.isAvailableInDatadog ? "✅" : "❌"}
-                {row.datadogExtraDetail && (
+                {row.isAvailableInOther ? "✅" : "❌"}
+                {row.otherExtraDetail && (
                   <small className={styles.tableMetricDesc}>
-                    {row.datadogExtraDetail}
+                    {row.otherExtraDetail}
                   </small>
                 )}
               </div>
@@ -76,13 +76,13 @@ const ComparisonGridMobile = (props) => {
                 <div className={styles.tableGridCompareCell}>
                   <span className={styles.tableGridProdCell}>
                     New Relic
-                    {cell.datadogExtraDetail && (
+                    {cell.otherExtraDetail && (
                       <small className={styles.tableMetricDesc}>
-                        {cell.datadogExtraDetail}
+                        {cell.otherExtraDetail}
                       </small>
                     )}
                   </span>
-                  <span> {cell.isAvailableInDatadog ? "✅" : "❌"}</span>
+                  <span> {cell.isAvailableInOther ? "✅" : "❌"}</span>
                 </div>
               </div>
             </div>

@@ -6,14 +6,16 @@ const TopReasons = (props) => {
     <>
       <div className={styles.svsdReasonContainer}>
         <h3 className={styles.reasonHeaderTitle}>
-          Top reasons why devs choose SigNoz over Datadog
+          {props.title}
         </h3>
         <div className="container">
           <OpenSourceReason />
           {(props.reasons || []).map(({ TITLE, DESC, FIGURE }, index) => {
             return (
               <div
-                className={`row ${styles.reasonRow} ${styles.shouldImageFirst}`}
+                className={`row ${styles.reasonRow} ${
+                  !(index % 2) ? styles.shouldImageFirst : ""
+                }`}
               >
                 {index % 2 ? (
                   <div
@@ -53,7 +55,7 @@ const OpenSourceReason = () => {
     <div className={`row ${styles.reasonRow} ${styles.reasonElonMusk}`}>
       <div className={`col col--6 margin-vert--md ${styles.reasonImageCol}`}>
         <div className={styles.reasonImageContainer}>
-          <img src="/img/reasons/elon-musk.png" alt="reason" />
+          <img src="/img/reasons/elon-musk.webp" alt="reason" />
           <div className={styles.reasonReviewContainer}>
             <p className={styles.reasonReview}>
               “In order to really build trust, you have to have transparency. If
