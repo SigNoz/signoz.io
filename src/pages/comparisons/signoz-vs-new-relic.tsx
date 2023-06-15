@@ -19,7 +19,10 @@ function SigNozVSNewRelic() {
           title={COMPARISON_DATA.MIGRATE.TITLE}
           desc={COMPARISON_DATA.MIGRATE.DESC}
         />
-        <TopReasons title={COMPARISON_DATA.REASON_TITLE} reasons={COMPARISON_DATA.REASONS} />
+        <TopReasons
+          title={COMPARISON_DATA.REASON_TITLE}
+          reasons={COMPARISON_DATA.REASONS}
+        />
         <ComparisonGrid comparisonData={COMPARISON_DATA.COMPARISON} />
         <GetStarted data={COMPARISON_DATA.MIGRATION_SUPPORT} />
       </ComparisonLayout>
@@ -124,10 +127,12 @@ const COMPARISON_DATA = {
         <>
           You can host SigNoz in your own cloud. We also provide managed
           services. It’s perfect for customers having data privacy and data
-          governance requirements.We have data centers in EU, US and India
-          region to help you comply with data regulations. Check out our{" "}
+          governance requirements.
+          <br />
+          We have data centers in the EU, US, and India region to help you
+          comply with data regulations.{" "}
           <a href="" className="highlight underline">
-            paid plans
+            Get started for free
           </a>
           .
         </>
@@ -136,6 +141,7 @@ const COMPARISON_DATA = {
   ],
   COMPARISON: {
     TITLE: <>Side by Side Comparison</>,
+    OTHER_HEADING: "New Relic",
     DATA: [
       {
         sideHeader: "Open Source",
@@ -146,7 +152,6 @@ const COMPARISON_DATA = {
         sideHeader: "Logs, Metrics, Traces",
         isAvailableInSignoz: true,
         isAvailableInOther: true,
-        signozExtraDetail: "(No vendor lock-in in instrumentation)",
       },
       {
         sideHeader: "OpenTelemetry-Native",

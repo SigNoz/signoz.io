@@ -3,26 +3,26 @@ import styles from "./styles.module.css";
 
 const ComparisonGrid = (props) => {
   const { comparisonData } = props;
-  const { DATA, TITLE } = comparisonData;
+  const { DATA, TITLE, OTHER_HEADING } = comparisonData;
 
   return (
     <div>
       <h3 className={styles.reasonHeaderTitle}>{TITLE}</h3>
-      <ComparisonGridDesktop data={DATA} />
-      <ComparisonGridMobile data={DATA} />
+      <ComparisonGridDesktop data={DATA} otherHeading={OTHER_HEADING} />
+      <ComparisonGridMobile data={DATA} otherHeading={OTHER_HEADING} />
     </div>
   );
 };
 
 const ComparisonGridDesktop = (props) => {
-  const { data } = props;
+  const { data, otherHeading } = props;
   return (
     <div className="container">
       <div className={styles.tableGrid}>
         {/* header */}
         <div className={styles.tableHeader}></div>
         <div className={styles.tableHeader}>SigNoz</div>
-        <div className={styles.tableHeader}>New Relic</div>
+        <div className={styles.tableHeader}>{otherHeading}</div>
         {/* data */}
         {data.map((row) => {
           return (
@@ -53,7 +53,7 @@ const ComparisonGridDesktop = (props) => {
 };
 
 const ComparisonGridMobile = (props) => {
-  const { data } = props;
+  const { data, otherHeading } = props;
   return (
     <div className="container">
       <div className={styles.tableGridMobile}>
@@ -75,7 +75,7 @@ const ComparisonGridMobile = (props) => {
                 </div>
                 <div className={styles.tableGridCompareCell}>
                   <span className={styles.tableGridProdCell}>
-                    New Relic
+                    {otherHeading}
                     {cell.otherExtraDetail && (
                       <small className={styles.tableMetricDesc}>
                         {cell.otherExtraDetail}

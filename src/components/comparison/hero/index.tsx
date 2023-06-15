@@ -18,7 +18,7 @@ const Hero = (props) => {
           className={`button button--outline button--secondary ${styles.ctaButton}`}
           type="button"
         >
-          Sign Up for free
+          Get started - free
         </button>
       </div>
       <div className={styles.headerHeroImageContainer}>

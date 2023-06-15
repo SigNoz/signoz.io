@@ -19,7 +19,10 @@ function SigNozVSNewRelic() {
           title={COMPARISON_DATA.MIGRATE.TITLE}
           desc={COMPARISON_DATA.MIGRATE.DESC}
         />
-        <TopReasons title={COMPARISON_DATA.REASON_TITLE} reasons={COMPARISON_DATA.REASONS} />
+        <TopReasons
+          title={COMPARISON_DATA.REASON_TITLE}
+          reasons={COMPARISON_DATA.REASONS}
+        />
         <ComparisonGrid comparisonData={COMPARISON_DATA.COMPARISON} />
         <GetStarted withHackerNews data={COMPARISON_DATA.MIGRATION_SUPPORT} />
       </ComparisonLayout>
@@ -63,7 +66,9 @@ const COMPARISON_DATA = {
           only Kubernetes being more active. Using an open source standard like
           OpenTelemetry frees you from vendor lock-in. SigNoz is built to
           support OpenTelemetry from Day 1. Datadog does not support OTel as
-          their primary data format. It also tried to kill an OTel PR!
+          their primary data format. However, Datadog does not support OTel as
+          its primary data format, and it even tried to kill an OTel pull
+          request.
         </>
       ),
     },
@@ -99,8 +104,8 @@ const COMPARISON_DATA = {
       TITLE: <>No special pricing for custom metrics</>,
       DESC: (
         <>
-          Datadog’s custom metrics is insane. It charges $0.5 per custom
-          metrics. You can end up with unpredictable bills, and custom metrics
+          Datadog’s custom metrics pricing is insane. It charges $0.5 per custom
+          metric. You can end up with unpredictable bills, and custom metrics
           pricing can constitute up to 52% of your bill for a large engineering
           team. SigNoz does not treat custom metrics differently and charges
           only $0.1 per million samples.{" "}
@@ -119,10 +124,10 @@ const COMPARISON_DATA = {
           services. It’s perfect for customers having data privacy and data
           governance requirements.
           <br />
-          We have data centers in EU, US and India region to help you comply
-          with data regulations. Check out our{" "}
+          We have data centers in the EU, US, and India region to help you
+          comply with data regulations.{" "}
           <a href="" className="highlight underline">
-            paid plans.
+            Get started for free
           </a>
         </>
       ),
@@ -130,6 +135,7 @@ const COMPARISON_DATA = {
   ],
   COMPARISON: {
     TITLE: <>Side by Side Comparison</>,
+    OTHER_HEADING: "Datadog",
     DATA: [
       {
         sideHeader: "Open Source",
@@ -183,6 +189,11 @@ const COMPARISON_DATA = {
         isAvailableInSignoz: true,
         isAvailableInOther: false,
         otherExtraDetail: "Transparent usage-based billing",
+      },
+      {
+        sideHeader: "Host Yourself",
+        isAvailableInSignoz: true,
+        isAvailableInOther: false,
       },
     ],
   },

@@ -5,9 +5,7 @@ const TopReasons = (props) => {
   return (
     <>
       <div className={styles.svsdReasonContainer}>
-        <h3 className={styles.reasonHeaderTitle}>
-          {props.title}
-        </h3>
+        <h3 className={styles.reasonHeaderTitle}>{props.title}</h3>
         <div className="container">
           <OpenSourceReason />
           {(props.reasons || []).map(({ TITLE, DESC, FIGURE }, index) => {
@@ -71,9 +69,10 @@ const OpenSourceReason = () => {
           <p className={styles.reasonDesc}>
             We believe the decision of choosing one product over the other
             ultimately comes down to trust - whether you trust the product to
-            fulfil all your use-cases, whether you trust it to be good value for
-            your money. Trust starts with transparency. SigNoz is open source -
-            have a look at our code, test it out, and then make a decision.
+            fulfill all your use-cases, whether you trust it to be good value
+            for your money. Trust starts with transparency. SigNoz is open
+            source, so you can take a look at our code, test it out, and then
+            make an informed decision.
           </p>
           <a
             href="https://github.com/SigNoz/signoz"
