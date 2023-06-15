@@ -6,14 +6,16 @@ import Hero from "../../components/comparison/hero";
 import ComparisonGrid from "../../components/comparison/grid";
 import GetStarted from "../../components/comparison/get-started";
 import ComparisonLayout from "../../components/comparison/layout";
+import Link from "@docusaurus/Link";
 
-function SigNozVSNewRelic() {
+function SigNozVSDatadog() {
   return (
     <Layout title="SigNoz vs Datadog">
       <ComparisonLayout>
         <Hero
           title={COMPARISON_DATA.HERO.TITLE}
           desc={COMPARISON_DATA.HERO.DESC}
+          billForComparison={COMPARISON_DATA.HERO.BILL_FOR_COMPARISON}
         />
         <Migration
           title={COMPARISON_DATA.MIGRATE.TITLE}
@@ -30,7 +32,7 @@ function SigNozVSNewRelic() {
   );
 }
 
-export default SigNozVSNewRelic;
+export default SigNozVSDatadog;
 
 const COMPARISON_DATA = {
   HERO: {
@@ -39,18 +41,28 @@ const COMPARISON_DATA = {
       <>
         For 20 APM and 50 infra hosts, SigNoz can save up to 86% of your Datadog
         bill - check{" "}
-        <span className="highlight">comparison with detailed spreadsheet</span>.
+        <Link
+          href="/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/"
+          className="highlight"
+        >
+          comparison with detailed spreadsheet
+        </Link>
+        .
       </>
     ),
+    BILL_FOR_COMPARISON: "/comparisons/datadog-savings/",
   },
   MIGRATE: {
     TITLE: <>Migrate from Datadog to SigNoz with ease.</>,
     DESC: (
       <>
-        We provide support for migrating from Datadog to SigNoz.{" "}
-        <a href="" className={`underline highlight`}>
+        We provide support for migrating from Datadog to SigNoz. <br />
+        <Link
+          href="/comparisons/migrate-from-datadog/"
+          className={`highlight`}
+        >
           Request a migration support
-        </a>{" "}
+        </Link>{" "}
         from one of our experts and get started with SigNoz quickly.
       </>
     ),
@@ -67,8 +79,14 @@ const COMPARISON_DATA = {
           OpenTelemetry frees you from vendor lock-in. SigNoz is built to
           support OpenTelemetry from Day 1. Datadog does not support OTel as
           their primary data format. However, Datadog does not support OTel as
-          its primary data format, and it even tried to kill an OTel pull
-          request.
+          its primary data format, and it even tried to{" "}
+          <Link
+            href="https://news.ycombinator.com/item?id=34540419"
+            className="highlight"
+          >
+            kill an OTel pull request
+          </Link>
+          .
         </>
       ),
     },
@@ -81,7 +99,13 @@ const COMPARISON_DATA = {
           SigNoz uses ClickHouse - a fast open source distributed columnar
           database. Ingestion and aggregations are lightening fast, while
           providing best-in-class compression for economical storage. Learn{" "}
-          <a className={`highlight underline`}>why is ClickHouse so fast</a>.
+          <Link
+            href="https://clickhouse.com/docs/en/concepts/why-clickhouse-is-so-fast"
+            className={`highlight`}
+          >
+            why is ClickHouse so fast
+          </Link>
+          .
         </>
       ),
     },
@@ -93,9 +117,12 @@ const COMPARISON_DATA = {
           Datadog has a very complex pricing tier which makes Datadog bills
           unpredictable. For 20 APM hosts, 50 infra hosts, and 2500 GB logs
           data, SigNoz can provide up to 7x more value than Datadog.{" "}
-          <a href="" className="highlight underline">
+          <Link
+            href="/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/"
+            className="highlight"
+          >
             Lean more.
-          </a>
+          </Link>
         </>
       ),
     },
@@ -109,9 +136,12 @@ const COMPARISON_DATA = {
           pricing can constitute up to 52% of your bill for a large engineering
           team. SigNoz does not treat custom metrics differently and charges
           only $0.1 per million samples.{" "}
-          <a href="" className="highlight underline">
+          <Link
+            href="/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/#no-limits-on-custom-metrics-with-signoz"
+            className="highlight"
+          >
             Learn more.
-          </a>
+          </Link>
         </>
       ),
     },
@@ -126,9 +156,9 @@ const COMPARISON_DATA = {
           <br />
           We have data centers in the EU, US, and India region to help you
           comply with data regulations.{" "}
-          <a href="" className="highlight underline">
+          <Link href="/teams/" className="highlight">
             Get started for free
-          </a>
+          </Link>
         </>
       ),
     },
@@ -201,18 +231,21 @@ const COMPARISON_DATA = {
     HACKER_THREAD_TITLE: (
       <>
         Datadog shocking bill of $65 million. Check out the{" "}
-        <a href="" className={`underline highlight`}>
+        <Link
+          href="https://news.ycombinator.com/item?id=35837330"
+          className={`highlight`}
+        >
           HackerNews thread.
-        </a>
+        </Link>
       </>
     ),
     TITLE: <>Migrate from Datadog to SigNoz with ease.</>,
     DESC: (
       <>
         We provide support for migrating from Datadog to SigNoz.{" "}
-        <a className={`underline highlight`} href="#">
+        <Link className={`highlight`} href="/comparisons/migrate-from-datadog/">
           Request a migration support
-        </a>{" "}
+        </Link>{" "}
         from one of our experts and get started with SigNoz quickly.
       </>
     ),

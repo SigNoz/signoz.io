@@ -1,25 +1,26 @@
 import React from "react";
 import styles from "./styles.module.css";
+import Link from "@docusaurus/Link";
 
 const Hero = (props) => {
-  const { title, desc } = props;
+  const { title, desc, billForComparison } = props;
   return (
     <div className={styles.svsdHeaderContainer}>
       <h2 className={styles.headerTitle}>{title}</h2>
       <p className={styles.headerDesc}>{desc}</p>
       <div className={styles.ctaContainer}>
-        <button
+        <Link
           className={`button button--primary ${styles.ctaButton}`}
-          type="button"
+          href={billForComparison}
         >
           Send your bill for comparison
-        </button>
-        <button
+        </Link>
+        <a
           className={`button button--outline button--secondary ${styles.ctaButton}`}
-          type="button"
+          href="/teams/"
         >
           Get started - free
-        </button>
+        </a>
       </div>
       <div className={styles.headerHeroImageContainer}>
         <img src="/img/signoz-distributed-tracing.png" />

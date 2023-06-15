@@ -1,5 +1,6 @@
 import React from "react";
 import styles from "./styles.module.css";
+import Link from "@docusaurus/Link";
 
 const GetStarted = (props) => {
   const { withHackerNews, data } = props;
@@ -47,12 +48,12 @@ const GetStartedSection = (props) => {
           glass
         </h3>
         <p className={styles.desc}>Sign up for SigNoz Cloud.</p>
-        <a
+        <Link
           className={`button button--secondary ${styles.trySigNozCtaBtn}`}
-          href="https://signoz.io/teams/"
+          href="/teams/"
         >
           Get started - free
-        </a>
+        </Link>
       </div>
     </div>
   );

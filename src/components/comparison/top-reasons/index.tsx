@@ -1,5 +1,6 @@
 import React from "react";
 import styles from "./styles.module.css";
+import Link from "@docusaurus/Link";
 
 const TopReasons = (props) => {
   return (
@@ -74,12 +75,12 @@ const OpenSourceReason = () => {
             source, so you can take a look at our code, test it out, and then
             make an informed decision.
           </p>
-          <a
+          <Link
             href="https://github.com/SigNoz/signoz"
             className="button button--primary"
           >
             Check out our GitHub repo
-          </a>
+          </Link>
         </div>
       </div>
     </div>

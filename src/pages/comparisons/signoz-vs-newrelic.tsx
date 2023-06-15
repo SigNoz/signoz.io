@@ -6,6 +6,7 @@ import Hero from "../../components/comparison/hero";
 import ComparisonGrid from "../../components/comparison/grid";
 import GetStarted from "../../components/comparison/get-started";
 import ComparisonLayout from "../../components/comparison/layout";
+import Link from "@docusaurus/Link";
 
 function SigNozVSNewRelic() {
   return (
@@ -14,6 +15,7 @@ function SigNozVSNewRelic() {
         <Hero
           title={COMPARISON_DATA.HERO.TITLE}
           desc={COMPARISON_DATA.HERO.DESC}
+          billForComparison={COMPARISON_DATA.HERO.BILL_FOR_COMPARISON}
         />
         <Migration
           title={COMPARISON_DATA.MIGRATE.TITLE}
@@ -40,21 +42,26 @@ const COMPARISON_DATA = {
         Tired of New Relic’s user-based pricing? Even for teams of 10-15 devs,
         New Relic’s pricing for user seats can be a significant portion of your
         monthly bill - check{" "}
-        <a href="" className="highlight">
+        <Link
+          href="/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/"
+          className="highlight"
+        >
           comparison with detailed spreadsheet
-        </a>
+        </Link>
         .
       </>
     ),
+    BILL_FOR_COMPARISON: "/comparisons/newrelic-savings/",
   },
   MIGRATE: {
     TITLE: <>Migrate from New Relic to SigNoz with ease.</>,
     DESC: (
       <>
         We provide support for migrating from New Relic to SigNoz.
-        <a href="" className="highlight underline">
+        <br />
+        <Link href="/comparisons/migrate-from-newrelic/" className="highlight">
           Request a migration support
-        </a>{" "}
+        </Link>{" "}
         from one of our experts and get started with SigNoz quickly.
       </>
     ),
@@ -83,9 +90,12 @@ const COMPARISON_DATA = {
           SigNoz uses ClickHouse - a fast open source distributed columnar
           database. Ingestion and aggregations are lightening fast, while
           providing best-in-class compression for economical storage. Learn{" "}
-          <a href="" className="highlight underline">
+          <Link
+            href="https://clickhouse.com/docs/en/concepts/why-clickhouse-is-so-fast"
+            className="highlight"
+          >
             why is ClickHouse so fast
-          </a>
+          </Link>
           .
         </>
       ),
@@ -101,9 +111,12 @@ const COMPARISON_DATA = {
           $549/user. Even for teams with 10-15 devs, the cost becomes
           significant. At scale, the cost of adding users can go up to 66% of
           the total bill.{" "}
-          <a href="" className="highlight underline">
+          <Link
+            href="/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/#no-user-based-pricing-collaborate-seamlessly-with-signoz"
+            className="highlight"
+          >
             Learn more.
-          </a>
+          </Link>
         </>
       ),
     },
@@ -114,9 +127,12 @@ const COMPARISON_DATA = {
         <>
           For 20 APM hosts, 50 million indexed spans, 50 infra hosts, and 2500
           GB logs data, SigNoz can save 60% of your New Relic bill.{" "}
-          <a href="" className="highlight underline">
+          <Link
+            href="/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/#cost-comparison-of-signoz-with-datadog-new-relic-and-grafana"
+            className="highlight"
+          >
             Lean more.
-          </a>
+          </Link>
         </>
       ),
     },
@@ -131,9 +147,9 @@ const COMPARISON_DATA = {
           <br />
           We have data centers in the EU, US, and India region to help you
           comply with data regulations.{" "}
-          <a href="" className="highlight underline">
+          <Link href="/teams/" className="highlight">
             Get started for free
-          </a>
+          </Link>
           .
         </>
       ),
@@ -211,9 +227,9 @@ const COMPARISON_DATA = {
     DESC: (
       <>
         We provide support for migrating from New Relic to SigNoz.{" "}
-        <a href="" className="highlight underline">
+        <Link href="/comparisons/migrate-from-newrelic/" className="highlight">
           Request a migration support
-        </a>{" "}
+        </Link>{" "}
         from one of our experts and get started with SigNoz quickly.
       </>
     ),
