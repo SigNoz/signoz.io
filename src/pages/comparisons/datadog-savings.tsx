@@ -5,7 +5,7 @@ import MigrateSaving from "../../components/comparison/migrate-saving";
 
 function DatadogSaving() {
   return (
-    <Layout title="Teams">
+    <Layout title="Datadog Saving">
       <HubspotProvider>
         <MigrateSaving data={DATA} />
       </HubspotProvider>

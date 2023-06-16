@@ -5,7 +5,7 @@ import MigrateSaving from "../../components/comparison/migrate-saving";
 
 function NewRelicSaving() {
   return (
-    <Layout title="Teams">
+    <Layout title="New Relic Saving">
       <HubspotProvider>
         <MigrateSaving data={DATA} />
       </HubspotProvider>
