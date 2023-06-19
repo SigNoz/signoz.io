@@ -35,7 +35,7 @@ OpenTelemetry is an open-source standard under Cloud Native Computing Foundation
 Instrumentation is the process of enabling your application code to generate telemetry data like logs, metrics, and traces. Using OpenTelemetry Nextjs client libraries, you can generate end-to-end tracing data from your Nextjs application.
 > 
 
-OpenTelemetry provides client libraries to take care of instrumentation. You then need to send the collected data to an analysis backend. In this tutorial, we will be using [SigNoz](https://signoz.io/utm_medium=monitor_express) to store and visualize the telemetry data collected by OpenTelemetry from the sample Nextjs application
+OpenTelemetry provides client libraries to take care of instrumentation. You then need to send the collected data to an analysis backend. In this tutorial, we will be using [SigNoz](https://signoz.io/) to store and visualize the telemetry data collected by OpenTelemetry from the sample Nextjs application
 
 Before we demonstrate how to implement the OpenTelemetry Nextjs libraries, let’s have a brief overview of OpenTelmetry.
 
