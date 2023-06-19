@@ -79,7 +79,7 @@ Some key features of SigNoz are:
 
 You can read more about SigNoz from its documentation.
 
-[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/utm_medium=open_source_log_management)
+[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/)
 
 ## Logstash
 
