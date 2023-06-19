@@ -98,7 +98,7 @@ Now let's explore the top 13 open source APM tools in 2023.
 - **Alternative to:** Datadog, New Relic, Dynatrace
 - [SigNoz on GitHub](https://github.com/SigNoz/signoz)
 
-[SigNoz](https://signoz.io/?utm_source=blog&utm_medium=open_source_apm_tools) is a full-stack open source APM and observability tool. It provides logs, metrics, and traces under a single pane of glass. It is built to support OpenTelemetry natively, and uses Clickhouse - a powerful OLAP database for faster ingestion and aggregations. 
+[SigNoz](https://signoz.io/utm_medium=open_source_apm_tools) is a full-stack open source APM and observability tool. It provides logs, metrics, and traces under a single pane of glass. It is built to support OpenTelemetry natively, and uses Clickhouse - a powerful OLAP database for faster ingestion and aggregations. 
 
 
 <!-- - User requests per second
@@ -123,9 +123,9 @@ Using distributed tracing, you can identify the root cause of performance issues
 
 #### Open Source license and Cloud Option
 
-SigNoz Open Source is free to use. You can get started with the open source by using Docker, Docker Swarm or Kubernetes. You can find the instructions to self-host SigNoz [here](https://signoz.io/docs/install/?utm_source=blog&utm_medium=open_source_apm_tools).
+SigNoz Open Source is free to use. You can get started with the open source by using Docker, Docker Swarm or Kubernetes. You can find the instructions to self-host SigNoz [here](https://signoz.io/docs/install/utm_medium=open_source_apm_tools).
 
-Signing up for [SigNoz cloud](https://signoz.io/teams/?utm_source=blog&utm_medium=open_source_apm_tools) gives you the most easiest way to get started with SigNoz. The cloud version gives you access to some paid-only features as well as customer support. SigNoz can help you save up to 86% of your Datadog bill. Here's a [pricing comparsion with detailed spreadsheet](https://signoz.io/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/?utm_source=blog&utm_medium=open_source_apm_tools).
+Signing up for [SigNoz cloud](https://signoz.io/teams/utm_medium=open_source_apm_tools) gives you the most easiest way to get started with SigNoz. The cloud version gives you access to some paid-only features as well as customer support. SigNoz can help you save up to 86% of your Datadog bill. Here's a [pricing comparsion with detailed spreadsheet](https://signoz.io/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/utm_medium=open_source_apm_tools).
 
 
 ### Graphite
@@ -517,7 +517,7 @@ cd signoz/deploy/
 
 For detailed instructions, you can visit our documentation.
 
-[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/?utm_source=blog&utm_medium=open_source_apm_tools)
+[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/utm_medium=open_source_apm_tools)
 
 You can check out SigNoz's GitHub repo here 👇
 

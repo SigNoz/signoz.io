@@ -210,7 +210,7 @@ cd signoz/deploy/
 
 For detailed instructions, you can visit our documentation.
 
-[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/?utm_source=blog&utm_medium=dd_vs_cloudwatch)
+[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/utm_medium=dd_vs_cloudwatch)
 
 If you don't want to self-host, and you can easily get started with [SigNoz cloud](https://signoz.io/teams/?utm_source=website_blog&utm_medium=dd_vs_cloudwatch&utm_campaign=try_cloud).
 

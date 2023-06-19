@@ -34,7 +34,7 @@ Nodejs is a popular Javascript runtime environment that executes Javascript code
 
 You can monitor your express application using OpenTelemetry and a tracing backend of your choice. OpenTelemetry is the leading open-source standard under the Cloud Native Computing Foundation that aims to standardize the process of instrumentation across multiple languages.
  
-In this article, we will be using [SigNoz](https://signoz.io/?utm_source=blog&utm_medium=monitor_express) to store and visualize the telemetry data collected by OpenTelemetry from a sample Expressjs application.
+In this article, we will be using [SigNoz](https://signoz.io/utm_medium=monitor_express) to store and visualize the telemetry data collected by OpenTelemetry from a sample Expressjs application.
 
 ## Running an Express application with OpenTelemetry
 
@@ -53,7 +53,7 @@ cd signoz/deploy/
 
 For detailed instructions, you can visit our documentation.
 
-[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/?utm_source=blog&utm_medium=opentelemetry_express)
+[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/)
 
 When you are done installing SigNoz, you can access the UI at: [http://localhost:3301](http://localhost:3301/application)
 

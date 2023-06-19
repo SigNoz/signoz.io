@@ -89,7 +89,7 @@ You can also do things like batching the data before sending it out, retrying in
 
 ### Exporters
 
-Exporters are used to export data to an observability backend like [SigNoz](https://signoz.io/?utm_source=blog&utm_medium=opentelemetry_colllector). You can send out data in multiple data formats. You can send different telemetry signals to different backend analysis tools. For example, you can send traces to Jaeger and metrics to Prometheus.
+Exporters are used to export data to an observability backend like [SigNoz](https://signoz.io/). You can send out data in multiple data formats. You can send different telemetry signals to different backend analysis tools. For example, you can send traces to Jaeger and metrics to Prometheus.
 
 With the combination of these three components, OpenTelemetry Collector can be used to build data pipelines. Pipelines are configured via a YAML configuration file easily. This provides flexibility to teams managing their telemetry data.
 
@@ -222,7 +222,7 @@ service:
           exporters: [clickhousemetricswrite]
 ```
 
-A sample OpenTelemetry Collector configuration file. (Source: <a href = "https://signoz.io/?utm_source=blog&utm_medium=opentelemetry_colllector" rel="noopener noreferrer nofollow" target="_blank" >SigNoz</a>)
+A sample OpenTelemetry Collector configuration file. (Source: <a href = "https://signoz.io/" rel="noopener noreferrer nofollow" target="_blank" >SigNoz</a>)
 
 ```bash
 receivers:
@@ -366,7 +366,7 @@ service:
 
 ## Getting started with OpenTelemetry
 
-OpenTelemetry provides a vendor-agnostic way of collecting and managing telemetry data. The next step is to choose a backend analysis tool that can help you make sense of the collected data. [SigNoz](https://signoz.io/?utm_source=blog&utm_medium=opentelemetry_colllector) is a full-stack open-source application performance monitoring and observability platform built natively for OpenTelemetry.
+OpenTelemetry provides a vendor-agnostic way of collecting and managing telemetry data. The next step is to choose a backend analysis tool that can help you make sense of the collected data. [SigNoz](https://signoz.io/) is a full-stack open-source application performance monitoring and observability platform built natively for OpenTelemetry.
 
 You can get started with SigNoz using just three commands at your terminal.
 
@@ -378,7 +378,7 @@ cd signoz/deploy/
 
 For detailed instructions, you can visit our documentation.
 
-[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/?utm_source=blog&utm_medium=opentelemetry_colllector)
+[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/)
 
 SigNoz can be used to visualize metrics and traces with charts that can enable quick insights for your teams.
 

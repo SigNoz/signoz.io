@@ -99,9 +99,9 @@ cd signoz/deploy/
 ./install.sh
 ```
 
-You can visit our [documentation](https://signoz.io/docs/install/?utm_source=blog&utm_medium=opentelemetry_springboot) for instructions on how to install SigNoz using various methods.
+You can visit our [documentation](https://signoz.io/docs/install/) for instructions on how to install SigNoz using various methods.
 
-You can also sign up for [SigNoz cloud](https://signoz.io/teams/?utm_source=blog&utm_medium=opentelemetry_spring_boot). The cloud version gives you access to some paid-only features as well as customer support. You can try SigNoz cloud for free for 30 days.
+You can also sign up for [SigNoz cloud](https://signoz.io/teams/utm_medium=opentelemetry_spring_boot). The cloud version gives you access to some paid-only features as well as customer support. You can try SigNoz cloud for free for 30 days.
 
 When you are done installing SigNoz, you can access the UI at [http://localhost:3301](http://localhost:3301/application)
 
@@ -123,7 +123,7 @@ cd signoz/deploy/
 
 For detailed instructions, you can visit our documentation.
 
-[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/?utm_source=blog&utm_medium=springboot)
+[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/utm_medium=springboot)
 
 When you are done installing SigNoz, you can access the UI at: [http://localhost:3301](http://localhost:3301/application)
 

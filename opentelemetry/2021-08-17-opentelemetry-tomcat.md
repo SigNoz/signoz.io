@@ -48,7 +48,7 @@ cd signoz/deploy/
 
 For detailed instructions, you can visit our documentation.
 
-[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/?utm_source=blog&utm_medium=opentelemetry_tomcat)
+[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/)
 
 We have installed SigNoz on a Ubuntu VM in Azure cloud. You can access SigNoz UI at `http://IP_of_SigNoz:3301`. You can access SigNoz UI at port: 3301 of any host that you choose. In case of local host just use: `http://localhost:3301`
 
