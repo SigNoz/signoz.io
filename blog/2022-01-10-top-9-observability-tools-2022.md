@@ -56,7 +56,7 @@ Now let's explore the top observability tools in 2023.
 
 ### SigNoz
 
-[SigNoz](https://signoz.io/?utm_source=blog&utm_medium=article) is a full-stack open-source APM and observability tool. It captures both metrics and traces with log management currently in the product roadmap. One of the advantages of SigNoz is that it is open-source, so you are not locked in with a SaaS vendor. It can also be hosted within your infra. As such, you don't need to send your data to any third party.
+[SigNoz](https://signoz.io/) is a full-stack open-source APM and observability tool. It captures both metrics and traces with log management currently in the product roadmap. One of the advantages of SigNoz is that it is open-source, so you are not locked in with a SaaS vendor. It can also be hosted within your infra. As such, you don't need to send your data to any third party.
 
 SigNoz enables a full-stack observability stack for your microservice application. Let's see what does a full-stack observability tool entails:
 
@@ -257,7 +257,7 @@ For applications with microservices architecture, observability tools have becom
 - How much data do you want to retain?
 - Does the tool provide seamless integration between metrics, logs, and traces?
 
-An open-source tool like [SigNoz](https://signoz.io/?utm_source=blog&utm_medium=article), can be your best option in today's privacy-driven digital economy. Moreover, SigNoz uses open-source standards for instrumentation, and its code can be assessed for quality from its [GitHub repo](https://github.com/SigNoz/signoz). Finally, as the tool is open-sourced, you get the support of the community while having access to out-of-box features like a SaaS vendor.
+An open-source tool like [SigNoz](https://signoz.io/), can be your best option in today's privacy-driven digital economy. Moreover, SigNoz uses open-source standards for instrumentation, and its code can be assessed for quality from its [GitHub repo](https://github.com/SigNoz/signoz). Finally, as the tool is open-sourced, you get the support of the community while having access to out-of-box features like a SaaS vendor.
 
 ## Getting started with SigNoz
 

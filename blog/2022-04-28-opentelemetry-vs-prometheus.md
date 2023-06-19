@@ -103,7 +103,7 @@ Some of the key disadvantages of using OpenTelemetry are:
 - Project has a lot of scope in improving documentation and support
 - It does not provide backend storage and a visualization layer
 
-But OpenTelemetry project is intentional about not providing a backend analysis tool as it aims to be vendor-neutral. You can use a tool like [SigNoz](https://signoz.io/?utm_source=blog&utm_medium=opentelemetry_vs_prometheus) to send your telemetry data. [SigNoz](https://signoz.io/?utm_source=blog&utm_medium=opentelemetry_vs_prometheus) is a full-stack open-source application monitoring and observability platform which comes with a great out of box visualization layer. It is also an open-source project.
+But OpenTelemetry project is intentional about not providing a backend analysis tool as it aims to be vendor-neutral. You can use a tool like [SigNoz](https://signoz.io/) to send your telemetry data. [SigNoz](https://signoz.io/) is a full-stack open-source application monitoring and observability platform which comes with a great out of box visualization layer. It is also an open-source project.
 
 [![SigNoz repo](/img/blog/common/signoz_github.webp)](https://github.com/signoz/signoz)
 
@@ -133,7 +133,7 @@ Some of the key features of Prometheus are:
 
 ### Disadvantages of Prometheus
 
-Prometheus is a great metrics monitoring tool, but that's it. It is not a full-stack application monitoring tool like [SigNoz](https://signoz.io/?utm_source=blog&utm_medium=opentelemetry_vs_prometheus). Some of the disadvantages of using Prometheus are listed down below:
+Prometheus is a great metrics monitoring tool, but that's it. It is not a full-stack application monitoring tool like [SigNoz](https://signoz.io/). Some of the disadvantages of using Prometheus are listed down below:
 
 - Prometheus only captures metrics. For creating a robust monitoring framework, you will need to track metrics, logs, and traces. For example, a tool like SigNoz captures both metrics and traces(log management in product roadmap).
 - Prometheus is designed for a single machine. It cannot be scaled horizontally.
@@ -158,7 +158,7 @@ With Prometheus, you can monitor metrics. But your engineering teams will never 
 
 OpenTelemetry is becoming the world standard for instrumenting application code due to its multi-language support and ease of use. But OpenTelemetry helps only to generate and collect telemetry data. You need to export the telemetry data to a backend analysis tool so that your teams can store, query, and visualize the collected data.
 
-And that's where [SigNoz](https://signoz.io/?utm_source=blog&utm_medium=opentelemetry_vs_prometheus) comes into the picture. SigNoz is built to support OpenTelemetry natively. Once you instrument your application with OpenTelemetry libraries, you can send the collected data to SigNoz.
+And that's where [SigNoz](https://signoz.io/) comes into the picture. SigNoz is built to support OpenTelemetry natively. Once you instrument your application with OpenTelemetry libraries, you can send the collected data to SigNoz.
 
 SigNoz comes with out of box visualization of things like RED metrics. There is a unified UI of logs, metrics, and traces, unlike Prometheus, so that you can easily identify the root cause of issues causing things like latency in your apps. 
 
@@ -205,7 +205,7 @@ cd signoz/deploy/
 
 For detailed instructions, you can visit our documentation.
 
-[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/?utm_source=blog&utm_medium=opentelemetry_vs_prometheus)
+[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/)
 
 You can check out SigNoz's GitHub repo here 👇
 
