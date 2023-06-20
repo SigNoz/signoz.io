@@ -21,7 +21,7 @@ export const CostComparison = () => {
                 id="learn-more"
                 className={`highlight`}
                 href={
-                  "/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/?utm_source=pricing_page_bottom&utm_medium=website"
+                  "/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/"
                 }
               >
                 Learn more.

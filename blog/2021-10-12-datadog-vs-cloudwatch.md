@@ -212,7 +212,7 @@ For detailed instructions, you can visit our documentation.
 
 [![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/)
 
-If you don't want to self-host, and you can easily get started with [SigNoz cloud](https://signoz.io/teams/?utm_source=website_blog&).
+If you don't want to self-host, and you can easily get started with [SigNoz cloud](https://signoz.io/teams/).
 
 ___
 

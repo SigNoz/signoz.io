@@ -53,7 +53,7 @@ Below is the snapshot of our full stack observability cost comparison. You can h
 
 <br></br>
 
-You can check out paid plans of SigNoz [here](https://signoz.io/pricing/?utm_source=pricing_blog&utm_medium=website).
+You can check out paid plans of SigNoz [here](https://signoz.io/pricing/).
 
 ## Issues with Datadog pricing
 

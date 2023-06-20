@@ -23,7 +23,7 @@ function Pricing() {
             <span className="highlight">Logs</span>, and{" "}
             <span className="highlight">Traces</span> in{" "}
             <span className="highlight">single</span> pane of glass */}
-            Tired of unpredictable pricing and complex billing structure? Save up to <Link href="/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/?utm_source=pricing_page&utm_medium=website"><u>86% on your Datadog bill</u></Link> with SigNoz.
+            Tired of unpredictable pricing and complex billing structure? Save up to <Link href="/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/"><u>86% on your Datadog bill</u></Link> with SigNoz.
           </p>
           <div className={`row ${styles.pricingRow}`}>
             <div className={"col col--6 margin-vert--md"}>

@@ -121,4 +121,4 @@ The verdict is in! And it says you need to start your observability journey or m
 
 So when are you starting your observability journey?
 
-You can check out **[SigNoz](https://signoz.io/?utm_source=learn&utm_medium=observability_statistics)** - our open-source full-stack observability platform to get started. It is an all-in-one platform to address your observability needs.
+You can check out **[SigNoz](https://signoz.io/)** - our open-source full-stack observability platform to get started. It is an all-in-one platform to address your observability needs.
