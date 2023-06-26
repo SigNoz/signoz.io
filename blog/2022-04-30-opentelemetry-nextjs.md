@@ -1,7 +1,7 @@
 ---
 title: Monitoring your Nextjs application using OpenTelemetry 
 slug: opentelemetry-nextjs
-date: 2022-10-25
+date: 2023-06-05
 tags: [OpenTelemetry Instrumentation, JavaScript]
 authors: [sai_deepesh]
 description: OpenTelemetry can help instrument Nextjs applications and provide you with end-to-end tracing. In this guide, we will demonstrate how to instrument your Nextjs app with OpenTelemetry...
@@ -35,7 +35,7 @@ OpenTelemetry is an open-source standard under Cloud Native Computing Foundation
 Instrumentation is the process of enabling your application code to generate telemetry data like logs, metrics, and traces. Using OpenTelemetry Nextjs client libraries, you can generate end-to-end tracing data from your Nextjs application.
 > 
 
-OpenTelemetry provides client libraries to take care of instrumentation. You then need to send the collected data to an analysis backend. In this tutorial, we will be using [SigNoz](https://signoz.io/?utm_source=blog&utm_medium=monitor_express) to store and visualize the telemetry data collected by OpenTelemetry from the sample Nextjs application
+OpenTelemetry provides client libraries to take care of instrumentation. You then need to send the collected data to an analysis backend. In this tutorial, we will be using [SigNoz](https://signoz.io/) to store and visualize the telemetry data collected by OpenTelemetry from the sample Nextjs application
 
 Before we demonstrate how to implement the OpenTelemetry Nextjs libraries, let’s have a brief overview of OpenTelmetry.
 
@@ -89,7 +89,7 @@ cd signoz/deploy/
 
 You can visit our documentation for instructions on how to install SigNoz using Docker Swarm and Helm Charts.
 
-[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/?utm_source=blog&utm_medium=opentelemetry_nextjs)
+[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/)
 
 When you are done installing SigNoz, you can access the UI at [http://localhost:3301](http://localhost:3301/application)
 
@@ -188,9 +188,6 @@ const sdk = new opentelemetry.NodeSDK({
 // initialize the SDK and register with the OpenTelemetry API
 // this enables the API to record telemetry
 sdk.start()
-  .then(() => console.log('Tracing initialized'))
-  .then(() => startServer())
-  .catch((error) => console.log('Error initializing tracing', error));
 
 // gracefully shut down the SDK on process exit
 process.on('SIGTERM', () => {

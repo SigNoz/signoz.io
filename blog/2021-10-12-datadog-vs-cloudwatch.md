@@ -1,7 +1,7 @@
 ---
 title: DataDog vs Cloudwatch - Which tool to choose?
 slug: datadog-vs-cloudwatch
-date: 2023-03-01
+date: 2023-06-02
 tags: [Tools Comparison]
 authors: ankit_anand
 description: DataDog is a paid SaaS tool that provides a range of products for monitoring applications and tech infrastructure. While CloudWatch is an Amazon Web Services product that monitors applications running on AWS infrastructure and using AWS services....
@@ -131,13 +131,13 @@ The challenge with CloudWatch is that you can only monitor AWS services with it.
 
 So you need a tool that is platform-independent. You also need a universal way of generating telemetry data(logs, metrics, and traces). A single set of rules and standards to generate and collect telemetry data is the first step in creating a robust monitoring framework.
 
-And that's where [SigNoz](https://signoz.io/?utm_source=blog&utm_medium=article) comes into the picture - an open-source APM tool.
+And that's where [SigNoz](https://signoz.io/) comes into the picture - an open-source APM tool.
 
 If you are only using AWS services, then you can go with CloudWatch, but if you are using multiple cloud vendors and third-party services, DataDog might be a better option.
 
 ## An alternative to DataDog and CloudWatch - SigNoz
 
-**[SigNoz](https://signoz.io/?utm_source=blog&utm_medium=article)** is a full-stack open-source application performance monitoring and observability tool which can be used in place of DataDog and Grafana. SigNoz is built to give SaaS like user experience combined with the perks of open-source software. Developer tools should be developer first, and SigNoz was built by developers to address the gap between SaaS vendors and open-source software.
+**[SigNoz](https://signoz.io/)** is a full-stack open-source application performance monitoring and observability tool which can be used in place of DataDog and Grafana. SigNoz is built to give SaaS like user experience combined with the perks of open-source software. Developer tools should be developer first, and SigNoz was built by developers to address the gap between SaaS vendors and open-source software.
 
 Key architecture features:
 
@@ -210,11 +210,9 @@ cd signoz/deploy/
 
 For detailed instructions, you can visit our documentation.
 
-[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/?utm_source=blog&utm_medium=dd_vs_cloudwatch)
+[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/)
 
-You can check out SigNoz's GitHub repo here 👇
-
-[![SigNoz GitHub repo](/img/blog/common/signoz_github.webp)](https://github.com/SigNoz/signoz)
+If you don't want to self-host, and you can easily get started with [SigNoz cloud](https://signoz.io/teams/).
 
 ___
 

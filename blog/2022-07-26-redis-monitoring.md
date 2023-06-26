@@ -1,7 +1,7 @@
 ---
 title: Redis Monitoring | 101 Guide to Redis Metrics Monitoring
 slug: redis-monitoring
-date: 2023-01-10
+date: 2023-06-05
 tags: [Database Monitoring]
 authors: [ankit_anand]
 description: Monitoring Redis for performance issues is critical. Metrics that need to be monitored for Redis instances can be divided into these categories - Performance metrics, Memory metrics, and basic activity metrics. Redis monitoring metrics - 1.Latency 2.CPU usage 3.Hit rate 4. Memory fragmentation...

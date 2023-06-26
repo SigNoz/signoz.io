@@ -1,7 +1,7 @@
 ---
 title: A Lightweight Open Source ELK alternative
 slug: elk-alternative-open-source
-date: 2022-10-20
+date: 2023-06-05
 tags: [SigNoz]
 authors: ankit_anand
 description: Are you looking for a lightweight ELK alternative? ELK stack is hard to manage at scale and is not resource efficient. Here's an alternative that is easy to deploy and manage...
@@ -136,7 +136,7 @@ cd signoz/deploy/
 
 For detailed instructions, you can visit our documentation.
 
-[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/?utm_source=blog&utm_medium=open_source_observability)
+[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/)
 
 If you liked what you read, then check out our GitHub repo 👇
 

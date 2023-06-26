@@ -327,7 +327,7 @@ function userstories() {
                   <div class="card__footer">
                     <Link
                       className="button button--secondary button--outline"
-                      href={"https://eng.uber.com/observability-at-scale/"}
+                      href={"https://www.uber.com/en-IN/blog/observability-at-scale/"}
                     >
                       Visit
                     </Link>
@@ -362,7 +362,7 @@ function userstories() {
                   <div class="card__footer">
                     <Link
                       className="button button--secondary button--outline"
-                      href={"https://eng.uber.com/optimizing-observability/"}
+                      href={"https://www.uber.com/en-IN/blog/optimizing-observability/"}
                     >
                       Visit
                     </Link>
@@ -397,7 +397,7 @@ function userstories() {
                     <Link
                       className="button button--secondary button--outline"
                       href={
-                        "https://eng.uber.com/observability-anomaly-detection/"
+                        "https://www.uber.com/en-IN/blog/observability-anomaly-detection/"
                       }
                     >
                       Visit
@@ -432,7 +432,7 @@ function userstories() {
                     <Link
                       className="button button--secondary button--outline"
                       href={
-                        "https://eng.uber.com/introducing-ugroup-ubers-consumer-management-framework/"
+                        "https://www.uber.com/en-IN/blog/introducing-ugroup-ubers-consumer-management-framework/"
                       }
                     >
                       Visit
@@ -467,7 +467,7 @@ function userstories() {
                     <Link
                       className="button button--secondary button--outline"
                       href={
-                        "https://eng.uber.com/eats-safety-team-on-call-overview/"
+                        "https://www.uber.com/en-IN/blog/eats-safety-team-on-call-overview/"
                       }
                     >
                       Visit

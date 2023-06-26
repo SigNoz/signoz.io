@@ -175,7 +175,7 @@ Jaeger's UI is basic but comprehensive when it comes to distributed tracing.
 
 Both Jaeger and Grafana Tempo are strong contenders when it comes to a distributed tracing tool. But are traces enough to solve all performance issues of a modern distributed application? The answer is no. You also need metrics and a way to correlate metrics with traces within a single dashboard. You also need out-of-the-box data visualization that will enable engineering teams to resolve issues faster.
 
-That's where [SigNoz](https://signoz.io/?utm_source=blog&utm_medium=article) comes into the picture.
+That's where [SigNoz](https://signoz.io/) comes into the picture.
 
 ## Alternative to Jaeger and Grafana Tempo - SigNoz
 SigNoz is a full-stack open-source application performance monitoring and observability tool which can be used in place of Grafana Tempo and Jaeger. It provides advanced distributed tracing capabilities along with metrics under a single dashboard.
@@ -233,7 +233,7 @@ cd signoz/deploy/
 
 For detailed instructions, you can visit our documentation.
 
-[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/?utm_source=blog&utm_medium=jaeger_vs_tempo)
+[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/)
 
 You can check out SigNoz's GitHub repo here 👇
 

@@ -52,7 +52,7 @@ A trace context is passed along when requests travel between services, which tra
 
 Using OpenTelemetry you can encapsulate several pieces of information with a span. Common information includes **the name of the operation, start and end timestamp, events occurring during the span**. You can also add custom attributes with key/value pairs to enable more insights if needed.
 
-In the picture below, you can see the details for the selected span. [SigNoz](https://signoz.io/?utm_source=blog&utm_medium=article) is a lightweight open-source APM tool based on OpenTelemetry, which can be used as an analysis tool.
+In the picture below, you can see the details for the selected span. [SigNoz](https://signoz.io/) is a lightweight open-source APM tool based on OpenTelemetry, which can be used as an analysis tool.
 
 <figure data-zoomable align='center'>
     <img src="/img/blog/2021/09/details_span-min.webp" alt="Attributes can be added to spans for more context"/>
@@ -154,7 +154,7 @@ You can also instrument your code manually to have more business specific contex
 ## How to get started with OpenTelemetry tracing?
 OpenTelemetry is becoming the world standard for instrumenting application code due to its multi-language support and ease of use. But OpenTelemetry helps only to generate and collect telemetry data. You need to export the telemetry data to a backend analysis tool so that your teams can store, query, and visualize the collected data.
 
-And that's where [SigNoz](https://signoz.io/?utm_source=blog&utm_medium=article) comes into the picture. SigNoz is an open source APM and observability tool that supports logs, metrics, and traces under a single pane of glass.  
+And that's where [SigNoz](https://signoz.io/) comes into the picture. SigNoz is an open source APM and observability tool that supports logs, metrics, and traces under a single pane of glass.  
 
 <figure data-zoomable>
     <img src="/img/blog/common/signoz_charts_application_metrics.webp" alt="SigNoz dashboard showing popular RED metrics"/>
@@ -195,7 +195,7 @@ cd signoz/deploy/
 
 You can visit our documentation for instructions on how to install SigNoz using Docker Swarm and Helm Charts.
 
-[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/?utm_source=blog&utm_medium=opentelemetry_tracing)
+[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/)
 
 
 You can check out SigNoz's GitHub repo here 👇

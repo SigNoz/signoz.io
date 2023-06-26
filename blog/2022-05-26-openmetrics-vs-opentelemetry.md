@@ -46,7 +46,7 @@ While all the underlying specifications are the same as Prometheus, including th
 OpenMetrics is still in its early stages. Let's look at the current state of the standard:
 
 - Prometheus python client is the reference implementation and uses the OpenMetrics data model internally.
-- OpenTelemetry supports OpenMetrics as a first-class wire format (although in <a href = "https://opentelemetry.io/docs/reference/specification/compatibility/openmetrics/" rel="noopener noreferrer nofollow" target="_blank">experimental stages</a>)
+- OpenTelemetry supports OpenMetrics as a first-class wire format (although in <a href = "https://opentelemetry.io/docs/specs/otel/compatibility/openmetrics/" rel="noopener noreferrer nofollow" target="_blank">experimental stages</a>)
 - OpenMetrics is a part of the Prometheus Conformance Program, which means that any client which needs the “Prometheus Compatible” mark, needs to be compatible with OpenMetrics as well. You can read more about Prometheus-OpenMetrics compliance on their GitHub page, <a href = "https://github.com/prometheus/compliance/tree/main/openmetrics" rel="noopener noreferrer nofollow" target="_blank">Prometheus - OpenMetrics Compliance tester</a>.
 
 
@@ -106,7 +106,7 @@ If you are choosing between OpenMetrics and OpenTelemetry, go for Opentelemetry.
 
 OpenTelemetry is becoming the world standard for instrumenting application code due to its multi-language support and ease of use. But OpenTelemetry helps only to generate and collect telemetry data. You need to export the telemetry data to a backend analysis tool so that your teams can store, query, and visualize the collected data.
 
-And that's where [SigNoz](https://signoz.io/?utm_source=blog&utm_medium=openmetrics_vs_opentelemetry) comes into the picture. SigNoz uses OpenTelemetry natively to instrument application codes. OpenTelemetry collector then sends the data to the SigNoz backend, where users can query and visualize their data with ease.
+And that's where [SigNoz](https://signoz.io/) comes into the picture. SigNoz uses OpenTelemetry natively to instrument application codes. OpenTelemetry collector then sends the data to the SigNoz backend, where users can query and visualize their data with ease.
 
 SigNoz comes with out of box visualization of things like RED metrics. There is a unified UI of metrics and traces so that you can easily identify the root cause of issues causing things like latency in your apps.
 
@@ -130,7 +130,7 @@ cd signoz/deploy/
 
 You can visit our documentation for instructions on how to install SigNoz using Docker Swarm and Helm Charts.
 
-[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/?utm_source=blog&utm_medium=openmetrics-vs-opentelemetry)
+[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/)
 
 
 ## Further Reading

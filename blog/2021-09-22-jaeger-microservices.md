@@ -25,7 +25,7 @@ Jaeger is a popular open-source tool used for distributed tracing in a microserv
 
 ![Cover Image](/img/blog/2023/01/jaeger_microservices_cover.webp)
 
-> Jaeger is a fantastic open-source tool for distributed tracing. But for effective resolution of production issues, engineering teams need both metrics and traces. [SigNoz](https://signoz.io/?utm_source=blog&utm_medium=jaeger_microservices), a full-stack open-source tool, provides a unified UI for both metrics and traces.
+> Jaeger is a fantastic open-source tool for distributed tracing. But for effective resolution of production issues, engineering teams need both metrics and traces. [SigNoz](https://signoz.io/), a full-stack open-source tool, provides a unified UI for both metrics and traces.
 
 Before we deep dive into how Jaeger accomplishes distributed tracing for microservices-based architecture, let's take a short detour to understand distributed tracing.
 
@@ -147,7 +147,7 @@ A few key challenges of using Jaeger as a distributed tracing tool are as follow
 - Databases supported by Jaeger need active maintenance.
 - Jaeger's web UI is limited with basic visualizations.
 
-For a fast-moving engineering team, you need dashboards that can drive quick insights and resolution. And that's where [SigNoz](https://signoz.io/?utm_source=blog&utm_medium=article) comes into the picture. It is a great alternative to Jaeger for distributed tracing in microservices.
+For a fast-moving engineering team, you need dashboards that can drive quick insights and resolution. And that's where [SigNoz](https://signoz.io/) comes into the picture. It is a great alternative to Jaeger for distributed tracing in microservices.
 
 ## SigNoz - a Jaeger alternative for microservices
 SigNoz is a full-stack open-source application performance monitoring and observability tool which can be used in place of Jaeger. SigNoz is built to support <a href = "https://opentelemetry.io/" rel="noopener noreferrer nofollow" target="_blank" ><b>OpenTelemetry</b></a> natively. OpenTelemetry is becoming the world standard to generate and maintain telemetry data(Logs, metrics, and traces).
@@ -210,7 +210,7 @@ cd signoz/deploy/
 
 For detailed instructions, you can visit our documentation.
 
-[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/?utm_source=blog&utm_medium=jaeger_microservices)
+[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/)
 
 You can check out SigNoz's GitHub repo here 👇
 

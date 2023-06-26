@@ -25,7 +25,7 @@ Jaeger and OpenTracing are both open-source projects. Jaeger was originally buil
 ![Cover Image](/img/blog/2021/09/jaeger_vs_opentracing_cover-min-2.webp)
 
 >OpenTracing has officially merged with another open-source project called OpenCensus to form OpenTelemetry, which is emerging as the world standard for creating and managing telemetry data.<br></br>
->If you're looking for an open-source distributed tracing tool, your best option is [SigNoz](https://signoz.io/?utm_source=blog&utm_medium=article) - a full-stack APM and observability tool.
+>If you're looking for an open-source distributed tracing tool, your best option is [SigNoz](https://signoz.io/) - a full-stack APM and observability tool.
 
 Both projects aimed to solve the pain point of distributed tracing in microservice-based architecture. In a distributed microservice architecture, a single request or transaction can traverse through hundreds of different services. It becomes difficult for engineering teams to identify the exact causes of issues like latency in such a scenario. With distributed tracing, engineering teams can have a central overview of how requests perform across services.
 
@@ -140,7 +140,7 @@ cd signoz/deploy/
 
 You can visit our documentation for instructions on how to install SigNoz using Docker Swarm and Helm Charts.
 
-[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/?utm_source=blog&utm_medium=jaeger_vs_opentracing)
+[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/)
 
 You can check out SigNoz's GitHub repo here 👇
 

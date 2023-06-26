@@ -58,7 +58,7 @@ OpenTelemetry is the bedrock for setting up an observability framework. It is ba
 
 ## OpenTelemetry and SigNoz
 
-In this article, we will use [SigNoz](https://signoz.io/?utm_source=blog&utm_medium=monitoring-kubernetes), a full-stack **open-source application monitoring and observability platform** that can be used for storing and visualizing the telemetry data collected with OpenTelemetry. It is built natively on OpenTelemetry and works on the various data formats: OTLP, Zipkin, Jaeger, Prometheus backends, etc.
+In this article, we will use [SigNoz](https://signoz.io/), a full-stack **open-source application monitoring and observability platform** that can be used for storing and visualizing the telemetry data collected with OpenTelemetry. It is built natively on OpenTelemetry and works on the various data formats: OTLP, Zipkin, Jaeger, Prometheus backends, etc.
 
 SigNoz provides query and visualization capabilities for the end-user and comes with out-of-box charts for application metrics and traces.
 
@@ -113,7 +113,7 @@ NOTES:
 
 For detailed instructions to set up SigNoz cluster in Kubernetes, please refer to our documentation.
 
-[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/kubernetes/?utm_source=blog&utm_medium=kubernetes_monitoring)
+[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/kubernetes/)
 
 To port forward SigNoz UI on your local machine, run the following:
 
@@ -238,7 +238,7 @@ In case of any errors in the above logs, you should not see except for the case 
 
 **Step 4. Plot Metrics in SigNoz UI**
 
-If the previous step was a success, you should be able to plot graphs from the [list of kubelet metrics](https://signoz.io/docs/tutorial/kubernetes-infra-metrics/#list-of-metrics-from-kubernetes-receiver/?utm_source=blog&utm_medium=monitoring-kubernetes), follow [these instructions](https://signoz.io/docs/userguide/dashboards/?utm_source=blog&utm_medium=monitoring-kubernetes) to create dashboards and widgets.
+If the previous step was a success, you should be able to plot graphs from the [list of kubelet metrics](https://signoz.io/docs/tutorial/kubernetes-infra-metrics/#list-of-metrics-from-kubernetes-receiver), follow [these instructions](https://signoz.io/docs/userguide/dashboards/) to create dashboards and widgets.
 
 ### Monitor Kubelet Metrics with SigNoz
 
@@ -305,6 +305,6 @@ If you have any questions or need any help in setting things up, join our slack 
 
 ## Further Reading
 
-- [SigNoz - an open-source alternative to DataDog](https://signoz.io/blog/open-source-datadog-alternative/?utm_source=blog&utm_medium=monitoring-kubernetes)
+- [SigNoz - an open-source alternative to DataDog](https://signoz.io/blog/open-source-datadog-alternative/)
 
 - [Distributed Tracing in a Golang application](https://signoz.io/blog/distributed-tracing-golang/)

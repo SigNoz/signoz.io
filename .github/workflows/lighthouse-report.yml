@@ -4,7 +4,10 @@ on:
   pull_request_target:
     branches:
       - main
-
+      
+permissions:
+  pull-requests: write
+  
 jobs:
   lighthouse-report:
     name: Lighthouse Report
@@ -12,14 +15,14 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Wait for the Netlify Preview
-        uses: jakepartusch/wait-for-netlify-action@v1
+        uses: jakepartusch/wait-for-netlify-action@v1.4
         id: netlify
         with:
           site_name: frosty-austin-928e43
           max_timeout: 600
       - name: Audit URLs using Lighthouse
         id: lighthouse_audit
-        uses: treosh/lighthouse-ci-action@v3
+        uses: treosh/lighthouse-ci-action@v10.1.0
         with:
           urls: |
             https://deploy-preview-$PR_NUMBER--frosty-austin-928e43.netlify.app
@@ -54,7 +57,7 @@ jobs:
 
       - name: Add Lighthouse stats as comment
         id: comment_to_pr
-        uses: marocchino/sticky-pull-request-comment@v2.0.0
+        uses: marocchino/sticky-pull-request-comment@v2.6.2
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           number: ${{ github.event.pull_request.number }}

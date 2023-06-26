@@ -245,14 +245,14 @@ Here's a video on how to instrument Tomcat applications with SigNoz and a [blog]
       -e BP_JVM_VERSION=17 -e BP_OPENTELEMETRY_ENABLED=true
     ```
     
-5. Pass environment variables to enable java agent `OTEL_JAVAAGENT_ENABLED=true` set exporter endpoint `OTEL_EXPORTER_OTLP_ENDPOINT=http://stagingapp.signoz.io:4317` and set service name `OTEL_RESOURCE_ATTRIBUTES=service.name=javaApp`
+5. Pass environment variables to enable java agent `OTEL_JAVAAGENT_ENABLED=true` set exporter endpoint `OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317` and set service name `OTEL_RESOURCE_ATTRIBUTES=service.name=javaApp`
 
 6. Other otel configurations can be updated by passing more environment variables. Refer to <a href = "https://opentelemetry.io/docs/instrumentation/java/automatic/agent-config/" rel="noopener noreferrer nofollow" target="_blank" >official docs</a> for more such configurations.
 
 7. Run docker command:
     
     ```bash
-    docker run -d -p 8080:8080 -e PORT=8080 -e OTEL_EXPORTER_OTLP_ENDPOINT=http://stagingapp.signoz.io:4317 -e OTEL_RESOURCE_ATTRIBUTES=service.name=javaApp -e OTEL_JAVAAGENT_ENABLED=true paketo-demo-app
+    docker run -d -p 8080:8080 -e PORT=8080 -e OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317 -e OTEL_RESOURCE_ATTRIBUTES=service.name=javaApp -e OTEL_JAVAAGENT_ENABLED=true paketo-demo-app
     ```
 
 ## Troubleshooting your installation

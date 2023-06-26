@@ -1,7 +1,7 @@
 ---
 title: OpenTelemetry Spring Boot Tutorial - complete implementation guide
 slug: opentelemetry-spring-boot
-date: 2023-04-06
+date: 2023-06-05
 tags: [OpenTelemetry Instrumentation, Java]
 authors: ankit_anand
 description: End-to-end performance monitoring of Spring Boot application with OpenTelemetry. Set up distributed tracing, collect JVM metrics and logs from Spring Boot applications and visualize the collected data with open source APM - SigNoz.
@@ -17,8 +17,6 @@ keywords:
   - application monitoring
 ---
 import { LiteYoutubeEmbed } from "react-lite-yt-embed";
-
-import SignUps from '../docs/shared/sign-ups.md'
 
 <head>
   <link rel="canonical" href="https://signoz.io/blog/opentelemetry-spring-boot/"/>
@@ -38,10 +36,11 @@ In this article, let's explore how you can auto-instrument your Java Spring Boot
 
 But before that, let's have a brief overview of OpenTelemetry.
 
-<SignUps />
-
 ## What is OpenTelemetry?
+
 <a href = "https://opentelemetry.io/" rel="noopener noreferrer nofollow" target="_blank" >OpenTelemetry</a> is a set of API, SDKs, libraries, and integrations aiming to standardize the generation, collection, and management of telemetry data(logs, metrics, and traces). OpenTelemetry is a Cloud Native Computing Foundation project created after the merger of OpenCensus(from Google) and OpenTracing(From Uber).
+
+<br></br>
 
 The data you collect with OpenTelemetry is vendor-agnostic and can be exported in many formats. Telemetry data has become critical to observe the state of distributed systems. With microservices and polyglot architectures, there was a need to have a global standard. OpenTelemetry aims to fill that space and is doing a great job at it thus far.
 
@@ -100,9 +99,9 @@ cd signoz/deploy/
 ./install.sh
 ```
 
-You can visit our documentation for instructions on how to install SigNoz using Docker Swarm and Helm Charts.
+You can visit our [documentation](https://signoz.io/docs/install/) for instructions on how to install SigNoz using various methods.
 
-[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/?utm_source=blog&utm_medium=opentelemetry_springboot)
+You can also sign up for [SigNoz cloud](https://signoz.io/teams/). The cloud version gives you access to some paid-only features as well as customer support. You can try SigNoz cloud for free for 30 days.
 
 When you are done installing SigNoz, you can access the UI at [http://localhost:3301](http://localhost:3301/application)
 
@@ -124,7 +123,7 @@ cd signoz/deploy/
 
 For detailed instructions, you can visit our documentation.
 
-[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/?utm_source=blog&utm_medium=springboot)
+[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/)
 
 When you are done installing SigNoz, you can access the UI at: [http://localhost:3301](http://localhost:3301/application)
 

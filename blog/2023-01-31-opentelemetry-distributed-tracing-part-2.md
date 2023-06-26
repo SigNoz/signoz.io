@@ -102,7 +102,7 @@ Once your application is instrumented with OTel libraries, you can configure the
 
 <figure data-zoomable align='center'>
     <img src="/img/blog/2023/01/api_sdk_thrid_party_library.webp" alt="API, SDK and Third-party Library design"/>
-    <figcaption>API, SDK and Third-party Library design (<a href="https://opentelemetry.io/docs/reference/specification/library-guidelines/" rel="noopener noreferrer nofollow" target="_blank">Pic Ref</a>)</figcaption>
+    <figcaption>API, SDK and Third-party Library design (<a href="https://opentelemetry.io/docs/specs/otel/library-guidelines/" rel="noopener noreferrer nofollow" target="_blank">Pic Ref</a>)</figcaption>
 </figure>
 
 <br></br>
@@ -160,7 +160,7 @@ cd signoz/deploy/
 
 You can visit our documentation for instructions on how to install SigNoz using Docker Swarm and Helm Charts.
 
-[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/?utm_source=blog&utm_medium=opentelemetry_distributed_tracing)
+[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/)
 
 When you are done installing SigNoz, you can access the UI at [http://localhost:3301](http://localhost:3301/application)
 

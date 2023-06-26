@@ -62,7 +62,7 @@ cd signoz/deploy/
 
 For detailed instructions, you can visit our documentation.
 
-[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/?utm_source=blog&utm_medium=opentelemetry_nodejs)
+[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/)
 
 When you are done installing SigNoz, you can access the UI at: [http://localhost:3301](http://localhost:3301)
 
@@ -187,8 +187,6 @@ Steps to get the app set up and running:
    // this enables the API to record telemetry
    
    sdk.start()
-   .then(() => console.log('Tracing initialized'))
-   .catch((error) => console.log('Error initializing tracing', error));
    
    // gracefully shut down the SDK on process exit
    process.on('SIGTERM', () => {

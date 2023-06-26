@@ -82,7 +82,7 @@ cd signoz/deploy/
 
 You can visit our documentation for instructions on how to install SigNoz using Docker Swarm and Helm Charts.
 
-[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/?utm_source=blog&utm_medium=opentelemetry_react)
+[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/)
 
 When you are done installing SigNoz, you can access the UI at [http://localhost:3301](http://localhost:3301/application)
 
@@ -160,7 +160,7 @@ _*Note: The stopped SigNoz cluster should resume and mount to the existing docke
 To instrument the React app with OpenTelemetry, we need to install the OpenTelemetry dependencies.
 
 ```bash
-yarn add -D @opentelemetry/api@1.0.3 @opentelemetry/context-zone@1.0.0 @opentelemetry/exporter-collector@0.25.0@opentelemetry/instrumentation-fetch@0.25.0
+yarn add -D @opentelemetry/api @opentelemetry/context-zone @opentelemetry/exporter-trace-otlp-http @opentelemetry/instrumentation-fetch
 ```
 
 **Step 5: Update Service Name and CollectorTrace Exporter**

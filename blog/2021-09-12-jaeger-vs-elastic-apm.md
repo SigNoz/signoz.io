@@ -111,7 +111,7 @@ Open-source standards like [OpenTelemetry](https://opentelemetry.io/) aims to st
 
 So is there a tool that can provide you extensive APM capabilities along with the freedom that comes with open-source standards?
 
-That's where [SigNoz](https://signoz.io/?utm_source=blog&utm_medium=jaeger_vs_elasticapm) comes into the picture.
+That's where [SigNoz](https://signoz.io/) comes into the picture.
 
 ## Alternative to Elastic APM and Jaeger - SigNoz
 SigNoz is a full-stack open-source application performance monitoring and observability tool which can be used in place of Elastic APM and Jaeger. It provides advanced distributed tracing capabilities along with metrics under a single dashboard.

@@ -194,7 +194,7 @@ cd signoz/deploy/
 
 You can visit our documentation for instructions on how to install SigNoz using Docker Swarm and Helm Charts.
 
-[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/?utm_source=blog&utm_medium=opentelemetry_logs)
+[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/)
 
 You can also check out the documentation for logs [here](https://signoz.io/docs/userguide/logs/).
 
@@ -276,7 +276,7 @@ In this example, we will configure `rsyslog` to forward our system logs to tcp e
 The goal of OpenTelemetry is to make log data have a richer context, making it more valuable to application owners. With OpenTelemetry you can correlate logs with traces and correlate logs emitted by different components of a distributed system.
 
 > Standardizing log correlation with traces and metrics, adding support for distributed context propagation for logs, unification of source attribution of logs, traces and metrics will increase the individual and combined value of observability information for legacy and modern systems.<br></br>
-Source: <a href = "https://opentelemetry.io/docs/reference/specification/logs/#opentelemetry-solution" rel="noopener noreferrer nofollow" target="_blank" >OpenTelemetry website</a>
+Source: <a href = "https://opentelemetry.io/docs/specs/otel/logs/" rel="noopener noreferrer nofollow" target="_blank" >OpenTelemetry website</a>
 > 
 
 To get started with OpenTelemetry logs, install SigNoz and start experimenting by sending some log data to SigNoz. SigNoz also provides traces and metrics. So you can have all three telemetry signals under [a single pane of glass](https://signoz.io/blog/single-pane-of-glass-monitoring/).

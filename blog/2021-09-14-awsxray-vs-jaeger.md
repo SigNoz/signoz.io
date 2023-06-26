@@ -138,7 +138,7 @@ AWS X-Ray is perfect for users who are building only on the AWS cloud ecosystem.
 
 This makes Jaeger a better alternative for end-to-end distributed tracing. But Jaeger is limited to distributed tracing, and engineering teams need more than just traces for a robust performance monitoring system.
 
-That's where [SigNoz](https://signoz.io/?utm_source=blog&utm_medium=aws_x_ray_vs_jaeger) comes into the picture. It provides a full-stack open-source performance monitoring platform.
+That's where [SigNoz](https://signoz.io/) comes into the picture. It provides a full-stack open-source performance monitoring platform.
 
 ## Alternative to AWS X-Ray and Jaeger - SigNoz
 SigNoz is a full-stack open-source application performance monitoring and observability tool which can be used in place of AWS X-Ray and Jaeger. It provides advanced distributed tracing capabilities along with metrics under a single dashboard.

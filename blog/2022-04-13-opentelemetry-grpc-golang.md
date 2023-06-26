@@ -1,7 +1,7 @@
 ---
 title: Monitor gRPC calls with OpenTelemetry - explained with a Golang example
 slug: opentelemetry-grpc-golang
-date: 2023-02-04
+date: 2023-06-04
 tags: [OpenTelemetry Instrumentation, Go / Golang]
 authors: vaishnavi
 description: This article demonstrates how to monitor gRPC calls with OpenTelemetry using a sample Golang application using gRPC framework. OpenTelemetry is a vendor-agnostic instrumentation library that can be used to monitor gRPC calls...
@@ -73,7 +73,7 @@ cd signoz/deploy/
 
 You can visit our documentation for instructions on how to install SigNoz using Docker Swarm and Helm Charts.
 
-[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/?utm_source=blog&utm_medium=opentelemetry_grpc_golang)
+[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/)
 
 When you are done installing SigNoz, you can access the UI at [http://localhost:3301](http://localhost:3301/application)
 

@@ -144,7 +144,7 @@ The decision between DataDog and Jaeger comes down to whether your organization 
 
 The lack of great user experience in open-source tools has always been there. Also, what if there was an open-source tool that could provide the scope of experience of a great SaaS tool like DataDog.
 
-That's where [SigNoz](https://signoz.io/?utm_source=blog&utm_medium=dd_vs_jaeger) comes into the picture.
+That's where [SigNoz](https://signoz.io/) comes into the picture.
 
 ## Alternative to DataDog and Jaeger - SigNoz
 SigNoz is a full-stack open-source application performance monitoring and observability tool which can be used in place of DataDog and Jaeger. It provides advanced distributed tracing capabilities along with metrics under a single dashboard.

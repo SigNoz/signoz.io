@@ -31,7 +31,7 @@ But before that, let us have a brief overview of OpenTelemetry.
 
 <a href = "https://opentelemetry.io/" rel="noopener noreferrer nofollow" target="_blank" >OpenTelemetry</a> is an open-source observability framework that aims to standardize the generation, collection, and management of telemetry data(Logs, metrics, and traces). It is incubated under Cloud Native Computing Foundation(<a href = "https://www.cncf.io/" rel="noopener noreferrer nofollow" target="_blank" >Cloud Native Computing Foundation</a>), the same foundation which incubated Kubernetes.
 
-OpenTelemetry follows a <a href = "https://opentelemetry.io/docs/reference/specification/" rel="noopener noreferrer nofollow" target="_blank" >specification-driven</a> development and provides client libraries to instrument applications in most programming languages. Once you have instrumented with OpenTelemetry, you should be able to collect various telemetry signals like logs, metrics, and traces from it.
+OpenTelemetry follows a <a href = "https://opentelemetry.io/docs/specs/otel/" rel="noopener noreferrer nofollow" target="_blank" >specification-driven</a> development and provides client libraries to instrument applications in most programming languages. Once you have instrumented with OpenTelemetry, you should be able to collect various telemetry signals like logs, metrics, and traces from it.
 
 ## What are OpenTelemetry Signals?
 
@@ -195,7 +195,7 @@ cd signoz/deploy/
 
 You can visit its documentation for instructions on how to install SigNoz using Docker Swarm and Helm Charts.
 
-[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/?utm_source=blog&utm_medium=opentelemetry_architecture)
+[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/)
 
 If you liked what you read, then check out our GitHub repo 👇
 

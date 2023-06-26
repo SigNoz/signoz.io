@@ -112,7 +112,7 @@ SigNoz is built to support OpenTelemetry natively.
 
 We emit logs, traces, and metrics in a way that is compliant with OpenTelemetry data models, and send the data through SigNoz collector, where it can be enriched and processed uniformly.
 
-OpenTelemetry defines a <a href = "https://opentelemetry.io/docs/reference/specification/logs/data-model/" rel="noopener noreferrer nofollow" target="_blank" >log data model</a>. The purpose of the data model is to have a common understanding of what a LogRecord is, what data needs to be recorded, transferred, stored, and interpreted by a logging system. Newly designed logging systems are expected to emit logs according to OpenTelemetry’s log data model.
+OpenTelemetry defines a <a href = "https://opentelemetry.io/docs/specs/otel/logs/data-model/" rel="noopener noreferrer nofollow" target="_blank" >log data model</a>. The purpose of the data model is to have a common understanding of what a LogRecord is, what data needs to be recorded, transferred, stored, and interpreted by a logging system. Newly designed logging systems are expected to emit logs according to OpenTelemetry’s log data model.
 
 Now let’s look at a practical example of correlating logs with traces.
 
@@ -198,7 +198,7 @@ log.Ctx(r.Context()).Info("Order controller called", metadata...)
 ```
 
 
-**Step 4:** With the integration of wrapper with the zap library, this is how our logs look like(with traceid, spanid and traceflags). This follows the <a href = "https://opentelemetry.io/docs/reference/specification/logs/data-model/" rel="noopener noreferrer nofollow" target="_blank" >log data model</a> from OpenTelemetry. For comparison, let’s look at logs with and without the integration of the wrapper.
+**Step 4:** With the integration of wrapper with the zap library, this is how our logs look like(with traceid, spanid and traceflags). This follows the <a href = "https://opentelemetry.io/docs/specs/otel/logs/data-model/" rel="noopener noreferrer nofollow" target="_blank" >log data model</a> from OpenTelemetry. For comparison, let’s look at logs with and without the integration of the wrapper.
 
 **Before Integration:**
 

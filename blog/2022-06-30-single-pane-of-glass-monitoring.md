@@ -163,7 +163,7 @@ When you are done installing SigNoz, you can access the UI at [http://localhost
 
 You can visit our documentation for instructions on how to install SigNoz using Docker Swarm and Helm Charts.
 
-[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/?utm_source=blog&utm_medium=single_pane_of_glass_monitoring)
+[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/)
 
 You can check out the SigNoz GitHub repo here:
 

@@ -10,12 +10,6 @@ import TabItem from "@theme/TabItem";
 import { LiteYoutubeEmbed } from "react-lite-yt-embed";
 
 
-<p align="center">
-
-[![Book meeting](/img/docs/ZoomCTA1.png)](https://calendly.com/pranay-signoz/instrumentation-office-hrs)
-
-</p>
-
 This troubleshooting guide includes step-by-step instructions that should resolve most installation issues.
 
 ## Using SigNoz Troubleshooting Repository

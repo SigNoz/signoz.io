@@ -40,7 +40,7 @@ DataDog and New Relic provide numerous products to monitor applications. Some of
 
 Let's compare DataDog and New Relic based on the features they provide in the above-mentioned categories.
 
->You can also check out [SigNoz](https://signoz.io/?utm_source=blog&utm_medium=datadog_vs_newrelic), a full-stack open-source APM tool. SigNoz provides logs, metrics, and traces all under a single dashboard. It is built to support OpenTelemetry natively. Choosing an open-source APM over SaaS vendors has many benefits for developers. At the same time, [SigNoz](https://signoz.io/?utm_source=blog&utm_medium=datadog_vs_newrelic) is built to avoid the pain of maintenance that comes with most open-source tools.
+>You can also check out [SigNoz](https://signoz.io/), a full-stack open-source APM tool. SigNoz provides logs, metrics, and traces all under a single dashboard. It is built to support OpenTelemetry natively. Choosing an open-source APM over SaaS vendors has many benefits for developers. At the same time, [SigNoz](https://signoz.io/) is built to avoid the pain of maintenance that comes with most open-source tools.
 
 ## Application Performance Monitoring
 
@@ -241,10 +241,10 @@ Hence,  not suitable for companies that have concerns with sending data outside 
 - Closed product roadmap
 For any small feature, you are dependent on their roadmap. We think this is an unnecessary restriction for a product which developers use. A product used by developers should be extendible
 
-The other alternative can be going for an open-source alternative. But the problem with most open-source products is that they are resource-intensive to set up, maintain and scale up. That's where [SigNoz](https://signoz.io/?utm_source=blog&utm_medium=datadog_vs_newrelic) comes into the picture.  [SigNoz](https://signoz.io/?utm_source=blog&utm_medium=datadog_vs_newrelic) is a full-stack open-source APM platform with easy configuration and scalable architecture.
+The other alternative can be going for an open-source alternative. But the problem with most open-source products is that they are resource-intensive to set up, maintain and scale up. That's where [SigNoz](https://signoz.io/) comes into the picture.  [SigNoz](https://signoz.io/) is a full-stack open-source APM platform with easy configuration and scalable architecture.
 
 ## An alternative to DataDog and New Relic - SigNoz
-[SigNoz](https://signoz.io/?utm_source=blog&utm_medium=datadog_vs_newrelic) is a full-stack open-source application performance monitoring and observability tool which can be used in place of DataDog and New Relic. SigNoz is built to give SaaS like user experience combined with the perks of open-source software. Developer tools should be developer first, and SigNoz was built by developers to address the gap between SaaS vendors and open-source software.
+[SigNoz](https://signoz.io/) is a full-stack open-source application performance monitoring and observability tool which can be used in place of DataDog and New Relic. SigNoz is built to give SaaS like user experience combined with the perks of open-source software. Developer tools should be developer first, and SigNoz was built by developers to address the gap between SaaS vendors and open-source software.
 
 Key architecture features:
 
@@ -339,7 +339,7 @@ cd signoz/deploy/
 
 For detailed instructions, you can visit our documentation.
 
-[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/?utm_source=blog&utm_medium=dd_vs_newrelic)
+[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/)
 
 
 You can check out SigNoz's GitHub repo here 👇

@@ -107,7 +107,7 @@ Summarizing the key differences between Jaeger and Prometheus:
 
 - Jaeger has a scalable architecture by design. On the other hand, Prometheus is designed for a single machine. It **cannot be scaled horizontally.**
 
-The issue with both tools is that they are limited to particular use-cases of distributed tracing and metrics monitoring. But for a robust monitoring framework, you need both metrics and traces. Engineering teams need to resolve issues fast, and they need access to a unified view of metrics and traces. That's where [SigNoz](https://signoz.io/?utm_source=blog&utm_medium=jaeger_vs_prometheus) comes into the picture.
+The issue with both tools is that they are limited to particular use-cases of distributed tracing and metrics monitoring. But for a robust monitoring framework, you need both metrics and traces. Engineering teams need to resolve issues fast, and they need access to a unified view of metrics and traces. That's where [SigNoz](https://signoz.io/) comes into the picture.
 
 ## Alternative to Jaeger and Prometheus - SigNoz
 SigNoz is a full-stack open-source application performance monitoring and observability tool which can be used in place of Jaeger and Prometheus. It provides advanced distributed tracing capabilities along with metrics under a single dashboard.
@@ -165,7 +165,7 @@ cd signoz/deploy/
 
 For detailed instructions, you can visit our documentation.
 
-[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/?utm_source=blog&utm_medium=jaeger_vs_prometheus)
+[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/)
 
 You can check out SigNoz's GitHub repo here 👇
 

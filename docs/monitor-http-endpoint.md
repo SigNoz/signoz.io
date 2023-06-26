@@ -3,16 +3,6 @@ title: Monitor HTTP Endpoints
 id: monitor-http-endpoints
 ---
 
-:::note
-This feature is available [0.11.3](https://github.com/SigNoz/signoz/releases/tag/v0.11.3) onwards. If you are on a lower version, please follow these instructions to upgrade
-
-[Docker](/docs/operate/docker-standalone/#upgrade)
-
-[Kubernetes](/docs/operate/kubernetes/#upgrade)
-:::
-
-<p>&nbsp;</p>
-
 With SigNoz, you can monitor the health of the HTTP endpoints and set up an alert in case of HTTP endpoints failure status codes.
 
 ## Steps to monitor the health of the HTTP endpoints:

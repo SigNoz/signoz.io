@@ -67,7 +67,7 @@ You can use OpenTelemetry Python to send your traces directly to SigNoz. OpenTel
     `opentelemetry-exporter-otlp` - This library provides a convenient way to install all supported OpenTelemetry Collector Exporters. You will need an exporter to send the data to SigNoz.
     
     :::note
-    💡 The `opentelemetry-exporter-otlp` is a convenient way to install all supported OpenTelemetry exporters. Currently it installs:
+    💡 The `opentelemetry-exporter-otlp` is a convenient way to install all supported OpenTelemetry exporters. Currently, it installs:
     
     - opentelemetry-exporter-otlp-proto-http
     - opentelemetry-exporter-otlp-proto-grpc
@@ -91,7 +91,7 @@ You can use OpenTelemetry Python to send your traces directly to SigNoz. OpenTel
      We recommend using the `otlp_proto_http` exporter.
      
     :::note
-     Don’t run app in reloader/hot-reload mode as it breaks instrumentation. For example, if you use `export FLASK_ENV=development`, it enables the reloader mode which breaks OpenTelemetry isntrumentation.
+     Don’t run app in reloader/hot-reload mode as it breaks instrumentation. For example, if you use `export FLASK_ENV=development`, it enables the reloader mode which breaks OpenTelemetry instrumentation.
     :::
      
      
@@ -101,7 +101,7 @@ You can use OpenTelemetry Python to send your traces directly to SigNoz. OpenTel
      OTEL_RESOURCE_ATTRIBUTES=service.name=<service_name> OTEL_EXPORTER_OTLP_ENDPOINT="http://<IP of SigNoz Backend>:4318"  opentelemetry-instrument --traces_exporter otlp_proto_http --metrics_exporter otlp_proto_http <your run command>
      ```
 
-     *<service_name>* is the name of service you want
+     *<service_name>* is the name of the service you want
 
      *<your_run_command>* can be `python3 app.py` or `flask run`
 
@@ -181,7 +181,7 @@ You can check the supported versions [here](https://github.com/open-telemetry/op
 
 ### MySQL
 
-You can use  `opentelemetry-distro` to initialize instrumentation for your MySQL database calls. You need to ensure that the version of your DB client library is supported by OpenTelemetry. For MySQL, we have two isntrumentation libraries:
+You can use  `opentelemetry-distro` to initialize instrumentation for your MySQL database calls. You need to ensure that the version of your DB client library is supported by OpenTelemetry. For MySQL, we have two instrumentation libraries:
 
 - opentelemetry-instrumentation-mysql
 - opentelemetry-instrumentation-pymysql
@@ -215,7 +215,7 @@ Check this [documentation](https://opentelemetry-python.readthedocs.io/en/latest
 
 #### Spans are not being reported
 
-If spans are not being reported to SigNoz, try enabling debug exporter which writes the json formatted trace data to console.
+If spans are not being reported to SigNoz, try enabling debug exporter which writes the JSON formatted trace data to the console.
 
 `opentelemetry-instrument --traces_exporter otlp_proto_http,console --metrics_exporter otlp_proto_http,console <your run command>`:
 

@@ -228,7 +228,7 @@ cd signoz/deploy/
 You can visit our documentation for instructions on how to install SigNoz using Docker Swarm and Helm Charts.
 
 
-[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/?utm_source=blog&utm_medium=loki-vs-prometheus)
+[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/)
 
 If you liked what you read, then check out our GitHub repo 👇
 

@@ -69,7 +69,7 @@ But you can't start digging the well when you are thirsty. You need to prepare f
 
 Hence, monitoring and observability tools become critical.
 
-At  [SigNoz](https://signoz.io/?utm_source=blog&utm_medium=article), we are broadly targeting the domain of **_observability for microservice applications. _**
+At  [SigNoz](https://signoz.io/), we are broadly targeting the domain of **_observability for microservice applications. _**
 
 What does that mean, you ask?
 

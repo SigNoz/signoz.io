@@ -29,7 +29,7 @@ Jaeger is an open-source distributed tracing tool meant to monitor and troublesh
 
 In a microservice architecture, you can use Jaeger to track transactions across multiple services. The process of tracking transactions across different services is called distributed tracing.
 
-> Jaeger is a fantastic open-source tool for distributed tracing. But for effective resolution of production issues, engineering teams need more than traces. [SigNoz](https://signoz.io/?utm_source=blog&utm_medium=article), a full-stack open-source tool, provides a unified UI for logs, metrics, and traces.
+> Jaeger is a fantastic open-source tool for distributed tracing. But for effective resolution of production issues, engineering teams need more than traces. [SigNoz](https://signoz.io/), a full-stack open-source tool, provides a unified UI for logs, metrics, and traces.
 
 ## What is distributed tracing?
 In the world of microservices, a user request travels through hundreds of services before serving a user what they need. To make a business scalable, engineering teams are responsible for particular services with no insight into how the system performs as a whole. And that's where distributed tracing comes into the picture.
@@ -198,7 +198,7 @@ A few key challenges of using Jaeger as a distributed tracing tool are as follow
 - Databases supported by Jaeger need active maintenance.
 - Jaeger's web UI is limited with basic visualizations.
 
-For a fast-moving engineering team, you need dashboards that can drive quick insights and resolution. And that's where [SigNoz](https://signoz.io/?utm_source=blog&utm_medium=article) comes into the picture. It is a great alternative to Jaeger for distributed tracing in microservices.
+For a fast-moving engineering team, you need dashboards that can drive quick insights and resolution. And that's where [SigNoz](https://signoz.io/) comes into the picture. It is a great alternative to Jaeger for distributed tracing in microservices.
 
 ## SigNoz - a Jaeger alternative for distributed tracing
 

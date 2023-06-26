@@ -37,7 +37,7 @@ Let's start by looking at how the cloud ecosystem is shaping up.
 
 2. 92% of enterprises have multi-cloud strategy; 82 percent have hybrid cloud strategy. (<a href = "https://www.flexera.com/blog/cloud/cloud-computing-trends-2021-state-of-the-cloud-report" rel="noopener noreferrer nofollow" target="_blank" >Flexera</a>)
 
-3. 96% of software leaders have adopted a cloud-native approach to software development. (<a href = "https://newrelic.com/more-perfect-software/more-perfect-software/" rel="noopener noreferrer nofollow" target="_blank" >New Relic</a>)
+3. 96% of software leaders have adopted a cloud-native approach to software development. (<a href = "https://newrelic.com/blog/best-practices/more-perfect-software-development-research-report" rel="noopener noreferrer nofollow" target="_blank" >New Relic</a>)
 
 4. 30% of organizations are using 3 or more clouds today. (<a href = "https://www.ibm.com/downloads/cas/VKW3RNDP" rel="noopener noreferrer nofollow" target="_blank" >IBM</a>)
 
@@ -121,4 +121,4 @@ The verdict is in! And it says you need to start your observability journey or m
 
 So when are you starting your observability journey?
 
-You can check out **[SigNoz](https://signoz.io/?utm_source=learn&utm_medium=observability_statistics)** - our open-source full-stack observability platform to get started. It is an all-in-one platform to address your observability needs.
+You can check out **[SigNoz](https://signoz.io/)** - our open-source full-stack observability platform to get started. It is an all-in-one platform to address your observability needs.

@@ -30,7 +30,7 @@ Create cluster and the command is:
 
 ### _Setup Prometheus and Grafana using Helm_
 
-Follow this [link](https://eksworkshop.com/monitoring/) to set up prometheus and grafana in EKS cluster
+Follow this [link](https://catalog.workshops.aws/running-batch-on-eks/en-US/exercises/calculate-pi/setup-prometheus-grafana) to set up prometheus and grafana in EKS cluster
 
 also add `--set server.global.scrape_interval="10s"` while installing prometheus from helm using the above link. The default scrape interval is 1m. This may test your patience to see metrics reflected in your Prometheus expression browser.
 
@@ -296,6 +296,7 @@ For any Prometheus related query reach me out on [Twitter](https://twitter.com/a
 #### Below blogs were helpful in understanding and implementing the concepts:
 
 - <a href = "https://blog.codeship.com/monitoring-your-synchronous-python-web-applications-using-prometheus/" rel="noopener noreferrer nofollow" target="_blank" >Monitoring synchronous Python web app using Prometheus</a>
+
 - <a href = "https://echorand.me/posts/python-prometheus-monitoring-options/#option-3-the-django-way" rel="noopener noreferrer nofollow" target="_blank" >Python Prometheus Monitoring</a>
-- <a href = "https://www.metricfire.com/prometheus-tutorials/monitoring-python-web-app" rel="noopener noreferrer nofollow" target="_blank" >Metric Fire - Prometheus Tutorial</a>
+
 - <a href = "https://github.com/amitsaha/python-monitoring-talk/blob/master/slides/Django-monitoring-with-prometheus.pdf" rel="noopener noreferrer nofollow" target="_blank" >Django Monitoring with Prometheus</a>

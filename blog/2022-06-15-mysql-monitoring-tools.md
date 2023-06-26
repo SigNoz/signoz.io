@@ -1,11 +1,11 @@
 ---
-title: Top 11 MYSQL monitoring tools in 2022 [open-source included]
+title: Top 11 MYSQL monitoring tools in 2023 [open-source included]
 slug: mysql-monitoring-tools
-date: 2023-02-05
+date: 2023-06-04
 tags: [Tech Resources]
 authors: [ankit_anand, daniel]
 description: Top MySQL Monitoring Tools List - 1.SigNoz 2.Prometheus 3.Dynatrace 4.Sematext 5.Solar winds 6.DataDog 7.MySQL Enterprise Monitor 8.Paessler PRTG Network Monitor...
-image: /img/blog/2022/06/mysql_monitoring_tools_cover.webp
+image: /img/blog/2023/06/mysql_monitoring_tools_cover-min.jpg
 keywords:
   - mysql
   - mysql monitoring
@@ -26,7 +26,7 @@ Database monitoring is a critical component in your application performance moni
 
 <!--truncate-->
 
-![Cover Image](/img/blog/2022/06/mysql_monitoring_tools_cover.webp)
+![Cover Image](/img/blog/2023/06/mysql_monitoring_tools_cover.webp)
 
 
 MySQL monitoring tools can help you identify potential issues with your database, keep a continuous check on your database instances, improve performance and detect and alert you about real-time issues. 
@@ -266,7 +266,7 @@ cd signoz/deploy/
 
 You can visit our documentation for instructions on how to install SigNoz using Docker Swarm and Helm Charts.
 
-[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/?utm_source=blog&utm_medium=mysql_monitoring_tools)
+[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/)
 
 ## Further Reading
 

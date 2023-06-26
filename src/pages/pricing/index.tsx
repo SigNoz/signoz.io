@@ -1,8 +1,7 @@
 import React from "react";
 import Layout from "@theme/Layout";
 import Link from "@docusaurus/Link";
-import FAQBody from "@site/src/components/FAQPricing";
-import ReactGA from "react-ga";
+import FAQBody from "../../components/FAQPricing";
 import { ShowCompanyLogos } from "../../modules/company-logos";
 import { RightSVG, WrongSVG } from "../../svgs/common";
 import { TalkToExpert } from "../../modules/talk-to-expert";
@@ -11,38 +10,25 @@ import { UserReview } from "../../modules/user-review";
 import { TrySigNozCTA } from "../../modules/try-signoz-cta";
 import { DataProtection } from "../../modules/data-protection";
 import styles from "./styles.module.css";
+import { CostComparison } from "../../modules/cost-comparison";
 
-ReactGA.initialize("UA-152867655-1");
-
-const handleClick = (message) => {
-  ReactGA.event({
-    category: "User",
-    action: message,
-  });
-};
-
-function pricingTest() {
+function Pricing() {
   return (
     <Layout title="SigNoz Plans">
       <section className={styles.pricing}>
-        <div
-          className={`container ${styles.pricingContainer}`}
-        >
+        <div className={`container ${styles.pricingContainer}`}>
           <h2 className={styles.title}>Transparent & Predictable Pricing</h2>
           <p className={styles.subtitle}>
-            OpenTelemetry-Native <span className="highlight">Metrics</span>,{" "}
+            {/* OpenTelemetry-Native <span className="highlight">Metrics</span>,{" "}
             <span className="highlight">Logs</span>, and{" "}
             <span className="highlight">Traces</span> in{" "}
-            <span className="highlight">single</span> pane of glass
+            <span className="highlight">single</span> pane of glass */}
+            Tired of unpredictable pricing and complex billing structure? Save up to <Link href="/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/"><u>86% on your Datadog bill</u></Link> with SigNoz.
           </p>
-          <div className={"row"}>
+          <div className={`row ${styles.pricingRow}`}>
             <div className={"col col--6 margin-vert--md"}>
-              <div
-                className={`card ${styles.card}`}
-              >
-                <div
-                  className={`card__header ${styles.card__header}`}
-                >
+              <div className={`card ${styles.card}`}>
+                <div className={`card__header ${styles.card__header}`}>
                   <div>
                     <h3>Teams</h3>
                     <p>For teams that need high-performing applications.</p>
@@ -50,22 +36,18 @@ function pricingTest() {
                   <div className={styles.priceCta}>
                     <div className={styles.priceCtaDesc}>
                       <span>starts at just</span>
-                      <span
-                        className={`${styles.price} highlight`}
-                      >
+                      <span className={`${styles.price} highlight`}>
                         $199/month
                       </span>
                     </div>
                     <div>
-                      <a
+                      <Link
                         id="btn-pricing-signoz-cloud-1"
-                        className="button button--primary"
-                        target="_blank"
-                        href="https://forms.gle/yYSkntXRRPU3MHRL7"
-                        onClick={() => handleClick("SigNozCloud")}
+                        className={`button button--primary ${styles.pricingCtaBtn}`}
+                        href={"/teams/"}
                       >
-                        Get Started
-                      </a>
+                        Get started
+                      </Link>
                     </div>
                   </div>
                   <hr />
@@ -106,12 +88,11 @@ function pricingTest() {
                       </span>
                     </div>
                     <div>
-                      <span>Managed by SigNoz in your cloud</span>
+                      {/* <span>Managed by SigNoz in your cloud</span>
                       <span>
                         <RightSVG />
-                      </span>
+                      </span> */}
                     </div>
-                    
                   </div>
                   <hr />
                   <div
@@ -148,61 +129,50 @@ function pricingTest() {
                       <li>Service Dependency Visualization</li>
                       <li>Run aggregates on ingested spans</li>
                       <li>Live Tail Logging</li>
+                      <li>Unlimited Logs & Traces based Dashboards</li>
                     </ul>
-                    {/* <span>
-                      <a href="#" className="explore">
-                        Explore all features
-                      </a>
-                    </span> */}
+                  </div>
+                  <hr />
+                  <div className={styles.packageDetailBlock}>
+                    <h4 className={styles.packageDetailTitle}>Upcoming</h4>
+                    <ul className="list-icon-right">
+                      <li>AWS Cloudwatch Integration</li>
+                    </ul>
                   </div>
                 </div>
-                <div
-                  className={`card__footer ${styles.card__footer}`}
-                >
-                  <a
+                <div className={`card__footer ${styles.card__footer}`}>
+                  <Link
                     id="btn-pricing-signoz-cloud-2"
-                    className="button button--primary"
-                    target="_blank"
-                    href="https://forms.gle/yYSkntXRRPU3MHRL7"
-                    onClick={() => handleClick("SigNozCloud")}
+                    className={`button button--primary ${styles.pricingCtaBtn}`}
+                    href={"/teams/"}
                   >
-                    Get Started
-                  </a>
+                    Get started
+                  </Link>
                 </div>
               </div>
             </div>
             <div className={"col col--6 margin-vert--md"}>
-              <div
-                className={`card ${styles.card}`}
-              >
-                <div
-                  className={`card__header ${styles.card__header}`}
-                >
+              <div className={`card ${styles.card}`}>
+                <div className={`card__header ${styles.card__header}`}>
                   <div>
                     <h3>Enterprise</h3>
                     <p>
-                      For at-scale orgs with advanced security, compliance and support needs.
+                      For at-scale orgs with advanced security, compliance and
+                      support needs.
                     </p>
                   </div>
                   <div className={styles.priceCta}>
                     <div className={styles.priceCtaDesc}>
-                    <span>Flexible Pricing for scale</span>
-                    {/* <span
-                        className={`${styles.price} highlight`}
-                      >
-                        Custom Pricing
-                      </span> */}
+                      <span>Flexible Pricing for scale</span>
                     </div>
                     <div>
-                      <a
+                      <Link
                         id="btn-pricing-signoz-enterprise-1"
-                        className="button button--primary"
-                        target="_blank"
-                        href="https://forms.gle/zxCEoSbnnPv6mSX57"
-                        onClick={() => handleClick("SelfHostedEnterprise")}
+                        className={`button button--primary ${styles.pricingCtaBtn}`}
+                        href={"/enterprise/"}
                       >
-                        Get Demo
-                      </a>
+                        Contact Us
+                      </Link>
                     </div>
                   </div>
                   <hr />
@@ -212,9 +182,7 @@ function pricingTest() {
                     className={`${styles.pricingDetails} ${styles.packageDetailBlock}`}
                   >
                     <h4 className={styles.packageDetailTitle}>Pricing</h4>
-                    <div>
-                      
-                    </div>
+                    <div></div>
                     <div>
                       <span>Custom Pricing</span>
                       <span>
@@ -297,12 +265,12 @@ function pricingTest() {
                       Includes all features in Team
                     </p>
                     <ul className="list-icon-right">
-                      <li>Single Sign On</li>
-                      <li>SAML and LDAP support</li>
-                      <li>Custom integration for metrics and logs (Cloudwatch, etc)</li>
+                    <li>Custom integration for metrics and logs</li>
                       <li>AWS Private Link</li>
                       <li>VPC Peering</li>
                       <li>Security tightening for on-prem installation</li>
+                      <li>Monitor Health of SigNoz</li>
+                      <li>Query API Keys (access data from anywhere)</li>
                     </ul>
                     {/* <span>
                       <a href="#" className="explore">
@@ -321,18 +289,14 @@ function pricingTest() {
                     </ul>
                   </div>
                 </div>
-                <div
-                  className={`card__footer ${styles.card__footer}`}
-                >
-                  <a
+                <div className={`card__footer ${styles.card__footer}`}>
+                  <Link
                     id="btn-pricing-signoz-enterprise-2"
-                    className="button button--primary"
-                    target="_blank"
-                    href="https://forms.gle/zxCEoSbnnPv6mSX57"
-                    onClick={() => handleClick("SelfHostedEnterprise")}
+                    className={`button button--primary ${styles.pricingCtaBtn}`}
+                    href={"/enterprise/"}
                   >
-                    Get Demo
-                  </a>
+                    Contact Us
+                  </Link>
                 </div>
               </div>
             </div>
@@ -399,6 +363,9 @@ function pricingTest() {
 
       {/* Companies Logo */}
       <ShowCompanyLogos />
+      
+      {/* Cost Comparison Graph */}
+      <CostComparison />
 
       {/* Data protection */}
       <DataProtection />
@@ -411,14 +378,10 @@ function pricingTest() {
 
       {/* FAQ section */}
       <section className={styles.faq}>
-        <div
-          className={`container ${styles.faqContainer}`}
-        >
+        <div className={`container ${styles.faqContainer}`}>
           <div className="row">
             <div className="col col--8 col--offset-2">
-              <p
-                className={`hero__subtitle margin--md ${styles.title}`}
-              >
+              <p className={`hero__subtitle margin--md ${styles.title}`}>
                 FAQs
               </p>
               <div className="card-demo margin--md">
@@ -438,4 +401,4 @@ function pricingTest() {
   );
 }
 
-export default pricingTest;
+export default Pricing;

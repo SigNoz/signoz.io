@@ -79,7 +79,7 @@ Some key features of SigNoz are:
 
 You can read more about SigNoz from its documentation.
 
-[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/?utm_source=blog&utm_medium=open_source_log_management)
+[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/)
 
 ## Logstash
 
@@ -246,7 +246,7 @@ cd signoz/deploy/
 You can visit our documentation for instructions on how to install SigNoz using Docker Swarm and Helm Charts.
 
 
-[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/?utm_source=blog&utm_medium=open-source-log-management)
+[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/)
 
 If you liked what you read, then check out our GitHub repo 👇
 

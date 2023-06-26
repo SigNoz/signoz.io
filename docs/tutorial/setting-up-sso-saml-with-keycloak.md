@@ -83,7 +83,8 @@ the secured endpoint of **Keycloak**.
 
   ![Client signature required](/img/docs/keycloak-saml/client-signature-required.png)
 
-8. Create new user which is to be used for login
+8. Create new user which is to be used for login. Be sure to include
+  email id in **username** and **email** fields
 
   ![Create new user](/img/docs/keycloak-saml/create-user.png)
 

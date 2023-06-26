@@ -2,11 +2,6 @@
 id: production-readiness
 title: Best Practices for Production
 ---
-<p align="center">
-
-[![Book meeting](/img/docs/ZoomCTA-production.png)](https://calendly.com/pranay-signoz/signoz-production-readiness)
-
-</p>
 
 # Best Practices to follow to run SigNoz in production
 

@@ -67,8 +67,9 @@ export default function NavbarContent() {
             className="button button--primary "
             //  onClick={setShowTrySignozModal.bind(this,true)}>
             href={
-              "/pricing/?utm_source=website&utm_medium=navbar&utm_campaign=try_cloud"
+              "/teams/"
             }
+            id="btn-get-started-website-navbar"
           >
             Try SigNoz Cloud
           </Link>

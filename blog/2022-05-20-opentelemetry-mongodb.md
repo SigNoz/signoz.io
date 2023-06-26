@@ -1,7 +1,7 @@
 ---
 title: OpenTelemetry MongoDB | Monitor and visualize your MongoDB database calls
 slug: opentelemetry-mongodb
-date: 2022-05-20
+date: 2023-06-03
 tags: [OpenTelemetry Instrumentation, Database Monitoring, JavaScript]
 authors: [pranshu, ankit_anand]
 description: In this tutorial, we will learn how to use OpenTelemetry to trace MongoDB calls. OpenTelemetry provides client libraries for instrumentation of application code in major programming languages & technologies, including databases like MongoDB...
@@ -61,7 +61,7 @@ cd signoz/deploy/
 
 You can visit our documentation for instructions on how to install SigNoz using Docker Swarm and Helm Charts.
 
-[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/?utm_source=blog&utm_medium=opentelemetry_mongodb)
+[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/)
 
 When you are done installing SigNoz, you can access the UI at [http://localhost:3301](http://localhost:3301/application)
 

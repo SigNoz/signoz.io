@@ -141,7 +141,7 @@ Summarizing the key differences between Jaeger and Zipkin:
 
 Both Jaeger and Zipkin are strong contenders when it comes to a distributed tracing tool. But are traces enough to solve all performance issues of a modern distributed application? The answer is no. You also need metrics and a way to correlate metrics with traces with a single dashboard. Most SaaS vendors provide both metrics and traces under a single pane of glass. But the beauty of Jaeger and Zipkin is that they are open-source. What if an open-source solution does both and comes with a great web UI with actionable insights for your engineering teams?
 
-That's where [SigNoz](https://signoz.io/?utm_source=blog&utm_medium=jaeger_vs_zipkin) comes into the picture.
+That's where [SigNoz](https://signoz.io/) comes into the picture.
 
 ## A better to alternative to Jaeger and Zipkin - SigNoz
 SigNoz is a full-stack open-source application performance monitoring and observability tool which can be used in place of Jaeger and Zipkin. It provides advanced distributed tracing capabilities along with metrics under a single dashboard.

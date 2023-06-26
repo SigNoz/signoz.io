@@ -93,6 +93,9 @@ using (var activity = MyActivitySource.StartActivity("Foo"))
 ### Record Exceptions in Ruby:
 
 ```ruby
+# Import otel sdk
+require "opentelemetry/sdk"
+
 # Get the current span from the tracer
 span = OpenTelemetry::Trace.current_span
 

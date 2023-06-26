@@ -1,7 +1,7 @@
 ---
 title: How to set up Golang application performance monitoring with open source monitoring tool - SigNoz
 slug: monitoring-your-go-application-with-signoz
-date: 2023-03-02
+date: 2023-05-04
 tags: [OpenTelemetry Instrumentation, Go / Golang]
 authors: ankit_anand
 description: In this article, learn how to setup application monitoring for Golang apps using an open-source solution, SigNoz.
@@ -88,7 +88,7 @@ cd signoz/deploy/
 
 You can visit our documentation for instructions on how to install SigNoz using Docker Swarm and Helm Charts.
 
-[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/?utm_source=blog&utm_medium=golang_monitoring)
+[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/)
 
 When you are done installing SigNoz, you can access the UI at [http://localhost:3301](http://localhost:3301/application)
 

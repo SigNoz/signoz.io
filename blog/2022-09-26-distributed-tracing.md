@@ -182,7 +182,7 @@ You can visit our documentation for instructions on how to install SigNoz using 
 
 <!-- [deploy_docker_documentation.webp](Distribute%20bc05b/deploy_docker_documentation.webp) -->
 
-[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/?utm_source=blog&utm_medium=distributed_tracing)
+[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/)
 
 ## Further Reading
 

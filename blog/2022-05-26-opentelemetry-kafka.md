@@ -1,7 +1,7 @@
 ---
 title: Complete Guide to tracing Kafka clients with OpenTelemetry in Go
 slug: opentelemetry-kafka
-date: 2023-01-12
+date: 2023-06-05
 tags: [OpenTelemetry Instrumentation, Golang]
 authors: [nitya, ankit_anand]
 description: In this tutorial, we will learn how to use OpenTelemtry for Kafka-based applications. OpenTelemetry can help instrument Kafka clients and provide an end-to-end tracing. In this guide, we will demonstrate how to instrument a Go application that uses Kafka with OpenTelemetry...
@@ -75,7 +75,7 @@ cd signoz/deploy/
 
 You can visit our documentation for instructions on how to install SigNoz using Docker Swarm and Helm Charts.
 
-[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/?utm_source=blog&utm_medium=opentelemetry_kafka)
+[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/)
 
 When you are done installing SigNoz, you can access the UI at [http://localhost:3301](http://localhost:3301/application).
 

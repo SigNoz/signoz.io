@@ -58,7 +58,7 @@ cd signoz/deploy/
 
 The above instruction is for MacOS and linux distributions. For detailed instructions, you can visit our documentation.
 
-[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/?utm_source=blog&utm_medium=opentelemetry_django)
+[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/docker/)
 
 If you have installed SigNoz on your local host, you can access the UI at: [http://localhost:3301](http://localhost:3301/application)
 
@@ -112,8 +112,6 @@ import Screenshot from "@theme/Screenshot"
    virtualenv mypython
    source mypython/bin/activate
    ```
-
-   You can read more about [creating virtual environments](https://uoa-eresearch.github.io/eresearch-cookbook/recipe/2014/11/26/python-virtual-env/) in Python.
 
 3. **Installing necessary OpenTelemetry and Python packages**<br></br>
    The `base.txt` file contains all the necessary OpenTelemetry and Python packages needed for instrumentation. In order to install those packages, run the following command:
