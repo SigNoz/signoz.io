@@ -39,7 +39,7 @@ From the sidebar, select **Services**:
 
 This page provides an overview of your applications’ health and performance. It shows the list of your applications formatted as a table and, for each application, SigNoz displays the RED metrics mentioned above.
 
-This page shows all the instrumented applications sending the data to SigNoz. This includes web servers, message brokers/queuing systems, web/mobile clients, corn jobs, and more.
+This page shows all the instrumented applications sending the data to SigNoz. This includes web servers, message brokers/queuing systems, web/mobile clients, cron jobs, and more.
 
 What services are shown? And how are the RED metrics calculated?
 
