@@ -6,7 +6,7 @@ and generate tracing data.
 and deploy HotROD application on it:
 
 ```bash
-curl -sL https://github.com/SigNoz/signoz/raw/main/sample-apps/hotrod/hotrod-install.sh \
+curl -sL https://github.com/SigNoz/signoz/raw/develop/sample-apps/hotrod/hotrod-install.sh \
   | HELM_RELEASE=my-release SIGNOZ_NAMESPACE=platform bash
 ```
 
