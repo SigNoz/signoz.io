@@ -49,8 +49,9 @@ This is expected and you can safely ignore it.
 Now, you proceed with the upgrade to `>=v0.23` as per the [usual instructions for Kubernetes][2]
 
 :::info
-ClickHouse pod will not be restarted but the clickhouse-operator will, no downtime is expected as part of this release.
-However, if you run the migration steps after the upgrade, you might see some downtime.
+If you had single node ClickHouse cluster, you might see some downtime during the upgrade.
+This is because the ClickHouse cluster is recreated with the new operator.
+The downtime is usually less than 5 minutes.
 :::
 
 ---
