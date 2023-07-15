@@ -52,6 +52,8 @@ Now, you proceed with the upgrade to `>=v0.23` as per the [usual instructions fo
 If you had single node ClickHouse cluster, you might see some downtime during the upgrade.
 This is because the ClickHouse cluster is recreated with the new operator.
 The downtime is usually less than 5 minutes.
+
+However, telemetry data should be queued and ingested once the ClickHouse cluster is up.
 :::
 
 ---
