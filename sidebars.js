@@ -88,6 +88,19 @@ module.exports = {
             'operate/clickhouse/external-clickhouse',
           ]
         },
+        {
+          type: 'category',
+          label: 'SQLite',
+          link: {
+            type: 'generated-index',
+            title: 'SQLite',
+            description: 'The following sections provide instructions to operate SQLite. You can proceed to one of the sections below.',
+            slug: '/operate/sqlite',
+          },
+          items: [
+            'operate/sqlite/reset-admin-password',
+          ]
+        },
         'operate/feature-flags',
       ],
     },
