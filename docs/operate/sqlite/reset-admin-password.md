@@ -58,12 +58,10 @@ In the sqlite shell, run the following commands:
 
 ```bash
 select * from users;
-
 select * from organizations;
 
-delete from users where 1=1;
-
-delete from organizations where 1=1;
+delete from users;
+delete from organizations;
 ```
 
 ### Step 3: Verify the Users and Organisation are Removed
