@@ -14,7 +14,7 @@ Below are the steps to collect syslogs.
     ```yaml {8}
     ...
     otel-collector:
-        image: signoz/signoz-otel-collector:0.55.0-rc.3
+        image: signoz/signoz-otel-collector:0.79.5
         command: ["--config=/etc/otel-collector-config.yaml"]
         volumes:
           - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml

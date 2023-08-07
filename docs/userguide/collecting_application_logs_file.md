@@ -37,7 +37,7 @@ We will create a sample python script name `main.py` and the following code for 
     ```yaml {6}
       ...
       otel-collector:
-      image: signoz/signoz-otel-collector:0.55.0-rc.3
+      image: signoz/signoz-otel-collector:0.79.5
       command: ["--config=/etc/otel-collector-config.yaml"]
       volumes:
         - ~/<path>/python.log:/tmp/python.log
@@ -134,7 +134,7 @@ If you have a signoz running on a different host then you will have to run a ote
 
 * We will start our otel-collector container and mount the logs file so that the logs can be read from log file.
   ```
-  docker run -d --name signoz-host-otel-collector --user root -v $(pwd)/python.log:/tmp/python.log:ro -v $(pwd)/otel-collector-config.yaml:/etc/otel/config.yaml signoz/signoz-otel-collector:0.55.0-rc.3
+  docker run -d --name signoz-host-otel-collector --user root -v $(pwd)/python.log:/tmp/python.log:ro -v $(pwd)/otel-collector-config.yaml:/etc/otel/config.yaml signoz/signoz-otel-collector:0.79.5
   ```
 
 * If there are no errors your logs will be exported and visible on the SigNoz UI. 
