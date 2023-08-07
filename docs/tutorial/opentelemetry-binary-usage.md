@@ -39,20 +39,20 @@ default configuration prepopulated at `/etc/otelcol-contrib` path. This method
 would be preferable in case you want the OpenTelemetry collector to always be
 running in the background.
 
-To download `deb` file of release version `0.66.0`:
+To download `deb` file of release version `0.79.0`:
 
 ```bash
-wget https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.66.0/otelcol-contrib_0.66.0_linux_amd64.deb
+wget https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.79.0/otelcol-contrib_0.79.0_linux_amd64.deb
 ```
 
 :::info
-In case of different OpenTelemetry collector version, replace `0.66.0` with respective version.
+In case of different OpenTelemetry collector version, replace `0.79.0` with respective version.
 :::
 
 To install `otelcol` as `systemd` using `dpkg`:
 
 ```bash
-sudo dpkg -i otelcol-contrib_0.66.0_linux_amd64.deb
+sudo dpkg -i otelcol-contrib_0.79.0_linux_amd64.deb
 ```
 
 ### Plain Binary
@@ -61,20 +61,20 @@ Using `tar.gz` release asset, we can extract the OpenTelemetry collector binary
 and default configuration at our desired path. We can run the binary directly
 with flags either use `tmux
 
-To download `tar.gz` file of release version `0.66.0`:
+To download `tar.gz` file of release version `0.79.0`:
 
 ```bash
-wget https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.66.0/otelcol-contrib_0.66.0_linux_amd64.tar.gz
+wget https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.79.0/otelcol-contrib_0.79.0_linux_amd64.tar.gz
 ```
 
 :::info
-In case of different OpenTelemetry collector version, replace `0.66.0` with respective version.
+In case of different OpenTelemetry collector version, replace `0.79.0` with respective version.
 :::
 
 To create `otelcol` folder and extract files from `tar.gz` to newly created folder:
 
 ```bash
-mkdir otelcol-contrib && tar xvzf otelcol-contrib_0.66.0_linux_amd64.tar.gz -C otelcol-contrib/
+mkdir otelcol-contrib && tar xvzf otelcol-contrib_0.79.0_linux_amd64.tar.gz -C otelcol-contrib/
 ```
 
 ## OpenTelemetry Collector Configuration
