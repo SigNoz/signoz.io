@@ -31,7 +31,7 @@ Let’s understand how to download, install, and run OpenTelemetry in Python.
 
 ## Requirements
 
-- Python 3.6 or newer
+- Python 3.8 or newer
 
 ## Send Traces Directly to SigNoz
 
@@ -49,30 +49,32 @@ You can use OpenTelemetry Python to send your traces directly to SigNoz. OpenTel
 1. **Create a virtual environment**<br></br>
     
     ```bash
-    python3 -m venv instrumentation_env
-    source instrumentation_env/bin/activate
+    python3 -m venv .venv
+    source .venv/bin/activate
     ```
-    
+
 2. **Install the OpenTelemetry dependencies**<br></br>
     
     ```bash
     pip install opentelemetry-distro
     pip install opentelemetry-exporter-otlp
     ```
-    
+
     The dependencies included are briefly explained below:
 
     `opentelemetry-distro` - The distro provides a mechanism to automatically configure some of the more common options for users. It helps to get started with OpenTelemetry auto-instrumentation quickly. 
     
-    `opentelemetry-exporter-otlp` - This library provides a convenient way to install all supported OpenTelemetry Collector Exporters. You will need an exporter to send the data to SigNoz.
-    
+    `opentelemetry-exporter-otlp` - This library provides a way to install all OTLP exporters. You will need an exporter to send the data to SigNoz.
+
     :::note
-    💡 The `opentelemetry-exporter-otlp` is a convenient way to install all supported OpenTelemetry exporters. Currently, it installs:
+    💡 The `opentelemetry-exporter-otlp` is a convenience wrapper package to install all OTLP exporters. Currently, it installs:
     
     - opentelemetry-exporter-otlp-proto-http
     - opentelemetry-exporter-otlp-proto-grpc
+
+    - (soon) opentelemetry-exporter-otlp-json-http
     
-    We recommend using the http exporter for sending data to SigNoz.
+    The `opentelemetry-exporter-otlp-proto-grpc` package installs the gRPC exporter which depends on the `grpcio` package. The installation of `grpcio` may fail on some platforms for various reasons. If you run into such issues, or you don't want to use gRPC, you can install the HTTP exporter instead by installing the `opentelemetry-exporter-otlp-proto-http` package. You need to set the `OTEL_EXPORTER_OTLP_PROTOCOL` environment variable to `http/protobuf` to use the HTTP exporter.
     :::
     
 3. **Add automatic instrumentation**<br></br>
@@ -82,13 +84,11 @@ You can use OpenTelemetry Python to send your traces directly to SigNoz. OpenTel
     opentelemetry-bootstrap --action=install
     ```
 
+    :::note
+     Please make sure that you have installed all the dependencies of your application before running the above command. The command will not install instrumentation for the dependencies which are not installed.
+    :::
 
 4. **Run your application**<br></br>
-     In the final run command, you can configure environment variables and flags. Flags for exporters:<br></br>
-     HTTP: otlp_proto_http<br></br>
-     gRPC: otlp_proto_grpc<br></br>
-
-     We recommend using the `otlp_proto_http` exporter.
      
     :::note
      Don’t run app in reloader/hot-reload mode as it breaks instrumentation. For example, if you use `export FLASK_ENV=development`, it enables the reloader mode which breaks OpenTelemetry instrumentation.
@@ -98,19 +98,19 @@ You can use OpenTelemetry Python to send your traces directly to SigNoz. OpenTel
      To start sending data to SigNoz, use the following run command:
 
      ```bash
-     OTEL_RESOURCE_ATTRIBUTES=service.name=<service_name> OTEL_EXPORTER_OTLP_ENDPOINT="http://<IP of SigNoz Backend>:4318"  opentelemetry-instrument --traces_exporter otlp_proto_http --metrics_exporter otlp_proto_http <your run command>
+     OTEL_RESOURCE_ATTRIBUTES=service.name=<service_name> OTEL_EXPORTER_OTLP_ENDPOINT="http://<IP of SigNoz Backend>:4317" OTEL_EXPORTER_OTLP_PROTOCOL=grpc opentelemetry-instrument <your run command>
      ```
 
      *<service_name>* is the name of the service you want
 
      *<your_run_command>* can be `python3 app.py` or `flask run`
 
-     `IP of SigNoz backend` is the IP of the machine where you installed SigNoz. If you have installed SigNoz on `localhost`, the endpoint will be `http://localhost:4318`.
+     `IP of SigNoz backend` is the IP of the machine where you installed SigNoz. If you have installed SigNoz on `localhost`, the endpoint will be `http://localhost:4317` for gRPC exporter and `http://localhost:4318` for HTTP exporter.
 
      Replacing these environment variables, a sample final run command will look like this:
 
      ```bash
-     OTEL_RESOURCE_ATTRIBUTES=service.name=python_app OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318"  opentelemetry-instrument --traces_exporter otlp_proto_http --metrics_exporter otlp_proto_http python3 app.py
+     OTEL_RESOURCE_ATTRIBUTES=service.name=python_app OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4317" opentelemetry-instrument python3 app.py
      ```
      
     :::note
@@ -206,7 +206,7 @@ For application servers which are based on pre fork model like Gunicorn, uWSGI y
 
 Check this [documentation](https://opentelemetry-python.readthedocs.io/en/latest/examples/fork-process-model/README.html) from OpenTelemetry on how to set it up.
 
-[Here's](https://github.com/SigNoz/opentelemetry-python/tree/main/docs/examples/fork-process-model) a working example where we have configured a gunicorn server with `post_fork` hook.
+[Here's](https://github.com/open-telemetry/opentelemetry-python/tree/main/docs/examples/fork-process-model) a working example configured with a gunicorn server with `post_fork` hook.
   
 <p>&nbsp;</p>
 
@@ -215,9 +215,9 @@ Check this [documentation](https://opentelemetry-python.readthedocs.io/en/latest
 
 #### Spans are not being reported
 
-If spans are not being reported to SigNoz, try enabling debug exporter which writes the JSON formatted trace data to the console.
+If spans are not being reported to SigNoz, try enabling debug exporter which writes the JSON formatted trace data to the console by setting env var OTEL_TRACES_EXPORTER=console.
 
-`opentelemetry-instrument --traces_exporter otlp_proto_http,console --metrics_exporter otlp_proto_http,console <your run command>`:
+`OTEL_RESOURCE_ATTRIBUTES=service.name=python_app OTEL_TRACES_EXPORTER=console opentelemetry-instrument <your run command>`:
 
 ```json
 {
