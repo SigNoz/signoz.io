@@ -68,7 +68,7 @@ You can use OpenTelemetry to send your traces directly to SigNoz. OpenTelemetry 
     `opentelemetry-exporter-otlp` - This library provides a way to install all OTLP exporters. You will need an exporter to send the data to SigNoz.
 
     :::note
-    💡 The `opentelemetry-exporter-otlp` is a convenience wrapper package to install all OTLP exporters. Currently, it installs:
+    💡 The `opentelemetry-exporter-otlp` is a convenient wrapper package to install all OTLP exporters. Currently, it installs:
     
     - opentelemetry-exporter-otlp-proto-http
     - opentelemetry-exporter-otlp-proto-grpc
