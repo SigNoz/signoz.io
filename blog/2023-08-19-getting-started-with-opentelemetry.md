@@ -4,8 +4,8 @@ slug: getting-started-with-opentelemetry
 date: 2023-08-19
 tags: [Talks, OpenTelemetry]
 authors: priyansh
-description: Tune in to learn more about OpenTelemetry Collector processors and how you can use them effectively in SigNoz...
-image: /img/blog/2023/08/scc_otel_collector_processor_cover.jpeg
+description: We often get asked, what's the best place to get started with OpenTelemetry - host metrics, traces, or even logs...
+image: /img/blog/2023/08/getting_started_with_opentelemetry_cover.jpg
 keywords:
   - opentelemetry
   - signoz
