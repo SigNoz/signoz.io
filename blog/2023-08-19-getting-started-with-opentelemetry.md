@@ -34,19 +34,19 @@ Below is the recording and an edited transcript of the conversation.
 
 *Find the conversation transcript below.👇*
 
-Nica: Good morning, everyone. This is the next in our OTel webinars. The topic for today is “Getting Started with OpenTelemetry”. A large audience for these webinars has been the SigNoz community, and this may be a little more basic than what the community needs.
+**Nica:** Good morning, everyone. This is the next in our OTel webinars. The topic for today is “Getting Started with OpenTelemetry”. A large audience for these webinars has been the SigNoz community, and this may be a little more basic than what the community needs.
 
 
 If you are already considering dashboards and how you store your data, this may not be the information you need. However, I am joined today by Pranay, co-founder of SigNoz. Pranay, what do you hope people will take away from this starter guide?
 
-Pranay: We decided to create this guide because we saw that many people in the SigNoz community already understand what OpenTelemetry is and have been using it. We also run an OpenTelemetry end-user group for the APAC region, and we see that many people have initial questions like, "How do I get started with OpenTelemetry? Is the log stable? How do I start sending my application tracing data?"
+**Pranay:** We decided to create this guide because we saw that many people in the SigNoz community already understand what OpenTelemetry is and have been using it. We also run an OpenTelemetry end-user group for the APAC region, and we see that many people have initial questions like, "How do I get started with OpenTelemetry? Is the log stable? How do I start sending my application tracing data?"
 
 These are the basic questions that any team needs to answer before investing in OpenTelemetry. So, we thought we would create a guide that covers some of the more basic topics so that people who are just starting out with OpenTelemetry can get an overview and a sense of where the project is headed. We will then go back to more technical questions in the future.
 
 We plan to alternate between more technical questions and more beginner-friendly ones so that people who are just starting out with OpenTelemetry have something to work with.
 
 
-Nica: It has been interesting for me to learn about the availability of beginner and advanced information for OpenTelemetry. OpenTelemetry is not intended as a beginner's tool, but rather as a tool for those who need to do distributed tracing through complex architectures. Since its inception, much of the material has started by diving deep into the topic.
+**Nica:** It has been interesting for me to learn about the availability of beginner and advanced information for OpenTelemetry. OpenTelemetry is not intended as a beginner's tool, but rather as a tool for those who need to do distributed tracing through complex architectures. Since its inception, much of the material has started by diving deep into the topic.
 
 Speaking of more advanced topics, I wanted to answer a question that was asked in chat: "Hey, we talked about Kafka with OTel in the later webinar, when's that going to happen?" The webinar will be held next month because we are going away for our whole staff meeting. I will announce the date and time in the topic and message you directly when we are ready. We wanted to do it this week, but it turned out to require a little more research.
 
@@ -55,9 +55,9 @@ Nishant has just mentioned that the live webinar hours are not great for us, and
 
 Yes, I do want to make it possible for people from all over the world to join our webinars. I am located on the west coast of the United States, so this time slot is ideal for me. However, I may start offering an evening time slot in the future.
 
-Pranay: I believe that this webinar was primarily focused on our community in the US. We will explore options for India or the APAC region ecosystem in the future.
+**Pranay:** I believe that this webinar was primarily focused on our community in the US. We will explore options for India or the APAC region ecosystem in the future.
 
-Nica: If you are watching this webinar replay, please feel free to comment below with your questions. We will answer them as we go along. So, let's get started.
+**Nica:** If you are watching this webinar replay, please feel free to comment below with your questions. We will answer them as we go along. So, let's get started.
 
 So, a pretty common question that we see, especially people who are dipping into the OpenTelemetry, "What's the first thing that you should instrument withOpenTelemetry?" Now in my presentation, I have an answer to this, but I'm curious Pranay, how you would answer this question of what's the first thing you'd instrument?
 
@@ -65,26 +65,30 @@ So, a pretty common question that we see, especially people who are dipping into
 > “***A common question, especially among new DevOps engineers or SREs who want to add some observability: “What’s the first thing I should instrument with OpenTelemetry***”
 
 
-Pranay: Indeed, it depends on who is asking the question. For an application developer, the most interesting thing might be APM, or application performance monitoring. If you are writing code and want to understand whether your code is performing well or has high latency, you might start with APM or distributed tracing to see the latency of your APIs. Are your database calls or external calls taking longer than usual?
+**Pranay:** Indeed, it depends on who is asking the question. For an application developer, the most interesting thing might be APM, or application performance monitoring. If you are writing code and want to understand whether your code is performing well or has high latency, you might start with APM or distributed tracing to see the latency of your APIs. Are your database calls or external calls taking longer than usual?
 
 However, if you are part of the platform team or DevOps team, the first thing you might want to look at is infrastructure metrics. These are the most important metrics to track, as they can tell you whether your machines are running smoothly and whether your CPU, memory, and other resources are being used efficiently.
 
 
 Configure some alerts on top of that, and so it depends really on the person who is trying to get started the OpenTelemetry. If you're a JavaScript developer, you can instrument your NodeJs application and just get started with the latency. 
 
-Nica: I concur. Indeed, there are people who are currently evaluating a full migration to OpenTelemetry. They are trying to determine whether it is better than the closed-source SaaS tool they are currently using. In this case, it may make sense to focus on the type of application performance metrics or APM that they will be getting. 
+**Nica:** I concur. Indeed, there are people who are currently evaluating a full migration to OpenTelemetry. They are trying to determine whether it is better than the closed-source SaaS tool they are currently using. In this case, it may make sense to focus on the type of application performance metrics or APM that they will be getting. 
 
 It is important to answer this question early on, because if they are fundamentally unable to do their jobs without automatic instrumentation of a particular Java method, then this may be a deal-breaker for them.
 
 I think I'm going to briefly step through this just because it's kind of a basic idea of what is and isn't inside the OpenTelemetry project. 
 
 
-<figure data-zoomable align='center'>
+<!-- <figure data-zoomable align='center'>
     <img src="/img/blog/2023/08/first_thing_otel.webp" alt=""/>
     <figcaption><i></i></figcaption>
 </figure>
 
-<br></br>
+<br></br> -->
+
+> The first thing to look into with Open Telemetry is Infrastructure metrics. After all *it's free.*
+> 
+> -CPU usage, RAM, disk I/O metrics
 
 I recommend starting with infrastructure metrics if you want to understand the OpenTelemetry project. Do not start with Kubernetes by trying to spin up five namespaces that talk to each other through a synchronous data store. Instead, start with something that is easy to debug, easy to look at, and where data collection will work right off the bat.
 
@@ -103,23 +107,24 @@ I have observed that some people have expressed concern about setting up alerts 
 
 This should encourage you to think carefully about all the steps involved in gathering metrics and sending them out. It is worth taking the time to do this properly.
 
+<!-- 
 <figure data-zoomable align='center'>
     <img src="/img/blog/2023/08/send_data_otel.webp" alt=""/>
     <figcaption><i></i></figcaption>
 </figure>
 
-<br></br>
+<br></br> -->
 
 Once we have collected the data, we need to decide where to send it. This is where I would like to discuss what is and is not included in the OpenTelemetry project.
 
 I believe that even for those of us who are already using OpenTelemetry, it would be beneficial to review what is and is not included in the project. Pranay, did you have anything to add about gathering information metrics or things that people should think about on day one or day two?
 
-Pranay: Yes, I think a general piece of advice is that if you are starting to use a new project or tool, the easiest way to get started is often the right way. You can start with the basics, such as understanding what the project does. This is very easy to do, and once you have done that, you will start to see some of your data in a dashboard. This will give you more confidence.
+**Pranay:** Yes, I think a general piece of advice is that if you are starting to use a new project or tool, the easiest way to get started is often the right way. You can start with the basics, such as understanding what the project does. This is very easy to do, and once you have done that, you will start to see some of your data in a dashboard. This will give you more confidence.
 
 So I think what you said was very accurate, that you should start with infrastructure metrics. This is easy to do, most people know how to do it, and by playing around with it, you will learn some of the OpenTelemetry ecosystem. You will also have some success under your belt, so you can say, "Okay, I know how to configure infrastructure metrics, now let's move on to application metrics."
 
 
-Nica: I am tempted to open up the collector diagrams from our previous webinar to illustrate a point. I have seen people dive in and grab the SDK, only to realize that the SDK allows them to feed in the endpoint they are sending each metric call to directly. They then drop lines into their Java code to send the data across the wire and hard-code the URL of where they want to pick up the OpenTelemetry data. 
+**Nica:** I am tempted to open up the collector diagrams from our previous webinar to illustrate a point. I have seen people dive in and grab the SDK, only to realize that the SDK allows them to feed in the endpoint they are sending each metric call to directly. They then drop lines into their Java code to send the data across the wire and hard-code the URL of where they want to pick up the OpenTelemetry data. 
 
 This does not make a lot of sense. It would be much better to have a collector running within the pod, within that architecture, that would then send on the data.
 
@@ -155,7 +160,7 @@ You know,  just the SigNoz collector or just telemetry hub's collector or just t
 
 So, it's okay for your tests on your Dev environment, and then Various other tools such as the OpenTelemetry operator for Kubernetes. That's the list of what is inside the project. I think it's interesting that auto instrumentation is inside the project, but data backends, as we're going to talk about, are not inside the project.
 
-Pranay: Yeah, I think one of the core parts here is defining the specs and the APIs. So that's an independent part of what the project defines, and then it also provides an SDK, which sort of implements it. 
+**Pranay:** Yeah, I think one of the core parts here is defining the specs and the APIs. So that's an independent part of what the project defines, and then it also provides an SDK, which sort of implements it. 
 
 So that you can get started very quickly, and they have, by default, auto instrumentation components so that you don't have to worry too much about “Are you instrumenting the right libraries, or are instrumenting the right frameworks”
 
@@ -193,24 +198,24 @@ But obviously, the closed-source boys are still out there. The SaaS people are s
 
 My understanding is that you can't move your distributed trace into AWS X-Ray, for example, into some of the cloud-specific monitoring tools. But that limitation probably would make some sense. Obviously, for any large observability platform, those exporters exist. 
 
-Pranay: I'm also not sure. I think the key point here is that some things are not part of the OpenTelemetry project. For example, the visualization layer, alerts, setting dashboards, setting retention policies, and for that, you use a backend like SigNoz or any other SaaS vendors or tools like Grafana, etc.
+**Pranay:** I'm also not sure. I think the key point here is that some things are not part of the OpenTelemetry project. For example, the visualization layer, alerts, setting dashboards, setting retention policies, and for that, you use a backend like SigNoz or any other SaaS vendors or tools like Grafana, etc.
 
 Some of the time I see people getting confused, "Hey if I use OpenTelemetry, do I also share dashboards?" So that's not really in the scope of the project.
 
-Nica: And so, we don't cover very much in this talk, but, while it's very straightforward to use a tool SigNoz or Prometheus or Grafana, to do a basic dashboard and say, "Hey, I'm going to track the CPU metrics," it's a good place to start. 
+**Nica:** And so, we don't cover very much in this talk, but, while it's very straightforward to use a tool SigNoz or Prometheus or Grafana, to do a basic dashboard and say, "Hey, I'm going to track the CPU metrics," it's a good place to start. 
 
 I think we can all understand that then you get to more advanced cases, and you're gonna want to evaluate a tool or two, right? To look at, does it give me the data that I need? What are we using from our observability tools now, and where do we want that to go? 
 
 
-<figure data-zoomable align='center'>
+<!-- <figure data-zoomable align='center'>
     <img src="/img/blog/2023/08/log_otel.webp" alt=""/>
     <figcaption><i></i></figcaption>
 </figure>
 
-<br></br>
+<br></br> -->
 
 
-Once you're collecting these hosted infrastructure metrics, a good second step is thinking about logging.
+> Once you're collecting these hosted infrastructure metrics, a good second step is thinking about logging.
 
 And again you can have your path through here, but just it's worth considering, thinking about how we're handling logging. It should be pretty doable as a project, and you can also use some of that collector power to do some of your log parsing which might improve your experience a little bit.
 
@@ -235,7 +240,7 @@ There are tons for whatever logging tool that you may wish. So, the point is tha
 
 They're, "Hey, you can send these logs anywhere”. Of course, you can send them to the OpenTelemetry collector. 
 
-Pranay: I think the two modes of sending logs are always available. One is writing something in a file and then reading from those files. So, there's a file log receiver in OpenTelemetry, which you can always use. 
+**Pranay:** I think the two modes of sending logs are always available. One is writing something in a file and then reading from those files. So, there's a file log receiver in OpenTelemetry, which you can always use. 
 
 OpenTelemetry also supports these log collectors, for example, I think they support FluentD, Fluent Bit, and Logstash. So, if you already have a pipeline set up with any of these three log collectors, you can configure the OpenTelemetry collector to get logs from there. 
 
@@ -245,29 +250,29 @@ So, Nica was pointing out that OpenTelemetry official site lists as logs are not
 
 
 
-Nica: It is crucial to be aware that there are more options available than simply using the SDK. It is very likely that you already have some kind of logs exported. If you do not, and you are starting from scratch, doing this as a student, or your observability efforts are a bit of a technical debt, you can absolutely do it. You can write your logs to a file, read from them, batch them with the collector, and send them out. 
+**Nica:** It is crucial to be aware that there are more options available than simply using the SDK. It is very likely that you already have some kind of logs exported. If you do not, and you are starting from scratch, doing this as a student, or your observability efforts are a bit of a technical debt, you can absolutely do it. You can write your logs to a file, read from them, batch them with the collector, and send them out. 
 
 However, you are probably already sending logs somewhere, and you should be able to leverage that. 
 Conceptually, the goal of OpenTelemetry is to provide a unified way to collect and export telemetry data, regardless of the source. This means that you should be able to use OpenTelemetry to collect logs from any source, even if it is not currently supported by the SDK.
 
-Pranay: There's a question
+**Pranay:** There's a question
 
 Can you say that it's another SIEM tool alternative to Splunk?
 
-Nica: I do not know the definition of SIEM, so now I want to know that. 
+**Nica:** I do not know the definition of SIEM, so now I want to know that. 
 
-Pranay: I'm going to take this up. 
+**Pranay:** I'm going to take this up. 
 
-Nica: Security Information and Event Management. Go ahead.
+**Nica:** Security Information and Event Management. Go ahead.
 
-Pranay: OpenTelemetry is not primarily focused on security. Splunk, for example, has an observability product and a security product. However, OpenTelemetry's primary focus is on observability, which is ensuring that production systems are running smoothly and debugging issues quickly.
+**Pranay:** OpenTelemetry is not primarily focused on security. Splunk, for example, has an observability product and a security product. However, OpenTelemetry's primary focus is on observability, which is ensuring that production systems are running smoothly and debugging issues quickly.
 
 The data that OpenTelemetry SDKs send, such as tracing data, can be used for more advanced security analysis. For example, if you see a certain type of payload in trace data, you can analyze it to determine if it is a security vulnerability.
 
 The data is there, but the project is not currently focused on security use cases. The vendors are also more focused on observability. Therefore, OpenTelemetry is not currently suitable for security use cases.
 
 
-Nica: Yeah, I would say, in terms of just using the OpenTelemetry project to do a ton of security, you're not gonna have some of the things you would expect as you have in a basic security tool. 
+**Nica:** Yeah, I would say, in terms of just using the OpenTelemetry project to do a ton of security, you're not gonna have some of the things you would expect as you have in a basic security tool. 
 
 I just wanted to point out this talk from Ron Vider at Oxeye, who is using OpenTelemetry to do security monitoring, and there are some other examples out there.
 
@@ -295,7 +300,7 @@ This would allow for logs that are not just structured, but that are also implic
 
 And so, this is a little bit of vision for the future and also why it may make sense, even if you're doing a little bit of work right now for logging that feels almost the repetition of what you've done before, connecting a logging tool. It may make sense to be thinking about OpenTelemetry in the future.
 
-Pranay: I would like to add that it is now possible to add log data to traces. While the other way around is not as simple, it is still possible to add trace data to logs. We recently shipped a feature in SigNoz that allows you to view related logs on a trace page. 
+**Pranay:** I would like to add that it is now possible to add log data to traces. While the other way around is not as simple, it is still possible to add trace data to logs. We recently shipped a feature in SigNoz that allows you to view related logs on a trace page. 
 
 This is possible because if you pass the context of the log to the trace, you can determine which logs were emitted during the request propagation of the trace. This information can be viewed by simply clicking a link.
 
@@ -308,7 +313,7 @@ Nica, this would be a good topic for you to discuss, as you are familiar with ho
 
 I think any OpenTelemetry native tools like SigNoz, will be leveraging those features to make this much easier, correlation across SigNoz. 
 
-Nica: I believe the fundamental challenge is in connecting the dots when someone says, "We gather or show you OpenTelemetry data." There should be a clean, correlated telemetry signal. However, this is a difficult task.
+**Nica:** I believe the fundamental challenge is in connecting the dots when someone says, "We gather or show you OpenTelemetry data." There should be a clean, correlated telemetry signal. However, this is a difficult task.
 
 I want to remain unbiased in this discussion. SigNoz does not have a monopoly on a good way to do this. However, I believe it is important to be aware that some very large, very expensive SaaS tools are not OpenTelemetry. I am willing to be biased in favor of the OpenTelemetry project because these tools struggle with this.
 
@@ -326,9 +331,9 @@ And so, yeah, thinking about distributed tracing and context propagation across 
 
 <br></br>
 
-Pranay: In our previous discussion, we thought that a webinar on Kafka could focus on sources, context propagation, and correlation.
+**Pranay:** In our previous discussion, we thought that a webinar on Kafka could focus on sources, context propagation, and correlation.
 
-Nica: It would be interesting to discuss what context propagation enables. The starter is saying that it enables you to connect your logs across the stack and know when a trace occurred, which is especially important for getting accurate information and connecting it to other data.
+**Nica:** It would be interesting to discuss what context propagation enables. The starter is saying that it enables you to connect your logs across the stack and know when a trace occurred, which is especially important for getting accurate information and connecting it to other data.
 
 
 I agree with what they mentioned in the write-up. It would be worth discussing this topic in a future webinar. There is a lot to talk about with OpenTelemetry, and it is new territory for many people, which we find exciting.
@@ -337,7 +342,7 @@ Okay folks, please follow our channel if you would like to see more of our conte
 
 Please feel free to leave a question in the comments below. We will get back to you and answer all of them. Thank you so much for joining us, and we hope to see you again soon.
 
-Pranay: Thanks for joining. Goodbye.
+**Pranay:** Thanks for joining. Goodbye.
 
 
 ---
