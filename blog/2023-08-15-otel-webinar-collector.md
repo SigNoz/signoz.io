@@ -43,8 +43,8 @@ I am joined today by Pranay, co-founder and CEO of SigNoz. We will be discussing
 We will also not be discussing the specific setups that people mentioned in their questions, but we will be covering similar topics that have been asked about on Reddit and in the CNCF Slack channel.
 
 <!-- <figure data-zoomable align='center'>
-<img src="/img/blog/2023/08/question_mike.webp" alt=""/>
-<figcaption><i></i></figcaption>
+    <img src="/img/blog/2023/08/question_mike.webp" alt=""/>
+    <figcaption><i></i></figcaption>
 </figure>
 
 <br></br> -->
@@ -95,8 +95,8 @@ This is another question that we will not get into the specifics of, but I will 
 This is a fairly specific question, but it is something that we often come across when discussing engineering with a collector. It is like saying, "I'm starting to get worried about where the collector sits in the architecture." The thread that follows up with this question makes it a little clearer that it is quite an engineering challenge to have OTLP data go into Kafka and come back out.
 
 <!-- <figure data-zoomable align='center'>
-<img src="/img/blog/2023/08/question_harsh.webp" alt=""/>
-<figcaption><i></i></figcaption>
+    <img src="/img/blog/2023/08/question_harsh.webp" alt=""/>
+    <figcaption><i></i></figcaption>
 </figure>
 
 <br></br> -->
@@ -292,8 +292,8 @@ The trade-off in this setting is that, because there is only one OTel collector 
 **Pranay:** A push-based system is a system where the data source pushes the data to the collector. In this case, the pod would push the metrics and logs to the collector. This is in contrast to a pull-based system, where the collector would pull the data from the data source.
 
 <figure data-zoomable align='center'>
-<img src="/img/blog/2023/08/question_vignesh2.webp" alt=""/>
-<figcaption><i></i></figcaption>
+    <img src="/img/blog/2023/08/question_vignesh2.webp" alt=""/>
+    <figcaption><i></i></figcaption>
 </figure>
 
 <br></br>
@@ -364,8 +364,8 @@ For example, in sidecar mode, it can automatically add the instrumentation SDKs 
 
 
 <figure data-zoomable align='center'>
-<img src="/img/blog/2023/08/question_rajesh.webp" alt=""/>
-<figcaption><i></i></figcaption>
+    <img src="/img/blog/2023/08/question_rajesh.webp" alt=""/>
+    <figcaption><i></i></figcaption>
 </figure>
 
 <br></br>
@@ -383,12 +383,9 @@ Nica, I think it would be beneficial to explore this topic in more detail. The e
 
 **Nica:** Indeed. The next question brings us back to an earlier query: '*Can we use Kafka in front of the central collector to provide some level of resilience in case the backend (the central collector) becomes unavailable?*'"
 
-
-
-
 <figure data-zoomable align='center'>
-<img src="/img/blog/2023/08/question_pranav.webp" alt=""/>
-<figcaption><i></i></figcaption>
+    <img src="/img/blog/2023/08/question_pranav.webp" alt=""/>
+    <figcaption><i></i></figcaption>
 </figure>
 
 <br></br>
