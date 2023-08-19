@@ -42,15 +42,18 @@ With me is Pranay (co-founder, CEO SigNoz) and we are going to be talking about 
 
 We're not going to get into the individual setup that people had in the questions but you know because we saw some similar questions like this, both on Reddit and obviously in CNCF Slack.
 
-<figure data-zoomable align='center'>
+<!-- <figure data-zoomable align='center'>
     <img src="/img/blog/2023/08/question_mike.webp" alt=""/>
     <figcaption><i></i></figcaption>
 </figure>
 
-<br></br>
+<br></br> -->
 
 
-We would like to talk about their kind of in general and what they kind of lead us to so the first one was from Mike on the CNCF Slack saying "*I’m new to OpenTelemetry, I was thinking that the collector was backed by some sort of data storage but I'm not finding that, I'm just seeing statements here to the contrary if it just spans in the data and passes it on elsewhere*" 
+We would like to talk about their kind of in general and what they kind of lead us to so the first one was from Mike on the CNCF Slack saying 
+
+> "***I’m new to OpenTelemetry, I was thinking that the collector was backed by some sort of data storage but I'm not finding that, I'm just seeing statements here to the contrary if it just spans in the data and passes it on elsewhere***" 
+
 
 and Pranay I think this is kind of one of the places that a beginner starts is saying "*Hey I thought that OpenTelemetry was a whole project from collecting data all the way to like presenting a cool dashboard with all your metrics and maybe even sending you like alert emails*" but that's not the reality. 
 
@@ -84,16 +87,19 @@ No, so you have to use some other open-source projects, or other vendor backends
 
 So obviously this will help you with batch data or compress it, you do things like averaging metrics with processes as well, so you reduce the number of metric sends but it's not specific about how it's it's going to be stored at all.
 
-So yes this is another question that we're not going to get into the specifics of but I think a little bit just about in general so Harsh Thakur asks on the CNCF Slack "*I’d like to use OTLP Gateway but I have this issue on finding a fault-tolerant way of getting into Kafka if I set up an OpenTelemetry collector on the server side to receive OTLP and then export it, I'm afraid those OTel collectors would be a single point of failure*" 
+So yes this is another question that we're not going to get into the specifics of but I think a little bit just about in general so Harsh Thakur asks on the CNCF Slack 
+
+> "***I’d like to use OTLP Gateway but I have this issue on finding a fault-tolerant way of getting into Kafka if I set up an OpenTelemetry collector on the server side to receive OTLP and then export it, I'm afraid those OTel collectors would be a single point of failure***" 
 
 and this is a fairly specific question but it is something that we like often get to when having these discussions about engineering with a collector where it's like "*Hey I'm starting to get worried about where the collector sits in the architecture*" and you know in the thread that follows up with this it sort of becomes a little clearer like it's quite an engineering thing to try to have like OTLP data go into Kafka and come back out. 
 
+<!-- 
 <figure data-zoomable align='center'>
     <img src="/img/blog/2023/08/question_harsh.webp" alt=""/>
     <figcaption><i></i></figcaption>
 </figure>
 
-<br></br>
+<br></br> -->
 
 
 After these questions, we’ll come back to like "Hey I'm really worried about I have maybe somethings far away on my cluster and it's sending data to my collector that I already set up and I'm worried they're going to be errors there, there's gonna be lag there I'm worried about creating a bunch of internal Network traffic and can I set up a queue or some other service inside my architecture to do that" and my understanding is generally that's not necessary because generally, people don't realize like one collector can’t talk to another but can talk about some sort of basic architecture considerations with the collector?
@@ -265,14 +271,18 @@ What do you lose with this setting? and the trade-off here is that because there
 
 **Pranay:** Yeah and like one other thing a set point here is that, because you are running things at the node level so it's difficult to do application-level multi-tenancy here, for example, if you want to run something where different applications belong to different tenants, that's difficult to do here because there's a single node here and hence you can't do different sampling for each tenant or different resource allocation for each tenant. So yeah basically that's the trade-off. 
 
-**Nica:** We have a great question that just came in via chat I've put up thrown up on the screen here "*How could we have a push-based system where the new pod will push the metrics and logs to a common collector*" So help me parse push-based system here because I want to make sure that we're answering this question well. 
+**Nica:** We have a great question that just came in via chat I've put up thrown up on the screen here 
 
-<figure data-zoomable align='center'>
+> "***How could we have a push-based system where the new pod will push the metrics and logs to a common collector***" 
+ 
+So help me parse push-based system here because I want to make sure that we're answering this question well. 
+
+<!-- <figure data-zoomable align='center'>
     <img src="/img/blog/2023/08/question_vignesh2.webp" alt=""/>
     <figcaption><i></i></figcaption>
 </figure>
 
-<br></br>
+<br></br> -->
 
 
 **Pranay:** Well, two systems can happen either it's a pullback system or a push-based system.
@@ -331,15 +341,15 @@ For example, in sidecar mode it can it will automatically inject the instrumenta
 
 **Nica:**  Yeah this is a very powerful tool that gets some real traction with what's possible and we have a couple more questions. 
 
-<figure data-zoomable align='center'>
+<!-- <figure data-zoomable align='center'>
     <img src="/img/blog/2023/08/question_rajesh.webp" alt=""/>
     <figcaption><i></i></figcaption>
 </figure>
 
-<br></br>
+<br></br> -->
 
 
-"*Can you touch base please on the resiliency part? In OpenTelemetry collector down time we lose data even though we're running multiple pods, during the switch we lose some data*" 
+> "***Can you touch base please on the resiliency part? In OpenTelemetry collector down time we lose data even though we're running multiple pods, during the switch we lose some data***" 
 
 At the top level, there's a single collector involved at one point so while that collector's down, in general, you're gonna be missing some data during that time other considerations about this I you know very often these like relatively quite short outages are not usually the biggest concern but can we talk a little bit about this.
 
@@ -349,26 +359,30 @@ A lot of the resolutions come from the horizontal scalability of it and the queu
 
 Nica, I think this might be a good topic to dive deeper into, like how this works, because here we have taken an example of a single OTel collector but the OTel collector is not generally a single OTel collector, it's like multiple OTel collectors running as a fleet. So even if one OTel collector is down you have a load balancer in front which redirects to the OTel other OTel.
 
-**Nica:** Yeah and the next question that we have goes back to a question is, "*Is it possible to use Kafka in front of the central collector to provide some resiliency in case the backend (that central collector goes down to) goes down?"* 
+**Nica:** Yeah and the next question that we have goes back to a question is,
 
-<figure data-zoomable align='center'>
+> "***Is it possible to use Kafka in front of the central collector to provide some resiliency in case the backend (that central collector goes down to) goes down?"*** 
+
+<!-- <figure data-zoomable align='center'>
     <img src="/img/blog/2023/08/question_pranav.webp" alt=""/>
     <figcaption><i></i></figcaption>
 </figure>
 
-<br></br>
+<br></br> -->
 
 
 and so I think we're going to cover this more in-depth in the future, I think that the short version is yes, it is possible to use Kafka. There's a great deal of lift there because OTLP is not super native there, but there is a bit more resiliency than you see in this initial version of this chart.
 
-Let's get back to that one about resiliency and the kind of advanced conceptualization. There's another great question "Is there any OpenTelemetry operator available for ec2 host metrics in specific?" 
+Let's get back to that one about resiliency and the kind of advanced conceptualization. There's another great question 
 
-<figure data-zoomable align='center'>
+> "***Is there any OpenTelemetry operator available for ec2 host metrics in specific?***" 
+
+<!-- <figure data-zoomable align='center'>
     <img src="/img/blog/2023/08/question_vignesh.webp" alt=""/>
     <figcaption><i></i></figcaption>
 </figure>
 
-<br></br>
+<br></br> -->
 
 
 and the answer to that is not exactly, it's not necessarily going to pick up or there's not like a build of the Kubernetes  OTeloperator for ec2. There is a collector which is the AWS distro for the OpenTelemetry collector which does grab some specific ec2 metrics directly and has a couple of other specified pieces including, a receiver for x-ray data and some other AWS-specific stuff. 
