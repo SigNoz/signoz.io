@@ -119,6 +119,11 @@ Download the <a href = "https://www.python.org/downloads/" rel="noopener norefer
    ```jsx
    opentelemetry-bootstrap --action=install
    ```
+
+  :::note
+    Please make sure that you have installed all the dependencies of your application before running the above command. The command will not install instrumentation for the dependencies which are not installed.
+  :::
+
 4. **Prepare your Django app**<br></br>
    Now you need to run the following three commands to prepare the sample Django application.<br></br>
 
@@ -155,7 +160,7 @@ Download the <a href = "https://www.python.org/downloads/" rel="noopener norefer
       - `DJANGO_SETTINGS_MODULE`
 
       :::note
-      Don’t run app in reloader/hot-reload mode as it breaks instrumentation.
+      Don’t run app in reloader/hot-reload mode as it breaks instrumentation. For example, you can disable the auto reload with `--noreload`.
       :::
 
       ```jsx
@@ -165,6 +170,15 @@ Download the <a href = "https://www.python.org/downloads/" rel="noopener norefer
       ```jsx
       DJANGO_SETTINGS_MODULE=mysite.settings  OTEL_RESOURCE_ATTRIBUTES=service.name=DjangoApp OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4317" opentelemetry-instrument gunicorn mysite.wsgi -c gunicorn.config.py --workers 2 --threads 2 --reload
       ```
+      
+      `IP of SigNoz backend` is the IP of the machine where you installed SigNoz. If you have installed SigNoz on `localhost`, the endpoint will be `http://localhost:4317` for gRPC exporter and `http://localhost:4318` for HTTP exporter.
+      
+      :::note
+      The port numbers are 4317 and 4318 for the gRPC and HTTP exporters respectively. Remember to allow incoming requests to port **4317**/**4318** of machine where SigNoz backend is hosted.
+
+      The `opentelemetry-exporter-otlp-proto-grpc` package installs the gRPC exporter which depends on the `grpcio` package. The installation of `grpcio` may fail on some platforms for various reasons. If you run into such issues, or you don't want to use gRPC, you can install the HTTP exporter instead by installing the `opentelemetry-exporter-otlp-proto-http` package. You need to set the `OTEL_EXPORTER_OTLP_PROTOCOL` environment variable to `http/protobuf` to use the HTTP exporter.
+      :::
+
       And, congratulations! You have enabled OpenTelemetry to capture telemetry data from your Django application. And, you are sending the captured data to SigNoz.
       
       You can check if your app by opening the admin panel at [http://localhost:8000/admin](http://localhost:8000/admin).
