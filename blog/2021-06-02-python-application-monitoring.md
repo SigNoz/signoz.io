@@ -1,7 +1,7 @@
 ---
 title: Monitor your Python application with full stack open source APM tool - SigNoz
 slug: python-application-monitoring
-date: 2021-06-02
+date: 2023-08-27
 tags: [OpenTelemetry Instrumentation, Python]
 authors: ankit_anand
 description: In this article, learn how to setup application monitoring for Python apps using an open-source solution, SigNoz.
@@ -29,7 +29,8 @@ If you want to check our Github repo before diving in 👇
 
 **The cost of a millisecond.**
 
-TABB Group, a financial services industry research firm, [estimates](https://research.tabbgroup.com/report/v06-007-value-millisecond-finding-optimal-speed-trading-infrastructure) that if a broker's electronic trading platform is 5 milliseconds behind the competition, it could cost $4 million in revenue per millisecond.
+TABB Group, a financial services industry research firm, <a href = "https://research.tabbgroup.com/report/v06-007-value-millisecond-finding-optimal-speed-trading-infrastructure" rel="noopener noreferrer nofollow" target="_blank" >estimates</a> that if a broker's electronic trading platform is 5 milliseconds behind the competition, it could cost $4 million in revenue per millisecond.
+
 
 The cost of latency is too high in the financial services industry, and the same is true for almost any software-based business today. For Google, half a second delay in search results caused a 20% drop in traffic. Half a second is enough to kill user satisfaction to a point where they abandon an app's service.
 
@@ -43,19 +44,30 @@ And to do that, you need insights into how your infrastructure handles user requ
 
 SigNoz is a full-stack open-source application monitoring and observability platform which can be installed within your infra. You can track metrics like p99 latency, error rates for your services, external API calls, and individual endpoints. With service maps, you can quickly assess the health of your services.
 
-![service maps](/img/blog/2021/05/ezgif.com-gif-maker-1.gif)
+<figure data-zoomable align='center'>
+    <img src="/img/blog/2021/05/ezgif.com-gif-maker-1.gif" alt=""/>
+    <figcaption><i>Service maps on SigNoz dashboard</i></figcaption>
+</figure>
+
+<br></br>
 
 <!--- Service maps on SigNoz dashboard --->
 
 And once you know the affected service, trace data can help you identify the exact code causing the issue. Using SigNoz dashboard, you can visualize your traces easily with flamegraphs.
 
-![flamegraphs](/img/blog/2021/05/screenzy-1622399034895.webp)
+
+<figure data-zoomable align='center'>
+    <img src="/img/blog/2021/05/screenzy-1622399034895.webp" alt=""/>
+    <figcaption><i>Distributed tracing visualized with flamegraphs on SigNoz dashboard</i></figcaption>
+</figure>
+
+<br></br>
 
 <!--- Distributed tracing visualized with flamegraphs on SigNoz dashboard --->
 
 Now let's get down to some action and see everything for yourself.
 
-We have set up a [sample ToDo Python app](https://github.com/SigNoz/sample-flask-app) based on Flask web framework, which uses MongoDB as a database to demonstrate how SigNoz works. We will divide the tutorial into two parts:
+We have set up a <a href = "https://github.com/SigNoz/sample-flask-app" rel="noopener noreferrer nofollow" target="_blank" >sample ToDo Python app</a> based on Flask web framework, which uses MongoDB as a database to demonstrate how SigNoz works. We will divide the tutorial into two parts:
 
 1. Installing SigNoz
 2. Instrumenting sample app to start monitoring
@@ -80,15 +92,13 @@ When you are done installing SigNoz, you can access the UI at: `http://localhos
 
 The application list shown in the dashboard is from a sample app called HOT R.O.D that comes bundled with the SigNoz installation package.
 
-import Screenshot from "@theme/Screenshot"
 
-<Screenshot
-  alt="SigNoz dashboard"
-  height={500}
-  src="/img/blog/common/signoz_dashboard_homepage.png"
-  title="SigNoz dashboard"
-  width={700}
-/>
+<figure data-zoomable align='center'>
+    <img src="/img/blog/common/signoz_dashboard_homepage.webp" alt="Homepage SigNoz dashboard"/>
+    <figcaption><i>SigNoz dashboard - It shows services from a sample app that comes bundled with the application</i></figcaption>
+</figure>
+
+<br></br>
 
 <!-- ## Part 1 - Installing SigNoz
 
@@ -135,27 +145,32 @@ The applications shown in the dashboard are from a sample app called Hot R.O.D t
 
 Now that you have SigNoz up and running, let's see how instrumentation works. Instrumentation is the process of implementing code instructions to monitor your application's performance. Instrumentation is key to see how your application handles the real world.
 
-SigNoz supports [OpenTelemetry](https://opentelemetry.io/) as the primary way for users to instrument their application. OpenTelemetry is a single, vendor-agnostic instrumentation library per language with support for both automatic and manual instrumentation. You don't need to worry about instrumentation in this tutorial. OpenTelemetry comes with all currently available [instrumentation](https://github.com/open-telemetry/opentelemetry-python).
+SigNoz supports <a href = "https://opentelemetry.io" rel="noopener noreferrer nofollow" target="_blank" >OpenTelemetry</a> as the primary way for users to instrument their application. OpenTelemetry is a single, vendor-agnostic instrumentation library per language with support for both automatic and manual instrumentation. You don't need to worry about instrumentation in this tutorial. OpenTelemetry comes with all currently available <a href = "https://github.com/open-telemetry/opentelemetry-python" rel="noopener noreferrer nofollow" target="_blank" >instrumentation</a>.
 
 ## Instrumenting sample app to start monitoring
 
 **Prerequisites**
 
-1. **Python 3.4 or newer**<br></br>
-   If you do not have Python installed on your system, you can download it from the link [here](https://www.python.org/downloads/). Check the version of Python using `python3 --version` on your terminal to see if Python is properly installed or not.
+1. **Python 3.8 or newer**<br></br>
+   If you do not have Python installed on your system, you can download it from the link <a href = "https://www.python.org/downloads/" rel="noopener noreferrer nofollow" target="_blank" >here</a>. Check the version of Python using `python3 --version` on your terminal to see if Python is properly installed or not.
 
 2. **MongoDB**<br></br>
    If you already have MongoDB services running on your system, you can skip this step.
-   For macOS:
-   Download link: [https://docs.mongodb.com/manual/tutorial/install-mongodb-on-os-x/](https://docs.mongodb.com/manual/tutorial/install-mongodb-on-os-x/)
+   
+   For macOS: <a href = "https://docs.mongodb.com/manual/tutorial/install-mongodb-on-os-x/" rel="noopener noreferrer nofollow" target="_blank" >https://docs.mongodb.com/manual/tutorial/install-mongodb-on-os-x</a>
 
-   For Linux:
-   [https://docs.mongodb.com/manual/administration/install-on-linux/](https://docs.mongodb.com/manual/administration/install-on-linux/)
+   For Linux: <a href = "https://docs.mongodb.com/manual/administration/install-on-linux/" rel="noopener noreferrer nofollow" target="_blank" >https://docs.mongodb.com/manual/administration/install-on-linux</a>
 
 
 On MacOS the installation is done using Homebrew's brew package manager. Once the installation is done, don't forget to start MongoDB services using `brew services start mongodb/brew/mongodb-community@4.4`  on your macOS terminal.
 
-![Starting mongodb with homebrew](/img/blog/2021/05/screenzy-1622494628333.webp)
+
+<figure data-zoomable align='center'>
+    <img src="/img/blog/2021/05/screenzy-1622494628333.webp" alt=""/>
+    <figcaption><i>Starting mongodb with homebrew</i></figcaption>
+</figure>
+
+<br></br>
 
 ### Steps
 
@@ -175,13 +190,28 @@ On MacOS the installation is done using Homebrew's brew package manager. Once th
    python3 app.py
    ```
 
-   ![mac terminal running Python apps](/img/blog/2021/05/screenzy-1622486361195.webp)
-   <!--- On my mac terminal --->
+
+<figure data-zoomable align='center'>
+    <img src="/img/blog/2021/05/screenzy-1622486361195.webp" alt=""/>
+    <figcaption><i>mac terminal running Python apps</i></figcaption>
+</figure>
+
+<br></br>
+
+<!--- On my mac terminal --->
 
    You can now access the UI of the app on your local host: [http://localhost:5002/](http://localhost:5002/)
 
-   ![sample app screenshot](/img/blog/2021/05/screenzy-1622486344949-1.webp)
-   TODO reminder app with Flask and MongoDB
+
+
+<figure data-zoomable align='center'>
+    <img src="/img/blog/2021/05/screenzy-1622486344949-1.webp" alt=""/>
+    <figcaption><i>TODO reminder app with Flask and MongoDB</i></figcaption>
+</figure>
+
+<br></br>
+
+
 
    Press 'Ctrl + C' to exit the app once you have made sure it is running properly.
 
@@ -192,7 +222,7 @@ On MacOS the installation is done using Homebrew's brew package manager. Once th
    pip3 install -r requirements.txt
    ```
 
-   If it hangs while installing `grpcio` during **pip3 install opentelemetry-exporter-otlp** then follow below steps as suggested in **[this stackoverflow link](https://stackoverflow.com/a/62500932/3243212)**
+   If it hangs while installing `grpcio` during **pip3 install opentelemetry-exporter-otlp** then follow below steps as suggested in **<a href = "https://stackoverflow.com/a/62500932/3243212" rel="noopener noreferrer nofollow" target="_blank" >this stackoverflow link</a>**
 
    - pip3 install --upgrade pip
    - python3 -m pip install --upgrade setuptools
@@ -204,6 +234,9 @@ On MacOS the installation is done using Homebrew's brew package manager. Once th
    ```
    opentelemetry-bootstrap --action=install
    ```
+:::note
+Please make sure that you have installed all the dependencies of your application before running the above command. The command will not install instrumentation for the dependencies which are not installed.
+:::
 
 5. **Configure environment variables to run app and send data to SigNoz**<br></br>
    You're almost done. In the last step, you just need to configure a few environment variables for your OTLP exporters. Environment variables that need to be configured:
@@ -211,10 +244,14 @@ On MacOS the installation is done using Homebrew's brew package manager. Once th
    - `service.name`- application service name (you can name it as you like)
    - `OTEL_EXPORTER_OTLP_ENDPOINT` - In this case, IP of the machine where SigNoz is installed
 
+   `IP of SigNoz backend` is the IP of the machine where you installed SigNoz. If you have installed SigNoz on `localhost`, the endpoint will be `http://localhost:4317` for gRPC exporter and `http://localhost:4318` for HTTP exporter.
+
    You need to put these environment variables in the below command.
 
    :::note
-   Don’t run app in reloader/hot-reload mode as it breaks instrumentation.
+   Don’t run app in reloader/hot-reload mode as it breaks instrumentation. For example, if you use `export FLASK_ENV=development`, it enables the reloader mode which breaks OpenTelemetry instrumentation.
+
+   The `opentelemetry-exporter-otlp-proto-grpc` package installs the gRPC exporter which depends on the `grpcio` package. The installation of `grpcio` may fail on some platforms for various reasons. If you run into such issues, or you don't want to use gRPC, you can install the HTTP exporter instead by installing the `opentelemetry-exporter-otlp-proto-http` package. You need to set the `OTEL_EXPORTER_OTLP_PROTOCOL` environment variable to `http/protobuf` to use the HTTP exporter.
    :::
    
    ```jsx
@@ -231,7 +268,13 @@ On MacOS the installation is done using Homebrew's brew package manager. Once th
 
 And, congratulations! You have instrumented your sample Python app. You can now access the SigNoz dashboard at [http://localhost:3301](http://localhost:3301/) to monitor your app for performance metrics.
 
-![Python app in the application list](/img/blog/2021/05/dashboard-1.webp)
+
+<figure data-zoomable align='center'>
+    <img src="/img/blog/2021/05/dashboard-1.webp" alt=""/>
+    <figcaption><i>Python app in the application list</i></figcaption>
+</figure>
+
+<br></br>
 
 ## Using SigNoz dashboard to identify issues causing high latency in your app
 
@@ -241,23 +284,48 @@ In just 5 easy steps, our dashboard lets you drill down to events causing a dela
 
 1. **Choose the service you want to inspect**
 
-   ![List of services monitored](/img/blog/2021/06/dashboard_applications_list-2.webp)
+<figure data-zoomable align='center'>
+    <img src="/img/blog/2021/06/dashboard_applications_list-2.webp" alt=""/>
+    <figcaption><i>List of services monitored</i></figcaption>
+</figure>
+
+<br></br>
 
 2. **Choose the timestamp where latency is high and click on view traces**
 
-   ![Dashboard showing RED metrics](/img/blog/2021/06/dashboard_view_traces-1.webp)
+<figure data-zoomable align='center'>
+    <img src="/img/blog/2021/06/dashboard_view_traces-1.webp" alt=""/>
+    <figcaption><i>Dashboard showing RED metrics</i></figcaption>
+</figure>
+
+<br></br>
 
 3. **Choose the trace ID with the highest latency**
 
-   ![See list of traces](/img/blog/2021/06/dashboard_highest_traceid.webp)
+<figure data-zoomable align='center'>
+    <img src="/img/blog/2021/06/dashboard_highest_traceid.webp" alt=""/>
+    <figcaption><i>See list of traces</i></figcaption>
+</figure>
+
+<br></br>
 
 4. **Inspect distributed traces with flamegraph**
 
-   ![Flamegraphs for distributed tracing](/img/blog/2021/06/dashboard_flamegraph.webp)
+<figure data-zoomable align='center'>
+    <img src="/img/blog/2021/06/dashboard_flamegraph.webp" alt=""/>
+    <figcaption><i>Flamegraphs for distributed tracing</i></figcaption>
+</figure>
+
+<br></br>
 
 5. **Zero in on the highest latency event and take action**
 
-   ![Zoom in to specific spans](/img/blog/2021/06/dashboard_highest_latency.webp)
+<figure data-zoomable align='center'>
+    <img src="/img/blog/2021/06/dashboard_highest_latency.webp" alt=""/>
+    <figcaption><i>Zoom in to specific spans</i></figcaption>
+</figure>
+
+<br></br>
 
 If you need any help with trying out SigNoz, feel free to mail me at ankit.anand@signoz.io.
 
