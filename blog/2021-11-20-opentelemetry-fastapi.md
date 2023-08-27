@@ -1,7 +1,7 @@
 ---
 title: OpenTelemetry FastAPI Tutorial - complete implementation guide
 slug: opentelemetry-fastapi
-date: 2023-02-22
+date: 2023-08-27
 tags: [OpenTelemetry Instrumentation, Python]
 authors: ankit_anand
 description: OpenTelemetry FastAPI client libraries can help you monitor your FastAPI applications for performance issues. In this article, learn how to set up monitoring for FastAPI web framework using OpenTelemetry.
@@ -64,20 +64,19 @@ When you are done installing SigNoz, you can access the UI at: [http://localhos
 
 The application list shown in the dashboard is from a sample app called HOT R.O.D that comes bundled with the SigNoz installation package.
 
-import Screenshot from "@theme/Screenshot"
 
-<Screenshot
-    alt="SigNoz dashboard home"
-    height={500}
-    src="/img/blog/common/signoz_dashboard_homepage.webp"
-    title="List of applications shown as an example on SigNoz dashboard"
-    width={700}
-/>
+
+<figure data-zoomable align='center'>
+    <img src="/img/blog/common/signoz_dashboard_homepage.webp" alt="Homepage SigNoz dashboard"/>
+    <figcaption><i>SigNoz dashboard - It shows services from a sample app that comes bundled with the application</i></figcaption>
+</figure>
+
+<br></br>
 
 ### Instrumenting a sample FastAPI application with OpenTelemetry
 
 **Prerequisites**<br></br>
-Python 3.6 or newer
+Python 3.8 or newer
 
 Download the <a href = "https://www.python.org/downloads/" rel="noopener noreferrer nofollow" target="_blank" >latest version</a> of Python.
 
@@ -108,6 +107,9 @@ opentelemetry-bootstrap --action=install
 ```
 <br></br>
 
+:::note
+Please make sure that you have installed all the dependencies of your application before running the above command. The command will not install instrumentation for the dependencies which are not installed.
+:::
 
 **4. Configure environment variables to run app and send data to SigNoz**<br></br>
 You're almost done. In the last step, you just need to configure a few environment variables for your OTLP exporters. Environment variables that need to be configured:
@@ -115,9 +117,9 @@ You're almost done. In the last step, you just need to configure a few environme
    - `service.name`- application service name (you can name it as you like)
    - `OTEL_EXPORTER_OTLP_ENDPOINT` - In this case, IP of the machine where SigNoz is installed
 
-   :::note
-   Don’t run app in reloader/hot-reload mode as it breaks instrumentation.
-   :::
+:::note
+Don’t run app in reloader/hot-reload mode as it breaks instrumentation. For example, if you use `--reload` or `reload=True`, it enables the reloader mode which breaks OpenTelemetry isntrumentation.
+:::
    
    You need to put these environment variables in the below command.
    
@@ -127,16 +129,22 @@ You're almost done. In the last step, you just need to configure a few environme
 
    As we are running SigNoz on local host, `IP of SigNoz` can be replaced with `localhost` in this case. And, for `service_name` let's use `fastapiApp`. Hence, the final command becomes:
 
-   :::note
+   `IP of SigNoz backend` is the IP of the machine where you installed SigNoz. If you have installed SigNoz on `localhost`, the endpoint will be `http://localhost:4317` for gRPC exporter and `http://localhost:4318` for HTTP exporter.
+      
+:::info
+The port numbers are 4317 and 4318 for the gRPC and HTTP exporters respectively. Remember to allow incoming requests to port **4317**/**4318** of machine where SigNoz backend is hosted.
+:::
 
-    The uvicorn run command with multiple workers has yet to be supported. Alternatively, you can use gunicorn with the worker class `uvicorn.workers.Uvicorn[H11]Worker`
+:::note
 
-    In that case, the final command will be
+The uvicorn run command with multiple workers has yet to be supported. Alternatively, you can use gunicorn with the worker class `uvicorn.workers.Uvicorn[H11]Worker`
 
-    ```
-    OTEL_RESOURCE_ATTRIBUTES=service.name=fastapiApp OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4317" opentelemetry-instrument gunicorn main:app --workers 2 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000
-    ```
-   :::
+In that case, the final command will be
+
+```
+OTEL_RESOURCE_ATTRIBUTES=service.name=fastapiApp OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4317" opentelemetry-instrument gunicorn main:app --workers 2 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000
+```
+:::
 
 
    **Final Command**
@@ -164,13 +172,13 @@ locust -f locust.py --headless --users 10 --spawn-rate 1 -H http://localhost:500
 
 You will find `fastapiAPP` in the list of sample applications being monitored by SigNoz.
 
-<Screenshot
-    alt="FastAPI in the list of applications"
-    height={500}
-    src="/img/blog/2021/11/list_of_apps_fastapi.webp"
-    title="FastAPI in the list of applications being monitored by SigNoz"
-    width={700}
-/>
+
+<figure data-zoomable align='center'>
+    <img src="/img/blog/2021/11/list_of_apps_fastapi.webp" alt="FastAPI in the list of applications"/>
+    <figcaption><i>FastAPI in the list of applications being monitored by SigNoz</i></figcaption>
+</figure>
+
+<br></br>
 
 If you want to run the application with a docker image, refer to the section below for instructions.
 
@@ -231,43 +239,40 @@ SigNoz comes with out of box RED metrics charts and visualization. RED metrics s
 - Error rate of requests
 - Duration taken by requests
 
-<Screenshot
-    alt="SigNoz charts and metrics"
-    height={500}
-    src="/img/blog/common/signoz_charts_application_metrics.webp"
-    title="Measure things like application latency, requests per sec, error percentage and see your top endpoints with SigNoz."
-    width={700}
-/>
 
+<figure data-zoomable align='center'>
+    <img src="/img/blog/common/signoz_charts_application_metrics.webp" alt="SigNoz charts and metrics"/>
+    <figcaption><i>Measure things like application latency, requests per sec, error percentage and see your top endpoints with SigNoz</i></figcaption>
+</figure>
+
+<br></br>
 You can then choose a particular timestamp where latency is high to drill down to traces around that timestamp.
 
-<Screenshot
-    alt="List of traces on SigNoz dashboard"
-    height={500}
-    src="/img/blog/common/signoz_list_of_traces_hc.webp"
-    title="View of traces at a particular timestamp"
-    width={700}
-/>
 
+<figure data-zoomable align='center'>
+    <img src="/img/blog/common/signoz_list_of_traces_hc.webp" alt="List of traces on SigNoz dashboard"/>
+    <figcaption><i>View of traces at a particular timestamp</i></figcaption>
+</figure>
+
+<br></br>
 You can use flamegraphs to exactly identify the issue causing the latency.
 
-<Screenshot
-    alt="Flamegraphs used to visualize spans of distributed tracing in SigNoz UI"
-    height={500}
-    src="/img/blog/common/signoz_flamegraphs.webp"
-    title="View of traces at a particular timestamp"
-    width={700}
-/>
 
+<figure data-zoomable align='center'>
+    <img src="/img/blog/common/signoz_flamegraphs.webp" alt="Flamegraphs used to visualize spans of distributed tracing in SigNoz UI"/>
+    <figcaption><i>View of traces at a particular timestamp</i></figcaption>
+</figure>
+
+<br></br>
 You can also build custom metrics dashboard for your infrastructure.
 
-<Screenshot
-    alt="Custom metrics dashboard"
-    height={500}
-    src="/img/blog/common/signoz_custom_dashboard-min.webp"
-    title="You can also build a custom metrics dashboard for your infrastructure"
-    width={700}
-/>
+
+<figure data-zoomable align='center'>
+    <img src="/img/blog/common/signoz_custom_dashboard-min.webp" alt="Custom metrics dashboard"/>
+    <figcaption><i>You can also build a custom metrics dashboard for your infrastructure</i></figcaption>
+</figure>
+
+<br></br>
 
 ## Conclusion
 OpenTelemetry makes it very convenient to instrument your FastAPI application. You can then use an open-source APM tool like SigNoz to analyze the performance of your app. As SigNoz offers a full-stack observability tool, you don't have to use multiple tools for your monitoring needs.
