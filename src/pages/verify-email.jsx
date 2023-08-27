@@ -2,7 +2,7 @@ import React from "react";
 import Layout from "@theme/Layout";
 import Head from '@docusaurus/Head';
 
-function cloudzoom() {
+function verifyemail() {
   return (
     <Layout title="Book a Call">
     <Head>
@@ -24,7 +24,7 @@ function cloudzoom() {
     <br />
     After that, we'll send your SigNoz cloud account login details to your email.    </p>
     <br />
-    <p class="hero__subtitle">Got a question about SigNoz? 
+    <p class="hero__subtitle" style={{ fontStyle: "italic"}}>Got a question about SigNoz? 
     <br />
     Pick a time from the calendar below to set up a call. We'll walk you through the product and address any queries you have.
     </p>
@@ -46,4 +46,4 @@ function cloudzoom() {
   );
 }
 
-export default cloudzoom;
+export default verifyemail;

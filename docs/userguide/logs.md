@@ -4,6 +4,8 @@ id: logs
 ---
 
 import SigNozCloud from '../shared/signoz-cloud.md'
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
 
 # Overview
 
@@ -20,8 +22,123 @@ OpenTelemetry logs support is added with the philosophy that it should support l
 
 At SigNoz we follow OpenTelemetry approach for logs. All the features that are present with OpenTelemetry for logs is supported by SigNoz. We have done optimizations on the collector side for adding different features for logs in SigNoz. **But all the documentation for OpenTelemetry logs remains valid for SigNoz.**
 
+## Collecting Logs in SigNoz Cloud
 
-## Collecting Logs in SigNoz using OpenTelemetry
+Sending logs to the SigNoz cloud depends on what environment your application is running on. In most cases, you need to install OpenTelemetry Collector to collect and send logs to SigNoz.
+
+If you’re using an [OpenTelemetry SDK](https://signoz.io/docs/userguide/collecting_application_logs_otel_sdk_python/), you can send your logs directly to Signoz.
+
+Let’s give you an overview of how OpenTelemetry Collector and OpenTelemetry SDK can collect and send logs to the SigNoz cloud.
+
+### Using OpenTelemetry Collector to send logs
+
+OpenTelemetry collector is a standalone service provided by OpenTelemetry to receive, process, and export telemetry data. You can use it for applications deployed on Kubernetes and VMs. You can also use it if you are using any log shipper like FluentD or Logstash.
+
+Here are different setups with OpenTelemetry Collector that you might set up with your application:
+
+- **Via File or Stdout Logs**<br></br>
+Here, the logs of the application are directly collected by the OpenTelemetry receiver using collectors like **[filelog receiver](/docs/userguide/logs/#log-receivers)** and operators and processors to parse them into the OTel model.
+
+<br></br>
+
+ <figure data-zoomable align='center'>
+    <img src="/img/docs/saas-docs/logs-via-stdout-file.webp" alt="Logs collection via stdout, etc."/></figure>
+
+
+<br></br>
+    
+
+- **Via a logging agent like FluentD, FluentBit, Logstash**<br></br>
+If advanced parsing and collecting capabilities are needed which is not present in OpenTelemetry or something like FluentBit/LogStash etc. is already present, then the agents can push the logs to OpenTelemetry collector using protocols like **FluentForward/TCP/UDP,** etc.
+
+<br></br>
+    
+ <figure data-zoomable align='center'>
+    <img src="/img/docs/saas-docs/via-logging-agent.webp" alt="via logging agent"/></figure>
+<br></br>
+
+### Using OpenTelemetry SDK
+
+In this approach, you can modify your logging library that is used by the application to use the logging SDK provided by OpenTelemetry and directly forward the logs from the application to OpenTelemetry. This approach removes any need for agents/intermediary medium but loses the simplicity of having the log file locally.
+
+Currently, OpenTelemetry logging SDK is available for [Python](https://signoz.io/docs/userguide/collecting_application_logs_otel_sdk_python/) and [Java](https://signoz.io/docs/userguide/collecting_application_logs_otel_sdk_java/).
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/saas-docs/otel-sdk-logs.webp" alt="Otel logs sdk"/></figure>
+<br></br>
+
+
+
+### Sending logs to SigNoz Cloud based on your environment
+
+Based on your application environment (Kubernetes, VMs, etc.), you need to install and configure OTel Collectors accordingly to collect and send logs.
+
+Please use this exporter for sending logs to SigNoz cloud.
+
+```yaml
+exporters:
+ otlp:
+   endpoint: "ingest.{region}.signoz.cloud:443"
+   tls:
+     insecure: false
+   headers:
+     "signoz-access-token": "<SIGNOZ_INGESTION_KEY>"
+
+...
+
+pipeline:
+
+....
+
+	logs:
+	     receivers: [otlp]
+	     processors: [batch]
+	     exporters: [otlp]
+         
+```
+
+- `SIGNOZ_INGESTION_KEY` is the API token provided by SigNoz. You can find your ingestion key from SigNoz cloud account details sent on your email.
+
+Depending on the choice of your region for SigNoz cloud, the ingest endpoint will vary according to this table.
+
+| Region | Endpoint |
+| --- | --- |
+| US |	ingest.us.signoz.cloud:443 |
+| IN |	ingest.in.signoz.cloud:443 |
+| EU | ingest.eu.signoz.cloud:443 |
+
+
+
+<Tabs>
+<TabItem value="vm" label="VM" default>
+
+For applications deployed on VMs, you can install `otel-binary` to collect and send logs to SigNoz. You can find the instructions [here](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/).
+
+The `otel-binary` collects logs from your application and parses them into the OTel model before sending it to the SigNoz cloud.
+
+You can then configure the otlp endpoint for SigNoz cloud to forward logs from your VMs to SigNoz cloud.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/saas-docs/multiple-vms-logs.webp" alt="Logs collection from application deployed on VMs"/>
+    <figcaption><i>For applications on VMs, you need to install otel-binary to collect logs and send them to SigNoz Cloud</i></figcaption></figure>
+<br></br>
+
+</TabItem>
+<TabItem value="k8s" label="Kubernetes">
+
+For applications deployed on Kubernetes, you can install Otel Collector agents in your K8s infra. You can find the instructions [here](https://signoz.io/docs/tutorial/kubernetes-infra-metrics/) under the `SigNoz Cloud` tab.
+
+It is recommended to send logs through OpenTelemetry Collector on Kubernetes as it also helps collect K8s infra metrics.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/saas-docs/k8s-infra-otel-agent.webp" alt="For applications on Kubernetes, you need to install OTelAgent Daemon to collect logs and send them to SigNoz Cloud."/>
+    <figcaption><i>For applications on Kubernetes, you need to install OTelAgent Daemon to collect logs and send them to SigNoz Cloud.</i></figcaption></figure>
+<br></br>
+
+</TabItem>
+</Tabs>
+
+## Collecting Logs in Self-Hosted SigNoz using OpenTelemetry
 
 SigNoz natively supports OpenTelemetry for collecting logs. OpenTelemetry provides various receivers and processors for collecting first-party and third-party logs directly via OpenTelemetry Collector or via existing agents such as FluentBit so that minimal changes are required to move to OpenTelemetry for logs.
 

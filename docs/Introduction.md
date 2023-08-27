@@ -24,7 +24,7 @@ You can either self-host SigNoz or try SigNoz Cloud. Once SigNoz is up and runni
 
 <div class="row">
  <article class="col col--6">
-    <a class="card margin-bottom--lg padding--lg cardContainer_node_modules-@docusaurus-theme-classic-lib-next-theme-DocCard-styles-module cardContainerLink_node_modules-@docusaurus-theme-classic-lib-next-theme-DocCard-styles-module" href="/teams/">
+    <a class="card margin-bottom--lg padding--lg cardContainer_node_modules-@docusaurus-theme-classic-lib-next-theme-DocCard-styles-module cardContainerLink_node_modules-@docusaurus-theme-classic-lib-next-theme-DocCard-styles-module" href="/docs/cloud/">
       <h2 class="text--truncate cardTitle_node_modules-@docusaurus-theme-classic-lib-next-theme-DocCard-styles-module" title="SigNoz Cloud">SigNoz Cloud</h2>
       <div class="text--truncate cardDescription_node_modules-@docusaurus-theme-classic-lib-next-theme-DocCard-styles-module" title="Learn how to instrument your application">Easy way to get started with SigNoz</div>
     </a>
@@ -64,14 +64,25 @@ The topics in this section provide details on using SigNoz to monitor your appli
 <div class="row">
  
   <article class="col col--6">
+    <a class="card margin-bottom--lg padding--lg cardContainer_node_modules-@docusaurus-theme-classic-lib-next-theme-DocCard-styles-module cardContainerLink_node_modules-@docusaurus-theme-classic-lib-next-theme-DocCard-styles-module" href="/docs/instrumentation/overview/">
+      <h2 class="text--truncate cardTitle_node_modules-@docusaurus-theme-classic-lib-next-theme-DocCard-styles-module" title="1. Tutorials">1. Instrumentation</h2>
+      <div class="text--truncate cardDescription_node_modules-@docusaurus-theme-classic-lib-next-theme-DocCard-styles-module" title="Tutorials about monitoring your applications and infrastructure<">Learn how to instrument your applications to send data to SigNoz</div>
+    </a>
+  </article>
+
+   <article class="col col--6">
     <a class="card margin-bottom--lg padding--lg cardContainer_node_modules-@docusaurus-theme-classic-lib-next-theme-DocCard-styles-module cardContainerLink_node_modules-@docusaurus-theme-classic-lib-next-theme-DocCard-styles-module" href="/docs/tutorials">
-      <h2 class="text--truncate cardTitle_node_modules-@docusaurus-theme-classic-lib-next-theme-DocCard-styles-module" title="1. Tutorials">1. Tutorials</h2>
+      <h2 class="text--truncate cardTitle_node_modules-@docusaurus-theme-classic-lib-next-theme-DocCard-styles-module" title="1. Tutorials">2. Tutorials</h2>
       <div class="text--truncate cardDescription_node_modules-@docusaurus-theme-classic-lib-next-theme-DocCard-styles-module" title="Tutorials about monitoring your applications and infrastructure<">Tutorials about monitoring your applications and infrastructure</div>
     </a>
   </article>
+
+</div>
+
+<div class="row">
   <article class="col col--6">
     <a class="card margin-bottom--lg padding--lg cardContainer_node_modules-@docusaurus-theme-classic-lib-next-theme-DocCard-styles-module cardContainerLink_node_modules-@docusaurus-theme-classic-lib-next-theme-DocCard-styles-module" href="/docs/operate">
-      <h2 class="text--truncate cardTitle_node_modules-@docusaurus-theme-classic-lib-next-theme-DocCard-styles-module" title="2. Operate">2. Operate</h2>
+      <h2 class="text--truncate cardTitle_node_modules-@docusaurus-theme-classic-lib-next-theme-DocCard-styles-module" title="2. Operate">3. Operate</h2>
       <div class="text--truncate cardDescription_node_modules-@docusaurus-theme-classic-lib-next-theme-DocCard-styles-module" title="This section explains how to manage SigNoz">This section explains how to manage SigNoz</div>
     </a>
   </article>

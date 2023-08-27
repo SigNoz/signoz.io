@@ -116,6 +116,17 @@ GROUP BY interval
 ORDER BY interval ASC;
 ```
 
+While writing queies for logs table, if you want to use an attribute/resource attribute in your query you will have to reference it in the following format
+`<type>_<dataType>_value[indexOf(<type>_<dataType>_key, <keyname>)]` 
+
+where `type` can be `attributes/resources` , `dataType` can be `int64/float64/string` and `keyname` is the name of the key.
+
+Eg: If your `keyname` is `status` of `dataType` `string` and `type` `attribute`, it needs to be referenced as `attributes_string_value[indexOf(attributes_string_key, 'status')]`
+
+Note:- In the above example, if `status` is an selected field, then it can be referenced as
+`attribute_string_status`
+
+
 ## Building Alert Queries with Clickhouse data
 
 The most common use case for alerts is to send notifications when a threshold condition is met. For example, conditions like CPU usage exceeds 70% (CPU Usage > 70) or failures in a service exceed your expections  (service error count > 10).  
