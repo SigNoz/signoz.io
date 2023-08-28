@@ -9,17 +9,19 @@ import TabItem from '@theme/TabItem';
 # Collecting Syslogs
 
 With SigNoz you can collect your syslogs logs and perform different queries on top of it.
-In this example we will configure `rsyslog` to forward our system logs to tcp endpoint of otel-collector and use `syslog` receiver in otel-collector to receive and parse the logs.
+We will demonstrate how to configure `rsyslog` to forward system logs to tcp endpoint of otel-collector and use `syslog` receiver in OpenTelemetry Collector to receive and parse the logs.
 Below are the steps to collect syslogs.
 
 ## Collect Syslogs in SigNoz cloud
+
+If you don’t already have a SigNoz cloud account, you can sign up [here](https://signoz.io/teams/).
 
 <Tabs>
 <TabItem value="VM" label="VM" default>
 
 * Add otel collector binary to your VM by following this [guide](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/).
   
-* Add the syslog reciever to `config.yaml`
+* Add the syslog reciever to `config.yaml` to otel-collector.
     ```yaml {2-10}
     receivers:
       syslog:
@@ -34,11 +36,11 @@ Below are the steps to collect syslogs.
     ...
     ```
     Here we are collecting the logs and moving message from attributes to body using operators that are available.
-    You can read more about operators [here](./logs.md#operators-for-parsing-and-manipulating-logs)
+    You can read more about operators [here](./logs.md#operators-for-parsing-and-manipulating-logs).
 
     For more configurations that are available for syslog receiver please check [here](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/syslogreceiver).
 
-* Next we will modify our pipeline inside `config.yaml` to include the receiver we have created above.
+* Next we will modify our pipeline inside `config.yaml` of otel-collector to include the receiver we have created above.
     ```yaml {4}
     service:
         ....
@@ -50,7 +52,14 @@ Below are the steps to collect syslogs.
 
 * Now we can restart the otel collector so that new changes are applied and we can forward our logs to port `54527`.
 
-* Modify your `rsyslog.conf` file present inside `/etc/` by running `sudo vim /etc/rsyslog.conf` and adding the this line at the end
+* Modify your `rsyslog.conf` file present inside `/etc/` by running the following command:
+  
+    ```bash
+    sudo vim /etc/rsyslog.conf
+    ```
+  
+  and adding the this line at the end
+    
     ```
     template(
       name="UTCTraditionalForwardFormat"
@@ -61,7 +70,7 @@ Below are the steps to collect syslogs.
     *.* action(type="omfwd" target="0.0.0.0" port="54527" protocol="tcp" template="UTCTraditionalForwardFormat")
     ```
 
-    For production use cases it is recommended to using something like
+    For production use cases it is recommended to use something like below:
     ```
     template(
       name="UTCTraditionalForwardFormat"
@@ -76,7 +85,7 @@ Below are the steps to collect syslogs.
 
     So that you have retires and queue in place to de-couple the sending from the other logging action.
 
-    The value of `target` might vary depending on where SigNoz is deployed, since it is deployed on the same host I am using `0.0.0.0` for more help you can visit [here](../install/troubleshooting.md#signoz-otel-collector-address-grid)
+    The value of `target` might vary depending on where SigNoz is deployed, since it is deployed on the same host I am using `0.0.0.0` for more help you can visit [here](../install/troubleshooting.md#signoz-otel-collector-address-grid).
 
 * Now restart your rsyslog service by running `sudo systemctl restart rsyslog.service`
 * You can check the status of service by running `sudo systemctl status rsyslog.service`
