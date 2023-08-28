@@ -64,7 +64,7 @@ services:
       - --tracing.openTelemetry.grpc=true
       - --tracing.openTelemetry.address=ingest.{region}.signoz.cloud:443
       - --tracing.openTelemetry.insecure=false
-      - `--tracing.openTelemetry.headers.signoz-access-token=SIGNOZ_INGESTION_KEY
+      - --tracing.openTelemetry.headers.signoz-access-token=SIGNOZ_INGESTION_KEY
     ports:
       - "80:80"
       - "8080:8080"
