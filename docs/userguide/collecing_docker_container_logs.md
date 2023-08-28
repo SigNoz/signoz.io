@@ -80,7 +80,7 @@ Logspout helps in collecting Docker logs by connecting to Docker socket.
   
 
 
-## Collect Syslogs in Self-Hosted SigNoz?
+## Collect Syslogs in Self-Hosted SigNoz
 
 ###  Steps for collecting logs if SigNoz is running on the same host.
 Once you deploy SigNoz in docker, it will automatically start collecting logs of all the docker containers, except for the container logs of SigNoz. 

@@ -5,7 +5,8 @@ id: collect_logs_from_file
 # Collecting application Logs from Log file
 
 With SigNoz you can collect your application logs from a log file and push it to SigNoz and perform different actions on your data.
-In this tutorail configure otel-collector to read logs from a file and push them to signoz.
+
+In this tutorail configure OpenTelemetry Collector to read logs from a file and push them to SigNoz.
 
 
 We will create a sample log file named `app.log` and paste the following lines.
@@ -15,14 +16,14 @@ We will create a sample log file named `app.log` and paste the following lines.
   This is a log line 3
   ```
 
-## Collect Syslogs in SigNoz cloud
+## Collect Application Logs from Log file in SigNoz cloud
 
 If you don’t already have a SigNoz cloud account, you can sign up [here](https://signoz.io/teams/).
 
 * Add otel collector binary to your VM by following this [guide](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/).
   
 
-* Add the filelog reciever to `config.yaml` which is present inside `deploy/docker/clickhouse-setup`
+* Add the filelog reciever to `config.yaml`.
     ```yaml {3-15}
     receivers:
       ...
@@ -33,7 +34,7 @@ If you don’t already have a SigNoz cloud account, you can sign up [here](https
     ```
     `start_at: beginning` can be removed once you are done testing.
 
-    For parsing logs of different formats you will have to use operators, you can read more about operators [here](./logs.md#operators-for-parsing-and-manipulating-logs)
+    For parsing logs of different formats you will have to use operators, you can read more about operators [here](https://signoz.io/docs/userguide/logs/#operators-for-parsing-and-manipulating-logs).
 
     For more configurations that are available for filelog receiver please check [here](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/filelogreceiver).
 
@@ -55,7 +56,7 @@ If you don’t already have a SigNoz cloud account, you can sign up [here](https
   
 
 
-## Collect Syslogs in Self-Hosted SigNoz?
+## Collect Application Logs from Log file in Self-Hosted SigNoz
 
 ### Steps for collecting logs if SigNoz is running on the same host.
 

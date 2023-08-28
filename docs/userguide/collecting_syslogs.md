@@ -96,7 +96,7 @@ If you don’t already have a SigNoz cloud account, you can sign up [here](https
 
 
 
-## Collect Syslogs in Self-Hosted SigNoz?
+## Collect Syslogs in Self-Hosted SigNoz
 * Modify the `docker-compose.yaml` file present inside `deploy/docker/clickhouse-setup` to expose a port, in this case `54527` so that we can forward syslogs to this port.
     ```yaml {8}
     ...
