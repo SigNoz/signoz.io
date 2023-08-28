@@ -20,6 +20,9 @@ of services running behind Traefik and troubleshoot issues.
 
 ## Export Traefik Metrics and Traces to SigNoz
 
+Based on how you are running SigNoz (e.g. SigNoz Cloud, in an independent VM or Kubernetes cluster),
+you have to provide the address to send data from the above receivers.
+
 <Tabs>
 <TabItem value="signoz-cloud" label="SigNoz Cloud" default>
 
