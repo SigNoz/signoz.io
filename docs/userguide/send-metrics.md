@@ -170,11 +170,11 @@ You can follow the below steps
   ````
 4. Run the query to list metrics
   ````
-  select DISTINCT(JSONExtractString(time_series_v2.labels,'__name__')) as metrics from signoz_metrics.time_series_v2
+  select DISTINCT(JSONExtractString(time_series_v2.labels,'__name__')) as metrics from signoz_metrics.distributed_time_series_v2
   ````
 5. If needed, dump in a csv file and parse it locally
   ```
-  select DISTINCT(labels) from signoz_metrics.time_series_v2 INTO OUTFILE 'output.csv' 
+  select DISTINCT(labels) from signoz_metrics.distributed_time_series_v2 INTO OUTFILE 'output.csv'
   ```
 
 You can use this metrics to plot in the [Dashboard](/docs/userguide/manage-dashboards) section

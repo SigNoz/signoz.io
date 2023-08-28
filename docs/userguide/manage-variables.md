@@ -46,7 +46,7 @@ SigNoz supports three ways of creating variables: query, custom, and textbox.
 
     ```sql
     SELECT DISTINCT JSONExtractString(labels, 'job') AS job
-    FROM signoz_metrics.time_series_v2
+    FROM signoz_metrics.distributed_time_series_v2
     WHERE metric_name = 'node_cpu_seconds_total'
     ```
 
