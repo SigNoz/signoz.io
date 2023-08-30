@@ -19,6 +19,7 @@ of services running behind Traefik and troubleshoot issues.
 - Traefik v3.0 or above
 - Must have SigNoz running. You can follow the [installation guide][1] to install SigNoz.
 - Must have SigNoz OtelCollector accessible from Traefik
+- If you don’t already have a SigNoz Cloud account, you can sign up [here][4].
 
 ## Export Traefik Metrics and Traces to SigNoz
 
@@ -196,3 +197,4 @@ Check out the [List of metrics from Traefik][3].
 [1]: https://signoz.io/docs/install/
 [2]: https://signoz.io/docs/userguide/dashboards/
 [3]: #list-of-metrics
+[4]: https://signoz.io/teams/
