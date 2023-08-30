@@ -28,7 +28,7 @@ you have to provide the address to send data from the above receivers.
 <Tabs>
 <TabItem value="signoz-cloud" label="SigNoz Cloud" default>
 
-In this section, we will see how to export Traefik metrics and traces to SigNoz.
+In this section, we will see how to export Traefik metrics and traces to SigNoz Cloud.
 
 For metrics, we will have to set the following CLI flags in Traefik:
 
@@ -46,11 +46,12 @@ For traces, we will have to set the following CLI flags in Traefik:
 - `--tracing.openTelemetry.insecure=false`
 - `--tracing.openTelemetry.headers.signoz-access-token=SIGNOZ_INGESTION_KEY`
 
-We will take an example of a simple `hello-app` running behind Traefik.
+We will take an example `docker-compose.yaml` with a simple `hello-app`
+running behind Traefik.
 
 _docker-compose.yaml_
 
-```yaml
+```yaml {13-14,18-19}
 version: '3'
 services:
   reverse-proxy:
@@ -62,13 +63,13 @@ services:
       - --providers.docker
       - --metrics.openTelemetry=true
       - --metrics.openTelemetry.grpc=true
-      - --metrics.openTelemetry.address=ingest.{region}.signoz.cloud:443
       - --metrics.openTelemetry.insecure=false
+      - --metrics.openTelemetry.address=ingest.{region}.signoz.cloud:443
       - --metrics.openTelemetry.headers.signoz-access-token=SIGNOZ_INGESTION_KEY
       - --tracing.openTelemetry=true
       - --tracing.openTelemetry.grpc=true
-      - --tracing.openTelemetry.address=ingest.{region}.signoz.cloud:443
       - --tracing.openTelemetry.insecure=false
+      - --tracing.openTelemetry.address=ingest.{region}.signoz.cloud:443
       - --tracing.openTelemetry.headers.signoz-access-token=SIGNOZ_INGESTION_KEY
     ports:
       - "80:80"
@@ -88,18 +89,19 @@ services:
 
 Notes:
 - Replace `SIGNOZ_INGESTION_KEY` with the one provided by SigNoz.
-- Replace `{region}` with the region of your SigNoz Cloud instance. Refer to the table below for the region-specific endpoints.
+- Replace `{region}` with the region of your SigNoz Cloud instance.
+  Refer to the table below for the region-specific endpoints:
 
-| Region	| Endpoint                   |
-| ------- | -------------------------- |
-| US      | ingest.us.signoz.cloud:443 |
-| IN      | ingest.in.signoz.cloud:443 |
-| EU      | ingest.eu.signoz.cloud:443 |
+  | Region	| Endpoint                   |
+  | ------- | -------------------------- |
+  | US      | ingest.us.signoz.cloud:443 |
+  | IN      | ingest.in.signoz.cloud:443 |
+  | EU      | ingest.eu.signoz.cloud:443 |
 
 </TabItem>
 <TabItem value="self-host" label="Self-Host">
 
-In this section, we will see how to export Traefik metrics and traces to SigNoz Cloud.
+In this section, we will see how to export Traefik metrics and traces to SigNoz.
 
 For metrics, we will have to set the following CLI flags in Traefik:
 
@@ -117,11 +119,12 @@ For traces, we will have to set the following CLI flags in Traefik:
 
 Note: Replace `<SigNoz OtelCollector IP>` with the IP address or hostname of the host running SigNoz OtelCollector.
 
-We will take an example of a simple `hello-app` running behind Traefik.
+We will take an example `docker-compose.yaml` with a simple `hello-app`
+running behind Traefik.
 
 _docker-compose.yaml_
 
-```yaml
+```yaml {13,17}
 version: '3'
 services:
   reverse-proxy:
@@ -132,13 +135,13 @@ services:
       - --api.insecure=true
       - --providers.docker
       - --metrics.openTelemetry=true
-      - --metrics.openTelemetry.address=signoz:4317
-      - --metrics.openTelemetry.insecure=true
       - --metrics.openTelemetry.grpc=true
+      - --metrics.openTelemetry.insecure=true
+      - --metrics.openTelemetry.address=signoz:4317
       - --tracing.openTelemetry=true
-      - --tracing.openTelemetry.address=signoz:4317
-      - --tracing.openTelemetry.insecure=true
       - --tracing.openTelemetry.grpc=true
+      - --tracing.openTelemetry.insecure=true
+      - --tracing.openTelemetry.address=signoz:4317
     ports:
       - "80:80"
       - "8080:8080"
