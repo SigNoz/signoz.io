@@ -34,7 +34,7 @@ For metrics, we will have to set the following CLI flags in Traefik:
 
 - `--metrics.openTelemetry=true`
 - `--metrics.openTelemetry.grpc=true`
-- `--metrics.openTelemetry.address=ingest.{region}.signoz.cloud:4317`
+- `--metrics.openTelemetry.address=ingest.{region}.signoz.cloud:443`
 - `--metrics.openTelemetry.insecure=false`
 - `--metrics.openTelemetry.headers.signoz-access-token=SIGNOZ_INGESTION_KEY`
 
@@ -42,7 +42,7 @@ For traces, we will have to set the following CLI flags in Traefik:
 
 - `--tracing.openTelemetry=true`
 - `--tracing.openTelemetry.grpc=true`
-- `--tracing.openTelemetry.address=ingest.{region}.signoz.cloud:4317`
+- `--tracing.openTelemetry.address=ingest.{region}.signoz.cloud:443`
 - `--tracing.openTelemetry.insecure=false`
 - `--tracing.openTelemetry.headers.signoz-access-token=SIGNOZ_INGESTION_KEY`
 
