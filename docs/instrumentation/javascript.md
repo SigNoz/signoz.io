@@ -53,7 +53,7 @@ const { SemanticResourceAttributes } = require('@opentelemetry/semantic-conventi
 const exporterOptions = {
   url: 'https://ingest.{region}.signoz.cloud:443',
   headers: {
-    "signoz-access-token": "Bearer SIGNOZ_INGESTION_KEY"
+    "signoz-access-token": "SIGNOZ_INGESTION_KEY"
   }
 }
 // highlight-end
