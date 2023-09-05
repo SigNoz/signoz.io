@@ -104,9 +104,11 @@ For grouping, you can use any of the tags like `severity`, `alertname` or any ot
 You can setup notification channels for sending the generated alerts to other applications. Currently, the following channels are supported: 
 - Slack ([v0.5.0](https://github.com/SigNoz/signoz/releases/tag/v0.5.0) onwards)
 - Webhook ([v0.7.4](https://github.com/SigNoz/signoz/releases/tag/v0.7.4) onwards)
-- PagerDuty
+- PagerDuty ([v0.8.0](https://github.com/SigNoz/signoz/releases/tag/v0.8.0) onwards)
+- MS Teams ([v0.26.0](https://github.com/SigNoz/signoz/releases/tag/v0.26.0) onwards)
+- Opsgenie ([v0.28.0](https://github.com/SigNoz/signoz/releases/tag/v0.28.0) onwards)
 
-We are also working towards adding more channels (like OpsGenie, Email) in the upcoming releases.
+We are also working towards adding more channels (like Email) in the upcoming releases.
 
 The alert channel tabs can be accessed from `Settings > Alert Channels` tab. This shows a list of configured alert channels. When multiple channels are setup, the alerts will be sent to all the configured channels.
 
@@ -266,6 +268,60 @@ You must have a valid Integration Key (aka Routing Key) before you setup a Pager
    ![image](https://user-images.githubusercontent.com/10277894/179956567-d4de2d44-4510-46bb-80df-13ecefc08064.png)
 
 
+### 4. Configure Opsgenie Channel
+
+#### a. Prerequisite
+
+First we need to create an integration in Opsgenie, and obtain an API key. Follow the steps written [here](https://support.atlassian.com/opsgenie/docs/integrate-opsgenie-with-prometheus/) to create an integration and obtain an API key.
+
+#### b. Creating a new Notification channel (Opsgenie)
+
+You have to provide a name, API Key to configure a notification channel. You may use [go templates](https://prometheus.io/docs/alerting/latest/notifications/) for the message, description, and priority.
+
+![new-notification-channel](../../static/img/docs/opsgenie-new-channel.png)
+
+You can also verify the configuration by using the _Test_ button. When you click _Test_, a test alert will be sent. The purpose of this feature is to confirm that signoz alert manager can talk to your opsgenie.
+
+#### c. Editing a Notification channel (Opsgenie)
+
+You can edit opsgenie API Key or other parameters except the channel name and channel type.
+
+
+#### d. Receive Alert in Opsgenie
+
+Once everything is set up correctly, you should see the alerts in the opsgenie Alerts whenever the monitored metrics cross the threshold specified in the alert rules.
+
+Now you can stay relaxed that SigNoz will promptly alert you whenever something goes wrong in any of your applications or infra components.
+
+![alert-in-opsgenie](../../static/img/docs/alert-in-opsgenie.png)
+
+
+### 5. Configure MS Teams Channel
+
+#### a. Prerequisite
+
+First we need to create an incoming webhook in MS Teams, and obtain a webhook URL. Follow the steps written [here](https://docs.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/add-incoming-webhook) to create an incoming webhook and obtain a webhook URL.
+
+#### b. Creating a new Notification channel (MS Teams)
+
+You have to provide a name, webhook URL to configure a notification channel. You may use [go templates](https://prometheus.io/docs/alerting/latest/notifications/) for the title and description.
+
+![new-notification-channel](../../static/img/docs/ms-teams-new-channel.png)
+
+You can also verify the configuration by using the _Test_ button. When you click _Test_, a test alert will be sent. The purpose of this feature is to confirm that signoz alert manager can talk to your MS Teams.
+
+#### c. Editing a Notification channel (MS Teams)
+
+You can edit MS Teams webhook URL or other parameters except the channel name and channel type.
+
+
+#### d. Receive Alert in MS Teams
+
+Once everything is set up correctly, you should see the alerts in the MS Teams Alerts whenever the monitored metrics cross the threshold specified in the alert rules.
+
+Now you can stay relaxed that SigNoz will promptly alert you whenever something goes wrong in any of your applications or infra components.
+
+![alert-in-ms-teams](../../static/img/docs/alert-in-ms-teams.png)
 
 :::note
 
