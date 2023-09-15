@@ -14,7 +14,7 @@ export const Header = () => {
         <Hero>
           OpenTelemetry-Native Traces,
           <br className="hidden lg:inline" />
-           Metrics, and Logs in a single pane
+          Metrics, and Logs in a single pane
         </Hero>
         <SubHeading>
           SigNoz is an open source Datadog or New Relic alternative. A single
@@ -23,7 +23,7 @@ export const Header = () => {
           by a powerful query builder.
         </SubHeading>
       </div>
-      <div className="flex gap-5 justify-center mb-12">
+      <div className="flex flex-col md:flex-row gap-5 justify-center mb-12 mx-5">
         <Button
           isButton
           className=""
