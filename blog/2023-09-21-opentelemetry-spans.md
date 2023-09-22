@@ -34,9 +34,10 @@ This article discusses OpenTelemetry, OpenTelemetry spans, and the processes inv
 
 OpenTelemetry, often abbreviated as Otel, is an open-source observability framework designed to generate, gather, and export telemetry data (logs, metrics, and traces) that can be used to troubleshoot performance issues in applications. 
 
-It is incubated under [Cloud Native Computing Foundation](https://www.cncf.io/), the same foundation that incubated Kubernetes.
+It is incubated under <a href = "https://www.cncf.io/" rel="noopener noreferrer nofollow" target="_blank" >Cloud Native Computing Foundation</a>, the same foundation that incubated Kubernetes.
 
-OpenTelemetry follows a [specification-driven](https://opentelemetry.io/docs/specs/otel/) development and provides client libraries to instrument applications in most programming languages. Once you have instrumented with OpenTelemetry, you should be able to collect various telemetry signals like logs, metrics, and traces from it.
+OpenTelemetry follows a <a href = "https://opentelemetry.io/docs/specs/otel/" rel="noopener noreferrer nofollow" target="_blank" >specification-driven</a>
+ development and provides client libraries to instrument applications in most programming languages. Once you have instrumented with OpenTelemetry, you should be able to collect various telemetry signals like logs, metrics, and traces from it.
 
 OpenTelemetry is also vendor-agnostic and contributes to standardization by allowing data to be exported to a wide range of backend systems and observability platforms, for example, [SigNoz](https://signoz.io/docs/). 
 
@@ -118,7 +119,7 @@ There are two approaches to incorporating tracing with OpenTelemetry: manual and
 
     Here, a library or agent is used to trace specific frameworks, libraries, or services automatically. This process occurs without the need for manual intervention. The agents or libraries integrate seamlessly into your application's code, capturing spans effortlessly.
 
-We will be looking at how to create a trace using the manual instrumentation technique using Golang. More information can be found in the [documentation](https://opentelemetry.io/docs/instrumentation/go/manual/) and the implementation for [other languages](https://opentelemetry.io/docs/instrumentation/). 
+We will be looking at how to create a trace using the manual instrumentation technique using Golang. More information can be found in the <a href = "https://opentelemetry.io/docs/instrumentation/go/manual" rel="noopener noreferrer nofollow" target="_blank" >documentation</a> and the implementation for  <a href = "https://opentelemetry.io/docs/instrumentation" rel="noopener noreferrer nofollow" target="_blank" >other languages</a>. 
 
 ### Creation of Traces
 
@@ -207,7 +208,7 @@ Once the tracer has been set up, you can access it and manually instrument your 
 
 With the tracer in place, spans can be created to track specific operations within the code.
 
-The creation of spans with tracers requires access to a `context.Context instance`. A `context.Context` instance is a way to carry request-scoped values across API boundaries and between processes. Usually, these instances are obtained from objects such as a request, and they may already have a parent span from an [instrumentation library](https://opentelemetry.io/docs/instrumentation/go/libraries/).
+The creation of spans with tracers requires access to a `context.Context instance`. A `context.Context` instance is a way to carry request-scoped values across API boundaries and between processes. Usually, these instances are obtained from objects such as a request, and they may already have a parent span from an <a href = "https://opentelemetry.io/docs/instrumentation/go/libraries/" rel="noopener noreferrer nofollow" target="_blank" >instrumentation library</a>.
 
 ```jsx
 func httpHandler(w http.ResponseWriter, r *http.Request) {
