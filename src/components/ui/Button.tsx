@@ -9,6 +9,7 @@ const Button = ({
   to = "/",
   className = "",
   id = "",
+  onClick = () => {},
 }) => {
   const classNames = {
     isButton:
@@ -31,6 +32,7 @@ const Button = ({
         ${className}
       `}
       id={id}
+      onClick={onClick}
       {...linkProps}
     >
       {children}
