@@ -1,7 +1,7 @@
 ---
 title: Parsing logs with the OpenTelemetry Collector
 slug: parsing-logs-with-the-opentelemetry-collector
-date: 2023-08-19
+date: 2023-08-21
 tags: [guides, OpenTelemetry]
 authors: nicamellifera
 description: This guide is for anyone who is getting started monitoring their application with OpenTelemetry, and is generating unstructured logs. 

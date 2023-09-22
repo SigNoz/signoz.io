@@ -1,7 +1,7 @@
 ---
 title: Sending and Filtering Python Logs with OpenTelemetry
 slug: sending-and-filtering-python-logs-with-opentelemetry
-date: 2023-09-06
+date: 2023-09-22
 tags: [guides, OpenTelemetry, Python]
 authors: nicamellifera
 description: This guide describes how to send logs to the OpenTelemetry Collector, and how to configure the collector to filter and transform your data.

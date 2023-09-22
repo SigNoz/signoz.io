@@ -22,7 +22,7 @@ keywords:
 
 import GetStartedSigNoz from '../docs/shared/get-started-signoz.md';
 
-Modern digital organizations have rapidly adopted microservices-based architecture for their applications. Distributed tracing tools help monitor microservices-based applications. Choosing the right distributed tracing tool is critical. How do you know which is the right one for you? Here are the top 13 distributed tracing tools in 2022 that can solve your monitoring and observability needs.
+Modern digital organizations have rapidly adopted microservices-based architecture for their applications. Distributed tracing tools help monitor microservices-based applications. Choosing the right distributed tracing tool is critical. How do you know which is the right one for you? Here are the top 13 distributed tracing tools in 2023 that can solve your monitoring and observability needs.
 
 <!--truncate-->
 
@@ -104,7 +104,7 @@ Below is a snapshot from SigNoz dashboard showing spans from a request as rectan
 Now let's explore the top 13 distributed tracing tools in 2022.
 
 ### SigNoz
-[SigNoz](https://signoz.io/) is a full-stack open-source APM and observability tool. It captures both metrics and traces with log management currently in the product roadmap. Logs, metrics, and traces are considered to be the three pillars of observability in modern-day distributed systems.
+[SigNoz](https://signoz.io/) is a full-stack distributed tracing tool that you can use for tracing your application. It captures both metrics and traces with log management currently in the product roadmap. Logs, metrics, and traces are considered to be the three pillars of observability in modern-day distributed systems.
 
 SigNoz provides a unified UI for metrics and traces so that there is no need to switch between different tools like Jaeger and Prometheus.
 

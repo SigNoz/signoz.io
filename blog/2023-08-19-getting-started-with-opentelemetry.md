@@ -1,7 +1,7 @@
 ---
 title: OpenTelemetry Webinars - Getting Started with OpenTelemetry
 slug: getting-started-with-opentelemetry
-date: 2023-08-19
+date: 2023-09-20
 tags: [Talks, OpenTelemetry]
 authors: priyansh
 description: We often get asked, what's the best place to get started with OpenTelemetry - host metrics, traces, or even logs...

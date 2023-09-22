@@ -63,7 +63,6 @@ List of Top 11 observability tools in 2023
 - [Instana](#instana)
 - [Appdynamics](#appdynamics)
 - [Zipkin (open-source)](#zipkin)
-- [Sumo Logic](#sumo-logic)
 
 ## Top 11 Observability Tools in 2023
 
