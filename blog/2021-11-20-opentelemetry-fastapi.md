@@ -88,17 +88,20 @@ git clone https://github.com/SigNoz/sample-fastAPI-app.git
 cd sample-fastapi-app/
 cd app
 ```
+It’s a good practice to create virtual environments for running Python apps, so we will using a virtual python environment for this sample fastAPI app.
 
-
-Note: We will using a virtual python environment for this sample fastAPI app. Learn how to do it [here](https://uoa-eresearch.github.io/eresearch-cookbook/recipe/2014/11/26/python-virtual-env/).
-
+#### Create a Virtual Environment
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
 <br></br>
 
 **Step 2. Run instructions for sending data to SigNoz**<br></br>
 The `requirements.txt` file contains all the necessary OpenTelemetry Python packages needed for instrumentation. In order to install those packages, run the following command:
 
 ```bash
-pip3 install -r requirements.txt
+python -m pip install -r requirements.txt
 ```
 The dependencies included are briefly explained below:
 

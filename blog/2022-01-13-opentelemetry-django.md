@@ -105,11 +105,16 @@ We will be using the Django app at this [Github repo](https://github.com/SigNoz/
 git clone https://github.com/SigNoz/sample-django.git
 cd sample-django
 ```
-
+It’s a good practice to create virtual environments for running Python apps, so we will be using a virtual python environment for this sample Django app
+#### Create a Virtual Environment
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
 **Step 2. Installing necessary OpenTelemetry and Python packages**<br></br>
 The `requirements.txt` file contains all the necessary OpenTelemetry and Python packages needed for instrumentation. In order to install those packages, run the following command:
 ```bash
-pip3 install -r requirements.txt
+python -m pip install -r requirements.txt
 ```
 
 The dependencies included are briefly explained below:
@@ -143,17 +148,17 @@ Please make sure that you have installed all the dependencies of your applicatio
 Now you need to run the following three commands to prepare the sample Django application.<br></br>
 
 a. This command is used to perform the initial database migration. You will only need to run this the very first time you deploy your app.
-```jsx
+```bash
 python3 manage.py migrate
 ```
 
 b. This command is used to collect static files from multiple apps into a single path.
-```jsx
+```bash
 python3 manage.py collectstatic
 ```
 
 c. The following command creates a user who can log in to the admin site. You will be asked to create a username and a password. You will need the username and password to login to the admin portal later.
-```jsx
+```bash
 python3 manage.py createsuperuser
 ```
 The sample app creates an admin login as shown in the picture below.
@@ -183,7 +188,7 @@ Don’t run app in reloader/hot-reload mode as it breaks instrumentation. For ex
 DJANGO_SETTINGS_MODULE=<DJANGO_APP>.settings  OTEL_RESOURCE_ATTRIBUTES=service.name=<serviceName> OTEL_EXPORTER_OTLP_ENDPOINT="http://<IP OF SigNoz>:4317" opentelemetry-instrument gunicorn <DJANGO_APP>.wsgi -c gunicorn.config.py --workers 2 --threads 2 --reload
 ```
 As we are running SigNoz on local host, `IP of SigNoz` can be replaced with `localhost` in this case. And, for `service_name `let's use `DjangoApp`. DJANGO_SETTINGS_MODULE for this example is mysite.settings. Hence, the final command becomes:
-```jsx
+```bash
 DJANGO_SETTINGS_MODULE=mysite.settings  OTEL_RESOURCE_ATTRIBUTES=service.name=DjangoApp OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4317" opentelemetry-instrument gunicorn mysite.wsgi -c gunicorn.config.py --workers 2 --threads 2 --reload
 ```
 
@@ -213,7 +218,7 @@ You need to generate some load on your app so that there is data to be captured 
 There are two other ways to run the Django app with OpenTelemetry using Docker and Docker compose.
 
 b. **If want to run docker image of django app directly**<br></br>
-```jsx
+```bash
 docker run --env \
     --env OTEL_SERVICE_NAME=djangoApp \
     --env OTEL_EXPORTER_OTLP_ENDPOINT=http://<IP of SigNoz>:4317 \
@@ -223,7 +228,7 @@ docker run --env \
 ```
 
 c. **If want to use docker image of django app in docker-compose**<br></br>
-```jsx
+```bash
 django-app:
     image: "signoz/sample-django:latest"
     container_name: sample-django

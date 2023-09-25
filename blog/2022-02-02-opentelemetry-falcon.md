@@ -50,7 +50,7 @@ First, you need to install SigNoz. We will use OpenTelemetry to instrument the s
 
 You can get started with SigNoz using just three commands at your terminal.
 
-``` jsx
+``` bash
 git clone -b main https://github.com/SigNoz/signoz.git
 cd signoz/deploy/
 ./install.sh
@@ -115,7 +115,7 @@ source .venv/bin/activate
 The `base.txt` file contains all the necessary OpenTelemetry and Python packages needed for instrumentation. In order to install those packages, run the following command:
 
 ```bash
-pip3 install -r requirements/base.txt
+python -m pip install -r requirements/base.txt
 ```
 
 The dependencies included are briefly explained below:

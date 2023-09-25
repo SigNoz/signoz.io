@@ -52,7 +52,7 @@ OpenTelemetry is a set of tools, APIs, and SDKs used to instrument applications 
 
 You can get started with SigNoz using just three commands at your terminal.
 
-```jsx
+```bash
 git clone -b main https://github.com/SigNoz/signoz.git
 cd signoz/deploy/
 ./install.sh
@@ -94,12 +94,17 @@ import Screenshot from "@theme/Screenshot"
 We will be using the Flask app at this <a href = "https://github.com/SigNoz/sample-flask-app" rel="noopener noreferrer nofollow" target="_blank" >Github repo</a>.
 
 1. Clone sample Flask app repository and go to the root folder<br></br>
-   ```jsx
+   ```bash
    git clone https://github.com/SigNoz/sample-flask-app.git
    cd sample-flask-app
    ```
-2. Check if the app is running
-   ```jsx
+2. Create a virtual environment
+   ```bash
+   python3 -m venv .venv
+   source .venv/bin/activate
+   ```
+3. Check if the app is running
+   ```bash
    python3 app.py
    ```
 You can now access the UI of the app on your local host: http://localhost:5002/
@@ -118,7 +123,7 @@ To capture data with OpenTelemetry, you need to configure some environment varia
 The app folder contains a file called `requirements.txt`, which contains all the necessary requirements to set up OpenTelemetry Python instrumentation. Make sure your path is updated to the root directory of your sample app and run the following command:
 
 ```bash
-pip3 install -r requirements.txt
+python -m pip install -r requirements.txt
 ```
 
 :::info
