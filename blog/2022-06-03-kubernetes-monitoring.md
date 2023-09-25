@@ -270,15 +270,6 @@ Node metrics are very important as we have nodes underneath the abstraction of K
 
 Similar to the previous section, we will be importing JSON files to create dashboards of our node metrics. We will be using the `hostmetrics` receiver of OTel collector to build these dashboards. There are many nodes in a Kubernetes cluster. Hence, we will be creating multiple dashboards for each node. SigNoz will add support for label widgets in the future, which would make it possible to monitor all nodes using a single dashboard.
 
-Let's run the following commands to generate `hostmetrics` dashboard JSON files for each node automatically:
-
-```bash
-for node in $(kubectl get nodes -o name | sed -e "s/^node\///");
-do
-  curl -sL https://github.com/SigNoz/benchmark/raw/main/dashboards/hostmetrics/hostmetrics-import.sh \
-    | HOSTNAME="$node" DASHBOARD_TITLE="HostMetrics Dashboard for $node" bash
-done
-```
 
 After importing the generated dashboard JSON, you should be able to see the dashboard for your node metrics.
 

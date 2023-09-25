@@ -463,18 +463,6 @@ import the `hostmetrics-with-variable.json` file in SigNoz UI from [here][4].
 It involves two steps: generating dashboard JSON using bash scripts and
 importing dashboard JSON in SigNoz UI.
 
-To generate HostMetrics dashboards for the VM:
-
-```bash
-curl -sL https://github.com/SigNoz/benchmark/raw/main/dashboards/hostmetrics/hostmetrics-import.sh | bash
-```
-
-The output should look similar to the following:
-
-```
-✅ Successfully generated Host Metrics dashboard: signoz-hostmetrics-one-piece.json
-```
-
 After importing the dashboard JSON, we should see the following dashboard in SigNoz UI:
 
 ![hostmetrics dashboard][3]
