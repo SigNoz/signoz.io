@@ -56,4 +56,4 @@ You can also refer to this [grid](https://signoz.io/docs/instrumentation/trouble
 
 You need to use OpenTelemetry Collector in your application servers to send host metrics data to SigNoz.
 
-Refer here: <a href="https://github.com/SigNoz/benchmark/tree/main/docker#binary" rel="noopener noreferrer nofollow" target="_blank">https://github.com/SigNoz/benchmark/tree/main/docker#binary</a>
+Refer here: [https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/).

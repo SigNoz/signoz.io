@@ -453,27 +453,13 @@ from `telemetrygen` in the SigNoz UI.
 
 ## HostMetrics Dashboard
 
-In this section, we will generate and import a dashboard with VM HostMetrics.
+In this section, we import a dashboard with metrics collected by the `hostmetrics` receiver from the VM.
 
-:::info
-Optionally, we can use a generic dashboard with a hostname variable. To do that,
-import the `hostmetrics-with-variable.json` file in SigNoz UI from [here][4].
-:::
+Hostmetrics dashboard is a generic dashboard with a hostname variable,
+which can be used to visualize metrics of any VMs that have the
+`hostmetrics` receiver configured.
 
-It involves two steps: generating dashboard JSON using bash scripts and
-importing dashboard JSON in SigNoz UI.
-
-To generate HostMetrics dashboards for the VM:
-
-```bash
-curl -sL https://github.com/SigNoz/benchmark/raw/main/dashboards/hostmetrics/hostmetrics-import.sh | bash
-```
-
-The output should look similar to the following:
-
-```
-✅ Successfully generated Host Metrics dashboard: signoz-hostmetrics-one-piece.json
-```
+To import the dashboard file in SigNoz UI from [here][4].
 
 After importing the dashboard JSON, we should see the following dashboard in SigNoz UI:
 

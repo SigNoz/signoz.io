@@ -242,7 +242,7 @@ If the previous step was a success, you should be able to plot graphs from the 
 
 ### Monitor Kubelet Metrics with SigNoz
 
-You can get started easily for monitoring Kubelet metrics with SigNoz. All you have to do is to import a [JSON file](https://raw.githubusercontent.com/SigNoz/benchmark/main/dashboards/k8s-infra-metrics/cpu-memory-metrics.json) and you will get out of box charts for your Kubelet metrics.
+You can get started easily for monitoring Kubelet metrics with SigNoz. All you have to do is to import a [JSON file](https://github.com/SigNoz/dashboards/raw/main/k8s-infra-metrics/cpu-memory-metrics.json) and you will get out of box charts for your Kubelet metrics.
 
 Under the `Dashboards` tab of SigNoz, click on `+ New Dashboard`, and then `Import JSON`.
 
@@ -270,17 +270,10 @@ Node metrics are very important as we have nodes underneath the abstraction of K
 
 Similar to the previous section, we will be importing JSON files to create dashboards of our node metrics. We will be using the `hostmetrics` receiver of OTel collector to build these dashboards. There are many nodes in a Kubernetes cluster. Hence, we will be creating multiple dashboards for each node. SigNoz will add support for label widgets in the future, which would make it possible to monitor all nodes using a single dashboard.
 
-Let's run the following commands to generate `hostmetrics` dashboard JSON files for each node automatically:
+Let's import the K8s Hostmetrics dashboard JSON file in SigNoz UI from
+[here](https://github.com/SigNoz/dashboards/blob/main/hostmetrics/hostmetrics-k8s.json).
 
-```bash
-for node in $(kubectl get nodes -o name | sed -e "s/^node\///");
-do
-  curl -sL https://github.com/SigNoz/benchmark/raw/main/dashboards/hostmetrics/hostmetrics-import.sh \
-    | HOSTNAME="$node" DASHBOARD_TITLE="HostMetrics Dashboard for $node" bash
-done
-```
-
-After importing the generated dashboard JSON, you should be able to see the dashboard for your node metrics.
+After importing the dashboard JSON, you should be able to see the dashboard for your node metrics.
 
 <figure data-zoomable align='center'>
     <img src="/img/blog/2022/06/k8s_node_monitoring.webp" alt="Node metrics monitoring with SigNoz"/>
