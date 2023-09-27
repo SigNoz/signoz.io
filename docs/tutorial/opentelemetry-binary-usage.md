@@ -114,47 +114,6 @@ Here are the steps to set up OpenTelemetry binary as an agent.
 </TabItem>
 </Tabs>
 
-Application Instrumentation → Otel-Binary Agent in Same VM → SigNoz Saas
-
-<!-- ## Example Java Instrumentation
-
-1. Download otel java binary
-
- ```bash
-wget https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar
- ```
-
-2. Run application
-
- ```bash
-OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4317" \
-OTEL_RESOURCE_ATTRIBUTES=service.name=javaApp \
-java -javaagent:/path/to/opentelemetry-javaagent.jar -jar target/spring-petclinic-2.4.5.jar
- ``` -->
-
-<!-- ## Dockerized Application Instrumentation
-
-For dockerized applications, we can use the same otel binary agent running in the same VM.
-
-1. Use `extra_hosts` in `docker-compose.yaml` to add `otel-binary` agent as a host:
-
- ```YAML
-  extra_hosts:
-    - "otel-binary:host-gateway"
- ```
-
-
-2. Instrument applications and update Dockerfile(s). Refer to [instrumentation docs](/docs/instrumentation/overview/).
-
-3. Use `OTEL_EXPORTER_OTLP_ENDPOINT` envvar to point to `otel-binary` agent:
- 
- ```YAML
-  environment:
-    - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-binary:4317
-  ...
-  
- ``` -->
-
 ## Test Sending Traces
 
 OpenTelemetry collector binary should be able to forward all types of telemetry data recevied:
