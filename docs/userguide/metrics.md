@@ -5,7 +5,6 @@ sidebar_label: View Services
 ---
 
 import GetHelp from '../shared/get-help.md'
-import PrereqsInstrument from '../shared/prereqs-instrument.md'
 import UseHotRod from '../shared/use-hotrod.md'
 import MetricsDefinition from '../shared/metrics-definition.md'
 
@@ -19,7 +18,7 @@ This page walks you through the **Services** section and gets you started with m
 
 ## Prerequisites
 
-<PrereqsInstrument />
+This section assumes that your application is already instrumented. For details about how you can instrument your application, see the [Instrument Your Application](/docs/instrumentation/) section.
 
 ## What Are Application Metrics?
 
@@ -30,87 +29,214 @@ The **Services** section relies on the rate, errors, and duration (”RED”) me
 - **P99 Latency:** the amount of time your application spends processing each of the fastest 99% of requests. For example, if the value of the `P99` latency is 760 ms, 99% percent of requests have responses that are equal to or faster than 760 ms.
 - **Error Rate**: the percentage of failing requests i.e ratio of error requests to the total requests.
 - **Requests per Second**: the number of requests your application processes per second.
+- **Key Operations**: It lists the key APIs and operations which the particular application is serving.
+- **Apdex**: It is a score between 0 and 1 that helps you measure the user satisfaction.
 
 ## Open the Services Section
 
 From the sidebar, select **Services**:
 
-![Open the Services section](/img/docs/open-services-v0.10.2.png)
+<figure data-zoomable align='center'>
+    <img src="/img/docs/services-overview.webp" alt="SigNoz UI showing the Services section"/>
+    <figcaption><i>Services Section</i></figcaption>
+</figure>
+
+<br></br>
 
 This page provides an overview of your applications’ health and performance. It shows the list of your applications formatted as a table and, for each application, SigNoz displays the RED metrics mentioned above.
 
 This page shows all the instrumented applications sending the data to SigNoz. This includes web servers, message brokers/queuing systems, web/mobile clients, cron jobs, and more.
 
-What services are shown? And how are the RED metrics calculated?
+**What services are shown? And how are the RED metrics calculated?**
 
-We rely on the semantic conventions provided by OpenTelemetry. Every unique `service.name` configured and received is part of the service list. The following logic is used for the RED metrics generation of each service.
+We rely on the semantic conventions provided by OpenTelemetry. Every unique `service.name` configured and received is part of the service list. 
 
-![trace-request](/img/docs/trace_request_shop.png)
+<figure data-zoomable align='center'>
+    <img src="/img/docs/trace-request-shop.webp" alt="A trace Request in SigNoz UI"/>
+    <figcaption><i>A typical trace request</i></figcaption>
+</figure>
 
+<br></br>
+
+The following logic is used for the RED metrics generation of each service.
 In a distributed trace, a request goes through several entities performing various kinds of work. There is an entry point span for each service that took part in the trace journey. This can be thought of as a sub-root span for the service. This sub-root span can have many child spans which could be doing work in parallel or sequential or a combination of both. From an outside perspective this sub-root span work is an operation done by the service and how much time it took to complete this operation is the duration metric. For a web server, this is an API endpoint returning some data and request time is the duration metric. For a messaging consumer service, this is a consume trigger, and till it is done with the message received. For a mobile client application, this could be a button click to submit a form and the time taken to fulfill the request.
 
-- Requests/s - Number of sub-root spans seen for a service
+- Operations/s - Number of sub-root spans seen for a service
 - PXX - Quantile of the duration of the sub-root spans
 - Error rate - Number of sub-root spans with status error / Total number of sub-root spans
 
-
-![RED metrics](/img/docs/open-services-v0.10.2.png)
-
 ## Sort the List of Applications
 
-Select a column heading to sort the list by the values in that column. Select the column heading again to reverse the sort order or to cancel sorting.
+You can switch the sorting order of the values in a column by clicking its heading: first click for ascending order, second click for descending order, and a third click to cancel the sorting.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/sort-list-applications.webp" alt="SigNoz UI showing how to sort the applications in the Services Section"/>
+    <figcaption><i>Sort Applications</i></figcaption>
+</figure>
+
+<br></br>
 
 ## Filter the List of Applications
 
 You can add attributes to applications and filter based on these attributes. 
 
-![resource-attribute-filtering](/img/docs/resource-attribute-filtering.png)
+<figure data-zoomable align='center'>
+    <img src="/img/docs/resource-attribute-filtering.webp" alt="SigNoz UI showing how to filter your application using attributes"/>
+    <figcaption><i>Attributes based filtering</i></figcaption>
+</figure>
 
-### Steps to add resource attributes
+<br></br>
 
 You can add attributes with `OTEL_RESOURCE_ATTRIBUTES` flag when starting the application. The below example shows how to set values for `service.namespace` and `deployment.environment`
 
-For example
-
 ```
-OTEL_RESOURCE_ATTRIBUTES="service.name=flaskApp,service.namespace=sampleapps,deployment.environment=play" OTEL_EXPORTER_OTLP_ENDPOINT="http://3.11.144.34:4317" opentelemetry-instrument python3 app.py
+OTEL_RESOURCE_ATTRIBUTES="service.name=flaskApp,service.namespace=sampleapps,deployment.environment=play" OTEL_EXPORTER_OTLP_ENDPOINT="http://3.11.144.34:4317"
+OTEL_EXPORTER_OTLP_PROTOCOL=grpc opentelemetry-instrument python3 app.py
 ```
 
 By default, you can filter based on `service.namespace` and `deployment.environment` dimensions.
 
-To add another dimension, update the dimension fields at https://github.com/SigNoz/signoz/blob/develop/deploy/docker/clickhouse-setup/otel-collector-config.yaml#L34
- and then deploy the yaml file again.
+To add another dimension, update the dimension fields of <a href = "https://github.com/SigNoz/signoz/blob/develop/deploy/docker/clickhouse-setup/otel-collector-config.yaml#L107" rel="noopener noreferrer nofollow" target="_blank" >config.yaml file</a> and then deploy the yaml file again.
+
+## Global Time
+On the top right corner of your application's dashboard, you have the ability to select the time frame for the data displayed in **all the metric graphs**. You can choose from a range of options, spanning from the last 5 minutes to the past week, and even opt for a custom date range.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/global-time.webp" alt="SigNoz UI showing how to apply a time interval for all your metrics chart"/>
+    <figcaption><i> Global Time</i></figcaption>
+</figure>
+
+<br></br>
+
+## View Magnified graphs
+
+You can magnify the graphs by hovering over the Metric name, clicking the dropdown arrow, and selecting the "View" option.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/view-enlarged-graphs.webp" alt="SigNoz UI showing how view a magnified view of a graph"/>
+    <figcaption><i>View Magnified Graphs</i></figcaption>
+</figure>
+
+<br></br>
+
+### Filter Series 
+
+Inside the Metric's graph, you can use the "Filter Series" search bar to locate specific labels, allowing you to include or exclude them from the graph. For instance, in the image below, our search for 'p9' within the latency graph resulted in the display of 'p90' and 'p99' latency data. Click on the **Save** Button to save any changes.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/filter-series.webp" alt="SigNoz UI showing the filter series feature inside a graph"/>
+    <figcaption><i> Filter Series </i></figcaption>
+</figure>
+
+<br></br>
+
+
+### Graph Specific Global Time 
+
+In the graph for any metric, you'll find the "Global Time" dropdown at the top right corner. This dropdown provides you with the flexibility to choose your preferred time interval for data, ranging from the last 5 minutes to the last 1 week. Once you select any value from this drop-down and click **Save**, these changes will be saved **for that particular graph**.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/graph-specific-global-time.webp" alt="SigNoz UI showing the Global Time for that particular graph"/>
+    <figcaption><i> Graph Specific Global Time </i></figcaption>
+</figure>
+
+<br></br>
+
 
 ## View Details About an Application
 
 The RED metrics help you spot performance bottlenecks or failures  across all your applications.  For example, if the error rate of an application increases, you can assume that these errors will impact the experience of your customers. Once you’ve identified a potential issue, select a row to open the application details page:
 
-![Open the application details page](/img/docs/open-application-details-v0.10.2.png)
-
-The application details pane contains three panes that are explained in the following sections:
-- Application Metrics
-- External Calls
+The application details pane contains three panes:
+- Application Metrics - Overview
 - Database Calls
+- External Calls
 
-![Panes on the application details page](/img/docs/application-details-page-panes-v0.10.2.png)
+<figure data-zoomable align='center'>
+    <img src="/img/docs/application-details-page.webp" alt="SigNoz UI showing the three panes on Applications details, i.e., Application Monitoring(Overview), Database call metrics, External Metrics"/>
+    <figcaption><i> Panes on Application Details </i></figcaption>
+</figure>
+
+<br></br>
 
 ### Application Metrics in SigNoz
 
-The application metrics pane is comprised of four graphs:
+The application metrics pane is comprised of five graphs:
 
-- **Application Latency in Milliseconds**: this graph shows the `P99`, `P95`, and `P50` latencies for the selected period of time.
-    ![Application latency](/img/docs/application-latency-v0.10.2.png)
-- **Requests per Second**: this graph shows the number of requests per second your application currently serves.
-    ![Requests per second](/img/docs/requests-per-second-v0.10.2.png)
-- **Error Percentage**: this graph shows the percentage of errors of the total sum of requests.
-    ![Error percentage](/img/docs/error-percentage-v0.10.2.png)
-- **Key Operations**: this list helps you find the slow operations of your application. You can select a column heading to sort the list by the values in that column. Select the column heading again to reverse the sort order or to cancel sorting.
-    ![Key operations](/img/docs/key-operations-v0.10.2.png)
-- **Apdex**: [Apdex](https://www.apdex.org/) (Application Performance Index) is an open standard that defines a method to report, benchmark, and rate application response time. An Apdex score helps you understand and identify the impact on application performance over time.
+**Application Latency in Milliseconds** <br></br>
+This graph shows the `P99`, `P95`, and `P50` latencies for the selected period of time.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/application-latency.webp" alt="SigNoz UI showing application 50th/90th/99th Percentile latencies"/>
+    <figcaption><i>Application Latency</i></figcaption>
+</figure>
+
+<br></br>
+
+**Operations per Second** <br></br>
+This graph shows the number of operations (Example requests) per second your application currently serves.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/operations-per-second.webp" alt="SigNoz UI showing application Operations per second or requests per second"/>
+    <figcaption><i> Application Operations per second </i></figcaption>
+</figure>
+
+<br></br>
+
+**Error Percentage** <br></br>
+This graph shows the percentage of errors of the total sum of requests.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/error-percentage.webp" alt="SigNoz UI showing application Error Percentage"/>
+    <figcaption><i> Application Error Percentage </i></figcaption>
+</figure>
+
+<br></br>
+
+**Key Operations** <br></br>
+This list helps you find the slow operations of your application. You can select a column heading to sort the list by the values in that column. Select the column heading again to reverse the sort order or to cancel sorting.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/key-operations.webp" alt="SigNoz UI showing application Key Operations such as API requests"/>
+    <figcaption><i> Application Key Operations </i></figcaption>
+</figure>
+
+<br></br>
+
+**Apdex** <br></br>
+Application Performance Index <a href = "https://www.apdex.org/" rel="noopener noreferrer nofollow" target="_blank" >(Apdex)</a> is an open standard that defines a method to report, benchmark, and rate application response time. An Apdex score helps you understand and identify the impact on application performance over time.
 The Apdex score indicates the end users' level of satisfaction from 0 (least satisfied) to 1 (most satisfied). Threshold is an aribtary value which is set to `0.5` by default and can be changed according to the requirements.
-    ![Key operations](/img/docs/apdex-score.png)
-  You can change the Threshold value by going to Settings on top-right corner of your dashboard.
-    ![Key operations](/img/docs/apdex-score-threshold.png)
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/apdex-score.webp" alt="SigNoz UI showing application Apdex Score which helps to identify the application performance over time"/>
+    <figcaption><i> Application Apdex Score </i></figcaption>
+</figure>
+
+<br></br>
+
+You can change the Threshold value by going to Settings on top-right corner of your SigNoz dashboard.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/apdex-score-threshold.webp" alt="SigNoz UI showing how to change the threshold of Apdex Score for an application in Settings"/>
+    <figcaption><i> Change Apdex Score Threshold</i></figcaption>
+</figure>
+
+<br></br>
+
+### Database Calls in SigNoz
+
+This pane shows details about the database calls that your application makes. The spans should have the following span attributes to be counted in this panel
+
+- `span.kind!=2` which means these are spans of kind anything except `SERVER`. You can read more details on SpanKinds [here](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/api.md#spankind)
+- `db.system` should be present as span attribute
+
+If your services are making DB calls and your Database Call panels show as empty, please make sure that:
+1. Your spans have the above attributes.
+2. You have used appropriate libraries for instrumenting packages which you use to make DB calls from your application
+
+The graphs in this pane provide the following information:
+- The number of database calls per second
+- The average duration of your database calls. expressed in milliseconds
 
 ### External Calls in SigNoz
 
@@ -140,20 +266,6 @@ The graphs in this pane provide the following information:
 - The number of external calls per second by address.
 - The average duration of your external calls by address.
 
-### Database Calls in SigNoz
-
-This pane shows details about the database calls that your application makes. The spans should have the following span attributes to be counted in this panel
-
-- `span.kind!=2` which means these are spans of kind anything except `SERVER`. You can read more details on SpanKinds [here](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/api.md#spankind)
-- `db.system` should be present as span attribute
-
-If your services are making DB calls and your Database Call panels show as empty, please make sure that:
-1. Your spans have the above attributes.
-2. You have used appropriate libraries for instrumenting packages which you use to make DB calls from your application
-
-The graphs in this pane provide the following information:
-- The number of database calls per second
-- The average duration of your database calls. expressed in milliseconds
 
 ## Get Help
 
