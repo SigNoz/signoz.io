@@ -29,13 +29,13 @@ OpenTelemetry is an open-source project which has emerged as the standard for ac
 
 The top use cases of OpenTelemetry are:
 
-- Distributed Tracing
-- Application Performance Monitoring
-- Metrics Monitoring
-- Logging and Event Collection
-- Context propagation
-- Exceptions Monitoring
-- Service Dependency Analysis
+- [Distributed Tracing](#distributed-tracing)
+- [Application Performance Monitoring](#application-performance-monitoring)
+- [Metrics Monitoring](#metrics-monitoring)
+- [Logging and Event Collection](#logging-and-event-collection)
+- [Context propagation](#context-propagation)
+- [Exceptions Monitoring](#exceptions-monitoring)
+- [Service Dependency Analysis](#service-dependency-analysis)
 
 Before we discuss these use cases, let us first have a brief overview of OpenTelemetry.
 
