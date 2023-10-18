@@ -1,0 +1,71 @@
+---
+title: Stream Logs from Heroku to SigNoz
+id: heroku_logs_to_signoz
+---
+
+If you are ruining your applications on heroku, you can stream logs from Heroku to SigNoz using [httpsdrain](https://devcenter.heroku.com/articles/log-drains#https-drains).
+
+
+## Stream Heroku logs to SigNoz in SigNoz cloud
+
+* Use the heroku cli to add a https drain
+    ```sh
+    heroku drains:add https://<TENANT_NAME>:<SIGNOZ_INGESTION_KEY>@ingest.<REGION>.signoz.cloud:443/httplogs -a <YOUR_APP_NAME>
+    ```
+
+  Set the values of `<TENANT_NAME>`,  `<SIGNOZ_INGESTION_KEY>`, `<REGION>` and `<YOUR APP NAME>`.
+  
+  Depending on the choice of your region for SigNoz cloud, the otlp endpoint will vary according to this table.
+
+  | Region | Endpoint                   |
+  | ------ | -------------------------- |
+  | US     | ingest.us.signoz.cloud:443 |
+  | IN     | ingest.in.signoz.cloud:443 |
+  | EU     | ingest.eu.signoz.cloud:443 |
+
+* Once added you can verify by going to the SigNoz UI.
+
+
+## Stream Heroku logs to SigNoz in Self-Hosted SigNoz
+
+* Modify the `docker-compose.yaml` file present inside `deploy/docker/clickhouse-setup` to expose a port, in this case `8081`.
+    ```yaml {8}
+    ...
+    otel-collector:
+        image: signoz/signoz-otel-collector:0.79.5
+        command: ["--config=/etc/otel-collector-config.yaml"]
+        volumes:
+          - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml
+        ports:
+          - "8081:8081"
+    ...
+    ```
+
+* Add the httpreceiver reciever to `otel-collector-config.yaml` which is present inside `deploy/docker/clickhouse-setup`
+    ```yaml {2-10}
+    receivers:
+      httpreceiver/heroku:
+        endpoint: localhost:8081
+        source: heroku
+    ...
+    ```
+
+* Next we will modify our pipeline inside `otel-collector-config.yaml` to include the receiver we have created above.
+    ```yaml {4}
+    service:
+        ....
+        logs:
+            receivers: [otlp, httpreceiver/heroku]
+            processors: [batch]
+            exporters: [clickhouselogsexporter]
+    ```
+
+* Now we can restart the otel collector container so that new changes are applied and we can forward our logs to port `8081`.
+
+* Use the heroku cli to add a https drain
+    ```sh
+    heroku drains:add http://<IP>:8081 -a <YOUR_APP_NAME>
+    ```
+    Replace IP with IP of the system where your collector is running.
+    For more info check [troubleshooting](../install/troubleshooting.md#signoz-otel-collector-address-grid). 
+* Once added you can verify by going to the SigNoz UI.

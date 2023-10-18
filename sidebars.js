@@ -154,6 +154,7 @@ module.exports = {
         'userguide/logs_fields',
         'userguide/collect_kubernetes_pod_logs',
         'userguide/collect_docker_logs',
+        'userguide/heroku_logs_to_signoz',
         'userguide/collecting_syslogs',
         'userguide/collect_logs_from_file',
         'userguide/collecting_nodejs_winston_logs',
