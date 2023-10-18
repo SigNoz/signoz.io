@@ -5,7 +5,7 @@ date: 2023-10-18
 tags: [OpenTelemetry]
 authors: daniel
 description: A good OpenTelemetry UI should make the most of the data collected by OpenTelemetry. If you’re using OpenTelemetry for collecting observability data, learn what’s possible in a good OpenTelemetry UI...
-image: /img/blog/2023/10/log-monitoring-cover.jpg
+image: /img/blog/2023/10/otel-ui-cover.jpeg
 hide_table_of_contents: false
 keywords:
   - opentelemetry
@@ -23,7 +23,7 @@ OpenTelemetry is a Cloud Native Computing Foundation(CNCF) project aimed at stan
 
 <!--truncate-->
 
-![Cover Image](/img/blog/2023/10/log-monitoring-cover.webp)
+![Cover Image](/img/blog/2023/10/otel-ui-cover.webp)
 
 OpenTelemetry is quietly becoming the web standard for instrumenting cloud-native applications. For applications based on distributed systems, OpenTelemetry becomes a natural choice for instrumentation. There are a few reasons why OpenTelemetry is the preferred choice for generating telemetry data:
 
