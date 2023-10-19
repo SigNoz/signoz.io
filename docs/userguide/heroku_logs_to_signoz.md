@@ -14,6 +14,13 @@ If you are ruining your applications on heroku, you can stream logs from Heroku 
     ```
 
   Set the values of `<TENANT_NAME>`,  `<SIGNOZ_INGESTION_KEY>`, `<REGION>` and `<YOUR APP NAME>`.
+
+  `<TENANT_NAME>` is name of your instance. Ex:- If the url is `https://cpvo-test.us.signoz.cloud` the `TENANT_NAME` is `cpvo-test`.
+
+  `<SIGNOZ_INGESTION_KEY>` is the ingestion key.
+
+  `<YOUR_APP_NAME>` is the name of the application where you want to add the drain.
+
   
   Depending on the choice of your region for SigNoz cloud, the otlp endpoint will vary according to this table.
 
