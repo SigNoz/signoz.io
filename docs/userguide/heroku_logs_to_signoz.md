@@ -39,7 +39,7 @@ If you are ruining your applications on heroku, you can stream logs from Heroku 
     ```yaml {8}
     ...
     otel-collector:
-        image: signoz/signoz-otel-collector:0.79.9
+        image: signoz/signoz-otel-collector:0.79.10
         command: ["--config=/etc/otel-collector-config.yaml"]
         volumes:
           - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml
