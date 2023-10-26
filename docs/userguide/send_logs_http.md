@@ -58,7 +58,7 @@ Note :-
 
 ## Send logs to SigNoz in SigNoz cloud
 
-* Here is a sample curl request
+* Here is a sample curl request:
 
   ```bash
   curl --location 'https://ingest.<REGION>.signoz.cloud/logs/json/' \
