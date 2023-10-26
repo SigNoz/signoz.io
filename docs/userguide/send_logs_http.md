@@ -136,7 +136,7 @@ Note :-
 
 * Sample curl
   ```bash
-  curl --location 'localhost:8082' \
+  curl --location 'http://<IP>:8082' \
   --header 'Content-Type: application/json' \
   --data '[
     {
@@ -158,4 +158,6 @@ Note :-
     }
   ]'
   ```
+  Replace IP with IP of the system where your collector is running.
+  For more info check [troubleshooting](../install/troubleshooting.md#signoz-otel-collector-address-grid). 
 * Once added you can verify by going to the SigNoz UI.
