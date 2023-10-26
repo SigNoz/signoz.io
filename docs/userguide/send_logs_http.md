@@ -30,28 +30,28 @@ Note :-
   * You can use `message` instead of `body`.
   * Any other keys present apart from the ones mentioned aboved will be moved to the attributes map.
     Ex:- 
-      ```json
-      [
-        {
+    ```json
+    [
+      {
+        "host": "myhost",
+        "method": "GET"
+        "body": "this is a log line"
+      }
+    ]
+    ```
+
+    Will be finally treated as 
+    ```json
+    [
+      {
+        "attributes": {
           "host": "myhost",
           "method": "GET"
-          "body": "this is a log line"
-        }
-      ]
-      ```
-
-      Will be finally treated as 
-      ```json
-      [
-        {
-          "attributes": {
-            "host": "myhost",
-            "method": "GET"
-          },
-          "body": "this is a log line"
-        }
-      ]
-      ```
+        },
+        "body": "this is a log line"
+      }
+    ]
+    ```
 
 
 ## Send logs to SigNoz in SigNoz cloud
