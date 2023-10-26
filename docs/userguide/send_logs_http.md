@@ -115,7 +115,7 @@ Note :-
     ...
     ```
 
-* Add the httpreceiver reciever to `otel-collector-config.yaml` which is present inside `deploy/docker/clickhouse-setup`
+* Add the httpreceiver reciever to `otel-collector-config.yaml` which is present inside `deploy/docker/clickhouse-setup`:
     ```yaml {2-10}
     receivers:
       httpreceiver/json:
