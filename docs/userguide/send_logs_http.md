@@ -41,7 +41,7 @@ Note :-
   ]
   ```
 
-  Will be finally treated as 
+  Will be finally treated as:
 
   ```json
   [
