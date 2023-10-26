@@ -94,7 +94,7 @@ Note :-
 * Once you run the above curl, you can open your SigNoz UI to verify it.
 
 
-## Stream Heroku logs to SigNoz in Self-Hosted SigNoz
+## Send logs to SigNoz in Self-Hosted SigNoz
 
 * Modify the `docker-compose.yaml` file present inside `deploy/docker/clickhouse-setup` to expose a port, in this case `8081`.
     ```yaml {8}
