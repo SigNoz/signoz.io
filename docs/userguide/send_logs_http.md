@@ -6,7 +6,7 @@ id: send_logs_http.md
 You can send your logs to SigNoz over HTTP.
 
 The paylod is an array of json logs. It follows the same structure as [OTEL Logs Data Model](https://opentelemetry.io/docs/specs/otel/logs/data-model/), here is how the payload looks like.
-```
+```json
 [
   {
     "timestamp": <uint64>,
@@ -18,8 +18,7 @@ The paylod is an array of json logs. It follows the same structure as [OTEL Logs
     "attributes": <map>,
     "resources": <map>,
     "body": <string>,
-  },
-  ...
+  }
 ]
 ```
 
@@ -32,9 +31,9 @@ Note :-
       [
         {
           "host": "myhost",
-          "method": "GET",
+          "method": "GET"
           "body": "this is a log line"
-        },
+        }
       ]
       ```
 
@@ -44,10 +43,10 @@ Note :-
         {
           "attributes": {
             "host": "myhost",
-            "method": "GET",
+            "method": "GET"
           },
           "body": "this is a log line"
-        },
+        }
       ]
       ```
 
@@ -56,7 +55,7 @@ Note :-
 
 * Here is a sample curl request
 
-  ```
+  ```bash
   curl --location 'https://ingest.<REGION>.signoz.cloud/logs/json/' \
   --header 'Content-Type: application/json' \
   --header 'signoz-access-token: <SIGNOZ_INGESTION_KEY>' \
@@ -82,8 +81,10 @@ Note :-
   ```
 
   `<SIGNOZ_INGESTION_KEY>` is the ingestion key.
+
+  `<REGION>` is the name of the region.
   
-  Depending on the choice of your region for SigNoz cloud, the otlp endpoint will vary according to this table.
+  Depending on the choice of your region for SigNoz Cloud, the OTLP endpoint will vary according to the table below:
 
   | Region | Endpoint                   |
   | ------ | -------------------------- |
@@ -131,10 +132,10 @@ Note :-
 * Now we can restart the otel collector container so that new changes are applied and we can send our logs to port `8082`.
 
 * Sample curl
-  ```
+  ```bash
   curl --location 'localhost:8082' \
---header 'Content-Type: application/json' \
---data '[
+  --header 'Content-Type: application/json' \
+  --data '[
     {
         "timestamp": 1698310066000000000,
         "trace_id": "000000000000000018c51935df0b93b9",
