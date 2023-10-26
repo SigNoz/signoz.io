@@ -3,7 +3,7 @@ title: Sending Logs to SigNoz over HTTP
 id: send_logs_http.md
 ---
 
-You can send your logs to signoz over HTTP.
+You can send your logs to SigNoz over HTTP.
 
 The paylod is an array of json logs. It follows the same structure as [OTEL Logs Data Model](https://opentelemetry.io/docs/specs/otel/logs/data-model/), here is how the payload looks like.
 ```
@@ -24,8 +24,9 @@ The paylod is an array of json logs. It follows the same structure as [OTEL Logs
 ```
 
 Note :- 
-  * you can use `message` instead of body.
-  * any other keys present apart from the ones mentioned aboved will be moved to the attributes map.
+  * `timestamp` is int64 nanoseconds since Unix epoch
+  * You can use `message` instead of `body`.
+  * Any other keys present apart from the ones mentioned aboved will be moved to the attributes map.
     Ex:- 
       ```json
       [
@@ -34,7 +35,6 @@ Note :-
           "method": "GET",
           "body": "this is a log line"
         },
-        ...
       ]
       ```
 
@@ -48,7 +48,6 @@ Note :-
           },
           "body": "this is a log line"
         },
-        ...
       ]
       ```
 
