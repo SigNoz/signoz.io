@@ -28,7 +28,7 @@ Here is how the payload looks like:
 Note :- 
 * `timestamp` is int64 nanoseconds since Unix epoch
 * You can use `message` instead of `body`.
-* Any other keys present apart from the ones mentioned aboved will be moved to the attributes map.
+* Any other keys present apart from the ones mentioned above will be moved to the attributes map.
   Ex:- 
   
   ```json
