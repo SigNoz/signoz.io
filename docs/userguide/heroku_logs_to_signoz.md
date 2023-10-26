@@ -10,7 +10,7 @@ If you are running your applications on heroku, you can stream logs from Heroku 
 
 * Use the heroku cli to add a https drain
     ```sh
-    heroku drains:add https://<TENANT_NAME>:<SIGNOZ_INGESTION_KEY>@ingest.<REGION>.signoz.cloud:443/httplogs -a <YOUR_APP_NAME>
+    heroku drains:add https://<TENANT_NAME>:<SIGNOZ_INGESTION_KEY>@ingest.<REGION>.signoz.cloud:443/logs/heroku -a <YOUR_APP_NAME>
     ```
 
   Set the values of `<TENANT_NAME>`,  `<SIGNOZ_INGESTION_KEY>`, `<REGION>` and `<YOUR APP NAME>`.
