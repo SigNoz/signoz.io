@@ -1,6 +1,6 @@
 ---
 title: Sending Logs to SigNoz over HTTP
-id: send_logs_http.md
+id: send-logs-http.md
 ---
 
 You can send your logs to SigNoz over HTTP.
@@ -61,7 +61,7 @@ Note :-
 * Here is a sample curl request:
 
   ```bash
-  curl --location 'https://ingest.<REGION>.signoz.cloud/logs/json/' \
+  curl --location 'https://ingest.<REGION>.signoz.cloud:443/logs/json/' \
   --header 'Content-Type: application/json' \
   --header 'signoz-access-token: <SIGNOZ_INGESTION_KEY>' \
   --data '[
@@ -98,11 +98,13 @@ Note :-
   | EU     | ingest.eu.signoz.cloud:443 |
 
 * Once you run the above curl, you can open your SigNoz UI to verify it.
+  ![JSON Data in log body](../../static/img/logs/http-log.png)
+  
 
 
 ## Send logs to SigNoz in Self-Hosted SigNoz
 
-* Modify the `docker-compose.yaml` file present inside `deploy/docker/clickhouse-setup` to expose a port, in this case `8081`.
+* Modify the `docker-compose.yaml` file present inside `deploy/docker/clickhouse-setup` to expose a port, in this case `8082`.
     ```yaml {8}
     ...
     otel-collector:
@@ -163,3 +165,4 @@ Note :-
   Replace IP with IP of the system where your collector is running.
   For more info check [troubleshooting](../install/troubleshooting.md#signoz-otel-collector-address-grid). 
 * Once added you can verify by going to the SigNoz UI.
+  ![test](../../static/img/logs/http-log.png)
