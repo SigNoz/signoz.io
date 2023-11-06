@@ -152,33 +152,39 @@ module.exports = {
         id: 'userguide/logs',
       },
       items: [
+        {
+          type: 'category',
+          label: 'Collecting Logs',
+          items: [
+            'userguide/collect_kubernetes_pod_logs',
+            'userguide/collect_docker_logs',
+            'userguide/heroku_logs_to_signoz',
+            'userguide/send-logs-http',
+            'userguide/collecting_syslogs',
+            'userguide/collect_logs_from_file',
+            'userguide/collecting_nodejs_winston_logs',
+            'userguide/send-cloudwatch-logs-to-signoz',
+            {
+              type: 'category',
+              label: 'Collecting Application Logs Using OTEL SDK',
+              items: [
+                'userguide/collecting_application_logs_otel_sdk_python',
+                'userguide/collecting_application_logs_otel_sdk_java',
+              ],
+            },
+            {
+              type: 'category',
+              label: 'Existing Collectors to SigNoz',
+              items: [
+                'userguide/fluentbit_to_signoz',
+                'userguide/fluentd_to_signoz',
+                'userguide/logstash_to_signoz',
+              ],
+            },
+          ],
+        },
         'userguide/logs_query_builder',
         'userguide/logs_fields',
-        'userguide/collect_kubernetes_pod_logs',
-        'userguide/collect_docker_logs',
-        'userguide/heroku_logs_to_signoz',
-        'userguide/send-logs-http',
-        'userguide/collecting_syslogs',
-        'userguide/collect_logs_from_file',
-        'userguide/collecting_nodejs_winston_logs',
-        'userguide/send-cloudwatch-logs-to-signoz',
-        {
-          type: 'category',
-          label: 'Collecting Application Logs Using OTEL SDK',
-          items: [
-            'userguide/collecting_application_logs_otel_sdk_python',
-            'userguide/collecting_application_logs_otel_sdk_java',
-          ]
-        },
-        {
-          type: 'category',
-          label: 'Existing Collectors to SigNoz',
-          items: [
-            'userguide/fluentbit_to_signoz',
-            'userguide/fluentd_to_signoz',
-            'userguide/logstash_to_signoz',
-          ]
-        },
         'userguide/logs_troubleshooting',
       ],
     },
