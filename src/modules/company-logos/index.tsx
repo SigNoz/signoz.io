@@ -3,12 +3,14 @@ import styles from "./styles.module.css";
 
 const COMPANIES = [
   { image: "/img/users/netapp.png", imageDesc: "netapp logo" },
+  { image: "/img/users/samsung.png", imageDesc: "samsung logo" },
   { image: "/img/users/zoho.png", imageDesc: "zoho logo" },
   { image: "/img/users/comcast.png", imageDesc: "comcast logo" },
-  { image: "/img/users/wonder.png", imageDesc: "wonder logo" },
   { image: "/img/users/appier.png", imageDesc: "appier logo" },
   { image: "/img/users/wombo.png", imageDesc: "wombo logo" },
   { image: "/img/users/outplay.png", imageDesc: "outplay logo" },
+  { image: "/img/users/licious_f2.png", imageDesc: "licious logo" },
+  { image: "/img/users/wonder.png", imageDesc: "wonder logo" },
 ];
 
 export const ShowCompanyLogos = () => {
