@@ -26,11 +26,11 @@ ENGINE = Distributed('cluster', 'signoz_metrics', 'samples_v2', cityHash64(metri
 
 Explanation of the columns:
 
-- metric_name: Name of the metric
-- fingerprint: Fingerprint of the metric. This is used to identify the metric uniquely. Currently, 
+- **metric_name**: Name of the metric
+- **fingerprint**: Fingerprint of the metric. This is used to identify the metric uniquely. Currently, 
   we are using the hash of the labels to generate the fingerprint.
-- timestamp_ms: Timestamp of the metric in milliseconds
-- value: Value of the metric
+- **timestamp_ms**: Timestamp of the metric in milliseconds
+- **value**: Value of the metric
 
 ### Example of a samples
 
@@ -65,12 +65,12 @@ ENGINE = Distributed('cluster', 'signoz_metrics', 'time_series_v2', cityHash64(m
 
 Explanation of the columns:
 
-- metric_name: Name of the metric
-- fingerprint: Fingerprint of the metric. This is used to identify the metric uniquely. Currently, 
+- **metric_name**: Name of the metric
+- **fingerprint**: Fingerprint of the metric. This is used to identify the metric uniquely. Currently, 
   we are using the hash of the labels to generate the fingerprint.
-- timestamp_ms: Timestamp of the metric when it was observed for the first time in milliseconds
-- labels: Labels of the metric; Stored as a JSON string
-- temporality: Temporality of the metric. This is used to identify the type of the metric. It can 
+- **timestamp_ms**: Timestamp of the metric when it was observed for the first time in milliseconds
+- **labels**: Labels of the metric; Stored as a JSON string
+- **temporality**: Temporality of the metric. This is used to identify the type of the metric. It can 
   be one of the following values:
   - Unspecified: This is the default value. 
   - Cumulative: This is used for monotonic counters.
@@ -159,7 +159,7 @@ FROM
             FROM signoz_metrics.time_series_v2
             WHERE (metric_name = 'signoz_latency_count') AND (temporality IN ['Cumulative', 'Unspecified']) AND (JSONExtractString(labels, 'service_name') IN ['frontend']) AND (JSONExtractString(labels, 'operation') IN ['HTTP GET /dispatch'])
         ) AS filtered_time_series USING (fingerprint)
-        WHERE (metric_name = 'signoz_latency_count') AND (timestamp_ms >= 1699328160000) AND (timestamp_ms <= 1699329960000)
+        WHERE (metric_name = 'signoz_latency_count') AND (timestamp_ms >= {{.start_timestamp_ms}}) AND (timestamp_ms <= {{.end_timestamp_ms}})
         GROUP BY
             fingerprint,
             ts
@@ -205,9 +205,9 @@ FROM
             (
                 SELECT fingerprint
                 FROM signoz_metrics.time_series_v2
-                WHERE (metric_name = 'signoz_calls_total') AND (temporality IN ['Cumulative', 'Unspecified']) AND (JSONExtractString(labels, 'service_name') IN ['frontend']) AND (JSONExtractString(labels, 'operation') IN ['HTTP GET /dispatch']) AND (JSONExtractString(labels, 'status_code') IN ['STATUS_CODE_ERROR'])
+                WHERE (metric_name = 'signoz_calls_total') AND (temporality IN ['Cumulative', 'Unspecified']) AND (JSONExtractString(labels, 'service_name') IN ['redis']) AND (JSONExtractString(labels, 'status_code') IN ['STATUS_CODE_ERROR'])
             ) AS filtered_time_series USING (fingerprint)
-            WHERE (metric_name = 'signoz_calls_total') AND (timestamp_ms >= 1699328280000) AND (timestamp_ms <= 1699330080000)
+            WHERE (metric_name = 'signoz_calls_total') AND (timestamp_ms >= {{.start_timestamp_ms}}) AND (timestamp_ms <= {{.end_timestamp_ms}})
             GROUP BY
                 fingerprint,
                 ts
@@ -244,9 +244,9 @@ INNER JOIN
             (
                 SELECT fingerprint
                 FROM signoz_metrics.time_series_v2
-                WHERE (metric_name = 'signoz_calls_total') AND (temporality IN ['Cumulative', 'Unspecified']) AND (JSONExtractString(labels, 'service_name') IN ['frontend']) AND (JSONExtractString(labels, 'operation') IN ['HTTP GET /dispatch'])
+                WHERE (metric_name = 'signoz_calls_total') AND (temporality IN ['Cumulative', 'Unspecified']) AND (JSONExtractString(labels, 'service_name') IN ['redis'])
             ) AS filtered_time_series USING (fingerprint)
-            WHERE (metric_name = 'signoz_calls_total') AND (timestamp_ms >= 1699328280000) AND (timestamp_ms <= 1699330080000)
+            WHERE (metric_name = 'signoz_calls_total') AND (timestamp_ms >= {{.start_timestamp_ms}}) AND (timestamp_ms <= {{.end_timestamp_ms}})
             GROUP BY
                 fingerprint,
                 ts
@@ -300,7 +300,7 @@ FROM
                 FROM signoz_metrics.time_series_v2
                 WHERE (metric_name = 'signoz_latency_bucket') AND (temporality IN ['Cumulative', 'Unspecified']) AND (JSONExtractString(labels, 'service_name') = 'frontend')
             ) AS filtered_time_series USING (fingerprint)
-            WHERE (metric_name = 'signoz_latency_bucket') AND (timestamp_ms >= 1699328340000) AND (timestamp_ms <= 1699330140000)
+            WHERE (metric_name = 'signoz_latency_bucket') AND (timestamp_ms >= {{.start_timestamp_ms}}) AND (timestamp_ms <= {{.end_timestamp_ms}})
             GROUP BY
                 fingerprint,
                 le,
@@ -357,7 +357,7 @@ FROM
             FROM signoz_metrics.time_series_v2
             WHERE (metric_name = 'signoz_latency_count') AND (temporality IN ['Cumulative', 'Unspecified']) AND (JSONExtractString(labels, 'service_name') IN {{.service_name}}) AND (JSONExtractString(labels, 'operation') IN ['HTTP GET /dispatch'])
         ) AS filtered_time_series USING (fingerprint)
-        WHERE (metric_name = 'signoz_latency_count') AND (timestamp_ms >= 1699328160000) AND (timestamp_ms <= 1699329960000)
+        WHERE (metric_name = 'signoz_latency_count') AND (timestamp_ms >= {{.start_timestamp_ms}}) AND (timestamp_ms <= {{.end_timestamp_ms}})
         GROUP BY
             fingerprint,
             ts
@@ -380,12 +380,3 @@ The following variables are available by default:
 
 - `{{.start_timestamp_ms}}` - This is the start time of the query in milliseconds
 - `{{.end_timestamp_ms}}` - This is the end time of the query in milliseconds
-
-- `{{.start_timestamp}}` - This is the start time of the query in seconds
-- `{{.end_timestamp}}` - This is the end time of the query in seconds
-
-- `{{.start_timestamp_nano}}` - This is the start time of the query in nanoseconds
-- `{{.end_timestamp_nano}}` - This is the end time of the query in nanoseconds
-
-- `{{.start_datetime}}` - This is the start time of the query in DateTime format
-- `{{.end_datetime}}` - This is the end time of the query in DateTime format
