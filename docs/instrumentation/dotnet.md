@@ -29,7 +29,16 @@ In this tutorial, we will instrument a .NET application for traces and send it t
 
 ## Send Traces to SigNoz Cloud
 
-**Step 1: Installing the OpenTelemetry dependency packages:**
+
+**Step 1: Creating a new .NET Core Application**
+
+Run the following command to create a new .NET Core Application
+
+```
+dotnet new web -o sample-app
+```
+
+**Step 2: Installing the OpenTelemetry dependency packages:**
 
 ```bash
 dotnet add package OpenTelemetry
@@ -40,7 +49,7 @@ dotnet add package OpenTelemetry.Instrumentation.AspNetCore
 dotnet add package OpenTelemetry.AutoInstrumentation
 ```
 
-**Step 2: Adding OpenTelemetry as a service and configuring exporter options in `Program.cs`:**
+**Step 3: Adding OpenTelemetry as a service and configuring exporter options in `Program.cs`:**
 
 In your `Program.cs` file, add OpenTelemetry as a service. Here, we are configuring these variables:
 
@@ -111,14 +120,14 @@ This is done by configuring an OpenTelemetry <a href = "https://github.com/open
 </figure>
 
 
-**Step 3. Running the .NET application:**
+**Step 4. Running the .NET application:**
 
 ```bash
 dotnet build
 dotnet run
 ```
 
-**Step 4: Generating some load data and checking your application in SigNoz UI**
+**Step 5: Generating some load data and checking your application in SigNoz UI**
 
 Once your application is running, generate some traffic by interacting with it.
 
