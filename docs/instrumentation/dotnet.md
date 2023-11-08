@@ -144,15 +144,14 @@ In the SigNoz account, open the `Services` tab. Hit the `Refresh` button on 
 
 ### Send traces via OTel Collector binary
 
-**Step 1: Creating a new .NET Core Application**
+**Step 1: Setup OpenTelemetry binary as an agent in your machine**
 
-Run the following command to create a new .NET Core Application.
+Go to [Setup OpenTelemetry binary](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) to Setup Otel Collector as agent that will collect telemetry data from your sample dotnet app and send it to SigNoz cloud.  
 
-```
-dotnet new web -o sample-app
-```
 
 **Step 2: Installing the OpenTelemetry dependency packages:**
+
+Install the following dependencies in your application. 
 
 ```bash
 dotnet add package OpenTelemetry
@@ -163,14 +162,14 @@ dotnet add package OpenTelemetry.Instrumentation.AspNetCore
 dotnet add package OpenTelemetry.AutoInstrumentation
 ```
 
-**Step 3: Adding OpenTelemetry as a service and configuring exporter options in `Program.cs`:**
+**Step 2: Adding OpenTelemetry as a service and configuring exporter options in `Program.cs`:**
 
-In your `Program.cs` file (that got generated with the dotnet command above), add OpenTelemetry as a service. Here, we are configuring these variables:
+In your `Program.cs` file, add OpenTelemetry as a service. Here, we are configuring these variables:
 
 - `serviceName` - It is the name of your service.
 - `otlpOptions.Endpoint` - It is the endpoint for SigNoz Cloud.
 
-Here’s a sample `Program.cs` file with the configured variables. Remove all the existing boilerplate code that already exist in the `Program.cs` file and replace the contents with below configurations. 
+Here’s a sample `Program.cs` file with the configured variables. 
 
 ```bash
 using System.Diagnostics;
@@ -218,16 +217,9 @@ dotnet build
 dotnet run
 ```
 
-**Step 5: Setup OpenTelemetry binary as an agent in your machine**
-
-Go to [Setup OpenTelemetry binary](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) to Setup Otel Collector as agent that will collect telemetry data from your sample dotnet app and send it to SigNoz cloud.  
-
-
-**Step 6: Generating some load data and checking your application in SigNoz UI**
+**Step 5: Generating some load data and checking your application in SigNoz UI**
 
 After the Otel collector is all set and running, and your too application is running, generate some traffic by interacting with it.
-
-For the sample-net-app that we built, go to [http://localhost:5256](http://localhost:5256) and refresh for a few times to generate some telemetry data. 
 
 In the SigNoz account, open the `Services` tab. Hit the `Refresh` button on the top right corner, and your application should appear in the list of `Applications`. Ensure that you're checking data for the `time range filter` applied in the top right corner. You might have to wait for a few seconds before the data appears on SigNoz UI.
 
