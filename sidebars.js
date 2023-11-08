@@ -188,6 +188,7 @@ module.exports = {
         'userguide/manage-panels',
         'userguide/manage-variables',
         'userguide/create-a-custom-query',
+        'userguide/write-a-metrics-clickhouse-query',
       ]
     },
     
