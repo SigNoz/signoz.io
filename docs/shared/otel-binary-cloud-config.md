@@ -31,7 +31,8 @@ receivers:
       scrape_configs:
         - job_name: otel-collector-binary
           static_configs:
-            - targets: ['localhost:8888']
+            - targets:
+              # - localhost:8888
 processors:
   batch:
     send_batch_size: 1000
