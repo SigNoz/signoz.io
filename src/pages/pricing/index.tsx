@@ -177,7 +177,7 @@ const PricingPlans = () => {
                 }`}
                 onClick={() => setTab("cloud")}
               >
-                Cloud
+                SigNoz Cloud
               </button>
               <button
                 type="button"
@@ -188,7 +188,7 @@ const PricingPlans = () => {
                 }`}
                 onClick={() => setTab("self-managed")}
               >
-                Self Managed
+                Hosted in your infra
               </button>
             </nav>
           </div>
@@ -596,7 +596,7 @@ const PricingPlans = () => {
               <Heading type={1}>Run SigNoz within your infrastructure</Heading>
               <SubHeading>
                 Get started with Community Edition and upgrade for
-                enterprise-ready features or BYOC (Bring your own Cloud).
+                enterprise-ready features or BYOC (Bring your own Cloud)
               </SubHeading>
             </div>
 
