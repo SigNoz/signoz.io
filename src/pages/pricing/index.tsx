@@ -18,7 +18,9 @@ import Divider from "../../components/ui/Divider";
 function Pricing() {
   return (
     <Layout title="SigNoz Plans">
+      {/* Plans */}
       <PricingPlans />
+      {/* All Features */}
       <ExploreAllFeature />
       {/* Companies Logo */}
       <TrustedByTeams />
@@ -168,9 +170,11 @@ const PricingPlans = () => {
               <button
                 type="button"
                 // TODO COLOR BLUR
-                // relative after:absolute after:content-[''] after:w-14 after:h-14 after:top-[0%] after:right-[50%] after:bg-primary-400 after:rounded-full after:opacity-50 after:blur-3xl
-                className={`rounded-3xl border-none px-6 py-2 cursor-pointer 
-            ${tab === "cloud" ? "bg-primary-400" : "bg-transparent"}`}
+                className={`rounded-3xl border-none px-6 py-2 cursor-pointer ${
+                  tab === "cloud"
+                    ? "bg-primary-400 relative before:absolute before:content-[''] before:w-full before:h-full before:top-[0%] before:left-[0%] before:bg-primary-400 before:rounded-full before:opacity-50 z-[2] before:z-[-1] before:blur-xl"
+                    : "bg-transparent"
+                }`}
                 onClick={() => setTab("cloud")}
               >
                 Cloud
@@ -178,7 +182,9 @@ const PricingPlans = () => {
               <button
                 type="button"
                 className={`rounded-3xl border-none px-6 py-2 cursor-pointer ${
-                  tab === "self-managed" ? "bg-primary-400" : "bg-transparent"
+                  tab === "self-managed"
+                    ? "bg-primary-400 relative before:absolute before:content-[''] before:w-full before:h-full before:top-[0%] before:left-[0%] before:bg-primary-400 before:rounded-full before:opacity-50 z-[2] before:z-[-1] before:blur-xl"
+                    : "bg-transparent"
                 }`}
                 onClick={() => setTab("self-managed")}
               >
@@ -204,22 +210,22 @@ const PricingPlans = () => {
         {tab === "cloud" ? (
           <>
             {/* Cloud Plan */}
-          <div className="flex flex-col items-center mb-5 text-center mx-auto max-w-4xl">
-          <Heading type={1}>
-            Transparent & Predictable Pricing for{" "}
-            {tab === "cloud" ? "Cloud" : "Self Managed"}
-          </Heading>
-          <SubHeading>
-            Tired of unpredictable pricing and complex billing structure? Save
-            up to{" "}
-            <Link href="/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/">
-              <u>90% on your Datadog bill</u>
-            </Link>{" "}
-            with SigNoz. No user-based and host-based pricing.
-          </SubHeading>
-        </div>
+            <div className="flex flex-col items-center mb-5 text-center mx-auto max-w-4xl">
+              <Heading type={1}>
+                Transparent & Predictable Pricing for{" "}
+                {tab === "cloud" ? "Cloud" : "Self Managed"}
+              </Heading>
+              <SubHeading>
+                Tired of unpredictable pricing and complex billing structure?
+                Save up to{" "}
+                <Link href="/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/">
+                  <u>90% on your Datadog bill</u>
+                </Link>{" "}
+                with SigNoz. No user-based and host-based pricing.
+              </SubHeading>
+            </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-y-10 gap-x-8 md:max-w-md lg:max-w-6xl mx-auto justify-center pricing-plans">
-              <div className="px-8 py-5 pricing-card bg-primary-400 bg-opacity-5">
+              <div className="px-8 py-5 pricing-card bg-white bg-opacity-5 rounded-lg">
                 <div>
                   <h3 className="font-heading text-2xl font-bold ">Teams</h3>
                   <p className="leading-relaxed text-base mb-4 text-gray-400">
@@ -252,15 +258,15 @@ const PricingPlans = () => {
                     <h4 className={styles.packageDetailTitle}>Pricing</h4>
                     <div>
                       <span>Logs</span>
-                      <div>
-                        <span>
+                      <span className="flex justify-center item-center flex-nowrap">
+                        <span className="flex justify-center items-center gap-1">
                           <span className="text-primary-500">
                             ${TRACES_AND_LOGS_PRICES[logsRetentionPeriod]}
                           </span>{" "}
                           per GB ingested &mdash;&nbsp;
                         </span>
                         <select
-                          className="border text-sm rounded-lg block w-fit p-1 placeholder-gray-400 text-white focus:ring-primary-500 focus:border-primary-500 accent-primary-400"
+                          className="border text-xs md:text-sm rounded-lg block w-fit p-0.5 md:p-1 placeholder-gray-400 text-white focus:ring-primary-500 focus:border-primary-500 accent-primary-400"
                           value={logsRetentionPeriod}
                           onChange={(e) =>
                             setLogsRetentionPeriod(Number(e.target.value))
@@ -275,19 +281,19 @@ const PricingPlans = () => {
                             )
                           )}
                         </select>
-                      </div>
+                      </span>
                     </div>
                     <div>
                       <span>Traces</span>
-                      <div>
-                        <span>
+                      <span className="flex justify-center item-center flex-nowrap">
+                        <span className="flex justify-center items-center gap-1">
                           <span className="text-primary-500">
                             ${TRACES_AND_LOGS_PRICES[tracesRetentionPeriod]}
                           </span>{" "}
                           per GB ingested &mdash;&nbsp;
                         </span>
                         <select
-                          className="border text-sm rounded-lg block w-fit p-1 placeholder-gray-400 text-white focus:ring-primary-500 focus:border-primary-500 accent-primary-400"
+                          className="border text-xs md:text-sm rounded-lg block w-fit p-0.5 md:p-1 placeholder-gray-400 text-white focus:ring-primary-500 focus:border-primary-500 accent-primary-400"
                           value={tracesRetentionPeriod}
                           onChange={(e) =>
                             setTracesRetentionPeriod(Number(e.target.value))
@@ -302,19 +308,19 @@ const PricingPlans = () => {
                             )
                           )}
                         </select>
-                      </div>
+                      </span>
                     </div>
                     <div>
                       <span>Metrics</span>
-                      <div>
-                        <span>
+                      <span className="flex justify-center item-center flex-nowrap">
+                        <span className="flex justify-center items-center gap-1">
                           <span className="text-primary-500">
                             ${METRICS_PRICES[metricsRetentionPeriod]}
                           </span>{" "}
                           per mn samples &mdash;&nbsp;
                         </span>
                         <select
-                          className="border text-sm rounded-lg block w-fit p-1 placeholder-gray-400 text-white focus:ring-primary-500 focus:border-primary-500 accent-primary-400"
+                          className="border text-xs md:text-sm rounded-lg block w-fit p-0.5 md:p-1 placeholder-gray-400 text-white focus:ring-primary-500 focus:border-primary-500 accent-primary-400"
                           value={metricsRetentionPeriod}
                           onChange={(e) =>
                             setMetricsRetentionPeriod(Number(e.target.value))
@@ -329,7 +335,7 @@ const PricingPlans = () => {
                             }`}</option>
                           ))}
                         </select>
-                      </div>
+                      </span>
                     </div>
                     <br />
                     <div>
@@ -356,7 +362,8 @@ const PricingPlans = () => {
                   </div>
                   <Divider isDashed />
                   <p className={styles.retention}>
-                    Default Retention: 15 days for Traces & Logs, 30 days for Metrics
+                    Default Retention: 15 days for Traces & Logs, 30 days for
+                    Metrics
                   </p>
                   <Divider isDashed />
                   <div
@@ -430,10 +437,12 @@ const PricingPlans = () => {
                   >
                     Get started - free
                   </Link>
-                  <div><br></br></div>
+                  <div>
+                    <br></br>
+                  </div>
                 </div>
               </div>
-              <div className="px-8 py-5 pricing-card bg-primary-400 bg-opacity-5">
+              <div className="px-8 py-5 pricing-card bg-white bg-opacity-5 rounded-lg">
                 <div>
                   <h3 className="font-heading text-2xl font-bold ">
                     Enterprise Cloud
@@ -582,33 +591,31 @@ const PricingPlans = () => {
             {/* Self Managed Plan */}
 
             <div className="flex flex-col items-center mb-5 text-center mx-auto max-w-4xl">
-          <Heading type={1}>
-          Run SigNoz within your infrastructure
-          </Heading>
-          <SubHeading>
-            Get started with Community Edition and upgrade for enterprise-ready features or BYOC (Bring your own Cloud).
-
-          </SubHeading>
-        </div>
+              <Heading type={1}>Run SigNoz within your infrastructure</Heading>
+              <SubHeading>
+                Get started with Community Edition and upgrade for
+                enterprise-ready features or BYOC (Bring your own Cloud).
+              </SubHeading>
+            </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-y-10 gap-x-8 md:max-w-md lg:max-w-6xl mx-auto justify-center pricing-plans">
-              <div className="px-8 py-5 pricing-card bg-primary-400 bg-opacity-5">
+              <div className="px-8 py-5 pricing-card bg-white bg-opacity-5 rounded-lg">
                 <div>
-                  <h3 className="font-heading text-2xl font-bold ">Community Edition</h3>
+                  <h3 className="font-heading text-2xl font-bold ">
+                    Community Edition
+                  </h3>
                   <p className="leading-relaxed text-base mb-4 text-gray-400">
-                  Free to Self Host
+                    Free to Self Host
                   </p>
                   <div className="flex justify-between items-center">
-                    <p className="m-0">
-                      Install in your infra
-                    </p>
+                    <p className="m-0">Install in your infra</p>
                     <div>
                       <Link
                         id="btn-pricing-signoz-cloud-1"
                         className={`button button--primary ${styles.pricingCtaBtn}`}
                         href={"/docs/install/"}
                       >
-                      Documentation
+                        Documentation
                       </Link>
                     </div>
                   </div>
@@ -646,17 +653,16 @@ const PricingPlans = () => {
                     className={`button button--primary ${styles.pricingCtaBtn}`}
                     href={"/docs/install/"}
                   >
-                  Documentation
+                    Documentation
                   </Link>
                 </div>
               </div>
-              <div className="px-8 py-5 pricing-card bg-primary-400 bg-opacity-5">
+              <div className="px-8 py-5 pricing-card bg-white bg-opacity-5 rounded-lg">
                 <div>
                   <h3 className="font-heading text-2xl font-bold ">
-                  Enterprise Edition
+                    Enterprise Edition
                   </h3>
-                  <p className="leading-relaxed text-base mb-4 text-gray-400">
-                  </p>
+                  <p className="leading-relaxed text-base mb-4 text-gray-400"></p>
                 </div>
                 <Divider isDashed />
                 <div className="__card__body">
@@ -680,7 +686,9 @@ const PricingPlans = () => {
                       Deployment Options
                     </h4>
                     <div>
-                      <span>Self Host with support contract by SigNoz team </span>
+                      <span>
+                        Self Host with support contract by SigNoz team{" "}
+                      </span>
                       <span>
                         <RightSVG />
                       </span>
@@ -738,7 +746,7 @@ const PricingPlans = () => {
                   <div className={styles.packageDetailBlock}>
                     <h4 className={styles.packageDetailTitle}>Features</h4>
                     <p className={styles.featureBlur}>
-                    Includes all features in community edition
+                      Includes all features in community edition
                     </p>
                     <ul className="list-icon-right">
                       <li>SSO and SAML Support</li>
@@ -908,7 +916,8 @@ const ExploreAllFeature = () => {
             inEnterprise: <RightIcon />,
           },
           {
-            feature: "Support for Slack, Pagerduty, OpsGenie & webhooks as alert channel",
+            feature:
+              "Support for Slack, Pagerduty, OpsGenie & webhooks as alert channel",
             inCommunity: <RightIcon />,
             inTeams: <RightIcon />,
             inEnterprise: <RightIcon />,
@@ -931,9 +940,9 @@ const ExploreAllFeature = () => {
             inEnterprise: <RightIcon />,
           },
         ],
-       },         
-       
-       {
+      },
+
+      {
         section: "Service Dependency Visualization",
         features: [
           {
@@ -1104,21 +1113,21 @@ const ExploreAllFeature = () => {
   };
 
   return (
-    <div>
+    <div className="mx-5 md:mx-0">
       <div className="md:max-w-md lg:max-w-6xl mx-auto overflow-hidden">
         <div className="mt-10">
-          <div className="ovc-table_top-wrapper grid grid-cols-4 gap-1">
+          <div className="ovc-table_top-wrapper grid grid-cols-3 md:grid-cols-4 gap-1">
             {ALL_FEATURES_DATA.HEADER.map((h, idx) => {
               return (
                 <div
                   className={`${
                     idx !== 0
-                      ? `rounded-tr-lg rounded-tl-lg p-2 bg-primary-400 ${Opacity[idx]}`
-                      : ""
+                      ? `rounded-lg p-2 bg-primary-400 ${Opacity[idx]}`
+                      : "hidden md:block"
                   }`}
                 >
-                  <h2 className="m-0">{h.heading}</h2>
-                  <p>{h.desc}</p>
+                  <h2 className="m-0 text-lg md:text-2xl">{h.heading}</h2>
+                  <p className="text-base md:text-lg">{h.desc}</p>
                 </div>
               );
             })}
@@ -1171,47 +1180,30 @@ const ExploreAllFeature = () => {
                       }`}
                     >
                       <Divider />
-                      <h3 className="m-0 my-1 p-2">{row.section}</h3>
+                      <h3 className="m-0 my-1 p-2 text-center md:text-left">
+                        {row.section}
+                      </h3>
                       <Divider />
                       <div className=" grid grid-cols-1 gap-1">
                         {row.features.map((r, idx) => {
                           return (
-                            <div
-                              className={`${
-                                false
-                                  ? `rounded-lg bg-primary-400 bg-opacity-[${idx}]`
-                                  : ""
-                              }`}
-                            >
-                              <div className="grid grid-cols-4 gap-1">
-                                <h4 className="m-0 p-2">{r.feature}</h4>
+                            <div>
+                              <div className="grid grid-cols-3 md:grid-cols-4 gap-1">
+                                <h4 className="m-0 p-2 col-span-3 md:col-span-1 font-medium text-center md:text-left">
+                                  {r.feature}
+                                </h4>
                                 <div
-                                  className={`bg-primary-400 text-center flex justify-center items-center bg-opacity-10 p-2 ${
-                                    row.features.length - 1 === idx &&
-                                    ALL_FEATURES_DATA.ROWS.length - 1 === i
-                                      ? "rounded-bl-lg rounded-br-lg"
-                                      : ""
-                                  }`}
+                                  className={`bg-primary-400 text-center flex justify-center items-center bg-opacity-10 p-2 rounded-lg`}
                                 >
                                   {r.inCommunity}
                                 </div>
                                 <div
-                                  className={`bg-primary-400 text-center flex justify-center items-center bg-opacity-20 p-2 ${
-                                    row.features.length - 1 === idx &&
-                                    ALL_FEATURES_DATA.ROWS.length - 1 === i
-                                      ? "rounded-bl-lg rounded-br-lg"
-                                      : ""
-                                  }`}
+                                  className={`bg-primary-400 text-center flex justify-center items-center bg-opacity-20 p-2 rounded-lg`}
                                 >
                                   {r.inTeams}
                                 </div>
                                 <div
-                                  className={`bg-primary-400 text-center flex justify-center items-center bg-opacity-30 p-2 ${
-                                    row.features.length - 1 === idx &&
-                                    ALL_FEATURES_DATA.ROWS.length - 1 === i
-                                      ? "rounded-bl-lg rounded-br-lg"
-                                      : ""
-                                  }`}
+                                  className={`bg-primary-400 text-center flex justify-center items-center bg-opacity-30 p-2 rounded-lg`}
                                 >
                                   {r.inEnterprise}
                                 </div>
@@ -1236,7 +1228,7 @@ const ExploreAllFeature = () => {
             before:backdrop-blur-xl before:absolute before:content-[''] before:w-screen before:h-40 before:top-[0] before:left-0 before:bg-[#1b1b1d] before:rounded-full before:opacity-50 before:blur-3xl
           `}
           >
-            <div className="flex rounded-3xl z-10">
+            <div className="flex rounded-3xl z-[1]">
               <nav
                 className={`flex space-x-2 rounded-3xl ${styles.pricingTabContainer}`}
               >
@@ -1258,4 +1250,3 @@ const ExploreAllFeature = () => {
     </div>
   );
 };
-
