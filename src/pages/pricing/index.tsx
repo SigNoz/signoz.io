@@ -418,6 +418,8 @@ const PricingPlans = () => {
                       <li>Unlimited Logs & Traces based Dashboards</li>
                       <li>Dashboard locking</li>
                       <li>Visualize very large traces (&gt;10K spans)</li>
+                      <li>Data centers available in the US, EU & India</li>
+
                     </ul>
                   </div>
                   <Divider isDashed />
@@ -836,6 +838,17 @@ const ExploreAllFeature = () => {
             inTeams: <RightIcon />,
             inEnterprise: <RightIcon />,
           },
+          {
+            feature: "Visualize very large traces (>10K spans)",
+            inCommunity: (
+              <div className="flex flex-col justify-center items-center">
+                <CrossIcon />
+                {/* <small>(Limited to 5 dashboard panels & alerts)</small> */}
+              </div>
+            ),
+            inTeams: <RightIcon />,
+            inEnterprise: <RightIcon />,
+          },
         ],
       },
       {
@@ -855,6 +868,12 @@ const ExploreAllFeature = () => {
           },
           {
             feature: "Saved Views for logs",
+            inCommunity: <RightIcon />,
+            inTeams: <RightIcon />,
+            inEnterprise: <RightIcon />,
+          },
+          {
+            feature: "Live tail Logging",
             inCommunity: <RightIcon />,
             inTeams: <RightIcon />,
             inEnterprise: <RightIcon />,
