@@ -366,7 +366,7 @@ const PricingPlans = () => {
                     Metrics
                   </p>
                   <Divider isDashed />
-                  <div
+                  {/* <div
                     className={`${styles.deploymentOptions} ${styles.packageDetailBlock}`}
                   >
                     <h4 className={styles.packageDetailTitle}>
@@ -380,7 +380,7 @@ const PricingPlans = () => {
                     </div>
                     <div></div>
                   </div>
-                  <Divider isDashed />
+                  <Divider isDashed /> */}
                   <div
                     className={`${styles.support} ${styles.packageDetailBlock}`}
                   >
@@ -428,7 +428,7 @@ const PricingPlans = () => {
                     </ul>
                   </div>
                 </div>
-                {/* <Divider isDashed /> */}
+                <Divider isDashed />
                 <div className={`__card__footer ${styles.card__footer}`}>
                   <Link
                     id="btn-pricing-signoz-cloud-2"
@@ -486,7 +486,7 @@ const PricingPlans = () => {
                     </div>
                   </div>
                   <Divider isDashed />
-                  <div
+                  {/* <div
                     className={`${styles.deploymentOptions} ${styles.packageDetailBlock}`}
                   >
                     <h4 className={styles.packageDetailTitle}>
@@ -505,7 +505,7 @@ const PricingPlans = () => {
                       </span>
                     </div>
                   </div>
-                  <Divider isDashed />
+                  <Divider isDashed /> */}
                   <div
                     className={`${styles.support} ${styles.packageDetailBlock}`}
                   >
