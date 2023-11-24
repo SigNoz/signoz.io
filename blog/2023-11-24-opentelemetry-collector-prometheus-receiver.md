@@ -6,7 +6,7 @@ tags: [OpenTelemetry]
 authors: daniel
 description: OpenTelemetry Collector can collect Prometheus metrics and send them to a backend of your choice. In this tutorial, you will configure an OpenTelemetry Collector to scrape Prometheus metrics from a Flask application...
 image: /img/blog/2023/11/opentelemetry-collector-prometheus-metrics-cover.jpeg
-hide_table_of_contents: false
+hide_table_of_contents: true
 keywords:
   - opentelemetry
   - signoz
@@ -27,6 +27,23 @@ OpenTelemetry provides a component called OpenTelemetry Collector, which can be 
 
 
 In this tutorial, you will configure an OpenTelemetry Collector to scrape Prometheus metrics from a sample Flask application and send it to SigNoz for monitoring and visualization.
+
+We cover:
+- [What is Prometheus?](#what-is-prometheus)
+- [What is OpenTelemetry](#what-is-opentelemetry)
+- [What is OpenTelemetry Collector?](#what-is-opentelemetry-collector)
+- [How does OpenTelemetry Collector collect data?](#how-does-opentelemetry-collector-collect-data)
+- [Flask Metrics that you can collect with OpenTelemetry in Prometheus format](#flask-metrics-that-you-can-collect-with-opentelemetry-in-prometheus-format)
+- [Collecting Prometheus Metrics with OpenTelemetry Collector](#collecting-prometheus-metrics-with-opentelemetry-collector)
+- [Prerequisites](#prerequisites)
+- [Set up the Flask application](#set-up-the-flask-application)
+- [Set up SigNoz](#set-up-signoz)
+- [Set up OpenTelemetry Collector](#set-up-opentelemetry-collector)
+- [Monitor Prometheus Metrics in SigNoz](#monitor-prometheus-metrics-in-signoz)
+- [Conclusion](#conclusion)
+- [Further Reading](#further-reading)
+
+If you want to jump straight into implementation, start with this [prerequisites](#prerequisites) section.
 
 ## What is Prometheus?
 
