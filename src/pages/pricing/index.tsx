@@ -364,6 +364,10 @@ const PricingPlans = () => {
                   <p className={styles.retention}>
                     Default Retention: 15 days for Traces & Logs, 30 days for
                     Metrics
+                    <br />
+                    <br />
+
+                    <i>Reach out to us for higher retention period</i>
                   </p>
                   <Divider isDashed />
                   {/* <div
@@ -596,7 +600,7 @@ const PricingPlans = () => {
               <Heading type={1}>Run SigNoz within your infrastructure</Heading>
               <SubHeading>
                 Get started with Community Edition and upgrade for
-                enterprise-ready features or BYOC (Bring your own Cloud)
+                enterprise-ready features or get it managed by SigNoz in your cloud (BYOC)
               </SubHeading>
             </div>
 
@@ -954,8 +958,8 @@ const ExploreAllFeature = () => {
         features: [
           {
             feature: "Support for S3/Google Cloud Storage archival",
-            inCommunity: <CrossIcon />,
-            inTeams: <CrossIcon />,
+            inCommunity: <RightIcon />,
+            inTeams: <RightIcon />,
             inEnterprise: <RightIcon />,
           },
         ],
