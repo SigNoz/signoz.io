@@ -1139,7 +1139,7 @@ const ExploreAllFeature = () => {
 
   return (
     <div className="mx-5 md:mx-0 relative">
-      <div className="md:max-w-md lg:max-w-6xl mx-auto overflow-hidden sticky top-0 left-0 right-0 bg-[#1b1b1d] z-[1]">
+      <div className="md:max-w-md lg:max-w-6xl mx-auto overflow-hidden">
         <div className="mt-10">
           <div className="ovc-table_top-wrapper grid grid-cols-3 md:grid-cols-4 gap-1">
             {ALL_FEATURES_DATA.HEADER.map((h, idx) => {
