@@ -22,6 +22,8 @@ function Pricing() {
       <PricingPlans />
       {/* All Features */}
       <ExploreAllFeature />
+      {/* Pricing Calculator */}
+      <PricingCalculator />
       {/* Companies Logo */}
       <TrustedByTeams />
       {/* Cost Comparison Graph */}
@@ -68,9 +70,9 @@ const RightIcon = () => (
     xmlns="http://www.w3.org/2000/svg"
   >
     <path
-      fill-rule="evenodd"
+      fillRule="evenodd"
       d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-      clip-rule="evenodd"
+      clipRule="evenodd"
     ></path>
   </svg>
 );
@@ -86,8 +88,8 @@ const CrossIcon = () => {
       xmlns="http://www.w3.org/2000/svg"
     >
       <path
-        fill-rule="evenodd"
-        clip-rule="evenodd"
+        fillRule="evenodd"
+        clipRule="evenodd"
         d="M0.5 8C0.5 12.1423 3.85775 15.5 8 15.5C12.1423 15.5 15.5 12.1423 15.5 8C15.5 3.85775 12.1423 0.5 8 0.5C3.85775 0.5 0.5 3.85775 0.5 8ZM10.4484 11.5L8 9.05156L5.55157 11.5L4.50002 10.4485L6.94846 8.00001L4.5 5.55155L5.55154 4.5L8 6.94846L10.4485 4.5L11.5 5.55155L9.05154 8.00001L11.5 10.4485L10.4484 11.5Z"
         fill="#FF5E7B"
       />
@@ -170,7 +172,7 @@ const PricingPlans = () => {
               <button
                 type="button"
                 // TODO COLOR BLUR
-                className={`rounded-3xl border-none px-6 py-2 cursor-pointer ${
+                className={`rounded-3xl border-none px-6 py-2 text-white cursor-pointer ${
                   tab === "cloud"
                     ? "bg-primary-400 relative before:absolute before:content-[''] before:w-full before:h-full before:top-[0%] before:left-[0%] before:bg-primary-400 before:rounded-full before:opacity-50 z-[2] before:z-[-1] before:blur-xl"
                     : "bg-transparent"
@@ -181,7 +183,7 @@ const PricingPlans = () => {
               </button>
               <button
                 type="button"
-                className={`rounded-3xl border-none px-6 py-2 cursor-pointer ${
+                className={`rounded-3xl border-none px-6 py-2 text-white cursor-pointer ${
                   tab === "self-managed"
                     ? "bg-primary-400 relative before:absolute before:content-[''] before:w-full before:h-full before:top-[0%] before:left-[0%] before:bg-primary-400 before:rounded-full before:opacity-50 z-[2] before:z-[-1] before:blur-xl"
                     : "bg-transparent"
@@ -225,7 +227,7 @@ const PricingPlans = () => {
               </SubHeading>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-y-10 gap-x-8 md:max-w-md lg:max-w-6xl mx-auto justify-center pricing-plans">
-              <div className="px-8 py-5 pricing-card bg-white bg-opacity-5 rounded-lg">
+              <div className="px-4 md:px-8 py-5 pricing-card bg-white bg-opacity-5 rounded-lg">
                 <div>
                   <h3 className="font-heading text-2xl font-bold ">Teams</h3>
                   <p className="leading-relaxed text-base mb-4 text-gray-400">
@@ -448,7 +450,7 @@ const PricingPlans = () => {
                   </div>
                 </div>
               </div>
-              <div className="px-8 py-5 pricing-card bg-white bg-opacity-5 rounded-lg">
+              <div className="px-4 md:px-8 py-5 pricing-card bg-white bg-opacity-5 rounded-lg">
                 <div>
                   <h3 className="font-heading text-2xl font-bold ">
                     Enterprise Cloud
@@ -605,7 +607,7 @@ const PricingPlans = () => {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-y-10 gap-x-8 md:max-w-md lg:max-w-6xl mx-auto justify-center pricing-plans">
-              <div className="px-8 py-5 pricing-card bg-white bg-opacity-5 rounded-lg">
+              <div className="px-4 md:px-8 py-5 pricing-card bg-white bg-opacity-5 rounded-lg">
                 <div>
                   <h3 className="font-heading text-2xl font-bold ">
                     Community Edition
@@ -663,7 +665,7 @@ const PricingPlans = () => {
                   </Link>
                 </div>
               </div>
-              <div className="px-8 py-5 pricing-card bg-white bg-opacity-5 rounded-lg">
+              <div className="px-4 md:px-8 py-5 pricing-card bg-white bg-opacity-5 rounded-lg">
                 <div>
                   <h3 className="font-heading text-2xl font-bold ">
                     Enterprise Edition
@@ -1136,13 +1138,14 @@ const ExploreAllFeature = () => {
   };
 
   return (
-    <div className="mx-5 md:mx-0">
-      <div className="md:max-w-md lg:max-w-6xl mx-auto overflow-hidden">
+    <div className="mx-5 md:mx-0 relative">
+      <div className="md:max-w-md lg:max-w-6xl mx-auto overflow-hidden sticky top-0 left-0 right-0 bg-[#1b1b1d] z-[1]">
         <div className="mt-10">
           <div className="ovc-table_top-wrapper grid grid-cols-3 md:grid-cols-4 gap-1">
             {ALL_FEATURES_DATA.HEADER.map((h, idx) => {
               return (
                 <div
+                  key={idx}
                   className={`${
                     idx !== 0
                       ? `rounded-lg p-2 bg-primary-400 ${Opacity[idx]}`
@@ -1196,6 +1199,7 @@ const ExploreAllFeature = () => {
                 {ALL_FEATURES_DATA.ROWS.map((row, i) => {
                   return (
                     <div
+                      key={i}
                       className={`${
                         false
                           ? `rounded-lg bg-primary-400 bg-opacity-[${i}]`
@@ -1210,7 +1214,7 @@ const ExploreAllFeature = () => {
                       <div className=" grid grid-cols-1 gap-1">
                         {row.features.map((r, idx) => {
                           return (
-                            <div>
+                            <div key={idx}>
                               <div className="grid grid-cols-3 md:grid-cols-4 gap-1">
                                 <h4 className="m-0 p-2 col-span-3 md:col-span-1 font-medium text-center md:text-left">
                                   {r.feature}
@@ -1273,3 +1277,203 @@ const ExploreAllFeature = () => {
     </div>
   );
 };
+
+function PricingCalculator() {
+  const TRACES_AND_LOGS_PRICES = {
+    15: 0.3,
+    30: 0.4,
+    90: 0.6,
+    180: 0.8,
+  };
+  const METRICS_PRICES = {
+    1: 0.1,
+    3: 0.12,
+    6: 0.15,
+    13: 0.18,
+  };
+  const RETENTION_PERIOD = {
+    TRACES_AND_LOGS: [
+      { days: 15, price: 0.3 },
+      { days: 30, price: 0.4 },
+      { days: 90, price: 0.6 },
+      { days: 180, price: 0.8 },
+    ],
+    METRICS: [
+      { months: 1, price: 0.1 },
+      { months: 3, price: 0.12 },
+      { months: 6, price: 0.15 },
+      { months: 13, price: 0.18 },
+    ],
+  };
+  // Period
+  const [tracesRetentionPeriod, setTracesRetentionPeriod] = useState(
+    RETENTION_PERIOD.TRACES_AND_LOGS[0].days
+  );
+  const [logsRetentionPeriod, setLogsRetentionPeriod] = useState(
+    RETENTION_PERIOD.TRACES_AND_LOGS[0].days
+  );
+  const [metricsRetentionPeriod, setMetricsRetentionPeriod] = useState(
+    RETENTION_PERIOD.METRICS[0].months
+  );
+  // GB plan
+  const [tracesGB, setTracesGB] = useState(500);
+  const [logsGB, setLogsGB] = useState(500);
+  const [metricsGB, setMetricsGB] = useState(1000);
+
+  const [usageBasedCost, setUsageBasedCost] = useState(0);
+  const [amountToBePaid, setAmountToBePaid] = useState(0);
+
+  useEffect(() => {
+    let cost = 0;
+    let minimumCost = 199;
+    cost =
+      TRACES_AND_LOGS_PRICES[tracesRetentionPeriod] * tracesGB +
+      TRACES_AND_LOGS_PRICES[logsRetentionPeriod] * logsGB +
+      METRICS_PRICES[metricsRetentionPeriod] * metricsGB;
+    setUsageBasedCost(cost);
+    cost = Math.max(minimumCost, cost);
+    setAmountToBePaid(cost);
+  }, [
+    tracesRetentionPeriod,
+    logsRetentionPeriod,
+    metricsRetentionPeriod,
+    tracesGB,
+    logsGB,
+    metricsGB,
+  ]);
+
+  return (
+    <div>
+      <div className="md:max-w-md lg:max-w-6xl mx-5 md:mx-auto overflow-hidden price-calc p-7 rounded-md my-16">
+        <div className="flex flex-col items-center mb-5 text-center">
+          <Heading type={1}>Estimate your costs with SigNoz</Heading>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 m-10 mx-2 md:m-10 gap-5">
+          <div className="col-span-1 md:col-span-2">
+            <div className="grid grid-cols-1 gap-y-8">
+              <div className="grid grid-cols-5">
+                <p className="col-span-3 flex justify-start items-center text-lg md:text-xl font-extrabold whitespace-nowrap">
+                  Logs
+                </p>
+                <p className="col-span-2 flex gap-2 flex-nowrap justify-end items-center">
+                  <span className="text-primary-400 text-lg md:text-xl font-extrabold whitespace-nowrap">
+                    {logsGB} GB
+                  </span>
+                  <span> for</span>
+                  <select
+                    className="border text-sm rounded-lg block w-fit p-2.5 placeholder-gray-400 text-white focus:ring-primary-500 focus:border-primary-500 accent-primary-400"
+                    value={logsRetentionPeriod}
+                    onChange={(e) =>
+                      setLogsRetentionPeriod(Number(e.target.value))
+                    }
+                  >
+                    {RETENTION_PERIOD.TRACES_AND_LOGS.map((option, idx) => (
+                      <option
+                        key={`${option.days}-${idx}`}
+                        value={option.days}
+                      >{`${option.days} days`}</option>
+                    ))}
+                  </select>
+                </p>
+                <p className="col-span-5">
+                  <input
+                    id="large-range"
+                    type="range"
+                    className="w-full h-3 slider"
+                    min={1}
+                    max={100000}
+                    value={logsGB}
+                    step={1}
+                    onChange={(e) => setLogsGB(Number(e.target.value))}
+                  />
+                </p>
+              </div>
+              <div className="grid grid-cols-5">
+                <p className="col-span-3 flex justify-start items-center text-lg md:text-xl font-extrabold whitespace-nowrap">
+                  Traces
+                </p>
+                <p className="col-span-2 flex gap-2 flex-nowrap justify-end items-center">
+                  <span className="text-primary-400 text-lg md:text-xl font-extrabold whitespace-nowrap">
+                    {tracesGB} GB
+                  </span>
+                  <span> for</span>
+                  <select
+                    className="border text-sm rounded-lg block w-fit p-2.5 placeholder-gray-400 text-white focus:ring-primary-500 focus:border-primary-500 accent-primary-400"
+                    value={tracesRetentionPeriod}
+                    onChange={(e) =>
+                      setTracesRetentionPeriod(Number(e.target.value))
+                    }
+                  >
+                    {RETENTION_PERIOD.TRACES_AND_LOGS.map((option, idx) => (
+                      <option
+                        key={`${option.days}-${idx}`}
+                        value={option.days}
+                      >{`${option.days} days`}</option>
+                    ))}
+                  </select>
+                </p>
+                <p className="col-span-5">
+                  <input
+                    id="large-range"
+                    type="range"
+                    className="w-full h-3 slider"
+                    min={1}
+                    max={100000}
+                    value={tracesGB}
+                    step={1}
+                    onChange={(e) => setTracesGB(Number(e.target.value))}
+                  />
+                </p>
+              </div>
+              <div className="grid grid-cols-5">
+                <p className="col-span-3 flex justify-start items-center text-lg md:text-xl font-extrabold whitespace-nowrap">
+                  Metrics
+                </p>
+                <p className="col-span-2 flex gap-2 flex-nowrap justify-end items-center">
+                  <span className="text-primary-400 text-lg md:text-xl font-extrabold whitespace-nowrap">
+                    {metricsGB} GB
+                  </span>
+                  <span> for</span>
+                  <select
+                    className="border text-sm rounded-lg block w-fit p-2.5 placeholder-gray-400 text-white focus:ring-primary-500 focus:border-primary-500 accent-primary-400"
+                    value={metricsRetentionPeriod}
+                    onChange={(e) =>
+                      setMetricsRetentionPeriod(Number(e.target.value))
+                    }
+                  >
+                    {RETENTION_PERIOD.METRICS.map((option, idx) => (
+                      <option
+                        key={`${option.months}-${idx}`}
+                        value={option.months}
+                      >{`${option.months} ${
+                        option.months === 1 ? "month" : "months"
+                      }`}</option>
+                    ))}
+                  </select>
+                </p>
+                <p className="col-span-5">
+                  <input
+                    id="large-range"
+                    type="range"
+                    className="w-full h-3 slider"
+                    min={1}
+                    max={100000}
+                    value={metricsGB}
+                    step={1}
+                    onChange={(e) => setMetricsGB(Number(e.target.value))}
+                  />
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="col-span-1 flex flex-col justify-center items-center gap-1">
+            <span className="font-extrabold text-5xl md:leading-12 tracking-tight min-w-fit text-primary-400">
+              ${new Intl.NumberFormat().format(amountToBePaid)}
+            </span>
+            <span>SigNoz total price</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
