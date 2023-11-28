@@ -36,7 +36,7 @@ Alert Rules set the expression you want to evaluate to start firing alerts. The 
 
 To create new alert rules, you can click the `New Alerts` button. This would open a pane with the type of alerts. 
 
-<img width="1101" alt="image" src="https://user-images.githubusercontent.com/10277894/208090898-2a05a349-c071-47e1-9dd3-d0a5de70f113.webp" />
+<img width="1101" alt="image" src="https://user-images.githubusercontent.com/10277894/208090898-2a05a349-c071-47e1-9dd3-d0a5de70f113.png" />
 
 
 Choose an appropriate type of alert by clicking on one of the cards. 
@@ -73,7 +73,7 @@ In PromQL, you can write the Prometheus expression to evaluate.
 #### 3. Writing Clickhouse Queries in Alert form
 On `clickhouse query` tab, you will be presented with a query editor with a default query that you can start working with. To learn more about the data-model and query format, read [this tutorial](https://signoz.io/docs/tutorial/writing-clickhouse-queries-in-dashboard/#building-alert-queries-with-clickhouse-data).  
 
-<img width="835" alt="image" src="https://user-images.githubusercontent.com/10277894/208092689-07e7edd6-2277-4cd4-9fbf-a2e13531a4a9.webp" />
+<img width="835" alt="image" src="https://user-images.githubusercontent.com/10277894/208092689-07e7edd6-2277-4cd4-9fbf-a2e13531a4a9.png" />
 
 
 You can use `Run Query` to confirm your query works. Include the bind variables and mandatory column aliases as mentioned [here](https://signoz.io/docs/tutorial/writing-clickhouse-queries-in-dashboard/#building-alert-queries-with-clickhouse-data). 
@@ -149,17 +149,17 @@ You must have a valid webhook URL (reachable from SigNoz Alert Manager) and an a
 #### b. Creating a new Webhook channel
 Enter Webhook URL endpoint, username and password (if needed). Use _Test_ button to test the connection with your application.  
 
-![image](https://user-images.githubusercontent.com/10277894/165084693-8034b65a-f0f4-4ff4-8a72-88fb7b8726b4.webp)
+![image](https://user-images.githubusercontent.com/10277894/165084693-8034b65a-f0f4-4ff4-8a72-88fb7b8726b4.png)
 
 
 #### c. Editing a Webhook channel
 Similar to slack, you can edit most of the webhook parameters except the channel name and type. 
 
-![image](https://user-images.githubusercontent.com/10277894/165084529-bf0aa817-5c4e-4f45-98bd-eeb33eb02547.webp)
+![image](https://user-images.githubusercontent.com/10277894/165084529-bf0aa817-5c4e-4f45-98bd-eeb33eb02547.png)
 
 #### d. Receive Alert through Webhook
 
-![image](https://user-images.githubusercontent.com/10277894/165078852-d3ae7571-bfa2-409a-93aa-2a870b379cb1.webp)
+![image](https://user-images.githubusercontent.com/10277894/165078852-d3ae7571-bfa2-409a-93aa-2a870b379cb1.png)
 
 #### e. Sample format of a Webhook message
 A webhook message may contain multiple alerts. By default, the SigNoz alert manager groups alerts by the alert name and delivers the grouped messages every 5 minutes. 
@@ -216,7 +216,7 @@ There are two ways to integrate with PagerDuty: via global [event orchestration]
 2. Create a new orchestration 
 3. Click on **Global Orchestration Key**, copy your **integration key** and keep it safe for later use. 
 
-![image](https://user-images.githubusercontent.com/10277894/180833019-c865ecd5-f752-419f-998e-baf296daef88.webp)
+![image](https://user-images.githubusercontent.com/10277894/180833019-c865ecd5-f752-419f-998e-baf296daef88.png)
 
 
 #### b. Get Integration or Routing key to integrate with pagerduty service
@@ -228,7 +228,7 @@ There are two ways to integrate with PagerDuty: via global [event orchestration]
 
 For more details on PagerDuty service setup, visit [here](https://support.pagerduty.com/docs/services-and-integrations#add-integrations-to-an-existing-service).
 
-![image](https://user-images.githubusercontent.com/10277894/179944431-4e7ebb09-c6ca-455f-88b5-02e0f7ccfd8a.webp)
+![image](https://user-images.githubusercontent.com/10277894/179944431-4e7ebb09-c6ca-455f-88b5-02e0f7ccfd8a.png)
 
 #### c. Prerequisite
 You must have a valid Integration Key (aka Routing Key) before you setup a PagerDuty channel in SigNoz Dashboard. 
@@ -242,30 +242,30 @@ You must have a valid Integration Key (aka Routing Key) before you setup a Pager
 6. Test the connect with **Test** button
 7. **Save** the channel 
 
-![image](https://user-images.githubusercontent.com/10277894/179944648-a9f3b558-2687-4132-a6ce-bc5d69f59368.webp)
+![image](https://user-images.githubusercontent.com/10277894/179944648-a9f3b558-2687-4132-a6ce-bc5d69f59368.png)
 
 #### e. Test the PagerDuty channel
 1. Let's create a simple alert rule that monitors average CPU performance for each host. Go to **Alerts** page in **your SigNoz app** and click `New Alert` button. When the new alert page opens, edit metric query as shown below. Feel free to choose any other metric, the idea is to pick a metric with sufficient data to raise an alert. 
 
-   ![image](https://user-images.githubusercontent.com/10277894/179949345-f242f0da-2afb-4041-ab72-3390d645dd77.webp)
+   ![image](https://user-images.githubusercontent.com/10277894/179949345-f242f0da-2afb-4041-ab72-3390d645dd77.png)
 
 2. We can now **review the graph** to identify a threshold that will definitely cause an alert. Here, anything below 0.2 looks like a good condition for threshold.
 
-   ![image](https://user-images.githubusercontent.com/10277894/179957078-b7e430ab-95c2-4d5d-8eac-10670f1e0e52.webp)
+   ![image](https://user-images.githubusercontent.com/10277894/179957078-b7e430ab-95c2-4d5d-8eac-10670f1e0e52.png)
 
 
 
 3. Let's **set threshold to 0.12** to be sure that alert will be raised in next few minutes.
 
-   ![image](https://user-images.githubusercontent.com/10277894/179949589-17cab9a8-640d-422a-a22a-f4e5ebd6f5c7.webp)
+   ![image](https://user-images.githubusercontent.com/10277894/179949589-17cab9a8-640d-422a-a22a-f4e5ebd6f5c7.png)
 
 4. **Save the alert** rule. Feel free to edit severity and labels as necessary.
 
 5. Go to your **PagerDuty Alerts Dashboard** (`PagerDuty Home >> Incident >> Alerts`) and wait for a few minutes. If all goes well, you will **see an incident**. You may have to refresh the page few times to see the alert. 
 
-   ![image](https://user-images.githubusercontent.com/10277894/179956540-0eae3553-c813-4d39-8484-bba2c6d939c5.webp)
+   ![image](https://user-images.githubusercontent.com/10277894/179956540-0eae3553-c813-4d39-8484-bba2c6d939c5.png)
 
-   ![image](https://user-images.githubusercontent.com/10277894/179956567-d4de2d44-4510-46bb-80df-13ecefc08064.webp)
+   ![image](https://user-images.githubusercontent.com/10277894/179956567-d4de2d44-4510-46bb-80df-13ecefc08064.png)
 
 
 ### 4. Configure Opsgenie Channel
