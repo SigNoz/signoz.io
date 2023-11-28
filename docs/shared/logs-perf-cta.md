@@ -1,1 +1,1 @@
-[![Logs Perf Benchmark](/img/blog/common/logs_perf_cta.png)](https://signoz.io/blog/logs-performance-benchmark/)
+[![Logs Perf Benchmark](/img/blog/common/logs_perf_cta.webp)](https://signoz.io/blog/logs-performance-benchmark/)

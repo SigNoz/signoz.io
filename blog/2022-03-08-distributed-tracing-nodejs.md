@@ -252,7 +252,7 @@ This will run the app UI on port 5000. Open the UI at [http://localhost:5000/](h
 <Screenshot
    alt="Running sample app UI"
    height={500}
-   src="/img/blog/2022/03/serve_ui_port.png"
+   src="/img/blog/2022/03/serve_ui_port.webp"
    title="Running sample app UI"
    width={700}
 />
@@ -442,7 +442,7 @@ If you are someone who understands more from video, then you can watch the below
 
 If you have any questions or need any help in setting things up, join our slack community and ping us in `#support` channel.
 
-[![SigNoz Slack community](/img/blog/common/join_slack_cta.png)](https://signoz.io/slack)
+[![SigNoz Slack community](/img/blog/common/join_slack_cta.webp)](https://signoz.io/slack)
 
 ---
 Read more about distributed tracing from SigNoz blog 👇

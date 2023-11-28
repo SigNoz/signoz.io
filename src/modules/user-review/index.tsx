@@ -7,7 +7,7 @@ export const UserReview = () => {
   return (
     <section className={styles.review}>
       <div className="container">
-        <img src="/img/users/blip_logo.png" />
+        <img src="/img/users/blip_logo.webp" />
         <p className={styles.subTagline}>
           We use SigNoz to trace requests step by step, and that kind of stuff
           is invaluable. Before SigNoz, we tried Jaeger to try and trace through

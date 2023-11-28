@@ -20,7 +20,7 @@ For each span, SigNoz shows the following details:
 
 The following illustration shows the **Span Details** page:
 
-![Screenshot showing the span details page](/img/span-details-page-v0.7.1.png)
+![Screenshot showing the span details page](/img/span-details-page-v0.7.1.webp)
 
 **Legend**:
 
@@ -53,4 +53,4 @@ Select the **Focus on selected span** button to view only the currently selected
 
 On the **Span Details** page SigNoz highlights in red all spans with errors. In the following example screenshot, you can see two spans with errors:
 
-![Screenshot showing a span with errors](/img/identify-span-with-errors-v0.7.1.png)
+![Screenshot showing a span with errors](/img/identify-span-with-errors-v0.7.1.webp)

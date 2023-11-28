@@ -14,7 +14,7 @@ import { LiteYoutubeEmbed } from "react-lite-yt-embed";
   <meta property="og:url" content="https://signoz.io/case-study/wombo/"/>
   <meta property="og:title" content="How Generative AI co Wombo provides great experience to its 5mn MAU using SigNoz for Observability | SigNoz"/>
   <meta property="og:description" content=""/>
-  <meta name="image" property="og:image" content="https://signoz.io/img/case_study/wombo-banner.png"/>
+  <meta name="image" property="og:image" content="https://signoz.io/img/case_study/wombo-banner.webp"/>
   <meta property="twitter:card" content="summary_large_image"/>
   <meta property="twitter:url" content="https://signoz.io/case-study/wombo/"/>
   <meta property="twitter:title" content="How Generative AI co Wombo provides great experience to its 5mn MAU using SigNoz for Observability | SigNoz"/>
@@ -161,4 +161,4 @@ Sharing stories of how different teams are using SigNoz helps the community in l
 
 Feel free to join our slack community and say hi! 👋
 
-[![SigNoz Slack community](/img/blog/common/join_slack_cta.png)](https://signoz.io/slack)
+[![SigNoz Slack community](/img/blog/common/join_slack_cta.webp)](https://signoz.io/slack)

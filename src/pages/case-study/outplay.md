@@ -117,4 +117,4 @@ Sharing stories of how different teams are using SigNoz helps the community in l
 
 Feel free to join our slack community and say hi! 👋
 
-[![SigNoz Slack community](/img/blog/common/join_slack_cta.png)](https://signoz.io/slack)
+[![SigNoz Slack community](/img/blog/common/join_slack_cta.webp)](https://signoz.io/slack)

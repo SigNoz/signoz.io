@@ -440,6 +440,6 @@ To setup the Hostmetrics Dashboard, check the docs [here](https://signoz.io/docs
 ---
 
 [1]: https://github.com/open-telemetry/opentelemetry-collector-releases/releases
-[2]: /img/docs/telemetrygen-output.png
-[3]: /img/docs/hostmetrics-dashboard.png
+[2]: /img/docs/telemetrygen-output.webp
+[3]: /img/docs/hostmetrics-dashboard.webp
 [4]: https://github.com/SigNoz/dashboards/raw/main/hostmetrics/hostmetrics-with-variable.json

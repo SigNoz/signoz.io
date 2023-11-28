@@ -181,7 +181,7 @@ You can check out SigNoz's GitHub repo here 👇
 
 We also have an active slack community. Feel free to join in and say hi! 👋
 
-[![SigNoz Slack community](/img/blog/common/join_slack_cta.png)](https://signoz.io/slack)
+[![SigNoz Slack community](/img/blog/common/join_slack_cta.webp)](https://signoz.io/slack)
 
 ___
 

@@ -101,6 +101,6 @@ kubectl -n platform rollout restart statefulset/my-release-signoz-query-service
 
 Now, you should be able to create a new admin account from SigNoz UI: `http://localhost:3301`.
 
-![Reset Admin Password](/img/docs/sqlite-reset-admin-password.png)
+![Reset Admin Password](/img/docs/sqlite-reset-admin-password.webp)
 
 ---

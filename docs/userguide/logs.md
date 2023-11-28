@@ -151,18 +151,18 @@ There are **two** ways to collect logs from these applications.
 - **Via File or Stdout Logs**<br></br>
     Here, the logs of the application are directly collected by the OpenTelemetry receiver using collectors like **[filelog receiver](/docs/userguide/logs/#receivers)** and operators and processors to parse them into the OTel model.
         
-    ![Untitled](../../static/img/logs/file_stdout.png)
+    ![Untitled](../../static/img/logs/file_stdout.webp)
 
         
     If advanced parsing and collecting capabilities are needed which is not present in OpenTelemetry or something like FluentBit/LogStash etc is already present then the agents can push the logs to OpenTelemetry collector using protocols like **FluentForward/TCP/UDP** etc.
         
-    ![Untitled](../../static/img/logs/using_agent.png)
+    ![Untitled](../../static/img/logs/using_agent.webp)
     
         
 - **Direct to collector**<br></br>
     In this approach you can modify your logging library that is used by the application to use the logging SDK provided by OpenTelemetry and directly forward the logs from the application to OpenTelemetry.  This approach removes any need for agents/intermediary medium but loses the simplicity of having the log file locally.
         
-    ![Untitled](../../static/img/logs/direct_to_collector.png)
+    ![Untitled](../../static/img/logs/direct_to_collector.webp)
         
 ### Collecting third-party application logs
 
@@ -201,7 +201,7 @@ This brings a requirement that the final collector should be SigNoz OTEL collect
 
 - If you have N number of OpenTelemetry collectors running in different places then they should process and send data to SigNoz OTEL collector using OTLP for it to be able to store in ClickHouse.
     
-    ![notelcollectors.png](../../static/img/logs/n_collectors.png)
+    ![notelcollectors.webp](../../static/img/logs/n_collectors.webp)
     
 - The other way is to use SigNoz OTEL collector everywhere which can directly write to ClickHouse.
     

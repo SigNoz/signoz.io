@@ -120,8 +120,8 @@ done
 For `png`:
 
 ```bash
-for file in *.png; do    
-          cwebp -q 80 "$file" -o "${file%.png}.webp"
+for file in *.webp; do    
+          cwebp -q 80 "$file" -o "${file%.webp}.webp"
 done
 ```
 

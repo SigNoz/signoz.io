@@ -143,7 +143,7 @@ const COMPARISON_DATA = {
   REASON_TITLE: "",
   REASONS: [
     {
-      FIGURE: "/img/reasons/signoz-vs-grafana-bill.png",
+      FIGURE: "/img/reasons/signoz-vs-grafana-bill.webp",
       TITLE: <>SigNoz is also better value for money.</>,
       DESC: (
         <>

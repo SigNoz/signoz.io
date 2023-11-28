@@ -321,7 +321,7 @@ const config = {
           {
             tagName: "link",
             rel: "icon",
-            href: "/img/icons/icon-512x512.png",
+            href: "/img/icons/icon-512x512.webp",
           },
           {
             tagName: "link",

@@ -82,7 +82,7 @@ const COMPARISON_DATA = {
   REASON_TITLE: <>In depth: SigNoz vs Dynatrace</>,
   REASONS: [
     {
-      FIGURE: "/img/reasons/ot-native.png",
+      FIGURE: "/img/reasons/ot-native.webp",
       TITLE: <>SigNoz is OpenTelemetry native </>,
       DESC: (
         <>
@@ -98,7 +98,7 @@ const COMPARISON_DATA = {
     },
     {
       FIGURE:
-        "/img/reasons/use-of-columnar-database-for-faster-ingestion-and-aggregation.png",
+        "/img/reasons/use-of-columnar-database-for-faster-ingestion-and-aggregation.webp",
       TITLE: <>Use of columnar database for faster ingestion & aggregation </>,
       DESC: (
         <>
@@ -118,7 +118,7 @@ const COMPARISON_DATA = {
       ),
     },
     {
-      FIGURE: "/img/reasons/dynatrace-host-based-billing.png",
+      FIGURE: "/img/reasons/dynatrace-host-based-billing.webp",
       TITLE: <>Dynatrace’s host-based billing is limiting for modern apps</>,
       DESC: (
         <>
@@ -134,7 +134,7 @@ const COMPARISON_DATA = {
       ),
     },
     {
-      FIGURE: "/img/reasons/dynatrace-complex-ui.png",
+      FIGURE: "/img/reasons/dynatrace-complex-ui.webp",
       TITLE: <>Dynatrace has a complex UI, and a steep learning curve </>,
       DESC: (
         <>
@@ -150,7 +150,7 @@ const COMPARISON_DATA = {
       ),
     },
     {
-      FIGURE: "/img/reasons/dynatrace-send-data-directly.png",
+      FIGURE: "/img/reasons/dynatrace-send-data-directly.webp",
       TITLE: (
         <>
           Send data directly from applications without needing any host-based

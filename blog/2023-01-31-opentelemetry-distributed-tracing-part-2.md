@@ -345,7 +345,7 @@ serve -l 5000 u
 ```
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2022/03/serve_ui_port.png" alt="Running sample app UI"/>
+    <img src="/img/blog/2022/03/serve_ui_port.webp" alt="Running sample app UI"/>
     <figcaption><i>Running sample app UI</i></figcaption>
 </figure>
 
@@ -458,7 +458,7 @@ OpenTelemetry and SigNoz provide a great open-source solution to implement distr
 
 If you have any questions or need any help in setting things up, join our slack community and ping us in `#support` channel.
 
-[![SigNoz Slack community](/img/blog/common/join_slack_cta.png)](https://signoz.io/slack)
+[![SigNoz Slack community](/img/blog/common/join_slack_cta.webp)](https://signoz.io/slack)
 
 
 ---

@@ -19,7 +19,7 @@ function caseStudies() {
                       </div>
                       <div class="card__image">
                         <img
-                            src="/img/case_study/Instasafe-summary.png"
+                            src="/img/case_study/Instasafe-summary.webp"
                             alt="InstaSafe"
                          />
                       </div>
@@ -47,7 +47,7 @@ function caseStudies() {
                       </div>
                       <div class="card__image">
                         <img
-                            src="/img/case_study/BlipBillBoards-summary.png"
+                            src="/img/case_study/BlipBillBoards-summary.webp"
                             alt="Blip"
                              />
                       </div>

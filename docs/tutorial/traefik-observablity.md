@@ -181,7 +181,7 @@ curl -H Host:hello-app.docker.localhost http://127.0.0.1
 
 Now, we will visit the SigNoz UI to see the traces and metrics.
 
-![Traefik Traces](/img/docs/tutorial/traefik-traces.png)
+![Traefik Traces](/img/docs/tutorial/traefik-traces.webp)
 
 To plot metrics generated from **Traefik**, follow the instructions
 given in the docs [here][2].

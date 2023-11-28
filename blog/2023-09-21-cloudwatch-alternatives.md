@@ -172,7 +172,7 @@ The platform stands out for its clean and modern UI, featuring heat maps for a c
 It can gather and assess logs and metrics from diverse sources, presenting a unified outlook on system well-being. Sematext also provides functionalities such as anomaly identification, customizable dashboards, and robust alerting systems. With its cloud-native design and compatibility with diverse technologies, it is well-suited for a broad spectrum of environments.
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2023/09/sematext-cloud-6.png.webp" alt="Infrastructure monitoring Sematext"/>
+    <img src="/img/blog/2023/09/sematext-cloud-6.webp.webp" alt="Infrastructure monitoring Sematext"/>
     <figcaption><i>Infrastructure monitoring ([Source](https://sematext.com/cloud/))</i></figcaption>
 </figure>
 

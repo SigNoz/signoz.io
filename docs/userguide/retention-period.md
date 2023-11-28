@@ -151,4 +151,4 @@ clickhouse:
 
 If you have any feedback or facing issues, feel free to join our slack community to get help!
 
-[![SigNoz Slack community](/img/blog/common/join_slack_cta.png)](https://signoz.io/slack)
+[![SigNoz Slack community](/img/blog/common/join_slack_cta.webp)](https://signoz.io/slack)

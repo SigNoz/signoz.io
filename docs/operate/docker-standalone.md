@@ -79,7 +79,7 @@ Follow the steps in this section to remove the sample application that comes ins
 
 2. Comment out or remove the `services.hotrod` and `services.load-hotrod` sections:
 
-  ![Remove the sample application on Docker Standalone](/img/docker-standalone-remove-the-sample-application.png)
+  ![Remove the sample application on Docker Standalone](/img/docker-standalone-remove-the-sample-application.webp)
 
 3. Move into the `deploy` directory and run the `install.sh` script again:
 

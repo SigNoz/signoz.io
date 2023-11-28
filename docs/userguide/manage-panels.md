@@ -38,7 +38,7 @@ SigNoz supports two types of panels: time series, which displays a metric over a
 Note the following about panels:
 - The total number of queries and functions you can plot on a single panel must be less or equal to ten.
 - Every time you add or modify a function or formula, you must select the **Stage & Run Query** button. If you do not select this button, the panel will not be updated and your changes will be lost whenever you move to a different tab. When you have unsaved changes, the system will display an orange circle next to the name of the tab that you've modified:
-  ![Orange Circle Showing Unsaved Changes](/img/docs/orange-circle.png)
+  ![Orange Circle Showing Unsaved Changes](/img/docs/orange-circle.webp)
 - You can hide or unhide a function or formula by selecting the eye icon at its left and then selecting the **Stage & Run Query** button.
 - When you install SigNoz, only the data provided by the Hostmetric receiver is available. To enable more metric receivers, see the [Send Metrics to SigNoz](/docs/userguide/send-metrics) section.
 

@@ -32,13 +32,13 @@ Aggregation is a method of reducing the amount of data that SigNoz displays, and
 
 SigNoz re-aggregates into longer intervals the metrics you collect at a high frequency, allowing low-resolution time series to be pre-calculated or used in place of the original metric data. SigNoz auto-adjusts this interval based on the time range selected to limit the number of points it plots on the chart. The following example diagram shows the aggregation of data into ten seconds intervals:
 
-![Temporal Aggregation](/img/docs/temporal_aggregation.png)
+![Temporal Aggregation](/img/docs/temporal_aggregation.webp)
 
 ### Spatial Aggregation
 
 If you collect a metric and you don’t need all the attributes, you can remove unwanted attributes. This way, your metrics will only have the attributes that you need. The following diagram shows the aggregation of the entire set of time series into a single value at each interval of time:
 
-![Spatial Aggregation](/img/docs/spatial_aggregation.png)
+![Spatial Aggregation](/img/docs/spatial_aggregation.webp)
 
 ### Supported Aggregation Functions
 
@@ -87,7 +87,7 @@ Note that you can use the *`IN`* and *`NIN`* operators as an alternative for 
 
 You can use the `Group By` clause to divide the results of your query based on the property you specify. The following example diagram shows how a `Group By` clause aggregates the same metric into separate groups, each group representing an AWS region:
 
-![Group By Clause](/img/docs/aggregation_by_region.png)
+![Group By Clause](/img/docs/aggregation_by_region.webp)
 
 ### Legend
 
@@ -114,30 +114,30 @@ Use host metrics to monitor the resource utilization of the hosts on which your 
 1. <AddPanelTimeSeries />
 
 2. Enter the title of your new panel. The example screenshot creates a new panel named “CPU Utilization”:
-  ![](/img/docs/new-panel-cpu-utilization.png)
+  ![](/img/docs/new-panel-cpu-utilization.webp)
 
 3. Choose `RATE_AVG` as the aggregate function:
-  ![](/img/docs/choose-rate-avg.png)
+  ![](/img/docs/choose-rate-avg.webp)
 
   <SeeAggregateFunctions />
 
 4. From the **Metrics** drop-down, select `system_cpu_time`:
-  ![](/img/docs/select-system-cpu-time.png)
+  ![](/img/docs/select-system-cpu-time.webp)
 
 5. Specify that the state should not be `idle` by adding a filtering condition as shown below:
-  ![](/img/docs/state-nin-idle.png)
+  ![](/img/docs/state-nin-idle.webp)
 
 6. In the **Legend Format** text box, enter `{{state}}`:
-  ![](/img/docs/legend-format-enter-state.png)
+  ![](/img/docs/legend-format-enter-state.webp)
 
 7. Use the **Y Axis Unit** dropdown to specify that the value displayed on the Y-axis is a percentage and can take values from 0 to 100:
-  ![](/img/docs/y-axis-percentage.png)
+  ![](/img/docs/y-axis-percentage.webp)
 
 8. To preview your query, select the **Stage & Run Query** button. SigNoz will plot a graph similar to the following one:
-  ![](/img/docs/preview-cpu-utilization.png)
+  ![](/img/docs/preview-cpu-utilization.webp)
 
 9. _(Optional)_ To further drill down, you can plot the a separate graph for each state by specifying `state` in the **Group By** drop-down and selecting the **Stage & Run Query** button. SigNoz will plot a graph similar to the following one:
-  ![](/img/docs/group-by-specify-state.png)
+  ![](/img/docs/group-by-specify-state.webp)
 
 10. <SaveGraph />
 
@@ -148,21 +148,21 @@ Disk saturation means the disk is often accessed, and applications usually must 
 1. <AddPanelTimeSeries />
 
 2. Enter the title of your new panel. The example screenshot creates a new panel named “Disk Saturation”:
-  ![](/img/docs/new-panel-disk-saturation.png)
+  ![](/img/docs/new-panel-disk-saturation.webp)
 
 3. Choose `RATE` as the aggregate function:
-  ![](/img/docs/choose-rate.png)
+  ![](/img/docs/choose-rate.webp)
 
     <SeeAggregateFunctions />
 
 4. From the **Metrics** drop-down, select `system_weighted_io_time`:
-  ![](/img/docs/select-system_weighted_io_time.png)
+  ![](/img/docs/select-system_weighted_io_time.webp)
 
 5. In the **Legend Format** text box, enter `{{device}}`:
-  ![](/img/docs/legend-format-enter-device.png)
+  ![](/img/docs/legend-format-enter-device.webp)
 
 6. To preview your query, select the **Stage & Run Query** button. SigNoz will plot a graph similar to the following one:
-  ![](/img/docs/preview-disk-saturation.png)
+  ![](/img/docs/preview-disk-saturation.webp)
 
 7. (Optional) To further drill down, you can plot the a separate graph for each host name by specifying host_name in the **Group By** drop-down and selecting the **Stage & Run Query** button.
 
@@ -174,27 +174,27 @@ Disk saturation means the disk is often accessed, and applications usually must 
 
 2. Enter the title of your new panel. The example screenshot creates a new panel named “Network Errors”:
 
-  ![](/img/docs/new-panel-network-errors.png)
+  ![](/img/docs/new-panel-network-errors.webp)
 
 3. From the **Metrics** drop-down, select `system_network_errors`:
 
-  ![](/img/docs/select-system_network_errors.png)
+  ![](/img/docs/select-system_network_errors.webp)
 
 4. _(Optional)_ Specify that you want to see the network errors for a specific host (this example uses `signoz-host`) by adding a filtering condition as shown below:
 
-  ![](/img/docs/host-name-in-signoz.png)
+  ![](/img/docs/host-name-in-signoz.webp)
 
   Note that, for each network interface, SigNoz plots separate time series for sending and receiving data. The example screenshot below shows a system named `signoz-host` with two network interfaces (`lo` and `eth0`):
 
-  ![](/img/docs/show-two-network-interfaces.png)
+  ![](/img/docs/show-two-network-interfaces.webp)
 
 5. In the **Legend Format** text box, enter `{{device}}-{{direction}}`:
 
-  ![](/img/docs/legend-format-enter-device-direction.png)
+  ![](/img/docs/legend-format-enter-device-direction.webp)
 
 6. To preview your query, select the **Stage & Run Query** button. SigNoz will plot a graph similar to the following one:
 
-  ![](/img/docs/preview-network-errors.png)
+  ![](/img/docs/preview-network-errors.webp)
 
 7. _(Optional)_ To further drill down, you can plot the a separate graph for sending and receiving data by specifying `direction` in the **Group By** drop-down and selecting the **Stage & Run Query** button.
 
@@ -213,30 +213,30 @@ The example in this section calculates the request rate per service for the SigN
 
 2. Enter the title of your new panel. The example screenshot creates a new panel named “Requests per Service”:
 
-  ![](/img/docs/new-panel-requests-per-service.png)
+  ![](/img/docs/new-panel-requests-per-service.webp)
 
 3. Choose `SUM_RATE` as the aggregate function:
 
-  ![](/img/docs/choose-sum-rate.png)
+  ![](/img/docs/choose-sum-rate.webp)
 
     <SeeAggregateFunctions />
 
 4. Use the **Metrics** drop-down to specify that you want to plot the total number requests made to your application. The example screenshot below plots the total number of requests made to SigNoz:
 
-  ![](/img/docs/signoz-total-calls.png)
+  ![](/img/docs/signoz-total-calls.webp)
 
 5. Specify the the services that you want to plot.
 
   To plot a single service, add a filtering condition as shown below:
-  ![](/img/docs/plot-a-single-service.png)
+  ![](/img/docs/plot-a-single-service.webp)
 
   To plot all the services, choose `service_name` from the **GROUP_BY** drop-down:
-  ![](/img/docs/plot-all-services.png)
+  ![](/img/docs/plot-all-services.webp)
 
 6. _(Optional)_ If you are plotting all the services, enter `{{service_name}}` in the **Legend Format** text box.
 
 7. To preview your query, select the **Stage & Run Query** button. SigNoz will plot a graph similar to the following one:
-  ![](/img/docs/preview-requests-per-service.png)
+  ![](/img/docs/preview-requests-per-service.webp)
 
 8. <SaveGraph />
 
@@ -248,22 +248,22 @@ This example plots the average latency per service using a formula based on two 
 
 2. Enter the title of your new panel. The example screenshot creates a new panel named “Latency per Service”:
 
-  ![](/img/docs/new-panel-latency-per-service.png)
+  ![](/img/docs/new-panel-latency-per-service.webp)
 
 3. **Specify the First Query (A)**
 
   3.1 Under **A**, choose `SUM_RATE` as the aggregate function:
-    ![](/img/docs/choose-sum-rate-avg-latency.png)
+    ![](/img/docs/choose-sum-rate-avg-latency.webp)
     <SeeAggregateFunctions />
   
   3.2 Use the **Metrics** drop-down to specify that you want to plot the latency of your application’s requests. The example screenshot below plots the total latency for SigNoz:
-    ![](/img/docs/total-latency-for-signoz.png)
+    ![](/img/docs/total-latency-for-signoz.webp)
 
   3.3 Indicate that you want to plot the a separate graph each service, by specifying `service_name` in the **Group By** drop-down:
-    ![](/img/docs/specify-service-name.png)
+    ![](/img/docs/specify-service-name.webp)
 
   3.4 To preview your query, select the **Stage & Run Query** button. SigNoz will plot a graph similar to the following one:
-    ![](/img/docs/preview-avg-latency-per-svc.png)
+    ![](/img/docs/preview-avg-latency-per-svc.webp)
 
 4. **Specify the Second Query (B)**
 
@@ -272,18 +272,18 @@ This example plots the average latency per service using a formula based on two 
   4.2 Under **B**, choose `SUM_RATE` as the aggregate function:
 
   4.3 To preview your query, select the **Stage & Run Query** button. SigNoz will plot a graph similar to the following one:
-    ![](/img/docs/choose-sum-rate-under-b.png)
+    ![](/img/docs/choose-sum-rate-under-b.webp)
     <SeeAggregateFunctions />
 
   4.4 Indicate that you want to plot the a separate graph each service, by specifying `service_name` in the **Group By** drop-down:
-    ![](/img/docs/latency-per-svc-specify-svc-name.png)
+    ![](/img/docs/latency-per-svc-specify-svc-name.webp)
 
 5. Hide **A** and **B** by selecting the corresponding eye icons:
     
-  ![](/img/docs/avg-latency-per-svc-hide-a-b.png)
+  ![](/img/docs/avg-latency-per-svc-hide-a-b.webp)
 
 6. Create a function that calculates `A/B` by selecting the **+Formula** button and entering `A/B` in the text box:
-  ![](/img/docs/avg-latency-per-svc-create-formula.png)
+  ![](/img/docs/avg-latency-per-svc-create-formula.webp)
 
 7. Select the **Stage & Run Query** button to preview your graph.
 
@@ -297,45 +297,45 @@ This example plots the error rate per service using a formula based on two queri
 
 2. Enter the title of your new panel. The example screenshot creates a new panel named “Error rates per service”:
 
-  ![](/img/docs/error-rate-per-service.png)
+  ![](/img/docs/error-rate-per-service.webp)
 
 
 3. **Specify the First Query (A)**
 
   3.1 Choose `SUM_RATE` as the aggregate function:
-    ![](/img/docs/error-rate-choose-sum-rate.png)
+    ![](/img/docs/error-rate-choose-sum-rate.webp)
     <SeeAggregateFunctions />
   
   3.2 Use the **Metrics** drop-down to specify that you want to plot the total number calls for your application. The example screenshot below plots the total number of calls for SigNoz:
-    ![](/img/docs/plot-total-number-of-calls.png)
+    ![](/img/docs/plot-total-number-of-calls.webp)
 
   3.3 Specify that the you want to plot only the calls that failed by adding a filtering condition as shown below:
-    ![](/img/docs/plot-the-calls-that-failed.png)
+    ![](/img/docs/plot-the-calls-that-failed.webp)
 
   3.4 To plot a particular service add a new `WHERE clause`. The following example plots a service named `redis`:
-    ![](/img/docs/plot-redis.png)
+    ![](/img/docs/plot-redis.webp)
 
 4. **Specify the Second Query (B)**
 
   4.1 To add a new query, select the **+Query** button.
 
   4.2 Choose `SUM_RATE` as the aggregate function:
-    ![](/img/docs/error-rate-choose-sum-rate-b.png)
+    ![](/img/docs/error-rate-choose-sum-rate-b.webp)
 
   4.3 Use the **Metrics** drop-down to specify that you want to plot the total number calls for your application. The example screenshot below plots the total number of calls for SigNoz:
-    ![](/img/docs/plot-the-total-number-of-calls.png)
+    ![](/img/docs/plot-the-total-number-of-calls.webp)
 
   4.4 Indicate that the you do not want to plot the calls for the service you’ve previously specified (`redis`):
-    ![](/img/docs/dont-plot-redis.png)
+    ![](/img/docs/dont-plot-redis.webp)
 
 5. Hide **A** and **B** by selecting the corresponding eye icons:
-  ![](/img/docs/error-rate-hide-a-b.png)
+  ![](/img/docs/error-rate-hide-a-b.webp)
 
 6. Create a function that calculates `A/B` by selecting the **+Formula** button and entering `A/B` in the text box:
-  ![](/img/docs/error-rate-create-function.png)
+  ![](/img/docs/error-rate-create-function.webp)
 
 7. Select the **Stage & Run Query** button. SigNoz will plot a graph similar to the following one:
-  ![](/img/docs/error-rate-preview.png)
+  ![](/img/docs/error-rate-preview.webp)
 
 8. <SaveGraph />
 

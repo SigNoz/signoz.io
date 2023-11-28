@@ -88,7 +88,7 @@ const COMPARISON_DATA = {
   REASON_TITLE: <>Top reasons why devs choose SigNoz over Datadog</>,
   REASONS: [
     {
-      FIGURE: "/img/reasons/ot-native.png",
+      FIGURE: "/img/reasons/ot-native.webp",
       TITLE: <>SigNoz is OpenTelemetry native </>,
       DESC: (
         <>
@@ -111,7 +111,7 @@ const COMPARISON_DATA = {
     },
     {
       FIGURE:
-        "/img/reasons/use-of-columnar-database-for-faster-ingestion-and-aggregation.png",
+        "/img/reasons/use-of-columnar-database-for-faster-ingestion-and-aggregation.webp",
       TITLE: <>Use of columnar database for faster ingestion & aggregation</>,
       DESC: (
         <>
@@ -148,7 +148,7 @@ const COMPARISON_DATA = {
       ),
     },
     {
-      FIGURE: "/img/reasons/datadog-no-pricing-for-custom-metic.png",
+      FIGURE: "/img/reasons/datadog-no-pricing-for-custom-metic.webp",
       TITLE: <>No special pricing for custom metrics</>,
       DESC: (
         <>
@@ -167,7 +167,7 @@ const COMPARISON_DATA = {
       ),
     },
     {
-      FIGURE: "/img/reasons/we-provided-managed-self-hosted-option.png",
+      FIGURE: "/img/reasons/we-provided-managed-self-hosted-option.webp",
       TITLE: <>We provide managed self-hosted option</>,
       DESC: (
         <>

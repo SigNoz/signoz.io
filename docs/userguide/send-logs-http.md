@@ -98,7 +98,7 @@ Note :-
   | EU     | ingest.eu.signoz.cloud:443 |
 
 * Once you run the above curl, you can open your SigNoz UI to verify it.
-  ![JSON Data in log body](../../static/img/logs/http-log.png)
+  ![JSON Data in log body](../../static/img/logs/http-log.webp)
   
 
 
@@ -165,4 +165,4 @@ Note :-
   Replace IP with IP of the system where your collector is running.
   For more info check [troubleshooting](../install/troubleshooting.md#signoz-otel-collector-address-grid). 
 * Once added you can verify by going to the SigNoz UI.
-  ![test](../../static/img/logs/http-log.png)
+  ![test](../../static/img/logs/http-log.webp)

@@ -95,7 +95,7 @@ If you have any feedback or facing issues, feel free to join our slack community
 
 [![SigNoz Slack community][1]][2]
 
-[1]: /img/blog/common/join_slack_cta.png
+[1]: /img/blog/common/join_slack_cta.webp
 [2]: https://signoz.io/slack
 [3]: https://signoz.io/docs/instrumentation/angular/
 [4]: https://signoz.io/blog/opentelemetry-react/

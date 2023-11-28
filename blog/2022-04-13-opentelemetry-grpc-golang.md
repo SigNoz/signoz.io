@@ -151,7 +151,7 @@ go mod vendor
 
 OpenTelemetry needs the following libraries to instrument the golang-grpc app.
 
-<!-- ![Untitled](Ashu%20-%20Mon%2092dcf/Untitled%201.png) -->
+<!-- ![Untitled](Ashu%20-%20Mon%2092dcf/Untitled%201.webp) -->
 
 <figure align="center">
   <img src="/img/blog/2022/04/opentelemetry_grpc_libraries.webp" alt="OpenTelemetry libraries required for monitoring gRPC" width="100%" />
@@ -178,7 +178,7 @@ For serializing the messages using protobuf and the other file
 - **employee_grpc.pb.go**<br></br>
 Consisting of code for the gRPC client and server code that we will be looking at later on.
 
-<!-- ![Untitled](Ashu%20-%20Mon%2092dcf/Untitled%202.png) -->
+<!-- ![Untitled](Ashu%20-%20Mon%2092dcf/Untitled%202.webp) -->
 
 If you look at the file ***employee_grpc.pb.go*,** you can notice that **structs** and **interfaces** are generated for the client and server implementation.
 
@@ -252,7 +252,7 @@ Do not use `http` or `https` in the IP address. For example, if the IP is `http:
 
 You can check the client env [file](https://github.com/SigNoz/distributed-tracing-go-grpc-sample/blob/main/client/.env) and server env [file](https://github.com/SigNoz/distributed-tracing-go-grpc-sample/blob/main/server/.env) in the sample GitHub repo.
 
-<!-- ![.env files loading in both *server/server.go* and *client/client.go.*](Ashu%20-%20Mon%2092dcf/Untitled%203.png) -->
+<!-- ![.env files loading in both *server/server.go* and *client/client.go.*](Ashu%20-%20Mon%2092dcf/Untitled%203.webp) -->
 
 <!-- <figure align="center">
   <img src="/img/blog/2022/04/grpc_env_files.webp" alt="Environment files" width="90%" />
@@ -307,7 +307,7 @@ Now, open the SigNoz dashboard in your browser at [http://localhost:3301/dashbo
 **Monitor list of top endpoints**<br></br>
 Our example telemetry configuration assumes that our application is running locally and that we want to process every span individually as it's emitted.
 
-<!-- ![L*ist of top endpoints of **Go-gRPC-Otel-Server** service shown by SigNoz*](Ashu%20-%20Mon%2092dcf/Untitled%207.png) -->
+<!-- ![L*ist of top endpoints of **Go-gRPC-Otel-Server** service shown by SigNoz*](Ashu%20-%20Mon%2092dcf/Untitled%207.webp) -->
 
 <figure align="center">
   <img src="/img/blog/2022/04/grpc_top_endpoints.webp" alt="List of Top endpoints" width="100%" />
@@ -319,7 +319,7 @@ Our example telemetry configuration assumes that our application is running loca
 **Explore all events(spans) in your  service**<br></br>
 You can get a list of all the events(or [spans](https://signoz.io/blog/distributed-tracing-span/) as defined in distributed tracing) related to your ***Go-gRPC-Otel-Server***. Use powerful filters on the `Traces` tab of SigNoz dashboard to analyze your Application performance.
 
-<!-- ![*SigNoz captures all events related to our application. You can use powerful filters to analyze and debug performance issues quickly.*](Ashu%20-%20Mon%2092dcf/Untitled%208.png) -->
+<!-- ![*SigNoz captures all events related to our application. You can use powerful filters to analyze and debug performance issues quickly.*](Ashu%20-%20Mon%2092dcf/Untitled%208.webp) -->
 
 <figure align="center">
   <img src="/img/blog/2022/04/grpc_span_table.webp" alt="Spans Table" width="100%" />
@@ -346,7 +346,7 @@ Establishing a sequential flow of the query and info on the time taken by each p
 
 It also provides the [semantic_conventions](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/semantic_conventions/database.md#mongodb) of MongoDB in the below window.
 
-<!-- ![Untitled](Ashu%20-%20Mon%2092dcf/Untitled%2010.png) -->
+<!-- ![Untitled](Ashu%20-%20Mon%2092dcf/Untitled%2010.webp) -->
 
 <figure align="center">
   <img src="/img/blog/2022/04/grpc_mongodb_traces.webp" alt="Traces for MongoDB" width="100%" />
@@ -358,7 +358,7 @@ It also provides the [semantic_conventions](https://github.com/open-telemetry/o
 **Troubleshooting an error**<br></br>
 You can also use SigNoz dashboard to capture error in your MongoDB queries. If you request for a data field that is not available in the backend, then the application will return an error.
 
-<!-- ![Untitled](Ashu%20-%20Mon%2092dcf/Untitled%2011.png) -->
+<!-- ![Untitled](Ashu%20-%20Mon%2092dcf/Untitled%2011.webp) -->
 
 <figure align="center">
   <img src="/img/blog/2022/04/grpc_error_troubleshooting.webp" alt="Troubleshooting an error" width="100%" />
@@ -390,9 +390,9 @@ If you are someone who understands more from video, then you can watch the below
 
 If you have any questions or need any help in setting things up, join our slack community and ping us in `#support` channel.
 
-<!-- ![join_slack_cta.png](Ashu%20-%20Mon%2092dcf/join_slack_cta.png) -->
+<!-- ![join_slack_cta.webp](Ashu%20-%20Mon%2092dcf/join_slack_cta.webp) -->
 
-[![SigNoz Slack community](/img/blog/common/join_slack_cta.png)](https://signoz.io/slack)
+[![SigNoz Slack community](/img/blog/common/join_slack_cta.webp)](https://signoz.io/slack)
 
 ---
 

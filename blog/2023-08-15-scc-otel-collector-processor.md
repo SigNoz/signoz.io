@@ -280,5 +280,5 @@ Thank you for taking out the time to read this transcript :) If you have any fee
 
 Feel free to join our Slack community and say hi! 👋
 
-[![SigNoz Slack community](/img/blog/common/join_slack_cta.png)](https://signoz.io/slack)
+[![SigNoz Slack community](/img/blog/common/join_slack_cta.webp)](https://signoz.io/slack)
 

@@ -29,7 +29,7 @@ New Relic provides an array of tools for monitoring and observability. But it’
 
 As a legacy tool, users are also getting stuck with its documentation and tooling.
 
-[![Why new-relic is bad reddit-comment.png](/img/blog/2023/09/new-relic-reddit-comment.webp)](https://www.reddit.com/r/devops/comments/11prydv/why_is_newrelic_so_bad/)
+[![Why new-relic is bad reddit-comment.webp](/img/blog/2023/09/new-relic-reddit-comment.webp)](https://www.reddit.com/r/devops/comments/11prydv/why_is_newrelic_so_bad/)
 
 In this article, we'll explore the top 7 alternatives to New Relic.
 
@@ -171,7 +171,7 @@ Some of the key features of Sematext include:
 
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2023/09/sematext-cloud-6.png.webp" alt="Infrastructure Monitoring (Source: Sematext Docs)"/>
+    <img src="/img/blog/2023/09/sematext-cloud-6.webp.webp" alt="Infrastructure Monitoring (Source: Sematext Docs)"/>
     <figcaption><i>Infrastructure Monitoring (Source: Sematext Docs)</i></figcaption>
 </figure>
 

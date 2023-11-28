@@ -5,7 +5,7 @@ date: 2021-02-02
 tags: [SigNoz, Community]
 authors: ankit_nayan
 description: With changing privacy laws, it's getting riskier to send your data to third party SaaS vendors. In the observability domain, traces and logs are something which you don't want to send outside. Let's find out why self-hosted software solutions are replacing SaaS providers now.
-image: /img/blog/2021/04/signoz-benchmarks-1.png
+image: /img/blog/2021/04/signoz-benchmarks-1.webp
 keywords:
   - SigNoz
   - DataDog pricing
@@ -18,7 +18,7 @@ In this post we want to lay out typical price which someone would incur in runni
 
 <!--truncate-->
 
-![Cover Image](/img/blog/2021/04/signoz-benchmarks-1.png)
+![Cover Image](/img/blog/2021/04/signoz-benchmarks-1.webp)
 
 In this post we would benchmark the cost of self hosting SigNoz and the price you will pay to SaaS APM vendors. For benchmarking, we will take **DataDog** as an example - as it is one of the more popular APM tools in the market.
 

@@ -1,7 +1,7 @@
 ---
 title:  How Blip uses SigNoz to improve their issue resolution time by 14x
 slug: blipbillboards
-image: /img/case_study/BlipBillBoards.png
+image: /img/case_study/BlipBillBoards.webp
 authors: [pranay]
 # hide_table_of_contents: true
 
@@ -12,8 +12,8 @@ import { LiteYoutubeEmbed } from "react-lite-yt-embed";
 
 <head>
   <link rel="canonical" href="https://signoz.io/case-study/blip/"/>
-  <meta property="og:image" content="https://signoz.io/img/case_study/BlipBillBoards.png"/>
-  <meta name ="twitter:image" content="https://signoz.io/img/case_study/BlipBillBoards.png"/>
+  <meta property="og:image" content="https://signoz.io/img/case_study/BlipBillBoards.webp"/>
+  <meta name ="twitter:image" content="https://signoz.io/img/case_study/BlipBillBoards.webp"/>
 
 </head>
 
@@ -43,7 +43,7 @@ Blip provides self-service subscription-based digital ad space across 1000’s o
 
 <!-- *I sat down with Nate, Senior DevOps engineer at [BlipBillBoards](https://www.blipbillboards.com/) to understand how they use SigNoz at BlipBillBoards. Here’s a few snippets from our conversation (edited for legibility)* -->
 
-![BlipBillBoards](/img/case_study/BlipBillBoards.png)
+![BlipBillBoards](/img/case_study/BlipBillBoards.webp)
 
 Blip used SigNoz to improve their issue resolution time by 14x. We sat down with Nate Bohman, Senior DevOps Engineer at Blip, to understand how they are using SigNoz to improve their observability. Some of the key points that the team liked about SigNoz:
 
@@ -214,4 +214,4 @@ Sharing stories of how different teams are using SigNoz helps the community in l
 
 Feel free to join our slack community and say hi! 👋
 
-[![SigNoz Slack community](/img/blog/common/join_slack_cta.png)](https://signoz.io/slack)
+[![SigNoz Slack community](/img/blog/common/join_slack_cta.webp)](https://signoz.io/slack)

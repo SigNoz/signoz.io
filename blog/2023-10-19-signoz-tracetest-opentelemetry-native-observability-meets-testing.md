@@ -65,28 +65,28 @@ Tracetest makes it possible to:
 If you already have OpenTelemetry instrumentation configured in your code and are using an OpenTelemetry Collector with SigNoz, adding Tracetest to your infrastructure can enable you to write detailed trace-based tests.
 
 <figure data-zoomable align='center'>
-<img src="https://res.cloudinary.com/djwdcmwdz/image/upload/v1697716957/Blogposts/signoz-integration/new/Untitled-2023-05-22-1321_m03lvk.png" alt="architecture"/>
+<img src="https://res.cloudinary.com/djwdcmwdz/image/upload/v1697716957/Blogposts/signoz-integration/new/Untitled-2023-05-22-1321_m03lvk.webp" alt="architecture"/>
 <figcaption><i>Image 1: Application architecture.</i></figcaption></figure>
 
 
 When running integration tests, it's hard to pinpoint where an HTTP transaction fails in a network of microservices. Tracetest solves this by letting you run tests with assertions using existing trace data across all services. These tests can then be seamlessly integrated into your CI/CD process to ensure your system works well and to catch any regressions.
 
 <figure data-zoomable align='center'>
-<img src="https://res.cloudinary.com/djwdcmwdz/image/upload/v1697715804/Blogposts/signoz-integration/new/image_51_ctrfnj.png" alt="test spec sample"/>
+<img src="https://res.cloudinary.com/djwdcmwdz/image/upload/v1697715804/Blogposts/signoz-integration/new/image_51_ctrfnj.webp" alt="test spec sample"/>
 <figcaption><i>Image 2: In this example, within the Tracetest UI you can see that test assertions for trace spans succeeded.</i></figcaption></figure>
 
 
 Elevate your testing approach by harnessing Tracetest for test creation and SigNoz for analyzing test results. SigNoz empowers you to monitor test executions, establish connections between relevant services across different time frames and gain valuable perspectives on system performance. This combination enables you to understand system behavior, gives you insights into system performance and highlights the impact of changes on performance.
 
 <figure data-zoomable align='center'>
-<img src="https://res.cloudinary.com/djwdcmwdz/image/upload/v1697715804/Blogposts/signoz-integration/new/image_52_hqyisz.png" alt="tracetest tests triggered and visualized in signoz"/>
+<img src="https://res.cloudinary.com/djwdcmwdz/image/upload/v1697715804/Blogposts/signoz-integration/new/image_52_hqyisz.webp" alt="tracetest tests triggered and visualized in signoz"/>
 <figcaption><i>Image 3: Traces triggered by Tracetest surfaced in SigNoz.</i></figcaption></figure>
 
 
 When using Tracetest, you can find problems by checking trace data over time in SigNoz. Any problems you encounter can become new tests or points to check in Tracetest. This gives you a quick feedback loop for continuous improvement.
 
 <figure data-zoomable align='center'>
-<img src="https://res.cloudinary.com/djwdcmwdz/image/upload/v1697715807/Blogposts/signoz-integration/new/image_53_ms9rcw.png" alt="Image 4: Here you see a trace drilldown of a test in the SigNoz front end."/>
+<img src="https://res.cloudinary.com/djwdcmwdz/image/upload/v1697715807/Blogposts/signoz-integration/new/image_53_ms9rcw.webp" alt="Image 4: Here you see a trace drilldown of a test in the SigNoz front end."/>
 <figcaption><i>Image 4: Here you see a trace drilldown of a test in the SigNoz front end.</i></figcaption></figure>
 
 
@@ -103,7 +103,7 @@ brew install kubeshop/tracetest/tracetest
 From here, follow the [official documentation](https://docs.tracetest.io/getting-started/installation) to install the Tracetest server. Once the server is installed, open the Tracetest Web UI in the browser and follow the instructions for connecting the <a href = "https://opentelemetry.io/docs/collector/" rel="noopener noreferrer nofollow" target="_blank">OpenTelemetry Collector</a> with Tracetest.
 
 <figure data-zoomable align='center'>
-<img src="https://res.cloudinary.com/djwdcmwdz/image/upload/v1697715806/Blogposts/signoz-integration/new/image_54_ymupdj.png" alt="Image 5: Selecting SigNoz in the Tracetest settings."/>
+<img src="https://res.cloudinary.com/djwdcmwdz/image/upload/v1697715806/Blogposts/signoz-integration/new/image_54_ymupdj.webp" alt="Image 5: Selecting SigNoz in the Tracetest settings."/>
 <figcaption><i>Image 5: Selecting SigNoz in the Tracetest settings.</i></figcaption></figure>
 
 
@@ -172,7 +172,7 @@ To create a test in Tracetest, start by clicking Create > Create New Test > HTTP
 This will trigger the test and display a distributed trace in the Trace tab. You’ll also see the results of the Trace Analyzer. These results show rules and conventions to adhere to while writing code instrumentation.
 
 <figure data-zoomable align='center'>
-<img src="https://res.cloudinary.com/djwdcmwdz/image/upload/v1697715808/Blogposts/signoz-integration/new/image_55_mk5mi1.png" alt="Image 6: Trace Analyzer in the Tracetest Web UI. Validate the quality of the code instrumentation."/>
+<img src="https://res.cloudinary.com/djwdcmwdz/image/upload/v1697715808/Blogposts/signoz-integration/new/image_55_mk5mi1.webp" alt="Image 6: Trace Analyzer in the Tracetest Web UI. Validate the quality of the code instrumentation."/>
 <figcaption><i>Image 6: Trace Analyzer in the Tracetest Web UI. Validate the quality of the code instrumentation.</i></figcaption></figure>
 
 
@@ -195,7 +195,7 @@ attr:http.status_code = 200
 Save the test spec and publish the test.
 
 <figure data-zoomable align='center'>
-<img src="https://res.cloudinary.com/djwdcmwdz/image/upload/v1697715808/Blogposts/signoz-integration/new/image_56_rua1fi.png" alt="Image 7: Adding assertions to a test in the Tracetest Web UI."/>
+<img src="https://res.cloudinary.com/djwdcmwdz/image/upload/v1697715808/Blogposts/signoz-integration/new/image_56_rua1fi.webp" alt="Image 7: Adding assertions to a test in the Tracetest Web UI."/>
 <figcaption><i>Image 7: Adding assertions to a test in the Tracetest Web UI.</i></figcaption></figure>
 
 
@@ -210,14 +210,14 @@ Because you are using two pipelines in the OpenTelemetry Collector, all distribu
 Data in the Tracetest service will give you insight into every test run. Start by running this query in the Tracetest service to filter all Tracetest test runs.
 
 <figure data-zoomable align='center'>
-<img src="https://res.cloudinary.com/djwdcmwdz/image/upload/v1697715807/Blogposts/signoz-integration/new/image_57_lzugvy.png" alt="Image 8: Filter “Tracetest trigger” traces."/>
+<img src="https://res.cloudinary.com/djwdcmwdz/image/upload/v1697715807/Blogposts/signoz-integration/new/image_57_lzugvy.webp" alt="Image 8: Filter “Tracetest trigger” traces."/>
 <figcaption><i>Image 8: Filter “Tracetest trigger” traces.</i></figcaption></figure>
 
 
 The distributed traces chart will be filtered and display performance over time.
 
 <figure data-zoomable align='center'>
-<img src="https://res.cloudinary.com/djwdcmwdz/image/upload/v1697715805/Blogposts/signoz-integration/new/image_58_tlqtqa.png" alt="Image 9: Show the results of the filter above. View the chart to see performance and select a distinct trace to drill down."/>
+<img src="https://res.cloudinary.com/djwdcmwdz/image/upload/v1697715805/Blogposts/signoz-integration/new/image_58_tlqtqa.webp" alt="Image 9: Show the results of the filter above. View the chart to see performance and select a distinct trace to drill down."/>
 <figcaption><i>Image 9: Show the results of the filter above. View the chart to see performance and select a distinct trace to drill down.</i></figcaption></figure>
 
 

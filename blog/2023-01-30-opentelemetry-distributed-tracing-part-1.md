@@ -44,7 +44,7 @@ Basically, **microservices are a software approach that creates applications as 
 
 As you break your single monolithic application into smaller sets of services, the number of moving components in your architecture increases. It becomes complex to track a request and its flow through the mesh of all the services. In the olden days, a single log file was enough to scan through the logs to troubleshoot an issue. 
 
-[![Get started with distributed tracing](/img/blog/common/distributed_tracing_cta.png)](https://signoz.io/docs/instrumentation/overview/)
+[![Get started with distributed tracing](/img/blog/common/distributed_tracing_cta.webp)](https://signoz.io/docs/instrumentation/overview/)
 
 However, in a microservice architecture, you could end up with 50-100 services, each with its logging file and separate process, with multiple instances running and distributed across multiple environments and locations. Imagine the pain of trying to understand or track a request in such a complex web of dynamic components. These requests are nearly impossible to track with traditional techniques designed for a single service application.
 

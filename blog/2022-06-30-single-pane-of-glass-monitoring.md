@@ -86,10 +86,10 @@ Distributed tracing is an important technology aimed at solving performance issu
 
 SigNoz also lets you run aggregates on trace data. Running aggregates on tracing data enables you to create service-centric views, providing insights to debug applications at the service level. It also makes sense for engineering teams as they own specific microservices.
 
-<!-- ![Running aggregates on your tracing data enables you to create service-centric views](Single%20Pane%20of%20Glass%20Monitoring%20with%20Open%20Source%20S%204cb8862202684b4bb545d5e9a7cbae5f/Untitled.png) -->
+<!-- ![Running aggregates on your tracing data enables you to create service-centric views](Single%20Pane%20of%20Glass%20Monitoring%20with%20Open%20Source%20S%204cb8862202684b4bb545d5e9a7cbae5f/Untitled.webp) -->
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2022/06/otel_backend_running_aggregates.png" alt="Running aggregates on trace data"/>
+    <img src="/img/blog/2022/06/otel_backend_running_aggregates.webp" alt="Running aggregates on trace data"/>
     <figcaption><i>Running aggregates on your tracing data enables you to create service-centric views</i></figcaption>
 </figure>
 

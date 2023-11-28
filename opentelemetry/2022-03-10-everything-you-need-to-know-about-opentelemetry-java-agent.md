@@ -143,7 +143,7 @@ cd signoz/deploy/
 ./install.sh
 ```
 
-[![Deployment Docs](/img/blog/common/deploy_docker_documentation.png)](https://signoz.io/docs/install/)
+[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/)
 
 
 import Screenshot from "@theme/Screenshot"

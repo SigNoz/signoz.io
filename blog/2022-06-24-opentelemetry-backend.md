@@ -159,7 +159,7 @@ The tracing signal from OpenTelemetry instrumentation helps you correlate events
 SigNoz also lets you run aggregates on your tracing data. Running aggregates on tracing data enables you to create service-centric views, providing insights to debug applications at the service level. It also makes sense for engineering teams as they own specific microservices.
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2022/06/otel_backend_running_aggregates.png" alt="Running aggregates on trace data"/>
+    <img src="/img/blog/2022/06/otel_backend_running_aggregates.webp" alt="Running aggregates on trace data"/>
     <figcaption><i>Running aggregates on your tracing data enables you to create service-centric views</i></figcaption>
 </figure>
 

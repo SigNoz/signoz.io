@@ -35,7 +35,7 @@ const Hero = (props) => {
         )}
       </div>
       <div className={styles.headerHeroImageContainer}>
-        <img src="/img/signoz-distributed-tracing.png" />
+        <img src="/img/signoz-distributed-tracing.webp" />
       </div>
     </div>
   );

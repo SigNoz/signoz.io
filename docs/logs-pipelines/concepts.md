@@ -17,7 +17,7 @@ logs and yet another for dropping PII fields from log attributes.
 <br/>
 <figure data-zoomable align="center">
     <img
-      src="/img/logs/pipelines/pipelines-list.png"
+      src="/img/logs/pipelines/pipelines-list.webp"
       alt="A list of pipelines, each addressing a single responsibility"
     />
     <figcaption>
@@ -42,7 +42,7 @@ When a log matches a pipeline’s filter, it is processed through its chain of p
 <br/>
 <figure data-zoomable align="center">
   <img
-    src="/img/logs/pipelines/nginx-pipeline-processors.png"
+    src="/img/logs/pipelines/nginx-pipeline-processors.webp"
     alt="Processors for an Nginx pipeline"
   />
   <figcaption>

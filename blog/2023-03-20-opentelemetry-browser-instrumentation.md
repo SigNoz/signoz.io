@@ -231,7 +231,7 @@ OpenTelemetry combined with SigNoz provides a full-stack open source solution. S
 
 If you have any questions or need any help in setting things up with SigNoz, join our slack community and ping us in `#support` channel.
 
-[![SigNoz Slack community](/img/blog/common/join_slack_cta.png)](https://signoz.io/slack)
+[![SigNoz Slack community](/img/blog/common/join_slack_cta.webp)](https://signoz.io/slack)
 
 ---
 

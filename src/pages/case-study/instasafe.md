@@ -1,7 +1,7 @@
 ---
 title:  How InstaSafe chose SigNoz over Grafana and Elastic APM to power their observability needs
 slug: instasafe
-image: /img/case_study/instasafe-banner.png
+image: /img/case_study/instasafe-banner.webp
 authors: [pranay]
 
 ---
@@ -10,8 +10,8 @@ authors: [pranay]
 
 <head>
   <link rel="canonical" href="https://signoz.io/case-study/instasafe/"/>
-  <meta property="og:image" content="https://signoz.io/img/case_study/instasafe-banner.png"/>
-  <meta name ="twitter:image" content="https://signoz.io/img/case_study/instasafe-banner.png"/>
+  <meta property="og:image" content="https://signoz.io/img/case_study/instasafe-banner.webp"/>
+  <meta name ="twitter:image" content="https://signoz.io/img/case_study/instasafe-banner.webp"/>
 
 </head>
 
@@ -37,7 +37,7 @@ authors: [pranay]
 
 *I sat down with Bhaswanth, Software Architect at <a href = "https://instasafe.com" rel="noopener noreferrer nofollow" target="_blank" >InstaSafe</a> to understand how they use SigNoz at InstaSafe. Here’s a few snippets from our conversation (edited for legibility)*
 
-![Instsafe Case Study](/img/case_study/instasafe-banner.png)
+![Instsafe Case Study](/img/case_study/instasafe-banner.webp)
 
 
 ![Instsafe Numbers](/img/case_study/instasafe-numbers.svg)
@@ -67,7 +67,7 @@ And what is the P99 latency? Such things. We didn't know how our applications di
 <br />
 
 <figure data-zoomable align='center'>
-    <img src="/img/case_study/instasafe-sc-traces.png" alt="InstaSafe Traces"/>
+    <img src="/img/case_study/instasafe-sc-traces.webp" alt="InstaSafe Traces"/>
     <figcaption><i> Instasafe uses traces extensively to solve performance issues</i></figcaption>
 </figure>
 
@@ -86,7 +86,7 @@ How much ever resources we had ELK was eating up all of it and was very slow. It
 <br />
 
 <figure data-zoomable align='center'>
-    <img src="/img/case_study/instasafe-trace-filter.png" alt="InstaSafe Trace Filter"/>
+    <img src="/img/case_study/instasafe-trace-filter.webp" alt="InstaSafe Trace Filter"/>
     <figcaption><i> Filter the right traces to focus on</i></figcaption>
 </figure>
 
@@ -94,7 +94,7 @@ How much ever resources we had ELK was eating up all of it and was very slow. It
 
 
 <figure data-zoomable align='center'>
-    <img src="/img/case_study/instasafe-sc-exceptions.png" alt="InstaSafe Exceptions"/>
+    <img src="/img/case_study/instasafe-sc-exceptions.webp" alt="InstaSafe Exceptions"/>
     <figcaption><i> Exceptions page will all exceptions in a single view</i></figcaption>
 </figure>
 
@@ -123,4 +123,4 @@ Sharing stories of how different teams are using SigNoz helps the community in l
 
 Feel free to join our slack community and say hi! 👋
 
-[![SigNoz Slack community](/img/blog/common/join_slack_cta.png)](https://signoz.io/slack)
+[![SigNoz Slack community](/img/blog/common/join_slack_cta.webp)](https://signoz.io/slack)

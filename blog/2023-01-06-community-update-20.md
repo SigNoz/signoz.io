@@ -281,4 +281,4 @@ Learn how to set up and configure error and access logs in NGINX. Once you have 
 Thank you for taking out the time to read this issue :) If you have any feedback or want any changes to the format, please create an <a href = "https://github.com/SigNoz/signoz/issues" rel="noopener noreferrer nofollow" target="_blank" >issue</a>.
 Feel free to join our slack community and say hi! 👋
 
-[![SigNoz Slack community](/img/blog/common/join_slack_cta.png)](https://signoz.io/slack)
+[![SigNoz Slack community](/img/blog/common/join_slack_cta.webp)](https://signoz.io/slack)

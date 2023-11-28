@@ -56,7 +56,7 @@ SigNoz uses the [OpenTelemetry Collector](https://github.com/open-telemetry/open
 
 2. In the `services.otel-collector.deploy.replicas` field, enter the number of replicas you wish to create. The following example creates four replicas:
 
-  ![Open Telemetry Collector - Create four replicas](/img/scale-up-otel.png)
+  ![Open Telemetry Collector - Create four replicas](/img/scale-up-otel.webp)
 
 3. Update the `signoz` stack by entering the following command:
 

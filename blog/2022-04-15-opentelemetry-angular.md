@@ -44,7 +44,7 @@ Before we demonstrate how to implement the OpenTelemetry libraries, let’s have
 
 The telemetry data is then sent to an observability tool for storage and visualization.
 
-<!-- ![OpenTelemetry libraries instrument application code to generate telemetry data that is then sent to an observability tool for storage & visualization](Implementi%20ebc9f/how_opentelemetry_fits.png) -->
+<!-- ![OpenTelemetry libraries instrument application code to generate telemetry data that is then sent to an observability tool for storage & visualization](Implementi%20ebc9f/how_opentelemetry_fits.webp) -->
 
 <figure data-zoomable align='center'>
     <img src="/img/blog/2022/09/opentelemetry_architecture.webp" alt="How opentelemetry fits with an application"/>
@@ -85,7 +85,7 @@ You can visit our documentation for instructions on how to install SigNoz using 
 
 When you are done installing SigNoz, you can access the UI at [http://localhost:3301](http://localhost:3301/application)
 
-<!-- ![SigNoz dashboard - It shows services from a sample app that comes bundled with the application](Implementi%20ebc9f/signoz_dashboard.png) -->
+<!-- ![SigNoz dashboard - It shows services from a sample app that comes bundled with the application](Implementi%20ebc9f/signoz_dashboard.webp) -->
 
 <figure data-zoomable>
     <img src="/img/blog/2022/02/signoz_dashboard.webp" alt="SigNoz dashboard"/>
@@ -118,7 +118,7 @@ http:
 
 You need to update the URL of your frontend application. For this tutorial, we will be running our frontend application on `http://localhost:4200`. 
 
-<!-- ![enabling_cors.png](Implementi%20ebc9f/enabling_cors.png) -->
+<!-- ![enabling_cors.webp](Implementi%20ebc9f/enabling_cors.webp) -->
 
 <figure data-zoomable align="center">
     <img src="/img/blog/2022/04/enabling_cors.webp" alt="Enabling CORS" width="90%" align="center"/>
@@ -209,7 +209,7 @@ In order to monitor your Angular application with SigNoz, you first need to gene
 
 Visit [http://localhost:4200/](http://localhost:4200/) to access your frontend application. Using the UI, make some calls to the backend API. You can check the network tab in your browser to see the requests that you have made.
 
-<!-- ![Angular Frontend Web UI](Implementi%20ebc9f/angular_frontend_webui.png) -->
+<!-- ![Angular Frontend Web UI](Implementi%20ebc9f/angular_frontend_webui.webp) -->
 
 <figure data-zoomable>
     <img src="/img/blog/2022/04/angular_frontend_webui.webp" alt="Angular frontend Web UI"/>
@@ -222,7 +222,7 @@ Visit [http://localhost:4200/](http://localhost:4200/) to access your frontend a
 
 With SigNoz you can monitor the data collected by OpenTelemetry from your sample Angular application. You can see end-to-end traces for your Angular application, starting from your frontend application to the downstream nodejs-sample-app.
 
-<!-- ![See end-to-end traces from your Angular application to downstream services](Implementi%20ebc9f/angular_app_trace_1.png) -->
+<!-- ![See end-to-end traces from your Angular application to downstream services](Implementi%20ebc9f/angular_app_trace_1.webp) -->
 
 <figure data-zoomable>
     <img src="/img/blog/2022/04/angular_app_trace_1.webp" alt="End-to-end tracing of Angular applications"/>
@@ -233,7 +233,7 @@ With SigNoz you can monitor the data collected by OpenTelemetry from your sample
 
 You can also monitor errors that takes place in your Angular application. SigNoz UI also shows attributes like `http_status_code` .
 
-<!-- ![Monitor errors in your frontend Angular application](Implementi%20ebc9f/angular_app_trace_2.png) -->
+<!-- ![Monitor errors in your frontend Angular application](Implementi%20ebc9f/angular_app_trace_2.webp) -->
 
 <figure data-zoomable>
     <img src="/img/blog/2022/04/angular_app_trace_2.webp" alt="Monitor errors in your frontend Angular applications"/>
@@ -265,9 +265,9 @@ If you are someone who understands more from video, then you can watch the our v
 
 If you face any issues while trying out SigNoz, you can reach out with your questions in #support channel 👇
 
-<!-- ![join_slack_cta.png](Implementi%20ebc9f/join_slack_cta.png) -->
+<!-- ![join_slack_cta.webp](Implementi%20ebc9f/join_slack_cta.webp) -->
 
-[![SigNoz Slack community](/img/blog/common/join_slack_cta.png)](https://signoz.io/slack)
+[![SigNoz Slack community](/img/blog/common/join_slack_cta.webp)](https://signoz.io/slack)
 
 ---
 

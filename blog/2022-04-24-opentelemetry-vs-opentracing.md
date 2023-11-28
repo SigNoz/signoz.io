@@ -47,7 +47,7 @@ The biggest advantage of using OpenTelemetry is that you have the freedom to cho
 
 To integrate OpenTelemetry with your application code, you can use the OpenTelemetry client libraries of the required programming language. OpenTelemetry also provides a collector known as OTel(OpenTelemetry) collector that can be used to process and export telemetry data in multiple formats.
 
-<!-- ![The architecture of OpenTelemetry. You can integrate OTel libraries with your application code](OpenTelemetry%20vs%20OpenTracing%20-%20choosing%20one%20for%20in%20665d83371fb941b1bdef6577733c75cd/opentelemetry_architecture_new.png) -->
+<!-- ![The architecture of OpenTelemetry. You can integrate OTel libraries with your application code](OpenTelemetry%20vs%20OpenTracing%20-%20choosing%20one%20for%20in%20665d83371fb941b1bdef6577733c75cd/opentelemetry_architecture_new.webp) -->
 
 
 <figure data-zoomable align='center'>

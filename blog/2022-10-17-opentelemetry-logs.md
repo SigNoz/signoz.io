@@ -262,7 +262,7 @@ There are **two** ways to collect application logs:
     <br></br>
     
     <figure data-zoomable align='center'>
-    <img src="/img/logs/file_stdout.png" alt="Collecting logs via file or Stdout logs"/>
+    <img src="/img/logs/file_stdout.webp" alt="Collecting logs via file or Stdout logs"/>
     <figcaption><i>Collecting logs via file or Stdout logs</i></figcaption>
     </figure>
     

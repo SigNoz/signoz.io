@@ -108,7 +108,7 @@ It will also help identify exactly in which service we have bottlenecks, which p
 But to have robust observability set up, it’s not enough just to collect these three telemetry signals. A good observability setup also has [correlated telemetry signals](https://signoz.io/blog/observability-net/). For example, if we know through our logs that there are some issues, we can correlate the logs with traces to dig deeper.
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2023/03/o11y-net-trans.png" alt="Correlated telemetry signals"/>
+    <img src="/img/blog/2023/03/o11y-net-trans.webp" alt="Correlated telemetry signals"/>
     <figcaption><i>A better observability model where all signals come together to give insights to users</i></figcaption>
 </figure>
 

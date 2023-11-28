@@ -168,7 +168,7 @@ SigNoz is an open source APM that provides metrics, logs, and traces under a sin
 It is easy to get started with SigNoz with out of box charts for key application metrics. SigNoz also provides an [enterprise version](https://signoz.io/pricing/) that can be self-hosted within your infra.
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/common/signoz_charts_application_metrics.png" alt="Application Metrics Dashboard in SigNoz"/>
+    <img src="/img/blog/common/signoz_charts_application_metrics.webp" alt="Application Metrics Dashboard in SigNoz"/>
     <figcaption><i>Application Metrics Dashboard in SigNoz</i></figcaption>
 </figure>
 

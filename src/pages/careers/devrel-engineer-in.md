@@ -1,7 +1,7 @@
 ---
 title:  DevRel Engineer (Remote) (India)
 slug: devrel-engineer-in
-#image: /img/case_study/BlipBillBoards.png
+#image: /img/case_study/BlipBillBoards.webp
 #authors: [pranay]
 # hide_table_of_contents: true
 

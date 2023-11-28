@@ -119,7 +119,7 @@ Context Propagation in distributed tracing is what makes tracing possible. And w
 
 OpenTelemetry provides libraries to take care of your application instrumentation. You need a tracing backend to store, analyze and visualize the generated trace data by OpenTelemetry. [SigNoz](https://signoz.io/) is an open-source distributed tracing tool built natively to support OpenTelemetry. You can check out its GitHub repo.
 
-[![SigNoz GitHub repo](/img/blog/common/signoz_github.png)](https://github.com/SigNoz/signoz)
+[![SigNoz GitHub repo](/img/blog/common/signoz_github.webp)](https://github.com/SigNoz/signoz)
 
 Read more from SigNoz blog:<br></br>
 [Spans - a key concept of distributed tracing](https://signoz.io/blog/distributed-tracing-span/)<br></br>

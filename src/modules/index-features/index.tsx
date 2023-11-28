@@ -20,8 +20,8 @@ export const SigNozFeatures = () => {
     {
       label: "APM",
       value: "apm",
-      figure: "/img/landing/feature-apm-min.png",
-      icon: "/img/landing/icon-placeholder.png",
+      figure: "/img/landing/feature-apm-min.webp",
+      icon: "/img/landing/icon-placeholder.webp",
       content: (
         <>
           <ul>
@@ -45,8 +45,8 @@ export const SigNozFeatures = () => {
     {
       label: "Distributed Tracing",
       value: "traces",
-      figure: "/img/landing/feature-distributed-tracing-min.png",
-      icon: "/img/landing/icon-placeholder.png",
+      figure: "/img/landing/feature-distributed-tracing-min.webp",
+      icon: "/img/landing/icon-placeholder.webp",
       content: (
         <>
           <ul>
@@ -72,8 +72,8 @@ export const SigNozFeatures = () => {
     {
       label: "Metrics & Dashboards ",
       value: "metrics",
-      figure: "/img/landing/feature-metrics-dashboards-min.png",
-      icon: "/img/landing/icon-placeholder.png",
+      figure: "/img/landing/feature-metrics-dashboards-min.webp",
+      icon: "/img/landing/icon-placeholder.webp",
       content: (
         <>
           <ul>
@@ -96,8 +96,8 @@ export const SigNozFeatures = () => {
     // {
     //   label: "Infrastructure Monitoring",
     //   value: "infra",
-    //   figure: "img/website/infrastructure.png",
-    //   icon: "/img/landing/icon-placeholder.png",
+    //   figure: "img/website/infrastructure.webp",
+    //   icon: "/img/landing/icon-placeholder.webp",
     //   content: (
     //     <>
     //       <ul>
@@ -121,8 +121,8 @@ export const SigNozFeatures = () => {
     {
       label: "Logs Management ",
       value: "logs",
-      figure: "/img/landing/feature-log-management-min.png",
-      icon: "/img/landing/icon-placeholder.png",
+      figure: "/img/landing/feature-log-management-min.webp",
+      icon: "/img/landing/icon-placeholder.webp",
       content: (
         <>
           <ul>
@@ -155,8 +155,8 @@ export const SigNozFeatures = () => {
     {
       label: "Exceptions Monitoring",
       value: "exceptions",
-      figure: "/img/landing/feature-exceptions-monitoring-min.png",
-      icon: "/img/landing/icon-placeholder.png",
+      figure: "/img/landing/feature-exceptions-monitoring-min.webp",
+      icon: "/img/landing/icon-placeholder.webp",
       content: (
         <>
           <ul>
@@ -182,8 +182,8 @@ export const SigNozFeatures = () => {
     {
       label: "Alerts ",
       value: "alerts",
-      figure: "/img/landing/feature-alerts-min.png",
-      icon: "/img/landing/icon-placeholder.png",
+      figure: "/img/landing/feature-alerts-min.webp",
+      icon: "/img/landing/icon-placeholder.webp",
       content: (
         <>
           <ul>

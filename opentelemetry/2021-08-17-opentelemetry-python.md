@@ -8,7 +8,7 @@ author_title: SigNoz Team
 author_url: https://github.com/ankit01-oss
 author_image_url: https://avatars.githubusercontent.com/u/83692067?v=4
 description: End-to-end performance monitoring of Python application with OpenTelemetry. Get your telemetry data visualized with SigNoz....
-image: /img/blog/2021/08/opentelemetry_python_cover.png
+image: /img/blog/2021/08/opentelemetry_python_cover.webp
 keywords:
   - opentelemetry
   - opentelemetry python
@@ -27,7 +27,7 @@ import Screenshot from "@theme/Screenshot"
 
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2021/08/opentelemetry_python_cover.png" alt="Monitor Python applications with SigNoz"/>
+    <img src="/img/blog/2021/08/opentelemetry_python_cover.webp" alt="Monitor Python applications with SigNoz"/>
     <figcaption><i>Monitor Python applications with SigNoz</i></figcaption>
 </figure>
 
@@ -78,7 +78,7 @@ When you are done installing SigNoz, you can access the UI at: `http://localhos
 The application list shown in the dashboard is from a sample app called HOT R.O.D that comes bundled with the SigNoz installation package.
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/common/signoz_dashboard_homepage.png" alt="SigNoz dashboard"/>
+    <img src="/img/blog/common/signoz_dashboard_homepage.webp" alt="SigNoz dashboard"/>
     <figcaption><i>SigNoz dashboard</i></figcaption>
 </figure>
 
@@ -105,7 +105,7 @@ The application list shown in the dashboard is from a sample app called HOT R.O.
    On MacOS the installation is done using Homebrew's brew package manager. Once the installation is done, don't forget to start MongoDB services using `brew services start mongodb/brew/mongodb-community@4.4`  on your macOS terminal.
 
    <figure data-zoomable align='center'>
-       <img src="/img/blog/2021/08/opentelemetry_python_start_mongodb.png" alt="starting mongoDB services from mac terminal"/>
+       <img src="/img/blog/2021/08/opentelemetry_python_start_mongodb.webp" alt="starting mongoDB services from mac terminal"/>
       <figcaption><i>starting mongoDB services from mac terminal</i></figcaption>
    </figure>
 
@@ -132,7 +132,7 @@ The application list shown in the dashboard is from a sample app called HOT R.O.
 
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2021/08/opentelemetry_python_python_app_terminal.png" alt="mac terminal commands for running a python app"/>
+    <img src="/img/blog/2021/08/opentelemetry_python_python_app_terminal.webp" alt="mac terminal commands for running a python app"/>
     <figcaption><i>mac terminal commands for running a python app</i></figcaption>
 </figure>
 
@@ -142,7 +142,7 @@ The application list shown in the dashboard is from a sample app called HOT R.O.
    You can now access the UI of the app on your local host: http://localhost:5002/
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2021/08/python_app_ui.png" alt="Python app UI"/>
+    <img src="/img/blog/2021/08/python_app_ui.webp" alt="Python app UI"/>
     <figcaption><i>Python app UI</i></figcaption>
 </figure>
 
@@ -200,7 +200,7 @@ The application list shown in the dashboard is from a sample app called HOT R.O.
 
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2021/08/opentelemetry_python_dashboard.png" alt="SigNoz dashboard showing python app in its list of applications"/>
+    <img src="/img/blog/2021/08/opentelemetry_python_dashboard.webp" alt="SigNoz dashboard showing python app in its list of applications"/>
     <figcaption><i>SigNoz dashboard showing python app in its list of applications</i></figcaption>
 </figure>
 
@@ -218,7 +218,7 @@ SigNoz comes with out of box RED metrics charts and visualization. RED metrics s
 
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/common/signoz_charts_application_metrics.png" alt="SigNoz dashboard showing the popular RED metrics for application performance monitoring"/>
+    <img src="/img/blog/common/signoz_charts_application_metrics.webp" alt="SigNoz dashboard showing the popular RED metrics for application performance monitoring"/>
     <figcaption><i>SigNoz dashboard showing the popular RED metrics for application performance monitoring</i></figcaption>
 </figure>
 
@@ -228,7 +228,7 @@ You can then choose a particular timestamp where latency is high to drill down t
 
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/common/signoz_list_of_traces_hc.png" alt="See traces, and apply powerful filters on trace data"/>
+    <img src="/img/blog/common/signoz_list_of_traces_hc.webp" alt="See traces, and apply powerful filters on trace data"/>
     <figcaption><i>View of traces at a particular timestamp</i></figcaption>
 </figure>
 
@@ -239,7 +239,7 @@ You can use flamegraphs to exactly identify the issue causing the latency.
 
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/common/signoz_flamegraphs.png" alt="Flamegraphs for distributed tracing"/>
+    <img src="/img/blog/common/signoz_flamegraphs.webp" alt="Flamegraphs for distributed tracing"/>
     <figcaption><i>Flamegraphs showing exact duration taken by each spans - a concept of distributed tracing</i></figcaption>
 </figure>
 
@@ -251,7 +251,7 @@ OpenTelemetry makes it very convenient to instrument your Python application. Yo
 
 You can try out SigNoz by visiting its GitHub repo 👇<br></br>
 
-[![SigNoz GitHub repo](/img/blog/common/signoz_github.png)](https://github.com/SigNoz/signoz)
+[![SigNoz GitHub repo](/img/blog/common/signoz_github.webp)](https://github.com/SigNoz/signoz)
 
 If you face any issues while trying out SigNoz, feel free to write to us at: support@signoz.io
 

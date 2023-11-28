@@ -43,7 +43,7 @@ kind create cluster
 ```
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2022/08/k8s_metrics_server01_kind.png" alt="Kubernetes cluster with kind"/>
+    <img src="/img/blog/2022/08/k8s_metrics_server01_kind.webp" alt="Kubernetes cluster with kind"/>
 </figure>
 
 <br></br>
@@ -81,7 +81,7 @@ kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/late
 you will create the necessary components for kubernetes metrics server:
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2022/08/k8s_metrics_server02_install.png" alt="k8s metrics server installation"/>
+    <img src="/img/blog/2022/08/k8s_metrics_server02_install.webp" alt="k8s metrics server installation"/>
 </figure>
 
 <br></br>
@@ -140,7 +140,7 @@ and then use your favorite text editor to edit the YAML file. For example, when 
 like this:
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2022/08/k8s_metrics_server03_deploy.png" alt="Deploying k8s metrics server"/>
+    <img src="/img/blog/2022/08/k8s_metrics_server03_deploy.webp" alt="Deploying k8s metrics server"/>
 </figure>
 
 <br></br>

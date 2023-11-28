@@ -356,7 +356,7 @@ Once your application is instrumented with OpenTelemetry, you can use SigNoz to 
 
 If you have any questions or need any help in setting things up, join our slack community and ping us in `#support` channel.
 
-[![SigNoz Slack community](/img/blog/common/join_slack_cta.png)](https://signoz.io/slack)
+[![SigNoz Slack community](/img/blog/common/join_slack_cta.webp)](https://signoz.io/slack)
 
 If you want to learn more about OpenTelemetry and SigNoz, feel free to follow these links:
 

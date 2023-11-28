@@ -179,7 +179,7 @@ You just need to reach out to writing@signoz.io with an interesting idea and a s
 
 <!-- If you have any questions about the program, join our slack community and message **Ashu** directly 👋. He looks after our Technical Writer Program.
 
-[![SigNoz Slack community](/img/blog/common/join_slack_cta.png)](https://signoz.io/slack) -->
+[![SigNoz Slack community](/img/blog/common/join_slack_cta.webp)](https://signoz.io/slack) -->
 
 
 <!-- ## Who can apply?

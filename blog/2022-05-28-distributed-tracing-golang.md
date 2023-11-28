@@ -437,7 +437,7 @@ If you are someone who understands more from video, then you can watch the below
 
 If you have any questions or need any help in setting things up, join our slack community and ping us in `#support` channel
 
-[![SigNoz Slack community](/img/blog/common/join_slack_cta.png)](https://signoz.io/slack)
+[![SigNoz Slack community](/img/blog/common/join_slack_cta.webp)](https://signoz.io/slack)
 
 If you want to know more about distributed tracing or SigNoz, feel free to follow these links:
 

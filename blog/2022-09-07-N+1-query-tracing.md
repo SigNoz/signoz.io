@@ -115,7 +115,7 @@ So, if you have distributed tracing implemented in your services and there are t
 
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2022/09/np1-calls.png" alt="tracing signoz n+1"/>
+    <img src="/img/blog/2022/09/np1-calls.webp" alt="tracing signoz n+1"/>
     <figcaption><i>Easy to identify N+1 queries in a distributed trace graph</i></figcaption>
 </figure>
 

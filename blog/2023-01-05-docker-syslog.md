@@ -23,7 +23,7 @@ Logs are useful for troubleshooting and identifying issues in applications, as t
 
 <!--truncate-->
 
-![docker_syslog_cover.png](/img/blog/2023/01/docker_syslog_cover.webp)
+![docker_syslog_cover.webp](/img/blog/2023/01/docker_syslog_cover.webp)
 
 Collecting logs from Docker can be challenging when running a large number of containers or running Docker on multiple hosts. These challenges include managing a large volume of logs, accessing logs from multiple hosts, ensuring the security of logs, and getting a comprehensive view of container and application behavior. A centralized logging system can help address these challenges by allowing you to store and manage all of your logs in a single location.
 

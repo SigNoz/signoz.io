@@ -58,7 +58,7 @@ The application list shown in the dashboard is from a sample app called HOT R.O.
 <Screenshot
   alt="SigNoz dashboard"
   height={500}
-  src="/img/blog/common/signoz_dashboard_homepage.png"
+  src="/img/blog/common/signoz_dashboard_homepage.webp"
   title="SigNoz dashboard"
   width={700}
 />

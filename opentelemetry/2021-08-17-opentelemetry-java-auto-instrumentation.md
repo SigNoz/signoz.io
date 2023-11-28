@@ -8,7 +8,7 @@ author_title: SigNoz Team
 author_url: https://github.com/ankit01-oss
 author_image_url: https://avatars.githubusercontent.com/u/83692067?v=4
 description: OpenTelemetry can be used to instrument Java apps automatically through a Java JAR agent. The agent recognizes popular libraries and frameworks and injects bytecode dynamically to instrument the code...
-image: /img/blog/2021/08/opentelemetry_java_auto_instrumentation-min.png
+image: /img/blog/2021/08/opentelemetry_java_auto_instrumentation-min.webp
 keywords:
   - opentelemetry
   - opentelemetry tomcat
@@ -22,7 +22,7 @@ OpenTelemetry auto instrumentation libraries are the best option for someone who
 
 <!--truncate-->
 
-![Cover image](/img/blog/2021/08/opentelemetry_java_auto_instrumentation-min.png)
+![Cover image](/img/blog/2021/08/opentelemetry_java_auto_instrumentation-min.webp)
 
 OpenTelemetry is a set of tools, APIs, and SDKs which enables you to create and manage the telemetry data for your services and applications.
 

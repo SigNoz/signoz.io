@@ -201,4 +201,4 @@ You can try out SigNoz by visiting its GitHub repo 👇
 
 If you have any questions or need any help in setting things up, join our slack community and ping us in`#support` channel.
 
-[![SigNoz Slack community](/img/blog/common/join_slack_cta.png)](https://signoz.io/slack)
+[![SigNoz Slack community](/img/blog/common/join_slack_cta.webp)](https://signoz.io/slack)

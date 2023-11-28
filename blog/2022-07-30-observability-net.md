@@ -5,7 +5,7 @@ date: 2022-09-02
 tags: [Observability]
 authors: [pranay]
 description: Not 3 pillars but a single whole to help customers solve issues faster
-image: /img/blog/2022/07/o11y-net-trans.png
+image: /img/blog/2022/07/o11y-net-trans.webp
 keywords:
   - observability
 ---
@@ -92,7 +92,7 @@ That is why at SigNoz, we don't believe in pillars or silos. There are just diff
 I think an analogy of a mesh or network may be more apt here. Rather than the three silos supporting making up a stack, think of it more as an observability hive mind which can correlate, talk to each other and point you to the source of the problems.
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2022/07/o11y-net-trans.png" alt="Observability net"/>
+    <img src="/img/blog/2022/07/o11y-net-trans.webp" alt="Observability net"/>
     <figcaption><i>A better model where all signals come together to give insights to users</i></figcaption>
 </figure>
 

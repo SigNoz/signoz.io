@@ -6,22 +6,22 @@ const BuildForDevelopers = () => {
     {
       title: "Query Builder",
       desc: "Write queries on all telemetry signals. Run aggregates, and apply filters and formulas to get deeper insights from your data.",
-      figure: "/img/landing/property-query-buider.png",
+      figure: "/img/landing/property-query-buider.webp",
     },
     {
       title: "Columnar Database",
       desc: "SigNoz uses ClickHouse - a fast open source distributed columnar database. Ingestion and aggregations are lightening fast.",
-      figure: "/img/landing/property-columnar-database.png",
+      figure: "/img/landing/property-columnar-database.webp",
     },
     {
       title: "Telemetry Pipelines",
       desc: "Build telemetry pipelines easily with SigNoz OTel Collector. Integrate any existing pipeline with OTel Collector to send data to SigNoz.",
-      figure: "/img/landing/property-telemetry-pipeline.png",
+      figure: "/img/landing/property-telemetry-pipeline.webp",
     },
     {
       title: "Source Code",
       desc: "Check out the entire source code of SigNoz on GitHub. Create issues, build features & integrations, get started without contacting any sales rep.",
-      figure: "/img/landing/property-source-code.png",
+      figure: "/img/landing/property-source-code.webp",
     },
   ];
   return (

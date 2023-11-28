@@ -33,7 +33,7 @@ Many big companies like <a href="https://www.uber.com/en-IN/blog/logging/" rel="
 Performance benchmarks are not easy to execute. Each tool has nuances, and the testing environments must aim to provide a level playing field for all tools. We have tried our best to be transparent about the setup and configurations used in this performance benchmark. We are open to receiving feedback from the community on what can be done better. Please feel free to create issues in the following repo.
 
 
-[![Logs Benchmark Repo](/img/blog/2022/12/benchmark-repo-new.png)](https://github.com/SigNoz/logs-benchmark)
+[![Logs Benchmark Repo](/img/blog/2022/12/benchmark-repo-new.webp)](https://github.com/SigNoz/logs-benchmark)
 
 
 We will go through how we have created the environment for benchmarking the different solutions and compare the results that can help you choose a tool based on your logging requirements. But before that, let’s give you a brief overview of the key findings.
@@ -96,7 +96,7 @@ The three VMs for generating logs is **`c6a.2xlarge`** EC2 instance with 8vCPU
 
 All the configurations used for performing the benchmark can be found in the SigNoz Logs benchmark repo.
 
-[![Logs Benchmark Repo](/img/blog/2022/12/benchmark-repo-new.png)](https://github.com/SigNoz/logs-benchmark)
+[![Logs Benchmark Repo](/img/blog/2022/12/benchmark-repo-new.webp)](https://github.com/SigNoz/logs-benchmark)
 
 
 ## Preparing SigNoz
@@ -328,7 +328,7 @@ Hence, we think that fast aggregation queries will greatly improve the user quer
 In all of our above test queries, Loki was not able to return results. This is consistent with some of the open issues in the Loki community around performance with high cardinality data.
 
 
-[![Loki High Cardinality Issue](/img/blog/2022/12/loki-issue.png)](https://github.com/grafana/loki/issues/91)
+[![Loki High Cardinality Issue](/img/blog/2022/12/loki-issue.webp)](https://github.com/grafana/loki/issues/91)
 
 
 ## Storage Comparison

@@ -40,7 +40,7 @@ OpenTelemetry specification is organized into distinct types of telemetry, which
 OpenTelemetry provides a way to **merge the three signals into a single cohesive data** so that debugging issues becomes very easy. For e.g, if you look at metrics on a chart, you can find the corresponding logs or find the trace associated with that metric instance if you have instrumented your application with OpenTelemetry client libraries.
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2022/07/o11y-net-trans.png" alt="Telemetry signals are correlated"/>
+    <img src="/img/blog/2022/07/o11y-net-trans.webp" alt="Telemetry signals are correlated"/>
     <figcaption><i>Telemetry signals are correlated to give maximum contextual insights for troubleshooting issues.</i></figcaption>
 </figure>
 

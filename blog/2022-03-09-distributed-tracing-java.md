@@ -311,7 +311,7 @@ serve -l 5000 u
 <Screenshot
    alt="Running sample app UI"
    height={500}
-   src="/img/blog/2022/03/serve_ui_port.png"
+   src="/img/blog/2022/03/serve_ui_port.webp"
    title="Running sample app UI"
    width={700}
 />
@@ -432,7 +432,7 @@ OpenTelemetry and SigNoz provide a great open-source solution to implement distr
 
 If you have any questions or need any help in setting things up, join our slack community and ping us in `#support` channel.
 
-[![SigNoz Slack community](/img/blog/common/join_slack_cta.png)](https://signoz.io/slack)
+[![SigNoz Slack community](/img/blog/common/join_slack_cta.webp)](https://signoz.io/slack)
 
 ---
 Read more about distributed tracing from SigNoz blog 👇

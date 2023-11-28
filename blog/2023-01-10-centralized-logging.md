@@ -23,7 +23,7 @@ Modern-day software systems emit millions of log lines per minute. Cloud computi
 
 <!--truncate-->
 
-![centralized_logging_cover.png](/img/blog/2023/01/centralized_logging_cover.webp)
+![centralized_logging_cover.webp](/img/blog/2023/01/centralized_logging_cover.webp)
 
 ## What is centralized logging?
 
@@ -113,7 +113,7 @@ There are **two** ways to collect application logs with OpenTelemetry:
     <br></br>
     
     <figure data-zoomable align='center'>
-    <img src="/img/logs/file_stdout.png" alt="Collecting logs via file or Stdout logs"/>
+    <img src="/img/logs/file_stdout.webp" alt="Collecting logs via file or Stdout logs"/>
     <figcaption><i>Collecting logs via file or Stdout logs</i></figcaption>
     </figure>
     
