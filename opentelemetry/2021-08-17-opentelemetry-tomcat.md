@@ -8,7 +8,7 @@ author_title: SigNoz Team
 author_url: https://github.com/ankit01-oss
 author_image_url: https://avatars.githubusercontent.com/u/83692067?v=4
 description: In this article learn how to monitor Tomcat Java applications using OpenTelemetry and SigNoz. It is very easy to get started...
-image: /img/blog/2021/08/opentelemetry_tomcat_cover-min.webp
+image: /img/blog/2021/08/opentelemetry_tomcat_cover-min.jpeg
 keywords:
   - opentelemetry
   - opentelemetry tomcat

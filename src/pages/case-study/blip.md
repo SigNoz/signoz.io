@@ -1,7 +1,7 @@
 ---
 title:  How Blip uses SigNoz to improve their issue resolution time by 14x
 slug: blipbillboards
-image: /img/case_study/BlipBillBoards.webp
+image: /img/case_study/BlipBillBoards.png
 authors: [pranay]
 # hide_table_of_contents: true
 
@@ -12,8 +12,8 @@ import { LiteYoutubeEmbed } from "react-lite-yt-embed";
 
 <head>
   <link rel="canonical" href="https://signoz.io/case-study/blip/"/>
-  <meta property="og:image" content="https://signoz.io/img/case_study/BlipBillBoards.webp"/>
-  <meta name ="twitter:image" content="https://signoz.io/img/case_study/BlipBillBoards.webp"/>
+  <meta property="og:image" content="https://signoz.io/img/case_study/BlipBillBoards.png"/>
+  <meta name ="twitter:image" content="https://signoz.io/img/case_study/BlipBillBoards.png"/>
 
 </head>
 

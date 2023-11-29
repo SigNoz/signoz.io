@@ -1,7 +1,7 @@
 ---
 title:  How InstaSafe chose SigNoz over Grafana and Elastic APM to power their observability needs
 slug: instasafe
-image: /img/case_study/instasafe-banner.webp
+image: /img/case_study/instasafe-banner.png
 authors: [pranay]
 
 ---
@@ -10,8 +10,8 @@ authors: [pranay]
 
 <head>
   <link rel="canonical" href="https://signoz.io/case-study/instasafe/"/>
-  <meta property="og:image" content="https://signoz.io/img/case_study/instasafe-banner.webp"/>
-  <meta name ="twitter:image" content="https://signoz.io/img/case_study/instasafe-banner.webp"/>
+  <meta property="og:image" content="https://signoz.io/img/case_study/instasafe-banner.png"/>
+  <meta name ="twitter:image" content="https://signoz.io/img/case_study/instasafe-banner.png"/>
 
 </head>
 

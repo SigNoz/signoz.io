@@ -8,7 +8,7 @@ author_title: SigNoz Team
 author_url: https://github.com/ankit01-oss
 author_image_url: https://avatars.githubusercontent.com/u/83692067?v=4
 description: End-to-end performance monitoring of Python application with OpenTelemetry. Get your telemetry data visualized with SigNoz....
-image: /img/blog/2021/08/opentelemetry_python_cover.webp
+image: /img/blog/2021/08/opentelemetry_python_cover.jpeg
 keywords:
   - opentelemetry
   - opentelemetry python
