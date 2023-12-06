@@ -71,6 +71,18 @@ At least one field among `Parse Trace Id From`, `Parse Span Id From` and `Parse 
 
 :::
 
+
+## Timestamp Parser
+The timestamp parsing processor can be used to parse log timestamp out of a log field.
+
+#### Processor Fields
+|     Field     |   Description   |
+|---------------|-----------------|
+|     Name of Timestamp Parsing Processor     | A descriptive name for the processor. |
+|     Parse Timestamp Value From     | The log field containing timestamp value. Eg: `attributes.timestamp` |
+|     Timestamp Format Type     | Type of timestamp value to be parsed. <br/> `epoch` can be used for parsing [unix time](https://en.wikipedia.org/wiki/Unix_time) and `strptime` can be used for parsing human readable values using [ctime-like directives](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/internal/coreinternal/timeutils/internal/ctimefmt/ctimefmt.go#L68) such as %Y (4-digit year) and %H (2-digit hour).  |
+|     Timestamp Format     | Format for parsing timestamp value. <br/> For example `%Y-%m-%d` can be used for parsing values like `2023-12-06` when Timestamp Format Type is `strptime`, or `seconds.milliseconds` can be used for parsing unix time values like `1701869406.245` when Timestamp Format Type is `epoch` |
+
 ## Add
 The add processor can be used to add a field to the log.
 
