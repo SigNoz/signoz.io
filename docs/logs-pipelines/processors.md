@@ -20,7 +20,7 @@ using [regular expressions](https://www3.ntu.edu.sg/home/ehchua/programming/howt
 #### Processor Fields
 |     Field     |   Description   |
 |---------------|-----------------|
-|     Name      | A descriptive name. Must be unique across all processors in the pipeline |
+|     Name      | A descriptive name for the processor. |
 |     Pattern      | The regex pattern to be used. Must include atleast one named capture group |
 |     Parse&#160;From      | The log text field to parse from. Eg: `body` or `attributes.sessionInfo` |
 |     Parse&#160;To      | The path to parse to. Eg: If set to `attributes`, a capture group like `(?P<userId>.+)` in the regex pattern would get stored in `attributes.userId` |
@@ -35,32 +35,32 @@ using grok patterns.
 #### Processor Fields
 |     Field     |   Description   |
 |---------------|-----------------|
-|     Name      | A descriptive name. Must be unique across all processors in the pipeline |
+|     Name      | A descriptive name for the processor. |
 |     Pattern      | The [grok pattern](https://grokdebugger.com/) to be used. Must include atleast one named capture group |
 |     Parse&#160;From      | The log text field to parse from. Eg: `body` or `attributes.sessionInfo` |
 |     Parse&#160;To      | The path to parse to. Eg: If set to `attributes`, a capture group like `%{WORD:userId}` in the grok pattern would get stored in `attributes.userId` |
 |     On&#160;Error     | What to do if the processor fails. Options are to `drop` the log or `send` it to the next processor  |
 
 
-## JSON
+## JSON Parser
 The JSON parsing processor can be used to parse serialized JSON text into log attributes.
 
 #### Processor Fields
 |     Field     |   Description   |
 |---------------|-----------------|
-|     Name      | A descriptive name. Must be unique across all processors in the pipeline |
+|     Name      | A descriptive name for the processor. |
 |     Parse&#160;From      | The log field containing serialized JSON text. Eg: `body` or `attributes.sessionInfo` |
 |     Parse&#160;To      | The path to parse to. Eg: If set to `attributes`, parsing the JSON text `'{ "userId": 8888 }'` would set `attributes.userId` to `8888` |
 
 
-## Trace
+## Trace Parser
 The trace processor can be used to populate trace id, span id and trace flags for a log.  
 Populating trace identifiers in logs allows navigation to and from corresponding traces for correlation.
 
 #### Processor Fields
 |     Field     |   Description   |
 |---------------|-----------------|
-|     Name      | A descriptive name. Must be unique across all processors in the pipeline |
+|     Name      | A descriptive name for the processor. |
 |     Parse&#160;Trace&#160;Id&#160;From   | The log field containing otel Trace Id. Eg: `attributes.myTraceId` <br/> Value at the specified path must be an even length string of hex characters |
 |     Parse&#160;Span&#160;Id&#160;From    | The log field containing otel Span Id.  Eg: `attributes.mySpanId` <br/> Value at the specified path must be an even length string of hex characters |
 |     Parse&#160;Trace&#160;Flags&#160;From    | The log field containing otel Trace Flags. Eg: `attributes.myTraceFlags` <br/> Value at the specified path must be an unsigned int |
@@ -77,7 +77,7 @@ The add processor can be used to add a field to the log.
 #### Processor Fields
 |     Field     |   Description   |
 |---------------|-----------------|
-|     Name      | A descriptive name. Must be unique across all processors in the pipeline |
+|     Name      | A descriptive name for the processor. |
 |     Field     | Path of the field to be added. Must be of the form `attributes.*` or `resource.*`  |
 |     Value     | The value to be set in the specified field |
 
@@ -88,7 +88,7 @@ The remove processor can be used for removing unwanted log fields such as PII.
 #### Processor Fields
 |     Field     |   Description   |
 |---------------|-----------------|
-|     Name      | A descriptive name. Must be unique across all processors in the pipeline |
+|     Name      | A descriptive name for the processor. |
 |     Field     | Path of the field to be removed. Must be of the form `attributes.*` or `resource.*`  |
 
 
@@ -98,7 +98,7 @@ The move processor can be used to move or rename a log field.
 #### Processor Fields
 |     Field     |   Description   |
 |---------------|-----------------|
-|     Name      | A descriptive name. Must be unique across all processors in the pipeline |
+|     Name      | A descriptive name for the processor. |
 |     From      | Path of the field to be moved. Must be of the form `attributes.*` or `resource.*` |
 |     To        | Path to move the field to. Must be of the form `attributes.*` or `resource.*` |
 
@@ -109,6 +109,6 @@ The copy processor can be used to copy log fields.
 #### Processor Fields
 |     Field     |   Description   |
 |---------------|-----------------|
-|     Name      | A descriptive name. Must be unique across all processors in the pipeline |
+|     Name      | A descriptive name for the processor. |
 |     From      | Path of the field to be copied. Must be of the form `attributes.*` or `resource.*` |
 |     To        | Path to copy the field to. Must be of the form `attributes.*` or `resource.*` |
