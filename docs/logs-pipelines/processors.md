@@ -83,6 +83,31 @@ The timestamp parsing processor can be used to parse log timestamp out of a log 
 |     Timestamp Format Type     | Type of timestamp value to be parsed. <br/> `epoch` can be used for parsing [unix time](https://en.wikipedia.org/wiki/Unix_time) and `strptime` can be used for parsing human readable values using [ctime-like directives](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/internal/coreinternal/timeutils/internal/ctimefmt/ctimefmt.go#L68) such as %Y (4-digit year) and %H (2-digit hour).  |
 |     Timestamp Format     | Format for parsing timestamp value. <br/> For example `%Y-%m-%d` can be used for parsing values like `2023-12-06` when Timestamp Format Type is `strptime`, or `seconds.milliseconds` can be used for parsing unix time values like `1701869406.245` when Timestamp Format Type is `epoch` |
 
+
+## Severity Parser
+The severity parsing processor can be used to parse log severity out of a log field.
+
+#### Processor Fields
+|     Field     |   Description   |
+|---------------|-----------------|
+|     Name of Severity Parsing Processor     | A descriptive name for the processor. |
+|     Parse Severity Value From     | The log field to parse severity from. For example `attributes.log_level` |
+|     Values for level TRACE     | Comma separated list of values that should be mapped to level TRACE. For example `0, trace` |
+|     Values for level DEBUG     | Comma separated list of values that should be mapped to level DEBUG. For example `debug, 2xx` |
+|     Values for level INFO     | Comma separated list of values that should be mapped to level INFO. For example `info, 3xx` |
+|     Values for level WARN     | Comma separated list of values that should be mapped to level WARN. For example `warning, 4xx` |
+|     Values for level ERROR     | Comma separated list of values that should be mapped to level ERROR. For example `error, 5xx` |
+|     Values for level FATAL     | Comma separated list of values that should be mapped to level FATAL. For example `panic, -1` |
+
+
+:::note
+
+Severity level values are case insensitive.<br/>
+As a special case, 2xx, 3xx, 4xx and 5xx can be used to map number ranges to severity levels. This can be useful for mapping HTTP status codes. For example `5xx` can be used to parse numbers between 500-599 into level `ERROR`.
+
+:::
+
+
 ## Add
 The add processor can be used to add a field to the log.
 
