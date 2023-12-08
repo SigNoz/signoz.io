@@ -1,10 +1,10 @@
 ---
-title: 7 Open-Source Log Management Tools that you may consider in 2023
+title: 7 Open-Source Log Management Tools that you may consider in 2024
 slug: open-source-log-management
 date: 2023-01-28
 tags: [Tools Comparison]
 authors: [daniel]
-description: Top open source log management tools in 2023 1.SigNoz 2.Graylog 3.Logstash 4.FluentD 5.Syslog-ng...
+description: Top open source log management tools in 2024 1.SigNoz 2.Graylog 3.Logstash 4.FluentD 5.Syslog-ng...
 hide_table_of_contents: false
 image: /img/blog/2023/01/open_source_log_management_cover-min.jpg
 keywords:

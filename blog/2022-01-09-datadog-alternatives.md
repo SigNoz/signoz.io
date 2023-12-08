@@ -1,5 +1,5 @@
 ---
-title: Comparing The Top 9 Datadog Alternatives in 2023
+title: Comparing The Top 9 Datadog Alternatives in 2024
 slug: datadog-alternatives
 date: 2023-09-20
 tags: [Tech Resources]
@@ -55,7 +55,7 @@ Datadog's billing has two key issues:
 
 The monitoring space is highly competitive, but there are a few products that stand out. In this article we will go through the best DatDog alternatives which you can explore while selecting your vendor for application monitoring.
 
-List of top DataDog alternatives in 2023:
+List of top DataDog alternatives in 2024:
 
 - [SigNoz (Open-Source)](#signoz-open-source)
 - [New Relic](#new-relic)

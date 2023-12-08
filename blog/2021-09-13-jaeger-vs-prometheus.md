@@ -1,5 +1,5 @@
 ---
-title: Jaeger vs Prometheus - Side by Side Comparison [Updated for 2023]
+title: Jaeger vs Prometheus - Side by Side Comparison [Updated for 2024]
 slug: jaeger-vs-prometheus
 date: 2023-10-18
 tags: [Tools Comparison, Jaeger, Prometheus]

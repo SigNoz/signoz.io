@@ -1,10 +1,10 @@
 ---
-title: Top 11 Observability Tools in 2023 [includes open-source]
+title: Top 11 Observability Tools in 2024 [includes open-source]
 slug: observability-tools
 date: 2023-09-10
 tags: [Tech Resources]
 authors: ankit_anand
-description: Top observability tools list 2023 - 1.SigNoz 2.Instana 3.Dynatrace 4.Grafana Labs 5.Honeycomb 6.Lightstep 7.New Relic 8.DataDog 9.AppDynamics...
+description: Top observability tools list 2024 - 1.SigNoz 2.Instana 3.Dynatrace 4.Grafana Labs 5.Honeycomb 6.Lightstep 7.New Relic 8.DataDog 9.AppDynamics...
 image: /img/blog/2023/09/observability-tools-cover-min.jpg
 keywords:
   - observability
@@ -50,7 +50,7 @@ An observability tool enables application owners to get answers to any question 
 
 In this article, let's explore the top 9 observability tools in 2023 which can be perfect for your microservice application. -->
 
-List of Top 11 observability tools in 2023
+List of Top 11 observability tools in 2024
 
 - [SigNoz (open-source)](#signoz)
 - [Dynatrace](#dynatrace)
@@ -64,9 +64,9 @@ List of Top 11 observability tools in 2023
 - [Appdynamics](#appdynamics)
 - [Zipkin (open-source)](#zipkin)
 
-## Top 11 Observability Tools in 2023
+## Top 11 Observability Tools in 2024
 
-Now let's explore the top observability tools in 2023.
+Now let's explore the top observability tools in 2024.
 
 ### SigNoz
 

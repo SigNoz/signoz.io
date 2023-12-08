@@ -1,5 +1,5 @@
 ---
-title: Top 13 open source APM tools in 2023
+title: Top 13 open source APM tools in 2024
 slug: open-source-apm-tools
 date: 2023-06-05
 tags: [Tech Resources]
@@ -66,7 +66,7 @@ A few essential APM benefits in solving performance issues are as follows:
 - **Increase revenue** by protecting against downtime and user churn
 - **Saves engineering bandwidth** in debugging and troubleshooting
 
-**List of top 13 open source APM tools in 2023**
+**List of top 13 open source APM tools in 2024**
 
  - [SigNoz](#signoz)
  - [Graphite](#graphite)
@@ -84,7 +84,7 @@ A few essential APM benefits in solving performance issues are as follows:
 
 ## Top Open Source APM Tools
 
-Now let's explore the top 13 open source APM tools in 2023.
+Now let's explore the top 13 open source APM tools in 2024.
 
 ### SigNoz
 

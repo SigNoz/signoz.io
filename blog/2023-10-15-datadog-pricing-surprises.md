@@ -1,5 +1,5 @@
 ---
-title: Datadog Pricing - Beware These Surprises in 2023
+title: Datadog Pricing - Beware These Surprises in 2024
 slug: datadog-pricing
 date: 2023-10-26
 tags: [Observability]

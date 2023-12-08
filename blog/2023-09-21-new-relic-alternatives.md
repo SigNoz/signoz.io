@@ -1,10 +1,10 @@
 ---
-title: Top 7 New Relic Alternatives [Updated for 2023]
+title: Top 7 New Relic Alternatives [Updated for 2024]
 slug: new-relic-alternatives
 date: 2023-09-21
 tags: [OpenTelemetry, Tools Comparison]
 authors: daniel
-description: Looking for a New Relic alternative? Here are top 7 New Relic alternatives that you can use in 2023. 1.SigNoz 2.AppDynamics 3.Dynatrace 4.Datadog...
+description: Looking for a New Relic alternative? Here are top 7 New Relic alternatives that you can use in 2024. 1.SigNoz 2.AppDynamics 3.Dynatrace 4.Datadog...
 image: /img/blog/2023/09/new-relic-alternatives-cover.jpeg
 hide_table_of_contents: false
 keywords:

@@ -1,5 +1,5 @@
 ---
-title: Top 11 MYSQL monitoring tools in 2023 [open-source included]
+title: Top 11 MYSQL monitoring tools in 2024 [open-source included]
 slug: mysql-monitoring-tools
 date: 2023-10-18
 tags: [Tech Resources]

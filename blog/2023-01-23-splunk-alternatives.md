@@ -1,5 +1,5 @@
 ---
-title: Top 11 Splunk Alternatives in 2023 [Includes Free & Open-Source Tools]
+title: Top 11 Splunk Alternatives in 2024 [Includes Free & Open-Source Tools]
 slug: splunk-alternatives
 date: 2023-10-31
 tags: [Tech Resources]

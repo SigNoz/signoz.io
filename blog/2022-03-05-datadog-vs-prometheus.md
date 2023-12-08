@@ -1,5 +1,5 @@
 ---
-title: DataDog vs Prometheus - Comprehensive Comparison Guide [Updated for 2023]
+title: DataDog vs Prometheus - Comprehensive Comparison Guide [Updated for 2024]
 slug: datadog-vs-prometheus
 date: 2023-09-05
 tags: [Tools Comparison, Prometheus]

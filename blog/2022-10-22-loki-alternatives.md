@@ -1,5 +1,5 @@
 ---
-title: Top 11 Loki alternatives in 2023
+title: Top 11 Loki alternatives in 2024
 slug: loki-alternatives
 date: 2023-09-14
 tags: [Tech Resources]

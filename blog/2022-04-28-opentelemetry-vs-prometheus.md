@@ -1,5 +1,5 @@
 ---
-title: OpenTelemetry vs Prometheus - Comprehensive Comparison Guide [Updated 2023]
+title: OpenTelemetry vs Prometheus - Comprehensive Comparison Guide [Updated 2024]
 slug: opentelemetry-vs-prometheus
 date: 2023-09-10
 tags: [Tools Comparison, Prometheus]
