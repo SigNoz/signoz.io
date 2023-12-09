@@ -5,7 +5,7 @@ date: 2023-10-18
 tags: [Tech Resources]
 authors: [ankit_anand, daniel]
 description: Top MySQL Monitoring Tools List - 1.SigNoz 2.Prometheus 3.Dynatrace 4.Sematext 5.Solar winds 6.DataDog 7.MySQL Enterprise Monitor 8.Paessler PRTG Network Monitor...
-image: /img/blog/2023/06/mysql_monitoring_tools_cover-min.jpg
+image: /img/blog/2023/06/mysql-monitoring-tools-cover.jpeg
 keywords:
   - mysql
   - mysql monitoring
@@ -24,7 +24,7 @@ Database monitoring is a critical component in your application performance moni
 
 <!--truncate-->
 
-![Cover Image](/img/blog/2023/06/mysql_monitoring_tools_cover.webp)
+![Cover Image](/img/blog/2023/06/mysql-monitoring-tools-cover.webp)
 
 
 MySQL monitoring tools can help you identify potential issues with your database, keep a continuous check on your database instances, improve performance and detect and alert you about real-time issues.

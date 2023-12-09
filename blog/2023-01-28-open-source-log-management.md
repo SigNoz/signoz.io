@@ -6,7 +6,7 @@ tags: [Tools Comparison]
 authors: [daniel]
 description: Top open source log management tools in 2024 1.SigNoz 2.Graylog 3.Logstash 4.FluentD 5.Syslog-ng...
 hide_table_of_contents: false
-image: /img/blog/2023/01/open_source_log_management_cover-min.jpg
+image: /img/blog/2023/01/open-source-log-management-cover.jpeg
 keywords:
   - logs
   - log management
@@ -23,7 +23,7 @@ Effective log management is a fundamental aspect of maintaining and troubleshoot
 
 <!--truncate-->
 
-![Cover Image](/img/blog/2023/01/open_source_log_management_cover.webp)
+![Cover Image](/img/blog/2023/01/open-source-log-management-cover.webp)
 
 
 Open-source log management tools offer a cost-efficient and customizable approach for collecting, analyzing, and visualizing log data. These tools empower administrators with the ability to swiftly discern patterns and trends within log data, thereby streamlining the diagnosis and resolution of problems.

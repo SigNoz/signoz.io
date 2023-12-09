@@ -6,7 +6,7 @@ tags: [Tech Resources]
 authors: [joseph]
 description: Are you looking for a Splunk alternative? Here are the top 11 Splunk alternatives that you can consider. 1.SigNoz 2.Graylog 3.Loggly 4.Dynatrace 5.New Relic 6.DataDog...
 hide_table_of_contents: false
-image: /img/blog/2023/01/splunk_alternatives_cover-min.jpg
+image: /img/blog/2023/01/splunk-alternatives-cover.jpeg
 keywords:
   - splunk
   - splunk alternatives
@@ -21,7 +21,7 @@ keywords:
 
 <!--truncate-->
 
-![Cover Image](/img/blog/2023/01/splunk_alternatives_cover.webp)
+![Cover Image](/img/blog/2023/01/splunk-alternatives-cover.webp)
 
 
 Splunk provides a wide range of tools for analyzing and visualizing your data fast and at scale. This way, you identify patterns, detect anomalies and make informed decisions. At its core, Splunk provides capabilities such as:

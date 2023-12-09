@@ -5,7 +5,7 @@ date: 2023-09-14
 tags: [Tech Resources]
 authors: ankit_anand
 description: There are many Loki alternatives that you can use for logs analytics. Top 11 Loki alternatives in 2022. 1.SigNoz 2.Logz.io 3.Graylog 4.Logtail 5.Sumologic ...
-image: /img/blog/2023/09/loki-alternatives-cover-min.jpg
+image: /img/blog/2023/09/loki-alternatives-cover.jpeg
 keywords:
   - loki
   - grafana loki

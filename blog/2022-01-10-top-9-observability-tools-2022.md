@@ -5,7 +5,7 @@ date: 2023-09-10
 tags: [Tech Resources]
 authors: ankit_anand
 description: Top observability tools list 2024 - 1.SigNoz 2.Instana 3.Dynatrace 4.Grafana Labs 5.Honeycomb 6.Lightstep 7.New Relic 8.DataDog 9.AppDynamics...
-image: /img/blog/2023/09/observability-tools-cover-min.jpg
+image: /img/blog/2023/09/observability-tools-cover.jpeg
 keywords:
   - observability
   - observability tools

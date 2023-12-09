@@ -5,7 +5,7 @@ date: 2023-10-10
 tags: [Tech Resources]
 authors: ankit_anand
 description: There are many ELK alternatives that you can use for logs analytics. Top 14 ELK alternatives in 2024. 1.SigNoz 2.Logz.io 3.Graylog 4.Logtail 5.Sumologic 6.Grafana Loki...
-image: /img/blog/2023/10/elk-alternatives-cover-min.jpg
+image: /img/blog/2023/10/elk-alternatives-cover.jpeg
 keywords:
   - elk
   - elk stack
