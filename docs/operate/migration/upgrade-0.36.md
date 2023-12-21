@@ -10,6 +10,13 @@ In the SigNoz version `>=0.36` i.e. SigNoz chart version `>=0.32.0` , we have ad
 
 Ex:- Previously `service.name` was stored and queried as `service_name` , after this upgrade `service.name` will be supported
 
+
+## Steps to run migration script:
+
+:::note
+It's recommended to run the migration script 10-15 mins after upgrading to `v0.36` . You can also run this migration script multiple times.
+:::
+
 ## First upgrade to v0.36
 
 Follow the platform specific instructions to upgrade to 0.36 and above.
@@ -20,8 +27,6 @@ Note that the past exceptions/error data will not be visible on the new applicat
 - [Docker Swarm](https://signoz.io/docs/operate/docker-swarm/#upgrade)
 - [Kubernetes](https://signoz.io/docs/operate/kubernetes/#upgrade)
 
-
-## Steps to run migration script:
 
 ### For Docker
 ```bash
