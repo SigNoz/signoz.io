@@ -8,7 +8,7 @@ sidebar_label: Upgrade to 0.36
 
 In the SigNoz version `>=0.36` i.e. SigNoz chart version `>=0.32.0` , we have added support for dot(`.`) in attribute names.
 
-Ex:- Previously `service.name` was stored and queried as `service_name` , after this upgrade `service.name` will be supported
+Ex:- Previously `service.name` was stored and queried as `service_name` , after this upgrade `service.name` will be supported.
 
 
 ## Steps to run migration script:
@@ -141,3 +141,13 @@ Flags:
 - `-userName` : Specify user name of clickhouse. `default=default`
 - `-password` : Specify password of clickhouse. `default=""`
 
+
+## Updating Query Payload, Dashboards and Alerts
+:::note
+It's recommended to update Dashboards and Alerts after a few days of installing the release so that sufficient amount of newer data is ingested.
+:::
+
+If you are using the SigNoz Query API, Dashboards, or Alerts which contain attributes which actually had dot `.` which were converted to `_`. They will keep working for the next month or two and then we will remove support for them. You need to update them to use the new attributes.
+Ex:- 
+* `service.name` would have been shown in SigNoz UI as `service_name` . Now you can update it to use `service.name`
+* `k8s.namespace.name` would have been shown in SigNoz UI as `k8s_namespace_name` . Now you can update it to use `k8s_namespace_name`
