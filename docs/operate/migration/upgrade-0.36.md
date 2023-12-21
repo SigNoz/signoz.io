@@ -110,7 +110,7 @@ kubectl -n platform delete pod signoz-migrate
 
 ## In case of Upgrade Failure
 
-1. Note the names of fields which were not migrated. ex:- `telemetry_sdk_name`
+1. Note the names of fields which were not migrated. ex:- `telemetry.sdk.name`
 2. Exec into the clickhouse container and run `clickhouse client`.
 3. Check the schema of the logs table `show create table signoz_logs.logs`
 4. If `telemetry_sdk_name` column or `telemetry_sdk_name_idx` index is present you can delete them
