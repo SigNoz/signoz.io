@@ -150,7 +150,7 @@ It's recommended to update Dashboards and Alerts after a few days of installing 
 If you've been using the SigNoz Query API, Dashboards, or Alerts with attributes that included a dot (.) but were converted to an underscore (_), they will continue to function for the next 45 days. However, it's essential to update these attributes to reflect the new format.
 
 Ex:- 
-* `service.name` was previous shown and stored as `service_name` . Now you can update it to use `service.name`
-* `k8s.namespace.name` was previous shown and stored as `k8s_namespace_name` . Now you can update it to use `k8s_namespace_name`
+* `service.name` was previously shown and stored as `service_name` . Now you can update it to use `service.name`
+* `k8s.namespace.name` was previously shown and stored as `k8s_namespace_name` . Now you can update it to use `k8s_namespace_name`
 
 For assistance in making these updates, please reach out to us via Intercom support or at cloud-support@signoz.io
