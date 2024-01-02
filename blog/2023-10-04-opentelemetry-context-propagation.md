@@ -139,19 +139,19 @@ Imagine two microservices, Service A and Service B, communicating via RabbitMQ. 
 ```python
 # Service A: Sending a message with trace context
 from opentelemetry import trace
+from opentelemetry.trace.propagation.tracecontext import TraceContextTextMapPropagator
 
+carrier = {}
 # Create a span for the current operation in Service A
 with trace.get_tracer(__name__).start_as_current_span("Operation in Service A") as span:
-    # Extract the current span context
-    trace_context = span.get_span_context()
+    # Write the current context into the carrier.
+    # A TextMapPropagator works with any dict-like object as its Carrier by default.
+    TraceContextTextMapPropagator().inject(carrier)
     
     # Attach trace context to the message
     message = {
         "content": "Hello, Service B!",
-        "trace_context": {
-            "trace_id": trace_context.trace_id,
-            "span_id": trace_context.span_id,
-        }
+        "trace_context": carrier
     }
     
     # Publish the message to RabbitMQ
@@ -166,10 +166,11 @@ from opentelemetry import trace
 
 def process_message(message):
     # Extract the trace context from the received message
-    trace_context = message.get("trace_context")
+    carrier = message.get("trace_context")
+    ctx = TraceContextTextMapPropagator().extract(carrier=carrier)
     
     # Create a new span in Service B using the extracted trace context
-    with trace.get_tracer(__name__).start_as_current_span("Operation in Service B", trace_context=trace_context):
+    with trace.get_tracer(__name__).start_as_current_span("Operation in Service B", context=ctx):
         # Your code for processing the message here
 ```
 
