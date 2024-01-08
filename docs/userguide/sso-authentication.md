@@ -56,8 +56,8 @@ Integrating SAML with SigNoz lets your users access SigNoz without re-authentica
 5. When the next page appears, you will see an card for `Basic SAML Configuration`. Click on edit icon button in this card 
 6. Fill out the following details and click `Save`:
     - Entity Identifier (Entity ID): Set Base URL (host and port - if any) of your SigNoz app. (e.g. `test.in.signoz.cloud`)
-    - Reply URL(Assertion Consumer Service URL): Set the reply URL using this format - http(s)://${SIGNOZ_BASEURL}/api/v1/complete/saml (e.g. `https://test.in.signoz.cloud/api/v1/complete/saml`)
-    - Sign on URL: Set the sign on URL using this format - http(s)://${SIGNOZ_BASEURL}/login (e.g. `https://test.in.signoz.cloud/login`)
+    - Reply URL(Assertion Consumer Service URL): Set the reply URL using this format - `http(s)://${SIGNOZ_BASEURL}/api/v1/complete/saml` (e.g. `https://test.in.signoz.cloud/api/v1/complete/saml`)
+    - Sign on URL: Set the sign on URL using this format - `http(s)://${SIGNOZ_BASEURL}/login` (e.g. `https://test.in.signoz.cloud/login`)
 7. Now we need to capture SSO information required to configure SAML in SigNoz. In the page, locate *App Federation Metadata URL*. Preferably, open this metadata page in a new tab. Once there, locate and copy these two field values from XML into a separate notepad:
     - At the top of page, locate XML tag `EntityDescriptor` and copy the `entityID` value
 
@@ -65,7 +65,7 @@ Integrating SAML with SigNoz lets your users access SigNoz without re-authentica
     <EntityDescriptor ID="_2d8d...a006" entityID="https://sts.windows.net/00d562...816c79/" xmlns="urn:oasis:names:tc:SAML:2.0:metadata">
     ```
 
-    - Locate `X509Data` tag and copy the entity content (value). This is certificate that SigNoz needs to validate response from IdP. It will be `Certificate Data` in SigNoz settings.
+    - Locate `X509Data` tag and copy the entity content (value). This is certificate (`Certificate Data`) that SigNoz needs to validate response from IdP.
     - Locate `Location` at the bottom of the page and copy its value. This is the ACS URL that SigNoz needs to send SAML response to.
 
     ```XML
