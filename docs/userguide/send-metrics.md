@@ -94,10 +94,10 @@ To enable a new OpenTelemetry receiver, follow the steps below:
 
 ## Enable a Prometheus Receiver
 
-SigNoz supports all the exporters that are listed on the [Exporters and Integrations](https://prometheus.io/docs/instrumenting/exporters/) page of the Prometheus documentation. If you have a running Prometheus instance, and you expose metrics in Prometheus, then you can scrape them in SigNoz by configuring Prometheus receivers in the `receivers.prometheus.config.scrape_configs` section of the `deploy/docker/clickhouse-setup/otel-collector-metrics-config.yaml` file.
+SigNoz supports all the exporters that are listed on the [Exporters and Integrations](https://prometheus.io/docs/instrumenting/exporters/) page of the Prometheus documentation. If you have a running Prometheus instance, and you expose metrics in Prometheus, then you can scrape them in SigNoz by configuring Prometheus receivers in the `receivers.prometheus.config.scrape_configs` section of the `deploy/docker/clickhouse-setup/otel-collector-config.yaml` file.
 
 To enable a Prometheus receiver, follow the steps below:
-1. Open the `deploy/docker/clickhouse-setup/otel-collector-metrics-config.yaml` file in a plain-text editor.
+1. Open the `deploy/docker/clickhouse-setup/otel-collector-config.yaml` file in a plain-text editor.
 2. Enable a new Prometheus receiver. Depending on your use case, there are two ways in which you can enable a new Prometheus exporter:
     - **By creating a new job**: The following example shows how you can enable a Prometheus receiver by creating a new job named `my-new-job`:
       ```yaml {15-18}

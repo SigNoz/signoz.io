@@ -291,9 +291,9 @@ You can read more on how to expose Prometheus metric from <a href = "https://doc
 
 ### Configure SigNoz otel-collector to scrape Prometheus metrics
 
-1. **Add the following code in `otel-collector-metrics-config.yaml` file**
+1. **Add the following code in `otel-collector-config.yaml` file**
    
-   <a href = "https://github.com/SigNoz/signoz/blob/main/deploy/docker/clickhouse-setup/otel-collector-metrics-config.yaml" rel="noopener noreferrer nofollow" target="_blank" >SigNoz Otel collector yaml file</a><br></br>
+   <a href = "https://github.com/SigNoz/signoz/blob/main/deploy/docker/clickhouse-setup/otel-collector-config.yaml" rel="noopener noreferrer nofollow" target="_blank" >SigNoz Otel collector yaml file</a><br></br>
 
    :::note
    Target should be updated to the IP and port where Spring Boot app is exposing metrics.
@@ -320,7 +320,7 @@ You can read more on how to expose Prometheus metric from <a href = "https://doc
 2. **Restart otel-collector metrics using the following command**
    
    ```jsx
-   sudo docker compose -f docker-compose.yaml restart otel-collector-metrics
+   sudo docker compose -f docker-compose.yaml restart otel-collector
    ```
 
 3. **Go to SigNoz dashboard and plot metrics you want**

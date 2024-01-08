@@ -37,14 +37,6 @@ By default, SigNoz runs with [this default Otel Collector configuration](https:/
 
 For any configuration changes in **Docker**, you would have to update `/deploy/docker/clickhouse-setup/otel-collector-config.yaml` and bring up Otel Collector.
 
-### Otel Collector Metrics
-
-Otel Collector Metrics uses same image and binary as that of the Otel Collector.
-Hence, you will find the configuration similarities of that of [Otel Collector](/docs/operate/configuration#otel-collector).
-
-By default, SigNoz runs with [this default Otel Collector Metrics configuration](https://github.com/SigNoz/signoz/blob/main/deploy/docker/clickhouse-setup/otel-collector-metrics-config.yaml).
-For any configuration changes in **Docker**, you would have to update `/deploy/docker/clickhouse-setup/otel-collector-metrics-config.yaml` and bring up Otel Collector.
-
 <p>&nbsp;</p>
 
 ## Kubernetes Configuration

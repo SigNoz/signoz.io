@@ -48,7 +48,6 @@ external ClickHouse.
 3. Replace `clickhouse:9000` with relavant ClickHouse endpoint and TCP port in the files below:
     - `docker-compose.yaml`
     - `otel-collector-config.yaml`
-    - `otel-collector-metrics-config.yaml`
     - `prometheus-config.yml`
 4. Start SigNoz using relevant instructions.
 

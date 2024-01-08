@@ -31,9 +31,9 @@ curl http://localhost:9216/metrics
 
 ### Update Otel Collector config file to scrape MongoDb metrics
 
-Add a job name corresponding to mongodb exporter in otel-collector-metrics config file in your SigNoz install
+Add a job name corresponding to mongodb exporter in otel-collector config file in your SigNoz install
 
-[signoz/otel-collector-metrics-config.yaml](https://github.com/SigNoz/signoz/blob/e3c4bfce528eec2e5a6441608165baf9e1b46388/deploy/docker/clickhouse-setup/otel-collector-metrics-config.yaml#L11)
+[signoz/otel-collector-config.yaml](https://github.com/SigNoz/signoz/blob/e3c4bfce528eec2e5a6441608165baf9e1b46388/deploy/docker/clickhouse-setup/otel-collector-config.yaml)
 
 ```java
 - job_name: "mongo-collector"
@@ -46,13 +46,13 @@ Job names should be aligned
 
 Please ensure that the edited YAML is correctly configured. You can use tools like [http://www.yamllint.com/](http://www.yamllint.com/) to check the correctness of the updated YAML file
 
-Make changes in otel-collector-metrics file 
+Make changes in otel-collector file 
 
-### Restart Otel Collector metrics container
+### Restart Otel Collector container
 
-`docker compose --env-file ./docker/clickhouse-setup/env/x86_64.env -f docker/clickhouse-setup/docker-compose.yaml restart otel-collector-metrics`
+`docker compose --env-file ./docker/clickhouse-setup/env/x86_64.env -f docker/clickhouse-setup/docker-compose.yaml restart otel-collector`
 
-check that otel-collector-metrics is running by doing
+check that otel-collector is running by doing
 
 ```java
 sudo docker ps

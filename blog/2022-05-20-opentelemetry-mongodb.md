@@ -116,7 +116,7 @@ services:
 
 **Step 2: Add job metrics scraping job**
 
-Add job metrics scraping job to the `otel-collector-metrics-config.yaml` file. You can find the file <a href = "https://github.com/SigNoz/signoz/blob/main/deploy/docker/clickhouse-setup/otel-collector-metrics-config.yaml" rel="noopener noreferrer nofollow" target="_blank">here</a>.
+Add job metrics scraping job to the `otel-collector-config.yaml` file. You can find the file <a href = "https://github.com/SigNoz/signoz/blob/main/deploy/docker/clickhouse-setup/otel-collector-config.yaml" rel="noopener noreferrer nofollow" target="_blank">here</a>.
 
 ```bash
 receivers:

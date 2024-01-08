@@ -68,7 +68,7 @@ In the `receivers:` section you’ll find this rather large expression:
 ```yaml
 - type: filter
   id: signoz_logs_filter
-  expr: 'attributes.container_name matches "^signoz-(logspout|frontend|alertmanager|query-service|otel-collector|otel-collector-metrics|clickhouse|zookeeper)"'
+  expr: 'attributes.container_name matches "^signoz-(logspout|frontend|alertmanager|query-service|otel-collector|clickhouse|zookeeper)"'
 ```
 
 The filter processor allows users to filter telemetry based on `include` or `exclude` rules. Include rules are used for defining “allow lists” where anything that does *not* match include rules is dropped from the collector. Exclude rules are used for defining “deny lists” where telemetry that matches rules is dropped from the collector.
@@ -82,7 +82,7 @@ In my case, my logging was getting clogged up by docker containers I was running
 ```yaml
 - type: filter
   id: signoz_logs_filter
-  expr: 'attributes.container_name matches "^(signoz-(logspout|frontend|alertmanager|query-service|otel-collector|otel-collector-metrics|clickhouse|zookeeper)|.*testkube.*)"'
+  expr: 'attributes.container_name matches "^(signoz-(logspout|frontend|alertmanager|query-service|otel-collector|clickhouse|zookeeper)|.*testkube.*)"'
 ```
 
 *I couldn’t be quite so elegant in finding testkube container logs since 'testkube' didn’t appear at the beginning.*

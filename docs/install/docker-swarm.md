@@ -61,7 +61,6 @@ docker stack deploy -c docker-swarm/clickhouse-setup/docker-compose.yaml signoz
   Creating service signoz_query-service
   Creating service signoz_frontend
   Creating service signoz_otel-collector
-  Creating service signoz_otel-collector-metrics
   Creating service signoz_hotrod
   Creating service signoz_load-hotrod
   Creating service signoz_clickhouse
@@ -88,7 +87,6 @@ docker stack services signoz
   dgisjp0vhv8m   signoz_hotrod                   replicated   1/1        jaegertracing/example-hotrod:1.30
   336omtkvwukm   signoz_load-hotrod              replicated   1/1        grubykarol/locust:1.2.3-python3.9-alpine3.12
   av5iggw983b5   signoz_otel-collector           replicated   3/3        signoz/otelcontribcol:0.43.0-0.1               *:4317-4318->4317-4318/tcp
-  nydl4sc11bfh   signoz_otel-collector-metrics   replicated   1/1        signoz/otelcontribcol:0.43.0-0.1
   hw28zb1hozu5   signoz_query-service            replicated   1/1        signoz/query-service:0.8.0                     *:8080->8080/tcp
   ```
 
