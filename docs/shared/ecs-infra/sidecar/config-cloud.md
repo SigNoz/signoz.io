@@ -1,3 +1,15 @@
+Download the [otelcol-sidecar.yaml](https://github.com/SigNoz/benchmark/blob/main/ecs/otelcol-sidecar.yaml):
+
+```bash
+wget https://github.com/SigNoz/benchmark/raw/main/ecs/otelcol-sidecar.yaml
+```
+
+Update `{region}` and `SIGNOZ_INGESTION_KEY` with the proper values in the config
+as stated in the *Notes* section below.
+
+Now, copy the content of the `otelcol-sidecar.yaml` file and paste it in the
+value field of the parameter.
+
 ***Notes:***
 
 - Depending on the choice of your region for SigNoz cloud, the OTLP endpoint

@@ -7,17 +7,17 @@ hide_table_of_contents: true
 
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
-import DSTemplateIntro from '../shared/ecs-infra/daemon-service-template-intro.md'
-import DSTemplateEC2 from '../shared/ecs-infra/daemon-service-template-ec2.md'
-import DSTemplateExternal from '../shared/ecs-infra/daemon-service-template-external.md'
-import DSConfigIntro from '../shared/ecs-infra/daemon-service-config-intro.md'
-import DSConfigCloud from '../shared/ecs-infra/daemon-service-config-cloud.md'
-import DSConfigOss from '../shared/ecs-infra/daemon-service-config-oss.md'
-import DSSetUpVerify from '../shared/ecs-infra/daemon-service-set-up-verify.md'
-import DSSendDataIntro from '../shared/ecs-infra/daemon-service-send-data-intro.md'
-import DSSendDataEc2 from '../shared/ecs-infra/daemon-service-send-data-ec2.md'
-import DSSendDataExternal from '../shared/ecs-infra/daemon-service-send-data-external.md'
-import DSSendDataEnd from '../shared/ecs-infra/daemon-service-send-data-end.md'
+import DSTemplateIntro from '../shared/ecs-infra/daemon/template-intro.md'
+import DSTemplateEC2 from '../shared/ecs-infra/daemon/template-ec2.md'
+import DSTemplateExternal from '../shared/ecs-infra/daemon/template-external.md'
+import DSConfigIntro from '../shared/ecs-infra/daemon/config-intro.md'
+import DSConfigCloud from '../shared/ecs-infra/daemon/config-cloud.md'
+import DSConfigOss from '../shared/ecs-infra/daemon/config-oss.md'
+import DSSetUpVerify from '../shared/ecs-infra/daemon/set-up-verify.md'
+import DSSendDataIntro from '../shared/ecs-infra/daemon/send-data-intro.md'
+import DSSendDataEc2 from '../shared/ecs-infra/daemon/send-data-ec2.md'
+import DSSendDataExternal from '../shared/ecs-infra/daemon/send-data-external.md'
+import DSSendDataEnd from '../shared/ecs-infra/daemon/send-data-end.md'
 
 This tutorial will show you how to collect metrics and logs from your ECS infrastructure
 using a daemon service. The daemon service will run a container in each nodes of
