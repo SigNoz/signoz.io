@@ -44,7 +44,7 @@ You can move it to the `otel-collector` container like this
             - targets: ['localhost:42069']
 ...
 ```
-
+In case of **Docker Swarm** cluster with **more than one node**, you will have to create new collector service with the prometheus receiver and scrape configs to ensure no redundant metrics data.
 ### How to continue using `otel-collector-metrics`
 
 This is not recommended as the `otel-collector-metrics` container has been removed. However, you may have a use case where you want to continue using the `otel-collector-metrics` container. This can create merge conflicts when you upgrade SigNoz. So it is recommended to make a copy of the deployment files before upgrading. You can use the `otel-collector-metrics` container from the `0.36` release to continue using it.
