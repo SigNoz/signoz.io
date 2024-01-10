@@ -84,7 +84,7 @@ in the same task definition.
             "secrets": [
                 {
                 "name": "SIGNOZ_CONFIG_CONTENT",
-                "valueFrom": "/ecs-otel-config/ecs-sidecar.yaml"
+                "valueFrom": "/ecs/signoz/otelcol-sidecar.yaml"
                 }
             ],
             "memory": 2048,
@@ -139,7 +139,7 @@ or by adding the following permissions.
                 "ssm:GetParameter"
             ],
             "Resource": [
-                "arn:aws:ssm:<aws-region>:<aws-account-id>:parameter/ecs-otel-config/ecs-sidecar.yaml"
+                "arn:aws:ssm:<aws-region>:<aws-account-id>:parameter/ecs/signoz/otelcol-sidecar.yaml"
             ],
             "Effect": "Allow"
         }
@@ -161,7 +161,7 @@ Similarly in your ECS Task Role, you can either add the policy
                 "ssm:GetParameter"
             ],
             "Resource": [
-                "arn:aws:ssm:<aws-region>:<aws-account-id>:parameter/ecs-otel-config/ecs-sidecar.yaml"
+                "arn:aws:ssm:<aws-region>:<aws-account-id>:parameter/ecs/signoz/otelcol-sidecar.yaml"
             ],
             "Effect": "Allow"
         }
