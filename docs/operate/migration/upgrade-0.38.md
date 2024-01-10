@@ -10,6 +10,8 @@ In the pervious version of SigNoz `0.36` i.e. SigNoz chart version `0.32.0` , we
 
 This migration updates the dashboards and alerts to support the new format.
 
+Please make sure that migration v0.36 is successful before running this.
+
 ## Steps to run migration script:
 
 ## First upgrade to v0.38
@@ -24,12 +26,19 @@ Note that the past exceptions/error data will not be visible on the new applicat
 
 
 ### For Docker
+
+Change the directory to SigNoz repo and run following commands:
+
+```bash
+cd deploy/docker/clickhouse-setup
+```
+
 ```bash
 docker run --name signoz-migrate-sqlite --network clickhouse-setup_default -it \
   -v $PWD/data/signoz/:/var/lib/signoz/ signoz/migrate:0.38 \
-  -data_source=/var/lib/signoz/signoz.db \
-  -host=clickhouse \
-  -port=9000
+  --data_source=/var/lib/signoz/signoz.db \
+  --host=clickhouse \
+  --port=9000
 ```
 
 Steps to check logs:
