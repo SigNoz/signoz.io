@@ -71,12 +71,13 @@ container. This container will run along with your application container
 in the same task definition.
 
 ```json
-...
+{
+    ...
     "containerDefinitions": [
         ...,
         {
             "name": "signoz-collector",
-            "image": "signoz/signoz-otel-collector:0.79.7",
+            "image": "signoz/signoz-otel-collector:0.88.7",
             "user": "root",
             "command": [
                 "--config=env:SIGNOZ_CONFIG_CONTENT"
@@ -87,8 +88,8 @@ in the same task definition.
                 "valueFrom": "/ecs/signoz/otelcol-sidecar.yaml"
                 }
             ],
-            "memory": 2048,
-            "cpu": 1024,
+            "memory": 1024,
+            "cpu": 512,
             "essential": true,
             "portMappings": [
                 {
@@ -122,6 +123,7 @@ in the same task definition.
         }
     ]
 ...
+}
 ```
 
 ### Update ECS Task Execution Role
@@ -205,13 +207,17 @@ endpoint of the sidecar container. This can be done by setting the
 environment variable `OTEL_EXPORTER_OTLP_ENDPOINT` to the endpoint of
 the sidecar container.
 
-```
-...
+Select the network mode of your ECS task definition:
+
+<Tabs>
+<TabItem value="bridge" label="Bridge" default>
+
+```json
+{
+    ...
     "containerDefinitions": [
-        ...,
         {
             "name": "<your-container-name>",
-            ...
             "environment": [
                 {
                     "name": "OTEL_EXPORTER_OTLP_ENDPOINT",
@@ -225,10 +231,39 @@ the sidecar container.
             "links": [
                 "signoz-collector"
             ],
+            ...
         }
     ]
-...
+}
 ```
+
+</TabItem>
+<TabItem value="awsvpc" label="AWS VPC">
+
+```json
+{
+    ...
+    "containerDefinitions": [
+        {
+            "name": "<your-container-name>",
+            "environment": [
+                {
+                    "name": "OTEL_EXPORTER_OTLP_ENDPOINT",
+                    "value": "http://localhost:4317"
+                },
+                {
+                    "name": "OTEL_RESOURCE_ATTRIBUTES",
+                    "value": "service.name=<your-service-name>"
+                }
+            ],
+            ...
+        }
+    ]
+}
+```
+
+</TabItem>
+</Tabs>
 
 ### Rebuild and Deploy Application Container
 
