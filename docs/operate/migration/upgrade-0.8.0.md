@@ -17,7 +17,7 @@ Note that the past data will not be visible on the new application until you run
 
 ### Upgrade Docker Installation
 
-- `git clone -b main https://github.com/SigNoz/signoz.git && cd signoz/deploy/`
+- `git clone --single-branch --depth 1 https://github.com/SigNoz/signoz.git && cd signoz/deploy/`
 - `git checkout v0.8.0`
 - `./install.sh`
 

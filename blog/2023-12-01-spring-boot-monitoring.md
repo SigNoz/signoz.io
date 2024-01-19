@@ -118,7 +118,7 @@ In this section, we will instrument a sample Spring Boot application to send log
 In this article, I’m going to use the Pet Clinic sample application to demonstrate a Spring Boot application, but these steps can work for any Spring Boot Application.
 
 ```bash
-git clone https://github.com/spring-projects/spring-petclinic.git
+git clone --single-branch --depth 1 https://github.com/spring-projects/spring-petclinic.git
 ```
 
 ### Setting up SigNoz

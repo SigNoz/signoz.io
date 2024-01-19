@@ -279,7 +279,7 @@ Clone the SigNoz github repository:
 ```
 Start the signoz server following the instructions:
 
-git clone -b main https://github.com/SigNoz/signoz.git
+git clone --single-branch --depth 1 https://github.com/SigNoz/signoz.git
 cd signoz/deploy/
 ./install.sh
 ```

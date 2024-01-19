@@ -162,7 +162,7 @@ Next, edit the config to add your SigNoz endpoint.
 For this example, we’ll use the official example app for Tracetest and SigNoz. To quickly access the example, run the following:
 
 ```bash
-git clone https://github.com/kubeshop/tracetest.git
+git clone --single-branch --depth 1 https://github.com/kubeshop/tracetest.git
 cd tracetest/examples/tracetest-signoz-pokeshop/
 docker compose up --build
 ```

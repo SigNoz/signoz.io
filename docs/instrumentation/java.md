@@ -320,7 +320,7 @@ Here's a video on how to instrument Tomcat applications with SigNoz and a [blog]
 1. **Clone OTel buildpack repo:**<br></br>
      
      ```bash
-     git clone https://github.com/paketo-buildpacks/opentelemetry.git
+     git clone --single-branch --depth 1 https://github.com/paketo-buildpacks/opentelemetry.git
      ```
 
 2. **Switch to config-binding branch:**<br></br>

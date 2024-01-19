@@ -294,7 +294,7 @@ The install script automatically installs Docker Engine on Linux. However, on ma
 
 
 ```bash
-git clone -b main https://github.com/SigNoz/signoz.git
+git clone --single-branch --depth 1 https://github.com/SigNoz/signoz.git
 cd signoz/deploy/
 ./install.sh
 ```

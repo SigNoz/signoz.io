@@ -246,7 +246,7 @@ SigNoz cloud is the easiest way to get started with SigNoz. You can sign up for 
 You can also self-host SigNoz. Get started with self-hosted SigNoz using just three commands at your terminal.
 
 ```bash
-git clone -b main https://github.com/SigNoz/signoz.git
+git clone --single-branch --depth 1 https://github.com/SigNoz/signoz.git
 cd signoz/deploy/
 ./install.sh
 ```

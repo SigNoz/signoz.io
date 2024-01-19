@@ -67,7 +67,7 @@ First, you need to install SigNoz. Data collected by OpenTelemetry will be sent 
 You can get started with SigNoz using just three commands at your terminal.
 
 ``` bash
-git clone -b main https://github.com/SigNoz/signoz.git
+git clone --single-branch --depth 1 https://github.com/SigNoz/signoz.git
 cd signoz/deploy/
 ./install.sh
 ```
@@ -102,7 +102,7 @@ export DJANGO_SETTINGS_MODULE=mysite.settings
 **Step 1. Running sample Django app**<br></br>
 We will be using the Django app at this [Github repo](https://github.com/SigNoz/sample-django). All the required OpenTelemetry and Python packages are contained within the `requirements.txt` file.
 ```bash
-git clone https://github.com/SigNoz/sample-django.git
+git clone --single-branch --depth 1 https://github.com/SigNoz/sample-django.git
 cd sample-django
 ```
 It’s a good practice to create virtual environments for running Python apps, so we will be using a virtual python environment for this sample Django app

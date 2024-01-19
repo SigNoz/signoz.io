@@ -154,7 +154,7 @@ Steps to run HotRod application with Jaeger:
 
 4. Clone Jaeger's GitHub repo in local and change directory
    ```jsx
-   git clone https://github.com/jaegertracing/jaeger.git
+   git clone --single-branch --depth 1 https://github.com/jaegertracing/jaeger.git
    cd jaeger
    ```
 5. Run the sample HotRod application

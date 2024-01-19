@@ -59,7 +59,7 @@ We shall be deploying our web application using kubernetes deployment. However, 
 
 Run following command at project root directory
 
-    $ git clone https://github.com/ankitnayan/django_sample_project.git
+    $ git clone --single-branch --depth 1 https://github.com/ankitnayan/django_sample_project.git
 
     $ cd django_sample_project
 
@@ -83,7 +83,7 @@ The image is also available at [https://hub.docker.com/r/ankitnayan/django_sampl
 
 Run below commands to run the application as docker container:
 
-    $ git clone https://github.com/ankitnayan/django_sample_project.git
+    $ git clone --single-branch --depth 1 https://github.com/ankitnayan/django_sample_project.git
     $ cd django_sample_project
     $ docker run  -ti -p 8000:8000 -v `pwd`:/usr/src/app ankitnayan/django_sample_project:quantiles_v1
 

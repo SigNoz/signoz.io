@@ -84,7 +84,7 @@ SigNoz can be installed on macOS or Linux computers in just three steps by using
 The install script automatically installs Docker Engine on Linux. However, on macOS, you must manually install [Docker Engine](https://docs.docker.com/engine/install/) before running the install script.
 
 ```bash
-git clone -b main https://github.com/SigNoz/signoz.git
+git clone --single-branch --depth 1 https://github.com/SigNoz/signoz.git
 cd signoz/deploy/
 ./install.sh
 ```
@@ -111,7 +111,7 @@ In this section, we will be monitoring the API calls made from the frontend Vuej
 You can find the application code instrumented with OpenTelemetry and ready to be monitored with SigNoz [here](https://github.com/SigNoz/mevn-opentelemetry-example). Get it to your local by cloning the GitHub repo:
 
 ```bash
-git clone https://github.com/SigNoz/mevn-opentelemetry-example.git
+git clone --single-branch --depth 1 https://github.com/SigNoz/mevn-opentelemetry-example.git
 ```
 
 In the sample app repo, the SigNoz folder is also included. You can keep your SigNoz folder anywhere you want. The section below explains how to go about setting up the MEVN application for monitoring. 

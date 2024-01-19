@@ -119,7 +119,7 @@ A sample Spring PetClinic Java application has been provided. To access it, run 
 
 ```jsx
 # Clone the Spring PetClinic repository from SigNoz's GitHub
-git clone https://github.com/SigNoz/spring-petclinic
+git clone --single-branch --depth 1 https://github.com/SigNoz/spring-petclinic
 
 # Change into the cloned directory
 cd spring-petclinic

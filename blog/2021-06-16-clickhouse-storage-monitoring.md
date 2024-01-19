@@ -59,7 +59,7 @@ As we are self-hosted and open source, you can try SigNoz out in a matter of a f
 
 You can get started with SigNoz with just three commands at your terminal:
 
-    $ git clone -b main https://github.com/SigNoz/signoz.git
+    $ git clone --single-branch --depth 1 https://github.com/SigNoz/signoz.git
     $ cd signoz/deploy/
     $ ./install.sh
 

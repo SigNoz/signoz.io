@@ -54,7 +54,7 @@ SigNoz can be installed on macOS or Linux computers in just three steps by using
 The install script automatically installs Docker Engine on Linux. However, on macOS, you must manually install <a href = "https://docs.docker.com/engine/install/" rel="noopener noreferrer nofollow" target="_blank" ><b>Docker Engine</b></a> before running the install script.
 
 ```jsx
-git clone -b main https://github.com/SigNoz/signoz.git
+git clone --single-branch --depth 1 https://github.com/SigNoz/signoz.git
 cd signoz/deploy/
 ./install.sh
 ```
@@ -78,7 +78,7 @@ When you are done installing SigNoz, you can access the UI at [http://localhost
 It contains the sample boilerplate code that we will instrument.
 
 ```bash
-git clone https://github.com/SigNoz/react-app-browser-instrumentation.git
+git clone --single-branch --depth 1 https://github.com/SigNoz/react-app-browser-instrumentation.git
 ```
 
 ### Instrument React App with OpenTelemetry

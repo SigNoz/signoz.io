@@ -53,7 +53,7 @@ OpenTelemetry is a set of tools, APIs, and SDKs used to instrument applications 
 You can get started with SigNoz using just three commands at your terminal.
 
 ```bash
-git clone -b main https://github.com/SigNoz/signoz.git
+git clone --single-branch --depth 1 https://github.com/SigNoz/signoz.git
 cd signoz/deploy/
 ./install.sh
 ```
@@ -95,7 +95,7 @@ We will be using the Flask app at this <a href = "https://github.com/SigNoz/samp
 
 1. Clone sample Flask app repository and go to the root folder<br></br>
    ```bash
-   git clone https://github.com/SigNoz/sample-flask-app.git
+   git clone --single-branch --depth 1 https://github.com/SigNoz/sample-flask-app.git
    cd sample-flask-app
    ```
 2. Create a virtual environment

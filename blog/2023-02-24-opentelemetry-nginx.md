@@ -67,7 +67,7 @@ Navigate to the root of the repository and hit the next commands (for Linux).
 
 ```jsx
 snap install multipass
-git clone https://github.com/SigNoz/opentelemetry-nginx-tutorial.git
+git clone --single-branch --depth 1 https://github.com/SigNoz/opentelemetry-nginx-tutorial.git
 cd opentelemetry-nginx-tutorial
 ./start.sh
 ```

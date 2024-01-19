@@ -142,7 +142,7 @@ We will use the following receivers of the OpenTelemetry collector to collect me
 **Step1: Clone Otel collector repo**
 
 ```bash
-git clone https://github.com/SigNoz/otel-collector-k8s.git && cd otel-collector-k8s
+git clone --single-branch --depth 1 https://github.com/SigNoz/otel-collector-k8s.git && cd otel-collector-k8s
 ```
 
 **Step2: Set up the address to SigNoz in your OTel collectors**

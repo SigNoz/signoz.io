@@ -65,7 +65,7 @@ Setup Cassandra in a cluster (3 replicas for the Cassandra):
 
 Setup Cortex in a cluster:
 
-    git clone https://github.com/kanuahs/cortex-demo.git
+    git clone --single-branch --depth 1 https://github.com/kanuahs/cortex-demo.git
     cd cortex-demo/
 
 `kubectl apply -f k8s-cassandra/` - this will deploy various components of Cortex to your cluster.

@@ -78,7 +78,7 @@ We have set up a <a href = "https://github.com/SigNoz/sample-flask-app" rel="noo
 You can get started with SigNoz using just three commands at your terminal.
 
 ```jsx
-git clone -b main https://github.com/SigNoz/signoz.git
+git clone --single-branch --depth 1 https://github.com/SigNoz/signoz.git
 cd signoz/deploy/
 ./install.sh
 ```
@@ -111,7 +111,7 @@ The application list shown in the dashboard is from a sample app called HOT R.O.
    From your terminal use the following command to clone SigNoz's GitHub repository.
 
    ```
-   git clone -b main https://github.com/SigNoz/signoz.git
+   git clone --single-branch --depth 1 https://github.com/SigNoz/signoz.git
    ```
 
 3. **Update path to signoz/deploy and install SigNoz**<br></br>
@@ -179,7 +179,7 @@ Step 1. Clone sample Flask app repository<br></br>
 From your terminal use the following command to clone sample Flask app GitHub repository.
 
 ```
-git clone https://github.com/SigNoz/sample-flask-app.git
+git clone --single-branch --depth 1 https://github.com/SigNoz/sample-flask-app.git
 ```
 
 Step 2. Update path to sample-flask-app<br></br>

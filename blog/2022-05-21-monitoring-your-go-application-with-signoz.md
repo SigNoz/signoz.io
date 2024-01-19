@@ -81,7 +81,7 @@ SigNoz can be installed on macOS or Linux machines in just three steps by using 
 The install script automatically installs Docker Engine on Linux. However, on macOS, you must manually install <a href = "https://docs.docker.com/engine/install/" rel="noopener noreferrer nofollow" target="_blank">Docker Engine</a> before running the install script.
 
 ```bash
-git clone -b main https://github.com/SigNoz/signoz.git
+git clone --single-branch --depth 1 https://github.com/SigNoz/signoz.git
 cd signoz/deploy/
 ./install.sh
 ```
@@ -123,7 +123,7 @@ Verify if you have Golang installed on your machine by running `$ go version` on
     From your terminal use the following command to clone sample Golang app GitHub repository.
 
     ```
-    git clone https://github.com/SigNoz/sample-golang-app.git
+    git clone --single-branch --depth 1 https://github.com/SigNoz/sample-golang-app.git
     ```
 
 2.  Update path to **sample-golang-app** & check if the app is working<br></br>

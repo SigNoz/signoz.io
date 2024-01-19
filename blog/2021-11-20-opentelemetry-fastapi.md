@@ -50,7 +50,7 @@ OpenTelemetry is a great choice to instrument ASGI frameworks. As it is open-sou
 You can get started with SigNoz using just three commands at your terminal.
 
 ```jsx
-git clone -b main https://github.com/SigNoz/signoz.git
+git clone --single-branch --depth 1 https://github.com/SigNoz/signoz.git
 cd signoz/deploy/
 ./install.sh
 ```
@@ -84,7 +84,7 @@ Download the <a href = "https://www.python.org/downloads/" rel="noopener norefer
 We will be using the FastAPI app at this <a href = "https://github.com/SigNoz/sample-fastAPI-app" rel="noopener noreferrer nofollow" target="_blank" >Github repo</a>. All the required OpenTelemetry packages are contained within the `requirements.txt` file under `app` folder in this sample app. Go to the `app` folder first.
 
 ```bash
-git clone https://github.com/SigNoz/sample-fastAPI-app.git
+git clone --single-branch --depth 1 https://github.com/SigNoz/sample-fastAPI-app.git
 cd sample-fastapi-app/
 cd app
 ```

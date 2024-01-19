@@ -51,7 +51,7 @@ First, you need to install SigNoz. We will use OpenTelemetry to instrument the s
 You can get started with SigNoz using just three commands at your terminal.
 
 ``` bash
-git clone -b main https://github.com/SigNoz/signoz.git
+git clone --single-branch --depth 1 https://github.com/SigNoz/signoz.git
 cd signoz/deploy/
 ./install.sh
 ```
@@ -99,7 +99,7 @@ The application list shown in the dashboard is from a sample app called HOT R.O.
 We will be using the Falcon app at this [Github repo](https://github.com/SigNoz/python-falcon-template).
 
 ```bash
-git clone https://github.com/SigNoz/python-falcon-template.git
+git clone --single-branch --depth 1 https://github.com/SigNoz/python-falcon-template.git
 cd python-falcon-template
 ```
 

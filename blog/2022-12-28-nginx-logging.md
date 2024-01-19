@@ -77,7 +77,7 @@ SigNoz may be installed in three simple steps on macOS or Linux PCs using a simp
 Docker Engine is installed automatically on Linux by the installation script. However, before running the setup script on macOS, you must manually install <a href = "https://docs.docker.com/engine/install/" rel="noopener noreferrer nofollow" target="_blank" >Docker Engine</a>.
 
 ```jsx
-git clone -b main https://github.com/SigNoz/signoz.git
+git clone --single-branch --depth 1 https://github.com/SigNoz/signoz.git
 cd signoz/deploy/
 ./install.sh
 ```

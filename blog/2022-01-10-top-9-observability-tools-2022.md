@@ -110,7 +110,7 @@ SigNoz provides Logs management with advanced log query builder. You can also mo
 You can get started with SigNoz using just three commands at your terminal.
 
 ```jsx
-git clone -b main https://github.com/SigNoz/signoz.git
+git clone --single-branch --depth 1 https://github.com/SigNoz/signoz.git
 cd signoz/deploy/
 ./install.sh
 ```
@@ -331,7 +331,7 @@ An open-source tool like [SigNoz](https://signoz.io/), can be your best option 
 You can get started with SigNoz using just three commands at your terminal.
 
 ```jsx
-git clone -b main https://github.com/SigNoz/signoz.git
+git clone --single-branch --depth 1 https://github.com/SigNoz/signoz.git
 cd signoz/deploy/
 ./install.sh
 ```

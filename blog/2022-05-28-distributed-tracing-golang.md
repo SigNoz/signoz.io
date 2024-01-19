@@ -82,7 +82,7 @@ SigNoz can be installed on macOS or Linux computers in just three steps by using
 The install script automatically installs Docker Engine on Linux. However, on macOS, you must manually install <a href = "https://docs.docker.com/engine/install/" rel="noopener noreferrer nofollow" target="_blank">Docker Engine</a> before running the install script.
 
 ```bash
-git clone -b main https://github.com/SigNoz/signoz.git
+git clone --single-branch --depth 1 https://github.com/SigNoz/signoz.git
 cd signoz/deploy/
 ./install.sh
 ```
@@ -121,7 +121,7 @@ These services are instrumented with OpenTelemetry libraries, and when they inte
 We will be using a sample Golang app at this <a href = "https://github.com/SigNoz/distributed-tracing-golang-sample" rel="noopener noreferrer nofollow" target="_blank">GitHub repo</a>.
 
 ```jsx
-git clone https://github.com/SigNoz/distributed-tracing-golang-sample.git
+git clone --single-branch --depth 1 https://github.com/SigNoz/distributed-tracing-golang-sample.git
 cd distributed-tracing-golang-sample
 ```
 

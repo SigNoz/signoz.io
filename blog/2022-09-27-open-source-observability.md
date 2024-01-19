@@ -169,7 +169,7 @@ You can drill down details of how many events is each application sending or at 
 You can get started with SigNoz using just three commands at your terminal.
 
 ```jsx
-git clone -b main https://github.com/SigNoz/signoz.git
+git clone --single-branch --depth 1 https://github.com/SigNoz/signoz.git
 cd signoz/deploy/
 ./install.sh
 ```
