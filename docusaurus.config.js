@@ -274,7 +274,7 @@ const config = {
         specs: [
           {
             spec: 'openapi/alerts.yaml',
-            route: '/api/v1',
+            route: '/api_reference',
           },
         ],
         // Theme Options for modifying how redoc renders them
