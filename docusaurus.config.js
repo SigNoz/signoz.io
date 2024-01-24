@@ -37,7 +37,7 @@ const config = {
     prism: {
       // Supported languages are:
       // https://prismjs.com/index.html#supported-languages
-      additionalLanguages: ["ruby", "csharp", "php", "java"],
+      additionalLanguages: ["ruby", "csharp", "php", "java", "scala", "kotlin"],
     },
     zoom: {
       selector: "figure[data-zoomable] > img",
@@ -263,6 +263,24 @@ const config = {
         // },
         googleTagManager: {
           containerId: "GTM-N9B6D4H",
+        },
+      },
+    ],
+    // Redocusaurus config
+    [
+      'redocusaurus',
+      {
+        // Plugin Options for loading OpenAPI files
+        specs: [
+          {
+            spec: 'openapi/alerts.yaml',
+            route: '/api/v1',
+          },
+        ],
+        // Theme Options for modifying how redoc renders them
+        theme: {
+          // Change with your site colors
+          primaryColor: '#1890ff',
         },
       },
     ],
