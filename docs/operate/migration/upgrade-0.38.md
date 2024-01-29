@@ -78,10 +78,7 @@ The steps for running the migration on kubernetes are :-
           repository: signoz/migrate
           tag: 0.38
           pullPolicy: IfNotPresent
-        command:
-          - "python3"
-          - "-u"
-          - "main.py"
+        args:
           - "--data_source=/var/lib/signoz/signoz.db"
           - "--host=my-release-clickhouse"
           - "--user=admin"
