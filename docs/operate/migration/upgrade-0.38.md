@@ -58,7 +58,15 @@ docker rm docker stop signoz-migrate-sqlite
 
 ### For Kubernetes
 
-* create a `override-values.yaml` file and add the following
+The steps for running the migration on kubernetes are :- 
+1. Make sure you have latest chart information from the
+  Helm repositories:
+
+  ```bash
+  helm repo update
+  ```
+
+2. Include the following in `override-values.yaml` file:
   
   ```yaml
   queryService:
@@ -81,11 +89,11 @@ docker rm docker stop signoz-migrate-sqlite
           - "--port=9000"
   ```
 
-* Now upgrade SigNoz using 
+3. Run the following command to upgrade the chart:
   ```bash
   helm --namespace platform upgrade my-release signoz/signoz -f deployment-override.yaml
   ```
-* You can check the logs migration container using 
+4. You can check the logs of the migration container using 
   ```bash
   kubectl logs my-release-signoz-query-service-0 -n platform -c my-release-signoz-query-service-migration
   ```
