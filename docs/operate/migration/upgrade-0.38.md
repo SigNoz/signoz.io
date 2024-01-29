@@ -67,7 +67,7 @@ docker rm docker stop signoz-migrate-sqlite
         enabled: true
         image:
           registry: docker.io
-          repository: nityag123/migrate
+          repository: signoz/migrate
           tag: 0.38
           pullPolicy: IfNotPresent
         command:
