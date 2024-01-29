@@ -58,28 +58,37 @@ docker rm docker stop signoz-migrate-sqlite
 
 ### For Kubernetes
 
-```bash
-RELEASE=my-release
-ADMIN_PASSWORD=$(
-  kubectl -n platform get clickhouseinstallations.clickhouse.altinity.com $RELEASE-clickhouse \
-  -o jsonpath --template '{.spec.configuration.users.admin/password}'
-)
+* create a `override-values.yaml` file and add the following
+  
+  ```yaml
+  queryService:
+    initContainers:
+      migration:
+        enabled: true
+        image:
+          registry: docker.io
+          repository: nityag123/migrate
+          tag: 0.38
+          pullPolicy: IfNotPresent
+        command:
+          - "python3"
+          - "-u"
+          - "main.py"
+          - "--data_source=/var/lib/signoz/signoz.db"
+          - "--host=my-release-clickhouse"
+          - "--user=admin"
+          - "--password=27ff0399-0d3a-4bd8-919d-17c2181e6fb9"
+          - "--port=9000"
+  ```
 
-kubectl -n platform run -i -t signoz-migrate --image=signoz/migrate:0.36 --restart='Never' \
-  -- -host=$RELEASE-clickhouse -port=9000 -userName=admin -password=$ADMIN_PASSWORD
-```
-
-Steps to check logs:
-
-```bash
-kubectl -n platform logs -f signoz-migrate
-```
-
-In case of failure and have to run again, make sure to cleanup the pod before running the migration script again.
-
-```bash
-kubectl -n platform delete pod signoz-migrate
-```
+* Now upgrade SigNoz using 
+  ```bash
+  helm --namespace platform upgrade my-release signoz/signoz -f deployment-override.yaml
+  ```
+* You can check the logs migration container using 
+  ```bash
+  kubectl logs my-release-signoz-query-service-0 -n platform -c my-release-signoz-query-service-migration
+  ```
 
 
 ## In case of Upgrade Failure
