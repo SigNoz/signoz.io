@@ -66,7 +66,7 @@ The steps for running the migration on kubernetes are :-
   helm repo update
   ```
 
-2. Include the following in `override-values.yaml` file:
+2. Include the following in `deployment-override.yaml` file:
   
   ```yaml
   queryService:
@@ -93,10 +93,14 @@ The steps for running the migration on kubernetes are :-
   ```bash
   helm --namespace platform upgrade my-release signoz/signoz -f deployment-override.yaml
   ```
-4. You can check the logs of the migration container using 
+4. Check the logs of the migration container using:
   ```bash
   kubectl logs my-release-signoz-query-service-0 -n platform -c my-release-signoz-query-service-migration
   ```
+5. Remove the init container added in step 1 if there are no errors in the step 4 and upgrade:
+  ```bash
+  helm --namespace platform upgrade my-release signoz/signoz -f deployment-override.yaml
+  ``` 
 
 
 ## In case of Upgrade Failure
