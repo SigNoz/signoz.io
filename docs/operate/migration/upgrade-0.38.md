@@ -10,7 +10,7 @@ In the pervious version of SigNoz `0.36` i.e. SigNoz chart version `0.32.0` , we
 
 This migration updates the dashboards and alerts to support the new format.
 
-Please make sure that migration v0.36 is successful before running this.
+Please make sure that migration [v0.36](/docs/operate/migration/upgrade-0.36.md) is successful before running this.
 
 ## Steps to run migration script:
 
@@ -88,6 +88,8 @@ The steps for running the migration on kubernetes are :-
           - "--password=27ff0399-0d3a-4bd8-919d-17c2181e6fb9"
           - "--port=9000"
   ```
+
+  If you are using external ClickHouse replace the value of `host` and `port` along with the respective value of `user` and `password`
 
 3. Run the following command to upgrade the chart:
   ```bash
