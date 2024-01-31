@@ -80,10 +80,10 @@ The steps for running the migration on kubernetes are :-
           pullPolicy: IfNotPresent
         args:
           - "--data_source=/var/lib/signoz/signoz.db"
-          - "--host=my-release-clickhouse"
-          - "--user=admin"
-          - "--password=27ff0399-0d3a-4bd8-919d-17c2181e6fb9"
-          - "--port=9000"
+          - "--host=$(CLICKHOUSE_HOST)"
+          - "--user=$(CLICKHOUSE_USER)"
+          - "--password=$(CLICKHOUSE_PASSWORD)"
+          - "--port=$(CLICKHOUSE_PORT)"
   ```
 
   If you are using external ClickHouse replace the value of `host` and `port` along with the respective value of `user` and `password`
