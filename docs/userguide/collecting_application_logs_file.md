@@ -100,7 +100,7 @@ In your self-hosted SigNoz setup, locate and edit the `docker-compose.yaml` file
   ```yaml {6}
     ...
     otel-collector:
-    image: signoz/signoz-otel-collector:0.79.5
+    image: signoz/signoz-otel-collector:0.88.11
     command: ["--config=/etc/otel-collector-config.yaml"]
     volumes:
       - ~/<path>/app.log:/tmp/app.log
@@ -207,7 +207,7 @@ The `otlp/log` exporter in the above configuration file uses a `http` endpoint b
 Run this docker command
 
 ```
-docker run -d --name signoz-host-otel-collector --user root -v $(pwd)/app.log:/tmp/app.log:ro -v $(pwd)/otel-collector-config.yaml:/etc/otel/config.yaml signoz/signoz-otel-collector:0.79.0
+docker run -d --name signoz-host-otel-collector --user root -v $(pwd)/app.log:/tmp/app.log:ro -v $(pwd)/otel-collector-config.yaml:/etc/otel/config.yaml signoz/signoz-otel-collector:0.88.11
 ```
 The above command runs an OpenTelemetry collector provided by SigNoz in a Docker container. It runs in the background with root privileges, mounts a log file and a configuration file from the host to the container
 
