@@ -97,15 +97,44 @@ You can install Self-Hosted SigNoz using the instructions [here](https://signoz.
 #### Modify Docker Compose file
 
 In your self-hosted SigNoz setup, locate and edit the `docker-compose.yaml` file found in the `deploy/docker/clickhouse-setup` directory. You'll need to mount the log file of your application to the `tmp` directory of SigNoz OTel collector. 
-  ```yaml {6}
+  ```yaml {17}
     ...
     otel-collector:
-    image: signoz/signoz-otel-collector:0.79.5
-    command: ["--config=/etc/otel-collector-config.yaml"]
-    volumes:
-      - ~/<path>/app.log:/tmp/app.log
-    ....
+      image: signoz/signoz-otel-collector:${OTELCOL_TAG:-0.88.8}
+      container_name: signoz-otel-collector
+      command:
+        [
+          "--config=/etc/otel-collector-config.yaml",
+          "--manager-config=/etc/manager-config.yaml",
+          "--copy-path=/var/tmp/collector-config.yaml",
+          "--feature-gates=-pkg.translator.prometheus.NormalizeName"
+        ]
+      user: root # required for reading docker container logs
+      volumes:
+        - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml
+        - ./otel-collector-opamp-config.yaml:/etc/manager-config.yaml
+        - /var/lib/docker/containers:/var/lib/docker/containers:ro
+        - ~/<path>/app.log:/tmp/app.log
+    ...
   ```
+
+
+  otel-collector:
+    image: signoz/signoz-otel-collector:${OTELCOL_TAG:-0.88.8}
+    container_name: signoz-otel-collector
+    command:
+      [
+        "--config=/etc/otel-collector-config.yaml",
+        "--manager-config=/etc/manager-config.yaml",
+        "--copy-path=/var/tmp/collector-config.yaml",
+        "--feature-gates=-pkg.translator.prometheus.NormalizeName"
+      ]
+    user: root # required for reading docker container logs
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml
+      - ./otel-collector-opamp-config.yaml:/etc/manager-config.yaml
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - ~/<path>/app.log:/tmp/app.log
 
 Replace `<path>` with the path where your log file is present. Please ensure that the file path is correctly specified.
   
