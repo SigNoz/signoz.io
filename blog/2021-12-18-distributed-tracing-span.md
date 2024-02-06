@@ -87,7 +87,7 @@ Combining all the spans in a trace can give you a detailed idea about how the re
 
 ### What are spans composed of?
 
-**Span attributes:**<br></br> Span attributes are key-value pairs that can be used to provide additional context on a span about the specific operation it tracks. They serve as descriptive elements, providing more information about the operation being performed within the span.
+**Span attributes:**<br></br> Span attributes are key-value pairs that can be used to provide additional context on a span about the specific operation it tracks. They serve as descriptive elements, providing more information about the operation being performed within the span
 
 **Span context:**<br></br> A Span context uniquely identifies the request a span is part of. It serves as a container holding critical information that links together spans across various services and machines. Span context consists of three core components: 
 
