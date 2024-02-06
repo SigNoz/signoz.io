@@ -1,7 +1,7 @@
 ---
 title: Spans - a key concept of distributed tracing
 slug: distributed-tracing-span
-date: 2023-10-18
+date: 2024-02-06
 tags: [Distributed Tracing]
 authors: ankit_anand
 description: Spans are fundamental blocks of distributed tracing. A single trace in distributed tracing consists of a series of tagged time intervals known as spans...
@@ -42,6 +42,12 @@ Distributed tracing gives insights into how a particular service is performing a
 
 These requests are broken down into spans, and the entire request is represented by a trace.
 
+## What is a Trace
+
+**A trace** is a detailed representation of a request’s journey as it travels various services within a distributed system. It acts like a **map**, illustrating how the request moves through different components. A trace consists of multiple **spans**, each representing a discrete unit of work within a service (e.g., a network request or database query). These spans collectively form the entire path of the request through the system.
+
+Traces provide visibility into the entire lifecycle of a request, from start to finish. This is particularly useful in understanding the flow of operations, identifying issues, and troubleshooting problems in software or systems.
+
 > **What are spans in distributed tracing?**<br></br>
 > In distributed tracing, a user request or a transaction is represented by a trace. Traces are broken down into multiple spans. Spans represent a single logical operation within a trace. For example, a function call during a user request can be represented by a span.
 
@@ -81,9 +87,15 @@ Combining all the spans in a trace can give you a detailed idea about how the re
 
 ### What are spans composed of?
 
-A span contains a span context that uniquely identifies the request the span is part of. Spans can provide request, error, and duration metrics that can be used to debug availability and performance issues.
+**Span attributes:**<br></br> Span attributes are key-value pairs that can be used to provide additional context on a span about the specific operation it tracks. They serve as descriptive elements, providing more information about the operation being performed within the span.
 
-You can also add span attributes to provide more context to your operations. Span attributes are key-value pairs that can be used to provide additional context on a span about the specific operation it tracks.
+**Span context:**<br></br> A Span context uniquely identifies the request a span is part of. It serves as a container holding critical information that links together spans across various services and machines. Span context consists of three core components: 
+
+- **Trace ID:** The same trace ID as in the trace context, linking spans to the broader trace.
+- **Span ID:** A unique identifier for each span within the trace, which is crucial for distinguishing the span's role within the trace.
+- **Timestamps:** Timing details for span creation.
+
+These contexts are propagated to child spans, ensuring that related spans are linked together for effective correlation of activities across distributed systems. Span contexts are instrumental in building a detailed and informative picture of the entire workflow or request, which is useful for effective troubleshooting of distributed transactions and gaining deep insights into system behavior.
 
 Let us see details of a selected span in an APM tool like [SigNoz](https://signoz.io/).
 
