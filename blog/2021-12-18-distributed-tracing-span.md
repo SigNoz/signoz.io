@@ -42,7 +42,7 @@ Distributed tracing gives insights into how a particular service is performing a
 
 These requests are broken down into spans, and the entire request is represented by a trace.
 
-## What is a Trace
+## What is a Trace?
 
 **A trace** is a detailed representation of a request’s journey as it travels various services within a distributed system. It acts like a **map**, illustrating how the request moves through different components. A trace consists of multiple **spans**, each representing a discrete unit of work within a service (e.g., a network request or database query). These spans collectively form the entire path of the request through the system.
 
