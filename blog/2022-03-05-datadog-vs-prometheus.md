@@ -1,7 +1,7 @@
 ---
 title: DataDog vs Prometheus - Comprehensive Comparison Guide [Updated for 2024]
 slug: datadog-vs-prometheus
-date: 2023-09-05
+date: 2024-02-07
 tags: [Tools Comparison, Prometheus]
 authors: ankit_anand
 description: Datadog is a cloud-based SaaS solution, meaning there's no need to install or maintain any infrastructure. While on the other hand being open-source, Prometheus requires manual download and installation on your infrastructure...
@@ -42,17 +42,27 @@ The major difference between DataDog and Prometheus lies in the scope of monitor
 
 On the other hand, Prometheus is an open-source metrics monitoring tool used to monitor metrics or time-series data.
 
-Some of the key differences between DataDog and Prometheus:
+Some of the key differences between DataDog and Prometheus at a glance:
+| Categories | Datadog | Prometheus |
+| --- | --- | --- |
+| Deployment | Cloud-based SaaS solution | Manual download |
+| Data collection | Uses pre-built connectors | Uses exporters |
+| Data Visualization | Pre-built and custom visualizations | Built-in expression browser |
+| Real-time monitoring | Provides real time monitoring | Utilizes a pull-based model for real-time monitoring |
+| Machine learning | Provides diverse machine learning capabilities | No support for machine learning |
+| Search capabilities | Robust search interface | Uses PromQL |
+| Pricing | Cloud-based, Paid | Open source, free |
+| Support | Comprehensive documentation, email and chat support | Documentation and community support |
 
 ### Getting Started - Datadog is easier
 
-Datadog:
+#### Datadog:
 
 **Deployment:** Datadog is a cloud-based SaaS solution, meaning there's no need to install or maintain any infrastructure. Simply sign up, install the Datadog Agent on your infrastructure, and begin sending metrics and logs to the platform.
 
 **Data Collection:** Datadog can collect data from a myriad of sources using integrations. These pre-built connectors allow data collection from specific technologies or platforms. Custom integrations are also supported.
 
-Prometheus:
+#### Prometheus:
 
 **Deployment:** Being open-source, Prometheus requires manual download and installation on your infrastructure. It comprises various components, including the Prometheus server, exporters, and client libraries.
 
@@ -65,7 +75,7 @@ Prometheus:
 
 ### Features - Datadog has much more to offer
 
-Datadog:
+#### Datadog:
 
 **Data Visualization:** Offers a plethora of visualization tools, including dashboards, graphs, and maps. Custom visualizations are also supported.
 
@@ -75,17 +85,23 @@ Datadog:
 
 **Machine Learning:** Features like anomaly detection and forecasting are driven by machine learning. Custom ML models can also be built.
 
-import Screenshot from "@theme/Screenshot"
+<!-- import Screenshot from "@theme/Screenshot" -->
 
-<Screenshot
+<!-- <Screenshot
     alt="DataDog dashboard"
     height={500}
     src="/img/blog/2021/08/observability_tools_datadog-min.webp"
     title="DataDog dashboard for traces"
     width={700}
-/>
+/> -->
 
-Prometheus:
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image" src="/img/blog/2024/02/datadog-dashboard-for-traces.webp" alt="DataDog dashboard for traces"/>
+    <figcaption><i>DataDog dashboard for traces</i></figcaption>
+</figure>
+<br/>
+
+#### Prometheus:
 
 **Data Visualization:** Comes with a built-in expression browser for data exploration. However, for advanced visualization, integration with Grafana is common.
 
@@ -93,13 +109,19 @@ Prometheus:
 
 **Search Capabilities:** Uses PromQL, a query language, to search through its time-series database. PromDash, a dashboard builder, allows custom dashboard creation using PromQL queries.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image" src="/img/blog/2024/02/datadog_vs_prometheus_prometheus_chart.webp" alt="Prometheus charts functionality"/>
+    <figcaption><i>Prometheus charts are limited in functionality</i></figcaption>
+</figure>
+<br/>
+
+<!-- <Screenshot
     alt="Prometheus UI"
     height={500}
     src="/img/blog/2021/10/datadog_vs_prometheus_prometheus_charts-min.webp"
     title="Prometheus charts are limited in functionality"
     width={700}
-/>
+/> -->
 
 <!-- - **Monitoring use-cases**<br></br>
   DataDog has an extensive list of monitoring services it offers. List of all monitoring products that DataDog provides:
@@ -113,13 +135,13 @@ Prometheus:
 
 ### Pricing - Prometheus is free(but has infra costs), Datadog can blow up bills
 
-Datadog:
+#### Datadog:
 
 Offers a free trial. Post-trial, users can opt for various paid plans based on data volume and feature requirements. Plans are categorized into Essential, Pro, and Enterprise tiers.
 
 But you need to ask [whether getting Datadog is worth it or not](https://signoz.io/blog/justifying-a-million-dollar-observability-bill/).
 
-Prometheus:
+#### Prometheus:
 
 Being open-source, it's free to download and use. However, associated costs might arise from hosting and maintaining the necessary infrastructure.
 
@@ -267,14 +289,3 @@ ___
 **[SigNoz vs Datadog](https://signoz.io/comparisons/signoz-vs-datadog/)**<br></br>
 **[Jaeger vs SigNoz](https://signoz.io/blog/jaeger-vs-signoz/)**<br></br>
 **[DataDog vs Grafana](https://signoz.io/blog/datadog-vs-grafana/)**<br></br>
-
-
-
-
-
-
-
-
-
-
-
