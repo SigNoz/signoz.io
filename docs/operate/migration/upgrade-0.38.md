@@ -50,7 +50,7 @@ In case of failure and have to run again, make sure to cleanup the container bef
 ```bash
 docker stop signoz-migrate-sqlite
 
-docker rm docker stop signoz-migrate-sqlite
+docker rm signoz-migrate-sqlite
 ```
 
 
