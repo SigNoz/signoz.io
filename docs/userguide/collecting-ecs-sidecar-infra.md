@@ -7,6 +7,7 @@ hide_table_of_contents: true
 
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
+import SCToc from '../shared/ecs-infra/sidecar/table-of-contents.md'
 import SCTemplateIntro from '../shared/ecs-infra/sidecar/template-intro.md'
 import SCConfigIntro from '../shared/ecs-infra/sidecar/config-intro.md'
 import SCConfigCloud from '../shared/ecs-infra/sidecar/config-cloud.md'
@@ -27,16 +28,7 @@ Select the type of SigNoz instance you are running: **SigNoz Cloud** or **Self-H
 <Tabs>
 <TabItem value="cloud" label="SigNoz Cloud" default>
 
-Below are the steps to collect your metrics and logs from ECS infrastructure:
-
-- [Prerequisites](#prerequisites)
-- [Create OpenTelemetry Collector Config file](#step-1-create-signoz-otelcollector-config)
-- [Create Sidecar Collector Container](#step-2-create-sidecar-collector-container)
-- [Deploy Task Definition](#step-3-deploy-the-task-definition)
-- [Verify Data in SigNoz](#step-4-verify-data-in-signoz)
-
-Send Data from your Application deployed on ECS:
-- [Send Data from your application](#send-data-from-applications)
+<SCToc />
 
 ### Prerequisites
 
@@ -97,16 +89,7 @@ It also acts as a gateway to send any telemetry data from your application conta
 </TabItem>
 <TabItem value="self-host" label="Self-Host">
 
-Below are the steps to collect your metrics and logs from ECS infrastructure:
-
-- [Prerequisites](#prerequisites-1)
-- [Create OpenTelemetry Collector Config file](#step-1-create-signoz-otelcollector-config)
-- [Create Sidecar Collector Container](#step-2-create-sidecar-collector-container)
-- [Deploy Task Definition](#step-3-deploy-the-task-definition)
-- [Verify Data in SigNoz](#step-4-verify-data-in-signoz)
-
-Send Data from your Application deployed on ECS:
-- [Send Data from your application](#send-data-from-applications)
+<SCToc />
 
 ### Prerequisites
 
@@ -444,7 +427,7 @@ generate some traffic to your application. Now go to the
 In this section, we will see how to send logs data from applications deployed in ECS
 to SigNoz using sidecar container that we deployed in the previous section.
 
-### Configure Fluent Bit Log Router
+### Configure Log Router
 
 In your application code, you need to configure the Fluent Bit log router to
 your application to the sidecar otel-collector container.
@@ -483,9 +466,13 @@ your application to the sidecar otel-collector container.
 }
 ```
 
-*Note: When collecting logs from multiple applications, it is recommended to use `<application-name>-log-router` pattern instead of `signoz-log-router` for container name and `awslogs-group`. It helps to separate log router of different application.*
+:::info
+When collecting logs from multiple applications, it is recommended to use
+`<application-name>-log-router` pattern instead of `signoz-log-router` for container
+name and `awslogs-group`. It helps to separate log router of different application.
+:::
 
-### Use Fluent Bit to Send Logs to Sidecar Container
+### Send Logs to Sidecar Container
 
 In your application task definition, you need to use `awsfirelens` log driver
 to send logs to the sidecar otel-collector container via Fluent Bit log router.
