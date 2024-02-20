@@ -28,7 +28,15 @@ Select the type of SigNoz instance you are running: **SigNoz Cloud** or **Self-H
 <Tabs>
 <TabItem value="cloud" label="SigNoz Cloud" default>
 
-<SCToc />
+Below are the steps to collect your metrics and logs from ECS infrastructure:
+
+- [Prerequisites](#prerequisites)
+- [Create OpenTelemetry Collector Config file](#step-1-create-signoz-otelcollector-config)
+- [Create Sidecar Collector Container](#step-2-create-sidecar-collector-container)
+- [Deploy Task Definition](#step-3-deploy-the-task-definition)
+- [Verify Data in SigNoz](#step-4-verify-data-in-signoz)
+- [Send Traces Data from your application](#send-traces-data-from-applications)
+- [Send Logs Data from your application](#send-logs-data-from-applications)
 
 ### Prerequisites
 
@@ -89,7 +97,15 @@ It also acts as a gateway to send any telemetry data from your application conta
 </TabItem>
 <TabItem value="self-host" label="Self-Host">
 
-<SCToc />
+Below are the steps to collect your metrics and logs from ECS infrastructure:
+
+- [Prerequisites](#prerequisites-1)
+- [Create OpenTelemetry Collector Config file](#step-1-create-signoz-otelcollector-config-1)
+- [Create Sidecar Collector Container](#step-2-create-sidecar-collector-container-1)
+- [Deploy Task Definition](#step-3-deploy-the-task-definition)
+- [Verify Data in SigNoz](#step-4-verify-data-in-signoz)
+- [Send Traces Data from your application](#send-traces-data-from-applications)
+- [Send Logs Data from your application](#send-logs-data-from-applications)
 
 ### Prerequisites
 
