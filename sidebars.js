@@ -574,6 +574,29 @@ module.exports = {
             },
           ]
         },
+        {
+          type: 'category',
+          label: 'ECS',
+          link: {
+            type: 'generated-index',
+            title: 'ECS Monitoring',
+            slug: '/ecs-monitoring',
+          },
+          items: [
+            {
+              type: 'doc',
+              id: 'aws-monitoring/ecs-ec2-external',
+              label: 'EC2/External'
+    
+            },
+            {
+              type: 'doc',
+              id: 'aws-monitoring/ecs-fargate',
+              label: 'Fargate'
+    
+            },
+          ]
+        },
         
       ],
     },
