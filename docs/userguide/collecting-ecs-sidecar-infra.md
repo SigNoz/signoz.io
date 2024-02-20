@@ -7,7 +7,6 @@ hide_table_of_contents: true
 
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
-import SCToc from '../shared/ecs-infra/sidecar/table-of-contents.md'
 import SCTemplateIntro from '../shared/ecs-infra/sidecar/template-intro.md'
 import SCConfigIntro from '../shared/ecs-infra/sidecar/config-intro.md'
 import SCConfigCloud from '../shared/ecs-infra/sidecar/config-cloud.md'
