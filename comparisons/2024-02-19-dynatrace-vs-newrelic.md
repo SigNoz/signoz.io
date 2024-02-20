@@ -70,7 +70,7 @@ I found the onboarding process for Dynatrace straightforward. After providing my
 
 ### New Relic
 
-The onboarding process for New Relic was easy as well. After providing my email address, verifying it, setting up a password, and choosing your data region, my New Relic account was set up in under a minute.
+The onboarding process for New Relic was easy as well. After providing my email address, verifying it, setting up a password, and choosing my data region, my New Relic account was set up in under a minute.
 
 <figure data-zoomable align='center'>
     <img className="box-shadowed-image" src="/img/blog/2024/02/dynatrace-vs-newrelic-account-setup-new-relic.webp" alt="Account setup in New Relic"/>
@@ -82,7 +82,7 @@ The onboarding process for New Relic was easy as well. After providing my email 
 
 ### Dynatrace
 
-Dynatrace supports a wide range of data sources, encompassing a total of 575 different integrations for data integration purposes. It provides data source options for automations, infrastructure observability, and more. It also allows you to build your own custom app. An app in Dynatrace refers to a tailored view or interface within the Dynatrace platform that is specifically optimized for a particular use case or set of needs. This could be focused on monitoring a particular aspect of an application's performance, security, or business analytics.
+Dynatrace supports a wide range of data sources, encompassing a total of 575 different options for automation, infrastructure observability, and more. It also allows you to build your own custom app. An app in Dynatrace refers to a tailored view or interface within the Dynatrace platform that is specifically optimized for a particular use case or set of needs. This could be focused on monitoring a particular aspect of an application's performance, security, or business analytics.
 
 <figure data-zoomable align='center'>
     <img className="box-shadowed-image" src="/img/blog/2024/02/dynatrace-vs-newrelic-dynatrace-data-integration.webp" alt="Data integration in Dynatrace"/>
@@ -138,7 +138,7 @@ Overall, both tools have good data querying capabilities.
 
 ### Dynatrace
 
-I had to install <a href = "https://docs.dynatrace.com/docs/platform/oneagent/how-one-agent-works" rel="noopener noreferrer nofollow" target="_blank" >One Agent</a> on my host machine to monitor my infrastructure. One Agent is what Dynatrace uses for conducting full-stack monitoring of your infrastructure and the services operating within it. It gave me a holistic view of my infrastructure performance, including incoming and outgoing connections, host performance, process analysis, disk usage, and more. My only drawback was not being able to set it up on macOS, as it doesn’t support it. I had to install it on a Ubuntu VM instead.
+I had to install <a href = "https://docs.dynatrace.com/docs/platform/oneagent/how-one-agent-works" rel="noopener noreferrer nofollow" target="_blank" >One Agent</a> on my host machine to monitor my infrastructure. One Agent is what Dynatrace uses for conducting full-stack monitoring of your infrastructure and the services operating within it. It gave me a holistic view of my infrastructure performance, including incoming and outgoing connections, host performance, process analysis, disk usage, and more. The only drawback was not being able to set it up on macOS, as it doesn’t support it. I had to install it on a Ubuntu VM instead.
 
 <figure data-zoomable align='center'>
     <img className="box-shadowed-image" src="/img/blog/2024/02/dynatrace-vs-newrelic-infra-monitoring-dynatrace.webp" alt="Infrastructure monitoring on Dynatrace"/>
@@ -172,7 +172,7 @@ If your goal is to gain a comprehensive understanding of all activities occurrin
 
 ### Dynatrace
 
-I had a hard time understanding the APM setup for Dynatrace because APM is not immediately visible as an option within the user interface. I found in the Dynatrace docs that you can instrument the application with OpenTelemetry or utilize the One Agent SDK, which complements the Dynatrace One Agent. The latter approach necessitates modifications to the application code, which may not be ideal for everyone.
+I had a hard time understanding the APM setup for Dynatrace because APM is not immediately visible as an option within the user interface. I found in the Dynatrace docs that you can instrument your application with OpenTelemetry or utilize the One Agent SDK, which complements the Dynatrace One Agent. The latter approach necessitates modifications to the application code, which may not be ideal for everyone.
 
 ### New Relic
 
@@ -190,7 +190,7 @@ In the case of APM, a direct comparison between Dynatrace and New Relic is chall
 
 ### Dynatrace
 
-Log management in Dynatrace is powered by <a href = "https://www.dynatrace.com/platform/grail" rel="noopener noreferrer nofollow" target="_blank" >Grail</a>, which is designed to manage log data efficiently without requiring schemas or indexing and allows users to store petabytes of data that can be queried at any time. When the OneAgent is deployed on a host, it seamlessly ingests log data into the Dynatrace platform.
+Log management in Dynatrace is powered by <a href = "https://www.dynatrace.com/platform/grail" rel="noopener noreferrer nofollow" target="_blank" >Grail</a>, which is designed to manage log data efficiently without requiring schemas or indexing and allows users to store petabytes of data that can be queried at any time. Once the OneAgent is deployed on a host, it seamlessly ingests log data into the Dynatrace platform.
 
 Users can define custom log ingestion rules with OneAgent and control the retention of log data by placing it into designated data retention buckets. This flexibility allows for retention periods that align with business and compliance requirements, whether for debugging or auditing purposes.
 
@@ -265,6 +265,8 @@ It has four different pricing tiers, with a free forever tier offering access to
     <figcaption><i>Pricing tiers</i></figcaption>
 </figure>
 <br/>
+
+New Relic can be seen as a good option based on its free forever plan, which allows new users to evaluate its capabilities without incurring immediate costs.
 
 ## UI/UX: New Relic
 
