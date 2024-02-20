@@ -102,7 +102,6 @@ in the same task definition.
                 },
                 {
                     "containerPort": 8006,
-                    "hostPort": 8006,
                     "protocol": "tcp"
                 }
             ],
