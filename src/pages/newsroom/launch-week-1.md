@@ -58,6 +58,7 @@ This is our first launch week, and we’re excited to introduce you to some cool
 Launch week for us is an opportunity to share the behind-the-scenes of new features that we have built in the recent past. Our open-source maintainers will share the story on the whats, whys, and hows of new upgrades to SigNoz!
 
 <!--truncate-->
+
 ![Cover Image](/img/events/launch-week-1/signoz-launch-week-cover.webp)
 
 <!-- Ours is a small team of passionate developers and builders who love building and shipping. And we ship fast! During our time at YCombinator, shipping fast was embedded in our DNA early on. As the saying goes around in YC:
@@ -102,10 +103,12 @@ Subscribe to our Linkedin launch event:
 
 <br></br>
 
-<div class="row">
+<div class="row spotlight-row">
   <div class="col col--6">
     <div class="card-demo">
-      <div class="card">
+      <a class="card" href="https://www.signoz.io"
+						rel="noopener noreferrer"
+						target="_blank">
         <div class="card__image">
         <img
           src="/img/events/launch-week-1/signoz-launch-week-coming-soon.webp"
@@ -118,10 +121,9 @@ Subscribe to our Linkedin launch event:
           Coming Soon...
         </small>
         </div>
-      </div>
+      </a>
     </div>
   </div>
-
 
   <div class="col col--6">
     <div class="card-demo">
@@ -141,10 +143,9 @@ Subscribe to our Linkedin launch event:
       </div>
     </div>
   </div>
+</div>
 
-<br></br>
-
-
+<div class="row spotlight-row">
 <div class="col col--6">
 <div class="card-demo">
   <div class="card">
@@ -180,10 +181,13 @@ Subscribe to our Linkedin launch event:
         Coming Soon...
       </small>
     </div>
-    
+
   </div>
 </div>
 </div>
+</div>
+
+<div class="row spotlight-row">
 
 <div class="col col--6">
 <div class="card-demo">
@@ -204,16 +208,12 @@ Subscribe to our Linkedin launch event:
   </div>
 </div>
 </div>
-
 </div>
 
-
 <br></br>
-
 
 For those interested, check out our Github repo:
 
 [![SigNoz GitHub repo](/img/blog/common/signoz_github.webp)](https://github.com/SigNoz/signoz)
-
 
 </div>
