@@ -3,7 +3,7 @@ import Link from "@docusaurus/Link";
 import useBaseUrl from "@docusaurus/useBaseUrl";
 import styles from "./styles.module.css";
 
-const TALK_TO_EXPERT_URL = "https://calendly.com/pranay-signoz/signoz-talk-to-expert";
+const TALK_TO_EXPERT_URL = "https://share.hsforms.com/1kLv_9137QQSkt56SM1s6YQda5af";
 
 export const TalkToExpert = () => {
   return (
@@ -26,7 +26,7 @@ export const TalkToExpert = () => {
             className="button button--primary"
             href={TALK_TO_EXPERT_URL}
           >
-            Talk to an Expert
+            Reach out to an Expert
           </Link>
         </div>
       </div>

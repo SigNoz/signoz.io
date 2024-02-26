@@ -1,13 +1,16 @@
 ---
-title: DataDog vs New Relic | Detailed comparison (5 key features)
+title: DataDog vs New Relic - The Real Winner [2024 Guide]
 slug: datadog-vs-newrelic
-date: 2023-01-05
+date: 2024-02-13
 tags: [Tools Comparison]
 authors: ankit_anand
-description: DataDog and New Relic are both Application Monitoring Tools used to monitor applications for performance issues. Want to choose between DataDog and New Relic? In this article, let's go through 5 key capabilities of both the tools...
-image: /img/blog/2021/10/datadog_vs_newrelic_cover-min.webp
+description: Datadog and New Relic are both popular monitoring tools that provide a wide range of products covering different aspects of application and infrastructure monitoring. I sent data from a sample Spring Boot application to both Datadog and New Relic to see the difference in user experience between Datadog and New Relic...
+image: /img/blog/2024/02/datadog-vs-new-relic-cover.webp
 hide_table_of_contents: false
+toc_min_heading_level: 2
+toc_max_heading_level: 2
 keywords:
+  - datadog vs new relic
   - datadog
   - new relic
   - apm tools
@@ -15,17 +18,280 @@ keywords:
 ---
 
 <head>
-  <title>DataDog vs New Relic | Detailed comparison (5 key features)</title>
+  <title>DataDog vs New Relic - The Real Winner [2024 Guide]</title>
   <link rel="canonical" href="https://signoz.io/blog/datadog-vs-newrelic/"/>
 </head>
 
-Both DataDog and New Relic are enterprise monitoring tools that provide a wide range of products covering different aspects of application and infrastructure monitoring. In this article, we will compare DataDog and New Relic based on their different monitoring capabilities.
+import GetStartedSigNoz from '../docs/shared/get-started-signoz.md';
+
+Both DataDog and New Relic are popular monitoring tools that provide a wide range of products covering different aspects of application and infrastructure monitoring. In this post, I have compared Datadog and New Relic on important features like APM, log management, infrastructure monitoring, OpenTelemetry support, etc. 
+
+:::info
+💡 I instrumented a sample Spring Boot Application and sent data to Datadog and New Relic to evaluate my experience. Some takeaways are subjective and based on personal preference.
+:::
+
+<br></br>
+
+
 
 <!--truncate-->
 
-![Cover Image](/img/blog/2021/10/datadog_vs_newrelic_cover-min.webp)
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image" src="/img/blog/2024/02/datadog-vs-new-relic-cover.webp" alt="Datadog vs New Relic Blog Cover Image"/>
+</figure>
+<br/>
 
-import Screenshot from "@theme/Screenshot"
+## Datadog vs New Relic: Overview
+
+For application monitoring, both Datadog and New Relic offer the same features. The difference lies in the actual user experience. Datadog has features for security management like Cloud SIEM, which is lacking in New Relic.
+
+My research found that Datadog gives you more granular controls, while New Relic feels simpler to start with.
+
+Here’s a quick overview of the overall platform features and functionality of Datadog and New Relic.
+
+<br></br>
+
+| Feature | DataDog | New Relic |
+| --- | --- | --- |
+| APM | ✅ | ✅ |
+| Log Management | ✅ | ✅ |
+| Infrastructure Monitoring | ✅ | ✅ |
+| Network Monitoring | ✅ | ✅ |
+| Cloud SIEM | ✅ | ❌ |
+| Real User Monitoring | 🟡 | ✅ |
+| Application Security | ✅ | 🟡 |
+| Log Archives | ✅ | 🟡 |
+| Container Monitoring | ✅ | 🟡 |
+| Free Tier | ❌ | ✅ (100GB free data per month) |
+
+
+<br></br>
+
+
+
+✅ - Available
+
+❌ - Not Available
+
+🟡 - Limited
+
+
+## APM: Datadog for more control, New Relic for Simplicity
+
+I instrumented a sample Java application and sent data to both Datadog and New Relic for APM. The steps are almost the same in both Datadog and New Relic, with New Relic having a few extra steps. Both New Relic and Datadog require you to install their agent as well as a programming language-specific agent, which, in my case, was a Java agent.
+
+In Datadog, I had a hard time figuring out whether my setup was complete or not, and I found the onboarding flow of New Relic much better.
+
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image" src="/img/blog/2024/02/datadog-onboarding-tabs.webp" alt="Datadog's onboarding tab"/>
+    <figcaption><i>Datadog’s onboarding flow is a bit overwhelming, with too many horizontal tabs.</i></figcaption>
+</figure>
+<br/>
+
+The good thing about Datadog is it gives you a lot of control. You can set up things like collecting custom metrics (which might be [expensive](https://signoz.io/blog/datadog-pricing/)), sampling rate, and telemetry correlation between traces and logs right from the beginning.
+
+Once the setup is done, you can see your list of spans and corresponding flamegraphs for your traces. Datadog does a good job of correlating different types of signals. You can relate info from infrastructure, metrics, network, etc., right from trace data if you have those products enabled.
+
+<br></br>
+
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image" src="/img/blog/2024/02/datadog-apm.webp" alt="Datadog APM"/>
+    <figcaption><i>Datadog’s APM showing breakdown of an internal server error</i></figcaption>
+</figure>
+<br/>
+
+New Relic’s traces page shows Trace groups instead of a list of spans, which feels like a cleaner representation, and you can filter by root spans, which comes in handy in case of large trace groups.
+
+<br></br>
+
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image" src="/img/blog/2024/02/new-relic-apm.webp" alt="New Relic APM"/>
+    <figcaption><i>New Relic groups spans in Trace groups and shows important metrics about it.</i></figcaption>
+</figure>
+<br/>
+
+You can get flamegraphs for your traces in New Relic, too. Compared to Datadog, New Relic has fewer options for correlation. But it is interesting to note that New Relic shows much more spans for the same call in my Java application.
+
+<br></br>
+
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image" src="/img/blog/2024/02/new-relic-traces.webp" alt="New Relic Traces"/>
+    <figcaption><i>New Relic’s Flamegraph view of traces - you can also check out corresponding logs</i></figcaption>
+</figure>
+<br/>
+
+Overall, if you need a simpler experience, then choose New Relic’s APM. But if you need more control over what things you can do with your data, then choose Datadog’s APM.
+
+
+## Log Management: Datadog for more filters, New Relic for quick-start
+
+### New Relic
+
+New Relic automatically collected logs from my Java application and showed them in their logs tab. It allows you to search your logs using Lucene, an open-source search library that allows for indexing and searching of text by breaking down text into searchable terms.
+
+New Relic also gives you the option to query your log data using NRQL. It’s a query language developed by New Relic which has a SQL-like syntax.
+
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image" src="/img/blog/2024/02/new-relic-log-management-dashboard.webp" alt="Log Management Dashboard in New Relic"/>
+    <figcaption><i>Log Management Dashboard in New Relic showing logs from instrumented Java application</i></figcaption>
+</figure>
+<br/>
+
+Other key features in New Relic’s log management and how they worked with my Java application logs are:
+
+- Takes out attributes automatically from logs.<br></br>
+
+    <figure data-zoomable align='center'>
+    <img className="box-shadowed-image" src="/img/blog/2024/02/new-relic-log-attributes.webp" alt="Log Attributes in New Relic"/>
+    <figcaption><i>Attributes filtered from Java application logs in New Relic</i></figcaption>
+    </figure>
+    <br/>
+    
+- It provides a feature called patterns, which claims to make log data discoverable without spending a lot of time. However, it couldn’t detect any pattern in my Java application logs.
+
+- Gives you tools to manage your log data by optimizing for storage by dropping filters.
+
+### Datadog
+
+For Datadog, there was no automatic collection of logs. Collecting logs is disabled by default in the Datadog agent, and you need to enable it in the agent’s config file. You also need to activate a java integration that will collect application logs from a file.
+
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image" src="/img/blog/2024/02/datadog-logs-tab.webp" alt="Log Tab in Datadog"/>
+    <figcaption><i>Log Tab in Datadog showing logs from my Spring Boot Application</i></figcaption>
+</figure>
+<br/>
+
+Both Datadog and New Relic have a feature to find patterns in logs automatically. While Datadog showed some patterns from my application logs, New Relic did not. Datadog offers more options to slice and dice your log data in its UI. 
+
+Both tools provide ways to optimize log data ingestion at scale. Datadog allows you to use your own cloud storage for logs, which seems to be a handy feature for storing logs for the long term.
+
+Compared to New Relic, setting up log collection took more time in Datadog. But Datadog provides more visualization options to see your logs.
+
+
+
+## Infrastructure Monitoring: Tie, decide based on cost
+
+Host monitoring in both Datadog and New Relic is good, and choosing one over the other can be a matter of personal choice. I personally like the color theme of New Relic and the representation of things like Disk usage in a table.
+
+What’s interesting about Datadog is that it showed me a glimpse of the JVM metrics dashboard while clicking on my host. Datadog has done a really good job at correlating different types of information collected from your application and host.
+
+<br></br>
+
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image" src="/img/blog/2024/02/datadog-infrastructure.webp" alt="Datadog infrastructure tab"/>
+    <figcaption><i>Datadog showing JVM metrics without any configuration was a good experience</i></figcaption>
+</figure>
+<br/>
+
+<br></br>
+
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image" src="/img/blog/2024/02/datadog-infrastructure-2.webp" alt="Datadog host monitoring dashboard"/>
+    <figcaption><i>Datadog’s dashboard for host monitoring</i></figcaption>
+</figure>
+<br/>
+
+<br></br>
+
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image" src="/img/blog/2024/02/new-relic-host-monitoring.webp" alt="New Relic Host Monitoring Dashboard"/>
+    <figcaption><i>New Relic’s Dashboard for Host monitoring</i></figcaption>
+</figure>
+<br/>
+
+If your use case is only infrastructure monitoring, then the decision comes down to cost. However, it’s not easy to figure out how much each tool will cost on a head-to-head basis as their pricing structures are very different. I recommend you sign up and do a trial for both tools, including factors like user seats(New Relic charges for user seats).
+
+## Pricing: Beware of these things
+
+Both Datadog and New Relic are expensive tools. The following points might help you decide which tool is better suited for your needs:
+
+### New Relic
+
+- Pricing is based on two things:
+    - Amount of data ingested
+    - User Seats
+- You get 100GB of free data ingest each month.
+- Post 100GB, you need to pay $0.3/GB or $0.5/GB ingested based on your plan.
+- [User seats](https://signoz.io/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/#no-user-based-pricing-collaborate-seamlessly-with-signoz) can get expensive. New Relic allows only 5 full platform users in its standard plan, and the cost of full platform users can be up to $549/user per month for enterprise plans.
+
+### Datadog
+
+- Datadog is known for being very expensive - here’s a <a href = "https://blog.pragmaticengineer.com/datadog-65m-year-customer-mystery/" rel="noopener noreferrer nofollow" target="_blank" >scoop</a> on Datadog’s 65 million dollar bill.
+- Complex SKU-based pricing. Each product(like APM, logs, infra) is priced differently, and it’s very hard to predict your actual usage.
+- Datadog defines its standard set of metrics; anything outside that definition falls under the category of custom metrics. If you’re not careful, the [cost of custom metrics](https://signoz.io/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/#no-limits-on-custom-metrics-with-signoz) can be a significant component of your billing.
+
+## OpenTelemetry Support: Not Great in Both Datadog & New Relic
+
+OpenTelemetry is quietly emerging as the open-source standard for collecting all types of telemetry signals. There are numerous [benefits](https://signoz.io/blog/opentelemetry-use-cases/#opentelemetry-vs-vendor-based-agents-for-application-instrumentation) to using OpenTelemetry for collecting telemetry data from your applications and host.
+
+Both Datadog’s and New Relic’s support for OpenTelemetry is [not up to the mark](https://signoz.io/blog/is-opentelemetry-a-first-class-citizen-in-your-dashboard-a-datadog-and-newrelic-comparison/), which seems reasonable as their entire product is anchored around their specific agents. 
+
+For example, Datadog cannot link traces and logs automatically with the DataDog OpenTelemetry tools. New Relic’s documentation is better for using OpenTelemetry, but once the data gets reported, you can see the difference again.
+
+<br></br>
+
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image" src="/img/blog/2023/09/firsclass-6.webp" alt="OpenTelemetry data in New Relic"/>
+    <figcaption><i>OpenTelemetry data is segregated in New Relic and not included in the APM experience.</i></figcaption>
+</figure>
+<br/>
+
+If you are looking to use OpenTelemetry, then I would recommend [SigNoz](https://signoz.io/) (of course) - an OpenTelemetry-native APM. And just like OpenTelemetry, SigNoz is also open-source. So you can have a full-stack open-source observability stack with SigNoz and OpenTelemetry.
+
+## Datadog vs New Relic: Final Verdict
+
+You should choose Datadog over New Relic if you are an observability expert and want more granular control over your data. That said, New Relic is not far behind in terms of features offered and can be a good solution for application observability.
+
+Here’s a use-case-based guide for Datadog vs New Relic:
+
+- If you want a better correlation between your signals, then choose Datadog.
+
+- If you want to use the entire platform without worrying too much about billing, then choose New Relic, as the pricing is based on usage.
+
+- If you want more granular controls over your data, choose Datadog.
+
+- If your use case is Cloud SIEM, then choose Datadog.
+
+- If your use case is real-user monitoring, then choose New Relic.
+
+Datadog and New Relic are great products for application monitoring and observability, but they are mostly suited for bigger enterprises. And if you’re looking to use OpenTelemetry, then neither product is that well-suited. SigNoz is an OpenTelemetry-native APM that can be used as an alternative to Datadog and New Relic.
+
+## Advantages of using SigNoz over Datadog and New Relic
+
+Datadog and New Relic have been leaders in the application monitoring domain for many years. But they are not suited for everyone. SigNoz can be a great choice as an alternative to Datadog or New Relic. Some of the advantages of using SigNoz over Datadog and New Relic are:
+
+- **Open-Source**<br></br>
+  SigNoz is open-source, just like OpenTelemetry. Being open-source, SigNoz is more suited to use cases where privacy is a concern, as it can be self-hosted. It can also be used in a hybrid way - using open-source for the dev and staging environment and [cloud](https://signoz.io/teams/) for the production environment.
+
+- **OpenTelemetry-native**<br></br>
+  OpenTelemetry is one of the leading open-source projects backed by CNCF and second only to Kubernetes when it comes to popularity. It is also safer to have an open-source standard deeply integrated with your application and infrastructure rather than a vendor-specific agent. OpenTelemetry frees you from vendor lock-in.
+
+  SigNoz is built to support OpenTelemetry from day 1. Our APM experience is based fully on OpenTelemetry data, and we provide features that utilize OpenTelemetry data well.
+
+- **No user-based & host-based pricing**<br></br>
+  You can add as many team members as you like when using the SigNoz cloud service. There is no charge for user seats in SigNoz. There is also no host-based pricing. You only pay for the amount of data you send.
+
+- **No special pricing for custom metrics**<br></br>
+  Custom metrics are important for getting application-specific insights. You understand your business best, so only you will be able to decide what things need to be monitored. Sending [custom metrics in Datadog](https://signoz.io/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/#no-limits-on-custom-metrics-with-signoz) can get really expensive, and there are many horror stories about unpredictable billing in Datadog.
+
+## Getting Started with SigNoz
+
+<GetStartedSigNoz />
+
+## Frequently Asked Questions
+
+#### Q: Is New Relic better than Datadog?
+In some aspects, New Relic is better than Datadog. But overall, Datadog provides more granular control over your data that can provide better insights about your application performance.
+
+#### Q: What is the difference between Datadog and New Relic?
+
+Datadog and New Relic offer majorly similar features. The main difference between Datadog and New Relic is the lack of Cloud SIEM in New Relic. On the other hand, New Relic provides better features for real user monitoring.
+
+#### Q: Datadog vs New Relic Cost
+
+Datadog is a more expensive product. It has complex SKU-based pricing, which makes it difficult for engineering teams to use the platform freely. While New Relic provides free access to its entire platform and charges based on usage. But New Relic has user-based pricing - and that can be a significant portion of your entire bill at scale.
+
+<!-- import Screenshot from "@theme/Screenshot"
 
 Businesses are embracing digital transformation now more than ever. In most cases, the digital channel is the primary driver of revenue and growth. Customers and end-users are going online to fulfill both their daily and long-term needs.
 
@@ -348,9 +614,12 @@ You can check out SigNoz's GitHub repo here 👇
 
 [![SigNoz GitHub repo](/img/blog/common/signoz_github.webp)](https://github.com/SigNoz/signoz)
 
+--- -->
+
 ---
 
 #### **Related Content**
 
+**[9x more value for money than Datadog and New Relic](https://signoz.io/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/)**<br></br>
 **[SigNoz vs Datadog](https://signoz.io/comparisons/signoz-vs-datadog/)**<br></br>
 **[SigNoz vs New Relic](https://signoz.io/comparisons/signoz-vs-newrelic/)**<br></br>

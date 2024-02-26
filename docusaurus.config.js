@@ -91,6 +91,12 @@ const config = {
           label: "Blog",
           position: "left",
         },
+        // {
+        //   to: "comparisons/",
+        //   activeBasePath: "comparisons",
+        //   label: "Comparisons",
+        //   position: "left",
+        // },
         {
           to: "opentelemetry/",
           activeBasePath: "opentelemetry",
@@ -304,6 +310,26 @@ const config = {
          */
         path: "./opentelemetry",
         blogTitle: "OpenTelemetry",
+        blogSidebarCount: 0,
+      },
+    ],
+    [
+      "@docusaurus/plugin-content-blog",
+      {
+        /**
+         * Required for any multi-instance plugin
+         */
+        id: "comparisons",
+        /**
+         * URL route for the blog section of your site.
+         * *DO NOT* include a trailing slash.
+         */
+        routeBasePath: "comparisons",
+        /**
+         * Path to data on filesystem relative to site dir.
+         */
+        path: "./comparisons",
+        blogTitle: "Comparisons",
         blogSidebarCount: 0,
       },
     ],

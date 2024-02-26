@@ -186,6 +186,7 @@ Some of the key advantages of using OpenTelemetry are:
 
 #### **Related Content**
 
+**[Dynatrace vs New Relic](https://signoz.io/comparisons/dynatrace-vs-newrelic/)**<br></br>
 **[SigNoz vs Dynatrace](https://signoz.io/comparisons/signoz-vs-dynatrace/)**<br></br>
 **[Top 9 Dynatrace Alternatives](https://signoz.io/blog/dynatrace-alternatives/)**<br></br>
 

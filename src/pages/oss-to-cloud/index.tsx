@@ -4,6 +4,7 @@ import styles from "./styles.module.css";
 import PricingForm from "../../modules/pricing-form";
 import { DiscussYourProject } from "../../modules/discuss-your-project";
 import { HubspotProvider } from "@aaronhayes/react-use-hubspot-form";
+import SignozCloudSignUpForm from "../../modules/signoz-cloud-signup-form";
 
 const OSS_TO_CLOUD_DATA = {
   TITLE: "SigNoz Cloud is the easiest way of running SigNoz",
@@ -82,12 +83,7 @@ function OSSToCloud() {
               <div className={"col col--6 margin-vert--md"}>
                 <div className={`card ${styles.ossCard}`}>
                   <div className="card__body">
-                    <HubspotProvider>
-                      <PricingForm
-                        portalId={OSS_TO_CLOUD_DATA.PORTAL_ID}
-                        formId={OSS_TO_CLOUD_DATA.FORM_ID}
-                      />
-                    </HubspotProvider>
+                     <SignozCloudSignUpForm />
                   </div>
                 </div>
               </div>

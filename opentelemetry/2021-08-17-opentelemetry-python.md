@@ -1,7 +1,7 @@
 ---
 title: Monitor your Python application with OpenTelemetry and SigNoz
 slug: python
-date: 2023-02-06
+date: 2024-02-13
 tags: [python-monitoring]
 author: Ankit Anand
 author_title: SigNoz Team
@@ -24,7 +24,6 @@ OpenTelemetry is a vendor-agnostic instrumentation library under CNCF. It can be
 <!--truncate-->
 
 import Screenshot from "@theme/Screenshot"
-
 
 <figure data-zoomable align='center'>
     <img src="/img/blog/2021/08/opentelemetry_python_cover.webp" alt="Monitor Python applications with SigNoz"/>
@@ -50,32 +49,19 @@ OpenTelemetry has laguage-specific implementation for generating telemetry data 
 
 You can check out the current releases of <a href = "https://github.com/open-telemetry/opentelemetry-python/releases" rel="noopener noreferrer nofollow" target="_blank">opentelemetry-python</a>.
 
-OpenTelemetry only generates telemetry data and lets you decide where to send your data for analysis and visualization. In this article, we will be using [SigNoz](https://signoz.io/) - an open-source full-stack application performance monitoring tool as our analysis backend.
+OpenTelemetry only generates telemetry data and lets you decide where to send your data for analysis and visualization. 
 
-**Steps to get started with OpenTelemetry for a Python application:**
+In this article, we will use [SigNoz](https://signoz.io/) as a backend. SigNoz is an open-source APM tool that can be used for both metrics and distributed tracing.
 
-- Installing SigNoz
-- Installing sample Python app
-- Instrumentation with OpenTelemetry and sending data to SigNoz
+Let's get started and see how to use OpenTelemetry for a Flask application.
 
-## Installing SigNoz
+## Running a Python application with OpenTelemetry
 
-You can get started with SigNoz using just three commands at your terminal.
+OpenTelemetry is a set of tools, APIs, and SDKs used to instrument applications to create and manage telemetry data(logs, metrics, and traces).
 
-```bash
-git clone -b main https://github.com/SigNoz/signoz.git
-cd signoz/deploy/
-./install.sh
-```
-<br></br>
+### Setting up SigNoz
 
-For detailed instructions, you can visit our documentation.
-
-[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/)
-
-When you are done installing SigNoz, you can access the UI at: `http://localhost:3301`
-
-The application list shown in the dashboard is from a sample app called HOT R.O.D that comes bundled with the SigNoz installation package.
+You need a backend to which you can send the collected data for monitoring and visualization. [SigNoz](https://signoz.io/) is an OpenTelemetry-native APM that is well-suited for visualizing OpenTelemetry data.
 
 <figure data-zoomable align='center'>
     <img src="/img/blog/common/signoz_dashboard_homepage.webp" alt="SigNoz dashboard"/>
@@ -84,127 +70,164 @@ The application list shown in the dashboard is from a sample app called HOT R.O.
 
 <br></br>
 
-## Installing sample Python app
+
+SigNoz cloud is the easiest way to run SigNoz. You can sign up [here](https://signoz.io/teams/) for a free account and get 30 days of unlimited access to all features.
+
+[![Try SigNoz Cloud CTA](/img/blog/2024/01/opentelemetry-collector-try-signoz-cloud-cta.webp)](https://signoz.io/teams/)
+
+You can also install and self-host SigNoz yourself. Check out the [docs](https://signoz.io/docs/install/) for installing self-host SigNoz.
+
+
+### Instrumenting a sample Python application with OpenTelemetry
 
 **Prerequisites**
 
-1. **Python 3.4 or newer**<br></br>
-   If you do not have Python installed on your system, you can download it from the <a href="https://www.python.org/downloads/" rel="noopener noreferrer nofollow" target="_blank">link</a>. Check the version of Python using `python3 --version` on your terminal to see if Python is properly installed or not.
+- Python 3.8 or newer<br></br>
+   Download the <a href = "https://www.python.org/downloads/" rel="noopener noreferrer nofollow" target="_blank" >latest version</a> of Python.
 
 2. **MongoDB**<br></br>
    If you already have MongoDB services running on your system, you can skip this step.
    
-   For macOS: https://docs.mongodb.com/manual/tutorial/install-mongodb-on-os-x/
+   Below are the download links for different OS:<br></br>
+   <a href = "https://docs.mongodb.com/manual/tutorial/install-mongodb-on-os-x/" rel="noopener noreferrer nofollow" target="_blank" >MacOS</a><br></br>
+   <a href = "https://docs.mongodb.com/manual/administration/install-on-linux/" rel="noopener noreferrer nofollow" target="_blank" >Linux</a><br></br>
+   <a href = "https://docs.mongodb.com/manual/tutorial/install-mongodb-on-windows/" rel="noopener noreferrer nofollow" target="_blank" >Windows</a><br></br>
+   <a href = "https://docs.mongodb.com/manual/tutorial/install-mongodb-on-ubuntu/" rel="noopener noreferrer nofollow" target="_blank" >Ubuntu</a><br></br>
 
-   For Linux: https://docs.mongodb.com/manual/administration/install-on-linux/
+   On MacOS the installation is done using Homebrew's brew package manager. Once the installation is done, don't forget to start MongoDB services using `brew services start mongodb/brew/mongodb-community@x.x`  on your macOS terminal where x being the mongodb version.
 
-   For Ubuntu: https://docs.mongodb.com/manual/tutorial/install-mongodb-on-ubuntu/
 
-   For Windows: https://docs.mongodb.com/manual/tutorial/install-mongodb-on-windows/
+**Step 1. Running sample Flask app**<br></br>
 
-   On MacOS the installation is done using Homebrew's brew package manager. Once the installation is done, don't forget to start MongoDB services using `brew services start mongodb/brew/mongodb-community@4.4`  on your macOS terminal.
+We will be using the Flask app at this <a href = "https://github.com/SigNoz/sample-flask-app" rel="noopener noreferrer nofollow" target="_blank" >Github repo</a>. All the required OpenTelemetry packages are contained within the `requirements.txt` file.
 
-   <figure data-zoomable align='center'>
-       <img src="/img/blog/2021/08/opentelemetry_python_start_mongodb.webp" alt="starting mongoDB services from mac terminal"/>
-      <figcaption><i>starting mongoDB services from mac terminal</i></figcaption>
-   </figure>
+```bash
+git clone https://github.com/SigNoz/sample-flask-app.git
+cd sample-flask-app
+```
 
-<br></br>
+It’s a good practice to create virtual environments for running Python apps, so we will be using a virtual python environment for this sample Flask app.
 
-### Steps to get the Python app up and running
+#### Create a Virtual Environment
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
 
-1. Clone sample Flask app repository and go to the root folder
-
-   ```bash
-   git clone https://github.com/SigNoz/sample-flask-app.git
-   cd sample-flask-app
-   ```
-
-2. Create a virtual environment
-   ```bash
-   python3 -m venv .venv
-   source .venv/bin/activate
-   ```
-3. Check if the app is running
+Check if the app is running
    ```bash
    python3 app.py
    ```
-
+You can now access the UI of the app on your local host: http://localhost:5002/
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2021/08/opentelemetry_python_python_app_terminal.webp" alt="mac terminal commands for running a python app"/>
-    <figcaption><i>mac terminal commands for running a python app</i></figcaption>
+    <img src="/img/blog/2021/08/python_app_ui.webp" alt="SigNoz dashboard showing application list"/>
+    <figcaption><i>Sample flask application running on local host</i></figcaption>
+</figure>
+
+<br />
+
+To capture data with OpenTelemetry, you need to configure some environment variables and run the app with OpenTelemetry packages. Once you ensure your app is running, stop the app with `ctrl + c` on a mac. Now, let us instrument the sample app with OpenTelemetry packages.
+
+**Step 2. Run instructions for sending data to SigNoz**<br></br>
+
+Your app folder contains a file called requirements.txt. This file contains all the necessary commands to set up OpenTelemetry Python instrumentation. All the mandatory packages required to start the instrumentation are installed with the help of this file. Make sure your path is updated to the root directory of your sample app and run the following command:
+
+```bash
+python -m pip install -r requirements.txt
+```
+
+The `requirements.txt` file contains all the necessary OpenTelemetry Python packages needed for instrumentation. In order to install those packages, run the following command:
+
+
+:::info
+The opentelemetry-exporter-otlp is a convenience wrapper package to install all OTLP exporters. Currently, it installs:
+
+- opentelemetry-exporter-otlp-proto-http
+- opentelemetry-exporter-otlp-proto-grpc
+- (soon) opentelemetry-exporter-otlp-json-http
+
+The `opentelemetry-exporter-otlp-proto-grpc` package installs the gRPC exporter which depends on the `grpcio` package. The installation of `grpcio` may fail on some platforms for various reasons. If you run into such issues, or you don't want to use gRPC, you can install the HTTP exporter instead by installing the `opentelemetry-exporter-otlp-proto-http` package. You need to set the `OTEL_EXPORTER_OTLP_PROTOCOL` environment variable to `http/protobuf` to use the HTTP exporter.
+:::
+
+
+
+If it hangs while installing `grpcio` during **pip3 install opentelemetry-exporter-otlp** then follow below steps as suggested in <a href="https://stackoverflow.com/questions/56357794/unable-to-install-grpcio-using-pip-install-grpcio/62500932#62500932" rel="noopener noreferrer nofollow" target="_blank">this stackoverflow link</a>.
+
+- pip3 install --upgrade pip
+- python3 -m pip install --upgrade setuptools
+- pip3 install --no-cache-dir --force-reinstall -Iv grpcio
+
+**Step 3. Install application specific packages**<br></br>
+This step is required to install packages specific to the application. Make sure to run this command in the root directory of your installed application. This command figures out which instrumentation packages the user might want to install and installs it for them:
+
+```bash
+opentelemetry-bootstrap --action=install
+```
+:::note
+Please make sure that you have installed all the dependencies of your application before running the above command. The command will not install instrumentation for the dependencies which are not installed.
+:::
+
+**Step 4. Configure environment variables to run app and send data to SigNoz**<br></br>
+You're almost done. In the last step, you just need to configure a few environment variables for your OTLP exporters. Environment variables that need to be configured:
+
+```bash
+OTEL_RESOURCE_ATTRIBUTES=service.name=<service_name> \
+OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.{region}.signoz.cloud:443" \
+OTEL_EXPORTER_OTLP_HEADERS="signoz-access-token=SIGNOZ_INGESTION_KEY" \
+OTEL_EXPORTER_OTLP_PROTOCOL=grpc \
+opentelemetry-instrument <your_run_command>
+```
+
+- <service_name> is the name of the service you want
+- <your_run_command> can be python3 app.py or flask run
+- Replace SIGNOZ_INGESTION_KEY with the api token provided by SigNoz. You can find it in the email sent by SigNoz with your cloud account details.
+
+You will be able to get ingestion details in SigNoz cloud account under settings --> ingestion settings.
+
+<figure data-zoomable align='center'>
+    <img src="/img/blog/common/ingestion-key-details.webp" alt="Ingestion key details"/>
+    <figcaption><i>Ingestion details in SigNoz dashboard</i></figcaption>
 </figure>
 
 <br></br>
 
-
-   You can now access the UI of the app on your local host: http://localhost:5002/
-
-<figure data-zoomable align='center'>
-    <img src="/img/blog/2021/08/python_app_ui.webp" alt="Python app UI"/>
-    <figcaption><i>Python app UI</i></figcaption>
-</figure>
-
-<br></br>
-
-## Instrumentation with OpenTelemetry and sending data to SigNoz
-
-1. **Opentelemetry Python instrumentation installation**<br></br>
-   Your app folder contains a file called requirements.txt. This file contains all the necessary commands to set up OpenTelemetry Python instrumentation. All the mandatory packages required to start the instrumentation are installed with the help of this file. Make sure your path is updated to the root directory of your sample app and run the following command:
-
-   ```bash
-   python -m pip install -r requirements.txt
-   ```
-
-   If it hangs while installing `grpcio` during **pip3 install opentelemetry-exporter-otlp** then follow below steps as suggested in <a href="https://stackoverflow.com/questions/56357794/unable-to-install-grpcio-using-pip-install-grpcio/62500932#62500932" rel="noopener noreferrer nofollow" target="_blank">this stackoverflow link</a>.
-
-   - pip3 install --upgrade pip
-   - python3 -m pip install --upgrade setuptools
-   - pip3 install --no-cache-dir --force-reinstall -Iv grpcio
-
-2. **Install application specific packages**<br></br>
-   This step is required to install packages specific to the application. Make sure to run this command in the root directory of your installed application. This command figures out which instrumentation packages the user might want to install and installs it for them:
-
-   ```bash
-   opentelemetry-bootstrap --action=install
-   ```
-
-3. **Configure a span exporter and run your application**<br></br>
-   You're almost done. In the last step, you just need to configure a few environment variables for your OTLP exporters. Environment variables that need to be configured:
-
-   - `service.name`- application service name (you can name it as you like)
-   - `OTEL_EXPORTER_OTLP_ENDPOINT` - In this case, IP of the machine where SigNoz is installed
-
-   You need to put these environment variables in the below command.
-
-   :::note
-   Don’t run app in reloader/hot-reload mode as it breaks instrumentation.
-   :::
+:::note
+Don’t run app in reloader/hot-reload mode as it breaks instrumentation. For example, if you use `--reload` or `reload=True`, it enables the reloader mode which breaks OpenTelemetry isntrumentation.
+:::
    
-   ```bash
-   OTEL_RESOURCE_ATTRIBUTES=service.name=<service_name> OTEL_EXPORTER_OTLP_ENDPOINT="http://<IP of SigNoz>:4317"
-   OTEL_EXPORTER_OTLP_PROTOCOL=grpc opentelemetry-instrument python3 app.py
-   ```
+```bash
+OTEL_RESOURCE_ATTRIBUTES=service.name=sample-flask-app \
+OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.{region}.signoz.cloud:443" \
+OTEL_EXPORTER_OTLP_HEADERS="signoz-access-token=SIGNOZ_INGESTION_KEY" \
+OTEL_EXPORTER_OTLP_PROTOCOL=grpc \
+opentelemetry-instrument python app.py
+```
 
-   As we are running SigNoz on local host, `IP of SigNoz` can be replaced with `localhost` in this case. And, for `service_name` let's use `pythonApp`. Hence, the final command becomes:
+And, congratulations! You have instrumented your sample Flask app. You can check if your app is running or not by hitting the endpoint at [http://localhost:5002/](http://localhost:5002/).
 
-   **Final Command**
+You need to interact with the application to generate some monitoring data. 
 
-   ```
-   OTEL_RESOURCE_ATTRIBUTES=service.name=pythonApp OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4317"
-   OTEL_EXPORTER_OTLP_PROTOCOL=grpc opentelemetry-instrument python3 app.py
-   ```
-
-   And, congratulations! You have instrumented your sample Python app. You can now access the SigNoz dashboard at [http://localhost:3301](http://localhost:3301/) to monitor your app for performance metrics.
-
+Below you can find your `sample-flask-app` in the list of applications being monitored on SigNoz dashboard.
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2021/08/opentelemetry_python_dashboard.webp" alt="SigNoz dashboard showing python app in its list of applications"/>
-    <figcaption><i>SigNoz dashboard showing python app in its list of applications</i></figcaption>
+    <img src="/img/blog/2021/11/flask_app_list_signoz.webp" alt="Flask app in the list of applications monitored by SigNoz"/>
+    <figcaption><i>Flask app in the list of applications monitored by SigNoz</i></figcaption>
 </figure>
 
 <br></br>
+
+### Troubleshooting
+
+The debug mode can break instrumentation from happening because it enables a reloader. To run instrumentation while the debug mode is enabled, set the use_reloader option to False:
+
+```bash
+if __name__ == "__main__":
+    app.run(host='0.0.0.0', port=5002, debug=True, use_reloader=False)
+```
+
+If you face any problem in instrumenting with OpenTelemetry, refer to [these docs](https://signoz.io/docs/instrumentation/python).
+
 
 ## Metrics and Traces of the Python application
 
@@ -245,6 +268,13 @@ You can use flamegraphs to exactly identify the issue causing the latency.
 
 <br></br>
 
+<figure data-zoomable align='center'>
+    <img src="/img/blog/common/signoz_custom_dashboard-min.webp" alt="Custom metrics dashboard"/>
+    <figcaption><i>You can also build a custom metrics dashboard for your infrastructure</i></figcaption>
+</figure>
+
+<br></br>
+
 ## Conclusion
 
 OpenTelemetry makes it very convenient to instrument your Python application. You can then use an open-source APM tool like SigNoz to analyze the performance of your app. As SigNoz offers a full-stack observability tool, you don't have to use multiple tools for your monitoring needs.
@@ -253,7 +283,10 @@ You can try out SigNoz by visiting its GitHub repo 👇<br></br>
 
 [![SigNoz GitHub repo](/img/blog/common/signoz_github.webp)](https://github.com/SigNoz/signoz)
 
-If you face any issues while trying out SigNoz, feel free to write to us at: support@signoz.io
+
+If you have any questions or need any help in setting things up, join our slack community and ping us in `#support` channel.
+
+[![SigNoz Slack community](/img/blog/common/join_slack_cta.webp)](https://signoz.io/slack)
 
 If you want to read more about SigNoz 👇<br></br>
 

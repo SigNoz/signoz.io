@@ -158,7 +158,7 @@ Don’t run app in reloader/hot-reload mode as it breaks instrumentation. For ex
 For our sample Flask application, the run command will look like:
 
 ```bash
-OTEL_RESOURCE_ATTRIBUTES=service.name=sample-flask-app \
+OTEL_RESOURCE_ATTRIBUTES=service.name=flask-app \
 OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.{region}.signoz.cloud:443" \
 OTEL_EXPORTER_OTLP_HEADERS="signoz-access-token=SIGNOZ_INGESTION_KEY" \
 OTEL_EXPORTER_OTLP_PROTOCOL=grpc \
@@ -169,10 +169,10 @@ And, congratulations! You have instrumented your sample Flask app. You can check
 
 You need to interact with the application to generate some monitoring data. 
 
-Below you can find your `sample-flask-app` in the list of applications being monitored on SigNoz dashboard.
+Below you can find your `flask-app` in the list of applications being monitored on SigNoz dashboard.
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2021/11/flask_app_list_signoz.webp" alt="Flask app in the list of applications monitored by SigNoz"/>
+    <img src="/img/blog/2024/02/list_of_apps_flask.webp" alt="Flask app in the list of applications monitored by SigNoz"/>
     <figcaption><i>Flask app in the list of applications monitored by SigNoz</i></figcaption>
 </figure>
 

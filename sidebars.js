@@ -268,7 +268,11 @@ module.exports = {
           id: 'userguide/collecting-ecs-logs-and-metrics',
           label: 'ECS Infra Metrics & Logs',
         },
-
+        {
+          type: 'doc',
+          id: 'userguide/collecting-ecs-sidecar-infra',
+          label: 'ECS Infra Sidecar',
+        }
       ],
     },
     {
@@ -566,6 +570,29 @@ module.exports = {
               type: 'doc',
               id: 'aws-monitoring/ec2-infra-metrics',
               label: 'Infrastructure Metrics'
+    
+            },
+          ]
+        },
+        {
+          type: 'category',
+          label: 'ECS',
+          link: {
+            type: 'generated-index',
+            title: 'ECS Monitoring',
+            slug: '/ecs-monitoring',
+          },
+          items: [
+            {
+              type: 'doc',
+              id: 'aws-monitoring/ecs-ec2-external',
+              label: 'EC2/External'
+    
+            },
+            {
+              type: 'doc',
+              id: 'aws-monitoring/ecs-fargate',
+              label: 'Fargate'
     
             },
           ]

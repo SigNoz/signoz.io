@@ -1,5 +1,5 @@
 ---
-title: Top 11 Observability Tools in Spotlight - 2024's Guide
+title: Latest Top 11 Observability Tools in Spotlight - 2024's Guide
 slug: observability-tools
 date: 2024-02-12
 tags: [Tech Resources]
@@ -51,7 +51,7 @@ An observability tool enables application owners to get answers to any question 
 
 In this article, let's explore the top 9 observability tools in 2023 which can be perfect for your microservice application. -->
 
-List of Top 11 observability tools in 2024:
+List of Latest Top 11 observability tools in 2024:
 
 - [SigNoz (open-source)](#signoz-open-source)
 - [Dynatrace](#dynatrace)

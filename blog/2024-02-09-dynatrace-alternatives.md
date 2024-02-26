@@ -290,6 +290,6 @@ Using OpenTelemetry to generate telemetry data fress you from vendor lock-in as 
 
 **Further Reading**
 
-[OpenTelemetry's Top Use Cases](https://signoz.io/blog/opentelemetry-use-cases/)
+**[Dynatrace vs New Relic](https://signoz.io/comparisons/dynatrace-vs-newrelic/)**<br></br>
 
-[SigNoz - open-source alternative to Dynatrace](https://signoz.io/blog/dynatrace-alternative/)
+**[SigNoz - open-source alternative to Dynatrace](https://signoz.io/blog/dynatrace-alternative/)<br></br>**

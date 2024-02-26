@@ -18,12 +18,8 @@ function verifyemail() {
 
 <div class="hero shadow--lw">
   <div class="container">
-    <h1>We have sent you a Verification Email</h1>
-    <p class="hero__subtitle"> 
-    Please click the Verify Email button to confirm your email.
-    <br />
-    After that, we'll send your SigNoz cloud account login details to your email.    </p>
-    <br />
+    <h2> Thank you for signing up for SigNoz Cloud. Please check your email for next steps</h2>
+    
     <p style={{fontStyle:"italic"}}>
     If you have not received the email in a few minutes, please check your spam folder.
     </p>

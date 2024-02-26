@@ -57,8 +57,8 @@ source .venv/bin/activate
 Step 2. Install the OpenTelemetry dependencies
 
 ```bash
-pip install opentelemetry-distro==0.38b0
-pip install opentelemetry-exporter-otlp==1.17.0
+pip install opentelemetry-distro==0.43b0
+pip install opentelemetry-exporter-otlp==1.22.0
 ```
 
 Step 3. Add automatic instrumentation
@@ -104,8 +104,8 @@ You can find instructions to install OTel Collector binary [here](https://signoz
 Step 1. Install the OpenTelemetry dependencies
 
 ```bash
-pip install opentelemetry-distro==0.38b0
-pip install opentelemetry-exporter-otlp==1.17.0
+pip install opentelemetry-distro==0.43b0
+pip install opentelemetry-exporter-otlp==1.22.0
 ```
 
 Step 2. Add automatic instrumentation
@@ -144,8 +144,8 @@ Once you have set up OTel Collector agent, you can proceed with OpenTelemetry Py
 Step 1. Install the OpenTelemetry dependencies
 
 ```bash
-pip install opentelemetry-distro==0.38b0
-pip install opentelemetry-exporter-otlp==1.17.0
+pip install opentelemetry-distro==0.43b0
+pip install opentelemetry-exporter-otlp==1.22.0
 ```
 
 Step 2. Add automatic instrumentation
@@ -201,8 +201,8 @@ You can use OpenTelemetry Python to send your traces directly to SigNoz. OpenTel
 2. **Install the OpenTelemetry dependencies**<br></br>
     
     ```bash
-    pip install opentelemetry-distro
-    pip install opentelemetry-exporter-otlp
+    pip install opentelemetry-distro==0.43b0
+    pip install opentelemetry-exporter-otlp==1.22.0
     ```
 
     The dependencies included are briefly explained below:
