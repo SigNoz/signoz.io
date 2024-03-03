@@ -259,6 +259,11 @@ module.exports = {
       label: "Infrastructure Monitoring",
       type: "category",
       items: [
+        {
+          type: 'doc',
+          id: 'infrastructure-monitoring/get-started',
+          label: 'Get Started',
+        },
         'userguide/send-metrics-cloud',
         'userguide/send-metrics',
         'userguide/navigate-user-interface',
