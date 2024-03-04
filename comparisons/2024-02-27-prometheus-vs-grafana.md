@@ -43,26 +43,29 @@ In this post, I have compared Prometheus and Grafana on important features like 
 
 | Features | Prometheus | Grafana |
 | --- | --- | --- |
-| Deployment | ✅  | ✅  |
-| Data Collection | ✅  | ✅ ✅  |
-| Visualization Capabilities | 🟡 | ✅ ✅ |
+| Ease of Deployment | ✅  | ✅  |
+| Data Collection | 🟡 | ✅  |
+| Visualization Capabilities | 🟡 | ✅  |
 | Data Query | ✅  | ✅  |
-| Data Storage | ✅  | ❌ |
+| Log management | ❌ | ✅  |
+| APM | 🟡 | ✅  |
+| Data Storage | 🟡 | ✅  |
 | Alerting | ✅  | ✅  |
-| UI/UX | 🟡 | ✅ ✅ |
+| UI/UX | 🟡 | ✅  |
 | Cloud Option | ❌ | ✅  |
-| Pricing | ✅ ✅ | ✅  |
-| Documentation & Community Support | ✅  | ✅ ✅ |
+| Pricing | ✅  | 🟡 |
+| Documentation & Community Support | 🟡 | ✅  |
 
-✅ ✅  - Excellent
 
-✅ - Good
+
+
+✅ - Available
 
 🟡 - Limited
 
 ❌ - Does not exist
 
-## Deployment: Both tools
+## Ease of Deployment: Both tools
 
 ### Prometheus
 
@@ -152,6 +155,47 @@ Grafana has highly customizable dashboards, allowing users to fine-tune their vi
 
 Of both tools, Grafana is the preferred choice for users seeking robust visualization capabilities.
 
+
+## Log management: Grafana
+
+### Prometheus
+
+Prometheus does not inherently support log management as its primary focus is metrics collection and monitoring. For log management, integrating Prometheus with a dedicated log management solution is recommended.
+
+### Grafana
+
+Grafana, in conjunction with Loki, offers a robust solution for log management. Loki, a component of the Grafana stack, is specifically designed for log aggregation. It is inspired by Prometheus and shares its label-based approach to indexing, making it highly scalable and cost-effective. 
+
+Loki allows you to store and query logs from all your applications and infrastructure, without worrying about log volumes, costs, or storage limits.
+
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image" src="/img/blog/2024/02/prometheus-vs-grafana-log.webp" alt="Log management with Loki in Grafana"/>
+    <figcaption><i>Log management with Loki in Grafana</i></figcaption>
+</figure>
+<br/>
+
+
+## APM
+
+### Prometheus
+
+Prometheus primarily focuses on metrics monitoring rather than traditional application performance monitoring (APM) in the way that dedicated APM solutions like Datadog or New Relic do. These dedicated APM solutions offer advanced features like distributed tracing, code-level insights, and user experience monitoring. 
+
+While Prometheus can collect metrics related to application performance, such as request latency, error rates, and throughput, it does not provide the same level of detailed tracing and diagnostics that are typically associated with APM tools. Prometheus is more about the "what" (e.g., how many requests are being made, how many errors are occurring) rather than the "why" (e.g., why are certain requests slow, what is causing errors).
+
+### Grafana
+
+Grafana, when leveraged as part of the Grafana stack (Loki, Grafana, Tempo, and Mimir), coupled with the integration of Prometheus, provides a robust platform for Application Performance Monitoring (APM). This integrated approach enhances application performance monitoring and provides detailed insights into application health and performance.
+
+Here's a streamlined overview of how the Grafana stack supports Application Performance Monitoring (APM):
+
+- **Prometheus**: Collects application metrics for performance monitoring.
+- **Tempo**: Focuses on collecting and storing trace data, offering detailed insights into the request flow across microservices. This trace data is crucial for identifying bottlenecks in application performance.
+- **Loki**: Collects and indexes log data from applications for error identification and analysis of events that could impact the application's performance.
+- **Mimir**: Provides scalable storage for long-term metrics data, aiding trend analysis of application performance over time and capacity planning.
+- Grafana: Provides customizable dashboards for visualizing key performance indicators (KPIs) from applications, trace data, and log data to identify patterns, trends, and anomalies in your application's performance.
+
+
 ## Data Query: Both tools
 
 ### Prometheus
@@ -197,9 +241,9 @@ However, Prometheus does not offer long-term data storage capabilities out of th
 
 ### Grafana
 
-Grafana does not have data storage capabilities on its own. Instead of storing data itself, Grafana connects to a diverse range of data sources, such as MySQL, InfluxDB, Elasticsearch, Prometheus, and more. These data sources handle the actual storage and management of the data themselves. Grafana's core function revolves around querying these data sources to retrieve relevant data and presenting it in an intuitive graphical format through customizable dashboards.
+Grafana uses Mimir, a part of the Grafana stack for metrics storage. Mimir is an open-source, scalable, highly available, multi-tenant time series database (TSDB) specifically engineered for the long-term storage of Prometheus metrics. Its development was motivated by the need to address the scalability limitations of Prometheus, and it is designed to natively ingest Prometheus metrics.
 
-Prometheus is a preferable choice due to its in-built database.
+Mimir's architecture is structured to support up to 1 billion metrics, enabling it to offer rapid query performance. It ensures high availability, durable storage, and is capable of scaling horizontally to meet the demands of large-scale deployments.
 
 ## Alerting: Both tools
 
