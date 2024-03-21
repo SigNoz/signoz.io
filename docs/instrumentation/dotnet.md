@@ -243,7 +243,7 @@ For .NET application deployed on Kubernetes, you need to install OTel Collector 
 
 Once you have set up OTel Collector agent, you can proceed with OpenTelemetry .NET instrumentation by following the below steps:
 
-**Step 2: Installing the OpenTelemetry dependency packages:**
+**Step 1: Installing the OpenTelemetry dependency packages:**
 
 Install the following dependencies in your application. 
 
