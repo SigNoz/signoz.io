@@ -324,7 +324,7 @@ Below are the steps to run the sample Java application with OpenTelemetry:
    
    <figure data-zoomable align='center'>
     <img src="/img/blog/2022/03/confirm_table_creation.webp" alt="Checking creation of tables"/>
-    <figcaption>Checking creation of tables after running microservices</figcaption>
+    <figcaption><i>Checking creation of tables after running microservices</i></figcaption>
     </figure>
     
     <br></br>
@@ -408,7 +408,7 @@ You can also see these aggregates in more granular detail by grouping them by se
 
 <figure data-zoomable align='center'>
     <img src="/img/blog/2022/03/group_aggregates.webp" alt="Group Aggregates"/>
-    <figcaption>Group aggregates across a list of dimensions</figcaption>
+    <figcaption><i>Group aggregates across a list of dimensions</i></figcaption>
     </figure>
     
     <br></br>
@@ -439,7 +439,7 @@ You will be able to see the Flamegraph of the selected span which shows how the 
 
 <figure data-zoomable align='center'>
     <img src="/img/blog/2022/03/db_traces.webp" alt="Database traces"/>
-    <figcaption>Databases traces which show semantics related to mysql db and query details</figcaption>
+    <figcaption><i>Databases traces which show semantics related to mysql db and query details</i></figcaption>
 </figure>
 
 <br></br>

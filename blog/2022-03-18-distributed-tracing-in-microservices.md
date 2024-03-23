@@ -34,13 +34,15 @@ Microservices architecture overcomes the challenges faced with monolithic applic
 
 import Screenshot from "@theme/Screenshot"
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="Microservices architecture"
-    height={500}
+    
     src="/img/blog/2022/03/ds_microservices_architecture.webp"
-    title="A fictional microservices-based e-commerce website (Source: microservices.io)"
-    width={700}
-/>
+    />
+<figcaption><i>A fictional microservices-based e-commerce website (Source: microservices.io)</i></figcaption>
+</figure>
+<br/>
 
 An application can now have thousands of microservices. Organizations require strict DevOps practices in provisioning, deployment, and monitoring to run such an application. Traditional monitoring tools struggle with distributed systems based on microservices architecture. Distributed tracing has become a critical technology that can monitor applications based on microservices.
 
@@ -48,13 +50,15 @@ An application can now have thousands of microservices. Organizations require st
 
 It is hard to monitor a microservices-based application because of its distributed and complex nature. The picture below shows the topology of microservices at Uber. The nodes in the diagram represent services, and the connecting lines represent the connection between the services. A single user click in such a system will spawn a request that can traverse hundreds of these nodes.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="Microservices topology map for Uber"
-    height={500}
+    
     src="/img/blog/2022/03/uber_microservice.webp"
-    title="Service topology map of Uber showing hundreds of microservices (Source: Uber Engineering)"
-    width={700}
-/>
+    />
+<figcaption><i>Service topology map of Uber showing hundreds of microservices (Source: Uber Engineering)</i></figcaption>
+</figure>
+<br/>
 
 Traditional monitoring tools were not designed to monitor such distributed systems. At best, you can monitor a single application instance for aggregated metrics of that instance. These metrics are important, but they lack the context to troubleshoot microservices-based distributed systems.
 
@@ -75,13 +79,15 @@ The two most important data points collected with distributed tracing are:
 
 The tracing data can then be visualized in various formats like [Flamegraphs and Gantt charts](https://signoz.io/blog/flamegraphs/) to show the journey of the entire user request.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="Flamegraphs and Gantt charts"
-    height={500}
+    
     src="/img/blog/2022/03/flamegraphs_gantt_charts_dt.webp"
-    title="Tracing data visualized as Flamegraph and Gantt chart. (Source: SigNoz dashboard)"
-    width={700}
-/>
+    />
+<figcaption><i>Tracing data visualized as Flamegraph and Gantt chart. (Source: SigNoz dashboard)</i></figcaption>
+</figure>
+<br/>
 
 ## Why is Distributed Tracing the right choice to monitor microservices?
 
@@ -108,23 +114,27 @@ You can then select a backend of your choice to store and visualize the tracing 
 
 SigNoz comes with out of box visualizations for your tracing data. The `Traces` dashboard of SigNoz provides you with powerful filters that can be used to analyze your tracing data.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="Traces tab of SigNoz"
-    height={500}
+    
     src="/img/blog/2022/03/dt_traces_tab.webp"
-    title="The Traces tab of SigNoz provides powerful filters like service name, status, HTTP status code, operation, etc. to analyze your traces data quickly"
-    width={700}
-/>
+    />
+<figcaption><i>The Traces tab of SigNoz provides powerful filters like service name, status, HTTP status code, operation, etc. to analyze your traces data quickly</i></figcaption>
+</figure>
+<br/>
 
 You can also view a selected span(a single logical unit of work that is a part of trace) as part of the entire request with the help of Flamegraphs and Gantt charts.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="Flamegraphs and Gantt charts in trace detail page of SigNoz"
-    height={500}
+    
     src="/img/blog/2022/03/dt_trace_details_tab.webp"
-    title="Flamegraphs and Gantt Charts visualizing the journey of a user request from a single trace data (SigNoz Dashboard)"
-    width={700}
-/>
+    />
+<figcaption><i>Flamegraphs and Gantt Charts visualizing the journey of a user request from a single trace data (SigNoz Dashboard)</i></figcaption>
+</figure>
+<br/>
 
 <GetStartedSigNoz />
 

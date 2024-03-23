@@ -44,25 +44,28 @@ You will be able to track metrics like CPU load and visualize it through SigNoz.
 
 import Screenshot from "@theme/Screenshot"
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
    alt="SigNoz dashboard showing metrics like CPU load"
-   height={500}
    src="/img/blog/2021/09/metrics_graph_cpu-min.webp"
-   title="Track and visualize critical performance metrics like CPU load with SigNoz"
-   width={700}
-/>
+   />
+<figcaption><i>Track and visualize critical performance metrics like CPU load with SigNoz</i></figcaption>
+   </figure>
+<br/>
 
 ### Enabled Cypress for a more robust frontend
 
 Cypress is a Javascript-based end-to-end testing framework which can run in the browser making asynchronous testing simple and convenient. We have enabled Cypress for our front-end testing so that we can ship out error-free UIs which our users enjoy.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="Cypress frontend testing framework"
-    height={500}
+    
     src="/img/blog/2021/09/cypress_frontend_testing-min.webp"
-    title="Testing SigNoz UI with Cypress"
-    width={700}
-/>
+    />
+<figcaption><i>Testing SigNoz UI with Cypress</i></figcaption>
+    </figure>
+<br/>
 
 ### Error tracking for gRPC calls
 
@@ -103,12 +106,12 @@ Find out [open roles](https://www.ycombinator.com/companies/signoz/) at SigNoz.
 
 We joined folks at ClickHouse for their community call to showcase how we use ClickHouse for storing observability data. ClickHouse is a very fast OLAP database perfect for storing and analyzing huge amounts of telemetry data. Find some of the reasons for using ClickHouse in the picture below.
 
-<Screenshot
-    height={500}
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     src="/img/blog/2021/09/clickhouse_community_call-min.webp"
-    alt="clickhouse community call"
-    width={700}
-/>
+    alt="clickhouse community call"/>
+    </figure>
+<br/>
 
 You can also find the complete recordings of the virtual meetup here 👇
 

@@ -209,7 +209,7 @@ SigNoz  is a comprehensive open-source platform for monitoring applications and 
 
 <figure data-zoomable align='center'>
     <img className="box-shadowed-image" src="/img/blog/2024/03/infrastructure-monitoring-tools-zabbix.webp" alt="Infrastructure monitoring dashboard in Zabbix"/>
-    <figcaption><i>Infrastructure monitoring dashboard in Zabbix</i></figcaption>
+<figcaption><i>Infrastructure monitoring dashboard in Zabbix</i></figcaption>
 </figure>
 <br/>
 

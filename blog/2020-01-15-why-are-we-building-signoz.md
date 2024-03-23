@@ -29,13 +29,15 @@ You wait hoping that it would show a success message. But no, it just stares bac
 
 import Screenshot from "@theme/Screenshot"
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="Blank page returned after making payment"
-    height={500}
+    
     src="/img/blog/2020/01/BlankPage.webp"
-    title="Blank page returned after making payment"
-    width={700}
-/>
+    />
+<figcaption><i>Blank page returned after making payment</i></figcaption>
+    </figure>
+<br/>
 
 You get worried, thinking - "What happened to my money? Will my order be delivered? Or not?"
 
@@ -81,13 +83,15 @@ It means that
 
 Of course, there are other players in this space, but we believe that there is a paradigm shift happening in how people run their software on the cloud. Cloud-native technologies like Kubernetes and Serverless are getting rapid adoption and they bring with them their own set of challenges and unique opportunities.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="KubeCon conference attendance"
-    height={500}
+    
     src="/img/blog/2020/01/KubeConCNCAttendance2019.webp"
-    title="KubeCon (leading k8s conference) attendance went from 500 to 23000 in 5 yrs"
-    width={700}
-/>
+    />
+<figcaption><i>KubeCon (leading k8s conference) attendance went from 500 to 23000 in 5 yrs</i></figcaption>
+    </figure>
+<br/>
 
 In this new world, monitoring can't be an afterthought but built into when you start building your systems. Any how-to guide on Kubernetes today also includes instruction on how to set up monitoring.
 
@@ -97,12 +101,12 @@ In this new world, monitoring can't be an afterthought but built into when you s
 
 We believe the AI/Robot age is already here. It's just that the robots are not roaming in the streets, as the movie Terminator showed it to be, but are settled in cloud provider data centers.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="Robots"
-    height={500}
-    src="/img/blog/2020/01/BlogTerminator.webp"
-    width={700}
-/>
+    src="/img/blog/2020/01/BlogTerminator.webp"/>
+    </figure>
+<br/>
 
 The robots are already here. They are just sitting in cloud datacentres.
 After all, if you think carefully - isn't a lot of our lives governed by the notifications we get on mobile or desktop. Be it slack pings, new offer on e-commerce, email, twitter replies or WhatsApp notifications. Our brain has got attuned to responding to these triggers like a Pavlovian dog. In a way, the robots are already here and controlling us, but by sitting in their comfortable datacentres.

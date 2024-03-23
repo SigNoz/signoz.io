@@ -88,13 +88,15 @@ Some of the key differences between DataDog and Prometheus at a glance:
 
 import Screenshot from "@theme/Screenshot"
 
-<!-- <Screenshot
+<!-- <figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="DataDog dashboard"
-    height={500}
+    
     src="/img/blog/2021/08/observability_tools_datadog-min.webp"
-    title="DataDog dashboard for traces"
-    width={700}
-/> -->
+    />
+<figcaption><i>DataDog dashboard for traces"
+    </figure>
+<br/> -->
 
 <figure data-zoomable align='center'>
     <img className="box-shadowed-image" src="/img/blog/2024/02/datadog-dashboard-for-traces.webp" alt="DataDog dashboard for traces"/>
@@ -116,13 +118,15 @@ import Screenshot from "@theme/Screenshot"
 </figure>
 <br/>
 
-<!-- <Screenshot
+<!-- <figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="Prometheus UI"
-    height={500}
+    
     src="/img/blog/2021/10/datadog_vs_prometheus_prometheus_charts-min.webp"
-    title="Prometheus charts are limited in functionality"
-    width={700}
-/> -->
+    />
+<figcaption><i>Prometheus charts are limited in functionality"
+    </figure>
+<br/> -->
 
 <!-- - **Monitoring use-cases**<br></br>
   DataDog has an extensive list of monitoring services it offers. List of all monitoring products that DataDog provides:
@@ -191,13 +195,15 @@ You can use a rules.yml file to set alerts for critical issues. You need to inst
 - **Visualization layer**<br></br>
 The visualization layer of Prometheus is basic, but it can be combined with Grafana - another open-source web visualization tool to create rich visualizations of monitoring data.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="Prometheus architecture"
-    height={500}
+    
     src="/img/blog/2021/09/otel_vs_prometheus_prometheus_architecture-min.webp"
-    title="Architecture of Prometheus (Source: Prometheus website)"
-    width={700}
-/>
+    />
+<figcaption><i>Architecture of Prometheus (Source: Prometheus website)</i></figcaption>
+</figure>
+<br/>
 
 ## A better alternative to DataDog and Prometheus - SigNoz
 
@@ -212,43 +218,51 @@ Key architecture features:
   SigNoz uses Clickhouse as its datastore. Many big companies like <a href = "https://www.uber.com/en-IN/blog/logging/" rel="noopener noreferrer nofollow" target="_blank" ><b>Uber</b></a> and <a href = "https://blog.cloudflare.com/log-analytics-using-clickhouse/" rel="noopener noreferrer nofollow" target="_blank" ><b>Cloudflare</b></a> have been shifting to ClickHouse as their choice of observability datastore.
 
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="Architecture of SigNoz with OpenTelemetry and ClickHouse"
-    height={500}
+    
     src="/img/blog/2021/09/SigNoz_architecture_clickhouse.webp"
-    title="Architecture of SigNoz with ClickHouse as storage backend and OpenTelemetry for code instrumentatiion"
-    width={700}
-/>
+    />
+<figcaption><i>Architecture of SigNoz with ClickHouse as storage backend and OpenTelemetry for code instrumentatiion</i></figcaption>
+</figure>
+<br/>
 
 SigNoz comes with out of box visualization of things like RED metrics.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="SigNoz UI showing the popular RED metrics"
-    height={500}
+    
     src="/img/blog/common/signoz_charts_application_metrics.webp"
-    title="SigNoz UI showing application overview metrics like RPS, 50th/90th/99th Percentile latencies, and Error Rate"
-    width={700}
-/>
+    />
+<figcaption><i>SigNoz UI showing application overview metrics like RPS, 50th/90th/99th Percentile latencies, and Error Rate</i></figcaption>
+</figure>
+<br/>
 
 You can also use [flamegraphs](https://signoz.io/blog/flamegraphs/) to visualize spans from your trace data. All of this comes out of the box with SigNoz.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="Flamegraphs used to visualize spans of distributed tracing in SigNoz UI"
-    height={500}
+    
     src="/img/blog/common/signoz_flamegraphs.webp"
-    title="Flamegraphs showing exact duration taken by each spans - a concept of distributed tracing"
-    width={700}
-/>
+    />
+<figcaption><i>Flamegraphs showing exact duration taken by each spans - a concept of distributed tracing</i></figcaption>
+</figure>
+<br/>
 
 You can also build custom metrics dashboard for your infrastructure.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="SigNoz custom metrics dashboard"
-    height={500}
+    
     src="/img/blog/common/signoz-infra-metrics.webp"
-    title="You can also build a custom metrics dashboard for your infrastructure"
-    width={700}
-/>
+    />
+<figcaption><i>You can also build a custom metrics dashboard for your infrastructure</i></figcaption>
+</figure>
+<br/>
 
 
 Some of the things SigNoz can help you track:

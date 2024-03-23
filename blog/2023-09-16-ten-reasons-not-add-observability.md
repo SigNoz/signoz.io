@@ -33,7 +33,7 @@ As long as reports of your outage are spread far and wide, people will know not 
 
 <figure data-zoomable align='center'>
     <img src="/img/blog/2023/09/ten_reasons/ten-reasons-1.webp" alt="a stock image of scissors cutting a phone cable"/>
-    <figcaption><i>"Pagerduty notification? Critical? Wow, phishing is getting so sophisticated these days. Blocked."</i></figcaption>
+    <figcaption><i>Pagerduty notification? Critical? Wow, phishing is getting so sophisticated these days. Blocked.</i></figcaption>
 </figure>
 
 ### 2. Who needs an SLA?
@@ -84,7 +84,7 @@ Did a restart solve the problem during the last outage? Good enough for me! Is m
 
 <figure data-zoomable align='center'>
     <img src="/img/blog/2023/09/ten_reasons/ten-reasons-6.webp" alt="an investigator looking at a damaged car"/>
-    <figcaption><i>"hmmm, looks like some kind of car"</i></figcaption>
+    <figcaption><i>hmmm, looks like some kind of car</i></figcaption>
 </figure>
 
 ### 7. It’s not tech debt if you don’t know that it’s there
@@ -102,7 +102,7 @@ Tech debt leads to greater tech debt, but as long as your company’s balance sh
 
 <figure data-zoomable align='center'>
     <img src="/img/blog/2023/09/ten_reasons/ten-reasons-8.webp" alt="By G. Lamar - The Upper Atmosphere at 10,000 Feet, CC BY 2.0 - an image of the upper atmosphere"/>
-    <figcaption><i>"I missed Christmas with my family, but it was a great chance to learn about the most comfortable benches at the Wichita airport"</i></figcaption>
+    <figcaption><i>I missed Christmas with my family, but it was a great chance to learn about the most comfortable benches at the Wichita airport</i></figcaption>
 </figure>
 
 ### 9. Why share operations data when you could hoard?

@@ -56,13 +56,15 @@ In April 2018, the Reserve Bank of India issued a guideline ordering all payment
 
 import Screenshot from "@theme/Screenshot"
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
    alt="RBI guidelines on the storage of payment system data - a snapshot"
-   height={500}
+   
    src="/img/blog/2022/02/rbi_notification.webp"
-   title="RBI guidelines on the storage of payment system data"
-   width={700}
-/>
+   />
+<figcaption><i>RBI guidelines on the storage of payment system data</i></figcaption>
+</figure>
+<br/>
 
 ### Entities that come under the guideline
 
@@ -96,13 +98,15 @@ And according to the circular, the following data needs to be stored in India:
 The list can get updated by RBI, and the definition of payment systems data might evolve.
 :::
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
    alt="Snippet of original notification from RBI. Their wordings indicate that they can identify and classify new data under this purview"
-   height={500}
+   
    src="/img/blog/2022/02/user_data.webp"
-   title="Snippet of original notification from RBI. Their wordings indicate that they can identify and classify new data under this purview"
-   width={700}
-/>
+   />
+<figcaption><i>Snippet of original notification from RBI. Their wordings indicate that they can identify and classify new data under this purview</i></figcaption>
+</figure>
+<br/>
 
 ### About System Audit Report
 
@@ -141,13 +145,15 @@ An APM tool has become critical to ensure the health of your application. But be
 
 DataDog, a popular APM tool, gives you the option to select between four data centers with no options for India, as shown in the pic below.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
    alt="DataDog has no data centers in India"
-   height={380}
+   
    src="/img/blog/2022/02/datadog_choose_region.webp"
-   title="DataDog has no data centers in India"
-   width={550}
-/>
+   />
+<figcaption><i>DataDog has no data centers in India</i></figcaption>
+</figure>
+<br/>
 
 Can you still send data outside? Is removing all PII data an option?
 

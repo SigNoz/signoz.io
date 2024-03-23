@@ -145,13 +145,15 @@ You can also filter based on **Operation** of that service and if you wish to se
 import Screenshot from "@theme/Screenshot"
 
 <div class="text--center">
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
   alt=""
-  height={700}
+  
   src="/img/blog/2020/04/Screenshot-2020-04-30-at-7.52.26-PM.webp"
-  title="Options to filter traces in Jaeger-UI"
-  width={450}
-/>
+  />
+<figcaption><i>Options to filter traces in Jaeger-UI</i></figcaption>
+  </figure>
+<br/>
 </div>
 
 Since we now know that instrumentation plays a big role in being able to filter and analyse traces based on tags. Most of the OpenCensus libraries provide auto-instrumentation libraries for different languages.

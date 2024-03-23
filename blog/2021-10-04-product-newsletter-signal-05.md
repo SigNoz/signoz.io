@@ -52,13 +52,15 @@ A snapshot of metrics dashboard built by a user 👇
 
 import Screenshot from "@theme/Screenshot"
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
    alt="SigNoz dashboard showing custom metrics dashboard"
-   height={500}
+   
    src="/img/blog/2021/10/signoz_custom_dashboard-min.webp"
-   title="Build a custom dashboard for your infrastruture with metrics that matters to you!"
-   width={700}
-/>
+   />
+<figcaption><i>Build a custom dashboard for your infrastruture with metrics that matters to you!</i></figcaption>
+</figure>
+<br/>
 
 ### [Release v0.4.1](https://github.com/SigNoz/signoz/releases/tag/v0.4.1)
 

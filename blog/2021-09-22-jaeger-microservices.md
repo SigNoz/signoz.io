@@ -34,13 +34,15 @@ In the world of microservices, a user request travels through hundreds of servic
 
 import Screenshot from "@theme/Screenshot"
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="Microservices architecture"
-    height={500}
+    
     src="/img/blog/2021/09/jaeger_vs_zipkin_microservices_architecture.webp"
-    title="Microservice architecture of a fictional e-commerce application"
-    width={700}
-/>
+    />
+<figcaption><i>Microservice architecture of a fictional e-commerce application</i></figcaption>
+</figure>
+<br/>
 
 Distributed tracing gives you insight into how a particular service is performing as part of the whole in a distributed software system. There are two essential concepts involved in distributed tracing: **[Spans](https://signoz.io/blog/distributed-tracing-span/)** and **[trace context](https://signoz.io/blog/context-propagation-in-distributed-tracing/)**.
 
@@ -53,13 +55,15 @@ User requests are broken down into spans.
 
 A **trace context** is passed along when requests travel between services, which tracks a user request across services. Thus, you can see how a user request performs across services and identify what exactly needs your attention without manually shifting through multiple dashboards.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="Trace context is passed to track user requests across services"
-    height={500}
+    
     src="/img/blog/2021/09/opentelemetry_distributed_tracing-min.webp"
-    title="A trace context is passed when user requests pass from one service to another"
-    width={700}
-/>
+    />
+<figcaption><i>A trace context is passed when user requests pass from one service to another</i></figcaption>
+</figure>
+<br/>
 
 ## What is Jaeger?
 Jaeger is a distributed tracing tool meant to monitor and troubleshoot transactions in a microservice architecture. It was developed by teams at Uber and then open-sourced in 2015. It was accepted as a Cloud Native Computing Foundation (CNCF) Incubation project in 2017 and was promoted to graduate status in 2019.
@@ -76,13 +80,15 @@ The four key components are:
 - Backend Storage
 - Web UI/Visualization
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="Jaeger architecture"
-    height={500}
+    
     src="/img/blog/2021/09/Jaeger_architecture-min.webp"
-    title="Jaeger architecture (Source: Jaeger Website)"
-    width={700}
-/>
+    />
+<figcaption><i>Jaeger architecture (Source: Jaeger Website)</i></figcaption>
+</figure>
+<br/>
 
 Let us see in detail what these components are and how these components come together to monitor a microservice architecture.
 
@@ -122,21 +128,25 @@ Jaeger ships with simple in-memory storage for testing setups. Jaeger supports t
 Jaeger's UI is basic but comprehensive when it comes to distributed tracing.
 
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="Jaeger UI showing services and corresponding traces"
-    height={500}
+    
     src="/img/blog/2021/08/jaeger_ui-min.webp"
-    title="Jaeger UI showing services and corresponding traces"
-    width={700}
-/>
+    />
+<figcaption><i>Jaeger UI showing services and corresponding traces</i></figcaption>
+</figure>
+<br/>
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="Jaeger UI showing spans"
-    height={500}
+    
     src="/img/blog/2021/08/jaeger_gantt_charts-min.webp"
-    title="Jaeger's UI showing spans for selected traces"
-    width={700}
-/>
+    />
+<figcaption><i>Jaeger's UI showing spans for selected traces</i></figcaption>
+</figure>
+<br/>
 
 ## Challenges of using Jaeger
 Jaeger is a preferred choice when it comes to distributed tracing. But engineering teams need more than traces to resolve issues quickly. They need access to both metrics and traces. Metrics such as response times, error rates, request rates, and CPU usage are equally important to understand application performance.
@@ -156,33 +166,39 @@ SigNoz can be used as a distributed tracing tool for a microservice architecture
 
 It also provides a fast OLAP datastore, ClickHouse as the storage backend.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="Architecture of SigNoz with OpenTelemetry and ClickHouse"
-    height={500}
+    
     src="/img/blog/2021/09/SigNoz_architecture_clickhouse.webp"
-    title="Architecture of SigNoz with ClickHouse as storage backend and OpenTelemetry for code instrumentatiion"
-    width={700}
-/>
+    />
+<figcaption><i>Architecture of SigNoz with ClickHouse as storage backend and OpenTelemetry for code instrumentatiion</i></figcaption>
+</figure>
+<br/>
 
 SigNoz comes with out of box visualization of things like RED metrics.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="SigNoz UI showing the popular RED metrics"
-    height={500}
+    
     src="/img/blog/common/signoz_charts_application_metrics.webp"
-    title="SigNoz UI showing application overview metrics like RPS, 50th/90th/99th Percentile latencies, and Error Rate"
-    width={700}
-/>
+    />
+<figcaption><i>SigNoz UI showing application overview metrics like RPS, 50th/90th/99th Percentile latencies, and Error Rate</i></figcaption>
+</figure>
+<br/>
 
 You can also use flamegraphs to visualize spans from your trace data. All of this comes out of the box with SigNoz.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="Flamegraphs used to visualize spans of distributed tracing in SigNoz UI"
-    height={500}
+    
     src="/img/blog/common/signoz_flamegraphs.webp"
-    title="Flamegraphs showing exact duration taken by each spans - a concept of distributed tracing"
-    width={700}
-/>
+    />
+<figcaption><i>Flamegraphs showing exact duration taken by each spans - a concept of distributed tracing</i></figcaption>
+</figure>
+<br/>
 
 
 Some of the things SigNoz can help you track:

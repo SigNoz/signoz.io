@@ -56,13 +56,15 @@ Jaeger was originally built by teams at Uber and then open-sourced. It is used f
 
 import Screenshot from "@theme/Screenshot"
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="Jaeger UI"
-    height={500}
+    
     src="/img/blog/2021/08/jaeger_ui-min.webp"
-    title="Jaeger UI showing services and corresponding traces"
-    width={700}
-/>
+    />
+<figcaption><i>Jaeger UI showing services and corresponding traces</i></figcaption>
+    </figure>
+<br/>
 
 ## Key features of Prometheus
 Prometheus was initially developed at SoundCloud in 2012 before being released as an open-source project. It got accepted into the CloudNative Computing Foundation in 2016 and was the second project to graduate from the foundation, following Kubernetes.
@@ -86,13 +88,15 @@ Prometheus enables you to capture time-series data as metrics. These metrics can
 - **Graphing and dashboarding support**<br></br>
   For visualization, Prometheus has three options: Prometheus Expression Browser, Grafana, and Prometheus Console Templates. Grafana is a popular data visualization tool, and it supports querying Prometheus. Although it requires time and effort to set up custom Prometheus metrics with Grafana, it can give you some solid visualization.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="Prometheus metrics visualized with Grafana"
-    height={500}
+    
     src="/img/blog/2021/09/jaeger_vs_prometheus_grafana dashboard-min.webp"
-    title="Prometheus metrics data visualization using Grafana"
-    width={700}
-/>
+    />
+<figcaption><i>Prometheus metrics data visualization using Grafana</i></figcaption>
+    </figure>
+<br/>
 
 ## Comparing Jaeger and Prometheus
 
@@ -168,23 +172,27 @@ SigNoz is built to support OpenTelemetry natively. <a href = "https://openteleme
 
 SigNoz comes with out of box visualization of things like RED metrics.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="SigNoz UI showing the popular RED metrics"
-    height={500}
+    
     src="/img/blog/common/signoz_charts_application_metrics.webp"
-    title="SigNoz UI showing application overview metrics like RPS, 50th/90th/99th Percentile latencies, and Error Rate"
-    width={700}
-/>
+    />
+<figcaption><i>SigNoz UI showing application overview metrics like RPS, 50th/90th/99th Percentile latencies, and Error Rate</i></figcaption>
+    </figure>
+<br/>
 
 You can also use [flamegraphs](https://signoz.io/blog/flamegraphs/) to visualize spans from your trace data. All of this comes out of the box with SigNoz.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="Flamegraphs used to visualize spans of distributed tracing in SigNoz UI"
-    height={500}
+    
     src="/img/blog/common/signoz_flamegraphs.webp"
-    title="Flamegraphs showing exact duration taken by each spans - a concept of distributed tracing"
-    width={700}
-/>
+    />
+<figcaption><i>Flamegraphs showing exact duration taken by each spans - a concept of distributed tracing</i></figcaption>
+    </figure>
+<br/>
 
 
 Some of the things SigNoz can help you track:

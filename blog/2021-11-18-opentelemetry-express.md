@@ -62,13 +62,15 @@ The application list shown in the dashboard is from a sample app called HOT R.O.
 
 import Screenshot from "@theme/Screenshot"
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="SigNoz dashboard home"
-    height={500}
+    
     src="/img/blog/common/signoz_dashboard_homepage.webp"
-    title="List of applications shown as an example on SigNoz dashboard"
-    width={700}
-/>
+    />
+<figcaption><i>List of applications shown as an example on SigNoz dashboard</i></figcaption>
+</figure>
+<br/>
 
 ### Creating a sample express application
 
@@ -224,13 +226,15 @@ Steps to get the app set up and running:
 
 And, congratulations! You have instrumented your sample Node.js app. You can now access the SigNoz dashboard at [http://localhost:3301](http://localhost:3301) to monitor your app for performance metrics.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="Express app in the list of applications"
-    height={500}
+    
     src="/img/blog/2021/11/express_list_apps.webp"
-    title="Express app in the list of applications"
-    width={700}
-/>
+    />
+<figcaption><i>Express app in the list of applications</i></figcaption>
+</figure>
+<br/>
 
 SigNoz is open-source, and a full-stack APM. It comes with charts of RED metrics and a seamless transition from metrics to traces.
 
@@ -244,43 +248,51 @@ SigNoz comes with out of box RED metrics charts and visualization. RED metrics s
 - Error rate of requests
 - Duration taken by requests
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="SigNoz charts and metrics"
-    height={500}
+    
     src="/img/blog/common/signoz_charts_application_metrics.webp"
-    title="Measure things like application latency, requests per sec, error percentage and see your top endpoints with SigNoz."
-    width={700}
-/>
+    />
+<figcaption><i>Measure things like application latency, requests per sec, error percentage and see your top endpoints with SigNoz.</i></figcaption>
+</figure>
+<br/>
 
 You can then choose a particular timestamp where latency is high to drill down to traces around that timestamp.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="List of traces on SigNoz dashboard"
-    height={500}
+    
     src="/img/blog/common/signoz_list_of_traces_hc.webp"
-    title="View of traces at a particular timestamp"
-    width={700}
-/>
+    />
+<figcaption><i>View of traces at a particular timestamp</i></figcaption>
+</figure>
+<br/>
 
 You can use flamegraphs to exactly identify the issue causing the latency.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="Flamegraphs used to visualize spans of distributed tracing in SigNoz UI"
-    height={500}
+    
     src="/img/blog/common/signoz_flamegraphs.webp"
-    title="View of traces at a particular timestamp"
-    width={700}
-/>
+    />
+<figcaption><i>View of traces at a particular timestamp</i></figcaption>
+</figure>
+<br/>
 
 You can also build custom metrics dashboard for your infrastructure.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="Custom metrics dashboard"
-    height={500}
+    
     src="/img/blog/common/signoz_custom_dashboard-min.webp"
-    title="You can also build a custom metrics dashboard for your infrastructure"
-    width={700}
-/>
+    />
+<figcaption><i>You can also build a custom metrics dashboard for your infrastructure</i></figcaption>
+</figure>
+<br/>
 
 ## Conclusion
 

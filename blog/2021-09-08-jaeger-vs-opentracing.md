@@ -43,26 +43,30 @@ Jaeger provides a minimal UI to analyze the trace data captured.
 
 import Screenshot from "@theme/Screenshot"
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="Jaeger's UI showing traces"
-    height={500}
+    
     src="/img/blog/2021/08/jaeger_ui-min.webp"
-    title="Jaeger's UI showing traces for selected services"
-    width={700}
-/>
+    />
+<figcaption><i>Jaeger's UI showing traces for selected services</i></figcaption>
+    </figure>
+<br/>
 
 ## What is OpenTracing?
 Opentracing was an initiative to enable vendor-neutral instrumentation for distributed tracing. The authors of the OpenTracing project wanted to provide a standard mechanism for instrumentation that does not bind any library or package to any specific vendor.
 
 The authors aimed to create standard instrumentation for all the middleware and the frameworks an application might use.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="OpenTracing design"
-    height={500}
+    
     src="/img/blog/2021/09/opentracing_ecosystem.webp"
-    title="How OpenTracing fits within an application architecture"
-    width={700}
-/>
+    />
+<figcaption><i>How OpenTracing fits within an application architecture</i></figcaption>
+    </figure>
+<br/>
 
 ## Comparing Jaeger and OpenTracing
 From the description above, you might have a good idea about the differences between Jaeger and OpenTracing. The key difference between the two projects is their scope. While Jaeger is an end-to-end distributed tracing tool, OpenTracing was a project that aimed to standardize code instrumentation for generating and managing telemetry data. 
@@ -99,23 +103,27 @@ The data collected with OpenTelemetry can also be sent to Jaeger's backend. But 
 
 SigNoz is a full-stack open-source application performance monitoring and observability tool which can be used in place of Jaeger. SigNoz is built to support OpenTelemetry natively. SigNoz provides logs, metrics, and traces under a [single pane of glass](https://signoz.io/blog/single-pane-of-glass-monitoring/). 
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="Architecture of SigNoz with OpenTelemetry and ClickHouse"
-    height={500}
+    
     src="/img/blog/2021/09/SigNoz_architecture_clickhouse.webp"
-    title="Architecture of SigNoz with ClickHouse as storage backend and OpenTelemetry for code instrumentatiion"
-    width={700}
-/>
+    />
+<figcaption><i>Architecture of SigNoz with ClickHouse as storage backend and OpenTelemetry for code instrumentatiion</i></figcaption>
+    </figure>
+<br/>
 
 SigNoz comes with out of box visualization of things like RED metrics.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="SigNoz UI showing the popular RED metrics"
-    height={500}
+    
     src="/img/blog/common/signoz_charts_application_metrics.webp"
-    title="SigNoz UI showing application overview metrics like RPS, 50th/90th/99th Percentile latencies, and Error Rate"
-    width={700}
-/>
+    />
+<figcaption><i>SigNoz UI showing application overview metrics like RPS, 50th/90th/99th Percentile latencies, and Error Rate</i></figcaption>
+    </figure>
+<br/>
 
 Some of the things SigNoz can help you track:
 

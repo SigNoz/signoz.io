@@ -43,27 +43,28 @@ We will take **90 RPS **workload as an example to compare cost of running DataDo
 
 import Screenshot from "@theme/Screenshot"
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
   alt="DataDog APM cost"
-  height={500}
+  
   src="/img/blog/2021/02/datadog-cost-90rps.webp"
-  title="DataDog costs for 90 RPS at 50 spans/ request
-5832 mn spans with each span around 0.3 KB = 1.75 TB  @ 0.08 USD/GB-month = 140 USD/month"
-  width={700}
-/>
+  />
+<figcaption><i>DataDog costs for 90 RPS at 50 spans/ request 5832 mn spans with each span around 0.3 KB = 1.75 TB  @ 0.08 USD/GB-month = 140 USD/month</i></figcaption>
+  </figure>
+<br/>
 
 ### Cost of running SigNoz
 
 For running this on SigNoz, we tested it on a EKS cluster of 3 nodes with 8GB RAM (t3.large). Monthly cost for t3.large (8 GB RAM, 2 CPU) is ~42 USD/ month ( with 30% annual reserved instance discount)
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
   alt="SigNoz cost"
-  height={500}
   src="/img/blog/2021/02/signoz-cost-90rps-1.webp"
-  title="SigNoz cost for 90 RPS at 50 spans/request
-Disc cost for 15 day retention at 0.08 USD/GB-month"
-  width={700}
-/>
+  />
+<figcaption><i>SigNoz cost for 90 RPS at 50 spans/request Disc cost for 15 day retention at 0.08 USD/GB-month</i></figcaption>
+  </figure>
+<br/>
 
 Total SigNoz cost ~** 338 USD per month**
 
@@ -79,12 +80,14 @@ Improvement over DataDog = 19982/676 = 29x improvement over DataDog's cost. Even
 
 And finally, this  is how it looks on your SigNoz dashboard 🤓
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
   alt="SigNoz UI"
-  height={500}
+  
   src="/img/blog/common/signoz_charts_application_metrics.webp"
-  title="SigNoz UI showing application metrics like latency, error rates and request rates"
-  width={700}
-/>
+  />
+<figcaption><i>SigNoz UI showing application metrics like latency, error rates and request rates</i></figcaption>
+  </figure>
+<br/>
 
 ### If this sounds interesting, check out our [GitHub](https://github.com/SigNoz/signoz) repo and get started with SigNoz.

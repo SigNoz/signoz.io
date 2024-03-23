@@ -148,21 +148,25 @@ cd signoz/deploy/
 
 import Screenshot from "@theme/Screenshot"
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
   alt="SigNoz UI showing RED metrics"
-  height={500}
+  
   src="/img/blog/common/signoz_charts_application_metrics.webp"
-  title="SigNoz Dashboard with visualization of the popular RED metrics for your application (Number of requests, rate of error & duration)"
-  width={700}
-/>
+  />
+<figcaption><i>SigNoz Dashboard with visualization of the popular RED metrics for your application (Number of requests, rate of error & duration)</i></figcaption>
+  </figure>
+<br/>
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
   alt="SigNoz UI showing RED metrics"
-  height={500}
+  
   src="/img/blog/common/signoz_flamegraphs.webp"
-  title="Flamegraphs and Gantt Charts for visualizing distributed tracing"
-  width={700}
-/>
+  />
+<figcaption><i>Flamegraphs and Gantt Charts for visualizing distributed tracing</i></figcaption>
+  </figure>
+<br/>
 
 
 Read how to monitor your Spring Boot application with OpenTelemetry Java agent and SigNoz 👇<br></br>

@@ -164,25 +164,29 @@ Zipkin's architecture includes:
 - API to query data
 - UI
 
-<!-- <Screenshot
+<!-- <figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="Zipkin architecture"
-    height={500}
+    
     src="/img/blog/2021/09/zipkin_architecture-min.webp"
-    title="Zipkin architecture (Source: Zipkin website)"
-    width={700}
-/> -->
+    />
+<figcaption><i>Zipkin architecture (Source: Zipkin website)"
+    </figure>
+<br/> -->
 
 Zipkin's in-built UI is limited, and you can use Grafana or Kibana from the ELK stack for better analytics and visualizations.
 
 It also includes a dependency diagram that shows how many user requests went through each service. It can help you to identify error paths and calls to deprecated services.
 <!-- 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="Zipkin dependency diagram"
-    height={500}
+    
     src="/img/blog/2021/07/zipkin_dependency_diagram-min_o.webp"
-    title="Zipkin dependency diagram (Source: GitHub repo)"
-    width={700}
-/> -->
+    />
+<figcaption><i>Zipkin dependency diagram (Source: GitHub repo)"
+    </figure>
+<br/> -->
 
 ### Grafana Tempo
 
@@ -250,21 +254,25 @@ Some of the key features provided by the Dynatrace distributed tracing tool incl
 - Code-level visibility across all application tiers for web and mobile apps together
 - Always-on code profiling and diagnostics tools for application analysis
 
-<!-- <Screenshot
+<!-- <figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="Dynatrace distributed tracing dashboard"
-    height={500}
+    
     src="/img/blog/2021/09/dynatrace_purepath-min.webp"
-    title=""
-    width={700}
-/>
+    />
+<figcaption><i>"
+    </figure>
+<br/>
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="Code-level insights with Dynatrace PurePath technology"
-    height={500}
+    
     src="/img/blog/2021/09/dynatrace_purepath_code_level-min.webp"
-    title="Code-level insights shown on Dynatrace dashboard (Source: Dynatrace website)"
-    width={700}
-/> -->
+    />
+<figcaption><i>Code-level insights shown on Dynatrace dashboard (Source: Dynatrace website)"
+    </figure>
+<br/> -->
 
 ### New Relic
 

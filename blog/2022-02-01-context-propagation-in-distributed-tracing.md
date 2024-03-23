@@ -47,13 +47,15 @@ Distributed tracing is becoming the go-to solution for solving this complexity a
 
 import Screenshot from "@theme/Screenshot"
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
    alt="A transaction broken down into all logical events that take place with the help of distributed tracing and represented with a Gantt chart"
-   height={500}
+   
    src="/img/blog/2022/02/trace_spans.webp"
-   title="A single transaction is broken down into various components it traverses. The above picture shows a popular way of visualizing a trace via Gantt charts. The width of the bars is proportional to the time a given operation took."
-   width={700}
-/>
+   />
+<figcaption><i>A single transaction is broken down into various components it traverses. The above picture shows a popular way of visualizing a trace via Gantt charts. The width of the bars is proportional to the time a given operation took.</i></figcaption>
+</figure>
+<br/>
 
 ## Context Propagation in Distributed Tracing
 
@@ -72,13 +74,15 @@ Suppose a request gets triggered at the frontend client in a fictional e-commerc
 
 A trace context is passed along the execution flow that can be used to correlate the events involved in the process. Other data points also get passed alongside a trace context, e.g., tags and attributes. Tracing context propagation is also known as metadata propagation.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
    alt="Context propagation in a fictional e-commerce web application. Trace context or request identifier is passed along the execution flow."
-   height={500}
+   
    src="/img/blog/2022/02/context_propagation_in_distributed_systems.webp"
-   title="Context propagation in a fictional e-commerce web application. Trace context or request identifier is passed along the execution flow."
-   width={700}
-/>
+   />
+<figcaption><i>Context propagation in a fictional e-commerce web application. Trace context or request identifier is passed along the execution flow.</i></figcaption>
+</figure>
+<br/>
 
 ### Types of Trace Context Propagation
 
@@ -90,13 +94,15 @@ Today’s applications based on distributed systems are quite complex. Multiple 
 - **Inter-process propagation**<br></br>
   This type of context propagation happens between network calls, and the metadata is passed along with headers of different communication frameworks like HTTP.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
    alt="Types of context propagation: In-process and Inter-process context propagation"
-   height={500}
+   
    src="/img/blog/2022/02/types_of_context_propagation.webp"
-   title="Types of context propagation: In-process and Inter-process context propagation"
-   width={700}
-/>
+   />
+<figcaption><i>Types of context propagation: In-process and Inter-process context propagation</i></figcaption>
+</figure>
+<br/>
 
 ### Identifiers used for context propagation
 

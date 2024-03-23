@@ -165,23 +165,27 @@ Pinpoint is an open source APM tool meant for large-scale distributed systems wr
 - APM agents which require minimal changes to code
 - Minimal impact on performance
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
    alt="Pinpoint APM tool architecture"
-   height={500}
+   
    src="/img/blog/2021/07/pinpoint-architecture-min.webp"
-   title="Architecture of Pinpoint (Source: Pinpoint Documentation)"
-   width={700}
-/>
+   />
+<figcaption><i>Architecture of Pinpoint (Source: Pinpoint Documentation)</i></figcaption>
+</figure>
+<br/>
 
 The main purpose of the Pinpoint APM tool is to identify and track how transactions flow between different components of a system. It does not track logs and metrics.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
    alt="Pinpoint dashboard"
-   height={500}
+   
    src="/img/blog/2021/07/pinpoint-dashboard-min.webp"
-   title="Pinpoint Dashboard (Source: Pinpoint documentation)"
-   width={700}
-/>
+   />
+<figcaption><i>Pinpoint Dashboard (Source: Pinpoint documentation)</i></figcaption>
+</figure>
+<br/>
 
 ### Prometheus
 
@@ -201,32 +205,38 @@ Prometheus monitoring stack includes the following components:
 - Alertmanager
 - Visualization Layer
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
    alt="Prometheus APM tool architecture"
-   height={500}
+   
    src="/img/blog/2021/07/Prometheus_architecture-min.webp"
-   title="Prometheus Architecture (Source: Prometheus Documentation)"
-   width={700}
-/>
+   />
+<figcaption><i>Prometheus Architecture (Source: Prometheus Documentation)</i></figcaption>
+</figure>
+<br/>
 
 Prometheus does not do distributed tracing but can be used effectively to monitor time-series data as metrics. It also has some limitations at scale as it is designed for a single machine.
 The visualization layer of Prometheus is basic, but it is generally used with Grafana, a visualization tool to create charts and graphs.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
    alt="Prometheus Expression Browser"
-   height={500}
+   
    src="/img/blog/2021/07/prom_exp_browser-min.webp"
-   title="Prometheus Expression Browser"
-   width={700}
-/>
+   />
+<figcaption><i>Prometheus Expression Browser</i></figcaption>
+</figure>
+<br/>
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
    alt="Grafana dashboard visualizing Prometheus metrics"
-   height={500}
+   
    src="/img/blog/2021/07/prometheus_grafana-min.webp"
-   title="Grafana used for visualization with Prometheus"
-   width={700}
-/>
+   />
+<figcaption><i>Grafana used for visualization with Prometheus</i></figcaption>
+</figure>
+<br/>
 
 ### Javamelody
 
@@ -242,13 +252,15 @@ Some of the key metrics captured by the Javamelody APM tool are as follows:
 - Number of user sessions
 - Number of JDBC connections
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
    alt="Charts shown on JavaMelody dashboard"
-   height={500}
+   
    src="/img/blog/2021/07/javamelody_ui-min.webp"
-   title="Charts provided by Javamelody APM tool (Source: Javamelody GitHub repo)"
-   width={700}
-/>
+   />
+<figcaption><i>Charts provided by Javamelody APM tool (Source: Javamelody GitHub repo)</i></figcaption>
+</figure>
+<br/>
 
 ### Stagemonitor
 
@@ -266,13 +278,15 @@ Some of the key features of Stagemonitor APM tool includes:
 - Production Monitoring
 - Preconfigured Dashboards
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
    alt="Architecture diagram of Stagemonitor APM tool"
-   height={500}
+   
    src="/img/blog/2021/07/stagemonitor_architecture-min.webp"
-   title="Stagemonitor architecture (Source: Stagemonitor GitHub repo)"
-   width={700}
-/>
+   />
+<figcaption><i>Stagemonitor architecture (Source: Stagemonitor GitHub repo)</i></figcaption>
+</figure>
+<br/>
 
 ### Scouter
 
@@ -284,13 +298,15 @@ Scouter is an open source APM tool written in Java, Javascript, and Scala. It ca
 - Services - Active service, TPS, Response time, Application profiles
 - Resources - Cpu, Memory, Network and Heap usage, Connection pools, etc.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
    alt="Architecture diagram of Scouter APM tool"
-   height={500}
+   
    src="/img/blog/2021/07/scouter_architecture-min-1.webp"
-   title="Scouter Architecture (Source: Scouter GitHub repo)"
-   width={700}
-/>
+   />
+<figcaption><i>Scouter Architecture (Source: Scouter GitHub repo)</i></figcaption>
+</figure>
+<br/>
 
 Scouter's architecture consists of the following components:
 
@@ -299,13 +315,15 @@ Scouter's architecture consists of the following components:
 - Java Agent to capture performance data of the Java program such as heap memory, thread, profiles
 - Client(Viewer) to visualize collected data
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
    alt="Charts visualized with Scouter APM"
-   height={500}
+   
    src="/img/blog/2021/07/scouter_ui-min.webp"
-   title="Scouter UI (Source: Scouter GitHub repo)"
-   width={700}
-/>
+   />
+<figcaption><i>Scouter UI (Source: Scouter GitHub repo)</i></figcaption>
+</figure>
+<br/>
 
 ### Zipkin
 
@@ -324,33 +342,39 @@ Zipkin's architecture includes:
 - API to query data
 - UI
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
    alt="Zipkin architecture diagram"
-   height={500}
+   
    src="/img/blog/2021/07/Zipkin_architecture-min.webp"
-   title="Zipkin architecture (Source: Zipkin website)"
-   width={700}
-/>
+   />
+<figcaption><i>Zipkin architecture (Source: Zipkin website)</i></figcaption>
+</figure>
+<br/>
 
 Zipkin's in-built UI is limited, and you can use Grafana or Kibana from the ELK stack for better analytics and visualizations.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
    alt="Zipkin dashboard showing traces"
-   height={500}
+   
    src="/img/blog/2021/07/Zipkin_ui-min.webp"
-   title="Zipkin UI (Source: Zipkin's GitHub repo)"
-   width={700}
-/>
+   />
+<figcaption><i>Zipkin UI (Source: Zipkin's GitHub repo)</i></figcaption>
+</figure>
+<br/>
 
 It also includes a dependency diagram that shows how many user requests went through each service. It can help you to identify error paths and calls to deprecated services.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
    alt="Zipkin dependency diagram to show user requests across services"
-   height={500}
+   
    src="/img/blog/2021/07/zipkin_dependency_diagram-min.webp"
-   title="Zipkin dependency diagram (Source: GitHub repo)"
-   width={700}
-/>
+   />
+<figcaption><i>Zipkin dependency diagram (Source: GitHub repo)</i></figcaption>
+</figure>
+<br/>
 
 ### Jaeger
 
@@ -368,23 +392,27 @@ It is used for monitoring and troubleshooting microservices-based distributed sy
 - Service dependency analysis
 - Performance / latency optimization
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
    alt="Architecture diagram of Jaeger APM"
-   height={500}
+   
    src="/img/blog/2021/07/jaeger_architecture-min.webp"
-   title="Jaeger Architecture (Source: Uber Engineering)"
-   width={700}
-/>
+   />
+<figcaption><i>Jaeger Architecture (Source: Uber Engineering)</i></figcaption>
+</figure>
+<br/>
 
 Jaeger supports two popular open source NoSQL databases as trace storage backends: Cassandra and Elasticsearch. Jaeger's UI can be used to see individual traces. You can also filter the traces based on service, duration, and tags.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
    alt="Jaeger UI"
-   height={500}
+   
    src="/img/blog/2021/07/jaeger_ui-min.webp"
-   title="Jaeger UI showing list of filtered traces"
-   width={700}
-/>
+   />
+<figcaption><i>Jaeger UI showing list of filtered traces</i></figcaption>
+</figure>
+<br/>
 
 ### Apache Skywalking
 
@@ -402,13 +430,15 @@ This open source APM tool is focused on monitoring distributed systems, includin
 
 Skywalking also supports the collection of telemetry data in multiple formats.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
    alt="Skywalking dashboard"
-   height={500}
+   
    src="/img/blog/2021/07/skywalking_ui-min.webp"
-   title="Skywalking dashboard (Source: Skywalking website)"
-   width={700}
-/>
+   />
+<figcaption><i>Skywalking dashboard (Source: Skywalking website)</i></figcaption>
+</figure>
+<br/>
 
 ### Elastic APM
 
@@ -423,23 +453,26 @@ You might already be familiar with Elasticsearch. Elastic APM is an open source 
 - Elasticsearch - It is used to store the APM performance metrics.
 - Kibana - It is a visualization platform designed to work with Elastsearch.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
    alt="Elastic APM architecture diagram"
-   height={500}
+   
    src="/img/blog/2021/07/elastic_apm_architecture-min.webp"
-   title="Elastic APM architecture (Source: Elastic APM documentation)"
-   width={700}
-/>
+   />
+<figcaption><i>Elastic APM architecture (Source: Elastic APM documentation)</i></figcaption>
+</figure>
+<br/>
 
 With Kibana, you can have visualize your requests and services.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
    alt="Service maps on Elastic APM dashboard"
-   height={500}
    src="/img/blog/2021/07/elasticapm_servicemaps-min.webp"
-   title="Service Maps in Elastic APM (Source: Elastic APM website)"
-   width={700}
-/>
+   />
+<figcaption><i>Service Maps in Elastic APM (Source: Elastic APM website)</i></figcaption>
+   </figure>
+<br/>
 
 ### App Metrics
 
@@ -455,13 +488,14 @@ App Metrics is an open source and cross-platform .NET library that can be used t
 
 App Metrics does not include a visualization tool, but it does provide App Metrics specific Grafana dashboards.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
    alt="Grafana charts for visualization of App Metrics"
-   height={500}
    src="/img/blog/2021/07/app-metrics-dashboard-min.webp"
-   title="App Metrics dashboard using Grafana (Source: App Metrics website)"
-   width={700}
-/>
+   />
+<figcaption><i>App Metrics dashboard using Grafana (Source: App Metrics website)</i></figcaption>
+</figure>
+<br/>
 
 ### Glowroot
 
@@ -474,13 +508,14 @@ Glowroot is an open source Java APM tool. It is used to monitor Java-based appli
 - With embedded collectors that can be used to monitor stand-alone applications
 - With central collector that can be used to monitor distributed systems
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
    alt="Glowroot architecture diagram"
-   height={500}
    src="/img/blog/2021/07/glowroot-architecture-min.webp"
-   title="Glowroot architecture"
-   width={700}
-/>
+   />
+<figcaption><i>Glowroot architecture</i></figcaption>
+   </figure>
+<br/>
 
 Glowroot agents help to capture metrics like:
 

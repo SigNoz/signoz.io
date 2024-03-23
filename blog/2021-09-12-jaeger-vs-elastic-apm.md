@@ -50,13 +50,15 @@ Jaeger was originally built by teams at Uber and then open-sourced. It is used f
 
 import Screenshot from "@theme/Screenshot"
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="Jaeger UI"
-    height={500}
+    
     src="/img/blog/2021/08/jaeger_ui-min.webp"
-    title="Jaeger UI showing services and corresponding traces"
-    width={700}
-/>
+    />
+<figcaption><i>Jaeger UI showing services and corresponding traces</i></figcaption>
+    </figure>
+<br/>
 
 ## Key features of Elastic APM
 Elastic APM consists of four components: APM agents, APM Server, Elasticsearch, and Kibana. Some of you might be familiar with the popular ELK stack which comprises of Elasticsearch, Logstash and Kibana. The ELK stack is used for collecting and analyzing logs. Elastic APM is an effort by [Elastic](https://www.elastic.co/) to venture into the field of application performance monitoring.
@@ -68,13 +70,15 @@ The four major components of elastic APM has the following features:
 - APM agents - Collects the data to send to the APM server
 - APM server - Receives data from APM agents and process it for storing in Elasticsearch
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="Elastic APM architecture"
-    height={500}
+    
     src="/img/blog/2021/09/elastic_apm_architecture.webp"
-    title="Elastic APM architecture"
-    width={700}
-/>
+    />
+<figcaption><i>Elastic APM architecture</i></figcaption>
+    </figure>
+<br/>
 
 Some of the key features of Elastic APM includes:
 
@@ -120,33 +124,39 @@ SigNoz is a full-stack open-source application performance monitoring and observ
 
 SigNoz is built to support OpenTelemetry natively. [OpenTelemetry](https://opentelemetry.io/) is becoming the world standard for generating and managing telemetry data (Logs, metrics and traces). It provides a fast OLAP datastore, ClickHouse as the storage backend.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="Architecture of SigNoz with OpenTelemetry and ClickHouse"
-    height={500}
+    
     src="/img/blog/2021/09/SigNoz_architecture_clickhouse.webp"
-    title="Architecture of SigNoz with ClickHouse as storage backend and OpenTelemetry for code instrumentatiion"
-    width={700}
-/>
+    />
+<figcaption><i>Architecture of SigNoz with ClickHouse as storage backend and OpenTelemetry for code instrumentatiion</i></figcaption>
+    </figure>
+<br/>
 
 SigNoz comes with out of box visualization of things like RED metrics.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="SigNoz UI showing the popular RED metrics"
-    height={500}
+    
     src="/img/blog/common/signoz_charts_application_metrics.webp"
-    title="SigNoz UI showing application overview metrics like RPS, 50th/90th/99th Percentile latencies, and Error Rate"
-    width={700}
-/>
+    />
+<figcaption><i>SigNoz UI showing application overview metrics like RPS, 50th/90th/99th Percentile latencies, and Error Rate</i></figcaption>
+    </figure>
+<br/>
 
 You can also use flamegraphs to visualize spans from your trace data. All of this comes out of the box with SigNoz.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="Flamegraphs used to visualize spans of distributed tracing in SigNoz UI"
-    height={500}
+    
     src="/img/blog/common/signoz_flamegraphs.webp"
-    title="Flamegraphs showing exact duration taken by each spans - a concept of distributed tracing"
-    width={700}
-/>
+    />
+<figcaption><i>Flamegraphs showing exact duration taken by each spans - a concept of distributed tracing</i></figcaption>
+    </figure>
+<br/>
 
 
 Some of the things SigNoz can help you track:

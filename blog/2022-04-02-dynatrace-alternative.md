@@ -109,13 +109,15 @@ Found something suspicious in application metrics, just click that point in the 
 
 For example, you can find latency experienced by customers who have customer_type set as `premium`.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="Filtering based on tags"
-    height={500}
+    
     src="/img/blog/2021/08/tags_based_filtering_signoz-min.webp"
-    title="Filter traces for a specific user group using tags"
-    width={700}
-/> -->
+    />
+<figcaption><i>Filter traces for a specific user group using tags"
+    </figure>
+<br/> -->
 
 ### Advanced filters on trace data
 

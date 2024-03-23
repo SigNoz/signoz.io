@@ -207,13 +207,15 @@ Some of the key features of Prometheus are:
 - an alert manager to handle alerts
 - Basic visualization layer but can be combined with Grafana to create rich visualizations
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="Prometheus Architecture"
-    height={500}
+    
     src="/img/blog/2021/09/otel_vs_prometheus_prometheus_architecture-min.webp"
-    title="Architecture of Prometheus (Source: Prometheus website)"
-    width={700}
-/>
+    />
+<figcaption><i>Architecture of Prometheus (Source: Prometheus website)"
+    </figure>
+<br/>
 
 ### Disadvantages of Prometheus
 
@@ -356,13 +358,15 @@ OpenTelemetry when combined with a OpenTelemetry-native APM like SigNoz can prov
 
 SigNoz comes with out of box visualization of things like RED metrics. There is a unified UI of logs, metrics, and traces so that you can easily identify the root cause of issues causing things like latency in your apps. 
 
-<!-- <Screenshot
+<!-- <figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="SigNoz UI"
-    height={500}
+    
     src="/img/blog/common/signoz_charts_application_metrics.webp"
-    title="SigNoz UI showing application overview metrics like RPS, 50th/90th/99th Percentile latencies, and Error Rate"
-    width={700}
-/> -->
+    />
+<figcaption><i>SigNoz UI showing application overview metrics like RPS, 50th/90th/99th Percentile latencies, and Error Rate"
+    </figure>
+<br/> -->
 
 <figure data-zoomable>
     <img src="/img/blog/common/signoz_charts_application_metrics.webp" alt="SigNoz dashboard showing popular RED metrics"/>

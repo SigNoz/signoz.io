@@ -135,11 +135,13 @@ Verify if you have Golang installed on your machine by running `$ go version` on
 
     If you see an empty array, it means your application is working. You can check out how to write, update and delete books in your array from the article [here](https://blog.logrocket.com/how-to-build-a-rest-api-with-golang-using-gin-and-gorm/).
 
-    <Screenshot
+    <figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="endpoint of bookstore app"
-    height={500}
+    
     src="/img/blog/2021/06/screenzy-1623261415095.webp"
-    title="endpoint of our bookstore app"
+    />
+<figcaption><i>endpoint of our bookstore app"
     width={700}
     />
 

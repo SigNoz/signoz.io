@@ -68,13 +68,15 @@ Here’s the architecture of the sample Java application along with OpenTelemetr
 
 import Screenshot from "@theme/Screenshot"
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
    alt="Sample Java app application architecture with SigNoz and OpenTelemetry"
-   height={500}
+   
    src="/img/blog/2022/03/java_app_architecture_opentelemetry_signoz.webp"
-   title="Application architecture along with SigNoz and OpenTelemetry(OTel Collector)"
-   width={700}
-/>
+   />
+<figcaption><i>Application architecture along with SigNoz and OpenTelemetry(OTel Collector)</i></figcaption>
+</figure>
+<br/>
 
 ### Pre-requisites
 
@@ -101,13 +103,15 @@ You can visit our documentation for instructions on how to install SigNoz using 
 
 When you are done installing SigNoz, you can access the UI at [http://localhost:3301](http://localhost:3301/application)
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
    alt="SigNoz dashboard"
-   height={500}
+   
    src="/img/blog/2022/02/signoz_dashboard.webp"
-   title="SigNoz dashboard - It shows services from a sample app that comes bundled with the application"
-   width={700}
-/>
+   />
+<figcaption><i>SigNoz dashboard - It shows services from a sample app that comes bundled with the application</i></figcaption>
+</figure>
+<br/>
 
 ### Installing MySql
 
@@ -160,26 +164,29 @@ Below are the steps to run the sample Java application with OpenTelemetry:
 
    You can go to [http://localhost:8761/](http://localhost:8761/) and make sure your discover service registry with Eureka server is up and running.
 
-   <Screenshot
+   <figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
    alt="SigNoz dashboard"
-   height={500}
+   
    src="/img/blog/2022/03/service_discovery_eureka.webp"
-   title="Eureka server is up and running"
-   width={700}
    />
+<figcaption><i>Eureka server is up and running</i></figcaption>
+</figure>
+<br/>
 
 3. **Setting up Opentelemetry agent**<br></br>
    For instrumenting Java applications, OpenTelemetry has a very handy Java JAR agent that can be attached to any Java 8+ application. The JAR agent can detect a number of [popular libraries and frameworks](https://github.com/open-telemetry/opentelemetry-java-instrumentation/blob/main/docs/supported-libraries.md) and instrument it right out of the box. You don't need to add any code for that.
 
    Download the [latest version](https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar) of the Java JAR agent, and copy jar agent file in your application code. We have placed the agent under the folder named `agents`.
 
-   <Screenshot
+   <figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="SigNoz dashboard"
-    height={200}
     src="/img/blog/2022/03/opentelemetry_java_jar_agent.webp"
-    title="Placed OpenTelemetry Java Jar agent under a folder named agents"
-    width={400}
     />
+<figcaption><i>Placed OpenTelemetry Java Jar agent under a folder named agents</i></figcaption>
+</figure>
+<br/>
 
 4. **Setting up SigNoz as the OpenTelemetry backend**<br></br>
 
@@ -203,21 +210,25 @@ Below are the steps to run the sample Java application with OpenTelemetry:
       -javaagent:../agents/opentelemetry-javaagent.jar"
    ```
 
-   <Screenshot
+   <figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
    alt="Code in scripts file"
-   height={500}
+   
    src="/img/blog/2022/03/scripts_sh_file.webp"
-   title="Code in scripts.sh file"
-   width={700}
    />
+<figcaption><i>Code in scripts.sh file</i></figcaption>
+</figure>
+<br/>
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="Scripts folder"
-    height={500}
+    
     src="/img/blog/2022/03/scripts_folder.webp"
-    title="Scritps.sh file under scripts folder"
-    width={700}
     />
+<figcaption><i>Scritps.sh file under scripts folder</i></figcaption>
+</figure>
+<br/>
 
 5. **Run the microservices**<br></br>
    Now you need to run your microservices. Run `users-service`:
@@ -241,29 +252,33 @@ Below are the steps to run the sample Java application with OpenTelemetry:
    cd scripts
    sh ./start.sh
    ```
-   <!-- <Screenshot
+   <!-- <figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
    alt="Running user service"
-   height={500}
+   
    src="/img/blog/2022/03/running_user_service.webp"
-   title="Running user service"
+   />
+    <figcaption><i>Running user service"
    width={700}
    /> -->
 
-<!-- <Screenshot
+<!-- <figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
 alt="Running all microservices"
-height={500}
-src="/img/blog/2022/03/running_all_microservices.webp"
-title="Running all microservices using different tabs in the terminal"
-width={700}
-/> -->
 
-<Screenshot
-alt="Running microservices on different ports using service registry"
-height={500}
-src="/img/blog/2022/03/eureka_running_all_services.webp"
-title="Running microservices on different ports using service registry"
-width={700}
+src="/img/blog/2022/03/running_all_microservices.webp"
 />
+<figcaption><i>Running all microservices using different tabs in the terminal</i></figcaption>
+</figure>
+<br/> -->
+
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
+    alt="Running microservices on different ports using service registry"
+    src="/img/blog/2022/03/eureka_running_all_services.webp"/>
+    <figcaption><i>Running microservices on different ports using service registry</i></figcaption>
+</figure>
+<br/>
 
 6. **Confirm table creation**<br></br>
    After running the services, check if the tables `ORDERS` and `USERS` are created using the commands below:
@@ -273,13 +288,15 @@ width={700}
    mysql> show tables;
    ```
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="Checking creation of tables"
-    height={500}
+    
     src="/img/blog/2022/03/confirm_table_creation.webp"
-    title="Checking creation of tables after running microservices"
-    width={700}
     />
+<figcaption><i>Checking creation of tables after running microservices</i></figcaption>
+</figure>
+<br/>
 
 ## Visualizing traces data with SigNoz dashboards
 
@@ -294,37 +311,41 @@ npm install -g serve
 serve -l 5000 u
 ```
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
    alt="Running sample app UI"
-   height={500}
+   
    src="/img/blog/2022/03/serve_ui_port.webp"
-   title="Running sample app UI"
-   width={700}
-/>
+   />
+<figcaption><i>Running sample app UI</i></figcaption>
+</figure>
+<br/>
 
 Use the buttons to interact with the app and generate some data. For example, click `Create User` button to create a new user in the MySQL db.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
    alt="Create a new user"
-   height={250}
    src="/img/blog/2022/03/create_new_user_java.webp"
-   title="Create a new user"
-   width={450}
-/>
-
+   />
+<figcaption><i>Create a new user</i></figcaption>
+</figure>
+<br/>
 Now go to SigNoz dashboard, you will notice the list of service names that we configured:
 
 - user-service
 - order-service
 - payment-service
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
    alt="Microservices in our Java app being monitored in the SigNoz dashboard"
-   height={500}
+   
    src="/img/blog/2022/03/java_microservices_list.webp"
-   title="Microservices in our Java app being monitored in the SigNoz dashboard"
-   width={700}
-/>
+   />
+<figcaption><i>Microservices in our Java app being monitored in the SigNoz dashboard</i></figcaption>
+</figure>
+<br/>
 
 You can play around with the dashboard to see what data is captured. Below is a handy guide on how to use the SigNoz dashboard to see the captured data.
 
@@ -334,35 +355,39 @@ The traces tab of the SigNoz dashboard provides powerful filters to analyze the 
 
 1. **See the count of requests by service and HTTP Status code**
 
-<Screenshot
-alt="Count of requests"
-height={500}
-src="/img/blog/2022/03/java_count_of_requests.webp"
-title="Use advanced filters to see count of requests by service and HTTP status code"
-width={700}
-/>
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
+    alt="Count of requests"
+    src="/img/blog/2022/03/java_count_of_requests.webp"/>
+    <figcaption><i>Use advanced filters to see count of requests by service and HTTP status code</i></figcaption>
+</figure>
+<br/>
 
 2. **Run aggregates on your tracing data**<br></br>
    You can run aggregates like avg, max, min, 50th percentile, 90th percentile on your tracing data to get analyze performance issues in your application.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="Run aggregates"
-    height={500}
+    
     src="/img/blog/2022/03/run_aggregates.webp"
-    title="Run aggregates using the dropdown on your traces data quickly"
-    width={700}
     />
+<figcaption><i>Run aggregates using the dropdown on your traces data quickly</i></figcaption>
+</figure>
+<br/>
 
 3. **Get more granular details by grouping traces data**<br></br>
    You can also see these aggregates in more granular detail by grouping them by service name, operation, HTTP URL, HTTP method, etc.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="Group aggregates"
-    height={500}
+    
     src="/img/blog/2022/03/group_aggregates.webp"
-    title="Group aggregates across a list of dimensions"
-    width={700}
     />
+<figcaption><i>Group aggregates across a list of dimensions</i></figcaption>
+</figure>
+<br/>
 
 4. **Identify latency issues with Flamegraphs and Gantt charts**<br></br>
 
@@ -370,31 +395,32 @@ width={700}
 
    Go to operation filter on the left navigation and apply two filters `/payment/transfer/id/{id}/amount/{amount}` and service name `payment-service` . Click on the single event listed in the table as shown below:
 
-<Screenshot
-alt="Use filters to inspect spans that you want to investigate further"
-height={500}
-src="/img/blog/2022/03/span_specific_filter.webp"
-title="Use filters to inspect spans that you want to investigate further"
-width={700}
-/>
+<figure data-zoomable align='center'>
+<img className="box-shadowed-image"
+    alt="Use filters to inspect spans that you want to investigate further"
+    src="/img/blog/2022/03/span_specific_filter.webp"/>
+    <figcaption><i>Use filters to inspect spans that you want to investigate further</i></figcaption>
+</figure>
+<br/>
 
 You will be able to see the Flamegraph of the selected span which shows how the request traveled between the `payment-service` and the `user-service`. You can also use the Gantt chart to analyze each event in detail.
 
-<Screenshot
-alt="Flamegraphs and Gantt charts"
-height={500}
-src="/img/blog/2022/03/java_payment_service_traces.webp"
-title="Flamegraph and Gantt chart for the selected event showing payment service traces with HTTP semantics"
-width={700}
-/>
+<figure data-zoomable align='center'>
+<img className="box-shadowed-image"
+    alt="Flamegraphs and Gantt charts"
+    src="/img/blog/2022/03/java_payment_service_traces.webp"/>
+    <figcaption><i>Flamegraph and Gantt chart for the selected event showing payment service traces with HTTP semantics</i></figcaption>
+</figure>
+<br/>
 
-<Screenshot
-alt="Database traces"
-height={500}
-src="/img/blog/2022/03/db_traces.webp"
-title="Databases traces which show semantics related to mysql db and query details"
-width={700}
-/>
+<figure data-zoomable align='center'>
+<img className="box-shadowed-image"
+    alt="Database traces"
+    src="/img/blog/2022/03/db_traces.webp"
+    />
+<figcaption><i>Databases traces which show semantics related to mysql db and query details</i></figcaption>
+</figure>
+<br/>
 
 SigNoz also provides a detailed view of common [semantic conventions](https://github.com/open-telemetry/semantic-conventions) like HTTP, network, and other attributes. The end-to-end tracing of user requests can help you to identify latency issues quickly.
 

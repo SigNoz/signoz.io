@@ -322,13 +322,15 @@ Some of the key features of DataDog APM includes:
 - With DataDog's APM, you can ingest 100% of your traces from the last 15 minutes. You can then retain error and high latency traces
 - You can inspect code-level performance and break down slow requests.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="DataDog APM Dashboard"
-    height={500}
+    
     src="/img/blog/2021/09/apm_tools_datadog-min.webp"
-    title="DataDog APM tool dashboard (Source: DataDog dashboard)"
-    width={700}
-/>
+    />
+<figcaption><i>DataDog APM tool dashboard (Source: DataDog dashboard)"
+    </figure>
+<br/>
 
 ### New Relic APM
 
@@ -341,13 +343,15 @@ Some of the key features of New Relic APM includes:
 - Correlation of tracing data with other aspects of application infrastructure and user monitoring
 - Fully managed cloud-native experience with on-demand scalability
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="New Relic APM Dashboard"
-    height={500}
+    
     src="/img/blog/2021/10/dd_vs_nr_newrelic_apm-min.webp"
-    title="New Relic APM Dashboard (Source: New Relic Dashboard)"
-    width={700}
-/>
+    />
+<figcaption><i>New Relic APM Dashboard (Source: New Relic Dashboard)"
+    </figure>
+<br/>
 
 ## Infrastructure Monitoring
 
@@ -361,13 +365,15 @@ Some of the key features of DataDog's infrastructure monitoring includes:
 - DataDog provides a Host map to visualize all your hosts on one screen
 - It also provides a container map and real-time monitoring of containers
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="DataDog Infrastructure Monitoring Dashboard"
-    height={500}
+    
     src="/img/blog/2021/10/dd_vs_nr_datadog_infrastructure-min.webp"
-    title="See detailed info about your hosts on DataDog dashboard (Source: DataDog website)"
-    width={700}
-/>
+    />
+<figcaption><i>See detailed info about your hosts on DataDog dashboard (Source: DataDog website)"
+    </figure>
+<br/>
 
 ### New Relic Infrastructure Monitoring
 
@@ -379,13 +385,15 @@ Some of the key features of New Relic infrastructure monitoring includes:
 - If your infrastructure account is connected with the APM account, then you can troubleshoot performance issues by connecting the server-side to the application side.
 - Provides integrations to collect metrics for popular platforms like AWS, GCP, Azure, Kubernetes, etc.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="New Relic Infrastructure Monitoring Dashboard"
-    height={500}
+    
     src="/img/blog/2021/10/dd_vs_nr_newrelic_infrastructure-min.webp"
-    title="New Relic Infrastructure Monitoring Dashboard (Source: New Relic documentation)"
-    width={700}
-/>
+    />
+<figcaption><i>New Relic Infrastructure Monitoring Dashboard (Source: New Relic documentation)"
+    </figure>
+<br/>
 
 ## Log Management
 
@@ -400,13 +408,15 @@ Some of the key features of DataDog Log Management includes:
 - Filter logs with a time range, tags, and full-text search
 - Provides aggregation of indexed logs
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="DataDog Log Management Dashboard"
-    height={500}
+    
     src="/img/blog/2021/10/dd_vs_nr_datadog_log_management-min.webp"
-    title="DataDog log management dashboard (Source: DataDog website)"
-    width={700}
-/>
+    />
+<figcaption><i>DataDog log management dashboard (Source: DataDog website)"
+    </figure>
+<br/>
 
 ### New Relic Log Management
 
@@ -418,13 +428,15 @@ Some of the key features of New Relic log management include:
 - Quick search response times for any volume of log data
 - Provides machine learning capabilities to detect issues from your log data automatically
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="New Relic Log Management Dashboard"
-    height={500}
+    
     src="/img/blog/2021/10/dd_vs_nr_newrelic_log_management-min.webp"
-    title="New Relic Log Management Dashboard (Source: New Relic website)"
-    width={700}
-/>
+    />
+<figcaption><i>New Relic Log Management Dashboard (Source: New Relic website)"
+    </figure>
+<br/>
 
 ## Network Monitoring
 
@@ -436,13 +448,15 @@ Some of the key features of DataDog network monitoring include:
 - Granular data for network flows in a multi-cloud environment along with aggregation capabilities supported by tags
 - Automatically collects tags from more than 450 integrations. You can see network volume between any two sets of tags
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="DataDog Network Monitoring Dashboard"
-    height={500}
+    
     src="/img/blog/2021/10/dd_vs_nr_datadog_network_monitoring-min.webp"
-    title="DataDog network monitoring (Source: DataDog website)"
-    width={700}
-/>
+    />
+<figcaption><i>DataDog network monitoring (Source: DataDog website)"
+    </figure>
+<br/>
 
 ### New Relic Network Monitoring
 
@@ -452,13 +466,15 @@ Some of the key features of New Relic Network monitoring include:
 - Provides integrations with 100+ services. You can check the full list of <a href = "https://docs.newrelic.com/docs/integrations/amazon-integrations/" rel="noopener noreferrer nofollow" target="_blank" ><b>AWS</b></a>, <a href = "https://docs.newrelic.com/docs/integrations/microsoft-azure-integrations/azure-integrations-list/" rel="noopener noreferrer nofollow" target="_blank" ><b>Azure</b></a> and <a href = "https://docs.newrelic.com/docs/integrations/google-cloud-platform-integrations/" rel="noopener noreferrer nofollow" target="_blank" ><b>GCP</b></a> integrations
 - Provides advanced Kubernetes monitoring capabilities correlating metrics from the application and the infrastructure
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="New Relic Network Monitoring Dashboard"
-    height={500}
+    
     src="/img/blog/2021/10/dd_vs_nr_newrelic_network_monitoring-min.webp"
-    title="New Relic Network Monitoring (Source: New Relic website)"
-    width={700}
-/>
+    />
+<figcaption><i>New Relic Network Monitoring (Source: New Relic website)"
+    </figure>
+<br/>
 
 ## Browser or real-user monitoring
 
@@ -472,13 +488,15 @@ Some of the key features of DataDog end-user monitoring:
 - Provides root cause analysis for slow loading times with visibility into code, network, and infrastructure
 - Offers customer segmentation with the help of tags for error tracking in real-time
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="DataDog RUM Dashboard"
-    height={500}
+    
     src="/img/blog/2021/10/dd_vs_nr_datadog_rum-min.webp"
-    title="DataDog Real User Monitoring"
-    width={700}
-/>
+    />
+<figcaption><i>DataDog Real User Monitoring"
+    </figure>
+<br/>
 
 ### New Relic Browser Monitoring
 
@@ -490,13 +508,15 @@ Some of the key features of New Relic Browser Monitoring include:
 - Provides session performance with a heatmap of a user's interaction with the webpage
 - Provides Javascript error analytics using which you can see end-user steps leading to errors
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="New Relic Browser Monitoring Dashboard"
-    height={500}
+    
     src="/img/blog/2021/10/dd_vs_nr_browser_monitoring-min.webp"
-    title="New Relic Browser monitoring (Source: New Relic website)"
-    width={700}
-/>
+    />
+<figcaption><i>New Relic Browser monitoring (Source: New Relic website)"
+    </figure>
+<br/>
 
 ## Issues with existing monitoring vendors
 
@@ -528,33 +548,39 @@ Key architecture features:
 - **Native OpenTelemetry support**<br></br>
   SigNoz is built to support <a href = "https://opentelemetry.io/" rel="noopener noreferrer nofollow" target="_blank" ><b>OpenTelemetry</b></a> natively, which is quietly becoming the world standard to generate and manage telemetry data.
 
-  <Screenshot
+  <figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
       alt="Architecture of SigNoz with OpenTelemetry and ClickHouse"
-      height={500}
+      
       src="/img/architecture-signoz-clickhouse.svg"
-      title="Architecture of SigNoz with ClickHouse as storage backend and OpenTelemetry for code instrumentatiion"
+      />
+<figcaption><i>Architecture of SigNoz with ClickHouse as storage backend and OpenTelemetry for code instrumentatiion"
       width={700}
   />
 
 SigNoz comes with out of box visualization of things like RED metrics.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="SigNoz UI showing the popular RED metrics"
-    height={500}
+    
     src="/img/blog/common/signoz_charts_application_metrics.webp"
-    title="SigNoz UI showing application overview metrics like RPS, 50th/90th/99th Percentile latencies, and Error Rate"
-    width={700}
-/>
+    />
+<figcaption><i>SigNoz UI showing application overview metrics like RPS, 50th/90th/99th Percentile latencies, and Error Rate"
+    </figure>
+<br/>
 
 You can also use flamegraphs to visualize spans from your trace data. All of this comes out of the box with SigNoz.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="Flamegraphs used to visualize spans of distributed tracing in SigNoz UI"
-    height={500}
+    
     src="/img/blog/common/signoz_flamegraphs.webp"
-    title="Flamegraphs showing exact duration taken by each spans - a concept of distributed tracing"
-    width={700}
-/>
+    />
+<figcaption><i>Flamegraphs showing exact duration taken by each spans - a concept of distributed tracing"
+    </figure>
+<br/>
 
 You can use logs to dig deeper into application issues.
 
@@ -567,13 +593,15 @@ You can use logs to dig deeper into application issues.
 
 You can also build custom metrics dashboard for your infrastructure.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="SigNoz custom metrics dashboard"
-    height={500}
+    
     src="/img/blog/2021/10/signoz_custom_dashboard-min.webp"
-    title="You can also build a custom metrics dashboard for your infrastructure"
-    width={700}
-/>
+    />
+<figcaption><i>You can also build a custom metrics dashboard for your infrastructure"
+    </figure>
+<br/>
 
 The logs tab in SigNoz has advanced features like a log query builder, search across multiple fields, structured table view, JSON view, etc.
 

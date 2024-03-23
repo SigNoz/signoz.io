@@ -40,13 +40,15 @@ Some of the challenges with tools like New Relic includes:
 
 import Screenshot from "@theme/Screenshot"
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="Reddit post discussing issues about pricing model of New Relic"
-    height={500}
+    
     src="/img/blog/2021/09/issue_with_newrelic-min.webp"
-    title="What's the catch with New Relic? (Source: Reddit)"
-    width={700}
-/>
+    />
+<figcaption><i>What's the catch with New Relic? (Source: Reddit)</i></figcaption>
+</figure>
+<br/>
 
 
 A relatively newer concept in the field of application performance monitoring is observability. Making a system observable is the pursuit of achieving a state of proactiveness to solve unknown issues. Logs, metrics, and traces are usually considered the three pillars of observability.
@@ -112,13 +114,15 @@ Get p90, p99 latencies, RPS, Error rates, and top endpoints for a service out of
 
 Found something suspicious in a metric, just click that point in the graph & get details of traces that may be causing the issues. Seamless, Intuitive.
 
-<!-- <Screenshot
+<!-- <figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="Seamless flow between metrics and traces"
-    height={500}
+    
     src="/img/blog/2021/08/metrics_to_traces_signoz-min.webp"
-    title="Move from metrics to traces at any point of time which needs more analysis"
-    width={700}
-/> -->
+    />
+<figcaption><i>Move from metrics to traces at any point of time which needs more analysis"
+    </figure>
+<br/> -->
 
 <figure data-zoomable align='center'>
     <img src="/img/blog/common/application_metrics_to_traces.webp" alt="Seamless flow between metrics and traces"/>
@@ -129,13 +133,15 @@ Found something suspicious in a metric, just click that point in the graph & get
 
 For example, you can find latency experienced by customers who have customer_type set as `premium`.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="Filtering based on tags"
-    height={500}
+    
     src="/img/blog/2021/08/tags_based_filtering_signoz-min.webp"
-    title="Filter traces for a specific user group using tags"
-    width={700}
-/> -->
+    />
+<figcaption><i>Filter traces for a specific user group using tags"
+    </figure>
+<br/> -->
 
 ### Advanced filters on trace data
 

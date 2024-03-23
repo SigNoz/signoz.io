@@ -30,13 +30,15 @@ In a microservices architecture, a user request travels through hundreds, even t
 
 import Screenshot from "@theme/Screenshot"
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="Microservices architecture"
-    height={500}
+    
     src="/img/blog/2021/12/fictional_ecommerce_microservices_architecture.webp"
-    title="Microservice architecture of a fictional e-commerce application"
-    width={700}
-/>
+    />
+<figcaption><i>Microservice architecture of a fictional e-commerce application</i></figcaption>
+</figure>
+<br/>
 
 Distributed tracing gives insights into how a particular service is performing as part of the whole in a distributed software system. It involves passing a [trace context](https://signoz.io/blog/context-propagation-in-distributed-tracing/) with each user request which is then passed across hosts, services, and protocols to track the user request.
 
@@ -67,13 +69,15 @@ Parent span calls four services which form the child spans, namely:
 
 These spans can then further have their own child spans.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="A complete trace consisting of multiple spans"
-    height={500}
+    
     src="/img/blog/2021/12/trace_spans.webp"
-    title="A sample trace demonstrating a request initiated by a frontend web client."
-    width={700}
-/>
+    />
+<figcaption><i>A sample trace demonstrating a request initiated by a frontend web client.</i></figcaption>
+</figure>
+<br/>
 
 The first span is known as the parent span and the subsequent spans are child spans. 
 
@@ -99,13 +103,15 @@ These contexts are propagated to child spans, ensuring that related spans are li
 
 Let us see details of a selected span in an APM tool like [SigNoz](https://signoz.io/).
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="Span attributes"
-    height={500}
+    
     src="/img/blog/2021/12/span_attributes1.webp"
-    title="Span attributes: Details associated with a span captured by SigNoz"
-    width={700}
-/>
+    />
+<figcaption><i>Span attributes: Details associated with a span captured by SigNoz</i></figcaption>
+</figure>
+<br/>
 
 ### Example of a basic span
 Let’s see an example of creating a basic span using the OpenTelemetry instrumentation library. <a href = "https://opentelemetry.io/" rel="noopener noreferrer nofollow" target="_blank" >OpenTelemetry</a> is a set of API, SDKs, libraries, and integrations that is aiming to standardize the generation, collection, and management of telemetry data(logs, metrics, and traces).
