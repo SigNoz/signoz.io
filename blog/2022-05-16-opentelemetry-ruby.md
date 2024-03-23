@@ -1,7 +1,7 @@
 ---
 title: Tracing a Ruby application with OpenTelemetry for performance monitoring 
 slug: opentelemetry-ruby
-date: 2023-01-07
+date: 2023-11-17
 tags: [OpenTelemetry Instrumentation, Ruby]
 authors: [vishal, ankit_anand]
 description: OpenTelemetry’s Ruby client libraries can be used to trace Ruby applications for performance monitoring. In this tutorial, we will auto-instrument a sample Ruby app with OpenTelemetry to collect tracing data and then visualize it using SigNoz...
@@ -61,25 +61,19 @@ SigNoz provides query and visualization capabilities for the end-user and comes 
 
 Now let’s get down to how to implement OpenTelemetry Ruby libraries and then visualize the collected data in SigNoz.
 
-## Install SigNoz
+## Setting up SigNoz
 
-First, you need to install SigNoz so that OpenTelemetry can send the data to it.
+You need a backend to which you can send the collected data for monitoring and visualization. [SigNoz](https://signoz.io/) is an OpenTelemetry-native APM that is well-suited for visualizing OpenTelemetry data.
 
-SigNoz can be installed on macOS or Linux computers in just three steps by using a simple install script.
+SigNoz cloud is the easiest way to run SigNoz. You can sign up [here](https://signoz.io/teams/) for a free account and get 30 days of unlimited access to all features.
 
-The install script automatically installs Docker Engine on Linux. However, on macOS, you must manually install <a href = "https://docs.docker.com/engine/install/" rel="noopener noreferrer nofollow" target="_blank">Docker Engine</a> before running the install script.
+[![Try SigNoz Cloud CTA](/img/blog/2024/01/opentelemetry-collector-try-signoz-cloud-cta.webp)](https://signoz.io/teams/)
 
-```bash
-git clone -b main https://github.com/SigNoz/signoz.git
-cd signoz/deploy/
-./install.sh
-```
+You can also install and self-host SigNoz yourself. Check out the [docs](https://signoz.io/docs/install/) for installing self-host SigNoz.
 
-You can visit our documentation for instructions on how to install SigNoz using Docker Swarm and Helm Charts.
+## Send Traces to SigNoz Cloud
 
-[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/)
-
-When you are done installing SigNoz, you can access the UI at [http://localhost:3301](http://localhost:3301/application)
+Based on your application environment, you can choose the setup below to send traces to SigNoz Cloud.
 
 ## Instrumenting a Ruby on Rails application with OpenTelemetry
 
@@ -135,16 +129,35 @@ Now we have to set the following environment variables to export the collected t
 
 - `OTEL_EXPORTER` : It is the format of exported data. Since SigNoz natively supports otlp so it should be set as `otlp`
 
-- `OTEL_SERVICE_NAME` : Name of service(anything you want)
+- `OTEL_SERVICE_NAME` : Name of Service (anything you want)
 
-- `OTEL_EXPORTER_OTLP_ENDPOINT` : Specify the endpoint of OTEL collector in format `http://IP_OF_SIGNOZ:4318`. The OTEL collector comes bundled with SigNoz installation. Since, we installed SigNoz on our local machine, the endpoint is `http://localhost:4318`.
+- `OTEL_EXPORTER_OTLP_ENDPOINT` : Specify the endpoint of OTEL collector in format `https://ingest.{region}.signoz.cloud:443`.
 
-- `OTEL_RESOURCE_ATTRIBUTES` : Pass custom attributes like application name with `OTEL_RESOURCE_ATTRIBUTES=application=yourAppName`
+- `SIGNOZ_INGESTION_KEY` : The ingestion key sent by SigNoz over email. It can also be found in the `settings` section of your SigNoz Cloud UI.
+
+You can copy the SIGNOZ_INGESTION_KEY and OTEL_EXPORTER_OTLP_ENDPOINT from your dashboard settings page. 
+
+<figure data-zoomable align='center'>
+    <img src="/img/blog/2022/05/signoz-key-region.webp" alt=""/>
+    <figcaption><i></i></figcaption>
+</figure>
+
+Depending on the choice of your region for SigNoz cloud, the ingest endpoint will vary according to this table.
+
+| Region | Endpoint |
+| --- | --- |
+| US |	ingest.us.signoz.cloud:443 |
+| IN |	ingest.in.signoz.cloud:443 |
+| EU | ingest.eu.signoz.cloud:443 |
 
 Using the above mentioned environment variables, run the application:
 
 ```jsx
-OTEL_EXPORTER=otlp OTEL_SERVICE_NAME=yourSampleRailsApp OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318 OTEL_RESOURCE_ATTRIBUTES=application=sparkapp rails server
+OTEL_EXPORTER=otlp \
+OTEL_SERVICE_NAME=<service_name> \
+OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.{region}.signoz.cloud:443 \
+OTEL_EXPORTER_OTLP_HEADERS=signoz-access-token=SIGNOZ_INGESTION_KEY \
+rails server
 ```
 
 ## Monitor your Ruby on Rails application with Signoz
@@ -158,17 +171,31 @@ To run the sample app use below commands
 - Run the app with env variables:
 
 ```jsx
-OTEL_EXPORTER=otlp OTEL_SERVICE_NAME=sampleRailsApp OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318 OTEL_RESOURCE_ATTRIBUTES=application=sparkapp rails server
+OTEL_EXPORTER=otlp \
+OTEL_SERVICE_NAME=ruby-app \
+OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.in.signoz.cloud:443 \
+OTEL_EXPORTER_OTLP_HEADERS=signoz-access-token=SIGNOZ_INGESTION_KEY \
+rails server
 ```
+
+
+
 
 Now the app should be running at [http://localhost:3000/](http://localhost:3000/)
 
+<figure data-zoomable align='center'>
+    <img src="/img/blog/2022/05/ruby-app-running.webp" alt="Ruby app being monitored on SigNoz dashboard"/>
+    <figcaption><i>The sample Ruby on Rails application monitored on SigNoz dashboard. The other applications are sample apps that come bundled with SigNoz installation.</i></figcaption>
+</figure>
+
+<br></br>
+
 Play around with the app to generate some demo monitoring data, which will automatically be exported to the SigNoz Otel collector.
 
-Now navigate to [http://localhost:3301/application](http://localhost:3301/application) (needs signup) to analyse the telemetry data of Rails app.
+Now navigate to [https://xxxx-xxxx.in.signoz.cloud/services](https://xxxx-xxxx.in.signoz.cloud/services) (needs signup) to analyse the telemetry data of Rails app.
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2022/05/ruby_app_on_signoz_dashboard.webp" alt="Ruby app being monitored on SigNoz dashboard"/>
+    <img src="/img/blog/2022/05/ruby-service-list.webp" alt="Ruby app being monitored on SigNoz dashboard"/>
     <figcaption><i>The sample Ruby on Rails application monitored on SigNoz dashboard. The other applications are sample apps that come bundled with SigNoz installation.</i></figcaption>
 </figure>
 
@@ -177,7 +204,7 @@ Now navigate to [http://localhost:3301/application](http://localhost:3301/applic
 You can analyze your tracing data with powerful filters using the `Traces` tab on SigNoz dashboard.
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2022/05/opentelemetry_ruby_traces_tab.webp" alt="Analyze your tracing data with powerful filters"/>
+    <img src="/img/blog/2022/05/ruby-trace.webp" alt="Analyze your tracing data with powerful filters"/>
     <figcaption><i>Analyze your tracing data with powerful filters</i></figcaption>
 </figure>
 
@@ -186,7 +213,7 @@ You can analyze your tracing data with powerful filters using the `Traces` tab o
 Using Flamegraphs and Gantt charts, you can see a complete breakdown of your request.
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2022/05/opentelemetry_ruby_flamegraphs.webp" alt="Analyze your tracing data with powerful filters"/>
+    <img src="/img/blog/2022/05/ruby-framegraph.webp" alt="Analyze your tracing data with powerful filters"/>
     <figcaption><i>You can see the complete breakdown of your requests with details like how much time each operation took, span attributes, etc.</i></figcaption>
 </figure>
 
