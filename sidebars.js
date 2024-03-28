@@ -103,10 +103,26 @@ module.exports = {
                 // slug: 'instrumentation/python',
               },
               items: [
-                'instrumentation/django',
-                'instrumentation/fastapi',
-                'instrumentation/flask',
-                'instrumentation/falcon',
+                {
+                  type: 'doc',
+                  label: 'Django',
+                  id: 'instrumentation/django',
+                },
+                {
+                  type: 'doc',
+                  label: 'FastAPI',
+                  id: 'instrumentation/fastapi',
+                },
+                {
+                  type: 'doc',
+                  label: 'Flask',
+                  id: 'instrumentation/flask',
+                },
+                {
+                  type: 'doc',
+                  label: 'Falcon',
+                  id: 'instrumentation/falcon',
+                },
               ]
             },
             {
@@ -120,9 +136,21 @@ module.exports = {
                 // slug: 'instrumentation/python',
               },
               items: [
-                'instrumentation/springboot',
-                'instrumentation/tomcat',
-                'instrumentation/jboss',
+                {
+                  type: 'doc',
+                  label: 'Spring Boot',
+                  id: 'instrumentation/springboot',
+                },
+                {
+                  type: 'doc',
+                  label: 'Apache Tomcat',
+                  id: 'instrumentation/tomcat',
+                },
+                {
+                  type: 'doc',
+                  label: 'JBoss',
+                  id: 'instrumentation/jboss',
+                }, 
               ]
             },
             {
@@ -136,9 +164,26 @@ module.exports = {
                 // slug: 'instrumentation/python',
               },
               items: [
-                'instrumentation/express',
-                'instrumentation/nestjs',
-                'instrumentation/angular',
+                {
+                  type: 'doc',
+                  label: 'Express',
+                  id: 'instrumentation/express',
+                },
+                {
+                  type: 'doc',
+                  label: 'NestJS',
+                  id: 'instrumentation/nestjs',
+                },
+                {
+                  type: 'doc',
+                  label: 'Angular',
+                  id: 'instrumentation/angular',
+                },
+                {
+                  type: 'doc',
+                  label: 'ReactJS',
+                  id: 'instrumentation/reactjs',
+                },
               ]
             },
             {
