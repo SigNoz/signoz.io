@@ -74,6 +74,17 @@ module.exports = {
       ],
     },
     {
+      label: "SigNoz Features",
+      type: "category",
+      items: [
+        {
+          type: 'doc',
+          id: 'product-features/saved-view',
+          label: 'Saved View',
+        },
+      ]
+    },
+    {
       label: "APM & Distributed Tracing",
       type: "category",
       items: [
