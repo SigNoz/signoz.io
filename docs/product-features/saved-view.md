@@ -30,9 +30,9 @@ Save View is just what you are looking for. This feature available in SigNoz's L
 The Save View feature in SigNoz enhances your log and trace data analysis by allowing you to create and access customized data perspectives efficiently. This feature simplifies repetitive data filtering tasks, making it easier to manage and analyze the vast quantities of data you encounter daily.
 
 
-## Feature and Use-Cases
+## Use-Cases
 
-Saved Views is an integral feature for both the Logs and Traces Explorers within SigNoz. It enables you to apply and save filter settings, creating a personalized dashboard that can be revisited with ease. This unified experience is crucial for several use-cases:
+The Saved Views functionality caters to a variety of real-life scenarios across the Logs and Traces Explorers:
 
 - **Incident Response**: During an incident, time is of the essence. Saved Views can help you quickly zoom in on the anomaly by applying predefined filters, allowing you to diagnose and respond to issues faster.
 - **Continuous Monitoring**: For routine checks, a saved view can serve as a daily dashboard, showing you the health and performance metrics that you care about most, without the need to rebuild filters each time.
