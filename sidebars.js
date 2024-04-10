@@ -535,6 +535,8 @@ module.exports = {
       },
       items: [
         'tutorial/jvm-metrics',
+        'tutorial/kubernetes-infra-metrics',
+        'tutorial/linux-host-metrics',
         'tutorial/mongodb-metrics',
         'tutorial/instrumenting-angular-frontend',
         'tutorial/s3-integration-iam-role-eks',
