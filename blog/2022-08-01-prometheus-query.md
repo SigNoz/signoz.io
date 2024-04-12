@@ -86,7 +86,7 @@ Let's break down a **simple expression** to learn by example:
 http_requests_total{job="apiserver", handler="/api/comments"}[5m]
 ```
 
-The expression above queries the time series engine for all `http_requests_total` occurrences that come under the `apiserver` job and `/api/comments` handler. The intended output would be a range that spans five minutes [5m] from the moment the expression executes.
+The expression above queries the time series engine for all `http_requests_total` occurrences that come under the `apiserver` job and `/api/comments` handler. The intended output would be a range that [spans](https://signoz.io/blog/distributed-tracing-span/) five minutes [5m] from the moment the expression executes.
 
 Such a request, when executed in the default <a href = "https://prometheus.io/docs/prometheus/latest/getting_started/#using-the-expression-browser" rel="noopener noreferrer nofollow" target="_blank">Prometheus browser</a>, would yield a graph dating back to the span/interval specified. Removing the time variable would give a single vector result closest to the time of execution, if any.
 

@@ -23,7 +23,7 @@ keywords:
 import GetStartedSigNoz from '../docs/shared/get-started-signoz.md';
 
 
-OpenTelemetry is a broader, vendor-neutral framework for generating and collecting telemetry data (logs, metrics, traces), offering flexible backend integration. Jaeger, on the other hand, is focused on distributed tracing in microservices. Earlier Jaeger had its own SDKs based on OpenTracing APIs for instrumenting applications, but now Jaeger recommends using OpenTelemetry instrumentation and SDKs.
+OpenTelemetry is a broader, vendor-neutral framework for generating and collecting telemetry data (logs, metrics, traces), offering flexible backend integration. Jaeger, on the other hand, is focused on [distributed tracing](https://signoz.io/blog/distributed-tracing-in-microservices/) in microservices. Earlier Jaeger had its own SDKs based on OpenTracing APIs for instrumenting applications, but now Jaeger recommends using OpenTelemetry instrumentation and SDKs.
 
 <!--truncate-->
 
@@ -72,7 +72,7 @@ import Screenshot from "@theme/Screenshot"
 
 ## What is Jaeger?
 
-Jaeger is a popular open-source distributed tracing tool that was originally built by teams at Uber and then open-sourced. It is used to monitor and troubleshoot applications based on microservices architecture.
+[Jaeger](https://signoz.io/blog/jaeger-microservices/) is a popular open-source distributed tracing tool that was originally built by teams at Uber and then open-sourced. It is used to monitor and troubleshoot applications based on microservices architecture.
 
 A distributed tracing tool tracks user requests across services and gives a central overview of how different components of a microservices architecture interact to process user requests. Jaeger is used to store, analyze and visualize tracing data.
 
@@ -155,7 +155,7 @@ You can analyze tracing data with powerful filters. You can also analyze service
     <figcaption><i>Filters for tracing data with capabilities for aggregated trace metrics</i></figcaption>
 </figure>
 
-SigNoz also provides a rich visualization of tracing data with the help of Flamegraphs and Gantt charts. You can see exactly how a single event performed as part of an entire user request.
+SigNoz also provides a rich visualization of tracing data with the help of [Flamegraphs and Gantt charts](https://signoz.io/blog/flamegraphs/). You can see exactly how a single event performed as part of an entire user request.
 
 <figure data-zoomable align='center'>
     <img src="/img/blog/common/signoz_flamegraphs.webp" alt="Flamegraphs and Gantt charts in SigNoz dashbaord"/>

@@ -110,7 +110,7 @@ $tracerProvider =  new TracerProvider(
 $tracer = $tracerProvider->getTracer('io.signoz.php.example');
 ```
 
-**Step 4: Creating spans**
+**Step 4: Creating [spans](https://signoz.io/blog/distributed-tracing-span/)**
 
 Create root span and activate it:
 

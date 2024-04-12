@@ -38,13 +38,15 @@ A trace context is passed along when requests travel between services, which tra
 
 import Screenshot from "@theme/Screenshot"
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="Trace context is used to track requests across services"
-    height={500}
+    
     src="/img/blog/2021/09/opentelemetry_distributed_tracing-min.webp"
-    title="A trace context is passed when user requests pass from one service to another"
-    width={700}
-/>
+    />
+<figcaption><i>A trace context is passed when user requests pass from one service to another</i></figcaption>
+    </figure>
+<br/>
 
 ## Key Features of Jaeger
 <a href = "https://www.jaegertracing.io/" rel="noopener noreferrer nofollow" target="_blank" ><b>Jaeger</b></a> was originally built by teams at Uber and then open-sourced. It is used for end-to-end distributed tracing for microservices. Some of the key features of Jaeger includes:
@@ -64,13 +66,15 @@ Using Jaeger's web UI, you can see how requests flow through different services 
 - **Performance/latency optimization**<br></br>
 Once you have identified, which service or query is creating latency, you can use the information to optimize it.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="Jaeger's UI showing traces"
-    height={500}
+    
     src="/img/blog/2021/08/jaeger_ui-min.webp"
-    title="Jaeger's UI showing traces for selected services"
-    width={700}
-/>
+    />
+<figcaption><i>Jaeger's UI showing traces for selected services</i></figcaption>
+    </figure>
+<br/>
 
 ## Key Features of New Relic
 <a href = "https://newrelic.com/" rel="noopener noreferrer nofollow" target="_blank" ><b>New Relic</b></a> is one of the oldest companies in the observability domain. Its observability tool enables you to visualize, analyze and troubleshoot your software stack in one platform. It also supports auto-instrumentation for eight popular programming languages.
@@ -92,13 +96,15 @@ You can also deploy log management using New Relic. It provides a fast query ser
 - **Integrations with tools and open standards**<br></br>
 New Relic provides integrations with all leading cloud providers and also supports popular open-source standards like OpenTelemetry.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="New Relic Dashboard"
-    height={500}
+    
     src="/img/blog/2021/08/New_relic_dashboard-min.webp"
-    title="New Relic Dashboard (Source: New Relic website)"
-    width={700}
-/>
+    />
+<figcaption><i>New Relic Dashboard (Source: New Relic website)</i></figcaption>
+    </figure>
+<br/>
 
 As New Relic is a SaaS vendor, it is not free. Standard offering includes plans for teams up to 5 full users. Their pricing depends on the amount of data ingested with 100 GB free data ingest and $0.25 per extra GB.
 
@@ -115,21 +121,25 @@ Let's focus on the distributed tracing capabilities of both the tools and see th
 
 - New Relic's tracing UI is more elaborate than Jaeger's, as you can relate data from other types of monitoring in a single dashboard.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="New Relic Dashboard"
-    height={500}
+    
     src="/img/blog/2021/09/new_relic_distributed_tracing-min.webp"
-    title="New Relic's distributed tracing dashboard (Source: New Relic Website)"
-    width={700}
-/>
+    />
+<figcaption><i>New Relic's distributed tracing dashboard (Source: New Relic Website)</i></figcaption>
+    </figure>
+<br/>
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="Jaeger's distributed tracing UI"
-    height={500}
+    
     src="/img/blog/2021/08/jaeger_gantt_charts-min.webp"
-    title="Jaeger's distributed tracing UI"
-    width={700}
-/>
+    />
+<figcaption><i>Jaeger's distributed tracing UI</i></figcaption>
+    </figure>
+<br/>
 
 It's no surprise that New Relic has better features than Jaeger as it's paid. Pricing of most APM tools is not cheap, and the call to use one should be made on the basis of your business impact.
 
@@ -138,23 +148,27 @@ Jaeger and New Relic are both established tools in the observability domain. But
 
 That's where [SigNoz](https://signoz.io/) comes into the picture. [SigNoz](https://signoz.io/) is a full-stack open-source application performance monitoring and observability tool which can be used in place of Jaeger. SigNoz is built to support OpenTelemetry natively. It provides a fast OLAP datastore, ClickHouse as the storage backend.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="Architecture of SigNoz with OpenTelemetry and ClickHouse"
-    height={500}
+    
     src="/img/blog/2021/09/SigNoz_architecture_clickhouse.webp"
-    title="Architecture of SigNoz with ClickHouse as storage backend and OpenTelemetry for code instrumentatiion"
-    width={700}
-/>
+    />
+<figcaption><i>Architecture of SigNoz with ClickHouse as storage backend and OpenTelemetry for code instrumentatiion</i></figcaption>
+    </figure>
+<br/>
 
 SigNoz comes with out of box visualization of things like RED metrics.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="SigNoz UI showing the popular RED metrics"
-    height={500}
+    
     src="/img/blog/common/signoz_charts_application_metrics.webp"
-    title="SigNoz UI showing application overview metrics like RPS, 50th/90th/99th Percentile latencies, and Error Rate"
-    width={700}
-/>
+    />
+<figcaption><i>SigNoz UI showing application overview metrics like RPS, 50th/90th/99th Percentile latencies, and Error Rate</i></figcaption>
+    </figure>
+<br/>
 
 Some of the things SigNoz can help you track:
 

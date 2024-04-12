@@ -4,6 +4,8 @@ title: OpenTelemetry Operator Usage
 description: How to use OpenTelemetry Operator to ease otelcol deployment and instrumentation in SigNoz
 ---
 
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
 import OtelOperatorOTLPEndpoint from '../shared/otel-operator-otlp-endpoint.md'
 import OtelOperatorAutoInstrumentation from '../shared/otel-operator-auto-instrumentation.md'
 import OtelOperatorPetClinic from '../shared/otel-operator-pet-clinic.md'
@@ -18,11 +20,12 @@ A Kubernetes operator is a method of packaging, deploying, and managing a Kubern
 
 ## Prerequisite
 
-- You must have a K8s cluster up and running
-- You must have `kubectl` access to your cluster
-- Make sure that [SigNoz cluster is up and running][2]
+- Must have a K8s cluster up and running
+- Must have `kubectl` access to your cluster
+- Must have SigNoz running. You can follow the [installation guide][2] to install SigNoz.
+- If you don’t already have a SigNoz Cloud account, you can sign up [here][7].
 - Make sure to install [`cert-manager`][3]
-- Suggestion: Make sure [Golang](https://go.dev/doc/install) is installed for [telemetrygen][4]
+- Suggestion: Make sure [Golang][8] is installed for [telemetrygen][4]
 
 ## Set up OpenTelemetry Operator
 
@@ -37,10 +40,10 @@ OpenTelemetry Collector (`otelcol`) instance and autoinstrumentation.
 
 ## Deployment Modes
 
-There are 3 deployment modes available for OpenTelemetry Operator
+There are 3 deployment modes available for OpenTelemetry Operator:
 - Daemonset
 - Sidecar
-- Deployment ( default mode)
+- Deployment (default mode)
 
 The `CustomResource` of the `OpenTelemetryCollector` kind exposes a property named
 `.Spec.Mode`, which can be used to specify whether the collector should run as a
@@ -283,7 +286,65 @@ Instrumentation, but will not actually provide the SDK.
 ### Using Sidecar
 
 To create a `Sidecar` which has `OTLP` receivers as input and as output
-send telemetry data to SigNoz Collector as well logs to console:
+send telemetry data to SigNoz Collector as well logs to console.
+
+<br/>
+
+Select the type of SigNoz instance you are running: **SigNoz Cloud** or **Self-Hosted**.
+
+<Tabs>
+<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
+
+```bash {19-23}
+kubectl apply -f - <<EOF
+apiVersion: opentelemetry.io/v1alpha1
+kind: OpenTelemetryCollector
+metadata:
+  name: my-sidecar
+spec:
+  mode: sidecar
+  config: |
+    receivers:
+      otlp:
+        protocols:
+          http:
+          grpc:
+    processors:
+      batch:
+    exporters:
+      logging:
+      otlp:
+        endpoint: "ingest.{region}.signoz.cloud:443"
+        tls:
+          insecure: false
+        headers:
+          "signoz-access-token": "<SIGNOZ_INGESTION_KEY>"
+    service:
+      pipelines:
+        traces:
+          receivers: [otlp]
+          processors: [batch]
+          exporters: [logging, otlp]
+        metrics:
+          receivers: [otlp]
+          processors: [batch]
+          exporters: [logging, otlp]
+EOF
+```
+
+**_Notes_**:
+- Replace `SIGNOZ_INGESTION_KEY` with the one provided by SigNoz.
+- Replace `{region}` with the region of your SigNoz Cloud instance.
+  Refer to the table below for the region-specific endpoints:
+
+  | Region	| Endpoint                   |
+  | ------- | -------------------------- |
+  | US      | ingest.us.signoz.cloud:443 |
+  | IN      | ingest.in.signoz.cloud:443 |
+  | EU      | ingest.eu.signoz.cloud:443 |
+
+</TabItem>
+<TabItem value="self-host" label="Self-Host">
 
 ```bash {19}
 kubectl apply -f - <<EOF
@@ -321,6 +382,9 @@ EOF
 ```
 
 <OtelOperatorOTLPEndpoint/>
+
+</TabItem>
+</Tabs>
 
 To create an instance of `Instrumentation`:
 
@@ -396,6 +460,59 @@ kubectl delete otelcol/my-sidecar
 
 To create an instance of `Instrumentation` which sends OTLP data to SigNoz endpoint:
 
+<br/>
+
+Select the type of SigNoz instance you are running: **SigNoz Cloud** or **Self-Hosted**.
+
+<Tabs>
+<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
+
+```bash {7-13}
+kubectl apply -f - <<EOF
+apiVersion: opentelemetry.io/v1alpha1
+kind: Instrumentation
+metadata:
+  name: my-instrumentation
+spec:
+  exporter:
+    endpoint: https://ingest.{region}.signoz.cloud:443
+  env:
+    - name: OTEL_EXPORTER_OTLP_HEADERS
+      value: signoz-access-token=<SIGNOZ_INGESTION_KEY>
+    - name: OTEL_EXPORTER_OTLP_INSECURE
+      value: "false"
+  propagators:
+    - tracecontext
+    - baggage
+    - b3
+  sampler:
+    type: parentbased_traceidratio
+    argument: "0.25"
+  java:
+    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java:latest
+  nodejs:
+    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-nodejs:latest
+  python:
+    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python:latest
+  dotnet:
+    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-dotnet:latest
+EOF
+```
+
+**_Notes_**:
+- Replace `SIGNOZ_INGESTION_KEY` with the one provided by SigNoz.
+- Replace `{region}` with the region of your SigNoz Cloud instance.
+  Refer to the table below for the region-specific endpoints:
+
+  | Region	| Endpoint                   |
+  | ------- | -------------------------- |
+  | US      | ingest.us.signoz.cloud:443 |
+  | IN      | ingest.in.signoz.cloud:443 |
+  | EU      | ingest.eu.signoz.cloud:443 |
+
+</TabItem>
+<TabItem value="self-host" label="Self-Host">
+
 ```bash {8}
 kubectl apply -f - <<EOF
 apiVersion: opentelemetry.io/v1alpha1
@@ -424,6 +541,51 @@ EOF
 ```
 
 <OtelOperatorOTLPEndpoint/>
+
+</TabItem>
+<TabItem value="k8s-infra" label="K8s-Infra Helm Chart">
+
+```bash {7-13}
+kubectl apply -f - <<EOF
+apiVersion: opentelemetry.io/v1alpha1
+kind: Instrumentation
+metadata:
+  name: my-instrumentation
+spec:
+  exporter:
+    endpoint: http://\$(OTEL_HOST_IP):4317
+  env:
+    - name: OTEL_HOST_IP
+      valueFrom:
+        fieldRef:
+          fieldPath: status.hostIP
+  propagators:
+    - tracecontext
+    - baggage
+    - b3
+  sampler:
+    type: parentbased_traceidratio
+    argument: "0.25"
+  java:
+    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java:latest
+  nodejs:
+    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-nodejs:latest
+  python:
+    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python:latest
+  dotnet:
+    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-dotnet:latest
+EOF
+```
+
+In the above example, we will use downward API of Kubernetes to get host IP of `otel-agent`
+DaemonSet of K8s-Infra Helm Chart and use it as `OTEL_HOST_IP` environment variable.
+Using this, we can send telemetry data to `otel-agent` which would in turn relay it to
+any desired collector endpoint as per the configuration of `otel-agent`.
+
+</TabItem>
+</Tabs>
+
+<br/>
 
 We would just have set the pod annotation `instrumentation.opentelemetry.io/inject-java`
 to `"true"` for our Java Springboot workload deployed in K8s.
@@ -468,3 +630,5 @@ EOF
 [4]: https://pkg.go.dev/github.com/open-telemetry/opentelemetry-collector-contrib/cmd/telemetrygen#readme-installing
 [5]: https://github.com/SigNoz/signoz-otel-collector
 [6]: http://localhost:8080
+[7]: /teams
+[8]: https://go.dev/doc/install

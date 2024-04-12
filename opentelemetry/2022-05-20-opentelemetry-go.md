@@ -222,7 +222,7 @@ Hit the `/books` endpoint of the bookstore app at [http://localhost:8090/book
 
 ## Adding custom attributes and custom events to spans
 
-It’s also possible to set custom attributes or tags to a span. To add custom attributes and events follow the below steps:
+It’s also possible to set custom attributes or tags to a [span](https://signoz.io/blog/distributed-tracing-span/). To add custom attributes and events follow the below steps:
 
 **Step 1: Import trace and attribute libraries**
 
@@ -309,7 +309,7 @@ In the `Traces` tab of SigNoz, you can analyze the tracing data using filters ba
 
 <br></br>
 
-You can also visualize your tracing data with the help of flamegraphs and Gantt charts.
+You can also visualize your tracing data with the help of [flamegraphs and Gantt charts](https://signoz.io/blog/flamegraphs/).
 
 <figure data-zoomable align='center'>
     <img src="/img/blog/2022/04/gin_application_flamegraph.webp" alt="Visualize your tracing data with the help of flamegraphs and gantt charts"/>

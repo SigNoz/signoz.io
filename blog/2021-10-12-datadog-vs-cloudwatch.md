@@ -86,7 +86,7 @@ Differences between DataDog and CloudWatch can be summarized below:
   **CloudWatch pricing details:**<br></br>
   CloudWatch provides a free tier that you can explore. CloudWatch's paid tier called EC2 detailed monitoring starts at $2.10 per instance per month(assuming 7 metrics per instance). The cost also depends on the number of metrics sent and is divided into multiple tiers. The first 10k metrics are charged at $0.30 per metric per month.
 
-  **DataDog pricing details:**<br></br>
+  **[DataDog pricing](https://signoz.io/blog/datadog-pricing/) details:**<br></br>
   DataDog is an expensive enterprise monitoring tool with many different pricing tiers that vary on your use cases. For example, infrastructure enterprise monitoring starts at $23 per host per month while its APM sand continuous profiler starts at $40 per host per month.
 
 ## Key Features of DataDog
@@ -140,7 +140,7 @@ Some of the key features of CloudWatch includes:
 - **Logs and metrics correlation**<br></br>
   Using CloudWatch, you can correlate log patterns to a specific metric and set alarms on it.
 
-- **Container monitoring, lambda monitoring, and anomaly detection**<br></br>
+- **[Container monitoring](https://signoz.io/blog/container-monitoring-tools/), lambda monitoring, and anomaly detection**<br></br>
   CloudWatch provides automatic dashboards for container and lambda insights. Using anomaly detection, you can create alarms to auto-adjust thresholds based on metrics patterns.
 
 The challenge with CloudWatch is that you can only monitor AWS services with it. So if your entire application architecture and infrastructure is using AWS services, then it is a great tool for monitoring. But in today's distributed systems, that is not the case. You might be using multiple cloud vendors and third-party services.
@@ -165,9 +165,9 @@ If you are only using AWS services, then you can go with CloudWatch, but if you 
 
 With SigNoz, you can do the following:
 
-- Visualise Traces, Metrics, and Logs in a single pane of glass
+- Visualise Traces, Metrics, and Logs in a [single pane of glass](https://signoz.io/blog/single-pane-of-glass-monitoring/)
 - Monitor application metrics like p99 latency, error rates for your services, external API calls, and individual endpoints.
-- Find the root cause of the problem by going to the exact traces which are causing the problem and see detailed flamegraphs of individual request traces.
+- Find the root cause of the problem by going to the exact traces which are causing the problem and see detailed [flamegraphs](https://signoz.io/blog/flamegraphs/) of individual request traces.
 - Run aggregates on trace data to get business-relevant metrics
 - Filter and query logs, build dashboards and alerts based on attributes in logs
 - Monitor infrastructure metrics such as CPU utilization or memory usage
@@ -177,33 +177,39 @@ With SigNoz, you can do the following:
 
 SigNoz comes with out of box visualization of things like RED metrics.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="SigNoz UI showing the popular RED metrics"
-    height={500}
+    
     src="/img/blog/common/signoz_charts_application_metrics.webp"
-    title="SigNoz UI showing application overview metrics like RPS, 50th/90th/99th Percentile latencies, and Error Rate"
-    width={700}
-/>
+    />
+<figcaption><i>SigNoz UI showing application overview metrics like RPS, 50th/90th/99th Percentile latencies, and Error Rate</i></figcaption>
+</figure>
+<br/>
 
-You can also use flamegraphs to visualize spans from your trace data. All of this comes out of the box with SigNoz.
+You can also use flamegraphs to visualize [spans](https://signoz.io/blog/distributed-tracing-span/) from your trace data. All of this comes out of the box with SigNoz.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="Flamegraphs used to visualize spans of distributed tracing in SigNoz UI"
-    height={500}
+    
     src="/img/blog/common/signoz_flamegraphs.webp"
-    title="Flamegraphs showing exact duration taken by each spans - a concept of distributed tracing"
-    width={700}
-/>
+    />
+<figcaption><i>Flamegraphs showing exact duration taken by each spans - a concept of distributed tracing</i></figcaption>
+</figure>
+<br/>
 
 You can also build custom metrics dashboard for your infrastructure.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="SigNoz custom metrics dashboard"
-    height={500}
+    
     src="/img/blog/common/signoz_custom_dashboard-min.webp"
-    title="You can also build a custom metrics dashboard for your infrastructure"
-    width={700}
-/>
+    />
+<figcaption><i>You can also build a custom metrics dashboard for your infrastructure</i></figcaption>
+</figure>
+<br/>
 
 ## Getting started with SigNoz
 

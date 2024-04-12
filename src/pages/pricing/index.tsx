@@ -780,7 +780,6 @@ const PricingPlans = () => {
                       <li>Dashboard locking</li>
                       <li>Visualize very large traces (&gt;10K spans)</li>
                       <li>Run aggregates on ingested spans</li>
-                      <li>Live Tail Logging</li>
                       <li>Security tightening for on-prem installation</li>
                       <li>Monitor Health of SigNoz</li>
                       <li>Query API Keys (access data from anywhere)</li>

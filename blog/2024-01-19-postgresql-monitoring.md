@@ -22,8 +22,6 @@ import { LiteYoutubeEmbed } from "react-lite-yt-embed";
   <link rel="canonical" href="https://signoz.io/blog/postgresql-monitoring/"/>
 </head>
 
-import GetStartedSigNoz from '../docs/shared/get-started-signoz.md';
-
 Monitoring PostgreSQL for performance issues is critical. PostgreSQL is a powerful open-source relational database system that stands out for its robustness, scalability, and strong emphasis on extensibility and standards compliance. In this guide on PostgreSQL monitoring, we will cover key PostgreSQL metrics that should be monitored, best practices for monitoring PostgreSQL and some tools with which you can set up PostgreSQL monitoring.
 
 <!--truncate-->

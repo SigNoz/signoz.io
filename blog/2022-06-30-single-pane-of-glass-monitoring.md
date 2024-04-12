@@ -97,7 +97,7 @@ SigNoz also lets you run aggregates on trace data. Running aggregates on tracing
 
 ### Log Management
 
-Logs are part of every developer's workflow, and gives the most granular information to debug applications quickly. Logs, metrics, and traces are often touted as three pillars of observability. But at its core, observability is about solving application issues fast. And rather than three pillars, logs, metrics, and traces can act as a single mesh that when correlated intelligently can help developers solve application issues quickly.
+Logs are part of every developer's workflow, and gives the most granular information to debug applications quickly. Logs, metrics, and traces are often touted as [three pillars of observability](https://signoz.io/blog/three-pillars-of-observability/). But at its core, observability is about solving application issues fast. And rather than three pillars, logs, metrics, and traces can act as a single mesh that when correlated intelligently can help developers solve application issues quickly.
 
 SigNoz also provides log management with advanced features like log query builder, search across multiple fields, structured table view, JSON view, etc.
 

@@ -1,15 +1,16 @@
 ---
 title: Grafana vs Splunk - Key Features and Differences
 slug: grafana-vs-splunk
-date: 2024-02-08
+date: 2024-03-04
 tags: [Tools Comparison]
-authors: vivek_sonar
+authors: dejan-lukic
 description: Grafana and Splunk are both used as monitoring tools. But while Grafana is majorly used as a data visualization tool, Splunk is an enterprise security and observability platform. Grafana is also an open-source project...
 image: /img/blog/2023/02/grafana_vs_splunk_cover-min.jpg
 hide_table_of_contents: false
 keywords:
   - grafana
   - splunk
+  - grafana vs splunk
   - open-source
   - monitoring-tools
   - signoz
@@ -19,24 +20,39 @@ keywords:
   <link rel="canonical" href="https://signoz.io/blog/grafana-vs-splunk/"/>
 </head>
 
+import GetStartedSigNoz from '../docs/shared/get-started-signoz.md';
+
 Grafana and Splunk are both used as monitoring tools. But while Grafana is majorly used as a data visualization tool, Splunk is an enterprise security and observability platform. Monitoring tools are essential for any business that wants to have visibility into its IT infrastructure. They provide real-time data that can be used to identify and troubleshoot problems. Grafana and Splunk are two of the most popular monitoring tools on the market.
 
 <!--truncate-->
 
 ![Cover Image](/img/blog/2023/02/grafana_vs_splunk_cover.webp)
 
-So, which one is better for your business? In this article, we’ll compare Grafana and Splunk side by side, looking at features, pricing, supported data sources, and more. By the end, you should have a good idea of which tool is a better fit for your business.
+So, which one is better for your business? In this article, we’ll compare Grafana and Splunk side by side, looking at features, pricing, supported data sources, and more. Understanding these differences can help you choose the right tool for your data needs.
+
+By the end, you should have a good idea of which tool is a better fit for your business.
+
+## Grafana vs Splunk: At a glance
+
+|  | Splunk | Grafana |
+| --- | --- | --- |
+| Type | Proprietary, closed-source, commercial software | Open-source, free with a paid plan |
+| Pricing | Splunk is a costly tool used by enterprises. | Free to use open-source, paid cloud option |
+| Data Integration | Can collect data from different channels, including file-based, script-based, network-based, and API | Has a lot of data integration plugins, with ability to develop custom plugins |
+| Data Querying | Uses Search Processing Language (SPL); Splunk SOAR | Supports multiple query languages like SQL and PromQL |
+| UI/UX | Needs a bit of learning curve | Easy to use and understand |
+| Community | Accessible customer support and training resources | Active open-source community, and paid support |
 
 ### What is Grafana?
 
 Grafana is a robust, open-source data visualization and monitoring tool that allows users to create interactive dashboards and charts. It is used to monitor and visualize data from a variety of data sources — including time series databases such as QuestDB or InfluxDB. Grafana's real-time data display capabilities have made it the choice among many people for monitoring systems and infrastructure.
 
-**Features:**
+<!-- **Features:**
 
 - It gives users the ability to identify trends and patterns in their data, which can be used to create alerts or notifications based on specific conditions and thresholds.
 - It is particularly popular among DevOps and SRE teams, who use it to quickly identify issues in their systems and infrastructure.
 - In addition to its versatile data-monitoring capabilities, Grafana also provides an API that allows users to create and manage dashboards.
-- Allows organizations to monitor large amounts of time-series data in real-time
+- Allows organizations to monitor large amounts of time-series data in real-time -->
 
 ### What is Splunk?
 
@@ -48,24 +64,10 @@ The forwarder pushes data to a remote indexer. The indexer manages all the index
 
 With Splunk, you can search and analyze large amounts of data in real-time, and it provides pre-built visualizations to help you quickly create informative dashboards.
 
-## Grafana vs Splunk: At a glance
 
-| At a Glance             | Splunk                                                                                               | Grafana                                                                                   |
-| ----------------------- | ---------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| Software type           | Closed Source (Commercial Software)                                                                  | Open source, free to use and modify. Also offers a paid version.                          |
-| Data Collection         | Can collect data from different channels, including file-based, script-based, network-based, and API | Can collect data from a variety of sources, including QuestDB, Elastic Search, Prometheus |
-| Data Visualisation      | Pre-built visualization                                                                              | Interactive dashboard and charts                                                          |
-| Alerting & Notification | Robots alert management system. SMS, Email, etc can be used and channeled.                           | The alert manager is built-in for real-time monitoring & alerts using slack, Email, etc   |
-| Pricing                 | Splunk is a costly tool used by enterprises.                                                         | Free to use open source software                                                          |
-| Scalability             | Distributed Architecture is highly scalable                                                          | Plug-in Architecture can be scaled by adding more servers                                 |
-| Learning Curve          | Steep learning curve for new users                                                                   | An active community of users                                                              |
-| Query Language          | Search Processing Language (SPL).                                                                    | Supports multiple query languages like SQL and PromQL.                                      |
-| Community and user support |	Accessible customer support and training resources |	Active community, documentation and enterprise support |
-| Pricing                 |	Pricing is based on the plan selected |	Free open-source version and paid cloud plans (a forever-free version, free pro version, and a $299 per month advanced version) |
+## Grafana vs Splunk: Key Differences
 
-## Grafana vs Splunk: Key Features comparison
-
-### Data Collection & Ingestion:
+### Data Collection & Integration
 
 While Splunk and Grafana are both data collection and analysis tools, they have different features and approaches in regard to data collection & ingestion.
 
@@ -79,31 +81,78 @@ As per the <a href = "https://docs.splunk.com/Documentation/DSP/1.3.1/Connectio
 - DSP Collect connectors that collect data from several types of data sources such as Amazon S3, Amazon CloudWatch, Azure, etc. These collectors collect data through jobs that run on a schedule.
 - Steaming connectors collect data from several data sources such as Apache Kafka, Apache Pulsar, Google Cloud Pub/Sub, etc. These types of connectors receive data continuously emitted by the sources.
 
+
+Splunk also has over 600 apps providing reports, dashboards, and data knowledge available at Splunkbase.
+
 **Grafana**, meanwhile, **is an open-source platform for data visualization and monitoring**. It focuses on providing graphical representations of metrics. It can connect to various data sources, including InfluxDB, Prometheus, Elasticsearch, etc., and retrieve data using SQL-like query language.
 
-In terms of data collection, Splunk has more options and is designed to be a central repository for all data, while Grafana collects information from specific sources in order to display it in a graphical format.
+Unlike Splunk, Grafana is open-source, thus making integration with any data source possible both through the community-published plugins and by creating your own plugins.
 
-### Data Visualisation:
+### Data Querying
 
-Both Kibana and Grafana offer a great set of visualization capabilities.
+In the previous step you’ve learned how the two tools integrate data, now its time to query and that data (and visualize).
 
-In Grafana, you need to set up these dashboards and panels, which requires some bandwidth depending on which metrics you wish to visualize. You can build a powerful dashboard by selecting a data source and then combining panels associated with different data sources together.
+**Splunk**
+
+Splunk has dozen of ways for data querying. The simplest solutions is to use <a href = "https://docs.splunk.com/Documentation/Splunk/9.2.0/SearchTutorial/Startsearching" rel="noopener noreferrer nofollow" target="_blank" >Splunk Search</a> - a simple method for data query from the dashboard.
+
+<a href = "https://docs.splunk.com/Documentation/SOAR/current/PlatformAPI/Using" rel="noopener noreferrer nofollow" target="_blank" >Splunk SOAR (Cloud)</a> is a REST API for data query that allows deep query customization from the backend.
+
+Splunk also uses its custom Splunk Search Processing Language (SPL) which is optimized for searching, analyzing, and visualizing large volumes of machine-generated data. SPL offers a rich set of commands for data manipulation, extraction, and analysis.
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2023/02/grafana_dashboard.webp" alt="Grafana dashboard visualizing application metrics (Source: Grafana website"/>
-    <figcaption><i>Grafana dashboard visualizing application metrics (Source: Grafana website</i></figcaption>
+    <img className="box-shadowed-image" src="/img/blog/2024/02/splunk-data-query.webp" alt="Grafana vs Splunk: Data Query"/>
+    <figcaption><i>Querying data in Splunk using SPL</i></figcaption>
 </figure>
 
 <br></br>
 
-Splunk provides a dashboard studio that lets you customize dashboards in Splunk with control over dashboard’s layout, images, colors, and more.
+**Grafana**
+
+Data source queries retrieve data that can be transformed and displayed in Grafana. Each data source utilizes its unique query language, and plugins for data sources incorporate a query editor to construct queries.
+
+Take a deeper overivew about <a href = "https://grafana.com/docs/grafana/latest/panels-visualizations/query-transform-data/" rel="noopener noreferrer nofollow" target="_blank" >queries and data transformation in Grafana</a>.
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2023/02/splunk_log_observer.webp" alt="Splunk Log Observer (Source: Splunk website"/>
+    <img className="box-shadowed-image" src="/img/blog/2024/02/grafana-data-query.webp" alt="Grafana vs Splunk: Data Query"/>
+    <figcaption><i>Querying data in Grafana using the unique query builder for the specific data source</i></figcaption>
+</figure>
+
+<br></br>
+
+
+### Data Visualisation & UI/UX
+
+Both Grafana and Splunk offer a great set of visualization capabilities.
+
+**Splunk**
+
+In our research, Splunk's UI/UX experience has been excellent. Some parts of the UI, documentation and overall product do lack clarity and can be hard to navigate and read. But, Splunk's customizability is where it shines. Splunk provides a dashboard studio that lets you customize dashboards in Splunk with control over dashboard’s layout, images, colors, and more.
+
+You can literally make anything in Splunk, change every single bit on a given dashboard to customize it to your customers' needs.
+
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image" src="/img/blog/2023/02/splunk_log_observer.webp" alt="Splunk Log Observer (Source: Splunk website"/>
     <figcaption><i>Splunk Log Observer (Source: Splunk website</i></figcaption>
 </figure>
 
 <br></br>
+
+**Grafana**
+
+As a multi-year Grafana user, I have really adopted the interface since my early adoption I've managed to work easily without many hiccups.
+
+Grafana's UI is very simple, without many elements (though you can add many, many elements in the dashboard) that interfere with the mental/visual overload. The UI elements have enough clarity and intuitiveness.
+
+In Grafana, you need to set up these dashboards and panels, which requires some bandwidth depending on which metrics you wish to visualize. You can build a powerful dashboard by selecting a data source and then combining panels associated with different data sources together.
+
+<figure data-zoomable align='center'>
+    <img  className="box-shadowed-image" src="/img/blog/2024/02/grafana-viz.webp" alt="Grafana dashboard visualizing application metrics (Source: Grafana website"/>
+    <figcaption><i>Grafana dashboard visualization capabilities (Source: Grafana website</i></figcaption>
+</figure>
+
+<br></br>
+
 
 ### Alerting and Notifications:
 
@@ -112,6 +161,63 @@ Splunk provides robust alerting capabilities, so alerts can be triggered based o
 Grafana has a built-in alert manager for real-time monitoring and alerts. Alerts can be configured based on conditions and thresholds and can be sent through various notification channels such as email, Slack, etc. Grafana enables users to create alerting rules at a dashboard panel level, making it easy to set up and manage alerts for specific data sets.
 
 Both Splunk and Grafana provide robust capabilities, but Splunk provides more advanced alert management and tracking, while Grafana provides more granular control over alerting rules at the panel level.
+
+### Pricing
+
+**Splunk**
+
+As an enterprise-oriented product, you need to schedule a sales meeting with a Splunk Pricing Expert to get an estimate. Scheduling a long sales meeting isn't very convenient, as such products tend to require a minimum amount of seats and bill annually, so depending on your use case Splunk may not be the best option.
+
+What we do know without a sales meeting is how Splunk tiers its pricing:
+
+- Workload Pricing: This pricing plan makes it very economical to bring more data into Splunk that is less frequently searched.
+
+- Ingest Pricing: Pay based on the amount of data you bring into the Splunk Cloud Platform.
+
+- Entity Pricing: Controllable plan that is based on the number of hosts using Splunk observability products.
+
+- Activity-based pricing: Connect costs directly to activities being monitored by Splunk observability products like metric time series (MTS), traces analyzed per minute, sessions, or uptime requests.
+
+**Grafana**
+
+Grafana, on the other hand, has simpler pricing. It has a simpler model than Splunk's pricing model. Grafana has a decent "free forever" plan with the following key specs:
+
+- all Grafana Cloud features
+- 10k metrics billable series, 14 days retention
+- 3 active users with Enterprise plugins
+
+Like Splunk, Grafana also offers a (similar) pay-as-you-go plan starting free, then you just pay for the used resources. That's the simple part of Grafana's pricing, they also have detailed <a href = "https://grafana.com/pricing/#metrics" rel="noopener noreferrer nofollow" target="_blank" >usage-based pricing</a>.
+
+## Grafana vs Splunk: Features
+
+Splunk and Grafana are both powerful tools used for monitoring, visualizing, and analyzing data. Here's a comparison of some key features of both platforms:
+
+1. **Data Sources**
+    - **Grafana**: Supports a wide range of data sources including databases (MySQL, PostgreSQL, etc.), cloud services (AWS CloudWatch, Google Stackdriver, etc.), and various monitoring systems (Prometheus, Graphite, etc.). It's highly extensible and supports plugins for additional data sources.
+
+    - **Splunk**: Splunk is particularly well-known for its ability to ingest and analyze machine-generated data such as logs, metrics, and events. It supports a variety of data sources including log files, syslog, SNMP, APIs, and custom applications.
+
+2. **Visualization and Dashboards**
+    - **Grafana**: Offers a wide array of visualization options including graphs, charts, histograms, and gauges. You can create interactive dashboards by combining data from multiple sources. Grafana's dashboarding capabilities are highly customizable with support for templating and annotations.
+
+    - **Splunk**: Splunk also provides robust visualization capabilities with a focus on real-time data exploration. It offers features like customizable dashboards, drill-down capabilities, and support for creating reports and alerts based on visualizations.
+
+3. **Querying and Search**
+    - **Grafana**: Grafana relies on data sources to handle querying, so the querying capabilities vary depending on the underlying data source. However, it provides a powerful query editor that supports syntax highlighting, auto-completion, and query history.
+
+    - **Splunk**: Splunk has its own search processing language called SPL (Splunk Processing Language), which is optimized for searching, analyzing, and visualizing large volumes of machine-generated data. SPL offers a rich set of commands for data manipulation, extraction, and analysis.
+
+4. **Alerting**
+    - **Grafana**: Grafana provides alerting capabilities through its built-in alerting engine. You can set up alerts based on thresholds and conditions, and receive notifications via various channels such as email, Slack, and PagerDuty.
+
+    - **Splunk**: Splunk also offers alerting functionalities allowing users to create alerts based on search results. It supports real-time alerts and can trigger actions like sending emails, running scripts, or executing other commands.
+
+5. **Community**
+    - **Grafana**: Grafana has a vibrant open-source community and a rich ecosystem of plugins and integrations. You can leverage community-developed plugins to extend Grafana's functionality.
+
+    - **Splunk**: Splunk also has a strong community and a wide range of third-party apps and integrations available on Splunkbase, its app store.
+
+In summary, both Grafana and Splunk are powerful platforms with distinct strengths and use cases. Grafana is well-suited for monitoring and visualization tasks, especially when integrating with various data sources, while Splunk excels in log management, real-time analysis, and operational intelligence. The choice between the two often depends on specific requirements, preferences, and existing infrastructure.
 
 ## Pros and Cons
 
@@ -136,7 +242,7 @@ Both Splunk and Grafana provide robust capabilities, but Splunk provides more ad
 
 - **Limited Storage:** Grafana on other hand has limited data storage capacity which can be a major issue for organizations that have large data sets.
 
-Now coming to the most important point, **SCALABILITY!**
+<!-- Now coming to the most important point, **SCALABILITY!**
 
 Both of these monitoring solutions have different approaches when it comes to scalability:
 
@@ -148,7 +254,7 @@ Both of these monitoring solutions have different approaches when it comes to sc
 
 - The plug-in architecture in Grafana can be scaled by adding more servers.
 
-In general, Splunk is comparatively more scalable than Grafana especially when it comes to organizations that have large amounts of data.
+In general, Splunk is comparatively more scalable than Grafana especially when it comes to organizations that have large amounts of data. -->
 
 ## Choosing between Grafana and Splunk
 
@@ -169,9 +275,10 @@ In summary, choose Splunk if you need a versatile platform for comprehensive dat
 
 ## SigNoz - an alternative to Grafana and Splunk
 
-SigNoz is an open source APM that provides metrics, logs, and traces under a single pane of glass. It uses OpenTelemetry for application instrumentation. OpenTelemetry is quietly becoming the world standard for instrumenting cloud-native applications. SigNoz can be a great alternative to Grafana and Splunk.
+SigNoz is an open source APM that provides metrics, logs, and traces under a [single pane of glass](https://signoz.io/blog/single-pane-of-glass-monitoring/). It uses OpenTelemetry for application instrumentation. OpenTelemetry is quietly becoming the world standard for instrumenting cloud-native applications. SigNoz can be a great alternative to Grafana and Splunk.
 
-It is easy to get started with SigNoz with out of box charts for key application metrics. SigNoz also provides an [enterprise version](https://signoz.io/pricing/) that can be self-hosted within your infra.
+
+It is available both as an [open-source software](https://github.com/SigNoz/signoz) and a [cloud offering](https://signoz.io/teams/).
 
 <figure data-zoomable align='center'>
     <img src="/img/blog/common/signoz_charts_application_metrics.webp" alt="Application Metrics Dashboard in SigNoz"/>
@@ -182,23 +289,42 @@ It is easy to get started with SigNoz with out of box charts for key application
 
 ## Getting Started with SigNoz
 
-SigNoz can be installed on macOS or Linux computers in just three steps by using a simple install script.
+<GetStartedSigNoz />
 
-The install script automatically installs Docker Engine on Linux. However, on macOS, you must manually install <a href = "https://docs.docker.com/engine/install/" rel="noopener noreferrer nofollow" target="_blank" >Docker Engine</a> before running the install script.
 
-```bash
-git clone -b main https://github.com/SigNoz/signoz.git
-cd signoz/deploy/
-./install.sh
-```
+## Grafana vs Splunk: FAQ
 
-You can visit our documentation for instructions on how to install SigNoz using Docker Swarm and Helm Charts.
+**Q: Is Slunk open-source?**
 
-[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/)
+A: Unlike Grafana, Splunk **is not** open-source.
 
-If you liked what you read, then check out our GitHub repo 👇
+**Q: What are the key differences between Splunk and Grafana?**
 
-[![SigNoz GitHub repo](/img/blog/common/signoz_github.webp)](https://github.com/SigNoz/signoz)
+A: Splunk is a comprehensive data platform offering log management, real-time analytics, and machine learning capabilities, while Grafana is primarily a visualization and dashboarding tool focused on monitoring metrics and time-series data.
+
+**Q: Which tool is more suitable for large-scale enterprise deployments?**
+
+A: Splunk is often preferred for enterprise deployments due to its robust data management features, scalability, and support for complex data analysis needs. Grafana, while powerful for visualization, may require additional integration for enterprise-grade data management.
+
+**Q: How do pricing models compare between Splunk and Grafana?**
+
+A: Splunk typically follows a per-gigabyte pricing model based on data ingestion volume, Grafana, on the other hand, is open-source with optional paid enterprise features and support, making it more cost-effective for some use-cases.
+
+**Q: Which tool offers better integration with other systems and data sources?**
+
+A: Splunk has extensive integrations with a wide range of systems and data sources out-of-the-box, along with a robust ecosystem of apps and add-ons. Grafana also supports various integrations but may require additional plugins or customization for specific data sources.
+
+**Q: What level of expertise is required to use Splunk versus Grafana?**
+
+A: Splunk typically requires specialized knowledge to set up and administer due to its complexity and range of features. Grafana, with its user-friendly interface and simpler setup process, may be more accessible to users with varying levels of technical expertise.
+
+**Q: Which tool is better suited for real-time monitoring and alerting?**
+
+A: Splunk is renowned for its real-time monitoring capabilities, including advanced alerting features based on complex queries and thresholds. While Grafana supports alerting, it may not offer the same level of sophistication out-of-the-box as Splunk.
+
+**Q: Can Grafana be used alongside Splunk?**
+
+A: Yes, many organizations use Grafana alongside Splunk to leverage Grafana's superior visualization capabilities while still benefiting from Splunk's powerful data management and analytics features. Integrations can pull data from Splunk into Grafana for visualization and analysis.
 
 ---
 

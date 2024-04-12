@@ -53,7 +53,7 @@ The specification is designed into distinct types of telemetry known as signals.
 - Metrics and
 - Traces
 
-Together, these three signals form the three pillars of observability. OpenTelemetry is the bedrock for setting up an observability framework. The application code is instrumented using OpenTelemetry client libraries, which enables the generation of telemetry data. Once the telemetry data is generated and collected, OpenTelemetry needs a backend analysis tool like [SigNoz](https://signoz.io/) to which it can send the data.
+Together, these three signals form the [three pillars of observability](https://signoz.io/blog/three-pillars-of-observability/). OpenTelemetry is the bedrock for setting up an observability framework. The application code is instrumented using OpenTelemetry client libraries, which enables the generation of telemetry data. Once the telemetry data is generated and collected, OpenTelemetry needs a backend analysis tool like [SigNoz](https://signoz.io/) to which it can send the data.
 
 ### The Use Cases of OpenTelemetry
 
@@ -63,7 +63,7 @@ OpenTelemetry can be applied in various scenarios across software development an
 
   OpenTelemetry can be used to generate trace data that tracks a request across a distributed system, enabling developers to understand the end-to-end flow of a request and identify bottlenecks or errors.
 
-  For example, if a user complains about slow response times, you can use OpenTelemetry tracing data to trace the request through all the services and identify the service that is causing the delay. You will need to instrument your application with OpenTelemetry client libraries to generate traces.
+  For example, if a user complains about slow response times, you can use [OpenTelemetry tracing](https://signoz.io/blog/opentelemetry-tracing/) data to trace the request through all the services and identify the service that is causing the delay. You will need to instrument your application with OpenTelemetry client libraries to generate traces.
 
 - #### Performance Monitoring: 
 

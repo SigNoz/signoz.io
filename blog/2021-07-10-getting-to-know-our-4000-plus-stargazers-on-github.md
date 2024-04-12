@@ -41,13 +41,15 @@ The massive bump in our GitHub stargazers came from trending across all programm
 
 import Screenshot from "@theme/Screenshot"
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
    alt="Trending on GitHub"
-   height={500}
+   
    src="/img/blog/2021/07/stargazers_rise-1.webp"
-   title="We were trending on GitHub at #1 across all programming languages."
-   width={700}
-/>
+   />
+<figcaption><i>We were trending on GitHub at #1 across all programming languages.</i></figcaption>
+   </figure>
+<br/>
 
 ## Where are our stargazers from?
 
@@ -57,13 +59,15 @@ Given the universal nature of the problem we are solving, our tool should be hel
 
 Here's a distribution of our stargazers from the top 25 countries.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
    alt="Chart showing countries where SigNoz stargazers are from"
-   height={500}
+   
    src="/img/blog/2021/07/countries-1.webp"
-   title="SigNoz's stargazers belong to nations worldwide with the largest number from United States"
-   width={700}
-/>
+   />
+<figcaption><i>SigNoz's stargazers belong to nations worldwide with the largest number from United States</i></figcaption>
+   </figure>
+<br/>
 
 This puts an extra responsibility on us to build a truly global product. We are also working on making our community more diverse. So wherever you are reading this from, come and get involved with our GitHub repo. 😊
 
@@ -71,13 +75,15 @@ This puts an extra responsibility on us to build a truly global product. We are 
 
 One of the coolest things about Spencer's code was that we could see what other GitHub repositories seemed interesting to our stargazers. Of course, we understand that starring a repo is relatively easy, and GitHub users can star many repos. Still, this data gives us a general sense of what's interesting to our stargazers.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
    alt="Correlated repos to SigNoz"
-   height={700}
+   
    src="/img/blog/2021/07/correlated-repos-1.webp"
-   title="Correlated repos to SigNoz"
-   width={500}
-/>
+   />
+<figcaption><i>Correlated repos to SigNoz</i></figcaption>
+   </figure>
+<br/>
 
 In the list, we can find some interesting developer tools. NocoDB is an open-source alternative to a popular SaaS product called Airtable. We have other developer tools on the list like Supabase, Authelia, and Dolt. This makes sense as SigNoz is also a developer tool. We are an open-source alternative to APM tools like DataDog, New relic, etc. Our stargazers also seem to be interested in open-source alternatives of popular closed SaaS products.
 
@@ -89,13 +95,15 @@ This shows that the developers who are starring our repo are active developers a
 
 Here are the commit stats of our top 20 stargazers.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
    alt="Commit stats for our top 20 stargazers"
-   height={700}
+   
    src="/img/blog/2021/07/commit-stats-1.webp"
-   title="Commit stats for our top 20 stargazers"
-   width={500}
-/>
+   />
+<figcaption><i>Commit stats for our top 20 stargazers</i></figcaption>
+  </figure>
+<br/>
 
 ## Are our stargazers connected among each other?
 
@@ -105,13 +113,15 @@ On other social platforms like Facebook and Instagram, it's normal to expect a h
 
 And as we have been starred from 110 different countries, we can be certain that this is a platform-wide phenomenon not specific to a particular location.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
    alt="Distribution of shared followers of SigNoz's Stargazers"
-   height={500}
+   
    src="/img/blog/2021/07/shared-followers---2.webp"
-   title="Histogram of % shared followers for stargazers of SigNoz"
-   width={700}
-/>
+   />
+<figcaption><i>Histogram of % shared followers for stargazers of SigNoz</i></figcaption>
+   </figure>
+<br/>
 
 ## What's next?
 

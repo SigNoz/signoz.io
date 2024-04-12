@@ -83,8 +83,8 @@ Some of the key features of SigNoz include:
 
 - Monitor important application metrics of each service with out-of-box charts and visualization.
 - For each service, monitor top endpoints and their key metrics
-- Drill down into the performance of each API with tracing data showing all spans processed by the endpoint
-- Analyze API calls as part of the whole user request with Flamegraphs and Gantt charts
+- Drill down into the performance of each API with tracing data showing all [spans](https://signoz.io/blog/distributed-tracing-span/) processed by the endpoint
+- Analyze API calls as part of the whole user request with [Flamegraphs and Gantt charts](https://signoz.io/blog/flamegraphs/)
 
 To see your application performance at a glance, you can use the `Metrics` tab. The top endpoints of your services will be listed in the `Top endpoints` table.
 
@@ -431,7 +431,7 @@ Selecting the appropriate API monitoring tool is pivotal for effectively monitor
 
 SigNoz is a full-stack open surce APM tool designed natively for OpenTelemetry, a powerful framework for generating and collecting telemetry data (logs, metrics, and traces). This integration ensures thorough monitoring of service endpoints and offers valuable insights into key metrics like P95 and P99 latencies, service error rates, external API interactions, and individual endpoint performance.
 
-Its distributed tracing capabilities allow for quick identification of the root causes of API failures. With just a few clicks, you can delve into the exact traces responsible for the problem, allowing you to visualize and analyze detailed flamegraphs of individual request traces. This level of granularity empowers you to identify performance bottlenecks, dependencies, and anomalies with precision and facilitates rapid troubleshooting and optimization.
+Its [distributed tracing](https://signoz.io/blog/distributed-tracing-in-microservices/) capabilities allow for quick identification of the root causes of API failures. With just a few clicks, you can delve into the exact traces responsible for the problem, allowing you to visualize and analyze detailed flamegraphs of individual request traces. This level of granularity empowers you to identify performance bottlenecks, dependencies, and anomalies with precision and facilitates rapid troubleshooting and optimization.
 
 ## Final Thoughts
 

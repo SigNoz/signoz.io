@@ -1,10 +1,10 @@
 import React from "react";
-import ReactGA from "react-ga";
+import ReactGA from "react-ga4";
 import Heading from "../../components/ui/Heading";
 import SubHeading from "../../components/ui/SubHeading";
 import Button from "../../components/ui/Button";
 
-ReactGA.initialize("UA-152867655-1");
+ReactGA.initialize("G-6NFJ2Y6NQN");
 
 const CTA = () => {
 

@@ -104,7 +104,7 @@ Observability enables application owners to get answers to any question that mig
 
 ### Logs, metrics, and traces as pillars of observability
 
-Logs, metrics, and traces are commonly referred to as three pillars of observability. These three telemetry signals when correlated can drive application insights faster. 
+Logs, metrics, and traces are commonly referred to as [three pillars of observability](https://signoz.io/blog/three-pillars-of-observability/). These three telemetry signals when correlated can drive application insights faster. 
 
 For robust observability, having a seamless way to correlate your telemetry signals is critical. For example, if you see that the latency of a particular service is high at the moment, can you deep-dive into relevant logs quickly? Can you correlate your metrics with traces to figure out where in the request journey the problem occurred?
 

@@ -110,7 +110,7 @@ In the sample code shown below, we have two receivers:
 Default OpenTelemetry protocol to transfer telemetry data. SigNoz receives telemetry data in OTLP format.
 
 2. Jaeger<br></br>
-You can also receive traces data in Jaeger format, which is a popular distributed tracing tool.
+You can also receive traces data in Jaeger format, which is a popular [distributed tracing](https://signoz.io/blog/distributed-tracing-in-microservices/) tool.
 
 ```bash
 receivers:
@@ -285,7 +285,7 @@ OpenTelemetry Agent and OpenTelemetry Collector are two ways of deploying the Op
 
 ### What is the difference between OpenTelemetry Collector and Jaeger?
 
-OpenTelemetry collector is part of the OpenTelemetry project and it's designed to collect, process, and export telemetry data - including metrics, logs, and traces. While jaeger, on the other hand, is a distributed tracing system used for monitoring and troubleshooting microservices-based system. Jaeger specifically focuses on traces.
+OpenTelemetry collector is part of the [OpenTelemetry project](https://signoz.io/blog/opentelemetry-apm/) and it's designed to collect, process, and export telemetry data - including metrics, logs, and traces. While jaeger, on the other hand, is a distributed tracing system used for monitoring and troubleshooting microservices-based system. Jaeger specifically focuses on traces.
 
 Jaeger can receive trace data from the OpenTelemetry Collector or directly from instrumented applications.
 

@@ -69,7 +69,7 @@ SigNoz also provides a metrics builder using which you can create customized das
 
 <br></br>
 
-SigNoz also provides distributed tracing, using which you can visualize completely how a user request performs in its entirety. You can trace calls from your frontend web application to any database interactions made during the call. You can pinpoint specific MySQL queries which are causing performance bottlenecks.
+SigNoz also provides [distributed tracing](https://signoz.io/blog/distributed-tracing-in-microservices/), using which you can visualize completely how a user request performs in its entirety. You can trace calls from your frontend web application to any database interactions made during the call. You can pinpoint specific MySQL queries which are causing performance bottlenecks.
 
 <figure data-zoomable align='center'>
     <img src="/img/blog/2022/06/db_traces.webp" alt="Distributed tracing"/>

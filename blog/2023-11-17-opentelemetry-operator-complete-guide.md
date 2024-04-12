@@ -357,7 +357,7 @@ In the Traces tab, you can utilize the ‘Trace Explorer’ to filter traces by 
 </figure>
 <br />
 
-Switching over to the new Traces Explorer UI, you can query metrics using the Query Builder, and you can see Root Spans under the Traces tab.
+Switching over to the new Traces Explorer UI, you can query metrics using the Query Builder, and you can see Root [Spans](https://signoz.io/blog/distributed-tracing-span/) under the Traces tab.
 
 <figure data-zoomable align='center'>
     <img src="/img/blog/2023/11/query-builder-petclinic.webp" alt="Query Builder in Trace Explorer"/>

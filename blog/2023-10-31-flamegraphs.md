@@ -160,7 +160,7 @@ Here are detailed guidelines to instrument your application(s) and visualize the
 Once you've instrumented your code, you can configure your SDK or OpenTelemetry exporter to send data to SigNoz.
 
 - Run your application and perform actions or generate load to capture traces.
-- In SigNoz, navigate to the trace data section and select the span you want to analyze. Spans are fundamental building blocks of distributed tracing. A single trace in distributed tracing consists of a series of tagged time intervals known as spans.
+- In SigNoz, navigate to the trace data section and select the span you want to analyze. [Spans](https://signoz.io/blog/distributed-tracing-span/) are fundamental building blocks of distributed tracing. A single trace in distributed tracing consists of a series of tagged time intervals known as spans.
 
 <figure data-zoomable align='center'>
     <img src="/img/blog/2023/10/signoz_traces.webp" alt="Trace Explorer page in SigNoz."/>

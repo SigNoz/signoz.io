@@ -129,7 +129,7 @@ The OpenTelemetry Java Jar agent provides a quick and convenient way to enable y
 
 As mentioned earlier, OpenTelemetry is a vendor-agnostic instrumentation library. So the telemetry data is portable. You can configure it to export in many different formats. A tool like [SigNoz](https://signoz.io/) supports the default OTLP formats and is a perfect choice for sending your telemetry data.
 
-SigNoz is a full-stack open-source APM tool built natively for OpenTelemetry. It provides metrics monitoring, log management, and distributed tracing under a single pane of glass.
+SigNoz is a full-stack open-source APM tool built natively for OpenTelemetry. It provides metrics monitoring, log management, and [distributed tracing](https://signoz.io/blog/distributed-tracing-in-microservices/) under a [single pane of glass](https://signoz.io/blog/single-pane-of-glass-monitoring/).
 
 It comes with a powerful visualization layer where you can visualize charts like the popular RED metrics and distributed tracing with flame graphs and Gantt charts.
 
@@ -148,21 +148,25 @@ cd signoz/deploy/
 
 import Screenshot from "@theme/Screenshot"
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
   alt="SigNoz UI showing RED metrics"
-  height={500}
+  
   src="/img/blog/common/signoz_charts_application_metrics.webp"
-  title="SigNoz Dashboard with visualization of the popular RED metrics for your application (Number of requests, rate of error & duration)"
-  width={700}
-/>
+  />
+<figcaption><i>SigNoz Dashboard with visualization of the popular RED metrics for your application (Number of requests, rate of error & duration)</i></figcaption>
+  </figure>
+<br/>
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
   alt="SigNoz UI showing RED metrics"
-  height={500}
+  
   src="/img/blog/common/signoz_flamegraphs.webp"
-  title="Flamegraphs and Gantt Charts for visualizing distributed tracing"
-  width={700}
-/>
+  />
+<figcaption><i>Flamegraphs and Gantt Charts for visualizing distributed tracing</i></figcaption>
+  </figure>
+<br/>
 
 
 Read how to monitor your Spring Boot application with OpenTelemetry Java agent and SigNoz 👇<br></br>

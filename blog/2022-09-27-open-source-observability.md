@@ -46,7 +46,7 @@ Observability enables application owners to get answers to any question that mig
 
 Observability is fundamentally a data analytics problem. Suppose you have collected all sorts of telemetry data from your IT infrastructure and application code. Now the challenge is creating an analytics layer to help you reach potential solutions quickly.
 
-Logs, metrics, and traces are often touted as the three pillars of observability. At SigNoz, we believe [differently](https://signoz.io/blog/observability-net/), but having access to these three telemetry signals is the first step towards observability. The tooling ecosystem for these three telemetry signals is so varied that it might be daunting for application owners to decide which tools to use. There are broadly two options: a SaaS observability vendor or open source observability tools.
+Logs, metrics, and traces are often touted as the [three pillars of observability](https://signoz.io/blog/three-pillars-of-observability/). At SigNoz, we believe [differently](https://signoz.io/blog/observability-net/), but having access to these three telemetry signals is the first step towards observability. The tooling ecosystem for these three telemetry signals is so varied that it might be daunting for application owners to decide which tools to use. There are broadly two options: a SaaS observability vendor or open source observability tools.
 
 ### Open Source better suited for Observability
 
@@ -62,7 +62,7 @@ As discussed earlier, observability is fundamentally a data analytics problem. H
 
 For example, you might use Prometheus for metrics and Jaeger for traces. But how would you correlate your metrics with traces?
 
-For robust observability, having a seamless way to correlate your telemetry signals is critical. For example, if you see that the latency of a particular service is high at the moment, can you deep-dive into relevant logs quickly? Can you correlate your metrics with traces to figure out where in the request journey the problem occurred? Building correlation across different tools is painful and requires a lot of engineering bandwidth. At SigNoz, we believe in providing a single pane of glass for observability.
+For robust observability, having a seamless way to correlate your telemetry signals is critical. For example, if you see that the latency of a particular service is high at the moment, can you deep-dive into relevant logs quickly? Can you correlate your metrics with traces to figure out where in the request journey the problem occurred? Building correlation across different tools is painful and requires a lot of engineering bandwidth. At SigNoz, we believe in providing a [single pane of glass](https://signoz.io/blog/single-pane-of-glass-monitoring/) for observability.
 
 ### Single pane of glass for observability
 

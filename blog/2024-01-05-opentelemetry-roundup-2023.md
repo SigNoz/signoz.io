@@ -106,7 +106,7 @@ We see many teams being comfortable with learning Otel fundamentals, as they kno
 
 5. **Better Control and Optimization with OTel**
 
-We have seen many customers use `filterprocessor` in OTel collector to optimise their metrics cost. This was seamless and gave better control to users on which metrics to send. Also, OTel collector gives more controls over metrics and spans they want to send. For example, you can choose which type of metrics you want to send for `hostmetrics` receiver. Most proprietary agents don’t give this flexibility to users.
+We have seen many customers use `filterprocessor` in OTel collector to optimise their metrics cost. This was seamless and gave better control to users on which metrics to send. Also, OTel collector gives more controls over metrics and [spans](https://signoz.io/blog/distributed-tracing-span/) they want to send. For example, you can choose which type of metrics you want to send for `hostmetrics` receiver. Most proprietary agents don’t give this flexibility to users.
 
 _Better control_: We have seen customers use include and exclude instrumentation of Java classes using [annotation](https://opentelemetry.io/docs/instrumentation/java/automatic/annotations/) very easily.
 
@@ -168,7 +168,7 @@ A [new repo](https://github.com/open-telemetry/opentelemetry-proto-profile/pull/
 
 2. **Query Standardization working group**
 
-There is a [WG under TAG observability](https://github.com/cncf/tag-observability/blob/main/working-groups/query-standardization.md) in CNCF, which is working on query standardization. The working group is not specifically under OpenTelemetry project, as the scope of Otel is confined to generating telemetry data - but how this working group progresses would be interesting to see. If successful, this would help standardize the query language different observability backends use for creating dashboards and alerts, and potentially enable porting of queries across backends.
+There is a [WG under TAG observability](https://github.com/cncf/tag-observability/blob/main/working-groups/query-standardization.md) in CNCF, which is working on query standardization. The working group is not specifically under [OpenTelemetry project](https://signoz.io/blog/opentelemetry-apm/), as the scope of Otel is confined to generating telemetry data - but how this working group progresses would be interesting to see. If successful, this would help standardize the query language different observability backends use for creating dashboards and alerts, and potentially enable porting of queries across backends.
 
 3. **CI/CD Observability working group**
 

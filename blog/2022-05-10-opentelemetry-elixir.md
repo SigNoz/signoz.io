@@ -20,7 +20,7 @@ import { LiteYoutubeEmbed } from "react-lite-yt-embed";
   <link rel="canonical" href="https://signoz.io/blog/opentelemetry-elixir/"/>
 </head>
 
-OpenTelemetry can be used to instrument your Elixir applications to generate telemetry data. The telemetry data can then be visualized using an observability tool to monitor your Elixir application performance. In this tutorial, we will use OpenTelemetry Elixir libraries to instrument an Elixir application and then visualize it using SigNoz.
+OpenTelemetry can be used to instrument your Elixir applications to generate telemetry data. The telemetry data can then be visualized using an observability tool to monitor your Elixir application performance. In this tutorial, we will use [OpenTelemetry Elixir](https://signoz.io/docs/instrumentation/elixir/) libraries to instrument an Elixir application and then visualize it using SigNoz.
 
 
 <!--truncate-->

@@ -99,13 +99,15 @@ Each logical part of the user request journey is broken down into its components
 
 import Screenshot from "@theme/Screenshot"
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="Distributed Tracing shown as Flamegraphs"
-    height={500}
+    
     src="/img/blog/2022/02/trace_spans.webp"
-    title="Distributed Tracing breaks down a user request into the components that it touches. The width of the bars is proportional to the time a given operation took."
-    width={700}
-/>
+    />
+<figcaption><i>Distributed Tracing breaks down a user request into the components that it touches. The width of the bars is proportional to the time a given operation took.</i></figcaption>
+</figure>
+<br/>
 
 The questions that we discussed in the previous section can be easily answered with the above representation of traces.
 
@@ -134,23 +136,27 @@ You can then select a backend of your choice to store and visualize the tracing 
 
 SigNoz comes with out of box visualizations for your tracing data. The `Traces` dashboard of SigNoz provides you with powerful filters that can be used to analyze your tracing data.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="Traces tab of SigNoz dashboard"
-    height={500}
+    
     src="/img/blog/2022/03/dt_traces_tab.webp"
-    title="The Traces tab of SigNoz provides powerful filters like service name, status, HTTP status code, operation, etc. to analyze your traces data quickly."
-    width={700}
-/>
+    />
+<figcaption><i>The Traces tab of SigNoz provides powerful filters like service name, status, HTTP status code, operation, etc. to analyze your traces data quickly.</i></figcaption>
+</figure>
+<br/>
 
 You can also view a selected span(a single logical unit of work that is a part of trace) as part of the entire request with the help of Flamegraphs and Gantt charts.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="Flamegraphs and Gantt Charts"
-    height={500}
+    
     src="/img/blog/2022/03/dt_trace_details_tab.webp"
-    title="Flamegraphs and Gantt Charts visualizing the journey of a user request from a single trace data (SigNoz Dashboard)"
-    width={700}
-/>
+    />
+<figcaption><i>Flamegraphs and Gantt Charts visualizing the journey of a user request from a single trace data (SigNoz Dashboard)</i></figcaption>
+</figure>
+<br/>
 
 SigNoz can be installed on macOS or Linux computers in just three steps by using a simple install script.
 

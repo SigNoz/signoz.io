@@ -115,7 +115,7 @@ Users who are getting started with OpenTelemetry sometimes get confused with so 
     These are specific implementations of the OpenTelemetry API and SDK for different programming languages. They are the actual packages or modules that developers integrate into their software applications to collect, process, and export telemetry data (metrics, logs, and traces).
 
 - **OpenTelemetry Collector**<br></br>
-    The OpenTelemetry Collector is a standalone service or agent that can collect, process, and export telemetry data (metrics, traces, and logs). It plays a crucial role in the OpenTelemetry architecture by acting as a central component that can receive data from various sources, process and enrich this data, and then send it to multiple backends for analysis and monitoring.
+    The OpenTelemetry Collector is a standalone service or agent that can collect, process, and export telemetry data (metrics, traces, and logs). It plays a crucial role in the [OpenTelemetry architecture](https://signoz.io/blog/opentelemetry-architecture/) by acting as a central component that can receive data from various sources, process and enrich this data, and then send it to multiple backends for analysis and monitoring.
 
 [OpenTelemetry Collector - architecture and configuration guide](https://signoz.io/blog/opentelemetry-collector-complete-guide/)
 
@@ -207,13 +207,15 @@ Some of the key features of Prometheus are:
 - an alert manager to handle alerts
 - Basic visualization layer but can be combined with Grafana to create rich visualizations
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="Prometheus Architecture"
-    height={500}
+    
     src="/img/blog/2021/09/otel_vs_prometheus_prometheus_architecture-min.webp"
-    title="Architecture of Prometheus (Source: Prometheus website)"
-    width={700}
-/>
+    />
+<figcaption><i>Architecture of Prometheus (Source: Prometheus website)"
+    </figure>
+<br/>
 
 ### Disadvantages of Prometheus
 
@@ -248,7 +250,7 @@ Whereas Prometheus provides a time-series database and basic web visualization l
 
 ## Interoperability between OpenTelemetry and Prometheus
 
-Prometheus supports OpenTelemetry metrics. On the other hand, you can configure OpenTelemetry Collector to collect metrics from Prometheus targets. This interoperability means you can use both the tools to monitor your software systems based on your use case.
+Prometheus supports [OpenTelemetry metrics](https://signoz.io/blog/introduction-to-opentelemetry-metrics/). On the other hand, you can configure OpenTelemetry Collector to collect metrics from Prometheus targets. This interoperability means you can use both the tools to monitor your software systems based on your use case.
 
 OpenTelemetry Collector provides various receivers including a receiver for Prometheus which you can use to collect Prometheus metrics. The data flow for this setup will look like below:
 
@@ -348,7 +350,7 @@ Both OpenTelemetry and Prometheus are open-source projects, implying that they a
 
 ## Future-proofing your Observability with OpenTelemetry
 
-With Prometheus, you can monitor metrics. But your engineering teams will never be able to identify the root cause of issues in your application using just metrics. For that, you also need distributed tracing and logs.
+With Prometheus, you can monitor metrics. But your engineering teams will never be able to identify the root cause of issues in your application using just metrics. For that, you also need [distributed tracing](https://signoz.io/blog/distributed-tracing-in-microservices/) and logs.
 
 OpenTelemetry is becoming the world standard for instrumenting application code due to its multi-language support and ease of use. But OpenTelemetry helps only to generate and collect telemetry data. You need to export the telemetry data to a backend analysis tool so that your teams can store, query, and visualize the collected data.
 
@@ -356,13 +358,15 @@ OpenTelemetry when combined with a OpenTelemetry-native APM like SigNoz can prov
 
 SigNoz comes with out of box visualization of things like RED metrics. There is a unified UI of logs, metrics, and traces so that you can easily identify the root cause of issues causing things like latency in your apps. 
 
-<!-- <Screenshot
+<!-- <figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="SigNoz UI"
-    height={500}
+    
     src="/img/blog/common/signoz_charts_application_metrics.webp"
-    title="SigNoz UI showing application overview metrics like RPS, 50th/90th/99th Percentile latencies, and Error Rate"
-    width={700}
-/> -->
+    />
+<figcaption><i>SigNoz UI showing application overview metrics like RPS, 50th/90th/99th Percentile latencies, and Error Rate"
+    </figure>
+<br/> -->
 
 <figure data-zoomable>
     <img src="/img/blog/common/signoz_charts_application_metrics.webp" alt="SigNoz dashboard showing popular RED metrics"/>

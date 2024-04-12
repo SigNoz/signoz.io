@@ -761,7 +761,7 @@ Feel free to use this repo to test out OpenTelemetry instrumentation and how to 
 
 ## Library and framework support
 
-Besides OpenTelemetry core modules, it is important to install instrumentation packages for every important library and framework which your service depends upon. Beyond the critical telemetry data these components emit, library and framework integrations are often required to ensure that the trace context is properly propagated.
+Besides OpenTelemetry core modules, it is important to install instrumentation packages for every important library and framework which your service depends upon. Beyond the critical telemetry data these components emit, library and framework integrations are often required to ensure that the [trace context](https://signoz.io/blog/context-propagation-in-distributed-tracing/) is properly propagated.
 
 OpenTelemetry automatically provides instrumentation for a large number of libraries and frameworks, right out of the box.
 

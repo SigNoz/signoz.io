@@ -269,7 +269,7 @@ Remember that once a span has been completed, it becomes immutable, and any furt
 
 ## Getting started with OpenTelemetry tracing
 
-If you’re looking for the right distributed tracing tool that supports OpenTelemetry, then SigNoz is the right choice. SigNoz is an open-source distributed tracing tool that supports OpenTelemetry natively. It also provides metrics monitoring and logs management under a single pane of glass.
+If you’re looking for the right [distributed tracing](https://signoz.io/blog/opentelemetry-tracing/) tool that supports OpenTelemetry, then SigNoz is the right choice. SigNoz is an open-source distributed tracing tool that supports OpenTelemetry natively. It also provides metrics monitoring and logs management under a single pane of glass.
 
 One of the key strengths of SigNoz is its native support for OpenTelemetry, which is rapidly emerging as the global standard for application instrumentation. By adopting OpenTelemetry, users can avoid vendor lock-in and gain access to a set of convenient client libraries that streamline the implementation of distributed tracing.
 

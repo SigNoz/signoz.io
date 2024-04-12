@@ -124,7 +124,7 @@ Once the opentelemetry-operator deployment is ready, we can proceed with creatio
 
 ### A note on language confusion: what is a collector
 
-When first using OpenTelemetry, it’s possible to get a bit hung up on the language of a collector. The term is intentionally indeterminate, since a collector may exist on the same server as the data being generated or very close to where the data is being received. In the OpenTelemetry project a collector can receive, process, or export data.
+When first using OpenTelemetry, it’s possible to get a bit hung up on the language of a collector. The term is intentionally indeterminate, since a collector may exist on the same server as the data being generated or very close to where the data is being received. In the [OpenTelemetry project](https://signoz.io/blog/opentelemetry-apm/) a collector can receive, process, or export data.
 
 ![A collector diagram](https://opentelemetry.io/docs/collector/img/otel-collector.svg)
 

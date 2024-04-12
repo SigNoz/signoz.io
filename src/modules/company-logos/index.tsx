@@ -4,7 +4,6 @@ import styles from "./styles.module.css";
 const COMPANIES = [
   { image: "/img/users/netapp.webp", imageDesc: "netapp logo" },
   { image: "/img/users/samsung.webp", imageDesc: "samsung logo" },
-  { image: "/img/users/zoho.webp", imageDesc: "zoho logo" },
   { image: "/img/users/comcast.webp", imageDesc: "comcast logo" },
   { image: "/img/users/appier.webp", imageDesc: "appier logo" },
   { image: "/img/users/wombo.webp", imageDesc: "wombo logo" },

@@ -154,7 +154,7 @@ http_requests_total{job="apiserver", handler="/api/comments"}[5m]
 ```
 
 The expression above queries the time series engine for all `http_requests_total`
- occurrences that come under the `apiserver` job and `/api/comments` handler. The intended output would be a range that spans five minutes [5m] from the moment the expression executes.
+ occurrences that come under the `apiserver` job and `/api/comments` handler. The intended output would be a range that [spans](https://signoz.io/blog/distributed-tracing-span/) five minutes [5m] from the moment the expression executes.
 
 On the other hand, Loki provides a query language known as LogQL which is inspired by PromQL. LogQL uses labels and operators for filtering. There are two types of LogQL queries: log queries return the content of log lines, and metric queries enable you to calculate values based on query results.
 
@@ -183,7 +183,7 @@ Some of the key use cases for Loki are:
 
 Loki is efficient at keeping the cost of log management low. But it doesn’t perform well if you want to index and query high cardinality data. Prometheus can only be used for metrics monitoring. You will have to use other tools for monitoring other telemetry signals. Using multiple tools for setting up your monitoring stack results in operational complexity and dependencies.
 
-Instead of using Loki and Prometheus, you can use [SigNoz](https://signoz.io/) - an open source full-stack observability platform. SigNoz provides log management, metrics monitoring, and distributed tracing under a single pane of glass and can be a one-stop solution for all your monitoring needs.
+Instead of using Loki and Prometheus, you can use [SigNoz](https://signoz.io/) - an open source full-stack observability platform. SigNoz provides log management, metrics monitoring, and distributed tracing under a [single pane of glass](https://signoz.io/blog/single-pane-of-glass-monitoring/) and can be a one-stop solution for all your monitoring needs.
 
 <figure data-zoomable align='center'>
     <img src="/img/blog/common/signoz_dashboard_homepage.webp" alt="SigNoz dashboard"/>

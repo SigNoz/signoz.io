@@ -387,7 +387,7 @@ You can also create alerts on any metric. Learn how to create alerts [here](htt
 
 ### Visualizing NGINX logs
 
-In order to visualize the logs sent by the OpenTelemetry collector, head over to Signoz → Logs → Logs Explorer. In the logs explorer, you can filter your logs using the tag `app=nginx`, as shown in the image below:
+In order to visualize the logs sent by the OpenTelemetry collector, head over to Signoz → Logs → Logs Explorer. In the logs explorer, you can filter your [logs](https://signoz.io/blog/nginx-logging/) using the tag `app=nginx`, as shown in the image below:
 
 <figure data-zoomable align='center'>
     <img className="box-shadowed-image" src="/img/blog/2023/12/nginx_logs.webp" alt="You can visualize the volume of logs as well as the actual log lines easily in this UI. "/>

@@ -223,7 +223,7 @@ curl --proto '=https' --tlsv1.2 -fOL https://github.com/open-telemetry/opentelem
 Create a new directory named `otelcol-contrib` and then extract the contents of the archive into this newly created directory with the following command:
 
 ```bash
-mkdir otelcol-contrib && tar xvzf otelcol-contrib_0.90.0_darwin_arm64.tar -C otelcol-contrib
+mkdir otelcol-contrib && tar xvzf otelcol-contrib_0.90.0_darwin_arm64.tar.gz -C otelcol-contrib
 ```
 
 ### Step 3 - Setting up the configuration file

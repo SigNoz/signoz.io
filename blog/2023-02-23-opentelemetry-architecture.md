@@ -66,7 +66,7 @@ The context object is a key-value store associated with an execution context, su
 
 ### Propagators:
 
-In order for distributed tracing to work, the trace context must be shared by every service that participates in the transaction. Propagators accomplish this by serializing and deserializing the context object, allowing the signals to follow their transactions across network requests.
+In order for distributed tracing to work, the [trace context](https://signoz.io/blog/context-propagation-in-distributed-tracing/) must be shared by every service that participates in the transaction. Propagators accomplish this by serializing and deserializing the context object, allowing the signals to follow their transactions across network requests.
 
 Hopefully, you must be comfortable with the basic concepts now. Let's try to understand the design of OpenTelemetry from a client perspective.
 

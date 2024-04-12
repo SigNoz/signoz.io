@@ -15,6 +15,7 @@ keywords:
   - plg stack
   - plg stack alternative
 ---
+import GetStartedSigNoz from '../docs/shared/get-started-signoz.md';
 
 <head>
   <link rel="canonical" href="https://signoz.io/blog/loki-alternatives/"/>

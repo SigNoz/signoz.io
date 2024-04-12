@@ -38,7 +38,7 @@ A front-end service may distribute a web query to many hundreds of query servers
 
 Moreover, web-search users are sensitive to delays, which can be caused by poor performance in any sub-system. An engineer looking only at the overall latency may know there is a problem but may not be able to guess which service is at fault nor why it is behaving poorly. And such services are also not written and managed by a single team. Also, day by day, new components might get added to the system. Distributed tracing provides insights into the inner workings of such a complex system. Tracing such complex systems enables engineering teams to set up an observability framework.
 
-Distributed tracing gives insights into how a particular service is performing as part of the whole in a distributed software system. It involves passing a trace context with each user request which is then passed across hosts, services, and protocols to track the user request.
+Distributed tracing gives insights into how a particular service is performing as part of the whole in a distributed software system. It involves passing a [trace context](https://signoz.io/blog/context-propagation-in-distributed-tracing/) with each user request which is then passed across hosts, services, and protocols to track the user request.
 
 In this article, we will use OpenTelemetry and SigNoz to enable distributed tracing in a sample Golang application with microservices. But before we deep dive into the implementation steps, let us give you a brief context on OpenTelemetry and SigNoz.
 

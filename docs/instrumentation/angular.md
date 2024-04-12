@@ -6,6 +6,8 @@ description: Instrument your angular frontend app with OpenTelemetry and send da
 
 import { LiteYoutubeEmbed } from "react-lite-yt-embed";
 
+import InstrumentationFAQ from '../shared/instrumentation-faq.md'
+
 ![Angular Instrumentation](../../static/img/angular-instrumentation.webp)
 
 

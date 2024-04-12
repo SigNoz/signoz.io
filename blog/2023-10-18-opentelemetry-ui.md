@@ -19,7 +19,7 @@ keywords:
 
 import GetStartedSigNoz from '../docs/shared/get-started-signoz.md';
 
-OpenTelemetry is a Cloud Native Computing Foundation(CNCF) project aimed at standardizing the way we instrument applications for generating telemetry data(logs, metrics, and traces). However, OpenTelemetry does not provide storage and visualization for the collected telemetry data. For visualizing OpenTelemetry data, you need an OpenTelemetry UI. The data collected by OpenTelemetry can be sent to a backend of your choice, which can then be visualized.
+OpenTelemetry is a Cloud Native Computing Foundation(CNCF) project aimed at standardizing the way we [instrument applications](https://signoz.io/docs/instrumentation/) for generating telemetry data(logs, metrics, and traces). However, OpenTelemetry does not provide storage and visualization for the collected telemetry data. For visualizing OpenTelemetry data, you need an OpenTelemetry UI. The data collected by OpenTelemetry can be sent to a backend of your choice, which can then be visualized.
 
 <!--truncate-->
 
@@ -56,7 +56,7 @@ The specification is designed into distinct types of telemetry known as signals.
 - Metrics and
 - Traces
 
-Together, these three signals form the three pillars of observability. OpenTelemetry is the bedrock for setting up an observability framework. The application code is instrumented using OpenTelemetry client libraries, which enables the generation of telemetry data. Once the telemetry data is generated and collected, you need to configure the OpenTelemetry exporter to send data to a backed analysis tool like [SigNoz](https://signoz.io/).
+Together, these three signals form the [three pillars of observability](https://signoz.io/blog/three-pillars-of-observability/). OpenTelemetry is the bedrock for setting up an observability framework. The application code is instrumented using OpenTelemetry client libraries, which enables the generation of telemetry data. Once the telemetry data is generated and collected, you need to configure the OpenTelemetry exporter to send data to a backed analysis tool like [SigNoz](https://signoz.io/).
 
 ## Why do we need an OpenTelemetry UI?
 
@@ -95,7 +95,7 @@ An OpenTelemetry UI should include APM metrics to provide a comprehensive view o
 
 Distributed tracing is a powerful observability feature for tracking the journey of a request as it flows through the various components of a distributed system. It provides a comprehensive view of user requests across various services and network boundaries. It can help identify performance bottlenecks and optimize system performance.
 
-In an OpenTelemetry UI, you should be able to do the following with OpenTelemetry trace data:
+In an OpenTelemetry UI, you should be able to do the following with [OpenTelemetry trace](https://signoz.io/blog/opentelemetry-distributed-tracing-part-1/) data:
 
 **Switch easily from application metrics to corresponding trace data.**
 

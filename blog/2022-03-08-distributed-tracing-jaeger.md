@@ -41,7 +41,7 @@ In the world of microservices, a user request travels through hundreds of servic
 
 <br></br>
 
-Distributed tracing gives you insight into how a particular service is performing as part of the whole in a distributed software system. There are two essential concepts involved in distributed tracing: **Spans** and **trace context**.
+Distributed tracing gives you insight into how a particular service is performing as part of the whole in a distributed software system. There are two essential concepts involved in distributed tracing: **[Spans](https://signoz.io/blog/distributed-tracing-span/)** and **[trace context](https://signoz.io/blog/context-propagation-in-distributed-tracing/)**.
 
 User requests are broken down into spans.
 
@@ -84,7 +84,7 @@ Let us see in detail what these components are and how these components come tog
 
 Instrumentation is the process of generating telemetry data(logs, metrics, and traces) from your application code. It is essentially writing code that enables your application code to emit telemetry data, which can be used later to investigate issues.
 
-Most distributed tracing tools offer clients libraries, agents, and SDKs to instrument application code. Jaeger's client libraries for instrumentation are based on <a href = "https://opentracing.io/" rel="noopener noreferrer nofollow" target="_blank" ><b>OpenTracing APIs</b></a>. 
+Most distributed tracing tools offer clients libraries, agents, and SDKs to [instrument application](https://signoz.io/docs/instrumentation/) code. Jaeger's client libraries for instrumentation are based on <a href = "https://opentracing.io/" rel="noopener noreferrer nofollow" target="_blank" ><b>OpenTracing APIs</b></a>. 
 
 OpenTracing was an open-source project aimed at providing vendor-neutral APIs and instrumentation for distributed tracing. It later got merged into <a href = "https://opentelemetry.io/" rel="noopener noreferrer nofollow" target="_blank" ><b>OpenTelemetry</b></a>. Jaeger has official client libraries in the following languages:
 

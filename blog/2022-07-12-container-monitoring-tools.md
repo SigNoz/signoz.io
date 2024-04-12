@@ -61,7 +61,7 @@ Here are our top choices of monitoring tools that can help you get better insigh
 
 [SigNoz](https://signoz.io/) is a full-stack open-source application monitoring tool. It is suited to monitor cloud-native applications based on distributed architecture like microservices and serverless. It is built to support OpenTelemetry natively. OpenTelemetry is an open source project under Cloud Native Computing Foundation that is becoming a world standard for instrumenting cloud-native applications.
 
-SigNoz provides distributed tracing to track transactions across services. You can easily correlate your application and infrastructure metrics with traces, giving better insights to debug performance issues.
+SigNoz provides [distributed tracing](https://signoz.io/blog/distributed-tracing-in-microservices/) to track transactions across services. You can easily correlate your application and infrastructure metrics with traces, giving better insights to debug performance issues.
 
 ### Prometheus + Grafana
 

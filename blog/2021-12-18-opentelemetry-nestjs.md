@@ -36,7 +36,7 @@ Monitoring your Nestjs application is critical for performance management. But s
 
 OpenTelemetry is the leading open-source standard for instrumenting your code to generate telemetry data that can be a one-stop solution for monitoring Nestjs applications.
 
-OpenTelemetry is a set of tools, APIs, and SDKs used to instrument applications to create and manage telemetry data(Logs, metrics, and traces). It aims to make telemetry data(logs, metrics, and traces) a built-in feature of cloud-native software applications.
+OpenTelemetry is a set of tools, APIs, and SDKs used to [instrument applications](https://signoz.io/docs/instrumentation/) to create and manage telemetry data(Logs, metrics, and traces). It aims to make telemetry data(logs, metrics, and traces) a built-in feature of cloud-native software applications.
 
 One of the biggest advantages of using OpenTelemetry is that it is vendor-agnostic. It can export data in multiple formats, which you can send to a backend of your choice.
 
@@ -129,7 +129,7 @@ process.on("SIGTERM", () => {
 export default sdk;
 ```
 
-OpenTelemetry Node SDK currently does not detect the `OTEL_RESOURCE_ATTRIBUTES` from `.env` files as of today. That’s why we need to include the variables in the `tracing.js` file itself.
+[OpenTelemetry Node](https://signoz.io/opentelemetry/nodejs/) SDK currently does not detect the `OTEL_RESOURCE_ATTRIBUTES` from `.env` files as of today. That’s why we need to include the variables in the `tracing.js` file itself.
 
 About environment variables:
 

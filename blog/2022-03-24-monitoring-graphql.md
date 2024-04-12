@@ -83,13 +83,15 @@ When you are done installing SigNoz, you can access the UI at [http://localhost
 
 import Screenshot from "@theme/Screenshot"
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
    alt="SigNoz dashboard"
-   height={500}
+   
    src="/img/blog/2022/02/signoz_dashboard.webp"
-   title="SigNoz dashboard - It shows services from a sample app that comes bundled with the application"
-   width={700}
-/>
+   />
+<figcaption><i>SigNoz dashboard - It shows services from a sample app that comes bundled with the application</i></figcaption>
+</figure>
+<br/>
 
 ### Running sample application
 
@@ -158,13 +160,15 @@ Below are the steps to run the sample GraphQL application with OpenTelemetry.
 
    Open GraphQL interface at [http://localhost:4000/graphql](http://localhost:4000/graphql)
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
    alt="GraphQL UI"
-   height={500}
+   
    src="/img/blog/2022/03/graphql_ui.webp"
-   title="GraphQL interface to fetch data using queries"
-   width={700}
-/>
+   />
+<figcaption><i>GraphQL interface to fetch data using queries</i></figcaption>
+</figure>
+<br/>
 
 ## Monitoring GraphQL APIs with SigNoz dashboards
 
@@ -187,50 +191,58 @@ query{
 
 Now, open the SigNoz dashboard in your browser at [http://localhost:3301/dashboard](http://localhost:3301/dashboard). You should now be able to notice `Graphql-service` in the list of services being monitored on the dashboard.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
    alt="GraphQL service being monitored by SigNoz"
-   height={500}
+   
    src="/img/blog/2022/03/graphql_app_signoz_dashboard.webp"
-   title="GraphQL service being monitored by SigNoz"
-   width={700}
-/>
+   />
+<figcaption><i>GraphQL service being monitored by SigNoz</i></figcaption>
+</figure>
+<br/>
 
 Here are a list of things that you can monitor about your GraphQL APIs with SigNoz.
 
 1. **Monitor list of top endpoints**<br></br>
    Our example telemetry configuration assumes that GraphQL is running locally, and that we want to process every span individually as it's emitted.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
    alt="List of top endpoints of GraphQL service shown by SigNoz"
-   height={500}
+   
    src="/img/blog/2022/03/graphql_top_endpoints.webp"
-   title="List of top endpoints of GraphQL service shown by SigNoz"
-   width={700}
-/>
+   />
+<figcaption><i>List of top endpoints of GraphQL service shown by SigNoz</i></figcaption>
+</figure>
+<br/>
 
 2. **Explore all events(spans) in your GraphQL service**<br></br>
    You can get a list of all the events(or [spans](https://signoz.io/blog/distributed-tracing-span/) as defined in distributed tracing) related to your `graphql-service`. Use powerful filters on the `Traces` tab of SigNoz dashboard to analyze your GraphQL performance.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="Traces tab of SigNoz dashboard"
-    height={500}
+    
     src="/img/blog/2022/03/traces_tab_graphql_spans.webp"
-    title="SigNoz captures all events related to the GraphQL service. You can use powerful filters to analyze and debug performance issues quickly."
-    width={700}
     />
+<figcaption><i>SigNoz captures all events related to the GraphQL service. You can use powerful filters to analyze and debug performance issues quickly.</i></figcaption>
+</figure>
+<br/>
 
 3. **Detailed trace of each span in GraphQL query**<br></br>
    Clicking on any span in the span table will bring you to a detailed trace page where the entire journey of the GraphQL query is shown.
 
    Establishing a sequential flow of the query along with info on time taken by each part of the request can help identify latency issues quickly. You can see details like how much time did the resolver take. You can also see the related GraphQL query.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="Traces Detail tab of SigNoz dashboard"
-    height={500}
+    
     src="/img/blog/2022/03/graphql_traces.webp"
-    title="Flamegraph and Gantt charts showing the flow of a request in detail"
-    width={700}
     />
+<figcaption><i>Flamegraph and Gantt charts showing the flow of a request in detail</i></figcaption>
+</figure>
+<br/>
 
 4. **Troubleshooting an error**<br></br>
    You can also use SigNoz dashboard to capture error in your GraphQL queries. If you request for a data field that is not available in the backend, the GraphQL interface will show an error.
@@ -246,26 +258,28 @@ Here are a list of things that you can monitor about your GraphQL APIs with SigN
 
 ```
 
- <Screenshot
- alt="GraphQL UI showing error"
- height={500}
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
+ alt="GraphQL UI showing error" 
  src="/img/blog/2022/03/graphql_ui_error_message.webp"
- title="Cannot query field"
- width={700}
  />
+<figcaption><i>Cannot query field</i></figcaption>
+</figure>
+<br/>
 
  SigNoz captures the list of all error calls. You can see the details of a specific error in the Gantt charts.
 
  Click on a particular trace to get a detailed view of the operation span with the error message and the offending query. In this case, you can see an internal server error related to the resolver.
 
- <Screenshot
+ <figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
   alt="SigNoz Trace Detail Tab showing errors in GraphQL queries"
-  height={500}
+  
   src="/img/blog/2022/03/graphql_error_traces.webp"
-  title="Error traces captured from the GraphQL query in Signoz dashboard"
-  width={700}
   />
-
+<figcaption><i>Error traces captured from the GraphQL query in Signoz dashboard</i></figcaption>
+</figure>
+<br/>
 SigNoz also provides a detailed view of common <a href = "https://github.com/open-telemetry/opentelemetry-specification/tree/main/specification/trace/semantic_conventions" rel="noopener noreferrer nofollow" target="_blank" >semantic conventions</a> like HTTP, network, and other attributes.
 
 

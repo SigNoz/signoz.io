@@ -61,7 +61,7 @@ The specification is designed into distinct types of telemetry known as signals.
 - Metrics and
 - Traces
 
-Together these three signals form the three pillars of observability. OpenTelemetry is the bedrock for setting up an observability framework. The application code is instrumented using OpenTelemetry client libraries, which enables the generation of telemetry data. Once the telemetry data is generated and collected, OpenTelemetry needs a backend analysis tool to which it can send the data for storage and visualization.
+Together these three signals form the [three pillars of observability](https://signoz.io/blog/three-pillars-of-observability/). OpenTelemetry is the bedrock for setting up an observability framework. The application code is instrumented using OpenTelemetry client libraries, which enables the generation of telemetry data. Once the telemetry data is generated and collected, OpenTelemetry needs a backend analysis tool to which it can send the data for storage and visualization.
 
 OpenTelemetry can send to multiple backends. You can use different backends for each signal in OpenTelemetry. But managing different tools is not recommended. Engineering teams also need to correlate all signals for effective analysis. And that’s where SigNoz comes into the picture.
 
@@ -145,7 +145,7 @@ To start with OpenTelemetry visualization, you first need to instrument your app
 
 Below are the steps required to start with OpenTelemetry visualization:
 
-- Instrument application code with language-specific OpenTelemetry libraries
+- [Instrument application](https://signoz.io/docs/instrumentation/) code with language-specific OpenTelemetry libraries
 - Configure OpenTelemetry Exporters to send data to SigNoz
 - Visualize and analyze telemetry data using SigNoz dashboards
 

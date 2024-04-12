@@ -18,7 +18,7 @@ keywords:
   <link rel="canonical" href="https://signoz.io/blog/opentelemetry-vs-opentracing/"/>
 </head>
 
-OpenTelemetry and OpenTracing are open-source projects used to instrument application code for generating telemetry data. While OpenTelemetry can help you generate logs, metrics, and traces, OpenTracing focuses on generating traces for distributed applications.
+OpenTelemetry and OpenTracing are open-source projects used to [instrument application](https://signoz.io/docs/instrumentation/) code for generating telemetry data. While OpenTelemetry can help you generate logs, metrics, and traces, OpenTracing focuses on generating traces for distributed applications.
 
 <!--truncate-->
 
@@ -57,7 +57,7 @@ To integrate OpenTelemetry with your application code, you can use the OpenTelem
 
 ## What is OpenTracing?
 
-<a href = "https://opentracing.io/" rel="noopener noreferrer nofollow" target="_blank">OpenTracing</a> was an open-source project aimed at providing vendor-neutral APIs and instrumentation for distributed tracing. In distributed cloud-native applications, it is difficult for engineering teams to see how requests are performing across services. And that’s where distributed tracing comes into the picture.
+<a href = "https://opentracing.io/" rel="noopener noreferrer nofollow" target="_blank">OpenTracing</a> was an open-source project aimed at providing vendor-neutral APIs and instrumentation for [distributed tracing](https://signoz.io/blog/distributed-tracing-in-microservices/). In distributed cloud-native applications, it is difficult for engineering teams to see how requests are performing across services. And that’s where distributed tracing comes into the picture.
 
 <div>
 <br></br>

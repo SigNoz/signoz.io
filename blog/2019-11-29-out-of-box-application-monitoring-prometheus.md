@@ -13,6 +13,11 @@ keywords:
   - Application Monitoring
 ---
 
+:::danger
+
+This blog is deprecated and is no longer maintained.
+:::
+
 Prometheus is undoubtedly growing as the native monitoring tool for Kubernetes. We have been using Prometheus to collect metrics about our infrastructure for a long, but setting it of the box is still painful
 
 <!--truncate-->

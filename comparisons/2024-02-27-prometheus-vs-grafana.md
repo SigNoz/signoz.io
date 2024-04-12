@@ -43,7 +43,6 @@ In this post, I have compared Prometheus and Grafana on important features like 
 
 | Features | Prometheus | Grafana |
 | --- | --- | --- |
-| Ease of Deployment | ✅  | ✅  |
 | Data Collection | 🟡 | ✅  |
 | Visualization Capabilities | 🟡 | ✅  |
 | Data Query | ✅  | ✅  |
@@ -200,7 +199,7 @@ Here's a streamlined overview of how the Grafana stack supports Application Perf
 
 ### Prometheus
 
-Prometheus provides a powerful and flexible querying language known as PromQL (Prometheus Query Language) for querying and analyzing time-series data. PromQL allows users to perform a wide range of operations, including filtering, aggregation, and mathematical transformations, on the collected metrics data. Users can write expressive queries to extract valuable insights and monitor system performance effectively. With support for functions like rate, sum, and histogram_quantile, PromQL enables advanced analysis and visualization of metrics data. 
+Prometheus provides a powerful and flexible querying language known as PromQL ([Prometheus Query Language](https://signoz.io/blog/prometheus-query/)) for querying and analyzing time-series data. PromQL allows users to perform a wide range of operations, including filtering, aggregation, and mathematical transformations, on the collected metrics data. Users can write expressive queries to extract valuable insights and monitor system performance effectively. With support for functions like rate, sum, and histogram_quantile, PromQL enables advanced analysis and visualization of metrics data. 
 
 <figure data-zoomable align='center'>
     <img className="box-shadowed-image" src="/img/blog/2024/02/prometheus-vs-grafana-promql.webp" alt="Query in Prometheus using PromQL"/>

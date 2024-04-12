@@ -24,7 +24,7 @@ OpenTelemetry is an instrumentation standard for application monitoring - both f
 
 At [SigNoz](https://signoz.io/), we support OpenTelemetry as an instrumentation standard - and provide an easy way to accomplish application monitoring leveraging the same. As a first step, we are sharing a detailed guide for developers/devops/SRE folks who want to get started with OpenTelemetry stack on Kubernetes.
 
-OpenTelemetry’s vendor neutral APIs and data formats form its core capability to act as both a metric and trace delivery pipeline has been an amazing step in the observability space. As per the project roadmap, logs too would be included to encompass the final of The Three Pillars of Observability.
+OpenTelemetry’s vendor neutral APIs and data formats form its core capability to act as both a metric and trace delivery pipeline has been an amazing step in the observability space. As per the project roadmap, logs too would be included to encompass the final of The [Three Pillars of Observability](https://signoz.io/blog/three-pillars-of-observability/).
 
 # The Lineage of an Open Standard
 
@@ -80,7 +80,7 @@ We use a load-generator deployment that generates simulated metrics and traces f
 
 [![Generates synthetic operational load (traces, metrics, logs, events) simulating a microservice-based app.](/img/blog/2020/07/synthetic_load_genrator_github.webp)](https://github.com/Omnition/synthetic-load-generator)
 
-- Jaeger traces
+- [Jaeger traces](https://signoz.io/blog/distributed-tracing-jaeger/)
 - Zipkin traces
 - Freshtracks.io’s prometheus metrics load generator - Avalanche
 
@@ -110,7 +110,7 @@ The source code for this post is available at below link:
 
 [![openelemetry-kubernetes setup with load-generators](/img/blog/2020/07/hashfyre_otel_k8s.webp)](https://github.com/Hashfyre/otel-k8s)
 
-Given the scope and expanse of the Opentelemetry project, we barely scratched the surface of the possibilities, and even important aspects like tail-sampling. That said, following this post should get one bootstrapped easily with a running OpenTelemetry stack on your own cluster.
+Given the scope and expanse of the [Opentelemetry project](https://signoz.io/blog/opentelemetry-apm/), we barely scratched the surface of the possibilities, and even important aspects like tail-sampling. That said, following this post should get one bootstrapped easily with a running OpenTelemetry stack on your own cluster.
 
 ---
 

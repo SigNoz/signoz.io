@@ -32,7 +32,7 @@ OpenTelemetry can auto-instrument your Java Spring Boot application to capture t
 
 ![Cover Image](/img/blog/2024/01/opentelemetry-spring-boot-cover.webp)
 
-OpenTelemetry is a vendor-agnostic instrumentation library that is used to generate telemetry data like logs, metrics, and traces. Using OpenTelemetry and SigNoz, you can collect logs, metrics, and traces and visualize everything under a single pane of glass.
+OpenTelemetry is a vendor-agnostic instrumentation library that is used to generate telemetry data like logs, metrics, and traces. Using OpenTelemetry and SigNoz, you can collect logs, metrics, and traces and visualize everything under a [single pane of glass](https://signoz.io/blog/single-pane-of-glass-monitoring/).
 
 For Java applications, OpenTelemetry provides a handy Java agent Jar that can be attached to any Java 8+ application and dynamically injects bytecode to capture telemetry from a number of popular libraries and frameworks.
 
@@ -223,7 +223,7 @@ And you can monitor all of this without any code change, just by integrating you
 
 <br></br>
 
-You can also visualize your trace data with flamegraphs and Gantt charts to see the flow of requests. This comes in very handy while debugging performance related issues.
+You can also visualize your trace data with [flamegraphs and Gantt charts](https://signoz.io/blog/flamegraphs/) to see the flow of requests. This comes in very handy while debugging performance related issues.
 
 <figure data-zoomable>
     <img className="box-shadowed-image" src="/img/blog/2024/01/opentelemetry-spring-boot-traces-flamegraphs.webp" alt="OpenTelemetry Spring Boot Monitoring with trace data visualized as flamegraphs"/>

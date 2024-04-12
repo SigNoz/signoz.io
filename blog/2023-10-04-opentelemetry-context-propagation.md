@@ -35,7 +35,7 @@ In this article, we embark on a journey to explore the core concept of context p
 
 ### Trace Context
 
-**Trace context** represents the overarching journey of a request or transaction across various services and components in a distributed system. It includes:
+**[Trace context](https://signoz.io/blog/context-propagation-in-distributed-tracing/)** represents the overarching journey of a request or transaction across various services and components in a distributed system. It includes:
 
 - **Trace ID**: A unique identifier for the entire trace.
 - **Timestamps**: Precise timing information for trace and span creation.

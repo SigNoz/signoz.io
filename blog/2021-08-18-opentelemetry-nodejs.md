@@ -31,12 +31,12 @@ OpenTelemetry can auto-instrument many common modules for a Javascript applicati
 
 import Screenshot from "@theme/Screenshot"
 
-<Screenshot
+<figure data-zoomable align='center'>
+ <img className="box-shadowed-image"
   alt="Monitor your Nodejs applications with SigNoz"
-  height={500}
-  src="/img/blog/common/signoz_charts_application_metrics.webp"
-  width={700}
-/>
+  src="/img/blog/common/signoz_charts_application_metrics.webp" />
+  </figure>
+<br/>
 OpenTelemetry is a set of tools, APIs, and SDKs used to instrument applications to create and manage telemetry data(Logs, metrics, and traces). For any distributed system based on microservice architecture, it's an operational challenge to solve performance issues quickly.
 
 Telemetry data helps engineering teams to troubleshoot issues across services and identify the root causes. In other words, telemetry data powers observability for your distributed applications.
@@ -68,13 +68,15 @@ When you are done installing SigNoz, you can access the UI at: [http://localhos
 
 The application list shown in the dashboard is from a sample app called HOT R.O.D that comes bundled with the SigNoz installation package.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
   alt="SigNoz dashboard"
-  height={500}
+  
   src="/img/blog/common/signoz_dashboard_homepage.webp"
-  title="SigNoz dashboard"
-  width={700}
-/>
+  />
+<figcaption><i>SigNoz dashboard</i></figcaption>
+  </figure>
+<br/>
 
 
 ## Creating sample Nodejs application
@@ -227,13 +229,14 @@ Steps to get the app set up and running:
 And, congratulations! You have instrumented your sample Node.js app. You can now access the SigNoz dashboard at [http://localhost:3301](http://localhost:3301) to monitor your app for performance metrics.
 
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
   alt="Sample nodejs app in the applications monitored"
-  height={500}
   src="/img/blog/2022/01/node_sample_app.webp"
-  title="Sample_app in the list of applications monitored"
-  width={700}
-/>
+  />
+<figcaption><i>Sample_app in the list of applications monitored</i></figcaption>
+  </figure>
+<br/>
 
 ## Metrics and Traces of the Nodejs application
 
@@ -245,33 +248,38 @@ SigNoz comes with out of box RED metrics charts and visualization. RED metrics s
 - Error rate of requests
 - Duration taken by requests
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
   alt="Sample nodejs app in the applications monitored"
-  height={500}
   src="/img/blog/common/signoz_charts_application_metrics.webp"
-  title="Measure things like application latency, requests per sec, error percentage and see your top endpoints"
-  width={700}
-/>
+  />
+<figcaption><i>Measure things like application latency, requests per sec, error percentage and see your top endpoints</i></figcaption>
+  </figure>
+<br/>
 
 You can then choose a particular timestamp where latency is high to drill down to traces around that timestamp.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
       alt="See traces, and apply powerful filters on trace data"
-      height={500}
+      
       src="/img/blog/common/signoz_list_of_traces_hc.webp"
-      title="View of traces at a particular timestamp"
-      width={700}
-/>
+      />
+<figcaption><i>View of traces at a particular timestamp</i></figcaption>
+      </figure>
+<br/>
 
 You can use flamegraphs to exactly identify the issue causing the latency.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
       alt="Flamegraphs for distributed tracing"
-      height={500}
+      
       src="/img/blog/common/signoz_flamegraphs.webp"
-      title="Flamegraphs showing exact duration taken by each spans - a concept of distributed tracing"
-      width={700}
-/>
+      />
+<figcaption><i>Flamegraphs showing exact duration taken by each spans - a concept of distributed tracing</i></figcaption>
+      </figure>
+<br/>
 
 ## Conclusion
 

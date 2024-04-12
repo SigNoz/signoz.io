@@ -244,7 +244,7 @@ In case you encounter an issue where all applications do not get listed in the s
 - Node.js version 14 or newer ([See here](https://github.com/open-telemetry/opentelemetry-js#supported-runtimes))<br></br>
   <!-- Previous versions of node may work, but they are not tested by OpenTelemetry and they are not guaranteed to work. Please note that versions of Node.JS v8 prior to `v8.12.0` will NOT work, because OpenTelemetry Node depends on the perf_hooks module introduced in v8.5.0 and performance.timeOrigin that is set correctly starting in `v8.12.0`. -->
 
-You can use OpenTelemetry Nodejs client libraries to send your traces directly to SigNoz. You have two choices for instrumenting your Nodejs application with OpenTelemetry.
+You can use [OpenTelemetry Nodejs](https://signoz.io/opentelemetry/nodejs/) client libraries to send your traces directly to SigNoz. You have two choices for instrumenting your Nodejs application with OpenTelemetry.
 
 - **[Use the all-in-one auto-instrumentation library(Recommended)](#using-the-all-in-one-auto-instrumentation-library)**<br></br>
 The auto-instrumentation library of OpenTelemetry is a meta package that provides a simple way to initialize multiple Nodejs instrumnetations.

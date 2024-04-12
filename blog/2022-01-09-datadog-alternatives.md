@@ -68,7 +68,7 @@ List of top DataDog alternatives in 2024:
 
 The first tool we want to discuss is, of course, SigNoz.
 
-[SigNoz](https://signoz.io/) is a great Datadog alternative. It is a full-stack open-source APM tool. Logs, metrics, and traces are three important signals needed to set up a robust observability stack. SigNoz provides all three signals under a single pane of glass.
+[SigNoz](https://signoz.io/) is a great Datadog alternative. It is a full-stack open-source APM tool. Logs, metrics, and traces are three important signals needed to set up a robust observability stack. SigNoz provides all three signals under a [single pane of glass](https://signoz.io/blog/single-pane-of-glass-monitoring/).
 
 One of the real challenges of using open source tools to set up an observability stack is to stitch together multiple tools like Jaeger for tracing and Prometheus for metrics. SigNoz is an open source APM that provides a SaaS-like experience. 
 
@@ -166,7 +166,7 @@ If you’re looking to use Grafana as a Datadog alternative, then you’ll use t
 
 1. **Loki**: An efficient log aggregation system that indexes log metadata, enabling cost-effective storage and fast querying, integrated seamlessly with Grafana.
 2. **Grafana**: A versatile visualization tool offering customizable dashboards to display and analyze data from various sources, including metrics, logs, and traces.
-3. **Tempo**: A distributed tracing backend focused on scalability, storing and querying trace data, with easy integration into Grafana for visualization.
+3. **Tempo**: A [distributed tracing](https://signoz.io/blog/distributed-tracing-in-microservices/) backend focused on scalability, storing and querying trace data, with easy integration into Grafana for visualization.
 4. **Mimir**: A long-term, scalable storage system for Prometheus metrics, ensuring high performance and availability for large-scale metric data.
 
 The disadvantage of using the LGTM stack is managing multiple backends, which can be cumbersome.
@@ -186,7 +186,7 @@ The disadvantage of using the LGTM stack is managing multiple backends, which ca
 With dynamic topology mapping, you can have an overview of your network devices and their inter-dependency. Some of the key monitoring capabilities provided by LogicMonitor are:
 
 - Cloud Monitoring (AWS, Google and Azure)
-- Container Monitoring (Kubernetes)
+- [Container Monitoring](https://signoz.io/blog/container-monitoring-tools/) (Kubernetes)
 - Network Monitoring
 - Server Monitoring
 - Storage Monitoring

@@ -128,7 +128,7 @@ When all is said and done, one should ensure the closer fit of either Prometheus
 
 Better still, when your application metrics monitoring scope is considerably large, going back to the fundamentals can be the way to go. Metrics are just one aspect of monitoring your application for performance issues. Today’s distributed applications need a combination of metrics, logs, and traces to debug performance issues quickly.
 
-For that you can explore OpenTelemetry based full-stack APM, [SigNoz](https://signoz.io/). With SigNoz you can monitor metrics and track transactions across services with distributed tracing. There are other features like exceptions monitoring, custom dashboards, and alerts too.
+For that you can explore OpenTelemetry based full-stack APM, [SigNoz](https://signoz.io/). With SigNoz you can monitor metrics and track transactions across services with [distributed tracing](https://signoz.io/blog/distributed-tracing-in-microservices/). There are other features like exceptions monitoring, custom dashboards, and alerts too.
 
 You can check out SigNoz GitHub repo here:
 

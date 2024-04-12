@@ -31,7 +31,7 @@ import CTA from "../modules/index-cta";
 
 import styles from "./styles.module.css";
 
-ReactGA.initialize("UA-152867655-1");
+ReactGA.initialize("G-6NFJ2Y6NQN");
 
 function Home() {
   const [showVideo, setShowVideo] = useState(false);

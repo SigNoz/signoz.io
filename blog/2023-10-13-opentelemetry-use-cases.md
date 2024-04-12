@@ -115,7 +115,7 @@ You can also pass on other important information across your services based on y
 
 ### Exceptions Monitoring
 
-Using OpenTelemetry trace data you can monitor exceptions happening in your application. Not many backend tools will let you do this. An OpenTelemetry-native backend like SigNoz allows you to monitor exceptions from your OpenTelemetry data.
+Using [OpenTelemetry trace](https://signoz.io/blog/opentelemetry-distributed-tracing-part-1/) data you can monitor exceptions happening in your application. Not many backend tools will let you do this. An OpenTelemetry-native backend like SigNoz allows you to monitor exceptions from your OpenTelemetry data.
 
 <figure data-zoomable align='center'>
     <img src="/img/blog/common/signoz_exceptions_monitoring.webp" alt="Exceptions monitoring in SigNoz"/>

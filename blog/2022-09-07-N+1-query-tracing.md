@@ -132,9 +132,9 @@ Once you see a pattern like the above, where a single request is fanning out mul
 
 You may ask, can’t logs help me solve this? If I log each database call 🤔
 
-Well, not really. What is essential, as you can see, is to get the structure of the calling patterns. Only when you see that a request is leading to multiple child spans, which are select queries on DB, can you confidently say that this is a case of N+1 query. It would be best if you had this hierarchical visualisation to pinpoint this.
+Well, not really. What is essential, as you can see, is to get the structure of the calling patterns. Only when you see that a request is leading to multiple child [spans](https://signoz.io/blog/distributed-tracing-span/), which are select queries on DB, can you confidently say that this is a case of N+1 query. It would be best if you had this hierarchical visualisation to pinpoint this.
 
-Logs may give you details about each DB call, but they don’t have the exact hierarchical call sequence. This is one of the most remarkable things about distributed tracing and why you may want to take a look at it.
+Logs may give you details about each DB call, but they don’t have the exact hierarchical call sequence. This is one of the most remarkable things about [distributed tracing](https://signoz.io/blog/distributed-tracing-in-microservices/) and why you may want to take a look at it.
 
 To share an example, one of users of SigNoz recently shared with us that they could detect such N+1 query issues in their code which led to reducing execution time for specific APIs from 180s to 2s.
 

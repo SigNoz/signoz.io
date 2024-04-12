@@ -78,13 +78,13 @@ Now let's explore the top observability tools in 2024.
 
 <br></br>
 
-SigNoz is a great observability tool that is open-source and provides three signals in a single pane of glass. You can monitor logs, metrics, and traces and correlate signals for better insights into application performance.
+SigNoz is a great observability tool that is open-source and provides three signals in a [single pane of glass](https://signoz.io/blog/single-pane-of-glass-monitoring/). You can monitor logs, metrics, and traces and correlate signals for better insights into application performance.
 
 With SigNoz, you can do the following:
 
 - Visualise Traces, Metrics, and Logs in a single pane of glass
 - Monitor application metrics like p99 latency, error rates for your services, external API calls, and individual endpoints.
-- Find the root cause of the problem by going to the exact traces which are causing the problem and see detailed flamegraphs of individual request traces.
+- Find the root cause of the problem by going to the exact traces which are causing the problem and see detailed [flamegraphs](https://signoz.io/blog/flamegraphs/) of individual request traces.
 - Run aggregates on trace data to get business-relevant metrics
 - Filter and query logs, build dashboards and alerts based on attributes in logs
 - Monitor infrastructure metrics such as CPU utilization or memory usage
@@ -209,7 +209,7 @@ With the <a href = "https://www.datadoghq.com/" rel="noopener noreferrer nofollo
 - Instrumentation with open-source libraries
 - seamless navigation between logs, metrics, and traces
 
-The pricing depends on the product you opt for. For example, the APM solution provides end-to-end distributed tracing, starts at $31 per host per month if billed annually.
+The pricing depends on the product you opt for. For example, the APM solution provides end-to-end [distributed tracing](https://signoz.io/blog/distributed-tracing-in-microservices/), starts at $31 per host per month if billed annually.
 
 ### Splunk
 

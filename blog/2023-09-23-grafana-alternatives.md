@@ -50,7 +50,7 @@ In this article, we will discuss the top 11 Grafana alternatives that you can ch
 
 [SigNoz](https://signoz.io/) can be a great Grafana alternative. SigNoz is also open-source, just like Grafana. So, if you want to self-host SigNoz, clone the <a href = "https://github.com/signoz/signoz/" rel="noopener noreferrer nofollow" target="_blank" >GitHub repo</a> to get started.
 
-Under the hood, Grafana is powered by multiple tools like Loki, Tempo, Mimir & Prometheus. SigNoz is built as a single tool to serve logs, metrics, and traces in a single pane of glass. SigNoz uses a single datastore - ClickHouse to power its observability stack. This makes SigNoz much better in correlating signals and driving better insights.
+Under the hood, Grafana is powered by multiple tools like Loki, Tempo, Mimir & Prometheus. SigNoz is built as a single tool to serve logs, metrics, and traces in a [single pane of glass](https://signoz.io/blog/single-pane-of-glass-monitoring/). SigNoz uses a single datastore - ClickHouse to power its observability stack. This makes SigNoz much better in correlating signals and driving better insights.
 
 SigNoz is built to support OpenTelemetry. <a href = "https://opentelemetry.io/" rel="noopener noreferrer nofollow" target="_blank" >OpenTelemetry</a> is an open-source standard for generating telemetry signals, which allows you to avoid vendor lock-in and provides flexibility in choosing different backends for different signals.
 
@@ -61,7 +61,7 @@ SigNoz comes with out-of-the-box APM charts like p90, p99 latency, request rates
     <figcaption><i>SigNoz UI showing application overview metrics like RPS, 50th/90th/99th Percentile latencies, and Error Rate</i></figcaption>
 </figure>
 
-SigNoz offers comprehensive insights into tracing data through visual representations like Flamegraphs and Gantt charts. The Gantt charts provide a clear visual hierarchy of services and events, easily identifying latency-causing events in a request call.
+SigNoz offers comprehensive insights into tracing data through visual representations like [Flamegraphs and Gantt charts](https://signoz.io/blog/flamegraphs/). The Gantt charts provide a clear visual hierarchy of services and events, easily identifying latency-causing events in a request call.
 
 <figure data-zoomable align='center'>
     <img src="/img/blog/common/signoz_flamegraphs.webp" alt="Flamegraphs showing the exact duration taken by each spans - a concept of distributed tracing"/>
@@ -131,7 +131,7 @@ Features of New Relic include:
 - APM
 - Real user monitoring
 - Synthetic monitoring
-- Distributed tracing
+- [Distributed tracing](https://signoz.io/blog/distributed-tracing-in-microservices/)
 - Customizable alerts
 - Robust dashboard creation
 

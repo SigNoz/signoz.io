@@ -205,7 +205,7 @@ In the SigNoz account, open the `Logs` tab. Hit the `Refresh` button on the t
 
 ## Correlating Logs With Traces
 
-To achieve OpenTelemetry tracing and logging correlation, you need to instrument your code with the OpenTelemetry API for tracing and add trace context to your log entries.
+To achieve [OpenTelemetry tracing](https://signoz.io/blog/opentelemetry-tracing/) and logging correlation, you need to instrument your code with the OpenTelemetry API for tracing and add [trace context](https://signoz.io/blog/context-propagation-in-distributed-tracing/) to your log entries.
 
 The program uses the <a href = "https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/src/OpenTelemetry.Instrumentation.AspNetCore/README.md" rel="noopener noreferrer nofollow" target="_blank">OpenTelemetry.Instrumentation.AspNetCore</a> package to automatically create traces for incoming ASP.NET Core requests.
 

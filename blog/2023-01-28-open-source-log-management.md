@@ -216,7 +216,7 @@ Some key features of Apache Flume are;
 
 When choosing a log management tool, it is important to consider factors such as data collection, ingestion, and processing capabilities. You should consider scalability, security features, integration with other tools and systems, user interface, and visualization options. Based on these factors, you can choose a log management tool that fit your use cases.
 
-If you are looking for an open source log management tool that solves most of your monitoring needs, then [SigNoz](https://signoz.io/) can be a good choice. It provides logs, metrics, and traces under a single pane of glass with an intelligent correlation between the three types of telemetry signals.
+If you are looking for an open source log management tool that solves most of your monitoring needs, then [SigNoz](https://signoz.io/) can be a good choice. It provides logs, metrics, and traces under a [single pane of glass](https://signoz.io/blog/single-pane-of-glass-monitoring/) with an intelligent correlation between the three types of telemetry signals.
 
 SigNoz is open-source and cost-effective for organizations. It is built to support OpenTelemetry natively. With the flexibility and scalability of OpenTelemetry and SigNoz, organizations can monitor and analyze large volumes of log data in real-time, making it an ideal solution for log management.
 

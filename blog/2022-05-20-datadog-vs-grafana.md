@@ -110,7 +110,7 @@ DataDog is an enterprise SaaS tool that offers an array of services in the monit
 DataDog offers scalable log ingestion and analytics through its log management product. You can search, filter, and analyze log data through its dashboard. You can route all your logs from one central control panel.
 
 - **Application performance monitoring**<br></br>
-DataDog's APM tool provides end-to-end distributed tracing from frontend devices to databases. You can connect the collected traces to infrastructure metrics, network calls, and live processes.
+DataDog's APM tool provides end-to-end [distributed tracing](https://signoz.io/blog/distributed-tracing-in-microservices/) from frontend devices to databases. You can connect the collected traces to infrastructure metrics, network calls, and live processes.
 
 - **Security monitoring**<br></br>
 Using DataDog security monitoring, you can analyze operational and security logs in real-time. It provides built-in threshold and anomaly detection rules to detect threats quickly.
@@ -150,7 +150,7 @@ Some of the key features of Grafana are:
 
 ## A better alternative to DataDog and Grafana - SigNoz
 
-[SigNoz](https://signoz.io/) is a full-stack open-source observability tool that can better replace DataDog or Grafana. It provides logs, metrics, and traces under a single pane of glass. 
+[SigNoz](https://signoz.io/) is a full-stack open-source observability tool that can better replace DataDog or Grafana. It provides logs, metrics, and traces under a [single pane of glass](https://signoz.io/blog/single-pane-of-glass-monitoring/). 
 
 Some of the key features of SigNoz are:
 

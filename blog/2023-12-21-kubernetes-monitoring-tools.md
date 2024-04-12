@@ -253,7 +253,7 @@ ElasticSearch is deployed as statefulset as it holds the log data, while Fluentd
 
 <a href = "https://newrelic.com" rel="noopener noreferrer nofollow" target="_blank" >New Relic</a> is an All-In-One observability platform offering 700+ external integrations. New Relic has its own Kubernetes integration that makes it easy for you to monitor your Kubernetes workloads. It has a dedicated UI navigator for this built on top of the <a href = "https://docs.newrelic.com/docs/new-relic-solutions/new-relic-one/core-concepts/new-relic-explorer-view-performance-across-apps-services-hosts/#view-navigator" rel="noopener noreferrer nofollow" target="_blank" >New Relic Navigator</a>.
 
-You also get integration with Pixie to step up your monitoring needs. With this, you get Pixie’s advanced Kubernetes observability alongside incident correlation, intelligent alerting, and long-term retention.
+You also get integration with Pixie to step up your monitoring needs. With this, you get Pixie’s advanced [Kubernetes observability](https://signoz.io/blog/kubernetes-observability/) alongside incident correlation, intelligent alerting, and long-term retention.
 
 **Features of New Relic (with Pixie)**
 

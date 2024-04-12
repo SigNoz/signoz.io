@@ -230,7 +230,7 @@ Both Kibana and Grafana have expanded beyond the scope of their initial offering
 
 ## A Better Alternative to Kibana & Grafana - SigNoz
 
-Modern observability trends show that for effective monitoring of application, all your telemetry signals should be under a single pane of glass. Both Grafana Labs and Elastic, the companies behind Grafana OSS and Kibana offer observability solutions by stitching together multiple tools. For observability, these three signals are considered important:
+Modern observability trends show that for effective monitoring of application, all your telemetry signals should be under a [single pane of glass](https://signoz.io/blog/single-pane-of-glass-monitoring/). Both Grafana Labs and Elastic, the companies behind Grafana OSS and Kibana offer observability solutions by stitching together multiple tools. For observability, these three signals are considered important:
 
 - Logs
 - Metrics
@@ -261,7 +261,7 @@ SigNoz comes with out-of-box application metrics charts.
 
 <br></br>
 
-Using Flamegraphs and Gantt charts, you can see a complete breakdown of user request.
+Using [Flamegraphs and Gantt charts](https://signoz.io/blog/flamegraphs/), you can see a complete breakdown of user request.
 
 <figure data-zoomable>
     <img src="/img/blog/common/signoz_flamegraphs.webp" alt="SigNoz flamegraphs"/>

@@ -39,10 +39,10 @@ Some of the challenges with tools like Dynatrace includes:
 
 Some of the key features of good observability tools are:
 
-- Logs, metrics, and traces under a single pane of glass
+- Logs, metrics, and traces under a [single pane of glass](https://signoz.io/blog/single-pane-of-glass-monitoring/)
 - Out of the box application metrics
 - Way to go from metrics to traces to find why some issues are happening
-- Seamless flow between metrics, traces & logs — the three pillars of observability
+- Seamless flow between metrics, traces & logs — the [three pillars of observability](https://signoz.io/blog/three-pillars-of-observability/)
 - Filtering of traces based on different tags and filters
 - Ability to set dynamic thresholds for alerts
 - Transparency in pricing
@@ -80,7 +80,7 @@ Some of our key features which makes SigNoz vastly superior to current open-sour
 
 - Visualise Traces, Metrics, and Logs in a single pane of glass
 - Monitor application metrics like p99 latency, error rates for your services, external API calls, and individual endpoints.
-- Find the root cause of the problem by going to the exact traces which are causing the problem and see detailed flamegraphs of individual request traces.
+- Find the root cause of the problem by going to the exact traces which are causing the problem and see detailed [flamegraphs](https://signoz.io/blog/flamegraphs/) of individual request traces.
 - Run aggregates on trace data to get business-relevant metrics
 - Filter and query logs, build dashboards and alerts based on attributes in logs
 - Monitor infrastructure metrics such as CPU utilization or memory usage
@@ -109,13 +109,15 @@ Found something suspicious in application metrics, just click that point in the 
 
 For example, you can find latency experienced by customers who have customer_type set as `premium`.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="Filtering based on tags"
-    height={500}
+    
     src="/img/blog/2021/08/tags_based_filtering_signoz-min.webp"
-    title="Filter traces for a specific user group using tags"
-    width={700}
-/> -->
+    />
+<figcaption><i>Filter traces for a specific user group using tags"
+    </figure>
+<br/> -->
 
 ### Advanced filters on trace data
 

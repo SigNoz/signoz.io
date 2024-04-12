@@ -181,7 +181,7 @@ But if you're using Kubernetes in production, you can't rely on manual spot-chec
 
 SigNoz is a full-stack open-source APM tool that can help you monitor your Kubernetes cluster. It uses [OpenTelemetry](https://opentelemetry.io/) to collect metrics from your K8s cluster for monitoring. OpenTelemetry is becoming the world standard for instrumentation of cloud-native applications, and it is backed by [CNCF](https://www.cncf.io/) foundation, the same foundation under which Kubernetes graduated.
 
-SigNoz provides logs, metrics, and traces under a single pane of glass. It's easy to get started with SigNoz. SigNoz can be installed on macOS or Linux computers in just three steps by using a simple install script.
+SigNoz provides logs, metrics, and traces under a [single pane of glass](https://signoz.io/blog/single-pane-of-glass-monitoring/). It's easy to get started with SigNoz. SigNoz can be installed on macOS or Linux computers in just three steps by using a simple install script.
 
 The install script automatically installs Docker Engine on Linux. However, on macOS, you must manually install <a href = "https://docs.docker.com/engine/install/" rel="noopener noreferrer nofollow" target="_blank">Docker Engine</a> before running the install script.
 

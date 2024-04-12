@@ -148,7 +148,7 @@ Let’s walk you through an example of how to come up with an outline for an art
 ### Define what you want readers to accomplish
 First, decide on what you want to write about. OpenTelemetry can help you generate and collect three types of signals - logs, metrics, and traces. It provides SDKs in almost all major programming languages.<br></br>
 
-There are also other components, like the OpenTelemetry Collector. But rather than focusing on what’s available in OpenTelemetry, you can focus on the learning outcome for readers. For example, the reader wants to collect Nginx logs, parse them, and create an alert on error logs. Once you have finalized the outcome, then decide on the components of technology needed.
+There are also other components, like the OpenTelemetry Collector. But rather than focusing on what’s available in OpenTelemetry, you can focus on the learning outcome for readers. For example, the reader wants to collect [Nginx logs](https://signoz.io/blog/nginx-logging/), parse them, and create an alert on error logs. Once you have finalized the outcome, then decide on the components of technology needed.
 
 ### Decide the scope
 It’s good to narrow down the scope of the article. You let readers accomplish a task well. We can do a series of articles if there are deeper use cases.

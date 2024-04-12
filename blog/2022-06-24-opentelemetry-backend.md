@@ -25,7 +25,7 @@ keywords:
 
 import SignUps from '../docs/shared/sign-ups.md'
 
-OpenTelemetry is a Cloud Native Computing Foundation(<a href = "https://www.cncf.io/" rel="noopener noreferrer nofollow" target="_blank">CNCF</a>) incubating project aimed at standardizing the way we instrument applications for generating telemetry data(logs, metrics, and traces). However, OpenTelemetry does not provide storage and visualization for the collected telemetry data. And that’s where an OpenTelemetry backend is needed.
+OpenTelemetry is a Cloud Native Computing Foundation(<a href = "https://www.cncf.io/" rel="noopener noreferrer nofollow" target="_blank">CNCF</a>) incubating project aimed at standardizing the way we [instrument applications](https://signoz.io/docs/instrumentation/) for generating telemetry data(logs, metrics, and traces). However, OpenTelemetry does not provide storage and visualization for the collected telemetry data. And that’s where an OpenTelemetry backend is needed.
 
 <!--truncate-->
 
@@ -53,7 +53,7 @@ The specification is designed into distinct types of telemetry known as signals.
 - Metrics, and
 - Traces
 
-Together these three signals form the three pillars of observability. OpenTelemetry is the bedrock for setting up an observability framework. The application code is instrumented using OpenTelemetry client libraries, which enables the generation of telemetry data. Once the telemetry data is generated and collected, OpenTelemetry needs a backend analysis tool to which it can send the data.
+Together these three signals form the [three pillars of observability](https://signoz.io/blog/three-pillars-of-observability/). OpenTelemetry is the bedrock for setting up an observability framework. The application code is instrumented using OpenTelemetry client libraries, which enables the generation of telemetry data. Once the telemetry data is generated and collected, OpenTelemetry needs a backend analysis tool to which it can send the data.
 
 ## Why does OpenTelemetry need a backend?
 

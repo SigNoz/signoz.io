@@ -53,13 +53,15 @@ The alerts page on the SigNoz dashboard has two tabs:
 
 import Screenshot from "@theme/Screenshot"
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
    alt="Alerts page on SigNoz dashboard"
-   height={500}
+   
    src="/img/blog/2021/12/alerts_snapshot.webp"
-   title="Alerts page on SigNoz dashboard"
-   width={700}
-/>
+   />
+<figcaption><i>Alerts page on SigNoz dashboard</i></figcaption>
+</figure>
+<br/>
 
 Creating rules for alerts involve three simple steps:
 
@@ -67,13 +69,15 @@ Creating rules for alerts involve three simple steps:
 - Set the period for which you want to wait (after the expression is true) to start firing alerts
 - Set labels like `severity` to communicate how severe the issue is if this alert starts firing
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
    alt="Setting alerts is easy with expressions."
-   height={500}
+   
    src="/img/blog/2021/12/setting_alerts.webp"
-   title="Setting alerts is easy with expressions."
-   width={700}
-/>
+   />
+<figcaption><i>Setting alerts is easy with expressions.</i></figcaption>
+</figure>
+<br/>
 
 In the current release, we support slack as a notification channel. We will be enabling more channels with upcoming releases.
 

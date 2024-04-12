@@ -63,6 +63,7 @@ To specify the function you wish to graph and indicate how the system should gro
 Tags/Attributes are key-value pairs that allow you to filter spans by their characteristics. SigNoz supports multi-selection criterion. And the characteristics include, but are not limited to HTTP headers, DB systems, and Messaging destinations etc. For exhaustive list please refer to OpenTelemetry’s semantic conventions described on the [Trace Semantic Conventions](https://github.com/open-telemetry/semantic-conventions/blob/main/docs/general/trace.md) page of the OpenTelemetry specification.
 
 There are two ways in which you can filter traces by tags:
+
 - You can enter plain text in the **Quick Filter** input box and then select the **Run** button at the far right. Note that text is interpreted as case-sensitive.
 - You can use the expression builder. To access the expression builder, select the **Add Tags Filter** button. Then, use the dropdown list to select a tag from the list of supported tags, specify an operator and enter a value. When you’ve finished, select the **Run Query** button.
 
@@ -79,6 +80,22 @@ Select a column heading to sort the list by the values in that column. Select th
 ## Inspect a Span
 
 To further troubleshoot your application, you can select a span from the list to view its details. For details, see the [Span Details](/docs/userguide/span-details) page.
+
+## Missing Spans
+
+If you are seeing missing spans in your traces, it could be due to the following reasons:
+
+- One of the service is instrumented but not sending spans to SigNoz. For example, the service might not be exporting spans to SigNoz.
+
+- The spans are not being sent to SigNoz. For example, the spans might be dropped due to network issues or the spans might be dropped due to sampling.
+
+## Span Gaps
+
+Sometimes it's possible that there are gaps between consequent spans. This happens when some process/code are not traced. For Example, by default OpenTelemetry auto instrumentation libraries do not trace the custom functions/methods. This can be fixed by adding manual instrumentation to the code.
+
+Example of span gaps:
+![Span Gap](/img/docs/span-gap.png)
+
 ## Get Help
 
 <GetHelp />

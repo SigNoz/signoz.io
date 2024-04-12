@@ -192,7 +192,7 @@ Both Elasticsearch and MongoDB are popular and established data stores. As we ha
 
 If you are looking at setting up analytics on your data, Elasticsearch can be a good choice. For example, Elasticsearch combined with Logstash and Kibana is used for Log analytics. But recently, big companies like <a href = "https://www.uber.com/en-IN/blog/logging/" rel="noopener noreferrer nofollow" target="_blank" > Uber </a> and <a href = "https://blog.cloudflare.com/log-analytics-using-clickhouse/" rel="noopener noreferrer nofollow" target="_blank" > Cloudflare </a> have shifted their log analytics from Elastic search to ClickHouse, a columnar database much more suited to store telemetry data like logs.
 
-If your use case is log analytics than [SigNoz](https://signoz.io/), an open-source log management tool based on ClickHouse can be a better choice. It provides logs, metrics, and traces under a single pane of glass, thus serving as a one-stop observability solution.
+If your use case is log analytics than [SigNoz](https://signoz.io/), an open-source log management tool based on ClickHouse can be a better choice. It provides logs, metrics, and traces under a [single pane of glass](https://signoz.io/blog/single-pane-of-glass-monitoring/), thus serving as a one-stop observability solution.
 
 <LogsPerf />
 

@@ -262,7 +262,7 @@ Process are also helpful when you have multiple recivers for logs and you want p
 
 **We highly recommend users to use Batch and Memory Limiter Processor with logs**
 
-- **[Batch Processor](https://github.com/open-telemetry/opentelemetry-collector/blob/main/processor/batchprocessor/README.md)** :- The batch processor accepts spans, metrics, or logs and places them into batches. Batching helps better compress the data and reduce the number of outgoing connections required to transmit the data. This processor supports both size and time based batching. 
+- **[Batch Processor](https://github.com/open-telemetry/opentelemetry-collector/blob/main/processor/batchprocessor/README.md)** :- The batch processor accepts [spans](https://signoz.io/blog/distributed-tracing-span/), metrics, or logs and places them into batches. Batching helps better compress the data and reduce the number of outgoing connections required to transmit the data. This processor supports both size and time based batching. 
 
 - **[Memory Limiter Processor](https://github.com/open-telemetry/opentelemetry-collector/blob/main/processor/memorylimiterprocessor/README.md)** :- The memory limiter processor is used to prevent out of memory situations on the collector. Given that the amount and type of data the collector processes is environment specific and resource utilization of the collector is also dependent on the configured processors, it is important to put checks in place regarding memory usage. The memory_limiter uses soft and hard memory limits. Hard limit is always above or equal the soft limit. 
 

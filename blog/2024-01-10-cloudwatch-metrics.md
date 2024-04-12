@@ -289,7 +289,7 @@ When exploring monitoring solutions, prioritize those that offer versatility in 
 
 ### Full-Stack Monitoring solution
 
-While CloudWatch excels in monitoring AWS resources, it falls short of being a full-stack monitoring solution. To achieve a more comprehensive monitoring approach that spans across the entire technology stack, exploring alternatives with robust full-stack monitoring capabilities becomes imperative. Look for solutions that offer enhanced features, encompassing infrastructure, network, application layers, and more, ensuring a holistic monitoring experience beyond the scope of AWS resources.
+While CloudWatch excels in monitoring AWS resources, it falls short of being a full-stack monitoring solution. To achieve a more comprehensive monitoring approach that [spans](https://signoz.io/blog/distributed-tracing-span/) across the entire technology stack, exploring alternatives with robust full-stack monitoring capabilities becomes imperative. Look for solutions that offer enhanced features, encompassing infrastructure, network, application layers, and more, ensuring a holistic monitoring experience beyond the scope of AWS resources.
 
 ## The right CloudWatch alternative to use - SigNoz
 

@@ -205,7 +205,7 @@ To set up the OpenTelemetry Collector for SigNoz, you'll first need your ingesti
 </figure>
 <br />
 
-Once you have your ingestion key and region, use the following commands to add the SigNoz Helm repository and install the OpenTelemetry Collector in your Kubernetes cluster:
+Once you have your ingestion key and region, use the following commands to add the [SigNoz Helm repository](https://signoz.io/docs/install/kubernetes/aws/) and install the OpenTelemetry Collector in your Kubernetes cluster:
 
 ```bash
 helm repo add signoz https://charts.signoz.io

@@ -55,13 +55,17 @@ When you are done installing SigNoz, you can access the UI at: [http://localhos
 
 The application list shown in the dashboard is from a sample app called HOT R.O.D that comes bundled with the SigNoz installation package.
 
-<Screenshot
+import Screenshot from "@theme/Screenshot"
+
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
   alt="SigNoz dashboard"
-  height={500}
+  
   src="/img/blog/common/signoz_dashboard_homepage.webp"
-  title="SigNoz dashboard"
-  width={700}
-/>
+  />
+<figcaption><i>SigNoz dashboard</i></figcaption>
+  </figure>
+<br/>
 
 Now comes the part where you can instrument your own sample app and get the metrics reported through SigNoz.
 
@@ -186,7 +190,7 @@ Steps to get the app set up and running:
    
    ```
    
-   OpenTelemetry Node SDK currently does not detect the `OTEL_RESOURCE_ATTRIBUTES` from `.env` files as of today. That’s why we need to include the variables in the `tracing.js` file itself.
+   [OpenTelemetry Node](https://signoz.io/opentelemetry/nodejs/) SDK currently does not detect the `OTEL_RESOURCE_ATTRIBUTES` from `.env` files as of today. That’s why we need to include the variables in the `tracing.js` file itself.
 
    About environment variables:
 
@@ -215,13 +219,15 @@ Steps to get the app set up and running:
 And, congratulations! You have instrumented your sample Node.js app. You can now access the SigNoz dashboard at [http://localhost:3301](http://localhost:3301) to monitor your app for performance metrics.
 
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
   alt="Sample nodejs app in the applications monitored"
-  height={500}
+  
   src="/img/blog/2022/01/node_sample_app.webp"
-  title="Sample_app in the list of applications monitored"
-  width={700}
-/>
+  />
+<figcaption><i>Sample_app in the list of applications monitored</i></figcaption>
+  </figure>
+<br/>
 
 ## Identifying events causing high latency in your app
 

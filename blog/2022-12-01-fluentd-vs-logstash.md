@@ -105,7 +105,7 @@ For the Kubernetes environments or teams working with Docker, Fluentd is the ide
 
 On the other hand, Logstash works well with Elasticsearch and Kibana. So, if you already have Elasticsearch and Kibana in your infrastructure then Logstash would be your best bet for a log collector. In general, if you are looking for a more managed and supported system, then always go for Logstash.
 
-If you have come this far, you surely are looking to try your hands at a log management system or looking for one for your application. You might want to try out [SigNoz](https://signoz.io/) as well. It is an open-source APM that supports logs, metrics, and traces under a single pane of glass. It also supports both FluentD and Logstash as a log collector.
+If you have come this far, you surely are looking to try your hands at a log management system or looking for one for your application. You might want to try out [SigNoz](https://signoz.io/) as well. It is an open-source APM that supports logs, metrics, and traces under a [single pane of glass](https://signoz.io/blog/single-pane-of-glass-monitoring/). It also supports both FluentD and Logstash as a log collector.
 
 ## Log management in Signoz
 

@@ -64,7 +64,7 @@ But as data can be exported in multiple formats, OpenTelemetry users have the fr
 
 OpenTelemetry provides its own set of <a href = "https://opentelemetry.io/docs/instrumentation/" rel="noopener noreferrer nofollow" target="_blank">client libraries</a> which makes it easier for you to integrate it into your application code. OpenTelemetry follows a specification-driven development. The client libraries follow the specification for their implementation.
 
-Monitoring apps have become a crucial component in a modern microservices architecture. A well setup observability stack with OpenTelemetry will help you answer questions like:
+Monitoring apps have become a crucial component in a modern microservices [architecture](https://signoz.io/blog/opentelemetry-architecture/). A well setup observability stack with OpenTelemetry will help you answer questions like:
 
 - Why is my application slow?
 - Why do we've so many errors?
@@ -79,7 +79,7 @@ The above questions can be answered on basis of these 3 key pieces of informatio
 
 <br></br>
 
-The OpenTelemetry project calls the above data points signals. It is currently working on four signals, namely, logs, metrics, traces, and baggage.
+The [OpenTelemetry project](https://signoz.io/blog/opentelemetry-apm/) calls the above data points signals. It is currently working on four signals, namely, logs, metrics, traces, and baggage.
 
 OpenTelemetry is a collaborative effort between 185 organizations around the world, involving thousands of individuals. Companies around the world have started adopting OpenTelemetry as a core engineering practice.
 
@@ -108,7 +108,7 @@ If you are choosing between OpenMetrics and OpenTelemetry, go for Opentelemetry.
 
 OpenTelemetry is becoming the world standard for instrumenting application code due to its multi-language support and ease of use. But OpenTelemetry helps only to generate and collect telemetry data. You need to export the telemetry data to a backend analysis tool so that your teams can store, query, and visualize the collected data.
 
-And that's where [SigNoz](https://signoz.io/) comes into the picture. SigNoz uses OpenTelemetry natively to instrument application codes. OpenTelemetry collector then sends the data to the SigNoz backend, where users can query and visualize their data with ease.
+And that's where [SigNoz](https://signoz.io/) comes into the picture. SigNoz uses OpenTelemetry natively to [instrument application](https://signoz.io/docs/instrumentation/) codes. OpenTelemetry collector then sends the data to the SigNoz backend, where users can query and visualize their data with ease.
 
 SigNoz comes with out of box visualization of things like RED metrics. There is a unified UI of metrics and traces so that you can easily identify the root cause of issues causing things like latency in your apps.
 

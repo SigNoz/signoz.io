@@ -40,7 +40,7 @@ A completely automatic and out of box experience, with minimal code changes. For
 :::
 
 - **Manual Instrumentation**<br></br>
-It involves writing instrumentation using OpenTelemetry SDK and API manually. You would need to get a handle to an instance of the `OpenTelemetry` interface, acquire a tracer, and create spans manually. Manual isntrumentation might also be used along with auto instrumentation.
+It involves writing instrumentation using OpenTelemetry SDK and API manually. You would need to get a handle to an instance of the `OpenTelemetry` interface, acquire a tracer, and create [spans](https://signoz.io/blog/distributed-tracing-span/) manually. Manual isntrumentation might also be used along with auto instrumentation.
 
 Let’s understand how to download, install, and run OpenTelemetry in Java. If you're using SigNoz cloud, refer to this [section](#send-traces-to-signoz-cloud). If you're using self-hosted SigNoz refer to this [section](#send-traces-to-self-hosted-signoz).
 
@@ -153,7 +153,7 @@ You can use OpenTelemetry Java to send your traces directly to SigNoz. OpenTelem
 
 ### Steps to auto-instrument Java applications for traces
 
-OpenTelemetry Java auto-instrumentation supports collecting telemetry data from a huge number of libraries and frameworks. You can check out the full list [here](https://github.com/open-telemetry/opentelemetry-java-instrumentation/blob/main/docs/supported-libraries.md).
+[OpenTelemetry Java auto-instrumentation](https://signoz.io/opentelemetry/java-auto-instrumentation/) supports collecting telemetry data from a huge number of libraries and frameworks. You can check out the full list [here](https://github.com/open-telemetry/opentelemetry-java-instrumentation/blob/main/docs/supported-libraries.md).
 
 1. **Download the latest OpenTelemetry Java JAR agent**<br></br>
    Download the latest [Java JAR agent](https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar). You can also use the terminal to get the file using the following command:

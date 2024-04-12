@@ -42,7 +42,7 @@ For any small feature, you are dependent on their roadmap. We think this is an u
 - **Costly and non-reliable pricing**<br></br>
 Pricing plans of enterprise tools can sometimes leave you in a lurch with frequent changes.
 
-A relatively newer concept in the field of application performance monitoring is observability. Making a system observable is the pursuit of achieving a state of proactiveness to solve unknown issues. Logs, metrics, and traces are usually considered the three pillars of observability.
+A relatively newer concept in the field of application performance monitoring is observability. Making a system observable is the pursuit of achieving a state of proactiveness to solve unknown issues. Logs, metrics, and traces are usually considered the [three pillars of observability](https://signoz.io/blog/three-pillars-of-observability/).
 
 Some of the key features of good observability tools are:
 

@@ -1,4 +1,5 @@
 // @ts-check
+require("dotenv").config();
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
@@ -10,17 +11,21 @@ const config = {
   trailingSlash: true,
   onBrokenMarkdownLinks: "warn",
   favicon: "img/favicon.ico",
+  customFields: {
+    AIRTABLE_KEY: process.env.AIRTABLE_KEY,
+    AIRTABLE_BASE_URL: process.env.AIRTABLE_BASE_URL,
+  },
   organizationName: "SigNoz", // Usually your GitHub org/user name.
   projectName: "signoz", // Usually your repo name.
   themeConfig: {
-    announcementBar: {
-      id: "funding",
-      content:
-        '🚀 SigNoz Launch Week 1.0 is live. <a target="_blank" rel="noopener noreferrer" href="/newsroom/launch-week-1/">Read more</a>',
-      backgroundColor: "#FAF9F6",
-      textColor: "#091E42",
-      isCloseable: false,
-    },
+    // announcementBar: {
+    //   id: "funding",
+    //   content:
+    //     '🚀 SigNoz Launch Week 1.0 is live. <a target="_blank" rel="noopener noreferrer" href="/newsroom/launch-week-1/">Read more</a>',
+    //   backgroundColor: "#FAF9F6",
+    //   textColor: "#091E42",
+    //   isCloseable: false,
+    // },
     colorMode: {
       defaultMode: "dark",
       disableSwitch: true,
@@ -82,15 +87,21 @@ const config = {
           label: "Docs",
           position: "left",
         },
+        {
+          to: "pricing/",
+          activeBasePath: "pricing",
+          label: "Pricing",
+          position: "left",
+        },
         //docusaurus expects href elements to be full links
         //https://stackoverflow.com/questions/63268853/how-do-i-link-to-non-docusaurus-defined-routes-from-a-docusuarus-footer
         //{href: 'https://signoz.io/blog/', label: 'Blog', position: 'left'}
-        {
-          to: "blog/",
-          activeBasePath: "blog",
-          label: "Blog",
-          position: "left",
-        },
+        // {
+        //   to: "blog/",
+        //   activeBasePath: "blog",
+        //   label: "Blog",
+        //   position: "left",
+        // },
         // {
         //   to: "comparisons/",
         //   activeBasePath: "comparisons",
@@ -98,17 +109,45 @@ const config = {
         //   position: "left",
         // },
         {
-          to: "opentelemetry/",
-          activeBasePath: "opentelemetry",
-          label: "OpenTelemetry",
-          position: "left",
+          // to: '/resources', // Path to your comparison section
+          label: "Resources", // Text for the link
+          position: "left", // Position on the navbar (left or right)
+          items: [
+            {
+              label: "Blog",
+              to: "/blog",
+            },
+            {
+              label: "OpenTelemetry",
+              to: "/opentelemetry",
+            },
+            // {
+            //   label: 'Documentation',
+            //   to: '/docs',
+            // },
+            {
+              label: "Comparisons",
+              to: "/comparisons",
+            },
+            {
+              label: "Customer Stories",
+              to: "case-study/",
+            },
+            // Add more article links here...
+          ],
         },
-        {
-          to: "case-study/",
-          activeBasePath: "case-study/",
-          label: "Customer Stories",
-          position: "right",
-        },
+        // {
+        //   to: "opentelemetry/",
+        //   activeBasePath: "opentelemetry",
+        //   label: "OpenTelemetry",
+        //   position: "left",
+        // },
+        // {
+        //   to: "case-study/",
+        //   activeBasePath: "case-study/",
+        //   label: "Customer Stories",
+        //   position: "right",
+        // },
 
         // {
         //   href: "https://signoz.io/pricing/",
@@ -126,12 +165,12 @@ const config = {
         //   label: "About",
         //   position: "right",
         // },
-        {
-          to: "pricing/",
-          activeBasePath: "pricing",
-          label: "Pricing",
-          position: "left",
-        },
+        // {
+        //   to: "pricing/",
+        //   activeBasePath: "pricing",
+        //   label: "Pricing",
+        //   position: "left",
+        // },
       ],
     },
     footer: {
@@ -208,7 +247,7 @@ const config = {
             },
             {
               label: "Careers",
-              to: "careers/",
+              to: "https://jobs.gem.com/signoz",
             },
             {
               label: "About",

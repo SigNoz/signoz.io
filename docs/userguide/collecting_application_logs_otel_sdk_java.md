@@ -5,7 +5,7 @@ id: collecting_application_logs_otel_sdk_java
 
 # Collecting Application Logs Using OTEL Java Agent
 
-You can directly send your application logs to SigNoz using Java Agent provided by OpenTelemetry.
+You can directly send your application logs to SigNoz using [Java Agent provided by OpenTelemetry](https://signoz.io/docs/instrumentation/java/).
 In this doc we will run a sample java application with the OpenTelemetry Java agent to send logs to SigNoz.
 
 

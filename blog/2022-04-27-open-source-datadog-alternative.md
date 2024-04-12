@@ -33,7 +33,7 @@ In our opinion, good observability tools should have
 
 - Out of the box application metrics
 - Way to go from metrics to traces to find why some issues are happening
-- Seamless flow between metrics, traces & logs — the three pillars of observability
+- Seamless flow between metrics, traces & logs — [the three pillars of observability](https://signoz.io/blog/three-pillars-of-observability/)
 - Filtering of traces based on different tags and filters
 - Ability to set dynamic thresholds for alerts
 - Transparency in pricing
@@ -41,7 +41,7 @@ In our opinion, good observability tools should have
 
 ## User experience not great in current open-source tools
 
-We found that though there are open-source tools like Prometheus & Jaeger, they don’t provide a great user experience as SaaS products do. It takes lots of time and effort to get them working, figuring out the long-term storage, etc. And if you want metrics and traces, it’s not possible as Prometheus metrics & Jaeger traces have different formats.
+We found that though there are open-source tools like Prometheus & Jaeger, they don’t provide a great user experience as SaaS products do. It takes lots of time and effort to get them working, figuring out the long-term storage, etc. And if you want metrics and traces, it’s not possible as Prometheus metrics & [Jaeger traces](https://signoz.io/blog/distributed-tracing-jaeger/) have different formats.
 
 SaaS tools like DataDog and NewRelic do a much better job at many of these aspects:
 
@@ -64,13 +64,13 @@ To fill this gap we built [SigNoz](https://signoz.io/), an open-source alternati
 
 Some of our key features which makes SigNoz vastly superior to current open-source products and a great alternative to DataDog are:
 
-- Metrics, traces, and logs under a single pane of glass
+- Metrics, traces, and logs under a [single pane of glass](https://signoz.io/blog/single-pane-of-glass-monitoring/)
 - Correlation of telemetry signals
 - Out of the box application metrics
 - Seamless flow between metrics, traces & logs
 - Filtering based on tags
 - Custom aggregates on filtered traces
-- Detailed Flamegraphs & Gantt charts
+- Detailed [Flamegraphs & Gantt charts](https://signoz.io/blog/flamegraphs/)
 - Infrastructure dashboards
 - Exceptions monitoring
 - Transparent usage data & pricing

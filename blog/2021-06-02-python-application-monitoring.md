@@ -218,7 +218,7 @@ Press 'Ctrl + C' to exit the app once you have made sure it is running properly.
 
 Step 3. **Set up OpenTelemetry Python instrumentation library**<br></br>
 
-Your app folder contains a file called `requirements.txt`. This file contains all the necessary commands to set up OpenTelemetry python instrumentation library. All the mandatory packages required to start the instrumentation are installed with the help of this file. Make sure your path is updated to the root directory of your sample app and run the following command:
+Your app folder contains a file called `requirements.txt`. This file contains all the necessary commands to set up OpenTelemetry [python instrumentation](https://signoz.io/docs/instrumentation/python/) library. All the mandatory packages required to start the instrumentation are installed with the help of this file. Make sure your path is updated to the root directory of your sample app and run the following command:
 
 ```
 pip3 install -r requirements.txt

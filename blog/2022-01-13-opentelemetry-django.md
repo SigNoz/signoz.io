@@ -35,7 +35,7 @@ Django is very popular among web developers and has a huge community behind it. 
 A Django application is built of different components like a web server, database, web server gateway interface, etc. To monitor a Django application for performance, you need to monitor all these components. And that’s where OpenTelemetry comes into the picture.
 
 > **What is OpenTelemetry Django?**<br></br>
-> OpenTelemetry Django instrumentation enables generation of telemetry data from your Django application. The data is then used to monitor performance of Django application.<br></br> OpenTelemetry provides an open-source standard with a consistent collection mechanism and data format. As application owners, you will always have the freedom to choose different vendors to visualize the collected telemetry data.
+> [OpenTelemetry Django](https://signoz.io/docs/instrumentation/django/) instrumentation enables generation of telemetry data from your Django application. The data is then used to monitor performance of Django application.<br></br> OpenTelemetry provides an open-source standard with a consistent collection mechanism and data format. As application owners, you will always have the freedom to choose different vendors to visualize the collected telemetry data.
 
 Instrumentation is the biggest challenge engineering teams face when starting out with monitoring their application performance. <a href = "https://opentelemetry.io/" rel="noopener noreferrer nofollow" target="_blank" >OpenTelemetry</a> is the leading open-source standard that is solving the problem of instrumentation. It is currently an incubating project under the <a href = "https://www.cncf.io/" rel="noopener noreferrer nofollow" target="_blank" >Cloud Native Computing Foundation</a>.
 

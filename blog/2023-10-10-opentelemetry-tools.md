@@ -97,7 +97,7 @@ Key features of Jaeger include:
 
 Prometheus is an open-source metrics monitoring and alerting toolkit designed to monitor the performance and health of various components in a distributed system. It excels at collecting time-series data, making it particularly effective for tracking metrics and trends over time. Prometheus employs a pull-based model, where it scrapes data from instrumented applications and services at regular intervals.
 
-If you want to do just OpenTelemetry metrics, then Prometheus can be a good choice.
+If you want to do just [OpenTelemetry metrics](https://signoz.io/blog/introduction-to-opentelemetry-metrics/), then Prometheus can be a good choice.
 
 Some of the key features of Prometheus are:
 

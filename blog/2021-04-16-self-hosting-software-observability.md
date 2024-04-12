@@ -61,13 +61,15 @@ Are all your SaaS vendors equally well secure?
 
 import Screenshot from "@theme/Screenshot"
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
   alt="DataDog APM cost"
-  height={500}
+  
   src="/img/blog/2021/04/Screenshot-2021-04-16-at-7.01.00-PM.webp"
-  title="AWS data transfer pricing"
-  width={700}
-/>
+  />
+<figcaption><i>AWS data transfer pricing</i></figcaption>
+  </figure>
+<br/>
 
   Grant Miller, CEO of Replicated recently wrote an interesting [blog](https://techcrunch.com/2018/06/17/after-twenty-years-of-salesforce-what-marc-benioff-got-right-and-wrong-about-the-cloud/) on why modern on-prem delivery model is a much better software delivery model than SaaS.
 

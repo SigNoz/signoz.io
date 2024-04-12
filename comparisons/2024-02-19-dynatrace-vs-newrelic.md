@@ -22,8 +22,6 @@ keywords:
   <link rel="canonical" href="https://signoz.io/comparisons/dynatrace-vs-newrelic/"/>
 </head>
 
-import GetStartedSigNoz from '../docs/shared/get-started-signoz.md';
-
 Dynatrace and New Relic are monitoring tools that provide a wide range of products and services for monitoring. In this post, I have compared Dynatrace and New Relic on important features like APM, log management, infrastructure monitoring, etc.
 
 :::info

@@ -67,7 +67,7 @@ Whatever path you take, you’ll find that once your data is in Datadog, the exp
 
 ### Limitations: Linking Traces and Logs
 
-You cannot link traces and logs automatically with the DataDog OpenTelemetry tools. It’s necessary to manually patch your particular logging module or library with a processor that adds the aforementioned translated `TraceId` and `SpanId` as Log attributes marked `dd.trace_id` and `dd.span_id`, respectively.
+You cannot link traces and logs automatically with the [DataDog OpenTelemetry](https://signoz.io/blog/opentelemetry-vs-datadog/) tools. It’s necessary to manually patch your particular logging module or library with a processor that adds the aforementioned translated `TraceId` and `SpanId` as Log attributes marked `dd.trace_id` and `dd.span_id`, respectively.
 
 <figure data-zoomable align='center'>
     <img src="/img/blog/2023/09/firsclass-2.webp" alt="a screenshot of datadog traces"/>
@@ -106,7 +106,7 @@ However in all my experiments these span events didn’t show up anywhere in Dat
     <figcaption><i>Notice the matching span name as the snippet above.</i></figcaption>
 </figure>
 
-Not only is this data missing from the trace, no failure is logged in the Datadog trace logging. The closest analogy to span events within Datadog’s tracing standard was a custom span tag, but this showed no information no matter how I checked my OpenTelemetry traces.
+Not only is this data missing from the trace, no failure is logged in the Datadog trace logging. The closest analogy to span events within Datadog’s tracing standard was a custom span tag, but this showed no information no matter how I checked my [OpenTelemetry traces](https://signoz.io/blog/opentelemetry-tracing/).
 
 This gap exemplifies the drawbacks of Datadog’s attempt to fully integrate OpenTelemetry data: OpenTelemetry is a different standard for monitoring. Where the two standards don’t align, Datadog’s solution seems to be a choice to ‘eat’ the data that doesn’t match.
 
@@ -202,6 +202,6 @@ Over at Datadog, the story inspires even less confidence. The documentation feat
 
 It’s surprising that two companies with highly mature products, hundreds of thousands of hosts under monitoring, and massive product teams would struggle so much to support OpenTelemetry. While OTel may have a different standard, it is after all data with a familiar purpose: telling users how their software is running. But it’s the gaps with their proprietary data that show the problem: Neither New Relic nor Datadog can devote all their time to OpenTelemetry, they have far too many legacy customers to stop development on their proprietary monitoring and dashboards. Even a small team, if they go ‘all in’ on supporting OpenTelemetry as the sole way to monitor applications, can produce a better experience for engineers than can New Relic or Datadog.
 
-The proof is in the pudding. Teams less than 1/10th the size of either company have delivered amazing results. From the deep tracing and long storage of Honeycomb or the ‘single pane of glass’ for OpenTelemetry delivered by SigNoz, we see that engineering teams focused on single common goal can achieve great things no matter their size.
+The proof is in the pudding. Teams less than 1/10th the size of either company have delivered amazing results. From the deep tracing and long storage of Honeycomb or the [single pane of glass](https://signoz.io/blog/single-pane-of-glass-monitoring/) for OpenTelemetry delivered by SigNoz, we see that engineering teams focused on single common goal can achieve great things no matter their size.
 
 While purchasing decisions will always be personal to your team, the concerns raised here should give any team lead pause if your primary data source is OpenTelemetry.

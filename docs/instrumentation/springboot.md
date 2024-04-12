@@ -148,7 +148,7 @@ You can use OpenTelemetry Java to send your traces directly to SigNoz. OpenTelem
 
 ### Steps to auto-instrument Spring Boot applications for traces
 
-OpenTelemetry Java auto-instrumentation supports collecting telemetry data from a huge number of libraries and frameworks. You can check out the full list [here](https://github.com/open-telemetry/opentelemetry-java-instrumentation/blob/main/docs/supported-libraries.md).
+[OpenTelemetry Java auto-instrumentation](https://signoz.io/opentelemetry/java-auto-instrumentation/) supports collecting telemetry data from a huge number of libraries and frameworks. You can check out the full list [here](https://github.com/open-telemetry/opentelemetry-java-instrumentation/blob/main/docs/supported-libraries.md).
 
 1. **Download the latest OpenTelemetry Java JAR agent**<br></br>
    Download the latest [Java JAR agent](https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar). You can also use the terminal to get the file using the following command:

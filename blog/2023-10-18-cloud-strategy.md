@@ -17,8 +17,6 @@ keywords:
   <link rel="canonical" href="https://signoz.io/blog/cloud-strategy/"/>
 </head>
 
-import GetStartedSigNoz from '../docs/shared/get-started-signoz.md';
-
 In today’s digital world, performance and agility are essential for running a successful business, and in the technology arena, there is no exception. Over the past few years, there has been a significant rise in the use of cloud computing technology as more companies prefer scalability of resources, flexibility in experimenting with new technologies, reducing cost by eliminating the need to invest in on-premises hardware, etc.
 
 <!--truncate-->
@@ -143,7 +141,7 @@ As we have previously discussed, monitoring stands as one of the main pillars in
 
 Key metrics to monitor include CPU usage, memory consumption, network bandwidth, storage I/O, and application performance metrics, etc.
 
-Although cloud providers like AWS provide monitoring tools like Cloudwatch, it is limited to monitoring things inside AWS. If you’re using multi-cloud or want better monitoring capabilities, you would need a robust monitoring tool. [SigNoz](https://signoz.io/) is an open-source observability tool that you can use for monitoring your cloud services. It provides metrics, traces, and logs under a single pane of glass and can be a one-stop observability solution.
+Although cloud providers like AWS provide monitoring tools like Cloudwatch, it is limited to monitoring things inside AWS. If you’re using multi-cloud or want better monitoring capabilities, you would need a robust monitoring tool. [SigNoz](https://signoz.io/) is an open-source observability tool that you can use for monitoring your cloud services. It provides metrics, traces, and logs under a [single pane of glass](https://signoz.io/blog/single-pane-of-glass-monitoring/) and can be a one-stop observability solution.
 
 ## FAQs
 

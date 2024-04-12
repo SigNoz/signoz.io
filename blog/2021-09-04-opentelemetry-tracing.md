@@ -35,13 +35,13 @@ OpenTelemetry aims to standardize the creation and management of telemetry data.
 ## Why is distributed tracing needed?
 In microservices architecture, often engineering teams are responsible for just one service and it becomes a nightmare to troubleshoot issues without an overview. Correlating logs and metrics is challenging with a lot of manual effort.
 
-That's where distributed tracing comes into the picture. User requests are broken down into spans.
+That's where distributed tracing comes into the picture. User requests are broken down into [spans](https://signoz.io/blog/distributed-tracing-span/).
 
 >What are spans?<br></br>
 >Spans represent a single operation within a trace.
 >It represents work done by a single service which can be broken down further depending on the use case.
 
-A trace context is passed along when requests travel between services, which tracks a user request across services. You can see how a user request performs across services and identify what exactly needs your attention without manually shifting through multiple dashboards.
+A [trace context](https://signoz.io/blog/context-propagation-in-distributed-tracing/) is passed along when requests travel between services, which tracks a user request across services. You can see how a user request performs across services and identify what exactly needs your attention without manually shifting through multiple dashboards.
 
 <figure data-zoomable align='center'>
     <img src="/img/blog/2021/09/opentelemetry_distributed_tracing-min.webp" alt="OpenTelemetry tracing uses trace context to track user request across services"/>

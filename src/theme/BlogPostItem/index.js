@@ -7,6 +7,7 @@ import BlogPostItemFooter from "@theme/BlogPostItem/Footer";
 import Link from "@docusaurus/Link";
 
 import trySignozImg from "../../../static/img/try-signoz-cloud-blog-cta.webp";
+import RelatedArticles from "../../components/RelatedArticles/RelatedArticles";
 
 // apply a bottom margin in list view
 function useContainerClassName(isBlogPostPage) {
@@ -28,6 +29,8 @@ export default function BlogPostItem({ children, className }) {
           <BlogPostItemHeader />
           <BlogPostItemContent>{children}</BlogPostItemContent>
           <BlogPostItemFooter />
+
+          {isBlogPostPage && <RelatedArticles />}
         </div>
 
         {isBlogPostPage && (
@@ -37,7 +40,11 @@ export default function BlogPostItem({ children, className }) {
               className="cta-image-container"
               id="try-signoz-cloud-blogpage-cta"
             >
-              <img id="blog-cloud-cta-image" className="cta-image" src={trySignozImg} />
+              <img
+                id="blog-cloud-cta-image"
+                className="cta-image"
+                src={trySignozImg}
+              />
             </Link>
           </div>
         )}

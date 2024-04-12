@@ -284,7 +284,7 @@ Its context utilizes real-time data enrichment and correlation to gain valuable 
 
 The above tools help you centralize your application monitoring and observability practices. These Splunk alternatives can be used for your monitoring prerequisites. If you’re looking for a comprehensive tool that can serve all your observability needs, then you can choose SigNoz.
 
-As SigNoz is a full-stack APM, it can act as a one-stop solution for metrics monitoring, distributed tracing, and log management. It is also based on OpenTelemetry, which frees you from any vendor lock-in.
+As SigNoz is a full-stack APM, it can act as a one-stop solution for metrics monitoring, [distributed tracing](https://signoz.io/blog/distributed-tracing-in-microservices/), and log management. It is also based on OpenTelemetry, which frees you from any vendor lock-in.
 
 ## Getting Started with SigNoz
 

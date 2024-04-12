@@ -54,7 +54,7 @@ Using OpenTelemetry and SigNoz, you can trace a user request end-to-end from the
 
 OpenTelemetry provides the instrumentation layer to generate and export your telemetry data to a backend. Then, you need to choose a backend tool that will provide the data storage and visualization for your telemetry data. That’s where SigNoz comes into the picture.
 
-[SigNoz](https://signoz.io/) is a full-stack open-source APM tool that provides metrics monitoring and distributed tracing.
+[SigNoz](https://signoz.io/) is a full-stack open-source APM tool that provides metrics monitoring and [distributed tracing](https://signoz.io/blog/distributed-tracing-in-microservices/).
 
 OpenTelemetry is the way forward for cloud-native application owners who want to set up a robust observability framework. It also provides you the freedom to choose any backend analysis tool. SigNoz is built to support OpenTelemetry natively, thus making a great combo.
 
@@ -456,7 +456,7 @@ The `Traces` tab of SigNoz helps you analyze the tracing data collected from you
 
 <br></br>
 
-SigNoz provides Flamegraphs and Gantt charts to visualize the complete journey of user requests or transactions.
+SigNoz provides [Flamegraphs and Gantt charts](https://signoz.io/blog/flamegraphs/) to visualize the complete journey of user requests or transactions.
 
 <figure data-zoomable align='center'>
     <img src="/img/blog/2022/06/nodejs_perf_flamegraphs.webp" alt="Flamegraphs and Gantt Charts on SigNoz"/>

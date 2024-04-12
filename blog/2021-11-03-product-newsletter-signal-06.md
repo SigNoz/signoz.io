@@ -42,13 +42,15 @@ Our metrics dashboard reported metrics generated from trace data. At scale, crun
 
 import Screenshot from "@theme/Screenshot"
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
    alt="Metrics dashboard"
-   height={500}
+   
    src="/img/blog/2021/11/metrics_dashboard.webp"
-   title="Metrics dashboard"
-   width={700}
-/>
+   />
+<figcaption><i>Metrics dashboard</i></figcaption>
+</figure>
+<br/>
 
 ### Cypress test cases
 
@@ -72,13 +74,15 @@ Our team is focused on working on alerts in the upcoming sprints. It's taking mo
 
 Our users also wanted to set the retention period of their collected telemetry data from the UI itself. So we are working on a settings page for managing the retention period.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
    alt="Retention settings page"
-   height={500}
+   
    src="/img/blog/2021/11/metrics_dashboard.webp"
-   title="Here's a sneak peek of the retention settings page"
-   width={700}
-/>
+   />
+<figcaption><i>Here's a sneak peek of the retention settings page</i></figcaption>
+</figure>
+<br/>
 
 ## SigNoz news
 
@@ -108,13 +112,15 @@ We also crossed 300+ members on our [slack community](https://signoz.io/slack).�
 
 This month, we crossed 5000+ stars on GitHub 🚀 🎉 It's been an incredible journey since we started out to build the best open-source APM tool, and we couldn't have anticipated such developer interest in such a short time in our wildest dreams 🥳
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
    alt="GitHub stargazers graph"
-   height={500}
+   
    src="/img/blog/2021/11/5000_stargazers.webp"
-   title="Crossed 50000 GitHub stars"
-   width={700}
-/>
+   />
+<figcaption><i>Crossed 50000 GitHub stars</i></figcaption>
+</figure>
+<br/>
 
 ### Features
 
@@ -124,13 +130,15 @@ We got featured in **[Julia Schottenstein's list](https://osschott.metabaseapp.c
 
 Our focus remains to make observability more accessible with open-source.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
    alt="OSS projects contributor growth"
-   height={500}
+   
    src="/img/blog/2021/11/contributor_growth.webp"
-   title="SigNoz is a top OSS project by contributor growth"
-   width={700}
-/>
+   />
+<figcaption><i>SigNoz is a top OSS project by contributor growth</i></figcaption>
+</figure>
+<br/>
 
 **Observability Trends 2021**
 

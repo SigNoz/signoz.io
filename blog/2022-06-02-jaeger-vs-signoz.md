@@ -71,13 +71,15 @@ SigNoz also provides an easy way to track the top endpoints of your application,
     <figcaption><i>SigNoz UI showing application overview metrics like RPS, 50th/90th/99th Percentile latencies, and Error Rate</i></figcaption>
 </figure>
 
-<!-- <Screenshot
+<!-- <figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="SigNoz UI"
-    height={500}
+    
     src="/img/blog/2021/08/signoz_ui-min.webp"
-    title="SigNoz UI showing application overview metrics like RPS, 50th/90th/99th Percentile latencies, and Error Rate"
-    width={700}
-/> -->
+    />
+<figcaption><i>SigNoz UI showing application overview metrics like RPS, 50th/90th/99th Percentile latencies, and Error Rate"
+    </figure>
+<br/> -->
 
 ### Out of box charts and visualization with SigNoz
 
@@ -103,13 +105,15 @@ Jaeger does not provide Flamegraphs, and to view details of a span, you need to 
 
 Currently in beta, SigNoz also provides interactive service maps which can automatically identify the dependency between your services. The size of each circle is proportional to the number of requests it is serving. The dots connecting the services are synced with the flow of requests between the services.
 
-<!-- <Screenshot
+<!-- <figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="SigNoz service maps"
-    height={500}
+    
     src= "/img/blog/2021/08/signoz_service_maps-min.webp"
-    title="Interactive Service Maps shown on SigNoz dashboard"
-    width={700}
-/> -->
+    />
+<figcaption><i>Interactive Service Maps shown on SigNoz dashboard"
+    </figure>
+<br/> -->
 
 <figure data-zoomable>
     <img src="/img/blog/common/signoz_service_maps_beta.webp" alt="SigNoz service maps"/>
@@ -176,13 +180,15 @@ SigNoz uses [ClickHouse](https://clickhouse.com/) for storing observability data
 
 <br></br>
 
-<!-- <Screenshot
+<!-- <figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt=""
-    height={500}
+    
     src= "/img/blog/2021/08/SigNoz_architecture-min.webp"
-    title="Technical architecture of SigNoz with ClickHouse setup"
-    width={700}
-/> -->
+    />
+<figcaption><i>Technical architecture of SigNoz with ClickHouse setup"
+    </figure>
+<br/> -->
 
 ClickHouse is designed to be a <a href = "https://clickhouse.tech/docs/en/faq/general/why-clickhouse-is-so-fast/" rel="noopener noreferrer nofollow" target="_blank" >very fast</a> OLAP database. It is also low resource-intensive. For Jaeger, Cassandra and Elasticsearch are the primary supported storage backends.
 

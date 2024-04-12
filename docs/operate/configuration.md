@@ -4,6 +4,8 @@ title: Configuration
 description: Learn how to configure SigNoz
 ---
 
+import APITable from "@theme/APITable"
+
 You can configure for SigNoz with different options.
 
 If no configuration for an option is set, then the default value as described is applied.

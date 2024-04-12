@@ -22,8 +22,6 @@ keywords:
   <link rel="canonical" href="https://signoz.io/blog/log-monitoring-tools/"/>
 </head>
 
-import GetStartedSigNoz from '../docs/shared/get-started-signoz.md';
-
 For any software company, a log monitoring tool is a must for collecting, storing, and providing a centralized view of all logs from different applications and hosts for faster anomaly detection, incident resolution, and troubleshooting.
 
 <!--truncate-->
@@ -358,7 +356,7 @@ You can centralize all logs from on-premise systems or cloud-based systems. You 
 
 | Pros | Cons |
 | --- | --- |
-| You can automatically parse syslog and Apache logs and NGINX logs. | Rest API is in beta, so still needs improvement. |
+| You can automatically parse syslog and Apache logs and [NGINX logs](https://signoz.io/blog/nginx-logging/). | Rest API is in beta, so still needs improvement. |
 | Has an intuitive UI for search and alert processing. | Data retention is usually available for 30 days. |
 | It can deal with spikes faster and more effectively. |  |
 

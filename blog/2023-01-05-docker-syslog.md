@@ -27,7 +27,7 @@ Logs are useful for troubleshooting and identifying issues in applications, as t
 
 Collecting logs from Docker can be challenging when running a large number of containers or running Docker on multiple hosts. These challenges include managing a large volume of logs, accessing logs from multiple hosts, ensuring the security of logs, and getting a comprehensive view of container and application behavior. A centralized logging system can help address these challenges by allowing you to store and manage all of your logs in a single location.
 
-Docker Syslog is a built-in logging system provided by Docker that allows you to centralize and manage the logs produced by your Docker containers. In this article, we will delve into the capabilities of Docker Syslog, discuss how to configure and use it as a centralized logging solution for your Docker containers and demonstrate how it can be utilized to effectively manage and analyze your Docker logs.
+Docker Syslog is a built-in logging system provided by Docker that allows you to centralize and manage the logs produced by your Docker containers. In this article, we will delve into the capabilities of Docker Syslog, discuss how to configure and use it as a centralized logging solution for your Docker containers and demonstrate how it can be utilized to effectively manage and analyze your [Docker logs](https://signoz.io/blog/docker-logs/).
 
 ## Understanding Syslog
 

@@ -56,7 +56,7 @@ You can check out paid plans of SigNoz [here](https://signoz.io/pricing/).
 
 ## Issues with Datadog pricing
 
-Datadog has a very complex SKU-based pricing structure. The complex billing structure makes it hard to predict how much you will be charged at the end of the month.
+Datadog has a very complex SKU-based [pricing](https://signoz.io/blog/datadog-pricing/) structure. The complex billing structure makes it hard to predict how much you will be charged at the end of the month.
 
 Recently, it was revealed that they charged a cryptocurrency company a bill of $65 million USD. A **[Hacker News thread](https://news.ycombinator.com/item?id=35837330)** discussing the report went viral, and there was an outpour of user stories around Datadog’s unpredictable billing practices.
 

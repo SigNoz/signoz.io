@@ -43,7 +43,7 @@ The specification is designed into distinct types of telemetry known as signals.
 - Metrics and
 - Traces
 
-Together, these three signals form the three pillars of observability. OpenTelemetry is the bedrock for setting up an observability framework. The application code is instrumented using OpenTelemetry client libraries, which enables the generation of telemetry data. Once the telemetry data is generated and collected, you need to configure the OpenTelemetry exporter to send data to a backed analysis tool like [SigNoz](https://signoz.io/).
+Together, these three signals form the [three pillars of observability](https://signoz.io/blog/three-pillars-of-observability/). OpenTelemetry is the bedrock for setting up an observability framework. The application code is instrumented using OpenTelemetry client libraries, which enables the generation of telemetry data. Once the telemetry data is generated and collected, you need to configure the OpenTelemetry exporter to send data to a backed analysis tool like [SigNoz](https://signoz.io/).
 
 ## Why do we need OpenTelemetry Exporters?
 
@@ -84,7 +84,7 @@ It is recommended to use the OTLP exporter for any OpenTelemetry setup.
 
 OpenTelemetry seamlessly integrates with Zipkin, offering two exporters for integrating trace data collected by OpenTelemetry into Zipkin: the OpenTelemetry Zipkin JSON Exporter and the OpenTelemetry Zipkin Protobuf Exporter.
 
-The <a href = "https://opentelemetry-python.readthedocs.io/en/latest/exporter/zipkin/zipkin.html#opentelemetry-zipkin-json-exporter/" rel="noopener noreferrer nofollow" target="_blank" >OpenTelemetry Zipkin JSON Exporter</a> simplifies the process of sending OpenTelemetry traces to Zipkin by packaging it in JSON format over HTTP to the designated Zipkin collector endpoint. This exporter supports multiple versions (v1 and v2), giving you more flexibility in how you manage and analyze your traces.
+The <a href = "https://opentelemetry-python.readthedocs.io/en/latest/exporter/zipkin/zipkin.html#opentelemetry-zipkin-json-exporter/" rel="noopener noreferrer nofollow" target="_blank" >OpenTelemetry Zipkin JSON Exporter</a> simplifies the process of sending [OpenTelemetry traces](https://signoz.io/blog/opentelemetry-tracing/) to Zipkin by packaging it in JSON format over HTTP to the designated Zipkin collector endpoint. This exporter supports multiple versions (v1 and v2), giving you more flexibility in how you manage and analyze your traces.
 
 Additionally, the <a href = "https://opentelemetry-python.readthedocs.io/en/latest/exporter/zipkin/zipkin.html#opentelemetry-zipkin-protobuf-exporter/" rel="noopener noreferrer nofollow" target="_blank" >OpenTelemetry Zipkin Protobuf Exporter</a> efficiently sends traces to Zipkin by transmitting the traces to the designated Zipkin collector endpoint via HTTP, and it supports the efficient v2 protobuf format for trace data.
 

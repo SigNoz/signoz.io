@@ -122,7 +122,7 @@ The primary goal of OpenTelemetry's log data model is to ensure a common underst
 
 **ObservedTimestamp:** The time when the event was observed by the collection system.
 
-**Trace Context Fields:** These include TraceId, SpanId, and TraceFlags which are essential for correlating logs with traces.
+**[Trace Context](https://signoz.io/blog/context-propagation-in-distributed-tracing/) Fields:** These include TraceId, SpanId, and TraceFlags which are essential for correlating logs with traces.
 
 **Severity Fields:** These include SeverityText and SeverityNumber which represent the severity or log level of the event.
 

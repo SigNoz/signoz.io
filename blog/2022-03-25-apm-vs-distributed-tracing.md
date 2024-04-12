@@ -52,13 +52,15 @@ Apart from application metrics, some APM tools can also provide host, infrastruc
 
 import Screenshot from "@theme/Screenshot"
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="Metrics dashboard in SigNoz APM"
-    height={500}
+    
     src="/img/blog/2022/03/apm_vs_dt_metrics.webp"
-    title="APM tools can measure application metrics like application latency, requests per sec, error percentage, etc. (Source: SigNoz dashboard)"
-    width={700}
-/>
+    />
+<figcaption><i>APM tools can measure application metrics like application latency, requests per sec, error percentage, etc. (Source: SigNoz dashboard)</i></figcaption>
+</figure>
+<br/>
 
 ## What is Distributed Tracing?
 
@@ -74,13 +76,15 @@ The data collected by distributed tracing is known as trace data. Trace data can
 
 Common visualization formats include Flamegraphs and Gantt Charts.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="Tracing data is often visualized in the form of Flamegraphs and Gantt Charts"
-    height={500}
+    
     src="/img/blog/2022/03/flamegraphs_gantt_charts_dt.webp"
-    title="Tracing data visualized as Flamegraph and Gantt chart. (Source: SigNoz dashboard)"
-    width={700}
-/>
+    />
+<figcaption><i>Tracing data visualized as Flamegraph and Gantt chart. (Source: SigNoz dashboard)</i></figcaption>
+</figure>
+<br/>
 
 Tracing data visualized as Flamegraph and Gantt chart. (Source: SigNoz dashboard)
 
@@ -92,25 +96,29 @@ An APM tool that also provides the capability to implement distributed tracing c
 
 For example, let’s suppose that you notice high latency in one of your services during a particular duration. You will need to dig deeper at that timestamp to identify the bottlenecks. In an APM tool that also provides distributed tracing, the tracing data is correlated with application metrics.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="Correlation of application metrics with tracing data helps in quick debugging"
-    height={500}
+    
     src="/img/blog/2022/03/apm_vs_dt_high_latency_point.webp"
-    title="You can click on ‘View Traces` to see the tracing data at a timestamp of high latency. (Source: SigNoz dashboard)"
-    width={700}
-/>
+    />
+<figcaption><i>You can click on ‘View Traces` to see the tracing data at a timestamp of high latency. (Source: SigNoz dashboard)</i></figcaption>
+</figure>
+<br/>
 
 You can click on `View Traces` to see the tracing data at a timestamp of high latency. (Source: SigNoz dashboard)
 
 Once you access the tracing data, you can identify the exact events that caused the latency issues. Distributed tracing makes the root cause analysis of performance issues much quicker.
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="Trace dashboard in SigNoz"
-    height={500}
+    
     src="/img/blog/2022/03/dt_traces_tab.webp"
-    title="Tracing data as shown in SigNoz dashboard. With the help of filters, you can quickly identify the exact events that are causing latency issues."
-    width={700}
-/>
+    />
+<figcaption><i>Tracing data as shown in SigNoz dashboard. With the help of filters, you can quickly identify the exact events that are causing latency issues.</i></figcaption>
+</figure>
+<br/>
 
 For microservices-based applications, it is critical for application owners to see how a specific event fits in the scheme of its entire user request. Tracing data in the form of Flamegraphs and Gantt charts can give you that picture.
 

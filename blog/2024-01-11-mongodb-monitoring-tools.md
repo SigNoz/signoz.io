@@ -22,7 +22,6 @@ import { LiteYoutubeEmbed } from "react-lite-yt-embed";
   <link rel="canonical" href="https://signoz.io/blog/mongodb-monitoring-tools/"/>
 </head>
 
-import GetStartedSigNoz from '../docs/shared/get-started-signoz.md';
 
 Are you looking for MongoDB monitoring tools? Then you’re at the right place. MongoDB is one of the most popular and powerful NoSQL databases out there. The fact that it’s a document-based database makes it blazing fast.
 

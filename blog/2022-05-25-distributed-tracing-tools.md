@@ -22,7 +22,7 @@ keywords:
 
 import GetStartedSigNoz from '../docs/shared/get-started-signoz.md';
 
-Modern digital organizations have rapidly adopted microservices-based architecture for their applications. Distributed tracing tools help monitor microservices-based applications. Choosing the right distributed tracing tool is critical. How do you know which is the right one for you? In this post, we will cover the top 13 distributed tracing tools in 2024 that can solve your monitoring and observability needs.
+Modern digital organizations have rapidly adopted microservices-based architecture for their applications. [Distributed tracing](https://signoz.io/blog/distributed-tracing-in-microservices/) tools help monitor microservices-based applications. Choosing the right distributed tracing tool is critical. How do you know which is the right one for you? In this post, we will cover the top 13 distributed tracing tools in 2024 that can solve your monitoring and observability needs.
 
 <!--truncate-->
 
@@ -73,7 +73,7 @@ In the world of microservices, a user request travels through hundreds of servic
 
 <br></br>
 
-Distributed tracing gives you insight into how a particular service is performing as part of the whole in a distributed software system. There are two essential concepts involved in distributed tracing: **Spans** and **trace context**.
+Distributed tracing gives you insight into how a particular service is performing as part of the whole in a distributed software system. There are two essential concepts involved in distributed tracing: **[Spans](https://signoz.io/blog/distributed-tracing-span/)** and **[trace context](https://signoz.io/blog/context-propagation-in-distributed-tracing/)**.
 
 **[Read our complete guide on Distributed Tracing](https://signoz.io/distributed-tracing/)**
 
@@ -104,13 +104,13 @@ Now let's explore the top 13 distributed tracing tools in 2024.
 
 <br></br>
 
-[SigNoz](https://signoz.io/) is a full-stack distributed tracing tool that you can use for tracing your application. You can monitor logs, metrics, and traces and correlate signals for better insights into application performance. Logs, metrics, and traces are considered to be the three pillars of observability in modern-day distributed systems.
+[SigNoz](https://signoz.io/) is a full-stack distributed tracing tool that you can use for tracing your application. You can monitor logs, metrics, and traces and correlate signals for better insights into application performance. Logs, metrics, and traces are considered to be the [three pillars of observability](https://signoz.io/blog/three-pillars-of-observability/) in modern-day distributed systems.
 
 SigNoz is a very good choice for distributed tracing based on OpenTelemetry. With SigNoz, you can do the following:
 
-- Visualise Traces, Metrics, and Logs in a single pane of glass
+- Visualise Traces, Metrics, and Logs in a [single pane of glass](https://signoz.io/blog/single-pane-of-glass-monitoring/)
 - Monitor application metrics like p99 latency, error rates for your services, external API calls, and individual endpoints.
-- Find the root cause of the problem by going to the exact traces which are causing the problem and see detailed flamegraphs of individual request traces.
+- Find the root cause of the problem by going to the exact traces which are causing the problem and see detailed [flamegraphs](https://signoz.io/blog/flamegraphs/) of individual request traces.
 - Run aggregates on trace data to get business-relevant metrics
 - Filter and query logs, build dashboards and alerts based on attributes in logs
 - Monitor infrastructure metrics such as CPU utilization or memory usage
@@ -164,25 +164,29 @@ Zipkin's architecture includes:
 - API to query data
 - UI
 
-<!-- <Screenshot
+<!-- <figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="Zipkin architecture"
-    height={500}
+    
     src="/img/blog/2021/09/zipkin_architecture-min.webp"
-    title="Zipkin architecture (Source: Zipkin website)"
-    width={700}
-/> -->
+    />
+<figcaption><i>Zipkin architecture (Source: Zipkin website)"
+    </figure>
+<br/> -->
 
 Zipkin's in-built UI is limited, and you can use Grafana or Kibana from the ELK stack for better analytics and visualizations.
 
 It also includes a dependency diagram that shows how many user requests went through each service. It can help you to identify error paths and calls to deprecated services.
 <!-- 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="Zipkin dependency diagram"
-    height={500}
+    
     src="/img/blog/2021/07/zipkin_dependency_diagram-min_o.webp"
-    title="Zipkin dependency diagram (Source: GitHub repo)"
-    width={700}
-/> -->
+    />
+<figcaption><i>Zipkin dependency diagram (Source: GitHub repo)"
+    </figure>
+<br/> -->
 
 ### Grafana Tempo
 
@@ -250,21 +254,25 @@ Some of the key features provided by the Dynatrace distributed tracing tool incl
 - Code-level visibility across all application tiers for web and mobile apps together
 - Always-on code profiling and diagnostics tools for application analysis
 
-<!-- <Screenshot
+<!-- <figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="Dynatrace distributed tracing dashboard"
-    height={500}
+    
     src="/img/blog/2021/09/dynatrace_purepath-min.webp"
-    title=""
-    width={700}
-/>
+    />
+<figcaption><i>"
+    </figure>
+<br/>
 
-<Screenshot
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
     alt="Code-level insights with Dynatrace PurePath technology"
-    height={500}
+    
     src="/img/blog/2021/09/dynatrace_purepath_code_level-min.webp"
-    title="Code-level insights shown on Dynatrace dashboard (Source: Dynatrace website)"
-    width={700}
-/> -->
+    />
+<figcaption><i>Code-level insights shown on Dynatrace dashboard (Source: Dynatrace website)"
+    </figure>
+<br/> -->
 
 ### New Relic
 

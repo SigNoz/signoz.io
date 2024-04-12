@@ -38,7 +38,7 @@ Before we demonstrate how to implement OpenTelemetry libraries for tracing Kafka
 
 ## What is OpenTelemetry?
 
-<a href = "https://opentelemetry.io/" rel="noopener noreferrer nofollow" target="_blank">OpenTelemetry</a> is an open-source vendor-agnostic set of tools, APIs, and SDKs used to instrument applications to create and manage telemetry data(logs, metrics, and traces). It aims to make telemetry data(logs, metrics, and traces) a built-in feature of cloud-native software applications.
+<a href = "https://opentelemetry.io/" rel="noopener noreferrer nofollow" target="_blank">OpenTelemetry</a> is an open-source vendor-agnostic set of tools, APIs, and SDKs used to [instrument applications](https://signoz.io/docs/instrumentation/) to create and manage telemetry data(logs, metrics, and traces). It aims to make telemetry data(logs, metrics, and traces) a built-in feature of cloud-native software applications.
 
 The telemetry data is then sent to an observability tool for storage and visualization.
 

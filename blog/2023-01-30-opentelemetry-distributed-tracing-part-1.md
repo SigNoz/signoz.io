@@ -109,7 +109,7 @@ It has the following high-level components, i.e., **instrumentation libraries(ag
 - A query service is an interface between the frontend and the database.
 - The instrumentation library sends the trace data that gets stored in a database. The visualization tool loads the trace data from the database and shows a web UI that shows trace information in a graphical format.
 
-For example, **Zipkin** and **Jaeger** also have similar architecture.
+For example, **Zipkin** and **[Jaeger](https://signoz.io/blog/distributed-tracing-jaeger/)** also have similar architecture.
 
 <figure data-zoomable align='center'>
     <img src="/img/blog/2023/01/jaeger_zipkin_architecture.webp" alt="Zipkin and Jaeger Architecture"/>

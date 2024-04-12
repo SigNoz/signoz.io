@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import Link from "@docusaurus/Link";
 import useBaseUrl from "@docusaurus/useBaseUrl";
-import ReactGA from "react-ga";
+import ReactGA from "react-ga4";
 import styles from "./styles.module.css";
 
 export const TrySigNozCTA = () => {
