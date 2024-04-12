@@ -59,7 +59,7 @@ Splunk and Dynatrace are monitoring tools that provide a wide range of products 
 
 🟡 - Limited
 
-## APM: Dynatrace for
+## APM: Dynatrace for real-time application performance
 
 ### Splunk
 
