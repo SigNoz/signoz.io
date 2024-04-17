@@ -15,7 +15,7 @@ sidebar_label: Saved View
 <!-- ![Alt Text](../../static/img/docs/product-features/saved-view.gif) -->
 
 
-The Save View feature offers a streamlined experience in Logs and Trace Explorer. This feature enables you to customize and preserve specific filter settings for the logs and traces data and save these tailored views for swift access in the future. This document provides a step-by-step process to using Saved Views in SigNoz.
+This feature enables you to customize and preserve specific filter settings for the logs and traces data and save these tailored views for swift access in the future. This document provides a step-by-step process to using Saved Views in SigNoz.
 
 <!-- The Save View feature in SigNoz enhances your log and trace data analysis by allowing you to create and access customized data perspectives efficiently. This feature simplifies repetitive data filtering tasks, making it easier to manage and analyze the vast quantities of data you encounter daily. -->
 
