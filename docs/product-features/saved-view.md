@@ -1,7 +1,7 @@
 ---
 id: saved-view
 title: Save a view in SigNoz
-sidebar_label: Saved View
+sidebar_label: Save View
 ---
 
 ## Introduction
