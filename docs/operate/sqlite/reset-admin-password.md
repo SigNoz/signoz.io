@@ -59,9 +59,11 @@ In the sqlite shell, run the following commands:
 ```bash
 select * from users;
 select * from organizations;
+select * from invites;
 
 delete from users;
 delete from organizations;
+delete from invites;
 ```
 
 ### Step 3: Verify the Users and Organisation are Removed
@@ -70,6 +72,8 @@ delete from organizations;
 select * from users;
 
 select * from organizations;
+
+select * from invites;
 ```
 
 ### Step 4: Exit from SQLite Shell and Container Shell
