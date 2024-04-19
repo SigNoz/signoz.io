@@ -25,8 +25,8 @@ This feature enables you to customize and preserve specific filter settings for 
 The Saved Views functionality caters to a variety of real-life scenarios across the Logs and Traces Explorers:
 
 - **Fast Incidence Response**: During an incident, time is of the essence. Saved Views can help you quickly zoom in on the anomaly by applying predefined filters, allowing you to diagnose and respond to issues faster.
+- **Collaborative Analysis**: When your team needs to tackle a problem, Saved Views ensure everyone can access the same data perspective instantly, fostering a unified approach to resolving issues.
 - **Continuous Monitoring**: For routine checks, a saved view can serve as a daily dashboard, showing you the health and performance metrics that you care about most, without the need to rebuild filters each time.
-<!-- - **Collaborative Analysis**: When your team needs to tackle a problem, Saved Views ensure everyone can access the same data perspective instantly, fostering a unified approach to resolving issues. -->
 <!-- - **Performance Tuning**: When optimizing application performance, Saved Views can track specific metrics over time, helping you gauge the impact of changes. -->
 <!-- - **Security Oversight**: Set up views to monitor security logs, and access them quickly in case of a suspected breach to trace the source or impact. -->
 
