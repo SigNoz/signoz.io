@@ -12,24 +12,26 @@ import SigNozCloud from '../../shared/signoz-cloud.md'
 
 :::info
 In v0.12, SigNoz introduces support for distributed clickhouse. Multiple replicas for clickhouse shards are not supported in v0.12.0, please follow upcoming releases to check availability.
+
+In v0.42, support for multiple replicas for clickhouse shards is added.
 :::
 
 ## Prerequisites
 
-- SigNoz version >= 0.12
-- SigNoz OtelCollector >= 0.66
-- SigNoz Chart >= 0.6.0
+- SigNoz version >= 0.42
+- SigNoz OtelCollector and Schema Migrator >= 0.88.19
+- SigNoz Chart >= 0.38.1
 - Zookeeper (or ClickHouse Keeper) is mandatory for running a distributed
 ClickHouse cluster
 - 3 nodes Zookeeper cluster recommended for distributed ClickHouse cluster
 with production environment, while single instance of Zookeeper should suffice for
-development environment.
+development environment
 
 ## Distributed ClickHouse Setup for SigNoz
 
 Basically, distributed ClickHouse cluster consists of the following:
 
-- More than one clickhouse shard instances
+- More than one clickhouse shard/replica instances
 - All clickhouse server information included in `remote_servers` clickhouse config as shards
 - Zookeeper cluster with 1 or 3 nodes, and including it in `zookeeper` clickhouse config
 
@@ -360,14 +362,14 @@ docker stack deploy -c docker-swarm/clickhouse-setup/docker-compose.yaml signoz
 
 ### Kubernetes Installation
 
-To set up ClickHouse cluster with **3 shards** and  **3 nodes** Zookeeper cluster,
+To set up ClickHouse cluster of **2 shards** with **2 replicas each** and  **3 nodes** Zookeeper cluster,
 include the following in `override-values.yaml`:
 
 ```yaml
 clickhouse:
   layout:
-    shardsCount: 3
-    replicasCount: 1
+    shardsCount: 2
+    replicasCount: 2
 
   zookeeper:
     replicaCount: 3
@@ -378,10 +380,6 @@ Followed by `helm upgrade` command:
 ```bash
 helm --namespace platform upgrade my-release signoz/signoz -f override-values.yaml
 ```
-
-:::info
-Multiple replicas for clickhouse shards are not supported in v0.12.0 so don't change `replicasCount` in the clickhouse config, please follow upcoming releases to check availability of replication of clickhouse shards
-:::
 
 :::info
 Replace `my-release` and `platform` from above with appropriate release name
