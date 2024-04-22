@@ -5,11 +5,11 @@ sidebar_label: Reset Admin Password
 ---
 
 In case you have forgotten the root admin password, you can reset it
-by removing all users and organisation from the SQLite database.
+by removing all users, organisation and invites from the SQLite database.
 
 The guide mainly covers the following:
 - Exec into the `query-service` container
-- Remove all users and organisation using SQLite shell
+- Remove all users, organisation and invites using SQLite shell
 - Restart the `query-service` container
 
 ## Exec into `query-service` Container
@@ -41,7 +41,7 @@ Replace `my-release` with your Helm release name. And `platform` with your
 SigNoz namespace.
 :::
 
-## Steps to Remove All Users and Organisation
+## Steps to Remove All Users, Organisation and Invites
 
 ### Step 1: Install SQLite and Connect to the Database File
 
@@ -66,7 +66,7 @@ delete from organizations;
 delete from invites;
 ```
 
-### Step 3: Verify the Users and Organisation are Removed
+### Step 3: Verify the Users, Organisation and Invites are Removed
 
 ```bash
 select * from users;
