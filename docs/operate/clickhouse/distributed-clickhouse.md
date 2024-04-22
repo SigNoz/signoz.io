@@ -381,7 +381,39 @@ Followed by `helm upgrade` command:
 helm --namespace platform upgrade my-release signoz/signoz -f override-values.yaml
 ```
 
+To spread ClickHouse instances across multiple nodes in desired order, update
+`clickhouse.podDistribution` in `values.yaml`.
+
+Examples:
+- All instances in unique nodes:
+  ```yaml
+  clickhouse:
+    podDistribution:
+      - type: ClickHouseAntiAffinity
+        topologyKey: kubernetes.io/hostname
+  ```
+- Distribute shards of replicas across nodes:
+  ```yaml
+  clickhouse:
+    podDistribution:
+      - type: ReplicaAntiAffinity
+        topologyKey: kubernetes.io/hostname
+  ```
+- Distribute replicas of shards across nodes:
+  ```yaml
+  clickhouse:
+    podDistribution:
+      - type: ShardAntiAffinity
+        topologyKey: kubernetes.io/hostname
+  ```
+
+For detailed instructions on the **Pod Distribution**, [see here][1].
+
 :::info
 Replace `my-release` and `platform` from above with appropriate release name
 and SigNoz namespace respectively.
 :::
+
+---
+
+[1]: https://github.com/Altinity/clickhouse-operator/blob/1414503921da3ae475eb6f9a296d3475a6993768/docs/chi-examples/99-clickhouseinstallation-max.yaml#L428-L481
