@@ -102,7 +102,11 @@ For grouping, you can use any of the tags like `severity`, `alertname` or any ot
 
 ## Alert Rules Tab
 
-<!-- Add a GIF here -->
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/alerts/alerts-alert-rules-tab.gif" alt="A gif explaining the Alerts Rules Tab in SigNoz"/>
+    <figcaption><i>Features of Alert Rules Tab </i></figcaption>
+</figure>
+<br></br>
 
 The Alert Rules Tab in SigNoz provides an overview of the alert defined by the user. This section allows you to view, edit, or manage alert rules, along with their associated metadata. Here's a breakdown of the features available:
 
@@ -122,11 +126,13 @@ The Alert Rules Tab in SigNoz provides an overview of the alert defined by the u
 - **Pagination Controls**: At the bottom-right corner, you can navigate through multiple pages of alert rules.
 - **Actions Menu**: Found on the right side of each row, this menu allows you to perform additional actions on the alert, such as **Enable**, **Edit**, **Clone** and **Delete**.
 
-<!-- ![Alert Rules Tab](file-2IgLUF2AgHgI5ijago93VuYW) -->
-
 ## Triggered Alerts Tab
 
-<!-- Add a GIF here -->
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/alerts/alerts-triggered-tab.gif" alt="A gif explaining the Triggered Alerts Tab in SigNoz"/>
+    <figcaption><i>Features of Triggered Alerts Tab </i></figcaption>
+</figure>
+<br></br>
 
 The Triggered Alerts Tab shows the current alerts that have been triggered in the system. It provides a real-time view of alerts, allowing you to quickly assess which alerts are active and require attention. Here's a detailed description of the tab's features:
 
@@ -152,7 +158,7 @@ As a first step before creating a new alert, you should set up a notification ch
 To configure the appropriate notification channel, navigate to the Alert Channel settings (`Settings -> Alert Channel Tab`). This section contains a list of available channels that you have created.
 
 ### Step 2: Create a New Alert Channel
-Click on the **+ New Alert Channel** button at the top right corner and fill in the details
+Click on the **`+ New Alert Channel`** button at the top right corner and fill in the details
 
 #### Name
 Assign a descriptive name to the notification channel in the "Name" field. This helps identify the channel when selecting it for alerts.
@@ -182,6 +188,12 @@ Once the Notification Channel is saved, you should be able to select it when cre
 <!-- Include a GIF with example for Webhook Channel -->
 
 
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/alerts/alerts-create-notification-channel.gif" alt="A gif explaining how to create an Alerts Notification Channel in SigNoz"/>
+    <figcaption><i>Setting up a notification channel for Alerts </i></figcaption>
+</figure>
+<br></br>
+
 ## Creating a New Alert in SigNoz
 
 After setting up a new notification channel, you can create an alert by clicking the "New Alert" button in the Alerts Tab. You will see four types of alerts to choose from:
@@ -206,15 +218,16 @@ Using metrics based alerts, we can create alerts on different types of metrics l
 A Metric-based alert in SigNoz allows you to define conditions based on metric data and trigger alerts when these conditions are met. Here's a breakdown of the various sections and options available when configuring a Metric-based alert:
 
 #### Step 1: Define the Metric
-In this step, you choose the metric to monitor and set conditions for triggering the alert. The following fields are available:
+In this step, you use the [Metrics Query Builder](https://signoz.io/docs/userguide/query-builder/#metrics-query-builder)
+to choose the metric to monitor. Some of the fields that are available in Metrics Query Builder includes:
 
 - **Metrics**: A field to select the specific metric you want to monitor (e.g., CPU usage, memory utilization). You can also choose an aggregation function like "Count," "Sum," or "Average."
 
-- **WHERE**: A filter field to define specific conditions for the metric. You can apply conditions like "IN," "NOT IN," or other logical operators.
+- **WHERE**: A filter field to define specific conditions for the metric. You can apply logical operators like "IN," "NOT IN" etc.
 
 - **Legend Format**: An optional field to customize the legend's format in the visual representation of the alert.
 
-- **Aggregation Interval**: A setting to define the time interval for aggregating metric data.
+To know more about the functionalities of the Query Builder, checkout the [documentation](https://signoz.io/docs/userguide/query-builder/).
 
 #### Step 2: Define Alert Conditions
 In this step, you define the specific conditions that trigger the alert and the notification frequency. The following fields are available:
@@ -223,14 +236,16 @@ In this step, you define the specific conditions that trigger the alert and the 
 
 - **Alert Threshold**: A field to set the threshold for the alert condition.
 
-- **Run alert every [X mins]**: This option determines the frequency at which the alert condition is checked and notifications are sent.
+- **More Options** :
 
-- **Send a notification if data is missing for [X] mins**: A field to specify if a notification should be sent when data is missing for a certain period.
+    - **Run alert every [X mins]**: This option determines the frequency at which the alert condition is checked and notifications are sent.
+
+    - **Send a notification if data is missing for [X] mins**: A field to specify if a notification should be sent when data is missing for a certain period.
 
 #### Step 3: Alert Configuration
 This step focuses on setting alert properties like severity, description, and other metadata. The following fields are available:
 
-- **Severity**: Set the severity level for the alert (e.g., "Warning" or "Critical").
+- **Severity**: Set the severity level for the alert (e.g., "Warning", "Critical" etc.).
 
 - **Alert Name**: A field to name the alert for easy identification.
 
@@ -238,17 +253,34 @@ This step focuses on setting alert properties like severity, description, and ot
 
 - **Tags**: A field to add labels or tags to the alert for categorization.
 
-#### Step 4: Configure Notifications
-In this step, you define the channels where the alert notifications are sent:
+- **Notifications channels**: A field to choose the notification channels from those configured in the Alert Channel settings.
 
-- **Select one or more channels**: A field to choose the notification channels from those configured in the Alert Channel settings.
-
-- **Test Alert**: A button to test the alert to ensure that it works as expected.
+- **Test Notification**: A button to test the alert to ensure that it works as expected.
 
 #### Example
 
 <!-- Add an example for this alert -->
 
+An example Metrics-based alert could be set to trigger when errors go above a certain percentage:
+
+- **Y-axis unit**: Percent(0 - 100)
+- **Query A**: Total Calls with Error
+- **Query B**: Total Calls 
+- **Function**: A*100/B
+- **Alert Threshold**: Above 0 within 5 minutes
+- **Run alert every**: 1 minute
+- **Send a notification if data is missing for** 5 minutes
+- **Severity**: "Critical"
+- **Alert Name**: "Error Percentage Alert"
+- **Alert Description**: "This alert triggers when the Error percentage > 5%."
+- **label**: `error percentage`
+- **Notification Channels**: signoz-slack-alerts (Slack channel)
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/alerts/alerts-metrics-based.gif" alt="A gif of Metrics Based alerts example in SigNoz"/>
+    <figcaption><i>Metrics Based Alert Example </i></figcaption>
+</figure>
+<br></br>
 
 
 ### Log-based Alert 
@@ -273,7 +305,11 @@ In this step, you define the specific conditions for triggering the alert, as we
 
 - **Alert Threshold**: A field to specify the threshold value for the alert condition.
 
-- **More Options**: Additional settings to fine-tune the alert condition. You can define how often the alert is checked and if a notification should be sent when data is missing for a specific time.
+- **More Options** :
+
+    - **Run alert every [X mins]**: This option determines the frequency at which the alert condition is checked and notifications are sent.
+
+    - **Send a notification if data is missing for [X] mins**: A field to specify if a notification should be sent when data is missing for a certain period.
 
 #### Step 3: Alert Configuration
 This step is for setting alert metadata like severity, description, and additional details:
@@ -295,7 +331,7 @@ Here you define where the alert notifications are sent:
 
 
 #### Example
-<!-- An example Log-based alert could be set to trigger when a specific error message appears in the log data:
+An example Log-based alert could be set to trigger when a specific error message appears in the log data:
 
 - **Alert Name**: "Error Log Alert"
 - **Severity**: "Critical"
@@ -303,7 +339,7 @@ Here you define where the alert notifications are sent:
 - **Aggregation Attribute**: "Count"
 - **Alert Threshold**: Above 0 within 5 minutes
 - **Alert Description**: "This alert triggers when the 'ERROR' log message appears."
-- **Notification Channels**: Slack, Email -->
+- **Notification Channels**: Test (A Slack Notification Channel)
 
 
 
@@ -329,7 +365,11 @@ In this step, you set specific conditions for triggering the alert and determine
 
 - **Alert Threshold**: A field to specify the threshold value for the alert condition.
 
-- **More Options**: Additional settings to customize the alert condition. You can set the frequency for checking the alert and choose whether to send a notification if data is missing for a certain period.
+- **More Options** :
+
+    - **Run alert every [X mins]**: This option determines the frequency at which the alert condition is checked and notifications are sent.
+
+    - **Send a notification if data is missing for [X] mins**: A field to specify if a notification should be sent when data is missing for a certain period.
 
 #### Step 3: Alert Configuration
 This step is for setting the alert's severity, name, and other descriptive details:
@@ -382,7 +422,11 @@ This step is for setting the specific conditions for triggering the alert and de
 
 - **Alert Threshold**: A field to specify the threshold value for the alert condition.
 
-- **More Options**: Additional settings to customize the alert condition. You can define how often the alert condition is checked and whether to send a notification if data is missing for a certain period.
+- **More Options** :
+
+    - **Run alert every [X mins]**: This option determines the frequency at which the alert condition is checked and notifications are sent.
+
+    - **Send a notification if data is missing for [X] mins**: A field to specify if a notification should be sent when data is missing for a certain period.
 
 #### Step 3: Alert Configuration
 In this step, you set the alert's metadata, including severity, name, and description:
