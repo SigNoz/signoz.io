@@ -100,6 +100,8 @@ For grouping, you can use any of the tags like `severity`, `alertname` or any ot
 
 <!-- # SigNoz Alerts Feature  -->
 
+Alerts in SigNoz provides a comprehensive way for you to stay informed about issues across your systems and applications. You can define which data to monitor, set thresholds to detect potential problems, and specify who should be notified and how. This enables you to identify critical issues and reduce noise. This document will help you in understanding how to set up and use alerts effectively.
+
 ## Alert Rules Tab
 
 <figure data-zoomable align='center'>
@@ -146,8 +148,6 @@ The Triggered Alerts Tab shows the current alerts that have been triggered in th
 ### Additional Triggered Alert Options
 - **Filter by Tags**: You can apply filters to narrow down the list of triggered alerts based on specific tags.
 - **Group by**: The "Group by" feature allows you to group alerts based on various criteria, such as alert name, severity etc.
-<!-- 
-![Triggered Alerts Tab](file-isD17ZiP7qUJKlM859ioSFHN) -->
 
 
 ## Setting a Notification Channel
@@ -183,10 +183,6 @@ The "Type" dropdown menu lets you choose the type of notification channel. The f
 
 Once the Notification Channel is saved, you should be able to select it when creating an Alert.
 
-<!-- ![Notification Channels](file-0l8VuVNimZX6xj7dSfBvz8T0) -->
-
-<!-- Include a GIF with example for Webhook Channel -->
-
 
 <figure data-zoomable align='center'>
     <img src="/img/docs/product-features/alerts/alerts-create-notification-channel.gif" alt="A gif explaining how to create an Alerts Notification Channel in SigNoz"/>
@@ -209,8 +205,6 @@ After setting up a new notification channel, you can create an alert by clicking
 These four types of alerts offer flexibility in monitoring different system aspects. 
 
 
-<!-- ### Metrics Based Alerts -->
-
 Using metrics based alerts, we can create alerts on different types of metrics like, Database Metrics, Hostmetrics etc.
 
 ### Metric-based Alert 
@@ -223,7 +217,7 @@ to choose the metric to monitor. Some of the fields that are available in Metric
 
 - **Metrics**: A field to select the specific metric you want to monitor (e.g., CPU usage, memory utilization). You can also choose an aggregation function like "Count," "Sum," or "Average."
 
-- **WHERE**: A filter field to define specific conditions for the metric. You can apply logical operators like "IN," "NOT IN" etc.
+- **WHERE**: A filter field to define specific conditions for the metric. You can apply logical operators like "IN," "NOT IN".
 
 - **Legend Format**: An optional field to customize the legend's format in the visual representation of the alert.
 
@@ -251,15 +245,13 @@ This step focuses on setting alert properties like severity, description, and ot
 
 - **Alert Description**: A field for adding a detailed description of the alert, explaining what it monitors and under what conditions it is triggered.
 
-- **Tags**: A field to add labels or tags to the alert for categorization.
+- **Labels**: A field to add labels or tags to the alert for categorization.
 
 - **Notifications channels**: A field to choose the notification channels from those configured in the Alert Channel settings.
 
 - **Test Notification**: A button to test the alert to ensure that it works as expected.
 
 #### Example
-
-<!-- Add an example for this alert -->
 
 An example Metrics-based alert could be set to trigger when errors go above a certain percentage:
 
@@ -285,16 +277,18 @@ An example Metrics-based alert could be set to trigger when errors go above a ce
 
 ### Log-based Alert 
 
-A Log-based alert in SigNoz allows you to define conditions based on log data, triggering alerts when these conditions are met. Here's a breakdown of the various sections and options available when configuring a Log-based alert:
+A Log-based alert allows you to define conditions based on log data, triggering alerts when these conditions are met. Here's a breakdown of the various sections and options available when configuring a Log-based alert:
 
 #### Step 1: Define the Log Metric
-This section involves selecting the log data and setting the aggregation method for the alert. The following elements are available:
 
-- **Logs**: A field to choose the specific log data to monitor. You can also set conditions like "IN," "NOT IN," and other operators.
+In this step, you use the [Logs Query Builder](https://signoz.io/docs/userguide/query-builder/#logs-and-traces-query-builder)
+perform operations on your logs to define conditions based on log data. Some of the fields that are available in Logs Query Builder includes
 
-- **Aggregation Attribute**: Allows you to select how the log data should be aggregated (e.g., "Count").
+- **Logs**: A field to filter the specific log data to monitor. 
 
-- **Group by**: Provides options to group log data by various attributes, such as "Service," "Status," or custom attributes.
+- **Aggregate Attribute**: Allows you to select how the log data should be aggregated (e.g., "Count").
+
+- **Group by**: Provides options to group log data by various attributes, such as "serviceName," "Status," or custom attributes.
 
 - **Legend Format**: Lets you define the format for the legend in the visual representation of the alert.
 
@@ -322,25 +316,29 @@ This step is for setting alert metadata like severity, description, and addition
 
 - **Labels**: A field to add labels or tags for categorization.
 
-#### Step 4: Configure Notifications
-Here you define where the alert notifications are sent:
+- **Notifications channels**: A field to choose the notification channels from those configured in the Alert Channel settings.
 
-- **Notification Channels**: Choose the configured notification channels from the Alert Channel settings. You can select multiple channels if needed.
-
-- **Test Alert**: A button to test the alert to ensure it's set up correctly.
+- **Test Notification**: A button to test the alert to ensure that it works as expected.
 
 
 #### Example
 An example Log-based alert could be set to trigger when a specific error message appears in the log data:
 
-- **Alert Name**: "Error Log Alert"
-- **Severity**: "Critical"
-- **Logs**: Filter by error messages containing "ERROR"
-- **Aggregation Attribute**: "Count"
-- **Alert Threshold**: Above 0 within 5 minutes
-- **Alert Description**: "This alert triggers when the 'ERROR' log message appears."
+- **Y-axis unit**: Percent(0 - 100)
+- **Query A**: Logs where the body contains error
+- **Query B**: Total count of logs
+- **Function**: A*100/B
+- **Alert Threshold**: Above 10 percent
+- **Alert Name**: "Log Contains Error"
+- **Severity**: "Error"
 - **Notification Channels**: Test (A Slack Notification Channel)
 
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/alerts/alerts-logs-based.gif" alt="A gif of Logs Based alerts example in SigNoz"/>
+    <figcaption><i>Logs Based Alert Example </i></figcaption>
+</figure>
+<br></br>
 
 
 ### Trace-based Alert
@@ -348,13 +346,15 @@ An example Log-based alert could be set to trigger when a specific error message
 A Trace-based alert in SigNoz allows you to define conditions based on trace data, triggering alerts when these conditions are met. Here's a breakdown of the various sections and options available when configuring a Trace-based alert:
 
 #### Step 1: Define the Trace Metric
-This step involves selecting the trace data and setting aggregation methods for the alert. The following elements are available:
 
-- **Traces**: A field to select the trace data to monitor. You can apply filters to trace attributes and use conditions like "IN," "NOT IN," and other logical operators.
+In this step, you use the [Traces Query Builder](https://signoz.io/docs/userguide/query-builder/#logs-and-traces-query-builder)
+perform operations on your Traces to define conditions based on traces data. Some of the fields that are available in Traces Query Builder includes
 
-- **Aggregation Attribute**: Allows you to choose how the trace data should be aggregated. You can use functions like "Count."
+- **Traces**: A field to filter the trace data to monitor. 
 
-- **Group by**: Lets you group trace data by different attributes, like "Service," "Operation," or other custom attributes.
+- **Aggregate Attribute**: Allows you to choose how the trace data should be aggregated. You can use functions like "Count."
+
+- **Group by**: Lets you group trace data by different attributes, like "serviceName," "Status," or other custom attributes.
 
 - **Legend Format**: An optional field to define the format for the legend in the visual representation of the alert.
 
@@ -382,24 +382,28 @@ This step is for setting the alert's severity, name, and other descriptive detai
 
 - **Labels**: A field to add tags or labels for easier categorization.
 
-#### Step 4: Configure Notifications
-In this step, you define where the alert notifications are sent:
+- **Notifications channels**: A field to choose the notification channels from those configured in the Alert Channel settings.
 
-- **Notification Channels**: Allows you to select the notification channels to which alerts will be sent. You can choose from configured channels in the Alert Channel settings.
-
-- **Test Alert**: A button to test the alert and ensure it functions correctly.
+- **Test Notification**: A button to test the alert to ensure that it works as expected.
 
 
 #### Example
-<!-- An example Trace-based alert could be set to trigger when a specific operation exceeds a latency threshold:
-
+An example Trace-based alert could be set to trigger when a specific operation exceeds a latency threshold:
+- **Y-axis unit**: "nanoseconds(ns)"
+- **Aggregate attribute**: "durationNano"
+- **Group by**: "serviceName"
+- **Alert Threshold**: "200 milliseconds(ms)"
+- **Run alert every**: 1 minute
+- **Send a notification if data is missing for** 5 minutes
 - **Alert Name**: "High Latency Alert"
-- **Severity**: "Critical"
-- **Traces**: Monitor operations with latency over a specified threshold.
-- **Aggregation Attribute**: "Count"
-- **Alert Threshold**: Above a defined latency limit within 5 minutes
-- **Alert Description**: "This alert triggers when an operation exceeds the defined latency threshold."
-- **Notification Channels**: Slack, Email, PagerDuty -->
+- **Severity**: "Warning"
+- **Notification Channels**: signoz-slack-alerts (Slack channel)
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/alerts/alerts-traces-based.gif" alt="A gif of Traces Based alerts example in SigNoz"/>
+    <figcaption><i>Traces Based Alert Example </i></figcaption>
+</figure>
+<br></br>
 
 
 ### Exceptions-based Alert 
@@ -409,9 +413,7 @@ An Exceptions-based alert in SigNoz allows you to define conditions based on exc
 #### Step 1: Define the Metric Using Clickhouse Query
 In this step, you define the Clickhouse query to retrieve the exception data and set conditions for triggering the alert. The following elements are available:
 
-- **Query**: A field to write a Clickhouse SQL query that selects and aggregates exception data. The query should define the exception type, time range, and other necessary conditions.
-
-- **Group by**: Lets you group exception data by various attributes, such as "Service," "Interval," or other custom attributes.
+- **Clickhouse Query**: A field to write a Clickhouse SQL query that selects and aggregates exception data. The query should define the exception type, time range, and other necessary conditions.
 
 - **Legend Format**: An optional field to define the format for the legend in the visual representation of the alert.
 
@@ -439,21 +441,22 @@ In this step, you set the alert's metadata, including severity, name, and descri
 
 - **Labels**: A field to add labels or tags for categorization.
 
-#### Step 4: Configure Notifications
-In this step, you set where the alert notifications are sent:
+- **Notifications channels**: A field to choose the notification channels from those configured in the Alert Channel settings.
 
-- **Notification Channels**: Choose the configured notification channels from the Alert Channel settings. You can select multiple channels if needed.
-
-- **Test Alert**: A button to test the alert and ensure it functions correctly.
+- **Test Notification**: A button to test the alert to ensure that it works as expected.
 
 
 #### Example
-<!-- An example Exceptions-based alert could be set to trigger when a specific exception type appears in the log data:
+An example Exceptions-based alert could be set to trigger when a specific exception type appears:
 
-- **Alert Name**: "Database Error Alert"
-- **Severity**: "Critical"
-- **Query**: Use Clickhouse SQL to select data from exception logs where "ExceptionType" is "DatabaseError."
-- **Alert Threshold**: Above a certain count of exceptions within 5 minutes
-- **Alert Description**: "This alert triggers when a 'DatabaseError' exception appears."
-- **Notification Channels**: Slack, Email, Opsgenie -->
+- **ClickHouse Query**: Counts occurrences of 'ConnectionError' exceptions within one-minute intervals, grouped by service name.
+- **Alert Threshold**: Set to **0** 
+- **Alert Name**: "Exceptions Alert"
+- **Severity**: "Warning"
+- **Notification Channels**: signoz-slack-alerts (Slack channel)
 
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/alerts/alerts-exceptions-based.gif" alt="A gif of Exceptions Based alerts example in SigNoz"/>
+    <figcaption><i>Exceptions Based Alert Example </i></figcaption>
+</figure>
+<br></br>
