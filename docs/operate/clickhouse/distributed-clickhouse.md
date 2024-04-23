@@ -11,9 +11,10 @@ import SigNozCloud from '../../shared/signoz-cloud.md'
 <SigNozCloud />
 
 :::info
-In v0.12, SigNoz introduces support for distributed clickhouse. Multiple replicas for clickhouse shards are not supported in v0.12.0, please follow upcoming releases to check availability.
+In v0.12, SigNoz introduces support for distributed clickhouse. Only multiple shards
+are supported until v0.42.
 
-In v0.42, support for multiple replicas for clickhouse shards is added.
+In v0.42, support for multiple replicas in distributed clickhouse is added.
 :::
 
 ## Prerequisites
@@ -36,7 +37,7 @@ Basically, distributed ClickHouse cluster consists of the following:
 - Zookeeper cluster with 1 or 3 nodes, and including it in `zookeeper` clickhouse config
 
 Follow the instructions in the respective sections below to set up distributed
-clickhouse with multiple shards for your SigNoz cluser.
+clickhouse with multiple shards/replicas for your SigNoz cluster.
 
 ### Using Docker 
 
@@ -370,10 +371,17 @@ clickhouse:
   layout:
     shardsCount: 2
     replicasCount: 2
-
   zookeeper:
     replicaCount: 3
+schemaMigrator:
+  enableReplication: true
 ```
+
+:::info
+In case of single replica in distributed ClickHouse cluster, you can use
+`replicasCount: 1` and disable replication by either removing `enableReplication`
+or setting `enableReplication: false` in `schemaMigrator`.
+:::
 
 Followed by `helm upgrade` command:
 
