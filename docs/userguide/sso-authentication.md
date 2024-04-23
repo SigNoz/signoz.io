@@ -121,6 +121,11 @@ For more details on the metadata page, click [here](https://learn.microsoft.com/
     <md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://redacted.okta.com/app/redacted_signoz_1/exk...697/sso/saml"/>
     <md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="https://redacted.okta.com/app/redacted_signoz_1/exk...697/sso/saml"/>
     ```
+7. At last, assign the **People** or **Groups** to SigNoz application
+    - From **Admin** page, go to **Directories** > **People** or **Groups**
+    - Select the specific people or groups
+    - Go to **Applications** > **Assign applications**
+    - Select **SigNoz** application > **Assign** > Hit **Done**
 
 #### Steps to be performed in SigNoz
 
