@@ -161,7 +161,7 @@ Consider a scenario where you want to compare the number of GET requests to POST
 
 After executing these queries and the function, the Query Builder will generate visualizations like histograms or time series charts for each query and the computed function `F1`, providing a comparative analysis of the request methods.
 
-
+<!-- 
 ## Histogram and Time Series Visualizations 
 
 SigNoz's Query Builder offers powerful visualization options for your data. The Histogram and Time Series visualizations transform numerical and time-based data into graphical representations, making trends and patterns readily apparent.
@@ -184,7 +184,7 @@ When analyzing the number of user sign-ups over a day, you might:
 
 - Configure the Query Builder to count the `user_sign_up` events.
 - Use the Histogram view to see the distribution of sign-ups across different times of the day.
-- Use the Time Series view to observe how sign-up rates trend over each hour.
+- Use the Time Series view to observe how sign-up rates trend over each hour. -->
 
 
 ## Metrics Query Builder
