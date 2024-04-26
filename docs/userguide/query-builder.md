@@ -97,15 +97,7 @@ After running this query, the Query Builder will display a count of each HTTP st
 
 ## Result Manipulation 
 
-Result Manipulation is a set of features in the Query Builder that enables you to refine your query.
-
-<figure data-zoomable align='center'>
-    <img src="/img/docs/product-features/query-builder/result_manipulation.gif" alt="A gif explaining some more features  in SigNoz Query Builder"/>
-    <figcaption><i>Order by, Limit, HAVING and Legend Format features of SigNoz Query Builder</i></figcaption>
-</figure>
-<br></br>
-
-The features include:
+Result Manipulation is a set of features in the Query Builder that enables you to refine your query. The features include:
 
 ### Order By
 Order your query results based on a specified attribute in either ascending or descending order. This can help in identifying the highest or lowest values in your data, such as the most frequently occurring errors.
@@ -120,29 +112,29 @@ Set a limit on the number of results returned. This is useful when you only want
 Apply conditions to filter the results further based on aggregate value.
 
 ### Legend Format
-Customize the legend in your query's visual output to give more clarity, by formatting how grouped data will be labeled in your charts or graphs.
+Customize the legend in your query's visual output to give more clarity, by formatting how grouped data will be labeled in your charts or graphs. We use the double
+curly braces - `{{}}` format to show the attribute. For Example, if you want to see the to use the `serviceName` attribute as your legend, you can do so by using `{{serviceName}}`. You can also add text along with the attribute. For example, `{{serviceName}} - This is a service` will show be shown as Name of your service followed by - This is a service name.
 
 ### Example
 
-Suppose you want to identify the top 5 endpoints that are most frequently returning `404 - Not Found` errors over the last 24 hours. You would configure the query as follows:
+Suppose you want to find the top 2 endpoints with an average response time greater than 500 ms. The query is configured as follows:
 
-- **Filter**: `status = 404`
-- **Group by**: `endpoint`
-- **Aggregate**: `Count` on `status` 
-- **HAVING**: `Count(status) > 5` to filter out endpoints with fewer than 5 occurrences
-- **Order by**: `Count(status) DESC` to prioritize endpoints with the highest count
-- **Limit**: `5` to focus on the top 5 endpoints (Note: This won't work for timeseries view)
-- **Legend Format**: You could format the legend to show `{{endpoint}} - {{status}} errors`, providing a clear and descriptive label.
+- **Group by**: `httpUrl`
+- **Aggregate**: `Avg` on `durationNano`
+- **HAVING**: `AVG(durationNano) >= 500000000` to filter for endpoints with average response times exceeding 500 ms
+- **Order by**: `avg(durationNano) desc` to list endpoints with the highest response times first
+- **Limit**: `2` to focus on the top 2 endpoints with the longest response times
+- **Legend Format**: `{{httpUrl}}` to display the endpoint's URL in the visualization legend
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/query-builder/query-builder-result-manipulation.gif" alt="A gif explaining some more features  in SigNoz Query Builder"/>
+    <figcaption><i>An example showcasing Order by, Limit, HAVING and Legend Format features of SigNoz Query Builder</i></figcaption>
+</figure>
+<br></br>
 
 ## Multiple Queries and Functions 
 
 The SigNoz Query Builder allows you to run multiple queries simultaneously and perform functions on them. This feature facilitates analysis of complex data, such as comparing data or calculating ratios.
-
-<figure data-zoomable align='center'>
-    <img src="/img/docs/product-features/query-builder/multiple_queries_functions.gif" alt="A gif explaining multiple queries and functions features in SigNoz Query Builder"/>
-    <figcaption><i>Multiple Queries and Functions features of SigNoz Query Builder</i></figcaption>
-</figure>
-<br></br>
 
 ### Multiple Queries
 Create and run multiple independent queries within the same view. Each query can have its own set of filters, aggregations, and groupings. This is particularly useful for analyzing different dimensions of your data in parallel.
@@ -152,14 +144,19 @@ Apply mathematical functions to the results of your queries. This allows you to 
 
 ### Example
 
-Consider a scenario where you want to compare the number of GET requests to POST requests over the same time period:
+Suppose you want to determiner the percentage of logs that contains errors relative to the total log count. You can achieve this using Multiple queries and a function as follows:
 
-- **Query A**: Set filters to count `method = GET`.
-- **Query B**: Configure filters to count `method = POST`.
-- With both queries configured, you can create a function, `F1`, that divides the results of Query A by Query B to find the ratio of GET to POST requests.
-- **Legend Format**: Customize as `GET divided by POST` to make the output more understandable.
+- **Query A**: Filters logs to count the instances where the `body` contains the word `error`.
+- **Query B**: Represents a baseline count of all logs.
+- **function `F1`** A**100/B
 
-After executing these queries and the function, the Query Builder will generate visualizations like histograms or time series charts for each query and the computed function `F1`, providing a comparative analysis of the request methods.
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/query-builder/query-builder-multiple-queries.gif" alt="A gif explaining multiple queries and functions features in SigNoz Query Builder"/>
+    <figcaption><i>Multiple Queries and Functions features of SigNoz Query Builder</i></figcaption>
+</figure>
+<br></br>
+
+<!-- After executing these queries and the function, the Query Builder will generate visualizations like histograms or time series charts for each query and the computed function `F1`, providing a comparative analysis of the request methods. -->
 
 <!-- 
 ## Histogram and Time Series Visualizations 
