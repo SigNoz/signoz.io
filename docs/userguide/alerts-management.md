@@ -11,12 +11,9 @@ import { LiteYoutubeEmbed } from "react-lite-yt-embed";
 ## Setting Alert Rules
 
 You can set Alert Rules in SigNoz in the following 3 ways:
-1. Query Builder - This is DIY way to build alerts by selecting metrics from dropdowns. You can also set filter and group by conditions by selecting options from the dashboard.
+1. Query Builder - This is DIY way to build alerts by selecting metrics from dropdowns. You can also set filter and group by conditions.
 2. PromQL - You can use [Prometheus Query Language](https://prometheus.io/docs/prometheus/latest/querying/basics/) to write expressions for alerts which will be evaluated in regular time interval. If you have set up alerts in Prometheus, this method should be very familiar.
 3. Clickhouse Queries - You can write clickhouse queries that adhere to the SigNoz data model and format. The result of the query will be used to evaluate alert threshold conditions. Additionally, you can also generate labels and annotations using the results of your query.
-
-
-
 
 
 Navigate to Alerts page from the left panel. It has 2 tabs:
@@ -26,15 +23,12 @@ Navigate to Alerts page from the left panel. It has 2 tabs:
 
 Alert Rules set the expression you want to evaluate to start firing alerts. The Alert Rules tab shows a list of currently configured alert rules and labels like `severity` and `Alert Name`. It also shows the current status of this Alert rules. If any alerts are `firing` because of this or everything is `Ok`
 
-
-
-
 ![alert-rules](../../static/img/docs/alert-rules.webp)
 
 
 ### Steps to Create Alert Rules:
 
-To create new alert rules, you can click the `New Alerts` button. This would open a pane with the type of alerts. 
+To create new alert rules, you can click the `New Alert` button. This would open a pane with the type of alerts.
 
 <img width="1101" alt="image" src="https://user-images.githubusercontent.com/10277894/208090898-2a05a349-c071-47e1-9dd3-d0a5de70f113.png" />
 
@@ -78,6 +72,9 @@ On `clickhouse query` tab, you will be presented with a query editor with a defa
 
 You can use `Run Query` to confirm your query works. Include the bind variables and mandatory column aliases as mentioned [here](https://signoz.io/docs/tutorial/writing-clickhouse-queries-in-dashboard/#building-alert-queries-with-clickhouse-data). 
 
+### Using result labels in alert description
+
+You can use the result labels in the alert description to create more informative alerts using `{{.Labels.<label-name>}}`. For example, if you have a query that returns the label `service_name`, you can use it in the alert description as `{{.Labels.service_name}}` to create an alert that is specific to a particular service.
 
 ### Steps to Setup Triggered Alerts
 
