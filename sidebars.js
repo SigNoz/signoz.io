@@ -273,6 +273,7 @@ module.exports = {
       items: [
         'userguide/send-metrics-cloud',
         'userguide/send-metrics',
+        'userguide/drop-metrics',
         'userguide/navigate-user-interface',
         'userguide/hostmetrics',
         {
