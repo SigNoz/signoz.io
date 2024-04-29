@@ -100,9 +100,9 @@ For grouping, you can use any of the tags like `severity`, `alertname` or any ot
 
 <!-- # SigNoz Alerts Feature  -->
 
-Alerts in SigNoz provides a comprehensive way for you to stay informed about issues across your systems and applications. You can define which data to monitor, set thresholds to detect potential problems, and specify who should be notified and how. This enables you to identify critical issues and reduce noise. This document will help you in understanding how to set up and use alerts effectively.
+Alerts in SigNoz can help you to define which data to monitor, set thresholds to detect potential problems, and specify who should be notified and how. This can help you to identify critical issues and reduce noise. This document will help you in understanding how to set up and use alerts effectively.
 
-## Alert Rules Tab
+## Managing Alerts
 
 <figure data-zoomable align='center'>
     <img src="/img/docs/product-features/alerts/alerts-alert-rules-tab.gif" alt="A gif explaining the Alerts Rules Tab in SigNoz"/>
@@ -136,7 +136,7 @@ The Alert Rules Tab in SigNoz provides an overview of the alert defined by the u
 </figure>
 <br></br>
 
-The Triggered Alerts Tab shows the current alerts that have been triggered in the system. It provides a real-time view of alerts, allowing you to quickly assess which alerts are active and require attention. Here's a detailed description of the tab's features:
+The Triggered Alerts Tab shows the currently firing alerts. It provides a real-time view of alerts, allowing you to quickly assess which alerts are active and require attention. Here's a detailed description of the tab's features:
 
 ### Triggered Alert Features
 - **Status**: Shows whether the alert is currently firing. It can have values like "Firing."
@@ -150,9 +150,9 @@ The Triggered Alerts Tab shows the current alerts that have been triggered in th
 - **Group by**: The "Group by" feature allows you to group alerts based on various criteria, such as alert name, severity etc.
 
 
-## Setting a Notification Channel
+<!-- ## Setting a Notification Channel
 
-As a first step before creating a new alert, you should set up a notification channel where you want to send your alert. You can select from multiple notification channels to determine how alert notifications are delivered. Here's how you can set the notification channel:
+As a first step before creating a new alert, you should set up a notification channel where you want to send your alert. There are multiple notification channels available to send your alerts. Here's how you can set the notification channel:
 
 ### Step 1: Open the Alert Channel Settings
 To configure the appropriate notification channel, navigate to the Alert Channel settings (`Settings -> Alert Channel Tab`). This section contains a list of available channels that you have created.
@@ -188,7 +188,7 @@ Once the Notification Channel is saved, you should be able to select it when cre
     <img src="/img/docs/product-features/alerts/alerts-create-notification-channel.gif" alt="A gif explaining how to create an Alerts Notification Channel in SigNoz"/>
     <figcaption><i>Setting up a notification channel for Alerts </i></figcaption>
 </figure>
-<br></br>
+<br></br> -->
 
 ## Creating a New Alert in SigNoz
 
@@ -205,9 +205,9 @@ After setting up a new notification channel, you can create an alert by clicking
 These four types of alerts offer flexibility in monitoring different system aspects. 
 
 
-Using metrics based alerts, we can create alerts on different types of metrics like, Database Metrics, Hostmetrics etc.
+<!-- Using metrics based alerts, we can create alerts on different types of metrics like, Database Metrics, Hostmetrics etc. -->
 
-### Metric-based Alert 
+<!-- ### Metric-based Alert 
 
 A Metric-based alert in SigNoz allows you to define conditions based on metric data and trigger alerts when these conditions are met. Here's a breakdown of the various sections and options available when configuring a Metric-based alert:
 
@@ -272,10 +272,10 @@ An example Metrics-based alert could be set to trigger when errors go above a ce
     <img src="/img/docs/product-features/alerts/alerts-metrics-based.gif" alt="A gif of Metrics Based alerts example in SigNoz"/>
     <figcaption><i>Metrics Based Alert Example </i></figcaption>
 </figure>
-<br></br>
+<br></br> -->
 
 
-### Log-based Alert 
+<!-- ### Log-based Alert 
 
 A Log-based alert allows you to define conditions based on log data, triggering alerts when these conditions are met. Here's a breakdown of the various sections and options available when configuring a Log-based alert:
 
@@ -339,9 +339,9 @@ An example Log-based alert could be set to trigger when a specific error message
     <figcaption><i>Logs Based Alert Example </i></figcaption>
 </figure>
 <br></br>
+ -->
 
-
-### Trace-based Alert
+<!-- ### Trace-based Alert
 
 A Trace-based alert in SigNoz allows you to define conditions based on trace data, triggering alerts when these conditions are met. Here's a breakdown of the various sections and options available when configuring a Trace-based alert:
 
@@ -403,10 +403,10 @@ An example Trace-based alert could be set to trigger when a specific operation e
     <img src="/img/docs/product-features/alerts/alerts-traces-based.gif" alt="A gif of Traces Based alerts example in SigNoz"/>
     <figcaption><i>Traces Based Alert Example </i></figcaption>
 </figure>
-<br></br>
+<br></br> -->
 
 
-### Exceptions-based Alert 
+<!-- ### Exceptions-based Alert 
 
 An Exceptions-based alert in SigNoz allows you to define conditions based on exception data, triggering alerts when these conditions are met. Here's a breakdown of the various sections and options available when configuring an Exceptions-based alert:
 
@@ -459,4 +459,4 @@ An example Exceptions-based alert could be set to trigger when a specific except
     <img src="/img/docs/product-features/alerts/alerts-exceptions-based.gif" alt="A gif of Exceptions Based alerts example in SigNoz"/>
     <figcaption><i>Exceptions Based Alert Example </i></figcaption>
 </figure>
-<br></br>
+<br></br> -->

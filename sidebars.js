@@ -82,6 +82,37 @@ module.exports = {
           id: 'product-features/saved-view',
           label: 'Saved View',
         },
+        {
+          type: 'category',
+          label: 'Alerts',
+          items: [
+            {
+              type: 'doc',
+              id: 'product-features/alerts/alerts-notification-channel',
+              label: 'Notification Channel',
+            },
+            {
+              type: 'doc',
+              id: 'product-features/alerts/metrics-based-alerts',
+              label: 'Metrics based Alert',
+            },
+            {
+              type: 'doc',
+              id: 'product-features/alerts/log-based-alerts',
+              label: 'Log based Alert',
+            },
+            {
+              type: 'doc',
+              id: 'product-features/alerts/trace-based-alerts',
+              label: 'Trace based Alert',
+            },
+            {
+              type: 'doc',
+              id: 'product-features/alerts/exceptions-based-alerts',
+              label: 'Exceptions based Alert',
+            },
+          ],
+        },
       ]
     },
     {
