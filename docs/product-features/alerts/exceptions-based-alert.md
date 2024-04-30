@@ -47,6 +47,19 @@ In this step, you set the alert's metadata, including severity, name, and descri
 An example Exceptions-based alert could be set to trigger when a specific exception type appears:
 
 - **ClickHouse Query**: Counts occurrences of 'ConnectionError' exceptions within one-minute intervals, grouped by service name.
+The ClickHouse Query would look like:
+
+```sql
+    SELECT 
+        count() as value,
+        toStartOfInterval(timestamp, toIntervalMinute(1)) AS interval,
+        serviceName
+    FROM signoz_traces.distributed_signoz_error_index_v2
+    WHERE exceptionType !='ConnectionError'
+    AND timestamp BETWEEN {{.start_datetime}} AND {{.end_datetime}}
+    GROUP BY serviceName, interval;
+```
+
 - **Alert Threshold**: Set to **0** 
 - **Alert Name**: "Exceptions Alert"
 - **Severity**: "Warning"

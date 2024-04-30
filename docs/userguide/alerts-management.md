@@ -112,7 +112,7 @@ Alerts in SigNoz can help you to define which data to monitor, set thresholds to
 
 The Alert Rules Tab in SigNoz provides an overview of the alert defined by the user. This section allows you to view, edit, or manage alert rules, along with their associated metadata. Here's a breakdown of the features available:
 
-### Alert Rule Features
+### Alert Rule Columns
 - **Status**: Indicates whether the alert rule is enabled (OK) or disabled.
 - **Alert Name**: The name given to the alert rule for easy identification.
 - **Severity**: The level of severity assigned to the alert. For example, `warning`, `critical` etc.
@@ -138,7 +138,7 @@ The Alert Rules Tab in SigNoz provides an overview of the alert defined by the u
 
 The Triggered Alerts Tab shows the currently firing alerts. It provides a real-time view of alerts, allowing you to quickly assess which alerts are active and require attention. Here's a detailed description of the tab's features:
 
-### Triggered Alert Features
+### Triggered Alert Columns
 - **Status**: Shows whether the alert is currently firing. It can have values like "Firing."
 - **Alert Name**: The name of the triggered alert.
 - **Severity**: Indicates the severity of the triggered alert (e.g., "warning").
