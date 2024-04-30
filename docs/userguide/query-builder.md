@@ -154,6 +154,38 @@ Create and run multiple independent queries within the same view. Each query can
 ### Functions on Queries
 Apply mathematical functions to the results of your queries. This allows you to derive new insights by performing operations like addition, subtraction, multiplication, division, or more complex functions on your data.
 
+<details>
+  <summary>
+   List of supported functions
+   </summary>
+
+- exp
+- log
+- ln
+- exp2
+- log2
+- exp10
+- log10
+- sqrt
+- cbrt
+- erf
+- erfc
+- lgamma
+- tgamma
+- sin
+- cos
+- tan
+- asin
+- acos
+- atan
+- degrees
+- radians
+- now
+- toUnixTimestamp
+
+
+</details>
+
 ### Example
 
 Suppose you want to determiner the percentage of logs that contains errors relative to the total log count. You can achieve this using Multiple queries and a function as follows:
@@ -167,6 +199,8 @@ Suppose you want to determiner the percentage of logs that contains errors relat
     <figcaption><i>Multiple Queries and Functions features of SigNoz Query Builder</i></figcaption>
 </figure>
 <br></br>
+
+
 
 <!-- After executing these queries and the function, the Query Builder will generate visualizations like histograms or time series charts for each query and the computed function `F1`, providing a comparative analysis of the request methods. -->
 
