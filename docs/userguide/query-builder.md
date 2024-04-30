@@ -14,11 +14,11 @@ Query Builder in SigNoz simplifies the process of filtering, aggregating, and vi
 
 The Query Builder in SigNoz allows users to apply filtering based on various attributes of logs or traces.
 
-<figure data-zoomable align='center'>
+<!-- <figure data-zoomable align='center'>
     <img src="/img/docs/product-features/query-builder/qb_filtering.gif" alt="A gif explaining the Filtering feature in SigNoz Query Builder"/>
     <figcaption><i>Filtering feature of SigNoz Query Builder</i></figcaption>
 </figure>
-<br></br>
+<br></br> -->
 
 
 ### Using the Filtering Feature
@@ -33,10 +33,15 @@ The Query Builder in SigNoz allows users to apply filtering based on various att
 
 ### Example
 
-Suppose you want to filter logs where the `service.name` is `UserAuth`, the level is `error`, and the `status` code is `500`. The filter setup would look like this:
+Suppose you want to filter logs logs from a specific service with a particular severity level. You can achieve this using the following filters:
+- selecting the service name. `service.name = demo-app` 
+- selecting the severity text, `severity_text = DEBUG`
 
-
-`service.name = UserAuth`  `level = error`  `status = 500`
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/query-builder/query-builder-filtering.gif" alt="A gif explaining the Filtering feature in SigNoz Query Builder"/>
+    <figcaption><i>Example showing the filtering feature of SigNoz Query Builder</i></figcaption>
+</figure>
+<br></br>
 
 
 ## Aggregation and Grouping 
@@ -87,13 +92,17 @@ Grouping allows you to segment your data based on chosen attributes, facilitatin
 
 ### Example
 
-To examine the frequency of HTTP responses across different service endpoints, you can configure a `Count` aggregation on `status` codes to determine the occurrence of various HTTP responses (like `200`, `404`, `500`, etc.). Here's the setup:
+ To analyze the average response time of services within a system, we can do so in the following way:
 
-- In the aggregation dropdown, select `Count`.
-- For the attribute to aggregate, choose `status`.
-- To see the status code distribution for each type of HTTP method, enter `method` in the `Group by` field.
+- In the aggregation dropdown, select `Avg`.
+- For the attribute to aggregate, choose `durationNano`.
+- To see the average duration for each of the service, enter `serviceName` in the `Group by` field.
 
-After running this query, the Query Builder will display a count of each HTTP status code for every HTTP method. This analysis can be crucial for understanding how different methods respond, which could help in troubleshooting and service optimization.
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/query-builder/query-builder-groupby-aggregation.gif" alt="A gif explaining the how to use Group by and Aggregation features together in SigNoz Query Builder"/>
+    <figcaption><i>Example combining Group By and Aggregation features </i></figcaption>
+</figure>
+<br></br>
 
 ## Result Manipulation 
 
