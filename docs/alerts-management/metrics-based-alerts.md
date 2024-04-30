@@ -3,8 +3,6 @@ id: metrics-based-alerts
 title: Metrics based alerts 
 ---
 
-## Metric-based Alert 
-
 A Metric-based alert in SigNoz allows you to define conditions based on metric data and trigger alerts when these conditions are met. Here's a breakdown of the various sections and options available when configuring a Metric-based alert:
 
 ### Step 1: Define the Metric
@@ -16,6 +14,12 @@ to choose the metric to monitor. Some of the fields that are available in Metric
 - **WHERE**: A filter field to define specific conditions for the metric. You can apply logical operators like "IN," "NOT IN".
 
 - **Legend Format**: An optional field to customize the legend's format in the visual representation of the alert.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/alerts/alerts-metrics-based-1.webp" alt="Using Query Builder to the metric to monitor"/>
+    <figcaption><i>Using Query Builder to define the metric to monitor</i></figcaption>
+</figure>
+<br></br>
 
 To know more about the functionalities of the Query Builder, checkout the [documentation](https://signoz.io/docs/userguide/query-builder/).
 
@@ -32,6 +36,12 @@ In this step, you define the specific conditions that trigger the alert and the 
 
     - **Send a notification if data is missing for [X] mins**: A field to specify if a notification should be sent when data is missing for a certain period.
 
+<figure data-zoomable align='center'>
+    <img src="/img/docs/alerts/alerts-metrics-based-2.webp" alt="Define the alert conditions"/>
+    <figcaption><i>Define the alert conditions </i></figcaption>
+</figure>
+<br></br>
+
 ### Step 3: Alert Configuration
 This step focuses on setting alert properties like severity, description, and other metadata. The following fields are available:
 
@@ -46,6 +56,12 @@ This step focuses on setting alert properties like severity, description, and ot
 - **Notifications channels**: A field to choose the notification channels from those configured in the Alert Channel settings.
 
 - **Test Notification**: A button to test the alert to ensure that it works as expected.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/alerts/alerts-metrics-based-3.webp" alt="Configure the alert"/>
+    <figcaption><i>Setting the alert metadata </i></figcaption>
+</figure>
+<br></br>
 
 ### Example
 

@@ -3,8 +3,6 @@ id: exceptions-based-alerts
 title: Exceptions based alerts 
 ---
 
-## Exceptions-based Alert 
-
 An Exceptions-based alert in SigNoz allows you to define conditions based on exception data, triggering alerts when these conditions are met. Here's a breakdown of the various sections and options available when configuring an Exceptions-based alert:
 
 ### Step 1: Define the Metric Using Clickhouse Query
@@ -13,6 +11,12 @@ In this step, you define the Clickhouse query to retrieve the exception data and
 - **Clickhouse Query**: A field to write a Clickhouse SQL query that selects and aggregates exception data. The query should define the exception type, time range, and other necessary conditions.
 
 - **Legend Format**: An optional field to define the format for the legend in the visual representation of the alert.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/alerts/alerts-exceptions-based-1.webp" alt="Using Clickhouse Query to define metrics"/>
+    <figcaption><i>Using Clickhouse Query to define metrics</i></figcaption>
+</figure>
+<br></br>
 
 ### Step 2: Define Alert Conditions
 This step is for setting the specific conditions for triggering the alert and determining the frequency of checking those conditions:
@@ -26,6 +30,12 @@ This step is for setting the specific conditions for triggering the alert and de
     - **Run alert every [X mins]**: This option determines the frequency at which the alert condition is checked and notifications are sent.
 
     - **Send a notification if data is missing for [X] mins**: A field to specify if a notification should be sent when data is missing for a certain period.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/alerts/alerts-exceptions-based-2.webp" alt="Define the alert conditions"/>
+    <figcaption><i>Define the alert conditions </i></figcaption>
+</figure>
+<br></br>
 
 ### Step 3: Alert Configuration
 In this step, you set the alert's metadata, including severity, name, and description:
@@ -42,6 +52,11 @@ In this step, you set the alert's metadata, including severity, name, and descri
 
 - **Test Notification**: A button to test the alert to ensure that it works as expected.
 
+<figure data-zoomable align='center'>
+    <img src="/img/docs/alerts/alerts-exceptions-based-3.webp" alt="Configure the alert"/>
+    <figcaption><i>Setting the alert metadata </i></figcaption>
+</figure>
+<br></br>
 
 ### Example
 An example Exceptions-based alert could be set to trigger when a specific exception type appears:

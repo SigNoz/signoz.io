@@ -3,14 +3,12 @@ id: log-based-alerts
 title: Log based alerts 
 ---
 
-## Log-based Alert 
-
 A Log-based alert allows you to define conditions based on log data, triggering alerts when these conditions are met. Here's a breakdown of the various sections and options available when configuring a Log-based alert:
 
 ### Step 1: Define the Log Metric
 
 In this step, you use the [Logs Query Builder](https://signoz.io/docs/userguide/query-builder/#logs-and-traces-query-builder)
-perform operations on your logs to define conditions based on log data. Some of the fields that are available in Logs Query Builder includes
+to perform operations on your logs to define conditions based on log data. Some of the fields that are available in Logs Query Builder includes
 
 - **Logs**: A field to filter the specific log data to monitor. 
 
@@ -19,6 +17,12 @@ perform operations on your logs to define conditions based on log data. Some of 
 - **Group by**: Provides options to group log data by various attributes, such as "serviceName," "Status," or custom attributes.
 
 - **Legend Format**: Lets you define the format for the legend in the visual representation of the alert.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/alerts/alerts-log-based-1.webp" alt="Using Query Builder to perform operations on your logs"/>
+    <figcaption><i>Using Query Builder to perform operations on your logs</i></figcaption>
+</figure>
+<br></br>
 
 ### Step 2: Define Alert Conditions
 In this step, you define the specific conditions for triggering the alert, as well as the frequency of checking those conditions:
@@ -32,6 +36,12 @@ In this step, you define the specific conditions for triggering the alert, as we
     - **Run alert every [X mins]**: This option determines the frequency at which the alert condition is checked and notifications are sent.
 
     - **Send a notification if data is missing for [X] mins**: A field to specify if a notification should be sent when data is missing for a certain period.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/alerts/alerts-log-based-2.webp" alt="Define the alert conditions"/>
+    <figcaption><i>Define the alert conditions </i></figcaption>
+</figure>
+<br></br>
 
 ### Step 3: Alert Configuration
 This step is for setting alert metadata like severity, description, and additional details:
@@ -48,6 +58,11 @@ This step is for setting alert metadata like severity, description, and addition
 
 - **Test Notification**: A button to test the alert to ensure that it works as expected.
 
+<figure data-zoomable align='center'>
+    <img src="/img/docs/alerts/alerts-log-based-3.webp" alt="Configure the alert"/>
+    <figcaption><i>Setting the alert metadata </i></figcaption>
+</figure>
+<br></br>
 
 ### Example
 An example Log-based alert could be set to trigger when a specific error message appears in the log data:
