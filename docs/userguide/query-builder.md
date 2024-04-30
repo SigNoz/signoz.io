@@ -23,7 +23,7 @@ The Query Builder in SigNoz allows users to apply filtering based on various att
 
 ### Using the Filtering Feature
 
-- **Access**: Navigate to the Query Builder within SigNoz logs and traces explorer.
+- **Access**: Navigate to the Query Builder.
 - **Open Filter Options**: Click on the Search Filter field to open a dropdown list of available attributes.
 - **Select Attributes**: Choose the attribute you want to filter by (e.g., `service.name`, `level`, `status`).
 - **Apply Operators**: Choose the operator (e.g., `=`, `!=`, `IN`, `NOT_IN`) for the selected attribute.
@@ -33,7 +33,7 @@ The Query Builder in SigNoz allows users to apply filtering based on various att
 
 ### Example
 
-Suppose you want to filter logs logs from a specific service with a particular severity level. You can achieve this using the following filters:
+Suppose you want to filter logs from a specific service with a particular severity level. You can achieve this using the following filters:
 - selecting the service name. `service.name = demo-app` 
 - selecting the severity text, `severity_text = DEBUG`
 
@@ -59,11 +59,11 @@ The Query Builder's Aggregation and Grouping feature enables you to combine data
 
 Aggregation allows you to perform calculations on a set of values to return a single value. With the Query Builder, you can:
 
-- **Count**: Tally the number of times a particular event occurs.
+- **Count**: Count the number of times a particular event occurs.
 - **Count Distinct**: Count unique occurrences of a specified attribute.
 - **Sum**: Calculate the total for a numerical attribute.
 - **Avg**: Find the average value of a numerical attribute.
-- **Max/Min**: Determine the maximum or minimum value of a numerical attribute.
+- **Max/Min**: Determine the maximum or minimum value of a numerical attribute in an aggregation interval.
 - **Percentiles (P05, P10, P90, etc.)**: Understand the distribution of your data with percentile calculations.
 - **Rate**: Measure the frequency of occurrence within a given time frame.
 - **Rate Sum**: Total the aggregated values over the specified rate period.
@@ -112,7 +112,7 @@ Result Manipulation is a set of features in the Query Builder that enables you t
 Order your query results based on a specified attribute in either ascending or descending order. This can help in identifying the highest or lowest values in your data, such as the most frequently occurring errors.
 
 ### Aggregate Every
-Define the interval over which to aggregate data. For example, you can aggregate count data in 60-second intervals to get a per-minute count of events. For now it is not editable in the Query Builder.
+Define the interval over which to aggregate data. For example, you can aggregate count data in 60-second intervals to get a per-minute count of events. For now it is not editable in the Query Builder and it changes dynamically based on time period of query.
 
 ### Limit
 Set a limit on the number of results returned. This is useful when you only want to see the top N results, such as the top 10 most visited endpoints.
@@ -122,7 +122,10 @@ Apply conditions to filter the results further based on aggregate value.
 
 ### Legend Format
 Customize the legend in your query's visual output to give more clarity, by formatting how grouped data will be labeled in your charts or graphs. We use the double
-curly braces - `{{}}` format to show the attribute. For Example, if you want to see the to use the `serviceName` attribute as your legend, you can do so by using `{{serviceName}}`. You can also add text along with the attribute. For example, `{{serviceName}} - This is a service` will show be shown as Name of your service followed by - This is a service name.
+curly braces - `{{}}` format to show the attribute. 
+
+For example, if you have grouped by `serviceName` attribute then you can write `{{serviceName}}` in your legend. You can also add text along with the attribute like **{{serviceName}} - This is a service** will show be shown as `sampleService - This is a service name`.
+
 
 ### Example
 
