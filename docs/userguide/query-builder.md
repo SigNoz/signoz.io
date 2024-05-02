@@ -117,7 +117,7 @@ Define the interval over which to aggregate data. For example, you can aggregate
 ### Limit
 Set a limit on the number of results returned. This is useful when you only want to see the top N results, such as the top 10 most visited endpoints.
 
-### HAVING
+### Having
 Apply conditions to filter the results further based on aggregate value.
 
 ### Legend Format
