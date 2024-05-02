@@ -13,7 +13,9 @@ to choose the metric to monitor. Some of the fields that are available in Metric
 
 - **WHERE**: A filter field to define specific conditions for the metric. You can apply logical operators like "IN," "NOT IN".
 
-- **Legend Format**: An optional field to customize the legend's format in the visual representation of the alert.
+- **[Legend Format](https://signoz.io/docs/userguide/query-builder/#legend-format)**: An optional field to customize the legend's format in the visual representation of the alert.
+
+- **Having**: Apply conditions to filter the results further based on aggregate value.
 
 <figure data-zoomable align='center'>
     <img src="/img/docs/alerts/alerts-metrics-based-1.webp" alt="Using Query Builder to the metric to monitor"/>
@@ -53,7 +55,7 @@ This step focuses on setting alert properties like severity, description, and ot
 
 - **Labels**: A field to add labels or tags to the alert for categorization.
 
-- **Notifications channels**: A field to choose the notification channels from those configured in the Alert Channel settings.
+- **Notification channels**: A field to choose the notification channels from those configured in the Alert Channel settings.
 
 - **Test Notification**: A button to test the alert to ensure that it works as expected.
 

@@ -97,13 +97,13 @@ Once the Notification Channel is saved, you should be able to select it when cre
 
 After setting up a new notification channel, you can create an alert by clicking the "New Alert" button in the Alerts Tab. You will see four types of alerts to choose from:
 
-- **Metric-based Alert**: Sends a notification when a condition occurs in metric data (e.g., CPU usage, memory utilization, request rates). You can set thresholds or rate-based conditions.
+- **[Metric-based Alert](../../alerts-management/metrics-based-alerts)**: Sends a notification when a condition occurs in metric data (e.g., CPU usage, memory utilization, request rates). You can set thresholds or rate-based conditions.
 
-- **Log-based Alert**: Sends a notification when a condition occurs in log data (e.g., specific patterns, keywords, error messages). You can set conditions based on log entries or error codes.
+- **[Log-based Alert](../../alerts-management/log-based-alerts)**: Sends a notification when a condition occurs in log data (e.g., specific patterns, keywords, error messages). You can set conditions based on log entries or error codes.
 
-- **Trace-based Alert**: Sends a notification when a condition occurs in trace data (e.g., latency, errors, specific trace events). You can define conditions to trigger the alert based on distributed system traces.
+- **[Trace-based Alert](../../alerts-management/trace-based-alerts)**: Sends a notification when a condition occurs in trace data (e.g., latency, errors, specific trace events). You can define conditions to trigger the alert based on distributed system traces.
 
-- **Exceptions-based Alert**: Sends a notification when a condition occurs in exceptions data (e.g., application exceptions or errors). You can set conditions to trigger the alert when specific exceptions are detected.
+- **[Exceptions-based Alert](../../alerts-management/exceptions-based-alerts)**: Sends a notification when a condition occurs in exceptions data (e.g., application exceptions or errors). You can set conditions to trigger the alert when specific exceptions are detected.
 
 These four types of alerts offer flexibility in monitoring different system aspects. 
 

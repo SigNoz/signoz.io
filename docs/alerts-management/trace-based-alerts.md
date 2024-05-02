@@ -16,7 +16,9 @@ to perform operations on your Traces to define conditions based on traces data. 
 
 - **Group by**: Lets you group trace data by different attributes, like "serviceName," "Status," or other custom attributes.
 
-- **Legend Format**: An optional field to define the format for the legend in the visual representation of the alert.
+- **[Legend Format](https://signoz.io/docs/userguide/query-builder/#legend-format)**: An optional field to define the format for the legend in the visual representation of the alert.
+
+- **Having**: Apply conditions to filter the results further based on aggregate value.
 
 <figure data-zoomable align='center'>
     <img src="/img/docs/alerts/alerts-trace-based-1.webp" alt="Using Query Builder to perform operations on your Traces"/>
@@ -54,7 +56,7 @@ This step is for setting the alert's severity, name, and other descriptive detai
 
 - **Labels**: A field to add tags or labels for easier categorization.
 
-- **Notifications channels**: A field to choose the notification channels from those configured in the Alert Channel settings.
+- **Notification channels**: A field to choose the notification channels from those configured in the Alert Channel settings.
 
 - **Test Notification**: A button to test the alert to ensure that it works as expected.
 

@@ -82,11 +82,11 @@ module.exports = {
           id: 'product-features/saved-view',
           label: 'Saved View',
         },
-        {
-          type: 'doc',
-          id: 'product-features/alert-management',
-          label: 'Alert Management',
-        },
+        // {
+        //   type: 'doc',
+        //   id: 'product-features/alert-management',
+        //   label: 'Alert Management',
+        // },
         // {
         //   type: 'category',
         //   label: 'Alerts',

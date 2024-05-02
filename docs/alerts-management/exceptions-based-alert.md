@@ -10,7 +10,9 @@ In this step, you define the Clickhouse query to retrieve the exception data and
 
 - **Clickhouse Query**: A field to write a Clickhouse SQL query that selects and aggregates exception data. The query should define the exception type, time range, and other necessary conditions.
 
-- **Legend Format**: An optional field to define the format for the legend in the visual representation of the alert.
+- **[Legend Format](https://signoz.io/docs/userguide/query-builder/#legend-format)**: An optional field to define the format for the legend in the visual representation of the alert.
+
+- **Having**: Apply conditions to filter the results further based on aggregate value.
 
 <figure data-zoomable align='center'>
     <img src="/img/docs/alerts/alerts-exceptions-based-1.webp" alt="Using Clickhouse Query to define metrics"/>
@@ -48,7 +50,7 @@ In this step, you set the alert's metadata, including severity, name, and descri
 
 - **Labels**: A field to add labels or tags for categorization.
 
-- **Notifications channels**: A field to choose the notification channels from those configured in the Alert Channel settings.
+- **Notification channels**: A field to choose the notification channels from those configured in the Alert Channel settings.
 
 - **Test Notification**: A button to test the alert to ensure that it works as expected.
 

@@ -8,7 +8,7 @@ A Log-based alert allows you to define conditions based on log data, triggering 
 ### Step 1: Define the Log Metric
 
 In this step, you use the [Logs Query Builder](https://signoz.io/docs/userguide/query-builder/#logs-and-traces-query-builder)
-to perform operations on your logs to define conditions based on log data. Some of the fields that are available in Logs Query Builder includes
+to apply filters and operations on your logs to define conditions which triggers log based alert Some of the fields that are available in Logs Query Builder includes:
 
 - **Logs**: A field to filter the specific log data to monitor. 
 
@@ -16,7 +16,9 @@ to perform operations on your logs to define conditions based on log data. Some 
 
 - **Group by**: Provides options to group log data by various attributes, such as "serviceName," "Status," or custom attributes.
 
-- **Legend Format**: Lets you define the format for the legend in the visual representation of the alert.
+- **[Legend Format](https://signoz.io/docs/userguide/query-builder/#legend-format)**: Lets you define the format for the legend in the visual representation of the alert.
+
+- **Having**: Apply conditions to filter the results further based on aggregate value.
 
 <figure data-zoomable align='center'>
     <img src="/img/docs/alerts/alerts-log-based-1.webp" alt="Using Query Builder to perform operations on your logs"/>
@@ -54,7 +56,7 @@ This step is for setting alert metadata like severity, description, and addition
 
 - **Labels**: A field to add labels or tags for categorization.
 
-- **Notifications channels**: A field to choose the notification channels from those configured in the Alert Channel settings.
+- **Notification channels**: A field to choose the notification channels from those configured in the Alert Channel settings.
 
 - **Test Notification**: A button to test the alert to ensure that it works as expected.
 
