@@ -81,6 +81,7 @@ module.exports = {
           type: 'doc',
           id: 'product-features/saved-view',
           label: 'Saved View',
+          className: 'new-doc', // Add this line
         },
         // {
         //   type: 'doc',
@@ -308,6 +309,7 @@ module.exports = {
       items: [
         'userguide/send-metrics-cloud',
         'userguide/send-metrics',
+        'userguide/drop-metrics',
         'userguide/navigate-user-interface',
         'userguide/hostmetrics',
         {
@@ -621,6 +623,7 @@ module.exports = {
       },
       items: [
         'tutorial/jvm-metrics',
+        'tutorial/jmx-metrics',
         'tutorial/mongodb-metrics',
         'tutorial/instrumenting-angular-frontend',
         'tutorial/s3-integration-iam-role-eks',

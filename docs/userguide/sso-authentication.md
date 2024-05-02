@@ -82,3 +82,62 @@ For more details on the metadata page, click [here](https://learn.microsoft.com/
 4. After domain is added, Click on `Configure SSO` and choose `SAML Authentication` option
 5. Enter values of tags `entity ID`, `Certificate Data` and `Location(ACS URL)` that you acquired from the metadata page (step 7 above)
 6. Save the settings and log in from an incognito tab to test the setup. If you face difficulties signing in, review the query service logs. Also if you are admin and are unable to login because of faulty setup, then you may login with password using this URL: `http(s)://${SIGNOZ_BASEURL}/login?password=Y`
+
+### SAML Authentication with Okta
+
+#### Steps to be performed in Okta
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/okta-sso-saml-integration.gif" alt="Okta SSO SAML Integration"/>
+    <figcaption><i>Okta SSO SAML Integration</i></figcaption>
+</figure>
+<br></br>
+
+1. Log in to **Okta**
+2. From the **Admin** page, go to **Applications** > **Applications** > **Create App Integration**
+3. Select **SAML 2.0**, and hit **Next**
+4. On the **SAML Integration** page, enter the following:
+    - **Application Name**: `SigNoz`
+    - **Single Sign-on URL**: `http(s)://${SIGNOZ_BASEURL}/api/v1/complete/saml`
+    - **Audience URI (SP Entity ID)**: `http(s)://${SIGNOZ_BASEURL}`
+5. Save the application integration
+6. Now, we can visit the **Metadata URL** in Okta to get the following information:
+    - **Entity ID**: At the top of page, locate XML tag `EntityDescriptor` and you will get the `entityID` value
+    ```XML
+    <md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata" entityID="http://www.okta.com/exk...697">
+    ```
+    - **X509Certificate Data**: Locate `X509Certificate` tag and copy the entity content (value). This is certificate (`Certificate Data`) that SigNoz needs to validate response from IdP. When copying this value, make sure that you copy the entire certificate and remove any whitespace
+    ```XML
+    <md:KeyDescriptor use="signing">
+        <ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+            <ds:X509Data>
+                <ds:X509Certificate>...</ds:X509Certificate>
+            </ds:X509Data>
+        </ds:KeyInfo>
+    </md:KeyDescriptor>
+    ```
+    - **Location (ACS URL)**: Locate `Location` at the bottom of the page and copy its value. This is the ACS URL that SigNoz needs to send SAML response to
+    ```XML
+    <md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://redacted.okta.com/app/redacted_signoz_1/exk...697/sso/saml"/>
+    <md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="https://redacted.okta.com/app/redacted_signoz_1/exk...697/sso/saml"/>
+    ```
+7. At last, assign the **People** or **Groups** to SigNoz application
+    - From **Admin** page, go to **Directories** > **People** or **Groups**
+    - Select the specific people or groups
+    - Go to **Applications** > **Assign applications**
+    - Select **SigNoz** application > **Assign** > Hit **Done**
+
+#### Steps to be performed in SigNoz
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/signoz-okta-sso-enable.gif" alt="Enable Okta SSO SAML in SigNoz"/>
+    <figcaption><i>Enable Okta SSO SAML in SigNoz</i></figcaption>
+</figure>
+<br></br>
+
+1. Go to `Settings`. Click on `Organization Settings` tab and locate `Authenticated Domains` in the page
+2. Click `Add Domain`
+3. Enter the domain that your users would login with. For example, if your user names or emails are in format such as *john@example.com* then you would have to enter *example.com* here.
+4. After domain is added, Click on `Configure SSO` and choose `SAML Authentication` option
+5. Enter values of tags `entity ID`, `Certificate Data` and `Location (ACS URL)` that you acquired from the metadata page (step 6 above)
+6. Save the settings and log in from an incognito tab to test the setup. If you face difficulties signing in, review the query service logs. Also if you are admin and are unable to login because of faulty setup, then you may login with password using this URL: `http(s)://${SIGNOZ_BASEURL}/login?password=Y`

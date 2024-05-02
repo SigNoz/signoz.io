@@ -10,7 +10,7 @@ const BuildForDevelopers = () => {
     },
     {
       title: "Columnar Database",
-      desc: "SigNoz uses ClickHouse - a fast open source distributed columnar database. Ingestion and aggregations are lightening fast.",
+      desc: "SigNoz uses ClickHouse - a fast open source distributed columnar database. Ingestion and aggregations are lightning fast.",
       figure: "/img/landing/property-columnar-database.webp",
     },
     {

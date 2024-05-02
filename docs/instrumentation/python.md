@@ -548,6 +548,11 @@ Check this [documentation](https://opentelemetry-python.readthedocs.io/en/latest
 
 ## Troubleshooting your SigNoz installation
 
+#### Application servers such as Uvicorn, Hypercorn, etc.
+
+- Uvicorn with `--workers` flag is not supported. The work around for this is to use `gunicorn` with uvicorn as the worker class `gunicorn -k uvicorn.workers.UvicornWorker`.
+- Hypercorn is not supported. There is no workaround for this. Please follow the issue https://github.com/pgjones/hypercorn/issues/215
+
 #### Spans are not being reported
 
 If spans are not being reported to SigNoz, try enabling debug exporter which writes the JSON formatted trace data to the console by setting env var OTEL_TRACES_EXPORTER=console.

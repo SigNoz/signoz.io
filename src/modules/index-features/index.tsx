@@ -138,8 +138,8 @@ export const SigNozFeatures = () => {
               you full control
             </li>
             <li className="mb-2 text-lg">
-              Use a columnar database to store logs which enables lightening
-              quick log analytics.
+              Use a columnar database to store logs which enables lightning
+              fast log analytics.
               <br />
               <a
                 target="_blank"

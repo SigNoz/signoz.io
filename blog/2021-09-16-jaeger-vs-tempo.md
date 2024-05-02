@@ -1,7 +1,7 @@
 ---
 title: Jaeger vs Tempo - key features, differences, and alternatives
 slug: jaeger-vs-tempo
-date: 2021-09-16
+date: 2024-04-22
 tags: [Tools Comparison, Jaeger]
 authors: ankit_anand
 description: Both Jaeger and Grafana Tempo are tools aimed at distributed tracing for microservice architecture. Tempo supports multiple open-source instrumentation standards, while Jaeger supports OpenTracing APIs..
@@ -148,12 +148,20 @@ Grafana Tempo has Grafana agents, which are deployed close to the application. I
 
 ### Backend storage
 
-Jaeger ships with simple in-memory storage for testing setups.Jaeger supports two popular open-source NoSQL databases as trace storage backends:
+Jaeger ships with simple in-memory storage for testing setups. Jaeger supports two popular open-source NoSQL databases as trace storage backends:
 
-- Cassandra
-- ElasticSearch
+- Cassandra - known for its scalability and high availability, making it suitable for handling large volumes of trace data with high uptime requirements.
+- ElasticSearch - known for its advanced search capabilities and efficiency, allowing for complex queries and fast retrieval of trace data.
 
-Grafana Tempo has its own custom TempoDB for storing trace data. TempoDB supports S3, GCS, Azure, local file systems, and optionally can use Memcached or Redis for increased query performance.
+Grafana Tempo has its own custom database, TempoDB, for storing trace data. It supports object storage solutions like Google Cloud Storage, Amazon S3, Azure Blob Storage, and local file system storage. However, its design and performance are primarily tailored towards object storage environments, rather than local storage. This design allows it to efficiently collect and store a vast volume of traces from distributed applications without the need for sampling.
+
+Additionally, it can use Memcached or Redis for increased query performance.
+
+### Cost
+
+Jaeger being an open-source project has no licensing fees associated with deploying and using it.
+
+Grafana Tempo also has an open-source version that is free to use and has no licensing fees attached to its management and use. If you do not want to manage your own Grafana Tempo instance, you can use [Grafana Cloud](https://grafana.com/docs/grafana-cloud/), a managed platform for Grafana products. It provides a free forever plan, a pay-as-you-go plan, and an advanced plan starting at $299.
 
 ### Visualization layer
 
@@ -173,7 +181,7 @@ Jaeger's UI is basic but comprehensive when it comes to distributed tracing.
 <figure data-zoomable align='center'>
     <img className="box-shadowed-image"
     alt="Jaeger UI"
-    src="/img/blog/2021/08/jaeger_ui-min.webp"
+    src="/img/blog/2021/09/jaeger_ui-min.webp"
     />
 <figcaption><i>Jaeger UI showing services and corresponding traces</i></figcaption>
     </figure>
@@ -231,26 +239,14 @@ Some of the things SigNoz can help you track:
 
 ## Getting started with SigNoz
 
-You can get started with SigNoz using just three commands at your terminal.
+SigNoz cloud is the easiest way to run SigNoz. [Sign up](https://signoz.io/teams/) for a free account and get 30 days of unlimited access to all features.
 
-```jsx
-git clone -b main https://github.com/SigNoz/signoz.git
-cd signoz/deploy/
-./install.sh
-```
-<br></br>
+!https://signoz.io/assets/images/try-signoz-cloud-all-blog-cta-e236d6935472e7a48a103148be0117f7.webp
 
-For detailed instructions, you can visit our documentation.
-
-[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/)
-
-You can check out SigNoz's GitHub repo here 👇
-
-[![SigNoz GitHub repo](/img/blog/common/signoz_github.webp)](https://github.com/SigNoz/signoz)
-
+You can also install and self-host SigNoz yourself since it is open-source. With 16,000+ GitHub stars, [open-source SigNoz](https://github.com/signoz/signoz) is loved by developers. Find the [instructions](https://signoz.io/docs/install/) to self-host SigNoz.
 ___
 
-#### **Related Content**
+#### **Related Posts**
 
 **[Jaeger vs Zipkin](https://signoz.io/blog/jaeger-vs-zipkin/)**<br></br>
 **[Jaeger vs SigNoz](https://signoz.io/blog/jaeger-vs-signoz/)**<br></br>

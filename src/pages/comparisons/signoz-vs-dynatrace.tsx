@@ -103,7 +103,7 @@ const COMPARISON_DATA = {
       DESC: (
         <>
           SigNoz uses ClickHouse - a fast open source column-oriented database.
-          Ingestion and aggregation are lightening fast, while providing
+          Ingestion and aggregation are lightning fast, while providing
           best-in-class compression for economical storage. Learn{" "}
           <Link
             href="https://clickhouse.com/docs/en/concepts/why-clickhouse-is-so-fast"

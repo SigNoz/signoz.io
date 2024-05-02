@@ -29,10 +29,10 @@ Updating retention period can be very long running operation with large data. So
 
 ### Docker and Docker Swarm
 
-In case of docker, uncomment `storage_configuration` from `clickhouse-config.xml`.
-Also configure the endpoint, access key and secret. If you have configured the AWS
+In case of docker, update the `storage_configuration` section from `clickhouse-storage.xml`
+to configure the endpoint, access key and secret. If you have configured the AWS
 credentials in the ClickHouse environment, set `use_environment_credentials` to `true`
-and you can remove `access_key_id` and `secret_access_key` from the configuration.
+and you can remove `access_key_id` and `secret_access_key` sections.
 
 If region is `us-east-1`, then the endpoint will be `https://<bucket-name>.s3.amazonaws.com/data/`.
 For other regions, the endpoint will be `https://<bucket-name>.s3-<region-name>.amazonaws.com/data/`.
@@ -86,8 +86,8 @@ clickhouse:
 
 ### Docker and Docker Swarm
 
-In case of docker, uncomment `storage_configuration` from `clickhouse-config.xml`.
-Also configure the endpoint, access key and secret.
+In case of docker, update the `storage_configuration` section from `clickhouse-storage.xml`
+to configure the endpoint, access key and secret.
 
 For GCS, `support_batch_delete` must be set to `false` as GCS doesn't support batch delete
 and results in error messages in the logs.

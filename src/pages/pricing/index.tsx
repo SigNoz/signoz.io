@@ -1030,7 +1030,7 @@ const ExploreAllFeature = () => {
             inEnterprise: <RightIcon />,
           },
           {
-            feature: "Security tightening for on-premise installtion",
+            feature: "Security tightening for on-premise installation",
             inCommunity: <CrossIcon />,
             inTeams: <CrossIcon />,
             inEnterprise: <div>Only in Enterprise Self Managed</div>,
