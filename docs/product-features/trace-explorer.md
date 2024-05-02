@@ -23,7 +23,7 @@ The List View is the default view on the Traces Explorer page.
 </figure>
 <br></br>
 
-You can do the following things in List View:
+You can perform the following operations in List view:
 
 **Apply Filters**
 
@@ -39,7 +39,7 @@ You can do the following things in List View:
 <br></br>
 
 **Note:** 
-- The **Group By**, **Add a query** and **Add a function** features are not supported in List View. These will be disabled in the UI soon.
+- The **Group By**, **Add a query** and **Add a function** features are not supported in List View. 
 
 **Customize Columns**
 
@@ -55,7 +55,7 @@ Add or delete columns using the `Options` button. For example, you can add the `
 **Note:** 
 - Timestamp column can't be removed.
 
-**Number of Spans to display**
+**Number of Traces to display**
 
 You can increase the number of spans displayed upto 200/page using the dropdown shown in image below.
 
@@ -79,7 +79,7 @@ The Traces View focuses on analysis of traces related to root span. A root span 
 </figure>
 <br></br>
 
-You can do the following things in Traces View:
+You can perform the following operations in Traces view:
 
 **Apply Filters**
 
@@ -96,7 +96,7 @@ When you apply filters for `serviceName` or `durationNano`(For the Root span dur
 <br></br>
 
 **Note:** 
-- The **Group By**, **Add a query** and **Add a function** features are not supported in List View. These will be disabled in the UI soon.
+- The **Group By**, **Add a query** and **Add a function** features are not supported in List View. 
 - Right now there is no support to filter by `No. of Spans`
 
 **Root Duration**
@@ -109,7 +109,7 @@ Traces are sorted by descending order of duration which helps in identifying the
 </figure>
 <br></br>
 
-**Number of Spans to display**
+**Number of Traces to display**
 
 You can increase the number of spans upto 200/page using the dropdown shown in image below.
 
@@ -177,7 +177,7 @@ Just like Time Series View, the Query builder in Table view also helps in filter
 This provides you with a tabular representation of the output of Query made using the Query Builder.
 
 <figure data-zoomable align='center'>
-    <img src="/img/docs/product-features/trace-explorer/trace-explorer-timeseries-view-2.webp" alt="Table in Table View"/>
+    <img src="/img/docs/product-features/trace-explorer/trace-explorer-table-view-2.webp" alt="Table in Table View"/>
     <figcaption><i> Table in Table View </i></figcaption>
 </figure>
 <br></br>
