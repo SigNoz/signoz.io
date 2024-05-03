@@ -183,23 +183,43 @@ This provides you with a tabular representation of the output of Query made usin
 <br></br>
 
 
-## Save View
+## Bottom Bar
+The bar present at the Bottom of each view in Traces Explorer has multiple helpful features.
 
 <figure data-zoomable align='center'>
-    <img src="/img/docs/product-features/trace-explorer/trace-explorer-save-view.webp" alt="Save view in List View of Traces Explorer"/>
-    <figcaption><i> Save view in List View of Traces Explorer </i></figcaption>
+    <img src="/img/docs/product-features/trace-explorer/trace-explorer-bottom-bar.webp" alt="Bottom Bar of Traces Explorer"/>
+    <figcaption><i> Bottom Bar in Traces Explorer </i></figcaption>
 </figure>
 <br></br>
 
+### Save View
+
 At the Bottom of each View available in the Traces Explorer, we have an option to **Save this View** . What this does is, it saves the specific settings that you have applied for the particular View as a template which can be accessed later from the `Views Tab` available at the top or from `Select a View` dropdown. To know more details about Save View, please refer to this [documentation](https://signoz.io/docs/product-features/saved-view/).
 
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/trace-explorer/trace-explorer-bottom-bar-save-view.webp" alt="Save view"/>
+    <figcaption><i> Save view </i></figcaption>
+</figure>
+<br></br>
 
 
+### Create an Alert 
 
+Just next to Save this view, we have the **Create an Alert** button which can be used to instantly create a [Trace based Alert](https://signoz.io/docs/alerts-management/metrics-based-alerts/) according to the filters applied in our current view.
 
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/trace-explorer/trace-explorer-bottom-bar-create-an-alert.gif" alt="Create an Alert"/>
+    <figcaption><i> Create an Alert </i></figcaption>
+</figure>
+<br></br>
 
+### Add to Dashboard
 
+Next to Create an Alert, we have the **Add to Dashboard** button using which you can add the current panel to a New or any other existing dashboard.
 
-
-
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/trace-explorer/trace-explorer-bottom-bar-add-to-dashboard.gif" alt="Add to Dashboard"/>
+    <figcaption><i> Add to Dashboard </i></figcaption>
+</figure>
+<br></br>
 
