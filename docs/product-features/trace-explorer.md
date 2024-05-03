@@ -55,7 +55,7 @@ Add or delete columns using the `Options` button. For example, you can add the `
 **Note:** 
 - Timestamp column can't be removed.
 
-**Number of Traces to display**
+**Number of Spans to display**
 
 You can increase the number of spans displayed upto 200/page using the dropdown shown in image below.
 
