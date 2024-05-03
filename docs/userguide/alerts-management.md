@@ -3,105 +3,65 @@ id: alerts-management
 title: Alerts 
 ---
 
-import { LiteYoutubeEmbed } from "react-lite-yt-embed";
+Alerts in SigNoz can help you to define which data to monitor, set thresholds to detect potential problems, and specify who should be notified and how. This can help you to identify critical issues and reduce noise. This document will help you in understanding how to set up and use alerts effectively.
 
-# Setting alerts in SigNoz  
+## Managing Alerts
 
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/alerts/alerts-alert-rules-tab.gif" alt="A gif explaining the Alerts Rules Tab in SigNoz"/>
+    <figcaption><i>Features of Alert Rules Tab </i></figcaption>
+</figure>
+<br></br>
 
-## Setting Alert Rules
+The Alert Rules Tab in SigNoz provides an overview of the alert defined by the user. This section allows you to view, edit, or manage alert rules, along with their associated metadata. Here's a breakdown of the features available:
 
-You can set Alert Rules in SigNoz in the following 3 ways:
-1. Query Builder - This is DIY way to build alerts by selecting metrics from dropdowns. You can also set filter and group by conditions.
-2. PromQL - You can use [Prometheus Query Language](https://prometheus.io/docs/prometheus/latest/querying/basics/) to write expressions for alerts which will be evaluated in regular time interval. If you have set up alerts in Prometheus, this method should be very familiar.
-3. Clickhouse Queries - You can write clickhouse queries that adhere to the SigNoz data model and format. The result of the query will be used to evaluate alert threshold conditions. Additionally, you can also generate labels and annotations using the results of your query.
+### Alert Rule Columns
+- **Status**: Indicates whether the alert rule is enabled (OK) or disabled.
+- **Alert Name**: The name given to the alert rule for easy identification.
+- **Severity**: The level of severity assigned to the alert. For example, `warning`, `critical` etc.
+- **Labels**: Displays any labels associated with the alert rule. Labels can help in categorizing alerts.
 
+### Additional Alert Rule Options
+- **Filter by Created At, Created By, Updated At, and Updated By**: The filter option in the top-right corner allows you to customize which fields are displayed. You can choose to show fields like when was the alert created who created the alert, when it was last updated, and who updated it.
+- **Sorting Columns**: By hovering over a column name and clicking it, you can sort the list of alert rules in ascending or descending order based on that column's data. 
+- **New Alert**: At the top-right corner, the "**+ New Alert**" button lets you create a new alert rule. 
 
-Navigate to Alerts page from the left panel. It has 2 tabs:
+### Navigation and Search
+- **Search Bar**: At the top of the tab, you can search for specific alert rules by **name**, **severity**, or **label**.
+- **Pagination Controls**: At the bottom-right corner, you can navigate through multiple pages of alert rules.
+- **Actions Menu**: Found on the right side of each row, this menu allows you to perform additional actions on the alert, such as **Enable**, **Edit**, **Clone** and **Delete**.
 
-1. Alert Rules
-2. Triggered Alerts
+## Triggered Alerts Tab
 
-Alert Rules set the expression you want to evaluate to start firing alerts. The Alert Rules tab shows a list of currently configured alert rules and labels like `severity` and `Alert Name`. It also shows the current status of this Alert rules. If any alerts are `firing` because of this or everything is `Ok`
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/alerts/alerts-triggered-tab.gif" alt="A gif explaining the Triggered Alerts Tab in SigNoz"/>
+    <figcaption><i>Features of Triggered Alerts Tab </i></figcaption>
+</figure>
+<br></br>
 
-![alert-rules](../../static/img/docs/alert-rules.webp)
+The Triggered Alerts Tab shows the currently firing alerts. It provides a real-time view of alerts, allowing you to quickly assess which alerts are active and require attention. Here's a detailed description of the tab's features:
 
+### Triggered Alert Columns
+- **Status**: Shows whether the alert is currently firing. It can have values like "Firing."
+- **Alert Name**: The name of the triggered alert.
+- **Severity**: Indicates the severity of the triggered alert (e.g., "warning").
+- **Tags**: Displays additional information or tags related to the alert.
+- **Firing Since**: The timestamp indicating when the alert started firing.
 
-### Steps to Create Alert Rules:
+### Additional Triggered Alert Options
+- **Filter by Tags**: You can apply filters to narrow down the list of triggered alerts based on specific tags.
+- **Group by**: The "Group by" feature allows you to group alerts based on various criteria, such as alert name, severity etc.
 
-To create new alert rules, you can click the `New Alert` button. This would open a pane with the type of alerts.
+## Creating a New Alert in SigNoz
 
-<img width="1101" alt="image" src="https://user-images.githubusercontent.com/10277894/208090898-2a05a349-c071-47e1-9dd3-d0a5de70f113.png" />
+After setting up a new notification channel, you can create an alert by clicking the "New Alert" button in the Alerts Tab. You will see four types of alerts to choose from:
 
+- **[Metric-based Alert](../../alerts-management/metrics-based-alerts)**: Sends a notification when a condition occurs in metric data (e.g., CPU usage, memory utilization, request rates). You can set thresholds or rate-based conditions.
 
-Choose an appropriate type of alert by clicking on one of the cards. 
+- **[Log-based Alert](../../alerts-management/log-based-alerts)**: Sends a notification when a condition occurs in log data (e.g., specific patterns, keywords, error messages). You can set conditions based on log entries or error codes.
 
-On the alert form, you can choose one of the following tabs to define source of your metric. 
+- **[Trace-based Alert](../../alerts-management/trace-based-alerts)**: Sends a notification when a condition occurs in trace data (e.g., latency, errors, specific trace events). You can define conditions to trigger the alert based on distributed system traces.
 
-1. Query Builder
-2. Clickhouse Query
-3. PromQL (Available only for metrics)
+- **[Exceptions-based Alert](../../alerts-management/exceptions-based-alerts)**: Sends a notification when a condition occurs in exceptions data (e.g., application exceptions or errors). You can set conditions to trigger the alert when specific exceptions are detected.
 
-> Note: Presently the logs, traces and exceptions-based alerts support only Clickhouse Query based metric. 
-
-#### 1. Query Builder
-In Query Builder, you can use the dropdowns in the dashboard to select the right metric. 
-- Then create an expression with WHERE and GROUPBY clauses which represents the expression to evaluate for alerting
-- Threshold which the value of expression should cross ( above or below) to trigger an alert.
-- Evaluation period of the expression
-- Set name, descriptions and tags about the alert to make it more informative
-
-![alerts-query-builder](../../static/img/docs/alerts-query-builder.webp)
-
-
-#### 2. PromQL
-
-In PromQL, you can write the Prometheus expression to evaluate. 
-
-- Set the expression you want to evaluate to trigger alerts. The expression also includes the evaluation interval.
-- Threshold which the value of expression should cross ( above or below) to trigger an alert.
-- Set labels like `severity` to communicate how severe the issue is if this alert starts firing
-
-![prometheus-alert-rules](../../static/img/docs/promql-alerts.webp)
-
-
-#### 3. Writing Clickhouse Queries in Alert form
-On `clickhouse query` tab, you will be presented with a query editor with a default query that you can start working with. To learn more about the data-model and query format, read [this tutorial](https://signoz.io/docs/tutorial/writing-clickhouse-queries-in-dashboard/#building-alert-queries-with-clickhouse-data).  
-
-<img width="835" alt="image" src="https://user-images.githubusercontent.com/10277894/208092689-07e7edd6-2277-4cd4-9fbf-a2e13531a4a9.png" />
-
-
-You can use `Run Query` to confirm your query works. Include the bind variables and mandatory column aliases as mentioned [here](https://signoz.io/docs/tutorial/writing-clickhouse-queries-in-dashboard/#building-alert-queries-with-clickhouse-data). 
-
-### Using result labels in alert description
-
-You can use the result labels in the alert description to create more informative alerts using `{{.Labels.<label-name>}}`. For example, if you have a query that returns the label `service_name`, you can use it in the alert description as `{{.Labels.service_name}}` to create an alert that is specific to a particular service.
-
-### Steps to Setup Triggered Alerts
-
-Triggered alerts show the alerts which are in `firing` or `pending` state. 
-
-Pending means that the rule threshold is crossed, but it is still waiting based on the specified time period. Once the specified time is passed, the alert starts firing.
-
-It also has different tags like alert name, severity, since when the alert started firing, etc.
-
-![triggered-alerts](../../static/img/docs/triggered-alerts.webp)
-
-- Filtering and grouping Triggered alerts
-
-You can also filter and group triggered alerts based on tags. The filtering field accepts multiple key-value pairs like `serverity:warning`
-
-For grouping, you can use any of the tags like `severity`, `alertname` or any other label you would have specified in your alert rule. You can use the grouping feature to group the list of triggered alerts based on these tags.
-
-
-![triggered-alerts-groups](../../static/img/docs/triggered-alerts-groups.webp)
-
-
-
-
-
-
-
-
-
-
-
+These four types of alerts offer flexibility in monitoring different system aspects. 
