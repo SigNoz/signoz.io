@@ -15,7 +15,7 @@ The Logs Explorer page in SigNoz enables developers to filter, examine, and anal
 - [Table View](#table-view)
 
 
-## Ways to filter
+## Operations on Data
 
 ### Search
 
@@ -145,7 +145,7 @@ The Time Series View provides a graphical representation of logs data over time 
 
 ### Table View
 
-The Table View provides a tabular representation of the count logs data based on the filters applied.
+The Table View provides a tabular representation of different operations like the count logs, average of duration etc., based on the filters applied.
 
 <figure data-zoomable align='center'>
     <img src="/img/docs/product-features/logs-explorer/logs-explorer-table-view.webp" alt="Table View in the Logs Explorer"/>
@@ -159,7 +159,7 @@ The Table View provides a tabular representation of the count logs data based on
 When you click on a log line in any format it will open up a Log Detail panel which gives a comprehensive view of your log. This is only available in the List View.
 
 <figure data-zoomable align='center'>
-    <img src="/img/docs/product-features/logs-explorer/logs-explorer-log-details.gif" alt="Log Details Panel in Logs Explorer"/>
+    <img src="/img/docs/product-features/logs-explorer/logs-explorer-log-details.webp" alt="Log Details Panel in Logs Explorer"/>
     <figcaption><i>Log Details Panel in Logs Explorer </i></figcaption>
 </figure>
 <br></br>
