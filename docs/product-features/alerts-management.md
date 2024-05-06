@@ -14,10 +14,13 @@ Alerts in SigNoz can help you to define which data to monitor, set thresholds to
 </figure>
 <br></br>
 
-## Key Options and Functionalities
+## Alert Rules management
 
 - **Alert Rules Tab**: Manage and overview alert rules with options to view, edit, sort, and filter based on various parameters like creation date, severity, labels etc.
 - **Triggered Alerts Tab**: Provides a real-time view of active alerts.
-- **Creating New Alerts**: Easily create new alerts by specifying the type of data to monitor (Metrics, Logs, Traces, Exceptions), and define specific conditions for triggering notifications.
+- **Creating New Alerts**: Create new alerts across different signals such as Metrics, Logs, Traces, and Exceptions, triggered by threshold conditions.
 
 For detailed instructions on setting up and managing alerts in SigNoz, please refer to this [documentation](https://signoz.io/docs/alerts/).
+
+
+Create alerts over different signals like Metrics, Logs, Traces and Exceptions triggered based on threshold conditions.
