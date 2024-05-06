@@ -1,10 +1,10 @@
 ---
-title: Kubernetes monitoring with open-source tools [OpenTelemetry and SigNoz]
+title: Kubernetes Monitoring: Metrics to Monitor, Tools and Best practices
 slug: kubernetes-monitoring
-date: 2022-06-03
-tags: [Tech Tutorial]
+date: 2024-05-06
+tags: [Tech Resources]
 authors: [prashant, ankit_anand]
-description: In this article, we will learn how to monitor a Kubernetes cluster using two completely free open-source tools. Kubernetes monitoring is a critical process needed for keeping your Kubernetes clusters in fine health...
+description: Kubernetes monitoring is crucial for maintaining the health, performance, and reliability of containerized applications. It provides crucial insights into...
 image: /img/blog/2022/06/kubernetes_monitoring_cover.webp
 hide_table_of_contents: false
 keywords:
@@ -21,282 +21,125 @@ keywords:
 
 <head>
   <link rel="canonical" href="https://signoz.io/blog/kubernetes-monitoring/"/>
-  <title>Kubernetes monitoring with open-source tools [OpenTelemetry and SigNoz]</title>
+  <title>Kubernetes monitoring</title>
 </head>
 
-Kubernetes monitoring is a critical process for keeping your Kubernetes clusters running in fine health. In this tutorial, we will learn everything about Kubernetes monitoring. We will be using two open-source tools: OpenTelemetry and SigNoz, to monitor a Kubernetes cluster, so you can follow along with the tutorial easily.
+Kubernetes has since emerged as “THE” container orchestration platform for deploying and managing containerized workloads as a result of its robust capabilities. However, the complexity of its architecture and its dynamic nature present significant challenges in monitoring deployed workloads and the platform itself.
 
 <!--truncate-->
 
 ![Cover Image](/img/blog/2022/06/kubernetes_monitoring_cover.webp)
 
-Containerization technologies like Docker and Kubernetes have solved many engineering problems like on-demand scaling and deploying new applications, but it also brings a lot of operational complexity. Modern distributed applications deployed using Kubernetes have too many moving parts, and cluster operators need a monitoring tool to run their clusters effectively.
+Kubernetes monitoring is crucial for maintaining the health, performance, and reliability of containerized applications. It provides insights into resource utilization, system behavior, and potential bottlenecks, ensuring optimal operation.
 
-In this tutorial, we will be using open-source tools: OpenTelemetry and SigNoz, to monitor a Kubernetes cluster. With open-source tools, you are more in control of your data. Furthermore, if there are privacy laws, you can deploy the tools on-prem so that there is no need to send the data to any cloud vendor.
+This article will discuss Kubernetes monitoring and why it is important, the key metrics to monitor, and best practices for monitoring.
 
-## Why monitor your Kubernetes cluster?
+## What is Kubernetes Monitoring?
 
-Kubernetes makes it easy to deploy and operate applications in a microservice architecture. However, as the number of microservices increases, your Kubernetes cluster also becomes quite complex to manage. Cluster operators need to take care of a lot of things like running the desired number of pods, utilization of cluster resources, and misconfigurations.
+Kubernetes monitoring is a critical process for keeping your Kubernetes clusters running in fine health. It is a proactive approach that involves continuously tracking, analyzing, and visualizing the health and performance of a Kubernetes cluster. This approach enables the early detection and resolution of potential issues before they disrupt applications or the cluster itself.
 
-Monitoring tools can help cluster operators proactively manage their clusters by reporting on critical metrics. But traditional monitoring tools are often inadequate to monitor the dynamic environment of a Kubernetes cluster.
+### Why is Kubernetes monitoring important?
 
-Modern monitoring tools should enable engineering teams to set up an **observability** framework for their infrastructure, including Kubernetes clusters. Observability is a term from control theory, which states that a system is observable if the internal states of the system can be determined by examining its output.
+Kubernetes monitoring is important for several reasons as it is necessary to keep your containerized infrastructure running properly. Here are some of the reasons why you should monitor your Kubernetes cluster:
 
-For observability in computing systems, these output signals are commonly divided into three major categories - **logs, metrics, and traces**. OpenTelemetry is an instrumentation layer for cloud-native applications that aims to generate and collect these output signals.
+- It provides complete visibility into your cluster and nodes.
+- It helps in detecting anomalies or deviations from expected behavior, such as sudden increases in resource usage, pod failures, or application errors.
+- It provides real-time performance insights for you to act on.
+- It reduces MTTR as you can drill down into issues quickly to resolve problems.
+- It helps in identifying and addressing potential issues before they impact applications and users.
 
-Before we deep-dive into the tutorial for Kubernetes monitoring, let’s have a brief overview of OpenTelemetry and SigNoz.
+## What Kubernetes Metrics Should You Monitor?
 
-## What is OpenTelemetry?
+Metrics are specific measurements or data points collected from systems. They provide quantifiable information about different aspects of the system, such as CPU usage, memory consumption, network traffic, and application performance.
 
-<a href = "https://opentelemetry.io/" rel="noopener noreferrer nofollow" target="_blank">OpenTelemetry</a>, also known as OTel for short, is an open-source vendor-agnostic set of tools, APIs, and SDKs used to instrument applications to create and manage telemetry data(metrics, traces, and logs). It is backed by <a href = "https://www.cncf.io/" rel="noopener noreferrer nofollow" target="_blank">Cloud Native Computing Foundation</a>, the same foundation under which Kubernetes graduated.
+Monitoring your Kubernetes clusters involves collecting and analyzing these metrics to gain insights into the health, performance, and overall well-being of your containerized applications. To effectively monitor your Kubernetes clusters, the first step is to decide what metrics are most relevant to your monitoring needs. Here are some key metrics to monitor in Kubernetes:
 
-<br></br>
+### **Control plane metrics**
 
-OpenTelemetry aims to make telemetry data a built-in feature of cloud-native software applications. The telemetry data is then sent to a backend analysis tool for storage and visualization. OpenTelemetry can be used to generate metrics from Kubernetes clusters.
+The control plane is responsible for managing the state of the cluster. The control plane is made up of the API server, kube-scheduler, etcd, kube-controller-manager, and cloud-controller-manager. Monitoring the metrics generated by these components is vital for maintaining the stability, performance, and reliability of the Kubernetes cluster.
 
-OpenTelemetry is the bedrock for setting up an observability framework. It is backed by a huge community, and it is quietly becoming the world standard for instrumentation of cloud-native applications. It also provides you the freedom to choose a backend analysis tool of your choice. And that’s where SigNoz comes into the picture.
+### **Node metrics**
 
-## OpenTelemetry and SigNoz
+Nodes are responsible for running containerized applications and executing tasks assigned by the control plane. Without the nodes, there would be nowhere for your pods to run which makes them important. Monitoring node metrics, including resource utilization such as CPU usage, memory consumption, disk I/O, and network traffic, alongside its overall health, is crucial for promptly detecting issues such as resource constraints or performance bottlenecks. 
 
-In this article, we will use [SigNoz](https://signoz.io/), a full-stack **open-source application monitoring and observability platform** that can be used for storing and visualizing the telemetry data collected with OpenTelemetry. It is built natively on OpenTelemetry and works on the various data formats: OTLP, Zipkin, Jaeger, Prometheus backends, etc.
+### **Pod metrics**
 
-SigNoz provides query and visualization capabilities for the end-user and comes with out-of-box charts for application metrics and traces.
+Pods are responsible for running containers. Pod metrics can be collected and analyzed to understand how pods are utilizing resources. They provide insights into the behavior and performance of individual pods in a Kubernetes cluster. Pod metrics include pod health (running, pending, failed), CPU and memory usage, and network traffic.
 
-OpenTelemetry and SigNoz can help you monitor important metrics from your Kubernetes cluster.
+### **Container metrics**
 
-## What should I monitor in Kubernetes?
+Containers are responsible for encapsulating and running application code, along with its dependencies. Container metrics provide insights into the performance and resource utilization of individual containers within a pod. These metrics are crucial for ensuring that containers are functioning efficiently and not consuming more resources than necessary. Container metrics include CPU usage, memory utilization, and network utilization.
 
-Monitoring your Kubernetes cluster effectively is necessary to keep your containerized infrastructure running properly. The first step is to decide which metrics to monitor for your Kubernetes cluster. The important components that need to be monitored in a Kubernetes cluster include:
+## Kubernetes Monitoring Challenges
 
-- Node-level metrics
-- Pod-level metrics
-- Container-level metrics
+A primary challenge DevOps and SRE teams face in monitoring Kubernetes is its architectural complexity. This complexity arises from the need to monitor applications spanning multiple components like containers, pods, and namespaces in a cluster or across fleets of clusters.
 
-With OpenTelemetry and SigNoz, you can collect and visualize these metrics easily. Now let's get down to some action and see everything for yourself.
+Additionally, Kubernetes generates a vast amount of metrics from its different components. Traditional monitoring methods may focus on collecting specific metrics or support only certain types of sources. Even after metrics are collected, it is quite difficult to correlate them for effective analysis to identify and address issues.
 
-We will divide the tutorial into two parts:
+Another monitoring challenge has to do with the ephemeral and dynamic nature of pods and containers. Pods and containers have a transient lifecycle - can be created, updated, restarted, and destroyed. These constant changes make it hard to track the health and performance of applications and services running in them.
 
-1. Installing SigNoz
-2. Kubernetes Infrastructure Monitoring
+## Kubernetes Monitoring Best Practices 
 
-## Installing SigNoz
+There are best practices to be adopted and implemented to effectively monitor the health, performance, and reliability of Kubernetes clusters and the applications running within them. Here are some of them:
 
-First, you need to install SigNoz so that OpenTelemetry can send the collected data to it.
+### Identify the right metrics to monitor
 
-SigNoz can be installed on Kubernetes easily using Helm:
+There are a vast number of Kubernetes metrics, if you are not careful, you may find yourself monitoring the wrong things. It is important to identify metrics in line with your monitoring objective. For instance, if performance is your focus, prioritize CPU usage, memory consumption, and request latency metrics.
 
-```bash
-helm repo add signoz https://charts.signoz.io
+### Prioritize the use of tags and labels
 
-kubectl create ns platform
+Tags and labels provide additional context and organizational structure to your Kubernetes environment, making it easier to manage, monitor, and troubleshoot. By attaching consistent labels across various Kubernetes objects, such as pods, deployments, namespaces, and nodes, you can efficiently filter and analyze issues within specific parts of your application. For example, you can filter pods by environment (e.g., "production" or "staging") or tier (e.g., "frontend" or "backend").
 
-helm --namespace platform install my-release signoz/signoz
-```
+### Implement “Single Pane of Glass” monitoring
 
-You should see similar output:
+This approach involves consolidating all monitoring data into a single, unified interface, making it easier to monitor and manage your cluster. This consolidated view simplifies the process of monitoring and managing your Kubernetes environment, as it eliminates the need to switch between multiple tools and interfaces. 
 
-```yaml
-NAME: my-release
-LAST DEPLOYED: Mon May 23 20:34:55 2022
-NAMESPACE: platform
-STATUS: deployed
-REVISION: 1
-NOTES:
-1. You have just deployed SigNoz cluster:
-  - frontend version: "0.8.0"
-  - query-service version: "0.8.0"
-  - alertmanager version: "0.23.0-0.1"
-  - otel-collector version: "0.43.0-0.1"
-  - otel-collector-metrics version: "0.43.0-0.1"
-```
+This also helps in correlating monitoring data. By having all metrics, logs, traces, and events in one place, you can easily see how different parts of your system interact. This allows you to identify patterns and pinpoint the root cause of issues much faster.
 
-For detailed instructions to set up SigNoz cluster in Kubernetes, please refer to our documentation.
+### Choose the right monitoring tool
 
-[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/kubernetes/)
+Choosing the right Kubernetes monitoring tool is pivotal for the continuous health and performance of your Kubernetes clusters. Here are some important things to consider when selecting a tool:
 
-To port forward SigNoz UI on your local machine, run the following:
+- Performance Evaluation: Scrutinize the tool's performance metrics thoroughly.
+- User-Friendly Interface: Assess the tool's interface for intuitiveness and accessibility.
+- Ease of Implementation: Prioritize tools that are straightforward to deploy and manage.
+- Integration Capabilities: Evaluate how seamlessly the tool integrates with existing systems and tools.
+- Scalability: Ensure the tool can scale alongside your Kubernetes infrastructure.
+- Cost Considerations: Analyze the pricing structure to align with your budget and needs.
+- Community and Support: Opt for tools backed by active communities and robust support channels for troubleshooting and assistance.
 
-```bash
-kubectl port-forward -n platform service/my-release-signoz-frontend 3301
-```
 
-When you are done installing SigNoz, you can access the UI at [http://localhost:3301](http://localhost:3301/application).
+## **Popular Kubernetes Monitoring Tools**
 
-You can alternatively set the SigNoz Frontend service type as `LoadBalancer`/`NodePort` or use `Ingress` for the custom domain.
+Selecting the ideal monitoring tool requires a comprehensive evaluation of its features and pricing to your specific monitoring requirements. To aid in this decision-making process, we've compiled a list of the most popular Kubernetes monitoring tools available, ranging from open-source to SaaS solutions.
 
-Now that you have SigNoz up and running, it’s time to set up OpenTelemetry Collectors for your Kubernetes cluster.
-
-[OpenTelemetry Collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/) is a component of OpenTelemetry that helps to collect, process, and export the telemetry data. You can enable sampling and export data in multiple formats using OpenTelemetry collectors.
-
-## Kubernetes Infrastructure monitoring
-
-OpenTelemetry uses receivers to collect data in specified formats. A receiver is how data gets into the OpenTelemetry Collector. Generally, a receiver accepts data in a specified format and translates it into the internal format to be consumed by OpenTelemetry.
-We will use the following receivers of the OpenTelemetry collector to collect metrics from the Kubernetes cluster.
-
-- `kubeletstats`: Kubelet Stats Receiver pulls pod metrics from the API server on a kubelet
-- `hostmetrics`: Host Metrics receiver generates metrics about the host system
-
-### Steps to export Kubernetes metrics to SigNoz
-
-**Step1: Clone Otel collector repo**
-
-```bash
-git clone https://github.com/SigNoz/otel-collector-k8s.git && cd otel-collector-k8s
-```
-
-**Step2: Set up the address to SigNoz in your OTel collectors**
-
-You need to set up the address to SigNoz in your OTel collector which is collecting the k8s metrics.
-
-If you are running SigNoz in an independent Kubernetes cluster or VM, you need to change the placeholder IPs in the following files with the IP of machine where you are hosting SigNoz.
-
-- <a href = "https://github.com/SigNoz/otel-collector-k8s/blob/main/agent/infra-metrics.yaml#L47" rel="noopener noreferrer nofollow" target="_blank">agent/infra-metrics.yaml</a>
-- <a href = "https://github.com/SigNoz/otel-collector-k8s/blob/main/deployment/all-in-one.yaml#L19" rel="noopener noreferrer nofollow" target="_blank">deployment/all-in-one.yaml</a>
-
-You need to update the below section.
-
-```yaml
-exporters:
-  otlp:
-    endpoint: "<SigNoz-Otel-Collector-Address>:4317"
-    tls:
-      insecure: true
-```
-
-If you are running SigNoz in the same Kubernetes cluster where your applications are, you have to replace the above endpoint in [agent/infra-metrics.yaml](https://github.com/SigNoz/otel-collector-k8s/blob/main/agent/infra-metrics.yaml#L47) and [deployment/all-in-one.yaml](https://github.com/SigNoz/otel-collector-k8s/blob/main/deployment/all-in-one.yaml#L19) by
-
-```yaml
-my-release-signoz-otel-collector.platform.svc.cluster.local:4317
-```
-
-In the above code snippet:
-
-- `my-release` is the Helm release name
-- `platform` is the namespace where SigNoz is deployed
-- In case of SigNoz installed in different kubernetes cluster/machine, update it to the appropriate address.
-
-**Step 3: Install OTel collectors and enable specific receivers to send metrics to SigNoz**
-
-To access metrics from kubeletstats receivers you have to:
-
-```bash
-kubectl create ns signoz-infra-metrics
-kubectl -n signoz-infra-metrics apply -Rf agent
-kubectl -n signoz-infra-metrics apply -Rf deployment
-```
-
-The output will be something like this:
-
-```
-namespace/signoz-infra-metrics created
-daemonset.apps/otel-collector-agent created
-configmap/otel-collector-agent-conf created
-serviceaccount/sa-otel-agent created
-clusterrole.rbac.authorization.k8s.io/sa-otel-agent-role created
-clusterrolebinding.rbac.authorization.k8s.io/aoc-agent-role-binding created
-configmap/otelcontribcol created
-serviceaccount/otelcontribcol created
-clusterrole.rbac.authorization.k8s.io/otelcontribcol created
-clusterrolebinding.rbac.authorization.k8s.io/otelcontribcol created
-deployment.apps/otelcontribcol created
-```
-
-To check pod status:
-
-```bash
-kubectl -n signoz-infra-metrics get pods
-```
-
-The output will be something like this:
-
-```yaml
-NAME                             READY   STATUS    RESTARTS   AGE
-otel-collector-agent-kkchn       1/1     Running   0          2m
-otelcontribcol-6d45c844c-tk2k8   1/1     Running   0          2m
-```
-
-To check logs of the OTel collector agent:
-
-```bash
-export POD_NAME=$(kubectl -n signoz-infra-metrics get pods -l "component=otel-collector-agent" -o jsonpath="{.items[0].metadata.name}")
-
-kubectl -n signoz-infra-metrics logs $POD_NAME
-```
-
-Output should look like this:
-
-```
-...
-2022-05-27T19:37:14.158Z	info	service/telemetry.go:95	Setting up own telemetry...
-2022-05-27T19:37:14.159Z	info	service/telemetry.go:115	Serving Prometheus metrics	{"address": ":8888", "level": "basic", "service.instance.id": "50674c90-240c-4e38-8c18-d2c2b8df1532", "service.version": "latest"}
-2022-05-27T19:37:14.159Z	info	service/collector.go:229	Starting otelcol-contrib...	{"Version": "0.43.0", "NumCPU": 8}
-2022-05-27T19:37:14.159Z	info	service/collector.go:124	Everything is ready. Begin running and processing data.
-```
-
-In case of any errors in the above logs, you should not see except for the case of SigNoz being unavailable or inaccessible.
-
-**Step 4. Plot Metrics in SigNoz UI**
-
-If the previous step was a success, you should be able to plot graphs from the [list of kubelet metrics](https://signoz.io/docs/tutorial/kubernetes-infra-metrics/#list-of-metrics-from-kubernetes-receiver), follow [these instructions](https://signoz.io/docs/userguide/dashboards/) to create dashboards and widgets.
-
-### Monitor Kubelet Metrics with SigNoz
-
-You can get started easily for monitoring Kubelet metrics with SigNoz. All you have to do is to import a [JSON file](https://github.com/SigNoz/dashboards/raw/main/k8s-infra-metrics/cpu-memory-metrics.json) and you will get out of box charts for your Kubelet metrics.
-
-Under the `Dashboards` tab of SigNoz, click on `+ New Dashboard`, and then `Import JSON`.
-
-<figure data-zoomable align='center'>
-    <img src="/img/blog/2022/06/k8s_monitoring_import_json.webp" alt="Importing JSON file for creating dashboards on SigNoz"/>
-    <figcaption><i>Import a JSON file to get started with monitoring your Kubelet metrics</i></figcaption>
-</figure>
-
-<br></br>
-
-The Kubelet metrics dashboard will give you stats about CPU and memory metrics of the Kubernetes cluster.
-
-<figure data-zoomable align='center'>
-    <img src="/img/blog/2022/06/kubelet_metrics_signoz.webp" alt="Monitor Kubelet metrics with SigNoz"/>
-    <figcaption><i>Monitor Kubelet metrics with SigNoz</i></figcaption>
-</figure>
-
-<br></br>
-
-You can include more widgets using other metrics to the dashboard as per your requirements.
-
-### Monitor Node Metrics of your Kubernetes cluster
-
-Node metrics are very important as we have nodes underneath the abstraction of Kubernetes container orchestration.
-
-Similar to the previous section, we will be importing JSON files to create dashboards of our node metrics. We will be using the `hostmetrics` receiver of OTel collector to build these dashboards. There are many nodes in a Kubernetes cluster. Hence, we will be creating multiple dashboards for each node. SigNoz will add support for label widgets in the future, which would make it possible to monitor all nodes using a single dashboard.
-
-Let's import the K8s Hostmetrics dashboard JSON file in SigNoz UI from
-[here](https://github.com/SigNoz/dashboards/blob/main/hostmetrics/hostmetrics-k8s.json).
-
-After importing the dashboard JSON, you should be able to see the dashboard for your node metrics.
-
-<figure data-zoomable align='center'>
-    <img src="/img/blog/2022/06/k8s_node_monitoring.webp" alt="Node metrics monitoring with SigNoz"/>
-    <figcaption><i>Node metrics monitoring with SigNoz</i></figcaption>
-</figure>
+[Top 11 Kubernetes Monitoring Tools[Includes Free & Open-Source] in 2024 | SigNoz](https://signoz.io/blog/kubernetes-monitoring-tools/)
 
 ## Conclusion
 
-Using OpenTelemetry and SigNoz, you can set up a robust monitoring framework for your Kubernetes cluster.
+Effective Kubernetes monitoring is essential for the smooth operation and optimal performance of Kubernetes environments. By implementing robust monitoring solutions, organizations can gain valuable insights into their clusters, proactively identify issues, and ensure the continuous health of their infrastructure. 
 
-OpenTelemetry is the future for setting up observability for cloud-native apps. It is backed by a huge community and covers a wide variety of technology and frameworks. Using OpenTelemetry, engineering teams can easily monitor their infrastructure and application, instrument polyglot, and distributed applications with peace of mind.
+If you are struggling to find the right monitoring tool for your Kubernetes cluster, a good option to consider is [SigNoz](https://signoz.io/).
 
-You can then use SigNoz to store and visualize your telemetry data. SigNoz is an open-source observability tool that comes with a SaaS-like experience. You can try out SigNoz by visiting its GitHub repo 👇
+## Monitoring Kubernetes with SigNoz
 
-[![SigNoz GitHub repo](/img/blog/common/signoz_github.webp)](https://github.com/SigNoz/signoz)
+SigNoz is an open-source observability and monitoring platform that stands out as a powerful solution for Kubernetes monitoring. It is built on [OpenTelemetry](https://opentelemetry.io/), an emerging standard for generating telemetry data (metrics, logs, traces). This foundation provides a unified approach to collecting and analyzing telemetry data with SigNoz, thereby avoiding vendor lock-in and facilitating seamless integration with various technologies and frameworks.
 
-If you have any questions or need any help in setting things up, join our slack community and ping us in the `#support` channel.
+With SigNoz, monitoring Kubernetes environments is a streamlined process as it is facilitated by the OpenTelemetry components. This ensures comprehensive visibility into the intricate workings of your Kubernetes cluster and helps identify issues proactively.
 
-[![SigNoz Slack community](/img/blog/common/join_slack_cta.webp)](https://signoz.io/slack)
+If you are interested in trying out SigNoz, we have created a [detailed guide](https://signoz.io/blog/using-signoz-to-monitor-your-kubernetes-cluster/) to get you started on monitoring your Kubernetes clusters.
+
+## Getting started with SigNoz[](https://signoz.io/blog/opentelemetry-spans/#getting-started-with-signoz)
+
+SigNoz cloud is the easiest way to run SigNoz. [Sign up](https://signoz.io/teams/) for a free account and get 30 days of unlimited access to all features.
+
+!https://signoz.io/assets/images/try-signoz-cloud-all-blog-cta-e236d6935472e7a48a103148be0117f7.webp
+
+You can also install and self-host SigNoz yourself since it is open-source. With 16,000+ GitHub stars, [open-source SigNoz](https://github.com/signoz/signoz) is loved by developers. Find the [instructions](https://signoz.io/docs/install/) to self-host SigNoz.
 
 ---
 
-## Further Reading
+#### **Related Posts**
 
-- [SigNoz - an open-source alternative to DataDog](https://signoz.io/blog/open-source-datadog-alternative/)
-
-- [Distributed Tracing in a Golang application](https://signoz.io/blog/distributed-tracing-golang/)
+**[Using SigNoz to Monitor Your Kubernetes Cluster](https://signoz.io/blog/using-signoz-to-monitor-your-kubernetes-cluster/)**<br></br>
+**[Top 11 Kubernetes Monitoring Tools[Includes Free & Open-Source] in 2024](https://signoz.io/blog/kubernetes-monitoring-tools/)**<br></br>
