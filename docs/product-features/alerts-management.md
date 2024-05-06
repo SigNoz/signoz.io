@@ -14,7 +14,7 @@ Alerts in SigNoz can help you to define which data to monitor, set thresholds to
 </figure>
 <br></br>
 
-## Alert Rules management
+## Alert Rules Management
 
 - **Alert Rules Tab**: Manage and overview alert rules with options to view, edit, sort, and filter based on various parameters like creation date, severity, labels etc.
 - **Triggered Alerts Tab**: Provides a real-time view of active alerts.
