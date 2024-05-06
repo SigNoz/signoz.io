@@ -65,7 +65,7 @@ You can download your logs in two format:
 
 ---
 
-**Settings**
+#### Settings
 
 The settings option has three sections:
 
@@ -77,7 +77,7 @@ There are three formats available which represents the logs in different formats
 3. **Column**: It organizes the logs data into different attribute Columns to provide a tabular view of logs.
 
 <figure data-zoomable align='center'>
-    <img src="/img/docs/product-features/logs-explorer/logs-explorer-list-view-settings-columns.gif" alt="Different logs format"/>
+    <img src="/img/docs/product-features/logs-explorer/logs-explorer-list-view-settings-format.gif" alt="Different logs format"/>
     <figcaption><i>Different logs format </i></figcaption>
 </figure>
 <br></br>
@@ -97,7 +97,7 @@ The maximum number of lines of text that each log entry is allowed to display.
 You can add new columns for the different attributes available in your logs. This only works for **Default** and **Column** format. By default the log is formatted into `Timestamp` and `Body` in the Default and Column views.
 
 <figure data-zoomable align='center'>
-    <img src="/img/docs/product-features/logs-explorer/logs-explorer-list-view-settings-max-number-rows.gif" alt="Add or remove attributes columns"/>
+    <img src="/img/docs/product-features/logs-explorer/logs-explorer-list-view-settings-columns.gif" alt="Add or remove attributes columns"/>
     <figcaption><i>Add or remove attributes columns </i></figcaption>
 </figure>
 <br></br>
@@ -134,7 +134,7 @@ You can copy the link to a particular log line which can be shared and accessed 
 
 ### Time Series View
 
-The Time Series View provides a graphical representation of logs data over time based on the filters applied.
+The Time Series View provides a graphical representation of logs data over time based on the filters or operations applied.
 
 <figure data-zoomable align='center'>
     <img src="/img/docs/product-features/logs-explorer/logs-explorer-timeseries-view.webp" alt="Timeseries View in the Logs Explorer"/>
