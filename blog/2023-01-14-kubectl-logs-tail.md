@@ -1,7 +1,7 @@
 ---
 title: Kubectl Logs Tail | How to Tail Kubernetes Logs
 slug: kubectl-logs-tail
-date: 2024-01-21
+date: 2024-05-07
 tags: [Tech Tutorial, Log Management]
 authors: [daniel]
 description: The `kubectl logs tail` command is a tool that allows users to stream the logs of a pod in real-time while using Kubernetes. This command is particularly useful for...
@@ -73,31 +73,83 @@ The `tail` flag can be used in conjunction with the `kubectl logs` command to st
 
 Let's look at different ways to use the `tail` command with the `kubectl logs` command:
 
-### Using the tail command with the pod name
+### **Tail logs from cluster**
 
-The syntax for usage:
+Kubernetes cluster logs are logs generated from various components within a Kubernetes cluster but majorly the control plane components such as the API server, Scheduler, and Controller Manager. The Kubernetes control plane is the brain of the cluster, managing worker nodes and pods to ensure a healthy and functioning containerized application environment. 
 
+Collecting logs from the control plane is important as they provide information about the state and operations of the cluster. 
+
+Here’s how you can tail logs from the control plane components:
+
+- **Tail logs from the API server**
+
+```bash
+tail -f /var/log/kube-apiserver.log
 ```
+
+- **Tail logs from the Scheduler**
+
+```bash
+tail -f /var/log/kube-scheduler.log
+```
+
+- **Tail logs from the Controller Manager**
+
+```bash
+tail -f /var/log/kube-controller-manager.log
+```
+
+Note that the location of the log files may differ based on the Kubernetes cluster.
+
+### **Tail logs from nodes**
+
+Nodes are worker machines that run the actual workloads, either as physical or virtual machines and are managed by the control plane. The worker node comprises three major components: the kubelet, container runtime, and kube-proxy.
+
+Collecting logs from the nodes is important as they provide insights into the health and performance of individual nodes, including resource usage, system metrics, and any errors or warnings encountered during operation. 
+
+Here’s how you can tail logs from the node components:
+
+- **Tail logs from the kubelet**
+
+```bash
+tail -f /var/log/kubelet.log
+```
+
+- **Tail logs from kube-proxy**
+
+```bash
+tail -f /var/log/kube-proxy.log
+```
+
+### **Tail Logs from pods**
+
+Pods serve as a wrapper. They are used to group one or more containers and run them as a single unit. Collecting logs from pods is important as they provide valuable insights into the application running within these containers.
+
+Here’s how you can tail logs from pods:
+
+- **Tail pod logs**
+
+If you want to tail the most recent [number] lines of output from a pod:
+
+```bash
 kubectl logs --tail=[number] [pod-name]
 ```
-
-This will show the most recent [number] lines of output from the container in the specified pod.
 
 An example is shown below;
 
 ```bash
-# Display only the most recent 10 lines of output in pod nginx 
-$ kubectl logs --tail=10 nginx   
+# Display only the most recent 10 lines of output in pod nginx
+$ kubectl logs --tail=10 nginx
 
-2023/01/05 08:16:27 [notice] 1#1: using the "epoll" event method 
-2023/01/05 08:16:27 [notice] 1#1: nginx/1.23.3 
-2023/01/05 08:16:27 [notice] 1#1: built by gcc 10.2.1 20210110 (Debian 10.2.1-6)  
-2023/01/05 08:16:27 [notice] 1#1: OS: Linux 5.15.0-52-generic 
-2023/01/05 08:16:27 [notice] 1#1: getrlimit(RLIMIT_NOFILE): 1048576:1048576 
-2023/01/05 08:16:27 [notice] 1#1: start worker processes 
-2023/01/05 08:16:27 [notice] 1#1: start worker process 30 
-2023/01/05 08:16:27 [notice] 1#1: start worker process 31 
-2023/01/05 08:16:27 [notice] 1#1: start worker process 32 
+2023/01/05 08:16:27 [notice] 1#1: using the "epoll" event method
+2023/01/05 08:16:27 [notice] 1#1: nginx/1.23.3
+2023/01/05 08:16:27 [notice] 1#1: built by gcc 10.2.1 20210110 (Debian 10.2.1-6)
+2023/01/05 08:16:27 [notice] 1#1: OS: Linux 5.15.0-52-generic
+2023/01/05 08:16:27 [notice] 1#1: getrlimit(RLIMIT_NOFILE): 1048576:1048576
+2023/01/05 08:16:27 [notice] 1#1: start worker processes
+2023/01/05 08:16:27 [notice] 1#1: start worker process 30
+2023/01/05 08:16:27 [notice] 1#1: start worker process 31
+2023/01/05 08:16:27 [notice] 1#1: start worker process 32
 2023/01/05 08:16:27 [notice] 1#1: start worker process 33
 ```
 
@@ -124,90 +176,63 @@ $ kubectl logs --tail=15 nginx
 2023/01/05 08:16:27 [notice] 1#1: start worker process 33
 ```
 
-### Using the tail command for all containers in a pod
+### **Tail logs from container**
 
-The syntax for usage:
+Containers are lightweight, self-contained units that provide a consistent way to package applications and their dependencies. Collecting logs from containers provides insight into the applications running in them to aid in troubleshooting.
+
+Here’s how you can tail logs from containers:
+
+- **Tail all containers log in a pod**[](https://signoz.io/blog/kubectl-logs-tail/#using-the-tail-command-for-all-containers-in-a-pod)
+
+If you want to tail the most recent [number] lines of output from “all containers” in the specified pod.
 
 ```bash
 kubectl logs --tail=[number] --all-containers [pod-name]
 ```
 
-This will show the most recent [number] lines of output from all containers in the specified pod.
+- **Tail a specific container’s log in a pod**[](https://signoz.io/blog/kubectl-logs-tail/#using-the-tail-command-for-a-specific-container-in-a-pod)
 
-### Using the tail command for a specific container in a pod
-
-The syntax for usage:
+In a case where multiple containers are running in a pod, if you want to tail only the most recent [number] lines of output from a “specific container” in a specific pod:
 
 ```bash
 kubectl logs --tail=[number] -c [container-name] [pod-name]
 ```
 
-This will show the most recent [number] lines of output from a specific container in the specified pod.
+- **Tail logs with the “f” flag**
 
-### Using the `tail` flag with the `f` flag
-
-The syntax for usage:
+If you want to tail the most recent [number] lines of output from a specific container in a pod, and continue to stream new log entries in real-time, you can make use of the `-f` flag. 
 
 ```bash
 kubectl logs --tail=[number] -f [pod-name] or   
 kubectl logs -f --tail=[number] [pod-name]
 ```
 
-This will stream the logs from the container in the specified pod and show the most recent [number] lines of output. New lines will be shown as they are written.
-
 An example can be seen below;
 
 ```bash
-$ kubectl logs -f --tail=10 queue  
+$ kubectl logs -f --tail=10 queue
 
-INFO | Apache ActiveMQ 5.14.3 (localhost, ID:queue-41599-1672906401588-0:1) started  
-INFO | For help or more information please see: <http://activemq.apache.org>  
-WARN | Store limit is 102400 mb (current store usage is 0 mb). The data directory: /apache-activemq-5.14.3/data/kahadb only has 31771 mb of usable space. - resetting to maximum available disk space: 31771 mb  
-WARN | Temporary Store limit is 51200 mb (current store usage is 0 mb). The data directory: /apache-activemq-5.14.3/data only has 31771 mb of usable space. - resetting to maximum available disk space: 31771 mb  
-INFO | No Spring WebApplicationInitializer types detected on classpath  
-INFO | ActiveMQ WebConsole available at <http://0.0.0.0:8161/>  
-INFO | ActiveMQ Jolokia REST API available at <http://0.0.0.0:8161/api/jolokia/>  
-INFO | Initializing Spring FrameworkServlet 'dispatcher'  
-INFO | No Spring WebApplicationInitializer types detected on classpath  
+INFO | Apache ActiveMQ 5.14.3 (localhost, ID:queue-41599-1672906401588-0:1) started
+INFO | For help or more information please see: <http://activemq.apache.org>
+WARN | Store limit is 102400 mb (current store usage is 0 mb). The data directory: /apache-activemq-5.14.3/data/kahadb only has 31771 mb of usable space. - resetting to maximum available disk space: 31771 mb
+WARN | Temporary Store limit is 51200 mb (current store usage is 0 mb). The data directory: /apache-activemq-5.14.3/data only has 31771 mb of usable space. - resetting to maximum available disk space: 31771 mb
+INFO | No Spring WebApplicationInitializer types detected on classpath
+INFO | ActiveMQ WebConsole available at <http://0.0.0.0:8161/>
+INFO | ActiveMQ Jolokia REST API available at <http://0.0.0.0:8161/api/jolokia/>
+INFO | Initializing Spring FrameworkServlet 'dispatcher'
+INFO | No Spring WebApplicationInitializer types detected on classpath
 INFO | jolokia-agent: Using policy access restrictor classpath:/jolokia-access.xml
 ```
 
-### Using the `tail` flag with the `p` flag
+- **Tail logs using the “since” flag**
 
-The syntax for usage:
-
-```bash
-kubectl logs --tail=[number] -p [pod-name] or
-kubectl logs -p --tail=[number] [pod-name]
-```
-
-This will show the most recent [number] lines of output from the previously terminated container in the specified pod.
-
-An example is shown below;
-
-```bash
-$ kubectl logs -p --tail=10 queue    
-
-INFO | Connector mqtt stopped  
-INFO | Connector ws stopped  
-INFO | PListStore:[/apache-activemq-5.14.3/data/localhost/tmp_storage] stopped  
-INFO | Stopping async queue tasks  
-INFO | Stopping async topic tasks  
-INFO | Stopped KahaDB  
-INFO | Apache ActiveMQ 5.14.3 (localhost, ID:queue-39515-1672238886867-0:1) uptime 11 minutes  
-INFO | Apache ActiveMQ 5.14.3 (localhost, ID:queue-39515-1672238886867-0:1) is shutdown  INFO | Closing org.apache.activemq.xbean.XBeanBrokerFactory$1@5bcab519: startup date [Wed Dec 28 14:48:01 UTC 2022]; root of context hierarchy  
-INFO | Destroying Spring FrameworkServlet 'dispatcher'
-```
-
-### Using the `tail` flag with the `since` flag
-
-Syntax for usage:
+If you want to tail the most recent [number] lines of logs written in the past [duration], for example, 1h, from the container in the specified pod, you can use the `since` flag.
 
 ```bash
 kubectl logs --tail=[number] --since=[duration] [pod-name]
 ```
 
-This will show the most recent [number] lines of logs written in the past [duration], for example, 1h, from the container in the specified pod.
+An example is shown below
 
 ```bash
 $ kubectl logs --tail=5 --since=1h nginx 
@@ -217,6 +242,31 @@ $ kubectl logs --tail=5 --since=1h nginx
 2023/01/05 08:16:27 [notice] 1#1: start worker process 31 
 2023/01/05 08:16:27 [notice] 1#1: start worker process 32 
 2023/01/05 08:16:27 [notice] 1#1: start worker process 33
+```
+
+- **Tail logs with the “p” flag**
+
+This is useful in the case of a container restart. If you want to tail the most recent [number] lines of output from a previously terminated container within a pod, you can make use of the `p` flag.
+
+```bash
+kubectl logs --tail=[number] -p [pod-name] or
+kubectl logs -p --tail=[number] [pod-name]
+```
+
+An example is shown below;
+
+```bash
+$ kubectl logs -p --tail=10 queue
+
+INFO | Connector mqtt stopped
+INFO | Connector ws stopped
+INFO | PListStore:[/apache-activemq-5.14.3/data/localhost/tmp_storage] stopped
+INFO | Stopping async queue tasks
+INFO | Stopping async topic tasks
+INFO | Stopped KahaDB
+INFO | Apache ActiveMQ 5.14.3 (localhost, ID:queue-39515-1672238886867-0:1) uptime 11 minutes
+INFO | Apache ActiveMQ 5.14.3 (localhost, ID:queue-39515-1672238886867-0:1) is shutdown  INFO | Closing org.apache.activemq.xbean.XBeanBrokerFactory$1@5bcab519: startup date [Wed Dec 28 14:48:01 UTC 2022]; root of context hierarchy
+INFO | Destroying Spring FrameworkServlet 'dispatcher'
 ```
 
 ## Benefits of the `kubectl logs tail` command
@@ -241,7 +291,7 @@ Here are some use cases where `kubectl logs tail`` command can be useful:
 
 6. **Incident Response:** In the event of an incident, quickly tailing logs to understand recent changes or errors.
 
-## Final Thoughts
+## Limitations of kubectl logs tail
 
 `kubectl logs tail` is a useful command for accessing and following the logs of a running container in a Kubernetes cluster. While it can be a convenient way to view and troubleshoot logs in real-time, it may not be the most efficient or comprehensive solution for managing logs in a production environment. These limitations include the lack of built-in features for organizing, storing, or analyzing logs, and the lack of options for filtering or highlighting specific log events. In addition, the command does not provide any alerting or notification capabilities and does not integrate with other tools or platforms for log management or analysis.
 
