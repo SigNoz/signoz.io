@@ -74,9 +74,55 @@ Debugging your Kubernetes resources depends on your logs. With the knowledge pro
 
 **[SigNoz to be 2.5x faster than ELK and consumed 50% less resources.](https://signoz.io/blog/logs-performance-benchmark/)**
 
-## Using kubectl logs
+## **Kubectl logs quick reference**
 
-To access the logs for a specific resource, you can first get a list of the resources that are part of your cluster.
+Here is an outline of commonly used kubectl logs commands and what they do:
+
+- List all the pods currently running in the default namespace
+
+```jsx
+kubectl get pods
+```
+
+- Print the logs for a pod
+
+```jsx
+kubectl logs [pod name]
+```
+
+- Follow the logs in a pod
+
+```jsx
+kubectl logs -f [pod name]
+```
+
+- Follow the logs for a particular container in a pod
+
+```jsx
+kubectl logs [POD name] [-c CONTAINER name] [--follow] [flags]
+```
+
+- Display all container logs in a pod
+
+```jsx
+kubectl logs [pod-name] --all-containers=true
+```
+
+- Output the logs for a pod into a file
+
+```jsx
+kubectl logs <pod_name> > file-name.log
+```
+
+- Obtain logs for a Pod that was previously running
+
+```jsx
+kubectl logs -p [pod-name]
+```
+
+## Kubectl Logs Command Quick Guide With Examples
+
+If you want to access the logs for a specific resource, you can get a list of the resources that are part of your cluster.
 
 To get a list of available pods in your cluster, run the below command:
 
