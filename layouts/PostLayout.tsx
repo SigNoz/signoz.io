@@ -11,6 +11,9 @@ import Image from '@/components/Image'
 import Tag from '@/components/Tag'
 import siteMetadata from '@/data/siteMetadata'
 import ScrollTopAndComment from '@/components/ScrollTopAndComment'
+import BlogHeader from '@/components/BlogHeader/BlogHeader'
+import RelatedArticles from '@/components/RelatedArticles/RelatedArticles'
+import BlogFeedback from '@/components/BlogFeedback/BlogFeedback'
 
 const editUrl = (path) => `${siteMetadata.siteRepo}/blob/main/data/${path}`
 const discussUrl = (path) =>
@@ -49,9 +52,22 @@ export default function PostLayout({
   const { filePath, path, slug, date, title, tags } = content
   const basePath = path.split('/')[0]
 
+  console.log({
+    content,
+  })
+
   return (
     <SectionContainer>
       <ScrollTopAndComment />
+
+      <BlogHeader
+        title={title}
+        tags={tags}
+        authors={[]}
+        publishedDate={date}
+        readingTime="5 mins"
+        key={slug}
+      />
 
       <div className="post container">
         <div className="post-toc">
@@ -83,6 +99,8 @@ export default function PostLayout({
           )} */}
 
             {children}
+
+            <BlogFeedback />
           </article>
         </div>
       </div>
@@ -228,6 +246,8 @@ export default function PostLayout({
           </div>
         </div>
       </article> */}
+
+      <RelatedArticles />
     </SectionContainer>
   )
 }
