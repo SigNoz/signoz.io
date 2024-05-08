@@ -1,7 +1,7 @@
 ---
 title: Kubectl Top Pod/Node | How to get & read resource utilization metrics of K8s?
 slug: kubectl-top
-date: 2024-01-20
+date: 2024-05-07
 tags: [Tech Tutorial]
 authors: [daniel, ankit_anand]
 description: Kubectl Top command can be used to retrieve snapshots of resource utilization of pods/nodes in your Kubernetes cluster. You can even retrieve metrics information about specific pods or nodes by specifying a namespace...
