@@ -79,6 +79,11 @@ module.exports = {
       items: [
         {
           type: 'doc',
+          id: 'product-features/alert-management',
+          label: 'Alert Management',
+        },
+        {
+          type: 'doc',
           id: 'product-features/saved-view',
           label: 'Saved View',
           className: 'new-doc', // Add this line
@@ -476,12 +481,23 @@ module.exports = {
     {
       label: "Alerts",
       type: "category",
+      link: {
+          type: "generated-index",
+          title: "Alert Management in SigNoz",
+          description: 'This documentation helps you in understanding the Alerts feature in SigNoz and how you can create different types of alerts.',
+          slug: '/alerts',
+      },
       items: [
         {
           type: 'doc',
           id: 'userguide/alerts-management',
-          label: 'Set Alert Rules',
+          label: 'Alert Management',
         },
+        // {
+        //   type: 'doc',
+        //   id: 'product-features/alerts/alerts-notification-channel',
+        //   label: 'Notification Channel',
+        // },
         {
           label: "Setup Alerts Notification",
           type: "category",
@@ -489,6 +505,9 @@ module.exports = {
             type: "generated-index",
             title: "Setup Alerts Notifications Channel",
             description: 'You can setup notification channel for sending the generated alerts to other applications. Currently, the following channels are supported.',
+            slug: '/setup-alerts-notification',
+            // type: "doc",
+            // id: "product-features/alerts/alerts-notification-channel",
           },
           items: [
             {
@@ -516,7 +535,32 @@ module.exports = {
               id: 'alerts-management/notification-channel/ms-teams',
               label: 'MS Teams',
             },
+            {
+              type: 'doc',
+              id: 'alerts-management/notification-channel/email',
+              label: 'Email',
+            },
           ],
+        },
+        {
+          type: 'doc',
+          id: 'alerts-management/metrics-based-alerts',
+          label: 'Metrics based Alert',
+        },
+        {
+          type: 'doc',
+          id: 'alerts-management/log-based-alerts',
+          label: 'Log based Alert',
+        },
+        {
+          type: 'doc',
+          id: 'alerts-management/trace-based-alerts',
+          label: 'Trace based Alert',
+        },
+        {
+          type: 'doc',
+          id: 'alerts-management/exceptions-based-alerts',
+          label: 'Exceptions based Alert',
         },
       ],
     },
@@ -662,16 +706,17 @@ module.exports = {
             slug: '/operate/migration',
           },
           items: [
-            'operate/migration/upgrade-0.8.0',
-            'operate/migration/upgrade-0.8.1',
-            'operate/migration/upgrade-0.9',
-            'operate/migration/upgrade-0.10',
-            'operate/migration/upgrade-0.12',
-            'operate/migration/upgrade-0.19',
-            'operate/migration/upgrade-0.23',
-            'operate/migration/upgrade-0.27',
-            'operate/migration/upgrade-0.36',
+            'operate/migration/upgrade-0.45',
             'operate/migration/upgrade-0.38',
+            'operate/migration/upgrade-0.36',
+            'operate/migration/upgrade-0.27',
+            'operate/migration/upgrade-0.23',
+            'operate/migration/upgrade-0.19',
+            'operate/migration/upgrade-0.12',
+            'operate/migration/upgrade-0.10',
+            'operate/migration/upgrade-0.9',
+            'operate/migration/upgrade-0.8.1',
+            'operate/migration/upgrade-0.8.0',
           ]
         },
         {

@@ -6,7 +6,7 @@ title: Configure Email Channel
 ## Prerequisites
 Before setting up Email as a notification channel in SigNoz, ensure the following:
 
-- **SMTP Host**: You need to have a SMTP host running through which emails are sent. 
+- **SMTP Host**: You need to have a SMTP host running through which emails are sent (Not needed for SigNoz Cloud).
 - **SigNoz Version**: [v0.41.0](https://github.com/SigNoz/signoz/releases/tag/v0.41.0) or later
 
 ## Accessing Alert Channels
@@ -42,6 +42,12 @@ The following environment variables need to be set for alertmanager to send emai
 - **ALERTMANAGER_SMTP_PORT**: The SMTP port obtained from your email provider.
 - **ALERTMANAGER_SMTP_AUTH_USERNAME**: The SMTP user obtained from your email provider.
 - **ALERTMANAGER_SMTP_AUTH_PASSWORD**: The SMTP password obtained from your email provider.
+
+:::info
+
+This section is only required for **Self-Hosted** users. Cloud users don't need to follow this step.
+
+:::
 
 **Test Configuration**: 
 Click the Test button to send a test alert to the configured email addresses. This verifies that SigNoz can communicate with your email provider.
