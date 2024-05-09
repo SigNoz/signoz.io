@@ -735,11 +735,16 @@ module.exports = {
     //   ],
     // },
     {
+      id: "community/llm-monitoring",
+      type: "doc",
+      className: 'new-doc',
+    },
+    {
       label: "Community",
       type: "category",
       items: [
         {
-          id: "community/community-tutorials",
+          id: "community/community-integrations",
           type: "doc",
           className: 'new-doc', 
         },
