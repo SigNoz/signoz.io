@@ -73,9 +73,7 @@ export default function BlogHeader({
             <h2 className="text-xs font-medium uppercase tracking-wide text-stone-300">
               written by
             </h2>
-            {authors.map((author) => (
-              <AuthorInfo author={author} />
-            ))}
+            {authors?.map((author) => <AuthorInfo author={author} />)}
           </div>
           <div className="flex flex-col">
             <h2 className="text-xs font-medium uppercase tracking-wide text-stone-300">

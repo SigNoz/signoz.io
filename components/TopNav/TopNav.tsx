@@ -15,6 +15,7 @@ import { ChevronDownIcon, PhoneIcon, PlayCircleIcon } from '@heroicons/react/20/
 import { ThemeToggle } from '../ThemeToggle/ThemeToggle'
 import Image from 'next/image'
 import Link from 'next/link'
+import SearchButton from '../SearchButton'
 
 const products = [
   {
@@ -164,9 +165,11 @@ export default function TopNav() {
           </Link>
         </Popover.Group>
         <div className="hidden lg:flex lg:flex-1 lg:justify-end">
-          <Link href="/" className="text-sm font-semibold leading-6 ">
+          {/* <Link href="/" className="text-sm font-semibold leading-6 ">
             Log in <span aria-hidden="true">&rarr;</span>
-          </Link>
+          </Link> */}
+
+          <SearchButton />
 
           <div className="px-4">
             <ThemeToggle />
@@ -242,12 +245,14 @@ export default function TopNav() {
                 </Link>
               </div>
               <div className="py-6">
-                <Link
+                <SearchButton />
+
+                {/* <Link
                   href="/"
                   className="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold leading-7 hover:bg-gray-50"
                 >
                   Log in
-                </Link>
+                </Link> */}
               </div>
             </div>
           </div>
