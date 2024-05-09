@@ -89,8 +89,6 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
     return notFound()
   }
 
-  const prev = sortedCoreContents[postIndex + 1]
-  const next = sortedCoreContents[postIndex - 1]
   const post = allBlogs.find((p) => p.slug === slug) as Blog
   const authorList = post?.authors || ['default']
   const authorDetails = authorList.map((author) => {
@@ -117,8 +115,7 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
       <Layout
         content={mainContent}
         authorDetails={authorDetails}
-        next={next}
-        prev={prev}
+        authors={post?.authors}
         toc={post.toc}
       >
         <MDXLayoutRenderer code={post.body.code} components={components} toc={post.toc} />

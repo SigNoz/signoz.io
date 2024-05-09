@@ -2,6 +2,8 @@ import { BackwardIcon } from '@heroicons/react/24/outline'
 import { ArrowBigLeftIcon } from 'lucide-react'
 import Link from 'next/link'
 import * as React from 'react'
+import AuthorInfo from '../AuthorInfo'
+import { format, parseISO } from 'date-fns'
 
 interface TagProps {
   children: React.ReactNode
@@ -15,9 +17,9 @@ function Tag({ children }: TagProps) {
   )
 }
 
-interface AuthorProps {
+export interface AuthorProps {
   name: string
-  avatarUrl: string
+  avatarUrl?: string
 }
 
 function Author({ name, avatarUrl }: AuthorProps) {
@@ -37,7 +39,7 @@ function Author({ name, avatarUrl }: AuthorProps) {
 interface BlogHeaderProps {
   tags: string[]
   title: string
-  authors: AuthorProps[]
+  authors: string[]
   publishedDate: string
   readingTime: string
 }
@@ -72,14 +74,16 @@ export default function BlogHeader({
               written by
             </h2>
             {authors.map((author) => (
-              <Author key={author.name} {...author} />
+              <AuthorInfo author={author} />
             ))}
           </div>
           <div className="flex flex-col">
             <h2 className="text-xs font-medium uppercase tracking-wide text-stone-300">
               published on
             </h2>
-            <time className="mt-2 text-base text-white">{publishedDate}</time>
+            <time className="mt-2 text-base text-white">
+              {format(parseISO(publishedDate), 'LLLL d, yyyy')}
+            </time>
           </div>
           <div className="flex flex-col">
             <h2 className="text-xs font-medium uppercase tracking-wide text-stone-300">

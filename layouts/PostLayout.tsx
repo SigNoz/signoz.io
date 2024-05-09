@@ -11,7 +11,7 @@ import Image from '@/components/Image'
 import Tag from '@/components/Tag'
 import siteMetadata from '@/data/siteMetadata'
 import ScrollTopAndComment from '@/components/ScrollTopAndComment'
-import BlogHeader from '@/components/BlogHeader/BlogHeader'
+import BlogHeader, { AuthorProps } from '@/components/BlogHeader/BlogHeader'
 import RelatedArticles from '@/components/RelatedArticles/RelatedArticles'
 import BlogFeedback from '@/components/BlogFeedback/BlogFeedback'
 
@@ -35,26 +35,14 @@ interface tocItemProps {
 interface LayoutProps {
   content: CoreContent<Blog>
   authorDetails: CoreContent<Authors>[]
-  next?: { path: string; title: string }
-  prev?: { path: string; title: string }
+  authors: string[]
   children: ReactNode
   toc: tocItemProps[]
 }
 
-export default function PostLayout({
-  content,
-  authorDetails,
-  next,
-  prev,
-  children,
-  toc,
-}: LayoutProps) {
-  const { filePath, path, slug, date, title, tags } = content
+export default function PostLayout({ content, authors, children, toc }: LayoutProps) {
+  const { filePath, path, slug, date, title, tags, readingTime } = content
   const basePath = path.split('/')[0]
-
-  console.log({
-    content,
-  })
 
   return (
     <SectionContainer>
@@ -63,9 +51,9 @@ export default function PostLayout({
       <BlogHeader
         title={title}
         tags={tags}
-        authors={[]}
+        authors={authors}
         publishedDate={date}
-        readingTime="5 mins"
+        readingTime={readingTime.text}
         key={slug}
       />
 

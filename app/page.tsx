@@ -26,7 +26,7 @@ export default async function Page() {
           preload=""
           poster="/img/landing/signoz-landing-snap.webp"
         >
-          <source src="/video/hero.mp4" type="video/mp4" />
+          <source src="https://player.vimeo.com/video/944340217" type="video/mp4" />
           Your browser does not support the video tag.
         </video>
       </div> */}
