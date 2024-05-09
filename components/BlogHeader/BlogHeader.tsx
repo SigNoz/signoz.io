@@ -68,7 +68,7 @@ export default function BlogHeader({
         <h1 className="mt-5 w-full text-3xl font-semibold leading-10 text-indigo-200 max-md:max-w-full">
           {title}
         </h1>
-        <div className="mt-5 flex w-full items-start justify-between gap-5 px-5 max-md:max-w-full max-md:flex-wrap">
+        <div className="mt-5 flex w-full items-start justify-between gap-5 max-md:max-w-full max-md:flex-wrap">
           <div className="flex flex-col self-stretch text-base text-white">
             <h2 className="text-xs font-medium uppercase tracking-wide text-stone-300">
               written by

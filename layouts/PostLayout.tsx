@@ -72,22 +72,7 @@ export default function PostLayout({ content, authors, children, toc }: LayoutPr
 
         <div className="post-content">
           <article className="prose prose-slate max-w-none py-6 dark:prose-invert">
-            <h1 className="mb-2">{title}</h1>
-
-            {/* <time dateTime={post.date} className="text-md mb-2 block text-gray-600">
-              {format(parseISO(post.date), 'LLLL d, yyyy')}
-            </time>
-
-            <AuthorInfo author={post.authors || ''} /> */}
-
-            {/* {post.description && (
-            <p className="text-xl mt-0 text-slate-700 dark:text-slate-200">
-              {post.description}
-            </p>
-          )} */}
-
             {children}
-
             <BlogFeedback />
           </article>
         </div>
