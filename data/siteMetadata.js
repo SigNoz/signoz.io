@@ -7,7 +7,7 @@ const siteMetadata = {
     'A single tool for all your observability needs - APM, logs, metrics, exceptions, alerts, and dashboards powered by a powerful query builder.',
   language: 'en-us',
   theme: 'system', // system, dark or light
-  siteUrl: 'https://www.signoz.co',
+  siteUrl: 'https://www.signoz.io',
   siteRepo: 'https://github.com/signoz/',
   siteLogo: '/img/logo.svg',
   socialBanner: '/img/social.png',
