@@ -152,7 +152,7 @@ const COMPARISON_DATA = {
       TITLE: <>No special pricing for custom metrics</>,
       DESC: (
         <>
-          Datadog’s custom metrics pricing is insane. It charges $0.5 per custom
+          Datadog’s custom metrics pricing is insane. It charges $0.05 per custom
           metric. You can end up with unpredictable bills, and custom metrics
           pricing can constitute up to 52% of your bill for a large engineering
           team. SigNoz does not treat custom metrics differently and charges
