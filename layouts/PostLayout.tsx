@@ -29,7 +29,7 @@ const postDateTemplate: Intl.DateTimeFormatOptions = {
   day: 'numeric',
 }
 
-interface tocItemProps {
+export interface tocItemProps {
   url: string
   depth: number
   value: string
