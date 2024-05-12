@@ -1,6 +1,8 @@
+'use client'
+
 import '../css/post.css'
 
-import { ReactNode } from 'react'
+import { ReactNode, useRef } from 'react'
 import { CoreContent } from 'pliny/utils/contentlayer'
 import type { Blog, Authors } from 'contentlayer/generated'
 import Comments from '@/components/Comments'
@@ -14,6 +16,7 @@ import ScrollTopAndComment from '@/components/ScrollTopAndComment'
 import BlogHeader, { AuthorProps } from '@/components/BlogHeader/BlogHeader'
 import RelatedArticles from '@/components/RelatedArticles/RelatedArticles'
 import BlogFeedback from '@/components/BlogFeedback/BlogFeedback'
+import { ProgressBar } from '@/components/ProgressBar/ProgressBar'
 
 const editUrl = (path) => `${siteMetadata.siteRepo}/blob/main/data/${path}`
 const discussUrl = (path) =>
@@ -41,8 +44,10 @@ interface LayoutProps {
 }
 
 export default function PostLayout({ content, authors, children, toc }: LayoutProps) {
-  const { filePath, path, slug, date, title, tags, readingTime } = content
+  const { filePath, path, slug, date, title, image, tags, readingTime } = content
   const basePath = path.split('/')[0]
+  const mainRef = useRef<HTMLElement | null>(null)
+  console.log('content', content.images)
 
   return (
     <SectionContainer>
@@ -56,8 +61,13 @@ export default function PostLayout({ content, authors, children, toc }: LayoutPr
         readingTime={readingTime.text}
         key={slug}
       />
+      <ProgressBar target={mainRef} />
 
-      <div className="post container">
+      {/* <div className="post-cover-image">
+        <img src={image} />
+      </div> */}
+
+      <div className="post container overflow-clip">
         <div className="post-toc">
           {toc.map((tocItem: tocItemProps) => {
             return (

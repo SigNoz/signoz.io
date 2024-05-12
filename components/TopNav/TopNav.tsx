@@ -63,10 +63,10 @@ export default function TopNav() {
 
   return (
     <header
-      className={`sticky top-0 z-30 bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-50`}
+      className={`container fixed left-0 right-0 z-30 mx-auto w-full bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-50`}
     >
       <nav
-        className="mx-auto flex items-center justify-between px-8 py-4 text-slate-900 dark:text-slate-50"
+        className="mx-auto flex items-center justify-between py-4 text-slate-900 dark:text-slate-50"
         aria-label="Global"
       >
         <div className="flex lg:flex-1">
