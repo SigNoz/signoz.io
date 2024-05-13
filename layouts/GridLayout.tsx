@@ -8,12 +8,9 @@ import type { Blog } from 'contentlayer/generated'
 import Link from '@/components/Link'
 import Tag from '@/components/Tag'
 import siteMetadata from '@/data/siteMetadata'
+import { PaginationProps } from './ListLayout'
 
-export interface PaginationProps {
-  totalPages: number
-  currentPage: number
-}
-interface ListLayoutProps {
+interface GridLayoutProps {
   posts: CoreContent<Blog>[]
   title: string
   initialDisplayPosts?: CoreContent<Blog>[]
@@ -60,12 +57,12 @@ export function Pagination({ totalPages, currentPage }: PaginationProps) {
   )
 }
 
-export default function ListLayout({
+export default function GridLayout({
   posts,
   title,
   initialDisplayPosts = [],
   pagination,
-}: ListLayoutProps) {
+}: GridLayoutProps) {
   const [searchValue, setSearchValue] = useState('')
   const filteredBlogPosts = posts.filter((post) => {
     const searchContent = post.title + post.summary + post.tags?.join(' ')
