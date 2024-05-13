@@ -6,6 +6,7 @@ import Image from './Image'
 import CustomLink from './Link'
 import TableWrapper from './TableWrapper'
 import YouTube from './VideoPlayer/VideoPlayer'
+import GetStartedSigNoz from '../docs/shared/get-started-signoz'
 
 export const components: MDXComponents = {
   Image,
@@ -15,4 +16,5 @@ export const components: MDXComponents = {
   table: TableWrapper,
   BlogNewsletterForm,
   YouTube,
+  GetStartedSigNoz,
 }

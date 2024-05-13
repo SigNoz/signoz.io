@@ -4,6 +4,7 @@ import React, { useState } from 'react'
 import Blogs from './Blog/Blogs'
 import Comparisons from './Comparisons/Comparisons'
 import Guides from './Guides/Guides'
+import OpenTelemetry from './OpenTelemetry/OpenTelemetry'
 
 export default function ResourceCenter() {
   const [activeTab, setActiveTab] = useState('blog-tab')
@@ -59,6 +60,21 @@ export default function ResourceCenter() {
               Guides
             </button>
           </li>
+
+          <li role="presentation">
+            <button
+              className={`inline-block rounded-t-lg px-4 py-2 ${activeTab === 'openTelemetry-tab' ? 'border-b-2 border-indigo-500 text-indigo-500' : ''}`}
+              id="openTelemetry-tab"
+              data-tabs-target="#openTelemetry"
+              type="button"
+              role="tab"
+              aria-controls="openTelemetry"
+              aria-selected="false"
+              onClick={() => setActiveTab(`openTelemetry-tab`)}
+            >
+              OpenTelemetry
+            </button>
+          </li>
         </ul>
       </div>
 
@@ -68,6 +84,8 @@ export default function ResourceCenter() {
         {activeTab === 'comparisons-tab' && <Comparisons />}
 
         {activeTab === 'guides-tab' && <Guides />}
+
+        {activeTab === 'openTelemetry-tab' && <OpenTelemetry />}
       </div>
 
       <div id="default-tab-content">

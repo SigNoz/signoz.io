@@ -1,0 +1,157 @@
+---
+id: upgrade-0.27
+title: Upgrade to 0.27
+sidebar_label: Upgrade to 0.27
+---
+
+# Upgrade to v0.27 from earlier versions (Kubernetes)
+
+In the SigNoz version `>=0.27` i.e. SigNoz chart version `>=0.23.0`, [ClickHouse](https://clickhouse.com/)
+is upgraded from version `22.8.8` to `23.7.3`.
+
+This upgrade brings changes in how we index attributes in logs. From now you can have fields with same names but different dataType as selected(indexed) fields.
+
+## First upgrade to v0.27
+
+Follow the platform specific instructions to upgrade to 0.27 and above.
+
+Note that the past exceptions/error data will not be visible on the new application until you run the migration script.
+
+- [Docker Standalone](https://signoz.io/docs/operate/docker-standalone/#upgrade)
+- [Docker Swarm](https://signoz.io/docs/operate/docker-swarm/#upgrade)
+- [Kubernetes](https://signoz.io/docs/operate/kubernetes/#upgrade)
+
+
+## Steps to run migration script:
+
+### For Docker
+```bash
+docker run --name signoz-migrate --network clickhouse-setup_default \
+  -it -d signoz/migrate:0.27 -host=clickhouse -port=9000
+```
+
+Steps to check logs:
+
+```bash
+docker logs -f signoz-migrate
+```
+
+In case of failure and have to run again, make sure to cleanup the container before running the migration script again.
+
+```bash
+docker stop signoz-migrate
+
+docker rm signoz-migrate
+```
+
+
+### For Docker Swarm
+
+For Swarm, you could follow similar step to that of [Docker](#docker). However,
+you would need to expose clickhouse container ports to host machine and use
+host machine IP i.e. `172.17.0.17` for `-host` flag instead of `clickhouse`.
+
+If you do not want to change anything in the current signoz deployment or to
+expose clickhouse ports even temporarily, you can go through following steps.
+
+1. To download `migrate-v0.27` binary:
+
+  ```bash
+  wget https://github.com/SigNoz/signoz-db-migrations/releases/download/v0.27/migrate-v0.27-linux-amd64
+
+  chmod +x migrate-v0.27-linux-amd64
+  ```
+
+2. To copy the binary in persistent volume path `/var/lib/clickhouse` in `clickhouse` container:
+
+  ```bash
+  docker cp migration-v0.27-linux-amd64 $(docker ps -q -f name=signoz_clickhouse):/var/lib/clickhouse/migrate-0.27
+  ```
+
+3. To exec into the `clickhouse` container:
+
+  ```bash
+  docker exec -it $(docker ps -q -f name=signoz_clickhouse) bash
+  ```
+
+4. Now, change directory to the `/var/lib/clickhouse` and run the migration script:
+
+  ```bash
+  cd /var/lib/clickhouse
+
+  ./migration-0.27
+  ```
+
+  You should see output similar to this:
+  ```
+  2023-08-14T16:48:37.081Z	DEBUG	migrate/main.go:227	Params: clickhouse 9000 default
+  2023-08-14T16:48:37.130Z	INFO	migrate/main.go:142	Dropping index: method_idx
+  2023-08-14T16:48:37.924Z	INFO	migrate/main.go:142	Dropping index: level_idx
+  2023-08-14T16:48:38.645Z	INFO	migrate/main.go:142	Dropping index: container_name_idx
+  2023-08-14T16:48:39.368Z	INFO	migrate/main.go:142	Dropping index: telemetry_sdk_name_idx
+  2023-08-14T16:48:40.104Z	INFO	migrate/main.go:166	Renaming materialized column: method to attribute_string_method
+  2023-08-14T16:48:41.067Z	INFO	migrate/main.go:203	Create index: attribute_string_method_idx
+  2023-08-14T16:48:41.185Z	INFO	migrate/main.go:166	Renaming materialized column: level to attribute_string_level
+  2023-08-14T16:48:42.164Z	INFO	migrate/main.go:203	Create index: attribute_string_level_idx
+  2023-08-14T16:48:42.285Z	INFO	migrate/main.go:166	Renaming materialized column: container_name to attribute_string_container_name
+  2023-08-14T16:48:42.999Z	INFO	migrate/main.go:203	Create index: attribute_string_container_name_idx
+  2023-08-14T16:48:43.118Z	INFO	migrate/main.go:166	Renaming materialized column: telemetry_sdk_name to resource_string_telemetry_sdk_name
+  2023-08-14T16:48:43.823Z	INFO	migrate/main.go:203	Create index: resource_string_telemetry_sdk_name_idx
+  2023-08-14T16:48:43.955Z	INFO	migrate/main.go:261	Completed migration in: 6.873610753s
+  ```
+
+5. At last, clean up the binary:
+
+  ```bash
+  rm migration-0.27
+  ```
+
+
+### For Kubernetes
+
+```bash
+kubectl -n platform run -i -t signoz-migrate --image=signoz/migrate:0.27 --restart='Never' \
+  -- -host=my-release-clickhouse -port=9000 -userName=admin -password=27ff0399-0d3a-4bd8-919d-17c2181e6fb9
+```
+
+Steps to check logs:
+
+```bash
+kubectl -n platform logs -f signoz-migrate
+```
+
+In case of failure and have to run again, make sure to cleanup the pod before running the migration script again.
+
+```bash
+kubectl -n platform delete pod signoz-migrate
+```
+
+
+## In case of Upgrade Failure
+
+1. Note the names of fields which were not migrated. ex:- `telemetry_sdk_name`
+2. Exec into the clickhouse container and run `clickhouse client`.
+3. Check the schema of the logs table `show create table signoz_logs.logs`
+4. If `telemetry_sdk_name` column or `telemetry_sdk_name_idx` index is present you can delete them
+   
+  For deleting index 
+    * `alter table signoz_logs.logs on cluster cluster drop index telemetry_sdk_name_idx`
+  
+  For deleting column 
+    * `alter table signoz_logs.logs on cluster cluster drop column telemetry_sdk_name`
+    * `alter table signoz_logs.distributed_logs on cluster cluster drop column telemetry_sdk_name`
+5. Now from the UI, you can convert `telemetry_sdk_name` to selected field. 
+6. If you still face issue, reach out to us at [Slack](https://signoz.io/slack).
+
+## Command-Line Interface (CLI) Flags
+
+There are some custom flags which can be enabled based on different usecases.
+All the flags below are `optional`.
+
+Flags:
+
+- `-port` : Specify port of clickhouse. `default=9000`
+- `-host` : Specify host of clickhouse. `default=127.0.0.1`
+- `-userName` : Specify user name of clickhouse. `default=default`
+- `-password` : Specify password of clickhouse. `default=""`
+

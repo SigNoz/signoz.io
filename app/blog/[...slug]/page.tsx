@@ -50,8 +50,6 @@ export async function generateMetadata({
     }
   })
 
-  console.log('post', post)
-
   return {
     title: post.title,
     description: post.summary,

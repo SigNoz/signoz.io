@@ -1,0 +1,73 @@
+---
+id: introduction
+title: Introduction
+---
+
+import { LiteYoutubeEmbed } from "react-lite-yt-embed";
+import Screenshot from "@theme/Screenshot"
+
+# Unleash the Potential of Your Logs with Logs Pipelines
+
+With Logs Pipelines, you can transform logs to suit your querying
+and aggregation needs before they get stored in the database.
+
+<br/>
+<LiteYoutubeEmbed id="OneENGNmLd0" mute={false} />
+<br/>
+
+Once you start sending logs to SigNoz, you can start searching their text
+and create basic reports based on standard fields. For example, you can find logs
+with text containing a particular user's id or plot the count of error logs by service name.  
+However, the text in your logs will typically contain a lot of other valuable information,
+and it can be inefficient or outright impossible to query and aggregate on
+that information.
+
+Logs pipelines enable you to unleash the full potential of your logs by
+pre-processing them to suit your needs before they get stored. This unlocks
+valuable logs based queries and dashboards that wouldn't be possible otherwise.  
+You can also use logs preprocessing to achieve other goals like cleaning sensitive
+information in your logs or normalizing names of fields across services.
+
+<figure data-zoomable align="center">
+  <img
+    alt="Raw Nginx Log"
+    src="/img/logs/pipelines/raw-nginx-log.webp "
+  />
+  <figcaption>
+    <i>
+      A raw Nginx log
+    </i>
+  </figcaption>
+</figure>
+
+<br/>
+<figure data-zoomable align="center">
+  <img
+    alt="Parsed Nginx Log"
+    src="/img/logs/pipelines/parsed-nginx-log.webp "
+  />
+  <figcaption>
+    <i>
+      A parsed Nginx log
+    </i>
+  </figcaption>
+</figure>
+
+<br/>
+<figure data-zoomable align="center">
+  <img
+    alt="Nginx Requests Count by User Agent"
+    src="/img/logs/pipelines/nginx-requests-by-user-agent.webp"
+  />
+  <figcaption>
+    <i>
+      A Report for Requests by User Agent, made possible by a pipeline that extracts User Agent from Nginx text logs
+    </i>
+  </figcaption>
+</figure>
+<br/>
+
+
+While you can achieve these goals by changing your application code or by changing config
+for your otel collectors, logs pipelines allow you to do it in SigNoz UI without having to ship changes
+or redeploy your applications and collectors.

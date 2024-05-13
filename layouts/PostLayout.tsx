@@ -47,7 +47,6 @@ export default function PostLayout({ content, authors, children, toc }: LayoutPr
   const { filePath, path, slug, date, title, image, tags, readingTime } = content
   const basePath = path.split('/')[0]
   const mainRef = useRef<HTMLElement | null>(null)
-  console.log('content', content.images)
 
   return (
     <main ref={mainRef}>

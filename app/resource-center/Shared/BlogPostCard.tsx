@@ -1,14 +1,16 @@
 import siteMetadata from '@/data/siteMetadata'
-import { Blog } from 'contentlayer/generated'
+import { Blog, Comparison, Guide, Opentelemetry } from 'contentlayer/generated'
 import { Timer } from 'lucide-react'
 import Link from 'next/link'
 import { CoreContent } from 'pliny/utils/contentlayer'
 import { formatDate } from 'pliny/utils/formatDate'
 
-export default function BlogPostCard({ blog }: { blog: CoreContent<Blog> }) {
+export default function BlogPostCard({
+  blog,
+}: {
+  blog: CoreContent<Blog | Comparison | Opentelemetry | Guide>
+}) {
   const { path, date, title, authors } = blog
-
-  console.log('datea', authors)
 
   return (
     <Link href={`/${path}`}>

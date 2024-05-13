@@ -1,10 +1,9 @@
-import { allBlogs } from 'contentlayer/generated'
+import { allComparisons } from 'contentlayer/generated'
 import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer'
 import BlogPostCard from '../Shared/BlogPostCard'
 
 export default function Comparisons() {
-  const posts = allCoreContent(sortPosts(allBlogs))
-
+  const posts = allCoreContent(sortPosts(allComparisons))
   const primaryFeaturedBlogs = posts.slice(0, 2)
   const secondaryFeaturedBlogs = posts.slice(2, 12)
 
