@@ -8,7 +8,7 @@ import { LiteYoutubeEmbed } from "react-lite-yt-embed";
 
 export const Header = () => {
   return (
-    <header className="my-16">
+    <header className="my-8">
       <div className="flex flex-col items-center mb-5 text-center px-5">
         <Hero>
           OpenTelemetry-Native Traces,&nbsp;
@@ -41,10 +41,11 @@ export const Header = () => {
         </Button>
       </div>
       <div className="container">
-        <div className="w-100 relative mx-auto">
-          <div className="hero-figure p-3 rounded-lg">
-            <div className="embed-container max-w-4xl">
+        <div className="w-100 mx-auto">
+          <div className="product-explainer-video hero-figure p-3 rounded-lg">
+            <div className="embed-container">
               <iframe
+                className="product-explainer-video-frame"
                 src="https://player.vimeo.com/video/944340217"
                 frameborder="0"
                 webkitAllowFullScreen
