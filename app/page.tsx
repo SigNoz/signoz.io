@@ -7,7 +7,7 @@ export default async function Page() {
   const sortedPosts = sortPosts(allBlogs)
   const posts = allCoreContent(sortedPosts)
   return (
-    <div className="bg-white dark:bg-gray-950">
+    <div className="dark:bg-signoz_ink-500 bg-white">
       <h1 className="my-4 whitespace-normal px-12 py-4 text-center text-4xl font-bold leading-12 tracking-wide">
         OpenTelemetry-Native Traces, <br /> Metrics, and Logs in a single pane
       </h1>

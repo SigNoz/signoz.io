@@ -77,8 +77,8 @@ const MainFooter: React.FC = () => {
   ]
 
   return (
-    <footer className="mt-16 flex flex-col justify-center">
-      <div className="flex w-full items-center justify-center bg-white bg-opacity-70 py-14 backdrop-blur-[20px] dark:bg-gray-950 max-md:max-w-full max-md:px-5">
+    <footer className="border-signoz_vanilla-300 mt-16 flex flex-col justify-center border-t border-solid p-16 dark:border-zinc-800">
+      <div className="dark:bg-signoz_ink-500 flex w-full items-center justify-center bg-white max-md:max-w-full max-md:px-5">
         <div className="w-full justify-between max-md:max-w-full">
           <div className="flex gap-5 max-md:flex-col max-md:gap-0">
             <FooterSection title="platform" links={platformLinks} />

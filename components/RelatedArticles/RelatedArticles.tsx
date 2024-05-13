@@ -19,24 +19,20 @@ const ArticleCard: React.FC<ArticleCardProps> = ({
 }) => {
   return (
     <div className="flex w-[33%] flex-col max-md:ml-0 max-md:w-full">
-      <article className="mx-auto flex w-full grow flex-col rounded border border-solid border-gray-900 bg-neutral-900 p-4 max-md:mt-6">
-        <h3 className="text-base font-medium leading-6 text-neutral-100">{title}</h3>
+      <article className="dark:bg-signoz_ink-400 mx-auto flex w-full grow flex-col rounded border border-solid p-4 dark:border-gray-900 max-md:mt-6">
+        <h3 className="text-signoz_ink-300 text-base font-medium leading-6 dark:text-neutral-100">
+          {title}
+        </h3>
         <div className="mt-3 flex gap-2 text-xs font-medium uppercase leading-5 tracking-wide">
-          <div className="justify-center whitespace-nowrap rounded-full bg-opacity-10 px-2.5 py-1 text-stone-400">
+          <div className="justify-center whitespace-nowrap rounded-full bg-opacity-10 px-2.5 py-1 dark:text-stone-400">
             {level}
           </div>
-          <div className="justify-center rounded-full bg-stone-300 bg-opacity-10 px-2.5 py-1 text-stone-300">
+          <div className="justify-center rounded-full bg-slate-500 bg-opacity-10 px-2.5 py-1 dark:bg-stone-300 dark:text-slate-950">
             {date}
           </div>
         </div>
         <div className="mt-20 flex w-full justify-between gap-5 py-px text-sm leading-5 max-md:mt-10">
-          <div className="flex gap-1.5 font-medium text-white">
-            <img
-              loading="lazy"
-              src={authorImage}
-              alt={`${authorName}'s profile picture`}
-              className="my-auto aspect-square w-4 shrink-0"
-            />
+          <div className="text-signoz_ink-300 flex gap-1.5 font-medium dark:text-white">
             <div>{authorName}</div>
           </div>
           <div className="flex gap-1.5 whitespace-nowrap text-stone-300">

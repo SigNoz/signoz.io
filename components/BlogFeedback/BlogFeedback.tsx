@@ -7,7 +7,7 @@ interface ButtonProps {
 
 const Button: React.FC<ButtonProps> = ({ icon, text }) => {
   return (
-    <div className="flex cursor-pointer gap-1 whitespace-nowrap rounded-full bg-stone-300 bg-opacity-10 px-2.5 py-1">
+    <div className="bg-signoz_ink-400 flex cursor-pointer gap-1 whitespace-nowrap rounded-full bg-opacity-10 px-2.5 py-1 dark:bg-stone-300">
       <img loading="lazy" src={icon} alt="" className="my-auto aspect-square w-3.5 shrink-0" />
       <div>{text}</div>
     </div>
@@ -31,7 +31,7 @@ const BlogFeedback: React.FC = () => {
   ]
 
   return (
-    <div className="mt-8 flex max-w-[899px] flex-col justify-center rounded border border-solid border-gray-900 bg-neutral-900 px-4 py-4 text-stone-300">
+    <div className="dark:bg-signoz_ink-400 bg-signoz_vanilla-100 border-signoz_vanilla-300 mt-8 flex max-w-[899px] flex-col justify-center rounded border border-solid px-4 py-4 text-stone-300 dark:border-gray-900">
       <div className="flex w-full justify-between gap-5 max-md:max-w-full max-md:flex-wrap">
         <div className="flex gap-2.5 self-start text-base leading-6 tracking-normal">
           <img
@@ -40,13 +40,13 @@ const BlogFeedback: React.FC = () => {
             alt="Helpful article icon"
             className="my-auto aspect-square w-4 shrink-0"
           />
-          <div>Was this article helpful?</div>
+          <div className="text-signoz_ink-300 dark:text-white">Was this article helpful?</div>
         </div>
         <div className="flex gap-2 text-sm leading-5 tracking-normal">
           {buttons.slice(0, 2).map((button, index) => (
             <Button key={index} icon={button.icon} text={button.text} />
           ))}
-          <div className="h-7 w-px shrink-0 border border-solid border-zinc-800 bg-zinc-800" />
+          <div className="h-7 w-px shrink-0 border border-solid  dark:border-zinc-800 dark:bg-zinc-800" />
           <Button icon={buttons[2].icon} text={buttons[2].text} />
         </div>
       </div>

@@ -16,7 +16,7 @@ export default function BlogPostCard({
     <Link href={`/${path}`}>
       <div className="flex cursor-pointer flex-col max-md:ml-0 max-md:w-full">
         <div
-          className={`mx-auto flex w-full grow flex-col rounded border border-solid p-4 dark:border-gray-700 dark:bg-neutral-900 max-md:mt-6`}
+          className={`dark:bg-signoz_ink-400 dark:border-signoz_ink-500 mx-auto flex w-full grow flex-col rounded border border-solid p-4 max-md:mt-6`}
         >
           <div className="content h-[96px]">
             <div

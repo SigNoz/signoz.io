@@ -10,7 +10,7 @@ export default function ResourceCenter() {
   const [activeTab, setActiveTab] = useState('blog-tab')
 
   return (
-    <div>
+    <div className="container mx-auto py-4">
       <div className="mb-4">
         <ul
           className="-mb-px flex flex-wrap text-center text-sm font-medium"

@@ -8,7 +8,7 @@ import SearchButton from './SearchButton'
 
 const Header = () => {
   return (
-    <header className="sticky top-0 z-30 flex items-center justify-between bg-white py-4 dark:bg-gray-950">
+    <header className="dark:bg-signoz_ink-500 sticky top-0 z-30 flex items-center justify-between bg-white py-4">
       <div>
         <Link href="/" aria-label={siteMetadata.headerTitle}>
           <div className="flex items-center justify-between">

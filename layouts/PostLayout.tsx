@@ -49,7 +49,7 @@ export default function PostLayout({ content, authors, children, toc }: LayoutPr
   const mainRef = useRef<HTMLElement | null>(null)
 
   return (
-    <main ref={mainRef}>
+    <main ref={mainRef} className="container mx-auto">
       <SectionContainer>
         <ScrollTopAndComment />
 

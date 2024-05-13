@@ -63,7 +63,7 @@ export default function TopNav() {
 
   return (
     <header
-      className={`container fixed left-0 right-0 z-30 mx-auto w-full bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-50`}
+      className={`dark:bg-signoz_ink-500 container fixed left-0 right-0 z-30 mx-auto w-full bg-white text-slate-900 dark:text-slate-50`}
     >
       <nav
         className="mx-auto flex items-center justify-between py-4 text-slate-900 dark:text-slate-50"

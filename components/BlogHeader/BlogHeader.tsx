@@ -54,9 +54,9 @@ export default function BlogHeader({
   return (
     <div className="mb-4 p-4">
       <div className="mb-4">
-        <Link href="/blog" className="flex items-center gap-4">
+        {/* <Link href="/blog" className="flex items-center gap-4">
           <ArrowLeft size={16} /> Back to Blog
-        </Link>
+        </Link> */}
       </div>
       <article className="flex max-w-[969px] flex-col leading-[150%]">
         <div className="flex gap-2 self-start whitespace-nowrap text-xs font-medium uppercase tracking-wide text-stone-700 dark:text-stone-300">
