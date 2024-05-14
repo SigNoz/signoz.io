@@ -1,34 +1,34 @@
-import Link from "@docusaurus/Link";
-import React from "react";
+import Link from 'next/link'
+import React from 'react'
 
 const Button = ({
   isButton = false,
   children,
   outlined = false,
   href = null,
-  to = "/",
-  className = "",
-  id = "",
+  to = '/',
+  className = '',
+  id = '',
   onClick = () => {},
 }) => {
   const classNames = {
     isButton:
-      "inline-block border-none outline-none px-8 py-2 text-white rounded-md font-heading text-md font-medium hover:text-white no-underline text-center",
-    filled: "primary-gradient",
-    outlined: "border-gradient bg-[#1b1b1d]",
-    inline: "text-tertiary underline",
-  };
+      'inline-block border-none outline-none px-8 py-2 text-white rounded-md font-heading text-md font-medium hover:text-white no-underline text-center',
+    filled: 'primary-gradient',
+    outlined: 'border-gradient bg-[#1b1b1d]',
+    inline: 'text-tertiary underline',
+  }
   const linkProps = {
-    [href ? "href" : "to"]: href ? href : to,
-    [href ? "rel" : "data-prop"]: "noopener noreferrer nofollow",
-    [href ? "target" : "data-prop"]: "_blank",
-  };
+    [href ? 'href' : 'to']: href ? href : to,
+    [href ? 'rel' : 'data-prop']: 'noopener noreferrer nofollow',
+    [href ? 'target' : 'data-prop']: '_blank',
+  }
 
   return (
     <Link
       className={`cursor-pointer
         ${isButton ? classNames.isButton : classNames.inline}
-        ${isButton ? (outlined ? classNames.outlined : classNames.filled) : ""}
+        ${isButton ? (outlined ? classNames.outlined : classNames.filled) : ''}
         ${className}
       `}
       id={id}
@@ -37,7 +37,7 @@ const Button = ({
     >
       {children}
     </Link>
-  );
-};
+  )
+}
 
-export default Button;
+export default Button

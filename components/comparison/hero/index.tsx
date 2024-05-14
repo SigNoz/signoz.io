@@ -1,9 +1,9 @@
-import React from "react";
-import styles from "./styles.module.css";
-import Link from "@docusaurus/Link";
+import React from 'react'
+import styles from './styles.module.css'
+import Link from 'next/link'
 
 const Hero = (props) => {
-  const { title, desc, billForComparison, trySigNozCloud, selfHost } = props;
+  const { title, desc, billForComparison, trySigNozCloud, selfHost } = props
   return (
     <div className={styles.svsdHeaderContainer}>
       <h2 className={styles.headerTitle}>{title}</h2>
@@ -19,17 +19,14 @@ const Hero = (props) => {
         )}
         {trySigNozCloud.isVisible && (
           <Link
-            className={`button ${trySigNozCloud.className} ${styles.ctaButton}`}
+            className={`button bg-signoz_vanilla-300 text-signoz_ink-300`}
             href={trySigNozCloud.path}
           >
             Try SigNoz Cloud
           </Link>
         )}
         {selfHost.isVisible && (
-          <Link
-            className={`button ${selfHost.className} ${styles.ctaButton}`}
-            href={selfHost.path}
-          >
+          <Link className={`button ${selfHost.className} ${styles.ctaButton}`} href={selfHost.path}>
             Self-Host
           </Link>
         )}
@@ -38,7 +35,7 @@ const Hero = (props) => {
         <img src="/img/signoz-distributed-tracing.webp" />
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default Hero;
+export default Hero

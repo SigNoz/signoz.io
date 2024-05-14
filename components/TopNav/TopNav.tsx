@@ -160,8 +160,8 @@ export default function TopNav() {
           <Link href="/pricing" className="text-sm font-semibold leading-6 ">
             Pricing
           </Link>
-          <Link href="/" className="text-sm font-semibold leading-6 ">
-            Company
+          <Link href="/case-study" className="text-sm font-semibold leading-6 ">
+            Customer Stories
           </Link>
         </Popover.Group>
         <div className="hidden lg:flex lg:flex-1 lg:justify-end">
@@ -238,10 +238,10 @@ export default function TopNav() {
                   Pricing
                 </Link>
                 <Link
-                  href="/"
+                  href="/case-study"
                   className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 hover:bg-gray-50"
                 >
-                  Company
+                  Customer Stories
                 </Link>
               </div>
               <div className="py-6">

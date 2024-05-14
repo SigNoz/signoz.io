@@ -1,15 +1,12 @@
-import React from "react";
-import styles from "./styles.module.css";
-import Link from "@docusaurus/Link";
+import React from 'react'
+import styles from './styles.module.css'
+import Link from 'next/link'
 
 const GetStarted = (props) => {
-  const { withHackerNews, withMigrationSupport, data } = props;
+  const { withHackerNews, withMigrationSupport, data } = props
   return (
     <>
-      <HackerNewsThread
-        withHackerNews={withHackerNews}
-        title={data.HACKER_THREAD_TITLE}
-      />
+      <HackerNewsThread withHackerNews={withHackerNews} title={data.HACKER_THREAD_TITLE} />
       <GetStartedSection
         withHackerNews={withHackerNews}
         withMigrationSupport={withMigrationSupport}
@@ -21,13 +18,13 @@ const GetStarted = (props) => {
         desc={data.DESC}
       />
     </>
-  );
-};
+  )
+}
 
 const HackerNewsThread = (props) => {
-  const { withHackerNews, title } = props;
+  const { withHackerNews, title } = props
   if (!withHackerNews) {
-    return null;
+    return null
   }
   return (
     <div className={styles.svsdThreadContainer}>
@@ -35,40 +32,34 @@ const HackerNewsThread = (props) => {
         <h3 className={styles.threadTitle}>{title}</h3>
       </div>
     </div>
-  );
-};
+  )
+}
 
 const GetStartedSection = (props) => {
-  const { withHackerNews, withMigrationSupport } = props;
+  const { withHackerNews, withMigrationSupport } = props
   return (
     <div className="container">
       <div
         className={`${styles.trySigNozContainer} 
         ${!withHackerNews && styles.withoutHackerNews} 
-        ${!withMigrationSupport && styles.withoutMigrationSupport}`}
+        ${!withMigrationSupport && styles.withoutMigrationSupport} bg-indigo-500`}
       >
         <h3 className={styles.tagline}>
-          OpenTelemetry-Native Metrics, Logs, and Traces in a single pane of
-          glass
+          OpenTelemetry-Native Metrics, Logs, and Traces in a single pane of glass
         </h3>
-        <p className={styles.desc}>
-          SigNoz Cloud is the easiest way to run SigNoz
-        </p>
-        <Link
-          className={`button button--secondary ${styles.trySigNozCtaBtn}`}
-          href="/teams/"
-        >
+        <p className={styles.desc}>SigNoz Cloud is the easiest way to run SigNoz</p>
+        <Link className={`button button--secondary ${styles.trySigNozCtaBtn}`} href="/teams/">
           Try SigNoz Cloud
         </Link>
       </div>
     </div>
-  );
-};
+  )
+}
 
 const MigrationSupport = (props) => {
-  const { withMigrationSupport, withHackerNews, title, desc } = props;
+  const { withMigrationSupport, withHackerNews, title, desc } = props
   if (!withMigrationSupport) {
-    return null;
+    return null
   }
   return (
     <div className="container">
@@ -81,7 +72,7 @@ const MigrationSupport = (props) => {
         <p className={styles.desc}>{desc}</p>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default GetStarted;
+export default GetStarted
