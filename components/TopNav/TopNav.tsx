@@ -63,7 +63,7 @@ export default function TopNav() {
 
   return (
     <header
-      className={`dark:bg-signoz_ink-500 container fixed left-0 right-0 z-30 mx-auto w-full bg-white text-slate-900 dark:text-slate-50`}
+      className={`fixed left-0 right-0 z-30 mx-auto w-full bg-signoz_ink-500 px-12 text-slate-900 dark:text-slate-50`}
     >
       <nav
         className="mx-auto flex items-center justify-between py-4 text-slate-900 dark:text-slate-50"
@@ -157,8 +157,8 @@ export default function TopNav() {
           <Link href="/blog" className="text-sm font-semibold leading-6 ">
             Blog
           </Link>
-          <Link href="/" className="text-sm font-semibold leading-6 ">
-            Marketplace
+          <Link href="/pricing" className="text-sm font-semibold leading-6 ">
+            Pricing
           </Link>
           <Link href="/" className="text-sm font-semibold leading-6 ">
             Company
@@ -171,9 +171,9 @@ export default function TopNav() {
 
           <SearchButton />
 
-          <div className="px-4">
+          {/* <div className="px-4">
             <ThemeToggle />
-          </div>
+          </div> */}
         </div>
       </nav>
       <Dialog as="div" className="lg:hidden" open={mobileMenuOpen} onClose={setMobileMenuOpen}>
@@ -232,10 +232,10 @@ export default function TopNav() {
                   Features
                 </Link>
                 <Link
-                  href="/"
+                  href="/pricing"
                   className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 hover:bg-gray-50"
                 >
-                  Marketplace
+                  Pricing
                 </Link>
                 <Link
                   href="/"
