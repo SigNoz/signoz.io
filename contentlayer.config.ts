@@ -107,6 +107,9 @@ export const Blog = defineDocumentType(() => ({
     layout: { type: 'string' },
     bibliography: { type: 'string' },
     canonicalUrl: { type: 'string' },
+    keywords: { type: 'list', of: { type: 'string' }, required: false },
+    slug: { type: 'string', required: false },
+    hide_table_of_contents: { type: 'boolean', required: false },
   },
   computedFields: {
     ...computedFields,
@@ -144,6 +147,7 @@ export const Comparison = defineDocumentType(() => ({
     layout: { type: 'string' },
     bibliography: { type: 'string' },
     canonicalUrl: { type: 'string' },
+    keywords: { type: 'list', of: { type: 'string' }, required: false },
   },
   computedFields: {
     ...computedFields,
@@ -181,6 +185,7 @@ export const Opentelemetry = defineDocumentType(() => ({
     layout: { type: 'string' },
     bibliography: { type: 'string' },
     canonicalUrl: { type: 'string' },
+    keywords: { type: 'list', of: { type: 'string' }, required: false },
   },
   computedFields: {
     ...computedFields,
