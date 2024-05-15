@@ -7,6 +7,7 @@ import CustomLink from './Link'
 import TableWrapper from './TableWrapper'
 import YouTube from './VideoPlayer/VideoPlayer'
 import GetStartedSigNoz from '../docs/shared/get-started-signoz'
+import Admonition from './Admonition/Admonition';
 
 export const components: MDXComponents = {
   Image,
@@ -17,4 +18,5 @@ export const components: MDXComponents = {
   BlogNewsletterForm,
   YouTube,
   GetStartedSigNoz,
+  Admonition,
 }
