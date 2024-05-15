@@ -16,6 +16,7 @@ import { ThemeToggle } from '../ThemeToggle/ThemeToggle'
 import Image from 'next/image'
 import Link from 'next/link'
 import SearchButton from '../SearchButton'
+import Button from '../ui/Button'
 
 const products = [
   {
@@ -164,12 +165,12 @@ export default function TopNav() {
             Customer Stories
           </Link>
         </Popover.Group>
-        <div className="hidden lg:flex lg:flex-1 lg:justify-end">
-          {/* <Link href="/" className="text-sm font-semibold leading-6 ">
-            Log in <span aria-hidden="true">&rarr;</span>
-          </Link> */}
-
+        <div className="hidden gap-8 lg:flex lg:flex-1 lg:justify-end">
           <SearchButton />
+
+          <Button isButton className="button button-sm" to={'/teams/'}>
+            Try SigNoz Cloud
+          </Button>
         </div>
       </nav>
       <Dialog as="div" className="lg:hidden" open={mobileMenuOpen} onClose={setMobileMenuOpen}>

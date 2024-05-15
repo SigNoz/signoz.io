@@ -36,7 +36,7 @@ const VimeoPlayer = ({ videoId }) => {
       <div ref={playerRef} />
       {!isPlaying && (
         <div onClick={handlePlay}>
-          <div className="play-container flex h-16 w-16 cursor-pointer items-center justify-center rounded-full bg-primary-500 focus-visible:outline-none md:h-24 md:w-24">
+          <div className="play-container primary-gradient flex h-16 w-16 cursor-pointer items-center justify-center rounded-full focus-visible:outline-none md:h-24 md:w-24">
             <img src="/img/landing/play-icon.webp" className="h-6 w-6 md:h-10 md:w-10" />
           </div>
         </div>
