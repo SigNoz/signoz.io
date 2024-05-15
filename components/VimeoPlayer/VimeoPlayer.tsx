@@ -1,17 +1,16 @@
 'use client'
 import React, { useEffect, useRef, useState } from 'react'
+import Player from '@vimeo/player'
 
 const VimeoPlayer = ({ videoId }) => {
   const playerRef = useRef(null)
   const [isPlaying, setIsPlaying] = useState(false)
-  let player = null
+  let player
 
   useEffect(() => {
     const loadVimeoPlayer = async () => {
       try {
-        if (videoId) {
-          const { default: Player } = await import('@vimeo/player')
-
+        if (videoId && playerRef.current) {
           player = new Player(playerRef.current, {
             url: `https://vimeo.com/${videoId}`,
           })

@@ -1,6 +1,4 @@
-import React, { useState } from 'react'
-import Link from 'next/link'
-import useBaseUrl from '@docusaurus/useBaseUrl'
+import React from 'react'
 import styles from './styles.module.css'
 
 export const DiscussYourProject = ({ title, desc, withUnderline = false }) => {

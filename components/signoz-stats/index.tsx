@@ -39,7 +39,7 @@ const SigNozStats = () => {
             </div>
           </div>
           <div className="flex justify-center">
-            <Button isButton href={'https://signoz.io/slack'}>
+            <Button isButton to={'https://signoz.io/slack'}>
               Join our slack community
             </Button>
           </div>

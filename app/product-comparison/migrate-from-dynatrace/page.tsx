@@ -1,3 +1,5 @@
+'use client'
+
 import React from 'react'
 import { HubspotProvider } from '@aaronhayes/react-use-hubspot-form'
 import MigrateSaving from '../../../components/comparison/migrate-saving'
