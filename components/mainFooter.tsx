@@ -2,6 +2,7 @@ import * as React from 'react'
 import Link from 'next/link'
 import { ArrowUpRight, GithubIcon, Linkedin, SlackIcon, Twitter, Youtube } from 'lucide-react'
 import { Github } from './social-icons/icons'
+import Image from 'next/image'
 
 /**
  * Footer component
@@ -100,7 +101,7 @@ function Footer() {
                 <Link href="#" className="mt-5">
                   Examples
                 </Link>
-                <Link href="#" className="mt-5">
+                <Link href="/product-comparison" className="mt-5">
                   Comparisons
                 </Link>
                 <Link href="#" className="mt-5">
@@ -110,7 +111,14 @@ function Footer() {
             </div>
             <div className="ml-5 flex w-3/12 flex-col max-md:ml-0 max-md:w-full">
               <div className="flex flex-col items-end shadow-sm max-md:mt-10">
-                <div className="flex justify-between gap-1.5 self-end whitespace-nowrap text-center text-lg font-medium leading-5 text-white">
+                <div className="flex items-center justify-between gap-2 self-end whitespace-nowrap text-center text-lg font-medium leading-5 text-white">
+                  <Image
+                    className="h-8 w-auto"
+                    src="/img/SigNozLogo-orange.svg"
+                    width={50}
+                    height={50}
+                    alt=""
+                  />
                   <div>SigNoz</div>
                 </div>
                 <div className="mt-5 items-end justify-center rounded text-sm leading-5 text-emerald-300">
