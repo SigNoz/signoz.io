@@ -1,0 +1,38 @@
+---
+title: How are RED metrics calculated in SigNoz | SigNoz Office Hours
+slug: red-metrics-calculation
+date: 2022-08-20
+tags: [Product]
+authors: ankit_anand
+description: Welcome to SigNoz office hours! In this series, one of our team members gives a presentation about a topic of their choice. This talk is presented by Srikanth Chekuri, backend engineer at SigNoz. He talks about how RED metrics are calculated in SigNoz...
+image: /img/blog/2022/08/office_hours_red_metrics.webp
+keywords:
+  - opentelemetry
+  - rate of request
+  - error rate
+  - duration
+  - signoz
+  - observability
+---
+
+import { LiteYoutubeEmbed } from "react-lite-yt-embed";
+
+<head>
+  <link rel="canonical" href="https://signoz.io/blog/red-metrics-calculation/"/>
+</head>
+
+Welcome to SigNoz office hours! In this series, one of our team members gives a presentation about a topic of their choice. This talk is presented by [Srikanth Chekuri](https://github.com/srikanthccv), backend engineer at SigNoz. He talks about the following:
+
+- How are RED metrics calculated in SigNoz?
+- The case of missing spans
+- Showing real-time metrics in service dependency graph
+
+<!--truncate-->
+
+Catch Srikanth as he takes you through the above concepts 👇
+
+<p>&nbsp;</p>
+
+<LiteYoutubeEmbed id="60zQWbZQSTY" mute={false} />
+
+<p>&nbsp;</p>

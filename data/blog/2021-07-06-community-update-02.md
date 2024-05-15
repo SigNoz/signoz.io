@@ -1,0 +1,119 @@
+---
+title: Launched ClickHouse support, crossed 4k stars on GitHub -Signal 02
+slug: community-update-02
+date: 2021-07-06
+tags: [Product Updates]
+authors: ankit_anand
+description: SigNoz is now available with ClickHouse as a storage backend. This and other updates on what we've been upto at SigNoz. And yes, we trended at number 1 on GitHub trending.
+image: /img/blog/2021/08/signal_02_cover_hc.webp
+keywords:
+  - SigNoz Product Update
+  - GitHub contributors
+---
+
+It's time for community updates 2. We're delighted to announce that SigNoz is now live with ClickHouse support. And yeah, we trended on GitHub at No.1 🎉
+
+<!--truncate-->
+
+![Cover Image](/img/blog/2021/08/signal_02_cover_hc.webp)
+
+Welcome to Signal #02!
+
+Quite a lot has happened since our last community updates. We had 2 major releases, crossed 4k GitHub stars and got featured in multiple newsletters. We were also trending at No.1 position on Github across all programming languages 🚀
+
+Here we are again, to update you with what we have been upto since our last newsletter issue.
+
+## What we shipped
+
+Last month, we had two major releases: [v0.3.1](https://github.com/SigNoz/signoz/releases/tag/v0.3.1) and [v0.3.2](https://github.com/SigNoz/signoz/releases/tag/v0.3.2).
+
+### ClickHouse Support
+
+In our last issue, we had mentioned community demands to extend support for ClickHouse as a storage backend. And we're delighted to announce that it is now integrated with SigNoz.
+When you install SigNoz, you will have an option to either go with ClickHouse or Kafka + Druid as your storage backend.
+
+![Installing SigNoz through Docker](/img/blog/2021/07/choose-setup-1.webp)
+
+Users can choose between ClickHouse or Kafka + Druid for their storage system of choice while installing SigNoz
+
+We have also written a [blog](/blog/clickhouse-storage-monitoring/) with comparison between the two set ups and how ClickHouse sits in our technical architecture.
+
+### Frontend upgrades
+
+**Performance upgrades**<br></br>
+We have improved our dashboard loading time and reduced the bundle size to less than 1 mb. Our dashboards are meant to take quick actions on your issues, so we will keep on improving our frontend performance.
+
+**Gantt charts for better trace/span visualization**<br></br>
+We have made it easier to drill down on issues causing latency in your services. With Gantt charts you can visualise your services and events in a parent-child relationship tree which makes it easier to figure out which events are causing a latency in a request call.
+
+![Gantt charts on SigNoz UI](/img/blog/2021/07/gantt-charts.webp)
+
+<!--- Gantt charts on SigNoz dashboard for trace/span visualization --->
+
+## Featured Issue
+
+**eBPF Support**
+Some of our community members were interested in having SigNoz support eBPF based instrumentation to have faster trials. We wanted to check with the community how relevant is this for you - or are folks more comfortable with OpenTelemetry based instrumentation which we currently support? Also, since eBPF support is only available for kernel 4.14+ - we wanted to understand how many people would be able to run eBPF.
+
+If you have any views on the above, would love it if you can add a comment to the [issue](https://github.com/SigNoz/signoz/issues/193).
+
+## What's upcoming
+
+### Custom Metrics
+
+We have been actively working on supporting 'custom metrics' to SigNoz. Once this feature is shipped, you should be able to send metrics from sources like StatsD, Prometheus, OpenTelemetry, etc. and visualise it in SigNoz dashboard.
+
+A few things that will be enabled post metrics ingestion pipeline:
+
+- Infrastructure metrics (CPU, memory, disk space) including K8s metrics and container metrics
+- DB metrics for mysql, redis, mongo, cassandra, etc and monitoring other components like nginx, kafka, etc
+- Custom metrics - you can send any metric you want to track
+
+## SigNoz News
+
+**Workshop 🛠**
+
+We conducted a workshop on **Observability 101 using OpenTelemetry & SigNoz** during Bengaluru's first ever **Kubernetes Community Days.** Ankit Nayan, our CTO talked about the importance of observability in modern-day distributed systems. We also gave a hands-on demo of SigNoz where we instrumented a Python app to set it up for monitoring with SigNoz.
+
+![Workshop on Observability 101 with SigNoz](/img/blog/2021/07/observability-101.webp)
+
+**Trending on GitHub 🔥**
+
+On 27th June, we found out we were trending at **#1 position on GitHub** worldwide across all programming languages. More than 100 million repositories are live on GitHub, and to find SigNoz right at #1 out of all these repos was an humbling experience for the team. We're extremely thankful to the entire Dev community for showing us such love 💙
+
+![Trending on GitHub](/img/blog/2021/07/github_trending_1.webp)
+Our GitHub repo trending at #1
+
+**Stargazers**✨
+
+On that front, we're also delighted to announce that we have **crossed 4k stargazers on GitHub.**⭐  We are thankful to each of you stargazers 🤓
+![Crossed 4k stars on GitHub](/img/blog/2021/07/stargazers-1.webp)
+We crossed 4k GitHub stargazers in June
+
+**Slack Community 👋**
+
+Our slack community is now **100+ members strong!** 🎉💪 We are always looking for ways in which we can be more helpful to our community. So if you have some ideas, feel free to pitch in! You can join our slack community [here](https://signoz.io/slack). 🙌
+
+**Features 📸**
+
+We got **featured in **[**Golang weekly**](https://golangweekly.com/issues/367) for our blog on instrumenting Golang app with SigNoz. We also got featured in **DevOpsLinks by Faun.dev**, one of Medium's largest DevOps publications. With these features, we are grateful to reach new developers across the globe.
+
+## From our blog
+
+This week we want to share this article explaining how you can instrument a sample Golang application and start monitoring it with SigNoz.
+
+SigNoz supports OpenTelemetry as the primary way for users to instrument their application. OpenTelemetry is a single, vendor-agnostic instrumentation library with support for both automatic and manual instrumentation.
+
+Read more about how you can instrument and start monitoring Golang apps here:
+
+[How to set up Golang application performance monitoring with SigNoz](/blog/monitoring-your-go-application-with-signoz/)
+
+## Contributors
+
+Shout out to [Raj](https://github.com/rajdas98) and [Yash](https://github.com/jyash97) our new contributors who have been awesome in making significant contributions to SigNoz this month. 🙌
+
+---
+
+Thank you for taking out the time to read our second issue :) If you have any feedback or want any changes with the format, create an issue [here](https://github.com/SigNoz/signoz/issues).
+
+[![SigNoz GitHub repo](/img/blog/common/signoz_github.webp)](https://github.com/SigNoz/signoz)

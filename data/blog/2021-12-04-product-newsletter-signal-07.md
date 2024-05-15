@@ -1,0 +1,147 @@
+---
+title: Get alerts on metrics that matter to you with SigNoz  - SigNal 07
+slug: community-update-07
+date: 2021-12-04
+tags: [Product Updates]
+authors: ankit_anand
+description: It's time for the monthly product update of SigNoz - a full-stack open-source APM tool. Find out what we've been upto at SigNoz during November, 2021.
+image: /img/blog/2021/12/signal_07_cover2.webp
+hide_table_of_contents: false
+keywords:
+  - SigNoz Product Update
+  - Dev community
+---
+
+import { LiteYoutubeEmbed } from "react-lite-yt-embed";
+
+<head>
+  <link rel="canonical" href="https://signoz.io/blog/community-update-07/"/>
+</head>
+
+Welcome to SigNal 07!
+
+We sipped coffee, shipped code, fixed bugs, and made commits! The highlight of November was the alerts feature release 🔔. We also expanded our team and got our first community-led tutorial on how to monitor Ruby on Rails app with SigNoz.
+
+<!--truncate-->
+
+![Cover Image](/img/blog/2021/12/signal_07_cover2.webp)
+
+Let's dive in to see what humans of SigNoz have been up to in the month of November.
+
+## What we shipped?
+
+We made four releases last month, with the capability to set alerts in SigNoz as a major feature upgrade.
+
+Latest Release:<br></br>
+[Release v0.5.1](https://github.com/SigNoz/signoz/releases/tag/v0.5.1)
+
+Alerts setting and management is a key feature of any APM tool. Let's see how we have enabled this in SigNoz.
+
+### Setting alerts in SigNoz
+
+You can now set alerts for metrics that matter to you with SigNoz! 🎉
+
+We have kept the UI for setting alerts very simple. You can use simple expressions to get started. You can use labels, summaries, and descriptions to provide better context to your alerts. Let's get a sneak peek. If you have set up alerts in Prometheus, this should look very familiar.
+
+The alerts page on the SigNoz dashboard has two tabs:
+
+1. Alert Rules<br></br>
+   For setting expressions you want to evaluate to start firing alerts.
+
+2. Triggered Alerts<br></br>
+   Shows the alerts which are in `firing` and `pending` state.
+
+import Screenshot from "@theme/Screenshot"
+
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
+   alt="Alerts page on SigNoz dashboard"
+   
+   src="/img/blog/2021/12/alerts_snapshot.webp"
+   />
+<figcaption><i>Alerts page on SigNoz dashboard</i></figcaption>
+</figure>
+<br/>
+
+Creating rules for alerts involve three simple steps:
+
+- Set the expression you want to evaluate to true to trigger alerts
+- Set the period for which you want to wait (after the expression is true) to start firing alerts
+- Set labels like `severity` to communicate how severe the issue is if this alert starts firing
+
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
+   alt="Setting alerts is easy with expressions."
+   
+   src="/img/blog/2021/12/setting_alerts.webp"
+   />
+<figcaption><i>Setting alerts is easy with expressions.</i></figcaption>
+</figure>
+<br/>
+
+In the current release, we support slack as a notification channel. We will be enabling more channels with upcoming releases.
+
+Here's a quick video on how to set alerts and receive notifications on Slack channels:
+
+<p>&nbsp;</p>
+
+<LiteYoutubeEmbed id="HBLtC3UKpmA" mute={false} />
+
+<p>&nbsp;</p>
+
+We would love to hear your feedback on alerts. Join our slack community to pass on any suggestions for improvement.
+
+[![SigNoz Slack community](/img/blog/common/join_slack_cta.webp)](https://signoz.io/slack)
+
+## Featured issue
+
+[Package SigNoz as a Single binary](https://github.com/SigNoz/signoz/issues/392)<br></br>
+Currently, installing SigNoz requires having/installing docker. But this might be an overhead for someone just testing out SigNoz. So we intend to provide a single binary application to reduce this friction.
+
+We have also noticed trying to install the docker script as one of the reasons for users dropping out. Let us know what you think; we would love to hear suggestions on how to make trying out SigNoz easier. Comment on this [issue](https://github.com/SigNoz/signoz/issues/392), or use our [GitHub discussions](https://github.com/SigNoz/signoz/discussions).
+
+## What's upcoming?
+
+### Helm charts for ClickHouse Setup
+
+Our team will work on enabling the deployment of SigNoz with ClickHouse setup using helm charts. Helm charts are the preferred way of deploying applications on Kubernetes and our users have requested this feature.
+
+## SigNoz News
+
+### Expanding the team
+
+We are excited to inform you that we have expanded our team with [Vishal Sharma](https://www.linkedin.com/in/makeavish/) joining as a backend engineer. He is passionate about deep tech and has great plans on how to make SigNoz better and he has already made his [first PR](https://github.com/SigNoz/signoz/pull/429)!
+
+To unwind, Vishal loves to play chess and listen to podcasts for personal growth.
+
+### Community-led tutorial
+
+Leunardus Vederis, a Ruby on rails developer wrote a tutorial on how to [monitor Ruby on Rails app with SigNoz and OpenTelemetry](https://medium.com/@leunardus.vederis714/monitor-your-ruby-on-rails-app-using-signoz-opentelemetry-b59578f3b252). This was a first for us that made us all happy! 🥳
+
+We are building a developer-first APM tool, and we envision a future where the community actively participates in educating others about open-source benefits.
+
+### Contributor Highlight
+
+We want to thank these amazing contributors who made SigNoz better with their contributions. 🤗
+
+PRs by new contributors in the last month:
+
+[fix(routes): update key and redirect home to application](https://github.com/SigNoz/signoz/pull/342) by [Yash Joshi](https://github.com/jyash97)
+
+[Update webpack config to typescript](https://github.com/SigNoz/signoz/pull/334) by [Estee Tey](https://github.com/lyqht)
+
+Improve ESLint Rules [#409](https://github.com/SigNoz/signoz/issues/409) & [#426](https://github.com/SigNoz/signoz/pull/426) by [Rishit Pandey](https://github.com/genzyy)
+
+Bug(FE): Remove time filter from settings page [#374](https://github.com/SigNoz/signoz/issues/374) & [#385](https://github.com/SigNoz/signoz/pull/385) by [Mohmn](https://github.com/Mohmn)
+
+## From our blog
+
+FastAPI is a modern Python web framework based on standard Python type hints that makes it easy to build APIs. It is based on ASGI specification, unlike other Python frameworks like Flask, which is based on WSGI specification.
+
+OpenTelemetry is a great choice to instrument ASGI frameworks. As it is open-source and vendor-agnostic, the data can be sent to any backend of your choice. In this blog, learn how to monitor your FastAPI applications with OpenTelemetry and SigNoz.
+
+[Monitoring your FastAPI application using OpenTelemetry](https://signoz.io/blog/opentelemetry-fastapi/)
+
+---
+
+Thank you for taking out the time to read this issue :) If you have any feedback or want any changes with the format, please create an [issue](https://github.com/SigNoz/signoz/issues).

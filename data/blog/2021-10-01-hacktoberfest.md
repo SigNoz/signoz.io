@@ -1,0 +1,94 @@
+---
+title: SigNoz is taking part in Hacktoberfest - 2022!
+slug: hacktoberfest
+date: 2022-10-03
+tags: [SigNoz, Open Source]
+authors: ankit_anand
+description: As an open-source project, we are excited to announce that SigNoz is participating in Hacktoberfest 2022!..
+image: /img/blog/2021/10/hacktoberfest_signoz_new-min.webp
+keywords:
+  - hacktoberfest
+  - open source
+  - github
+---
+
+<head>
+  <link rel="canonical" href="https://signoz.io/blog/hacktoberfest/"/>
+</head>
+
+Have you been waiting to start making open-source contributions? There can never be a better time than Hacktoberfest.
+
+<!--truncate-->
+
+![cover image](/img/blog/2021/10/hacktoberfest_signoz_new-min.webp)
+
+
+Do you want your GitHub profile to look like this👇
+
+<figure data-zoomable>
+    <img src="/img/blog/2021/10/github_contributions-min.webp" alt="GitHub contributions"/>
+    <figcaption><i>Do you want your GitHub profile full of these green dots?</i></figcaption>
+</figure>
+
+<br></br>
+
+>Open-source is changing the world, one contribution at a time.
+
+For a month-long period, participation in open-source projects is celebrated and you are also eligible to receive cool swags if you complete the challenge of making **four approved Pull Requests(PRs)** between October 1-31 in any time zone.
+
+As an open-source project, we are excited to announce that **SigNoz is participating in Hacktoberfest!**
+
+## Steps to participate in Hacktoberfest
+Here are the steps that you need to follow in order to participate in hacktoberfest:
+
+- Sign up on the official **[Hacktoberfest website](https://hacktoberfest.com/)** for your pull requests to count.
+- Pull requests can be made in any participating GitHub or GitLab hosted project. Projects having `hacktoberfest` in its topic are participating.
+- Make four approved PRs in opted-in projects between October 1 and October 31 in any time zone to complete the Hacktoberfest.
+
+The first 40,000 participants who complete the challenge successfully can elect to receive one of two prizes: a tree planted in their name, or the Hacktoberfest 2022 t-shirt.
+
+## Why choose SigNoz for participating in Hacktoberfest??
+Well, we have tons of issues to be taken care and we will be glad to have your helping hand. We also have a vibrant **[slack community](https://signoz.io/slack)** where you can seek out help in order to make your PRs. Just join our community and tell us you're there for Hacktoberfest!
+
+Our backend is written in Golang, while our frontend is written in Typescript. Check your favorite issues to tackle now 🤺👇
+
+[![SigNoz good first issues](/img/blog/2021/10/hacktoberfest_signoz_first_issues.webp)](https://github.com/SigNoz/signoz/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)
+
+## Why contribute to open-source projects?
+If you're here, then you probably understand the importance of the open-source ecosystem. But it's just not about how open-source software has the potential to change the world. It is also very beneficial for developers to contribute to open-source.
+
+ It is said that there is no better code base than that maintained by an open-source community, and it's probably true. Without strict adherence to code quality and governance, imagine how chaotic it will be for a group of developers who have never even met in person to build world-class software.
+
+Here are a few benefits of contributing to open-source:
+
+- You get a thorough understanding of the concepts involved in the open-source project you're participating
+- You get in touch with more experienced and talented developers from whom you can learn and get mentorship
+- Contributions to open-source is a strong proof of someone's technical acumen. It's better to have contributions on your preferred tech stack rather than just mentioning about it on your CV
+- Contributing to open-source is fun! You get to meet new people while accumulating new skills along the way
+
+At SigNoz, we believe that the future of software is open-source. SigNoz is a full-stack **application performance monitoring tool** with which we hope to empower developers to solve issues in production quickly. We believe a **developer-first** and **community-driven approach** would be best suited for a product that is used by developers day in and day out.
+
+We have a vibrant community of **more than 1400 developers** collaborating together to build the next-gen open-source monitoring solution to keep your systems in fine health. The best thing about open-source is its community where you get to meet a diverse set of people coming together to solve some challenging problems.
+
+We're looking forward to help you take your first steps in the world of open-source. We would also love to host folks who want to learn more about performance monitoring software.
+
+So, let's not wait to create those pull requests and get some green dots on your GitHub profile 🥳🎉
+
+<!-- ## List of good first issues in SigNoz
+Here's a list of some good first issues that you can take up for SigNoz:
+
+[Integrate bundlephobia as GitHub CI/CD actions](https://github.com/SigNoz/signoz/issues/319)
+
+[Configure JEST(Typescript) with React Testing Library](https://github.com/SigNoz/signoz/issues/312)
+
+[Bug: Handle uncaught error in component](https://github.com/SigNoz/signoz/issues/227)
+
+[Flamegraph - Sort children by startTime](https://github.com/SigNoz/signoz/issues/178)
+
+[Configure eslint and Prettier github actions](https://github.com/SigNoz/signoz/issues/280) -->
+
+Visit to our GitHub repo now, and start hacking 👇
+
+[![SigNoz GitHub repo](/img/blog/common/signoz_github.webp)](https://github.com/SigNoz/signoz)
+
+Join our **[slack community](https://signoz.io/slack)** if you need any help.

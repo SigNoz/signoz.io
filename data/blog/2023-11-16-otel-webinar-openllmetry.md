@@ -1,0 +1,319 @@
+---
+title: OpenTelemetry for AI - OpenLLMetry with SigNoz and Traceloop 
+slug: opentelemetry-webinar-openllmetry
+date: 2023-11-16
+tags: [OpenTelemetry]
+authors: priyansh
+description: Join Nica and Nir to discuss how machine learning can be monitored with OpenTelemetry. We'll see how the SigNoz dashboards can help you monitor resource use, performance, and find problems before your infra budget goes haywire....
+image: /img/blog/2023/11/otel-webinar-openllmetry-cover.jpeg
+hide_table_of_contents: true
+keywords:
+  - opentelemetry
+  - webinar
+  - openllmetry
+  - traceloop
+  - signoz
+  - observability
+---
+
+import { LiteYoutubeEmbed } from "react-lite-yt-embed";
+
+<head>
+  <link rel="canonical" href="https://signoz.io/blog/opentelemetry-webinar-openllmetry/"/>
+</head>
+
+Join <a href="https://github.com/serverless-mom" rel="nofollow">Nočnica Mellifera</a> and <a href="https://www.linkedin.com/in/nirga/" rel="nofollow">Nir</a> to discuss how machine learning can be monitored with OpenTelemetry. We'll see how the SigNoz dashboards can help you monitor resource use, performance, and find problems before your infra budget goes haywire.
+
+
+Below is the recording and an edited transcript of the conversation.
+
+<!--truncate-->
+
+
+## Summary of the Talk
+
+<LiteYoutubeEmbed id="feKopGAlKtc" mute={false} />
+
+<p>&nbsp;</p>
+
+*Find the conversation transcript below.👇*
+
+**NICA:** In my first role as a developer, I believe I was trying to do a day-one commit, and I ran my unit tests. I got back that 223 tests were failing. I'll always remember that number because I went to my senior developer, my mentor, and I said I broke a couple of the unit tests with my commit and she said “How many did you break?” I was like, "Oh, 223." 
+
+What I said was I said a couple hundred." She said, "How many exactly did you break?" I said, "Oh boy, you know she's more upset with me than I thought, 223."
+
+She says, "Oh, that's fine. 223. You're always broken. If it had been 224 or 220, that would have been a problem. But 223 is fine. You're ready to go and commit."
+
+That is always a better thing to start with than, I think we're live. But that has that much to do with what we're talking about today. We're talking about OpenTelemetry and machine learning with my guest. We have Nir here today. Nir, say hi to the people. Tell us something about Trace Loop. Yeah, thank you so much for joining us. 
+
+**NIR:** Thank you. I'm Nir, the CEO of Trace Loop. We're a YC company. We did YC Winter '23, and we are focusing on building a tool for monitoring and evaluation of large language models.
+
+**NICA:** I love that. I think this is such a great topic because OpenTelemetry is this tool to have a very standard way to monitor how our software is running in production. And one of the things that it has always been able to do is tell you how much your resource usage is. But for web applications, we're not concerned about resource usage with massive growth of users.
+
+Yeah, they're using the amount of bandwidth they're using, and they're usually doing okay. But, in the machine learning space, this is a huge concern. Is stuff growing totally out of proportion?
+
+**NIR:** Yeah, I think specifically around evaluation, this is the most complex part and it still hasn't been resolved for large language models or generative AI in general. So if you look at traditional machine learning, you always had this set of metrics that were sort of guiding you towards what's right and wrong.
+
+But then came GenAI and you build a prompt where you're working with this model, and you get a response, and you have no idea whether this response was better than the previous one other than just looking at it with your human eyes and saying, "Okay, this looks better."
+
+**NICA:** Yeah, and a massive thing is that when you sit down and realize, "Oh, I am just manually examining my AWS billing to see if I'm doing well," that's a concern. And what's the quality that we're getting out as well is another big piece.
+
+I love this topic, and I wrote a whole bunch of questions because I was very curious. We were gonna have a great demo of using SigNoz to do this monitoring. We've had a little bit of a technical limitation today, so we are going to do that as a separate segment that will go live probably next week or shortly before KubeCon. We'll try to make that happen, but this is going to be the Q&A portion. We'll do our demo portion very soon. But I wanted to start with my questions here.
+
+You know you can read them if you're a visual learner, but talk to me about the decision to use OpenTelemetry on top of your basis for these tools. I'm curious about that because I think a lot of people do associate OpenTelemetry with a web request, event-based framework, which is not what we're working with here.
+
+**NIR:** We're huge fans of OpenTelemetry. We've been using it for years. I used to be Chief Architect with Fiverr, and we integrated OpenTelemetry into Fiverr.
+
+**NICA:** That's right, I forgot that Fiverr was like an early OpenTelemetry shop. That's cool. Sorry, go ahead.
+
+**NIR:** So we're huge fans of OpenTelemetry, and I think when we started working with large language models, building these pipelines where you have a vector database, you retrieve data, and then you use it to build a prompt that you send to OpenAI, it makes sense. It feels like a trace that you have in OpenTelemetry. So it's natural to just use OpenTelemetry to export this data and visualize it. For us, it was the easiest. The decision to just use OpenTelemetry because it's easier to build a tracing dashboard using OpenTelemetry rather than starting from scratch. 
+
+**NICA:** Yeah, I love that. On our community Slack for SigNoz, we have conversations where someone's like, "Is your dashboard compatible with this specific library that generates metrics?" I understand where they're coming from because I've been working in observability for a very long time.
+
+I remember when that was the case. It was like, "Oh yeah, you have this one library to do this one thing." For example, database indexing. That's an example of something not very event-based or request-based. "Is it compatible with my observability dashboard?" Of course, you find out no, it won't handle those kinds of metrics these days. 
+
+In the OpenTelemetry space, it's like, "Will it report to the OpenTelemetry collector?" If yes, then yes. If no, then no. But generally, the answer is yes. You know there's some kind of ingestion tool for it. But you're right that the actual, like, giving a prompt, adding a single vector, and getting back a response that looks like a trace, with a request-response pattern to it.
+
+**NIR:** Yeah, exactly. 
+
+**NICA:** And I apologize, this is my ignorance. You know, I think of using monitoring for LLMs as monitoring for the construction phase, the learning phase. But we're also talking about monitoring how well is it performing to answer questions. How well is it functioning that model? 
+
+All right, so talk to me a little bit about the limitations of existing tools. We're not trying to embarrass anybody, but this is new technology, so of course, there are limitations to what's out there.
+
+**NIR:** I think the thing I like the most about OpenTelemetry or one of the things I like the most, is auto-instrumentation. So you don't have to do anything. You just initialize the standard OpenTelemetry SDK, and you immediately get visibility into HTTP calls, database calls, whatever you want. So we wanted to have the same experience with LLMs. 
+
+Right now, the existing tools for observability with LLMs require you to manually log and specify in your code where you call OpenAI or replace the OpenAI API with some other proprietary API, which is a lot of work if you have a significant code base already using LLMs. What's great about OpenTelemetry is that you get a great infrastructure for auto-instrumenting these calls. So basically, you just add one line of code, and you get instant visibility into your vector database calls, LLMs calls, and anything you want.
+
+**NICA:** This is such a big piece with OpenTelemetry. This context propagation and automatic instrumentation is fantastic. A lot of the early tools for adding observability to IoT, for example, tend to be very single-use tools. It's a specific dashboard, a specific call. But yeah, also you'll see where it's like, "Oh, we're fully bought into this technology, so we have 500 calls for it across the code base." That's going to be a tough sell.
+
+**NIR:** Definitely. 
+
+**NICA:** Now, this gets us to how we handle tracing the entire system execution, not just the model.
+
+**NIR:** Because we're using OpenTelemetry, we need to instrument and log calls to Pinecone and OpenAI. But if you also use some database in your system as part of the LLM chain or workflow, then you get it out of the box. OpenTelemetry already instruments a lot of standard libraries. So if you're using requests in Python, you get this visibility out of the box. You don't need to do anything.
+
+**NICA:** That's been my experience as well. Even if you have something like Treay Bizarre, you can add a couple of lines of code to add it to your traces or add metrics if you're bought into that context.
+
+One of the things we have seen people dealing with is the issue of extreme vendor lock-in. They got locked into an observability tool or a DB tool and were completely stuck on that model. You mentioned that you are seeing some growth with people saying, "Hey, I want to move beyond OpenAI," or, "I want to integrate this other tool," and lock-in has been more limited. How do you feel like that's a concern that you're addressing with this tool?
+
+**NIR:** I think, and this was one of the points I made when we did a Show Hackernews post a few weeks ago, is that I think OpenTelemetry did a great thing for the traditional microservice cloud observability world. Ten years ago or five years ago, you needed to install a Datadog agent, and then you were locked into Datadog for life. Switching to another observability platform was a lot of work. But then came OpenTelemetry, and it gave you the freedom to choose. You can use Datadog, you can use New Relic, you can use Sentry, whatever you want. 
+
+So, we can use the same technology and the same idea to do the same with large language models. Just use OpenTelemetry as a standard, and then you can connect it to those traditional observability platforms, but also to the new ones that specialize in evaluation and monitoring for large language models.
+
+And when you talk to a lot of companies, many companies, when they're just starting, they still want to use their existing observability tools. They don't want to switch to a new one. Only when they start using LLMs in a more advanced way do they look for more sophisticated, specific solutions for LLMs.
+
+**NICA:** By the way, I want to thank you so much. We drafted a few questions, and I said, "Here's what I want to ask you." Thank you so much for rolling with me, and completely changing the sequence on you. I feel so bad about this. Two or three years ago, I had a great guest, very knowledgeable, who had rehearsed the questions in order and was super disappointed that I had to change the sequence.
+
+I want to talk about some of the technical challenges that you faced. I think that the very basic request modeling and the concept of tracing can make sense here. But I'm sure there was a bit of a challenge doing that translation.
+
+**NIR:** I think OpenTelemetry is a great technology as a consumer, someone who's just using it. But if you're developing around it, it's fairly complex. We were already knowledgeable of observability, but there was a steep learning curve in understanding how to build custom instrumentations in OpenTelemetry. How do you connect it to the LLM ecosystem? It's a complex technology, evolving all the time, and it's still very young. There's a steep learning curve to work with it properly. 
+
+**NICA:** One of the things I was looking at this month is that you can't connect trace spans after the fact on the collector side. It's a perfect example where a lot of people using this are experts at it, they've been working in large enterprises, but it's not the first thing that occurs to you to document.
+
+It's something I'm trying to work on with the project, finding places where we can put something out, either changing the documentation or writing guides to help people get more into it. But once you're trying to develop against it, it's an advanced tool.
+
+By the way, I shared the link to the Show Hackernews. That's a great place to get a primer and also to see what's on people's minds and what they're interested in. Hackernews always has an interesting crowd that shows up. It can be very hard to get their interest, but once you do, they get excited. The number of people who moved from clicking on it, and reading the README, to downloading it and deploying it is quite impressive.
+
+So right now, it (here, Traceloop) provides instrumentation for specific models like OpenAI, Anthropic, and Coherent. Are there plans to extend into other machine learning models in the future?
+
+**NIR:** Yes, we already support the Transformers model for Hugging Face. We're adding more every day. If you go by this list, I got it from the comments. I didn't try it out on every integration to start with. We are constantly adding more and more instrumentations. We plan to support everything in the ecosystem. We already support Pinecone and ChromIDB as vector databases. We'll have others coming in soon. We are supporting the Langchain as a framework for LLMs. We basically will support everything in this ecosystem.
+
+**NICA:** This makes sense. If you're working with APIs and you have expected request or response structures, it shouldn't come to a point where you're like, "No, we can't instrument that API." That should be doable.
+
+Lastly, before we go into a demo, do you have advice for engineers who are considering a lot of this tooling for people who are making use of these models within their products but want to start asking questions about security, compliance, observability, the second-order concerns?
+
+**NIR:** I think you should always aspire to use as many open-source tools as you can because they can be easily deployed on-prem if you need to. Especially around large language models, we see a lot of larger companies that see privacy as a major concern for them because the prompts within the traces contain very sensitive data. They can't trust this information with anyone.
+
+**NICA:** Yeah, it makes sense, especially when you're dealing with sensitive data like sales relationships on the enterprise side or therapy questions on the personal side. It's the kind of data you don't want to see spread about or shared. Talking about self-hosting and open-source tools as alternatives for how you're modeling certain data makes a lot of sense. Telemetry's strength is that you can route data to multiple places, so you can have the same collector doing that kind of routing.
+
+This has been a fantastic talk, and I can't wait for us to dive into a little demo of implementing it on your own set of tools and reporting some of the data over to SigNoz.
+
+**NIR:** One of the questions people keep asking is, "Hey, why is this separate from OpenTelemetry? Are you planning on integrating it back into OpenTelemetry, giving it to the bigger project?" I've been contributing to the OpenTelemetry project for a long time, and I'd love to become part of OpenTelemetry at some point. But you have to understand that OpenTelemetry is a big project.
+
+This is a huge project with a lot of stakeholders, and a lot of users are using it outside of the LM world. It's hard to commit the semantic conventions we're defining for the instrumentations today into the main OpenTelemetry repo. This is still evolving, and we're trying to figure out what's the right way to report the different prompts or bases.
+
+**NICA:** I'll say on that, when you talk to the tags or the SIGs within the group, they're like, "We want to see people doing instrumentation as separate projects." Instrumentation is mainly for the core language projects. Anybody could do a collector, but this is new instrumentation. So, it's early days, and how it's going to be folded in and when it will be folded could be years down the line. I think that makes sense.
+
+Yeah, it may surprise some people, but that's how the project works. It's easy to contribute to the collector, but instrumentation is generally done as separate projects. I think that makes a ton of sense.
+
+Thank you for having such complete answers to these questions. I love that you're coming in with so much background and empathy for the users who are trying to understand what's going on with these models and track their actual usage.
+
+*DEMO STARTS NOW*
+
+*Note: The conversation ends here, as it transitions into a demonstration.*
+
+
+**NIR** Today, I'm going to showcase OpenTelemetry with a simple demo using Pinecone, a recommendation engine. I've set up a RAG pipeline based on a Pinecone demo. I loaded a dataset named 'longchain-python-docs,' containing all the Langchain documentation up to around June or May 2023, into the Pinecone database and now it's ready to use
+and if we go here we can see this is like the set of documentation all the docs you have on Langchain.
+
+On top of that, I built a really simple RAG pipeline, that allows you to ask questions on on the Lang chain documentation. Whenever you get a question we go to Pinecone we get the five most relevant documents from Lang chain documentation and then we call open AI with a prompt that contains all this documentation with the question the user asks and that's it and we we print the answer. 
+
+We can run it here and see the answer, it's called look retrieval it takes a while because the opening is slow. 
+
+**NICA:** This is probably the number one use case for OpenTelemetry: "Hey, why has our service gotten so much slower?" Well, I think it might be the API, but I can't prove it. 
+
+**NIR:** So now you might ask, what was the slow part? Was it the querying? The pinecone? OpenAI? The embedding? I have no idea, right? But yeah, you can see the answer here gave me a pretty good answer to the question, "How do I build an agent with Langchain?" Like, a really good agent, good answer, sorry, from the documentation. And yeah, we want to see, okay, it took like 10 seconds to build this agent, and now we can see all the telemetry for our service. This is helpful!
+
+Let's see how long it takes to install OpenLLMetry. It should only take a few seconds. If it takes longer, we'll need to figure out why.
+To install OpenLLMetry, go to the documentation. It's pretty easy to follow. If you're a keyboard person, you can use the command line instead.
+
+**NICA:** We'll also share links to the documentation in the chat, so you don't have to type everything you see in the video.
+
+**NIR:** Okay, so to install OpenLLMetry, we'll install traceloop-sdk, which wraps OpenLLMetry. Then, we'll initialize it. Since we're running locally, we'll disable batch as well.
+Let's see how long it takes...
+
+**NICA:** We are going to see right now how to disable batching when trying out instrumentation. If you start with a production-style thing with batch responses, you will sit there sending requests for five minutes and see nothing. You will think it is broken, go back and change your code, so you want your batching to be disabled to get that data.
+
+**NIR:** Right, so let's do it here. I am using poetry to install the traceloop-sdk. After it is installed, we are going to go to the pipeline and import the traceloop-sdk.
+
+**NICA:** Sorry, I have a funny story to tell you. I had not used a code completion tool like a modern code completion tool until this week because a friend asked me to try out their tool. I was like, "Oh, this is very nice!" I was doing my imports and it said, "Do you want to import this other thing that you use later in your code?" I was like, "Uh, why are you telling me to import this random component?" Then I saw, "Oh, right, because I use it and I forgot to import it." It was marked in the parser and stuff, but I was like, "Oh, that's pretty nice!" Thank you for that 
+
+When you are first implementing open telemetry instrumentation or when using instrumentation, it is important to disable batching so that you can see each request traced in your dashboard. This is because you want to be able to see the results of your changes as soon as possible. 
+
+**NIR:** Absolutely. So, I'll do that now. We're using Poetry to install the SDK. 
+
+*Installation process is performed.*
+
+Once it's installed, we can use OpenTelemetry to trace our requests. We need to import it, and we're good to go. 
+
+*OpenTelemetry is imported.*
+
+So, now, you can instrument your code and monitor the performance in detail. 
+
+We'll re-run the demo with OpenTelemetry, and this time, we'll see the results displayed as traces.
+
+*The demo is rerun with OpenTelemetry.*
+
+You can see that the traces are exported. This allows you to see the different steps and response times within your application.
+
+This level of visibility is essential for understanding how each part of your system contributes to the overall response time. 
+
+However, what you'll notice is that these are individual spans, and they're not connected to form a complete trace. 
+
+A complete trace, with connected spans, would provide a better picture of the entire workflow. 
+
+To create connected traces, we can use annotations. OpenTelemetry recommends annotating your workflow. You can use decorators to annotate different tasks and link them together.
+
+So, you'll have a comprehensive view of how data flows through your system.
+
+**NICA:** Precisely. We'll annotate our workflow and different tasks within our program. We've annotated the main method, which is the "ask_question" function. It's the core of our workflow.
+
+That's the part that calls other methods and orchestrates the whole process.
+
+We've also annotated the "query_lm" task, which corresponds to the call to OpenAI, and the "retrieve_docs" task, which retrieves documents from Pinecone.
+
+This helps us see how different parts of our system are performing and if any are causing bottlenecks. After annotating our code, we can re-run it and check the traces to see the complete workflow.
+
+*The program is rerun with annotations.*
+
+**NIR:** Let’s go to the Trace Loop website and create an account.
+
+1. Sign in to your GitHub account and create an organization.
+2. Generate an API key.
+3. Add the API key as an environment variable.
+4. Run your program again.
+
+Once you have disabled batching, you can see the traces of your requests in the Trace Loop dashboard. You can also see how long each request took and which services were called.
+
+*They demonstrate how to enable a trace loop, sign up, and create an API key to export traces to the OpenTelemetry dashboard. However, they realize that the generated traces are individual and not a connected sequence.*
+
+To see a complete connected trace, annotations are needed. OpenTelemetry recommends annotating your workflow to view a unified trace. You can use decorators to connect and visualize the overall process.
+
+*They proceed to add annotations to connect the spans and show the workflow as a comprehensive trace.*
+
+
+**NIR:** Great, now let's run the program again. You can see it exporting traces. Go back to the tracing screen, and you can see the traces for the call to OpenAI and the call to Pinecone. But they're disconnected spans, so we want to connect them.
+
+Now, when we view the traces, we can see the entire workflow. With annotations, you can follow the sequence of tasks and get insights into which parts might need optimization. This provides valuable information for improving the performance of your application.
+
+It's an essential tool for anyone building AI-integrated services and wanting to understand what's happening under the hood.
+
+OpenTelemetry's integration capabilities allow you to connect it to various components and gather comprehensive traces of your system's operation.
+
+Now, if you go back to the Traceloop dashboard, you can see the workflow that connects everything. It shows you how much time was spent on each task, offering real insight into what's happening.
+
+Exactly, and because we're using OpenTelemetry, you can connect it to anything you want. In our documentation, we have a section on integrations, like how to integrate with SigNoz and send trace data to it. It's easy, and you can set environment variables to configure it.
+
+[The demonstration ends here, with a transition into further discussion about integrations.]
+
+**NICA:** Alright, so I want to show you how easy it is to integrate OpenTelemetry with your existing services. First, make sure you've set up your service name to ensure that everything is well-defined. Setting the service name is a crucial step for proper tracing and monitoring of your application.
+
+**NIR:** Once you have your service name in place, you can go to your settings, which I already have here in my SigNoz instance. And please, bear with us for a moment as we adjust the text size to make it look just right. 
+
+**NICA:** It's always interesting when text sizing becomes a part of your workflow, isn't it?
+
+Oh, you have no idea! It's a common struggle, especially when you zoom in and out of your interface. So, let's go to the ingestion keys now. But remember folks, don't send stuff to the Trace Loop account; that would be weird. Right, and we want to avoid any odd data ending up in the Trace Loop account.
+
+Now, can we take a look at a couple of traces in the SigNoz dashboard? Let's explore and report it. 
+
+**NIR:** To report it, we need to set up Trace Loop and add the correct base URL. We also need to export the Trace Loop headers. These details are all well-documented. Now, let's copy the ingestion key and add it as an environment variable. 
+
+**NICA:** By the way, typing keys from memory is quite an acrobatic feat, especially when you're doing it during a live stream. It's indeed a skill, but it's all part of the job.
+
+**NIR:** And that's it; now we're all set. Let's run the app again. 
+
+**NICA:** I'd undoubtedly misspell "access" if I were doing it manually. Automation can be a lifesaver in these situations. 
+
+*The setup is complete, and they start sending traces.*
+
+**NIR:** So now we're sending traces. Let's go back to SigNoz, navigate to the traces section, and wait for a few seconds to see the traces.
+
+We should be able to see the traces from our application within SigNoz.
+
+*They wait for a moment and start seeing the traces.*
+
+We've got a couple of traces. Let's explore them. This is where we can dive into the details of what our application is doing.
+
+*They analyze the traces in the Signals dashboard.*
+
+**NICA:** These are the same traces we saw in Trace Loop, and you can observe the workflow, tasks, and everything here. The ability to have a complete trace of your application's operation is invaluable for monitoring and debugging.
+
+But what's impressive is how well-structured the attributes are. The key naming is logical and makes sense. It's organized in a way that you can query and analyze the data effectively. And check out the prompt attributes – they're nicely labeled and provide meaningful data.
+
+**NICA:** This is the kind of visibility that's essential for understanding your application's behavior.
+
+*They discuss the service name and attributes in the traces.*
+
+You can set your service name explicitly if needed, but the default service name is quite reasonable.
+
+Customizing the service name gives you the flexibility to label services in a way that suits your business.
+
+Nir That's true. And here's one more thing I want to show. Some people might be hesitant to annotate their code. But if you're using structured frameworks like Langchain, you don't need to annotate anything. Frameworks often have built-in structures that OpenTelemetry can utilize for tracing. I've rewritten the example you saw earlier, this time using Langchain. And you can see that you don't need to annotate anything. We're still calling Trace Loop to initialize it. It's essentially two lines of code to integrate with OpenTelemetry.
+
+It's a very clean approach, and it saves you the effort of manually annotating your code.
+
+*They run the Langchain example without manual annotations.*
+
+Now, with Langchain, we don't have to annotate tasks manually. OpenTelemetry can figure out the program structure and tasks automatically.
+
+That's a significant advantage for those who prefer a more hands-off approach to tracing.
+
+*They analyze the traces generated by Langchain and see the same high-quality attributes.*
+
+As you can see, we have the same level of detail in the traces without manual annotations. 
+
+**NICA:** It's an excellent option for people who want to streamline their tracing without investing in extensive annotations.
+
+**NIR:** And it's good to remember that not all LLM providers, databases, or frameworks are supported yet. We encourage anyone interested to contribute and help us build OpenTelemetry integration for their preferred frameworks and tools.
+
+Collaboration and contributions can make OpenTelemetry even more versatile and comprehensive.
+
+**NICA:** Absolutely. Start with what you can integrate automatically, and then build on that. Your observability will benefit from the additional context. It's a practical approach to gain better insights into your applications.
+
+*They wrap up their discussion.*
+
+I want people to check this out, and they can find links to the documentation in the description below. If you have questions, please feel free to ask in the comments. And I'll reach out to you on the CNCF Slack.
+
+*The demonstration ends with a call to action for the audience.*
+
+**NICA:** Thank you for joining us. We'll be back next week with more insights.
+
+
+
+---
+
+Thank you for taking out the time to read this transcript :) If you have any feedback or want any changes to the format, please create an <a href = "https://github.com/SigNoz/signoz/issues" rel="noopener noreferrer nofollow" target="_blank" >issue</a>.
+
+Feel free to join our Slack community and say hi! 👋 
+
+[![SigNoz Slack community](/img/blog/common/join_slack_cta.webp)](https://signoz.io/slack)
