@@ -1,0 +1,412 @@
+---
+title: OpenTelemetry Logs - A Complete Introduction & Implementation
+slug: opentelemetry-logs
+date: 2023-10-19
+tags: [OpenTelemetry]
+authors: ankit_anand
+description: Unlike traces and metrics, OpenTelemetry logs take a different approach. In order to be successful, OpenTelemetry needs to support the existing legacy of logs and logging libraries. And this is the main design philosophy of OpenTelemetry logs....
+image: /img/blog/2023/10/single-pane-of-glass-cover-min.jpg
+hide_table_of_contents: false
+keywords: [opentelemetry logs,opentelemetry log,opentelemetry,logs correlation,opentelemetry logging,telemetry signals,observability,signoz]
+---
+
+<head>
+  <link rel="canonical" href="https://signoz.io/blog/opentelemetry-logs/"/>
+</head>
+
+
+
+OpenTelemetry is a Cloud Native Computing Foundation(<a href = "https://www.cncf.io/" rel="noopener noreferrer nofollow" target="_blank" >CNCF</a>) incubating project aimed at standardizing the way we instrument applications for generating telemetry data(logs, metrics, and traces). OpenTelemetry aims to provide a vendor-agnostic observability framework that provides a set of tools, APIs, and SDKs to instrument applications.
+
+
+
+![Cover Image](/img/blog/2023/10/otel-logs-cover.webp)
+
+Modern-day software systems are built with many pre-built components taken from the open source ecosystem like web frameworks, databases, HTTP clients, etc. Instrumenting such a software system in-house can pose a huge challenge. And using vendor-specific instrumentation agents can create a dependency. OpenTelemetry provides an open source instrumentation layer that can instrument various technologies like open source libraries, programming languages, databases, etc.
+
+This is a complete guide on OpenTelemetry logs. We are covering the following sections in this guide:
+
+- [What is OpenTelemetry?](#what-is-opentelemetry)
+- [What are OpenTelemetry Logs?](#what-are-opentelemetry-logs)
+- [OpenTelemetry's Log Data Model](#opentelemetrys-log-data-model)
+  - [Why is OpenTelemetry's log data model needed?](#why-is-opentelemetrys-log-data-model-needed)
+  - [Key Components Of OpenTelemetry's log data model](#key-components-of-opentelemetrys-log-data-model)
+- [Limitations of existing logging solutions](#limitations-of-existing-logging-solutions)
+- [Why Correlation of telemetry signals is Important?](#why-correlation-is-important)
+{/* <!-- - [Correlation in OpenTelemetry](#correlation-in-opentelemetry) --> */}
+- [Collecting log data with OpenTelemetry](#collecting-log-data-with-opentelemetry)
+  - [Collecting legacy first-party application logs](#collecting-legacy-first-party-application-logs)
+  - [Collecting third-party application log data](#collecting-third-party-application-log-data)
+  - [Collecting syslogs with OpenTelemetry](#a-practical-example---collecting-syslogs-with-opentelemetry)
+- [Log processing with OpenTelemetry](#log-processing-with-opentelemetry)
+- [SigNoz - a full-stack logging system based on OpenTelemetry](#signoz---a-full-stack-logging-system-based-on-opentelemetry)
+- [Getting started with SigNoz](#getting-started-with-signoz)
+- [OpenTelemetry logs are the way forward!](#opentelemetry-logs-are-the-way-forward)
+
+With OpenTelemetry instrumentation, you can collect four telemetry signals:
+
+- **Traces**<br></br>
+  Traces help track user requests across services.
+
+- **Metrics**<br></br>
+  Metrics are measurements at specific timestamps to monitor performance like server response times, memory utilization, etc.
+
+- **Logs**<br></br>
+  Logs are text records - structured or unstructured- containing information about activities and operations within an operating system, application, server, etc.
+
+- **Baggage**<br></br>
+  Baggage helps to pass information with context propagation between two process boundaries.
+
+Before deep diving into OpenTelemetry logs, let's briefly overview OpenTelemetry.
+
+## What is OpenTelemetry?
+
+OpenTelemetry provides instrumentation libraries for your application. The development of these libraries is guided by the <a href = "https://github.com/open-telemetry/opentelemetry-specification" rel="noopener noreferrer nofollow" target="_blank" >OpenTelemetry specification</a>. The OpenTelemetry specification describes the cross-language requirements and design expectations for all OpenTelemetry implementations in various programming languages.
+
+<figure data-zoomable align='center'>
+    <img src="/img/blog/2022/09/opentelemetry_architecture.webp" alt="OpenTelemetry Architecture"/>
+    <figcaption><i>How OpenTelemetry fits in an application architecture. OTel collector refers to OpenTelemetry Collector</i></figcaption>
+</figure>
+
+<br></br>
+
+OpenTelemetry libraries can be used to generate logs, metrics, and traces. You can then collect these signals with OpenTelemetry Collector or send them to an observability backend of your choice. In this article, we will focus on OpenTelemetry logs. OpenTelemetry can be used to collect log data and process it. Let's explore OpenTelemetry logs further.
+
+[![Try SigNoz Cloud CTA](/img/blog/2024/01/opentelemetry-collector-try-signoz-cloud-cta.webp)](https://signoz.io/teams/)
+
+## What are OpenTelemetry Logs?
+
+You can generate logs using OpenTelemetry SDK's in different languages. Unlike traces and metrics, OpenTelemetry logs take a different approach. In order to be successful, OpenTelemetry needs to support the existing legacy of logs and logging libraries. And this is the main design philosophy of OpenTelemetry logs. But it is not limited to this. With time, OpenTelemetry aims to integrate logs better with other signals.
+
+A log usually captures an event and stores it as a text record. Developers use log data to debug applications. There are many types of log data:
+
+- **Application logs**<br></br>
+  Application logs contain information about events that have occurred within a software application.
+
+- **System Logs**<br></br>
+  System logs contain information about events that occur within the operating system itself.
+
+- **Network logs**<br></br>
+  Devices in the networking infrastructure provide various logs based on their network activity.
+
+- **Web server logs**<br></br>
+  Popular web servers like Apache and NGINX produce log files that can be used to identify performance bottlenecks.
+
+Most of these logs are either computer generated or generated by using some well-known logging libraries. Most programming languages have built-in logging capabilities or well-known logging libraries. Using OpenTelemetry Collector, you can collect these logs and send it to a log analysis tool like [SigNoz](https://signoz.io/), which supports the OpenTelemetry logs data model.
+
+OpenTelemetry's log data model provides a unified framework to represent logs from various sources, such as application log files, machine-generated events, and system logs.
+
+## OpenTelemetry's Log Data Model
+
+The primary goal of OpenTelemetry's log data model is to ensure a common understanding of what constitutes a log record, the data that needs to be recorded, transferred, stored, and interpreted by a logging system.
+
+### Why is OpenTelemetry's log data model needed?
+
+**1. Unambiguous Mapping:** The data model allows existing log formats to be mapped unambiguously to this model. This ensures that translating log data from any log format to this data model and back results in consistent data.
+
+**2. Semantic Meaning:** It ensures that mappings of other log formats to this data model are semantically meaningful, preserving the semantics of particular elements of existing log formats.
+
+**3. Efficiency:** The data model is designed to be efficiently represented in implementations that require data storage or transmission, focusing on CPU usage for serialization/deserialization and space requirements in serialized form.
+
+### Key Components Of OpenTelemetry's log data model
+
+**Timestamp:** Represents the time when the event occurred.
+
+**ObservedTimestamp:** The time when the event was observed by the collection system.
+
+**[Trace Context](https://signoz.io/blog/context-propagation-in-distributed-tracing/) Fields:** These include TraceId, SpanId, and TraceFlags which are essential for correlating logs with traces.
+
+**Severity Fields:** These include SeverityText and SeverityNumber which represent the severity or log level of the event.
+
+**Body:** Contains the main content of the log record. It can be a human-readable string message or structured data.
+
+**Resource:** Describes the source of the log.
+
+**InstrumentationScope:** Represents the instrumentation scope, which can be useful for sources that define a logger name.
+
+**Attributes:** Provides additional information about the specific event occurrence.
+
+An example of a log record following OpenTelemetry log data model in JSON format might look like this:
+
+```json
+{
+  "Timestamp": "1634630400000",
+  "ObservedTimestamp": "1634630401000",
+  "TraceId": "abcd1234",
+  "SpanId": "efgh5678",
+  "SeverityText": "ERROR",
+  "SeverityNumber": "17",
+  "Body": "An error occurred while processing the request.",
+  "Resource": {
+    "service.name": "web-backend",
+    "host.name": "web-server-1"
+  },
+  "InstrumentationScope": {
+    "Name": "JavaLogger",
+    "Version": "1.0.0"
+  },
+  "Attributes": {
+    "http.method": "GET",
+    "http.status_code": "500"
+  }
+}
+```
+
+This example represents a log record from a backend service, indicating an error during request processing. The log is associated with a specific trace and span, has a severity of "ERROR", and includes additional attributes related to the HTTP request.
+
+## Limitations of existing logging solutions
+
+For a robust observability framework, all telemetry signals should be easily correlated. But most application owners have disparate tools to collect each telemetry signal and no way to correlate the signals. Current logging solutions don’t support integrating logs with other observability signals.
+
+Existing logging solutions also don’t have any standardized way to propagate and record the request execution context. Without request execution context, collected logs are disassociated sets from different components of a software system. But having contextual log data can help draw quicker insights. OpenTelemetry aims to collect log data with request execution context and to correlate it with other observability signals
+
+## Why Correlation is Important?
+
+**Root Cause Analysis:** When an issue arises, correlating logs with traces can help identify the root cause. For instance, an error trace can be linked to specific log entries that provide detailed error messages.
+
+**Performance Optimization:** By correlating metrics with traces, one can identify performance bottlenecks. For example, a spike in response time metric can be correlated with specific trace spans to identify slow-performing services or operations.
+
+**Holistic View:** Correlation provides a complete picture of the system, allowing developers and operators to understand how different components interact and affect each other.
+
+{/* <!-- ## Correlation in OpenTelemetry
+
+Let's see through a code example how correlation works in OpenTelemetry. Consider a hypothetical scenario where a web service processes user requests. We'll showcase how to correlate logs, metrics, and traces using OpenTelemetry:
+
+```python
+import openTelemetry from 'opentelemetry';
+
+# Initialize OpenTelemetry Tracer, Meter, and Logger
+tracer = openTelemetry.trace.getTracer('example-app');
+meter = openTelemetry.metrics.getMeter('example-app');
+logger = openTelemetry.logging.getLogger('example-app');
+
+# Start a trace span for processing a user request
+with tracer.start_as_current_span('process-request') as span:
+    try:
+        # Some processing logic here...
+
+        # Log an informational message
+        logger.info("Processing user request for user_id: 12345");
+
+        # Record a metric for request count
+        request_count_metric = meter.createCounter('request_count');
+        request_count_metric.add(1, {"method": "GET"});
+
+        # More processing logic...
+
+    except Exception as e:
+        # Log an error message
+        logger.error(f"Error processing request: {str(e)}");
+
+        # Set error attributes on the span
+        span.set_attribute("error", True);
+        span.set_attribute("error.message", str(e));
+
+        # Record a metric for error count
+        error_count_metric = meter.createCounter('error_count');
+        error_count_metric.add(1, {"type": "processing_error"});
+
+```
+
+In the above example:
+
+- We start a trace span for processing a user request.
+
+- Within the span, we log an informational message about the request processing.
+
+- We record a metric for the request count.
+
+If there's an exception during processing, we log an error message, set error attributes on the span, and record an error count metric.
+
+With OpenTelemetry's correlation capabilities, when analyzing the data, you can link the log entries, metrics, and trace spans together. This allows you to see, for instance, the specific log messages associated with a particular trace or the metrics associated with a specific operation.
+
+Now let's talk about how to collect log data with OpenTelmetry. --> */}
+
+## Collecting log data with OpenTelemetry
+
+OpenTelemetry provides various receivers and processors for collecting first-party and third-party logs directly via OpenTelemetry Collector or via existing agents such as FluentBit so that minimal changes are required to move to OpenTelemetry for logs.
+
+### Collecting legacy first-party application logs
+
+These applications are built in-house and use existing logging libraries. The logs from these applications can be pushed to OpenTelemetry with little to no changes in the application code. OpenTelemetry provides a `trace_parser` with which you can add context IDs to your logs to correlate them with other signals.
+
+In OpenTelemetry, there are two important context IDs for context propagation.
+
+- **Trace IDs**<br></br>
+  A trace is a complete breakdown of a transaction as it travels through different components of a distributed system. Each trace gets a trace ID that helps to correlate all events connected with a single trace.
+
+- **Span IDs**<br></br>
+  A trace consists of multiple spans. Each span represents a single unit of logical work in the trace data. Spans have span ids that are used to represent the parent-child relationship.
+    <figure data-zoomable align='center'>
+    <img src="/img/blog/2022/10/otel_logs_traces.webp" alt="Traces in SigNoz"/>
+    <figcaption><i>A trace graph broken down into individual spans visualized as Flamegraphs and Gantt charts in SigNoz dashboard</i></figcaption>
+    </figure><br></br>
+
+Correlating your logs with traces can help drive deeper insights. If you don’t have request context like **traceId** and **spanId** in your logs, you might want to add them for easier correlation with metrics and traces.
+
+There are **two** ways to collect application logs:
+
+- **Via File or Stdout Logs**<br></br>
+  Here, the logs of the application are directly collected by the OpenTelemetry receiver using collectors like **filelog receiver.** Then operators and processors are used for parsing them into the OpenTelemetry log data model.
+  <br></br>
+    <figure data-zoomable align='center'>
+    <img src="/img/logs/file_stdout.webp" alt="Collecting logs via file or Stdout logs"/>
+    <figcaption><i>Collecting logs via file or Stdout logs</i></figcaption>
+    </figure>
+    
+    <br></br>
+    
+    For advanced parsing and collecting capabilities, you can also use something like FluentBit or Logstash. The agents can push the logs to the OpenTelemetry collector using protocols like FluentForward/TCP/UDP, etc.
+
+- **Directly to OpenTelemetry Collector**<br></br>
+  In this approach, you can modify your logging library that is used by the application to use the logging SDK provided by OpenTelemetry and directly forward the logs from the application to OpenTelemetry. This approach removes any need for agents/intermediary medium but loses the simplicity of having the log file locally.
+
+### Collecting third-party application log data
+
+Logs emitted by third-party applications running on the system are known as third-party application logs. The logs are typically written to stdout, files, or other specialized mediums. For example, Windows event logs for applications.
+
+These logs can be collected using the OpenTelemetry file receiver and then processed.
+
+### A practical example - Collecting syslogs with OpenTelemetry
+
+You will need OpenTelemetry Collector (otel collector) to collect syslogs. In this example, we will illustrate collecting syslogs from your VM and sending it to SigNoz.
+
+- Add otel collector binary to your VM by following this [guide](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/).
+- Add the syslog reciever to `config.yaml` to otel-collector.
+
+  ```yaml {2-10}
+  receivers:
+    syslog:
+      tcp:
+        listen_address: "0.0.0.0:54527"
+      protocol: rfc3164
+      location: UTC
+      operators:
+        - type: move
+          from: attributes.message
+          to: body
+  ```
+
+  Here we are collecting the logs and moving message from attributes to body using operators that are available.
+  You can read more about operators [here](https://signoz.io/docs/userguide/logs/#operators-for-parsing-and-manipulating-logs).
+
+  For more configurations that are available for syslog receiver please check [here](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/syslogreceiver).
+
+- Next we will modify our pipeline inside `config.yaml` of otel-collector to include the receiver we have created above.
+
+  ```yaml {4}
+  service:
+      ....
+      logs:
+          receivers: [otlp, syslog]
+          processors: [batch]
+          exporters: [otlp]
+  ```
+
+- Now we can restart the otel collector so that new changes are applied and we can forward our logs to port `54527`.
+
+- Modify your `rsyslog.conf` file present inside `/etc/` by running the following command:
+
+  ```bash
+  sudo vim /etc/rsyslog.conf
+  ```
+
+  and adding the this line at the end
+
+  ```
+  template(
+    name="UTCTraditionalForwardFormat"
+    type="string"
+    string="<%PRI%>%TIMESTAMP:::date-utc% %HOSTNAME% %syslogtag:1:32%%msg:::sp-if-no-1st-sp%%msg%"
+  )
+
+  *.* action(type="omfwd" target="0.0.0.0" port="54527" protocol="tcp" template="UTCTraditionalForwardFormat")
+  ```
+
+  For production use cases it is recommended to use something like below:
+
+  ```
+  template(
+    name="UTCTraditionalForwardFormat"
+    type="string"
+    string="<%PRI%>%TIMESTAMP:::date-utc% %HOSTNAME% %syslogtag:1:32%%msg:::sp-if-no-1st-sp%%msg%"
+  )
+
+  *.*  action(type="omfwd" target="0.0.0.0" port="54527" protocol="tcp"
+          action.resumeRetryCount="10"
+          queue.type="linkedList" queue.size="10000" template="UTCTraditionalForwardFormat")
+  ```
+
+  So that you have retries and queue in place to de-couple the sending from the other logging action.
+  Also we are assuming that you are running the otel binary on the same host. If not, the value of `target` might change depending on your environment.
+
+- Now restart your rsyslog service by running `sudo systemctl restart rsyslog.service`
+- You can check the status of service by running `sudo systemctl status rsyslog.service`
+- If there are no errors your logs will be visible on SigNoz UI.
+
+## Log processing with OpenTelemetry
+
+OpenTelemetry provides operators to process logs. An operator is the most basic unit of log processing. Each operator fulfills a single responsibility, such as adding an attribute to a log field or parsing JSON from a field. Operators are then chained together in a pipeline to achieve the desired result.
+
+For example, a user may parse log lines using `regex_parser` and then use `trace_parser` to parse the `traceId` and `spanId` from the logs.
+
+OpenTelemetry also provides processors for processing logs. Processors are used at various stages of a pipeline. Generally, a processor pre-processes data before it is exported (e.g. modify attributes or sample) or helps ensure that data makes it through a pipeline successfully (e.g. batch/retry).
+
+Processors are also helpful when you have multiple receivers for logs and you want to parse/transforms logs collected from all the receivers. Some well-known log processors are:
+
+- Batch Processor
+- Memory Limit Processor
+- Attributes Processor
+- Resource Processor
+
+## SigNoz - a full-stack logging system based on OpenTelemetry
+
+OpenTelemetry provides instrumentation for generating logs. You then need a backend for storing, querying, and analyzing your logs. [SigNoz](https://signoz.io/), a full-stack open source APM is built to support OpenTelemetry natively. It uses a columnar database - ClickHouse for storing logs effectively. Big companies like <a href = "https://www.uber.com/en-IN/blog/logging/" rel="noopener noreferrer nofollow" target="_blank" >Uber</a> and <a href = "https://blog.cloudflare.com/log-analytics-using-clickhouse/" rel="noopener noreferrer nofollow" target="_blank" >Cloudflare</a> have shifted to ClickHouse for log analytics.
+
+The logs tab in SigNoz has advanced features like a log query builder, search across multiple fields, structured table view, JSON view, etc.
+
+<figure data-zoomable align='center'>
+    <img src="/img/blog/common/signoz_logs.webp" alt="Log Management in SigNoz"/>
+    <figcaption><i>Logs management in SigNoz</i></figcaption>
+</figure>
+
+<br></br>
+
+You can also view logs in real-time with live tail logging.
+
+<figure data-zoomable align='center'>
+    <img src="/img/blog/common/signoz_live_logs.webp" alt="Live tail logging in SigNoz"/>
+    <figcaption><i>Live tail logging in SigNoz</i></figcaption>
+</figure>
+
+<br></br>
+
+With advanced Log Query Builder, you can filter out logs quickly with a mix and match of fields.
+
+<figure data-zoomable align='center'>
+    <img src="/img/blog/common/signoz_log_query_builder.webp" alt="Advanced Log Query Builder in SigNoz"/>
+    <figcaption><i>Advanced Log Query Builder in SigNoz</i></figcaption>
+</figure>
+
+<br></br>
+
+## Getting started with SigNoz
+
+<GetStartedSigNoz />
+
+## OpenTelemetry logs are the way forward!
+
+The goal of OpenTelemetry is to make log data have a richer context, making it more valuable to application owners. With OpenTelemetry you can correlate logs with traces and correlate logs emitted by different components of a distributed system.
+
+> Standardizing log correlation with traces and metrics, adding support for distributed context propagation for logs, unification of source attribution of logs, traces and metrics will increase the individual and combined value of observability information for legacy and modern systems.<br></br>
+> Source: <a href = "https://opentelemetry.io/docs/specs/otel/logs/" rel="noopener noreferrer nofollow" target="_blank" >OpenTelemetry website</a>
+
+To get started with OpenTelemetry logs, install SigNoz and start experimenting by sending some log data to SigNoz. SigNoz also provides traces and metrics. So you can have all three telemetry signals under [a single pane of glass](https://signoz.io/blog/single-pane-of-glass-monitoring/).
+
+---
+
+**Related Posts**<br></br>
+
+[OpenTelemetry Collector - complete guide](https://signoz.io/blog/opentelemetry-collector-complete-guide/)
+
+[Log Monitoring 101 Detailed Guide](https://signoz.io/blog/log-monitoring/)

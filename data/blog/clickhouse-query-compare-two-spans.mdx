@@ -1,0 +1,76 @@
+---
+title: Measuring the time between spans in an OpenTelemetry trace with a Clickhouse query
+slug: clickhouse-query-compare-two-spans
+date: 2023-08-09
+tags: [OpenTelemetry, Product]
+authors: nicamellifera
+description: Sharing a query that lets you compare the time between two spans in different traces, even across two different services.
+image: /img/blog/2023/08/clickhouse_query_cover-min.jpg
+hide_table_of_contents: false
+keywords: [OpenTelemetry,Dev community]
+---
+
+<head>
+  <link rel="canonical" href="https://signoz.io/blog/clickhouse-query-compare-two-spans/"/>
+</head>
+
+In a recent conversation on our <a href = "https://signoz.io/slack" rel="noopener noreferrer nofollow" target="_blank" >SigNoz community Slack</a>, a user shared their query that asks a deceptively simple question: **what is the average time between two spans in a trace?**
+
+The usefulness of this answer is evident if you think about how often the total trace time does not highlight the time you care about most. This could mean any number of things: that the total trace time of handling a web request might include lots of spans _after_ a satisfying response was sent to the user. Or the time to handle a critical transaction might happen inside a larger trace.
+
+
+
+![Cover Image](/img/blog/2023/08/clickhouse_query_cover.webp)
+
+While it would be great to report a span with this critical section of time, that’s not always feasible. We don’t all control our codebase to the degree we can add custom markers to our tracer, and it’s possible the two spans in question are on very different services, requiring a ton work to tie them together at execution time.
+
+## The Power of ClickHouse Queries
+
+Let’s talk about how great Clickhouse has been for SigNoz. Adopted [just over two years ago](https://signoz.io/blog/clickhouse-storage-monitoring/), Clickhouse has enabled blazing speed and simple setup for SigNoz users. Clickhouse also enables queries like this, that aren’t possible in other monitoring tools.
+
+This query plots the average time between 2 spans in a trace which satisfy
+
+- span of service `driver` with name `/driver.DriverService/FindNearest` and a component name of `gRPC`
+- span of service `route` with name `HTTP GET /route`
+
+```sql
+SELECT
+    interval,
+    round(avg(time_diff), 2) AS result
+FROM
+(
+    SELECT
+        interval,
+        traceID,
+        if(startTime1 != 0, if(startTime2 != 0, (toUnixTimestamp64Nano(startTime2) - toUnixTimestamp64Nano(startTime1)) / 1000000, nan), nan) AS time_diff
+    FROM
+    (
+        SELECT
+            toStartOfInterval(timestamp, toIntervalMinute(1)) AS interval,
+            traceID,
+            minIf(timestamp, if(serviceName='driver', if(name = '/driver.DriverService/FindNearest', if((stringTagMap['component']) = 'gRPC', true, false), false), false)) AS startTime1,
+            minIf(timestamp, if(serviceName='route', if(name = 'HTTP GET /route', true, false), false)) AS startTime2
+        FROM signoz_traces.distributed_signoz_index_v2
+        WHERE (timestamp BETWEEN {{.start_datetime}} AND {{.end_datetime}}) AND (serviceName IN ('driver', 'route'))
+        GROUP BY (interval, traceID)
+        ORDER BY (interval, traceID) ASC
+    )
+)
+WHERE isNaN(time_diff) = 0
+GROUP BY interval
+ORDER BY interval ASC;
+
+```
+
+The resulting graph gives us a track of the time between these spans, which may be a better indicator of performance than any span created by default.
+
+<figure data-zoomable align='center'>
+    <img src="/img/blog/2023/08/time-gap.webp" alt="image of the SigNoz dashboard"/>
+    <figcaption><i>The resulting timeseries. You could also chart these as a table if you're less interested in the time series and more the total value.</i></figcaption>
+</figure>
+
+## Charting non-metric data
+
+The power of these queries implies a more general concept: the idea that we can get meaningful time series data from inputs that weren’t explicitly entered as such. In this case it’s not much of a stretch to go from two spans in two different service’s traces to a time series, but this concept can take us further. With our recent release of the logs explorer its becoming easier to calculate a time series based on the frequency of certain parameters within logs, expanding our ability to perform post-hoc analysis on our OpenTelemetry event data.
+
+See more examples of custom queries in the <a href = "https://signoz.io/docs/tutorial/writing-clickhouse-queries-in-dashboard/" rel="noopener noreferrer nofollow" target="_blank" >SigNoz query documenation.</a>

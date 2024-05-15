@@ -1,0 +1,202 @@
+---
+title: Challenges in Choosing an APM tool for Fintech Companies in India due to RBI Guidelines
+slug: challenges-in-choosing-a-monitoring-tool-for-fintech-companies-in-india
+date: 2023-04-24
+tags: [APM, Security]
+authors: [ankit_anand]
+description: RBI has issued guidelines on storing payment system data of Indian users for fintech companies in India. All user data needs to be stored in India. This also applies to all third-party tools they use, including monitoring tools..
+image: /img/blog/2023/04/challenges_in_choosing_APM_tool_cover-min.jpg
+hide_table_of_contents: false
+keywords: [application performance monitoring,apm tool,fintech companies,rbi guideline,data storage,signoz]
+---
+
+<head>
+  <link rel="canonical" href="https://signoz.io/blog/challenges-in-choosing-a-monitoring-tool-for-fintech-companies-in-india/"/>
+</head>
+
+As the growth lead of an open-source APM tool, I keep interacting with developers from companies of all shapes and sizes. I recently talked with a developer from a fintech startup in India. The startup provides a payment processing platform that enables businesses to accept payments from customers worldwide. For them, monitoring is critical, but the dev shared how limited they were when exploring an APM tool for their application.
+
+
+
+![Cover Image](/img/blog/2023/04/challenges_in_choosing_APM_tool_cover.webp)
+
+The reason?
+
+**Reserve Bank of India.**
+
+But what does RBI has to do with the monitoring tools of fintech firms? I was intrigued, so I dug further.
+
+The fintech space in India has been one of the leading forerunners in the story of driving innovation for new-age India. And, it is not just payments, fintech companies are innovating in every space such as credit, loan, insurance, investment, etc. In a nutshell, all financial products and services are available at the fingertips of Indian customers.
+
+The user demand for simplified financial services has also skyrocketed, leading to many players in the market who are vying for customers' trust to deal with their money. Apps in this domain need to take care of critical user flows where any technical issue can **cause mistrust and anxiety**.
+
+The performance of your application in production needs to be monitored to ensure high availability at all times. Not only that, but companies also need to monitor any latency issues in serving users' requests. As they say, "**Slow is the new down**" in today's competitive digital landscape.
+
+And that's where APM tools come into the picture. APM stands for application performance monitoring, and there are a number of tools in the market that you can choose from.
+
+## Or, can you?
+
+In 2018, RBI came out with a guideline on storing payment system data of Indian users. According to the guideline, all payment data need to be stored in data centers located in India. So how does this affect performance monitoring of fintech applications?
+
+Before we deep dive into that, let’s see in detail what this RBI guideline entails.
+
+## RBI guidelines on the storage of Payment System Data
+
+In April 2018, the Reserve Bank of India issued a guideline ordering all payment system operators to store all payments data in India, citing the need to have unfettered access to all payment data for supervisory purposes. In addition, all payment system operators need to submit a **System Audit Report** conducted by a CERT-IN empaneled auditor.
+
+[RBI circular on storage of payment system data](https://www.rbi.org.in/scripts/NotificationUser.aspx?Id=11244)
+
+[FAQs on the circular](https://m.rbi.org.in/scripts/FAQView.aspx?Id=130)
+
+import Screenshot from "@theme/Screenshot"
+
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
+   alt="RBI guidelines on the storage of payment system data - a snapshot"
+   
+   src="/img/blog/2022/02/rbi_notification.webp"
+   />
+<figcaption><i>RBI guidelines on the storage of payment system data</i></figcaption>
+</figure>
+<br/>
+
+### Entities that come under the guideline
+
+The circular is applicable to the following entities:
+
+- All payment system providers authorized/approved by RBI to set up and operate a payment system in India
+- All banks operating in India
+- System participants, service providers, intermediaries, payment gateways, third-party vendors, and other entities, whatever name they are referred to in the payment ecosystem
+
+> Note: The subtle mention of `other entities whatever name they are referred`. A fintech company should be careful in the selection of its third-party services.
+
+:::caution
+💡 What happens in case of non-compliance?<br></br>
+RBI barred American Express and Diners Club International Ltd. from [onboarding new customers](https://www.livemint.com/industry/banking/rbi-bars-amex-diners-club-from-adding-new-customers-11619187733124.html) in April 2021 because of non-compliance with data localization norms as issued in the guideline.
+:::
+
+So no, there is no way around it.
+
+### Data that is classified as payments system data
+
+And according to the circular, the following data needs to be stored in India:
+
+- End-to-end transaction details
+- Data related to payment or settlement transaction that is gathered/transmitted/processed as part of the payment message/instruction. This might include:
+  - Customer Data (name, mobile number, email, Aadhar number, PAN number, etc. as applicable)
+  - Payment sensitive data (customer and beneficiary account details)
+  - Payment credentials (OTP, pin, passwords, etc.)
+  - Transaction data (originating and destination system information, transaction reference, timestamp, amount, etc.)
+
+:::note  
+The list can get updated by RBI, and the definition of payment systems data might evolve.
+:::
+
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
+   alt="Snippet of original notification from RBI. Their wordings indicate that they can identify and classify new data under this purview"
+   
+   src="/img/blog/2022/02/user_data.webp"
+   />
+<figcaption><i>Snippet of original notification from RBI. Their wordings indicate that they can identify and classify new data under this purview</i></figcaption>
+</figure>
+<br/>
+
+### About System Audit Report
+
+Payment system operators(PSOs) have a mandate to submit a System Audit Report to the RBI. CERT-IN empaneled auditors should conduct the audit. This audit ensures that PSOs follow appropriate security and data localization practices in handling the storage of payment-related data.
+
+Some of the key data points that are collected for the audit report include:
+
+- A list of service providers/third parties with whom data is shared and the description of service offered along with their data localization report.
+- Details of systems used to store the data(database/file serve/paper/electronic media/ logs, etc.) in your environment.
+- For each channel or source, details of the information collected(full end-to-end transaction details/information collected /carried/processed as part of the message/payment instruction)
+- A confirmation/contractual agreement from the service provider that the data shared with them is stored in systems in India.
+
+So you need to ensure that any third-party tool/service you’re using is compliant with the RBI guideline.
+
+According to [Security Brigade](https://www.securitybrigade.com/system-audit-report-for-data-localization/), the following key criteria need to be covered as part of the audit:
+
+- Payment Data Elements
+- Transaction/Data Flow
+- Application architecture
+- Network Diagram/architecture
+- Data Storage
+- Transaction Processing
+- Activities subsequent to Payment Processing
+- Cross Border Transactions
+- Database Storage and Maintenance
+- Data Backup & Restoration
+- Data Security
+- Access Management
+
+## APM tool for Fintech Companies
+
+In a modern-day microservice architecture, a single transaction can travel across many services, hosts, protocols, and regions. While benefitting the organizations implementing this application architecture, it has led to increased operational and troubleshooting complexity. In order to keep your application in high availability(nine nines), it needs to be monitored for latency, throughputs, error rates, etc.
+
+And to identify which part of a request is taking more time, you need to track the transaction across services. That is called distributed tracing. All these features are provided by a modern-day APM tool.
+An APM tool has become critical to ensure the health of your application. But because of RBI guidelines, you cannot send payment systems data outside. Most full-stack APM tools have data centers outside India.
+
+DataDog, a popular APM tool, gives you the option to select between four data centers with no options for India, as shown in the pic below.
+
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
+   alt="DataDog has no data centers in India"
+   
+   src="/img/blog/2022/02/datadog_choose_region.webp"
+   />
+<figcaption><i>DataDog has no data centers in India</i></figcaption>
+</figure>
+<br/>
+
+Can you still send data outside? Is removing all PII data an option?
+
+### Scrubbing PII data to send data outside India
+
+Can fintech firms send application performance data without including any **Personally Identifiable Information (PII)**?
+
+You can consider using data scrubbers for removing PII data, but they are not full-proof. Also, it comes with the risk of occasional misses as your application will constantly be evolving.
+
+Another way is to give guidelines to developers that they dont log or send PII data to APM tools. But it is fraught with the risk of human error.
+
+## Way to go for Fintech Companies
+
+So what are the options of having robust performance monitoring in place?
+
+Self-hosted versions of popular open-source software like Prometheus and Jaeger can be a good solution. But they have their own challenges, and not all companies can afford to solve the complexity of running a self-hosted version of the current popular open-source tools.
+
+Most of these tools solve a particular use-case, e.g., Prometheus is used for metrics monitoring, and Jaeger is used for distributed tracing. However, the true advantage of an APM solution comes by combining metrics with distributed tracing.
+
+[<Screenshot
+   alt="Popular open-source tools in the monitoring domain take bandwidth to be set up"
+   height={500}
+   src="/img/blog/2022/02/current_open_source_tools_time.webp"
+   title="Depending on the use-cases, these tools can take a good amount of bandwidth to set up (Source:reddit)"
+   width={700}
+/>](https://www.reddit.com/r/devops/comments/o56csn/why_use_datadog_when_it_is_so_expensive/)
+
+[<Screenshot
+   alt="Complexity of maintaining popular open-source tools increases with scale"
+   height={500}
+   src="/img/blog/2022/02/complexity_current_os.webp"
+   title="Complexity with scale is another challenge that you might need to deal with (Source:reddit)"
+   width={700}
+/>](https://www.reddit.com/r/kubernetes/comments/p2in04/beginner_using_prometheus_what_are_the_proscons/)
+
+The scope and nuances of payment system data defined by RBI can evolve. At the same time, an APM tool has become a critical component of dev workflow in tech companies. The tool gets tightly integrated with both your application and culture.
+
+Sending monitoring data outside India possesses a risk that can be avoided by using a good self-hosted APM. Having the tool within your infra set in India ensures you will never violate the guidelines set by RBI.
+
+So the question is: are there good self-hosted APM solutions out there?
+
+At this point, let me introduce to you, **SigNoz - an open-source APM** that can be hosted within your infrastructure. SigNoz is focused on distributed tracing and metrics monitoring.
+
+You don't have to use multiple open-source tools for your monitoring needs. Also, you don’t have to miss out on a SaaS experience.
+
+You can try out SigNoz by visiting its GitHub repo 👇
+
+[![SigNoz GitHub repo](/img/blog/common/signoz_github.webp)](https://github.com/SigNoz/signoz)
+
+If you have any questions or need any help in setting things up, join our slack community and ping us in`#support` channel.
+
+[![SigNoz Slack community](/img/blog/common/join_slack_cta.webp)](https://signoz.io/slack)

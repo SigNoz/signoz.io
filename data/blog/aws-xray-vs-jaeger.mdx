@@ -1,0 +1,207 @@
+---
+title: AWS X-Ray vs Jaeger - key features, differences and alternatives
+slug: aws-xray-vs-jaeger
+date: 2021-09-14
+tags: [Tools Comparison, Jaeger]
+authors: ankit_anand
+description: Both AWS X-Ray and Jaeger are distributed tracing tools used for performance monitoring in a microservices architecture. Jaeger was originally built by teams at Uber and then open-sourced in 2015. On the other hand, AWS X-Ray is a distributed tracing tool provided by AWS specifically focused on distributed tracing for applications using Amazon Cloud Services.
+image: /img/blog/2021/09/aws_xray_vs_jaeger_cover.webp
+keywords: [jaeger,aws x ray,aws,distributed tracing,traces]
+---
+<head>
+  <link rel="canonical" href="https://signoz.io/blog/aws-xray-vs-jaeger/"/>
+</head>
+
+Both AWS X-Ray and Jaeger are distributed tracing tools used for performance monitoring in a microservices architecture. Jaeger was originally built by teams at Uber and then open-sourced in 2015. On the other hand, AWS X-Ray is a distributed tracing tool provided by AWS specifically focused on distributed tracing for applications using Amazon Cloud Services.
+
+
+
+![Cover Image](/img/blog/2021/09/aws_xray_vs_jaeger_cover.webp)
+
+Jaeger is a popular open-source tool that graduated as a project from Cloud Native Computing Foundation. On the other hand, Amazon X-Ray is more suited to an application built on Amazon Cloud Services.
+
+But before we dive into the details of Amazon X-Ray and Jaeger, let's take a short detour to understand distributed tracing.
+
+## What is distributed tracing?
+
+In the world of microservices, a user request travels through hundreds of services before serving a user what they need. To make a business scalable, engineering teams are responsible for particular services with no insight into how the system performs as a whole. And that's where distributed tracing comes into the picture.
+
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
+    alt="Microservices architecture"
+    
+    src="/img/blog/2021/09/jaeger_vs_zipkin_microservices_architecture.webp"
+    />
+<figcaption><i>Microservice architecture of a fictional e-commerce application</i></figcaption>
+    </figure>
+<br/>
+
+Distributed tracing gives you insight into how a particular service is performing as part of the whole in a distributed software system. There are two essential concepts involved in distributed tracing: **Spans** and **trace context**.
+
+User requests are broken down into spans.
+
+> What are spans?<br></br>
+> Spans represent a single operation within a trace. Thus, it represents work done by a single service which can be broken down further depending on the use case.
+
+A [trace context](https://signoz.io/blog/context-propagation-in-distributed-tracing/) is passed along when requests travel between services, which tracks a user request across services. Thus, you can see how a user request performs across services and identify what exactly needs your attention without manually shifting through multiple dashboards.
+
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
+    alt="Trace context is passed to track user requests across services"
+    
+    src="/img/blog/2021/09/opentelemetry_distributed_tracing-min.webp"
+    />
+<figcaption><i>A trace context is passed when user requests pass from one service to another</i></figcaption>
+    </figure>
+<br/>
+
+## Key Features of AWS X-Ray
+<a href = "https://aws.amazon.com/xray/" rel="noopener noreferrer nofollow" target="_blank" ><b>AWS X-Ray</b></a> helps developers to analyze and debug distributed applications in production. Using AWS X-Ray, you can identify the root cause of performance issues and errors. Some of the key features of AWS X-Ray includes:
+
+- **End-to-end tracing**<br></br>
+AWS X-Ray gathers data from individual services and gives you a cross-service view of requests made to your application. It aggregates request data into a single trace, which can then be used to follow the path of an individual request as it passes through different services.
+
+- **Service Map**<br></br>
+Service Maps give you an overview of how your services are connected in the application architecture. Service Maps can be used to identify latency issues in the services of your application at a glance.
+
+- **Server and Client side latency detection**<br></br>
+Using AWS X-Ray, you can detect node and edge latency distribution directly from the service map. With filters based on custom annotations, you can quickly drill down to issues impacting your end-user experience.
+
+- **Data annotation and filtering**<br></br>
+You can add business-specific metadata to your traces. Data annotation enables rich context for your trace data which can further be utilized for advanced trace filtering.
+
+- **Role based access control**<br></br>
+A large distributed application will have lots of sensitive telemetry data. AWS X-Ray gives you the flexibility to control which users and resources have permission to access your traces and how.
+
+
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
+    alt="Service maps give an overview of how services are connected in your application"
+    
+    src="/img/blog/2021/09/aws_xray_service_maps-min.webp"
+    />
+<figcaption><i>Service Maps feature on AWS X-Ray</i></figcaption>
+    </figure>
+<br/>
+
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
+    alt="Traces capture how a user request travel across services"
+    
+    src="/img/blog/2021/09/aws_xray_traces-min.webp"
+    />
+<figcaption><i>User request tracking using traces on AWS X-Ray dashboard</i></figcaption>
+    </figure>
+<br/>
+
+## Key features of Jaeger
+<a href = "https://www.jaegertracing.io/" rel="noopener noreferrer nofollow" target="_blank" ><b>Jaeger</b></a> was originally built by teams at Uber and then open-sourced. It is used for end-to-end distributed tracing for microservices. Some of the key features of Jaeger includes:
+
+- **Distributed context propagation**<br></br>
+  One of the challenges of distributed systems is to have a standard format for passing context across process boundaries and services. Jaeger provides client libraries that support code instrumentation in multiple languages to propagate context across services
+
+- **Distributed transaction monitoring**<br></br>
+  Jaeger comes with a web UI written in Javascript. The dashboard can be used to see traces and spans across services.
+
+- **Root Cause Analysis**<br></br>
+  Using traces you can drill down to services causing latency in particular user request.
+
+- **Server dependency analysis**<br></br>
+  Using Jaeger's web UI, you can see how requests flow through different services and different servers interact while serving user requests.
+
+- **Performance/latency optimization**<br></br>
+  Once you have identified, which service or query is creating latency, you can use the information to optimize it.
+
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
+    alt="Jaeger UI"
+    
+    src="/img/blog/2021/08/jaeger_ui-min.webp"
+    />
+<figcaption><i>Jaeger UI showing services and corresponding traces</i></figcaption>
+    </figure>
+<br/>
+
+## Comparing AWS X-Ray and Jaeger
+The most important difference between AWS X-Ray and Jaeger is that AWS X-Ray only supports tracing for applications in the AWS cloud ecosystem while Jaeger, an open-source tool, provides a vendor-agnostic way to collect and analyze trace data.
+
+Some of the key differences between AWS X-Ray and Jaeger are:
+
+- AWS X-Ray can only be used with applications running on Amazon EC2, Amazon EC2 container service, AWS Lambda, and AWS Elastic Beanstalk. On the other hand, Jaeger is an open-source tool under CNCF that can generate and manage trace data on any cloud vendor.
+
+- Jaeger's instrumentation libraries used to generate trace data are based on OpenTracing standards - vendor-neutral APIs and instrumentation for distributed tracing. Open-source instrumentation libraries are better suited for distributed and polyglot architectures. AWS X-Ray offers X-Ray SDK and X-Ray agent to instrument code.
+
+- AWS X-Ray supports only a handful of databases to be monitored. The X-Ray SDK can capture metadata for requests made to My SQL, PostgreSQL, and Amazon Dynamo databases. Whereas Jaeger can track requests to most databases as it is based on OpenTracing APIs.
+
+- Jaeger has broad community support. Its GitHub repo has almost 14k stars, and its community is backed up by members from all major cloud vendors like Microsoft and Google. On the other hand, AWS X-Ray is a proprietary tool by Amazon and does not have an open community around it.
+
+- AWS X-Ray is a paid tool including an option of 100k traces to be recorded free on the AWS free tier. It is managed service by AWS, which can be used by customers building on AWS. Jaeger, on the other hand, is completely open-source and free. That also means you are responsible for setting up and maintain your distributed tracing stack with Jaeger.
+
+AWS X-Ray is perfect for users who are building only on the AWS cloud ecosystem. But with distributed teams and multi-language tech architecture, you might use different cloud vendors and pieces outside the AWS ecosystem. So it makes more sense to use an open-source solution for setting up distributed tracing.
+
+This makes Jaeger a better alternative for end-to-end distributed tracing. But Jaeger is limited to distributed tracing, and engineering teams need more than just traces for a robust performance monitoring system.
+
+That's where [SigNoz](https://signoz.io/) comes into the picture. It provides a full-stack open-source performance monitoring platform.
+
+## Alternative to AWS X-Ray and Jaeger - SigNoz
+SigNoz is a full-stack open-source application performance monitoring and observability tool which can be used in place of AWS X-Ray and Jaeger. It provides advanced distributed tracing capabilities along with metrics under a single dashboard.
+
+ SigNoz is built to support OpenTelemetry natively. <a href = "https://opentelemetry.io/" rel="noopener noreferrer nofollow" target="_blank" ><b>OpenTelemetry</b></a> is becoming the world standard for generating and managing telemetry data (Logs, metrics and traces). It also provides a fast OLAP datastore, ClickHouse as the storage backend.
+
+ <figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
+    alt="Architecture of SigNoz with OpenTelemetry and ClickHouse"
+    
+    src="/img/blog/2021/09/SigNoz_architecture_clickhouse.webp"
+    />
+<figcaption><i>Architecture of SigNoz with ClickHouse as storage backend and OpenTelemetry for code instrumentatiion</i></figcaption>
+    </figure>
+<br/>
+
+SigNoz comes with out of box visualization of things like RED metrics.
+
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
+    alt="SigNoz UI showing the popular RED metrics"
+    
+    src="/img/blog/common/signoz_charts_application_metrics.webp"
+    />
+<figcaption><i>SigNoz UI showing application overview metrics like RPS, 50th/90th/99th Percentile latencies, and Error Rate</i></figcaption>
+    </figure>
+<br/>
+
+You can also use flamegraphs to visualize spans from your trace data. All of this comes out of the box with SigNoz.
+
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image"
+    alt="Flamegraphs used to visualize spans of distributed tracing in SigNoz UI"
+    
+    src="/img/blog/common/signoz_flamegraphs.webp"
+    />
+<figcaption><i>Flamegraphs showing exact duration taken by each spans - a concept of distributed tracing</i></figcaption>
+    </figure>
+<br/>
+
+
+Some of the things SigNoz can help you track:
+
+- Application overview metrics like RPS, 50th/90th/99th Percentile latencies, and Error Rate
+- Slowest endpoints in your application
+- See exact request trace to figure out issues in downstream services, slow DB queries, call to 3rd party services like payment gateways, etc
+- Filter traces by service name, operation, latency, error, tags/annotations.
+- Run aggregates on trace data
+- Unified UI for both metrics and traces
+
+You can check out SigNoz's GitHub repo here 👇
+
+[![SigNoz GitHub repo](/img/blog/common/signoz_github.webp)](https://github.com/SigNoz/signoz)
+
+___
+
+#### **Related Content**
+
+**[Jaeger vs Zipkin](https://signoz.io/blog/jaeger-vs-zipkin/)**<br></br>
+**[Jaeger vs SigNoz](https://signoz.io/blog/jaeger-vs-signoz/)**<br></br>
+**[Jaeger vs Prometheus](https://signoz.io/blog/jaeger-vs-prometheus/)**<br></br>
+**[Jaeger vs New Relic](https://signoz.io/blog/jaeger-vs-newrelic/)**<br></br>
+

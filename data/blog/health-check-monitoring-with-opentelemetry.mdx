@@ -1,0 +1,375 @@
+---
+title: Health Check Monitoring With OpenTelemetry | Complete Code Tutorial
+slug: health-check-monitoring-with-opentelemetry
+date: 2023-12-05
+tags: [OpenTelemetry]
+authors: daniel
+description: HTTP endpoints can be monitored with OpenTelemetry. The HTTP Check Receiver is a component of the OpenTelemetry Collector that enables monitoring of HTTP endpoints. It periodically sends HTTP requests to specified endpoints...
+image: /img/blog/2023/12/http-endpoint-monitoring-cover.jpeg
+hide_table_of_contents: false
+keywords: [opentelemetry,signoz,observability,metrics]
+---
+
+<head>
+  <link rel="canonical" href="https://signoz.io/blog/health-check-monitoring-with-opentelemetry/"/>
+</head>
+
+In this tutorial, you will learn how HTTP endpoints can be monitored with OpenTelemetry. You will use the OpenTelemetry Collector to collect metrics from the target endpoint and send them to SigNoz for monitoring and visualization.
+
+
+
+![Cover Image](/img/blog/2023/12/http-endpoint-monitoring-cover.webp)
+
+In this tutorial, we cover:
+
+- [What is an HTTP endpoint?](#what-is-an-http-endpoint)
+- [What is OpenTelemetry](#what-is-opentelemetry)
+- [What is OpenTelemetry Collector?](#what-is-opentelemetry-collector)
+- [How does OpenTelemetry Collector collect data?](#how-does-opentelemetry-collector-collect-data)
+- [Monitoring HTTP endpoint with OpenTelemetry Collector](#monitoring-http-endpoint-with-opentelemetry-collector)
+- [Prerequisites](#prerequisites)
+- [Setting up SigNoz](#setting-up-signoz)
+- [Setting up OpenTelemetry Collector](#setting-up-opentelemetry-collector)
+- [Monitoring HTTP Endpoints with SigNoz dashboard](#monitoring-http-endpoints-with-signoz-dashboard)
+- [Metrics and Resource Attributes for HTTP receiver supported by OpenTelemetry](#metrics-and-resource-attributes-for-http-receiver-supported-by-opentelemetry)
+- [Conclusion](#conclusion)
+
+If you want to jump straight into implementation, start with this [prerequisites](#prerequisites) section.
+
+## What is an HTTP endpoint?
+
+An HTTP endpoint is a specific URL or path on a web server that is designed to receive and respond to HTTP requests. It acts as an entry point for clients to interact with the server and access its resources. When a client sends an HTTP request to a specific endpoint, the server processes the request and sends back an HTTP response. The endpoint, therefore, acts as a gateway or entry point for interacting with a specific part of a web application or service.
+
+### Why Monitor HTTP endpoints?
+
+Monitoring HTTP endpoints is crucial for ensuring the continuous availability, optimal performance, and reliability of web services. It helps detect issues such as downtime, slow response times, or errors, allowing for proactive identification and resolution of potential problems.
+
+## What is OpenTelemetry
+
+OpenTelemetry is a set of APIs, SDKs, libraries, and integrations aiming to standardize the generation, collection, and management of telemetry data(logs, metrics, and traces). It is backed by the Cloud Native Computing Foundation and is the leading open-source project in the observability domain.
+
+The data you collect with OpenTelemetry is vendor-agnostic and can be exported in many formats. Telemetry data has become critical in observing the state of distributed systems. With microservices and polyglot architectures, there was a need to have a global standard. OpenTelemetry aims to fill that space and is doing a great job at it thus far.
+
+## What is OpenTelemetry Collector?
+
+OpenTelemetry Collector is a stand-alone service provided by OpenTelemetry. It can be used as a telemetry-processing system with a lot of flexible configurations that gather and process observability data, such as traces, metrics, and logs, from different parts of a software system. It then sends this data to chosen destinations, allowing for centralized analysis and monitoring. The collector simplifies the task of collecting and exporting telemetry data in cloud-native environments.
+
+## How does OpenTelemetry Collector collect data?
+
+Data collection in OpenTelemetry Collector is facilitated through receivers. Receivers are configured via YAML under the top-level `receivers` tag. To ensure a valid configuration, at least one receiver must be enabled.
+
+Below is an example of an **`otlp`** receiver:
+
+```yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+      http:
+```
+
+The OTLP receiver accepts data through gRPC or HTTP in the <a href = "https://github.com/open-telemetry/opentelemetry-proto/blob/main/docs/specification.md" rel="noopener noreferrer nofollow" target="_blank" >OTLP</a> format. There are advanced configurations that you can enable via the YAML file.
+
+Here’s a sample configuration for an otlp receiver:
+
+```yaml
+receivers:
+  otlp:
+    protocols:
+      http:
+        endpoint: "localhost:4318"
+        cors:
+          allowed_origins:
+            - http://test.com
+            # Origins can have wildcards with *, use * by itself to match any origin.
+            - https://*.example.com
+          allowed_headers:
+            - Example-Header
+          max_age: 7200
+```
+
+You can find more details on advanced configurations <a href = "https://github.com/open-telemetry/opentelemetry-collector/blob/main/receiver/otlpreceiver/README.md" rel="noopener noreferrer nofollow" target="_blank" >here</a>.
+
+Once a receiver is configured, it needs to be **enabled** to start the data flow. This involves setting up **pipelines** within a **`service`**. A **pipeline** acts as a streamlined pathway for data, outlining how it should be processed and where it should go. A pipeline comprises of the following:
+
+1. **Receivers:** These are entry points for data into the OpenTelemetry Collector, responsible for collecting data from various sources and feeding it into the pipeline.
+2. **Processors:** After data is received, processors manipulate, filter, or enhance the data as needed before it proceeds further in the pipeline. They provide a way to customize the data according to specific requirements.
+3. **Exporters:** After processing, the data is ready for export. Exporters define the destination for the data, whether it's an external monitoring system, storage, or another service. They format the data appropriately for the chosen output.
+
+Below is an example pipeline configuration:
+
+```yaml
+service:
+  pipelines:
+    metrics:
+      receivers: [otlp, httpcheck]
+      processors: [batch]
+      exporters: [otlp]
+```
+
+Here’s a breakdown of the above metrics pipeline:
+
+- **Receivers:** This pipeline is configured to receive metrics data from two sources: OTLP and HTTP Check. The **`otlp`** receiver collects metrics using both gRPC and HTTP protocols, while the **`httpcheck`** receiver gathers metrics from the HTTP endpoint.
+- **Processors:** Metrics data is processed using the **`batch`** processor. This processor likely batches metrics before exporting them, optimizing the data flow.
+- **Exporters:** Metrics processed through this pipeline are exported to the OTLP destination. The **`otlp`** exporter sends data to an endpoint specified in the configuration.
+
+## Monitoring HTTP endpoint with OpenTelemetry Collector
+
+In this section, you will learn how HTTP endpoints can be monitored and how metrics can be collected from those endpoints using the OpenTelemetry Collector. You will also learn how the collected metrics can be sent to SigNoz for visualization.
+
+## Prerequisites
+
+- A web app, a <a href = "https://github.com/SigNoz/http-endpoint-monitoring-demo-with-flask" rel="noopener noreferrer nofollow" target="_blank" >sample Flask App</a> has been provided. This app has five endpoints that we will set up to be monitored.
+- A [SigNoz cloud](https://signoz.io/teams/) account
+
+## Setting up SigNoz
+
+You need a backend to send the collected data for monitoring and visualization. [SigNoz](https://signoz.io/) is an OpenTelemetry-native APM that is well-suited for visualizing OpenTelemetry data.
+
+SigNoz cloud is the easiest way to run SigNoz. You can sign up [here](https://signoz.io/teams/) for a free account and get 30 days of unlimited access to all features.
+
+You can also install and self-host SigNoz yourself. Check out the [docs](https://signoz.io/docs/install/) for installing self-host SigNoz.
+
+## Setting up OpenTelemetry Collector
+
+The OpenTelemetry Collector offers various deployment options to suit different environments and preferences. It can be deployed using Docker, Kubernetes, Nomad, or directly on Linux systems. You can find all the installation options <a href = "https://opentelemetry.io/docs/collector/installation" rel="noopener noreferrer nofollow" target="_blank" >here</a>. For the purpose of this article, the OpenTelemetry Collector will be installed manually.
+
+### Download the OpenTelemetry Collector
+
+Download the appropriate binary package for your Linux or macOS distribution from the OpenTelemetry Collector <a href = "https://github.com/open-telemetry/opentelemetry-collector-releases/releases" rel="noopener noreferrer nofollow" target="_blank" >releases</a> page. We are using the latest version available at the time of writing this tutorial.
+
+```jsx
+curl --proto '=https' --tlsv1.2 -fOL https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.89.0/otelcol-contrib_0.89.0_darwin_arm64.tar.gz
+```
+
+Note: For macOS users, download the binary package specific to your system.
+
+| Build   | Architecture   |
+| ------- | -------------- |
+| M1 Chip | arm64          |
+| Intel   | amd64 (x86-64) |
+
+### Extract the package
+
+Create a new directory named `otelcol-contrib` and then extract the contents of the `otelcol-contrib_0.89.0_darwin_arm64.tar.gz` archive into this newly created directory with the following command:
+
+```json
+mkdir otelcol-contrib
+```
+
+Extract the contents of the binary package in that directory:
+
+```json
+tar xvzf otelcol-contrib_0.89.0_darwin_arm64.tar.gz -C otelcol-contrib
+```
+
+Go into the directory:
+
+```bash
+cd otelcol-contrib
+```
+
+### Set up the Configuration file
+
+In the same `otelcol-contrib` directory, create a config.yaml file:
+
+```bash
+touch config.yaml
+```
+
+Paste the below config into the file:
+
+```jsx
+receivers:
+  otlp:
+    protocols:
+      grpc: {}
+      http: {}
+  httpcheck:
+    targets:
+      - endpoint: http://localhost:5000/
+        method: GET
+      - endpoint: http://localhost:5000/one
+        method: GET
+      - endpoint: http://localhost:5000/two
+        method: GET
+      - endpoint: http://localhost:5000/three
+        method: GET
+      - endpoint: http://localhost:5000/four
+        method: GET
+      - endpoint: http://localhost:5000/error
+        method: GET
+    collection_interval: 10s
+
+processors:
+  batch:
+    send_batch_size: 1000
+    timeout: 10s
+
+exporters:
+  otlp:
+    endpoint: "ingest.{region}.signoz.cloud:443"
+    tls:
+      insecure: false
+    timeout: 20s
+    headers:
+      "signoz-access-token": "<SIGNOZ_INGESTION_KEY>"
+  logging:
+    verbosity: detailed
+
+service:
+  telemetry:
+    metrics:
+      address: localhost:8888
+  pipelines:
+    metrics:
+      receivers: [otlp, httpcheck]
+      processors: [batch]
+      exporters: [otlp]
+```
+
+The HTTP Check Receiver is a component of the OpenTelemetry Collector that enables monitoring of HTTP endpoints. It periodically sends HTTP requests to specified endpoints and collects metrics about the responses, such as response time, status code, and error messages. You can find more information on the OpenTelemetry HTTP Check receiver <a href = "https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/httpcheckreceiver" rel="noopener noreferrer nofollow" target="_blank" >here</a>.
+
+In the above config file, you can see that we are setting the endpoints as targets to be monitored.
+
+Replace http://localhost:5000 with the correct endpoint where you have your web app running. If you have only one target endpoint, take out the rest endpoints. Also, replace `{region}` with the region for your SigNoz cloud account and `<SIGNOZ_INGESTION_KEY>` with the ingestion key for your account. You can find these settings in the SigNoz dashboard under `Settings > Ingestion Settings`.
+
+<figure data-zoomable align='center'>
+    <img src="/img/blog/common/ingestion-key-details.webp" alt="You can find ingestion details in the SigNoz dashboard"/>
+    <figcaption><i>You can find ingestion details in the SigNoz dashboard</i></figcaption>
+</figure>
+<br />
+
+### Run the collector service
+
+In the same `otelcol-contrib` directory, run the below command to start the collector service:
+
+```jsx
+./otelcol-contrib --config ./config.yaml
+```
+
+You should receive a similar output to show it has started successfully:
+
+```jsx
+2023-11-29T00:16:14.193+0100    info    service@v0.89.0/telemetry.go:85    Setting up own telemetry...
+2023-11-29T00:16:14.195+0100    info    service@v0.89.0/telemetry.go:202   Serving Prometheus metrics      {"address": "localhost:8888", "level": "Basic"}
+2023-11-29T00:16:14.197+0100    info    receiver@v0.89.0/receiver.go:296   Development component. May change in the future.        {"kind": "receiver", "name": "httpcheck", "data_type": "metrics"}
+2023-11-29T00:16:14.198+0100    info    service@v0.89.0/service.go:143     Starting otelcol-contrib...     {"Version": "0.89.0", "NumCPU": 12}
+2023-11-29T00:16:14.198+0100    info    extensions/extensions.go:34        Starting extensions...
+2023-11-29T00:16:14.200+0100    warn    internal@v0.89.0/warning.go:40     Using the 0.0.0.0 address exposes this server to every network interface, which may facilitate Denial of Service attacks     {"kind": "receiver", "name": "otlp", "data_type": "metrics", "documentation": "https://github.com/open-telemetry/opentelemetry-collector/blob/main/docs/security-best-practices.md#safeguards-against-denial-of-service-attacks"}
+2023-11-29T00:16:14.201+0100    info    otlpreceiver@v0.89.0/otlp.go:83    Starting GRPC server    {"kind": "receiver", "name": "otlp", "data_type": "metrics", "endpoint": "0.0.0.0:4317"}
+2023-11-29T00:16:14.202+0100    warn    internal@v0.89.0/warning.go:40     Using the 0.0.0.0 address exposes this server to every network interface, which may facilitate Denial of Service attacks     {"kind": "receiver", "name": "otlp", "data_type": "metrics", "documentation": "https://github.com/open-telemetry/opentelemetry-collector/blob/main/docs/security-best-practices.md#safeguards-against-denial-of-service-attacks"}
+2023-11-29T00:16:14.203+0100    info    otlpreceiver@v0.89.0/otlp.go:101   Starting HTTP server    {"kind": "receiver", "name": "otlp", "data_type": "metrics", "endpoint": "0.0.0.0:4318"}
+2023-11-29T00:16:14.203+0100    info    service@v0.89.0/service.go:169     Everything is ready. Begin running and processing data.
+```
+
+## Monitoring HTTP Endpoints with SigNoz dashboard
+
+Once the collector service has started successfully, it will collect the data and send it to SigNoz.
+
+Navigate to your SigNoz Cloud account and access the "Dashboard" tab. Click on the “New Dashboard” button to create a new dashboard.
+
+For HTTP endpoint monitoring, you can use the time-series chart.
+
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image" src="/img/blog/2023/12/create_new_dashboard.webp" alt="Create a new dashboard and click on the time-series panel type"/>
+    <figcaption><i>Create a new dashboard and click on the time-series panel type</i></figcaption>
+</figure>
+<br/>
+
+In the "Query Builder" tab, enter "http", and you should see various metrics collected by the `httpcheck` receiver. This confirms that the OpenTelemetry Collector is successfully collecting the http metrics and forwarding them to SigNoz for monitoring and visualization.
+
+**HTTP metrics sent to SigNoz**
+
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image" src="/img/blog/2023/12/receiver_metrics_signoz.webp" alt="HTTP Receiver Metrics monitored by SigNoz"/>
+    <figcaption><i>HTTP Receiver Metrics monitored by SigNoz</i></figcaption>
+</figure>
+<br/>
+
+In SigNoz, you can monitor the health of HTTP endpoints by running queries against the `httpcheck_status` metrics. This metric is generated by the HTTP Check Receiver, which makes a request to the specified endpoint and generates a metric labeled for each HTTP response status class with a value of 1 if the status code matches the class.
+
+So if you need the endpoints monitored, you can create a query with the `where` clause set to `http_status_class = 2xx` .
+
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image" src="/img/blog/2023/12/https_check_status.webp" alt=""/>
+    <figcaption><i></i></figcaption>
+</figure>
+<br/>
+
+It will give you a chart where you can see all the URLs are monitored their value as 1 when they are up and 0 when they are down.
+
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image" src="/img/blog/2023/12/monitoring_chart_signoz.webp" alt="Chart for monitoring HTTP endpoints in SigNoz"/>
+    <figcaption><i>Chart for monitoring HTTP endpoints in SigNoz</i></figcaption>
+</figure>
+<br/>
+
+You can also create an alert for an endpoint going down and get it in your preferred notification channel. Click on drop-down at the top of the panel and then click on `Create Alerts`.
+
+It will take you to the alerts page; from there, you can create the alerts.
+
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image" src="/img/blog/2023/12/alert_endpoint_down.webp" alt="Create alerts to be notified in case an endpoint is down"/>
+    <figcaption><i>Create alerts to be notified in case an endpoint is down</i></figcaption>
+</figure>
+<br/>
+
+Visit the SigNoz [documentation](https://signoz.io/docs/userguide/manage-dashboards-and-panels/) to learn more about creating dashboards and running queries.
+
+## Metrics and Resource Attributes for HTTP receiver supported by OpenTelemetry
+
+The following metrics and resource attributes for the HTTP receiver can be collected by the OpenTelemetry Collector.
+
+### Metrics
+
+These metrics are enabled by default. Each of them can be disabled by applying the following configuration:
+
+```
+metrics:
+  <metric_name>:
+    enabled: false
+```
+
+| Metrics             | Description                                                         | Metrics Name       | Metric Type | Value Type | Unit    | Aggregation Temporality | Monotonic |
+| ------------------- | ------------------------------------------------------------------- | ------------------ | ----------- | ---------- | ------- | ----------------------- | --------- |
+| HTTP Check Duration | Measures the duration of the HTTP check                             | httpcheck.duration | Gauge       | Int        | ms      | -                       | -         |
+| HTTP Check Error    | Records errors occurring during HTTP check                          | httpcheck.error    | Sum         | Int        | {error} | Cumulative              | False     |
+| HTTP Check Status   | Records the status of the HTTP check (1 for success, 0 for failure) | httpcheck.status   | Sum         | Int        | 1       | Cumulative              | False     |
+
+You can visit the <a href = "https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/httpcheckreceiver/documentation.md" rel="noopener noreferrer nofollow" target="_blank" >HTTP Check receiver</a> GitHub repo to learn more about these metrics.
+
+### Attributes
+
+Resource attributes are a set of key-value pairs that provide additional context about the source of a metric. They are used to identify and classify metrics and to associate them with specific resources or entities within a system.
+
+The below attributes are enabled by default for the HTTP receiver.
+
+| Name              | Description                | Values  |
+| ----------------- | -------------------------- | ------- |
+| http.url          | Full HTTP request URL.     | Any Str |
+| http.status_code  | HTTP response status code  | Any Int |
+| http.method       | HTTP request method        | Any Str |
+| http.status_class | HTTP response status class | Any Str |
+
+You can see these resource attributes in the <a href = "https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/httpcheckreceiver/documentation.md#attributes-2" rel="noopener noreferrer nofollow" target="_blank" >OpenTelemetry Collector Contrib</a> repo for the HTTP receiver.
+
+## Conclusion
+
+In this tutorial, you monitored an HTTP endpoint, collected metrics using the OpenTelemetry collector, and sent them to SigNoz for monitoring and visualization.
+
+Visit our [complete guide](https://signoz.io/blog/opentelemetry-collector-complete-guide/) on OpenTelemetry Collector to learn more about it.
+
+OpenTelemetry is becoming a global standard for open-source observability, offering advantages such as a unified standard for all telemetry signals and avoiding vendor lock-in. With OpenTelemetry, instrumenting your applications to collect logs, metrics, and traces becomes seamless, and you can monitor and visualize your telemetry data with SigNoz.
+
+SigNoz is an open-source [OpenTelemetry-native APM](https://signoz.io/blog/opentelemetry-apm/) that can be used as a single backend for all your observability needs.
+
+---
+
+## Further Reading
+
+- [Complete Guide on OpenTelemetry Collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/)
+
+- [An OpenTelemetry-native APM](https://signoz.io/blog/opentelemetry-apm/)
+
+---
