@@ -1,148 +1,149 @@
 import * as React from 'react'
-import Image from 'next/image'
+import Link from 'next/link'
+import { ArrowUpRight, GithubIcon, Linkedin, SlackIcon, Twitter, Youtube } from 'lucide-react'
+import { Github } from './social-icons/icons'
 
-interface LinkWithIconProps {
-  text: string
-  iconSrc: string
-}
-
-const LinkWithIcon: React.FC<LinkWithIconProps> = ({ text, iconSrc }) => (
-  <div className="mt-5 flex gap-2 whitespace-nowrap pr-3.5">
-    <div className="text-md font-semibold">{text}</div>
-    {/* <Image
-      src={iconSrc}
-      alt=""
-      width={14}
-      height={14}
-      className="aspect-square w-3.5 shrink-0 self-start"
-    /> */}
-  </div>
-)
-
-interface FooterSectionProps {
-  title: string
-  links: Array<string | LinkWithIconProps>
-}
-
-const FooterSection: React.FC<FooterSectionProps> = ({ title, links }) => (
-  <div className="flex w-3/12 flex-col max-md:ml-0 max-md:w-full">
-    <div className="flex flex-col pb-2.5 text-sm tracking-wide text-black dark:text-stone-300 max-md:mt-10">
-      <div className="text-md font-bold uppercase leading-5 tracking-wide text-gray-700 dark:text-white">
-        {title}
-      </div>
-      {links.map((link, index) => (
-        <React.Fragment key={index}>
-          {typeof link === 'string' ? (
-            <div className="mt-5 text-sm font-semibold">{link}</div>
-          ) : (
-            <LinkWithIcon text={link.text} iconSrc={link.iconSrc} />
-          )}
-        </React.Fragment>
-      ))}
-    </div>
-  </div>
-)
-
-const MainFooter: React.FC = () => {
-  const platformLinks = [
-    'Metrics',
-    'Logs',
-    'Traces',
-    'Dashboards',
-    'Alerts',
-    'Exceptions',
-    'Integrations',
-    { text: 'Documentation', iconSrc: '/icons/external-link.svg' },
-    { text: 'Product guide', iconSrc: '/icons/external-link.svg' },
-    'FAQ',
-  ]
-
-  const companyLinks = [
-    'Team',
-    'Careers',
-    'Privacy Policy',
-    'Terms of Service',
-    { text: 'Press Kit', iconSrc: '/icons/download.svg' },
-    { text: 'Contact', iconSrc: '/icons/external-link.svg' },
-  ]
-
-  const developerLinks = [
-    { text: 'Open Source', iconSrc: '/icons/external-link.svg' },
-    { text: 'Self-hosting', iconSrc: '/icons/external-link.svg' },
-    'Tutorials',
-    'Guides',
-    'Examples',
-    'Comparisons',
-    'Changelog',
-  ]
-
+/**
+ * Footer component
+ */
+function Footer() {
   return (
-    <footer className="flex flex-col justify-center border-t border-solid border-signoz_vanilla-300 p-16 dark:border-zinc-800">
-      <div className="flex w-full items-center justify-center bg-white dark:bg-signoz_ink-500 max-md:max-w-full max-md:px-5">
-        <div className="w-full justify-between max-md:max-w-full">
+    <div className="flex flex-col justify-center border-t border-solid border-gray-900">
+      <div className="flex w-full items-center justify-center bg-neutral-950 bg-opacity-70 px-16 py-14 backdrop-blur-[20px] max-md:max-w-full max-md:px-5">
+        <div className="w-full max-w-[1200px] justify-between max-md:max-w-full">
           <div className="flex gap-5 max-md:flex-col max-md:gap-0">
-            <FooterSection title="platform" links={platformLinks} />
-            <FooterSection title="company" links={companyLinks} />
-            <FooterSection title="developers" links={developerLinks} />
+            <div className="flex w-3/12 flex-col max-md:ml-0 max-md:w-full">
+              <div className="flex flex-col pb-2.5 text-sm tracking-wide text-stone-300 max-md:mt-10">
+                <div className="text-sm font-semibold uppercase leading-5 tracking-wide text-gray-700">
+                  platform
+                </div>
+                <Link href="#" className="mt-5">
+                  Metrics
+                </Link>
+                <Link href="#" className="mt-5">
+                  Logs
+                </Link>
+                <Link href="#" className="mt-5">
+                  Traces
+                </Link>
+                <Link href="#" className="mt-5">
+                  Dashboards
+                </Link>
+                <Link href="#" className="mt-5">
+                  Alerts
+                </Link>
+                <Link href="#" className="mt-5">
+                  Exceptions
+                </Link>
+                <Link href="#" className="mt-5">
+                  Integrations
+                </Link>
+                <div className="mt-5 flex items-center gap-2 whitespace-nowrap pr-3.5">
+                  <Link href="#">Documentation</Link>
+                  <ArrowUpRight size={16} />
+                </div>
+                <div className="mt-5 flex gap-2 pr-3.5">
+                  <Link href="#">Product guide</Link>
+                  <ArrowUpRight size={16} />
+                </div>
+                <Link href="#" className="mt-5">
+                  FAQ
+                </Link>
+              </div>
+            </div>
             <div className="ml-5 flex w-3/12 flex-col max-md:ml-0 max-md:w-full">
-              <div className="flex grow flex-col items-start self-stretch pb-20 pl-16 shadow-sm max-md:mt-10">
-                <div className="text-dark flex justify-between gap-1.5 self-end whitespace-nowrap text-center text-lg font-medium leading-5 dark:text-white">
-                  {/* <Image
-                    src="/logo.svg"
-                    alt=""
-                    width={19}
-                    height={20}
-                    className="aspect-[0.95] w-[19px] shrink-0 self-start"
-                  /> */}
+              <div className="flex grow flex-col self-stretch pb-20 text-sm tracking-wide text-stone-300 max-md:mt-10">
+                <div className="text-sm font-semibold uppercase leading-5 tracking-wide text-gray-700">
+                  company
+                </div>
+                <Link href="#" className="mt-5">
+                  Team
+                </Link>
+                <Link href="#" className="mt-5">
+                  Careers
+                </Link>
+                <Link href="#" className="mt-5">
+                  Privacy Policy
+                </Link>
+                <Link href="#" className="mt-5">
+                  Terms of Service
+                </Link>
+                <div className="mt-5 flex items-center gap-2 pr-7 max-md:pr-5">
+                  <Link href="#">Press Kit</Link>
+                  <ArrowUpRight size={16} />
+                </div>
+                <div className="mt-5 flex items-center gap-2 whitespace-nowrap pr-8 max-md:pr-5">
+                  <Link href="#">Contact</Link>
+                  <ArrowUpRight size={16} />
+                </div>
+              </div>
+            </div>
+            <div className="ml-5 flex w-3/12 flex-col max-md:ml-0 max-md:w-full">
+              <div className="flex grow flex-col self-stretch pb-20 text-sm tracking-wide text-stone-300 max-md:mt-10">
+                <div className="text-sm font-semibold uppercase leading-5 tracking-wide text-gray-700">
+                  developers
+                </div>
+                <div className="mt-5 flex items-center gap-2 pr-4">
+                  <Link href="#">Open Source</Link>
+                  <ArrowUpRight size={16} />
+                </div>
+                <div className="mt-5 flex items-center gap-2 whitespace-nowrap pr-5">
+                  <Link href="#">Self-hosting</Link>
+                  <ArrowUpRight size={16} />
+                </div>
+                <Link href="#" className="mt-5">
+                  Tutorials
+                </Link>
+                <Link href="#" className="mt-5">
+                  Guides
+                </Link>
+                <Link href="#" className="mt-5">
+                  Examples
+                </Link>
+                <Link href="#" className="mt-5">
+                  Comparisons
+                </Link>
+                <Link href="#" className="mt-5">
+                  Changelog
+                </Link>
+              </div>
+            </div>
+            <div className="ml-5 flex w-3/12 flex-col max-md:ml-0 max-md:w-full">
+              <div className="flex flex-col items-end shadow-sm max-md:mt-10">
+                <div className="flex justify-between gap-1.5 self-end whitespace-nowrap text-center text-lg font-medium leading-5 text-white">
                   <div>SigNoz</div>
                 </div>
-                {/* <div className="mt-5 justify-center rounded px-3.5 text-right text-sm leading-5 text-emerald-300 max-md:ml-2">
+                <div className="mt-5 items-end justify-center rounded text-sm leading-5 text-emerald-300">
                   All systems operational
-                </div> */}
-                {/* <div className="mt-5 flex items-start justify-between gap-1 px-1.5 py-1.5">
-                  <Image
-                    src="/icons/github.svg"
-                    alt=""
-                    width={20}
-                    height={20}
-                    className="aspect-square w-5 shrink-0 fill-stone-300"
-                  />
-                  <Image
-                    src="/icons/twitter.svg"
-                    alt=""
-                    width={20}
-                    height={22}
-                    className="aspect-[0.91] w-5 shrink-0 self-stretch"
-                  />
-                  <Image
-                    src="/icons/linkedin.svg"
-                    alt=""
-                    width={20}
-                    height={20}
-                    className="aspect-square w-5 shrink-0"
-                  />
-                  <Image
-                    src="/icons/slack.svg"
-                    alt=""
-                    width={18}
-                    height={20}
-                    className="aspect-[0.9] w-[18px] shrink-0"
-                  />
-                  <Image
-                    src="/icons/youtube.svg"
-                    alt=""
-                    width={20}
-                    height={18}
-                    className="my-auto aspect-[1.11] w-5 shrink-0 self-stretch"
-                  />
-                </div> */}
+                </div>
+                <div className="mt-5 flex items-end justify-between gap-4 py-2">
+                  <Link href={'https://github.com/SigNoz'} target="_blank">
+                    <GithubIcon size={24} />{' '}
+                  </Link>
+
+                  <Link href={'https://www.linkedin.com/company/signozio/'} target="_blank">
+                    <Linkedin size={24} />
+                  </Link>
+
+                  <Link href={'https://signoz.io/slack'} target="_blank">
+                    <SlackIcon size={24} />
+                  </Link>
+
+                  <Link href={'https://twitter.com/SigNozHQ'} target="_blank">
+                    <Twitter size={24} />
+                  </Link>
+
+                  <Link href={'https://www.youtube.com/@signoz'} target="_blank">
+                    <Youtube size={24} />
+                  </Link>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </footer>
+    </div>
   )
 }
 
-export default MainFooter
+export default Footer

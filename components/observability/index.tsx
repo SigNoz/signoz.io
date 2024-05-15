@@ -1,12 +1,13 @@
-import React from "react";
-import Heading from "../../components/ui/Heading";
-import Button from "../../components/ui/Button";
+'use client'
+import React from 'react'
+import Heading from '../../components/ui/Heading'
+import Button from '../../components/ui/Button'
 
 const Observability = () => {
   return (
     <section>
       <div className="container mt-16">
-        <div className="flex flex-col items-center mb-5 text-center">
+        <div className="mb-5 flex flex-col items-center text-center">
           <Heading type={4}>Enterprise Grade Observability</Heading>
           <Heading type={1}>
             Get access to observability at any scale&nbsp;
@@ -14,8 +15,8 @@ const Observability = () => {
             with advanced security and compliance.
           </Heading>
         </div>
-        <div className="max-w-2xl mx-auto">
-          <div className="bg-[#252529] grid grid-cols-1 md:grid-cols-2 md:gap-10 mx-auto rounded-lg plans-container px-10 py-8">
+        <div className="mx-auto max-w-2xl">
+          <div className="plans-container mx-auto grid grid-cols-1 rounded-lg bg-[#252529] px-10 py-8 md:grid-cols-2 md:gap-10">
             <div>
               <ul className="plans-features m-0">
                 <li className="py-3 text-lg">SSO and SAML support</li>
@@ -25,30 +26,26 @@ const Observability = () => {
               </ul>
             </div>
             <div>
-              <div className="flex flex-col justify-between h-full">
+              <div className="flex h-full flex-col justify-between">
                 <ul className="plans-features m-0">
                   <li className="py-3 text-lg">VPC Peering</li>
                   <li className="py-3 text-lg">Custom Integrations</li>
                 </ul>
-                <Button isButton to={"pricing"} className="hidden md:block">
+                <Button isButton to={'pricing'} className="hidden md:block">
                   Check plans
                 </Button>
               </div>
             </div>
           </div>
           <div>
-            <Button
-              isButton
-              to={"pricing"}
-              className="block md:hidden w-full mx-auto my-5"
-            >
+            <Button isButton to={'pricing'} className="mx-auto my-5 block w-full md:hidden">
               Check plans
             </Button>
           </div>
         </div>
       </div>
     </section>
-  );
-};
+  )
+}
 
-export default Observability;
+export default Observability

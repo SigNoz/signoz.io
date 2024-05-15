@@ -1,19 +1,20 @@
-import React from "react";
-import ReactGA from "react-ga4";
-import Heading from "../../components/ui/Heading";
-import SubHeading from "../../components/ui/SubHeading";
-import Button from "../../components/ui/Button";
+'use client'
 
-ReactGA.initialize("G-6NFJ2Y6NQN");
+import React from 'react'
+import ReactGA from 'react-ga4'
+import Heading from '../../components/ui/Heading'
+import SubHeading from '../../components/ui/SubHeading'
+import Button from '../../components/ui/Button'
+
+ReactGA.initialize('G-6NFJ2Y6NQN')
 
 const CTA = () => {
-
   const requestDemoClicked = () => {
     ReactGA.event({
-      category: "User",
-      action: "Request Demo Clicked",
-    });
-  };
+      category: 'User',
+      action: 'Request Demo Clicked',
+    })
+  }
 
   return (
     <section className="bluish-gradient py-16">
@@ -25,24 +26,17 @@ const CTA = () => {
               <br className="hidden lg:inline" />
               and Traces in a single pane of glass
             </Heading>
-            <SubHeading>
-              Check out our hosted and enterprise solutions.
-            </SubHeading>
+            <SubHeading>Check out our hosted and enterprise solutions.</SubHeading>
           </div>
-          <div className="flex gap-5 flex-col sm:flex-row">
-            <Button
-              isButton
-              className=""
-              to={"/teams/"}
-              id="btn-get-started-homepage-bottom"
-            >
+          <div className="flex flex-col gap-5 sm:flex-row">
+            <Button isButton className="" to={'/teams/'} id="btn-get-started-homepage-bottom">
               Try SigNoz Cloud
             </Button>
             <Button
               isButton
               outlined
               className=""
-              to={"/docs/install/"}
+              to={'/docs/install/'}
               onClick={requestDemoClicked}
               id="btn-self-hosted-homepage-bottom"
             >
@@ -52,7 +46,7 @@ const CTA = () => {
         </div>
       </div>
     </section>
-  );
-};
+  )
+}
 
-export default CTA;
+export default CTA

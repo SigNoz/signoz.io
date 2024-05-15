@@ -2,21 +2,38 @@
 import { sortPosts, allCoreContent } from 'pliny/utils/contentlayer'
 import { allBlogs } from 'contentlayer/generated'
 import Main from './Main'
+import { Header } from '@/components/index-header'
+import BuildForDevelopers from '@/components/build-for-developers'
+import DataProtectionLaws from '@/components/data-protection-laws'
+import CTA from '@/components/index-cta'
+import { SigNozFeatures } from '@/components/index-features'
+import LatestInOpenTelementry from '@/components/latest-in-open-telementry'
+import Observability from '@/components/observability'
+import PricingStructure from '@/components/pricing-structure'
+import SigNozStats from '@/components/signoz-stats'
+import { Testimonials } from '@/components/testimonials'
+import { TrustedByTeams } from '@/components/trusted-by'
+import { WhyOpenTelemetry } from '@/components/why-opentelemetry'
 
 export default async function Page() {
   const sortedPosts = sortPosts(allBlogs)
   const posts = allCoreContent(sortedPosts)
   return (
-    <div className="dark:bg-signoz_ink-500 bg-white">
-      <h1 className="my-4 whitespace-normal px-12 py-4 text-center text-4xl font-bold leading-12 tracking-wide">
-        OpenTelemetry-Native Traces, <br /> Metrics, and Logs in a single pane
-      </h1>
-      <h2 className="mx-24 px-16 text-center text-lg">
-        A single tool for all your observability needs - APM, logs, metrics, exceptions, alerts, and
-        dashboards powered by a powerful query builder.
-      </h2>
-
-      <Main posts={posts} />
+    <div className="bg-white dark:bg-signoz_ink-500">
+      <main className="landing-section">
+        <Header />
+        <TrustedByTeams />
+        <SigNozFeatures />
+        <WhyOpenTelemetry />
+        <BuildForDevelopers />
+        <DataProtectionLaws />
+        <Observability />
+        <PricingStructure />
+        <SigNozStats />
+        <Testimonials />
+        <LatestInOpenTelementry />
+        <CTA />
+      </main>
     </div>
   )
 }

@@ -16,7 +16,7 @@ const Button = ({
       'inline-block border-none outline-none px-8 py-2 text-white rounded-md font-heading text-md font-medium hover:text-white no-underline text-center',
     filled: 'primary-gradient',
     outlined: 'border-gradient bg-[#1b1b1d]',
-    inline: 'text-tertiary underline',
+    inline: 'text-indigo-500 underline',
   }
   const linkProps = {
     [href ? 'href' : 'to']: href ? href : to,
@@ -26,6 +26,7 @@ const Button = ({
 
   return (
     <Link
+      href={to}
       className={`cursor-pointer
         ${isButton ? classNames.isButton : classNames.inline}
         ${isButton ? (outlined ? classNames.outlined : classNames.filled) : ''}

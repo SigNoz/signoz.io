@@ -154,8 +154,8 @@ export default function TopNav() {
           <Link href="/documentation" className="text-sm font-semibold leading-6 ">
             Documentation
           </Link>
-          <Link href="/blog" className="text-sm font-semibold leading-6 ">
-            Blog
+          <Link href="/about-us" className="text-sm font-semibold leading-6 ">
+            Company
           </Link>
           <Link href="/pricing" className="text-sm font-semibold leading-6 ">
             Pricing
@@ -170,10 +170,6 @@ export default function TopNav() {
           </Link> */}
 
           <SearchButton />
-
-          {/* <div className="px-4">
-            <ThemeToggle />
-          </div> */}
         </div>
       </nav>
       <Dialog as="div" className="lg:hidden" open={mobileMenuOpen} onClose={setMobileMenuOpen}>
@@ -181,12 +177,7 @@ export default function TopNav() {
         <Dialog.Panel className="fixed inset-y-0 right-0 z-10 w-full overflow-y-auto bg-white px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10">
           <div className="flex items-center justify-between">
             <Link href="/" className="-m-1.5 p-1.5">
-              <span className="sr-only">Your Company</span>
-              <Image
-                className="h-8 w-auto"
-                src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=600"
-                alt=""
-              />
+              <span className="sr-only">SigNoz</span>
             </Link>
             <button
               type="button"
@@ -246,13 +237,6 @@ export default function TopNav() {
               </div>
               <div className="py-6">
                 <SearchButton />
-
-                {/* <Link
-                  href="/"
-                  className="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold leading-7 hover:bg-gray-50"
-                >
-                  Log in
-                </Link> */}
               </div>
             </div>
           </div>
