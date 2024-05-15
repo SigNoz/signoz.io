@@ -103,6 +103,12 @@ module.exports = {
           label: 'Saved View',
           className: 'new-doc', // Add this if you want to add a new tag in sidebar
         },
+        {
+          type: 'doc',
+          id: 'product-features/invite-team-member',
+          label: 'Invite Team Member',
+        },
+
       ]
     },
     {
