@@ -5,4 +5,4 @@ The text contents of this website are licensed under a Creative Commons Attribut
 
 The design contents of this website are proprietary and may not be reproduced or reused in any way other than to run the website locally. The license for the design is owned solely by SigNoz Inc.
 
-Copyright 2021 SigNoz Inc.
+Copyright 2024 SigNoz Inc.
