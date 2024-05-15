@@ -6,7 +6,6 @@ import MigrateSaving from '../../../components/comparison/migrate-saving'
 function NewRelicSaving() {
   return (
     <div title="New Relic Saving">
-      <h4> New Relic Saving </h4>
       <HubspotProvider>
         <MigrateSaving data={DATA} />
       </HubspotProvider>
