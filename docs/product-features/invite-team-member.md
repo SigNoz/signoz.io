@@ -6,7 +6,7 @@ sidebar_label: Invite Team Member
 
 ## Introduction
 
-The **Invite Team Member** feature gives you the ability to invite your team members based on different access levels. 
+SigNoz users can invite **unlimited** team members with different access levels like Admin, Editor and Viewer.
 
 Follow the below steps to invite a Team Member to SigNoz:
 
@@ -46,7 +46,7 @@ Follow the below steps to invite a Team Member to SigNoz:
 
 
 ### Roles and Access Levels
-- **ADMIN**: Has full access to all settings and data. 
+- **ADMIN**: Has full access to Invite new users, editing settings and viewing data.
 - **EDITOR**: Can view and edit data. For example, edit dashboard panels.
 - **VIEWER**: Has read-only access to view data.
 
