@@ -747,15 +747,16 @@ module.exports = {
         },
         {
           type: 'category',
-          label: 'SQLite',
+          label: 'Query Service',
           link: {
             type: 'generated-index',
-            title: 'SQLite',
-            description: 'The following sections provide instructions to operate SQLite. You can proceed to one of the sections below.',
-            slug: '/operate/sqlite',
+            title: 'Query Service',
+            description: 'The following sections provide instructions to operate Query Service. You can proceed to one of the sections below.',
+            slug: '/operate/query-service',
           },
           items: [
-            'operate/sqlite/reset-admin-password',
+            'operate/query-service/reset-admin-password',
+            'operate/query-service/user-invitation-smtp',
           ]
         },
         'operate/feature-flags',
