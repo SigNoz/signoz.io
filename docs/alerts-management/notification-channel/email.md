@@ -49,6 +49,38 @@ This section is only required for **Self-Hosted** users. Cloud users don't need 
 
 :::
 
+### Docker
+
+Based on your Docker installation, you can include the following section in your Docker Compose YAML file to configure alertmanager.
+
+- Docker Standalone: `deploy/docker/clickhouse-setup/docker-compose.yaml`
+- Docker Swarm: `deploy/docker-swarm/clickhouse-setup/docker-compose.yaml`
+
+```yaml {4-8}
+services:
+  alertmanager:
+    environment:
+      - ALERTMANAGER_SMTP_FROM=<email address>
+      - ALERTMANAGER_SMTP_HOST=<smtp host>
+      - ALERTMANAGER_SMTP_PORT=<smtp port>
+      - ALERTMANAGER_SMTP_AUTH_USERNAME=<smtp user>
+      - ALERTMANAGER_SMTP_AUTH_PASSWORD=<smtp password>
+```
+
+### Kubernetes
+
+You can include the following section in your Helm override values YAML file.
+
+```yaml
+alertmanager:
+  additionalEnvs:
+    ALERTMANAGER_SMTP_FROM: <email address>
+    ALERTMANAGER_SMTP_HOST: <smtp host>
+    ALERTMANAGER_SMTP_PORT: <smtp port>
+    ALERTMANAGER_SMTP_AUTH_USERNAME: <smtp user>
+    ALERTMANAGER_SMTP_AUTH_PASSWORD: <smtp password>
+```
+
 **Test Configuration**: 
 Click the Test button to send a test alert to the configured email addresses. This verifies that SigNoz can communicate with your email provider.
 
