@@ -1,0 +1,198 @@
+---
+title: Celery worker | Tutorial on how to set up with Flask & Redis
+slug: celery-worker
+date: 2022-05-27
+tags: [Tech Tutorial, Python]
+authors: [ezz]
+description: In this tutorial, learn how to implement a Celery worker with Flask and Redis. Celery worker is a simple and reliable task queue with a focus on real-time processing while also supporting task scheduling...
+image: /img/blog/2022/05/celery_worker_cover.jpeg
+keywords: [celery worker,Flask,Redis,Python,celery flask,celery redis]
+---
+<head>
+  <link rel="canonical" href="https://signoz.io/blog/celery-worker/"/>
+</head>
+
+Celery worker is a simple, flexible, and reliable distributed system to process vast amounts of messages while providing operations with the tools required to maintain such a system. In this tutorial, we will learn how to implement Celery with Flask and Redis.
+
+
+
+![Cover Image](/img/blog/2022/05/celery_worker_cover.webp)
+
+Before we deep dive into the tutorial, let’s have a brief overview of Celery workers.
+
+## What is a Celery worker?
+
+<a href = "https://docs.celeryq.dev/en/stable/" rel="noopener noreferrer nofollow" target="_blank">Celery</a> is a task management system that you can use to distribute tasks across different machines or threads. It allows you to have a task queue and can schedule and process tasks in real-time. This task queue is monitored by workers which constantly look for new work to perform.
+
+Let's try to understand the role of a Celery worker with the help of an example. Imagine you're at a car service station to get your car serviced. You place a request at the reception to get your car serviced.
+
+1. Message<br></br>
+You place a request at the reception to get your car serviced. This request is a message.
+2. Task<br></br>
+Servicing your car is the task to be executed.
+3. Task Queue<br></br>
+Like yourself, there will be other customers at the station. All the customer cars waiting to be serviced is part of the task queue.
+4. Worker<br></br>
+The mechanics at the station are workers who execute the tasks.
+
+Celery makes use of brokers to distribute tasks across multiple workers and to manage the task queue. In the example above, the attendant who takes your car service request from the reception to the workshop is the broker. The role of the broker is to deliver messages between clients and workers.
+
+Some examples of message brokers are Redis, RabbitMQ, Apache Kafka, and Amazon SQS.
+
+In this tutorial, we will use Redis as the broker, Celery as the worker, and Flask as the webserver. We'll introduce you to the concepts of Celery using two examples going from simpler to more complex tasks.
+
+Let's get started and install Celery, Flask, and Redis.
+
+## Prerequisites
+
+To follow along with this tutorial, you need to have a basic knowledge of Flask. You don't need to have any knowledge of Redis; however, it would be good to be familiar with it.
+
+## Installing Flask, Celery, and Redis
+
+First, initiate a new project with a new virtual environment with Python 3 and an upgraded version of pip:
+
+```bash
+$ python3 -m venv venv
+$ . venv/bin/activate
+$ pip install --upgrade pip
+```
+
+and install Flask, Celery, and Redis: (The following command includes the versions we’re using for this tutorial)
+
+```bash
+$ pip install celery==4.4.1 Flask==1.1.1 redis==3.4.1
+```
+
+## Running Redis locally
+
+Run the Redis server on your local machine (assuming Linux or macOS) using the following <a href = "https://redis.io/docs/getting-started/installation/install-redis-from-source/" rel="noopener noreferrer nofollow" target="_blank">commands</a>:
+
+```bash
+$ wget http://download.redis.io/redis-stable.tar.gz
+$ tar xvzf redis-stable.tar.gz
+$ rm redis-stable.tar.gz
+$ cd redis-stable
+$ make
+```
+
+The compilation is done now. Some binaries are available in the `src` directory inside `redis-stable/` like `redis-server` (which is the Redis server that you will need to run) and `redis-cli` (which is the command-line client that you might need to talk to Redis).
+To run the server globally (from anywhere on your machine) instead of moving every time to the `src` directory, you can use the following command:
+
+```bash
+$ make install
+```
+
+The binaries of `redis-server` are now available in your `/usr/local/bin` directory. You can run the server using the following command:
+
+```bash
+$ redis-server
+```
+
+The server is now running on port 6379 (the default port). Leave it running on a separate terminal.
+ We would need two other new terminal tabs to be able to run the web server and the Celery worker later. But before running the web server, let's integrate Flask with Celery and make our web server ready to run.
+
+## Integrating Flask and Celery
+
+It's easy to integrate Flask with Celery. Let's start simple and write the following imports and instantiation code:
+
+```bash
+from flask import Flask
+from celery import Celery
+
+app = Flask(__name__)
+app.config["CELERY_BROKER_URL"] = "redis://localhost:6379"
+
+celery = Celery(app.name, broker=app.config["CELERY_BROKER_URL"])
+celery.conf.update(app.config)
+```
+
+`app` is the Flask application object that you will use to run the web server. `celery` is the Celery object that you will use to run the Celery worker.
+
+Note that the `CELERY_BROKER_URL` configuration here is set to the Redis server that you're running locally on your machine. You can change this to any other message broker that you want to use.
+
+The `celery` object takes the application name as an argument and sets the `broker` argument to the one you specified in the configuration.
+
+To add the Flask configuration to the Celery configuration, you update it with the `conf.update` method.
+
+Now, it's time to run the Celery worker.
+
+## Running the Celery worker
+
+In the new terminal tab, run the following command:
+
+```bash
+(venv) $ celery -A app.celery worker --loglevel=info
+```
+
+where `celery` is the version of Celery you're using in this tutorial (4.4.1), with the `-A` option to specify the celery instance to use (in our case, it's `celery` in the `app.py` file, so it's `app.celery`), and `worker` is the subcommand to run the worker, and `--loglevel=info` to set the verbosity log level to `INFO`.
+
+You'll see something like the following:
+
+<figure data-zoomable align='center'>
+    <img src="/img/blog/2022/05/celery_worker_running_terminal_screenshot.webp" alt="Screenshot of the terminal showing a running celery worker"/>
+</figure>
+
+<br></br>
+
+Let's dive into the logic inside your Flask application before running the web server.
+
+## Running the Flask web server
+
+Let's first add the celery task decorator with the `task()` method and wrap the function that we want to run as a Celery task to that decorator:
+
+```bash
+@celery.task()
+def add(x, y):
+		return x + y
+```
+
+So this simple `add` function is now a Celery task. Then add a route to your web server to handle the GET request to the root URL and add a pair of numbers as the parameters to the add function:
+
+```bash
+@app.route('/')
+def add_task():
+for i in range(10000):
+    add.delay(i, i)
+return jsonify({'status': 'ok'})
+```
+
+Note: Don't forget to import the `jsonify` function from the `flask` module to be able to return JSON data.
+
+Now, run the web server with the following command:
+
+```bash
+$flask run
+```
+
+When you check the `localhost:5000` URL in your browser, you should see the following response:
+
+```bash
+{
+    "status": "ok"
+}
+```
+
+Note that this response is not instantly shown on your browser. That’s because the Redis server listens to the client and enqueues the task to the task queue of that `add_task` function. The Celery worker then has to wait for every task before it starts execution.
+
+This demonstrates how Celery made use of Redis to distribute tasks across multiple workers and to manage the task queue.
+
+You can find the entire code sample for this tutorial at this <a href = "https://github.com/EzzEddin/tutorials/tree/master/celery_workers_flask_redis" rel="noopener noreferrer nofollow" target="_blank">GitHub repo</a>.
+
+## Conclusion
+
+In this tutorial, you learned what a Celery worker is and how to use it with a message broker like Redis in a Flask application.
+
+Celery workers are used for offloading data-intensive processes to the background, making applications more efficient. Celery is highly available, and a single Celery worker can process millions of tasks a minute. 
+
+As Celery workers perform critical tasks at scale, it is also important to monitor their performance. Celery can be used to inspect and manage worker nodes with the help of some terminal commands. If you need a holistic picture of how your Celery clusters are performing, you can use [SigNoz](https://signoz.io/) - an open-source observability platform.
+
+It can monitor all components of your application - from application metrics and database performance to infrastructure monitoring. For example, it can be used to monitor Python applications for performance issues and bugs.
+
+SigNoz is fully open-source and can be hosted within your infra. You can try out SigNoz by visiting its GitHub repo 👇
+
+[![SigNoz GitHub repo](/img/blog/common/signoz_github.webp)](https://github.com/SigNoz/signoz)
+
+If you want to learn more about monitoring your Python applications with SigNoz, feel free to follow the links below:
+
+- [Python application monitoring](https://signoz.io/opentelemetry/python/)
+- [Django application performance monitoring](https://signoz.io/blog/opentelemetry-django/)

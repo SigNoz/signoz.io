@@ -110,6 +110,8 @@ export const Blog = defineDocumentType(() => ({
     keywords: { type: 'list', of: { type: 'string' }, required: false },
     slug: { type: 'string', required: false },
     hide_table_of_contents: { type: 'boolean', required: false },
+    toc_min_heading_level: { type: 'number', required: false },
+    toc_max_heading_level: { type: 'number', required: false },
   },
   computedFields: {
     ...computedFields,
@@ -148,6 +150,10 @@ export const Comparison = defineDocumentType(() => ({
     bibliography: { type: 'string' },
     canonicalUrl: { type: 'string' },
     keywords: { type: 'list', of: { type: 'string' }, required: false },
+    slug: { type: 'string', required: false },
+    hide_table_of_contents: { type: 'boolean', required: false },
+    toc_min_heading_level: { type: 'number', required: false },
+    toc_max_heading_level: { type: 'number', required: false },
   },
   computedFields: {
     ...computedFields,
@@ -179,6 +185,7 @@ export const Opentelemetry = defineDocumentType(() => ({
     draft: { type: 'boolean' },
     summary: { type: 'string' },
     description: { type: 'string' },
+    slug: { type: 'string', required: false },
     images: { type: 'json' },
     image: { type: 'string' },
     authors: { type: 'list', of: { type: 'string' } },
