@@ -1,15 +1,16 @@
+import { InfoIcon, PenBox, ThumbsDown, ThumbsDownIcon, ThumbsUp } from 'lucide-react'
 import * as React from 'react'
 
 interface ButtonProps {
-  icon: string
+  icon: React.ReactNode
   text: string
 }
 
 const Button: React.FC<ButtonProps> = ({ icon, text }) => {
   return (
-    <div className="bg-signoz_ink-400 flex cursor-pointer gap-1 whitespace-nowrap rounded-full bg-opacity-10 px-2.5 py-1 dark:bg-stone-300">
-      <img loading="lazy" src={icon} alt="" className="my-auto aspect-square w-3.5 shrink-0" />
-      <div>{text}</div>
+    <div className="flex cursor-pointer items-center gap-2 rounded-full bg-signoz_ink-400 bg-opacity-10 px-2 py-1  dark:bg-stone-300">
+      {icon}
+      <div className="text-xs text-signoz_robin-500">{text}</div>
     </div>
   )
 }
@@ -17,30 +18,25 @@ const Button: React.FC<ButtonProps> = ({ icon, text }) => {
 const BlogFeedback: React.FC = () => {
   const buttons: ButtonProps[] = [
     {
-      icon: 'https://cdn.builder.io/api/v1/image/assets/TEMP/48d2bb2600de70d96aae657db8e83bc2d84e038f930f404aca56e8d1e6693bf0?apiKey=f0103e73688241f896979b7df0e7cb45&',
+      icon: <ThumbsUp color="#6366f1" size={14} />,
       text: 'Yes',
     },
     {
-      icon: 'https://cdn.builder.io/api/v1/image/assets/TEMP/10b82243b64605588eca48254a8f43aba58d67cda7600e24c84e45ede8d95d1d?apiKey=f0103e73688241f896979b7df0e7cb45&',
+      icon: <ThumbsDown color="#6366f1" size={14} />,
       text: 'No',
     },
     {
-      icon: 'https://cdn.builder.io/api/v1/image/assets/TEMP/d7871a591e6def7d77678e020b2cc97b4988f896554fd9c6908569e4aba5fe47?apiKey=f0103e73688241f896979b7df0e7cb45&',
+      icon: <PenBox color="#6366f1" size={14} />,
       text: 'Send feedback',
     },
   ]
 
   return (
-    <div className="dark:bg-signoz_ink-400 bg-signoz_vanilla-100 border-signoz_vanilla-300 mt-8 flex max-w-[899px] flex-col justify-center rounded border border-solid px-4 py-4 text-stone-300 dark:border-gray-900">
-      <div className="flex w-full justify-between gap-5 max-md:max-w-full max-md:flex-wrap">
-        <div className="flex gap-2.5 self-start text-base leading-6 tracking-normal">
-          <img
-            loading="lazy"
-            src="https://cdn.builder.io/api/v1/image/assets/TEMP/92be7ae47230f8d2b95cb930f9eff28cf0927c02ea7f79c80de8acd9c5f1c3fd?apiKey=f0103e73688241f896979b7df0e7cb45&"
-            alt="Helpful article icon"
-            className="my-auto aspect-square w-4 shrink-0"
-          />
-          <div className="text-signoz_ink-300 dark:text-white">Was this article helpful?</div>
+    <div className="mt-8 flex flex-col justify-center rounded border border-solid border-signoz_vanilla-300 bg-signoz_vanilla-100 px-4 py-4 text-stone-300 dark:border-gray-900 dark:bg-signoz_ink-400">
+      <div className="flex w-full items-center justify-between gap-5 max-md:max-w-full max-md:flex-wrap">
+        <div className="flex items-center gap-2.5 self-start text-base leading-6 tracking-normal">
+          <InfoIcon size={14} />
+          <div className="text-sm text-signoz_robin-500">Was this article helpful?</div>
         </div>
         <div className="flex gap-2 text-sm leading-5 tracking-normal">
           {buttons.slice(0, 2).map((button, index) => (
