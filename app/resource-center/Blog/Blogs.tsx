@@ -34,7 +34,7 @@ const BlogsPageHeader: React.FC<BlogPageHeaderProps> = ({ onSearch }) => {
   )
 }
 
-export default function Blogs() {
+export default function Blogs({ currentPage, itemsPerPage }) {
   const posts = allCoreContent(sortPosts(allBlogs))
   const [blogs, setBlogs] = React.useState(posts)
   const [searchValue, setSearchValue] = React.useState('')
@@ -45,13 +45,18 @@ export default function Blogs() {
     setBlogs(filteredPosts)
   }
 
+  // Calculate the posts to display for the current page
+  const startIndex = (currentPage - 1) * itemsPerPage
+  const endIndex = startIndex + itemsPerPage
+  const paginatedBlogs = blogs.slice(startIndex, endIndex)
+
   return (
     <div>
       <BlogsPageHeader onSearch={handleSearch} />
 
       {searchValue.length === 0 && <FeaturedBlogs isDarkMode={true} />}
 
-      <AllBlogs blogs={blogs} />
+      <AllBlogs blogs={paginatedBlogs} />
     </div>
   )
 }

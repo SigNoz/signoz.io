@@ -5,15 +5,38 @@ import Blogs from './Blog/Blogs'
 import Comparisons from './Comparisons/Comparisons'
 import Guides from './Guides/Guides'
 import OpenTelemetry from './OpenTelemetry/OpenTelemetry'
+import Pagination from '@/components/Pagination'
 
 export default function ResourceCenter() {
   const [activeTab, setActiveTab] = useState('blog-tab')
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 10
+
+  const handleTabChange = (tab) => {
+    setActiveTab(tab)
+    setCurrentPage(1)
+  }
+
+  const getTotalItems = () => {
+    switch (activeTab) {
+      case 'blog-tab':
+        return 10
+      case 'comparisons-tab':
+        return 10
+      case 'guides-tab':
+        return 10
+      case 'openTelemetry-tab':
+        return 10
+      default:
+        return 0
+    }
+  }
 
   return (
     <div className="container mx-auto py-4">
       <div className="mb-4">
         <ul
-          className="-mb-px flex flex-wrap pl-0 text-center text-sm font-medium"
+          className="-mb-px flex flex-wrap text-center text-sm font-medium"
           id="default-tab"
           data-tabs-toggle="#default-tab-content"
           role="tablist"
@@ -27,7 +50,7 @@ export default function ResourceCenter() {
               role="tab"
               aria-controls="blog"
               aria-selected="false"
-              onClick={() => setActiveTab(`blog-tab`)}
+              onClick={() => handleTabChange('blog-tab')}
             >
               Blog
             </button>
@@ -41,7 +64,7 @@ export default function ResourceCenter() {
               role="tab"
               aria-controls="comparisons"
               aria-selected="false"
-              onClick={() => setActiveTab(`comparisons-tab`)}
+              onClick={() => handleTabChange('comparisons-tab')}
             >
               Comparisons
             </button>
@@ -55,7 +78,7 @@ export default function ResourceCenter() {
               role="tab"
               aria-controls="guides"
               aria-selected="false"
-              onClick={() => setActiveTab(`guides-tab`)}
+              onClick={() => handleTabChange('guides-tab')}
             >
               Guides
             </button>
@@ -70,7 +93,7 @@ export default function ResourceCenter() {
               role="tab"
               aria-controls="openTelemetry"
               aria-selected="false"
-              onClick={() => setActiveTab(`openTelemetry-tab`)}
+              onClick={() => handleTabChange('openTelemetry-tab')}
             >
               OpenTelemetry
             </button>
@@ -79,14 +102,18 @@ export default function ResourceCenter() {
       </div>
 
       <div className="tab-content">
-        {activeTab === 'blog-tab' && <Blogs />}
-
-        {activeTab === 'comparisons-tab' && <Comparisons />}
-
-        {activeTab === 'guides-tab' && <Guides />}
-
-        {activeTab === 'openTelemetry-tab' && <OpenTelemetry />}
+        {activeTab === 'blog-tab' && <Blogs currentPage={currentPage} itemsPerPage={itemsPerPage} />}
+        {activeTab === 'comparisons-tab' && <Comparisons currentPage={currentPage} itemsPerPage={itemsPerPage} />}
+        {activeTab === 'guides-tab' && <Guides currentPage={currentPage} itemsPerPage={itemsPerPage} />}
+        {activeTab === 'openTelemetry-tab' && <OpenTelemetry currentPage={currentPage} itemsPerPage={itemsPerPage} />}
       </div>
+
+      <Pagination 
+        currentPage={currentPage}
+        itemsPerPage={itemsPerPage}
+        totalItems={getTotalItems()}
+        onPageChange={(page) => setCurrentPage(page)}
+      />
 
       <div id="default-tab-content">
         <div
