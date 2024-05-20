@@ -4,7 +4,6 @@ title: Introduction
 ---
 
 import { LiteYoutubeEmbed } from "react-lite-yt-embed";
-import Screenshot from "@theme/Screenshot"
 
 # Unleash the Potential of Your Logs with Logs Pipelines
 

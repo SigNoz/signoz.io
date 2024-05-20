@@ -3,8 +3,6 @@ id: concepts
 title: Concepts
 ---
 
-import Screenshot from "@theme/Screenshot"
-
 # Concepts
 
 ## Pipelines

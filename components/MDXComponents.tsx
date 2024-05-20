@@ -7,6 +7,11 @@ import CustomLink from './Link'
 import TableWrapper from './TableWrapper'
 import YouTube from './VideoPlayer/VideoPlayer'
 import GetStartedSigNoz from '../docs/shared/get-started-signoz'
+import Admonition from './Admonition/Admonition';
+import SignUps from '../docs/shared/sign-ups'
+import LogsPerf from '../docs/shared/logs-perf-cta'
+import VersionPin from '../docs/shared/nodejs-version-pin'
+import VersionPinNestJs from '../docs/shared/nestjs-version-pin'
 
 export const components: MDXComponents = {
   Image,
@@ -17,4 +22,10 @@ export const components: MDXComponents = {
   BlogNewsletterForm,
   YouTube,
   GetStartedSigNoz,
+  Admonition,
+  SignUps,
+  LogsPerf,
+  VersionPin,
+  VersionPinNestJs
+
 }

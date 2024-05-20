@@ -1,0 +1,418 @@
+---
+title: Nginx Metrics and Logs Monitoring with OpenTelemetry
+slug: nginx-metrics-and-logs-monitoring-with-opentelemetry
+date: 2023-12-01
+tags: [OpenTelemetry]
+authors: [abhishek-kothari]
+description: Steps to monitor Nginx metrics and logs with OpenTelemetry 1. Setting up OpenTelemetry Collector 2. Configuring OpenTelemetry Collector to collect Nginx metrics and logs 3. Send collected data to SigNoz...
+image: /img/blog/2023/12/nginx-metrics-logs-otel-cover.jpeg
+hide_table_of_contents: false
+keywords: [opentelemetry,signoz,observability,logs,nginx]
+---
+
+<head>
+  <link rel="canonical" href="https://signoz.io/blog/nginx-metrics-and-logs-monitoring-with-opentelemetry/"/>
+</head>
+
+Nginx metrics and logs monitoring are important to ensure that Nginx is performing as expected and to identify and resolve problems quickly. In this tutorial, you will install OpenTelemetry Collector to collect Nginx metrics and logs and then send the collected data to SigNoz for monitoring and visualization.
+
+
+
+![Cover Image](/img/blog/2023/12/nginx-metrics-logs-otel-cover.webp)
+
+In this tutorial, we cover:
+
+- [A Brief Overview of NGINX](#a-brief-overview-of-nginx)
+- [A Brief Overview of OpenTelemetry](#a-brief-overview-of-opentelemetry)
+- [How does OpenTelemetry Collector collect data?](#how-does-opentelemetry-collector-collect-data)
+- [Pre-requisites](#pre-requisites)
+- [Setting up SigNoz](#setting-up-signoz)
+- [Setting up OpenTelemetry Collector](#setting-up-opentelemetry-collector)
+- [Monitoring with Signoz Dashboard](#monitoring-with-signoz-dashboard)
+- [Reference: NGINX metrics collected by OpenTelemetry Collector](#reference-nginx-metrics-collected-by-opentelemetry-collector)
+- [Conclusion](#conclusion)
+- [Further Reading](#further-reading)
+
+If you want to jump straight into implementation, start with this [pre-requisites](#pre-requisites) section.
+
+For large-scale web applications serving thousands of requests per second, it becomes necessary to have multiple backend servers. These backend servers eventually receive traffic through a load-balancing server that handles the request distribution as needed. This type of server is known as a reverse proxy server. In this article, we will learn about monitoring one of the most popular reverse proxy servers - NGINX.
+
+## A Brief Overview of NGINX
+
+NGINX is one of the most popular open-source reverse proxy servers in use today. It is widely used for hosting static frontend as a web server as well as for routing traffic to multiple backend servers by acting as a load balancer. At its core, NGINX is written in C++ and is quite modular in design. NGINX allows you to add plug-and-play modules for enhanced features like security and monitoring. Although NGINX is quite easy to set up initially, it has some complex parameters that need to be tweaked in order to achieve the best configuration for a high-traffic website. This makes it necessary to retrieve and observe metrics obtained from NGINX.
+
+## A Brief Overview of OpenTelemetry
+
+OpenTelemetry is a set of APIs, SDKs, libraries, and integrations aiming to standardize the generation, collection, and management of telemetry data(logs, metrics, and traces). It is backed by the Cloud Native Computing Foundation and is the leading open-source project in the observability domain.
+
+The data you collect with OpenTelemetry is vendor-agnostic and can be exported in many formats. Telemetry data has become critical in observing the state of distributed systems. With microservices and polyglot architectures, there was a need to have a global standard. OpenTelemetry aims to fill that space and is doing a great job at it thus far.
+
+In this tutorial, you will use OpenTelemetry Collector to collect PostgreSQL metrics for performance monitoring.
+
+### What is OpenTelemetry Collector?
+
+OpenTelemetry Collector is a stand-alone service provided by OpenTelemetry. It can be used as a telemetry-processing system with a lot of flexible configurations to collect and manage telemetry data.
+
+It can understand different data formats and send it to different backends, making it a versatile tool for building observability solutions.
+
+[Read our complete guide on OpenTelemetry Collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/)
+
+## How does OpenTelemetry Collector collect data?
+
+A receiver is how data gets into the OpenTelemetry Collector. Receivers are configured via YAML under the top-level `receivers` tag. There must be at least one enabled receiver for a configuration to be considered valid.
+
+Here’s an example of an `otlp` receiver:
+
+```yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+      http:
+```
+
+An OTLP receiver can receive data via gRPC or HTTP using the <a href = "https://github.com/open-telemetry/opentelemetry-proto/blob/main/docs/specification.md" rel="noopener noreferrer nofollow" target="_blank">OTLP</a> format. There are advanced configurations that you can enable via the YAML file.
+
+Here’s a sample configuration for an otlp receiver.
+
+```yaml
+receivers:
+  otlp:
+    protocols:
+      http:
+        endpoint: "localhost:4318"
+        cors:
+          allowed_origins:
+            - http://test.com
+            # Origins can have wildcards with *, use * by itself to match any origin.
+            - https://*.example.com
+          allowed_headers:
+            - Example-Header
+          max_age: 7200
+```
+
+You can find more details on advanced configurations <a href = "https://github.com/open-telemetry/opentelemetry-collector/blob/main/receiver/otlpreceiver/README.md" rel="noopener noreferrer nofollow" target="_blank">here</a>.
+
+After configuring a receiver, **you must enable it**. Receivers are enabled via pipelines within the service section. A pipeline consists of a set of receivers, processors, and exporters.
+
+The following is an example pipeline configuration:
+
+```yaml
+service:
+  pipelines:
+    metrics:
+      receivers: [otlp, prometheus]
+      exporters: [otlp, prometheus]
+    traces:
+      receivers: [otlp, jaeger]
+      processors: [batch]
+      exporters: [otlp, zipkin]
+```
+
+Now that you understand how OpenTelemetry collector collects data, let’s see how we can collect Nginx metrics and logs.
+
+## Pre-requisites
+
+This tutorial assumes that you have the OpenTelemetry collector installed on the same host as your NGINX if you plan to monitor a local NGINX setup. In case you are looking to monitor a remote NGINX setup, you would need to open up the network port to allow the OpenTelemetry collector to access the metrics.
+
+### Preparing NGINX
+
+For the purpose of this tutorial, we will assume the following:
+
+- NGINX is installed on the same host when you are setting up the OpenTelemetry collector
+- Logs for NGINX are enabled and stored on the path `/var/log/nginx/access.log`
+
+You can install NGINX on your server using this <a href = "https://docs.nginx.com/nginx/admin-guide/installing-nginx/installing-nginx-open-source" rel="noopener noreferrer nofollow" target="_blank">reference</a>.
+
+Once installed, we can configure NGINX to contain an endpoint showing the server statistics. In order to do so, add the below block at the top of your server block
+
+```yaml
+http {
+
+server {
+
+location /status {
+stub_status on;
+}
+---
+
+---
+# your configuration
+
+}
+
+}
+```
+
+If this is a fresh installation of NGINX, you can add this block to your `default.conf` file. Once added, run the command `sudo nginx -t` to validate the change. If the test is successful, you can restart the NGINX service. Now, hit the URL `http://your-domain/status` (use `[localhost](http://localhost)` for `your domain` if you are testing this locally). You will see an output similar to what is shown below.
+
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image" src="/img/blog/2023/12/nginx_status_page.webp" alt="NGINX status page"/>
+    <figcaption><i>NGINX status page</i></figcaption>
+</figure>
+<br/>
+
+Your NGINX server is ready to serve the metrics now.
+
+## Setting up SigNoz
+
+You need a backend to which you can send the collected data for monitoring and visualization. [SigNoz](https://signoz.io/) is an OpenTelemetry-native APM that is well-suited for visualizing OpenTelemetry data.
+
+SigNoz cloud is the easiest way to run SigNoz. You can sign up [here](https://signoz.io/teams/) for a free account and get 30 days of unlimited access to all features.
+
+You can also install and self-host SigNoz yourself. Check out the [docs](https://signoz.io/docs/install/) for installing self-host SigNoz.
+
+## Setting up OpenTelemetry Collector
+
+### Step 1 - Downloading OpenTelemetry Collector
+
+Download the appropriate binary package for your Linux or macOS distribution from the OpenTelemetry Collector <a href = "https://github.com/open-telemetry/opentelemetry-collector-releases/releases" rel="noopener noreferrer nofollow" target="_blank">releases</a> page. We are using the latest version available at the time of writing this tutorial.
+
+For MACOS (arm64):
+
+```bash
+curl --proto '=https' --tlsv1.2 -fOL https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.90.0/otelcol-contrib_0.90.0_darwin_arm64.tar.gz
+```
+
+### Step 2 - Extracting the package
+
+Create a new directory named `otelcol-contrib` and then extract the contents of the archive into this newly created directory with the following command:
+
+```bash
+mkdir otelcol-contrib && tar xvzf otelcol-contrib_0.90.0_darwin_arm64.tar -C otelcol-contrib
+```
+
+### Step 3 - Setting up the configuration file
+
+In this tutorial, we will monitor the metrics of NGINX and visualize its access logs. Let’s create a `config.yaml` in the `otelcol-contrib` folder. This will configure the collector with an <a href = "https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/nginxreceiver" rel="noopener noreferrer nofollow" target="_blank">NGINX receiver</a> for metrics and the <a href = "https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/filelogreceiver" rel="noopener noreferrer nofollow" target="_blank">File Log receiver</a> for logs.
+
+**Note:**
+
+The configuration file should be created in the same directory where you unpack the `otel-collector-contrib` binary. In case you have globally installed the binary, it is ok to create on any path.
+
+```yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: localhost:4317
+      http:
+        endpoint: localhost:4318
+  nginx:
+    endpoint: "http://localhost:80/status"
+    collection_interval: 10s
+  filelog:
+    include:
+      - /var/log/nginx/*.log
+
+processors:
+  batch:
+    send_batch_size: 1000
+    timeout: 10s
+  attributes:
+    actions:
+      - key: app
+        value: nginx
+        action: insert
+exporters:
+  otlp:
+    endpoint: "ingest.{region}.signoz.cloud:443" # replace {region} with your region
+    tls:
+      insecure: false
+    headers:
+      "signoz-access-token": "{your-signoz-token}" # Obtain from https://{your-signoz-url}/settings/ingestion-settings
+  logging:
+    verbosity: detailed
+service:
+  telemetry:
+    metrics:
+      address: localhost:8888
+  pipelines:
+    metrics:
+      receivers: [otlp, nginx]
+      processors: [batch]
+      exporters: [otlp]
+    logs:
+      receivers: [filelog]
+      processors: [attributes]
+      exporters: [otlp]
+```
+
+You would need to replace `region` and `signoz-token` in the above file with the region of your choice (for Signoz Cloud) and token obtained from Signoz Cloud → Settings → Ingestion Settings.
+
+<figure data-zoomable align='center'>
+    <img src="/img/blog/common/ingestion-key-details.webp" alt="You can find ingestion details in the SigNoz dashboard"/>
+    <figcaption><i>You can find ingestion details in the SigNoz dashboard</i></figcaption>
+</figure>
+<br />
+
+The above configuration is quite simple - Whenever you wish to monitor a different Nginx instance, you would need to change the `endpoint` URL for the `nginxreceiver`. However, for logs, the OpenTelemetry collector needs to run in the same host where the log files reside. You can also monitor multiple NGINX servers by adding multiple receivers, as shown below:
+
+```yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: localhost:4317
+      http:
+        endpoint: localhost:4318
+  nginx:
+    endpoint: "http://localhost:80/status"
+    collection_interval: 10s
+  nginx/2:
+    endpoint: "http://<remote-nginx>:80/status"
+    collection_interval: 10s
+  filelog:
+    include:
+      - /var/log/nginx/*.log
+processors:
+  batch:
+    send_batch_size: 1000
+    timeout: 10s
+  attributes/remotenginx:
+    actions:
+      - key: endpoint
+        value: <remote-endpoint>
+        action: insert
+  attributes/localnginx:
+    actions:
+      - key: endpoint
+        value: <local-endpoint>
+        action: insert
+  attributes:
+    actions:
+      - key: app
+        value: nginx
+        action: insert
+exporters:
+  otlp:
+    endpoint: "ingest.{region}.signoz.cloud:443" # replace {region} with your region
+    tls:
+      insecure: false
+    headers:
+      "signoz-access-token": "{your-signoz-token}" # Obtain from https://{your-signoz-url}/settings/ingestion-settings
+  logging:
+    verbosity: detailed
+service:
+  telemetry:
+    metrics:
+      address: localhost:8888
+  pipelines:
+    metrics:
+      receivers: [otlp, nginx]
+      processors: [attributes/localnginx, batch]
+      exporters: [otlp]
+    metrics/2:
+      receivers: [otlp, nginx/2]
+      processors: [attributes/remotenginx, batch]
+      exporters: [otlp]
+    logs:
+      receivers: [filelog]
+      processors: [attributes]
+      exporters: [otlp]
+```
+
+### Step 4 - Running the collector service
+
+Every Collector release includes an `otelcol` executable that you can run. Since we’re done with configurations, we can now run the collector service with the following command.
+
+From the `otelcol-contrib`, run the following command:
+
+```bash
+./otelcol-contrib --config ./config.yaml
+```
+
+If you want to run it in the background -
+
+```bash
+./otelcol-contrib --config ./config.yaml &> otelcol-output.log & echo "$\!" > otel-pid
+```
+
+### Step 5 - Debugging the output
+
+If you want to see the output of the logs, we’ve just set up for the background process. You may look it up with:
+
+```bash
+tail -f -n 50 otelcol-output.log
+```
+
+tail 50 will give the last 50 lines from the file `otelcol-output.log`
+
+You can stop the collector service with the following command:
+
+```yaml
+kill "$(< otel-pid)"
+```
+
+You should start seeing the metrics on your Signoz Cloud UI in about 30 seconds. You can import this [dashboard JSON](https://github.com/SigNoz/dashboards/tree/main/nginx) into your SigNoz environment to start monitoring your Nginx instance quickly.
+
+## Monitoring with Signoz Dashboard
+
+Once the above setup is done, you will be able to access the metrics in the SigNoz dashboard. You can go to the Dashboards tab and try adding a new panel. You can learn how to create dashboards in SigNoz [here](https://signoz.io/docs/userguide/manage-dashboards-and-panels/).
+
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image" src="/img/blog/2023/12/nginx_metrics.webp" alt="NGINX metrics collected by OpenTelemetry collector"/>
+    <figcaption><i>NGINX metrics collected by OpenTelemetry collector</i></figcaption>
+</figure>
+<br/>
+
+You can easily create charts with [query builder](https://signoz.io/docs/userguide/create-a-custom-query/#sample-examples-to-create-custom-query) in SigNoz. Here are the [steps](https://signoz.io/docs/userguide/manage-panels/#steps-to-add-a-panel-to-a-dashboard) to add a new panel to the dashboard.
+
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image" src="/img/blog/2023/12/nginx_dashboard_panel.webp" alt="Creating a dashboard panel for average connections accepted"/>
+    <figcaption><i>Creating a dashboard panel for average connections accepted</i></figcaption>
+</figure>
+<br/>
+
+You can build a complete dashboard around various metrics emitted. Here’s a look at a sample dashboard we built out using the metrics collected.
+
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image" src="/img/blog/2023/12/nginx_dashboard_panel2.webp" alt="sample dashboard"/>
+    <figcaption><i>sample dashboard</i></figcaption>
+</figure>
+<br/>
+
+You can also create alerts on any metric. Learn how to create alerts [here](https://signoz.io/docs/userguide/alerts-management/).
+
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image" src="/img/blog/2023/12/nginx_create_alerts.webp" alt=""/>
+    <figcaption><i></i></figcaption>
+</figure>
+<br/>
+
+### Visualizing NGINX logs
+
+In order to visualize the logs sent by the OpenTelemetry collector, head over to Signoz → Logs → Logs Explorer. In the logs explorer, you can filter your [logs](https://signoz.io/blog/nginx-logging/) using the tag `app=nginx`, as shown in the image below:
+
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image" src="/img/blog/2023/12/nginx_logs.webp" alt="You can visualize the volume of logs as well as the actual log lines easily in this UI. "/>
+    <figcaption><i>You can visualize the volume of logs as well as the actual log lines easily in this UI.</i></figcaption>
+</figure>
+<br/>
+
+## Reference: NGINX metrics collected by OpenTelemetry Collector
+
+| Metric                     | Description                            | Type |
+| -------------------------- | -------------------------------------- | ---- |
+| nginx_requests             | Total number of requests received      | Sum  |
+| nginx_connections_accepted | Total connections accepted             | Sum  |
+| nginx_connections_current  | Total active connections               | Sum  |
+| nginx_connections_handled  | Total connections handled successfully | Sum  |
+
+## Conclusion
+
+In this tutorial, you installed an OpenTelemetry Collector to collect Nginx metrics and logs and sent the collected data to SigNoz for monitoring and alerts.
+
+Visit our [complete guide](https://signoz.io/blog/opentelemetry-collector-complete-guide/) on OpenTelemetry Collector to learn more about it. OpenTelemetry is quietly becoming the world standard for open-source observability, and by using it, you can have advantages like a single standard for all telemetry signals, no vendor lock-in, etc.
+
+SigNoz is an open-source [OpenTelemetry-native APM](https://signoz.io/blog/opentelemetry-apm/) that can be used as a single backend for all your observability needs.
+
+---
+
+## Further Reading
+
+[Complete Guide on OpenTelemetry Collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/)
+
+[An OpenTelemetry-native APM](https://signoz.io/blog/opentelemetry-apm/)
+
+---
