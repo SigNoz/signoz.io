@@ -4,15 +4,11 @@ title: Angular OpenTelemetry Instrumentation
 description: Instrument your angular frontend app with OpenTelemetry and send data to SigNoz
 ---
 
-import { LiteYoutubeEmbed } from "react-lite-yt-embed";
-
 import InstrumentationFAQ from '../shared/instrumentation-faq.md'
 
 ![Angular Instrumentation](../../static/img/angular-instrumentation.webp)
 
-
 This document contains instructions on how to set up OpenTelemetry instrumentation in your Angular applications. OpenTelemetry, also known as OTel for short, is an open source observability framework that can help you generate and collect telemetry data - traces, metrics, and logs from your Nestjs application.
-
 
 Once the telemetry data is collected, you can configure an exporter to send the data to SigNoz.
 
@@ -89,14 +85,12 @@ import {
 
 This config would be enough to get you up and running. For more tweaks refer to [this](https://github.com/jufab/opentelemetry-angular-interceptor#readme) detailed documentation of the instrumentation library.
 
-
-
 Facing difficulties with instrumenting your application? Check out this video tutorial 👇
 
-<LiteYoutubeEmbed id="g-I-v1FtMoM" mute={false} />
+<YouTube id="g-I-v1FtMoM" mute={false} />
 
 ## Sample Angular App
-- [Sample Angular App](https://github.com/SigNoz/sample-angular-app/) - Contains without-instrumentation branch as well as instrumented branch `main`.
 
+- [Sample Angular App](https://github.com/SigNoz/sample-angular-app/) - Contains without-instrumentation branch as well as instrumented branch `main`.
 
 <InstrumentationFAQ />

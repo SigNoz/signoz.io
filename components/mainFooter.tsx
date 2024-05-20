@@ -1,7 +1,6 @@
 import * as React from 'react'
 import Link from 'next/link'
 import { ArrowUpRight, GithubIcon, Linkedin, SlackIcon, Twitter, Youtube } from 'lucide-react'
-import { Github } from './social-icons/icons'
 import Image from 'next/image'
 
 /**

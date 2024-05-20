@@ -25,14 +25,14 @@ function FeaturedBlogs({ isDarkMode }: FeaturedBlogsProps) {
       <div className="mt-5 w-full max-md:max-w-full">
         <div className="mt-4 grid grid-cols-2 gap-4">
           {primaryFeaturedBlogs.map((featuredBlog) => {
-            return <BlogPostCard blog={featuredBlog} />
+            return <BlogPostCard blog={featuredBlog} key={featuredBlog.slug} />
           })}
         </div>
       </div>
 
       <div className="mt-4 grid grid-cols-3 gap-4">
         {secondaryFeaturedBlogs.map((post) => {
-          return <BlogPostCard blog={post} />
+          return <BlogPostCard blog={post} key={post.slug} />
         })}
       </div>
     </div>

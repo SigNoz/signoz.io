@@ -3,15 +3,13 @@ id: introduction
 title: Introduction
 ---
 
-import { LiteYoutubeEmbed } from "react-lite-yt-embed";
-
 # Unleash the Potential of Your Logs with Logs Pipelines
 
 With Logs Pipelines, you can transform logs to suit your querying
 and aggregation needs before they get stored in the database.
 
 <br/>
-<LiteYoutubeEmbed id="OneENGNmLd0" mute={false} />
+<YouTube id="OneENGNmLd0" mute={false} />
 <br/>
 
 Once you start sending logs to SigNoz, you can start searching their text
@@ -65,7 +63,6 @@ information in your logs or normalizing names of fields across services.
   </figcaption>
 </figure>
 <br/>
-
 
 While you can achieve these goals by changing your application code or by changing config
 for your otel collectors, logs pipelines allow you to do it in SigNoz UI without having to ship changes
