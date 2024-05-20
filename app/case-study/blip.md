@@ -1,14 +1,10 @@
 ---
-title:  How Blip uses SigNoz to improve their issue resolution time by 14x
+title: How Blip uses SigNoz to improve their issue resolution time by 14x
 slug: blipbillboards
 image: /img/case_study/BlipBillBoards.png
 authors: [pranay]
 # hide_table_of_contents: true
-
 ---
-import { LiteYoutubeEmbed } from "react-lite-yt-embed";
-
-
 
 <head>
   <link rel="canonical" href="https://signoz.io/case-study/blip/"/>
@@ -18,7 +14,6 @@ import { LiteYoutubeEmbed } from "react-lite-yt-embed";
 </head>
 
 # How Blip uses SigNoz to improve their issue resolution time by 14x
-
 
 <div class="avatar">
   <a
@@ -39,7 +34,7 @@ import { LiteYoutubeEmbed } from "react-lite-yt-embed";
 <br />
 <br />
 
-Blip provides self-service subscription-based digital ad space across 1000’s of digital billboards in the US and Canada. Many small and medium-sized businesses use Blip services to reach their audience anytime, anywhere they want. 
+Blip provides self-service subscription-based digital ad space across 1000’s of digital billboards in the US and Canada. Many small and medium-sized businesses use Blip services to reach their audience anytime, anywhere they want.
 
 <!-- *I sat down with Nate, Senior DevOps engineer at [BlipBillBoards](https://www.blipbillboards.com/) to understand how they use SigNoz at BlipBillBoards. Here’s a few snippets from our conversation (edited for legibility)* -->
 
@@ -54,8 +49,7 @@ Blip used SigNoz to improve their issue resolution time by 14x. We sat down with
 
 Read on to find out how Blip uses SigNoz as their observability backend.
 
-
-### *Tell us a bit about yourself.*
+### _Tell us a bit about yourself._
 
 My name is Nate, and I work as a senior DevOps engineer at Blip. I love everything technical and love to build things.
 
@@ -65,17 +59,15 @@ So, my primary goal is to try and optimize the application and keep our develope
 
 <!-- ### *What does BlipBillBoards do?*
 
-BlipBillBoards is an advertising agency. They don't advertise themselves, but they connect advertisers to sign owners. 
+BlipBillBoards is an advertising agency. They don't advertise themselves, but they connect advertisers to sign owners.
 
 So we have digital billboards here in the US. On the sides of freeways and on the sides of buildings. And these billboard owners don't have any way other than direct marketing to advertisers to display things on their signs.
 
 And so we kind of stepped in in the middle there and said, hey, there's this advertiser that would like to play an ad on your sign at this time or this time period, this time frame. So we  coordinate the backend of getting the advertisers connected with the sign owners and then putting them together. -->
 
+### _What were the business problems you're trying to solve with SigNoz? _
 
-
-### *What were the business problems you're trying to solve with SigNoz? *
-
-<LiteYoutubeEmbed id="ISPfqGmJGYE" mute={false} />
+<YouTube id="ISPfqGmJGYE" mute={false} />
 
 <p>&nbsp;</p>
 
@@ -89,8 +81,7 @@ SigNoz choosing ClickHouse is a very good idea because I had no issues other tha
 
 I've had no issues with it. It showed me exactly what's going on, how the code is flowing, where it's going, what logic it's using to determine what response it will give, and everything else going along with that.
 
-
-### *Can you share any specific business use cases you solved with SigNoz?*
+### _Can you share any specific business use cases you solved with SigNoz?_
 
 A few months ago, before I implemented SigNoz, we were having an issue. We had an endpoint that we called `checklist`.
 
@@ -107,9 +98,7 @@ But what happened behind the scenes was nebulous. For example, we knew it was ta
 
 <p>&nbsp;</p>
 
-
-
-### *Logs did not solve the problem.*
+### _Logs did not solve the problem._
 
 You can try and run a couple of queries to check what queries are being run and what's going on. But correlating that to a specific endpoint is next to impossible with logs. We had an outage that occurred because of that. The endpoint started getting so large and running so many queries that it took down the website for everyone, not just the person accessing that particular endpoint.
 
@@ -117,7 +106,7 @@ I spent about two weeks diagnosing the cause and then another two weeks fixing i
 
 I had to add a log statement and then run a query. Then add another log statement, and run a query to see where the request would go. This is how I was trying to reproduce it.
 
-### *Many a time staging environment doesn’t reflect issues that come up in production.*
+### _Many a time staging environment doesn’t reflect issues that come up in production._
 
 The staging environment doesn't have the same data as the production environment, and it's not nearly as full-featured. So when we were trying to run queries in staging, the request was completed in seconds. But when we ran it in production, we were suddenly getting these timings out, taking down the whole website and the entire back end.
 
@@ -127,8 +116,7 @@ It was awful. And so I did finally fix it. So we got that push, and now the back
 
 But now we know how to avoid such things. For example, an endpoint came up just the other day, and with SigNoz in place, it took me just an hour to figure out why, how, and exactly what was going wrong.
 
-
-### *N+1 query issue.*
+### _N+1 query issue._
 
 <figure data-zoomable align='center'>
     <img src="/img/case_study/Nplus1.webp" alt="N+1 query "/>
@@ -143,10 +131,9 @@ Data is right there in memory, and you're able to iterate through it and do what
 
 And by seeing the trace details in SigNoz, I showed the developers what exactly was going on. I showed them the data that was being passed in. And now, instead of three minutes, it takes 2 seconds to complete the exact same request.
 
+### What made you choose SigNoz over other solutions?
 
-### What made you choose SigNoz over other solutions? 
-
-<LiteYoutubeEmbed id="8b3rutiPnTc" mute={false} />
+<YouTube id="8b3rutiPnTc" mute={false} />
 
 <p>&nbsp;</p>
 
@@ -168,8 +155,7 @@ So we didn't have any of those issues with rolling out OpenTelemetry into the co
 
 It just runs and runs very efficiently for what it's doing.
 
-
-### *How much resource did SigNoz need to handle your scale?*
+### _How much resource did SigNoz need to handle your scale?_
 
 So we did have to upsize the Kubernetes cluster we were using. We were using `t3large` before, and now we had to go up to `t3xlarge` because the amount of memory and CPU that was available on the `t3large` wasn't enough to run the ClickHouse database.
 
@@ -181,7 +167,7 @@ And on average, we go between about three OTel Collectors up to about nine. I ha
 
 Altogether, if I remember right, it was about 32GB of RAM on average for everything, including the ClickHouse and OTel collector. So, broadly 32GB RAM is sufficient for 40 mn spans per hour.
 
-### *What features do you use the most in SigNoz?*
+### _What features do you use the most in SigNoz?_
 
 We use distributed tracing a lot. We use all the features of distributed tracing, individual spans, attributes, and events associated with each span. With all the features combined, distributed tracing shows exactly how things are running, and that’s incredibly helpful.
 
@@ -194,8 +180,7 @@ The second feature that we use the most is the application metrics page which sh
 
 <p>&nbsp;</p>
 
-
-### *Any advice for teams trying to set up their observability systems?*
+### _Any advice for teams trying to set up their observability systems?_
 
 I would suggest teams use the automatic instrumentation provided by OpenTelemetry libraries. It's good to automatically instrument things like your database calls, and your various HTTP calls, among other things. You don't need to worry about instrumenting applications yourself initially. It's great to get something up and going because it is so insightful to just see things laid out.
 
@@ -203,10 +188,9 @@ The second thing I would suggest is that if you have a place where there's a com
 
 If you have to instrument one place, make sure you instrument the place where everything enters your system. So if there's a routing handling system, or if there's a piece of code that handles requests, you can wrap that in a single span, and then all of those database calls get tied together, and it's wonderful.
 
-
 <p>&nbsp;</p>
 
------
+---
 
 Thank you for taking out the time to read this case study. If you have any feedback or want to share your story using SigNoz, please feel free to reach out to `hello@signoz.io` with `Case Study` as subject.
 

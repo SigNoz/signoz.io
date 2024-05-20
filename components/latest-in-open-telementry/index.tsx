@@ -2,7 +2,8 @@
 
 import React from 'react'
 import Heading from '../../components/ui/Heading'
-import { LiteYoutubeEmbed } from 'react-lite-yt-embed'
+import YouTube from '../../components/VideoPlayer/VideoPlayer'
+
 const LatestInOpenTelementry = () => {
   const TUTORIALS_LIST = [
     {
@@ -33,7 +34,7 @@ const LatestInOpenTelementry = () => {
                 <div className="card bluish-gradient rounded-lg">
                   <div className="card__body p-0">
                     <div className="flex flex-col gap-5">
-                      <LiteYoutubeEmbed id={tutorial.youtubeId} mute={false} />
+                      <YouTube id={tutorial.youtubeId} />
                       <p className="line-clamp-2 text-ellipsis px-5">{tutorial.desc}</p>
                     </div>
                   </div>
