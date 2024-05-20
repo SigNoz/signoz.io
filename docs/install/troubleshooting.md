@@ -7,9 +7,6 @@ description: Instructions that should resolve most installation issues
 import Tabs from "@theme/Tabs";
 import TabItem from "@theme/TabItem";
 
-import { LiteYoutubeEmbed } from "react-lite-yt-embed";
-
-
 This troubleshooting guide includes step-by-step instructions that should resolve most installation issues.
 
 ## Using SigNoz Troubleshooting Repository
@@ -47,7 +44,7 @@ You can also use troubleshoot Docker image:
 docker run -it --rm signoz/troubleshoot checkEndpoint --endpoint=172.17.0.1:4317
 ```
 
-_*Notes: SigNoz Otel Collector should be accessible in `172.17.0.1:4317` from your application even if running in different docker network._
+_\*Notes: SigNoz Otel Collector should be accessible in `172.17.0.1:4317` from your application even if running in different docker network._
 
 #### Kubernetes
 
@@ -67,9 +64,10 @@ kubectl -n app-namespace run troubleshoot --image=signoz/troubleshoot \
   --endpoint=my-release-signoz-otel-collector.platform.svc.cluster.local:4317
 ```
 
-_*Notes:_
-  1. Replace `app-namespace` with your application namespace, `my-release` with SigNoz helm release name, and `platform` with SigNoz namespace.
-  2. In case on multiple k8s cluster, you might have to set otel collector service type as `NodePort` or `LoadBalancer`.
+_\*Notes:_
+
+1. Replace `app-namespace` with your application namespace, `my-release` with SigNoz helm release name, and `platform` with SigNoz namespace.
+2. In case on multiple k8s cluster, you might have to set otel collector service type as `NodePort` or `LoadBalancer`.
 
 ```bash
 helm upgrade --install -n platform my-release signoz/signoz \
@@ -89,11 +87,10 @@ If you instead prefer to watch a video, check out this video:
   overflow:"hidden",
   postiton:"relative"
 }}>
-<LiteYoutubeEmbed id="Y7OkvmuTRQ8" mute={false} />
+<YouTube id="Y7OkvmuTRQ8" mute={false} />
 </div>
 
 <p>&nbsp;</p>
-
 
 ## Troubleshooting Docker Standalone Installation of SigNoz
 
@@ -102,7 +99,7 @@ If you instead prefer to watch a video, check out this video:
 3. If you don't see any data in the front-end, please wait two or three minutes.
 4. Run the `install.sh` script again. The script will try to reinstall the containers that failed.
 5. Follow the steps for [uninstalling SigNoz](/docs/operate/docker-standalone/#uninstall-signoz) section and then install SigNoz again by following the steps in the [Install SigNoz on Docker Standalone](/docs/install/docker) section.
-6. If you're still facing issues trying to install SigNoz, please reach out to us on [Slack](https://signoz.io/slack) 
+6. If you're still facing issues trying to install SigNoz, please reach out to us on [Slack](https://signoz.io/slack)
 
 ## SigNoz Otel Collector Address Grid
 
@@ -151,14 +148,15 @@ Here is the SigNoz Otel Collector address grid which could be helpful:
     </tbody>
 </table>
 
-
 **Notes:**
+
 1. For the `<otelcollector-IP>`, use private IP address if the VM is in same private network.
 2. Replace `<namespace>` with SigNoz namespace and `<release-name>` with SigNoz helm
-  release name.
+   release name.
 3. In the case of k8s where the application and SigNoz are running in different k8s cluster, you will have to expose otel collector service.
-  Set the service type to either `NodePort` or `LoadBalancer`.
-  ```
+   Set the service type to either `NodePort` or `LoadBalancer`.
+
+```
 helm upgrade --install -n platform my-release signoz/signoz \
-  --set otelCollector.serviceType="<NodePort or LoadBalancer>"
-  ```
+--set otelCollector.serviceType="<NodePort or LoadBalancer>"
+```
