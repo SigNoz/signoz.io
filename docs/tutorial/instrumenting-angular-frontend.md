@@ -4,8 +4,6 @@ title: Instrumenting Angular Frontend Web App
 description: Instrument your angular frontend app.
 ---
 
-import { LiteYoutubeEmbed } from "react-lite-yt-embed";
-
 ![Angular Instrumentation](../../static/img/angular-instrumentation.webp)
 
 ### Why you need to instrument your frontend application 🤔
@@ -86,4 +84,4 @@ This config would be enough to get you up and running. For more tweaks refer to 
 
 Facing difficulties with instrumenting your application? Check out this video tutorial 👇
 
-<LiteYoutubeEmbed id="g-I-v1FtMoM" mute={false} />
+<YouTube id="g-I-v1FtMoM" mute={false} />

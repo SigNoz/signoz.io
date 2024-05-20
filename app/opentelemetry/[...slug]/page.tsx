@@ -76,7 +76,7 @@ export async function generateMetadata({
 }
 
 export const generateStaticParams = async () => {
-  const paths = allOpentelemetries.map((p) => ({ slug: p.slug.split('/') }))
+  const paths = allOpentelemetries.map((p) => ({ slug: p.slug?.split('/') }))
 
   return paths
 }

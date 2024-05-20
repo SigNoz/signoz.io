@@ -3,7 +3,6 @@ id: upgrade-0.8.0
 title: Upgrade to 0.8.0
 sidebar_label: Upgrade to 0.8.0
 ---
-import { LiteYoutubeEmbed } from "react-lite-yt-embed";
 
 # Upgrade to v0.8.0 from earlier versions
 
@@ -87,12 +86,12 @@ Flags:
 
 ### For Chrome
 
-<LiteYoutubeEmbed id="PmbfbTKKxmk" mute={false} />
+<YouTube id="PmbfbTKKxmk" mute={false} />
 
 ### For Firefox
 
-<LiteYoutubeEmbed id="ESivE729ZTs" mute={false} />
+<YouTube id="ESivE729ZTs" mute={false} />
 
 ### For Safari
 
-<LiteYoutubeEmbed id="T_ovOttPRhA" mute={false} />
+<YouTube id="T_ovOttPRhA" mute={false} />

@@ -3,7 +3,6 @@ id: upgrade-0.9
 title: Upgrade to 0.9
 sidebar_label: Upgrade to 0.9
 ---
-import { LiteYoutubeEmbed } from "react-lite-yt-embed";
 
 # Upgrade to v0.9 from earlier versions
 
@@ -34,7 +33,6 @@ docker run --name signoz-migrate-clickhouse --network clickhouse-setup_default -
 ```bash
 docker run --name signoz-migrate-sqlite --network clickhouse-setup_default -it -v $PWD/data/signoz/:/var/lib/signoz/ signoz/migrate:0.9-sqlite -dataSource /var/lib/signoz/signoz.db
 ```
-
 
 ### For Kubernetes
 

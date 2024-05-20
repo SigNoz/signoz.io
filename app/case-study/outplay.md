@@ -1,11 +1,9 @@
 ---
-title:  How Outplay uses SigNoz to improve their backend API response time by 35%
+title: How Outplay uses SigNoz to improve their backend API response time by 35%
 slug: outplay
 image: /img/case_study/outplay-banner-min.jpg
 authors: [pranay]
-
 ---
-import { LiteYoutubeEmbed } from "react-lite-yt-embed";
 
 # How Outplay uses SigNoz to improve their backend API response time by 35%
 
@@ -17,7 +15,6 @@ import { LiteYoutubeEmbed } from "react-lite-yt-embed";
   <meta property="twitter:title" content="How Outplay uses SigNoz to improve their backend API response time by 35% | SigNoz"/>
   <meta property="twitter:description" content=""/>
   <meta name ="twitter:image" content="https://signoz.io/img/case_study/outplay-banner-min.jpg"/>
-
 
 </head>
 
@@ -40,8 +37,7 @@ import { LiteYoutubeEmbed } from "react-lite-yt-embed";
 <br />
 <br />
 
-
-*I sat down with Vijay, Technical Lead  at <a href = "https://outplayhq.com" rel="noopener noreferrer nofollow" target="_blank" >Outplay</a> to understand how they use SigNoz at Outplay. Here’s a few snippets from our conversation (edited for legibility)*
+_I sat down with Vijay, Technical Lead at <a href = "https://outplayhq.com" rel="noopener noreferrer nofollow" target="_blank" >Outplay</a> to understand how they use SigNoz at Outplay. Here’s a few snippets from our conversation (edited for legibility)_
 
 ![Outplay Case Study](/img/case_study/outplay-banner.webp)
 
@@ -51,14 +47,16 @@ Main area of focus was to have APM metrics on the application to understand the 
 
 ### Any specific use cases?
 
-Basically, we had to find the application API whose performance needs to be optimised? Is it the back end or the database query? What kind of queries which needs tuning? 
+Basically, we had to find the application API whose performance needs to be optimised? Is it the back end or the database query? What kind of queries which needs tuning?
 
 These were the questions we wanted to figure out from an APM.
 
 ### What's the business impact?
+
 Outplay is used by salespeople to reach their prospects and close deals. Salespeople are always under pressure to hit their targets and time is money. The more efficient they are, the more they can engage with more prospects. If the application is down, their productivity is impacted and since Outplay also supports multiple CRMs integrations, automatic data flow would also be impacted.
 
 ### How did SigNoz help?
+
 We migrated our entire workload from EC2 to Kubernetes, so that scaling would be easier. Then we started optimising the backend, that's when SigNoz helped us. We started getting a list of APIs and database call times which we started optimising. We are able to load more users now with the same infra and the backend response time is 35% faster. We handle peak load 3000 active concurrent connections currently.
 
 Generating traces for background services and DB calls to understand and improve their services. Also, track all the DB call traces from background workers to check for potential bottlenecks.
@@ -77,7 +75,7 @@ That was one of the major reason. A second thing was we wanted to make this as a
 We have test engineers in our team go to the SigNoz platform on staging environment and they verify if any calls is taking more than the defined limits.
 
 <br />
-<LiteYoutubeEmbed id="nh79MBqwc0w" mute={false} />
+<YouTube id="nh79MBqwc0w" mute={false} />
 <br />
 <br />
 
@@ -91,7 +89,7 @@ We needed something which just works after deploying and doesn't need continuous
 <br />
 <br />
 
-<LiteYoutubeEmbed id="diaVE3TT2Ck" mute={false} />
+<YouTube id="diaVE3TT2Ck" mute={false} />
 
 <br />
 <br />
@@ -99,7 +97,6 @@ We needed something which just works after deploying and doesn't need continuous
 ### Any advice for teams implementing observability systems for the first time
 
 So, first thing is make your platform. as simple as possible. Don't bring in lot of components as that would become a mess. Failure of one component can bring down your whole observability stack.
-
 
 Try to have back end storage for storing the observability data. Something like s3, so that you don't have to think about loosing your telemetry data.
 

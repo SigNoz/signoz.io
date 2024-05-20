@@ -9,7 +9,7 @@ image: /img/blog/2021/06/python_application_monitoring_hc.webp
 keywords: [python application monitoring,opentelemetry,opentelemetry python,python app,python,distributed tracing]
 ---
 
-import { LiteYoutubeEmbed } from "react-lite-yt-embed";
+
 
 In this article, learn how to setup application monitoring for Python apps using an open-source solution, SigNoz.
 
@@ -23,7 +23,7 @@ If you want to check our Github repo before diving in 👇
 
 **The cost of a millisecond.**
 
-TABB Group, a financial services industry research firm, <a href = "https://research.tabbgroup.com/report/v06-007-value-millisecond-finding-optimal-speed-trading-infrastructure" rel="noopener noreferrer nofollow" target="_blank" >estimates</a> that if a broker's electronic trading platform is 5 milliseconds behind the competition, it could cost $4 million in revenue per millisecond.
+TABB Group, a financial services industry research firm, <a href="https://research.tabbgroup.com/report/v06-007-value-millisecond-finding-optimal-speed-trading-infrastructure" rel="noopener noreferrer nofollow" target="_blank" >estimates</a> that if a broker's electronic trading platform is 5 milliseconds behind the competition, it could cost $4 million in revenue per millisecond.
 
 
 The cost of latency is too high in the financial services industry, and the same is true for almost any software-based business today. For Google, half a second delay in search results caused a 20% drop in traffic. Half a second is enough to kill user satisfaction to a point where they abandon an app's service.
@@ -39,29 +39,29 @@ And to do that, you need insights into how your infrastructure handles user requ
 SigNoz is a full-stack open-source application monitoring and observability platform which can be installed within your infra. You can track metrics like p99 latency, error rates for your services, external API calls, and individual endpoints. With service maps, you can quickly assess the health of your services.
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/common/signoz_service_maps.webp" alt=""/>
+    <img src="/img/blog/common/signoz_service_maps.webp" alt="" />
     <figcaption><i>Service maps on SigNoz dashboard</i></figcaption>
 </figure>
 
 <br></br>
 
-{/* <!--- Service maps on SigNoz dashboard ---> */}
+{ /* <!--- Service maps on SigNoz dashboard ---> */}
 
 And once you know the affected service, trace data can help you identify the exact code causing the issue. Using SigNoz dashboard, you can visualize your traces easily with flamegraphs.
 
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/common/signoz_flamegraphs.webp" alt=""/>
+    <img src="/img/blog/common/signoz_flamegraphs.webp" alt="" />
     <figcaption><i>Distributed tracing visualized with flamegraphs on SigNoz dashboard</i></figcaption>
 </figure>
 
 <br></br>
 
-{/* <!--- Distributed tracing visualized with flamegraphs on SigNoz dashboard ---> */}
+{ /* <!--- Distributed tracing visualized with flamegraphs on SigNoz dashboard ---> */}
 
 Now let's get down to some action and see everything for yourself.
 
-We have set up a <a href = "https://github.com/SigNoz/sample-flask-app" rel="noopener noreferrer nofollow" target="_blank" >sample ToDo Python app</a> based on Flask web framework, which uses MongoDB as a database to demonstrate how SigNoz works. We will divide the tutorial into two parts:
+We have set up a <a href="https://github.com/SigNoz/sample-flask-app" rel="noopener noreferrer nofollow" target="_blank" >sample ToDo Python app</a> based on Flask web framework, which uses MongoDB as a database to demonstrate how SigNoz works. We will divide the tutorial into two parts:
 
 1. Installing SigNoz
 2. Instrumenting sample app to start monitoring
@@ -88,13 +88,13 @@ The application list shown in the dashboard is from a sample app called HOT R.O.
 
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/common/signoz_dashboard_homepage.webp" alt="Homepage SigNoz dashboard"/>
+    <img src="/img/blog/common/signoz_dashboard_homepage.webp" alt="Homepage SigNoz dashboard" />
     <figcaption><i>SigNoz dashboard - It shows services from a sample app that comes bundled with the application</i></figcaption>
 </figure>
 
 <br></br>
 
-{/* <!-- ## Part 1 - Installing SigNoz
+{ /* <!-- ## Part 1 - Installing SigNoz
 
 1. **Install Docker**<br></br>
    You can install Docker by following the steps listed on their website [here.](https://www.docker.com/get-started) For this tutorial, you can choose the Docker Desktop option based on the system you have.
@@ -139,27 +139,27 @@ The applications shown in the dashboard are from a sample app called Hot R.O.D t
 
 Now that you have SigNoz up and running, let's see how instrumentation works. Instrumentation is the process of implementing code instructions to monitor your application's performance. Instrumentation is key to see how your application handles the real world.
 
-SigNoz supports <a href = "https://opentelemetry.io" rel="noopener noreferrer nofollow" target="_blank" >OpenTelemetry</a> as the primary way for users to instrument their application. OpenTelemetry is a single, vendor-agnostic instrumentation library per language with support for both automatic and manual instrumentation. You don't need to worry about instrumentation in this tutorial. OpenTelemetry comes with all currently available <a href = "https://github.com/open-telemetry/opentelemetry-python" rel="noopener noreferrer nofollow" target="_blank" >instrumentation</a>.
+SigNoz supports <a href="https://opentelemetry.io" rel="noopener noreferrer nofollow" target="_blank" >OpenTelemetry</a> as the primary way for users to instrument their application. OpenTelemetry is a single, vendor-agnostic instrumentation library per language with support for both automatic and manual instrumentation. You don't need to worry about instrumentation in this tutorial. OpenTelemetry comes with all currently available <a href="https://github.com/open-telemetry/opentelemetry-python" rel="noopener noreferrer nofollow" target="_blank" >instrumentation</a>.
 
 ## Instrumenting sample app to start monitoring
 
 **Prerequisites**
 
 1. **Python 3.8 or newer**<br></br>
-   If you do not have Python installed on your system, you can download it from the link <a href = "https://www.python.org/downloads/" rel="noopener noreferrer nofollow" target="_blank" >here</a>. Check the version of Python using `python3 --version` on your terminal to see if Python is properly installed or not.
+   If you do not have Python installed on your system, you can download it from the link <a href="https://www.python.org/downloads/" rel="noopener noreferrer nofollow" target="_blank" >here</a>. Check the version of Python using `python3 --version` on your terminal to see if Python is properly installed or not.
 
 2. **MongoDB**<br></br>
    If you already have MongoDB services running on your system, you can skip this step.
    
-   For macOS: <a href = "https://docs.mongodb.com/manual/tutorial/install-mongodb-on-os-x/" rel="noopener noreferrer nofollow" target="_blank" >https://docs.mongodb.com/manual/tutorial/install-mongodb-on-os-x</a>
+   For macOS: <a href="https://docs.mongodb.com/manual/tutorial/install-mongodb-on-os-x/" rel="noopener noreferrer nofollow" target="_blank" >https://docs.mongodb.com/manual/tutorial/install-mongodb-on-os-x</a>
 
-   For Linux: <a href = "https://docs.mongodb.com/manual/administration/install-on-linux/" rel="noopener noreferrer nofollow" target="_blank" >https://docs.mongodb.com/manual/administration/install-on-linux</a>
+   For Linux: <a href="https://docs.mongodb.com/manual/administration/install-on-linux/" rel="noopener noreferrer nofollow" target="_blank" >https://docs.mongodb.com/manual/administration/install-on-linux</a>
 
 
 On MacOS the installation is done using Homebrew's brew package manager. Once the installation is done, don't forget to start MongoDB services using `brew services start mongodb/brew/mongodb-community@4.4`  on your macOS terminal.
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2021/05/screenzy-1622494628333.webp" alt=""/>
+    <img src="/img/blog/2021/05/screenzy-1622494628333.webp" alt="" />
     <figcaption><i>Starting mongodb with homebrew</i></figcaption>
 </figure>
 
@@ -186,18 +186,18 @@ python3 app.py
 
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2021/05/screenzy-1622486361195.webp" alt=""/>
+    <img src="/img/blog/2021/05/screenzy-1622486361195.webp" alt="" />
     <figcaption><i>mac terminal running Python apps</i></figcaption>
 </figure>
 
 <br></br>
 
-{/* <!--- On my mac terminal ---> */}
+{ /* <!--- On my mac terminal ---> */}
 
 You can now access the UI of the app on your local host: [http://localhost:5002/](http://localhost:5002/)
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2021/05/screenzy-1622486344949-1.webp" alt=""/>
+    <img src="/img/blog/2021/05/screenzy-1622486344949-1.webp" alt="" />
     <figcaption><i>TODO reminder app with Flask and MongoDB</i></figcaption>
 </figure>
 
@@ -328,7 +328,7 @@ If you are someone who understands more from video, then you can watch the below
 
 <p>&nbsp;</p>
 
-<LiteYoutubeEmbed id="oZkFfMN57yI" mute={false} />
+<YouTube id="oZkFfMN57yI" mute={false} />
 
 <p>&nbsp;</p>
 
