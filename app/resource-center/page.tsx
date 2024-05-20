@@ -13,7 +13,7 @@ export default function ResourceCenter() {
     <div className="container mx-auto py-4">
       <div className="mb-4">
         <ul
-          className="-mb-px flex flex-wrap text-center text-sm font-medium"
+          className="-mb-px flex flex-wrap pl-0 text-center text-sm font-medium"
           id="default-tab"
           data-tabs-toggle="#default-tab-content"
           role="tablist"
