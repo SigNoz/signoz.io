@@ -24,7 +24,7 @@ function Footer() {
                   Contributing
                 </Link>
                 <div className="mt-5 flex items-center gap-2 pr-7 max-md:pr-5">
-                  <Link href="https://knowledgebase.signoz.io/kb" target="__blank">Knowledge Base</Link>
+                  <Link href="https://knowledgebase.signoz.io/kb" target="_blank">Knowledge Base</Link>
                   <ArrowUpRight size={16} />
                 </div>
 
@@ -37,15 +37,15 @@ function Footer() {
                 </div>
               
                 <div className="mt-5 flex items-center gap-2 pr-7 max-md:pr-5">
-                  <Link href="https://signoz.io/slack" target="__blank">Slack</Link>
+                  <Link href="https://signoz.io/slack" target="_blank">Slack</Link>
                   <ArrowUpRight size={16} />
                 </div>
                 <div className="mt-5 flex items-center gap-2 whitespace-nowrap pr-8 max-md:pr-5">
-                  <Link href = "https://twitter.com/SigNozHQ" target="__blank">Twitter</Link>
+                  <Link href = "https://twitter.com/SigNozHQ" target="_blank">Twitter</Link>
                   <ArrowUpRight size={16} />
                 </div>
                 <div className="mt-5 flex items-center gap-2 whitespace-nowrap pr-8 max-md:pr-5">
-                  <Link href="https://community-chat.signoz.io/" target="__blank">Community Archive</Link>
+                  <Link href="https://community-chat.signoz.io/" target="_blank">Community Archive</Link>
                   <ArrowUpRight size={16} />
                 </div>
               </div>
@@ -70,7 +70,7 @@ function Footer() {
                 </Link>
 
                 <div className="mt-5 flex items-center gap-2 whitespace-nowrap pr-8 max-md:pr-5">
-                  <Link href="https://jobs.gem.com/signoz" target='__blank'>Careers</Link>
+                  <Link href="https://jobs.gem.com/signoz" target='_blank'>Careers</Link>
                   <ArrowUpRight size={16} />
                 </div>
 
