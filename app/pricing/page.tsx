@@ -219,7 +219,6 @@ const PricingPlans = () => {
               <SubHeading>
                 Tired of unpredictable pricing and complex billing structure? Save up to{' '}
                 <Link href="/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/">
-                  {/* <u>80% on your Datadog bill</u> */}
                   <u className='bg-blue-100 text-blue-800 me-2 px-2.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300'>80% on your Datadog bill</u>
                 </Link>{' '}
                 with SigNoz. No user-based and host-based pricing.
