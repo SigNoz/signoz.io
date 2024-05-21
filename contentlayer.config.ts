@@ -87,6 +87,12 @@ function createSearchIndex(allBlogs) {
   }
 }
 
+export const Page = defineDocumentType(() => ({
+  name: 'Page',
+  filePathPattern: 'blog/**/*.mdx',
+  contentType: 'mdx',
+}))
+
 export const Blog = defineDocumentType(() => ({
   name: 'Blog',
   filePathPattern: 'blog/**/*.mdx',
