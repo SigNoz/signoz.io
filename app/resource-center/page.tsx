@@ -46,7 +46,7 @@ export default function ResourceCenter() {
               Comparisons
             </button>
           </li>
-          <li role="presentation">
+          {/* <li role="presentation">
             <button
               className={`inline-block rounded-t-lg px-4 py-2 ${activeTab === 'guides-tab' ? 'border-b-2 border-indigo-500 text-indigo-500' : ''}`}
               id="guides-tab"
@@ -59,7 +59,7 @@ export default function ResourceCenter() {
             >
               Guides
             </button>
-          </li>
+          </li> */}
 
           <li role="presentation">
             <button

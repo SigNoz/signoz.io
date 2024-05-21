@@ -20,7 +20,7 @@ From VMs, there are two ways to send data to SigNoz Cloud.
 - [Send traces directly to SigNoz Cloud](#send-traces-directly-to-signoz-cloud)
 - [Send traces via OTel Collector binary](#send-traces-via-otel-collector-binary) (recommended)
 
-#### **Send traces directly to SigNoz Cloud**
+#### Send traces directly to SigNoz Cloud
 
 **Step 1. Install dependencies**
 
@@ -85,7 +85,7 @@ Depending on the choice of your region for SigNoz cloud, the ingest endpoint wil
 | EU | ingest.eu.signoz.cloud:443 |
 
 ---
-#### **Send traces via OTel Collector binary**
+#### Send traces via OTel Collector binary
 
 OTel Collector binary helps to collect logs, hostmetrics, resource and infra attributes. It is recommended to install Otel Collector binary to collect and send traces to SigNoz cloud. You can correlate signals and have rich contextual data through this way.
 
