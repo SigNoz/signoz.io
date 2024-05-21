@@ -1,0 +1,1 @@
+[![Pricing Page](/img/blog/common/signup_cta_1.webp)](https://signoz.io/pricing/)

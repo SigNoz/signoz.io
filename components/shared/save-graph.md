@@ -1,0 +1,1 @@
+When you’ve finished, select the **Save** button at the top right corner of the screen. Then, select the **OK** button to confirm.

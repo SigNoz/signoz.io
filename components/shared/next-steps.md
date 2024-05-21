@@ -1,0 +1,3 @@
+- [Instrument Your Application](/docs/instrumentation/overview)
+- [Use OpenTelemetry Operator for automatic instrumentation (if your applications are in k8s)](https://signoz.io/docs/tutorial/opentelemetry-operator-usage/#opentelemetry-auto-instrumentation-injection)
+- [Tutorials](/docs/tutorials/)
