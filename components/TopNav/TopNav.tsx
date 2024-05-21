@@ -12,11 +12,11 @@ import {
   XMarkIcon,
 } from '@heroicons/react/24/outline'
 import { ChevronDownIcon, PhoneIcon, PlayCircleIcon } from '@heroicons/react/20/solid'
-import { ThemeToggle } from '../ThemeToggle/ThemeToggle'
 import Image from 'next/image'
 import Link from 'next/link'
 import SearchButton from '../SearchButton'
 import Button from '../ui/Button'
+import { ArrowRight } from 'lucide-react'
 
 const products = [
   {
@@ -64,7 +64,7 @@ export default function TopNav() {
 
   return (
     <header
-      className={`fixed left-0 right-0 z-30 mx-auto w-full bg-signoz_ink-500 px-12 text-slate-900 dark:text-slate-50`}
+      className={`fixed left-0 right-0 z-30 mx-auto w-full border-b-2 border-signoz_slate-500 bg-signoz_ink-500 px-12 text-slate-900 dark:text-slate-50`}
     >
       <nav
         className="mx-auto flex items-center justify-between py-4 text-slate-900 dark:text-slate-50"
@@ -152,7 +152,7 @@ export default function TopNav() {
             Resources
           </a>
 
-          <Link href="/documentation" className="text-sm font-semibold leading-6 ">
+          <Link href="/docs" className="text-sm font-semibold leading-6 ">
             Documentation
           </Link>
           <Link href="/about-us" className="text-sm font-semibold leading-6 ">
@@ -168,8 +168,12 @@ export default function TopNav() {
         <div className="hidden gap-8 lg:flex lg:flex-1 lg:justify-end">
           <SearchButton />
 
-          <Button isButton className="button button-sm" to={'/teams/'}>
-            Try SigNoz Cloud
+          <Button
+            isButton
+            className="button button-sm flex items-center justify-center gap-2"
+            to={'/teams/'}
+          >
+            Try SigNoz Cloud <ArrowRight size={16} />
           </Button>
         </div>
       </nav>

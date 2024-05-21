@@ -247,6 +247,45 @@ export const Guide = defineDocumentType(() => ({
   },
 }))
 
+export const Doc = defineDocumentType(() => ({
+  name: 'Doc',
+  filePathPattern: 'docs/**/*.mdx',
+  contentType: 'mdx',
+  fields: {
+    title: { type: 'string', required: true },
+    id: { type: 'string', required: true },
+    slug: { type: 'string', required: false },
+    date: { type: 'date', required: false },
+    tags: { type: 'list', of: { type: 'string' }, default: [], required: false },
+    lastmod: { type: 'date', required: false },
+    draft: { type: 'boolean', required: false },
+    summary: { type: 'string', required: false },
+    description: { type: 'string', required: false },
+    images: { type: 'json', required: false },
+    image: { type: 'string', required: false },
+    authors: { type: 'list', of: { type: 'string' }, required: false },
+    layout: { type: 'string', required: false },
+    bibliography: { type: 'string', required: false },
+    canonicalUrl: { type: 'string', required: false },
+  },
+  computedFields: {
+    ...computedFields,
+    structuredData: {
+      type: 'json',
+      resolve: (doc) => ({
+        '@context': 'https://schema.org',
+        '@type': 'DocPosting',
+        headline: doc.title,
+        datePublished: doc.date,
+        dateModified: doc.lastmod || doc.date,
+        description: doc.description,
+        image: doc.images ? doc.images[0] : siteMetadata.socialBanner,
+        url: `${siteMetadata.siteUrl}/${doc._raw.flattenedPath}`,
+      }),
+    },
+  },
+}))
+
 export const Authors = defineDocumentType(() => ({
   name: 'Authors',
   filePathPattern: 'authors/**/*.mdx',
@@ -267,7 +306,7 @@ export const Authors = defineDocumentType(() => ({
 
 export default makeSource({
   contentDirPath: 'data',
-  documentTypes: [Blog, Authors, Comparison, Guide, Opentelemetry],
+  documentTypes: [Blog, Authors, Comparison, Guide, Opentelemetry, Doc],
   mdx: {
     cwd: process.cwd(),
     remarkPlugins: [
