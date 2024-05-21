@@ -208,7 +208,7 @@ config :opentelemetry, :processors,
 
 We’ll focus on instrumenting one of the most common combos of the Elixir world: `Phoenix + Ecto`.
 
-### **Step 1:** **Add dependencies**
+### Step 1: Add dependencies
 
 The first step to instrument your Elixir application with OpenTelemetry is to add the required dependencies to your `mix.exs` file and fetch them with `mix deps.get`
 
@@ -219,7 +219,7 @@ The first step to instrument your Elixir application with OpenTelemetry is to ad
 {:opentelemetry_ecto, "~> 1.0.0"}
 ```
 
-### **Step 2: Configure Elixir application**
+### Step 2: Configure Elixir application
 
 Then we need to configure our application to export telemetry data. There are two things that you need to set:
 
@@ -240,7 +240,7 @@ config :opentelemetry, :processors,
   }
 ```
 
-### **Step 3: Initialize telemetry handlers**
+### Step 3: Initialize telemetry handlers
 
 As it is documented in the `opentelemetry_phoenix` and `opentelemetry_ecto` [hexdocs.pm](http://hexdocs.pm) pages, we need to initialize both telemetry handlers.
 
