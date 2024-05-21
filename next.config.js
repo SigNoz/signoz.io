@@ -80,6 +80,10 @@ module.exports = () => {
           protocol: 'https',
           hostname: 'signoz.io',
         },
+        {
+          protocol: 'https',
+          hostname: 'avatars.githubusercontent.com',
+        },
       ],
     },
     async headers() {
