@@ -32,7 +32,7 @@ export default function OpenTelemetry() {
   const posts = allCoreContent(sortPosts(allOpentelemetries))
 
   const primaryFeaturedBlogs = posts.slice(0, 2)
-  const secondaryFeaturedBlogs = posts.slice(2, 12)
+  const secondaryFeaturedBlogs = posts.slice(2, 200)
 
   const [blogs, setBlogs] = React.useState(posts)
   const [searchValue, setSearchValue] = React.useState('')
