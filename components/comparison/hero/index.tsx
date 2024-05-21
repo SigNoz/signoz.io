@@ -26,7 +26,7 @@ const Hero = (props) => {
           </Link>
         )}
         {selfHost.isVisible && (
-          <Link className={`button ${selfHost.className} ${styles.ctaButton}`} href={selfHost.path}>
+          <Link className={`button x${selfHost.className} ${styles.ctaButton}`} href={selfHost.path}>
             Self-Host
           </Link>
         )}

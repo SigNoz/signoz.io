@@ -5,7 +5,7 @@ import { Children } from 'react'
 const comparisons = [
   {
     id: 1,
-    title: 'SigNoz vs Datadog',
+    title: 'SigNoz vs Datadog | SigNoz',
     url: '/product-comparison/signoz-vs-datadog',
     desc: (
       <>

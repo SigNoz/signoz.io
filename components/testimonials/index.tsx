@@ -134,7 +134,7 @@ export const Testimonials = () => {
               {column.map((testimonial, i) => (
                 <div className="row" key={`${idx}-${i}`}>
                   <div className="card-demo m-2 w-full">
-                    <div className="card-dark">
+                    <div className="card-dark bg-slate-800">
                       <div className="card__header">
                         <div className="avatar">
                           <img
