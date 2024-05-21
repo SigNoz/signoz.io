@@ -39,10 +39,13 @@ const SigNozStats = () => {
             </div>
           </div>
           <div className="flex justify-center">
-            <Button isButton to={'https://signoz.io/slack'}>
+            <Button
+              isButton
+              onClick={() => window.open('https://signoz.io/slack', '_blank')}>
               Join our slack community
             </Button>
           </div>
+
         </div>
       </div>
     </section>
