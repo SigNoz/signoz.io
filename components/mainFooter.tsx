@@ -15,65 +15,37 @@ function Footer() {
             <div className="flex w-3/12 flex-col max-md:ml-0 max-md:w-full">
               <div className="flex flex-col pb-2.5 text-sm tracking-wide text-stone-300 max-md:mt-10">
                 <div className="text-sm font-semibold uppercase leading-5 tracking-wide text-gray-700">
-                  platform
+                  Docs
                 </div>
-                <Link href="#" className="mt-5">
-                  Metrics
+                <Link href="https://signoz.io/docs/" className="mt-5">
+                  Introduction
                 </Link>
-                <Link href="#" className="mt-5">
-                  Logs
+                <Link href="https://signoz.io/docs/contributing/" className="mt-5">
+                  Contributing
                 </Link>
-                <Link href="#" className="mt-5">
-                  Traces
-                </Link>
-                <Link href="#" className="mt-5">
-                  Dashboards
-                </Link>
-                <Link href="#" className="mt-5">
-                  Alerts
-                </Link>
-                <Link href="#" className="mt-5">
-                  Exceptions
-                </Link>
-                <Link href="#" className="mt-5">
-                  Integrations
-                </Link>
-                <div className="mt-5 flex items-center gap-2 whitespace-nowrap pr-3.5">
-                  <Link href="#">Documentation</Link>
+                <div className="mt-5 flex items-center gap-2 pr-7 max-md:pr-5">
+                  <Link href="https://knowledgebase.signoz.io/kb" target="_blank">Knowledge Base</Link>
                   <ArrowUpRight size={16} />
                 </div>
-                <div className="mt-5 flex gap-2 pr-3.5">
-                  <Link href="#">Product guide</Link>
-                  <ArrowUpRight size={16} />
-                </div>
-                <Link href="#" className="mt-5">
-                  FAQ
-                </Link>
+
               </div>
             </div>
             <div className="ml-5 flex w-3/12 flex-col max-md:ml-0 max-md:w-full">
               <div className="flex grow flex-col self-stretch pb-20 text-sm tracking-wide text-stone-300 max-md:mt-10">
                 <div className="text-sm font-semibold uppercase leading-5 tracking-wide text-gray-700">
-                  company
+                  Community
                 </div>
-                <Link href="#" className="mt-5">
-                  Team
-                </Link>
-                <Link href="#" className="mt-5">
-                  Careers
-                </Link>
-                <Link href="#" className="mt-5">
-                  Privacy Policy
-                </Link>
-                <Link href="#" className="mt-5">
-                  Terms of Service
-                </Link>
+              
                 <div className="mt-5 flex items-center gap-2 pr-7 max-md:pr-5">
-                  <Link href="#">Press Kit</Link>
+                  <Link href="https://signoz.io/slack" target="_blank">Slack</Link>
                   <ArrowUpRight size={16} />
                 </div>
                 <div className="mt-5 flex items-center gap-2 whitespace-nowrap pr-8 max-md:pr-5">
-                  <Link href="#">Contact</Link>
+                  <Link href = "https://twitter.com/SigNozHQ" target="_blank">Twitter</Link>
+                  <ArrowUpRight size={16} />
+                </div>
+                <div className="mt-5 flex items-center gap-2 whitespace-nowrap pr-8 max-md:pr-5">
+                  <Link href="https://community-chat.signoz.io/" target="_blank">Community Archive</Link>
                   <ArrowUpRight size={16} />
                 </div>
               </div>
@@ -81,31 +53,37 @@ function Footer() {
             <div className="ml-5 flex w-3/12 flex-col max-md:ml-0 max-md:w-full">
               <div className="flex grow flex-col self-stretch pb-20 text-sm tracking-wide text-stone-300 max-md:mt-10">
                 <div className="text-sm font-semibold uppercase leading-5 tracking-wide text-gray-700">
-                  developers
+                  More
                 </div>
-                <div className="mt-5 flex items-center gap-2 pr-4">
-                  <Link href="#">Open Source</Link>
+               
+                <Link href="https://signoz.io/comparisons/signoz-vs-datadog/" className="mt-5">
+                  SigNoz vs Datadog
+                </Link>
+                <Link href="https://signoz.io/comparisons/signoz-vs-newrelic/" className="mt-5">
+                SigNoz vs New Relic
+                </Link>
+                <Link href="https://signoz.io/comparisons/signoz-vs-grafana/" className="mt-5">
+                SigNoz vs Grafana
+                </Link>
+                <Link href="https://signoz.io/product-comparison/signoz-vs-dynatrace/" className="mt-5">
+                SigNoz vs Dynatrace
+                </Link>
+
+                <div className="mt-5 flex items-center gap-2 whitespace-nowrap pr-8 max-md:pr-5">
+                  <Link href="https://jobs.gem.com/signoz" target='_blank'>Careers</Link>
                   <ArrowUpRight size={16} />
                 </div>
-                <div className="mt-5 flex items-center gap-2 whitespace-nowrap pr-5">
-                  <Link href="#">Self-hosting</Link>
-                  <ArrowUpRight size={16} />
-                </div>
-                <Link href="#" className="mt-5">
-                  Tutorials
+
+                <Link href="https://signoz.io/about-us/" className="mt-5">
+                  About
                 </Link>
-                <Link href="#" className="mt-5">
-                  Guides
+                <Link href="https://signoz.io/terms-of-service/" className="mt-5">
+                  Terms
                 </Link>
-                <Link href="#" className="mt-5">
-                  Examples
+                <Link href="https://signoz.io/privacy/" className="mt-5">
+                  Privacy
                 </Link>
-                <Link href="/product-comparison" className="mt-5">
-                  Comparisons
-                </Link>
-                <Link href="#" className="mt-5">
-                  Changelog
-                </Link>
+               
               </div>
             </div>
             <div className="ml-5 flex w-3/12 flex-col max-md:ml-0 max-md:w-full">

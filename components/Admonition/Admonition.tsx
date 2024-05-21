@@ -1,32 +1,48 @@
 import React from 'react';
-import './Admonition.styles.css'; // This will be our CSS file for styling the component
 
 const Admonition = ({ type, title, children }) => {
   return (
-    <div className={`admonition admonition-${type}`}>
-      <div className="admonition-header">
-        <span className="admonition-icon">{getIcon(type)}</span>
-        <span className="admonition-title">{title}</span>
+    <div className={`admonition ${getAdmonitionStyles(type)}`}>
+      <div className="flex items-center mb-2">
+        <span className="mr-2 text-xl">{getIcon(type)}</span>
+        <span className="font-bold text-white">{title}</span>
       </div>
-      <div className="admonition-content">
+      <div className="text-gray-300">
         {children}
       </div>
     </div>
   );
 };
 
-const getIcon = (type) => {
+const getAdmonitionStyles = (type) => {
   switch(type) {
     case 'note':
-      return '📝';
+      return 'border-l-4 border-blue-400 bg-blue-900 p-4';
     case 'tip':
-      return '💡';
+      return 'border-l-4 border-green-400 bg-green-900 p-4';
     case 'warning':
-      return '⚠️';
+      return 'border-l-4 border-yellow-400 bg-yellow-900 p-4';
     case 'danger':
-      return '❗';
+      return 'border-l-4 border-red-400 bg-red-900 p-4';
+    case 'info':
+      return 'border-l-4 border-indigo-400 bg-indigo-900 p-4';
     default:
-      return 'ℹ️';
+      return 'border-l-4 border-gray-400 bg-gray-900 p-4';
+  }
+};
+
+const getIcon = (type) => {
+  switch(type) {
+    case 'tip':
+      return '💡 Tip';
+    case 'warning':
+      return '⚠️ Warning';
+    case 'danger':
+      return '❗Danger';
+    case 'info':
+      return '✅ Info';
+    default:
+      return '📝 Note';
   }
 };
 

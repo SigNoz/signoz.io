@@ -30,12 +30,11 @@ const OpenTelemetryPageHeader: React.FC<OpenTelemetryPageHeaderProps> = ({ onSea
 
 export default function OpenTelemetry() {
   const posts = allCoreContent(sortPosts(allOpentelemetries))
-
-  const primaryFeaturedBlogs = posts.slice(0, 2)
-  const secondaryFeaturedBlogs = posts.slice(2, 12)
-
   const [blogs, setBlogs] = React.useState(posts)
   const [searchValue, setSearchValue] = React.useState('')
+
+  const primaryFeaturedBlogs = posts.slice(0, 2)
+  const secondaryFeaturedBlogs = posts.slice(2)
 
   const handleSearch = (e) => {
     setSearchValue(e.target.value)
@@ -62,3 +61,4 @@ export default function OpenTelemetry() {
     </div>
   )
 }
+

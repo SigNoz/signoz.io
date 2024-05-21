@@ -45,7 +45,7 @@ From VMs, there are two ways to send data to SigNoz Cloud.
 - [Send traces directly to SigNoz Cloud](#send-traces-directly-to-signoz-cloud)
 - [Send traces via OTel Collector binary](#send-traces-via-otel-collector-binary) (recommended)
 
-#### **Send traces directly to SigNoz Cloud**
+#### Send traces directly to SigNoz Cloud
 
 Step 1. Create a virtual environment<br></br>
     
@@ -95,7 +95,7 @@ In case you encounter an issue where all applications do not get listed in the s
 
 ---
 
-#### **Send traces via OTel Collector binary**
+#### Send traces via OTel Collector binary
 
 OTel Collector binary helps to collect logs, hostmetrics, resource and infra attributes. It is recommended to install Otel Collector binary to collect and send traces to SigNoz cloud. You can correlate signals and have rich contextual data through this way.
 
@@ -238,7 +238,7 @@ There are two ways to send data to SigNoz Cloud. You can containerize the images
 - Send traces directly to SigNoz Cloud
 - Send traces via OTel Collector binary **(recommended)**
 
-#### **Send traces directly to SigNoz Cloud**
+#### Send traces directly to SigNoz Cloud
 
 Step 1. Add OpenTelemetry dependencies
 
@@ -315,7 +315,7 @@ In case you encounter an issue where all applications do not get listed in the s
 
 ---
 
-#### **Send traces via OTel Collector binary**
+#### Send traces via OTel Collector binary
 
 OTel Collector binary helps to collect logs, hostmetrics, resource and infra attributes. It is recommended to install Otel Collector binary to collect and send traces to SigNoz cloud. You can correlate signals and have rich contextual data through this way.
 

@@ -213,7 +213,7 @@ Your app folder contains a file called `requirements.txt`. This file contains al
 pip3 install -r requirements.txt
 ```
 
-:::note
+<Admonition>
 The opentelemetry-exporter-otlp is a convenience wrapper package to install all OTLP exporters. Currently, it installs:
 
 - opentelemetry-exporter-otlp-proto-http
@@ -223,7 +223,7 @@ The opentelemetry-exporter-otlp is a convenience wrapper package to install all 
 - (soon) opentelemetry-exporter-otlp-json-http
 
 The `opentelemetry-exporter-otlp-proto-grpc` package installs the gRPC exporter which depends on the `grpcio` package. The installation of `grpcio` may fail on some platforms for various reasons. If you run into such issues, or you don't want to use gRPC, you can install the HTTP exporter instead by installing the `opentelemetry-exporter-otlp-proto-http` package. You need to set the `OTEL_EXPORTER_OTLP_PROTOCOL` environment variable to `http/protobuf` to use the HTTP exporter.
-:::
+</Admonition>
 
 If it hangs while installing `grpcio` during **pip3 install opentelemetry-exporter-otlp** then follow below steps as suggested in **<a href = "https://stackoverflow.com/a/62500932/3243212" rel="noopener noreferrer nofollow" target="_blank" >this stackoverflow link</a>**
 
@@ -238,9 +238,9 @@ This step is required to install packages specific to the application. Make sure
 ```
 opentelemetry-bootstrap --action=install
 ```
-:::note
+<Admonition>
 Please make sure that you have installed all the dependencies of your application before running the above command. The command will not install instrumentation for the dependencies which are not installed.
-:::
+</Admonition>
 
 Step 5. **Configure environment variables to run app and send data to SigNoz**<br></br>
 You're almost done. In the last step, you just need to configure a few environment variables for your OTLP exporters. Environment variables that need to be configured:
@@ -256,9 +256,9 @@ You need to put these environment variables in the below command.
 OTEL_RESOURCE_ATTRIBUTES=service.name=<service_name> OTEL_EXPORTER_OTLP_ENDPOINT="http://<IP of SigNoz>:4317" opentelemetry-instrument python3 app.py
 ```
 
-:::note
+<Admonition>
 Don’t run app in reloader/hot-reload mode as it breaks instrumentation. For example, if you use `export FLASK_ENV=development`, it enables the reloader mode which breaks OpenTelemetry instrumentation.
-:::
+</Admonition>
 
 As we are running SigNoz on local host, `IP of SigNoz` can be replaced with `localhost` in this case. And, for `service_name` let's use `pythonApp`. Hence, the final command becomes:
 

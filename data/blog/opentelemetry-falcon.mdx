@@ -105,7 +105,7 @@ The dependencies included are briefly explained below:
 
 `opentelemetry-exporter-otlp` - This library provides a way to install all OTLP exporters. You will need an exporter to send the data to SigNoz.
 
-:::note
+<Admonition>
 💡 The `opentelemetry-exporter-otlp` is a convenient wrapper package to install all OTLP exporters. Currently, it installs:
 
 - opentelemetry-exporter-otlp-proto-http
@@ -114,7 +114,7 @@ The dependencies included are briefly explained below:
 - (soon) opentelemetry-exporter-otlp-json-http
 
 The `opentelemetry-exporter-otlp-proto-grpc` package installs the gRPC exporter which depends on the `grpcio` package. The installation of `grpcio` may fail on some platforms for various reasons. If you run into such issues, or you don't want to use gRPC, you can install the HTTP exporter instead by installing the `opentelemetry-exporter-otlp-proto-http` package. You need to set the `OTEL_EXPORTER_OTLP_PROTOCOL` environment variable to `http/protobuf` to use the HTTP exporter.
-:::
+</Admonition>
 
 **Step 3. Install application specific packages**<br></br>
 This step is required to install packages specific to the application. This command figures out which instrumentation packages the user might want to install and installs it for them:
@@ -125,9 +125,9 @@ opentelemetry-bootstrap --action=install
 
 <br></br>
 
-:::note
+<Admonition>
 Please make sure that you have installed all the dependencies of your application before running the above command. The command will not install instrumentation for the dependencies which are not installed.
-:::
+</Admonition>
 
 **Step 4. Configure environment variables to run app and send data to SigNoz**<br></br>
 You're almost done. In the last step, you just need to configure a few environment variables for your OTLP exporters. Environment variables that need to be configured:
@@ -150,9 +150,9 @@ opentelemetry-instrument <your_run_command>
 
 <br></br>
 
-:::note
+<Admonition>
 Don’t run app in reloader/hot-reload mode as it breaks instrumentation. For example, if you use `--reload` or `reload=True`, it enables the reloader mode which breaks OpenTelemetry isntrumentation.
-:::
+</Admonition>
 
 For our sample Falcon application, the run command will look like:
 

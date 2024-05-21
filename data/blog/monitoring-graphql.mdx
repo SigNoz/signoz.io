@@ -116,7 +116,8 @@ Below are the steps to run the sample GraphQL application with OpenTelemetry.
 3. **Configure instrumentation using tracer.js file**<br></br>
    In order to instrument our GraphQL APIs, we will create a single `tracer.js` file and use it to instrument the service.
    To capture GraphQL instrumentation, add the OpenTelemetry instrumentation GraphQL package. You can also <a href = "https://www.npmjs.com/package/@opentelemetry/instrumentation-graphql" rel="noopener noreferrer nofollow" target="_blank" >configure some parameters</a> based on your use-case.
-   ```jsx
+
+   ```
    const sdk = new opentelemetry.NodeSDK({
      traceExporter,
      instrumentations: [
@@ -131,6 +132,7 @@ Below are the steps to run the sample GraphQL application with OpenTelemetry.
    });
    ```
    We need to initialize OpenTelemetry before your application gets loaded. If your application begins requiring packages before OpenTelemetry is set up, it can create issues. You can initialize OpenTelemetry by using the code as shown below:
+
    ```jsx
    const init = require("./tracer");
    init("graphql-service");
@@ -169,7 +171,7 @@ You need to generate some data to see how traces captured in the SigNoz dashboar
 
 Run the below graphql query in GraphQL interface at [http://localhost:4000/graphql](http://localhost:4000/graphql). You can make a bunch of calls so that it generates some monitoring data to be explored on the SigNoz dashboard.
 
-```jsx
+```
 query{
   userById(id:2){
     email
@@ -215,9 +217,7 @@ Here are a list of things that you can monitor about your GraphQL APIs with SigN
 <figure data-zoomable align='center'>
     <img className="box-shadowed-image"
     alt="Traces tab of SigNoz dashboard"
-    
-    src="/img/blog/2022/03/traces_tab_graphql_spans.webp"
-    />
+    src="/img/blog/2022/03/traces_tab_graphql_spans.webp"/>
 <figcaption><i>SigNoz captures all events related to the GraphQL service. You can use powerful filters to analyze and debug performance issues quickly.</i></figcaption>
 </figure>
 <br/>
@@ -249,8 +249,6 @@ Here are a list of things that you can monitor about your GraphQL APIs with SigN
        }
    ```
 
-```
-
 <figure data-zoomable align='center'>
     <img className="box-shadowed-image"
  alt="GraphQL UI showing error" 
@@ -260,11 +258,11 @@ Here are a list of things that you can monitor about your GraphQL APIs with SigN
 </figure>
 <br/>
 
- SigNoz captures the list of all error calls. You can see the details of a specific error in the Gantt charts.
+SigNoz captures the list of all error calls. You can see the details of a specific error in the Gantt charts.
 
- Click on a particular trace to get a detailed view of the operation span with the error message and the offending query. In this case, you can see an internal server error related to the resolver.
+Click on a particular trace to get a detailed view of the operation span with the error message and the offending query. In this case, you can see an internal server error related to the resolver.
 
- <figure data-zoomable align='center'>
+<figure data-zoomable align='center'>
     <img className="box-shadowed-image"
   alt="SigNoz Trace Detail Tab showing errors in GraphQL queries"
   
@@ -273,6 +271,7 @@ Here are a list of things that you can monitor about your GraphQL APIs with SigN
 <figcaption><i>Error traces captured from the GraphQL query in Signoz dashboard</i></figcaption>
 </figure>
 <br/>
+
 SigNoz also provides a detailed view of common <a href = "https://github.com/open-telemetry/opentelemetry-specification/tree/main/specification/trace/semantic_conventions" rel="noopener noreferrer nofollow" target="_blank" >semantic conventions</a> like HTTP, network, and other attributes.
 
 
@@ -296,7 +295,7 @@ If you have any questions or need any help in setting things up, join our slack 
 
 ---
 
-## Further Read
+**Further Reading**
 
 [Implementing Distributed Tracing in a Nodejs application](https://signoz.io/blog/distributed-tracing-nodejs/)
 ```

@@ -26,9 +26,9 @@ export const SigNozFeatures = () => {
       icon: '/img/landing/icon-placeholder.webp',
       content: (
         <>
-          <ul>
+          <ul className='list-disc'>
             <li className="mb-2 text-lg">
-              Out-of-box charts for application metrics like p90, p99 latency, error rates, request
+            Out-of-box charts for application metrics like p90, p99 latency, error rates, request
               rates, etc.
             </li>
             <li className="mb-2 text-lg">Monitor RED metrics for key operations in any service</li>
