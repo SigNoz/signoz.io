@@ -1,2 +1,0 @@
-- This section assumes that your application is already instrumented. For details about how you can instrument your application, see the [Instrument Your Application](/docs/instrumentation/) section.
-- This section assumes that you are familiar with the basics of monitoring applications.
