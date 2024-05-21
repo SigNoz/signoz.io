@@ -626,7 +626,7 @@ opentelemetry.trace.getTracer('your_tracer_name').getActiveSpanProcessor().shutd
   - [Sample NodeJs App Github Repo](https://github.com/SigNoz/sample-nodejs-app)
   - [Sample Distributed Tracing NodeJs App Github Repo](https://github.com/SigNoz/distributed-tracing-nodejs-sample)
 
-## Further Reading
+**Further Reading**
 
 - [Nodejs Performance Monitoring](https://signoz.io/blog/nodejs-performance-monitoring/)
 - [Implementing Distributed Tracing in a Nodejs application](https://signoz.io/blog/distributed-tracing-nodejs/)

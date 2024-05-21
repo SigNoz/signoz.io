@@ -638,7 +638,7 @@ opentelemetry.trace.getTracer('your_tracer_name').getActiveSpanProcessor().shutd
 - We have included a sample NestJs application with README.md at [Sample NestJs App Github Repo.](https://github.com/SigNoz/sample-NestJs-app)
 
 
-## Further Reading
+**Further Reading**
 
 - [Nodejs Performance Monitoring](https://signoz.io/blog/nodejs-performance-monitoring/)
 - [Implementing Distributed Tracing in a Nodejs application](https://signoz.io/blog/distributed-tracing-nodejs/)
