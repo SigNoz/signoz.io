@@ -151,7 +151,7 @@ export default function TopNav() {
             Resources
           </a>
 
-          <Link href="/documentation" className="text-sm font-semibold leading-6 ">
+          <Link href="/docs" className="text-sm font-semibold leading-6 ">
             Documentation
           </Link>
           <Link href="/about-us" className="text-sm font-semibold leading-6 ">

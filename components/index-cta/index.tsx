@@ -17,10 +17,10 @@ const CTA = () => {
   }
 
   return (
-    <section className="bluish-gradient py-16">
+    <section className="py-16">
       <div className="container">
         <div className="mx-auto max-w-xl">
-          <div className="">
+          <div className="text-center">
             <Heading type={2}>
               OpenTelemetry-Native Metrics, Logs,&nbsp;
               <br className="hidden lg:inline" />
@@ -28,14 +28,19 @@ const CTA = () => {
             </Heading>
             <SubHeading>Check out our hosted and enterprise solutions.</SubHeading>
           </div>
-          <div className="flex flex-col gap-5 sm:flex-row">
-            <Button isButton className="" to={'/teams/'} id="btn-get-started-homepage-bottom">
+          <div className="mt-8 flex flex-col justify-center gap-5 sm:flex-row">
+            <Button
+              isButton
+              className="button button-sm"
+              to={'/teams/'}
+              id="btn-get-started-homepage-bottom"
+            >
               Try SigNoz Cloud
             </Button>
             <Button
               isButton
               outlined
-              className=""
+              className="button button-sm"
               to={'/docs/install/'}
               onClick={requestDemoClicked}
               id="btn-self-hosted-homepage-bottom"
