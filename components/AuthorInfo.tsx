@@ -289,6 +289,24 @@ const Authors: AuthorInterface = {
     url: 'https://www.linkedin.com/in/gargighosal/',
     image_url: 'https://signoz.io/img/authors/gargi.webp',
   },
+  mary: {
+    name: 'Mary Ayobami',
+    title: 'SigNoz Community',
+    url: 'https://www.linkedin.com/in/mary-ayobami-8a85141b0/',
+    image_url: 'https://signoz.io/img/authors/mary.webp',
+  },
+  'sarafadeen-ibrahim': {
+    name: 'Sarafadeen Ibrahim Ayomide',
+    title: 'SigNoz Community',
+    url: 'https://www.linkedin.com/in/sarafadeen-ibrahim/',
+    image_url: 'https://signoz.io/img/authors/sarafadeen-ibrahim.webp',
+  },
+  ehis: {
+    name: 'Ehis Iribhogbe',
+    title: 'SigNoz Community',
+    url: 'https://www.linkedin.com/in/ehis-iribhogbe/',
+    image_url: 'https://signoz.io/img/authors/ehis.webp',
+  }
 }
 
 export default function AuthorInfo({ author }: { author: string }) {
