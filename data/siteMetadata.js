@@ -1,10 +1,10 @@
 /** @type {import("pliny/config").PlinyConfig } */
 const siteMetadata = {
-  title: 'OpenTelemetry-Native Traces, Metrics, and Logs in a single pane',
+  title: 'Open-Source Observability | SigNoz',
   author: 'SigNoz Inc',
   headerTitle: 'SigNoz',
   description:
-    'A single tool for all your observability needs - APM, logs, metrics, exceptions, alerts, and dashboards powered by a powerful query builder.',
+    'SigNoz is an open-source observability tool to help you find issues in your deployed applications & solve them quickly. It provides logs, metrics, and traces under a single pane of glass. Built with ClickHouse as datastore, it is designed to handle enterprise scale.',
   language: 'en-us',
   theme: 'dark', // system, dark or light
   siteUrl: 'https://www.signoz.io',

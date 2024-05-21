@@ -56,7 +56,7 @@ export default function Guides() {
   const [blogs, setBlogs] = useState(posts)
 
   const primaryFeaturedBlogs = blogs.slice(0, 2)
-  const secondaryFeaturedBlogs = blogs.slice(2, 12)
+  const secondaryFeaturedBlogs = blogs.slice(2)
 
   const handleSearch = (e) => {
     const filteredPosts = filterData(posts, e.target.value)

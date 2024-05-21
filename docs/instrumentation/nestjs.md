@@ -31,7 +31,7 @@ From VMs, there are two ways to send data to SigNoz Cloud.
 - [Send traces directly to SigNoz Cloud](#send-traces-directly-to-signoz-cloud)
 - [Send traces via OTel Collector binary](#send-traces-via-otel-collector-binary) (recommended)
 
-#### **Send traces directly to SigNoz Cloud**
+#### Send traces directly to SigNoz Cloud
 
 Step 1. Install OpenTelemetry packages
 
@@ -144,7 +144,7 @@ Step 6. You can validate if your application is sending traces to SigNoz cloud [
 In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#troubleshooting-your-installation).
 
 ---
-#### **Send traces via OTel Collector binary**
+#### Send traces via OTel Collector binary
 
 OTel Collector binary helps to collect logs, hostmetrics, resource and infra attributes. It is recommended to install Otel Collector binary to collect and send traces to SigNoz cloud. You can correlate signals and have rich contextual data through this way.
 
@@ -638,7 +638,7 @@ opentelemetry.trace.getTracer('your_tracer_name').getActiveSpanProcessor().shutd
 - We have included a sample NestJs application with README.md at [Sample NestJs App Github Repo.](https://github.com/SigNoz/sample-NestJs-app)
 
 
-## Further Reading
+**Further Reading**
 
 - [Nodejs Performance Monitoring](https://signoz.io/blog/nodejs-performance-monitoring/)
 - [Implementing Distributed Tracing in a Nodejs application](https://signoz.io/blog/distributed-tracing-nodejs/)
