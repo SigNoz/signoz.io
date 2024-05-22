@@ -274,6 +274,7 @@ export const Doc = defineDocumentType(() => ({
     bibliography: { type: 'string', required: false },
     canonicalUrl: { type: 'string', required: false },
     sidebar_label: { type: 'string', required: false },
+    hide_table_of_contents: { type: 'boolean' , required: false},
   },
   computedFields: {
     ...computedFields,
