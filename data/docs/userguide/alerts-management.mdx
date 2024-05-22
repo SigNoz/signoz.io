@@ -1,0 +1,67 @@
+---
+id: alerts-management
+title: Alerts 
+---
+
+Alerts in SigNoz can help you to define which data to monitor, set thresholds to detect potential problems, and specify who should be notified and how. This can help you to identify critical issues and reduce noise. This document will help you in understanding how to set up and use alerts effectively.
+
+## Managing Alerts
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/alerts/alerts-alert-rules-tab.gif" alt="A gif explaining the Alerts Rules Tab in SigNoz"/>
+    <figcaption><i>Features of Alert Rules Tab </i></figcaption>
+</figure>
+<br></br>
+
+The Alert Rules Tab in SigNoz provides an overview of the alert defined by the user. This section allows you to view, edit, or manage alert rules, along with their associated metadata. Here's a breakdown of the features available:
+
+### Alert Rule Columns
+- **Status**: Indicates whether the alert rule is enabled (OK) or disabled.
+- **Alert Name**: The name given to the alert rule for easy identification.
+- **Severity**: The level of severity assigned to the alert. For example, `warning`, `critical` etc.
+- **Labels**: Displays any labels associated with the alert rule. Labels can help in categorizing alerts.
+
+### Additional Alert Rule Options
+- **Filter by Created At, Created By, Updated At, and Updated By**: The filter option in the top-right corner allows you to customize which fields are displayed. You can choose to show fields like when was the alert created who created the alert, when it was last updated, and who updated it.
+- **Sorting Columns**: By hovering over a column name and clicking it, you can sort the list of alert rules in ascending or descending order based on that column's data. 
+- **New Alert**: At the top-right corner, the "**+ New Alert**" button lets you create a new alert rule. 
+
+### Navigation and Search
+- **Search Bar**: At the top of the tab, you can search for specific alert rules by **name**, **severity**, or **label**.
+- **Pagination Controls**: At the bottom-right corner, you can navigate through multiple pages of alert rules.
+- **Actions Menu**: Found on the right side of each row, this menu allows you to perform additional actions on the alert, such as **Enable**, **Edit**, **Clone** and **Delete**.
+
+## Triggered Alerts Tab
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/alerts/alerts-triggered-tab.gif" alt="A gif explaining the Triggered Alerts Tab in SigNoz"/>
+    <figcaption><i>Features of Triggered Alerts Tab </i></figcaption>
+</figure>
+<br></br>
+
+The Triggered Alerts Tab shows the currently firing alerts. It provides a real-time view of alerts, allowing you to quickly assess which alerts are active and require attention. Here's a detailed description of the tab's features:
+
+### Triggered Alert Columns
+- **Status**: Shows whether the alert is currently firing. It can have values like "Firing."
+- **Alert Name**: The name of the triggered alert.
+- **Severity**: Indicates the severity of the triggered alert (e.g., "warning").
+- **Tags**: Displays additional information or tags related to the alert.
+- **Firing Since**: The timestamp indicating when the alert started firing.
+
+### Additional Triggered Alert Options
+- **Filter by Tags**: You can apply filters to narrow down the list of triggered alerts based on specific tags.
+- **Group by**: The "Group by" feature allows you to group alerts based on various criteria, such as alert name, severity etc.
+
+## Creating a New Alert in SigNoz
+
+After setting up a new notification channel, you can create an alert by clicking the "New Alert" button in the Alerts Tab. You will see four types of alerts to choose from:
+
+- **[Metric-based Alert](../../alerts-management/metrics-based-alerts)**: Sends a notification when a condition occurs in metric data (e.g., CPU usage, memory utilization, request rates). You can set thresholds or rate-based conditions.
+
+- **[Log-based Alert](../../alerts-management/log-based-alerts)**: Sends a notification when a condition occurs in log data (e.g., specific patterns, keywords, error messages). You can set conditions based on log entries or error codes.
+
+- **[Trace-based Alert](../../alerts-management/trace-based-alerts)**: Sends a notification when a condition occurs in trace data (e.g., latency, errors, specific trace events). You can define conditions to trigger the alert based on distributed system traces.
+
+- **[Exceptions-based Alert](../../alerts-management/exceptions-based-alerts)**: Sends a notification when a condition occurs in exceptions data (e.g., application exceptions or errors). You can set conditions to trigger the alert when specific exceptions are detected.
+
+These four types of alerts offer flexibility in monitoring different system aspects. 

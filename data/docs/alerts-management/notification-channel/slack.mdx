@@ -1,0 +1,61 @@
+---
+id: slack
+title: Configure Slack Channel
+---
+
+## Prerequisites
+Before configuring Slack as a notification channel in SigNoz, ensure that you have:
+- **Incoming Webhook**: Follow the steps outlined in [sending messages to slack using Incoming Webhook](https://api.slack.com/messaging/webhooks) to set up an Incoming Webhook in your Slack workspace.
+- **SigNoz Version**: [v0.5.0](https://github.com/SigNoz/signoz/releases/tag/v0.5.0) or later
+
+## Accessing Alert Channels
+
+To manage your alert channels in SigNoz:
+
+- Navigate to `Settings > Alert Channels` tab within SigNoz. This tab displays a list of configured alert channels.
+
+![alert-channels](../../../static/img/docs/alert-channels.webp)
+
+:::info
+
+When multiple channels are set up, alerts will be sent to all the configured channels.
+
+:::
+
+## Creating a new Notification channel
+
+To create a new Slack notification channel in SigNoz, follow these steps:
+
+- Navigate to `Settings > Alert Channels` and click on `New Channel`.
+- Enter a **Name** for the channel and select Slack as the channel type.
+- **Webhook URL**: Paste the Incoming Webhook URL generated in Slack.
+- **Recipient**: Specify channel or user, use #channel-name, @username (has to be all lowercase, no whitespace)
+
+**Note**: You can use [Go templates](https://prometheus.io/docs/alerting/latest/notifications/) for customizing the title and description.
+
+![new-notification-channel](../../../static/img/docs/new-notification-channel.webp)
+
+**Test Configuration**: 
+Click the Test button to send a test alert to the configured Slack channel. This verifies that SigNoz can communicate with your Slack webhook.
+
+## Editing a Notification channel
+
+To edit an existing Slack notification channel:
+- Navigate to the channel settings in SigNoz.
+- You can edit the slack webhook URL and other parameters. However, note that the channel name and type are not editable after creation.
+
+![edit-notification-channel](../../../static/img/docs/edit-notification-channel.webp)
+
+
+## Receive Alert in Slack
+
+Once the configuration is set up correctly, you will receive alerts in the configured Slack channel whenever monitored metrics exceed the specified thresholds in alert rules. This ensures you are promptly notified of any issues in your applications or infrastructure components.
+
+![alerts-in-slack](../../../static/img/docs/alerts-in-slack.webp)
+
+
+## Troubleshooting
+If you encounter issues:
+
+- **Check the Webhook URL**: Ensure the webhook URL is correctly entered in SigNoz.
+- **Verify Slack Permissions**: Confirm that the webhook has permissions to post to the desired channel.

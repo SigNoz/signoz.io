@@ -1,0 +1,145 @@
+---
+id: upgrade-0.45
+title: Upgrade to 0.45
+sidebar_label: Upgrade to 0.45
+---
+
+# Upgrade to v0.45 from earlier versions
+
+After upgrading to SigNoz version `0.45` i.e. SigNoz chart version `0.41.0`, you need
+to run the migration script to sanitise the dashboards data.
+
+This migration updates the panel height of the dashboard according
+to the new format.
+
+## Steps to run migration script:
+
+## First upgrade to v0.45
+
+Follow the platform-specific instructions for upgrading to `0.45` and above.
+
+- [Docker Standalone][1]
+- [Docker Swarm][2]
+- [Kubernetes][3]
+
+### For Docker
+
+To change the directory in SigNoz repo and run following commands:
+
+For **Docker Standalone**,
+
+```bash
+cd deploy/docker/clickhouse-setup
+```
+
+For **Docker Swarm**,
+```bash
+cd deploy/docker-swarm/clickhouse-setup
+```
+
+To run the migration script:
+
+```bash
+docker run --name signoz-migrate -it \
+  -v $PWD/data/signoz/:/var/lib/signoz/ signoz/migrate:0.45 \
+  -dataSource=/var/lib/signoz/signoz.db
+```
+
+Output should be similar as below:
+
+```
+Data Source path:  signoz.db
+2024/05/01 15:28:22 Total Dashboard found: 2
+2024/05/01 15:28:22 625fa391-d9d3-47c1-809a-1a147eea229d
+2024/05/01 15:28:22 b05af383-23ec-4061-8f57-0765d45ccd51
+2024/05/01 15:28:22 Dashboard 625fa391-d9d3-47c1-809a-1a147eea229d updated
+2024/05/01 15:28:22 Dashboard b05af383-23ec-4061-8f57-0765d45ccd51 updated
+2024/05/01 15:28:22 Dashboards migrated
+```
+
+In case of failure or when you have to run the script again, make sure to
+cleanup the container.
+
+```bash
+docker stop signoz-migrate
+
+docker rm signoz-migrate
+```
+
+### For Kubernetes
+
+:::info
+Replace `my-release` with your Helm release name. And `platform` with
+your SigNoz namespace.
+:::
+
+The steps for running the migration on kubernetes are :
+
+1. Update the latest chart information from the Helm repositories:
+
+  ```bash
+  helm repo update
+  ```
+
+2. Include the following in your custom `override-values.yaml` file:
+
+  ```yaml
+  queryService:
+    initContainers:
+      migration:
+        enabled: true
+        image:
+          registry: docker.io
+          repository: signoz/migrate
+          tag: 0.45
+          pullPolicy: IfNotPresent
+        args:
+          - "-dataSource=/var/lib/signoz/signoz.db"
+  ```
+
+3. Run the following command to upgrade the chart:
+
+  ```bash
+  helm --namespace platform upgrade my-release signoz/signoz -f override-values.yaml
+  ```
+
+4. Check the logs of the migration container using:
+
+  ```bash
+  kubectl --namespace platform logs my-release-signoz-query-service-0 -c my-release-signoz-query-service-migration
+  ```
+
+  Output should be similar as below:
+
+  ```
+  Data Source path:  signoz.db
+  2024/05/01 15:28:22 Total Dashboard found: 2
+  2024/05/01 15:28:22 625fa391-d9d3-47c1-809a-1a147eea229d
+  2024/05/01 15:28:22 b05af383-23ec-4061-8f57-0765d45ccd51
+  2024/05/01 15:28:22 Dashboard 625fa391-d9d3-47c1-809a-1a147eea229d updated
+  2024/05/01 15:28:22 Dashboard b05af383-23ec-4061-8f57-0765d45ccd51 updated
+  2024/05/01 15:28:22 Dashboards migrated
+  ```
+
+5. Remove the `migration` init container section added in **Step 2**
+  followed by `helm upgrade`.
+
+  ```bash
+  helm --namespace platform upgrade my-release signoz/signoz -f override-values.yaml
+  ``` 
+
+## In case of Upgrade Failure
+
+Reach out to us at [Slack][4].
+
+## Command-Line Interface (CLI) Flags
+
+There is a `-dataSource` flag to specify the path of SQLite database file.
+It defaults to `signoz.db`.
+
+---
+
+[1]: https://signoz.io/docs/operate/docker-standalone/#upgrade
+[2]: https://signoz.io/docs/operate/docker-swarm/#upgrade
+[3]: https://signoz.io/docs/operate/kubernetes/#upgrade
+[4]: https://signoz.io/slack

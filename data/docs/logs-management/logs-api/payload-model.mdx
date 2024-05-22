@@ -1,0 +1,134 @@
+---
+title: Logs API Payload Model
+id: payload-model
+---
+
+The SigNoz Logs API uses a JSON payload for queries, which includes various fields and nested fields. This document provides a detailed explanation of each field to help users construct effective queries.
+
+### Top-level  
+
+The top-level of the payload model has the following fields:
+
+|  NAME  | DESCRIPTION  |
+|---|---|
+|start| Epoch timestamp marking the start of the query range (in milliseconds or nanoseconds) |
+|end | Epoch timestamp marking the end of the query range (in milliseconds or nanoseconds) |
+|step | Aggregation interval for the query, specified in seconds |
+|compositeQuery | This contains the [**compositeQuery**](#composite-query) which is explained below |
+
+### Composite Query
+
+The `compositeQuery` field consists of:
+
+|  NAME  | DESCRIPTION  |
+|---|---|
+|queryType| Type of query (e.g., builder, clickhouse, prometheus).Scope of this documentation is limited to **builder** type|
+|panelType| Type of panel (e.g., list, graph, table) |
+|offset| Offset used in pagination |
+|pageSize| Number of items to fetch, used in list view |
+|limit| For list view: - Maximum number of items to be paginate, i.e., offset + pageSize cannot exceed limit, For aggregation:- limit on the results  |
+|builderQueries | Map of [**builderQuery**](#builder-query) |
+
+### Builder Query
+
+A `builderQuery` consists of:
+
+|  NAME  | DESCRIPTION  |
+|---|---|
+|stepInterval| Aggregation interval for query in seconds |
+|queryName| Name of the query, should match the key to this map value | 
+|dataSource| Source of data, e.g., logs |
+|aggregateOperator| Type of aggregation - noop, count, count_distinct, sum, avg, min, max, p05, p10, p20, p25, p50, p75, p90, p95, p99, rate, sum_rate, avg_rate, min_rate, max_rate, rate_sum, rate_avg, rate_min, rate_max|
+|aggregateAttribute| The [**attribute**](#attribute) against which the aggregateOperator is applied |
+|filters| Array of [**filter**](#filter) used for filtering data|
+|groupBy| Array  of [**attribute**](#attribute) used for groupBy|
+|expression| Will be same as query name but different in case of formulas|
+|disabled| Specifies if the query is disabled |
+
+
+### Filter
+
+A `filter` consists of:
+
+|  NAME  | DESCRIPTION  |
+|---|---|
+|items| Array of [**filterItem**](#filter-item)|
+|op| Operator defining how filter items are joined (e.g., AND).
+
+### Filter Item
+
+The `filterItem` includes:
+
+|  NAME  | DESCRIPTION  |
+|---|---|
+|key | Corresponding [**attribute**](#attribute) |
+|op| Operators -  =, !=, >, >=, \<, \<=, in, nin, contains, ncontains, regex, nregex, like, nlike, exists, nexists, has, nhas |
+|value | Value for the filter, can be empty for some **op** |
+
+**Note:** The `value` parameter will be empty for `exists` and `nexists`.
+
+### Attribute 
+
+An `attribute` consists of:
+
+|  NAME  | DESCRIPTION  |
+|---|---|
+|key| Name of the key |
+|type| Type of the key, i.e., tag/resource. It is empty for top level fields. (e.g., tag = method, resource = k8s_deployment_name, (empty) = trace_id) |
+|dataType| Data type of the key (e.g., string, int64, float64, bool) |
+|isColumn| Indicates if it has a materialized column, i.e., selected field |
+|isJson| Specifies if the key is a JSON key |
+
+## Sample Payload
+
+This sample payload contains the different fields that we looked at above. It queries the SigNoz Logs API and illustrates how to count distinct `component` values and group them by `container_id`.
+
+```json
+{
+    "start": 1700734490000,
+    "end": 1700738090000,
+    "step": 60,
+    "variables": {},
+    "compositeQuery": {
+        "queryType": "builder",
+        "panelType": "table",
+        "builderQueries": {
+            "A": {
+                "dataSource": "logs",
+                "queryName": "A",
+                "aggregateOperator": "count_distinct",
+                "aggregateAttribute": {
+                    "key": "component",
+                    "dataType": "string",
+                    "type": "tag",
+                    "isColumn": false
+                },
+                "filters": {
+                    "items": [],
+                    "op": "AND"
+                },
+                "expression": "A",
+                "disabled": false,
+                "stepInterval": 60,
+                "orderBy": [
+                    {
+                        "columnName": "timestamp",
+                        "order": "desc"
+                    }
+                ],
+                "groupBy": [
+                    {
+                        "key": "container_id",
+                        "dataType": "string",
+                        "type": "tag",
+                        "isColumn": true,
+                        "isJSON": false
+                    }
+                ],
+                "offset": 0
+            }
+        }
+    }
+}
+
+```
