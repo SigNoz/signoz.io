@@ -1,3 +1,5 @@
+'use client'
+
 import { allComparisons } from 'contentlayer/generated'
 import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer'
 import BlogPostCard from '../Shared/BlogPostCard'
@@ -16,7 +18,7 @@ const ComparisonsPageHeader: React.FC<ComparisonsPageHeaderProps> = ({ onSearch 
         resources
       </h2>
       <h1 className="mt-3 self-start text-3xl font-semibold text-indigo-500 dark:text-indigo-200">
-      Comparisons
+        Comparisons
       </h1>
       <p className="mt-4 w-full text-lg leading-8 tracking-normal text-gray-700 dark:text-stone-300 max-md:max-w-full">
         Dive into SigNoz product updates, company news, and more on how developers and startups can
@@ -28,7 +30,7 @@ const ComparisonsPageHeader: React.FC<ComparisonsPageHeaderProps> = ({ onSearch 
   )
 }
 
-export default function Comparisons() {
+export default function ComparisonsListing() {
   const posts = allCoreContent(sortPosts(allComparisons))
   const primaryFeaturedBlogs = posts.slice(0, 2)
   const secondaryFeaturedBlogs = posts.slice(2)
