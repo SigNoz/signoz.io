@@ -1,0 +1,84 @@
+---
+id: installation
+title: Installation - FAQs
+description: Frequently Asked Questions About Installation
+---
+
+### Where can I get the SigNoz Docker images?
+
+Find the SigNoz Docker images here: <a href="https://hub.docker.com/u/signoz" rel="noopener noreferrer nofollow" target="_blank">https://hub.docker.com/u/signoz</a>
+
+
+### Can I install SigNoz without Docker?
+
+No, it is not supported as of today.
+
+There's an existing issue on this <a href="https://github.com/SigNoz/signoz/issues/392" rel="noopener noreferrer nofollow" target="_blank">https://github.com/SigNoz/signoz/issues/392</a>
+
+Please add your use case on the issue so that we can understand how much community demand there is for this.
+
+
+### Is it mandatory to install SigNoz on every server and map the required IP?
+
+No, you do not have to install SigNoz on every server. Just configure the application in server-A(say) to send data to SigNoz running in server-B (say). Make sure the network settings are taken care of.
+
+It is recommended to install SigNoz in an independent VM or K8s cluster apart from that where the application is hosted. You need to point the applications to the `IP of the SigNoz machine` to send the telemetry data. You can get started [here](https://signoz.io/docs/install/).
+
+
+### I am not seeing my Old Data after migrating to a newer version, what am I doing wrong?
+
+You might need to run migration scripts to see your old data.
+
+Refer here: [Migration Docs](https://signoz.io/docs/operate/migration/)
+
+
+### What is the difference between the OpenTelemetry Collector and OpenTelemetry Metrics Collector with the Helm Chart?
+
+We are creating application metrics from traces and exposing them at the OpenTelemetry Collector level using the Prometheus exporter.
+
+We use the OpenTelemetry Collector Metrics to scrape application metrics from other metrics exporters and write to ClickHouse DB.
+
+
+### How to increase persistent volume for ClickHouse DB in Kubernetes? Is the default volume 20GB?
+
+Yes, the default size is 20 GB. You can refer to the docs [here](https://signoz.io/docs/operate/clickhouse/increase-clickhouse-pv/) for increasing the persistent volume for ClickHouse.
+
+
+### I do not want to increase the storage space but wanted to delete the older metrics and traces to free up the disk space; what should I do?
+
+The quick and easy way would be to first increase disk space, wait for some time, and then set TTL to auto-remove old traces/metrics.
+
+Follow the guide below to increase the ClickHouse persistent volume size:
+
+[Increase the ClickHouse Persistent Volume Size](https://signoz.io/docs/operate/clickhouse/increase-clickhouse-pv/#increase-persisent-volume)
+
+
+### I want to monitor different AWS services like RDS, APIGateway, and Lambda for my serverless application. How can that be achieved?
+
+You can use AWS metric receivers available <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver" rel="noopener noreferrer nofollow" target="_blank">here</a> and send data to the SigNoz OTel collector. You can then visualize your metrics in SigNoz dashboards.
+
+Check this [section](https://signoz.io/docs/userguide/send-metrics/#enable-a-specific-metric-receiver) in the docs for more information.
+
+
+### Are there any guides or use cases for using SigNoz with AWS / GCP / Azure or other cloud providers?
+
+You can install SigNoz in AWS / GCP / Azure with Helm charts if you are using Kubernetes. More details here:
+
+[How to install SigNoz on Kubernetes with Helm](https://signoz.io/docs/install/kubernetes)
+
+
+### My pods are in waiting for the state. What could be the reason for it?
+
+It can be caused by insufficient resources on your machine. It can also be caused by unhealthy ClickHouse POD. Other possible causes could be:
+- insufficient resource
+- K8s cluster IP range out of the ClickHouse IP whitelisting:
+<a href="https://github.com/SigNoz/charts/blob/main/charts/signoz/values.yaml#L120-L126" rel="noopener noreferrer nofollow" target="_blank">https://github.com/SigNoz/charts/blob/main/charts/signoz/values.yaml#L120-L126</a>
+- sometimes, data ambiguity issues caused by signoz-otel-collector
+
+
+### I am not seeing a move to the AWS S3 option for cold storage on the SigNoz UI, what to do?
+
+To get the S3 option, you have to configure S3 first.
+
+Refer to the docs [here](https://signoz.io/docs/userguide/retention-period/#configuring-cold-storage---amazon-s3).
+

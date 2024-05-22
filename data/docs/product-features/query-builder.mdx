@@ -1,0 +1,25 @@
+---
+id: query-builder
+title: Query Builder
+sidebar_label: Query Builder
+---
+
+### Introduction
+
+The SigNoz Query Builder is a powerful tool that simplifies the process of filtering, aggregating, and visualizing data across the three signals, i.e. , Logs, Traces and Metrics. 
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/query-builder/product-features-query-builder.webp" alt="Query Builder in SigNoz Logs Explorer"/>
+    <figcaption><i>Query Builder in SigNoz Logs Explorer</i></figcaption>
+</figure>
+<br></br>
+
+### Key Features
+
+- **Filtering**: Apply various filters to refine data based on specific attributes.
+- **Aggregation and Grouping**: Perform calculations like count, sum, average, and more while grouping data by selected attributes.
+- **Result Manipulation**: Order, limit, and format result outputs according to your requirements.
+- **Multiple Queries and Functions**: Run several queries simultaneously and apply mathematical functions on queries.
+- **Spatial and Temporal Aggregations**: Analyze metrics data over time or across various dimensions for deeper insights.
+
+For detailed instructions on using each feature of the Query Builder, please refer to this [documentation](https://signoz.io/docs/userguide/query-builder/).

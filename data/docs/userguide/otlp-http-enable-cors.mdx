@@ -1,0 +1,101 @@
+---
+id: otlp-http-enable-cors
+title: CORS in OTLP HTTP Receiver
+---
+
+Enabling CORS (Cross-Origin Resource Sharing) in OTLP (OpenTelemetry Protocol)
+HTTP receiver is necessary when we want to send requests to our OTLP HTTP receiver
+from a different domain using browsers. Without enabling CORS, browsers will block
+these requests for security reasons.
+
+By default, SigNoz does not enable CORS for OTLP HTTP receiver, which means it will
+block all requests sent via browsers due to security reasons. To change that, we will
+have to alter the CORS configurations in the OTLP HTTP receiver.
+
+## Enable CORS in OTLP HTTP Receiver
+
+To enable CORS, there are mainly three steps involved:
+
+1. Open SigNoz OtelCollector configuration and locate `http` receiver section.
+  It should look similar to the following:
+  ```yaml
+  receivers:
+    otlp:
+      protocols:
+        http:
+  ```
+
+2. Add the CORS configuration under `http` receiver section.
+  ```yaml
+  http:
+    cors:
+      allowed_origins:
+        - https://netflix.com  # URL of your Frontend application
+  ```
+  Update the above example origin i.e. `https://netflix.com` with your frontend
+  application URL. If you are experimenting on your local machine on port `3000`,
+  you can use `http://localhost:3000` instead.
+
+  ```yaml
+  http:
+    cors:
+      allowed_origins:
+        - http://localhost:3000 
+  ```
+
+  To allow any origin to make requests, you can use `*` wildcard character instead.
+  However, it is not recommended to set allow all origins due to security risks.
+
+  ```yaml
+  http:
+    cors:
+      allowed_origins:
+        - "*"
+  ```
+
+3. Save the updated configurations and restart SigNoz OtelCollector.
+
+### Docker
+
+In case of docker, update `otel-collector.yaml` to include CORS configuration
+inside `deploy/docker/clickhouse-setup` folder as instructed above.
+
+Followed by clean removal of SigNoz OtelCollector to guarantee updatation of
+configuration and restart the SigNoz OtelCollector using `docker compose`:
+
+```bash
+# clean remove SigNoz OtelCollector
+docker stop signoz-otel-collector
+docker rm signoz-otel-collector
+
+# restart SigNoz OtelCollector using `docker compose`
+cd deploy
+docker compose -f docker/clickhouse-setup/docker-compose.yaml up -d
+```
+
+### Kubernetes
+
+In case of helm charts, copy the `otelCollector.config` section from `values.yaml`
+to `override-values.yaml` and include CORS configuration under `otlp.protocols.http`.
+
+Followed by `helm upgrade` command below to restart OtelCollector:
+
+```bash
+helm upgrade --namespace platform my-release signoz/signoz -f override-values.yaml
+```
+
+## Related
+
+- [Angular Intrumentation guide][3]
+- [React Instrumentation guide][4]
+
+---
+
+If you have any feedback or facing issues, feel free to join our slack community to get help!
+
+[![SigNoz Slack community][1]][2]
+
+[1]: /img/blog/common/join_slack_cta.webp
+[2]: https://signoz.io/slack
+[3]: https://signoz.io/docs/instrumentation/angular/
+[4]: https://signoz.io/blog/opentelemetry-react/
