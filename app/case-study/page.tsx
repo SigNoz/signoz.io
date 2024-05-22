@@ -1,9 +1,16 @@
 import Link from 'next/link'
 import React from 'react'
 
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'SigNoz Customer Stories',
+  description: 'SigNoz Customer Stories',
+}
+
 function caseStudies() {
   return (
-    <div title="SigNoz Plans">
+    <div title="SigNoz Customer Stories">
       <section>
         <div className="container" style={{ marginTop: '2rem', marginBottom: '4rem' }}>
           <h2 style={{ textAlign: 'center' }}> Customer Stories </h2>
