@@ -5,29 +5,11 @@ import '../css/post.css'
 import { ReactNode, useRef } from 'react'
 import { CoreContent } from 'pliny/utils/contentlayer'
 import type { Blog, Authors } from 'contentlayer/generated'
-import Comments from '@/components/Comments'
-import Link from '@/components/Link'
-import PageTitle from '@/components/PageTitle'
 import SectionContainer from '@/components/SectionContainer'
-import Image from '@/components/Image'
-import Tag from '@/components/Tag'
-import siteMetadata from '@/data/siteMetadata'
 import ScrollTopAndComment from '@/components/ScrollTopAndComment'
 import BlogHeader, { AuthorProps } from '@/components/BlogHeader/BlogHeader'
 import RelatedArticles from '@/components/RelatedArticles/RelatedArticles'
-import BlogFeedback from '@/components/BlogFeedback/BlogFeedback'
 import { ProgressBar } from '@/components/ProgressBar/ProgressBar'
-
-const editUrl = (path) => `${siteMetadata.siteRepo}/blob/main/data/${path}`
-const discussUrl = (path) =>
-  `https://mobile.twitter.com/search?q=${encodeURIComponent(`${siteMetadata.siteUrl}/${path}`)}`
-
-const postDateTemplate: Intl.DateTimeFormatOptions = {
-  weekday: 'long',
-  year: 'numeric',
-  month: 'long',
-  day: 'numeric',
-}
 
 export interface tocItemProps {
   url: string
@@ -44,8 +26,7 @@ interface LayoutProps {
 }
 
 export default function PostLayout({ content, authors, children, toc }: LayoutProps) {
-  const { filePath, path, slug, date, title, image, tags, readingTime } = content
-  const basePath = path.split('/')[0]
+  const { slug, date, title, tags, readingTime } = content
   const mainRef = useRef<HTMLElement | null>(null)
 
   return (
@@ -78,7 +59,7 @@ export default function PostLayout({ content, authors, children, toc }: LayoutPr
           <div className="post-content">
             <article className="prose prose-slate max-w-none py-6 dark:prose-invert">
               {children}
-              <BlogFeedback />
+              {/* <BlogFeedback /> */}
             </article>
           </div>
         </div>

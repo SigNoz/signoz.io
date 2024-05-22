@@ -1,7 +1,7 @@
 import { defineDocumentType, ComputedFields, makeSource } from 'contentlayer2/source-files'
 import { writeFileSync } from 'fs'
 import readingTime from 'reading-time'
-import { slug } from 'github-slugger'
+import GithubSlugger, { slug } from 'github-slugger'
 import path from 'path'
 import { fromHtmlIsomorphic } from 'hast-util-from-html-isomorphic'
 // Remark packages
@@ -51,9 +51,27 @@ const computedFields: ComputedFields = {
     type: 'string',
     resolve: (doc) => doc._raw.sourceFilePath,
   },
-  toc: { type: 'string', resolve: (doc) => extractTocHeadings(doc.body.raw) },
-}
+  // toc: { type: 'string', resolve: (doc) => extractTocHeadings(doc.body.raw) },
+  toc: {
+    type: 'json',
+    resolve: async (doc) => {
+      const regXHeader = /\n(?<flag>#{1,3})\s+(?<content>.+)/g
+      const slugger = new GithubSlugger()
 
+      const headings = Array.from(doc.body.raw.matchAll(regXHeader)).map(({ groups }) => {
+        const flag = groups?.flag
+        const content = groups?.content
+        return {
+          value: content,
+          url: content ? `#${slugger.slug(content)}` : undefined,
+          depth: flag?.length == 1 ? 1 : flag?.length == 2 ? 2 : 3,
+        }
+      })
+
+      return headings
+    },
+  },
+}
 /**
  * Count the occurrences of all tags across blog posts and write to json file
  */
