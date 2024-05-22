@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 
 import FAQBody from '../../components/FAQPricing'
 import styles from './styles.module.css'
@@ -45,6 +45,7 @@ function Pricing() {
 }
 
 export default Pricing
+
 function FAQ() {
   return (
     <section className={styles.faq}>
@@ -195,20 +196,6 @@ const PricingPlans = () => {
             </nav>
           </div>
         </div>
-        {/* <div className="flex flex-col items-center mb-5 text-center mx-auto max-w-4xl">
-          <Heading type={1}>
-            Transparent & Predictable Pricing for{" "}
-            {tab === "cloud" ? "Cloud" : "Self Managed"}
-          </Heading>
-          <SubHeading>
-            Tired of unpredictable pricing and complex billing structure? Save
-            up to{" "}
-            <Link href="/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/">
-              <u>90% on your Datadog bill</u>
-            </Link>{" "}
-            with SigNoz. No user-based and host-based pricing.
-          </SubHeading>
-        </div> */}
         {tab === 'cloud' ? (
           <>
             {/* Cloud Plan */}
@@ -219,7 +206,9 @@ const PricingPlans = () => {
               <SubHeading>
                 Tired of unpredictable pricing and complex billing structure? Save up to{' '}
                 <Link href="/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/">
-                  <u className='bg-blue-100 text-blue-800 me-2 px-2.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300'>80% on your Datadog bill</u>
+                  <u className="me-2 rounded bg-blue-100 px-2.5 py-0.5 text-blue-800 dark:bg-green-900 dark:text-green-300">
+                    80% on your Datadog bill
+                  </u>
                 </Link>{' '}
                 with SigNoz. No user-based and host-based pricing.
               </SubHeading>
@@ -353,21 +342,6 @@ const PricingPlans = () => {
                     <i>Reach out to us for higher retention period</i>
                   </p>
                   <Divider isDashed />
-                  {/* <div
-                    className={`${styles.deploymentOptions} ${styles.packageDetailBlock}`}
-                  >
-                    <h4 className={styles.packageDetailTitle}>
-                      Deployment Options
-                    </h4>
-                    <div>
-                      <span>SaaS</span>
-                      <span>
-                        <RightSVG />
-                      </span>
-                    </div>
-                    <div></div>
-                  </div>
-                  <Divider isDashed /> */}
                   <div className={`${styles.support} ${styles.packageDetailBlock}`}>
                     <h4 className={styles.packageDetailTitle}>Support</h4>
                     <div>
