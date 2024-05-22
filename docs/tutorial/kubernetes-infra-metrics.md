@@ -58,7 +58,7 @@ helm install my-release signoz/k8s-infra  \
   --set global.clusterName=<CLUSTER_NAME>
 ```
 
-Depending on the choice of your region for SigNoz cloud, the ingest endpoint will vary according to this table.
+Depending on the choice of your region for SigNoz cloud, the ingestion endpoint will vary according to this table.
 
 | Region	| Endpoint |
 | --- | --- |
