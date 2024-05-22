@@ -1,7 +1,7 @@
 'use client'
 
 import { Fragment, useState } from 'react'
-import { Dialog, Disclosure, Popover, Transition } from '@headlessui/react'
+import { Button, Dialog, Disclosure, Popover, Transition } from '@headlessui/react'
 import {
   ArrowPathIcon,
   Bars3Icon,
@@ -12,11 +12,10 @@ import {
   XMarkIcon,
 } from '@heroicons/react/24/outline'
 import { ChevronDownIcon, PhoneIcon, PlayCircleIcon } from '@heroicons/react/20/solid'
-import { ThemeToggle } from '../ThemeToggle/ThemeToggle'
 import Image from 'next/image'
 import Link from 'next/link'
 import SearchButton from '../SearchButton'
-import Button from '../ui/Button'
+import { ArrowRight } from 'lucide-react'
 
 const products = [
   {
@@ -64,23 +63,23 @@ export default function TopNav() {
 
   return (
     <header
-      className={`fixed left-0 right-0 z-30 mx-auto w-full bg-signoz_ink-500 px-12 text-slate-900 dark:text-slate-50`}
+      className={`fixed left-0 right-0 z-30 mx-auto h-[48px] w-full border-b border-signoz_slate-500 bg-signoz_ink-500 px-12 text-slate-900 dark:text-slate-50`}
     >
       <nav
-        className="mx-auto flex items-center justify-between py-4 text-slate-900 dark:text-slate-50"
+        className="mx-auto flex items-center justify-between py-2 text-slate-900 dark:text-slate-50"
         aria-label="Global"
       >
         <div className="flex lg:flex-1">
           <Link href="/" className="-m-1.5 flex items-center gap-2 p-1.5">
             <Image
-              className="h-8 w-auto"
+              className="h-6 w-auto"
               src="/img/SigNozLogo-orange.svg"
-              width={200}
-              height={80}
+              width={160}
+              height={60}
               alt=""
             />
 
-            <span className="text-lg font-bold">SigNoz</span>
+            <span className="text-md font-bold">SigNoz</span>
           </Link>
         </div>
         <div className="flex lg:hidden">
@@ -168,8 +167,8 @@ export default function TopNav() {
         <div className="hidden gap-8 lg:flex lg:flex-1 lg:justify-end">
           <SearchButton />
 
-          <Button isButton className="button button-sm" to={'/teams/'}>
-            Try SigNoz Cloud
+          <Button className="flex gap-2 rounded-full bg-signoz_robin-600 px-4 py-2 text-xs font-normal leading-4 text-white">
+            Start your free trail <ArrowRight size={14} />
           </Button>
         </div>
       </nav>
