@@ -167,9 +167,11 @@ export default function TopNav() {
         <div className="hidden gap-8 lg:flex lg:flex-1 lg:justify-end">
           <SearchButton />
 
-          <Button className="flex gap-2 rounded-full bg-signoz_robin-600 px-4 py-2 text-xs font-normal leading-4 text-white">
-            Start your free trail <ArrowRight size={14} />
-          </Button>
+          <Link href="/teams">
+            <Button className="flex gap-2 rounded-full bg-signoz_robin-600 px-4 py-2 text-xs font-normal leading-4 text-white">
+              Start your free trail <ArrowRight size={14} />
+            </Button>
+          </Link>
         </div>
       </nav>
       <Dialog as="div" className="lg:hidden" open={mobileMenuOpen} onClose={setMobileMenuOpen}>
