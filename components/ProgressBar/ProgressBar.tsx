@@ -37,7 +37,7 @@ export const ProgressBar = ({ target }: ProgressBarProps) => {
   }, [scrollListener])
 
   return (
-    <div className="progress-bar fixed left-0 right-0 top-[64px] z-30 w-full">
+    <div className="progress-bar fixed left-0 right-0 top-[46px] z-30 w-full">
       <div
         className="h-1 bg-indigo-500"
         style={{
