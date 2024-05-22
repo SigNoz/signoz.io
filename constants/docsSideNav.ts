@@ -12,13 +12,14 @@ const docsSideNav = [
       {
         type: 'category',
         label: 'Installation',
+        route: '/install',
         // route: '/docs/install',
         // link: {
-          // type: 'doc',
-          // title: 'Install SigNoz',
-          // description:
-            // "To install SigNoz, follow the instructions in the sections below. If you don't want to self-host, try SigNoz Cloud.",
-          // slug: '/docs/install',
+        // type: 'doc',
+        // title: 'Install SigNoz',
+        // description:
+        // "To install SigNoz, follow the instructions in the sections below. If you don't want to self-host, try SigNoz Cloud.",
+        // slug: '/docs/install',
         // },
         items: [
           {
@@ -29,6 +30,7 @@ const docsSideNav = [
           {
             type: 'category',
             label: 'Self-Host SigNoz',
+            route: '',
             items: [
               {
                 type: 'doc',
@@ -44,10 +46,10 @@ const docsSideNav = [
                 type: 'category',
                 label: 'Kubernetes',
                 // link: {
-                  // type: 'generated-index',
-                  // title: 'Kubernetes',
-                  // description: 'Learn how to install SigNoz on Kubernetes with Helm',
-                  // slug: '/docs/install/kubernetes',
+                // type: 'generated-index',
+                // title: 'Kubernetes',
+                // description: 'Learn how to install SigNoz on Kubernetes with Helm',
+                // slug: '/docs/install/kubernetes',
                 // },
                 items: [
                   {
@@ -75,10 +77,10 @@ const docsSideNav = [
             ],
           },
 
-
           {
             type: 'category',
             label: 'Install OTel collector',
+            route: '',
             items: [
               {
                 route: '/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/',
@@ -99,6 +101,7 @@ const docsSideNav = [
   {
     label: 'SigNoz Features',
     type: 'category',
+    route: '',
     items: [
       {
         type: 'doc',
@@ -136,6 +139,7 @@ const docsSideNav = [
   {
     label: 'APM & Distributed Tracing',
     type: 'category',
+    route: '',
     items: [
       {
         type: 'doc',
@@ -145,17 +149,19 @@ const docsSideNav = [
       {
         label: 'Instrument Application',
         type: 'category',
+        route: '',
         // link: {
-          // type: 'generated-index',
-          // title: 'Instrument your Application',
-          // description:
-            // 'To instrument your applications and send data to SigNoz, follow the instructions in the sections below.',
-          // slug: '/docs/instrumentation/index',
+        // type: 'generated-index',
+        // title: 'Instrument your Application',
+        // description:
+        // 'To instrument your applications and send data to SigNoz, follow the instructions in the sections below.',
+        // slug: '/docs/instrumentation/index',
         // },
         items: [
           {
             type: 'category',
             label: 'Python',
+            route: '',
             link: {
               type: 'doc',
               route: '/docs/instrumentation/python',
@@ -189,6 +195,7 @@ const docsSideNav = [
           {
             type: 'category',
             label: 'Java',
+            route: '',
             link: {
               type: 'doc',
               route: '/docs/instrumentation/java',
@@ -217,6 +224,7 @@ const docsSideNav = [
           {
             type: 'category',
             label: 'Javascript',
+            route: '',
             link: {
               type: 'doc',
               route: '/docs/instrumentation/javascript',
@@ -282,6 +290,7 @@ const docsSideNav = [
       {
         type: 'category',
         label: 'APM Product Overview',
+        route: '',
         items: [
           {
             type: 'doc',
@@ -313,6 +322,7 @@ const docsSideNav = [
       {
         type: 'category',
         label: 'Trace API',
+        route: '',
         items: [
           {
             type: 'doc',
@@ -339,6 +349,7 @@ const docsSideNav = [
       {
         type: 'category',
         label: 'Tutorials',
+        route: '',
         items: [
           {
             type: 'doc',
@@ -362,6 +373,7 @@ const docsSideNav = [
   {
     label: 'Infrastructure Monitoring',
     type: 'category',
+    route: '',
     items: [
       {
         type: 'doc',
@@ -403,6 +415,7 @@ const docsSideNav = [
   {
     label: 'Logs Management',
     type: 'category',
+    route: '',
     items: [
       {
         type: 'doc',
@@ -492,7 +505,7 @@ const docsSideNav = [
                 type: 'doc',
                 route: '/docs/userguide/logstash_to_signoz',
                 label: 'Logstash to SigNoz',
-              },            
+              },
             ],
           },
         ],
@@ -500,6 +513,7 @@ const docsSideNav = [
       {
         type: 'category',
         label: 'Preprocess Logs',
+        route: '',
         link: {
           type: 'doc',
           route: '/docs/logs-pipelines/introduction',
@@ -519,11 +533,11 @@ const docsSideNav = [
             type: 'category',
             label: 'Guides',
             // link: {
-              // type: 'generated-index',
-              // route: '/docs/category/guides',
-              // title: 'Logs Pipeline Guides',
-              // description:
-                // 'See these guides for detailed walkthroughs on creating Log Pipelines for specific purposes.',
+            // type: 'generated-index',
+            // route: '/docs/category/guides',
+            // title: 'Logs Pipeline Guides',
+            // description:
+            // 'See these guides for detailed walkthroughs on creating Log Pipelines for specific purposes.',
             // },
             items: [
               {
@@ -543,6 +557,7 @@ const docsSideNav = [
       {
         type: 'category',
         label: 'Features',
+        route: '',
         items: [
           {
             type: 'doc',
@@ -564,6 +579,7 @@ const docsSideNav = [
       {
         type: 'category',
         label: 'Logs API',
+        route: '',
         items: [
           {
             type: 'doc',
@@ -602,6 +618,7 @@ const docsSideNav = [
   {
     label: 'Dashboards & Querying',
     type: 'category',
+    route: '',
     items: [
       {
         type: 'doc',
@@ -639,6 +656,7 @@ const docsSideNav = [
   {
     label: 'Alerts',
     type: 'category',
+    route: '',
     // link: {
     //   type: 'generated-index',
     //   title: 'Alert Management in SigNoz',
@@ -660,14 +678,15 @@ const docsSideNav = [
       {
         label: 'Setup Alerts Notification',
         type: 'category',
+        route: '',
         // link: {
         //   type: 'generated-index',
         //   title: 'Setup Alerts Notifications Channel',
         //   description:
         //     'You can setup notification channel for sending the generated alerts to other applications. Currently, the following channels are supported.',
         //   slug: '/docs/setup-alerts-notification',
-          // type: "doc",
-          // route: "product-features/alerts/alerts-notification-channel",
+        // type: "doc",
+        // route: "product-features/alerts/alerts-notification-channel",
         // },
         items: [
           {
@@ -738,6 +757,7 @@ const docsSideNav = [
   {
     label: 'Security & Compliance',
     type: 'category',
+    route: '',
     items: [
       //     'userguide/overview',
       {
@@ -765,12 +785,13 @@ const docsSideNav = [
   {
     label: 'Tutorials',
     type: 'category',
+    route: '',
     // link: {
-      // type: 'generated-index',
-      // title: 'Tutorials',
-      // description:
-        // 'SigNoz tutorials are step-by-step training exercises that guide you through monitoring your applications and infrastructure.',
-      // route: '/docs/tutorial/tutorials',
+    // type: 'generated-index',
+    // title: 'Tutorials',
+    // description:
+    // 'SigNoz tutorials are step-by-step training exercises that guide you through monitoring your applications and infrastructure.',
+    // route: '/docs/tutorial/tutorials',
     // },
     items: [
       {
@@ -833,15 +854,17 @@ const docsSideNav = [
   {
     label: 'AWS Monitoring',
     type: 'category',
+    route: '',
     items: [
       //'aws/getting-started',
       {
         type: 'category',
         label: 'EC2',
+        route: '',
         // link: {
-          // type: 'generated-index',
-          // title: 'EC2 Monitoring',
-          // slug: '/docs/ec2-monitoring',
+        // type: 'generated-index',
+        // title: 'EC2 Monitoring',
+        // slug: '/docs/ec2-monitoring',
         // },
         items: [
           {
@@ -859,10 +882,11 @@ const docsSideNav = [
       {
         type: 'category',
         label: 'ECS',
+        route: '',
         // link: {
-          // type: 'generated-index',
-          // title: 'ECS Monitoring',
-          // slug: '/docs/ecs-monitoring',
+        // type: 'generated-index',
+        // title: 'ECS Monitoring',
+        // slug: '/docs/ecs-monitoring',
         // },
         items: [
           {
@@ -902,12 +926,13 @@ const docsSideNav = [
   {
     type: 'category',
     label: 'Operate Self-Hosted SigNoz',
+    route: '',
     // link: {
-      // type: 'generated-index',
-      // title: 'Operate',
-      // description:
-        // 'The following sections provide an overview of the activities that are required to successfully operate SigNoz. Based on your environment, proceed to one of the sections below.',
-      // slug: '/docs/operate',
+    // type: 'generated-index',
+    // title: 'Operate',
+    // description:
+    // 'The following sections provide an overview of the activities that are required to successfully operate SigNoz. Based on your environment, proceed to one of the sections below.',
+    // slug: '/docs/operate',
     // },
     items: [
       {
@@ -933,12 +958,13 @@ const docsSideNav = [
       {
         type: 'category',
         label: 'Migration Guides',
+        route: '',
         // link: {
-          // type: 'generated-index',
-          // title: 'Migration Guides',
-          // description:
-            // 'The following sections provide instructions to migrate SigNoz components across newer versions. You need to run these migration scripts step by step. For example if you are currently on `0.8.2` and want to migrate to `0.10.0` - you need to run migration script for `0.9` first and then `0.10`',
-          // slug: '/docs/operate/migration/migration',
+        // type: 'generated-index',
+        // title: 'Migration Guides',
+        // description:
+        // 'The following sections provide instructions to migrate SigNoz components across newer versions. You need to run these migration scripts step by step. For example if you are currently on `0.8.2` and want to migrate to `0.10.0` - you need to run migration script for `0.9` first and then `0.10`',
+        // slug: '/docs/operate/migration/migration',
         // },
         items: [
           {
@@ -1001,12 +1027,13 @@ const docsSideNav = [
       {
         type: 'category',
         label: 'ClickHouse',
+        route: '',
         // link: {
-          // type: 'generated-index',
-          // title: 'ClickHouse',
-          // description:
-            // 'The following sections provide instructions to operate ClickHouse. Based on your environment, proceed to one of the sections below.',
-          // slug: '/operate/clickhouse/clickhouse',
+        // type: 'generated-index',
+        // title: 'ClickHouse',
+        // description:
+        // 'The following sections provide instructions to operate ClickHouse. Based on your environment, proceed to one of the sections below.',
+        // slug: '/operate/clickhouse/clickhouse',
         // },
         items: [
           {
@@ -1029,18 +1056,18 @@ const docsSideNav = [
             route: '/docs/operate/clickhouse/external-clickhouse',
             label: 'External ClickHouse',
           },
-
         ],
       },
       {
         type: 'category',
         label: 'Query Service',
+        route: '',
         // link: {
-          // type: 'generated-index',
-          // title: 'Query Service',
-          // description:
-            // 'The following sections provide instructions to operate Query Service. You can proceed to one of the sections below.',
-          // slug: '/docs/operate/query-service',
+        // type: 'generated-index',
+        // title: 'Query Service',
+        // description:
+        // 'The following sections provide instructions to operate Query Service. You can proceed to one of the sections below.',
+        // slug: '/docs/operate/query-service',
         // },
         items: [
           {
@@ -1105,7 +1132,6 @@ const docsSideNav = [
     route: '/docs/community/llm-monitoring',
     label: 'LLM Monitoring',
     type: 'doc',
-    className: 'new-doc',
   },
   {
     label: 'Community',
@@ -1115,7 +1141,6 @@ const docsSideNav = [
         route: '/docs/community/community-integrations',
         type: 'doc',
         label: 'Community Integrations',
-        className: 'new-doc',
       },
       {
         label: 'Community Channels',
@@ -1128,11 +1153,11 @@ const docsSideNav = [
     label: 'FAQ',
     type: 'category',
     // link: {
-      // type: 'generated-index',
-      // title: 'Frequently Asked Questions',
-      // description:
-        // 'Find the most commonly questions about SigNoz Installation, Instrumentation, Features, Troubleshooting, and Contributing here:',
-      // slug: '/docs/faqs/faq',
+    // type: 'generated-index',
+    // title: 'Frequently Asked Questions',
+    // description:
+    // 'Find the most commonly questions about SigNoz Installation, Instrumentation, Features, Troubleshooting, and Contributing here:',
+    // slug: '/docs/faqs/faq',
     // },
     items: [
       {

@@ -1,24 +1,24 @@
 // types.ts
 
 export type Doc = {
-  type: 'doc'
+  type: string
   route: string
   label: string
   className?: string
 }
 
 export type Category = {
-  type: 'category'
+  type: string
   label: string
   route: string
   link?: {
-    type: 'generated-index' | 'doc'
-    title: string
+    type?: string
+    title?: string
     description?: string
     slug?: string
     id?: string
   }
-  items: Array<Doc | Category | string>
+  items: Array<Doc | Category>
 }
 
 export type TocItem = Doc | Category

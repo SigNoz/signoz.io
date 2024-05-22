@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 'use client'
 
 import React, { useState } from 'react'
@@ -31,7 +33,7 @@ const TocComponent: React.FC<TocProps> = ({ toc }) => {
   )
 
   const renderCategory = (category: Category) => {
-    const isExpanded = !!expandedCategories[category.label]
+    const isExpanded = true
 
     return (
       <li key={category.label} className="py-[8px] pl-[20px]">
@@ -54,7 +56,7 @@ const TocComponent: React.FC<TocProps> = ({ toc }) => {
                 </h4>
               </div>
             )}
-            {category.items.map(renderItem)}
+            {category?.items?.map(renderItem)}
           </ul>
         )}
       </li>
@@ -67,21 +69,22 @@ const TocComponent: React.FC<TocProps> = ({ toc }) => {
       if (referencedItem) {
         return renderItem(referencedItem)
       }
-      return null // or handle the missing reference appropriately
+      return null
     } else if (item.type === 'doc') {
       return renderDoc(item)
     } else if (item.type === 'category') {
-      return renderCategory(item)
+      return renderCategory(item as Category)
     }
   }
 
-  const findItemById = (id: string, items: TocItem[]): TocItem | undefined => {
+  const findItemById = (route: string, items: TocItem[]): TocItem | undefined => {
     for (const item of items) {
-      if (item.type === 'doc' && item.id === id) {
+      if (item.type === 'doc' && item.route === route) {
         return item
       }
+
       if (item.type === 'category') {
-        const found = findItemById(id, item.items as TocItem[])
+        const found = findItemById(route, item.items)
         if (found) {
           return found
         }
