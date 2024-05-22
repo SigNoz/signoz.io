@@ -1,5 +1,11 @@
 import Link from 'next/link'
 import React from 'react'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'About us - SigNoz',
+  description: 'About us - SigNoz',
+}
 
 function aboutus() {
   return (
