@@ -4,12 +4,13 @@ import '../css/doc.css'
 
 import { ReactNode, useRef } from 'react'
 import { CoreContent } from 'pliny/utils/contentlayer'
-import type { Blog, Authors } from 'contentlayer/generated'
+import type { Blog, Authors, Doc } from 'contentlayer/generated'
 import SectionContainer from '@/components/SectionContainer'
 import { ProgressBar } from '@/components/ProgressBar/ProgressBar'
 import React from 'react'
 import TocComponent from '@/components/DocsTOC/DocsTOC'
 import docsSideNav from '../constants/docsSideNav'
+import { TocItem } from '@/components/DocsTOC/types'
 
 export interface tocItemProps {
   url: string
@@ -18,14 +19,13 @@ export interface tocItemProps {
 }
 
 interface LayoutProps {
-  content: CoreContent<Blog>
+  content: CoreContent<Doc>
   children: ReactNode
   toc: tocItemProps[]
 }
 
 export default function DocLayout({ content, children, toc }: LayoutProps) {
-  const { filePath, path, slug, date, title, image, tags, readingTime } = content
-  const basePath = path.split('/')[0]
+  const { title } = content
   const mainRef = useRef<HTMLElement | null>(null)
 
   return (
@@ -34,7 +34,7 @@ export default function DocLayout({ content, children, toc }: LayoutProps) {
         <ProgressBar target={mainRef} />
         <div className="doc overflow-clip">
           <div className="doc-sidenav border-r border-signoz_slate-500 ">
-            <TocComponent toc={docsSideNav} />
+            <TocComponent toc={docsSideNav as TocItem[]} />
           </div>
 
           <div className="doc-content px-8">

@@ -1,11 +1,10 @@
 import 'css/prism.css'
-import 'katex/dist/katex.css'
 
 import { components } from '@/components/MDXComponents'
 import { MDXLayoutRenderer } from 'pliny/mdx-components'
-import { sortPosts, coreContent, allCoreContent } from 'pliny/utils/contentlayer'
-import { allAuthors, allDocs } from 'contentlayer/generated'
-import type { Authors, Blog, Doc } from 'contentlayer/generated'
+import { coreContent } from 'pliny/utils/contentlayer'
+import { allDocs } from 'contentlayer/generated'
+import type { Doc } from 'contentlayer/generated'
 import PostSimple from '@/layouts/PostSimple'
 import PostLayout from '@/layouts/PostLayout'
 import PostBanner from '@/layouts/PostBanner'
@@ -55,25 +54,14 @@ export const generateStaticParams = async () => {
 
 export default async function Page({ params }: { params: { slug: string[] } }) {
   const slug = decodeURI(params.slug.join('/'))
-
   const post = allDocs.find((p) => p.slug === slug) as Doc
-  const authorList = post?.authors || ['default']
-  const authorDetails = authorList.map((author) => {
-    const authorResults = allAuthors.find((p) => p.slug === author)
-    return coreContent(authorResults as Authors)
-  })
   const mainContent = coreContent(post)
 
-  const Layout = layouts[post.layout || defaultLayout]
+  const Layout = DocLayout
 
   return (
     <>
-      <Layout
-        content={mainContent}
-        authorDetails={authorDetails}
-        authors={post?.authors}
-        toc={post?.toc || []}
-      >
+      <Layout content={mainContent} toc={post?.toc || []}>
         <MDXLayoutRenderer code={post.body.code} components={components} toc={post.toc || []} />
       </Layout>
     </>
