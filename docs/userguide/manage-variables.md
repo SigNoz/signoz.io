@@ -50,6 +50,10 @@ SigNoz supports three ways of creating variables: query, custom, and textbox.
     WHERE metric_name = 'system_cpu_time'
     ```
 
+    Follwing image shows above case
+
+    ![Variables-with-ClickHouse](../../static/img/docs/var_with_clickhouse_sql.png)
+
 2. Custom  - A comma-separated list values as a Variable
 
     Example: It is common to have some attributes with a known and small number of unique values, such as the region or availability zone of the application deployment. The custom variable type allows you to achieve this with comma-delimited values. An example for reference
