@@ -1,0 +1,87 @@
+---
+id: invite-team-member
+title: Invite Team Member
+sidebar_label: Invite Team Member
+---
+
+## Introduction
+
+SigNoz users can invite **unlimited** team members with different access levels like Admin, Editor and Viewer.
+
+Follow the below steps to invite a Team Member to SigNoz:
+
+## Step 1: Access the Team Management Area
+
+- Click on the **Invite Team Member** button at the bottom of the left-hand menu. This will open up the Organization settings tab.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/invite-team-member/invite-team-member-step1.webp" alt="Invite Team Member Tab in SigNoz"/>
+    <figcaption><i>Invite Team Member Tab in SigNoz </i></figcaption>
+</figure>
+<br></br>
+
+
+## Step 2: Invite Team Members
+
+- Click the **+ Invite Members** button located at the top right corner of the section. This will open a popup window.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/invite-team-member/invite-team-member-step2.webp" alt="Invite Team member to SigNoz"/>
+    <figcaption><i>Invite Team member to SigNoz </i></figcaption>
+</figure>
+<br></br>
+
+
+## Step 3: Enter Team Member Details
+- In the popup window, enter the email address of the person you wish to invite.
+- Optionally, you can add a name for the team member.
+- Select the appropriate role for the member from the dropdown: ADMIN, EDITOR, or VIEWER.
+- To invite multiple team members at once, click the **+ Add another team member** button and repeat the process for each additional team member.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/invite-team-member/invite-team-member-step3.webp" alt="Enter Team Member Details"/>
+    <figcaption><i>Enter Team Member Details and invite multiple members at once </i></figcaption>
+</figure>
+<br></br>
+
+
+### Roles and Access Levels
+- **ADMIN**: Has full access to Invite new users, editing settings and viewing data.
+- **EDITOR**: Can view and edit data. For example, edit dashboard panels.
+- **VIEWER**: Has read-only access to view data.
+
+## Step 4: Send the Invites
+- Once all details are correctly entered for each team member, click the **Invite Members** button at the bottom of the popup.
+- This will generate individual invite links and send invitation emails to each member’s email address.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/invite-team-member/invite-team-member-step4.webp" alt="Send the invites"/>
+    <figcaption><i>Send Invites </i></figcaption>
+</figure>
+<br></br>
+
+:::info
+
+For SigNoz Self-Host users, you need to copy and send the invite link. The user won't receive an email invite.
+
+:::
+
+## Step 5: Manage Invites
+- After sending invites, you can view and manage all pending invites in the **Pending Invites** section.
+- You can revoke invites or copy the invite link using the options available beside each pending invite.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/invite-team-member/invite-team-member-step5.webp" alt="Manage Invites"/>
+    <figcaption><i>Revoke invite or copy invite link options </i></figcaption>
+</figure>
+<br></br>
+
+
+
+
+
+
+
+
+
+

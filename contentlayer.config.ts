@@ -273,6 +273,7 @@ export const Doc = defineDocumentType(() => ({
     layout: { type: 'string', required: false },
     bibliography: { type: 'string', required: false },
     canonicalUrl: { type: 'string', required: false },
+    sidebar_label: { type: 'string', required: false },
   },
   computedFields: {
     ...computedFields,
