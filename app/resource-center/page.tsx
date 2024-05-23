@@ -1,10 +1,10 @@
 'use client'
 
 import React, { useState } from 'react'
-import Blogs from './Blog/Blogs'
-import Comparisons from './Comparisons/Comparisons'
-import Guides from './Guides/Guides'
-import OpenTelemetry from './OpenTelemetry/OpenTelemetry'
+import Blogs from './blog/Blogs'
+import ComparisonsListing from './comparisons/Comparisons'
+import Guides from './guides/Guides'
+import OpenTelemetry from './opentelemetry/OpenTelemetry'
 
 export default function ResourceCenter() {
   const [activeTab, setActiveTab] = useState('blog-tab')
@@ -67,7 +67,7 @@ export default function ResourceCenter() {
       <div className="tab-content">
         {activeTab === 'blog-tab' && <Blogs />}
 
-        {activeTab === 'comparisons-tab' && <Comparisons />}
+        {activeTab === 'comparisons-tab' && <ComparisonsListing />}
 
         {activeTab === 'guides-tab' && <Guides />}
 

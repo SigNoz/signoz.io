@@ -30,11 +30,11 @@ const OpenTelemetryPageHeader: React.FC<OpenTelemetryPageHeaderProps> = ({ onSea
 
 export default function OpenTelemetry() {
   const posts = allCoreContent(sortPosts(allOpentelemetries))
-  const [blogs, setBlogs] = React.useState(posts)
-  const [searchValue, setSearchValue] = React.useState('')
-
   const primaryFeaturedBlogs = posts.slice(0, 2)
   const secondaryFeaturedBlogs = posts.slice(2)
+
+  const [blogs, setBlogs] = React.useState(secondaryFeaturedBlogs)
+  const [searchValue, setSearchValue] = React.useState('')
 
   const handleSearch = (e) => {
     setSearchValue(e.target.value)
@@ -45,16 +45,19 @@ export default function OpenTelemetry() {
   return (
     <div className="comparisons">
       <OpenTelemetryPageHeader onSearch={handleSearch} />
-      <div className="mt-5 w-full max-md:max-w-full">
-        <div className="mt-4 grid gap-4 sm:grid-cols-1 md:grid-cols-2">
-          {primaryFeaturedBlogs.map((featuredBlog) => {
-            return <BlogPostCard blog={featuredBlog} />
-          })}
+
+      {searchValue && searchValue.length == 0 && (
+        <div className="mt-5 w-full max-md:max-w-full">
+          <div className="mt-4 grid gap-4 sm:grid-cols-1 md:grid-cols-2">
+            {primaryFeaturedBlogs.map((featuredBlog) => {
+              return <BlogPostCard blog={featuredBlog} />
+            })}
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="mt-4 grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-        {secondaryFeaturedBlogs.map((post) => {
+        {blogs.map((post) => {
           return <BlogPostCard blog={post} />
         })}
       </div>

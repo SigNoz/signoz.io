@@ -1,10 +1,10 @@
 import * as React from 'react'
-import FeaturedBlogs from './FeaturedBlogs'
-import AllBlogs from './AllBlogs'
 import { filterData } from 'app/utils/common'
 import { allBlogs } from 'contentlayer/generated'
 import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer'
 import SearchInput from '../Shared/Search'
+import FeaturedBlogs from './FeaturedBlogs'
+import AllBlogs from './AllBlogs'
 
 interface SearchInputProps {
   placeholder: string

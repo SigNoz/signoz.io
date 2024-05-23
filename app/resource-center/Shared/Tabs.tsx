@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import React from 'react'
 
-export default function Tabs({ activeTab, onSelectTab }) {
+export default function Tabs({ activeTab }) {
   return (
     <div className="mb-4">
       <ul

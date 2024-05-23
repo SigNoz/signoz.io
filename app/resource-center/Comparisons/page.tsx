@@ -12,7 +12,7 @@ export default function ComparisonsHome() {
 
   return (
     <div className="container mx-auto py-4">
-      <Tabs activeTab={activeTab} onSelectTab={setActiveTab} />
+      <Tabs activeTab={activeTab} />
 
       <div className="tab-content">
         {activeTab === 'blog-tab' && <Blogs />}

@@ -13,8 +13,6 @@ export default function BlogPostCard({
 }) {
   const { path, date, title, authors } = blog
 
-  console.log('Authors', Authors)
-
   const getAuthorName = (authorID) => {
     if (Authors[authorID]) {
       return Authors[authorID].name

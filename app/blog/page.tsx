@@ -17,6 +17,7 @@ export default function BlogPage() {
   const pagination = {
     currentPage: pageNumber,
     totalPages: Math.ceil(posts.length / POSTS_PER_PAGE),
+    pageRoute: '/blog',
   }
 
   return (
