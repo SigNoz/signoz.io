@@ -5,21 +5,9 @@ import { MDXLayoutRenderer } from 'pliny/mdx-components'
 import { coreContent } from 'pliny/utils/contentlayer'
 import { allDocs } from 'contentlayer/generated'
 import type { Doc } from 'contentlayer/generated'
-import PostSimple from '@/layouts/PostSimple'
-import PostLayout from '@/layouts/PostLayout'
-import PostBanner from '@/layouts/PostBanner'
 import DocLayout from '@/layouts/DocLayout'
 import { Metadata } from 'next'
 import siteMetadata from '@/data/siteMetadata'
-import { notFound } from 'next/navigation'
-
-const defaultLayout = 'DocLayout'
-const layouts = {
-  PostSimple,
-  PostLayout,
-  PostBanner,
-  DocLayout,
-}
 
 export async function generateMetadata({
   params,

@@ -1,5 +1,4 @@
 // @ts-nocheck
-
 'use client'
 
 import React, { useEffect, useRef, useState } from 'react'
@@ -42,17 +41,6 @@ const DocsSidebar: React.FC = () => {
 
     expandCategoriesForRoute(docsSideNav)
   }, [pathname])
-
-  const scrollToDoc = (route: string) => {
-    console.log('first', sidebarRef)
-
-    if (!sidebarRef.current) return
-
-    const docElement = sidebarRef.current.querySelector(`li[id="${route}"]`)
-    if (docElement) {
-      docElement.scrollIntoView({ behavior: 'smooth', block: 'center' })
-    }
-  }
 
   const renderDoc = (doc: Doc) => {
     const isActiveRoute = activeRoute === `${doc.route}/`
