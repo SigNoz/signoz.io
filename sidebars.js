@@ -707,7 +707,7 @@ module.exports = {
           label: 'Bootstrapping',
           link: {
             type: 'generated-index',
-            title: 'bootstrapping',
+            title: 'Bootstrapping',
             slug: '/azure-monitoring/bootstrapping',
           },
           items: [
