@@ -1,0 +1,60 @@
+---
+id: logging
+title: App Service Logging
+---
+
+## Overview
+The following categories of App Service Logs are available to export to Storage Account or EventHub. 
+
+- HTTP logs
+- App Service Console Logs
+- App Service Application Logs
+- Access Audit Logs
+- IPSecurity Audit logs
+- App Service Platform logs
+
+Although, the application logs could be sent directly in the Application Level using a Opentelemetry Log Appender, this might not be an ideal solution for legacy software or micro-services model. It’s easier to do centralised logging for both application logs, system logs and SIEM Audit logs.
+
+### Prerequisites
+
+- [EventHub Setup](../../bootstrapping/data-ingestion)
+- [Central Collector Setup](../../bootstrapping/collector-setup)
+
+## Setup
+
+1. Navigate to your App Service in the Azure portal
+2. Search for "Diagnostic settings" in the left navigation menu
+3. Click on "Add Diagnostic Setting"
+    <figure data-zoomable align="left">
+    <img
+        src="/img/docs/azure-monitoring/app-svc-diag-settings.webp"
+        alt="App Service Diagnostic Settings"
+    />
+    <figcaption>
+    <i>
+    App Service Diagnostic Settings
+    </i>
+    </figcaption>
+    </figure>
+4. Select the desired log categories to export:
+    - HTTP logs
+    - App Service Console Logs
+    - App Service Application Logs
+    - Access Audit Logs
+    - IPSecurity Audit logs
+    - App Service Platform logs
+    <figure data-zoomable align="left">
+    <img
+        src="/img/docs/azure-monitoring/app-svc-diag-configuration.webp"
+        alt="App Service Diagnostic Configuration"
+    />
+    <figcaption>
+    <i>
+    App Service Diagnostic Configuration
+    </i>
+    </figcaption>
+    </figure>
+5. Configure the destination details as "**Stream to an Event Hub**" and select the Event Hub namespace and Event Hub name created during the [EventHub Setup](../../bootstrapping/data-ingestion)
+6. Save the diagnostic settings
+
+That's it! You have successfully set up logging for your Azure App Service. 
