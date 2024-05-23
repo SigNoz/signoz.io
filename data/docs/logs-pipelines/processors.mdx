@@ -41,7 +41,7 @@ using grok patterns.
 |     Parse&#160;To      | The path to parse to. Eg: If set to `attributes`, a capture group like `%{WORD:userId}` in the grok pattern would get stored in `attributes.userId` |
 |     On&#160;Error     | What to do if the processor fails. Options are to `drop` the log or `send` it to the next processor  |
 
-:::note
+<Admonition>
 
 By default, values extracted using grok patterns are strings.  
 For example, parsing `status: 202` with the pattern `status: %{INT:status_code}` will extract `status_code` as a string with value `"202"`.
@@ -52,7 +52,7 @@ For example, parsing `status: 202` with the pattern `status: %{INT:status_code:i
 
 This can enable the use of numeric operators (`>`, `<` etc) on the extracted values and unlock features like using the values as metrics in dashboards.
 
-:::
+</Admonition>
 
 
 ## JSON Parser
@@ -78,11 +78,11 @@ Populating trace identifiers in logs allows navigation to and from corresponding
 |     Parse&#160;Span&#160;Id&#160;From    | The log field containing otel Span Id.  Eg: `attributes.mySpanId` <br/> Value at the specified path must be an even length string of hex characters |
 |     Parse&#160;Trace&#160;Flags&#160;From    | The log field containing otel Trace Flags. Eg: `attributes.myTraceFlags` <br/> Value at the specified path must be an unsigned int |
 
-:::note
+<Admonition>
 
 At least one field among `Parse Trace Id From`, `Parse Span Id From` and `Parse Trace Flags From` must be specified.
 
-:::
+</Admonition>
 
 
 ## Timestamp Parser
@@ -113,12 +113,12 @@ The severity parsing processor can be used to parse log severity out of a log fi
 |     Values&#160;for&#160;level&#160;FATAL     | Comma separated list of values that should be mapped to level FATAL. For example `panic, -1` |
 
 
-:::note
+<Admonition>
 
 Severity level values are case insensitive.<br/>
 As a special case, 2xx, 3xx, 4xx and 5xx can be used to map number ranges to severity levels. This can be useful for mapping HTTP status codes. For example `5xx` can be used to parse numbers between 500-599 into level `ERROR`.
 
-:::
+</Admonition>
 
 
 ## Add
@@ -131,13 +131,13 @@ The add processor can be used to add a field to the log.
 |     Field     | Path of the field to be added. Must be of the form `attributes.*` or `resource.*`  |
 |     Value     | The value to be set in the specified field |
 
-:::note
+<Admonition>
 
 The value field can be set to an [expression](https://github.com/open-telemetry/opentelemetry-log-collection/blob/main/docs/types/expression.md) which will get evaluated for each entry to set the value.  
 For example the value can be set to `EXPR(attributes.subtotal + attributes.taxes)` to add a new field for total.  
 Value expressions are also useful for accessing array items that can't be referenced with field paths in operators like `COPY` and `MOVE`, for example `EXPR(attributes.locale[0])`.
 
-:::
+</Admonition>
 
 ## Remove
 The remove processor can be used for removing unwanted log fields such as PII.

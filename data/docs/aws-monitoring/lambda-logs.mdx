@@ -41,9 +41,9 @@ To accomplish the task described, please follow these steps:
 
 
 2. **Uploading Data to the S3 Bucket:**
-:::info
+<Admonition type="info">
 Refer [this link](https://aws.amazon.com/blogs/compute/using-aws-lambda-extensions-to-send-logs-to-custom-destinations/) to know how to automatically collect Lambda logs in S3.
-:::
+</Admonition>
    - After creating the bucket, navigate to the S3 Management Console.
    - Click on the **Upload** button.
    - Select the files you wish to upload from your local machine.
@@ -58,9 +58,9 @@ Refer [this link](https://aws.amazon.com/blogs/compute/using-aws-lambda-extensio
 
 To move forward, we assume that you already have some data in your S3 bucket.
 
-:::info
+<Admonition type="info">
 For the scope of this documentation, we assume that all the data in S3 bucket is in the same format. For example, if one file is in `.csv` format (say), then all files within the bucket will be in `.csv` format.  For files in different formats, you will have to use different parsing functions for each format or update the existing function accordingly.
-:::
+</Admonition>
 
 
 The general header(table) format of Lambda logs is:
@@ -99,9 +99,9 @@ When you successfully attach your lambda function with the S3 bucket and configu
 
 ### Creating a lambda function
 
-:::note
+<Admonition>
 The below attached screenshots are repurposed here (previously for load balancer logs), lambda function creation processes remains the same, adjust the name values according to your needs.
-:::
+</Admonition>
 
 Follow these steps to create the lambda function:
 
@@ -167,9 +167,9 @@ As said in Step 3 previously, we need extra permissions in order to access the S
 </figure>
 <br />
 
-:::caution
+<Admonition type="warning" >
 It's advisable to proceed with caution when granting full S3 access, particularly in a production environment. Before deploying your Lambda function with such extensive permissions, it's essential to consult with your system administrator or designated authority to ensure compliance with security protocols and best practices. This step helps mitigate potential risks and ensures that access permissions align with organizational guidelines and requirements.
-:::
+</Admonition>
 
 <figure data-zoomable align='center'>
     <img className="box-shadowed-image" src="/img/docs/elb/elb-logs-policies-used.webp" alt=""/>
@@ -177,9 +177,9 @@ It's advisable to proceed with caution when granting full S3 access, particularl
 </figure>
 <br />
 
-:::info
+<Admonition type="info">
 Please refer to the image above as a comprehensive guide to the policy names that you may consider adding to your Lambda function. Failure to include these policies could result in insufficient privileges, potentially hindering the function's ability to perform necessary operations within the AWS environment.
-:::
+</Admonition>
 
 Congrats, you are just done with one of the major hurdle in running your code. Now, let’s add a trigger. 
 
@@ -187,9 +187,9 @@ Congrats, you are just done with one of the major hurdle in running your code. N
 
 You need to use the Lambda console to build a trigger so that your function can be called immediately by another AWS service (S3, in our case). A trigger is a resource you set up to enable your function to be called by another AWS service upon the occurrence of specific events or conditions. 
 
-:::note
+<Admonition>
 A function may have more than one trigger. Every trigger functions as a client, independently calling your method, and Lambda transfers data from a single trigger to each event it passes to your function.
-:::
+</Admonition>
 
 To setup the trigger, follow these steps:
 
@@ -325,9 +325,9 @@ def lambda_handler(event, context):
 In the `http_url = 'https://ingest.in.signoz.cloud:443/logs/json/'`, replace the `in` with your REGION name. You can find ingestion details (REGION and SIGNOZ_INGESTION_KEY) in the SigNoz dashboard.
 
 
-:::caution
+<Admonition type="warning" >
 The provided code is functional, but exercise caution when copying and pasting it in its entirety. Incorrect configuration could result in the unintentional ingestion of a large volume of data.
-:::
+</Admonition>
 
 Other than the above explanation and the code comments, in a nutshell, what the this code does is: 
 
@@ -405,9 +405,9 @@ if __name__ == '__main__':
     main()
 ```
 
-:::info
+<Admonition type="info">
 To incorporate log files into the folder, including nested directories, the code systematically examines all sub-folders to identify files ending with the `.log` extension. Should you wish to target different file types, you have the flexibility to modify the code accordingly.
-:::
+</Admonition>
 
 ### Testing your Lambda function
 

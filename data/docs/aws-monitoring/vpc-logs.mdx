@@ -51,19 +51,19 @@ To accomplish the task described, please follow these steps:
    - You can upload files in various formats such as .json, .csv, .log, .gz, .zip, etc.
    - If you have configured Virtual Private Cloud (VPC) logging, VPC logs are automatically saved in `.gzip` format in your S3 bucket.
 
-:::info
+<Admonition type="info">
 Ensure that you have appropriate permissions and follow AWS best practices for security and cost optimization when creating and using S3 buckets. Refer to [this link](https://docs.aws.amazon.com/vpc/latest/tgw/flow-logs-s3.html) to know more about setting automatic VPC flowlogs collection to S3 bucket. 
-:::
+</Admonition>
 
-:::note
+<Admonition>
 Please be advised that all logs will undergo conversion to JSON format before transmission. Consequently, it may be necessary to perform supplementary preprocessing of the logs as part of this conversion process. Here preprocessing of the logs means getting them from S3 bucket, separating each log line based on the delimiter ("," or based on quotes) and assigning them to respective keys. Thus making a key, value pair before sending to SigNoz. 
-:::
+</Admonition>
 
 To move forward, we assume that you already have some data in your S3 bucket.
 
-:::info
+<Admonition type="info">
 For the scope of this documentation, we assume that all the data in S3 bucket is in the same format. For example, if one file is in `.csv` format, then all files within the bucket will be in `.csv` format.  For files in different formats, you will have to use different parsing functions for each format or update the existing function accordingly.
-:::
+</Admonition>
 
 
 The general header(table) format of VPC logs is:
@@ -73,9 +73,9 @@ vpc_headers= ["version","account-id","interface-id","srcaddr","dstaddr","srcport
 "dstport","protocol","packets","bytes","start","end","action","log-status"]
 ```
 
-:::info
+<Admonition type="info">
 Note that these headers are just for name sake, you can change them if you wish to, but it is not advisable. 
-:::
+</Admonition>
 
 ## Understanding how lambda function work
 
@@ -147,9 +147,9 @@ As said in Step 3 previously, we need extra permissions in order to access the S
 </figure>
 <br />
 
-:::caution
+<Admonition type="warning" >
 It's advisable to proceed with caution when granting full S3 access, particularly in a production environment. Before deploying your Lambda function with such extensive permissions, it's essential to consult with your system administrator or designated authority to ensure compliance with security protocols and best practices. This step helps mitigate potential risks and ensures that access permissions align with organizational guidelines and requirements.
-:::
+</Admonition>
 
 <figure data-zoomable align='center'>
     <img className="box-shadowed-image" src="/img/docs/elb/elb-logs-policies-used.webp" alt=""/>
@@ -337,9 +337,9 @@ Here’s how a raw, unprocessed VPC log line looks like:
 
 In the code, each field corresponds to a header. The purpose of the code above is to transmit Virtual Private Cloud (VPC) logs to the SigNoz endpoint.
 
-:::caution
+<Admonition type="warning" >
 The provided code is functional, but exercise caution when copying and pasting it in its entirety. Incorrect configuration could result in the unintentional ingestion of a large volume of data.
-:::
+</Admonition>
 
 
 Other than the above explanation and the code comments, in a nutshell, what the this code does is: 
@@ -432,9 +432,9 @@ if __name__ == '__main__':
     main()
 ```
 
-:::info
+<Admonition type="info">
 To incorporate log files into the folder, including nested directories, the code systematically examines all sub-folders to identify files ending with the `.log.gz` extension. Should you wish to target different file types, you have the flexibility to modify the code accordingly.
-:::
+</Admonition>
 
 ### Testing your Lambda function
 

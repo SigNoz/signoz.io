@@ -7,7 +7,7 @@ description: Send events from your Express application to SigNoz
 
 
 import InstrumentationFAQ from '@/components/shared/instrumentation-faq.md'
-import VersionPin from '@/components/shared/nodejs-version-pin.md'
+import VersionPin from '@/components/shared/nodejs-version-pin.mdx'
 
 
 This document contains instructions on how to set up OpenTelemetry instrumentation in your Express applications. OpenTelemetry, also known as OTel for short, is an open source observability framework that can help you generate and collect telemetry data - traces, metrics, and logs from your Express application.
@@ -111,9 +111,9 @@ In case you encounter an issue where all applications do not get listed in the s
 
 OTel Collector binary helps to collect logs, hostmetrics, resource and infra attributes. It is recommended to install Otel Collector binary to collect and send traces to SigNoz cloud. You can correlate signals and have rich contextual data through this way.
 
-:::note
+<Admonition>
 You can find instructions to install OTel Collector binary [here](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) in your VM. Once you are done setting up your OTel Collector binary, you can follow the below steps for instrumenting your Javascript application.
-:::
+</Admonition>
 
 Step 1. Install OpenTelemetry packages
 
@@ -259,11 +259,11 @@ You have two choices for instrumenting your Express application with OpenTelemet
 - **[Use the all-in-one auto-instrumentation library(Recommended)](#using-the-all-in-one-auto-instrumentation-library)**<br></br>
 The auto-instrumentation library of OpenTelemetry is a meta package that provides a simple way to initialize multiple Nodejs instrumnetations.
 
-:::info
+<Admonition type="info">
 
   If you are on K8s, you should checkout [opentelemetry operators](/docs/tutorial/opentelemetry-operator-usage/#opentelemetry-auto-instrumentation-injection) which enable auto instrumenting Javascript applications very easily.
 
-:::
+</Admonition>
 
 - **[Use a specific auto-instrumentation library](#using-a-specific-auto-instrumentation-library)**<br></br>
 You can use individual auto-instrumentation libraries too for a specific component of your application. For example, you can use `@opentelemetry/instrumentation-express` for instrumenting the Express web framework.
@@ -352,9 +352,9 @@ Internally, it calls the specific auto-instrumentation library for components us
 
     Here’s a handy [grid](https://signoz.io/docs/instrumentation/troubleshoot-instrumentation/) to figure out which address to use to send data to SigNoz.
 
-  :::note
+  <Admonition>
     Remember to allow incoming requests to port 4318 of machine where SigNoz backend is hosted.
-    
+  </Admonition>
 
   
 3. **Run the application**<br></br>
@@ -364,9 +364,9 @@ Internally, it calls the specific auto-instrumentation library for components us
     node -r ./tracing.js app.js
     ```
 
-  :::note
+  <Admonition>
   If you're running your nodejs application in PM2 cluster mode, it doesn't support node args: [Unitech/pm2#3227](https://github.com/Unitech/pm2/issues/3227). As above sample app instrumentation requires to load `tracing.js` before app load by passing node arg, so nodejs instrumentation doesn't work in PM2 cluster mode. So you need to import `tracing.js` in your main application. The `import ./tracing.js` should be the first line of your application code and initialize it before any other function. Here's the [sample github repo](https://github.com/SigNoz/sample-nodejs-app/tree/init-tracer-main) which shows the implementation.    
-  :::    
+  </Admonition>    
 
   In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#troubleshooting-your-installation).
 
