@@ -366,6 +366,11 @@ module.exports = {
                 },
                 {
                   type: 'doc',
+                  id: 'userguide/python-logs-auto-instrumentation',
+                  label: 'Python Logs Auto-Instrumentation',
+                },
+                {
+                  type: 'doc',
                   id: 'userguide/collecting_application_logs_otel_sdk_python',
                   label: 'Using OTel Python SDK',
                 },
