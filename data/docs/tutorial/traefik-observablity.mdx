@@ -4,15 +4,11 @@ title: Traefik Observability
 description: Tutorial to export Traefik metrics and traces to SigNoz.
 ---
 
-
-
 import TraefikMetrics from '@/components/shared/traefik-metrics-list.md'
 
 ### Overview
 
-In this tutorial, we will see how to export metrics and traces of Traefik to SigNoz.
-Visualizing Traefik metrics and traces will help you to understand the performance
-of services running behind Traefik and troubleshoot issues.
+In this tutorial, we will see how to export metrics and traces of Traefik to SigNoz. Visualizing Traefik metrics and traces will help you to understand the performance of services running behind Traefik and troubleshoot issues.
 
 ### Prerequisites
 
@@ -23,8 +19,7 @@ of services running behind Traefik and troubleshoot issues.
 
 ## Export Traefik Metrics and Traces to SigNoz
 
-Based on how you are running SigNoz (e.g. SigNoz Cloud, in an independent VM or Kubernetes cluster),
-you have to provide the address to send data from the above receivers.
+Based on how you are running SigNoz (e.g. SigNoz Cloud, in an independent VM or Kubernetes cluster), you have to provide the address to send data from the above receivers.
 
 <Tabs>
 <TabItem value="signoz-cloud" label="SigNoz Cloud" default>
@@ -47,12 +42,13 @@ For traces, we will have to set the following CLI flags in Traefik:
 - `--tracing.openTelemetry.insecure=false`
 - `--tracing.openTelemetry.headers.signoz-access-token=SIGNOZ_INGESTION_KEY`
 
-We will take an example `docker-compose.yaml` with a simple `hello-app`
-running behind Traefik.
+We will take an example `docker-compose.yaml` with a simple `hello-app` running behind Traefik.
 
-_docker-compose.yaml_
 
-```yaml {13-14,18-19}
+
+```
+# docker-compose.yaml {13-14,18-19}
+
 version: '3'
 services:
   reverse-proxy:
@@ -91,15 +87,17 @@ services:
 Notes:
 - Replace `SIGNOZ_INGESTION_KEY` with the one provided by SigNoz.
 - Replace `{region}` with the region of your SigNoz Cloud instance.
-  Refer to the table below for the region-specific endpoints:
+  
+Refer to the table below for the region-specific endpoints:
 
-  | Region	| Endpoint                   |
-  | ------- | -------------------------- |
-  | US      | ingest.us.signoz.cloud:443 |
-  | IN      | ingest.in.signoz.cloud:443 |
-  | EU      | ingest.eu.signoz.cloud:443 |
+| Region	| Endpoint                   |
+| ------- | -------------------------- |
+| US      | ingest.us.signoz.cloud:443 |
+| IN      | ingest.in.signoz.cloud:443 |
+| EU      | ingest.eu.signoz.cloud:443 |
 
 </TabItem>
+
 <TabItem value="self-host" label="Self-Host">
 
 In this section, we will see how to export Traefik metrics and traces to SigNoz.
@@ -120,12 +118,11 @@ For traces, we will have to set the following CLI flags in Traefik:
 
 Note: Replace `<SigNoz OtelCollector IP>` with the IP address or hostname of the host running SigNoz OtelCollector.
 
-We will take an example `docker-compose.yaml` with a simple `hello-app`
-running behind Traefik.
+We will take an example `docker-compose.yaml` with a simple `hello-app` running behind Traefik.
 
-_docker-compose.yaml_
+docker-compose.yaml
 
-```yaml {13,17}
+```
 version: '3'
 services:
   reverse-proxy:
@@ -160,8 +157,7 @@ services:
 ```
 
 <Admonition type="info">
-In case SigNoz is not running on the same host, you will have to replace `signoz`
-with the IP address of the host running SigNoz.
+In case SigNoz is not running on the same host, you will have to replace `signoz` with the IP address of the host running SigNoz.
 </Admonition>
 
 </TabItem>
@@ -169,13 +165,13 @@ with the IP address of the host running SigNoz.
 
 To start the services, run the following command:
 
-```bash
+```
 docker compose up -d
 ```
 
 We will visit the `hello-app` service to generate some traffic.
 
-```bash
+```
 curl -H Host:hello-app.docker.localhost http://127.0.0.1
 ```
 
@@ -183,8 +179,7 @@ Now, we will visit the SigNoz UI to see the traces and metrics.
 
 ![Traefik Traces](/img/docs/tutorial/traefik-traces.webp)
 
-To plot metrics generated from **Traefik**, follow the instructions
-given in the docs [here][2].
+To plot metrics generated from **Traefik**, follow the instructions given in the docs [here][2].
 
 Check out the [List of metrics from Traefik][3].
 
