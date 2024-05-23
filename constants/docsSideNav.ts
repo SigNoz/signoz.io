@@ -10,17 +10,16 @@ const docsSideNav = [
         route: '/docs',
       },
       {
-        type: 'category',
+        type:  'category',
         label: 'Installation',
-        route: '/install',
-        // route: '/docs/install',
-        // link: {
-        // type: 'doc',
-        // title: 'Install SigNoz',
+        link: {
+          type:  'doc',
+          route: '/docs/install/install',
+        //   title: 'Install SigNoz',
         // description:
         // "To install SigNoz, follow the instructions in the sections below. If you don't want to self-host, try SigNoz Cloud.",
-        // slug: '/docs/install',
-        // },
+          
+        },
         items: [
           {
             type: 'doc',
