@@ -1,8 +1,10 @@
+'use client'
+
 import Heading from '@/components/ui/Heading'
 import SubHeading from '@/components/ui/SubHeading'
-import { Button } from '@headlessui/react'
 import Image from 'next/image'
 import React from 'react'
+import Button from '../../components/ui/Button'
 
 export default function SecurityAndCompliance() {
   return (
@@ -33,8 +35,43 @@ export default function SecurityAndCompliance() {
             </div>
           </div>
 
-          <div className="m-8 flex items-center justify-center">
-            <Image src="/img/security.png" width={500} height={400} alt="Security Image" />
+          <div className="mx-auto max-w-2xl">
+            <div className="plans-container mx-auto bg-[#252529]">
+              <div className="grid grid-cols-1 rounded-lg px-10 py-8 md:grid-cols-2 md:gap-10">
+                <div>
+                  <ul className="plans-features m-0">
+                    <li className="text-md py-3">SSO and SAML support</li>
+                    <li className="text-md py-3">Query API Keys</li>
+                    <li className="text-md py-3">Advanced Security</li>
+                  </ul>
+                </div>
+                <div>
+                  <div className="flex h-full flex-col justify-between">
+                    <ul className="plans-features m-0">
+                      <li className="text-md py-3">VPC Peering</li>
+                      <li className="text-md py-3">Custom Integrations</li>
+                      <li className="text-md py-3">AWS Private Link</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex w-full justify-center pb-8">
+                <Button isButton to={'/pricing'} className="button button-sm hidden md:block">
+                  Check plans
+                </Button>
+              </div>
+            </div>
+
+            <div>
+              <Button
+                isButton
+                to={'/pricing'}
+                className="button button-sm mx-auto my-5 block w-full md:hidden"
+              >
+                Check plans
+              </Button>
+            </div>
           </div>
         </div>
       </section>

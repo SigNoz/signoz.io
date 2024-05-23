@@ -1,15 +1,20 @@
-import GridLayout from '@/layouts/GridLayout'
 import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer'
+import GridLayout from '@/layouts/GridLayout'
 import { allBlogs } from 'contentlayer/generated'
-import { genPageMetadata } from 'app/seo'
+import React from 'react'
 
 const POSTS_PER_PAGE = 10
 
-export const metadata = genPageMetadata({ title: 'Blog' })
+export const generateStaticParams = async () => {
+  const totalPages = Math.ceil(allBlogs.length / POSTS_PER_PAGE)
+  const paths = Array.from({ length: totalPages }, (_, i) => ({ page: (i + 1).toString() }))
 
-export default function BlogPage() {
+  return paths
+}
+
+export default function Page({ params }: { params: { page: string } }) {
   const posts = allCoreContent(sortPosts(allBlogs))
-  const pageNumber = 1
+  const pageNumber = parseInt(params.page as string)
   const initialDisplayPosts = posts.slice(
     POSTS_PER_PAGE * (pageNumber - 1),
     POSTS_PER_PAGE * pageNumber
@@ -17,7 +22,7 @@ export default function BlogPage() {
   const pagination = {
     currentPage: pageNumber,
     totalPages: Math.ceil(posts.length / POSTS_PER_PAGE),
-    pageRoute: '/blog',
+    pageRoute: 'blog',
   }
 
   return (
@@ -25,7 +30,7 @@ export default function BlogPage() {
       posts={posts}
       initialDisplayPosts={initialDisplayPosts}
       pagination={pagination}
-      title="All Blogs"
+      title="All Posts"
     />
   )
 }

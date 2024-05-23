@@ -94,7 +94,7 @@ const TocComponent: React.FC<TocProps> = ({ toc }) => {
   }
 
   return (
-    <nav className="w-100 sticky top-[64px] p-4 pl-0 text-white">
+    <nav className="w-100 sticky top-[48px] h-[100vh] overflow-y-auto p-4 pl-0 text-white">
       <ul className="list-none p-0 pl-0">{toc.map(renderItem)}</ul>
     </nav>
   )
