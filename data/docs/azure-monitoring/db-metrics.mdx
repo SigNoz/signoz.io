@@ -1,0 +1,63 @@
+---
+id: db-metrics
+title: SQL Database Metrics
+---
+
+# QuickStart
+
+To monitor Database's system metrics like CPU Percentage, Memory Percentage, Storage Usage with SigNoz, you just need to set up the OpenTelemetry Collector with the Azure Monitor exporter and enable Monitoring for the databases.
+
+# Overview
+
+In this guide, you will learn how to monitor Database's system metrics like CPU Percentage, Memory Percentage, Data In, and Data Out with SigNoz. By monitoring these metrics, you can keep track of your application's resource utilization and performance.
+
+For application-level traces and metrics, you can use the DNS name of the OpenTelemetry Collector you set up earlier. Simply configure your application to send traces and metrics to the Central Collector, and they will be forwarded to SigNoz automatically.
+
+# Prerequisites
+
+Before you can monitor your Database with SigNoz, you need to ensure the following prerequisites are met:
+
+1. You have an Azure subscription and an Database instance running.
+2. You have set up the Central Collector with the Azure Monitor exporter. If you haven't set it up yet, follow the instructions in the [Central Collector Setup](../bootstrapping/collector-setup)
+3. You should have sql monitoring profile created to monitor the databases in Azure Monitor if not, Follow this guide to [Create SQL Monitoring Profile](https://learn.microsoft.com/en-us/azure/azure-sql/database/sql-insights-enable?view=azuresql#create-sql-monitoring-profile)
+
+# Setup
+
+Once you have completed the prerequisites, you can start monitoring your Database's system metrics with SigNoz. Here's how you can do it:
+
+1. Log in to your SigNoz account.
+2. Navigate to the Dashboards, and add an dashboard
+3. Add a Timeseries Panel
+4. In *Metrics*, select `azure_storage_maximum`  and *Avg By* select tag `location`
+5. In Filter say `name = <database-name>`
+6. Hit “Save Changes” You now have Memory Usage of your Database in a Dashboard for reporting and alerting 
+
+<figure data-zoomable align="center">
+    <img
+        src="/img/docs/azure-monitoring/db-metrics-signoz.webp"
+        alt="Signoz Dashboard"
+    />
+    <figcaption>
+        <i>
+        Signoz Dashboard
+        </i>
+    </figcaption>
+</figure>
+
+That's it! You have successfully set up monitoring for your Database's system metrics with SigNoz.
+
+:::note
+Make sure you have created a sql monitoring profile in Azure Monitor if not, Follow this guide to [Create SQL Monitoring Profile](https://learn.microsoft.com/en-us/azure/azure-sql/database/sql-insights-enable?view=azuresql#create-sql-monitoring-profile).
+You can monitor multiple databases in a single profile.
+:::
+
+# Troubleshooting
+
+If you encounter any issues while setting up monitoring for your Database's system metrics with SigNoz, here are a few troubleshooting steps you can try:
+
+1. Check if the OpenTelemetry Collector is running and properly configured with the Azure Monitor exporter.
+2. Verify that your Database instance is running and accessible.
+3. Ensure that you have the necessary permissions to access the metrics in your Azure subscription.
+4. Double-check the configuration of the OpenTelemetry Collector with the Azure Monitor exporter to ensure that a resource group filter is not preventing the metrics from being collected.
+
+By following this guide, you should be able to easily monitor your Database's system metrics with SigNoz and gain valuable insights into your application's performance and resource utilization.

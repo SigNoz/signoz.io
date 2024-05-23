@@ -14,6 +14,8 @@ import VersionPin from './NodeVersionPin/NodeVersionPin'
 import VersionPinNestJs from './NestVersionPin/NestVersionPin'
 import Tabs from './Tabs'
 import TabItem from './TabItem'
+import DocCard from './DocCard'
+import DocCardContainer from './DocCardContainer'
 
 
 export const components: MDXComponents = {
@@ -32,4 +34,6 @@ export const components: MDXComponents = {
   VersionPinNestJs,
   Tabs,
   TabItem,
+  DocCard,
+  DocCardContainer,
 }
