@@ -400,11 +400,11 @@ You can use OpenTelemetry Python to send your traces directly to SigNoz. OpenTel
 ### Steps to auto-instrument Python app for traces
 
 
-:::info
+<Admonition type="info">
 
   If you are on K8s, you should checkout [opentelemetry operators](/docs/tutorial/opentelemetry-operator-usage/#opentelemetry-auto-instrumentation-injection) which enable auto instrumenting Python applications very easily.
 
-:::
+</Admonition>
 
 1. **Create a virtual environment**<br></br>
     
@@ -426,7 +426,7 @@ You can use OpenTelemetry Python to send your traces directly to SigNoz. OpenTel
     
     `opentelemetry-exporter-otlp` - This library provides a way to install all OTLP exporters. You will need an exporter to send the data to SigNoz.
 
-    :::note
+    <Admonition>
     💡 The `opentelemetry-exporter-otlp` is a convenience wrapper package to install all OTLP exporters. Currently, it installs:
     
     - opentelemetry-exporter-otlp-proto-http
@@ -435,7 +435,7 @@ You can use OpenTelemetry Python to send your traces directly to SigNoz. OpenTel
     - (soon) opentelemetry-exporter-otlp-json-http
     
     The `opentelemetry-exporter-otlp-proto-grpc` package installs the gRPC exporter which depends on the `grpcio` package. The installation of `grpcio` may fail on some platforms for various reasons. If you run into such issues, or you don't want to use gRPC, you can install the HTTP exporter instead by installing the `opentelemetry-exporter-otlp-proto-http` package. You need to set the `OTEL_EXPORTER_OTLP_PROTOCOL` environment variable to `http/protobuf` to use the HTTP exporter.
-    :::
+    </Admonition>
     
 3. **Add automatic instrumentation**<br></br>
      The below command inspects the dependencies of your application and installs the instrumentation packages relevant for your Python application.
@@ -444,15 +444,15 @@ You can use OpenTelemetry Python to send your traces directly to SigNoz. OpenTel
     opentelemetry-bootstrap --action=install
     ```
 
-    :::note
+    <Admonition>
      Please make sure that you have installed all the dependencies of your application before running the above command. The command will not install instrumentation for the dependencies which are not installed.
-    :::
+    </Admonition>
 
 4. **Run your application**<br></br>
      
-    :::note
+    <Admonition>
      Don’t run app in reloader/hot-reload mode as it breaks instrumentation. For example, if you use `export FLASK_ENV=development`, it enables the reloader mode which breaks OpenTelemetry instrumentation.
-    :::
+    </Admonition>
      
      
      To start sending data to SigNoz, use the following run command:
@@ -473,9 +473,9 @@ You can use OpenTelemetry Python to send your traces directly to SigNoz. OpenTel
      OTEL_RESOURCE_ATTRIBUTES=service.name=python_app OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4317" OTEL_EXPORTER_OTLP_PROTOCOL=grpc opentelemetry-instrument python3 app.py
      ```
      
-    :::note
+    <Admonition>
      The port numbers are 4317 and 4318 for the gRPC and HTTP exporters respectively. Remember to allow incoming requests to port **4317**/**4318** of machine where SigNoz backend is hosted.
-    :::
+    </Admonition>
      
     In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#troubleshooting-your-signoz-installation).
 
@@ -530,11 +530,11 @@ You can use  `opentelemetry-distro` to initialize instrumentation for your Postg
 
 You can check the supported versions [here](https://github.com/open-telemetry/opentelemetry-python-contrib/tree/main/instrumentation).
 
-:::note
+<Admonition>
 
 `psycopg2-binary` is not supported by opentelemetry auto instrumentation libraries as it is not recommended for production use. Please use `psycopg2` to see DB calls also in your trace data in SigNoz
 
-:::
+</Admonition>
 
 ## Running applications with Gunicorn, uWSGI
 
