@@ -7,13 +7,12 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 // You might need to insert additional domains in script-src if you are using external services
 const ContentSecurityPolicy = `
   default-src 'self';
-  script-src 'self' 'unsafe-eval' 'unsafe-inline' giscus.app analytics.umami.is;
+  script-src 'self' 'unsafe-eval' 'unsafe-inline' giscus.app https://js.hsforms.net;
   style-src 'self' 'unsafe-inline';
   img-src * blob: data:;
   media-src *;
-  media-src *.s3.amazonaws.com;
   connect-src *;
-  font-src 'self';
+  font-src * 'self';
   frame-src * giscus.app youtube.com
 `
 
@@ -67,6 +66,10 @@ module.exports = () => {
       dirs: ['app', 'components', 'layouts', 'scripts'],
     },
     trailingSlash: true,
+    env: {
+      AIRTABLE_BASE_URL: process.env.AIRTABLE_BASE_URL,
+      AIRTABLE_KEY: process.env.AIRTABLE_KEY,
+    },
     images: {
       remotePatterns: [
         {
@@ -77,6 +80,10 @@ module.exports = () => {
           protocol: 'https',
           hostname: 'signoz.io',
         },
+        {
+          protocol: 'https',
+          hostname: 'avatars.githubusercontent.com',
+        },
       ],
     },
     async headers() {
@@ -84,6 +91,15 @@ module.exports = () => {
         {
           source: '/(.*)',
           headers: securityHeaders,
+        },
+      ]
+    },
+    async redirects() {
+      return [
+        {
+          source: '/docs',
+          destination: '/docs/introduction',
+          permanent: true,
         },
       ]
     },

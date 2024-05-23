@@ -6,12 +6,17 @@ import Image from './Image'
 import CustomLink from './Link'
 import TableWrapper from './TableWrapper'
 import YouTube from './VideoPlayer/VideoPlayer'
-import GetStartedSigNoz from '../docs/shared/get-started-signoz'
-import Admonition from './Admonition/Admonition';
-import SignUps from '../docs/shared/sign-ups'
-import LogsPerf from '../docs/shared/logs-perf-cta'
-import VersionPin from '../docs/shared/nodejs-version-pin'
-import VersionPinNestJs from '../docs/shared/nestjs-version-pin'
+import GetStartedSigNoz from './GetStartedSigNoz/GetStartedSigNoz'
+import Admonition from './Admonition/Admonition'
+import SignUps from './SignUps/SignUps'
+import LogsPerf from './LogsPerf/LogsPerf'
+import VersionPin from './NodeVersionPin/NodeVersionPin'
+import VersionPinNestJs from './NestVersionPin/NestVersionPin'
+import Tabs from './Tabs'
+import TabItem from './TabItem'
+import DocCard from './DocCard'
+import DocCardContainer from './DocCardContainer'
+
 
 export const components: MDXComponents = {
   Image,
@@ -26,6 +31,9 @@ export const components: MDXComponents = {
   SignUps,
   LogsPerf,
   VersionPin,
-  VersionPinNestJs
-
+  VersionPinNestJs,
+  Tabs,
+  TabItem,
+  DocCard,
+  DocCardContainer,
 }

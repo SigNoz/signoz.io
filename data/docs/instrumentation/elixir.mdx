@@ -1,0 +1,264 @@
+---
+id: elixir
+title: Elixir Opentelemetry Instrumentation
+description: Send events from your Elixir application to SigNoz
+
+---
+
+
+import InstrumentationFAQ from '@/components/shared/instrumentation-faq.md'
+
+This document contains OpenTelemetry instrumentation instructions for Elixir Phoenix + Ecto framework.
+
+## Send Traces to SigNoz Cloud
+
+Based on your application environment, you can choose the setup below to send traces to SigNoz Cloud.
+
+<Tabs>
+<TabItem value="vm" label="VM" default>
+
+From VMs, there are two ways to send data to SigNoz Cloud.
+
+- [Send traces directly to SigNoz Cloud](#send-traces-directly-to-signoz-cloud)
+- [Send traces via OTel Collector binary](#send-traces-via-otel-collector-binary) (recommended)
+
+#### **Send traces directly to SigNoz Cloud**
+
+**Step 1. Add dependencies**
+
+Install dependencies related to OpenTelemetry by adding them to `mix.exs` file
+
+```elixir
+    {:opentelemetry_exporter, "~> 1.6"},
+    {:opentelemetry_api, "~> 1.2"},
+    {:opentelemetry, "~> 1.3"},
+    {:opentelemetry_semantic_conventions, "~> 0.2"},
+    {:opentelemetry_cowboy, "~> 0.2.1"},
+    {:opentelemetry_phoenix, "~> 1.1"},
+    {:opentelemetry_ecto, "~> 1.1"}
+```
+
+In your application start, usually the `application.ex` file, setup the telemetry handlers
+
+```elixir
+    :opentelemetry_cowboy.setup()
+    OpentelemetryPhoenix.setup(adapter: :cowboy2)
+    OpentelemetryEcto.setup([:YOUR_APP_NAME, :repo])
+```
+
+`YOUR_APP_NAME` - Name of your application or service.
+
+As an example, this is how you can setup the handlers in your `application.ex` file for an application called `demo` :
+
+```elixir
+# application.ex
+@impl true
+def start(_type, _args) do
+  :opentelemetry_cowboy.setup()
+  OpentelemetryPhoenix.setup(adapter: :cowboy2)
+  OpentelemetryEcto.setup([:demo, :repo])
+
+end
+```
+
+**Step 2. Configure Application**
+
+You need to configure your application to send telemtry data by adding the follwing config to your `runtime.exs` file:
+
+```elixir
+config :opentelemetry, :resource, service: %{name: "YOUR_APP_NAME"}
+
+config :opentelemetry, :processors,
+  otel_batch_processor: %{
+    exporter: {
+      :opentelemetry_exporter,
+      %{
+        endpoints: ["https://ingest.{region}.signoz.cloud:443"],
+        headers: [
+          {"signoz-access-token", SIGNOZ_ACCESS_TOKEN}
+        ]
+      }
+    }
+  }
+```
+`YOUR_APP_NAME`: Your application or service name.
+
+`SIGNOZ_INGESTION_KEY` : The ingestion key sent by SigNoz over email. It can also be found in the `settings` section of your SigNoz Cloud UI.
+
+Depending on the choice of your region for SigNoz cloud, the ingest endpoint will vary according to this table.
+
+| Region | Endpoint |
+| --- | --- |
+| US |	ingest.us.signoz.cloud:443 |
+| IN |	ingest.in.signoz.cloud:443 |
+| EU | ingest.eu.signoz.cloud:443 |
+
+---
+#### **Send traces via OTel Collector binary**
+
+OTel Collector binary helps to collect logs, hostmetrics, resource and infra attributes. It is recommended to install Otel Collector binary to collect and send traces to SigNoz cloud. You can correlate signals and have rich contextual data through this way.
+
+You can find instructions to install OTel Collector binary [here](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) in your VM. Once you are done setting up your OTel Collector binary, you can follow the below steps for instrumenting your Elixir (Phoenix + Ecto) application.
+
+**Step 1. Add dependencies**
+
+Install dependencies related to OpenTelemetry by adding them to `mix.exs` file
+
+```elixir
+    {:opentelemetry_exporter, "~> 1.6"},
+    {:opentelemetry_api, "~> 1.2"},
+    {:opentelemetry, "~> 1.3"},
+    {:opentelemetry_semantic_conventions, "~> 0.2"},
+    {:opentelemetry_cowboy, "~> 0.2.1"},
+    {:opentelemetry_phoenix, "~> 1.1"},
+    {:opentelemetry_ecto, "~> 1.1"}
+```
+
+In your application start, usually the `application.ex` file, setup the telemetry handlers
+
+```elixir
+    :opentelemetry_cowboy.setup()
+    OpentelemetryPhoenix.setup(adapter: :cowboy2)
+    OpentelemetryEcto.setup([:YOUR_APP_NAME, :repo])
+```
+
+As an example, this is how you can setup the handlers in your `application.ex` file for an application called `demo` :
+
+```elixir
+# application.ex
+@impl true
+def start(_type, _args) do
+  :opentelemetry_cowboy.setup()
+  OpentelemetryPhoenix.setup(adapter: :cowboy2)
+  OpentelemetryEcto.setup([:demo, :repo])
+
+end
+```
+
+**Step 2. Configure Application**
+
+You need to configure your application to send telemtry data by adding the follwing config to your `runtime.exs` file:
+
+```elixir
+config :opentelemetry, :resource, service: %{name: "YOUR_APP_NAME"}
+
+config :opentelemetry, :processors,
+    otel_batch_processor: %{
+      exporter: 
+      {:opentelemetry_exporter, 
+      %{endpoints: ["http://localhost:4318"]}
+      }
+  }
+```
+
+`YOUR_APP_NAME`: Your application or service name.
+
+
+</TabItem>
+
+<TabItem value="k8s" label="Kubernetes" default>
+
+For Elixir (Phoenix + Ecto) application deployed on Kubernetes, you need to install OTel Collector agent in your k8s infra to collect and send traces to SigNoz Cloud. You can find the instructions to install OTel Collector agent [here](https://signoz.io/docs/tutorial/kubernetes-infra-metrics/).
+
+**Step 1. Add dependencies**
+
+Install dependencies related to OpenTelemetry by adding them to `mix.exs` file
+
+```elixir
+    {:opentelemetry_exporter, "~> 1.6"},
+    {:opentelemetry_api, "~> 1.2"},
+    {:opentelemetry, "~> 1.3"},
+    {:opentelemetry_semantic_conventions, "~> 0.2"},
+    {:opentelemetry_cowboy, "~> 0.2.1"},
+    {:opentelemetry_phoenix, "~> 1.1"},
+    {:opentelemetry_ecto, "~> 1.1"}
+```
+
+In your application start, usually the `application.ex` file, setup the telemetry handlers
+
+```elixir
+    :opentelemetry_cowboy.setup()
+    OpentelemetryPhoenix.setup(adapter: :cowboy2)
+    OpentelemetryEcto.setup([:YOUR_APP_NAME, :repo])
+```
+
+**Step 2. Configure Application**
+
+You need to configure your application to send telemtry data by adding the follwing config to your `runtime.exs` file:
+
+```elixir
+config :opentelemetry, :resource, service: %{name: "YOUR_APP_NAME"}
+
+config :opentelemetry, :processors,
+    otel_batch_processor: %{
+      exporter: 
+      {:opentelemetry_exporter, 
+      %{endpoints: ["http://localhost:4318"]}
+      }
+  }
+```
+
+`YOUR_APP_NAME`: Your application or service name.
+
+</TabItem>
+
+</Tabs>
+
+## Send Traces to Self-Hosted SigNoz
+
+We’ll focus on instrumenting one of the most common combos of the Elixir world: `Phoenix + Ecto`.
+
+### **Step 1:** **Add dependencies**
+
+The first step to instrument your Elixir application with OpenTelemetry is to add the required dependencies to your `mix.exs` file and fetch them with `mix deps.get`
+
+```jsx
+{:opentelemetry, "~> 1.0.3"},
+{:opentelemetry_exporter, "~> 1.0.3"},
+{:opentelemetry_phoenix, "~> 1.0.0"},
+{:opentelemetry_ecto, "~> 1.0.0"}
+```
+
+### **Step 2: Configure Elixir application**
+
+Then we need to configure our application to export telemetry data. There are two things that you need to set:
+
+- `YOUR_APP_NAME`<br></br>
+You can put your application or service name here for identification.
+- `OTEL Collector endpoint`<br></br>
+The OTEL collector comes bundled with SigNoz installation. Since, we installed SigNoz on our local machine, the endpoint is `http://localhost:4318`.
+
+```jsx
+config :opentelemetry, :resource, service: %{name: "YOUR_APP_NAME"}
+
+config :opentelemetry, :processors,
+  otel_batch_processor: %{
+    exporter: {
+      :opentelemetry_exporter,
+      %{endpoints: ["http://localhost:4318"]}
+    }
+  }
+```
+
+### **Step 3: Initialize telemetry handlers**
+
+As it is documented in the `opentelemetry_phoenix` and `opentelemetry_ecto` [hexdocs.pm](http://hexdocs.pm) pages, we need to initialize both telemetry handlers.
+
+```elixir
+OpentelemetryPhoenix.setup()
+OpentelemetryEcto.setup([:your_app_name, :repo])
+```
+
+`:your_app_name` should be replaced by your app name and congratulations, you have instrumented your application with OpenTelemetry.
+
+## Sample Examples
+
+{/* <!---
+Add sample apps for both Cloud and Self-Host
+---> */}
+
+Here's a [tutorial](https://signoz.io/blog/opentelemetry-elixir/) with step by step guide on how to install SigNoz and start monitoring a sample Elixir app. 
+
+Thanks to our community member [Ricardo](https://github.com/ricardoccpaiva) for creating this guide.
+
+<InstrumentationFAQ />

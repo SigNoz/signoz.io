@@ -1,9 +1,9 @@
-import ListLayout from '@/layouts/ListLayoutWithTags'
+import GridLayout from '@/layouts/GridLayout'
 import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer'
 import { allBlogs } from 'contentlayer/generated'
 import { genPageMetadata } from 'app/seo'
 
-const POSTS_PER_PAGE = 5
+const POSTS_PER_PAGE = 10
 
 export const metadata = genPageMetadata({ title: 'Blog' })
 
@@ -17,14 +17,15 @@ export default function BlogPage() {
   const pagination = {
     currentPage: pageNumber,
     totalPages: Math.ceil(posts.length / POSTS_PER_PAGE),
+    pageRoute: '/blog',
   }
 
   return (
-    <ListLayout
+    <GridLayout
       posts={posts}
       initialDisplayPosts={initialDisplayPosts}
       pagination={pagination}
-      title="All Posts"
+      title="All Blogs"
     />
   )
 }

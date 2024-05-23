@@ -1,17 +1,17 @@
 'use client'
 
 import React, { useState } from 'react'
-import Blogs from './Blog/Blogs'
-import Comparisons from './Comparisons/Comparisons'
-import Guides from './Guides/Guides'
-import OpenTelemetry from './OpenTelemetry/OpenTelemetry'
+import Blogs from './blog/Blogs'
+import ComparisonsListing from './comparisons/Comparisons'
+import Guides from './guides/Guides'
+import OpenTelemetry from './opentelemetry/OpenTelemetry'
 
 export default function ResourceCenter() {
   const [activeTab, setActiveTab] = useState('blog-tab')
 
   return (
     <div className="container mx-auto py-4">
-      <div className="mb-4">
+      <div className="mb-8">
         <ul
           className="-mb-px flex flex-wrap pl-0 text-center text-sm font-medium"
           id="default-tab"
@@ -46,20 +46,6 @@ export default function ResourceCenter() {
               Comparisons
             </button>
           </li>
-          {/* <li role="presentation">
-            <button
-              className={`inline-block rounded-t-lg px-4 py-2 ${activeTab === 'guides-tab' ? 'border-b-2 border-indigo-500 text-indigo-500' : ''}`}
-              id="guides-tab"
-              data-tabs-target="#guides"
-              type="button"
-              role="tab"
-              aria-controls="guides"
-              aria-selected="false"
-              onClick={() => setActiveTab(`guides-tab`)}
-            >
-              Guides
-            </button>
-          </li> */}
 
           <li role="presentation">
             <button
@@ -81,7 +67,7 @@ export default function ResourceCenter() {
       <div className="tab-content">
         {activeTab === 'blog-tab' && <Blogs />}
 
-        {activeTab === 'comparisons-tab' && <Comparisons />}
+        {activeTab === 'comparisons-tab' && <ComparisonsListing />}
 
         {activeTab === 'guides-tab' && <Guides />}
 

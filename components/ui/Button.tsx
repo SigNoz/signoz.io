@@ -13,7 +13,7 @@ const Button = ({
 }) => {
   const classNames = {
     isButton:
-      'inline-block border-none outline-none px-8 py-2 text-white rounded-md font-heading text-md font-medium hover:text-white no-underline text-center',
+      'inline-block border-none outline-none px-4 py-1 text-white rounded-md font-heading text-md font-medium hover:text-white no-underline text-center',
     filled: 'primary-gradient',
     outlined: 'border-gradient bg-[#1b1b1d]',
     inline: 'text-indigo-500 underline',

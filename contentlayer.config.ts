@@ -1,7 +1,7 @@
 import { defineDocumentType, ComputedFields, makeSource } from 'contentlayer2/source-files'
 import { writeFileSync } from 'fs'
 import readingTime from 'reading-time'
-import { slug } from 'github-slugger'
+import GithubSlugger, { slug } from 'github-slugger'
 import path from 'path'
 import { fromHtmlIsomorphic } from 'hast-util-from-html-isomorphic'
 // Remark packages
@@ -51,9 +51,27 @@ const computedFields: ComputedFields = {
     type: 'string',
     resolve: (doc) => doc._raw.sourceFilePath,
   },
-  toc: { type: 'string', resolve: (doc) => extractTocHeadings(doc.body.raw) },
-}
+  // toc: { type: 'string', resolve: (doc) => extractTocHeadings(doc.body.raw) },
+  toc: {
+    type: 'json',
+    resolve: async (doc) => {
+      const regXHeader = /\n(?<flag>#{1,3})\s+(?<content>.+)/g
+      const slugger = new GithubSlugger()
 
+      const headings = Array.from(doc.body.raw.matchAll(regXHeader)).map(({ groups }) => {
+        const flag = groups?.flag
+        const content = groups?.content
+        return {
+          value: content,
+          url: content ? `#${slugger.slug(content)}` : undefined,
+          depth: flag?.length == 1 ? 1 : flag?.length == 2 ? 2 : 3,
+        }
+      })
+
+      return headings
+    },
+  },
+}
 /**
  * Count the occurrences of all tags across blog posts and write to json file
  */
@@ -86,6 +104,12 @@ function createSearchIndex(allBlogs) {
     console.log('Local search index generated...')
   }
 }
+
+export const Page = defineDocumentType(() => ({
+  name: 'Page',
+  filePathPattern: 'blog/**/*.mdx',
+  contentType: 'mdx',
+}))
 
 export const Blog = defineDocumentType(() => ({
   name: 'Blog',
@@ -247,6 +271,47 @@ export const Guide = defineDocumentType(() => ({
   },
 }))
 
+export const Doc = defineDocumentType(() => ({
+  name: 'Doc',
+  filePathPattern: 'docs/**/*.mdx',
+  contentType: 'mdx',
+  fields: {
+    title: { type: 'string', required: true },
+    id: { type: 'string', required: true },
+    slug: { type: 'string', required: false },
+    date: { type: 'date', required: false },
+    tags: { type: 'list', of: { type: 'string' }, default: [], required: false },
+    lastmod: { type: 'date', required: false },
+    draft: { type: 'boolean', required: false },
+    summary: { type: 'string', required: false },
+    description: { type: 'string', required: false },
+    images: { type: 'json', required: false },
+    image: { type: 'string', required: false },
+    authors: { type: 'list', of: { type: 'string' }, required: false },
+    layout: { type: 'string', required: false },
+    bibliography: { type: 'string', required: false },
+    canonicalUrl: { type: 'string', required: false },
+    sidebar_label: { type: 'string', required: false },
+    hide_table_of_contents: { type: 'boolean' , required: false},
+  },
+  computedFields: {
+    ...computedFields,
+    structuredData: {
+      type: 'json',
+      resolve: (doc) => ({
+        '@context': 'https://schema.org',
+        '@type': 'DocPosting',
+        headline: doc.title,
+        datePublished: doc.date,
+        dateModified: doc.lastmod || doc.date,
+        description: doc.description,
+        image: doc.images ? doc.images[0] : siteMetadata.socialBanner,
+        url: `${siteMetadata.siteUrl}/${doc._raw.flattenedPath}`,
+      }),
+    },
+  },
+}))
+
 export const Authors = defineDocumentType(() => ({
   name: 'Authors',
   filePathPattern: 'authors/**/*.mdx',
@@ -267,7 +332,7 @@ export const Authors = defineDocumentType(() => ({
 
 export default makeSource({
   contentDirPath: 'data',
-  documentTypes: [Blog, Authors, Comparison, Guide, Opentelemetry],
+  documentTypes: [Blog, Authors, Comparison, Guide, Opentelemetry, Doc],
   mdx: {
     cwd: process.cwd(),
     remarkPlugins: [
