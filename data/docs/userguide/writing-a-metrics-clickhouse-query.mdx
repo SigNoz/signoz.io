@@ -4,7 +4,7 @@ title: Writing a Metrics ClickHouse Query
 ---
 
 
-# Table schema definitions & examples for metrics
+## Table schema definitions & examples for metrics
 
 There are two tables in the database. One is for storing the samples/metrics and the other is for storing the time series data. 
 
@@ -26,27 +26,25 @@ ENGINE = Distributed('cluster', 'signoz_metrics', 'samples_v2', cityHash64(metri
 Explanation of the columns:
 
 - **metric_name**: Name of the metric
-- **fingerprint**: Fingerprint of the metric. This is used to identify the metric uniquely. Currently, 
-  we are using the hash of the labels to generate the fingerprint.
+- **fingerprint**: Fingerprint of the metric. This is used to identify the metric uniquely. Currently, we are using the hash of the labels to generate the fingerprint.
 - **timestamp_ms**: Timestamp of the metric in milliseconds
 - **value**: Value of the metric
 
 ### Example of a samples
 
-```
-┌─metric_name────────┬────────fingerprint─┬──timestamp_ms─┬─value─┐
-│ signoz_calls_total │ 844117381117785689 │ 1698611461282 │ 25085 │
-│ signoz_calls_total │ 844117381117785689 │ 1698611521282 │ 25140 │
-│ signoz_calls_total │ 844117381117785689 │ 1698611581282 │ 25192 │
-│ signoz_calls_total │ 844117381117785689 │ 1698611641282 │ 25248 │
-│ signoz_calls_total │ 844117381117785689 │ 1698611701282 │ 25305 │
-│ signoz_calls_total │ 844117381117785689 │ 1698611761282 │ 25361 │
-│ signoz_calls_total │ 844117381117785689 │ 1698611821282 │ 25421 │
-│ signoz_calls_total │ 844117381117785689 │ 1698611881282 │ 25475 │
-│ signoz_calls_total │ 844117381117785689 │ 1698611941282 │ 25534 │
-│ signoz_calls_total │ 844117381117785689 │ 1698612001282 │ 25588 │
-└────────────────────┴────────────────────┴───────────────┴───────┘
-```
+| metric_name        | fingerprint        | timestamp_ms  | value |
+|--------------------|--------------------|---------------|-------|
+| signoz_calls_total | 844117381117785689 | 1698611461282 | 25085 |
+| signoz_calls_total | 844117381117785689 | 1698611521282 | 25140 |
+| signoz_calls_total | 844117381117785689 | 1698611581282 | 25192 |
+| signoz_calls_total | 844117381117785689 | 1698611641282 | 25248 |
+| signoz_calls_total | 844117381117785689 | 1698611701282 | 25305 |
+| signoz_calls_total | 844117381117785689 | 1698611761282 | 25361 |
+| signoz_calls_total | 844117381117785689 | 1698611821282 | 25421 |
+| signoz_calls_total | 844117381117785689 | 1698611881282 | 25475 |
+| signoz_calls_total | 844117381117785689 | 1698611941282 | 25534 |
+| signoz_calls_total | 844117381117785689 | 1698612001282 | 25588 |
+
 
 ## Schema for time series table:
 
@@ -65,23 +63,18 @@ ENGINE = Distributed('cluster', 'signoz_metrics', 'time_series_v2', cityHash64(m
 Explanation of the columns:
 
 - **metric_name**: Name of the metric
-- **fingerprint**: Fingerprint of the metric. This is used to identify the metric uniquely. Currently, 
-  we are using the hash of the labels to generate the fingerprint.
+- **fingerprint**: Fingerprint of the metric. This is used to identify the metric uniquely. Currently, we are using the hash of the labels to generate the fingerprint.
 - **timestamp_ms**: Timestamp of the metric when it was observed for the first time in milliseconds
 - **labels**: Labels of the metric; Stored as a JSON string
-- **temporality**: Temporality of the metric. This is used to identify the type of the metric. It can 
-  be one of the following values:
-  - Unspecified: This is the default value. 
-  - Cumulative: This is used for monotonic counters.
-  - Delta: This is used for non-monotonic counters.
+- **temporality**: Temporality of the metric. This is used to identify the type of the metric. It can be one of the following values:
+    - Unspecified: This is the default value. 
+    - Cumulative: This is used for monotonic counters.
+    - Delta: This is used for non-monotonic counters.
 
-### Example of a time series
+### Example of a time series| metric_name        | fingerprint        | timestamp_ms  | labels                                                                                                                                                                                                                                         | temporality  |
+|--------------------|--------------------|---------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------|
+| signoz_calls_total | 844117381117785689 | 1698584462214 | \{"__name__":"signoz_calls_total","__temporality__":"Cumulative","deployment_environment":"default","operation":"/driver.DriverService/FindNearest","resource_signoz_collector_id":"1e183921-3de2-4afe-9729-78db8f2b65b5","service_name":"driver","service_namespace":"default","signoz_collector_id":"1e183921-3de2-4afe-9729-78db8f2b65b5","span_kind":"SPAN_KIND_SERVER","status_code":"STATUS_CODE_UNSET"} | Cumulative  |
 
-```
-┌─metric_name────────┬────────fingerprint─┬──timestamp_ms─┬─labels─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┬─temporality─┐
-│ signoz_calls_total │ 844117381117785689 │ 1698584462214 │ {"__name__":"signoz_calls_total","__temporality__":"Cumulative","deployment_environment":"default","operation":"/driver.DriverService/FindNearest","resource_signoz_collector_id":"1e183921-3de2-4afe-9729-78db8f2b65b5","service_name":"driver","service_namespace":"default","signoz_collector_id":"1e183921-3de2-4afe-9729-78db8f2b65b5","span_kind":"SPAN_KIND_SERVER","status_code":"STATUS_CODE_UNSET"} │ Cumulative  │
-└────────────────────┴────────────────────┴───────────────┴────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┴─────────────┘
-```
 
 ## Querying the metrics
 
@@ -97,7 +90,7 @@ Note: The queries should have a result column with the name `value` and a column
 
 #### Retrieving the fingerprints and labels of the metric
 
-```sql
+```
 SELECT
     fingerprint,
     labels
@@ -108,7 +101,7 @@ LIMIT 10
 
 #### Retrieving the samples of the metric
 
-```sql
+```
 SELECT
     timestamp_ms,
     value
@@ -119,7 +112,7 @@ LIMIT 10
 
 #### Retrieving the label values of a metric
 
-```sql
+```
 SELECT DISTINCT
     fingerprint,
     JSONExtractString(labels, 'service_name') AS service_name
@@ -136,7 +129,7 @@ The following queries are used to generate the graphs for the frontend service R
 
 #### Request rate for a service
 
-```sql
+```
 SELECT
     ts,
     sum(value) AS value
@@ -179,7 +172,7 @@ ORDER BY ts ASC
 
 This is the query for the error rate for a service. The query is similar to the request rate query. The only difference is that we are filtering the samples based on the status code. Then, we divide the error samples by the total samples to get the error rate.
 
-```sql
+```
 SELECT
     A.ts AS ts,
     (A.value * 100) / B.value AS value
@@ -267,7 +260,7 @@ INNER JOIN
 
 This is the query for the 99th percentile latency for a service. The query is similar to the request rate query. We are using the histogramQuantile function to get the 99th percentile latency. The histogramQuantile function is used to get the quantile value from a histogram. The histogram is represented as two arrays. One array contains the buckets and the other array contains the values. The histogramQuantile function takes the two arrays and the quantile value as input and returns the quantile value. The bucket bounds and values are obtained by taking the rate of change for each bucket.
 
-```sql
+```
 SELECT
     ts,
     histogramQuantile(arrayMap(x -> toFloat64(x), groupArray(le)), groupArray(value), 0.99) AS value
@@ -334,7 +327,7 @@ SigNoz supports using variables in queries. This allows you to create a single d
 
 The variable `{{.service_name}}` is used to get the service name from the variable. The variable is replaced with the service name when the query is executed.
 
-```sql
+```
 SELECT
     ts,
     sum(value) AS value
