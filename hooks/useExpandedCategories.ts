@@ -1,20 +1,27 @@
+'use client'
 import { useState, useEffect } from 'react'
 
 export const useExpandedCategories = () => {
-  const [expandedCategories, setExpandedCategories] = useState<{ [key: string]: boolean }>(() => {
-    const storedState = localStorage.getItem('expandedCategories')
-    return storedState ? JSON.parse(storedState) : {}
-  })
+  const [expandedCategories, setExpandedCategories] = useState({})
 
   useEffect(() => {
-    localStorage.setItem('expandedCategories', JSON.stringify(expandedCategories))
-  }, [expandedCategories])
+    const storedState = localStorage.getItem('expandedCategories')
+
+    if (storedState) {
+      setExpandedCategories(JSON.parse(storedState))
+    }
+  }, [])
 
   const toggleCategory = (label: string) => {
-    setExpandedCategories((prev) => ({
-      ...prev,
-      [label]: !prev[label], // Toggle the state for the specified category label
-    }))
+    // Update local storage first
+    const updatedCategories = {
+      ...expandedCategories,
+      [label]: !expandedCategories[label], // Toggle the state for the specified category label
+    }
+    localStorage.setItem('expandedCategories', JSON.stringify(updatedCategories))
+
+    // Update state
+    setExpandedCategories(updatedCategories)
   }
 
   const getExpandedCategoriesFromLocalStorage = () => {
