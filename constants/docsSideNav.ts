@@ -447,7 +447,7 @@ const docsSideNav = [
           },
           {
             type: 'doc',
-            route: 'userguide/send-logs-http',
+            route: '/docs/userguide/send-logs-http',
             label: 'HTTP logs',
           },
           {
