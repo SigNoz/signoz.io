@@ -1,7 +1,6 @@
-<details>
-    <summary>
-        \{props.name\} - <i>hostmetrics</i>
-    </summary>
+
+### Hostmetrics
+
 
 - system_network_connections
 - system_disk_weighted_io_time
@@ -22,5 +21,3 @@
 - system_cpu_load_average_5m
 - system_cpu_load_average_15m
 - system_cpu_load_average_1m
-
-</details>

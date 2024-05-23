@@ -3,9 +3,6 @@ title: Collecting syslogs
 id: collecting_syslogs
 ---
 
-
-
-
 # Collecting Syslogs
 
 With SigNoz you can collect your syslogs logs and perform different queries on top of it.
@@ -16,13 +13,10 @@ Below are the steps to collect syslogs.
 
 If you don’t already have a SigNoz cloud account, you can sign up [here](https://signoz.io/teams/).
 
-<Tabs>
-<TabItem value="VM" label="VM" default>
-
 * Add otel collector binary to your VM by following this [guide](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/).
   
 * Add the syslog reciever to `config.yaml` to otel-collector.
-    ```yaml {2-10}
+    ```
     receivers:
       syslog:
         tcp:
@@ -41,7 +35,7 @@ If you don’t already have a SigNoz cloud account, you can sign up [here](https
     For more configurations that are available for syslog receiver please check [here](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/syslogreceiver).
 
 * Next we will modify our pipeline inside `config.yaml` of otel-collector to include the receiver we have created above.
-    ```yaml {4}
+    ```
     service:
         ....
         logs:
@@ -54,7 +48,7 @@ If you don’t already have a SigNoz cloud account, you can sign up [here](https
 
 * Modify your `rsyslog.conf` file present inside `/etc/` by running the following command:
   
-    ```bash
+    ```
     sudo vim /etc/rsyslog.conf
     ```
   
@@ -90,14 +84,10 @@ If you don’t already have a SigNoz cloud account, you can sign up [here](https
 * You can check the status of service by running `sudo systemctl status rsyslog.service`
 * If there are no errors your logs will be visible on SigNoz UI.
 
-</TabItem>
-</Tabs>
-
-
 
 ## Collect Syslogs in Self-Hosted SigNoz
 * Modify the `docker-compose.yaml` file present inside `deploy/docker/clickhouse-setup` to expose a port, in this case `54527` so that we can forward syslogs to this port.
-    ```yaml {8}
+    ```
     ...
     otel-collector:
         image: signoz/signoz-otel-collector:0.88.11
@@ -110,7 +100,7 @@ If you don’t already have a SigNoz cloud account, you can sign up [here](https
     ```
 
 * Add the syslog reciever to `otel-collector-config.yaml` which is present inside `deploy/docker/clickhouse-setup`
-    ```yaml {2-10}
+    ```
     receivers:
       syslog:
         tcp:
@@ -129,7 +119,7 @@ If you don’t already have a SigNoz cloud account, you can sign up [here](https
     For more configurations that are available for syslog receiver please check [here](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/syslogreceiver).
 
 * Next we will modify our pipeline inside `otel-collector-config.yaml` to include the receiver we have created above.
-    ```yaml {4}
+    ```
     service:
         ....
         logs:

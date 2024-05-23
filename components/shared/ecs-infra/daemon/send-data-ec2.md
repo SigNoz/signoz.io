@@ -6,7 +6,7 @@ For EC2, the metadata service is available at `169.254.169.254`.
 
 The `entryPoint` will look like:
 
-```json
+```
 {
       ...,
       "entryPoint": [
