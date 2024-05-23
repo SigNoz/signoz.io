@@ -10,5 +10,6 @@
   | Memory      | 8 GB                 | 16 GB       |
   | CPU         | 4 cores              | 8 cores     |
   | Storage     | 30 GB                | 80 GB       |
+  
 - Suggestion: In case you want to use your own custom storage class for PVCs,
   you can set `global.storageClass` configuration to desired storage class.
