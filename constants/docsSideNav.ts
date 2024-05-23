@@ -10,16 +10,15 @@ const docsSideNav = [
         route: '/docs',
       },
       {
-        type:  'category',
+        type: 'category',
         label: 'Installation',
         route: '/docs/install',
         link: {
-          type:  'doc',
+          type: 'doc',
           // route: '/docs/install/install',
-        //   title: 'Install SigNoz',
-        // description:
-        // "To install SigNoz, follow the instructions in the sections below. If you don't want to self-host, try SigNoz Cloud.",
-          
+          //   title: 'Install SigNoz',
+          // description:
+          // "To install SigNoz, follow the instructions in the sections below. If you don't want to self-host, try SigNoz Cloud.",
         },
         items: [
           {
@@ -652,7 +651,6 @@ const docsSideNav = [
       },
     ],
   },
-
   {
     label: 'Alerts',
     type: 'category',
@@ -743,7 +741,6 @@ const docsSideNav = [
       },
     ],
   },
-
   {
     type: 'doc',
     route: '/docs/monitor-http-endpoints',
@@ -1182,7 +1179,6 @@ const docsSideNav = [
       },
     ],
   },
-
   {
     label: 'Others',
     type: 'category',
