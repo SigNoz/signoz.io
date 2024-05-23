@@ -1,6 +1,6 @@
 ---
-title: Sending Logs to SigNoz over HTTP
 id: send-logs-http
+title: Sending Logs to SigNoz over HTTP
 ---
 
 ## Overview
@@ -29,28 +29,29 @@ Below is how the payload would look like:
 ```
 Here's a brief description of each field in the log record:
 
-Field Name     |Description
----------------|--------------------------------------------
-timestamp      |Time when the event occurred
-trace_id        |Request trace id
-span_id         |Request span id
-trace_flags     |[W3C](https://www.w3.org/TR/trace-context/#trace-flags) trace flag
-severity_text   |The severity text (also known as log level)
-severity_number |Numerical value of the severity
-attributes     |Additional information about the event
-resources       |Describes the source of the log
-body           |The body of the log record
+| Field Name     |Description|
+|---------------|--------------------------------------------|
+|timestamp      |Time when the event occurred|
+|trace_id        |Request trace id|
+|span_id         |Request span id|
+|trace_flags     |[W3C](https://www.w3.org/TR/trace-context/#trace-flags) trace flag|
+|severity_text   |The severity text (also known as log level)|
+|severity_number |Numerical value of the severity|
+|attributes     |Additional information about the event|
+|resources       |Describes the source of the log|
+|body           |The body of the log record|
 
 To know more details about the different fields in a log record, you can check [this documentation](https://opentelemetry.io/docs/specs/otel/logs/data-model/#log-and-event-record-definition).
 
 <Admonition>
 
-- `timestamp` is an uint64 showing time in **nanoseconds** since Unix epoch.
-- You can use `message` instead of `body` to represent the body of a log record.
+`timestamp` is an uint64 showing time in **nanoseconds** since Unix epoch.
+
+You can use `message` instead of `body` to represent the body of a log record.
 
 </Admonition>
 
-<br></br>
+
 
 ## Additional Keys
 
@@ -131,7 +132,7 @@ You can use cURL to send your logs. Below is a sample cURL request which is used
 
 To include a specific timestamp in your log, be sure to incorporate the `timestamp` field in your cURL request. If timestamp field is not mentioned, then it will take the timestamp when the log record was sent. For instance:
 
-```bash
+```
   curl --location 'https://ingest.<REGION>.signoz.cloud:443/logs/json/' \
   --header 'Content-Type: application/json' \
   --header 'signoz-access-token: <SIGNOZ_INGESTION_KEY>' \
@@ -148,9 +149,7 @@ To include a specific timestamp in your log, be sure to incorporate the `timesta
 
 Once you run the above cURL request, you should be able to see it in SigNoz UI.
 
-![JSON Data in log body](../../img/logs/http-log.webp)
-  
-
+![JSON Data in log body](/img/logs/http-log.webp)
 
 ## Send logs to Self-Hosted SigNoz
 
@@ -164,7 +163,7 @@ Once you're done installing SigNoz, follow the steps below.
 Inside the `deploy/docker/clickhouse-setup` directory of your SigNoz self-hosted installation, you will find `docker-compose.yaml` file which you should modify to expose a port, in this case `8082`. Below is a code snippet of the modified file.
 
 
-```yaml {8}
+```yaml
 ...
 otel-collector:
     image: signoz/signoz-otel-collector:0.88.11
@@ -179,7 +178,7 @@ otel-collector:
 
 Inside the `deploy/docker/clickhouse-setup` directory of your SigNoz self-hosted installation, you will find `otel-collector-config.yaml` file which you should modify to add `httplogreceiver`.
 
-```yaml {2-10}
+```yaml
 receivers:
   httplogreceiver/json:
     endpoint: 0.0.0.0:8082
@@ -189,7 +188,7 @@ receivers:
 
 Next modify the pipeline section inside `otel-collector-config.yaml` to include the `httplogreceiver` we have created above.
 
-```yaml {4}
+```yaml 
 service:
     ....
     logs:
@@ -227,16 +226,16 @@ curl --location 'http://<IP>:8082' \
 ]'
 ```
 
- `<IP>` is the IP of the system where your collector is running.
+`<IP>` is the IP of the system where your collector is running.
 
-  To know more details about `<IP>`, checkout this [troubleshooting](../install/troubleshooting.md#signoz-otel-collector-address-grid). 
+To know more details about `<IP>`, checkout this [troubleshooting](../install/troubleshooting.md#signoz-otel-collector-address-grid). 
 
 
 <Admonition>
 
 To include a specific timestamp in your log, be sure to incorporate the `timestamp` field in your cURL request. If timestamp field is not mentioned, then it will take the timestamp when the log record was sent. For instance:
 
-```bash
+```
   curl --location 'https://ingest.<REGION>.signoz.cloud:443/logs/json/' \
   --header 'Content-Type: application/json' \
   --header 'signoz-access-token: <SIGNOZ_INGESTION_KEY>' \
@@ -253,4 +252,4 @@ To include a specific timestamp in your log, be sure to incorporate the `timesta
 
 Once you run the above cURL request, you should be able to see it in SigNoz UI.
 
-  ![test](../../img/logs/http-log.webp)
+![test](/img/logs/http-log.webp)
