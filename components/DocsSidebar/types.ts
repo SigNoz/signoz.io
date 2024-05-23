@@ -21,4 +21,4 @@ export type Category = {
   items: Array<Doc | Category>
 }
 
-export type TocItem = Doc | Category
+export type NavItem = Doc | Category
