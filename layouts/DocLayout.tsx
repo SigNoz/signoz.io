@@ -4,13 +4,11 @@ import '../css/doc.css'
 
 import { ReactNode, useRef } from 'react'
 import { CoreContent } from 'pliny/utils/contentlayer'
-import type { Blog, Authors, Doc } from 'contentlayer/generated'
+import type { Doc } from 'contentlayer/generated'
 import SectionContainer from '@/components/SectionContainer'
 import { ProgressBar } from '@/components/ProgressBar/ProgressBar'
 import React from 'react'
-import TocComponent from '@/components/DocsTOC/DocsTOC'
-import docsSideNav from '../constants/docsSideNav'
-import { TocItem } from '@/components/DocsTOC/types'
+import DocsSidebar from '@/components/DocsSidebar/DocsSidebar'
 
 export interface tocItemProps {
   url: string
@@ -33,8 +31,8 @@ export default function DocLayout({ content, children, toc }: LayoutProps) {
       <SectionContainer>
         <ProgressBar target={mainRef} />
         <div className="doc overflow-clip">
-          <div className="doc-sidenav border-r border-signoz_slate-500 ">
-            <TocComponent toc={docsSideNav as TocItem[]} />
+          <div className="doc-sidenav border-r border-signoz_slate-500">
+            <DocsSidebar />
           </div>
 
           <div className="doc-content px-8">
@@ -44,25 +42,27 @@ export default function DocLayout({ content, children, toc }: LayoutProps) {
             </article>
           </div>
 
-          <div className="doc-toc">
-            <div className="mb-3 text-xs uppercase"> On this page </div>
+          {toc && Array.isArray(toc) && toc.length > 0 && (
+            <div className="doc-toc">
+              <div className="mb-3 text-xs uppercase"> On this page </div>
 
-            <div className="doc-toc-items border-l border-signoz_slate-500 pl-3">
-              {toc.map((tocItem: tocItemProps) => {
-                return (
-                  <div className="doc-toc-item" key={tocItem.url}>
-                    <a
-                      data-level={tocItem.depth}
-                      href={tocItem.url}
-                      className="mb-1 line-clamp-2 text-xs"
-                    >
-                      {tocItem.value}
-                    </a>
-                  </div>
-                )
-              })}
+              <div className="doc-toc-items border-l border-signoz_slate-500 pl-3 ">
+                {toc.map((tocItem: tocItemProps) => {
+                  return (
+                    <div className="doc-toc-item" key={tocItem.url}>
+                      <a
+                        data-level={tocItem.depth}
+                        href={tocItem.url}
+                        className="mb-1 line-clamp-2 text-xs"
+                      >
+                        {tocItem.value}
+                      </a>
+                    </div>
+                  )
+                })}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </SectionContainer>
     </main>
