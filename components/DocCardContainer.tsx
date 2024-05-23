@@ -6,7 +6,7 @@ interface CardContainerProps {
 
 const DocCardContainer: React.FC<CardContainerProps> = ({ children }) => {
   return (
-    <div className="container mx-auto p-4 flex flex-wrap gap-10">
+    <div className="container mx-auto p-4 grid grid-cols-1 md:grid-cols-2 gap-6">
       {children}
     </div>
   );
