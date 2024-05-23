@@ -48,14 +48,14 @@ export default function ComparisonsListing() {
     <div className="comparisons">
       <ComparisonsPageHeader onSearch={handleSearch} />
       <div className="mt-5 w-full max-md:max-w-full">
-        <div className="mt-4 grid grid-cols-2 gap-4">
+        <div className="mt-4 grid gap-4 sm:grid-cols-1 md:grid-cols-2">
           {primaryFeaturedBlogs.map((featuredBlog) => {
             return <BlogPostCard blog={featuredBlog} />
           })}
         </div>
       </div>
 
-      <div className="mt-4 grid grid-cols-3 gap-4">
+      <div className="mt-4 grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
         {secondaryFeaturedBlogs.map((post) => {
           return <BlogPostCard blog={post} />
         })}

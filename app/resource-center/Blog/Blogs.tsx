@@ -48,9 +48,7 @@ export default function Blogs() {
   return (
     <div>
       <BlogsPageHeader onSearch={handleSearch} />
-
       {searchValue.length === 0 && <FeaturedBlogs isDarkMode={true} />}
-
       <AllBlogs blogs={blogs} />
     </div>
   )

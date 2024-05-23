@@ -147,7 +147,7 @@ export default function TopNav() {
             </Transition>
           </Popover>
 
-          <a href="/resource-center" className="text-sm font-semibold leading-6 ">
+          <a href="/resource-center/blog" className="text-sm font-semibold leading-6 ">
             Resources
           </a>
 
