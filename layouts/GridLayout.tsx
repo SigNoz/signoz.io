@@ -29,8 +29,6 @@ export function Pagination({ totalPages, currentPage, pageRoute }: PaginationPro
   const prevPage = currentPage - 1 > 0
   const nextPage = currentPage + 1 <= totalPages
 
-  console.log('pathname', pathname, currentPage, pageRoute)
-
   return (
     <div className="space-y-2 pb-8 pt-6 md:space-y-5">
       <nav className="flex items-center justify-between">

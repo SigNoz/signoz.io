@@ -21,8 +21,6 @@ export default function AllBlogs({ blogs }) {
     pageRoute: 'blog',
   }
 
-  console.log('pagination', pagination)
-
   return (
     <GridLayout
       posts={blogs}
