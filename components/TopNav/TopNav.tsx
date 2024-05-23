@@ -168,8 +168,8 @@ export default function TopNav() {
           <SearchButton />
 
           <Link href="/teams">
-            <Button className="flex gap-2 truncate rounded-full bg-signoz_robin-600 px-4 py-2 text-xs font-normal leading-4 text-white">
-              Start your free trail <ArrowRight size={14} />
+            <Button className="primary-gradient flex justify-center gap-1 truncate rounded-full px-4 py-2 text-xs font-normal leading-4 text-white">
+              Try SigNoz Cloud <ArrowRight size={14} />
             </Button>
           </Link>
         </div>
