@@ -66,6 +66,7 @@ const DocsSidebar: React.FC = () => {
 
     return (
       <li key={category.label} className="pl-[16px] pt-[8px]">
+        <Link href={category.route || ''}>
         <div
           onClick={() => toggleCategory(category.label)}
           className="flex cursor-pointer items-center gap-2 text-sm text-gray-300 hover:text-white"
@@ -73,6 +74,7 @@ const DocsSidebar: React.FC = () => {
           {isExpanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
           <span className="font-normal">{category.label}</span>
         </div>
+        </Link>
         {isExpanded && (
           <ul className="ml-2 pl-0">
             {category.link && category.link.type === 'generated-index' && (
