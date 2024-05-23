@@ -48,6 +48,6 @@ After following previous step, you need to rebuild the application container and
 
 <div>
 You will need to generate some traffic to your application. After which you can go to the
-SigNoz {props.name} Services page and you should see your application in the services list.
+SigNoz `{props.name}` Services page and you should see your application in the services list.
 </div>
 <br/>
