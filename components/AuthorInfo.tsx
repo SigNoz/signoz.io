@@ -306,7 +306,7 @@ const Authors: AuthorInterface = {
     title: 'SigNoz Community',
     url: 'https://www.linkedin.com/in/ehis-iribhogbe/',
     image_url: 'https://signoz.io/img/authors/ehis.webp',
-  }
+  },
 }
 
 export default function AuthorInfo({ author }: { author: string }) {
@@ -325,7 +325,9 @@ export default function AuthorInfo({ author }: { author: string }) {
       />
 
       <div className="author-name-team">
-        <h4 className="mt-0 capitalize text-stone-700 dark:text-white">{Authors[author]?.name}</h4>
+        <h4 className="m-0 text-sm font-medium capitalize text-stone-700 dark:text-white">
+          {Authors[author]?.name}
+        </h4>
       </div>
     </div>
   )

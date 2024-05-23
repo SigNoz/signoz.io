@@ -82,7 +82,7 @@ const RelatedArticles: React.FC = () => {
         )}
 
       <section className="mt-5 w-full px-5 max-md:max-w-full">
-        <div className="grid grid-cols-3 gap-5 max-md:flex-col max-md:gap-0">
+        <div className="grid gap-5 max-md:flex-col max-md:gap-0 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
           {relatedArticles.map((article, index) => (
             <ArticleCard key={index} {...article} />
           ))}
