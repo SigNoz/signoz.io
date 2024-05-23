@@ -14,8 +14,8 @@ import {
 import { ChevronDownIcon, PhoneIcon, PlayCircleIcon } from '@heroicons/react/20/solid'
 import Image from 'next/image'
 import Link from 'next/link'
-import SearchButton from '../SearchButton'
 import { ArrowRight } from 'lucide-react'
+import SearchButton from '../SearchButton'
 
 const products = [
   {
@@ -151,7 +151,7 @@ export default function TopNav() {
             Resources
           </a>
 
-          <Link href="/documentation" className="text-sm font-semibold leading-6 ">
+          <Link href="/docs" className="text-sm font-semibold leading-6 ">
             Documentation
           </Link>
           <Link href="/about-us" className="text-sm font-semibold leading-6 ">

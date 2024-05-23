@@ -1,0 +1,162 @@
+---
+id: upgrade-0.36
+title: Upgrade to 0.36
+sidebar_label: Upgrade to 0.36
+---
+
+# Upgrade to v0.36 from earlier versions (Kubernetes)
+
+In the SigNoz version `>=0.36` i.e. SigNoz chart version `>=0.32.0` , we have added support for dot(`.`) in attribute names.
+
+Ex:- Previously `service.name` was stored and queried as `service_name` , after this upgrade `service.name` will be supported.
+
+
+## Steps to run migration script:
+
+<Admonition>
+It's recommended to run the migration script 10-15 mins after upgrading to `v0.36` . You can also run this migration script multiple times.
+</Admonition>
+
+## First upgrade to v0.36
+
+Follow the platform specific instructions to upgrade to 0.36 and above.
+
+Note that the past exceptions/error data will not be visible on the new application until you run the migration script.
+
+- [Docker Standalone](https://signoz.io/docs/operate/docker-standalone/#upgrade)
+- [Docker Swarm](https://signoz.io/docs/operate/docker-swarm/#upgrade)
+- [Kubernetes](https://signoz.io/docs/operate/kubernetes/#upgrade)
+
+
+### For Docker
+```bash
+docker run --name signoz-migrate --network clickhouse-setup_default \
+  -it -d signoz/migrate:0.36 -host=clickhouse -port=9000
+```
+
+Steps to check logs:
+
+```bash
+docker logs -f signoz-migrate
+```
+
+In case of failure and have to run again, make sure to cleanup the container before running the migration script again.
+
+```bash
+docker stop signoz-migrate
+
+docker rm signoz-migrate
+```
+
+
+### For Docker Swarm
+
+For Swarm, you could follow similar step to that of [Docker](#docker). However,
+you would need to expose clickhouse container ports to host machine and use
+host machine IP i.e. `172.17.0.17` for `-host` flag instead of `clickhouse`.
+
+If you do not want to change anything in the current signoz deployment or to
+expose clickhouse ports even temporarily, you can go through following steps.
+
+1. To download `migrate-v0.36` binary:
+
+  ```bash
+  wget https://github.com/SigNoz/signoz-db-migrations/releases/download/v0.36/migrate-v0.36-linux-amd64
+
+  chmod +x migrate-v0.36-linux-amd64
+  ```
+
+2. To copy the binary in persistent volume path `/var/lib/clickhouse` in `clickhouse` container:
+
+  ```bash
+  docker cp migration-v0.36-linux-amd64 $(docker ps -q -f name=signoz_clickhouse):/var/lib/clickhouse/migrate-0.36
+  ```
+
+3. To exec into the `clickhouse` container:
+
+  ```bash
+  docker exec -it $(docker ps -q -f name=signoz_clickhouse) bash
+  ```
+
+4. Now, change directory to the `/var/lib/clickhouse` and run the migration script:
+
+  ```bash
+  cd /var/lib/clickhouse
+
+  ./migration-0.36
+  ```
+
+5. At last, clean up the binary:
+
+  ```bash
+  rm migration-0.36
+  ```
+
+
+### For Kubernetes
+
+```bash
+RELEASE=my-release
+ADMIN_PASSWORD=$(
+  kubectl -n platform get clickhouseinstallations.clickhouse.altinity.com $RELEASE-clickhouse \
+  -o jsonpath --template '{.spec.configuration.users.admin/password}'
+)
+
+kubectl -n platform run -i -t signoz-migrate --image=signoz/migrate:0.36 --restart='Never' \
+  -- -host=$RELEASE-clickhouse -port=9000 -userName=admin -password=$ADMIN_PASSWORD
+```
+
+Steps to check logs:
+
+```bash
+kubectl -n platform logs -f signoz-migrate
+```
+
+In case of failure and have to run again, make sure to cleanup the pod before running the migration script again.
+
+```bash
+kubectl -n platform delete pod signoz-migrate
+```
+
+
+## In case of Upgrade Failure
+
+1. Note the names of fields which were not migrated. ex:- `telemetry.sdk.name`
+2. Exec into the clickhouse container and run `clickhouse client`.
+3. Check the schema of the logs table `show create table signoz_logs.logs`
+4. If `telemetry_sdk_name` column or `telemetry_sdk_name_idx` index is present you can delete them
+   
+  For deleting index 
+    * `alter table signoz_logs.logs on cluster cluster drop index telemetry_sdk_name_idx`
+  
+  For deleting column 
+    * `alter table signoz_logs.logs on cluster cluster drop column telemetry_sdk_name`
+    * `alter table signoz_logs.distributed_logs on cluster cluster drop column telemetry_sdk_name`
+5. Now from the UI, you can convert `telemetry.sdk.name` to selected field. 
+6. If you still face issue, reach out to us at [Slack](https://signoz.io/slack).
+
+## Command-Line Interface (CLI) Flags
+
+There are some custom flags which can be enabled based on different use-cases.
+All the flags below are `optional`.
+
+Flags:
+
+- `-port` : Specify port of clickhouse. `default=9000`
+- `-host` : Specify host of clickhouse. `default=127.0.0.1`
+- `-userName` : Specify user name of clickhouse. `default=default`
+- `-password` : Specify password of clickhouse. `default=""`
+
+
+## Updating Query Payload, Dashboards and Alerts
+<Admonition>
+It's recommended to update Dashboards and Alerts after a few days of installing the release so that sufficient amount of newer data is ingested.
+</Admonition>
+
+If you've been using the SigNoz Query API, Dashboards, or Alerts with attributes that included a dot (.) but were converted to an underscore (_), they will continue to function for the next 45 days. However, it's essential to update these attributes to reflect the new format.
+
+Ex:- 
+* `service.name` was previously shown and stored as `service_name` . Now you can update it to use `service.name`
+* `k8s.namespace.name` was previously shown and stored as `k8s_namespace_name` . Now you can update it to use `k8s.namespace.name`
+
+For assistance in making these updates, please reach out to us via Intercom support or at cloud-support@signoz.io

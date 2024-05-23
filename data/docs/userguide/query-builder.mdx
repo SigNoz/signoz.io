@@ -1,0 +1,313 @@
+---
+id: query-builder
+title: Query Builder
+sidebar_label: Query Builder
+---
+
+## Introduction
+
+Query Builder in SigNoz simplifies the process of filtering, aggregating, and visualizing data, making complex queries accessible to all users. This documentation will walk you through features of the Query Builder, showing you how to create detailed queries, visualize results, and understand your data better. 
+
+## Logs and Traces Query Builder
+
+## Filtering 
+
+The Query Builder in SigNoz allows users to apply filtering based on various attributes of logs or traces.
+
+{/* <!-- <figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/query-builder/qb_filtering.gif" alt="A gif explaining the Filtering feature in SigNoz Query Builder"/>
+    <figcaption><i>Filtering feature of SigNoz Query Builder</i></figcaption>
+</figure>
+<br></br> --> */}
+
+
+### Using the Filtering Feature
+
+- **Access**: Navigate to the Query Builder.
+- **Open Filter Options**: Click on the Search Filter field to open a dropdown list of available attributes.
+- **Select Attributes**: Choose the attribute you want to filter by (e.g., `service.name`, `level`, `status`).
+- **Apply Operators**: Choose the operator (e.g., `=`, `!=`, `IN`, `NOT_IN`) for the selected attribute.
+- **Input Values**: Input the value(s) you want to filter by.
+- **Combine Filters**: You can add multiple filters by repeating the above steps.
+- **View Results**: Click the Stage & Run Query Button to display the logs or traces that match the applied filters.
+
+### Example
+
+Suppose you want to filter logs from a specific service with a particular severity level. You can achieve this using the following filters:
+- selecting the service name. `service.name = demo-app` 
+- selecting the severity text, `severity_text = DEBUG`
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/query-builder/query-builder-filtering.gif" alt="A gif explaining the Filtering feature in SigNoz Query Builder"/>
+    <figcaption><i>Example showing the filtering feature of SigNoz Query Builder</i></figcaption>
+</figure>
+<br></br>
+
+
+## Aggregation and Grouping 
+
+The Query Builder's Aggregation and Grouping feature enables you to combine data points and categorize them for complex insights.
+
+### Aggregation
+
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/query-builder/aggregation.gif" alt="A gif explaining the Aggregation feature in SigNoz Query Builder"/>
+    <figcaption><i>Aggregation feature of SigNoz Query Builder</i></figcaption>
+</figure>
+<br></br>
+
+Aggregation allows you to perform calculations on a set of values to return a single value. With the Query Builder, you can:
+
+- **Count**: Count the number of times a particular event occurs.
+- **Count Distinct**: Count unique occurrences of a specified attribute.
+- **Sum**: Calculate the total for a numerical attribute.
+- **Avg**: Find the average value of a numerical attribute.
+- **Max/Min**: Determine the maximum or minimum value of a numerical attribute in an aggregation interval.
+- **Percentiles (P05, P10, P90, etc.)**: Understand the distribution of your data with percentile calculations.
+- **Rate**: Measure the frequency of occurrence within a given time frame.
+- **Rate Sum**: Total the aggregated values over the specified rate period.
+- **Rate Avg**: Find the average rate over the period.
+- **Rate Min/Max**: Determine the minimum or maximum rate observed in the selected period.
+
+### Grouping
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/query-builder/group_by.gif" alt="A gif explaining the Group by feature in SigNoz Query Builder"/>
+    <figcaption><i>Group by feature of SigNoz Query Builder</i></figcaption>
+</figure>
+<br></br>
+
+Grouping allows you to segment your data based on chosen attributes, facilitating comparative analysis across different categories of the selected attributes:
+
+- You can group data by attributes like `service.name` or `method` to analyze patterns per service or HTTP method.
+- When combined with aggregation, grouping enables you to, for example, find the average response time per service or count errors per endpoint.
+
+### Using Aggregation and Grouping Together
+
+- Select an aggregation function from the dropdown, such as `Avg`.
+- Then, choose an attribute to apply it to, like `response_time`.
+- To group the data, you would then specify an attribute in the `Group by` field.
+- After running the query, you'll see the average response times for each group, allowing you to identify areas that may need optimization.
+
+### Example
+
+ To analyze the average response time of services within a system, we can do so in the following way:
+
+- In the aggregation dropdown, select `Avg`.
+- For the attribute to aggregate, choose `durationNano`.
+- To see the average duration for each of the service, enter `serviceName` in the `Group by` field.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/query-builder/query-builder-groupby-aggregation.gif" alt="A gif explaining the how to use Group by and Aggregation features together in SigNoz Query Builder"/>
+    <figcaption><i>Example combining Group By and Aggregation features </i></figcaption>
+</figure>
+<br></br>
+
+## Result Manipulation 
+
+Result Manipulation is a set of features in the Query Builder that enables you to refine your query. The features include:
+
+### Order By
+Order your query results based on a specified attribute in either ascending or descending order. This can help in identifying the highest or lowest values in your data, such as the most frequently occurring errors.
+
+### Aggregate Every
+Define the interval over which to aggregate data. For example, you can aggregate count data in 60-second intervals to get a per-minute count of events. For now it is not editable in the Query Builder and it changes dynamically based on time period of query.
+
+### Limit
+Set a limit on the number of results returned. This is useful when you only want to see the top N results, such as the top 10 most visited endpoints.
+
+### Having
+Apply conditions to filter the results further based on aggregate value.
+
+### Legend Format
+Customize the legend in your query's visual output to give more clarity, by formatting how grouped data will be labeled in your charts or graphs. We use the double
+curly braces - `{{}}` format to show the attribute. 
+
+For example, if you have grouped by `serviceName` attribute then you can write `{{serviceName}}` in your legend. You can also add text along with the attribute like `{{serviceName}}` - This is a service** will show be shown as `sampleService - This is a service name`.
+
+
+### Example
+
+Suppose you want to find the top 2 endpoints with an average response time greater than 500 ms. The query is configured as follows:
+
+- **Group by**: `httpUrl`
+- **Aggregate**: `Avg` on `durationNano`
+- **HAVING**: `AVG(durationNano) >= 500000000` to filter for endpoints with average response times exceeding 500 ms
+- **Order by**: `avg(durationNano) desc` to list endpoints with the highest response times first
+- **Limit**: `2` to focus on the top 2 endpoints with the longest response times
+- **Legend Format**: `{{httpUrl}}` to display the endpoint's URL in the visualization legend
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/query-builder/query-builder-result-manipulation.gif" alt="A gif explaining some more features  in SigNoz Query Builder"/>
+    <figcaption><i>An example showcasing Order by, Limit, HAVING and Legend Format features of SigNoz Query Builder</i></figcaption>
+</figure>
+<br></br>
+
+## Multiple Queries and Functions 
+
+The SigNoz Query Builder allows you to run multiple queries simultaneously and perform functions on them. This feature facilitates analysis of complex data, such as comparing data or calculating ratios.
+
+### Multiple Queries
+Create and run multiple independent queries within the same view. Each query can have its own set of filters, aggregations, and groupings. This is particularly useful for analyzing different dimensions of your data in parallel.
+
+### Functions on Queries
+Apply mathematical functions to the results of your queries. This allows you to derive new insights by performing operations like addition, subtraction, multiplication, division, or more complex functions on your data.
+
+###   List of supported functions
+
+- exp
+- log
+- ln
+- exp2
+- log2
+- exp10
+- log10
+- sqrt
+- cbrt
+- erf
+- erfc
+- lgamma
+- tgamma
+- sin
+- cos
+- tan
+- asin
+- acos
+- atan
+- degrees
+- radians
+- now
+- toUnixTimestamp
+
+
+### Example
+
+Suppose you want to determiner the percentage of logs that contains errors relative to the total log count. You can achieve this using Multiple queries and a function as follows:
+
+- **Query A**: Filters logs to count the instances where the `body` contains the word `error`.
+- **Query B**: Represents a baseline count of all logs.
+- **function `F1`** A**100/B
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/query-builder/query-builder-multiple-queries.gif" alt="A gif explaining multiple queries and functions features in SigNoz Query Builder"/>
+    <figcaption><i>Multiple Queries and Functions features of SigNoz Query Builder</i></figcaption>
+</figure>
+<br></br>
+
+
+
+{/* <!-- After executing these queries and the function, the Query Builder will generate visualizations like histograms or time series charts for each query and the computed function `F1`, providing a comparative analysis of the request methods. --> */}
+
+{/* <!-- 
+## Histogram and Time Series Visualizations 
+
+SigNoz's Query Builder offers powerful visualization options for your data. The Histogram and Time Series visualizations transform numerical and time-based data into graphical representations, making trends and patterns readily apparent.
+
+### Histogram Visualization
+A histogram is a bar chart that represents the distribution of numerical data. Each bar groups numbers into ranges, showing the number of occurrences of data points within each range.
+
+- Useful for understanding the frequency distribution of data points.
+- Ideal for identifying common values or ranges with high concentrations of data.
+
+### Time Series Visualization
+The time series chart plots data points over time, allowing you to observe changes and trends related to temporal factors.
+
+- Provides insights into data patterns over specified time intervals.
+- Enables you to track the progression or decline of metrics, such as system performance.
+
+### Example
+
+When analyzing the number of user sign-ups over a day, you might:
+
+- Configure the Query Builder to count the `user_sign_up` events.
+- Use the Histogram view to see the distribution of sign-ups across different times of the day.
+- Use the Time Series view to observe how sign-up rates trend over each hour. --> */}
+
+
+## Metrics Query Builder
+
+SigNoz's Metrics Query Builder has all the features mentioned above like filtering, aggregation, Order by, Multiple Queries etc. but it also has some additional functionalities which can enable users to delve deeper into metrics analysis with ease.
+
+## Spatial and Temporal Aggregations
+
+Efficiently aggregate metrics data across time and various dimensions to gain comprehensive insights into your system's performance.
+
+### Temporal Aggregation
+
+Temporal aggregation simplifies metric analysis by consolidating data points over specific time periods. It's essential for managing data from applications that transmit metrics at regular intervals, helping to reduce the volume of data points into a more interpretable format. This aggregation is particularly crucial when dealing with long-term data visualization, where displaying each data point is neither practical nor informative due to limited screen space.
+
+### Spatial Aggregation
+
+Modern applications will have many time series across dimensions such as container names, service names, etc.
+
+While temporal aggregations are meant for reducing data points across a single time axis, spatial aggregation refers to the technique of merging metric data across various dimensions or labels, such as container names, service names, or geographical regions.
+
+### Example 
+
+If you select a counter metric called `signoz_calls_total`, you can apply temporal aggregations like `Rate` and `Increase` on it. Similarly, you can apply spatial aggregations across many dimensions, such as `service_name`, `operation`, `deployment_environment`, etc.
+
+<figure data-zoomable align='center'>
+<img className="box-shadowed-image" src="/img/docs/product-features/query-builder/temporal-spatial-aggregations.webp" alt="Spatial & temporal aggregations in the metrics query builder of SigNoz"/>
+<figcaption><i>How to apply temporal and spatial aggregations in metrics query builder of SigNoz</i></figcaption>
+</figure>
+<br/>
+
+## Functions for Extended Data Analysis
+
+To extend the data analysis capabilities of the Metrics Query Builder, you can use four different categories of functions.
+
+### Function Types:
+
+- **Exclusion Functions:** These allow users to exclude data points based on certain conditions, such as values falling outside a specified range. This helps in focusing on the most relevant data. For example, `Cut Off Min` excludes data below a threshold, while `Cut Off Max` ignores values above a certain point.
+
+- **Arithmetic Functions:** Users can perform mathematical operations on data points, enabling the customization of metric calculations to suit specific analysis needs. For example, functions like `Absolute` can return the absolute value of data points, and logarithmic functions such as `Log2` or `Log10` can transform data to a log scale for better comparison of wide-ranging numbers.
+
+- **Smoothing Functions:** To deal with volatile data, smoothing functions can be applied, such as moving averages, which help in identifying underlying trends by reducing noise. For example, functions like EWMA 3/5/7 (Exponentially Weighted Moving Average) can smooth data fluctuations over 3, 5, or 7 periods.
+
+- **Time Shift Functions:** These functions enable comparisons of data across different time periods, useful for analyzing trends, changes, or anomalies over time. For example, using the `Time Shift` function for shifting a series by a fixed amount of seconds to compare current data with past data.
+
+<figure data-zoomable align='center'>
+<img className="box-shadowed-image" src="/img/docs/product-features/query-builder/support-for-functions.webp" alt="Functions in metrics query builder"/>
+<figcaption><i>Functions in metrics query builder will help extend data analysis capabilities on metrics</i></figcaption>
+</figure>
+<br/>
+
+### Chain Functions:
+
+Combine two or more functions, like applying a logarithmic scale after setting a minimum cutoff, to tailor your metrics.
+
+<figure data-zoomable align='center'>
+<img className="box-shadowed-image" src="/img/docs/product-features/query-builder/chain-two-functions.webp" alt="Chained functions"/>
+<figcaption><i>Chain two functions to get your required metrics</i></figcaption>
+</figure>
+<br/>
+
+### Example
+
+This example uses the `Time Shift` function to compare total calls for frontend service in an interval of 1hr.
+
+<figure data-zoomable align='center'>
+<img className="box-shadowed-image" src="/img/docs/product-features/query-builder/time-shift.webp" alt="Time Shift function"/>
+<figcaption><i>Use the time shift function to compare data across different time periods</i></figcaption>
+</figure>
+<br/>
+
+You can plot charts for the same service an hour apart.
+
+<figure data-zoomable align='center'>
+<img className="box-shadowed-image" src="/img/docs/product-features/query-builder/plot-time-shift-charts.webp" alt="Compare performance of services"/>
+<figcaption><i>Check the performance of frontend service an hour apart with the help of time shift function</i></figcaption>
+</figure>
+<br/>
+
+Users can use the time shift function for very practical use cases, like comparing performance metrics before and after a deployment.
+
+To know more details about the Metrics Query Builder, you can checkout these resources from the first SigNoz Launch Week:
+- Article: [Feature in Spotlight: Metrics & Query Builder [Day 2]](https://signoz.io/newsroom/launch-week-1-day-2/)
+- Video : [SigNoz Launch Week - Day 2 - Metrics & Query Builder Improvements](https://www.youtube.com/watch?v=fl-z1YoSB_w&t=1s)
+
+
+
+
+

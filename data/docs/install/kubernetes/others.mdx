@@ -1,0 +1,72 @@
+---
+id: others
+sidebar_label: Other Platforms
+title: Deploying with Helm directly
+description: Instructions to install on other Cloud Platform and Bare-Metal Servers
+---
+
+import K8sComponents from '@/components/shared/k8s-components.md'
+import CommonPrerequisites from '@/components/shared/k8s-common-prerequisites.md'
+import InstallSigNozPart1 from '@/components/shared/install-signoz-k8s-part-1.md'
+import InstallSigNozPart2 from '@/components/shared/install-signoz-k8s-part-2.mdx'
+import VerifyInstallation from '@/components/shared/k8s-verify-installation.mdx'
+import K8sHotrod from '@/components/shared/k8s-hotrod.md'
+import NextSteps from '@/components/shared/next-steps.md'
+import StorageClass from '@/components/shared/k8s-storageclass.mdx'
+import SigNozCloud from '@/components/shared/signoz-cloud.mdx'
+
+<SigNozCloud />
+
+Follow the steps on this page to install SigNoz on other Kubernetes
+Cloud Platform and bare-metal servers with Helm.
+
+<K8sComponents />
+
+## Prerequisites
+
+- You must have a Kubernetes cluster
+
+<CommonPrerequisites />
+
+- Suggestion: In case you do not have any other storage class which supports volume
+  expansion, you can patch default storage class definition by setting
+  `allowVolumeExpansion` to `True` (this enables PVC resize).
+
+  ```bash
+  DEFAULT_STORAGE_CLASS=$(kubectl get storageclass -o=jsonpath='{.items[?(@.metadata.annotations.storageclass\.kubernetes\.io/is-default-class=="true")].metadata.name}')
+
+  kubectl patch storageclass "$DEFAULT_STORAGE_CLASS" -p '{"allowVolumeExpansion": true}'
+  ```
+
+  <StorageClass />
+
+## Chart configuration
+
+You can find an overview of the parameters that can be configured during installation under
+[chart configuration][1]
+
+## Install SigNoz on Kubernetes with Helm
+
+<InstallSigNozPart1 />
+
+```bash
+helm --namespace platform install my-release signoz/signoz
+```
+
+<InstallSigNozPart2 />
+
+## Verify the Installation
+
+<VerifyInstallation />
+
+## (Optional) Install a Sample Application and Generate Tracing Data
+
+<K8sHotrod />
+
+## Next Steps
+
+<NextSteps />
+
+---
+
+[1]: https://github.com/SigNoz/charts/tree/main/charts/signoz#configuration

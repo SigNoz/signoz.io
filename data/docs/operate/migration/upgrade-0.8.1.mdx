@@ -1,0 +1,128 @@
+---
+id: upgrade-0.8.1
+title: Upgrade to 0.8.1
+sidebar_label: Upgrade to 0.8.1
+---
+
+# Upgrade to v0.8.1 from earlier versions
+
+SigNoz `v0.8.1` requires users to run migration script for dashboard.
+
+If you had created dashboard in 0.8.0 and before, you would need to run this script to sanitise dashboard data.
+
+## First Upgrade to v0.8.1
+
+Follow the platform specific instructions to upgrade to 0.8.1 and above.
+
+- [Docker Standalone](https://signoz.io/docs/operate/docker-standalone/#upgrade)
+- [Docker Swarm](https://signoz.io/docs/operate/docker-swarm/#upgrade)
+- [Kubernetes](https://signoz.io/docs/operate/kubernetes/#upgrade)
+
+<Admonition type="warning" >
+After upgrading to 0.8.1, it is recommended to run the migration script before modifying any existing dashboards.
+It could potentially cause irreversible changes to dashboard data.
+</Admonition>
+
+## Steps to run migration script
+
+### For Docker
+
+`cd` to SigNoz repository and run following commands:
+
+```bash
+cd deploy/docker/clickhouse-setup
+
+docker run -it -v $PWD/data/signoz/:/var/lib/signoz/ signoz/migrate-dashboard:0.8.1
+```
+
+Output should be similar as below:
+
+```
+2022/06/08 18:27:49 Total Dashboard found: 2
+2022/06/08 18:27:49 e2e2ff6d-29ca-444c-8625-d64218a990bc
+2022/06/08 18:27:49 683ac919-b858-4387-b14f-bebd55f074fa
+2022/06/08 18:27:49 Dashboard e2e2ff6d-29ca-444c-8625-d64218a990bc updated
+2022/06/08 18:27:49 Dashboard 683ac919-b858-4387-b14f-bebd55f074fa updated
+2022/06/08 18:27:49 Dashboards migrated
+```
+
+### For Docker Swarm
+
+`cd` to SigNoz repository and run following commands:
+
+```bash
+cd deploy/swarm/clickhouse-setup
+
+docker run -it -v $PWD/data/signoz/:/var/lib/signoz/ signoz/migrate-dashboard:0.8.1
+```
+
+Output should be similar as below:
+
+```
+2022/06/08 18:27:49 Total Dashboard found: 2
+2022/06/08 18:27:49 e2e2ff6d-29ca-444c-8625-d64218a990bc
+2022/06/08 18:27:49 683ac919-b858-4387-b14f-bebd55f074fa
+2022/06/08 18:27:49 Dashboard e2e2ff6d-29ca-444c-8625-d64218a990bc updated
+2022/06/08 18:27:49 Dashboard 683ac919-b858-4387-b14f-bebd55f074fa updated
+2022/06/08 18:27:49 Dashboards migrated
+```
+
+<Admonition type="info">
+In case of multi node swarm cluster, run the above commands in the node where
+query-service is running. To find out which node: `docker service ps query-service`.
+</Admonition>
+
+### For Kubernetes
+
+To download `migrate-dashboard` binary:
+
+```bash
+wget https://github.com/signoz/migrate-dashboard/releases/download/v0.8.1/migrate-dashboard-v0.8.1-linux-amd64.tar.gz
+
+tar xzvf migrate-dashboard-v0.8.1-linux-amd64.tar.gz
+```
+
+To copy the binary in persistent volume path `/var/lib/signoz` in `query-service`:
+
+```bash
+kubectl cp -n platform ./migrate-dashboard my-release-signoz-query-service-0:/var/lib/signoz/migrate-dashboard
+```
+
+To `exec` into the `query-service` container:
+
+```bash
+kubectl -n platform exec -it pod/my-release-signoz-query-service-0 -- sh
+```
+
+Now, change directory to the `/var/lib/signoz` and run the migration script:
+
+```bash
+cd /var/lib/signoz
+
+./migrate-dashboard
+```
+
+You should see output similar to this:
+
+```bash
+2022/06/08 18:27:49 Total Dashboard found: 3
+2022/06/08 18:27:49 e2e2ff6d-29ca-444c-8625-d64218a990bc
+2022/06/08 18:27:49 683ac919-b858-4387-b14f-bebd55f074fa
+2022/06/08 18:27:49 f10d6c5e-fb2d-4e4c-9c37-f0b2fdf7f3db
+2022/06/08 18:27:49 Dashboard e2e2ff6d-29ca-444c-8625-d64218a990bc updated
+2022/06/08 18:27:49 Dashboard 683ac919-b858-4387-b14f-bebd55f074fa updated
+2022/06/08 18:27:49 Dashboard f10d6c5e-fb2d-4e4c-9c37-f0b2fdf7f3db updated
+2022/06/08 18:27:49 Dashboards migrated
+```
+
+At last, clean up the binary:
+
+```bash
+rm migrate-dashboard
+```
+
+## Command-Line Interface (CLI) Flags
+
+There are is only one flag in the `migrate-dashboard` binary:
+
+- `--dataSource` : Data Source path. `default=/var/lib/signoz/signoz.db`

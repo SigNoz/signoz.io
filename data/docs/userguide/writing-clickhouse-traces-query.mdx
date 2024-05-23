@@ -1,0 +1,338 @@
+---
+title: Writing traces based ClickHouse queries for building dashboard panels
+id: writing-clickhouse-traces-query
+---
+
+## Traces Schema
+
+Traces has 6 tables used for different usecases
+
+All Traces table follows [OpenTelemetry Trace Semantic conventions](https://github.com/open-telemetry/semantic-conventions/blob/main/docs/general/trace.md)
+
+<Admonition type="info">
+The distributed tables in clickhouse have been named by prefixing distributed_ to existing single shard table names. If you want to use clickhouse queries in dashboard or alerts, you should use the distributed table names. 
+Eg, signoz_index_v2 now corresponds to the table of a single shard. To query all the shards, query against distributed_signoz_index_v2.
+</Admonition>
+
+### signoz_index_v2
+
+This is primary table of Traces which is queried to fetch spans and apply aggregation on spans. It has over 30 different columns which helps in faster filtering on most common attributes following [OpenTelemetry Trace Semantic conventions](https://github.com/open-telemetry/semantic-conventions/blob/main/docs/general/trace.md).
+
+```sql
+CREATE TABLE signoz_traces.signoz_index_v2
+(
+    `timestamp` DateTime64(9) CODEC(DoubleDelta, LZ4),
+    `traceID` FixedString(32) CODEC(ZSTD(1)),
+    `spanID` String CODEC(ZSTD(1)),
+    `parentSpanID` String CODEC(ZSTD(1)),
+    `serviceName` LowCardinality(String) CODEC(ZSTD(1)),
+    `name` LowCardinality(String) CODEC(ZSTD(1)),
+    `kind` Int8 CODEC(T64, ZSTD(1)),
+    `durationNano` UInt64 CODEC(T64, ZSTD(1)),
+    `statusCode` Int16 CODEC(T64, ZSTD(1)),
+    `component` LowCardinality(String) CODEC(ZSTD(1)),
+    `dbSystem` LowCardinality(String) CODEC(ZSTD(1)),
+    `dbName` LowCardinality(String) CODEC(ZSTD(1)),
+    `dbOperation` LowCardinality(String) CODEC(ZSTD(1)),
+    `peerService` LowCardinality(String) CODEC(ZSTD(1)),
+    `events` Array(String) CODEC(ZSTD(2)),
+    `httpMethod` LowCardinality(String) CODEC(ZSTD(1)),
+    `httpUrl` LowCardinality(String) CODEC(ZSTD(1)),
+    `httpRoute` LowCardinality(String) CODEC(ZSTD(1)),
+    `httpHost` LowCardinality(String) CODEC(ZSTD(1)),
+    `msgSystem` LowCardinality(String) CODEC(ZSTD(1)),
+    `msgOperation` LowCardinality(String) CODEC(ZSTD(1)),
+    `hasError` Bool CODEC(T64, ZSTD(1)),
+    `rpcSystem` LowCardinality(String) CODEC(ZSTD(1)),
+    `rpcService` LowCardinality(String) CODEC(ZSTD(1)),
+    `rpcMethod` LowCardinality(String) CODEC(ZSTD(1)),
+    `responseStatusCode` LowCardinality(String) CODEC(ZSTD(1)),
+    `stringTagMap` Map(String, String) CODEC(ZSTD(1)),
+    `numberTagMap` Map(String, Float64) CODEC(ZSTD(1)),
+    `boolTagMap` Map(String, Bool) CODEC(ZSTD(1)),
+    `resourceTagsMap` Map(LowCardinality(String), String) CODEC(ZSTD(1)),
+    INDEX idx_service serviceName TYPE bloom_filter GRANULARITY 4,
+    INDEX idx_name name TYPE bloom_filter GRANULARITY 4,
+    INDEX idx_kind kind TYPE minmax GRANULARITY 4,
+    INDEX idx_duration durationNano TYPE minmax GRANULARITY 1,
+    INDEX idx_hasError hasError TYPE set(2) GRANULARITY 1,
+    INDEX idx_httpRoute httpRoute TYPE bloom_filter GRANULARITY 4,
+    INDEX idx_httpUrl httpUrl TYPE bloom_filter GRANULARITY 4,
+    INDEX idx_httpHost httpHost TYPE bloom_filter GRANULARITY 4,
+    INDEX idx_httpMethod httpMethod TYPE bloom_filter GRANULARITY 4,
+    INDEX idx_timestamp timestamp TYPE minmax GRANULARITY 1,
+    INDEX idx_rpcMethod rpcMethod TYPE bloom_filter GRANULARITY 4,
+    INDEX idx_responseStatusCode responseStatusCode TYPE set(0) GRANULARITY 1,
+    INDEX idx_resourceTagsMapKeys mapKeys(resourceTagsMap) TYPE bloom_filter(0.01) GRANULARITY 64,
+    INDEX idx_resourceTagsMapValues mapValues(resourceTagsMap) TYPE bloom_filter(0.01) GRANULARITY 64,
+    PROJECTION timestampSort
+    (
+        SELECT *
+        ORDER BY timestamp
+    )
+)
+ENGINE = MergeTree
+PARTITION BY toDate(timestamp)
+PRIMARY KEY (serviceName, hasError, toStartOfHour(timestamp), name)
+ORDER BY (serviceName, hasError, toStartOfHour(timestamp), name, timestamp)
+TTL toDateTime(timestamp) + toIntervalSecond(1296000)
+SETTINGS index_granularity = 8192, ttl_only_drop_parts = 1
+```
+
+#### Columns in the signoz_index_v2 table
+
+|  NAME  | DESCRIPTION  |
+|---|---|
+|**timestamp** | Time when the span generated at the source|
+|**traceID** | Trace ID. [W3C Trace Context](https://www.w3.org/TR/trace-context/#trace-id)|
+|**spanID** | Span ID |
+|**parentSpanID** | Parent Span ID |
+|**serviceName** | Name of the service |
+|**name** | Name of the span |
+|**kind** | Kind of the span. [OpenTelemetry Span Kind](https://opentelemetry.io/docs/concepts/signals/traces/#span-kind)|
+|**durationNano** | Duration of the span in nanoseconds |
+|**statusCode** | Status code of the span. [OpenTelemetry Status Code](https://opentelemetry.io/docs/concepts/signals/traces/#span-status)
+|**component** | Component of the span. Eg: `http`, `grpc` etc. Derived from `component` attribute of a span|
+|**dbSystem** | Database system of the span. Eg: `mysql`, `postgres` etc. Derived from `db.system` attribute of a span|
+|**dbName** | Database name of the span. Derived from `db.name` attribute of a span|
+|**dbOperation** | Database operation of the span. Derived from `db.operation` attribute of a span|
+|**peerService** | Peer service of the span. Derived from `peer.service` attribute of a span|
+|**events** | Events of the span. It is an array of stringified json of span events|
+|**httpMethod** | HTTP method of the span. Derived from `http.method` attribute of a span|
+|**httpUrl** | HTTP url of the span. Derived from `http.url` attribute of a span|
+|**httpRoute** | HTTP route of the span. Derived from `http.route` attribute of a span|
+|**httpHost** | HTTP host of the span. Derived from `http.host` attribute of a span|
+|**msgSystem** | Messaging system of the span. Derived from `messaging.system` attribute of a span|
+|**msgOperation** | Messaging operation of the span. Derived from `messaging.operation` attribute of a span|
+|**hasError** | Whether the span has error or not|
+|**rpcSystem** | RPC system of the span. Derived from `rpc.system` attribute of a span|
+|**rpcService** | RPC service of the span. Derived from `rpc.service` attribute of a span|
+|**rpcMethod** | RPC method of the span. Derived from `rpc.method` attribute of a span|
+|**responseStatusCode** | Response status code of the span. Derived from `http.status_code`, `rpc.grpc.status_code` and `rpc.jsonrpc.error_code` attribute of a span|
+|**stringTagMap** | Map of all string tags/attributes of the span|
+|**numberTagMap** | Map of all number tags/attributes of the span|
+|**boolTagMap** | Map of all bool tags/attributes of the span|
+|**resourceTagsMap** | Map of all resource tags/attributes of the span|
+
+### signoz_spans
+
+This table stores span json model which is used to create trace tree and displayed on trace detail page.
+
+```sql
+CREATE TABLE signoz_traces.signoz_spans
+(
+    `timestamp` DateTime64(9) CODEC(DoubleDelta, LZ4),
+    `traceID` FixedString(32) CODEC(ZSTD(1)),
+    `model` String CODEC(ZSTD(9))
+)
+ENGINE = MergeTree
+PARTITION BY toDate(timestamp)
+ORDER BY traceID
+TTL toDateTime(timestamp) + toIntervalSecond(1296000)
+SETTINGS index_granularity = 1024, ttl_only_drop_parts = 1
+```
+
+#### Columns in the signoz_spans table
+
+|  NAME  | DESCRIPTION  |
+|---|---|
+|**timestamp** | Time when the span generated at the source|
+|**traceID** | Trace ID. [W3C Trace Context](https://www.w3.org/TR/trace-context/#trace-id)|
+|**model** | Stringified json of the span|
+
+### signoz_error_index_v2
+
+This table stores error events derived from spans
+
+```sql
+CREATE TABLE signoz_traces.signoz_error_index_v2
+(
+    `timestamp` DateTime64(9) CODEC(DoubleDelta, LZ4),
+    `errorID` FixedString(32) CODEC(ZSTD(1)),
+    `groupID` FixedString(32) CODEC(ZSTD(1)),
+    `traceID` FixedString(32) CODEC(ZSTD(1)),
+    `spanID` String CODEC(ZSTD(1)),
+    `serviceName` LowCardinality(String) CODEC(ZSTD(1)),
+    `exceptionType` LowCardinality(String) CODEC(ZSTD(1)),
+    `exceptionMessage` String CODEC(ZSTD(1)),
+    `exceptionStacktrace` String CODEC(ZSTD(1)),
+    `exceptionEscaped` Bool CODEC(T64, ZSTD(1)),
+    `resourceTagsMap` Map(LowCardinality(String), String) CODEC(ZSTD(1)),
+    INDEX idx_error_id errorID TYPE bloom_filter GRANULARITY 4,
+    INDEX idx_resourceTagsMapKeys mapKeys(resourceTagsMap) TYPE bloom_filter(0.01) GRANULARITY 64,
+    INDEX idx_resourceTagsMapValues mapValues(resourceTagsMap) TYPE bloom_filter(0.01) GRANULARITY 64
+)
+ENGINE = MergeTree
+PARTITION BY toDate(timestamp)
+ORDER BY (timestamp, groupID)
+TTL toDateTime(timestamp) + toIntervalSecond(86400)
+SETTINGS index_granularity = 8192, ttl_only_drop_parts = 1
+```
+
+#### Columns in the signoz_error_index_v2 table
+
+|  NAME  | DESCRIPTION  |
+|---|---|
+|**timestamp** | Time when the span generated at the source|
+|**errorID** | Error ID. [W3C Trace Context](https://www.w3.org/TR/trace-context/#trace-id)|
+|**groupID** | Group ID of the error|
+|**traceID** | Trace ID. [W3C Trace Context](https://www.w3.org/TR/trace-context/#trace-id)|
+|**spanID** | Span ID |
+|**serviceName** | Name of the service. Derived from `service.name` attribute of a span|
+|**exceptionType** | Exception type of the error. Derived from `exception.type` attribute of a span|
+|**exceptionMessage** | Exception message of the error. Derived from `exception.message` attribute of a span|
+|**exceptionStacktrace** | Exception stacktrace of the error. Derived from `exception.stacktrace` attribute of a span|
+|**exceptionEscaped** | Whether the exception is escaped or not. Derived from `exception.escaped` attribute of a span|
+|**resourceTagsMap** | Map of all resource tags/attributes of the span|
+
+### top_level_operations
+
+This table stores top operations and service name.
+
+```sql
+CREATE TABLE signoz_traces.top_level_operations
+(
+    `name` LowCardinality(String) CODEC(ZSTD(1)),
+    `serviceName` LowCardinality(String) CODEC(ZSTD(1))
+)
+ENGINE = ReplacingMergeTree
+ORDER BY (serviceName, name)
+SETTINGS index_granularity = 8192
+```
+
+
+#### Columns in the top_level_operations table
+
+|  NAME  | DESCRIPTION  |
+|---|---|
+|**name** | Name of the span |
+|**serviceName** | Name of the service |
+
+### span_attributes_keys
+
+This table stores all the attributes keys of the span.
+
+```sql
+CREATE TABLE signoz_traces.span_attributes_keys
+(
+    `tagKey` LowCardinality(String) CODEC(ZSTD(1)),
+    `tagType` Enum8('tag' = 1, 'resource' = 2) CODEC(ZSTD(1)),
+    `dataType` Enum8('string' = 1, 'bool' = 2, 'float64' = 3) CODEC(ZSTD(1)),
+    `isColumn` Bool CODEC(ZSTD(1))
+)
+ENGINE = ReplacingMergeTree
+ORDER BY (tagKey, tagType, dataType, isColumn)
+SETTINGS index_granularity = 8192
+```
+
+#### Columns in the span_attributes_keys table
+
+|  NAME  | DESCRIPTION  |
+|---|---|
+|**tagKey** | Name of the attribute |
+|**tagType** | Type of the attribute. It can be `tag` or `resource` |
+|**dataType** | Data type of the attribute. It can be `string`, `bool` or `float64` |
+|**isColumn** | Whether the attribute is a column or not |
+
+### span_attributes
+
+This table stores all the attributes of the span.
+
+```sql
+CREATE TABLE signoz_traces.span_attributes
+(
+    `timestamp` DateTime CODEC(DoubleDelta, ZSTD(1)),
+    `tagKey` LowCardinality(String) CODEC(ZSTD(1)),
+    `tagType` Enum8('tag' = 1, 'resource' = 2) CODEC(ZSTD(1)),
+    `dataType` Enum8('string' = 1, 'bool' = 2, 'float64' = 3) CODEC(ZSTD(1)),
+    `stringTagValue` String CODEC(ZSTD(1)),
+    `float64TagValue` Nullable(Float64) CODEC(ZSTD(1)),
+    `isColumn` Bool CODEC(ZSTD(1))
+)
+ENGINE = ReplacingMergeTree
+ORDER BY (tagKey, tagType, dataType, stringTagValue, float64TagValue, isColumn)
+TTL toDateTime(timestamp) + toIntervalSecond(172800)
+SETTINGS ttl_only_drop_parts = 1, allow_nullable_key = 1, index_granularity = 8192
+```
+
+#### Columns in the span_attributes table
+
+|  NAME  | DESCRIPTION  |
+|---|---|
+|**timestamp** | Time when the span generated at the source|
+|**tagKey** | Name of the attribute |
+|**tagType** | Type of the attribute. It can be `tag` or `resource` |
+|**dataType** | Data type of the attribute. It can be `string`, `bool` or `float64` |
+|**stringTagValue** | String value of the attribute |
+|**float64TagValue** | Float64 value of the attribute |
+|**isColumn** | Whether the attribute is a column or not |
+
+## Writing Clickhouse Queries for Dashboard Panels
+
+### Timeseries
+
+This panel is used when you want to view your aggregated data in a timeseries.
+
+#### Examples
+
+##### Plotting a chart on 100ms interval
+
+Plot a chart of 1 minute showing count of spans in 100ms interval of service frontend with duration > 50ms
+
+```sql
+SELECT fromUnixTimestamp64Milli(intDiv( toUnixTimestamp64Milli ( timestamp ), 100) * 100) AS interval, 
+toFloat64(count()) AS count 
+FROM (
+ SELECT timestamp 
+ FROM signoz_traces.distributed_signoz_index_v2 
+ WHERE serviceName='frontend' 
+ AND durationNano>=50*exp10(6) 
+ AND timestamp BETWEEN {{.start_datetime}} AND {{.end_datetime}})
+ GROUP BY interval ORDER BY interval ASC;
+```
+
+### Value
+
+For the value type panel, the overall query will be similar to timeseries, just that you will have to get the absolute value at the end.
+You can reduce your end result to either average, latest, sum, min, or max.
+
+#### Examples
+
+##### Average duration of spans where `method = 'POST'` , `service_name = 'sample-service'`
+
+```sql
+SELECT 
+    avg(value) as value, 
+    any(ts) as ts FROM (
+        SELECT 
+            toStartOfInterval((timestamp), INTERVAL 1 MINUTE) AS ts, 
+            toFloat64(count()) AS value 
+        FROM 
+            signoz_traces.distributed_signoz_index_v2
+        WHERE 
+            timestamp BETWEEN {{.start_datetime}} AND {{.end_datetime}} AND
+            httpMethod = 'POST' AND 
+            serviceName = 'sample-service'
+        GROUP BY ts 
+        ORDER BY ts ASC
+    )
+```
+
+### Table
+
+This is used when you want to view the timeseries data in a tabular format.
+
+The query is similar to timeseries query but instead of using time interval we use just use `now() as ts` in select.
+
+#### Examples
+
+##### GroupBy a tag/attribute in distributed tracing data
+
+```sql
+SELECT now() as ts, 
+stringTagMap['example_string_attribute'] AS attribute_name, 
+toFloat64(avg(durationNano)) AS value 
+FROM signoz_traces.distributed_signoz_index_v2  
+WHERE timestamp BETWEEN {{.start_datetime}} AND {{.end_datetime}}
+GROUP BY (attribute_name, ts) order by (attribute_name, ts) ASC;
+```

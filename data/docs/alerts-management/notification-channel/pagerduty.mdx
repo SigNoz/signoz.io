@@ -1,0 +1,95 @@
+---
+id: pagerduty
+title: Configure PagerDuty Channel
+---
+
+## Prerequisites
+Before setting up PagerDuty as a notification channel in SigNoz, ensure the following:
+
+- **Valid Integration Key**: You have a valid Integration Key (also known as Routing Key) from PagerDuty.
+- **SigNoz Version**: [v0.8.0](https://github.com/SigNoz/signoz/releases/tag/v0.8.0) or later
+
+
+There are two main ways to integrate with PagerDuty:
+
+- **Global [Event Orchestration](https://support.pagerduty.com/docs/event-orchestration)**: Ideal for automating incident creation and management.
+- **Direct Integration on [PagerDuty service](https://support.pagerduty.com/docs/services-and-integrations)**: Suitable for specific service-level integrations.
+
+## Accessing Alert Channels
+
+To manage your alert channels in SigNoz:
+
+- Navigate to `Settings > Alert Channels` tab within SigNoz. This tab displays a list of configured alert channels.
+
+![alert-channels](../../../img/docs/alert-channels.webp)
+
+<Admonition type="info">
+
+When multiple channels are set up, alerts will be sent to all the configured channels.
+
+</Admonition>
+
+## Obtaining Integration or Routing key 
+
+### For Global Event Orchestration
+1. From the **Automation** menu, select **Event Orchestration**
+2. Create a new orchestration 
+3. Click on **Global Orchestration Key** and copy your **integration key** and keep it safe for later use. 
+
+![image](https://user-images.githubusercontent.com/10277894/180833019-c865ecd5-f752-419f-998e-baf296daef88.png)
+
+
+### For PagerDuty Service Integration
+1. Navigate to **Services > Service Directory** and select the **service** where you’d like to add the integration.
+2. Select **Integration tab** and click **Add another integration**
+3. Select **Events API V2** from the list 
+4. Click **Add**
+5. Locate your integration in the list and click down arrow to view and copy integration key.
+
+For more details on PagerDuty service setup, visit [PagerDuty Service and Integrations](https://support.pagerduty.com/docs/services-and-integrations#add-integrations-to-an-existing-service).
+
+![image](https://user-images.githubusercontent.com/10277894/179944431-4e7ebb09-c6ca-455f-88b5-02e0f7ccfd8a.png)
+
+
+## Create a New PagerDuty Channel
+To create a new PagerDuty notification channel in SigNoz, follow these steps:
+
+- Navigate to `Settings > Alert Channels` and click on `New Channel`.
+- Enter a **Name** for the channel and select PagerDuty as the channel type.
+- **Routing Key**: Enter Routing Key (Integration Key) obtained from PagerDuty.
+- **More information**: Enter more information as necessary. Refer to the [Events API V2 Overview](https://developer.pagerduty.com/docs/ZG9jOjExMDI5NTgw-events-api-v2-overview) for more details. 
+
+**Note**: You can use [Go templates](https://prometheus.io/docs/alerting/latest/notifications/) for customizing the title and description.
+
+**Test Configuration**: 
+Click the Test button to test the connection with your application.
+
+![image](https://user-images.githubusercontent.com/10277894/179944648-a9f3b558-2687-4132-a6ce-bc5d69f59368.png)
+
+## Testing the PagerDuty channel
+1. Let's create a simple alert rule that monitors average CPU performance for each host. Go to **Alerts** page in **your SigNoz app** and click `New Alert` button. When the new alert page opens, edit metric query as shown below. Feel free to choose any other metric, the idea is to pick a metric with sufficient data to raise an alert. 
+
+   ![image](https://user-images.githubusercontent.com/10277894/179949345-f242f0da-2afb-4041-ab72-3390d645dd77.png)
+
+2. We can now **review the graph** to identify a threshold that will definitely cause an alert. Here, anything below 0.2 looks like a good condition for threshold.
+
+   ![image](https://user-images.githubusercontent.com/10277894/179957078-b7e430ab-95c2-4d5d-8eac-10670f1e0e52.png)
+
+3. Let's **set threshold to 0.12** to be sure that alert will be raised in next few minutes.
+
+   ![image](https://user-images.githubusercontent.com/10277894/179949589-17cab9a8-640d-422a-a22a-f4e5ebd6f5c7.png)
+
+4. **Save the alert** rule. Feel free to edit severity and labels as necessary.
+
+5. Go to your **PagerDuty Alerts Dashboard** (`PagerDuty Home >> Incident >> Alerts`) and wait for a few minutes. If all goes well, you will **see an incident**. You may have to refresh the page few times to see the alert. 
+
+   ![image](https://user-images.githubusercontent.com/10277894/179956540-0eae3553-c813-4d39-8484-bba2c6d939c5.png)
+
+   ![image](https://user-images.githubusercontent.com/10277894/179956567-d4de2d44-4510-46bb-80df-13ecefc08064.png)
+
+## Troubleshooting
+If you encounter issues with the PagerDuty integration:
+
+- **Check the Integration Key**: Ensure that the Routing Key or Integration Key is correctly entered in SigNoz.
+- **Verify PagerDuty Configuration**: Confirm that the PagerDuty service or global event orchestration is set up correctly.
+- **Test Connectivity**: Use the Test button in SigNoz to verify connectivity with PagerDuty. If the test fails, review your network settings and integration key.

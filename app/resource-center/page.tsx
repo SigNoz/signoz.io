@@ -11,7 +11,7 @@ export default function ResourceCenter() {
 
   return (
     <div className="container mx-auto py-4">
-      <div className="mb-4">
+      <div className="mb-8">
         <ul
           className="-mb-px flex flex-wrap pl-0 text-center text-sm font-medium"
           id="default-tab"
