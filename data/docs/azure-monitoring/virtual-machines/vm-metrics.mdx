@@ -1,0 +1,153 @@
+---
+id: vm-metrics
+title: VM Host Metrics & Logging
+---
+
+## Overview
+
+In this guide, we'll walk you through the process of setting up an Azure Virtual Machine to send  logs, traces and metrics to SigNoz, an open-source observability platform. By following these steps, you'll be able to monitor your Azure VM's performance and troubleshoot issues using SigNoz.
+
+## Prerequisites
+
+Before you begin, ensure that you have the following:
+
+1. [SigNoz Cloud Account](https://signoz.io/teams/)
+2. An Azure subscription with permissions to create and manage Virtual Machines.
+3. [Central Collector Setup](../../bootstrapping/collector-setup)
+4. Azure Linux VM with SSH access enabled. Follow [SSH Keys Guide](https://learn.microsoft.com/en-us/azure/virtual-machines/ssh-keys-portal) to enable SSH access.
+
+## Setup
+
+This document assumes that you have already set up your Azure VM and have SSH access to it. If not, follow the steps outlined in the [Azure VM Guide](https://learn.microsoft.com/en-us/azure/virtual-machines/linux/quick-create-portal?tabs=ubuntu#create-virtual-machine) and [SSH Keys Guide](https://learn.microsoft.com/en-us/azure/virtual-machines/ssh-keys-portal) to create VM and enable SSH access.
+
+### Connect to the VM
+The [SSH Keys Guide](https://learn.microsoft.com/en-us/azure/virtual-machines/ssh-keys-portal#connect-to-the-vm) has steps on how to connect to your VM via SSH.
+
+### Install OpenTelemetry Collector
+
+Follow the [OpenTelemetry SigNoz Guide](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) to install the OpenTelemetry Collector. 
+
+### Configure Collector
+
+The configuration file for the OpenTelemetry Collector is located at `/etc/otelcol-contrib/config.yaml`. We send the logs, traces and metrics to the central collector instead of SigNoz directly, in order to adopt a scalable architecture pattern. We recommend to our users to use the same pattern in your Azure subscription.
+
+```bash
+cat > /etc/otelcol-contrib/config.yaml << EOF
+receivers:
+  filelog:
+    include: [ <file paths> ] # /var/log/myservice/*.json 
+    operators:
+      - type: json_parser
+        timestamp:
+          parse_from: attributes.time
+          layout: '%Y-%m-%d %H:%M:%S'
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+  hostmetrics:
+    collection_interval: 60s
+    scrapers:
+      cpu: {}
+      disk: {}
+      load: {}
+      filesystem: {}
+      memory: {}
+      network: {}
+      paging: {}
+      process:
+        mute_process_name_error: true
+        mute_process_exe_error: true
+        mute_process_io_error: true
+      processes: {}
+  prometheus:
+    config:
+      global:
+        scrape_interval: 60s
+      scrape_configs:
+        - job_name: otel-collector-binary
+          static_configs:
+            - targets:
+              # - localhost:8888
+processors:
+  batch:
+    send_batch_size: 1000
+    timeout: 10s
+  # Ref: https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/resourcedetectionprocessor/README.md
+  resourcedetection:
+    detectors: [env, azure, system] 
+    # Using OTEL_RESOURCE_ATTRIBUTES envvar, env detector adds custom labels.
+    timeout: 2s
+    system:
+      hostname_sources: [dns, os] 
+extensions:
+  health_check: {}
+  zpages: {}
+exporters:
+  otlp:
+    endpoint: "<Central Collector DNS Name>:4318"
+  logging:
+    verbosity: normal
+service:
+  telemetry:
+    metrics:
+      address: 0.0.0.0:8888
+  extensions: [health_check, zpages]
+  pipelines:
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp]
+    metrics/internal:
+      receivers: [prometheus, hostmetrics]
+      processors: [resourcedetection, batch]
+      exporters: [otlp]
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp]
+    logs:
+      receivers: [otlp, filelog]
+      processors: [batch]
+      exporters: [otlp]
+EOF
+```
+
+#### OLTP Exporter Configuration
+Make sure to replace `<Central Collector DNS Name>` with the DNS name of your central collector. If you don't have a central collector yet, follow the [Central Collector Setup](../../bootstrapping/collector-setup) guide to set one up.
+
+#### File Logs Receiver Configuration
+The file logs receiver needs to be configured with the paths to the log files that you want to stream to SigNoz. You can specify multiple paths by separating them as a array.
+
+You can also specify globed path patterns to match multiple log files. For example, `/var/log/myservice/*.json` will match all log files in the `/var/log/myservice` directory with a `.json` extension.
+
+### Start the OpenTelemetry Collector
+
+Once we are done with the above configurations, we can now run the collector service with the following command:
+
+```bash
+./otelcol-contrib --config ./config.yaml &> otelcol-output.log & echo "$!" > otel-pid
+```
+
+### SigNoz Dashboard
+
+Once the collector is running, you can access the SigNoz dashboard to view the logs and metrics from your Azure VM.
+
+Please refer to the [Hostmetrics Dashboard](https://signoz.io/docs/userguide/hostmetrics/) for information on how to import and use the dashboard.
+
+
+## Troubleshooting
+
+If you encounter any issues during the setup process, here are a few troubleshooting steps:
+
+- Check the OpenTelemetry Collector logs for any errors:
+    
+    ```bash
+    tail -f -n 50 otelcol-output.log 
+    ```
+- Verify that the necessary outbound ports (4317 for gRPC, 4318 for HTTP) are open in the Azure VM's out network security group.
+- Verify that the central collector is running and configured correctly.
+
+That's it! You have now successfully set up your Azure Virtual Machine to send logs and metrics to SigNoz. You can start monitoring your VM's performance and troubleshooting any issues using the SigNoz dashboard.
