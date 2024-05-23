@@ -1,7 +1,5 @@
-<details>
-  <summary>
-   Kubernetes Metrics - <i>kubeletstats</i> and <i>k8s_cluster</i>
-   </summary>
+
+### Kubernetes Metrics - kubeletstats and k8s_cluster
 
 - container_cpu_time
 - container_cpu_utilization
@@ -75,4 +73,3 @@
 - k8s_node_allocatable_cpu
 - k8s_node_allocatable_memory
 
-</details>

@@ -12,5 +12,3 @@ kubectl port-forward ${POD_NAME} 8080:8080
 
 Now, let's use Pet Clinic UI for a while in browser to generate telemetry
 data: [http://localhost:8080](http://localhost:8080).
-
-![Spring Pet Clinic metrics page](/img/docs/otel-operator-spring-pet-clinic.webp)
