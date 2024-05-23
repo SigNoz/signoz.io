@@ -1,22 +1,34 @@
 import React from 'react'
 import { allBlogs } from 'contentlayer/generated'
 import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer'
-import BlogPostCard from '../Shared/BlogPostCard'
+// import BlogPostCard from '../Shared/BlogPostCard'
+import { genPageMetadata } from 'app/seo'
+import GridLayout from '@/layouts/GridLayout'
+
+const POSTS_PER_PAGE = 9
+
+export const metadata = genPageMetadata({ title: 'Blog' })
 
 export default function AllBlogs({ blogs }) {
-  return (
-    <div className="my-8 flex flex-col">
-      <div
-        className={`w-full text-sm font-semibold uppercase leading-5 tracking-wide max-md:max-w-full`}
-      >
-        All posts
-      </div>
+  const pageNumber = 1
+  const initialDisplayPosts = blogs.slice(
+    POSTS_PER_PAGE * (pageNumber - 1),
+    POSTS_PER_PAGE * pageNumber
+  )
+  const pagination = {
+    currentPage: pageNumber,
+    totalPages: Math.ceil(blogs.length / POSTS_PER_PAGE),
+    pageRoute: 'blog',
+  }
 
-      <div className="mt-4 grid grid-cols-3 gap-4">
-        {blogs.map((post) => {
-          return <BlogPostCard blog={post} />
-        })}
-      </div>
-    </div>
+  console.log('pagination', pagination)
+
+  return (
+    <GridLayout
+      posts={blogs}
+      initialDisplayPosts={initialDisplayPosts}
+      pagination={pagination}
+      title="All Blogs"
+    />
   )
 }
