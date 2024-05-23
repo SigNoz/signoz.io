@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import Blogs from './Blog/Blogs'
-import Comparisons from './comparisons/Comparisons'
+import Comparisons from './Comparisons/Comparisons'
 import Guides from './Guides/Guides'
 import OpenTelemetry from './OpenTelemetry/OpenTelemetry'
 

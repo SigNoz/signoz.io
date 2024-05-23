@@ -1,6 +1,6 @@
 <details>
     <summary>
-        {props.name} - <i>hostmetrics</i>
+        \{props.name\} - <i>hostmetrics</i>
     </summary>
 
 - system_network_connections
