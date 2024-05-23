@@ -12,6 +12,8 @@ import SignUps from './SignUps/SignUps'
 import LogsPerf from './LogsPerf/LogsPerf'
 import VersionPin from './NodeVersionPin/NodeVersionPin'
 import VersionPinNestJs from './NestVersionPin/NestVersionPin'
+import Tabs from './Tabs'
+import TabItem from './TabItem'
 
 export const components: MDXComponents = {
   Image,
@@ -27,4 +29,6 @@ export const components: MDXComponents = {
   LogsPerf,
   VersionPin,
   VersionPinNestJs,
+  Tabs,
+  TabItem,
 }
