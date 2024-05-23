@@ -12,7 +12,7 @@ const docsSideNav = [
       {
         type:  'category',
         label: 'Installation',
-        route: '/docs/install',
+        route: '/docs/install/install',
         link: {
           type:  'doc',
           // route: '/docs/install/install',
@@ -45,6 +45,7 @@ const docsSideNav = [
               {
                 type: 'category',
                 label: 'Kubernetes',
+                route: '/docs/install/kubernetes/kubernetes',
                 // link: {
                 // type: 'generated-index',
                 // title: 'Kubernetes',
@@ -101,7 +102,6 @@ const docsSideNav = [
   {
     label: 'SigNoz Features',
     type: 'category',
-    route: '',
     items: [
       {
         type: 'doc',
@@ -149,7 +149,7 @@ const docsSideNav = [
       {
         label: 'Instrument Application',
         type: 'category',
-        route: '',
+        route: '/docs/instrumentation/instrumentation',
         // link: {
         // type: 'generated-index',
         // title: 'Instrument your Application',
@@ -161,14 +161,14 @@ const docsSideNav = [
           {
             type: 'category',
             label: 'Python',
-            route: '',
-            link: {
-              type: 'doc',
-              route: '/docs/instrumentation/python',
+            route: '/docs/instrumentation/python',
+            // link: {
+              // type: 'doc',
+              // route: '/docs/instrumentation/python',
               // title: 'Python',
               // description: 'Learn how to instrument Python applications with OpenTelemetry',
               // slug: 'instrumentation/python',
-            },
+            // },
             items: [
               {
                 type: 'doc',
@@ -195,14 +195,14 @@ const docsSideNav = [
           {
             type: 'category',
             label: 'Java',
-            route: '',
-            link: {
-              type: 'doc',
-              route: '/docs/instrumentation/java',
+            route: '/docs/instrumentation/java',
+            // link: {
+              // type: 'doc',
+              // route: '/docs/instrumentation/java',
               // title: 'Python',
               // description: 'Learn how to instrument Python applications with OpenTelemetry',
               // slug: 'instrumentation/python',
-            },
+            // },
             items: [
               {
                 type: 'doc',
@@ -224,14 +224,14 @@ const docsSideNav = [
           {
             type: 'category',
             label: 'Javascript',
-            route: '',
-            link: {
-              type: 'doc',
-              route: '/docs/instrumentation/javascript',
+            route: '/docs/instrumentation/javascript',
+            // link: {
+              // type: 'doc',
+              // route: '/docs/instrumentation/javascript',
               // title: 'Python',
               // description: 'Learn how to instrument Python applications with OpenTelemetry',
               // slug: 'instrumentation/python',
-            },
+            // },
             items: [
               {
                 type: 'doc',
@@ -300,10 +300,10 @@ const docsSideNav = [
           {
             type: 'category',
             label: 'View Traces',
-            link: {
-              type: 'doc',
-              route: '/docs/userguide/traces',
-            },
+            route: '/docs/userguide/traces',
+            // link: {
+              // type: 'doc',
+            // },
             items: [
               {
                 type: 'doc',
@@ -513,11 +513,10 @@ const docsSideNav = [
       {
         type: 'category',
         label: 'Preprocess Logs',
-        route: '',
-        link: {
-          type: 'doc',
-          route: '/docs/logs-pipelines/introduction',
-        },
+        route: '/docs/logs-pipelines/introduction',
+        // link: {
+          // type: 'doc',
+        // },
         items: [
           {
             type: 'doc',
@@ -532,9 +531,9 @@ const docsSideNav = [
           {
             type: 'category',
             label: 'Guides',
+            route: '/docs/category/guides',
             // link: {
             // type: 'generated-index',
-            // route: '/docs/category/guides',
             // title: 'Logs Pipeline Guides',
             // description:
             // 'See these guides for detailed walkthroughs on creating Log Pipelines for specific purposes.',
@@ -656,7 +655,7 @@ const docsSideNav = [
   {
     label: 'Alerts',
     type: 'category',
-    route: '',
+    route: '/docs/alerts',
     // link: {
     //   type: 'generated-index',
     //   title: 'Alert Management in SigNoz',
@@ -678,7 +677,7 @@ const docsSideNav = [
       {
         label: 'Setup Alerts Notification',
         type: 'category',
-        route: '',
+        route: '/docs/setup-alerts-notification',
         // link: {
         //   type: 'generated-index',
         //   title: 'Setup Alerts Notifications Channel',
@@ -785,7 +784,7 @@ const docsSideNav = [
   {
     label: 'Tutorials',
     type: 'category',
-    route: '',
+    route: '/docs/tutorials',
     // link: {
     // type: 'generated-index',
     // title: 'Tutorials',
@@ -860,7 +859,7 @@ const docsSideNav = [
       {
         type: 'category',
         label: 'EC2',
-        route: '',
+        route: '/docs/ec2-monitoring',
         // link: {
         // type: 'generated-index',
         // title: 'EC2 Monitoring',
@@ -882,7 +881,7 @@ const docsSideNav = [
       {
         type: 'category',
         label: 'ECS',
-        route: '',
+        route: '/docs/ecs-monitoring',
         // link: {
         // type: 'generated-index',
         // title: 'ECS Monitoring',
@@ -924,9 +923,113 @@ const docsSideNav = [
     ],
   },
   {
+    label: 'Azure Monitoring',
+    type: 'category',
+    // route: '',
+    items: [
+      {
+        type: 'category',
+        label: 'Bootstrapping',
+        // route: '/docs/azure-monitoring/bootstrapping',
+        // link: {
+        // type: 'generated-index',
+        // title: 'EC2 Monitoring',
+        // slug: '/docs/ec2-monitoring',
+        // },
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/azure-monitoring/bootstrapping/collector-setup',
+            label: 'Central Collector Setup',
+          },
+          {
+            type: 'doc',
+            route: '/docs/azure-monitoring/bootstrapping/data-ingestion',
+            label: 'EventHub Streaming Ingestion',
+          },
+        ],
+      },
+      {
+        type: 'category',
+        label: 'Virtual Machines',
+        // route: '/docs/ecs-monitoring',
+        // link: {
+        // type: 'generated-index',
+        // title: 'ECS Monitoring',
+        // slug: '/docs/ecs-monitoring',
+        // },
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/azure-monitoring/virtual-machines/vm-metrics/',
+            label: 'VM Host Metrics & Logging',
+          },
+        ],
+      },
+      {
+        type: 'category',
+        label: 'App Service',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/azure-monitoring/app-service/metrics',
+            label: 'Metrics',
+          },
+          {
+            type: 'doc',
+            route: '/docs/azure-monitoring/app-service/logging',
+            label: 'Logging',
+          },
+        ],
+      },
+      {
+        type: 'doc',
+        route: '/docs/azure-monitoring/aks',
+        label: 'AKS',
+      },
+      {
+        type: 'category',
+        label: 'Azure Functions',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/azure-monitoring/az-fns/metrics',
+            label: 'Metrics',
+          },
+          {
+            type: 'doc',
+            route: '/docs/azure-monitoring/az-fns/logging',
+            label: 'Logging',
+          },
+        ],
+      },
+      {
+        type: 'doc',
+        route: '/docs/azure-monitoring/db-metrics',
+        label: 'SQL Database Metrics',
+      },
+      {
+        type: 'category',
+        label: 'Azure Blog Storage',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/azure-monitoring/az-blob-storage/metrics',
+            label: 'Metrics',
+          },
+          {
+            type: 'doc',
+            route: '/docs/azure-monitoring/az-blob-storage/logging',
+            label: 'Logging',
+          },
+        ],
+      },
+    ],
+  },
+  {
     type: 'category',
     label: 'Operate Self-Hosted SigNoz',
-    route: '',
+    // route: '',
     // link: {
     // type: 'generated-index',
     // title: 'Operate',
@@ -958,7 +1061,7 @@ const docsSideNav = [
       {
         type: 'category',
         label: 'Migration Guides',
-        route: '',
+        route: '/docs/operate/migration/migrate',
         // link: {
         // type: 'generated-index',
         // title: 'Migration Guides',
@@ -1027,7 +1130,7 @@ const docsSideNav = [
       {
         type: 'category',
         label: 'ClickHouse',
-        route: '',
+        // route: '',
         // link: {
         // type: 'generated-index',
         // title: 'ClickHouse',
@@ -1061,7 +1164,7 @@ const docsSideNav = [
       {
         type: 'category',
         label: 'Query Service',
-        route: '',
+        // route: '',
         // link: {
         // type: 'generated-index',
         // title: 'Query Service',

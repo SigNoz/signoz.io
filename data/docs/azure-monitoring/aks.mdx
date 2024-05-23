@@ -1,0 +1,62 @@
+---
+id: aks
+title: AKS Metrics & Logging
+---
+
+## Overview
+
+[AKS (Azure Kubernetes Service)](https://learn.microsoft.com/en-us/azure/aks/what-is-aks) is a managed Kubernetes service provided by Microsoft Azure that simplifies the deployment, management, and operations of Kubernetes clusters.
+
+## Prerequisites
+
+- AKS cluster
+- `kubectl` installed and logged in to the AKS cluster
+- Helm
+
+## Quick Start
+
+This setup is similar to the central collector but with a different function.
+
+```bash
+helm repo add signoz <https://charts.signoz.io>
+helm install -n signoz  --create-namespace kubelet-otel signoz/k8s-infra \\
+--set signozApiKey=<ingestionKey> --set otelCollectorEndpoint="ingest.<region>.signoz.cloud:443" --set otelInsecure=false
+
+```
+
+## Troubleshooting
+
+If you encounter any issues while setting up logging and metrics for your AKS cluster, follow these troubleshooting steps:
+
+1. Check the logs of the OpenTelemetry Collector:
+    
+    ```bash
+    kubectl logs -f -n signoz -l app.kubernetes.io/component=otel-agent
+    
+    ```
+    
+    Review the logs for any error messages or indications of misconfiguration.
+    
+2. Verify the rendered configuration:
+    
+    ```bash
+    kubectl get cm/kubelet-otel-k8s-infra-otel-agent -n signoz -o yaml
+    
+    ```
+    
+    Ensure that the configuration matches your expected settings, including the SigNoz API key and the OpenTelemetry Collector endpoint.
+    
+3. Confirm that the necessary Kubernetes resources are created:
+    
+    ```bash
+    kubectl get pods,services,configmaps -n signoz
+    
+    ```
+    
+    Check if the required pods, services, and config maps are running and in a healthy state.
+    
+4. Verify network connectivity:
+    - Ensure that the AKS cluster has network access to the SigNoz ingestion endpoint (`ingest.<region>.signoz.cloud:443`).
+    - Check if there are any network security groups or firewalls blocking the required ports.
+5. Double-check the SigNoz API key:
+    - Confirm that the provided `signozApiKey` is correct and has the necessary permissions to ingest data.

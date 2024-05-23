@@ -1,0 +1,81 @@
+---
+id: data-ingestion
+title: Centralized Collector Setup
+---
+
+## Overview
+
+Azure Event Hubs is a big data streaming platform and event ingestion service that can receive and process millions of events per second. It is an ideal solution for centralizing logging and enabling real-time log streaming for applications running on Azure or on-premises.
+
+By creating an Event Hubs namespace and an event hub, you can stream logs from various sources into a central location. This allows you to collect, store, and analyze logs efficiently, gaining valuable insights into your application's behavior and performance.
+
+SigNoz, an open-source application performance monitoring and observability tool, can be integrated with Azure Event Hubs to provide a powerful log management solution. By streaming logs to SigNoz via Event Hubs, you can leverage SigNoz's features for log aggregation, querying, visualization, and alerting.
+
+{/* <!-- To learn more about the general strategy for monitoring Azure resources, see [this documentation](../strategy). --> */}
+
+## Prerequisites
+
+Before proceeding with the setup, ensure you have the following:
+
+- An Azure subscription
+- [SigNoz Cloud Account](https://signoz.io/teams/)
+
+## Setup
+
+To set up an Event Hubs namespace and an event hub for log streaming, follow these steps: 
+You might want to repeat these steps for other regions. 
+
+1. **Create an Event Hubs namespace:**
+    - Sign in to the Azure portal ([https://portal.azure.com](https://portal.azure.com/)).
+    - Click on "Create a resource" and search for "Event Hubs".
+    - Click on "Event Hubs" and then click "Create".
+    - Fill in the required details:
+        - Resource group: Choose an existing resource group in the same region as the resources you want to monitor or create a new one.
+        - Namespace name: Enter a unique name for your namespace, such as `<orgName>-obs-signoz`.
+        - Pricing tier: Choose the appropriate pricing tier based on your logging requirements.
+        - Region: Ideally should be the same region as the resources you want to monitor.
+        - Throughput units: The throughput units determine the maximum number of events that can be processed per second. You need to choose a value that is appropriate for your logging requirements.
+    - Click "Review + create" and then "Create" to provision the Event Hubs namespace.
+2. **Create an event hub:**
+    - Once the Event Hubs namespace is created, navigate to it in the Azure portal.
+    - Click on "Event Hubs" in the left menu.
+    - Click on "+ Event Hub" to create a new event hub.
+    - Enter a name for your event hub, such as `logs`.
+    - Click "Create" to create the event hub.
+3. **Create a SAS policy for the event hub and copy the connection string:**
+    - Navigate to the Event Hubs namespace in the Azure portal.
+    - Search for "Event Hubs" in the left menu and click on it.
+    - Click on the event hub you created.
+    - Click on "Shared access policies" in the left menu.
+    - Click on "Add" to create a new policy, name the policy as `signozListen`
+    - Select the "Listen" permission and specify the expiration time for the policy.
+    - Click "Save" to create the policy.
+    - Now, click on the created policy to copy the *Connection string–primary key*. Note this connection string as you will need it to configure the Central Collector.
+3. **Configure OpenTelemetry integration:**
+    - Add a new receiver to [Central Collector Setup](../collector-setup)
+    - Configure the receiver to receive logs from Azure Event Hubs.
+    - Provide the necessary connection details, such as the Event Hubs namespace connection string and the event hub name.
+4. **Stream logs to Event Hubs:**
+    - Configure the diagnostic settings of your Azure services to forward logs to the Event Hub you created.
+    - Ensure that the logs are sent in the [Azure Common Log Format](https://learn.microsoft.com/en-us/azure/azure-monitor/essentials/resource-logs-schema) for compatibility with OpenTelemetry Receiver.
+    - Verify that logs are being successfully streamed to Event Hubs and received by SigNoz.
+
+For more detailed instructions on creating an Event Hubs namespace and event hub, refer to the Azure documentation: [Azure Event Hub](https://learn.microsoft.com/en-us/azure/event-hubs/event-hubs-create).
+
+For more configuration options for the receiver see the OpenTelemetry Documentation, [Azure Event Hub Receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/azureeventhubreceiver)  
+
+:::note
+This is a beginner-friendly guide. If you are a more advanced user, you might want to use IaC (Infrastructure as Code) to automate the deployment of the Azure resources and the OpenTelemetry Collector.
+:::
+
+## Troubleshooting
+
+If you encounter any issues during the setup process, consider the following troubleshooting steps:
+
+- Verify that you have the necessary permissions to create resources in your Azure subscription.
+- Double-check the connection details provided to SigNoz for the Event Hubs integration.
+- Ensure that your applications or logging agents are correctly configured to send logs to the specified Event Hubs namespace and event hub.
+- Check the Event Hubs metrics and logs in the Azure portal for any error messages or abnormalities.
+- Consult the SigNoz documentation or reach out to their support channels for further assistance.
+
+By following this guide and integrating Azure Event Hubs with SigNoz, you can establish a robust and scalable logging infrastructure. Centralizing your logs and enabling real-time streaming allows you to gain valuable insights, troubleshoot issues efficiently, and maintain the health and performance of your applications.
