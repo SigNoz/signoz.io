@@ -75,7 +75,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <div className="relative flex h-screen flex-col justify-between ">
               <SearchProvider searchConfig={siteMetadata.search as SearchConfig}>
                 <TopNav />
-                <main className="mb-auto mt-[64px]">{children}</main>
+                <main className="mb-auto mt-[48px]">{children}</main>
               </SearchProvider>
               <MainFooter />
             </div>
