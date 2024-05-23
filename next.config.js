@@ -80,6 +80,10 @@ module.exports = () => {
           protocol: 'https',
           hostname: 'signoz.io',
         },
+        {
+          protocol: 'https',
+          hostname: 'avatars.githubusercontent.com',
+        },
       ],
     },
     async headers() {
@@ -87,6 +91,15 @@ module.exports = () => {
         {
           source: '/(.*)',
           headers: securityHeaders,
+        },
+      ]
+    },
+    async redirects() {
+      return [
+        {
+          source: '/docs',
+          destination: '/docs/introduction',
+          permanent: true,
         },
       ]
     },
