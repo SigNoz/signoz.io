@@ -82,12 +82,6 @@ export default function TopNav() {
           >
             Customer Stories
           </Link>
-          <Link
-            href="/about-us"
-            className="hidden truncate text-sm font-semibold leading-6 xl:block"
-          >
-            Newsroom
-          </Link>
 
           <GitHubStars />
         </Popover.Group>
@@ -141,13 +135,6 @@ export default function TopNav() {
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     Pricing
-                  </Link>
-
-                  <Link
-                    href="/case-study"
-                    className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 hover:bg-signoz_ink-200"
-                  >
-                    Newsroom
                   </Link>
 
                   <div className="-mx-3 inline-block rounded-lg px-3 py-2 text-base font-semibold leading-7 hover:bg-signoz_ink-200">
