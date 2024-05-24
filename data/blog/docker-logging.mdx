@@ -1,7 +1,7 @@
 ---
 title: Docker Logging - Types, Configuring Drivers, Logging Strategies [Complete Guide]
 slug: docker-logging
-date: 2024-01-24
+date: 2024-05-16
 tags: [Tech Tutorial]
 authors: [muskan, ankit_anand]
 description: In this article, we will discuss log analysis in Docker and how logging in Docker containers is different than in other applications. These logs are specific to Docker and are stored on the Docker host. We’ll thoroughly discuss the `docker logs` command and how we can configure a logging driver for containers...
@@ -258,6 +258,25 @@ Some of them are:
 - **Data volumes**: Because containers are stateless, and to avoid losing logs data, you can bind the container’s directory to the host OS directory. Containers can now be terminated or shut down, and access logs from multiple containers. You can run a regular backup in order to prevent data corruption or loss in case of failure.
 
 - **Docker logging driver**: This type has already been discussed in detail. The configured driver reads the data broadcast by the container’s **`stdout`** or **`stderr`** streams and writes it to a file on the host machine. You can then send this log data anywhere you want to.
+
+
+- **Sidecar pattern:** The sidecar pattern involves running a separate container alongside the main application container. This container performs a specific function, such as logging, monitoring, or caching. This approach allows for better separation of concerns, where each container has a single responsibility.
+
+- **Dedicated logging containers:** This strategy is similar to the sidecar pattern, but instead of having a dedicated logging container for each application, you have a pool of logging containers serving multiple applications. This approach can be more resource-efficient than the single sidecar per application approach.
+
+- **Centralized Logging:** This involves aggregating logs from multiple sources (containers, hosts, services) into a single, unified logging system. This makes it easier to search, analyze, and monitor logs.
+
+### Choosing the Right Logging Strategy
+
+Selecting the appropriate logging strategy for your Dockerized applications is necessary for effective monitoring, debugging, and maintenance. The best logging strategy will depend on several factors, including the scale of your deployment, the complexity of your applications, the infrastructure, and your specific logging requirements. Here's a general guide to help you choose:
+
+- If isolating log data from your application is your concern, the **sidecar approach** is well-suited.
+- Use **dedicated logging containers** for scenarios where portability, resource efficiency, and scalability are priorities.
+- If you need to integrate your log data with existing logging solutions or send logs to remote storage or analysis services, using a **logging driver** can streamline this process.
+- For large and dynamic environments with numerous containers and services, a **centralized logging** solution is the best option.
+- To ensure log data persistence across container restarts and failures, use **data volumes**.
+- For applications with specific, complex logging requirements, use the **application logging** strategy.
+- If you require advanced log management features, analysis tools, and alerting capabilities, a **centralized logging** solution is an excellent choice.
 
 ## Final Thoughts
 
