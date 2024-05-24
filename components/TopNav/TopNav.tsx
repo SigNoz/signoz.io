@@ -169,7 +169,8 @@ export default function TopNav() {
                   >
                     <MoveLeft size={16} /> Back to main menu
                   </div>
-                  <DocsSidebar />
+
+                  <DocsSidebar onNavItemClick={() => setMobileMenuOpen(false)} />
                 </div>
               )}
             </div>
