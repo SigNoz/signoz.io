@@ -20,10 +20,10 @@ export async function generateMetadata({
 
   return {
     title: post?.title,
-    description: post.description,
+    description: post?.description,
     openGraph: {
       title: post?.title,
-      description: post.description,
+      description: post?.description,
       siteName: siteMetadata.title,
       locale: 'en_US',
       type: 'article',
