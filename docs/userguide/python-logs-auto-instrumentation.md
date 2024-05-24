@@ -3,6 +3,9 @@ title: Python Logs Auto-Instrumentation
 id: python-logs-auto-instrumentation
 ---
 
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
 # Collecting Python Application Logs Using Auto-Instrumentation
 
 If you are using python auto-instrumentation for instrumenting your python application you can send logs to SigNoz easily with auto-instrumentation.
@@ -57,7 +60,9 @@ You will be able to see the otel logs on the console once you visit `http://loca
 
 If you want to send data to SigNoz cloud or self host SigNoz the run command will change and will be described in the next steps
 
-# For SigNoz Cloud 
+
+<Tabs>
+<TabItem value="cloud" label="SigNoz Cloud" default>
 
 For SigNoz Cloud the run command will be
 ```bash
@@ -76,8 +81,9 @@ opentelemetry-instrument --traces_exporter otlp --metrics_exporter otlp --logs_e
 
 * The value of `INGESTION_KEY`  is your ingestion key
 
+</TabItem>
 
-# For SigNoz Self-Hosted 
+<TabItem value="self-host" label="Self-Host">
 
 For SigNoz Cloud the run command will be
 ```bash
@@ -87,3 +93,6 @@ opentelemetry-instrument --traces_exporter otlp --metrics_exporter otlp --logs_e
 ```
 * The value of `OTLP_ENDPOINT` will be you otlp receiver endpoint
 * You might need to add `OTEL_EXPORTER_OTLP_INSECURE=true` if your endpoint is not secured.
+
+</TabItem>
+</Tabs>
