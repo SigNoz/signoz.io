@@ -8,6 +8,7 @@ import type { Doc } from 'contentlayer/generated'
 import DocLayout from '@/layouts/DocLayout'
 import { Metadata } from 'next'
 import siteMetadata from '@/data/siteMetadata'
+import React from 'react'
 
 export async function generateMetadata({
   params,
@@ -44,8 +45,9 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
   const slug = decodeURI(params.slug.join('/'))
   const post = allDocs.find((p) => p.slug === slug) as Doc
   const mainContent = coreContent(post)
-
   const Layout = DocLayout
+
+  console.log('post', slug)
 
   return (
     <>
