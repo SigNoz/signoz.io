@@ -14,16 +14,16 @@ function Footer() {
           <div className="flex gap-5 max-md:flex-col max-md:gap-0">
             <div className="flex w-3/12 flex-col max-md:ml-0 max-md:w-full">
               <div className="flex flex-col pb-2.5 text-sm tracking-wide text-stone-300 max-md:mt-10">
-                <div className="text-sm font-semibold uppercase leading-5 tracking-wide text-gray-700">
+                <div className="text-sm font-semibold uppercase leading-5 tracking-wide">
                   Docs
                 </div>
-                <Link href="/docs/" className="mt-5">
+                <Link href="/docs/" className="mt-5 hover:underline">
                   Introduction
                 </Link>
-                <Link href="/docs/contributing/" className="mt-5">
+                <Link href="/docs/contributing/" className="mt-5 hover:underline">
                   Contributing
                 </Link>
-                <div className="mt-5 flex items-center gap-2 pr-7 max-md:pr-5">
+                <div className="mt-5 flex items-center gap-2 pr-7 max-md:pr-5 hover:underline">
                   <Link href="https://knowledgebase.signoz.io/kb" target="_blank">
                     Knowledge Base
                   </Link>
@@ -33,23 +33,23 @@ function Footer() {
             </div>
             <div className="ml-5 flex w-3/12 flex-col max-md:ml-0 max-md:w-full">
               <div className="flex grow flex-col self-stretch pb-20 text-sm tracking-wide text-stone-300 max-md:mt-10">
-                <div className="text-sm font-semibold uppercase leading-5 tracking-wide text-gray-700">
+                <div className="text-sm font-semibold uppercase leading-5 tracking-wide">
                   Community
                 </div>
 
-                <div className="mt-5 flex items-center gap-2 pr-7 max-md:pr-5">
+                <div className="mt-5 flex items-center gap-2 pr-7 max-md:pr-5 hover:underline">
                   <Link href="https://signoz.io/slack" target="_blank">
                     Slack
                   </Link>
                   <ArrowUpRight size={16} />
                 </div>
-                <div className="mt-5 flex items-center gap-2 whitespace-nowrap pr-8 max-md:pr-5">
+                <div className="mt-5 flex items-center gap-2 whitespace-nowrap pr-8 max-md:pr-5 hover:underline">
                   <Link href="https://twitter.com/SigNozHQ" target="_blank">
                     Twitter
                   </Link>
                   <ArrowUpRight size={16} />
                 </div>
-                <div className="mt-5 flex items-center gap-2 whitespace-nowrap pr-8 max-md:pr-5">
+                <div className="mt-5 flex items-center gap-2 whitespace-nowrap pr-8 max-md:pr-5 hover:underline">
                   <Link href="https://community-chat.signoz.io/" target="_blank">
                     Community Archive
                   </Link>
@@ -59,41 +59,41 @@ function Footer() {
             </div>
             <div className="ml-5 flex w-3/12 flex-col max-md:ml-0 max-md:w-full">
               <div className="flex grow flex-col self-stretch pb-20 text-sm tracking-wide text-stone-300 max-md:mt-10">
-                <div className="text-sm font-semibold uppercase leading-5 tracking-wide text-gray-700">
+                <div className="text-sm font-semibold uppercase leading-5 tracking-wide">
                   More
                 </div>
 
-                <Link href="/product-comparison/signoz-vs-datadog/" className="mt-5">
+                <Link href="/product-comparison/signoz-vs-datadog/" className="mt-5 hover:underline">
                   SigNoz vs Datadog
                 </Link>
-                <Link href="/product-comparison/signoz-vs-newrelic/" className="mt-5">
+                <Link href="/product-comparison/signoz-vs-newrelic/" className="mt-5 hover:underline">
                   SigNoz vs New Relic
                 </Link>
-                <Link href="/product-comparison/signoz-vs-grafana/" className="mt-5">
+                <Link href="/product-comparison/signoz-vs-grafana/" className="mt-5 hover:underline">
                   SigNoz vs Grafana
                 </Link>
-                <Link href="/product-comparison/signoz-vs-dynatrace/" className="mt-5">
+                <Link href="/product-comparison/signoz-vs-dynatrace/" className="mt-5 hover:underline">
                   SigNoz vs Dynatrace
                 </Link>
 
-                <div className="mt-5 flex items-center gap-2 whitespace-nowrap pr-8 max-md:pr-5">
+                <div className="mt-5 flex items-center gap-2 whitespace-nowrap pr-8 max-md:pr-5 hover:underline">
                   <Link href="https://jobs.gem.com/signoz" target="_blank">
                     Careers
                   </Link>
                   <ArrowUpRight size={16} />
                 </div>
 
-                <Link href="/about-us" className="mt-5">
+                <Link href="/about-us" className="mt-5 hover:underline ">
                   About
                 </Link>
-                <Link href="/terms-of-service" className="mt-5">
+                <Link href="/terms-of-service" className="mt-5 hover:underline">
                   Terms
                 </Link>
-                <Link href="/privacy" className="mt-5">
+                <Link href="/privacy" className="mt-5 hover:underline">
                   Privacy
                 </Link>
 
-                <Link href="/security" className="mt-5">
+                <Link href="/security" className="mt-5 hover:underline">
                   Security & Compliance
                 </Link>
               </div>
