@@ -69,7 +69,7 @@ And so we kind of stepped in in the middle there and said, hey, there's this adv
 
 <YouTube id="ISPfqGmJGYE" mute={false} />
 
-<p>&nbsp;</p>
+
 
 Yes, absolutely! With SigNoz, we are currently doing about 13 million to 40 million spans per hour which varies with the time of the day. The number goes up during the day quite a bit, up to ~40mn spans/hr, and it's like 13 million spans or so during the night. We have primarily instrumented our backend services.
 
@@ -96,7 +96,7 @@ But what happened behind the scenes was nebulous. For example, we knew it was ta
     <figcaption><i>Trace filters helps you find interesting spans quickly, which you can dive deeper into </i></figcaption>
 </figure>
 
-<p>&nbsp;</p>
+
 
 ### _Logs did not solve the problem._
 
@@ -123,7 +123,7 @@ But now we know how to avoid such things. For example, an endpoint came up just 
     <figcaption><i>N+1 queries are suboptimal and can lead to significant perf impact</i></figcaption>
 </figure>
 
-<p>&nbsp;</p>
+
 
 SigNoz showed me that if someone hits this particular endpoint with a particular campaign with a specific amount of data, it leads to 100 SQL queries in a single request. So if you do a `select` query on all of the rows you're looking for in the database in one go, it creates one SQL query. It takes like 5 seconds to complete, which is not great, but it's not terrible.
 
@@ -135,7 +135,7 @@ And by seeing the trace details in SigNoz, I showed the developers what exactly 
 
 <YouTube id="8b3rutiPnTc" mute={false} />
 
-<p>&nbsp;</p>
+
 
 Sure, we tried Jaeger before, but I think the OpenTelemetry packages were a little bit forked at that time or something.
 
@@ -178,7 +178,7 @@ The second feature that we use the most is the application metrics page which sh
     <figcaption><i>SigNoz Service Map shows a birds eye view of your architecture</i></figcaption>
 </figure>
 
-<p>&nbsp;</p>
+
 
 ### _Any advice for teams trying to set up their observability systems?_
 
@@ -188,7 +188,7 @@ The second thing I would suggest is that if you have a place where there's a com
 
 If you have to instrument one place, make sure you instrument the place where everything enters your system. So if there's a routing handling system, or if there's a piece of code that handles requests, you can wrap that in a single span, and then all of those database calls get tied together, and it's wonderful.
 
-<p>&nbsp;</p>
+
 
 ---
 

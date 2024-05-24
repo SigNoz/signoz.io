@@ -78,17 +78,22 @@ We need to modify the values.yaml file:
 3. Enable serviceMonitor for exposing Jaeger related metrics to Prometheus
 
 ```
-   serviceMonitor:
-   enabled: true
-   additionalLabels: {release: prometheus}
+serviceMonitor:
+enabled: true
+additionalLabels: {release: prometheus}
 ```
 
 4. Enable sample application already instrumented to send metrics to jaeger-agent. Read the full blog post on [this medium blog](https://medium.com/opentracing/take-opentracing-for-a-hotrod-ride-f6e3141f7941). For now, we just need to set `hotrod.enabled=true`
 
 With the new values.yaml file, install Jaeger with the below command:
-`helm install jaeger jaegertracing/jaeger -f values.yaml`
+```
+helm install jaeger jaegertracing/jaeger -f values.yaml
+```
 
-Watch status of pods by running `kubectl get pods -w`
+Watch status of pods by running 
+```
+kubectl get pods -w
+```
 
 Now wait for Cassandra cluster to get ready. The collector and query service will restart several times before the DB is ready.
 
@@ -100,11 +105,16 @@ Looking at schema creation script at [Jaeger Repo](https://github.com/jaegertrac
 
 The Replication Factor is 2 and LZ4Compressor is used to compress trace data.
 
-Now run, `kubectl exec -it jaeger-cassandra-0 /bin/bash` to get into the Cassandra container and then run `nodetool status`, the below is the result:
+Now run, 
+```
+kubectl exec -it jaeger-cassandra-0 /bin/bash
+``` 
+
+to get into the Cassandra container and then run `nodetool status`, the below is the result:
 ![result of nodetool status](/img/blog/2020/04/Screenshot-2020-04-30-at-8.08.12-PM.webp)Result of nodetool status
 Load Column shows the space consumed in each disk attached to Cassandra node. Owns column is around 67% which is correct since the replication factor is 2 and the number of nodes is 3. Hence 2/3 of data is in each node.
 
-**Table Names: **dependencies_v2, duration_index, operation_names_v2, service_name_index, service_names, service_operation_index, tag_index, traces
+**Table Names:** dependencies_v2, duration_index, operation_names_v2, service_name_index, service_names, service_operation_index, tag_index, traces
 
 ### Sample application to see tracing in work
 
@@ -113,11 +123,20 @@ We enabled HotROD application while installing Jaeger from helm chart, remember?
 [![OpenTracing for HOT ROD](/img/blog/2020/05/opentracing_hotrod.webp)](https://medium.com/opentracing/take-opentracing-for-a-hotrod-ride-f6e3141f7941)
 
 To access the UI of the HotROD application run
-`kubectl port-forward svc/jaeger-hotrod 4000:80`. The below screen will be visible. Click on a few buttons and check whether you get a response about a driver arriving in some time, something like below.
+```
+kubectl port-forward svc/jaeger-hotrod 4000:80
+```
+
+The below screen will be visible. Click on a few buttons and check whether you get a response about a driver arriving in some time, something like below.
 
 ![Landing page of hotrod application](/img/blog/2020/04/Screenshot-2020-04-30-at-7.21.15-PM.webp)Landing Page of HotROD application
 
-Now to access the Jaeger UI run `kubectl port-forward svc/jaeger-query 8080:80`. You will see a dashboard like below:
+Now to access the Jaeger UI run 
+```
+kubectl port-forward svc/jaeger-query 8080:80
+``` 
+
+You will see a dashboard like below:
 
 ![Traces of customer service](/img/blog/2020/04/Screenshot-2020-04-30-at-7.23.54-PM.webp)Traces of customer service
 
@@ -132,12 +151,16 @@ The left-hand side panel will show you some filters to apply to your traces. Fro
 From the right panel of dashboard, you can choose to order traces based on the longest trace or most number of spans or most recent traces.
 
 Now, click on a trace to view the details of a single trace. An individual trace consists of many spans where each span represents a unit of operation performed by the application like calling mysql or redis or other services. The spans have parent-child relationships and correctly represent the order of execution (sequential or parallel) along with the time taken by each span.
+
 ![Waterfall view of a single trace with multiple spans](/img/blog/2020/04/Screenshot-2020-04-30-at-7.37.36-PM.webp)Waterfall view of a single trace with multiple spans
+
 Clicking on span from mysql service shows the exact query executed and the time it takes. Ideally, you should mask queries that have personal data. You need to check how this is handled with Jaeger instrumentation or from the collector side.
+
 ![span from mysql service](/img/blog/2020/04/Screenshot-2020-04-30-at-7.47.21-PM.webp)span from mysql service showing exact query and latency
+
 The below image shows the left panel of Jaeger-UI in detail. You can filter to see traces of mysql service which took more than 1s by choosing **Service** and **Min Duration** filter.
 
-You can also filter based on **Operation** of that service and if you wish to see all the traces where mysql service responded with an error, just set the **Tags **filter with value **error=true. **We can also filter based on various other tags that you have instrumented.
+You can also filter based on **Operation** of that service and if you wish to see all the traces where mysql service responded with an error, just set the **Tags** filter with value **error=true.** We can also filter based on various other tags that you have instrumented.
 
 
 
@@ -159,17 +182,28 @@ Since we now know that instrumentation plays a big role in being able to filter 
 
 ### Monitor Jaeger using Prometheus and Grafana
 
-Run `kubectl port-forward svc/prometheus-grafana 3000:80` to proxy to grafana dashboard installed in your Kubernetes cluster. At the login page fill the below credentials which is the default setting when installing prometheus-operator:
+Run 
+```
+kubectl port-forward svc/prometheus-grafana 3000:80
+``` 
+to proxy to grafana dashboard installed in your Kubernetes cluster. At the login page fill the below credentials which is the default setting when installing prometheus-operator:
 
-    username: admin
-    password prom-operator
+```
+username: admin
+password prom-operator
+```
 
-Go to Dashboards -> import and add id `10001` and choose data source as Prometheus. The publicly available dashboard can be found at [this link](https://grafana.com/grafana/dashboards/10001). You need to generate a sufficient amount of traffic to your sample application to get such graphs. These graphs do not correspond to the default installation of HotROD application.
+Go to Dashboards -> import and add id `10001` and choose data source as Prometheus. The publicly available dashboard can be found at [this link](https://grafana.com/grafana/dashboards/10001). You need to generate a sufficient amount of traffic to your sample application to get such graphs. 
+
+These graphs do not correspond to the default installation of HotROD application.
 ![Metrics dashboard](/img/blog/2020/04/Screenshot-2020-04-30-at-9.36.33-PM.webp)Metrics Dashboard for Jaeger Collector
-The above dashboard is of **Jaeger Collector **which displays:
+
+The above dashboard is of **Jaeger Collector** which displays:
 
 - Spans received per second
-  `sum(rate(jaeger_collector_spans_received_total[5m]))`
+  ```
+  sum(rate(jaeger_collector_spans_received_total[5m]))
+  ```
 - Average in-queue latency
 - Batch size of spans
 - Queue length
@@ -177,18 +211,28 @@ The above dashboard is of **Jaeger Collector **which displays:
 - Latency to save span to DB
 
 ![metrics dashboard for jaeger agent](/img/blog/2020/04/Screenshot-2020-04-30-at-7.57.00-PM.webp)Metrics Dashboard for Jaeger Agent
-Similar important metrics for **Jaeger Agent **around reporter spans submitted and batch size is displayed in the image above. Among other metrics are HTTP and UDP requests and drop rate of spans. Configure an alert on these metrics at a threshold you are comfortable with.
+Similar important metrics for **Jaeger Agent** around reporter spans submitted and batch size is displayed in the image above. Among other metrics are HTTP and UDP requests and drop rate of spans. Configure an alert on these metrics at a threshold you are comfortable with.
 
 Latency and Request rate to query service is also there in the dashboard to keep track of UI access.
 ![Metrics of cassandra usage](/img/blog/2020/04/Screenshot-2020-04-30-at-9.29.11-PM.webp)Metrics of Cassandra usage by Jaeger
 Above image shows how to monitor **Cassandra** usage by Jaeger:
 
-- Write Error Rate `sum(rate(jaeger_cassandra_errors_total[5m]))*100/sum(rate(jaeger_cassandra_attempts_total[5m]))`
-- Read Error Rate `sum(rate(jaeger_cassandra_read_errors_total[5m]))*100/sum(rate(jaeger_cassandra_read_attempts_total[5m]))`
+- Write Error Rate 
+  ```
+  sum(rate(jaeger_cassandra_errors_total[5m]))*100/sum(rate(jaeger_cassandra_attempts_total[5m]))
+  ```
+- Read Error Rate 
+  ```
+  sum(rate(jaeger_cassandra_read_errors_total[5m]))*100/sum(rate(jaeger_cassandra_read_attempts_total[5m]))
+  ```
 - Write Duration by table
-  `increase(jaeger_cassandra_latency_ok_sum[5m])/increase(jaeger_cassandra_latency_ok_count[5m])`
+  ```
+  increase(jaeger_cassandra_latency_ok_sum[5m])/increase(jaeger_cassandra_latency_ok_count[5m])
+  ```
 - Writes per second by table
-  `sum(rate(jaeger_cassandra_inserts_total[5m])) by (table)`
+  ```
+  sum(rate(jaeger_cassandra_inserts_total[5m])) by (table)
+  ```
 
 ### How to find issues from the Flame graph
 
@@ -198,33 +242,33 @@ Chapter 9 from this book from Yuri Shkuro, the author of Jaeger gives details on
 
 - **Look For Error Markers**
 
-![Error in a span](/img/blog/2020/04/image-2.webp)Error in a span
-The spans with tag `error=true` are marked in red and can provide useful information about the error in the logs section or other tags.
+  ![Error in a span](/img/blog/2020/04/image-2.webp)Error in a span
+  The spans with tag `error=true` are marked in red and can provide useful information about the error in the logs section or other tags.
 
 - **Look for the longest span on the critical path**
 
-![optimising for the longest span](/img/blog/2020/04/image.webp)Optimising for the longest span
-Optimising time taken by the longest span in the trace would help the most in reducing the trace time.
+  ![optimising for the longest span](/img/blog/2020/04/image.webp)Optimising for the longest span
+  Optimising time taken by the longest span in the trace would help the most in reducing the trace time.
 
 - **Look out for the missing details**
 
-![look out for missing details](/img/blog/2020/04/image-1.webp)Instrumentation gap
-Probably the server was waiting on a database query and our database driver is not instrumented for tracing. Whenever a considerable portion of the trace is unaccounted for, ask for instrumentation.
+  ![look out for missing details](/img/blog/2020/04/image-1.webp)Instrumentation gap
+  Probably the server was waiting on a database query and our database driver is not instrumented for tracing. Whenever a considerable portion of the trace is unaccounted for, ask for instrumentation.
 
 - **Avoid Sequential Execution Or "STAIRCASE"**
 
-![sequential execution](/img/blog/2020/04/image-3.webp)Sequential Execution
-The staircase pattern means sequential execution. This may require a deeper look into whether it is intended or it is happening unintentionally, if such, there lies a scope of improvement.
-For example, I have seen many times where using an \***\*object-relational mapping\*\*** (\***\*ORM\*\***) library has produced the "staircase" pattern without the developer even realizing that it is happening.
+  ![sequential execution](/img/blog/2020/04/image-3.webp)Sequential Execution
+  The staircase pattern means sequential execution. This may require a deeper look into whether it is intended or it is happening unintentionally, if such, there lies a scope of improvement.
+  For example, I have seen many times where using an **object-relational mapping** (**ORM**) library has produced the "staircase" pattern without the developer even realizing that it is happening.
 
 - **Be wary when things finish at exactly the same time**
 
-![spans finishing at the same time](/img/blog/2020/04/image-4.webp)Spans finishing at same time
-What could cause a series of spans to finish at **exactly** the same time? One possible explanation is when the system supports timeouts with cancellations. In the _above figure_, the top-level span may have been waiting for the four tasks to finish, but since they did not complete in the allotted timeframe, it canceled them and aborted the whole request. In this scenario, we may want to tune the timeout parameter or to investigate why the individual work units were taking longer than anticipated.
+  ![spans finishing at the same time](/img/blog/2020/04/image-4.webp)Spans finishing at same time
+  What could cause a series of spans to finish at **exactly** the same time? One possible explanation is when the system supports timeouts with cancellations. In the _above figure_, the top-level span may have been waiting for the four tasks to finish, but since they did not complete in the allotted timeframe, it canceled them and aborted the whole request. In this scenario, we may want to tune the timeout parameter or to investigate why the individual work units were taking longer than anticipated.
 
-Another example where we can observe this pattern is when there is a resource contention and all the requests are waiting on some lock, such as a long-running database transaction from another request that locked the table. Once the lock is released, our units of work can complete quickly. We may want to investigate what it is that is blocking all these spans, by adding additional instrumentation.
+  Another example where we can observe this pattern is when there is a resource contention and all the requests are waiting on some lock, such as a long-running database transaction from another request that locked the table. Once the lock is released, our units of work can complete quickly. We may want to investigate what it is that is blocking all these spans, by adding additional instrumentation.
 
-[![SigNoz GitHub repo](/img/blog/common/signoz_github.webp)](https://github.com/SigNoz/signoz)
+  [![SigNoz GitHub repo](/img/blog/common/signoz_github.webp)](https://github.com/SigNoz/signoz)
 
 ## Conclusion
 

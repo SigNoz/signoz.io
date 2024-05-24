@@ -104,7 +104,7 @@ SigNoz provides that option where you can connect your S3 to ClickHouse and conf
 
 Now with open telemetry becoming a standard, which supports all kinds of programming languages, you don't have to worry about how we are exporting the data. The devops teams should focus on the right tools to store the data and visualising it.
 
-<p>&nbsp;</p>
+
 
 ---
 

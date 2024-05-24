@@ -108,8 +108,8 @@ We also need to enable ha-tracker mode in distributor of Cortex. Open `k8s-cassa
 We shall use `apache2-utils` to add authentication to NGINX. I shall demonstrate a POC for authentication. Install the above package by:
 
 ```
-    apt-get update
-    apt-get install apache2-utils
+apt-get update
+apt-get install apache2-utils
 ```
 
 You can try the above commands in your local machine.
@@ -157,42 +157,42 @@ auth_basic_user_file /etc/serviceproxy/htpasswd;
 Now change the _k8s-cassandra/nginx-dep.yaml_ to mount htpasswd file with username and password.
 
 ```
-    ---
-    apiVersion: extensions/v1beta1
-    kind: Deployment
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: nginx
+spec:
+  replicas: 1
+  template:
     metadata:
-      name: nginx
+      labels:
+        name: nginx
+      annotations:
+        prometheus.io.scrape: "false"
     spec:
-      replicas: 1
-      template:
-        metadata:
-          labels:
+      containers:
+      - name: nginx
+        image: nginx
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http
+          containerPort: 80
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/nginx
+        - name: htpasswd
+          mountPath: /etc/serviceproxy/
+      volumes:
+        - name: config-volume
+          configMap:
             name: nginx
-          annotations:
-            prometheus.io.scrape: "false"
-        spec:
-          containers:
-          - name: nginx
-            image: nginx
-            imagePullPolicy: IfNotPresent
-            ports:
-            - name: http
-              containerPort: 80
-            volumeMounts:
-            - name: config-volume
-              mountPath: /etc/nginx
-            - name: htpasswd
-              mountPath: /etc/serviceproxy/
-          volumes:
-            - name: config-volume
-              configMap:
-                name: nginx
-            - name: htpasswd
-              configMap:
-                name: basicauth
-                items:
-                - key: htpasswd
-                  path: htpasswd
+        - name: htpasswd
+          configMap:
+            name: basicauth
+            items:
+            - key: htpasswd
+              path: htpasswd
 ```
 
 > Scope of improvement -> add config reloader to dynamically add users

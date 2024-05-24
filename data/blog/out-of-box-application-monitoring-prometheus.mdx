@@ -116,17 +116,24 @@ We build on top of Prometheus. All these features are pluggable to already runni
 
 1. Install signoz agent
 
-`helm install stable/signoz-agent --name=signoz-agent --set cluster.name=demo-cluster-1 --set agent.licence=xxxxxxxxx`
+```
+helm install stable/signoz-agent --name=signoz-agent --set cluster.name=demo-cluster-1 --set agent.licence=xxxxxxxxx
+```
 
 2. Install Prometheus
 
-`helm install stable/promethues --name=prom-demo` We need to set a few flags like setting external_labels cluster and replica, remote_write details:
+```
+helm install stable/promethues --name=prom-demo
+``` 
 
+We need to set a few flags like setting external_labels cluster and replica, remote_write details:
+```
     --set server.global.external_labels.cluster=demo-cluster-1 \
     --set server.global.external_labels.replica=two
     --set serverFiles."prometheus\.yml".remote_write[0].url=xxxxx
     --set serverFiles."prometheus\.yml".remote_write[0].basic_auth.username=x
     --set serverFiles."prometheus\.yml".remote_write[0].basic_auth.password=x
+```
 
 - Remote Write url will send your samples to Cortex for long term storage
 - Setting flag cluster will let you aggregate metrics across clusters
@@ -137,7 +144,7 @@ We build on top of Prometheus. All these features are pluggable to already runni
 > We have separate packages for different languages and thus enabling a wide variety of technologies in Python, NodeJs, Java, etc
 
 4.  Setup a few environment variables in  your* deployment.yaml*
-
+```
             env:
               - name: NODE_IP
                 valueFrom:
@@ -147,6 +154,7 @@ We build on top of Prometheus. All these features are pluggable to already runni
               	value: signoz
               - name: APP_NAME
               	value: payment
+```
 
 - **NODE_IP** for the sensor to communicate with the agent
 - **AUTOWRAPT_BOOTSTRAP** to enable sensor
