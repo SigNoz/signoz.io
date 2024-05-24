@@ -12,7 +12,7 @@ const docsSideNav = [
       {
         type: 'category',
         label: 'Installation',
-        route: '/docs/install/install',
+        route: '/docs/install',
         // link: {
           // type: 'doc',
           // route: '/docs/install/install',
@@ -29,7 +29,7 @@ const docsSideNav = [
           {
             type: 'category',
             label: 'Self-Host SigNoz',
-            route: '',
+            // route: '',
             items: [
               {
                 type: 'doc',
@@ -44,7 +44,7 @@ const docsSideNav = [
               {
                 type: 'category',
                 label: 'Kubernetes',
-                route: '/docs/install/kubernetes/kubernetes',
+                route: '/docs/install/kubernetes',
                 // link: {
                 // type: 'generated-index',
                 // title: 'Kubernetes',
@@ -80,7 +80,7 @@ const docsSideNav = [
           {
             type: 'category',
             label: 'Install OTel collector',
-            route: '',
+            // route: '',
             items: [
               {
                 route: '/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/',
@@ -138,7 +138,7 @@ const docsSideNav = [
   {
     label: 'APM & Distributed Tracing',
     type: 'category',
-    route: '',
+    // route: '',
     items: [
       {
         type: 'doc',
@@ -148,7 +148,7 @@ const docsSideNav = [
       {
         label: 'Instrument Application',
         type: 'category',
-        route: '/docs/instrumentation/instrumentation',
+        route: '/docs/instrumentation',
         // link: {
         // type: 'generated-index',
         // title: 'Instrument your Application',
@@ -289,7 +289,7 @@ const docsSideNav = [
       {
         type: 'category',
         label: 'APM Product Overview',
-        route: '',
+        // route: '',
         items: [
           {
             type: 'doc',
@@ -321,7 +321,7 @@ const docsSideNav = [
       {
         type: 'category',
         label: 'Trace API',
-        route: '',
+        // route: '',
         items: [
           {
             type: 'doc',
@@ -348,7 +348,7 @@ const docsSideNav = [
       {
         type: 'category',
         label: 'Tutorials',
-        route: '',
+        // route: '',
         items: [
           {
             type: 'doc',
@@ -372,7 +372,7 @@ const docsSideNav = [
   {
     label: 'Infrastructure Monitoring',
     type: 'category',
-    route: '',
+    // route: '',
     items: [
       {
         type: 'doc',
@@ -414,7 +414,7 @@ const docsSideNav = [
   {
     label: 'Logs Management',
     type: 'category',
-    route: '',
+    // route: '',
     items: [
       {
         type: 'doc',
@@ -555,7 +555,7 @@ const docsSideNav = [
       {
         type: 'category',
         label: 'Features',
-        route: '',
+        // route: '',
         items: [
           {
             type: 'doc',
@@ -577,7 +577,7 @@ const docsSideNav = [
       {
         type: 'category',
         label: 'Logs API',
-        route: '',
+        // route: '',
         items: [
           {
             type: 'doc',
@@ -616,7 +616,7 @@ const docsSideNav = [
   {
     label: 'Dashboards & Querying',
     type: 'category',
-    route: '',
+    // route: '',
     items: [
       {
         type: 'doc',
@@ -753,7 +753,7 @@ const docsSideNav = [
   {
     label: 'Security & Compliance',
     type: 'category',
-    route: '',
+    // route: '',
     items: [
       //     'userguide/overview',
       {
@@ -850,7 +850,7 @@ const docsSideNav = [
   {
     label: 'AWS Monitoring',
     type: 'category',
-    route: '',
+    // route: '',
     items: [
       //'aws/getting-started',
       {
@@ -1058,7 +1058,7 @@ const docsSideNav = [
       {
         type: 'category',
         label: 'Migration Guides',
-        route: '/docs/operate/migration/migrate',
+        route: '/docs/operate/migration',
         // link: {
         // type: 'generated-index',
         // title: 'Migration Guides',
