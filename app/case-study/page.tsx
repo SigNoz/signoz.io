@@ -45,7 +45,7 @@ function caseStudies() {
                 </div>
 
                 <div className="card__footer">
-                  <a className="button button--primary" href="/case-study/blip/">
+                  <a className="button button--primary" href="/case-study/blip">
                     Read more
                   </a>
                 </div>
