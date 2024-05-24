@@ -52,15 +52,15 @@ To follow along with this tutorial, you need to have a basic knowledge of Flask.
 First, initiate a new project with a new virtual environment with Python 3 and an upgraded version of pip:
 
 ```bash
-$ python3 -m venv venv
-$ . venv/bin/activate
-$ pip install --upgrade pip
+python3 -m venv venv
+. venv/bin/activate
+pip install --upgrade pip
 ```
 
 and install Flask, Celery, and Redis: (The following command includes the versions we’re using for this tutorial)
 
 ```bash
-$ pip install celery==4.4.1 Flask==1.1.1 redis==3.4.1
+pip install celery==4.4.1 Flask==1.1.1 redis==3.4.1
 ```
 
 ## Running Redis locally
@@ -68,24 +68,24 @@ $ pip install celery==4.4.1 Flask==1.1.1 redis==3.4.1
 Run the Redis server on your local machine (assuming Linux or macOS) using the following <a href = "https://redis.io/docs/getting-started/installation/install-redis-from-source/" rel="noopener noreferrer nofollow" target="_blank">commands</a>:
 
 ```bash
-$ wget http://download.redis.io/redis-stable.tar.gz
-$ tar xvzf redis-stable.tar.gz
-$ rm redis-stable.tar.gz
-$ cd redis-stable
-$ make
+wget http://download.redis.io/redis-stable.tar.gz
+tar xvzf redis-stable.tar.gz
+rm redis-stable.tar.gz
+cd redis-stable
+make
 ```
 
 The compilation is done now. Some binaries are available in the `src` directory inside `redis-stable/` like `redis-server` (which is the Redis server that you will need to run) and `redis-cli` (which is the command-line client that you might need to talk to Redis).
 To run the server globally (from anywhere on your machine) instead of moving every time to the `src` directory, you can use the following command:
 
 ```bash
-$ make install
+make install
 ```
 
 The binaries of `redis-server` are now available in your `/usr/local/bin` directory. You can run the server using the following command:
 
 ```bash
-$ redis-server
+redis-server
 ```
 
 The server is now running on port 6379 (the default port). Leave it running on a separate terminal.
@@ -121,7 +121,7 @@ Now, it's time to run the Celery worker.
 In the new terminal tab, run the following command:
 
 ```bash
-(venv) $ celery -A app.celery worker --loglevel=info
+celery -A app.celery worker --loglevel=info
 ```
 
 where `celery` is the version of Celery you're using in this tutorial (4.4.1), with the `-A` option to specify the celery instance to use (in our case, it's `celery` in the `app.py` file, so it's `app.celery`), and `worker` is the subcommand to run the worker, and `--loglevel=info` to set the verbosity log level to `INFO`.
@@ -132,7 +132,6 @@ You'll see something like the following:
     <img src="/img/blog/2022/05/celery_worker_running_terminal_screenshot.webp" alt="Screenshot of the terminal showing a running celery worker"/>
 </figure>
 
-<br></br>
 
 Let's dive into the logic inside your Flask application before running the web server.
 
@@ -161,7 +160,7 @@ Note: Don't forget to import the `jsonify` function from the `flask` module 
 Now, run the web server with the following command:
 
 ```bash
-$flask run
+flask run
 ```
 
 When you check the `localhost:5000` URL in your browser, you should see the following response:

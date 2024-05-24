@@ -98,7 +98,6 @@ SigNoz cluster architecture for the performance benchmark looks as the following
     <figcaption><i>SigNoz setup for logs performance benchmark</i></figcaption>
 </figure>
 
-<br></br>
 
 The three VMs are generating logs and sending it to signoz-otel-collector using OTLP. The reason we are using OTEL collectors on the receiver side instead of directly writing to ClickHouse from the generator VMs is that the OTEL collectors running in the generator VM's may or may not be the distribution from SigNoz.
 
@@ -115,7 +114,6 @@ Elasticsearch cluster architecture for the performance benchmark looks as the fo
     <figcaption><i>ElasticSearch setup for logs performance benchmark</i></figcaption>
 </figure>
 
-<br></br>
 
 In the three generators’ virtual machines, the logs are generated using flog, and these logs are sent to Logstash in each of the VMs using TCP protocol. The Logstash agent in each virtual machine is writing the data to Elasticsearch deployed in the host VM. Here, Elasticsearch uses a dynamic indexing template to index all the fields in the logs.
 
@@ -130,7 +128,6 @@ Loki cluster architecture for the performance benchmark looks as the following:
     <figcaption><i>Loki setup for logs performance benchmark</i></figcaption>
 </figure>
 
-<br></br>
 
 Here we have used only two `flog` containers for generating logs. If we try to increase the number of `flog` containers, Loki errors out with `max` stream errors as the number of files increases and thus resulting in a higher number of streams. Also we were able to only index two attributes which are **protocol and method**. If we try to create more labels, it reaches `max` stream error.
 
@@ -155,21 +152,18 @@ Now let's go through each of them individually.
     <figcaption><i>SigNoz insertion speed(count/sec)</i></figcaption>
 </figure>
 
-<br></br>
 
 <figure data-zoomable align='center'>
     <img src="/img/blog/2022/12/elk-indexing-rate.webp" alt="ElasticSearch indexing rate. (count/sec)"/>
     <figcaption><i>ElasticSearch indexing rate. (count/sec)</i></figcaption>
 </figure>
 
-<br></br>
 
 <figure data-zoomable align='center'>
     <img src="/img/blog/2022/12/loki_insertion_speed.webp" alt="Loki insertion speed(count/sec)"/>
     <figcaption><i>Loki insertion speed(count/sec)</i></figcaption>
 </figure>
 
-<br></br>
 
 From the above three graphs of SigNoz, Elasticsearch and Loki we can see that the number of log lines inserted by each is about 55K/s, 20K/s, and 21K/s respectively.
 
@@ -184,21 +178,18 @@ Many a times, ingestion processes are CPU intensive. In such scenario, an applic
     <figcaption><i>SigNoz VM using 40% of the CPU</i></figcaption>
 </figure>
 
-<br></br>
 
 <figure data-zoomable align='center'>
     <img src="/img/blog/2022/12/elk-cpu.webp" alt="ElasticSearch VM using 75% of the CPU"/>
     <figcaption><i>ElasticSearch VM using 75% of the CPU</i></figcaption>
 </figure>
 
-<br></br>
 
 <figure data-zoomable align='center'>
     <img src="/img/blog/2022/12/loki_cpu.webp" alt="Loki VM using 15% of the CPU"/>
     <figcaption><i>Loki VM using 15% of the CPU</i></figcaption>
 </figure>
 
-<br></br>
 
 From the above three graphs of CPU usage for SigNoz, Elasticsearch and Loki we can see that the CPU usage was **40%, 75%, and 15%** respectively. The high usage of Elasticsearch is mainly due to the amount of indexing and processing that it has to do internally. Since the **number of indexes is lowest in Loki**, it has to do the minimum processing because of which the usage is very low with respect to others. SigNoz CPU usage is the sum of CPU used by different components such as the three collectors used for receiving logs because of which it stands in a very good position with respect to Elasticsearch and Loki.
 
@@ -215,21 +206,18 @@ Some terminologies on how memory is measured and what the graphs below indicate:
     <figcaption><i>SigNoz VM using 20% of the available memory (~6GB out of 32 GB)</i></figcaption>
 </figure>
 
-<br></br>
 
 <figure data-zoomable align='center'>
     <img src="/img/blog/2022/12/elk-memory-new.webp" alt="ElasticSearch VM using 60% of the available memory"/>
     <figcaption><i>ElasticSearch VM using 60% of the available memory (~18GB out of 32 GB)</i></figcaption>
 </figure>
 
-<br></br>
 
 <figure data-zoomable align='center'>
     <img src="/img/blog/2022/12/loki-memory-new.webp" alt="Loki VM using 30% of the available memory"/>
     <figcaption><i>Loki VM using 30% of the available memory (~9.6GB out of 32 GB)</i></figcaption>
 </figure>
 
-<br></br>
 
 From the above graphs for memory usage of SigNoz, Elasticsearch and Loki we can see the memory usage to be 20%, 60%, and 30% respectively.
 
@@ -250,21 +238,18 @@ Here we are using <a href = "https://aws.amazon.com/ebs/volume-types/" rel="noop
     <figcaption><i>SigNoz VM Disk I/O (avg. Write ~145 MiB/s, Read ~48 MiB/s)</i></figcaption>
 </figure>
 
-<br></br>
 
 <figure data-zoomable align='center'>
     <img src="/img/blog/2022/12/elk-diskio.webp" alt="ElasticSearch VM Disk I/O"/>
     <figcaption><i>ElasticSearch VM Disk I/O (avg. Write ~180 MiB/s, Read ~40 MiB/s)</i></figcaption>
 </figure>
 
-<br></br>
 
 <figure data-zoomable align='center'>
     <img src="/img/blog/2022/12/loki-diskio.webp" alt="Loki VM Disk I/O"/>
     <figcaption><i>Loki VM Disk I/O (avg. Write ~50 MiB/s, Read ~40 MiB/s)</i></figcaption>
 </figure>
 
-<br></br>
 
 From the above graphs of Disk I/O we can see that Elasticsearch has higher disk I/O than SigNoz for less number of log lines ingested per second. One of the reasons why elasticsearch disk usage is high is because of translogs that get written to the disk. Elasticsearch writes all insert and delete operations to a translog, because of which there is extra disk usage.
 
@@ -283,7 +268,6 @@ This is also helpful because if your disk throughput is low, then it would keep 
     <figcaption><i>Data Drop due to backpressure from Disk running at 100%</i></figcaption>
 </figure>
 
-<br></br>
 
 ## Query Benchmark Results
 

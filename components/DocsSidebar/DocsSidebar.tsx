@@ -53,8 +53,8 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
       <li
         key={doc.route}
         id={`#${doc.route}`}
-        className={`flex cursor-pointer truncate pl-[16px] pt-[8px] text-sm font-normal ${
-          isActiveRoute ? 'active-route text-white' : 'text-gray-300 hover:text-white'
+        className={`flex cursor-pointer truncate pl-[16px] pt-[8px] text-lg font-normal ${
+          isActiveRoute ? 'active-route text-white' : 'text-gray-300 hover:text-white hover:underline'
         }`}
         onClick={() => onNavItemClick && typeof onNavItemClick == 'function' && onNavItemClick()}
       >
@@ -74,17 +74,17 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
         <Link href={category.route || ''}>
         <div
           onClick={() => toggleCategory(category.label)}
-          className="flex cursor-pointer items-center gap-2 text-sm text-gray-300 hover:text-white"
+          className="flex cursor-pointer items-center gap-2 text-sm text-gray-200 hover:text-white"
         >
           {isExpanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
-          <span className="font-normal">{category.label}</span>
+          <span className="font-normal text-lg">{category.label}</span>
         </div>
         </Link>
         {isExpanded && (
           <ul className="ml-2 pl-0">
             {category.link && category.link.type === 'generated-index' && (
               <div className="ml-2 mt-2">
-                <h4 className="mb-2 truncate text-sm font-normal text-gray-300">
+                <h4 className="mb-2 truncate text-lg font-normal text-gray-300">
                   {category.link.title}
                 </h4>
               </div>

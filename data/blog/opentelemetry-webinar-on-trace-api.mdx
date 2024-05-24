@@ -50,7 +50,7 @@ I wanted to talk today a little bit about some of the questions that I had about
     <img className="box-shadowed-image" src="/img/webinars/trace-api/1.webp" alt=""/>
     <figcaption><i></i></figcaption>
 </figure>
-<br />
+
 
 **Srikanth:** Let's start with the slides first.
 
@@ -73,7 +73,7 @@ So, you're very often adding spans, not saying, "Hey, this trace is just getting
     <img className="box-shadowed-image" src="/img/webinars/trace-api/2.webp" alt=""/>
     <figcaption><i></i></figcaption>
 </figure>
-<br />
+
 
 Okay. I want to give a brief idea about when you want to start manual instrumentation. Having some understanding of the concepts helps you work with manual instrumentation well, especially when it comes to the tracing API of OpenTelemetry. These are the main parts: a tracer provider, a context, a tracer, and a span. 
 
@@ -84,7 +84,7 @@ We'll go through them to give a brief idea about what each one does. The tracer 
     <img className="box-shadowed-image" src="/img/webinars/trace-api/3.webp" alt=""/>
     <figcaption><i></i></figcaption>
 </figure>
-<br />
+
 
 Let's talk about the tracer provider. The tracer provider, as I mentioned, is the object that helps you get tracers. You might wonder why there's a need for a provider. Why not just start the span? Why have this hierarchy structure where you obtain the tracer object first and then try to create it later? 
 
@@ -105,7 +105,7 @@ If it's like, "Oh, this doesn't make sense, and I want to add explanatory detail
     <img className="box-shadowed-image" src="/img/webinars/trace-api/4.webp" alt=""/>
     <figcaption><i></i></figcaption>
 </figure>
-<br />
+
 
 In general, you may not need this many scoped tracers in practice, but it is possible to have different traces for different purposes. For example, within a certain package, you might want to attribute spans to a specific scope, like com.mycompany.package. 
 
@@ -117,7 +117,7 @@ If you want even further granularity, you could use com.mycompany.module. It's u
     <img className="box-shadowed-image" src="/img/webinars/trace-api/5.webp" alt=""/>
     <figcaption><i></i></figcaption>
 </figure>
-<br />
+
 
 Next, I want to talk about the context. This is important for you to know because tracing is based on spans connected by parent-child relationships. This relationship is preserved based on context, known as context propagation. 
 
@@ -140,7 +140,7 @@ Nika: If you get back just a span from the span from context, can you add a chil
     <img className="box-shadowed-image" src="/img/webinars/trace-api/6.webp" alt=""/>
     <figcaption><i></i></figcaption>
 </figure>
-<br />
+
 
 If you want to add a child, just start a new span with the given context. If you want to add certain attributes or perform certain operations on the existing span object, you will use SpanFromContext; otherwise, you just start a span with the given context object. 
 
@@ -157,7 +157,7 @@ Yeah, this [IMAGE] is another example where you don't want to create a new span 
     <img className="box-shadowed-image" src="/img/webinars/trace-api/7.webp" alt=""/>
     <figcaption><i></i></figcaption>
 </figure>
-<br />
+
 
 Yeah. So, that was about the context, having proper context propagation to avoid broken traces. If you have broken traces or need to connect spans that aren't connected, the go-to place is to look at the context and ensure that it's propagated properly. In many languages, you don't need to worry about it, but in languages without implicit context propagation, you should take care of that detail. Next up, we have the Tracer.
 
@@ -170,7 +170,7 @@ The Tracer object has two primary operations: StartAsCurrentSpan and StartSpan. 
     <img className="box-shadowed-image" src="/img/webinars/trace-api/8.webp" alt=""/>
     <figcaption><i></i></figcaption>
 </figure>
-<br />
+
 
 
 
@@ -185,7 +185,7 @@ If you're seeing orphan spans or broken traces, you need to go fix it within you
     <img className="box-shadowed-image" src="/img/webinars/trace-api/9.webp" alt=""/>
     <figcaption><i></i></figcaption>
 </figure>
-<br />
+
 
 **Srikanth:** You cannot do that at the collector level because the collector does not know how to have this parent-child relationship. It doesn't know how to connect these spans. Any broken relationship has to be fixed in the application where you have instrumented. 
 
@@ -212,7 +212,7 @@ So they get this, "When should I start this operation?" So they get that start t
     <img className="box-shadowed-image" src="/img/webinars/trace-api/10.webp" alt=""/>
     <figcaption><i></i></figcaption>
 </figure>
-<br />
+
 
 **Srikanth:** Now we have seen the Tracer object. I'm just repeating myself. There's a provider that gives you access to the Tracer, and then there's a Tracer object that helps you to start spans. The entire work of manual instrumentation will be revolving around the span. Anything that you do will be on the span object, and there are several operations you can perform on the span object. I've listed them, and we'll go through them one by one.
 
@@ -221,7 +221,7 @@ So they get this, "When should I start this operation?" So they get that start t
     <img className="box-shadowed-image" src="/img/webinars/trace-api/11.webp" alt=""/>
     <figcaption><i></i></figcaption>
 </figure>
-<br />
+
 
 Now, we have the GetContext. So, what does it give you? A span has a context associated with it. What does that SpanContext contain? It contains a TraceID, it contains a SpanID, it contains a TraceState and Flag, and it contains a IsRemote. Every span you create has this information. Is this span IsRemote or is this not? 
 
@@ -236,7 +236,7 @@ This GetContext helps you get the TraceID, SpanID, and IsRemote information. For
     <img className="box-shadowed-image" src="/img/webinars/trace-api/12.webp" alt=""/>
     <figcaption><i></i></figcaption>
 </figure>
-<br />
+
 
 Here, in the example, the first line is `span.get_span_context()`, which gives you the span context object. We have a span_id that gets the SpanID from the context. One common use case is when you want to include trace contextual information, such as TraceID, and SpanID, as part of your logs. You use `GetContext` to access the SpanID and TraceID, and you can include them in your logs. This helps correlate between the traces generated and the logs sent to the log backend.
 
@@ -247,7 +247,7 @@ Here, in the example, the first line is `span.get_span_context()`, which gives y
     <img className="box-shadowed-image" src="/img/webinars/trace-api/13.webp" alt=""/>
     <figcaption><i></i></figcaption>
 </figure>
-<br />
+
 
 **Srikanth:** Now, we have another, which is very unknown. There's something called `IsRecording`. It tells you whether the span is recording the data or not. If `IsRecording` is set to false, any operation on the span object will be ignored. 
 
@@ -264,7 +264,7 @@ Let's say you do `SetAttributes`, and add event on the span; it is only captured
     <img className="box-shadowed-image" src="/img/webinars/trace-api/14.webp" alt=""/>
     <figcaption><i></i></figcaption>
 </figure>
-<br />
+
 
 **Srikanth:** Now, we have `SetAttributes`. This will be the most common operation you will do on a span when you are doing manual instrumentation. Anytime you create a span, the real value comes when you attach some rich contextual information to it. Just starting a span alone doesn't give you any meaningful information. It's only useful when you have some contextual information on it, like when, local, or whatever contextual information that is associated with when it started. 
 
@@ -277,7 +277,7 @@ When you start a span, make sure that you add the necessary information that wil
     <img className="box-shadowed-image" src="/img/webinars/trace-api/15.webp" alt=""/>
     <figcaption><i></i></figcaption>
 </figure>
-<br />
+
 
 Next, we have `AddEvents`. During your span journey, there could be many events happening. You could send an event like a request to an external system and know whether it succeeded or not. 
 
@@ -290,7 +290,7 @@ For example, if it failed, you would want to add an "external call failed" event
     <img className="box-shadowed-image" src="/img/webinars/trace-api/16.webp" alt=""/>
     <figcaption><i></i></figcaption>
 </figure>
-<br />
+
 
 **Srikanth:** Next, next, we have `AddLinks`. It's useful when you want to link different traces together, like when you want to add traces together. 
 
@@ -303,7 +303,7 @@ In those cases, how do you connect whatever the queue has received, like whateve
     <img className="box-shadowed-image" src="/img/webinars/trace-api/17.webp" alt=""/>
     <figcaption><i></i></figcaption>
 </figure>
-<br />
+
 
 Next, we have `SetStatus`. Any span that you perform, any operation, has states associated with it—either the operation was successful or it was a failure. A span represents a unit of operation. The `SetStatus` method lets you set the status of this operation. By default, it is unset. Let's say you make a call to the database and the call fails for some reason. You use `SetStatus` to indicate that this operation failed.
 
@@ -318,7 +318,7 @@ Here in this example, we are looking at an external event. We are making some re
     <img className="box-shadowed-image" src="/img/webinars/trace-api/18.webp" alt=""/>
     <figcaption><i></i></figcaption>
 </figure>
-<br />
+
 
 Next, we have `UpdateName`. I haven't seen anybody use this in practice, but once you start the span name, you can change the name afterward. Also, when you create the span, you generally give the span name. But for some reason, you don't want to use the original span name, `updateName` gives you the ability to change the span name. I haven't seen this in practice. Not many people use it, but it is possible. Let's say you start with some name, and you don't have enough information to give a proper span name, but you'll get it sometime later. Then it's perfectly fine to start with some name that does not make sense, which is not very useful, but update it later on.
 
@@ -329,7 +329,7 @@ Next, we have `UpdateName`. I haven't seen anybody use this in practice, but onc
     <img className="box-shadowed-image" src="/img/webinars/trace-api/19.webp" alt=""/>
     <figcaption><i></i></figcaption>
 </figure>
-<br />
+
 
 **Srikanth:** And then we discussed that there's a start span that accepts the timestamp. Similarly, there is an `End` method which also accepts a timestamp. If you do not provide any timestamp when you perform `span.end`, it takes the current timestamp as the end timestamp. But it gives you the flexibility to give the custom timestamp. 
 
@@ -342,7 +342,7 @@ The `End` also has this optional parameter timestamp. If you don't provide it, i
     <img className="box-shadowed-image" src="/img/webinars/trace-api/20.webp" alt=""/>
     <figcaption><i></i></figcaption>
 </figure>
-<br />
+
 
 And next, we have `RecordException`. This is an `AddEvent`. It's a convenient method again. When you do `RecordException`, it adds an event with certain attributes like stack trace, exception type, and exception message. There are certain attributes which it neatly formats for you. But it is just a simple convenience around the event.
 

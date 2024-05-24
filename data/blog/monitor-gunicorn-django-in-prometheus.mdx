@@ -12,18 +12,16 @@ keywords: [Prometheus,Grafana,kubernetes,Application Monitoring,python monitorin
 
 In this blog, I will discuss about how to set up Prometheus and Grafana in EKS and how to monitor Python based applications using Prometheus.
 
-
-
 ![Cover Image](/img/blog/2019/08/Python-Prometheus-2.webp)
 
 ## Setting up Prometheus and Grafana in EKS
 
-### _Create cluster in EKS_
+### Create cluster in EKS
 
 Create cluster and the command is:
 `eksctl create cluster --name prod --version 1.13 --nodegroup-name standard-workers --node-type t3.medium --nodes 3 --nodes-min 1 --nodes-max 4 --node-ami auto`
 
-### _Setup Prometheus and Grafana using Helm_
+### Setup Prometheus and Grafana using Helm
 
 Follow this [link](https://catalog.workshops.aws/running-batch-on-eks/en-US/exercises/calculate-pi/setup-prometheus-grafana) to set up prometheus and grafana in EKS cluster
 
@@ -36,8 +34,8 @@ also add `--set server.global.scrape_interval="10s"` while installing prometheus
 **Prometheus server by default is not exposed to public** and you can access the prometheus expression browser by running below commands in your localhost/environment:
 
 ```
-    $ PROM_SERVER_POD=$(kubectl -n prometheus get pod -l component=server -o jsonpath="{.items[0].metadata.name}")
-    $ kubectl -n prometheus port-forward $PROM_SERVER_POD 9090
+PROM_SERVER_POD=$(kubectl -n prometheus get pod -l component=server -o jsonpath="{.items[0].metadata.name}")
+kubectl -n prometheus port-forward $PROM_SERVER_POD 9090
 ```
 
 Now you can access the prometheus expression browser at `http://localhost:9090`
@@ -54,15 +52,23 @@ We shall be deploying our web application using kubernetes deployment. However, 
 
 ### Running application in your environment (Optional)
 
-Run following command at project root directory
+Run following command at project root directory:-
 
-    $ git clone https://github.com/ankitnayan/django_sample_project.git
+```
+git clone https://github.com/ankitnayan/django_sample_project.git
+```
 
-    $ cd django_sample_project
+```
+cd django_sample_project
+```
 
-    $ pip3 install -r requirements.txt
+```
+pip3 install -r requirements.txt
+```
 
-    $ gunicorn django_sample_project.wsgi:application --bind 0.0.0.0:8000 --workers 3 --access-logfile='-' --statsd-host=localhost:9125 --access-logformat='%(h)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(p)s" "%(D)s"'
+```
+gunicorn django_sample_project.wsgi:application --bind 0.0.0.0:8000 --workers 3 --access-logfile='-' --statsd-host=localhost:9125 --access-logformat='%(h)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(p)s" "%(D)s"'
+```
 
 `--statsd-host` parameter enables gunicorn to send metrics to statsd-server
 Also, I have changed the access log format of gunicorn to log **_worker pid_** and **_response time (in microseconds)_** . This format later helps to debug request count and latency by worker processes.
@@ -73,16 +79,27 @@ The application also logs `Error sending message to statsd` because we have not 
 ### Creating and Push the repo as docker image (Optional)
 
 Build docker image and push to registry
-`docker build -t <username>/django_sample_project:quantiles_v1 .`
-`docker push <username>/django_sample_project:quantiles_v1`
+
+```
+docker build -t <username>/django_sample_project:quantiles_v1 .
+```
+
+```
+docker push <username>/django_sample_project:quantiles_v1
+```
 
 The image is also available at [https://hub.docker.com/r/ankitnayan/django_sample_project](https://hub.docker.com/r/ankitnayan/django_sample_project)
 
 Run below commands to run the application as docker container:
 
-    $ git clone https://github.com/ankitnayan/django_sample_project.git
-    $ cd django_sample_project
-    $ docker run  -ti -p 8000:8000 -v `pwd`:/usr/src/app ankitnayan/django_sample_project:quantiles_v1
+```
+git clone https://github.com/ankitnayan/django_sample_project.git
+cd django_sample_project
+```
+
+```
+docker run  -ti -p 8000:8000 -v `pwd`:/usr/src/app ankitnayan/django_sample_project:quantiles_v1
+```
 
 Run `curl http://localhost:8000/polls/2xx_success/` from your terminal to check the response
 The application also logs `Error sending message to statsd` because we have not run statsd server till now but the django application runs perfectly.
@@ -92,6 +109,7 @@ The application also logs `Error sending message to statsd` because we have not 
 ### The problem with exporting metrics in  python applications
 
 Prometheus inherits many of Borgmon's assumptions about its environment. In particular, client libraries assume that metrics come from various libraries and subsystems, in multiple threads of execution, running in a shared address space. On the server side, Prometheus assumes that one target is one (probably) multi-threaded program.
+
 These assumptions break in many non-Google deployments, particularly in the Python world. Here it is common (e.g. using  [Django](https://www.djangoproject.com/)  or  [Flask](http://flask.pocoo.org/)) to run under a  [WSGI](https://wsgi.readthedocs.io/en/latest/what.html)  application server that spreads requests across multiple workers, each of which is a  **process**  rather than a thread.
 
 In a naive deployment of the Prometheus  [Python client](https://github.com/prometheus/client_python)  for a Flask app running under uWSGI, each request from the Prometheus server to  */metrics*  can hit a different worker process, each of which exports its own counters, histograms, etc.
@@ -125,14 +143,24 @@ Or we can run 1 statsd-exporter per node. All applications in a node shall push 
 ![django-deployment.yml file](/img/blog/2019/08/Screenshot-2019-08-30-at-11.55.49-AM.webp)
 
 Now, deploy the pods and services using
-`kubectl create namespace django-with-statsd`
-`kubectl -n django-with-statsd apply -f k8s/` (see k8s folder inside the repo)
+
+```
+kubectl create namespace django-with-statsd
+```
+
+```
+kubectl -n django-with-statsd apply -f k8s/
+``` 
+
+(see k8s folder inside the repo)
 
 > Don't forget to open port 8000 for that security group in AWS
 
 Run below command to get the External IP of the service which exposes your application to the public world.
 
-`kubectl get svc -n django-with-statsd django-with-statsd -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'`
+```
+kubectl get svc -n django-with-statsd django-with-statsd -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'
+```
 
 The type of service is LoadBalancer (ELB) which is provided by AWS and hence you will be charged for the same. You can view the ELB used in the list of Load Balancer in AWS dashboard.
 
@@ -151,7 +179,13 @@ pip3 install locustio in any environment (can be your localhost)
 2. /polls/4xx_not_found/ with a weight of 1
 3. /polls/5xx_exception/   with a weight of 1
 
-Now, run `locust -f load-test/profile1.py --host=<ExternalIP>:8000` from the project root directory.
+Now, run 
+```
+locust -f load-test/profile1.py --host=<ExternalIP>:8000
+```
+
+from the project root directory.
+
 Locust web portal is now available at `http://localhost:8089/`. Generate the type of load you want.
 
 > I used 10 users with a hatch rate of 2
@@ -261,7 +295,7 @@ Now, we have very detailed RPS and latency filtering working for our application
 
 ## What happens to Prometheus metrics when one of the nodes die? Exploring highly available Prometheus!
 
-### _Case 1: The node other than Prometheus server was stopped_
+### Case 1: The node other than Prometheus server was stopped
 
 ![Node other than Prometheus server was stopped](/img/blog/2019/08/stopping_non_prometheus_server_node.webp)
 
@@ -271,11 +305,13 @@ The node which was killed was hosting 1 pod of the django application. So, we se
 
 Soon enough (roughly after 2 minutes) kubernetes started another pod to match current state to desired state and the metrics from this new pod start coming automatically as prometheus discovers them by auto discovery of targets which I enabled in our `k8s/django-deployment.yml` file by below annotations:
 
+```
             prometheus.io/scrape: 'true'
             prometheus.io/port:   '9102'
             prometheus.io/path:   '/metrics'
+```
 
-### _Case 2: The node hosting Prometheus server was stopped_
+### Case 2: The node hosting Prometheus server was stopped
 
 ![node hosting Prometheus server was stopped](/img/blog/2019/08/stopping_prometheus_server_node.webp)
 Around the right side, we see a gap in the graph. This is the expected behaviour because prometheus server is not able to scrape metrics from any targets. Hence no metrics are collected till the time kubernetes auto restarts the prometheus-server pod.

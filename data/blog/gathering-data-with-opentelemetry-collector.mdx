@@ -41,8 +41,7 @@ We will also not be discussing the specific setups that people mentioned in thei
     <img src="/img/blog/2023/08/question_mike.webp" alt=""/>
     <figcaption><i></i></figcaption>
 </figure>
-
-<br></br> --> */}
+ --> */}
 
 
 We would like to discuss these comments in general and what they suggest. The first comment was from Mike on the CNCF Slack, who said, 
@@ -64,7 +63,6 @@ We hope this clarifies the situation.
 <figcaption><i></i></figcaption>
 </figure>
 
-<br></br>
 
 
 or how to set alerts. SRE Engineers and DevOps Engineers use a variety of tools to configure their systems. The OpenTelemetry collector is a data pipeline processor that can be used to collect, process, and export data from applications. The collector has three key components: receivers, processors, and exporters.
@@ -93,8 +91,7 @@ This is a fairly specific question, but it is something that we often come acros
     <img src="/img/blog/2023/08/question_harsh.webp" alt=""/>
     <figcaption><i></i></figcaption>
 </figure>
-
-<br></br> --> */}
+ --> */}
 
 After addressing these questions, we may return to the following concern: "I am concerned that some of my data may be located far from my cluster and that it will be sent to the collector that I have already set up. I am worried that there will be errors, lag, and a lot of internal network traffic. Can I set up a queue or another service within my architecture to address this?" 
 
@@ -105,7 +102,6 @@ My understanding is that this is generally not necessary because collectors cann
 <figcaption><i></i></figcaption>
 </figure>
 
-<br></br>
 
 **Pranay:** Indeed, this is a topic that we can explore in more depth. The idea is that we have OpenTelemetry collectors, which may be used with a storage backend. However, there are various ways in which apps and nodes can interactively send data.
 
@@ -125,7 +121,6 @@ One advantage is that it is simple to set up and use. Another advantage is that 
 <figcaption><i></i></figcaption>
 </figure>
 
-<br></br>
 
 
 One of the key advantages of using OTel is its simplicity. You can start using it in a development environment with ease, and there is no need to operate other OTel collectors in the application flow. 
@@ -144,7 +139,6 @@ The next approach is to use a separate service for data collection and ingestion
 <figcaption><i></i></figcaption>
 </figure>
 
-<br></br>
 
 
 **Nica:** I often think of this solution as being a developer solution. A developer might say, "I'm excited about monitoring my application more closely with OpenTelemetry." They may have someone set up a collector for them, or they may do it themselves. Then, they can experiment with their application code, instrument their code on the application side, and see the results pretty quickly. 
@@ -160,7 +154,6 @@ A better approach would be to use a tool that can automatically instrument code.
 <figcaption><i></i></figcaption>
 </figure>
 
-<br></br>
 
 
 So a great place to get started but not too often do you see this, you see this almost as really as you see no OTel collector with just sending data to the backend.
@@ -185,7 +178,6 @@ However, this is a common approach that is used by many vendors. They ask you to
 <figcaption><i></i></figcaption>
 </figure>
 
-<br></br>
 
 
 **Nica:** One of the factors that we are overlooking here, but which is usually present, is that the first Green Arrow, the first screen send, is often associated with some cost. Therefore, having these collectors left on these virtual machines gives you the opportunity to batch, debounce, compress, and collate your data a little bit, which can save you a lot of money if you are spending on this end.
@@ -205,7 +197,6 @@ Let's move on to the next topic.
 <figcaption><i></i></figcaption>
 </figure>
 
-<br></br>
 
 
 
@@ -250,7 +241,6 @@ If the OTel collector in the observability system is scaling, you want to ensure
 <figcaption><i></i></figcaption>
 </figure>
 
-<br></br>
 
 
 The other only disadvantage or one of the disadvantages of this is that because you are running an application pod with each, like an OTel collector with each of the application pods, you are just running so many of them and that is higher resource requirements.
@@ -265,7 +255,6 @@ So generally the OTel collector should run within five to ten megabytes and then
 <figcaption><i></i></figcaption>
 </figure>
 
-<br></br>
 
 
 **Pranay:** I believe this is a trade-off between the application sidecar pattern and the first-second pattern, which is seen in the VM world where an OTel collector runs at the node level.
@@ -291,7 +280,6 @@ The trade-off in this setting is that, because there is only one OTel collector 
     <figcaption><i></i></figcaption>
 </figure>
 
-<br></br>
 
 
 **Nica:** Okay
@@ -326,7 +314,6 @@ But there are a few scenarios where this has been used. For instance, if someone
 <figcaption><i></i></figcaption>
 </figure>
 
-<br></br>
 
 **Nica:** Yes, the OpenTelemetry operator might not be widely understood or extremely popular, so it's worth discussing.
 
@@ -346,7 +333,6 @@ If you see this graph,
 <figcaption><i></i></figcaption>
 </figure>
 
-<br></br>
 
 
 here we have a single pod and here we have multiple application pods, what happens is if you have multiple says 100 or such application pods, it becomes difficult to manage the OTel collector parts.
@@ -363,7 +349,6 @@ For example, in sidecar mode, it can automatically add the instrumentation SDKs 
     <figcaption><i></i></figcaption>
 </figure>
 
-<br></br>
 
 
 "Could you please discuss the resiliency aspect? In situations where the OpenTelemetry collector is not operational, data loss occurs despite the use of multiple pods. During the transition, some data loss happens.
@@ -383,7 +368,6 @@ Nica, I think it would be beneficial to explore this topic in more detail. The e
     <figcaption><i></i></figcaption>
 </figure>
 
-<br></br>
 
 
 and so I think we're going to cover this more in-depth in the future, I think that the short version is yes, it is possible to use Kafka. There's a great deal of lift there because OTLP is not super native there, but there is a bit more resiliency than you see in this initial version of this chart.
@@ -395,7 +379,6 @@ Let's get back to that one about resiliency and the kind of advanced conceptuali
 <figcaption><i></i></figcaption>
 </figure>
 
-<br></br>
 
 
 The answer is not exactly a "yes." It might not always catch or include a specific build of Kubernetes OTeloperator for ec2. Instead, there is a collector called AWS distro for OpenTelemetry collector. This collector directly captures certain ec2 metrics and also includes some AWS-related features, like a receiver for x-ray data.
@@ -416,7 +399,6 @@ So, what you should consider looking into is the AWS version of the OpenTelemetr
 <figcaption><i></i></figcaption>
 </figure>
 
-<br></br>
 
 
 We would like to discuss this a bit, especially if many people are interested in doing this on AWS; that's the main topic.
@@ -433,7 +415,6 @@ If you're reading this on LinkedIn, please consider following us there. If you'r
 <figcaption><i></i></figcaption>
 </figure>
 
-<br></br>
 
 
 **Pranay:** Yeah, thanks a lot bye.
