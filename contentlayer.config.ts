@@ -153,6 +153,48 @@ export const Blog = defineDocumentType(() => ({
   },
 }))
 
+export const Newsroom = defineDocumentType(() => ({
+  name: 'Newsroom',
+  filePathPattern: 'newsroom/**/*.mdx',
+  contentType: 'mdx',
+  fields: {
+    title: { type: 'string', required: true },
+    date: { type: 'date', required: true },
+    tags: { type: 'list', of: { type: 'string' }, default: [] },
+    lastmod: { type: 'date' },
+    draft: { type: 'boolean' },
+    summary: { type: 'string' },
+    description: { type: 'string' },
+    images: { type: 'json' },
+    image: { type: 'string' },
+    authors: { type: 'list', of: { type: 'string' } },
+    layout: { type: 'string' },
+    bibliography: { type: 'string' },
+    canonicalUrl: { type: 'string' },
+    keywords: { type: 'list', of: { type: 'string' }, required: false },
+    slug: { type: 'string', required: false },
+    hide_table_of_contents: { type: 'boolean', required: false },
+    toc_min_heading_level: { type: 'number', required: false },
+    toc_max_heading_level: { type: 'number', required: false },
+  },
+  computedFields: {
+    ...computedFields,
+    structuredData: {
+      type: 'json',
+      resolve: (doc) => ({
+        '@context': 'https://schema.org',
+        '@type': 'BlogPosting',
+        headline: doc.title,
+        datePublished: doc.date,
+        dateModified: doc.lastmod || doc.date,
+        description: doc.description,
+        image: doc.images ? doc.images[0] : siteMetadata.socialBanner,
+        url: `${siteMetadata.siteUrl}/${doc._raw.flattenedPath}`,
+      }),
+    },
+  },
+}))
+
 export const Comparison = defineDocumentType(() => ({
   name: 'Comparison',
   filePathPattern: 'comparisons/*.mdx',
@@ -292,7 +334,7 @@ export const Doc = defineDocumentType(() => ({
     bibliography: { type: 'string', required: false },
     canonicalUrl: { type: 'string', required: false },
     sidebar_label: { type: 'string', required: false },
-    hide_table_of_contents: { type: 'boolean' , required: false},
+    hide_table_of_contents: { type: 'boolean', required: false },
   },
   computedFields: {
     ...computedFields,
@@ -332,7 +374,7 @@ export const Authors = defineDocumentType(() => ({
 
 export default makeSource({
   contentDirPath: 'data',
-  documentTypes: [Blog, Authors, Comparison, Guide, Opentelemetry, Doc],
+  documentTypes: [Blog, Authors, Comparison, Guide, Opentelemetry, Doc, Newsroom],
   mdx: {
     cwd: process.cwd(),
     remarkPlugins: [
