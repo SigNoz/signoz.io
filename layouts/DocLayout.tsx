@@ -35,7 +35,7 @@ export default function DocLayout({ content, children, toc }: LayoutProps) {
             <DocsSidebar />
           </div>
 
-          <div className="doc-content px-8">
+          <div className="doc-content md:px-0 lg:px-8">
             <article className="prose prose-slate max-w-none py-6 dark:prose-invert">
               <h2 className="text-3xl">{title}</h2>
               {children}
