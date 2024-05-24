@@ -10,7 +10,7 @@ import { useExpandedCategories } from '@/hooks/useExpandedCategories'
 import { usePathname } from 'next/navigation'
 
 interface DocsSidebarProps {
-  onNavItemClick: () => void
+  onNavItemClick?: () => void
 }
 
 const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
@@ -56,7 +56,7 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
         className={`flex cursor-pointer truncate pl-[16px] pt-[8px] text-sm font-normal ${
           isActiveRoute ? 'active-route text-white' : 'text-gray-300 hover:text-white'
         }`}
-        onClick={onNavItemClick}
+        onClick={() => onNavItemClick && typeof onNavItemClick == 'function' && onNavItemClick()}
       >
         <Link href={doc.route} className="line-clamp-2 flex w-full items-center gap-2" replace>
           <FileText size={12} />
