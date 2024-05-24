@@ -50,7 +50,7 @@ const COMPARISON_DATA = {
       </>
     ),
     BILL_FOR_COMPARISON: {
-      path: '/comparisons/newrelic-savings/',
+      path: '/product-comparison/newrelic-savings/',
       className: 'button--primary',
       isVisible: true,
     },
@@ -60,7 +60,7 @@ const COMPARISON_DATA = {
       isVisible: true,
     },
     SELF_HOST: {
-      path: '/comparisons/newrelic-savings/',
+      path: '/product-comparison/newrelic-savings/',
       className: 'button--outline button--secondary',
       isVisible: false,
     },

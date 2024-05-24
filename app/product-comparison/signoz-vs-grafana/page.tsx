@@ -45,7 +45,7 @@ const COMPARISON_DATA = {
       </>
     ),
     BILL_FOR_COMPARISON: {
-      path: '/comparisons/newrelic-savings/',
+      path: '/product-comparison/newrelic-savings/',
       className: 'button--primary',
       isVisible: false,
     },
