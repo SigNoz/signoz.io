@@ -59,7 +59,7 @@ Docker provides support for multiple logging drivers. You can check out other <a
 To know your current logging driver for Docker Daemon, run the following command:
 
 ```bash
-$ docker info --format '{{.LoggingDriver}}'
+docker info --format '{{.LoggingDriver}}'
 ```
 
 ## Why is Docker Log Rotation needed?
@@ -141,7 +141,7 @@ The change in the default logging driver impacts only the containers created aft
 To configure a container to use a different logging driver than the Docker daemon’s default, use the `--log-driver` flag. You need to include the container ID or container name alongside the command.
 
 ```bash
-$ docker run -it --log-driver json-file nginx
+docker run -it --log-driver json-file nginx
 ```
 
 The `--log-driver` flag specifies the log driver you are assigning to that container. In the above example, the log driver assigned to the container is the `json-file`.
@@ -150,13 +150,13 @@ To find the current logging driver for a running container, if the daemon is usi
 logging driver, run the following command:
 
 ```bash
-$ docker inspect -f '{{.HostConfig.LogConfig.Type}}' <CONTAINER>
+docker inspect -f '{{.HostConfig.LogConfig.Type}}' <CONTAINER>
 ```
 
 Then to setup log rotation for the specified container, run the below commands:
 
 ```bash
-$ docker run \
+docker run \
     --log-driver json-file \
     --log-opt max-size=15m \
     --log-opt max-file=5 \
@@ -197,7 +197,6 @@ The first step for efficient log management is log aggregation. Once the logs ar
     <figcaption><i>Logs management in SigNoz</i></figcaption>
 </figure>
 
-<br></br>
 
 SigNoz is built to support <a href = "https://opentelemetry.io/" rel="noopener noreferrer nofollow" target="_blank">OpenTelemetry</a> natively. OpenTelemetry, an open-source project backed by <a href = "https://www.cncf.io/" rel="noopener noreferrer nofollow" target="_blank">Cloud Native Computing Foundation</a>, can be used to aggregate and process logs from multiple sources. OpenTelemetry is quietly becoming the world standard for instrumenting cloud-native applications to generate telemetry data.
 
