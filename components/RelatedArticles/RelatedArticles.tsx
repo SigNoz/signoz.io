@@ -70,7 +70,7 @@ const RelatedArticles: React.FC = () => {
   }, [])
 
   return (
-    <div className="my-8 flex flex-col">
+    <div className="related-articles my-8 flex flex-col">
       {!loadingRelatedArticles &&
         relatedArticles &&
         Array.isArray(relatedArticles) &&
@@ -81,8 +81,8 @@ const RelatedArticles: React.FC = () => {
           </h2>
         )}
 
-      <section className="mt-5 w-full px-5 max-md:max-w-full">
-        <div className="grid gap-5 max-md:flex-col max-md:gap-0 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+      <section className="px5 mt-5">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
           {relatedArticles.map((article, index) => (
             <ArticleCard key={index} {...article} />
           ))}
