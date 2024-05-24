@@ -1,77 +1,48 @@
 'use client'
 
-import { Fragment, useState } from 'react'
-import { Button, Dialog, Disclosure, Popover, Transition } from '@headlessui/react'
-import {
-  ArrowPathIcon,
-  Bars3Icon,
-  ChartPieIcon,
-  CursorArrowRaysIcon,
-  FingerPrintIcon,
-  SquaresPlusIcon,
-  XMarkIcon,
-} from '@heroicons/react/24/outline'
-import { PhoneIcon, PlayCircleIcon } from '@heroicons/react/20/solid'
+import { useEffect, useState } from 'react'
+import { Button, Dialog, Popover } from '@headlessui/react'
+import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
 import Image from 'next/image'
 import Link from 'next/link'
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, MoveLeft } from 'lucide-react'
 import SearchButton from '../SearchButton'
 import GitHubStars from '../GithubStars/GithubStars'
-
-const products = [
-  {
-    name: 'Analytics',
-    description: 'Get a better understanding of your traffic',
-    href: '#',
-    icon: ChartPieIcon,
-  },
-  {
-    name: 'Engagement',
-    description: 'Speak directly to your customers',
-    href: '#',
-    icon: CursorArrowRaysIcon,
-  },
-  {
-    name: 'Security',
-    description: 'Your customers’ data will be safe and secure',
-    href: '#',
-    icon: FingerPrintIcon,
-  },
-  {
-    name: 'Integrations',
-    description: 'Connect with third-party tools',
-    href: '#',
-    icon: SquaresPlusIcon,
-  },
-  {
-    name: 'Automations',
-    description: 'Build strategic funnels that will convert',
-    href: '#',
-    icon: ArrowPathIcon,
-  },
-]
-const callsToAction = [
-  { name: 'Watch demo', href: '#', icon: PlayCircleIcon },
-  { name: 'Contact sales', href: '#', icon: PhoneIcon },
-]
-
-function classNames(...classes: unknown[]) {
-  return classes.filter(Boolean).join(' ')
-}
+import React from 'react'
+import DocsSidebar from '../DocsSidebar/DocsSidebar'
+import { usePathname } from 'next/navigation'
 
 export default function TopNav() {
+  const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [isDocsBasePath, setIsDocsBasePath] = useState(false)
+  const [showMainMenu, setShowMainMenu] = useState(false)
+
+  useEffect(() => {
+    const isDocsBasePath = pathname.startsWith('/docs')
+    setIsDocsBasePath(isDocsBasePath)
+
+    if (!isDocsBasePath) {
+      setShowMainMenu(true)
+    } else {
+      setShowMainMenu(false)
+    }
+  }, [pathname])
 
   return (
     <header
-      className={`fixed left-0 right-0 z-30 mx-auto h-[48px] w-full border-b border-signoz_slate-500 bg-signoz_ink-500 px-12 text-slate-900 dark:text-slate-50`}
+      className={`fixed left-0 right-0 z-30 mx-auto h-[48px] w-full border-b border-signoz_slate-500 bg-signoz_ink-500 px-4 text-slate-900 dark:text-slate-50 md:px-8 lg:px-16`}
     >
       <nav
         className="mx-auto flex items-center justify-between py-2 text-slate-900 dark:text-slate-50"
         aria-label="Global"
       >
         <div className="flex lg:flex-1">
-          <Link href="/" className="-m-1.5 flex items-center gap-2 p-1.5">
+          <Link
+            href="/"
+            className="-m-1.5 flex items-center gap-2 p-1.5"
+            onClick={() => setMobileMenuOpen(false)}
+          >
             <Image
               className="h-6 w-auto"
               src="/img/SigNozLogo-orange.svg"
@@ -98,17 +69,23 @@ export default function TopNav() {
             Documentation
           </Link>
 
-          <a href="/resource-center/blog" className="text-sm font-semibold leading-6 ">
+          <a href="/resource-center/blog" className="truncate text-sm font-semibold leading-6">
             Resources
           </a>
 
-          <Link href="/pricing" className="text-sm font-semibold leading-6 ">
+          <Link href="/pricing" className="truncate text-sm font-semibold leading-6">
             Pricing
           </Link>
-          <Link href="/case-study" className="text-sm font-semibold leading-6 ">
+          <Link
+            href="/case-study"
+            className="hidden truncate text-sm font-semibold leading-6 xl:block"
+          >
             Customer Stories
           </Link>
-          <Link href="/about-us" className="text-sm font-semibold leading-6 ">
+          <Link
+            href="/about-us"
+            className="hidden truncate text-sm font-semibold leading-6 xl:block"
+          >
             Newsroom
           </Link>
 
@@ -142,43 +119,59 @@ export default function TopNav() {
           </div>
           <div className="mt-6 flow-root">
             <div className="-my-6 divide-y divide-gray-500/10">
-              <div className="space-y-2 py-6">
-                <Link
-                  href="/docs"
-                  className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 hover:bg-signoz_ink-200"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  Documentation
-                </Link>
-                <Link
-                  href="/resource-center/blog"
-                  className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 hover:bg-signoz_ink-200"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  Resources
-                </Link>
-                <Link
-                  href="/pricing"
-                  className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 hover:bg-signoz_ink-200"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  Pricing
-                </Link>
+              {showMainMenu && (
+                <div className="space-y-2 py-6">
+                  <Link
+                    href="/docs"
+                    className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 hover:bg-signoz_ink-200"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Documentation
+                  </Link>
+                  <Link
+                    href="/resource-center/blog"
+                    className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold  leading-7 hover:bg-signoz_ink-200 sm:text-sm"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Resources
+                  </Link>
+                  <Link
+                    href="/pricing"
+                    className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 hover:bg-signoz_ink-200"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Pricing
+                  </Link>
 
-                <Link
-                  href="/case-study"
-                  className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 hover:bg-signoz_ink-200"
-                >
-                  Newsroom
-                </Link>
+                  <Link
+                    href="/case-study"
+                    className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 hover:bg-signoz_ink-200"
+                  >
+                    Newsroom
+                  </Link>
 
-                <div className="-mx-3 inline-block rounded-lg px-3 py-2 text-base font-semibold leading-7 hover:bg-signoz_ink-200">
-                  <GitHubStars />
+                  <div className="-mx-3 inline-block rounded-lg px-3 py-2 text-base font-semibold leading-7 hover:bg-signoz_ink-200">
+                    <GitHubStars />
+                  </div>
                 </div>
-              </div>
-              <div className="py-6">
+              )}
+              <div className="hidden py-6 md:block">
                 <SearchButton />
               </div>
+
+              {isDocsBasePath && !showMainMenu && (
+                <div className="docs-sidebar-mobile-nav">
+                  <div
+                    className="mt-4 flex items-center gap-2 text-sm"
+                    onClick={() => {
+                      setShowMainMenu(true)
+                    }}
+                  >
+                    <MoveLeft size={16} /> Back to main menu
+                  </div>
+                  <DocsSidebar />
+                </div>
+              )}
             </div>
           </div>
         </Dialog.Panel>
