@@ -148,26 +148,26 @@ To expose the metrics, open the Apache configuration file for editing, depending
 
 - For mac:
 
-```jsx
-sudo nano /etc/apache2/httpd.conf
-```
+  ```jsx
+  sudo nano /etc/apache2/httpd.conf
+  ```
 
 - Verify that the below config line is enabled and not commented out
 
-```jsx
-LoadModule status_module lib/httpd/modules/mod_status.so
-```
+  ```jsx
+  LoadModule status_module lib/httpd/modules/mod_status.so
+  ```
 
 The **`mod_status`** module is an Apache module that provides a web-based view of server statistics, including information about server performance, current connections, and other relevant details. When enabled, it creates a web page accessible through a browser that displays real-time information about the Apache server's status. It's a useful tool for monitoring and troubleshooting server performance.
 
 - Scroll to the end of the file and paste the below
 
-```jsx
-<Location "/server-status">
-    SetHandler server-status
-    Require host example.com
-</Location>
-```
+  ```jsx
+  <Location "/server-status">
+      SetHandler server-status
+      Require host example.com
+  </Location>
+  ```
 
 This configuration block enables the **`/server-status`** endpoint, and it can only be accessed from the localhost. This is a security measure to ensure that sensitive server status information is not exposed to the public internet. This is where Apache’s server statistics will be displayed.
 
@@ -182,15 +182,15 @@ Replace [example.com](http://example.com) with the correct domain name where you
 
 - Check for syntax errors
 
-```jsx
-sudo apachectl configtest
-```
+  ```jsx
+  sudo apachectl configtest
+  ```
 
 - Restart the server to apply changes
 
-```jsx
-sudo apachectl restart
-```
+  ```jsx
+  sudo apachectl restart
+  ```
 
 To view Apache server statistics in your browser, navigate to the domain where Apache is running and add the "/server-status" endpoint to the URL. In this example, since Apache is running on localhost, you can access the statistics by visiting [localhost/server-status](http://localhost/server-status) in your browser.
 

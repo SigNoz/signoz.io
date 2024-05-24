@@ -41,21 +41,20 @@ OpenTelemetry offers standard vendor neutral APIs for collecting metrics and tra
 
 The code is instrumented either with any of OpenTelemetry’s provided language-specific client libraries, auto-instrumentation libraries or using any of the existing vendor libraries like jaeger, opentracing, opencensus, zipkin.
 
-**Receivers **collect the data from all available sources and convert them to internal format before sending out to processors. **OTLP **is OpenTelemetry’s internal wire protocol and the intermediate data format for all other open / proprietary formats for telemetry data.
+**Receivers** collect the data from all available sources and convert them to internal format before sending out to processors. **OTLP** is OpenTelemetry’s internal wire protocol and the intermediate data format for all other open / proprietary formats for telemetry data.
 ![OpenTelemetry data flow](/img/blog/2020/07/Copy-of-fig-2---Open-Telemetry-data-flow--1-.webp)Fig 2. Open-telemetry data flow
-The **OTLP **receiver collects data from code instrumented with provided client libraries, while there are specific receivers available for many of the current instrumentation vendors / FOSS projects.
+The **OTLP** receiver collects data from code instrumented with provided client libraries, while there are specific receivers available for many of the current instrumentation vendors / FOSS projects.
 
-**Processors **would then pre-process data before sending it to a specific exporter as defined in the pipeline. They queue and batch the received data and implement retry mechanisms to prevent lossy transmissions. They may do validations before either refusing or accepting telemetry data. Additionally a processor can add / remove attributes as needed and sample the data before sending them to all available exporters.
+**Processors** would then pre-process data before sending it to a specific exporter as defined in the pipeline. They queue and batch the received data and implement retry mechanisms to prevent lossy transmissions. They may do validations before either refusing or accepting telemetry data. Additionally a processor can add / remove attributes as needed and sample the data before sending them to all available exporters.
 
-**Exporters **are again vendor / data-sink specific like receivers. They receive massaged, possibly sampled data from processors and convert that to a target data-sink specific format and implement communication protocols for such data sinks.
+**Exporters** are again vendor / data-sink specific like receivers. They receive massaged, possibly sampled data from processors and convert that to a target data-sink specific format and implement communication protocols for such data sinks.
 
-A **Pipeline **defines a combination of various metric and trace receivers, a set of processors and a final set of metrics and trace receivers.
+A **Pipeline** defines a combination of various metric and trace receivers, a set of processors and a final set of metrics and trace receivers.
 
 ![OpenTelemetry receivers, processors and exporters](https://lh5.googleusercontent.com/mRc_j2ZiBvrIxHL0NCH7_aVROB8P8vSJ36vxrygh65uAshupJ2aepeQq949wQSuN2ZC2HrnaNUfUjAJqVPANdo8_waeC3UytWzI0fW6foMD3oISajNNvs5kWNhIS71qMuC_kk1q7)Fig 3. OpenTelemetry Receivers, Processors and Exporters : Core components in green, contrib components in Red
 
 The core receivers, processors and exporters live on the [https://github.com/open-telemetry/opentelemetry-collector](https://github.com/open-telemetry/opentelemetry-collector) repo. However, many other community contributed ones can be found on the official contrib repo at [https://github.com/open-telemetry/opentelemetry-collector-contrib](https://github.com/open-telemetry/opentelemetry-collector-contrib).
 
-Fig. 3 provides a snapshot view of available components as of now.
 
 Please note that the above lists and diagrams are not exhaustive and only indicative, new receivers and exporters are constantly being added by the community.
 
@@ -63,7 +62,7 @@ Please note that the above lists and diagrams are not exhaustive and only indica
 
 We will now try and deploy a fully working example of open-telemetry collector in kubernetes. We assume familiarity with kubernetes objects like Deployment, Service, Daemonset, ConfigMap etc going ahead.
 
-![OpenTelemetry collector kubernetes deployment](/img/blog/2020/07/Copy-of-fig-4---otel-collector-k8s.webp)Fig 4. Opentelemetry-collector kubernetes deployment
+![OpenTelemetry collector kubernetes deployment](/img/blog/2020/07/Copy-of-fig-4---otel-collector-k8s.webp)Fig 3. Opentelemetry-collector kubernetes deployment
 
 We use a load-generator deployment that generates simulated metrics and traces for OpenTelemetry stack to consume, this consists of:
 
@@ -81,7 +80,7 @@ We use a load-generator deployment that generates simulated metrics and traces f
 
 For each of the above data sources, we configure a corresponding receiver in opentelmetry agent which runs as a daemonset. While the opencensus, jaeger and zipkin receivers are push based, with the app having to push traces and metrics to a pre-configured endpoint; the prometheus receiver is pull based, one just needs to write standard prometheus scrape-configs on the sources /metrics endpoint in order to receive the metrics.
 
-One caveat to note here is that since all above receivers work on GRPC ports, the agent needs to expose them through an headless service with **ClusterIP: None, **so that individual pod IPs are exposed through the **Endpoint** object, making sure grpc clients on the load-generator deployment don’t break connection.
+One caveat to note here is that since all above receivers work on GRPC ports, the agent needs to expose them through an headless service with **ClusterIP: None,** so that individual pod IPs are exposed through the **Endpoint** object, making sure grpc clients on the load-generator deployment don’t break connection.
 
 Once the traces and metrics have been consumed by opentelemetry-agent, they are converted to the internal format and then sent to the opencensus exporter through both the batch and queued-retry processors.
 

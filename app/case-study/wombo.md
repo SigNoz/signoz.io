@@ -53,7 +53,7 @@ We have two key products:
 
 - Wombo Song - It is a generative video platform where users can upload images of their faces, choose a song, and a video is generated that looks like the users are singing that song.
 - Dream - It is an AI-generated art product similar to Stable Diffusion but much simpler to use. You can enter prompts and choose styles to create unique art that you can share with others.
-<p>&nbsp;</p>
+
 
 ### How is the engineering team at Wombo organized?​
 
@@ -61,7 +61,7 @@ Ours is a small team. We have five back-end engineers, and they also work as dat
 
 We handle everything from the coding to reviewing, to deployment, debugging, and ensuring the system's health.
 
-<p>&nbsp;</p>
+
 
 ### What business problems were you trying to solve when you started exploring SigNoz?​
 
@@ -80,14 +80,14 @@ Hence monitoring was super essential for us.
 
 The most critical thing for me was safe deployments and the system's health because we want to know immediately if something has gone wrong so we can take corrective actions as soon as possible.
 
-<p>&nbsp;</p>
+
 
 ### What are the key use cases you had for SigNoz?​
 
-<p>&nbsp;</p>
+
 
 <YouTube id="vUpSEASieKs" mute={false} />
-<p>&nbsp;</p>
+
 
 The key metric was the image generation time. But other than that, finding the logs across multiple containers is also crucial.
 
@@ -103,15 +103,15 @@ Oh, this is stepping through all those calls. Or, okay, I'm hitting graph DB. So
 
 We have multiple data sources — the ability to see which is taking time and why is crucial for us.
 
-<p>&nbsp;</p>
+
 
 ### How did SigNoz compare to other solutions you evaluated?​
 
-<p>&nbsp;</p>
+
 
 <YouTube id="cuRyrvZpYV4" mute={false} />
 
-<p>&nbsp;</p>
+
  
 We tried a few other tools, like DataDog.
 
@@ -127,17 +127,17 @@ The fact that I got SigNoz running in a single day, at least the traces and exce
 
 ### Why does the team at Wombo prefer open-source software?​
 
-<p>&nbsp;</p>
+
 
 <YouTube id="AO3tpixbf8M" mute={false} />
 
-<p>&nbsp;</p>
+
 
 It's very simple to find solutions to problems without needing to depend on contacting someone in a company. There's just a bigger community so that we will find answers quicker, and more people will look at whatever issues we create.
 
 There will be community contributors and dedicated contributors, which makes getting help from the community much more straightforward. We also like contributing back to the open source community and engaging with them; hence, it's a win-win.
 
-<p>&nbsp;</p>
+
 
 ### Any advice for new teams setting up their observability systems?​
 
@@ -148,7 +148,7 @@ So every time you change something in your infrastructure, do you also have to c
 
 The top two things are the completeness of the feature set and less maintenance.
 
-<p>&nbsp;</p>
+
 
 ---
 

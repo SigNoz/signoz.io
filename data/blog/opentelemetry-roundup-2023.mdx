@@ -48,7 +48,7 @@ As I mentioned, we also run OpenTelemetry APAC meetup group. Some of the key the
 
 1. **How to setup OpenTelemetry at scale**
 
-The current OTel documentation is focused on sending logs/traces/metrics data from individual applications to a backend. But when someone is deploying OpenTelemetry in their organizations - they need an understanding of the best practices to deploy it. e.g.
+    The current OTel documentation is focused on sending logs/traces/metrics data from individual applications to a backend. But when someone is deploying OpenTelemetry in their organizations - they need an understanding of the best practices to deploy it. e.g.
 
     - Should you send data directly to the o11y backend or via an OTel collector?
 
@@ -66,15 +66,15 @@ The current OTel documentation is focused on sending logs/traces/metrics data fr
 
 2. **Optimizing the value generated and cost involved**
 
-Once the applications are instrumented, the next question is how to optimize between the value generated and the cost involved. Generally, people want to implement some filtering mechanism of logs (e.g excluding healthcheck endpoints) or do sampling for traces. Esp. for [tail based sampling](https://opentelemetry.io/docs/concepts/sampling/#tail-sampling) for traces, people have many questions around how to do it correctly.
+    Once the applications are instrumented, the next question is how to optimize between the value generated and the cost involved. Generally, people want to implement some filtering mechanism of logs (e.g excluding healthcheck endpoints) or do sampling for traces. Esp. for [tail based sampling](https://opentelemetry.io/docs/concepts/sampling/#tail-sampling) for traces, people have many questions around how to do it correctly.
 
 3. **Evagelization within the org**
 
-Since Opentelemetry is still a new-ish project, people need more help in evangelizing it in their org. Questions like what are the advantages compared to the current solution, as introducing OpenTelemetry is an org-wide change in how people are doing observability. It would need buy-in from multiple stakeholders with their own concerns and vantage points.
+    Since Opentelemetry is still a new-ish project, people need more help in evangelizing it in their org. Questions like what are the advantages compared to the current solution, as introducing OpenTelemetry is an org-wide change in how people are doing observability. It would need buy-in from multiple stakeholders with their own concerns and vantage points.
 
-As a community, we need to publish more success stories of organizations becoming successful with OTel and how they achieved it.
+    As a community, we need to publish more success stories of organizations becoming successful with OTel and how they achieved it.
 
-Other common questions were around confusion in understanding that OTel is just focused on getting telemetry data, and you still need a backend/visualization tool to get insight from this data. Here's a [video](https://www.youtube.com/watch?v=K5fs55i4T9c) trying to address the question of the difference between OpenTelemetry and observability backends.
+    Other common questions were around confusion in understanding that OTel is just focused on getting telemetry data, and you still need a backend/visualization tool to get insight from this data. Here's a [video](https://www.youtube.com/watch?v=K5fs55i4T9c) trying to address the question of the difference between OpenTelemetry and observability backends.
 
 ### Learnings from SigNoz users and customers
 
@@ -84,10 +84,10 @@ As we encounter many users and customers using SigNoz as the backend and visuali
    - At SigNoz, we deeply leverage OTel semantic conventions for showing views that would not be possible in non-otel native products. e.g. Something that many of our users and customers like a lot is the exceptions monitoring view created directly from traces data.
    - Linking traces and logs is more easily possible by inserting and using `traceid` fields in logs to show related logs to traces. This helps in correlating logs and traces easily and debugging issues faster.
 
-<figure data-zoomable align='center'>
-<img className="box-shadowed-image" src="/img/blog/2024/01/logs-data-model.png" alt="OpenTelemetry Logs Data Model"/>
-<figcaption><i>OpenTelemetry Logs Data Model</i></figcaption>
-</figure>
+    <figure data-zoomable align='center'>
+    <img className="box-shadowed-image" src="/img/blog/2024/01/logs-data-model.png" alt="OpenTelemetry Logs Data Model"/>
+    <figcaption><i>OpenTelemetry Logs Data Model</i></figcaption>
+    </figure>
 
 
 2. **Users are comfortable in doing manual instrumentation**
@@ -95,67 +95,67 @@ As we encounter many users and customers using SigNoz as the backend and visuali
 
 3. **Switching to new o11y backends becomes very easy**
 
-We had an interesting incident where teams sending TBs of data per day were able to change the observability backend in a matter of few minutes as their code was already instrumented with OTel and the new backend also supported OTel. This is only possible because of the open source standards that OTel has developed. Otherwise just changing the observability backend would have been a 3-month project taking a lot of bandwidth from the team.
+    We had an interesting incident where teams sending TBs of data per day were able to change the observability backend in a matter of few minutes as their code was already instrumented with OTel and the new backend also supported OTel. This is only possible because of the open source standards that OTel has developed. Otherwise just changing the observability backend would have been a 3-month project taking a lot of bandwidth from the team.
 
 4. **Willingness to invest time learning about OpenTelemetry**
 
-We see many teams being comfortable with learning Otel fundamentals, as they know once their teams gets understanding of the basics they can use any vendors taht support OTel and the basic constructs will remain the same. This is very different from the earlier era where each tool would have its own proprietary conventions, and changing backends would mean retraining the whole team
+    We see many teams being comfortable with learning Otel fundamentals, as they know once their teams gets understanding of the basics they can use any vendors taht support OTel and the basic constructs will remain the same. This is very different from the earlier era where each tool would have its own proprietary conventions, and changing backends would mean retraining the whole team
 
 5. **Better Control and Optimization with OTel**
 
-We have seen many customers use `filterprocessor` in OTel collector to optimise their metrics cost. This was seamless and gave better control to users on which metrics to send. Also, OTel collector gives more controls over metrics and [spans](https://signoz.io/blog/distributed-tracing-span/) they want to send. For example, you can choose which type of metrics you want to send for `hostmetrics` receiver. Most proprietary agents don’t give this flexibility to users.
+    We have seen many customers use `filterprocessor` in OTel collector to optimise their metrics cost. This was seamless and gave better control to users on which metrics to send. Also, OTel collector gives more controls over metrics and [spans](https://signoz.io/blog/distributed-tracing-span/) they want to send. For example, you can choose which type of metrics you want to send for `hostmetrics` receiver. Most proprietary agents don’t give this flexibility to users.
 
-_Better control_: We have seen customers use include and exclude instrumentation of Java classes using [annotation](https://opentelemetry.io/docs/instrumentation/java/automatic/annotations/) very easily.
+    _Better control_: We have seen customers use include and exclude instrumentation of Java classes using [annotation](https://opentelemetry.io/docs/instrumentation/java/automatic/annotations/) very easily.
 
 6. **Using Tracing for performance testing**
 
-We have seen some organizations use trace data to test the performance of their system to periodically test the end-to-end flow of the data and analyse performance. People deeply instrument their code and enable it for performance analysis only for a specific time when they want to do performance testing
+    We have seen some organizations use trace data to test the performance of their system to periodically test the end-to-end flow of the data and analyse performance. People deeply instrument their code and enable it for performance analysis only for a specific time when they want to do performance testing
 
 7. **More and more projects emitting telemetry in OTLP format**
 
-Open source products have started support for emitting telemetry data in OTLP format so that it can be used to better understand their performance. Some examples of such projects are [ClickHouse](https://clickhouse.com/docs/en/operations/opentelemetry#tracing-the-clickhouse-itself), [Hasura](https://hasura.io/docs/latest/observability/opentelemetry/), [Traefik](https://doc.traefik.io/traefik/master/observability/tracing/opentelemetry/), etc.
+    Open source products have started support for emitting telemetry data in OTLP format so that it can be used to better understand their performance. Some examples of such projects are [ClickHouse](https://clickhouse.com/docs/en/operations/opentelemetry#tracing-the-clickhouse-itself), [Hasura](https://hasura.io/docs/latest/observability/opentelemetry/), [Traefik](https://doc.traefik.io/traefik/master/observability/tracing/opentelemetry/), etc.
 
 8. **Using OTEL OpAMP framework for logs pipeline**
 
-We are amongst the early adopters of the [OpAMP](https://opentelemetry.io/docs/specs/opamp/). It enables our customers to do operations with logs attributes from the UI. The logs pipelines UI provides the ability to create and manage the processors. SigNoz provides an easy-to-use UI to create and manage the processors which our users love, and OpAMP was a big part of successfully implementing it.
+    We are amongst the early adopters of the [OpAMP](https://opentelemetry.io/docs/specs/opamp/). It enables our customers to do operations with logs attributes from the UI. The logs pipelines UI provides the ability to create and manage the processors. SigNoz provides an easy-to-use UI to create and manage the processors which our users love, and OpAMP was a big part of successfully implementing it.
 
-<figure data-zoomable align='center'>
-    <img className="box-shadowed-image" src="/img/blog/2024/01/opamp-signoz.png" alt="Logs Pipeline architecture using OpAMP"/>
-    <figcaption><i>Logs Pipeline architecture using OpAMP in SigNoz</i></figcaption>
-</figure>
+    <figure data-zoomable align='center'>
+        <img className="box-shadowed-image" src="/img/blog/2024/01/opamp-signoz.png" alt="Logs Pipeline architecture using OpAMP"/>
+        <figcaption><i>Logs Pipeline architecture using OpAMP in SigNoz</i></figcaption>
+    </figure>
 
 
 ### What was achieved in OpenTelemetry in 2023?
 
 - **Logs becoming GA**
 
-This was announced in Kubecon NA ( Nov 2023)
+    This was announced in Kubecon NA ( Nov 2023)
 
 - **New tools coming up leveraging OpenTelemetry data format**
 
-Tools like <a href="https://github.com/kubeshop/tracetest">Tracetest</a> & <a href="https://github.com/traceloop/openllmetry"> OpenLLMetry </a> were released, which leverage standardised data model of OTel to derive insights. We think the standardization of data formats will lead to an ecosystem of tools that go beyond observability into other areas like testing, performance, security, etc.
+    Tools like <a href="https://github.com/kubeshop/tracetest">Tracetest</a> & <a href="https://github.com/traceloop/openllmetry"> OpenLLMetry </a> were released, which leverage standardised data model of OTel to derive insights. We think the standardization of data formats will lead to an ecosystem of tools that go beyond observability into other areas like testing, performance, security, etc.
 
 - **Stable release of the Metrics [API](https://github.com/open-telemetry/opentelemetry-go/blob/main/CHANGELOG.md#11600390-2023-05-18) and [SDK](https://github.com/open-telemetry/opentelemetry-go/blob/main/CHANGELOG.md#11900420007-2023-09-28) in the Go implementation**
 
 - **OpAMP**
 
-[Open Agent Management Protocol](https://github.com/open-telemetry/opamp-spec) (OpAMP) is a network protocol for remote management of large fleets of data collection Agents. The spec is currently in Beta stage but lots of progress was made in 2023 to make it ready for production usage. As mentioned above, we at SigNoz have also leveraged it to make our logs pipelines module.
+    [Open Agent Management Protocol](https://github.com/open-telemetry/opamp-spec) (OpAMP) is a network protocol for remote management of large fleets of data collection Agents. The spec is currently in Beta stage but lots of progress was made in 2023 to make it ready for production usage. As mentioned above, we at SigNoz have also leveraged it to make our logs pipelines module.
 
 - **14 new receivers and 8 exporters were added in Otel Collector in 2023**
 
-Some interesting ones are:
+    Some interesting ones are:
 
-`datadog-receiver` : Famous receiver merged after it was sabotaged by [DataDog.](https://github.com/open-telemetry/opentelemetry-collector-contrib/pull/5836#issuecomment-1404724926)
+    `datadog-receiver` : Famous receiver merged after it was sabotaged by [DataDog.](https://github.com/open-telemetry/opentelemetry-collector-contrib/pull/5836#issuecomment-1404724926)
 
-`gitproviderreceiver` : Allows receiving git events. This way users can measure dev productivity, aligning with DORA.
+    `gitproviderreceiver` : Allows receiving git events. This way users can measure dev productivity, aligning with DORA.
 
-`webhookeventreceiver` : Allows receiving events of any webhook style data source. User can also use transform extension to convert those events to logs.
+    `webhookeventreceiver` : Allows receiving events of any webhook style data source. User can also use transform extension to convert those events to logs.
 
-`apachesparkreceiver` : Allows monitoring of Apache Spark applications and jobs.
+    `apachesparkreceiver` : Allows monitoring of Apache Spark applications and jobs.
 
-`azuremonitorreceiver`: Allows to collect Azure Monitor metrics per a subscription/resource group(s) by using Azure REST API.
+    `azuremonitorreceiver`: Allows to collect Azure Monitor metrics per a subscription/resource group(s) by using Azure REST API.
 
-`cloudflarereceiver` : Allows collecting Cloudflare logs.
+    `cloudflarereceiver` : Allows collecting Cloudflare logs.
 
 ### What we are excited about OpenTelemetry in 2024
 

@@ -19,22 +19,36 @@ In this blog, I will discuss about how to set up Prometheus and Grafana in EKS a
 ### Create cluster in EKS
 
 Create cluster and the command is:
-`eksctl create cluster --name prod --version 1.13 --nodegroup-name standard-workers --node-type t3.medium --nodes 3 --nodes-min 1 --nodes-max 4 --node-ami auto`
+
+```
+eksctl create cluster --name prod --version 1.13 --nodegroup-name standard-workers --node-type t3.medium --nodes 3 --nodes-min 1 --nodes-max 4 --node-ami auto
+```
 
 ### Setup Prometheus and Grafana using Helm
 
 Follow this [link](https://catalog.workshops.aws/running-batch-on-eks/en-US/exercises/calculate-pi/setup-prometheus-grafana) to set up prometheus and grafana in EKS cluster
 
-also add `--set server.global.scrape_interval="10s"` while installing prometheus from helm using the above link. The default scrape interval is 1m. This may test your patience to see metrics reflected in your Prometheus expression browser.
+also add 
+```
+--set server.global.scrape_interval="10s"
+``` 
+
+while installing prometheus from helm using the above link. The default scrape interval is 1m. This may test your patience to see metrics reflected in your Prometheus expression browser.
 
 [![SigNoz GitHub repo](/img/blog/common/signoz_github.webp)](https://github.com/SigNoz/signoz)
 
-**Grafana is exposed to public using Service type LoadBalancer.** You can get the External IP by running: `kubectl get svc -n grafana grafana -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'` which runs on port 80. Just visit the result the above command and you should see your grafana dashboard.
+**Grafana is exposed to public using Service type LoadBalancer.** You can get the External IP by running: 
+
+```
+kubectl get svc -n grafana grafana -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'
+```
+
+which runs on port 80. Just visit the result the above command and you should see your grafana dashboard.
 
 **Prometheus server by default is not exposed to public** and you can access the prometheus expression browser by running below commands in your localhost/environment:
 
 ```
-PROM_SERVER_POD=$(kubectl -n prometheus get pod -l component=server -o jsonpath="{.items[0].metadata.name}")
+PROM_SERVER_POD=$(kubectl -n prometheus get pod -l component=server -o jsonpath="\{.items[0].metadata.name}")
 kubectl -n prometheus port-forward $PROM_SERVER_POD 9090
 ```
 
@@ -73,18 +87,24 @@ gunicorn django_sample_project.wsgi:application --bind 0.0.0.0:8000 --workers 3 
 `--statsd-host` parameter enables gunicorn to send metrics to statsd-server
 Also, I have changed the access log format of gunicorn to log **_worker pid_** and **_response time (in microseconds)_** . This format later helps to debug request count and latency by worker processes.
 
-Run `curl http://localhost:8000/polls/2xx_success/` from your terminal to check the response
+Run 
+```
+curl http://localhost:8000/polls/2xx_success/
+``` 
+
+from your terminal to check the response.
+
 The application also logs `Error sending message to statsd` because we have not run statsd server till now but the django application runs perfectly.
 
 ### Creating and Push the repo as docker image (Optional)
 
 Build docker image and push to registry
 
-```
+```jsx
 docker build -t <username>/django_sample_project:quantiles_v1 .
 ```
 
-```
+```jsx
 docker push <username>/django_sample_project:quantiles_v1
 ```
 
@@ -101,7 +121,13 @@ cd django_sample_project
 docker run  -ti -p 8000:8000 -v `pwd`:/usr/src/app ankitnayan/django_sample_project:quantiles_v1
 ```
 
-Run `curl http://localhost:8000/polls/2xx_success/` from your terminal to check the response
+Run 
+```
+curl http://localhost:8000/polls/2xx_success/
+``` 
+
+from your terminal to check the response.
+
 The application also logs `Error sending message to statsd` because we have not run statsd server till now but the django application runs perfectly.
 
 ## Choosing the metric collection system in gunicorn + django and other python applications
@@ -159,7 +185,7 @@ kubectl -n django-with-statsd apply -f k8s/
 Run below command to get the External IP of the service which exposes your application to the public world.
 
 ```
-kubectl get svc -n django-with-statsd django-with-statsd -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'
+kubectl get svc -n django-with-statsd django-with-statsd -o jsonpath='\{.status.loadBalancer.ingress[0].hostname}'
 ```
 
 The type of service is LoadBalancer (ELB) which is provided by AWS and hence you will be charged for the same. You can view the ELB used in the list of Load Balancer in AWS dashboard.
@@ -200,7 +226,11 @@ Those who are wondering what RED metrics mean.
 - E -> Errors -> Error rates per second
 - D -> Duration -> Time each request takes
 
-### Request Rate: `sum(rate(gunicorn_requests[1m]))`
+### Request Rate: 
+
+```
+sum(rate(gunicorn_requests[1m]))
+```
 
 ![RPS](/img/blog/2019/08/Screenshot-2019-08-30-at-1.24.00-PM.webp)
 
@@ -216,7 +246,9 @@ Similarly we can get other rates by:
 
 ### Avg Request Duration:
 
-`rate(gunicorn_request_duration_sum[1m])/rate(gunicorn_request_duration_count[1m])`
+```
+rate(gunicorn_request_duration_sum[1m])/rate(gunicorn_request_duration_count[1m])
+```
 
 This will generate the below graph
 ![avg. request duration](/img/blog/2019/08/Screenshot-2019-08-30-at-1.17.50-PM.webp)
@@ -229,7 +261,7 @@ This will generate the below graph
 
 You might be thinking, why do we need to instrument when we are getting RED metrics from gunicorn in the last section?
 
-**Answer: **More detailed filtering on RED metrics like
+**Answer:** More detailed filtering on RED metrics like
 
 - Which endpoint has more error rates? Or which endpoint has the highest response time (latency)?
 - Which endpoints produce 500 errors and at what rate?
@@ -241,20 +273,18 @@ We shall put up a middleware which shall start the timer as the request comes an
 
 Before we move through, let's understand the execution order of middlewares in Django in a request/response life cycle. Every middleware is called twice in a request/response cycle. During the request cycle the middlewares are executed top down and during the response cycle, they are executed bottoms up. So, if I put a middleware on top, it will be the first to get invoked when a request comes and the last one before the response leaves.
 
-![Middleware execution order](https://i.stack.imgur.com/iKDL1.webp)
-
 Our middleware class must implement 1 of the below methods:
 
 Called during request:
 
-- \***\*`process_request(request)`\*\***
-- \***\*`process_view(request, view_func, view_args, view_kwargs)`\*\***
+- **`process_request(request)`**
+- **`process_view(request, view_func, view_args, view_kwargs)`**
 
 Called during response:
 
-- \***\*`process_exception(request, exception)`\*\*** (only if the view raised an exception)
-- \***\*`process_template_response(request, response)`\*\*** (only for template responses)
-- \***\*`process_response(request, response)`\*\***
+- **`process_exception(request, exception)`** (only if the view raised an exception)
+- **`process_template_response(request, response)`** (only for template responses)
+- **`process_response(request, response)`**
 
 We shall implement `process_request` and `process_response` methods for our case. Have a look at the `[middlewares/collect_statsd_metrics.py](https://github.com/ankitnayan/django_sample_project/blob/master/middlewares/collect_statsd_metrics.py)`
 
@@ -270,23 +300,36 @@ Now add this on top of all middlewares in your settings.py and you will be good 
 
 ### RPS of `/polls/2xx_success/`
 
-`sum(rate(django_request_count{endpoint="/polls/2xx_success/", instance=~".*"}[1m]))`
+```
+sum(rate(django_request_count{endpoint="/polls/2xx_success/", instance=~".*"}[1m]))
+```
+
 ![RPS](/img/blog/2019/08/Screenshot-2019-08-30-at-4.26.03-PM.webp)
 
 ### RPS by endpoint
 
-`sum(rate(django_request_count{instance=~".*"}[1m])) by (endpoint)`
+```
+sum(rate(django_request_count{instance=~".*"}[1m])) by (endpoint)
+```
+
 ![RPS by endpoint](/img/blog/2019/08/Screenshot-2019-08-30-at-4.50.34-PM.webp)
 
 ### Average request duration per endpoint
 
-`avg(rate(django_request_latency_seconds_sum[1m])/rate(django_request_latency_seconds_count[1m])) by (endpoint)`
+```
+avg(rate(django_request_latency_seconds_sum[1m])/rate(django_request_latency_seconds_count[1m])) by (endpoint)
+```
+
 ![Avg request duration per endpoint](/img/blog/2019/08/Screenshot-2019-08-30-at-4.48.02-PM.webp)
 
 ### Quantile of endpoints
 
-`django_request_latency_seconds{endpoint="/polls/2xx_success/"}`
+```
+django_request_latency_seconds{endpoint="/polls/2xx_success/"}
+```
+
 ![quantile of endpoints](/img/blog/2019/08/Screenshot-2019-08-30-at-4.53.45-PM.webp)
+
 We now have 50, 90 and 99 percentile metrics from each of statsd-exporter instance. Since we have 2 statsd-exporter we see each of these percentile for each of them.
 
 > Note that we cannot aggregate on the quantiles collected. The post aggregation does not make any sense of data.
@@ -306,9 +349,9 @@ The node which was killed was hosting 1 pod of the django application. So, we se
 Soon enough (roughly after 2 minutes) kubernetes started another pod to match current state to desired state and the metrics from this new pod start coming automatically as prometheus discovers them by auto discovery of targets which I enabled in our `k8s/django-deployment.yml` file by below annotations:
 
 ```
-            prometheus.io/scrape: 'true'
-            prometheus.io/port:   '9102'
-            prometheus.io/path:   '/metrics'
+prometheus.io/scrape: 'true'
+prometheus.io/port:   '9102'
+prometheus.io/path:   '/metrics'
 ```
 
 ### Case 2: The node hosting Prometheus server was stopped

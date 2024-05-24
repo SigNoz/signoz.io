@@ -149,7 +149,7 @@ If you are using some firewall for your VMs to block inbound traffic there too y
 
 Once you have completed these preparations, you can install and run the OpenTelemetry Collector for PostgreSQL.
 
-## Setting up SigNoz[](https://signoz.io/blog/opentelemetry-rabbitmq-metrics-monitoring/#setting-up-signoz)
+## Setting up SigNoz
 
 You need a backend to which you can send the collected data for monitoring and visualization. [SigNoz](https://signoz.io/) is an OpenTelemetry-native APM that is well-suited for visualizing OpenTelemetry data.
 
@@ -157,13 +157,13 @@ SigNoz cloud is the easiest way to run SigNoz. You can sign up [here](https://s
 
 You can also install and self-host SigNoz yourself. Check out the [docs](https://signoz.io/docs/install/) for installing self-host SigNoz.
 
-## Setting Up OpenTelemetry Collector[](https://signoz.io/blog/opentelemetry-rabbitmq-metrics-monitoring/#setting-up-opentelemetry-collector)
+## Setting Up OpenTelemetry Collector
 
 The OpenTelemetry Collector offers various deployment options to suit different environments and preferences. It can be deployed using Docker, Kubernetes, Nomad, or directly on Linux systems. You can find all the installation options <a href = "https://opentelemetry.io/docs/collector/installation" rel="noopener noreferrer nofollow" target="_blank">here</a>.
 
 We are going to discuss the manual installation here and resolve any hiccups that come in the way.
 
-### Step 1 - Downloading OpenTelemetry Collector[](https://signoz.io/blog/opentelemetry-rabbitmq-metrics-monitoring/#step-1---downloading-opentelemetry-collector)
+### Step 1 - Downloading OpenTelemetry Collector
 
 Download the appropriate binary package for your Linux or macOS distribution from the OpenTelemetry Collector <a href = "https://github.com/open-telemetry/opentelemetry-collector-releases/releases" rel="noopener noreferrer nofollow" target="_blank">releases</a> page. We are using the latest version available at the time of writing this tutorial.
 
@@ -173,7 +173,7 @@ For MACOS (arm64):
 curl --proto '=https' --tlsv1.2 -fOL https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.88.0/otelcol-contrib_0.88.0_darwin_arm64.tar.gz
 ```
 
-### Step 2 - Extracting the package[](https://signoz.io/blog/opentelemetry-rabbitmq-metrics-monitoring/#step-2---extracting-the-package)
+### Step 2 - Extracting the package
 
 Create a new directory named `otelcol-contrib` and then extract the contents of the `otelcol-contrib_0.88.0_darwin_arm64.tar.gz` archive into this newly created directory with the following command:
 
@@ -181,7 +181,7 @@ Create a new directory named `otelcol-contrib` and then extract the contents o
 mkdir otelcol-contrib && tar xvzf otelcol-contrib_0.88.0_darwin_arm64.tar.gz -C otelcol-contrib
 ```
 
-### Step 3 - Setting up the Configuration file[](https://signoz.io/blog/opentelemetry-rabbitmq-metrics-monitoring/#step-3---setting-up-the-configuration-file)
+### Step 3 - Setting up the Configuration file
 
 Create a `config.yaml` file in the `otelcol-contrib` folder. This configuration file will enable the collector to connect with PostgreSQL and have other settings like at what frequency you want to monitor the instance.
 
@@ -286,7 +286,7 @@ You would need to replace the following details for the config to work properly:
 
 Also note how we have set up the pipeline in the `service` section of the config. We have added `postgresql` and `postgresql/all` in the receiver section of metrics and set the exporter to `otlp`.
 
-### Step 4 - Running the collector service[](https://signoz.io/blog/opentelemetry-rabbitmq-metrics-monitoring/#step-4---running-the-collector-service)
+### Step 4 - Running the collector service
 
 Every Collector release includes an `otelcol` executable that you can run. Since we’re done with configurations, we can now run the collector service with the following command.
 
@@ -294,7 +294,6 @@ From the `otelcol-contrib`, run the following command:
 
 ```bash
 ./otelcol-contrib --config ./config.yaml
-
 ```
 
 If you want to run it in the background:
@@ -303,13 +302,12 @@ If you want to run it in the background:
 ./otelcol-contrib --config ./config.yaml &> otelcol-output.log & echo "$\!" > otel-pid
 ```
 
-### Step 5 - Debugging the output[](https://signoz.io/blog/opentelemetry-rabbitmq-metrics-monitoring/#step-5---debugging-the-output)
+### Step 5 - Debugging the output
 
 If you want to see the output of the logs, we’ve just set up for the background process. You may look it up with:
 
 ```bash
 tail -f -n 50 otelcol-output.log
-
 ```
 
 tail 50 will give the last 50 lines from the file `otelcol-output.log`
@@ -326,7 +324,7 @@ You can stop the collector service with the following command:
 kill "$(< otel-pid)"
 ```
 
-## Monitoring with SigNoz Dashboard[](https://signoz.io/blog/opentelemetry-rabbitmq-metrics-monitoring/#monitoring-with-signoz-dashboard)
+## Monitoring with SigNoz Dashboard
 
 Once the above setup is done, you will be able to access the metrics in the SigNoz dashboard. You can go to the `Dashboards` tab and try adding a new panel. You can learn how to create dashboards in SigNoz [here](https://signoz.io/docs/userguide/manage-dashboards-and-panels/).
 
