@@ -13,13 +13,13 @@ const docsSideNav = [
         type: 'category',
         label: 'Installation',
         route: '/docs/install/install',
-        link: {
-          type: 'doc',
+        // link: {
+          // type: 'doc',
           // route: '/docs/install/install',
           //   title: 'Install SigNoz',
           // description:
           // "To install SigNoz, follow the instructions in the sections below. If you don't want to self-host, try SigNoz Cloud.",
-        },
+        // },
         items: [
           {
             type: 'doc',
@@ -530,7 +530,7 @@ const docsSideNav = [
           {
             type: 'category',
             label: 'Guides',
-            route: '/docs/category/guides',
+            // route: '/docs/category/guides',
             // link: {
             // type: 'generated-index',
             // title: 'Logs Pipeline Guides',
@@ -1252,6 +1252,7 @@ const docsSideNav = [
   {
     label: 'FAQ',
     type: 'category',
+    route: '/docs/faqs',
     // link: {
     // type: 'generated-index',
     // title: 'Frequently Asked Questions',

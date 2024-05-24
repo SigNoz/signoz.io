@@ -10,13 +10,12 @@ const DocCard: React.FC<CardProps> = ({ title, description, href }) => {
   return (
     <a
       href={href}
-      className="block rounded overflow-hidden shadow-lg p-6 bg-white dark:bg-gray-800 transform transition-transform hover:scale-105 no-underline w-full sm:w-1/2 md:w-1/2 lg:w-1/3 xl:w-1/3"
-      style={{ textDecoration: 'none' }}
+      className="block rounded overflow-hidden shadow-lg  p-6 bg-gray-900 dark:bg-gray-800 border border-gray-700 hover:border-blue-500 transition-all duration-200 ease-in-out no-underline"
     >
-      <div className="font-bold text-xl mb-2 text-gray-900 dark:text-gray-100">
+      <div className="font-bold text-xl mb-2 text-white dark:text-gray-100">
         {title}
       </div>
-      <p className="text-gray-700 dark:text-gray-300 text-base">
+      <p className="text-gray-400 dark:text-gray-300 text-base">
         {description}
       </p>
     </a>

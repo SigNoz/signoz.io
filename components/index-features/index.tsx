@@ -1,22 +1,20 @@
+
 'use client'
 
-import React, { useState } from 'react'
-import Heading from '../../components/ui/Heading'
-import SubHeading from '../../components/ui/SubHeading'
+import React, { useState } from 'react';
+import Heading from '../../components/ui/Heading';
+import SubHeading from '../../components/ui/SubHeading';
 
 export const SigNozFeatures = () => {
-  const [tab, setTab] = useState('apm')
+  const [tab, setTab] = useState('apm');
 
   const featureChangeHandler = (value: string) => {
     if (value === tab) {
-      setTab('')
+      setTab('');
     } else {
-      setTab(value)
+      setTab(value);
     }
-    // document
-    //   .getElementById(`accordion-${value}`)
-    //   .scrollIntoView({ behavior: "smooth" });
-  }
+  };
 
   const FEATURES_LIST = [
     {
@@ -26,15 +24,12 @@ export const SigNozFeatures = () => {
       icon: '/img/landing/icon-placeholder.webp',
       content: (
         <>
-          <ul className='list-disc'>
+          <ul className="list-disc">
             <li className="mb-2 text-lg">
-            Out-of-box charts for application metrics like p90, p99 latency, error rates, request
-              rates, etc.
+              Out-of-box charts for application metrics like p90, p99 latency, error rates, request rates, etc.
             </li>
             <li className="mb-2 text-lg">Monitor RED metrics for key operations in any service</li>
-            <li className="mb-2 text-lg">
-              Monitor database and external calls made by any service
-            </li>
+            <li className="mb-2 text-lg">Monitor database and external calls made by any service</li>
             <li className="mb-2 text-lg">Service maps to show application topology</li>
           </ul>
         </>
@@ -47,91 +42,44 @@ export const SigNozFeatures = () => {
       icon: '/img/landing/icon-placeholder.webp',
       content: (
         <>
-          <ul>
-            <li className="mb-2 text-lg">
-              Get end-to-end visibility of your services with rich contextual tags and attributes.
-            </li>
-            <li className="mb-2 text-lg">
-              Run aggregates on trace data like sum, avg, p99 latency, etc.
-            </li>
-            <li className="mb-2 text-lg">
-              Group your trace data by different attributes like HTTP URL, service names, etc. to
-              find granular issues
-            </li>
-            <li className="mb-2 text-lg">
-              Flamegraphs and Gantt charts to visualize the flow of requests easily.
-            </li>
+          <ul className="list-disc">
+            <li className="mb-2 text-lg">Get end-to-end visibility of your services with rich contextual tags and attributes.</li>
+            <li className="mb-2 text-lg">Run aggregates on trace data like sum, avg, p99 latency, etc.</li>
+            <li className="mb-2 text-lg">Group your trace data by different attributes like HTTP URL, service names, etc. to find granular issues</li>
+            <li className="mb-2 text-lg">Flamegraphs and Gantt charts to visualize the flow of requests easily.</li>
           </ul>
         </>
       ),
     },
     {
-      label: 'Metrics & Dashboards ',
+      label: 'Metrics & Dashboards',
       value: 'metrics',
       figure: '/img/landing/feature-metrics-dashboards-min.webp',
       icon: '/img/landing/icon-placeholder.webp',
       content: (
         <>
-          <ul>
+          <ul className="list-disc">
             <li className="mb-2 text-lg">Monitor any metrics important to you.</li>
-            <li className="mb-2 text-lg">
-              Support for OpenTelemetry metrics SDK or enable a Prometheus receiver to receive any
-              metrics exposed in a running Prometheus instance.
-            </li>
-            <li className="mb-2 text-lg">
-              Create dashboards around any use case like external calls, API endpoints, JVM metrics
-              - there is no limit.
-            </li>
+            <li className="mb-2 text-lg">Support for OpenTelemetry metrics SDK or enable a Prometheus receiver to receive any metrics exposed in a running Prometheus instance.</li>
+            <li className="mb-2 text-lg">Create dashboards around any use case like external calls, API endpoints, JVM metrics - there is no limit.</li>
           </ul>
         </>
       ),
     },
-    // {
-    //   label: "Infrastructure Monitoring",
-    //   value: "infra",
-    //   figure: "img/website/infrastructure.webp",
-    //   icon: "/img/landing/icon-placeholder.webp",
-    //   content: (
-    //     <>
-    //       <ul>
-    //         <li className="mb-2 text-lg">
-    //           End-to-End visibility into infrastructure performance
-    //         </li>
-    //         <li className="mb-2 text-lg">
-    //           Ingest metrics from all kinds of host environments
-    //         </li>
-    //         <li className="mb-2 text-lg">
-    //           Correlate infrastructure and application metrics for contextual
-    //           insights
-    //         </li>
-    //         <li className="mb-2 text-lg">
-    //           Build customized dashboards with powerful query builder
-    //         </li>
-    //       </ul>
-    //     </>
-    //   ),
-    // },
     {
-      label: 'Logs Management ',
+      label: 'Logs Management',
       value: 'logs',
       figure: '/img/landing/feature-log-management-min.webp',
       icon: '/img/landing/icon-placeholder.webp',
       content: (
         <>
-          <ul>
+          <ul className="list-disc">
             <li className="mb-2 text-lg">Ingest, process, and analyze logs at any scale.</li>
-            <li className="mb-2 text-lg">
-              Support for OpenTelemetry logs or any existing logging pipeline that you have.
-            </li>
-            <li className="mb-2 text-lg">
-              Live tail, easy search, and a powerful logs query builder to give you full control
-            </li>
-            <li className="mb-2 text-lg">
-              Use a columnar database to store logs which enables lightning fast log analytics.
+            <li className="mb-2 text-lg">Support for OpenTelemetry logs or any existing logging pipeline that you have.</li>
+            <li className="mb-2 text-lg">Live tail, easy search, and a powerful logs query builder to give you full control</li>
+            <li className="mb-2 text-lg">Use a columnar database to store logs which enables lightning fast log analytics.
               <br />
-              <a target="_blank" href="https://signoz.io/blog/logs-performance-benchmark/">
-                (Logs performance benchmark)
-              </a>
+              <a target="_blank" href="https://signoz.io/blog/logs-performance-benchmark/">(Logs performance benchmark)</a>
             </li>
           </ul>
         </>
@@ -144,41 +92,31 @@ export const SigNozFeatures = () => {
       icon: '/img/landing/icon-placeholder.webp',
       content: (
         <>
-          <ul>
-            <li className="mb-2 text-lg">
-              Record exceptions automatically in Python, Java, Ruby, and Javascript
-            </li>
-            <li className="mb-2 text-lg">
-              Rich contextual data with stack trace, exceptions attributes and linked span data
-            </li>
+          <ul className="list-disc">
+            <li className="mb-2 text-lg">Record exceptions automatically in Python, Java, Ruby, and Javascript</li>
+            <li className="mb-2 text-lg">Rich contextual data with stack trace, exceptions attributes and linked span data</li>
             <li className="mb-2 text-lg">Exceptions grouping and custom exceptions</li>
-            <li className="mb-2 text-lg">
-              Navigate from Exceptions to related traces to see the error in trace graph
-            </li>
+            <li className="mb-2 text-lg">Navigate from Exceptions to related traces to see the error in trace graph</li>
           </ul>
         </>
       ),
     },
     {
-      label: 'Alerts ',
+      label: 'Alerts',
       value: 'alerts',
       figure: '/img/landing/feature-alerts-min.webp',
       icon: '/img/landing/icon-placeholder.webp',
       content: (
         <>
-          <ul>
+          <ul className="list-disc">
             <li className="mb-2 text-lg">Easy to set alerts with DIY query builder</li>
-            <li className="mb-2 text-lg">
-              Support for PromQL for users familiar with Prometheus alert manager
-            </li>
-            <li className="mb-2 text-lg">
-              Support for multiple notification channels like Slack and PagerDuty
-            </li>
+            <li className="mb-2 text-lg">Support for PromQL for users familiar with Prometheus alert manager</li>
+            <li className="mb-2 text-lg">Support for multiple notification channels like Slack and PagerDuty</li>
           </ul>
         </>
       ),
     },
-  ]
+  ];
 
   return (
     <section>
@@ -187,8 +125,7 @@ export const SigNozFeatures = () => {
           <Heading type={4}>EXPLORE SIGNOZ</Heading>
           <Heading type={1}>One Stop Observability</Heading>
           <SubHeading>
-            You don’t need to manage multiple tools for traces, metrics, and logs. Get great
-            out-of-the-box charts and a powerful query builder to dig deeper into your data.
+            You don’t need to manage multiple tools for traces, metrics, and logs. Get great out-of-the-box charts and a powerful query builder to dig deeper into your data.
           </SubHeading>
         </div>
 
@@ -200,7 +137,7 @@ export const SigNozFeatures = () => {
                 onClick={() => setTab(feature.value)}
                 className={`flex cursor-pointer flex-col items-center justify-center gap-2 rounded-t-lg pt-5 text-center ${
                   tab === feature.value ? 'active' : ''
-                }`}
+                } transition-all duration-300`}
               >
                 <img src={feature.icon} alt={feature.label} className="hidden h-10 w-10" />
                 <p
@@ -213,11 +150,11 @@ export const SigNozFeatures = () => {
               </div>
             ))}
           </div>
-          <div className="rounded-lg">
+          <div className="rounded-lg transition-all duration-500 ease-in-out">
             {FEATURES_LIST.map((feature, idx) => (
               <div
                 key={feature.label}
-                className={`grid grid-cols-5 ${tab === feature.value ? '' : 'hidden'}`}
+                className={`grid grid-cols-5 ${tab === feature.value ? 'opacity-100 scale-100' : 'opacity-0 scale-95 hidden'} transition-opacity duration-500 ease-in-out`}
               >
                 <div
                   className={`
@@ -229,10 +166,10 @@ export const SigNozFeatures = () => {
                   <img
                     src={feature.figure}
                     alt={feature.label}
-                    className="relative z-[1] h-full w-full object-contain"
+                    className="relative z-[1] h-full w-full object-contain transition-transform duration-500 ease-in-out"
                   />
                 </div>
-                <div className="col-span-2 flex items-center justify-center px-12 py-10">
+                <div className="col-span-2 flex items-center justify-center px-12 py-10 transition-opacity duration-500 ease-in-out">
                   {feature.content}
                 </div>
               </div>
@@ -269,26 +206,26 @@ export const SigNozFeatures = () => {
                       <DownArrow />
                     </span>
                   </div>
-                  <div className={`${tab === feature.value ? 'visible' : 'hidden'}`}>
+                  <div className={`${tab === feature.value ? 'visible' : 'hidden'} transition-all duration-500 ease-in-out`}>
                     <div className="px-5 py-4">
                       <div className="mx-auto max-w-sm">
                         <img
                           src={feature.figure}
                           alt={feature.label}
-                          className="rounded-xl object-contain"
+                          className="rounded-xl object-contain transition-transform duration-500 ease-in-out"
                         />
                       </div>
                       <div>{feature.content}</div>
                     </div>
                   </div>
                 </div>
-              )
+              );
             })}
           </div>
         </div>
       </div>
     </section>
-  )
+  );
 }
 
 const DownArrow = () => {
@@ -306,5 +243,5 @@ const DownArrow = () => {
         fill="#ffffff"
       />
     </svg>
-  )
+  );
 }
