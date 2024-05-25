@@ -5,10 +5,7 @@ description: Send events from your Python application to SigNoz
 
 ---
 
-
-
 import InstrumentationFAQ from '@/components/shared/instrumentation-faq.md'
-
 
 This document contains instructions on how to set up OpenTelemetry instrumentation in your Python applications. OpenTelemetry, also known as OTel for short, is an open source observability framework that can help you generate and collect telemetry data - traces, metrics, and logs from your Python application.
 
@@ -25,7 +22,6 @@ There are three major steps to using OpenTelemetry:
     <figcaption><i>OpenTelemetry helps generate and collect telemetry data from Python applications which can then be sent to SigNoz for storage, visualization, and analysis.</i></figcaption>
 </figure>
 
-<br></br>
 
 Let’s understand how to download, install, and run OpenTelemetry in Python.
 
@@ -45,7 +41,7 @@ From VMs, there are two ways to send data to SigNoz Cloud.
 - [Send traces directly to SigNoz Cloud](#send-traces-directly-to-signoz-cloud)
 - [Send traces via OTel Collector binary](#send-traces-via-otel-collector-binary) (recommended)
 
-#### **Send traces directly to SigNoz Cloud**
+#### Send traces directly to SigNoz Cloud
 
 Step 1. Create a virtual environment<br></br>
     
@@ -95,7 +91,7 @@ In case you encounter an issue where all applications do not get listed in the s
 
 ---
 
-#### **Send traces via OTel Collector binary**
+#### Send traces via OTel Collector binary
 
 OTel Collector binary helps to collect logs, hostmetrics, resource and infra attributes. It is recommended to install Otel Collector binary to collect and send traces to SigNoz cloud. You can correlate signals and have rich contextual data through this way.
 
@@ -148,7 +144,6 @@ In your `requirements.txt` file, add these two OpenTelemetry dependencies:
 ```bash
 opentelemetry-distro==0.43b0
 opentelemetry-exporter-otlp==1.22.0
-
 ```
 
 Step 2. Add automatic instrumentation
@@ -180,7 +175,6 @@ To make sure that you Dockerize your application along with the OpenTelemetry in
 
 ```bash
 ...
-
 # Install any needed packages specified in requirements.txt
 # And install OpenTelemetry packages
 RUN pip install --no-cache-dir -r requirements.txt 
@@ -199,7 +193,6 @@ ENV OTEL_EXPORTER_OTLP_PROTOCOL=grpc
 # Run app.py with OpenTelemetry instrumentation when the container launches
 CMD ["opentelemetry-instrument", "python", "app.py"]
 ...
-
 ```
 
 This updated Dockerfile instructions will install required packages from `requirements.txt`, including OpenTelemetry components. It sets the environment variable for OpenTelemetry configuration specifying the service name, OTLP exporter endpoint, and protocol. The container executes 'app.py' with OpenTelemetry tracing, exposing port 5000. 
@@ -215,7 +208,6 @@ Here's how you can run your docker container:
 
 ```bash
 docker run -p 5000:5000 <your-image-name>
-
 ```
 
 The Docker run command starts a container in detached mode (-d) and maps port 5000 of the host to port 5000 of the container. 
@@ -238,7 +230,7 @@ There are two ways to send data to SigNoz Cloud. You can containerize the images
 - Send traces directly to SigNoz Cloud
 - Send traces via OTel Collector binary **(recommended)**
 
-#### **Send traces directly to SigNoz Cloud**
+#### Send traces directly to SigNoz Cloud
 
 Step 1. Add OpenTelemetry dependencies
 
@@ -247,7 +239,6 @@ In your `requirements.txt` file, add these two OpenTelemetry dependencies:
 ```bash
 opentelemetry-distro==0.43b0
 opentelemetry-exporter-otlp==1.22.0
-
 ```
 
 Step 2. Dockerize and Build your application
@@ -315,7 +306,7 @@ In case you encounter an issue where all applications do not get listed in the s
 
 ---
 
-#### **Send traces via OTel Collector binary**
+#### Send traces via OTel Collector binary
 
 OTel Collector binary helps to collect logs, hostmetrics, resource and infra attributes. It is recommended to install Otel Collector binary to collect and send traces to SigNoz cloud. You can correlate signals and have rich contextual data through this way.
 
@@ -328,7 +319,6 @@ In your `requirements.txt` file, add these two OpenTelemetry dependencies:
 ```bash
 opentelemetry-distro==0.43b0
 opentelemetry-exporter-otlp==1.22.0
-
 ```
 
 Step 2. Dockerize and Build your application
@@ -400,11 +390,9 @@ You can use OpenTelemetry Python to send your traces directly to SigNoz. OpenTel
 ### Steps to auto-instrument Python app for traces
 
 
-<Admonition type="info">
-
-  If you are on K8s, you should checkout [opentelemetry operators](/docs/tutorial/opentelemetry-operator-usage/#opentelemetry-auto-instrumentation-injection) which enable auto instrumenting Python applications very easily.
-
-</Admonition>
+    <Admonition type="info">
+    If you are on K8s, you should checkout [opentelemetry operators](/docs/tutorial/opentelemetry-operator-usage/#opentelemetry-auto-instrumentation-injection) which enable auto instrumenting Python applications very easily.
+    </Admonition>
 
 1. **Create a virtual environment**<br></br>
     
@@ -497,7 +485,7 @@ You might see other dummy applications if you’re using SigNoz for the first ti
     <img src="/img/docs/opentelemetry_python_app_instrumented.webp" alt="Python Application in the list of services being monitored in SigNoz"/>
     <figcaption><i>Python Application in the list of services being monitored in SigNoz</i></figcaption>
     </figure>
-<br></br>
+
 
 ## Database Instrumentation
 
@@ -544,7 +532,7 @@ Check this [documentation](https://opentelemetry-python.readthedocs.io/en/latest
 
 [Here's](https://github.com/open-telemetry/opentelemetry-python/tree/main/docs/examples/fork-process-model) a working example configured with a gunicorn server with `post_fork` hook.
   
-<p>&nbsp;</p>
+
 
 
 ## Troubleshooting your SigNoz installation
@@ -558,7 +546,10 @@ Check this [documentation](https://opentelemetry-python.readthedocs.io/en/latest
 
 If spans are not being reported to SigNoz, try enabling debug exporter which writes the JSON formatted trace data to the console by setting env var OTEL_TRACES_EXPORTER=console.
 
-`OTEL_RESOURCE_ATTRIBUTES=service.name=python_app OTEL_TRACES_EXPORTER=console opentelemetry-instrument <your run command>`:
+```
+OTEL_RESOURCE_ATTRIBUTES=service.name=python_app OTEL_TRACES_EXPORTER=console opentelemetry-instrument <your run command>
+```
+
 
 ```json
 {
@@ -587,7 +578,7 @@ If spans are not being reported to SigNoz, try enabling debug exporter which wri
 }
 ```
 
-<p>&nbsp;</p>
+
 {/* 
 <!-- #### If DB Calls are not reported in spans
 

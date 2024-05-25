@@ -22,11 +22,11 @@ NOTES:
   
   (Optional) To install a different version, you can use the `--set` flag to specify the version you wish to install. The following example command installs SigNoz version `0.8.0`:
   
-```bash
-helm --namespace platform install my-release signoz/signoz \
-  --set frontend.image.tag="0.8.0" \
-  --set queryService.image.tag="0.8.0"
-```
+  ```bash
+  helm --namespace platform install my-release signoz/signoz \
+    --set frontend.image.tag="0.8.0" \
+    --set queryService.image.tag="0.8.0"
+  ```
 
 <Admonition type="info">
   - If you use the `--set` flag, ensure that you specify the same versions for the `frontend` and `queryService` images. Specifying different versions could lead the SigNoz cluster to behave abnormally.
@@ -35,8 +35,8 @@ helm --namespace platform install my-release signoz/signoz \
 
 5. You can access SigNoz by setting up port forwarding and browsing to the specified port. The following `kubectl port-forward` example command forwards all connections made to `localhost:3301` to `<signoz-frontend-service>:3301`:
 
-```bash
-export SERVICE_NAME=$(kubectl get svc --namespace platform -l "app.kubernetes.io/component=frontend" -o jsonpath="{.items[0].metadata.name}")
+  ```bash
+  export SERVICE_NAME=$(kubectl get svc --namespace platform -l "app.kubernetes.io/component=frontend" -o jsonpath="{.items[0].metadata.name}")
 
-kubectl --namespace platform port-forward svc/$SERVICE_NAME 3301:3301
-```
+  kubectl --namespace platform port-forward svc/$SERVICE_NAME 3301:3301
+  ```

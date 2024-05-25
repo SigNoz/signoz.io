@@ -30,7 +30,7 @@ From VMs, there are two ways to send data to SigNoz Cloud.
 - [Send traces directly to SigNoz Cloud](#send-traces-directly-to-signoz-cloud)
 - [Send traces via OTel Collector binary](#send-traces-via-otel-collector-binary) (recommended)
 
-#### **Send traces directly to SigNoz Cloud**
+#### Send traces directly to SigNoz Cloud
 
 Step 1. Install OpenTelemetry packages
 
@@ -107,7 +107,7 @@ Step 4. You can validate if your application is sending traces to SigNoz cloud [
 In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#troubleshooting-your-installation).
 
 ---
-#### **Send traces via OTel Collector binary**
+#### Send traces via OTel Collector binary
 
 OTel Collector binary helps to collect logs, hostmetrics, resource and infra attributes. It is recommended to install Otel Collector binary to collect and send traces to SigNoz cloud. You can correlate signals and have rich contextual data through this way.
 
@@ -252,18 +252,16 @@ There are three major steps to using OpenTelemetry:
     <img src="/img/docs/express_instrumentation.webp" alt="All in one auto instrumentation library - identifies and instruments packages used by your NestJS application"/>
     <figcaption><i>All in one auto instrumentation library - identifies and instruments packages used by your Express application</i></figcaption>
 </figure>
-<br></br>
+
 
 You have two choices for instrumenting your Express application with OpenTelemetry.
 
 - **[Use the all-in-one auto-instrumentation library(Recommended)](#using-the-all-in-one-auto-instrumentation-library)**<br></br>
 The auto-instrumentation library of OpenTelemetry is a meta package that provides a simple way to initialize multiple Nodejs instrumnetations.
 
-<Admonition type="info">
-
+  <Admonition type="info">
   If you are on K8s, you should checkout [opentelemetry operators](/docs/tutorial/opentelemetry-operator-usage/#opentelemetry-auto-instrumentation-injection) which enable auto instrumenting Javascript applications very easily.
-
-</Admonition>
+  </Admonition>
 
 - **[Use a specific auto-instrumentation library](#using-a-specific-auto-instrumentation-library)**<br></br>
 You can use individual auto-instrumentation libraries too for a specific component of your application. For example, you can use `@opentelemetry/instrumentation-express` for instrumenting the Express web framework.
@@ -352,23 +350,23 @@ Internally, it calls the specific auto-instrumentation library for components us
 
     Here’s a handy [grid](https://signoz.io/docs/instrumentation/troubleshoot-instrumentation/) to figure out which address to use to send data to SigNoz.
 
-  <Admonition>
+    <Admonition>
     Remember to allow incoming requests to port 4318 of machine where SigNoz backend is hosted.
-  </Admonition>
+    </Admonition>
 
   
 3. **Run the application**<br></br>
-  The tracing configuration should be run before your application code. We will use the [`-r, —require module`](https://nodejs.org/api/cli.html#cli_r_require_module) flag for that.<br></br>
+    The tracing configuration should be run before your application code. We will use the [`-r, —require module`](https://nodejs.org/api/cli.html#cli_r_require_module) flag for that.
 
-  ```jsx
+    ```jsx
     node -r ./tracing.js app.js
     ```
 
-  <Admonition>
-  If you're running your nodejs application in PM2 cluster mode, it doesn't support node args: [Unitech/pm2#3227](https://github.com/Unitech/pm2/issues/3227). As above sample app instrumentation requires to load `tracing.js` before app load by passing node arg, so nodejs instrumentation doesn't work in PM2 cluster mode. So you need to import `tracing.js` in your main application. The `import ./tracing.js` should be the first line of your application code and initialize it before any other function. Here's the [sample github repo](https://github.com/SigNoz/sample-nodejs-app/tree/init-tracer-main) which shows the implementation.    
-  </Admonition>    
+    <Admonition>
+    If you're running your nodejs application in PM2 cluster mode, it doesn't support node args: [Unitech/pm2#3227](https://github.com/Unitech/pm2/issues/3227). As above sample app instrumentation requires to load `tracing.js` before app load by passing node arg, so nodejs instrumentation doesn't work in PM2 cluster mode. So you need to import `tracing.js` in your main application. The `import ./tracing.js` should be the first line of your application code and initialize it before any other function. Here's the [sample github repo](https://github.com/SigNoz/sample-nodejs-app/tree/init-tracer-main) which shows the implementation.    
+    </Admonition>    
 
-  In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#troubleshooting-your-installation).
+    In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#troubleshooting-your-installation).
 
 ### Validating instrumentation by checking for traces
 
@@ -389,7 +387,6 @@ You might see other dummy applications if you’re using SigNoz for the first ti
     <figcaption><i>Express Application in the list of services being monitored in SigNoz</i></figcaption>
 </figure>
 
-<br></br>
 
 If you don't see your application reported in the list of services, try our [troubleshooting](https://signoz.io/docs/install/troubleshooting/) guide.
 
@@ -475,8 +472,6 @@ Set an environment variable to run the OpenTelemetry launcher in debug mode, whe
 export OTEL_LOG_LEVEL=debug
 ```
 
-<br></br>
-
 The output may be very verbose with some benign errors. Early in the console output, look for logs about the configuration. Next, look for lines like the ones below, which are emitted when spans are emitted to SigNoz.
 
 ```bash
@@ -512,7 +507,6 @@ The output may be very verbose with some benign errors. Early in the console out
 }
 ```
 
-<br></br>
 
 _Running short applications (Lambda/Serverless/etc)_
 If your application exits quickly after startup, you may need to explicitly shutdown the tracer to ensure that all spans are flushed:

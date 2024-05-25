@@ -1,7 +1,7 @@
 ---
 title: Configure your Docker Syslog Logging Driver
 slug: docker-syslog
-date: 2023-01-10
+date: 2024-05-16
 tags: [Tech Tutorial, Docker, Log Management]
 authors: [daniel]
 description: Logs are useful for troubleshooting and identifying issues in applications, as they provide a record of events and activities. However, managing log data can be challenging due to ...
@@ -133,9 +133,17 @@ docker run \\
 - The `syslog-facility` option is used to specify the Syslog facility value that should be associated with the container's log messages. The Syslog facility value is a numeric or symbolic value that identifies the source of the log message and is used to categorize and filter the log data. Sample values that can be used include `auth`, `cron`, `daemon`, `kern`, etc.
 - The `syslog-format` option is used to specify the format in which the container's log messages should be sent to the Syslog server. Examples of more formats that could be used in Docker include `json`, `rfc3164`, `rfc5424`, `text`, etc.
 
+## Limitations of Docker Syslog
+
+Using Docker with the syslog logging driver has several limitations that users should be aware of:
+
+- **No Built-in Log Rotation**: By default, the syslog driver does not handle log rotation on the Docker host. This can result in log files growing indefinitely, potentially consuming significant disk space over time.
+- **Decompression Overhead**: Reading log information from rotated and compressed log files requires decompression, temporarily increasing disk usage and CPU load. This can impact system performance, especially under heavy logging activities.
+- **Limited Metadata**: The syslog logging driver may include less metadata about the Docker containers compared to other logging drivers, such as the name, ID, or labels of the container. This can limit the ability to filter and search logs effectively.
+
 ## Final Thoughts
 
-In this article, we discussed Syslog, Docker Syslog as a logging driver, and how to set it up for Docker daemon and containers,
+In this article, we discussed Syslog, Docker Syslog as a logging driver, and how to set it up for Docker daemon and containers.
 
 {/* <!-- Docker Syslog driver is a good option for centralizing logs, but it has its limits. The Syslog driver does not support logging to remote syslog servers over a Secure Sockets Layer (SSL) connection and with Transport Layer Security (TLS). If you need to transmit log data, you will need to use a different log driver. Also, Syslog servers may have limitations on the size and number of messages that they can handle. --> */}
 

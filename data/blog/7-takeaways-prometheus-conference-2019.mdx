@@ -83,12 +83,12 @@ We recently open-sourced our observability platform on Github.
    - Silences are used to not get alerted when an outage is known
    - Inhibitions - If service B is down, then service A, which uses Service B, would also be down. In this case, the alert from Service A being down should be inhibited - as we already know the cause of it going down.
 
-   _How do you ensure High Availability of alert manager _
+   How do you ensure High Availability of alert manager?
 
    - Prefer notification to be sent twice, rather than not sending at all if the cluster is down or split (network partition)
    - Use gossip protocol to replicate all the information in the alert manager cluster- Based on the [hashicorp/memberlist](https://github.com/hashicorp/memberlist) library
 
-     - Broadcast silences and notification logs via gossip protocol so  that duplicate                notifications are avoided
+     - Broadcast silences and notification logs via gossip protocol so  that duplicate notifications are avoided
 
      - Requires a dedicated TCP/UDP port
          1. UDP for small messages `(<= 700 bytes)`
@@ -96,7 +96,7 @@ We recently open-sourced our observability platform on Github.
 
 5. **Capacity Planning Using Prometheus**
 
-   [Andrew Newdigate](https://promcon.io/2019-munich/speakers/andrew-newdigate) from **GitLab **gave a great presentation on how their team used Prometheus to monitor issues caused because of resource saturation. Resource saturation could occur for any of the following resources:
+   [Andrew Newdigate](https://promcon.io/2019-munich/speakers/andrew-newdigate) from **GitLab** gave a great presentation on how their team used Prometheus to monitor issues caused because of resource saturation. Resource saturation could occur for any of the following resources:
 
    - **Server Workers** : unicorn worker processes, puma threads, sidekiq worker
    - **Disk**: disk space, disk throughput, disk IOPs
@@ -105,40 +105,42 @@ We recently open-sourced our observability platform on Github.
    - **Database pools**: postgres connections, redis connections, pgbounder pools
    - **Cloud**: Cloud quota limits
 
-   Saturation Measurement Recording Rules
+   **Saturation Measurement Recording Rules**
 
-   > Setup a recording rule with two fixed dimensions (labels)
-   > service_component:saturation:ratio
-   >
-   > Two fixed dimensions/label
-   >
-   > - "service" - the service reporting the resource - e.g. web, postgres
-   > - "component" dimension - the component resource we are measuring - e.g. memory, cpu
-   >
-   > All series report a ratio between 0 and 1.  0 is (good) - 1 = 100% Saturated (bad)
+   Setup a recording rule with two fixed dimensions (labels)
+   service_component:saturation:ratio
+   
+   Two fixed dimensions/label
+   
+   - "service" - the service reporting the resource - e.g. web, postgres
+   - "component" dimension - the component resource we are measuring - e.g. memory, cpu
+   
+   All series report a ratio between 0 and 1.  0 is (good) - 1 = 100% Saturated (bad)
 
    Below is a graph on measuring saturation :
 
-   ![Modeling Saturation](/img/blog/2019/11/Screen-Shot-2019-11-10-at-10.21.38-PM.webp)Figure 6 - Modelling Saturation
+   ![Modeling Saturation](/img/blog/2019/11/Screen-Shot-2019-11-10-at-10.21.38-PM.webp)
+   
+   Figure 6 - Modelling Saturation
 
    These metrics can be used to predict the saturation level of resources. Generally, we just need to monitor only the worst case prediction. Below is a PromQL query showing how this could be done.
 
    Worst-Case Predictions in PromQL
 
-```
-record: service_component:stauration:ratio:predict_linear_2w
+   ```
+   record: service_component:stauration:ratio:predict_linear_2w
 
-expr: >
+   expr: >
 
-predict_liner(
+   predict_liner(
 
-service_component:saturation:ratio:avg_over_time_1w[1w],
+   service_component:saturation:ratio:avg_over_time_1w[1w],
 
-86400 \* 14 #14 days in seconds
-   > )
-```
+   86400 \* 14 #14 days in seconds
+      >)
+   ```
 
-{/* <!--- Video for the talk  below. ---> */}
+
 
 Below is a snapshot of how Gitlab currently does its capacity planning. Any resources which is predicted to reach 100% saturation is looked into.
 

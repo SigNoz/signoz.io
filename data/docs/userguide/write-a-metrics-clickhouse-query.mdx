@@ -6,86 +6,181 @@ title: Writing a Metrics ClickHouse Query
 
 ## Table schema definitions & examples for metrics
 
-There are two tables in the database. One is for storing the samples/metrics and the other is for storing the time series data. 
+There are four main tables in the database. One is for storing the samples/measurements and the rest are for storing the time series data.
 
 ## Schema for samples table:
 
 Note: the schemas are not final. We might change it in the future. 
 
 ```
-CREATE TABLE signoz_metrics.distributed_samples_v2
+CREATE TABLE signoz_metrics.distributed_samples_v4
 (
+    `env` LowCardinality(String) DEFAULT 'default',
+    `temporality` LowCardinality(String) DEFAULT 'Unspecified',
     `metric_name` LowCardinality(String),
-    `fingerprint` UInt64 CODEC(DoubleDelta, LZ4),
-    `timestamp_ms` Int64 CODEC(DoubleDelta, LZ4),
-    `value` Float64 CODEC(Gorilla, LZ4)
+    `fingerprint` UInt64 CODEC(Delta(8), ZSTD(1)),
+    `unix_milli` Int64 CODEC(DoubleDelta, ZSTD(1)),
+    `value` Float64 CODEC(Gorilla, ZSTD(1))
 )
-ENGINE = Distributed('cluster', 'signoz_metrics', 'samples_v2', cityHash64(metric_name, fingerprint))
+ENGINE = Distributed('cluster', 'signoz_metrics', 'samples_v4', cityHash64(env, temporality, metric_name, fingerprint))
 ```
 
 Explanation of the columns:
 
+- **env**: The `deployment.environment` label value. This is used to identify the environment in which the metric was observed. This is used to filter the metrics based on the environment.
+- **temporality**: Temporality of the metric. This is used to identify the type of the metric. It can be one of the following values:
+  - Unspecified: This is used for gauge metrics.
+  - Cumulative: This is used for monotonic counters.
+  - Delta: This is used for counters that send the delta values.
 - **metric_name**: Name of the metric
 - **fingerprint**: Fingerprint of the metric. This is used to identify the metric uniquely. Currently, we are using the hash of the labels to generate the fingerprint.
-- **timestamp_ms**: Timestamp of the metric in milliseconds
+- **unix_milli**: Timestamp in milliseconds when the metric was observed.
 - **value**: Value of the metric
 
 ### Example of a samples
 
+1. Sample data for Counter metric `signoz_calls_total`.
+```
+    ┌─env─────┬─temporality─┬─metric_name────────┬────────fingerprint─┬────unix_milli─┬─value─┐
+ 1. │ default │ Cumulative  │ signoz_calls_total │ 826125025100650961 │ 1715354263778 │   560 │
+ 2. │ default │ Cumulative  │ signoz_calls_total │ 826125025100650961 │ 1715354323779 │  1140 │
+ 3. │ default │ Cumulative  │ signoz_calls_total │ 826125025100650961 │ 1715354383778 │  1669 │
+ 4. │ default │ Cumulative  │ signoz_calls_total │ 826125025100650961 │ 1715354443779 │  2180 │
+ 5. │ default │ Cumulative  │ signoz_calls_total │ 826125025100650961 │ 1715354503779 │  2745 │
+ 6. │ default │ Cumulative  │ signoz_calls_total │ 826125025100650961 │ 1715354563778 │  3300 │
+ 7. │ default │ Cumulative  │ signoz_calls_total │ 826125025100650961 │ 1715354623779 │  3870 │
+ 8. │ default │ Cumulative  │ signoz_calls_total │ 826125025100650961 │ 1715354683778 │  4460 │
+ 9. │ default │ Cumulative  │ signoz_calls_total │ 826125025100650961 │ 1715354743778 │  5030 │
+10. │ default │ Cumulative  │ signoz_calls_total │ 826125025100650961 │ 1715354803779 │  5590 │
+    └─────────┴─────────────┴────────────────────┴────────────────────┴───────────────┴───────┘
+```
 
-| metric_name        | fingerprint    | timestamp_ms  | value          |
-| --------------- | ----------------- | --------------- | -------   |
-| signoz_calls_total | 844117381117785689 | 1698611461282 | 25085 |
-| signoz_calls_total | 844117381117785689 | 1698611521282 | 25140 |
-| signoz_calls_total | 844117381117785689 | 1698611581282 | 25192 |
-| signoz_calls_total | 844117381117785689 | 1698611641282 | 25248 |
-| signoz_calls_total | 844117381117785689 | 1698611701282 | 25305 |
-| signoz_calls_total | 844117381117785689 | 1698611761282 | 25361 |
-| signoz_calls_total | 844117381117785689 | 1698611821282 | 25421 |
-| signoz_calls_total | 844117381117785689 | 1698611881282 | 25475 |
-| signoz_calls_total | 844117381117785689 | 1698611941282 | 25534 |
-| signoz_calls_total | 844117381117785689 | 1698612001282 | 25588 |
-
-
-## Schema for time series table:
+2. Sample data for Gauge metric `otelcol_exporter_queue_size`
 
 ```
-CREATE TABLE signoz_metrics.distributed_time_series_v2
+    ┌─env─────┬─temporality─┬─metric_name─────────────────┬─────────fingerprint─┬────unix_milli─┬─value─┐
+ 1. │ default │ Unspecified │ otelcol_exporter_queue_size │ 8219912421067840979 │ 1715558433378 │     0 │
+ 2. │ default │ Unspecified │ otelcol_exporter_queue_size │ 8219912421067840979 │ 1715558493378 │    20 │
+ 3. │ default │ Unspecified │ otelcol_exporter_queue_size │ 8219912421067840979 │ 1715558553378 │     5 │
+ 4. │ default │ Unspecified │ otelcol_exporter_queue_size │ 8219912421067840979 │ 1715558613378 │    13 │
+ 5. │ default │ Unspecified │ otelcol_exporter_queue_size │ 8219912421067840979 │ 1715558673378 │     0 │
+ 6. │ default │ Unspecified │ otelcol_exporter_queue_size │ 8219912421067840979 │ 1715558733378 │    12 │
+ 7. │ default │ Unspecified │ otelcol_exporter_queue_size │ 8219912421067840979 │ 1715558793378 │     0 │
+ 8. │ default │ Unspecified │ otelcol_exporter_queue_size │ 8219912421067840979 │ 1715558853378 │    14 │
+ 9. │ default │ Unspecified │ otelcol_exporter_queue_size │ 8219912421067840979 │ 1715558913378 │     0 │
+10. │ default │ Unspecified │ otelcol_exporter_queue_size │ 8219912421067840979 │ 1715558973378 │     6 │
+    └─────────┴─────────────┴─────────────────────────────┴─────────────────────┴───────────────┴───────┘
+```
+
+3. Sample data for Histogram metrics `signoz_latency_bucket`
+
+```
+    ┌─env─────┬─temporality─┬─metric_name───────────┬───────fingerprint─┬────unix_milli─┬─value─┐
+ 1. │ default │ Cumulative  │ signoz_latency_bucket │ 81477507584972766 │ 1715764440740 │   145 │
+ 2. │ default │ Cumulative  │ signoz_latency_bucket │ 81477507584972766 │ 1715764500740 │   280 │
+ 3. │ default │ Cumulative  │ signoz_latency_bucket │ 81477507584972766 │ 1715764560740 │   412 │
+ 4. │ default │ Cumulative  │ signoz_latency_bucket │ 81477507584972766 │ 1715764620740 │   567 │
+ 5. │ default │ Cumulative  │ signoz_latency_bucket │ 81477507584972766 │ 1715764680740 │   715 │
+ 6. │ default │ Cumulative  │ signoz_latency_bucket │ 81477507584972766 │ 1715764740740 │   855 │
+ 7. │ default │ Cumulative  │ signoz_latency_bucket │ 81477507584972766 │ 1715764800740 │   992 │
+ 8. │ default │ Cumulative  │ signoz_latency_bucket │ 81477507584972766 │ 1715764860740 │  1135 │
+ 9. │ default │ Cumulative  │ signoz_latency_bucket │ 81477507584972766 │ 1715764920740 │  1265 │
+10. │ default │ Cumulative  │ signoz_latency_bucket │ 81477507584972766 │ 1715764980742 │  1397 │
+    └─────────┴─────────────┴───────────────────────┴───────────────────┴───────────────┴───────┘
+```
+
+## Schema for time series tables:
+
+There are three time series tables, namely `time_series_v4`, `time_series_v4_6hrs`, `time_series_v4_1day`. The time series tables are used to store the label set that is used to identify the metric. See the description of the column `unix_milli` for the explanation of the granularity of the time series tables.
+
+```
+CREATE TABLE signoz_metrics.distributed_time_series_v4
 (
+    `env` LowCardinality(String) DEFAULT 'default',
+    `temporality` LowCardinality(String) DEFAULT 'Unspecified',
     `metric_name` LowCardinality(String),
-    `fingerprint` UInt64 CODEC(DoubleDelta, LZ4),
-    `timestamp_ms` Int64 CODEC(DoubleDelta, LZ4),
-    `labels` String CODEC(ZSTD(5)),
-    `temporality` LowCardinality(String) DEFAULT 'Unspecified' CODEC(ZSTD(5))
+    `description` LowCardinality(String) DEFAULT '' CODEC(ZSTD(1)),
+    `unit` LowCardinality(String) DEFAULT '' CODEC(ZSTD(1)),
+    `type` LowCardinality(String) DEFAULT '' CODEC(ZSTD(1)),
+    `is_monotonic` Bool DEFAULT false CODEC(ZSTD(1)),
+    `fingerprint` UInt64 CODEC(Delta(8), ZSTD(1)),
+    `unix_milli` Int64 CODEC(Delta(8), ZSTD(1)),
+    `labels` String CODEC(ZSTD(5))
 )
-ENGINE = Distributed('cluster', 'signoz_metrics', 'time_series_v2', cityHash64(metric_name, fingerprint))
+ENGINE = Distributed('cluster', 'signoz_metrics', 'time_series_v4', cityHash64(env, temporality, metric_name, fingerprint))
+
+
+CREATE TABLE signoz_metrics.distributed_time_series_v4_6hrs
+(
+    `env` LowCardinality(String) DEFAULT 'default',
+    `temporality` LowCardinality(String) DEFAULT 'Unspecified',
+    `metric_name` LowCardinality(String),
+    `description` LowCardinality(String) DEFAULT '' CODEC(ZSTD(1)),
+    `unit` LowCardinality(String) DEFAULT '' CODEC(ZSTD(1)),
+    `type` LowCardinality(String) DEFAULT '' CODEC(ZSTD(1)),
+    `is_monotonic` Bool DEFAULT false CODEC(ZSTD(1)),
+    `fingerprint` UInt64 CODEC(Delta(8), ZSTD(1)),
+    `unix_milli` Int64 CODEC(Delta(8), ZSTD(1)),
+    `labels` String CODEC(ZSTD(5))
+)
+ENGINE = Distributed('cluster', 'signoz_metrics', 'time_series_v4_6hrs', cityHash64(env, temporality, metric_name, fingerprint))
+
+CREATE TABLE signoz_metrics.distributed_time_series_v4_1day
+(
+    `env` LowCardinality(String) DEFAULT 'default',
+    `temporality` LowCardinality(String) DEFAULT 'Unspecified',
+    `metric_name` LowCardinality(String),
+    `description` LowCardinality(String) DEFAULT '' CODEC(ZSTD(1)),
+    `unit` LowCardinality(String) DEFAULT '' CODEC(ZSTD(1)),
+    `type` LowCardinality(String) DEFAULT '' CODEC(ZSTD(1)),
+    `is_monotonic` Bool DEFAULT false CODEC(ZSTD(1)),
+    `fingerprint` UInt64 CODEC(Delta(8), ZSTD(1)),
+    `unix_milli` Int64 CODEC(Delta(8), ZSTD(1)),
+    `labels` String CODEC(ZSTD(5))
+)
+ENGINE = Distributed('cluster', 'signoz_metrics', 'time_series_v4_1day', cityHash64(env, temporality, metric_name, fingerprint))
 ```
 
 Explanation of the columns:
 
-- **metric_name**: Name of the metric
+- **env**: The `deployment.environment` label value. This is used to identify the environment in which the metric was observed. This is used to filter the metrics based on the environment.
+- **temporality**: Temporality of the metric. This is used to identify the type of the metric. It can  be one of the following values:
+  - Unspecified: This is the default value and used for gauge metrics.
+  - Cumulative: This is used for monotonic counters.
+  - Delta: This is used for counters that send the delta values.
+- **metric_name**: Name of the metric.
+- **description**: Description of the metric.
+- **unit**: Unit of the metric.
+- **type**: Type of the metric. One of the following values:
+  - Sum: This is used for monotonic counters.
+  - Gauge: This is used for gauge metrics.
+  - Histogram: This is used for histogram metrics.
+  - ExponentialHistogram: This is used for exponential histogram metrics.
+- **is_monotonic**: This is used to identify if the metric is a monotonic counter. This is used to identify the type of the metric.
 - **fingerprint**: Fingerprint of the metric. This is used to identify the metric uniquely. Currently, we are using the hash of the labels to generate the fingerprint.
-- **timestamp_ms**: Timestamp of the metric when it was observed for the first time in milliseconds
-- **labels**: Labels of the metric; Stored as a JSON string
-- **temporality**: Temporality of the metric. This is used to identify the type of the metric. It can be one of the following values:
-    - Unspecified: This is the default value. 
-    - Cumulative: This is used for monotonic counters.
-    - Delta: This is used for non-monotonic counters.
+- **unix_milli**: Dependent on the granularity of the time series table. The `time_series_v4` table has a granularity of 1 hour. The `time_series_v4_6hrs` table has a granularity of 6 hours. The `time_series_v4_1day` table has a granularity of 1 day. The value is the start of the time interval in milliseconds. Example: If the granularity is 1 hour, then the value will be the start of the hour in milliseconds. Why do we do this? If we were to store the timestamp of the metric, then we would have to store the timestamp for each sample. This would increase the size of the table and slow down the queries. By storing the start of the time interval, we try to balance the ability to know the most recent appearance of the metric and the speed of the queries. Even then, the scans on the time series table can be slow if we are looking for a week's worth of data. Hence, we have additional tables with different granularities to speed up the queries.
+- **labels**: Labels of the metric; Stored as a JSON string.
 
 ### Example of a time series
 
-| metric_name | fingerprint | timestamp_ms | labels | temporality
-| -- | -- | --  | --  | --  |
-| signoz_calls_total | 844117381117785689 | 1698584462214 | \{"__name__":"signoz_calls_total","__temporality__":"Cumulative","deployment_environment":"default","operation":"/driver.DriverService/FindNearest","resource_signoz_collector_id":"1e183921-3de2-4afe-9729-78db8f2b65b5","service_name":"driver","service_namespace":"default","signoz_collector_id":"1e183921-3de2-4afe-9729-78db8f2b65b5","span_kind":"SPAN_KIND_SERVER","status_code":"STATUS_CODE_UNSET"} | Cumulative  |
-
+```
+env:          default
+temporality:  Cumulative
+metric_name:  signoz_calls_total
+description:
+unit:
+type:         Sum
+is_monotonic: true
+fingerprint:  1918473123734562099
+unix_milli:   1715385600000
+labels:       {"__name__":"signoz_calls_total","__temporality__":"Cumulative","deployment_environment":"default","operation":"FindDriverIDs","resource_signoz_collector_id":"b2f22d66-0851-44f2-9104-2292189958d1","service_name":"redis","service_namespace":"default","signoz_collector_id":"b2f22d66-0851-44f2-9104-2292189958d1","span_kind":"SPAN_KIND_CLIENT","status_code":"STATUS_CODE_UNSET"}
+```
 
 ## Querying the metrics
 
-Querying the metrics is done in two steps. First, we query the time series table to get the fingerprints and labels of the metrics. Then, we use the fingerprints to query the samples table to get the actual samples. This is done to reduce the amount of data that needs to be scanned from the samples table. Also, the time series table is much smaller than the samples table. 
+Querying the metrics is done in two steps. First, we query the time series table to get the fingerprints and labels of the metrics. Then, we use the fingerprints to query the samples table to get the actual samples. This is done to reduce the amount of data that needs to be scanned. Also, the time series table is much smaller than the samples table.
 
-We use the JOIN operation to join the two tables. The JOIN operation is done on the metric_name and fingerprint columns. The JOIN operation is done on the cluster level. This means that the JOIN operation is done on the data nodes and not on the aggregator nodes. This is done to reduce the amount of data that needs to be transferred between the nodes. This works because the data is sharded based on the metric_name and fingerprint columns hence all the data for a particular metric and fingerprint will be present on the same node.
-
-Note: The following queries use `GROUPING SETS` to get the data for the overall metric. This is used when the limit is applied to the query. Please refer to the [ClickHouse documentation](https://clickhouse.com/docs/en/sql-reference/statements/select/group-by#grouping-sets-modifier) for more information on `GROUPING SETS`.
+We use the JOIN operation to join the two tables. The JOIN operation is done on the fingerprint column. The JOIN operation is done on the cluster level. This means that the JOIN operation is done on the data nodes and not on the aggregator nodes. This is done to reduce the amount of data that needs to be transferred between the nodes. This works because the data is sharded based on the `env`, `temporality`, `metric_name`, `fingerprint` columns hence all the data for a particular metric and fingerprint will be present on the same node.
 
 Note: The queries should have a result column with the name `value` and a column with type [DateTime](https://clickhouse.com/docs/en/sql-reference/data-types/datetime) for the graphs to work.
 
@@ -93,33 +188,33 @@ Note: The queries should have a result column with the name `value` and a column
 
 #### Retrieving the fingerprints and labels of the metric
 
-```
-SELECT
+```sql
+SELECT DISTINCT
     fingerprint,
     labels
-FROM signoz_metrics.distributed_time_series_v2
+FROM signoz_metrics.distributed_time_series_v4
 WHERE (metric_name = 'signoz_calls_total') AND (temporality = 'Cumulative')
 LIMIT 10
 ```
 
 #### Retrieving the samples of the metric
 
-```
+```sql
 SELECT
     timestamp_ms,
     value
-FROM signoz_metrics.distributed_samples_v2
+FROM signoz_metrics.distributed_samples_v4
 WHERE metric_name = 'signoz_calls_total'
 LIMIT 10
 ```
 
 #### Retrieving the label values of a metric
 
-```
+```sql
 SELECT DISTINCT
     fingerprint,
     JSONExtractString(labels, 'service_name') AS service_name
-FROM signoz_metrics.distributed_time_series_v2
+FROM signoz_metrics.distributed_time_series_v4_1day
 WHERE (metric_name = 'signoz_calls_total') AND (temporality = 'Cumulative')
 LIMIT 10
 ```
@@ -132,29 +227,29 @@ The following queries are used to generate the graphs for the frontend service R
 
 #### Request rate for a service
 
-```
+```sql
 SELECT
     ts,
-    sum(value) AS value
+    sum(per_series_value) AS value
 FROM
 (
     SELECT
         ts,
-        if(runningDifference(ts) <= 0, nan, if(runningDifference(value) < 0, value / runningDifference(ts), runningDifference(value) / runningDifference(ts))) AS value
+        If((per_series_value - lagInFrame(per_series_value, 1, 0) OVER rate_window) < 0, nan, If((ts - lagInFrame(ts, 1, toDate('1970-01-01')) OVER rate_window) >= 86400, nan, (per_series_value - lagInFrame(per_series_value, 1, 0) OVER rate_window) / (ts - lagInFrame(ts, 1, toDate('1970-01-01')) OVER rate_window))) AS per_series_value
     FROM
     (
         SELECT
             fingerprint,
-            toStartOfInterval(toDateTime(intDiv(timestamp_ms, 1000)), toIntervalSecond(60)) AS ts,
-            max(value) AS value
-        FROM signoz_metrics.distributed_samples_v2
+            toStartOfInterval(toDateTime(intDiv(unix_milli, 1000)), toIntervalSecond(60)) AS ts,
+            max(value) AS per_series_value
+        FROM signoz_metrics.distributed_samples_v4
         INNER JOIN
         (
-            SELECT fingerprint
-            FROM signoz_metrics.time_series_v2
-            WHERE (metric_name = 'signoz_latency_count') AND (temporality IN ['Cumulative', 'Unspecified']) AND (JSONExtractString(labels, 'service_name') IN ['frontend']) AND (JSONExtractString(labels, 'operation') IN ['HTTP GET /dispatch'])
+            SELECT DISTINCT fingerprint
+            FROM signoz_metrics.time_series_v4_1day
+            WHERE (metric_name = 'signoz_calls_total') AND (temporality = 'Cumulative') AND (unix_milli >= intDiv({{.start_timestamp_ms}}, 86400000) * 86400000) AND (unix_milli < {{.end_timestamp_ms}}) AND JSONExtractString(labels, 'service_name') = 'frontend'
         ) AS filtered_time_series USING (fingerprint)
-        WHERE (metric_name = 'signoz_latency_count') AND (timestamp_ms >= {{.start_timestamp_ms}}) AND (timestamp_ms <= {{.end_timestamp_ms}})
+        WHERE (metric_name = 'signoz_calls_total') AND (unix_milli >= {{.start_timestamp_ms}}) AND (unix_milli < {{.end_timestamp_ms}})
         GROUP BY
             fingerprint,
             ts
@@ -162,12 +257,10 @@ FROM
             fingerprint ASC,
             ts ASC
     )
-    WHERE isNaN(value) = 0
+    WINDOW rate_window AS (PARTITION BY fingerprint ORDER BY fingerprint ASC, ts ASC)
 )
-GROUP BY
-    GROUPING SETS (
-        (ts),
-        ())
+WHERE isNaN(per_series_value) = 0
+GROUP BY ts
 ORDER BY ts ASC
 ```
 
@@ -175,7 +268,7 @@ ORDER BY ts ASC
 
 This is the query for the error rate for a service. The query is similar to the request rate query. The only difference is that we are filtering the samples based on the status code. Then, we divide the error samples by the total samples to get the error rate.
 
-```
+```sql
 SELECT
     A.ts AS ts,
     (A.value * 100) / B.value AS value
@@ -193,16 +286,16 @@ FROM
         (
             SELECT
                 fingerprint,
-                toStartOfInterval(toDateTime(intDiv(timestamp_ms, 1000)), toIntervalSecond(60)) AS ts,
+                toStartOfInterval(toDateTime(intDiv(unix_milli, 1000)), toIntervalSecond(60)) AS ts,
                 max(value) AS value
-            FROM signoz_metrics.distributed_samples_v2
+            FROM signoz_metrics.distributed_samples_v4
             INNER JOIN
             (
-                SELECT fingerprint
-                FROM signoz_metrics.time_series_v2
-                WHERE (metric_name = 'signoz_calls_total') AND (temporality IN ['Cumulative', 'Unspecified']) AND (JSONExtractString(labels, 'service_name') IN ['redis']) AND (JSONExtractString(labels, 'status_code') IN ['STATUS_CODE_ERROR'])
+                SELECT DISTINCT fingerprint
+                FROM signoz_metrics.time_series_v4_1day
+                WHERE (metric_name = 'signoz_calls_total') AND (temporality = 'Cumulative') AND (unix_milli >= intDiv({{.start_timestamp_ms}}, 86400000) * 86400000) AND (unix_milli < {{.end_timestamp_ms}}) AND JSONExtractString(labels, 'service_name') = 'redis' AND (JSONExtractString(labels, 'status_code') IN ['STATUS_CODE_ERROR'])
             ) AS filtered_time_series USING (fingerprint)
-            WHERE (metric_name = 'signoz_calls_total') AND (timestamp_ms >= {{.start_timestamp_ms}}) AND (timestamp_ms <= {{.end_timestamp_ms}})
+            WHERE (metric_name = 'signoz_calls_total') AND (unix_milli >= {{.start_timestamp_ms}}) AND (unix_milli <= {{.end_timestamp_ms}})
             GROUP BY
                 fingerprint,
                 ts
@@ -212,10 +305,7 @@ FROM
         )
         WHERE isNaN(value) = 0
     )
-    GROUP BY
-        GROUPING SETS (
-            (ts),
-            ())
+    GROUP BY ts
     ORDER BY ts ASC
 ) AS A
 INNER JOIN
@@ -232,16 +322,16 @@ INNER JOIN
         (
             SELECT
                 fingerprint,
-                toStartOfInterval(toDateTime(intDiv(timestamp_ms, 1000)), toIntervalSecond(60)) AS ts,
+                toStartOfInterval(toDateTime(intDiv(unix_milli, 1000)), toIntervalSecond(60)) AS ts,
                 max(value) AS value
-            FROM signoz_metrics.distributed_samples_v2
+            FROM signoz_metrics.distributed_samples_v4
             INNER JOIN
             (
-                SELECT fingerprint
-                FROM signoz_metrics.time_series_v2
-                WHERE (metric_name = 'signoz_calls_total') AND (temporality IN ['Cumulative', 'Unspecified']) AND (JSONExtractString(labels, 'service_name') IN ['redis'])
+                SELECT DISTINCT fingerprint
+                FROM signoz_metrics.time_series_v4_1day
+                WHERE (metric_name = 'signoz_calls_total') AND (temporality = 'Cumulative') AND (unix_milli >= intDiv({{.start_timestamp_ms}}, 86400000) * 86400000) AND (unix_milli < {{.end_timestamp_ms}}) AND JSONExtractString(labels, 'service_name') = 'redis'
             ) AS filtered_time_series USING (fingerprint)
-            WHERE (metric_name = 'signoz_calls_total') AND (timestamp_ms >= {{.start_timestamp_ms}}) AND (timestamp_ms <= {{.end_timestamp_ms}})
+            WHERE (metric_name = 'signoz_calls_total') AND (unix_milli >= {{.start_timestamp_ms}}) AND (unix_milli <= {{.end_timestamp_ms}})
             GROUP BY
                 fingerprint,
                 ts
@@ -251,10 +341,7 @@ INNER JOIN
         )
         WHERE isNaN(value) = 0
     )
-    GROUP BY
-        GROUPING SETS (
-            (ts),
-            ())
+    GROUP BY ts
     ORDER BY ts ASC
 ) AS B ON A.ts = B.ts
 ```
@@ -263,7 +350,7 @@ INNER JOIN
 
 This is the query for the 99th percentile latency for a service. The query is similar to the request rate query. We are using the histogramQuantile function to get the 99th percentile latency. The histogramQuantile function is used to get the quantile value from a histogram. The histogram is represented as two arrays. One array contains the buckets and the other array contains the values. The histogramQuantile function takes the two arrays and the quantile value as input and returns the quantile value. The bucket bounds and values are obtained by taking the rate of change for each bucket.
 
-```
+```sql
 SELECT
     ts,
     histogramQuantile(arrayMap(x -> toFloat64(x), groupArray(le)), groupArray(value), 0.99) AS value
@@ -284,18 +371,18 @@ FROM
             SELECT
                 fingerprint,
                 le,
-                toStartOfInterval(toDateTime(intDiv(timestamp_ms, 1000)), toIntervalSecond(60)) AS ts,
+                toStartOfInterval(toDateTime(intDiv(unix_milli, 1000)), toIntervalSecond(60)) AS ts,
                 max(value) AS value
-            FROM signoz_metrics.distributed_samples_v2
+            FROM signoz_metrics.distributed_samples_v4
             INNER JOIN
             (
-                SELECT
+                SELECT DISTINCT
                     JSONExtractString(labels, 'le') AS le,
                     fingerprint
-                FROM signoz_metrics.time_series_v2
-                WHERE (metric_name = 'signoz_latency_bucket') AND (temporality IN ['Cumulative', 'Unspecified']) AND (JSONExtractString(labels, 'service_name') = 'frontend')
+                FROM signoz_metrics.time_series_v4_1day
+                WHERE (metric_name = 'signoz_latency_bucket') AND (temporality = 'Cumulative') AND (unix_milli >= intDiv({{.start_timestamp_ms}}, 86400000) * 86400000) AND (unix_milli < {{.end_timestamp_ms}}) AND JSONExtractString(labels, 'service_name') = 'frontend'
             ) AS filtered_time_series USING (fingerprint)
-            WHERE (metric_name = 'signoz_latency_bucket') AND (timestamp_ms >= {{.start_timestamp_ms}}) AND (timestamp_ms <= {{.end_timestamp_ms}})
+            WHERE (metric_name = 'signoz_latency_bucket') AND (unix_milli >= {{.start_timestamp_ms}}) AND (unix_milli <= {{.end_timestamp_ms}})
             GROUP BY
                 fingerprint,
                 le,
@@ -307,10 +394,7 @@ FROM
         )
         WHERE isNaN(value) = 0
     )
-    GROUP BY
-        GROUPING SETS (
-            (le, ts),
-            (le))
+    GROUP BY le, ts
     HAVING isNaN(value) = 0
     ORDER BY
         le ASC,
@@ -330,29 +414,29 @@ SigNoz supports using variables in queries. This allows you to create a single d
 
 The variable `{{.service_name}}` is used to get the service name from the variable. The variable is replaced with the service name when the query is executed.
 
-```
+```sql
 SELECT
     ts,
-    sum(value) AS value
+    sum(per_series_value) AS value
 FROM
 (
     SELECT
         ts,
-        if(runningDifference(ts) <= 0, nan, if(runningDifference(value) < 0, value / runningDifference(ts), runningDifference(value) / runningDifference(ts))) AS value
+        If((per_series_value - lagInFrame(per_series_value, 1, 0) OVER rate_window) < 0, nan, If((ts - lagInFrame(ts, 1, toDate('1970-01-01')) OVER rate_window) >= 86400, nan, (per_series_value - lagInFrame(per_series_value, 1, 0) OVER rate_window) / (ts - lagInFrame(ts, 1, toDate('1970-01-01')) OVER rate_window))) AS per_series_value
     FROM
     (
         SELECT
             fingerprint,
-            toStartOfInterval(toDateTime(intDiv(timestamp_ms, 1000)), toIntervalSecond(60)) AS ts,
-            max(value) AS value
-        FROM signoz_metrics.distributed_samples_v2
+            toStartOfInterval(toDateTime(intDiv(unix_milli, 1000)), toIntervalSecond(60)) AS ts,
+            max(value) AS per_series_value
+        FROM signoz_metrics.distributed_samples_v4
         INNER JOIN
         (
-            SELECT fingerprint
-            FROM signoz_metrics.time_series_v2
-            WHERE (metric_name = 'signoz_latency_count') AND (temporality IN ['Cumulative', 'Unspecified']) AND (JSONExtractString(labels, 'service_name') IN {{.service_name}}) AND (JSONExtractString(labels, 'operation') IN ['HTTP GET /dispatch'])
+            SELECT DISTINCT fingerprint
+            FROM signoz_metrics.time_series_v4_1day
+            WHERE (metric_name = 'signoz_calls_total') AND (temporality = 'Cumulative') AND (unix_milli >= intDiv({{.start_timestamp_ms}}, 86400000) * 86400000) AND (unix_milli < {{.end_timestamp_ms}}) AND JSONExtractString(labels, 'service_name') = {{.service_name}}
         ) AS filtered_time_series USING (fingerprint)
-        WHERE (metric_name = 'signoz_latency_count') AND (timestamp_ms >= {{.start_timestamp_ms}}) AND (timestamp_ms <= {{.end_timestamp_ms}})
+        WHERE (metric_name = 'signoz_calls_total') AND (unix_milli >= {{.start_timestamp_ms}}) AND (unix_milli < {{.end_timestamp_ms}})
         GROUP BY
             fingerprint,
             ts
@@ -360,12 +444,10 @@ FROM
             fingerprint ASC,
             ts ASC
     )
-    WHERE isNaN(value) = 0
+    WINDOW rate_window AS (PARTITION BY fingerprint ORDER BY fingerprint ASC, ts ASC)
 )
-GROUP BY
-    GROUPING SETS (
-        (ts),
-        ())
+WHERE isNaN(per_series_value) = 0
+GROUP BY ts
 ORDER BY ts ASC
 ```
 

@@ -22,7 +22,6 @@ There are three major steps to using OpenTelemetry:
     <figcaption><i>OpenTelemetry helps generate and collect telemetry data from Python applications which can then be sent to SigNoz for storage, visualization, and analysis.</i></figcaption>
 </figure>
 
-<br></br>
 
 Let’s understand how to download, install, and run OpenTelemetry in Django.
 
@@ -32,11 +31,11 @@ Let’s understand how to download, install, and run OpenTelemetry in Django.
 
 - for Django, you must define `DJANGO_SETTINGS_MODULE`correctly. If your project is called `mysite`, something like following should work:
 
-```bash
-export DJANGO_SETTINGS_MODULE=mysite.settings
-```
+    ```bash
+    export DJANGO_SETTINGS_MODULE=mysite.settings
+    ```
 
-  Please refer the official [Django docs](https://docs.djangoproject.com/en/1.10/topics/settings/#designating-the-settings) for more details.
+Please refer the official [Django docs](https://docs.djangoproject.com/en/1.10/topics/settings/#designating-the-settings) for more details.
 
 
 ## Send Traces to SigNoz Cloud
@@ -126,7 +125,7 @@ In case you encounter an issue where all applications do not get listed in the s
 
 ---
 
-#### **Send traces via OTel Collector binary**
+#### Send traces via OTel Collector binary
 
 OTel Collector binary helps to collect logs, hostmetrics, resource and infra attributes. It is recommended to install Otel Collector binary to collect and send traces to SigNoz cloud. You can correlate signals and have rich contextual data through this way.
 
@@ -164,7 +163,7 @@ OTEL_EXPORTER_OTLP_PROTOCOL=grpc opentelemetry-instrument <your run command>
 
 *`<your_run_command>`* can be `python3 app.py` or `python manage.py runserver --noreload`
 
-*`http://localhost:4317` for gRPC exporter and `http://localhost:4318` for HTTP exporter.
+*`http://localhost:4317`* for gRPC exporter and `http://localhost:4318` for HTTP exporter.
 
 <Admonition>
 The port numbers are 4317 and 4318 for the gRPC and HTTP exporters respectively.
@@ -215,7 +214,7 @@ OTEL_EXPORTER_OTLP_PROTOCOL=grpc opentelemetry-instrument <your run command>
 
 *`<your_run_command>`* can be `python3 app.py` or `python manage.py runserver --noreload`
 
-*`http://localhost:4317` for gRPC exporter and `http://localhost:4318` for HTTP exporter.
+*`http://localhost:4317`* for gRPC exporter and `http://localhost:4318` for HTTP exporter.
 
 <Admonition>
 The port numbers are 4317 and 4318 for the gRPC and HTTP exporters respectively.
@@ -327,7 +326,7 @@ You might see other dummy applications if you’re using SigNoz for the first ti
     <img src="/img/docs/opentelemetry_python_app_instrumented.webp" alt="Python Application in the list of services being monitored in SigNoz"/>
     <figcaption><i>Python Application in the list of services being monitored in SigNoz</i></figcaption>
 </figure>
-<br></br>
+
 
 ## Database Instrumentation
 
@@ -367,7 +366,7 @@ You can check the supported versions [here](https://github.com/open-telemetry/op
 </Admonition>
 
 
-<p>&nbsp;</p>
+
 
 ## Running applications with Gunicorn, uWSGI
 
@@ -377,7 +376,7 @@ Check this [documentation](https://opentelemetry-python.readthedocs.io/en/latest
 
 [Here's](https://github.com/open-telemetry/opentelemetry-python/tree/main/docs/examples/fork-process-model) a working example a gunicorn server is configured with `post_fork` hook.
   
-<p>&nbsp;</p>
+
 
 
 ## Troubleshooting your installation
@@ -386,7 +385,10 @@ Check this [documentation](https://opentelemetry-python.readthedocs.io/en/latest
 
 If spans are not being reported to SigNoz, try enabling debug exporter which writes the JSON formatted trace data to the console by setting env var OTEL_TRACES_EXPORTER=console.
 
-`OTEL_RESOURCE_ATTRIBUTES=service.name=python_app OTEL_TRACES_EXPORTER=console opentelemetry-instrument <your run command>`:
+```
+OTEL_RESOURCE_ATTRIBUTES=service.name=python_app OTEL_TRACES_EXPORTER=console opentelemetry-instrument <your run command>
+```
+
 
 ```json
 {
@@ -415,7 +417,7 @@ If spans are not being reported to SigNoz, try enabling debug exporter which wri
 }
 ```
 
-<p>&nbsp;</p>
+
 
 {/* <!-- #### If DB Calls are not reported in spans
 

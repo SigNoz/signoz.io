@@ -614,6 +614,17 @@ const docsSideNav = [
     ],
   },
   {
+    label: 'Metrics',
+    type: 'category',
+    items: [
+      {
+        type: 'doc',
+        route: '/docs/metrics-management/types-and-aggregation',
+        label: 'Types and Aggregation',
+      },
+    ]
+  },
+  {
     label: 'Dashboards & Querying',
     type: 'category',
     // route: '',

@@ -11,6 +11,8 @@ import GitHubStars from '../GithubStars/GithubStars'
 import React from 'react'
 import DocsSidebar from '../DocsSidebar/DocsSidebar'
 import { usePathname } from 'next/navigation'
+import styles from './styles.module.css'
+
 
 export default function TopNav() {
   const pathname = usePathname()
@@ -57,7 +59,7 @@ export default function TopNav() {
         <div className="flex lg:hidden">
           <button
             type="button"
-            className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-gray-700"
+            className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5"
             onClick={() => setMobileMenuOpen(true)}
           >
             <span className="sr-only">Open main menu</span>
@@ -65,23 +67,15 @@ export default function TopNav() {
           </button>
         </div>
         <Popover.Group className="hidden items-center lg:flex lg:gap-x-12">
-          <Link href="/docs" className="text-sm font-semibold leading-6 ">
-            Documentation
-          </Link>
+       
+<Link href="/docs" className={styles.navbarlink}>Documentation</Link>
 
-          <a href="/resource-center/blog" className="truncate text-sm font-semibold leading-6">
-            Resources
-          </a>
+<Link href="/resource-center/blog" className={styles.navbarlink}>Resources</Link>
 
-          <Link href="/pricing" className="truncate text-sm font-semibold leading-6">
-            Pricing
-          </Link>
-          <Link
-            href="/case-study"
-            className="hidden truncate text-sm font-semibold leading-6 xl:block"
-          >
-            Customer Stories
-          </Link>
+<Link href="/pricing" className={styles.navbarlink}>Pricing</Link>
+
+<Link href="/case-study" className={styles.navbarlink}>Customer Stories</Link>
+
 
           <GitHubStars />
         </Popover.Group>

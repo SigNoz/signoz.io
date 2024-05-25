@@ -37,7 +37,7 @@ To accomplish the task described, please follow these steps:
     <img className="box-shadowed-image" src="/img/docs/elb/elb-logs-create_bucket_2.webp" alt=""/>
     <figcaption><i>Fill up bucket details</i></figcaption>
 </figure>
-<br />
+
 
 
 2. **Uploading Data to the S3 Bucket:**
@@ -91,7 +91,7 @@ Follow these steps to create the lambda function:
     <img className="box-shadowed-image"  src="/img/docs/elb/elb-logs-lambda_1.webp" alt=""/>
     <figcaption><i>Create Lambda function from AWS Console</i></figcaption>
 </figure>
-<br />
+
 
 **Step 2:** Choose the `Author from scratch` checkbox and proceed to fill in the function name. 
 
@@ -99,7 +99,7 @@ Follow these steps to create the lambda function:
     <img className="box-shadowed-image" src="/img/docs/vpc-docs/create_function.webp" alt=""/>
     <figcaption><i>Choose the Author from scratch and fill up other details</i></figcaption>
 </figure>
-<br />
+
 
 
 **Step 3:** Choose `Python 3.x` as the Runtime version, `x86_64` as Architecture (preferably), and keep other settings as default. Select `Create a new role with basic Lambda permissions`for now, we’ll requiring more permissions down the lane. So for now, select this option. 
@@ -108,7 +108,7 @@ Follow these steps to create the lambda function:
     <img className="box-shadowed-image" src="/img/docs/elb/elb-logs-lambda_3.webp" alt=""/>
     <figcaption><i>Choose Create a new role here</i></figcaption>
 </figure>
-<br />
+
 
 **Step 4:** Once you are done configuring the lambda function, you Lambda function is created.
 
@@ -116,7 +116,7 @@ Follow these steps to create the lambda function:
     <img className="box-shadowed-image" src="/img/docs/vpc-docs/lambda_function.webp" alt=""/>
     <figcaption><i>Your barebones Lambda function is created now</i></figcaption>
 </figure>
-<br />
+
 
 
 ### Configuring Policies for Lambda function
@@ -129,7 +129,7 @@ As said in Step 3 previously, we need extra permissions in order to access the S
     <img className="box-shadowed-image" src="/img/docs/vpc-docs/execution_role.webp" alt=""/>
     <figcaption><i>Choosing execution role from Configurations tab</i></figcaption>
 </figure>
-<br />
+
 
 **Step 2:** Click on the `Execution Role name` link just under Role name, it will take us to AWS IAM page. Here we will add policies to get full S3 access. Once here, click on the `Add permissions` button and select `Attach policies` from the drop down list. 
 
@@ -137,7 +137,7 @@ As said in Step 3 previously, we need extra permissions in order to access the S
     <img className="box-shadowed-image" src="/img/docs/vpc-docs/add_policy.webp" alt=""/>
     <figcaption><i>Attach policies to your Lambda function</i></figcaption>
 </figure>
-<br />
+
 
 **Step 3:** Search “S3” and you’ll a policy named `AmazonS3FullAccess`select that and proceed. 
 
@@ -145,7 +145,7 @@ As said in Step 3 previously, we need extra permissions in order to access the S
     <img className="box-shadowed-image" src="/img/docs/elb/elb-logs-lambda_7.webp" alt=""/>
     <figcaption><i>Policies you'll need to run your Lambda function</i></figcaption>
 </figure>
-<br />
+
 
 <Admonition type="warning" >
 It's advisable to proceed with caution when granting full S3 access, particularly in a production environment. Before deploying your Lambda function with such extensive permissions, it's essential to consult with your system administrator or designated authority to ensure compliance with security protocols and best practices. This step helps mitigate potential risks and ensures that access permissions align with organizational guidelines and requirements.
@@ -155,7 +155,7 @@ It's advisable to proceed with caution when granting full S3 access, particularl
     <img className="box-shadowed-image" src="/img/docs/elb/elb-logs-policies-used.webp" alt=""/>
     <figcaption><i>Extra policies you might require to execute your Lambda function</i></figcaption>
 </figure>
-<br />
+
 
 Please refer to the image above as a comprehensive guide to the policy names that you may consider adding to your Lambda function. Failure to include these policies could result in insufficient privileges, potentially hindering the function's ability to perform necessary operations within the AWS environment.
 
@@ -175,7 +175,7 @@ To setup the trigger, follow these steps:
     <img className="box-shadowed-image" src="/img/docs/vpc-docs/add_trigger.webp" alt=""/>
     <figcaption><i>Add a trigger to the function.</i></figcaption>
 </figure>
-<br />
+
 
 **Step 2:** Select `S3` from the first drop down of AWS services list. Pick your S3 bucket for the second field. 
 
@@ -185,7 +185,7 @@ To setup the trigger, follow these steps:
     <img className="box-shadowed-image" src="/img/docs/vpc-docs/add_trigger_2.webp" alt=""/>
     <figcaption><i>Choose event types from the drop down menu</i></figcaption>
 </figure>
-<br />
+
 
 Verify the settings and click on `Add` button at bottom right to add this trigger.
 
@@ -218,7 +218,7 @@ zip -r dependencies.zip ../python
     <img className="box-shadowed-image" src="/img/docs/elb/elb-logs-layer_3.webp" alt=""/>
     <figcaption><i>Creating a new Layer</i></figcaption>
 </figure>
-<br />
+
 
 **Step 3:** You’ll be redirected to Layer configurations page, here, give a name to your layer, an optional description, select `Upload a .zip file` , click on `Upload` and locate the requirements.zip file. 
 
@@ -228,7 +228,7 @@ zip -r dependencies.zip ../python
     <img className="box-shadowed-image" src="/img/docs/elb/elb-logs-layer_4.webp" alt=""/>
     <figcaption><i>Uploading the requirements.zip file to later add it as a layer </i></figcaption>
 </figure>
-<br />
+
 
 **Step 5:** Go to your Lambda function, scroll down to Layers section and on the right of it, you’ll find a button that says `Add a layer` to click on. 
 
@@ -236,7 +236,7 @@ zip -r dependencies.zip ../python
     <img className="box-shadowed-image" src="/img/docs/elb/elb-logs-layer_5.webp" alt=""/>
     <figcaption><i>Add a layer to your Lambda function</i></figcaption>
 </figure>
-<br />
+
 
 **Step 6:** Pick `Custom layers` from the checkbox and select your custom layer from the given drop down below and then click on the button `Add`. 
 
@@ -244,7 +244,7 @@ zip -r dependencies.zip ../python
     <img className="box-shadowed-image" src="/img/docs/elb/elb-logs-layer_6.webp" alt=""/>
     <figcaption><i>Choose your layer name</i></figcaption>
 </figure>
-<br />
+
 
 Congratulations, the `requests` module has been successfully integrated into your code area. By adding this layer, you have resolved the `request module not found error` that would have otherwise occurred.
 
@@ -454,7 +454,7 @@ By adjusting the timeout setting, you ensure that your Lambda function has suffi
     <img className="box-shadowed-image" src="/img/docs/elb/elb-logs-timeout_increase.webp" alt=""/>
     <figcaption><i>Configuring execution timeout of Lambda function</i></figcaption>
 </figure>
-<br />
+
 
 Once you've finished adjusting the timeout setting, navigate to the code editor for your Lambda function. Locate the 'test' button, and from the dropdown menu, select the option labeled 'Configure test events.' Create a new test case by specifying it as an S3 PUT event, then save your configuration.
 
@@ -471,7 +471,7 @@ Below is an image showing the process of transmitting VPC logs to the SigNoz end
     <img className="box-shadowed-image" src="/img/docs/elb/elb-logs-lambda_10.webp" alt=""/>
     <figcaption><i>Visual representation of code in Lambda function</i></figcaption>
 </figure>
-<br />
+
 
 ### Test Case and Output
 
@@ -481,7 +481,7 @@ If the logs are sent successfully, here's how they'll be transmitted. The follow
     <img className="box-shadowed-image" src="/img/docs/elb/elb-logs-lambda_output.webp" alt=""/>
     <figcaption><i>Visual representation of code output of Lambda function</i></figcaption>
 </figure>
-<br />
+
 
 ## Visualize the logs in SigNoz
 
@@ -491,4 +491,4 @@ Upon accessing the SigNoz logs section, you will notice a considerable influx of
     <img className="box-shadowed-image" src="/img/docs/elb/elb-logs-lambda_12.webp" alt="A sample log line of the logs sent from AWS Lambda"/>
     <figcaption><i>A sample log line of the logs sent from AWS Lambda</i></figcaption>
 </figure>
-<br />
+
