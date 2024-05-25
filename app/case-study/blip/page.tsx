@@ -1,42 +1,11 @@
----
-title: How Blip uses SigNoz to improve their issue resolution time by 14x
-slug: blipbillboards
-image: /img/case_study/BlipBillBoards.png
-authors: [pranay]
-# hide_table_of_contents: true
----
+import MarkdownRenderer from '@/components/ReactMarkdown'
+import React from 'react'
 
-<head>
-  <link rel="canonical" href="https://signoz.io/case-study/blip/"/>
-  <meta property="og:image" content="https://signoz.io/img/case_study/BlipBillBoards.png"/>
-  <meta name ="twitter:image" content="https://signoz.io/img/case_study/BlipBillBoards.png"/>
 
-</head>
-
+const markdownContent = `
 # How Blip uses SigNoz to improve their issue resolution time by 14x
 
-<div class="avatar">
-  <a
-    class="avatar__photo-link avatar__photo avatar__photo--lg"
-    href="https://twitter.com/pranay01">
-    <img
-      alt="Pranay Profile"
-      src="/img/authors/pranay_profile_pic.webp" />
-  </a>
-  <div class="avatar__intro">
-    <div class="avatar__name">Pranay Prateek</div>
-    <small class="avatar__subtitle">
-      Maintainer, SigNoz
-    </small>
-  </div>
-</div>
-
-<br />
-<br />
-
 Blip provides self-service subscription-based digital ad space across 1000’s of digital billboards in the US and Canada. Many small and medium-sized businesses use Blip services to reach their audience anytime, anywhere they want.
-
-<!-- *I sat down with Nate, Senior DevOps engineer at [BlipBillBoards](https://www.blipbillboards.com/) to understand how they use SigNoz at BlipBillBoards. Here’s a few snippets from our conversation (edited for legibility)* -->
 
 ![BlipBillBoards](/img/case_study/BlipBillBoards.webp)
 
@@ -49,7 +18,7 @@ Blip used SigNoz to improve their issue resolution time by 14x. We sat down with
 
 Read on to find out how Blip uses SigNoz as their observability backend.
 
-### _Tell us a bit about yourself._
+### Tell us a bit about yourself.
 
 My name is Nate, and I work as a senior DevOps engineer at Blip. I love everything technical and love to build things.
 
@@ -58,11 +27,9 @@ At Blip, I do a lot of integration with various platforms and services. For moni
 So, my primary goal is to try and optimize the application and keep our developers informed about where the application is having issues. It’s also my job to help them fix the issue.
 
 
-### _What were the business problems you're trying to solve with SigNoz? _
+### What were the business problems you're trying to solve with SigNoz?
 
 <YouTube id="ISPfqGmJGYE" mute={false} />
-
-
 
 Yes, absolutely! With SigNoz, we are currently doing about 13 million to 40 million spans per hour which varies with the time of the day. The number goes up during the day quite a bit, up to ~40mn spans/hr, and it's like 13 million spans or so during the night. We have primarily instrumented our backend services.
 
@@ -74,9 +41,9 @@ SigNoz choosing ClickHouse is a very good idea because I had no issues other tha
 
 I've had no issues with it. It showed me exactly what's going on, how the code is flowing, where it's going, what logic it's using to determine what response it will give, and everything else going along with that.
 
-### _Can you share any specific business use cases you solved with SigNoz?_
+### Can you share any specific business use cases you solved with SigNoz?
 
-A few months ago, before I implemented SigNoz, we were having an issue. We had an endpoint that we called `checklist`.
+A few months ago, before I implemented SigNoz, we were having an issue. We had an endpoint that we called \`checklist\`
 
 And it's a checklist to ensure an ad is ready to plan a sign. If an ad has to go through, it has to get approved. It has to have the right tags on it. It has to be approved by the sign owner.
 
@@ -84,14 +51,11 @@ Going through all the checklists made it a very slow endpoint. And we knew it wa
 
 But what happened behind the scenes was nebulous. For example, we knew it was taking 20 seconds to get rendered, but we had no idea of what exactly happened during those 20 seconds.
 
-<figure data-zoomable align='center'>
-    <img src="/img/case_study/trace-filter.webp" alt="SigNoz trace filter page "/>
-    <figcaption><i>Trace filters helps you find interesting spans quickly, which you can dive deeper into </i></figcaption>
-</figure>
+
+![Trace filters helps you find interesting spans quickly, which you can dive deeper into](/img/case_study/trace-filter.webp)
 
 
-
-### _Logs did not solve the problem._
+### Logs did not solve the problem.
 
 You can try and run a couple of queries to check what queries are being run and what's going on. But correlating that to a specific endpoint is next to impossible with logs. We had an outage that occurred because of that. The endpoint started getting so large and running so many queries that it took down the website for everyone, not just the person accessing that particular endpoint.
 
@@ -99,7 +63,7 @@ I spent about two weeks diagnosing the cause and then another two weeks fixing i
 
 I had to add a log statement and then run a query. Then add another log statement, and run a query to see where the request would go. This is how I was trying to reproduce it.
 
-### _Many a time staging environment doesn’t reflect issues that come up in production._
+### Many a time staging environment doesn’t reflect issues that come up in production.
 
 The staging environment doesn't have the same data as the production environment, and it's not nearly as full-featured. So when we were trying to run queries in staging, the request was completed in seconds. But when we ran it in production, we were suddenly getting these timings out, taking down the whole website and the entire back end.
 
@@ -109,16 +73,11 @@ It was awful. And so I did finally fix it. So we got that push, and now the back
 
 But now we know how to avoid such things. For example, an endpoint came up just the other day, and with SigNoz in place, it took me just an hour to figure out why, how, and exactly what was going wrong.
 
-### _N+1 query issue._
+### N+1 query issue.
 
-<figure data-zoomable align='center'>
-    <img src="/img/case_study/Nplus1.webp" alt="N+1 query "/>
-    <figcaption><i>N+1 queries are suboptimal and can lead to significant perf impact</i></figcaption>
-</figure>
+![N+1 queries are suboptimal and can lead to significant perf impact](/img/case_study/Nplus1.webp)
 
-
-
-SigNoz showed me that if someone hits this particular endpoint with a particular campaign with a specific amount of data, it leads to 100 SQL queries in a single request. So if you do a `select` query on all of the rows you're looking for in the database in one go, it creates one SQL query. It takes like 5 seconds to complete, which is not great, but it's not terrible.
+SigNoz showed me that if someone hits this particular endpoint with a particular campaign with a specific amount of data, it leads to 100 SQL queries in a single request. So if you do a \`select\` query on all of the rows you're looking for in the database in one go, it creates one SQL query. It takes like 5 seconds to complete, which is not great, but it's not terrible.
 
 Data is right there in memory, and you're able to iterate through it and do whatever you need to do. Before that, it was going out and wouldn't cache this data. It would be selecting a single row at a time. And because of that, it took over three minutes to complete a single request.
 
@@ -126,9 +85,12 @@ And by seeing the trace details in SigNoz, I showed the developers what exactly 
 
 ### What made you choose SigNoz over other solutions?
 
+
+<p>&nbsp;</p>
+
 <YouTube id="8b3rutiPnTc" mute={false} />
 
-
+<p>&nbsp;</p>
 
 Sure, we tried Jaeger before, but I think the OpenTelemetry packages were a little bit forked at that time or something.
 
@@ -148,11 +110,11 @@ So we didn't have any of those issues with rolling out OpenTelemetry into the co
 
 It just runs and runs very efficiently for what it's doing.
 
-### _How much resource did SigNoz need to handle your scale?_
+### How much resource did SigNoz need to handle your scale?
 
-So we did have to upsize the Kubernetes cluster we were using. We were using `t3large` before, and now we had to go up to `t3xlarge` because the amount of memory and CPU that was available on the `t3large` wasn't enough to run the ClickHouse database.
+So we did have to upsize the Kubernetes cluster we were using. We were using \`t3large\` before, and now we had to go up to \`t3xlarge\` because the amount of memory and CPU that was available on the \`t3large\` wasn't enough to run the ClickHouse database.
 
-So the `t3xlarge`, as soon as we have created that, we basically dedicate one entire node to just the ClickHouse database, and it's okay with that.
+So the \`t3xlarge\`, as soon as we have created that, we basically dedicate one entire node to just the ClickHouse database, and it's okay with that.
 
 And then, we also did auto-scaling for the OTel collectors to be able to collect the data accurately. As soon as one of the nodes hits 50% Ram or CPU, go ahead and bump it up a little bit, and then bump it back down when you don’t need it.
 
@@ -160,20 +122,16 @@ And on average, we go between about three OTel Collectors up to about nine. I ha
 
 Altogether, if I remember right, it was about 32GB of RAM on average for everything, including the ClickHouse and OTel collector. So, broadly 32GB RAM is sufficient for 40 mn spans per hour.
 
-### _What features do you use the most in SigNoz?_
+### What features do you use the most in SigNoz?
 
 We use distributed tracing a lot. We use all the features of distributed tracing, individual spans, attributes, and events associated with each span. With all the features combined, distributed tracing shows exactly how things are running, and that’s incredibly helpful.
 
 The second feature that we use the most is the application metrics page which shows latency like p95, p99, and response times for different endpoints. At a glance, we can review which endpoints are taking longer and investigate them.
 
-<figure data-zoomable align='center'>
-    <img src="/img/case_study/ServiceMap.webp" alt="Service Map "/>
-    <figcaption><i>SigNoz Service Map shows a birds eye view of your architecture</i></figcaption>
-</figure>
 
+![SigNoz Service Map shows a birds eye view of your architecture](/img/case_study/ServiceMap.webp)
 
-
-### _Any advice for teams trying to set up their observability systems?_
+### Any advice for teams trying to set up their observability systems?
 
 I would suggest teams use the automatic instrumentation provided by OpenTelemetry libraries. It's good to automatically instrument things like your database calls, and your various HTTP calls, among other things. You don't need to worry about instrumenting applications yourself initially. It's great to get something up and going because it is so insightful to just see things laid out.
 
@@ -181,14 +139,22 @@ The second thing I would suggest is that if you have a place where there's a com
 
 If you have to instrument one place, make sure you instrument the place where everything enters your system. So if there's a routing handling system, or if there's a piece of code that handles requests, you can wrap that in a single span, and then all of those database calls get tied together, and it's wonderful.
 
-
-
 ---
 
-Thank you for taking out the time to read this case study. If you have any feedback or want to share your story using SigNoz, please feel free to reach out to `hello@signoz.io` with `Case Study` as subject.
+Thank you for taking out the time to read this case study. If you have any feedback or want to share your story using SigNoz, please feel free to reach out to \`hello@signoz.io\` with \`Case Study\` as subject.
 
 Sharing stories of how different teams are using SigNoz helps the community in learning different use cases and problems SigNoz can solve and also showcases how you are solving issues in a unique way.
 
 Feel free to join our slack community and say hi! 👋
 
 [![SigNoz Slack community](/img/blog/common/join_slack_cta.webp)](https://signoz.io/slack)
+
+`
+
+export default function page() {
+  return (
+    <div className="container mx-auto my-16">
+      <MarkdownRenderer markdownContent={markdownContent} />
+    </div>
+  )
+}

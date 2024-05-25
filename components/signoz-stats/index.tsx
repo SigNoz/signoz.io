@@ -6,10 +6,10 @@ import SubHeading from '../../components/ui/SubHeading'
 import Button from '../../components/ui/Button'
 const SigNozStats = () => {
   const STATS_LIST = [
-    { id: 1, name: 'Downloads', value: '9Mn+' },
-    { id: 2, name: 'GitHub Stars', value: '16k+' },
-    { id: 3, name: 'Contributors', value: '130+' },
-    { id: 4, name: 'Community Members', value: '4k+' },
+    { id: 1, name: 'Downloads', value: '10Mn+' },
+    { id: 2, name: 'GitHub Stars', value: '17k+' },
+    { id: 3, name: 'Contributors', value: '140+' },
+    { id: 4, name: 'Community Members', value: '4.5k+' },
   ]
   return (
     <section>
