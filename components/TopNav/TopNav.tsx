@@ -11,8 +11,6 @@ import GitHubStars from '../GithubStars/GithubStars'
 import React from 'react'
 import DocsSidebar from '../DocsSidebar/DocsSidebar'
 import { usePathname } from 'next/navigation'
-import styles from './styles.module.css'
-
 
 export default function TopNav() {
   const pathname = usePathname()
@@ -30,6 +28,8 @@ export default function TopNav() {
       setShowMainMenu(false)
     }
   }, [pathname])
+
+  console.log('pathname', pathname)
 
   return (
     <header
@@ -67,15 +67,33 @@ export default function TopNav() {
           </button>
         </div>
         <Popover.Group className="hidden items-center lg:flex lg:gap-x-12">
-       
-<Link href="/docs" className={styles.navbarlink}>Documentation</Link>
+          <Link
+            href="/docs"
+            className={`truncate text-sm font-semibold leading-6 hover:text-signoz_robin-500`}
+          >
+            Documentation
+          </Link>
 
-<Link href="/resource-center/blog" className={styles.navbarlink}>Resources</Link>
+          <Link
+            href="/resource-center/blog"
+            className={`truncate text-sm font-semibold leading-6 hover:text-signoz_robin-500`}
+          >
+            Resources
+          </Link>
 
-<Link href="/pricing" className={styles.navbarlink}>Pricing</Link>
+          <Link
+            href="/pricing"
+            className={`truncate text-sm font-semibold leading-6 hover:text-signoz_robin-500`}
+          >
+            Pricing
+          </Link>
 
-<Link href="/case-study" className={styles.navbarlink}>Customer Stories</Link>
-
+          <Link
+            href="/case-study"
+            className={`truncate text-sm font-semibold leading-6 hover:text-signoz_robin-500`}
+          >
+            Customer Stories
+          </Link>
 
           <GitHubStars />
         </Popover.Group>
