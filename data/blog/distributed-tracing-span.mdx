@@ -1,7 +1,7 @@
 ---
 title: Spans - a key concept of distributed tracing
 slug: distributed-tracing-span
-date: 2024-02-06
+date: 2024-05-21
 tags: [Distributed Tracing]
 authors: [ankit_anand]
 description: Spans are fundamental blocks of distributed tracing. A single trace in distributed tracing consists of a series of tagged time intervals known as spans...
@@ -33,7 +33,7 @@ In a microservices architecture, a user request travels through hundreds, even t
     />
 <figcaption><i>Microservice architecture of a fictional e-commerce application</i></figcaption>
 </figure>
-<br/>
+
 
 Distributed tracing gives insights into how a particular service is performing as part of the whole in a distributed software system. It involves passing a [trace context](https://signoz.io/blog/context-propagation-in-distributed-tracing/) with each user request which is then passed across hosts, services, and protocols to track the user request.
 
@@ -72,7 +72,7 @@ These spans can then further have their own child spans.
     />
 <figcaption><i>A sample trace demonstrating a request initiated by a frontend web client.</i></figcaption>
 </figure>
-<br/>
+
 
 The first span is known as the parent span and the subsequent spans are child spans. 
 
@@ -106,7 +106,7 @@ Let us see details of a selected span in an APM tool like [SigNoz](https://signo
     />
 <figcaption><i>Span attributes: Details associated with a span captured by SigNoz</i></figcaption>
 </figure>
-<br/>
+
 
 ### Example of a basic span
 Let’s see an example of creating a basic span using the OpenTelemetry instrumentation library. <a href = "https://opentelemetry.io/" rel="noopener noreferrer nofollow" target="_blank" >OpenTelemetry</a> is a set of API, SDKs, libraries, and integrations that is aiming to standardize the generation, collection, and management of telemetry data(logs, metrics, and traces).
@@ -125,7 +125,7 @@ try (Scope scope = span.makeCurrent()) {
     span.end(); // closing the scope does not end the span, this has to be done manually
 }
 ```
-<br></br>
+
 
 Example of adding span attributes
 ```jsx
@@ -133,6 +133,16 @@ Span span = tracer.spanBuilder("/resource/path").setSpanKind(SpanKind.CLIENT).st
 span.setAttribute("http.method", "GET");
 span.setAttribute("http.url", url.toString());
 ```
+
+## Difference between Traces and Spans
+
+The key difference between Traces and Spans is that a **Trace** represents the complete journey of a request through a distributed system, while a **Span** represents a single unit of work or operation within that Trace. 
+
+Traces provide an end-to-end overview of the transaction flow, showing the complete path a request takes from start to finish. This overview helps in understanding the overall performance, latency, and any issues affecting the transaction as a whole.
+
+Spans, on the other hand, provide detailed information about individual operations or steps, such as an HTTP request to a service, a database query, or any other specific task. Each span contains metadata about the operation, including its duration, start and end time, and any associated tags or logs.
+
+In essence, Traces give a broad overview of a request journey while Spans give a detailed breakdown of each step within that journey.
 
 ## Getting started with Distributed Tracing
 
@@ -147,7 +157,7 @@ SigNoz provides easy-to-use visualizations like flamegraphs and Gantt charts fro
     <figcaption><i>Spans of a trace visualized with the help of flamegraphs and gantt charts in SigNoz dashboard</i></figcaption>
 </figure>
 
-<br></br>
+
 
 SigNoz can be installed on macOS or Linux computers in just three steps by using a simple install script.
 

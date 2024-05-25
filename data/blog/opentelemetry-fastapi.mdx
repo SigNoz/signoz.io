@@ -56,7 +56,7 @@ git clone -b main https://github.com/SigNoz/signoz.git
 cd signoz/deploy/
 ./install.sh
 ```
-<br></br>
+
 
 For detailed instructions, you can visit our documentation.
 
@@ -72,8 +72,7 @@ The application list shown in the dashboard is from a sample app called HOT R.O.
     <img src="/img/blog/common/signoz_dashboard_homepage.webp" alt="Homepage SigNoz dashboard"/>
     <figcaption><i>SigNoz dashboard - It shows services from a sample app that comes bundled with the application</i></figcaption>
 </figure>
-
-<br></br> --> */}
+ --> */}
 
 ### Instrumenting a sample FastAPI application with OpenTelemetry
 
@@ -97,7 +96,7 @@ It’s a good practice to create virtual environments for running Python apps, s
 python3 -m venv .venv
 source .venv/bin/activate
 ```
-<br></br>
+
 
 **Step 2. Run instructions for sending data to SigNoz**<br></br>
 The `requirements.txt` file contains all the necessary OpenTelemetry Python packages needed for instrumentation. In order to install those packages, run the following command:
@@ -124,7 +123,6 @@ opentelemetry-exporter-otlp - This library provides a way to install all OTLP ex
 The `opentelemetry-exporter-otlp-proto-grpc` package installs the gRPC exporter which depends on the `grpcio` package. The installation of `grpcio` may fail on some platforms for various reasons. If you run into such issues, or you don't want to use gRPC, you can install the HTTP exporter instead by installing the `opentelemetry-exporter-otlp-proto-http` package. You need to set the `OTEL_EXPORTER_OTLP_PROTOCOL` environment variable to `http/protobuf` to use the HTTP exporter.
 </Admonition>
 
-<br></br>
 
 **Step 3. Install application specific packages**<br></br>
 This step is required to install packages specific to the application. This command figures out which instrumentation packages the user might want to install and installs it for them:
@@ -132,7 +130,7 @@ This step is required to install packages specific to the application. This comm
 ```bash
 opentelemetry-bootstrap --action=install
 ```
-<br></br>
+
 
 <Admonition>
 Please make sure that you have installed all the dependencies of your application before running the above command. The command will not install instrumentation for the dependencies which are not installed.
@@ -161,7 +159,6 @@ You will be able to get ingestion details in SigNoz cloud account under settings
     <figcaption><i>Ingestion details in SigNoz dashboard</i></figcaption>
 </figure>
 
-<br></br>
 
 <Admonition>
 Don’t run app in reloader/hot-reload mode as it breaks instrumentation. For example, if you use `--reload` or `reload=True`, it enables the reloader mode which breaks OpenTelemetry isntrumentation.
@@ -202,12 +199,12 @@ You need to generate some load on your app so that there is data to be captured 
 pip3 install locust
 ```
 
-<br></br>
+
 
 ```bash
 locust -f locust.py --headless --users 10 --spawn-rate 1 -H http://localhost:5002
 ```
-<br></br>
+
 
 Or you can also hit the endpoint [http://localhost:5002/](http://localhost:5002/) manually to generate some load. 
 
@@ -219,7 +216,6 @@ You will find `sample-fastapi-app` in the list of sample applications being moni
     <figcaption><i>FastAPI in the list of applications being monitored by SigNoz</i></figcaption>
 </figure>
 
-<br></br>
 
 If you want to run the application with a docker image, refer to the section below for instructions.
 
@@ -230,7 +226,7 @@ You can use the below instructions if you want to run your app as a docker image
 ```jsx
 docker build -t sample-fastapi-app .
 ```
-<br></br>
+
 
 **Setting environment variables**<br></br>
 You need to set some environment variables while running the application with OpenTelemetry and send collected data to SigNoz. You can do so with the following commands at the terminal:
@@ -246,7 +242,7 @@ docker run -d --name fastapi-container \
 -e OTEL_EXPORTER_OTLP_PROTOCOL=grpc \
 -p 5002:5002 sample-fastapi-app
 ```
-<br></br>
+
 
 If you're using docker compose setup:
 
@@ -265,7 +261,7 @@ docker run -d --name fastapi-container \
 -p 5002:5002 sample-fastapi-app
 ```
 
-<br></br>
+
 
 
 ## Monitor FastAPI application with SigNoz
@@ -284,40 +280,36 @@ SigNoz comes with out of box RED metrics charts and visualization. RED metrics s
     <figcaption><i>Measure things like application latency, requests per sec, error percentage and see your top endpoints with SigNoz</i></figcaption>
 </figure>
 
-<br></br>
 
 You can then choose a particular timestamp where latency is high to drill down to traces around that timestamp.
 
-<br></br>
+
 
 <figure data-zoomable align='center'>
     <img src="/img/blog/common/trace_filter_apply_aggregates.webp" alt="List of traces on SigNoz dashboard"/>
     <figcaption><i>View of traces at a particular timestamp</i></figcaption>
 </figure>
 
-<br></br>
 
 You can use flamegraphs to exactly identify the issue causing the latency.
 
-<br></br>
+
 
 <figure data-zoomable align='center'>
     <img src="/img/blog/common/signoz_flamegraphs.webp" alt="Flamegraphs used to visualize spans of distributed tracing in SigNoz UI"/>
     <figcaption><i>View of traces at a particular timestamp</i></figcaption>
 </figure>
 
-<br></br>
 
 You can also build custom metrics dashboard for your infrastructure.
 
-<br></br>
+
 
 <figure data-zoomable align='center'>
     <img src="/img/blog/common/signoz_custom_dashboard-min.webp" alt="Custom metrics dashboard"/>
     <figcaption><i>You can also build a custom metrics dashboard for your infrastructure</i></figcaption>
 </figure>
 
-<br></br>
 
 ## Conclusion
 OpenTelemetry makes it very convenient to instrument your FastAPI application. You can then use an open-source APM tool like SigNoz to analyze the performance of your app. As SigNoz offers a full-stack observability tool, you don't have to use multiple tools for your monitoring needs.

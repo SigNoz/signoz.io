@@ -25,16 +25,11 @@ Both DataDog and New Relic are popular monitoring tools that provide a wide rang
 💡 I instrumented a sample Spring Boot Application and sent data to Datadog and New Relic to evaluate my experience. Some takeaways are subjective and based on personal preference.
 </Admonition>
 
-<br></br>
-
-
-
-
 
 <figure data-zoomable align='center'>
     <img className="box-shadowed-image" src="/img/blog/2024/02/datadog-vs-new-relic-cover.webp" alt="Datadog vs New Relic Blog Cover Image"/>
 </figure>
-<br/>
+
 
 ## Datadog vs New Relic: Overview
 
@@ -44,7 +39,7 @@ My research found that Datadog gives you more granular controls, while New Relic
 
 Here’s a quick overview of the overall platform features and functionality of Datadog and New Relic.
 
-<br></br>
+
 
 | Feature | DataDog | New Relic |
 | --- | --- | --- |
@@ -60,7 +55,6 @@ Here’s a quick overview of the overall platform features and functionality of 
 | Free Tier | ❌ | ✅ (100GB free data per month) |
 
 
-<br></br>
 
 
 
@@ -81,39 +75,39 @@ In Datadog, I had a hard time figuring out whether my setup was complete or not,
     <img className="box-shadowed-image" src="/img/blog/2024/02/datadog-onboarding-tabs.webp" alt="Datadog's onboarding tab"/>
     <figcaption><i>Datadog’s onboarding flow is a bit overwhelming, with too many horizontal tabs.</i></figcaption>
 </figure>
-<br/>
+
 
 The good thing about Datadog is it gives you a lot of control. You can set up things like collecting custom metrics (which might be [expensive](https://signoz.io/blog/datadog-pricing/)), sampling rate, and telemetry correlation between traces and logs right from the beginning.
 
 Once the setup is done, you can see your list of [spans](https://signoz.io/blog/distributed-tracing-span/) and corresponding [flamegraphs](https://signoz.io/blog/flamegraphs/) for your traces. Datadog does a good job of correlating different types of signals. You can relate info from infrastructure, metrics, network, etc., right from trace data if you have those products enabled.
 
-<br></br>
+
 
 <figure data-zoomable align='center'>
     <img className="box-shadowed-image" src="/img/blog/2024/02/datadog-apm.webp" alt="Datadog APM"/>
     <figcaption><i>Datadog’s APM showing breakdown of an internal server error</i></figcaption>
 </figure>
-<br/>
+
 
 New Relic’s traces page shows Trace groups instead of a list of spans, which feels like a cleaner representation, and you can filter by root spans, which comes in handy in case of large trace groups.
 
-<br></br>
+
 
 <figure data-zoomable align='center'>
     <img className="box-shadowed-image" src="/img/blog/2024/02/new-relic-apm.webp" alt="New Relic APM"/>
     <figcaption><i>New Relic groups spans in Trace groups and shows important metrics about it.</i></figcaption>
 </figure>
-<br/>
+
 
 You can get flamegraphs for your traces in New Relic, too. Compared to Datadog, New Relic has fewer options for correlation. But it is interesting to note that New Relic shows much more spans for the same call in my Java application.
 
-<br></br>
+
 
 <figure data-zoomable align='center'>
     <img className="box-shadowed-image" src="/img/blog/2024/02/new-relic-traces.webp" alt="New Relic Traces"/>
     <figcaption><i>New Relic’s Flamegraph view of traces - you can also check out corresponding logs</i></figcaption>
 </figure>
-<br/>
+
 
 Overall, if you need a simpler experience, then choose New Relic’s APM. But if you need more control over what things you can do with your data, then choose Datadog’s APM.
 
@@ -130,11 +124,11 @@ New Relic also gives you the option to query your log data using NRQL. It’s a 
     <img className="box-shadowed-image" src="/img/blog/2024/02/new-relic-log-management-dashboard.webp" alt="Log Management Dashboard in New Relic"/>
     <figcaption><i>Log Management Dashboard in New Relic showing logs from instrumented Java application</i></figcaption>
 </figure>
-<br/>
+
 
 Other key features in New Relic’s log management and how they worked with my Java application logs are:
 
-- Takes out attributes automatically from logs.<br></br>
+- Takes out attributes automatically from logs.<br> </br>
 
     <figure data-zoomable align='center'>
     <img className="box-shadowed-image" src="/img/blog/2024/02/new-relic-log-attributes.webp" alt="Log Attributes in New Relic"/>
@@ -154,7 +148,7 @@ For Datadog, there was no automatic collection of logs. Collecting logs is disab
     <img className="box-shadowed-image" src="/img/blog/2024/02/datadog-logs-tab.webp" alt="Log Tab in Datadog"/>
     <figcaption><i>Log Tab in Datadog showing logs from my Spring Boot Application</i></figcaption>
 </figure>
-<br/>
+
 
 Both Datadog and New Relic have a feature to find patterns in logs automatically. While Datadog showed some patterns from my application logs, New Relic did not. Datadog offers more options to slice and dice your log data in its UI. 
 
@@ -170,29 +164,29 @@ Host monitoring in both Datadog and New Relic is good, and choosing one over the
 
 What’s interesting about Datadog is that it showed me a glimpse of the JVM metrics dashboard while clicking on my host. Datadog has done a really good job at correlating different types of information collected from your application and host.
 
-<br></br>
+
 
 <figure data-zoomable align='center'>
     <img className="box-shadowed-image" src="/img/blog/2024/02/datadog-infrastructure.webp" alt="Datadog infrastructure tab"/>
     <figcaption><i>Datadog showing JVM metrics without any configuration was a good experience</i></figcaption>
 </figure>
-<br/>
 
-<br></br>
+
+
 
 <figure data-zoomable align='center'>
     <img className="box-shadowed-image" src="/img/blog/2024/02/datadog-infrastructure-2.webp" alt="Datadog host monitoring dashboard"/>
     <figcaption><i>Datadog’s dashboard for host monitoring</i></figcaption>
 </figure>
-<br/>
 
-<br></br>
+
+
 
 <figure data-zoomable align='center'>
     <img className="box-shadowed-image" src="/img/blog/2024/02/new-relic-host-monitoring.webp" alt="New Relic Host Monitoring Dashboard"/>
     <figcaption><i>New Relic’s Dashboard for Host monitoring</i></figcaption>
 </figure>
-<br/>
+
 
 If your use case is only infrastructure monitoring, then the decision comes down to cost. However, it’s not easy to figure out how much each tool will cost on a head-to-head basis as their pricing structures are very different. I recommend you sign up and do a trial for both tools, including factors like user seats(New Relic charges for user seats).
 
@@ -223,13 +217,13 @@ Both Datadog’s and New Relic’s support for OpenTelemetry is [not up to the m
 
 For example, Datadog cannot link traces and logs automatically with the [DataDog OpenTelemetry](https://signoz.io/blog/opentelemetry-vs-datadog/) tools. New Relic’s documentation is better for using OpenTelemetry, but once the data gets reported, you can see the difference again.
 
-<br></br>
+
 
 <figure data-zoomable align='center'>
     <img className="box-shadowed-image" src="/img/blog/2023/09/firsclass-6.webp" alt="OpenTelemetry data in New Relic"/>
     <figcaption><i>OpenTelemetry data is segregated in New Relic and not included in the APM experience.</i></figcaption>
 </figure>
-<br/>
+
 
 If you are looking to use OpenTelemetry, then I would recommend [SigNoz](https://signoz.io/) (of course) - an OpenTelemetry-native APM. And just like OpenTelemetry, SigNoz is also open-source. So you can have a full-stack open-source observability stack with SigNoz and OpenTelemetry.
 
@@ -321,7 +315,7 @@ Some of the key features of DataDog APM includes:
     src="/img/blog/2021/09/apm_tools_datadog-min.webp"/>
 <figcaption><i>DataDog APM tool dashboard (Source: DataDog dashboard)</i></figcaption>
 </figure>
-<br/>
+
 
 ### New Relic APM
 
@@ -341,7 +335,7 @@ Some of the key features of New Relic APM includes:
     />
 <figcaption><i>New Relic APM Dashboard (Source: New Relic Dashboard)</i></figcaption>
     </figure>
-<br/>
+
 
 ## Infrastructure Monitoring
 
@@ -362,7 +356,7 @@ Some of the key features of DataDog's infrastructure monitoring includes:
     />
 <figcaption><i>See detailed info about your hosts on DataDog dashboard (Source: DataDog website)</i></figcaption>
     </figure>
-<br/>
+
 
 ### New Relic Infrastructure Monitoring
 
@@ -381,7 +375,7 @@ Some of the key features of New Relic infrastructure monitoring includes:
     />
 <figcaption><i>New Relic Infrastructure Monitoring Dashboard (Source: New Relic documentation)</i></figcaption>
     </figure>
-<br/>
+
 
 ## Log Management
 
@@ -403,7 +397,7 @@ Some of the key features of DataDog Log Management includes:
     />
 <figcaption><i>DataDog log management dashboard (Source: DataDog website)</i></figcaption>
     </figure>
-<br/>
+
 
 ### New Relic Log Management
 
@@ -422,7 +416,7 @@ Some of the key features of New Relic log management include:
     />
 <figcaption><i>New Relic Log Management Dashboard (Source: New Relic website)</i></figcaption>
     </figure>
-<br/>
+
 
 ## Network Monitoring
 
@@ -441,7 +435,7 @@ Some of the key features of DataDog network monitoring include:
     />
 <figcaption><i>DataDog network monitoring (Source: DataDog website)</i></figcaption>
     </figure>
-<br/>
+
 
 ### New Relic Network Monitoring
 
@@ -458,7 +452,7 @@ Some of the key features of New Relic Network monitoring include:
     />
 <figcaption><i>New Relic Network Monitoring (Source: New Relic website)</i></figcaption>
     </figure>
-<br/>
+
 
 ## Browser or real-user monitoring
 
@@ -479,7 +473,7 @@ Some of the key features of DataDog end-user monitoring:
     />
 <figcaption><i>DataDog Real User Monitoring</i></figcaption>
     </figure>
-<br/>
+
 
 ### New Relic Browser Monitoring
 
@@ -498,7 +492,7 @@ Some of the key features of New Relic Browser Monitoring include:
     />
 <figcaption><i>New Relic Browser monitoring (Source: New Relic website)</i></figcaption>
     </figure>
-<br/>
+
 
 ## Issues with existing monitoring vendors
 
@@ -537,7 +531,6 @@ Key architecture features:
       />
 <figcaption><i>Architecture of SigNoz with ClickHouse as storage backend and OpenTelemetry for code instrumentatiion</i></figcaption>
 </figure>
-  />
 
 SigNoz comes with out of box visualization of things like RED metrics.
 
@@ -549,7 +542,7 @@ SigNoz comes with out of box visualization of things like RED metrics.
     />
 <figcaption><i>SigNoz UI showing application overview metrics like RPS, 50th/90th/99th Percentile latencies, and Error Rate</i></figcaption>
     </figure>
-<br/>
+
 
 You can also use flamegraphs to visualize spans from your trace data. All of this comes out of the box with SigNoz.
 
@@ -561,7 +554,7 @@ You can also use flamegraphs to visualize spans from your trace data. All of thi
     />
 <figcaption><i>Flamegraphs showing exact duration taken by each spans - a concept of distributed tracing</i></figcaption>
     </figure>
-<br/>
+
 
 You can use logs to dig deeper into application issues.
 
@@ -570,7 +563,7 @@ You can use logs to dig deeper into application issues.
     <figcaption><i>Logs management in SigNoz</i></figcaption>
 </figure>
 
-<br></br>
+
 
 You can also build custom metrics dashboard for your infrastructure.
 
@@ -582,7 +575,7 @@ You can also build custom metrics dashboard for your infrastructure.
     />
 <figcaption><i>You can also build a custom metrics dashboard for your infrastructure</i></figcaption>
     </figure>
-<br/>
+
 
 The logs tab in SigNoz has advanced features like a log query builder, search across multiple fields, structured table view, JSON view, etc.
 
@@ -591,7 +584,7 @@ The logs tab in SigNoz has advanced features like a log query builder, search ac
     <figcaption><i>Log management in SigNoz</i></figcaption>
 </figure>
 
-<br></br>
+
 
 Some of the things SigNoz can help you track:
 
@@ -613,8 +606,6 @@ cd signoz/deploy/
 ./install.sh
 ```
 
-<br></br>
-
 For detailed instructions, you can visit our documentation.
 
 [![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/)
@@ -623,12 +614,10 @@ You can check out SigNoz's GitHub repo here 👇
 
 [![SigNoz GitHub repo](/img/blog/common/signoz_github.webp)](https://github.com/SigNoz/signoz)
 
---- -->
-
 ---
 
 **Related Content**
 
-**[9x more value for money than Datadog and New Relic](https://signoz.io/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/)**<br></br>
-**[SigNoz vs Datadog](https://signoz.io/product-comparison/signoz-vs-datadog/)**<br></br>
-**[SigNoz vs New Relic](https://signoz.io/product-comparison/signoz-vs-newrelic/)**<br></br>
+**[9x more value for money than Datadog and New Relic](https://signoz.io/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/)**
+**[SigNoz vs Datadog](https://signoz.io/product-comparison/signoz-vs-datadog/)**
+**[SigNoz vs New Relic](https://signoz.io/product-comparison/signoz-vs-newrelic/)**

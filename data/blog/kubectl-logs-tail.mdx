@@ -27,18 +27,18 @@ Before we get started, let's quickly review some essential Kubernetes concepts.
 
 <SignUps />
 
-## What is `kubectl`?
+## What is kubectl?
 
 Kubectl is the Kubernetes command-line tool that enables users to execute commands and interact with their Kubernetes cluster for everyday management tasks. With `kubectl`, users can perform various tasks related to the administration and maintenance of their cluster and applications, such as creating and updating deployments, scaling replicas, rolling out new features, etc.
 
-## What is the `kubectl logs` command?
+## What is the kubectl logs command?
 
 The `kubectl logs` command is a useful tool for accessing and viewing the logs of pods in a Kubernetes cluster. With this command, you can retrieve the log output of a pod and display it in the terminal for inspection.
 
 Syntax for the `kubectl logs` command usage:
 
 ```
-$ kubectl logs [-f] [-p] (POD | TYPE/NAME) [-c CONTAINER] [options]
+kubectl logs [-f] [-p] (POD | TYPE/NAME) [-c CONTAINER] [options]
 ```
 
 The `kubectl logs` command provides various flags that can be used to tailor its functionality to your needs.
@@ -54,7 +54,7 @@ A full list of all flag options by the command can be found on the official Kube
 
 <LogsPerf />
 
-## The `tail` flag
+## The tail flag
 
 The `tail` flag can be used in conjunction with the `kubectl logs` command to stream the latest logs in real-time, rather than returning all the logs at once. It can be used to specify the number of log lines to show from the end of the logs for a specific container in a pod.
 
@@ -70,21 +70,21 @@ Here’s how you can tail logs from the control plane components:
 
 - **Tail logs from the API server**
 
-```bash
-tail -f /var/log/kube-apiserver.log
-```
+    ```bash
+    tail -f /var/log/kube-apiserver.log
+    ```
 
 - **Tail logs from the Scheduler**
 
-```bash
-tail -f /var/log/kube-scheduler.log
-```
+    ```bash
+    tail -f /var/log/kube-scheduler.log
+    ```
 
 - **Tail logs from the Controller Manager**
 
-```bash
-tail -f /var/log/kube-controller-manager.log
-```
+    ```bash
+    tail -f /var/log/kube-controller-manager.log
+    ```
 
 Note that the location of the log files may differ based on the Kubernetes cluster.
 
@@ -98,15 +98,15 @@ Here’s how you can tail logs from the node components:
 
 - **Tail logs from the kubelet**
 
-```bash
-tail -f /var/log/kubelet.log
-```
+    ```bash
+    tail -f /var/log/kubelet.log
+    ```
 
 - **Tail logs from kube-proxy**
 
-```bash
-tail -f /var/log/kube-proxy.log
-```
+    ```bash
+    tail -f /var/log/kube-proxy.log
+    ```
 
 ### Tail Logs from pods
 
@@ -118,15 +118,15 @@ Here’s how you can tail logs from pods:
 
 If you want to tail the most recent [number] lines of output from a pod:
 
-```bash
-kubectl logs --tail=[number] [pod-name]
-```
+    ```bash
+    kubectl logs --tail=[number] [pod-name]
+    ```
 
 An example is shown below;
 
 ```bash
 # Display only the most recent 10 lines of output in pod nginx
-$ kubectl logs --tail=10 nginx
+kubectl logs --tail=10 nginx
 
 2023/01/05 08:16:27 [notice] 1#1: using the "epoll" event method
 2023/01/05 08:16:27 [notice] 1#1: nginx/1.23.3
@@ -144,7 +144,7 @@ In the below example, the tail number has been set to 15
 
 ```bash
 # Display only the most recent 15 lines of output in pod nginx 
-$ kubectl logs --tail=15 nginx   
+kubectl logs --tail=15 nginx   
 
 10-listen-on-ipv6-by-default.sh: info: Getting the checksum of /etc/nginx/conf.d/default.conf 
 10-listen-on-ipv6-by-default.sh: info: Enabled listen on IPv6 in /etc/nginx/conf.d/default.conf 
@@ -169,7 +169,7 @@ Containers are lightweight, self-contained units that provide a consistent way t
 
 Here’s how you can tail logs from containers:
 
-- **Tail all containers log in a pod**[](https://signoz.io/blog/kubectl-logs-tail/#using-the-tail-command-for-all-containers-in-a-pod)
+**Tail all containers log in a pod**[](https://signoz.io/blog/kubectl-logs-tail/#using-the-tail-command-for-all-containers-in-a-pod)
 
 If you want to tail the most recent [number] lines of output from “all containers” in the specified pod.
 
@@ -177,7 +177,7 @@ If you want to tail the most recent [number] lines of output from “all conta
 kubectl logs --tail=[number] --all-containers [pod-name]
 ```
 
-- **Tail a specific container’s log in a pod**[](https://signoz.io/blog/kubectl-logs-tail/#using-the-tail-command-for-a-specific-container-in-a-pod)
+**Tail a specific container’s log in a pod**[](https://signoz.io/blog/kubectl-logs-tail/#using-the-tail-command-for-a-specific-container-in-a-pod)
 
 In a case where multiple containers are running in a pod, if you want to tail only the most recent [number] lines of output from a “specific container” in a specific pod:
 
@@ -185,7 +185,7 @@ In a case where multiple containers are running in a pod, if you want to tail on
 kubectl logs --tail=[number] -c [container-name] [pod-name]
 ```
 
-- **Tail logs with the “f” flag**
+**Tail logs with the “f” flag**
 
 If you want to tail the most recent [number] lines of output from a specific container in a pod, and continue to stream new log entries in real-time, you can make use of the `-f` flag. 
 
@@ -197,7 +197,7 @@ kubectl logs -f --tail=[number] [pod-name]
 An example can be seen below;
 
 ```bash
-$ kubectl logs -f --tail=10 queue
+kubectl logs -f --tail=10 queue
 
 INFO | Apache ActiveMQ 5.14.3 (localhost, ID:queue-41599-1672906401588-0:1) started
 INFO | For help or more information please see: <http://activemq.apache.org>
@@ -211,7 +211,7 @@ INFO | No Spring WebApplicationInitializer types detected on classpath
 INFO | jolokia-agent: Using policy access restrictor classpath:/jolokia-access.xml
 ```
 
-- **Tail logs using the “since” flag**
+**Tail logs using the “since” flag**
 
 If you want to tail the most recent [number] lines of logs written in the past [duration], for example, 1h, from the container in the specified pod, you can use the `since` flag.
 
@@ -222,7 +222,7 @@ kubectl logs --tail=[number] --since=[duration] [pod-name]
 An example is shown below
 
 ```bash
-$ kubectl logs --tail=5 --since=1h nginx 
+kubectl logs --tail=5 --since=1h nginx 
 
 2023/01/05 08:16:27 [notice] 1#1: start worker processes 
 2023/01/05 08:16:27 [notice] 1#1: start worker process 30 
@@ -231,7 +231,7 @@ $ kubectl logs --tail=5 --since=1h nginx
 2023/01/05 08:16:27 [notice] 1#1: start worker process 33
 ```
 
-- **Tail logs with the “p” flag**
+**Tail logs with the “p” flag**
 
 This is useful in the case of a container restart. If you want to tail the most recent [number] lines of output from a previously terminated container within a pod, you can make use of the `p` flag.
 
@@ -243,7 +243,7 @@ kubectl logs -p --tail=[number] [pod-name]
 An example is shown below;
 
 ```bash
-$ kubectl logs -p --tail=10 queue
+kubectl logs -p --tail=10 queue
 
 INFO | Connector mqtt stopped
 INFO | Connector ws stopped
@@ -256,13 +256,13 @@ INFO | Apache ActiveMQ 5.14.3 (localhost, ID:queue-39515-1672238886867-0:1) is s
 INFO | Destroying Spring FrameworkServlet 'dispatcher'
 ```
 
-## Benefits of the `kubectl logs tail` command
+## Benefits of the kubectl logs tail command
 
 The `kubectl logs --tail` command offers the ability to stream the most recent logs in real-time, making it an invaluable tool for debugging issues within a pod. By providing a live view of the logs as they are generated, this command enables users to quickly identify and troubleshoot problems as they arise. For instance, if an error is occurring in a container, `kubectl logs --tail` can be used to stream the logs and search for error messages or other indicators of the issue at hand.
 
 In addition to its usefulness in debugging, `kubectl logs --tail` can also serve as a means of monitoring the output of long-running processes. By streaming the logs of such processes, users can track the progress of a task and identify any potential issues as they occur. This feature can be particularly helpful in keeping tabs on the status of tasks that take an extended period of time to complete.
 
-## Use cases of `kubectl logs tail` command
+## Use cases of kubectl logs tail command
 
 Here are some use cases where `kubectl logs tail`` command can be useful:
 
@@ -297,7 +297,6 @@ SigNoz's logs tab offers numerous advanced features, including a log query build
     <figcaption><i>Log management in SigNoz</i></figcaption>
 </figure>
 
-<br></br>
 
 With SigNoz, you have the ability to analyze logs in real-time, allowing for quick searching, filtering, and visualization as they are generated. This can aid in uncovering patterns, trends, and potential issues and resolving them in a timely manner.
 
@@ -306,7 +305,6 @@ With SigNoz, you have the ability to analyze logs in real-time, allowing for qui
     <figcaption><i>Live Tail Logging in SigNoz</i></figcaption>
 </figure>
 
-<br></br>
 
 The advanced Log Query Builder feature in SigNoz allows you to filter logs quickly by using a combination of different fields.
 <figure data-zoomable align='center'>
@@ -314,7 +312,6 @@ The advanced Log Query Builder feature in SigNoz allows you to filter logs quick
     <figcaption><i>Advanced Log Query Builder in SigNoz</i></figcaption>
 </figure>
 
-<br></br>
 
 ## Getting started with SigNoz
 
@@ -324,6 +321,6 @@ The advanced Log Query Builder feature in SigNoz allows you to filter logs quick
 
 **Related Posts**
 
-[Using Kubectl Logs | How to view Kubernetes Pod Logs? | SigNoz](https://signoz.io/blog/kubectl-logs/)
+- [Using Kubectl Logs | How to view Kubernetes Pod Logs? | SigNoz](https://signoz.io/blog/kubectl-logs/)
 
-[SigNoz - A Lightweight Open Source ELK alternative](https://signoz.io/blog/elk-alternative-open-source/)
+- [SigNoz - A Lightweight Open Source ELK alternative](https://signoz.io/blog/elk-alternative-open-source/)

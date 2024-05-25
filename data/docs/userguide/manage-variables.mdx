@@ -22,7 +22,7 @@ To add a variable to a dashboard, follow the steps below:
 1. From the left sidebar, choose **Dashboards**.
 2. Find the dashboard to which you want to add a new variable.
 3. Select **Configure**.
-4. Select **New Variables** from the **Variables** section tab.
+4. Select **Add Variable** from the **Variables** section tab.
 5. Populate the following fields:
     1. **Name**: Name of the variable. This is used in Metrics builder/ClickHouse query/ PromQL later
     2. **Description**: Enter a brief and meaningful description of your variable.
@@ -37,20 +37,19 @@ To add a variable to a dashboard, follow the steps below:
 
 SigNoz supports three ways of creating variables: query, custom, and textbox.
 
-1. Query   - A SQL query that fetches data from ClickHouse (only supported data source at the time) server SigNoz configured to use
+1. Query - A ClickHouse SQL query that fetches data from ClickHouse (only supported data source at the time) server SigNoz configured to use
 
-    Example: You want to query the list of jobs from the metrics database and use them as a variable. Any ClickHouse SQL query that returns a column with desired values is valid. For instance, a query to fetch all jobs that are reporting the CPU metric collection would be
+    Example: You want to query the list of host names from the metrics database and use them as a variable. Any ClickHouse SQL query that returns a column with desired values is valid. For instance, a query to fetch all host names that are reporting the CPU metric collection would be
 
     ```sql
-    SELECT DISTINCT JSONExtractString(labels, 'job') AS job
-    FROM signoz_metrics.distributed_time_series_v2
-    WHERE metric_name = 'node_cpu_seconds_total'
+    SELECT DISTINCT JSONExtractString(labels, 'host_name') AS host_name
+    FROM signoz_metrics.distributed_time_series_v4_1day
+    WHERE metric_name = 'system_cpu_time'
     ```
 
     Follwing image shows above case
 
-    ![Variables-with-ClickHouse](/img/docs/var-with-clickhouse-query.webp)
-
+    ![Variables-with-ClickHouse](/img/docs/var_with_clickhouse_sql.png)
 
 2. Custom  - A comma-separated list values as a Variable
 
@@ -67,12 +66,17 @@ SigNoz supports three ways of creating variables: query, custom, and textbox.
 
 ## Variable syntax and usage in queries
 
-All metric queries can refer to variables using the go variable templating syntax `{{. }}`.
+All metric queries can refer to variables using any of the following syntax.
+
+1. `{{.variable_name}}`
+2. `$variable_name`
+3. `[[variable_name]]`
+4. `{{variable_name}}`
 
 For example, A PromQL query for service request rate using dynamic service selection would be.
 
 ```
-sum(rate(signoz_calls_total{service_name="{{.service_name}}"}[5m]))
+sum(rate(signoz_calls_total{service_name="$service_name"}[5m]))
 ```
 
 

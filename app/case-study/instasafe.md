@@ -113,7 +113,7 @@ So I was able to run a script and then configure everything.”
 
 So, I would suggest to understand what data do you need today - and only send that data to the platform.
 
-<p>&nbsp;</p>
+
 
 ---
 

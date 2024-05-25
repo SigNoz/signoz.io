@@ -102,19 +102,29 @@ Lets say we have this example data in your json log body
 
 * logs where value of message is `hello`
   
-    `body.message = hello`
+    ```
+    body.message = hello
+    ```
 * logs where value of message is contains `he`
   
-    `body.message CONTAINS he`
+    ```
+    body.message CONTAINS he
+    ```
 * logs where value of latency of service_1 is >100
   
-    `body.request.service_meta[*].latency > 100`
+    ```
+    body.request.service_meta[*].latency > 100
+    ```
 * logs where `tag1` is present in service tags
   
-    `body.request.service_meta[*].tags[*] HAS tag1`
+    ```
+    body.request.service_meta[*].tags[*] HAS tag1
+    ```
 * logs where `tag2` is not present in service tags
   
-    `body.request.service_meta[*].tags[*] NHAS tag2`
+    ```
+    body.request.service_meta[*].tags[*] NHAS tag2
+    ```
 
 
 
@@ -161,8 +171,10 @@ If you have a use case which you are not able to fullfill with the current featu
     
 The fulltext key is used when we want to write freehand queries and combine them with filters.
 
-eg:- `id IN ('2DCVZOsKHioCeuvbObzVzzL1eZ5') AND fulltext contains 'Dispatch Successful'`
-
+eg:- 
+```
+id IN ('2DCVZOsKHioCeuvbObzVzzL1eZ5') AND fulltext contains 'Dispatch Successful'
+```
 In this cases we are searching `Dispatch Successful` as fulltext along with the id filter.
 
 Note:- The `fulltext` keyword can be only used with `contains` and the `ncontains` operator.
@@ -174,23 +186,36 @@ Note:- The `fulltext` keyword can be only used with `contains` and the `ncontain
     eg:-
     If you want to search for logs with stream error and which contains Mozilla in body, the corresponding query on the ui will be 
 
-    `stream IN ('stderr') AND fulltext contains 'Mozilla'`
+    ```
+    stream IN ('stderr') AND fulltext contains 'Mozilla'
+    ```
 
     as we can see `Mozilla` is enclosed in single quotes as well as `stderr`.
 
 - Order of execution is similar to sql i.e left to right and `and` has higher precedence over `or` , but currently SigNoz doesn’t support combining explicitly using parenthesis.
     
-    **correct** :-`stream IN ('stdout') and fulltext contains 'Mozilla' or stream IN ('stderr')` ✅
+    **correct** ✅ :-
+    ```
+    stream IN ('stdout') and fulltext contains 'Mozilla' or stream IN ('stderr')
+    ``` 
 
-    **incorrect** :- `(stream IN ('stdout') and fulltext contains 'Mozilla') or stream IN ('stderr')` ❌ 
+    **incorrect** ❌ :- 
+    ```
+    (stream IN ('stdout') and fulltext contains 'Mozilla') or stream IN ('stderr')
+    ```  
     
-    while the above to evaluates to the same expression, it’s not necessarily same for the one below
+    While the above to evaluates to the same expression, it’s not necessarily same for the one below
     
-    **correct** :-`stream IN ('stdout') and fulltext contains 'Mozilla' or stream IN ('stderr'` ✅
-    
-    **incorrect** :- `stream IN ('stdout') and (fulltext contains 'Mozilla' or stream IN ('stderr'))` ❌ 
-    
-    here both the statements are not equivalent of each other **i.e it is currently not supported**
+     **correct** ✅ :-
+    ```
+    stream IN ('stdout') and fulltext contains 'Mozilla' or stream IN ('stderr'
+    ``` 
+
+    **incorrect** ❌ :- ```
+    stream IN ('stdout') and (fulltext contains 'Mozilla' or stream IN ('stderr'))
+    ``` 
+
+Here both the statements are not equivalent of each other **i.e it is currently not supported**
 
 ## Query Examples
 

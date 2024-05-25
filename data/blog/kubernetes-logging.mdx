@@ -233,40 +233,40 @@ Before you learn to collect your Kubernetes pod logs with SigNoz, ensure you hav
 
 - Using a text editor like nano or vim, create a file called `logging.yaml` and paste the below configuration in it:
 
-```jsx
-apiVersion: v1
-kind: Pod
-metadata:
-  name: flog-pod
-spec:
-  containers:
-  - name: flog-container
-    image: mingrammer/flog
-    command: ["flog", "-p", "8080"]
-```
+    ```jsx
+    apiVersion: v1
+    kind: Pod
+    metadata:
+    name: flog-pod
+    spec:
+    containers:
+    - name: flog-container
+        image: mingrammer/flog
+        command: ["flog", "-p", "8080"]
+    ```
 
 The above manifest file creates a pod called `flog-pod`. <a href = "https://github.com/SigNoz/flog#using-docker" rel="noopener noreferrer nofollow" target="_blank">Flog</a> a fake log generator for common log formats such as apache-common, apache error and RFC3164 syslog. We will be utilizing it here to generate logs for us which we will be collecting in SigNoz.
 
 - To create the pod, run the following command in your terminal:
 
-```jsx
-kubectl apply -f logging.yaml
-```
+    ```jsx
+    kubectl apply -f logging.yaml
+    ```
 
 - Run “kubectl get pods” to get the status of the pod, it should return a similar output as below:
 
-```jsx
-NAME                                     READY   STATUS      RESTARTS    AGE
-flog-pod                                 0/1     Completed   0           8s
-```
+    ```jsx
+    NAME                                     READY   STATUS      RESTARTS    AGE
+    flog-pod                                 0/1     Completed   0           8s
+    ```
 
 This shows that the pod **`flog-pod`** has been created successfully and is in a completed state. It means that the container within the pod executed its task and then terminated.
 
 - To get the logs from the pod:
 
-```jsx
-kubectl logs flog-pod
-```
+    ```jsx
+    kubectl logs flog-pod
+    ```
 
 The output will return a series of events that occurred.
 
@@ -319,25 +319,25 @@ We will be utilizing Helm, a Kubernetes package manager, to install the OtelColl
 
 - Add the SigNoz helm repo to the cluster:
 
-```jsx
-helm repo add signoz https://charts.signoz.io
-```
+    ```jsx
+    helm repo add signoz https://charts.signoz.io
+    ```
 
 - If the chart is already present, update the chart to the latest using:
 
-```jsx
-helm repo update
-```
+    ```jsx
+    helm repo update
+    ```
 
 - Install the release
 
-```jsx
-helm install my-release signoz/k8s-infra  \
---set otelCollectorEndpoint=ingest.{region}.signoz.cloud:443 \
---set otelInsecure=false \
---set signozApiKey=<SIGNOZ_INGESTION_KEY> \
---set global.clusterName=<CLUSTER_NAME>
-```
+    ```jsx
+    helm install my-release signoz/k8s-infra  \
+    --set otelCollectorEndpoint=ingest.{region}.signoz.cloud:443 \
+    --set otelInsecure=false \
+    --set signozApiKey=<SIGNOZ_INGESTION_KEY> \
+    --set global.clusterName=<CLUSTER_NAME>
+    ```
 
 Replace `{region}` with the data region you selected when setting up your account.
 
