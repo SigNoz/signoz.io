@@ -21,8 +21,7 @@ const ComparisonsPageHeader: React.FC<ComparisonsPageHeaderProps> = ({ onSearch 
         Comparisons
       </h1>
       <p className="mt-4 w-full text-lg leading-8 tracking-normal text-gray-700 dark:text-stone-300 max-md:max-w-full">
-        Dive into SigNoz product updates, company news, and more on how developers and startups can
-        leverage the open observability ecosystem.
+      Stay informed about the latest tools in the observability domain with in-depth comparisons of popular options to determine the best fit for your needs.
       </p>
 
       <SearchInput placeholder={'Search for a blog...'} onSearch={onSearch} />
