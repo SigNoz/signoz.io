@@ -249,11 +249,9 @@ You can use [OpenTelemetry Nodejs](https://signoz.io/opentelemetry/nodejs/) clie
 - **[Use the all-in-one auto-instrumentation library(Recommended)](#using-the-all-in-one-auto-instrumentation-library)**<br></br>
 The auto-instrumentation library of OpenTelemetry is a meta package that provides a simple way to initialize multiple Nodejs instrumnetations.
 
-<Admonition type="info">
-
+  <Admonition type="info">
   If you are on K8s, you should checkout [opentelemetry operators](/docs/tutorial/opentelemetry-operator-usage/#opentelemetry-auto-instrumentation-injection) which enable auto instrumenting Javascript applications very easily.
-
-</Admonition>
+  </Admonition>
 
 - **[Use a specific auto-instrumentation library](#using-a-specific-auto-instrumentation-library)**<br></br>
 You can use individual auto-instrumentation libraries too for a specific component of your application. For example, you can use `@opentelemetry/instrumentation-express` for instrumenting the Express web framework.
@@ -355,22 +353,22 @@ The instrumentation automatically identifies the following within your applicati
     
     `http://<IP of SigNoz backend>:4318/v1/traces`
 
-  <Admonition>
-    Remember to allow incoming requests to port 4318 of machine where SigNoz backend is hosted.
-  </Admonition>
+    <Admonition>
+      Remember to allow incoming requests to port 4318 of machine where SigNoz backend is hosted.
+    </Admonition>
 
-  
 3. **Run the application**<br></br>
-  The tracing configuration should be run before your application code. We will use the [`-r, —require module`](https://nodejs.org/api/cli.html#cli_r_require_module) flag for that.<br></br>
+    The tracing configuration should be run before your application code. We will use the [`-r, —require module`](https://nodejs.org/api/cli.html#cli_r_require_module) flag for that.<br></br>
 
-  ```jsx
+    ```
     node -r ./tracing.js app.js
     ```
-  <Admonition>
-  If you're running your nodejs application in PM2 cluster mode, it doesn't support node args: [Unitech/pm2#3227](https://github.com/Unitech/pm2/issues/3227). As above sample app instrumentation requires to load `tracing.js` before app load by passing node arg, so nodejs instrumentation doesn't work in PM2 cluster mode. So you need to import `tracing.js` in your main application. The `import ./tracing.js` should be the first line of your application code and initialize it before any other function. Here's the [sample github repo](https://github.com/SigNoz/sample-nodejs-app/tree/init-tracer-main) which shows the implementation.    
-  </Admonition>
 
-  In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#troubleshooting-your-installation).
+    <Admonition>
+    If you're running your nodejs application in PM2 cluster mode, it doesn't support node args: [Unitech/pm2#3227](https://github.com/Unitech/pm2/issues/3227). As above sample app instrumentation requires to load `tracing.js` before app load by passing node arg, so nodejs instrumentation doesn't work in PM2 cluster mode. So you need to import `tracing.js` in your main application. The `import ./tracing.js` should be the first line of your application code and initialize it before any other function. Here's the [sample github repo](https://github.com/SigNoz/sample-nodejs-app/tree/init-tracer-main) which shows the implementation.    
+    </Admonition>
+
+    In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#troubleshooting-your-installation).
 
 ## Validating instrumentation by checking for traces
 
@@ -489,7 +487,7 @@ If you are using Express, the instrumentation relies on HTTP calls to also be in
 3. **Run the application**<br></br>
   The tracing configuration should be run before your application code. We will use the [`-r, —require module`](https://nodejs.org/api/cli.html#cli_r_require_module) flag for that.<br></br>
 
-  ```jsx
+    ```jsx
     node -r ./tracing.js app.js
     ```
   <Admonition>
