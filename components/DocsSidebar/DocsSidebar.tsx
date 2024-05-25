@@ -62,7 +62,7 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
       >
         <Link href={doc.route} className="line-clamp-2 flex w-full items-center gap-2" replace>
           <FileText size={12} />
-          <div className="line-clamp-2 text-sm xl:text-lg"> {doc.label} </div>
+          <div className="line-clamp-2 text-sm"> {doc.label} </div>
         </Link>
       </li>
     )
@@ -76,17 +76,17 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
         <Link href={category.route || ''}>
           <div
             onClick={() => toggleCategory(category.label)}
-            className="flex cursor-pointer items-center gap-2 text-sm text-gray-200 hover:text-white xl:text-lg"
+            className="flex cursor-pointer items-center gap-2 text-sm text-gray-200 hover:text-white "
           >
             {isExpanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
-            <span className="text-sm font-normal xl:text-lg">{category.label}</span>
+            <span className="text-sm font-normal ">{category.label}</span>
           </div>
         </Link>
         {isExpanded && (
           <ul className="ml-2 pl-0">
             {category.link && category.link.type === 'generated-index' && (
               <div className="ml-2 mt-2">
-                <h4 className="mb-2 truncate text-sm font-normal text-gray-300 xl:text-lg">
+                <h4 className="mb-2 truncate text-sm font-normal text-gray-300 ">
                   {category.link.title}
                 </h4>
               </div>

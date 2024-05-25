@@ -34,12 +34,22 @@ const GitHubStars = () => {
 
   return (
     <Link href="https://github.com/SigNoz/signoz" target="_blank">
-      <div className="github github-stars primary-gradient flex cursor-pointer items-center justify-center gap-1 rounded bg-white pr-1 font-sans text-sm font-bold text-white">
-        <div className="-ml-1 flex gap-1 rounded bg-black p-1 text-white">
-          <Github color="white" size={16} />
+      <div className="github github-stars flex cursor-pointer items-stretch justify-center gap-1 rounded p-1 font-sans text-sm font-bold ">
+        <div className="-ml-1 box-border flex items-center gap-2 rounded bg-white p-0.5 px-2 text-signoz_ink-300">
+          <div className="github-icon box-border rounded-full bg-signoz_slate-500 p-1">
+            <Github color="white" size={16} />
+          </div>
+          Stars
         </div>
 
-        {stars}
+        <div className="flex items-center">
+          <div className="relative">
+            <div className="-mr-[2px] h-0 w-0 border-b-8 border-r-8 border-t-8 border-b-transparent border-r-white border-t-transparent"></div>
+          </div>
+          <div className="stars-count rounded bg-white p-1 px-1.5 font-extrabold text-signoz_ink-300">
+            {stars}
+          </div>
+        </div>
       </div>
     </Link>
   )
