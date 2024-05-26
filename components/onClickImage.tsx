@@ -1,17 +1,11 @@
-// OnClickImage.tsx or OnClickImage.jsx
-import React from 'react';
-import Zoom from 'react-medium-image-zoom';
-import 'react-medium-image-zoom/dist/styles.css';
+import React from "react";
+import "react-medium-image-zoom/dist/styles.css";
+import Zoom from "react-medium-image-zoom";
 
-interface ImageProps {
-  image: string;
-  alt: string;
-}
-
-const OnClickImage: React.FC<ImageProps> = ({ image, alt }) => (
-  <Zoom>
-    <img src={image} alt={alt} style={{ width: '100%', cursor: 'pointer' }} />
+const onClickImage = ({ image, alt }): JSX.Element => (
+  <Zoom zoomMargin={100}>
+    <img src={image} alt={alt} />
   </Zoom>
 );
 
-export default OnClickImage;
+export default onClickImage;
