@@ -71,7 +71,7 @@ const COMPARISON_DATA = {
       <>
         We provide support for migrating from New Relic to SigNoz.
         <br />
-        <Link href="/comparisons/migrate-from-newrelic/" className="highlight">
+        <Link href="/product-comparison/migrate-from-newrelic/" className="highlight">
           Request a migration support
         </Link>{' '}
         from one of our experts and get started with SigNoz quickly.
@@ -234,7 +234,7 @@ const COMPARISON_DATA = {
     DESC: (
       <>
         We provide support for migrating from New Relic to SigNoz.{' '}
-        <Link href="/comparisons/migrate-from-newrelic/" className="highlight">
+        <Link href="/product-comparison/migrate-from-newrelic/" className="highlight">
           Request a migration support
         </Link>{' '}
         from one of our experts and get started with SigNoz quickly.
