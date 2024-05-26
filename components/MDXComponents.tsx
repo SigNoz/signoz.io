@@ -17,6 +17,7 @@ import TabItem from './TabItem'
 import DocCard from './DocCard'
 import DocCardContainer from './DocCardContainer'
 import figure from './figure'
+import GitHubUserGrid from './ContributorCard'
 
 export const components: MDXComponents = {
   Image,
@@ -37,4 +38,5 @@ export const components: MDXComponents = {
   DocCard,
   DocCardContainer,
   figure,
+  GitHubUserGrid,
 }
