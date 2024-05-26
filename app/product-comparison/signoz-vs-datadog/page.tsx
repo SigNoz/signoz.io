@@ -71,7 +71,7 @@ const COMPARISON_DATA = {
     DESC: (
       <>
         We provide support for migrating from Datadog to SigNoz. <br />
-        <Link href="/comparisons/migrate-from-datadog/" className={`highlight`}>
+        <Link href="/product-comparison/migrate-from-datadog/" className={`highlight`}>
           Request a migration support
         </Link>{' '}
         from one of our experts and get started with SigNoz quickly.
@@ -254,7 +254,7 @@ const COMPARISON_DATA = {
     DESC: (
       <>
         We provide support for migrating from Datadog to SigNoz.{' '}
-        <Link className={`highlight`} href="/comparisons/migrate-from-datadog/">
+        <Link className={`highlight`} href="/product-comparison/migrate-from-datadog/">
           Request a migration support
         </Link>{' '}
         from one of our experts and get started with SigNoz quickly.
