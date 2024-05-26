@@ -1,6 +1,6 @@
 ---
 title: What is N+1 query problem and how distributed tracing solves it?
-slug: N+1-query-distributed-tracing
+slug: n+1-query-distributed-tracing
 date: 2022-09-06
 tags: [distributed-tracing]
 authors: [pranay]
@@ -22,12 +22,9 @@ Mouthful of words, I agree 🙂
 
 Let’s take an example to illustrate what it means.
 
-
-
 ## What is N+1 query problem?
 
 ![Cover Image](/img/blog/2022/09/n_plus_cover.webp)
-
 
 Let's say you have a collection of `team` objects (database rows), and each `team`
 has a collection of `members` objects (also rows). In other words, `team` → `members`
@@ -37,11 +34,15 @@ Now, let's say you need to iterate through all the `teams`, and for each one, pr
 
 find all the teams
 
-`SELECT * from teams WHERE …`
+```
+SELECT * from teams WHERE …
+```
 
 then for each team, find their members
 
-`SELECT * from members where teamID = x`
+```
+SELECT * from members where teamID = x
+```
 
 If there are N teams, you can see why this would lead to N+1 database queries.
 
