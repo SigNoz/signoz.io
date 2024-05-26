@@ -530,7 +530,7 @@ const docsSideNav = [
           {
             type: 'category',
             label: 'Guides',
-            // route: '/docs/category/guides',
+            route: '/docs/category/guides',
             // link: {
             // type: 'generated-index',
             // title: 'Logs Pipeline Guides',
@@ -938,7 +938,7 @@ const docsSideNav = [
       {
         type: 'category',
         label: 'Bootstrapping',
-        // route: '/docs/azure-monitoring/bootstrapping',
+        route: '/docs/azure-monitoring/bootstrapping',
         // link: {
         // type: 'generated-index',
         // title: 'EC2 Monitoring',
@@ -960,7 +960,7 @@ const docsSideNav = [
       {
         type: 'category',
         label: 'Virtual Machines',
-        // route: '/docs/ecs-monitoring',
+        route: '/docs/azure-monitoring/virtual-machines',
         // link: {
         // type: 'generated-index',
         // title: 'ECS Monitoring',
@@ -977,6 +977,7 @@ const docsSideNav = [
       {
         type: 'category',
         label: 'App Service',
+        route: '/docs/azure-monitoring/app-service',
         items: [
           {
             type: 'doc',
@@ -998,6 +999,7 @@ const docsSideNav = [
       {
         type: 'category',
         label: 'Azure Functions',
+        route: '/docs/azure-monitoring/az-fns',
         items: [
           {
             type: 'doc',
@@ -1019,6 +1021,7 @@ const docsSideNav = [
       {
         type: 'category',
         label: 'Azure Blog Storage',
+        route: '/docs/azure-monitoring/az-blob-storage',
         items: [
           {
             type: 'doc',
@@ -1037,7 +1040,7 @@ const docsSideNav = [
   {
     type: 'category',
     label: 'Operate Self-Hosted SigNoz',
-    // route: '',
+    route: '/docs/operate',
     // link: {
     // type: 'generated-index',
     // title: 'Operate',
@@ -1138,7 +1141,7 @@ const docsSideNav = [
       {
         type: 'category',
         label: 'ClickHouse',
-        // route: '',
+        route: '/docs/operate/clickhouse',
         // link: {
         // type: 'generated-index',
         // title: 'ClickHouse',
@@ -1172,7 +1175,7 @@ const docsSideNav = [
       {
         type: 'category',
         label: 'Query Service',
-        // route: '',
+        route: '/docs/operate/query-service',
         // link: {
         // type: 'generated-index',
         // title: 'Query Service',
