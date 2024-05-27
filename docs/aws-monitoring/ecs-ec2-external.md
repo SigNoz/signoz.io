@@ -1,6 +1,0 @@
----
-id: ecs-ec2-external
-title: Monitor your ECS EC2 and External launch type
----
-
-To monitor your ECS EC2 or external service, check out [these detailed docs](https://signoz.io/docs/userguide/collecting-ecs-logs-and-metrics/)
