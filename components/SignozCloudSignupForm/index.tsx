@@ -293,7 +293,7 @@ export default function SignozCloudSignUpForm() {
             {isSubmitting ? (
               <div className={styles.submittingForm}>
                 {/* <Spin indicator={<LoadingOutlined style={{ fontSize: 18 }} spin />} /> */}
-                Submitting
+                Submitting...
               </div>
             ) : (
               'Get Started'

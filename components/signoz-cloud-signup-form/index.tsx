@@ -288,7 +288,11 @@ export default function SignozCloudSignUpForm() {
             disabled={isSubmitting}
             onClick={handleSubmit}
           >
-            {isSubmitting ? <div className={styles.submittingForm}>Submitting</div> : 'Get Started'}
+            {isSubmitting ? (
+              <div className={styles.submittingForm}>Submitting...</div>
+            ) : (
+              'Get Started'
+            )}
           </button>
         </form>
       )}
