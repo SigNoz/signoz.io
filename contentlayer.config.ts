@@ -92,14 +92,14 @@ function createTagCount(allBlogs) {
   writeFileSync('./app/tag-data.json', JSON.stringify(tagCount))
 }
 
-function createSearchIndex(allBlogs) {
+function createSearchIndex(content) {
   if (
     siteMetadata?.search?.provider === 'kbar' &&
     siteMetadata.search.kbarConfig.searchDocumentsPath
   ) {
     writeFileSync(
       `public/${siteMetadata.search.kbarConfig.searchDocumentsPath}`,
-      JSON.stringify(allCoreContent(sortPosts(allBlogs)))
+      JSON.stringify(allCoreContent(sortPosts(content)))
     )
     console.log('Local search index generated...')
   }
@@ -321,7 +321,7 @@ export const Doc = defineDocumentType(() => ({
     title: { type: 'string', required: true },
     id: { type: 'string', required: true },
     slug: { type: 'string', required: false },
-    date: { type: 'date', required: false },
+    date: { type: 'date', required: false, default: new Date().toDateString() },
     tags: { type: 'list', of: { type: 'string' }, default: [], required: false },
     lastmod: { type: 'date', required: false },
     draft: { type: 'boolean', required: false },
@@ -401,8 +401,8 @@ export default makeSource({
     ],
   },
   onSuccess: async (importData) => {
-    const { allBlogs } = await importData()
+    const { allBlogs, allDocs, allComparisons, allOpentelemetries } = await importData()
     createTagCount(allBlogs)
-    createSearchIndex(allBlogs)
+    createSearchIndex([...allBlogs, ...allDocs, ...allComparisons, ...allOpentelemetries])
   },
 })
