@@ -172,8 +172,7 @@ const PricingPlans = () => {
             >
               <button
                 type="button"
-                // TODO COLOR BLUR
-                className={`cursor-pointer rounded-3xl border-none px-6 py-2 text-white ${
+                className={`cursor-pointer rounded-3xl border-none px-4 py-2 text-xs text-white ${
                   tab === 'cloud'
                     ? "relative z-[2] bg-primary-400 before:absolute before:left-[0%] before:top-[0%] before:z-[-1] before:h-full before:w-full before:rounded-full before:bg-primary-400 before:opacity-50 before:blur-xl before:content-['']"
                     : 'bg-transparent'
@@ -184,7 +183,7 @@ const PricingPlans = () => {
               </button>
               <button
                 type="button"
-                className={`cursor-pointer rounded-3xl border-none px-6 py-2 text-white ${
+                className={`cursor-pointer rounded-3xl border-none px-4 py-2 text-xs text-white ${
                   tab === 'self-managed'
                     ? "relative z-[2] bg-primary-400 before:absolute before:left-[0%] before:top-[0%] before:z-[-1] before:h-full before:w-full before:rounded-full before:bg-primary-400 before:opacity-50 before:blur-xl before:content-['']"
                     : 'bg-transparent'
@@ -206,7 +205,7 @@ const PricingPlans = () => {
               <SubHeading>
                 Tired of unpredictable pricing and complex billing structure? Save up to{' '}
                 <Link href="/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/">
-                  <u className="me-2 rounded bg-blue-100 px-2.5 py-0.5 text-blue-800 dark:bg-green-900 dark:text-green-300">
+                  <u className="mx-0 rounded px-0 py-0.5 text-primary-400">
                     80% on your Datadog bill
                   </u>
                 </Link>{' '}
