@@ -4,6 +4,7 @@ import BlogPostCard from '../Shared/BlogPostCard'
 import SearchInput from '../Shared/Search'
 import React from 'react'
 import { filterData } from 'app/utils/common'
+import { Frown } from 'lucide-react'
 
 interface OpenTelemetryPageHeaderProps {
   onSearch: (e) => void
@@ -19,7 +20,7 @@ const OpenTelemetryPageHeader: React.FC<OpenTelemetryPageHeaderProps> = ({ onSea
         OpenTelemetry
       </h1>
       <p className="mt-4 w-full text-lg leading-8 tracking-normal text-gray-700 dark:text-stone-300 max-md:max-w-full">
-      Articles on OpenTelemetry concepts, implementation, and its use cases.
+        Articles on OpenTelemetry concepts, implementation, and its use cases.
       </p>
 
       <SearchInput placeholder={'Search for a blog...'} onSearch={onSearch} />
@@ -30,7 +31,7 @@ const OpenTelemetryPageHeader: React.FC<OpenTelemetryPageHeaderProps> = ({ onSea
 export default function OpenTelemetry() {
   const posts = allCoreContent(sortPosts(allOpentelemetries))
   const primaryFeaturedBlogs = posts.slice(0, 2)
-  const secondaryFeaturedBlogs = posts.slice(2)
+  const secondaryFeaturedBlogs = posts.slice(0)
 
   const [blogs, setBlogs] = React.useState(secondaryFeaturedBlogs)
   const [searchValue, setSearchValue] = React.useState('')
@@ -52,6 +53,12 @@ export default function OpenTelemetry() {
               return <BlogPostCard blog={featuredBlog} />
             })}
           </div>
+        </div>
+      )}
+
+      {blogs && Array.isArray(blogs) && blogs.length <= 0 && (
+        <div className="no-blogs my-8 flex items-center gap-4 font-mono font-bold">
+          <Frown size={16} /> No Articles found
         </div>
       )}
 

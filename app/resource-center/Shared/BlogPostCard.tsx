@@ -11,21 +11,21 @@ export default function BlogPostCard({
 }: {
   blog: CoreContent<Blog | Comparison | Opentelemetry | Guide>
 }) {
-  const { path, date, title, authors } = blog;
+  const { path, date, title, authors } = blog
 
   const getAuthorName = (authorID) => {
     if (Authors[authorID]) {
-      return Authors[authorID].name;
+      return Authors[authorID].name
     }
 
-    return '';
-  };
+    return ''
+  }
 
   return (
     <Link href={`/${path}`}>
       <div className="flex cursor-pointer flex-col max-md:ml-0 max-md:w-full">
         <div
-          className={`mx-auto flex w-full grow flex-col rounded border border-solid p-4 dark:border-signoz_ink-500 dark:bg-signoz_ink-200 max-md:mt-6 transition-all hover:border-blue-500 dark:hover:border-blue-400`}
+          className={`mx-auto flex w-full grow flex-col rounded border border-solid p-4 transition-all hover:border-blue-500 dark:border-signoz_ink-500 dark:bg-signoz_ink-200 dark:hover:border-blue-400 max-md:mt-6`}
         >
           <div className="content h-[96px]">
             <div
@@ -61,5 +61,5 @@ export default function BlogPostCard({
         </div>
       </div>
     </Link>
-  );
+  )
 }
