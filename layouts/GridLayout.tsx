@@ -7,6 +7,7 @@ import type { Blog } from 'contentlayer/generated'
 import Link from '@/components/Link'
 import React from 'react'
 import BlogPostCard from 'app/resource-center/Shared/BlogPostCard'
+import { Frown, HeartCrack } from 'lucide-react'
 
 export interface PaginationProps {
   totalPages: number
@@ -79,6 +80,14 @@ export default function GridLayout({
   // If initialDisplayPosts exist, display it if no searchValue is specified
   const displayPosts =
     initialDisplayPosts.length > 0 && !searchValue ? initialDisplayPosts : filteredBlogPosts
+
+  if (posts && Array.isArray(posts) && posts.length <= 0) {
+    return (
+      <div className="no-blogs my-8 flex items-center gap-4 font-mono font-bold">
+        <Frown size={16} /> No Blogs found
+      </div>
+    )
+  }
 
   return (
     <div className="container mx-auto p-0">
