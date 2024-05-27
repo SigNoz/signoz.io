@@ -5,7 +5,7 @@ import { Button, Dialog, Popover } from '@headlessui/react'
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
 import Image from 'next/image'
 import Link from 'next/link'
-import { ArrowRight, MoveLeft } from 'lucide-react'
+import { ArrowBigLeft, ArrowRight, MoveLeft } from 'lucide-react'
 import SearchButton from '../SearchButton'
 import GitHubStars from '../GithubStars/GithubStars'
 import React from 'react'
@@ -31,13 +31,13 @@ export default function TopNav() {
 
   return (
     <header
-      className={`fixed left-0 right-0 z-30 mx-auto h-[48px] w-full border-b border-signoz_slate-500 bg-signoz_ink-500 px-4 text-slate-900 dark:text-slate-50 md:px-8 lg:px-16`}
+      className={`fixed left-0 right-0 z-30 mx-auto box-border flex h-[48px] w-full items-center border-b border-signoz_slate-500 bg-signoz_ink-500 px-4 text-slate-900 dark:text-slate-50 md:px-8 lg:px-8`}
     >
       <nav
-        className="w-100 mx-auto flex items-center justify-between py-2 text-slate-900 dark:text-slate-50"
+        className="flex w-full items-center justify-between text-slate-900 dark:text-slate-50"
         aria-label="Global"
       >
-        <div className="flex justify-start lg:flex-1">
+        <div className="mr-4 flex justify-start lg:flex-1">
           <Link
             href="/"
             className="-m-1.5 flex items-center gap-2 p-1.5"
@@ -54,7 +54,7 @@ export default function TopNav() {
             <span className="text-md font-bold">SigNoz</span>
           </Link>
         </div>
-        <div className="flex lg:hidden">
+        <div className="flex justify-end lg:hidden">
           <button
             type="button"
             className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5"
@@ -99,7 +99,7 @@ export default function TopNav() {
           <SearchButton />
 
           <Link href="/teams">
-            <Button className="primary-gradient flex justify-center gap-1 truncate rounded-full px-4 py-2 text-xs font-normal leading-4 text-white">
+            <Button className="try-signoz-cloud-btn font-heading text-md flex items-center justify-center gap-1 truncate rounded-md border-none px-4 py-2 text-center text-xs  font-bold leading-4 text-white no-underline outline-none hover:text-white">
               Try SigNoz Cloud <ArrowRight size={14} />
             </Button>
           </Link>
@@ -159,12 +159,12 @@ export default function TopNav() {
               {isDocsBasePath && !showMainMenu && (
                 <div className="docs-sidebar-mobile-nav">
                   <div
-                    className="mt-4 flex items-center gap-2 text-sm"
+                    className="mt-4 inline-flex items-center gap-1 rounded px-1 py-1 text-sm font-bold text-white"
                     onClick={() => {
                       setShowMainMenu(true)
                     }}
                   >
-                    <MoveLeft size={16} /> Back to main menu
+                    <ArrowBigLeft size={16} /> Back to main menu
                   </div>
 
                   <DocsSidebar onNavItemClick={() => setMobileMenuOpen(false)} />

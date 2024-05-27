@@ -22,16 +22,15 @@ export const Header = () => {
         </SubHeading>
       </div>
       <div className="mx-5 mb-12 flex flex-col justify-center gap-5 md:flex-row">
-        <Button isButton className="" to={'/teams/'} id="btn-get-started-homepage-hero">
-          Try SigNoz Cloud
-        </Button>
         <Button
           isButton
-          outlined
-          className=""
-          to={'/docs/install/'}
-          id="btn-self-host-homepage-hero"
+          className="flex items-center justify-center"
+          to={'/teams/'}
+          id="btn-get-started-homepage-hero"
         >
+          Try SigNoz Cloud
+        </Button>
+        <Button isButton outlined className="" to={'/docs'} id="btn-self-host-homepage-hero">
           Documentation
         </Button>
       </div>
