@@ -54,7 +54,7 @@ function aboutus() {
                       className="button button--secondary button--outline"
                       href={'https://twitter.com/pranay01'}
                     >
-                      <div className="text-white"> Twitter </div>
+                      <div className=""> Twitter </div>
                     </Link>
 
                     <a
@@ -100,7 +100,7 @@ function aboutus() {
                       className="button button--secondary button--outline text-white"
                       href={'https://twitter.com/ankitnayan'}
                     >
-                      <div className="text-white"> Twitter </div>
+                      <div className=""> Twitter </div>
                     </Link>
 
                     <a
