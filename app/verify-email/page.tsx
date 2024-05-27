@@ -4,17 +4,17 @@ function verifyemail() {
   return (
     <div title="Book a Call">
       <section>
-        <div className="container" style={{ marginTop: '8rem', marginBottom: '4rem' }}>
-          <div className="hero shadow--lw">
-            <div className="container">
-              <h2>
-                Thank you for signing up for SigNoz Cloud. Please check your email for next steps
-              </h2>
+        <div className="m-36">
+          <div className="card-dark mx-auto max-w-[1024px] rounded-sm bg-signoz_slate-500 p-16">
+            <h2 className="mb-8">
+              Thank you for signing up for SigNoz Cloud. Please check your email for next steps
+            </h2>
 
-              <p style={{ fontStyle: 'italic' }}>
-                If you have not received the email in a few minutes, please check your spam folder.
-              </p>
+            <p className="mb-8 italic">
+              If you have not received the email in a few minutes, please check your spam folder.
+            </p>
 
+            <div className="flex">
               <a className="button button--primary" href="mailto:cloud-support@signoz.io">
                 Contact Support
               </a>
