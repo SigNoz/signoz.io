@@ -73,7 +73,7 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
     const isActiveRoute = activeRoute === `${category.route}/`
 
     return (
-      <li key={category.label} className="pl-[16px] pt-[8px]">
+      <li key={category.label} className="pt-[8px] md:pl-[0px] lg:pl-[16px]">
         <Link href={category.route || ''}>
           <div
             onClick={() => toggleCategory(category.label)}
@@ -139,7 +139,7 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
   return (
     <nav
       ref={sidebarRef}
-      className="w-100 docs-sidebar sticky top-[48px] overflow-y-auto p-4 pl-0 text-white"
+      className="w-100 docs-sidebar sticky top-[48px] overflow-y-auto pl-0 text-white md:pt-0 lg:p-4 lg:pt-4"
     >
       <ul className="list-none p-0 pl-0">{docsSideNav.map(renderItem)}</ul>
     </nav>
