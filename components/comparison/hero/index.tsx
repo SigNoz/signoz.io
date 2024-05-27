@@ -18,7 +18,10 @@ const Hero = (props) => {
           </Link>
         )}
         {trySigNozCloud.isVisible && (
-          <Link className={`button bg-signoz_vanilla-300 text-signoz_ink-300`} href="/teams">
+          <Link
+            className={`button primary-gradient bg-signoz_vanilla-300 text-signoz_ink-300`}
+            href="/teams"
+          >
             Try SigNoz Cloud
           </Link>
         )}

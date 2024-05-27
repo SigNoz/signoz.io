@@ -48,8 +48,6 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
   const mainContent = coreContent(post)
   const Layout = DocLayout
 
-  console.log('post', slug)
-
   return (
     <>
       <Layout content={mainContent} toc={post?.toc || []}>

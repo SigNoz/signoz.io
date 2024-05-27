@@ -29,17 +29,15 @@ export default function TopNav() {
     }
   }, [pathname])
 
-  console.log('pathname', pathname)
-
   return (
     <header
       className={`fixed left-0 right-0 z-30 mx-auto h-[48px] w-full border-b border-signoz_slate-500 bg-signoz_ink-500 px-4 text-slate-900 dark:text-slate-50 md:px-8 lg:px-16`}
     >
       <nav
-        className="mx-auto flex items-center justify-between py-2 text-slate-900 dark:text-slate-50"
+        className="w-100 mx-auto flex items-center justify-between py-2 text-slate-900 dark:text-slate-50"
         aria-label="Global"
       >
-        <div className="flex lg:flex-1">
+        <div className="flex justify-start lg:flex-1">
           <Link
             href="/"
             className="-m-1.5 flex items-center gap-2 p-1.5"
