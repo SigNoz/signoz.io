@@ -7,19 +7,12 @@ const docsSideNav = [
       {
         type: 'doc',
         label: 'What is SigNoz?',
-        route: '/docs',
+        route: '/docs/introduction',
       },
       {
         type: 'category',
         label: 'Installation',
         route: '/docs/install',
-        // link: {
-          // type: 'doc',
-          // route: '/docs/install/install',
-          //   title: 'Install SigNoz',
-          // description:
-          // "To install SigNoz, follow the instructions in the sections below. If you don't want to self-host, try SigNoz Cloud.",
-        // },
         items: [
           {
             type: 'doc',
@@ -65,14 +58,14 @@ const docsSideNav = [
                   {
                     type: 'doc',
                     label: 'Other Platform',
-                    route: '/docs/install/kubernetes/others/',
+                    route: '/docs/install/kubernetes/others',
                   },
                 ],
               },
               {
                 type: 'doc',
                 label: 'Troubleshooting',
-                route: '/docs/install/troubleshooting/',
+                route: '/docs/install/troubleshooting',
               },
             ],
           },
@@ -83,12 +76,12 @@ const docsSideNav = [
             // route: '',
             items: [
               {
-                route: '/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/',
+                route: '/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine',
                 type: 'doc',
                 label: 'VM',
               },
               {
-                route: '/docs/tutorial/kubernetes-infra-metrics/',
+                route: '/docs/tutorial/kubernetes-infra-metrics',
                 type: 'doc',
                 label: 'Kubernetes',
               },
@@ -119,18 +112,18 @@ const docsSideNav = [
       },
       {
         type: 'doc',
-        route: '/docs/product-features/logs-explorer/',
+        route: '/docs/product-features/logs-explorer',
         label: 'Logs Explorer',
       },
       {
         type: 'doc',
-        route: '/docs/product-features/saved-view/',
+        route: '/docs/product-features/saved-view',
         label: 'Saved View',
         className: 'new-doc', // Add this if you want to add a new tag in sidebar
       },
       {
         type: 'doc',
-        route: '/docs/product-features/invite-team-member/',
+        route: '/docs/product-features/invite-team-member',
         label: 'Invite Team Member',
       },
     ],
@@ -162,11 +155,11 @@ const docsSideNav = [
             label: 'Python',
             route: '/docs/instrumentation/python',
             // link: {
-              // type: 'doc',
-              // route: '/docs/instrumentation/python',
-              // title: 'Python',
-              // description: 'Learn how to instrument Python applications with OpenTelemetry',
-              // slug: 'instrumentation/python',
+            // type: 'doc',
+            // route: '/docs/instrumentation/python',
+            // title: 'Python',
+            // description: 'Learn how to instrument Python applications with OpenTelemetry',
+            // slug: 'instrumentation/python',
             // },
             items: [
               {
@@ -196,11 +189,11 @@ const docsSideNav = [
             label: 'Java',
             route: '/docs/instrumentation/java',
             // link: {
-              // type: 'doc',
-              // route: '/docs/instrumentation/java',
-              // title: 'Python',
-              // description: 'Learn how to instrument Python applications with OpenTelemetry',
-              // slug: 'instrumentation/python',
+            // type: 'doc',
+            // route: '/docs/instrumentation/java',
+            // title: 'Python',
+            // description: 'Learn how to instrument Python applications with OpenTelemetry',
+            // slug: 'instrumentation/python',
             // },
             items: [
               {
@@ -225,11 +218,11 @@ const docsSideNav = [
             label: 'Javascript',
             route: '/docs/instrumentation/javascript',
             // link: {
-              // type: 'doc',
-              // route: '/docs/instrumentation/javascript',
-              // title: 'Python',
-              // description: 'Learn how to instrument Python applications with OpenTelemetry',
-              // slug: 'instrumentation/python',
+            // type: 'doc',
+            // route: '/docs/instrumentation/javascript',
+            // title: 'Python',
+            // description: 'Learn how to instrument Python applications with OpenTelemetry',
+            // slug: 'instrumentation/python',
             // },
             items: [
               {
@@ -301,7 +294,7 @@ const docsSideNav = [
             label: 'View Traces',
             route: '/docs/userguide/traces',
             // link: {
-              // type: 'doc',
+            // type: 'doc',
             // },
             items: [
               {
@@ -519,7 +512,7 @@ const docsSideNav = [
         label: 'Preprocess Logs',
         route: '/docs/logs-pipelines/introduction',
         // link: {
-          // type: 'doc',
+        // type: 'doc',
         // },
         items: [
           {
@@ -627,7 +620,7 @@ const docsSideNav = [
         route: '/docs/metrics-management/types-and-aggregation',
         label: 'Types and Aggregation',
       },
-    ]
+    ],
   },
   {
     label: 'Dashboards & Querying',
@@ -974,7 +967,7 @@ const docsSideNav = [
         items: [
           {
             type: 'doc',
-            route: '/docs/azure-monitoring/virtual-machines/vm-metrics/',
+            route: '/docs/azure-monitoring/virtual-machines/vm-metrics',
             label: 'VM Host Metrics & Logging',
           },
         ],
@@ -1191,12 +1184,12 @@ const docsSideNav = [
         items: [
           {
             type: 'doc',
-            route: '/docs/operate/query-service/reset-admin-password/',
+            route: '/docs/operate/query-service/reset-admin-password',
             label: 'Reset Admin Password',
           },
           {
             type: 'doc',
-            route: '/docs/operate/query-service/user-invitation-smtp/',
+            route: '/docs/operate/query-service/user-invitation-smtp',
             label: 'Enable SMTP for User Invitations',
           },
         ],
@@ -1237,16 +1230,6 @@ const docsSideNav = [
       // 'about-signoz/roadmap',
     ],
   },
-  // {
-  //   route: "community",
-  //   type: "category",
-  //   items: [
-  //     'faqs/product',
-  //     'faqs/troubleshooting',
-  //     'faqs/instrumentation',
-  //     'faqs/installation',
-  //   ],
-  // },
   {
     route: '/docs/community/llm-monitoring',
     label: 'LLM Monitoring',
@@ -1282,7 +1265,7 @@ const docsSideNav = [
     items: [
       {
         type: 'doc',
-        route: '/docs/faqs/product/',
+        route: '/docs/faqs/product',
         label: 'Product - FAQs',
       },
       {
@@ -1297,7 +1280,7 @@ const docsSideNav = [
       },
       {
         type: 'doc',
-        route: '/docs/faqs/installation/',
+        route: '/docs/faqs/installation',
         label: 'Installation - FAQs',
       },
     ],
@@ -1308,7 +1291,7 @@ const docsSideNav = [
     items: [
       {
         type: 'doc',
-        route: '/docs/telemetry/',
+        route: '/docs/telemetry',
         label: 'Telemetry',
       },
     ],
