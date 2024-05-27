@@ -306,7 +306,7 @@ By email: support@signoz.io.`
 
 export default function page() {
   return (
-    <div className="container mx-auto my-16">
+    <div className="privacy container mx-auto my-16">
       <MarkdownRenderer markdownContent={markdownContent} />
     </div>
   )
