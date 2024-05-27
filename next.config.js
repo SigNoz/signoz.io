@@ -101,6 +101,129 @@ module.exports = () => {
           destination: '/docs/introduction',
           permanent: true,
         },
+        {
+          source: '/comparisons/signoz-vs-datadog/',
+          destination: '/product-comparison/signoz-vs-datadog/',
+          permanent: true,
+        },
+        {
+          source: '/comparisons/signoz-vs-newrelic/',
+          destination: '/product-comparison/signoz-vs-newrelic/',
+          permanent: true,
+        },
+        {
+          source: '/comparisons/signoz-vs-grafana/',
+          destination: '/product-comparison/signoz-vs-grafana/',
+          permanent: true,
+        },
+        {
+          source: '/comparisons/signoz-vs-dynatrace/',
+          destination: '/product-comparison/signoz-vs-dynatrace/',
+          permanent: true,
+        },
+        {
+          source: '/blog/tags/',
+          destination: '/tags/',
+          permanent: true,
+        },
+        {
+          source: '/comparisons/',
+          destination: '/resource-center/comparisons/',
+          permanent: true,
+        },
+        {
+          source: '/learn/user-stories',
+          destination: '/observability-user-stories',
+          permanent: true,
+        },
+        {
+          source: '/slack',
+          destination:
+            'https://join.slack.com/t/signoz-community/shared_invite/zt-2gag5t3k4-WE5I6xpNbczyDJNdLLJkAg',
+          basePath: false,
+          permanent: true,
+        },
+        {
+          source: '/docs/deployment/docker',
+          destination: '/docs/install/docker',
+          permanent: true,
+        },
+        {
+          source: '/docs/deployment/docker_swarm',
+          destination: '/docs/install/docker-swarm',
+          permanent: true,
+        },
+        {
+          source: '/docs/deployment/helm_chart',
+          destination: '/docs/install/kubernetes',
+          permanent: true,
+        },
+        {
+          source: '/docs/deployment/troubleshooting',
+          destination: '/docs/install/troubleshooting',
+          permanent: true,
+        },
+        {
+          source: '/docs/installation',
+          destination: '/docs/install',
+          permanent: true,
+        },
+        {
+          source: '/docs/userguide/metrics-dashboard',
+          destination: '/docs/userguide/dashboards',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/upgrade',
+          destination: '/docs/operate/migration/upgrade-0.8.0',
+          permanent: true,
+        },
+        {
+          source: '/docs/userguide/dashboards/',
+          destination: '/docs/userguide/manage-dashboards/',
+          permanent: true,
+        },
+        {
+          source: '/distributed-tracing/',
+          destination: '/blog/distributed-tracing/',
+          permanent: true,
+        },
+        {
+          source: '/blog/signoz-benchmarks/',
+          destination: '/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/nodejs/',
+          destination: '/docs/instrumentation/javascript/',
+          permanent: true,
+        },
+        {
+          source: '/gh',
+          destination: 'https://github.com/SigNoz/signoz/',
+          basePath: false,
+          permanent: true,
+        },
+        {
+          source: '/free-trial/',
+          destination: '/teams/',
+          permanent: true,
+        },
+        {
+          source: '/opentelemetry-2023/',
+          destination: '/blog/opentelemetry-roundup-2023/',
+          permanent: true,
+        },
+        {
+          source: '/blog/what-is-cloudwatch-metrics/',
+          destination: '/blog/cloudwatch-metrics/',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/sqlite/reset-admin-password/',
+          destination: '/docs/operate/query-service/reset-admin-password/',
+          permanent: true,
+        },
       ]
     },
     webpack: (config, options) => {
