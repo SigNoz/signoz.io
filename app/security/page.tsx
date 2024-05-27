@@ -17,7 +17,7 @@ export default function SecurityAndCompliance() {
                 Security & Compliance
               </Heading>
               <SubHeading className="text-center">
-                At Signoz, maintaining the highest standards of security and privacy comes first. We
+                At SigNoz, maintaining the highest standards of security and privacy comes first. We
                 are committed to providing observability at any scale by protecting your personal
                 information and ensuring a safe and trustworthy experience when using our products
                 and services.
