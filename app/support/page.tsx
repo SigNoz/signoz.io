@@ -50,6 +50,7 @@ function support() {
                   <div className="card__footer">
                     <Link
                       className="button button--secondary button--outline text-xs"
+                      target="_blank"
                       href={'https://signoz.io/slack'}
                     >
                       Slack Community
@@ -74,6 +75,7 @@ function support() {
                   <div className="card__footer">
                     <Link
                       className="button button--secondary button--outline text-xs"
+                      target="_blank"
                       href={'https://github.com/SigNoz/signoz/discussions'}
                     >
                       GitHub Discussions
