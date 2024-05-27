@@ -32,7 +32,7 @@ const ComparisonsPageHeader: React.FC<ComparisonsPageHeaderProps> = ({ onSearch 
 export default function ComparisonsListing() {
   const posts = allCoreContent(sortPosts(allComparisons))
   const primaryFeaturedBlogs = posts.slice(0, 2)
-  const secondaryFeaturedBlogs = posts.slice(2)
+  const secondaryFeaturedBlogs = posts.slice(0)
 
   const [blogs, setBlogs] = React.useState(secondaryFeaturedBlogs)
   const [searchValue, setSearchValue] = React.useState('')
