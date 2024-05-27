@@ -9,7 +9,7 @@ const GitHubUserGrid = ({ contributors }) => {
           href={contributor.profileUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center bg-gray-800 text-white rounded-lg p-4 shadow-md hover:bg-gray-700 transition-colors duration-200"
+          className="flex items-center text-white rounded-lg p-4 shadow-md hover:bg-gray-700 transition-colors duration-200"
           style={{ maxWidth: '400px', maxHeight:'100px', textDecoration: 'none' }}
         >
           <img
