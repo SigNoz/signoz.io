@@ -58,14 +58,14 @@ const docsSideNav = [
                   {
                     type: 'doc',
                     label: 'Other Platform',
-                    route: '/docs/install/kubernetes/others/',
+                    route: '/docs/install/kubernetes/others',
                   },
                 ],
               },
               {
                 type: 'doc',
                 label: 'Troubleshooting',
-                route: '/docs/install/troubleshooting/',
+                route: '/docs/install/troubleshooting',
               },
             ],
           },
@@ -76,12 +76,12 @@ const docsSideNav = [
             // route: '',
             items: [
               {
-                route: '/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/',
+                route: '/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine',
                 type: 'doc',
                 label: 'VM',
               },
               {
-                route: '/docs/tutorial/kubernetes-infra-metrics/',
+                route: '/docs/tutorial/kubernetes-infra-metrics',
                 type: 'doc',
                 label: 'Kubernetes',
               },

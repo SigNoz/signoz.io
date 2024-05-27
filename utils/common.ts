@@ -2,7 +2,6 @@ interface RoutesProps {
   route: string
   label: string
 }
-
 function flattenRoutes(navItems) {
   let routes: RoutesProps[] = []
 
