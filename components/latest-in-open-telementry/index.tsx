@@ -1,8 +1,8 @@
 'use client'
 
 import React from 'react'
+import { LiteYoutubeEmbed } from 'react-lite-yt-embed'
 import Heading from '../../components/ui/Heading'
-import YouTube from '../../components/VideoPlayer/VideoPlayer'
 
 const LatestInOpenTelementry = () => {
   const TUTORIALS_LIST = [
@@ -34,7 +34,7 @@ const LatestInOpenTelementry = () => {
                 <div className="card bluish-gradient rounded-lg">
                   <div className="card__body p-0">
                     <div className="flex flex-col gap-5">
-                      <YouTube id={tutorial.youtubeId} />
+                      <LiteYoutubeEmbed id={tutorial.youtubeId} muted={false} />
                       <p className="line-clamp-2 text-ellipsis px-5">{tutorial.desc}</p>
                     </div>
                   </div>
