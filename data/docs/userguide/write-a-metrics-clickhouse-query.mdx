@@ -10,7 +10,9 @@ There are four main tables in the database. One is for storing the samples/measu
 
 ## Schema for samples table:
 
-Note: the schemas are not final. We might change it in the future. 
+<Admonition>
+The schemas are not final. We might change it in the future. 
+</Admonition>
 
 ```
 CREATE TABLE signoz_metrics.distributed_samples_v4
@@ -182,7 +184,9 @@ Querying the metrics is done in two steps. First, we query the time series table
 
 We use the JOIN operation to join the two tables. The JOIN operation is done on the fingerprint column. The JOIN operation is done on the cluster level. This means that the JOIN operation is done on the data nodes and not on the aggregator nodes. This is done to reduce the amount of data that needs to be transferred between the nodes. This works because the data is sharded based on the `env`, `temporality`, `metric_name`, `fingerprint` columns hence all the data for a particular metric and fingerprint will be present on the same node.
 
-Note: The queries should have a result column with the name `value` and a column with type [DateTime](https://clickhouse.com/docs/en/sql-reference/data-types/datetime) for the graphs to work.
+<Admonition>
+The queries should have a result column with the name `value` and a column with type [DateTime](https://clickhouse.com/docs/en/sql-reference/data-types/datetime) for the graphs to work.
+</Admonition>
 
 ### Example queries
 
@@ -221,7 +225,9 @@ LIMIT 10
 
 ### Example queries for the frontend service RED metrics
 
-Note: The following queries can be modified to get the metrics for each service by adding grouping by the service name.
+<Admonition>
+The following queries can be modified to get the metrics for each service by adding grouping by the service name.
+</Admonition>
 
 The following queries are used to generate the graphs for the frontend service RED metrics. The innermost join is used to get the raw samples joined with the time series table. Then, we use the runningDifference function to get the rate of change of the samples. Then, we use the outermost query to get the sum of the rate of change of the samples. 
 

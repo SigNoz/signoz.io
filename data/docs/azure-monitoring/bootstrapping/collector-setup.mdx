@@ -35,13 +35,13 @@ Prior to installation, you must ensure your Kubernetes cluster is ready and that
 
 1. **Add the OpenTelemetry Helm repository:**
 
-```bash
-helm repo add open-telemetry https://open-telemetry.github.io/opentelemetry-helm-charts
-```
+    ```bash
+    helm repo add open-telemetry https://open-telemetry.github.io/opentelemetry-helm-charts
+    ```
 
 2. **Prepare the `otel-collector-values.yaml` Configuration**
 
-  #### Azure Event Hub Receiver Configuration
+    #### Azure Event Hub Receiver Configuration
     If you haven't created the logs Event Hub, you can create one by following the steps in the [Azure Event Hubs documentation](../../bootstrapping/data-ingestion).
 
     and replace the placeholders `<Primary Connection String>` with the primary connection string for your Event Hub, it should look something like this:
@@ -51,7 +51,7 @@ helm repo add open-telemetry https://open-telemetry.github.io/opentelemetry-helm
     ```
     The Event Hub docs have a step to create a SAS policy for the event hub and copy the connection string.
 
-  #### Azure Monitor Receiver Configuration
+    #### Azure Monitor Receiver Configuration
 
     You will need to set up a [service principal](https://learn.microsoft.com/en-us/entra/identity-platform/howto-create-service-principal-portal) with Read permissions to receive data from Azure Monitor.
 
@@ -130,13 +130,13 @@ exporters:
 
 3. **Deploy the OpenTelemetry Collector to your Kubernetes cluster:**
 
-You'll need to prepare a custom configuration file, say `otel-collector-values.yaml`, that matches your environment's specific needs. Replace `<namespace>` with the Kubernetes namespace where you wish to install the Collector.
+    You'll need to prepare a custom configuration file, say `otel-collector-values.yaml`, that matches your environment's specific needs. Replace `<namespace>` with the Kubernetes namespace where you wish to install the Collector.
 
-```bash
-helm install -n <namespace> --create-namespace otel-collector open-telemetry/opentelemetry-collector -f otel-collector-values.yaml
-```
+    ```bash
+    helm install -n <namespace> --create-namespace otel-collector open-telemetry/opentelemetry-collector -f otel-collector-values.yaml
+    ```
 
-For more detail, refer to the [official OpenTelemetry Helm Chart documentation](https://github.com/open-telemetry/opentelemetry-helm-charts/tree/main/charts/opentelemetry-collector), which offers comprehensive installation instructions and configuration options tailored to your environment's requirements.
+    For more detail, refer to the [official OpenTelemetry Helm Chart documentation](https://github.com/open-telemetry/opentelemetry-helm-charts/tree/main/charts/opentelemetry-collector), which offers comprehensive installation instructions and configuration options tailored to your environment's requirements.
 
 ### Running the Collector on a Virtual Machine
 
