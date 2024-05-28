@@ -87,7 +87,7 @@ const Authors: AuthorInterface = {
   },
   palash: {
     name: 'Palash Gupta',
-    title: 'SigNoz Team',
+    title: 'SigNoz Community',
     url: 'https://github.com/palash-signoz',
     image_url: 'https://signoz.io/img/authors/palash_gupta_profile.webp',
   },
