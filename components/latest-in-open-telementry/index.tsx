@@ -34,7 +34,7 @@ const LatestInOpenTelementry = () => {
                 <div className="card bluish-gradient rounded-lg">
                   <div className="card__body p-0">
                     <div className="flex flex-col gap-5">
-                      <LiteYoutubeEmbed id={tutorial.youtubeId} muted={false} />
+                      <LiteYoutubeEmbed id={tutorial.youtubeId} mute={false} />
                       <p className="line-clamp-2 text-ellipsis px-5">{tutorial.desc}</p>
                     </div>
                   </div>
