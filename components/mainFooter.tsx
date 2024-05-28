@@ -126,23 +126,43 @@ function Footer() {
                   All systems operational
                 </div>
                 <div className="mt-5 flex items-end justify-between gap-4 py-2">
-                  <Link href={'https://github.com/SigNoz'} target="_blank">
+                  <Link
+                    href={'https://github.com/SigNoz'}
+                    target="_blank"
+                    aria-label="SigNoz Github URL"
+                  >
                     <GithubIcon size={24} />{' '}
                   </Link>
 
-                  <Link href={'https://www.linkedin.com/company/signozio/'} target="_blank">
+                  <Link
+                    href={'https://www.linkedin.com/company/signozio/'}
+                    target="_blank"
+                    aria-label="SigNoz LinkedIN URL"
+                  >
                     <Linkedin size={24} />
                   </Link>
 
-                  <Link href={'https://signoz.io/slack'} target="_blank">
+                  <Link
+                    href={'https://signoz.io/slack'}
+                    target="_blank"
+                    aria-label="SigNoz Slack Connect URL"
+                  >
                     <SlackIcon size={24} />
                   </Link>
 
-                  <Link href={'https://twitter.com/SigNozHQ'} target="_blank">
+                  <Link
+                    href={'https://twitter.com/SigNozHQ'}
+                    target="_blank"
+                    aria-label="SigNoz Twitter URL"
+                  >
                     <Twitter size={24} />
                   </Link>
 
-                  <Link href={'https://www.youtube.com/@signoz'} target="_blank">
+                  <Link
+                    href={'https://www.youtube.com/@signoz'}
+                    target="_blank"
+                    aria-label="SigNoz Youtube Channel URL"
+                  >
                     <Youtube size={24} />
                   </Link>
                 </div>
