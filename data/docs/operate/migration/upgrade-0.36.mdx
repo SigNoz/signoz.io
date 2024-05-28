@@ -57,37 +57,37 @@ expose clickhouse ports even temporarily, you can go through following steps.
 
 1. To download `migrate-v0.36` binary:
 
-  ```bash
-  wget https://github.com/SigNoz/signoz-db-migrations/releases/download/v0.36/migrate-v0.36-linux-amd64
+    ```bash
+    wget https://github.com/SigNoz/signoz-db-migrations/releases/download/v0.36/migrate-v0.36-linux-amd64
 
-  chmod +x migrate-v0.36-linux-amd64
-  ```
+    chmod +x migrate-v0.36-linux-amd64
+    ```
 
 2. To copy the binary in persistent volume path `/var/lib/clickhouse` in `clickhouse` container:
 
-  ```bash
-  docker cp migration-v0.36-linux-amd64 $(docker ps -q -f name=signoz_clickhouse):/var/lib/clickhouse/migrate-0.36
-  ```
+    ```bash
+    docker cp migration-v0.36-linux-amd64 $(docker ps -q -f name=signoz_clickhouse):/var/lib/clickhouse/migrate-0.36
+    ```
 
 3. To exec into the `clickhouse` container:
 
-  ```bash
-  docker exec -it $(docker ps -q -f name=signoz_clickhouse) bash
-  ```
+    ```bash
+    docker exec -it $(docker ps -q -f name=signoz_clickhouse) bash
+    ```
 
 4. Now, change directory to the `/var/lib/clickhouse` and run the migration script:
 
-  ```bash
-  cd /var/lib/clickhouse
+    ```bash
+    cd /var/lib/clickhouse
 
-  ./migration-0.36
-  ```
+    ./migration-0.36
+    ```
 
 5. At last, clean up the binary:
 
-  ```bash
-  rm migration-0.36
-  ```
+    ```bash
+    rm migration-0.36
+    ```
 
 
 ### For Kubernetes

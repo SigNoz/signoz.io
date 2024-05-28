@@ -217,7 +217,9 @@ func SendRequest(ctx context.Context, method string, url string, data []byte) (*
 }
 ```
 
-Note that the `ctx` parameter contains the tracing metadata of the parent span. So now the client sends the metadata and the server can extract this and connect the tracing information of various services.
+<Admonition>
+The `ctx` parameter contains the tracing metadata of the parent span. So now the client sends the metadata and the server can extract this and connect the tracing information of various services.
+</Admonition>
 
 Apart from the instrumentation already provided by <a href = "https://pkg.go.dev/go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp" rel="noopener noreferrer nofollow" target="_blank">otelhttp</a> library, we might want to have custom spans for various purposes (e.g. trace database call, or trace function execution). We can do that using:
 
@@ -241,7 +243,9 @@ db, err = otelsql.Open("mysql", datasourceName(username, password, host, dbName)
 res, err := stmt.ExecContext(ctx, p.Vars...)
 ```
 
-Note: [http://github.com/XSAM/otelsql](http://github.com/XSAM/otelsql) is not yet officially supported by OpenTelemetry.
+<Admonition>
+[http://github.com/XSAM/otelsql](http://github.com/XSAM/otelsql) is not yet officially supported by OpenTelemetry.
+</Admonition>
 
 ### Running the sample Golang application
 

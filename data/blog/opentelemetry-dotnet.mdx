@@ -77,13 +77,13 @@ When you are done installing SigNoz, you can access the UI at [http://localhost
 
 ## OpenTelemetry .NET instrumentation for tracing
 
-Step 1: Create new .NET MVC project
+**Step 1:** Create new .NET MVC project
 
 ```bash
 dotnet new mvc -n Org.MyWebApp --no-https
 ```
 
-Step 2: Install OpenTelemetry Packages
+**Step 2:** Install OpenTelemetry Packages
 
 ```bash
 cd Org.MyWebApp
@@ -92,9 +92,11 @@ dotnet add package OpenTelemetry.Instrumentation.AspNetCore --prerelease
 dotnet add package OpenTelemetry.Exporter.OpenTelemetryProtocol --prerelease
 ```
 
-Step 3: Configure OpenTelemetry
+**Step 3:** Configure OpenTelemetry
 
-Note that you need to set the endpoint of SigNoz in this code snippet. If you have installed SigNoz in your local, then the endpoint is `http://localhost:4317`.
+<Admonition>
+You need to set the endpoint of SigNoz in this code snippet. If you have installed SigNoz in your local, then the endpoint is `http://localhost:4317`.
+</Admonition>
 
 ```bash
 using OpenTelemetry.Resources;
@@ -119,13 +121,13 @@ var app = builder.Build();
 ...
 ```
 
-Step 4: Run the .NET app
+**Step 4:** Run the .NET app
 
 ```bash
 dotnet run
 ```
 
-Step 5: Monitor traces of your .NET application
+**Step 5:** Monitor traces of your .NET application
 
 Visit application `localhost:<port>/` and then visit SigNoz dashboard [http://localhost:3301/application](http://localhost:3301/trace) to see your .NET application being monitored on the SigNoz dashboard. 
 
@@ -158,16 +160,16 @@ Instrument arbitrary values that are likely to be statistically meaningful, eg: 
 - **Gauge**<br></br>
 Instrument non-additive values with time, eg: room temperature, no of running tasks.
 
-To illustrate how to collect metrics with OpenTelemetry,  let’s create a **timed background service.**
+To illustrate how to collect metrics with OpenTelemetry, let’s create a **timed background service.**
 
-Step: 1: Create worker app
+**Step: 1:** Create worker app
 
 ```bash
 dotnet new worker -n Org.Worker
 cd Org.Worker
 ```
 
-Step 2: Modify `Worker.cs`
+**Step 2:** Modify `Worker.cs`
 
 ```bash
 using System.Diagnostics;
@@ -214,14 +216,14 @@ public class Worker : IHostedService, IDisposable
 }
 ```
 
-Step 3: Install OpenTelemetry Packages
+**Step 3:** Install OpenTelemetry Packages
 
 ```bash
 dotnet add package OpenTelemetry.Extensions.Hosting --prerelease
 dotnet add package OpenTelemetry.Exporter.OpenTelemetryProtocol --prerelease
 ```
 
-Step 4:Configure OpenTelemetry Metrics in `Program.cs`
+**Step 4:** Configure OpenTelemetry Metrics in `Program.cs`
 
 ```bash
 using OpenTelemetry.Metrics;
@@ -243,7 +245,7 @@ services.AddOpenTelemetryMetrics(options =>
 ...
 ```
 
-Step 5: Create Meter & Counters
+**Step 5:** Create Meter & Counters
 
 ```bash
 ...
@@ -261,7 +263,7 @@ public Worker(ILogger<Worker> logger)
 }
 ```
 
-Step 6: Update Counters
+**Step 6:** Update Counters
 
 ```bash
 private void DoWork(object? state)
@@ -284,7 +286,7 @@ private void DoWork(object? state)
 }
 ```
 
-Step 7: Visit SigNoz dashboard [http://localhost:3301/dashboard](http://localhost:3301/dashboard) and click on new Dashboard
+**Step 7:** Visit SigNoz dashboard [http://localhost:3301/dashboard](http://localhost:3301/dashboard) and click on new Dashboard
 
 - Set Name of the dashboard
 
@@ -294,22 +296,22 @@ Step 7: Visit SigNoz dashboard [http://localhost:3301/dashboard](http://localhos
 
 - For Histogram: Click on time-series widget, enter `TimeTaken_bucket` in PromQL query, and save the widget. Other values which can be viewed `TimeTaken_sum` and `TimeTaken_count`
 
-<figure data-zoomable align='center'>
-    <img src="/img/blog/2022/06/dotnet_metrics.webp" alt="Metrics tab of SigNoz dashboard"/>
-    <figcaption><i>Sample Gauge metrics on SigNoz dashboard</i></figcaption>
-</figure>
+    <figure data-zoomable align='center'>
+        <img src="/img/blog/2022/06/dotnet_metrics.webp" alt="Metrics tab of SigNoz dashboard"/>
+        <figcaption><i>Sample Gauge metrics on SigNoz dashboard</i></figcaption>
+    </figure>
 
 
 ## OpenTelemetry .NET instrumentation for Logs
 
-Step 1: Create .NET Core Web API
+**Step 1:** Create .NET Core Web API
 
 ```bash
 dotnet new webapi -n Org.WebAPI --no-https
 cd Org.WebAPI
 ```
 
-Step 2: Install OpenTelemetry Packages
+**Step 2:** Install OpenTelemetry Packages
 
 ```bash
 dotnet add package OpenTelemetry.Extensions.Hosting --prerelease
@@ -317,7 +319,7 @@ dotnet add package OpenTelemetry.Instrumentation.AspNetCore --prerelease
 dotnet add package OpenTelemetry.Exporter.OpenTelemetryProtocol --prerelease
 ```
 
-Step 3: Configure Open Telemetry as Logging Provider
+**Step 3:** Configure Open Telemetry as Logging Provider
 
 ```csharp
 builder.Services.AddOpenTelemetryTracing(budiler =>
@@ -339,7 +341,7 @@ builder.Services.AddOpenTelemetryTracing(budiler =>
 });
 ```
 
-Step 4: Let’s create a custom error in `Controllers/WeatherForcastController.cs`
+**Step 4:** Let’s create a custom error in `Controllers/WeatherForcastController.cs`
 
 ```csharp
 [HttpGet(Name = "GetWeatherForecast")]
@@ -350,7 +352,7 @@ public IEnumerable<WeatherForecast> Get()
 }
 ```
 
-Step 5: Visit [http://localhost:3301/errors](http://localhost:3301/errors) to view errors
+**Step 5:** Visit [http://localhost:3301/errors](http://localhost:3301/errors) to view errors
 
 <figure data-zoomable align='center'>
     <img src="/img/blog/2022/06/dotnet_error_monitoring.webp" alt="Exceptions Logging on SigNoz dashboard"/>

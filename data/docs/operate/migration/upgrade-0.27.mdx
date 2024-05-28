@@ -52,55 +52,55 @@ expose clickhouse ports even temporarily, you can go through following steps.
 
 1. To download `migrate-v0.27` binary:
 
-  ```bash
-  wget https://github.com/SigNoz/signoz-db-migrations/releases/download/v0.27/migrate-v0.27-linux-amd64
+    ```bash
+    wget https://github.com/SigNoz/signoz-db-migrations/releases/download/v0.27/migrate-v0.27-linux-amd64
 
-  chmod +x migrate-v0.27-linux-amd64
-  ```
+    chmod +x migrate-v0.27-linux-amd64
+    ```
 
 2. To copy the binary in persistent volume path `/var/lib/clickhouse` in `clickhouse` container:
 
-  ```bash
-  docker cp migration-v0.27-linux-amd64 $(docker ps -q -f name=signoz_clickhouse):/var/lib/clickhouse/migrate-0.27
-  ```
+    ```bash
+    docker cp migration-v0.27-linux-amd64 $(docker ps -q -f name=signoz_clickhouse):/var/lib/clickhouse/migrate-0.27
+    ```
 
 3. To exec into the `clickhouse` container:
 
-  ```bash
-  docker exec -it $(docker ps -q -f name=signoz_clickhouse) bash
-  ```
+    ```bash
+    docker exec -it $(docker ps -q -f name=signoz_clickhouse) bash
+    ```
 
 4. Now, change directory to the `/var/lib/clickhouse` and run the migration script:
 
-  ```bash
-  cd /var/lib/clickhouse
+    ```bash
+    cd /var/lib/clickhouse
 
-  ./migration-0.27
-  ```
+    ./migration-0.27
+    ```
 
-  You should see output similar to this:
-  ```
-  2023-08-14T16:48:37.081Z	DEBUG	migrate/main.go:227	Params: clickhouse 9000 default
-  2023-08-14T16:48:37.130Z	INFO	migrate/main.go:142	Dropping index: method_idx
-  2023-08-14T16:48:37.924Z	INFO	migrate/main.go:142	Dropping index: level_idx
-  2023-08-14T16:48:38.645Z	INFO	migrate/main.go:142	Dropping index: container_name_idx
-  2023-08-14T16:48:39.368Z	INFO	migrate/main.go:142	Dropping index: telemetry_sdk_name_idx
-  2023-08-14T16:48:40.104Z	INFO	migrate/main.go:166	Renaming materialized column: method to attribute_string_method
-  2023-08-14T16:48:41.067Z	INFO	migrate/main.go:203	Create index: attribute_string_method_idx
-  2023-08-14T16:48:41.185Z	INFO	migrate/main.go:166	Renaming materialized column: level to attribute_string_level
-  2023-08-14T16:48:42.164Z	INFO	migrate/main.go:203	Create index: attribute_string_level_idx
-  2023-08-14T16:48:42.285Z	INFO	migrate/main.go:166	Renaming materialized column: container_name to attribute_string_container_name
-  2023-08-14T16:48:42.999Z	INFO	migrate/main.go:203	Create index: attribute_string_container_name_idx
-  2023-08-14T16:48:43.118Z	INFO	migrate/main.go:166	Renaming materialized column: telemetry_sdk_name to resource_string_telemetry_sdk_name
-  2023-08-14T16:48:43.823Z	INFO	migrate/main.go:203	Create index: resource_string_telemetry_sdk_name_idx
-  2023-08-14T16:48:43.955Z	INFO	migrate/main.go:261	Completed migration in: 6.873610753s
-  ```
+    You should see output similar to this:
+    ```
+    2023-08-14T16:48:37.081Z	DEBUG	migrate/main.go:227	Params: clickhouse 9000 default
+    2023-08-14T16:48:37.130Z	INFO	migrate/main.go:142	Dropping index: method_idx
+    2023-08-14T16:48:37.924Z	INFO	migrate/main.go:142	Dropping index: level_idx
+    2023-08-14T16:48:38.645Z	INFO	migrate/main.go:142	Dropping index: container_name_idx
+    2023-08-14T16:48:39.368Z	INFO	migrate/main.go:142	Dropping index: telemetry_sdk_name_idx
+    2023-08-14T16:48:40.104Z	INFO	migrate/main.go:166	Renaming materialized column: method to attribute_string_method
+    2023-08-14T16:48:41.067Z	INFO	migrate/main.go:203	Create index: attribute_string_method_idx
+    2023-08-14T16:48:41.185Z	INFO	migrate/main.go:166	Renaming materialized column: level to attribute_string_level
+    2023-08-14T16:48:42.164Z	INFO	migrate/main.go:203	Create index: attribute_string_level_idx
+    2023-08-14T16:48:42.285Z	INFO	migrate/main.go:166	Renaming materialized column: container_name to attribute_string_container_name
+    2023-08-14T16:48:42.999Z	INFO	migrate/main.go:203	Create index: attribute_string_container_name_idx
+    2023-08-14T16:48:43.118Z	INFO	migrate/main.go:166	Renaming materialized column: telemetry_sdk_name to resource_string_telemetry_sdk_name
+    2023-08-14T16:48:43.823Z	INFO	migrate/main.go:203	Create index: resource_string_telemetry_sdk_name_idx
+    2023-08-14T16:48:43.955Z	INFO	migrate/main.go:261	Completed migration in: 6.873610753s
+    ```
 
 5. At last, clean up the binary:
 
-  ```bash
-  rm migration-0.27
-  ```
+    ```bash
+    rm migration-0.27
+    ```
 
 
 ### For Kubernetes
