@@ -48,14 +48,14 @@ extensions:
   health_check: {}
   zpages: {}
 exporters:
-// highlight-start
+# highlight-start
   otlp:
-    endpoint: "ingest.{region}.signoz.cloud:443"
+    endpoint: "ingest.us.signoz.cloud:443"
     tls:
       insecure: false
     headers:
       "signoz-access-token": "<SIGNOZ_INGESTION_KEY>"
-// highlight-end
+# highlight-end
   logging:
     verbosity: normal
 service:
