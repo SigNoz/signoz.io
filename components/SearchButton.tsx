@@ -12,7 +12,7 @@ const SearchButton = () => {
       siteMetadata.search.provider === 'algolia' ? AlgoliaButton : KBarButton
 
     return (
-      <SearchButtonWrapper aria-label="Search">
+      <SearchButtonWrapper aria-label="Search" className="px-4">
         <SearchIcon size={18} />
       </SearchButtonWrapper>
     )

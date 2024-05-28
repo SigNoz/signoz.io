@@ -98,7 +98,7 @@ export default function TopNav() {
         <div className="hidden gap-8 lg:flex lg:flex-1 lg:justify-end">
           <SearchButton />
 
-          <Link href="/teams">
+          <Link href="/teams" className="mx-2">
             <Button
               id="btn-get-started-website-navbar"
               className="try-signoz-cloud-btn font-heading text-md flex items-center justify-center gap-1 truncate rounded-md border-none px-4 py-2 text-center text-xs  font-bold leading-4 text-white no-underline outline-none hover:text-white"
