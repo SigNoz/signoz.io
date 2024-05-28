@@ -19,7 +19,7 @@ export default async function Page() {
   const sortedPosts = sortPosts(allBlogs)
   const posts = allCoreContent(sortedPosts)
   return (
-    <div className="bg-white dark:bg-signoz_ink-500">
+    <div className="bg-signoz_ink-500">
       <main className="landing-section">
         <Header />
         <TrustedByTeams />
