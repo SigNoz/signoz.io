@@ -72,56 +72,56 @@ The steps for running the migration on kubernetes are :
 
 1. Update the latest chart information from the Helm repositories:
 
-  ```bash
-  helm repo update
-  ```
+    ```bash
+    helm repo update
+    ```
 
 2. Include the following in your custom `override-values.yaml` file:
 
-  ```yaml
-  queryService:
-    initContainers:
-      migration:
-        enabled: true
-        image:
-          registry: docker.io
-          repository: signoz/migrate
-          tag: 0.45
-          pullPolicy: IfNotPresent
-        args:
-          - "-dataSource=/var/lib/signoz/signoz.db"
-  ```
+    ```yaml
+    queryService:
+      initContainers:
+        migration:
+          enabled: true
+          image:
+            registry: docker.io
+            repository: signoz/migrate
+            tag: 0.45
+            pullPolicy: IfNotPresent
+          args:
+            - "-dataSource=/var/lib/signoz/signoz.db"
+    ```
 
 3. Run the following command to upgrade the chart:
 
-  ```bash
-  helm --namespace platform upgrade my-release signoz/signoz -f override-values.yaml
-  ```
+    ```bash
+    helm --namespace platform upgrade my-release signoz/signoz -f override-values.yaml
+    ```
 
 4. Check the logs of the migration container using:
 
-  ```bash
-  kubectl --namespace platform logs my-release-signoz-query-service-0 -c my-release-signoz-query-service-migration
-  ```
+    ```bash
+    kubectl --namespace platform logs my-release-signoz-query-service-0 -c my-release-signoz-query-service-migration
+    ```
 
-  Output should be similar as below:
+    Output should be similar as below:
 
-  ```
-  Data Source path:  signoz.db
-  2024/05/01 15:28:22 Total Dashboard found: 2
-  2024/05/01 15:28:22 625fa391-d9d3-47c1-809a-1a147eea229d
-  2024/05/01 15:28:22 b05af383-23ec-4061-8f57-0765d45ccd51
-  2024/05/01 15:28:22 Dashboard 625fa391-d9d3-47c1-809a-1a147eea229d updated
-  2024/05/01 15:28:22 Dashboard b05af383-23ec-4061-8f57-0765d45ccd51 updated
-  2024/05/01 15:28:22 Dashboards migrated
-  ```
+    ```
+    Data Source path:  signoz.db
+    2024/05/01 15:28:22 Total Dashboard found: 2
+    2024/05/01 15:28:22 625fa391-d9d3-47c1-809a-1a147eea229d
+    2024/05/01 15:28:22 b05af383-23ec-4061-8f57-0765d45ccd51
+    2024/05/01 15:28:22 Dashboard 625fa391-d9d3-47c1-809a-1a147eea229d updated
+    2024/05/01 15:28:22 Dashboard b05af383-23ec-4061-8f57-0765d45ccd51 updated
+    2024/05/01 15:28:22 Dashboards migrated
+    ```
 
 5. Remove the `migration` init container section added in **Step 2**
   followed by `helm upgrade`.
 
-  ```bash
-  helm --namespace platform upgrade my-release signoz/signoz -f override-values.yaml
-  ``` 
+    ```bash
+    helm --namespace platform upgrade my-release signoz/signoz -f override-values.yaml
+    ``` 
 
 ## In case of Upgrade Failure
 
