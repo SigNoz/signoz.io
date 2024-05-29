@@ -14,13 +14,320 @@ import InstrumentationFAQ from '@/components/shared/instrumentation-faq.md'
 This document contains instructions on how to set up OpenTelemetry instrumentation in your Angular applications. OpenTelemetry, also known as OTel for short, is an open source observability framework that can help you generate and collect telemetry data - traces, metrics, and logs from your Nestjs application.
 
 
-Once the telemetry data is collected, you can configure an exporter to send the data to SigNoz.
+## Send traces to SigNoz Cloud
+
+Based on your application environment, you can choose the setup below to send traces to SigNoz Cloud.
+
+<Tabs>
+<TabItem value="vm" label="VM" default>
+
+From VMs, there are two ways to send data to SigNoz Cloud.
+
+- [Send traces directly to SigNoz Cloud](#send-traces-directly-to-signoz-cloud)
+- [Send traces via OTel Collector binary](#send-traces-via-otel-collector-binary) (recommended)
+
+#### Send traces directly to SigNoz Cloud
+
+Step 1. Install OpenTelemetry packages
+
+```bash
+npm install --save @opentelemetry/sdk-trace-web@^1.21.0                                                                   
+npm install --save @opentelemetry/instrumentation@^0.48.0
+npm install --save @opentelemetry/auto-instrumentations-web@^0.36.0
+npm install --save @opentelemetry/exporter-trace-otlp-http@^0.48.0
+npm install --save @opentelemetry/resources@^1.21.0
+npm install --save @opentelemetry/propagator-b3@^1.21.0
+npm install --save @opentelemetry/semantic-conventions@^1.21.0
+```
+
+Step 2. Create `instrument.ts` file<br></br>
+You need to configure the endpoint for SigNoz cloud in this file.
+
+```ts
+import { registerInstrumentations } from '@opentelemetry/instrumentation';
+import {
+  WebTracerProvider,
+  ConsoleSpanExporter,
+  SimpleSpanProcessor,
+  BatchSpanProcessor,
+} from '@opentelemetry/sdk-trace-web';
+import { getWebAutoInstrumentations } from '@opentelemetry/auto-instrumentations-web';
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
+import { Resource } from '@opentelemetry/resources';
+import { B3Propagator } from '@opentelemetry/propagator-b3';
+import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
+
+const resource = Resource.default().merge(
+  new Resource({
+    [SemanticResourceAttributes.SERVICE_NAME]: '<service_name>',
+    [SemanticResourceAttributes.SERVICE_VERSION]: '0.1.0',
+  })
+);
+
+const provider = new WebTracerProvider({ resource });
+
+provider.addSpanProcessor(new SimpleSpanProcessor(new ConsoleSpanExporter()));
+
+provider.addSpanProcessor(
+  new BatchSpanProcessor(
+    new OTLPTraceExporter({
+      url: 'https://ingest.{REGION}.signoz.cloud:443/v1/traces',
+      headers: {
+        'signoz-access-token': '{SIGNOZ_INGESTION_KEY}',
+      },
+    })
+  )
+);
+
+provider.register({
+  propagator: new B3Propagator(),
+});
+
+registerInstrumentations({
+  instrumentations: [
+    getWebAutoInstrumentations({
+      '@opentelemetry/instrumentation-document-load': {},
+      '@opentelemetry/instrumentation-user-interaction': {},
+      '@opentelemetry/instrumentation-fetch': {
+        propagateTraceHeaderCorsUrls: /.+/,
+      },
+      '@opentelemetry/instrumentation-xml-http-request': {
+        propagateTraceHeaderCorsUrls: /.+/,
+      },
+    }),
+  ],
+});
+
+```
+- `<service_name>` : Name of your service.
+- `SIGNOZ_INGESTION_KEY` : You can find your ingestion key from SigNoz cloud account details sent on your email.
+
+Depending on the choice of your region for SigNoz cloud, the ingest endpoint will vary according to this table.
+
+| Region | Endpoint |
+| --- | --- |
+| US |	ingest.us.signoz.cloud:443/v1/traces |
+| IN |	ingest.in.signoz.cloud:443/v1/traces |
+| EU | ingest.eu.signoz.cloud:443/v1/traces |
+
+
+
+Step 3. Add the below import to your `main.ts` file.
+
+{/* <Admonition type="info">
+The below import should be the first line in the main file of your application (Ex -> `main.ts`)
+</Admonition>  */}
+
+
+    
+```jsx
+import './app/instrument';
+```
+
+Step 4. Run the application
+
+```bash
+ng serve
+```
+
+The data captured with OpenTelemetry from your application should start showing on the SigNoz Traces Explorer.
+
+
+---
+
+#### Send traces via OTel Collector binary
+
+OTel Collector binary helps to collect logs, hostmetrics, resource and infra attributes. It is recommended to install Otel Collector binary to collect and send traces to SigNoz cloud. You can correlate signals and have rich contextual data through this way.
+
+<Admonition>
+You can find instructions to install OTel Collector binary [here](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) in your VM. Once you are done setting up your OTel Collector binary, you can follow the below steps for instrumenting your Javascript application.
+</Admonition>
+
+Step 1. Install OpenTelemetry packages
+
+```bash
+npm install --save @opentelemetry/sdk-trace-web@^1.21.0                                                                   
+npm install --save @opentelemetry/instrumentation@^0.48.0
+npm install --save @opentelemetry/auto-instrumentations-web@^0.36.0
+npm install --save @opentelemetry/exporter-trace-otlp-http@^0.48.0
+npm install --save @opentelemetry/resources@^1.21.0
+npm install --save @opentelemetry/propagator-b3@^1.21.0
+npm install --save @opentelemetry/semantic-conventions@^1.21.0
+```
+
+Step 2. Create `instrument.ts` file<br></br>
+
+```ts
+import { registerInstrumentations } from '@opentelemetry/instrumentation';
+import {
+  WebTracerProvider,
+  ConsoleSpanExporter,
+  SimpleSpanProcessor,
+  BatchSpanProcessor,
+} from '@opentelemetry/sdk-trace-web';
+import { getWebAutoInstrumentations } from '@opentelemetry/auto-instrumentations-web';
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
+import { Resource } from '@opentelemetry/resources';
+import { B3Propagator } from '@opentelemetry/propagator-b3';
+import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
+
+const resource = Resource.default().merge(
+  new Resource({
+    [SemanticResourceAttributes.SERVICE_NAME]: '<service_name>',
+    [SemanticResourceAttributes.SERVICE_VERSION]: '0.1.0',
+  })
+);
+
+const provider = new WebTracerProvider({ resource });
+
+provider.addSpanProcessor(new SimpleSpanProcessor(new ConsoleSpanExporter()));
+
+provider.addSpanProcessor(
+  new BatchSpanProcessor(
+    new OTLPTraceExporter({
+      url: 'http://localhost:4318/v1/traces',
+    })
+  )
+);
+
+provider.register({
+  propagator: new B3Propagator(),
+});
+
+registerInstrumentations({
+  instrumentations: [
+    getWebAutoInstrumentations({
+      '@opentelemetry/instrumentation-document-load': {},
+      '@opentelemetry/instrumentation-user-interaction': {},
+      '@opentelemetry/instrumentation-fetch': {
+        propagateTraceHeaderCorsUrls: /.+/,
+      },
+      '@opentelemetry/instrumentation-xml-http-request': {
+        propagateTraceHeaderCorsUrls: /.+/,
+      },
+    }),
+  ],
+});
+```
+- `<service_name>` : Name of your service.
+
+Step 3. Add the below import to your `main.ts` file.
+{/* <Admonition type="info">
+The below import should be the first line in the main file of your application (Ex -> `main.ts`)
+</Admonition> */}
+    
+```jsx
+import './app/instrument';
+```
+    
+
+Step 4. Run the application
+```bash
+ng serve
+```
+
+</TabItem>
+<TabItem value="k8s" label="Kubernetes">
+
+For Angular application deployed on Kubernetes, you need to install OTel Collector agent in your k8s infra to collect and send traces to SigNoz Cloud. You can find the instructions to install OTel Collector agent [here](/docs/tutorial/kubernetes-infra-metrics/).
+
+Once you have set up OTel Collector agent, you can proceed with OpenTelemetry Angular instrumentation by following the below steps:
+
+Step 1. Install OpenTelemetry packages
+
+```bash
+npm install --save @opentelemetry/sdk-trace-web@^1.21.0                                                                   
+npm install --save @opentelemetry/instrumentation@^0.48.0
+npm install --save @opentelemetry/auto-instrumentations-web@^0.36.0
+npm install --save @opentelemetry/exporter-trace-otlp-http@^0.48.0
+npm install --save @opentelemetry/resources@^1.21.0
+npm install --save @opentelemetry/propagator-b3@^1.21.0
+npm install --save @opentelemetry/semantic-conventions@^1.21.0
+```
+
+Step 2. Create `instrument.ts` file<br></br>
+
+```ts
+import { registerInstrumentations } from '@opentelemetry/instrumentation';
+import {
+  WebTracerProvider,
+  ConsoleSpanExporter,
+  SimpleSpanProcessor,
+  BatchSpanProcessor,
+} from '@opentelemetry/sdk-trace-web';
+import { getWebAutoInstrumentations } from '@opentelemetry/auto-instrumentations-web';
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
+import { Resource } from '@opentelemetry/resources';
+import { B3Propagator } from '@opentelemetry/propagator-b3';
+import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
+
+const resource = Resource.default().merge(
+  new Resource({
+    [SemanticResourceAttributes.SERVICE_NAME]: '<service_name>',
+    [SemanticResourceAttributes.SERVICE_VERSION]: '0.1.0',
+  })
+);
+
+const provider = new WebTracerProvider({ resource });
+
+provider.addSpanProcessor(new SimpleSpanProcessor(new ConsoleSpanExporter()));
+
+provider.addSpanProcessor(
+  new BatchSpanProcessor(
+    new OTLPTraceExporter({
+      url: 'http://localhost:4318/v1/traces',
+    })
+  )
+);
+
+provider.register({
+  propagator: new B3Propagator(),
+});
+
+registerInstrumentations({
+  instrumentations: [
+    getWebAutoInstrumentations({
+      '@opentelemetry/instrumentation-document-load': {},
+      '@opentelemetry/instrumentation-user-interaction': {},
+      '@opentelemetry/instrumentation-fetch': {
+        propagateTraceHeaderCorsUrls: /.+/,
+      },
+      '@opentelemetry/instrumentation-xml-http-request': {
+        propagateTraceHeaderCorsUrls: /.+/,
+      },
+    }),
+  ],
+});
+```
+- `<service_name>` : Name of your service.
+
+Step 3. Add the below import to your `main.ts` file.
+{/* <Admonition type="info">
+The below import should be the first line in the main file of your application (Ex -> `main.ts`)
+</Admonition> */}
+    
+```jsx
+import './app/instrument';
+```
+    
+
+Step 4. Run the application
+```bash
+ng serve
+```
+</TabItem>
+</Tabs>
+
+
+
+
+{/* Once the telemetry data is collected, you can configure an exporter to send the data to SigNoz.
 
 There are three major steps to using OpenTelemetry:
 
 - Instrumenting your Angular application with OpenTelemetry
 - Configuring exporter to send data to SigNoz
-- Validating that configuration to ensure that data is being sent as expected.
+- Validating that configuration to ensure that data is being sent as expected. */}
 
 {/* <!-- ### Why you need to instrument your frontend application 🤔
 
@@ -32,6 +339,8 @@ We all are familiar with instrumenting backend services but have you ever though
 - To examine and analyze the reliability of a new feature served as an A/B experiment.
 - It works in region X but not in region Y.
 - RCA on the user's complete journey inside the application. --> */}
+
+## Send Traces to SigNoz Self-Host
 
 ### Instrumenting your Angular App with OpenTelemetry 🛠
 
