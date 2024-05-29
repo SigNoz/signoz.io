@@ -147,9 +147,13 @@ To enable a Prometheus receiver, follow the steps below:
           timeout: 10s
       # This file was truncated for brevity.
       ```
-    Note that all the jobs are scraped in parallel, and all targets inside a job are scraped serially. For more details about configuring jobs and targets, see the following sections of the Prometheus documentation:
+
+    <Admonition>
+    All the jobs are scraped in parallel, and all targets inside a job are scraped serially. For more details about configuring jobs and targets, see the following sections of the Prometheus documentation:
       - [\<Scrape_config>](https://prometheus.io/docs/prometheus/latest/configuration/configuration/#scrape_config)
       - [Jobs and Instances](https://prometheus.io/docs/concepts/jobs_instances/)
+    </Admonition>
+
 3. <SaveChangesRestart />
 
 ## Find Metrics available in SigNoz
@@ -161,21 +165,21 @@ You can follow the below steps
 1. [Install ClickHouse client](https://clickhouse.com/docs/en/getting-started/install/)
 
 2. Connect to the ClickHouse container
-  ````
-  docker exec -it signoz-clickhouse bash
-  ````
+    ````
+    docker exec -it signoz-clickhouse bash
+    ````
 3. Run the clickhouse-client command to connect to the database service
-  ````
-  clickhouse client --host <SigNoz IP>  --port 9000
-  ````
+    ````
+    clickhouse client --host <SigNoz IP>  --port 9000
+    ````
 4. Run the query to list metrics
-  ````
-  select DISTINCT(JSONExtractString(time_series_v2.labels,'__name__')) as metrics from signoz_metrics.distributed_time_series_v2
-  ````
+    ````
+    select DISTINCT(JSONExtractString(time_series_v2.labels,'__name__')) as metrics from signoz_metrics.distributed_time_series_v2
+    ````
 5. If needed, dump in a csv file and parse it locally
-  ```
-  select DISTINCT(labels) from signoz_metrics.distributed_time_series_v2 INTO OUTFILE 'output.csv'
-  ```
+    ```
+    select DISTINCT(labels) from signoz_metrics.distributed_time_series_v2 INTO OUTFILE 'output.csv'
+    ```
 
 You can use this metrics to plot in the [Dashboard](/docs/userguide/manage-dashboards) section
 

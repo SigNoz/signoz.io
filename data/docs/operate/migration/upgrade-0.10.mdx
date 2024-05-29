@@ -9,11 +9,13 @@ v0.10 is a breaking release which requires data migration for errors and excepti
 
 Follow the platform specific instructions to upgrade to 0.10 and above.
 
-Note that the past exceptions/error data will not be visible on the new application until you run the migration script.
+<Admonition>
+The past exceptions/error data will not be visible on the new application until you run the migration script.
 
 - [Docker Standalone](https://signoz.io/docs/operate/docker-standalone/#upgrade)
 - [Docker Swarm](https://signoz.io/docs/operate/docker-swarm/#upgrade)
 - [Kubernetes](https://signoz.io/docs/operate/kubernetes/#upgrade)
+</Admonition>
 
 ## Steps to run migration script:
 
@@ -49,54 +51,54 @@ expose clickhouse ports even temporarily, you can go through following steps.
 
 1. To download `migration-v0.10` binary:
 
-  ```bash
-  wget https://github.com/SigNoz/signoz-db-migrations/releases/download/v0.10/migration-v0.10-linux-amd64
+    ```bash
+    wget https://github.com/SigNoz/signoz-db-migrations/releases/download/v0.10/migration-v0.10-linux-amd64
 
-  chmod +x migration-v0.10-linux-amd64
-  ```
+    chmod +x migration-v0.10-linux-amd64
+    ```
 
 2. To copy the binary in persistent volume path `/var/lib/clickhouse` in `clickhouse` container:
 
-  ```bash
-  docker cp migration-v0.10-linux-amd64 $(docker ps -q -f name=signoz_clickhouse):/var/lib/clickhouse/migration-0.10
-  ```
+    ```bash
+    docker cp migration-v0.10-linux-amd64 $(docker ps -q -f name=signoz_clickhouse):/var/lib/clickhouse/migration-0.10
+    ```
 
 3. To exec into the `clickhouse` container:
 
-  ```bash
-  docker exec -it $(docker ps -q -f name=signoz_clickhouse) bash
-  ```
+    ```bash
+    docker exec -it $(docker ps -q -f name=signoz_clickhouse) bash
+    ```
 
 4. Now, change directory to the `/var/lib/clickhouse` and run the migration script:
 
-  ```bash
-  cd /var/lib/clickhouse
+    ```bash
+    cd /var/lib/clickhouse
 
-  ./migration-0.10
-  ```
+    ./migration-0.10
+    ```
 
-  You should see output similar to this:
-  ```
-  127.0.0.1 9000 default 
-  No TTL found, skipping TTL migration
-  There are total 1 rows, starting migration... 
+    You should see output similar to this:
+    ```
+    127.0.0.1 9000 default 
+    No TTL found, skipping TTL migration
+    There are total 1 rows, starting migration... 
 
-  Processing 1 rows of serviceName flaskApp 
-  Writing 1 rows
-  ServiceName: flaskApp 
-  Migrated till: 2022-07-15 09:15:04.151093623 +0000 UTC 
-  TimeNano: 1657876504151093623 
-  _________**********************************_________ 
-  Completed migration in:  14.299842ms
-  Dropping signoz_error_index table
-  Successfully dropped signoz_error_index
-  ```
+    Processing 1 rows of serviceName flaskApp 
+    Writing 1 rows
+    ServiceName: flaskApp 
+    Migrated till: 2022-07-15 09:15:04.151093623 +0000 UTC 
+    TimeNano: 1657876504151093623 
+    _________**********************************_________ 
+    Completed migration in:  14.299842ms
+    Dropping signoz_error_index table
+    Successfully dropped signoz_error_index
+    ```
 
 5. At last, clean up the binary:
 
-  ```bash
-  rm migration-0.10
-  ```
+    ```bash
+    rm migration-0.10
+    ```
 
 ### For Kubernetes
 

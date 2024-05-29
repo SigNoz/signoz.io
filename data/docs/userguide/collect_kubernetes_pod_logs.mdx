@@ -16,7 +16,7 @@ To collect logs from your kubernetes cluster, you will need to deploy k8s-infra 
 
 
 ## Collect Kubernetes Pod Logs in Self-Hosted SigNoz
-When you deploy SigNoz to your kubernetes cluster it will automatically start collecting all the pod logs. It will automatically parse out different attributes from the logs like name, namespace, container name, uid etc. But if you want to parse specific attributes from certain kind of logs you can use different kinds of operators provided by OpenTelemetry [here](./logs.md#operators-for-parsing-and-manipulating-logs).
+When you deploy SigNoz to your kubernetes cluster it will automatically start collecting all the pod logs. It will automatically parse out different attributes from the logs like name, namespace, container name, uid etc. But if you want to parse specific attributes from certain kind of logs you can use different kinds of operators provided by OpenTelemetry [here](/docs/userguide/logs#operators-for-parsing-and-manipulating-logs).
 
 If your signoz cluster is hosted in a different cluster then you will have to install k8s-infra chart on your application kubernetes cluster. Please follow the guide [here](/docs/tutorial/kubernetes-infra-metrics/). Log collection of pods from all namespaces is enabled by default except for pods in `kube-system` and `hotrod`. To modify the log collection mechanism, please follow the guides below.
 
@@ -79,7 +79,9 @@ If your signoz cluster is hosted in a different cluster then you will have to in
           # additional exclude rules
           additionalExclude: []
   ```
-  Note: In case of  `k8s-infra` chart installed directly, omit `k8s-infra:` from the above configuration. 
+  <Admonition>
+  In case of  `k8s-infra` chart installed directly, omit `k8s-infra:` from the above configuration. 
+  </Admonition>
  
 
 * **Using filter operator in filelog receiver** : You can also use the filter operator to filter out logs by changing the operators here [charts](https://github.com/SigNoz/charts/blob/main/charts/k8s-infra/values.yaml).
