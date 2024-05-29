@@ -108,7 +108,9 @@ celery.conf.update(app.config)
 
 `app` is the Flask application object that you will use to run the web server. `celery` is the Celery object that you will use to run the Celery worker.
 
-Note that the `CELERY_BROKER_URL` configuration here is set to the Redis server that you're running locally on your machine. You can change this to any other message broker that you want to use.
+<Admonition>
+The `CELERY_BROKER_URL` configuration here is set to the Redis server that you're running locally on your machine. You can change this to any other message broker that you want to use.
+</Admonition>
 
 The `celery` object takes the application name as an argument and sets the `broker` argument to the one you specified in the configuration.
 
@@ -155,7 +157,9 @@ for i in range(10000):
 return jsonify({'status': 'ok'})
 ```
 
-Note: Don't forget to import the `jsonify` function from the `flask` module to be able to return JSON data.
+<Admonition>
+Don't forget to import the `jsonify` function from the `flask` module to be able to return JSON data.
+</Admonition>
 
 Now, run the web server with the following command:
 
@@ -171,7 +175,9 @@ When you check the `localhost:5000` URL in your browser, you should see the fo
 }
 ```
 
-Note that this response is not instantly shown on your browser. That’s because the Redis server listens to the client and enqueues the task to the task queue of that `add_task` function. The Celery worker then has to wait for every task before it starts execution.
+<Admonition>
+This response is not instantly shown on your browser. That’s because the Redis server listens to the client and enqueues the task to the task queue of that `add_task` function. The Celery worker then has to wait for every task before it starts execution.
+</Admonition>
 
 This demonstrates how Celery made use of Redis to distribute tasks across multiple workers and to manage the task queue.
 

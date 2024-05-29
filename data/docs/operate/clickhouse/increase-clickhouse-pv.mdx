@@ -84,21 +84,21 @@ If you had started with default configurations, you would have to follow the ste
 1. You would have to edit default storage class i.e. `gp2`
 and patch the `allowVolumeExpansion` to `true`.
 
-```bash
-kubectl patch storageclass gp2 -p '{"allowVolumeExpansion": true}'
-```
+    ```bash
+    kubectl patch storageclass gp2 -p '{"allowVolumeExpansion": true}'
+    ```
 
-Output:
-```
-storageclass.storage.k8s.io/gp2 patched
-```
+    Output:
+    ```
+    storageclass.storage.k8s.io/gp2 patched
+    ```
 
 2. Run helm upgrade command:
 
-```bash
-helm -n platform upgrade my-release signoz/signoz \
-  --set clickhouse.persistence.size=25Gi
-```
+    ```bash
+    helm -n platform upgrade my-release signoz/signoz \
+      --set clickhouse.persistence.size=25Gi
+    ```
 
 3. (Optional) After the size change reflects in few minutes, you could edit
 the default storage class `gp2` back to its previous state.
@@ -125,21 +125,21 @@ If you had started with default configurations, you would have to follow the ste
 1. You would have to edit default storage class i.e. `pd-standard`,
 and patch the `allowVolumeExpansion` to `true`.
 
-```bash
-kubectl patch storageclass pd-standard -p '{"allowVolumeExpansion": true}'
-```
+    ```bash
+    kubectl patch storageclass pd-standard -p '{"allowVolumeExpansion": true}'
+    ```
 
-Output:
-```
-storageclass.storage.k8s.io/pd-standard patched
-```
+    Output:
+    ```
+    storageclass.storage.k8s.io/pd-standard patched
+    ```
 
 2. Now, run helm upgrade command:
 
-```bash
-helm -n platform upgrade my-release signoz/signoz \
-  --set clickhouse.persistence.size=25Gi
-```
+    ```bash
+    helm -n platform upgrade my-release signoz/signoz \
+      --set clickhouse.persistence.size=25Gi
+    ```
 
 3. (Optional) After the size change reflects in few minutes, you could edit
 the default storage class `pd-standard` back to its previous state.
@@ -162,28 +162,24 @@ helm -n platform install my-release signoz/signoz \
 
 If you had started with default configurations, you would have to follow the steps below:
 
-1. You would have to edit default storage class i.e. `standard` in case
-of [kind cluster](https://kind.sigs.k8s.io) - it could be different in
-your scenerio, and patch the `allowVolumeExpansion` to `true`.
+1. You would have to edit default storage class i.e. `standard` in case of [kind cluster](https://kind.sigs.k8s.io) - it could be different in your scenerio, and patch the `allowVolumeExpansion` to `true`.
 
-```bash
-DEFAULT_STORAGE_CLASS=$(kubectl get storageclass -o=jsonpath='{.items[?(@.metadata.annotations.storageclass\.kubernetes\.io/is-default-class=="true")].metadata.name}')
+    ```bash
+    DEFAULT_STORAGE_CLASS=$(kubectl get storageclass -o=jsonpath='{.items[?(@.metadata.annotations.storageclass\.kubernetes\.io/is-default-class=="true")].metadata.name}')
 
-kubectl patch storageclass "$DEFAULT_STORAGE_CLASS" -p '{"allowVolumeExpansion": true}'
-```
+    kubectl patch storageclass "$DEFAULT_STORAGE_CLASS" -p '{"allowVolumeExpansion": true}'
+    ```
 
-Output should be similar to the following:
-```
-storageclass.storage.k8s.io/standard patched
-```
+    Output should be similar to the following:
+    ```
+    storageclass.storage.k8s.io/standard patched
+    ```
 
 2. Run helm upgrade command:
 
-```bash
-helm -n platform upgrade my-release signoz/signoz \
-  --set clickhouse.persistence.size=25Gi
-```
+    ```bash
+    helm -n platform upgrade my-release signoz/signoz \
+      --set clickhouse.persistence.size=25Gi
+    ```
 
-3. (Optional) After the size change reflects in few minutes, you could edit
-the default storage class `standard` - or some other storage class as per your
-previous output, back to its previous state.
+3. (Optional) After the size change reflects in few minutes, you could edit the default storage class `standard` - or some other storage class as per your previous output, back to its previous state.

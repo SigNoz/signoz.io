@@ -8,7 +8,7 @@ In the previous version of SigNoz v0.36 i.e. SigNoz chart version v0.32.0, we ha
 
 This migration updates the dashboards and alerts to support the new format.
 
-If you are using SigNoz version prior to v0.36 please make sure that migration [v0.36](/docs/operate/migration/upgrade-0.36.md) is successful before running this.
+If you are using SigNoz version prior to v0.36 please make sure that migration [v0.36](/docs/operate/migration/upgrade-0.36) is successful before running this.
 
 ## Steps to run migration script:
 
@@ -58,44 +58,44 @@ The steps for running the migration on kubernetes are :-
 1. Make sure you have latest chart information from the
   Helm repositories:
 
-  ```bash
-  helm repo update
-  ```
+    ```bash
+    helm repo update
+    ```
 
 2. Include the following in `deployment-override.yaml` file:
   
-  ```yaml
-  queryService:
-    initContainers:
-      migration:
-        enabled: true
-        image:
-          registry: docker.io
-          repository: signoz/migrate
-          tag: 0.38
-          pullPolicy: IfNotPresent
-        args:
-          - "--data_source=/var/lib/signoz/signoz.db"
-          - "--host=$(CLICKHOUSE_HOST)"
-          - "--user=$(CLICKHOUSE_USER)"
-          - "--password=$(CLICKHOUSE_PASSWORD)"
-          - "--port=$(CLICKHOUSE_PORT)"
-  ```
+    ```yaml
+    queryService:
+      initContainers:
+        migration:
+          enabled: true
+          image:
+            registry: docker.io
+            repository: signoz/migrate
+            tag: 0.38
+            pullPolicy: IfNotPresent
+          args:
+            - "--data_source=/var/lib/signoz/signoz.db"
+            - "--host=$(CLICKHOUSE_HOST)"
+            - "--user=$(CLICKHOUSE_USER)"
+            - "--password=$(CLICKHOUSE_PASSWORD)"
+            - "--port=$(CLICKHOUSE_PORT)"
+    ```
 
   If you are using external ClickHouse replace the value of `host` and `port` along with the respective value of `user` and `password`
 
 3. Run the following command to upgrade the chart:
-  ```bash
-  helm --namespace platform upgrade my-release signoz/signoz -f deployment-override.yaml
-  ```
+    ```bash
+    helm --namespace platform upgrade my-release signoz/signoz -f deployment-override.yaml
+    ```
 4. Check the logs of the migration container using:
-  ```bash
-  kubectl logs my-release-signoz-query-service-0 -n platform -c my-release-signoz-query-service-migration
-  ```
+    ```bash
+    kubectl logs my-release-signoz-query-service-0 -n platform -c my-release-signoz-query-service-migration
+    ```
 5. Remove the init container added in step 1 if there are no errors in the step 4 and upgrade:
-  ```bash
-  helm --namespace platform upgrade my-release signoz/signoz -f deployment-override.yaml
-  ``` 
+    ```bash
+    helm --namespace platform upgrade my-release signoz/signoz -f deployment-override.yaml
+    ``` 
 
 
 ## In case of Upgrade Failure

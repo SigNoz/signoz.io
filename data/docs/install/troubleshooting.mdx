@@ -41,7 +41,9 @@ You can also use troubleshoot Docker image:
 docker run -it --rm signoz/troubleshoot checkEndpoint --endpoint=172.17.0.1:4317
 ```
 
-**Note:** SigNoz Otel Collector should be accessible in `172.17.0.1:4317` from your application even if running in different docker network.
+<Admonition>
+SigNoz Otel Collector should be accessible in `172.17.0.1:4317` from your application even if running in different docker network.
+</Admonition>
 
 #### Kubernetes
 
@@ -61,9 +63,10 @@ kubectl -n app-namespace run troubleshoot --image=signoz/troubleshoot \
   --endpoint=my-release-signoz-otel-collector.platform.svc.cluster.local:4317
 ```
 
-**Notes:**
+<Admonition>
   1. Replace `app-namespace` with your application namespace, `my-release` with SigNoz helm release name, and `platform` with SigNoz namespace.
   2. In case on multiple k8s cluster, you might have to set otel collector service type as `NodePort` or `LoadBalancer`.
+</Admonition>
 
 ```bash
 helm upgrade --install -n platform my-release signoz/signoz \
@@ -146,13 +149,15 @@ Here is the SigNoz Otel Collector address grid which could be helpful:
 </table>
 
 
-**Notes:**
+<Admonition>
 1. For the `<otelcollector-IP>`, use private IP address if the VM is in same private network.
 2. Replace `<namespace>` with SigNoz namespace and `<release-name>` with SigNoz helm
   release name.
 3. In the case of k8s where the application and SigNoz are running in different k8s cluster, you will have to expose otel collector service.
   Set the service type to either `NodePort` or `LoadBalancer`.
+</Admonition>
+
   ```
-helm upgrade --install -n platform my-release signoz/signoz \
+  helm upgrade --install -n platform my-release signoz/signoz \
   --set otelCollector.serviceType="<NodePort or LoadBalancer>"
   ```

@@ -21,7 +21,6 @@ This setup is similar to the central collector but with a different function.
 helm repo add signoz <https://charts.signoz.io>
 helm install -n signoz  --create-namespace kubelet-otel signoz/k8s-infra \\
 --set signozApiKey=<ingestionKey> --set otelCollectorEndpoint="ingest.<region>.signoz.cloud:443" --set otelInsecure=false
-
 ```
 
 ## Troubleshooting
@@ -32,7 +31,6 @@ If you encounter any issues while setting up logging and metrics for your AKS cl
     
     ```bash
     kubectl logs -f -n signoz -l app.kubernetes.io/component=otel-agent
-    
     ```
     
     Review the logs for any error messages or indications of misconfiguration.
@@ -41,7 +39,6 @@ If you encounter any issues while setting up logging and metrics for your AKS cl
     
     ```bash
     kubectl get cm/kubelet-otel-k8s-infra-otel-agent -n signoz -o yaml
-    
     ```
     
     Ensure that the configuration matches your expected settings, including the SigNoz API key and the OpenTelemetry Collector endpoint.
@@ -50,7 +47,6 @@ If you encounter any issues while setting up logging and metrics for your AKS cl
     
     ```bash
     kubectl get pods,services,configmaps -n signoz
-    
     ```
     
     Check if the required pods, services, and config maps are running and in a healthy state.

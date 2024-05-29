@@ -2,6 +2,7 @@ import 'css/tailwind.css'
 import 'css/global.css'
 import 'pliny/search/algolia.css'
 
+import { GoogleTagManager } from '@next/third-parties/google'
 import { SearchProvider, SearchConfig } from 'pliny/search'
 import SectionContainer from '@/components/SectionContainer'
 import siteMetadata from '@/data/siteMetadata'
@@ -10,7 +11,7 @@ import { Metadata } from 'next'
 import MainFooter from '@/components/mainFooter'
 import TopNav from '@/components/TopNav/TopNav'
 import { Inter } from 'next/font/google'
-import { GoogleTagManager } from '@next/third-parties/google'
+import React from 'react'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -61,6 +62,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       className={`${inter.className} scroll-smooth`}
       suppressHydrationWarning
     >
+      <GoogleTagManager gtmId="GTM-N9B6D4H" />
       <link rel="apple-touch-icon" sizes="76x76" href="/static/favicons/apple-touch-icon.png" />
       <link rel="icon" type="image/png" sizes="32x32" href="/static/favicons/favicon-32x32.png" />
       <link rel="icon" type="image/png" sizes="16x16" href="/static/favicons/favicon-16x16.png" />
@@ -70,8 +72,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <meta name="theme-color" media="(prefers-color-scheme: light)" content="#fff" />
       <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000" />
       <link rel="alternate" type="application/rss+xml" href="/feed.xml" />
-      <GoogleTagManager gtmId="GTM-N9B6D4H" />
-      <body className="bg-white pl-[calc(100vw-100%)] text-black antialiased dark:bg-signoz_ink-500 dark:text-white">
+
+      <body className="bg-signoz_ink-500 pl-[calc(100vw-100%)] text-white antialiased">
+        <noscript>
+          <iframe
+            src="https://www.googletagmanager.com/ns.html?id=GTM-N9B6D4H"
+            height="0"
+            width="0"
+            style={{ display: 'none', visibility: 'hidden' }}
+          ></iframe>
+        </noscript>
+
         <ThemeProviders>
           <SectionContainer>
             <div className="relative flex h-screen flex-col justify-between ">
