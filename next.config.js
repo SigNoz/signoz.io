@@ -224,6 +224,16 @@ module.exports = () => {
           destination: '/docs/operate/query-service/reset-admin-password/',
           permanent: true,
         },
+        {
+          source: '/blog/',
+          destination: '/resource-center/blog/',
+          permanent: true,
+        },
+        {
+          source: '/opentelemetry/',
+          destination: '/resource-center/opentelemetry/',
+          permanent: true,
+        },
       ]
     },
     webpack: (config, options) => {
