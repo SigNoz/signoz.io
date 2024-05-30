@@ -28,7 +28,7 @@ From VMs, there are two ways to send data to SigNoz Cloud.
 
 #### Send traces directly to SigNoz Cloud
 
-Step 1. Install OpenTelemetry packages
+**Step 1.** Install OpenTelemetry packages
 
 ```bash
 npm install --save @opentelemetry/sdk-trace-web@^1.21.0                                                                   
@@ -40,7 +40,7 @@ npm install --save @opentelemetry/propagator-b3@^1.21.0
 npm install --save @opentelemetry/semantic-conventions@^1.21.0
 ```
 
-Step 2. Create `instrument.ts` file<br></br>
+**Step 2.** Create `instrument.ts` file<br></br>
 You need to configure the endpoint for SigNoz cloud in this file.
 
 ```ts
@@ -112,7 +112,7 @@ Depending on the choice of your region for SigNoz cloud, the ingest endpoint wil
 
 
 
-Step 3. Add the below import to your `main.ts` file.
+**Step 3.** Add the below import to your `main.ts` file.
 
 {/* <Admonition type="info">
 The below import should be the first line in the main file of your application (Ex -> `main.ts`)
@@ -124,7 +124,7 @@ The below import should be the first line in the main file of your application (
 import './app/instrument';
 ```
 
-Step 4. Run the application
+**Step 4.** Run the application
 
 ```bash
 ng serve
@@ -137,13 +137,31 @@ The data captured with OpenTelemetry from your application should start showing 
 
 #### Send traces via OTel Collector binary
 
+
+{/* <Admonition>
+You can find instructions to install OTel Collector binary [here](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) in your VM. Once you are done setting up your OTel Collector binary, you can follow the below steps for instrumenting your Javascript application.
+</Admonition> */}
+
+**Step 1.** Install OpenTelemetry Collector binary
+
 OTel Collector binary helps to collect logs, hostmetrics, resource and infra attributes. It is recommended to install Otel Collector binary to collect and send traces to SigNoz cloud. You can correlate signals and have rich contextual data through this way.
 
-<Admonition>
-You can find instructions to install OTel Collector binary [here](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) in your VM. Once you are done setting up your OTel Collector binary, you can follow the below steps for instrumenting your Javascript application.
-</Admonition>
+You can find instructions to install OTel Collector binary [here](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) in your VM. 
 
-Step 1. Install OpenTelemetry packages
+While creating the `config.yaml` during the installation fo the OTel Collector Binary, you need to enable CORS under the receivers section of the config file. This is needed so that you don't get 
+CORS error which can hinder sending your Traces to SigNoz Cloud. See the code snippet below to understand how you can enable CORS in your config file:
+
+```yml
+      http:
++        cors:
++          allowed_origins:
++            - <Frontend-application-URL>  # URL of your Frontend application. Example -> http://localhost:4200, https://netflix.com etc.
+```
+`<Frontend-application-URL>` - URL where your frontend application is running. For Example, http://localhost:4200 or https://netflix.com etc.
+
+**NOTE:** Make sure to restart your collector after making the config changes
+
+**Step 2.** Install OpenTelemetry packages
 
 ```bash
 npm install --save @opentelemetry/sdk-trace-web@^1.21.0                                                                   
@@ -155,7 +173,7 @@ npm install --save @opentelemetry/propagator-b3@^1.21.0
 npm install --save @opentelemetry/semantic-conventions@^1.21.0
 ```
 
-Step 2. Create `instrument.ts` file<br></br>
+**Step 3.** Create `instrument.ts` file<br></br>
 
 ```ts
 import { registerInstrumentations } from '@opentelemetry/instrumentation';
@@ -211,7 +229,7 @@ registerInstrumentations({
 ```
 - `<service_name>` : Name of your service.
 
-Step 3. Add the below import to your `main.ts` file.
+**Step 4.** Add the below import to your `main.ts` file.
 {/* <Admonition type="info">
 The below import should be the first line in the main file of your application (Ex -> `main.ts`)
 </Admonition> */}
@@ -221,7 +239,7 @@ import './app/instrument';
 ```
     
 
-Step 4. Run the application
+**Step 5.** Run the application
 ```bash
 ng serve
 ```
@@ -233,7 +251,7 @@ For Angular application deployed on Kubernetes, you need to install OTel Collect
 
 Once you have set up OTel Collector agent, you can proceed with OpenTelemetry Angular instrumentation by following the below steps:
 
-Step 1. Install OpenTelemetry packages
+**Step 1.** Install OpenTelemetry packages
 
 ```bash
 npm install --save @opentelemetry/sdk-trace-web@^1.21.0                                                                   
@@ -245,7 +263,7 @@ npm install --save @opentelemetry/propagator-b3@^1.21.0
 npm install --save @opentelemetry/semantic-conventions@^1.21.0
 ```
 
-Step 2. Create `instrument.ts` file<br></br>
+**Step 2.** Create `instrument.ts` file<br></br>
 
 ```ts
 import { registerInstrumentations } from '@opentelemetry/instrumentation';
@@ -301,7 +319,7 @@ registerInstrumentations({
 ```
 - `<service_name>` : Name of your service.
 
-Step 3. Add the below import to your `main.ts` file.
+**Step 3.** Add the below import to your `main.ts` file.
 {/* <Admonition type="info">
 The below import should be the first line in the main file of your application (Ex -> `main.ts`)
 </Admonition> */}
@@ -311,7 +329,7 @@ import './app/instrument';
 ```
     
 
-Step 4. Run the application
+**Step 4.** Run the application
 ```bash
 ng serve
 ```
@@ -405,7 +423,7 @@ Facing difficulties with instrumenting your application? Check out this video tu
 <YouTube id="g-I-v1FtMoM" mute={false} />
 
 ## Sample Angular App
-- [Sample Angular App](https://github.com/SigNoz/sample-angular-app/) - Contains without-instrumentation branch as well as instrumented branch `main`.
+- [Sample Angular App](https://github.com/SigNoz/angular-otel-native) - contains `instrument.ts` file with placeholder for URL and Ingestion Details (For SigNoz Cloud)
 
 
 <InstrumentationFAQ />
