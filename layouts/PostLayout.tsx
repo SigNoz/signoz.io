@@ -17,16 +17,23 @@ export interface tocItemProps {
   value: string
 }
 
+export interface RelatedArticleProps {
+  title: string
+  publishedOn: string
+  url: string
+}
+
 interface LayoutProps {
   content: CoreContent<Blog>
   authorDetails: CoreContent<Authors>[]
   authors: string[]
   children: ReactNode
   toc: tocItemProps[]
+  relatedArticles?: RelatedArticleProps[]
 }
 
 export default function PostLayout({ content, authors, children, toc }: LayoutProps) {
-  const { slug, date, title, tags, readingTime } = content
+  const { slug, date, title, tags, readingTime, relatedArticles } = content
   const mainRef = useRef<HTMLElement | null>(null)
 
   return (
@@ -59,12 +66,13 @@ export default function PostLayout({ content, authors, children, toc }: LayoutPr
           <div className="post-content">
             <article className="prose prose-slate max-w-none py-6 dark:prose-invert">
               {children}
-              {/* <BlogFeedback /> */}
             </article>
           </div>
         </div>
 
-        <RelatedArticles />
+        {relatedArticles && Array.isArray(relatedArticles) && (
+          <RelatedArticles relatedArticles={relatedArticles} />
+        )}
       </SectionContainer>
     </main>
   )
