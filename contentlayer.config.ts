@@ -2,7 +2,6 @@ import { defineDocumentType, ComputedFields, makeSource } from 'contentlayer2/so
 import { writeFileSync } from 'fs'
 import readingTime from 'reading-time'
 import GithubSlugger, { slug } from 'github-slugger'
-import path from 'path'
 import { fromHtmlIsomorphic } from 'hast-util-from-html-isomorphic'
 // Remark packages
 import remarkGfm from 'remark-gfm'
@@ -19,6 +18,8 @@ import rehypeAutolinkHeadings from 'rehype-autolink-headings'
 import rehypePrismPlus from 'rehype-prism-plus'
 import rehypePresetMinify from 'rehype-preset-minify'
 import siteMetadata from './data/siteMetadata'
+import blogRelatedArticles from './constants/blogRelatedArticles.json'
+import comparisonsRelatedArticles from './constants/comparisonsRelatedArticles.json'
 import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer.js'
 
 const root = process.cwd()
@@ -105,6 +106,20 @@ function createSearchIndex(content) {
   }
 }
 
+function getRelatedArticles(doc, relatedArticles) {
+  const blogSlug = doc._raw.flattenedPath
+
+  const blog = relatedArticles.find((blog) => {
+    return blog.blogURL === blogSlug
+  })
+
+  if (blog) {
+    return blog.relatedArticles
+  } else {
+    return []
+  }
+}
+
 export const Page = defineDocumentType(() => ({
   name: 'Page',
   filePathPattern: 'blog/**/*.mdx',
@@ -137,6 +152,10 @@ export const Blog = defineDocumentType(() => ({
   },
   computedFields: {
     ...computedFields,
+    relatedArticles: {
+      type: 'json',
+      resolve: (doc) => getRelatedArticles(doc, blogRelatedArticles),
+    },
     structuredData: {
       type: 'json',
       resolve: (doc) => ({
@@ -221,6 +240,10 @@ export const Comparison = defineDocumentType(() => ({
   },
   computedFields: {
     ...computedFields,
+    relatedArticles: {
+      type: 'json',
+      resolve: (doc) => getRelatedArticles(doc, comparisonsRelatedArticles),
+    },
     structuredData: {
       type: 'json',
       resolve: (doc) => ({
