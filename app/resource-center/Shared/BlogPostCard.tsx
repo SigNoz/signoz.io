@@ -13,12 +13,27 @@ export default function BlogPostCard({
 }) {
   const { path, date, title, authors } = blog
 
-  const getAuthorName = (authorID) => {
+  const getAuthorDetails = (authorID) => {
     if (Authors[authorID]) {
-      return Authors[authorID].name
+      return Authors[authorID]
     }
 
-    return ''
+    return {}
+  }
+
+  const renderAuthor = (author) => {
+    const authorData = getAuthorDetails(author)
+
+    return (
+      <div className="flex items-center gap-2">
+        <img
+          loading="lazy"
+          src={authorData.image_url}
+          className="my-auto inline-block aspect-square h-6 w-6 shrink-0 rounded-full"
+        />
+        <div className="text-xs capitalize">{authorData.name}</div>
+      </div>
+    )
   }
 
   return (
@@ -40,22 +55,13 @@ export default function BlogPostCard({
             </div>
           </div>
 
-          <div className="mt-16 flex w-full flex-col justify-between gap-5 py-px text-sm leading-5 max-md:mt-10 lg:flex-row">
-            <div className="flex items-center gap-2 font-medium text-stone-500 dark:text-white">
-              {authors && Array.isArray(authors) && (
-                <>
-                  <img
-                    loading="lazy"
-                    src={`https://dummyimage.com/300.png&text=${authors[0]?.slice(0, 1)}`}
-                    className="my-auto inline-block aspect-square h-6 w-4 w-6 shrink-0 rounded-full"
-                  />
-                  <div className="capitalize">{getAuthorName(authors[0])}</div>
-                </>
-              )}
+          <div className="mt-16 flex w-full flex-col items-end justify-between gap-5 py-px text-sm leading-5 max-md:mt-10 lg:flex-row">
+            <div className="flex flex-col gap-2 font-medium text-stone-500 dark:text-white">
+              {authors && Array.isArray(authors) && renderAuthor(authors[0])}
             </div>
             <div className="flex items-center gap-1.5 whitespace-nowrap text-stone-700 dark:text-stone-300">
               <Timer size={16} />
-              <div className="text-stone-700 dark:text-white">{blog.readingTime.text}</div>
+              <div className="text-xs text-stone-700 dark:text-white">{blog.readingTime.text}</div>
             </div>
           </div>
         </div>
