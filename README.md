@@ -1,5 +1,3 @@
-Certainly! Here's the updated guide with the instructions for adding images to the appropriate folder:
-
 # Contributing a Blog to the SigNoz Repository
 
 We appreciate your interest in contributing to the SigNoz blog! Follow the steps below to create and submit your blog post.
