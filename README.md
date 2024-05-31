@@ -121,7 +121,7 @@ Before pushing your changes, it's a good idea to fetch and merge any changes fro
 1. Push your branch to your forked repository:
     
     ```bash
-    git push origin add-new-blog
+    git push --set-upstream origin add-new-blog
     
     ```
 
