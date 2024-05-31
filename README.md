@@ -32,7 +32,7 @@ Setting up the upstream repository allows you to fetch changes from the original
 1. Add the original repository as the upstream remote:
     
     ```bash
-    git remote add upstream <https://github.com/SigNoz/signoz-web.git>
+    git remote add upstream https://github.com/SigNoz/signoz-web.git
     ```
     
 2. Verify the new remote named `upstream`:
