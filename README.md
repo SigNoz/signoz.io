@@ -125,7 +125,7 @@ Before pushing your changes, it's a good idea to fetch and merge any changes fro
     
     ```
 
-## Step 10: Run the Project Locally
+## Step 10: Build the Project Locally
 
 1. Navigate to the root directory of the repository (if not already there):
 
@@ -139,16 +139,25 @@ Before pushing your changes, it's a good idea to fetch and merge any changes fro
    yarn install
    ```
 
-3. Start the development server:
+3. Build the project to ensure there are no errors:
+
+   ```bash
+   yarn build
+   ```
+
+4. This will create a `build` directory with the production build of the website. Check the output for any errors.
+
+## Step 11: Run the Project Locally
+
+1. Start the development server:
 
    ```bash
    yarn start
    ```
 
-4. Open your browser and navigate to `http://localhost:3000` to view the website locally. Check your blog post to ensure everything looks correct.
+2. Open your browser and navigate to `http://localhost:3000` to view the website locally. Check your blog post to ensure everything looks correct.
 
-    
-## Step 10: Create a Pull Request
+## Step 12: Create a Pull Request
 
 1. Navigate to your forked repository on GitHub.
 2. Click on the "Compare & pull request" button.
