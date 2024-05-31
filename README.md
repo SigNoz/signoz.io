@@ -124,8 +124,30 @@ Before pushing your changes, it's a good idea to fetch and merge any changes fro
     git push origin add-new-blog
     
     ```
-    
 
+## Step 10: Run the Project Locally
+
+1. Navigate to the root directory of the repository (if not already there):
+
+   ```bash
+   cd ../../..
+   ```
+
+2. Install the project dependencies using Yarn:
+
+   ```bash
+   yarn install
+   ```
+
+3. Start the development server:
+
+   ```bash
+   yarn start
+   ```
+
+4. Open your browser and navigate to `http://localhost:3000` to view the website locally. Check your blog post to ensure everything looks correct.
+
+    
 ## Step 10: Create a Pull Request
 
 1. Navigate to your forked repository on GitHub.
