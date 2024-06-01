@@ -29,7 +29,7 @@ export default function NextCarousel({ items }) {
   }
 
   return (
-    <div className="carousel">
+    <div className="next-carousel">
       <Carousel responsive={responsive}>
         {items.map((item) => {
           return (
