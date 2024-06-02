@@ -25,6 +25,12 @@ const Authors: AuthorInterface = {
     url: 'https://github.com/ankit01-oss',
     image_url: 'https://signoz.io/img/users/ankit-anand.webp',
   },
+  shivanshu: {
+    name: 'Shivanshu Raj',
+    title: 'SigNoz Team',
+    url: 'https://github.com/shivanshuraj1333',
+    image_url: 'https://signoz.io/img/users/shivanshu.jpeg',
+  },
   vishal: {
     name: 'Vishal Sharma',
     title: 'SigNoz Team',
