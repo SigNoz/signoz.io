@@ -1,6 +1,6 @@
 ---
 title: Deep dive observability of messaging queues with OpenTelemetry
-slug: kubernetes-monitoring-troubleshooting
+slug: kubernetes-monitoring-opentelemetry
 date: 2024-06-02
 tags: [Tech Tutorial]
 authors: [pranay]
@@ -10,7 +10,9 @@ hide_table_of_contents: false
 keywords: [kubernetes monitoring,kubernetes,k8s monitoring,host metrics,node metrics,kuberentes monitoring open source,opentelemetry,signoz,kubernetes opentelemetry]
 ---
 
-# Deep dive observability of messaging queues with OpenTelemetry
+<head>
+  <link rel="canonical" href="https://signoz.io/blog/kafka-monitoring-opentelemetry/"/>
+</head>
 
 Working in the observability and monitoring space for the last few years, we have had multiple users complain about lack of detailed monitoring for messaging systems and Kafka in particular. Especially with the coming of standards like OpenTelemetry, 
 
@@ -23,6 +25,10 @@ One of the key things we want to leverage is tracing. Most current monitoring so
 ### Background
 
 In the modern distributed architecture, Infrastructure monitoring has become crucial, there are many components which contributes for system stability, In this blog post we will see how end to end observability of Messaging queues can be achieved using [OpenTelemetry](https://opentelemetry.io/) and the problems it can solve to ensuring stability and scalability of Distributed Asynchronous Architectures.
+
+![request_flow.png](/img/blog/2024/05/kafka-monitoring/request_flow.png)
+
+**Fig. 1:** Request flow through kafka
 
 Today there are solutions which can help with visualising out of the box [JMX metrics](https://docs.confluent.io/platform/current/kafka/monitoring.html) from a Messaging queues like Kafka, but it’s still hard to see what’s happening in a single trace and how kafka components are affecting every request. We will see what can be done to improve the reliability and performance by using client side instrumentation of async systems using OpenTelemetry.
 
@@ -41,15 +47,13 @@ Some challenges that can be solved involves:
 3. Deep insights into Kafka at every time down to every request
 4. Insights into Maintaining, Scaling and Capacity Planning of Brokers of Kafka
 
-![request_flow.png](/img/blog/2024/05/kafka-monitoring/request_flow.png)
 
- **Fig. 1:** Request flow through kafka
 
 For this we assume that the Kakfa producers and consumers use opentelemetry client libraries for context propagation. If you’re new to OpenTelemetry or want to follow along with an example you can follow the [github guide](https://github.com/shivanshuraj1333/kafka-opentelemetry-instrumentation) which will help you configure the above kafka setup along with producer and consumer applications in Java, which are automatically instrumented with [Opentelemetry Java Agent](https://github.com/open-telemetry/opentelemetry-java-instrumentation). You’d be able to see metrics and traces in the SigNoz UI.
 
 ## Technical Deep Dive
 
-Consider the Fig [2] of Kafka which describes the setup from the [guide](https://github.com/shivanshuraj1333/kafka-opentelemetry-instrumentation).When it comes to observability within kafka as a request travels from producers to some topic split across Brokers and queued in a partition, before a consumer group starts consuming it, a lot of things happen which may slowdown the request, observing exactly what happens is a challenge. Kafka out of the box provides JMX metrics which helps in understanding the health of Kafka clusters and individual components involved but there’s no easy way to correlate every individual request that’s going through kafka components. Correlating every request with the metrics for a given time can give some deep internal insights which might be hard to collect otherwise.
+Consider **Fig 2** which describes the setup from the [guide](https://github.com/shivanshuraj1333/kafka-opentelemetry-instrumentation).When it comes to observability within kafka as a request travels from producers to some topic split across Brokers and queued in a partition, before a consumer group starts consuming it, a lot of things happen which may slowdown the request, observing exactly what happens is a challenge. Kafka out of the box provides JMX metrics which helps in understanding the health of Kafka clusters and individual components involved but there’s no easy way to correlate every individual request that’s going through kafka components. Correlating every request with the metrics for a given time can give some deep internal insights which might be hard to collect otherwise.
 
 ![kafka-otel-signoz](/img/blog/2024/05/kafka-monitoring/kafka-otel-signoz.png)
 
@@ -63,7 +67,7 @@ As you can see, both `kafka-producer`  and `kafka-consumer` are shown in the tra
 
 ![kafka-messaging.jpg](/img/blog/2024/05/kafka-monitoring/kafka-messaging.jpg)
 
-Fig. 1
+**Fig. 3:** Tracing the message path from Producers to Consumers
 
 If we look at the attributes collected from Producer and Consumer spans, we can identify some attributes which can help us correlate with metrics for a given time period.
 
@@ -97,9 +101,9 @@ Attributes:
 -> messaging.message.body.size: Int(10)
 ```
 
-Fig. 2 
+**Fig. 4:**  Key attributes available in Producer and Consumer spans instrumented with OpenTelemetry
 
-You check out our video tutorial here on monitoring kafka [here](https://www.youtube.com/watch?v=ov1pyCBwlJs&t=54s) 
+You check out our detailed video tutorial here on how to setup complete client side monitoring of Kafka [here](https://www.youtube.com/watch?v=ov1pyCBwlJs) 
 
 ### Scenario 1 : Kafka partition latency is high and you want to understand why it’s happening
 
@@ -109,14 +113,15 @@ Possible reason for increase in partition latencies are:
 
 1. Partition is getting resource constrained potentially with high usage of memory or cpu
 2. Consumers are slow and are not processing messages fast enough. This can be because of 2 reasons
-    1. Consumers getting slow (either they call some other services like DBs internally and they are having issues or some other reasons)
-    2. Consumers having high errors
+    a. Consumers getting slow (either they call some other services like DBs internally and they are having issues or some other reasons)
+    b. Consumers having high errors
 3. Producers are sending lots of data 
 
 
 <NextCarousel items={['/img/blog/2024/05/kafka-monitoring/kafka-latency-1.png', '/img/blog/2024/05/kafka-monitoring/kafka-latency-2.png', '/img/blog/2024/05/kafka-monitoring/kafka-latency-3.png' , '/img/blog/2024/05/kafka-monitoring/kafka-latency-4.png' , '/img/blog/2024/05/kafka-monitoring/kafka-latency-5.png', '/img/blog/2024/05/kafka-monitoring/kafka-latency-6.png']} />
+**Fig 5:** Kafka Partition latency troubleshooting
 
-In the above proposal, users can find Topic and Partition wise latency and throughput metrics. As shown in Fig. 2, the producer and consumer spans have `topic` and `partition`  as attributes and we will leverage this to show the above details.
+In the above proposal, users can find Topic and Partition wise latency and throughput metrics. As shown in Fig. 4, the producer and consumer spans have `topic` and `partition`  as attributes and we will leverage this to show the above details.
 
 If a particular latency/ throughput looks problematic, users can dive deeper into the issue by clicking on action links to see:
 
@@ -137,7 +142,7 @@ Compared to metrics, this doesn’t aggregate  over all messages going to differ
 
 ### Scenario 2 : Kafka consumer lag is high and you want to understand why
 
-**Approach** : Possible reasons for increase in consumer lag[1] are:
+**Approach** : Possible [reasons](https://docs.confluent.io/platform/current/monitor/monitor-consumer-lag.html#causes-of-consumer-lag) for increase in consumer lag are:
 
 - Slow consumers: Slow consumers that take a long time to process messages can cause consumer lag.
 - Message size: Large message sizes can cause consumer lag, especially if the consumer is not configured to handle large messages.
@@ -146,13 +151,13 @@ Compared to metrics, this doesn’t aggregate  over all messages going to differ
 - Network latency: High network latency between the Kafka cluster and the consumer can cause consumer lag.
 
 
-![consumer-lag.png](/img/blog/2024/05/kafka-monitoring/consumer-lag.png)
-
 In the above proposal, a user can see consumer lag graphs for for different Consumer Group - Partition ordered by average consumer lag.
 
 If she wants to find more details about a particular point ( which corresponds to a specific consumer group and partition), she can find more details about it in a side panel.
 
 <NextCarousel items={['/img/blog/2024/05/kafka-monitoring/consumer-lag-1.png', '/img/blog/2024/05/kafka-monitoring/consumer-lag-2.png','/img/blog/2024/05/kafka-monitoring/consumer-lag-3.png','/img/blog/2024/05/kafka-monitoring/consumer-lag-4.png','/img/blog/2024/05/kafka-monitoring/consumer-lag-5.png','/img/blog/2024/05/kafka-monitoring/consumer-lag-6.png']} />
+
+**Fig 6:** Consumer Lag troubleshooting and possible causes
 
 They key parameters we show are:
 
@@ -165,19 +170,19 @@ The other source could be message size getting bigger and the consumer not able 
 
 4. Network Latency - Consumers can also face issues in getting messages from Kafka because of network issues. Understanding fetch latencies for each of the consumer instances in the selected consumer group could be a good way to find if this is an issue.
 
-Questions:
+_Question:_
 
-One question we had was if breaking down a consumer group into corresponding consumer instances is more useful or are consumer services a better grouping parameter?
+_One question we had was if breaking down a consumer group into corresponding consumer instances is more useful or are consumer services a better grouping parameter?_
 
-[1] [https://docs.confluent.io/platform/current/monitor/monitor-consumer-lag.html#causes-of-consumer-lag](https://docs.confluent.io/platform/current/monitor/monitor-consumer-lag.html#causes-of-consumer-lag)
 
 ### Scenario 3: Producer and Consumer RED Overview  metrics with correlation to traces
 
 This use case is designed to cater scenarios where platform owners want to get an overview of all the producers and consumers which are writing to Kafka and their performance. 
 
-![Producers and Consumers Overview](/img/blog/2024/05/kafka-monitoring/overview.png)
 
 <NextCarousel items={['/img/blog/2024/05/kafka-monitoring/producer-consumer-overview-1.png','/img/blog/2024/05/kafka-monitoring/producer-consumer-overview-2.png','/img/blog/2024/05/kafka-monitoring/producer-consumer-overview-3.png','/img/blog/2024/05/kafka-monitoring/producer-consumer-overview-4.png' ]} />
+**Fig 7:** Producer and Consumer Overview
+
 
 **Approach**
 
@@ -190,6 +195,8 @@ Since, all of these are powered by traces, users can dive deeper into partitions
 Another issue we have observed users facing is around dropping of messages from producer to consumer services. With the above features, you can find if latency has increased between a producer and consumer services. But some times, the messages have not reached consumers and in that case the latency is `undefined` and it is not included in the p99 latency calculations.
 
 ![Producer to Consumer Drop rate.png](/img/blog/2024/05/kafka-monitoring/drop.png)
+**Fig 8:** Dropping messages between Producer and Consumer 
+
 
 **Approach**
 
@@ -200,6 +207,19 @@ In this proposal, we plan to show the list of producer and relevant consumer ser
 The evaluation period for determining the drop rate would be configurable as different businesses have different expectations on when the messages should reach the consumer.
 
 
+## Conclusion and Questions
+
+In the above sections, we have explained the limitations of currently available solutions for monitoring messaging systems (more specifically Kafka). We have proposed solutions for this can be improved deeply leveraging tracing powered by OpenTelemetry.
+
+Which of the scenarios seem most relevant to you and is the proposed solution useful or you would like to see any more data points. Would love to get any inputs on that. 
+
+Please comments below or write to us at <a href="mailto:product@signoz.io">product@signoz.io</a> 
+
+
 ---
 
-Which of the scenarios seem most relevant to you and is the proposed solution useful or you would like to see any more data points here
+Read more about Monitoring Kafka Clients with OpenTelemetry:<br></br>
+
+[Complete Guide to tracing Kafka clients with OpenTelemetry in Go](https://signoz.io/blog/opentelemetry-kafka/)<br></br>
+
+[ [Video] Detailed tutorial on setting up tracing for Kafka clients with OpenTelemetry](https://www.youtube.com/watch?v=ov1pyCBwlJs)<br></br>
