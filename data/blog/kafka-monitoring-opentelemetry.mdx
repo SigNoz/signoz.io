@@ -14,11 +14,13 @@ keywords: [kubernetes monitoring,kubernetes,k8s monitoring,host metrics,node met
   <link rel="canonical" href="https://signoz.io/blog/kafka-monitoring-opentelemetry/"/>
 </head>
 
-Working in the observability and monitoring space for the last few years, we have had multiple users complain about lack of detailed monitoring for messaging systems and Kafka in particular. Especially with the coming of standards like OpenTelemetry, 
+Working in the observability and monitoring space for the last few years, we have had multiple users complain about lack of detailed monitoring for messaging queues and Kafka in particular. Especially with the coming of standards like OpenTelemetry, 
 
 We dived deeper into the problem and were trying to understand what better can be done here to make understanding and remediating issues in messaging systems much easier.
 
-In the below sections, we have taken Kafka as our focus as a representative messaging system and shared some problems and possible solutions. We would love to understand if these problem statements resonate with the community here and would love any feedback on how this can be more useful to you. We also have shared some wireframes on solutions, but those are just to put things more concretely and would love any feedback on what flows, starting points would be most useful to you.
+In the below sections, we have taken Kafka as our focus as a representative messaging queue and shared some problems and possible solutions. Though Kafka is a more generic distributed event store, we are using it as a representative abstraction for a messaging queue which is a common way in which it is used.
+
+We would love to understand if these problem statements resonate with the community here and would love any feedback on how this can be more useful to you. We also have shared some wireframes on solutions, but those are just to put things more concretely and **would love any feedback on what flows, starting points would be most useful to you**.
 
 One of the key things we want to leverage is tracing. Most current monitoring solutions for Kafka show metrics about Kafka, but metrics are often aggregated and often don’t give much details on where exactly things are going wrong. Traces on the other hand shows you the exact path which a message has taken and provides lot more details. One of our focus is how we can leverage information from traces to help solving issues much faster.
 
@@ -48,10 +50,10 @@ Some challenges that can be solved involves:
 4. Insights into Maintaining, Scaling and Capacity Planning of Brokers of Kafka
 
 
-For this we assume that the Kakfa producers and consumers use opentelemetry client libraries for context propagation. If you’re new to OpenTelemetry or want to follow along with an example you can follow the [github guide](https://github.com/shivanshuraj1333/kafka-opentelemetry-instrumentation) which will help you configure the above kafka setup along with producer and consumer applications in Java, which are automatically instrumented with [Opentelemetry Java Agent](https://github.com/open-telemetry/opentelemetry-java-instrumentation). You’d be able to see metrics and traces in the SigNoz UI.
+For this we assume that the Kakfa producers and consumers use opentelemetry client libraries for context propagation. If you’re new to OpenTelemetry or want to follow along with an example you can follow the [github guide](https://github.com/SigNoz/kafka-opentelemetry-instrumentation) which will help you configure the above kafka setup along with producer and consumer applications in Java, which are automatically instrumented with [Opentelemetry Java Agent](https://github.com/open-telemetry/opentelemetry-java-instrumentation). You’d be able to see metrics and traces in the SigNoz UI.
 
 
- **Fig 2** below describes the setup from the [guide](https://github.com/shivanshuraj1333/kafka-opentelemetry-instrumentation). We use JMX receiver, [Kafkametrics receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/kafkametricsreceiver/README.md) from OpenTelemetry and also traces data sent in OTLP format. 
+ **Fig 2** below describes the setup from the [guide](https://github.com/SigNoz/kafka-opentelemetry-instrumentation). We use JMX receiver, [Kafkametrics receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/kafkametricsreceiver/README.md) from OpenTelemetry and also traces data sent in OTLP format. 
 
 
 ![kafka-otel-signoz](/img/blog/2024/05/kafka-monitoring/kafka-otel-signoz.png)
@@ -71,7 +73,7 @@ As you can see, both `kafka-producer`  and `kafka-consumer` are shown in the tra
 If we look at the attributes collected from Producer and Consumer spans, we can identify some attributes which can help us correlate with metrics for a given time period.
 
 You can follow along in this github repo to implement
-[Reference](https://github.com/shivanshuraj1333/kafka-opentelemetry-instrumentation/tree/master/client-spans)  
+[Reference](https://github.com/SigNoz/kafka-opentelemetry-instrumentation/tree/master/client-spans)  
 
 ```jsx
 // Some important attributes from producer span
@@ -204,9 +206,14 @@ In this proposal, we plan to have 2 tabs listing producer and consumer services 
 
 Since, all of these are powered by traces, users can dive deeper into partitions were p99 latency or Error rate seems high. On clicking the latency/error rate values they will be taken to detailed trace list pages which will show the spans with high latency or errors. Users can then dive deeper into the traces to hypothesize the issue that could have occured.
 
-### Scenario 4: Messages dropping from Producers to Consumers
+### Scenario 4: Messages not consumed within a specified time 
 
-Another issue we have observed users facing is around dropping of messages from producer to consumer services. With the above features, you can find if latency has increased between a producer and consumer services. But some times, the messages have not reached consumers and in that case the latency is `undefined` and it is not included in the p99 latency calculations.
+Another issue we have observed users facing is around dropping of messages from producer to consumer services. More explicitly - the messages were not consumed within an accepted time interval by the consumer. A typical use case for this scenario could be an email delivery system - where emails are sent to a queue and from there forwarded to multiple inboxes. If they are not delivered within a specified time (say 5 minutes), they could be considered as having been dropped.
+
+
+With the above solution approaches, you can find if latency has increased between a producer and consumer services. But some times, the messages have not reached consumers and in that case the end-to-end latency is `undefined` and it is not included in the p99 latency calculations. 
+
+In such a case, the producer metrics will be fine, consumers metrics will be fine. Consumer lag will be going up but you need to know which messages could not make to consumer with a given SLO and might want to look into those traces and drill down by customers affected by doing a group by on `customer_id` and even decide to act on the SLO breach by escalation
 
 ![Producer to Consumer Drop rate.png](/img/blog/2024/05/kafka-monitoring/drop.png)
 **Fig 8:** Dropping messages between Producer and Consumer 
@@ -214,7 +221,7 @@ Another issue we have observed users facing is around dropping of messages from 
 
 **Approach**
 
- It may help users if there is a funnel chart which shows drop rate between producer and consumer services. Assuming all the producer and consumer services are instrumented correctly, we have the complete traces of messages going from producer to consumer.  And we can identify if a message has reached from producer to consumer in a give time period.
+It may help users if there is a funnel chart which shows drop rate between producer and consumer services. Assuming all the producer and consumer services are instrumented correctly, we have the complete traces of messages going from producer to consumer.  And we can identify if a message has reached from producer to consumer in a give time period.
 
 In this proposal, we plan to show the list of producer and relevant consumer services and the drop rate between them after a given time period. Users can dive deeper into the drop rates by clicking them to see traces for which we have not received the consumer span in the selected time period.
 
