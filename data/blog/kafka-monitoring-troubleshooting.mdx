@@ -16,4 +16,156 @@ In the modern distributed architecture, Infrastructure monitoring has become cru
 
 Today there are solutions which can help with visualising out of the box [JMX metrics](https://docs.confluent.io/platform/current/kafka/monitoring.html) from a Messaging queues like Kafka, but it’s still hard to see what’s happening in a single trace and how kafka components are affecting every request. We will see what can be done to improve the reliability and performance by using client side instrumentation of async systems using OpenTelemetry.
 
-![consumer-lag-based-analysis](/img/blog/2024/05/kafka-monitoring/Kafka-Feature-Latency.svg)
+
+
+# Deep dive observability of messaging queues with OpenTelemetry
+
+Working in the observability and monitoring space for the last few years, we have had multiple users complain about lack of detailed monitoring for messaging systems and Kafka in particular. Especially with the coming of standards like OpenTelemetry, 
+
+We dived deeper into the problem and were trying to understand what better can be done here to make understanding and remediating issues in messaging systems much easier.
+
+In the below sections, we have taken Kafka as our focus as a representative messaging system and shared some problems and possible solutions. We would love to understand if these problem statements resonate with the community here and would love any feedback on how this can be more useful to you. We also have shared some wireframes on solutions, but those are just to put things more concretely and would love any feedback on what flows, starting points would be most useful to you.
+
+One of the key things we want to leverage is tracing. Most current monitoring solutions for Kafka show metrics about Kafka, but metrics are often aggregated and often don’t give much details on where exactly things are going wrong. Traces on the other hand shows you the exact path which a message has taken and provides lot more details. One of our focus is how we can leverage information from traces to help solving issues much faster.
+
+### Tracing the complete path  - Producers → Kafka → Consumers
+
+To trace the complete path of a message from producer to consumer you need to instrument both the producer and consumer. In the below example, we have instrumented
+
+As you can see, both `kafka-producer`  and `kafka-consumer` are shown in the trace and you can infer the time it spent in Kafka by the difference between the two. You also have interesting attributes like `messaging.destination` which shows the exact topic to which the consumers are  reading from and producers are writing to.
+
+![kafka-messaging.jpg](/img/blog/2024/05/kafka-monitoring/kafka-messaging.jpg)
+
+Fig. 1
+
+If we look at the attributes collected from Producer and Consumer spans, we can identify some attributes which can help us correlate with metrics for a given time period.
+
+You can follow along in this github repo to implement
+[Reference](https://github.com/shivanshuraj1333/kafka-opentelemetry-instrumentation/tree/master/client-spans)  
+
+```jsx
+// Some important attributes from producer span
+
+Attributes:
+-> messaging.kafka.message.offset: Int(4)
+-> messaging.kafka.message.key: Str(MY_KEY)
+-> messaging.system: Str(kafka)
+-> [messaging.destination.partition.id](http://messaging.destination.partition.id/): Str(0)
+-> [messaging.destination.name](http://messaging.destination.name/): Str(topic1)
+-> messaging.operation: Str(publish)
+-> messaging.client_id: Str(producer-1)
+
+// Some important attributed from consumer span
+
+Attributes:
+-> messaging.kafka.message.offset: Int(4)
+-> messaging.kafka.consumer.group: Str(my-consumer-group)
+-> messaging.kafka.message.key: Str(MY_KEY)
+-> messaging.system: Str(kafka)
+-> [messaging.destination.partition.id](http://messaging.destination.partition.id/): Str(0)
+-> kafka.record.queue_time_ms: Int(30)
+-> [messaging.destination.name](http://messaging.destination.name/): Str(topic1)
+-> messaging.operation: Str(process)
+-> messaging.client_id: Str(consumer-my-consumer-group-1)
+-> messaging.message.body.size: Int(10)
+```
+
+Fig. 2 
+
+You check out our video tutorial here on monitoring kafka [here](https://www.youtube.com/watch?v=ov1pyCBwlJs&t=54s) 
+
+### Scenario 1 : Kafka partition latency is high and you want to understand why it’s happening
+
+Approach:
+
+Possible reason for increase in partition latencies are:
+
+1. Partition is getting resource constrained potentially with high usage of memory or cpu
+2. Consumers are slow and are not processing messages fast enough. This can be because of 2 reasons
+    1. Consumers getting slow (either they call some other services like DBs internally and they are having issues or some other reasons)
+    2. Consumers having high errors
+3. Producers are sending lots of data 
+
+
+In the above proposal, users can find Topic and Partition wise latency and throughput metrics. As shown in Fig. 2, the producer and consumer spans have `topic` and `partition`  as attributes and we will leverage this to show the above details.
+
+If a particular latency/ throughput looks problematic, users can dive deeper into the issue by clicking on action links to see:
+
+1. Partition Host Metrics
+2. Consumer Group details
+3. Producer details
+
+They key parameters we show are:
+
+1. **Partition host metrics** - The user can find CPU usage, memory usage and other details about the machine in which the partition resides. This can help him judge if the partition is performing poorly because of any issues with the machine.
+2. **Consumer Group issues** - The other source of issues can be consumers getting slow. These will be reflected in RED metrics of the consumer services and users can dive deeper into traces of any service which they find slow to understand the exact traces which are causing the issue. This could surface issues like if the consumer is calling a DB internally and it is getting blocked. Or if a third party API being called by the consumer is getting slow.
+
+3. **Producer Throughput** - Producer throughput tab can help users understand if there is an increase in message throughput from producers. If this is unexpected, it can be good area to investigate further if why the producer service is getting too chatty.
+
+We are able to provide details as shown in the wireframe as we can track a message across the kafka partitions. You can exactly check, which messages are causing the increase in latency and if needed drill down to relevant consumer and producer traces to find the issue.
+
+Compared to metrics, this doesn’t aggregate  over all messages going to different consumer groups and partitions. You can drill down if messages going through a particular partition and particular consumer group has an issue
+
+### Scenario 2 : Kafka consumer lag is high and you want to understand why
+
+Approach : Possible reasons for increase in consumer lag[1] are:
+
+- Slow consumers: Slow consumers that take a long time to process messages can cause consumer lag.
+- Message size: Large message sizes can cause consumer lag, especially if the consumer is not configured to handle large messages.
+- Partitions getting resource constrained with high memory or CPU usage
+- High message throughput: High message throughput can overwhelm consumers, causing consumer lag.
+- Network latency: High network latency between the Kafka cluster and the consumer can cause consumer lag.
+
+
+![consumer-lag.png](/img/blog/2024/05/kafka-monitoring/consumer-lag.png)
+
+In the above proposal, a user can see consumer lag graphs for for different Consumer Group - Partition ordered by average consumer lag.
+
+If she wants to find more details about a particular point ( which corresponds to a specific consumer group and partition), she can find more details about it in a side panel.
+
+They key parameters we show are:
+
+1. **Partition host metrics** - The user can find CPU usage, memory usage and other details about the machine in which the partition resides. This can help him judge if the partition is performing poorly because of any issues with the machine.
+2. **Consumer Group issues** - The other source of issues can be consumers getting slow. These will be reflected in RED metrics of the consumer services and users can dive deeper into traces of any service which they find slow to understand the exact traces which are causing the issue. This could surface issues like if the consumer is calling a DB internally and it is getting blocked. Or if a third party API being called by the consumer is getting slow.
+
+The other source could be message size getting bigger and the consumer not able to handle it. `Average message size` information which we can get from the traces can help users find if this is a potential issue.
+
+3. **Producer Throughput** - Producer throughput tab can help users understand if there is an increase in message throughput from producers. If this is unexpected, it can be good area to investigate further if why the producer service is getting too chatty.
+
+4. Network Latency - Consumers can also face issues in getting messages from Kafka because of network issues. Understanding fetch latencies for each of the consumer instances in the selected consumer group could be a good way to find if this is an issue.
+
+Questions:
+
+One question we had was if breaking down a consumer group into corresponding consumer instances is more useful or are consumer services a better grouping parameter?
+
+[1] [https://docs.confluent.io/platform/current/monitor/monitor-consumer-lag.html#causes-of-consumer-lag](https://docs.confluent.io/platform/current/monitor/monitor-consumer-lag.html#causes-of-consumer-lag)
+
+Scenario 3: Producer and Consumer RED Overview  metrics with correlation to traces
+
+This use case is designed to cater scenarios where platform owners want to get an overview of all the producers and consumers which are writing to Kafka and their performance. 
+
+![Producers and Consumers Overview.png](public/img/blog/2024/05/kafka-monitoring/Producers_and_Consumers_Overview.png)
+
+Approach:
+
+In this proposal, we plan to have 2 tabs listing producer and consumer services grouped by topics. A user would be able to see details about producer and consumer services and on clicking a particula Topic & Service group they can see a side panel which will show more detailed RED metrics for each partition. 
+
+Since, all of these are powered by traces, users can dive deeper into partitions were p99 latency or Error rate seems high. On clicking the latency/error rate values they will be taken to detailed trace list pages which will show the spans with high latency or errors. Users can then dive deeper into the traces to hypothesize the issue that could have occured.
+
+### Scenario 4: Messages dropping from Producers to Consumers
+
+Another issue we have observed users facing is around dropping of messages from producer to consumer services. With the above features, you can find if latency has increased between a producer and consumer services. But some times, the messages have not reached consumers and in that case the latency is `undefined` and it is not included in the p99 latency calculations.
+
+![Producer to Consumer Drop rate.png](/img/blog/2024/05/kafka-monitoring/Producer to Consumer Drop rate.png)
+
+**Approach**
+
+ It may help users if there is a funnel chart which shows drop rate between producer and consumer services. Assuming all the producer and consumer services are instrumented correctly, we have the complete traces of messages going from producer to consumer.  And we can identify if a message has reached from producer to consumer in a give time period.
+
+In this proposal, we plan to show the list of producer and relevant consumer services and the drop rate between them after a given time period. Users can dive deeper into the drop rates by clicking them to see traces for which we have not received the consumer span in the selected time period.
+
+The evaluation period for determining the drop rate would be configurable as different businesses have different expectations on when the messages should reach the consumer.
+
+---
+
+Which of the scenarios seem most relevant to you and is the proposed solution useful or you would like to see any more data points here
