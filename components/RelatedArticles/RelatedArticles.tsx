@@ -1,6 +1,4 @@
-'use client'
-
-import { fetchRelatedArticles } from '@/api/relatedArticles'
+import { RelatedArticleProps } from '@/layouts/PostLayout'
 import Link from 'next/link'
 import * as React from 'react'
 
@@ -35,51 +33,16 @@ const ArticleCard: React.FC<ArticleCardProps> = ({ title, publishedOn, url }) =>
   )
 }
 
-const RelatedArticles: React.FC = () => {
-  const [relatedArticles, setRelatedArticles] = React.useState<ArticleCardProps[]>([])
-  const [loadingRelatedArticles, setLoadingRelatedArticles] = React.useState(false)
-
-  React.useEffect(() => {
-    setLoadingRelatedArticles(true)
-
-    const blogPath = window.location.pathname
-    const AIRTABLE_URL = `${process.env.AIRTABLE_BASE_URL}?filterByFormula={blogURL}='${blogPath}'&maxRecords=1`
-
-    const options = {
-      method: 'GET',
-      headers: {
-        Authorization: `Bearer ${process.env.AIRTABLE_KEY}`,
-      },
-    }
-
-    const fetchAndCacheData = async () => {
-      try {
-        const articles = await fetchRelatedArticles(AIRTABLE_URL, blogPath, EXPIRY, options)
-
-        if (articles && Array.isArray(articles)) {
-          setRelatedArticles(articles)
-        }
-      } catch (error) {
-        console.error(error)
-      } finally {
-        setLoadingRelatedArticles(false)
-      }
-    }
-
-    fetchAndCacheData()
-  }, [])
-
+const RelatedArticles: React.FC<{
+  relatedArticles: RelatedArticleProps[]
+}> = ({ relatedArticles }) => {
   return (
     <div className="related-articles my-8 flex flex-col">
-      {!loadingRelatedArticles &&
-        relatedArticles &&
-        Array.isArray(relatedArticles) &&
-        relatedArticles.length > 0 && (
-          <h2 className="w-full px-5 text-sm font-semibold uppercase leading-5 tracking-wide text-gray-700 max-md:max-w-full">
-            {' '}
-            Related Articles{' '}
-          </h2>
-        )}
+      {relatedArticles && Array.isArray(relatedArticles) && relatedArticles.length > 0 && (
+        <h2 className="w-full text-sm font-semibold uppercase leading-5 tracking-wide text-white max-md:max-w-full">
+          Related Articles
+        </h2>
+      )}
 
       <section className="px5 mt-5">
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
