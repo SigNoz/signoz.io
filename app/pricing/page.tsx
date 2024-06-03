@@ -781,12 +781,7 @@ const ExploreAllFeature = () => {
           },
           {
             feature: 'Unlimited dashboards & alerts based on traces',
-            inCommunity: (
-              <div className="flex flex-col items-center justify-center">
-                <CrossIcon />
-                {/* <small>(Limited to 5 dashboard panels & alerts)</small> */}
-              </div>
-            ),
+            inCommunity: <RightIcon />,
             inTeams: <RightIcon />,
             inEnterprise: <RightIcon />,
           },
@@ -832,12 +827,7 @@ const ExploreAllFeature = () => {
           },
           {
             feature: 'Unlimited dashboards & alerts based on logs',
-            inCommunity: (
-              <div className="flex flex-col items-center justify-center">
-                <CrossIcon />
-                {/* <small>(Limited to 5 dashboard panels & alerts)</small> */}
-              </div>
-            ),
+            inCommunity: <RightIcon />,
             inTeams: <RightIcon />,
             inEnterprise: <RightIcon />,
           },
