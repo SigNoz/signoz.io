@@ -59,17 +59,10 @@ const computedFields: ComputedFields = {
       const regXHeader = /\n(?<flag>#{1,3})\s+(?<content>.+)/g
       const slugger = new GithubSlugger()
 
-      // Remove the codeblocks from the doc before generating ToC Headings
-      const bodyWithoutCodeblocks = doc.body.raw.split('```').reduce((acc, ele, index) => {
-        // Every alternate block of text would be outside of the codeblock
-        if (index %2 === 0)  {
-          acc += ele;
-        }
+      const regXCodeBlock = /```[\s\S]*?```/g;
+      const contentWithoutCodeBlocks = doc.body.raw.replace(regXCodeBlock, '');
 
-        return acc;
-      }, '');
-
-      const headings = Array.from(bodyWithoutCodeblocks.matchAll(regXHeader)).map(({ groups }) => {
+      const headings = Array.from(contentWithoutCodeBlocks.matchAll(regXHeader)).map(({ groups }) => {
         const flag = groups?.flag
         const content = groups?.content
         return {
