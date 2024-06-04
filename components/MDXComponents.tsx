@@ -17,6 +17,7 @@ import TabItem from './TabItem'
 import DocCard from './DocCard'
 import DocCardContainer from './DocCardContainer'
 import NextCarousel from './Carousel/Carousel'
+import Figure from './Figure/Figure'
 
 export const components: MDXComponents = {
   Image,
@@ -37,4 +38,5 @@ export const components: MDXComponents = {
   DocCard,
   DocCardContainer,
   NextCarousel,
+  Figure,
 }
