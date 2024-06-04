@@ -17,13 +17,13 @@ keywords: [kafka monitoring, opentelemetry, distributed tracing, signoz, trouble
 
 Over the past few years in the observability and monitoring space, we've received numerous complaints from users about the lack of detailed monitoring for messaging queues, particularly Kafka. With the introduction of instrumentation standards like OpenTelemetry, we realized there must be a better solution to this problem.
 
-We delved deeper into the problem, seeking to understand how we could improve the process of identifying and resolving issues in messaging systems, making it much easier for users.
+We delved deeper into the problem, seeking to understand how to improve the process of identifying and resolving issues in messaging systems, making it much easier for users.
 
-In the following sections, we focus on Kafka as a representative messaging queue to illustrate some common problems and potential solutions. Though Kafka is a more generic distributed event store, we are using it as a representative abstraction for a messaging queue, which is a common way in which it is used.
+The following sections focus on Kafka as a representative messaging queue to illustrate some common problems and potential solutions. Though Kafka is a more generic distributed event store, we are using it as a representative abstraction for a messaging queue, which is a common way in which it is used.
 
 We would love to hear if these problem statements resonate with the community and welcome any feedback on how this can be more useful to you. We have also shared some wireframes of proposed solutions to concretize our current thought process. **We appreciate any feedback on which flows and starting points would be most useful to you.**
 
-One of our key objectives is to leverage distributed tracing. Most current monitoring solutions for Kafka show metrics about Kafka, but metrics are often aggregated and often don’t give much details on where exactly things are going wrong. Traces, however, reveal the exact path a message takes, offering much more detailed information. Our focus is on how we can use this trace information to resolve issues more quickly and effectively.
+One of our key objectives is to leverage distributed tracing. Most current monitoring solutions for Kafka show metrics about Kafka, but metrics are often aggregated and don’t give much details on exactly where things are going wrong. Traces on the other hand show you the exact path a message takes, offering much more detailed information. Our focus is on how we can use this trace information to resolve issues more quickly and effectively.
 
 ## Background
 
@@ -204,9 +204,9 @@ This use case is designed to cater scenarios where platform owners want to get a
 
 **Approach**
 
-In this proposal, we plan to have two tabs listing producer and consumer services grouped by topics. A user would be able to see details about producer and consumer services, by clicking on a particular topic and service group, and accessing a side panel displaying more detailed RED (Rate, Error, Duration) metrics for each partition.
+In this proposal, we plan to have two tabs listing producer and consumer services grouped by topics. A user would be able to see details about producer and consumer services, and on clicking a particular Topic & Service group, they can see a side panel that will show more detailed RED (Rate, Error, Duration) metrics for each partition.
 
-Powered by traces, users can dive deeper into partitions where p99 latency or error rates are high. By clicking on the latency/error rate values, they will be taken to detailed trace list pages showing the spans with high latency or errors. Users can then further investigate the traces to hypothesize the underlying issues.
+Since, all of these are powered, users can dive deeper into partitions where p99 latency or error rates are high. By clicking on the latency/error rate values, they will be taken to detailed trace list pages showing the spans with high latency or errors. Users can then further investigate the traces to hypothesize the underlying issues.
 
 ### Scenario 4: Messages not consumed within a specified time
 
