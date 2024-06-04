@@ -1,6 +1,12 @@
 import MarkdownRenderer from '@/components/ReactMarkdown'
 import React from 'react'
 
+import { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Wombo Case Study',
+}
+
 
 const markdownContent = `
 
