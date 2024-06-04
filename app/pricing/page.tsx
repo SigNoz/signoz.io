@@ -705,7 +705,6 @@ const PricingPlans = () => {
                     <p className={styles.featureBlur}>Includes all features in community edition</p>
                     <ul className="list-icon-right">
                       <li>SSO and SAML Support</li>
-                      <li>Unlimited Logs & Traces based Dashboards</li>
                       <li>Dashboard locking</li>
                       <li>Visualize very large traces (&gt;10K spans)</li>
                       <li>Run aggregates on ingested spans</li>
@@ -781,12 +780,7 @@ const ExploreAllFeature = () => {
           },
           {
             feature: 'Unlimited dashboards & alerts based on traces',
-            inCommunity: (
-              <div className="flex flex-col items-center justify-center">
-                <CrossIcon />
-                {/* <small>(Limited to 5 dashboard panels & alerts)</small> */}
-              </div>
-            ),
+            inCommunity: <RightIcon />,
             inTeams: <RightIcon />,
             inEnterprise: <RightIcon />,
           },
@@ -832,12 +826,7 @@ const ExploreAllFeature = () => {
           },
           {
             feature: 'Unlimited dashboards & alerts based on logs',
-            inCommunity: (
-              <div className="flex flex-col items-center justify-center">
-                <CrossIcon />
-                {/* <small>(Limited to 5 dashboard panels & alerts)</small> */}
-              </div>
-            ),
+            inCommunity: <RightIcon />,
             inTeams: <RightIcon />,
             inEnterprise: <RightIcon />,
           },
