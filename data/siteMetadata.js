@@ -1,6 +1,6 @@
 /** @type {import("pliny/config").PlinyConfig } */
 const siteMetadata = {
-  title: 'Open-Source Observability | SigNoz',
+  title: 'SigNoz',
   author: 'SigNoz Inc',
   headerTitle: 'SigNoz',
   description:
