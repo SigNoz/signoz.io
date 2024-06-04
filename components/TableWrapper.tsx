@@ -11,7 +11,7 @@ const TableWrapper = ({ children }) => {
               return React.cloneElement(
                 child,
                 {
-                  className: 'border-b border-gray-200 border-4 hover:bg-gray-100', // Styles for rows
+                  className: 'border-b border-gray-200 border-1', // Styles for rows
                 },
                 React.Children.map(child.props.children, (cell) => {
                   if (cell.type === 'td' || cell.type === 'th') {
