@@ -1,6 +1,12 @@
 import MarkdownRenderer from '@/components/ReactMarkdown'
 import React from 'react'
 
+import { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Privacy Policy',
+}
+
 const markdownContent = `# **PRIVACY POLICY**
 
 Effective date: 01/01/2021
