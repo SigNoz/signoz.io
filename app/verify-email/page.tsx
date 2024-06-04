@@ -1,5 +1,11 @@
 import React from 'react'
 
+import { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Verify Email',
+}
+
 function verifyemail() {
   return (
     <div title="Book a Call">
