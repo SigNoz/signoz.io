@@ -3,7 +3,7 @@ import Enterprise from './EnterpriseCloud'
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Enterprise Pricing',
+  title: 'Enterprise Cloud',
 }
 
 export default function EnterprisePage() {
