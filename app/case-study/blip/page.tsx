@@ -1,6 +1,11 @@
 import MarkdownRenderer from '@/components/ReactMarkdown'
 import React from 'react'
 
+import { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Blip Case Study',
+}
 
 const markdownContent = `
 # How Blip uses SigNoz to improve their issue resolution time by 14x
