@@ -1,7 +1,11 @@
 import MarkdownRenderer from '@/components/ReactMarkdown'
 import React from 'react'
 
+import { Metadata } from 'next'
 
+export const metadata: Metadata = {
+  title: 'Outplay Case Study',
+}
 const markdownContent = `
 
 # How Outplay uses SigNoz to improve their backend API response time by 35%

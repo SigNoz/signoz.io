@@ -1,6 +1,12 @@
 import MarkdownRenderer from '@/components/ReactMarkdown'
 import React from 'react'
 
+import { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Terms of Service',
+}
+
 const markdownContent = `
 # TERMS OF SERVICE
 
@@ -184,7 +190,7 @@ Please send your feedback, comments, requests for technical support:
 
 By email: support@signoz.io.`
 
-export default function page() {
+export default function termsPage() {
   return (
     <div className="terms-of-service container mx-auto my-16">
       <MarkdownRenderer markdownContent={markdownContent} />
