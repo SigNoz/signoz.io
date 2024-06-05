@@ -77,10 +77,7 @@ export const SigNozFeatures = () => {
             <li className="mb-2 text-lg">Ingest, process, and analyze logs at any scale.</li>
             <li className="mb-2 text-lg">Support for OpenTelemetry logs or any existing logging pipeline that you have.</li>
             <li className="mb-2 text-lg">Live tail, easy search, and a powerful logs query builder to give you full control</li>
-            <li className="mb-2 text-lg">Use a columnar database to store logs which enables lightning fast log analytics.
-              <br />
-              <a target="_blank" href="https://signoz.io/blog/logs-performance-benchmark/">(Logs performance benchmark)</a>
-            </li>
+            <li className="mb-2 text-lg">Use a columnar database to store logs which enables lightning fast log analytics.</li>
           </ul>
         </>
       ),

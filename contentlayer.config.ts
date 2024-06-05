@@ -59,7 +59,10 @@ const computedFields: ComputedFields = {
       const regXHeader = /\n(?<flag>#{1,3})\s+(?<content>.+)/g
       const slugger = new GithubSlugger()
 
-      const headings = Array.from(doc.body.raw.matchAll(regXHeader)).map(({ groups }) => {
+      const regXCodeBlock = /```[\s\S]*?```/g;
+      const contentWithoutCodeBlocks = doc.body.raw.replace(regXCodeBlock, '');
+
+      const headings = Array.from(contentWithoutCodeBlocks.matchAll(regXHeader)).map(({ groups }) => {
         const flag = groups?.flag
         const content = groups?.content
         return {
