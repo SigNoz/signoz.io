@@ -47,6 +47,20 @@ export default function ResourceCenter() {
             </button>
           </li>
 
+          <li className="me-2" role="presentation">
+            <button
+              className={`inline-block rounded-t-lg px-4 py-2 ${activeTab === 'guides-tab' ? 'border-b-2 border-indigo-500 text-indigo-500' : ''}`}
+              id="guides-tab"
+              data-tabs-target="#guides"
+              type="button"
+              role="tab"
+              aria-controls="guides"
+              aria-selected="false"
+              onClick={() => setActiveTab(`guides-tab`)}
+            >
+              Guides
+            </button>
+          </li>
           <li role="presentation">
             <button
               className={`inline-block rounded-t-lg px-4 py-2 ${activeTab === 'openTelemetry-tab' ? 'border-b-2 border-indigo-500 text-indigo-500' : ''}`}

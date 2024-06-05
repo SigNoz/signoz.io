@@ -427,8 +427,8 @@ export default makeSource({
     ],
   },
   onSuccess: async (importData) => {
-    const { allBlogs, allDocs, allComparisons, allOpentelemetries } = await importData()
+    const { allBlogs, allDocs, allComparisons, allOpentelemetries, allGuides } = await importData()
     createTagCount(allBlogs)
-    createSearchIndex([...allBlogs, ...allDocs, ...allComparisons, ...allOpentelemetries])
+    createSearchIndex([...allBlogs, ...allDocs, ...allComparisons, ...allOpentelemetries, ...allGuides])
   },
 })
