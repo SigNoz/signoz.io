@@ -49,10 +49,6 @@ export default Pricing
 function FAQ() {
   return (
     <section className={styles.faq}>
-      <Head>
-        <title>Pricing Page</title>
-        <meta name="description" content="example description" />
-      </Head>
       <div className={`container ${styles.faqContainer}`}>
         <div className="row">
           <div className="col col--8 col--offset-2">
