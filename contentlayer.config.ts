@@ -82,20 +82,23 @@ const computedFields: ComputedFields = {
  * Count the occurrences of all tags across blog posts and write to json file
  */
 function createTagCount(allBlogs) {
-  const tagCount: Record<string, number> = {}
+  const tags: Record<string, number> = {}
   allBlogs.forEach((file) => {
     if (file.tags && (!isProduction || file.draft !== true)) {
       file.tags.forEach((tag) => {
         const formattedTag = slug(tag)
-        if (formattedTag in tagCount) {
-          tagCount[formattedTag] += 1
+        if (formattedTag in tags) {
+          tags[formattedTag] += 1
         } else {
-          tagCount[formattedTag] = 1
+          tags[formattedTag] = 1
         }
       })
     }
   })
-  writeFileSync('./app/tag-data.json', JSON.stringify(tagCount))
+  writeFileSync('./app/tag-data.json', JSON.stringify(tags, null, 2), {
+    flag: 'w',
+    encoding: 'utf-8',
+  })
 }
 
 function createSearchIndex(content) {
@@ -103,9 +106,12 @@ function createSearchIndex(content) {
     siteMetadata?.search?.provider === 'kbar' &&
     siteMetadata.search.kbarConfig.searchDocumentsPath
   ) {
+    const indexJSON = allCoreContent(sortPosts(content))
+
     writeFileSync(
       `public/${siteMetadata.search.kbarConfig.searchDocumentsPath}`,
-      JSON.stringify(allCoreContent(sortPosts(content)))
+      JSON.stringify(indexJSON, null, 2),
+      { flag: 'w', encoding: 'utf-8' }
     )
     console.log('Local search index generated...')
   }
