@@ -372,8 +372,8 @@ export const Doc = defineDocumentType(() => ({
         '@context': 'https://schema.org',
         '@type': 'DocPosting',
         headline: doc.title,
-        datePublished: doc.date,
-        dateModified: doc.lastmod || doc.date,
+        datePublished: doc.date || 'Thu Jun 06 2024', // Setting it Jun 06, 2024 as date metadat doesn't exist for docs, TODO: add date to all exisiting doc files
+        dateModified: doc.lastmod || doc.date || 'Thu Jun 06 2024',
         description: doc.description,
         image: doc.images ? doc.images[0] : siteMetadata.socialBanner,
         url: `${siteMetadata.siteUrl}/${doc._raw.flattenedPath}`,
