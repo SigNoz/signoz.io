@@ -59,18 +59,20 @@ const computedFields: ComputedFields = {
       const regXHeader = /\n(?<flag>#{1,3})\s+(?<content>.+)/g
       const slugger = new GithubSlugger()
 
-      const regXCodeBlock = /```[\s\S]*?```/g;
-      const contentWithoutCodeBlocks = doc.body.raw.replace(regXCodeBlock, '');
+      const regXCodeBlock = /```[\s\S]*?```/g
+      const contentWithoutCodeBlocks = doc.body.raw.replace(regXCodeBlock, '')
 
-      const headings = Array.from(contentWithoutCodeBlocks.matchAll(regXHeader)).map(({ groups }) => {
-        const flag = groups?.flag
-        const content = groups?.content
-        return {
-          value: content,
-          url: content ? `#${slugger.slug(content)}` : undefined,
-          depth: flag?.length == 1 ? 1 : flag?.length == 2 ? 2 : 3,
+      const headings = Array.from(contentWithoutCodeBlocks.matchAll(regXHeader)).map(
+        ({ groups }) => {
+          const flag = groups?.flag
+          const content = groups?.content
+          return {
+            value: content,
+            url: content ? `#${slugger.slug(content)}` : undefined,
+            depth: flag?.length == 1 ? 1 : flag?.length == 2 ? 2 : 3,
+          }
         }
-      })
+      )
 
       return headings
     },
@@ -347,7 +349,7 @@ export const Doc = defineDocumentType(() => ({
     title: { type: 'string', required: true },
     id: { type: 'string', required: true },
     slug: { type: 'string', required: false },
-    date: { type: 'date', required: false, default: new Date().toDateString() },
+    date: { type: 'date', required: false },
     tags: { type: 'list', of: { type: 'string' }, default: [], required: false },
     lastmod: { type: 'date', required: false },
     draft: { type: 'boolean', required: false },
@@ -427,8 +429,8 @@ export default makeSource({
     ],
   },
   onSuccess: async (importData) => {
-    const { allBlogs, allDocs, allComparisons, allOpentelemetries } = await importData()
-    createTagCount(allBlogs)
-    createSearchIndex([...allBlogs, ...allDocs, ...allComparisons, ...allOpentelemetries])
+    const { allDocuments } = await importData()
+    createTagCount(allDocuments)
+    createSearchIndex(allDocuments)
   },
 })
