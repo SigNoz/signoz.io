@@ -611,7 +611,7 @@ const docsSideNav = [
       },
       {
         type: 'doc',
-        route: '/docs/userguide/drop-logs',
+        route: '/docs/logs-management/guides/drop-logs',
         label: 'Guide to drop logs',
       },
     ],
