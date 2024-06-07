@@ -357,6 +357,11 @@ const docsSideNav = [
       },
       {
         type: 'doc',
+        route: '/docs/userguide/apm-metrics',
+        label: 'APM Metrics',
+      },
+      {
+        type: 'doc',
         route: '/docs/instrumentation/troubleshoot-instrumentation',
         label: 'Troubleshooting',
       },
