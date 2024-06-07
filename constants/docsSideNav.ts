@@ -360,6 +360,11 @@ const docsSideNav = [
         route: '/docs/instrumentation/troubleshoot-instrumentation',
         label: 'Troubleshooting',
       },
+      {
+        type: 'doc',
+        route: '/docs/traces-management/drop-spans',
+        label: 'Control Traces Volume',
+      },
     ],
   },
   {
