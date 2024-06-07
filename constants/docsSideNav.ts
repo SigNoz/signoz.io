@@ -609,6 +609,11 @@ const docsSideNav = [
         route: '/docs/userguide/logs_troubleshooting',
         label: 'Troubleshooting',
       },
+      {
+        type: 'doc',
+        route: '/docs/userguide/drop-logs',
+        label: 'Guide to drop logs',
+      },
     ],
   },
   {
