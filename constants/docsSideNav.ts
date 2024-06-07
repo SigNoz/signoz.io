@@ -639,6 +639,11 @@ const docsSideNav = [
       },
       {
         type: 'doc',
+        route: '/docs/dashboards/panel-types',
+        label: 'Panel Types',
+      },
+      {
+        type: 'doc',
         route: '/docs/userguide/manage-variables',
         label: 'Manage Variables',
       },
