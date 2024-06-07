@@ -1,0 +1,92 @@
+---
+date: 2024-06-06
+id: drop-logs
+title: Guide to drop logs
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+## Overview
+
+The filter processor in OpenTelemetry allows you to drop logs based on body, log level (aka severity text), or other attributes. This is useful if you want to exclude certain logs from being sent to SigNoz.
+
+The filter processor is configured in the `processors::filter` section of the `otel-collector-config.yaml` file.
+
+<Admonition>
+
+The processor needs to be added to the logs pipeline to take effect. 
+```
+logs:
+  receivers: [otlp]
+  processors: [filter/drop_logs_by_severity_text, batch]
+  exporters: [otlp]
+```
+</Admonition>
+
+## Drop Logs 
+1. Drop logs by log level / severity text
+
+```yaml
+processors:
+  filter/drop_logs_by_level:
+    logs:
+      log_record:
+        - 'IsMatch(severity_text, "(?i)\b(DEBUG)\b")'
+```
+
+2. Drop logs by body regex
+
+```yaml
+processors:
+  filter/drop_logs_by_body_regex:
+    logs:
+      log_record:
+        - 'IsMatch(body, ".*password.*")'
+```
+
+
+3. Drop logs by resource attributes (like service.name, host.name, k8s.pod.name, etc.)
+
+```yaml
+processors:
+  filter/drop_logs_by_label_values:
+    logs:
+      log_record:
+        - resource.attributes["k8s.pod.name"] == "test-pod"
+```
+
+4. Drop logs by resource attributes regex
+
+```yaml
+processors:
+  filter/drop_logs_by_label_values_regex:
+    logs:
+      log_record:
+        - IsMatch(resource.attributes["k8s.pod.name"], "test-pod-.*")
+```
+
+5. Drop logs by logs attributes (like remote_addr, user_agent.name, etc.)
+
+```yaml
+processors:
+  filter/drop_logs_by_label_values:
+    logs:
+      log_record:
+        - attributes["user_agent.name"] == "Safari"
+```
+
+6. Drop logs by logs attributes regex
+
+```yaml
+processors:
+  filter/drop_logs_by_label_values_regex:
+    logs:
+      log_record:
+        - IsMatch(attributes["http.method"], "GET|POST")
+```
+
+Refer to the [OpenTelemetry documentation](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/filterprocessor) for more details on how to configure the filter processor.
+
+## Get Help
+
+<GetHelp />
