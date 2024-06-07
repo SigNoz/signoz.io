@@ -78,6 +78,7 @@ const computedFields: ComputedFields = {
     },
   },
 }
+
 /**
  * Count the occurrences of all tags across blog posts and write to json file
  */
@@ -99,22 +100,6 @@ function createTagCount(allBlogs) {
     flag: 'w',
     encoding: 'utf-8',
   })
-}
-
-function createSearchIndex(content) {
-  if (
-    siteMetadata?.search?.provider === 'kbar' &&
-    siteMetadata.search.kbarConfig.searchDocumentsPath
-  ) {
-    const indexJSON = allCoreContent(sortPosts(content))
-
-    writeFileSync(
-      `public/${siteMetadata.search.kbarConfig.searchDocumentsPath}`,
-      JSON.stringify(indexJSON, null, 2),
-      { flag: 'w', encoding: 'utf-8' }
-    )
-    console.log('Local search index generated...')
-  }
 }
 
 function getRelatedArticles(doc, relatedArticles) {
@@ -437,6 +422,5 @@ export default makeSource({
   onSuccess: async (importData) => {
     const { allDocuments } = await importData()
     createTagCount(allDocuments)
-    createSearchIndex(allDocuments)
   },
 })
