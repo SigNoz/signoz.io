@@ -31,7 +31,7 @@ Sharing a few examples of some queries which might be helpful in building dashbo
 SELECT toStartOfInterval(timestamp, INTERVAL 1 MINUTE) AS interval, 
 stringTagMap['peer.service'] AS op_name, 
 toFloat64(avg(durationNano)) AS value 
-FROM signoz_traces.signoz_index_v2  
+FROM signoz_traces.distributed_signoz_index_v2
 WHERE stringTagMap['peer.service']!='' 
 AND timestamp > now() - INTERVAL 30 MINUTE  
 GROUP BY (op_name, interval) order by (op_name, interval) ASC;
@@ -43,7 +43,7 @@ GROUP BY (op_name, interval) order by (op_name, interval) ASC;
 WITH arrayFilter(x -> JSONExtractString(x, 'name')='Getting customer', events) AS filteredEvents
 SELECT toStartOfInterval(timestamp, INTERVAL 1 MINUTE) AS interval, toFloat64(count()) AS count, 
 arrayJoin(arrayMap(x -> JSONExtractString(JSONExtractString(x, 'attributeMap'), 'customer_id'), filteredEvents)) AS resultArray 
-FROM signoz_traces.signoz_index_v2 
+FROM signoz_traces.distributed_signoz_index_v2
 WHERE not empty(filteredEvents) 
 AND timestamp > toUnixTimestamp(now() - INTERVAL 30 MINUTE) 
 GROUP BY (resultArray, interval) order by (resultArray, interval) ASC;
@@ -86,7 +86,7 @@ ORDER BY interval ASC;
 WITH arrayFilter(x -> JSONExtractString(x, 'name')='Getting customer', events) AS filteredEvents
 SELECT toStartOfInterval(timestamp, INTERVAL 1 MINUTE) AS interval, toFloat64(sum(toInt32(resultArray))) AS sum, 
 arrayJoin(arrayMap(x -> JSONExtractString(JSONExtractString(x, 'attributeMap'), 'customer_id'), filteredEvents)) AS resultArray 
-FROM signoz_traces.signoz_index_v2 
+FROM signoz_traces.distributed_signoz_index_v2
 WHERE not empty(filteredEvents) and timestamp > toUnixTimestamp(now() - INTERVAL 30 MINUTE) 
 GROUP BY (resultArray, interval) order by (resultArray, interval) ASC;
 ```
@@ -101,7 +101,7 @@ SELECT fromUnixTimestamp64Milli(intDiv( toUnixTimestamp64Milli ( timestamp ), 10
 toFloat64(count()) AS count 
 FROM (
  SELECT timestamp 
- FROM signoz_traces.signoz_index_v2 
+ FROM signoz_traces.distributed_signoz_index_v2
  WHERE serviceName='frontend' 
  AND durationNano>=50*exp10(6) 
  AND timestamp > now() - INTERVAL 1 MINUTE) GROUP BY interval 
@@ -113,7 +113,7 @@ FROM (
 ```sql
 SELECT toStartOfInterval(fromUnixTimestamp64Nano(timestamp), INTERVAL 1 MINUTE) AS interval, 
 toFloat64(count()) AS value 
-FROM signoz_logs.logs  
+FROM signoz_logs.distributed_logs
 WHERE timestamp > toUnixTimestamp64Nano(now64() - INTERVAL 30 MINUTE)  
 GROUP BY interval 
 ORDER BY interval ASC;
@@ -159,7 +159,7 @@ For example, the following query retrieves `not found` errors of a service. When
 
 ```sql
 SELECT count() AS value  
-FROM signoz_traces.signoz_error_index_v2 
+FROM signoz_traces.distributed_signoz_error_index_v2
 WHERE (serviceName='api-service’) 
 AND (exceptionType='Not found’);
 ```
@@ -170,7 +170,7 @@ Second reserved column alias is `interval`.  It is useful when you want to apply
 
 ```sql
 SELECT count() AS value, toStartOfInterval(timestamp, INTERVAL 5 MINUTE) AS interval 
-FROM signoz_traces.signoz_error_index_v2 
+FROM signoz_traces.distributed_signoz_error_index_v2
 WHERE (serviceName = 'api-service') 
 AND (exceptionType = 'Not found') 
 GROUP BY interval
@@ -180,7 +180,7 @@ The rule engine is also capable of dynamically applying date ranges to your sele
 
 ```sql
 SELECT count() AS value, toStartOfInterval(timestamp, INTERVAL 5 MINUTE) AS interval 
-FROM signoz_traces.signoz_error_index_v2 
+FROM signoz_traces.distributed_signoz_error_index_v2
 WHERE timestamp BETWEEN {{.start_datetime}} AND {{.end_datetime}} 
 AND (serviceName = 'api-service') 
 AND (exceptionType = 'Not found') 
