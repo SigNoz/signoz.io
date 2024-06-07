@@ -80,6 +80,29 @@ For example, A PromQL query for service request rate using dynamic service selec
 sum(rate(signoz_calls_total{service_name="$service_name"}[5m]))
 ```
 
+## Chaining Variables
+
+It is often useful to chain variables to make the dashboard dynamic.
+
+### Example
+
+The following example shows how to chain the service name variable to make the endpoint URL dynamic.
+
+1. Write the query for service with name `service_name`
+
+    ```sql
+    SELECT DISTINCT JSONExtractString(labels, 'service_name') AS service_name
+    FROM signoz_metrics.distributed_time_series_v4_1day
+    WHERE metric_name = 'signoz_calls_total'
+    ```
+
+2. Write the query for endpoint with name `endpoint_name`
+
+    ```sql
+    SELECT DISTINCT JSONExtractString(labels, 'operation') AS operation
+    FROM signoz_metrics.distributed_time_series_v4_1day
+    WHERE metric_name = 'signoz_calls_total' AND JSONExtractString(labels, 'service_name') IN {{.service_name}}
+    ```
 
 ## Get Help
 
