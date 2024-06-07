@@ -1,0 +1,212 @@
+---
+title: Correlating Traces, Logs, and Metrics - OpenTelemetry NodeJS
+slug: correlating-traces-logs-metrics-nodejs
+date: 2024-06-05
+tags: [opentelemetry-tutorials]
+authors: [yuvraj]
+description: Discover how to enhance the observability of your Node.js application by integrating structured logging with trace data using Pino and OpenTelemetry, and visualizing this correlated data in SigNoz. Learn the benefits and best practices for correlating logs, traces, and metrics
+keywords: 
+  - opentelemetry
+  - opentelemetry nodejs
+  - distributed tracing
+  - observability
+  - nodejs application monitoring
+  - nodejs instrumentation
+  - signoz
+---
+
+<head>
+  <link rel="canonical" href="https://signoz.io/opentelemetry/correlating-traces-logs-metrics-nodejs/"/>
+</head>
+
+<Admonition type="info">
+This article is part of the **OpenTelemetry NodeJS series**:
+- Previous Article: [Sending Logs to SigNoz - OpenTelemetry NodeJS](/opentelemetry/logging-nodejs)
+- **You are here:** Correlating Traces, Logs, and Metrics - OpenTelemetry NodeJS
+
+Check out the complete series at: [Overview - Implementing OpenTelemetry in NodeJS with SigNoz - OpenTelemetry NodeJS](/opentelemetry/nodejs-tutorial-overview)
+</Admonition>
+
+One of the main advantage of using SigNoz is the ability to correlate Metrics, Logs, and Traces. This article explores how to enhance the observability of a Node.js application by integrating structured logging with trace data using Pino and OpenTelemetry, and visualizing this correlated data in SigNoz.
+
+**Prerequisites**
+
+To follow along, you'll need:
+
+- Basic knowledge of Node.js and Docker.
+- An understanding of microservices and observability principles.
+- A setup with SigNoz and OpenTelemetry configured as described in previous tutorials.
+
+## Benefits of Correlation
+
+Correlating traces and logs enhances debugging capabilities by providing a unified view of distributed transactions. It simplifies the identification of issues and improves the monitoring of microservices by offering a holistic view of application performance and behavior.
+
+### Configuring the Logger for Correlation
+
+To correlate logs with traces, we've enhanced the Pino logger configuration to include trace information in each log entry. This allows each log message to carry its trace ID and span ID, aligning log entries with their corresponding trace segments.
+
+**Logger Configuration:**
+
+```jsx
+// logger.js
+import pino from "pino";
+import { trace } from "@opentelemetry/api";
+
+const logger = pino({
+  transport: {
+    targets: [
+      {
+        target: "pino-opentelemetry-transport",
+        options: {
+          resourceAttributes: {
+            "service.name": "order-service",
+          },
+        },
+      },
+      {
+        target: "pino-pretty",
+        level: "info",
+        options: { colorize: true },
+      },
+    ],
+  },
+  formatters: {
+    log: (log) => {
+      const currentSpan = trace.getActiveSpan();
+      if (currentSpan) {
+        const { traceId, spanId, traceFlags } = currentSpan.spanContext();
+
+        log.traceId = traceId;
+        log.spanId = spanId;
+        log.traceFlags = traceFlags;
+
+        console.log("Hereeee in the object", traceId, " + ", spanId);
+      }
+      return log;
+    },
+  },
+});
+
+export default logger;
+
+```
+
+This configuration enhances each log entry with trace context, making it easier to follow a transaction across the system’s logs and traces.
+
+## Creating a Logs Pipeline in SigNoz
+
+SigNoz provides the logs pipeline feature to extract the trace information from the logs attributes and add to the log data in the OpenTelemetry defined format.
+
+This is crucial to interact from one type of Telemetry data to another.
+
+### Step 1: Go to the logs pipeline
+
+Open the logs pipeline dashboard inside the logs panel.
+
+
+<figure data-zoomable align='center'>
+  <img className="box-shadowed-image"
+  alt=""  
+  src="/img/blog/2024/06/correlating-traces-logs-metrics-nodejs-logs-pipeline.webp"
+  />
+</figure>
+
+### Step 2: Create a new pipeline
+
+If you are creating a pipeline for the first time, click on add a new pipeline or else click on enter edit mode and then select add a new pipeline.
+
+
+
+<figure data-zoomable align='center'>
+  <img className="box-shadowed-image"
+  alt=""  
+  src="/img/blog/2024/06/correlating-traces-logs-metrics-nodejs-new-pipeline.webp"
+  />
+</figure>
+
+### Step 3: Complete the pipeline setup
+
+Add the required information like name and description and select the order service by applying the right filter. Add the pipeline by clicking on update.
+
+
+<figure data-zoomable align='center'>
+  <img className="box-shadowed-image"
+  alt=""  
+  src="/img/blog/2024/06/correlating-traces-logs-metrics-nodejs-complete-the-setup.webp"
+  />
+</figure>
+
+### Step 4: Add a processor to the pipeline
+
+Click on the dropdown and add a new processor to the pipeline.
+
+
+<figure data-zoomable align='center'>
+  <img className="box-shadowed-image"
+  alt=""  
+  src="/img/blog/2024/06/correlating-traces-logs-metrics-nodejs-add-processor.webp"
+  />
+</figure>
+
+### Step 5: Complete the setup for the processor
+
+This allows the pipeline to extract and parse the trace variables from the logs data and add it to the logs in the required format.
+
+
+<figure data-zoomable align='center'>
+  <img className="box-shadowed-image"
+  alt=""  
+  src="/img/blog/2024/06/correlating-traces-logs-metrics-nodejs-complete-the-setup.webp"
+  />
+</figure>
+
+### Step 6: Simulate the processing
+
+Click on the eye icon on the pipeline and then simulate the processing
+
+
+<figure data-zoomable align='center'>
+  <img className="box-shadowed-image"
+  alt=""  
+  src="/img/blog/2024/06/correlating-traces-logs-metrics-nodejs-simulate.webp"
+  />
+</figure>
+
+### Step 7: Verify the processing
+
+If the `span_id` and `trace_id` contains the right value then everything is working alright.
+
+<figure data-zoomable align='center'>
+  <img className="box-shadowed-image"
+  alt=""  
+  src="/img/blog/2024/06/correlating-traces-logs-metrics-nodejs-verify.webp"
+  />
+</figure>
+
+## Interacting between Metrics, Traces, and Logs
+
+We can now proceed with checking the panels in SigNoz to go from one telemetry data to another and debug efficiently.
+
+
+<video width="820" height="540" controls>
+  <source src="/img/blog/2024/06/correlating-traces-logs-metrics-nodejs-video-interaction.mov" type="video/mp4"/>
+  Your browser does not support the video tag.
+</video>
+
+## Practical Example
+
+Consider a scenario where an order fails due to an inventory issue. By correlating logs with traces, a developer can quickly identify where the failure occurred and see relevant log statements that provide context about the inventory check, all within the same interface.
+
+### Best Practices for Effective Correlation
+
+- **Logging Practices**: Ensure that logs include key identifiers, such as user IDs, transaction IDs, and any other relevant context that can help link logs with specific operations or transactions.
+- **Trace Configuration**: Set trace configurations to collect enough detail to be useful for debugging while avoiding excessive data collection that could lead to performance issues.
+
+## Conclusion
+
+Correlating logs, traces, and metrics provides a powerful way to enhance the observability of microservices. By integrating structured logging with OpenTelemetry and visualizing this data in SigNoz, developers can gain deeper insights into their applications, leading to more effective troubleshooting and improved system reliability.
+
+<Admonition type="info">
+Kudos on completing the entire [OpenTelemetry NodeJS series](/opentelemetry/nodejs-tutorial-overview).
+Share your achievement on [LinkedIn](https://www.linkedin.com/)/[Twitter/X](https://x.com/) 🎉
+</Admonition>

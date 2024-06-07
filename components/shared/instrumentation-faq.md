@@ -20,4 +20,62 @@
 
         Please double check if the pods in SigNoz installation are running fine. `docker ps` or `kubectl get pods -n platform` are your friends for this. 
 
-    
+## What Cloud Endpoint Should I Use?
+
+The primary method for sending data to SigNoz Cloud is through OTLP exporters. You can either send the data directly from your application using the exporters available in SDKs/language agents or send the data to a collector agent, which batches/enriches telemetry and sends it to the Cloud.
+
+### My Collector Sends Data to SigNoz Cloud
+
+#### Using gRPC Exporter
+
+The endpoint should be `ingest.{region}.signoz.cloud:443`, where `{region}` should be replaced with `in`, `us`, or `eu`. Note that the exporter endpoint doesn't require a scheme for the gRPC exporter in the collector.
+
+```yaml
+# Sample config with `us` region
+exporters:
+    otlp:
+        endpoint: "ingest.us.signoz.cloud:443"
+        tls:
+            insecure: false
+        headers:
+            "signoz-access-token": "<SIGNOZ_INGESTION_KEY>"
+```
+
+#### Using HTTP Exporter
+
+The endpoint should be `https://ingest.{region}.signoz.cloud:443`, where `{region}` should be replaced with `in`, `us`, or `eu`. Note that the endpoint includes the scheme `https` for the HTTP exporter in the collector.
+
+```yaml
+# Sample config with `us` region
+exporters:
+    otlphttp:
+        endpoint: "https://ingest.us.signoz.cloud:443"
+        tls:
+            insecure: false
+        headers:
+            "signoz-access-token": "<SIGNOZ_INGESTION_KEY>"
+```
+
+### My Application Sends Data to SigNoz Cloud
+
+The endpoint should be configured either with environment variables or in the SDK setup code.
+
+#### Using Environment Variables
+
+##### Using gRPC Exporter
+
+Examples with `us` region
+
+- `OTEL_EXPORTER_OTLP_PROTOCOL=grpc OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.us.signoz.cloud:443 OTEL_EXPORTER_OTLP_HEADERS=signoz-access-token=<SIGNOZ_INGESTION_KEY>`
+
+##### Using HTTP Exporter
+
+- `OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.us.signoz.cloud:443 OTEL_EXPORTER_OTLP_HEADERS=signoz-access-token=<SIGNOZ_INGESTION_KEY>`
+
+#### Configuring Endpoint in Code
+
+Please refer to the agent documentation.
+
+### Sending Data from a Third-Party Service
+
+The endpoint configuration here depends on the export protocol supported by the third-party service. They may support either gRPC, HTTP, or both. Generally, you will need to adjust the host and port. The host address should be `ingest.{region}.signoz.cloud:443`, where `{region}` should be replaced with `in`, `us`, or `eu`, and port `443` should be used.

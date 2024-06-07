@@ -1,0 +1,314 @@
+---
+title: Setting up the Otel Collector - OpenTelemetry NodeJSS
+slug: collector-nodejs
+date: 2024-06-05
+tags: [opentelemetry-tutorials]
+authors: [yuvraj]
+description: Learn how to set up the OpenTelemetry Collector to manage and export telemetry data in a NodeJS environment. This guide covers configuration, Docker Compose integration, and troubleshooting to enhance the observability of your microservices
+keywords: 
+  - opentelemetry
+  - opentelemetry nodejs
+  - distributed tracing
+  - observability
+  - nodejs application monitoring
+  - nodejs instrumentation
+  - signoz
+---
+
+<head>
+  <link rel="canonical" href="https://signoz.io/opentelemetry/collector-nodejs/"/>
+</head>
+
+<Admonition type="info">
+This article is part of the **OpenTelemetry NodeJS series**:
+- Previous Article: [Exploring Metrics Created via Traces in SigNoz - OpenTelemetry NodeJS](/opentelemetry/metrics-nodejs)
+- **You are here:** Setting up the Otel Collector - OpenTelemetry NodeJS
+- Next Article: [Manual Instrumentation for Traces - OpenTelemetry NodeJS](/opentelemetry/add-manual-span-to-traces-nodejs)
+
+Check out the complete series at: [Overview - Implementing OpenTelemetry in NodeJS with SigNoz - OpenTelemetry NodeJS](/opentelemetry/nodejs-tutorial-overview)
+</Admonition>
+
+The OpenTelemetry Collector is a crucial component for managing and exporting telemetry data. It acts as a central point to receive, process, and export traces, metrics, and logs from various services, enhancing the observability of your microservices architecture.
+
+Understand why and when to use the collector in the following [article](https://signoz.io/opentelemetry/collector-nodejs)
+
+**Use the OpenTelemetry Collector When:**
+
+- **Centralized Management**: You need a central point to manage, process, and export telemetry data from multiple services.
+- **Data Enrichment and Processing**: You need to batch, filter, or enrich data before exporting it.
+- **Protocol Translation**: Your services emit telemetry data in different formats or protocols.
+- **Scalability and High Availability**: You need to distribute the load and ensure high availability.
+- **Security and Compliance**: You have stringent security or compliance requirements.
+
+**Send Data Directly When:**
+
+- **Simplicity**: Your setup is small-scale or simple.
+- **Low Latency**: Minimizing latency is critical.
+- **Minimal Processing Needed**: Your telemetry data doesn't require additional processing.
+- **Fewer Services**: You have only a few services emitting telemetry data.
+
+- **Centralized Management**: You need a central point to manage, process, and export telemetry data from multiple services.
+- **Data Enrichment and Processing**: You need to batch, filter, or enrich data before exporting it.
+- **Protocol Translation**: Your services emit telemetry data in different formats or protocols.
+- **Scalability and High Availability**: You need to distribute the load and ensure high availability.
+- **Security and Compliance**: You have stringent security or compliance requirements.
+
+### Send Data Directly When:
+
+- **Simplicity**: Your setup is small-scale or simple.
+- **Low Latency**: Minimizing latency is critical.
+- **Minimal Processing Needed**: Your telemetry data doesn't require additional processing.
+- **Fewer Services**: You have only a few services emitting telemetry data.
+
+### Setting Up the OpenTelemetry Collector
+
+### Prerequisites and Requirements
+
+Before setting up the OpenTelemetry Collector, ensure you have the following:
+
+- Basic understanding of Docker and Docker Compose.
+- Access to your SigNoz account and the ingestion key.
+
+### Creating the Collector Configuration File
+
+First, create a **`otel-collector-config.yaml`** file in the same folder as your `docker-compose.yml` with the following content. Make sure `SIGNOZ_INGESTION_KEY` and `OTEL_EXPORTER_OTLP_ENDPOINT` exists in your `.env` file
+
+```yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+  hostmetrics:
+    collection_interval: 60s
+    scrapers:
+      cpu: {}
+      disk: {}
+      load: {}
+      filesystem: {}
+      memory: {}
+      network: {}
+      paging: {}
+      process:
+        mute_process_name_error: true
+        mute_process_exe_error: true
+        mute_process_io_error: true
+      processes: {}
+  prometheus:
+    config:
+      global:
+        scrape_interval: 60s
+      scrape_configs:
+        - job_name: otel-collector-binary
+          static_configs:
+            - targets:
+processors:
+  batch:
+    send_batch_size: 1000
+    timeout: 10s
+  resourcedetection:
+    detectors: [env, system]
+    timeout: 2s
+    system:
+      hostname_sources: [os]
+extensions:
+  health_check: {}
+  zpages: {}
+exporters:
+  otlp:
+    endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT}
+    tls:
+      insecure: false
+    headers:
+      "signoz-access-token": ${SIGNOZ_INGESTION_KEY}
+  logging:
+    verbosity: normal
+service:
+  telemetry:
+    metrics:
+      address: 0.0.0.0:8888
+  extensions: [health_check, zpages]
+  pipelines:
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp]
+    metrics/internal:
+      receivers: [prometheus, hostmetrics]
+      processors: [resourcedetection, batch]
+      exporters: [otlp]
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp]
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp]
+```
+
+### Adding the Collector to Docker Compose
+
+We will add the OpenTelemetry Collector as a service in our existing **`docker-compose.yml`**
+
+### Modify `docker-compose.yml`
+
+```yaml
+version: '3.8'
+services:
+  mongodb:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - myapp-network
+
+  order:
+    build: ./order-service
+    ports:
+      - "3001:3001"
+    environment:
+      - OTEL_TRACES_EXPORTER=otlp
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
+      - OTEL_NODE_RESOURCE_DETECTORS=env,host,os
+      - OTEL_SERVICE_NAME=order-service
+      - NODE_OPTIONS=--require @opentelemetry/auto-instrumentations-node/register
+    depends_on:
+      - mongodb
+      - otel-collector
+    networks:
+      - myapp-network
+
+  payment:
+    build: ./payment-service
+    ports:
+      - "3002:3002"
+    environment:
+      - OTEL_TRACES_EXPORTER=otlp
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
+      - OTEL_NODE_RESOURCE_DETECTORS=env,host,os
+      - OTEL_SERVICE_NAME=payment-service
+      - NODE_OPTIONS=--require @opentelemetry/auto-instrumentations-node/register
+    depends_on:
+      - mongodb
+      - otel-collector
+    networks:
+      - myapp-network
+
+  product:
+    build: ./product-service
+    ports:
+      - "3003:3003"
+    environment:
+      - OTEL_TRACES_EXPORTER=otlp
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
+      - OTEL_NODE_RESOURCE_DETECTORS=env,host,os
+      - OTEL_SERVICE_NAME=product-service
+      - NODE_OPTIONS=--require @opentelemetry/auto-instrumentations-node/register
+    depends_on:
+      - mongodb
+      - otel-collector
+    networks:
+      - myapp-network
+
+  user:
+    build: ./user-service
+    ports:
+      - "3004:3004"
+    environment:
+      - OTEL_TRACES_EXPORTER=otlp
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
+      - OTEL_NODE_RESOURCE_DETECTORS=env,host,os
+      - OTEL_SERVICE_NAME=user-service
+      - NODE_OPTIONS=--require @opentelemetry/auto-instrumentations-node/register
+    depends_on:
+      - mongodb
+      - otel-collector
+    networks:
+      - myapp-network
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    command: ["--config", "/etc/otel-collector-config.yaml"]
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml:ro
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+      - "8888:8888"
+    environment:
+      - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT}
+      - SIGNOZ_INGESTION_KEY=${SIGNOZ_INGESTION_KEY}
+    networks:
+      - myapp-network
+
+networks:
+  myapp-network:
+
+volumes:
+  mongo-data:
+```
+
+### Running the Services
+
+Now, start all the services using Docker Compose:
+
+```bash
+docker-compose up --build
+```
+
+### **Verifying the Setup**
+
+Once the services are running, you should see telemetry data being sent to SigNoz. Check the SigNoz dashboard to visualize the collected traces, metrics, and logs.
+
+### Common Issues and Troubleshooting
+
+- **Missing Traces**: Ensure that the environment variables are correctly set and that the OpenTelemetry Collector is reachable.
+- **Collector Connectivity Issues**: Verify that the collector is running and the endpoints are correctly configured.
+- **Port not mentioned in the endpoint:** Ensure you add the port to the SigNoz endpoint URL as follow:
+    
+    ```bash
+    OTEL_EXPORTER_OTLP_ENDPOINT="ingest.{region}.signoz.cloud:443"
+    ```
+    
+- **Connection Issue:** OpenTelemetry traces are not being exported correctly, and errors like **`Parse Error: Expected HTTP/`** appear in the logs.
+    
+    **Solution**:
+    
+    Verify that the OpenTelemetry environment variables are set correctly. Ensure that the **`OTEL_EXPORTER_OTLP_ENDPOINT`** is set to the correct endpoint. Change the OTLP endpoint port from **`4317`** (gRPC) to **`4318`** (HTTP) if you're facing connection issues. This change resolved the issue in our setup:
+    
+    ```yaml
+    - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
+    ```
+    
+- **Unauthorized Error with Signoz Ingest:** When trying to send traces to Signoz, you encounter a **`401 Unauthorized`** error.
+    
+    **Solution**:
+    
+    Ensure that the **`signoz-access-token`** is correctly set in your environment variables.
+    
+    Verify that the token has not expired or been revoke. You can test the token using a **`curl`** command:
+    
+    ```bash
+    curl -v -H "signoz-access-token: YOUR_ACCESS_TOKEN" https://ingest.in.signoz.cloud:443
+    ```
+    
+
+### Conclusion
+
+- **Centralized Telemetry Management**: The OpenTelemetry Collector centralizes the management and export of telemetry data, enhancing observability in microservices architectures.
+- **Configuration and Setup**: Properly configuring the collector and ensuring correct environment variables are crucial for successful telemetry data export.
+- **Endpoint and Port Configuration**: Understanding the importance of using the correct OTLP endpoint and port (switching from 4317 for gRPC to 4318 for HTTP) can resolve common connectivity issues.
+- **Authentication and Authorization**: Ensuring the correct usage of authentication tokens when sending data to external services like SigNoz to avoid unauthorized access issues.
+
+By setting up the OpenTelemetry Collector within Docker, you've centralized the management and export of telemetry data, enhancing the observability of your microservices. This setup allows you to capture detailed traces, metrics, and logs, providing valuable insights into your application's performance.
+
+**Next steps** include exploring more advanced configurations and custom metrics to fully leverage the capabilities of OpenTelemetry and SigNoz.
+
+<Admonition type="info">
+Read Next Article of OpenTelemetry NodeJS series on [Manual Instrumentation for Traces - OpenTelemetry NodeJS](/opentelemetry/add-manual-span-to-traces-nodejs)
+</Admonition>
