@@ -78,44 +78,6 @@ const computedFields: ComputedFields = {
     },
   },
 }
-/**
- * Count the occurrences of all tags across blog posts and write to json file
- */
-function createTagCount(allBlogs) {
-  const tags: Record<string, number> = {}
-  allBlogs.forEach((file) => {
-    if (file.tags && (!isProduction || file.draft !== true)) {
-      file.tags.forEach((tag) => {
-        const formattedTag = slug(tag)
-        if (formattedTag in tags) {
-          tags[formattedTag] += 1
-        } else {
-          tags[formattedTag] = 1
-        }
-      })
-    }
-  })
-  writeFileSync('./app/tag-data.json', JSON.stringify(tags, null, 2), {
-    flag: 'w',
-    encoding: 'utf-8',
-  })
-}
-
-function createSearchIndex(content) {
-  if (
-    siteMetadata?.search?.provider === 'kbar' &&
-    siteMetadata.search.kbarConfig.searchDocumentsPath
-  ) {
-    const indexJSON = allCoreContent(sortPosts(content))
-
-    writeFileSync(
-      `public/${siteMetadata.search.kbarConfig.searchDocumentsPath}`,
-      JSON.stringify(indexJSON, null, 2),
-      { flag: 'w', encoding: 'utf-8' }
-    )
-    console.log('Local search index generated...')
-  }
-}
 
 function getRelatedArticles(doc, relatedArticles) {
   const blogSlug = doc._raw.flattenedPath
@@ -436,7 +398,5 @@ export default makeSource({
   },
   onSuccess: async (importData) => {
     const { allDocuments } = await importData()
-    createTagCount(allDocuments)
-    createSearchIndex(allDocuments)
   },
 })
