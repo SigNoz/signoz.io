@@ -639,7 +639,7 @@ const docsSideNav = [
       },
       {
         type: 'doc',
-        route: '/docs/userguide/panel-types',
+        route: '/docs/dashboards/panel-types',
         label: 'Panel Types',
       },
       {
