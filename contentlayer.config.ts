@@ -391,9 +391,22 @@ export const Authors = defineDocumentType(() => ({
   computedFields,
 }))
 
+export const CaseStudy = defineDocumentType(() => ({
+  name: 'CaseStudy',
+  filePathPattern: 'case-study/**/*.mdx',
+  contentType: 'mdx',
+  fields: {
+    title: { type: 'string', required: true },
+    slug: { type: 'string', required: true },
+    image: { type: 'string', required: false },
+    authors: { type: 'list', of: { type: 'string' }, required: false },
+  },
+  computedFields,
+}))
+
 export default makeSource({
   contentDirPath: 'data',
-  documentTypes: [Blog, Authors, Comparison, Guide, Opentelemetry, Doc, Newsroom],
+  documentTypes: [Blog, Authors, Comparison, Guide, Opentelemetry, Doc, Newsroom, CaseStudy],
   mdx: {
     cwd: process.cwd(),
     remarkPlugins: [
