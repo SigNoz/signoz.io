@@ -1,14 +1,32 @@
-import MarkdownRenderer from '@/components/ReactMarkdown'
-import React from 'react'
+---
+title: How Blip uses SigNoz to improve their issue resolution time by 14x
+slug: blipbillboards
+image: /img/case_study/BlipBillBoards.png
+authors: [pranay]
+# hide_table_of_contents: true
+---
 
-import { Metadata } from 'next'
+<head>
+  <link rel="canonical" href="https://signoz.io/case-study/blip/"/>
+  <meta property="og:image" content="https://signoz.io/img/case_study/BlipBillBoards.png"/>
+  <meta name ="twitter:image" content="https://signoz.io/img/case_study/BlipBillBoards.png"/>
+</head>
 
-export const metadata: Metadata = {
-  title: 'Blip Case Study',
-}
-
-const markdownContent = `
-# How Blip uses SigNoz to improve their issue resolution time by 14x
+<div class="avatar">
+  <a
+    class="avatar__photo-link avatar__photo avatar__photo--lg"
+    href="https://twitter.com/pranay01">
+    <img
+      alt="Pranay Profile"
+      src="/img/authors/pranay_profile_pic.webp" />
+  </a>
+  <div class="avatar__intro">
+    <div class="avatar__name">Pranay Prateek</div>
+    <small class="avatar__subtitle">
+      Maintainer, SigNoz
+    </small>
+  </div>
+</div>
 
 Blip provides self-service subscription-based digital ad space across 1000’s of digital billboards in the US and Canada. Many small and medium-sized businesses use Blip services to reach their audience anytime, anywhere they want.
 
@@ -31,7 +49,6 @@ At Blip, I do a lot of integration with various platforms and services. For moni
 
 So, my primary goal is to try and optimize the application and keep our developers informed about where the application is having issues. It’s also my job to help them fix the issue.
 
-
 ### What were the business problems you're trying to solve with SigNoz?
 
 <YouTube id="ISPfqGmJGYE" mute={false} />
@@ -48,7 +65,7 @@ I've had no issues with it. It showed me exactly what's going on, how the code i
 
 ### Can you share any specific business use cases you solved with SigNoz?
 
-A few months ago, before I implemented SigNoz, we were having an issue. We had an endpoint that we called \`checklist\`
+A few months ago, before I implemented SigNoz, we were having an issue. We had an endpoint that we called `checklist`.
 
 And it's a checklist to ensure an ad is ready to plan a sign. If an ad has to go through, it has to get approved. It has to have the right tags on it. It has to be approved by the sign owner.
 
@@ -56,9 +73,10 @@ Going through all the checklists made it a very slow endpoint. And we knew it wa
 
 But what happened behind the scenes was nebulous. For example, we knew it was taking 20 seconds to get rendered, but we had no idea of what exactly happened during those 20 seconds.
 
-
-![Trace filters helps you find interesting spans quickly, which you can dive deeper into](/img/case_study/trace-filter.webp)
-
+<figure data-zoomable align='center'>
+    <img src="/img/case_study/trace-filter.webp" alt="SigNoz trace filter page "/>
+    <figcaption><i>Trace filters helps you find interesting spans quickly, which you can dive deeper into </i></figcaption>
+</figure>
 
 ### Logs did not solve the problem.
 
@@ -80,9 +98,12 @@ But now we know how to avoid such things. For example, an endpoint came up just 
 
 ### N+1 query issue.
 
-![N+1 queries are suboptimal and can lead to significant perf impact](/img/case_study/Nplus1.webp)
+<figure data-zoomable align='center'>
+    <img src="/img/case_study/Nplus1.webp" alt="N+1 query "/>
+    <figcaption><i>N+1 queries are suboptimal and can lead to significant perf impact</i></figcaption>
+</figure>
 
-SigNoz showed me that if someone hits this particular endpoint with a particular campaign with a specific amount of data, it leads to 100 SQL queries in a single request. So if you do a \`select\` query on all of the rows you're looking for in the database in one go, it creates one SQL query. It takes like 5 seconds to complete, which is not great, but it's not terrible.
+SigNoz showed me that if someone hits this particular endpoint with a particular campaign with a specific amount of data, it leads to 100 SQL queries in a single request. So if you do a `select` query on all of the rows you're looking for in the database in one go, it creates one SQL query. It takes like 5 seconds to complete, which is not great, but it's not terrible.
 
 Data is right there in memory, and you're able to iterate through it and do whatever you need to do. Before that, it was going out and wouldn't cache this data. It would be selecting a single row at a time. And because of that, it took over three minutes to complete a single request.
 
@@ -90,12 +111,7 @@ And by seeing the trace details in SigNoz, I showed the developers what exactly 
 
 ### What made you choose SigNoz over other solutions?
 
-
-<p>&nbsp;</p>
-
 <YouTube id="8b3rutiPnTc" mute={false} />
-
-<p>&nbsp;</p>
 
 Sure, we tried Jaeger before, but I think the OpenTelemetry packages were a little bit forked at that time or something.
 
@@ -117,9 +133,9 @@ It just runs and runs very efficiently for what it's doing.
 
 ### How much resource did SigNoz need to handle your scale?
 
-So we did have to upsize the Kubernetes cluster we were using. We were using \`t3large\` before, and now we had to go up to \`t3xlarge\` because the amount of memory and CPU that was available on the \`t3large\` wasn't enough to run the ClickHouse database.
+So we did have to upsize the Kubernetes cluster we were using. We were using `t3large` before, and now we had to go up to `t3xlarge` because the amount of memory and CPU that was available on the `t3large` wasn't enough to run the ClickHouse database.
 
-So the \`t3xlarge\`, as soon as we have created that, we basically dedicate one entire node to just the ClickHouse database, and it's okay with that.
+So the `t3xlarge`, as soon as we have created that, we basically dedicate one entire node to just the ClickHouse database, and it's okay with that.
 
 And then, we also did auto-scaling for the OTel collectors to be able to collect the data accurately. As soon as one of the nodes hits 50% Ram or CPU, go ahead and bump it up a little bit, and then bump it back down when you don’t need it.
 
@@ -133,8 +149,10 @@ We use distributed tracing a lot. We use all the features of distributed tracing
 
 The second feature that we use the most is the application metrics page which shows latency like p95, p99, and response times for different endpoints. At a glance, we can review which endpoints are taking longer and investigate them.
 
-
-![SigNoz Service Map shows a birds eye view of your architecture](/img/case_study/ServiceMap.webp)
+<figure data-zoomable align='center'>
+    <img src="/img/case_study/ServiceMap.webp" alt="Service Map "/>
+    <figcaption><i>SigNoz Service Map shows a birds eye view of your architecture</i></figcaption>
+</figure>
 
 ### Any advice for teams trying to set up their observability systems?
 
@@ -146,20 +164,10 @@ If you have to instrument one place, make sure you instrument the place where ev
 
 ---
 
-Thank you for taking out the time to read this case study. If you have any feedback or want to share your story using SigNoz, please feel free to reach out to \`hello@signoz.io\` with \`Case Study\` as subject.
+Thank you for taking out the time to read this case study. If you have any feedback or want to share your story using SigNoz, please feel free to reach out to `hello@signoz.io` with `Case Study` as subject.
 
 Sharing stories of how different teams are using SigNoz helps the community in learning different use cases and problems SigNoz can solve and also showcases how you are solving issues in a unique way.
 
 Feel free to join our slack community and say hi! 👋
 
 [![SigNoz Slack community](/img/blog/common/join_slack_cta.webp)](https://signoz.io/slack)
-
-`
-
-export default function page() {
-  return (
-    <div className="container mx-auto my-16">
-      <MarkdownRenderer markdownContent={markdownContent} />
-    </div>
-  )
-}
