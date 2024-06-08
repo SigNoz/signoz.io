@@ -353,17 +353,17 @@ const docsSideNav = [
             route: '/docs/application-monitoring/api-monitoring',
             label: 'API Monitoring',
           },
+          {
+            type: 'doc',
+            route: '/docs/traces-management/guides/drop-spans',
+            label: 'Control Traces Volume',
+          },
         ],
       },
       {
         type: 'doc',
         route: '/docs/instrumentation/troubleshoot-instrumentation',
         label: 'Troubleshooting',
-      },
-      {
-        type: 'doc',
-        route: '/docs/traces-management/drop-spans',
-        label: 'Control Traces Volume',
       },
     ],
   },
