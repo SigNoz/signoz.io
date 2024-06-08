@@ -648,9 +648,46 @@ const docsSideNav = [
         label: 'Manage Panels',
       },
       {
-        type: 'doc',
+        type: 'category',
         route: '/docs/dashboards/panel-types',
         label: 'Panel Types',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/dashboards/panel-types/bar',
+            label: 'Bar Chart',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/panel-types/histogram',
+            label: 'Histogram',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/panel-types/list',
+            label: 'List',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/panel-types/pie',
+            label: 'Pie',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/panel-types/table',
+            label: 'Table',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/panel-types/timeseries',
+            label: 'Timeseries',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/panel-types/value',
+            label: 'Value',
+          },
+        ],
       },
       {
         type: 'doc',
