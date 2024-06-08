@@ -57,12 +57,9 @@ At Blip, I do a lot of integration with various platforms and services. For moni
 
 So, my primary goal is to try and optimize the application and keep our developers informed about where the application is having issues. It’s also my job to help them fix the issue.
 
-
 ### _What were the business problems you're trying to solve with SigNoz? _
 
 <YouTube id="ISPfqGmJGYE" mute={false} />
-
-
 
 Yes, absolutely! With SigNoz, we are currently doing about 13 million to 40 million spans per hour which varies with the time of the day. The number goes up during the day quite a bit, up to ~40mn spans/hr, and it's like 13 million spans or so during the night. We have primarily instrumented our backend services.
 
@@ -89,8 +86,6 @@ But what happened behind the scenes was nebulous. For example, we knew it was ta
     <figcaption><i>Trace filters helps you find interesting spans quickly, which you can dive deeper into </i></figcaption>
 </figure>
 
-
-
 ### _Logs did not solve the problem._
 
 You can try and run a couple of queries to check what queries are being run and what's going on. But correlating that to a specific endpoint is next to impossible with logs. We had an outage that occurred because of that. The endpoint started getting so large and running so many queries that it took down the website for everyone, not just the person accessing that particular endpoint.
@@ -116,8 +111,6 @@ But now we know how to avoid such things. For example, an endpoint came up just 
     <figcaption><i>N+1 queries are suboptimal and can lead to significant perf impact</i></figcaption>
 </figure>
 
-
-
 SigNoz showed me that if someone hits this particular endpoint with a particular campaign with a specific amount of data, it leads to 100 SQL queries in a single request. So if you do a `select` query on all of the rows you're looking for in the database in one go, it creates one SQL query. It takes like 5 seconds to complete, which is not great, but it's not terrible.
 
 Data is right there in memory, and you're able to iterate through it and do whatever you need to do. Before that, it was going out and wouldn't cache this data. It would be selecting a single row at a time. And because of that, it took over three minutes to complete a single request.
@@ -126,9 +119,7 @@ And by seeing the trace details in SigNoz, I showed the developers what exactly 
 
 ### What made you choose SigNoz over other solutions?
 
-<YouTube id="8b3rutiPnTc" mute={false} />
-
-
+<!-- <YouTube id="8b3rutiPnTc" mute={false} /> -->
 
 Sure, we tried Jaeger before, but I think the OpenTelemetry packages were a little bit forked at that time or something.
 
@@ -171,8 +162,6 @@ The second feature that we use the most is the application metrics page which sh
     <figcaption><i>SigNoz Service Map shows a birds eye view of your architecture</i></figcaption>
 </figure>
 
-
-
 ### _Any advice for teams trying to set up their observability systems?_
 
 I would suggest teams use the automatic instrumentation provided by OpenTelemetry libraries. It's good to automatically instrument things like your database calls, and your various HTTP calls, among other things. You don't need to worry about instrumenting applications yourself initially. It's great to get something up and going because it is so insightful to just see things laid out.
@@ -180,8 +169,6 @@ I would suggest teams use the automatic instrumentation provided by OpenTelemetr
 The second thing I would suggest is that if you have a place where there's a common endpoint that comes in your application, wrap that in a span because all of the different things are automatically instrumented and aren't necessarily tied together with a single request by default.
 
 If you have to instrument one place, make sure you instrument the place where everything enters your system. So if there's a routing handling system, or if there's a piece of code that handles requests, you can wrap that in a single span, and then all of those database calls get tied together, and it's wonderful.
-
-
 
 ---
 
