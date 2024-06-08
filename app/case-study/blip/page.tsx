@@ -34,7 +34,6 @@ So, my primary goal is to try and optimize the application and keep our develope
 
 ### What were the business problems you're trying to solve with SigNoz?
 
-<YouTube id="ISPfqGmJGYE" mute={false} />
 
 Yes, absolutely! With SigNoz, we are currently doing about 13 million to 40 million spans per hour which varies with the time of the day. The number goes up during the day quite a bit, up to ~40mn spans/hr, and it's like 13 million spans or so during the night. We have primarily instrumented our backend services.
 
@@ -88,14 +87,9 @@ Data is right there in memory, and you're able to iterate through it and do what
 
 And by seeing the trace details in SigNoz, I showed the developers what exactly was going on. I showed them the data that was being passed in. And now, instead of three minutes, it takes 2 seconds to complete the exact same request.
 
+
+
 ### What made you choose SigNoz over other solutions?
-
-
-<p>&nbsp;</p>
-
-<YouTube id="8b3rutiPnTc" mute={false} />
-
-<p>&nbsp;</p>
 
 Sure, we tried Jaeger before, but I think the OpenTelemetry packages were a little bit forked at that time or something.
 

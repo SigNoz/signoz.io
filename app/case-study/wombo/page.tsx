@@ -7,7 +7,6 @@ export const metadata: Metadata = {
   title: 'Wombo Case Study',
 }
 
-
 const markdownContent = `
 
 # How Generative AI co Wombo provides great experience to its 5mn MAU using SigNoz for Observability
@@ -56,11 +55,6 @@ The most critical thing for me was safe deployments and the system's health beca
 
 ### What are the key use cases you had for SigNoz?​
 
-
-
-<YouTube id="vUpSEASieKs" mute={false} />
-
-
 The key metric was the image generation time. But other than that, finding the logs across multiple containers is also crucial.
 
 Although we are not completely service-oriented, we still have celery queues. For example, we have machine learning AI models which run on NVIDIA cards on AWS. They are separate containers from the API that the front end, like mobile or web-app, talks to get the response. So, getting a complete view there was significant.
@@ -78,12 +72,6 @@ We have multiple data sources — the ability to see which is taking time and wh
 
 
 ### How did SigNoz compare to other solutions you evaluated?​
-
-
-
-<YouTube id="cuRyrvZpYV4" mute={false} />
-
-
  
 We tried a few other tools, like DataDog.
 
@@ -97,11 +85,8 @@ Whereas for DataDog, you have to go to either AWS CLI or AWS console and manuall
 
 The fact that I got SigNoz running in a single day, at least the traces and exceptions part, was huge.
 
+
 ### Why does the team at Wombo prefer open-source software?​
-
-
-
-<YouTube id="AO3tpixbf8M" mute={false} />
 
 
 

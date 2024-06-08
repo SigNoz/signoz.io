@@ -59,7 +59,7 @@ So, my primary goal is to try and optimize the application and keep our develope
 
 ### _What were the business problems you're trying to solve with SigNoz? _
 
-<YouTube id="ISPfqGmJGYE" mute={false} />
+<!-- <YouTube id="ISPfqGmJGYE" mute={false} /> -->
 
 Yes, absolutely! With SigNoz, we are currently doing about 13 million to 40 million spans per hour which varies with the time of the day. The number goes up during the day quite a bit, up to ~40mn spans/hr, and it's like 13 million spans or so during the night. We have primarily instrumented our backend services.
 
