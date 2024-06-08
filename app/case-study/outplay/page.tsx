@@ -49,9 +49,6 @@ That was one of the major reason. A second thing was we wanted to make this as a
 We have test engineers in our team go to the SigNoz platform on staging environment and they verify if any calls is taking more than the defined limits.
 
 
-<YouTube id="nh79MBqwc0w" mute={false} />
-
-
 ### Why did you choose SigNoz over other solutions?
 
 We were also checking out another tool, Tempo from Grafana. But the number of components inside Tempo is huge.
@@ -60,8 +57,6 @@ We wanted to keep the number of components as small as possible. We don't want t
 
 We needed something which just works after deploying and doesn't need continuous maintenance.
 
-
-<YouTube id="diaVE3TT2Ck" mute={false} />
 
 
 ### Any advice for teams implementing observability systems for the first time
