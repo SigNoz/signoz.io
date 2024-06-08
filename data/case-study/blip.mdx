@@ -10,10 +10,7 @@ authors: [pranay]
   <link rel="canonical" href="https://signoz.io/case-study/blip/"/>
   <meta property="og:image" content="https://signoz.io/img/case_study/BlipBillBoards.png"/>
   <meta name ="twitter:image" content="https://signoz.io/img/case_study/BlipBillBoards.png"/>
-
 </head>
-
-# How Blip uses SigNoz to improve their issue resolution time by 14x
 
 <div class="avatar">
   <a
@@ -31,12 +28,7 @@ authors: [pranay]
   </div>
 </div>
 
-<br />
-<br />
-
 Blip provides self-service subscription-based digital ad space across 1000’s of digital billboards in the US and Canada. Many small and medium-sized businesses use Blip services to reach their audience anytime, anywhere they want.
-
-<!-- *I sat down with Nate, Senior DevOps engineer at [BlipBillBoards](https://www.blipbillboards.com/) to understand how they use SigNoz at BlipBillBoards. Here’s a few snippets from our conversation (edited for legibility)* -->
 
 ![BlipBillBoards](/img/case_study/BlipBillBoards.webp)
 
@@ -49,7 +41,7 @@ Blip used SigNoz to improve their issue resolution time by 14x. We sat down with
 
 Read on to find out how Blip uses SigNoz as their observability backend.
 
-### _Tell us a bit about yourself._
+### Tell us a bit about yourself.
 
 My name is Nate, and I work as a senior DevOps engineer at Blip. I love everything technical and love to build things.
 
@@ -57,9 +49,9 @@ At Blip, I do a lot of integration with various platforms and services. For moni
 
 So, my primary goal is to try and optimize the application and keep our developers informed about where the application is having issues. It’s also my job to help them fix the issue.
 
-### _What were the business problems you're trying to solve with SigNoz? _
+### What were the business problems you're trying to solve with SigNoz?
 
-<!-- <YouTube id="ISPfqGmJGYE" mute={false} /> -->
+<YouTube id="ISPfqGmJGYE" mute={false} />
 
 Yes, absolutely! With SigNoz, we are currently doing about 13 million to 40 million spans per hour which varies with the time of the day. The number goes up during the day quite a bit, up to ~40mn spans/hr, and it's like 13 million spans or so during the night. We have primarily instrumented our backend services.
 
@@ -71,7 +63,7 @@ SigNoz choosing ClickHouse is a very good idea because I had no issues other tha
 
 I've had no issues with it. It showed me exactly what's going on, how the code is flowing, where it's going, what logic it's using to determine what response it will give, and everything else going along with that.
 
-### _Can you share any specific business use cases you solved with SigNoz?_
+### Can you share any specific business use cases you solved with SigNoz?
 
 A few months ago, before I implemented SigNoz, we were having an issue. We had an endpoint that we called `checklist`.
 
@@ -86,7 +78,7 @@ But what happened behind the scenes was nebulous. For example, we knew it was ta
     <figcaption><i>Trace filters helps you find interesting spans quickly, which you can dive deeper into </i></figcaption>
 </figure>
 
-### _Logs did not solve the problem._
+### Logs did not solve the problem.
 
 You can try and run a couple of queries to check what queries are being run and what's going on. But correlating that to a specific endpoint is next to impossible with logs. We had an outage that occurred because of that. The endpoint started getting so large and running so many queries that it took down the website for everyone, not just the person accessing that particular endpoint.
 
@@ -94,7 +86,7 @@ I spent about two weeks diagnosing the cause and then another two weeks fixing i
 
 I had to add a log statement and then run a query. Then add another log statement, and run a query to see where the request would go. This is how I was trying to reproduce it.
 
-### _Many a time staging environment doesn’t reflect issues that come up in production._
+### Many a time staging environment doesn’t reflect issues that come up in production.
 
 The staging environment doesn't have the same data as the production environment, and it's not nearly as full-featured. So when we were trying to run queries in staging, the request was completed in seconds. But when we ran it in production, we were suddenly getting these timings out, taking down the whole website and the entire back end.
 
@@ -104,7 +96,7 @@ It was awful. And so I did finally fix it. So we got that push, and now the back
 
 But now we know how to avoid such things. For example, an endpoint came up just the other day, and with SigNoz in place, it took me just an hour to figure out why, how, and exactly what was going wrong.
 
-### _N+1 query issue._
+### N+1 query issue.
 
 <figure data-zoomable align='center'>
     <img src="/img/case_study/Nplus1.webp" alt="N+1 query "/>
@@ -119,7 +111,7 @@ And by seeing the trace details in SigNoz, I showed the developers what exactly 
 
 ### What made you choose SigNoz over other solutions?
 
-<!-- <YouTube id="8b3rutiPnTc" mute={false} /> -->
+<YouTube id="8b3rutiPnTc" mute={false} />
 
 Sure, we tried Jaeger before, but I think the OpenTelemetry packages were a little bit forked at that time or something.
 
@@ -139,7 +131,7 @@ So we didn't have any of those issues with rolling out OpenTelemetry into the co
 
 It just runs and runs very efficiently for what it's doing.
 
-### _How much resource did SigNoz need to handle your scale?_
+### How much resource did SigNoz need to handle your scale?
 
 So we did have to upsize the Kubernetes cluster we were using. We were using `t3large` before, and now we had to go up to `t3xlarge` because the amount of memory and CPU that was available on the `t3large` wasn't enough to run the ClickHouse database.
 
@@ -151,7 +143,7 @@ And on average, we go between about three OTel Collectors up to about nine. I ha
 
 Altogether, if I remember right, it was about 32GB of RAM on average for everything, including the ClickHouse and OTel collector. So, broadly 32GB RAM is sufficient for 40 mn spans per hour.
 
-### _What features do you use the most in SigNoz?_
+### What features do you use the most in SigNoz?
 
 We use distributed tracing a lot. We use all the features of distributed tracing, individual spans, attributes, and events associated with each span. With all the features combined, distributed tracing shows exactly how things are running, and that’s incredibly helpful.
 
@@ -162,7 +154,7 @@ The second feature that we use the most is the application metrics page which sh
     <figcaption><i>SigNoz Service Map shows a birds eye view of your architecture</i></figcaption>
 </figure>
 
-### _Any advice for teams trying to set up their observability systems?_
+### Any advice for teams trying to set up their observability systems?
 
 I would suggest teams use the automatic instrumentation provided by OpenTelemetry libraries. It's good to automatically instrument things like your database calls, and your various HTTP calls, among other things. You don't need to worry about instrumenting applications yourself initially. It's great to get something up and going because it is so insightful to just see things laid out.
 
