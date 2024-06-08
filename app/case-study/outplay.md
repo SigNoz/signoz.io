@@ -75,7 +75,7 @@ That was one of the major reason. A second thing was we wanted to make this as a
 We have test engineers in our team go to the SigNoz platform on staging environment and they verify if any calls is taking more than the defined limits.
 
 <br />
-<YouTube id="nh79MBqwc0w" mute={false} />
+<!-- <YouTube id="nh79MBqwc0w" mute={false} /> -->
 <br />
 <br />
 
@@ -89,7 +89,7 @@ We needed something which just works after deploying and doesn't need continuous
 <br />
 <br />
 
-<YouTube id="diaVE3TT2Ck" mute={false} />
+<!-- <YouTube id="diaVE3TT2Ck" mute={false} /> -->
 
 <br />
 <br />
@@ -103,8 +103,6 @@ Try to have back end storage for storing the observability data. Something like 
 SigNoz provides that option where you can connect your S3 to ClickHouse and configure it in such a way that after 80% of disk storage is used, it automatically shifts data to s3.
 
 Now with open telemetry becoming a standard, which supports all kinds of programming languages, you don't have to worry about how we are exporting the data. The devops teams should focus on the right tools to store the data and visualising it.
-
-
 
 ---
 
