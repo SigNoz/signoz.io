@@ -11,6 +11,7 @@ import GitHubStars from '../GithubStars/GithubStars'
 import React from 'react'
 import DocsSidebar from '../DocsSidebar/DocsSidebar'
 import { usePathname } from 'next/navigation'
+import Banner from '../Banner/Banner'
 
 export default function TopNav() {
   const pathname = usePathname()
@@ -30,9 +31,11 @@ export default function TopNav() {
   }, [pathname])
 
   return (
+    <div className='fixed left-0 right-0 z-30'>  
+    <Banner/>
     <header
-      className={`fixed left-0 right-0 z-30 mx-auto box-border flex h-[48px] w-full items-center border-b border-signoz_slate-500 bg-signoz_ink-500 px-4 text-slate-900 dark:text-slate-50 md:px-8 lg:px-8`}
-    >
+      className={`mx-auto box-border flex h-[48px] w-full items-center border-b border-signoz_slate-500 bg-signoz_ink-500 px-4 text-slate-900 dark:text-slate-50 md:px-8 lg:px-8`}
+    >                                                
       <nav
         className="flex w-full items-center justify-between text-slate-900 dark:text-slate-50"
         aria-label="Global"
@@ -190,5 +193,6 @@ export default function TopNav() {
         </Dialog.Panel>
       </Dialog>
     </header>
+    </div>
   )
 }
