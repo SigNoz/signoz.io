@@ -8,6 +8,7 @@ description: It is essential to monitor your Angular frontend apps. OpenTelemetr
 image: /img/blog/2022/04/opentelemetry_angular_cover.webp
 keywords: [opentelemetry,angular,opentelemetry angular,opentelemetry angular interceptor,opentelemetry angular example,javascript,apm tools,application performance monitoring]
 ---
+
 <head>
   <link rel="canonical" href="https://signoz.io/blog/opentelemetry-angular/" />
 </head>
@@ -58,23 +59,13 @@ Now let’s get down to how to implement OpenTelemetry Angular libraries and the
 
 **Step 1: Install SigNoz**
 
-First, you need to install SigNoz so that OpenTelemetry can send the data to it.
+You need a backend to which you can send the collected data for monitoring and visualization. [SigNoz](https://signoz.io/) is an OpenTelemetry-native APM that is well-suited for visualizing OpenTelemetry data.
 
-SigNoz can be installed on macOS or Linux computers in just three steps by using a simple install script.
+SigNoz cloud is the easiest way to run SigNoz. You can sign up [here](https://signoz.io/teams/) for a free account and get 30 days of unlimited access to all features.
 
-The install script automatically installs Docker Engine on Linux. However, on macOS, you must manually install <a href="https://docs.docker.com/engine/install/" rel="noopener noreferrer nofollow" target="_blank">Docker Engine</a> before running the install script.
+[![Try SigNoz Cloud CTA](/img/blog/2024/01/opentelemetry-collector-try-signoz-cloud-cta.webp)](https://signoz.io/teams/)
 
-```bash
-git clone -b main https://github.com/SigNoz/signoz.git
-cd signoz/deploy/
-./install.sh
-```
-
-You can visit our documentation for instructions on how to install SigNoz using Docker Swarm and Helm Charts.
-
-[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/)
-
-When you are done installing SigNoz, you can access the UI at [http://localhost:3301](http://localhost:3301/application)
+You can also install and self-host SigNoz yourself. Check out the [docs](https://signoz.io/docs/install/) for installing self-host SigNoz.
 
 { /* <!-- ![SigNoz dashboard - It shows services from a sample app that comes bundled with the application](Implementi%20ebc9f/signoz_dashboard.webp) --> */}
 
@@ -90,7 +81,7 @@ We have set up two sample GitHub repos in order to demonstrate the example at ha
 
 - [Sample Angular App](https://github.com/SigNoz/sample-angular-app/tree/without-instrumentation)<br></br>
 It contains the sample boilerplate code that we will instrument. If you want to follow the tutorial, then you should follow the `without instrumentation` branch.
-- [Sample Nodejs App](https://github.com/SigNoz/sample-nodejs-app/tree/main)<br></br>
+- [Sample Nodejs App](https://github.com/SigNoz/sample-nodejs-app)<br></br>
 It contains a basic backend API which we will be calling. The backend API is also instrumented with OpenTelemetry to have end-to-end tracing.
 
 **Step 3: Enable CORS in the OTel Receiver**
@@ -99,11 +90,11 @@ Enable CORS in the OTel Receiver. Under SigNoz folder, open the `otel-collector-
 
 You can view the file at [SigNoz GitHub repo](https://github.com/SigNoz/signoz/blob/develop/deploy/docker/clickhouse-setup/otel-collector-config.yaml). Inside the file add the following CORS config:
 
-```go
+```yaml
 http:
-+        cors:
-+          allowed_origins:
-+            - https://netflix.com  # URL of your Frontend application
++  cors:
++    allowed_origins:
++      - https://netflix.com  # URL of your Frontend application
 ```
 
 You need to update the URL of your frontend application. For this tutorial, we will be running our frontend application on `http://localhost:4200`. 
@@ -121,13 +112,14 @@ Once you make the changes, you need to restart the Docker containers.
 
 To instrument the angular app with OpenTelemetry, we need to install the OpenTelemetry dependencies.
 
-```go
-npm i @jufab/opentelemetry-angular-interceptor && npm i @opentelemetry/api @opentelemetry/sdk-trace-web @opentelemetry/sdk-trace-base @opentelemetry/core @opentelemetry/semantic-conventions @opentelemetry/resources @opentelemetry/exporter-trace-otlp-http @opentelemetry/exporter-zipkin @opentelemetry/propagator-b3 @opentelemetry/propagator-jaeger @opentelemetry/context-zone-peer-dep @opentelemetry/instrumentation @opentelemetry/instrumentation-document-load @opentelemetry/instrumentation-fetch @opentelemetry/instrumentation-xml-http-request @opentelemetry/propagator-aws-xray --save-dev
+```bash
+npm i @jufab/opentelemetry-angular-interceptor && 
+npm i @opentelemetry/api @opentelemetry/sdk-trace-web @opentelemetry/sdk-trace-base @opentelemetry/core @opentelemetry/semantic-conventions @opentelemetry/resources @opentelemetry/exporter-trace-otlp-http @opentelemetry/exporter-zipkin @opentelemetry/propagator-b3 @opentelemetry/propagator-jaeger @opentelemetry/context-zone-peer-dep @opentelemetry/instrumentation @opentelemetry/instrumentation-document-load @opentelemetry/instrumentation-fetch @opentelemetry/instrumentation-xml-http-request @opentelemetry/propagator-aws-xray --save-dev
 ```
 
 **Step 5: Update `app.module.ts` file**
 
-```go
+```ts
 import {
   OpenTelemetryInterceptorModule,
   OtelColExporterModule,
@@ -146,7 +138,11 @@ import {
         probabilitySampler: '1',
       },
       otelcolConfig: {
-        url: 'http://127.0.0.1:4318/v1/traces', // URL of opentelemetry collector
+        url: 'https://ingest.{REGION}.signoz.cloud:443/v1/traces', // URL of opentelemetry collector
+        headers: {
+          // SigNoz access token
+          'signoz-access-token': '{SIGNOZ_INGESTION_KEY}',
+        },
       },
     }),
     //Insert OtelCol exporter module
@@ -158,7 +154,10 @@ import {
 })
 ```
 
-Make sure to update then URL of OpenTelemetry Collector under `otelcolConfig`. In our case since we’re running SigNoz in local, the URL is `http://127.0.0.1:4318/v1/traces`.
+Make sure to update then URL of OpenTelemetry Collector under `otelcolConfig`. 
+In our case since we’re using SigNoz Cloud, the URL is `https://ingest.{REGION}.signoz.cloud:443/v1/traces`.
+
+If you are running SigNoz in local, the URL will be `http://127.0.0.1:4318/v1/traces`.
 
 You can change the name of the service, and other configurations under `commonConfig`.
 
@@ -167,28 +166,47 @@ You can change the name of the service, and other configurations under `commonCo
 For Angular app:<br></br>
 Go to the root folder of your Angular application, and run the following command:
 
-```go
+```bash
 yarn start
 ```
 
 For backend API:<br></br>
 Install the dependencies
 
-```go
+```bash
 yarn install
 ```
 
-If SigNoz is installed locally, run your backend API using:
+{/* If SigNoz is installed locally, run your backend API using:
 
 ```go
 yarn run start:local
+``` */}
+
+To start your backend API, you can do so by using the below command:
+
+```bash
+OTEL_RESOURCE_ATTRIBUTES=service.name=NAME_OF_SERVICE \
+OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.{REGION}.signoz.cloud:443" \
+OTEL_EXPORTER_OTLP_HEADERS="signoz-access-token=SIGNOZ_INGESTION_KEY" \
+OTEL_EXPORTER_OTLP_PROTOCOL=grpc \
+yarn run start
 ```
 
-If SigNoz is not installed locally, then you would need to set the IP of the machine where SigNoz is installed. You can do so by using the below command:
+- `NAME_OF_SERVICE` is the name of the service you want
+- Replace `SIGNOZ_INGESTION_KEY` with the api token provided by SigNoz. You can find it in the email sent by SigNoz with your cloud account details.
+- replace `REGION` with your region, (in, us, etc)
 
-```go
-OTEL_EXPORTER_OTLP_ENDPOINT="<IP of SigNoz>:4317" OTEL_RESOURCE_ATTRIBUTES=service.name=NAME_OF_SERVICE yarn run start:custom```
-```
+You will be able to get ingestion details in SigNoz cloud account under settings --> ingestion settings.
+
+<figure data-zoomable align='center'>
+    <img src="/img/blog/common/ingestion-key-details.webp" alt="Ingestion key details"/>
+    <figcaption><i>Ingestion details in SigNoz dashboard</i></figcaption>
+</figure>
+
+<Admonition>
+Don’t run app in reloader/hot-reload mode as it breaks instrumentation. For example, if you use `--reload` or `reload=True`, it enables the reloader mode which breaks OpenTelemetry isntrumentation.
+</Admonition>
 
 Congratulations! You have successfully run your Angular application with OpenTelemetry. It’s time to see the collected data.
 
@@ -227,7 +245,6 @@ You can also monitor errors that takes place in your Angular application. SigNoz
     <figcaption><i>Monitor errors in your frontend Angular application</i></figcaption>
 </figure>
 
-
 ## Conclusion
 
 Using OpenTelemetry Angular libraries, you can instrument your frontend applications for end-to-end tracing. You can then use an open-source APM tool like SigNoz to ensure the smooth performance of your Angular apps.
@@ -251,7 +268,6 @@ If you are someone who understands more from video, then you can watch the our v
 
 If you face any issues while trying out SigNoz, you can reach out with your questions in #support channel 👇
 
-{ /* <!-- ![join_slack_cta.webp](Implementi%20ebc9f/join_slack_cta.webp) --> */}
 
 [![SigNoz Slack community](/img/blog/common/join_slack_cta.webp)](https://signoz.io/slack)
 
