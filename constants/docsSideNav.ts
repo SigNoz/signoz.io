@@ -355,6 +355,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/traces-management/guides/apm-metrics',
+            label: 'APM Metrics',
+          },
+          {
+            type: 'doc',
             route: '/docs/traces-management/guides/drop-spans',
             label: 'Control Traces Volume',
           },
