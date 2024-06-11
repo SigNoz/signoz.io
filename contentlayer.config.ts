@@ -59,54 +59,47 @@ const computedFields: ComputedFields = {
       const regXHeader = /\n(?<flag>#{1,3})\s+(?<content>.+)/g
       const slugger = new GithubSlugger()
 
-      const regXCodeBlock = /```[\s\S]*?```/g;
-      const contentWithoutCodeBlocks = doc.body.raw.replace(regXCodeBlock, '');
+      const regXCodeBlock = /```[\s\S]*?```/g
+      const contentWithoutCodeBlocks = doc.body.raw.replace(regXCodeBlock, '')
 
-      const headings = Array.from(contentWithoutCodeBlocks.matchAll(regXHeader)).map(({ groups }) => {
-        const flag = groups?.flag
-        const content = groups?.content
-        return {
-          value: content,
-          url: content ? `#${slugger.slug(content)}` : undefined,
-          depth: flag?.length == 1 ? 1 : flag?.length == 2 ? 2 : 3,
+      const headings = Array.from(contentWithoutCodeBlocks.matchAll(regXHeader)).map(
+        ({ groups }) => {
+          const flag = groups?.flag
+          const content = groups?.content
+          return {
+            value: content,
+            url: content ? `#${slugger.slug(content)}` : undefined,
+            depth: flag?.length == 1 ? 1 : flag?.length == 2 ? 2 : 3,
+          }
         }
-      })
+      )
 
       return headings
     },
   },
 }
+
 /**
  * Count the occurrences of all tags across blog posts and write to json file
  */
 function createTagCount(allBlogs) {
-  const tagCount: Record<string, number> = {}
+  const tags: Record<string, number> = {}
   allBlogs.forEach((file) => {
     if (file.tags && (!isProduction || file.draft !== true)) {
       file.tags.forEach((tag) => {
         const formattedTag = slug(tag)
-        if (formattedTag in tagCount) {
-          tagCount[formattedTag] += 1
+        if (formattedTag in tags) {
+          tags[formattedTag] += 1
         } else {
-          tagCount[formattedTag] = 1
+          tags[formattedTag] = 1
         }
       })
     }
   })
-  writeFileSync('./app/tag-data.json', JSON.stringify(tagCount))
-}
-
-function createSearchIndex(content) {
-  if (
-    siteMetadata?.search?.provider === 'kbar' &&
-    siteMetadata.search.kbarConfig.searchDocumentsPath
-  ) {
-    writeFileSync(
-      `public/${siteMetadata.search.kbarConfig.searchDocumentsPath}`,
-      JSON.stringify(allCoreContent(sortPosts(content)))
-    )
-    console.log('Local search index generated...')
-  }
+  writeFileSync('./app/tag-data.json', JSON.stringify(tags, null, 2), {
+    flag: 'w',
+    encoding: 'utf-8',
+  })
 }
 
 function getRelatedArticles(doc, relatedArticles) {
@@ -347,7 +340,7 @@ export const Doc = defineDocumentType(() => ({
     title: { type: 'string', required: true },
     id: { type: 'string', required: true },
     slug: { type: 'string', required: false },
-    date: { type: 'date', required: false, default: new Date().toDateString() },
+    date: { type: 'date', required: false },
     tags: { type: 'list', of: { type: 'string' }, default: [], required: false },
     lastmod: { type: 'date', required: false },
     draft: { type: 'boolean', required: false },
@@ -370,8 +363,8 @@ export const Doc = defineDocumentType(() => ({
         '@context': 'https://schema.org',
         '@type': 'DocPosting',
         headline: doc.title,
-        datePublished: doc.date,
-        dateModified: doc.lastmod || doc.date,
+        datePublished: doc.date || 'Thu Jun 06 2024', // Setting it Jun 06, 2024 as date metadat doesn't exist for docs, TODO: add date to all exisiting doc files
+        dateModified: doc.lastmod || doc.date || 'Thu Jun 06 2024',
         description: doc.description,
         image: doc.images ? doc.images[0] : siteMetadata.socialBanner,
         url: `${siteMetadata.siteUrl}/${doc._raw.flattenedPath}`,
@@ -398,9 +391,22 @@ export const Authors = defineDocumentType(() => ({
   computedFields,
 }))
 
+export const CaseStudy = defineDocumentType(() => ({
+  name: 'CaseStudy',
+  filePathPattern: 'case-study/**/*.mdx',
+  contentType: 'mdx',
+  fields: {
+    title: { type: 'string', required: true },
+    slug: { type: 'string', required: true },
+    image: { type: 'string', required: false },
+    authors: { type: 'list', of: { type: 'string' }, required: false },
+  },
+  computedFields,
+}))
+
 export default makeSource({
   contentDirPath: 'data',
-  documentTypes: [Blog, Authors, Comparison, Guide, Opentelemetry, Doc, Newsroom],
+  documentTypes: [Blog, Authors, Comparison, Guide, Opentelemetry, Doc, Newsroom, CaseStudy],
   mdx: {
     cwd: process.cwd(),
     remarkPlugins: [
@@ -427,8 +433,7 @@ export default makeSource({
     ],
   },
   onSuccess: async (importData) => {
-    const { allBlogs, allDocs, allComparisons, allOpentelemetries, allGuides } = await importData()
-    createTagCount(allBlogs)
-    createSearchIndex([...allBlogs, ...allDocs, ...allComparisons, ...allOpentelemetries, ...allGuides])
+    const { allDocuments } = await importData()
+    createTagCount(allDocuments)
   },
 })

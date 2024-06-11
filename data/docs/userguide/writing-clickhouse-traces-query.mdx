@@ -1,4 +1,5 @@
 ---
+date: 2024-06-06
 title: Writing traces based ClickHouse queries for building dashboard panels
 id: writing-clickhouse-traces-query
 ---
@@ -14,12 +15,11 @@ The distributed tables in clickhouse have been named by prefixing distributed_�
 Eg, signoz_index_v2 now corresponds to the table of a single shard. To query all the shards, query against distributed_signoz_index_v2.
 </Admonition>
 
-### signoz_index_v2
+### distributed_signoz_index_v2
 
 This is primary table of Traces which is queried to fetch spans and apply aggregation on spans. It has over 30 different columns which helps in faster filtering on most common attributes following [OpenTelemetry Trace Semantic conventions](https://github.com/open-telemetry/semantic-conventions/blob/main/docs/general/trace.md).
 
 ```sql
-CREATE TABLE signoz_traces.signoz_index_v2
 (
     `timestamp` DateTime64(9) CODEC(DoubleDelta, LZ4),
     `traceID` FixedString(32) CODEC(ZSTD(1)),
@@ -71,15 +71,9 @@ CREATE TABLE signoz_traces.signoz_index_v2
         ORDER BY timestamp
     )
 )
-ENGINE = MergeTree
-PARTITION BY toDate(timestamp)
-PRIMARY KEY (serviceName, hasError, toStartOfHour(timestamp), name)
-ORDER BY (serviceName, hasError, toStartOfHour(timestamp), name, timestamp)
-TTL toDateTime(timestamp) + toIntervalSecond(1296000)
-SETTINGS index_granularity = 8192, ttl_only_drop_parts = 1
 ```
 
-#### Columns in the signoz_index_v2 table
+#### Columns in the distributed_signoz_index_v2 table
 
 |  NAME  | DESCRIPTION  |
 |---|---|
@@ -114,25 +108,19 @@ SETTINGS index_granularity = 8192, ttl_only_drop_parts = 1
 |**boolTagMap** | Map of all bool tags/attributes of the span|
 |**resourceTagsMap** | Map of all resource tags/attributes of the span|
 
-### signoz_spans
+### distributed_signoz_spans
 
 This table stores span json model which is used to create trace tree and displayed on trace detail page.
 
 ```sql
-CREATE TABLE signoz_traces.signoz_spans
 (
     `timestamp` DateTime64(9) CODEC(DoubleDelta, LZ4),
     `traceID` FixedString(32) CODEC(ZSTD(1)),
     `model` String CODEC(ZSTD(9))
 )
-ENGINE = MergeTree
-PARTITION BY toDate(timestamp)
-ORDER BY traceID
-TTL toDateTime(timestamp) + toIntervalSecond(1296000)
-SETTINGS index_granularity = 1024, ttl_only_drop_parts = 1
 ```
 
-#### Columns in the signoz_spans table
+#### Columns in the distributed_signoz_spans table
 
 |  NAME  | DESCRIPTION  |
 |---|---|
@@ -140,12 +128,11 @@ SETTINGS index_granularity = 1024, ttl_only_drop_parts = 1
 |**traceID** | Trace ID. [W3C Trace Context](https://www.w3.org/TR/trace-context/#trace-id)|
 |**model** | Stringified json of the span|
 
-### signoz_error_index_v2
+### distributed_signoz_error_index_v2
 
 This table stores error events derived from spans
 
 ```sql
-CREATE TABLE signoz_traces.signoz_error_index_v2
 (
     `timestamp` DateTime64(9) CODEC(DoubleDelta, LZ4),
     `errorID` FixedString(32) CODEC(ZSTD(1)),
@@ -162,14 +149,9 @@ CREATE TABLE signoz_traces.signoz_error_index_v2
     INDEX idx_resourceTagsMapKeys mapKeys(resourceTagsMap) TYPE bloom_filter(0.01) GRANULARITY 64,
     INDEX idx_resourceTagsMapValues mapValues(resourceTagsMap) TYPE bloom_filter(0.01) GRANULARITY 64
 )
-ENGINE = MergeTree
-PARTITION BY toDate(timestamp)
-ORDER BY (timestamp, groupID)
-TTL toDateTime(timestamp) + toIntervalSecond(86400)
-SETTINGS index_granularity = 8192, ttl_only_drop_parts = 1
 ```
 
-#### Columns in the signoz_error_index_v2 table
+#### Columns in the distributed_signoz_error_index_v2 table
 
 |  NAME  | DESCRIPTION  |
 |---|---|
@@ -185,47 +167,39 @@ SETTINGS index_granularity = 8192, ttl_only_drop_parts = 1
 |**exceptionEscaped** | Whether the exception is escaped or not. Derived from `exception.escaped` attribute of a span|
 |**resourceTagsMap** | Map of all resource tags/attributes of the span|
 
-### top_level_operations
+### distributed_top_level_operations
 
 This table stores top operations and service name.
 
 ```sql
-CREATE TABLE signoz_traces.top_level_operations
 (
     `name` LowCardinality(String) CODEC(ZSTD(1)),
     `serviceName` LowCardinality(String) CODEC(ZSTD(1))
 )
-ENGINE = ReplacingMergeTree
-ORDER BY (serviceName, name)
-SETTINGS index_granularity = 8192
 ```
 
 
-#### Columns in the top_level_operations table
+#### Columns in the distributed_top_level_operations table
 
 |  NAME  | DESCRIPTION  |
 |---|---|
 |**name** | Name of the span |
 |**serviceName** | Name of the service |
 
-### span_attributes_keys
+### distributed_span_attributes_keys
 
 This table stores all the attributes keys of the span.
 
 ```sql
-CREATE TABLE signoz_traces.span_attributes_keys
 (
     `tagKey` LowCardinality(String) CODEC(ZSTD(1)),
     `tagType` Enum8('tag' = 1, 'resource' = 2) CODEC(ZSTD(1)),
     `dataType` Enum8('string' = 1, 'bool' = 2, 'float64' = 3) CODEC(ZSTD(1)),
     `isColumn` Bool CODEC(ZSTD(1))
 )
-ENGINE = ReplacingMergeTree
-ORDER BY (tagKey, tagType, dataType, isColumn)
-SETTINGS index_granularity = 8192
 ```
 
-#### Columns in the span_attributes_keys table
+#### Columns in the distributed_span_attributes_keys table
 
 |  NAME  | DESCRIPTION  |
 |---|---|
@@ -234,12 +208,11 @@ SETTINGS index_granularity = 8192
 |**dataType** | Data type of the attribute. It can be `string`, `bool` or `float64` |
 |**isColumn** | Whether the attribute is a column or not |
 
-### span_attributes
+### distributed_span_attributes
 
 This table stores all the attributes of the span.
 
 ```sql
-CREATE TABLE signoz_traces.span_attributes
 (
     `timestamp` DateTime CODEC(DoubleDelta, ZSTD(1)),
     `tagKey` LowCardinality(String) CODEC(ZSTD(1)),
@@ -249,13 +222,9 @@ CREATE TABLE signoz_traces.span_attributes
     `float64TagValue` Nullable(Float64) CODEC(ZSTD(1)),
     `isColumn` Bool CODEC(ZSTD(1))
 )
-ENGINE = ReplacingMergeTree
-ORDER BY (tagKey, tagType, dataType, stringTagValue, float64TagValue, isColumn)
-TTL toDateTime(timestamp) + toIntervalSecond(172800)
-SETTINGS ttl_only_drop_parts = 1, allow_nullable_key = 1, index_granularity = 8192
 ```
 
-#### Columns in the span_attributes table
+#### Columns in the distributed_span_attributes table
 
 |  NAME  | DESCRIPTION  |
 |---|---|

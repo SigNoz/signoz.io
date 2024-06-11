@@ -63,7 +63,7 @@ An example of a ClickHouse query:
 SELECT toStartOfInterval(timestamp, INTERVAL 1 MINUTE) AS interval,
 stringTagMap['peer.service'] AS op_name,
 toFloat64(avg(durationNano)) AS value
-FROM signoz_traces.signoz_index_v2
+FROM signoz_traces.distributed_signoz_index_v2
 WHERE stringTagMap['peer.service']!=''
 AND timestamp > now() - INTERVAL 30 MINUTE
 GROUP BY (op_name, interval) order by (op_name, interval) ASC;

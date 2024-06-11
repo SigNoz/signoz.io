@@ -1,4 +1,5 @@
 ---
+date: 2024-06-06
 title: Logs Schema and Writing ClickHouse Queries for Building Dashboard Panels.
 id: logs_clickhouse_queries
 ---
@@ -10,7 +11,6 @@ At SigNoz we store our data on ClickHouse. In this documentation, we will go thr
 If we check the schema of the logs table in clickhouse this is what it looks like. The table was created with respect to the [OpenTelemetry Logs Data Model](https://opentelemetry.io/docs/specs/otel/logs/data-model/)
 
 ```sql
-CREATE TABLE signoz_logs.logs
 (
     `timestamp` UInt64 CODEC(DoubleDelta, LZ4),
     `observed_timestamp` UInt64 CODEC(DoubleDelta, LZ4),
@@ -37,11 +37,6 @@ CREATE TABLE signoz_logs.logs
     INDEX severity_text_idx severity_text TYPE set(25) GRANULARITY 4,
     INDEX trace_flags_idx trace_flags TYPE bloom_filter GRANULARITY 4
 )
-ENGINE = MergeTree
-PARTITION BY toDate(timestamp / 1000000000)
-ORDER BY (timestamp, id)
-TTL toDateTime(timestamp / 1000000000) + toIntervalSecond(1296000)
-SETTINGS index_granularity = 8192, ttl_only_drop_parts = 1
 ```
 
 There is a distributed logs table which references the above table in each shard. The name of the table is `distributed_logs`. The schema is same as above.

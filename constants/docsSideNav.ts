@@ -353,6 +353,16 @@ const docsSideNav = [
             route: '/docs/application-monitoring/api-monitoring',
             label: 'API Monitoring',
           },
+          {
+            type: 'doc',
+            route: '/docs/traces-management/guides/apm-metrics',
+            label: 'APM Metrics',
+          },
+          {
+            type: 'doc',
+            route: '/docs/traces-management/guides/drop-spans',
+            label: 'Control Traces Volume',
+          },
         ],
       },
       {
@@ -609,6 +619,11 @@ const docsSideNav = [
         route: '/docs/userguide/logs_troubleshooting',
         label: 'Troubleshooting',
       },
+      {
+        type: 'doc',
+        route: '/docs/logs-management/guides/drop-logs',
+        label: 'Guide to drop logs',
+      },
     ],
   },
   {
@@ -636,6 +651,48 @@ const docsSideNav = [
         type: 'doc',
         route: '/docs/userguide/manage-panels',
         label: 'Manage Panels',
+      },
+      {
+        type: 'category',
+        route: '/docs/dashboards/panel-types',
+        label: 'Panel Types',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/dashboards/panel-types/bar',
+            label: 'Bar Chart',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/panel-types/histogram',
+            label: 'Histogram',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/panel-types/list',
+            label: 'List',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/panel-types/pie',
+            label: 'Pie',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/panel-types/table',
+            label: 'Table',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/panel-types/timeseries',
+            label: 'Timeseries',
+          },
+          {
+            type: 'doc',
+            route: '/docs/dashboards/panel-types/value',
+            label: 'Value',
+          },
+        ],
       },
       {
         type: 'doc',
