@@ -377,6 +377,7 @@ const PricingPlans = () => {
                       <li>Dashboard locking</li>
                       <li>Visualize very large traces (&gt;10K spans)</li>
                       <li>Data centers available in the US, EU & India</li>
+                      <li>SOC2 Type 1 Compliant</li>
                     </ul>
                   </div>
                   {/* <Divider isDashed />
