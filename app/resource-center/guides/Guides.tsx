@@ -49,10 +49,18 @@ const GuidesHeader = ({ title, description, searchPlaceholder, onSearch }) => {
 
 export default function Guides() {
   const posts = allCoreContent(sortPosts(allGuides))
-  const [activeItem, setActiveItem] = useState(window.location.hash || GUIDES_TOPICS.ALL)
+  const [activeItem, setActiveItem] = useState(GUIDES_TOPICS.ALL)
   const [searchQuery, setSearchQuery] = useState('');
   const POST_PER_PAGE = 20
   const pageNumber = 1
+
+  useEffect(() => {
+    if (!window) {
+      return
+    }
+
+    setActiveItem(window.location.hash as GUIDES_TOPICS)
+  }, [window]);
 
 
   const blogs = useMemo(() => {
