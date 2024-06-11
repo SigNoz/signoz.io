@@ -45,15 +45,13 @@ export function Pagination({
   const shouldRenderTwoNextPages = currentPage === 1
 
 
-
-
   return (
     <div className="flex items-center justify-between space-y-2 pb-8 pt-6 md:space-y-5">
       <nav className="flex w-full items-center justify-between">
-        <span className="text-sm font-normal text-signoz_vanilla-100">
-          {startPost} - {endPost} <span className='text-signoz_vanilla-400'>of {totalPosts}</span>
+        <span className="text-sm font-normal text-signoz_vanilla-100 font-mono">
+          {startPost} ⎯ {endPost} <span className='text-signoz_vanilla-400'>of {totalPosts}</span>
         </span>
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2.5 font-mono">
 
           {prevPage ? (
             <Link
@@ -169,8 +167,8 @@ export default function GridLayout({
           </div>
 
           <div className="mt-4 grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-            {displayPosts.map((post) => {
-              return <BlogPostCard blog={post} />
+            {displayPosts.map((post, index) => {
+              return <BlogPostCard key={index} blog={post} />
             })}
           </div>
         </div>
