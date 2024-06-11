@@ -11,6 +11,25 @@ import SideBar, {GUIDES_TOPICS }from '@/components/SideBar'
 import { Pagination } from '@/layouts/GridLayout'
 
 
+interface HeadingProps {
+  tag: string
+  text: string
+  className?: string
+}
+
+const Heading: React.FC<HeadingProps> = ({ tag, text, className = '' }) => {
+  const Tag = tag as keyof JSX.IntrinsicElements
+  return <Tag className={className}>{text}</Tag>
+}
+
+interface GuidesHeaderProps {
+  title: string
+  description: string
+  searchPlaceholder?: string
+  onSearch: (e) => void
+}
+
+
 const GuidesHeader = ({ title, description, searchPlaceholder, onSearch }) => {
   return (
     <section className="flex max-w-[697px] flex-col leading-[143%]">
@@ -36,8 +55,6 @@ export default function Guides() {
   const pageNumber = 1
 
 
-  
-
   const blogs = useMemo(() => {
     if (searchQuery) {
       return filterData(posts, searchQuery)
@@ -47,9 +64,12 @@ export default function Guides() {
       return posts
     }
 
-    return posts.filter((post) =>
-      post.tags?.map(tag => tag.toLowerCase()).includes(activeItem.replace('#', '').toLowerCase())
-    )
+    const formattedActiveItem = activeItem.replace('#', '').toLowerCase().replace(/\s+/g, '')
+
+    return posts.filter((post) => {
+      const postTags = post.tags?.map(tag => tag.toLowerCase().replace(/\s+/g, ''))
+      return postTags?.includes(formattedActiveItem)
+    })
 
   }, [searchQuery, activeItem])
 
@@ -101,9 +121,7 @@ export default function Guides() {
         currentPage={pagination.currentPage}
         totalPages={pagination.totalPages}
         pageRoute={pagination.pageRoute}
-      />
-
-      
+      />  
     </div>
   )
 }
