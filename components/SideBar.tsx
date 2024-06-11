@@ -6,7 +6,7 @@ import { SidebarIcons } from '@/components/sidebar-icons/icons'
 export enum GUIDES_TOPICS{
   ALL = '#all',
   OPENTELEMETRY = '#opentelemetry',
-  KUBERNETES = '#kubernetes-monitoring' ,
+  KUBERNETES = '#kubernetes' ,
   DISTRIBUTED = '#distributed-tracing',
   OBSERVABILITY = '#observability',
   LOGS = '#logs',
@@ -35,7 +35,7 @@ const SideBar = ({ onCategoryClick, activeItem }) => {
           const Icon = item.icon
           const isActive = activeItem === item.href
           return (
-            <li key={index} className={`rounded-md py-2 pl-3 ${!isActive && 'hover:bg-signoz_ink-400'} ${isActive ? 'bg-signoz_ink-200 ' : ''}`}>
+            <li key={index} className={`rounded-md py-2 pl-3 ${isActive ? 'bg-signoz_ink-200' : 'hover:bg-signoz_ink-400'}`}>
               <div onClick={() => onCategoryClick(item.href)} className="flex items-center text-white cursor-pointer">
                 <Icon />
                 <span className="pl-2.5">{item.label}</span>

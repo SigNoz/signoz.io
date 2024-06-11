@@ -51,6 +51,7 @@ export default function Tabs({ activeTab }) {
             Guides
           </button>
         </Link>
+
         <Link role="presentation" href="/resource-center/opentelemetry">
           <button
             className={`inline-block rounded-t-lg px-4 py-2 ${activeTab === 'openTelemetry-tab' ? 'border-b-2 border-indigo-500 text-indigo-500' : ''}`}
