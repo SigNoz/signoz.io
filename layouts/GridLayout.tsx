@@ -50,8 +50,8 @@ export function Pagination({
   return (
     <div className="flex items-center justify-between space-y-2 pb-8 pt-6 md:space-y-5">
       <nav className="flex w-full items-center justify-between">
-        <span className="text-sm font-normal text-white">
-          {startPost} - {endPost} <span className='text-gray-400'>of {totalPosts}</span>
+        <span className="text-sm font-normal text-signoz_vanilla-100">
+          {startPost} - {endPost} <span className='text-signoz_vanilla-400'>of {totalPosts}</span>
         </span>
         <div className="flex items-center gap-2.5">
 
