@@ -13,8 +13,8 @@ export interface PaginationProps {
   totalPages: number
   currentPage: number
   pageRoute: string
-  postsPerPage: number
-  totalPosts: number
+  postsPerPage?: number
+  totalPosts?: number
 }
 interface GridLayoutProps {
   posts: CoreContent<Blog>[]
