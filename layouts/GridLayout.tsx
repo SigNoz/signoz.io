@@ -7,12 +7,14 @@ import type { Blog } from 'contentlayer/generated'
 import Link from '@/components/Link'
 import React from 'react'
 import BlogPostCard from 'app/resource-center/Shared/BlogPostCard'
-import { Frown, HeartCrack } from 'lucide-react'
+import { Frown, HeartCrack, ChevronLeft, ChevronRight } from 'lucide-react'
 
 export interface PaginationProps {
   totalPages: number
   currentPage: number
   pageRoute: string
+  postsPerPage: number
+  totalPosts: number
 }
 interface GridLayoutProps {
   posts: CoreContent<Blog>[]
@@ -21,45 +23,111 @@ interface GridLayoutProps {
   pagination?: PaginationProps
 }
 
-export function Pagination({ totalPages, currentPage, pageRoute }: PaginationProps) {
+const PAGE_NUMBER_STYLES = 'pt-px pb-px px-2 h-6 w-6 justify-center items-center flex flex-col rounded-sm'
+
+export function Pagination({
+  totalPages,
+  currentPage,
+  pageRoute,
+  postsPerPage,
+  totalPosts,
+}: PaginationProps) {
   const pathname = usePathname()
   const basePath = pathname.split('/')[1]
   const prevPage = currentPage - 1 > 0
   const nextPage = currentPage + 1 <= totalPages
+  const startPost = (currentPage - 1) * postsPerPage + 1
+  const endPost = Math.min(currentPage * postsPerPage, totalPosts)
+
+  const shouldRenderTwoPrevPages = currentPage === totalPages
+  const shouldRenderPrevPage = currentPage - 1 > 1
+  const shouldRenderNextPage = currentPage + 1 < totalPages
+  const shouldRenderTwoNextPages = currentPage === 1
+
+
+
 
   return (
-    <div className="space-y-2 pb-8 pt-6 md:space-y-5">
-      <nav className="flex items-center justify-between">
-        {!prevPage && (
-          <button className="cursor-auto disabled:opacity-50" disabled={!prevPage}>
-            Previous
-          </button>
-        )}
-        {prevPage && (
-          <Link
-            href={
-              currentPage - 1 === 1
-                ? `/${basePath}/${pageRoute}`
-                : `/${basePath}/${pageRoute}/page/${currentPage - 1}`
-            }
-            rel="prev"
-          >
-            Previous
-          </Link>
-        )}
-        <span className="text-sm">
-          {currentPage} of {totalPages}
+    <div className="flex items-center justify-between space-y-2 pb-8 pt-6 md:space-y-5">
+      <nav className="flex w-full items-center justify-between">
+        <span className="text-sm font-normal text-white">
+          {startPost} - {endPost} <span className='text-gray-400'>of {totalPosts}</span>
         </span>
-        {!nextPage && (
-          <button className="cursor-auto disabled:opacity-50" disabled={!nextPage}>
-            Next
-          </button>
-        )}
-        {nextPage && (
-          <Link href={`/${basePath}/${pageRoute}/page/${currentPage + 1}`} rel="next">
-            Next
+        <div className="flex items-center gap-2.5">
+
+          {prevPage ? (
+            <Link
+              href={
+                currentPage - 1 === 1
+                  ? `/${basePath}/${pageRoute}`
+                  : `/${basePath}/${pageRoute}/page/${currentPage - 1}`
+              }
+              rel="prev"
+              className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
+            >
+              <ChevronLeft size={16}/>
+            </Link>
+          ) : (
+            <span className="cursor-auto disabled:opacity-50"><ChevronLeft size={16}/></span>
+          )}
+
+          {currentPage !== 1 ?
+          <Link className={PAGE_NUMBER_STYLES} href={`/${basePath}/${pageRoute}`}>1</Link> : null
+          }
+          {currentPage - 2 > 1 ?(
+            <div className="w-8 h-px bg-signoz_vanilla-400"></div> ) : null}
+
+
+          {shouldRenderTwoPrevPages ? (
+            <Link className={PAGE_NUMBER_STYLES} href={`/${basePath}/${pageRoute}/page/${currentPage - 2}`}>
+              {currentPage - 2}
+            </Link>
+          ) : null}
+
+          {shouldRenderPrevPage ? (
+            <Link className={PAGE_NUMBER_STYLES} href={`/${basePath}/${pageRoute}/page/${currentPage - 1}`}>
+              {currentPage - 1}
+            </Link>
+          ) : null}
+
+          <Link
+            href={`/${basePath}/${pageRoute}/page/${currentPage}`}
+            className={`${PAGE_NUMBER_STYLES} bg-signoz_robin-500 text-black`}
+          >
+            {currentPage}
           </Link>
-        )}
+
+          {shouldRenderNextPage ? (
+            <Link className={PAGE_NUMBER_STYLES} href={`/${basePath}/${pageRoute}/page/${currentPage + 1}`}>
+              {currentPage + 1}
+            </Link>
+          ) : null}
+
+          {shouldRenderTwoNextPages ? (
+            <Link className={PAGE_NUMBER_STYLES} href={`/${basePath}/${pageRoute}/page/${currentPage + 2}`}>
+              {currentPage + 2}
+            </Link>
+          ) : null}
+
+          {totalPages - 2 > currentPage ?(
+            <div className="w-8 h-px bg-signoz_vanilla-400"></div>) : null}
+          {
+            currentPage !== totalPages ?
+          <Link className={PAGE_NUMBER_STYLES} href={`/${basePath}/${pageRoute}/page/${totalPages}`}>{totalPages}</Link> : null
+          }
+
+          {nextPage ? (
+            <Link
+              href={`/${basePath}/${pageRoute}/page/${currentPage + 1}`}
+              rel="next"
+              className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
+            >
+              <ChevronRight size={16}/>
+            </Link>
+          ) : (
+            <span className="cursor-auto disabled:opacity-50"><ChevronRight size={16}/></span>
+          )}
+        </div>
       </nav>
     </div>
   )
@@ -89,13 +157,14 @@ export default function GridLayout({
     )
   }
 
+  const totalPosts = posts.length
+  const postsPerPage = displayPosts.length
+
   return (
     <div className="container mx-auto p-0">
       <div className="divide-y divide-gray-200 dark:divide-gray-700">
         <div className="my-8 flex flex-col">
-          <div
-            className={`w-full text-sm font-semibold uppercase leading-5 tracking-wide max-md:max-w-full`}
-          >
+          <div className="w-full text-sm font-semibold uppercase leading-5 tracking-wide max-md:max-w-full">
             All posts
           </div>
 
@@ -111,6 +180,8 @@ export default function GridLayout({
           currentPage={pagination.currentPage}
           totalPages={pagination.totalPages}
           pageRoute={pagination.pageRoute}
+          postsPerPage={postsPerPage}
+          totalPosts={totalPosts}
         />
       )}
     </div>
