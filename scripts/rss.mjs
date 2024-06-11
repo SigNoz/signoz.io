@@ -6,6 +6,7 @@ import siteMetadata from '../data/siteMetadata.js'
 import tagData from '../app/tag-data.json' assert { type: 'json' }
 import {
   allBlogs,
+  allDocs,
   allComparisons,
   allGuides,
   allOpentelemetries,
@@ -60,7 +61,8 @@ async function generateRSS(config, allBlogs, page = 'feed.xml') {
 }
 
 const rss = () => {
-  generateRSS(siteMetadata, [...allBlogs, ...allComparisons, ...allGuides, ...allOpentelemetries])
+  generateRSS(siteMetadata, [...allBlogs, ...allComparisons, ...allGuides, ...allOpentelemetries, ...allDocs])
   console.log('RSS feed generated...')
 }
+
 export default rss
