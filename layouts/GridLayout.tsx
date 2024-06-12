@@ -13,9 +13,13 @@ export interface PaginationProps {
   totalPages: number
   currentPage: number
   pageRoute: string
-  postsPerPage?: number
-  totalPosts?: number
 }
+
+interface PaginationInternalProps extends PaginationProps {
+  postsPerPage: number
+  totalPosts: number
+}
+
 interface GridLayoutProps {
   posts: CoreContent<Blog>[]
   title: string
@@ -31,7 +35,7 @@ export function Pagination({
   pageRoute,
   postsPerPage,
   totalPosts,
-}: PaginationProps) {
+}: PaginationInternalProps) {
   const pathname = usePathname()
   const basePath = pathname.split('/')[1]
   const prevPage = currentPage - 1 > 0
