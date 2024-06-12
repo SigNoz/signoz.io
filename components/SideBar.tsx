@@ -5,26 +5,26 @@ import { SidebarIcons } from '@/components/sidebar-icons/icons'
 
 export enum GUIDES_TOPICS{
   ALL = '#all',
-  OPENTELEMETRY = '#opentelemetry',
+  // OPENTELEMETRY = '#opentelemetry',
   KUBERNETES = '#kubernetes' ,
-  DISTRIBUTED = '#distributed-tracing',
-  OBSERVABILITY = '#observability',
-  LOGS = '#logs',
-  PROMETHEUS = '#prometheus',
-  METRICS = '#metrics' ,
-  DOCKER = '#docker' 
+  // DISTRIBUTED = '#distributed-tracing',
+  // OBSERVABILITY = '#observability',
+  // LOGS = '#logs',
+  // PROMETHEUS = '#prometheus',
+  // METRICS = '#metrics' ,
+  // DOCKER = '#docker' 
 }
 
 const sidebarItems = [
   { href: GUIDES_TOPICS.ALL, icon: SidebarIcons.All, label: 'All' },
-  { href: GUIDES_TOPICS.OPENTELEMETRY, icon: SidebarIcons.Opentelemetry, label: 'Opentelemetry' },
+  // { href: GUIDES_TOPICS.OPENTELEMETRY, icon: SidebarIcons.Opentelemetry, label: 'Opentelemetry' },
   { href: GUIDES_TOPICS.KUBERNETES, icon: SidebarIcons.Kubernetes, label: 'Kubernetes Monitoring' },
-  { href: GUIDES_TOPICS.DISTRIBUTED, icon: SidebarIcons.Distributed, label: 'Distributed Tracing' },
-  { href: GUIDES_TOPICS.OBSERVABILITY, icon: SidebarIcons.Observability, label: 'Observability' },
-  { href: GUIDES_TOPICS.LOGS, icon: SidebarIcons.Logs, label: 'Logs' },
-  { href: GUIDES_TOPICS.PROMETHEUS, icon: SidebarIcons.Prometheus, label: 'Prometheus' },
-  { href: GUIDES_TOPICS.METRICS, icon: SidebarIcons.Metrics, label: 'Metrics' },
-  { href: GUIDES_TOPICS.DOCKER, icon: SidebarIcons.Docker, label: 'Docker' },
+  // { href: GUIDES_TOPICS.DISTRIBUTED, icon: SidebarIcons.Distributed, label: 'Distributed Tracing' },
+  // { href: GUIDES_TOPICS.OBSERVABILITY, icon: SidebarIcons.Observability, label: 'Observability' },
+  // { href: GUIDES_TOPICS.LOGS, icon: SidebarIcons.Logs, label: 'Logs' },
+  // { href: GUIDES_TOPICS.PROMETHEUS, icon: SidebarIcons.Prometheus, label: 'Prometheus' },
+  // { href: GUIDES_TOPICS.METRICS, icon: SidebarIcons.Metrics, label: 'Metrics' },
+  // { href: GUIDES_TOPICS.DOCKER, icon: SidebarIcons.Docker, label: 'Docker' },
 ]
 
 const SideBar = ({ onCategoryClick, activeItem }) => {
