@@ -74,27 +74,78 @@ You can incorporate result labels in the alert descriptions to make the alerts m
 
 **Example**: If you have a query that returns the label `service_name` then to use it in the alert description, you will use `{{.Labels.service_name}}`which creates an alert that is specific to the particular service.
 
+## Examples
 
-## Example
-
-An example Metrics-based alert could be set to trigger when errors go above a certain percentage:
-
-- **Y-axis unit**: Percent(0 - 100)
-- **Query A**: Total Calls with Error
-- **Query B**: Total Calls 
-- **Function**: A*100/B
-- **Alert Threshold**: Above 0 within 5 minutes
-- **Run alert every**: 1 minute
-- **Send a notification if data is missing for** 5 minutes
-- **Severity**: "Critical"
-- **Alert Name**: "Error Percentage Alert"
-- **Alert Description**: "This alert triggers when the Error percentage > 5%."
-- **label**: `error percentage`
-- **Notification Channels**: signoz-slack-alerts (Slack channel)
+### 1. Alert when memory usage for host goes above 400 MB (or any fixed memory)
 
 <figure data-zoomable align='center'>
-    <img src="/img/docs/product-features/alerts/alerts-metrics-based.gif" alt="A gif of Metrics Based alerts example in SigNoz"/>
-    <figcaption><i>Metrics Based Alert Example </i></figcaption>
+    <img src="/img/docs/product-features/alerts/metrics/mem-usage-alert-builder.png" alt="metrics builder query for memory usage"/>
+    <figcaption><i>Memory usage metric builder query</i></figcaption>
 </figure>
 
+The [`hostmetricsreceiver`](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/hostmetricsreceiver) creates several host system metrics, including [`system_memory_usage`](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/hostmetricsreceiver/internal/scraper/memoryscraper/documentation.md#systemmemoryusage), which contains the memory usage for each [state](https://www.kernel.org/doc/Documentation/filesystems/proc.txt) from `/proc/meminfo`. 
+The states can be `free`, `used`, `cached`, etc. We want to alert when the total memory usage of a host exceeds the threshold, so the WHERE clause excludes the `free` state. 
+We calculate the average value for each state and then sum them up by host to get the per-host memory usage. 
 
+We set the unit of the `y-axis` to bytes, as that is the unit of the mentioned metric.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/alerts/metrics/mem-usage-alert-builder-condition.png" alt="metrics builder query for memory usage"/>
+    <figcaption><i>Memory usage alert condition</i></figcaption>
+</figure>
+
+The condition is set to trigger a notification if the per-minute memory usage exceeds the threshold of 400 MB at least once in the last five minutes.
+
+### 2. Alert when memory usage for host goes above 70%
+
+You might want to alert based on the percentage rather than a fixed threshold. There are two ways to get the percentage: the convenient option is when the usage percentage is reported directly by the source, or when the source only sends the exact usage in bytes and you need to derive the percentage yourself. This example demonstrates how to derive the percentage from the original bytes metric.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/alerts/metrics/mem-usage-alert-percentage-builder.png" alt="metrics builder query for memory usage"/>
+    <figcaption><i>Memory usage percentage query</i></figcaption>
+</figure>
+
+We use a formula to derive the percentage value from the exact memory usage in bytes. In the example, query `A` calculates the per-host memory usage, while query `B`, as shown in the image, doesn't have any WHERE clause filter, thus providing the total memory available. The formula for `A`/`B` is interpreted as (memory usage in bytes) / (total memory available in bytes). We set the unit of the y-axis to Percent (0.0 - 1.0) to match the result of the formula.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/alerts/metrics/mem-usage-alert-percentage-builder-condition.png" alt="metrics builder query for memory usage"/>
+    <figcaption><i>Memory usage percentage condition</i></figcaption>
+</figure>
+
+The condition is set to trigger a notification if the per-minute memory usage exceeds the threshold of 70% all the times in the last five minutes.
+
+### 3. Alert when the error percentage for an endpoint exceeds 5%
+
+SigNoz creates a metric `signoz_calls_total` from the trace data. The default attributes of the metric are `service_name`, `operation`, `span_kind`, `status_code`, and `http_status_code`. There is no separate metric for counting errors; instead, the `status_code` attribute is used to determine if a request counts as an error. This example demonstrates how to calculate the error percentage and alert on it.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/alerts/metrics/error-percentage-builder.png" alt="metrics builder query for error percentage"/>
+    <figcaption><i>Error percentage query</i></figcaption>
+</figure>
+
+We use a formula to derive the error percentage from the total calls metric. In the example, query `A` calculates the per-endpoint error rate, while query `B`, as shown in the image, doesn't have any WHERE clause filter for `status_code`, thus providing the per-endpoint total request rate. The formula for `A`/`B` is interpreted as (error request rate) / (total request rate), which gives the error percentage per endpoint. We set the unit of the y-axis to Percent (0.0 - 1.0) to match the result of the formula.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/alerts/metrics/error-percentage-builder-condition.png" alt="metrics builder query for error percentage"/>
+    <figcaption><i>Error percentage condition</i></figcaption>
+</figure>
+
+The condition is set to trigger a notification if the per-minute error percentage exceeds the threshold of 5% all the times in the last five minutes.
+
+### 4. Alert when P95 latency for an endpoint is above 1200 ms
+
+SigNoz creates a metric `signoz_latency_bucket` from the trace data. The default attributes of the metric are `service_name`, `operation`, `span_kind`, `status_code`, and `http_status_code`. This example demonstrates how to calculate the P95 latency for an endpoint and alert on it.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/alerts/metrics/p95-latency-builder.png" alt="metrics builder query for latency"/>
+    <figcaption><i>Endpoint latency query</i></figcaption>
+</figure>
+
+We use the P95 aggregation, which gives the 95th-percentile request latency per endpoint. We set the unit of the y-axis to milliseconds to match the unit of the metric.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/alerts/metrics/p95-latency-builder-condition.png" alt="metrics builder query for latency"/>
+    <figcaption><i>Endpoint latency condition</i></figcaption>
+</figure>
+
+The condition is set to trigger a notification if the per-minute P95 latency exceeds the threshold of 1200 ms at any time in the last five minutes.
