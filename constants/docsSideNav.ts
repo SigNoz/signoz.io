@@ -916,6 +916,11 @@ const docsSideNav = [
         route: '/docs/tutorial/traefik-observability',
         label: 'Traefik Observability',
       },
+      {
+        type: 'doc',
+        route: '/docs/tutorial/infinite-retention-aws-s3',
+        label: 'Infinite Retention using AWS S3',
+      },
     ],
   },
   {
