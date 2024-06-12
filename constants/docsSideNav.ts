@@ -1318,6 +1318,46 @@ const docsSideNav = [
       },
     ],
   },
+
+  {
+    label: 'Troubleshooting',
+    type: 'category',
+    route: '/docs/faqs',
+    // link: {
+    // type: 'generated-index',
+    // title: 'Frequently Asked Questions',
+    // description:
+    // 'Find the most commonly questions about SigNoz Installation, Instrumentation, Features, Troubleshooting, and Contributing here:',
+    // slug: '/docs/faqs/faq',
+    // },
+    items: [
+      {
+        label: 'SigNoz Cloud',
+        type: 'category',
+          items: [{
+            type: 'doc',
+            route: '/docs/troubleshooting/signoz-cloud/general-troubleshooting',
+            label: 'General Troubleshooting',
+          },
+          {
+            type: 'doc',
+            route: '/docs/troubleshooting/signoz-cloud/traces-troubleshooting',
+            label: 'Traces Troubleshooting',
+          },
+          {
+            type: 'doc',
+            route: '/docs/troubleshooting/signoz-cloud/logs-troubleshooting',
+            label: 'Logs Troubleshooting',
+          },
+          {
+            type: 'doc',
+            route: '/docs/troubleshooting/signoz-cloud/metrics-troubleshooting',
+            label: 'Metrics Troubleshooting',
+          },
+        ],
+      },
+    ],
+  },
   {
     label: 'FAQ',
     type: 'category',
