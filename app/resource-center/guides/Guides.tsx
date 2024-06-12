@@ -59,7 +59,9 @@ export default function Guides() {
       return
     }
 
-    setActiveItem(window.location.hash as GUIDES_TOPICS)
+    const activeItemToSet: GUIDES_TOPICS = window.location.hash as GUIDES_TOPICS || GUIDES_TOPICS.ALL;
+
+    setActiveItem(activeItemToSet)
   }, [window]);
 
 
