@@ -127,25 +127,19 @@ Before pushing your changes, it's a good idea to fetch and merge any changes fro
 
 ## Step 10: Build the Project Locally
 
-1. Navigate to the root directory of the repository (if not already there):
-
-   ```bash
-   cd ../../..
-   ```
-
-2. Install the project dependencies using Yarn:
+1. Install the project dependencies using Yarn:
 
    ```bash
    yarn install
    ```
 
-3. Build the project to ensure there are no errors:
+2. Build the project to ensure there are no errors:
 
    ```bash
    yarn build
    ```
 
-4. This will create a `build` directory with the production build of the website. Check the output for any errors.
+3. This will create a `build` directory with the production build of the website. Check the output for any errors.
 
 ## Step 11: Run the Project Locally
 
