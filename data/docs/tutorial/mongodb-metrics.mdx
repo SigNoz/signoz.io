@@ -21,12 +21,11 @@ Based on how you are using MongoDB, your exact steps may be different - but this
   http://172.17.0.1:4317
   ```
 
-
 This comes with Mongo Exporter built in which exposes metrics in prometheus format at port 9216
 
 ### Check that MongoDB metrics are exposed at following end point
 
-```java
+```bash
 curl http://localhost:9216/metrics
 ```
 
@@ -34,26 +33,26 @@ curl http://localhost:9216/metrics
 
 Add a job name corresponding to mongodb exporter in otel-collector config file in your SigNoz install
 
-[signoz/otel-collector-config.yaml](https://github.com/SigNoz/signoz/blob/e3c4bfce528eec2e5a6441608165baf9e1b46388/deploy/docker/clickhouse-setup/otel-collector-config.yaml)
+Make changes in otel-collector file. If you've [self-hosted SigNoz](https://signoz.io/docs/operate/), you can find the otel-collector file [here](https://github.com/SigNoz/signoz/blob/develop/deploy/docker/clickhouse-setup/otel-collector-config.yaml).
 
-```java
+```bash
 - job_name: "mongo-collector"
-          scrape_interval: 30s
-          static_configs:
-            - targets: ["172.17.0.1:9216"]
+  scrape_interval: 30s
+  static_configs:
+  - targets: ["172.17.0.1:9216"]
 ```
 
-Job names should be aligned
+Job names should be aligned.
 
-Please ensure that the edited YAML is correctly configured. You can use tools like [http://www.yamllint.com/](http://www.yamllint.com/) to check the correctness of the updated YAML file
-
-Make changes in otel-collector file 
+Please ensure that the edited YAML is correctly configured. You can use tools like [http://www.yamllint.com/](http://www.yamllint.com/) to check the correctness of the updated YAML file.
 
 ### Restart Otel Collector container
 
-```
+```bash
 docker compose --env-file ./docker/clickhouse-setup/env/x86_64.env -f docker/clickhouse-setup/docker-compose.yaml restart otel-collector
 ```
+
+For self host, you can try running the install script once again to make sure otel collector container is able to collect the telemetry data from the application.
 
 Check that otel-collector is running by doing
 
@@ -63,17 +62,20 @@ sudo docker ps
 
 ## Plotting Mongo metrics in SigNoz
 
-[Good guide on metrics you may want to monitor](https://www.mongodb.com/basics/how-to-monitor-mongodb-and-what-metrics-to-monitor)
+There are a lot of metrics that you can actually plot on the SigNoz Dashboard. If you'd like to monitor
+some specific metrics, this is a [good guide on metrics you may want to monitor](https://www.mongodb.com/basics/how-to-monitor-mongodb-and-what-metrics-to-monitor)
 
 Create new panels in [Dashboard section](/docs/userguide/manage-dashboards-and-panels) of SigNoz and add the following queries for example. 
 
-```java
+```bash
 PromQL query - mongodb_ss_connections
 Legend Format - {{conn_type}}
 
 PromQL query - rate(mongodb_ss_opcounters[5m])
 Legend Format - {{legacy_op_type}}
 ```
+
+This is a [good guide](https://signoz.io/docs/userguide/manage-dashboards/) to help you understand on how to create your own dashboard at SigNoz.
 
 <Admonition type="tip"> 
 
