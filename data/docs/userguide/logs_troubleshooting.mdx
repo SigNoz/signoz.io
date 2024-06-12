@@ -4,7 +4,34 @@ id: logs_troubleshooting
 title: Troubleshooting
 description: Instructions that should resolve most issues with logs
 ---
+
 This troubleshooting guide includes step-by-step instructions that should resolve most issues with logs.
+
+## Filter logs of same application/service from different host
+If you have a application/service which is emitting similar kind of logs but there are multiple instances of it running on different
+hosts you can identify them by adding a resource attribute.
+
+There are different ways to add a resource attribute.
+
+1. By passing it as an environment variable if you are using the opentelemtry SDK or auto-instrumentation
+    ```
+    OTEL_RESOURCE_ATTRIBUTES=service.name=<service_name>,hostname=<host_name>
+    ```
+    replace the value of `<service_name>` with the actual service name and `<host_name>` with the actual hostname
+2. If you have a otel collector running on each host you can add a processor to add the hostname.
+    ```yaml
+    processors:
+        attributes/add_hostname:
+            actions:
+                - key: hostname
+                  value: <hostname>
+                  action: upsert
+    ...
+    service:
+        logs:
+            processors: [attributes/add_hostname, batch]
+    ```
+    replace the value of `<host_name>` with the actual hostname
 
 ## Missing Columns Issue
 
