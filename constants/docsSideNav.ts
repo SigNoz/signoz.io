@@ -1059,6 +1059,11 @@ const docsSideNav = [
             route: '/docs/azure-monitoring/app-service/logging',
             label: 'Logging',
           },
+          {
+            type: 'doc',
+            route: '/docs/azure-monitoring/app-service/tracing',
+            label: 'APM & Tracing',
+          },
         ],
       },
       {
@@ -1069,7 +1074,7 @@ const docsSideNav = [
       {
         type: 'category',
         label: 'Azure Container Apps',
-        // route: '/docs/azure-monitoring/app-service',
+        route: '/docs/azure-monitoring/az-container-app',
         items: [
           {
             type: 'doc',
@@ -1080,6 +1085,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/azure-monitoring/az-container-apps/metrics',
             label: 'Metrics',
+          },
+          {
+            type: 'doc',
+            route: '/docs/azure-monitoring/az-container-apps/tracing',
+            label: 'APM & Tracing ',
           },
         ],
       },
@@ -1097,6 +1107,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/azure-monitoring/az-fns/logging',
             label: 'Logging',
+          },
+          {
+            type: 'doc',
+            route: '/docs/azure-monitoring/az-fns/tracing',
+            label: 'APM & Tracing ',
           },
         ],
       },
