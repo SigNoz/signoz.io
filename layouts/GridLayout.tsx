@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { CoreContent } from 'pliny/utils/contentlayer'
 import type { Blog } from 'contentlayer/generated'
@@ -40,8 +40,32 @@ export function Pagination({
   const basePath = pathname.split('/')[1]
   const prevPage = currentPage - 1 > 0
   const nextPage = currentPage + 1 <= totalPages
-  const startPost = (currentPage - 1) * postsPerPage + 1
-  const endPost = Math.min(currentPage * postsPerPage, totalPosts)
+  const DEFAULT_POSTS_PER_PAGE = 10
+  const DEFAULT_POSTS_IN_FIRST_PAGE = 9;
+  // const startPost = (currentPage - 1) * postsPerPage + 1
+  // const endPost = Math.min(currentPage * postsPerPage, totalPosts)
+  
+  const startPost = useMemo(() => {
+    if (currentPage === 1) {
+      return 1
+    }
+
+    return Math.max((DEFAULT_POSTS_IN_FIRST_PAGE + 1) + (currentPage - 2) * DEFAULT_POSTS_PER_PAGE, 0)
+  }, [currentPage]);
+
+  const endPost = useMemo(() => {
+    if (currentPage === 1) {
+      return 9
+    }
+
+    if (currentPage === totalPages) {
+      return totalPosts
+    }
+
+    return Math.max(DEFAULT_POSTS_IN_FIRST_PAGE + (currentPage - 1) * DEFAULT_POSTS_PER_PAGE, 0)
+  }, [currentPage, totalPages]);
+
+  console.log({currentPage,postsPerPage})
 
   const shouldRenderTwoPrevPages = currentPage === totalPages
   const shouldRenderPrevPage = currentPage - 1 > 1
