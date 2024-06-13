@@ -998,6 +998,7 @@ const docsSideNav = [
   {
     label: 'Azure Monitoring',
     type: 'category',
+    className: 'new-doc',
     // route: '',
     items: [
       {
@@ -1338,6 +1339,7 @@ const docsSideNav = [
     route: '/docs/community/llm-monitoring',
     label: 'LLM Monitoring',
     type: 'doc',
+    className: 'new-doc',
   },
   {
     label: 'Community',
