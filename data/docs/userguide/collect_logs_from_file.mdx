@@ -3,6 +3,7 @@ date: 2024-06-06
 title: Collecting Application Logs from Log file
 id: collect_logs_from_file
 ---
+
 ## Overview
 
 This guide provides detailed instructions on configuring the OpenTelemetry Collector to read logs from a file and push them to SigNoz, enabling you to analyze your application logs effectively.
@@ -49,6 +50,8 @@ receivers:
 <Admonition>
 
 The `start_at: end` configuration ensures that only newly added logs are transmitted. If you wish to include historical logs from the file, remember to modify `start_at` to `beginning`.
+
+Log lines from the file will be visible on the SigNoz UI and you will able to filter them once new logs are added to the file while using `start_at: end`
 
 </Admonition>
 
@@ -127,6 +130,8 @@ Add the filelog reciever to `otel-collector-config.yaml` which is present inside
 
 The `start_at: end` configuration ensures that only newly added logs are transmitted. If you wish to include historical logs from the file, remember to modify `start_at` to `beginning`.
 
+Log lines from the file will be visible on the SigNoz UI and you will able to filter them once new logs are added to the file while using `start_at: end`
+
 </Admonition>
 
 {/* <!---
@@ -195,7 +200,7 @@ You need to create an `otel-collector-config.yaml` file, this file defines how t
 {/* <!--- For parsing logs of different formats you will have to use operators, you can read more about operators [here](./logs.md#operators-for-parsing-and-manipulating-logs) ---> */}
   
 
-The parsed logs are batched up using the batch processor and then exported to the host where SigNoz is deployed. For finding the right host and port for your SigNoz cluster please follow the guide [here](/docs/install/troubleshooting#signoz-otel-collector-address-grid).  
+The parsed logs are batched up using the batch processor and then exported to the host where SigNoz is deployed. For finding the right host and port for your SigNoz cluster please follow the guide [here](../install/troubleshooting.md#signoz-otel-collector-address-grid).  
 
 <Admonition>
 
