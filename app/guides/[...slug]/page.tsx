@@ -1,18 +1,19 @@
-import 'css/prism.css'
-import 'katex/dist/katex.css'
 
-import PageTitle from '@/components/PageTitle'
+
+import 'css/prism.css'
 import { components } from '@/components/MDXComponents'
 import { MDXLayoutRenderer } from 'pliny/mdx-components'
 import { sortPosts, coreContent, allCoreContent } from 'pliny/utils/contentlayer'
-import { allAuthors, allOpentelemetries } from 'contentlayer/generated'
-import type { Authors, Blog, Opentelemetry } from 'contentlayer/generated'
+import { allGuides, allAuthors,} from 'contentlayer/generated'
+import type { Authors, Blog, Guide} from 'contentlayer/generated'
 import PostSimple from '@/layouts/PostSimple'
 import PostLayout from '@/layouts/PostLayout'
 import PostBanner from '@/layouts/PostBanner'
 import { Metadata } from 'next'
 import siteMetadata from '@/data/siteMetadata'
 import { notFound } from 'next/navigation'
+import Link from 'next/link'
+import { SidebarIcons } from '@/components/sidebar-icons/icons'
 
 const defaultLayout = 'PostLayout'
 const layouts = {
@@ -27,8 +28,7 @@ export async function generateMetadata({
   params: { slug: string[] }
 }): Promise<Metadata | undefined> {
   const slug = decodeURI(params.slug.join('/'))
-  const post = allOpentelemetries.find((p) => p.slug === slug)
-
+  const post = allGuides.find((p) => p.slug === slug)
   const authorList = post?.authors || ['default']
   const authorDetails = authorList.map((author) => {
     const authorResults = allAuthors.find((p) => p.slug === author)
@@ -42,8 +42,8 @@ export async function generateMetadata({
   const modifiedAt = new Date(post.lastmod || post.date).toISOString()
   const authors = authorDetails.map((author) => author.name)
   let imageList = [siteMetadata.socialBanner]
-  if (post.image) {
-    imageList = typeof post.image === 'string' ? [post.image] : post.image
+  if (post.images) {
+    imageList = typeof post.images === 'string' ? [post.images] : post.images
   }
   const ogImages = imageList.map((img) => {
     return {
@@ -53,10 +53,10 @@ export async function generateMetadata({
 
   return {
     title: post.title,
-    description: post?.description,
+    description: post.description,
     openGraph: {
       title: post.title,
-      description: post?.description,
+      description: post.description,
       siteName: siteMetadata.title,
       locale: 'en_US',
       type: 'article',
@@ -69,14 +69,14 @@ export async function generateMetadata({
     twitter: {
       card: 'summary_large_image',
       title: post.title,
-      description: post?.description,
+      description: post.summary,
       images: imageList,
     },
   }
 }
 
 export const generateStaticParams = async () => {
-  const paths = allOpentelemetries.map((p) => ({ slug: p.slug?.split('/') }))
+  const paths = allGuides.map((p) => ({ slug: p.slug?.split('/') }))
 
   return paths
 }
@@ -84,13 +84,13 @@ export const generateStaticParams = async () => {
 export default async function Page({ params }: { params: { slug: string[] } }) {
   const slug = decodeURI(params.slug.join('/'))
   // Filter out drafts in production
-  const sortedCoreContents = allCoreContent(sortPosts(allOpentelemetries))
+  const sortedCoreContents = allCoreContent(sortPosts(allGuides))
   const postIndex = sortedCoreContents.findIndex((p) => p.slug === slug)
   if (postIndex === -1) {
     return notFound()
   }
 
-  const post = allOpentelemetries.find((p) => p.slug === slug) as Opentelemetry
+  const post = allGuides.find((p) => p.slug === slug) as Guide
   const authorList = post?.authors || ['default']
   const authorDetails = authorList.map((author) => {
     const authorResults = allAuthors.find((p) => p.slug === author)
@@ -113,12 +113,26 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+
+      <div className='container mx-auto'>
+          <Link href={`/resource-center/guides/`}>
+            
+            <button className='flex items-center ml-3.5 mt-10'>
+              <SidebarIcons.ArrowLeft/> 
+              <span className='text-sm pl-1.5'>
+              Back to Guides
+              </span>
+            </button>
+          </Link>
+        </div>
+
       <Layout
         content={mainContent}
         authorDetails={authorDetails}
         authors={post?.authors}
         toc={post.toc}
       >
+        
         <MDXLayoutRenderer code={post.body.code} components={components} toc={post.toc} />
       </Layout>
     </>
