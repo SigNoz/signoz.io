@@ -1012,6 +1012,11 @@ const docsSideNav = [
         items: [
           {
             type: 'doc',
+            route: '/docs/azure-monitoring/bootstrapping/strategy',
+            label: 'Strategy',
+          },
+          {
+            type: 'doc',
             route: '/docs/azure-monitoring/bootstrapping/collector-setup',
             label: 'Central Collector Setup',
           },
@@ -1060,6 +1065,23 @@ const docsSideNav = [
         type: 'doc',
         route: '/docs/azure-monitoring/aks',
         label: 'AKS',
+      },
+      {
+        type: 'category',
+        label: 'Azure Container Apps',
+        // route: '/docs/azure-monitoring/app-service',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/azure-monitoring/az-container-apps/logging',
+            label: 'Logging',
+          },
+          {
+            type: 'doc',
+            route: '/docs/azure-monitoring/az-container-apps/metrics',
+            label: 'Metrics',
+          },
+        ],
       },
       {
         type: 'category',
