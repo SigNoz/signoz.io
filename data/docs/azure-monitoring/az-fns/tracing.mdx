@@ -1,0 +1,57 @@
+---
+id: tracing
+title: Azure Function Tracing
+---
+
+## QuickStart
+
+To get started with monitoring your Azure Function App, we recommend using OpenTelemetry (Otel) SDKs to instrument your application. These SDKs will allow you to collect and forward metrics and traces to a Central Collector.
+
+### Installing the OpenTelemetry SDK
+
+Please refer to our [SigNoz Tutorials](../../../instrumentation/) or [Blog](https://signoz.io/blog/) to find information on how to instrument your application like Spring, FastAPI, NextJS, Langchain, Node.js, Flask, Django, etc. with OpenTelemetry.
+
+
+```bash
+# Node.js example
+npm install @opentelemetry/api
+npm install @opentelemetry/auto-instrumentations-node
+npm install @opentelemetry/exporter-trace-otlp-http
+```
+
+### Configure the OpenTelemetry SDK
+
+```bash
+# Set env vars or config file
+export OTEL_EXPORTER_OTLP_ENDPOINT="http://<Your-Central-Collector-DNS>:4318/"
+```
+
+For application-level traces and metrics, configure your application to use the DNS name of the [Central Collector](../../bootstrapping/collector-setup) you set up earlier. This Central Collector will automatically forward the collected data to SigNoz.
+
+
+## Overview
+
+Unified monitoring of your Azure Function App involves capturing application-level metrics and traces to provide comprehensive insights into your application's performance and resource utilization. For more detailed information on the unified monitoring in Azure, please refer to the [Azure Monitoring Strategy](../../bootstrapping/strategy).
+
+
+## Prerequisites
+
+Before you proceed, ensure the following prerequisites are met:
+
+1. **Azure Subscription & Container App**: You need an active Azure subscription with a running Azure Function App instance.
+2. **Central Collector Setup**: Make sure you have set up the Central Collector with the Azure Monitor exporter. If you haven't completed this setup, follow the instructions in the [Central Collector Setup](../../bootstrapping/collector-setup).
+
+
+
+## Troubleshooting
+
+If you encounter any issues while setting up monitoring for your Azure Function App, here are a few troubleshooting steps to help you resolve common problems:
+
+1. **OpenTelemetry Collector Configuration**:
+   - Verify that the OpenTelemetry Collector is running.
+   - Ensure it is properly configured with the OLTP HTTP receiver.
+
+2. **Azure Function App Accessibility**:
+   - Confirm that your Azure Function App instance is up and accessible.
+
+By following this guide, you should be able to monitor your Azure Function App's traces with SigNoz effectively, gaining valuable insights into your application's performance and resource utilization.
