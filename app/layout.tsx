@@ -75,6 +75,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <link rel="preconnect" href="https://dev.visualwebsiteoptimizer.com" />
 
       <script
+        type="text/javascript"
+        id="vwoCode"
         dangerouslySetInnerHTML={{
           __html: `
             window._vwo_code=window._vwo_code || (function() {
