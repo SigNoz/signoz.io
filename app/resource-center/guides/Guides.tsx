@@ -131,6 +131,8 @@ export default function Guides() {
         currentPage={pagination.currentPage}
         totalPages={pagination.totalPages}
         pageRoute={pagination.pageRoute}
+        postsPerPage={POST_PER_PAGE}
+        totalPosts={posts.length}
       />  
     </div>
   )
