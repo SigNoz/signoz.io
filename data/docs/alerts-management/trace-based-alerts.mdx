@@ -13,9 +13,9 @@ to perform operations on your Traces to define conditions based on traces data. 
 
 - **Traces**: A field to filter the trace data to monitor. 
 
-- **Aggregate Attribute**: Allows you to choose how the trace data should be aggregated. You can use functions like "Count."
+- **Aggregate Attribute**: Allows you to choose how the trace data should be aggregated. You can use functions like "Count"
 
-- **Group by**: Lets you group trace data by different attributes, like "serviceName," "Status," or other custom attributes.
+- **Group by**: Lets you group trace data by different span/trace attributes, like "serviceName", "Status" or other custom attributes.
 
 - **[Legend Format](https://signoz.io/docs/userguide/query-builder/#legend-format)**: An optional field to define the format for the legend in the visual representation of the alert.
 
@@ -75,20 +75,34 @@ You can incorporate result labels in the alert descriptions to make the alerts m
 
 **Example**: If you have a query that returns the label `service_name` then to use it in the alert description, you will use `{{.Labels.service_name}}`which creates an alert that is specific to the particular service.
 
-## Example
-An example Trace-based alert could be set to trigger when a specific operation exceeds a latency threshold:
-- **Y-axis unit**: "nanoseconds(ns)"
-- **Aggregate attribute**: "durationNano"
-- **Group by**: "serviceName"
-- **Alert Threshold**: "200 milliseconds(ms)"
-- **Run alert every**: 1 minute
-- **Send a notification if data is missing for** 5 minutes
-- **Alert Name**: "High Latency Alert"
-- **Severity**: "Warning"
-- **Notification Channels**: signoz-slack-alerts (Slack channel)
+## Examples
+
+### 1. Alert when external API latency (P90) is over 1 second for last 5 mins
 
 <figure data-zoomable align='center'>
-    <img src="/img/docs/product-features/alerts/alerts-traces-based.gif" alt="A gif of Traces Based alerts example in SigNoz"/>
-    <figcaption><i>Traces Based Alert Example </i></figcaption>
+    <img src="/img/docs/product-features/alerts/traces/external-api-metric.png" alt="traces builder query for external API latency(p90)"/>
+    <figcaption><i>External API latency (P90) query</i></figcaption>
 </figure>
 
+Using `externalHttpUrl` attribute we can filter specific external API endpoint and then set aggregation attribute to durationNano with P90 aggregation operation to plot a chart which measures 90th percentile latency. You can also choose `Avg` or anyother operation as aggregate operation depending on your needs.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/alerts/traces/external-api-metric-chart.png" alt="external API latency(p90) chart"/>
+    <figcaption><i>External API latency (P90) chart</i></figcaption>
+</figure>
+
+Remember to select y-axis unit as nanoseconds as our aggregate key is durationNano.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/alerts/traces/external-api-metric-condition.png" alt="external API latency(p90) condition"/>
+    <figcaption><i>External API latency (P90) alert condition</i></figcaption>
+</figure>
+
+The condition is set to trigger a notification if the per-minute external API latency (P90) exceeds the threshold of 1 second all the time in the last five minutes.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/alerts/traces/external-api-metric-configuration.png" alt="external API latency(p90) alert configuration"/>
+    <figcaption><i>External API latency (P90) alert configuration</i></figcaption>
+</figure>
+
+At last configure the alert as `Warning` and add a name, and notification channel.
