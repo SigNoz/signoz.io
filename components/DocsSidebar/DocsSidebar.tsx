@@ -60,9 +60,9 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
         }`}
         onClick={() => onNavItemClick && typeof onNavItemClick == 'function' && onNavItemClick()}
       >
-        <Link href={doc.route} className="line-clamp-2 flex w-full items-center gap-2" replace>
+        <Link href={doc.route} className={`line-clamp-2 flex w-full items-center gap-2 ${doc.className}`} replace>
           <FileText size={12} />
-          <div className="line-clamp-2 text-sm"> {doc.label} </div>
+          <div className="line-clamp-2 text-sm sidebar-label"> {doc.label} </div>
         </Link>
       </li>
     )
@@ -77,11 +77,11 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
         <Link href={category.route || ''}>
           <div
             onClick={() => toggleCategory(category.label)}
-            className={`folder flex cursor-pointer items-center gap-2 text-sm text-gray-200 hover:text-white ${isActiveRoute ? 'active-route text-white' : ''}`}
+            className={`folder flex cursor-pointer items-center gap-2 text-sm text-gray-200 hover:text-white ${category.className} ${isActiveRoute ? 'active-route text-white' : ''}`}
           >
             {isExpanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
 
-            <span className={`text-sm font-normal`}>{category.label}</span>
+            <span className={`text-sm font-normal sidebar-label`}>{category.label}</span>
           </div>
         </Link>
         {isExpanded && (
