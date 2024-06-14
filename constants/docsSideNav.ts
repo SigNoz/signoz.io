@@ -515,6 +515,11 @@ const docsSideNav = [
               },
             ],
           },
+          {
+            type: 'doc',
+            route: '/docs/logs-management/send-logs/collect-tomcat-access-and-garbage-collector-logs',
+            label: 'Tomcat',
+          },
         ],
       },
       {
@@ -911,6 +916,11 @@ const docsSideNav = [
         route: '/docs/tutorial/traefik-observability',
         label: 'Traefik Observability',
       },
+      {
+        type: 'doc',
+        route: '/docs/tutorial/infinite-retention-aws-s3',
+        label: 'Infinite Retention using AWS S3',
+      },
     ],
   },
   {
@@ -988,6 +998,7 @@ const docsSideNav = [
   {
     label: 'Azure Monitoring',
     type: 'category',
+    className: 'new-doc',
     // route: '',
     items: [
       {
@@ -1000,6 +1011,11 @@ const docsSideNav = [
         // slug: '/docs/ec2-monitoring',
         // },
         items: [
+          {
+            type: 'doc',
+            route: '/docs/azure-monitoring/bootstrapping/strategy',
+            label: 'Strategy',
+          },
           {
             type: 'doc',
             route: '/docs/azure-monitoring/bootstrapping/collector-setup',
@@ -1044,12 +1060,39 @@ const docsSideNav = [
             route: '/docs/azure-monitoring/app-service/logging',
             label: 'Logging',
           },
+          {
+            type: 'doc',
+            route: '/docs/azure-monitoring/app-service/tracing',
+            label: 'APM & Tracing',
+          },
         ],
       },
       {
         type: 'doc',
         route: '/docs/azure-monitoring/aks',
         label: 'AKS',
+      },
+      {
+        type: 'category',
+        label: 'Azure Container Apps',
+        route: '/docs/azure-monitoring/az-container-app',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/azure-monitoring/az-container-apps/logging',
+            label: 'Logging',
+          },
+          {
+            type: 'doc',
+            route: '/docs/azure-monitoring/az-container-apps/metrics',
+            label: 'Metrics',
+          },
+          {
+            type: 'doc',
+            route: '/docs/azure-monitoring/az-container-apps/tracing',
+            label: 'APM & Tracing ',
+          },
+        ],
       },
       {
         type: 'category',
@@ -1065,6 +1108,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/azure-monitoring/az-fns/logging',
             label: 'Logging',
+          },
+          {
+            type: 'doc',
+            route: '/docs/azure-monitoring/az-fns/tracing',
+            label: 'APM & Tracing ',
           },
         ],
       },
@@ -1291,6 +1339,7 @@ const docsSideNav = [
     route: '/docs/community/llm-monitoring',
     label: 'LLM Monitoring',
     type: 'doc',
+    className: 'new-doc',
   },
   {
     label: 'Community',
@@ -1305,6 +1354,46 @@ const docsSideNav = [
         label: 'Community Channels',
         route: '/docs/community',
         type: 'doc',
+      },
+    ],
+  },
+
+  {
+    label: 'Troubleshooting',
+    type: 'category',
+    route: '/docs/faqs',
+    // link: {
+    // type: 'generated-index',
+    // title: 'Frequently Asked Questions',
+    // description:
+    // 'Find the most commonly questions about SigNoz Installation, Instrumentation, Features, Troubleshooting, and Contributing here:',
+    // slug: '/docs/faqs/faq',
+    // },
+    items: [
+      {
+        label: 'SigNoz Cloud',
+        type: 'category',
+          items: [{
+            type: 'doc',
+            route: '/docs/troubleshooting/signoz-cloud/general-troubleshooting',
+            label: 'General Troubleshooting',
+          },
+          {
+            type: 'doc',
+            route: '/docs/troubleshooting/signoz-cloud/traces-troubleshooting',
+            label: 'Traces Troubleshooting',
+          },
+          {
+            type: 'doc',
+            route: '/docs/troubleshooting/signoz-cloud/logs-troubleshooting',
+            label: 'Logs Troubleshooting',
+          },
+          {
+            type: 'doc',
+            route: '/docs/troubleshooting/signoz-cloud/metrics-troubleshooting',
+            label: 'Metrics Troubleshooting',
+          },
+        ],
       },
     ],
   },
