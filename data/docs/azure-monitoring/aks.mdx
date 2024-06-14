@@ -23,6 +23,54 @@ helm repo add signoz <https://charts.signoz.io>
 helm install -n signoz  --create-namespace kubelet-otel signoz/k8s-infra \\
 --set signozApiKey=<ingestionKey> --set otelCollectorEndpoint="ingest.<region>.signoz.cloud:443" --set otelInsecure=false
 ```
+This should start sending logs and metrics to SigNoz.
+
+
+## Tracing
+
+### eBPF Tracing 
+
+There are solution to collect metrics and traces without modifying the application code. These solutions come under the category of eBPF Tracing. These solutions are relatively new and are still in the early stages of development.
+
+However, there are some open source projects that export metrics and traces to OpenTelemetry.
+- [Pixie](https://github.com/pixie-io/pixie) 
+- [Hubble](https://github.com/cilium/hubble) 
+- [OpenTelemetry eBPF](https://github.com/open-telemetry/opentelemetry-network)
+
+For example, Pixie can be configured by following the instructions in the respective repositories.
+[Pixie OpenTelemetry Tutorial](https://docs.px.dev/tutorials/integrations/otel/)
+
+```endpoint=px.otel.Endpoint(
+    url='otel-collector.kubelet-otel.svc.cluster.local:4317',
+    insecure=True
+  ),
+```
+
+:::note
+These solutions may not be suitable for all use cases, and are still may not be production-ready. It is recommended to evaluate  solutions and choose the one that best fits your needs.
+:::
+
+### Application-Level Tracing
+
+For application-level tracing, you can use the OpenTelemetry SDKs integrated with your application. These SDKs will automatically collect and forward traces to the Central Collector.
+
+Please refer to our [SigNoz Tutorials](../../instrumentation/) or [Blog](https://signoz.io/blog/) to find information on how to instrument your application like Spring, FastAPI, NextJS, Langchain, Node.js, Flask, Django, etc.
+
+```bash
+# Node.js example
+npm install @opentelemetry/api
+npm install @opentelemetry/auto-instrumentations-node
+npm install @opentelemetry/exporter-trace-otlp-http
+```
+
+### Configure the OpenTelemetry SDK
+
+```bash
+# Set env vars or config file
+export OTEL_EXPORTER_OTLP_ENDPOINT="http://otel-collector.kubelet-otel.svc.cluster.local:4318/"
+```
+
+For application-level traces and metrics, configure your application to use the kube-dns name of the [Central Collector](../bootstrapping/collector-setup) you set up earlier.
 
 ## Troubleshooting
 
@@ -32,6 +80,7 @@ If you encounter any issues while setting up logging and metrics for your AKS cl
     
     ```bash
     kubectl logs -f -n signoz -l app.kubernetes.io/component=otel-agent
+    
     ```
     
     Review the logs for any error messages or indications of misconfiguration.
@@ -40,6 +89,7 @@ If you encounter any issues while setting up logging and metrics for your AKS cl
     
     ```bash
     kubectl get cm/kubelet-otel-k8s-infra-otel-agent -n signoz -o yaml
+    
     ```
     
     Ensure that the configuration matches your expected settings, including the SigNoz API key and the OpenTelemetry Collector endpoint.
@@ -48,6 +98,7 @@ If you encounter any issues while setting up logging and metrics for your AKS cl
     
     ```bash
     kubectl get pods,services,configmaps -n signoz
+    
     ```
     
     Check if the required pods, services, and config maps are running and in a healthy state.
