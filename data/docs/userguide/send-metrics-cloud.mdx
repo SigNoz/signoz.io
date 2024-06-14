@@ -7,19 +7,89 @@ title: Send Metrics to SigNoz Cloud
 import GetHelp from '@/components/shared/get-help.md'
 import SaveChangesRestart from '@/components/shared/save-changes-and-restart.md'
 
+## Methods to Send Metrics
+There are two primary ways to send metrics to SigNoz:
 
-There are two ways in which you can send metrics to SigNoz using OpenTelemetry:
-- From your application
-- From OpenTelemetry Collector
+1. From your application
+2. From OpenTelemetry Collector
+
+This document will cover sending metrics from the OpenTelemetry Collector.
+
+## Prerequisites
+Before you begin, ensure you have the following:
+
+- A running instance of SigNoz Cloud.
+- OpenTelemetry Collector installed.
+- Appropriate access and permissions.
 
 In this document, we will cover how to send metrics from OpenTelemetry Collector. The Collector is a swiss-army knife that can collect metrics from various sources and send them to SigNoz.
 
+- [How does OpenTelemetry Collector collect data](#how-does-opentelemetry-collector-collect-data)
 - [Enable a Specific Metric Receiver](#enable-a-specific-metric-receiver)
 - [Enable a Prometheus Receiver](#enable-a-prometheus-receiver)
 - [Find Metrics available in SigNoz](#find-metrics-available-in-signoz)
   - [Metrics from Hostmetrics receiver](#metrics-from-hostmetrics-receiver)
 - [Related Videos](#related-videos)
 - [Get Help](#get-help)
+
+## How does OpenTelemetry Collector collect data?
+
+Data collection in OpenTelemetry Collector is facilitated through receivers. Receivers are configured via YAML under the top-level `receivers` tag. To ensure a valid configuration, at least one receiver must be enabled.
+
+Below is an example of an **`otlp`** receiver:
+
+```yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+      http:
+```
+
+The OTLP receiver accepts data through gRPC or HTTP in the <a href = "https://github.com/open-telemetry/opentelemetry-proto/blob/main/docs/specification.md" rel="noopener noreferrer nofollow" target="_blank" >OTLP</a> format. There are advanced configurations that you can enable via the YAML file.
+
+Here’s a sample configuration for an otlp receiver:
+
+```yaml
+receivers:
+  otlp:
+    protocols:
+      http:
+        endpoint: "localhost:4318"
+        cors:
+          allowed_origins:
+            - http://test.com
+            # Origins can have wildcards with *, use * by itself to match any origin.
+            - https://*.example.com
+          allowed_headers:
+            - Example-Header
+          max_age: 7200
+```
+
+You can find more details on advanced configurations <a href = "https://github.com/open-telemetry/opentelemetry-collector/blob/main/receiver/otlpreceiver/README.md" rel="noopener noreferrer nofollow" target="_blank" >here</a>.
+
+Once a receiver is configured, it needs to be **enabled** to start the data flow. This involves setting up **pipelines** within a **`service`**. A **pipeline** acts as a streamlined pathway for data, outlining how it should be processed and where it should go. A pipeline comprises of the following:
+
+1. **Receivers:** These are entry points for data into the OpenTelemetry Collector, responsible for collecting data from various sources and feeding it into the pipeline.
+2. **Processors:** After data is received, processors manipulate, filter, or enhance the data as needed before it proceeds further in the pipeline. They provide a way to customize the data according to specific requirements.
+3. **Exporters:** After processing, the data is ready for export. Exporters define the destination for the data, whether it's an external monitoring system, storage, or another service. They format the data appropriately for the chosen output.
+
+Below is an example pipeline configuration:
+
+```yaml
+service:
+  pipelines:
+    metrics:
+      receivers: [otlp, httpcheck]
+      processors: [batch]
+      exporters: [otlp]
+```
+
+Here’s a breakdown of the above metrics pipeline:
+
+- **Receivers:** This pipeline is configured to receive metrics data from two sources: OTLP and HTTP Check. The **`otlp`** receiver collects metrics using both gRPC and HTTP protocols, while the **`httpcheck`** receiver gathers metrics from the HTTP endpoint.
+- **Processors:** Metrics data is processed using the **`batch`** processor. This processor likely batches metrics before exporting them, optimizing the data flow.
+- **Exporters:** Metrics processed through this pipeline are exported to the OTLP destination. The **`otlp`** exporter sends data to an endpoint specified in the configuration.
 
 ## Enable a Specific Metric Receiver
 
@@ -198,6 +268,9 @@ To enable a Prometheus receiver, follow the steps below:
       - [\<Scrape_config>](https://prometheus.io/docs/prometheus/latest/configuration/configuration/#scrape_config)
       - [Jobs and Instances](https://prometheus.io/docs/concepts/jobs_instances/)
     </Admonition>
+
+    If you'd like to learn more about how to monitor Prometheus Metrics with OpenTelemetry Collector, 
+    refer to this [blog](https://signoz.io/blog/opentelemetry-collector-prometheus-receiver/#how-does-opentelemetry-collector-collect-data).
 
 ## Find Metrics available in SigNoz
 
