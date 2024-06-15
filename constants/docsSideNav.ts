@@ -182,6 +182,11 @@ const docsSideNav = [
                 route: '/docs/instrumentation/falcon',
                 label: 'Falcon OpenTelemetry Instrumentation',
               },
+              {
+                type: 'doc',
+                route: '/docs/instrumentation/celery',
+                label: 'Celery Worker OpenTelemetry Setup',
+              },
             ],
           },
           {
