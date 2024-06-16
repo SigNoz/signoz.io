@@ -184,6 +184,11 @@ const docsSideNav = [
               },
               {
                 type: 'doc',
+                route: '/docs/instrumentation/hypercorn-unicorn-support',
+                label: 'Hypercorn/Unicorn OpenTelemetry Instrumentation',
+              },
+              {
+                type: 'doc',
                 route: '/docs/instrumentation/celery',
                 label: 'Celery Worker OpenTelemetry Setup',
               },
