@@ -31,7 +31,7 @@ SigNoz helps developers build more reliable and performant applications. As a pa
 ## Why write technical content for us?
 
 ### We compensate well:
-We know technical content takes time to create, so we compensate well. We will pay out up to **$300 for every article** published. You can check our [topic wishlist](https://signoz.notion.site/SigNoz-Technical-Writing-Program-Topic-Wishlist-82ac9afcbe314208a453798d379b54e3?pvs=4) to get an idea of the amount we pay based on the type of article.
+We know technical content takes time to create, so we compensate well.
 
 ### Build an authoritative online presence:
 The topics that we deal with are either emerging technologies or concepts that need good technical understanding. Having published content around these topics will always act as a booster to your digital presence. We publish all our articles with a clear picture of the authors and a link to their social profile.
@@ -123,7 +123,7 @@ We're also not looking for:
 
 ## General FAQs
 
-We pay $150 - $300 USD per published article. Clarify the exact amount with us before starting to work on the article. We pay via PayPal for international transfers, and via bank accounts for Indian transfers.
+We pay based on the expertise required for the article. Clarify the exact amount with us before starting to work on the article. We pay via PayPal for international transfers, and via bank accounts for Indian transfers.
 
 ### When do I get paid?
 Payment is processed after the article is published. You will need to submit a receipt. You can use this [free tool](https://www.zoho.com/in/invoice/free-invoice-generator.html) to generate a receipt. We will share a sample receipt when we collaborate. It can take 3-7 working days to reflect in your account.
