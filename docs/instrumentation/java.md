@@ -138,9 +138,126 @@ Once you have set up OTel Collector agent, you can proceed with OpenTelemetry ja
    - `<myapp>` is the name of your application jar file
    - In case you download `opentelemetry-javaagent.jar` file in different directory than that of the project, replace `$PWD` with the path of the otel jar file.
 
-3. Make sure to dockerise your application along with OpenTelemetry instrumentation.
+3. Dockerize your application<br></br>
+   
+   To dockerize your application, you don't need to follow **step 2**, instead update your Dockerfile to include the `opentelemetry-javaagent.jar`and your application jar file.
+  
+  ```bash
+  ...
+  # Set the working directory inside the container. Change it to your working directory.
+  WORKDIR /app
+
+  # Copy the OpenTelemetry Java binary agent into the container
+  COPY /path/to/opentelemetry-javaagent.jar /app/opentelemetry-javaagent.jar
+
+  # Copy your application jar file into the container
+  COPY <myapp>.jar /app/
+
+  # Run your application with the OpenTelemetry Java agent
+  CMD ["java", "-javaagent:/app/opentelemetry-javaagent.jar", "-jar", "/app/<myapp>.jar"]
+  ...
+  ```
+  - `/path/to/opentelemetry-javaagent.jar` is the actual path where the OpenTelemetry Java binary agent is on your machine.
+  - `/app` is the working directory for your container. Change it with your own working directory.
+  - `<myapp>` is the name of your application jar file.
 
 You can validate if your application is sending traces to SigNoz cloud by following the instructions [here](#validating-instrumentation-by-checking-for-traces).
+
+In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#troubleshooting-your-installation).
+  
+</TabItem>
+
+<TabItem value="docker" label="Docker" default>
+
+There are two ways to send data to SigNoz Cloud:
+
+- Send traces directly to SigNoz Cloud
+- Send traces via OTel Collector binary **(recommended)**
+
+#### **Send traces directly to SigNoz Cloud**
+OpenTelemetry Java agent can send traces directly to SigNoz Cloud.
+  
+Step 1. Download OTel java binary agent
+
+```bash
+wget https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar
+```
+
+Step 2. Dockerize your application
+
+Update your Dockerfile to include the `opentelemetry-javaagent.jar`, your application jar and environment variables.
+
+```bash
+...
+# Set the working directory inside the container. Change it to your working directory.
+WORKDIR /app
+
+# Copy the OpenTelemetry Java binary agent into the working directory
+COPY opentelemetry-javaagent.jar /app/
+
+# Copy your application jar file into the working directory
+COPY <my-app>.jar /app/
+
+# Set environment variables for OpenTelemetry configuration
+ENV OTEL_RESOURCE_ATTRIBUTES="service.name=<service-name>"
+ENV OTEL_EXPORTER_OTLP_HEADERS="signoz-access-token=<SIGNOZ-INGESTION-KEY>"
+ENV OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.{region}.signoz.cloud:443"
+
+# Run your application with the OpenTelemetry Java agent
+CMD ["java", "-javaagent:/app/opentelemetry-javaagent.jar", "-jar", "/app/<my-app>.jar"]
+...
+```
+- `/app` is the working directory for your container. Change it with your own working directory.
+- `<myapp>` is the name of your application jar file
+- `<service-name>` is the name of your service
+- `<SIGNOZ-INGESTION-KEY>` is the ingestion key provided by SigNoz. You can find your ingestion key from SigNoz cloud account details sent on your email.
+
+Depending on the choice of your region for SigNoz cloud, the ingest endpoint will vary according to this table.
+
+| Region | Endpoint |
+| --- | --- |
+| US |	ingest.us.signoz.cloud:443 |
+| IN |	ingest.in.signoz.cloud:443 |
+| EU | ingest.eu.signoz.cloud:443 |
+
+In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#troubleshooting-your-installation).
+
+---
+
+#### **Send traces via OTel Collector binary**
+
+OTel Collector binary helps to collect logs, hostmetrics, resource and infra attributes. It is recommended to install Otel Collector binary to collect and send traces to SigNoz cloud. You can correlate signals and have rich contextual data through this way.
+
+You can find instructions to install OTel Collector binary [here](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) in your VM. Once you are done setting up your OTel Collector binary, you can follow the below steps for instrumenting your Java application.
+
+Step 1. Download OTel java binary agent<br></br>
+```bash
+wget https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar
+```
+
+Step 2. Dockerize your application
+
+Update your Dockerfile to include the `opentelemetry-javaagent.jar`and your application jar file.
+
+```bash
+...
+# Set the working directory inside the container. Change it to your working directory.
+WORKDIR /app
+
+# Copy the OpenTelemetry Java binary agent into the container
+COPY /path/to/opentelemetry-javaagent.jar /app/opentelemetry-javaagent.jar
+
+# Copy your application jar file into the container
+COPY <myapp>.jar /app/
+
+# Run your application with the OpenTelemetry Java agent
+CMD ["java", "-javaagent:/app/opentelemetry-javaagent.jar", "-jar", "/app/<myapp>.jar"]
+...
+```
+- `/app` is the working directory for your container. Change it with your own working directory.
+- `<myapp>` is the name of your application jar file.
+
+Depending on the choice of your region for SigNoz cloud, the ingest endpoint will vary according to this table.
 
 In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#troubleshooting-your-installation).
   
