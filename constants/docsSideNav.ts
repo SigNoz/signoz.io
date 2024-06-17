@@ -350,11 +350,6 @@ const docsSideNav = [
         items: [
           {
             type: 'doc',
-            label: 'ClickHouse Queries for Traces',
-            route: '/docs/userguide/writing-clickhouse-traces-query',
-          },
-          {
-            type: 'doc',
             route: '/docs/application-monitoring/api-monitoring',
             label: 'API Monitoring',
           },
@@ -588,11 +583,6 @@ const docsSideNav = [
         ],
       },
       {
-        type: 'doc',
-        route: '/docs/userguide/logs_clickhouse_queries',
-        label: 'ClickHouse Queries for Logs',
-      },
-      {
         type: 'category',
         label: 'Logs API',
         // route: '',
@@ -648,7 +638,7 @@ const docsSideNav = [
     ],
   },
   {
-    label: 'Dashboards & Querying',
+    label: 'Dashboards',
     type: 'category',
     // route: '',
     items: [
@@ -709,6 +699,13 @@ const docsSideNav = [
         route: '/docs/userguide/manage-variables',
         label: 'Manage Variables',
       },
+    ],
+  },
+  {
+    label: 'Querying',
+    type: 'category',
+    // route: '',
+    items: [
       {
         type: 'doc',
         route: '/docs/userguide/create-a-custom-query',
@@ -720,9 +717,26 @@ const docsSideNav = [
         label: 'Query Builder',
       },
       {
-        type: 'doc',
-        route: '/docs/userguide/write-a-metrics-clickhouse-query',
-        label: 'ClickHouse Query for Metrics',
+        type: 'category',
+        // route: '',
+        label: 'ClickHouse Query',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/userguide/write-a-metrics-clickhouse-query',
+            label: 'Metrics',
+          },
+          {
+            type: 'doc',
+            route: '/docs/userguide/logs_clickhouse_queries',
+            label: 'Logs',
+          },
+          {
+            type: 'doc',
+            route: '/docs/userguide/writing-clickhouse-traces-query',
+            label: 'Traces',
+          },
+        ],
       },
     ],
   },
