@@ -20,7 +20,7 @@ export default async function Page() {
   const posts = allCoreContent(sortedPosts)
   return (
     <div className="bg-signoz_ink-500">
-      <main className="landing-section pt-12">
+      <main className="landing-section pt-12 sm:pt-0">
         <Header />
         <TrustedByTeams />
         <SigNozFeatures />
