@@ -173,49 +173,8 @@ To install the `k8s-infra` chart with the above configuration, run the following
 ```bash
 helm install my-release signoz/k8s-infra -f override-values.yaml
 ```
-  
-## Send data from applications to OtelCollectors in your infra
 
-<figure data-zoomable align='center'>
-    <img src="/img/docs/data-flow-2x.webp" alt="Data flow from your application to SigNoz Cloud"/>
-    <figcaption><i>OpenTelemetry instrumented application sends data to OTelAgent Daemon deployed in your k8s infra. The OTelAgent daemon sends the collected data to SigNoz Cloud.</i></figcaption>
-</figure>
-
-
-To send data from your applications, you must first instrument it with OpenTelemetry. You can find instrumentation instructions for your specific language [here](https://signoz.io/docs/instrumentation/). 
-
-
-Once you're done instrumenting your application, add below to your application manifest files for applications to start sending data to the otel-collectors running as daemonset. Eg. add the below config to the `deployment.yaml` of your application.
-
-```YAML
-env:
-  - name: HOST_IP
-    valueFrom:
-      fieldRef:
-        fieldPath: status.hostIP
-  - name: K8S_POD_IP
-    valueFrom:
-      fieldRef:
-        apiVersion: v1
-        fieldPath: status.podIP
-  - name: K8S_POD_UID
-    valueFrom:
-      fieldRef:
-        fieldPath: metadata.uid
-  - name: OTEL_EXPORTER_OTLP_INSECURE
-    value: "true"
-  - name: OTEL_EXPORTER_OTLP_ENDPOINT
-    value: $(HOST_IP):4317
-  - name: OTEL_RESOURCE_ATTRIBUTES
-    value: service.name=APPLICATION_NAME,k8s.pod.ip=$(K8S_POD_IP),k8s.pod.uid=$(K8S_POD_UID)
-  ```
-  
-<Admonition>
-  - Replace `APPLICATION_NAME` with your application name that you wish to see in SigNoz.
-  - In cases of some SDKs, you would have to include `https://` prefix for `OTEL_EXPORTER_OTLP_ENDPOINT`
-</Admonition>
 </TabItem>
-
 <TabItem value="self-host" label="Self-Host">
 
 <Admonition type="info">
@@ -343,7 +302,7 @@ helm repo update
   </TabItem>
 </Tabs>
 
-<Admonition type="info">
+<Admonition>
 Replace `<CLUSTER_NAME>` with the name of the Kubernetes cluster or a unique
 identifier of the cluster.
 
@@ -361,6 +320,64 @@ helm install my-release signoz/k8s-infra  \
 
 </TabItem>
 </Tabs>
+
+## Send Data from Instrumented Applications
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/data-flow-2x.webp" alt="Data flow from your application to SigNoz"/>
+    <figcaption>
+      <i>
+        OpenTelemetry instrumented application sends data to OTelAgent Daemon deployed in
+        your k8s infra. The OTelAgent daemon sends the collected data to SigNoz.
+      </i>
+    </figcaption>
+</figure>
+
+<Admonition>
+In case of **GKE Autopilot**, you will not be able to send data to OTelAgent Daemon
+via host port. You will need to use either the SigNoz ingestion endpoint directly
+or OtelAgent service name.
+
+For OtelAgent service name, the endpoint would be something like
+`my-release-k8s-infra-otel-agent.default.svc:4317`. Replace `my-release` with
+your helm release name and `default` with your namespace.
+</Admonition>
+
+To send data from your applications, you must first instrument it with OpenTelemetry.
+You can find instrumentation instructions for your specific language [here][10]. 
+
+Once you're done instrumenting your application, add below to your application manifest
+files for applications to start sending data to the otel-collectors running as DaemonSet.
+
+For example, you can add the below config to your application manifest file.
+
+```YAML
+env:
+  - name: HOST_IP
+    valueFrom:
+      fieldRef:
+        fieldPath: status.hostIP
+  - name: K8S_POD_IP
+    valueFrom:
+      fieldRef:
+        apiVersion: v1
+        fieldPath: status.podIP
+  - name: K8S_POD_UID
+    valueFrom:
+      fieldRef:
+        fieldPath: metadata.uid
+  - name: OTEL_EXPORTER_OTLP_INSECURE
+    value: "true"
+  - name: OTEL_EXPORTER_OTLP_ENDPOINT
+    value: $(HOST_IP):4317
+  - name: OTEL_RESOURCE_ATTRIBUTES
+    value: service.name=APPLICATION_NAME,k8s.pod.ip=$(K8S_POD_IP),k8s.pod.uid=$(K8S_POD_UID)
+  ```
+  
+<Admonition>
+  - Replace `APPLICATION_NAME` with your application name that you wish to see in SigNoz.
+  - In cases of some SDKs, you would need to include `http://` or `https://` prefix for `OTEL_EXPORTER_OTLP_ENDPOINT`
+</Admonition>
 
 ### Disable Logs Collection
 
@@ -444,3 +461,4 @@ need using metrics from the [list below][3].
 [7]: https://github.com/SigNoz/dashboards/blob/main/k8s-infra-metrics/kubernetes-pod-metrics-detailed.json
 [8]: https://github.com/SigNoz/dashboards/blob/main/k8s-infra-metrics/kubernetes-node-metrics-overall.json
 [9]: https://github.com/SigNoz/dashboards/blob/main/k8s-infra-metrics/kubernetes-node-metrics-detailed.json
+[10]: https://signoz.io/docs/instrumentation/
