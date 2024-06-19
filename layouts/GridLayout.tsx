@@ -25,6 +25,7 @@ interface GridLayoutProps {
   title: string
   initialDisplayPosts?: CoreContent<Blog>[]
   pagination?: PaginationProps
+  isDarkMode: boolean
 }
 
 const PAGE_NUMBER_STYLES = 'pt-px pb-px px-2 h-6 w-6 justify-center items-center flex flex-col rounded-sm'
@@ -162,6 +163,7 @@ export default function GridLayout({
   title,
   initialDisplayPosts = [],
   pagination,
+  isDarkMode,
 }: GridLayoutProps) {
   const [searchValue, setSearchValue] = useState('')
   const filteredBlogPosts = posts.filter((post) => {
@@ -188,11 +190,11 @@ export default function GridLayout({
     <div className="container mx-auto p-0">
       <div className="divide-y divide-gray-200 dark:divide-gray-700">
         <div className="my-8 flex flex-col">
-          <div className="w-full text-sm font-semibold uppercase leading-5 tracking-wide max-md:max-w-full">
+          <div className={`w-full text-sm font-semibold uppercase leading-5 tracking-wide max-md:max-w-full ${isDarkMode ? 'text-signoz_slate-100' : 'text-signoz_slate-300'}`}>
             All posts
           </div>
 
-          <div className="mt-4 grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-4 grid gap-y-5 gap-x-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
             {displayPosts.map((post, index) => {
               return <BlogPostCard key={index} blog={post} />
             })}
