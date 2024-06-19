@@ -1,7 +1,7 @@
 import siteMetadata from '@/data/siteMetadata'
 import { Blog, Comparison, Guide, Opentelemetry } from 'contentlayer/generated'
 import Authors from '../../../constants/authors.json'
-import { Timer } from 'lucide-react'
+import { Clock4 } from 'lucide-react'
 import Link from 'next/link'
 import { CoreContent } from 'pliny/utils/contentlayer'
 import { formatDate } from 'pliny/utils/formatDate'
@@ -40,7 +40,7 @@ export default function BlogPostCard({
     <Link href={`/${path}`}>
       <div className="flex cursor-pointer flex-col max-md:ml-0 max-md:w-full">
         <div
-          className={`mx-auto flex w-full grow flex-col rounded border border-solid p-4 transition-all hover:border-blue-500 dark:border-signoz_ink-500 dark:bg-signoz_ink-200 dark:hover:border-blue-400 max-md:mt-6`}
+          className={`mx-auto flex w-full grow flex-col rounded border border-solid p-4 transition-all hover:bg-signoz_ink-300 dark:border-signoz_ink-500 dark:bg-signoz_ink-400 dark:hover:bg-signoz_ink-300 max-md:mt-6`}
         >
           <div className="content h-[96px]">
             <div
@@ -59,9 +59,9 @@ export default function BlogPostCard({
             <div className="flex flex-col gap-2 font-medium text-stone-500 dark:text-white">
               {authors && Array.isArray(authors) && renderAuthor(authors[0])}
             </div>
-            <div className="flex items-center gap-1.5 whitespace-nowrap text-stone-700 dark:text-stone-300">
-              <Timer size={16} />
-              <div className="text-xs text-stone-700 dark:text-white">{blog.readingTime.text}</div>
+            <div className="flex items-center gap-1.5 whitespace-nowrap font-mono dark:text-stone-300">
+              <Clock4 size={16} />
+              <div className="text-xs font-mono dark:text-white">{blog.readingTime.text}</div>
             </div>
           </div>
         </div>

@@ -31,6 +31,7 @@ export default function Page({ params }: { params: { page: string } }) {
       initialDisplayPosts={initialDisplayPosts}
       pagination={pagination}
       title="All Posts"
+      isDarkMode = {true}
     />
   )
 }
