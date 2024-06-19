@@ -245,6 +245,11 @@ const docsSideNav = [
                 route: '/docs/instrumentation/angular',
                 label: 'Angular',
               },
+              {
+                type: 'doc',
+                route: '/docs/instrumentation/nextjs',
+                label: 'NextJS', 
+              },
             ],
           },
           {
