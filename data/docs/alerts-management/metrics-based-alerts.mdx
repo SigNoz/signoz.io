@@ -8,11 +8,15 @@ A Metric-based alert in SigNoz allows you to define conditions based on metric d
 
 ## Step 1: Define the Metric
 In this step, you use the [Metrics Query Builder](https://signoz.io/docs/userguide/query-builder/#metrics-query-builder)
-to choose the metric to monitor. Some of the fields that are available in Metrics Query Builder includes:
+to choose the metric to monitor. The following fields that are available in Metrics Query Builder includes:
 
-- **Metrics**: A field to select the specific metric you want to monitor (e.g., CPU usage, memory utilization). You can also choose an aggregation function like "Count," "Sum," or "Average."
+- **Metric**: A field to select the specific metric you want to monitor (e.g., CPU usage, memory utilization).
+
+- **Time aggregation**: A field to select the time aggregation function to use for the metric. Learn more about [time aggregation](../../metrics-management/types-and-aggregation/#aggregation)
 
 - **WHERE**: A filter field to define specific conditions for the metric. You can apply logical operators like "IN," "NOT IN".
+
+- **Space aggregation**: A field to select the space aggregation function to use for the metric. Learn more about [space aggregation](../../metrics-management/types-and-aggregation/#aggregation)
 
 - **[Legend Format](https://signoz.io/docs/userguide/query-builder/#legend-format)**: An optional field to customize the legend's format in the visual representation of the alert.
 
@@ -29,13 +33,34 @@ To know more about the functionalities of the Query Builder, checkout the [docum
 ## Step 2: Define Alert Conditions
 In this step, you define the specific conditions that trigger the alert and the notification frequency. The following fields are available:
 
-- **Send a notification when [A] is [above/below] the threshold at least once during the last [X] mins**: A condition template to set the threshold for the alert, with options to define when and how often the condition should be checked.
+
+- **Condition**: Specify when the metric should trigger the notification
+  - Greater than (`>`)
+  - Less than (`<`)
+  - Equal to (`=`)
+  - Not equal to (`!=`)
+
+- **Occurrence**: Specify how condition should be evaluated
+  - At least once
+  - Every time
+  - On average
+  - In total
+
+- **Evaluation window**: Specify the rolling time window for the condition evaluation. The following look back options are available:
+  - Last 5 minutes
+  - Last 10 minutes
+  - Last 15 minutes
+  - Last 1 hour
+  - Last 4 hours
+  - Last 1 day
 
 - **Alert Threshold**: A field to set the threshold for the alert condition.
 
+- **Threshold Unit**: The unit of the threshold value. This is convenient when you want to set the threshold in a different unit than the metric. For example, the memory usage metric might be in bytes, but you might want to monitor it in MBs. Please make sure to set the Y-axis unit to indicate the unit of the metric.
+
 - **More Options** :
 
-    - **Run alert every [X mins]**: This option determines the frequency at which the alert condition is checked and notifications are sent.
+    - **Run alert every [X mins]**: This option determines the frequency at which the alert is evaluated.
 
     - **Send a notification if data is missing for [X] mins**: A field to specify if a notification should be sent when data is missing for a certain period.
 
@@ -54,7 +79,7 @@ This step focuses on setting alert properties like severity, description, and ot
 
 - **Alert Description**: A field for adding a detailed description of the alert, explaining what it monitors and under what conditions it is triggered.
 
-- **Labels**: A field to add labels or tags to the alert for categorization.
+- **Labels**: A field to add labels or tags to the alert for categorization. The label is a key-value pair to annotate the alert. Use `key:value` format to add labels.
 
 - **Notification channels**: A field to choose the notification channels from those configured in the Alert Channel settings.
 

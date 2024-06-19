@@ -165,27 +165,27 @@ const docsSideNav = [
               {
                 type: 'doc',
                 route: '/docs/instrumentation/django',
-                label: 'Django OpenTelemetry Instrumentation',
+                label: 'Django ',
               },
               {
                 type: 'doc',
                 route: '/docs/instrumentation/fastapi',
-                label: 'FastAPI OpenTelemetry Instrumentation',
+                label: 'FastAPI ',
               },
               {
                 type: 'doc',
                 route: '/docs/instrumentation/flask',
-                label: 'Flask OpenTelemetry Instrumentation',
+                label: 'Flask ',
               },
               {
                 type: 'doc',
                 route: '/docs/instrumentation/falcon',
-                label: 'Falcon OpenTelemetry Instrumentation',
+                label: 'Falcon ',
               },
               {
                 type: 'doc',
                 route: '/docs/instrumentation/hypercorn-unicorn-support',
-                label: 'Hypercorn/Unicorn OpenTelemetry Instrumentation',
+                label: 'Hypercorn/Unicorn ',
               },
               {
                 type: 'doc',
@@ -209,17 +209,17 @@ const docsSideNav = [
               {
                 type: 'doc',
                 route: '/docs/instrumentation/springboot',
-                label: 'Spring Boot OpenTelemetry Instrumentation',
+                label: 'Spring Boot',
               },
               {
                 type: 'doc',
                 route: '/docs/instrumentation/tomcat',
-                label: 'Tomcat OpenTelemetry Instrumentation',
+                label: 'Tomcat',
               },
               {
                 type: 'doc',
                 route: '/docs/instrumentation/jboss',
-                label: 'JBoss OpenTelemetry Instrumentation',
+                label: 'JBoss',
               },
             ],
           },
@@ -238,17 +238,17 @@ const docsSideNav = [
               {
                 type: 'doc',
                 route: '/docs/instrumentation/express',
-                label: 'Express OpenTelemetry Instrumentation',
+                label: 'Express',
               },
               {
                 type: 'doc',
                 route: '/docs/instrumentation/nestjs',
-                label: 'Nestjs OpenTelemetry Instrumentation',
+                label: 'NestJS',
               },
               {
                 type: 'doc',
                 route: '/docs/instrumentation/angular',
-                label: 'Angular OpenTelemetry Instrumentation',
+                label: 'Angular',
               },
             ],
           },
@@ -353,11 +353,6 @@ const docsSideNav = [
         label: 'Tutorials',
         // route: '',
         items: [
-          {
-            type: 'doc',
-            label: 'ClickHouse Queries for Traces',
-            route: '/docs/userguide/writing-clickhouse-traces-query',
-          },
           {
             type: 'doc',
             route: '/docs/application-monitoring/api-monitoring',
@@ -593,11 +588,6 @@ const docsSideNav = [
         ],
       },
       {
-        type: 'doc',
-        route: '/docs/userguide/logs_clickhouse_queries',
-        label: 'ClickHouse Queries for Logs',
-      },
-      {
         type: 'category',
         label: 'Logs API',
         // route: '',
@@ -653,7 +643,7 @@ const docsSideNav = [
     ],
   },
   {
-    label: 'Dashboards & Querying',
+    label: 'Dashboards',
     type: 'category',
     // route: '',
     items: [
@@ -714,6 +704,13 @@ const docsSideNav = [
         route: '/docs/userguide/manage-variables',
         label: 'Manage Variables',
       },
+    ],
+  },
+  {
+    label: 'Querying',
+    type: 'category',
+    // route: '',
+    items: [
       {
         type: 'doc',
         route: '/docs/userguide/create-a-custom-query',
@@ -725,9 +722,26 @@ const docsSideNav = [
         label: 'Query Builder',
       },
       {
-        type: 'doc',
-        route: '/docs/userguide/write-a-metrics-clickhouse-query',
-        label: 'ClickHouse Query for Metrics',
+        type: 'category',
+        // route: '',
+        label: 'ClickHouse Query',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/userguide/write-a-metrics-clickhouse-query',
+            label: 'Metrics',
+          },
+          {
+            type: 'doc',
+            route: '/docs/userguide/logs_clickhouse_queries',
+            label: 'Logs',
+          },
+          {
+            type: 'doc',
+            route: '/docs/userguide/writing-clickhouse-traces-query',
+            label: 'Traces',
+          },
+        ],
       },
     ],
   },
