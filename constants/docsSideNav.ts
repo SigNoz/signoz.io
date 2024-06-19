@@ -277,6 +277,31 @@ const docsSideNav = [
             label: 'Swift',
             route: '/docs/instrumentation/swift',
           },
+          {
+            type: 'category',
+            label: 'Manual Instrumentation',
+            // route: '',
+            // link: {
+            // type: 'doc',
+            // },
+            items: [
+                {
+                  type: 'category',
+                  label: 'JavaScript',
+                  // route: '',
+                  // link: {
+                  // type: 'doc',
+                  // },
+                  items: [
+                    {
+                      type: 'doc',
+                      label: 'NodeJS',
+                      route: '/docs/instrumentation/manual-instrumentation/javascript/nodejs',
+                   },
+                ],
+              },
+            ],
+          },
         ],
       },
       {
