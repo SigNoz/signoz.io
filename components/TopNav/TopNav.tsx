@@ -111,9 +111,9 @@ export default function TopNav() {
           <Link href="/teams" className="mx-2">
             <Button
               id="btn-get-started-website-navbar"
-              className="start-free-trial-btn h-8 pr-3 pl-4 px-4 py-2 rounded-full text-sm flex items-center justify-center gap-1.5 not-italic truncate text-center font-medium leading-5 text-white no-underline outline-none hover:text-white"
+              className="start-free-trial-btn primary-gradient h-8 pr-3 pl-4 px-4 py-2 rounded-full text-sm flex items-center justify-center gap-1.5 not-italic truncate text-center font-medium leading-5 text-white no-underline outline-none hover:text-white"
             >
-              Start your free trial <ArrowRight size={14} />
+              Try SigNoz Cloud <ArrowRight size={14} />
             </Button>
           </Link>
         </div>
@@ -162,9 +162,9 @@ export default function TopNav() {
                   >
                     <Button
                       id="btn-get-started-website-navbar"
-                      className="start-free-trial-btn font-heading text-sm flex items-center justify-center gap-1 truncate rounded-md border-none px-4 py-2 text-center text-xs  font-bold leading-4 text-white no-underline outline-none hover:text-white"
+                      className="start-free-trial-btn primary-gradient font-heading text-sm flex items-center justify-center gap-1 truncate rounded-md border-none px-4 py-2 text-center text-xs  font-bold leading-4 text-white no-underline outline-none hover:text-white"
                     >
-                      Start your free trial <ArrowRight size={14} />
+                      Try SigNoz Cloud <ArrowRight size={14} />
                     </Button>
                   </Link>
                 </div>
