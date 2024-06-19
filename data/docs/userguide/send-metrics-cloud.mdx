@@ -34,7 +34,7 @@ In this document, we will cover how to send metrics from OpenTelemetry Collector
 
 ## How does OpenTelemetry Collector collect data?
 
-Data collection in OpenTelemetry Collector is facilitated through receivers. Receivers are configured via YAML under the top-level `receivers` tag. To ensure a valid configuration, at least one receiver must be enabled.
+Data collection in OpenTelemetry Collector is facilitated through receivers. Receivers are configured via YAML under the top-level `receivers` section. To ensure a valid configuration, at least one receiver must be enabled.
 
 Below is an example of an **`otlp`** receiver:
 
@@ -46,7 +46,7 @@ receivers:
       http:
 ```
 
-The OTLP receiver accepts data through gRPC or HTTP in the <a href = "https://github.com/open-telemetry/opentelemetry-proto/blob/main/docs/specification.md" rel="noopener noreferrer nofollow" target="_blank" >OTLP</a> format. There are advanced configurations that you can enable via the YAML file.
+The OTLP receiver accepts data through gRPC or HTTP in the <a href = "https://github.com/open-telemetry/opentelemetry-proto/blob/main/docs/specification.md" rel="noopener noreferrer nofollow" target="_blank" >OTLP</a> format. 
 
 Here’s a sample configuration for an otlp receiver:
 
@@ -66,13 +66,13 @@ receivers:
           max_age: 7200
 ```
 
-You can find more details on advanced configurations <a href = "https://github.com/open-telemetry/opentelemetry-collector/blob/main/receiver/otlpreceiver/README.md" rel="noopener noreferrer nofollow" target="_blank" >here</a>.
+To see more configuration options for otlp receiver, you can checkout [this link](https://github.com/open-telemetry/opentelemetry-collector/blob/main/receiver/otlpreceiver/README.md).
 
 Once a receiver is configured, it needs to be **enabled** to start the data flow. This involves setting up **pipelines** within a **`service`**. A **pipeline** acts as a streamlined pathway for data, outlining how it should be processed and where it should go. A pipeline comprises of the following:
 
-1. **Receivers:** These are entry points for data into the OpenTelemetry Collector, responsible for collecting data from various sources and feeding it into the pipeline.
-2. **Processors:** After data is received, processors manipulate, filter, or enhance the data as needed before it proceeds further in the pipeline. They provide a way to customize the data according to specific requirements.
-3. **Exporters:** After processing, the data is ready for export. Exporters define the destination for the data, whether it's an external monitoring system, storage, or another service. They format the data appropriately for the chosen output.
+- **Receivers:** These are entry points for data into the OpenTelemetry Collector, responsible for collecting data from various sources and feeding it into the pipeline.
+- **Processors:** Metrics data is processed using the **`batch`** processor. This processor batches metrics before exporting them, optimizing the data flow.
+- **Exporters:** Metrics processed through this pipeline are exported to the OTLP endpoint mentioned in the configuration file. 
 
 Below is an example pipeline configuration:
 
