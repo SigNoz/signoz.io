@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Button, Dialog, Popover } from '@headlessui/react'
+import { Button, Dialog, Popover} from '@headlessui/react'
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -34,13 +34,13 @@ export default function TopNav() {
     <div className='fixed left-0 right-0 z-30'>  
     <Banner/>
     <header
-      className={`mx-auto box-border flex h-[48px] w-full items-center border-b border-signoz_slate-500 bg-signoz_ink-500 px-4 text-slate-900 dark:text-slate-50 md:px-8 lg:px-8`}
+      className={`mx-auto box-border flex h-[56px] w-full items-center border-b border-signoz_slate-500 header-bg px-4 text-signoz_vanilla-100 dark:text-signoz_vanilla-100 md:px-8 lg:px-8 backdrop-blur-[20px]`}
     >                                                
       <nav
-        className="flex w-full items-center justify-between text-slate-900 dark:text-slate-50"
+        className="flex w-full justify-between text-signoz_vanilla-100 dark:text-signoz_vanilla-100"
         aria-label="Global"
       >
-        <div className="mr-4 flex justify-start lg:flex-1">
+        <div className="mr-4 gap-x-6 flex justify-start lg:flex-1">
           <Link
             href="/"
             className="-m-1.5 flex items-center gap-2 p-1.5"
@@ -54,8 +54,39 @@ export default function TopNav() {
               alt=""
             />
 
-            <span className="text-md font-bold">SigNoz</span>
+            <span className="text-[17.111px] font-medium">SigNoz</span>
+          </Link>        
+          <Popover.Group className="hidden items-center lg:flex gap-x-6">
+          <Link
+            href="/docs"
+            className={`truncate text-sm font-normal  hover:text-signoz_robin-500 py-1 px-1.5`}
+          >
+            Documentation
           </Link>
+
+          <Link
+            href="/resource-center/blog"
+            className={`truncate text-sm font-normal hover:text-signoz_robin-500 py-1 px-1.5`}
+          >
+            Resources
+          </Link>
+
+          <Link
+            href="/pricing"
+            className={`truncate text-sm font-normal hover:text-signoz_robin-500 py-1 px-1.5`}
+          >
+            Pricing
+          </Link>
+
+          <Link
+            href="/case-study"
+            className={`truncate text-sm font-normal hover:text-signoz_robin-500 py-1 px-1.5`}
+          >
+            Customer Stories
+          </Link>
+
+
+        </Popover.Group>
         </div>
         <div className="flex justify-end lg:hidden">
           <button
@@ -67,46 +98,18 @@ export default function TopNav() {
             <Bars3Icon className="h-6 w-6" aria-hidden="true" />
           </button>
         </div>
-        <Popover.Group className="hidden items-center lg:flex lg:gap-x-12">
-          <Link
-            href="/docs"
-            className={`truncate text-sm font-semibold leading-6 hover:text-signoz_robin-500`}
-          >
-            Documentation
-          </Link>
 
-          <Link
-            href="/resource-center/blog"
-            className={`truncate text-sm font-semibold leading-6 hover:text-signoz_robin-500`}
-          >
-            Resources
-          </Link>
-
-          <Link
-            href="/pricing"
-            className={`truncate text-sm font-semibold leading-6 hover:text-signoz_robin-500`}
-          >
-            Pricing
-          </Link>
-
-          <Link
-            href="/case-study"
-            className={`truncate text-sm font-semibold leading-6 hover:text-signoz_robin-500`}
-          >
-            Customer Stories
-          </Link>
-
+  
+        <div className="hidden gap-8 lg:flex lg:flex-1 lg:justify-end">      
           <GitHubStars />
-        </Popover.Group>
-        <div className="hidden gap-8 lg:flex lg:flex-1 lg:justify-end">
           <SearchButton />
 
           <Link href="/teams" className="mx-2">
             <Button
               id="btn-get-started-website-navbar"
-              className="try-signoz-cloud-btn font-heading text-md flex items-center justify-center gap-1 truncate rounded-md border-none px-4 py-2 text-center text-xs  font-bold leading-4 text-white no-underline outline-none hover:text-white"
+              className="start-free-trial-btn h-8 pr-3 pl-4 px-4 py-2 rounded-full text-sm flex items-center justify-center gap-1.5 not-italic truncate text-center font-medium leading-5 text-white no-underline outline-none hover:text-white"
             >
-              Try SigNoz Cloud <ArrowRight size={14} />
+              Start your free trial <ArrowRight size={14} />
             </Button>
           </Link>
         </div>
@@ -163,9 +166,9 @@ export default function TopNav() {
                   >
                     <Button
                       id="btn-get-started-website-navbar"
-                      className="try-signoz-cloud-btn font-heading text-md flex items-center justify-center gap-1 truncate rounded-md border-none px-4 py-2 text-center text-xs  font-bold leading-4 text-white no-underline outline-none hover:text-white"
+                      className="start-free-trial-btn font-heading text-sm flex items-center justify-center gap-1 truncate rounded-md border-none px-4 py-2 text-center text-xs  font-bold leading-4 text-white no-underline outline-none hover:text-white"
                     >
-                      Try SigNoz Cloud <ArrowRight size={14} />
+                      Start your free trial <ArrowRight size={14} />
                     </Button>
                   </Link>
                 </div>
