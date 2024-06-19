@@ -1,0 +1,44 @@
+---
+id: logging
+title: Container App Logging
+---
+
+## Overview
+The following categories of Container Apps Logs are available to export to Storage Account or EventHub. 
+
+ - Container App console logs
+ - Container App system logs
+ - Spring App console logs
+
+Although, the application logs could be sent directly in the Application Level using a OpenTelemetry Log Appender, this might not be an ideal solution for legacy software or micro-services model. It’s easier to do centralised logging for both application logs, system logs and SIEM Audit logs.
+
+### Prerequisites
+
+- [EventHub Setup](../../bootstrapping/data-ingestion)
+- [Central Collector Setup](../../bootstrapping/collector-setup)
+
+## Setup
+
+1. Navigate to your Container Apps in the Azure portal
+2. Click on "Container Apps Environment" to open the Container Apps Environment
+3. Search for "Diagnostic settings" in the left navigation menu
+4. Click on "Add Diagnostic Setting"
+5. Select the desired log categories to export:
+    - Container App console logs
+    - Container App system logs
+    - Spring App console logs
+    <figure data-zoomable align="left">
+    <img
+        src="/img/docs/azure-monitoring/azure-container-app-diag-settings.webp"
+        alt="Container Apps Environment"
+    />
+    <figcaption>
+    <i>
+    Container Apps Environment Diagnostic Configuration
+    </i>
+    </figcaption>
+    </figure>
+5. Configure the destination details as "**Stream to an Event Hub**" and select the Event Hub namespace and Event Hub name created during the [EventHub Setup](../../bootstrapping/data-ingestion)
+6. Save the diagnostic settings
+
+That's it! You have successfully set up logging for your Azure Container App. 

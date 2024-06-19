@@ -20,7 +20,7 @@ export default function ResourceCenter() {
         >
           <li className="me-2" role="presentation">
             <button
-              className={`inline-block rounded-t-lg px-4 py-2 ${activeTab === 'blog-tab' ? 'border-b-2 border-indigo-500 text-indigo-500' : ''}`}
+              className={`inline-block rounded-t-lg px-4 py-2 ${activeTab === 'blog-tab' ? 'border-b-2 border-signoz_indigo-500 text-indigo-500' : ''}`}
               id="blog-tab"
               data-tabs-target="#blog"
               type="button"
@@ -34,7 +34,7 @@ export default function ResourceCenter() {
           </li>
           <li className="me-2" role="presentation">
             <button
-              className={`inline-block rounded-t-lg px-4 py-2 ${activeTab === 'comparisons-tab' ? 'border-b-2 border-indigo-500 text-indigo-500' : ''}`}
+              className={`inline-block rounded-t-lg px-4 py-2 ${activeTab === 'comparisons-tab' ? 'border-b-2 border-signoz_indigo-500 text-indigo-500' : ''}`}
               id="comparisons-tab"
               data-tabs-target="#comparisons"
               type="button"
@@ -47,9 +47,23 @@ export default function ResourceCenter() {
             </button>
           </li>
 
+          <li className="me-2" role="presentation">
+            <button
+              className={`inline-block rounded-t-lg px-4 py-2 ${activeTab === 'guides-tab' ? 'border-b-2 border-signoz_indigo-500 text-indigo-500' : ''}`}
+              id="guides-tab"
+              data-tabs-target="#guides"
+              type="button"
+              role="tab"
+              aria-controls="guides"
+              aria-selected="false"
+              onClick={() => setActiveTab(`guides-tab`)}
+            >
+              Guides
+            </button>
+          </li>
           <li role="presentation">
             <button
-              className={`inline-block rounded-t-lg px-4 py-2 ${activeTab === 'openTelemetry-tab' ? 'border-b-2 border-indigo-500 text-indigo-500' : ''}`}
+              className={`inline-block rounded-t-lg px-4 py-2 ${activeTab === 'openTelemetry-tab' ? 'border-b-2 border-signoz_indigo-500 text-indigo-500' : ''}`}
               id="openTelemetry-tab"
               data-tabs-target="#openTelemetry"
               type="button"

@@ -28,10 +28,10 @@ The Query Builder in SigNoz allows users to apply filtering based on various att
 
 - **Access**: Navigate to the Query Builder.
 - **Open Filter Options**: Click on the Search Filter field to open a dropdown list of available attributes.
-- **Select Attributes**: Choose the attribute you want to filter by (e.g., `service.name`, `level`, `status`).
+- **Select Attributes**: Choose the attribute you want to filter by (e.g., `service.name`, `level`, `status`). Start typing to filter the list.
 - **Apply Operators**: Choose the operator (e.g., `=`, `!=`, `IN`, `NOT_IN`) for the selected attribute.
 - **Input Values**: Input the value(s) you want to filter by.
-- **Combine Filters**: You can add multiple filters by repeating the above steps.
+- **Combine Filters**: You can add multiple filters by repeating the above steps. Multiple filters are combined with `AND`.
 - **View Results**: Click the Stage & Run Query Button to display the logs or traces that match the applied filters.
 
 ### Example
@@ -68,10 +68,10 @@ Aggregation allows you to perform calculations on a set of values to return a si
 - **Avg**: Find the average value of a numerical attribute.
 - **Max/Min**: Determine the maximum or minimum value of a numerical attribute in an aggregation interval.
 - **Percentiles (P05, P10, P90, etc.)**: Understand the distribution of your data with percentile calculations.
-- **Rate**: Measure the frequency of occurrence within a given time frame.
-- **Rate Sum**: Total the aggregated values over the specified rate period.
-- **Rate Avg**: Find the average rate over the period.
-- **Rate Min/Max**: Determine the minimum or maximum rate observed in the selected period.
+- **Rate**: Measure the frequency of occurrence within a given time frame. It is often expressed as a ratio, where the numerator represents the number of occurrences, and the denominator represents the length of the time period.
+- **Rate Sum**: The rate of change in the sum of the selected attribute over the specified rate period.
+- **Rate Avg**: The rate of change in the average of the selected attribute over the specified rate period.
+- **Rate Min/Max**: The rate of change in the minimum or maximum value of the selected attribute over the specified rate period.
 
 ### Grouping
 
@@ -115,7 +115,7 @@ Result Manipulation is a set of features in the Query Builder that enables you t
 Order your query results based on a specified attribute in either ascending or descending order. This can help in identifying the highest or lowest values in your data, such as the most frequently occurring errors.
 
 ### Aggregate Every
-Define the interval over which to aggregate data. For example, you can aggregate count data in 60-second intervals to get a per-minute count of events. For now it is not editable in the Query Builder and it changes dynamically based on time period of query.
+Define the interval over which to aggregate data. For example, you can aggregate count data in 60-second intervals to get a per-minute count of events.
 
 ### Limit
 Set a limit on the number of results returned. This is useful when you only want to see the top N results, such as the top 10 most visited endpoints.
@@ -134,12 +134,12 @@ For example, if you have grouped by `serviceName` attribute then you can write `
 
 Suppose you want to find the top 2 endpoints with an average response time greater than 500 ms. The query is configured as follows:
 
-- **Group by**: `httpUrl`
+- **Group by**: `serviceName`
 - **Aggregate**: `Avg` on `durationNano`
 - **HAVING**: `AVG(durationNano) >= 500000000` to filter for endpoints with average response times exceeding 500 ms
-- **Order by**: `avg(durationNano) desc` to list endpoints with the highest response times first
-- **Limit**: `2` to focus on the top 2 endpoints with the longest response times
-- **Legend Format**: `{{httpUrl}}` to display the endpoint's URL in the visualization legend
+- **Order by**: `avg(durationNano) desc` to list services with the highest response times first
+- **Limit**: `2` to focus on the top 2 services with the longest response times
+- **Legend Format**: `{{serviceName}}` to display the service name in the visualization legend
 
 <figure data-zoomable align='center'>
     <img src="/img/docs/product-features/query-builder/query-builder-result-manipulation.gif" alt="A gif explaining some more features  in SigNoz Query Builder"/>
@@ -181,8 +181,6 @@ Apply mathematical functions to the results of your queries. This allows you to 
 - degrees
 - radians
 - now
-- toUnixTimestamp
-
 
 ### Example
 

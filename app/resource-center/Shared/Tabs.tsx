@@ -5,14 +5,14 @@ export default function Tabs({ activeTab }) {
   return (
     <div className="mb-4">
       <ul
-        className="-mb-px flex flex-wrap pl-0 text-center text-sm font-medium"
+        className="-mb-px flex flex-wrap pl-0 text-center text-sm font-medium gap-6 text-signoz_vanilla-400"
         id="default-tab"
         data-tabs-toggle="#default-tab-content"
         role="tablist"
       >
         <Link className="me-2" role="presentation" href="/resource-center/blog">
           <button
-            className={`inline-block rounded-t-lg px-4 py-2 ${activeTab === 'blog-tab' ? 'border-b-2 border-indigo-500 text-indigo-500' : ''}`}
+            className={`inline-block rounded-t-lg px-1 py-1.5 pb-3 ${activeTab === 'blog-tab' ? ' text-signoz_vanilla-100 border-b-2 border-signoz_robin-500' : ''}`}
             id="blog-tab"
             data-tabs-target="#blog"
             type="button"
@@ -26,7 +26,7 @@ export default function Tabs({ activeTab }) {
         </Link>
         <Link className="me-2" role="presentation" href="/resource-center/comparisons">
           <button
-            className={`inline-block rounded-t-lg px-4 py-2 ${activeTab === 'comparisons-tab' ? 'border-b-2 border-indigo-500 text-indigo-500' : ''}`}
+            className={`inline-block rounded-t-lg px-1 py-1.5 pb-3 ${activeTab === 'comparisons-tab' ? ' text-signoz_vanilla-100 border-b-2 border-signoz_robin-500' : ''}`}
             id="comparisons-tab"
             data-tabs-target="#comparisons"
             type="button"
@@ -38,10 +38,23 @@ export default function Tabs({ activeTab }) {
             Comparisons
           </button>
         </Link>
+        <Link className="me-2" role="presentation" href="/resource-center/guides">
+          <button
+            className={`inline-block rounded-t-lg px-1 py-1.5 pb-3 ${activeTab === 'guides-tab' ? ' text-signoz_vanilla-100 border-b-2 border-signoz_robin-500' : ''}`}
+            id="guides-tab"
+            data-tabs-target="#guides"
+            type="button"
+            role="tab"
+            aria-controls="guides"
+            aria-selected="false"
+          >
+            Guides
+          </button>
+        </Link>
 
         <Link role="presentation" href="/resource-center/opentelemetry">
           <button
-            className={`inline-block rounded-t-lg px-4 py-2 ${activeTab === 'openTelemetry-tab' ? 'border-b-2 border-indigo-500 text-indigo-500' : ''}`}
+            className={`inline-block rounded-t-lg px-1 py-1.5 pb-3 ${activeTab === 'openTelemetry-tab' ? ' text-signoz_vanilla-100 border-b-2 border-signoz_robin-500' : ''}`}
             id="openTelemetry-tab"
             data-tabs-target="#openTelemetry"
             type="button"

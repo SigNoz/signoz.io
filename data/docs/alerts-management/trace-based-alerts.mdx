@@ -55,7 +55,7 @@ This step is for setting the alert's severity, name, and other descriptive detai
 
 - **Alert Description**: Add a detailed description for the alert, explaining its purpose and trigger conditions.
 
-- **Labels**: A field to add tags or labels for easier categorization.
+- **Labels**: A field to add labels or tags to the alert for categorization. The label is a key-value pair to annotate the alert. Use `key:value` format to add labels.
 
 - **Notification channels**: A field to choose the notification channels from those configured in the Alert Channel settings.
 
@@ -79,6 +79,12 @@ You can incorporate result labels in the alert descriptions to make the alerts m
 
 ### 1. Alert when external API latency (P90) is over 1 second for last 5 mins
 
+#### Here's a video tutorial for creating this alert:
+
+<YouTube id="9iX-h9yALBc" mute={false} />
+<br></br>
+#### Step 1: Write Query Builder query to define alert metric
+
 <figure data-zoomable align='center'>
     <img src="/img/docs/product-features/alerts/traces/external-api-metric.png" alt="traces builder query for external API latency(p90)"/>
     <figcaption><i>External API latency (P90) query</i></figcaption>
@@ -91,7 +97,11 @@ Using `externalHttpUrl` attribute we can filter specific external API endpoint a
     <figcaption><i>External API latency (P90) chart</i></figcaption>
 </figure>
 
+<Admonition type="info">
 Remember to select y-axis unit as nanoseconds as our aggregate key is durationNano.
+</Admonition>
+<br></br>
+#### Step 2: Set alert conditions
 
 <figure data-zoomable align='center'>
     <img src="/img/docs/product-features/alerts/traces/external-api-metric-condition.png" alt="external API latency(p90) condition"/>
@@ -100,9 +110,11 @@ Remember to select y-axis unit as nanoseconds as our aggregate key is durationNa
 
 The condition is set to trigger a notification if the per-minute external API latency (P90) exceeds the threshold of 1 second all the time in the last five minutes.
 
+#### Step 3: Set alert configuration
+
 <figure data-zoomable align='center'>
     <img src="/img/docs/product-features/alerts/traces/external-api-metric-configuration.png" alt="external API latency(p90) alert configuration"/>
     <figcaption><i>External API latency (P90) alert configuration</i></figcaption>
 </figure>
 
-At last configure the alert as `Warning` and add a name, and notification channel.
+At last configure the alert as `Warning`, add a name and notification channel.
