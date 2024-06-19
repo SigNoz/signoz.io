@@ -27,6 +27,7 @@ export default function AllBlogs({ blogs }) {
       initialDisplayPosts={initialDisplayPosts}
       pagination={pagination}
       title="All Blogs"
+      isDarkMode = {true}
     />
   )
 }
