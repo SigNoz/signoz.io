@@ -12,6 +12,7 @@ import MainFooter from '@/components/mainFooter'
 import TopNav from '@/components/TopNav/TopNav'
 import { Inter } from 'next/font/google'
 import React from 'react'
+import Script from 'next/script'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -64,7 +65,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     >
       <head>
         <link rel="preconnect" href="https://dev.visualwebsiteoptimizer.com" />
-        <script
+        <Script
           type="text/javascript"
           id="vwoCode"
           strategy="beforeInteractive"
