@@ -494,6 +494,11 @@ const docsSideNav = [
               },
               {
                 type: 'doc',
+                route: '/docs/userguide/parse-multiline-logs',
+                label: 'Parse Multiline Logs',
+              },
+              {
+                type: 'doc',
                 route: '/docs/userguide/python-logs-auto-instrumentation',
                 label: 'Python Logs Auto-Instrumentation',
               },
