@@ -1,7 +1,8 @@
 import * as React from 'react'
 import Link from 'next/link'
-import { ArrowUpRight, GithubIcon, Linkedin, SlackIcon, Twitter, Youtube } from 'lucide-react'
+import { ArrowUpRight } from 'lucide-react'
 import Image from 'next/image'
+import { Github, Linkedin, Slack, Twitter, Youtube } from '@/components/social-icons/SolidIcons'
 
 /**
  * Footer component
@@ -125,13 +126,13 @@ function Footer() {
                 <div className="mt-5 items-end justify-center rounded text-sm leading-5 text-emerald-300">
                   All systems operational
                 </div>
-                <div className="mt-5 flex items-end justify-between gap-4 py-2">
+                <div className="mt-5 flex items-end justify-between gap-4 py-2 footer-icons">
                   <Link
                     href={'https://github.com/SigNoz'}
                     target="_blank"
                     aria-label="SigNoz Github URL"
                   >
-                    <GithubIcon size={24} />{' '}
+                    <Github />
                   </Link>
 
                   <Link
@@ -139,7 +140,7 @@ function Footer() {
                     target="_blank"
                     aria-label="SigNoz LinkedIN URL"
                   >
-                    <Linkedin size={24} />
+                    <Linkedin />
                   </Link>
 
                   <Link
@@ -147,7 +148,7 @@ function Footer() {
                     target="_blank"
                     aria-label="SigNoz Slack Connect URL"
                   >
-                    <SlackIcon size={24} />
+                    <Slack />
                   </Link>
 
                   <Link
@@ -155,7 +156,7 @@ function Footer() {
                     target="_blank"
                     aria-label="SigNoz Twitter URL"
                   >
-                    <Twitter size={24} />
+                    <Twitter />
                   </Link>
 
                   <Link
@@ -163,7 +164,7 @@ function Footer() {
                     target="_blank"
                     aria-label="SigNoz Youtube Channel URL"
                   >
-                    <Youtube size={24} />
+                    <Youtube />
                   </Link>
                 </div>
               </div>
