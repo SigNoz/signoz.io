@@ -1,0 +1,59 @@
+
+---
+
+title: Configure OpenTelemetry logging SDK in a Python application
+slug: logging-in-python
+
+date: 2024-06-20
+tags: [opentelemetry]
+authors: [srikanth]
+description: In this tutorial, we will look at how to configure OTel logging SDK in a Python application.
+image: /img/blog/2024/06/opentelemetry-logging-sdk-cover.webp
+keywords: [opentelemetry, python, opentelemetry python, flask, opentelemetry flask]
+
+---
+
+In the previous tutorials, we have seen how to manually create spans in a Python application. In this tutorial, we will look at how to configure OTel logging SDK in a Python application.
+
+The OpenTelemetry SDK provides a handler that can be used to transport logs to any OTLP-compatible backend. The following code snippets show how to configure the OTel logging SDK in a Python application.
+
+<Figure src="/img/opentelemetry/2024/06/opentelemetry-logging-sdk-cover.webp" alt="d" caption="" />
+
+### Configure the logging SDK
+
+```python
+import logging
+from opentelemetry._logs import set_logger_provider
+from opentelemetry.exporter.otlp.proto.grpc._log_exporter import (
+    OTLPLogExporter,
+)
+from opentelemetry.sdk._logs import LoggerProvider, LoggingHandler
+from opentelemetry.sdk._logs.export import BatchLogRecordProcessor
+
+logger_provider = LoggerProvider()
+set_logger_provider(logger_provider)
+
+exporter = OTLPLogExporter()
+logger_provider.add_log_record_processor(BatchLogRecordProcessor(exporter))
+handler = LoggingHandler(level=logging.NOTSET, logger_provider=logger_provider)
+
+# Attach OTLP handler to root logger
+logging.getLogger().addHandler(handler)
+
+```
+
+In the above code snippet, a handler is created using the `LoggingHandler` class. The handler is attached to the root logger using the `addHandler()` method. The handler receives log records from the logger and sends them to the OTLP backend using the `OTLPLogExporter`.
+
+## Step 6: See your logs in SigNoz
+
+Go to `Logs` tab of SigNoz and apply filter for your Flask application service. You will be able to see the logs coming from your application.
+
+<Figure src="/img/opentelemetry/2024/06/flask-app-logs.webp" alt="Logs from your Flask application" caption="Logs from your Flask application" />
+
+Logs from your Flask application
+
+## Next Steps
+
+In this tutorial, we configured the Python application to send logs to SigNoz using the OpenTelemetry logging SDK.
+
+In the next tutorial, we will see how to customize the metrics stream produced by OpenTelemetry SDK using views.
