@@ -187,6 +187,11 @@ const docsSideNav = [
                 route: '/docs/instrumentation/hypercorn-unicorn-support',
                 label: 'Hypercorn/Unicorn ',
               },
+              {
+                type: 'doc',
+                route: '/docs/instrumentation/celery',
+                label: 'Celery Worker OpenTelemetry Setup',
+              },
             ],
           },
           {
@@ -491,6 +496,11 @@ const docsSideNav = [
                 type: 'doc',
                 route: '/docs/userguide/collect_logs_from_file',
                 label: 'From Log File',
+              },
+              {
+                type: 'doc',
+                route: '/docs/userguide/parse-multiline-logs',
+                label: 'Parse Multiline Logs',
               },
               {
                 type: 'doc',
