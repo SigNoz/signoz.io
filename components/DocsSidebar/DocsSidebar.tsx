@@ -46,6 +46,21 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
     expandCategoriesForRoute(docsSideNav)
   }, [pathname])
 
+  // Scroll the active sidebar element into view since the page reloads while navigating between pages
+  useEffect(() => {
+    requestIdleCallback(() => {
+      const elementId = `#${pathname.substring(0, pathname.length - 1)}`;
+      const element = document.getElementById(elementId)
+      
+      if (element) {
+        element.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center'
+        })
+      }
+    })
+  }, [])
+
   const renderDoc = (doc: Doc) => {
     const isActiveRoute = activeRoute === `${doc.route}/`
 
