@@ -92,10 +92,14 @@ export default function TopNav() {
           <button
             type="button"
             className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5"
-            onClick={() => setMobileMenuOpen(true)}
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             <span className="sr-only">Open main menu</span>
-            <Bars3Icon className="h-6 w-6" aria-hidden="true" />
+            {mobileMenuOpen ? (
+                <XMarkIcon className="h-6 w-6" aria-hidden="true" />
+              ) : (
+                <Bars3Icon className="h-6 w-6" aria-hidden="true" />
+              )}
           </button>
         </div>
 
@@ -107,28 +111,20 @@ export default function TopNav() {
           <Link href="/teams" className="mx-2">
             <Button
               id="btn-get-started-website-navbar"
-              className="start-free-trial-btn h-8 pr-3 pl-4 px-4 py-2 rounded-full text-sm flex items-center justify-center gap-1.5 not-italic truncate text-center font-medium leading-5 text-white no-underline outline-none hover:text-white"
+              className="start-free-trial-btn primary-gradient h-8 pr-3 pl-4 px-4 py-2 rounded-full text-sm flex items-center justify-center gap-1.5 not-italic truncate text-center font-medium leading-5 text-white no-underline outline-none hover:text-white"
             >
-              Start your free trial <ArrowRight size={14} />
+              Try SigNoz Cloud <ArrowRight size={14} />
             </Button>
           </Link>
         </div>
       </nav>
       <Dialog as="div" className="lg:hidden" open={mobileMenuOpen} onClose={setMobileMenuOpen}>
-        <div className="fixed inset-0 z-10" />
-        <Dialog.Panel className="fixed inset-y-0 right-0 z-10 w-full overflow-y-auto bg-signoz_ink-500 px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10">
+        <div className="fixed inset-0 z-50" />
+        <Dialog.Panel className="fixed inset-y-0 right-0 z-10 w-full overflow-y-auto bg-signoz_ink-500 px-6 py-24 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10 ">
           <div className="flex items-center justify-between">
             <Link href="/" className="-m-1.5 p-1.5">
               <span className="sr-only">SigNoz</span>
             </Link>
-            <button
-              type="button"
-              className="-m-2.5 rounded-md p-2.5 text-gray-700"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              <span className="sr-only">Close menu</span>
-              <XMarkIcon className="h-6 w-6" aria-hidden="true" />
-            </button>
           </div>
           <div className="mt-6 flow-root">
             <div className="-my-6 divide-y divide-gray-500/10">
@@ -166,9 +162,9 @@ export default function TopNav() {
                   >
                     <Button
                       id="btn-get-started-website-navbar"
-                      className="start-free-trial-btn font-heading text-sm flex items-center justify-center gap-1 truncate rounded-md border-none px-4 py-2 text-center text-xs  font-bold leading-4 text-white no-underline outline-none hover:text-white"
+                      className="start-free-trial-btn primary-gradient font-heading text-sm flex items-center justify-center gap-1 truncate rounded-md border-none px-4 py-2 text-center text-xs  font-bold leading-4 text-white no-underline outline-none hover:text-white"
                     >
-                      Start your free trial <ArrowRight size={14} />
+                      Try SigNoz Cloud <ArrowRight size={14} />
                     </Button>
                   </Link>
                 </div>
