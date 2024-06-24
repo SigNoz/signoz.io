@@ -873,7 +873,7 @@ const docsSideNav = [
   {
     type: 'doc',
     route: '/docs/userguide/exceptions',
-    label: 'Monitroing Exceptions',
+    label: 'Monitoring Exceptions',
   },
   {
     label: 'Security & Compliance',
