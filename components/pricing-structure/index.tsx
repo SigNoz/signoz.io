@@ -15,7 +15,7 @@ const PricingStructure = () => {
             We’re here for you.
           </SubHeading>
         </div>
-        <div className="mx-auto flex flex-wrap justify-center gap-y-5 md:max-w-md lg:max-w-5xl">
+        <div className="mx-auto flex flex-col gap-y-5 md:max-w-md lg:max-w-5xl">
           <div className="pricing-card px-8 py-1 md:w-full lg:w-1/3 xl:w-1/3">
             <Heading type={3}>No user-based pricing</Heading>
             <p className="mb-4 text-base leading-relaxed text-gray-400">

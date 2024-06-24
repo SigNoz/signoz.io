@@ -2,49 +2,45 @@
 import React from 'react'
 import Heading from '../../components/ui/Heading'
 import Button from '../../components/ui/Button'
+import {ArrowRightSolid }from "@/components/homepage-icons/icons"
+
 
 const Observability = () => {
   return (
     <section>
-      <div className="container mt-16">
-        <div className="mb-5 flex flex-col items-center text-center">
-          <Heading type={4}>Enterprise Grade Observability</Heading>
-          <Heading type={1}>
-            Get access to observability at any scale&nbsp;
-            <br className="hidden lg:inline" />
-            with advanced security and compliance.
-          </Heading>
+    <div className='container flex flex-col w-auto h-auto'>
+      <div className="flex flex-row">
+        <div>
+        <p> Enterprise-grade Observability</p>
+        <p>Get access to observability at any scale with advanced security and compliance.</p>
+        <ul>
+          <li className="flex flex-row">
+          <ArrowRightSolid/><span>SSO and SAML support</span>
+          </li>
+          <li className="flex flex-row">
+          <ArrowRightSolid/><span>Query API Keys</span>
+          </li>
+          <li className="flex flex-row">
+          <ArrowRightSolid/><span>Advanced Security</span>
+          </li>
+          <li className="flex flex-row">
+          <ArrowRightSolid/><span>AWS Private Link</span>
+          </li>
+          <li className="flex flex-row">
+          <ArrowRightSolid/><span>VPC Peering</span>
+          </li>
+          <li className="flex flex-row">
+          <ArrowRightSolid/><span>Custom Integrations</span>
+          </li>
+        </ul>
         </div>
-        <div className="mx-auto max-w-2xl">
-          <div className="plans-container mx-auto grid grid-cols-1 rounded-lg bg-[#252529] px-10 py-8 md:grid-cols-2 md:gap-10">
-            <div>
-              <ul className="plans-features m-0">
-                <li className="py-3 text-lg">SSO and SAML support</li>
-                <li className="py-3 text-lg">Query API Keys</li>
-                <li className="py-3 text-lg">Advanced Security</li>
-                <li className="py-3 text-lg">AWS Private Link</li>
-              </ul>
-            </div>
-            <div>
-              <div className="flex h-full flex-col justify-between">
-                <ul className="plans-features m-0">
-                  <li className="py-3 text-lg">VPC Peering</li>
-                  <li className="py-3 text-lg">Custom Integrations</li>
-                </ul>
-                <Button isButton to={'pricing'} className="hidden md:block">
-                  Check plans
-                </Button>
-              </div>
-            </div>
-          </div>
-          <div>
-            <Button isButton to={'pricing'} className="mx-auto my-5 block w-full md:hidden">
-              Check plans
-            </Button>
-          </div>
+        <div className="h-[352px] w-[449px] bg-signoz_ink-400">
+
         </div>
       </div>
-    </section>
+    </div>
+  </section>
+    
   )
 }
 

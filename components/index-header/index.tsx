@@ -11,14 +11,13 @@ export const Header = () => {
     <header className="my-8">
       <div className="mb-5 flex flex-col items-center px-5 text-center">
         <Hero>
-          OpenTelemetry-Native Traces,&nbsp;
+          Best OpenTelemetry-Native&nbsp;
           <br className="hidden lg:inline" />
-          Metrics, and Logs in a single pane
+          Observability In A Single Pane
         </Hero>
         <SubHeading>
-          A single tool for all your observability needs - APM, logs, metrics, exceptions,{' '}
-          <br className="hidden lg:inline" /> alerts, and dashboards powered by a powerful query
-          builder.
+          SigNoz is an open-source Datadog or New Relic alternative. Get APM, logs,{' '}
+          <br className="hidden lg:inline" /> traces, metrics, exceptions, & alerts in a single tool.
         </SubHeading>
       </div>
       <div className="mx-5 mb-12 flex flex-col justify-center gap-5 md:flex-row">

@@ -38,7 +38,7 @@ export const TrustedByTeams = () => {
           <Link href="/case-study/" className="mx-2">
           <Button
                 id="btn-get-started-website-navbar"
-                className=" z-[1] relative bg-signoz_slate-400 h-8 pr-3 pl-4 py-2 rounded-full text-sm flex items-center justify-center gap-1.5 not-italic truncate text-center font-medium leading-5 text-white no-underline outline-none hover:text-white"
+                className=" z-[1] relative button-background h-8 pr-3 pl-4 py-2 rounded-full text-sm flex items-center justify-center gap-1.5 not-italic truncate text-center font-medium leading-5 text-white no-underline outline-none hover:text-white"
               >
                 Read customer stories <ArrowRight size={14} />
           </Button>

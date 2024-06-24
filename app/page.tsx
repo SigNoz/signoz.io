@@ -14,6 +14,7 @@ import SigNozStats from '@/components/signoz-stats'
 import { Testimonials } from '@/components/testimonials'
 import { TrustedByTeams } from '@/components/trusted-by'
 import { WhyOpenTelemetry } from '@/components/why-opentelemetry'
+import WhySelectSignoz from '@/components/why-select-signoz'
 
 export default async function Page() {
   const sortedPosts = sortPosts(allBlogs)
@@ -23,16 +24,12 @@ export default async function Page() {
       <main className="landing-section pt-12 sm:pt-0">
         <Header />
         <TrustedByTeams />
-        <SigNozFeatures />
-        <WhyOpenTelemetry />
+        <SigNozFeatures />        
         <BuildForDevelopers />
-        <DataProtectionLaws />
-        <Observability />
-        <PricingStructure />
+        <WhyOpenTelemetry />
+        <WhySelectSignoz/>
         <SigNozStats />
         <Testimonials />
-        <LatestInOpenTelementry />
-        <CTA />
       </main>
     </div>
   )

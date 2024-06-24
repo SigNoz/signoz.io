@@ -1,5 +1,7 @@
 import React from 'react'
 import Heading from '../../components/ui/Heading'
+import Link from 'next/link'
+import { ArrowRight } from 'lucide-react'
 
 export const Testimonials = () => {
   const TESTIMONIALS_LIST = [
@@ -123,14 +125,18 @@ export const Testimonials = () => {
   return (
     <section>
       <div className="container my-8">
-        <div className="mb-5 flex flex-col items-center text-center">
-          <Heading type={4}>TESTIMONIALS</Heading>
-          <Heading type={1}>We love what people are saying about SigNoz</Heading>
+        <div className="mb-5 flex flex-col items-center text-center gap-12">
+          <img src="/img/users/incident_io.svg" alt="incident.io logo" />
+          <p>SigNoz balances flexibility and security extremely well. They've built clean and thoughtful abstractions over advanced security foundations, and the product just works. We barely have to think about it.</p>
+          <div>
+            <p className='m-0'>Mike Hudak</p>
+            <p className='m-0'>CTO - incident.io</p>
+          </div>
         </div>
 
         <div className="row">
           {TESTIMONIALS_LIST.map((column, idx) => (
-            <div key={idx} className="col col--4">
+            <div key={idx} className="col col--6">
               {column.map((testimonial, i) => (
                 <div className="row" key={`${idx}-${i}`}>
                   <div className="card-demo m-2 w-full">
@@ -166,6 +172,10 @@ export const Testimonials = () => {
             </div>
           ))}
         </div>
+        <Link href="/">
+          <button className="h-8 pr-3 pl-4 px-4 py-2 rounded-full text-sm flex items-center justify-center gap-1.5 not-italic truncate button-background text-center font-medium leading-5 text-white no-underline outline-none hover:text-white">Read customer stories<ArrowRight size={14} />
+          </button>
+        </Link>
       </div>
     </section>
   )
