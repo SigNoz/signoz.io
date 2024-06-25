@@ -365,7 +365,7 @@ We all are familiar with instrumenting backend services but have you ever though
 
 #### Pre-requisites
 
-Enable CORS in the OTel Receiver. Inside `docker/clickhouse-setup/otel-collector-config.yaml` add the following CORS config. You can view the file at [SigNoz GitHub repo](https://github.com/SigNoz/signoz/blob/develop/deploy/docker/clickhouse-setup/otel-collector-config.yaml).
+Enable CORS in the OTel Receiver. Add the below required changes in the `otel-config.yml` file which can be generally found [here](https://github.com/SigNoz/signoz/blob/develop/deploy/docker/clickhouse-setup/otel-collector-config.yaml).
 
 ```yml
       http:
@@ -376,55 +376,97 @@ Enable CORS in the OTel Receiver. Inside `docker/clickhouse-setup/otel-collector
 
 > Make sure to restart the container after making the config changes
 
-Now let's get back to instrumenting our Angular Application. Let's start by installing a couple of dependencies.
+**Step 1.** Now let's get back to instrumenting our Angular Application. Let's start by installing a couple of dependencies.
 
-```sh
-npm i @jufab/opentelemetry-angular-interceptor && npm i @opentelemetry/api @opentelemetry/sdk-trace-web @opentelemetry/sdk-trace-base @opentelemetry/core @opentelemetry/semantic-conventions @opentelemetry/resources @opentelemetry/exporter-trace-otlp-http @opentelemetry/exporter-zipkin @opentelemetry/propagator-b3 @opentelemetry/propagator-jaeger @opentelemetry/context-zone-peer-dep @opentelemetry/instrumentation @opentelemetry/instrumentation-document-load @opentelemetry/instrumentation-fetch @opentelemetry/instrumentation-xml-http-request @opentelemetry/propagator-aws-xray --save-dev
+```bash
+npm install --save @opentelemetry/sdk-trace-web@^1.21.0                                                                   
+npm install --save @opentelemetry/instrumentation@^0.48.0
+npm install --save @opentelemetry/auto-instrumentations-web@^0.36.0
+npm install --save @opentelemetry/exporter-trace-otlp-http@^0.48.0
+npm install --save @opentelemetry/resources@^1.21.0
+npm install --save @opentelemetry/propagator-b3@^1.21.0
+npm install --save @opentelemetry/semantic-conventions@^1.21.0
 ```
 
-Not let's import OTel module in `app.module.ts`
+**Step 2.** Create `instrument.ts` file<br></br>
+You need to configure the endpoint for SigNoz Self-Host in this file.
 
 ```ts
+import { registerInstrumentations } from '@opentelemetry/instrumentation';
 import {
-  OpenTelemetryInterceptorModule,
-  OtelColExporterModule,
-  CompositePropagatorModule,
-} from '@jufab/opentelemetry-angular-interceptor';
+  WebTracerProvider,
+  ConsoleSpanExporter,
+  SimpleSpanProcessor,
+  BatchSpanProcessor,
+} from '@opentelemetry/sdk-trace-web';
+import { getWebAutoInstrumentations } from '@opentelemetry/auto-instrumentations-web';
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
+import { Resource } from '@opentelemetry/resources';
+import { B3Propagator } from '@opentelemetry/propagator-b3';
+import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 
-@NgModule({
-  ...
-  imports: [
-    ...
-    OpenTelemetryInterceptorModule.forRoot({
-      commonConfig: {
-        console: true, // Display trace on console (only in DEV env)
-        production: false, // Send Trace with BatchSpanProcessor (true) or SimpleSpanProcessor (false)
-        serviceName: 'Angular Sample App', // Service name send in trace
-        probabilitySampler: '1',
+const resource = Resource.default().merge(
+  new Resource({
+    [SemanticResourceAttributes.SERVICE_NAME]: '<service_name>',
+    [SemanticResourceAttributes.SERVICE_VERSION]: '0.1.0',
+  })
+);
+
+const provider = new WebTracerProvider({ resource });
+
+provider.addSpanProcessor(new SimpleSpanProcessor(new ConsoleSpanExporter()));
+
+provider.addSpanProcessor(
+  new BatchSpanProcessor(
+    new OTLPTraceExporter({
+      url: 'https://ingest.{REGION}.signoz.cloud:443/v1/traces',
+    })
+  )
+);
+
+provider.register({
+  propagator: new B3Propagator(),
+});
+
+registerInstrumentations({
+  instrumentations: [
+    getWebAutoInstrumentations({
+      '@opentelemetry/instrumentation-document-load': {},
+      '@opentelemetry/instrumentation-user-interaction': {},
+      '@opentelemetry/instrumentation-fetch': {
+        propagateTraceHeaderCorsUrls: /.+/,
       },
-      otelcolConfig: {
-        url: 'http://127.0.0.1:4318/v1/traces', // URL of opentelemetry collector
+      '@opentelemetry/instrumentation-xml-http-request': {
+        propagateTraceHeaderCorsUrls: /.+/,
       },
     }),
-    //Insert OtelCol exporter module
-    OtelColExporterModule,
-    //Insert propagator module
-    CompositePropagatorModule,
   ],
-  ...
-})
+});
 ```
 
 This config would be enough to get you up and running. For more tweaks refer to [this](https://github.com/jufab/opentelemetry-angular-interceptor#readme) detailed documentation of the instrumentation library.
 
+Again, `http://localhost:4318/v1/traces` is the default url for sending your tracing data. We are assuming you have installed SigNoz on your localhost. Based on your environment, you can update it accordingly. It should be in the following format:
 
+`http://<IP of SigNoz backend>:4318/v1/traces`
 
-Facing difficulties with instrumenting your application? Check out this video tutorial 👇
+**NOTE:** Remember to allow incoming requests to port 4318 of machine where SigNoz backend is hosted.
+
+## Conclusion
+
+OpenTelemetry is the future for setting up observability for cloud-native apps. It is backed by a huge community and covers a wide variety of technology and frameworks. Using OpenTelemetry, engineering teams can instrument polyglot and distributed applications and be assured about compatibility with a lot of technologies.
+
+SigNoz is an open-source observability tool that comes with a SaaS-like experience. You can check out SigNoz by visiting its GitHub repo 👇
+
+[![SigNoz GitHub repo](/img/blog/common/signoz_github.webp)](https://github.com/SigNoz/signoz)
+
+If you are someone who understands more from video, then you can watch the below video tutorial on the same with SigNoz.
 
 <YouTube id="g-I-v1FtMoM" mute={false} />
 
 ## Sample Angular App
 - [Sample Angular App](https://github.com/SigNoz/angular-otel-native) - contains `instrument.ts` file with placeholder for URL and Ingestion Details (For SigNoz Cloud)
 
+If you face any issues while trying out SigNoz, you can reach out with your questions in #support channel 👇
 
-<InstrumentationFAQ />
+[![SigNoz Slack community](/img/blog/common/join_slack_cta.webp)](https://signoz.io/slack)
