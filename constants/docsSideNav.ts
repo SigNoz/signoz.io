@@ -658,6 +658,7 @@ const docsSideNav = [
         type: 'doc',
         route: '/docs/logs-management/long-term-storage',
         label: 'Long Term Storage',
+        className: 'new-doc',
       },
       {
         type: 'doc',
