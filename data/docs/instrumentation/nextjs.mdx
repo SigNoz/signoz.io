@@ -97,7 +97,7 @@ OTel Collector binary helps to collect logs, hostmetrics, resource and infra att
 
 You can find instructions to install OTel Collector binary [here](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) in your VM. 
 
-While creating the `otel-config.yaml` during the installation fo the OTel Collector Binary, you need to enable CORS under the receivers section of the config file. This is needed so that you don't get 
+While creating the `config.yaml` during the installation fo the OTel Collector Binary, you need to enable CORS under the receivers section of the config file. This is needed so that you don't get 
 CORS error which can hinder sending your Traces to SigNoz Cloud. See the code snippet below to understand how you can enable CORS in your config file:
 
 ```yml
@@ -120,7 +120,7 @@ npm i @opentelemetry/resources
 npm i @opentelemetry/semantic-conventions
 ```
 
-**Step 3.** In the `tracing.js` file, remove the headers from the exporterOptions since you're already using the signoz access token in the `otel-config.yml` file.
+**Step 3.** In the `tracing.js` file, remove the headers from the exporterOptions since you're already using the signoz access token in the `config.yml` file.
 
 ```jsx
 // tracing.js
@@ -179,8 +179,6 @@ OTel Collector binary helps to collect logs, hostmetrics, resource and infra att
 
 You can find instructions to install OTel Collector binary [here](https://signoz.io/docs/tutorial/kubernetes-infra-metrics/) in your Kubernetes cluster. 
 
-**NOTE:** Make sure to restart your collector after making the config changes
-
 **Step 2.** Install OpenTelemetry packages
 
 ```bash
@@ -191,7 +189,7 @@ npm i @opentelemetry/resources
 npm i @opentelemetry/semantic-conventions
 ```
 
-**Step 3.** In the `tracing.js` file, remove the headers from the exporterOptions since you're already using the signoz access token in the `otel-config.yml` file.
+**Step 3.** In the `tracing.js` file, remove the headers from the exporterOptions since you're already using the signoz access token in the `config.yml` file.
 
 ```jsx
 // tracing.js
@@ -246,7 +244,21 @@ process.on('SIGTERM', () => {
 
 ## Send traces to SigNoz Self-Host
 
-If you're trying to send instrumentation data to SigNoz self-hosted way, the only minor thing that you'd be required is to change the `exporterOptions` in the `tracing.js` file
+If you're trying to send instrumentation data to SigNoz self-hosted way, the only minor thing (apart from installing OpenTelemetry packages) that you'd be required is to change the `exporterOptions` in the `tracing.js` file
+
+You can find instructions to install OTel Collector binary [here](https://signoz.io/docs/tutorial/kubernetes-infra-metrics/) in your Kubernetes cluster. 
+
+**Step 1.** Install OpenTelemetry packages
+
+```bash
+npm i @opentelemetry/sdk-node
+npm i @opentelemetry/auto-instrumentations-node
+npm i @opentelemetry/exporter-trace-otlp-http
+npm i @opentelemetry/resources
+npm i @opentelemetry/semantic-conventions
+```
+
+**Step 2.** Create the `tracing.ts` file
 
 ```jsx
 // tracing.js
@@ -294,7 +306,7 @@ Again, `http://localhost:4318/v1/traces` is the default url for sending your tra
 
 **NOTE:** Remember to allow incoming requests to port 4318 of machine where SigNoz backend is hosted.
 
-Once you're done with this, add your required changes in the `otel-config.yml` file which can be generally found [here](https://github.com/SigNoz/signoz/blob/develop/deploy/docker/clickhouse-setup/otel-collector-config.yaml).
+Once you're done with this, add your required changes including receivers, exporters in the `config.yml` file which can be generally found [here](https://github.com/SigNoz/signoz/blob/develop/deploy/docker/clickhouse-setup/otel-collector-config.yaml).
 
 ## Conclusion
 
