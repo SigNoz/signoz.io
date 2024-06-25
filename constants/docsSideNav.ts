@@ -746,11 +746,11 @@ const docsSideNav = [
     type: 'category',
     // route: '',
     items: [
-      {
-        type: 'doc',
-        route: '/docs/userguide/create-a-custom-query',
-        label: 'Create a Custom Query',
-      },
+      // {
+      //   type: 'doc',
+      //   route: '/docs/userguide/create-a-custom-query',
+      //   label: 'Create a Custom Query',
+      // },
       {
         type: 'doc',
         route: '/docs/userguide/query-builder',
