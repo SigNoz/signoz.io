@@ -187,6 +187,11 @@ const docsSideNav = [
                 route: '/docs/instrumentation/hypercorn-unicorn-support',
                 label: 'Hypercorn/Unicorn ',
               },
+              {
+                type: 'doc',
+                route: '/docs/instrumentation/celery',
+                label: 'Celery Worker OpenTelemetry Setup',
+              },
             ],
           },
           {
@@ -281,6 +286,31 @@ const docsSideNav = [
             type: 'doc',
             label: 'Swift',
             route: '/docs/instrumentation/swift',
+          },
+          {
+            type: 'category',
+            label: 'Manual Instrumentation',
+            // route: '',
+            // link: {
+            // type: 'doc',
+            // },
+            items: [
+                {
+                  type: 'category',
+                  label: 'JavaScript',
+                  // route: '',
+                  // link: {
+                  // type: 'doc',
+                  // },
+                  items: [
+                    {
+                      type: 'doc',
+                      label: 'NodeJS',
+                      route: '/docs/instrumentation/manual-instrumentation/javascript/nodejs',
+                   },
+                ],
+              },
+            ],
           },
         ],
       },
@@ -466,6 +496,11 @@ const docsSideNav = [
                 type: 'doc',
                 route: '/docs/userguide/collect_logs_from_file',
                 label: 'From Log File',
+              },
+              {
+                type: 'doc',
+                route: '/docs/userguide/parse-multiline-logs',
+                label: 'Parse Multiline Logs',
               },
               {
                 type: 'doc',
@@ -838,7 +873,7 @@ const docsSideNav = [
   {
     type: 'doc',
     route: '/docs/userguide/exceptions',
-    label: 'Monitroing Exceptions',
+    label: 'Monitoring Exceptions',
   },
   {
     label: 'Security & Compliance',
