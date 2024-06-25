@@ -17,7 +17,7 @@ To verify the successful setup of Otel Collector, run the following command
 .\otelcol-contrib.exe --version
 ```
 
-Expected output
+Expected output:
 
 ```bash
 otelcol-contrib version 0.88.0
