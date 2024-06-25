@@ -651,6 +651,11 @@ const docsSideNav = [
       },
       {
         type: 'doc',
+        route: '/docs/logs-management/long-term-storage',
+        label: 'Long Term Storage',
+      },
+      {
+        type: 'doc',
         route: '/docs/userguide/logs_troubleshooting',
         label: 'Troubleshooting',
       },
