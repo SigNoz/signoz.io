@@ -365,7 +365,7 @@ We all are familiar with instrumenting backend services but have you ever though
 
 #### Pre-requisites
 
-Enable CORS in the OTel Receiver. Add the below required changes in the `otel-config.yml` file which can be generally found [here](https://github.com/SigNoz/signoz/blob/develop/deploy/docker/clickhouse-setup/otel-collector-config.yaml).
+Enable CORS in the OTel Receiver. Add the below required changes in the `otel-collector-config.yaml` file which can be generally found [here](https://github.com/SigNoz/signoz/blob/develop/deploy/docker/clickhouse-setup/otel-collector-config.yaml).
 
 ```yml
       http:
@@ -376,7 +376,9 @@ Enable CORS in the OTel Receiver. Add the below required changes in the `otel-co
 
 > Make sure to restart the container after making the config changes
 
-**Step 1.** Now let's get back to instrumenting our Angular Application. Let's start by installing a couple of dependencies.
+**Step 1.** Install OpenTelemetry packages.
+
+
 
 ```bash
 npm install --save @opentelemetry/sdk-trace-web@^1.21.0                                                                   
@@ -419,7 +421,7 @@ provider.addSpanProcessor(new SimpleSpanProcessor(new ConsoleSpanExporter()));
 provider.addSpanProcessor(
   new BatchSpanProcessor(
     new OTLPTraceExporter({
-      url: 'https://ingest.{REGION}.signoz.cloud:443/v1/traces',
+      url: 'http://127.0.0.1:4318/v1/traces', //url of OpenTelemetry Collector',
     })
   )
 );
@@ -444,13 +446,15 @@ registerInstrumentations({
 });
 ```
 
-This config would be enough to get you up and running. For more tweaks refer to [this](https://github.com/jufab/opentelemetry-angular-interceptor#readme) detailed documentation of the instrumentation library.
-
 Again, `http://localhost:4318/v1/traces` is the default url for sending your tracing data. We are assuming you have installed SigNoz on your localhost. Based on your environment, you can update it accordingly. It should be in the following format:
 
 `http://<IP of SigNoz backend>:4318/v1/traces`
 
 **NOTE:** Remember to allow incoming requests to port 4318 of machine where SigNoz backend is hosted.
+
+
+_The below Frequently Asked Questions (FAQs) are specifically meant for users who are using SigNoz as Self-Hosted._
+<InstrumentationFAQ />
 
 ## Conclusion
 
@@ -459,13 +463,6 @@ OpenTelemetry is the future for setting up observability for cloud-native apps. 
 SigNoz is an open-source observability tool that comes with a SaaS-like experience. You can check out SigNoz by visiting its GitHub repo 👇
 
 [![SigNoz GitHub repo](/img/blog/common/signoz_github.webp)](https://github.com/SigNoz/signoz)
-
-If you are someone who understands more from video, then you can watch the below video tutorial on the same with SigNoz.
-
-<YouTube id="g-I-v1FtMoM" mute={false} />
-
-## Sample Angular App
-- [Sample Angular App](https://github.com/SigNoz/angular-otel-native) - contains `instrument.ts` file with placeholder for URL and Ingestion Details (For SigNoz Cloud)
 
 If you face any issues while trying out SigNoz, you can reach out with your questions in #support channel 👇
 
