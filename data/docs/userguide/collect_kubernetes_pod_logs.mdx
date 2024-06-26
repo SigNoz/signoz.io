@@ -53,10 +53,16 @@ If your signoz cluster is hosted in a different cluster then you will have to in
 
   Once the above is applied to your k8s cluster, logs collection will be disabled.
 
-### Steps to Filter/Exclude logs collection
+### Steps to Filter/Exclude/Include Logs Collection
 
-* **Excluding certain log files** : If you want to exclude logs of certain pods/namespace you can do it using the following config in `override-values.yaml`.
-  
+* **Exclude certain log files** : If you want to exclude logs of certain namespaces, pods or containers,
+  you can append the following config in your Helm override values file.
+
+  _override-values.yaml_
+
+  <Tabs>
+  <TabItem value="signoz" label="SigNoz chart" default>
+
   ```yaml
   k8s-infra:
     presets:
@@ -80,10 +86,97 @@ If your signoz cluster is hosted in a different cluster then you will have to in
           # additional exclude rules
           additionalExclude: []
   ```
-  <Admonition>
-  In case of  `k8s-infra` chart installed directly, omit `k8s-infra:` from the above configuration. 
-  </Admonition>
- 
+
+  </TabItem>
+  <TabItem value="k8s-infra" label="K8s-Infra chart" default>
+
+  ```yaml
+  presets:
+    logsCollection:
+      # whether to enable log collection
+      enabled: true
+      blacklist:
+        # whether to enable blacklisting
+        enabled: true
+        # whether to exclude signoz logs
+        signozLogs: false
+        # which namespaces to exclude
+        namespaces:
+          - kube-system
+        # which pods to exclude
+        pods:
+          - hotrod
+          - locust
+        # which containers to exclude
+        containers: []
+        # additional exclude rules
+        additionalExclude: []
+  ```
+
+  </TabItem>
+  </Tabs>
+
+* **Include certain log files only** : If you want to only include logs of certain namespaces, pods or containers,
+  you can append the following config in your Helm override values file.
+
+  _override-values.yaml_
+
+  <Tabs>
+  <TabItem value="signoz" label="SigNoz chart" default>
+
+  ```yaml
+  k8s-infra:
+    presets:
+      logsCollection:
+        # whether to enable log collection
+        enabled: true
+        whitelist:
+          # whether to enable whitelisting
+          enabled: true
+          # whether to include signoz logs
+          signozLogs: false
+          # which namespaces to include
+          namespaces:
+            - platform
+            - my-application-namespace
+          # which pods to include
+          pods:
+            - otel  # all pods with otel prefix
+            - my-application-pod
+          # which containers to include
+          containers: []
+          # additional include rules
+          additionalInclude: []
+  ```
+
+  </TabItem>
+  <TabItem value="k8s-infra" label="K8s-Infra chart" default>
+
+  ```yaml
+  presets:
+    logsCollection:
+      # whether to enable log collection
+      enabled: true
+      whitelist:
+        # whether to enable whitelisting
+        enabled: true
+        # whether to include signoz logs
+        signozLogs: false
+        # which namespaces to include
+        namespaces:
+          - platform
+        # which pods to include
+        pods:
+          - otel-agent
+          - otel-deployment
+        # which containers to include
+        containers: []
+        # additional include rules
+        additionalInclude: []
+  ```
+
+  </TabItem>
+  </Tabs>
 
 * **Using filter operator in filelog receiver** : You can also use the filter operator to filter out logs by changing the operators here [charts](https://github.com/SigNoz/charts/blob/main/charts/k8s-infra/values.yaml).
   
