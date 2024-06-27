@@ -30,49 +30,49 @@ export const SigNozFeatures = () => {
 
   const sections = [
     {
-      title: 'INGEST DATA',
+      iconTag: 'INGEST DATA',
       description: 'Ingest data from 50+ sources — send your data and start digging through.',
       buttonText: 'Explore',
       logo: '/img/index_features/bar-chart-2.svg',
       img: '/img/blog/2022/02/signal_09_cover.webp'
     },
     {
-      title: 'APPLICATION PERFORMANCE MONITORING',
+      iconTag: 'APPLICATION PERFORMANCE MONITORING',
       description: 'Monitor & troubleshoot your application performance with APM.',
       buttonText: 'Explore',
       logo: '/img/index_features/bar-chart-2.svg',
       img: '/img/blog/2022/02/signal_09_cover.webp'
     },
     {
-      title: 'DISTRIBUTED TRACING',
+      iconTag: 'DISTRIBUTED TRACING',
       description: 'Track user requests across services to identify bottlenecks.',
       buttonText: 'Learn more',
       logo: '/img/index_features/drafting-compass.svg',
       img: '/img/blog/2022/02/signal_09_cover.webp'
     },
     {
-      title: 'LOG MANAGEMENT',
+      iconTag: 'LOG MANAGEMENT',
       description: 'Ingest, search, and analyze your logs at any scale.',
       buttonText: 'Learn more',
       logo: '/img/index_features/logs.svg',
       img: '/img/blog/2022/02/signal_09_cover.webp'
     },
     {
-      title: 'EXCEPTIONS',
+      iconTag: 'EXCEPTIONS',
       description: 'Record exceptions automatically with stack trace & linked span data.',
       buttonText: 'Explore',
       logo: '/img/index_features/bug.svg',
       img: '/img/blog/2022/02/signal_09_cover.webp'
     },
     {
-      title: 'METRICS & DASHBOARDS',
+      iconTag: 'METRICS & DASHBOARDS',
       description: 'Metrics monitoring with configurable dashboards to fit any use case.',
       buttonText: 'Explore',
       logo: '/img/index_features/layout-grid.svg',
       img: '/img/blog/2022/02/signal_09_cover.webp'
     },
     {
-      title: 'ALERTS',
+      iconTag: 'ALERTS',
       description: 'Get actionable alerts in your preferred notification channel.',
       buttonText: 'Learn more',
       logo: '/img/index_features/concierge-bell.svg',
@@ -107,10 +107,10 @@ export const SigNozFeatures = () => {
         </div>
 
 
-        <div className='grid grid-cols-2 p-4'>
+        <div className='grid grid-cols-2 p-4 homepage-observability-container'>
           {sections.map((section, index) => (
             <Card
-              title={section.title}
+              iconTag={section.iconTag}
               description={section.description}
               buttonText={section.buttonText}
               logo={section.logo}
@@ -118,6 +118,7 @@ export const SigNozFeatures = () => {
             />
           ))}
         </div>
+        {/* grid-column: span 2; first child, last child*/} 
       </div>
     </section>
   );

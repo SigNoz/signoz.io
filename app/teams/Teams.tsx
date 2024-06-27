@@ -36,42 +36,73 @@ const TEAMS_DATA = {
 
 function Teams() {
   return (
-    <div className="" title="Teams">
-      <section className={styles.team}>
-        <DiscussYourProject title={TEAMS_DATA.TITLE} desc={TEAMS_DATA.DESC} />
-        <div className={styles.teamSection}>
-          <div className={`container ${styles.teamContainer}`}>
-            <div className={`row ${styles.teamRow}`}>
-              <div className={'col col--6 margin-vert--md'}>
-                <div className={styles.featuresContainer}>
-                  {TEAMS_DATA.FEATURE_POINTS.map((feature, idx) => (
-                    <div key={idx} className={styles.featureWrapper}>
-                      <img
-                        className={styles.featureImage}
-                        src={feature.imageUrl}
-                        alt={feature.title}
-                      />
-                      <div className={styles.featureContent}>
-                        <h3 className={styles.featureTitle}>{feature.title}</h3>
-                        <p className={styles.featureDesc}>{feature.desc}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div className={'col col--6 margin-vert--md'}>
-                <div className={`card ${styles.teamCard}`}>
-                  <div className="card__body">
-                    <SignozCloudSignUpForm />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+    // <div className="" title="Teams">
+    //   <section className={styles.team}>
+    //     <DiscussYourProject title={TEAMS_DATA.TITLE} desc={TEAMS_DATA.DESC} />
+    //     <div className={styles.teamSection}>
+    //       <div className={`container ${styles.teamContainer}`}>
+    //         <div className={`row ${styles.teamRow}`}>
+    //           <div className={'col col--6 margin-vert--md'}>
+    //             <div className={styles.featuresContainer}>
+    //               {TEAMS_DATA.FEATURE_POINTS.map((feature, idx) => (
+    //                 <div key={idx} className={styles.featureWrapper}>
+    //                   <img
+    //                     className={styles.featureImage}
+    //                     src={feature.imageUrl}
+    //                     alt={feature.title}
+    //                   />
+    //                   <div className={styles.featureContent}>
+    //                     <h3 className={styles.featureTitle}>{feature.title}</h3>
+    //                     <p className={styles.featureDesc}>{feature.desc}</p>
+    //                   </div>
+    //                 </div>
+    //               ))}
+    //             </div>
+    //           </div>
+    //           <div className={'col col--6 margin-vert--md'}>
+    //             <div className={`card ${styles.teamCard}`}>
+    //               <div className="card__body">
+    //                 <SignozCloudSignUpForm />
+    //               </div>
+    //             </div>
+    //           </div>
+    //         </div>
+    //       </div>
+    //     </div>
+    //   </section>
+    // </div>
+
+    // <div className='flex mt-32' style={{border: "2px solid red"}}>
+    //   <div className='pl-40 w-7/12'>
+    //     <SignozCloudSignUpForm/>
+    //   </div>
+    //   <div className='' style={{border: "2px solid red", padding: "67px", width: "466px", height: "344px"}}>
+        
+    //   </div>
+    // </div>
+    <div className='flex flex-col md:flex-row mt-32 px-20 md:flex-row'>
+      <div className='flex-[3_3_0%]' style={{paddingLeft: '36px', paddingRight: '156px'}}> <SignozCloudSignUpForm /> </div>
+      <div className='flex-[2_2_0%]'>
+        <div className='flex flex-col gap-12 py-20 px-16'>
+          <img src="/img/users/incident_io.svg" alt="incident.io logo"  style={{width: '112px', height: '28px'}}/>
+          <span className=''>SigNoz balances flexibility and security extremely well. They've built clean and thoughtful abstractions over advanced security foundations, and the product just works. We barely have to think about it.</span>
+          <div className='flex flex-col gap-2'>
+            <span className=''>Mike Hudak</span>
+            <span className=''>CTO - incident.io</span>
+         </div>
         </div>
-      </section>
+      </div>
     </div>
   )
 }
 
 export default Teams
+
+  // < div className = "" >
+  //         <img src="/img/users/incident_io.svg" alt="incident.io logo" />
+  //         <p className='text-signoz_sienna-200 text-2xl font-normal leading-10 text-eenter'>SigNoz balances flexibility and security extremely well. They've built clean and thoughtful abstractions over advanced security foundations, and the product just works. We barely have to think about it.</p>
+  //         <div className='flex flex-col gap-2'>
+  //           <p className='m-0 text-signoz_sienna-200 text-xl font-medium text-center'>Mike Hudak</p>
+  //           <p className='m-0 text-signoz_sienna-200 text-base font-normal text-center'>CTO - incident.io</p>
+  //         </div>
+  //       </div >

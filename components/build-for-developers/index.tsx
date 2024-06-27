@@ -1,6 +1,7 @@
 import React from "react";
 import Heading from "../../components/ui/Heading";
 import Card from "../Card/card";
+import Divider from '@/components/ui/Divider'
 
 const BuildForDevelopers = () => {
   const REASONS = [
@@ -41,19 +42,18 @@ const BuildForDevelopers = () => {
         >
           <div className={`container px-5 py-12 mx-auto mb-0`}>
             <div className="flex flex-col items-center mb-10 text-center">
-            <div className="text-signoz_sienna-100 text-[44px] font-semibold leading-[3.5rem]">Built for developers, <br/>crafted by humans.</div>
+              <div className="text-signoz_sienna-100 text-[44px] font-semibold leading-[3.5rem]">Built for developers, <br />crafted by humans.</div>
             </div>
-
-<div className='grid grid-cols-2 p-4'>
-      {REASONS.map((section, index) => (
-        <Card 
-            title = {section.title}
-            description={section.desc}
-            img ={section.figure}
-            />
-      ))}
-    </div>
-    </div>
+            <div className='grid grid-cols-2 p-4 homepage-build-dev-container'>
+              {REASONS.map((section, index) => (
+                <Card
+                  title={section.title}
+                  description={section.desc}
+                  img={section.figure}
+                />
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </section>

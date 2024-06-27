@@ -8,29 +8,29 @@ import {ArrowRightSolid }from "@/components/homepage-icons/icons"
 const Observability = () => {
   return (
     <section>
-    <div className='container flex flex-col w-auto h-auto'>
+    <div className='flex flex-col w-auto h-auto border border-signoz_slate-400 border-dashed py-10 pl-10'>
       <div className="flex flex-row">
         <div>
-        <p> Enterprise-grade Observability</p>
-        <p>Get access to observability at any scale with advanced security and compliance.</p>
-        <ul>
-          <li className="flex flex-row">
-          <ArrowRightSolid/><span>SSO and SAML support</span>
+        <p className='text-2xl font-semibold text-signoz_vanilla-100'> Enterprise-grade Observability</p>
+        <p className='text-signoz_vanilla-400 text-base font-normal leading-9'>Get access to observability at any scale with advanced security and compliance.</p>
+        <ul className='ul-no-padding flex flex-col gap-3'>
+          <li className="flex flex-row items-center gap-3">
+          <ArrowRightSolid/><span className='text-signoz_vanilla-400 text-base font-normal leading-9'>SSO and SAML support</span>
           </li>
-          <li className="flex flex-row">
-          <ArrowRightSolid/><span>Query API Keys</span>
+          <li className="flex flex-row items-center gap-3">
+          <ArrowRightSolid/><span className='text-signoz_vanilla-400 text-base font-normal leading-9'>Query API Keys</span>
           </li>
-          <li className="flex flex-row">
-          <ArrowRightSolid/><span>Advanced Security</span>
+          <li className="flex flex-row items-center gap-3">
+          <ArrowRightSolid/><span className='text-signoz_vanilla-400 text-base font-normal leading-9'>Advanced Security</span>
           </li>
-          <li className="flex flex-row">
-          <ArrowRightSolid/><span>AWS Private Link</span>
+          <li className="flex flex-row items-center gap-3">
+          <ArrowRightSolid/><span className='text-signoz_vanilla-400 text-base font-normal leading-9'>AWS Private Link</span>
           </li>
-          <li className="flex flex-row">
-          <ArrowRightSolid/><span>VPC Peering</span>
+          <li className="flex flex-row items-center gap-3">
+          <ArrowRightSolid/><span className='text-signoz_vanilla-400 text-base font-normal leading-9'>VPC Peering</span>
           </li>
-          <li className="flex flex-row">
-          <ArrowRightSolid/><span>Custom Integrations</span>
+          <li className="flex flex-row items-center gap-3">
+          <ArrowRightSolid/><span className='text-signoz_vanilla-400 text-base font-normal leading-9'>Custom Integrations</span>
           </li>
         </ul>
         </div>
