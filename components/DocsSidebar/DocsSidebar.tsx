@@ -48,7 +48,8 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
 
   // Scroll the active sidebar element into view since the page reloads while navigating between pages
   useEffect(() => {
-    requestIdleCallback(() => {
+    const rIC = window.requestIdleCallback ?? setTimeout
+    rIC(() => {
       const elementId = `#${pathname.substring(0, pathname.length - 1)}`;
       const element = document.getElementById(elementId)
       
