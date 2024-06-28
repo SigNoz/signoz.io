@@ -366,6 +366,9 @@ const PricingPlans = () => {
                     <ul className="list-icon-right">
                       <li>APM & Distributed Tracing</li>
                       <li>Log Management</li>
+                      <li>Long term Logs Storage options - <a href="/docs/logs-management/long-term-storage/">
+                  <u className="mx-0 rounded px-0 py-0.5 text-primary-400"> Details</u>
+                </a></li>
                       <li>Infrastructure Monitoring</li>
                       <li>Exceptions Monitoring</li>
                       <li>Alerts Management</li>
