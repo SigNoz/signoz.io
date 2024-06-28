@@ -250,6 +250,11 @@ const docsSideNav = [
                 route: '/docs/instrumentation/angular',
                 label: 'Angular',
               },
+              {
+                type: 'doc',
+                route: '/docs/instrumentation/nextjs',
+                label: 'NextJS', 
+              },
             ],
           },
           {
@@ -651,6 +656,12 @@ const docsSideNav = [
       },
       {
         type: 'doc',
+        route: '/docs/logs-management/long-term-storage',
+        label: 'Long Term Storage',
+        className: 'new-doc',
+      },
+      {
+        type: 'doc',
         route: '/docs/userguide/logs_troubleshooting',
         label: 'Troubleshooting',
       },
@@ -741,11 +752,11 @@ const docsSideNav = [
     type: 'category',
     // route: '',
     items: [
-      {
-        type: 'doc',
-        route: '/docs/userguide/create-a-custom-query',
-        label: 'Create a Custom Query',
-      },
+      // {
+      //   type: 'doc',
+      //   route: '/docs/userguide/create-a-custom-query',
+      //   label: 'Create a Custom Query',
+      // },
       {
         type: 'doc',
         route: '/docs/userguide/query-builder',
@@ -873,7 +884,7 @@ const docsSideNav = [
   {
     type: 'doc',
     route: '/docs/userguide/exceptions',
-    label: 'Monitroing Exceptions',
+    label: 'Monitoring Exceptions',
   },
   {
     label: 'Security & Compliance',
