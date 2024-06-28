@@ -3,10 +3,10 @@
 import React from 'react'
 import SubHeading from '../../components/ui/SubHeading'
 import Hero from '../../components/ui/Hero'
-import Button from '../../components/ui/Button'
 import VimeoPlayer from '../../components/VimeoPlayer/VimeoPlayer'
 import Link from 'next/link'
 import { ArrowRight, BookOpen } from 'lucide-react'
+import Button from '@/components/Button/Button'
 
 export const Header = () => {
   return (
@@ -27,18 +27,18 @@ export const Header = () => {
           <br className="hidden lg:inline" /> traces, metrics, exceptions, & alerts in a single tool.
         </p>
       </div>
-      <div className="mx-5 mb-12 flex flex-col justify-center gap-5 md:flex-row">
+      <div className="mx-5 mb-12 flex flex-col justify-center gap-3 md:flex-row">
       <Link href="/teams/">
-          <button className="h-10 pr-3 pl-4 px-4 py-2 rounded-full text-sm flex items-center justify-center gap-1.5 bg-signoz_robin-500 text-center font-medium leading-5 text-white no-underline outline-none hover:text-white">
+          <Button>
             Start your free trial
             <ArrowRight size={14} />
-        </button>
+          </Button>
           </Link>
       <Link href="/docs/introduction/">
-          <button className="h-10 pr-3 pl-4 px-4 py-2 rounded-full text-sm flex items-center justify-center gap-1.5 button-background text-center font-medium leading-5 text-white no-underline outline-none hover:text-white">
+          <Button type={Button.TYPES.SECONDARY}>
             <BookOpen size={14}/>
             Read Documentation
-        </button>
+            </Button>
           </Link>
       </div>
       <div className="container">

@@ -8,28 +8,28 @@ import { SignozDatalog } from '@/components/signoz-datalog'
 
 const WhySelectSignoz = ({isInPricingPage = false}) => {
     return (
-        <div className="container my-10 mb-16 border border-signoz_slate-400 border-dashed">
+        <div className="container border border-signoz_slate-400 border-dashed">
             <div className="flex flex-row">
                 <div className='flex-1 '>
                     <p className='sticky top-[100px] pl-12 pt-10 text-signoz_vanilla-100 text-[44px] font-bold leading-[3.5rem]'>Why <br/> select <br/> signoz? </p>
                 </div>
                 <div className='flex-[2_2_0%]'>
                     <div className='flex border border-signoz_slate-400 border-dashed py-10 pl-10'>
-                    <div className='flex flex-col gap-10'>
+                    <div className='flex flex-col gap-16'>
                         <div>
-                            <p className='text-signoz_vanilla-100 text-base font-medium'>Built for scale</p>
-                            <p className='text-signoz_vanilla-400 text-base font-normal leading-9'>Our powerful ingestion engine has a proven track record of handling 10TB+ data ingestion per day.</p>
+                            <p className='text-signoz_vanilla-100 text-base font-medium block mb-2'>Built for scale</p>
+                            <p className='text-signoz_vanilla-400 text-sm font-normal block m-0 leading-9'>Our powerful ingestion engine has a proven track record of handling 10TB+ data ingestion per day.</p>
                         </div>
                         <div>
-                            <p className='text-signoz_vanilla-100 text-base font-medium'>Trusted across the globe</p>
-                            <p className='text-signoz_vanilla-400 text-base font-normal leading-9'>Used by teams in all 5 continents ⎯ across the mountains, rivers, and the high seas.</p>
+                            <p className='text-signoz_vanilla-100 text-base font-medium block mb-2'>Trusted across the globe</p>
+                            <p className='text-signoz_vanilla-400 text-sm font-normal block m-0 leading-9'>Used by teams in all 5 continents ⎯ across the mountains, rivers, and the high seas.</p>
                         </div>
                         <div>
-                            <p className='text-signoz_vanilla-100 text-base font-medium'>Powering observability for teams of all sizes</p>
-                            <p className='text-signoz_vanilla-400 text-base font-normal leading-9'>Hundreds of companies ⎯from early-stage start-ups to public enterprises use SigNoz to build more reliable products.</p>
+                            <p className='text-signoz_vanilla-100 text-base font-medium block mb-2'>Powering observability for teams of all sizes</p>
+                            <p className='text-signoz_vanilla-400 text-sm font-normal block m-0 leading-9'>Hundreds of companies ⎯from early-stage start-ups to public enterprises use SigNoz to build more reliable products.</p>
                         </div>
                     </div>
-                    <div className="h-[352px] w-[449px] bg-signoz_ink-400">
+                    <div className="h-[352px] w-[272px] card-background">
                     </div>
                     </div>
                     <Observability />

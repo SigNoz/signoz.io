@@ -105,11 +105,10 @@ export const Testimonials = () => {
   ]
   return (
     <section>
-
-      <div className="container my-8 flex flex-col items-center">
-        <div className="mb-5 flex flex-col items-center text-center gap-12 w-[880px]">
+      <div className="container py-24 flex flex-col items-center border border-signoz_slate-400 border-dashed">
+        <div className="mb-16 flex flex-col items-center text-center gap-12 w-[880px]">
           <img src="/img/users/incident_io.svg" alt="incident.io logo" />
-          <p className='text-signoz_sienna-200 text-2xl font-normal leading-10 text-eenter'>SigNoz balances flexibility and security extremely well. They've built clean and thoughtful abstractions over advanced security foundations, and the product just works. We barely have to think about it.</p>
+          <span className='text-signoz_sienna-200 text-2xl font-normal leading-10 text-center'>SigNoz balances flexibility and security extremely well. They've built clean and thoughtful abstractions over advanced security foundations, and the product just works. We barely have to think about it.</span>
           <div className='flex flex-col gap-2'>
             <p className='m-0 text-signoz_sienna-200 text-xl font-medium text-center'>Mike Hudak</p>
             <p className='m-0 text-signoz_sienna-200 text-base font-normal text-center'>CTO - incident.io</p>

@@ -33,7 +33,7 @@ function Pricing() {
       {/* Cost Comparison Graph */}
       <ExploreAllFeature />
       {/* Companies Logo */}
-      <CostComparison />
+      {/* <CostComparison /> */}
       {/* <WhySelectSignoz/> */}
       {/* Data protection */}
       {/* <DataProtection /> */}
@@ -42,8 +42,8 @@ function Pricing() {
       {/* More Options */}
       {/* <CommunityEdition /> */}
       {/* FAQ section */}
-      <MonthlyEstimate/>
-      <WhySelectSignoz isInPricingPage/>  
+      <MonthlyEstimate />
+      <WhySelectSignoz isInPricingPage />
       <FAQ />
       {/* User Review */}
       {/* <UserReview /> */}
@@ -63,7 +63,7 @@ function FAQ() {
         <div className="row max-w-6xl mx-auto">
           <div className="flex w-full">
             <div className='flex-1'>
-            <p className="text-5xl font-semibold text-signoz_vanilla-100 leading-[3.5rem]">Frequently<br/>Asked <br/>Questions</p>
+              <p className="text-5xl font-semibold text-signoz_vanilla-100 leading-[3.5rem]">Frequently<br />Asked <br />Questions</p>
             </div>
             <div className="card-demo flex-2">
               <FAQBody />
@@ -175,13 +175,13 @@ const PricingPlans = () => {
   const [tab, setTab] = useState('cloud')
 
   return (
-    <section className={styles.pricing}>
-      <div className={`container ${styles.pricingContainer}`}>
+    <section className={`${styles.pricing }`}>
+      <div className={`container  border border-signoz_slate-400 border-dashed ${styles.pricingContainer}`}>
 
         {tab === 'cloud' ? (
           <>
             {/* Cloud Plan */}
-            <div className="mx-auto mb-5 flex max-w-4xl flex-col items-center text-center">
+            <div className="mx-auto mb-5 flex max-w-4xl flex-col items-center text-center ">
               <Heading type={1}>
                 Pricing
               </Heading>
@@ -195,23 +195,29 @@ const PricingPlans = () => {
                 with SigNoz. No user-based and host-based pricing.
               </SubHeading>
               <div className="my-5 flex justify-center">
-                <div className="flex rounded-3xl">
+                <div className="flex">
                   <nav
-                    className={`flex items-center space-x-2 rounded-3xl ${styles.pricingTabContainer}`}
+                    className={`flex items-center space-x-2 border border-signoz_slate-400 rounded-sm`}
                   >
                     <button
                       type="button"
-                      className={`cursor-pointer rounded-3xl border-none px-4 py-2 text-xs text-white relative z-[2] bg-primary-400 before:absolute before:left-[0%] before:top-[0%] before:z-[-1] before:h-full before:w-full before:rounded-full before:bg-primary-400 before:opacity-50 before:blur-xl before:content-['']`}
+                      className={`cursor-pointer border-none px-4 py-2 text-xs text-white relative z-[2] bg-signoz_slate-400`}
                       onClick={() => setTab('cloud')}
                     >
-                      SigNoz Cloud
+                      <div className='flex gap-1.5'>
+                        <Cloud size={14} />
+                        SigNoz Cloud
+                      </div>
                     </button>
                     <button
                       type="button"
-                      className={`cursor-pointer rounded-3xl border-none px-4 py-2 text-xs text-white`}
+                      className={`cursor-pointer border-none px-4 py-2 text-xs text-signoz_vanilla-400`}
                       onClick={() => setTab('self-managed')}
                     >
-                      Hosted in your infra
+                      <div className='flex gap-1.5'>
+                        <Server size={14} />
+                        Hosted in your infra
+                      </div>
                     </button>
                   </nav>
                 </div>
@@ -249,14 +255,15 @@ const PricingPlans = () => {
                   </p>
                   <div className="flex items-center justify-between mb-6">
                     <p className="m-0">
-                      Starts at just
+                      Starts at
                     </p>
+                    <div className='w-3/5 border-b border-signoz_slate-400 border-dashed'/>
                     <span className="text-xl text-primary-400">$199/Month*</span>
                   </div>
                   <div>
                     <Link
                       id="btn-pricing-signoz-cloud-1"
-                      className={`flex justify-center items-center button button--primary ${styles.pricingCtaBtn}`}
+                      className={`flex justify-center items-center py-2 pr-3 pl-4 bg-signoz_robin-500 rounded-full h-10 text-sm gap-1.5`}
                       href={'/teams/'}
                     >
                       Get started with SigNoz Cloud <ArrowRight size={14} />
@@ -272,6 +279,7 @@ const PricingPlans = () => {
                         <img src="/img/index_features/logs.svg" alt="Logs Icon" className="w-6 h-6" />
                         <span>Logs</span>
                       </div>
+                      <div className='w-1/4 border-b border-signoz_slate-400 border-dashed'/>
                       <span className="item-center flex flex-nowrap justify-center">
                         <span className="flex items-center justify-center gap-1">
                           <span className="text-primary-500">
@@ -299,6 +307,7 @@ const PricingPlans = () => {
                         <img src="/img/index_features/drafting-compass.svg" alt="Logs Icon" className="w-6 h-6" />
                         <span>Traces</span>
                       </div>
+                      <div className='w-1/4 border-b border-signoz_slate-400 border-dashed'/>
                       <span className="item-center flex flex-nowrap justify-center">
                         <span className="flex items-center justify-center gap-1">
                           <span className="text-primary-500">
@@ -325,6 +334,7 @@ const PricingPlans = () => {
                         <img src="/img/index_features/bar-chart-2.svg" alt="Logs Icon" className="w-6 h-6" />
                         <span>Metrics</span>
                       </div>
+                      <div className='w-1/4 border-b border-signoz_slate-400 border-dashed'/>
                       <span className="item-center flex flex-nowrap justify-center">
                         <span className="flex items-center justify-center gap-1">
                           <span className="text-primary-500">
@@ -443,7 +453,7 @@ const PricingPlans = () => {
                 <div className={`__card__footer ${styles.card__footer}`}>
                   <Link
                     id="btn-pricing-signoz-cloud-2"
-                    className={`flex justify-center items-center button button--primary ${styles.pricingCtaBtn}`}
+                    className={`flex justify-center items-center py-2 pr-3 pl-4 bg-signoz_robin-500 rounded-full h-10 text-sm font-medium gap-1.5`}
                     href={'/teams/'}
                   >
                     Get started with Signoz Cloud <ArrowRight size={14} />
@@ -456,7 +466,7 @@ const PricingPlans = () => {
                 <div className=''>
                   <Link
                     id="btn-pricing-signoz-cloud-2"
-                    className={`flex justify-center items-center button button-background`}
+                    className={`flex justify-center items-center py-2 px-4 button-background rounded-full h-10 text-sm font-medium gap-1.5`}
                     href={'/teams/'}
                   >
                     Estimate your monthly bill <ArrowDown size={14} />
@@ -480,10 +490,10 @@ const PricingPlans = () => {
                   <div>
                     <Link
                       id="btn-pricing-signoz-enterprise-1"
-                      className={`flex justify-center items-center button button--primary ${styles.pricingCtaBtn}`}
+                      className={`flex justify-center items-center py-2 px-4 button-background rounded-full h-10 text-sm font-medium gap-1.5`}
                       href={'/enterprise-cloud/'}
                     >
-                      Contact Us
+                      Contact Us <ArrowRight size={14}/>
                     </Link>
                   </div>
                 </div>
@@ -586,7 +596,7 @@ const PricingPlans = () => {
                 <div className={`__card__footer ${styles.card__footer}`}>
                   <Link
                     id="btn-pricing-signoz-enterprise-2"
-                    className={`flex justify-center items-center button button--primary ${styles.pricingCtaBtn}`}
+                    className={`flex justify-center items-center py-2 px-4 button-background rounded-full h-10 text-sm font-medium gap-1.5`}
                     href={'/enterprise-cloud/'}
                   >
                     Contact Us <ArrowRight size={14} />
@@ -608,27 +618,33 @@ const PricingPlans = () => {
               <div className="my-5 flex justify-center">
                 <div className="flex rounded-3xl">
                   <nav
-                    className={`flex items-center space-x-2 rounded-3xl ${styles.pricingTabContainer}`}
+                    className={`flex items-center space-x-2 border border-signoz_slate-400 rounded-sm`}
                   >
                     <button
                       type="button"
-                      className={`cursor-pointer rounded-3xl border-none px-4 py-2 text-xs text-white ${tab === 'cloud'
-                        ? "relative z-[2] bg-primary-400 before:absolute before:left-[0%] before:top-[0%] before:z-[-1] before:h-full before:w-full before:rounded-full before:bg-primary-400 before:opacity-50 before:blur-xl before:content-['']"
+                      className={`cursor-pointer border-none px-4 py-2 text-xs text-signoz_vanilla-400 relative z-[2] bg-signoz_slate-400 ${tab === 'cloud'
+                        ? " "
                         : 'bg-transparent'
                         }`}
                       onClick={() => setTab('cloud')}
                     >
-                      SigNoz Cloud
+                      <div className='flex gap-1.5'>
+                        <Cloud size={14} />
+                        SigNoz Cloud
+                      </div>
                     </button>
                     <button
                       type="button"
-                      className={`cursor-pointer rounded-3xl border-none px-4 py-2 text-xs text-white ${tab === 'self-managed'
-                        ? "relative z-[2] bg-primary-400 before:absolute before:left-[0%] before:top-[0%] before:z-[-1] before:h-full before:w-full before:rounded-full before:bg-primary-400 before:opacity-50 before:blur-xl before:content-['']"
+                      className={`cursor-pointer px-4 py-2 text-xs text-white relative z-[2] bg-signoz_slate-400 ${tab === 'self-managed'
+                        ? " "
                         : 'bg-transparent'
                         }`}
                       onClick={() => setTab('self-managed')}
                     >
-                      Hosted in your infra
+                      <div className='flex gap-1.5'>
+                        <Server size={14} />
+                        Hosted in your infra
+                      </div>
                     </button>
                   </nav>
                 </div>
@@ -641,19 +657,19 @@ const PricingPlans = () => {
                   <h3 className="font-heading text-2xl font-bold ">Community Edition</h3>
                   <p className="mb-4 text-base leading-relaxed text-gray-400">Free to Self Host
                   </p>
-                    <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3">
                     <p className="m-0">Install in your infra</p>
-                    </div>
-                    <div>
-                      <Link
-                        id="btn-pricing-signoz-cloud-1"
-                        className={`flex justify-center items-center button button--primary ${styles.pricingCtaBtn}`}
-                        href={'/docs/install/'}
-                      >
-                        Documentation
-                      </Link>
-                    </div>
                   </div>
+                  <div>
+                    <Link
+                      id="btn-pricing-signoz-cloud-1"
+                      className={`flex justify-center items-center button button--primary ${styles.pricingCtaBtn}`}
+                      href={'/docs/install/'}
+                    >
+                      Documentation
+                    </Link>
+                  </div>
+                </div>
                 <div>
 
                 </div>
@@ -705,7 +721,7 @@ const PricingPlans = () => {
                   <div>
                     <Link
                       id="btn-pricing-signoz-cloud-1"
-                      className={`flex justify-center items-center button button--primary ${styles.pricingCtaBtn}`}
+                      className={`flex justify-center items-center py-2 px-4 button-background rounded-full h-10 text-sm font-medium gap-1.5`}
                       href={'/enterprise/'}
                     >
                       Contact us<ArrowRight size={14} />
@@ -732,10 +748,10 @@ const PricingPlans = () => {
                   <div className={`mt-7 ${styles.deploymentOptions} ${styles.packageDetailBlock}`}>
                     <h4 className={styles.packageDetailTitle}>Deployment Options</h4>
                     <div>
-                    <ul className='ul-no-padding'>
-                      <li className='flex gap-3 items-center'> <CircleCheckSolid /> Self Host with support contract by SigNoz team</li>
-                      <li className='flex gap-3 items-center'> <CircleCheckSolid /> Managed by SigNoz in your cloud</li>
-                    </ul>
+                      <ul className='ul-no-padding'>
+                        <li className='flex gap-3 items-center'> <CircleCheckSolid /> Self Host with support contract by SigNoz team</li>
+                        <li className='flex gap-3 items-center'> <CircleCheckSolid /> Managed by SigNoz in your cloud</li>
+                      </ul>
                     </div>
                   </div>
                   <div className={`mt-7 ${styles.support} ${styles.packageDetailBlock}`}>
@@ -803,7 +819,7 @@ const PricingPlans = () => {
                 <div className={`__card__footer ${styles.card__footer}`}>
                   <Link
                     id="btn-pricing-signoz-enterprise-2"
-                    className={`flex justify-center items-center button button--primary ${styles.pricingCtaBtn}`}
+                    className={`flex justify-center items-center py-2 px-4 button-background rounded-full h-10 text-sm font-medium gap-1.5`}
                     href={'/enterprise/'}
                   >
                     Contact Us <ArrowRight size={14} />
@@ -959,7 +975,7 @@ const ExploreAllFeature = () => {
   }
 
   return (
-    <div className="relative mx-5 md:mx-0">
+    <div className="relative mx-5 md:mx-0 border border-signoz_slate-400 border-dashed">
       <div className="mx-auto overflow-hidden md:max-w-md lg:max-w-6xl">
         <div className="mt-10">
           <div className="ovc-table_top-wrapper grid grid-cols-3 gap-1 md:grid-cols-4">
@@ -977,7 +993,7 @@ const ExploreAllFeature = () => {
               )
             })}
           </div>
-          <Line/>
+          <Line />
         </div>
       </div>
       {/* {!isOpened ? (
@@ -1020,9 +1036,9 @@ const ExploreAllFeature = () => {
                     key={i}
                     className={`${false ? `rounded-lg bg-opacity-[${i}]` : ''}`}
                   >
-                    
+
                     <h3 className="mt-12 mb-3 p-2 text-center text-sm font-medium md:text-left">{row.section}</h3>
-                    <Line/>
+                    <Line />
                     <div className=" grid grid-cols-1 gap-1">
                       {row.features.map((r, idx) => {
                         return (
@@ -1047,7 +1063,7 @@ const ExploreAllFeature = () => {
                                 {r.inEnterprise}
                               </div>
                             </div>
-                            <Line/>
+                            <Line />
                           </div>
                         )
                       })}

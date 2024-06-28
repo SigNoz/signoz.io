@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { ArrowRight } from 'lucide-react'
 import Link from 'next/link';
+import Button from '@/components/Button/Button'
 
 type CardProps = {
   icon?: string,
@@ -28,27 +29,29 @@ const Card: React.FC<CardProps> = ({ iconTag, title, subTitle, stats, descriptio
     }
   }, [logoSize]);
   return (
-    <div className={`p-6 bg-signoz_ink-500 border border-signoz_slate-400 border-dashed`}>
+    <div className={`p-9 bg-signoz_ink-500 border border-signoz_slate-400 border-dashed`}>
       <div className="flex items-center mb-4">
         {logo ? <img src={logo} alt={`${iconTag} Logo`} className={`${logoSizeClassnames} mr-2.5`} /> : null}
         <span className="text-sm font-medium text-signoz_vanilla-400 uppercase tracking-[0.05em]">{iconTag}</span>
         <span className="text-2xl font-semibold text-signoz_vanilla-100">{title}</span>
       </div>
       <div>
-        {subTitle ? <p className='text-signoz_vanilla-100 text-base font-semibold'>{subTitle} </p> : null}
+        {subTitle ? <p className='text-signoz_vanilla-100 text-base font-semibold pt-4 m-0'>{subTitle} </p> : null}
       </div>
       <div>
-        {stats ? <p className='font-mono text-signoz_vanilla-100 text-[32px] leading-10 font-semibold'>{stats}</p> : null}
+        {stats ? <p className='font-mono text-signoz_vanilla-100 text-[32px] pt-4 leading-10 font-semibold block mb-2'>{stats}</p> : null}
       </div>
-      <p className="text-signoz_vanilla-400 text-base font-normal leading-9 my-3">{description}</p>
+      <p className="text-signoz_vanilla-400 text-base font-normal leading-9 mt-2 mb-3 lg:w-[28.5rem]">{description}</p>
       {buttonText ? (
-        <Link href={buttonLink ? buttonLink: ''}>
-        <button className="h-8 pr-3 pl-4 px-4 py-2 mb-[18px] rounded-full text-sm flex items-center justify-center gap-1.5 not-italic truncate button-background text-center font-medium leading-5 text-white no-underline outline-none hover:text-white">
+        <Link href={buttonLink ? buttonLink: ''} className='mb-2'>
+        <Button type={Button.TYPES.SECONDARY}>
           {buttonText} <ArrowRight size={14} />
-        </button>
+        </Button>
         </Link>
       ) : null}
-      {img ? <img src={img} className="w-full h-[302px]" alt={`${title} Image`} /> : null}
+      {/* We will update this once we have the assets */}
+      {/* {img ? <img src={''} className="card-background border-none w-full h-60"  /> : null} */}
+      {img ? <div className="card-background w-full h-60"  /> : null}
     </div>
   );
 };

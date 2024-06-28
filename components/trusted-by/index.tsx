@@ -18,7 +18,7 @@ const COMPANIES = [
 export const TrustedByTeams = () => {
   return (
     <section className={styles.used_by}>
-      <div className="container">
+      <div className="container border border-signoz_slate-400 border-dashed">
         <div className="flex flex-col items-center mb-12 text-center">
           <div className="text-signoz_vanilla-400 text-sm font-semibold leading-5 tracking-[0.05em] uppercase">Trusted by the <span className="text-signoz_vanilla-100">best platform teams</span></div> 
         </div>

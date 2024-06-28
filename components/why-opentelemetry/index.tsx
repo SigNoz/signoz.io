@@ -39,7 +39,7 @@ export const WhyOpenTelemetry = () => {
   return (
     <>
       <section>
-        <div className="container py-16">
+        <div className="container pt-16">
           <div className="flex flex-col items-center mb-5 text-center">
             <p className="text-signoz_vanilla-400 text-center text-sm font-medium tracking-[.05em] uppercase">SigNoz is OpenTelemetry-Native</p>
             <p className="text-signoz_sakura-100 text-[44px] font-semibold leading-[3.5rem]">But why OpenTelemetry?</p>
@@ -54,7 +54,7 @@ export const WhyOpenTelemetry = () => {
           </button>
         </Link>
           </div>
-          <div className='grid grid-cols-2 p-4'>
+          <div className='grid grid-cols-2 pt-4'>
             {REASONS.map((section, index) => (
               <Card
                 logo={section.logo}
@@ -68,35 +68,36 @@ export const WhyOpenTelemetry = () => {
       </section>
       <section>
         <div className="container mb-16">
-          <div className='flex flex-col border border-signoz_slate-400 border-dashed p-9'>
+          <div className='flex flex-col border border-signoz_slate-400 border-dashed p-9 justify-between'>
             <div className="flex flex-row">
               <div>
                 <p className="text-2xl font-semibold text-signoz_vanilla-100"> SigNoz is built from the ground up for OpenTelemetry</p>
                 <p className="text-signoz_vanilla-400 text-base font-normal leading-9 my-3 w-[42rem]">SigNoz offers the best in class support for OpenTelemetry’s semantic conventions with the best visualizations ⎯ powered by our powerful ingestion engine.</p>
                 <ul className="ul-no-padding">
-                  <li className="flex flex-row items-center gap-3">
+                  <li className="flex flex-row items-center gap-3 mt-3">
                     <ArrowRightSolid /><span>OpenTelemetry-first docs</span>
                   </li>
-                  <li className="flex flex-row items-center gap-3">
+                  <li className="flex flex-row items-center gap-3 mt-3">
                     <ArrowRightSolid /><span>Correlation of signals based on OpenTelemetry’s semantic conventions</span>
                   </li>
-                  <li className="flex flex-row items-center gap-3">
+                  <li className="flex flex-row items-center gap-3 mt-3">
                     <ArrowRightSolid /><span>Exceptions based on OpenTelemetry’s Trace data</span>
                   </li>
-                  <li className="flex flex-row items-center gap-3">
+                  <li className="flex flex-row items-center gap-3 mt-3">
                     <ArrowRightSolid /><span>Messaging queue monitoring based on OTel’s trace & metric’s data</span>
                   </li>
-                  <li className="flex flex-row items-center gap-3">
+                  <li className="flex flex-row items-center gap-3 mt-3">
                     <ArrowRightSolid /><span>Deployment env and marker support powered by OpenTelemetry</span>
                   </li>
-                  <li className="flex flex-row items-center gap-3">
+                  <li className="flex flex-row items-center gap-3 mt-3">
                     <ArrowRightSolid /><span>Configurable observability pipelines supported by Opamp</span>
                   </li>
-                  <li className="flex flex-row items-center gap-3">
+                  <li className="flex flex-row items-center gap-3 mt-3">
                     <ArrowRightSolid /><span>Span-based events for richer context while debugging</span>
                   </li>
                 </ul>
               </div>
+              <div className="h-[352px] w-[449px] bg-signoz_ink-400"></div>
             </div>
             <div className="bg-signoz_ink-400 p-4 border border-signoz_slate-500 rounded">
               <p className="text-signoz_vanilla-100 text-base font-medium mb-2">Comparing Datadog and New Relic's support for OpenTelemetry data</p>

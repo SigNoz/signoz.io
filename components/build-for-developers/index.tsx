@@ -17,7 +17,7 @@ const BuildForDevelopers = () => {
     },
     {
       title: "Columnar database",
-      desc: "Build telemetry pipelines easily with SigNoz OTel Collector. Integrate any existing pipeline with OTel Collector to send data to SigNoz.",
+      desc: "SigNoz uses ClickHouse as datastore. It is extremely fast and highly optimized storage for observability data.",
       figure: "/img/landing/property-telemetry-pipeline.webp",
     },
     {

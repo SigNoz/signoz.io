@@ -85,11 +85,12 @@ export const SigNozFeatures = () => {
   return (
     <section>
       <div className={`container my-10 mb-16`}>
-        <div className="mx-auto mb-5 flex max-w-4xl flex-col items-center text-center">
-          <div className='text-signoz_sienna-100 text-[32px] leading-[3.25rem]'>The one-stop observability tool</div>
+        <div className='flex flex-col gap-6'>
+        <div className="mx-auto flex max-w-4xl flex-col items-center text-center">
+          <div className='text-signoz_sienna-100 text-[32px] leading-[3.25rem] font-medium'>The one-stop observability tool</div>
         </div>
 
-        <div className="flex justify-center items-center gap-0 p-8">
+        <div className="flex justify-center items-center">
           {icons.map((icon, index) => (
             <>
               <div key={index} className={`text-center ${icon.label === 'Dashboards' ? 'homepage-dashboard-icon' : ''}`}>
@@ -105,6 +106,8 @@ export const SigNozFeatures = () => {
             </>
           ))}
         </div>
+
+      </div>
 
 
         <div className='grid grid-cols-2 p-4 homepage-observability-container'>
