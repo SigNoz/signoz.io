@@ -93,8 +93,8 @@ export const SigNozFeatures = () => {
               {icons.map((icon, index) => (
                 <>
                   <div key={index} className={`text-center ${icon.label === 'Dashboards' ? 'homepage-dashboard-icon' : ''}`}>
-                    <div className="p-4 homepage-border rounded-full flex justify-center items-center w-fit m-auto">
-                      <img src={icon.src} alt={`${icon.label} Icon`} className="w-6 h-6" />
+                    <div className="p-2 sm:p-4 homepage-border rounded-full flex justify-center items-center w-fit m-auto">
+                      <img src={icon.src} alt={`${icon.label} Icon`} className="w-4 h-4 sm:w-6 sm:h-6" />
                     </div>
                     <p className="text-signoz_sienna-300 mt-2 text-xs m-auto">{icon.label}</p>
                   </div>
@@ -111,7 +111,7 @@ export const SigNozFeatures = () => {
 
         </div>
       </section>
-      <div className='!w-[80vw] !mx-auto grid grid-cols-2 homepage-observability-container border border-signoz_slate-400 border-dashed !border-l-0 !border-t-0'>
+      <div className='!w-[80vw] !mx-auto grid grid-cols-1 sm:grid-cols-2 homepage-observability-container border border-signoz_slate-400 border-dashed !border-l-0 !border-t-0'>
         {sections.map((section, index) => (
           <Card
             iconTag={section.iconTag}

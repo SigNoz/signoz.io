@@ -11,7 +11,7 @@ import Button from '@/components/Button/Button'
 export const Header = () => {
   return (
     <header className="mt-16 "> 
-      <div className="mb-5 flex flex-col items-center pt-24 px-5 text-center relative">
+      <div className="flex flex-col items-center pt-24 px-5 text-center relative !w-[80vw] !mx-auto border border-signoz_slate-400 border-dashed pb-4">
         <Link href="/">
           <button className="h-10 px-4 py-2 rounded-full text-sm flex items-center justify-center gap-1.5 bg-signoz_slate-400 font-medium leading-5 text-white border border-signoz_slate-200 shadow-[0_0_14px_0_rgba(78,116,248,0.40)]">
             <BookOpen size={14}/>SigNoz raises $6.5 million<ArrowRight size={14} />
@@ -27,7 +27,8 @@ export const Header = () => {
           <br className="hidden lg:inline" /> traces, metrics, exceptions, & alerts in a single tool.
         </p>
       </div>
-      <div className="mx-5 mb-12 flex flex-col justify-center gap-3 md:flex-row">
+      <div className='!w-[80vw] h-12 !mx-auto border border-signoz_slate-400 border-dashed !border-t-0 !border-b-0' />
+      <div className="mx-5 pt-4 pb-12 flex flex-col justify-center gap-3 md:flex-row items-center !w-[80vw] !mx-auto border border-signoz_slate-400 border-dashed !border-b-0">
       <Link href="/teams/">
           <Button>
             Start your free trial
@@ -41,7 +42,7 @@ export const Header = () => {
             </Button>
           </Link>
       </div>
-      <div className="container">
+      <div className="container  !w-[80vw] !mx-auto border border-signoz_slate-400 border-dashed !border-b-0 !border-t-0">
         <div className="w-100 mx-auto">
           <div className="product-explainer-video hero-figure rounded-lg p-3">
             <div className="embed-container">

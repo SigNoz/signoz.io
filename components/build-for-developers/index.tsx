@@ -36,16 +36,17 @@ const BuildForDevelopers = () => {
       <div className=" border border-signoz_slate-400 border-dashed w-full h-12 !border-t-0 !border-r-0" />
       <div className="overflow-hidden">
         <div
-          className={`relative
-          after:-z-[2] after:absolute after:content-[''] after:w-[180px] md:after:w-[350px] after:h-[800px] lg:after:w-[500px] lg:after:h-[600px] xl:after:w-[750px] xl:after:h-[600px] after:top-[10%] after:-left-[50%] after:bg-primary-500 after:rounded-full after:opacity-50 after:blur-3xl 
-          before:-z-[2] before:absolute before:content-[''] before:w-[180px] md:before:w-[350px] before:h-[800px] lg:before:w-[500px] lg:before:h-[600px] xl:before:w-[750px] xl:before:h-[600px] before:top-[10%] before:-right-[50%] before:bg-primary-500 before:rounded-full before:opacity-50 before:blur-3xl 
+          className={`relative bg-[length:85%] bg-no-repeat bg-[center_top_8rem] bg-[url('/img/background_blur/Perlin_noise.png')]
       `}
         >
           <div className={`container pt-12 mb-0 !px-0`}>
-            <div className="flex flex-col items-center py-36 text-center border border-signoz_slate-400 border-dashed !border-r-0 !border-t-0 !border-b-0 ">
+            <div className="w-[80vw] mx-auto border border-signoz_slate-400 border-dashed !border-b-0 !border-t-0 bg-[center_top_calc(100px)] bg-[url('/img/background_blur/Ellipse_388.png')] ">
+            <div className="flex flex-col items-center py-48 px-24 sm:px-0 text-center border border-signoz_slate-400 border-dashed !border-r-0 !border-t-0 !border-b-0 ">
               <div className="text-signoz_sienna-100 text-[44px] font-semibold leading-[3.5rem]">Built for developers, <br />crafted by humans.</div>
             </div>
-            <div className='grid grid-cols-2 homepage-build-dev-container'>
+
+            </div>
+            <div className='grid grid-cols-1 sm:grid-cols-2 homepage-build-dev-container'>
               {REASONS.map((section, index) => (
                 <Card
                   title={section.title}

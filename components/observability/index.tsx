@@ -9,7 +9,7 @@ const Observability = () => {
   return (
     <section>
     <div className='flex flex-col w-auto h-auto border border-signoz_slate-400 border-dashed py-10 pl-10 !border-r-0 !border-b-0'>
-      <div className="flex flex-row">
+      <div className="flex flex-col sm:flex-row">
         <div className='flex flex-col justify-between'>
         <div>
         <p className='text-2xl font-semibold text-signoz_vanilla-100 block mb-2'> Enterprise-grade Observability</p>
@@ -38,7 +38,7 @@ const Observability = () => {
         </ul>
         </div>
         </div>
-        <div className="h-[404px] w-[272px] card-background"></div>
+        <div className="aspect-[272/404] max-w-[50vw] w-[272px] card-background"></div>
       </div>
     </div>
   </section>

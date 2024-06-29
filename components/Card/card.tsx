@@ -30,7 +30,7 @@ const Card: React.FC<CardProps> = ({ iconTag, title, subTitle, stats, descriptio
     }
   }, [logoSize]);
   return (
-    <div className={`p-9 bg-signoz_ink-500 border border-signoz_slate-400 border-dashed !border-b-0 !border-r-0`}>
+    <div className={`p-9 bg-signoz_ink-500 border border-signoz_slate-400 border-dashed !border-b-0 !border-r-0 col-span-2 sm:col-span-1`}>
       <div className="flex items-center mb-4">
         {logo ? <img src={logo} alt={`${iconTag} Logo`} className={`${logoSizeClassnames} mr-2.5`} /> : null}
         <span className="text-sm font-medium text-signoz_vanilla-400 uppercase tracking-[0.05em]">{iconTag}</span>

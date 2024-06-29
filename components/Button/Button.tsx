@@ -11,8 +11,8 @@ const TYPE_TO_STYLES_MAP = {
 }
 
 function Button(props) {
-  const { children, type = BUTTON_TYPES.PRIMARY, ...rest } = props
-  const style = TYPE_TO_STYLES_MAP[type]
+  const { children, type = BUTTON_TYPES.PRIMARY, className = '', ...rest } = props
+  const style = `${TYPE_TO_STYLES_MAP[type]} ${className}`;
 
   return (
     <button className={style} {...rest}>
