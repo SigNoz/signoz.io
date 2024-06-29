@@ -8,7 +8,7 @@ import {ArrowRightSolid }from "@/components/homepage-icons/icons"
 const Observability = () => {
   return (
     <section>
-    <div className='flex flex-col w-auto h-auto border border-signoz_slate-400 border-dashed py-10 pl-10'>
+    <div className='flex flex-col w-auto h-auto border border-signoz_slate-400 border-dashed py-10 pl-10 !border-r-0 !border-b-0'>
       <div className="flex flex-row">
         <div className='flex flex-col justify-between'>
         <div>

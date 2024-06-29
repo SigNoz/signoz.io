@@ -5,7 +5,7 @@ import { H1, H4 } from '../Headings/Headings'
 
 const PricingStructure = () => {
   return (
-    <section className="border border-signoz_slate-400 border-dashed">
+    <section className="border border-signoz_slate-400 border-dashed !border-r-0 !border-b-0">
       <div className="container mx-auto px-10 py-10">
         <div className='flex flex-col justify-between'>
           <div className='mb-5'>

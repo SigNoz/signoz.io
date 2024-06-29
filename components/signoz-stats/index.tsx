@@ -18,8 +18,8 @@ const SigNozStats = () => {
   return (
     <section>
       <div className="">
-        <div className="container flex border border-signoz_slate-400 border-dashed">
-          <div className="flex-1">
+        <div className="!w-[80vw] !mx-auto !px-0 container flex border border-signoz_slate-400 border-dashed !border-t-0 !border-b-0">
+          <div className="flex-1 !w-[300px] border border-signoz_slate-400 border-dashed !border-b-0 !border-r-0 !border-l-0">
             <p className='text-signoz_vanilla-100 text-[44px] font-bold leading-[3.5rem] text-left pt-10 pl-12'>
               Developers <br/>Love<br/>Signoz
             </p>
@@ -36,7 +36,7 @@ const SigNozStats = () => {
                 />
               ))}
             </div>
-            <div className="flex flex-row gap-3 py-6 pl-10 border border-signoz_slate-400 border-dashed ">
+            <div className="flex flex-row gap-3 py-6 pl-10 border border-signoz_slate-400 border-dashed !border-b-0 !border-r-0">
               <Link href="/">
                 <Button>
                 <BookOpen size={14}/>Join the community<ArrowRight size={14} />

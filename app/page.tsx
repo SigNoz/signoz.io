@@ -20,8 +20,10 @@ export default async function Page() {
   const sortedPosts = sortPosts(allBlogs)
   const posts = allCoreContent(sortedPosts)
   return (
-    <div className="bg-signoz_ink-500">
-      <main className="landing-section pt-12 sm:pt-0">
+    <div className="bg-signoz_ink-500 relative mt-[-56px]">
+      <div className="absolute top-0 right-0 left-0 h-screen bg-[length:80%] bg-no-repeat bg-[center_top_4rem] bg-[url('/img/background_blur/Perlin_noise.png')] " />
+      <div className="absolute top-0 right-0 left-0 h-screen bg-[center_top_-50rem] bg-[length:110%] bg-no-repeat bg-[url('/img/background_blur/Circle.png')]" />
+      <main className="landing-section pt-12 sm:pt-0 relative z-[1]">
         <Header />
         <TrustedByTeams />
         <SigNozFeatures />        

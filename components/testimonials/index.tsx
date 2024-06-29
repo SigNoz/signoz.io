@@ -105,7 +105,11 @@ export const Testimonials = () => {
   ]
   return (
     <section>
-      <div className="container py-24 flex flex-col items-center border border-signoz_slate-400 border-dashed">
+      {/* background-size: 100%;
+    background-repeat: no-repeat;
+    background-position-x: center;
+    background-position-y: -500px; */}
+      <div className="!w-[80vw] !mx-auto container py-24 flex flex-col items-center border border-signoz_slate-400 border-dashed !border-b-0 bg-[length:auto_100%] bg-no-repeat bg-[center_top_-32rem] bg-[url('/img/background_blur/Footer_backdrop.png')]">
         <div className="mb-16 flex flex-col items-center text-center gap-12 w-[880px]">
           <img src="/img/users/incident_io.svg" alt="incident.io logo" />
           <span className='text-signoz_sienna-200 text-2xl font-normal leading-10 text-center'>SigNoz balances flexibility and security extremely well. They've built clean and thoughtful abstractions over advanced security foundations, and the product just works. We barely have to think about it.</span>
@@ -146,7 +150,7 @@ export const Testimonials = () => {
             </div>
           ))}
         </div>
-        <Link href="/">
+        <Link href="/" className="shadow-[0_0_200px_400px_rgba(11,12,14,0.9)]">
           <button className="h-8 pr-3 pl-4 px-4 py-2 rounded-full text-sm flex items-center justify-center gap-1.5 not-italic truncate button-background text-center font-medium leading-5 text-white no-underline outline-none hover:text-white">Read customer stories<ArrowRight size={14} />
           </button>
         </Link>

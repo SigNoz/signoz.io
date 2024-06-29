@@ -32,7 +32,8 @@ const BuildForDevelopers = () => {
     },
   ];
   return (
-    <section>
+    <section className="!w-[80vw] !mx-auto border border-signoz_slate-400 border-dashed !border-l-0 !border-t-0">
+      <div className=" border border-signoz_slate-400 border-dashed w-full h-12 !border-t-0 !border-r-0" />
       <div className="overflow-hidden">
         <div
           className={`relative
@@ -40,11 +41,11 @@ const BuildForDevelopers = () => {
           before:-z-[2] before:absolute before:content-[''] before:w-[180px] md:before:w-[350px] before:h-[800px] lg:before:w-[500px] lg:before:h-[600px] xl:before:w-[750px] xl:before:h-[600px] before:top-[10%] before:-right-[50%] before:bg-primary-500 before:rounded-full before:opacity-50 before:blur-3xl 
       `}
         >
-          <div className={`container px-5 py-12 mx-auto mb-0`}>
-            <div className="flex flex-col items-center mb-10 text-center">
+          <div className={`container pt-12 mb-0 !px-0`}>
+            <div className="flex flex-col items-center py-36 text-center border border-signoz_slate-400 border-dashed !border-r-0 !border-t-0 !border-b-0 ">
               <div className="text-signoz_sienna-100 text-[44px] font-semibold leading-[3.5rem]">Built for developers, <br />crafted by humans.</div>
             </div>
-            <div className='grid grid-cols-2 p-4 homepage-build-dev-container'>
+            <div className='grid grid-cols-2 homepage-build-dev-container'>
               {REASONS.map((section, index) => (
                 <Card
                   title={section.title}

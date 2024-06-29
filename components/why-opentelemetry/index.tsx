@@ -38,9 +38,9 @@ export const WhyOpenTelemetry = () => {
 
   return (
     <>
-      <section>
-        <div className="container pt-16">
-          <div className="flex flex-col items-center mb-5 text-center">
+      <section className="!w-[80vw] !mx-auto border border-signoz_slate-400 border-dashed !border-t-0 !border-b-0">
+        <div className="container bg-[center_top_calc(-600px)] bg-[url('/img/background_blur/Ellipse_207.png')]">
+          <div className="flex flex-col items-center pb-5 text-center pt-28">
             <p className="text-signoz_vanilla-400 text-center text-sm font-medium tracking-[.05em] uppercase">SigNoz is OpenTelemetry-Native</p>
             <p className="text-signoz_sakura-100 text-[44px] font-semibold leading-[3.5rem]">But why OpenTelemetry?</p>
             <p className="text-signoz_vanilla-100 text-center text-base font-medium">
@@ -49,26 +49,26 @@ export const WhyOpenTelemetry = () => {
               Kubernetes being more active.
             </p>
             <Link href="/">
-          <button className="h-10 px-4 py-2 mt-3 mb-24 rounded-full text-sm flex items-center justify-center gap-1.5 bg-signoz_slate-400 font-medium leading-5 text-white border border-signoz_slate-200 shadow-[0_0_20px_0_rgba(242,71,105,0.20)]">
-            <BookOpen size={14}/>Learn why OpenTelemetry is the future<ArrowRight size={14} />
-          </button>
-        </Link>
-          </div>
-          <div className='grid grid-cols-2 pt-4'>
-            {REASONS.map((section, index) => (
-              <Card
-                logo={section.logo}
-                subTitle={section.title}
-                description={section.desc}
-                logoSize={24}
-              />
-            ))}
+              <button className="h-10 px-4 py-2 mt-3 mb-24 rounded-full text-sm flex items-center justify-center gap-1.5 bg-signoz_slate-400 font-medium leading-5 text-white border border-signoz_slate-200 shadow-[0_0_20px_0_rgba(242,71,105,0.20)]">
+                <BookOpen size={14} />Learn why OpenTelemetry is the future<ArrowRight size={14} />
+              </button>
+            </Link>
           </div>
         </div>
       </section>
-      <section>
+      <div className='!w-[80vw] !mx-auto grid grid-cols-2 border border-signoz_slate-400 border-dashed !border-t-0 !border-l-0 !border-b-0'>
+        {REASONS.map((section, index) => (
+          <Card
+            logo={section.logo}
+            subTitle={section.title}
+            description={section.desc}
+            logoSize={24}
+          />
+        ))}
+      </div>
+      <section className="!w-[80vw] !mx-auto border border-signoz_slate-400 border-dashed ">
         <div className="container mb-16">
-          <div className='flex flex-col border border-signoz_slate-400 border-dashed p-9 justify-between'>
+          <div className='flex flex-col p-9 justify-between'>
             <div className="flex flex-row">
               <div>
                 <p className="text-2xl font-semibold text-signoz_vanilla-100"> SigNoz is built from the ground up for OpenTelemetry</p>
@@ -97,7 +97,7 @@ export const WhyOpenTelemetry = () => {
                   </li>
                 </ul>
               </div>
-              <div className="h-[352px] w-[449px] bg-signoz_ink-400"></div>
+              <div className="h-[352px] w-[449px] card-background"></div>
             </div>
             <div className="bg-signoz_ink-400 p-4 border border-signoz_slate-500 rounded">
               <p className="text-signoz_vanilla-100 text-base font-medium mb-2">Comparing Datadog and New Relic's support for OpenTelemetry data</p>
@@ -106,6 +106,7 @@ export const WhyOpenTelemetry = () => {
           </div>
         </div>
       </section>
+      <div className="!w-[80vw] !mx-auto border border-signoz_slate-400 border-dashed w-full h-12 !border-t-0 !border-b-0" />
     </>
   );
 };
