@@ -7,7 +7,7 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 // You might need to insert additional domains in script-src if you are using external services
 const ContentSecurityPolicy = `
   default-src 'self';
-  script-src 'self' 'unsafe-eval' 'unsafe-inline' giscus.app https://www.googletagmanager.com https://js.hsforms.net https://f.vimeocdn.com;
+  script-src 'self' 'unsafe-eval' 'unsafe-inline' giscus.app https://www.googletagmanager.com https://js.hsforms.net https://f.vimeocdn.com blob:;
   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
   img-src * blob: data:;
   media-src *;
@@ -223,6 +223,11 @@ module.exports = () => {
         {
           source: '/blog/',
           destination: '/resource-center/blog/',
+          permanent: true,
+        },
+        {
+          source: '/api_reference/',
+          destination: '/resource-center/api_reference/',
           permanent: true,
         },
         {
