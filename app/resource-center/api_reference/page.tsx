@@ -18,7 +18,7 @@ const REDOC_OPTIONS = {
   theme: {
     colors: { primary: { main: '#4e74f8' }, text: { primary: '#fff' } },
     sidebar: {
-      backgroundColor: '#18181b00',
+      backgroundColor: '#1b1b1d',
       textColor: '#fff',
       level1Items: { activeTextColor: '#4e74f8' },
     },
