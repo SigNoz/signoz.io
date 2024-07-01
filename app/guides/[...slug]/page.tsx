@@ -1,0 +1,140 @@
+
+
+import 'css/prism.css'
+import { components } from '@/components/MDXComponents'
+import { MDXLayoutRenderer } from 'pliny/mdx-components'
+import { sortPosts, coreContent, allCoreContent } from 'pliny/utils/contentlayer'
+import { allGuides, allAuthors,} from 'contentlayer/generated'
+import type { Authors, Blog, Guide} from 'contentlayer/generated'
+import PostSimple from '@/layouts/PostSimple'
+import PostLayout from '@/layouts/PostLayout'
+import PostBanner from '@/layouts/PostBanner'
+import { Metadata } from 'next'
+import siteMetadata from '@/data/siteMetadata'
+import { notFound } from 'next/navigation'
+import Link from 'next/link'
+import { SidebarIcons } from '@/components/sidebar-icons/icons'
+
+const defaultLayout = 'PostLayout'
+const layouts = {
+  PostSimple,
+  PostLayout,
+  PostBanner,
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: { slug: string[] }
+}): Promise<Metadata | undefined> {
+  const slug = decodeURI(params.slug.join('/'))
+  const post = allGuides.find((p) => p.slug === slug)
+  const authorList = post?.authors || ['default']
+  const authorDetails = authorList.map((author) => {
+    const authorResults = allAuthors.find((p) => p.slug === author)
+    return coreContent(authorResults as Authors)
+  })
+  if (!post) {
+    return
+  }
+
+  const publishedAt = new Date(post.date).toISOString()
+  const modifiedAt = new Date(post.lastmod || post.date).toISOString()
+  const authors = authorDetails.map((author) => author.name)
+  let imageList = [siteMetadata.socialBanner]
+  if (post.image) {
+    imageList = typeof post.image === 'string' ? [post.image] : post.image
+  }
+  const ogImages = imageList.map((img) => {
+    return {
+      url: img.includes('http') ? img : siteMetadata.siteUrl + img,
+    }
+  })
+
+  return {
+    title: post.title,
+    description: post.description,
+    openGraph: {
+      title: post.title,
+      description: post.description,
+      siteName: siteMetadata.title,
+      locale: 'en_US',
+      type: 'article',
+      publishedTime: publishedAt,
+      modifiedTime: modifiedAt,
+      url: './',
+      images: ogImages,
+      authors: authors.length > 0 ? authors : [siteMetadata.author],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: post.title,
+      description: post.summary,
+      images: imageList,
+    },
+  }
+}
+
+export const generateStaticParams = async () => {
+  const paths = allGuides.map((p) => ({ slug: p.slug?.split('/') }))
+
+  return paths
+}
+
+export default async function Page({ params }: { params: { slug: string[] } }) {
+  const slug = decodeURI(params.slug.join('/'))
+  // Filter out drafts in production
+  const sortedCoreContents = allCoreContent(sortPosts(allGuides))
+  const postIndex = sortedCoreContents.findIndex((p) => p.slug === slug)
+  if (postIndex === -1) {
+    return notFound()
+  }
+
+  const post = allGuides.find((p) => p.slug === slug) as Guide
+  const authorList = post?.authors || ['default']
+  const authorDetails = authorList.map((author) => {
+    const authorResults = allAuthors.find((p) => p.slug === author)
+    return coreContent(authorResults as Authors)
+  })
+  const mainContent = coreContent(post)
+  const jsonLd = post.structuredData
+  jsonLd['author'] = authorDetails.map((author) => {
+    return {
+      '@type': 'Person',
+      name: author.name,
+    }
+  })
+
+  const Layout = layouts[post.layout || defaultLayout]
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
+      <div className='container mx-auto'>
+          <Link href={`/resource-center/guides/`}>
+            
+            <button className='flex items-center ml-3.5 mt-10'>
+              <SidebarIcons.ArrowLeft/> 
+              <span className='text-sm pl-1.5'>
+              Back to Guides
+              </span>
+            </button>
+          </Link>
+        </div>
+
+      <Layout
+        content={mainContent}
+        authorDetails={authorDetails}
+        authors={post?.authors}
+        toc={post.toc}
+      >
+        
+        <MDXLayoutRenderer code={post.body.code} components={components} toc={post.toc} />
+      </Layout>
+    </>
+  )
+}

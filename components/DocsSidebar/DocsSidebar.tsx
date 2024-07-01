@@ -46,6 +46,22 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
     expandCategoriesForRoute(docsSideNav)
   }, [pathname])
 
+  // Scroll the active sidebar element into view since the page reloads while navigating between pages
+  useEffect(() => {
+    const rIC = window.requestIdleCallback ?? setTimeout
+    rIC(() => {
+      const elementId = `#${pathname.substring(0, pathname.length - 1)}`;
+      const element = document.getElementById(elementId)
+      
+      if (element) {
+        element.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center'
+        })
+      }
+    })
+  }, [])
+
   const renderDoc = (doc: Doc) => {
     const isActiveRoute = activeRoute === `${doc.route}/`
 
@@ -60,9 +76,9 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
         }`}
         onClick={() => onNavItemClick && typeof onNavItemClick == 'function' && onNavItemClick()}
       >
-        <Link href={doc.route} className="line-clamp-2 flex w-full items-center gap-2" replace>
+        <Link href={doc.route} className={`line-clamp-2 flex w-full items-center gap-2 ${doc.className}`} replace>
           <FileText size={12} />
-          <div className="line-clamp-2 text-sm"> {doc.label} </div>
+          <div className="line-clamp-2 text-sm sidebar-label"> {doc.label} </div>
         </Link>
       </li>
     )
@@ -77,11 +93,11 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
         <Link href={category.route || ''}>
           <div
             onClick={() => toggleCategory(category.label)}
-            className={`folder flex cursor-pointer items-center gap-2 text-sm text-gray-200 hover:text-white ${isActiveRoute ? 'active-route text-white' : ''}`}
+            className={`folder flex cursor-pointer items-center gap-2 text-sm text-gray-200 hover:text-white ${category.className} ${isActiveRoute ? 'active-route text-white' : ''}`}
           >
             {isExpanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
 
-            <span className={`text-sm font-normal`}>{category.label}</span>
+            <span className={`text-sm font-normal sidebar-label`}>{category.label}</span>
           </div>
         </Link>
         {isExpanded && (

@@ -323,15 +323,34 @@ const PricingPlans = () => {
                         {' '}
                         <li>No host-based pricing</li>
                       </span>
+                    
+                     
+                    </div>
+                    <div>
+                    <span> 
+                      <li>Long term Logs Storage options -
+                        <a href="/docs/logs-management/long-term-storage/">
+                        <a className="mx-0 rounded px-0 py-0.5 text-primary-400"> Details</a>
+                        </a>
+                      </li>
+                      </span>
                     </div>
                     <br />
 
                     <div>
                       <span>
-                        *$199 includes data usage. Monthly bill will be $199 till you ingest data
-                        higher than what's covered in $199.
+                        $199 includes data usage. Monthly bill will be $199 till you ingest data
+                        higher than what's covered in $199. <a href="https://vimeo.com/968489758" target="_blank" className="mx-0 rounded px-0 py-0.5 text-primary-400" >Explainer Video</a>
                       </span>
                     </div>
+                    <br/>
+
+                    <div>
+                    <span>
+                    How does pricing of metrics work in SigNoz? <a href='https://vimeo.com/973012522' target='_blank' className='mx-0 rounded px-0 py-0.5 text-primary-400'> Explainer Video </a> 
+                      </span>
+                    </div>
+
                   </div>
                   <Divider isDashed />
                   <p className={styles.retention}>
