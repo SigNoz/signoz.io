@@ -17,6 +17,7 @@ const Card = ({ title, body }: CardProps): JSX.Element => {
           borderStyle: 'dashed',
           borderWidth: '1px',
           borderColor: '#1D212D',
+          borderBottom: 'hidden',
         }}
         className=""
         onClick={() => setIsActive((state) => !state)}

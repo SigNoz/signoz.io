@@ -17,11 +17,13 @@ import MonthlyEstimate from '@/components/Monthly-estimate/MonthlyEstimate'
 import Link from 'next/link'
 import Divider from '@/components/ui/Divider'
 import Heading from '@/components/ui/Heading'
+import Button from '@/components/Button/Button'
 import Line from '@/components/ui/Line'
 import SubHeading from '@/components/ui/SubHeading'
 import { Chevron, RightSVG } from '@/components/svgs/common'
 import { ArrowBigLeft, ArrowRight, MoveLeft, ArrowUpRight, ArrowDown, Cloud, Server } from 'lucide-react'
 import { CircleCheckSolid, CircleInfoSolid, ZapSolid, ClockSolid, CheckSolid, CrossSolid, FlameSolid, CloudSolid, ServerSolid } from "@/components/homepage-icons/icons"
+
 
 function Pricing() {
   return (
@@ -59,13 +61,13 @@ export default Pricing
 function FAQ() {
   return (
     <section className={styles.faq}>
-      <div className={`container ${styles.faqContainer} border border-signoz_slate-400 border-dashed`}>
+      <div className={`container !w-[80vw] border border-signoz_slate-400 border-dashed !border-b-0 !px-0`}>
         <div className="row max-w-6xl mx-auto">
-          <div className="flex w-full">
-            <div className='flex-1'>
-              <p className="text-5xl font-semibold text-signoz_vanilla-100 leading-[3.5rem]">Frequently<br />Asked <br />Questions</p>
+          <div className="flex flex-col sm:flex-row w-full">
+            <div className='flex-1 !w-[300px]'>
+              <p className="text-4xl sm:text-[44px] font-semibold text-signoz_vanilla-100 leading-[3.5rem] pl-12 pt-10">Frequently<br />Asked <br />Questions</p>
             </div>
-            <div className="card-demo flex-2">
+            <div className="card-demo flex-[2_2_0%] border border-signoz_slate-400 border-dashed left-0 !border-b-0">
               <FAQBody />
             </div>
           </div>
@@ -175,8 +177,8 @@ const PricingPlans = () => {
   const [tab, setTab] = useState('cloud')
 
   return (
-    <section className={`${styles.pricing }`}>
-      <div className={`container  border border-signoz_slate-400 border-dashed ${styles.pricingContainer}`}>
+    <section className={`${styles.pricing}`}>
+      <div className={`container !w-[80vw] !mx-auto border border-signoz_slate-400 border-dashed !mb-0 !border-b-0 ${styles.pricingContainer}`}>
 
         {tab === 'cloud' ? (
           <>
@@ -188,9 +190,9 @@ const PricingPlans = () => {
               <SubHeading>
                 Tired of unpredictable pricing and complex billing structure? Save up to{' '}
                 <Link href="/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/">
-                  <u className="mx-0 rounded px-0 py-0.5 text-primary-400">
+                  <span className="mx-0 rounded-none px-0 py-0.5 text-signoz_robin-300 border border-signoz_robin-300 border-dashed !border-t-0 !border-r-0 !border-l-0">
                     80% on your Datadog bill <br />
-                  </u>
+                  </span>
                 </Link>{' '}
                 with SigNoz. No user-based and host-based pricing.
               </SubHeading>
@@ -225,27 +227,6 @@ const PricingPlans = () => {
             </div>
 
 
-            {/* <div className='flex justify-center'>
-              <div className='flex w-fit border border-[#1D212D] rounded-sm'>
-                <button
-                  type='button'
-                  className={`flex justify-center cursor-pointer gap-1.5 items-center w-[10.69rem] h-[2rem] ${tab === 'cloud' ? 'bg-signoz_slate-400' : 'bg-signoz_ink-400'}`}
-                  onClick={() => setTab('cloud')}
-                >
-                  <Cloud size={16} />
-                  SigNoz Cloud
-                </button>
-                <button
-                  type='button'
-                  className={`flex justify-center cursor-pointer gap-1.5 items-center w-[10.69rem] h-[2rem] ${tab === 'self-managed' ? 'bg-signoz_slate-400' : 'bg-signoz_ink-400'}`}
-                  onClick={() => setTab('self-managed')}
-                >
-                  <Server size={16} />
-                  Self-Hosted
-                </button>
-              </div>
-            </div> */}
-
             <div className="pricing-plans mx-auto grid grid-cols-1 justify-center gap-x-8 gap-y-10 md:max-w-md lg:max-w-6xl lg:grid-cols-2">
               <div className="pricing-card rounded-lg bg-opacity-5 px-4 py-5 md:px-8">
                 <div>
@@ -257,8 +238,10 @@ const PricingPlans = () => {
                     <p className="m-0">
                       Starts at
                     </p>
-                    <div className='w-3/5 border-b border-signoz_slate-400 border-dashed'/>
-                    <span className="text-xl text-primary-400">$199/Month*</span>
+                    <div className='w-3/5 border-b border-signoz_slate-400 border-dashed' />
+                    <div className='flex gap-1.5 items-center'>
+                      <span className="text-base font-medium text-signoz_robin-300">$199/Month</span><CircleInfoSolid height='16' width='16' />
+                    </div>
                   </div>
                   <div>
                     <Link
@@ -270,25 +253,25 @@ const PricingPlans = () => {
                     </Link>
                   </div>
                 </div>
-                {/* <Divider isDashed /> */}
+                
                 <div className="__card__body">
                   <div className={`mt-7 ${styles.packageDetailBlock}`}>
                     <h4 className={styles.packageDetailTitle}>Pricing</h4>
                     <div>
-                      <div className='gap-2'>
-                        <img src="/img/index_features/logs.svg" alt="Logs Icon" className="w-6 h-6" />
+                      <div className='gap-3'>
+                        <img src="/img/index_features/logs.svg" alt="Logs Icon" className="w-5 h-5" />
                         <span>Logs</span>
                       </div>
-                      <div className='w-1/4 border-b border-signoz_slate-400 border-dashed'/>
+                      <div className='w-1/4 border-b border-signoz_slate-400 border-dashed' />
                       <span className="item-center flex flex-nowrap justify-center">
                         <span className="flex items-center justify-center gap-1">
-                          <span className="text-primary-500">
+                          <span className="text-base font-medium text-signoz_robin-300">
                             ${TRACES_AND_LOGS_PRICES[logsRetentionPeriod]}
                           </span>{' '}
                           per GB ingested &mdash;&nbsp;
                         </span>
                         <select
-                          className="t block w-[100px] rounded-sm border border-signoz_slate-400 p-0.5 text-xs text-signoz_vanilla-100 placeholder-gray-400 accent-primary-400 bg-signoz_ink-400 focus:border-primary-500 focus:ring-primary-500 md:p-1 md:text-sm"
+                          className="block w-[100px] rounded-sm border border-signoz_slate-400 p-0.5 text-xs text-signoz_vanilla-100 placeholder-gray-400 accent-primary-400 bg-signoz_ink-400 focus:border-primary-500 focus:ring-primary-500 md:p-1 md:text-sm"
                           value={logsRetentionPeriod}
                           onChange={(e) => setLogsRetentionPeriod(Number(e.target.value))}
                         >
@@ -303,14 +286,14 @@ const PricingPlans = () => {
                       </span>
                     </div>
                     <div>
-                      <div className='gap-2'>
-                        <img src="/img/index_features/drafting-compass.svg" alt="Logs Icon" className="w-6 h-6" />
+                      <div className='gap-3'>
+                        <img src="/img/index_features/drafting-compass.svg" alt="Logs Icon" className="w-5 h-5" />
                         <span>Traces</span>
                       </div>
-                      <div className='w-1/4 border-b border-signoz_slate-400 border-dashed'/>
+                      <div className='w-1/4 border-b border-signoz_slate-400 border-dashed' />
                       <span className="item-center flex flex-nowrap justify-center">
                         <span className="flex items-center justify-center gap-1">
-                          <span className="text-primary-500">
+                          <span className="text-base font-medium text-signoz_robin-300">
                             ${TRACES_AND_LOGS_PRICES[tracesRetentionPeriod]}
                           </span>{' '}
                           per GB ingested &mdash;&nbsp;
@@ -330,14 +313,14 @@ const PricingPlans = () => {
                       </span>
                     </div>
                     <div>
-                      <div className='gap-2'>
-                        <img src="/img/index_features/bar-chart-2.svg" alt="Logs Icon" className="w-6 h-6" />
+                      <div className='gap-3'>
+                        <img src="/img/index_features/bar-chart-2.svg" alt="Logs Icon" className="w-5 h-5" />
                         <span>Metrics</span>
                       </div>
-                      <div className='w-1/4 border-b border-signoz_slate-400 border-dashed'/>
+                      <div className='w-1/4 border-b border-signoz_slate-400 border-dashed' />
                       <span className="item-center flex flex-nowrap justify-center">
                         <span className="flex items-center justify-center gap-1">
-                          <span className="text-primary-500">
+                          <span className="text-base font-medium text-signoz_robin-300">
                             ${METRICS_PRICES[metricsRetentionPeriod]}
                           </span>{' '}
                           per mn samples &mdash;&nbsp;
@@ -361,7 +344,7 @@ const PricingPlans = () => {
                     <div>
                       <div className='gap-3'>
                         <CircleCheckSolid />
-                        <span>
+                        <span className='text-signoz_vanilla-400'>
                           Add as many teammates as you want.
                         </span>
                       </div>
@@ -369,7 +352,7 @@ const PricingPlans = () => {
                     <div>
                       <div className='gap-3'>
                         <CircleCheckSolid />
-                        <span>
+                        <span className='text-signoz_vanilla-400'>
                           No host-based pricing
                         </span>
                       </div>
@@ -418,28 +401,27 @@ const PricingPlans = () => {
                     <div>
                       <div className='gap-3'>
                         <CircleCheckSolid color="signoz_sienna-400" />
-                        <span>Dedicated Slack Channel</span>
-                        <span className="uppercase text-xs bg-signoz_slate-100">On spends above $999</span>
+                        <span className='text-signoz_vanilla-400'>Dedicated Slack Channel</span>
+                        <span className="uppercase text-xs text-signoz_vanilla-400 bg-signoz_slate-400 border border-none px-2 py-1 rounded-full">On spends above $999</span>
                       </div>
                     </div>
                   </div>
                   <div className={styles.packageDetailBlock}>
                     <h4 className={`mt-7 ${styles.packageDetailTitle}`}>Features</h4>
                     <ul className='ul-no-padding'>
-                      <li className='flex gap-3 items-center'> <CircleCheckSolid /> APM & Distributed Tracing</li>
-                      <li className='flex gap-3 items-center'> <CircleCheckSolid /> Log Management</li>
-                      <li className='flex gap-3 items-center'> <CircleCheckSolid /> Infrastructure Monitoring</li>
-                      <li className='flex gap-3 items-center'> <CircleCheckSolid /> Exceptions Monitoring</li>
-                      <li className='flex gap-3 items-center'> <CircleCheckSolid /> Alerts Management</li>
-                      <li className='flex gap-3 items-center'> <CircleCheckSolid /> SSO and SAML Support</li>
-                      <li className='flex gap-3 items-center'> <CircleCheckSolid /> Service Dependency Visualization</li>
-                      <li className='flex gap-3 items-center'> <CircleCheckSolid /> Run aggregates on ingested spans</li>
-                      <li className='flex gap-3 items-center'> <CircleCheckSolid /> Live Tail Logging</li>
-                      <li className='flex gap-3 items-center'> <CircleCheckSolid /> Unlimited Logs & Traces based Dashboards</li>
-                      <li className='flex gap-3 items-center'> <CircleCheckSolid /> Dashboard locking</li>
-                      <li className='flex gap-3 items-center'> <CircleCheckSolid /> Visualize very large traces (&gt;10K spans)</li>
-                      <li className='flex gap-3 items-center'> <CircleCheckSolid /> Data centers available in the US, EU & India</li>
-                      <li className='flex gap-3 items-center'> <CircleCheckSolid /> SOC2 Type 1 Compliant</li>
+                      <li className='flex gap-3 items-center mb-3'> <CircleCheckSolid /> APM & Distributed Tracing</li>
+                      <li className='flex gap-3 items-center mb-3'> <CircleCheckSolid /> Log Management</li>
+                      <li className='flex gap-3 items-center mb-3'> <CircleCheckSolid /> Infrastructure Monitoring</li>
+                      <li className='flex gap-3 items-center mb-3'> <CircleCheckSolid /> Exceptions Monitoring</li>
+                      <li className='flex gap-3 items-center mb-3'> <CircleCheckSolid /> Alerts Management</li>
+                      <li className='flex gap-3 items-center mb-3'> <CircleCheckSolid /> SSO and SAML Support</li>
+                      <li className='flex gap-3 items-center mb-3'> <CircleCheckSolid /> Service Dependency Visualization</li>
+                      <li className='flex gap-3 items-center mb-3'> <CircleCheckSolid /> Run aggregates on ingested spans</li>
+                      <li className='flex gap-3 items-center mb-3'> <CircleCheckSolid /> Live Tail Logging</li>
+                      <li className='flex gap-3 items-center mb-3'> <CircleCheckSolid /> Unlimited Logs & Traces based Dashboards</li>
+                      <li className='flex gap-3 items-center mb-3'> <CircleCheckSolid /> Dashboard locking</li>
+                      <li className='flex gap-3 items-center mb-3'> <CircleCheckSolid /> Visualize very large traces<span className="uppercase text-xs text-signoz_vanilla-400 bg-signoz_slate-400 border border-none px-2 py-1 rounded-full">&gt;10k spans</span></li>
+                      <li className='flex gap-3 items-center mb-6'> <CircleCheckSolid /> Data centers available in the US, EU & India</li>
                     </ul>
                   </div>
                   {/* <Divider isDashed />
@@ -450,26 +432,21 @@ const PricingPlans = () => {
                     </ul>
                   </div> */}
                 </div>
-                <div className={`__card__footer ${styles.card__footer}`}>
-                  <Link
-                    id="btn-pricing-signoz-cloud-2"
-                    className={`flex justify-center items-center py-2 pr-3 pl-4 bg-signoz_robin-500 rounded-full h-10 text-sm font-medium gap-1.5`}
-                    href={'/teams/'}
-                  >
-                    Get started with Signoz Cloud <ArrowRight size={14} />
-                  </Link>
-                  <div>
-                    <br></br>
-                  </div>
-
-                </div>
                 <div className=''>
-                  <Link
-                    id="btn-pricing-signoz-cloud-2"
-                    className={`flex justify-center items-center py-2 px-4 button-background rounded-full h-10 text-sm font-medium gap-1.5`}
-                    href={'/teams/'}
-                  >
-                    Estimate your monthly bill <ArrowDown size={14} />
+                  <Link href={'/teams/'}>
+                    <Button className='w-full'>
+                      Get started with SigNoz Cloud
+                      <ArrowRight size={14} />
+                    </Button>
+                  </Link>
+                </div>
+
+                <div className='mt-3'>
+                  <Link href={'/teams/'}>
+                    <Button className='w-full' type={Button.TYPES.SECONDARY}>
+                      Estimate your monthly bill
+                      <ArrowDown size={14} />
+                    </Button>
                   </Link>
                   <div>
                     <br></br>
@@ -493,7 +470,7 @@ const PricingPlans = () => {
                       className={`flex justify-center items-center py-2 px-4 button-background rounded-full h-10 text-sm font-medium gap-1.5`}
                       href={'/enterprise-cloud/'}
                     >
-                      Contact Us <ArrowRight size={14}/>
+                      Contact Us <ArrowRight size={14} />
                     </Link>
                   </div>
                 </div>
@@ -504,13 +481,13 @@ const PricingPlans = () => {
                     <div>
                       <div className='gap-3'>
                         <CircleCheckSolid />
-                        <span>Custom Pricing</span>
+                        <span className='text-signoz_vanilla-400'>Custom Pricing</span>
                       </div>
                     </div>
                     <div>
                       <div className='gap-3'>
                         <CircleCheckSolid />
-                        <span>Custom Retention</span>
+                        <span className='text-signoz_vanilla-400'>Custom Retention</span>
                       </div>
                     </div>
                   </div>
@@ -534,72 +511,43 @@ const PricingPlans = () => {
                     </div>
                   </div>
                   <Divider isDashed /> */}
-                  <div className={`mt-7 ${styles.support} ${styles.packageDetailBlock}`}>
+                  <div className={`mt-7`}>
                     <h4 className={styles.packageDetailTitle}>Support</h4>
-                    <div>
-                      <div className='gap-3'>
-                        <CircleCheckSolid color="signoz_sienna-400" />
-                        <span>Email</span>
-                      </div>
-                    </div>
-                    <div>
-                      <div className='gap-3'>
-                        <CircleCheckSolid color="signoz_sienna-400" />
-                        <span>Dedicated Slack Channel</span>
-                      </div>
-                    </div>
-                    <div>
-                      <div className='gap-3'>
-                        <CircleCheckSolid color="signoz_sienna-400" />
-                        <span>Team Training</span>
-                      </div>
-                    </div>
-                    <div>
-                      <div className='gap-3'>
-                        <CircleCheckSolid color="signoz_sienna-400" />
-                        <span>Dashboard Configuration Support</span>
-                      </div>
-                    </div>
-                    <div>
-                      <div className='gap-3'>
-                        <CircleCheckSolid color="signoz_sienna-400" />
-                        <span>Instrumentation Support</span>
-                      </div>
-                    </div>
-                    <div>
-                      <div className='gap-3'>
-                        <CircleCheckSolid color="signoz_sienna-400" />
-                        <span>SLA w/ downtime developer pairing</span>
-                      </div>
-                    </div>
+                    <ul className="ul-no-padding">
+                      <li className='flex gap-3 items-center mb-2 text-signoz_vanilla-400'> <CircleCheckSolid color="signoz_sienna-400" /> Email</li>
+                      <li className='flex gap-3 items-center mb-2 text-signoz_vanilla-400'> <CircleCheckSolid color="signoz_sienna-400" /> Dedicated Slack Channel</li>
+                      <li className='flex gap-3 items-center mb-2 text-signoz_vanilla-400'> <CircleCheckSolid color="signoz_sienna-400" /> Team Training</li>
+                      <li className='flex gap-3 items-center mb-2 text-signoz_vanilla-400'> <CircleCheckSolid color="signoz_sienna-400" /> Dashboard Configuration Support</li>
+                      <li className='flex gap-3 items-center mb-2 text-signoz_vanilla-400'> <CircleCheckSolid color="signoz_sienna-400" /> Instrumentation Support</li>
+                      <li className='flex gap-3 items-center text-signoz_vanilla-400'> <CircleCheckSolid color="signoz_sienna-400" /> SLA w/ downtime developer pairing</li>
+                    </ul>
                   </div>
                   <div className={styles.packageDetailBlock}>
-                    <h4 className={`mt-7 ${styles.packageDetailTitle}`}>Features</h4>
+                    <h4 className={`mt-7 mb-4 ${styles.packageDetailTitle}`}>Features</h4>
                     <ul className="ul-no-padding">
-                      <li className='flex gap-3 items-center'> <CircleCheckSolid /> Includes all features in Teams plan</li>
-                      <li className='flex gap-3 items-center'> <CircleCheckSolid /> Custom integration for metrics and logs</li>
-                      <li className='flex gap-3 items-center'> <CircleCheckSolid /> AWS Private Link</li>
-                      <li className='flex gap-3 items-center'> <CircleCheckSolid /> VPC Peering</li>
-                      <li className='flex gap-3 items-center'> <CircleCheckSolid /> Query API Keys (access data from anywhere)</li>
+                      <li className='flex gap-3 items-center mb-3'> <CircleCheckSolid /> Includes all features in Teams plan</li>
+                      <li className='flex gap-3 items-center mb-3'> <CircleCheckSolid /> Custom integration for metrics and logs<div className="uppercase text-[10px] text-signoz_ink-400 font-semibold bg-signoz_aqua-400 border border-none py-px px-1.5 rounded-[50px] !mb-0">new</div></li>
+                      <li className='flex gap-3 items-center mb-3'> <CircleCheckSolid /> AWS Private Link<div className="uppercase text-[10px] text-signoz_ink-400 font-semibold bg-signoz_aqua-400 border border-none py-px px-1.5 rounded-[50px] !mb-0">new</div></li>
+                      <li className='flex gap-3 items-center mb-3'> <CircleCheckSolid /> VPC Peering</li>
+                      <li className='flex gap-3 items-center mb-3'> <CircleCheckSolid /> Query API Keys (access data from anywhere)</li>
                     </ul>
                   </div>
                   <div className={styles.packageDetailBlock}>
                     <h4 className={`mt-7 ${styles.packageDetailTitle}`}>Coming soon</h4>
                     <ul className="ul-no-padding">
-                      <li className='flex gap-3 items-center'> <ClockSolid /> Finer RBAC with custom roles</li>
-                      <li className='flex gap-3 items-center'> <ClockSolid /> Audit Logs</li>
-                      <li className='flex gap-3 items-center'> <ClockSolid /> Custom retention for different sources of logs</li>
-                      <li className='flex gap-3 items-center'> <ClockSolid /> Multi-tenancy</li>
+                      <li className='flex gap-3 items-center mb-2 text-signoz_vanilla-400'> <ClockSolid /> Finer RBAC with custom roles</li>
+                      <li className='flex gap-3 items-center mb-2 text-signoz_vanilla-400'> <ClockSolid /> Audit Logs</li>
+                      <li className='flex gap-3 items-center mb-2 text-signoz_vanilla-400'> <ClockSolid /> Custom retention for different sources of logs</li>
+                      <li className='flex gap-3 items-center mb-4 text-signoz_vanilla-400'> <ClockSolid /> Multi-tenancy</li>
                     </ul>
                   </div>
                 </div>
                 <div className={`__card__footer ${styles.card__footer}`}>
-                  <Link
-                    id="btn-pricing-signoz-enterprise-2"
-                    className={`flex justify-center items-center py-2 px-4 button-background rounded-full h-10 text-sm font-medium gap-1.5`}
-                    href={'/enterprise-cloud/'}
-                  >
-                    Contact Us <ArrowRight size={14} />
+                  <Link href={'/enterprise-cloud/'}>
+                    <Button className='w-full' type={Button.TYPES.SECONDARY}>
+                      Contact us
+                      <ArrowRight size={14} />
+                    </Button>
                   </Link>
                 </div>
               </div>
@@ -654,19 +602,17 @@ const PricingPlans = () => {
             <div className="pricing-plans mx-auto grid grid-cols-1 justify-center gap-x-8 gap-y-10 md:max-w-md lg:max-w-6xl lg:grid-cols-2">
               <div className="pricing-card rounded-lg bg-opacity-5 px-4 py-5 md:px-8">
                 <div>
-                  <h3 className="font-heading text-2xl font-bold ">Community Edition</h3>
+                  <h3 className="font-heading text-2xl font-bold  pinkish-gradient">Community Edition</h3>
                   <p className="mb-4 text-base leading-relaxed text-gray-400">Free to Self Host
                   </p>
                   <div className="flex items-center gap-3">
-                    <p className="m-0">Install in your infra</p>
+                    <p>Install in your infra</p>
                   </div>
                   <div>
-                    <Link
-                      id="btn-pricing-signoz-cloud-1"
-                      className={`flex justify-center items-center button button--primary ${styles.pricingCtaBtn}`}
-                      href={'/docs/install/'}
-                    >
-                      Documentation
+                    <Link href={'/docs/install/'}>
+                      <Button className='w-full'>
+                        Documentation
+                      </Button>
                     </Link>
                   </div>
                 </div>
@@ -686,45 +632,45 @@ const PricingPlans = () => {
                   <div className={`mt-7 ${styles.packageDetailBlock}`}>
                     <h4 className={styles.packageDetailTitle}>Features</h4>
                     <ul className='ul-no-padding'>
-                      <li className='flex gap-3 items-center'> <CircleCheckSolid /> APM & Distributed Tracing</li>
-                      <li className='flex gap-3 items-center'> <CircleCheckSolid /> Log Management</li>
-                      <li className='flex gap-3 items-center'> <CircleCheckSolid /> Infrastructure Monitoring</li>
-                      <li className='flex gap-3 items-center'> <CircleCheckSolid /> Exceptions Monitoring</li>
-                      <li className='flex gap-3 items-center'> <CircleCheckSolid /> Alerts Management</li>
-                      <li className='flex gap-3 items-center'> <CircleCheckSolid /> SSO and SAML Support</li>
-                      <li className='flex gap-3 items-center'> <CircleCheckSolid /> Service Dependency Visualization</li>
+                      <li className='flex gap-3 items-center mb-3'> <CircleCheckSolid /> APM & Distributed Tracing</li>
+                      <li className='flex gap-3 items-center mb-3'> <CircleCheckSolid /> Log Management</li>
+                      <li className='flex gap-3 items-center mb-3'> <CircleCheckSolid /> Infrastructure Monitoring</li>
+                      <li className='flex gap-3 items-center mb-3'> <CircleCheckSolid /> Exceptions Monitoring</li>
+                      <li className='flex gap-3 items-center mb-3'> <CircleCheckSolid /> Alerts Management</li>
+                      <li className='flex gap-3 items-center mb-3'> <CircleCheckSolid /> SSO and SAML Support</li>
+                      <li className='flex gap-3 items-center mb-6'> <CircleCheckSolid /> Service Dependency Visualization</li>
                     </ul>
                   </div>
                 </div>
                 <div className={`__card__footer ${styles.card__footer}`}>
-                  <Link
-                    id="btn-pricing-signoz-cloud-2"
-                    className={`flex justify-center items-center button button--primary ${styles.pricingCtaBtn}`}
-                    href={'/docs/install/'}
-                  >
-                    Documentation
+                  <Link href={'/docs/install/'}>
+                    <Button className='w-full'>
+                      Documentation
+                    </Button>
                   </Link>
+
                 </div>
               </div>
               <div className="pricing-card rounded-lg bg-opacity-5 px-4 py-5 md:px-8">
                 <div>
-                  <h3 className="font-heading text-2xl font-bold ">Enterprise Edition</h3>
+                  <h3 className="font-heading text-2xl font-bold orangish-gradient">Enterprise Edition</h3>
                   <p className="mb-4 text-base leading-relaxed text-gray-400">
                     For at-scale orgs who want to host SigNoz in their own infra.
                   </p>
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between mb-6">
                     <p className="m-0">
-                      Starts at just
+                      Starts at
                     </p>
-                    <span className="text-xl text-primary-400">$2500/Month*</span>
+                    <div className='w-3/5 border-b border-signoz_slate-400 border-dashed' />
+                    <div className='flex gap-1.5 items-center'>
+                      <span className="text-base font-medium text-signoz_robin-300">$2500/Month*</span><CircleInfoSolid height='16' width='16' />
+                    </div>
                   </div>
                   <div>
-                    <Link
-                      id="btn-pricing-signoz-cloud-1"
-                      className={`flex justify-center items-center py-2 px-4 button-background rounded-full h-10 text-sm font-medium gap-1.5`}
-                      href={'/enterprise/'}
-                    >
-                      Contact us<ArrowRight size={14} />
+                    <Link href={'/enterprise/'}>
+                      <Button className='w-full' type={Button.TYPES.SECONDARY}>
+                        Contact us<ArrowRight size={14} />
+                      </Button>
                     </Link>
                   </div>
 
@@ -749,80 +695,50 @@ const PricingPlans = () => {
                     <h4 className={styles.packageDetailTitle}>Deployment Options</h4>
                     <div>
                       <ul className='ul-no-padding'>
-                        <li className='flex gap-3 items-center'> <CircleCheckSolid /> Self Host with support contract by SigNoz team</li>
+                        <li className='flex gap-3 items-center mb-3'> <CircleCheckSolid /> Self Host with support contract by SigNoz team</li>
                         <li className='flex gap-3 items-center'> <CircleCheckSolid /> Managed by SigNoz in your cloud</li>
                       </ul>
                     </div>
                   </div>
-                  <div className={`mt-7 ${styles.support} ${styles.packageDetailBlock}`}>
+                  <div className={`mt-7`}>
                     <h4 className={styles.packageDetailTitle}>Support</h4>
-                    <div>
-                      <div className='gap-3'>
-                        <CircleCheckSolid color="signoz_sienna-400" />
-                        <span>Email</span>
-                      </div>
-                    </div>
-                    <div>
-                      <div className='gap-3'>
-                        <CircleCheckSolid color="signoz_sienna-400" />
-                        <span>Dedicated Slack Channel</span>
-                      </div>
-                    </div>
-                    <div>
-                      <div className='gap-3'>
-                        <CircleCheckSolid color="signoz_sienna-400" />
-                        <span>Team Training</span>
-                      </div>
-                    </div>
-                    <div>
-                      <div className='gap-3'>
-                        <CircleCheckSolid color="signoz_sienna-400" />
-                        <span>Dashboard Configuration Support</span>
-                      </div>
-                    </div>
-                    <div>
-                      <div className='gap-3'>
-                        <CircleCheckSolid color="signoz_sienna-400" />
-                        <span>Instrumentation Support</span>
-                      </div>
-                    </div>
-                    <div>
-                      <div className='gap-3'>
-                        <CircleCheckSolid color="signoz_sienna-400" />
-                        <span>SLA w/ downtime developer pairing</span>
-                      </div>
-                    </div>
+                    <ul className="ul-no-padding">
+                      <li className='flex gap-3 items-center mb-2 text-signoz_vanilla-400'> <CircleCheckSolid color="signoz_sienna-400" /> Email</li>
+                      <li className='flex gap-3 items-center mb-2 text-signoz_vanilla-400'> <CircleCheckSolid color="signoz_sienna-400" /> Dedicated Slack Channel</li>
+                      <li className='flex gap-3 items-center mb-2 text-signoz_vanilla-400'> <CircleCheckSolid color="signoz_sienna-400" /> Team Training</li>
+                      <li className='flex gap-3 items-center mb-2 text-signoz_vanilla-400'> <CircleCheckSolid color="signoz_sienna-400" /> Dashboard Configuration Support</li>
+                      <li className='flex gap-3 items-center mb-2 text-signoz_vanilla-400'> <CircleCheckSolid color="signoz_sienna-400" /> Instrumentation Support</li>
+                      <li className='flex gap-3 items-center text-signoz_vanilla-400'> <CircleCheckSolid color="signoz_sienna-400" /> SLA w/ downtime developer pairing</li>
+                    </ul>
                   </div>
                   <div className={`mt-7 ${styles.packageDetailBlock}`}>
                     <h4 className={styles.packageDetailTitle}>Features</h4>
-                    <p className={styles.featureBlur}>Includes all features in community edition</p>
+                    <p className="mt-1 text-sm text-signoz_vanilla-400">Includes all features in community edition</p>
                     <ul className="ul-no-padding">
-                      <li className='flex gap-3 items-center'> <CircleCheckSolid /> SSO and SAML Support</li>
-                      <li className='flex gap-3 items-center'> <CircleCheckSolid /> Dashboard locking</li>
-                      <li className='flex gap-3 items-center'> <CircleCheckSolid /> Visualize very large traces (&gt;10K spans)</li>
-                      <li className='flex gap-3 items-center'> <CircleCheckSolid /> Run aggregates on ingested spans</li>
-                      <li className='flex gap-3 items-center'> <CircleCheckSolid /> Security tightening for on-prem installation</li>
-                      <li className='flex gap-3 items-center'> <CircleCheckSolid /> Monitor Health of SigNoz</li>
+                      <li className='flex gap-3 items-center mb-3'> <CircleCheckSolid /> SSO and SAML Support</li>
+                      <li className='flex gap-3 items-center mb-3'> <CircleCheckSolid /> Dashboard locking</li>
+                      <li className='flex gap-3 items-center mb-3'> <CircleCheckSolid /> Visualize very large traces<span className="uppercase text-xs text-signoz_vanilla-400 bg-signoz_slate-400 border border-none px-2 py-1 rounded-full">&gt;10k spans</span></li>
+                      <li className='flex gap-3 items-center mb-3'> <CircleCheckSolid /> Run aggregates on ingested spans</li>
+                      <li className='flex gap-3 items-center mb-3'> <CircleCheckSolid /> Security tightening for on-prem installation</li>
+                      <li className='flex gap-3 items-center mb-3'> <CircleCheckSolid /> Monitor Health of SigNoz</li>
                       <li className='flex gap-3 items-center'> <CircleCheckSolid /> Query API Keys (access data from anywhere)</li>
                     </ul>
                   </div>
                   <div className={`mt-7 ${styles.packageDetailBlock}`}>
                     <h4 className={styles.packageDetailTitle}>Coming soon</h4>
                     <ul className="ul-no-padding">
-                      <li className='flex gap-3 items-center'> <ClockSolid />  Finer RBAC with custom roles</li>
-                      <li className='flex gap-3 items-center'> <ClockSolid />  Audit Logs</li>
-                      <li className='flex gap-3 items-center'> <ClockSolid />  Custom retention for different sources of logs</li>
-                      <li className='flex gap-3 items-center'> <ClockSolid />  Multi-tenancy</li>
+                      <li className='flex gap-3 items-center mb-2 text-signoz_vanilla-400'> <ClockSolid />  Finer RBAC with custom roles</li>
+                      <li className='flex gap-3 items-center mb-2 text-signoz_vanilla-400'> <ClockSolid />  Audit Logs</li>
+                      <li className='flex gap-3 items-center mb-2 text-signoz_vanilla-400'> <ClockSolid />  Custom retention for different sources of logs</li>
+                      <li className='flex gap-3 items-center mb-2 text-signoz_vanilla-400'> <ClockSolid />  Multi-tenancy</li>
                     </ul>
                   </div>
                 </div>
                 <div className={`__card__footer ${styles.card__footer}`}>
-                  <Link
-                    id="btn-pricing-signoz-enterprise-2"
-                    className={`flex justify-center items-center py-2 px-4 button-background rounded-full h-10 text-sm font-medium gap-1.5`}
-                    href={'/enterprise/'}
-                  >
-                    Contact Us <ArrowRight size={14} />
+                  <Link href={'/enterprise/'}>
+                    <Button className='w-full' type={Button.TYPES.SECONDARY}>
+                      Contact us<ArrowRight size={14} />
+                    </Button>
                   </Link>
                 </div>
               </div>
@@ -840,10 +756,10 @@ const ExploreAllFeature = () => {
   const ALL_FEATURES_DATA = {
     HEADER: [
       { heading: '', desc: '' },
-      { heading: 'Community Edition', desc: '$0 ⎯ host in your infra', action: <Link href={'/docs/introduction'} className='button-background h-8 pr-3 pl-4 py-2 rounded-full text-sm flex items-center justify-center gap-1.5 truncate text-center font-medium leading-5 text-white'>Read Documenation</Link> },
-      { heading: 'Teams', desc: 'Cloud ⎯ starts at $199/mo', action: <Link href={'/teams/'} className='bg-signoz_robin-500 h-8 pr-3 pl-4 py-2 rounded-full text-sm flex items-center justify-center gap-1.5 truncate text-center font-medium leading-5 text-white '>Get Started</Link> },
+      { heading: 'Community Edition', desc: '$0 ⎯ host in your infra', action: <Link href={'/docs/introduction'} className='button-background h-8 pr-3 pl-4 py-2 rounded-full text-sm flex items-center justify-center gap-1.5 truncate text-center font-medium leading-5 text-white w-full'>Read Documenation</Link> },
+      { heading: 'Teams', desc: 'Cloud ⎯ starts at $199/mo', action: <Link href={'/teams/'} className='bg-signoz_robin-500 h-8 pr-3 pl-4 py-2 rounded-full text-sm flex items-center justify-center gap-1.5 truncate text-center font-medium leading-5 text-white w-full '>Get Started</Link> },
       {
-        heading: 'Enterprise', desc: 'Cloud / Self-Hosted', action: <Link href={'/enterprise-cloud/'} className='button-background h-8 pr-3 pl-4 py-2 rounded-full text-sm flex items-center justify-center gap-1.5 text-center font-medium leading-5 text-white'>Contact Us</Link>
+        heading: 'Enterprise', desc: 'Cloud / Self-Hosted', action: <Link href={'/enterprise-cloud/'} className='button-background h-8 pr-3 pl-4 py-2 rounded-full text-sm flex items-center justify-center gap-1.5 text-center font-medium leading-5 text-white w-full'>Contact Us</Link>
       },
     ],
     ROWS: [
@@ -904,64 +820,264 @@ const ExploreAllFeature = () => {
           },
           {
             feature: 'Create direct filters from JSON logs',
-            inCommunity: null,
-            inTeams: null,
-            inEnterprise: null,
+            inCommunity: <CheckSolid />,
+            inTeams: <CheckSolid />,
+            inEnterprise: <CheckSolid />,
+          },
+          {
+            feature: 'Saved Views for logs',
+            inCommunity: <CheckSolid />,
+            inTeams: <CheckSolid />,
+            inEnterprise: <CheckSolid />,
+          },
+          {
+            feature: 'Live tail Logging',
+            inCommunity: <CheckSolid />,
+            inTeams: <CheckSolid />,
+            inEnterprise: <CheckSolid />,
+          },
+          {
+            feature: 'Unlimited dashboards & alerts based on logs',
+            inCommunity: <CheckSolid />,
+            inTeams: <CheckSolid />,
+            inEnterprise: <CheckSolid />,
           },
         ],
       },
       {
-        section: 'Features',
+        section: 'Infrastructure Monitoring',
         features: [
           {
-            feature: 'Role-based Access Control',
-            inCommunity: null,
-            inTeams: null,
-            inEnterprise: null,
+            feature: 'Out of the box dashboards for hostmetrics',
+            inCommunity: <CheckSolid />,
+            inTeams: <CheckSolid />,
+            inEnterprise: <CheckSolid /> ,
           },
           {
-            feature: 'Audit log',
-            inCommunity: null,
-            inTeams: null,
-            inEnterprise: null,
+            feature: 'Kubernetes Monitoring',
+            inCommunity: <CheckSolid />,
+            inTeams: <CheckSolid />,
+            inEnterprise: <CheckSolid /> ,
           },
           {
-            feature: 'Reports & Insights',
-            inCommunity: null,
-            inTeams: null,
-            inEnterprise: null,
+            feature: 'Container Monitoring',
+            inCommunity: <CheckSolid />,
+            inTeams: <CheckSolid />,
+            inEnterprise: <CheckSolid /> ,
           },
           {
-            feature: 'API & Webhooks',
-            inCommunity: null,
-            inTeams: null,
-            inEnterprise: null,
+            feature: 'Unlimited dashboards & alerts based on metrics',
+            inCommunity: <CheckSolid />,
+            inTeams: <CheckSolid />,
+            inEnterprise: <CheckSolid /> ,
           },
         ],
       },
+      {
+        section: 'Exceptions Monitoring',
+        features: [
+          {
+            feature: 'Separate view of exceptions based on Trace data',
+            inCommunity: <CheckSolid />,
+            inTeams: <CheckSolid />,
+            inEnterprise: <CheckSolid /> ,
+          },
+        ],
+      },
+      {
+        section: 'Alerts Management',
+        features: [
+          {
+            feature: 'Create alerts directly from dashboards',
+            inCommunity: <CheckSolid />,
+            inTeams: <CheckSolid />,
+            inEnterprise: <CheckSolid /> ,
+          },
+          {
+            feature: 'Support for Slack, Pagerduty, OpsGenie & webhooks as alert channel',
+            inCommunity: <CheckSolid />,
+            inTeams: <CheckSolid />,
+            inEnterprise: <CheckSolid /> ,
+          },
+          {
+            feature: 'MS Teams as alert channel',
+            inCommunity: <CrossSolid />,
+            inTeams: <CheckSolid />,
+            inEnterprise: <CheckSolid /> ,
+          },
+        ],
+      },
+      {
+        section: 'Data Pipelines',
+        features: [
+          {
+            feature: 'Support for Cold Storage for long term data archival',
+            inCommunity: <CheckSolid />,
+            inTeams: <div className="flex items-center">
+            <FlameSolid />
+            <span className="ml-1.5 text-xs">EARLY ACCESS</span>
+          </div>,
+            inEnterprise: <div className="flex items-center">
+            <FlameSolid />
+            <span className="ml-1.5 text-xs">EARLY ACCESS</span>
+          </div>,
+          },
+        ],
+      },
+      {
+        section: 'Service Dependency Visualization',
+        features: [
+          {
+            feature: 'Overview of your application graph with health indication',
+            inCommunity: <CheckSolid />,
+            inTeams: <CheckSolid />,
+            inEnterprise: <CheckSolid /> ,
+          },
+        ],
+      },
+      {
+        section: 'Configuration',
+        features: [
+          {
+            feature: 'SSO/SAML support',
+            inCommunity: <CrossSolid/>,
+            inTeams: <CheckSolid />,
+            inEnterprise: <CheckSolid /> ,
+          },
+          {
+            feature: 'Dashboard Locking & Access control',
+            inCommunity: <CrossSolid/>,
+            inTeams: <CheckSolid />,
+            inEnterprise: <CheckSolid /> ,
+          },
+          {
+            feature: 'Security tightening for on-premise installation',
+            inCommunity: <CrossSolid/>,
+            inTeams: <CheckSolid />,
+            inEnterprise: <div className="flex items-center">
+            <ServerSolid />
+            <span className="ml-1.5 text-xs">SELF-HOSTED</span>
+          </div>,
+          },
+          {
+            feature: 'Monitor Health of SigNoz',
+            inCommunity: <CrossSolid/>,
+            inTeams: <CheckSolid />,
+            inEnterprise: <div className="flex items-center">
+            <ServerSolid />
+            <span className="ml-1.5 text-xs">SELF-HOSTED</span>
+          </div>,
+          },
+          {
+            feature: 'Finer RBAC with custom roles',
+            inCommunity: <CrossSolid/>,
+            inTeams: <CheckSolid />,
+            inEnterprise: <div className="flex items-center">
+            <ClockSolid height='15' width='15' />
+            <span className="ml-1.5 text-xs">COMING SOON</span>
+          </div>,
+          },
+          {
+            feature: 'AWS Private link',
+            inCommunity: <CrossSolid/>,
+            inTeams: <CheckSolid />,
+            inEnterprise: <div className="flex items-center">
+            <CloudSolid />
+            <span className="ml-1.5 text-xs">CLOUD</span>
+          </div>,
+          },
+          {
+            feature: 'Alert as code',
+            inCommunity: <CrossSolid/>,
+            inTeams: <CheckSolid />,
+            inEnterprise: <div className="flex items-center">
+            <ClockSolid height='15' width='15' />
+            <span className="ml-1.5 text-xs">COMING SOON</span>
+          </div>,
+          },
+          {
+            feature: 'Audit Logs',
+            inCommunity: <CrossSolid/>,
+            inTeams: <CheckSolid />,
+            inEnterprise: <div className="flex items-center">
+            <ClockSolid height='15' width='15' />
+            <span className="ml-1.5 text-xs">COMING SOON</span>
+          </div>,
+          },
+          {
+            feature: 'Custom retention for different sources of logs',
+            inCommunity: <CrossSolid/>,
+            inTeams: <CheckSolid />,
+            inEnterprise: <div className="flex items-center">
+            <ClockSolid height='15' width='15' />
+            <span className="ml-1.5 text-xs">COMING SOON</span>
+          </div>,
+          },
+          {
+            feature: 'Access Data in SigNoz from Anywhere (via API keys)',
+            inCommunity: <CrossSolid/>,
+            inTeams: <CheckSolid />,
+            inEnterprise: <CheckSolid /> ,
+          },
+          {
+            feature: 'Multi-tenancy',
+            inCommunity: <CrossSolid/>,
+            inTeams: <CheckSolid />,
+            inEnterprise: <CheckSolid /> ,
+          },
+        ],
+      },
+
       {
         section: 'Support',
         features: [
           {
-            feature: 'Community Support',
-            inCommunity: <div className="flex items-center">
-              <FlameSolid />
-              <span className="ml-1.5 text-xs">EARLY ACCESS</span>
-            </div>,
+            feature: 'Community Support on Slack',
+            inCommunity: <CheckSolid />,
             inTeams: <CheckSolid />,
-            inEnterprise: <div className="flex items-center">
-              <CloudSolid />
-              <span className="ml-1.5 text-xs">CLOUD</span>
-            </div>,
+            inEnterprise: <CheckSolid /> ,
           },
           {
-            feature: 'Priority Support',
+            feature: 'Email Support',
             inCommunity: <CrossSolid />,
             inTeams: <CheckSolid />,
-            inEnterprise: <div className="flex items-center">
-              <ServerSolid />
-              <span className="ml-1.5 text-xs">SELF-HOSTED</span>
-            </div>,
+            inEnterprise: <CheckSolid /> ,
+          },
+          {
+            feature: 'In product chat support',
+            inCommunity: <CrossSolid />,
+            inTeams: <CheckSolid />,
+            inEnterprise: <CheckSolid /> ,
+          },
+          {
+            feature: 'Dedicated Slack Channel',
+            inCommunity: <CrossSolid />,
+            inTeams: <CrossSolid />,
+            inEnterprise: <CheckSolid /> ,
+          },
+          {
+            feature: 'Team Training',
+            inCommunity: <CrossSolid />,
+            inTeams: <CrossSolid />,
+            inEnterprise: <CheckSolid /> ,
+          },
+          {
+            feature: 'Dashboard Configuration Support',
+            inCommunity: <CrossSolid />,
+            inTeams: <CrossSolid />,
+            inEnterprise: <CheckSolid /> ,
+          },
+          {
+            feature: 'Instrumentation Support',
+            inCommunity: <CrossSolid />,
+            inTeams: <CrossSolid />,
+            inEnterprise: <CheckSolid /> ,
+          },
+          {
+            feature: 'SLA w/ downtime developer pairingl',
+            inCommunity: <CrossSolid />,
+            inTeams: <CrossSolid />,
+            inEnterprise: <CheckSolid /> ,
           },
         ],
       },
@@ -975,20 +1091,20 @@ const ExploreAllFeature = () => {
   }
 
   return (
-    <div className="relative mx-5 md:mx-0 border border-signoz_slate-400 border-dashed">
+    <div className="relative mx-5 md:mx-0 !mx-auto !w-[80vw] border border-signoz_slate-400 border-dashed !border-t-0 !m-0">
       <div className="mx-auto overflow-hidden md:max-w-md lg:max-w-6xl">
         <div className="mt-10">
-          <div className="ovc-table_top-wrapper grid grid-cols-3 gap-1 md:grid-cols-4">
+          <div className="ovc-table_top-wrapper grid grid-cols-3 gap-1 md:grid-cols-[3fr_1fr_1fr_1fr]">
             {ALL_FEATURES_DATA.HEADER.map((h, idx) => {
               return (
                 <div
                   key={idx}
-                  className={`${idx !== 0 ? `rounded-lg p-2 ${Opacity[idx]}` : 'hidden md:block'
+                  className={`${idx !== 0 ? `rounded-lg p-3 ${Opacity[idx]}` : 'hidden md:block'
                     }`}
                 >
-                  <h2 className="m-0 text-lg md:text-2xl">{h.heading}</h2>
-                  <p className="text-base md:text-lg">{h.desc}</p>
-                  <div className='flex justify-center'>{h.action}</div>
+                  <h2 className="m-0 text-lg md:text-base">{h.heading}</h2>
+                  <p className="text-base md:text-xs text-signoz_vanilla-400">{h.desc}</p>
+                  <div className='flex justify-cente w-fullr'>{h.action}</div>
                 </div>
               )
             })}
@@ -996,36 +1112,7 @@ const ExploreAllFeature = () => {
           <Line />
         </div>
       </div>
-      {/* {!isOpened ? (
-        <div
-          className={`wavy-line relative mb-16
-        after:absolute after:top-[50%] after:h-0 after:w-full after:bg-transparent after:content-['']
-      `}
-        >
-          <div
-            className={`relative my-5 flex justify-center
-            before:absolute before:left-0 before:top-[0] before:h-20 before:w-full before:bg-[#1b1b1d] before:opacity-100 before:blur-xl before:backdrop-blur-xl before:content-['']  
-            after:absolute after:bottom-[0] after:left-0 after:h-20 after:w-full after:bg-[#1b1b1d] after:opacity-100 after:blur-xl after:backdrop-blur-xl after:content-['']
-          `}
-          >
-            <div className="z-[1] flex rounded-3xl">
-              <nav className={`flex space-x-2 rounded-3xl ${styles.pricingTabContainer}`}>
-                <button
-                  type="button"
-                  className={`button button--primary text-md flex flex-nowrap items-center gap-2 font-bold`}
-                  onClick={() => setIsOpened(!isOpened)}
-                >
-                  <span>Explore all Features</span>
-                  <span className={isOpened ? 'rotate-180' : ''}>
-                    <Chevron />
-                  </span>
-                </button>
-              </nav>
-            </div>
-          </div>
-        </div>
-      ) : null} */}
-      {/* {isOpened ? ( */}
+
       <div className="mx-auto md:max-w-md lg:max-w-6xl">
         <div className="mb-10">
           <div className="container-medium">
@@ -1036,29 +1123,28 @@ const ExploreAllFeature = () => {
                     key={i}
                     className={`${false ? `rounded-lg bg-opacity-[${i}]` : ''}`}
                   >
-
-                    <h3 className="mt-12 mb-3 p-2 text-center text-sm font-medium md:text-left">{row.section}</h3>
+                    <h3 className="mt-12 mb-3 pl-6 pr-2 py-2 text-center text-sm font-medium md:text-left">{row.section}</h3>
                     <Line />
                     <div className=" grid grid-cols-1 gap-1">
                       {row.features.map((r, idx) => {
                         return (
                           <div key={idx}>
-                            <div className="grid grid-cols-3 gap-1 md:grid-cols-4 mb-3">
-                              <h4 className="col-span-3 m-0 p-2 text-center text-sm text-signoz_vanilla-400 font-normal md:col-span-1 md:text-left">
+                            <div className="grid grid-cols-3 gap-1 md:grid-cols-[3fr_1fr_1fr_1fr]">
+                              <h4 className="col-span-3 m-0 pl-6 pr-2 py-3 text-center text-sm text-signoz_vanilla-400 font-normal md:col-span-1 md:text-left">
                                 {r.feature}
                               </h4>
                               <div
-                                className={`flex items-center rounded-lg p-2 text-center`}
+                                className={`flex items-center rounded-lg p-3 justify-center sm:justify-left`}
                               >
                                 {r.inCommunity}
                               </div>
                               <div
-                                className={`flex items-center rounded-lg p-2 text-center`}
+                                className={`flex items-center rounded-lg p-3 justify-center sm:justify-left`}
                               >
                                 {r.inTeams}
                               </div>
                               <div
-                                className={`flex items-center rounded-lg  p-2 text-center`}
+                                className={`flex items-center rounded-lg p-3 justify-center sm:justify-left`}
                               >
                                 {r.inEnterprise}
                               </div>

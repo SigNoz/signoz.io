@@ -105,10 +105,6 @@ export const Testimonials = () => {
   ]
   return (
     <section>
-      {/* background-size: 100%;
-    background-repeat: no-repeat;
-    background-position-x: center;
-    background-position-y: -500px; */}
       <div className="!w-[80vw] !mx-auto container py-24 flex flex-col items-center border border-signoz_slate-400 border-dashed !border-b-0 bg-[length:auto_100%] bg-no-repeat bg-[center_top_-32rem] bg-[url('/img/background_blur/Footer_backdrop.png')]">
         <div className="mb-16 flex flex-col items-center text-center gap-12 w-[880px]">
           <img src="/img/users/incident_io.svg" alt="incident.io logo" />

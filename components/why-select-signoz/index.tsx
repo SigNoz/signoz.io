@@ -36,7 +36,7 @@ const WhySelectSignoz = ({ isInPricingPage = false }) => {
           {
             isInPricingPage ? <SignozDatalog /> : null
           }
-          <DataProtectionLaws />
+          <DataProtectionLaws isInPricingPage= {isInPricingPage} />
           {
             !isInPricingPage ? <PricingStructure /> : null
           }
