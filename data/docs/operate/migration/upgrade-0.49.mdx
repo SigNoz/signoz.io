@@ -5,15 +5,20 @@ title: Upgrade to v0.49 from earlier versions
 ---
 
 In SigNoz version >= v0.36, support for `.` in log attribute names was added.
-Before that, any `.` in log attribute names would get replaced by an `_`
+Before that, any `.` in log attribute names would get replaced by an `_`  
+For example, the attribute `k8s.pod.name` would appear as `k8s_pod_name` in SigNoz
 
 SigNoz versions < v0.49 have a measure in place to ensure log pipelines that were created
 with filters based on attributes whose `.`s had been replaced with `_`s worked fine with raw
-logs that had such attributes with `.`s in them instead of `_`s.
+logs that had such attributes with `.`s in them instead of `_`s.  
+So a pipeline with the filter `k8s_pod_name = test-pod` would work even though actual raw
+logs being sent to SigNoz only had the attribute `k8s.pod.name = test-pod`
 
 In SigNoz version >=v0.49 i.e. SigNoz chart version >=0.45.0, this measure is being removed.  
-So after this upgrade, any such pipelines will only work if the attributes in their filters
-are updated to their `.` based name.
+After this upgrade, any such pipelines that use filters based on attributes whose `.`s had
+been replaced with `_`s will only work if the filters are updated to use `.` based names.  
+So after this upgrade, any pipeline that had the filter `k8s_pod_name = test-pod`
+will only work if the filter is updated to `k8s.pod.name = test-pod`
 
 ## Steps to Update Pipeline Filters If Needed
 
