@@ -1,0 +1,62 @@
+---
+date: 2024-07-03
+title: Ingestion Endpoints 
+id: overview
+---
+
+## Regional Endpoints
+
+|Region|Endpoint|Ports|
+|:---:|:---:| :---: |
+|US|```https://ingest.us.signoz.cloud```| ```443``` |
+|IN|```https://ingest.in.signoz.cloud```| ```443```|
+|EU||```https://ingest.eu.signoz.cloud```| ```443``` |
+
+## Authentication
+Option 1 : Using `signoz-access-token` [Recommended]
+Option 2 : Using `basic authorization`
+
+## Additional Information
+16MB max size per POST request
+CORS enabled with the access-control-headers
+The payload must be encoded as UTF-8.
+
+## Sending OTLP data
+
+#### Configuring the endpoint and protocol
+In order to configure send OTLP data to Signoz, you must configure your OTLP exporter to use the relevant endpoint and port from the table below based on your environment.
+
+The mechanism to configure the endpoint will vary, but OpenTelemetry language SDKs generally support setting the OTEL_EXPORTER_OTLP_ENDPOINT=<INSERT_ENDPOINT> environment variable (see OpenTelemetry docs for more info).
+
+Config: Payload batching, timeout, compression and rate limits 
+Requirement level: Required
+
+In order to send OTLP data to Signoz, your payloads must be smaller than the 1MB (10^6 bytes) maximum payload size. Larger payloads will be rejected with an error status code. Larger payloads may also fail to export with a timeout before an error status code is returned.
+
+To avoid payload size limits and rate limits, you must configure your OTLP exporter to use an appropriate batch size which causes data to be exported on an appropriate interval.
+
+The mechanism for configuring batching will vary. OpenTelemetry SDKs generally support setting the following environment variables (see OpenTelemetry docs for more info):
+
+OTEL_BSP_* for spans
+OTEL_METRIC_EXPORT_* for metrics
+OTEL_BLRP_* for logs
+If using the collector, the batch processor controls batch size.
+
+Additionally, you should pay attention to exporter timeout settings. Generally, export requests take longer when payloads are larger and when networks are slower (higher latency, lower bandwidth). If your application produces large payloads because telemetry volume is high or the export interval is high, you may need to increase the default timeout settings to avoid export errors.
+
+The mechanism to configure timeout will vary, but OpenTelemetry language SDKs generally support setting the OTEL_EXPORTER_OTLP_TIMEOUT environment variable (see OpenTelemetry docs for more info).
+
+Additionally, you should enable compression to reduce payload size and limit the likelihood of encountering payload size limits. Signoz supports gzip and zstd compression. zstd compression is higher performance and recommended if your exporter supports it. See compression comparison for more details on benchmark information.
+
+The mechanism to configure the endpoint will vary, but OpenTelemetry language SDKs generally support setting the OTEL_EXPORTER_OTLP_COMPRESSION=gzip environment variable (see OpenTelemetry docs for more info).
+
+If using the collector, gzip is the default compression, but zstd can be optionally configured.
+
+Config: Retry 
+Requirement level: Recommended
+
+In order to send OTLP data to Signoz, you should configure your OTLP exporter to retry when transient errors occur. The internet is unreliable, and failure to retry increases the likelihood of data loss.
+
+The mechanism to configure retry will vary. Some OpenTelemetry SDKs may have language specific environment variables (for example java supports setting OTEL_EXPERIMENTAL_EXPORTER_OTLP_RETRY_ENABLED=true), but there is no general mechanism. Programmatic configuration may be required.
+
+If using the collector, the otlphttpexporter and otlpexporter retry by default. See exporterhelper for more details.
