@@ -167,3 +167,35 @@ Your pull request will be reviewed, and if everything looks good, it will be mer
 - **Images**: Make sure to place your images in the correct month folder under `public/img/blog`.
 
 If you have any questions or need further assistance, feel free to reach out to the SigNoz team.
+
+---
+
+## Add a `NEW` tag to Documentation
+
+We can add a `NEW` tag for doc that went live recently. To do this, you just need to add `className: 'new-doc'` key value pair to the doc in the `docsSideNav.ts` file. For example, if a new doc for LLM monitoring went live, you can add a new tag to it as follows:
+
+```tsx
+{
+    route: '/docs/community/llm-monitoring',
+    label: 'LLM Monitoring',
+    type: 'doc',
+    className: 'new-doc',
+},
+
+```
+
+You can do the same for a Category. For example, if you're adding a new category with the label `Azure Monitoring` and it has multiple docs inside it, you can add a new tag as shown below:
+
+```tsx
+
+{
+    label: 'Azure Monitoring',
+    type: 'category',
+    className: 'new-doc',
+    items: [
+      { 
+        ...
+      },
+    ],
+
+```
