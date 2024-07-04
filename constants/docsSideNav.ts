@@ -250,6 +250,11 @@ const docsSideNav = [
                 route: '/docs/instrumentation/angular',
                 label: 'Angular',
               },
+              {
+                type: 'doc',
+                route: '/docs/instrumentation/nextjs',
+                label: 'NextJS',
+              },
             ],
           },
           {
@@ -295,19 +300,19 @@ const docsSideNav = [
             // type: 'doc',
             // },
             items: [
-                {
-                  type: 'category',
-                  label: 'JavaScript',
-                  // route: '',
-                  // link: {
-                  // type: 'doc',
-                  // },
-                  items: [
-                    {
-                      type: 'doc',
-                      label: 'NodeJS',
-                      route: '/docs/instrumentation/manual-instrumentation/javascript/nodejs',
-                   },
+              {
+                type: 'category',
+                label: 'JavaScript',
+                // route: '',
+                // link: {
+                // type: 'doc',
+                // },
+                items: [
+                  {
+                    type: 'doc',
+                    label: 'NodeJS',
+                    route: '/docs/instrumentation/manual-instrumentation/javascript/nodejs',
+                  },
                 ],
               },
             ],
@@ -552,7 +557,8 @@ const docsSideNav = [
           },
           {
             type: 'doc',
-            route: '/docs/logs-management/send-logs/collect-tomcat-access-and-garbage-collector-logs',
+            route:
+              '/docs/logs-management/send-logs/collect-tomcat-access-and-garbage-collector-logs',
             label: 'Tomcat',
           },
         ],
@@ -651,6 +657,12 @@ const docsSideNav = [
       },
       {
         type: 'doc',
+        route: '/docs/logs-management/long-term-storage',
+        label: 'Long Term Storage',
+        className: 'new-doc',
+      },
+      {
+        type: 'doc',
         route: '/docs/userguide/logs_troubleshooting',
         label: 'Troubleshooting',
       },
@@ -741,11 +753,11 @@ const docsSideNav = [
     type: 'category',
     // route: '',
     items: [
-      {
-        type: 'doc',
-        route: '/docs/userguide/create-a-custom-query',
-        label: 'Create a Custom Query',
-      },
+      // {
+      //   type: 'doc',
+      //   route: '/docs/userguide/create-a-custom-query',
+      //   label: 'Create a Custom Query',
+      // },
       {
         type: 'doc',
         route: '/docs/userguide/query-builder',
@@ -1240,6 +1252,11 @@ const docsSideNav = [
         items: [
           {
             type: 'doc',
+            route: '/docs/operate/migration/upgrade-0.49',
+            label: 'Upgrade to v0.49',
+          },
+          {
+            type: 'doc',
             route: '/docs/operate/migration/upgrade-0.45',
             label: 'Upgrade to v0.45',
           },
@@ -1427,7 +1444,8 @@ const docsSideNav = [
       {
         label: 'SigNoz Cloud',
         type: 'category',
-          items: [{
+        items: [
+          {
             type: 'doc',
             route: '/docs/troubleshooting/signoz-cloud/general-troubleshooting',
             label: 'General Troubleshooting',
