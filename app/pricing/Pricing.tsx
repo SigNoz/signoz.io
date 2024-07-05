@@ -27,31 +27,34 @@ import { CircleCheckSolid, CircleInfoSolid, ZapSolid, ClockSolid, CheckSolid, Cr
 
 function Pricing() {
   return (
-    <div title="SigNoz Plans">
-      {/* Plans */}
-      <PricingPlans />
-      {/* All Features */}
-      <TrustedByTeams />
-      {/* Cost Comparison Graph */}
-      <ExploreAllFeature />
-      {/* Companies Logo */}
-      {/* <CostComparison /> */}
-      {/* <WhySelectSignoz/> */}
-      {/* Data protection */}
-      {/* <DataProtection /> */}
-      {/* Talk To Expert */}
-      {/* <TalkToExpert /> */}
-      {/* More Options */}
-      {/* <CommunityEdition /> */}
-      {/* FAQ section */}
-      <MonthlyEstimate />
-      <WhySelectSignoz isInPricingPage />
-      <FAQ />
-      {/* User Review */}
-      {/* <UserReview /> */}
-      {/* Give a Try CTA */}
-      {/* <TrySigNozCTA /> */}
-      <Testimonials />
+    <div className='bg-signoz_ink-500 relative mt-[100px]'>
+
+      <div title="SigNoz Plans">
+        {/* Plans */}
+        <PricingPlans />
+        {/* All Features */}
+        <TrustedByTeams />
+        {/* Cost Comparison Graph */}
+        <ExploreAllFeature />
+        {/* Companies Logo */}
+        {/* <CostComparison /> */}
+        {/* <WhySelectSignoz/> */}
+        {/* Data protection */}
+        {/* <DataProtection /> */}
+        {/* Talk To Expert */}
+        {/* <TalkToExpert /> */}
+        {/* More Options */}
+        {/* <CommunityEdition /> */}
+        {/* FAQ section */}
+        <MonthlyEstimate />
+        <WhySelectSignoz isInPricingPage />
+        <FAQ />
+        {/* User Review */}
+        {/* <UserReview /> */}
+        {/* Give a Try CTA */}
+        {/* <TrySigNozCTA /> */}
+        <Testimonials />
+      </div>
     </div>
   )
 }
@@ -62,7 +65,7 @@ function FAQ() {
   return (
     <section className={styles.faq}>
       <div className={`container !w-[80vw] border border-signoz_slate-400 border-dashed !border-b-0 !px-0`}>
-        <div className="row max-w-6xl mx-auto">
+        <div className="row mx-auto">
           <div className="flex flex-col sm:flex-row w-full">
             <div className='flex-1 !w-[300px]'>
               <p className="text-4xl sm:text-[44px] font-semibold text-signoz_vanilla-100 leading-[3.5rem] pl-12 pt-10">Frequently<br />Asked <br />Questions</p>
@@ -235,7 +238,7 @@ const PricingPlans = () => {
                     For teams that need high-performing applications.
                   </p>
                   <div className="flex items-center justify-between mb-6">
-                    <p className="m-0">
+                    <p className="m-0 min-w-[72px]">
                       Starts at
                     </p>
                     <div className='w-3/5 border-b border-signoz_slate-400 border-dashed' />
@@ -253,10 +256,10 @@ const PricingPlans = () => {
                     </Link>
                   </div>
                 </div>
-                
+
                 <div className="__card__body">
                   <div className={`mt-7 ${styles.packageDetailBlock}`}>
-                    <h4 className={styles.packageDetailTitle}>Pricing</h4>
+                    <h4 className={`${styles.packageDetailTitle}`}>Pricing</h4>
                     <div>
                       <div className='gap-3'>
                         <img src="/img/index_features/logs.svg" alt="Logs Icon" className="w-5 h-5" />
@@ -363,7 +366,15 @@ const PricingPlans = () => {
                         <span>
                           Learn how the price for metrics is calculated
                         </span>
-                        <ArrowUpRight size={20} />
+                        <button onClick={() => {
+                          const element = document.getElementById('my-section');
+                          element?.scrollIntoView({
+                            behavior: 'smooth'
+                          });
+                        }}>
+                          <ArrowUpRight size={20} />
+
+                        </button>
                       </div>
                     </div>
                     <div>
@@ -385,7 +396,7 @@ const PricingPlans = () => {
 
                   </div>
                   <div className={` mt-7 ${styles.support} ${styles.packageDetailBlock}`}>
-                    <h4 className={styles.packageDetailTitle}>Support</h4>
+                    <h4 className={`${styles.packageDetailTitle}`}>Support</h4>
                     <div>
                       <div className='gap-3'>
                         <CircleCheckSolid color="signoz_sienna-400" />
@@ -402,7 +413,7 @@ const PricingPlans = () => {
                       <div className='gap-3'>
                         <CircleCheckSolid color="signoz_sienna-400" />
                         <span className='text-signoz_vanilla-400'>Dedicated Slack Channel</span>
-                        <span className="uppercase text-xs text-signoz_vanilla-400 bg-signoz_slate-400 border border-none px-2 py-1 rounded-full">On spends above $999</span>
+                        <span className="uppercase !text-[10px] sm:text-xs text-signoz_vanilla-400 text-center bg-signoz_slate-400 border border-none px-2 py-1 rounded-full">On spends above $999</span>
                       </div>
                     </div>
                   </div>
@@ -476,7 +487,7 @@ const PricingPlans = () => {
                 </div>
                 <div className="__card__body">
                   <div className={`mt-7 ${styles.pricingDetails} ${styles.packageDetailBlock}`}>
-                    <h4 className={styles.packageDetailTitle}>Pricing</h4>
+                    <h4 className={`${styles.packageDetailTitle}`}>Pricing</h4>
                     <div></div>
                     <div>
                       <div className='gap-3'>
@@ -512,7 +523,7 @@ const PricingPlans = () => {
                   </div>
                   <Divider isDashed /> */}
                   <div className={`mt-7`}>
-                    <h4 className={styles.packageDetailTitle}>Support</h4>
+                    <h4 className={`${styles.packageDetailTitle}`}>Support</h4>
                     <ul className="ul-no-padding">
                       <li className='flex gap-3 items-center mb-2 text-signoz_vanilla-400'> <CircleCheckSolid color="signoz_sienna-400" /> Email</li>
                       <li className='flex gap-3 items-center mb-2 text-signoz_vanilla-400'> <CircleCheckSolid color="signoz_sienna-400" /> Dedicated Slack Channel</li>
@@ -658,7 +669,7 @@ const PricingPlans = () => {
                     For at-scale orgs who want to host SigNoz in their own infra.
                   </p>
                   <div className="flex items-center justify-between mb-6">
-                    <p className="m-0">
+                    <p className="m-0 min-w-[72px]">
                       Starts at
                     </p>
                     <div className='w-3/5 border-b border-signoz_slate-400 border-dashed' />
@@ -692,7 +703,7 @@ const PricingPlans = () => {
                   </div>
                   <Divider isDashed /> */}
                   <div className={`mt-7 ${styles.deploymentOptions} ${styles.packageDetailBlock}`}>
-                    <h4 className={styles.packageDetailTitle}>Deployment Options</h4>
+                    <h4 className={`${styles.packageDetailTitle}`}>Deployment Options</h4>
                     <div>
                       <ul className='ul-no-padding'>
                         <li className='flex gap-3 items-center mb-3'> <CircleCheckSolid /> Self Host with support contract by SigNoz team</li>
@@ -701,7 +712,7 @@ const PricingPlans = () => {
                     </div>
                   </div>
                   <div className={`mt-7`}>
-                    <h4 className={styles.packageDetailTitle}>Support</h4>
+                    <h4 className={`${styles.packageDetailTitle}`}>Support</h4>
                     <ul className="ul-no-padding">
                       <li className='flex gap-3 items-center mb-2 text-signoz_vanilla-400'> <CircleCheckSolid color="signoz_sienna-400" /> Email</li>
                       <li className='flex gap-3 items-center mb-2 text-signoz_vanilla-400'> <CircleCheckSolid color="signoz_sienna-400" /> Dedicated Slack Channel</li>
@@ -712,7 +723,7 @@ const PricingPlans = () => {
                     </ul>
                   </div>
                   <div className={`mt-7 ${styles.packageDetailBlock}`}>
-                    <h4 className={styles.packageDetailTitle}>Features</h4>
+                    <h4 className={`${styles.packageDetailTitle}`}>Features</h4>
                     <p className="mt-1 text-sm text-signoz_vanilla-400">Includes all features in community edition</p>
                     <ul className="ul-no-padding">
                       <li className='flex gap-3 items-center mb-3'> <CircleCheckSolid /> SSO and SAML Support</li>
@@ -725,7 +736,7 @@ const PricingPlans = () => {
                     </ul>
                   </div>
                   <div className={`mt-7 ${styles.packageDetailBlock}`}>
-                    <h4 className={styles.packageDetailTitle}>Coming soon</h4>
+                    <h4 className={`${styles.packageDetailTitle}`}>Coming soon</h4>
                     <ul className="ul-no-padding">
                       <li className='flex gap-3 items-center mb-2 text-signoz_vanilla-400'> <ClockSolid />  Finer RBAC with custom roles</li>
                       <li className='flex gap-3 items-center mb-2 text-signoz_vanilla-400'> <ClockSolid />  Audit Logs</li>
@@ -756,10 +767,10 @@ const ExploreAllFeature = () => {
   const ALL_FEATURES_DATA = {
     HEADER: [
       { heading: '', desc: '' },
-      { heading: 'Community Edition', desc: '$0 ⎯ host in your infra', action: <Link href={'/docs/introduction'} className='button-background h-8 pr-3 pl-4 py-2 rounded-full text-sm flex items-center justify-center gap-1.5 truncate text-center font-medium leading-5 text-white w-full'>Read Documenation</Link> },
-      { heading: 'Teams', desc: 'Cloud ⎯ starts at $199/mo', action: <Link href={'/teams/'} className='bg-signoz_robin-500 h-8 pr-3 pl-4 py-2 rounded-full text-sm flex items-center justify-center gap-1.5 truncate text-center font-medium leading-5 text-white w-full '>Get Started</Link> },
+      { heading: 'Community Edition', desc: '$0 ⎯ host in your infra', action: <Link href={'/docs/introduction'} className='button-background h-8 px-4 py-2 rounded-full text-[7px] sm:text-sm flex items-center justify-center gap-1.5 truncate text-center font-medium leading-5 text-white w-full'>Read Documenation</Link> },
+      { heading: 'Teams', desc: 'Cloud ⎯ starts at $199/mo', action: <Link href={'/teams/'} className='bg-signoz_robin-500 h-8 px-4 py-2 rounded-full text-[8px] sm:text-sm flex items-center justify-center gap-1.5 truncate text-center font-medium leading-5 text-white w-full'>Get Started</Link> },
       {
-        heading: 'Enterprise', desc: 'Cloud / Self-Hosted', action: <Link href={'/enterprise-cloud/'} className='button-background h-8 pr-3 pl-4 py-2 rounded-full text-sm flex items-center justify-center gap-1.5 text-center font-medium leading-5 text-white w-full'>Contact Us</Link>
+        heading: 'Enterprise', desc: 'Cloud / Self-Hosted', action: <Link href={'/enterprise-cloud/'} className='button-background h-8 px-4 py-2 rounded-full text-[8px] sm:text-sm flex items-center justify-center gap-1.5 text-center font-medium leading-5 text-white w-full'>Contact Us</Link>
       },
     ],
     ROWS: [
@@ -800,7 +811,7 @@ const ExploreAllFeature = () => {
             ),
             inTeams: <div className="flex items-center">
               <ClockSolid height='15' width='15' />
-              <span className="ml-1.5 text-xs">COMING SOON</span>
+              <span className="ml-1.5 text-[8px] sm:text-xs">COMING SOON</span>
             </div>,
             inEnterprise: <CheckSolid />,
           },
@@ -814,7 +825,7 @@ const ExploreAllFeature = () => {
             inCommunity: <CheckSolid />,
             inTeams: <div className="flex items-center ">
               <FlameSolid />
-              <span className="ml-1.5 text-xs">EARLY ACCESS</span>
+              <span className="ml-1.5 text-[8px] sm:text-xs">EARLY ACCESS</span>
             </div>,
             inEnterprise: <CheckSolid />,
           },
@@ -851,25 +862,25 @@ const ExploreAllFeature = () => {
             feature: 'Out of the box dashboards for hostmetrics',
             inCommunity: <CheckSolid />,
             inTeams: <CheckSolid />,
-            inEnterprise: <CheckSolid /> ,
+            inEnterprise: <CheckSolid />,
           },
           {
             feature: 'Kubernetes Monitoring',
             inCommunity: <CheckSolid />,
             inTeams: <CheckSolid />,
-            inEnterprise: <CheckSolid /> ,
+            inEnterprise: <CheckSolid />,
           },
           {
             feature: 'Container Monitoring',
             inCommunity: <CheckSolid />,
             inTeams: <CheckSolid />,
-            inEnterprise: <CheckSolid /> ,
+            inEnterprise: <CheckSolid />,
           },
           {
             feature: 'Unlimited dashboards & alerts based on metrics',
             inCommunity: <CheckSolid />,
             inTeams: <CheckSolid />,
-            inEnterprise: <CheckSolid /> ,
+            inEnterprise: <CheckSolid />,
           },
         ],
       },
@@ -880,7 +891,7 @@ const ExploreAllFeature = () => {
             feature: 'Separate view of exceptions based on Trace data',
             inCommunity: <CheckSolid />,
             inTeams: <CheckSolid />,
-            inEnterprise: <CheckSolid /> ,
+            inEnterprise: <CheckSolid />,
           },
         ],
       },
@@ -891,19 +902,19 @@ const ExploreAllFeature = () => {
             feature: 'Create alerts directly from dashboards',
             inCommunity: <CheckSolid />,
             inTeams: <CheckSolid />,
-            inEnterprise: <CheckSolid /> ,
+            inEnterprise: <CheckSolid />,
           },
           {
             feature: 'Support for Slack, Pagerduty, OpsGenie & webhooks as alert channel',
             inCommunity: <CheckSolid />,
             inTeams: <CheckSolid />,
-            inEnterprise: <CheckSolid /> ,
+            inEnterprise: <CheckSolid />,
           },
           {
             feature: 'MS Teams as alert channel',
             inCommunity: <CrossSolid />,
             inTeams: <CheckSolid />,
-            inEnterprise: <CheckSolid /> ,
+            inEnterprise: <CheckSolid />,
           },
         ],
       },
@@ -914,13 +925,13 @@ const ExploreAllFeature = () => {
             feature: 'Support for Cold Storage for long term data archival',
             inCommunity: <CheckSolid />,
             inTeams: <div className="flex items-center">
-            <FlameSolid />
-            <span className="ml-1.5 text-xs">EARLY ACCESS</span>
-          </div>,
+              <FlameSolid />
+              <span className="ml-1.5 text-[8px] sm:text-xs">EARLY ACCESS</span>
+            </div>,
             inEnterprise: <div className="flex items-center">
-            <FlameSolid />
-            <span className="ml-1.5 text-xs">EARLY ACCESS</span>
-          </div>,
+              <FlameSolid />
+              <span className="ml-1.5 text-[8px] sm:text-xs">EARLY ACCESS</span>
+            </div>,
           },
         ],
       },
@@ -931,7 +942,7 @@ const ExploreAllFeature = () => {
             feature: 'Overview of your application graph with health indication',
             inCommunity: <CheckSolid />,
             inTeams: <CheckSolid />,
-            inEnterprise: <CheckSolid /> ,
+            inEnterprise: <CheckSolid />,
           },
         ],
       },
@@ -940,90 +951,90 @@ const ExploreAllFeature = () => {
         features: [
           {
             feature: 'SSO/SAML support',
-            inCommunity: <CrossSolid/>,
+            inCommunity: <CrossSolid />,
             inTeams: <CheckSolid />,
-            inEnterprise: <CheckSolid /> ,
+            inEnterprise: <CheckSolid />,
           },
           {
             feature: 'Dashboard Locking & Access control',
-            inCommunity: <CrossSolid/>,
+            inCommunity: <CrossSolid />,
             inTeams: <CheckSolid />,
-            inEnterprise: <CheckSolid /> ,
+            inEnterprise: <CheckSolid />,
           },
           {
             feature: 'Security tightening for on-premise installation',
-            inCommunity: <CrossSolid/>,
+            inCommunity: <CrossSolid />,
             inTeams: <CheckSolid />,
             inEnterprise: <div className="flex items-center">
-            <ServerSolid />
-            <span className="ml-1.5 text-xs">SELF-HOSTED</span>
-          </div>,
+              <ServerSolid />
+              <span className="ml-1.5 text-[8px] sm:text-xs">SELF-HOSTED</span>
+            </div>,
           },
           {
             feature: 'Monitor Health of SigNoz',
-            inCommunity: <CrossSolid/>,
+            inCommunity: <CrossSolid />,
             inTeams: <CheckSolid />,
             inEnterprise: <div className="flex items-center">
-            <ServerSolid />
-            <span className="ml-1.5 text-xs">SELF-HOSTED</span>
-          </div>,
+              <ServerSolid />
+              <span className="ml-1.5 text-[8px] sm:text-xs">SELF-HOSTED</span>
+            </div>,
           },
           {
             feature: 'Finer RBAC with custom roles',
-            inCommunity: <CrossSolid/>,
+            inCommunity: <CrossSolid />,
             inTeams: <CheckSolid />,
             inEnterprise: <div className="flex items-center">
-            <ClockSolid height='15' width='15' />
-            <span className="ml-1.5 text-xs">COMING SOON</span>
-          </div>,
+              <ClockSolid height='15' width='15' />
+              <span className="ml-1.5 text-[8px] sm:text-xs">COMING SOON</span>
+            </div>,
           },
           {
             feature: 'AWS Private link',
-            inCommunity: <CrossSolid/>,
+            inCommunity: <CrossSolid />,
             inTeams: <CheckSolid />,
             inEnterprise: <div className="flex items-center">
-            <CloudSolid />
-            <span className="ml-1.5 text-xs">CLOUD</span>
-          </div>,
+              <CloudSolid />
+              <span className="ml-1.5 text-[8px] sm:text-xs">CLOUD</span>
+            </div>,
           },
           {
             feature: 'Alert as code',
-            inCommunity: <CrossSolid/>,
+            inCommunity: <CrossSolid />,
             inTeams: <CheckSolid />,
             inEnterprise: <div className="flex items-center">
-            <ClockSolid height='15' width='15' />
-            <span className="ml-1.5 text-xs">COMING SOON</span>
-          </div>,
+              <ClockSolid height='15' width='15' />
+              <span className="ml-1.5 text-[8px] sm:text-xs">COMING SOON</span>
+            </div>,
           },
           {
             feature: 'Audit Logs',
-            inCommunity: <CrossSolid/>,
+            inCommunity: <CrossSolid />,
             inTeams: <CheckSolid />,
             inEnterprise: <div className="flex items-center">
-            <ClockSolid height='15' width='15' />
-            <span className="ml-1.5 text-xs">COMING SOON</span>
-          </div>,
+              <ClockSolid height='15' width='15' />
+              <span className="ml-1.5 text-[8px] sm:text-xs">COMING SOON</span>
+            </div>,
           },
           {
             feature: 'Custom retention for different sources of logs',
-            inCommunity: <CrossSolid/>,
+            inCommunity: <CrossSolid />,
             inTeams: <CheckSolid />,
             inEnterprise: <div className="flex items-center">
-            <ClockSolid height='15' width='15' />
-            <span className="ml-1.5 text-xs">COMING SOON</span>
-          </div>,
+              <ClockSolid height='15' width='15' />
+              <span className="ml-1.5 text-[8px] sm:text-xs">COMING SOON</span>
+            </div>,
           },
           {
             feature: 'Access Data in SigNoz from Anywhere (via API keys)',
-            inCommunity: <CrossSolid/>,
+            inCommunity: <CrossSolid />,
             inTeams: <CheckSolid />,
-            inEnterprise: <CheckSolid /> ,
+            inEnterprise: <CheckSolid />,
           },
           {
             feature: 'Multi-tenancy',
-            inCommunity: <CrossSolid/>,
+            inCommunity: <CrossSolid />,
             inTeams: <CheckSolid />,
-            inEnterprise: <CheckSolid /> ,
+            inEnterprise: <CheckSolid />,
           },
         ],
       },
@@ -1035,49 +1046,49 @@ const ExploreAllFeature = () => {
             feature: 'Community Support on Slack',
             inCommunity: <CheckSolid />,
             inTeams: <CheckSolid />,
-            inEnterprise: <CheckSolid /> ,
+            inEnterprise: <CheckSolid />,
           },
           {
             feature: 'Email Support',
             inCommunity: <CrossSolid />,
             inTeams: <CheckSolid />,
-            inEnterprise: <CheckSolid /> ,
+            inEnterprise: <CheckSolid />,
           },
           {
             feature: 'In product chat support',
             inCommunity: <CrossSolid />,
             inTeams: <CheckSolid />,
-            inEnterprise: <CheckSolid /> ,
+            inEnterprise: <CheckSolid />,
           },
           {
             feature: 'Dedicated Slack Channel',
             inCommunity: <CrossSolid />,
             inTeams: <CrossSolid />,
-            inEnterprise: <CheckSolid /> ,
+            inEnterprise: <CheckSolid />,
           },
           {
             feature: 'Team Training',
             inCommunity: <CrossSolid />,
             inTeams: <CrossSolid />,
-            inEnterprise: <CheckSolid /> ,
+            inEnterprise: <CheckSolid />,
           },
           {
             feature: 'Dashboard Configuration Support',
             inCommunity: <CrossSolid />,
             inTeams: <CrossSolid />,
-            inEnterprise: <CheckSolid /> ,
+            inEnterprise: <CheckSolid />,
           },
           {
             feature: 'Instrumentation Support',
             inCommunity: <CrossSolid />,
             inTeams: <CrossSolid />,
-            inEnterprise: <CheckSolid /> ,
+            inEnterprise: <CheckSolid />,
           },
           {
             feature: 'SLA w/ downtime developer pairingl',
             inCommunity: <CrossSolid />,
             inTeams: <CrossSolid />,
-            inEnterprise: <CheckSolid /> ,
+            inEnterprise: <CheckSolid />,
           },
         ],
       },
@@ -1099,7 +1110,7 @@ const ExploreAllFeature = () => {
               return (
                 <div
                   key={idx}
-                  className={`${idx !== 0 ? `rounded-lg p-3 ${Opacity[idx]}` : 'hidden md:block'
+                  className={`${idx === 2 ? `rounded-lg p-3 teamColumnBackground` : idx !== 0 ? `rounded-lg p-3 ${Opacity[idx]}` : 'hidden md:block'
                     }`}
                 >
                   <h2 className="m-0 text-lg md:text-base">{h.heading}</h2>
@@ -1125,7 +1136,7 @@ const ExploreAllFeature = () => {
                   >
                     <h3 className="mt-12 mb-3 pl-6 pr-2 py-2 text-center text-sm font-medium md:text-left">{row.section}</h3>
                     <Line />
-                    <div className=" grid grid-cols-1 gap-1">
+                    <div className=" grid grid-cols-1">
                       {row.features.map((r, idx) => {
                         return (
                           <div key={idx}>
@@ -1139,7 +1150,7 @@ const ExploreAllFeature = () => {
                                 {r.inCommunity}
                               </div>
                               <div
-                                className={`flex items-center rounded-lg p-3 justify-center sm:justify-left`}
+                                className={`flex items-center rounded-lg p-3 justify-center sm:justify-left teamColumnBackground rounded-none`}
                               >
                                 {r.inTeams}
                               </div>
