@@ -1,0 +1,895 @@
+---
+
+title: Complete Guide to Logging in Golang with slog
+slug: golang-slog
+date: 2024-07-01
+tags: [logging]
+authors: [aayush_sharma]
+description: In this tutorial, we will discover Golang slog and some of the best practices provided by slog for implementing structured logging in Golang applications. We will set up the Golang application and practice different logging formats slog provides.
+keywords: [slog, logging, logging slog, golang, opentelemetry, opentelemetry golang, opentelemetry slog]
+
+---
+
+<head>
+<script type="application/ld+json">
+    {`{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Complete Guide to Logging in Golang with slog",
+  "alternativeHeadline": "A comprehensive guide to implementing structured logging in Golang using slog",
+  "image": "https://signoz.io/img/blog/2024/07/golang-slog-cover.webp",
+  "author": {
+    "@type": "Person",
+    "name": "Aayush Sharma"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SigNoz",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://signoz.io/img/SigNozLogo-orange.svg"
+    }
+  },
+  "datePublished": "2024-07-01",
+  "dateModified": "2024-07-01",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://signoz.io/blog/golang-slog/"
+  },
+  "description": "In this tutorial, we will discover Golang slog and some of the best practices provided by slog for implementing structured logging in Golang applications. We will set up the Golang application and practice different logging formats slog provides.",
+  "keywords": "slog, logging, logging slog, golang, opentelemetry, opentelemetry golang, opentelemetry slog",
+  "articleSection": "Technology",
+  "inLanguage": "en",
+  "isPartOf": {
+    "@type": "Blog",
+    "name": "SigNoz Blog",
+    "url": "https://signoz.io/blog/"
+  },
+  "about": [
+    {
+      "@type": "Thing",
+      "name": "Go (Programming Language)",
+      "description": "An open-source programming language developed by Google"
+    },
+    {
+      "@type": "Thing",
+      "name": "slog",
+      "description": "A structured logging package for Go"
+    },
+    {
+      "@type": "Thing",
+      "name": "OpenTelemetry",
+      "description": "An observability framework for cloud-native software"
+    }
+  ],
+  "mentions": [
+    {
+      "@type": "SoftwareApplication",
+      "name": "SigNoz",
+      "applicationCategory": "Observability Platform"
+    }
+  ],
+  "mainEntity": {
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What are the features of slog?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The slog package in Go offers enhanced logging capabilities with features like multiple output destinations, allowing logs to be sent to various handlers simultaneously. It provides robust filtering control, enabling developers to filter logs by level, and message content. Additionally, slog-envlogger acts as a port of env_logger, facilitating environment-based log filtering."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What are the levels of slog logging?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The log/slog package provides four log levels by default, with each one associated with an integer value: DEBUG (-4), INFO (0), WARN (4), and ERROR (8)."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Where to place the logger when logging with slog?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "In Go, using the slog library, you can handle logger placement based on your application's complexity. For simple setups, a global logger initialized in the main or an init function is effective. For more complex applications, dependency injection is recommended, where the logger is passed as a dependency to maintain clean architecture and ease testing."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What are the benefits of using slog over log?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "slog provides structured logging, which is beneficial for querying and analyzing logs, especially in microservices architectures or distributed systems where logs are critical for debugging."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can slog integrate with external logging systems?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, slog can integrate with systems like SigNoz, ELK, Splunk, or any other logging infrastructure that supports structured log data. This is often done through custom handlers that format and transmit log data."
+        }
+      }
+    ]
+  }
+}`}
+</script>
+</head>
+
+Logging is the record of events that occur in an application, providing critical insights into its behavior, performance, and potential problems. In Golang, the built-in log package helps monitor and debug applications. 
+
+However, for more advanced logging needs, Golang offers slog, a powerful package designed for structured logging. This guide will explore the features and best practices of using slog for implementing structured logging in Golang applications.
+
+## Prerequisites
+
+- <a href="https://go.dev/doc/install" rel="noopener noreferrer nofollow" target="_blank">Golang Installed in your system</a>
+- Familiarity with Logging in Golang
+
+## Quick Guide: How to use slog in Golang?
+
+### What is slog?
+
+slog is a logging package introduced in version `1.21` of Golang. It brings structured logging into your application, enhancing the way logs are recorded and analyzed.
+
+### Basic Usage
+
+To use `slog` in your Golang application, import the `log/slog` package.
+
+```go
+package main
+
+import (
+    "log/slog"
+)
+
+func main() {
+    slog.Info("SigNoz", "Message", "Golang slog is best for structured logging")
+}
+
+```
+
+The above code demonstrates a simple example of logging using slog. When this code is executed, it generates a log entry with the following components:
+
+- Timestamps
+- Message
+- Severity Level
+- Key-Value paired attributes
+
+Output of the above code:
+
+```
+2024/06/23 01:33:42 INFO SigNoz Message="Golang slog is best for structured logging"
+
+```
+
+Syntax of the output:
+
+```
+Timestamps Severity-Level Message Key=Value
+```
+
+### What is Structured Logging?
+
+Structured logging is a technique where data is formatted for easy searching, filtering, and processing, paving the way for more sophisticated analytics. JSON is the standard format for structured logging. It is best practice to provide structured logging using a logging framework integrated with a log management system that supports custom fields.
+
+### Why Structured Logging?
+
+Structured logging offers several advantages over traditional text-based logging:
+
+- Ease of Searching and Filtering: Logs formatted as key-value pairs are easier to search and filter, allowing for more efficient troubleshooting and analysis.
+- Better Integration: Structured logs are machine-readable, making it easier to integrate with log management systems and analytics tools.
+- Improved Analytics: With structured logs, you can perform more sophisticated analytics, enabling better insights into your application's behavior and performance.
+
+Example of structured logging:
+
+```json
+{
+   "time":"2024-06-25T03:02:16.291247+05:30",
+   "level":"INFO",
+   "msg":"slog Groups",
+   "Usage":{
+      "Item1":"random string",
+      "Item2":453666601985459141,
+      "Item3":7914595825068479671
+   }
+}
+
+```
+
+The above structured logging output, when converted into text-based logging, looks like the example below:
+
+```
+2024-06-25T03:02:16.291247+05:30 - INFO - slog Groups - Item1: random string, Item2: 453666601985459141, Item3: 7914595825068479671
+```
+
+Let's dive deep into the slog libraries and explore the advanced features of `slog`.
+
+## Important Components in slog
+
+To effectively use slog, it's essential to understand its three main components: `Logger`, `Records`, and `Handlers`.
+
+- Loggers: A logger is the primary interface for logging events in slog. It provides various methods (such as `Info()` and `Error()`) for reporting events. When you log an event, you use these methods provided by the logger.
+- Records: When a logger method is called, it creates a record. A record's sole purpose is to store the data required to generate a log entry.
+- Handlers: Handlers are responsible for processing log records, generating the final log output, and determining the log destination (such as a file or console). slog includes two built-in handlers: `TextHandler` and `JSONHandler`.
+
+We will discuss more on this in the later part of the article.
+
+## slog Levels
+
+In slog, logging levels are used to describe the severity of logs. These levels help determine which logs are emitted based on their importance, which can be critical in both development and production environments. Here's a breakdown of the typical logging levels provided by slog, which are similar to those in many other logging libraries:
+
+- Debug: This level is used for detailed information, primarily useful for diagnosing problems. Debug logging is usually enabled only in development settings.
+    
+    Use Case: Diagnosing a complex issue by logging detailed information about the application's state.
+    
+- Info: Provides general information about the application's operations, offering insights into its normal functioning.
+    
+    Use Case: Logging the successful completion of an operation or regular status updates.
+    
+- Warn: Indicates that something unexpected happened or there might be a potential issue (e.g., 'disk space low'). The application continues to work as expected.
+    
+    Use Case: Alerting about deprecated API usage or low disk space warnings.
+    
+- Error: Represents serious issues where the application has encountered a problem and cannot perform some functions.
+    
+    Use Case: Logging errors that prevent a function from executing properly, such as database connection failures.
+    
+
+slog is designed to be modular and extensible, allowing users to create custom levels as needed. Logging levels help control log output based on the severity of the information, which is especially useful in production environments to avoid log flooding while maintaining clear and informative logs.
+
+You can see below an example that demonstrates how to use these logging levels in a Golang application:
+
+```go
+package main
+
+import (
+    "log/slog"
+    "os"
+)
+
+func main() {
+    // Create a new logger with a JSON handler
+    logger := slog.New(slog.NewJSONHandler(os.Stderr, nil))
+    slog.SetDefault(logger)
+
+    slog.Debug("Debug Level", "Detailed information for debugging")
+    slog.Info("Info Level", "General operational information")
+    slog.Warn("Warn Level", "Potential issue detected")
+    slog.Error("Error Level", "A serious issue occurred")
+}
+```
+
+## Creating Logger with Handler
+
+slog provides two types of handlers for logging: `TextHandler` and `JSONHandler`. These handlers determine the format and destination of the log output.
+
+### TextHandler
+
+`TextHandler` helps in writing structured log entries as human-readable text. You can create a new logger using `TextHandler` with the following code:
+
+```go
+package main
+
+import (
+    "log/slog"
+    "os"
+)
+
+func main() {
+    // Create a logger with TextHandler
+    logger := slog.New(slog.NewTextHandler(os.Stderr, nil))
+    logger.Info("TextHandler Example", "Content", "Logging in text format")
+}
+```
+
+The `New` keyword creates a new Logger instance with a nil context. The output of logs received using `TextHandler` is in a `key=value` sequence, making it more structured and easy to understand.
+
+Example Output:
+
+```
+time=2024-06-23T01:33:13.531+05:30 level=INFO msg=SigNoz Content="Golang slog is best for structured logging"
+```
+
+In the above output, `TextHandler` has mapped the keys (time, level, msg, Content) with their respective values.
+
+### JSONHandler
+
+`JSONHandler` helps in writing structured logs as JSON objects. You can create a new logger using `JSONHandler` with the following code:
+
+```go
+package main
+
+import (
+    "log/slog"
+    "os"
+)
+
+func main() {
+    // Create a logger with JSONHandler
+    logger := slog.New(slog.NewJSONHandler(os.Stderr, nil))
+    logger.Info("JSONHandler Example", "Content", "Logging in JSON format")
+}
+```
+
+Example Output:
+
+```json
+{
+   "time":"2024-06-23T01:32:14.715901+05:30",
+   "level":"INFO",
+   "msg":"SigNoz",
+   "Content":"Golang slog is best for structured logging"
+}
+```
+
+This handler is perfect for logs that must be consumed by log management systems, examined by automated programs, or sent via network protocols that benefit from standardized, structured data formats. It is frequently utilized in production settings where logs are gathered and examined by platforms such as SigNoz, Splunk, the ELK stack, or others.
+
+## Setting Default Logger in slog
+
+Each method in slog has a top-level function that uses the default logger. Let’s try to understand this with an example:
+
+`slog.Info()` is called by the top-level function by a default logger. The default handler formats the log record's message, time, level, and attributes as a string and passes it to the log package.
+
+The `SetDefault` function in the slog package sets the default logger that will be used by slog package levels such as `slog.Info` and `slog.Warn`. It establishes a new default logger that these levels will utilize for logging operations.
+
+Using the below code, we will set a default logger using the SetDefault function:
+
+```go
+package main
+
+import (
+	"log/slog"
+	"os"
+)
+
+func main() {
+	logger := slog.New(slog.NewJSONHandler(os.Stderr, nil))
+	slog.SetDefault(logger)
+
+	slog.Info("SigNoz", "Content", "Golang slog is best for structured logging")
+	slog.Warn("Article", "Read", "Till the end")
+}
+```
+
+Output:
+
+```json
+{
+   "time":"2024-06-23T01:30:03.174166+05:30",
+   "level":"INFO",
+   "msg":"SigNoz",
+   "Content":"Golang slog is best for structured logging"
+}{
+   "time":"2024-06-23T01:30:03.174464+05:30",
+   "level":"WARN",
+   "msg":"Article",
+   "Read":"Till the end"
+}
+```
+
+## slog Customization
+
+Further customization can be done in slog logging components to get the log output in the desired format. This helps in customizing the logs output to make it suitable for a specific use case and more flexible:
+
+### Levels
+
+You should log messages in an application at a specific level or above. A typical setup involves logging messages at the Info or higher tier and delaying debug logging until necessary. To change the behaviour you can use the `HandlerOptions` type as shown in the below code:
+
+```go
+package main
+
+import (
+	"log/slog"
+	"os"
+)
+
+func main() {
+	logger := slog.New(slog.NewJSONHandler(os.Stderr,
+        &slog.HandlerOptions{Level: slog.LevelDebug}))
+	slog.SetDefault(logger)
+
+	slog.Info("SigNoz", "Content", "Golang slog is best for structured logging")
+	slog.Warn("Article", "Read", "Till the end")
+	slog.Debug("Debug Level", "Working", "True")
+}
+```
+
+Output:
+
+```json
+{
+   "time":"2024-06-23T02:22:18.587372+05:30",
+   "level":"INFO",
+   "msg":"SigNoz",
+   "Content":"Golang slog is best for structured logging"
+}{
+   "time":"2024-06-23T02:22:18.587867+05:30",
+   "level":"WARN",
+   "msg":"Article",
+   "Read":"Till the end"
+}{
+   "time":"2024-06-23T02:22:18.587874+05:30",
+   "level":"DEBUG",
+   "msg":"Debug Level",
+   "Working":"True"
+}
+```
+
+The above level setting method keeps the handler at that level for the duration of its existence. You must use the `LevelVar` type, as shown below if you want dynamic variation in the minimum level:
+
+```go
+package main
+
+import (
+	"log/slog"
+	"os"
+)
+
+func main() {
+	var logLevel = new(slog.LevelVar)
+
+	logger := slog.NewJSONHandler(os.Stderr,
+        &slog.HandlerOptions{Level: logLevel})
+	slog.SetDefault(slog.New(logger))
+
+	logLevel.Set(slog.LevelDebug)
+
+	slog.Info("SigNoz", "Content", "Golang slog is best for structured logging")
+	slog.Warn("Article", "Read", "Till the end")
+	slog.Debug("Debug Level", "Working", "True")
+}
+```
+
+### Child Logger
+
+A child logger is a derived logger that inherits configuration from a parent logger while potentially adding its own specific settings or contextual information. Creating child loggers is a common practice in structured logging, which enhances log management and debugging by embedding additional, relevant data directly into log messages.
+
+Benefits of using a child logger
+
+- Automatic inclusion of contextual information specific to different parts of an application.
+- Reduces redundancy in log entries.
+- Enhances traceability.
+- Allows logs to be segmented according to their source or nature.
+- Facilitates easier filtering and searching based on embedded context, such as module names or version numbers.
+
+Below code demonstrates how you can implement a child logger in your Golang application:
+
+```go
+package main
+
+import (
+	"log/slog"
+	"os"
+	"runtime/debug"
+)
+
+func main() {
+	handler := slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{
+		Level: new(slog.LevelVar), 
+	})
+
+	logger := slog.New(handler)
+
+	buildInfo, _ := debug.ReadBuildInfo()
+
+	child := logger.With(
+		slog.Group("program_info",
+			slog.Int("pid", os.Getpid()),
+			slog.String("go_version", buildInfo.GoVersion),
+		),
+	)
+
+	child.Info("SigNoz", "Content", "Golang slog is best for structured logging")
+	child.Warn("Article", "Read", "Till the end")
+	child.Debug("Debug Level", "Working", "True")
+}
+
+```
+
+Output:
+
+```json
+{
+   "time":"2024-06-26T01:27:30.704406+05:30",
+   "level":"INFO",
+   "msg":"SigNoz",
+   "program_info":{
+      "pid":8252,
+      "go_version":"go1.22.0"
+   },
+   "Content":"Golang slog is best for structured logging"
+}{
+   "time":"2024-06-26T01:27:30.70472+05:30",
+   "level":"WARN",
+   "msg":"Article",
+   "program_info":{
+      "pid":8252,
+      "go_version":"go1.22.0"
+   },
+   "Read":"Till the end"
+}
+```
+
+### Extending Logging with External Packages
+
+To enrich your logging output with additional context or dynamic data, you can seamlessly integrate external packages into your log statements. This allows for more detailed and useful log messages, aiding in debugging and monitoring.
+
+For example, consider a scenario where you wish to log a randomly generated number using the `math/rand` package. Here's how you can set it up:
+
+```go
+package main
+
+import (
+	"log/slog"
+	"math/rand"
+	"os"
+)
+
+func main() {
+	logger := slog.NewTextHandler(os.Stderr, nil)
+	slog.SetDefault(slog.New(logger))
+
+	slog.Info("Packages using random number function", slog.Int("Random Number", rand.Int()))
+}
+```
+
+Output:
+
+```
+time=2024-06-23T02:38:45.264+05:30 level=INFO msg="Packages using random number function" "Random Number"=4476702455706698296
+```
+
+### Groups
+
+The slog becomes more challenging as we add more fields, and the logging becomes more complicated. The slog groups function helps us overcome this complication by allowing us to group attributes under a single unit. `TextHandler` uses a dot to divide the group and attribute names, with the group name serving as the key. On the other hand, `JSONHandler` handles each group as a distinct JSON object.
+
+slog also makes multi-attribute grouping possible, but the results vary depending on the Handler used. We may group relevant fields together under a single key, choose a group name, and then stack the characteristics that make sense for that group:
+
+```go
+package main
+
+import (
+	"log/slog"
+	"math/rand"
+	"os"
+)
+
+func main() {
+	var logLevel = new(slog.LevelVar)
+
+	logger := slog.NewJSONHandler(os.Stderr,
+        &slog.HandlerOptions{Level: logLevel})
+	slog.SetDefault(slog.New(logger))
+
+	logLevel.Set(slog.LevelDebug)
+
+	slog.Info("slog Groups",
+		slog.Group("Usage",
+			slog.String("Item1", "random string"),
+			slog.Int("Item2", rand.Int()),
+			slog.Int("Item3", rand.Int()),
+		),
+	)
+}
+```
+
+Output:
+
+```json
+{
+   "time":"2024-06-23T16:28:24.558121+05:30",
+   "level":"INFO",
+   "msg":"slog Groups",
+   "Usage":{
+      "Item1":"random string",
+      "Item2":4205951361080029762,
+      "Item3":7503774366427698219
+   }
+}
+```
+
+### Context Integration
+
+slog allows the integration of function context into log statements. This capability is particularly useful as it enables handlers to understand the circumstances surrounding each log event.
+
+Both `Logger.Log` and `Logger.LogAttrs` methods accept a context as their initial argument, aligning with their respective top-level function. Although the use of context is not mandatory for the top-level functions and the convenience methods on the `Logger` (such as `Info`), there are specific versions of these functions that incorporate context if needed.
+
+For Example:
+
+```go
+package main
+
+import (
+	"context"
+	"log/slog"
+	"math/rand"
+	"os"
+)
+
+func main() {
+	var logLevel = new(slog.LevelVar)
+
+	logger := slog.NewJSONHandler(os.Stderr,
+        &slog.HandlerOptions{Level: logLevel})
+	slog.SetDefault(slog.New(logger))
+
+	logLevel.Set(slog.LevelDebug)
+	ctx := context.WithValue(context.Background(), "serial_id", "1")
+
+	slog.InfoContext(ctx, "slog Groups",
+		slog.Group("Usage",
+			slog.String("Item1", "random string"),
+			slog.Int("Item2", rand.Int()),
+			slog.Int("Item3", rand.Int()),
+		),
+	)
+}
+```
+
+The `ctx` variable receives a `serial_id`, which is then supplied to the `InfoContext` function. Nevertheless, the serial_id field is absent from the log when the program is executed:
+
+```json
+{
+   "time":"2024-06-23T17:43:22.740439+05:30",
+   "level":"INFO",
+   "msg":"slog Groups",
+   "Usage":{
+      "Item1":"random string",
+      "Item2":4643155037035395637,
+      "Item3":224524224166418815
+   }
+}
+```
+
+## Monitoring Logs with an Observability Tool
+
+So far, we have implemented logs using slog in Golang. However, simply logging events is not enough to ensure the health and performance of your application. Monitoring these logs is crucial to gaining real-time insights, detecting issues promptly, and maintaining the overall stability of your system.
+
+### Why Monitoring Logs is Important
+
+Here are the key reasons why monitoring logs is important:
+
+1. Issue detection and troubleshooting
+2. Performance monitoring
+3. Security and Compliance
+4. Operational insights
+5. Automation and alerts
+6. Historical analysis
+7. Proactive maintenance
+8. Support and customer service
+
+To cover all the above major components, you can make use of tools like [SigNoz](https://signoz.io/). 
+
+SigNoz is a full-stack open-source application performance monitoring and observability tool that can be used in place of DataDog and New Relic. SigNoz is built to give SaaS like user experience combined with the perks of open-source software. Developer tools should be developed first, and SigNoz was built by developers to address the gap between SaaS vendors and open-source software.
+
+Key architecture features:
+
+- Logs, Metrics, and traces under a single dashboard
+    
+    SigNoz provides logs, metrics, and traces all under a single dashboard. You can also correlate these telemetry signals to debug your application issues quickly.
+    
+- Native OpenTelemetry support
+    
+    SigNoz is built to support <a href="https://opentelemetry.io/" rel="noopener noreferrer nofollow" target="_blank">OpenTelemetry</a> natively, which is quietly becoming the world standard to generate and manage telemetry data.
+    
+
+## Tracking Logs Using Signoz
+
+Let's enhance the above code examples to set up a basic `HTTP` server integrated with structured logging using the slog package. It establishes a logging system where logs are formatted in JSON for better readability and parsing. This is achieved by creating a JSONHandler from slog, which is attached to a log file and configured to record debug-level logs.
+
+### Step 1: Set up SigNoz
+
+<GetStartedSigNoz />
+
+### Step 2: Building a Sample Application
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"log/slog"
+	"net/http"
+	"os"
+)
+
+func main() {
+	logFile, err := os.OpenFile("application.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		panic(err)
+	}
+	defer logFile.Close()
+
+	var logLevel = new(slog.LevelVar)
+
+	logger := slog.NewJSONHandler(logFile, &slog.HandlerOptions{Level: logLevel})
+	slog.SetDefault(slog.New(logger))
+
+	logLevel.Set(slog.LevelDebug)
+
+	http.HandleFunc("/", handleIndex)
+	http.HandleFunc("/log", handleLog)
+	http.HandleFunc("/data", handleData)
+	http.HandleFunc("/error", handleError)
+
+	fmt.Println("Server starting on <http://localhost:8080>")
+	if err := http.ListenAndServe(":8080", nil); err != nil {
+		panic(err)
+	}
+}
+
+func handleIndex(w http.ResponseWriter, r *http.Request) {
+	ctx := context.Background()
+	slog.InfoContext(ctx, "Accessing index page", slog.String("method", r.Method))
+	fmt.Fprintln(w, "Welcome to the Go Application!")
+}
+
+func handleLog(w http.ResponseWriter, r *http.Request) {
+	ctx := context.WithValue(r.Context(), "serial_id", "1")
+	switch r.Method {
+	case "GET":
+		slog.InfoContext(ctx, "Handled GET request on /log",
+			slog.Group("Request Info",
+				slog.String("Method", "GET"),
+				slog.String("Path", r.URL.Path),
+			),
+		)
+		fmt.Fprintln(w, "Received a GET request at /log.")
+	case "POST":
+		slog.InfoContext(ctx, "Handled POST request on /log",
+			slog.Group("Request Info",
+				slog.String("Method", "POST"),
+				slog.String("Path", r.URL.Path),
+			),
+		)
+		fmt.Fprintln(w, "Received a POST request at /log.")
+	default:
+		http.Error(w, "Unsupported HTTP method", http.StatusMethodNotAllowed)
+	}
+}
+
+func handleData(w http.ResponseWriter, r *http.Request) {
+	ctx := context.WithValue(r.Context(), "request_id", fmt.Sprintf("%d", os.Getpid()))
+	slog.InfoContext(ctx, "Data endpoint hit",
+		slog.String("method", r.Method),
+		slog.String("endpoint", "/data"),
+	)
+	fmt.Fprintln(w, "This is the data endpoint. Method used:", r.Method)
+}
+
+func handleError(w http.ResponseWriter, r *http.Request) {
+	ctx := context.WithValue(r.Context(), "error_id", "error123")
+	slog.ErrorContext(ctx, "Error endpoint accessed",
+		slog.String("method", r.Method),
+		slog.String("endpoint", "/error"),
+	)
+	http.Error(w, "You have reached the error endpoint", http.StatusInternalServerError)
+}
+```
+
+The above code defines a server with several routes (/, /log, /data, /error), each managed by different handler functions designed to simulate various server operations. These functions log relevant information using slog, illustrating how to incorporate contextual logging in a real-world application. For example, `handleLog` function logs different messages based on the `HTTP` method (GET or POST), and `handleError` function simulates error logging when the error endpoint is accessed.
+
+The server is set to listen on port 8080, and the application will panic and shut down if it encounters an error starting the server. This example provides a practical illustration of integrating logging into a web service, which can help in monitoring the application's behavior and troubleshooting issues.
+
+### Step 3: Setting up the Logs Pipeline in Otel Collector
+
+The above code generates a log file named `application.log` on the execution of the code. In order to export logs from the log file generated an OpenTelemetry Collector needs to be integrated.
+
+You can set up the complete pipeline following this [guide](https://signoz.io/docs/userguide/collect_logs_from_file/). Here is the complete configuration for the above go code:
+
+```yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+  hostmetrics:
+    collection_interval: 60s
+    scrapers:
+      cpu: {}
+      disk: {}
+      load: {}
+      filesystem: {}
+      memory: {}
+      network: {}
+      paging: {}
+      process:
+        mute_process_name_error: true
+        mute_process_exe_error: true
+        mute_process_io_error: true
+      processes: {}
+  prometheus:
+    config:
+      global:
+        scrape_interval: 60s
+      scrape_configs:
+        - job_name: otel-collector-binary
+          static_configs:
+            - targets:
+              # - localhost:8888
+  filelog/app:
+    include: [ <path-to-log-file> ] #include the full path to your log file
+    start_at: end
+processors:
+  batch:
+    send_batch_size: 1000
+    timeout: 10s
+  # Ref: <https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/resourcedetectionprocessor/README.md>
+  resourcedetection:
+    detectors: [env, system] # Before system detector, include ec2 for AWS, gcp for GCP and azure for Azure.
+    # Using OTEL_RESOURCE_ATTRIBUTES envvar, env detector adds custom labels.
+    timeout: 2s
+    system:
+      hostname_sources: [os] # alternatively, use [dns,os] for setting FQDN as host.name and os as fallback
+extensions:
+  health_check: {}
+  zpages: {}
+exporters:
+  otlp:
+    endpoint: "<https://ingest>.{region}.signoz.cloud:443"
+    tls:
+      insecure: false
+    headers:
+      "signoz-access-token": "<SIGNOZ_INGESTION_KEY>"
+  logging:
+    verbosity: normal
+service:
+  telemetry:
+    metrics:
+      address: 0.0.0.0:8888
+  extensions: [health_check, zpages]
+  pipelines:
+    logs:
+      receivers: [otlp, filelog/app]
+      processors: [batch]
+      exporters: [otlp]
+```
+
+### Step 4: Viewing Logs in SigNoz
+
+After running the above application and making the correct configurations, you can navigate to the SigNoz logs dashboard to see all the logs sent to SigNoz.
+
+<Figure src="/img/guides/2024/07/golangslog-1.webp" alt="SigNoz localhost showcasing the log output of the above application." caption="SigNoz localhost showcasing the log output of the above application." />
+
+
+## Advantages of using slog
+
+- Structured Logging: slog supports structured logging, which is advantageous for producing logs that are simple to interpret and filter. This is especially helpful for contemporary logging systems that compile and examine log information. Key-value pairs represent log data. As a result, logs are more straightforward to search, process, and analyze than unstructured logs that contain free-form text. Because structured logs are machine-readable, integrating them with log analysis tools is made simpler.
+- Contextual Logging: Contextual data, such as requests or user IDs, may be easily appended to your log entries using slog. With this extra information, the logs are enhanced and become much more useful for troubleshooting and comprehending complicated systems. Each log entry may include rich structured data that facilitates more efficient debugging and application flow tracing.
+Integration: slog is easily integrated with the standard library's log package. This implies that you may take advantage of slog's structured logging features in addition to using the existing log mechanisms.
+- Flexibility: slog enables developers to customize logging to meet the requirements of various contexts (development, staging, and production) by supporting various output formats (such as JSON) and destinations. It provides an excellent level of personalization. Because of its adaptability, you may customize your logging to meet your requirements.
+
+## Conclusion
+
+- slog offers structured logging, which is essential for more sophisticated analytics. It enables logging with key-value paired attributes, making the logs easy to parse and filter, thus significantly improving debugging and monitoring capabilities.
+- slog supports extensive customization options, including various logging levels and structured formats like JSON. This allows developers to tailor the logging to meet the needs of different environments and purposes. This flexibility makes slog suitable for complex applications where detailed and contextual logging is critical.
+- slog simplifies the logging process with components like loggers, records, and handlers while also offering features like default settings adjustment and integration with other packages. This extensibility and ease of use make slog a robust tool for both development and production environments, providing a modern solution to application logging challenges.
+- Use the SetDefault Function after creating a new logger to avoid repetitive usage and directly use slog to print messages in the console.
+- slog integrates seamlessly with the standard library's log package. This lets you leverage existing log functionalities while benefiting from slog's structured logging capabilities.
+
+## FAQs
+
+### What are the features of slog?
+
+The slog package in Go offers enhanced logging capabilities with features like multiple output destinations, allowing logs to be sent to various handlers simultaneously. It provides robust filtering control, enabling developers to filter logs by level, and message content. Additionally, `slog-envlogger` acts as a port of `env_logger`, facilitating environment-based log filtering. These features make slog a versatile choice for developers needing precise and configurable logging in complex applications.
+
+### What are the levels of slog logging?
+
+The log/slog package provides four log levels by default, with each one associated with an integer value: DEBUG (-4), INFO (0), WARN (4), and ERROR (8).
+
+### Where to place the logger when logging with slog?
+
+In Go, using the `slog` library, you can handle logger placement based on your application's complexity. For simple setups, a global logger initialized in the `main` or an `init` function is effective. For more complex applications, dependency injection is recommended, where the logger is passed as a dependency to maintain clean architecture and ease testing. 
+
+### What are the benefits of using slog over log?
+
+slog provides structured logging, which is beneficial for querying and analyzing logs, especially in microservices architectures or distributed systems where logs are critical for debugging.
+
+### Can slog integrate with external logging systems?
+
+Yes, slog can integrate with systems like SigNoz, ELK, Splunk, or any other logging infrastructure that supports structured log data. This is often done through custom handlers that format and transmit log data.
