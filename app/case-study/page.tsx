@@ -91,6 +91,26 @@ function caseStudies() {
                 </div>
               </div>
             </div>
+            <div className={'col col--6 margin-vert--md'}>
+              <div className="card">
+                <div className="card__header">
+                  <h3 className="text-signoz_ink-300">HTTP-SCOUT</h3>
+                </div>
+                <div className="card__image">
+                  <img
+                    src="/img/case_study/wombo-list-image.webp"
+                    alt="Wombo"
+                    title="Wombo Case Study"
+                  />
+                </div>
+
+                <div className="card__footer">
+                  <a className="button button--primary" href="/case-study/http-scout/">
+                    Read more
+                  </a>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
