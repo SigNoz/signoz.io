@@ -135,6 +135,7 @@ module.exports = {
     },
     fontFamily: {
       'sans': ['Inter', 'ui-sans-serif', 'system-ui'],
+      'mono': ['Geist Mono', 'monospace' ],
     }
   },
   plugins: [
