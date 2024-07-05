@@ -1,8 +1,7 @@
 import { MetadataRoute } from 'next'
-import { allBlogs, allComparisons, allOpentelemetries, allDocs } from 'contentlayer/generated'
+import { allBlogs, allComparisons, allOpentelemetries, allDocs, allGuides } from 'contentlayer/generated'
 import siteMetadata from '@/data/siteMetadata'
 
-// Mapping function to ensure changeFrequency is correctly typed
 const mapChangeFrequency = (
   frequency: string
 ): 'weekly' | 'always' | 'hourly' | 'daily' | 'monthly' | 'yearly' | 'never' => {
@@ -59,6 +58,16 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.5,
     }))
 
+  // New section for guides
+  const guideRoutes = allGuides
+    .filter((guide) => !guide.draft)
+    .map((guide) => ({
+      url: `${siteUrl}/guides/${guide.slug}`,
+      lastModified: guide.lastmod || guide.date,
+      changeFrequency: mapChangeFrequency('weekly'),
+      priority: 0.7,
+    }))
+
   const routes = [
     '',
     'blog',
@@ -72,11 +81,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     'security',
     'support',
     'teams',
+    'guides', // Add the main guides page
   ].map((route) => ({
     url: `${siteUrl}/${route}`,
     lastModified: new Date().toISOString().split('T')[0],
     changeFrequency: mapChangeFrequency('weekly'),
   }))
 
-  return [...routes, ...blogRoutes, ...comparisonRoutes, ...opentelemetryRoutes, ...docRoutes]
+  return [...routes, ...blogRoutes, ...comparisonRoutes, ...opentelemetryRoutes, ...docRoutes, ...guideRoutes]
 }
