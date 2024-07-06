@@ -2,7 +2,7 @@
 
 import '../../css/doc.css'
 
-import { ReactNode, useEffect, useRef } from 'react'
+import { ReactNode, useRef } from 'react'
 import { CoreContent } from 'pliny/utils/contentlayer'
 import type { Doc } from 'contentlayer/generated'
 import SectionContainer from '@/components/SectionContainer'
@@ -17,9 +17,7 @@ export interface tocItemProps {
 }
 
 interface LayoutProps {
-  content: CoreContent<Doc>
   children: ReactNode
-  toc: tocItemProps[]
 }
 
 export default function DocLayout({ children }: LayoutProps) {
