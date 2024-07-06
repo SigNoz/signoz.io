@@ -1,8 +1,8 @@
-import { LucidePlus, X } from 'lucide-react'
-import React, { useState } from 'react'
+import { LucidePlus, X } from 'lucide-react';
+import React, { useState } from 'react';
 
-const Card = ({ title, body }: CardProps): JSX.Element => {
-  const [isActive, setIsActive] = useState(false)
+const Card = ({ title, body, idx }: CardProps): JSX.Element => {
+  const [isActive, setIsActive] = useState(false);
 
   return (
     <div>
@@ -18,8 +18,10 @@ const Card = ({ title, body }: CardProps): JSX.Element => {
           borderWidth: '1px',
           borderColor: '#1D212D',
           borderBottom: 'hidden',
+          borderLeft: 0,
+          borderRight: 0,
+          ...(idx === 0 ? {borderTop: 0} : {})
         }}
-        className=""
         onClick={() => setIsActive((state) => !state)}
       >
         <div
@@ -42,22 +44,24 @@ const Card = ({ title, body }: CardProps): JSX.Element => {
             {!isActive ? <LucidePlus /> : <X />}
           </div>
         </div>
-        {isActive && (
+        <div
+          className={`overflow-hidden transition-max-height duration-500 ease-in-out ${isActive ? 'max-h-screen' : 'max-h-0'
+            }`}
+        >
           <div
-            className="card__body text-signoz_vanilla-400"
+            className="card__body text-signoz_vanilla-400 p-4"
             dangerouslySetInnerHTML={{ __html: body }}
-          >
-            { }
-          </div>
-        )}
+          />
+        </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
 interface CardProps {
-  title: string
-  body: string
+  title: string;
+  body: string;
+  idx?: number;
 }
 
-export default Card
+export default Card;

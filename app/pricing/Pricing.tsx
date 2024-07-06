@@ -27,11 +27,13 @@ import { CircleCheckSolid, CircleInfoSolid, ZapSolid, ClockSolid, CheckSolid, Cr
 
 function Pricing() {
   return (
-    <div className='bg-signoz_ink-500 relative mt-[100px]'>
+    <div className='bg-signoz_ink-500 relative'>
 
       <div title="SigNoz Plans">
         {/* Plans */}
+        <div className="flex flex-col items-center pt-24 px-5 relative !w-[80vw] !mx-auto border border-signoz_slate-400 border-dashed !border-b-0">
         <PricingPlans />
+        </div>
         {/* All Features */}
         <TrustedByTeams />
         {/* Cost Comparison Graph */}
@@ -70,7 +72,7 @@ function FAQ() {
             <div className='flex-1 !w-[300px]'>
               <p className="text-4xl sm:text-[44px] font-semibold text-signoz_vanilla-100 leading-[3.5rem] pl-12 pt-10">Frequently<br />Asked <br />Questions</p>
             </div>
-            <div className="card-demo flex-[2_2_0%] border border-signoz_slate-400 border-dashed left-0 !border-b-0">
+            <div className="card-demo flex-[2_2_0%] border border-signoz_slate-400 border-dashed left-0 !border-b-0 !border-r-0 !border-t-0">
               <FAQBody />
             </div>
           </div>
@@ -180,16 +182,15 @@ const PricingPlans = () => {
   const [tab, setTab] = useState('cloud')
 
   return (
-    <section className={`${styles.pricing}`}>
-      <div className={`container !w-[80vw] !mx-auto border border-signoz_slate-400 border-dashed !mb-0 !border-b-0 ${styles.pricingContainer}`}>
+    <section className={`${styles.pricing} relative`}>
+      <div className={`container !w-[80vw] !mx-auto  border border-signoz_slate-400 border-dashed !my-0 !border-t-0 !border-b-0 ${styles.pricingContainer}`}>
 
         {tab === 'cloud' ? (
           <>
             {/* Cloud Plan */}
-            <div className="mx-auto mb-5 flex max-w-4xl flex-col items-center text-center ">
-              <Heading type={1}>
-                Pricing
-              </Heading>
+            <div className="mx-auto mb-5 flex max-w-4xl flex-col items-center text-center">
+            <div className='absolute !w-[80vw] h-[7rem] border border-signoz_slate-400 border-dashed top-[-80px] !border-r-0 !border-l-0 !border-t-0 z-[0]'/>
+              <Heading type={1} className='z-[1]'>Pricing</Heading>
               <SubHeading>
                 Tired of unpredictable pricing and complex billing structure? Save up to{' '}
                 <Link href="/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/">
@@ -199,6 +200,7 @@ const PricingPlans = () => {
                 </Link>{' '}
                 with SigNoz. No user-based and host-based pricing.
               </SubHeading>
+              <div className='absolute h-[22.5rem] border border-signoz_slate-400 border-dashed top-[-95px] left-[29px] right-[29px] !border-t-0 !border-b-0 z-[1]'/>
               <div className="my-5 flex justify-center">
                 <div className="flex">
                   <nav
@@ -216,12 +218,12 @@ const PricingPlans = () => {
                     </button>
                     <button
                       type="button"
-                      className={`cursor-pointer border-none px-4 py-2 text-xs text-signoz_vanilla-400`}
+                      className={`cursor-pointer border-none px-4 py-2 text-xs text-signoz_vanilla-400 ml-0`}
                       onClick={() => setTab('self-managed')}
                     >
-                      <div className='flex gap-1.5'>
+                      <div className='relative flex gap-1.5 z-[3]'>
                         <Server size={14} />
-                        Hosted in your infra
+                        Self-Hosted
                       </div>
                     </button>
                   </nav>
@@ -230,10 +232,10 @@ const PricingPlans = () => {
             </div>
 
 
-            <div className="pricing-plans mx-auto grid grid-cols-1 justify-center gap-x-8 gap-y-10 md:max-w-md lg:max-w-6xl lg:grid-cols-2">
-              <div className="pricing-card rounded-lg bg-opacity-5 px-4 py-5 md:px-8">
+            <div className="pricing-plans mx-auto grid grid-cols-1 justify-center gap-y-10 md:max-w-md lg:max-w-6xl lg:grid-cols-2">
+              <div className="pricing-card bg-opacity-5 px-4 py-5 md:px-8 border border-signoz_slate-400 border-dashed !mb-0 !border-b-0 !border-r-0">
                 <div>
-                  <h3 className="text-2xl font-bold tracking-tight pinkish-gradient">For Teams</h3>
+                  <h3 className="text-2xl font-bold tracking-tight pinkish-gradient">Teams</h3>
                   <p className="mb-4 text-base leading-relaxed text-gray-400">
                     For teams that need high-performing applications.
                   </p>
@@ -364,26 +366,24 @@ const PricingPlans = () => {
                       <div className='gap-3'>
                         <CircleInfoSolid />
                         <span>
-                          Learn how the price for metrics is calculated
-                        </span>
                         <button onClick={() => {
                           const element = document.getElementById('my-section');
                           element?.scrollIntoView({
                             behavior: 'smooth'
                           });
                         }}>
-                          <ArrowUpRight size={20} />
-
+                          Learn how the price for metrics is calculated <ArrowUpRight size={20} className='inline' />
                         </button>
+                        </span>
+
                       </div>
                     </div>
                     <div>
                       <div className='gap-3'>
                         <CircleInfoSolid />
                         <span>
-                          What comes included in the $199?
+                          What comes included in the $199? <ArrowUpRight size={20} className='inline' />
                         </span>
-                        <ArrowUpRight size={20} />
                       </div>
                     </div>
                     <br/>
@@ -465,7 +465,7 @@ const PricingPlans = () => {
 
                 </div>
               </div>
-              <div className="pricing-card rounded-lg bg-opacity-5 px-4 py-5 md:px-8">
+              <div className="pricing-card bg-opacity-5 px-4 py-5 md:px-8 border border-signoz_slate-400 border-dashed !mb-0 !border-b-0">
                 <div>
                   <h3 className="font-heading text-2xl font-bold orangish-gradient">Enterprise Cloud</h3>
                   <p className="mb-4 text-base leading-relaxed text-gray-400">
@@ -569,11 +569,13 @@ const PricingPlans = () => {
             {/* Self Managed Plan */}
 
             <div className="mx-auto mb-5 flex max-w-4xl flex-col items-center text-center">
-              <Heading type={1}>Run SigNoz within your infrastructure</Heading>
+            <div className='absolute !w-[80vw] h-[7rem] border border-signoz_slate-400 border-dashed top-[-80px] !border-r-0 !border-l-0 !border-t-0'/>
+              <Heading type={1} className='z-[1]'>Run SigNoz within your infrastructure</Heading>
               <SubHeading>
                 Get started with Community Edition and upgrade for enterprise-ready features or get
                 it managed by SigNoz in your cloud (BYOC)
               </SubHeading>
+              <div className='absolute h-[22.5rem] border border-signoz_slate-400 border-dashed top-[-90px] left-[29px] right-[29px] !border-t-0 !border-b-0 z-[1]'/>
               <div className="my-5 flex justify-center">
                 <div className="flex rounded-3xl">
                   <nav
@@ -594,7 +596,7 @@ const PricingPlans = () => {
                     </button>
                     <button
                       type="button"
-                      className={`cursor-pointer px-4 py-2 text-xs text-white relative z-[2] bg-signoz_slate-400 ${tab === 'self-managed'
+                      className={`cursor-pointer px-4 py-2 text-xs text-white relative z-[2] bg-signoz_slate-400 !ml-0 ${tab === 'self-managed'
                         ? " "
                         : 'bg-transparent'
                         }`}
@@ -602,7 +604,7 @@ const PricingPlans = () => {
                     >
                       <div className='flex gap-1.5'>
                         <Server size={14} />
-                        Hosted in your infra
+                        Self-Hosted
                       </div>
                     </button>
                   </nav>
@@ -610,8 +612,8 @@ const PricingPlans = () => {
               </div>
             </div>
 
-            <div className="pricing-plans mx-auto grid grid-cols-1 justify-center gap-x-8 gap-y-10 md:max-w-md lg:max-w-6xl lg:grid-cols-2">
-              <div className="pricing-card rounded-lg bg-opacity-5 px-4 py-5 md:px-8">
+            <div className="pricing-plans mx-auto grid grid-cols-1 justify-center gap-y-10 md:max-w-md lg:max-w-6xl lg:grid-cols-2">
+              <div className="pricing-card bg-opacity-5 px-4 py-5 md:px-8 border border-signoz_slate-400 border-dashed !mb-0 !border-b-0 !border-r-0">
                 <div>
                   <h3 className="font-heading text-2xl font-bold  pinkish-gradient">Community Edition</h3>
                   <p className="mb-4 text-base leading-relaxed text-gray-400">Free to Self Host
@@ -662,7 +664,7 @@ const PricingPlans = () => {
 
                 </div>
               </div>
-              <div className="pricing-card rounded-lg bg-opacity-5 px-4 py-5 md:px-8">
+              <div className="pricing-card bg-opacity-5 px-4 py-5 md:px-8 border border-signoz_slate-400 border-dashed !mb-0 !border-b-0">
                 <div>
                   <h3 className="font-heading text-2xl font-bold orangish-gradient">Enterprise Edition</h3>
                   <p className="mb-4 text-base leading-relaxed text-gray-400">
@@ -1085,7 +1087,7 @@ const ExploreAllFeature = () => {
             inEnterprise: <CheckSolid />,
           },
           {
-            feature: 'SLA w/ downtime developer pairingl',
+            feature: 'SLA w/ downtime developer pairing',
             inCommunity: <CrossSolid />,
             inTeams: <CrossSolid />,
             inEnterprise: <CheckSolid />,
@@ -1110,7 +1112,7 @@ const ExploreAllFeature = () => {
               return (
                 <div
                   key={idx}
-                  className={`${idx === 2 ? `rounded-lg p-3 teamColumnBackground` : idx !== 0 ? `rounded-lg p-3 ${Opacity[idx]}` : 'hidden md:block'
+                  className={`${idx === 2 ? `rounded-lg !rounded-b-none p-3 teamColumnBackground` : idx !== 0 ? `rounded-lg p-3 ${Opacity[idx]}` : 'hidden md:block'
                     }`}
                 >
                   <h2 className="m-0 text-lg md:text-base">{h.heading}</h2>
@@ -1134,9 +1136,19 @@ const ExploreAllFeature = () => {
                     key={i}
                     className={`${false ? `rounded-lg bg-opacity-[${i}]` : ''}`}
                   >
-                    <h3 className="mt-12 mb-3 pl-6 pr-2 py-2 text-center text-sm font-medium md:text-left">{row.section}</h3>
+                    <div className='gird grid-cols-1'>
+                      <div className="grid grid-cols-3 gap-1 md:grid-cols-[3fr_1fr_1fr_1fr]">
+                        <div className="mt-12 mb-3 pl-6 pr-2 py-2 text-center text-sm font-medium md:text-left">{row.section}</div>
+                        <div>
+                        </div>
+                        <div className='teamColumnBackground'>
+                        </div>
+                        <div>
+                        </div>
+                      </div>
+                    </div>
                     <Line />
-                    <div className=" grid grid-cols-1">
+                    <div className="grid grid-cols-1">
                       {row.features.map((r, idx) => {
                         return (
                           <div key={idx}>
@@ -1168,6 +1180,12 @@ const ExploreAllFeature = () => {
                   </div>
                 )
               })}
+              <div className="grid grid-cols-3 gap-1 md:grid-cols-[3fr_1fr_1fr_1fr] h-[18px]">
+                <div />
+                <div />
+                <div className='teamColumnBackground rounded-lg !rounded-t-none' />
+                <div />
+              </div>
             </div>
           </div>
         </div>

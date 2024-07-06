@@ -1,3 +1,4 @@
+'use client'
 import React, { useState } from 'react'
 import ReactGA from 'react-ga4'
 import styles from './styles.module.css'
@@ -80,7 +81,7 @@ export default function SignozCloudSignUpForm() {
 
   const handleGTMCustomEventTrigger = (payload) => {
     if (window && window?.dataLayer && Array.isArray(window.dataLayer)) {
-      window?.dataLayer.push({
+      window.dataLayer.push({
         event: 'signoz-cloud-signup-form-submit',
         ...payload,
       })
@@ -162,12 +163,11 @@ export default function SignozCloudSignUpForm() {
   }
 
   return (
-    <div className='flex flex-col gap-20'>
+    <>
       <div className={styles.header}>
-        <h2 className="text-2xl font-bold text-white text-start"> Get started with SigNoz </h2>
-        <p className="font-bold text-signoz_vanilla-400 text-start">
-          Experience SigNoz effortlessly. No installation, maintenance, or scaling needed. Get started now with a free trial account for 30 days.
-        </p>
+        <h2> Get started with SigNoz </h2>
+        <h4>Try SigNoz free for 30 days with full access to all features</h4>
+        <h5> No credit card required</h5>
       </div>
 
       {!isSubmitting && submitFailed ? (
@@ -189,33 +189,36 @@ export default function SignozCloudSignUpForm() {
       ) : (
         <form className={styles.sigNozCloudSignUpForm}>
           <div className="mb-5">
-            <label htmlFor="fullName" className="mb-2 block text-sm font-medium text-white">
-              Your full name
+            <label htmlFor="fullName" className="mb-2 block text-sm font-medium text-gray-900">
+              Full Name*
             </label>
             <input
               type="text"
               disabled={isSubmitting}
               id="fullName"
               name="fullName"
-              className={`block w-full rounded-sm border border-2 border-[signoz_slate-400] bg-signoz_ink-300 p-2.5 text-sm ${errors?.fullName ? styles.hasError : ''}`}
-              placeholder="E.g. Bart Simpson"
+              className={`block w-full rounded-sm border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 ${
+                styles.formInput
+              } ${errors?.fullName ? styles.hasError : ''}`}
+              placeholder=""
               onChange={handleInputChange}
               required
-
             />
+
             {errors?.fullName && <span className="text-sm text-red-400">{errors.fullName}</span>}
           </div>
           <div className="mb-5">
-            <label htmlFor="workEmail" className="mb-2 block text-sm font-medium text-white">
-              Work Email
+            <label htmlFor="workEmail" className="mb-2 block text-sm font-medium text-gray-900">
+              Work Email*
             </label>
             <input
               type="email"
               disabled={isSubmitting}
               id="workEmail"
               name="workEmail"
-              className={`block w-full rounded-sm border border-[signoz_slate-400] bg-signoz_ink-300 p-2.5 text-sm ${errors?.fullName ? styles.hasError : ''}`}
-              placeholder="E.g. bart@simpsonmail.com"
+              className={`block w-full rounded-sm border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 ${
+                styles.formInput
+              } ${errors?.fullName ? styles.hasError : ''}`}
               onChange={handleInputChange}
               required
             />
@@ -223,8 +226,8 @@ export default function SignozCloudSignUpForm() {
             {errors?.workEmail && <span className="text-sm text-red-400">{errors.workEmail}</span>}
           </div>
 
-          {/* <div className="mb-5">
-            <label htmlFor="companyName" className="mb-2 block text-sm font-medium text-gray-900 ">
+          <div className="mb-5">
+            <label htmlFor="companyName" className="mb-2 block text-sm font-medium text-gray-900">
               Company Name*
             </label>
             <input
@@ -232,7 +235,7 @@ export default function SignozCloudSignUpForm() {
               id="companyName"
               disabled={isSubmitting}
               name="companyName"
-              className={`block w-full rounded-sm border border-gray-200 bg-gray-50 p-2.5 text-sm text-gray-900  ${
+              className={`block w-full rounded-sm border border-gray-200 bg-gray-50 p-2.5 text-sm text-gray-900 ${
                 styles.formInput
               } ${errors?.fullName ? styles.hasError : ''}`}
               onChange={handleInputChange}
@@ -242,23 +245,17 @@ export default function SignozCloudSignUpForm() {
             {errors?.companyName && (
               <span className="text-sm text-red-400">{errors.companyName}</span>
             )}
-          </div> */}
+          </div>
 
           <div className="mb-5">
-            <label htmlFor="dataRegion" className="mb-2 block text-sm font-medium text-white">
-              Data Region
+            <label htmlFor="dataRegion" className="mb-2 block text-sm font-medium text-gray-900 ">
+              Data Region*
             </label>
-            <div className='grid grid-cols-2 gap-3'>
-              <div className='rounded-sm border border-[signoz_slate-400] bg-signoz_ink-300 p-2.5'> United States </div>
-              <div> Europe </div>
-              <div> India </div>
-              <div></div>
-            </div>
-            {/* <select
+            <select
               id="dataRegion"
               name="dataRegion"
               disabled={isSubmitting}
-              className="block w-full rounded-sm border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 "
+              className="block w-full rounded-sm border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900"
               onChange={handleInputChange}
             >
               <option value="us" className={styles.dataRegionOption}>
@@ -270,11 +267,11 @@ export default function SignozCloudSignUpForm() {
               <option value="in" className={styles.dataRegionOption}>
                 India
               </option>
-            </select> */}
+            </select>
           </div>
 
-          {/* <div className="mb-5">
-            <label htmlFor="message" className="mb-2 block text-sm font-medium text-gray-900 ">
+          <div className="mb-5">
+            <label htmlFor="message" className="mb-2 block text-sm font-medium text-gray-900">
               Where did you hear about us?
             </label>
             <textarea
@@ -282,10 +279,10 @@ export default function SignozCloudSignUpForm() {
               name="source"
               disabled={isSubmitting}
               rows={4}
-              className={`block w-full rounded-sm border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900  ${styles.source}`}
+              className={`block w-full rounded-sm border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 ${styles.source}`}
               onChange={handleInputChange}
             ></textarea>
-          </div> */}
+          </div>
 
           <button
             className={`h-10 w-4/12 cursor-pointer rounded-none border-none bg-primary-400 text-sm outline-none hover:bg-primary-500 ${styles.getStartedBtn}`}
@@ -303,6 +300,6 @@ export default function SignozCloudSignUpForm() {
           </button>
         </form>
       )}
-    </div>
+    </>
   )
 }
