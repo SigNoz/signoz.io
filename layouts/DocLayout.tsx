@@ -2,7 +2,7 @@
 
 import '../css/doc.css'
 
-import { ReactNode, useRef } from 'react'
+import { ReactNode, useEffect, useRef } from 'react'
 import { CoreContent } from 'pliny/utils/contentlayer'
 import type { Doc } from 'contentlayer/generated'
 import SectionContainer from '@/components/SectionContainer'
