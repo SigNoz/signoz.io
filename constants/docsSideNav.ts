@@ -253,7 +253,7 @@ const docsSideNav = [
               {
                 type: 'doc',
                 route: '/docs/instrumentation/nextjs',
-                label: 'NextJS', 
+                label: 'NextJS',
               },
             ],
           },
@@ -300,19 +300,19 @@ const docsSideNav = [
             // type: 'doc',
             // },
             items: [
-                {
-                  type: 'category',
-                  label: 'JavaScript',
-                  // route: '',
-                  // link: {
-                  // type: 'doc',
-                  // },
-                  items: [
-                    {
-                      type: 'doc',
-                      label: 'NodeJS',
-                      route: '/docs/instrumentation/manual-instrumentation/javascript/nodejs',
-                   },
+              {
+                type: 'category',
+                label: 'JavaScript',
+                // route: '',
+                // link: {
+                // type: 'doc',
+                // },
+                items: [
+                  {
+                    type: 'doc',
+                    label: 'NodeJS',
+                    route: '/docs/instrumentation/manual-instrumentation/javascript/nodejs',
+                  },
                 ],
               },
             ],
@@ -557,7 +557,8 @@ const docsSideNav = [
           },
           {
             type: 'doc',
-            route: '/docs/logs-management/send-logs/collect-tomcat-access-and-garbage-collector-logs',
+            route:
+              '/docs/logs-management/send-logs/collect-tomcat-access-and-garbage-collector-logs',
             label: 'Tomcat',
           },
         ],
@@ -1251,6 +1252,11 @@ const docsSideNav = [
         items: [
           {
             type: 'doc',
+            route: '/docs/operate/migration/upgrade-0.49',
+            label: 'Upgrade to v0.49',
+          },
+          {
+            type: 'doc',
             route: '/docs/operate/migration/upgrade-0.45',
             label: 'Upgrade to v0.45',
           },
@@ -1438,7 +1444,8 @@ const docsSideNav = [
       {
         label: 'SigNoz Cloud',
         type: 'category',
-          items: [{
+        items: [
+          {
             type: 'doc',
             route: '/docs/troubleshooting/signoz-cloud/general-troubleshooting',
             label: 'General Troubleshooting',
