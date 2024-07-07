@@ -44,8 +44,8 @@ export const Header = () => {
             </Button>
           </Link>
       </div>
-      <div className="container !w-[80vw] !mx-auto border border-signoz_slate-400 border-dashed !border-b-0 !border-t-0">
-        <div className="w-100 mx-auto">
+      <div className="container !w-[80vw] !mt-0 !mx-auto border border-signoz_slate-400 border-dashed !border-b-0 !border-t-0">
+        <div className="w-100 mx-[-28px]">
           <div className="product-explainer-video hero-figure rounded-lg p-3">
             <div className="embed-container">
               <VimeoPlayer videoId="944340217" />

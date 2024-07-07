@@ -47,15 +47,15 @@ const Card: React.FC<CardProps> = ({ iconTag, title, subTitle, stats, descriptio
       </div>
       <p className="text-signoz_vanilla-400 text-base font-normal leading-9 mt-2 mb-3">{description}</p>
       {buttonText ? (
-        <Link href={buttonLink ? buttonLink: ''} className='mb-2'>
-        <Button type={Button.TYPES.SECONDARY}>
+        <Link href={buttonLink ? buttonLink: ''} >
+        <Button type={Button.TYPES.SECONDARY} className='mb-4'>
           {buttonText} <ArrowRight size={14} />
         </Button>
         </Link>
       ) : null}
       {/* We will update this once we have the assets */}
-      {/* {img ? <img src={''} className="card-background border-none w-full h-60"  /> : null} */}
-      {img ? <div className="card-background w-full h-60 mt-4"  /> : null}
+      {img ? <img src={img} className="card-background border-none w-auto h-auto"  /> : null}
+      {/* {img ? <div className="card-background w-full h-60 mt-4"  /> : null} */}
     </div>
   );
 };

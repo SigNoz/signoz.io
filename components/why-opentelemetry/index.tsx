@@ -14,25 +14,25 @@ export const WhyOpenTelemetry = () => {
       title: "No vendor lock-in",
       desc: "Get free of vendor-based agents inside your codebase.",
       figure: "/img/landing/property-no-vendor-lock-in.webp",
-      logo: '/img/index_features/layout-grid.svg',
+      logo: '/img/index_features/key.svg',
     },
     {
       title: "Futureproof",
       desc: "OpenTelemetry’s extensibility ensures support for any evolving technologies.",
       figure: "/img/landing/property-ease-of-use.webp",
-      logo: '/img/index_features/layout-grid.svg',
+      logo: '/img/index_features/future.svg',
     },
     {
       title: "Covers all use-cases",
       desc: "OpenTelemetry is a one-stop solution for all your telemetry needs.",
       figure: "/img/landing/property-covers-all-use-cases.webp",
-      logo: '/img/index_features/layout-grid.svg',
+      logo: '/img/index_features/cases.svg',
     },
     {
       title: "Standardize Observability",
       desc: "A single standard for all telemetry signals means increased developer productivity, consistency across teams.",
       figure: "/img/landing/property-standardize-observability.webp",
-      logo: '/img/index_features/layout-grid.svg',
+      logo: '/img/index_features/easy-to-use.svg',
     },
   ];
 
@@ -97,7 +97,8 @@ export const WhyOpenTelemetry = () => {
                   </li>
                 </ul>
               </div>
-              <div className="aspect-[449/352] max-w-[50vw] sm:w-[449px] card-background mb-6"></div>
+              <div className="aspect-[449/352] sm:h-[352px] card-background mb-6">
+              <img src="/img/graphics/homepage/feature-graphic-otel.png" alt="" /></div>
             </div>
             <div className="bg-signoz_ink-400 p-4 border border-signoz_slate-500 rounded">
               <p className="text-signoz_vanilla-100 text-base font-medium mb-2">Comparing Datadog and New Relic's support for OpenTelemetry data</p>

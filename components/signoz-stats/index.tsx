@@ -10,10 +10,10 @@ import { ArrowRight, BookOpen } from 'lucide-react'
 
 const SigNozStats = () => {
   const STATS_LIST = [
-    { id: 1, logo: '/img/index_features/layout-grid.svg', name: 'Downloads', value: '10 million+' },
-    { id: 2, logo: '/img/index_features/layout-grid.svg', name: 'GitHub Stars', value: '17k+' },
-    { id: 3, logo: '/img/index_features/layout-grid.svg', name: 'Contributors', value: '140+' },
-    { id: 4, logo: '/img/index_features/layout-grid.svg', name: 'Community Members', value: '4.5k+' },
+    { id: 1, logo: '/img/index_features/download.svg', name: 'OSS Downloads', value: '10 million+' },
+    { id: 2, logo: '/img/index_features/github.svg', name: 'GitHub Stars', value: '17k+' },
+    { id: 3, logo: '/img/index_features/contributions.svg', name: 'Contributors', value: '140+' },
+    { id: 4, logo: '/img/index_features/community.svg', name: 'Community Members', value: '4.5k+' },
   ]
   return (
     <section>

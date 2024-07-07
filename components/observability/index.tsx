@@ -9,8 +9,8 @@ const Observability = () => {
   return (
     <section>
     <div className='flex flex-col w-auto h-auto border border-signoz_slate-400 border-dashed py-10 pl-10 !border-r-0 !border-b-0'>
-      <div className="flex flex-col sm:flex-row">
-        <div className='flex flex-col justify-between'>
+      <div className="flex flex-col sm:flex-row gap-8">
+        <div className='flex flex-col justify-between shrink-[10]'>
         <div>
         <p className='text-2xl font-semibold text-signoz_vanilla-100 block mb-2'> Enterprise-grade Observability</p>
         <p className='text-signoz_vanilla-400 text-base font-normal leading-9'>Get access to observability at any scale with advanced security and compliance.</p>
@@ -38,7 +38,8 @@ const Observability = () => {
         </ul>
         </div>
         </div>
-        <div className="aspect-[272/404] max-w-[50vw] w-[272px] card-background"></div>
+        <div className="aspect-[272/404] max-w-[50vw] w-[272px]">
+        <img src="/img/graphics/homepage/feature-graphic-enterprise-2.png" alt="" /></div>
       </div>
     </div>
   </section>

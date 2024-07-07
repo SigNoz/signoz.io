@@ -27,7 +27,7 @@ const DataProtectionLaws = ({ isInPricingPage = false }) => {
             }
 
           </div>
-          <div className="aspect-[720/206] max-w-[50vw] h-[206px] w-[720px] card-background"></div>
+          <img src="/img/graphics/homepage/feature-graphic-data-protection.png" alt="" />
           {
             !isInPricingPage ?
               <div className='flex flex-col sm:flex-row gap-3 mt-[18px]'>

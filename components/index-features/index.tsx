@@ -32,49 +32,49 @@ export const SigNozFeatures = () => {
       text: 'Ingest data from 50+ sources — send your data and start digging through.',
       buttonText: 'Explore',
       logo: '/img/index_features/bar-chart-2.svg',
-      img: '/img/blog/2022/02/signal_09_cover.webp'
+      img: '/img/graphics/homepage/feature-graphic-1.png'
     },
     {
       iconTag: 'APPLICATION PERFORMANCE MONITORING',
       text: 'Monitor & troubleshoot your application performance with APM.',
       buttonText: 'Explore',
       logo: '/img/index_features/bar-chart-2.svg',
-      img: '/img/blog/2022/02/signal_09_cover.webp'
+      img: '/img/graphics/homepage/feature-graphic-2.png'
     },
     {
       iconTag: 'DISTRIBUTED TRACING',
       text: 'Track user requests across services to identify bottlenecks.',
       buttonText: 'Learn more',
       logo: '/img/index_features/drafting-compass.svg',
-      img: '/img/blog/2022/02/signal_09_cover.webp'
+      img: '/img/graphics/homepage/feature-graphic-3.png'
     },
     {
       iconTag: 'LOG MANAGEMENT',
       text: 'Ingest, search, and analyze your logs at any scale.',
       buttonText: 'Learn more',
       logo: '/img/index_features/logs.svg',
-      img: '/img/blog/2022/02/signal_09_cover.webp'
+      img: '/img/graphics/homepage/feature-graphic-4.png'
     },
     {
       iconTag: 'EXCEPTIONS',
       text: 'Record exceptions automatically with stack trace & linked span data.',
       buttonText: 'Explore',
       logo: '/img/index_features/bug.svg',
-      img: '/img/blog/2022/02/signal_09_cover.webp'
+      img: '/img/graphics/homepage/feature-graphic-5.png'
     },
     {
       iconTag: 'METRICS & DASHBOARDS',
       text: 'Metrics monitoring with configurable dashboards to fit any use case.',
       buttonText: 'Explore',
       logo: '/img/index_features/layout-grid.svg',
-      img: '/img/blog/2022/02/signal_09_cover.webp'
+      img: '/img/graphics/homepage/feature-graphic-6.png'
     },
     {
       iconTag: 'ALERTS',
       text: 'Get actionable alerts in your preferred notification channel.',
       buttonText: 'Learn more',
       logo: '/img/index_features/concierge-bell.svg',
-      img: '/img/blog/2022/02/signal_09_cover.webp'
+      img: '/img/graphics/homepage/feature-graphic-7.png'
     },
   ];
 

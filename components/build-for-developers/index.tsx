@@ -8,27 +8,27 @@ const BuildForDevelopers = () => {
     {
       title: "Single tool for observability",
       desc: "No need of using disparate tools for observability. Get everything in a single platform. ",
-      figure: "/img/landing/property-query-buider.webp",
+      figure: "/img/graphics/homepage/feature-graphic-single-tool.png",
     },
     {
       title: "Flexible deployment options",
       desc: "You can self-host SigNoz or use our cloud services, or use both depending on your use-cases.",
-      figure: "/img/landing/property-columnar-database.webp",
+      figure: "/img/graphics/homepage/feature-graphic-flexible-deployment.png",
     },
     {
       title: "Columnar database",
       desc: "SigNoz uses ClickHouse as datastore. It is extremely fast and highly optimized storage for observability data.",
-      figure: "/img/landing/property-telemetry-pipeline.webp",
+      figure: "/img/graphics/homepage/feature-graphic-columnar-db.png",
     },
     {
       title: "Flexible Querying",
       desc: "DIY Query builder, PromQL, and ClickHouse queries to fulfill all your use-cases around querying observability data.",
-      figure: "/img/landing/property-source-code.webp",
+      figure: "/img/graphics/homepage/feature-graphic-flexible-querying.png",
     },
     {
       title: "Correlated Signals",
       desc: "Correlated logs, metrics and traces for much richer context while debugging.",
-      figure: "/img/landing/property-source-code.webp",
+      figure: "/img/graphics/homepage/feature-graphic-correlation.png",
     },
   ];
   return (
