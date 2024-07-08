@@ -5,10 +5,11 @@ import { MDXLayoutRenderer } from 'pliny/mdx-components'
 import { coreContent } from 'pliny/utils/contentlayer'
 import { allDocs } from 'contentlayer/generated'
 import type { Doc } from 'contentlayer/generated'
-import DocLayout from '@/layouts/DocLayout'
 import { Metadata } from 'next'
 import siteMetadata from '@/data/siteMetadata'
 import React from 'react'
+import { tocItemProps } from '../layout'
+import DocsPrevNext from '../../../components/DocsPrevNext/DocsPrevNext'
 
 export async function generateMetadata({
   params,
@@ -46,13 +47,42 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
   const slug = decodeURI(params.slug.join('/'))
   const post = allDocs.find((p) => p.slug === slug) as Doc
   const mainContent = coreContent(post)
-  const Layout = DocLayout
+  const toc = post?.toc || []
+  const { title } = mainContent
 
   return (
     <>
-      <Layout content={mainContent} toc={post?.toc || []}>
-        <MDXLayoutRenderer code={post.body.code} components={components} toc={post.toc || []} />
-      </Layout>
+      <div className="doc">
+        <div className="doc-content">
+          <h2 className="text-3xl">{title}</h2>
+          <MDXLayoutRenderer code={post.body.code} components={components} toc={post.toc || []} />
+          <DocsPrevNext />
+        </div>
+
+        {toc && Array.isArray(toc) && toc.length > 0 && (
+          <div className="doc-toc">
+            <div className="mb-3 text-xs uppercase"> On this page </div>
+
+            <div className="doc-toc-items border-l border-signoz_slate-500 pl-3 ">
+              {toc.map((tocItem: tocItemProps) => {
+                return (
+                  <div className="doc-toc-item" key={tocItem.url}>
+                    <a
+                      data-level={tocItem.depth}
+                      href={tocItem.url}
+                      className="mb-1 line-clamp-2 text-xs"
+                    >
+                      {tocItem.value}
+                    </a>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* </DocLayout> */}
     </>
   )
 }
