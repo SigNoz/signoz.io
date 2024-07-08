@@ -32,7 +32,7 @@ function Pricing() {
       <div title="SigNoz Plans">
         {/* Plans */}
         <div className="flex flex-col items-center pt-24 px-5 relative !w-[80vw] !mx-auto border border-signoz_slate-400 border-dashed !border-b-0">
-        <PricingPlans />
+          <PricingPlans />
         </div>
         {/* All Features */}
         <TrustedByTeams />
@@ -189,7 +189,7 @@ const PricingPlans = () => {
           <>
             {/* Cloud Plan */}
             <div className="mx-auto mb-5 flex max-w-4xl flex-col items-center text-center">
-            <div className='absolute !w-[80vw] h-[7rem] border border-signoz_slate-400 border-dashed top-[-80px] !border-r-0 !border-l-0 !border-t-0 z-[0]'/>
+              <div className='absolute !w-[80vw] h-[7rem] border border-signoz_slate-400 border-dashed top-[-80px] !border-r-0 !border-l-0 !border-t-0 z-[0]'/>
               <Heading type={1} className='z-[1]'>Pricing</Heading>
               <SubHeading>
                 Tired of unpredictable pricing and complex billing structure? Save up to{' '}
@@ -366,14 +366,14 @@ const PricingPlans = () => {
                       <div className='gap-3'>
                         <CircleInfoSolid />
                         <span>
-                        <button onClick={() => {
-                          const element = document.getElementById('my-section');
-                          element?.scrollIntoView({
-                            behavior: 'smooth'
-                          });
-                        }}>
-                          Learn how the price for metrics is calculated <ArrowUpRight size={20} className='inline' />
-                        </button>
+                          <button onClick={() => {
+                            const element = document.getElementById('monthly-estimate');
+                            element?.scrollIntoView({
+                              behavior: 'smooth'
+                            });
+                          }}>
+                            Learn how the price for metrics is calculated <ArrowUpRight size={20} className='inline' />
+                          </button>
                         </span>
 
                       </div>
@@ -453,12 +453,15 @@ const PricingPlans = () => {
                 </div>
 
                 <div className='mt-3'>
-                  <Link href={'/teams/'}>
-                    <Button className='w-full' type={Button.TYPES.SECONDARY}>
-                      Estimate your monthly bill
-                      <ArrowDown size={14} />
-                    </Button>
-                  </Link>
+                  <Button className='w-full' type={Button.TYPES.SECONDARY} onClick={() => {
+                    const element = document.getElementById('monthly-estimate');
+                    element?.scrollIntoView({
+                      behavior: 'smooth'
+                    });
+                  }}>
+                    Estimate your monthly bill
+                    <ArrowDown size={14} />
+                  </Button>
                   <div>
                     <br></br>
                   </div>
@@ -569,7 +572,7 @@ const PricingPlans = () => {
             {/* Self Managed Plan */}
 
             <div className="mx-auto mb-5 flex max-w-4xl flex-col items-center text-center">
-            <div className='absolute !w-[80vw] h-[7rem] border border-signoz_slate-400 border-dashed top-[-80px] !border-r-0 !border-l-0 !border-t-0'/>
+              <div className='absolute !w-[80vw] h-[7rem] border border-signoz_slate-400 border-dashed top-[-80px] !border-r-0 !border-l-0 !border-t-0'/>
               <Heading type={1} className='z-[1]'>Run SigNoz within your infrastructure</Heading>
               <SubHeading>
                 Get started with Community Edition and upgrade for enterprise-ready features or get

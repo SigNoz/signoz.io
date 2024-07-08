@@ -31,17 +31,17 @@ const DataProtectionLaws = ({ isInPricingPage = false }) => {
           {
             !isInPricingPage ?
               <div className='flex flex-col sm:flex-row gap-3 mt-[18px]'>
-                <Link href="/">
+                <Link href="/teams/">
                   <Button className="w-[100%] text-xs sm:text-sm">
                     Use Signoz Cloud <ArrowRight className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                   </Button>
                 </Link>
-                <Link href="/">
+                <Link href="/docs/install/">
                   <Button type={Button.TYPES.SECONDARY} className="w-[100%] text-xs sm:text-sm">
                     <BookOpen className="h-3 w-3 sm:h-3.5 sm:w-3.5" />Self-Host Signoz
                   </Button>
                 </Link>
-                <Link href="/">
+                <Link href="/enterprise/">
                   <Button type={Button.TYPES.SECONDARY} className="w-[100%] text-xs sm:text-sm">
                     <BookOpen className="h-3 w-3 sm:h-3.5 sm:w-3.5" />On-prem, managed by SigNoz
                   </Button>

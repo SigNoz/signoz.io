@@ -37,12 +37,12 @@ const SigNozStats = () => {
               ))}
             </div>
             <div className="flex flex-col items-center py-6 sm:flex-row gap-3 sm:py-6 sm:pl-10 border border-signoz_slate-400 border-dashed !border-b-0 !border-r-0">
-              <Link href="/">
+              <Link href="https://signoz.io/slack/">
                 <Button  className="w-[100%] text-xs sm:text-sm">
                 <BookOpen className="h-3 w-3 sm:h-3.5 sm:w-3.5"/>Join the community<ArrowRight className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                 </Button>
               </Link>
-              <Link href="/">
+              <Link href="https://github.com/SigNoz/signoz/">
                 <Button type={Button.TYPES.SECONDARY}  className="w-[100%] text-xs sm:text-sm">
                 <BookOpen className="h-3 w-3 sm:h-3.5 sm:w-3.5"/>GitHub Repository<ArrowRight className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                 </Button>

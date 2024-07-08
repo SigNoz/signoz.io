@@ -146,7 +146,7 @@ export const Testimonials = () => {
             </div>
           ))}
         </div>
-        <Link href="/" className="shadow-[0_0_200px_400px_rgba(11,12,14,0.9)]">
+        <Link href="/case-study/" className="shadow-[0_0_200px_400px_rgba(11,12,14,0.9)]">
           <button className="h-8 pr-3 pl-4 px-4 py-2 rounded-full text-sm flex items-center justify-center gap-1.5 not-italic truncate button-background text-center font-medium leading-5 text-white no-underline outline-none hover:text-white">Read customer stories<ArrowRight size={14} />
           </button>
         </Link>
