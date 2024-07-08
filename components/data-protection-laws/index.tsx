@@ -3,64 +3,51 @@
 import React from 'react'
 import Heading from '../../components/ui/Heading'
 import SubHeading from '../../components/ui/SubHeading'
-import Button from '../../components/ui/Button'
+import { ArrowRight, Book, BookOpen } from 'lucide-react'
+import Link from 'next/link'
+import Button from '@/components/Button/Button'
 
-const DataProtectionLaws = () => {
+const DataProtectionLaws = ({ isInPricingPage = false }) => {
   return (
     <section>
-      <div className="container mb-24 mt-5">
-        <div className="mb-1 flex flex-col items-center text-center">
-          <Heading type={1}>
-            Worried about data protection laws?&nbsp;
-            <br className="hidden lg:inline" />
-            We can help.
-          </Heading>
-        </div>
-        <div className="self-hosted-data-protection mx-auto my-16 max-w-4xl grid-cols-2 gap-10 md:grid">
-          <div className="mb-10 flex flex-col justify-between gap-5 text-center md:pl-5 md:text-left">
-            <div>
-              <Heading type={4}>For SigNoz Cloud</Heading>
-              <Heading type={3}>Send data to your preferred hosting location</Heading>
-              <SubHeading>
-                Store your data in the US, EU or India region depending on your needs.
-              </SubHeading>
-            </div>
-            <div className="flex flex-wrap justify-center gap-5 md:justify-start">
-              <div className="flex flex-col items-center justify-center gap-1 md:items-start">
-                <img src="/img/landing/us.webp" alt="flag of hosting available" />
-                <span>US Cloud</span>
+      <div className='container flex w-auto h-auto border border-signoz_slate-400 border-dashed px-10 py-10 !border-r-0 !border-b-0'>
+        <div className="flex flex-col">
+          <div>
+            <p className='text-2xl font-semibold text-signoz_vanilla-100 block mb-2'>Worried about Data Protection Laws?</p>
+            {!isInPricingPage ?
+
+              <ul className="list-['—_'] pl-5 ">
+                <li className='text-signoz_vanilla-400 text-base font-normal leading-9 mb-2 max-w-[50vw] sm:w-[35rem]'>&nbsp;Store your data in the US, EU or India region depending on your needs.</li>
+                <li className='text-signoz_vanilla-400 text-base font-normal leading-9 max-w-[50vw] sm:w-[35rem]'>&nbsp;You can self-host SigNoz or opt for our managed self-hosted offerings to have complete adherence to data privacy and regulation laws.</li>
+              </ul> :
+
+              <div className='text-signoz_vanilla-400 text-base font-normal leading-9 mb-10'>
+                No need to send data outside your region. We have data centers in US, EU and India to comply with data privacy regulations. You can also host SigNoz in your own cloud.
               </div>
-              <div className="flex flex-col items-center justify-center gap-1 md:items-start">
-                <img src="/img/landing/eu.webp" alt="flag of hosting available" />
-                <span>EU Cloud</span>
-              </div>
-              <div className="flex flex-col items-center justify-center gap-1 md:items-start">
-                <img src="/img/landing/india.webp" alt="flag of hosting available" />
-                <span>India Cloud</span>
-              </div>
-            </div>
-            <Button to="/teams">Try SigNoz Cloud</Button>
+            }
+
           </div>
-          <div className="mb-10 flex flex-col justify-between gap-5 text-center md:pl-5 md:text-left">
-            <div>
-              <Heading type={4}>For Self-Hosted</Heading>
-              <Heading type={3}>Have your customer data in your infra</Heading>
-              <SubHeading>
-                You can self-host SigNoz or opt for our managed self-hosted offerings to have
-                complete adherence to data privacy and regulation laws.
-              </SubHeading>
-            </div>
-            <div className="flex flex-wrap justify-center gap-5 md:justify-start">
-              <div className="flex flex-col items-center justify-center gap-1 md:items-start">
-                <img src="/img/landing/data-privacy.webp" alt="data privacy available" />
-                <span>Data Privacy</span>
-              </div>
-            </div>
-            <div className="flex flex-col items-center gap-5 md:items-start md:gap-0 lg:flex-row lg:justify-between">
-              <Button to="/docs/install/">Self Host</Button>
-              <Button to="/enterprise/">Managed by SigNoz in your cloud</Button>
-            </div>
-          </div>
+          <img src="/img/graphics/homepage/feature-graphic-data-protection.png" alt="" />
+          {
+            !isInPricingPage ?
+              <div className='flex flex-col sm:flex-row gap-3 mt-[18px]'>
+                <Link href="/teams/">
+                  <Button className="w-[100%] text-xs sm:text-sm">
+                    Use Signoz Cloud <ArrowRight className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                  </Button>
+                </Link>
+                <Link href="/docs/install/">
+                  <Button type={Button.TYPES.SECONDARY} className="w-[100%] text-xs sm:text-sm">
+                    <BookOpen className="h-3 w-3 sm:h-3.5 sm:w-3.5" />Self-Host Signoz
+                  </Button>
+                </Link>
+                <Link href="/enterprise/">
+                  <Button type={Button.TYPES.SECONDARY} className="w-[100%] text-xs sm:text-sm">
+                    <BookOpen className="h-3 w-3 sm:h-3.5 sm:w-3.5" />On-prem, managed by SigNoz
+                  </Button>
+                </Link>
+              </div> : null
+          }
         </div>
       </div>
     </section>
@@ -68,3 +55,4 @@ const DataProtectionLaws = () => {
 }
 
 export default DataProtectionLaws
+

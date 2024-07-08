@@ -1,51 +1,52 @@
 'use client'
-import React, { useEffect, useRef, useState } from 'react'
+
+import React, { useRef, useEffect, useState } from 'react'
+import { Modal, ModalContent, ModalBody, useDisclosure } from "@nextui-org/react"
 import Player from '@vimeo/player'
 
 const VimeoPlayer = ({ videoId }) => {
+  const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure()
   const playerRef = useRef(null)
-  const [isPlaying, setIsPlaying] = useState(false)
-  let player
+  const [isPlayerReady, setIsPlayerReady] = useState(false)
 
   useEffect(() => {
-    const loadVimeoPlayer = async () => {
-      try {
-        if (videoId && playerRef.current) {
-          player = new Player(playerRef.current, {
-            url: `https://vimeo.com/${videoId}`,
-          })
-        }
-      } catch (error) {
-        console.error('Error loading Vimeo Player:', error)
-      }
+    if (isOpen && videoId && playerRef.current && !isPlayerReady) {
+      const player = new Player(playerRef.current, {
+        url: `https://vimeo.com/${videoId}`,
+        autoplay: true,
+      })
+      setIsPlayerReady(true)
     }
-
-    loadVimeoPlayer()
-  }, [videoId])
-
-  const handlePlay = () => {
-    if (!isPlaying && player && typeof player.play === 'function') {
-      player.play()
-      setIsPlaying(true)
-    }
-  }
+  }, [isOpen, videoId, isPlayerReady])
 
   return (
     <div>
-      <div ref={playerRef} />
-      {!isPlaying && (
-        <div onClick={handlePlay}>
-          <div className="play-container primary-gradient flex h-16 w-16 cursor-pointer items-center justify-center rounded-full focus-visible:outline-none md:h-24 md:w-24">
-            <img
-              src="/img/landing/play-icon.webp"
-              alt="signoz-video-play-btn"
-              className="h-6 w-6 md:h-10 md:w-10"
-            />
-          </div>
+      <div className="absolute">
+        <img
+          src="/img/landing/landing_thumbnail.png"
+          alt="Custom Thumbnail"
+          className="w-full rounded-lg"
+        />
+
+        <div onClick={onOpen} className="play-container flex h-16 w-16 cursor-pointer items-center justify-center rounded-full focus-visible:outline-none absolute inset-0 m-auto">
+          <img
+            src="/svgs/icons/play-icon.svg"
+            alt="signoz-video-play-btn"
+            className="h-6 w-6 md:h-20 md:w-20"
+          />
         </div>
-      )}
+      </div>
+
+      <Modal size="5xl" isOpen={isOpen} onOpenChange={onOpenChange} onClose={onClose}>
+        <ModalContent>
+          <ModalBody>
+            <div ref={playerRef} className="embed-container w-full" />
+          </ModalBody>
+        </ModalContent>
+      </Modal>
     </div>
   )
 }
 
 export default VimeoPlayer
+

@@ -24,7 +24,7 @@ const FAQs = [
 const FAQBody = () => (
   <>
     {FAQs.map((faq, idx) => (
-      <Card body={faq.body} title={faq.title} key={`${idx}${faq.title}`} />
+      <Card body={faq.body} idx={idx} title={faq.title} key={`${idx}${faq.title}`} />
     ))}
   </>
 );

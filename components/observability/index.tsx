@@ -2,49 +2,48 @@
 import React from 'react'
 import Heading from '../../components/ui/Heading'
 import Button from '../../components/ui/Button'
+import {ArrowRightSolid }from "@/components/homepage-icons/icons"
+
 
 const Observability = () => {
   return (
     <section>
-      <div className="container mt-16">
-        <div className="mb-5 flex flex-col items-center text-center">
-          <Heading type={4}>Enterprise Grade Observability</Heading>
-          <Heading type={1}>
-            Get access to observability at any scale&nbsp;
-            <br className="hidden lg:inline" />
-            with advanced security and compliance.
-          </Heading>
+    <div className='flex flex-col w-auto h-auto border border-signoz_slate-400 border-dashed py-10 pl-10 !border-r-0 !border-b-0'>
+      <div className="flex flex-col sm:flex-row gap-8">
+        <div className='flex flex-col justify-between shrink-[10]'>
+        <div>
+        <p className='text-2xl font-semibold text-signoz_vanilla-100 block mb-2'> Enterprise-grade Observability</p>
+        <p className='text-signoz_vanilla-400 text-base font-normal leading-9'>Get access to observability at any scale with advanced security and compliance.</p>
         </div>
-        <div className="mx-auto max-w-2xl">
-          <div className="plans-container mx-auto grid grid-cols-1 rounded-lg bg-[#252529] px-10 py-8 md:grid-cols-2 md:gap-10">
-            <div>
-              <ul className="plans-features m-0">
-                <li className="py-3 text-lg">SSO and SAML support</li>
-                <li className="py-3 text-lg">Query API Keys</li>
-                <li className="py-3 text-lg">Advanced Security</li>
-                <li className="py-3 text-lg">AWS Private Link</li>
-              </ul>
-            </div>
-            <div>
-              <div className="flex h-full flex-col justify-between">
-                <ul className="plans-features m-0">
-                  <li className="py-3 text-lg">VPC Peering</li>
-                  <li className="py-3 text-lg">Custom Integrations</li>
-                </ul>
-                <Button isButton to={'pricing'} className="hidden md:block">
-                  Check plans
-                </Button>
-              </div>
-            </div>
-          </div>
-          <div>
-            <Button isButton to={'pricing'} className="mx-auto my-5 block w-full md:hidden">
-              Check plans
-            </Button>
-          </div>
+        <div>
+        <ul className='ul-no-padding flex flex-col gap-3'>
+          <li className="flex flex-row items-center gap-3">
+          <ArrowRightSolid/><span className='text-signoz_vanilla-400 text-base font-normal leading-9'>SSO and SAML support</span>
+          </li>
+          <li className="flex flex-row items-center gap-3">
+          <ArrowRightSolid/><span className='text-signoz_vanilla-400 text-base font-normal leading-9'>Query API Keys</span>
+          </li>
+          <li className="flex flex-row items-center gap-3">
+          <ArrowRightSolid/><span className='text-signoz_vanilla-400 text-base font-normal leading-9'>Advanced Security</span>
+          </li>
+          <li className="flex flex-row items-center gap-3">
+          <ArrowRightSolid/><span className='text-signoz_vanilla-400 text-base font-normal leading-9'>AWS Private Link</span>
+          </li>
+          <li className="flex flex-row items-center gap-3">
+          <ArrowRightSolid/><span className='text-signoz_vanilla-400 text-base font-normal leading-9'>VPC Peering</span>
+          </li>
+          <li className="flex flex-row items-center gap-3">
+          <ArrowRightSolid/><span className='text-signoz_vanilla-400 text-base font-normal leading-9'>Custom Integrations</span>
+          </li>
+        </ul>
         </div>
+        </div>
+        <div className="aspect-[272/404] max-w-[50vw] w-[272px]">
+        <img src="/img/graphics/homepage/feature-graphic-enterprise-2.png" alt="" /></div>
       </div>
-    </section>
+    </div>
+  </section>
+    
   )
 }
 

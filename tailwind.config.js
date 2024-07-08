@@ -1,6 +1,7 @@
 // @ts-check
 const { fontFamily } = require('tailwindcss/defaultTheme')
 const colors = require('tailwindcss/colors')
+const { nextui } = require("@nextui-org/react");
 
 /** @type {import("tailwindcss/types").Config } */
 module.exports = {
@@ -11,6 +12,7 @@ module.exports = {
     './components/**/*.{js,ts,tsx}',
     './layouts/**/*.{js,ts,tsx}',
     './data/**/*.mdx',
+    "./node_modules/@nextui-org/theme/dist/**/*.{js,ts,jsx,tsx}",
   ],
   darkMode: 'class',
   theme: {
@@ -131,6 +133,31 @@ module.exports = {
         },
       }),
     },
+    fontFamily: {
+      'sans': ['Inter', 'ui-sans-serif', 'system-ui'],
+      'mono': ['Geist Mono', 'monospace' ],
+    }
   },
-  plugins: [require('@tailwindcss/forms'), require('@tailwindcss/typography')],
+  plugins: [
+    require('@tailwindcss/forms'),
+    require('@tailwindcss/typography'),
+    nextui({
+      themes: {
+        light: {
+          colors: {
+            secondary: '#4E74F8',
+            danger: '#F24769',
+            warning: '#FFCD56',
+          },
+        },
+        dark: {
+          colors: {
+            secondary: '#4E74F8',
+            danger: '#F24769',
+            warning: '#FFCD56'
+          },
+        },
+      }
+    }),
+  ]
 }
