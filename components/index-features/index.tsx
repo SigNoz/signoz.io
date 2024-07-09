@@ -116,7 +116,7 @@ export const SigNozFeatures = () => {
           <Card
             iconTag={section.iconTag}
             text={section.text}
-            buttonText={section.buttonText}
+            // buttonText={section.buttonText}
             logo={section.logo}
             img={section.img}
           />
