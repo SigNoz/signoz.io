@@ -164,12 +164,6 @@ export default function SignozCloudSignUpForm() {
 
   return (
     <>
-      <div className={styles.header}>
-        <h2> Get started with SigNoz </h2>
-        <h4>Try SigNoz free for 30 days with full access to all features</h4>
-        <h5> No credit card required</h5>
-      </div>
-
       {!isSubmitting && submitFailed ? (
         <div className={styles.errorContainer}>
           <div
