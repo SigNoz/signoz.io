@@ -23,7 +23,11 @@ import SubHeading from '@/components/ui/SubHeading'
 import { Chevron, RightSVG } from '@/components/svgs/common'
 import { ArrowBigLeft, ArrowRight, MoveLeft, ArrowUpRight, ArrowDown, Cloud, Server } from 'lucide-react'
 import { CircleCheckSolid, CircleInfoSolid, ZapSolid, ClockSolid, CheckSolid, CrossSolid, FlameSolid, CloudSolid, ServerSolid } from "@/components/homepage-icons/icons"
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/react";
+import VimeoPlayer from '@/components/VimeoPlayer/VimeoPlayer'
 
+
+const CloseButton = () => <div className='absolute top-0 right-0'>Close</div>;
 
 function Pricing() {
   return (
@@ -181,6 +185,8 @@ const PricingPlans = () => {
 
   const [tab, setTab] = useState('cloud')
 
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+
   return (
     <section className={`${styles.pricing} relative`}>
       <div className={`container !w-[80vw] !mx-auto  border border-signoz_slate-400 border-dashed !my-0 !border-t-0 !border-b-0 ${styles.pricingContainer}`}>
@@ -189,7 +195,7 @@ const PricingPlans = () => {
           <>
             {/* Cloud Plan */}
             <div className="mx-auto mb-5 flex max-w-4xl flex-col items-center text-center">
-              <div className='absolute !w-[80vw] h-[7rem] border border-signoz_slate-400 border-dashed top-[-80px] !border-r-0 !border-l-0 !border-t-0 z-[0]'/>
+              <div className='absolute !w-[80vw] h-[7rem] border border-signoz_slate-400 border-dashed top-[-80px] !border-r-0 !border-l-0 !border-t-0 z-[0]' />
               <Heading type={1} className='z-[1]'>Pricing</Heading>
               <SubHeading>
                 Tired of unpredictable pricing and complex billing structure? Save up to{' '}
@@ -200,7 +206,7 @@ const PricingPlans = () => {
                 </Link>{' '}
                 with SigNoz. No user-based and host-based pricing.
               </SubHeading>
-              <div className='absolute h-[22.5rem] border border-signoz_slate-400 border-dashed top-[-95px] left-[29px] right-[29px] !border-t-0 !border-b-0 z-[1]'/>
+              <div className='absolute h-[22.5rem] border border-signoz_slate-400 border-dashed top-[-95px] left-[29px] right-[29px] !border-t-0 !border-b-0 z-[1]' />
               <div className="my-5 flex justify-center">
                 <div className="flex">
                   <nav
@@ -362,12 +368,33 @@ const PricingPlans = () => {
                         </span>
                       </div>
                     </div>
+
+                    <div onClick={onOpen} style={{ cursor: "pointer" }}>
+                      <div className='gap-3'>
+                        <CircleInfoSolid />
+                        <span className='block items-center'>
+                            What comes included in the $199? <ArrowUpRight size={20} className='inline' />
+                        </span>
+                      </div>
+                    </div>
+                    <Modal size={'5xl'} backdrop='blur' isOpen={isOpen} onOpenChange={onOpenChange}>
+                      <ModalContent className='bg-transparent'>
+                        {() => (
+                          <>
+                            <ModalBody className='py-6'>
+                              <VimeoPlayer videoId="968489758" />
+                            </ModalBody>
+                          </>
+                        )}
+                      </ModalContent>
+                    </Modal>
+
                     <div>
                       <div className='gap-3'>
                         <CircleInfoSolid />
                         <span>
-                          <Link href={'/docs/logs-management/long-term-storage/'}>
-                            Long term Logs Storage options <ArrowUpRight size={20} className='inline' />
+                          <Link href={'/pricing/metrics-cost-estimation/'}>
+                            Learn how the price for metrics is calculated <ArrowUpRight size={20} className='inline' />
                           </Link>
                         </span>
                       </div>
@@ -377,9 +404,8 @@ const PricingPlans = () => {
                       <div className='gap-3'>
                         <CircleInfoSolid />
                         <span>
-                          <Link href={'https://vimeo.com/968489758'}>
-
-                          What comes included in the $199? <ArrowUpRight size={20} className='inline' />
+                          <Link href={'/docs/logs-management/long-term-storage/'}>
+                            Long term Logs Storage options <ArrowUpRight size={20} className='inline' />
                           </Link>
                         </span>
                       </div>
@@ -427,13 +453,6 @@ const PricingPlans = () => {
                       <li className='flex gap-3 items-center mb-6'> <CircleCheckSolid /> Data centers available in the US, EU & India</li>
                     </ul>
                   </div>
-                  {/* <Divider isDashed />
-                  <div className={styles.packageDetailBlock}>
-                    <h4 className={styles.packageDetailTitle}>Upcoming</h4>
-                    <ul className="list-icon-right">
-                      <li>AWS Cloudwatch Integration</li>
-                    </ul>
-                  </div> */}
                 </div>
                 <div className=''>
                   <Link href={'/teams/'}>
@@ -497,26 +516,7 @@ const PricingPlans = () => {
                       </div>
                     </div>
                   </div>
-                  {/* <div
-                    className={`${styles.deploymentOptions} ${styles.packageDetailBlock}`}
-                  >
-                    <h4 className={styles.packageDetailTitle}>
-                      Deployment Options
-                    </h4>
-                    <div>
-                      <span>SaaS</span>
-                      <span>
-                        <RightSVG />
-                      </span>
-                    </div>
-                    <div>
-                      <span>Managed by SigNoz in your cloud</span>
-                      <span>
-                        <RightSVG />
-                      </span>
-                    </div>
-                  </div>
-                  <Divider isDashed /> */}
+
                   <div className={`mt-7`}>
                     <h4 className={`${styles.packageDetailTitle}`}>Support</h4>
                     <ul className="ul-no-padding">
@@ -561,16 +561,15 @@ const PricingPlans = () => {
           </>
         ) : (
           <>
-            {/* Self Managed Plan */}
 
             <div className="mx-auto mb-5 flex max-w-4xl flex-col items-center text-center">
-              <div className='absolute !w-[80vw] h-[7rem] border border-signoz_slate-400 border-dashed top-[-80px] !border-r-0 !border-l-0 !border-t-0'/>
+              <div className='absolute !w-[80vw] h-[7rem] border border-signoz_slate-400 border-dashed top-[-80px] !border-r-0 !border-l-0 !border-t-0' />
               <Heading type={1} className='z-[1]'>Run SigNoz within your infrastructure</Heading>
               <SubHeading>
                 Get started with Community Edition and upgrade for enterprise-ready features or get
                 it managed by SigNoz in your cloud (BYOC)
               </SubHeading>
-              <div className='absolute h-[22.5rem] border border-signoz_slate-400 border-dashed top-[-90px] left-[29px] right-[29px] !border-t-0 !border-b-0 z-[1]'/>
+              <div className='absolute h-[22.5rem] border border-signoz_slate-400 border-dashed top-[-90px] left-[29px] right-[29px] !border-t-0 !border-b-0 z-[1]' />
               <div className="my-5 flex justify-center">
                 <div className="flex rounded-3xl">
                   <nav
