@@ -1,6 +1,7 @@
 'use client'
 
 import './teams.styles.css'
+import Link from 'next/link'
 import React, { useState } from 'react'
 import ReactGA from 'react-ga4'
 import TestimonialSection from './TestimonialSection'
@@ -200,8 +201,6 @@ const Teams: React.FC<SignUpPageProps> = () => {
     }
   }
 
-  console.log('formData', formData)
-
   return (
     <main className="bg-signoz_ink-500">
       <div className="m-auto max-w-[1440px]">
@@ -390,18 +389,21 @@ const Teams: React.FC<SignUpPageProps> = () => {
               </div>
             </div>
 
-            <button
+            <a
               type="submit"
               className="mt-[28px] flex w-full items-center justify-center gap-4 rounded-full bg-signoz_robin-500 px-[16px] py-[8px] text-sm font-medium"
+              href="mailto:cloud-support@signoz.io"
             >
               <span className="flex text-xs leading-5">Contact cloud support</span>
               <ArrowRight size={14} />
-            </button>
+            </a>
 
-            <button className="mt-[12px] flex w-full items-center justify-center gap-4 rounded-full bg-signoz_ink-300 px-[16px] py-[8px] text-sm font-medium">
-              <span className="flex text-xs leading-5">Read the docs </span>
-              <ArrowRight size={14} />
-            </button>
+            <Link href="/docs" className="w-full">
+              <button className="mt-[12px] flex w-full items-center justify-center gap-4 rounded-full bg-signoz_ink-300 px-[16px] py-[8px] text-sm font-medium">
+                <span className="flex text-xs leading-5">Read the docs </span>
+                <ArrowRight size={14} />
+              </button>
+            </Link>
           </div>
         )}
       </div>
