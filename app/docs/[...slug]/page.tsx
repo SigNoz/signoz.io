@@ -54,7 +54,7 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
     <>
       <div className="doc">
         <div className="doc-content">
-          <h2 className="text-3xl">{title}</h2>
+          <h2 className="mt-2 text-3xl">{title}</h2>
           <MDXLayoutRenderer code={post.body.code} components={components} toc={post.toc || []} />
           <DocsPrevNext />
         </div>
