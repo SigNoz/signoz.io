@@ -32,49 +32,49 @@ export const SigNozFeatures = () => {
       text: 'Ingest data from 50+ sources — send your data and start digging through.',
       buttonText: 'Explore',
       logo: '/img/index_features/bar-chart-2.svg',
-      img: '/img/graphics/homepage/feature-graphic-1.png'
+      img: '/img/graphics/homepage/feature-graphic-1.webp'
     },
     {
       iconTag: 'APPLICATION PERFORMANCE MONITORING',
       text: 'Monitor & troubleshoot your application performance with APM.',
       buttonText: 'Explore',
       logo: '/img/index_features/bar-chart-2.svg',
-      img: '/img/graphics/homepage/feature-graphic-2.png'
+      img: '/img/graphics/homepage/feature-graphic-2.webp'
     },
     {
       iconTag: 'DISTRIBUTED TRACING',
       text: 'Track user requests across services to identify bottlenecks.',
       buttonText: 'Learn more',
       logo: '/img/index_features/drafting-compass.svg',
-      img: '/img/graphics/homepage/feature-graphic-3.png'
+      img: '/img/graphics/homepage/feature-graphic-3.webp'
     },
     {
       iconTag: 'LOG MANAGEMENT',
       text: 'Ingest, search, and analyze your logs at any scale.',
       buttonText: 'Learn more',
       logo: '/img/index_features/logs.svg',
-      img: '/img/graphics/homepage/feature-graphic-4.png'
+      img: '/img/graphics/homepage/feature-graphic-4.webp'
     },
     {
       iconTag: 'EXCEPTIONS',
       text: 'Record exceptions automatically with stack trace & linked span data.',
       buttonText: 'Explore',
       logo: '/img/index_features/bug.svg',
-      img: '/img/graphics/homepage/feature-graphic-5.png'
+      img: '/img/graphics/homepage/feature-graphic-5.webp'
     },
     {
       iconTag: 'METRICS & DASHBOARDS',
       text: 'Metrics monitoring with configurable dashboards to fit any use case.',
       buttonText: 'Explore',
       logo: '/img/index_features/layout-grid.svg',
-      img: '/img/graphics/homepage/feature-graphic-6.png'
+      img: '/img/graphics/homepage/feature-graphic-6.webp'
     },
     {
       iconTag: 'ALERTS',
       text: 'Get actionable alerts in your preferred notification channel.',
       buttonText: 'Learn more',
       logo: '/img/index_features/concierge-bell.svg',
-      img: '/img/graphics/homepage/feature-graphic-7.png'
+      img: '/img/graphics/homepage/feature-graphic-7.webp'
     },
   ];
 
@@ -82,7 +82,7 @@ export const SigNozFeatures = () => {
 
   return (
     <>
-      <section className="w-[80vw] mx-auto border border-signoz_slate-400 border-dashed !border-b-0 !border-t-0 bg-[center_top_calc(-78px)] bg-[url('/img/background_blur/Ellipse_388.png')] ">
+      <section className="w-[80vw] mx-auto border border-signoz_slate-400 border-dashed !border-b-0 !border-t-0 bg-[center_top_calc(-78px)] bg-[url('/img/background_blur/Ellipse_388.webp')] ">
         <div className={`container pb-16`}>
           <div className="flex flex-col pb-20 gap-6 ">
             <div className="mx-auto flex max-w-4xl flex-col items-center text-center">

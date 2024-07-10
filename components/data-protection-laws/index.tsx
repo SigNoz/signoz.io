@@ -27,7 +27,7 @@ const DataProtectionLaws = ({ isInPricingPage = false }) => {
             }
 
           </div>
-          <img src="/img/graphics/homepage/feature-graphic-data-protection.png" alt="" />
+          <img src="/img/graphics/homepage/feature-graphic-data-protection.webp" alt="" />
           {
             !isInPricingPage ?
               <div className='flex flex-col sm:flex-row gap-3 mt-[18px]'>
