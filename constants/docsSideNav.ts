@@ -1244,6 +1244,28 @@ const docsSideNav = [
     ],
   },
   {
+    label: 'GCP Monitoring',
+    type: 'category',
+    isExpanded: false,
+    className: 'new-doc',
+    // route: '',
+    items: [
+      {
+        type: 'category',
+        isExpanded: false,
+        label: 'Cloud Functions',
+        route: '/docs/gcp-monitoring/gcp-fns',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/gcp-monitoring/gcp-fns/logging',
+            label: 'Logging',
+          }
+        ],
+      },
+    ],
+  },
+  {
     type: 'category',
     isExpanded: false,
     label: 'Operate Self-Hosted SigNoz',
