@@ -1,17 +1,15 @@
 ---
-
-title: How to find and read crontab logs
+title: How to Find and Read Crontab Logs
 slug: crontab-logs
 date: 2024-07-01
 tags: [logging]
 authors: [simran_kumari]
 description: To read and find crontab logs, check the default system log files like /var/log/syslog or /var/log/cron. Learn how to locate, read, and analyze these logs using command-line tools, with insights on integrating with SigNoz for comprehensive monitoring.
-keywords: [ crontab logs, logs, cronjob]
-
+keywords: [crontab logs, logs, cronjob]
 ---
 
 <head>
-<script type="application/ld+json">
+  <script type="application/ld+json">
     {`{
   "@context": "https://schema.org",
   "@type": "BlogPosting",
@@ -197,7 +195,7 @@ keywords: [ crontab logs, logs, cronjob]
     ]
   }
 }`}
-</script>
+  </script>
 </head>
 
 In Unix-like operating systems, the cron daemon is crucial for automating repetitive tasks. Whether you are running system maintenance scripts, performing data backups, or executing custom scripts, cron jobs ensure that these tasks are performed on schedule without manual intervention. However, to ensure that these automated processes run smoothly and effectively, it is vital to monitor their execution. This is where Crontab logs come into play.
@@ -223,9 +221,9 @@ The location of Crontab logs can vary based on the operating system:
 - macOS: `/var/log/system.log`
 - FreeBSD: `/var/log/cron`
 - Windows WSL (Windows Subsystem for Linux): Logs are typically found in the same locations as their Linux counterparts depending on the Linux distribution used in WSL. For instance:
-    - Ubuntu on WSL: `/var/log/syslog` or `/var/log/cron.log`
-    - Debian on WSL: `/var/log/syslog` or `/var/log/cron.log`
-    - CentOS on WSL: `/var/log/cron`
+  - Ubuntu on WSL: `/var/log/syslog` or `/var/log/cron.log`
+  - Debian on WSL: `/var/log/syslog` or `/var/log/cron.log`
+  - CentOS on WSL: `/var/log/cron`
 
 For WSL, you can access and read these logs using standard Linux commands. However, ensure you have permission to view these log files using `sudo` if required.
 
@@ -238,91 +236,137 @@ Below are examples of accessing and reading Crontab logs on different systems.
 On Ubuntu/Debian
 
 1. View all cron job entries in syslog:
-    
-    ```bash
-    grep CRON /var/log/syslog
-    ```
-    
-    <Figure src="/img/guides/2024/07/crontab-logs-9c1cc39e-ffc7-4d9b-bcad-b03d71bdaa34.webp" alt="Syslog cronjob entries - Ubuntu" caption="Syslog cronjob entries - Ubuntu" /><br></br>2. View the latest cron log entries using `tail`:
-    
-    ```bash
-    tail -f /var/log/syslog | grep CRON
-    ```
-    
-    <Figure src="/img/guides/2024/07/crontab-logs-Untitled.webp" alt="Latest cronjob log entries - Ubuntu" caption="Latest cronjob log entries - Ubuntu" /><br></br>3. Use `less` for detailed log examination:
-    
-    ```bash
-    less /var/log/syslog | grep CRON
-    ```
-    
-    <Figure src="/img/guides/2024/07/crontab-logs-Untitled%201.webp" alt="Detailed cronjob logs - Ubuntu" caption="Detailed cronjob logs - Ubuntu" /><br></br>On Red Hat/CentOS
+
+   ```bash
+   grep CRON /var/log/syslog
+   ```
+
+   <Figure
+     src="/img/guides/2024/07/crontab-logs-9c1cc39e-ffc7-4d9b-bcad-b03d71bdaa34.webp"
+     alt="Syslog cronjob entries - Ubuntu"
+     caption="Syslog cronjob entries - Ubuntu"
+   />
+   <br></br>2. View the latest cron log entries using `tail`:
+
+   ```bash
+   tail -f /var/log/syslog | grep CRON
+   ```
+
+   <Figure
+     src="/img/guides/2024/07/crontab-logs-Untitled.webp"
+     alt="Latest cronjob log entries - Ubuntu"
+     caption="Latest cronjob log entries - Ubuntu"
+   />
+   <br></br>3. Use `less` for detailed log examination:
+
+   ```bash
+   less /var/log/syslog | grep CRON
+   ```
+
+   <Figure
+     src="/img/guides/2024/07/crontab-logs-Untitled%201.webp"
+     alt="Detailed cronjob logs - Ubuntu"
+     caption="Detailed cronjob logs - Ubuntu"
+   />
+   <br></br>On Red Hat/CentOS
 
 Similar commands can be followed for RedHat/CentOS operating systems by just changing the file location. Below are the commands:
 
 1. View all cron job entries in the cron log:
-    
-    ```bash
-    grep CRON /var/log/cron
-    ```
-    
-    <Figure src="/img/guides/2024/07/crontab-logs-Untitled%202.webp" alt="Syslog cronjob entries - RedHat" caption="Syslog cronjob entries - RedHat" /><br></br>2. View the latest cron log entries using `tail`:
-    
-    ```bash
-    tail -f /var/log/cron
-    ```
-    
-    <Figure src="/img/guides/2024/07/crontab-logs-image.webp" alt="Latest cronjob log entries - RedHat" caption="Latest cronjob log entries - RedHat" /><br></br>3. Use `less` for detailed log examination:
-    
-    ```bash
-    less /var/log/cron
-    ```
-    
-    <Figure src="/img/guides/2024/07/crontab-logs-image2.webp" alt="Detailed cronjob log entries - RedHat" caption="Detailed cronjob log entries - RedHat" /><br></br>
+
+   ```bash
+   grep CRON /var/log/cron
+   ```
+
+   <Figure
+     src="/img/guides/2024/07/crontab-logs-Untitled%202.webp"
+     alt="Syslog cronjob entries - RedHat"
+     caption="Syslog cronjob entries - RedHat"
+   />
+   <br></br>2. View the latest cron log entries using `tail`:
+
+   ```bash
+   tail -f /var/log/cron
+   ```
+
+   <Figure
+     src="/img/guides/2024/07/crontab-logs-image.webp"
+     alt="Latest cronjob log entries - RedHat"
+     caption="Latest cronjob log entries - RedHat"
+   />
+   <br></br>3. Use `less` for detailed log examination:
+
+   ```bash
+   less /var/log/cron
+   ```
+
+   <Figure
+     src="/img/guides/2024/07/crontab-logs-image2.webp"
+     alt="Detailed cronjob log entries - RedHat"
+     caption="Detailed cronjob log entries - RedHat"
+   />
+   <br></br>
 
 ### Creating Custom Crontab Logs
 
 Creating custom Crontab logs involves redirecting the output of your cron jobs to specific log files. This can help organize logs and make monitoring and troubleshooting cron jobs easier.
 
 1. Create a `script.sh` for the cron job using any editor.
-    
-    <Figure src="/img/guides/2024/07/crontab-logs-Untitled%203.webp" alt="Using `vi` editor for custom crontab log script" caption="Using `vi` editor for custom crontab log script" /><br></br>
-      ```bash
-      #!/bin/bash
-      echo "Custom Log - $(date): Current time"
-      ```
+
+   <Figure
+     src="/img/guides/2024/07/crontab-logs-Untitled%203.webp"
+     alt="Using `vi` editor for custom crontab log script"
+     caption="Using `vi` editor for custom crontab log script"
+   />
+   <br></br>
+   ```bash #!/bin/bash echo "Custom Log - $(date): Current time" ```
 
 1. Make the `script.sh` file executable.
-    
-    ```bash
-    chmod +x script.sh
-    ```
-    
-    <Figure src="/img/guides/2024/07/crontab-logs-Untitled%204.webp" alt="Making custom crontab logs creation script executable" caption="Making custom crontab logs creation script executable" /><br></br>2. Open your Crontab file for editing:
-    
-    ```bash
-    crontab -e
-    ```
-    
-    <Figure src="/img/guides/2024/07/crontab-logs-Untitled%205.webp" alt="Opening Crontab file" caption="Opening Crontab file" /><br></br>3. Add a cron job with custom logging:
-    
-    ```bash
-    * * * * * /root/script.sh >> /var/log/custom_log.log 2>&1
-    ```
-    
-    This line schedules `script.sh` to run at 2 AM daily, redirecting both standard output and error output to `custom_log.log`.
-    
+
+   ```bash
+   chmod +x script.sh
+   ```
+
+   <Figure
+     src="/img/guides/2024/07/crontab-logs-Untitled%204.webp"
+     alt="Making custom crontab logs creation script executable"
+     caption="Making custom crontab logs creation script executable"
+   />
+   <br></br>2. Open your Crontab file for editing:
+
+   ```bash
+   crontab -e
+   ```
+
+   <Figure
+     src="/img/guides/2024/07/crontab-logs-Untitled%205.webp"
+     alt="Opening Crontab file"
+     caption="Opening Crontab file"
+   />
+   <br></br>3. Add a cron job with custom logging:
+
+   ```bash
+   * * * * * /root/script.sh >> /var/log/custom_log.log 2>&1
+   ```
+
+   This line schedules `script.sh` to run at 2 AM daily, redirecting both standard output and error output to `custom_log.log`.
 
 ### How to Check If a Cron Job Ran Successfully
 
 To check if a cron job ran successfully, you can examine the exit status and the log output. A successful cron job typically exits with a status code of `0`.
 
 1. Check the last 10 logs of the log file:
-    
-    ```bash
-    tail -n 10 /var/log/custom_log.log
-    ```
-    
-    <Figure src="/img/guides/2024/07/crontab-logs-Untitled%206.webp" alt="Latest cronjob log entries" caption="Latest cronjob log entries" /><br></br>2. Add an exit status check in your script:
+
+   ```bash
+   tail -n 10 /var/log/custom_log.log
+   ```
+
+   <Figure
+     src="/img/guides/2024/07/crontab-logs-Untitled%206.webp"
+     alt="Latest cronjob log entries"
+     caption="Latest cronjob log entries"
+   />
+   <br></br>2. Add an exit status check in your script:
 
 The script below logs a custom message with the current time, checks if the logging command succeeded, and then logs a success or failure message accordingly with the current date and time.
 
@@ -343,59 +387,75 @@ fi
 Timestamps in log files indicate when each cron job was executed. This helps verify the execution times and identify any delays or issues.
 
 1. View the latest entries in the log file:
-    
-    ```bash
-    tail -n 10 /var/log/custom_log.log
-    ```
-    
-    <Figure src="/img/guides/2024/07/crontab-logs-Untitled%207.webp" alt="Latest cronjob log entries with timestamp" caption="Latest cronjob log entries with timestamp" /><br></br>Each log entry should include a timestamp indicating when the job was executed.
-    
+
+   ```bash
+   tail -n 10 /var/log/custom_log.log
+   ```
+
+   <Figure
+     src="/img/guides/2024/07/crontab-logs-Untitled%207.webp"
+     alt="Latest cronjob log entries with timestamp"
+     caption="Latest cronjob log entries with timestamp"
+   />
+   <br></br>Each log entry should include a timestamp indicating when the job was executed.
+
 2. Example log entry with timestamp:
-    
-    ```bash
-    [Wed Jun 23 02:00:01 2023] Script executed successfully
-    ```
-    
+
+   ```bash
+   [Wed Jun 23 02:00:01 2023] Script executed successfully
+   ```
 
 ### Using Cron Output and Error Logs
 
 Cron jobs can generate both output and error logs. By default, these are emailed to the user running the cron job. You can redirect these outputs to specific files for easier monitoring.
 
 1. Redirect standard output and error to separate files:
-    
-    ```bash
-    * * * * * /root/script.sh >> /var/log/custom_log.log 2>> /var/log/custom_error.log
-    ```
-    
+
+   ```bash
+   * * * * * /root/script.sh >> /var/log/custom_log.log 2>> /var/log/custom_error.log
+   ```
+
 2. Example script with logging:
-    
-    ```bash
-    #!/bin/bash
-    
-    echo "Custom Log - $(date): Current time"
-    
-    cal
-    stamp
-    if [ $? -eq 0 ]; then
-        echo "$(date +"[%a %b %d %H:%M:%S %Y]") Script run successfully"
-    else
-        echo "$(date +"[%a %b %d %H:%M:%S %Y]") Script failed"
-    fi
-    ```
-    
+
+   ```bash
+   #!/bin/bash
+
+   echo "Custom Log - $(date): Current time"
+
+   cal
+   stamp
+   if [ $? -eq 0 ]; then
+       echo "$(date +"[%a %b %d %H:%M:%S %Y]") Script run successfully"
+   else
+       echo "$(date +"[%a %b %d %H:%M:%S %Y]") Script failed"
+   fi
+   ```
+
 3. Check the output and error logs.
-    
-    ```bash
-    tail -n 10 /var/log/custom_log.log
-    ```
-    
-    <Figure src="/img/guides/2024/07/crontab-logs-Untitled%208.webp" alt="Latest entries of cronjob output logs" caption="Latest entries of cronjob output logs" /><br></br>
-    
-    ```bash
-    tail -n 10 /var/log/custom_error.log
-    ```
-    
-    <Figure src="/img/guides/2024/07/crontab-logs-Untitled%209.webp" alt="Latest entries of cronjob error logs" caption="Latest entries of cronjob error logs" /><br></br>By following these practices, you can create custom Crontab logs, check the success of your cron jobs, verify timestamps, and effectively manage output and error logs. This helps you maintain and troubleshoot your automated tasks efficiently.
+
+   ```bash
+   tail -n 10 /var/log/custom_log.log
+   ```
+
+   <Figure
+     src="/img/guides/2024/07/crontab-logs-Untitled%208.webp"
+     alt="Latest entries of cronjob output logs"
+     caption="Latest entries of cronjob output logs"
+   />
+   <br></br>
+
+   ```bash
+   tail -n 10 /var/log/custom_error.log
+   ```
+
+   <Figure
+     src="/img/guides/2024/07/crontab-logs-Untitled%209.webp"
+     alt="Latest entries of cronjob error logs"
+     caption="Latest entries of cronjob error logs"
+   />
+   <br></br>By following these practices, you can create custom Crontab logs, check the success of
+   your cron jobs, verify timestamps, and effectively manage output and error logs. This helps you
+   maintain and troubleshoot your automated tasks efficiently.
 
 ## Monitoring Crontab Logs with SigNoz
 
@@ -413,17 +473,44 @@ Specify the Data Source for Crontab Logs
 
 1. To send your crontab logs to SigNoz, you need to specify the data source from which the logs originate. To do this, log into your SigNoz cloud account and navigate to the “Get Started” tab.
 
-<Figure src="/img/guides/2024/07/crontab-logs-Untitled%2010.webp" alt="Get Started with SigNoz cloud" caption="Get Started with SigNoz cloud" /><br></br>1. Next, you need to select your use case, here its `Logs Management`. 
+<Figure
+  src="/img/guides/2024/07/crontab-logs-Untitled%2010.webp"
+  alt="Get Started with SigNoz cloud"
+  caption="Get Started with SigNoz cloud"
+/>
+<br></br>1. Next, you need to select your use case, here its `Logs Management`.{' '}
 
-<Figure src="/img/guides/2024/07/crontab-logs-Untitled%2011.webp" alt="Selecting a use-case to work with using SigNoz" caption="Selecting a use-case to work with using SigNoz" /><br></br>1. Under Logs Management, you need to select the source of our data, for crontab logs choose `Syslogs`. 
+<Figure
+  src="/img/guides/2024/07/crontab-logs-Untitled%2011.webp"
+  alt="Selecting a use-case to work with using SigNoz"
+  caption="Selecting a use-case to work with using SigNoz"
+/>
+<br></br>1. Under Logs Management, you need to select the source of our data, for crontab logs
+choose `Syslogs`.{' '}
 
-<Figure src="/img/guides/2024/07/crontab-logs-Untitled%2012.webp" alt="Selecting Data source for monitoring using SigNoz" caption="Selecting Data source for monitoring using SigNoz" /><br></br>1. You also need to select the environment based on your system specifications and move to the next steps.
+<Figure
+  src="/img/guides/2024/07/crontab-logs-Untitled%2012.webp"
+  alt="Selecting Data source for monitoring using SigNoz"
+  caption="Selecting Data source for monitoring using SigNoz"
+/>
+<br></br>1. You also need to select the environment based on your system specifications and move to
+the next steps.
 
-<Figure src="/img/guides/2024/07/crontab-logs-Untitled%2013.webp" alt="Selecting Environment from which logs will be sent to SigNoz" caption="Selecting Environment from which logs will be sent to SigNoz" /><br></br>Setup OpenTelemetry Binary as an agent
+<Figure
+  src="/img/guides/2024/07/crontab-logs-Untitled%2013.webp"
+  alt="Selecting Environment from which logs will be sent to SigNoz"
+  caption="Selecting Environment from which logs will be sent to SigNoz"
+/>
+<br></br>Setup OpenTelemetry Binary as an agent
 
-On clicking the `Continue to Next Step` button you will see the next set of steps to follow. 
+On clicking the `Continue to Next Step` button you will see the next set of steps to follow.
 
-<Figure src="/img/guides/2024/07/crontab-logs-Untitled%2014.webp" alt="Steps to set up Otel-Collector" caption="Steps to set up Otel-Collector" /><br></br>The same steps will be followed with some tweaks. 
+<Figure
+  src="/img/guides/2024/07/crontab-logs-Untitled%2014.webp"
+  alt="Steps to set up Otel-Collector"
+  caption="Steps to set up Otel-Collector"
+/>
+<br></br>The same steps will be followed with some tweaks.{' '}
 
 1. Download otel-collector tar.gz using the following command:
 
@@ -431,109 +518,96 @@ On clicking the `Continue to Next Step` button you will see the next set of step
 wget https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.88.0/otelcol-contrib_0.88.0_linux_amd64.tar.gz
 ```
 
-<Figure src="/img/guides/2024/07/crontab-logs-Untitled%2015.webp" alt="Downloading Otel-Collector" caption="Downloading Otel-Collector" /><br></br>1. Extract otel-collector tar.gz to the `otelcol-contrib` folder using the command specified below:
+<Figure
+  src="/img/guides/2024/07/crontab-logs-Untitled%2015.webp"
+  alt="Downloading Otel-Collector"
+  caption="Downloading Otel-Collector"
+/>
+<br></br>1. Extract otel-collector tar.gz to the `otelcol-contrib` folder using the command
+specified below:
 
 ```bash
 mkdir otelcol-contrib && tar xvzf otelcol-contrib_0.88.0_linux_amd64.tar.gz -C otelcol-contrib
 ```
 
-<Figure src="/img/guides/2024/07/crontab-logs-Untitled%2016.webp" alt="Extracting Otel-collector tar file" caption="Extracting Otel-collector tar file" /><br></br>1. Create config.yaml in folder otelcol-contrib with the below content in it.
+<Figure
+  src="/img/guides/2024/07/crontab-logs-Untitled%2016.webp"
+  alt="Extracting Otel-collector tar file"
+  caption="Extracting Otel-collector tar file"
+/>
+<br></br>1. Create config.yaml in folder otelcol-contrib with the below content in it.
 
-<Figure src="/img/guides/2024/07/crontab-logs-Untitled%2017.webp" alt="Creating config file for Otel-collector" caption="Creating config file for Otel-collector" /><br></br>
-```yaml
-receivers:
-  otlp:
-    protocols:
-      grpc:
-        endpoint: 0.0.0.0:4317
-      http:
-        endpoint: 0.0.0.0:4318
-  hostmetrics:
-    collection_interval: 60s
-    scrapers:
-      cpu: {}
-      disk: {}
-      load: {}
-      filesystem: {}
-      memory: {}
-      network: {}
-      paging: {}
-      process:
-        mute_process_name_error: true
-        mute_process_exe_error: true
-        mute_process_io_error: true
-      processes: {}
-  prometheus:
-    config:
-      global:
-        scrape_interval: 60s
-      scrape_configs:
-        - job_name: otel-collector-binary
-          static_configs:
-            - targets:
-              # - localhost:8888
-  syslog:
-    tcp:
-      listen_address: '0.0.0.0:54527'
-    protocol: rfc3164
-    location: UTC
-    operators:
-      - type: move
-        from: attributes.message
-        to: body
-  filelog:
-    include: [ /var/log/custom_log.log ] # Update with your actual log file path
-    start_at: end
+<Figure
+  src="/img/guides/2024/07/crontab-logs-Untitled%2017.webp"
+  alt="Creating config file for Otel-collector"
+  caption="Creating config file for Otel-collector"
+/>
+<br></br>
+```yaml receivers: otlp: protocols: grpc: endpoint: 0.0.0.0:4317 http: endpoint: 0.0.0.0:4318
+hostmetrics: collection_interval: 60s scrapers: cpu: {}
+disk: {}
+load: {}
+filesystem: {}
+memory: {}
+network: {}
+paging: {}
+process: mute_process_name_error: true mute_process_exe_error: true mute_process_io_error: true
+processes: {}
+prometheus: config: global: scrape_interval: 60s scrape_configs: - job_name: otel-collector-binary
+static_configs: - targets: # - localhost:8888 syslog: tcp: listen_address: '0.0.0.0:54527' protocol:
+rfc3164 location: UTC operators: - type: move from: attributes.message to: body filelog: include: [
+/var/log/custom_log.log ] # Update with your actual log file path start_at: end
 
 processors:
-  batch:
-    send_batch_size: 1000
-    timeout: 10s
-  resourcedetection:
-    detectors: [env, system]
-    timeout: 2s
-    system:
-      hostname_sources: [os]
+batch:
+send_batch_size: 1000
+timeout: 10s
+resourcedetection:
+detectors: [env, system]
+timeout: 2s
+system:
+hostname_sources: [os]
 
 extensions:
-  health_check: 
-    endpoint: "0.0.0.0:13134"
-  zpages:
-    endpoint: "127.0.0.1:55680"
+health_check:
+endpoint: "0.0.0.0:13134"
+zpages:
+endpoint: "127.0.0.1:55680"
 
 exporters:
-  otlp:
-    endpoint: "cloud endpoint goes here"
-    tls:
-      insecure: false
-    headers:
-      "signoz-access-token": "access token goes here"
+otlp:
+endpoint: "cloud endpoint goes here"
+tls:
+insecure: false
+headers:
+"signoz-access-token": "access token goes here"
 
 service:
-  telemetry:
-    metrics:
-      address: 0.0.0.0:8888  # Metrics telemetry address
-  extensions: [health_check, zpages]
-  pipelines:
-    metrics:
-      receivers: [otlp]
-      processors: [batch]
-      exporters: [otlp]
-    metrics/internal:
-      receivers: [prometheus, hostmetrics]  # Ensure receivers are defined
-      processors: [resourcedetection, batch]
-      exporters: [otlp]
-    traces:
-      receivers: [otlp]
-      processors: [batch]
-      exporters: [otlp]
-    logs:
-      receivers: [otlp, syslog, filelog]  # Include filelog receiver here
-      processors: [batch]
-      exporters: [otlp]
-```
+telemetry:
+metrics:
+address: 0.0.0.0:8888 # Metrics telemetry address
+extensions: [health_check, zpages]
+pipelines:
+metrics:
+receivers: [otlp]
+processors: [batch]
+exporters: [otlp]
+metrics/internal:
+receivers: [prometheus, hostmetrics] # Ensure receivers are defined
+processors: [resourcedetection, batch]
+exporters: [otlp]
+traces:
+receivers: [otlp]
+processors: [batch]
+exporters: [otlp]
+logs:
+receivers: [otlp, syslog, filelog] # Include filelog receiver here
+processors: [batch]
+exporters: [otlp]
 
-You can update the access token and endpoint with the values specified in the Otel-collector Setup step.  
+````
+
+You can update the access token and endpoint with the values specified in the Otel-collector Setup step.
 
 Note: Crontab logs are not added by default to the system logs, so you need to define the output file where your crontab logs are stored under the `filelog` section.
 
@@ -541,9 +615,13 @@ Note: Crontab logs are not added by default to the system logs, so you need to d
 
 ```bash
 ./otelcol-contrib --config ./config.yaml &> otelcol-output.log & echo "$!" > otel-pid
-```
+````
 
-<Figure src="/img/guides/2024/07/crontab-logs-Untitled%2018.webp" alt="Untitled" caption="Untitled" />
+<Figure
+  src="/img/guides/2024/07/crontab-logs-Untitled%2018.webp"
+  alt="Untitled"
+  caption="Untitled"
+/>
 
 Modify the `rsyslog.conf` file
 
@@ -577,21 +655,56 @@ Check Service Status
 sudo systemctl restart rsyslog.service
 ```
 
-<Figure src="/img/guides/2024/07/crontab-logs-Untitled%2019.webp" alt="Restarting rsyslog service" caption="Restarting rsyslog service" /><br></br>1. Check the status of your service. Make sure your service is in an active state. 
+<Figure
+  src="/img/guides/2024/07/crontab-logs-Untitled%2019.webp"
+  alt="Restarting rsyslog service"
+  caption="Restarting rsyslog service"
+/>
+<br></br>1. Check the status of your service. Make sure your service is in an active state.{' '}
 
 ```bash
 sudo systemctl status rsyslog.service
 ```
 
-<Figure src="/img/guides/2024/07/crontab-logs-Untitled%2020.webp" alt="Status of rsyslog service" caption="Status of rsyslog service" /><br></br>Once things are up and running, you can click on `Done` button of the SigNoz steps and you will be redirected to `Logs Explorer` where you will see your logs getting updated.
+<Figure
+  src="/img/guides/2024/07/crontab-logs-Untitled%2020.webp"
+  alt="Status of rsyslog service"
+  caption="Status of rsyslog service"
+/>
+<br></br>Once things are up and running, you can click on `Done` button of the SigNoz steps and you
+will be redirected to `Logs Explorer` where you will see your logs getting updated.
 
-<Figure src="/img/guides/2024/07/crontab-logs-Untitled%2021.webp" alt="SigNoz Logs Explorer" caption="SigNoz Logs Explorer" /><br></br>You can expand the logs and see the various attributes associated with them. You can also filter logs based on the attributes and their values.
+<Figure
+  src="/img/guides/2024/07/crontab-logs-Untitled%2021.webp"
+  alt="SigNoz Logs Explorer"
+  caption="SigNoz Logs Explorer"
+/>
+<br></br>You can expand the logs and see the various attributes associated with them. You can also
+filter logs based on the attributes and their values.
 
-<Figure src="/img/guides/2024/07/crontab-logs-Untitled%2022.webp" alt="Log Attributes Section in SigNoz Dashboard" caption="Log Attributes Section in SigNoz Dashboard" /><br></br>For example, say you redirect output from various files to SigNoz , and now you want to filter logs associated with a particular logfile, you can filter based on query `log.file.name=custom_log.log` or any other file name.
+<Figure
+  src="/img/guides/2024/07/crontab-logs-Untitled%2022.webp"
+  alt="Log Attributes Section in SigNoz Dashboard"
+  caption="Log Attributes Section in SigNoz Dashboard"
+/>
+<br></br>For example, say you redirect output from various files to SigNoz , and now you want to
+filter logs associated with a particular logfile, you can filter based on query
+`log.file.name=custom_log.log` or any other file name.
 
-<Figure src="/img/guides/2024/07/crontab-logs-Untitled%2023.webp" alt="Filtering logs in SigNoz Log Explorer" caption="Filtering logs in SigNoz Log Explorer" /><br></br>From the below image, you can see that no data is returned as there are no logs associated with the file name `custom.log` .
+<Figure
+  src="/img/guides/2024/07/crontab-logs-Untitled%2023.webp"
+  alt="Filtering logs in SigNoz Log Explorer"
+  caption="Filtering logs in SigNoz Log Explorer"
+/>
+<br></br>From the below image, you can see that no data is returned as there are no logs associated
+with the file name `custom.log` .
 
-<Figure src="/img/guides/2024/07/crontab-logs-Untitled%2024.webp" alt="No data was found based on the search query passed in the SigNoz Dashboard" caption="No data was found based on the search query passed in the SigNoz Dashboard" /><br></br>
+<Figure
+  src="/img/guides/2024/07/crontab-logs-Untitled%2024.webp"
+  alt="No data was found based on the search query passed in the SigNoz Dashboard"
+  caption="No data was found based on the search query passed in the SigNoz Dashboard"
+/>
+<br></br>
 
 ### Benefits of Monitoring and Analyzing Crontab Logs with SigNoz
 
