@@ -24,7 +24,14 @@ module.exports = {
         14: '3.5rem',
       },
       colors: {
-        primary: colors.indigo,
+        primary: {
+          100: '#CAD5FD',
+          200: '#B8C7FC',
+          300: '#95ACFB',
+          400: '#7190F9',
+          500: '#4E74F8',
+          600: '#3F5ECC',
+        },
         gray: colors.gray,
         signoz_robin: {
           100: '#CAD5FD',
@@ -93,10 +100,24 @@ module.exports = {
           300: '#242834',
           400: '#1D212D',
           500: '#161922',
+        },
+        signoz_forest: {
+          200: '#A8F3D3',
+          300: '#7CEDBE',
+          400: '#51E7A8',
+          500: '#25E192',
+          600: '#1EB475',
         },
       },
       borderColor: {
-        primary: colors.indigo,
+        primary: {
+          100: '#CAD5FD',
+          200: '#B8C7FC',
+          300: '#95ACFB',
+          400: '#7190F9',
+          500: '#4E74F8',
+          600: '#3F5ECC',
+        },
         gray: colors.gray,
         signoz_robin: {
           100: '#CAD5FD',
@@ -165,6 +186,13 @@ module.exports = {
           300: '#242834',
           400: '#1D212D',
           500: '#161922',
+        },
+        signoz_forest: {
+          200: '#A8F3D3',
+          300: '#7CEDBE',
+          400: '#51E7A8',
+          500: '#25E192',
+          600: '#1EB475',
         },
       },
       typography: ({ theme }) => ({

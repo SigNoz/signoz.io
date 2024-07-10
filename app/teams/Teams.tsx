@@ -1,12 +1,13 @@
 'use client'
 
 import './teams.styles.css'
-import Link from 'next/link'
+
 import React, { useState } from 'react'
 import ReactGA from 'react-ga4'
 import TestimonialSection from './TestimonialSection'
 
-import { Loader2 } from 'lucide-react'
+import { ArrowRight, Loader2 } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 
 interface ErrorsProps {
   fullName?: string
@@ -15,8 +16,6 @@ interface ErrorsProps {
 }
 
 ReactGA.initialize('G-6NFJ2Y6NQN')
-
-import { ArrowRight } from 'lucide-react'
 
 interface SignUpPageProps {}
 
@@ -45,8 +44,6 @@ const regions: Region[] = [
 ]
 
 const Teams: React.FC<SignUpPageProps> = () => {
-  const [isFormSubmitted, setIsFormSubmitted] = useState(false)
-
   const [formData, setFormData] = useState({
     fullName: '',
     workEmail: '',
@@ -58,7 +55,8 @@ const Teams: React.FC<SignUpPageProps> = () => {
   const [errors, setErrors] = useState<ErrorsProps>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitSuccess, setSubmitSuccess] = useState(false)
-  const [submitFailed, setSubmitFailed] = useState(false)
+  const [submitFailed, setSubmitFailed] = useState(true)
+  const router = useRouter()
 
   const handleInputChange = (event) => {
     const { name, value } = event.target
@@ -185,7 +183,7 @@ const Teams: React.FC<SignUpPageProps> = () => {
           source: '',
         })
 
-        setIsFormSubmitted(true)
+        router.push('/verify-email')
       } else {
         // To do, handle other errors apart from invalid email
         if (response.status === 400) {
@@ -204,17 +202,37 @@ const Teams: React.FC<SignUpPageProps> = () => {
   return (
     <main className="bg-signoz_ink-500">
       <div className="m-auto max-w-[1440px]">
-        {!isFormSubmitted && (
-          <div className="flex items-stretch max-lg:flex-col max-md:gap-0">
-            <section className="signup-form-section flex w-full flex-col bg-signoz_ink-500 max-md:ml-0 max-md:w-full lg:w-[70%] xl:w-[60%]">
-              <div className="flex w-full grow flex-col px-8 py-4 text-sm leading-5 text-white max-md:mt-10 max-md:max-w-full lg:px-12 lg:py-8 xl:px-36 xl:py-8">
-                <h1 className="mt-11 text-2xl font-semibold leading-8 max-md:mt-10 max-md:max-w-full">
-                  Sign up for SigNoz Cloud
-                </h1>
-                <p className="w-100 text-md mt-2 text-base leading-6 text-signoz_vanilla-400 max-md:max-w-full">
-                  Experience SigNoz effortlessly. No installation, maintenance, or scaling needed.
-                  Get started now with a free trial account for 30 days.
-                </p>
+        <div className="flex items-stretch max-lg:flex-col max-md:gap-0">
+          <section className="signup-form-section flex w-full flex-col bg-signoz_ink-500 max-md:ml-0 max-md:w-full lg:w-[70%] xl:w-[60%]">
+            <div className="flex w-full grow flex-col px-8 py-4 text-sm leading-5 text-white max-md:mt-10 max-md:max-w-full lg:px-12 lg:py-8 xl:px-36 xl:py-8">
+              <h1 className="mt-11 text-2xl font-semibold leading-8 max-md:mt-10 max-md:max-w-full">
+                Sign up for SigNoz Cloud
+              </h1>
+              <p className="w-100 text-md mt-2 text-base leading-6 text-signoz_vanilla-400 max-md:max-w-full">
+                Experience SigNoz effortlessly. No installation, maintenance, or scaling needed. Get
+                started now with a free trial account for 30 days.
+              </p>
+
+              {!isSubmitting && submitFailed ? (
+                <div className="welcome-container mt-[32px] flex flex-col items-center">
+                  <div className="text-md rounded-[6px] border border-[#1D212D] bg-signoz_ink-300 p-[24px]">
+                    <div>
+                      {' '}
+                      We're sorry, it looks like something didn't go as planned. Please reach out to
+                      us for assistance.
+                    </div>
+                  </div>
+
+                  <a
+                    type="submit"
+                    className="mt-[28px] flex w-full items-center justify-center gap-4 rounded-full bg-signoz_cherry-500 px-[16px] py-[8px] text-sm font-medium"
+                    href="mailto:cloud-support@signoz.io"
+                  >
+                    <span className="text-xs leading-5">Contact cloud support</span>
+                    <ArrowRight size={14} />
+                  </a>
+                </div>
+              ) : (
                 <form className="w-100 mt-[24px]">
                   <div className="mb-[28px]">
                     <label htmlFor="fullName" className="mb-2 block font-medium">
@@ -340,72 +358,11 @@ const Teams: React.FC<SignUpPageProps> = () => {
                     No credit card required.
                   </p>
                 </form>
-              </div>
-            </section>
-            <TestimonialSection />
-          </div>
-        )}
-
-        {isFormSubmitted && (
-          <div className="welcome-container mx-auto flex max-w-[520px] flex-col items-center py-32">
-            <svg
-              width="56"
-              height="56"
-              viewBox="0 0 56 56"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <circle cx="28" cy="28" r="20" fill="#7190F9" fill-opacity="0.1" />
-              <circle cx="28" cy="28" r="20" fill="#7190F9" fill-opacity="0.1" />
-              <path
-                d="M28.0003 51.3337C40.8873 51.3337 51.3337 40.8873 51.3337 28.0003C51.3337 15.1133 40.8873 4.66699 28.0003 4.66699C15.1133 4.66699 4.66699 15.1133 4.66699 28.0003C4.66699 40.8873 15.1133 51.3337 28.0003 51.3337Z"
-                fill="#4E74F8"
-                stroke="#4E74F8"
-                stroke-width="4.66667"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              />
-              <path
-                d="M16 27L23.9615 36L39 22"
-                stroke="#121317"
-                stroke-width="4.66667"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              />
-            </svg>
-
-            <div className="mt-[28px] bg-neutral-950 text-2xl"> Welcome to SigNoz </div>
-
-            <div className="text-md mt-[28px] rounded-[6px] border border-[#1D212D] bg-signoz_ink-300 p-[24px]">
-              <div>
-                {' '}
-                Thank you for signing up for SigNoz Cloud. Please check your email for the next
-                steps.{' '}
-              </div>
-
-              <div className="mt-[28px]">
-                If you do not find the email in your inbox within the next few minutes, please check
-                your spam folder.
-              </div>
+              )}
             </div>
-
-            <a
-              type="submit"
-              className="mt-[28px] flex w-full items-center justify-center gap-4 rounded-full bg-signoz_robin-500 px-[16px] py-[8px] text-sm font-medium"
-              href="mailto:cloud-support@signoz.io"
-            >
-              <span className="flex text-xs leading-5">Contact cloud support</span>
-              <ArrowRight size={14} />
-            </a>
-
-            <Link href="/docs" className="w-full">
-              <button className="mt-[12px] flex w-full items-center justify-center gap-4 rounded-full bg-signoz_ink-300 px-[16px] py-[8px] text-sm font-medium">
-                <span className="flex text-xs leading-5">Read the docs </span>
-                <ArrowRight size={14} />
-              </button>
-            </Link>
-          </div>
-        )}
+          </section>
+          <TestimonialSection />
+        </div>
       </div>
     </main>
   )
