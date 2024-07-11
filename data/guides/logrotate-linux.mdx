@@ -1,5 +1,4 @@
 ---
-
 title: How to Setup and Manage Log Rotation Using logrotate in Linux
 slug: logrotate-linux
 date: 2024-07-11
@@ -7,11 +6,10 @@ tags: [logging]
 authors: [simran_kumari]
 description: Learn to manage log rotation in Linux with logrotate, configuring schedules, compression, and actions in /etc/logrotate.d/ for efficient log management.
 keywords: [logs, logrotate, logrotate linux]
-
 ---
 
 <head>
-<script type="application/ld+json">
+  <script type="application/ld+json">
     {`{
   "@context": "https://schema.org",
   "@type": "BlogPosting",
@@ -151,7 +149,7 @@ keywords: [logs, logrotate, logrotate linux]
     ]
   }
 }`}
-</script>
+  </script>
 </head>
 
 Effective log management in Linux is crucial for maintaining system health, performance, and security. Logs are invaluable records of system events, application behavior, and security incidents. However, these logs can quickly grow out of control without proper management, consuming valuable disk space and leading to potential system issues. This is where log rotation comes into play. Regularly rotating logs ensures they are archived systematically, preventing disk space exhaustion and enhancing overall system performance.
@@ -187,7 +185,18 @@ sudo apt update
 sudo apt install logrotate
 ```
 
-<Figure src="/img/guides/2024/07/logrotate-linux-Untitled.webp" alt="Updating package lists" caption="Updating package lists" /><br></br><Figure src="/img/guides/2024/07/logrotate-linux-Untitled%201.webp" alt="Installinf logrotate on Ubuntu" caption="Installinf logrotate on Ubuntu" /><br></br>
+<Figure
+  src="/img/guides/2024/07/logrotate-linux-Untitled.webp"
+  alt="Updating package lists"
+  caption="Updating package lists"
+/>
+<br></br>
+<Figure
+  src="/img/guides/2024/07/logrotate-linux-Untitled%201.webp"
+  alt="Installing logrotate on Ubuntu"
+  caption="Installinf logrotate on Ubuntu"
+/>
+<br></br>
 
 ### CentOS/Red Hat
 
@@ -199,7 +208,12 @@ Use the following command to install `logrotate`:
 sudo yum install logrotate
 ```
 
-<Figure src="/img/guides/2024/07/logrotate-linux-Untitled%202.webp" alt="Installing logrotate on CentOS" caption="Installing logrotate on CentOS" /><br></br>
+<Figure
+  src="/img/guides/2024/07/logrotate-linux-Untitled%202.webp"
+  alt="Installing logrotate on CentOS"
+  caption="Installing logrotate on CentOS"
+/>
+<br></br>
 
 ### Arch Linux
 
@@ -226,7 +240,12 @@ You should see output similar to the following:
 logrotate 3.21.0
 ```
 
-<Figure src="/img/guides/2024/07/logrotate-linux-Untitled%203.webp" alt="Checking the logrotate version" caption="Checking the logrotate version" /><br></br>
+<Figure
+  src="/img/guides/2024/07/logrotate-linux-Untitled%203.webp"
+  alt="Checking the logrotate version"
+  caption="Checking the logrotate version"
+/>
+<br></br>
 
 ## `logrotate` Configuration Basics
 
@@ -240,17 +259,21 @@ Once `logrotate` is installed, you need to configure it to manage your log files
 
 The global configuration file defines the default settings and behaviors for logrotate. It specifies the rotation frequency, compression options, and other global parameters that apply to all log files unless overridden by more specific configurations.
 
-<Figure src="/img/guides/2024/07/logrotate-linux-Untitled%204.webp" alt="`logrotate` Global Configuration file" caption="`logrotate` Global Configuration file" />
-
-`*logrotate` Global Configuration file*
+<Figure
+  src="/img/guides/2024/07/logrotate-linux-Untitled%204.webp"
+  alt="`logrotate` Global Configuration file"
+  caption="`logrotate` Global Configuration file"
+/>
 
 - Additional Configuration Files Directory: `/etc/logrotate.d/`
 
 This directory contains additional configuration files that can override or extend the global settings. Each file in this directory typically corresponds to a specific application or log file, allowing for fine-tuned control over log rotation policies. For instance, you might have separate configurations for web server logs, database logs, and system logs, each with its own rotation schedule and parameters.
 
-<Figure src="/img/guides/2024/07/logrotate-linux-9a1791a9-da17-4ba9-83aa-1275585e8a4f.webp" alt="`logrotate` addtional configuration files directory" caption="`logrotate` addtional configuration files directory" />
-
-`*logrotate` addtional configuration files directory*
+<Figure
+  src="/img/guides/2024/07/logrotate-linux-9a1791a9-da17-4ba9-83aa-1275585e8a4f.webp"
+  alt="`logrotate` addtional configuration files directory"
+  caption="`logrotate` addtional configuration files directory"
+/>
 
 The global configuration file sets the default parameters and includes any additional configuration files from `/etc/logrotate.d/`.
 
@@ -286,24 +309,24 @@ Example:
 `logrotate` configuration files include various directives that control how and when log files are rotated, compressed, and managed. These directives allow you to customize the behavior of logrotate to suit the needs of your system and applications. Below are some of the most commonly used directives in `logrotate` configuration files:
 
 - Frequency of Rotation:
-    - `daily`: This directive specifies that the log files should be rotated every day.
-    - `weekly`: This directive specifies that the log files should be rotated every week.
-    - `monthly`: This directive specifies that the log files should be rotated every month.
+  - `daily`: This directive specifies that the log files should be rotated every day.
+  - `weekly`: This directive specifies that the log files should be rotated every week.
+  - `monthly`: This directive specifies that the log files should be rotated every month.
 - Number of Rotations to Keep:
-    - `rotate <count>`: This directive specifies the number of old log files to keep. For example, `rotate 7` keeps the last seven rotated logs.
+  - `rotate <count>`: This directive specifies the number of old log files to keep. For example, `rotate 7` keeps the last seven rotated logs.
 - Compression:
-    - `compress`: This directive compresses the rotated log files to save space.
-    - `nocompress`: This directive ensures that the rotated log files are not compressed.
+  - `compress`: This directive compresses the rotated log files to save space.
+  - `nocompress`: This directive ensures that the rotated log files are not compressed.
 - Handling Missing Log Files:
-    - `missingok`: If the log file is missing, `logrotate` will skip it without issuing an error.
-    - `nomissingok`: If the log file is missing, `logrotate` will issue an error message.
+  - `missingok`: If the log file is missing, `logrotate` will skip it without issuing an error.
+  - `nomissingok`: If the log file is missing, `logrotate` will issue an error message.
 - Empty Log Files:
-    - `notifempty`: This directive ensures that empty log files are not rotated.
-    - `ifempty`: This directive ensures that log files are rotated even if they are empty.
+  - `notifempty`: This directive ensures that empty log files are not rotated.
+  - `ifempty`: This directive ensures that log files are rotated even if they are empty.
 - Creating New Log Files:
-    - `create <mode> <owner> <group>`: After rotation, this directive creates a new log file with the specified permissions and ownership. For example, `create 640 root adm` creates a new log file with read/write permissions for the owner and read-only permissions for the group.
+  - `create <mode> <owner> <group>`: After rotation, this directive creates a new log file with the specified permissions and ownership. For example, `create 640 root adm` creates a new log file with read/write permissions for the owner and read-only permissions for the group.
 - Post-Rotation Scripts:
-    - `postrotate`/`endscript`: These directives specify commands to run after the log file is rotated. This is useful for tasks such as restarting a service to ensure it writes to the new log file.
+  - `postrotate`/`endscript`: These directives specify commands to run after the log file is rotated. This is useful for tasks such as restarting a service to ensure it writes to the new log file.
 
 Example with Post-Rotation Script:
 
@@ -490,7 +513,7 @@ while true; do
 done
 ```
 
-The above script continuously writes a sample log entry along with the date to the application log file every second. 
+The above script continuously writes a sample log entry along with the date to the application log file every second.
 
 - Make the script executable:
 
@@ -504,7 +527,12 @@ sudo chmod +x /usr/local/bin/generate-logs.sh
 nohup /usr/local/bin/generate-logs.sh &
 ```
 
-<Figure src="/img/guides/2024/07/logrotate-linux-Untitled%205.webp" alt="Running the generate-logs script in the background" caption="Running the generate-logs script in the background" /><br></br>Step 5: Monitor Log Rotation
+<Figure
+  src="/img/guides/2024/07/logrotate-linux-Untitled%205.webp"
+  alt="Running the generate-logs script in the background"
+  caption="Running the generate-logs script in the background"
+/>
+<br></br>Step 5: Monitor Log Rotation
 
 - Open a new terminal and run the following command to watch the log directory:
 
@@ -512,7 +540,13 @@ nohup /usr/local/bin/generate-logs.sh &
 watch -n 1 ls -l /var/log/myapp
 ```
 
-<Figure src="/img/guides/2024/07/logrotate-linux-Untitled%206.webp" alt="Watch the log directory to get the list of  file generated by logrotate" caption="Watch the log directory to get the list of  file generated by logrotate" /><br></br>This command updates the file listing every second, allowing you to see new log files being created and old ones being compressed and archived.
+<Figure
+  src="/img/guides/2024/07/logrotate-linux-Untitled%206.webp"
+  alt="Watch the log directory to get the list of  file generated by logrotate"
+  caption="Watch the log directory to get the list of  file generated by logrotate"
+/>
+<br></br>This command updates the file listing every second, allowing you to see new log files being
+created and old ones being compressed and archived.
 
 ## Monitoring Logs with SigNoz When Using Logrotate
 
@@ -529,66 +563,69 @@ To monitor logrotate logs using SigNoz and ensure the logs are correctly forward
 Step 1: Configure `logrotate` to Send Rotated Logs to SigNoz
 
 - Ensure you have the OpenTelemetry Collector installed on your system. If not, install it using the following commands:
-    
-    ```bash
-    wget https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.88.0/otelcol-contrib_0.88.0_linux_amd64.tar.gz
-    mkdir otelcol-contrib && tar xvzf otelcol-contrib_0.88.0_linux_amd64.tar.gz -C otelcol-contrib
-    ```
-    
+  ```bash
+  wget https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.88.0/otelcol-contrib_0.88.0_linux_amd64.tar.gz
+  mkdir otelcol-contrib && tar xvzf otelcol-contrib_0.88.0_linux_amd64.tar.gz -C otelcol-contrib
+  ```
 
-<Figure src="/img/guides/2024/07/logrotate-linux-Untitled%207.webp" alt="Installing OpenTelemetry collector" caption="Installing OpenTelemetry collector" /><br></br>Note: Ensure you have the latest version of the OpenTelemetry Collector. The commands above use version 0.88.0, which is the latest at the time of writing. To verify and download the most current version, visit the <a href="https://github.com/open-telemetry/opentelemetry-collector-releases" rel="noopener noreferrer nofollow" target="_blank">OpenTelemetry Collector Releases</a> page.
+<Figure
+  src="/img/guides/2024/07/logrotate-linux-Untitled%207.webp"
+  alt="Installing OpenTelemetry collector"
+  caption="Installing OpenTelemetry collector"
+/>
+<br></br>Note: Ensure you have the latest version of the OpenTelemetry Collector. The commands above
+use version 0.88.0, which is the latest at the time of writing. To verify and download the most
+current version, visit the <a
+  href="https://github.com/open-telemetry/opentelemetry-collector-releases"
+  rel="noopener noreferrer nofollow"
+  target="_blank">OpenTelemetry Collector Releases</a> page.
 
 - Create the OpenTelemetry configuration file, `config.yaml` in the folder otelcol-contrib with the below content in it.
-    
-    ```yaml
-    receivers:
-      filelog:
-        include: [/var/log/myapp/*.log]
-        start_at: end
-    exporters:
-      otlp:
-        endpoint: "<cloud endpoint goes here>"
-        tls:
-          insecure: false
-        headers:
-          "signoz-access-token": "<access token goes here>"
-    
-    service:
-      pipelines:
-        logs:
-          receivers: [filelog]
-          exporters: [otlp]
-    ```
-    
-    You can update the access token and endpoint with the values specified in the Otel-collector Setup step.  
-    
+
+  ```yaml
+  receivers:
+    filelog:
+      include: [/var/log/myapp/*.log]
+      start_at: end
+  exporters:
+    otlp:
+      endpoint: '<cloud endpoint goes here>'
+      tls:
+        insecure: false
+      headers:
+        'signoz-access-token': '<access token goes here>'
+
+  service:
+    pipelines:
+      logs:
+        receivers: [filelog]
+        exporters: [otlp]
+  ```
+
+  You can update the access token and endpoint with the values specified in the Otel-collector Setup step.
+
 - To run otel-collector, run the following command inside the `otelcol-contrib` directory:
-    
-    ```bash
-    ./otelcol-contrib --config ./otel-collector-config.yml &> otelcol-output.log & echo "$!" > otel-pid
-    ```
-    
+  ```bash
+  ./otelcol-contrib --config ./otel-collector-config.yml &> otelcol-output.log & echo "$!" > otel-pid
+  ```
 
 Step 2: Modify `logrotate` Configuration
 
 - Create a logrotate configuration file in the `/etc/logrotate.d/` directory for your application, which contains logrotate configurations for various applications. Here’s a sample configuration file located at `/etc/logrotate.d/myapp`:
-    
-    ```bash
-    /var/log/myapp/*.log {
-        size 1M
-        rotate 7
-        compress
-        missingok
-        notifempty
-        create 644 ec2-user ec2-user
-        postrotate
-            /usr/bin/killall -HUP myapp
-        endscript
-    }
-    ```
-    
-    This configuration rotates logs in the `/var/log/myapp` directory when they reach 1MB in size, keeps 7 rotated logs, compresses them, and ensures the log rotation process doesn’t break if a log file is missing or empty. After rotation, it signals the `myapp` process to reopen the log files.
-    
+  ```bash
+  /var/log/myapp/*.log {
+      size 1M
+      rotate 7
+      compress
+      missingok
+      notifempty
+      create 644 ec2-user ec2-user
+      postrotate
+          /usr/bin/killall -HUP myapp
+      endscript
+  }
+  ```
+  This configuration rotates logs in the `/var/log/myapp` directory when they reach 1MB in size, keeps 7 rotated logs, compresses them, and ensures the log rotation process doesn’t break if a log file is missing or empty. After rotation, it signals the `myapp` process to reopen the log files.
 
 Step 3: Setting Up Log Monitoring in SigNoz
 
@@ -597,25 +634,51 @@ To connect your application logs to SigNoz, you will need a SigNoz cloud account
 - Access your SigNoz cloud account by navigating to your SigNoz URL and logging in.
 - Go to the "Logs" section. You will start receiving logs in the log explorer section from the OpenTelemetry Collector.
 
-<Figure src="/img/guides/2024/07/logrotate-linux-Untitled%208.webp" alt="Exploring logs in the SigNoz Dashboard" caption="Exploring logs in the SigNoz Dashboard" /><br></br>- You can filter logs on various parameters , for example if body contains “Error”
+<Figure
+  src="/img/guides/2024/07/logrotate-linux-Untitled%208.webp"
+  alt="Exploring logs in the SigNoz Dashboard"
+  caption="Exploring logs in the SigNoz Dashboard"
+/>
+<br></br>- You can filter logs on various parameters , for example if body contains “Error”
 
-<Figure src="/img/guides/2024/07/logrotate-linux-Untitled%209.webp" alt="Filtering logs in SigNoz Logs Explorer" caption="Filtering logs in SigNoz Logs Explorer" /><br></br>What if you want to set up alerts if some error logs are received?  You can make use of SigNoz alerts in that case.
+<Figure
+  src="/img/guides/2024/07/logrotate-linux-Untitled%209.webp"
+  alt="Filtering logs in SigNoz Logs Explorer"
+  caption="Filtering logs in SigNoz Logs Explorer"
+/>
+<br></br>What if you want to set up alerts if some error logs are received? You can make use of
+SigNoz alerts in that case.
 
 ### Creating Alerts in SigNoz
 
 1. Set Up Alerts Based on Log Monitoring Rules:
-    
-    In the SigNoz dashboard, go to the "Alerts" section and create a new alert based on the logs received. Configure the alert with conditions such as error counts, log patterns, or specific log messages.
-    
-    Example: Alert on Log Rotation Errors
-    
-    - Condition: If the log message contains "error" or "failed".
 
-<Figure src="/img/guides/2024/07/logrotate-linux-Untitled%2010.webp" alt="Setting up conditions for SigNoz alerts" caption="Setting up conditions for SigNoz alerts" /><br></br>- Threshold: 1 occurrence within the last 60 minutes.
+   In the SigNoz dashboard, go to the "Alerts" section and create a new alert based on the logs received. Configure the alert with conditions such as error counts, log patterns, or specific log messages.
 
-<Figure src="/img/guides/2024/07/logrotate-linux-Untitled%2011.webp" alt="Configuring threshold for SigNoz alerts" caption="Configuring threshold for SigNoz alerts" /><br></br>- Action: Send an email or trigger a webhook.
+   Example: Alert on Log Rotation Errors
 
-<Figure src="/img/guides/2024/07/logrotate-linux-Untitled%2012.webp" alt="Configuring notification channel for SigNoz alerts" caption="Configuring notification channel for SigNoz alerts" /><br></br>
+   - Condition: If the log message contains "error" or "failed".
+
+<Figure
+  src="/img/guides/2024/07/logrotate-linux-Untitled%2010.webp"
+  alt="Setting up conditions for SigNoz alerts"
+  caption="Setting up conditions for SigNoz alerts"
+/>
+<br></br>- Threshold: 1 occurrence within the last 60 minutes.
+
+<Figure
+  src="/img/guides/2024/07/logrotate-linux-Untitled%2011.webp"
+  alt="Configuring threshold for SigNoz alerts"
+  caption="Configuring threshold for SigNoz alerts"
+/>
+<br></br>- Action: Send an email or trigger a webhook.
+
+<Figure
+  src="/img/guides/2024/07/logrotate-linux-Untitled%2012.webp"
+  alt="Configuring notification channel for SigNoz alerts"
+  caption="Configuring notification channel for SigNoz alerts"
+/>
+<br></br>
 
 ### Generating Sample Logs to Test Monitoring and Alerts
 
