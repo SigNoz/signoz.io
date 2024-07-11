@@ -1,0 +1,149 @@
+---
+date: 2024-07-03
+title: Ingestion Overview
+id: Ingestion-overview
+---
+
+## Overview
+
+SigNoz is designed with an OpenTelemetry-first approach, natively supporting the [OpenTelemetry Protocol](https://github.com/open-telemetry/opentelemetry-proto/blob/main/docs/specification.md). In addition to OpenTelemetry compatibility, SigNoz also provides custom in-house endpoints for enhanced functionality.
+
+## Get Started
+
+* If you haven't already done so, sign up for a [SigNoz Cloud account](https://SigNoz.io/teams/).
+* After logging into your SigNoz Cloud account, create an [Ingestion Key](/docs/Ingestion/keys/).
+
+## Endpoint
+
+Based on your SigNoz Cloud environment, you must configure your applications to use the relevant endpoint and port from the table below:
+
+<div style={{display: "flex", justifyContent: "center", width: "100%"}}>
+<table style={{width: "80%", display:"table"}}>
+  <tr>
+    <th className="px-6 border-white-200" style={{textAlign:"center", width: "30%"}}>Region</th>
+    <th className="px-6 border-white-200" style={{textAlign:"center", width: "60%"}}>Endpoint</th>
+    <th className="px-6 border-white-200" style={{textAlign:"center", width: "10%"}}>Port</th>
+  </tr>
+  <tr>
+      <td className="px-6 border-white-200 font-bold p-0" style={{textAlign:"center"}}>United States (US)</td>
+      <td className="px-6 border-white-200 p-0" style={{textAlign:"left"}}>
+      ```bash
+      ingest.us.signoz.cloud
+      ```
+      </td>
+      <td className="px-6 border-white-200 p-0" style={{textAlign:"center"}}>443</td>
+  </tr>
+  <tr>
+      <td className="px-6 border-white-200 font-bold p-0" style={{textAlign:"center"}}>Europe (EU)</td>
+      <td className="px-6 border-white-200 p-0" style={{textAlign:"left"}}>
+      ```bash
+      ingest.eu.signoz.cloud
+      ```
+      </td>
+      <td className="px-6 border-white-200 p-0" style={{textAlign:"center"}}>443</td>
+  </tr>
+  <tr style={{textAlign:"center", borderTop: 0}}>
+      <td className="px-6 border-white-200 font-bold p-0" style={{textAlign:"center"}}>India (IN)</td>
+      <td className="px-6 border-white-200 p-0" style={{textAlign:"left"}}>
+      ```bash
+      ingest.in.signoz.cloud
+      ```
+      </td>
+      <td className="px-6 border-white-200 p-0" style={{textAlign:"center"}}>443</td>
+  </tr>
+</table>
+</div>
+
+#### Notes
+- SigNoz uses **port 443 for both OTLP/HTTP and OTLP/gRPC protocols**, consolidating traffic through a single port. This approach diverges from the conventional use of separate ports (4317 for OTLP/gRPC and 4318 for OTLP/HTTP) typically seen in OpenTelemetry documentation.
+
+### Language SDK Configuration
+Configuration typically involves setting the `OTEL_EXPORTER_OTLP_ENDPOINT` environment variable. Refer to the SigNoz [instrumentation docs](/docs/instrumentation/) for language-specific details.
+
+If you are using the signal agnostic environment variable (`OTEL_EXPORTER_OTLP_ENDPOINT`), you can simply set `OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443` and the exporter should append the appropriate path for the signal type (such as v1/traces or v1/metrics). Similarly, if you are using OTLP/GRPC, setting the variable `OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443` (replace with your endpoint from the above table).
+
+### OpenTelemetry Collector Configuration
+Configure the OpenTelemetry [exporter](https://opentelemetry.io/docs/specs/otel/protocol/exporter/) in your collector configuration file to point to the appropriate SigNoz endpoint.
+
+```yaml
+exporters:
+  <otlp|otlphttp>:
+    endpoint: <endpoint>
+```
+
+<Admonition type="warning" title="Deprecation Notice">
+The following endpoints are deprecated:
+* https://ingest.signoz.io
+* https://ingest-in.signoz.io
+* https://ingest-eu.signoz.io
+</Admonition>
+
+## Authentication Methods
+
+All endpoints are protected by header based key authentication. The header `signoz-access-token` must be set to the** value of your ingestion key** in order to successfully ingest data. Additionally, SigNoz also supports basic authentication which means that the header `authorization` may also additionally be used to ingest data.
+
+### Language SDK Configuration
+The mechanism to configure headers will vary, but OpenTelemetry language SDKs generally support setting the `OTEL_EXPORTER_OTLP_HEADERS=SigNoz-access-token=<key>` environment variable. Refer to the SigNoz [instrumentation docs](/docs/instrumentation/) for language-specific details.
+
+### OpenTelemetry Collector Configuration
+Configure the OpenTelemetry [exporter](https://opentelemetry.io/docs/specs/otel/protocol/exporter/) in your collector configuration with the appropriate header values.
+
+```yaml
+exporters:
+  <otlp|otlphttp>:
+    headers:
+      signoz-access-token: <key>
+```
+
+<Admonition type="warning" title="Deprecation Notice">
+The following ways of authentication are deprecated:
+* Using the `SigNoz-access-token` header with the value set `Bearer <key>` to your Ingestion key. 
+* Using the `SigNoz-access-token` header for basic authentication. 
+* Using the `authorization` header with the value set `Bearer <key>` to your Ingestion key. 
+</Admonition>
+
+## Important Considerations
+
+
+* **Payload Size Limit**: In order to send data to SigNoz, your payloads must be smaller than the **16MB maximum payload size**. Larger payloads will be rejected with an error status code.
+
+* **Cross-Origin Resource Sharing (CORS)**: CORS is enabled on all SigNoz endpoints if you wish to send telemetry from your frontend applications.
+
+* **Timeouts**: Requests generally take longer when payloads are larger or networks are slower. If your application produces large payloads due to high telemetry volume or long export intervals, you may need to increase the default timeout settings to avoid export errors.
+
+* **Compression**: Enable compression while sending OTLP data. SigNoz supports gzip compression on all OTLP endpoints. Note that this compression does not apply to any custom endpoints supported by SigNoz.
+
+* **Retries**: Implement retry mechanisms to handle transient errors and reduce data loss.
+
+### Language SDK Configuration
+
+* OpenTelemetry SDKs generally support setting the following environment variables (see [OpenTelemetry docs](https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/) for more info):
+  - `OTEL_BSP_*` for spans
+  - `OTEL_METRIC_EXPORT_*` for metrics
+  - `OTEL_BLRP_*` for logs
+
+* Increase the default timeout settings using the `OTEL_EXPORTER_OTLP_TIMEOUT` environment variable. The value should be set in milliseconds. Example: `OTEL_EXPORTER_OTLP_TIMEOUT=30000`. This sets the timeout to 30 seconds.
+
+* Configure compression using the `OTEL_EXPORTER_OTLP_COMPRESSION=gzip` environment variable.
+
+* For retries, configuration methods vary by language and SDK. Some SDKs support environment variables (e.g., Java: `OTEL_EXPERIMENTAL_EXPORTER_OTLP_RETRY_ENABLED=true`). Programmatic configuration may be necessary in some cases. Refer to your specific SDK's documentation for detailed retry configuration options
+
+### OpenTelemetry Collector Configuration
+Configure the OpenTelemetry [otlpexporter](https://github.com/open-telemetry/opentelemetry-collector/blob/main/exporter/otlpexporter/README.md) or [otlphttpexporter](https://github.com/open-telemetry/opentelemetry-collector/blob/main/exporter/otlphttpexporter/README.md) in your collector configuration with the appropriate values. The defaults of these exporters can be found below:
+
+```yaml
+exporters:
+  <otlp|otlphttp>:
+    ...
+    timeout: 5s
+    compression: gzip
+    retry_on_failure:
+      enabled: true
+      initial_interval: 5s
+      max_interval: 30s
+      max_elapsed_time: 300s
+    sending_queue:
+      enabled: true
+      num_consumers: 10
+      queue_size: 1000
+```
