@@ -4,52 +4,80 @@ title: Ingestion
 id: ingestion
 ---
 
-## Regional Endpoints
+SigNoz is designed with an OpenTelemetry-first approach, natively supporting the <a href = "https://github.com/open-telemetry/opentelemetry-proto/blob/main/docs/specification.md" rel="noopener noreferrer nofollow" target="_blank" >Opentelemetry Protocol</a>.In addition to OpenTelemetry compatibility, SigNoz also provides custom in-house endpoints for enhanced functionality and flexibility.
+
+## Get Started
+
+* If you haven't already done so, sign up for a [Signoz Cloud account](https://signoz.io/teams/).
+* After logging into your SigNoz Cloud account, create an ingestion key. This key is essential for configuring authentication to report telemetry to SigNoz Cloud.
+
+## Endpoint
+
+Based on your Signoz Cloud environment, you must configure your applications to use the relevant endpoint and port from the table below.
 
 | Region | Endpoint | Port |
 |:------:|:---------|:----:|
-| US | `https://ingest.us.signoz.cloud` | 443 |
-| IN | `https://ingest.in.signoz.cloud` | 443 |
-| EU | `https://ingest.eu.signoz.cloud` | 443 |
+| US | ```https://ingest.us.signoz.cloud``` | 443 |
+| IN | ```https://ingest.in.signoz.cloud``` | 443 |
+| EU | ```https://ingest.eu.signoz.cloud``` | 443 |
 
-## Authentication Methods
-
-1. **Recommended:** Using `signoz-access-token`
-2. Alternative: Using `basic authorization`
-
-## Important Considerations
-
-- Maximum payload size: 16MB per POST request
-- CORS enabled with the following access-control-headers:
-  `Keep-Alive, User-Agent, If-Modified-Since, Cache-Control, Content-Type, Authorization, signoz-access-token`
-- All payloads must be UTF-8 encoded
-
-## Sending OTLP Data
-
-### Configuring the Endpoint and Protocol
-
-To send OTLP data to SigNoz:
-
-1. Configure your OTLP exporter to use the appropriate endpoint from the [regional endpoint](#regional-endpoints) table.
-2. Use port 443 for all OTLP protocols (HTTP & gRPC).
-
-{/* Ask Vibhu - SigNoz Cloud*/}
-**Note:** SigNoz Cloud uses a single port (443) for both HTTP and gRPC, unlike the standard ports 4317 (gRPC) and 4318 (HTTP) mentioned in some documentation.
+This documentation will refer to the Signoz Endpoint as ```https://ingest.<region>.signoz.cloud:443```. Refer to the above table to get your exact endpoint.
 
 #### For SDKs:
 Configuration typically involves setting the `OTEL_EXPORTER_OTLP_ENDPOINT` environment variable. Refer to the SigNoz [instrumentation docs](https://signoz.io/docs/instrumentation/) for language-specific details.
 
 #### For Collector:
-When using the OpenTelemetry Collector, configure the `otlp` exporter in your collector configuration file to point to the appropriate SigNoz endpoint.
+When using the OpenTelemetry Collector, configure the[opentelemetry exporter](https://opentelemetry.io/docs/specs/otel/protocol/exporter/) in your collector configuration file to point to the appropriate SigNoz endpoint.
 
-### Optimizing Batching and Timeout Settings
+If you are using the signal agnostic environment variable (`OTEL_EXPORTER_OTLP_ENDPOINT`), you can simply set `OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443` and the exporter should append the appropriate path for the signal type (such as v1/traces or v1/metrics). Similarly, if you are using OTLP/GRPC, setting the variable `OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443` (replace with your endpoint from the above table).
 
-To ensure successful data transmission:
+Most documentation of Opentelemtry will mention the OTLP/HTTP port as 4318 and OTLP/GRPC port as 4317. The important thing to remember is that Signoz uses a single port (443) for both HTTP and gRPC and for any other custom ingestion endpoint.
 
-1. Configure appropriate batch sizes to stay within the 16MB payload limit.
-2. Adjust export intervals to prevent timeouts and rejected payloads.
+## Authentication Methods
+
+Note: Replace <key> with your ingestion key in the examples listed in this section.
+
+All signoz endpoints are protected by header based key authentication. An ingestion key must be configured in all exporters (and for any custom ingestion endpoints) in order to successfully ingest data.
+
+1. **Recommended:** Using the `signoz-access-token` header with the value set to your ingestion key. 
+```
+signoz-access-token: <key>
+```
+
+2. Using basic authentication with the value set to your ingestion key. This will most likely be used to interact with custom ingestion endpoints created by Signoz.
+```
+Authorization: Basic PGtleT4K
+```
+
+3. Deprecated: Using the `signoz-access-token` header with the value set `Bearer <key>` to your ingestion key. 
+```
+signoz-access-token: Bearer <key>
+```
+
+4. Deprecated: Using the `signoz-access-token` header for basic authentication. 
+```
+signoz-access-token: <key>
+```
+
+5. Deprecated: Using the `authorization` header with the value set `Bearer <key>` to your ingestion key. 
+```
+Authorization: Bearer <key>
+```
+
+## Batching, Timeout, Retries and other Relevant Settings
+
+* In order to send data to Signoz, your payloads must be smaller than the 16MB maximum payload size. Larger payloads will be rejected with an error status code. Larger payloads may also fail to export with a timeout before an error status code is returned.
+* CORS is already enabled on all signoz endpoints if you want to send telemetry from your frontend applications.
+* Pay close attention to exporter timeout settings. Export requests generally take longer when:
+    - Payloads are larger
+    - Networks are slower (higher latency, lower bandwidth)
+If your application produces large payloads due to high telemetry volume or long export intervals, you may need to increase the default timeout settings to avoid export errors.
+* Enable compression while sending OTLP data. Signoz supports gzip compression on all OTLP endpoints. Note this compression does not apply to any custom endpoints implemented by Signoz.
+* Implement retry mechanisms to handle transient errors and reduce data loss.
 
 #### For SDKs:
+
+##### Batching
 Use these environment variables for configuration for configuring batching:
 
 - Spans: `OTEL_BSP_*`
@@ -58,59 +86,56 @@ Use these environment variables for configuration for configuring batching:
 
 {/* Increase the default timeout settings for large payloads or slow networks using the `OTEL_EXPORTER_OTLP_TIMEOUT` environment variable. */}
 
-#### For Collector:
-Utilize the batch processor to control batch size. Configure it in your collector's configuration file under the `processors` section.
-
-#### Exporter Timeout Settings
-
-Pay close attention to exporter timeout settings. Export requests generally take longer when:
-- Payloads are larger
-- Networks are slower (higher latency, lower bandwidth)
-
-If your application produces large payloads due to high telemetry volume or long export intervals, you may need to increase the default timeout settings to avoid export errors.
-
-#### For SDKs:
+##### Timeout
 Increase the default timeout settings using the `OTEL_EXPORTER_OTLP_TIMEOUT` environment variable. The value should be set in milliseconds.
 
 Example:
 `OTEL_EXPORTER_OTLP_TIMEOUT=30000`. This sets the timeout to 30 seconds.
 
-#### For Collector:
-Adjust the timeout settings in the exporter configuration section of your collector configuration file. The exact parameter may vary depending on the exporter used.
-
-Example for OTLP exporter:
-```yaml
-exporters:
-  otlp:
-    endpoint: "https://ingest.us.signoz.cloud:443"
-    timeout: 30s
-```
-
-### Implementing Compression
-
-Enable compression to reduce payload size and minimize the risk of hitting size limits:
-
-- SigNoz supports gzip and zstd compression
-- zstd is recommended for better performance when supported by your exporter
-
-#### For SDKs:
+##### Compression
 Configure compression using the `OTEL_EXPORTER_OTLP_COMPRESSION=gzip` environment variable (or `zstd` if supported).
 
-{/* Ask Vibhu if this is correct*/}
-#### For Collector:
-gzip is the default compression method. To use zstd, configure it in the `otlpexporter` section of your collector configuration file.
-
-### Configuring Retries
-
-Implement retry mechanisms to handle transient errors and reduce data loss:
-
-#### For SDKs:
+##### Retries
 - Configuration methods vary by language and SDK
 - Some SDKs support environment variables (e.g., Java: `OTEL_EXPERIMENTAL_EXPORTER_OTLP_RETRY_ENABLED=true`)
 - Programmatic configuration may be necessary in some cases
 - Refer to your specific SDK's documentation for detailed retry configuration options
 
 #### For Collector:
-The `otlphttpexporter` and `otlpexporter` retry by default. You can customize retry behavior in the exporter configuration section of your collector configuration file. 
+If you are using the otlp/grpc protocol, use the following [exporter configuration](https://github.com/open-telemetry/opentelemetry-collector/blob/main/exporter/otlpexporter/README.md):
+```yaml
+exporters:
+  otlp:
+    endpoint: "https://ingest.<region>.signoz.cloud:443"
+    timeout: 5s
+    compression: gzip
+    retry_on_failure:
+      enabled: true
+      initial_interval: 5s
+      max_interval: 30s
+      max_elapsed_time: 300s
+    sending_queue:
+      enabled: true
+      num_consumers: 10
+      queue_size: 1000
+```
 
-{/* Refer to the exporterhelper documentation for more information. */}
+If you are using the otlp/http protocol, use the following [exporter configuration](https://github.com/open-telemetry/opentelemetry-collector/blob/main/exporter/otlphttpexporter/README.md) 
+```yaml
+exporters:
+  otlphttp:
+    endpoint: "https://ingest.<region>.signoz.cloud:443"
+    timeout: 5s
+    compression: gzip
+    encoding: proto
+    retry_on_failure:
+      enabled: true
+      initial_interval: 5s
+      max_interval: 30s
+      max_elapsed_time: 300s
+    sending_queue:
+      enabled: true
+      num_consumers: 10
+      queue_size: 1000
+      timeout: 5s
+```
