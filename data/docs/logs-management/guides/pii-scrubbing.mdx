@@ -8,34 +8,32 @@ import GetHelp from '@/components/shared/get-help.md'
 
 ## Overview
 
-PII scrubbing, also known as data sanitization or anonymization, is the process of removing or obfuscating personally identifiable information from data sets.
-This is essential to protect individuals' privacy and comply with various data protection regulations like GDPR (General Data Protection Regulation) and CCPA (California Consumer Privacy Act). The goal is to ensure compliance with data protection regulations like GDPR, CCPA, and HIPAA while still allowing the data to be used for analysis and sharing. 
+PII scrubbing removes sensitive personal information from data to protect privacy and comply with regulations like GDPR and CCPA. SigNoz simplifies this process for your applications using OpenTelemetry. This guide explains how to implement PII scrubbing in your data pipeline before sending information to SigNoz.
 
-SigNoz makes it easy to implement PII scrubbing for your applications:
+## Prerequisite
+- [SigNoz Cloud](https://signoz.io/teams/) account
+- Logs in log file
 
-1. **Identify PII fields:** SigNoz shows you the data being collected from your app through metrics, traces and logs. Review this to determine which fields may contain PII that needs scrubbing.
-2. **Mask PII data:** SigNoz supports OpenTelemetry which provides APIs for applying data masking techniques to PII before sending to the backend. Options include hashing, tokenization, and pseudonymization to replace sensitive values with non-identifying placeholders.
-3. **Scrub data before sending to SigNoz:** Instrument your app with OpenTelemetry to perform PII scrubbing in the code before any data is sent to the SigNoz agent. This ensures sensitive info never leaves your environment.
-4. **Verify scrubbing:** SigNoz's query builder lets you run filters on the collected data to verify PII has been properly removed or masked. Spot check fields to validate the scrubbing process is working.
-5. **Ensure compliance:** Implementing PII scrubbing with SigNoz helps ensure compliance with data protection regulations while still gaining insights into app performance and health.
+{/* In this guide, we are going to perform the PII Scrubbing with the Python application whose source code is avaiable on [this GitHub Repository](https://github.com/SigNoz/sample-flask-app). The Python application has already been instrumented in a way to send the Metrics, Logs and Traces to SigNoz. If you'd like to know more about how to instrument a Python application to send data to SigNoz, Please refer to [this instrumentation guide](https://signoz.io/docs/instrumentation/python/). */}
 
-In this guide, we are going to perform the PII Scrubbing with the Python application whose source code is avaiable on [this GitHub Repository](https://github.com/SigNoz/sample-flask-app). The Python application has already been instrumented in a way to send the Metrics, Logs and Traces to SigNoz. If you'd like to know more about how to instrument a Python application to send data to SigNoz, Please refer to [this instrumentation guide](https://signoz.io/docs/instrumentation/python/).
+{/* **Note:** _This guide assumes that you're using the SigNoz Cloud. However, if you're using the SigNoz Self-Host way, most of the steps will remain same except restarting the otel-collector._ */}
 
-**Note:** _This guide assumes that you're using the SigNoz Cloud. However, if you're using the SigNoz Self-Host way, most of the steps will remain same except restarting the otel-collector._
-
-## I. Instrument your application
+{/* ## I. Instrument your application
 
 The first step in order to scrub the relevant data is to instrument your application so that it can send the instrumentation data. While you don't have to report any traces or metrics to be able to send logs, you will need to add OpenTelemetry dependencies to your project, and run the OpenTelemetry agent. Refer to this [Instrumentation Guide](http://localhost:3000/docs/instrumentation/).
 
-### Requirement for the Otel Collector
+// ### Requirement for the Otel Collector
 
 This guide won't show in detail how to [install the OpenTelemetry collector](https://opentelemetry.io/docs/collector/getting-started/), suffice to say that you'll need a collector available to send data. Though in a pinch you can send data to a console, it's possible to run a local collector as a docker image, or you can [install SigNoz](https://signoz.io/docs/install/) and get both an OpenTelemetry collector, data store, and observability dashboard. This guide will assume that your collector is available to receive at `localhost:4317`.
 
-For our Python application, we are specifically interested in scrubbing the relevant data from the logs, so we need to make sure to send the application logs to the SigNoz. 
+For our Python application, we are specifically interested in scrubbing the relevant data from the logs, so we need to make sure to send the application logs to the SigNoz.  */}
 
-## II. Send Logs from your application to SigNoz
+## Send application logs to SigNoz
 
-The majority of production applications using OpenTelemetry adopted the standard sometime after they were first architected. As such the most common use case is routing an existing log pipeline to the OpenTelemetry collector.
+You need to configure OpenTelemetry Collector to send your logs in log files to SigNoz, checkout [this documentation](https://signoz.io/docs/userguide/collect_logs_from_file/)
+for detailed instructions on how to do this.
+
+{/* The majority of production applications using OpenTelemetry adopted the standard sometime after they were first architected. As such the most common use case is routing an existing log pipeline to the OpenTelemetry collector.
 
 In our Python application, we are sending the logs to the local file and then using the `filelog/app` receiver in our [otel configuration file](https://github.com/SigNoz/signoz/blob/develop/deploy/docker/clickhouse-setup/otel-collector-config.yaml) `otel-config.yaml` to send those logs directly to SigNoz.
 
@@ -61,27 +59,35 @@ service:
 
 Once you're done with this, you can start your otel-collector to fetch the application logs. If you'd like to know more about how to use the otel-collector binary for sending data to SigNoz, refer to [this documentation](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/).
 
-Interact with your application to generate the logs and see those logs in the Logs section at SigNoz Cloud.
+Interact with your application to generate the logs and see those logs in the Logs section at SigNoz Cloud. */}
 
 <figure data-zoomable align='center'>
     <img src="/img/docs/python-application-logs.webp" alt="Logs of the python app.log file visible in SigNoz"/>
     <figcaption><i>Sample log file data shown in SigNoz Logs Explorer</i></figcaption>
 </figure>
 
-## III. Examine the Attributes
+{/* ## III. Examine the Attributes */}
 
-In order to scrub the relevant data, it is important to examine the existing log attributes. You can take a look at the existing log attributes below
+In order to scrub the relevant data, it is important to examine the existing log attributes. Below is a sample log with different attributes.
 
 <figure data-zoomable align='center'>
     <img src="/img/docs/python-log-attributes.webp" alt="Logs of the python app.log file visible in SigNoz"/>
     <figcaption><i>Sample log file attributes shown in SigNoz Logs Explorer</i></figcaption>
 </figure>
 
-As you can see that, there are multiple log attributes present such as `id`, `body`, `severity_number` and so on. Now it's time to scrub these log attributes according to specific needs.
+{/* As you can see that, there are multiple log attributes present such as `id`, `body`, `severity_number` and so on. Now it's time to scrub these log attributes according to specific needs. */}
 
 ## Process of Scrubbing the data
 
-To filter data using the OpenTelemetry Collector:
+OpenTelemetry Collector offers several processors to filter and modify sensitive data before it reaches SigNoz:
+
+1. `transform`: Change values within spans
+2. `attributes`: Modify individual attributes
+3. `redaction`: Mask or block attribute values
+
+
+
+{/* To filter data using the OpenTelemetry Collector:
 
 1. Add the required `processors` to the OpenTelemetry Collector’s configuration file. The processors allow you to delete, edit or redact, or hash specific attributes.
 2. Activate the processor functionality by modifying the appropriate `service | pipelines`.
@@ -91,10 +97,17 @@ To filter data using the OpenTelemetry Collector:
 
     - `attributes` - to access individual attributes within a span.
 
-    - `redaction` - to mask or block the attributes’ values for security.
+    - `redaction` - to mask or block the attributes’ values for security. */}
 
-The `attributes` [processor](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/attributesprocessor) is generally used instead of the other two processors (redaction and transform) to access individual attributes within a span.
+{/* The `attributes` [processor](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/attributesprocessor) is generally used instead of the other two processors (redaction and transform) to access individual attributes within a span. */}
 
+### Sample log 
+
+To demonstrate what each processor does, we will use the sample log shown below
+
+```bash
+
+```
 Within the `processors` section. we’ll add a `transform`
 
 ```yaml
@@ -104,7 +117,7 @@ Within the `processors` section. we’ll add a `transform`
       statements:
         - set(severity_text, "FAIL") where body == "request failed"
 ```
-If our request to the application gets failed due to certain reasons, we are going to set the `severity_text` attribute value to `FAIL`.
+{/* If our request to the application gets failed due to certain reasons, we are going to set the `severity_text` attribute value to `FAIL`.
 
 Adding this mapping, however, isn’t enough. To add the attribute, we are required to add this processor to our pipeline:
 
@@ -239,8 +252,8 @@ processors:
 
 In the above configuration file, we're using regex to block credit card numbers and ip addresses.
 
-Using the `transform`, `attributes`, and `redaction` processors in OpenTelemetry, you can effectively manage and scrub sensitive information from your telemetry data. By configuring these processors, you ensure that sensitive data such as credit card numbers, email addresses, and other personally identifiable information are either masked, removed, or transformed before they are sent to SigNoz. This not only helps in maintaining compliance with data protection regulations like GDPR, CCPA, and HIPAA but also enhances the security and privacy of your application's telemetry data.
+Using the `transform`, `attributes`, and `redaction` processors in OpenTelemetry, you can effectively manage and scrub sensitive information from your telemetry data. By configuring these processors, you ensure that sensitive data such as credit card numbers, email addresses, and other personally identifiable information are either masked, removed, or transformed before they are sent to SigNoz. This not only helps in maintaining compliance with data protection regulations like GDPR, CCPA, and HIPAA but also enhances the security and privacy of your application's telemetry data. */}
 
-## Get Help
+{/* ## Get Help
 
-<GetHelp />
+<GetHelp /> */}
