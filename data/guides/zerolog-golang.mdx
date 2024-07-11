@@ -1,0 +1,1143 @@
+---
+
+title: Zerolog Golang - Complete Guide to Logging 
+slug: zerolog-golang
+date: 2024-07-11
+tags: [logging]
+authors: [eromosele]
+description: The article guides on using Zerolog, a high-performance Go logging library. It covers installation, usage, log levels, context, prettifying logs, sampling, and integration with web apps.
+keywords: [log, logging, golang, zap, zerolog, sampling, pretty logging]
+
+---
+
+<head>
+<script type="application/ld+json">
+    {`{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Zerolog Golang - Complete Guide to Logging",
+  "alternativeHeadline": "Master Golang logging with Zerolog - Learn setup, configuration, and advanced features for efficient, structured logging",
+  "author": {
+    "@type": "Person",
+    "name": "Eromosele"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SigNoz",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://signoz.io/img/SigNozLogo-orange.svg"
+    }
+  },
+  "datePublished": "2024-07-11",
+  "dateModified": "2024-07-11",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://signoz.io/guides/zerolog-golang/"
+  },
+  "description": "The article guides on using Zerolog, a high-performance Go logging library. It covers installation, usage, log levels, context, prettifying logs, sampling, and integration with web apps.",
+  "keywords": "log, logging, golang, zap, zerolog, sampling, pretty logging",
+  "articleSection": "Technology",
+  "inLanguage": "en",
+  "isPartOf": {
+    "@type": "Blog",
+    "name": "SigNoz Blog",
+    "url": "https://signoz.io/blog/"
+  },
+  "about": [
+    {
+      "@type": "Thing",
+      "name": "Zerolog",
+      "description": "A high-performance, zero-allocation logging library for Go"
+    },
+    {
+      "@type": "Thing",
+      "name": "Golang",
+      "description": "A statically typed, compiled programming language developed by Google"
+    },
+    {
+      "@type": "Thing",
+      "name": "Structured Logging",
+      "description": "A logging approach that treats log entries as data structures rather than plain text"
+    }
+  ],
+  "mentions": [
+    {
+      "@type": "SoftwareApplication",
+      "name": "Zerolog",
+      "applicationCategory": "Logging Library"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "name": "SigNoz",
+      "applicationCategory": "Observability Platform"
+    }
+  ],
+  "mainEntity": {
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What is Zerolog?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Zerolog is a high-performance, structured logging library for Go. It is designed to provide efficient and fast logging by using a simple interface and outputting logs in JSON format. Zerolog's focus on performance makes it suitable for applications requiring minimal overhead in their logging operations."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is Structured Logging?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Structured logging refers to the practice of logging data in a consistent, structured format, usually in JSON. This format allows logs to be easily parsed and analyzed by various tools, facilitating better monitoring, debugging, and analysis. Structured logs include key-value pairs that provide more context and are machine-readable, making automated processing and querying more effective."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is the Difference Between Zerolog and Zap Logger?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Both Zerolog and Zap Logger are popular logging libraries in the Go ecosystem, but they have key differences. Zerolog is known for its zero-allocation logging, making it extremely fast and efficient. It has a simpler, more minimalistic API focused on ease of use and minimal overhead. Zap offers more configurability and flexibility with features like structured logging and logging levels, and provides more advanced features out-of-the-box."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Which Logger is Best in Golang?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The 'best' logger in Golang depends on the specific requirements of your project. For performance, Zerolog is typically preferred for its zero-allocation and high-performance characteristics, making it ideal for applications where logging overhead needs to be minimized. For flexibility and features, Zap Logger is a strong choice if you need a more feature-rich logging library with advanced capabilities and configurability."
+        }
+      }
+    ]
+  },
+  "tutorial": {
+    "@type": "HowTo",
+    "name": "How to Use Zerolog in Golang",
+    "step": [
+      {
+        "@type": "HowToStep",
+        "name": "Install Zerolog",
+        "text": "Install Zerolog using go get -u github.com/rs/zerolog"
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Import Zerolog",
+        "text": "Import Zerolog in your Go code: import 'github.com/rs/zerolog/log'"
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Initialize Logger",
+        "text": "Initialize a Zerolog logger with desired configuration"
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Set Log Levels",
+        "text": "Configure log levels to control the verbosity of logs"
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Add Context to Logs",
+        "text": "Use methods like With() to add context to your logs"
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Implement Log Sampling",
+        "text": "Use Zerolog's sampling features to control log volume"
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Integrate with SigNoz",
+        "text": "Set up SigNoz and configure Zerolog to send logs to SigNoz for centralized monitoring"
+      }
+    ]
+  }
+}`}
+</script>
+</head>
+
+Logging is the practice of recording or storing information and messages that provide insights into the behavior and execution of a program.
+
+Zerolog is a high-performance, zero-allocation logging library tailored for the Go programming language. Engineered for speed and efficiency, it is particularly suited for latency-sensitive applications where minimizing garbage collection is crucial. 
+
+Zerolog empowers developers with structured logging capabilities, enabling detailed and organized logs with minimal performance overhead. This guide delves into using the Zerolog package for logging, explores its key features, and provides insights into integrating Zerolog seamlessly with web applications.
+
+## Prerequisites
+
+- Go Installation: Ensure that Go is installed on your system. You can download and install it from the official <a href="https://golang.org/" rel="noopener noreferrer nofollow" target="_blank">Go website</a>.
+- Basic familiarity with [Logging in GoLang](https://signoz.io/guides/golang-log/)
+
+## Getting Started With ZeroLog
+
+### Installation
+
+To use `zerolog` in your Go application, you need to install it using `go get` on your Terminal /PowerShell:
+
+```bash
+go get -u github.com/rs/zerolog
+```
+
+After installation,  import `zerolog` into your Go code (if there is an error run `go mod tidy`):
+
+```go
+import (
+    "github.com/rs/zerolog"
+    "github.com/rs/zerolog/log"
+)
+```
+
+Ensure that you import both `zerolog` for the core library and `log` for convenient access to the logger.
+
+### Basic Usage
+
+Let's explore an example of using the `zerolog` package to log events in your application:
+
+```go
+package main
+
+import (
+    "os"
+
+    "github.com/rs/zerolog"
+    "github.com/rs/zerolog/log"
+)
+
+func main() {
+    // Initialize Zerolog logger with output to stdout
+    zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
+    log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stdout})
+
+    // Example usage of the logger
+    log.Info().Msg("Hello, David!")
+}
+```
+
+Output:
+
+```bash
+10:56PM INF Hello, David!
+```
+
+In this example:
+
+- `zerolog.TimeFieldFormat = zerolog.TimeFormatUnix` is configuring how the `zerolog` logging library formats the timestamp in log entries.
+- `log.Output(zerolog.ConsoleWriter{Out: os.Stdout})` sets up the Zerolog logger to output logs to `os.Stdout`, which is the standard output.
+- `log.Info().Msg("Hello, David!")` logs an informational message "Hello, David!" using the `Info` level log.
+
+## Features Of ZeroLog
+
+### Log Levels
+
+Log levels are an essential concept in logging frameworks like Zerolog, defining the severity or importance of log messages. By categorizing log messages into different levels, developers can control which types of messages get recorded and how they are handled.
+
+Understanding Log Levels
+
+Log levels in Zerolog and other logging frameworks typically consist of standard levels, each representing varying severity levels of events alongside their corresponding integer priority values:
+
+- TRACE(-1): The most detailed level. Used for tracing the flow through the application, providing fine-grained details. Typically not enabled in production due to its verbosity.
+    
+    Use Case: Trace code and explain behavior, frequently with step-by-step execution.
+    
+- DEBUG(0): Used for debugging information that is useful during development but may not be needed in production. This level often includes detailed information about the application's state.
+    
+    Use Case: Diagnosing a complex issue by logging detailed information about the application's state.
+    
+- INFO(1): Provides information messages that highlight the progress of the application at a higher level. This level is often used to record major lifecycle events or significant state changes.
+    
+    Use Case: Log significant events like service starts, user logins, and transactions.
+    
+- WARN(2): Indicates potential issues or anomalies that are not necessarily errors but might require attention. It alerts developers to situations that may lead to problems if not addressed.
+    
+    Use Case: Log anomalies that might need attention but are not errors, like slow responses or deprecated API use.
+    
+- ERROR(3): Logs errors that occurred during the execution of the application. These messages indicate problems that need immediate attention but do not necessarily stop the application from functioning.
+    
+    Use Case: Log errors that need immediate attention but don't stop the application, such as failed operations.
+    
+- FATAL(4): The highest severity level, indicating critical errors that cause the application to terminate abruptly. These errors typically require immediate intervention.
+    
+    Use Case: Log critical errors that cause the application to terminate.
+    
+- PANIC(5): Logs indicate a critical and unexpected situation where the program cannot safely continue, leading to a panic. These logs capture the application's state just before termination, crucial for debugging the issue.
+    
+    Use Case: Log the state just before a panic for post-mortem analysis.
+    
+
+You can set the minimum log level for a custom Logger using the `Level()` method. You can either use the integer values (e.g., -1 for TRACE, 0 for DEBUG) or the predefined constants from the zerolog package (e.g., `zerolog.TraceLevel`, `zerolog.DebugLevel`).
+
+```go
+package main
+
+import (
+    "os"
+
+    "github.com/rs/zerolog"
+)
+
+func main() {
+    // Initialize a new logger with output to stdout and set the minimum log level to TraceLevel
+    logger := zerolog.New(os.Stdout).Level(zerolog.TraceLevel)
+
+    // Example usage of the logger
+		logger.Trace().Msg("This is a trace message")
+		logger.Debug().Msg("This is a debug message")
+    logger.Info().Msg("This is an info message")
+    logger.Warn().Msg("This is a warning message")
+    logger.Error().Msg("This is an error message")
+		logger.Fatal().Msg("This is a fatal message")
+		logger.Panic().Msg("This is a panic message")
+}
+```
+
+Output:
+
+```bash
+{"level":"trace","message":"This is a trace message"}
+{"level":"debug","message":"This is a debug message"}
+{"level":"info","message":"This is an info message"}
+{"level":"warn","message":"This is a warning message"}
+{"level":"error","message":"This is an error message"}
+{"level":"fatal","message":"This is a fatal message"}
+exit status 1
+```
+
+`.Level(zerolog.TraceLevel)` sets the minimum log level to `WarnLevel`, meaning only log messages with `Warn` level and higher ( Error, Fatal, Panic) will be logged.
+
+### Logger
+
+A logger is a tool used to record and manage log messages throughout the execution of an application. 
+
+The `github.com/rs/zerolog/log` package offers a preconfigured and universally accessible logger that can be imported and utilized. By default, this global logger logs to standard error and is initially set to log at the TRACE level. However, you can adjust the minimum logging level using the `SetGlobalLevel()` function from the main `zerolog` package.
+
+```go
+package main
+
+import (
+	"github.com/rs/zerolog/log"
+	"github.com/rs/zerolog"
+)
+
+func main() {
+	// Setting the global log level to DEBUG
+	zerolog.SetGlobalLevel(zerolog.DebugLevel)
+
+	// Example usage of the global logger
+	log.Trace().Msg("This is a TRACE level message")
+	log.Debug().Msg("This is a DEBUG level message")
+	log.Info().Msg("This is an INFO level message")
+	log.Warn().Msg("This is a WARNING level message")
+}
+
+```
+
+Output:
+
+```json
+{"level":"debug","time":"2024-07-04T23:25:25+01:00","message":"This is a DEBUG level message"}
+{"level":"info","time":"2024-07-04T23:25:25+01:00","message":"This is an INFO level message"}
+{"level":"warn","time":"2024-07-04T23:25:25+01:00","message":"This is a WARNING level message"}
+```
+
+`zerolog.SetGlobalLevel(zerolog.DebugLevel)` sets the global logging level to DEBUG, meaning all log messages with level DEBUG and higher (INFO, WARN) will be logged. In the example, the TRACE level message was not logged.
+
+Logger Initialization in Zerolog involves creating a custom logger tailored to specific needs. This process typically revolves around utilizing the `zerolog.New()` method to configure various aspects of logging behavior.
+
+```go
+package main
+
+import (
+    "os"
+
+    "github.com/rs/zerolog"
+)
+
+func main() {
+    // Initialize Zerolog logger
+    logger := zerolog.New(os.Stdout).With().Timestamp().Logger()
+
+    // Example usage of the logger
+    logger.Info().Msg("Custom logger initialized with timestamp")
+
+    // Additional configuration options can be chained
+    logger = logger.Output(zerolog.ConsoleWriter{Out: os.Stderr})
+
+    // Example usage after additional configuration
+    logger.Warn().Str("module", "main").Msg("Warning: Module main")
+
+}
+```
+
+Output:
+
+```
+{"level":"info","time":"2024-07-04T23:38:38+01:00","message":"Custom logger initialized with timestamp"}
+11:38PM WRN Warning: Module main module=main
+```
+
+### Adding Context to Logs
+
+Let's talk about why adding context to your logs is so important. When you're trying to figure out what's going on in your app, having more information can be a real lifesaver. It's like the difference between someone telling you "there's a problem" versus "there's a problem with user 12345 trying to log in from the mobile app."
+
+When you add context to your logs, you're essentially attaching extra bits of information that can be super helpful later on.
+
+We're talking about things like:
+
+- User IDs
+- Operation names
+- Application versions
+- Environment settings
+
+By including these extra details, your logs become much more informative and easier to analyze. It's like leaving a trail of very specific breadcrumbs that help you and your team quickly pinpoint and solve issues.
+
+- Event Context: Event context involves attaching key-value pairs to specific log messages, giving more detail about the circumstances under which a log entry was generated.
+
+In the example below, we add context to a log event to include the user ID and the operation being performed:
+
+```go
+package main
+
+import (
+    "os"
+    "github.com/rs/zerolog"
+    "github.com/rs/zerolog/log"
+)
+
+func main() {
+    // Initialize Zerolog logger with output to stdout
+    zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
+    log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
+
+    // Log with event context
+    log.Info().
+        Str("user_id", "12345").
+        Str("operation", "user_login").
+        Msg("User login successful")
+}
+
+```
+
+Output:
+
+```
+4:24PM INF User login successful operation=user_login user_id=12345
+```
+
+- Global Context: Global Context in Zerolog allows you to attach key-value pairs to all log messages produced by a logger using methods like`.With` or`.UpdateContext`. This feature is valuable for including consistent information across all logs, such as application version, environment details, or instance ID, providing essential context for debugging and monitoring purposes.
+
+Set up global context using `.With` :
+
+```go
+package main
+
+import (
+    "os"
+    "github.com/rs/zerolog"
+    "github.com/rs/zerolog/log"
+)
+
+func main() {
+    // Initialize Zerolog logger with output to stdout
+    zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
+    logger := zerolog.New(os.Stdout).With().
+        Str("app_version", "1.0.0").
+        Str("environment", "production").
+        Logger()
+    
+    // Replace the global logger with the new logger that has global context
+    log.Logger = logger
+
+    // Log messages with global context
+    log.Info().Msg("Application started")
+    log.Warn().Msg("Deprecated API endpoint used")
+}
+```
+
+Output:
+
+```json
+{"level":"info","app_version":"1.0.0","environment":"production","message":"Application started"}
+{"level":"warn","app_version":"1.0.0","environment":"production","message":"Deprecated API endpoint used"}
+```
+
+Set up global context using`.UpdateContext`:
+
+```go
+package main
+
+import (
+	"os"
+
+	"github.com/rs/zerolog"
+)
+
+func main() {
+    logger := zerolog.New(os.Stdout).With().Timestamp().Logger()
+
+    logger.UpdateContext(func(c zerolog.Context) zerolog.Context {
+        return c.Str("Environment", "Production")
+    })
+
+    logger.Warn().Msg("Excessive disk usage")
+}
+
+```
+
+Output:
+
+```json
+{"level":"warn","Environment":"Production","time":"2024-07-05T16:41:49+01:00","message":"Excessive disk usage"}
+```
+
+`.With` is used during logger initialization to establish static context fields, while`.UpdateContext` is employed to adjust or add context fields dynamically throughout the application's lifecycle.
+
+### Prettifying Logs For Development
+
+When developing applications, especially during the testing and debugging phases, logging becomes crucial for understanding the flow of execution and diagnosing issues. Zerolog provides several mechanisms to enhance the readability and usefulness of logs, particularly through its `ConsoleWriter` functionality.
+
+By default, Zerolog logs to `os.Stderr`, which is typically the console or terminal where the application is running. Here’s how you can configure Zerolog to use `ConsoleWriter`:
+
+```go
+package main
+
+import (
+    "os"
+    "runtime/debug"
+    "time"
+
+    "github.com/rs/zerolog"
+)
+
+func main() {
+    buildInfo, _ := debug.ReadBuildInfo()
+
+    logger := zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.RFC3339}).
+        Level(zerolog.TraceLevel).
+        With().
+        Timestamp().
+        Caller().
+        Int("pid", os.Getpid()).
+        Str("go_version", buildInfo.GoVersion).
+        Logger()
+
+    logger.Trace().Msg("trace message")
+    logger.Debug().Msg("debug message")
+    logger.Info().Msg("info message")
+    logger.Warn().Msg("warn message")
+    logger.Error().Msg("error message")
+}
+```
+
+Output
+
+<Figure src="/img/guides/2024/07/zerolog-golang-Screenshot_2024-07-05_at_17.10.30.webp" alt="Output of the application" caption="Output of the application" />
+
+
+Using `ConsoleWriter`, you can also customize the appearance of the output:
+
+```go
+package main
+
+import (
+	"fmt"
+	"os"
+	"runtime/debug"
+	"time"
+
+	"github.com/rs/zerolog"
+)
+
+func main() {
+	buildInfo, _ := debug.ReadBuildInfo()
+
+	// Customize ConsoleWriter
+	consoleWriter := zerolog.ConsoleWriter{
+		Out:        os.Stderr,
+		TimeFormat: time.RFC3339, // Custom time format
+		FormatLevel: func(i interface{}) string {
+			return fmt.Sprintf("[%-6s]", i) // Custom level format in square brackets
+		},
+		FormatMessage: func(i interface{}) string {
+			return fmt.Sprintf("| %-20s |", i) // Custom message format surrounded by pipes
+		},
+		FormatCaller: func(i interface{}) string {
+			return fmt.Sprintf("[%s]", i) // Custom caller format in brackets
+		},
+	}
+
+	// Initialize logger with customized ConsoleWriter
+	logger := zerolog.New(consoleWriter).
+		Level(zerolog.TraceLevel).
+		With().
+		Timestamp().
+		Caller().
+		Int("pid", os.Getpid()).
+		Str("go_version", buildInfo.GoVersion).
+		Logger()
+
+	logger.Trace().Msg("trace message")
+	logger.Debug().Msg("debug message")
+	logger.Info().Msg("info message")
+	logger.Warn().Msg("warn message")
+	logger.Error().Msg("error message")
+}
+
+```
+
+Output:
+
+```
+2024-07-05T17:53:43+01:00 [trace ] [/Users/macbook/Desktop/API Project in Go/Signoz-Article/main.go:40] | trace message        | go_version=go1.22.1 pid=16359
+2024-
+07-05T17:53:43+01:00 [debug ] [/Users/macbook/Desktop/API Project in Go/Signoz-Article/main.go:41] | debug message        | go_version=go1.22.1 pid=16359
+2024-07-05T17:53:43+01:00 [info  ] [/Users/macbook/Desktop/API Project in Go/Signoz-Article/main.go:42] | info message         | go_version=go1.22.1 pid=16359
+2024-07-05T17:53:43+01:00 [warn  ] [/Users/macbook/Desktop/API Project in Go/Signoz-Article/main.go:43] | warn message         | go_version=go1.22.1 pid=16359
+2024-07-05T17:53:43+01:00 [error ] [/Users/macbook/Desktop/API Project in Go/Signoz-Article/main.go:44] | error message        | go_version=go1.22.1 pid=16359
+```
+
+NOTE: It's important to note that `ConsoleWriter` is primarily intended for development environments and is not recommended for production use.
+
+### Log Sampling
+
+Logging in applications can generate a significant volume of data, especially in high-traffic environments. Log sampling involves selecting a subset of log messages to record based on predefined criteria such as time intervals, random selection, or specific conditions. 
+
+- Basic Sampler: Basic Sampling allows you to log only a fixed percentage of events. This is useful when you want to reduce the amount of log data but still retain a representative sample. With basic sampling, you specify the frequency with which log messages should be recorded. For example, if you set `N` to 2, only one out of every 2 log messages will be recorded.
+
+```go
+package main
+
+import (
+	"os"
+	"github.com/rs/zerolog"
+)
+
+func main() {
+    log := zerolog.New(os.Stdout).
+        With().
+        Timestamp().
+        Logger().
+        Sample(&zerolog.BasicSampler{N: 2})
+
+    for i := 1; i <= 6; i++ {
+        log.Info().Msgf("This is message: %d", i)
+    }
+}
+```
+
+Output:
+
+```json
+{"level":"info","time":"2024-07-05T22:16:59+01:00","message":"This is message: 1"}
+{"level":"info","time":"2024-07-05T22:16:59+01:00","message":"This is message: 3"}
+{"level":"info","time":"2024-07-05T22:16:59+01:00","message":"This is message: 5"}
+```
+
+- Burst Sampler: This allows you to log bursts of messages and then skip a period, which can be useful for scenarios where you expect bursts of log messages and want to avoid logging them all.
+
+```go
+package main
+
+import (
+    "os"
+    "time"
+
+    "github.com/rs/zerolog"
+    "github.com/rs/zerolog/log"
+)
+
+func main() {
+    // Initialize a logger with burst sampling
+    log.Logger = zerolog.New(os.Stdout).
+        With().
+        Timestamp().
+        Logger().
+        Sample(&zerolog.BurstSampler{
+            Burst:  5,             // Number of messages to log in a burst
+            Period: 10 * time.Second, // Period to wait after a burst
+        })
+
+    // Generate log messages
+    for i := 1; i <= 20; i++ {
+        log.Info().Msgf("message number: %d", i)
+        time.Sleep(1 * time.Second)
+    }
+}
+```
+
+Output:
+
+```json
+{"level":"info","time":"2024-07-05T22:27:33+01:00","message":"message number: 1"}
+{"level":"info","time":"2024-07-05T22:27:34+01:00","message":"message number: 2"}
+{"level":"info","time":"2024-07-05T22:27:35+01:00","message":"message number: 3"}
+{"level":"info","time":"2024-07-05T22:27:36+01:00","message":"message number: 4"}
+{"level":"info","time":"2024-07-05T22:27:37+01:00","message":"message number: 5"}
+{"level":"info","time":"2024-07-05T22:27:43+01:00","message":"message number: 11"}
+{"level":"info","time":"2024-07-05T22:27:44+01:00","message":"message number: 12"}
+{"level":"info","time":"2024-07-05T22:27:45+01:00","message":"message number: 13"}
+{"level":"info","time":"2024-07-05T22:27:46+01:00","message":"message number: 14"}
+{"level":"info","time":"2024-07-05T22:27:47+01:00","message":"message number: 15"}
+```
+
+In this example:
+
+The logger is configured with a `BurstSampler` that logs 5 messages in a burst and then waits 10 seconds before logging the next burst.
+
+Running this code will result in 5 messages being logged immediately, then a 10-second pause, and then another 5 messages being logged.
+
+- Level Sampler:  The Level Sampler allows you to specify different sampling rates for different log levels. This is useful when you want to have detailed logging at lower levels (like DEBUG) but less frequent logging at higher levels (like INFO or WARN).
+
+```go
+package main
+
+import (
+    "os"
+
+    "github.com/rs/zerolog"
+)
+
+func main() {
+    // Initialize a logger with level sampling
+    log := zerolog.New(os.Stdout).
+        With().
+        Timestamp().
+        Logger().
+        Sample(zerolog.LevelSampler{
+            TraceSampler: &zerolog.BasicSampler{N: 10},  // Log 1 out of every 10 TRACE messages
+            DebugSampler: &zerolog.BasicSampler{N: 5},   // Log 1 out of every 5 DEBUG messages
+            InfoSampler:  &zerolog.BasicSampler{N: 2},   // Log 1 out of every 2 INFO messages
+        })
+
+    // Generate log messages
+    for i := 1; i <= 10; i++ {
+        log.Trace().Msgf("trace message: %d", i)
+        log.Debug().Msgf("debug message: %d", i)
+        log.Info().Msgf("info message: %d", i)
+    }
+}
+```
+
+Output:
+
+```json
+{"level":"trace","time":"2024-07-05T22:39:59+01:00","message":"trace message: 1"}
+{"level":"debug","time":"2024-07-05T22:39:59+01:00","message":"debug message: 1"}
+{"level":"info","time":"2024-07-05T22:39:59+01:00","message":"info message: 1"}
+{"level":"info","time":"2024-07-05T22:39:59+01:00","message":"info message: 3"}
+{"level":"info","time":"2024-07-05T22:39:59+01:00","message":"info message: 5"}
+{"level":"debug","time":"2024-07-05T22:39:59+01:00","message":"debug message: 6"}
+{"level":"info","time":"2024-07-05T22:39:59+01:00","message":"info message: 7"}
+{"level":"info","time":"2024-07-05T22:39:59+01:00","message":"info message: 9"}
+```
+
+- Custom Sampler: If you need a specific sampling strategy, you can implement your own custom sampler by satisfying the `zerolog.Sampler` interface.
+
+```go
+package main
+
+import (
+    "os"
+
+    "github.com/rs/zerolog"
+    "github.com/rs/zerolog/log"
+)
+
+type CustomSampler struct{}
+
+func (s *CustomSampler) Sample(lvl zerolog.Level) bool {
+    // Custom sampling logic: log only warnings and above
+    return lvl >= zerolog.WarnLevel
+}
+
+func main() {
+    // Initialize a logger with custom sampling
+    log.Logger = zerolog.New(os.Stdout).
+        With().
+        Timestamp().
+        Logger().
+        Sample(&CustomSampler{})
+
+    // Generate log messages
+    for i := 1; i <= 3; i++ {
+        log.Debug().Msgf("debug message: %d", i)
+        log.Info().Msgf("info message: %d", i)
+        log.Warn().Msgf("warn message: %d", i)
+        log.Error().Msgf("error message: %d", i)
+    }
+}
+```
+
+Running this code will result in only WARN and ERROR messages being logged, skipping DEBUG and INFO messages.
+
+Output:
+
+```json
+{"level":"warn","time":"2024-07-05T22:31:41+01:00","message":"warn message: 1"}
+{"level":"error","time":"2024-07-05T22:31:41+01:00","message":"error message: 1"}
+{"level":"warn","time":"2024-07-05T22:31:41+01:00","message":"warn message: 2"}
+{"level":"error","time":"2024-07-05T22:31:41+01:00","message":"error message: 2"}
+{"level":"warn","time":"2024-07-05T22:31:41+01:00","message":"warn message: 3"}
+{"level":"error","time":"2024-07-05T22:31:41+01:00","message":"error message: 3"}
+```
+
+### Zerolog Hooks
+
+Zerolog provides a feature called "hooks" that allows you to intercept and modify log events before they are written to the output. This is useful for adding custom behavior or enriching log events with additional data
+
+How Hooks Work
+
+Hooks in Zerolog are implemented via the `Hook` interface, which has a single method:
+
+```go
+type Hook interface {
+    Run(e *Event, level Level, msg string)
+}
+```
+
+- Event (`e`): The log event that can be modified.
+- Level (`level`): The level of the log event (e.g., debug, info, warn).
+- Message (`msg`): The message associated with the log event.
+
+When a log event is created, Zerolog passes it through the hook's `Run` method, allowing you to modify the event before it gets logged.
+
+Use Cases for Hooks
+
+- Enriching Logs: Add additional context or metadata to log events, such as timestamps, user IDs, or request IDs.
+- Filtering Logs: Modify or filter out log events based on custom criteria.
+- External Integrations: Send log events to external systems or services for further processing or alerting.
+- Custom Formatting: Apply custom formatting or transformation to log events before they are written.
+
+Implementing a Hook
+
+To create a custom hook, you need to implement the `Hook` interface. Here’s an example of a simple hook that adds a timestamp to every log event:
+
+```go
+package main
+
+import (
+    "github.com/rs/zerolog"
+    "time"
+
+	"os"
+)
+
+// TimestampHook adds a timestamp to log events
+type TimestampHook struct{}
+
+func (h TimestampHook) Run(e *zerolog.Event, level zerolog.Level, msg string) {
+    e.Str("timestamp", time.Now().Format(time.RFC3339))
+}
+
+func main() {
+    // Create a logger
+    logger := zerolog.New(os.Stderr).With().Logger()
+
+    // Add the hook to the logger
+    logger = logger.Hook(TimestampHook{})
+
+    // Log some messages
+    logger.Info().Msg("This is an info message")
+    logger.Error().Msg("This is an error message")
+}
+```
+
+Output:
+
+```json
+{"level":"info","timestamp":"2024-07-06T03:38:58+01:00","message":"This is an info message"}
+{"level":"error","timestamp":"2024-07-06T03:38:58+01:00","message":"This is an error message"}
+```
+
+### Customizing Log Output
+
+Writing Logs to Files or External Systems:
+
+Zerolog allows you to easily configure log outputs to write logs to files or external systems. This flexibility is crucial for maintaining logs in persistent storage or forwarding logs to log management systems.
+
+Here's an example of writing logs to a file:
+
+```go
+package main
+
+import (
+    "os"
+
+    "github.com/rs/zerolog"
+)
+
+func main() {
+    // Open a file for logging
+    file, err := os.OpenFile("app.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+    if err != nil {
+        logger := zerolog.New(os.Stderr).With().Timestamp().Logger()
+        logger.Fatal().Err(err).Msg("Failed to open log file")
+        return
+    }
+    defer file.Close()
+
+    // Initialize a logger with file output
+    logger := zerolog.New(file).With().Timestamp().Logger()
+
+    // Example usage
+    logger.Info().Msg("This is an info message")
+    logger.Error().Msg("This is an error message")
+}
+```
+
+Output(`app.log` ):
+
+```json
+{"level":"info","time":"2024-07-05T22:56:43+01:00","message":"This is an info message"}
+{"level":"error","time":"2024-07-05T22:56:43+01:00","message":"This is an error message"}
+```
+
+Implementing Rotating Log Files
+
+To manage log file sizes and avoid excessive disk usage, you can implement log rotation. This process involves switching to a new log file after a certain size or time interval. The `lumberjack` package can be used for this purpose in Go.
+
+Here's an example using `lumberjack` to implement log rotation:
+
+```go
+package main
+
+import (
+ 
+
+    "github.com/natefinch/lumberjack"
+    "github.com/rs/zerolog"
+)
+
+func main() {
+    // Configure log rotation with lumberjack
+    lumberjackLogger := &lumberjack.Logger{
+        Filename:   "app.log",
+        MaxSize:    10, // Max size in megabytes before log is rotated
+        MaxBackups: 3,  // Max number of old log files to retain
+        MaxAge:     28, // Max number of days to retain old log files
+        Compress:   true, // Compress old log files
+    }
+
+    // Initialize a logger with rotating file output
+    logger := zerolog.New(lumberjackLogger).With().Timestamp().Logger()
+
+    // Example usage
+    logger.Info().Msg("This is an info message")
+    logger.Error().Msg("This is an error message")
+}
+```
+
+Output(`app.log` ):
+
+```json
+{"level":"info","time":"2024-07-05T23:13:16+01:00","message":"This is an old info message"}
+{"level":"error","time":"2024-07-05T23:13:16+01:00","message":"This is an old error message"}
+```
+
+## Tracking Logs Using SigNoz
+
+Implementing logging in your Golang application with zerolog is just the first step. To truly leverage the power of logs, sending them to an observability platform like SigNoz can provide numerous benefits, let’s see how to setup SigNoz:
+
+### Using the  Zerolog Package to Send Logs to Signoz:
+
+Step 1: Setting up Signoz in your Environment:
+
+<GetStartedSigNoz />
+
+Step 2: Building the Application:
+
+Create a new file named `main.go` and paste the following code block into it:
+
+```go
+package main
+
+import (
+	"fmt"
+	"net/http"
+	"os"
+	"github.com/rs/zerolog"
+)
+
+var (
+	logger zerolog.Logger
+)
+
+func init() {
+	logFile, err := os.OpenFile("application.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		panic(err)
+	}
+
+	// Configure zerolog logger
+	logger = zerolog.New(logFile).With().Caller().Timestamp().Logger()
+	zerolog.SetGlobalLevel(zerolog.DebugLevel) // Set global log level (optional)
+
+}
+
+func main() {
+	http.HandleFunc("/", handleIndex)
+	http.HandleFunc("/log", handleLog)
+	http.HandleFunc("/data", handleData)
+	http.HandleFunc("/error", handleError)
+
+	fmt.Println("Server starting on <http://localhost:8080>")
+	if err := http.ListenAndServe(":8080", nil); err != nil {
+		panic(err)
+	}
+}
+
+func handleIndex(w http.ResponseWriter, r *http.Request) {
+	logger.Info().Str("method", r.Method).Msg("Accessing index page")
+	fmt.Fprintln(w, "Welcome to the Go Application!")
+}
+
+func handleLog(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case "GET":
+		logger.Info().Str("Method", "GET").Str("Path", r.URL.Path).Msg("Handled GET request on /log")
+		fmt.Fprintln(w, "Received a GET request at /log.")
+	case "POST":
+		logger.Info().Str("Method", "POST").Str("Path", r.URL.Path).Msg("Handled POST request on /log")
+		fmt.Fprintln(w, "Received a POST request at /log.")
+	default:
+		http.Error(w, "Unsupported HTTP method", http.StatusMethodNotAllowed)
+	}
+}
+
+func handleData(w http.ResponseWriter, r *http.Request) {
+	logger.Info().Str("method", r.Method).Str("endpoint", "/data").Msg("Data endpoint hit")
+	fmt.Fprintln(w, "This is the data endpoint. Method used:", r.Method)
+}
+
+func handleError(w http.ResponseWriter, r *http.Request) {
+	logger.Error().Str("method", r.Method).Str("endpoint", "/error").Msg("Error endpoint accessed")
+	http.Error(w, "You have reached the error endpoint", http.StatusInternalServerError)
+}
+```
+
+This Go code sets up a basic HTTP server that logs events to a file (`application.log`) using the  `zerolog` package. It demonstrates how to configure logging output and format, define HTTP request handlers, start an HTTP server, and handle errors. Each HTTP handler logs relevant information about incoming requests and responds with appropriate messages or errors to clients. This setup is useful for monitoring and debugging web applications in a structured manner.
+
+After running your application you should see the following output on `localhost:8080/`:
+
+<Figure src="/img/guides/2024/07/zerolog-golang-Screenshot_2024-07-01_at_14.15.51.webp" alt="Output after running the Go Application" caption="Output after running the Go Application" />
+
+
+Step 3: Setting up the Logs Pipeline in Otel Collector
+
+The above code also generates a log file named `application.log` on the execution of the code. To export logs from the log file generated, an OpenTelemetry Collector needs to be integrated.
+
+You can set up the complete pipeline following this [guide](https://signoz.io/docs/userguide/collect_logs_from_file/). Here is the complete configuration for the above go code:
+
+```yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+  hostmetrics:
+    collection_interval: 60s
+    scrapers:
+      cpu: {}
+      disk: {}
+      load: {}
+      filesystem: {}
+      memory: {}
+      network: {}
+      paging: {}
+      process:
+        mute_process_name_error: true
+        mute_process_exe_error: true
+        mute_process_io_error: true
+      processes: {}
+  prometheus:
+    config:
+      global:
+        scrape_interval: 60s
+      scrape_configs:
+        - job_name: otel-collector-binary
+          static_configs:
+            - targets:
+              # - localhost:8888
+  filelog/app:
+    include: [ <path-to-log-file> ] #include the full path to your log file
+    start_at: end
+processors:
+  batch:
+    send_batch_size: 1000
+    timeout: 10s
+  # Ref: <https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/resourcedetectionprocessor/README.md>
+  resourcedetection:
+    detectors: [env, system] # Before system detector, include ec2 for AWS, gcp for GCP and azure for Azure.
+    # Using OTEL_RESOURCE_ATTRIBUTES envvar, env detector adds custom labels.
+    timeout: 2s
+    system:
+      hostname_sources: [os] # alternatively, use [dns,os] for setting FQDN as host.name and os as fallback
+extensions:
+  health_check: {}
+  zpages: {}
+exporters:
+  otlp:
+    endpoint: "<https://ingest>.{region}.signoz.cloud:443"
+    tls:
+      insecure: false
+    headers:
+      "signoz-access-token": "<SIGNOZ_INGESTION_KEY>"
+  logging:
+    verbosity: normal
+service:
+  telemetry:
+    metrics:
+      address: 0.0.0.0:8888
+  extensions: [health_check, zpages]
+  pipelines:
+    logs:
+      receivers: [otlp, filelog/app]
+      processors: [batch]
+      exporters: [otlp]
+```
+
+Step 4: Viewing Logs in SigNoz
+
+After running the above application and making the correct configurations, you can navigate to the SigNoz logs dashboard to see all the logs sent to SigNoz.
+
+<Figure src="/img/guides/2024/07/zerolog-golang-Screenshot_2024-07-06_at_02.29.06.webp" alt="Signoz Log Output" caption="Signoz Log Output" />
+ 
+
+## Conclusion
+
+- Zerolog Overview and Prerequisites: Zerolog provides a highly performant logging solution with minimal overhead, suitable for high-throughput applications. Before getting started, ensure you have the required tools, including Go installed on your system.
+- Getting Started with Zerolog: Installing and setting up Zerolog is straightforward. Basic usage involves simple installation commands and initializing the logger for immediate use.
+- Core Features of Zerolog:
+    - Logger Initialization and Configuration: Properly initializing and configuring the global logger is crucial for maintaining consistent logging behavior across your application.
+    - Log Levels: Understanding and setting log levels allows you to control the verbosity of your logs, ensuring that only relevant information is logged.
+    - Adding Context to Logs: Adding context to your logs, whether through event-specific context or global context, provides more detailed and meaningful log messages.
+    - Prettifying Logs: Using the ConsoleWriter for prettier log output during development can improve readability and debugging efficiency.
+    - Log Sampling: Implementing log sampling techniques, including basic, burst, and advanced sampling, helps manage log volume and performance.
+    - Zerolog Hooks: Hooks offer a way to extend logging functionality, allowing for custom actions to be triggered on log events.
+    - Customizing Log Output: Configuring Zerolog to write logs to files or external systems and implementing rotating log files ensures persistent and organized log storage.
+- Integration with Web Applications: Zerolog seamlessly integrates with web applications, enhancing logging capabilities in a web context.
+- Tracking Logs Using SigNoz: SigNoz provides an efficient solution for tracking and analyzing logs. Integrating Zerolog with SigNoz involves setting up the environment, configuring the logging package, and sending logs for comprehensive monitoring and analysis.
+
+## FAQs
+
+### What is Zerolog?
+
+Zerolog is a high-performance, structured logging library for Go. It is designed to provide efficient and fast logging by using a simple interface and outputting logs in JSON format. Zerolog's focus on performance makes it suitable for applications requiring minimal overhead in their logging operations.
+
+### What is Structured Logging?
+
+Structured logging refers to the practice of logging data in a consistent, structured format, usually in JSON. This format allows logs to be easily parsed and analyzed by various tools, facilitating better monitoring, debugging, and analysis. Structured logs include key-value pairs that provide more context and are machine-readable, making automated processing and querying more effective.
+
+### What is the Difference Between Zerolog and Zap Logger?
+
+Both Zerolog and Zap Logger are popular logging libraries in the Go ecosystem, but they have key differences:
+
+- Performance: Zerolog is known for its zero-allocation logging, making it extremely fast and efficient. Zap also offers high performance with its "SugaredLogger" and "Logger" options, but Zerolog is often seen as the more lightweight option.
+- Ease of Use: Zerolog has a simpler, more minimalistic API focused on ease of use and minimal overhead. Zap offers more configurability and flexibility with features like structured logging and logging levels.
+- Features: Zap provides more advanced features out-of-the-box, such as sampling, more complex log configurations, and different logger types. Zerolog focuses on simplicity and performance with fewer built-in features but can be extended as needed.
+
+### Which Logger is Best in Golang?
+
+The "best" logger in Golang depends on the specific requirements of your project:
+
+- For Performance: Zerolog is typically preferred for its zero-allocation and high-performance characteristics, making it ideal for applications where logging overhead needs to be minimized.
+- For Flexibility and Features: Zap Logger is a strong choice if you need a more feature-rich logging library with advanced capabilities and configurability.
