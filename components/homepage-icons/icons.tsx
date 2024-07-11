@@ -10,7 +10,7 @@ export const ArrowRightSolid = () => {
 
 export const CircleCheckSolid = ({ color = "fill-signoz_robin-500" }) => {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="20" height="20" className={color}>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="20" height="20" className={`${color} min-w-5`}>
       <path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM369 209L241 337c-9.4 9.4-24.6 9.4-33.9 0l-64-64c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0l47 47L335 175c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9z" />
     </svg>
   )
@@ -50,7 +50,7 @@ export const ZapSolid = () => {
 
 export const ClockSolid = ({ height = "20", width = "20" }) => {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox="0 0 20 20" fill="none">
+    <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox="0 0 20 20" fill="none" className='min-w-5'>
       <g clip-path="url(#clip0_2605_6510)">
         <path d="M10 18.3333C14.6024 18.3333 18.3333 14.6024 18.3333 10C18.3333 5.39763 14.6024 1.66667 10 1.66667C5.39763 1.66667 1.66667 5.39763 1.66667 10C1.66667 14.6024 5.39763 18.3333 10 18.3333Z" fill="#62687C" stroke="#62687C" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round" />
         <path d="M10 5V10L13.3333 11.6667" stroke="#121317" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round" />

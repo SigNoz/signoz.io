@@ -183,7 +183,8 @@ const PricingPlans = () => {
 
   return (
     <section className={`${styles.pricing} relative`}>
-      <div className={`section-container !w-[80vw] !mx-auto  border border-signoz_slate-400 border-dashed !my-0 !border-t-0 !border-b-0 ${styles.pricingContainer}`}>
+      <div className={`section-container !w-[80vw] !mx-auto  border border-signoz_slate-400 border-dashed !my-0 !border-t-0 !border-b-0 ${styles.pricingContainer} max-sm:!px-0`}>
+        <div className='absolute top-0 bottom-0 border border-signoz_slate-400 border-dashed top-[-95px] left-[24px] right-[24px] !border-t-0 !border-b-0 z-[1]'/>
 
         {tab === 'cloud' ? (
           <>
@@ -200,7 +201,7 @@ const PricingPlans = () => {
                 </Link>{' '}
                 with SigNoz. No user-based and host-based pricing.
               </SubHeading>
-              <div className='absolute h-[22.5rem] border border-signoz_slate-400 border-dashed top-[-95px] left-[29px] right-[29px] !border-t-0 !border-b-0 z-[1]'/>
+              
               <div className="my-5 flex justify-center">
                 <div className="flex">
                   <nav
@@ -232,8 +233,8 @@ const PricingPlans = () => {
             </div>
 
 
-            <div className="pricing-plans mx-auto grid grid-cols-1 justify-center gap-y-10 md:max-w-md lg:max-w-6xl lg:grid-cols-2">
-              <div className="pricing-card bg-opacity-5 px-4 py-5 md:px-8 border border-signoz_slate-400 border-dashed !mb-0 !border-b-0 !border-r-0">
+            <div className="pricing-plans mx-[8px] !max-w-[calc(80vw-24px)] max-sm:!max-w-[calc(80vw-48px)] max-sm:!ml-[24px] grid grid-cols-1 justify-center gap-y-10 md:max-w-md lg:max-w-6xl lg:grid-cols-2">
+              <div className="pricing-card bg-opacity-5 px-4 py-5 md:px-8 border border-signoz_slate-400 border-dashed !mb-0 !border-b-0 !border-r-0 !border-l-0">
                 <div>
                   <h3 className="text-2xl font-bold tracking-tight pinkish-gradient">Teams</h3>
                   <p className="mb-4 text-base leading-relaxed text-gray-400">
@@ -460,7 +461,7 @@ const PricingPlans = () => {
 
                 </div>
               </div>
-              <div className="pricing-card bg-opacity-5 px-4 py-5 md:px-8 border border-signoz_slate-400 border-dashed !mb-0 !border-b-0">
+              <div className="pricing-card bg-opacity-5 px-4 py-5 md:px-8 border border-signoz_slate-400 border-dashed !mb-0 !border-b-0 max-sm:!border-l-0 !border-r-0">
                 <div>
                   <h3 className="font-heading text-2xl font-bold orangish-gradient">Enterprise Cloud</h3>
                   <p className="mb-4 text-base leading-relaxed text-gray-400">
@@ -570,7 +571,6 @@ const PricingPlans = () => {
                 Get started with Community Edition and upgrade for enterprise-ready features or get
                 it managed by SigNoz in your cloud (BYOC)
               </SubHeading>
-              <div className='absolute h-[22.5rem] border border-signoz_slate-400 border-dashed top-[-90px] left-[29px] right-[29px] !border-t-0 !border-b-0 z-[1]'/>
               <div className="my-5 flex justify-center">
                 <div className="flex rounded-3xl">
                   <nav
@@ -607,8 +607,8 @@ const PricingPlans = () => {
               </div>
             </div>
 
-            <div className="pricing-plans mx-auto grid grid-cols-1 justify-center gap-y-10 md:max-w-md lg:max-w-6xl lg:grid-cols-2">
-              <div className="pricing-card bg-opacity-5 px-4 py-5 md:px-8 border border-signoz_slate-400 border-dashed !mb-0 !border-b-0 !border-r-0">
+            <div className="pricing-plans  mx-[8px] !max-w-[calc(80vw-24px)] max-sm:!max-w-[calc(80vw-48px)] max-sm:!ml-[24px] grid grid-cols-1 justify-center gap-y-10 md:max-w-md lg:max-w-6xl lg:grid-cols-2">
+              <div className="pricing-card bg-opacity-5 px-4 py-5 md:px-8 border border-signoz_slate-400 border-dashed !mb-0 !border-b-0 !border-r-0 !border-l-0 ">
                 <div>
                   <h3 className="font-heading text-2xl font-bold  pinkish-gradient">Community Edition</h3>
                   <p className="mb-4 text-base leading-relaxed text-gray-400">Free to Self Host
@@ -659,7 +659,7 @@ const PricingPlans = () => {
 
                 </div>
               </div>
-              <div className="pricing-card bg-opacity-5 px-4 py-5 md:px-8 border border-signoz_slate-400 border-dashed !mb-0 !border-b-0">
+              <div className="pricing-card bg-opacity-5 px-4 py-5 md:px-8 border border-signoz_slate-400 border-dashed !mb-0 !border-b-0 max-sm:!border-l-0 !border-r-0">
                 <div>
                   <h3 className="font-heading text-2xl font-bold orangish-gradient">Enterprise Edition</h3>
                   <p className="mb-4 text-base leading-relaxed text-gray-400">
@@ -1100,7 +1100,7 @@ const ExploreAllFeature = () => {
 
   return (
     <div className="relative mx-5 md:mx-0 !mx-auto !w-[80vw] border border-signoz_slate-400 border-dashed !border-t-0 !m-0">
-      <div className="mx-auto overflow-hidden md:max-w-md lg:max-w-6xl">
+      <div className="mx-auto overflow-hidden">
         <div className="mt-10">
           <div className="ovc-table_top-wrapper grid grid-cols-3 gap-1 md:grid-cols-[3fr_1fr_1fr_1fr]">
             {ALL_FEATURES_DATA.HEADER.map((h, idx) => {
@@ -1121,7 +1121,7 @@ const ExploreAllFeature = () => {
         </div>
       </div>
 
-      <div className="mx-auto md:max-w-md lg:max-w-6xl">
+      <div className="mx-auto overflow-hidden">
         <div className="mb-10">
           <div className="container-medium">
             <div className="table-body">
