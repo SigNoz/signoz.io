@@ -14,246 +14,81 @@ PII scrubbing removes sensitive personal information from data to protect privac
 - [SigNoz Cloud](https://signoz.io/teams/) account
 - Logs in log file
 
-{/* In this guide, we are going to perform the PII Scrubbing with the Python application whose source code is avaiable on [this GitHub Repository](https://github.com/SigNoz/sample-flask-app). The Python application has already been instrumented in a way to send the Metrics, Logs and Traces to SigNoz. If you'd like to know more about how to instrument a Python application to send data to SigNoz, Please refer to [this instrumentation guide](https://signoz.io/docs/instrumentation/python/). */}
-
-{/* **Note:** _This guide assumes that you're using the SigNoz Cloud. However, if you're using the SigNoz Self-Host way, most of the steps will remain same except restarting the otel-collector._ */}
-
-{/* ## I. Instrument your application
-
-The first step in order to scrub the relevant data is to instrument your application so that it can send the instrumentation data. While you don't have to report any traces or metrics to be able to send logs, you will need to add OpenTelemetry dependencies to your project, and run the OpenTelemetry agent. Refer to this [Instrumentation Guide](http://localhost:3000/docs/instrumentation/).
-
-// ### Requirement for the Otel Collector
-
-This guide won't show in detail how to [install the OpenTelemetry collector](https://opentelemetry.io/docs/collector/getting-started/), suffice to say that you'll need a collector available to send data. Though in a pinch you can send data to a console, it's possible to run a local collector as a docker image, or you can [install SigNoz](https://signoz.io/docs/install/) and get both an OpenTelemetry collector, data store, and observability dashboard. This guide will assume that your collector is available to receive at `localhost:4317`.
-
-For our Python application, we are specifically interested in scrubbing the relevant data from the logs, so we need to make sure to send the application logs to the SigNoz.  */}
-
 ## Send application logs to SigNoz
 
 You need to configure OpenTelemetry Collector to send your logs in log files to SigNoz, checkout [this documentation](https://signoz.io/docs/userguide/collect_logs_from_file/)
 for detailed instructions on how to do this.
 
-{/* The majority of production applications using OpenTelemetry adopted the standard sometime after they were first architected. As such the most common use case is routing an existing log pipeline to the OpenTelemetry collector.
+## Process of Scrubbing PII Data
 
-In our Python application, we are sending the logs to the local file and then using the `filelog/app` receiver in our [otel configuration file](https://github.com/SigNoz/signoz/blob/develop/deploy/docker/clickhouse-setup/otel-collector-config.yaml) `otel-config.yaml` to send those logs directly to SigNoz.
-
-```yaml 
-receivers:
-  ...
-  filelog/app:
-    include: [ /tmp/app.log ] #include the full path to your log file
-    start_at: end
-...
-```
-
-In the same `config.yaml` file, update the pipeline settings to include the new filelog receiver. This step is crucial for ensuring that the logs are correctly processed and sent to SigNoz.
-
-```yaml 
-service:
-    ....
-    logs:
-        receivers: [otlp, filelog/app]
-        processors: [batch]
-        exporters: [otlp]
-```
-
-Once you're done with this, you can start your otel-collector to fetch the application logs. If you'd like to know more about how to use the otel-collector binary for sending data to SigNoz, refer to [this documentation](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/).
-
-Interact with your application to generate the logs and see those logs in the Logs section at SigNoz Cloud. */}
-
-<figure data-zoomable align='center'>
-    <img src="/img/docs/python-application-logs.webp" alt="Logs of the python app.log file visible in SigNoz"/>
-    <figcaption><i>Sample log file data shown in SigNoz Logs Explorer</i></figcaption>
-</figure>
-
-{/* ## III. Examine the Attributes */}
-
-In order to scrub the relevant data, it is important to examine the existing log attributes. Below is a sample log with different attributes.
-
-<figure data-zoomable align='center'>
-    <img src="/img/docs/python-log-attributes.webp" alt="Logs of the python app.log file visible in SigNoz"/>
-    <figcaption><i>Sample log file attributes shown in SigNoz Logs Explorer</i></figcaption>
-</figure>
-
-{/* As you can see that, there are multiple log attributes present such as `id`, `body`, `severity_number` and so on. Now it's time to scrub these log attributes according to specific needs. */}
-
-## Process of Scrubbing the data
-
-OpenTelemetry Collector offers several processors to filter and modify sensitive data before it reaches SigNoz:
-
-1. `transform`: Change values within spans
-2. `attributes`: Modify individual attributes
-3. `redaction`: Mask or block attribute values
-
-
-
-{/* To filter data using the OpenTelemetry Collector:
-
-1. Add the required `processors` to the OpenTelemetry Collector’s configuration file. The processors allow you to delete, edit or redact, or hash specific attributes.
-2. Activate the processor functionality by modifying the appropriate `service | pipelines`.
-3. The processors available for filtering sensitive data are:
-
-    - `transform` - to transform the values within the spans.
-
-    - `attributes` - to access individual attributes within a span.
-
-    - `redaction` - to mask or block the attributes’ values for security. */}
-
-{/* The `attributes` [processor](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/attributesprocessor) is generally used instead of the other two processors (redaction and transform) to access individual attributes within a span. */}
+OpenTelemetry Collector offers a powerful [transform processor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/transformprocessor/README.md) to filter and modify sensitive data before it reaches SigNoz. We'll use this processor to perform PII scrubbing on our logs.
 
 ### Sample log 
 
-To demonstrate what each processor does, we will use the sample log shown below
-
-```bash
-
-```
-Within the `processors` section. we’ll add a `transform`
-
-```yaml
-  transform:
-    log_statements:
-    - context: log
-      statements:
-        - set(severity_text, "FAIL") where body == "request failed"
-```
-{/* If our request to the application gets failed due to certain reasons, we are going to set the `severity_text` attribute value to `FAIL`.
-
-Adding this mapping, however, isn’t enough. To add the attribute, we are required to add this processor to our pipeline:
-
-
-```yaml
-logs:
-    receivers: [otlp, filelog/app]
-    processors: [batch, transform]
-    exporters: [otlp]
-```
-<figure data-zoomable align='center'>
-    <img src="/img/blog/2023/08/severity_text.webp" alt="severity text in the log attributes"/>
-    <figcaption><i>with the transform in place, we now get a new attribute whenever the body exactly matches “request failed”</i></figcaption>
-</figure>
-
-### Filter the Relevant Data
-
-In order to filter the sensitive data, we will be required to insert certain statements for the `transform` processor indicating what kind of attribute we would like to be filtered out
-
-```yaml
-transform:
-    log_statements:
-    - context: log
-      statements:
-        - set(severity_text, "FAIL") where body == "request failed"
-        - replace_match(attributes["social_security_number"], "*", "{userSocial}")
-```
-
-The above config replaces any occurrence of `userSocial` in the `social_security_number` attribute with *. 
-
-Assume your application logs contain sensitive information such as email addresses, phone numbers, and credit card numbers. You want to scrub this information to protect user privacy.
-
-**Example Log Entry Before Scrubbing**
+Let's use the following sample log line to demonstrate the PII scrubbing process:
 
 ```json
-{
-  "timestamp": "2024-07-05T12:34:56Z",
-  "severity_text": "INFO",
-  "body": "User registration completed",
-  "attributes": {
-    "user_email": "user@example.com",
-    "phone_number": "+1234567890",
-    "credit_card_number": "4111 1111 1111 1111"
-  }
-}
+{"timestamp": "2024-07-05T12:34:56Z", "severity": "INFO", "message": "User john.doe@example.com (SSN: 123-45-6789) made a purchase with credit card 4111-1111-1111-1111", "user_id": "12345", "purchase_amount": 99.99}
 ```
 
-In order to filter out the sensitive data, the config file will look like 
+This log contains several pieces of PII that we want to scrub: an email address, a social security number (SSN), and a credit card number inside the log body.
+### Configuring the Transform Processor
+To scrub this PII, we'll use the transform processor in our OpenTelemetry Collector configuration. Trasform processor makes use of [Regular Expressions](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_expressions) for scrubbing your sensitive data. Here's how we can set it up:
 
 ```yaml
 processors:
+  ...
   transform:
     log_statements:
       - context: log
         statements:
-          - replace_match(attributes["user_email"], "*", "{user_email}")
-          - replace_match(attributes["phone_number"], "*", "{phone_number}")
-          - replace_match(attributes["credit_card_number"], "*", "{credit_card_number}")
+          # Scrub email address
+          - replace_pattern(body, "(\\w+)@(\\w+)\\.(\\w+)", "****@$2.$3")
+          # Scrub SSN
+          - replace_pattern(body, "\\d{3}-\\d{2}-\\d{4}", "***-**-****")
+          # Scrub credit card number
+          - replace_pattern(body, "\\d{4}-\\d{4}-\\d{4}-\\d{4}", "****-****-****-****")
 ```
 
-Once you restart your otel-collector, the log entry in the scrubbing would look like
+Let's break down what each statement does:
 
-```yaml
-{
-  "timestamp": "2024-07-05T12:34:56Z",
-  "severity_text": "INFO",
-  "body": "User registration completed",
-  "attributes": {
-    "user_email": "*",
-    "phone_number": "*",
-    "credit_card_number": "*"
-  }
-}
-```
+- The first replace_pattern statement looks for email addresses and replaces the username part with asterisks.
+- The second statement finds patterns matching SSNs (###-##-####) and replaces them entirely with asterisks.
+- The third statement identifies credit card number patterns and replaces all digits with asterisks.
 
-The attributes processor in OpenTelemetry allows you to manage and clean up your telemetry data by adding, modifying, or removing attributes. 
-- You can change specific data points within your telemetry, such as replacing credit card information with a placeholder, removing passwords, or transforming email addresses.
-- You can set rules to decide which data should be processed based on certain conditions, ensuring only relevant information is included or excluded.
-
-**Here's an example of how to configure the attributes processor to handle sensitive data:**
-
-```yaml
-processors:
-  attributes/update:
-    actions:
-      - key: cc_number
-        value: redacted
-        action: update  # Replaces the credit card number with 'redacted'
-      - key: account_password
-        action: delete  # Removes the password attribute entirely
-      - key: account_email
-        action: hash  # Applies a hash function to the email address
-```
-
-You can apply this processor configuration to different telemetry pipelines like traces, metrics, and logs. Here's how you integrate it:
-
+### Applying the Processor
+To apply this processor to your logs pipeline, add it to the processors list in your pipeline configuration:
 ```yaml
 service:
   pipelines:
-    traces:
-      processors: [..., attributes/update, ...]  # Use in traces pipeline
-    metrics:
-      processors: [..., attributes/update, ...]  # Use in metrics pipeline
+    ...
     logs:
-      processors: [..., attributes/update, ...]  # Use in logs pipeline
+      receivers: [otlp, filelog/app]
+      processors: [batch, transform]
+      exporters: [otlp]
 ```
-#### Using the Redaction Processor
-The `redaction` processor is designed to mask or block the values of attributes for security. This is particularly useful when you want to ensure that sensitive information is never logged in plain text.
-
-If you'd like to remove all the attributes except `description`, `group`, and `id` from your logs, you can use the `redaction` processor. The configuration file would look like
+### Result
+After applying this configuration and restarting your OpenTelemetry Collector, the sample log line would be transformed to:
 ```yaml
-processors:
-  redaction/update:
-    allow_all_keys: false
-    allowed_keys:
-      - description 
-      - group
-      - id
+{
+  "timestamp": "2024-07-05T12:34:56Z",
+  "severity": "INFO",
+  "message": "User ****@. (SSN: ***-**-****) made a purchase with credit card ****-****-****-****",
+  "user_id": "12345",
+  "purchase_amount": 99.99
+}
 ```
+<figure data-zoomable align='center'>
+    <img src="/img/docs/logs-management/guides/sample-log-scrubbed-output.webp" alt="Sample log output with PII data scrubbed out"/>
+    <figcaption><i>Sample log output with PII data scrubbed out</i></figcaption>
+</figure>
 
-The `allowed_keys` are the log attributes that you'd like to see in the logs. If you'd like to block certain attributes such as credit card numbers, you can modify your configuration file in the following way
-```yaml
-processors:
-  redaction/update:
-    allow_all_keys: true
-    blocked_values:
-      - "^4[0-9]{12}(?:[0-9]{3})?$"  # Visa
-      - "^3[47][0-9]{13}$"           # Amex
-      - "^(5[1-5][0-9]{14}|2(22[1-9][0-9]{12}|2[3-9][0-9]{13}|[3-6][0-9]{14}|7[0-1][0-9]{13}|720[0-9]{12}))$"  # MasterCard
-      - "\b((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|$)){4}\b"  # IP Address
-```
+As you can see, the email address, SSN, and credit card number have been scrubbed, protecting this sensitive information before it reaches SigNoz.
+Remember to adjust the regular expressions in the `replace_pattern` statements as needed to match the specific formats of PII in your logs. You can add more statements to handle additional types of sensitive data that may appear in your logs.
 
-In the above configuration file, we're using regex to block credit card numbers and ip addresses.
 
-Using the `transform`, `attributes`, and `redaction` processors in OpenTelemetry, you can effectively manage and scrub sensitive information from your telemetry data. By configuring these processors, you ensure that sensitive data such as credit card numbers, email addresses, and other personally identifiable information are either masked, removed, or transformed before they are sent to SigNoz. This not only helps in maintaining compliance with data protection regulations like GDPR, CCPA, and HIPAA but also enhances the security and privacy of your application's telemetry data. */}
+To know more about the capabilities of trasform processsor, checkout [this documentation](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/transformprocessor/README.md).
 
-{/* ## Get Help
+## Get Help
 
-<GetHelp /> */}
+<GetHelp /> 
