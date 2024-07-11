@@ -35,7 +35,7 @@ Most documentation of Opentelemtry will mention the OTLP/HTTP port as 4318 and O
 
 ## Authentication Methods
 
-Note: Replace <key> with your ingestion key in the examples listed in this section.
+Note: Replace `<key>` with your ingestion key in the examples listed in this section.
 
 All signoz endpoints are protected by header based key authentication. An ingestion key must be configured in all exporters (and for any custom ingestion endpoints) in order to successfully ingest data.
 
@@ -64,6 +64,22 @@ signoz-access-token: <key>
 Authorization: Bearer <key>
 ```
 
+#### For SDKs:
+The mechanism to configure headers will vary, but OpenTelemetry language SDKs generally support setting the `OTEL_EXPORTER_OTLP_HEADERS=signoz-access-token=<key>` environment variable. Refer to the SigNoz [instrumentation docs](https://signoz.io/docs/instrumentation/) for language-specific details.
+
+#### For Collectors:
+```yaml
+exporters:
+  otlp:
+    headers:
+      signoz-access-token: <key>
+
+  ...
+  otlphttp:
+    headers:
+      signoz-access-token: <key>
+```
+
 ## Batching, Timeout, Retries and other Relevant Settings
 
 * In order to send data to Signoz, your payloads must be smaller than the 16MB maximum payload size. Larger payloads will be rejected with an error status code. Larger payloads may also fail to export with a timeout before an error status code is returned.
@@ -78,13 +94,11 @@ If your application produces large payloads due to high telemetry volume or long
 #### For SDKs:
 
 ##### Batching
-Use these environment variables for configuration for configuring batching:
+OpenTelemetry SDKs generally support setting the following environment variables (see [OpenTelemetry docs](https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/) for more info):
 
-- Spans: `OTEL_BSP_*`
-- Metrics: `OTEL_METRIC_EXPORT_*`
-- Logs: `OTEL_BLRP_*`
-
-{/* Increase the default timeout settings for large payloads or slow networks using the `OTEL_EXPORTER_OTLP_TIMEOUT` environment variable. */}
+- `OTEL_BSP_*` for spans
+- `OTEL_METRIC_EXPORT_*` for metrics
+- `OTEL_BLRP_*` for logs
 
 ##### Timeout
 Increase the default timeout settings using the `OTEL_EXPORTER_OTLP_TIMEOUT` environment variable. The value should be set in milliseconds.
