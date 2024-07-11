@@ -1,23 +1,20 @@
 ---
-
-title: Where are Docker Logs Stored? - Docker Logs Location 
+title: Where are Docker Logs Stored? - Docker Logs Location
 slug: docker-logs-location
 date: 2024-07-03
-tags:  [logging]
+tags: [logging]
 authors: [daniel]
 description: Docker container logs are stored in subdirectories under `/var/lib/docker/containers/` on Linux hosts and in `C -\ProgramData\docker\containers` on Windows hosts.
-keywords: [docker,logs,logging,docker logs]
-
+keywords: [docker, logs, logging, docker logs]
 ---
 
 <head>
-<script type="application/ld+json">
+  <script type="application/ld+json">
     {`{
   "@context": "https://schema.org",
   "@type": "BlogPosting",
   "headline": "Where are Docker Logs Stored? - Docker Logs Location",
   "alternativeHeadline": "A comprehensive guide to understanding and accessing Docker container and daemon logs",
-  "image": "https://signoz.io/img/blog/2024/07/docker-logs-location-cover.webp",
   "author": {
     "@type": "Person",
     "name": "Daniel"
@@ -34,7 +31,7 @@ keywords: [docker,logs,logging,docker logs]
   "dateModified": "2024-07-03",
   "mainEntityOfPage": {
     "@type": "WebPage",
-    "@id": "https://signoz.io/blog/docker-logs-location/"
+    "@id": "https://signoz.io/guides/docker-logs-location/"
   },
   "description": "Docker container logs are stored in subdirectories under /var/lib/docker/containers/ on Linux hosts and in C:\\ProgramData\\docker\\containers on Windows hosts.",
   "keywords": "docker, logs, logging, docker logs",
@@ -151,12 +148,12 @@ keywords: [docker,logs,logging,docker logs]
     ]
   }
 }`}
-</script>
+  </script>
 </head>
 
 Docker logs are valuable for diagnosing and resolving issues that may arise within your containerized applications and environment. Understanding where these logs are stored and how they can be accessed can help you quickly identify the root cause of errors, track performance trends, and ensure the overall stability of your Docker environment.
 
- Docker container logs are stored in subdirectories under `/var/lib/docker/containers/` on Linux hosts and in `C:\ProgramData\docker\containers` on Windows hosts.
+Docker container logs are stored in subdirectories under `/var/lib/docker/containers/` on Linux hosts and in `C:\ProgramData\docker\containers` on Windows hosts.
 
 In this article, you will briefly explain about Docker logs and their types, explain where they are located, how to clear them, and how they can be monitored.
 
@@ -183,7 +180,7 @@ Within this directory, the exact location of logs can vary depending on the type
 
 ### Where are Docker Container Logs Stored?
 
-The location where Docker container logs are stored depends on the host operating system. 
+The location where Docker container logs are stored depends on the host operating system.
 
 On Linux Systems
 
@@ -250,7 +247,12 @@ Direct Docker Engine installation is <a href="https://docs.docker.com/engine/ins
 
 To access individual Docker container logs on Docker Desktop, from the Docker Desktop UI, select the container of choice and click on the `Logs` section:
 
-<Figure src="/img/guides/2024/07/docker-logs-location-docker_container_logs.webp" alt="Docker container logs" caption="Docker container logs" /><br></br>On Windows Systems
+<Figure
+  src="/img/guides/2024/07/docker-logs-location-docker_container_logs.webp"
+  alt="Docker container logs"
+  caption="Docker container logs"
+/>
+<br></br>On Windows Systems
 
 Docker Engine is currently <a href="https://docs.docker.com/engine/install/" rel="noopener noreferrer nofollow" target="_blank">not supported</a> natively on Windows. However, you can use Docker on Windows through Docker Desktop. Depending on your configuration, Docker Desktop leverages either the Windows Subsystem for Linux (WSL 2) or Hyper-V and sets up a lightweight VM that runs a Linux kernel.
 
@@ -276,19 +278,28 @@ The location where Docker daemon logs are stored depends on the host operating s
 
 On Linux Systems
 
-On older Docker versions and Linux hosts, Docker daemon logs are located at the `/var/log/syslog` or `/var/log/messages` directories. For modern Linux distributions and recent Docker versions, Docker logs are stored in the journal files under `/var/log/journal`. This is because, on most modern Linux distributions using `systemd`, Docker uses the default logging settings, which typically log to the system journal managed by `systemd` (i.e., `journald`). 
+On older Docker versions and Linux hosts, Docker daemon logs are located at the `/var/log/syslog` or `/var/log/messages` directories. For modern Linux distributions and recent Docker versions, Docker logs are stored in the journal files under `/var/log/journal`. This is because, on most modern Linux distributions using `systemd`, Docker uses the default logging settings, which typically log to the system journal managed by `systemd` (i.e., `journald`).
 
-To identify the location where Docker logs are stored on your Linux system, you need to check the Docker service file. The Docker service file contains configuration details about how the Docker daemon is started and managed. On systems using `systemd`, this file is typically located at `/lib/systemd/system/docker.service`. 
+To identify the location where Docker logs are stored on your Linux system, you need to check the Docker service file. The Docker service file contains configuration details about how the Docker daemon is started and managed. On systems using `systemd`, this file is typically located at `/lib/systemd/system/docker.service`.
 
 To see the Docker service file content:
 
 ```jsx
-cat /lib/systemd/system/docker.service
+cat / lib / systemd / system / docker.service
 ```
 
 Look for the `ExecStart` line to see how the Docker daemon is being started.
 
-<Figure src="/img/guides/2024/07/docker-logs-location-docker_service.webp" alt="Docker service" caption="Docker service" /><br></br>From the above screenshot, the `ExecStart` line in the Docker service unit file, specifically `/usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock`, indicates that Docker is set up to use socket activation with `systemd`. In this setup, the Docker daemon communicates with `systemd` via the file descriptor passed (`fd://`), and `systemd` handles the activation and monitoring of the Docker service.
+<Figure
+  src="/img/guides/2024/07/docker-logs-location-docker_service.webp"
+  alt="Docker service"
+  caption="Docker service"
+/>
+<br></br>From the above screenshot, the `ExecStart` line in the Docker service unit file,
+specifically `/usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock`, indicates
+that Docker is set up to use socket activation with `systemd`. In this setup, the Docker daemon
+communicates with `systemd` via the file descriptor passed (`fd://`), and `systemd` handles the
+activation and monitoring of the Docker service.
 
 As a result, logs generated by the Docker daemon are directed to `systemd's` journald. Journal files are typically binary and not designed for direct human readability. To effectively view the Docker daemon logs captured by `journald`, use the command:
 
@@ -300,9 +311,14 @@ journalctl -xu docker.service
 
 The above command displays and filters the `systemd` journal logs for messages related to the Docker service, including errors.
 
-<Figure src="/img/guides/2024/07/docker-logs-location-journal_docker_service.webp" alt="Docker daemon logs" caption="Docker daemon logs" /><br></br>On Mac Systems
+<Figure
+  src="/img/guides/2024/07/docker-logs-location-journal_docker_service.webp"
+  alt="Docker daemon logs"
+  caption="Docker daemon logs"
+/>
+<br></br>On Mac Systems
 
-On macOS, the Docker Engine itself is not directly supported. However, you can use Docker Engine on macOS through Docker Desktop. 
+On macOS, the Docker Engine itself is not directly supported. However, you can use Docker Engine on macOS through Docker Desktop.
 
 The Docker daemon logs, tagged as <a href="https://www.notion.so/Docker-Logs-Location-8e305679af0d4c82a93c245f1fdb39c2?pvs=21" rel="noopener noreferrer nofollow" target="_blank">dockerd</a> on macOS, are stored at:
 
@@ -328,7 +344,7 @@ Docker daemon (dockerd) logs are stored within the filesystem of the WSL2 VM tha
  %LOCALAPPDATA%\Docker\log\vm\dockerd.log
 ```
 
-If you are interested in the container runtime, `containerd` logs, they are also stored within the  WSL2 VM filesystem at:
+If you are interested in the container runtime, `containerd` logs, they are also stored within the WSL2 VM filesystem at:
 
 ```jsx
 %LOCALAPPDATA%\Docker\log\vm\containerd.log
@@ -350,8 +366,15 @@ sudo journalctl --vacuum-time=1s --unit=docker.service
 
 This command deletes any archived systemd journal logs related to the Docker service that are older than one second. It ensures that only the logs from the Docker service are cleared, leaving other system logs intact.
 
-<Figure src="/img/guides/2024/07/docker-logs-location-vacuum_command.webp" alt="Cleared Docker logs" caption="Cleared Docker logs" /><br></br>Note: Docker continuously generates new logs as containers are started, stopped, or interacted with. Clearing logs with `journalctl` only removes archived logs, not the active ones currently in memory.
-Once the logs are cleared, restart the Docker service to resume normal operation:
+<Figure
+  src="/img/guides/2024/07/docker-logs-location-vacuum_command.webp"
+  alt="Cleared Docker logs"
+  caption="Cleared Docker logs"
+/>
+<br></br>Note: Docker continuously generates new logs as containers are started, stopped, or
+interacted with. Clearing logs with `journalctl` only removes archived logs, not the active ones
+currently in memory. Once the logs are cleared, restart the Docker service to resume normal
+operation:
 
 ```jsx
 sudo systemctl start docker
@@ -359,23 +382,35 @@ sudo systemctl start docker
 
 ## Monitor and Analyze Docker Logs in SigNoz
 
-Monitoring and analyzing Docker logs directly in the terminal is not very efficient or scalable, especially as your application grows in complexity and the volume of logs increases.  For advanced log management and analysis, it is best to forward the logs to a log management tool like [SigNoz](https://signoz.io/).
+Monitoring and analyzing Docker logs directly in the terminal is not very efficient or scalable, especially as your application grows in complexity and the volume of logs increases. For advanced log management and analysis, it is best to forward the logs to a log management tool like [SigNoz](https://signoz.io/).
 
-SigNoz is an open-source observability platform that offers comprehensive log management capabilities. 
+SigNoz is an open-source observability platform that offers comprehensive log management capabilities.
 
 SigNoz uses a columnar database, ClickHouse, to store logs. This database is very efficient at ingesting and storing log data and making it available for analysis. It also uses <a href="https://opentelemetry.io/" rel="noopener noreferrer nofollow" target="_blank">OpenTelemetry</a> for instrumenting applications. OpenTelemetry, backed by <a href="https://www.cncf.io/" rel="noopener noreferrer nofollow" target="_blank">CNCF</a>, is quickly becoming the world standard for instrumenting cloud-native applications.
 
 The logs tab in SigNoz has advanced features like a log query builder, search across multiple fields, structured table view, JSON view, etc.
 
-<Figure src="/img/guides/2024/07/docker-logs-location-Untitled.webp" alt="Untitled" caption="SigNoz Dashboard" />
+<Figure
+  src="/img/guides/2024/07/docker-logs-location-Untitled.webp"
+  alt="Untitled"
+  caption="SigNoz Dashboard"
+/>
 
 You can also view logs in real time with live tail logging.
 
-<Figure src="/img/guides/2024/07/docker-logs-location-Untitled%201.webp" alt="Untitled" caption="SigNoz Dashboard" />
+<Figure
+  src="/img/guides/2024/07/docker-logs-location-Untitled%201.webp"
+  alt="Untitled"
+  caption="SigNoz Dashboard"
+/>
 
 With the advanced Log Query Builder, you can filter out logs quickly by mixing and matching fields.
 
-<Figure src="/img/guides/2024/07/docker-logs-location-Untitled%202.webp" alt="Untitled" caption="SigNoz Dashboard" />
+<Figure
+  src="/img/guides/2024/07/docker-logs-location-Untitled%202.webp"
+  alt="Untitled"
+  caption="SigNoz Dashboard"
+/>
 
 You can visit the [documentation](https://signoz.io/docs/userguide/collect_docker_logs/) for steps on monitoring and analyzing your Docker container logs in SigNoz.
 
@@ -385,7 +420,7 @@ You can visit the [documentation](https://signoz.io/docs/userguide/collect_docke
 
 ## Conclusion
 
-Understanding where Docker logs are stored and how to access them is useful for troubleshooting and monitoring your containerized applications. 
+Understanding where Docker logs are stored and how to access them is useful for troubleshooting and monitoring your containerized applications.
 
 Key takeaways:
 
