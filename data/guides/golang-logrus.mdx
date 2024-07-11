@@ -1,0 +1,629 @@
+---
+
+title: Golang Logrus - Complete Guide to logging in Golang with Logrus
+slug: golang-logrus
+date: 2024-07-11
+tags: [logging]
+authors: [aayush_sharma]
+description: In this tutorial, we will discover Golang logrus and some of the best practices provided by logrus for implementing structured logging in Golang applications. We will set up the Golang application and practice different logging formats logrus provides.
+keywords: [logrus, logging, logging logrus, golang, logrus golang, opentelemetry golang, opentelemetry logrus]
+
+---
+
+Logging is the record of events that occur in an application, providing critical insights into its behavior, performance, and potential problems. In Golang, the built-in log package helps monitor and debug applications. 
+
+However, for more advanced logging needs, Golang offers logrus, a powerful package designed for structured logging. This guide will explore the features and best practices of using logrus for implementing structured logging in Golang applications.
+
+## Prerequisites
+
+- <a href="https://go.dev/doc/install" rel="noopener noreferrer nofollow" target="_blank">Golang Installed in your system</a>
+- Familiarity with [Logging in Golang](https://signoz.io/guides/golang-log/)
+
+## Quick Guide: How to use logrus in Golang?
+
+### What is logrus?
+
+`logrus` is a popular organized logger designed for `Golang`. It is renowned for being compatible with the common library logger and having an easy-to-use API. The built-in log package in Go is expanded by Logrus to offer structured logging features. 
+
+Compared to plain text logs, structured logging logs are easier to interpret programmatically because of their format. An overview of logrus's features and the reasons developers like it over alternative logging frameworks are covered in the later sections of this guide.  
+
+The current version of logrus is in maintenance mode, but security updates and bug fixes are still being implemented to prevent changes from breaking in future releases. 
+
+### Importing logrus
+
+To use `logrus` in your Golang application, import the `github.com/sirupsen/logrus` package using the below steps:
+
+### Step 1
+
+Install the logrus package tree in your local system or in the environment where your golang application resides by running the below command in terminal:
+
+```bash
+go get github.com/sirupsen/logrus
+```
+
+### Step 2
+
+Import the logrus package in your golang application, your import section should look similar to this:
+
+```go
+package main
+
+import (
+    "github.com/sirupsen/logrus"
+    // other imports 
+)
+
+func main() {
+    // application code and logic
+}
+```
+
+To implement the logging convention and decrease confusion for the reviewers, logrus package is aliased as `log` from the logrus package as shown in the below sample of code. 
+
+Note that it's completely api-compatible with the stdlib logger, so you can replace your `log` imports everywhere with `log "github.com/sirupsen/logrus"` and you'll now have the flexibility of Logrus. 
+
+You can now use the logrus library within the log namespace:
+
+```go
+package main
+
+import (
+    log "github.com/sirupsen/logrus"
+    // other imports 
+)
+
+func main() {
+    // application code and logic
+}
+```
+
+### Step 3
+
+To print the log statements we simply use `logrus` with some level function to print the desired message. logrus is replaced by `log` if the namespace is used in the import section, below is the code for both approaches resulting in the same output:
+
+Using logrus without alias
+
+```go
+package main
+
+import (
+    "github.com/sirupsen/logrus"
+)
+
+func main() {
+    logrus.Info("This is a guide to cover logging in golang using logrus")
+    logrus.Error("This is a error")
+}
+```
+
+Using logrus with `log` alias
+
+```go
+package main
+
+import (
+    log "github.com/sirupsen/logrus"
+)
+
+func main() {
+    log.Info("This is a guide to cover logging in golang using logrus")
+    log.Error("This is a error")
+}
+```
+
+Output
+
+<Figure src="/img/guides/2024/07/golang-logrus-Untitled.webp" alt="Untitled" caption="Untitled" />
+
+The default logger for logrus prints the logs statement with color coding. 
+
+### What is Structured Logging?
+
+Structured logging is a technique where data is formatted for easy searching, filtering, and processing, paving the way for more sophisticated analytics. JSON is the standard format for structured logging. It is best practice to provide structured logging using a logging framework integrated with a log management system that supports custom fields.
+
+### Why Structured Logging?
+
+Structured logging offers several advantages over traditional text-based logging:
+
+- Ease of Searching and Filtering: Logs formatted as key-value pairs are easier to search and filter, allowing for more efficient troubleshooting and analysis.
+- Better Integration: Structured logs are machine-readable, making integrating with log management systems and analytics tools easier.
+- Improved Analytics: With structured logs, you can perform more sophisticated analytics, enabling better insights into your application's behavior and performance.
+
+Example of structured logging
+
+```json
+{
+   "time":"2024-06-25T03:02:16.291247+05:30",
+   "level":"INFO",
+   "msg":"logrus Groups",
+   "Usage":{
+      "Item1":"random string",
+      "Item2":453666601985459141,
+      "Item3":7914595825068479671
+   }
+}
+
+```
+
+The above-structured logging output, when converted into text-based logging, looks like the example below
+
+```
+2024-06-25T03:02:16.291247+05:30 - INFO - logrus Groups - Item1: random string, Item2: 453666601985459141, Item3: 7914595825068479671
+```
+
+Let's dive deep into the logrus libraries and explore the advanced features of `logrus`.
+
+## Levels in logrus
+
+In logrus, levels allow developers to classify the importance of the log messages and control what gets logged based on the environment (e.g., development, testing, production). It has seven logging levels:
+
+- Trace: This level is used to log very detailed information, finer-grained than Debug. Generally not enabled in production because of the verbose output, which may be costly in terms of performance and storage.
+    
+    Use Case: Trace code and explain behavior, frequently with step-by-step execution.
+    
+- Debug: This level is used for detailed information, primarily useful for diagnosing problems. Debug logging is usually enabled only in development settings.
+    
+    Use Case: Diagnosing a complex issue by logging detailed information about the application's state.
+    
+- Info: Provides general information about the application's operations, offering insights into its normal functioning.
+    
+    Use Case: Logging the successful completion of an operation or regular status updates.
+    
+- Warn: Indicates that something unexpected happened or there might be a potential issue (e.g., 'disk space low'). The application continues to work as expected.
+    
+    Use Case: Alerting about deprecated API usage or low disk space warnings.
+    
+- Error: Represents serious issues where the application has encountered a problem and cannot perform some functions.
+    
+    Use Case: Logging errors that prevent a function from executing properly, such as database connection failures.
+    
+- Fatal: This level logs a message, then calls `os.Exit(1)`. Suitable for errors that require immediate program termination.Suitable for errors that require immediate program termination.
+    
+    Use Case: It is useful for severe errors that prevent further execution of the application in a safe state.
+    
+- Panic: This level has the highest level of severity, it logs a message and then panics.
+    
+    Use Case: Often used for unrecoverable errors where the application cannot recover without losing data or state significantly. 
+    
+
+Example code for the above levels
+
+```go
+package main
+
+import (
+	log "github.com/sirupsen/logrus"
+)
+
+func main() {
+	log.SetLevel(log.TraceLevel)
+	log.Trace("This is the trace level")
+	log.Debug("This is the debug level")
+	log.Info("This is the info level")
+	log.Warn("This is the warn level")
+	log.Error("This is the error level")
+	log.Fatal("This is the fatal level") 	// Calls os.Exit(1) after logging
+	log.Panic("This is the panic level") 	// Calls panic() after logging
+}
+```
+
+Output
+
+<Figure src="/img/guides/2024/07/golang-logrus-Untitled%201.webp" alt="Output of all the levels" caption="Output of all the levels" />
+
+Output of all the levels
+
+In the above code you might have come across a line - `log.SetLevel(log.TraceLevel)`, it is the `SetLevel` function that is used to set the logger level in logrus. It logs entries with that severity or anything above it. By default, it is set to `InfoLevel`.
+
+## Fields in logrus
+
+Fields in logrus are `key-value` pairs that you may include in your log entries to give more information about the event that's being documented. This falls under the category of organised logging, which is a very useful method for producing logs that are easier to search and more informative.
+
+You may attach structured data to log messages in logrus using fields. Any information that is important to the message's context, such as user IDs, error codes, or other operational data, can be included in this data. Logs become far more actionable and helpful with these variables, especially when troubleshooting complicated systems. Additionally, because fields are organized, it is simpler to query logs, which enables more accurate and efficient log analysis.
+
+The `WithFields` function in logrus allows you to add fields to your logs by returning a log entry that includes the fields. Messages can then be logged using this entry. You may add the following fields to your logs as shown below:
+
+```go
+package main
+
+import (
+	log "github.com/sirupsen/logrus"
+)
+
+func main() {
+	// Using WithFields function
+	log.WithFields(log.Fields{
+		"key": "value",
+	}).Info("Fields in logrus")
+}
+```
+
+Output
+
+```bash
+INFO[0000] Fields in logrus                              key=value
+```
+
+Using the above code you can set fields to your log messages.
+
+## Formatters in logrus
+
+In logrus, the formatting of log messages is handled through formatters. Formatters determine how the log entries are displayed and stored, which can be crucial for readability and for integration with log management tools. It provides two types of built-in formatters: `TextFormatter` and `JSONFormatter`, and developers can also create custom formatters to meet specific logging requirements.
+
+### TextFormatter
+
+The default formatter in logrus is `TextFormatter` which produces logs in a plain-text format that is readable by humans. Because it is simple to read on the console, it is frequently utilised during development. But it's not as good for production applications, particularly where parsing or log aggregation are required.
+
+Example code
+
+```go
+package main
+
+import (
+	log "github.com/sirupsen/logrus"
+	// other imports
+)
+
+func main() {
+	// Setting Text formatter
+	log.SetFormatter(&log.TextFormatter{
+		DisableColors: true,
+		FullTimestamp: true,
+	})
+	log.WithFields(log.Fields{
+		"key": "value",
+	}).Info("This is Text(Default) Formatter with additional fields.")
+}
+
+```
+
+Output
+
+```
+time="2024-07-09T04:08:05+05:30" level=info msg="This is Text(Default) Formatter with additional fields." key=value
+```
+
+Using the above code you can set up `TextFormatter` with the `SetFormatter` function. You can additionally set internal fields to the SetFormatter function such as: `DisableColors` and `FullTimestamp`. DisableColors as the name suggests is used to disable color-coding in the log messages and FullTimestamp is used to display time in the TextFormatter log messages.
+
+### JSONFormatter
+
+Logs are formatted into JSON objects using the `JSONFormatter`. This is especially helpful in production settings where log management may be handled by programs like SigNoz, Elasticsearch, Splunk, or Logstash. Because JSON logs are organized, they are simpler to index and search.
+
+Example code
+
+```go
+package main
+
+import (
+	log "github.com/sirupsen/logrus"
+	// other imports
+)
+
+func main() {
+	// Setting JSON formatter
+	log.SetFormatter(&log.JSONFormatter{})
+	log.WithFields(log.Fields{
+		"key": "value",
+	}).Info("This is JSON Formatter with additional fields.")
+}
+```
+
+Output:
+
+```bash
+{"key":"value","level":"info","msg":"This is JSON Formatter with additional fields.","time":"2024-07-09T04:20:34+05:30"}
+```
+
+Besides the fields added with `WithField`, some fields are automatically added to all logging events:
+
+1. `time`: The timestamp when the entry was created.
+2. `msg`: The logging message passed to `{Info,Warn,Error,Fatal,Panic}` after the `AddFields` call. E.g. `Failed to send event.`
+3. `level`: The logging level. E.g. `info`.
+
+## Monitoring Logs with an Observability Tool
+
+So far, we have implemented logs using logrus in Golang. However, simply logging events is not enough to ensure the health and performance of your application. Monitoring these logs is crucial to gaining real-time insights, detecting issues promptly, and maintaining the overall stability of your system.
+
+### Why Monitoring Logs is Important
+
+Here are the key reasons why monitoring logs is important:
+
+1. Issue detection and troubleshooting
+2. Performance monitoring
+3. Security and Compliance
+4. Operational insights
+5. Automation and alerts
+6. Historical analysis
+7. Proactive maintenance
+8. Support and customer service
+
+To cover all the above major components, you can make use of tools like [SigNoz](https://signoz.io/). 
+
+[SigNoz](https://signoz.io/) is a full-stack open-source application performance monitoring and observability tool that can be used in place of DataDog and New Relic. SigNoz is built to give SaaS like user experience combined with the perks of open-source software. Developer tools should be developed first, and SigNoz was built by developers to address the gap between SaaS vendors and open-source software.
+
+Key architecture features:
+
+- Logs, Metrics, and traces under a single dashboard
+    
+    SigNoz provides logs, metrics, and traces all under a single dashboard. You can also correlate these telemetry signals to debug your application issues quickly.
+    
+- Native OpenTelemetry support
+    
+    SigNoz is built to support <a href="https://opentelemetry.io/" rel="noopener noreferrer nofollow" target="_blank">OpenTelemetry</a> natively, which is quietly becoming the world standard to generate and manage telemetry data.
+    
+
+## Tracking Logs Using Signoz
+
+Let's enhance the above code examples to set up a basic `HTTP` server integrated with structured logging using the logrus package. It establishes a logging system where logs are formatted in JSON for better readability and parsing. This is achieved by creating a JSONFormatter from logrus, which is attached to a log file and configured to record debug-level logs.
+
+### Step 1: Set up SigNoz
+
+<GetStartedSigNoz />
+
+### Step 2: Building a Sample Application
+
+```go
+package main
+
+import (
+	"fmt"
+	"net/http"
+	"os"
+
+	"io"
+
+	log "github.com/sirupsen/logrus"
+)
+
+func main() {
+	logFile, err := os.OpenFile("application.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		panic(err)
+	}
+	defer logFile.Close()
+
+	// Setting up Logrus with a multi-writer
+	logger := log.New()
+	mw := io.MultiWriter(os.Stdout, logFile) // MultiWriter to log to stdout and file
+	logger.SetOutput(mw)
+	logger.Formatter = &log.JSONFormatter{}
+	logger.Level = log.DebugLevel // Setting the log level to debug
+
+	http.HandleFunc("/", handleIndex(logger))
+	http.HandleFunc("/log", handleLog(logger))
+	http.HandleFunc("/data", handleData(logger))
+	http.HandleFunc("/error", handleError(logger))
+
+	fmt.Println("Server starting on <http://localhost:8080>")
+	if err := http.ListenAndServe(":8080", nil); err != nil {
+		panic(err)
+	}
+}
+
+func handleIndex(logger *log.Logger) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		logger.WithFields(log.Fields{
+			"method": r.Method,
+		}).Info("Accessing index page")
+		fmt.Fprintln(w, "Welcome to the Go Application!")
+	}
+}
+
+func handleLog(logger *log.Logger) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		fields := log.Fields{
+			"Method": r.Method,
+			"Path":   r.URL.Path,
+		}
+		switch r.Method {
+		case "GET":
+			logger.WithFields(fields).Info("Handled GET request on /log")
+			fmt.Fprintln(w, "Received a GET request at /log.")
+		case "POST":
+			logger.WithFields(fields).Info("Handled POST request on /log")
+			fmt.Fprintln(w, "Received a POST request at /log.")
+		default:
+			http.Error(w, "Unsupported HTTP method", http.StatusMethodNotAllowed)
+		}
+	}
+}
+
+func handleData(logger *log.Logger) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		logger.WithFields(log.Fields{
+			"method":     r.Method,
+			"endpoint":   "/data",
+			"request_id": fmt.Sprintf("%d", os.Getpid()),
+		}).Info("Data endpoint hit")
+		fmt.Fprintln(w, "This is the data endpoint. Method used:", r.Method)
+	}
+}
+
+func handleError(logger *log.Logger) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		logger.WithFields(log.Fields{
+			"method":   r.Method,
+			"endpoint": "/error",
+			"error_id": "error123",
+		}).Error("Error endpoint accessed")
+		http.Error(w, "You have reached the error endpoint", http.StatusInternalServerError)
+	}
+}
+```
+
+The above code demonstrates a basic HTTP server with integrated structured logging using the ogrus library. The server logs information about HTTP requests to various endpoints and records these logs in both the console and a file (`application.log`) for effective monitoring and debugging. It sets up HTTP handlers for different endpoints (`"/"`, `"/log"`, `"/data"`, and `"/error"`) each equipped with logging that captures detailed information about the requests and any errors. The log output is formatted as JSON and is set to the debug level, ensuring that all debug-level messages and above are captured.
+
+The program uses `io.MultiWriter` to simultaneously log to the terminal and a file, enhancing visibility during development while ensuring data persistence. Each handler function logs relevant request details using logrus `WithFields` method, providing structured and searchable log data. This setup not only aids in development but also prepares the application for production use by implementing robust logging practices that facilitate maintenance and troubleshooting.
+
+### Step 3: Setting up the Logs Pipeline in Otel Collector
+
+The above code generates a log file named `application.log` on the execution of the code. To export logs from the log file generated an OpenTelemetry Collector needs to be integrated.
+
+You can set up the complete pipeline following this [guide](https://signoz.io/docs/userguide/collect_logs_from_file/). Here is the complete configuration for the above go code:
+
+```yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+  hostmetrics:
+    collection_interval: 60s
+    scrapers:
+      cpu: {}
+      disk: {}
+      load: {}
+      filesystem: {}
+      memory: {}
+      network: {}
+      paging: {}
+      process:
+        mute_process_name_error: true
+        mute_process_exe_error: true
+        mute_process_io_error: true
+      processes: {}
+  prometheus:
+    config:
+      global:
+        scrape_interval: 60s
+      scrape_configs:
+        - job_name: otel-collector-binary
+          static_configs:
+            - targets:
+              # - localhost:8888
+  filelog/app:
+    include: [ <path-to-log-file> ] #include the full path to your log file
+    start_at: end
+processors:
+  batch:
+    send_batch_size: 1000
+    timeout: 10s
+  # Ref: <https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/resourcedetectionprocessor/README.md>
+  resourcedetection:
+    detectors: [env, system] # Before system detector, include ec2 for AWS, gcp for GCP and azure for Azure.
+    # Using OTEL_RESOURCE_ATTRIBUTES envvar, env detector adds custom labels.
+    timeout: 2s
+    system:
+      hostname_sources: [os] # alternatively, use [dns,os] for setting FQDN as host.name and os as fallback
+extensions:
+  health_check: {}
+  zpages: {}
+exporters:
+  otlp:
+    endpoint: "<https://ingest>.{region}.signoz.cloud:443"
+    tls:
+      insecure: false
+    headers:
+      "signoz-access-token": "<SIGNOZ_INGESTION_KEY>"
+  logging:
+    verbosity: normal
+service:
+  telemetry:
+    metrics:
+      address: 0.0.0.0:8888
+  extensions: [health_check, zpages]
+  pipelines:
+    logs:
+      receivers: [otlp, filelog/app]
+      processors: [batch]
+      exporters: [otlp]
+```
+
+### Step 4: Viewing Logs in SigNoz
+
+After running the above application and making the correct configurations, you can navigate to the SigNoz logs dashboard to see all the logs sent to SigNoz.
+
+<Figure src="/img/guides/2024/07/golang-logrus-Untitled%202.webp" alt="SigNoz localhost showcasing the log output of the above application." caption="SigNoz localhost showcasing the log output of the above application." />
+
+SigNoz localhost showcasing the log output of the above application.
+
+## Best Practices for Logging with logrus
+
+### Maintain a Consistent Log Format
+
+Understanding and parsing logs is made easier when your application uses a consistent log format, especially in distributed or large-scale systems. The names of the fields, the log levels, and the message structure should all be consistent.
+
+- Standardise Field Names: To make querying and analysis easier, use the same field names for comparable data across various application sections.
+- Establish Custom Log Levels Correctly: Create custom log levels only when absolutely necessary, and make sure your staff understands and uses them regularly.
+- Make Use of Structured Logging For consistent and machine-readable logs, use Logrus's JSONFormatter with structured logging (JSON, for example).
+
+### Implement Contextual Logging
+
+Contextualizing your logs can greatly help with problem diagnosis. Contextualization is made especially easy using Logrus's field-based functionality.
+
+- Make Good Use of Fields: Add fields in your logs with essential contextual data, such as user IDs, transaction IDs, and other relevant information.
+- Context Per Operation: Use a basic logger with pre-populated information when managing a request or a particular operation. After that, this logger may be distributed to those involved in the operation.
+
+### Consider Performance Implications
+
+Logging shouldn't have a big effect on how well your application runs. Consider the effects of excessive logging on performance.
+
+- Log Level Adjustments for Environments: To minimize the amount of recorded data, use higher log levels (like WARN, ERROR) in production and lower levels (like DEBUG, TRACE) in development.
+- Asynchronous Logging: To prevent obstructing the primary application activities, think about logging asynchronously. Logs may be sent to external systems by utilizing Logrus's hooks.
+- Setting a rate limit: To stop log flooding, which might happen during faults or DDoS assaults, use log rate limitation.
+
+### Ensure Security in Logging Practices
+
+Sensitive information may occasionally be accidentally included in logs, raising security concerns.
+
+- Never Log Sensitive Information: Passwords, PINs, and security tokens are examples of sensitive data that should never be explicitly logged.
+- Use Logrus Hooks for Sensitive Data: To sanitize or encrypt log entries before storage or transmission, use Logrus Hooks if sensitive data has to be recorded.
+- Safe Log Storage: Make sure that log files and log data are kept safely. If logs are kept in a public cloud or a distributed system, use encryption to protect them.
+
+## Other logging libraries vs logrus
+
+| Libraries | Advantage | Disadvantage |
+| --- | --- | --- |
+| logrus | - Structured Logging: logrus supports structured logging which allows logging in a JSON format, making it easier for machines to read and process logs.
+- Extensibility: It provides a lot of flexibility, supporting custom formatters, levels, and hooks that integrate with various external systems (like log aggregators).
+- Contextual Information: It makes it easy to add contextual information to logs with fields, improving the diagnosability of log entries. | - Performance: logrus is not the fastest logging library due to its use of reflection and its more abstract design. This can be a drawback in performance-critical applications.
+- API Stability: logrus's API has been known to have breaking changes in the past, although it has largely stabilized now |
+| zap | - High Performance: zap is designed for high performance. Unlike logrus, zap avoids reflection and uses a zero-allocation philosophy under typical use, which means it can log with minimal impact on application performance.
+- Structured Logging: Like logrus, zap naturally encodes logs in JSON and provides APIs for adding structured context to the logs. | - Complex API: zap's API can be more complex to use compared to logrus, especially when customizing logger behavior.
+- Less Customizable: While highly performant, zap doesn’t offer as much flexibility in terms of log formatting compared to logrus. |
+| zerolog | - Performance: zerolog is designed for low-latency applications and claims to have zero allocations in its logging calls, making it extremely fast and suitable for high-throughput applications.
+- JSON-First: zerolog logs are structured as JSON by default, making it ideal for modern log management solutions that are designed to ingest JSON logs. | - Simplicity vs. Flexibility: zerolog focuses on performance and simplicity, which might limit customization options compared to logrus. |
+| slog | - Structured and Contextual Logging: slog supports structured logging and allows for extensive contextual information to be logged, similar to logrus.
+- Scalability and Concurrency: slog is designed with concurrency in mind, which makes it suitable for applications that require logging from multiple goroutines without losing performance.
+- Filters and Handlers: It offers a flexible system of handlers and filters, allowing detailed control over which logs are processed and how. | - Less Popular: slog is not as widely used or well-known as logrus, zap, or zerolog, which can translate to fewer community resources, examples, and third-party integrations.
+- Complexity: Its API can be more complex due to its flexible and powerful filtering and handler mechanisms, possibly leading to a steeper learning curve. |
+
+## Conclusion
+
+- logrus offers structured logging, which is essential for more sophisticated analytics. It enables logging with `key-value` paired attributes, making the logs easy to parse and filter, thus significantly improving debugging and monitoring capabilities.
+- logrus supports extensive customization options, including various logging levels and structured formats like JSON. This allows developers to tailor the logging to meet the needs of different environments and purposes. This flexibility makes logrus suitable for complex applications where detailed and contextual logging is critical.
+- logrus simplifies the logging process with components like fields and formatters. This extensibility and ease of use make logrus a robust tool for both development and production environments, providing a modern solution to application logging challenges.
+- While logrus offers many benefits, it is not the fastest logging library available for Go, primarily due to its use of reflection and more abstract design. For applications where performance is critical, especially those requiring high-throughput or low-latency logging, other libraries like `zap` or `zerolog` might be more appropriate.
+- Despite its rich functionality, logrus maintains an API that is easy to use and integrate into existing applications. It's also well-documented, which helps new users get up to speed quickly.
+
+## FAQs
+
+### What is logrus?
+
+`logrus` is a popular organized logger designed for `Golang`. It is renowned for being compatible with the common library logger and having an easy-to-use API. The built-in log package in Go is expanded by Logrus to offer structured logging features. 
+
+Compared to plain text logs, structured logging logs are easier to interpret programmatically because of their format. An overview of logrus's features and the reasons developers would like it over alternative logging frameworks are covered in the later sections of this guide.  
+
+### Is logrus deprecated?
+
+As of the last update, logrus is not deprecated. It remains a popular and actively used logging library in the Go programming community. While there have been discussions and speculations in the past about its maintenance status due to periods of less activity, the repository on GitHub continues to receive updates and contributions.
+
+However, developers need to keep an eye on the official logrus GitHub repository and related community channels for the most current information about its status and any future deprecation plans. This is a common practice with open-source software to ensure the tools and libraries you use are actively maintained and secure.
+
+### What is deprecation logging?
+
+Deprecation logging refers to the practice of logging warnings about features, functionalities, or components in software that are obsolete or will soon be removed in future versions. It's an essential aspect of software maintenance and development, particularly for APIs, libraries, frameworks, and large applications undergoing iterative updates and enhancements.
+
+### Which is better logrus vs zap?
+
+Choosing between Logrus and zap for logging in Go depends on specific project requirements. logrus is known for its flexibility and ease of use, with features like custom log levels and structured logging, making it suitable for applications where a straightforward and adaptable logging solution is favored. 
+
+On the other hand, zap shines in high-performance environments due to its zero-allocation design and efficient logging, ideal for high-load or low-latency systems where logging overhead must be minimized. Therefore, while logrus offers a great balance of features for general-purpose applications, zap is better suited for scenarios where performance is a critical factor. Assessing factors such as load, log volume, and system performance requirements will help determine the best choice for your specific needs.
+
+### Which is better logrus vs zerolog?
+
+Choosing between logrus and zerolog for logging in Go applications hinges on balancing ease of use, flexibility, and performance. logrus excels with its user-friendly API, extensive customizability, and structured logging capabilities, making it suitable for general web applications where performance is not the primary concern. 
+
+In contrast, zerolog stands out in high-performance environments due to its focus on speed and efficiency, boasting zero allocation in many operations and optimal performance for high-throughput or low-latency systems. Thus, the decision should be based on whether developer convenience and flexibility (logrus) or logging performance with minimal system impact (zerolog) is more critical for your project's needs.
