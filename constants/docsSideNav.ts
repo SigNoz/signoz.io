@@ -676,6 +676,7 @@ const docsSideNav = [
       {
         type: 'category',
         label: 'User Guide',
+        isExpanded: false,
         items: [
           {
             type: 'doc',
