@@ -1658,6 +1658,11 @@ const docsSideNav = [
             route: '/docs/troubleshooting/signoz-cloud/metrics-troubleshooting',
             label: 'Metrics Troubleshooting',
           },
+          {
+            type: 'doc',
+            route: '/docs/troubleshooting/signoz-cloud/ingestion-troubleshooting',
+            label: 'Ingestion Troubleshooting',
+          },
         ],
       },
     ],
