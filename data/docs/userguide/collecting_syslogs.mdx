@@ -163,4 +163,42 @@ If you don’t already have a SigNoz cloud account, you can sign up [here](https
 * You can check the status of service by running `sudo systemctl status rsyslog.service`
 * If there are no errors your logs will be visible on SigNoz UI.
 
-  
+## Troubleshooting Guide
+
+This troubleshooting guide includes step-by-step instructions that should resolve most issues with syslogs.
+
+## Syslogs not appearing in the SigNoz UI
+
+If you are not seeing the syslog stream from your IoT device in the SigNoz web UI, try the following steps:
+
+1. Verify the IoT device is sending syslog to the correct IP address and port. The IoT device should be sending syslog to the IP address of the machine running SigNoz on port `514` over UDP.
+2. Check the `otel-collector-config.yaml` file. Ensure you have added the following configuration under the receivers section to listen for syslog on port `514` over UDP
+```yaml
+syslog:
+  udp:
+    listen_address: "0.0.0.0:514"
+    protocol: rfc3164
+    location: UTC
+```
+
+3. Restart the SigNoz containers after making any changes to the config file:
+```bash
+docker compose up --force-recreate --build -d
+```
+
+4. Check the logs of the otel-collector container for any errors or warnings related to syslog:
+```bash
+docker logs <signoz-otel-collector-name>
+```
+
+5. Look for any errors parsing the syslog messages or issues binding to port `514`. Ensure the signoz-clickhouse container is healthy. Review the logs for any errors:
+```bash
+docker logs <signoz-clickhouse-container-name>
+```
+
+6. Change the retention period to see the logs for the latest period of time. For eg. changing the retention period to, say _Last 5 minutes_.
+
+## Docker container issues
+
+- Use `docker ps` to check the status of the containers. Restart any containers that are not running using `docker compose up --force-recreate --build -d`.
+- Check the logs using `docker logs <collector-container-id>`. Look for errors or warnings that indicate issues with the syslog receiver.
