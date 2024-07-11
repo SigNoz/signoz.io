@@ -28,7 +28,8 @@ import { CircleCheckSolid, CircleInfoSolid, ZapSolid, ClockSolid, CheckSolid, Cr
 function Pricing() {
   return (
     <div className='bg-signoz_ink-500 relative'>
-
+      <div className="absolute top-0 right-0 left-0 h-screen bg-[length:55%] sm:bg-no-repeat bg-[center_top_4rem] bg-[url('/img/background_blur/Perlin_noise.png')] " />
+      <div className="absolute top-0 right-0 left-0 h-screen sm:bg-[center_top_-50rem] bg-[length:110%] bg-no-repeat bg-[url('/img/background_blur/Circle.png')]" />
       <div title="SigNoz Plans">
         {/* Plans */}
         <div className="flex flex-col items-center pt-24 px-5 relative !w-[80vw] !mx-auto border border-signoz_slate-400 border-dashed !border-b-0">
