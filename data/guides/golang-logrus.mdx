@@ -10,6 +10,159 @@ keywords: [logrus, logging, logging logrus, golang, logrus golang, opentelemetry
 
 ---
 
+<head>
+<script type="application/ld+json">
+    {`{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Golang Logrus - Complete Guide to logging in Golang with Logrus",
+  "alternativeHeadline": "Master Golang logging with Logrus - Learn setup, configuration, and best practices for structured logging",
+  "author": {
+    "@type": "Person",
+    "name": "Aayush Sharma"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SigNoz",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://signoz.io/img/SigNozLogo-orange.svg"
+    }
+  },
+  "datePublished": "2024-07-11",
+  "dateModified": "2024-07-11",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://signoz.io/guides/golang-logrus/"
+  },
+  "description": "In this tutorial, we will discover Golang logrus and some of the best practices provided by logrus for implementing structured logging in Golang applications. We will set up the Golang application and practice different logging formats logrus provides.",
+  "keywords": "logrus, logging, logging logrus, golang, logrus golang, opentelemetry golang, opentelemetry logrus",
+  "articleSection": "Technology",
+  "inLanguage": "en",
+  "isPartOf": {
+    "@type": "Blog",
+    "name": "SigNoz Blog",
+    "url": "https://signoz.io/blog/"
+  },
+  "about": [
+    {
+      "@type": "Thing",
+      "name": "Logrus",
+      "description": "A structured logger for Go (Golang)"
+    },
+    {
+      "@type": "Thing",
+      "name": "Golang",
+      "description": "A statically typed, compiled programming language developed by Google"
+    },
+    {
+      "@type": "Thing",
+      "name": "Structured Logging",
+      "description": "A logging approach that treats log entries as data structures rather than plain text"
+    }
+  ],
+  "mentions": [
+    {
+      "@type": "SoftwareApplication",
+      "name": "Logrus",
+      "applicationCategory": "Logging Library"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "name": "SigNoz",
+      "applicationCategory": "Observability Platform"
+    }
+  ],
+  "mainEntity": {
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What is logrus?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Logrus is a popular organized logger designed for Golang. It is renowned for being compatible with the common library logger and having an easy-to-use API. The built-in log package in Go is expanded by Logrus to offer structured logging features."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is logrus deprecated?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "As of the last update, logrus is not deprecated. It remains a popular and actively used logging library in the Go programming community. While there have been discussions and speculations in the past about its maintenance status due to periods of less activity, the repository on GitHub continues to receive updates and contributions."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is deprecation logging?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Deprecation logging refers to the practice of logging warnings about features, functionalities, or components in software that are obsolete or will soon be removed in future versions. It's an essential aspect of software maintenance and development, particularly for APIs, libraries, frameworks, and large applications undergoing iterative updates and enhancements."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Which is better logrus vs zap?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Choosing between Logrus and zap for logging in Go depends on specific project requirements. Logrus is known for its flexibility and ease of use, with features like custom log levels and structured logging. Zap shines in high-performance environments due to its zero-allocation design and efficient logging. The choice depends on whether you prioritize flexibility and ease of use (Logrus) or performance (zap)."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Which is better logrus vs zerolog?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Choosing between logrus and zerolog depends on balancing ease of use, flexibility, and performance. Logrus excels with its user-friendly API and extensive customizability, suitable for general web applications. Zerolog stands out in high-performance environments due to its focus on speed and efficiency. The decision should be based on whether developer convenience (logrus) or logging performance (zerolog) is more critical for your project's needs."
+        }
+      }
+    ]
+  },
+  "tutorial": {
+    "@type": "HowTo",
+    "name": "How to Use Logrus in Golang",
+    "step": [
+      {
+        "@type": "HowToStep",
+        "name": "Install Logrus",
+        "text": "Install Logrus using go get github.com/sirupsen/logrus"
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Import Logrus",
+        "text": "Import Logrus in your Go code: import 'github.com/sirupsen/logrus'"
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Initialize Logger",
+        "text": "Create a logger instance using logrus.New()"
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Set Log Levels",
+        "text": "Configure log levels using SetLevel() method"
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Add Fields to Logs",
+        "text": "Use WithFields() method to add structured data to log entries"
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Choose Formatter",
+        "text": "Select between TextFormatter and JSONFormatter based on your needs"
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Integrate with SigNoz",
+        "text": "Set up SigNoz and configure Logrus to send logs to SigNoz for centralized monitoring"
+      }
+    ]
+  }
+}`}
+</script>
+</head>
+
 Logging is the record of events that occur in an application, providing critical insights into its behavior, performance, and potential problems. In Golang, the built-in log package helps monitor and debug applications. 
 
 However, for more advanced logging needs, Golang offers logrus, a powerful package designed for structured logging. This guide will explore the features and best practices of using logrus for implementing structured logging in Golang applications.
@@ -113,7 +266,7 @@ func main() {
 
 Output
 
-<Figure src="/img/guides/2024/07/golang-logrus-Untitled.webp" alt="Untitled" caption="Untitled" />
+<Figure src="/img/guides/2024/07/golang-logrus-Untitled.webp" alt="Output of above code" caption="Output of above code" />
 
 The default logger for logrus prints the logs statement with color coding. 
 
@@ -211,7 +364,6 @@ Output
 
 <Figure src="/img/guides/2024/07/golang-logrus-Untitled%201.webp" alt="Output of all the levels" caption="Output of all the levels" />
 
-Output of all the levels
 
 In the above code you might have come across a line - `log.SetLevel(log.TraceLevel)`, it is the `SetLevel` function that is used to set the logger level in logrus. It logs entries with that severity or anything above it. By default, it is set to `InfoLevel`.
 
