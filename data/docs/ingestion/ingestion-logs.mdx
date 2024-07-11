@@ -4,11 +4,65 @@ title: Ingestion Logs
 id: ingestion-logs
 ---
 
-## Send Logs via OTLP
+## Overview
 
-In line with the OTLP protocol specifications (insert links to OTLP protocol specification), SigNoz supports both the OTLP/HTTP and OTLP/GRPC protocols.
+In accordance with the [OTLP specification](https://github.com/open-telemetry/opentelemetry-proto/blob/main/docs/specification.md), SigNoz supports both the OTLP/HTTP and OTLP/GRPC protocol. In addition, SigNoz exposes custom endpoints listed below.
 
-See (## Sending OTLP data) for more information on configuring your exporters to send data
+See [Ingestion](https://signoz.io/docs/ingestion/ingestion/) to get started.
+
+## Send Logs via OTLP/GRPC
+```bash
+POST /opentelemetry.proto.collector.logs.v1.LogsService/Export
+```
+
+#### Request Model
+The data model is the one supported by opentelemetry [logs](https://opentelemetry.io/docs/specs/otel/logs/data-model/) data model.
+
+#### Response
+<Tabs>
+<TabItem value="ok" label="OK" default>
+```
+{
+  "partialSuccess": {}
+}
+```
+</TabItem>
+</Tabs>
+
+#### Code Examples
+<Tabs>
+<TabItem value="grpcurl" label="gRPCurl" default>
+
+Prerequisites:
+- Git and gRPCurl installed.
+```bash
+#!/bin/bash
+
+function main() {
+    local body=$(cat <<EOF
+{"resourceLogs":[{"resource":{"attributes":[{"key":"resource-attr","value":{"stringValue":"resource-attr-val-1"}}]},"scopeLogs":[{"scope":{},"logRecords":[{"timeUnixNano":"$(date +%s)000000000","severityNumber":9,"severityText":"Info","body":{"stringValue":"This is a log message"},"attributes":[{"key":"app","value":{"stringValue":"server"}},{"key":"instance_num","value":{"intValue":"1"}}],"droppedAttributesCount":1,"traceId":"","spanId":""},{"timeUnixNano":"$(date +%s)000000000","severityNumber":9,"severityText":"Info","body":{"stringValue":"something happened"},"attributes":[{"key":"customer","value":{"stringValue":"acme"}},{"key":"env","value":{"stringValue":"dev"}}],"droppedAttributesCount":1,"traceId":"","spanId":""}]}]}]}
+EOF
+)
+
+    # Clone OpenTelemetry protobuf definitions
+    git clone https://github.com/open-telemetry/opentelemetry-proto.git
+
+    # Send logs to Signoz 
+    echo "$body" | grpcurl -v -d @ \
+    -rpc-header "signoz-access-token: ${SIGNOZ_INGESTION_KEY}" \
+    -proto opentelemetry/proto/collector/logs/v1/logs_service.proto \
+    -import-path ./opentelemetry-proto \
+    ${SIGNOZ_ENDPOINT} \
+    opentelemetry.proto.collector.logs.v1.LogsService/Export
+}
+
+main
+
+```
+
+</TabItem>
+</Tabs>
+
 
 ## Send Logs from heroku
 
