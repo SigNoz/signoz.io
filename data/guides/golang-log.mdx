@@ -1,23 +1,20 @@
 ---
-
 title: Complete Guide to Logging in Go - Golang Log
 slug: golang-log
 date: 2024-07-02
 tags: [logging]
-authors: [eromosele] 
-description: This guide explores the critical role of logging in GoLang application development. It introduces the basics of effective logging practices and dives into the `log` package from the standard library, covering usage and customization. Popular third-party logging libraries like Logrus, Zap, and Zerolog are detailed for their features and setup. Additionally, it provides instructions on integrating SigNoz for log management. 
+authors: [eromosele]
+description: This guide explores the critical role of logging in GoLang application development. It introduces the basics of effective logging practices and dives into the `log` package from the standard library, covering usage and customization. Popular third-party logging libraries like Logrus, Zap, and Zerolog are detailed for their features and setup. Additionally, it provides instructions on integrating SigNoz for log management.
 keywords: [log, logging, golang, zap, zerolog, logrus, logxi, klog, seelog, log15, glog]
-
 ---
 
 <head>
-<script type="application/ld+json">
+  <script type="application/ld+json">
     {`{
   "@context": "https://schema.org",
   "@type": "BlogPosting",
   "headline": "Complete Guide to Logging in Go - Golang Log",
   "alternativeHeadline": "A comprehensive guide to effective logging practices in Go",
-  "image": "https://signoz.io/img/blog/2024/07/golang-logging-cover.webp",
   "author": {
     "@type": "Person",
     "name": "Eromosele"
@@ -34,7 +31,7 @@ keywords: [log, logging, golang, zap, zerolog, logrus, logxi, klog, seelog, log1
   "dateModified": "2024-07-02",
   "mainEntityOfPage": {
     "@type": "WebPage",
-    "@id": "https://signoz.io/blog/golang-log/"
+    "@id": "https://signoz.io/guides/golang-log/"
   },
   "description": "This guide explores the critical role of logging in GoLang application development. It introduces the basics of effective logging practices and dives into the 'log' package from the standard library, covering usage and customization. Popular third-party logging libraries like Logrus, Zap, and Zerolog are detailed for their features and setup. Additionally, it provides instructions on integrating SigNoz for log management.",
   "keywords": "log, logging, golang, zap, zerolog, logrus, logxi, klog, seelog, log15, glog",
@@ -105,10 +102,10 @@ keywords: [log, logging, golang, zap, zerolog, logrus, logxi, klog, seelog, log1
     }
   ]
 }`}
-</script>
+  </script>
 </head>
 
-Logging is crucial for detecting bugs early, tracing issues efficiently, and mitigating hacking attempts. To achieve these benefits, it's essential to set up logging correctly. 
+Logging is crucial for detecting bugs early, tracing issues efficiently, and mitigating hacking attempts. To achieve these benefits, it's essential to set up logging correctly.
 
 This article will teach us how to use Golang to generate logs effectively, including setting up loggers, formatting log messages, and managing log levels. By mastering these techniques, you can ensure robust and reliable logging in your applications.
 
@@ -131,7 +128,7 @@ Logging and monitoring are crucial for several reasons, including:
 
 ## Standard Library Logging
 
-In Golang, the standard package provided for logging is the `log` package.  The `log` package offers a simple and easy-to-use interface for logging messages, errors, and other information.
+In Golang, the standard package provided for logging is the `log` package. The `log` package offers a simple and easy-to-use interface for logging messages, errors, and other information.
 
 The `log` package also provides a default logger that writes to the standard error and includes methods for formatting output.
 
@@ -255,7 +252,7 @@ ERROR: 2024/06/27 12:34:56 main.go:14: This is an error message.
 
 ## Third-Party Logging Libraries
 
-In addition to the standard `log` package provided by Go, several popular third-party logging libraries offerres and flexibility. 
+In addition to the standard `log` package provided by Go, several popular third-party logging libraries offerres and flexibility.
 
 These libraries cater to various logging requirements, including:
 
@@ -268,7 +265,7 @@ Let's discuss some popular logging libraries in GoLang:
 
 ### logrus
 
- `logrus` is a structured logging library for Go (Golang) that offers extensive features and flexibility. It is widely used for its ability to handle structured log data efficiently and its customizable logging levels.
+`logrus` is a structured logging library for Go (Golang) that offers extensive features and flexibility. It is widely used for its ability to handle structured log data efficiently and its customizable logging levels.
 
 Installation and Setup
 
@@ -278,7 +275,7 @@ To use `logrus` in your Go application, you need to install it using `go get` o
 go get github.com/sirupsen/logrus
 ```
 
-After installation,  import `logrus` into your Go code (if there is an error run `go mod tidy`):
+After installation, import `logrus` into your Go code (if there is an error run `go mod tidy`):
 
 ```go
 import (
@@ -374,15 +371,15 @@ Output:
 
 ```json
 {
-"level":"info",
-"msg":"This is a JSON formatted log message",
-"time":"2024-06-27T12:00:00Z"
+  "level": "info",
+  "msg": "This is a JSON formatted log message",
+  "time": "2024-06-27T12:00:00Z"
 }
 ```
 
 ### Zap
 
-`Zap` is a high-performance, structured logging library for Go. It is designed for speed and efficiency, making it ideal for performance-critical applications. 
+`Zap` is a high-performance, structured logging library for Go. It is designed for speed and efficiency, making it ideal for performance-critical applications.
 
 Installation and Setup
 
@@ -404,7 +401,7 @@ Basic Usage and Features
 
 - High-Performance Logging: `Zap` is designed for high-performance logging, providing both a "sugar" (simpler) API and a more complex API for high-performance needs.
 
- Using the "Sugar" API:
+Using the "Sugar" API:
 
 ```go
 package main
@@ -434,7 +431,7 @@ Output
 {"level":"info","ts":1592580737.941084,"caller":"main/main.go:14","msg":"A formatted log message: example"}
 ```
 
- Using the More Complex API:
+Using the More Complex API:
 
 ```go
 package main
@@ -459,7 +456,13 @@ func main() {
 Output:
 
 ```json
-{"level":"info","ts":1592580737.941084,"caller":"main/main.go:14","msg":"A formatted log message","Observability":"Signoz"}
+{
+  "level": "info",
+  "ts": 1592580737.941084,
+  "caller": "main/main.go:14",
+  "msg": "A formatted log message",
+  "Observability": "Signoz"
+}
 ```
 
 - Structured Logging: `Zap` supports structured logging, allowing developers to include key-value pairs in log entries. This helps in organizing and analyzing log data effectively.
@@ -489,7 +492,15 @@ func main() {
 Output:
 
 ```json
-{"level":"info","ts":1592580737.941084,"caller":"main/main.go:11","msg":"Structured logging example","url":"https://signoz.io","attempt":3,"backoff":2}
+{
+  "level": "info",
+  "ts": 1592580737.941084,
+  "caller": "main/main.go:11",
+  "msg": "Structured logging example",
+  "url": "https://signoz.io",
+  "attempt": 3,
+  "backoff": 2
+}
 ```
 
 - Configuring Zap: `Zap` is highly configurable, allowing you to customize the logging configuration to meet your needs.
@@ -657,7 +668,7 @@ Output:
 
 ### Glog
 
- `glog` is a library for Go that implements logging with severity levels. Developed by Google, Glog offers simple usage patterns and is designed to handle log file rotation automatically. It is an excellent choice for applications that require categorized logging.
+`glog` is a library for Go that implements logging with severity levels. Developed by Google, Glog offers simple usage patterns and is designed to handle log file rotation automatically. It is an excellent choice for applications that require categorized logging.
 
 Installation and Setup
 
@@ -700,7 +711,7 @@ func main() {
     glog.Info("This is an info message")
     glog.Warning("This is a warning message")
     glog.Error("This is an error message")
-    
+
     // Flushes all pending log I/O.
     glog.Flush()
 }
@@ -757,7 +768,7 @@ I0628 20:58:23.457638   13419 main.go:16] Log message number 4
 
 ### Log15
 
- Package `log15` provides an easy-to-use logging toolkit inspired by the `io` and `net/http` packages. It enforces logging with key/value pairs, using strings for keys and any type for values. The default format is `logfmt`, with optional JSON support for output.
+Package `log15` provides an easy-to-use logging toolkit inspired by the `io` and `net/http` packages. It enforces logging with key/value pairs, using strings for keys and any type for values. The default format is `logfmt`, with optional JSON support for output.
 
 Installation and Setup
 
@@ -869,9 +880,9 @@ func main() {
 Output:
 
 ```
-INFO[06-29|02:42:56] This is an info message 
-WARN[06-29|02:42:56] This is a warning message 
-EROR[06-29|02:42:56] This is an error message 
+INFO[06-29|02:42:56] This is an info message
+WARN[06-29|02:42:56] This is a warning message
+EROR[06-29|02:42:56] This is an error message
 ```
 
 ### Seelog
@@ -880,7 +891,7 @@ EROR[06-29|02:42:56] This is an error message
 
 Installation and Setup
 
- To use `seelog` in your Go application, you need to install it using `go get`:
+To use `seelog` in your Go application, you need to install it using `go get`:
 
 ```
 go get github.com/cihub/seelog
@@ -1040,11 +1051,11 @@ func main() {
     klog.Info("This is an info message")
     klog.Warning("This is a warning message")
     klog.Error("This is an error message")
-    
+
     // klog.Fatal logs a message, then calls os.Exit(255)
     // Uncommenting the following line will terminate the program
     // klog.Fatal("This is a fatal message")
-    
+
     // Flushes all pending log I/O
     klog.Flush()
 }
@@ -1079,7 +1090,7 @@ func main() {
     klog.Info("This is an info message")
     klog.Warning("This is a warning message")
     klog.Error("This is an error message")
-    
+
     // Flushes all pending log I/O
     klog.Flush()
 }
@@ -1110,7 +1121,7 @@ func main() {
     // Log structured messages with key-value pairs
     klog.InfoS("User signup", "username", "akhigbeeromo", "email", "akhigbeeromo@signoz.io")
     klog.InfoS("Order processed", "orderID", 1234, "amount", 56.78)
-    
+
     // Flushes all pending log I/O
     klog.Flush()
 }
@@ -1153,13 +1164,13 @@ Basic Usage and Features
 package main
 
 import (
-    "github.com/mgutz/logxi/v1" 
+    "github.com/mgutz/logxi/v1"
 )
 
 func main() {
     // Create a logger instance
     logger := log.New("example")
-    
+
     // Set log level to Debug
     logger.SetLevel(log.LevelDebug)
 
@@ -1177,26 +1188,27 @@ Output:
 12:05:40.559250 DBG example This is a debug message
 12:05:40.559977 INF example User signup username: akhigbeeromo
    email: akhigbeeromo@signoz.io
-12:05:40.560013 WRN example This is a warning message in: 
+12:05:40.560013 WRN example This is a warning message in:
 ```
 
 ## Guidelines for Effective Logging in GoLang
 
 1. Categorize Logs According to Their Respective Levels
-    
-    Log levels categorize messages based on their importance and severity, aiding in effective troubleshooting and monitoring. Log levels include: 
-    
-    - DEBUG: provides detailed information useful for diagnosing problems.
-    - INFO: highlights the progress or status of the application.
-    - WARN: Indicates potential issues or situations that may lead to problems in the future.
-    - ERROR: logs errors that are recoverable and allow the application to continue running.
-    - FATAL: logs critical errors that cause the application to terminate.
+
+   Log levels categorize messages based on their importance and severity, aiding in effective troubleshooting and monitoring. Log levels include:
+
+   - DEBUG: provides detailed information useful for diagnosing problems.
+   - INFO: highlights the progress or status of the application.
+   - WARN: Indicates potential issues or situations that may lead to problems in the future.
+   - ERROR: logs errors that are recoverable and allow the application to continue running.
+   - FATAL: logs critical errors that cause the application to terminate.
+
 2. Structured Logging: Use structured formats like JSON for logs to enhance searchability and parsing.
 3. Consistent Log Formatting: Maintain uniform log formats across applications for clarity and automated processing.
 4. Log Rotation and Retention: Implement log rotation to efficiently manage log file sizes, prevent disk space overload, and establish retention policies specifying the duration logs are stored before archiving or deletion.
 5. Sensitive Data Handling: Avoid logging sensitive information like passwords or credit card numbers to mitigate security risks and if necessary, ensure it is masked or obfuscated.
 6. Correlation IDs: Utilize unique identifiers (correlation IDs) in logs to trace and link events across different components or services.
-7. Centralized Logging:  Aggregate logs from various sources into a centralized logging system (e.g., ELK Stack, Splunk) for easier management and analysis.
+7. Centralized Logging: Aggregate logs from various sources into a centralized logging system (e.g., ELK Stack, Splunk) for easier management and analysis.
 8. Log Enrichment: Enrich logs with additional context such as user details, transaction IDs, or session information to facilitate troubleshooting and analysis.
 
 ## Monitoring Logs with an Observability Tool
@@ -1208,20 +1220,20 @@ In this article, we have learned about different logging packages and implemente
 Here are the key reasons why monitoring logs is crucial:
 
 1. Issue Detection and Troubleshooting
-    - Early Identification: Logs provide comprehensive information about errors and exceptions within the system, enabling early detection and swift resolution.
-    - Root Cause Analysis: Detailed log records assist in diagnosing the underlying causes of issues, offering insights into what went wrong and why.
+   - Early Identification: Logs provide comprehensive information about errors and exceptions within the system, enabling early detection and swift resolution.
+   - Root Cause Analysis: Detailed log records assist in diagnosing the underlying causes of issues, offering insights into what went wrong and why.
 2. Performance Monitoring
-    - Identifying Bottlenecks: Logs can reveal performance issues such as slow response times or resource constraints, allowing for proactive optimization.
-    - Resource Utilization Tracking: Monitoring logs help track the usage of resources like CPU, memory, and disk space, facilitating better resource management and capacity planning.
+   - Identifying Bottlenecks: Logs can reveal performance issues such as slow response times or resource constraints, allowing for proactive optimization.
+   - Resource Utilization Tracking: Monitoring logs help track the usage of resources like CPU, memory, and disk space, facilitating better resource management and capacity planning.
 3. Security and Compliance
-    - Security Surveillance: Logs help detect suspicious activities, unauthorized access, and potential security breaches, which is vital for maintaining a strong security posture.
-    - Compliance Adherence: Regular log monitoring helps meet regulatory requirements by maintaining and auditing logs as required by various compliance frameworks.
+   - Security Surveillance: Logs help detect suspicious activities, unauthorized access, and potential security breaches, which is vital for maintaining a strong security posture.
+   - Compliance Adherence: Regular log monitoring helps meet regulatory requirements by maintaining and auditing logs as required by various compliance frameworks.
 4. Operational Insights
-    - Health Monitoring: Logs provide insights into the health and status of various system components, including hardware, software, and network resources.
-    - Operational Metrics: Logs can be used to generate metrics that provide insights into operational efficiency and overall system performance.
+   - Health Monitoring: Logs provide insights into the health and status of various system components, including hardware, software, and network resources.
+   - Operational Metrics: Logs can be used to generate metrics that provide insights into operational efficiency and overall system performance.
 5. Automation and Alerts
-    - Automated Notifications: Observability tools can automatically generate alerts based on log data, enabling faster response times and reducing the need for manual monitoring.
-    - Anomaly Detection: Advanced log monitoring tools can use machine learning to detect anomalies in log data, helping to identify potential issues before they escalate.
+   - Automated Notifications: Observability tools can automatically generate alerts based on log data, enabling faster response times and reducing the need for manual monitoring.
+   - Anomaly Detection: Advanced log monitoring tools can use machine learning to detect anomalies in log data, helping to identify potential issues before they escalate.
 
 ## Sending GoLang Logs to Signoz
 
@@ -1312,11 +1324,13 @@ This Go code sets up a basic HTTP server that logs events to a file (`applicatio
 
 After running your application you should see the following output on `localhost:8080/`:
 
-<Figure src="/img/guides/2024/07/Screenshot_2024-07-01_at_14.15.51.webp" alt="Output after running the Go Application" caption="Output after running the Go Application" />
+<Figure
+  src="/img/guides/2024/07/Screenshot_2024-07-01_at_14.15.51.webp"
+  alt="Output after running the Go Application"
+  caption="Output after running the Go Application"
+/>
 
-
-
-Output after running the Go Application 
+Output after running the Go Application
 
 Step 3: Setting up the Logs Pipeline in Otel Collector
 
@@ -1357,7 +1371,7 @@ receivers:
             - targets:
               # - localhost:8888
   filelog/app:
-    include: [ <path-to-log-file> ] #include the full path to your log file
+    include: [<path-to-log-file>] #include the full path to your log file
     start_at: end
 processors:
   batch:
@@ -1375,11 +1389,11 @@ extensions:
   zpages: {}
 exporters:
   otlp:
-    endpoint: "<https://ingest>.{region}.signoz.cloud:443"
+    endpoint: '<https://ingest>.{region}.signoz.cloud:443'
     tls:
       insecure: false
     headers:
-      "signoz-access-token": "<SIGNOZ_INGESTION_KEY>"
+      'signoz-access-token': '<SIGNOZ_INGESTION_KEY>'
   logging:
     verbosity: normal
 service:
@@ -1398,7 +1412,11 @@ Step 4: Viewing Logs in SigNoz
 
 After running the above application and making the correct configurations, you can navigate to the SigNoz logs dashboard to see all the logs sent to SigNoz.
 
-<Figure src="/img/guides/2024/07/Screenshot_2024-07-01_at_14.13.26.webp" alt="Signoz log output of Go application" caption="Signoz log output of Go application" />
+<Figure
+  src="/img/guides/2024/07/Screenshot_2024-07-01_at_14.13.26.webp"
+  alt="Signoz log output of Go application"
+  caption="Signoz log output of Go application"
+/>
 
 Signoz log output of Go application
 
