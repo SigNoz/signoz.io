@@ -114,13 +114,13 @@ function Footer() {
               <div className="flex flex-col items-end shadow-sm max-md:mt-10">
                 <div className="flex items-center justify-between gap-2 self-end whitespace-nowrap text-center text-lg font-medium leading-5 text-white">
                   <Image
-                    className="h-8 w-auto"
+                    className="h-7 w-auto"
                     src="/img/SigNozLogo-orange.svg"
                     width={50}
                     height={50}
                     alt=""
                   />
-                  <div>SigNoz</div>
+                  <div className='font-satoshi-bold font-medium'>SigNoz</div>
                 </div>
                 <div className="mt-5 items-end justify-center rounded text-sm leading-5 text-emerald-300">
                   All systems operational

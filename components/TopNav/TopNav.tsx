@@ -54,7 +54,7 @@ export default function TopNav() {
               alt=""
             />
 
-            <span className="text-[17.111px] font-medium">SigNoz</span>
+            <span className="text-[18.58px] font-satoshi-bold font-medium">SigNoz</span>
           </Link>        
           <Popover.Group className="hidden items-center lg:flex gap-x-6">
           <Link
