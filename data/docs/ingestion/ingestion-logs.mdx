@@ -27,15 +27,30 @@ The data model is the one supported by opentelemetry [logs](https://opentelemetr
 }
 ```
 </TabItem>
+<TabItem value="12" label="12" default>
+```
+ERROR:
+  Code: Unimplemented
+  Message: not found
+```
+```
+ERROR:
+  Code: NotFound
+  Message: No key found in request
+```
+</TabItem>
+<TabItem value="16" label="16" default>
+```
+ERROR:
+  Code: Unauthenticated
+  Message: Invalid or missing key
+```
+</TabItem>
 </Tabs>
 
 #### Code Examples
 <Tabs>
-<TabItem value="grpcurl" label="gRPCurl" default>
-
-Prerequisites:
-- Git and gRPCurl installed.
-
+<TabItem value="grpcurl" label="grpcurl" default>
 ```bash
 #!/bin/bash
 
@@ -61,6 +76,106 @@ main
 
 ```
 
+```
+SIGNOZ_ENDPOINT=ingest.<region>.signoz.cloud:443 SIGNOZ_INGESTION_KEY=<key> ./logs.sh
+```
+
+</TabItem>
+
+<TabItem value="go" label="go" default>
+```go
+package main
+
+import (
+	"context"
+	"errors"
+	"time"
+
+	"go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploggrpc"
+	"go.opentelemetry.io/otel/log"
+	"go.opentelemetry.io/otel/log/global"
+	sdklog "go.opentelemetry.io/otel/sdk/log"
+)
+
+func setupOTelSDK(ctx context.Context) (shutdown func(context.Context) error, err error) {
+	var shutdownFuncs []func(context.Context) error
+
+	// shutdown calls cleanup functions registered via shutdownFuncs.
+	// The errors from the calls are joined.
+	// Each registered cleanup will be invoked once.
+	shutdown = func(ctx context.Context) error {
+		var err error
+		for _, fn := range shutdownFuncs {
+			err = errors.Join(err, fn(ctx))
+		}
+		shutdownFuncs = nil
+		return err
+	}
+
+	// handleErr calls shutdown for cleanup and makes sure that all errors are returned.
+	handleErr := func(inErr error) {
+		err = errors.Join(inErr, shutdown(ctx))
+	}
+
+	// Set up logger provider.
+	loggerProvider, err := newLoggerProvider(ctx)
+	if err != nil {
+		handleErr(err)
+		return
+	}
+	shutdownFuncs = append(shutdownFuncs, loggerProvider.Shutdown)
+	global.SetLoggerProvider(loggerProvider)
+
+	return
+}
+
+func newLoggerProvider(ctx context.Context) (*sdklog.LoggerProvider, error) {
+	logExporter, err := otlploggrpc.New(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	loggerProvider := sdklog.NewLoggerProvider(
+		sdklog.WithProcessor(sdklog.NewBatchProcessor(logExporter)),
+	)
+	return loggerProvider, nil
+}
+
+func main() {
+	ctx := context.Background()
+	// Set up OpenTelemetry.
+	otelShutdown, err := setupOTelSDK(ctx)
+	if err != nil {
+		return
+	}
+	// Handle shutdown properly so nothing leaks.
+	defer func() {
+		err = errors.Join(err, otelShutdown(ctx))
+	}()
+
+	now := time.Now()
+	observed := now.Add(time.Second)
+	body := log.StringValue("This is a log message")
+	attrs := []log.KeyValue{
+		log.Int("int", 1),
+		log.String("str", "foo"),
+		log.Float64("flt", 3.14),
+	}
+
+	var record log.Record
+	record.SetTimestamp(now)
+	record.SetObservedTimestamp(observed)
+	record.SetSeverity(log.SeverityDebug)
+	record.SetBody(body)
+	record.AddAttributes(attrs...)
+
+	global.Logger("my.logger").Emit(ctx, record)
+}
+```
+
+```
+OTEL_EXPORTER_OTLP_ENDPOINT='https://ingest.<region>.signoz.cloud:443' OTEL_EXPORTER_OTLP_HEADERS=signoz-access-token=<key> go run logs.go
+```
 </TabItem>
 </Tabs>
 
@@ -74,6 +189,7 @@ POST /v1/logs
 The data model is the one supported by opentelemetry [logs](https://opentelemetry.io/docs/specs/otel/logs/data-model/) data model.
 
 #### Response
+
 <Tabs>
 <TabItem value="200" label="200" default>
 ```
@@ -82,15 +198,30 @@ The data model is the one supported by opentelemetry [logs](https://opentelemetr
 }
 ```
 </TabItem>
+<TabItem value="401" label="401" default>
+```
+Unauthorized
+```
+</TabItem>
+<TabItem value="404" label="404" default>
+```
+{
+  "code":12,
+  "message":"not found"
+}
+```
+</TabItem>
+<TabItem value="415" label="415" default>
+```
+415 unsupported media type, supported: [application/json, application/x-protobuf]
+```
+</TabItem>
 </Tabs>
 
 #### Code Examples
+
 <Tabs>
 <TabItem value="curl" label="curl" default>
-
-Prerequisites:
-- Git and gRPCurl installed.
-
 ```bash
 #!/bin/bash
 
@@ -111,6 +242,105 @@ main
 
 ```
 
+```
+SIGNOZ_ENDPOINT=ingest.<region>.signoz.cloud:443 SIGNOZ_INGESTION_KEY=<key> ./logs.sh
+```
+
+</TabItem>
+<TabItem value="go" label="go">
+```go
+package main
+
+import (
+	"context"
+	"errors"
+	"time"
+
+	"go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploghttp"
+	"go.opentelemetry.io/otel/log"
+	"go.opentelemetry.io/otel/log/global"
+	sdklog "go.opentelemetry.io/otel/sdk/log"
+)
+
+func setupOTelSDK(ctx context.Context) (shutdown func(context.Context) error, err error) {
+	var shutdownFuncs []func(context.Context) error
+
+	// shutdown calls cleanup functions registered via shutdownFuncs.
+	// The errors from the calls are joined.
+	// Each registered cleanup will be invoked once.
+	shutdown = func(ctx context.Context) error {
+		var err error
+		for _, fn := range shutdownFuncs {
+			err = errors.Join(err, fn(ctx))
+		}
+		shutdownFuncs = nil
+		return err
+	}
+
+	// handleErr calls shutdown for cleanup and makes sure that all errors are returned.
+	handleErr := func(inErr error) {
+		err = errors.Join(inErr, shutdown(ctx))
+	}
+
+	// Set up logger provider.
+	loggerProvider, err := newLoggerProvider(ctx)
+	if err != nil {
+		handleErr(err)
+		return
+	}
+	shutdownFuncs = append(shutdownFuncs, loggerProvider.Shutdown)
+	global.SetLoggerProvider(loggerProvider)
+
+	return
+}
+
+func newLoggerProvider(ctx context.Context) (*sdklog.LoggerProvider, error) {
+	logExporter, err := otlploghttp.New(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	loggerProvider := sdklog.NewLoggerProvider(
+		sdklog.WithProcessor(sdklog.NewBatchProcessor(logExporter)),
+	)
+	return loggerProvider, nil
+}
+
+func main() {
+	ctx := context.Background()
+	// Set up OpenTelemetry.
+	otelShutdown, err := setupOTelSDK(ctx)
+	if err != nil {
+		return
+	}
+	// Handle shutdown properly so nothing leaks.
+	defer func() {
+		err = errors.Join(err, otelShutdown(ctx))
+	}()
+
+	now := time.Now()
+	observed := now.Add(time.Second)
+	body := log.StringValue("This is a log message")
+	attrs := []log.KeyValue{
+		log.Int("int", 1),
+		log.String("str", "foo"),
+		log.Float64("flt", 3.14),
+	}
+
+	var record log.Record
+	record.SetTimestamp(now)
+	record.SetObservedTimestamp(observed)
+	record.SetSeverity(log.SeverityDebug)
+	record.SetBody(body)
+	record.AddAttributes(attrs...)
+
+	global.Logger("my.logger").Emit(ctx, record)
+}
+```
+
+```
+OTEL_EXPORTER_OTLP_ENDPOINT='https://ingest.<region>.signoz.cloud:443' OTEL_EXPORTER_OTLP_HEADERS=signoz-access-token=<key> go run logs.go
+```
 </TabItem>
 </Tabs>
 
