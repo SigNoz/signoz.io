@@ -389,6 +389,8 @@ const PricingPlans = () => {
                       <li>Exceptions Monitoring</li>
                       <li>Alerts Management</li>
                       <li>SSO and SAML Support</li>
+                      <li>Support for Multiple Ingestion Keys</li>
+                      <li>Support for Rate Limits based on Ingestion keys</li>
                       <li>Service Dependency Visualization</li>
                       <li>Run aggregates on ingested spans</li>
                       <li>Live Tail Logging</li>
@@ -725,6 +727,8 @@ const PricingPlans = () => {
                     <p className={styles.featureBlur}>Includes all features in community edition</p>
                     <ul className="list-icon-right">
                       <li>SSO and SAML Support</li>
+                      <li>Support for Multiple Ingestion Keys</li>
+                      <li>Support for Rate Limits based on Ingestion keys</li>
                       <li>Dashboard locking</li>
                       <li>Visualize very large traces (&gt;10K spans)</li>
                       <li>Run aggregates on ingested spans</li>
@@ -955,6 +959,18 @@ const ExploreAllFeature = () => {
         features: [
           {
             feature: 'SSO/SAML support',
+            inCommunity: <CrossIcon />,
+            inTeams: <RightIcon />,
+            inEnterprise: <RightIcon />,
+          },
+          {
+            feature: 'Support for Multiple Ingestion Keys',
+            inCommunity: <CrossIcon />,
+            inTeams: <RightIcon />,
+            inEnterprise: <RightIcon />,
+          },
+          {
+            feature: 'Support for Rate Limits based on Ingestion keys',
             inCommunity: <CrossIcon />,
             inTeams: <RightIcon />,
             inEnterprise: <RightIcon />,

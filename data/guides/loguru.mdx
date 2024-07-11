@@ -1,5 +1,4 @@
 ---
-
 title: Loguru Python - Complete Guide to Logging
 slug: loguru
 date: 2024-07-09
@@ -7,17 +6,15 @@ tags: [logging]
 authors: [soumya_gupta]
 description: This tutorial provides comprehensive guidance on using Loguru for logging in Python. It covers the necessity and benefits of Loguru, fundamental usage, practical techniques, and a detailed, step-by-step guide on sending Loguru logs to Signoz.
 keywords: [loguru, python, loguru python, loguru vs logging, logging in python, logs, SigNoz]
-
 ---
 
 <head>
-<script type="application/ld+json">
+  <script type="application/ld+json">
     {`{
   "@context": "https://schema.org",
   "@type": "BlogPosting",
   "headline": "Loguru Python - Complete Guide to Logging",
   "alternativeHeadline": "Comprehensive Guide on Using Loguru for Efficient Logging in Python",
-  "image": "https://signoz.io/img/blog/2024/07/loguru-python-cover.webp",
   "author": {
     "@type": "Person",
     "name": "Soumya Gupta"
@@ -34,7 +31,7 @@ keywords: [loguru, python, loguru python, loguru vs logging, logging in python, 
   "dateModified": "2024-07-09",
   "mainEntityOfPage": {
     "@type": "WebPage",
-    "@id": "https://signoz.io/blog/loguru/"
+    "@id": "https://signoz.io/guides/loguru/"
   },
   "description": "This tutorial provides comprehensive guidance on using Loguru for logging in Python. It covers the necessity and benefits of Loguru, fundamental usage, practical techniques, and a detailed, step-by-step guide on sending Loguru logs to Signoz.",
   "keywords": "loguru, python, loguru python, loguru vs logging, logging in python, logs, SigNoz",
@@ -151,7 +148,7 @@ keywords: [loguru, python, loguru python, loguru vs logging, logging in python, 
     ]
   }
 }`}
-</script>
+  </script>
 </head>
 
 Logging in Python helps developers keep a detailed record of their application's operations. These logs capture crucial information such as errors, execution paths, performance metrics, and other significant events. Much like Captain Kirk's captain's logs in Star Trek, which documented the adventures and challenges of the USS Enterprise, this continuous record-keeping is vital for diagnosing problems, monitoring the application's health, and ensuring smooth operations.
@@ -211,16 +208,21 @@ cd loguru-test
   pip install loguru
   ```
 - Create a `test.py` file in your project directory (e.g., `loguru-test`). This file will demonstrate various features of Loguru. By default, Loguru logs messages at the INFO level and above:
+
   ```python
   # Log a message with the default configuration
   logger.info("info level")
   logger.debug("debug level")
   ```
+
   Output
+
   ```python
   2024-07-01 16:20:29,653 - __main__ INFO - info level
   ```
+
   By default, DEBUG messages are not shown because the default logging level is INFO. To see DEBUG messages, configure the logger:
+
   ```python
   # Add a handler with a lower level and remove the default handler
   logger.remove()
@@ -230,7 +232,9 @@ cd loguru-test
   logger.debug("debug level")
   logger.info("info level")
   ```
+
   Output
+
   ```jsx
   2024-07-01 16:20:29.009 | DEBUG    | __main__:<module>:2 - debug level
   2024-07-01 16:20:29.009 | INFO     | __main__:<module>:3 - info level
@@ -274,7 +278,11 @@ logger.info("Info log with formatted message as {time} {level} {message}")
 
 The resulting output can be seen as:
 
-<Figure src="/img/guides/2024/07/loguru-Untitled.webp" alt="Displaying logs formatted with various logging levels in the resulting output." caption="Displaying logs formatted with various logging levels in the resulting output." />
+<Figure
+  src="/img/guides/2024/07/loguru-Untitled.webp"
+  alt="Displaying logs formatted with various logging levels in the resulting output."
+  caption="Displaying logs formatted with various logging levels in the resulting output."
+/>
 
 Displaying logs formatted with various logging levels in the resulting output.
 
@@ -347,7 +355,9 @@ We can also change `add()` method to customize our log data
 
 - Rotation
   Specifies a condition under which the current log file will be closed, and a new one will be created
+
   - datetime: When it has a `datetime.timedelta` value, it specifies the frequency of each rotation, whereas a `datetime.time` value indicates the time of day when each rotation should occur.
+
     ```python
     # Rotates using datetime.timedelta every (1) day
     logger.add("log_file_timedelta.log", rotation=timedelta(days=1))
@@ -355,6 +365,7 @@ We can also change `add()` method to customize our log data
     # Rotates using datetime.time at 00:00 every day
     logger.add("log_file_time.log", rotation=time(0, 0))
     ```
+
   - int: When rotation is set to an integer value, it represents the maximum number of bytes the current file can hold before a new one is created.
     ```python
     # Rotates every 10 MB
@@ -365,6 +376,7 @@ We can also change `add()` method to customize our log data
     # rotates daily
     logger.add("log_file_str.log", rotation="1 day")
     ```
+
 - Retention
   Specifies the duration for which each log file will be retained before it is deletion
   ```python
@@ -382,6 +394,7 @@ We can also change `add()` method to customize our log data
   This would result in a file with "zip" compression being created to store log records. Loguru supports various compressed formats, including `zip`, `gz`, `bz2`, and `xz`, allowing users to choose the most suitable option for their needs.
 - Delay
   When set to True, a new log file is not created until the first log message is generated.
+
   ```powershell
   # log file added with delay enabled
   logger.add("delayed_log.log", delay=True)
@@ -390,7 +403,9 @@ We can also change `add()` method to customize our log data
   logger.info("This is an info message")
   logger.debug("This is a debug message")
   ```
+
   The `delay` parameter, if set to `True`, ensures that the log file is created only after the first log message is written.
+
 - Mode, Buffering, Encoding
   These parameters are used in Python's `open()` function to specify the opening of the log files.
   ```python
@@ -436,7 +451,7 @@ You can then utilize either `bind()` or `contextualize()` to incorporate additio
   ```
   Notice that the `bind()` method does not affect the original logger, which causes it to have an empty extra object, as shown above. If you want to override the parent logger, you can assign it to the `logger.bind()` as shown below:
   ```jsx
-  logger = logger.bind((seller_id = "001"), (product_id = "123"));
+  logger = logger.bind((seller_id = '001'), (product_id = '123'))
   ```
 - Contextualize:
   Contextualize lets you seamlessly incorporate extra contextual information into your log messages. It directly modifies its extra dictionary without returning a new logger. So, any log messages generated within the contextualize block will automatically include the additional context you provide.
@@ -473,6 +488,7 @@ Note: Loguru is also fully compatible with existing Handler objects created usin
 
 - Filter
   If you require a more intricate criterion to determine acceptance of a log record, utilize the filter option as demonstrated below.
+
   ```python
   import sys
   from loguru import logger
@@ -492,14 +508,19 @@ Note: Loguru is also fully compatible with existing Handler objects created usin
   logger.error("This is an error message")
   logger.critical("This is a critical message")
   ```
+
   In this scenario, the filter option is configured to use a function that accepts a record variable containing log record details. When the function returns True and the record's level matches the level parameter in the surrounding scope, the log message is then sent to the sink.
   Output
+
   ```powershell
   2024-06-30 19:33:56.380 | WARNING  | __main__:<module>:12 - This is a warning message
   ```
+
   With this setup, only log messages at the WARNING level or higher will be logged by the logger.
+
 - Formatting
   You can reformat the log records produced by Loguru using the format option within the `add()` method.
+
   ```python
   import sys
   from loguru import logger
@@ -511,14 +532,17 @@ Note: Loguru is also fully compatible with existing Handler objects created usin
   logger.debug("Formatting log records")
 
   ```
+
   The format parameter specifies a custom format that includes three directives in this example:
   `{time}`: Represents the timestamp.
   `{level}`: Indicates the log level.
   `{message}`: Displays the log message.
   Output
+
   ```powershell
   2024-06-28T01:57:18.050587+0530 | DEBUG | Formatting log records
   ```
+
   To know more about sending and filtering logs refer to: [SigNoz: Sending and Filtering Python Logs with OpenTelemetry](https://signoz.io/blog/sending-and-filtering-python-logs-with-opentelemetry/)
 
 ### Adding Loguru to your Django project
@@ -601,6 +625,7 @@ logger.info("This message will not go to level_only_log.log as the sink is remov
   All sinks added to the logger are thread-safe by default. Within a process, multiple threads share the same resources. Loguru ensures that when multiple threads log messages to the same resource, such as a log file, the log data remains clean and orderly.
   Loguru uses locks to ensure that only one thread writes to a sink consecutively, preventing mixed-up or corrupted log messages. The logger acquires a lock before writing a message and releases it afterward. This way, even with multiple threads logging simultaneously, each message is written entirely without interference.
   Let’s take an example.
+
   ```python
   from loguru import logger
   import threading
@@ -629,7 +654,9 @@ logger.info("This message will not go to level_only_log.log as the sink is remov
   logger.info("All threads have finished logging.")
 
   ```
+
   Output
+
   ```powershell
   2024-07-01 16:45:56.489 | INFO     | __main__:log_messages:11 - Message 0 from thread 0
   2024-07-01 16:45:56.489 | INFO     | __main__:log_messages:11 - Message 0 from thread 1
@@ -639,7 +666,9 @@ logger.info("This message will not go to level_only_log.log as the sink is remov
   2024-07-01 16:45:56.706 | INFO     | __main__:log_messages:11 - Message 2 from thread 1
   2024-07-01 16:45:56.809 | INFO     | __main__:<module>:25 - All threads have finished logging.
   ```
+
   In addition to the console output, these log records are also saved in the file `thread_safe_log.log`
+
 - Multi-process Safe
   For processes that do not share resources, employ message enqueuing to ensure log integrity. By setting `enqueue=True` functions like having a central coordinator. Each process sends log messages to a queue, and a single logging thread writes them down.
   ```python
@@ -648,10 +677,14 @@ logger.info("This message will not go to level_only_log.log as the sink is remov
 - Asynchronous
   Enqueuing log messages also allows for asynchronous logging, where log messages are processed in the background without blocking the main application thread. Coroutine functions used as sinks are also supported and should be awaited with `complete()`.
   Thereby ensuring the main application thread doesn't have to wait for the logging operation to complete before continuing its execution.
+
   ### Exceptions catching within threads or main
+
   Have you ever had your program crash unexpectedly without anything appearing in the log file? Or notice that exceptions occurring in threads were not logged? You can solve this using the `catch()` decorator or context manager, which ensures that any error is correctly propagated to the logger.
+
   - Decorator
     A decorator is used to wrap a function, making it ideal for catching exceptions from the entire function.
+
     ```python
     from loguru import logger
     @logger.catch
@@ -661,7 +694,9 @@ logger.info("This message will not go to level_only_log.log as the sink is remov
     problematic_function()
 
     ```
+
     The `catch()` decorator logs exceptions like `ZeroDivisionError`.
+
   - Context Manager
     A Context Manager wraps a block of code within a function. It is suitable for catching exceptions from a specific part of the code.
     ```python
@@ -673,27 +708,41 @@ logger.info("This message will not go to level_only_log.log as the sink is remov
     another_problematic_function()
     ```
     When the code within the `logger.catch:` block is executed, the context manager catches any exceptions that occur.
+
   ### Custom Logging Levels
+
   Loguru includes all standard logging levels and `trace()` and `success()` levels. You can create custom levels using the `level()` function.
+
   ```python
   logger.level("Apple", no=38, color="<green>")
   logger.log("Apple", "It's an apple")
   ```
+
   Here we have following arguments,
+
   - Name: Unique identifier for the level
   - Number: Unique number given to it
   - Color: Color for terminal output (Optional)
-  Output
-  <Figure src="/img/guides/2024/07/loguru-Untitled%201.webp" alt="The resulting output demonstrates user-defined arguments like color and name." caption="The resulting output demonstrates user-defined arguments like color and name." />
-  The resulting output demonstrates user-defined arguments like color and name.
+    Output
+    <Figure
+      src="/img/guides/2024/07/loguru-Untitled%201.webp"
+      alt="The resulting output demonstrates user-defined arguments like color and name."
+      caption="The resulting output demonstrates user-defined arguments like color and name."
+    />
+    The resulting output demonstrates user-defined arguments like color and name.
+
   ### Simplified Logging: One Function for All
+
   How do you add a handler, set up log formatting, filter messages, or set the log level?
   The answer to all these questions is the `add()` function.
+
   ```python
   logger.add(sys.stderr, format="{time} {level} {message}", filter="my_module", level="INFO")
   ```
+
   Use this function to register sinks, which are responsible for managing log messages with contextual information provided by a record dictionary. A sink can take various forms: a simple function, a string path, a file-like object, a coroutine function, or a built-in Handler.
   Additionally, you can remove a previously added handler using the identifier returned when it was added. This is especially useful if you want to replace the default stderr handler; simply call `logger.remove()` to start fresh.
+
   ```python
   # Add a new handler and assign it to an identifier
   handler_id = logger.add("file.log", rotation="500 MB")
@@ -711,6 +760,7 @@ logger.info("This message will not go to level_only_log.log as the sink is remov
   # Log another message
   logger.info("This is a test log message with the new setup.")
   ```
+
   Two files are created: `file.log` and `new_file.log`. The first message is logged to file.log, and the second message is logged to `new_file.log`. Log messages are directed to different files depending on the active handler at the time of logging.
 
 ## Monitoring your Loguru logs with SigNoz
@@ -731,7 +781,11 @@ Make sure you've activated your virtual environment as follows:
 
 From the SigNoz Cloud Dashboard, navigate to Settings > Ingestion Settings and Copy the Ingestion URL and the Ingestion Key.
 
-<Figure src="/img/guides/2024/07/loguru-Untitled2.webp" alt="The SigNoz Cloud Dashboard demonstrates user navigation through its interface." caption="The SigNoz Cloud Dashboard demonstrates user navigation through its interface." />
+<Figure
+  src="/img/guides/2024/07/loguru-Untitled2.webp"
+  alt="The SigNoz Cloud Dashboard demonstrates user navigation through its interface."
+  caption="The SigNoz Cloud Dashboard demonstrates user navigation through its interface."
+/>
 
 The SigNoz Cloud Dashboard demonstrates user navigation through its interface.
 
@@ -781,7 +835,11 @@ logger.error("This is an error log")
 
 The output on the console shows the successful delivery of log records to the SigNoz cloud.
 
-<Figure src="/img/guides/2024/07/loguru-Untitled%202.webp" alt="This resulting output in the console illustrates successful delivery of log records to SigNoz Cloud" caption="This resulting output in the console illustrates successful delivery of log records to SigNoz Cloud." />
+<Figure
+  src="/img/guides/2024/07/loguru-Untitled%202.webp"
+  alt="This resulting output in the console illustrates successful delivery of log records to SigNoz Cloud"
+  caption="This resulting output in the console illustrates successful delivery of log records to SigNoz Cloud."
+/>
 
 This resulting output in the console illustrates successful delivery of log records to SigNoz Cloud.
 
@@ -792,7 +850,11 @@ Response Body: An empty response body signifies that the server did not return a
 
 Navigate to the SigNoz Cloud Dashboard to see if the log records are sent to Signoz successfully. The main screen will display as:
 
-<Figure src="/img/guides/2024/07/loguru-Untitled%203.webp" alt="The SigNoz Cloud Dashboard is displayed upon successful receipt of log records." caption="The SigNoz Cloud Dashboard is displayed upon successful receipt of log records." />
+<Figure
+  src="/img/guides/2024/07/loguru-Untitled%203.webp"
+  alt="The SigNoz Cloud Dashboard is displayed upon successful receipt of log records."
+  caption="The SigNoz Cloud Dashboard is displayed upon successful receipt of log records."
+/>
 
 The SigNoz Cloud Dashboard is displayed upon successful receipt of log records.
 
