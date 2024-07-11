@@ -10,6 +10,151 @@ keywords: [log, logging, golang, zap, zerolog, sampling, pretty logging]
 
 ---
 
+<head>
+<script type="application/ld+json">
+    {`{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Zerolog Golang - Complete Guide to Logging",
+  "alternativeHeadline": "Master Golang logging with Zerolog - Learn setup, configuration, and advanced features for efficient, structured logging",
+  "author": {
+    "@type": "Person",
+    "name": "Eromosele"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SigNoz",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://signoz.io/img/SigNozLogo-orange.svg"
+    }
+  },
+  "datePublished": "2024-07-11",
+  "dateModified": "2024-07-11",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://signoz.io/guides/zerolog-golang/"
+  },
+  "description": "The article guides on using Zerolog, a high-performance Go logging library. It covers installation, usage, log levels, context, prettifying logs, sampling, and integration with web apps.",
+  "keywords": "log, logging, golang, zap, zerolog, sampling, pretty logging",
+  "articleSection": "Technology",
+  "inLanguage": "en",
+  "isPartOf": {
+    "@type": "Blog",
+    "name": "SigNoz Blog",
+    "url": "https://signoz.io/blog/"
+  },
+  "about": [
+    {
+      "@type": "Thing",
+      "name": "Zerolog",
+      "description": "A high-performance, zero-allocation logging library for Go"
+    },
+    {
+      "@type": "Thing",
+      "name": "Golang",
+      "description": "A statically typed, compiled programming language developed by Google"
+    },
+    {
+      "@type": "Thing",
+      "name": "Structured Logging",
+      "description": "A logging approach that treats log entries as data structures rather than plain text"
+    }
+  ],
+  "mentions": [
+    {
+      "@type": "SoftwareApplication",
+      "name": "Zerolog",
+      "applicationCategory": "Logging Library"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "name": "SigNoz",
+      "applicationCategory": "Observability Platform"
+    }
+  ],
+  "mainEntity": {
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What is Zerolog?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Zerolog is a high-performance, structured logging library for Go. It is designed to provide efficient and fast logging by using a simple interface and outputting logs in JSON format. Zerolog's focus on performance makes it suitable for applications requiring minimal overhead in their logging operations."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is Structured Logging?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Structured logging refers to the practice of logging data in a consistent, structured format, usually in JSON. This format allows logs to be easily parsed and analyzed by various tools, facilitating better monitoring, debugging, and analysis. Structured logs include key-value pairs that provide more context and are machine-readable, making automated processing and querying more effective."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is the Difference Between Zerolog and Zap Logger?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Both Zerolog and Zap Logger are popular logging libraries in the Go ecosystem, but they have key differences. Zerolog is known for its zero-allocation logging, making it extremely fast and efficient. It has a simpler, more minimalistic API focused on ease of use and minimal overhead. Zap offers more configurability and flexibility with features like structured logging and logging levels, and provides more advanced features out-of-the-box."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Which Logger is Best in Golang?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The 'best' logger in Golang depends on the specific requirements of your project. For performance, Zerolog is typically preferred for its zero-allocation and high-performance characteristics, making it ideal for applications where logging overhead needs to be minimized. For flexibility and features, Zap Logger is a strong choice if you need a more feature-rich logging library with advanced capabilities and configurability."
+        }
+      }
+    ]
+  },
+  "tutorial": {
+    "@type": "HowTo",
+    "name": "How to Use Zerolog in Golang",
+    "step": [
+      {
+        "@type": "HowToStep",
+        "name": "Install Zerolog",
+        "text": "Install Zerolog using go get -u github.com/rs/zerolog"
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Import Zerolog",
+        "text": "Import Zerolog in your Go code: import 'github.com/rs/zerolog/log'"
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Initialize Logger",
+        "text": "Initialize a Zerolog logger with desired configuration"
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Set Log Levels",
+        "text": "Configure log levels to control the verbosity of logs"
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Add Context to Logs",
+        "text": "Use methods like With() to add context to your logs"
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Implement Log Sampling",
+        "text": "Use Zerolog's sampling features to control log volume"
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Integrate with SigNoz",
+        "text": "Set up SigNoz and configure Zerolog to send logs to SigNoz for centralized monitoring"
+      }
+    ]
+  }
+}`}
+</script>
+</head>
+
 Logging is the practice of recording or storing information and messages that provide insights into the behavior and execution of a program.
 
 Zerolog is a high-performance, zero-allocation logging library tailored for the Go programming language. Engineered for speed and efficiency, it is particularly suited for latency-sensitive applications where minimizing garbage collection is crucial. 
@@ -385,7 +530,6 @@ Output
 
 <Figure src="/img/guides/2024/07/zerolog-golang-Screenshot_2024-07-05_at_17.10.30.webp" alt="Output of the application" caption="Output of the application" />
 
-Output of the application
 
 Using `ConsoleWriter`, you can also customize the appearance of the output:
 
@@ -874,7 +1018,6 @@ After running your application you should see the following output on `localhost
 
 <Figure src="/img/guides/2024/07/zerolog-golang-Screenshot_2024-07-01_at_14.15.51.webp" alt="Output after running the Go Application" caption="Output after running the Go Application" />
 
-Output after running the Go Application 
 
 Step 3: Setting up the Logs Pipeline in Otel Collector
 
@@ -957,8 +1100,7 @@ Step 4: Viewing Logs in SigNoz
 After running the above application and making the correct configurations, you can navigate to the SigNoz logs dashboard to see all the logs sent to SigNoz.
 
 <Figure src="/img/guides/2024/07/zerolog-golang-Screenshot_2024-07-06_at_02.29.06.webp" alt="Signoz Log Output" caption="Signoz Log Output" />
-
-Signoz Log Output 
+ 
 
 ## Conclusion
 
