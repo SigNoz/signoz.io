@@ -67,9 +67,9 @@ export const WhyOpenTelemetry = () => {
         ))}
       </div>
       <section className="!w-[80vw] !mx-auto border border-signoz_slate-400 border-dashed ">
-        <div className="container mb-16">
+        <div className="section-container mb-16">
           <div className='flex flex-col p-9 justify-between'>
-            <div className="flex flex-col sm:flex-row">
+            <div className="flex flex-col sm:flex-row justify-between">
               <div>
                 <p className="text-2xl font-semibold text-signoz_vanilla-100"> SigNoz is built from the ground up for OpenTelemetry</p>
                 <p className="text-signoz_vanilla-400 text-base font-normal leading-9 my-3 max-w-[50vw] sm:w-[42rem]">SigNoz offers the best in class support for OpenTelemetry’s semantic conventions with the best visualizations ⎯ powered by our powerful ingestion engine.</p>

@@ -105,7 +105,7 @@ export const Testimonials = () => {
   ]
   return (
     <section>
-      <div className="!w-[80vw] !mx-auto container py-24 flex flex-col items-center border border-signoz_slate-400 border-dashed !border-b-0 bg-[length:auto_100%] bg-no-repeat bg-[center_top_-32rem] bg-[url('/img/background_blur/Footer_backdrop.png')]">
+      <div className="!w-[80vw] !mx-auto section-container py-24 flex flex-col items-center border border-signoz_slate-400 border-dashed !border-b-0 bg-[length:auto_100%] bg-no-repeat bg-[center_top_-32rem] bg-[url('/img/background_blur/Footer_backdrop.png')]">
         <div className="mb-16 flex flex-col items-center text-center gap-12 w-[880px]">
           <img src="/img/users/incident_io.svg" alt="incident.io logo" />
           <span className='text-signoz_sienna-200 max-w-[50vw] text-sm sm:text-2xl font-normal leading-10 text-center'>SigNoz balances flexibility and security extremely well. They've built clean and thoughtful abstractions over advanced security foundations, and the product just works. We barely have to think about it.</span>

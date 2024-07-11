@@ -73,7 +73,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000" />
       <link rel="alternate" type="application/rss+xml" href="/feed.xml" />
 
-      <body className="bg-signoz_ink-500 pl-[calc(100vw-100%)] text-white antialiased">
+      <body className="pl-[calc(100vw-100%)] text-white antialiased">
         <noscript>
           <iframe
             src="https://www.googletagmanager.com/ns.html?id=GTM-N9B6D4H"

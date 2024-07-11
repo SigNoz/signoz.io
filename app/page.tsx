@@ -22,10 +22,10 @@ export default async function Page() {
   const posts = allCoreContent(sortedPosts)
   return (
     <NextUIProvider>
-      <div className="bg-signoz_ink-500 relative mt-[-56px]">
+      <div className="relative mt-[-56px]">
         <div className="absolute top-0 right-0 left-0 h-screen bg-[length:55%] bg-no-repeat bg-[center_top_4rem] bg-[url('/img/background_blur/Perlin_noise.png')] " />
         <div className="absolute top-0 right-0 left-0 h-screen bg-[center_top_-50rem] bg-[length:110%] bg-no-repeat bg-[url('/img/background_blur/Circle.png')]" />
-        <main className="landing-section pt-12 sm:pt-0 relative z-[1]">
+        <main className="bg-signoz_ink-500 landing-section pt-12 sm:pt-0 relative z-[1]">
           <Header />
           <TrustedByTeams />
           <SigNozFeatures />

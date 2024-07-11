@@ -124,7 +124,7 @@ const MonthlyEstimate = () => {
 
   return (
     <section ref={myRef} id="monthly-estimate">
-      <div className="container !w-[80vw] border border-signoz_slate-400 border-dashed !border-t-0">
+      <div className="section-container !w-[80vw] !mx-[auto] border border-signoz_slate-400 border-dashed !border-t-0">
         <div className="flex flex-col gap-2 pt-5">
           <span className="text-signoz_vanilla-100 text-2xl font-semibold pl-1">
             Estimate your monthly bill

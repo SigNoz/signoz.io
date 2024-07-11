@@ -66,7 +66,7 @@ export default Pricing
 function FAQ() {
   return (
     <section className={styles.faq}>
-      <div className={`container !w-[80vw] border border-signoz_slate-400 border-dashed !border-b-0 !px-0`}>
+      <div className={`section-container !w-[80vw] !mx-[auto] border border-signoz_slate-400 border-dashed !border-b-0 !px-0`}>
         <div className="row mx-auto">
           <div className="flex flex-col sm:flex-row w-full">
             <div className='flex-1 !w-[300px]'>
@@ -183,7 +183,7 @@ const PricingPlans = () => {
 
   return (
     <section className={`${styles.pricing} relative`}>
-      <div className={`container !w-[80vw] !mx-auto  border border-signoz_slate-400 border-dashed !my-0 !border-t-0 !border-b-0 ${styles.pricingContainer}`}>
+      <div className={`section-container !w-[80vw] !mx-auto  border border-signoz_slate-400 border-dashed !my-0 !border-t-0 !border-b-0 ${styles.pricingContainer}`}>
 
         {tab === 'cloud' ? (
           <>
@@ -391,19 +391,19 @@ const PricingPlans = () => {
                     <h4 className={`${styles.packageDetailTitle}`}>Support</h4>
                     <div>
                       <div className='gap-3'>
-                        <CircleCheckSolid color="signoz_sienna-400" />
+                        <CircleCheckSolid color="fill-signoz_sienna-400" />
                         <span className='text-signoz_vanilla-400'>Community Slack</span>
                       </div>
                     </div>
                     <div>
                       <div className='gap-3'>
-                        <CircleCheckSolid color="signoz_sienna-400" />
+                        <CircleCheckSolid color="fill-signoz_sienna-400" />
                         <span className='text-signoz_vanilla-400'>Email</span>
                       </div>
                     </div>
                     <div>
                       <div className='gap-3'>
-                        <CircleCheckSolid color="signoz_sienna-400" />
+                        <CircleCheckSolid color="fill-signoz_sienna-400" />
                         <span className='text-signoz_vanilla-400'>Dedicated Slack Channel</span>
                         <span className="uppercase !text-[10px] sm:text-xs text-signoz_vanilla-400 text-center bg-signoz_slate-400 border border-none px-2 py-1 rounded-full">On spends above $999</span>
                       </div>
@@ -520,12 +520,12 @@ const PricingPlans = () => {
                   <div className={`mt-7`}>
                     <h4 className={`${styles.packageDetailTitle}`}>Support</h4>
                     <ul className="ul-no-padding">
-                      <li className='flex gap-3 items-center mb-2 text-signoz_vanilla-400'> <CircleCheckSolid color="signoz_sienna-400" /> Email</li>
-                      <li className='flex gap-3 items-center mb-2 text-signoz_vanilla-400'> <CircleCheckSolid color="signoz_sienna-400" /> Dedicated Slack Channel</li>
-                      <li className='flex gap-3 items-center mb-2 text-signoz_vanilla-400'> <CircleCheckSolid color="signoz_sienna-400" /> Team Training</li>
-                      <li className='flex gap-3 items-center mb-2 text-signoz_vanilla-400'> <CircleCheckSolid color="signoz_sienna-400" /> Dashboard Configuration Support</li>
-                      <li className='flex gap-3 items-center mb-2 text-signoz_vanilla-400'> <CircleCheckSolid color="signoz_sienna-400" /> Instrumentation Support</li>
-                      <li className='flex gap-3 items-center text-signoz_vanilla-400'> <CircleCheckSolid color="signoz_sienna-400" /> SLA w/ downtime developer pairing</li>
+                      <li className='flex gap-3 items-center mb-2 text-signoz_vanilla-400'> <CircleCheckSolid color="fill-signoz_sienna-400" /> Email</li>
+                      <li className='flex gap-3 items-center mb-2 text-signoz_vanilla-400'> <CircleCheckSolid color="fill-signoz_sienna-400" /> Dedicated Slack Channel</li>
+                      <li className='flex gap-3 items-center mb-2 text-signoz_vanilla-400'> <CircleCheckSolid color="fill-signoz_sienna-400" /> Team Training</li>
+                      <li className='flex gap-3 items-center mb-2 text-signoz_vanilla-400'> <CircleCheckSolid color="fill-signoz_sienna-400" /> Dashboard Configuration Support</li>
+                      <li className='flex gap-3 items-center mb-2 text-signoz_vanilla-400'> <CircleCheckSolid color="fill-signoz_sienna-400" /> Instrumentation Support</li>
+                      <li className='flex gap-3 items-center text-signoz_vanilla-400'> <CircleCheckSolid color="fill-signoz_sienna-400" /> SLA w/ downtime developer pairing</li>
                     </ul>
                   </div>
                   <div className={styles.packageDetailBlock}>
@@ -632,7 +632,7 @@ const PricingPlans = () => {
                     <h4 className={styles.packageDetailTitle}>Support</h4>
                     <div>
                       <div className='gap-3'>
-                        <CircleCheckSolid color="signoz_sienna-400" />
+                        <CircleCheckSolid color="fill-signoz_sienna-400" />
                         <span className='text-signoz_vanilla-400'>Community Slack</span>
                       </div>
                     </div>
@@ -711,12 +711,12 @@ const PricingPlans = () => {
                   <div className={`mt-7`}>
                     <h4 className={`${styles.packageDetailTitle}`}>Support</h4>
                     <ul className="ul-no-padding">
-                      <li className='flex gap-3 items-center mb-2 text-signoz_vanilla-400'> <CircleCheckSolid color="signoz_sienna-400" /> Email</li>
-                      <li className='flex gap-3 items-center mb-2 text-signoz_vanilla-400'> <CircleCheckSolid color="signoz_sienna-400" /> Dedicated Slack Channel</li>
-                      <li className='flex gap-3 items-center mb-2 text-signoz_vanilla-400'> <CircleCheckSolid color="signoz_sienna-400" /> Team Training</li>
-                      <li className='flex gap-3 items-center mb-2 text-signoz_vanilla-400'> <CircleCheckSolid color="signoz_sienna-400" /> Dashboard Configuration Support</li>
-                      <li className='flex gap-3 items-center mb-2 text-signoz_vanilla-400'> <CircleCheckSolid color="signoz_sienna-400" /> Instrumentation Support</li>
-                      <li className='flex gap-3 items-center text-signoz_vanilla-400'> <CircleCheckSolid color="signoz_sienna-400" /> SLA w/ downtime developer pairing</li>
+                      <li className='flex gap-3 items-center mb-2 text-signoz_vanilla-400'> <CircleCheckSolid color="fill-signoz_sienna-400" /> Email</li>
+                      <li className='flex gap-3 items-center mb-2 text-signoz_vanilla-400'> <CircleCheckSolid color="fill-signoz_sienna-400" /> Dedicated Slack Channel</li>
+                      <li className='flex gap-3 items-center mb-2 text-signoz_vanilla-400'> <CircleCheckSolid color="fill-signoz_sienna-400" /> Team Training</li>
+                      <li className='flex gap-3 items-center mb-2 text-signoz_vanilla-400'> <CircleCheckSolid color="fill-signoz_sienna-400" /> Dashboard Configuration Support</li>
+                      <li className='flex gap-3 items-center mb-2 text-signoz_vanilla-400'> <CircleCheckSolid color="fill-signoz_sienna-400" /> Instrumentation Support</li>
+                      <li className='flex gap-3 items-center text-signoz_vanilla-400'> <CircleCheckSolid color="fill-signoz_sienna-400" /> SLA w/ downtime developer pairing</li>
                     </ul>
                   </div>
                   <div className={`mt-7 ${styles.packageDetailBlock}`}>
