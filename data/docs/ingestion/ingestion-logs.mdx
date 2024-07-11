@@ -20,7 +20,7 @@ The data model is the one supported by opentelemetry [logs](https://opentelemetr
 
 #### Response
 <Tabs>
-<TabItem value="ok" label="OK" default>
+<TabItem value="0" label="0" default>
 ```
 {
   "partialSuccess": {}
@@ -35,6 +35,7 @@ The data model is the one supported by opentelemetry [logs](https://opentelemetr
 
 Prerequisites:
 - Git and gRPCurl installed.
+
 ```bash
 #!/bin/bash
 
@@ -54,6 +55,56 @@ EOF
     -import-path ./opentelemetry-proto \
     ${SIGNOZ_ENDPOINT} \
     opentelemetry.proto.collector.logs.v1.LogsService/Export
+}
+
+main
+
+```
+
+</TabItem>
+</Tabs>
+
+
+## Send Logs via OTLP/HTTP
+```bash
+POST /v1/logs
+```
+
+#### Request Model
+The data model is the one supported by opentelemetry [logs](https://opentelemetry.io/docs/specs/otel/logs/data-model/) data model.
+
+#### Response
+<Tabs>
+<TabItem value="200" label="200" default>
+```
+{
+  "partialSuccess": {}
+}
+```
+</TabItem>
+</Tabs>
+
+#### Code Examples
+<Tabs>
+<TabItem value="curl" label="curl" default>
+
+Prerequisites:
+- Git and gRPCurl installed.
+
+```bash
+#!/bin/bash
+
+function main() {
+    local body=$(cat <<EOF
+{"resourceLogs":[{"resource":{"attributes":[{"key":"resource-attr","value":{"stringValue":"resource-attr-val-1"}}]},"scopeLogs":[{"scope":{},"logRecords":[{"timeUnixNano":"$(date +%s)000000000","severityNumber":9,"severityText":"Info","body":{"stringValue":"This is a log message"},"attributes":[{"key":"app","value":{"stringValue":"server"}},{"key":"instance_num","value":{"intValue":"1"}}],"droppedAttributesCount":1,"traceId":"","spanId":""},{"timeUnixNano":"$(date +%s)000000000","severityNumber":9,"severityText":"Info","body":{"stringValue":"something happened"},"attributes":[{"key":"customer","value":{"stringValue":"acme"}},{"key":"env","value":{"stringValue":"dev"}}],"droppedAttributesCount":1,"traceId":"","spanId":""}]}]}]}
+EOF
+)
+
+    # Clone OpenTelemetry protobuf definitions
+    git clone https://github.com/open-telemetry/opentelemetry-proto.git
+
+    # Send logs to Signoz 
+    curl -X POST -H 'Content-Type: application/json' -H "signoz-access-token: ${SIGNOZ_INGESTION_KEY}" https://${SIGNOZ_ENDPOINT}/v1/logs -d "$body"
 }
 
 main
