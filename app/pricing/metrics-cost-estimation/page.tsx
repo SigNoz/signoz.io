@@ -298,7 +298,7 @@ const metricsRetentionPeriod = () => {
                   </ModalContent>
                 </Modal>
                 <div className='flex flex-col gap-3'>
-                  <Link href={'https://github.com/SigNoz/signoz'} style={{ cursor: 'default' }}>
+                  <Link href={'/pricing/'} style={{ cursor: 'default' }}>
                     <div className="flex w-full items-center p-4 bg-signoz_ink-400 hover:bg-signoz_ink-300 text-white border border-none rounded group">
                       <div className="mr-4">
                         <img src="/svgs/icons/play-icon.svg" alt="SigNoz Icon" height={24} width={24} />
@@ -311,23 +311,33 @@ const metricsRetentionPeriod = () => {
                       </div>
                     </div>
                   </Link>
-                  <Link href={'https://github.com/SigNoz/signoz'} style={{ cursor: 'default' }}>
+                  <div onClick={onOpen} style={{ cursor: 'default' }}>
                     <div className="flex w-full  items-center p-4 bg-signoz_ink-400 hover:bg-signoz_ink-300 text-white border border-none rounded group">
                       <div className="mr-4">
                         <img src="/svgs/icons/play-icon.svg" alt="SigNoz Icon" height={24} width={24} />
                       </div>
                       <div className="flex-grow">
-                        <div className="text-[10px] sm:text-sm text-signoz_vanilla-400">What is included in $200?</div>
+                        <div className="text-[10px] sm:text-sm text-signoz_vanilla-400">What is included in $199?</div>
                       </div>
                       <div className="ml-4 transform transition-transform group-hover:translate-x-1">
                         <ArrowRight size={16} />
                       </div>
                     </div>
-                  </Link>
+                  </div>
+                  <Modal size={'5xl'} backdrop='blur' isOpen={isOpen} onOpenChange={onOpenChange}>
+                    <ModalContent className='bg-transparent'>
+                      {() => (
+                        <>
+                          <ModalBody className='py-6'>
+                            <VimeoPlayer videoId="968489758" />
+                          </ModalBody>
+                        </>
+                      )}
+                    </ModalContent>
+                  </Modal>
                 </div>
               </div>
             </div>
-
           </div>
         </div>
 
