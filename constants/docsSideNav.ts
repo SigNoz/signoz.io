@@ -964,23 +964,28 @@ const docsSideNav = [
     items: [
       {
         type: 'doc',
-        route: '/docs/ingestion/ingestion',
+        route: '/docs/ingestion/overview',
         label: 'Overview',
       },
       {
         type: 'doc',
-        route: '/docs/ingestion/ingestion-logs',
-        label: 'Ingestion Logs',
+        route: '/docs/ingestion/keys',
+        label: 'Keys',
       },
       {
         type: 'doc',
-        route: '/docs/ingestion/ingestion-traces',
-        label: 'Ingestion Traces',
+        route: '/docs/ingestion/logs',
+        label: 'Logs',
       },
       {
         type: 'doc',
-        route: '/docs/ingestion/ingestion-metrics',
-        label: 'Ingestion Metrics',
+        route: '/docs/ingestion/traces',
+        label: 'Traces',
+      },
+      {
+        type: 'doc',
+        route: '/docs/ingestion/metrics',
+        label: 'Metrics',
       }
     ],
   },
