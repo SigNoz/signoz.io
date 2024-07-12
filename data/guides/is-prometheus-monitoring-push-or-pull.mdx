@@ -10,6 +10,118 @@ keywords: [prometheus,monitoring,metrics]
 
 ---
 
+<head>
+<script type="application/ld+json">
+    {`{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Is Prometheus Monitoring Push or Pull?",
+  "alternativeHeadline": "Understanding Prometheus' pull-based monitoring model and its push-based alternative",
+  "author": {
+    "@type": "Person",
+    "name": "Daniel"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SigNoz",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://signoz.io/img/SigNozLogo-orange.svg"
+    }
+  },
+  "datePublished": "2024-07-12",
+  "dateModified": "2024-07-12",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://signoz.io/guides/is-prometheus-monitoring-push-or-pull/"
+  },
+  "description": "Prometheus utilizes a pull-based monitoring model, where it retrieves metrics from predefined targets by scraping data from their exposed endpoints.",
+  "keywords": "prometheus, monitoring, metrics",
+  "articleSection": "Technology",
+  "inLanguage": "en",
+  "isPartOf": {
+    "@type": "Blog",
+    "name": "SigNoz Blog",
+    "url": "https://signoz.io/blog/"
+  },
+  "about": [
+    {
+      "@type": "Thing",
+      "name": "Prometheus",
+      "description": "An open-source systems monitoring and alerting toolkit"
+    },
+    {
+      "@type": "Thing",
+      "name": "Pull-based Monitoring",
+      "description": "A monitoring approach where the monitoring system retrieves metrics from targets"
+    },
+    {
+      "@type": "Thing",
+      "name": "Push-based Monitoring",
+      "description": "A monitoring approach where targets send metrics to the monitoring system"
+    }
+  ],
+  "mentions": [
+    {
+      "@type": "SoftwareApplication",
+      "name": "Prometheus",
+      "applicationCategory": "Monitoring Tool"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "name": "Pushgateway",
+      "applicationCategory": "Monitoring Component"
+    }
+  ],
+  "mainEntity": {
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Is Prometheus monitoring push or pull?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Prometheus primarily uses a pull-based monitoring model, where it retrieves metrics from configured targets by scraping their exposed endpoints. However, it can also support push-based monitoring through the use of the Pushgateway component."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How does pull-based monitoring work in Prometheus?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "In Prometheus' pull-based model, the Prometheus server regularly sends HTTP requests to specified endpoints of configured targets to collect metrics. These metrics are then stored in Prometheus' time series database for querying and analysis."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can Prometheus do push-based monitoring?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, Prometheus can support push-based monitoring using the Pushgateway component. The Pushgateway allows short-lived jobs to push their metrics to an intermediary job, which Prometheus can then scrape."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What are the pros of pull-based monitoring?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Pull-based monitoring offers simplicity in setup, easy integration with service discovery mechanisms, reliability in detecting down targets, and fine-grained control over scrape intervals and metrics collection."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What are the cons of push-based monitoring?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Push-based monitoring can potentially lead to metric loss if the target is unavailable when Prometheus attempts to scrape, and it introduces dependency on external systems like the Pushgateway, which could become a single point of failure."
+        }
+      }
+    ]
+  }
+}`}
+</script>
+</head>
+
 Prometheus uses a pull-based model for monitoring. In this model, the Prometheus server regularly pulls metrics from configured targets by scraping their endpoints. This contrasts with a push-based model where the monitored systems send (push) their metrics to the monitoring server. Pull-based monitoring is preferred for its flexibility, centralized control, and security advantages.
 
 ## How Pull-Based Monitoring Works in Prometheus
