@@ -962,7 +962,6 @@ const docsSideNav = [
     label: 'Ingestion',
     type: 'category',
     isExpanded: false,
-    route: '/docs/ingestion',
     items: [
       {
         label: 'SigNoz Cloud',
