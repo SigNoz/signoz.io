@@ -961,17 +961,26 @@ const docsSideNav = [
   {
     label: 'Ingestion',
     type: 'category',
+    isExpanded: false,
+    route: '/docs/ingestion',
     items: [
       {
-        type: 'doc',
-        route: '/docs/ingestion/signoz-cloud/overview',
-        label: 'Overview',
+        label: 'SigNoz Cloud',
+        type: 'category',
+        isExpanded: false,
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/ingestion/signoz-cloud/overview',
+            label: 'Overview',
+          },
+          {
+            type: 'doc',
+            route: '/docs/ingestion/signoz-cloud/keys',
+            label: 'Keys',
+          },
+        ],
       },
-      {
-        type: 'doc',
-        route: '/docs/ingestion/signoz-cloud/keys',
-        label: 'Keys',
-      }
     ],
   },
   {
@@ -1504,10 +1513,11 @@ const docsSideNav = [
       },
     ],
   },
-
   {
     label: 'Troubleshooting',
     type: 'category',
+    isExpanded: false,
+    route: '/docs/faqs',
     // route: '/docs/faqs',
     // link: {
     // type: 'generated-index',
