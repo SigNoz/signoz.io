@@ -75,11 +75,9 @@ const metricsRetentionPeriod = () => {
       <div className="absolute top-0 right-0 left-0 h-screen bg-[length:55%] bg-no-repeat bg-[center_top_4rem] bg-[url('/img/background_blur/Perlin_noise.png')] " />
       <div className="absolute top-0 right-0 left-0 h-screen bg-[center_top_-50rem] bg-[length:110%] bg-no-repeat bg-[url('/img/background_blur/Circle.png')]" />
       <main className="landing-section pt-12 sm:pt-0 relative z-[1]">
-
         <div className=''>
-          <div className='flex flex-row'>
-            <div className='flex-1 px-36 py-32  bg-signoz_ink-500'>
-
+          <div className='flex flex-col md:flex-row'>
+            <div className='flex-1 px-6 py-6 md:px-36 md:py-32 bg-signoz_ink-500'>
               <div className='flex flex-col gap-7'>
                 <div>
                   <div className='text-signoz_vanilla-100 text-2xl font-semibold'>
@@ -89,12 +87,8 @@ const metricsRetentionPeriod = () => {
                     We use a transparent and usage-based pricing model that helps you <br /> prevent costs from ballooning.
                   </div>
                 </div>
-
                 <div>
-
-
                 </div>
-
                 <div>
                   <div className='flex flex-col gap-2'>
                     <div className='text-signoz_vanilla-100 text-sm'>
@@ -118,7 +112,6 @@ const metricsRetentionPeriod = () => {
                        -webkit-appearance: none;
                       margin: 0;
                     }
-
                     input[type=number] {
                      -moz-appearance: textfield;
                    }
@@ -127,7 +120,6 @@ const metricsRetentionPeriod = () => {
                     </div>
                   </div>
                 </div>
-
                 <div>
                   <div className='flex flex-col gap-7'>
                     <div className='text-signoz_vanilla-100 text-sm'>
@@ -151,7 +143,6 @@ const metricsRetentionPeriod = () => {
                           },
                         ]}
                         classNames={{
-                          base: "max-w-md",
                           label: "text-medium",
                         }}
                         renderThumb={(props) => (
@@ -190,7 +181,6 @@ const metricsRetentionPeriod = () => {
                     </div>
                   </div>
                 </div>
-
                 <div>
                   <div className='flex gap-7 justify-between'>
                     <div className='flex-1 self-center text-signoz_vanilla-100 text-sm'>
@@ -213,7 +203,6 @@ const metricsRetentionPeriod = () => {
                     </div>
                   </div>
                 </div>
-
                 <div>
                   <div className="flex justify-between items-center pt-4 bg-signoz_ink-400 px-3 py-4 border border-transparent rounded-t rounded-b-none">
                     <span className="text-signoz_vanilla-100 text-sm font-medium">
@@ -243,14 +232,12 @@ const metricsRetentionPeriod = () => {
                     <div>${formatNumber(monthlyEstimate)}</div>
                   </div>
                 </div>
-
                 <div className='flex flex-col gap-4'>
                   <Link href={'/enterprise/'}>
                     <Button className='w-full'>
                       Start your free 14-day trial<ArrowRight size={14} />
                     </Button>
                   </Link>
-
                   <Link href={'/docs/introduction/'}>
                     <Button className='w-full' type={Button.TYPES.SECONDARY}>
                       Read the docs<ArrowRight size={14} />
@@ -260,10 +247,9 @@ const metricsRetentionPeriod = () => {
               </div>
             </div>
 
-
-            <div className='flex-1 p-28'>
+            
+            <div className='flex-1 p-4 max-sm:mt-10 md:p-28'>
               <div className='flex flex-col gap-7'>
-
                 <div className='relative flex flex-col gap-3'>
                   <div className='relative'>
                     <img
@@ -271,7 +257,6 @@ const metricsRetentionPeriod = () => {
                       className='h-auto w-auto'
                       alt='Metrics Thumnail'
                     />
-
                     <div className='flex items-center justify-center inset-0 absolute'>
                       <img
                         src="/svgs/icons/play-icon.svg"
@@ -340,7 +325,6 @@ const metricsRetentionPeriod = () => {
             </div>
           </div>
         </div>
-
       </main>
     </div>
   )
