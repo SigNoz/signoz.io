@@ -1518,7 +1518,6 @@ const docsSideNav = [
     type: 'category',
     isExpanded: false,
     route: '/docs/faqs',
-    // route: '/docs/faqs',
     // link: {
     // type: 'generated-index',
     // title: 'Frequently Asked Questions',
