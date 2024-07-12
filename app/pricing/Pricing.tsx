@@ -366,33 +366,25 @@ const PricingPlans = () => {
                       <div className='gap-3'>
                         <CircleInfoSolid />
                         <span>
-                          <button onClick={() => {
-                            const element = document.getElementById('monthly-estimate');
-                            element?.scrollIntoView({
-                              behavior: 'smooth'
-                            });
-                          }}>
-                            Learn how the price for metrics is calculated <ArrowUpRight size={20} className='inline' />
-                          </button>
+                          <Link href={'/docs/logs-management/long-term-storage/'}>
+                            Long term Logs Storage options <ArrowUpRight size={20} className='inline' />
+                          </Link>
                         </span>
-
                       </div>
                     </div>
+
                     <div>
                       <div className='gap-3'>
                         <CircleInfoSolid />
                         <span>
+                          <Link href={'https://vimeo.com/968489758'}>
+
                           What comes included in the $199? <ArrowUpRight size={20} className='inline' />
+                          </Link>
                         </span>
                       </div>
                     </div>
-                    <br/>
-
-                    <div>
-                    <span>
-                    How does pricing of metrics work in SigNoz? <a href='https://vimeo.com/973012522' target='_blank' className='mx-0 rounded px-0 py-0.5 text-primary-400'> Explainer Video </a> 
-                      </span>
-                    </div>
+                    <br />
 
                   </div>
                   <div className={` mt-7 ${styles.support} ${styles.packageDetailBlock}`}>

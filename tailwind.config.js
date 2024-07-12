@@ -234,9 +234,10 @@ module.exports = {
       }),
     },
     fontFamily: {
-      sans: ['Inter', 'ui-sans-serif', 'system-ui'],
-      mono: ['Geist Mono', 'monospace'],
-    },
+      'sans': ['Inter', 'ui-sans-serif', 'system-ui'],
+      'mono': ['Geist Mono', 'monospace' ],
+      'satoshi': ['Satoshi', 'sans-serif'],'satoshi-bold': ['Satoshi Bold', 'sans-serif'],
+    }
   },
   plugins: [
     require('@tailwindcss/forms'),
