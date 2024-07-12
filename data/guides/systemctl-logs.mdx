@@ -1,0 +1,520 @@
+---
+
+title: Comprehensive Guide to using Systemctl Logs in Linux
+slug: systemctl-logs
+date: 2024-07-04
+tags: [logging]
+authors: [manjunath_irukulla]
+description: In this article, we learn about systemctl logs, their uses, basic commands, and a few common messages with their meanings.
+keywords: [systemctl, logs, systemd, Linux ]
+
+---
+
+<head>
+<script type="application/ld+json">
+    {`{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Comprehensive Guide to using Systemctl Logs in Linux",
+  "alternativeHeadline": "Understanding and utilizing systemctl logs for effective Linux system management",
+  "author": {
+    "@type": "Person",
+    "name": "Manjunath Irukulla"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SigNoz",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://signoz.io/img/SigNozLogo-orange.svg"
+    }
+  },
+  "datePublished": "2024-07-04",
+  "dateModified": "2024-07-04",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://signoz.io/guides/systemctl-logs/"
+  },
+  "description": "In this article, we learn about systemctl logs, their uses, basic commands, and a few common messages with their meanings.",
+  "keywords": "systemctl, logs, systemd, Linux",
+  "articleSection": "Technology",
+  "inLanguage": "en",
+  "isPartOf": {
+    "@type": "Blog",
+    "name": "SigNoz Blog",
+    "url": "https://signoz.io/blog/"
+  },
+  "about": [
+    {
+      "@type": "Thing",
+      "name": "Systemctl",
+      "description": "A command-line utility used to control and manage systemd services in Linux"
+    },
+    {
+      "@type": "Thing",
+      "name": "Systemd",
+      "description": "A system and service manager for Linux operating systems"
+    },
+    {
+      "@type": "Thing",
+      "name": "Linux Logging",
+      "description": "The process of recording events and information in Linux systems"
+    }
+  ],
+  "mentions": [
+    {
+      "@type": "SoftwareApplication",
+      "name": "SigNoz",
+      "applicationCategory": "Monitoring Tool"
+    }
+  ],
+  "mainEntity": {
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How to see systemctl services logs?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "To view logs for a specific service, use sudo systemctl status <service-name>"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Where are systemctl logs stored?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "systemctl itself doesn't store logs. Logs are managed by systemd and stored in the run/log/journal or /var/log/journal directories depending on the system configuration."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is systemctl in Linux?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "systemctl is a command-line utility in Linux for managing systemd, which controls system services with commands for status, start, stop, enable or disable."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I open service logs?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Open service logs using sudo journalctl -u <service-name> to view logs for a specific service."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I view logs in Linux?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "View logs in Linux using journalctl for systemd logs or directly by accessing log files in the /var/log directory using commands like cat, less, or tails."
+        }
+      }
+    ]
+  },
+  "tutorial": {
+    "@type": "HowTo",
+    "name": "How to Use Systemctl Logs",
+    "step": [
+      {
+        "@type": "HowToStep",
+        "name": "Check Service Status",
+        "text": "Use sudo systemctl status <service-name> to display the current status and recent logs of the service."
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Start a Service",
+        "text": "Use sudo systemctl start <service-name> to initialize the specified service."
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Stop a Service",
+        "text": "Use sudo systemctl stop <service-name> to halt the specified service."
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Restart a Service",
+        "text": "Use sudo systemctl restart <service-name> to restart the specified service."
+      },
+      {
+        "@type": "HowToStep",
+        "name": "View Detailed Logs",
+        "text": "Use sudo journalctl -u <service-name> to view detailed logs for a specific service."
+      }
+    ]
+  }
+}`}
+</script>
+</head>
+
+Effective management and monitoring of services are crucial for maintaining stability and optimizing performance in Linux systems. With `systemctl` and its counterpart `systemd`, you have powerful capabilities at your disposal for overseeing service statuses and diagnosing issues. 
+
+This article explores `systemctl` to access and analyze service logs, detailing essential `systemctl` commands to enhance your system administration skills.
+
+## Understanding `systemctl` Logs
+
+`systemctl` is a command-line utility used to interact with and control the `systemd` system and service manager. `systemd` itself is a system and service manager for Linux operating systems responsible for orchestrating the startup, shutdown, and management of system processes and services.
+
+Whenever a service starts, stops, crashes, or changes its configuration, `systemd` generates logs. These logs are managed by `systemd-journald`, a system service that collects and stores logging data.  
+
+`Systemctl` can be used to manage and control `systemd` services and units, providing commands to start, stop, restart, enable, disable, and check status. Additionally, `systemctl` can be used to view logs for these services and units.
+
+## Basic Commands for Logging using  `systemctl`
+
+`Systemctl` commands allow you to manage services on your Linux system effortlessly. These are essential commands to effectively log and manage different services. 
+
+To  display the current status and recent logs of the service:
+
+```bash
+sudo systemctl status <service-name>
+```
+
+To show detailed properties of the specified service, including its configuration and state: 
+
+```bash
+sudo systemctl show <service-name>
+```
+
+To initialize the specified service:
+
+```bash
+sudo systemctl start <service-name>
+```
+
+To halt the specified service: 
+
+```bash
+sudo systemctl stop <service-name> 
+```
+
+To restart the specified service: 
+
+```bash
+sudo systemctl restart <service-name> 
+```
+
+To configure the service to start automatically at system boot: 
+
+```bash
+sudo systemctl enable <service-name>
+```
+
+To prevent the service from starting automatically at system boot:
+
+```bash
+sudo systemctl disable <service-name> 
+```
+
+To list all the service units, including their states:  
+
+```bash
+sudo systemctl list-units --type=service --all 
+```
+
+To list all services that have failed to start: 
+
+```bash
+sudo systemctl --failed
+```
+
+## Advanced Troubleshooting Techniques
+
+Correlating Logs Across Services:
+Use `journalctl` to view logs from multiple related services simultaneously:
+
+```
+sudo journalctl -u service1 -u service2 -u service3
+```
+
+Filtering Logs by Priority:
+Focus on critical issues by filtering logs based on priority:
+
+```
+sudo journalctl -p err..alert -u service-name
+```
+
+Analyzing Boot-time Issues:
+Investigate problems during system startup:
+
+```
+sudo journalctl -b -1
+```
+
+Tracing Service Dependencies:
+Understand service relationships for complex issues:
+
+```
+sudo systemctl list-dependencies service-name
+```
+
+### Understanding `systemctl status` vs `journalctl`
+
+While both commands can be used to view logs, they serve different purposes:
+
+- `systemctl status service-name`: Provides a snapshot of the current service status, including recent log entries. It's useful for a quick overview.
+- `journalctl -u service-name`: Offers a comprehensive view of all logs for a specific service. It allows for more detailed filtering and analysis.
+
+For example:
+
+```bash
+# Quick status check
+sudo systemctl status nginx
+
+# Detailed log analysis
+sudo journalctl -u nginx --since today
+```
+
+## Common `systemctl` Log Messages and their Meaning
+
+Understanding `systemctl` log messages is crucial for effectively managing and troubleshooting services on your Linux system. These messages provide valuable insights into the operational status and behaviour of various services on your system. 
+
+Below are common `systemctl` log messages and their explanations. 
+
+- Service started:
+
+```bash
+started [service_name]
+```
+
+The system successfully started the specified service.
+
+- Service stopped:
+
+```bash
+stopped [service_name]
+```
+
+The system successfully stopped the specified service.
+
+- Service enabled to start at boot:
+
+```bash
+Enabled [service-name] to start at boot
+```
+
+The specified service has been configured to start automatically when the system boots up.
+
+- Service disabled to start at boot:
+
+```bash
+Disabled [service-name] from starting at boot
+```
+
+The specified service has been configured to not start automatically when the system boots up.
+
+- Failed to start service:
+
+```bash
+Failed to start [service-name]. See 'systemctl status [service-name]' for details
+```
+
+The system attempted to start the service, but it failed. The `systemctl status` command can provide more details about the failure, such as error messages, logs, and dependency information.
+
+- Main process exited with the status information:
+
+```bash
+[service-name]:Main process exited, code=exited, status=[error=code]
+```
+
+The main process of the service terminated unexpectedly with an error code. Additional details like "code=exited" and "status=[error=code]" specify the exact status and error code associated with the process termination.
+
+- Main process exited with an error code:
+
+```bash
+[service-name]: Main process exited with error code [error-code]
+```
+
+This indicates that the main process of the specified service has unexpectedly terminated or crashed. The `[error-code]` provides a numerical code that can help you diagnose the reason for the failure.
+
+- Start operation timed out:
+
+```bash
+[service-name]:Main process exited, code=exited, status=[error=code]0
+```
+
+The main process of the specified service terminated unexpectedly with an error code, indicating a failure in the service's operation.
+
+- Service entered failed state:
+
+```bash
+[service-name] entered failed state
+```
+
+The specified service has encountered a critical error and has entered a failed state, meaning it is not running and requires further investigation.
+
+- Dependency failed for the service:
+
+```bash
+Dependency failed for [service-name]
+```
+
+A dependency required for the specified service to start is not available or has failed, preventing the service from starting successfully.
+
+- Service process terminated by a specific signal:
+
+```bash
+killing [service-name] (PID [PID-number]) with signal [signal-type]
+```
+
+The system is terminating the specified service process due to receiving a specific signal (e.g., SIGTERM for normal termination, SIGKILL for forced termination).
+
+## Real-world Examples and Case Studies
+
+### Case Study 1: Debugging a Failed Service Start
+
+A system administrator noticed that a critical service wasn't starting after a system reboot. Here's how they used systemctl logs to diagnose and solve the issue:
+
+1. Checked the service status:
+    
+    ```
+    sudo systemctl status critical-service
+    ```
+    
+2. Observed the error message: "Failed to start due to missing dependency"
+3. Investigated the dependency:
+    
+    ```
+    sudo systemctl list-dependencies critical-service
+    ```
+    
+4. Found that a required service wasn't starting
+5. Checked the logs of the required service:
+    
+    ```
+    sudo journalctl -u required-service
+    ```
+    
+6. Discovered a configuration error in the required service
+7. Fixed the configuration and restarted both services, resolving the issue
+
+### Case Study 2: Identifying Resource Bottlenecks
+
+A web application was experiencing intermittent slowdowns. The admin used systemctl logs to identify the root cause:
+
+1. Checked the web server service status:
+    
+    ```
+    sudo systemctl status web-server
+    ```
+    
+2. Noticed frequent restarts in the logs
+3. Examined detailed logs:
+    
+    ```
+    sudo journalctl -u web-server --since "1 hour ago"
+    ```
+    
+4. Found "Out of Memory" errors preceding each restart
+5. Used this information to optimize the application's memory usage and increase system resources
+
+## Limitations of systemctl in Logs Management
+
+While `systemctl` provides a convenient way to manage system services, its capabilities for log analysis and management are limited, especially in complex environments with large data volumes. These limitations include:
+
+- Limited Visualization: Logs are presented in plain text format, and analyzing logs directly from the command line makes it difficult to identify patterns and trends.
+- Time-consuming: As log volumes grow, manually sifting through them for troubleshooting becomes time-consuming, especially in production environments when logs from multiple services need to be correlated.
+- Limited Filtering and Searching: `systemctl` primarily focuses on starting, stopping, and checking the status of services. It doesn't offer advanced log analysis features like filtering, searching, or correlating logs from multiple sources, making it difficult to pinpoint specific events or patterns within the logs.
+- No Centralized Log Management: `systemctl` doesn't provide a centralized way to manage logs from multiple systems. In a distributed environment, you'll need additional tools like Syslog servers or log aggregation solutions to collect and analyze logs across different machines.
+
+## Logs Management and Analysis with SigNoz
+
+[SigNoz](https://signoz.io/) is a full-stack open-source APM tool with log management and analysis features. It uses a columnar database, <a href="https://clickhouse.com/" rel="noopener noreferrer nofollow" target="_blank">ClickHouse</a>, which is [very efficient at ingesting and storing logs data](https://signoz.io/blog/logs-performance-benchmark/) for analysis.
+
+SigNoz offers several key features to to help you effectively manage and analyze your logs, they include:
+
+- Unified UI: SigNoz consolidates metrics, traces, and logs into a single user interface, allowing seamless log correlation with metrics and traces.
+- Centralized Log Management: SigNoz can aggregate logs from various sources, providing a centralized platform for efficient storage, management, and analysis. This eliminates the need to switch between multiple tools and simplifies the process of monitoring and troubleshooting complex systems.
+- Real-Time Log Monitoring: SigNoz provides a live tail logging feature to help you monitor your logs in real time, enabling proactive incident management and faster resolution times.
+- Advanced Log Query Builder: The advanced query builder in the logs UI allows you to filter out logs quickly by mixing and matching fields.
+- OpenTelemetry Support: SigNoz is built to support <a href="https://opentelemetry.io/" rel="noopener noreferrer nofollow" target="_blank">OpenTelemetry</a> natively, which is quietly becoming the global standard for generating and managing telemetry signals ( logs, metrics, and traces).
+
+<Figure src="/img/guides/2024/07/systemctl-logs-Untitled.webp" alt="Logs management in SigNoz" caption="Logs management in SigNoz" />
+
+
+## Getting Started with SigNoz
+
+<GetStartedSigNoz />
+
+## Conclusion
+
+Analyzing `systemctl` logs offers insights into events, services, and application activities, which are essential for monitoring, troubleshooting, auditing, and optimizing system performance. Here are the key takeaways from this article:
+
+- `Systemctl` logs are crucial for maintaining the reliability of your Linux system. They help monitor the status and behavior of services, diagnose and fix service failures, audit service-related actions, and identify performance bottlenecks.
+- You can use essential `systemctl` commands such as status, start, stop, restart, enable, disable, and list all units and failed services to manage your services effectively.
+- By leveraging essential `systemctl` commands such as status, start, stop, restart, enable, disable, and listing units and failed services, you can effectively manage and optimize your system services.
+- Knowing how to interpret common `systemctl` log messages can help you effectively manage and troubleshoot services.
+- Adopting a log management tool like SigNoz enhances your ability to analyze logs, troubleshoot efficiently, and optimize system performance.
+
+## FAQs
+
+### How to see `systemctl` services logs?
+
+To view logs for a specific service, use `sudo systemctl status <service-name>` 
+
+### Where are `systemctl` logs stored?
+
+`systemctl` itself doesn’t store logs. Logs are managed by `systemd` and stored in the `run/log/journal` or `/var/log/journal` directories depending on the system configuration. 
+
+### What are `systemd` logs?
+
+`Systemd` logs are a centralized and structured logging system for Linux systems. 
+
+### What is `systemctl` in Linux?
+
+`systemctl` is a command-line utility in Linux for managing `systemd`, which controls system services with commands for status, start, stop, enable or disable.  
+
+### How do I open service logs?
+
+Open service logs using `sudo journalctl -u <service-name>`  to view logs for a specific service. 
+
+### What are the service logs?
+
+Service logs are records of events, actions and messages generated by a service, which document its activities, status changes, errors, and other significant occurrences for monitoring and troubleshooting. 
+
+### How do I view logs in Linux?
+
+View logs in Linux using `journalctl` for `systemd` logs or directly by accessing log files in the `/var/log` directory using commands like `cat`, `less`, or `tails`. 
+
+### How to check all `systemctl` services?
+
+Use `systemctl list-units --type=service -all` to list all `systemctl` services and their states. 
+
+### Where are the `systemctl` service files?
+
+`Systemctl` service files are typically stored in directories like `/lib/systemd/system`, `/etc/systemd/system/` or `/usr/lib/systemd/system` depending on the Linux distribution. 
+
+### What is the size limit of `systemd` log?
+
+The size limit of `systemd` log is not fixed and varies depending on the configuration.
+
+### Can I delete journal logs?
+
+Yes, you can delete journal logs by using the `journalctl` command to delete journal logs. You can specify the size or time duration for which you want to delete the logs. For example, 
+
+`sudo journalctl --vaccum-time=1d` to delete logs older than one day. 
+
+### How to check service restart logs in Linux?
+
+Use `journalctl -u <service-name>`  to check service restart logs in Linux.
+
+### How do I view services in `Systemctl`?
+
+View all services and their current states with `systemctl list-units --type=service` 
+
+### How to check service restart logs in Linux?
+
+To check service restart logs in Linux using `journalctl`, you can use the command `sudo journalctl -u <service-name> | grep "status"`. The status could be Running, Started, etc. 
+
+### How do I view logs in ServiceNow?
+
+To view logs in ServiceNow, you can typically use the “System Log” or “Application Logs” modules depending on the type of logs you are interested in. You can access System logs using predefined queries or create custom queries to filter logs based on specific parameters. 
+
+### Where are the `systemctl` service files?
+
+The `systemctl` files are typically stored in serval directories on a Linux system. The primary locations of `systemctl` like `/lib/systemd/system`, `/etc/systemd/system`, `etc/init.d` 
+
+## Resources
+
+- [Microservices Logging](https://signoz.io/blog/microservices-logging/)
+- [Kubectl Logs](https://signoz.io/blog/kubectl-logs/)
