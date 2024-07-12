@@ -964,12 +964,12 @@ const docsSideNav = [
     items: [
       {
         type: 'doc',
-        route: '/docs/ingestion/overview',
+        route: '/docs/ingestion/signoz-cloud/overview',
         label: 'Overview',
       },
       {
         type: 'doc',
-        route: '/docs/ingestion/keys',
+        route: '/docs/ingestion/signoz-cloud/keys',
         label: 'Keys',
       }
     ],
