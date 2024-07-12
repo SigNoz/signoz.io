@@ -971,21 +971,6 @@ const docsSideNav = [
         type: 'doc',
         route: '/docs/ingestion/keys',
         label: 'Keys',
-      },
-      {
-        type: 'doc',
-        route: '/docs/ingestion/logs',
-        label: 'Logs',
-      },
-      {
-        type: 'doc',
-        route: '/docs/ingestion/traces',
-        label: 'Traces',
-      },
-      {
-        type: 'doc',
-        route: '/docs/ingestion/metrics',
-        label: 'Metrics',
       }
     ],
   },
@@ -1556,11 +1541,6 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/troubleshooting/signoz-cloud/metrics-troubleshooting',
             label: 'Metrics Troubleshooting',
-          },
-          {
-            type: 'doc',
-            route: '/docs/troubleshooting/signoz-cloud/ingestion-troubleshooting',
-            label: 'Ingestion Troubleshooting',
           },
         ],
       },
