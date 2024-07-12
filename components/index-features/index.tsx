@@ -29,7 +29,7 @@ export const SigNozFeatures = () => {
   const sections = [
     {
       iconTag: 'INGEST DATA',
-      text: 'Ingest data from 50+ sources — send your data and start digging through.',
+      text: 'Ingest data from 50+ sources — send your data and start monitoring.',
       buttonText: 'Explore',
       logo: '/img/index_features/bar-chart-2.svg',
       img: '/img/graphics/homepage/feature-graphic-1.webp'

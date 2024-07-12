@@ -74,25 +74,25 @@ export const WhyOpenTelemetry = () => {
                 <p className="text-2xl font-semibold text-signoz_vanilla-100"> SigNoz is built from the ground up for OpenTelemetry</p>
                 <p className="text-signoz_vanilla-400 text-base font-normal leading-9 my-3 max-w-[50vw] sm:w-[42rem]">SigNoz offers the best in class support for OpenTelemetry’s semantic conventions with the best visualizations ⎯ powered by our powerful ingestion engine.</p>
                 <ul className="ul-no-padding">
-                  <li className="flex flex-row items-start sm:items-center gap-3 mt-3">
+                  <li className="flex gap-3 items-center mb-3 text-sm sm:text-base">
                     <ArrowRightSolid /><span>OpenTelemetry-first docs</span>
                   </li>
-                  <li className="flex flex-row items-start sm:items-center gap-3 mt-3">
+                  <li className="flex gap-3 items-center mb-3 text-sm sm:text-base">
                     <ArrowRightSolid /><span>Correlation of signals based on OpenTelemetry’s semantic conventions</span>
                   </li>
-                  <li className="flex flex-row items-start sm:items-center gap-3 mt-3">
+                  <li className="flex gap-3 items-center mb-3 text-sm sm:text-base">
                     <ArrowRightSolid /><span>Exceptions based on OpenTelemetry’s Trace data</span>
                   </li>
-                  <li className="flex flex-row items-start sm:items-center gap-3 mt-3">
+                  <li className="flex gap-3 items-center mb-3 text-sm sm:text-base">
                     <ArrowRightSolid /><span>Messaging queue monitoring based on OTel’s trace & metric’s data</span>
                   </li>
-                  <li className="flex flex-row items-start sm:items-center gap-3 mt-3">
+                  <li className="flex gap-3 items-center mb-3 text-sm sm:text-base">
                     <ArrowRightSolid /><span>Deployment env and marker support powered by OpenTelemetry</span>
                   </li>
-                  <li className="flex flex-row items-start sm:items-center gap-3 mt-3">
+                  <li className="flex gap-3 items-center mb-3 text-sm sm:text-base">
                     <ArrowRightSolid /><span>Configurable observability pipelines supported by Opamp</span>
                   </li>
-                  <li className="flex flex-row items-start sm:items-center gap-3 mt-3">
+                  <li className="flex gap-3 items-center mb-3 text-sm sm:text-base">
                     <ArrowRightSolid /><span>Span-based events for richer context while debugging</span>
                   </li>
                 </ul>

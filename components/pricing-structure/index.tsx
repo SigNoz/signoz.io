@@ -27,6 +27,12 @@ const PricingStructure = () => {
                 </p>
               </div>
               <div className="bg-signoz_ink-400 p-4 border border-signoz_slate-500 rounded w-full">
+                <p className="text-signoz_vanilla-100 text-base font-medium mb-2">No host (container or nodes) based pricing</p>
+                <p className="text-signoz_vanilla-400 text-sm font-normal leading-9 m-0">
+                  No need to worry about auto-scaling during peak hours.
+                </p>
+              </div>
+              <div className="bg-signoz_ink-400 p-4 border border-signoz_slate-500 rounded w-full">
                 <p className="text-signoz_vanilla-100 text-base font-medium mb-2">Simple usage-based pricing</p>
                 <p className="text-signoz_vanilla-400 text-sm font-normal leading-9 m-0">
                   Only pay for the data you send.

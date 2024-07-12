@@ -11,7 +11,7 @@ const WhySelectSignoz = ({ isInPricingPage = false }) => {
     <div className="!w-[80vw] !mx-auto !px-0 section-container border border-signoz_slate-400 border-dashed !border-b-0">
       <div className="flex flex-col sm:flex-row">
         <div className='flex-1 !w-[300px]'>
-          <p className='sticky top-[100px] pl-12 pt-10 text-signoz_vanilla-100 text-4xl sm:text-[44px] font-bold leading-[3.5rem]'>Why <br /> select <br /> signoz? </p>
+          <p className='sticky top-[100px] pl-12 pt-10 text-signoz_vanilla-100 text-4xl sm:text-[44px] font-bold !leading-[3.5rem]'>Why <br /> select <br /> SigNoz? </p>
         </div>
         <div className='flex-[2_2_0%]'>
           <div className='flex flex-col sm:flex-row border border-signoz_slate-400 border-dashed py-10 pl-10 !border-r-0 !border-t-0 !border-b-0 gap-8 justify-between'>

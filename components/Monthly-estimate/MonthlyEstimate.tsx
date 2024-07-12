@@ -420,7 +420,7 @@ const MonthlyEstimate = () => {
             Reach out to us for custom pricing and retention for high volume
           </span>
           <div className="w-2/5 border-b border-signoz_slate-400 border-dashed" />
-          <Link href={'/enterprise/'}>
+          <Link href={'https://share.hsforms.com/1AZy88ajlRsCPZUP0kSMb2gda5af'}>
             <Button className="w-full">
               Contact us
             </Button>
