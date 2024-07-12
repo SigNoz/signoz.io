@@ -39,7 +39,7 @@ const Observability = () => {
         </div>
         </div>
         <div className="aspect-[272/404] max-w-[50vw] w-[272px]">
-        <img src="/img/graphics/homepage/feature-graphic-enterprise-2.png" alt="" /></div>
+        <img src="/img/graphics/homepage/feature-graphic-enterprise-2.webp" alt="" /></div>
       </div>
     </div>
   </section>

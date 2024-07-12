@@ -30,7 +30,7 @@ const WhySelectSignoz = ({ isInPricingPage = false }) => {
               </div>
             </div>
             <div className="aspect-[272/352] max-w-[50vw] w-[272px]">
-            <img src="/img/graphics/homepage/feature-graphic-enterprise.png" alt="" />
+            <img src="/img/graphics/homepage/feature-graphic-enterprise.webp" alt="" />
             </div>
           </div>
           <Observability />
