@@ -18,15 +18,15 @@ const Button: React.FC<ButtonProps> = ({ icon, text }) => {
 const BlogFeedback: React.FC = () => {
   const buttons: ButtonProps[] = [
     {
-      icon: <ThumbsUp color="#6366f1" size={14} />,
+      icon: <ThumbsUp color="#4E74F8" size={14} />,
       text: 'Yes',
     },
     {
-      icon: <ThumbsDown color="#6366f1" size={14} />,
+      icon: <ThumbsDown color="#4E74F8" size={14} />,
       text: 'No',
     },
     {
-      icon: <PenBox color="#6366f1" size={14} />,
+      icon: <PenBox color="#4E74F8" size={14} />,
       text: 'Send feedback',
     },
   ]

@@ -6,11 +6,18 @@ import { ArrowRight } from 'lucide-react'
 import Link from "next/link";
 
 const COMPANIES = [
-  { image: "/img/users/super.svg", imageDesc: "super logo" },
-  { image: "/img/users/hashnode.svg", imageDesc: "hashnode logo" },
-  { image: "/img/users/zapier.svg", imageDesc: "zapier logo" },
-  { image: "/img/users/incident_io.svg", imageDesc: "incident.io logo" },
-  { image: "/img/users/mintlify.svg", imageDesc: "mintlify logo" },
+  { image: "/img/users/netapp.svg", imageDesc: "netapp logo" },
+  { image: "/img/users/samsung.svg", imageDesc: "samsung logo" },
+  { image: "/img/users/comcast.svg", imageDesc: "comcast logo" },
+  { image: "/img/users/freo.svg", imageDesc: "freo logo" },
+  { image: "/img/users/hyperface.svg", imageDesc: "hyperface logo" },
+  { image: "/img/users/salesforce.svg", imageDesc: "salesforce logo" },
+  { image: "/img/users/rattle.svg", imageDesc: "rattle logo" },
+  { image: "/img/users/webstaurantstore.svg", imageDesc: "webstaurant logo" },
+  { image: "/img/users/gokiwi.svg", imageDesc: "GoKiwi logo" },
+  { image: "/img/users/outplay.svg", imageDesc: "outplay logo" },
+  { image: "/img/users/tuneai.svg", imageDesc: "tune logo" },
+  { image: "/img/users/wombo.svg", imageDesc: "wombo logo" },
 
 
 ];
@@ -18,7 +25,7 @@ const COMPANIES = [
 export const TrustedByTeams = () => {
   return (
     <section className={`${styles.used_by} !mx-auto !w-[80vw] border border-signoz_slate-400 border-dashed !border-b-0 !m-0`}>
-      <div className="container">
+      <div className="section-container">
         <div className="flex flex-col items-center mb-12 text-center">
           <div className="text-signoz_vanilla-400 text-sm font-semibold leading-5 tracking-[0.05em] uppercase">Trusted by the <span className="text-signoz_vanilla-100">best platform teams</span></div>
         </div>

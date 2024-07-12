@@ -40,7 +40,7 @@ export const WhyOpenTelemetry = () => {
     <>
       <section className="!w-[80vw] !mx-auto border border-signoz_slate-400 border-dashed !border-t-0 !border-b-0">
         <div className="container bg-[center_top_calc(-600px)] bg-[url('/img/background_blur/Ellipse_207.png')]">
-          <div className="flex flex-col items-center pb-5 text-center pt-28">
+          <div className="flex flex-col items-center text-center py-28">
             <p className="text-signoz_vanilla-400 text-center text-sm font-medium tracking-[.05em] uppercase">SigNoz is OpenTelemetry-Native</p>
             <p className="text-signoz_sakura-100 text-3xl sm:text-[44px] font-semibold leading-[3.5rem]">But why OpenTelemetry?</p>
             <p className="text-signoz_vanilla-100 text-center text-xs sm:text-base font-medium">
@@ -48,11 +48,11 @@ export const WhyOpenTelemetry = () => {
               <br className="hidden lg:inline" />
               Kubernetes being more active.
             </p>
-            <Link href="/">
+            {/* <Link href="/">
               <button className="h-10 px-4 py-2 mt-3 mb-24 rounded-full text-[10px] sm:text-sm flex items-center justify-center gap-1.5 bg-signoz_slate-400 font-medium leading-5 text-white border border-signoz_slate-200 shadow-[0_0_20px_0_rgba(242,71,105,0.20)]">
                 <BookOpen className="h-3 w-3 sm:h-3.5 sm:w-3.5"/>Learn why OpenTelemetry is the future<ArrowRight className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
               </button>
-            </Link>
+            </Link> */}
           </div>
         </div>
       </section>
@@ -67,9 +67,9 @@ export const WhyOpenTelemetry = () => {
         ))}
       </div>
       <section className="!w-[80vw] !mx-auto border border-signoz_slate-400 border-dashed ">
-        <div className="container mb-16">
+        <div className="section-container mb-16">
           <div className='flex flex-col p-9 justify-between'>
-            <div className="flex flex-col sm:flex-row">
+            <div className="flex flex-col sm:flex-row justify-between">
               <div>
                 <p className="text-2xl font-semibold text-signoz_vanilla-100"> SigNoz is built from the ground up for OpenTelemetry</p>
                 <p className="text-signoz_vanilla-400 text-base font-normal leading-9 my-3 max-w-[50vw] sm:w-[42rem]">SigNoz offers the best in class support for OpenTelemetry’s semantic conventions with the best visualizations ⎯ powered by our powerful ingestion engine.</p>
@@ -98,7 +98,7 @@ export const WhyOpenTelemetry = () => {
                 </ul>
               </div>
               <div className="aspect-[449/352] sm:h-[352px] card-background mb-6">
-              <img src="/img/graphics/homepage/feature-graphic-otel.png" alt="" /></div>
+              <img src="/img/graphics/homepage/feature-graphic-otel.webp" alt="" /></div>
             </div>
             <div className="bg-signoz_ink-400 p-4 border border-signoz_slate-500 rounded">
               <p className="text-signoz_vanilla-100 text-base font-medium mb-2">Comparing Datadog and New Relic's support for OpenTelemetry data</p>

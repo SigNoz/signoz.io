@@ -4,23 +4,36 @@ import { Slider, Tooltip, SliderValue } from "@nextui-org/react";
 import { ArrowUpRight } from 'lucide-react';
 import Button from '@/components/Button/Button';
 
-const formatNumber = (number: Number) => number.toLocaleString(undefined, { maximumFractionDigits: 2, minimumFractionDigits: 0 })
+const formatNumber = (number) => number.toLocaleString(undefined, { maximumFractionDigits: 2, minimumFractionDigits: 0 });
 
 const formatBytes = (size) => {
-  if (size < 1024) {
-    return `${size} GB`
+  if (size < 1000) {
+    return `${formatNumber(size)} GB`;
   }
-
-  return `${formatNumber(size / 1024)} TB`
-}
+  return `${formatNumber(size / 1000)} TB`;
+};
 
 const formatMetrics = (size) => {
   if (size < 1000) {
-    return `${size} mn`
+    return `${formatNumber(size)} mn`;
   }
+  return `${formatNumber(size / 1000)} bn`;
+};
 
-  return `${formatNumber(size / 1000)} bn`
-}
+// Transformation functions
+const linearToLog = (value, minLog, maxLog) => {
+  const minValue = Math.log(minLog);
+  const maxValue = Math.log(maxLog);
+  const scale = (maxValue - minValue) / (maxLog - minLog);
+  return Math.exp(minValue + scale * (value - minLog));
+};
+
+const logToLinear = (value, minLog, maxLog) => {
+  const minValue = Math.log(minLog);
+  const maxValue = Math.log(maxLog);
+  const scale = (maxLog - minLog) / (maxValue - minValue);
+  return minLog + scale * (Math.log(value) - minValue);
+};
 
 const MonthlyEstimate = () => {
   const TRACES_AND_LOGS_PRICES = {
@@ -60,41 +73,35 @@ const MonthlyEstimate = () => {
     RETENTION_PERIOD.METRICS[0].months
   );
 
-  const [tracesValue, setTracesValue] = React.useState<SliderValue>(0.2);
-  const [inputTracesValue, setinputTracesValue] = React.useState<string>("0.2");
+  const [tracesValue, setTracesValue] = React.useState<SliderValue>(2);
+  const [inputTracesValue, setInputTracesValue] = React.useState<string>("2");
 
-  const [logsValue, setLogsValue] = React.useState<SliderValue>(0.2);
-  const [inputLogsValue, setinputLogsValue] = React.useState<string>("0.2");
+  const [logsValue, setLogsValue] = React.useState<SliderValue>(2);
+  const [inputLogsValue, setInputLogsValue] = React.useState<string>("2");
 
-  const [metricsValue, setMetricsValue] = React.useState<SliderValue>(0.2);
-  const [inputMetricsValue, setinputMetricsValue] = React.useState<string>("0.2");
+  const [metricsValue, setMetricsValue] = React.useState<SliderValue>(2);
+  const [inputMetricsValue, setInputMetricsValue] = React.useState<string>("2");
 
+  const MIN_VALUE = 1;
+  const MAX_VALUE = 200000;
 
   const handleChangeTraces = (value: SliderValue) => {
     if (isNaN(Number(value))) return;
-
     setTracesValue(value);
-    setinputTracesValue(value.toString());
-
+    setInputTracesValue(linearToLog(value, MIN_VALUE, MAX_VALUE).toString());
   };
-
 
   const handleChangeLogs = (value: SliderValue) => {
     if (isNaN(Number(value))) return;
-
     setLogsValue(value);
-    setinputLogsValue(value.toString());
-
+    setInputLogsValue(linearToLog(value, MIN_VALUE, MAX_VALUE).toString());
   };
 
   const handleChangeMetrics = (value: SliderValue) => {
     if (isNaN(Number(value))) return;
-
     setMetricsValue(value);
-    setinputMetricsValue(value.toString());
+    setInputMetricsValue(linearToLog(value, MIN_VALUE, MAX_VALUE).toString());
   };
-
-
 
   const getPricePerUnit = (type: string, retentionPeriod: number) => {
     if (type === 'metrics') {
@@ -106,7 +113,7 @@ const MonthlyEstimate = () => {
 
   const calculateSubtotal = (type: string, value: SliderValue, retentionPeriod: number) => {
     const pricePerUnit = getPricePerUnit(type, retentionPeriod);
-    const estimatedUsage = value;
+    const estimatedUsage = linearToLog(value, MIN_VALUE, MAX_VALUE);
     return Number(pricePerUnit) * Number(estimatedUsage);
   };
 
@@ -116,15 +123,15 @@ const MonthlyEstimate = () => {
 
   const totalEstimate = Math.max(199, tracesSubtotal + logsSubtotal + metricsSubtotal);
 
-
   const myRef = useRef<HTMLElement | null>(null);
 
   const isHighVolume = tracesValue === 200 * 1024 || logsValue === 200 * 1024 || metricsValue === 200 * 1000;
 
+  console.log({tracesValue, linearToLogTraces: linearToLog(tracesValue, MIN_VALUE, MAX_VALUE), traces: formatBytes(linearToLog(tracesValue, MIN_VALUE, MAX_VALUE))})
 
   return (
     <section ref={myRef} id="monthly-estimate">
-      <div className="container !w-[80vw] border border-signoz_slate-400 border-dashed !border-t-0">
+      <div className="section-container !w-[80vw] !mx-[auto] border border-signoz_slate-400 border-dashed !border-t-0">
         <div className="flex flex-col gap-2 pt-5">
           <span className="text-signoz_vanilla-100 text-2xl font-semibold pl-1">
             Estimate your monthly bill
@@ -182,24 +189,22 @@ const MonthlyEstimate = () => {
             <Slider
               size="sm"
               step={0.01}
-              maxValue={200 * 1024}
-              minValue={0}
+              maxValue={MAX_VALUE}
+              minValue={MIN_VALUE}
               color="secondary"
               marks={[
                 {
-                  value: 0,
+                  value: MIN_VALUE,
                   label: "0GB",
                 },
                 {
-                  value: 204800,
+                  value: MAX_VALUE,
                   label: "200TB",
                 },
               ]}
               classNames={{
                 base: "max-w-md",
                 label: "text-medium",
-                // filler: "bg-signoz_robin-500",
-                // startContent: "bg-signoz_robin-500"
               }}
               renderThumb={(props) => (
                 <div
@@ -220,11 +225,11 @@ const MonthlyEstimate = () => {
                       value={inputTracesValue}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                         const v = e.target.value;
-                        setinputTracesValue(v);
+                        setInputTracesValue(v);
                       }}
                       onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
                         if (e.key === "Enter" && !isNaN(Number(inputTracesValue))) {
-                          setTracesValue(Number(inputTracesValue));
+                          setTracesValue(logToLinear(Number(inputTracesValue), MIN_VALUE, MAX_VALUE));
                         }
                       }}
                     />
@@ -234,10 +239,9 @@ const MonthlyEstimate = () => {
               value={tracesValue}
               onChange={handleChangeTraces}
             />
-
           </div>
 
-          <div className="p-2 metrics-background text-right text-signoz_vanilla-400">{formatBytes(tracesValue)}</div>
+          <div className="p-2 metrics-background text-right text-signoz_vanilla-400">{formatBytes(linearToLog(tracesValue, MIN_VALUE, MAX_VALUE))}</div>
           <div className="p-2 metrics-background text-right">${formatNumber(tracesSubtotal)}</div>
 
           <div className="flex p-2 gap-2 metrics-background items-center">
@@ -267,23 +271,22 @@ const MonthlyEstimate = () => {
             <Slider
               size="sm"
               step={0.01}
-              maxValue={200 * 1024}
-              minValue={0}
+              maxValue={MAX_VALUE}
+              minValue={MIN_VALUE}
               color="danger"
               marks={[
                 {
-                  value: 0,
+                  value: MIN_VALUE,
                   label: "0GB",
                 },
                 {
-                  value: 204800,
+                  value: MAX_VALUE,
                   label: "200TB",
                 },
               ]}
               classNames={{
                 base: "max-w-md",
                 label: "text-medium",
-                // filler: "bg-signoz_sakura-500"
               }}
               renderThumb={(props) => (
                 <div
@@ -304,11 +307,11 @@ const MonthlyEstimate = () => {
                       value={inputLogsValue}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                         const v = e.target.value;
-                        setinputLogsValue(v);
+                        setInputLogsValue(v);
                       }}
                       onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
                         if (e.key === "Enter" && !isNaN(Number(inputLogsValue))) {
-                          setLogsValue(Number(inputLogsValue));
+                          setLogsValue(logToLinear(Number(inputLogsValue), MIN_VALUE, MAX_VALUE));
                         }
                       }}
                     />
@@ -318,10 +321,9 @@ const MonthlyEstimate = () => {
               value={logsValue}
               onChange={handleChangeLogs}
             />
-
           </div>
 
-          <div className="p-2 metrics-background text-right text-signoz_vanilla-400">{formatBytes(logsValue)}</div>
+          <div className="p-2 metrics-background text-right text-signoz_vanilla-400">{formatBytes(linearToLog(logsValue, MIN_VALUE, MAX_VALUE))}</div>
           <div className="p-2 metrics-background text-right">${formatNumber(logsSubtotal)}</div>
 
           <div className="flex p-2 gap-2 metrics-background items-center">
@@ -351,16 +353,16 @@ const MonthlyEstimate = () => {
             <Slider
               size="sm"
               step={0.01}
-              maxValue={200 * 1000}
-              minValue={0}
+              maxValue={MAX_VALUE}
+              minValue={MIN_VALUE}
               color="warning"
               marks={[
                 {
-                  value: 0,
+                  value: MIN_VALUE,
                   label: "0M",
                 },
                 {
-                  value: 200000,
+                  value: MAX_VALUE,
                   label: "200B",
                 },
               ]}
@@ -387,11 +389,11 @@ const MonthlyEstimate = () => {
                       value={inputMetricsValue}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                         const v = e.target.value;
-                        setinputMetricsValue(v);
+                        setInputMetricsValue(v);
                       }}
                       onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
                         if (e.key === "Enter" && !isNaN(Number(inputMetricsValue))) {
-                          setMetricsValue(Number(inputMetricsValue));
+                          setMetricsValue(logToLinear(Number(inputMetricsValue), MIN_VALUE, MAX_VALUE));
                         }
                       }}
                     />
@@ -403,7 +405,7 @@ const MonthlyEstimate = () => {
             />
           </div>
 
-          <div className="p-2 metrics-background text-right text-signoz_vanilla-400">{formatMetrics(metricsValue)}</div>
+          <div className="p-2 metrics-background text-right text-signoz_vanilla-400">{(formatMetrics(linearToLog(metricsValue, MIN_VALUE, MAX_VALUE)))}</div>
           <div className="p-2 metrics-background text-right">${formatNumber(metricsSubtotal)}</div>
         </div>
 

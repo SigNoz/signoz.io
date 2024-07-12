@@ -10,7 +10,7 @@ import Button from '@/components/Button/Button'
 const DataProtectionLaws = ({ isInPricingPage = false }) => {
   return (
     <section>
-      <div className='container flex w-auto h-auto border border-signoz_slate-400 border-dashed px-10 py-10 !border-r-0 !border-b-0'>
+      <div className='section-container flex w-auto h-auto border border-signoz_slate-400 border-dashed px-10 py-10 !border-r-0 !border-b-0'>
         <div className="flex flex-col">
           <div>
             <p className='text-2xl font-semibold text-signoz_vanilla-100 block mb-2'>Worried about Data Protection Laws?</p>
@@ -27,7 +27,7 @@ const DataProtectionLaws = ({ isInPricingPage = false }) => {
             }
 
           </div>
-          <img src="/img/graphics/homepage/feature-graphic-data-protection.png" alt="" />
+          <img src="/img/graphics/homepage/feature-graphic-data-protection.webp" alt="" />
           {
             !isInPricingPage ?
               <div className='flex flex-col sm:flex-row gap-3 mt-[18px]'>

@@ -6,7 +6,7 @@ import { ArrowRight } from 'lucide-react'
 export const CommunityEdition = () => {
   return (
     <section>
-      <div className='container flex h-auto border border-signoz_slate-400 border-dashed px-10 py-10 !border-b-0 !border-r-0'>
+      <div className='section-container flex h-auto border border-signoz_slate-400 border-dashed px-10 py-10 !border-b-0 !border-r-0'>
         <div className="flex flex-col w-full">
           <div>
             <p className='text-2xl font-semibold text-signoz_vanilla-100'> Get started with Community Edition</p>
