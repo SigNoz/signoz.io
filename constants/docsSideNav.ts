@@ -1,6 +1,7 @@
 const docsSideNav = [
   {
     type: 'category',
+    isExpanded: false,
     label: 'Get Started',
     route: '/docs',
     items: [
@@ -11,6 +12,7 @@ const docsSideNav = [
       },
       {
         type: 'category',
+        isExpanded: false,
         label: 'Installation',
         route: '/docs/install',
         items: [
@@ -21,8 +23,8 @@ const docsSideNav = [
           },
           {
             type: 'category',
+            isExpanded: false,
             label: 'Self-Host SigNoz',
-            // route: '',
             items: [
               {
                 type: 'doc',
@@ -36,14 +38,9 @@ const docsSideNav = [
               },
               {
                 type: 'category',
+                isExpanded: false,
                 label: 'Kubernetes',
                 route: '/docs/install/kubernetes',
-                // link: {
-                // type: 'generated-index',
-                // title: 'Kubernetes',
-                // description: 'Learn how to install SigNoz on Kubernetes with Helm',
-                // slug: '/docs/install/kubernetes',
-                // },
                 items: [
                   {
                     type: 'doc',
@@ -72,8 +69,8 @@ const docsSideNav = [
 
           {
             type: 'category',
+            isExpanded: false,
             label: 'Install OTel collector',
-            // route: '',
             items: [
               {
                 route: '/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine',
@@ -94,6 +91,7 @@ const docsSideNav = [
   {
     label: 'SigNoz Features',
     type: 'category',
+    isExpanded: false,
     items: [
       {
         type: 'doc',
@@ -131,6 +129,7 @@ const docsSideNav = [
   {
     label: 'APM & Distributed Tracing',
     type: 'category',
+    isExpanded: false,
     // route: '',
     items: [
       {
@@ -141,6 +140,7 @@ const docsSideNav = [
       {
         label: 'Instrument Application',
         type: 'category',
+        isExpanded: false,
         route: '/docs/instrumentation',
         // link: {
         // type: 'generated-index',
@@ -152,6 +152,7 @@ const docsSideNav = [
         items: [
           {
             type: 'category',
+            isExpanded: false,
             label: 'Python',
             route: '/docs/instrumentation/python',
             // link: {
@@ -196,6 +197,7 @@ const docsSideNav = [
           },
           {
             type: 'category',
+            isExpanded: false,
             label: 'Java',
             route: '/docs/instrumentation/java',
             // link: {
@@ -225,6 +227,7 @@ const docsSideNav = [
           },
           {
             type: 'category',
+            isExpanded: false,
             label: 'Javascript',
             route: '/docs/instrumentation/javascript',
             // link: {
@@ -249,6 +252,11 @@ const docsSideNav = [
                 type: 'doc',
                 route: '/docs/instrumentation/angular',
                 label: 'Angular',
+              },
+              {
+                type: 'doc',
+                route: '/docs/instrumentation/nextjs',
+                label: 'NextJS',
               },
             ],
           },
@@ -289,25 +297,27 @@ const docsSideNav = [
           },
           {
             type: 'category',
+            isExpanded: false,
             label: 'Manual Instrumentation',
             // route: '',
             // link: {
             // type: 'doc',
             // },
             items: [
-                {
-                  type: 'category',
-                  label: 'JavaScript',
-                  // route: '',
-                  // link: {
-                  // type: 'doc',
-                  // },
-                  items: [
-                    {
-                      type: 'doc',
-                      label: 'NodeJS',
-                      route: '/docs/instrumentation/manual-instrumentation/javascript/nodejs',
-                   },
+              {
+                type: 'category',
+                isExpanded: false,
+                label: 'JavaScript',
+                // route: '',
+                // link: {
+                // type: 'doc',
+                // },
+                items: [
+                  {
+                    type: 'doc',
+                    label: 'NodeJS',
+                    route: '/docs/instrumentation/manual-instrumentation/javascript/nodejs',
+                  },
                 ],
               },
             ],
@@ -316,6 +326,7 @@ const docsSideNav = [
       },
       {
         type: 'category',
+        isExpanded: false,
         label: 'APM Product Overview',
         // route: '',
         items: [
@@ -326,6 +337,7 @@ const docsSideNav = [
           },
           {
             type: 'category',
+            isExpanded: false,
             label: 'View Traces',
             route: '/docs/userguide/traces',
             // link: {
@@ -348,6 +360,7 @@ const docsSideNav = [
       },
       {
         type: 'category',
+        isExpanded: false,
         label: 'Trace API',
         // route: '',
         items: [
@@ -375,6 +388,7 @@ const docsSideNav = [
       },
       {
         type: 'category',
+        isExpanded: false,
         label: 'Tutorials',
         // route: '',
         items: [
@@ -405,6 +419,7 @@ const docsSideNav = [
   {
     label: 'Infrastructure Monitoring',
     type: 'category',
+    isExpanded: false,
     // route: '',
     items: [
       {
@@ -447,6 +462,7 @@ const docsSideNav = [
   {
     label: 'Logs Management',
     type: 'category',
+    isExpanded: false,
     // route: '',
     items: [
       {
@@ -456,6 +472,7 @@ const docsSideNav = [
       },
       {
         type: 'category',
+        isExpanded: false,
         label: 'Send Logs to SigNoz',
         items: [
           {
@@ -490,6 +507,7 @@ const docsSideNav = [
           },
           {
             type: 'category',
+            isExpanded: false,
             label: 'Application Logs',
             items: [
               {
@@ -531,6 +549,7 @@ const docsSideNav = [
           },
           {
             type: 'category',
+            isExpanded: false,
             label: 'Existing Collectors to SigNoz',
             items: [
               {
@@ -552,13 +571,15 @@ const docsSideNav = [
           },
           {
             type: 'doc',
-            route: '/docs/logs-management/send-logs/collect-tomcat-access-and-garbage-collector-logs',
+            route:
+              '/docs/logs-management/send-logs/collect-tomcat-access-and-garbage-collector-logs',
             label: 'Tomcat',
           },
         ],
       },
       {
         type: 'category',
+        isExpanded: false,
         label: 'Preprocess Logs',
         route: '/docs/logs-pipelines/introduction',
         // link: {
@@ -577,6 +598,7 @@ const docsSideNav = [
           },
           {
             type: 'category',
+            isExpanded: false,
             label: 'Guides',
             route: '/docs/category/guides',
             // link: {
@@ -602,6 +624,7 @@ const docsSideNav = [
       },
       {
         type: 'category',
+        isExpanded: false,
         label: 'Features',
         // route: '',
         items: [
@@ -619,6 +642,7 @@ const docsSideNav = [
       },
       {
         type: 'category',
+        isExpanded: false,
         label: 'Logs API',
         // route: '',
         items: [
@@ -650,20 +674,44 @@ const docsSideNav = [
         ],
       },
       {
+        type: 'category',
+        label: 'User Guide',
+        isExpanded: false,
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/logs-management/guides/drop-logs',
+            label: 'Drop Logs',
+          },
+          {
+            type: 'doc',
+            route: '/docs/logs-management/guides/pii-scrubbing',
+            label: 'PII Scrubbing'
+          },
+        ]
+      },
+      {
+        type: 'doc',
+        route: '/docs/logs-management/long-term-storage',
+        label: 'Long Term Storage',
+        className: 'new-doc',
+      },
+      {
         type: 'doc',
         route: '/docs/userguide/logs_troubleshooting',
         label: 'Troubleshooting',
       },
-      {
-        type: 'doc',
-        route: '/docs/logs-management/guides/drop-logs',
-        label: 'Guide to drop logs',
-      },
+      // {
+      //   type: 'doc',
+      //   route: '/docs/logs-management/guides/drop-logs',
+      //   label: 'Guide to drop logs',
+      // },
     ],
   },
   {
     label: 'Metrics',
     type: 'category',
+    isExpanded: false,
     items: [
       {
         type: 'doc',
@@ -675,6 +723,7 @@ const docsSideNav = [
   {
     label: 'Dashboards',
     type: 'category',
+    isExpanded: false,
     // route: '',
     items: [
       {
@@ -689,6 +738,7 @@ const docsSideNav = [
       },
       {
         type: 'category',
+        isExpanded: false,
         route: '/docs/dashboards/panel-types',
         label: 'Panel Types',
         items: [
@@ -739,13 +789,14 @@ const docsSideNav = [
   {
     label: 'Querying',
     type: 'category',
+    isExpanded: false,
     // route: '',
     items: [
-      {
-        type: 'doc',
-        route: '/docs/userguide/create-a-custom-query',
-        label: 'Create a Custom Query',
-      },
+      // {
+      //   type: 'doc',
+      //   route: '/docs/userguide/create-a-custom-query',
+      //   label: 'Create a Custom Query',
+      // },
       {
         type: 'doc',
         route: '/docs/userguide/query-builder',
@@ -753,6 +804,7 @@ const docsSideNav = [
       },
       {
         type: 'category',
+        isExpanded: false,
         // route: '',
         label: 'ClickHouse Query',
         items: [
@@ -778,6 +830,7 @@ const docsSideNav = [
   {
     label: 'Alerts',
     type: 'category',
+    isExpanded: false,
     route: '/docs/alerts',
     // link: {
     //   type: 'generated-index',
@@ -800,6 +853,7 @@ const docsSideNav = [
       {
         label: 'Setup Alerts Notification',
         type: 'category',
+        isExpanded: false,
         route: '/docs/setup-alerts-notification',
         // link: {
         //   type: 'generated-index',
@@ -873,11 +927,12 @@ const docsSideNav = [
   {
     type: 'doc',
     route: '/docs/userguide/exceptions',
-    label: 'Monitroing Exceptions',
+    label: 'Monitoring Exceptions',
   },
   {
     label: 'Security & Compliance',
     type: 'category',
+    isExpanded: false,
     // route: '',
     items: [
       //     'userguide/overview',
@@ -906,6 +961,7 @@ const docsSideNav = [
   {
     label: 'Tutorials',
     type: 'category',
+    isExpanded: false,
     route: '/docs/tutorials',
     // link: {
     // type: 'generated-index',
@@ -980,11 +1036,13 @@ const docsSideNav = [
   {
     label: 'AWS Monitoring',
     type: 'category',
+    isExpanded: false,
     // route: '',
     items: [
       //'aws/getting-started',
       {
         type: 'category',
+        isExpanded: false,
         label: 'EC2',
         route: '/docs/ec2-monitoring',
         // link: {
@@ -1007,6 +1065,7 @@ const docsSideNav = [
       },
       {
         type: 'category',
+        isExpanded: false,
         label: 'ECS',
         route: '/docs/ecs-monitoring',
         // link: {
@@ -1052,11 +1111,13 @@ const docsSideNav = [
   {
     label: 'Azure Monitoring',
     type: 'category',
+    isExpanded: false,
     className: 'new-doc',
     // route: '',
     items: [
       {
         type: 'category',
+        isExpanded: false,
         label: 'Bootstrapping',
         route: '/docs/azure-monitoring/bootstrapping',
         // link: {
@@ -1084,6 +1145,7 @@ const docsSideNav = [
       },
       {
         type: 'category',
+        isExpanded: false,
         label: 'Virtual Machines',
         route: '/docs/azure-monitoring/virtual-machines',
         // link: {
@@ -1101,6 +1163,7 @@ const docsSideNav = [
       },
       {
         type: 'category',
+        isExpanded: false,
         label: 'App Service',
         route: '/docs/azure-monitoring/app-service',
         items: [
@@ -1128,6 +1191,7 @@ const docsSideNav = [
       },
       {
         type: 'category',
+        isExpanded: false,
         label: 'Azure Container Apps',
         route: '/docs/azure-monitoring/az-container-app',
         items: [
@@ -1150,6 +1214,7 @@ const docsSideNav = [
       },
       {
         type: 'category',
+        isExpanded: false,
         label: 'Azure Functions',
         route: '/docs/azure-monitoring/az-fns',
         items: [
@@ -1177,6 +1242,7 @@ const docsSideNav = [
       },
       {
         type: 'category',
+        isExpanded: false,
         label: 'Azure Blog Storage',
         route: '/docs/azure-monitoring/az-blob-storage',
         items: [
@@ -1196,6 +1262,7 @@ const docsSideNav = [
   },
   {
     type: 'category',
+    isExpanded: false,
     label: 'Operate Self-Hosted SigNoz',
     route: '/docs/operate',
     // link: {
@@ -1228,6 +1295,7 @@ const docsSideNav = [
       },
       {
         type: 'category',
+        isExpanded: false,
         label: 'Migration Guides',
         route: '/docs/operate/migration',
         // link: {
@@ -1238,6 +1306,11 @@ const docsSideNav = [
         // slug: '/docs/operate/migration/migration',
         // },
         items: [
+          {
+            type: 'doc',
+            route: '/docs/operate/migration/upgrade-0.49',
+            label: 'Upgrade to v0.49',
+          },
           {
             type: 'doc',
             route: '/docs/operate/migration/upgrade-0.45',
@@ -1297,6 +1370,7 @@ const docsSideNav = [
       },
       {
         type: 'category',
+        isExpanded: false,
         label: 'ClickHouse',
         route: '/docs/operate/clickhouse',
         // link: {
@@ -1331,6 +1405,7 @@ const docsSideNav = [
       },
       {
         type: 'category',
+        isExpanded: false,
         label: 'Query Service',
         route: '/docs/operate/query-service',
         // link: {
@@ -1367,6 +1442,7 @@ const docsSideNav = [
   },
   {
     type: 'category',
+    isExpanded: false,
     label: 'About SigNoz',
     items: [
       {
@@ -1398,6 +1474,7 @@ const docsSideNav = [
   {
     label: 'Community',
     type: 'category',
+    isExpanded: false,
     items: [
       {
         route: '/docs/community/community-integrations',
@@ -1415,6 +1492,7 @@ const docsSideNav = [
   {
     label: 'Troubleshooting',
     type: 'category',
+    isExpanded: false,
     route: '/docs/faqs',
     // link: {
     // type: 'generated-index',
@@ -1427,7 +1505,9 @@ const docsSideNav = [
       {
         label: 'SigNoz Cloud',
         type: 'category',
-          items: [{
+        isExpanded: false,
+        items: [
+          {
             type: 'doc',
             route: '/docs/troubleshooting/signoz-cloud/general-troubleshooting',
             label: 'General Troubleshooting',
@@ -1454,6 +1534,7 @@ const docsSideNav = [
   {
     label: 'FAQ',
     type: 'category',
+    isExpanded: false,
     route: '/docs/faqs',
     // link: {
     // type: 'generated-index',
@@ -1488,6 +1569,7 @@ const docsSideNav = [
   {
     label: 'Others',
     type: 'category',
+    isExpanded: false,
     items: [
       {
         type: 'doc',

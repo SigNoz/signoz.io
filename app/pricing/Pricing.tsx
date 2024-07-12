@@ -323,15 +323,34 @@ const PricingPlans = () => {
                         {' '}
                         <li>No host-based pricing</li>
                       </span>
+                    
+                     
+                    </div>
+                    <div>
+                    <span> 
+                      <li>Long term Logs Storage options -
+                        <a href="/docs/logs-management/long-term-storage/">
+                        <a className="mx-0 rounded px-0 py-0.5 text-primary-400"> Details</a>
+                        </a>
+                      </li>
+                      </span>
                     </div>
                     <br />
 
                     <div>
                       <span>
-                        *$199 includes data usage. Monthly bill will be $199 till you ingest data
-                        higher than what's covered in $199.
+                        $199 includes data usage. Monthly bill will be $199 till you ingest data
+                        higher than what's covered in $199. <a href="https://vimeo.com/968489758" target="_blank" className="mx-0 rounded px-0 py-0.5 text-primary-400" >Explainer Video</a>
                       </span>
                     </div>
+                    <br/>
+
+                    <div>
+                    <span>
+                    How does pricing of metrics work in SigNoz? <a href='https://vimeo.com/973012522' target='_blank' className='mx-0 rounded px-0 py-0.5 text-primary-400'> Explainer Video </a> 
+                      </span>
+                    </div>
+
                   </div>
                   <Divider isDashed />
                   <p className={styles.retention}>
@@ -370,6 +389,8 @@ const PricingPlans = () => {
                       <li>Exceptions Monitoring</li>
                       <li>Alerts Management</li>
                       <li>SSO and SAML Support</li>
+                      <li>Support for Multiple Ingestion Keys</li>
+                      <li>Support for Rate Limits based on Ingestion keys</li>
                       <li>Service Dependency Visualization</li>
                       <li>Run aggregates on ingested spans</li>
                       <li>Live Tail Logging</li>
@@ -706,6 +727,8 @@ const PricingPlans = () => {
                     <p className={styles.featureBlur}>Includes all features in community edition</p>
                     <ul className="list-icon-right">
                       <li>SSO and SAML Support</li>
+                      <li>Support for Multiple Ingestion Keys</li>
+                      <li>Support for Rate Limits based on Ingestion keys</li>
                       <li>Dashboard locking</li>
                       <li>Visualize very large traces (&gt;10K spans)</li>
                       <li>Run aggregates on ingested spans</li>
@@ -936,6 +959,18 @@ const ExploreAllFeature = () => {
         features: [
           {
             feature: 'SSO/SAML support',
+            inCommunity: <CrossIcon />,
+            inTeams: <RightIcon />,
+            inEnterprise: <RightIcon />,
+          },
+          {
+            feature: 'Support for Multiple Ingestion Keys',
+            inCommunity: <CrossIcon />,
+            inTeams: <RightIcon />,
+            inEnterprise: <RightIcon />,
+          },
+          {
+            feature: 'Support for Rate Limits based on Ingestion keys',
             inCommunity: <CrossIcon />,
             inTeams: <RightIcon />,
             inEnterprise: <RightIcon />,
