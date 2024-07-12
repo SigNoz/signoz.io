@@ -445,13 +445,16 @@ const PricingPlans = () => {
                       <li className='flex gap-3 items-center mb-3'> <CircleCheckSolid /> Exceptions Monitoring</li>
                       <li className='flex gap-3 items-center mb-3'> <CircleCheckSolid /> Alerts Management</li>
                       <li className='flex gap-3 items-center mb-3'> <CircleCheckSolid /> SSO and SAML Support</li>
+                      <li className='flex gap-3 items-center mb-3'> <CircleCheckSolid /> Support for Multiple Ingestion Keys</li>
+                      <li className='flex gap-3 items-center mb-3'> <CircleCheckSolid /> Support for Rate Limits based on Ingestion keys</li>
                       <li className='flex gap-3 items-center mb-3'> <CircleCheckSolid /> Service Dependency Visualization</li>
                       <li className='flex gap-3 items-center mb-3'> <CircleCheckSolid /> Run aggregates on ingested spans</li>
                       <li className='flex gap-3 items-center mb-3'> <CircleCheckSolid /> Live Tail Logging</li>
                       <li className='flex gap-3 items-center mb-3'> <CircleCheckSolid /> Unlimited Logs & Traces based Dashboards</li>
                       <li className='flex gap-3 items-center mb-3'> <CircleCheckSolid /> Dashboard locking</li>
                       <li className='flex gap-3 items-center mb-3'> <CircleCheckSolid /> Visualize very large traces<span className="uppercase text-xs text-signoz_vanilla-400 bg-signoz_slate-400 border border-none px-2 py-1 rounded-full">&gt;10k spans</span></li>
-                      <li className='flex gap-3 items-center mb-6'> <CircleCheckSolid /> Data centers available in the US, EU & India</li>
+                      <li className='flex gap-3 items-center mb-3'> <CircleCheckSolid /> Data centers available in the US, EU & India</li>
+                      <li className='flex gap-3 items-center mb-6'> <CircleCheckSolid /> SOC2 Type 1 Compliant</li>
                     </ul>
                   </div>
                 </div>

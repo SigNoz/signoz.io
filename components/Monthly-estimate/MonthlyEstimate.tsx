@@ -127,7 +127,6 @@ const MonthlyEstimate = () => {
 
   const isHighVolume = tracesValue === 200 * 1024 || logsValue === 200 * 1024 || metricsValue === 200 * 1000;
 
-  console.log({tracesValue, linearToLogTraces: linearToLog(tracesValue, MIN_VALUE, MAX_VALUE), traces: formatBytes(linearToLog(tracesValue, MIN_VALUE, MAX_VALUE))})
 
   return (
     <section ref={myRef} id="monthly-estimate">
