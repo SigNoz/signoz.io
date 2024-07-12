@@ -98,7 +98,7 @@ export const WhyOpenTelemetry = () => {
                 </ul>
               </div>
               <div className="aspect-[449/352] sm:h-[352px] card-background mb-6">
-              <img src="/img/graphics/homepage/feature-graphic-otel.png" alt="" /></div>
+              <img src="/img/graphics/homepage/feature-graphic-otel.webp" alt="" /></div>
             </div>
             <div className="bg-signoz_ink-400 p-4 border border-signoz_slate-500 rounded">
               <p className="text-signoz_vanilla-100 text-base font-medium mb-2">Comparing Datadog and New Relic's support for OpenTelemetry data</p>
