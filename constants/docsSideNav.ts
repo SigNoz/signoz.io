@@ -674,6 +674,23 @@ const docsSideNav = [
         ],
       },
       {
+        type: 'category',
+        label: 'User Guide',
+        isExpanded: false,
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/logs-management/guides/drop-logs',
+            label: 'Drop Logs',
+          },
+          {
+            type: 'doc',
+            route: '/docs/logs-management/guides/pii-scrubbing',
+            label: 'PII Scrubbing'
+          },
+        ]
+      },
+      {
         type: 'doc',
         route: '/docs/logs-management/long-term-storage',
         label: 'Long Term Storage',
@@ -684,11 +701,11 @@ const docsSideNav = [
         route: '/docs/userguide/logs_troubleshooting',
         label: 'Troubleshooting',
       },
-      {
-        type: 'doc',
-        route: '/docs/logs-management/guides/drop-logs',
-        label: 'Guide to drop logs',
-      },
+      // {
+      //   type: 'doc',
+      //   route: '/docs/logs-management/guides/drop-logs',
+      //   label: 'Guide to drop logs',
+      // },
     ],
   },
   {

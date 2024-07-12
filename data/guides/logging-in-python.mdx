@@ -1,23 +1,27 @@
 ---
-
 title: Complete Guide to Logging in Python
 slug: logging-in-python
 date: 2024-07-03
 tags: [logging]
 authors: [sushant_gaurav]
 description: Master Python Logging with this Comprehensive Guide on Loggers, Handlers, Formatters, Filters, Configurations, and Best Practices for Debugging, Monitoring, and Performance.
-keywords: [logging in python, python logging example, python logging to file, python logging to the console, python logging best practices]
-
+keywords:
+  [
+    logging in python,
+    python logging example,
+    python logging to file,
+    python logging to the console,
+    python logging best practices,
+  ]
 ---
 
 <head>
-<script type="application/ld+json">
+  <script type="application/ld+json">
     {`{
   "@context": "https://schema.org",
   "@type": "BlogPosting",
   "headline": "Complete Guide to Logging in Python",
   "alternativeHeadline": "Master Python Logging with this Comprehensive Guide on Loggers, Handlers, Formatters, Filters, Configurations, and Best Practices for Debugging, Monitoring, and Performance",
-  "image": "https://signoz.io/img/blog/2024/07/python-logging-cover.webp",
   "author": {
     "@type": "Person",
     "name": "Sushant Gaurav"
@@ -34,7 +38,7 @@ keywords: [logging in python, python logging example, python logging to file, py
   "dateModified": "2024-07-03",
   "mainEntityOfPage": {
     "@type": "WebPage",
-    "@id": "https://signoz.io/blog/logging-in-python/"
+    "@id": "https://signoz.io/guides/logging-in-python/"
   },
   "description": "Master Python Logging with this Comprehensive Guide on Loggers, Handlers, Formatters, Filters, Configurations, and Best Practices for Debugging, Monitoring, and Performance.",
   "keywords": "logging in python, python logging example, python logging to file, python logging to the console, python logging best practices",
@@ -151,7 +155,7 @@ keywords: [logging in python, python logging example, python logging to file, py
     ]
   }
 }`}
-</script>
+  </script>
 </head>
 
 Logging is essential in software development. It helps developers understand how applications behave and spot any issues. Good logging practices are key for debugging, monitoring, optimizing performance, and staying compliant with regulations.
@@ -320,16 +324,17 @@ logger.addHandler(file_handler)
 **Explanation**:
 
 1. **Formatter**: The `logging.Formatter` class is used to create a formatter object. In this example, the formatter is defined with a specific format string:
-    - `%(asctime)s`: Timestamp when the log record was created.
-    - `%(name)s`: Name of the logger that produced the log message.
-    - `%(levelname)s`: Log level of the message (e.g., DEBUG, INFO, WARNING, ERROR, CRITICAL).
-    - `%(message)s`: The actual log message.
-    
-    The format string specifies that each log message will include the timestamp, logger name, log level, and message, separated by hyphens.
-    
+
+   - `%(asctime)s`: Timestamp when the log record was created.
+   - `%(name)s`: Name of the logger that produced the log message.
+   - `%(levelname)s`: Log level of the message (e.g., DEBUG, INFO, WARNING, ERROR, CRITICAL).
+   - `%(message)s`: The actual log message.
+
+   The format string specifies that each log message will include the timestamp, logger name, log level, and message, separated by hyphens.
+
 2. **setFormatter**: The `setFormatter` method is used to assign the formatter to a handler. This tells the handler to use the specified format for all log messages it handles.
-    - `console_handler.setFormatter(formatter)`: Sets the formatter for the `StreamHandler`, which sends log messages to the console.
-    - `file_handler.setFormatter(formatter)`: Sets the same formatter for the `FileHandler`, which writes log messages to the specified file (`app.log`).
+   - `console_handler.setFormatter(formatter)`: Sets the formatter for the `StreamHandler`, which sends log messages to the console.
+   - `file_handler.setFormatter(formatter)`: Sets the same formatter for the `FileHandler`, which writes log messages to the specified file (`app.log`).
 
 By defining a formatter and setting it for the handlers, you ensure that log messages are consistently formatted, making them easier to read and analyze.
 
@@ -378,9 +383,9 @@ logger.warning('Another message without the keyword')
 **Explanation**:
 
 1. **SpecificFilter**: The `SpecificFilter` class inherits from `logging.Filter` and override the `filter` method. This method is where the custom filtering logic is implemented. It takes a `record` argument, which represents a log record, and returns `True` if the log message should be passed to the handlers, and `False` otherwise.
-    - In this example, the filter method checks if the word "specific" is in the log message using `record.getMessage()`.
+   - In this example, the filter method checks if the word "specific" is in the log message using `record.getMessage()`.
 2. **Adding the Filter**: The `addFilter` method is used to add the `SpecificFilter` to the logger. This ensures that only log messages passing the filter criteria are dispatched to the handlers.
-    - `logger.addFilter(SpecificFilter())`: Adds an instance of `SpecificFilter` to the logger.
+   - `logger.addFilter(SpecificFilter())`: Adds an instance of `SpecificFilter` to the logger.
 3. **Filter Method Invocation**: The `filter` method is invoked automatically by the logger for each log record it processes. When a log message is generated, the logger passes the log record through all its filters. If a filter returns `False`, the log record is not passed to the handlers.
 
 In this example, only the message "This message contains a specific keyword" will be logged to the console because it passes the filter criteria. The other messages are ignored.
@@ -435,29 +440,29 @@ payment_logger.error('Payment processing failed due to insufficient funds')
 **Explanation**:
 
 1. **Creating Custom Loggers**:
-    - `auth_logger = logging.getLogger('my_app.auth')`: Creates a custom logger for the authentication module.
-    - `payment_logger = logging.getLogger('my_app.payment')`: Creates a custom logger for the payment processing module.
-    - The hierarchical naming (dot-separated) indicates that these loggers are sub-loggers of a parent logger `my_app`.
+   - `auth_logger = logging.getLogger('my_app.auth')`: Creates a custom logger for the authentication module.
+   - `payment_logger = logging.getLogger('my_app.payment')`: Creates a custom logger for the payment processing module.
+   - The hierarchical naming (dot-separated) indicates that these loggers are sub-loggers of a parent logger `my_app`.
 2. **Setting Logging Levels**:
-    - `auth_logger.setLevel(logging.INFO)`: Sets the logging level to `INFO` for the authentication logger.
-    - `payment_logger.setLevel(logging.DEBUG)`: Sets the logging level to `DEBUG` for the payment logger.
+   - `auth_logger.setLevel(logging.INFO)`: Sets the logging level to `INFO` for the authentication logger.
+   - `payment_logger.setLevel(logging.DEBUG)`: Sets the logging level to `DEBUG` for the payment logger.
 3. **Creating and Configuring Handlers**:
-    - `console_handler = logging.StreamHandler()`: Creates a handler to send log messages to the console.
-    - `file_handler = logging.FileHandler('app.log')`: Creates a handler to write log messages to a file (`app.log`).
+   - `console_handler = logging.StreamHandler()`: Creates a handler to send log messages to the console.
+   - `file_handler = logging.FileHandler('app.log')`: Creates a handler to write log messages to a file (`app.log`).
 4. **Creating and Setting Formatters**:
-    - `formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')`: Defines the format for log messages.
-    - `console_handler.setFormatter(formatter)`: Sets the formatter for the console handler.
-    - `file_handler.setFormatter(formatter)`: Sets the formatter for the file handler.
+   - `formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')`: Defines the format for log messages.
+   - `console_handler.setFormatter(formatter)`: Sets the formatter for the console handler.
+   - `file_handler.setFormatter(formatter)`: Sets the formatter for the file handler.
 5. **Adding Handlers to Loggers**:
-    - `auth_logger.addHandler(console_handler)`: Adds the console handler to the authentication logger.
-    - `auth_logger.addHandler(file_handler)`: Adds the file handler to the authentication logger.
-    - `payment_logger.addHandler(console_handler)`: Adds the console handler to the payment logger.
-    - `payment_logger.addHandler(file_handler)`: Adds the file handler to the payment logger.
+   - `auth_logger.addHandler(console_handler)`: Adds the console handler to the authentication logger.
+   - `auth_logger.addHandler(file_handler)`: Adds the file handler to the authentication logger.
+   - `payment_logger.addHandler(console_handler)`: Adds the console handler to the payment logger.
+   - `payment_logger.addHandler(file_handler)`: Adds the file handler to the payment logger.
 6. **Logging Messages**:
-    - `auth_logger.info('User login successful')`: Logs an informational message from the authentication module.
-    - `auth_logger.warning('User login attempt failed')`: Logs a warning message from the authentication module.
-    - `payment_logger.debug('Payment processing started')`: Logs a debug message from the payment processing module.
-    - `payment_logger.error('Payment processing failed due to insufficient funds')`: Logs an error message from the payment processing module.
+   - `auth_logger.info('User login successful')`: Logs an informational message from the authentication module.
+   - `auth_logger.warning('User login attempt failed')`: Logs a warning message from the authentication module.
+   - `payment_logger.debug('Payment processing started')`: Logs a debug message from the payment processing module.
+   - `payment_logger.error('Payment processing failed due to insufficient funds')`: Logs an error message from the payment processing module.
 
 By creating custom loggers, you can better organize your logging strategy and have more control over which messages are logged by different parts of your application. This approach enhances modularity and makes it easier to debug and maintain your code.
 
@@ -553,12 +558,12 @@ file_handler.setFormatter(formatter)
 **Explanation**:
 
 - **`logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')`**:
-    - `%(asctime)s`: The timestamp when the log message was created.
-    - `%(name)s`: The name of the logger that generated the log message.
-    - `%(levelname)s`: The log level (e.g., DEBUG, INFO, WARNING, ERROR, CRITICAL) of the log message.
-    - `%(message)s`: The actual log message.
+  - `%(asctime)s`: The timestamp when the log message was created.
+  - `%(name)s`: The name of the logger that generated the log message.
+  - `%(levelname)s`: The log level (e.g., DEBUG, INFO, WARNING, ERROR, CRITICAL) of the log message.
+  - `%(message)s`: The actual log message.
 - **`console_handler.setFormatter(formatter)`** and **`file_handler.setFormatter(formatter)`**:
-    - These lines set the formatter for the console handler and the file handler, respectively. This means that all log messages handled by these handlers will be formatted according to the specified layout.
+  - These lines set the formatter for the console handler and the file handler, respectively. This means that all log messages handled by these handlers will be formatted according to the specified layout.
 
 ### Adding Contextual Information
 
@@ -634,7 +639,7 @@ if ENV == 'development':
     console_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     console_handler.setFormatter(console_formatter)
     logger.addHandler(console_handler)
-    
+
     # Optional: File handler for development logs
     file_handler = logging.FileHandler('development.log')
     file_handler.setLevel(logging.DEBUG)
@@ -649,7 +654,7 @@ else:
     console_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     console_handler.setFormatter(console_formatter)
     logger.addHandler(console_handler)
-    
+
     # Optional: File handler for production logs
     file_handler = logging.FileHandler('production.log')
     file_handler.setLevel(logging.WARNING)
@@ -702,7 +707,7 @@ thread.join()
 
 ### Using SysLogHandler for Centralized Logging
 
-`SysLogHandler` sends logs to a centralized syslog server. 
+`SysLogHandler` sends logs to a centralized syslog server.
 
 A syslog server is a centralized logging server that collects and stores log messages from various sources, including applications, devices, and operating systems. It operates over the User Datagram Protocol (UDP) or Transmission Control Protocol (TCP) network protocols.
 
@@ -763,7 +768,7 @@ structured_log(custom_logger, logging.INFO, 'User login', user_id=123, status='s
 
 ### Overlogging
 
- Excessive logging can degrade performance and fill up storage, impacting both the logging system's storage and potentially the console where logs are displayed.
+Excessive logging can degrade performance and fill up storage, impacting both the logging system's storage and potentially the console where logs are displayed.
 
 ```python
 # Example of setting appropriate logging levels
@@ -773,11 +778,11 @@ custom_logger.setLevel(logging.ERROR)
 **Impact of Overlogging:**
 
 1. Logging System's Storage:
-    - **Disk Space:** Excessive logging can consume disk space on the server where log files are stored. This is particularly relevant when logs are saved to files (`FileHandler` in Python's logging module) or a database.
-    - **Performance:** Writing too many logs to disk can degrade system performance, especially in high-throughput applications or systems with limited disk I/O bandwidth.
+   - **Disk Space:** Excessive logging can consume disk space on the server where log files are stored. This is particularly relevant when logs are saved to files (`FileHandler` in Python's logging module) or a database.
+   - **Performance:** Writing too many logs to disk can degrade system performance, especially in high-throughput applications or systems with limited disk I/O bandwidth.
 2. Console (Output) Display:
-    - **User Interface:** In environments where logs are displayed in real-time on a console or terminal, excessive logging can overwhelm the display, making it difficult to read and follow important log messages.
-    - **User Experience:** Continuous output of non-critical or verbose logs can distract or obscure critical information for developers or operators monitoring the system.
+   - **User Interface:** In environments where logs are displayed in real-time on a console or terminal, excessive logging can overwhelm the display, making it difficult to read and follow important log messages.
+   - **User Experience:** Continuous output of non-critical or verbose logs can distract or obscure critical information for developers or operators monitoring the system.
 
 ### Sensitive Information in Logs
 
@@ -798,7 +803,7 @@ To optimize the logging, we can:
 
 - Use the appropriate logging level (`DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL`) based on the importance of the message. Avoid logging verbose or unnecessary information at lower levels (`DEBUG`) in production environments.
 - Wrap debug-level logging statements in conditional checks to ensure they are only executed when needed, minimizing unnecessary logging overhead.
-**Example**:
+  **Example**:
 
 ```python
 if custom_logger.isEnabledFor(logging.DEBUG):
@@ -807,7 +812,7 @@ if custom_logger.isEnabledFor(logging.DEBUG):
 
 - Use buffered handlers (`BufferingHandler`) to accumulate log messages and write them out in batches. This reduces the frequency of I/O operations, which can be a bottleneck in high-throughput scenarios.
 - Employ asynchronous logging handlers (`AsyncHandler`) that offload log writing operations to separate threads or processes. This allows the main application thread to continue executing without waiting for I/O operations to complete.
-**Example**:
+  **Example**:
 
 ```python
 async_handler = logging.handlers.AsyncHandler()
@@ -831,20 +836,16 @@ Here are the key reasons why monitoring logs is important:
 7. **Proactive maintenance**
 8. **Support and customer service**
 
-To cover all the above major components, you can make use of tools like [**SigNoz**](https://signoz.io/). 
+To cover all the above major components, you can make use of tools like [**SigNoz**](https://signoz.io/).
 
 **SigNoz** is a full-stack open-source application performance monitoring and observability tool that can be used in place of DataDog and New Relic. SigNoz is built to give SaaS-like user experience combined with the perks of open-source software. Developer tools should be developed first, and SigNoz was built by developers to address the gap between SaaS vendors and open-source software.
 
 **Key architecture features:**
 
 - **Logs, Metrics, and traces under a single dashboard**
-    
-    SigNoz provides logs, metrics, and traces all under a single dashboard. You can also correlate these telemetry signals to debug your application issues quickly.
-    
+  SigNoz provides logs, metrics, and traces all under a single dashboard. You can also correlate these telemetry signals to debug your application issues quickly.
 - **Native OpenTelemetry support**
-    
-    SigNoz is built to support [**OpenTelemetry**](https://opentelemetry.io/) natively, which is quietly becoming the world standard for generating and managing telemetry data.
-    
+  SigNoz is built to support [**OpenTelemetry**](https://opentelemetry.io/) natively, which is quietly becoming the world standard for generating and managing telemetry data.
 
 ### **Setup SigNoz**
 
