@@ -171,13 +171,16 @@ export const Testimonials = () => {
   ]
   return (
     <section>
-      <div className="!w-[80vw] !mx-auto section-container py-24 flex flex-col items-center border border-signoz_slate-400 border-dashed !border-b-0 bg-[length:auto_100%] bg-no-repeat bg-[center_top_-32rem] bg-[url('/img/background_blur/Footer_backdrop.png')]">
+      <div className="!w-[80vw] !mx-auto section-container py-24 flex flex-col items-center border border-signoz_slate-400 border-dashed !border-b-0 bg-[length:auto_100%] bg-no-repeat bg-[center_top_-45rem] bg-[url('/img/background_blur/Footer_backdrop.png')]">
         <div className="mb-16 flex flex-col items-center text-center gap-12 w-[880px]">
-          <img src="/img/users/incident_io.svg" alt="incident.io logo" />
-          <span className='text-signoz_sienna-200 max-w-[50vw] text-sm sm:text-2xl font-normal leading-10 text-center'>SigNoz balances flexibility and security extremely well. They've built clean and thoughtful abstractions over advanced security foundations, and the product just works. We barely have to think about it.</span>
+          <img src="/img/users/outplay.svg" alt="Outplay logo" className='h-7'/>
+          <span className='text-signoz_sienna-200 max-w-[50vw] text-sm sm:text-2xl font-normal leading-10 text-center'>
+            We optimized all our top endpoints and fine-tuned database calls to improve our backend API 
+            response times by 35% using SigNoz. <br/>Both our dev and QA teams use SigNoz actively in dev and
+            staging environments to optimize application performance.</span>
           <div className='flex flex-col gap-2'>
-            <p className='m-0 text-signoz_sienna-200 text-xl font-medium text-center'>Mike Hudak</p>
-            <p className='m-0 text-signoz_sienna-200 text-base font-normal text-center'>CTO - incident.io</p>
+            <p className='m-0 text-signoz_sienna-200 text-xl font-medium text-center'>Vijaya Perumal</p>
+            <p className='m-0 text-signoz_sienna-200 text-base font-normal text-center'>Tech Lead</p>
           </div>
         </div>
 
