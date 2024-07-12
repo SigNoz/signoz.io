@@ -9,7 +9,7 @@ const Observability = () => {
   return (
     <section>
     <div className='flex flex-col w-auto h-auto border border-signoz_slate-400 border-dashed py-10 pl-10 !border-r-0 !border-b-0'>
-      <div className="flex flex-col sm:flex-row gap-8">
+      <div className="flex flex-col sm:flex-row gap-8 justify-between">
         <div className='flex flex-col justify-between shrink-[10]'>
         <div>
         <p className='text-2xl font-semibold text-signoz_vanilla-100 block mb-2'> Enterprise-grade Observability</p>

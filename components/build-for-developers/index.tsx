@@ -39,7 +39,7 @@ const BuildForDevelopers = () => {
           className={`relative bg-[length:85%] bg-no-repeat bg-[center_top_8rem] bg-[url('/img/background_blur/Perlin_noise.png')]
       `}
         >
-          <div className={`container pt-12 mb-0 !px-0`}>
+          <div className={`section-container pt-12 mb-0 !px-0`}>
             <div className="w-[80vw] mx-auto border border-signoz_slate-400 border-dashed !border-b-0 !border-t-0 bg-[center_top_calc(100px)] bg-[url('/img/background_blur/Ellipse_388.png')] ">
             <div className="flex flex-col items-center py-48 px-24 sm:px-0 text-center border border-signoz_slate-400 border-dashed !border-r-0 !border-t-0 !border-b-0 ">
               <div className="text-signoz_sienna-100 text-[44px] font-semibold leading-[3.5rem]">Built for developers, <br />crafted by humans.</div>

@@ -10,9 +10,9 @@ import Button from '@/components/Button/Button'
 
 export const Header = () => {
   return (
-    <header className="mt-16 "> 
-      <div className="flex flex-col items-center pt-[8.5rem] px-5 text-center relative !w-[80vw] !mx-auto border border-signoz_slate-400 border-dashed pb-4 !border-b-0">
-      <div className='absolute h-[59.5rem] border border-signoz_slate-400 border-dashed top-0 left-[24px] right-[24px] z-[-1] !border-t-0 !border-b-0'/>
+    <header className="mt-16 relative !w-[80vw] !mx-auto "> 
+      <div className='absolute top-0 bottom-0 border border-signoz_slate-400 border-dashed top-0 left-[24px] right-[24px] z-[-1] !border-t-0 !border-b-0'/>
+      <div className="flex flex-col items-center pt-24 px-5 text-center relative !w-[80vw] !mx-auto border border-signoz_slate-400 border-dashed pb-4 !border-b-0">
         {/* <Link href="/">
           <button className="h-10 px-4 py-2 rounded-full text-sm flex items-center justify-center gap-1.5 bg-signoz_slate-400 font-medium leading-5 text-white border border-signoz_slate-200 shadow-[0_0_14px_0_rgba(78,116,248,0.40)]">
             <BookOpen size={14}/>SigNoz raises $6.5 million<ArrowRight size={14} />
@@ -44,7 +44,7 @@ export const Header = () => {
             </Button>
           </Link>
       </div>
-      <div className="container !w-[80vw] !mt-0 !mx-auto border border-signoz_slate-400 border-dashed !border-b-0 !border-t-0">
+      <div className="section-container !w-[80vw] !mt-0 !mx-auto border border-signoz_slate-400 border-dashed !border-b-0 !border-t-0">
         <div className="w-100 mx-[-28px]">
           <div className="product-explainer-video hero-figure rounded-lg p-3">
             <div className="embed-container">

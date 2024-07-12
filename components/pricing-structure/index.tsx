@@ -6,7 +6,7 @@ import { H1, H4 } from '../Headings/Headings'
 const PricingStructure = () => {
   return (
     <section className="border border-signoz_slate-400 border-dashed !border-r-0 !border-b-0">
-      <div className="container mx-auto px-10 py-10">
+      <div className="section-container mx-auto px-10 py-10">
         <div className='flex flex-col justify-between'>
           <div className='mb-5'>
             <div className="flex flex-col justify-start">
@@ -19,7 +19,7 @@ const PricingStructure = () => {
             </div>
           </div>
           <div>
-            <div className="mx-auto flex flex-col justify-center gap-y-4 md:max-w-md lg:max-w-5xl">
+            <div className="flex flex-col justify-center gap-y-4">
               <div className="bg-signoz_ink-400 p-4 border border-signoz_slate-500 rounded w-full">
                 <p className="text-signoz_vanilla-100 text-base font-medium mb-2">No user-based pricing</p>
                 <p className="text-signoz_vanilla-400 text-sm font-normal leading-9 m-0">
