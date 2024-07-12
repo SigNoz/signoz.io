@@ -55,7 +55,7 @@ const Teams: React.FC<SignUpPageProps> = () => {
   const [errors, setErrors] = useState<ErrorsProps>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitSuccess, setSubmitSuccess] = useState(false)
-  const [submitFailed, setSubmitFailed] = useState(true)
+  const [submitFailed, setSubmitFailed] = useState(false)
   const router = useRouter()
 
   const handleInputChange = (event) => {
