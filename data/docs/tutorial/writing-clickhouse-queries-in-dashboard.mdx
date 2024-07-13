@@ -5,10 +5,10 @@ title: ClickHouse queries for building dashboards and alerts
 description: Example clickhouse queries to run analytics on observability data
 ---
 
-SigNoz gives you ability to write powerful clickhouse queries to plot charts. You can run SQL queries supported by ClickHouse to extract immense value out of your distributed tracing data or logs data. 
+SigNoz gives you the ability to write powerful ClickHouse queries to plot charts. You can run SQL queries supported by ClickHouse to extract immense value out of your distributed tracing data or logs data. 
 
 <Admonition type="info">
-The distributed tables in clickhouse have been named by prefixing `distributed_` to existing single shard table names. If you want to use clickhouse queries in dashboard or alerts, you should use the distributed table names. Eg, `signoz_index_v2` now corresponds to the table of a single shard. To query all the shards, query against `distributed_signoz_index_v2`. 
+The distributed tables in ClickHouse have been named by prefixing `distributed_` to existing single shard table names. If you want to use ClickHouse queries in dashboard or alerts, you should use the distributed table names. Eg, `signoz_index_v2` now corresponds to the table of a single shard. To query all the shards, query against `distributed_signoz_index_v2`. 
 </Admonition>
 
 <br />
@@ -119,7 +119,7 @@ GROUP BY interval
 ORDER BY interval ASC;
 ```
 
-While writing queies for logs table, if you want to use an attribute/resource attribute in your query you will have to reference it in the following format
+While writing queries for logs table, if you want to use an attribute/resource in your query you will have to reference it in the following format
 `<type>_<dataType>_value[indexOf(<type>_<dataType>_key, <keyname>)]` 
 
 where `type` can be `attributes/resources` , `dataType` can be `int64/float64/string` and `keyname` is the name of the key.
@@ -131,17 +131,17 @@ In the above example, if `status` is an selected field, then it can be reference
 </Admonition>
 
 
-## Building Alert Queries with Clickhouse data
+## Building alert queries with ClickHouse data
 
-The most common use case for alerts is to send notifications when a threshold condition is met. For example, conditions like CPU usage exceeds 70% (CPU Usage > 70) or failures in a service exceed your expections  (service error count > 10).  
+The most common use case for alerts is to send notifications when a threshold condition is met. For example, conditions like CPU usage exceeds 70% (CPU Usage > 70) or failures in a service exceed your expectations  (service error count > 10).  
 
 Every alert is composed of a threshold, date range (e.g. last 5 mins) and match condition (e.g. at least once).  The rule engine is responsible for evaluating these conditions and triggering notifications. SigNoz allows you a complete flexibility in choosing all three conditions to meet your business requirements. 
 
 The evaluation is also based on the source or metric data, the left-hand side of the threshold condition - consider CPU Usage (LHS) > 70 (RHS).    
 
-The query editor (`clickhouse` tab in the `alert form`) allows you define a query to fetch the metric (source) data from Clickhouse and evaluate if the threshold condition occurs in it.  The query format requires use of following reserved columns and parameters which simplify the syntax and support dynamic parts.
+The query editor (`ClickHouse` tab in the `alert form`) allows you to define a query to fetch the metric (source) data from ClickHouse and evaluate if the threshold condition occurs in it.  The query format requires use of following reserved columns and parameters which simplify the syntax and support dynamic parts.
 
-**Reserved Aliases (for use in SELECT, GROUP BY only) **: `value`, `res`, `result`, `interval` 
+**Reserved Aliases (for use in SELECT, GROUP BY only)**: `value`, `res`, `result`, `interval` 
 
 **Reserved Parameters (for use in WHERE condition only)**: 
 
@@ -151,7 +151,7 @@ The query editor (`clickhouse` tab in the `alert form`) allows you define a quer
 - `{{.start_timestamp_nano}}` `{{.end_timestamp_nano}}`
 
 
-Let's explore sample queries to use clickhouse data in alert evaluation. 
+Let's explore sample queries to use ClickHouse data in alert evaluation. 
 
 The rule engine is always looking for special column aliases. When the query returns data, the rule engine looks into the result for a column with alias `value` or `result` and compares the vector of all those values with the threshold (defined in alert form).   
 
@@ -176,7 +176,7 @@ AND (exceptionType = 'Not found')
 GROUP BY interval
 ```
 
-The rule engine is also capable of dynamically applying date ranges to your select query.  When you choose `last 15 mins` option in the alert conditions section, the rule engine applies timestamp values in the timeframe condition below.   
+The rule engine is also capable of dynamically applying date ranges to your `SELECT` query.  When you choose `last 15 mins` option in the alert conditions section, the rule engine applies timestamp values in the timeframe condition below.   
 
 ```sql
 SELECT count() AS value, toStartOfInterval(timestamp, INTERVAL 5 MINUTE) AS interval 
