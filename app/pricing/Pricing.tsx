@@ -191,7 +191,7 @@ const PricingPlans = () => {
   return (
     <section className={`${styles.pricing} relative`}>
       <div className={`section-container !w-[80vw] !mx-auto  border border-signoz_slate-400 border-dashed !my-0 !border-t-0 !border-b-0 ${styles.pricingContainer} max-sm:!px-0`}>
-        <div className='absolute top-0 bottom-0 border border-signoz_slate-400 border-dashed top-[-95px] left-[24px] right-[24px] !border-t-0 !border-b-0 z-[1]'/>
+        <div className='absolute top-0 bottom-0 border border-signoz_slate-400 border-dashed top-[-95px] left-[24px] right-[24px] !border-t-0 !border-b-0 z-[-1]'/>
 
         {tab === 'cloud' ? (
           <>
@@ -201,7 +201,7 @@ const PricingPlans = () => {
               <Heading type={1} className='z-[1]'>Pricing</Heading>
               <SubHeading>
                 Tired of unpredictable pricing and complex billing structure? Save up to{' '}
-                <Link href="/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/">
+                <Link href="https://signoz.io/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/">
                   <span className="mx-0 rounded-none px-0 py-0.5 text-signoz_robin-300 border border-signoz_robin-300 border-dashed !border-t-0 !border-r-0 !border-l-0">
                     80% on your Datadog bill <br />
                   </span>
@@ -230,7 +230,7 @@ const PricingPlans = () => {
                     >
                       <div className='relative flex gap-1.5 z-[3]'>
                         <Server size={14} />
-                        Self-Hosted
+                        SELF-HOSTED
                       </div>
                     </button>
                   </nav>
@@ -269,14 +269,14 @@ const PricingPlans = () => {
                 <div className="__card__body">
                   <div className={`mt-7 ${styles.packageDetailBlock}`}>
                     <h4 className={`${styles.packageDetailTitle}`}>Pricing</h4>
-                    <div>
+                    <div className='flex flex-col sm:flex-row'>
                       <div className='gap-3'>
                         <img src="/img/index_features/logs.svg" alt="Logs Icon" className="w-5 h-5" />
                         <span>Logs</span>
                       </div>
                       <div className='w-1/4 border-b border-signoz_slate-400 border-dashed' />
                       <span className="item-center flex flex-nowrap justify-center">
-                        <span className="flex items-center justify-center gap-1">
+                        <span className="flex items-center justify-center gap-1 min-w-[170px]">
                           <span className="text-base font-medium text-signoz_robin-300">
                             ${TRACES_AND_LOGS_PRICES[logsRetentionPeriod]}
                           </span>{' '}
@@ -297,14 +297,14 @@ const PricingPlans = () => {
                         </select>
                       </span>
                     </div>
-                    <div>
+                    <div className='flex flex-col sm:flex-row'>
                       <div className='gap-3'>
                         <img src="/img/index_features/drafting-compass.svg" alt="Logs Icon" className="w-5 h-5" />
                         <span>Traces</span>
                       </div>
                       <div className='w-1/4 border-b border-signoz_slate-400 border-dashed' />
                       <span className="item-center flex flex-nowrap justify-center">
-                        <span className="flex items-center justify-center gap-1">
+                        <span className="flex items-center justify-center gap-1 min-w-[170px]">
                           <span className="text-base font-medium text-signoz_robin-300">
                             ${TRACES_AND_LOGS_PRICES[tracesRetentionPeriod]}
                           </span>{' '}
@@ -324,14 +324,14 @@ const PricingPlans = () => {
                         </select>
                       </span>
                     </div>
-                    <div>
+                    <div className='flex flex-col sm:flex-row'>
                       <div className='gap-3'>
                         <img src="/img/index_features/bar-chart-2.svg" alt="Logs Icon" className="w-5 h-5" />
                         <span>Metrics</span>
                       </div>
                       <div className='w-1/4 border-b border-signoz_slate-400 border-dashed' />
                       <span className="item-center flex flex-nowrap justify-center">
-                        <span className="flex items-center justify-center gap-1">
+                        <span className="flex items-center justify-center gap-1 min-w-[170px]">
                           <span className="text-base font-medium text-signoz_robin-300">
                             ${METRICS_PRICES[metricsRetentionPeriod]}
                           </span>{' '}
@@ -601,7 +601,7 @@ const PricingPlans = () => {
                     >
                       <div className='flex gap-1.5'>
                         <Server size={14} />
-                        Self-Hosted
+                         Self-Hosted
                       </div>
                     </button>
                   </nav>
@@ -769,7 +769,7 @@ const ExploreAllFeature = () => {
       { heading: 'Community Edition', desc: '$0 ⎯ host in your infra', action: <Link href={'/docs/introduction'} className='button-background h-8 px-4 py-2 rounded-full text-[7px] sm:text-sm flex items-center justify-center gap-1.5 truncate text-center font-medium leading-5 text-white w-full'>Read Documenation</Link> },
       { heading: 'Teams', desc: 'Cloud ⎯ starts at $199/mo', action: <Link href={'/teams/'} className='bg-signoz_robin-500 h-8 px-4 py-2 rounded-full text-[8px] sm:text-sm flex items-center justify-center gap-1.5 truncate text-center font-medium leading-5 text-white w-full'>Get Started</Link> },
       {
-        heading: 'Enterprise', desc: 'Cloud / Self-Hosted', action: <Link href={'/enterprise-cloud/'} className='button-background h-8 px-4 py-2 rounded-full text-[8px] sm:text-sm flex items-center justify-center gap-1.5 text-center font-medium leading-5 text-white w-full'>Contact Us</Link>
+        heading: 'Enterprise', desc: 'Cloud /  Self-Hosted', action: <Link href={'/enterprise-cloud/'} className='button-background h-8 px-4 py-2 rounded-full text-[8px] sm:text-sm flex items-center justify-center gap-1.5 text-center font-medium leading-5 text-white w-full'>Contact Us</Link>
       },
     ],
     ROWS: [
@@ -808,10 +808,7 @@ const ExploreAllFeature = () => {
                 {/* <small>(Limited to 5 dashboard panels & alerts)</small> */}
               </div>
             ),
-            inTeams: <div className="flex items-center">
-              <ClockSolid height='15' width='15' />
-              <span className="ml-1.5 text-[8px] sm:text-xs">COMING SOON</span>
-            </div>,
+            inTeams:<CheckSolid />,
             inEnterprise: <CheckSolid />,
           },
         ],
@@ -822,10 +819,7 @@ const ExploreAllFeature = () => {
           {
             feature: 'Parsing logs via pipeline',
             inCommunity: <CheckSolid />,
-            inTeams: <div className="flex items-center ">
-              <FlameSolid />
-              <span className="ml-1.5 text-[8px] sm:text-xs">EARLY ACCESS</span>
-            </div>,
+            inTeams: <CheckSolid />,
             inEnterprise: <CheckSolid />,
           },
           {
@@ -966,7 +960,7 @@ const ExploreAllFeature = () => {
             inTeams: <CheckSolid />,
             inEnterprise: <div className="flex items-center">
               <ServerSolid />
-              <span className="ml-1.5 text-[8px] sm:text-xs">SELF-HOSTED</span>
+              <span className="ml-1.5 text-[8px] sm:text-xs">ENTERPRISE SELF-HOSTED</span>
             </div>,
           },
           {
@@ -975,7 +969,7 @@ const ExploreAllFeature = () => {
             inTeams: <CheckSolid />,
             inEnterprise: <div className="flex items-center">
               <ServerSolid />
-              <span className="ml-1.5 text-[8px] sm:text-xs">SELF-HOSTED</span>
+              <span className="ml-1.5 text-[8px] sm:text-xs">ENTERPRISE SELF-HOSTED</span>
             </div>,
           },
           {
@@ -993,7 +987,7 @@ const ExploreAllFeature = () => {
             inTeams: <CheckSolid />,
             inEnterprise: <div className="flex items-center">
               <CloudSolid />
-              <span className="ml-1.5 text-[8px] sm:text-xs">CLOUD</span>
+              <span className="ml-1.5 text-[8px] sm:text-xs">ENTERPRISE CLOUD</span>
             </div>,
           },
           {

@@ -2,7 +2,7 @@ import React from 'react';
 
 export const ArrowRightSolid = () => {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="20" height="20" className='fill-signoz_robin-500'>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="20" height="20" className='fill-signoz_robin-500 min-w-5'>
       <path d="M0 256a256 256 0 1 0 512 0A256 256 0 1 0 0 256zM281 385c-9.4 9.4-24.6 9.4-33.9 0s-9.4-24.6 0-33.9l71-71L136 280c-13.3 0-24-10.7-24-24s10.7-24 24-24l182.1 0-71-71c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0L393 239c9.4 9.4 9.4 24.6 0 33.9L281 385z" />
     </svg>
   )
@@ -18,7 +18,7 @@ export const CircleCheckSolid = ({ color = "fill-signoz_robin-500" }) => {
 
 export const CircleInfoSolid = ({ height = "20", width = "20" }) => {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox="0 0 20 20" fill="none">
+    <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox="0 0 20 20" fill="none" className='min-w-5'>
       <g clip-path="url(#clip0_2663_8479)">
         <path d="M9.99996 18.3346C14.6023 18.3346 18.3333 14.6037 18.3333 10.0013C18.3333 5.39893 14.6023 1.66797 9.99996 1.66797C5.39759 1.66797 1.66663 5.39893 1.66663 10.0013C1.66663 14.6037 5.39759 18.3346 9.99996 18.3346Z" fill="#62687C" stroke="#62687C" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round" />
         <path d="M9.99996 14.168V9.16797H7.91663" stroke="#121317" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round" />
