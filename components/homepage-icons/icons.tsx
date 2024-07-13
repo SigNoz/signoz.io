@@ -35,7 +35,7 @@ export const CircleInfoSolid = ({ height = "20", width = "20" }) => {
 
 export const ZapSolid = () => {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" className='min-w-5'>
       <g clip-path="url(#clip0_2623_7333)">
         <path d="M10.8333 1.66803L2.5 11.668H10L9.16667 18.3347L17.5 8.3347H10L10.8333 1.66803Z" fill="#F24769" stroke="#F24769" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round" />
       </g>
@@ -82,7 +82,7 @@ export const CrossSolid = () => {
 
 export const FlameSolid = () => {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 15 16" fill="none">
+    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 15 16" fill="none" className='min-w-5'>
       <path d="M5.3125 9.5625C5.7269 9.5625 6.12433 9.39788 6.41735 9.10485C6.71038 8.81183 6.875 8.4144 6.875 8C6.875 7.1375 6.5625 6.75 6.25 6.125C5.58 4.78562 6.11 3.59125 7.5 2.375C7.8125 3.9375 8.75 5.4375 10 6.4375C11.25 7.4375 11.875 8.625 11.875 9.875C11.875 10.4495 11.7618 11.0184 11.542 11.5492C11.3221 12.08 10.9998 12.5623 10.5936 12.9686C10.1873 13.3748 9.70504 13.6971 9.17424 13.917C8.64344 14.1368 8.07453 14.25 7.5 14.25C6.92547 14.25 6.35656 14.1368 5.82576 13.917C5.29496 13.6971 4.81266 13.3748 4.40641 12.9686C4.00015 12.5623 3.67789 12.08 3.45803 11.5492C3.23816 11.0184 3.125 10.4495 3.125 9.875C3.125 9.15438 3.39563 8.44125 3.75 8C3.75 8.4144 3.91462 8.81183 4.20765 9.10485C4.50067 9.39788 4.8981 9.5625 5.3125 9.5625Z" fill="#F24769" stroke="#F24769" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" />
     </svg>
   )
@@ -90,7 +90,7 @@ export const FlameSolid = () => {
 
 export const CloudSolid = () => {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 15 16" fill="none">
+    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 15 16" fill="none" className='min-w-5'>
       <path d="M10.9375 12.375H5.62498C4.81364 12.3748 4.01835 12.149 3.32796 11.7228C2.63758 11.2966 2.0793 10.6868 1.71552 9.96163C1.35174 9.23643 1.19679 8.42435 1.26797 7.61614C1.33916 6.80793 1.63368 6.03544 2.11863 5.38499C2.60358 4.73454 3.25985 4.23175 4.0141 3.9328C4.76836 3.63386 5.59088 3.55055 6.38976 3.69217C7.18864 3.83378 7.9324 4.19476 8.53794 4.73475C9.14347 5.27475 9.58692 5.97249 9.81873 6.75H10.9375C11.6834 6.75 12.3988 7.04632 12.9262 7.57376C13.4537 8.10121 13.75 8.81658 13.75 9.5625C13.75 10.3084 13.4537 11.0238 12.9262 11.5512C12.3988 12.0787 11.6834 12.375 10.9375 12.375Z" fill="#7190F9" stroke="#7190F9" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" />
     </svg>
   )
@@ -98,7 +98,7 @@ export const CloudSolid = () => {
 
 export const ServerSolid = () => {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 15 15" fill="none">
+    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 15 15" fill="none" className='min-w-5'>
       <g clip-path="url(#clip0_2605_7148)">
         <path d="M12.5 1.25H2.5C1.80964 1.25 1.25 1.80964 1.25 2.5V5C1.25 5.69036 1.80964 6.25 2.5 6.25H12.5C13.1904 6.25 13.75 5.69036 13.75 5V2.5C13.75 1.80964 13.1904 1.25 12.5 1.25Z" fill="#BD9979" stroke="#BD9979" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" />
         <path d="M12.5 8.75H2.5C1.80964 8.75 1.25 9.30964 1.25 10V12.5C1.25 13.1904 1.80964 13.75 2.5 13.75H12.5C13.1904 13.75 13.75 13.1904 13.75 12.5V10C13.75 9.30964 13.1904 8.75 12.5 8.75Z" fill="#BD9979" stroke="#BD9979" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" />

@@ -99,7 +99,7 @@ export const Testimonials = () => {
       },
       {
         name: 'Anselm Eickhoff',
-        avatar: 'img/users/anselm.jpg',
+        avatar: '/img/users/anselm.jpg',
         designation: 'Software Architect',
         review: (
           <>
@@ -117,7 +117,7 @@ export const Testimonials = () => {
     [
       {
         name: 'Apoorva Kumar',
-        avatar: 'img/users/apoorva-kumar.webp',
+        avatar: '/img/users/apoorva-kumar.webp',
         designation: 'Lead Backend Infra Eng, NuCash',
         review: (
           <>
@@ -138,7 +138,7 @@ export const Testimonials = () => {
     [
       {
         name: 'Pawan Bhadauria',
-        avatar: 'img/users/pawan-outplay.webp',
+        avatar: '/img/users/pawan-outplay.webp',
         designation: 'VP - Engineering, Outplay',
         review: (
           <>
@@ -152,7 +152,7 @@ export const Testimonials = () => {
       },
       {
         name: 'Faris Hassan',
-        avatar: 'img/users/faris.jpeg',
+        avatar: '/img/users/faris.jpeg',
         designation: 'Lead Data Scientist',
         review: (
           <>
