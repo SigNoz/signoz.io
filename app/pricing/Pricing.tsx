@@ -767,9 +767,9 @@ const ExploreAllFeature = () => {
     HEADER: [
       { heading: '', desc: '' },
       { heading: 'Community Edition', desc: '$0 ⎯ host in your infra', action: <Link href={'/docs/introduction'} className='button-background h-8 px-4 py-2 rounded-full text-[7px] sm:text-sm flex items-center justify-center gap-1.5 truncate text-center font-medium leading-5 text-white w-full'>Read Documenation</Link> },
-      { heading: 'Teams', desc: 'Cloud ⎯ starts at $199/mo', action: <Link href={'/teams/'} className='bg-signoz_robin-500 h-8 px-4 py-2 rounded-full text-[8px] sm:text-sm flex items-center justify-center gap-1.5 truncate text-center font-medium leading-5 text-white w-full'>Get Started</Link> },
+      { heading: 'Teams', desc: 'Cloud ⎯ starts at $199/mo', action: <Link href={'/teams/'} className='bg-signoz_robin-500 h-8 px-4 py-2 rounded-full text-[9px] sm:text-sm flex items-center justify-center gap-1.5 truncate text-center font-medium leading-5 text-white w-full'>Get Started</Link> },
       {
-        heading: 'Enterprise', desc: 'Cloud /  Self-Hosted', action: <Link href={'/enterprise-cloud/'} className='button-background h-8 px-4 py-2 rounded-full text-[8px] sm:text-sm flex items-center justify-center gap-1.5 text-center font-medium leading-5 text-white w-full'>Contact Us</Link>
+        heading: 'Enterprise', desc: 'Cloud /  Self-Hosted', action: <Link href={'/enterprise-cloud/'} className='button-background h-8 px-4 py-2 rounded-full text-[9px] sm:text-sm flex items-center justify-center gap-1.5 text-center font-medium text-white w-full'>Contact Us</Link>
       },
     ],
     ROWS: [
@@ -960,7 +960,7 @@ const ExploreAllFeature = () => {
             inTeams: <CheckSolid />,
             inEnterprise: <div className="flex items-center">
               <ServerSolid />
-              <span className="ml-1.5 text-[8px] sm:text-xs">ENTERPRISE SELF-HOSTED</span>
+              <span className="ml-1.5 max-sm:text-[8px] text-[10px]">ENTERPRISE SELF-HOSTED</span>
             </div>,
           },
           {
@@ -969,7 +969,7 @@ const ExploreAllFeature = () => {
             inTeams: <CheckSolid />,
             inEnterprise: <div className="flex items-center">
               <ServerSolid />
-              <span className="ml-1.5 text-[8px] sm:text-xs">ENTERPRISE SELF-HOSTED</span>
+              <span className="ml-1.5 max-sm:text-[8px] text-[10px]">ENTERPRISE SELF-HOSTED</span>
             </div>,
           },
           {
@@ -1103,11 +1103,13 @@ const ExploreAllFeature = () => {
               return (
                 <div
                   key={idx}
-                  className={`${idx === 2 ? `rounded-lg !rounded-b-none p-3 teamColumnBackground` : idx !== 0 ? `rounded-lg p-3 ${Opacity[idx]}` : 'hidden md:block'
+                  className={`${idx === 2 ? `flex flex-col justify-between rounded-lg !rounded-b-none p-3 bg-signoz_ink-500 sm:bg-[#16181d]` : idx !== 0 ? `flex flex-col justify-between rounded-lg p-3 ${Opacity[idx]}` : 'hidden md:block'
                     }`}
                 >
-                  <h2 className="m-0 text-lg md:text-base">{h.heading}</h2>
-                  <p className="text-base md:text-xs text-signoz_vanilla-400">{h.desc}</p>
+                  <div className='flex flex-col gap-1'>
+                  <h2 className="max-sm:h-16 m-0 text-sm md:text-base">{h.heading}</h2>
+                  <p className="text-xs text-signoz_vanilla-400">{h.desc}</p>
+                  </div>
                   <div className='flex justify-cente w-fullr'>{h.action}</div>
                 </div>
               )
@@ -1127,12 +1129,12 @@ const ExploreAllFeature = () => {
                     key={i}
                     className={`${false ? `rounded-lg bg-opacity-[${i}]` : ''}`}
                   >
-                    <div className='gird grid-cols-1'>
-                      <div className="grid grid-cols-3 gap-1 md:grid-cols-[3fr_1fr_1fr_1fr]">
+                    <div className='grid grid-cols-1'>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-1 md:grid-cols-[3fr_1fr_1fr_1fr]">
                         <div className="mt-12 mb-3 pl-6 pr-2 py-2 text-center text-sm font-medium md:text-left">{row.section}</div>
                         <div>
                         </div>
-                        <div className='teamColumnBackground'>
+                        <div className='bg-signoz_ink-500 sm:bg-[#16181d]'>
                         </div>
                         <div>
                         </div>
@@ -1153,7 +1155,7 @@ const ExploreAllFeature = () => {
                                 {r.inCommunity}
                               </div>
                               <div
-                                className={`flex items-center rounded-lg p-3 justify-center sm:justify-left teamColumnBackground rounded-none`}
+                                className={`flex items-center rounded-lg p-3 justify-center sm:justify-left bg-signoz_ink-500 sm:bg-[#16181d] rounded-none`}
                               >
                                 {r.inTeams}
                               </div>
@@ -1174,7 +1176,7 @@ const ExploreAllFeature = () => {
               <div className="grid grid-cols-3 gap-1 md:grid-cols-[3fr_1fr_1fr_1fr] h-[18px]">
                 <div />
                 <div />
-                <div className='teamColumnBackground rounded-lg !rounded-t-none' />
+                <div className='bg-signoz_ink-500 sm:bg-[#16181d] rounded-lg !rounded-t-none' />
                 <div />
               </div>
             </div>
