@@ -724,23 +724,15 @@ Sensitive information may occasionally be accidentally included in logs, raising
 - Use Logrus Hooks for Sensitive Data: To sanitize or encrypt log entries before storage or transmission, use Logrus Hooks if sensitive data has to be recorded.
 - Safe Log Storage: Make sure that log files and log data are kept safely. If logs are kept in a public cloud or a distributed system, use encryption to protect them.
 
-## Other logging libraries vs logrus
+## Other Logging Libraries vs Loguru
 
-| Libraries | Advantage | Disadvantage |
+| Libraries | Advantages | Disadvantages |
 | --- | --- | --- |
-| logrus | - Structured Logging: logrus supports structured logging which allows logging in a JSON format, making it easier for machines to read and process logs.
-- Extensibility: It provides a lot of flexibility, supporting custom formatters, levels, and hooks that integrate with various external systems (like log aggregators).
-- Contextual Information: It makes it easy to add contextual information to logs with fields, improving the diagnosability of log entries. | - Performance: logrus is not the fastest logging library due to its use of reflection and its more abstract design. This can be a drawback in performance-critical applications.
-- API Stability: logrus's API has been known to have breaking changes in the past, although it has largely stabilized now |
-| zap | - High Performance: zap is designed for high performance. Unlike logrus, zap avoids reflection and uses a zero-allocation philosophy under typical use, which means it can log with minimal impact on application performance.
-- Structured Logging: Like logrus, zap naturally encodes logs in JSON and provides APIs for adding structured context to the logs. | - Complex API: zap's API can be more complex to use compared to logrus, especially when customizing logger behavior.
-- Less Customizable: While highly performant, zap doesn’t offer as much flexibility in terms of log formatting compared to logrus. |
-| zerolog | - Performance: zerolog is designed for low-latency applications and claims to have zero allocations in its logging calls, making it extremely fast and suitable for high-throughput applications.
-- JSON-First: zerolog logs are structured as JSON by default, making it ideal for modern log management solutions that are designed to ingest JSON logs. | - Simplicity vs. Flexibility: zerolog focuses on performance and simplicity, which might limit customization options compared to logrus. |
-| slog | - Structured and Contextual Logging: slog supports structured logging and allows for extensive contextual information to be logged, similar to logrus.
-- Scalability and Concurrency: slog is designed with concurrency in mind, which makes it suitable for applications that require logging from multiple goroutines without losing performance.
-- Filters and Handlers: It offers a flexible system of handlers and filters, allowing detailed control over which logs are processed and how. | - Less Popular: slog is not as widely used or well-known as logrus, zap, or zerolog, which can translate to fewer community resources, examples, and third-party integrations.
-- Complexity: Its API can be more complex due to its flexible and powerful filtering and handler mechanisms, possibly leading to a steeper learning curve. |
+| **Logrus** | - **Structured Logging:** Supports logging in a JSON format, making it easier for machines to read and process logs.<br />- **Extensibility:** Offers flexibility with custom formatters, levels, and hooks that integrate with various external systems.<br />- **Contextual Information:** Easy to add contextual information to logs with fields, improving diagnosability of log entries. | - **Performance:** Not the fastest due to its use of reflection and more abstract design.<br />- **API Stability:** Has had breaking changes in the past, though it has stabilized now. |
+| **Zap** | - **High Performance:** Avoids reflection and uses a zero-allocation philosophy, logging with minimal impact on application performance.<br />- **Structured Logging:** Encodes logs in JSON and provides APIs for adding structured context. | - **Complex API:** More complex to use compared to Logrus, especially when customizing logger behavior.<br />- **Less Customizable:** Doesn’t offer as much flexibility in log formatting compared to Logrus. |
+| **Zerolog** | - **Performance:** Designed for low-latency applications with zero allocations in logging calls, making it extremely fast.<br />- **JSON-First:** Logs are structured as JSON by default, ideal for modern log management solutions. | - **Simplicity vs. Flexibility:** Focuses on performance and simplicity, which might limit customization options compared to Logrus. |
+| **Slog** | - **Structured and Contextual Logging:** Supports extensive contextual information logging.<br />- **Scalability and Concurrency:** Suitable for logging from multiple goroutines without losing performance.<br />- **Filters and Handlers:** Offers detailed control over log processing with flexible handlers and filters. | - **Less Popular:** Not as widely used or well-known as Logrus, Zap, or Zerolog, leading to fewer community resources and third-party integrations.<br />- **Complexity:** API can be more complex due to its flexible and powerful filtering and handler mechanisms, leading to a steeper learning curve. |
+
 
 ## Conclusion
 
