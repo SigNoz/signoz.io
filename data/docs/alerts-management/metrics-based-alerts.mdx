@@ -71,33 +71,37 @@ In this step, you define the specific conditions that trigger the alert and the 
 
 
 ## Step 3: Alert Configuration
-This step focuses on setting alert properties like severity, description, and other metadata. The following fields are available:
+In this step, you set the alert's metadata, including severity, name, and description:
 
-- **Severity**: Set the severity level for the alert (e.g., "Warning", "Critical" etc.).
+### Severity
+Set the severity level for the alert (e.g., "Warning" or "Critical").
 
-- **Alert Name**: A field to name the alert for easy identification.
+### Alert Name
+A field to name the alert for easy identification.
 
-- **Alert Description**: A field for adding a detailed description of the alert, explaining what it monitors and under what conditions it is triggered.
+### Alert Description
 
-- **Labels**: A field to add labels or tags to the alert for categorization. The label is a key-value pair to annotate the alert. Use `key:value` format to add labels.
+Add a detailed description for the alert, explaining its purpose and trigger conditions.
 
-- **Notification channels**: A field to choose the notification channels from those configured in the Alert Channel settings.
+You can incorporate result labels in the alert descriptions to make the alerts more informative:
 
-- **Test Notification**: A button to test the alert to ensure that it works as expected.
+**Syntax**: Use `{{.Labels.<label-name>}}` to insert label values. Label values can be any attribute used in group by. Ensure that all `.` (dots) in attribute are converted to `_`
+
+**Example**: If you have a query that has the label `service.name` then to use it in the alert description, you will use `{{.Labels.service_name}}`which creates an alert that is specific to the particular service.
+
+### Labels
+A field to add labels or tags for categorization. Labels should be added in key value pairs. First enter key (avoid space in key) and set value.
+
+### Notification channels
+A field to choose the [notification channels](https://signoz.io/docs/setup-alerts-notification) from those configured in the Alert Channel settings.
+
+### Test Notification
+A button to test the alert to ensure that it works as expected.
 
 <figure data-zoomable align='center'>
     <img src="/img/docs/alerts/alerts-metrics-based-3.webp" alt="Configure the alert"/>
     <figcaption><i>Setting the alert metadata </i></figcaption>
 </figure>
-
-
-### Result labels in alert description
-
-You can incorporate result labels in the alert descriptions to make the alerts more informative:
-
-**Syntax**: Use `{{.Labels.<label-name>}}` to insert label values. 
-
-**Example**: If you have a query that returns the label `service_name` then to use it in the alert description, you will use `{{.Labels.service_name}}`which creates an alert that is specific to the particular service.
 
 ## Examples
 
