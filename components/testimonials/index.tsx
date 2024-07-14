@@ -172,7 +172,7 @@ export const Testimonials = () => {
   return (
     <section>
       <div className="!w-[80vw] !mx-auto section-container py-24 flex flex-col items-center border border-signoz_slate-400 border-dashed !border-b-0 bg-[length:auto_100%] bg-no-repeat bg-[center_top_-45rem] bg-[url('/img/background_blur/Footer_backdrop.png')]">
-        <div className="mb-16 flex flex-col items-center text-center gap-12 w-[880px]">
+        <div className="mb-16 flex flex-col items-center text-center gap-12">
           <img src="/img/users/outplay.svg" alt="Outplay logo" className='h-7'/>
           <span className='text-signoz_sienna-200 max-w-[50vw] text-sm sm:text-2xl font-normal leading-10 text-center'>
             We optimized all our top endpoints and fine-tuned database calls to improve our backend API 
