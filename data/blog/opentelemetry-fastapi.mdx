@@ -149,8 +149,8 @@ opentelemetry-instrument <your_run_command>
 ```
 
 - `<service_name>` is the name of the service you want
-- `<your_run_command>` can be python3 app.py or python manage.py runserver --noreload
-- Replace SIGNOZ_INGESTION_KEY with the api token provided by SigNoz. You can find it in the email sent by SigNoz with your cloud account details.
+- `<your_run_command>` can be `python3 app.py` or `python manage.py runserver --noreload`
+- Replace `SIGNOZ_INGESTION_KEY` with the api token provided by SigNoz. You can find it in the email sent by SigNoz with your cloud account details.
 
 You will be able to get ingestion details in SigNoz cloud account under settings --> ingestion settings.
 
@@ -176,7 +176,7 @@ opentelemetry-instrument uvicorn main:app --host localhost --port 5002
 
 <Admonition>
 
-The uvicorn run command with multiple workers has yet to be supported. Alternatively, you can use gunicorn with the worker class `uvicorn.workers.Uvicorn[H11]Worker`
+The uvicorn run command with multiple workers is yet to be supported. Alternatively, you can use gunicorn with the worker class `uvicorn.workers.Uvicorn[H11]Worker`
 
 </Admonition>
 
@@ -202,7 +202,7 @@ pip3 install locust
 
 
 ```bash
-locust -f locust.py --headless --users 10 --spawn-rate 1 -H http://localhost:5002
+locust -f locustfile.py --headless --users 10 --spawn-rate 1 -H http://localhost:5002
 ```
 
 
@@ -217,12 +217,12 @@ You will find `sample-fastapi-app` in the list of sample applications being moni
 </figure>
 
 
-If you want to run the application with a docker image, refer to the section below for instructions.
+If you want to run the application with a Docker image, refer to the section below for instructions.
 
-### Run with docker
-You can use the below instructions if you want to run your app as a docker image, below are the instructions.<br></br>
+### Run with Docker
+You can use the below instructions if you want to run your app as a Docker image, below are the instructions.<br></br>
 
-**Build docker image**
+**Build Docker image**
 ```jsx
 docker build -t sample-fastapi-app .
 ```
@@ -244,11 +244,11 @@ docker run -d --name fastapi-container \
 ```
 
 
-If you're using docker compose setup:
+If you're using Docker Compose setup:
 
 ```bash
-# If you are running signoz through official docker compose setup, run `docker network ls` and find clickhouse network id. It will be something like this clickhouse-setup_default 
-# and pass network id by using --net <network ID>
+# If you are running SigNoz through official Docker Compose setup, run `docker network ls` and find ClickHouse network ID. It will be something like this `clickhouse-setup_default` 
+# and pass network ID by using `--net <network ID>`
 
 docker run -d --name fastapi-container \ 
 --net clickhouse-setup_default  \ 
