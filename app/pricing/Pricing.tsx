@@ -53,7 +53,9 @@ function Pricing() {
         {/* More Options */}
         {/* <CommunityEdition /> */}
         {/* FAQ section */}
+        <div className='max-sm:hidden'>
         <MonthlyEstimate />
+        </div>
         <WhySelectSignoz isInPricingPage />
         <FAQ />
         {/* User Review */}
