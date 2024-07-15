@@ -10,7 +10,7 @@ const siteMetadata = {
   siteUrl: 'https://signoz.io',
   siteRepo: 'https://github.com/signoz/',
   siteLogo: '/img/logo.svg',
-  socialBanner: '/img/signoz-landing.png',
+  socialBanner: '/img/signoz-meta.webp',
   mastodon: 'https://mastodon.social/@mastodonuser',
   email: 'address@yoursite.com',
   github: 'https://github.com/SigNoz',

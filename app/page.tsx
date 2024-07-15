@@ -19,7 +19,7 @@ import { NextUIProvider } from '@nextui-org/react'
 import { genPageMetadata } from './seo'
 
 export const metadata = genPageMetadata({
-  title: 'SigNoz | Open-Source Datadog Alternative',
+  title: 'The Open Source Datadog Alternative',
   description:
     'SigNoz is an open-source observability tool powered by OpenTelemetry. Get APM, logs, traces, metrics, exceptions, & alerts in a single tool.',
 })
