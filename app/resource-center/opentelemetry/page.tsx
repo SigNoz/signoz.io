@@ -11,10 +11,9 @@ export default function OpenTelemetryHome() {
   const [activeTab, setActiveTab] = useState('openTelemetry-tab')
 
   return (
-    <div className="container mx-auto py-4">
-      <Tabs activeTab={activeTab} />
+    <div className="container mx-auto py-16 sm:py-8 !mt-[48px]">
 
-      <div className="tab-content">
+      <div className="tab-content pt-6">
         {activeTab === 'blog-tab' && <Blogs />}
 
         {activeTab === 'comparisons-tab' && <Comparisons />}

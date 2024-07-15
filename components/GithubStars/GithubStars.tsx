@@ -1,4 +1,4 @@
-import { Github } from 'lucide-react'
+import { Github } from '@/components/social-icons/SolidIcons'
 import Link from 'next/link'
 import React, { useState, useEffect } from 'react'
 
@@ -24,6 +24,13 @@ const GitHubStars = () => {
     fetchStars()
   }, [])
 
+  const formatStars = (num) => {
+    if (num>= 1000){
+      return (num / 1000).toFixed(1) + 'k';
+    }
+    return num.toString();
+  }
+
   if (error) {
     return null
   }
@@ -34,23 +41,14 @@ const GitHubStars = () => {
 
   return (
     <Link href="https://github.com/SigNoz/signoz" target="_blank">
-      <div className="github github-stars flex cursor-pointer items-stretch justify-center gap-1 rounded p-1 font-sans text-sm font-bold ">
-        <div className="-ml-1 box-border flex items-center gap-2 rounded bg-white p-0.5 px-2 text-signoz_ink-300">
-          <div className="github-icon box-border rounded-full bg-signoz_slate-500 p-1">
-            <Github color="white" size={16} />
-          </div>
-          Stars
-        </div>
-
-        <div className="flex items-center">
-          <div className="relative">
-            <div className="-mr-[2px] h-0 w-0 border-b-8 border-r-8 border-t-8 border-b-transparent border-r-white border-t-transparent"></div>
-          </div>
-          <div className="stars-count rounded bg-white p-1 px-1.5 font-extrabold text-signoz_ink-300">
-            {stars}
+        <div className="-ml-1 box-border flex items-center gap-2 rounded-full bg-signoz_slate-500 py-2 pl-2 pr-2.5 text-signoz_ink-300 h-8">
+          <div className="github-icon box-border rounded-full p-1">
+            <Github className='fill-signoz_vanilla-100' width={16} />
+          </div> 
+          <div className='font-medium text-signoz_vanilla-100'>
+          {formatStars(stars)}
           </div>
         </div>
-      </div>
     </Link>
   )
 }
