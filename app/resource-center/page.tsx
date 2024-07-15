@@ -78,7 +78,7 @@ export default function ResourceCenter() {
         </ul>
       </div>
 
-      <div className="tab-content">
+      <div className="tab-content pt-6">
         {activeTab === 'blog-tab' && <Blogs />}
 
         {activeTab === 'comparisons-tab' && <ComparisonsListing />}
