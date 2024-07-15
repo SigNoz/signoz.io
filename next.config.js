@@ -230,6 +230,11 @@ module.exports = () => {
           destination: '/resource-center/opentelemetry/',
           permanent: true,
         },
+        {
+          source: '/api_reference/',
+          destination: '/api-reference/',
+          permanent: true,
+        },
       ]
     },
     webpack: (config, options) => {
