@@ -52,6 +52,7 @@ export const metadata: Metadata = {
     title: siteMetadata.title,
     card: 'summary_large_image',
     images: [siteMetadata.socialBanner],
+    description: siteMetadata.description,
   },
 }
 

@@ -178,7 +178,7 @@ export const Testimonials = () => {
           <span className="max-w-[50vw] text-center text-sm font-normal leading-10 text-signoz_sienna-200 sm:text-2xl">
             We optimized all our top endpoints and fine-tuned database calls to improve our backend
             API response times by 35% using SigNoz. <br />
-            Both our dev and QA teams use SigNoz actively in dev and staging environments to
+            Both our dev and QA teams use SigNoz actively in dev and production environments to
             optimize application performance.
           </span>
           <div className="flex flex-col gap-2">
