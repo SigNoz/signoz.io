@@ -15,14 +15,14 @@ const linearToLog = (value, minLog, maxLog) => {
   const minValue = Math.log(minLog)
   const maxValue = Math.log(maxLog)
   const scale = (maxValue - minValue) / (maxLog - minLog)
-  return Math.exp(minValue + scale * (value - minLog))
+  return Math.round(Math.exp(minValue + scale * (value - minLog)))
 }
 
 const logToLinear = (value, minLog, maxLog) => {
   const minValue = Math.log(minLog)
   const maxValue = Math.log(maxLog)
   const scale = (maxLog - minLog) / (maxValue - minValue)
-  return minLog + scale * (Math.log(value) - minValue)
+  return Math.round(minLog + scale * (Math.log(value) - minValue))
 }
 
 const MetricsCostEstimation = () => {
@@ -44,11 +44,11 @@ const MetricsCostEstimation = () => {
 
   const { isOpen, onOpen, onOpenChange } = useDisclosure()
 
-  const MIN_VALUE = 2
+  const MIN_VALUE = 1
   const MAX_VALUE = 2000000
 
-  const [metricsValue, setMetricsValue] = React.useState<SliderValue>(2)
-  const [inputMetricsValue, setinputMetricsValue] = React.useState<string>('0.1')
+  const [metricsValue, setMetricsValue] = React.useState<SliderValue>(1)
+  const [inputMetricsValue, setinputMetricsValue] = React.useState<string>('1')
   const [metricsRetentionPeriod, setMetricsRetentionPeriod] = useState(
     RETENTION_PERIOD.METRICS[0].months
   )
@@ -137,9 +137,13 @@ const MetricsCostEstimation = () => {
                     <div>
                       <Slider
                         size="sm"
-                        step={0.01}
+                        step={1}
                         maxValue={MAX_VALUE}
                         minValue={MIN_VALUE}
+                        showTooltip={true}
+                        tooltipProps={{
+                          content: formatNumber (linearToLog(metricsValue, MIN_VALUE, MAX_VALUE))
+                        }}
                         color="secondary"
                         marks={[
                           {

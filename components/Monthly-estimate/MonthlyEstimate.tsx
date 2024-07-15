@@ -190,6 +190,10 @@ const MonthlyEstimate = () => {
               step={0.01}
               maxValue={MAX_VALUE}
               minValue={MIN_VALUE}
+              showTooltip={true}
+              tooltipProps={{
+                content: formatBytes (linearToLog(tracesValue, MIN_VALUE, MAX_VALUE))
+              }}
               color="secondary"
               marks={[
                 {
@@ -272,6 +276,10 @@ const MonthlyEstimate = () => {
               step={0.01}
               maxValue={MAX_VALUE}
               minValue={MIN_VALUE}
+              showTooltip={true}
+              tooltipProps={{
+                content: formatBytes (linearToLog(logsValue, MIN_VALUE, MAX_VALUE))
+              }}
               color="danger"
               marks={[
                 {
@@ -354,6 +362,10 @@ const MonthlyEstimate = () => {
               step={0.01}
               maxValue={MAX_VALUE}
               minValue={MIN_VALUE}
+              showTooltip={true}
+              tooltipProps={{
+                content: formatMetrics (linearToLog(metricsValue, MIN_VALUE, MAX_VALUE))
+              }}
               color="warning"
               marks={[
                 {
