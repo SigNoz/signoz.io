@@ -44,11 +44,11 @@ const MetricsCostEstimation = () => {
 
   const { isOpen, onOpen, onOpenChange } = useDisclosure()
 
-  const MIN_VALUE = 2
+  const MIN_VALUE = 1
   const MAX_VALUE = 2000000
 
-  const [metricsValue, setMetricsValue] = React.useState<SliderValue>(2)
-  const [inputMetricsValue, setinputMetricsValue] = React.useState<string>('0.1')
+  const [metricsValue, setMetricsValue] = React.useState<SliderValue>(1)
+  const [inputMetricsValue, setinputMetricsValue] = React.useState<string>('1')
   const [metricsRetentionPeriod, setMetricsRetentionPeriod] = useState(
     RETENTION_PERIOD.METRICS[0].months
   )
@@ -140,6 +140,10 @@ const MetricsCostEstimation = () => {
                         step={1}
                         maxValue={MAX_VALUE}
                         minValue={MIN_VALUE}
+                        showTooltip={true}
+                        tooltipProps={{
+                          content: formatNumber (linearToLog(metricsValue, MIN_VALUE, MAX_VALUE))
+                        }}
                         color="secondary"
                         marks={[
                           {
