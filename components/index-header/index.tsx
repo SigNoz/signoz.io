@@ -30,9 +30,9 @@ export const Header = () => {
         </Link> */}
         <div className="absolute left-0 top-[96px] z-[-1] h-14 !w-[100vw] border !border-l-0 !border-r-0 border-dashed border-signoz_slate-400 md:top-[212px] md:!w-[80vw]" />
         <Hero>
-          Best OpenTelemetry-Native&nbsp;
+        OpenTelemetry-Native Logs,&nbsp;
           <br className="hidden lg:inline" />
-          Observability In A Single Pane
+          Metrics and Traces in a single pane
         </Hero>
         <p className="m-0 p-3 text-base font-medium sm:p-0">
           SigNoz is an open-source Datadog or New Relic alternative. Get APM, logs,{' '}
