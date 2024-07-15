@@ -1234,6 +1234,18 @@ const ExploreAllFeature = () => {
             inEnterprise: <CheckSolid />,
           },
           {
+            feature: 'Support for Multiple Ingestion Keys',
+            inCommunity: <CrossIcon />,
+            inTeams: <RightIcon />,
+            inEnterprise: <RightIcon />,
+          },
+          {
+            feature: 'Support for Rate Limits based on Ingestion keys',
+            inCommunity: <CrossIcon />,
+            inTeams: <RightIcon />,
+            inEnterprise: <RightIcon />,
+          },
+          {
             feature: 'Dashboard Locking & Access control',
             inCommunity: <CrossSolid />,
             inTeams: <CheckSolid />,

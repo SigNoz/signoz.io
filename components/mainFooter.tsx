@@ -1,16 +1,17 @@
 import * as React from 'react'
 import Link from 'next/link'
-import { ArrowUpRight, GithubIcon, Linkedin, SlackIcon, Twitter, Youtube } from 'lucide-react'
+import { ArrowUpRight } from 'lucide-react'
 import Image from 'next/image'
+import { Github, Linkedin, Slack, Twitter, Youtube } from '@/components/social-icons/SolidIcons'
 
 /**
  * Footer component
  */
 function Footer() {
   return (
-    <div className="z-[1] flex flex-col justify-center border-t border-solid border-gray-900">
-      <div className="flex w-full items-center justify-center px-16 py-14 max-md:max-w-full max-md:px-5 md:bg-opacity-70 md:backdrop-blur-[20px]">
-        <div className="w-full max-w-[1200px] justify-between max-md:max-w-full">
+    <div className="flex flex-col justify-center border-t border-solid border-gray-900">
+      <div className="flex w-full items-center justify-center bg-opacity-70 px-16 py-14 max-md:max-w-full max-md:px-5">
+        <div className="container w-full max-w-[1200px] justify-between max-md:max-w-full">
           <div className="flex gap-5 max-md:flex-col max-md:gap-0">
             <div className="flex w-3/12 flex-col max-md:ml-0 max-md:w-full">
               <div className="flex flex-col pb-2.5 text-sm tracking-wide text-stone-300 max-md:mt-10">
@@ -125,13 +126,13 @@ function Footer() {
                 <div className="mt-5 items-end justify-center rounded text-sm leading-5 text-emerald-300">
                   All systems operational
                 </div>
-                <div className="mt-5 flex items-end justify-between gap-4 py-2">
+                <div className="mt-5 flex items-end justify-between gap-4 py-2 footer-icons">
                   <Link
                     href={'https://github.com/SigNoz'}
                     target="_blank"
                     aria-label="SigNoz Github URL"
                   >
-                    <GithubIcon size={24} />{' '}
+                    <Github />
                   </Link>
 
                   <Link
@@ -139,7 +140,7 @@ function Footer() {
                     target="_blank"
                     aria-label="SigNoz LinkedIN URL"
                   >
-                    <Linkedin size={24} />
+                    <Linkedin />
                   </Link>
 
                   <Link
@@ -147,7 +148,7 @@ function Footer() {
                     target="_blank"
                     aria-label="SigNoz Slack Connect URL"
                   >
-                    <SlackIcon size={24} />
+                    <Slack />
                   </Link>
 
                   <Link
@@ -155,7 +156,7 @@ function Footer() {
                     target="_blank"
                     aria-label="SigNoz Twitter URL"
                   >
-                    <Twitter size={24} />
+                    <Twitter />
                   </Link>
 
                   <Link
@@ -163,7 +164,7 @@ function Footer() {
                     target="_blank"
                     aria-label="SigNoz Youtube Channel URL"
                   >
-                    <Youtube size={24} />
+                    <Youtube />
                   </Link>
                 </div>
               </div>

@@ -12,12 +12,29 @@ import React from 'react'
 import DocsSidebar from '../DocsSidebar/DocsSidebar'
 import { usePathname } from 'next/navigation'
 import Banner from '../Banner/Banner'
+import Tabs from '../../app/resource-center/Shared/Tabs'
+
+enum TABS {
+  BLOG = 'blog-tab',
+  COMPARISONS = 'comparisons-tab',
+  GUIDES = 'guides-tab',
+  OPENTELEMETRY = 'openTelemetry-tab'
+}
+
+enum TAB_PATHNAMES {
+  BLOG = '/resource-center/blog',
+  COMPARISONS = '/resource-center/comparisons',
+  GUIDES = '/resource-center/guides',
+  OPENTELEMETRY = '/resource-center/opentelemetry'
+}
 
 export default function TopNav() {
   const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [isDocsBasePath, setIsDocsBasePath] = useState(false)
   const [showMainMenu, setShowMainMenu] = useState(false)
+  const [activeTab, setActiveTab] = useState(TABS.GUIDES);
+  const [shouldShowTabs, setShouldShowTabs] = useState(false);
 
   useEffect(() => {
     const isDocsBasePath = pathname.startsWith('/docs')
@@ -28,19 +45,37 @@ export default function TopNav() {
     } else {
       setShowMainMenu(false)
     }
+
+    if (pathname.startsWith(TAB_PATHNAMES.BLOG)) {
+      setActiveTab(TABS.BLOG)
+      setShouldShowTabs(true);
+    } else if (pathname.startsWith(TAB_PATHNAMES.COMPARISONS)) {
+      setActiveTab(TABS.COMPARISONS)
+      setShouldShowTabs(true);
+    } else if (pathname.startsWith(TAB_PATHNAMES.GUIDES)) {
+      setActiveTab(TABS.GUIDES)
+      setShouldShowTabs(true);
+    } else if (pathname.startsWith(TAB_PATHNAMES.OPENTELEMETRY)) {
+      setActiveTab(TABS.OPENTELEMETRY)
+      setShouldShowTabs(true);
+    } else {
+      setShouldShowTabs(false);
+    }
   }, [pathname])
 
   return (
     <div className="fixed left-0 right-0 z-30">
-      <Banner />
+
+      {/* <Banner/> */}
+
       <header
         className={`header-bg mx-auto box-border flex h-[56px] w-full items-center border-b border-signoz_slate-500 px-4 text-signoz_vanilla-100 backdrop-blur-[20px] dark:text-signoz_vanilla-100 md:px-8 lg:px-8`}
       >
         <nav
-          className="flex w-full justify-between text-signoz_vanilla-100 dark:text-signoz_vanilla-100"
+          className="flex w-full justify-between text-signoz_vanilla-100 dark:text-signoz_vanilla-100 container"
           aria-label="Global"
         >
-          <div className="mr-4 flex justify-start gap-x-6 lg:flex-1">
+          <div className="flex justify-start gap-x-6">
             <Link
               href="/"
               className="-m-1.5 flex items-center gap-2 p-1.5"
@@ -54,7 +89,7 @@ export default function TopNav() {
                 alt=""
               />
 
-              <span className="font-satoshi-bold text-[18.58px] font-medium">SigNoz</span>
+              <span className="text-[17.111px] font-medium">SigNoz</span>
             </Link>
             <Popover.Group className="hidden items-center gap-x-6 lg:flex">
               <Link
@@ -101,14 +136,15 @@ export default function TopNav() {
             </button>
           </div>
 
-          <div className="hidden gap-8 lg:flex lg:flex-1 lg:justify-end">
-            <GitHubStars />
+
+          <div className="hidden gap-3 lg:flex lg:flex-1 lg:justify-end" >
             <SearchButton />
+            <GitHubStars />
 
             <Link href="/teams" className="mx-2">
               <Button
                 id="btn-get-started-website-navbar"
-                className="start-free-trial-btn primary-gradient flex h-8 items-center justify-center gap-1.5 truncate rounded-full px-4 py-2 pl-4 pr-3 text-center text-sm font-medium not-italic leading-5 text-white no-underline outline-none hover:text-white"
+                className="start-free-trial-btn h-8 pr-3 pl-4 px-4 py-2 rounded-full text-sm flex items-center justify-center gap-1.5 not-italic truncate text-center font-medium leading-5 text-white no-underline outline-none hover:text-white"
               >
                 Try SigNoz Cloud <ArrowRight size={14} />
               </Button>
@@ -159,7 +195,7 @@ export default function TopNav() {
                     >
                       <Button
                         id="btn-get-started-website-navbar"
-                        className="start-free-trial-btn primary-gradient font-heading flex items-center justify-center gap-1 truncate rounded-md border-none px-4 py-2 text-center text-sm text-xs  font-bold leading-4 text-white no-underline outline-none hover:text-white"
+                        className="start-free-trial-btn font-heading flex items-center justify-center gap-1 truncate rounded-md border-none px-4 py-2 text-center text-sm text-xs  font-bold leading-4 text-white no-underline outline-none hover:text-white"
                       >
                         Try SigNoz Cloud <ArrowRight size={14} />
                       </Button>
@@ -189,6 +225,11 @@ export default function TopNav() {
           </Dialog.Panel>
         </Dialog>
       </header>
+
+      {
+        shouldShowTabs ?
+          <Tabs activeTab={activeTab} /> : null
+      }
     </div>
   )
 }
