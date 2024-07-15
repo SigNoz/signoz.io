@@ -137,10 +137,12 @@ const MonthlyEstimate = () => {
           </span>
           <span className="mb-16 text-signoz_vanilla-400 font-normal text-base pl-1">
             You can also set data ingestion limits so you never get a surprise bill.
+            <Link href={"https://signoz.io/docs/ingestion/signoz-cloud/keys/"}>
             <span className="text-signoz_robin-400 font-medium">
               &nbsp;Learn more
               <ArrowUpRight className="inline" size={16} />
             </span>
+            </Link>
           </span>
         </div>
         <div className="grid grid-cols-6 grid-rows-4 gap-y-4">

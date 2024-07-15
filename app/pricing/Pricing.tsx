@@ -677,16 +677,16 @@ const PricingPlans = () => {
                       <li className="mb-3 flex items-center gap-3">
                         {' '}
                         <CircleCheckSolid /> Custom integration for metrics and logs
-                        <div className="!mb-0 rounded-[50px] border border-none bg-signoz_aqua-400 px-1.5 py-px text-[10px] font-semibold uppercase text-signoz_ink-400">
+                        {/* <div className="!mb-0 rounded-[50px] border border-none bg-signoz_aqua-400 px-1.5 py-px text-[10px] font-semibold uppercase text-signoz_ink-400">
                           new
-                        </div>
+                        </div> */}
                       </li>
                       <li className="mb-3 flex items-center gap-3">
                         {' '}
                         <CircleCheckSolid /> AWS Private Link
-                        <div className="!mb-0 rounded-[50px] border border-none bg-signoz_aqua-400 px-1.5 py-px text-[10px] font-semibold uppercase text-signoz_ink-400">
+                        {/* <div className="!mb-0 rounded-[50px] border border-none bg-signoz_aqua-400 px-1.5 py-px text-[10px] font-semibold uppercase text-signoz_ink-400">
                           new
-                        </div>
+                        </div> */}
                       </li>
                       <li className="mb-3 flex items-center gap-3">
                         {' '}
@@ -1235,15 +1235,15 @@ const ExploreAllFeature = () => {
           },
           {
             feature: 'Support for Multiple Ingestion Keys',
-            inCommunity: <CrossIcon />,
-            inTeams: <RightIcon />,
-            inEnterprise: <RightIcon />,
+            inCommunity: <CrossSolid />,
+            inTeams: <CheckSolid />,
+            inEnterprise: <CheckSolid/>,
           },
           {
             feature: 'Support for Rate Limits based on Ingestion keys',
-            inCommunity: <CrossIcon />,
-            inTeams: <RightIcon />,
-            inEnterprise: <RightIcon />,
+            inCommunity: <CrossSolid />,
+            inTeams: <CheckSolid />,
+            inEnterprise: <CheckSolid />,
           },
           {
             feature: 'Dashboard Locking & Access control',
