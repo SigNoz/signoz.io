@@ -738,10 +738,10 @@ const PricingPlans = () => {
               <Heading type={1} className="z-[1]">
                 Run SigNoz within your infrastructure
               </Heading>
-              <SubHeading>
+              <div className="text-sm md:text-lg">
                 Get started with Community Edition and upgrade for enterprise-ready features or get
                 it managed by SigNoz in your cloud (BYOC)
-              </SubHeading>
+              </div>
               <div className="my-5 flex justify-center">
                 <div className="flex rounded-3xl">
                   <nav
@@ -776,7 +776,7 @@ const PricingPlans = () => {
               </div>
             </div>
 
-            <div className="pricing-plans  mx-[8px] grid !max-w-[calc(80vw-24px)] grid-cols-1 justify-center gap-y-10 max-sm:!ml-[24px] max-sm:!max-w-[calc(80vw-48px)] md:max-w-md lg:max-w-6xl lg:grid-cols-2">
+            <div className="pricing-plans mx-[8px] grid max-w-[100vw] grid-cols-1 justify-center gap-y-10 md:!max-w-[calc(80vw-24px)] lg:max-w-6xl lg:grid-cols-2">
               <div className="pricing-card !mb-0 border !border-b-0 !border-l-0 !border-r-0 border-dashed border-signoz_slate-400 bg-opacity-5 px-4 py-5 md:px-8 ">
                 <div>
                   <h3 className="font-heading pinkish-gradient text-2xl  font-bold">
@@ -1394,9 +1394,9 @@ const ExploreAllFeature = () => {
   }
 
   return (
-    <div className="xs:mx-5 relative !m-0 !w-[100vw] border !border-t-0 border-dashed border-signoz_slate-400 md:!w-[80vw]">
+    <div className="xs:mx-5 relative !m-0 !mx-auto !w-[100vw] border !border-t-0 border-dashed border-signoz_slate-400 md:!w-[80vw]">
       <div className="mx-auto overflow-hidden">
-        <div className="mt-10">
+        <div className="">
           <div className="ovc-table_top-wrapper grid grid-cols-3 gap-1 md:grid-cols-[3fr_1fr_1fr_1fr]">
             {ALL_FEATURES_DATA.HEADER.map((h, idx) => {
               return (

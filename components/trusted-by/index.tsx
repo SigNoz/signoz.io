@@ -43,7 +43,7 @@ export const TrustedByTeams = () => {
           ))}
         </div>
         <div
-          className={`wavy-line relative mx-[-1rem] mb-16
+          className={`wavy-line relative mx-[-1rem]
         after:absolute after:top-[50%] after:h-0 after:w-full after:bg-transparent after:content-['']
       `}
         >
