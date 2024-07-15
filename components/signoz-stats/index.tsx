@@ -3,49 +3,59 @@
 import React from 'react'
 import Heading from '../../components/ui/Heading'
 import SubHeading from '../../components/ui/SubHeading'
-import Button from '../../components/ui/Button'
+import Button from '@/components/Button/Button'
+import Card from '@/components/Card/card'
+import Link from 'next/link'
+import { ArrowRight, BookOpen } from 'lucide-react'
+
 const SigNozStats = () => {
   const STATS_LIST = [
-    { id: 1, name: 'Downloads', value: '10Mn+' },
-    { id: 2, name: 'GitHub Stars', value: '17k+' },
-    { id: 3, name: 'Contributors', value: '140+' },
-    { id: 4, name: 'Community Members', value: '4.5k+' },
+    {
+      id: 1,
+      logo: '/img/index_features/download.svg',
+      name: 'OSS Downloads',
+      value: '10 million+',
+    },
+    { id: 2, logo: '/img/index_features/github.svg', name: 'GitHub Stars', value: '17k+' },
+    { id: 3, logo: '/img/index_features/contributions.svg', name: 'Contributors', value: '140+' },
+    { id: 4, logo: '/img/index_features/community.svg', name: 'Community Members', value: '4.5k+' },
   ]
   return (
     <section>
-      <div className="bg-[#252529] py-16">
-        <div className="container">
-          <div className="mb-10 flex flex-col items-center justify-center text-center">
-            <Heading type={1}>
-              Developers <span className="heart-emoji">❤️</span> Open Source SigNoz
-            </Heading>
-            <SubHeading>
-              Join our huge open source community and nerd about observability
-            </SubHeading>
-          </div>
-          <div className="mx-auto mb-16 max-w-7xl px-6 lg:px-8">
-            <div className="grid grid-cols-2 gap-x-8 gap-y-16 text-center lg:grid-cols-4">
-              {STATS_LIST.map((stat) => (
-                <div
-                  key={stat.id}
-                  className="mx-auto flex max-w-xs flex-col justify-center gap-y-4"
-                >
-                  <div className="text-2xl leading-7 text-white">{stat.name}</div>
-                  <div className="order-first text-2xl font-semibold tracking-tight text-white sm:text-5xl">
-                    {stat.value}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-          <div className="flex justify-center">
-            <Button
-              isButton
-              onClick={() => window.open('https://signoz.io/slack', '_blank')}>
-              Join our slack community
-            </Button>
+      <div className="">
+        <div className="section-container !mx-auto flex !w-[100vw] flex-col border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 !px-0 sm:flex-row md:!w-[80vw]">
+          <div className="!w-[300px] flex-1 border !border-b-0 !border-l-0 !border-r-0 border-dashed border-signoz_slate-400">
+            <p className="pl-12 pt-10 text-left text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-[44px]">
+              Developers <br />
+              Love
+              <br />
+              SigNoz
+            </p>
           </div>
 
+          <div className="flex flex-[2_2_0%] flex-col">
+            <div className="grid grid-cols-1 text-left sm:grid-cols-2">
+              {STATS_LIST.map((stat) => (
+                <Card logo={stat.logo} stats={stat.value} description={stat.name} logoSize={24} />
+              ))}
+            </div>
+            <div className="flex flex-col items-center gap-3 border !border-b-0 !border-r-0 border-dashed border-signoz_slate-400 py-6 sm:flex-row sm:py-6 sm:pl-10">
+              <Link href="https://signoz.io/slack/">
+                <Button className="w-[100%] text-xs sm:text-sm">
+                  <BookOpen className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                  Join the community
+                  <ArrowRight className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                </Button>
+              </Link>
+              <Link href="https://github.com/SigNoz/signoz/">
+                <Button type={Button.TYPES.SECONDARY} className="w-[100%] text-xs sm:text-sm">
+                  <BookOpen className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                  GitHub Repository
+                  <ArrowRight className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                </Button>
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
     </section>

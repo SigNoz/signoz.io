@@ -4,6 +4,8 @@ import { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Pricing',
+  description:
+    'Explore SigNoz plans and pricing. Transparent & predictable with only usage-based pricing. No user-based pricing, no pricing based on containers, hosts, or nodes. No special pricing for custom metrics.',
 }
 
 export default function PricingPage() {
