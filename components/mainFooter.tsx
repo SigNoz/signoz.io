@@ -8,8 +8,8 @@ import Image from 'next/image'
  */
 function Footer() {
   return (
-    <div className="flex flex-col justify-center border-t border-solid border-gray-900 z-[1]">
-      <div className="flex w-full items-center justify-center bg-opacity-70 px-16 py-14 backdrop-blur-[20px] max-md:max-w-full max-md:px-5">
+    <div className="z-[1] flex flex-col justify-center border-t border-solid border-gray-900">
+      <div className="flex w-full items-center justify-center px-16 py-14 max-md:max-w-full max-md:px-5 md:bg-opacity-70 md:backdrop-blur-[20px]">
         <div className="w-full max-w-[1200px] justify-between max-md:max-w-full">
           <div className="flex gap-5 max-md:flex-col max-md:gap-0">
             <div className="flex w-3/12 flex-col max-md:ml-0 max-md:w-full">
@@ -120,7 +120,7 @@ function Footer() {
                     height={50}
                     alt=""
                   />
-                  <div className='font-satoshi-bold font-medium'>SigNoz</div>
+                  <div className="font-satoshi-bold font-medium">SigNoz</div>
                 </div>
                 <div className="mt-5 items-end justify-center rounded text-sm leading-5 text-emerald-300">
                   All systems operational
