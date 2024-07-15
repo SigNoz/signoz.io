@@ -226,7 +226,7 @@ export const Testimonials = () => {
             </div>
           ))}
         </div>
-        <Link href="/case-study/" className="shadow-[0_-350px_200px_400px_rgba(11,12,14,0.9)]">
+        <Link href="/case-study/" className="shadow-[-10px_-250px_200px_370px_rgba(11,12,14,0.9)]">
           <button className="button-background flex h-8 items-center justify-center gap-1.5 truncate rounded-full px-4 py-2 pl-4 pr-3 text-center text-sm font-medium not-italic leading-5 text-white no-underline outline-none hover:text-white">
             Read customer stories
             <ArrowRight size={14} />
