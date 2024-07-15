@@ -70,10 +70,10 @@ export default function TopNav() {
         className={`header-bg mx-auto box-border flex h-[56px] w-full items-center border-b border-signoz_slate-500 px-4 text-signoz_vanilla-100 backdrop-blur-[20px] dark:text-signoz_vanilla-100 md:px-8 lg:px-8`}
       >
         <nav
-          className="flex w-full justify-between text-signoz_vanilla-100 dark:text-signoz_vanilla-100"
+          className="flex w-full justify-between text-signoz_vanilla-100 dark:text-signoz_vanilla-100 container"
           aria-label="Global"
         >
-          <div className="mr-4 flex justify-start gap-x-6 lg:flex-1">
+          <div className="flex justify-start gap-x-6">
             <Link
               href="/"
               className="-m-1.5 flex items-center gap-2 p-1.5"
@@ -142,7 +142,7 @@ export default function TopNav() {
             <Link href="/teams" className="mx-2">
               <Button
                 id="btn-get-started-website-navbar"
-                className="start-free-trial-btn primary-gradient h-8 pr-3 pl-4 px-4 py-2 rounded-full text-sm flex items-center justify-center gap-1.5 not-italic truncate text-center font-medium leading-5 text-white no-underline outline-none hover:text-white"
+                className="start-free-trial-btn h-8 pr-3 pl-4 px-4 py-2 rounded-full text-sm flex items-center justify-center gap-1.5 not-italic truncate text-center font-medium leading-5 text-white no-underline outline-none hover:text-white"
               >
                 Try SigNoz Cloud <ArrowRight size={14} />
               </Button>
@@ -193,7 +193,7 @@ export default function TopNav() {
                     >
                       <Button
                         id="btn-get-started-website-navbar"
-                        className="start-free-trial-btn primary-gradient font-heading flex items-center justify-center gap-1 truncate rounded-md border-none px-4 py-2 text-center text-sm text-xs  font-bold leading-4 text-white no-underline outline-none hover:text-white"
+                        className="start-free-trial-btn font-heading flex items-center justify-center gap-1 truncate rounded-md border-none px-4 py-2 text-center text-sm text-xs  font-bold leading-4 text-white no-underline outline-none hover:text-white"
                       >
                         Try SigNoz Cloud <ArrowRight size={14} />
                       </Button>
