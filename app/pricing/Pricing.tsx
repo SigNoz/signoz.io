@@ -1184,6 +1184,12 @@ const ExploreAllFeature = () => {
             inEnterprise: <CheckSolid />,
           },
           {
+            feature: 'Alert as Code',
+            inCommunity: <CrossSolid />,
+            inTeams: <CheckSolid />,
+            inEnterprise: <CheckSolid />,
+          },
+          {
             feature: 'MS Teams as alert channel',
             inCommunity: <CrossSolid />,
             inTeams: <CheckSolid />,
@@ -1251,6 +1257,12 @@ const ExploreAllFeature = () => {
             inEnterprise: <CheckSolid />,
           },
           {
+            feature: 'Access Data in SigNoz from Anywhere (via API keys)',
+            inCommunity: <CrossSolid />,
+            inTeams: <CheckSolid />,
+            inEnterprise: <CheckSolid />,
+          },
+          {
             feature: 'Security tightening for on-premise installation',
             inCommunity: <CrossSolid />,
             inTeams: <CheckSolid />,
@@ -1295,20 +1307,14 @@ const ExploreAllFeature = () => {
             ),
           },
           {
-            feature: 'Alert as code',
+            feature: 'Audit Logs',
             inCommunity: <CrossSolid />,
-            inTeams: <CheckSolid />,
-            inEnterprise: (
+            inTeams: (
               <div className="flex items-center">
                 <ClockSolid height="15" width="15" />
                 <span className="ml-1.5 text-[8px] sm:text-xs">COMING SOON</span>
               </div>
             ),
-          },
-          {
-            feature: 'Audit Logs',
-            inCommunity: <CrossSolid />,
-            inTeams: <CheckSolid />,
             inEnterprise: (
               <div className="flex items-center">
                 <ClockSolid height="15" width="15" />
@@ -1319,7 +1325,12 @@ const ExploreAllFeature = () => {
           {
             feature: 'Custom retention for different sources of logs',
             inCommunity: <CrossSolid />,
-            inTeams: <CheckSolid />,
+            inTeams: (
+              <div className="flex items-center">
+                <ClockSolid height="15" width="15" />
+                <span className="ml-1.5 text-[8px] sm:text-xs">COMING SOON</span>
+              </div>
+            ),
             inEnterprise: (
               <div className="flex items-center">
                 <ClockSolid height="15" width="15" />
@@ -1328,16 +1339,15 @@ const ExploreAllFeature = () => {
             ),
           },
           {
-            feature: 'Access Data in SigNoz from Anywhere (via API keys)',
-            inCommunity: <CrossSolid />,
-            inTeams: <CheckSolid />,
-            inEnterprise: <CheckSolid />,
-          },
-          {
             feature: 'Multi-tenancy',
             inCommunity: <CrossSolid />,
             inTeams: <CheckSolid />,
-            inEnterprise: <CheckSolid />,
+            inEnterprise: (
+              <div className="flex items-center">
+                <ClockSolid height="15" width="15" />
+                <span className="ml-1.5 text-[8px] sm:text-xs">COMING SOON</span>
+              </div>
+            ),
           },
         ],
       },
