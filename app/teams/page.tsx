@@ -4,6 +4,10 @@ import { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Teams',
+  openGraph: {
+    title: 'SigNoz | Teams',
+    description: ' Sign up for SigNoz cloud and get 30 days of free trial with access to all features.',
+  },
   description:
     'Sign up for SigNoz cloud and get 30 days of free trial with access to all features.',
 }
