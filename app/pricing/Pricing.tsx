@@ -1265,7 +1265,7 @@ const ExploreAllFeature = () => {
           {
             feature: 'Security tightening for on-premise installation',
             inCommunity: <CrossSolid />,
-            inTeams: <CheckSolid />,
+            inTeams: <CrossSolid />,
             inEnterprise: (
               <div className="flex items-center">
                 <ServerSolid />
@@ -1276,49 +1276,11 @@ const ExploreAllFeature = () => {
           {
             feature: 'Monitor Health of SigNoz',
             inCommunity: <CrossSolid />,
-            inTeams: <CheckSolid />,
+            inTeams: <CrossSolid />,
             inEnterprise: (
               <div className="flex items-center">
                 <ServerSolid />
                 <span className="ml-1.5 text-[10px] max-sm:text-[8px]">ENTERPRISE SELF-HOSTED</span>
-              </div>
-            ),
-          },
-          {
-            feature: 'Finer RBAC with custom roles',
-            inCommunity: <CrossSolid />,
-            inTeams: <CheckSolid />,
-            inEnterprise: (
-              <div className="flex items-center">
-                <ClockSolid height="15" width="15" />
-                <span className="ml-1.5 text-[8px] sm:text-xs">COMING SOON</span>
-              </div>
-            ),
-          },
-          {
-            feature: 'AWS Private link',
-            inCommunity: <CrossSolid />,
-            inTeams: <CheckSolid />,
-            inEnterprise: (
-              <div className="flex items-center">
-                <CloudSolid />
-                <span className="ml-1.5 text-[8px] sm:text-xs">ENTERPRISE CLOUD</span>
-              </div>
-            ),
-          },
-          {
-            feature: 'Audit Logs',
-            inCommunity: <CrossSolid />,
-            inTeams: (
-              <div className="flex items-center">
-                <ClockSolid height="15" width="15" />
-                <span className="ml-1.5 text-[8px] sm:text-xs">COMING SOON</span>
-              </div>
-            ),
-            inEnterprise: (
-              <div className="flex items-center">
-                <ClockSolid height="15" width="15" />
-                <span className="ml-1.5 text-[8px] sm:text-xs">COMING SOON</span>
               </div>
             ),
           },
@@ -1339,9 +1301,42 @@ const ExploreAllFeature = () => {
             ),
           },
           {
+            feature: 'Finer RBAC with custom roles',
+            inCommunity: <CrossSolid />,
+            inTeams: <CrossSolid />,
+            inEnterprise: (
+              <div className="flex items-center">
+                <ClockSolid height="15" width="15" />
+                <span className="ml-1.5 text-[8px] sm:text-xs">COMING SOON</span>
+              </div>
+            ),
+          },
+          {
+            feature: 'AWS Private link',
+            inCommunity: <CrossSolid />,
+            inTeams: <CrossSolid />,
+            inEnterprise: (
+              <div className="flex items-center">
+                <CloudSolid />
+                <span className="ml-1.5 text-[8px] sm:text-xs">ENTERPRISE CLOUD</span>
+              </div>
+            ),
+          },
+          {
+            feature: 'Audit Logs',
+            inCommunity: <CrossSolid />,
+            inTeams: <CrossSolid />,
+            inEnterprise: (
+              <div className="flex items-center">
+                <ClockSolid height="15" width="15" />
+                <span className="ml-1.5 text-[8px] sm:text-xs">COMING SOON</span>
+              </div>
+            ),
+          },
+          {
             feature: 'Multi-tenancy',
             inCommunity: <CrossSolid />,
-            inTeams: <CheckSolid />,
+            inTeams:  <CrossSolid />,
             inEnterprise: (
               <div className="flex items-center">
                 <ClockSolid height="15" width="15" />
