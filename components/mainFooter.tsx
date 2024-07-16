@@ -29,7 +29,7 @@ function Footer() {
                   <ArrowUpRight size={16} />
                 </div>
                 <Link href="/api_reference/" className="mt-5 hover:underline">
-                  API
+                  SigNoz API
                 </Link>
               </div>
             </div>
