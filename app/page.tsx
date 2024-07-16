@@ -16,13 +16,17 @@ import { TrustedByTeams } from '@/components/trusted-by'
 import { WhyOpenTelemetry } from '@/components/why-opentelemetry'
 import WhySelectSignoz from '@/components/why-select-signoz'
 import { NextUIProvider } from '@nextui-org/react'
-import { genPageMetadata } from './seo'
+import { Metadata } from 'next'
 
-export const metadata = genPageMetadata({
+export const metadata: Metadata = {
   title: 'SigNoz | The Open Source Datadog Alternative',
+  openGraph: {
+    title: 'SigNoz | The Open Source Datadog Alternative',
+    description: 'SigNoz is an open-source observability tool powered by OpenTelemetry. Get APM, logs, traces, metrics, exceptions, & alerts in a single tool.',
+  },
   description:
     'SigNoz is an open-source observability tool powered by OpenTelemetry. Get APM, logs, traces, metrics, exceptions, & alerts in a single tool.',
-})
+}
 
 export default async function Page() {
   const sortedPosts = sortPosts(allBlogs)
