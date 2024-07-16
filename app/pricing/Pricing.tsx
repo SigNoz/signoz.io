@@ -1253,7 +1253,7 @@ const ExploreAllFeature = () => {
           {
             feature: 'Security tightening for on-premise installation',
             inCommunity: <CrossSolid />,
-            inTeams: <CheckSolid />,
+            inTeams: <CrossSolid />,
             inEnterprise: (
               <div className="flex items-center">
                 <ServerSolid />
@@ -1264,7 +1264,7 @@ const ExploreAllFeature = () => {
           {
             feature: 'Monitor Health of SigNoz',
             inCommunity: <CrossSolid />,
-            inTeams: <CheckSolid />,
+            inTeams: <CrossSolid />,
             inEnterprise: (
               <div className="flex items-center">
                 <ServerSolid />
@@ -1275,7 +1275,7 @@ const ExploreAllFeature = () => {
           {
             feature: 'Finer RBAC with custom roles',
             inCommunity: <CrossSolid />,
-            inTeams: <CheckSolid />,
+            inTeams: <CrossSolid />,
             inEnterprise: (
               <div className="flex items-center">
                 <ClockSolid height="15" width="15" />
@@ -1286,7 +1286,7 @@ const ExploreAllFeature = () => {
           {
             feature: 'AWS Private link',
             inCommunity: <CrossSolid />,
-            inTeams: <CheckSolid />,
+            inTeams: <CrossSolid />,
             inEnterprise: (
               <div className="flex items-center">
                 <CloudSolid />
@@ -1297,7 +1297,7 @@ const ExploreAllFeature = () => {
           {
             feature: 'Alert as code',
             inCommunity: <CrossSolid />,
-            inTeams: <CheckSolid />,
+            inTeams: <CrossSolid />,
             inEnterprise: (
               <div className="flex items-center">
                 <ClockSolid height="15" width="15" />
@@ -1308,7 +1308,7 @@ const ExploreAllFeature = () => {
           {
             feature: 'Audit Logs',
             inCommunity: <CrossSolid />,
-            inTeams: <CheckSolid />,
+            inTeams: <CrossSolid />,
             inEnterprise: (
               <div className="flex items-center">
                 <ClockSolid height="15" width="15" />
@@ -1319,7 +1319,7 @@ const ExploreAllFeature = () => {
           {
             feature: 'Custom retention for different sources of logs',
             inCommunity: <CrossSolid />,
-            inTeams: <CheckSolid />,
+            inTeams: <CrossSolid />,
             inEnterprise: (
               <div className="flex items-center">
                 <ClockSolid height="15" width="15" />
@@ -1336,7 +1336,7 @@ const ExploreAllFeature = () => {
           {
             feature: 'Multi-tenancy',
             inCommunity: <CrossSolid />,
-            inTeams: <CheckSolid />,
+            inTeams: <CrossSolid />,
             inEnterprise: <CheckSolid />,
           },
         ],
