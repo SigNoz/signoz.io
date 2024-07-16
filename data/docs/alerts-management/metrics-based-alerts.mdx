@@ -8,11 +8,15 @@ A Metric-based alert in SigNoz allows you to define conditions based on metric d
 
 ## Step 1: Define the Metric
 In this step, you use the [Metrics Query Builder](https://signoz.io/docs/userguide/query-builder/#metrics-query-builder)
-to choose the metric to monitor. Some of the fields that are available in Metrics Query Builder includes:
+to choose the metric to monitor. The following fields that are available in Metrics Query Builder includes:
 
-- **Metrics**: A field to select the specific metric you want to monitor (e.g., CPU usage, memory utilization). You can also choose an aggregation function like "Count," "Sum," or "Average."
+- **Metric**: A field to select the specific metric you want to monitor (e.g., CPU usage, memory utilization).
+
+- **Time aggregation**: A field to select the time aggregation function to use for the metric. Learn more about [time aggregation](../../metrics-management/types-and-aggregation/#aggregation)
 
 - **WHERE**: A filter field to define specific conditions for the metric. You can apply logical operators like "IN," "NOT IN".
+
+- **Space aggregation**: A field to select the space aggregation function to use for the metric. Learn more about [space aggregation](../../metrics-management/types-and-aggregation/#aggregation)
 
 - **[Legend Format](https://signoz.io/docs/userguide/query-builder/#legend-format)**: An optional field to customize the legend's format in the visual representation of the alert.
 
@@ -29,13 +33,34 @@ To know more about the functionalities of the Query Builder, checkout the [docum
 ## Step 2: Define Alert Conditions
 In this step, you define the specific conditions that trigger the alert and the notification frequency. The following fields are available:
 
-- **Send a notification when [A] is [above/below] the threshold at least once during the last [X] mins**: A condition template to set the threshold for the alert, with options to define when and how often the condition should be checked.
+
+- **Condition**: Specify when the metric should trigger the notification
+  - Greater than (`>`)
+  - Less than (`<`)
+  - Equal to (`=`)
+  - Not equal to (`!=`)
+
+- **Occurrence**: Specify how condition should be evaluated
+  - At least once
+  - Every time
+  - On average
+  - In total
+
+- **Evaluation window**: Specify the rolling time window for the condition evaluation. The following look back options are available:
+  - Last 5 minutes
+  - Last 10 minutes
+  - Last 15 minutes
+  - Last 1 hour
+  - Last 4 hours
+  - Last 1 day
 
 - **Alert Threshold**: A field to set the threshold for the alert condition.
 
+- **Threshold Unit**: The unit of the threshold value. This is convenient when you want to set the threshold in a different unit than the metric. For example, the memory usage metric might be in bytes, but you might want to monitor it in MBs. Please make sure to set the Y-axis unit to indicate the unit of the metric.
+
 - **More Options** :
 
-    - **Run alert every [X mins]**: This option determines the frequency at which the alert condition is checked and notifications are sent.
+    - **Run alert every [X mins]**: This option determines the frequency at which the alert is evaluated.
 
     - **Send a notification if data is missing for [X] mins**: A field to specify if a notification should be sent when data is missing for a certain period.
 
@@ -46,55 +71,121 @@ In this step, you define the specific conditions that trigger the alert and the 
 
 
 ## Step 3: Alert Configuration
-This step focuses on setting alert properties like severity, description, and other metadata. The following fields are available:
+In this step, you set the alert's metadata, including severity, name, and description:
 
-- **Severity**: Set the severity level for the alert (e.g., "Warning", "Critical" etc.).
+### Severity
+Set the severity level for the alert (e.g., "Warning" or "Critical").
 
-- **Alert Name**: A field to name the alert for easy identification.
+### Alert Name
+A field to name the alert for easy identification.
 
-- **Alert Description**: A field for adding a detailed description of the alert, explaining what it monitors and under what conditions it is triggered.
+### Alert Description
 
-- **Labels**: A field to add labels or tags to the alert for categorization.
+Add a detailed description for the alert, explaining its purpose and trigger conditions.
 
-- **Notification channels**: A field to choose the notification channels from those configured in the Alert Channel settings.
+You can incorporate result labels in the alert descriptions to make the alerts more informative:
 
-- **Test Notification**: A button to test the alert to ensure that it works as expected.
+**Syntax**: Use `{{.Labels.<label-name>}}` to insert label values. Label values can be any attribute used in group by. Ensure that all `.` (dots) in attribute are converted to `_`
+
+**Example**: If you have a query that has the label `service.name` then to use it in the alert description, you will use `{{.Labels.service_name}}`which creates an alert that is specific to the particular service.
+
+### Labels
+A field to add labels or tags for categorization. Labels should be added in key value pairs. First enter key (avoid space in key) and set value.
+
+### Notification channels
+A field to choose the [notification channels](https://signoz.io/docs/setup-alerts-notification) from those configured in the Alert Channel settings.
+
+### Test Notification
+A button to test the alert to ensure that it works as expected.
 
 <figure data-zoomable align='center'>
     <img src="/img/docs/alerts/alerts-metrics-based-3.webp" alt="Configure the alert"/>
     <figcaption><i>Setting the alert metadata </i></figcaption>
 </figure>
 
+## Examples
 
-### Result labels in alert description
+### 1. Alert when memory usage for host goes above 400 MB (or any fixed memory)
 
-You can incorporate result labels in the alert descriptions to make the alerts more informative:
+#### Here's a video tutorial for creating this alert:
 
-**Syntax**: Use `{{.Labels.<label-name>}}` to insert label values. 
+<YouTube id="xjxNIqiv4_M" mute={false} />
+<br></br>
 
-**Example**: If you have a query that returns the label `service_name` then to use it in the alert description, you will use `{{.Labels.service_name}}`which creates an alert that is specific to the particular service.
-
-
-## Example
-
-An example Metrics-based alert could be set to trigger when errors go above a certain percentage:
-
-- **Y-axis unit**: Percent(0 - 100)
-- **Query A**: Total Calls with Error
-- **Query B**: Total Calls 
-- **Function**: A*100/B
-- **Alert Threshold**: Above 0 within 5 minutes
-- **Run alert every**: 1 minute
-- **Send a notification if data is missing for** 5 minutes
-- **Severity**: "Critical"
-- **Alert Name**: "Error Percentage Alert"
-- **Alert Description**: "This alert triggers when the Error percentage > 5%."
-- **label**: `error percentage`
-- **Notification Channels**: signoz-slack-alerts (Slack channel)
+#### Step 1: Write Query Builder query to define alert metric
 
 <figure data-zoomable align='center'>
-    <img src="/img/docs/product-features/alerts/alerts-metrics-based.gif" alt="A gif of Metrics Based alerts example in SigNoz"/>
-    <figcaption><i>Metrics Based Alert Example </i></figcaption>
+    <img src="/img/docs/product-features/alerts/metrics/mem-usage-alert-builder.png" alt="metrics builder query for memory usage"/>
+    <figcaption><i>Memory usage metric builder query</i></figcaption>
 </figure>
 
+The [`hostmetricsreceiver`](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/hostmetricsreceiver) creates several host system metrics, including [`system_memory_usage`](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/hostmetricsreceiver/internal/scraper/memoryscraper/documentation.md#systemmemoryusage), which contains the memory usage for each [state](https://www.kernel.org/doc/Documentation/filesystems/proc.txt) from `/proc/meminfo`. 
+The states can be `free`, `used`, `cached`, etc. We want to alert when the total memory usage of a host exceeds the threshold, so the WHERE clause excludes the `free` state. 
+We calculate the average value for each state and then sum them up by host to get the per-host memory usage. 
 
+<Admonition type="info">
+Remember to set the unit of the `y-axis` to bytes, as that is the unit of the mentioned metric.
+</Admonition>
+<br></br>
+#### Step 2: Set alert conditions
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/alerts/metrics/mem-usage-alert-builder-condition.png" alt="metrics builder query for memory usage"/>
+    <figcaption><i>Memory usage alert condition</i></figcaption>
+</figure>
+
+The condition is set to trigger a notification if the per-minute memory usage exceeds the threshold of 400 MB at least once in the last five minutes.
+
+### 2. Alert when memory usage for host goes above 70%
+
+You might want to alert based on the percentage rather than a fixed threshold. There are two ways to get the percentage: the convenient option is when the usage percentage is reported directly by the source, or when the source only sends the exact usage in bytes and you need to derive the percentage yourself. This example demonstrates how to derive the percentage from the original bytes metric.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/alerts/metrics/mem-usage-alert-percentage-builder.png" alt="metrics builder query for memory usage"/>
+    <figcaption><i>Memory usage percentage query</i></figcaption>
+</figure>
+
+We use a formula to derive the percentage value from the exact memory usage in bytes. In the example, query `A` calculates the per-host memory usage, while query `B`, as shown in the image, doesn't have any WHERE clause filter, thus providing the total memory available. The formula for `A`/`B` is interpreted as (memory usage in bytes) / (total memory available in bytes). We set the unit of the y-axis to Percent (0.0 - 1.0) to match the result of the formula.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/alerts/metrics/mem-usage-alert-percentage-builder-condition.png" alt="metrics builder query for memory usage"/>
+    <figcaption><i>Memory usage percentage condition</i></figcaption>
+</figure>
+
+The condition is set to trigger a notification if the per-minute memory usage exceeds the threshold of 70% all the times in the last five minutes.
+
+### 3. Alert when the error percentage for an endpoint exceeds 5%
+
+SigNoz creates a metric `signoz_calls_total` from the trace data. The default attributes of the metric are `service_name`, `operation`, `span_kind`, `status_code`, and `http_status_code`. There is no separate metric for counting errors; instead, the `status_code` attribute is used to determine if a request counts as an error. This example demonstrates how to calculate the error percentage and alert on it.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/alerts/metrics/error-percentage-builder.png" alt="metrics builder query for error percentage"/>
+    <figcaption><i>Error percentage query</i></figcaption>
+</figure>
+
+We use a formula to derive the error percentage from the total calls metric. In the example, query `A` calculates the per-endpoint error rate, while query `B`, as shown in the image, doesn't have any WHERE clause filter for `status_code`, thus providing the per-endpoint total request rate. The formula for `A`/`B` is interpreted as (error request rate) / (total request rate), which gives the error percentage per endpoint. We set the unit of the y-axis to Percent (0.0 - 1.0) to match the result of the formula.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/alerts/metrics/error-percentage-builder-condition.png" alt="metrics builder query for error percentage"/>
+    <figcaption><i>Error percentage condition</i></figcaption>
+</figure>
+
+The condition is set to trigger a notification if the per-minute error percentage exceeds the threshold of 5% all the times in the last five minutes.
+
+### 4. Alert when P95 latency for an endpoint is above 1200 ms
+
+SigNoz creates a metric `signoz_latency_bucket` from the trace data. The default attributes of the metric are `service_name`, `operation`, `span_kind`, `status_code`, and `http_status_code`. This example demonstrates how to calculate the P95 latency for an endpoint and alert on it.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/alerts/metrics/p95-latency-builder.png" alt="metrics builder query for latency"/>
+    <figcaption><i>Endpoint latency query</i></figcaption>
+</figure>
+
+We use the P95 aggregation, which gives the 95th-percentile request latency per endpoint. We set the unit of the y-axis to milliseconds to match the unit of the metric.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/alerts/metrics/p95-latency-builder-condition.png" alt="metrics builder query for latency"/>
+    <figcaption><i>Endpoint latency condition</i></figcaption>
+</figure>
+
+The condition is set to trigger a notification if the per-minute P95 latency exceeds the threshold of 1200 ms at any time in the last five minutes.

@@ -127,25 +127,19 @@ Before pushing your changes, it's a good idea to fetch and merge any changes fro
 
 ## Step 10: Build the Project Locally
 
-1. Navigate to the root directory of the repository (if not already there):
-
-   ```bash
-   cd ../../..
-   ```
-
-2. Install the project dependencies using Yarn:
+1. Install the project dependencies using Yarn:
 
    ```bash
    yarn install
    ```
 
-3. Build the project to ensure there are no errors:
+2. Build the project to ensure there are no errors:
 
    ```bash
    yarn build
    ```
 
-4. This will create a `build` directory with the production build of the website. Check the output for any errors.
+3. This will create a `build` directory with the production build of the website. Check the output for any errors.
 
 ## Step 11: Run the Project Locally
 
@@ -173,3 +167,35 @@ Your pull request will be reviewed, and if everything looks good, it will be mer
 - **Images**: Make sure to place your images in the correct month folder under `public/img/blog`.
 
 If you have any questions or need further assistance, feel free to reach out to the SigNoz team.
+
+---
+
+## Add a `NEW` tag to Documentation
+
+We can add a `NEW` tag for doc that went live recently. To do this, you just need to add `className: 'new-doc'` key value pair to the doc in the `docsSideNav.ts` file. For example, if a new doc for LLM monitoring went live, you can add a new tag to it as follows:
+
+```tsx
+{
+    route: '/docs/community/llm-monitoring',
+    label: 'LLM Monitoring',
+    type: 'doc',
+    className: 'new-doc',
+},
+
+```
+
+You can do the same for a Category. For example, if you're adding a new category with the label `Azure Monitoring` and it has multiple docs inside it, you can add a new tag as shown below:
+
+```tsx
+
+{
+    label: 'Azure Monitoring',
+    type: 'category',
+    className: 'new-doc',
+    items: [
+      { 
+        ...
+      },
+    ],
+
+```

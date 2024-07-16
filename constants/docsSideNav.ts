@@ -1,6 +1,7 @@
 const docsSideNav = [
   {
     type: 'category',
+    isExpanded: false,
     label: 'Get Started',
     route: '/docs',
     items: [
@@ -11,6 +12,7 @@ const docsSideNav = [
       },
       {
         type: 'category',
+        isExpanded: false,
         label: 'Installation',
         route: '/docs/install',
         items: [
@@ -21,8 +23,8 @@ const docsSideNav = [
           },
           {
             type: 'category',
+            isExpanded: false,
             label: 'Self-Host SigNoz',
-            // route: '',
             items: [
               {
                 type: 'doc',
@@ -36,14 +38,9 @@ const docsSideNav = [
               },
               {
                 type: 'category',
+                isExpanded: false,
                 label: 'Kubernetes',
                 route: '/docs/install/kubernetes',
-                // link: {
-                // type: 'generated-index',
-                // title: 'Kubernetes',
-                // description: 'Learn how to install SigNoz on Kubernetes with Helm',
-                // slug: '/docs/install/kubernetes',
-                // },
                 items: [
                   {
                     type: 'doc',
@@ -72,8 +69,8 @@ const docsSideNav = [
 
           {
             type: 'category',
+            isExpanded: false,
             label: 'Install OTel collector',
-            // route: '',
             items: [
               {
                 route: '/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine',
@@ -94,6 +91,7 @@ const docsSideNav = [
   {
     label: 'SigNoz Features',
     type: 'category',
+    isExpanded: false,
     items: [
       {
         type: 'doc',
@@ -131,6 +129,7 @@ const docsSideNav = [
   {
     label: 'APM & Distributed Tracing',
     type: 'category',
+    isExpanded: false,
     // route: '',
     items: [
       {
@@ -141,6 +140,7 @@ const docsSideNav = [
       {
         label: 'Instrument Application',
         type: 'category',
+        isExpanded: false,
         route: '/docs/instrumentation',
         // link: {
         // type: 'generated-index',
@@ -152,6 +152,7 @@ const docsSideNav = [
         items: [
           {
             type: 'category',
+            isExpanded: false,
             label: 'Python',
             route: '/docs/instrumentation/python',
             // link: {
@@ -165,27 +166,38 @@ const docsSideNav = [
               {
                 type: 'doc',
                 route: '/docs/instrumentation/django',
-                label: 'Django OpenTelemetry Instrumentation',
+                label: 'Django ',
               },
               {
                 type: 'doc',
                 route: '/docs/instrumentation/fastapi',
-                label: 'FastAPI OpenTelemetry Instrumentation',
+                label: 'FastAPI ',
               },
               {
                 type: 'doc',
                 route: '/docs/instrumentation/flask',
-                label: 'Flask OpenTelemetry Instrumentation',
+                label: 'Flask ',
               },
               {
                 type: 'doc',
                 route: '/docs/instrumentation/falcon',
-                label: 'Falcon OpenTelemetry Instrumentation',
+                label: 'Falcon ',
+              },
+              {
+                type: 'doc',
+                route: '/docs/instrumentation/hypercorn-unicorn-support',
+                label: 'Hypercorn/Unicorn ',
+              },
+              {
+                type: 'doc',
+                route: '/docs/instrumentation/celery',
+                label: 'Celery Worker OpenTelemetry Setup',
               },
             ],
           },
           {
             type: 'category',
+            isExpanded: false,
             label: 'Java',
             route: '/docs/instrumentation/java',
             // link: {
@@ -199,22 +211,23 @@ const docsSideNav = [
               {
                 type: 'doc',
                 route: '/docs/instrumentation/springboot',
-                label: 'Spring Boot OpenTelemetry Instrumentation',
+                label: 'Spring Boot',
               },
               {
                 type: 'doc',
                 route: '/docs/instrumentation/tomcat',
-                label: 'Tomcat OpenTelemetry Instrumentation',
+                label: 'Tomcat',
               },
               {
                 type: 'doc',
                 route: '/docs/instrumentation/jboss',
-                label: 'JBoss OpenTelemetry Instrumentation',
+                label: 'JBoss',
               },
             ],
           },
           {
             type: 'category',
+            isExpanded: false,
             label: 'Javascript',
             route: '/docs/instrumentation/javascript',
             // link: {
@@ -228,17 +241,22 @@ const docsSideNav = [
               {
                 type: 'doc',
                 route: '/docs/instrumentation/express',
-                label: 'Express OpenTelemetry Instrumentation',
+                label: 'Express',
               },
               {
                 type: 'doc',
                 route: '/docs/instrumentation/nestjs',
-                label: 'Nestjs OpenTelemetry Instrumentation',
+                label: 'NestJS',
               },
               {
                 type: 'doc',
                 route: '/docs/instrumentation/angular',
-                label: 'Angular OpenTelemetry Instrumentation',
+                label: 'Angular',
+              },
+              {
+                type: 'doc',
+                route: '/docs/instrumentation/nextjs',
+                label: 'NextJS',
               },
             ],
           },
@@ -277,10 +295,38 @@ const docsSideNav = [
             label: 'Swift',
             route: '/docs/instrumentation/swift',
           },
+          {
+            type: 'category',
+            isExpanded: false,
+            label: 'Manual Instrumentation',
+            // route: '',
+            // link: {
+            // type: 'doc',
+            // },
+            items: [
+              {
+                type: 'category',
+                isExpanded: false,
+                label: 'JavaScript',
+                // route: '',
+                // link: {
+                // type: 'doc',
+                // },
+                items: [
+                  {
+                    type: 'doc',
+                    label: 'NodeJS',
+                    route: '/docs/instrumentation/manual-instrumentation/javascript/nodejs',
+                  },
+                ],
+              },
+            ],
+          },
         ],
       },
       {
         type: 'category',
+        isExpanded: false,
         label: 'APM Product Overview',
         // route: '',
         items: [
@@ -291,6 +337,7 @@ const docsSideNav = [
           },
           {
             type: 'category',
+            isExpanded: false,
             label: 'View Traces',
             route: '/docs/userguide/traces',
             // link: {
@@ -313,6 +360,7 @@ const docsSideNav = [
       },
       {
         type: 'category',
+        isExpanded: false,
         label: 'Trace API',
         // route: '',
         items: [
@@ -340,14 +388,10 @@ const docsSideNav = [
       },
       {
         type: 'category',
+        isExpanded: false,
         label: 'Tutorials',
         // route: '',
         items: [
-          {
-            type: 'doc',
-            label: 'ClickHouse Queries for Traces',
-            route: '/docs/userguide/writing-clickhouse-traces-query',
-          },
           {
             type: 'doc',
             route: '/docs/application-monitoring/api-monitoring',
@@ -375,6 +419,7 @@ const docsSideNav = [
   {
     label: 'Infrastructure Monitoring',
     type: 'category',
+    isExpanded: false,
     // route: '',
     items: [
       {
@@ -417,6 +462,7 @@ const docsSideNav = [
   {
     label: 'Logs Management',
     type: 'category',
+    isExpanded: false,
     // route: '',
     items: [
       {
@@ -426,6 +472,7 @@ const docsSideNav = [
       },
       {
         type: 'category',
+        isExpanded: false,
         label: 'Send Logs to SigNoz',
         items: [
           {
@@ -460,12 +507,18 @@ const docsSideNav = [
           },
           {
             type: 'category',
+            isExpanded: false,
             label: 'Application Logs',
             items: [
               {
                 type: 'doc',
                 route: '/docs/userguide/collect_logs_from_file',
                 label: 'From Log File',
+              },
+              {
+                type: 'doc',
+                route: '/docs/userguide/parse-multiline-logs',
+                label: 'Parse Multiline Logs',
               },
               {
                 type: 'doc',
@@ -496,6 +549,7 @@ const docsSideNav = [
           },
           {
             type: 'category',
+            isExpanded: false,
             label: 'Existing Collectors to SigNoz',
             items: [
               {
@@ -515,10 +569,17 @@ const docsSideNav = [
               },
             ],
           },
+          {
+            type: 'doc',
+            route:
+              '/docs/logs-management/send-logs/collect-tomcat-access-and-garbage-collector-logs',
+            label: 'Tomcat',
+          },
         ],
       },
       {
         type: 'category',
+        isExpanded: false,
         label: 'Preprocess Logs',
         route: '/docs/logs-pipelines/introduction',
         // link: {
@@ -537,6 +598,7 @@ const docsSideNav = [
           },
           {
             type: 'category',
+            isExpanded: false,
             label: 'Guides',
             route: '/docs/category/guides',
             // link: {
@@ -562,6 +624,7 @@ const docsSideNav = [
       },
       {
         type: 'category',
+        isExpanded: false,
         label: 'Features',
         // route: '',
         items: [
@@ -578,12 +641,8 @@ const docsSideNav = [
         ],
       },
       {
-        type: 'doc',
-        route: '/docs/userguide/logs_clickhouse_queries',
-        label: 'ClickHouse Queries for Logs',
-      },
-      {
         type: 'category',
+        isExpanded: false,
         label: 'Logs API',
         // route: '',
         items: [
@@ -615,20 +674,44 @@ const docsSideNav = [
         ],
       },
       {
+        type: 'category',
+        label: 'User Guide',
+        isExpanded: false,
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/logs-management/guides/drop-logs',
+            label: 'Drop Logs',
+          },
+          {
+            type: 'doc',
+            route: '/docs/logs-management/guides/pii-scrubbing',
+            label: 'PII Scrubbing'
+          },
+        ]
+      },
+      {
+        type: 'doc',
+        route: '/docs/logs-management/long-term-storage',
+        label: 'Long Term Storage',
+        className: 'new-doc',
+      },
+      {
         type: 'doc',
         route: '/docs/userguide/logs_troubleshooting',
         label: 'Troubleshooting',
       },
-      {
-        type: 'doc',
-        route: '/docs/logs-management/guides/drop-logs',
-        label: 'Guide to drop logs',
-      },
+      // {
+      //   type: 'doc',
+      //   route: '/docs/logs-management/guides/drop-logs',
+      //   label: 'Guide to drop logs',
+      // },
     ],
   },
   {
     label: 'Metrics',
     type: 'category',
+    isExpanded: false,
     items: [
       {
         type: 'doc',
@@ -638,8 +721,9 @@ const docsSideNav = [
     ],
   },
   {
-    label: 'Dashboards & Querying',
+    label: 'Dashboards',
     type: 'category',
+    isExpanded: false,
     // route: '',
     items: [
       {
@@ -654,6 +738,7 @@ const docsSideNav = [
       },
       {
         type: 'category',
+        isExpanded: false,
         route: '/docs/dashboards/panel-types',
         label: 'Panel Types',
         items: [
@@ -699,26 +784,53 @@ const docsSideNav = [
         route: '/docs/userguide/manage-variables',
         label: 'Manage Variables',
       },
-      {
-        type: 'doc',
-        route: '/docs/userguide/create-a-custom-query',
-        label: 'Create a Custom Query',
-      },
+    ],
+  },
+  {
+    label: 'Querying',
+    type: 'category',
+    isExpanded: false,
+    // route: '',
+    items: [
+      // {
+      //   type: 'doc',
+      //   route: '/docs/userguide/create-a-custom-query',
+      //   label: 'Create a Custom Query',
+      // },
       {
         type: 'doc',
         route: '/docs/userguide/query-builder',
         label: 'Query Builder',
       },
       {
-        type: 'doc',
-        route: '/docs/userguide/write-a-metrics-clickhouse-query',
-        label: 'ClickHouse Query for Metrics',
+        type: 'category',
+        isExpanded: false,
+        // route: '',
+        label: 'ClickHouse Query',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/userguide/write-a-metrics-clickhouse-query',
+            label: 'Metrics',
+          },
+          {
+            type: 'doc',
+            route: '/docs/userguide/logs_clickhouse_queries',
+            label: 'Logs',
+          },
+          {
+            type: 'doc',
+            route: '/docs/userguide/writing-clickhouse-traces-query',
+            label: 'Traces',
+          },
+        ],
       },
     ],
   },
   {
     label: 'Alerts',
     type: 'category',
+    isExpanded: false,
     route: '/docs/alerts',
     // link: {
     //   type: 'generated-index',
@@ -741,6 +853,7 @@ const docsSideNav = [
       {
         label: 'Setup Alerts Notification',
         type: 'category',
+        isExpanded: false,
         route: '/docs/setup-alerts-notification',
         // link: {
         //   type: 'generated-index',
@@ -814,11 +927,12 @@ const docsSideNav = [
   {
     type: 'doc',
     route: '/docs/userguide/exceptions',
-    label: 'Monitroing Exceptions',
+    label: 'Monitoring Exceptions',
   },
   {
     label: 'Security & Compliance',
     type: 'category',
+    isExpanded: false,
     // route: '',
     items: [
       //     'userguide/overview',
@@ -845,8 +959,33 @@ const docsSideNav = [
     ],
   },
   {
+    label: 'Ingestion',
+    type: 'category',
+    isExpanded: false,
+    items: [
+      {
+        label: 'SigNoz Cloud',
+        type: 'category',
+        isExpanded: false,
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/ingestion/signoz-cloud/overview',
+            label: 'Overview',
+          },
+          {
+            type: 'doc',
+            route: '/docs/ingestion/signoz-cloud/keys',
+            label: 'Keys',
+          },
+        ],
+      },
+    ],
+  },
+  {
     label: 'Tutorials',
     type: 'category',
+    isExpanded: false,
     route: '/docs/tutorials',
     // link: {
     // type: 'generated-index',
@@ -911,16 +1050,23 @@ const docsSideNav = [
         route: '/docs/tutorial/traefik-observability',
         label: 'Traefik Observability',
       },
+      {
+        type: 'doc',
+        route: '/docs/tutorial/infinite-retention-aws-s3',
+        label: 'Infinite Retention using AWS S3',
+      },
     ],
   },
   {
     label: 'AWS Monitoring',
     type: 'category',
+    isExpanded: false,
     // route: '',
     items: [
       //'aws/getting-started',
       {
         type: 'category',
+        isExpanded: false,
         label: 'EC2',
         route: '/docs/ec2-monitoring',
         // link: {
@@ -943,6 +1089,7 @@ const docsSideNav = [
       },
       {
         type: 'category',
+        isExpanded: false,
         label: 'ECS',
         route: '/docs/ecs-monitoring',
         // link: {
@@ -988,10 +1135,13 @@ const docsSideNav = [
   {
     label: 'Azure Monitoring',
     type: 'category',
+    isExpanded: false,
+    className: 'new-doc',
     // route: '',
     items: [
       {
         type: 'category',
+        isExpanded: false,
         label: 'Bootstrapping',
         route: '/docs/azure-monitoring/bootstrapping',
         // link: {
@@ -1000,6 +1150,11 @@ const docsSideNav = [
         // slug: '/docs/ec2-monitoring',
         // },
         items: [
+          {
+            type: 'doc',
+            route: '/docs/azure-monitoring/bootstrapping/strategy',
+            label: 'Strategy',
+          },
           {
             type: 'doc',
             route: '/docs/azure-monitoring/bootstrapping/collector-setup',
@@ -1014,6 +1169,7 @@ const docsSideNav = [
       },
       {
         type: 'category',
+        isExpanded: false,
         label: 'Virtual Machines',
         route: '/docs/azure-monitoring/virtual-machines',
         // link: {
@@ -1031,6 +1187,7 @@ const docsSideNav = [
       },
       {
         type: 'category',
+        isExpanded: false,
         label: 'App Service',
         route: '/docs/azure-monitoring/app-service',
         items: [
@@ -1044,6 +1201,11 @@ const docsSideNav = [
             route: '/docs/azure-monitoring/app-service/logging',
             label: 'Logging',
           },
+          {
+            type: 'doc',
+            route: '/docs/azure-monitoring/app-service/tracing',
+            label: 'APM & Tracing',
+          },
         ],
       },
       {
@@ -1053,6 +1215,30 @@ const docsSideNav = [
       },
       {
         type: 'category',
+        isExpanded: false,
+        label: 'Azure Container Apps',
+        route: '/docs/azure-monitoring/az-container-app',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/azure-monitoring/az-container-apps/logging',
+            label: 'Logging',
+          },
+          {
+            type: 'doc',
+            route: '/docs/azure-monitoring/az-container-apps/metrics',
+            label: 'Metrics',
+          },
+          {
+            type: 'doc',
+            route: '/docs/azure-monitoring/az-container-apps/tracing',
+            label: 'APM & Tracing ',
+          },
+        ],
+      },
+      {
+        type: 'category',
+        isExpanded: false,
         label: 'Azure Functions',
         route: '/docs/azure-monitoring/az-fns',
         items: [
@@ -1066,6 +1252,11 @@ const docsSideNav = [
             route: '/docs/azure-monitoring/az-fns/logging',
             label: 'Logging',
           },
+          {
+            type: 'doc',
+            route: '/docs/azure-monitoring/az-fns/tracing',
+            label: 'APM & Tracing ',
+          },
         ],
       },
       {
@@ -1075,6 +1266,7 @@ const docsSideNav = [
       },
       {
         type: 'category',
+        isExpanded: false,
         label: 'Azure Blog Storage',
         route: '/docs/azure-monitoring/az-blob-storage',
         items: [
@@ -1094,6 +1286,7 @@ const docsSideNav = [
   },
   {
     type: 'category',
+    isExpanded: false,
     label: 'Operate Self-Hosted SigNoz',
     route: '/docs/operate',
     // link: {
@@ -1126,6 +1319,7 @@ const docsSideNav = [
       },
       {
         type: 'category',
+        isExpanded: false,
         label: 'Migration Guides',
         route: '/docs/operate/migration',
         // link: {
@@ -1136,6 +1330,11 @@ const docsSideNav = [
         // slug: '/docs/operate/migration/migration',
         // },
         items: [
+          {
+            type: 'doc',
+            route: '/docs/operate/migration/upgrade-0.49',
+            label: 'Upgrade to v0.49',
+          },
           {
             type: 'doc',
             route: '/docs/operate/migration/upgrade-0.45',
@@ -1195,6 +1394,7 @@ const docsSideNav = [
       },
       {
         type: 'category',
+        isExpanded: false,
         label: 'ClickHouse',
         route: '/docs/operate/clickhouse',
         // link: {
@@ -1229,6 +1429,7 @@ const docsSideNav = [
       },
       {
         type: 'category',
+        isExpanded: false,
         label: 'Query Service',
         route: '/docs/operate/query-service',
         // link: {
@@ -1265,6 +1466,7 @@ const docsSideNav = [
   },
   {
     type: 'category',
+    isExpanded: false,
     label: 'About SigNoz',
     items: [
       {
@@ -1291,10 +1493,12 @@ const docsSideNav = [
     route: '/docs/community/llm-monitoring',
     label: 'LLM Monitoring',
     type: 'doc',
+    className: 'new-doc',
   },
   {
     label: 'Community',
     type: 'category',
+    isExpanded: false,
     items: [
       {
         route: '/docs/community/community-integrations',
@@ -1309,8 +1513,51 @@ const docsSideNav = [
     ],
   },
   {
+    label: 'Troubleshooting',
+    type: 'category',
+    isExpanded: false,
+    route: '/docs/faqs',
+    // link: {
+    // type: 'generated-index',
+    // title: 'Frequently Asked Questions',
+    // description:
+    // 'Find the most commonly questions about SigNoz Installation, Instrumentation, Features, Troubleshooting, and Contributing here:',
+    // slug: '/docs/faqs/faq',
+    // },
+    items: [
+      {
+        label: 'SigNoz Cloud',
+        type: 'category',
+        isExpanded: false,
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/troubleshooting/signoz-cloud/general-troubleshooting',
+            label: 'General Troubleshooting',
+          },
+          {
+            type: 'doc',
+            route: '/docs/troubleshooting/signoz-cloud/traces-troubleshooting',
+            label: 'Traces Troubleshooting',
+          },
+          {
+            type: 'doc',
+            route: '/docs/troubleshooting/signoz-cloud/logs-troubleshooting',
+            label: 'Logs Troubleshooting',
+          },
+          {
+            type: 'doc',
+            route: '/docs/troubleshooting/signoz-cloud/metrics-troubleshooting',
+            label: 'Metrics Troubleshooting',
+          },
+        ],
+      },
+    ],
+  },
+  {
     label: 'FAQ',
     type: 'category',
+    isExpanded: false,
     route: '/docs/faqs',
     // link: {
     // type: 'generated-index',
@@ -1345,6 +1592,7 @@ const docsSideNav = [
   {
     label: 'Others',
     type: 'category',
+    isExpanded: false,
     items: [
       {
         type: 'doc',

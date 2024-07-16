@@ -4,13 +4,13 @@ const siteMetadata = {
   author: 'SigNoz Inc',
   headerTitle: 'SigNoz',
   description:
-    'SigNoz is an open-source observability tool to help you find issues in your deployed applications & solve them quickly. It provides logs, metrics, and traces under a single pane of glass. Built with ClickHouse as datastore, it is designed to handle enterprise scale.',
+    'SigNoz is an open-source observability tool powered by OpenTelemetry. Get APM, logs, traces, metrics, exceptions, & alerts in a single tool.',
   language: 'en-us',
   theme: 'dark', // system, dark or light
   siteUrl: 'https://signoz.io',
   siteRepo: 'https://github.com/signoz/',
   siteLogo: '/img/logo.svg',
-  socialBanner: '/img/signoz-landing.png',
+  socialBanner: '/img/signoz-meta-image.webp',
   mastodon: 'https://mastodon.social/@mastodonuser',
   email: 'address@yoursite.com',
   github: 'https://github.com/SigNoz',
@@ -55,9 +55,14 @@ const siteMetadata = {
     },
   },
   search: {
-    provider: 'kbar', // kbar or algolia
+    provider: 'algolia', // kbar or algolia
     kbarConfig: {
       searchDocumentsPath: 'search.json', // path to load documents to search
+    },
+    algoliaConfig: {
+      appId: 'E88QYIQ6K4',
+      apiKey: '1061c173ae001d5f5aaa4f0354e373a0',
+      indexName: 'signoz',
     },
   },
 }

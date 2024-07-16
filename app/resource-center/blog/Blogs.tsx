@@ -17,14 +17,14 @@ interface BlogPageHeaderProps {
 
 const BlogsPageHeader: React.FC<BlogPageHeaderProps> = ({ onSearch }) => {
   return (
-    <section className="flex max-w-[697px] flex-col leading-[143%]">
-      <h2 className="self-start text-sm font-medium uppercase tracking-wider text-rose-500 dark:text-rose-400">
+    <section className="flex max-w-[697px] flex-col leading-[143%] mb-[72px]">
+      <h2 className="self-start text-sm font-medium uppercase tracking-wider text-signoz_sakura-500 dark:text-signoz_sakura-400 mb-0">
         resources
       </h2>
-      <h1 className="mt-3 self-start text-3xl font-semibold text-indigo-500 dark:text-indigo-200">
+      <h1 className="mt-3 my-0 self-start text-3xl font-semibold text-indigo-500 dark:text-indigo-200">
         The SigNoz Blog
       </h1>
-      <p className="mt-4 w-full text-lg leading-8 tracking-normal text-gray-700 dark:text-stone-300 max-md:max-w-full">
+      <p className="my-4 w-full text-lg leading-8 tracking-normal text-gray-700 dark:text-stone-300 max-md:max-w-full">
       Stay updated with SigNoz product updates, company news, and articles on OpenTelemetry, observability, monitoring, and open-source tools.
       </p>
 

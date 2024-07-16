@@ -15,7 +15,7 @@ to apply filters and operations on your logs to define conditions which triggers
 
 - **Aggregate Attribute**: Allows you to select how the log data should be aggregated (e.g., "Count").
 
-- **Group by**: Provides options to group log data by various attributes, such as "serviceName," "Status," or custom attributes.
+- **Group by**: Provides options to group log data by various attributes, such as "service.name", "method" or custom attributes.
 
 - **[Legend Format](https://signoz.io/docs/userguide/query-builder/#legend-format)**: Lets you define the format for the legend in the visual representation of the alert.
 
@@ -47,50 +47,81 @@ In this step, you define the specific conditions for triggering the alert, as we
 
 
 ## Step 3: Alert Configuration
-This step is for setting alert metadata like severity, description, and additional details:
+In this step, you set the alert's metadata, including severity, name, and description:
 
-- **Severity**: Choose the severity of the alert (e.g., "Warning," "Critical").
+### Severity
+Set the severity level for the alert (e.g., "Warning" or "Critical").
 
-- **Alert Name**: A field to name the alert.
+### Alert Name
+A field to name the alert for easy identification.
 
-- **Alert Description**: Add a detailed description of the alert, explaining its purpose and trigger conditions.
+### Alert Description
 
-- **Labels**: A field to add labels or tags for categorization.
+Add a detailed description for the alert, explaining its purpose and trigger conditions.
 
-- **Notification channels**: A field to choose the notification channels from those configured in the Alert Channel settings.
+You can incorporate result labels in the alert descriptions to make the alerts more informative:
 
-- **Test Notification**: A button to test the alert to ensure that it works as expected.
+**Syntax**: Use `{{.Labels.<label-name>}}` to insert label values. Label values can be any attribute used in group by. Ensure that all `.` (dots) in attribute are converted to `_`
+
+**Example**: If you have a query that has the label `service.name` then to use it in the alert description, you will use `{{.Labels.service_name}}`which creates an alert that is specific to the particular service.
+
+### Labels
+A field to add labels or tags for categorization. Labels should be added in key value pairs. First enter key (avoid space in key) and set value.
+
+### Notification channels
+A field to choose the [notification channels](https://signoz.io/docs/setup-alerts-notification) from those configured in the Alert Channel settings.
+
+### Test Notification
+A button to test the alert to ensure that it works as expected.
 
 <figure data-zoomable align='center'>
     <img src="/img/docs/alerts/alerts-log-based-3.webp" alt="Configure the alert"/>
     <figcaption><i>Setting the alert metadata </i></figcaption>
 </figure>
 
+## Examples
 
-### Result labels in alert description
+### 1. Alert when percentage of `redis timeout` error logs greater than 7% in last 5 mins
 
-You can incorporate result labels in the alert descriptions to make the alerts more informative:
 
-**Syntax**: Use `{{.Labels.<label-name>}}` to insert label values. 
+#### Here's a video tutorial for creating this alert: 
 
-**Example**: If you have a query that returns the label `service_name` then to use it in the alert description, you will use `{{.Labels.service_name}}`which creates an alert that is specific to the particular service.
+<YouTube id="2IgZbpuuEW0" mute={false} />
+<br></br>
 
-## Example
-An example Log-based alert could be set to trigger when a specific error message appears in the log data:
-
-- **Y-axis unit**: Percent(0 - 100)
-- **Query A**: Logs where the body contains error
-- **Query B**: Total count of logs
-- **Function**: A*100/B
-- **Alert Threshold**: Above 10 percent
-- **Alert Name**: "Log Contains Error"
-- **Severity**: "Error"
-- **Notification Channels**: Test (A Slack Notification Channel)
-
+#### Step 1: Write Query Builder query to define alert metric
 
 <figure data-zoomable align='center'>
-    <img src="/img/docs/product-features/alerts/alerts-logs-based.gif" alt="A gif of Logs Based alerts example in SigNoz"/>
-    <figcaption><i>Logs Based Alert Example </i></figcaption>
+    <img src="/img/docs/product-features/alerts/logs/too-many-redis-timeouts-metric.png" alt="logs builder query for redis timeout logs percentage"/>
+    <figcaption><i>Redis timeout query</i></figcaption>
 </figure>
 
+Here we write 2 queries to calculate error logs percent. First query to count logs which are `redis timeout` error logs.
+Second query to count total logs. Then we add a formula to calculate percentage.
 
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/alerts/logs/too-many-redis-timeouts-chart.png" alt="error logs percentage chart"/>
+    <figcaption><i>Error log percentage chart</i></figcaption>
+</figure>
+
+<Admonition type="info">
+Remember to select y-axis unit as Percent(0-100) as we want to apply threshold in percent.
+</Admonition>
+<br></br>
+#### Step 2: Set alert conditions
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/alerts/logs/too-many-redis-timeouts-conditions.png" alt="redis timeout alert condition"/>
+    <figcaption><i>Error logs percentage alert condition</i></figcaption>
+</figure>
+
+The condition is set to trigger a notification if the per-minute error logs percentage exceeds the threshold of 1 second on average in the last five minutes.
+
+#### Step 3: Set alert configuration
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/alerts/logs/too-many-redis-timeouts-configuration.png" alt="redis timeout alert configuration"/>
+    <figcaption><i>Error logs percentage alert configuration</i></figcaption>
+</figure>
+
+At last configure the alert as `Warning`, add a name and notification channel.

@@ -135,7 +135,7 @@ module.exports = () => {
         {
           source: '/slack',
           destination:
-            'https://join.slack.com/t/signoz-community/shared_invite/zt-2gag5t3k4-WE5I6xpNbczyDJNdLLJkAg',
+            'https://join.slack.com/t/signoz-community/shared_invite/zt-2lf7lz2rb-~yiQUjEisGTJm56Hlde4pA',
           basePath: false,
           permanent: true,
         },
@@ -228,6 +228,11 @@ module.exports = () => {
         {
           source: '/opentelemetry/',
           destination: '/resource-center/opentelemetry/',
+          permanent: true,
+        },
+        {
+          source: '/api_reference/',
+          destination: '/api-reference/',
           permanent: true,
         },
       ]
