@@ -1,7 +1,8 @@
 import * as React from 'react'
 import Link from 'next/link'
-import { ArrowUpRight, GithubIcon, Linkedin, SlackIcon, Twitter, Youtube } from 'lucide-react'
+import { ArrowUpRight } from 'lucide-react'
 import Image from 'next/image'
+import { Github, Linkedin, Slack, Twitter, Youtube } from '@/components/social-icons/SolidIcons'
 
 /**
  * Footer component
@@ -9,8 +10,8 @@ import Image from 'next/image'
 function Footer() {
   return (
     <div className="flex flex-col justify-center border-t border-solid border-gray-900">
-      <div className="flex w-full items-center justify-center bg-opacity-70 px-16 py-14 backdrop-blur-[20px] max-md:max-w-full max-md:px-5">
-        <div className="w-full max-w-[1200px] justify-between max-md:max-w-full">
+      <div className="flex w-full items-center justify-center bg-opacity-70 px-16 py-14 max-md:max-w-full max-md:px-5">
+        <div className="container w-full max-w-[1200px] justify-between max-md:max-w-full">
           <div className="flex gap-5 max-md:flex-col max-md:gap-0">
             <div className="flex w-3/12 flex-col max-md:ml-0 max-md:w-full">
               <div className="flex flex-col pb-2.5 text-sm tracking-wide text-stone-300 max-md:mt-10">
@@ -27,6 +28,9 @@ function Footer() {
                   </Link>
                   <ArrowUpRight size={16} />
                 </div>
+                <Link href="/api_reference/" className="mt-5 hover:underline">
+                  SigNoz API
+                </Link>
               </div>
             </div>
             <div className="ml-5 flex w-3/12 flex-col max-md:ml-0 max-md:w-full">
@@ -114,24 +118,24 @@ function Footer() {
               <div className="flex flex-col items-end shadow-sm max-md:mt-10">
                 <div className="flex items-center justify-between gap-2 self-end whitespace-nowrap text-center text-lg font-medium leading-5 text-white">
                   <Image
-                    className="h-8 w-auto"
+                    className="h-7 w-auto"
                     src="/img/SigNozLogo-orange.svg"
                     width={50}
                     height={50}
                     alt=""
                   />
-                  <div>SigNoz</div>
+                  <div className="font-satoshi-bold font-medium">SigNoz</div>
                 </div>
                 <div className="mt-5 items-end justify-center rounded text-sm leading-5 text-emerald-300">
                   All systems operational
                 </div>
-                <div className="mt-5 flex items-end justify-between gap-4 py-2">
+                <div className="mt-5 flex items-end justify-between gap-4 py-2 footer-icons">
                   <Link
                     href={'https://github.com/SigNoz'}
                     target="_blank"
                     aria-label="SigNoz Github URL"
                   >
-                    <GithubIcon size={24} />{' '}
+                    <Github />
                   </Link>
 
                   <Link
@@ -139,7 +143,7 @@ function Footer() {
                     target="_blank"
                     aria-label="SigNoz LinkedIN URL"
                   >
-                    <Linkedin size={24} />
+                    <Linkedin />
                   </Link>
 
                   <Link
@@ -147,7 +151,7 @@ function Footer() {
                     target="_blank"
                     aria-label="SigNoz Slack Connect URL"
                   >
-                    <SlackIcon size={24} />
+                    <Slack />
                   </Link>
 
                   <Link
@@ -155,7 +159,7 @@ function Footer() {
                     target="_blank"
                     aria-label="SigNoz Twitter URL"
                   >
-                    <Twitter size={24} />
+                    <Twitter />
                   </Link>
 
                   <Link
@@ -163,7 +167,7 @@ function Footer() {
                     target="_blank"
                     aria-label="SigNoz Youtube Channel URL"
                   >
-                    <Youtube size={24} />
+                    <Youtube />
                   </Link>
                 </div>
               </div>

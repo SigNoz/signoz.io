@@ -674,6 +674,23 @@ const docsSideNav = [
         ],
       },
       {
+        type: 'category',
+        label: 'User Guide',
+        isExpanded: false,
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/logs-management/guides/drop-logs',
+            label: 'Drop Logs',
+          },
+          {
+            type: 'doc',
+            route: '/docs/logs-management/guides/pii-scrubbing',
+            label: 'PII Scrubbing'
+          },
+        ]
+      },
+      {
         type: 'doc',
         route: '/docs/logs-management/long-term-storage',
         label: 'Long Term Storage',
@@ -684,11 +701,11 @@ const docsSideNav = [
         route: '/docs/userguide/logs_troubleshooting',
         label: 'Troubleshooting',
       },
-      {
-        type: 'doc',
-        route: '/docs/logs-management/guides/drop-logs',
-        label: 'Guide to drop logs',
-      },
+      // {
+      //   type: 'doc',
+      //   route: '/docs/logs-management/guides/drop-logs',
+      //   label: 'Guide to drop logs',
+      // },
     ],
   },
   {
@@ -938,6 +955,30 @@ const docsSideNav = [
         type: 'doc',
         route: '/docs/userguide/otlp-http-enable-cors',
         label: 'CORS in OTLP HTTP Receiver',
+      },
+    ],
+  },
+  {
+    label: 'Ingestion',
+    type: 'category',
+    isExpanded: false,
+    items: [
+      {
+        label: 'SigNoz Cloud',
+        type: 'category',
+        isExpanded: false,
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/ingestion/signoz-cloud/overview',
+            label: 'Overview',
+          },
+          {
+            type: 'doc',
+            route: '/docs/ingestion/signoz-cloud/keys',
+            label: 'Keys',
+          },
+        ],
       },
     ],
   },
@@ -1493,7 +1534,6 @@ const docsSideNav = [
       },
     ],
   },
-
   {
     label: 'Troubleshooting',
     type: 'category',
