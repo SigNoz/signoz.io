@@ -154,7 +154,7 @@ const MonthlyEstimate = () => {
             Retention
           </div>
           <div className="py-2 pr-2 uppercase text-[13px] font-semibold text-signoz_vanilla-400">
-            Scale of ingestion
+            Scale of ingestion (per month)
           </div>
           <div className="py-2 pr-2 uppercase text-[13px] font-semibold text-signoz_vanilla-400 text-right">
             Estimated usage
