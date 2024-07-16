@@ -290,9 +290,8 @@ const PricingPlans = () => {
                     <div className="w-3/5 border-b border-dashed border-signoz_slate-400" />
                     <div className="flex items-center gap-1.5">
                       <span className="text-base font-medium text-signoz_robin-300">
-                        $199/Month
+                        $199/month
                       </span>
-                      <CircleInfoSolid height="16" width="16" />
                     </div>
                   </div>
                   <div>
