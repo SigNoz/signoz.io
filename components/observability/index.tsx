@@ -51,12 +51,6 @@ const Observability = () => {
                     VPC Peering
                   </span>
                 </li>
-                <li className="flex flex-row items-center gap-3">
-                  <ArrowRightSolid />
-                  <span className="text-base font-normal leading-9 text-signoz_vanilla-400">
-                    Custom Integrations
-                  </span>
-                </li>
               </ul>
             </div>
           </div>
