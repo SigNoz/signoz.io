@@ -102,6 +102,27 @@ If you instead prefer to watch a video, check out this video:
 5. Follow the steps for [uninstalling SigNoz](/docs/operate/docker-standalone/#uninstall-signoz) section and then install SigNoz again by following the steps in the [Install SigNoz on Docker Standalone](/docs/install/docker) section.
 6. If you're still facing issues trying to install SigNoz, please reach out to us on [Slack](https://signoz.io/slack) 
 
+### Troubleshooting clickhouse container crashes
+
+If the clickhouse container is unable to start due to certain reasons, it is recommended to take the following steps before 
+recreating the container
+
+1. Run the following command to see more detailed logs for the ClickHouse container:
+```bash
+sudo docker-compose -f ./docker/clickhouse-setup/docker-compose.yaml ps -a
+``` 
+This will show you the status of all containers, including ClickHouse.
+
+- **Verify system resources:** Ensure your system has enough resources (CPU, memory, disk space) to run the ClickHouse container.
+
+- **Check permissions:** Make sure you have the necessary permissions to run Docker containers. Try running the installation script with sudo privileges.
+
+- **Review Docker configuration:** Ensure your Docker installation is up-to-date and properly configured.
+
+2. If the logs mention about `Permission denied` error, it is likely due to the correct permissions not set for the container.
+3. Use the `chwon` command to change the ownership for the files that clickhouse container is unable to access.
+4. If neither of this works, run the `install.sh` script again as the root user or by using `sudo` as a prefix.
+
 ## SigNoz Otel Collector Address Grid
 
 You might have specific set up for your application and SigNoz cluster.
