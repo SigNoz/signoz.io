@@ -63,7 +63,7 @@ export const SigNozFeatures = () => {
     },
     {
       iconTag: 'METRICS & DASHBOARDS',
-      text: 'Metrics monitoring with configurable dashboards to fit any use case.',
+      text: 'Infrastructure monitoring, custom metrics & configurable dashboards to fit any use case.',
       buttonText: 'Explore',
       logo: '/img/index_features/layout-grid.svg',
       img: '/img/graphics/homepage/feature-graphic-6.webp',
