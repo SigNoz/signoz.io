@@ -575,6 +575,12 @@ const docsSideNav = [
               '/docs/logs-management/send-logs/collect-tomcat-access-and-garbage-collector-logs',
             label: 'Tomcat',
           },
+          {
+            type: 'doc',
+            route:
+              '/docs/logs-management/send-logs/vector-logs-to-signoz',
+            label: 'Vector',
+          },
         ],
       },
       {
