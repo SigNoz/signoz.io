@@ -1,0 +1,83 @@
+---
+date: 2024-06-06
+title: Send Logs from Vector to SigNoz
+id: vector-logs-to-signoz
+---
+
+If you have [Vector](https://vector.dev/) running on your system, you can forward logs from Vector to SigNoz by following this guide. 
+
+
+## Send Logs from Vector to SigNoz in SigNoz Cloud
+
+* Update the vector `config.yaml` and add the following changes.
+    ```yaml
+    signoz_sink:
+      type: http
+      inputs:
+        - <SOURCE_NAME>
+      uri: https://ingest.<REGION>.signoz.cloud/logs/vector
+      encoding:
+        codec: json
+      request:
+        headers:
+          signoz-access-token: "<SIGNOZ_INGESTION_KEY>"
+    ```
+
+  Set the values of `<SOURCE_NAME>`, `<REGION>`  and  `<SIGNOZ_INGESTION_KEY>`.
+
+  `<SOURCE_NAME>` is the name of the source eg:- `docker` . Read about sources [here](https://vector.dev/docs/reference/configuration/sources/).
+
+  `<SIGNOZ_INGESTION_KEY>` is the ingestion key for SigNoz.
+
+  Depending on the choice of your region for SigNoz cloud, the URI will vary according to this table.
+
+  | Region | Endpoint                   |
+  | ------ | -------------------------- |
+  | US     | ingest.us.signoz.cloud     |
+  | IN     | ingest.in.signoz.cloud     |
+  | EU     | ingest.eu.signoz.cloud     |
+
+* Once the changes are applied, data will be sent to SigNoz from Vector.
+
+
+# Mapping for SigNoz
+
+* Any logs that you send, the `timestamp` will be parsed and the `source_type` will be moved to resource attributes.
+* The `message` key will be mapped to `body`.
+* You can transform your logs at Vector level to convert it to OTEL schema which will look like this.
+  ```
+  {
+    "trace_id": <hex string>,
+    "span_id": <hex string>,
+    "trace_flags": <int>
+    "severity_text": <string>,
+    "severity_number": <int>,
+    "attributes": <map>,
+    "resources": <map>,
+    "source_type": <string>,
+    "message": <string>
+  }
+  ```
+
+  Eg:-
+  ```
+  {
+    "trace_id": "000000000000000018c51935df0b93b9",
+    "span_id": "18c51935df0b93b9",
+    "trace_flags": 0,
+    "severity_text": "info",
+    "severity_number": 4,
+    "attributes": {
+        "method": "GET",
+        "path": "/api/users"
+    },
+    "resources": {
+        "host": "myhost",
+        "namespace": "prod"
+    },
+    "source_type": "docker",
+    "message": "This is a log line"
+  }
+  ```
+* Any other keys which are not present in the above schema will be moved to log attributes.
+* If you don't want to transform using Vector, you can transform using SigNoz [pipelines](https://signoz.io/docs/logs-pipelines/introduction/).
