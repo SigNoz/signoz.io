@@ -125,7 +125,7 @@ const MonthlyEstimate = () => {
 
   const myRef = useRef<HTMLElement | null>(null);
 
-  const isHighVolume = tracesValue === 200 * 1000 || logsValue === 200 * 1000 || metricsValue === 200 * 1000;
+  const isHighVolume = totalEstimate >= 2500;
 
 
   return (
