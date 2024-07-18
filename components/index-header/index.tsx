@@ -21,16 +21,11 @@ export const Header = () => {
 
   return (
     <header className="relative !mx-auto mt-16 !w-[100vw] md:!w-[80vw]">
-      <div className="absolute bottom-0 left-[12px] right-[12px] top-0 top-0  z-[-1] border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 md:left-[24px] md:right-[24px]" />
+      <div className="absolute bottom-0 left-[12px] right-[12px] top-0 z-[-1] border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 md:left-[24px] md:right-[24px]" />
       <div className="relative !mx-auto flex !w-[100vw] flex-col items-center border !border-b-0 border-dashed border-signoz_slate-400 px-2 pb-4 pt-12 text-center md:!w-[80vw] md:px-5 md:pt-[8.5rem]">
-        {/* <Link href="/">
-          <button className="h-10 px-4 py-2 rounded-full text-sm flex items-center justify-center gap-1.5 bg-signoz_slate-400 font-medium leading-5 text-white border border-signoz_slate-200 shadow-[0_0_14px_0_rgba(78,116,248,0.40)]">
-            <BookOpen size={14} />SigNoz raises $6.5 million<ArrowRight size={14} />
-          </button>
-        </Link> */}
         <div className="absolute left-0 top-[96px] z-[-1] h-14 !w-[100vw] border !border-l-0 !border-r-0 border-dashed border-signoz_slate-400 md:top-[212px] md:!w-[80vw]" />
         <Hero>
-        OpenTelemetry-Native Logs,&nbsp;
+          OpenTelemetry-Native Logs,&nbsp;
           <br className="hidden lg:inline" />
           Metrics and Traces in a single pane
         </Hero>
@@ -42,18 +37,19 @@ export const Header = () => {
       </div>
       {/* <div className='!w-[80vw] h-12 !mx-auto border border-signoz_slate-400 border-dashed !border-t-0 !border-b-0' /> */}
       <div className="!mx-auto mx-2 flex !w-[100vw] flex-col items-center justify-center gap-3 border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 pb-12 pt-4 md:mx-5 md:!w-[80vw] md:flex-row">
-        <Link href="/teams/">
-          <Button>
+        <Button>
+          <Link href="/teams/" className="flex-center">
             Try SigNoz Cloud
             <ArrowRight size={14} />
-          </Button>
-        </Link>
-        <Link href="/docs/introduction/">
-          <Button type={Button.TYPES.SECONDARY}>
+          </Link>
+        </Button>
+
+        <Button type={Button.TYPES.SECONDARY}>
+          <Link href="/docs/introduction/" className="flex-center">
             <BookOpen size={14} />
             Read Documentation
-          </Button>
-        </Link>
+          </Link>
+        </Button>
       </div>
       <div className="section-container !mx-auto !mt-0 !w-[90vw] border !border-b-0 !border-t-0 border-none border-signoz_slate-400 md:!w-[80vw] md:border-dashed">
         <div className="w-100 mx-[-28px]">
