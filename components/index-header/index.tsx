@@ -43,12 +43,13 @@ export const Header = () => {
             <ArrowRight size={14} />
           </Link>
         </Button>
-        <Link href="/docs/introduction/">
-          <Button type={Button.TYPES.SECONDARY}>
+
+        <Button type={Button.TYPES.SECONDARY}>
+          <Link href="/docs/introduction/" className="flex-center">
             <BookOpen size={14} />
             Read Documentation
-          </Button>
-        </Link>
+          </Link>
+        </Button>
       </div>
       <div className="section-container !mx-auto !mt-0 !w-[90vw] border !border-b-0 !border-t-0 border-none border-signoz_slate-400 md:!w-[80vw] md:border-dashed">
         <div className="w-100 mx-[-28px]">
