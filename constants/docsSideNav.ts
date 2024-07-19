@@ -1307,6 +1307,16 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/gcp-monitoring/gcp-fns/logging',
             label: 'Logging',
+          },
+          {
+            type: 'doc',
+            route: '/docs/gcp-monitoring/gcp-fns/custom-metrics',
+            label: 'Custom Metrics',
+          },
+          {
+            type: 'doc',
+            route: '/docs/gcp-monitoring/gcp-fns/fns-metrics',
+            label: 'Cloud Function Metrics',
           }
         ],
       },
