@@ -575,6 +575,12 @@ const docsSideNav = [
               '/docs/logs-management/send-logs/collect-tomcat-access-and-garbage-collector-logs',
             label: 'Tomcat',
           },
+          {
+            type: 'doc',
+            route:
+              '/docs/logs-management/send-logs/vector-logs-to-signoz',
+            label: 'Vector',
+          },
         ],
       },
       {
@@ -1297,6 +1303,11 @@ const docsSideNav = [
         label: 'Cloud Functions',
         route: '/docs/gcp-monitoring/gcp-fns',
         items: [
+          {
+            type: 'doc',
+            route: '/docs/gcp-monitoring/gcp-fns/logging',
+            label: 'Logging',
+          },
           {
             type: 'doc',
             route: '/docs/gcp-monitoring/gcp-fns/tracing',
