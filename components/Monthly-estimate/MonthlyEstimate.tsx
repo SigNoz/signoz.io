@@ -25,14 +25,14 @@ const linearToLog = (value, minLog, maxLog) => {
   const minValue = Math.log(minLog);
   const maxValue = Math.log(maxLog);
   const scale = (maxValue - minValue) / (maxLog - minLog);
-  return Math.exp(minValue + scale * (value - minLog));
+  return Math.floor(Math.exp(minValue + scale * (value - minLog)));
 };
 
 const logToLinear = (value, minLog, maxLog) => {
   const minValue = Math.log(minLog);
   const maxValue = Math.log(maxLog);
   const scale = (maxLog - minLog) / (maxValue - minValue);
-  return minLog + scale * (Math.log(value) - minValue);
+  return Math.floor(minLog + scale * (Math.log(value) - minValue));
 };
 
 const MonthlyEstimate = () => {
@@ -125,7 +125,7 @@ const MonthlyEstimate = () => {
 
   const myRef = useRef<HTMLElement | null>(null);
 
-  const isHighVolume = tracesValue === 200 * 1024 || logsValue === 200 * 1024 || metricsValue === 200 * 1000;
+  const isHighVolume = totalEstimate >= 2500;
 
 
   return (
