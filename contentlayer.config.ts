@@ -157,8 +157,15 @@ export const Blog = defineDocumentType(() => ({
       resolve: (doc) => ({
         '@context': 'https://schema.org',
         '@type': 'BlogPosting',
+        mainEntityOfPage: {
+          '@type': 'WebPage',
+          '@id': `https://signoz.io/blog/${doc.slug}`,
+        },
         headline: doc.title,
-        author: doc.authors,
+        author: {
+          '@type': 'Person',
+          name: doc.authors[0],
+        },
         datePublished: doc.date,
         dateModified: doc.lastmod || doc.date,
         description: doc.description,
@@ -324,6 +331,10 @@ export const Guide = defineDocumentType(() => ({
       resolve: (doc) => ({
         '@context': 'https://schema.org',
         '@type': 'BlogPosting',
+        mainEntityOfPage: {
+          '@type': 'WebPage',
+          '@id': `https://signoz.io/slug/${doc.slug}`,
+        },
         headline: doc.title,
         datePublished: doc.date,
         dateModified: doc.lastmod || doc.date,
