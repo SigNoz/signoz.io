@@ -166,6 +166,14 @@ export const Blog = defineDocumentType(() => ({
           '@type': 'Person',
           name: doc.authors[0],
         },
+        publisher: {
+          '@type': 'Organization',
+          name: 'SigNoz',
+          logo: {
+            '@type': 'ImageObject',
+            url: 'https://signoz.io/img/SigNozLogo-orange.svg',
+          },
+        },
         datePublished: doc.date,
         dateModified: doc.lastmod || doc.date,
         description: doc.description,
