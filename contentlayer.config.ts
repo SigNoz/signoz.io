@@ -161,7 +161,6 @@ export const Blog = defineDocumentType(() => ({
           '@type': 'WebPage',
           '@id': `https://signoz.io/blog/${doc.slug}`,
         },
-        headline: doc.title,
         author: {
           '@type': 'Person',
           name: doc.authors[0],
@@ -174,6 +173,7 @@ export const Blog = defineDocumentType(() => ({
             url: 'https://signoz.io/img/SigNozLogo-orange.svg',
           },
         },
+        headline: doc.title,
         datePublished: doc.date,
         dateModified: doc.lastmod || doc.date,
         description: doc.description,
@@ -215,6 +215,22 @@ export const Newsroom = defineDocumentType(() => ({
       resolve: (doc) => ({
         '@context': 'https://schema.org',
         '@type': 'BlogPosting',
+        mainEntityOfPage: {
+          '@type': 'WebPage',
+          '@id': `https://signoz.io/newsroom/${doc.slug}`,
+        },
+        author: {
+          '@type': 'Organization',
+          name: 'SigNoz',
+        },
+        publisher: {
+          '@type': 'Organization',
+          name: 'SigNoz',
+          logo: {
+            '@type': 'ImageObject',
+            url: 'https://signoz.io/img/SigNozLogo-orange.svg',
+          },
+        },
         headline: doc.title,
         datePublished: doc.date,
         dateModified: doc.lastmod || doc.date,
@@ -261,6 +277,22 @@ export const Comparison = defineDocumentType(() => ({
       resolve: (doc) => ({
         '@context': 'https://schema.org',
         '@type': 'BlogPosting',
+        mainEntityOfPage: {
+          '@type': 'WebPage',
+          '@id': `https://signoz.io/comparisons/${doc.slug}`,
+        },
+        author: {
+          '@type': 'Person',
+          name: doc.authors[0],
+        },
+        publisher: {
+          '@type': 'Organization',
+          name: 'SigNoz',
+          logo: {
+            '@type': 'ImageObject',
+            url: 'https://signoz.io/img/SigNozLogo-orange.svg',
+          },
+        },
         headline: doc.title,
         datePublished: doc.date,
         dateModified: doc.lastmod || doc.date,
@@ -300,6 +332,22 @@ export const Opentelemetry = defineDocumentType(() => ({
       resolve: (doc) => ({
         '@context': 'https://schema.org',
         '@type': 'BlogPosting',
+        mainEntityOfPage: {
+          '@type': 'WebPage',
+          '@id': `https://signoz.io/opentelemetry/${doc.slug}`,
+        },
+        author: {
+          '@type': 'Person',
+          name: doc.authors[0],
+        },
+        publisher: {
+          '@type': 'Organization',
+          name: 'SigNoz',
+          logo: {
+            '@type': 'ImageObject',
+            url: 'https://signoz.io/img/SigNozLogo-orange.svg',
+          },
+        },
         headline: doc.title,
         datePublished: doc.date,
         dateModified: doc.lastmod || doc.date,
@@ -341,7 +389,19 @@ export const Guide = defineDocumentType(() => ({
         '@type': 'BlogPosting',
         mainEntityOfPage: {
           '@type': 'WebPage',
-          '@id': `https://signoz.io/slug/${doc.slug}`,
+          '@id': `https://signoz.io/guides/${doc.slug}`,
+        },
+        author: {
+          '@type': 'Person',
+          name: doc.authors[0],
+        },
+        publisher: {
+          '@type': 'Organization',
+          name: 'SigNoz',
+          logo: {
+            '@type': 'ImageObject',
+            url: 'https://signoz.io/img/SigNozLogo-orange.svg',
+          },
         },
         headline: doc.title,
         datePublished: doc.date,
@@ -384,6 +444,22 @@ export const Doc = defineDocumentType(() => ({
       resolve: (doc) => ({
         '@context': 'https://schema.org',
         '@type': 'TechArticle',
+        mainEntityOfPage: {
+          '@type': 'WebPage',
+          '@id': `https://signoz.io/docs/${doc.slug}`,
+        },
+        author: {
+          '@type': 'Organization',
+          name: 'SigNoz',
+        },
+        publisher: {
+          '@type': 'Organization',
+          name: 'SigNoz',
+          logo: {
+            '@type': 'ImageObject',
+            url: 'https://signoz.io/img/SigNozLogo-orange.svg',
+          },
+        },
         headline: doc.title,
         datePublished: doc.date || 'Thu Jun 06 2024', // Setting it Jun 06, 2024 as date metadat doesn't exist for docs, TODO: add date to all exisiting doc files
         dateModified: doc.lastmod || doc.date || 'Thu Jun 06 2024',
