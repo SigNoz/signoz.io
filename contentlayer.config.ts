@@ -10,7 +10,6 @@ import {
   remarkExtractFrontmatter,
   remarkCodeTitles,
   remarkImgToJsx,
-  extractTocHeadings,
 } from 'pliny/mdx-plugins/index.js'
 // Rehype packages
 import rehypeSlug from 'rehype-slug'
@@ -20,9 +19,8 @@ import rehypePresetMinify from 'rehype-preset-minify'
 import siteMetadata from './data/siteMetadata'
 import blogRelatedArticles from './constants/blogRelatedArticles.json'
 import comparisonsRelatedArticles from './constants/comparisonsRelatedArticles.json'
-import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer.js'
+import allAuthors from './constants/authors.json'
 
-const root = process.cwd()
 const isProduction = process.env.NODE_ENV === 'production'
 
 // heroicon mini link
@@ -116,6 +114,23 @@ function getRelatedArticles(doc, relatedArticles) {
   }
 }
 
+const getAuthorDetails = (authorID) => {
+  if (allAuthors[authorID]) {
+    return allAuthors[authorID]
+  }
+
+  return {}
+}
+
+function getAuthors(doc) {
+  const authorsArr = doc?.authors._array || ['SigNoz Team']
+
+  return authorsArr.map((author) => ({
+    '@type': 'Person',
+    name: getAuthorDetails(author).name || 'SigNoz Team',
+  }))
+}
+
 export const Page = defineDocumentType(() => ({
   name: 'Page',
   filePathPattern: 'blog/**/*.mdx',
@@ -161,10 +176,7 @@ export const Blog = defineDocumentType(() => ({
           '@type': 'WebPage',
           '@id': `https://signoz.io/blog/${doc.slug}`,
         },
-        author: {
-          '@type': 'Person',
-          name: doc.authors[0] || 'SigNoz Team 2',
-        },
+        author: getAuthors(doc),
         publisher: {
           '@type': 'Organization',
           name: 'SigNoz',
@@ -281,10 +293,7 @@ export const Comparison = defineDocumentType(() => ({
           '@type': 'WebPage',
           '@id': `https://signoz.io/comparisons/${doc.slug}`,
         },
-        author: {
-          '@type': 'Person',
-          name: doc.authors ? doc.authors[0] : 'SigNoz Team',
-        },
+        author: getAuthors(doc),
         publisher: {
           '@type': 'Organization',
           name: 'SigNoz',
@@ -336,10 +345,7 @@ export const Opentelemetry = defineDocumentType(() => ({
           '@type': 'WebPage',
           '@id': `https://signoz.io/opentelemetry/${doc.slug}`,
         },
-        author: {
-          '@type': 'Person',
-          name: doc.authors ? doc.authors[0] : 'SigNoz Team',
-        },
+        author: getAuthors(doc),
         publisher: {
           '@type': 'Organization',
           name: 'SigNoz',
@@ -391,10 +397,7 @@ export const Guide = defineDocumentType(() => ({
           '@type': 'WebPage',
           '@id': `https://signoz.io/guides/${doc.slug}`,
         },
-        author: {
-          '@type': 'Person',
-          name: doc.authors ? doc.authors[0] : 'SigNoz Team',
-        },
+        author: getAuthors(doc),
         publisher: {
           '@type': 'Organization',
           name: 'SigNoz',
@@ -473,10 +476,13 @@ export const Doc = defineDocumentType(() => ({
 
 export const Authors = defineDocumentType(() => ({
   name: 'Authors',
-  filePathPattern: 'authors/**/*.mdx',
+  filePathPattern: 'constants/authors.json',
   contentType: 'mdx',
   fields: {
     name: { type: 'string', required: true },
+    title: { type: 'string' },
+    url: { type: 'string' },
+    image_url: { type: 'string' },
     avatar: { type: 'string' },
     occupation: { type: 'string' },
     company: { type: 'string' },
