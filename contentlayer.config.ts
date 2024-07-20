@@ -163,7 +163,7 @@ export const Blog = defineDocumentType(() => ({
         },
         author: {
           '@type': 'Person',
-          name: doc.authors[0],
+          name: doc.authors ? doc.authors[0] : 'SigNoz Team',
         },
         publisher: {
           '@type': 'Organization',
@@ -283,7 +283,7 @@ export const Comparison = defineDocumentType(() => ({
         },
         author: {
           '@type': 'Person',
-          name: doc.authors[0],
+          name: doc.authors ? doc.authors[0] : 'SigNoz Team',
         },
         publisher: {
           '@type': 'Organization',
@@ -338,7 +338,7 @@ export const Opentelemetry = defineDocumentType(() => ({
         },
         author: {
           '@type': 'Person',
-          name: doc.authors[0],
+          name: doc.authors ? doc.authors[0] : 'SigNoz Team',
         },
         publisher: {
           '@type': 'Organization',
@@ -393,7 +393,7 @@ export const Guide = defineDocumentType(() => ({
         },
         author: {
           '@type': 'Person',
-          name: doc.authors[0],
+          name: doc.authors ? doc.authors[0] : 'SigNoz Team',
         },
         publisher: {
           '@type': 'Organization',
