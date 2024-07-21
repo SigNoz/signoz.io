@@ -12,11 +12,514 @@ This documentation provides a detailed walkthrough on how to set up a Google Clo
 <Tabs>
 <TabItem value="cloud" label="SigNoz Cloud" default>
 
+
+<Tabs>
+<TabItem value="cloud-pubsub" label="Using Pub/Sub (Recommended)" default>
+**Here's a quick summary of what we will be doing in this guide**
+
+* Create and configure a Cloud Function
+* Create a Pub/Sub topic
+* Create a Log Router to route the Cloud Functions logs to SigNoz
+* Create a Compute Engine instance
+* Create OTel Collector to route logs from Pub/Sub topic to SigNoz Cloud
+* Invoke the Cloud Function using Trigger
+* Send and Visualize the logs in SigNoz Cloud
+
+## Prerequisites
+
+
+* [Google Cloud account](https://console.cloud.google.com/) with administrative privilege or Cloud Functions Admin privilege.
+* [SigNoz Cloud Account](https://signoz.io/teams/) (we are using SigNoz Cloud for this demonstration, we will also need ingestion details. To get your **Ingestion Key** and **Ingestion URL,** sign-in to your SigNoz Cloud Account and go to **Settings** >> **Ingestion Settings**)
+* Access to a project in GCP
+* Google Cloud Functions APIs enabled (follow [this](https://support.google.com/googleapi/answer/6158841?hl=en) guide to see how to enable an API in Google Cloud)
+
+### Get started with Cloud Function Configuration
+
+Follow these steps to create the Cloud Function:
+
+Step 1: Go to your GCP console and search for Cloud Functions, go to Functions and click on **CREATE FUNCTION**.
+
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/cloud-logs/cloud-functions-pubsub.webp"
+        alt="GCP Cloud Function"
+    />
+<figcaption>
+<i>
+GCP Cloud Functions
+</i>
+</figcaption>
+</figure>
+
+
+Step 2: Fill in the following details to create a Cloud Function:
+
+1. Environment: 2nd gen
+2. Function name: Name for the Cloud Function
+3. Region: Takes the default region of the GCP account
+4. Trigger: Defines how to trigger the Cloud Function
+    1. Trigger Type: HTTPS - this allows us to trigger the Cloud Function using a URL
+    2. Authentication: Choose whether you need authenticated or unauthenticated invocations. We have chosen unauthenticated invocation for this demonstration.
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/cloud-logs/create-function-pubsub.webp"
+        alt="Create Cloud function"
+    />
+<figcaption>
+<i>
+Create Cloud Function
+</i>
+</figcaption>
+</figure>
+
+
+Step 3: Click on the **NEXT** button, which will bring us to the page where we can add our code.
+
+Select `Runtime` as `Python 3.10`.
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/cloud-logs/functions-entrypoint-pubsub.webp"
+        alt="Runtime and Entry Point of Cloud Function"
+    />
+<figcaption>
+<i>
+Set entrypoint and source code
+</i>
+</figcaption>
+</figure>
+
+### Add code to the Google Cloud Function
+
+Below is the comprehensive code of the `main.py` file, followed by a high level overview of what the code is doing.
+
+```python
+import functions_framework
+
+@functions_framework.http
+def hello_http(request):
+
+    print("Initializing Function...")
+
+    request_json = request.get_json(silent=True)
+    request_args = request.args
+
+    if request_json and 'name' in request_json:
+        name = request_json['name']
+        print("name is in request_json")
+
+    elif request_args and 'name' in request_args:
+        name = request_args['name']
+        print("name is in request_args")
+
+    else:
+        print("No name found.")
+        name = 'World'
+
+    print("Sending response...")
+
+    return 'Hello {}!'.format(name)
+```
+
+Below is a high-level overview of the above code snippet:
+
+* **hello_http(request)**: Handles incoming HTTP requests, extracts 'name' from the request, and logs various stages of execution.
+* **@funtions_framework.http**: Decorator that defines `hello_http` as an HTTP handler for Google Cloud Functions.
+* The code print out different messages for log entries and returns a greeting message.
+
+There are no changes to requirements.txt file.
+
+Once you’ve finished writing your code, locate the **DEPLOY** button. After clicking the **DEPLOY** button, Google Cloud Function initiates deployment, starts provisioning the function according to the specified configuration, initializes the environment, handles dependencies, and makes the function ready to handle incoming requests.
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/cloud-logs/functions-complete-code-pubsub.webp"
+        alt="Complete Cloud Function Code"
+    />
+<figcaption>
+<i>
+Complete Cloud Function Code
+</i>
+</figcaption>
+</figure>
+
+
+## Testing your cloud function
+
+Step 1: After completing the deployment, navigate to the **TRIGGER** section to obtain the URL to invoke the function.
+
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/cloud-logs/functions-navigate-to-trigger.webp"
+        alt="Navigate to Trigger"
+    />
+<figcaption>
+<i>
+Navigate to Trigger
+</i>
+</figcaption>
+</figure>
+
+
+Step 2: Hit the URL that you have obtained, you will see the function output.
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/cloud-logs/cloud-functions-url-pubsub.webp"
+        alt="Cloud Function URL"
+    />
+<figcaption>
+<i>
+Cloud Function URL
+</i>
+</figcaption>
+</figure>
+
+
+Step 3: Click on the **LOGS** section in your Cloud Function to view the logs, which will indicate that the log has been sent to SigNoz successfully.
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/cloud-logs/functions-logs-pubsub.webp"
+        alt="Cloud Function Logs"
+    />
+<figcaption>
+<i>
+Viewing Cloud Function Logs
+</i>
+</figcaption>
+</figure>
+
+### Create a Pub/Sub topic
+
+Follow these steps to create the Pub/Sub topic:
+
+Step 1: Go to your GCP console and search for Pub/Sub, go to Pub/Sub and click on **CREATE TOPIC**.
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/cloud-logs/cloud-functions-pubsub.webp"
+        alt="Navigate to Pub/Sub"
+    />
+<figcaption>
+<i>
+Navigate to Pub/Sub
+</i>
+</figcaption>
+</figure>
+
+Step 2: Create the Pub/Sub topic
+
+Put an appropriate Pub/Sub topic ID. Select `Add a default subscription` checkbox. Under Encryption, let the default selection of `Google-managed encryption key` as is. Click on `Create`.
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/cloud-logs/functions-create-pubsub-topic.webp"
+        alt="Create Pub/Sub Topic"
+    />
+<figcaption>
+<i>
+Create Pub/Sub Topic
+</i>
+</figcaption>
+</figure>
+
+Step 3: Ensure the Pub/Sub topic and its subscription is created.
+
+Once you click on the `Create` button in Step 2, you will land on the newly created Pub/Sub topic's page. Ensure that the default subscription is created as well. The subscription will be of the form `<topic-name>-sub`.
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/cloud-logs/functions-pubsub-topic-created.webp"
+        alt="Created Pub/Sub Topic"
+    />
+<figcaption>
+<i>
+Created Pub/Sub Topic
+</i>
+</figcaption>
+</figure>
+
+### Create Log Router to Pub/Sub Topic
+
+Follow these steps to create the Log Router to the newly created Pub/Sub topic:
+
+Step 1: On the GCP console, search for Logs and go to Logs Explorer. Select an appropriate relative time.
+
+You will start seeing the recent logs.
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/cloud-logs/functions-log-explorer.webp"
+        alt="Logs Explorer"
+    />
+<figcaption>
+<i>
+Log Explorer
+</i>
+</figcaption>
+</figure>
+
+Step 2: To ensure you see only Cloud Function logs, add the following query in the Query textbox:
+
+```
+resource.type="cloud_run_revision"
+```
+
+In case you want the logs only from a particular Cloud Function, you can add the following query to the Query text box:
+
+```
+resource.type="cloud_run_revision"
+resource.labels.service_name="<function-name>"
+```
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/cloud-logs/functions-logs-filter.webp"
+        alt="Filter Cloud Functions Logs"
+    />
+<figcaption>
+<i>
+Filter Cloud Functions Logs
+</i>
+</figcaption>
+</figure>
+
+Step 3: With the log filters in place, click on `More actions` dropdown below the Query text box, and select `Create sink` option from the dropdown.
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/cloud-logs/functions-create-sink.webp"
+        alt="Create Log Sink"
+    />
+<figcaption>
+<i>
+Create Log Sink
+</i>
+</figcaption>
+</figure>
+
+Step 4: Provide appropriate sink name and description, and click `Next`.
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/cloud-logs/functions-sink-details.webp"
+        alt="Provide Sink Details"
+    />
+<figcaption>
+<i>
+Provide Sink Details
+</i>
+</figcaption>
+</figure>
+
+Step 5: In the "Sink destination" section, select `Cloud Pub/Sub topic` from the "Select sink service" dropdown, and in the "Select a Cloud Pub/Sub topic" dropdown, select the Pub/Sub topic that we had created in the earlier section. Click on `Next`.
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/cloud-logs/functions-sink-destination.webp"
+        alt="Provide Sink Destination"
+    />
+<figcaption>
+<i>
+Provide Sink Destination
+</i>
+</figcaption>
+</figure>
+
+Step 6: In the "Choose logs to include in sink" section, ensure appropriate log filtering query is present. Click on `Next`.
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/cloud-logs/functions-log-sink-filter.webp"
+        alt="Provide Log Filter Rules"
+    />
+<figcaption>
+<i>
+Provide Log Filter Rules
+</i>
+</figcaption>
+</figure>
+
+
+Step 7: We need not make any change in the `Choose logs to filter out of sink` section, and click on `Create sink` at the bottom.
+
+Step 8: With this, the log router sink will be created. You will get the message `Your log sink was successfully created. Data should be available soon.` on the page.
+
+You can also go to this sink at later point of time by navigating to the `Log router` from the left navigation menu in the GCP Logging service.
+
+
+### Provide permissions to Log Router Sink
+
+- On the GCP console, search for Log Router, and navigate to Logs Router in the GCP Logging service.
+- Click on the 3 dots to the right of the Log Router sink that we created in the earlier steps, and select `View sink details` from the dropdown.
+- From the sink details, copy the `Writer identity` and keep it with you. We will require this in the upcoming steps.
+- In order to provide the Log Router sink with the permissions to write to the Pub/Sub topic, navigate to the Pub/Sub service, and click on the 3 dots to the right of the Pub/Sub topic where the router is going to sink the logs. Select `View permissions` from this dropdown.
+- Click on **APP PRINCIPAL** button on the top. In the `New principals` textbox, copy the value from the `Writer identity` (remove the `serviceAccount:` prefix from the value), and select any value from the dropdown that appears. In the `Select a role` dropdown, search for `Pub/Sub Publisher` and select it.
+- Click on `Save`. With this, the Log Router sink now has the permission to write to the Pub/Sub topic.
+- Wait for ~1 minute for the permissions to take effect, and now trigger the Cloud Function a few times. You should see the Log Router's volume increasing, as well as Pub/Sub topic's metrics showing up published requests.
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/cloud-logs/functions-log-router-metrics.webp"
+        alt="Log Router Metrics"
+    />
+<figcaption>
+<i>
+Log Router Metrics
+</i>
+</figcaption>
+</figure>
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/cloud-logs/functions-pubsub-topic-metrics.webp"
+        alt="Pub/Sub Topic Metrics"
+    />
+<figcaption>
+<i>
+Pub/Sub Topic Metrics
+</i>
+</figcaption>
+</figure>
+
+### Creating OTel Collector
+
+We will create the Compute Engine instance, and then run OTel Collector on it.
+
+#### Creating Compute Engine (VM) instance
+
+- On the GCP Console, search for `Compute Engine`, and navigate to the `Compute Engine` GCP service. Click on **CREATE INSTANCE** at the top.
+- Put an appropriate name for the instance, and select an appropriate region and zone.
+- Select an appropriate machine configuration. Here, we have selected E2 machine.
+- In the machine type, we have selected `e2-medium`. You can choose a larger machine in case you want to run multiple processes on this machine.
+- Coming to the `Boot Disk` section, click on **CHANGE** button.
+- Select the `Ubuntu` operating system, and the version as `Ubuntu 22.04 LTS x86/64, amd64 image`. You can put the disk size as per your requirement. We are going with `20GB` disk size for this example. Click on `Save`.
+- In the `Identity and API Access` section, select the service account that has atleast `Pub/Sub Editor` permission.
+- In the `Firewall` section, select `Allow HTTP access` and `Allow HTTPS access`.
+- Click on **CREATE** button at the bottom, and wait for the instance to get created.
+- Once the instance is created, click on the `SSH` button to connect to the instance. Click on the `Authorize` button on the popup. With this you will enter into the terminal of the instance.
+
+#### Install OTel Collector as agent
+
+Firstly, we will establish the authentication using the following commands:
+
+1. Initialize `gcloud`:
+
+```
+gcloud init
+```
+
+2. Authenticate into GCP:
+
+```
+gcloud auth application-default login
+```
+
+Let us now proceed to the OTel Collector installation:
+
+Step 1: Download otel-collector tar.gz for your architecture
+
+```bash
+wget https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.88.0/otelcol-contrib_0.88.0_linux_amd64.tar.gz
+```
+
+Step 2: Extract otel-collector tar.gz to the otelcol-contrib folder
+
+```bash
+mkdir otelcol-contrib && tar xvzf otelcol-contrib_0.88.0_linux_amd64.tar.gz -C otelcol-contrib
+```
+
+Step 3: Create `config.yaml` in the folder `otelcol-contrib` with the below content in it. Replace `<region>` with the appropriate SigNoz Cloud region. Replace `SIGNOZ_INGESTION_KEY` with what is provided by SigNoz:
+
+```yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+  googlecloudpubsub:
+    project: <gcp-project-id>
+    subscription: projects/<gcp-project-id>/subscriptions/functions-log-sink-sub
+    encoding: raw_text
+processors:
+  batch: {}
+exporters:
+  otlp:
+    endpoint: "ingest.<region>.signoz.cloud:443"
+    tls:
+      insecure: false
+    headers:
+      "signoz-access-token": "<SigNoz-Key>"
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp]
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp]
+    logs:
+      receivers: [otlp, googlecloudpubsub]
+      processors: [batch]
+      exporters: [otlp]
+```
+
+Step 4: Once we are done with the above configurations, we can now run the collector service with the following command:
+
+From the otelcol-contrib, run the following command:
+
+```bash
+./otelcol-contrib --config ./config.yaml
+```
+
+**Run in background**
+
+If you want to run OTel Collector process in the background:
+
+```bash
+./otelcol-contrib --config ./config.yaml &> otelcol-output.log & echo "$!" > otel-pid
+```
+
+The above command sends the output of the otel-collector to `otelcol-output.log` file and prints the process id of the background running OTel Collector process to the `otel-pid` file.
+
+If you want to see the output of the logs you’ve just set up for the background process, you may look it up with:
+
+```bash
+tail -f -n 50 otelcol-output.log
+```
+
+You can now trigger the Cloud Function a few times, and see the logs from the GCP Cloud Functions on SigNoz.
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/cloud-logs/functions-signoz-cloud-logs.webp"
+        alt="Functions Logs in SigNoz Cloud"
+    />
+<figcaption>
+<i>
+Functions Logs in SigNoz Cloud
+</i>
+</figcaption>
+</figure>
+
+</TabItem>
+
+
+
+<TabItem value="cloud-http" label="Using HTTP">
 **Here's a quick summary of what we will be doing in this guide**
 
 * Create and configure a Cloud Function
 * Invoke the Cloud Function using Trigger
-* Send and Visualize the logs in SigNoz Cloud
+* Send and Visualize the logs in SigNoz Cloud using HTTP calls
 
 ## Prerequisites
 
@@ -76,7 +579,7 @@ Create Cloud Function
 
 Step 3: Expand the **Runtime, build, connections, and security settings** section, and under **Runtime environment variables:**
 
-Add `SIGNOZ_ACCESS_TOKEN` and `SIGNOZ_HTTP_URL` with **Ingestion Key** and **Ingestion URL** respectively. You can get Ingestion Key and Ingestion URL.
+Add `SIGNOZ_ACCESS_TOKEN` and `SIGNOZ_HTTP_URL` with **Ingestion Key** and **Ingestion URL** (as `https://ingest.<region>.signoz.cloud/logs/json`) respectively. You can get Ingestion Key and Ingestion URL.
 
 
 <figure data-zoomable align="left">
@@ -129,7 +632,7 @@ def write_log(log_data, trace_id):
 
     req_headers = {
 
-         ‘signoz-access-token': environ.get(‘SIGNOZ_ACCESS_TOKEN’),
+         'signoz-access-token': environ.get('SIGNOZ_ACCESS_TOKEN'),
          'Content-Type': 'application/json'
 
     }
@@ -305,9 +808,502 @@ If you encounter any issues while setting up monitoring for your Cloud Function'
 By following this guide, you should be able to easily send the logs of your Google Cloud Function's system to SigNoz and gain valuable insights in case there is some issue.
 
 </TabItem>
+</Tabs>
+
+</TabItem>
+
 
 <TabItem value="self-host" label="Self-Host">
 
+<Tabs>
+<TabItem value="self-host-pubsub" label="Using Pub/Sub (Recommended)" default>
+
+**Here's a quick summary of what we will be doing in this guide**
+
+* Create and configure a Cloud Function
+* Create a Pub/Sub topic
+* Create a Log Router to route the Cloud Functions logs to SigNoz
+* Self-Host SigNoz
+* Create OTel collector to route logs from Pub/Sub topic to self hosted SigNoz
+* Invoke the Cloud Function using Trigger
+* Send and Visualize the logs in SigNoz
+
+## Prerequisites
+
+
+* [Google Cloud account](https://console.cloud.google.com/) with administrative privilege or Cloud Functions Admin privilege.
+* Access to a project in GCP
+* Google Cloud Functions APIs enabled (follow [this](https://support.google.com/googleapi/answer/6158841?hl=en) guide to see how to enable an API in Google Cloud)
+* [Self-Host SigNoz](https://signoz.io/docs/install/docker/) 
+
+<Admonition type="info">
+For more details on how to configure Self-Hosted SigNoz for Logs, check [official documentation by Self-Hosted SigNoz](https://signoz.io/docs/userguide/send-logs-http/#send-logs-to-self-hosted-signoz) and navigate to the "Send Logs to Self-Hosted SigNoz" section
+</Admonition>
+
+### Get started with Cloud Function Configuration
+
+Follow these steps to create the Cloud Function:
+
+Step 1: Go to your GCP console and search for Cloud Functions, go to Functions and click on **CREATE FUNCTION**.
+
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/cloud-logs/cloud-functions-pubsub.webp"
+        alt="GCP Cloud Function"
+    />
+<figcaption>
+<i>
+GCP Cloud Functions
+</i>
+</figcaption>
+</figure>
+
+
+Step 2: Fill in the following details to create a Cloud Function:
+
+1. Environment: 2nd gen
+2. Function name: Name for the Cloud Function
+3. Region: Takes the default region of the GCP account
+4. Trigger: Defines how to trigger the Cloud Function
+    1. Trigger Type: HTTPS - this allows us to trigger the Cloud Function using a URL
+    2. Authentication: Choose whether you need authenticated or unauthenticated invocations. We have chosen unauthenticated invocation for this demonstration.
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/cloud-logs/create-function-pubsub.webp"
+        alt="Create Cloud function"
+    />
+<figcaption>
+<i>
+Create Cloud Function
+</i>
+</figcaption>
+</figure>
+
+
+Step 3: Click on the **NEXT** button, which will bring us to the page where we can add our code.
+
+Select `Runtime` as `Python 3.10`.
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/cloud-logs/functions-entrypoint-pubsub.webp"
+        alt="Runtime and Entry Point of Cloud Function"
+    />
+<figcaption>
+<i>
+Set entrypoint and source code
+</i>
+</figcaption>
+</figure>
+
+### Add code to the Google Cloud Function
+
+Below is the comprehensive code of the `main.py` file, followed by a high level overview of what the code is doing.
+
+```python
+import functions_framework
+
+@functions_framework.http
+def hello_http(request):
+
+    print("Initializing Function...")
+
+    request_json = request.get_json(silent=True)
+    request_args = request.args
+
+    if request_json and 'name' in request_json:
+        name = request_json['name']
+        print("name is in request_json")
+
+    elif request_args and 'name' in request_args:
+        name = request_args['name']
+        print("name is in request_args")
+
+    else:
+        print("No name found.")
+        name = 'World'
+
+    print("Sending response...")
+
+    return 'Hello {}!'.format(name)
+```
+
+Below is a high-level overview of the above code snippet:
+
+* **hello_http(request)**: Handles incoming HTTP requests, extracts 'name' from the request, and logs various stages of execution.
+* **@funtions_framework.http**: Decorator that defines `hello_http` as an HTTP handler for Google Cloud Functions.
+* The code print out different messages for log entries and returns a greeting message.
+
+There are no changes to requirements.txt file.
+
+Once you’ve finished writing your code, locate the **DEPLOY** button. After clicking the **DEPLOY** button, Google Cloud Function initiates deployment, starts provisioning the function according to the specified configuration, initializes the environment, handles dependencies, and makes the function ready to handle incoming requests.
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/cloud-logs/functions-complete-code-pubsub.webp"
+        alt="Complete Cloud Function Code"
+    />
+<figcaption>
+<i>
+Complete Cloud Function Code
+</i>
+</figcaption>
+</figure>
+
+
+## Testing your cloud function
+
+Step 1: After completing the deployment, navigate to the **TRIGGER** section to obtain the URL to invoke the function.
+
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/cloud-logs/functions-navigate-to-trigger.webp"
+        alt="Navigate to Trigger"
+    />
+<figcaption>
+<i>
+Navigate to Trigger
+</i>
+</figcaption>
+</figure>
+
+
+Step 2: Hit the URL that you have obtained, you will see the function output.
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/cloud-logs/cloud-functions-url-pubsub.webp"
+        alt="Cloud Function URL"
+    />
+<figcaption>
+<i>
+Cloud Function URL
+</i>
+</figcaption>
+</figure>
+
+
+Step 3: Click on the **LOGS** section in your Cloud Function to view the logs, which will indicate that the log has been sent to SigNoz successfully.
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/cloud-logs/function-logs.webp"
+        alt="Cloud Function Logs"
+    />
+<figcaption>
+<i>
+Viewing Cloud Function Logs
+</i>
+</figcaption>
+</figure>
+
+### Create a Pub/Sub topic
+
+Follow these steps to create the Pub/Sub topic:
+
+Step 1: Go to your GCP console and search for Pub/Sub, go to Pub/Sub and click on **CREATE TOPIC**.
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/cloud-logs/cloud-functions-pubsub.webp"
+        alt="Navigate to Pub/Sub"
+    />
+<figcaption>
+<i>
+Navigate to Pub/Sub
+</i>
+</figcaption>
+</figure>
+
+Step 2: Create the Pub/Sub topic
+
+Put an appropriate Pub/Sub topic ID. Select `Add a default subscription` checkbox. Under Encryption, let the default selection of `Google-managed encryption key` as is. Click on `Create`.
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/cloud-logs/functions-create-pubsub-topic.webp"
+        alt="Create Pub/Sub Topic"
+    />
+<figcaption>
+<i>
+Create Pub/Sub Topic
+</i>
+</figcaption>
+</figure>
+
+Step 3: Ensure the Pub/Sub topic and its subscription is created.
+
+Once you click on the `Create` button in Step 2, you will land on the newly created Pub/Sub topic's page. Ensure that the default subscription is created as well. The subscription will be of the form `<topic-name>-sub`.
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/cloud-logs/functions-pubsub-topic-created.webp"
+        alt="Created Pub/Sub Topic"
+    />
+<figcaption>
+<i>
+Created Pub/Sub Topic
+</i>
+</figcaption>
+</figure>
+
+### Create Log Router to Pub/Sub Topic
+
+Follow these steps to create the Log Router to the newly created Pub/Sub topic:
+
+Step 1: On the GCP console, search for Logs and go to Logs Explorer. Select an appropriate relative time.
+
+You will start seeing the recent logs.
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/cloud-logs/functions-log-explorer.webp"
+        alt="Logs Explorer"
+    />
+<figcaption>
+<i>
+Log Explorer
+</i>
+</figcaption>
+</figure>
+
+Step 2: To ensure you see only Cloud Function logs, add the following query in the Query textbox:
+
+```
+resource.type="cloud_run_revision"
+```
+
+In case you want the logs only from a particular Cloud Function, you can add the following query to the Query text box:
+
+```
+resource.type="cloud_run_revision"
+resource.labels.service_name="<function-name>"
+```
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/cloud-logs/functions-logs-filter.webp"
+        alt="Filter Cloud Functions Logs"
+    />
+<figcaption>
+<i>
+Filter Cloud Functions Logs
+</i>
+</figcaption>
+</figure>
+
+Step 3: With the log filters in place, click on `More actions` dropdown below the Query text box, and select `Create sink` option from the dropdown.
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/cloud-logs/functions-create-sink.webp"
+        alt="Create Log Sink"
+    />
+<figcaption>
+<i>
+Create Log Sink
+</i>
+</figcaption>
+</figure>
+
+Step 4: Provide appropriate sink name and description, and click `Next`.
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/cloud-logs/functions-sink-details.webp"
+        alt="Provide Sink Details"
+    />
+<figcaption>
+<i>
+Provide Sink Details
+</i>
+</figcaption>
+</figure>
+
+Step 5: In the "Sink destination" section, select `Cloud Pub/Sub topic` from the "Select sink service" dropdown, and in the "Select a Cloud Pub/Sub topic" dropdown, select the Pub/Sub topic that we had created in the earlier section. Click on `Next`.
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/cloud-logs/functions-sink-destination.webp"
+        alt="Provide Sink Destination"
+    />
+<figcaption>
+<i>
+Provide Sink Destination
+</i>
+</figcaption>
+</figure>
+
+Step 6: In the "Choose logs to include in sink" section, ensure appropriate log filtering query is present. Click on `Next`.
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/cloud-logs/functions-log-sink-filter.webp"
+        alt="Provide Log Filter Rules"
+    />
+<figcaption>
+<i>
+Provide Log Filter Rules
+</i>
+</figcaption>
+</figure>
+
+
+Step 7: We need not make any change in the `Choose logs to filter out of sink` section, and click on `Create sink` at the bottom.
+
+Step 8: With this, the log router sink will be created. You will get the message `Your log sink was successfully created. Data should be available soon.` on the page.
+
+You can also go to this sink at later point of time by navigating to the `Log router` from the left navigation menu in the GCP Logging service.
+
+
+### Provide permissions to Log Router Sink
+
+- On the GCP console, search for Log Router, and navigate to Logs Router in the GCP Logging service.
+- Click on the 3 dots to the right of the Log Router sink that we created in the earlier steps, and select `View sink details` from the dropdown.
+- From the sink details, copy the `Writer identity` and keep it with you. We will require this in the upcoming steps.
+- In order to provide the Log Router sink with the permissions to write to the Pub/Sub topic, navigate to the Pub/Sub service, and click on the 3 dots to the right of the Pub/Sub topic where the router is going to sink the logs. Select `View permissions` from this dropdown.
+- Click on **APP PRINCIPAL** button on the top. In the `New principals` textbox, copy the value from the `Writer identity` (remove the `serviceAccount:` prefix from the value), and select any value from the dropdown that appears. In the `Select a role` dropdown, search for `Pub/Sub Publisher` and select it.
+- Click on `Save`. With this, the Log Router sink now has the permission to write to the Pub/Sub topic.
+- Wait for ~1 minute for the permissions to take effect, and now trigger the Cloud Function a few times. You should see the Log Router's volume increasing, as well as Pub/Sub topic's metrics showing up published requests.
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/cloud-logs/functions-log-router-metrics.webp"
+        alt="Log Router Metrics"
+    />
+<figcaption>
+<i>
+Log Router Metrics
+</i>
+</figcaption>
+</figure>
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/cloud-logs/functions-pubsub-topic-metrics.webp"
+        alt="Pub/Sub Topic Metrics"
+    />
+<figcaption>
+<i>
+Pub/Sub Topic Metrics
+</i>
+</figcaption>
+</figure>
+
+### Creatingel Collector
+
+We will create the Compute Engine instance, and then run OTel Collector on it.
+
+#### Creating Compute Engine (VM) instance
+
+- On the GCP Console, search for `Compute Engine`, and navigate to the `Compute Engine` GCP service. Click on **CREATE INSTANCE** at the top.
+- Put an appropriate name for the instance, and select an appropriate region and zone.
+- Select an appropriate machine configuration. Here, we have selected E2 machine.
+- In the machine type, we have selected `e2-medium`. You can choose a larger machine in case you want to run multiple processes on this machine.
+- Coming to the `Boot Disk` section, click on **CHANGE** button.
+- Select the `Ubuntu` operating system, and the version as `Ubuntu 22.04 LTS x86/64, amd64 image`. You can put the disk size as per your requirement. We are going with `20GB` disk size for this example. Click on `Save`.
+- In the `Identity and API Access` section, select the service account that has atleast `Pub/Sub Editor` permission.
+- In the `Firewall` section, select `Allow HTTP access` and `Allow HTTPS access`.
+- Click on **CREATE** button at the bottom, and wait for the instance to get created.
+- Once the instance is created, click on the `SSH` button to connect to the instance. Click on the `Authorize` button on the popup. With this you will enter into the terminal of the instance.
+
+#### Install OTel Collector as agent
+
+Firstly, we will establish the authentication using the following commands. These commands need to be run on the same host where you would be running the OTel Collector agent.
+
+1. Initialize `gcloud`:
+
+```
+gcloud init
+```
+
+2. Authenticate into GCP:
+
+```
+gcloud auth application-default login
+```
+
+Let us now proceed to the OTel Collector installation:
+
+Step 1: Download otel-collector tar.gz for your architecture
+
+```bash
+wget https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.88.0/otelcol-contrib_0.88.0_linux_amd64.tar.gz
+```
+
+Step 2: Extract otel-collector tar.gz to the otelcol-contrib folder
+
+```bash
+mkdir otelcol-contrib && tar xvzf otelcol-contrib_0.88.0_linux_amd64.tar.gz -C otelcol-contrib
+```
+
+Step 3: Create `config.yaml` in the folder `otelcol-contrib` with the below content in it. We are using the `clickhouselogsexporter` in this case.
+
+```yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+  googlecloudpubsub:
+    project: <gcp-project-id>
+    subscription: projects/<gcp-project-id>/subscriptions/functions-log-sink-sub
+    encoding: raw_text
+processors:
+  batch: {}
+exporters:
+  clickhouselogsexporter:
+    dsn: tcp://clickhouse:9000/
+    timeout: 5s
+    sending_queue:
+      queue_size: 100
+    retry_on_failure:
+      enabled: true
+      initial_interval: 5s
+      max_interval: 30s
+      max_elapsed_time: 300s
+service:
+  pipelines:
+    logs:
+      receivers: [otlp, googlecloudpubsub]
+      processors: [batch]
+      exporters: [clickhouselogsexporter]
+```
+
+Step 4: Once we are done with the above configurations, we can now run the collector service with the following command:
+
+From the otelcol-contrib, run the following command:
+
+```bash
+./otelcol-contrib --config ./config.yaml
+```
+
+**Run in background**
+
+If you want to run OTel Collector process in the background:
+
+```bash
+./otelcol-contrib --config ./config.yaml &> otelcol-output.log & echo "$!" > otel-pid
+```
+
+The above command sends the output of the otel-collector to `otelcol-output.log` file and prints the process id of the background running OTel Collector process to the `otel-pid` file.
+
+If you want to see the output of the logs you’ve just set up for the background process, you may look it up with:
+
+```bash
+tail -f -n 50 otelcol-output.log
+```
+
+You can now trigger the Cloud Function a few times, and see the logs from the GCP Cloud Functions on SigNoz.
+
+</TabItem>
+
+<TabItem value="self-host-http" label="Using HTTP">
 **Here's a quick summary of what we will be doing in this guide**
 
 * Create and configure a Cloud Function
@@ -572,9 +1568,11 @@ If you encounter any issues while setting up monitoring for your Cloud Function'
 
 * Verify that your Cloud Function instance is running and accessible.
 * Ensure that you have the necessary permissions to access the logs in your function.
-* Check and mention the correct URL of the Self-Hosted SigNoz Self-Host, OTEL configuration, and routing.
+* Check and mention the correct URL of the Self-Hosted SigNoz Self-Host, OTel configuration, and routing.
 
 By following this guide, you should be able to easily send the logs of your Google Cloud Function's system to Self-Hosted SigNoz and gain valuable insights in case there is some issue.
 
+</TabItem>
+</Tabs>
 </TabItem>
 </Tabs>
