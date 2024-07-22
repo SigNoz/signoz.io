@@ -48,14 +48,13 @@ export const TrustedByTeams = () => {
       `}
         >
           <div className="mb-5 flex flex-col items-center text-center">
-            <Link href="/case-study/" className="z-[1] mx-2 bg-signoz_ink-500">
               <Button
-                id="btn-get-started-website-navbar"
                 className=" button-background relative z-[1] flex h-8 items-center justify-center gap-1.5 truncate rounded-full py-2 pl-4 pr-3 text-center text-sm font-medium not-italic leading-5 text-white no-underline outline-none hover:text-white"
               >
+            <Link href="/case-study/" className="z-[1] mx-2 flex-center">
                 Read customer stories <ArrowRight size={14} />
-              </Button>
             </Link>
+              </Button>
           </div>
         </div>
       </div>

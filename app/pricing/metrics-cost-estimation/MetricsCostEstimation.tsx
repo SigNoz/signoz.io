@@ -142,7 +142,7 @@ const MetricsCostEstimation = () => {
                         minValue={MIN_VALUE}
                         showTooltip={true}
                         tooltipProps={{
-                          content: formatNumber (linearToLog(metricsValue, MIN_VALUE, MAX_VALUE))
+                          content: formatNumber(linearToLog(metricsValue, MIN_VALUE, MAX_VALUE))
                         }}
                         color="secondary"
                         marks={[
@@ -243,18 +243,18 @@ const MetricsCostEstimation = () => {
                   </div>
                 </div>
                 <div className="flex flex-col gap-4">
-                  <Link href={'/teams'}>
-                    <Button className="w-full">
+                  <Button className="w-full">
+                    <Link href={'/teams'} className='flex-center'>
                       Start your free 30-day trial
                       <ArrowRight size={14} />
-                    </Button>
-                  </Link>
-                  <Link href={'/docs/introduction/'}>
-                    <Button className="w-full" type={Button.TYPES.SECONDARY}>
+                    </Link>
+                  </Button>
+                  <Button className="w-full" type={Button.TYPES.SECONDARY}>
+                    <Link href={'/docs/introduction/'} className='flex-center'>
                       Read the docs
                       <ArrowRight size={14} />
-                    </Button>
-                  </Link>
+                    </Link>
+                  </Button>
                 </div>
               </div>
             </div>
