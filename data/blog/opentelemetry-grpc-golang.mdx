@@ -195,6 +195,45 @@ func main() {
 You can check out the configuration in the code sample [here](https://github.com/SigNoz/distributed-tracing-go-grpc-sample/blob/main/config/config.go).
 
 **Step 5:
+Instrumenting gRPC server and client**
+
+To instrument any gRPC servers you have.
+
+```go
+import (
+    "go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
+)
+
+func main() {
+  [...]
+
+    // add StatsHandler to gRPC server initialization
+	s := grpc.NewServer(grpc.StatsHandler(otelgrpc.NewServerHandler()))
+
+}
+
+```
+
+Similarly, instrument your gRPC client as well by adding otelgrpc when initializing gRPC client
+
+```go
+import (
+    "go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
+)
+
+func main() {
+  [...]
+
+    // add StatsHandler to gRPC client initialization
+	cc, err := grpc.NewClient(serverUrl, grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithStatsHandler(otelgrpc.NewClientHandler()),
+	)
+
+}
+
+```
+
+**Step 6:
 Instrumenting MongoDB**
 
 But when it comes to instrumentation data for MongoDB, we need to use <a href="https://pkg.go.dev/go.opentelemetry.io/contrib/instrumentation/go.mongodb.org/mongo-driver/mongo/otelmongo" rel="noopener noreferrer nofollow" target="_blank">this OpenTelemetry Go library</a>.
@@ -210,7 +249,7 @@ client, err := mongo.NewClient(options.Client().ApplyURI(mongo_url).SetMonitor(o
 	}
 ```
 
-**Step 6: Setting up .env files**<br></br>
+**Step 7: Setting up .env files**<br></br>
 We have the .env files in the client and server directory in order to set up environment variables required for ***grpc-server*** and ***grpc-client*** components.
 
 `OTEL_EXPORTER_OTLP_ENDPOINT`: localhost:4317
@@ -222,7 +261,7 @@ This is how the ***server/.env*** looks like.
 ```jsx
 MONGO_URL=mongodb://localhost:27017/employeedb
 OTEL_EXPORTER_OTLP_ENDPOINT="localhost:4317"
-OTEL_SERVICE_NAME="go-grpc-otel-server"
+SERVICE_NAME="go-grpc-otel-server"
 INSECURE_MODE=true
 ```
 
@@ -230,7 +269,7 @@ This is how the ***client/.env*** looks like
 
 ```jsx
 OTEL_EXPORTER_OTLP_ENDPOINT="localhost:4317"
-OTEL_SERVICE_NAME="go-grpc-otel-client"
+SERVICE_NAME="go-grpc-otel-client"
 INSECURE_MODE=true
 ```
 
@@ -253,7 +292,7 @@ You can check the client env [file](https://github.com/SigNoz/distributed-traci
  <br></br> --> */}
 
 
-**Step 7:**
+**Step 8:**
 **Create MongoDB Table and Collection in Mongo Compass**
 
 1. Click on Connect → New Connection
@@ -276,12 +315,12 @@ You need to generate some data to see how traces are captured in the SigNoz dash
 
 1. `cd` to the server directory and then run the go grpc server
    ```jsx
-   go run server.go
+   SERVICE_NAME=goAppServer OTEL_EXPORTER_OTLP_HEADERS=signoz-access-token=YOUR_SIGNOZ_ACCESS_TOKEN OTEL_EXPORTER_OTLP_ENDPOINT=YOUR_COLLECTOR_ENDPOINT go run .
    ```
 
 2. `cd` to the client directory and then run the go grpc client
    ```jsx
-   go run client.go
+   SERVICE_NAME=goAppClient OTEL_EXPORTER_OTLP_HEADERS=signoz-access-token=YOUR_SIGNOZ_ACCESS_TOKEN OTEL_EXPORTER_OTLP_ENDPOINT=YOUR_COLLECTOR_ENDPOINT  go run .
    ```
 
 Running the client makes a set of CRUD operations in MongoDB such as create Employee, Read Employee, Update Employee and Delete Employee. We have added traces for all these operations so that it generates some monitoring data to be explored on the SigNoz dashboard.
