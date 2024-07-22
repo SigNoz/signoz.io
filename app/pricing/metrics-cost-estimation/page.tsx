@@ -3,7 +3,9 @@ import MetricsCostEstimation from './MetricsCostEstimation'
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Metrics Cost Estimation',
+  title: {
+    absolute: 'SigNoz | Metrics Cost Estimation',
+  },
   openGraph: {
     title: 'SigNoz | Metrics Cost Estimation',
     description: 'Understand the pricing of metrics in SigNoz cloud.',
