@@ -48,7 +48,7 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
   const post = allDocs.find((p) => p.slug === slug) as Doc
   const mainContent = coreContent(post)
   const toc = post?.toc || []
-  const { title } = mainContent
+  const { title, hide_table_of_contents } = mainContent
 
   return (
     <>
@@ -59,7 +59,7 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
           <DocsPrevNext />
         </div>
 
-        {toc && Array.isArray(toc) && toc.length > 0 && (
+        {!hide_table_of_contents && toc && Array.isArray(toc) && toc.length > 0 && (
           <div className="doc-toc">
             <div className="mb-3 text-xs uppercase"> On this page </div>
 
