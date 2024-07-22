@@ -137,12 +137,12 @@ const MonthlyEstimate = () => {
           </span>
           <span className="mb-16 text-signoz_vanilla-400 font-normal text-base pl-1">
             You can also set data ingestion limits so you never get a surprise bill.
-            <Link href={"https://signoz.io/docs/ingestion/signoz-cloud/keys/"}>
             <span className="text-signoz_robin-400 font-medium">
-              &nbsp;Learn more
-              <ArrowUpRight className="inline" size={16} />
+              <Link href={"https://signoz.io/docs/ingestion/signoz-cloud/keys/"}>
+                &nbsp;Learn more
+                <ArrowUpRight className="inline" size={16} />
+              </Link>
             </span>
-            </Link>
           </span>
         </div>
         <div className="grid grid-cols-6 grid-rows-4 gap-y-4">
@@ -194,7 +194,7 @@ const MonthlyEstimate = () => {
               minValue={MIN_VALUE}
               showTooltip={true}
               tooltipProps={{
-                content: formatBytes (linearToLog(tracesValue, MIN_VALUE, MAX_VALUE))
+                content: formatBytes(linearToLog(tracesValue, MIN_VALUE, MAX_VALUE))
               }}
               color="secondary"
               marks={[
@@ -280,7 +280,7 @@ const MonthlyEstimate = () => {
               minValue={MIN_VALUE}
               showTooltip={true}
               tooltipProps={{
-                content: formatBytes (linearToLog(logsValue, MIN_VALUE, MAX_VALUE))
+                content: formatBytes(linearToLog(logsValue, MIN_VALUE, MAX_VALUE))
               }}
               color="danger"
               marks={[
@@ -366,7 +366,7 @@ const MonthlyEstimate = () => {
               minValue={MIN_VALUE}
               showTooltip={true}
               tooltipProps={{
-                content: formatMetrics (linearToLog(metricsValue, MIN_VALUE, MAX_VALUE))
+                content: formatMetrics(linearToLog(metricsValue, MIN_VALUE, MAX_VALUE))
               }}
               color="warning"
               marks={[
@@ -434,11 +434,11 @@ const MonthlyEstimate = () => {
             Reach out to us for custom pricing and retention for high volume
           </span>
           <div className="w-2/5 border-b border-signoz_slate-400 border-dashed" />
-          <Link href={'https://share.hsforms.com/1AZy88ajlRsCPZUP0kSMb2gda5af'}>
-            <Button className="w-full">
+          <Button>
+            <Link href={'https://share.hsforms.com/1AZy88ajlRsCPZUP0kSMb2gda5af'} className='flex-center'>
               Contact us
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
       </div>
     </section>
