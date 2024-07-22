@@ -733,7 +733,6 @@ You can find instructions to install OTel Collector binary [here](https://signoz
 7. You can validate if your application is sending traces to SigNoz cloud by following the instructions [here](#validating-instrumentation-by-checking-for-traces).
 
 </TabItem>
-
 </Tabs>
 
 
@@ -1018,24 +1017,42 @@ span.AddEvent("This is a sample event", trace.WithAttributes(attribute.Int("pid"
 
 ## gRPC Instrumentation with OpenTelemetry
 
-Similarly, OpenTelemetry can also help you automatically instrument gRPC requests. To instrument any gRPC servers you have, add an Interceptor to the instantiation of the server.
+OpenTelemetry can also help you automatically instrument gRPC requests. To instrument any gRPC servers you have.
 
-```bash
+```go
 import (
-  grpcotel "go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
+    "go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 )
 
 func main() {
   [...]
 
-	s := grpc.NewServer(
-		grpc.UnaryInterceptor(grpcotel.UnaryServerInterceptor()),
-		grpc.StreamInterceptor(grpcotel.StreamServerInterceptor()),
+    // add StatsHandler to gRPC server initialization
+	s := grpc.NewServer(grpc.StatsHandler(otelgrpc.NewServerHandler()))
+
+}
+
+```
+
+Similarly, instrument your gRPC client as well by adding otelgrpc when initializing gRPC client
+
+```go
+import (
+    "go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
+)
+
+func main() {
+  [...]
+
+    // add StatsHandler to gRPC client initialization
+	cc, err := grpc.NewClient(serverUrl, grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithStatsHandler(otelgrpc.NewClientHandler()),
 	)
 
 }
 
 ```
+
 We have a blog [Monitor gRPC calls with OpenTelemetry - explained with a Golang example](https://signoz.io/blog/opentelemetry-grpc-golang/), do refer to that in case you need a helping hand to work with gRPC server.
 
 ## Recording Errors and Exceptions
