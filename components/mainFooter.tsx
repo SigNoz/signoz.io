@@ -109,7 +109,7 @@ function Footer() {
                   Privacy
                 </Link>
 
-                <Link href="/security" className="mt-5 hover:underline">
+                <Link href="https://trust.signoz.io/" target="_blank" className="mt-5 hover:underline">
                   Security & Compliance
                 </Link>
               </div>
