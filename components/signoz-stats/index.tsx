@@ -40,20 +40,20 @@ const SigNozStats = () => {
               ))}
             </div>
             <div className="flex flex-col items-center gap-3 border !border-b-0 !border-r-0 border-dashed border-signoz_slate-400 py-6 sm:flex-row sm:py-6 sm:pl-10">
-              <Link href="https://signoz.io/slack/">
-                <Button className="w-[100%] text-xs sm:text-sm">
+              <Button className="text-xs sm:text-sm">
+                <Link href="https://signoz.io/slack/" className='flex-center'>
                   <BookOpen className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                   Join the community
                   <ArrowRight className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-                </Button>
-              </Link>
-              <Link href="https://github.com/SigNoz/signoz/">
-                <Button type={Button.TYPES.SECONDARY} className="w-[100%] text-xs sm:text-sm">
+                </Link>
+              </Button>
+              <Button type={Button.TYPES.SECONDARY} className="text-xs sm:text-sm">
+                <Link href="https://github.com/SigNoz/signoz/" className='flex-center'>
                   <BookOpen className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                   GitHub Repository
                   <ArrowRight className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-                </Button>
-              </Link>
+                </Link>
+              </Button>
             </div>
           </div>
         </div>
