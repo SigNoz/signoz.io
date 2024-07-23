@@ -468,6 +468,51 @@ SigNoz Self-Hosted using Docker.
 </figcaption>
 </figure>
 
+<Tabs>
+<TabItem value="self-hosted-otel" label="Directly send to self-hosted SigNoz">
+
+The self-hosted SigNoz setup also includes the OTel collector in the bundle. Docker will deploy the OTel collector beside SigNoz as a container. The same OTel collector can be used to directly receive any signals, otherwise, if one more OTel Collector is required for a more granular collection, we can add an additional independent OTel collector, see Using Central OTel collector in between tab.
+
+</TabItem>
+
+<TabItem value="addon-otel" label="Using central OTel collector in between">
+
+Apart from using the native OTel collector present in the docker from the previous method, we can also deploy an additional independent OTel collector which can act as an additional collector in this setup for more granular metrics collection. Here we are considering OTel and Telegraf being set up in different VMs.
+
+**Step 1:** Install and configure OpenTelemetry to scrape the metrics from Telegraf. Add the following code block to the OpenTelemetry configuration file. Under exporters, we should have an exporter pointing to our SigNoz self-host setup. For example, in the below snippet, the endpoint-ip would be the address of the VM in which the SigNoz self-host setup is present.
+
+```yaml
+exporters:
+  otlp:
+	endpoint: "<endpoint-ip>:4317"
+	tls:
+  	   insecure: true
+  logging:
+	verbosity: normal
+```
+<Admonition type="info">
+We can use the default receiver configurations for OTel.
+```yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+```
+</Admonition>
+
+**Step 2:** After successful configuration, start the OTel service.
+
+<Admonition type="note">
+Please make appropriate changes to the networking connections (adding network to security groups, opening ports, etc.) on your VMs as per your setup.
+</Admonition>
+
+</TabItem>
+
+</Tabs>
+
 ## Deploy Telegraf to fetch the metrics from Google Cloud Monitoring.
 
 **Step 1:** Install [`telegraf`](https://github.com/influxdata/telegraf) which will collect metrics from Google Cloud Monitoring for Cloud Function, see the [available metrics for Cloud Function](https://cloud.google.com/monitoring/api/metrics_gcp#gcp-cloudfunctions). The installation process for the respective operating system can be found in official [documentation](https://docs.influxdata.com/telegraf/v1/install/).
@@ -526,7 +571,7 @@ The configuration file for telegraf can be found here:
 
   ## address:port
 
-  #   service_address = "localhost:4317"
+  #   service_address = "<endpoint-otel>:4317"
 ```
 
 **Step 3:** Restart the [`telegraf`](https://github.com/influxdata/telegraf) service.
