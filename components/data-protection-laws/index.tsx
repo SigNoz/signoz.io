@@ -36,23 +36,23 @@ const DataProtectionLaws = ({ isInPricingPage = false }) => {
           <img src="/img/graphics/homepage/feature-graphic-data-protection.webp" alt="" />
           {!isInPricingPage ? (
             <div className="mt-[18px] flex flex-col gap-3 sm:flex-row">
-              <Link href="/teams/">
-                <Button className="w-[100%] text-xs sm:text-sm">
+                <Button className="text-xs sm:text-sm">
+              <Link href="/teams/" className='flex-center'>
                   Use SigNoz Cloud <ArrowRight className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-                </Button>
               </Link>
-              <Link href="/docs/install/">
-                <Button type={Button.TYPES.SECONDARY} className="w-[100%] text-xs sm:text-sm">
+                </Button>
+                <Button type={Button.TYPES.SECONDARY} className="text-xs sm:text-sm">
+              <Link href="/docs/install/" className='flex-center'>
                   <BookOpen className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                   Self-Host SigNoz
-                </Button>
               </Link>
-              <Link href="/enterprise/">
-                <Button type={Button.TYPES.SECONDARY} className="w-[100%] text-xs sm:text-sm">
+                </Button>
+                <Button type={Button.TYPES.SECONDARY} className="text-xs sm:text-sm">
+              <Link href="/enterprise/" className='flex-center'>
                   <BookOpen className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                   On-prem, managed by SigNoz
-                </Button>
               </Link>
+                </Button>
             </div>
           ) : null}
         </div>
