@@ -1,8 +1,38 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { Slider, Tooltip, SliderValue } from "@nextui-org/react";
 import { ArrowUpRight } from 'lucide-react';
 import Button from '@/components/Button/Button';
+
+const scrollToSection = (id) => {
+  const element = document.getElementById(id);
+  if (element) {
+    element.scrollIntoView({
+      block: "start",
+      behavior: "smooth",
+    });
+    window.location.hash = `#${id}`;
+  }
+};
+
+const useHash = () => {
+  const [hash, setHash] = useState("");
+
+  useEffect(() => {
+    const handleHashChange = () => {
+      setHash(window.location.hash);
+    };
+    
+    setHash(window.location.hash);
+
+    window.addEventListener("hashchange", handleHashChange);
+    return () => {
+      window.removeEventListener("hashchange", handleHashChange);
+    };
+  }, []);
+
+  return hash;
+};
 
 const formatNumber = (number) => number.toLocaleString(undefined, { maximumFractionDigits: 2, minimumFractionDigits: 0 });
 
@@ -127,13 +157,29 @@ const MonthlyEstimate = () => {
 
   const isHighVolume = totalEstimate >= 2500;
 
+  const hash = useHash();
+
+  useEffect(() => {
+    const section = hash.replace("#", "");
+    if (section) scrollToSection(section);
+  }, [hash]);
+
+  const copyLinkToClipboard = () => {
+    navigator.clipboard.writeText("https://signoz.io/pricing/#estimate-your-monthly-bill");
+  };
 
   return (
-    <section ref={myRef} id="monthly-estimate">
+    <section ref={myRef} id="estimate-your-monthly-bill">
       <div className="section-container !w-[80vw] !mx-[auto] border border-signoz_slate-400 border-dashed !border-t-0">
         <div className="flex flex-col gap-2 pt-5">
-          <span className="text-signoz_vanilla-100 text-2xl font-semibold pl-1">
+          <span className="text-signoz_vanilla-100 text-2xl font-semibold pl-1 relative group">
             Estimate your monthly bill
+            <a href="#estimate-your-monthly-bill" onClick={copyLinkToClipboard} className="ml-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="#4E74F8" className="w-6 h-6 linkicon">
+                <path d="M12.232 4.232a2.5 2.5 0 0 1 3.536 3.536l-1.225 1.224a.75.75 0 0 0 1.061 1.06l1.224-1.224a4 4 0 0 0-5.656-5.656l-3 3a4 4 0 0 0 .225 5.865.75.75 0 0 0 .977-1.138 2.5 2.5 0 0 1-.142-3.667l3-3Z" />
+                <path d="M11.603 7.963a.75.75 0 0 0-.977 1.138 2.5 2.5 0 0 1 .142 3.667l-3 3a2.5 2.5 0 0 1-3.536-3.536l1.225-1.224a.75.75 0 0 0-1.061-1.06l-1.224 1.224a4 4 0 1 0 5.656 5.656l3-3a4 4 0 0 0-.225-5.865Z" />
+              </svg>
+            </a>
           </span>
           <span className="mb-16 text-signoz_vanilla-400 font-normal text-base pl-1">
             You can also set data ingestion limits so you never get a surprise bill.
