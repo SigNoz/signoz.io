@@ -109,7 +109,7 @@ function Footer() {
                   Privacy
                 </Link>
 
-                <Link href="/security" className="mt-5 hover:underline">
+                <Link href="https://trust.signoz.io/" target="_blank" className="mt-5 hover:underline">
                   Security & Compliance
                 </Link>
               </div>
@@ -169,6 +169,15 @@ function Footer() {
                   >
                     <Youtube />
                   </Link>
+                </div>
+                <div className='mt-5 '>
+                <img
+                    className="shadow-[0px_0_40px_0_rgba(255,255,255,0.27)] rounded-full"
+                    src="/img/Footer_SOC2.webp"
+                    width={90}
+                    height={90}
+                    alt=""
+                  />
                 </div>
               </div>
             </div>

@@ -23,7 +23,7 @@ export const WhyOpenTelemetry = () => {
     },
     {
       title: 'Covers all use-cases',
-      desc: 'OpenTelemetry is a one-stop solution for all your telemetry needs.',
+      desc: 'OpenTelemetry is a one-stop solution for all your telemetry needs. Generate logs, metrics, and traces with one SDK.',
       figure: '/img/landing/property-covers-all-use-cases.webp',
       logo: '/img/index_features/cases.svg',
     },

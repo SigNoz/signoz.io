@@ -17,7 +17,7 @@ const BuildForDevelopers = () => {
     },
     {
       title: 'Columnar database',
-      desc: 'SigNoz uses ClickHouse as datastore. It is extremely fast and highly optimized storage for observability data.',
+      desc: 'SigNoz uses ClickHouse (used by likes of Uber & Cloudflare) as datastore - an extremely fast and highly optimized storage for observability data.',
       figure: '/img/graphics/homepage/feature-graphic-columnar-db.webp',
     },
     {
