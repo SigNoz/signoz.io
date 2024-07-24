@@ -16,14 +16,21 @@ const scrollToSection = (id) => {
 };
 
 const useHash = () => {
-  const [hash, setHash] = useState(window.location.hash);
+  const [hash, setHash] = useState("");
+
   useEffect(() => {
-    const onHashChange = () => {
+    const handleHashChange = () => {
       setHash(window.location.hash);
     };
-    window.addEventListener('hashchange', onHashChange);
-    return () => window.removeEventListener('hashchange', onHashChange);
+    
+    setHash(window.location.hash);
+
+    window.addEventListener("hashchange", handleHashChange);
+    return () => {
+      window.removeEventListener("hashchange", handleHashChange);
+    };
   }, []);
+
   return hash;
 };
 
