@@ -15,6 +15,7 @@ import { Testimonials } from '@/components/testimonials'
 import { TrustedByTeams } from '@/components/trusted-by'
 import { WhyOpenTelemetry } from '@/components/why-opentelemetry'
 import WhySelectSignoz from '@/components/why-select-signoz'
+import {GetStarted} from '@/components/GetStarted'
 import { NextUIProvider } from '@nextui-org/react'
 import { Metadata } from 'next'
 
@@ -46,6 +47,7 @@ export default async function Page() {
           <WhySelectSignoz />
           <SigNozStats />
           <Testimonials />
+          <GetStarted />
         </main>
       </div>
     </NextUIProvider>
