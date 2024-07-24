@@ -471,7 +471,7 @@ const PricingPlans = () => {
                     <div>
                       <div className="gap-3">
                         <CircleCheckSolid color="fill-signoz_sienna-400" />
-                        <span className="text-signoz_vanilla-400">Community Slack</span>
+                        <span className="text-signoz_vanilla-400">In-Product Chat Support</span>
                       </div>
                     </div>
                     <div>
@@ -483,9 +483,18 @@ const PricingPlans = () => {
                     <div>
                       <div className="gap-3">
                         <CircleCheckSolid color="fill-signoz_sienna-400" />
+                        <span className="text-signoz_vanilla-400">Support for Migrating DataDog Dashboards</span>
+                        <span className="rounded-full border border-none bg-signoz_slate-400 px-2 py-1 text-center !text-[10px] uppercase text-signoz_vanilla-400 sm:text-xs">
+                          On spends above $999 per month
+                        </span>
+                      </div>
+                    </div>
+                    <div>
+                      <div className="gap-3">
+                        <CircleCheckSolid color="fill-signoz_sienna-400" />
                         <span className="text-signoz_vanilla-400">Dedicated Slack Channel</span>
                         <span className="rounded-full border border-none bg-signoz_slate-400 px-2 py-1 text-center !text-[10px] uppercase text-signoz_vanilla-400 sm:text-xs">
-                          On spends above $999
+                          On spends above $999 per month
                         </span>
                       </div>
                     </div>
@@ -640,6 +649,14 @@ const PricingPlans = () => {
                       <li className="mb-2 flex items-center gap-3 text-signoz_vanilla-400">
                         {' '}
                         <CircleCheckSolid color="fill-signoz_sienna-400" /> Dedicated Slack Channel
+                      </li>
+                      <li className="mb-2 flex items-center gap-3 text-signoz_vanilla-400">
+                        {' '}
+                        <CircleCheckSolid color="fill-signoz_sienna-400" /> In-Product Chat Support
+                      </li>
+                      <li className="mb-2 flex items-center gap-3 text-signoz_vanilla-400">
+                        {' '}
+                        <CircleCheckSolid color="fill-signoz_sienna-400" /> Support for Migrating DataDog Dashboards
                       </li>
                       <li className="mb-2 flex items-center gap-3 text-signoz_vanilla-400">
                         {' '}
@@ -819,10 +836,6 @@ const PricingPlans = () => {
                         {' '}
                         <CircleCheckSolid /> Alerts Management
                       </li>
-                      <li className="mb-3 flex items-center gap-3">
-                        {' '}
-                        <CircleCheckSolid /> SSO and SAML Support
-                      </li>
                       <li className="mb-6 flex items-center gap-3">
                         {' '}
                         <CircleCheckSolid /> Service Dependency Visualization
@@ -904,6 +917,10 @@ const PricingPlans = () => {
                       <li className="mb-2 flex items-center gap-3 text-signoz_vanilla-400">
                         {' '}
                         <CircleCheckSolid color="fill-signoz_sienna-400" /> Dedicated Slack Channel
+                      </li>
+                      <li className="mb-2 flex items-center gap-3 text-signoz_vanilla-400">
+                        {' '}
+                        <CircleCheckSolid color="fill-signoz_sienna-400" /> Support for Migrating DataDog Dashboards
                       </li>
                       <li className="mb-2 flex items-center gap-3 text-signoz_vanilla-400">
                         {' '}
@@ -1360,12 +1377,31 @@ const ExploreAllFeature = () => {
             feature: 'In product chat support',
             inCommunity: <CrossSolid />,
             inTeams: <CheckSolid />,
+            inEnterprise: (
+              <div className="flex items-center">
+                <CloudSolid />
+                <span className="ml-1.5 text-[8px] sm:text-xs">ENTERPRISE CLOUD</span>
+              </div>
+            ),
+          },
+          {
+            feature: 'Support for Migrating DataDog Dashboards',
+            inCommunity: <CrossSolid />,
+            inTeams: (
+              <div className="flex items-center">
+                <span className="ml-1.5 text-[8px] sm:text-xs uppercase"> for spends above $999</span>
+              </div>
+            ),
             inEnterprise: <CheckSolid />,
           },
           {
             feature: 'Dedicated Slack Channel',
             inCommunity: <CrossSolid />,
-            inTeams: <CrossSolid />,
+            inTeams: (
+              <div className="flex items-center">
+                <span className="ml-1.5 text-[8px] sm:text-xs uppercase"> for spends above $999</span>
+              </div>
+            ),
             inEnterprise: <CheckSolid />,
           },
           {

@@ -141,14 +141,14 @@ export default function TopNav() {
             <SearchButton />
             <GitHubStars />
 
-            <Link href="/teams" className="mx-2">
               <Button
                 id="btn-get-started-website-navbar"
-                className="start-free-trial-btn h-8 pr-3 pl-4 px-4 py-2 rounded-full text-sm flex items-center justify-center gap-1.5 not-italic truncate text-center font-medium leading-5 text-white no-underline outline-none hover:text-white"
+                className="start-free-trial-btn h-8 pr-3 pl-4 px-4 py-2 rounded-full text-sm flex items-center justify-center gap-1.5 not-italic truncate text-center font-medium leading-5 text-white no-underline outline-none hover:text-white mx-2"
               >
+            <Link href="/teams" className="flex-center">
                 Try SigNoz Cloud <ArrowRight size={14} />
-              </Button>
             </Link>
+              </Button>
           </div>
         </nav>
         <Dialog as="div" className="lg:hidden" open={mobileMenuOpen} onClose={setMobileMenuOpen}>
@@ -191,11 +191,12 @@ export default function TopNav() {
 
                     <Button
                       id="btn-get-started-website-navbar"
-                      className="start-free-trial-btn font-heading flex items-center justify-center gap-1 truncate rounded-md border-none px-4 py-2 text-center text-sm text-xs  font-bold leading-4 text-white no-underline outline-none hover:text-white"
+                      className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 hover:bg-signoz_ink-200"
                     >
                       <Link
                         href="/teams"
-                        className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 hover:bg-signoz_ink-200"
+                        className="start-free-trial-btn font-heading flex items-center justify-center gap-1 truncate rounded-md border-none px-4 py-2 text-center text-sm text-xs  font-bold leading-4 text-white no-underline outline-none hover:text-white"
+                        onClick={() => setMobileMenuOpen(false)}
                       >
                         Try SigNoz Cloud <ArrowRight size={14} />
                       </Link>
