@@ -1,7 +1,7 @@
 ---
 title: Monitoring your Nextjs application using OpenTelemetry 
 slug: opentelemetry-nextjs
-date: 2024-05-16
+date: 2024-07-24
 tags: [OpenTelemetry Instrumentation, JavaScript]
 authors: [sai_deepesh]
 description: OpenTelemetry can help instrument Nextjs applications and provide you with end-to-end tracing. In this guide, we will demonstrate how to instrument your Nextjs app with OpenTelemetry...
@@ -87,7 +87,7 @@ When you are done installing SigNoz, you can access the UI at [http://localhost
 
 ### Creating a sample Nextjs application
 
-To install and run a Nextjs application you need to have Nodejs 12.22.0 or later. You can also check the sample application at this <a href = "https://github.com/SigNoz/opentelemetry-nextjs-example" rel="noopener noreferrer nofollow" target="_blank">GitHub repo</a>.
+To install and run a Nextjs application you need to have Nodejs 12.22.0 or later. You can also check the sample application at this <a href = "https://github.com/SigNoz/sample-nextjs-app" rel="noopener noreferrer nofollow" target="_blank">GitHub repo</a>.
 
 <a href = "https://nodejs.org/en/download/" rel="noopener noreferrer nofollow" target="_blank">Download the latest version of Nodejs</a>
 
@@ -152,38 +152,56 @@ You can use yarn or npm as per the package manager that you’re using for the p
 </Admonition>
 
 
-**Step 2: Create a `tracing.js` file**
+**Step 2.** Update `next.config.mjs` to include instrumentationHook
+```tsx
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+    // include instrumentationHook experimental feature
+    experimental: {
+        instrumentationHook: true,
+    },
+};
 
-Instantiate tracing by creating a `tracing.js` file and using the below code. 
+export default nextConfig;
+```
 
-We are also setting up the IP of SigNoz backend in this file as `http://localhost:4318/v1/traces`. If you have installed SigNoz on a different machine other than your localhost, use the relevant IP.
+**Step 3.** Create `instrumentation.ts` file<br></br>
+```tsx
+export async function register() {
+  if (process.env.NEXT_RUNTIME === 'nodejs') {
+    await import('./instrumentation.node')
+  }
+}
+```
 
-```jsx
+**Step 4.** Create `instrumentation.node.ts` file<br></br>
+You need to configure the endpoint for SigNoz cloud in this file.
+
+```tsx
 'use strict'
+import process from 'process';
+import {NodeSDK} from '@opentelemetry/sdk-node';
+import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http'
+import { Resource } from '@opentelemetry/resources'
+import { SEMRESATTRS_SERVICE_NAME } from '@opentelemetry/semantic-conventions'
+ 
+// Add otel logging when debugging
+// import { diag, DiagConsoleLogger, DiagLogLevel } from '@opentelemetry/api';
+// diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.DEBUG);
 
-const opentelemetry = require('@opentelemetry/sdk-node');
-const { getNodeAutoInstrumentations } = require('@opentelemetry/auto-instrumentations-node');
-const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-http');
-
-
-const { Resource } = require('@opentelemetry/resources');
-const { SemanticResourceAttributes } = require('@opentelemetry/semantic-conventions');
-
-// custom nextjs server
-const { startServer } = require('./server');
-
-// configure the SDK to export telemetry data to the console
-// enable all auto-instrumentations from the meta package
 const exporterOptions = {
-  url: 'http://localhost:4318/v1/traces',
- }
+  url: 'https://ingest.[region].signoz.cloud:443/v1/traces', // Use your own data region or set to http://localhost:4318/v1/traces if using selfhost SigNoz
+  headers: { 'signoz-access-token': 'SIGNOZ_INGESTION_KEY' }, // Use if you are using SigNoz Cloud
+}
+
 const traceExporter = new OTLPTraceExporter(exporterOptions);
-const sdk = new opentelemetry.NodeSDK({
-  resource: new Resource({
-    [SemanticResourceAttributes.SERVICE_NAME]: 'SigNoz-Nextjs-Example'
-  }),
+const sdk = new NodeSDK({
   traceExporter,
-  instrumentations: [getNodeAutoInstrumentations()]
+  instrumentations: [getNodeAutoInstrumentations()],
+    resource: new Resource({
+    [SEMRESATTRS_SERVICE_NAME]: 'SigNoz-Nextjs-Example',
+  }),
 });
 
 // initialize the SDK and register with the OpenTelemetry API
@@ -197,75 +215,11 @@ process.on('SIGTERM', () => {
     .catch((error) => console.log('Error terminating tracing', error))
     .finally(() => process.exit(0));
 });
-
-module.exports = sdk
-```
-
-About environment variables:
-
-`service_name`: name of the service you want to monitor
-
-`http://localhost:4318/v1/traces` is the default url for sending your tracing data. We are assuming you have installed SigNoz on your `localhost`. Based on your environment, you can update it accordingly. It should be in the following format:
-
-`http://<IP of SigNoz backend>:4318/v1/traces`
-
-<Admonition>
-Remember to allow incoming requests to port 4318 of machine where SigNoz backend is hosted.
-</Admonition>
-
-
-Now we will have to create the `server.js` file that we have imported into the `tracing.js` file.
-
-**Step 3: Create a custom Nextjs server**
-
-Create a `server.js` file in the source folder using the following code.
-
-```jsx
-const { createServer } = require("http")
-const { parse } = require("url")
-const next = require("next")
-
-const dev = process.env.NODE_ENV !== "production"
-const app = next({ dev })
-const handle = app.getRequestHandler()
-
-module.exports = {
-  startServer: async function startServer() {
-    return app.prepare().then(() => {
-      createServer((req, res) => {
-        const parsedUrl = parse(req.url, true)
-        handle(req, res, parsedUrl)
-      }).listen(8080, (err) => {
-        if (err) throw err
-        console.log("> Ready on http://localhost:8080")
-      })
-    })
-  },
-}
-```
-
-You can use whichever port is available, for this example we’ve used port 8080.
-
-**Step 4: Adding the script to start the server**
-
-Now we will have to run the server in order to trace the data,
-
-In the `package.json`, let’s create a new script `npm run start:server` or `yarn start:server` and point that you `node tracing.js`.
-
-With this `scripts` JSON in the `package.json` file looks something like this.
-
-```jsx
-"scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start:server": "node tracing.js",
-    "lint": "next lint"
-  }
 ```
 
 **Step 5: Run the server and monitor the application**
 
-Run the application using `npm run start:server` or `yarn start:server` , and your application should be available on [http://localhost:8080](http://localhost:8080/) .
+Run the application, and your application should be available on [http://localhost:8080](http://localhost:8080/) .
 
 Hit the URL a couple of times to generate some dummy data and wait for the `SigNoz-Nextjs-Example` application to be visible on the SigNoz dashboard.
 
