@@ -157,8 +157,6 @@ const MonthlyEstimate = () => {
 
   const isHighVolume = totalEstimate >= 2500;
 
-  const [tooltipText, setTooltipText] = useState("Copy link");
-
   const hash = useHash();
 
   useEffect(() => {
