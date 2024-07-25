@@ -11,7 +11,7 @@ import { Github, Linkedin, Slack, Twitter, Youtube } from '@/components/social-i
  */
 function Footer() {
   return (
-    <div className="flex flex-col justify-center border-t border-solid border-gray-900">
+    <div className="flex flex-col justify-center border-t border-solid border-gray-900 z-[10] bg-signoz_ink-500 backdrop-blur-md bg-opacity-70">
       <div className="flex w-full items-center justify-center bg-opacity-70 px-16 py-14 max-md:max-w-full max-md:px-5">
         <div className="container w-full max-w-[1200px] justify-between max-md:max-w-full">
           <div className="flex gap-5 max-md:flex-col max-md:gap-0">
