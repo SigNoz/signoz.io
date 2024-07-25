@@ -19,7 +19,7 @@ export const CommunityEdition = () => {
             </p>
           </div>
           <div className="h-[72px] md:h-[250px]">
-            <Link href={'https://github.com/SigNoz/signoz'} style={{ cursor: 'default' }}>
+            <Link href={'https://github.com/SigNoz/signoz'}>
               <div className="group flex items-center rounded border border-none bg-signoz_ink-400 p-4 text-white hover:bg-signoz_ink-300">
                 <div className="mr-4">
                   <img src="/svgs/icons/signoz.svg" alt="SigNoz Icon" />

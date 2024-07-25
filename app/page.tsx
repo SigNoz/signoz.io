@@ -15,6 +15,7 @@ import { Testimonials } from '@/components/testimonials'
 import { TrustedByTeams } from '@/components/trusted-by'
 import { WhyOpenTelemetry } from '@/components/why-opentelemetry'
 import WhySelectSignoz from '@/components/why-select-signoz'
+import {GetStarted} from '@/components/GetStarted'
 import { NextUIProvider } from '@nextui-org/react'
 import { Metadata } from 'next'
 
@@ -39,13 +40,14 @@ export default async function Page() {
         <div className="absolute left-0 right-0 top-0 h-screen bg-[url('/img/background_blur/Circle.png')] bg-[length:110%] bg-no-repeat sm:bg-[center_top_-50rem]" />
         <main className="landing-section relative z-[1] pt-12 sm:pt-0">
           <Header />
-          <TrustedByTeams />
+          <TrustedByTeams page="homepage" />
           <SigNozFeatures />
           <BuildForDevelopers />
           <WhyOpenTelemetry />
           <WhySelectSignoz />
           <SigNozStats />
-          <Testimonials />
+          <Testimonials page="homepage"/>
+          <GetStarted page="homepage" />
         </main>
       </div>
     </NextUIProvider>
