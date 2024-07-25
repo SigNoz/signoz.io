@@ -82,7 +82,7 @@ export default function TopNav() {
               onClick={() => setMobileMenuOpen(false)}
             >
               <Image
-                className="h-6 w-auto"
+                className="h-5 w-auto"
                 src="/img/SigNozLogo-orange.svg"
                 width={160}
                 height={60}
