@@ -5,7 +5,7 @@ import Link from 'next/link'
 
 export const GetStarted = ({page}) => {
   const getStartedId = `btn-get-started-${page}`;
-  const readDocumentationId = `btn-read-documentation=${page}`;
+  const readDocumentationId = `btn-read-documentation-${page}`;
 
   return (
  <div className="bg-[url('/img/background_blur/Frame_2185.png')] bg-[length:55%] bg-[width:50%] bg-[center_top_4rem] sm:bg-no-repeat">
