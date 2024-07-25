@@ -1,3 +1,5 @@
+'use client'
+
 import * as React from 'react'
 import Link from 'next/link'
 import { ArrowUpRight } from 'lucide-react'
@@ -118,7 +120,7 @@ function Footer() {
               <div className="flex flex-col items-end shadow-sm max-md:mt-10">
                 <div className="flex items-center justify-between gap-2 self-end whitespace-nowrap text-center text-lg font-medium leading-5 text-white">
                   <Image
-                    className="h-7 w-auto"
+                    className="h-5 w-auto"
                     src="/img/SigNozLogo-orange.svg"
                     width={50}
                     height={50}
@@ -170,13 +172,14 @@ function Footer() {
                     <Youtube />
                   </Link>
                 </div>
-                <div className='mt-5 '>
+                <div className='mt-5'>
                 <img
-                    className="shadow-[0px_0_40px_0_rgba(255,255,255,0.27)] rounded-full"
-                    src="/img/Footer_SOC2.webp"
+                    className="shadow-[0px_0_40px_0_rgba(255,255,255,0.27)] rounded-full opacity-60 hover:opacity-100 transition-opacity cursor-pointer"
+                    src="/svgs/icons/SOC-2.svg"
                     width={90}
                     height={90}
                     alt=""
+                    onClick={()=> window.open("https://trust.signoz.io/", "_blank")}
                   />
                 </div>
               </div>
