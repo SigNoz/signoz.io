@@ -1,0 +1,320 @@
+---
+
+title: What are the Prometheus Queries to Monitoring Kubernetes Pod CPU and Memory
+slug: prometheus-queries-to-get-cpu-and-memory-usage-in-kubernetes-pods
+date: 2024-07-25
+tags: [prometheus, faq]
+authors: [daniel]
+description: Learn how to monitor Kubernetes pod CPU and memory usage with Prometheus queries. Optimize your cluster performance with effective resource tracking.
+keywords: [Kubernetes monitoring, Prometheus queries, pod CPU usage, pod memory usage, PromQL, resource metrics, container monitoring]
+
+---
+
+<head>
+<script
+  type="application/ld+json"
+  dangerouslySetInnerHTML={{ __html: JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "What are the Prometheus Queries to Monitoring Kubernetes Pod CPU and Memory",
+    "alternativeHeadline": "Prometheus Queries for Monitoring Kubernetes Pod CPU and Memory Usage",
+    "author": {
+      "@type": "Daniel",
+      "name": "Yuvraj"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "SigNoz",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://signoz.io/img/SigNozLogo-orange.svg"
+      }
+    },
+    "datePublished": "2024-07-25T00:00:00Z",
+    "dateModified": "2024-07-25T00:00:00Z",
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": "https://signoz.io/guides/prometheus-queries-to-get-cpu-and-memory-usage-in-kubernetes-pods/"
+    },
+    "description": "Learn how to monitor Kubernetes pod CPU and memory usage with Prometheus queries. Optimize your cluster performance with effective resource tracking.",
+    "keywords": "Kubernetes monitoring, Prometheus queries, pod CPU usage, pod memory usage, PromQL, resource metrics, container monitoring",
+    "articleSection": "Technology",
+    "inLanguage": "en",
+    "isPartOf": {
+      "@type": "Blog",
+      "name": "SigNoz Blog",
+      "url": "https://signoz.io/blog/"
+    },
+    "about": [
+      {
+        "@type": "Thing",
+        "name": "Prometheus",
+        "description": "An open-source monitoring and alerting toolkit designed for reliability and scalability."
+      },
+      {
+        "@type": "Thing",
+        "name": "Kubernetes",
+        "description": "An open-source container orchestration platform designed to automate the deployment, scaling, and management of containerized applications."
+      },
+      {
+        "@type": "Thing",
+        "name": "PromQL",
+        "description": "Prometheus Query Language used to query and analyze metrics."
+      },
+      {
+        "@type": "Thing",
+        "name": "CPU Usage",
+        "description": "Measurement of the processing power used by an application or system."
+      },
+      {
+        "@type": "Thing",
+        "name": "Memory Usage",
+        "description": "Measurement of the memory consumed by an application or system."
+      }
+    ],
+    "mentions": [
+      {
+        "@type": "SoftwareApplication",
+        "name": "Prometheus",
+        "applicationCategory": "Monitoring Tool"
+      },
+      {
+        "@type": "SoftwareApplication",
+        "name": "SigNoz",
+        "applicationCategory": "Observability Platform"
+      },
+      {
+        "@type": "SoftwareApplication",
+        "name": "Grafana",
+        "applicationCategory": "Visualization Tool"
+      }
+    ],
+    "mainEntity": {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Why monitor Kubernetes pod resources?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Monitoring Kubernetes pod resources is essential for maintaining optimal cluster performance and cost-efficiency. It helps track resource usage, identify issues, make informed scaling decisions, and control costs."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What are key metrics for CPU and memory usage in Kubernetes pods?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Key metrics include container_cpu_usage_seconds_total for CPU usage and container_memory_usage_bytes for memory usage. Additionally, kube_pod_container_resource_limits and kube_pod_container_resource_requests provide information on resource limits and requests."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How to query CPU usage in Kubernetes pods with Prometheus?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "To query CPU usage, use Prometheus queries such as: sum(rate(container_cpu_usage_seconds_total{container!=\"\"}[5m])) by (pod) for basic CPU usage per pod, and sum(rate(container_cpu_usage_seconds_total{container!=\"\"}[5m])) by (pod) / sum(kube_pod_container_resource_limits{resource=\"cpu\"}) by (pod) * 100 for CPU usage as a percentage of allocated resources."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How to monitor memory usage in Kubernetes pods with Prometheus?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Use queries like sum(container_memory_usage_bytes{container!=\"\"}) by (pod) for current memory usage across pods and sum(rate(container_memory_usage_bytes{container!=\"\"}[1h])) by (pod) for memory usage trends over time. To identify potential memory leaks, use sum(container_memory_working_set_bytes{container!=\"\"}) by (pod) / sum(kube_pod_container_resource_limits{resource=\"memory\"}) by (pod) > 0.8."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What are best practices for Prometheus queries in Kubernetes?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Best practices include using label selectors efficiently, aggregating metrics wisely, implementing rate() and increase() functions for accurate measurements, and optimizing query performance by using time range selectors judiciously and avoiding overly complex queries."
+          }
+        }
+      ]
+    },
+    "tutorial": {
+      "@type": "HowTo",
+      "name": "Monitoring Kubernetes Pod CPU and Memory Usage with Prometheus",
+      "step": [
+        {
+          "@type": "HowToStep",
+          "name": "Understand PromQL",
+          "text": "Grasp the basics of PromQL (Prometheus Query Language) to unlock powerful insights from your Kubernetes metrics."
+        },
+        {
+          "@type": "HowToStep",
+          "name": "Identify Key Metrics",
+          "text": "Key metrics for CPU and memory usage in Kubernetes pods include container_cpu_usage_seconds_total, container_memory_usage_bytes, kube_pod_container_resource_limits, and kube_pod_container_resource_requests."
+        },
+        {
+          "@type": "HowToStep",
+          "name": "Query CPU Usage",
+          "text": "Use PromQL queries to monitor CPU usage, such as sum(rate(container_cpu_usage_seconds_total{container!=\"\"}[5m])) by (pod) for basic CPU usage per pod."
+        },
+        {
+          "@type": "HowToStep",
+          "name": "Query Memory Usage",
+          "text": "Use PromQL queries to monitor memory usage, such as sum(container_memory_usage_bytes{container!=\"\"}) by (pod) for current memory usage across pods."
+        },
+        {
+          "@type": "HowToStep",
+          "name": "Visualize Data in Grafana",
+          "text": "Create informative dashboards in Grafana by setting up panels for CPU and memory usage trends, using gauge charts for current resource utilization percentages, and implementing heat maps to identify patterns in resource usage over time."
+        }
+      ]
+    }
+  }) }}
+/>
+</head>
+
+Kubernetes has revolutionized container orchestration, but with great power comes great responsibility—especially when it comes to resource management. Monitoring your Kubernetes pod CPU and memory usage is crucial for maintaining optimal cluster performance and cost-efficiency. Prometheus, a powerful open-source monitoring system, offers robust querying capabilities to help you track these vital metrics. This guide will walk you through essential Prometheus queries to get CPU and memory usage in Kubernetes pods, ensuring you can keep your cluster running smoothly.
+
+## Why Monitor Kubernetes Pod Resources?
+
+Resource monitoring in Kubernetes environments is not just a nice-to-have—it's a necessity. Excessive CPU and memory usage can significantly impact cluster performance, leading to slower response times, increased latency, and even pod evictions. By implementing effective monitoring with Prometheus, you gain:
+
+1. **Real-time visibility**: Track resource usage across your entire cluster.
+2. **Proactive management**: Identify and address issues before they escalate.
+3. **Optimized scaling**: Make informed decisions about when to scale your resources.
+4. **Cost control**: Avoid over-provisioning and reduce unnecessary expenses.
+
+## Understanding Prometheus Queries for Kubernetes Monitoring
+
+Before diving into specific queries, it's essential to grasp the basics of PromQL (Prometheus Query Language). PromQL is the key to unlocking powerful insights from your Kubernetes metrics. Here are some fundamental concepts:
+
+- **Metrics**: Time series data with a name and key-value pairs (labels).
+- **Selectors**: Used to filter and aggregate metrics based on labels.
+- **Functions**: Manipulate and transform data (e.g., `rate()`, `sum()`, `avg()`).
+
+Key metrics for CPU and memory usage in Kubernetes pods include:
+
+- `container_cpu_usage_seconds_total`: Total CPU time consumed by a container.
+- `container_memory_usage_bytes`: Current memory usage of a container.
+- `kube_pod_container_resource_limits`: Resource limits set for containers.
+- `kube_pod_container_resource_requests`: Resource requests set for containers.
+
+It's important to note the difference between container-level and pod-level metrics. Container metrics provide granular data for individual containers, while pod metrics aggregate data across all containers in a pod.
+
+## How to Query CPU Usage in Kubernetes Pods with Prometheus
+
+To monitor CPU usage effectively, you'll need to craft queries that provide meaningful insights. Here are some essential queries to get you started:
+
+1. **Basic CPU usage per pod**:
+
+```
+sum(rate(container_cpu_usage_seconds_total{container!=""}[5m])) by (pod)
+
+```
+
+This query calculates the average CPU usage over the last 5 minutes for each pod.
+
+1. **CPU usage as a percentage of allocated resources**:
+
+```
+sum(rate(container_cpu_usage_seconds_total{container!=""}[5m])) by (pod) /
+sum(kube_pod_container_resource_limits{resource="cpu"}) by (pod) * 100
+
+```
+
+This query shows CPU usage as a percentage of the pod's CPU limit, helping you identify pods approaching their resource constraints.
+
+1. **Identifying pods with highest CPU consumption**:
+
+```
+topk(5, sum(rate(container_cpu_usage_seconds_total{container!=""}[5m])) by (pod))
+
+```
+
+Use this query to find the top 5 pods consuming the most CPU resources.
+
+1. **Detecting CPU throttling events**:
+
+```
+sum(rate(container_cpu_cfs_throttled_seconds_total{container!=""}[5m])) by (pod) > 0
+
+```
+
+This query helps you identify pods experiencing CPU throttling, which can indicate resource constraints.
+
+## Monitoring Memory Usage in Kubernetes Pods
+
+Memory usage is equally critical to monitor. Here are some useful Prometheus queries for tracking memory consumption:
+
+1. **Current memory usage across pods**:
+
+```
+sum(container_memory_usage_bytes{container!=""}) by (pod)
+
+```
+
+This query shows the current memory usage for each pod in bytes.
+
+1. **Memory usage trends over time**:
+
+```
+sum(rate(container_memory_usage_bytes{container!=""}[1h])) by (pod)
+
+```
+
+Use this query to observe memory usage trends over the past hour.
+
+1. **Identifying potential memory leaks**:
+
+```
+sum(container_memory_working_set_bytes{container!=""}) by (pod) /
+sum(kube_pod_container_resource_limits{resource="memory"}) by (pod) > 0.8
+
+```
+
+This query helps you spot pods using more than 80% of their memory limit, which could indicate a memory leak.
+
+1. **Detecting Out of Memory (OOM) events**:
+
+```
+kube_pod_container_status_last_terminated_reason{reason="OOMKilled"} == 1
+
+```
+
+Use this query to identify pods that have been terminated due to OOM events.
+
+## Best Practices for Prometheus Queries in Kubernetes
+
+To get the most out of your Prometheus queries for Kubernetes monitoring, follow these best practices:
+
+1. **Use label selectors efficiently**: Target specific namespaces or deployments to reduce query complexity and improve performance.
+2. **Aggregate metrics wisely**: Use functions like `sum()`, `avg()`, and `max()` to get meaningful insights across groups of pods or nodes.
+3. **Implement `rate()` and `increase()` functions**: These functions provide more accurate measurements for counters over time.
+4. **Optimize query performance**: Use time range selectors judiciously and avoid overly complex queries that may impact Prometheus performance.
+
+## Visualizing Kubernetes Resource Usage with Grafana
+
+While Prometheus provides powerful querying capabilities, visualizing the data can enhance your monitoring experience. Grafana, an open-source visualization tool, integrates seamlessly with Prometheus to create informative dashboards. Here are some tips for effective visualization:
+
+1. Create dedicated panels for CPU and memory usage trends.
+2. Use gauge charts to display current resource utilization percentages.
+3. Implement heat maps to identify patterns in resource usage over time.
+4. Set up alerting rules based on predefined thresholds to proactively manage resources.
+
+## Key Takeaways
+
+- Prometheus offers robust querying capabilities for monitoring Kubernetes pod resources.
+- Effective PromQL queries are essential for gaining accurate insights into CPU and memory usage.
+- Combining CPU and memory metrics provides a comprehensive view of pod health and performance.
+- Regular monitoring and alerting help maintain optimal cluster performance and cost-efficiency.
+
+By mastering Prometheus queries for CPU and memory usage in Kubernetes pods, you'll be well-equipped to maintain a healthy, efficient, and scalable cluster. Remember to continuously refine your monitoring strategy as your Kubernetes environment evolves, ensuring you stay ahead of potential resource issues and optimize your infrastructure for peak performance.
+
+## Enhance Your Monitoring with SigNoz
+
+While Prometheus offers powerful monitoring capabilities, managing retention and scaling can become challenging as your infrastructure grows. SigNoz provides a comprehensive monitoring solution that builds upon Prometheus' strengths while addressing its limitations.
+
+<GetStartedSigNoz />
+
+With SigNoz, you can:
+- Scale your monitoring infrastructure effortlessly
+- Access advanced querying and visualization capabilities
+- Benefit from integrated tracing and logging alongside metrics.
+- Get high performance with the clickhouse database
+- Take advantage of SigNoz's exceptional exception monitoring capabilities

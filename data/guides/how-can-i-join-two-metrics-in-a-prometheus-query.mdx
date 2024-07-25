@@ -1,0 +1,365 @@
+---
+
+title: How can I 'join' two metrics in a Prometheus query? - Joining Metrics in PromQL
+slug: how-can-i-join-two-metrics-in-a-prometheus-query
+date: 2024-07-24 
+tags: [faq, prometheus]
+authors: [daniel]
+description: Learn how to join two metrics in Prometheus queries using PromQL. Discover techniques, best practices, and real-world examples for effective metric correlation.
+keywords: [Prometheus, PromQL, metrics, joining metrics, vector matching, label matching, monitoring, time series]
+
+---
+
+<head>
+<script
+  type="application/ld+json"
+  dangerouslySetInnerHTML={{ __html: JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "How can I 'join' two metrics in a Prometheus query? - Joining Metrics in PromQL",
+    "alternativeHeadline": "Learn Techniques to Join Metrics in Prometheus Using PromQL",
+    "author": {
+      "@type": "Person",
+      "name": "Daniel"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "SigNoz",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://signoz.io/img/SigNozLogo-orange.svg"
+      }
+    },
+    "datePublished": "2024-07-24T00:00:00Z",
+    "dateModified": "2024-07-24T00:00:00Z",
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": "https://signoz.io/guides/how-can-i-join-two-metrics-in-a-prometheus-query/"
+    },
+    "description": "Learn how to join two metrics in Prometheus queries using PromQL. Discover techniques, best practices, and real-world examples for effective metric correlation.",
+    "keywords": "Prometheus, PromQL, metrics, joining metrics, vector matching, label matching, monitoring, time series",
+    "articleSection": "Technology",
+    "inLanguage": "en",
+    "isPartOf": {
+      "@type": "Blog",
+      "name": "SigNoz Blog",
+      "url": "https://signoz.io/blog/"
+    },
+    "about": [
+      {
+        "@type": "Thing",
+        "name": "Prometheus",
+        "description": "An open-source monitoring and alerting toolkit designed for reliability and scalability."
+      },
+      {
+        "@type": "Thing",
+        "name": "PromQL",
+        "description": "Prometheus Query Language used to query and analyze metrics."
+      },
+      {
+        "@type": "Thing",
+        "name": "Metrics",
+        "description": "Quantitative data used to measure and track the performance of a system."
+      }
+    ],
+    "mentions": [
+      {
+        "@type": "SoftwareApplication",
+        "name": "Prometheus",
+        "applicationCategory": "Monitoring Tool"
+      },
+      {
+        "@type": "SoftwareApplication",
+        "name": "SigNoz",
+        "applicationCategory": "Observability Platform"
+      }
+    ],
+    "mainEntity": {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "How can I 'join' two metrics in a Prometheus query?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Joining two metrics in a Prometheus query allows you to correlate data from different sources. This process involves using PromQL (Prometheus Query Language) to combine metrics based on their labels and apply operations to the resulting data."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What is Prometheus?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Prometheus is an open-source monitoring and alerting toolkit designed for reliability and scalability. It collects and stores metrics as time series data, allowing users to query and analyze the data using its powerful query language, PromQL."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What is PromQL?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "PromQL is the query language used by Prometheus to query and analyze metrics. It enables you to retrieve, manipulate, and analyze time-series data effectively."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What are the types of metrics in Prometheus?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Prometheus supports several metric types: Counter metrics, Gauge metrics, Histogram metrics, and Summary metrics."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What is vector matching in PromQL?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Vector matching is the primary method for joining metrics in PromQL. It allows you to combine time series based on their label sets."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What are some common techniques for joining metrics in Prometheus?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Common techniques include vector matching, label matching, and applying mathematical operations. Advanced techniques involve using modifiers like group_left and group_right."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What are some real-world examples of joined metric queries?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Examples include calculating resource utilization percentage, error rate with traffic metrics, and correlating application latency with CPU usage."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What are common pitfalls when joining metrics in Prometheus?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Common pitfalls include mismatched label sets, performance issues with high-cardinality metrics, and time alignment challenges."
+          }
+        }
+      ]
+    },
+    "tutorial": {
+      "@type": "HowTo",
+      "name": "How to Join Two Metrics in a Prometheus Query",
+      "step": [
+        {
+          "@type": "HowToStep",
+          "name": "Identify the Metrics",
+          "text": "Identify the metrics you want to join, such as http_requests_total and http_errors_total."
+        },
+        {
+          "@type": "HowToStep",
+          "name": "Analyze Label Sets",
+          "text": "Analyze the label sets of both metrics to find common labels."
+        },
+        {
+          "@type": "HowToStep",
+          "name": "Construct the Query",
+          "text": "Construct the basic query structure using the identified metrics and operator."
+        },
+        {
+          "@type": "HowToStep",
+          "name": "Add Label Matching",
+          "text": "Add label matching criteria to the query."
+        },
+        {
+          "@type": "HowToStep",
+          "name": "Apply Operations or Aggregations",
+          "text": "Apply additional operations or aggregations to derive meaningful insights."
+        }
+      ]
+    }
+  }) }}
+/>
+</head>
+
+Joining two metrics in a Prometheus query allows you to correlate data from different sources, providing deeper insights into your system's behavior. This process involves using PromQL (Prometheus Query Language) to combine metrics based on their labels and apply operations to the resulting data. By mastering metric joining, you'll unlock powerful analysis capabilities for your monitoring and observability needs.
+
+## Understanding Prometheus Metrics and PromQL Basics
+
+Prometheus metrics form the foundation of monitoring in many modern systems. These time-series data points represent various aspects of your application and infrastructure performance. PromQL, the query language designed for Prometheus, enables you to retrieve, manipulate, and analyze these metrics effectively.
+
+Labels play a crucial role in Prometheus metrics. They provide additional context to the data, allowing for fine-grained filtering and grouping. When joining metrics, these labels become the key to establishing relationships between different data sets.
+
+### Types of Metrics in Prometheus
+
+Prometheus supports several metric types:
+
+- **Counter metrics**: These always increase over time and are useful for tracking totals, such as the number of requests processed.
+- **Gauge metrics**: They can increase or decrease and represent current values, like memory usage.
+- **Histogram and Summary metrics**: These provide distribution of values over time, often used for measuring request durations or response sizes.
+
+## The Need for Joining Metrics in Prometheus
+
+Combining data from multiple metrics becomes necessary in various scenarios:
+
+1. Calculating ratios or percentages (e.g., error rate as a fraction of total requests)
+2. Correlating application performance with infrastructure metrics
+3. Comparing metrics from different services or components
+4. Creating complex alert conditions based on multiple data sources
+
+By joining metrics, you gain more comprehensive insights that aren't possible when querying single metrics in isolation. This approach allows for a holistic view of your system's health and performance.
+
+## Techniques for Joining Metrics in Prometheus Queries
+
+### Vector Matching
+
+Vector matching is the primary method for joining metrics in PromQL. It allows you to combine time series based on their label sets. Here's a basic example:
+
+```
+http_requests_total / http_requests_total{status="200"}
+```
+
+This query calculates the ratio of total HTTP requests to successful (status 200) requests.
+
+### Label Matching
+
+To join metrics effectively, you need to understand how to match labels between different time series. PromQL uses label matching to determine which series to combine. For example:
+
+```
+sum(rate(http_requests_total[5m])) by (service) /
+sum(rate(http_requests_total{status="200"}[5m])) by (service)
+```
+
+This query calculates the error rate for each service by matching the `service` label.
+
+### Mathematical Operations
+
+Once metrics are joined, you can apply various mathematical operations to derive meaningful insights:
+
+```
+100 * (1 - node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)
+```
+
+This query calculates the percentage of used memory by combining available and total memory metrics.
+
+### Advanced Joining Techniques
+
+For more complex scenarios, PromQL offers advanced joining modifiers:
+
+- `group_left`: Used for many-to-one relationships
+- `group_right`: Used for one-to-many relationships
+
+Example using `group_left`:
+
+```
+sum(rate(http_requests_total[5m])) by (service) /
+sum(rate(http_requests_total{status="200"}[5m])) by (service) *
+on(service) group_left(slo_target) slo_targets
+```
+
+This query joins the error rate calculation with a separate `slo_targets` metric to include the SLO target in the result.
+
+## Step-by-Step Guide: Joining Two Metrics in a Prometheus Query
+
+1. Identify the metrics you want to join (e.g., `http_requests_total` and `http_errors_total`)
+2. Analyze the label sets of both metrics to find common labels
+3. Construct the basic query structure:
+
+```
+<metric1> <operator> <metric2>
+```
+
+1. Add label matching criteria:
+
+```
+<metric1> <operator> on(label1, label2) <metric2>
+
+```
+
+1. Apply additional operations or aggregations:
+
+```
+sum(rate(http_requests_total[5m])) by (service) /
+sum(rate(http_errors_total[5m])) by (service)
+
+```
+
+This query calculates the error rate per service by joining request and error metrics.
+
+### Common Pitfalls and How to Avoid Them
+
+- **Mismatched label sets**: Ensure that the labels you're matching on exist in both metrics
+- **Performance issues**: Be cautious when joining high-cardinality metrics; use aggregation to reduce the number of time series
+- **Time alignment**: When joining metrics with different scrape intervals, use the `timestamp()` function to align the time series
+
+## Real-World Examples of Joined Metric Queries
+
+1. **Resource utilization percentage**:
+
+```
+100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100)
+
+```
+
+1. **Error rate with traffic metrics**:
+
+```
+sum(rate(http_requests_total{status=~"5.."}[5m])) /
+sum(rate(http_requests_total[5m])) * 100
+
+```
+
+1. **Correlating application latency with CPU usage**:
+
+```
+avg(http_request_duration_seconds) by (service) /
+on(instance) group_left avg(rate(node_cpu_seconds_total{mode!="idle"}[5m])) by (instance)
+
+```
+
+## Key Takeaways
+
+- Joining metrics in Prometheus enables complex and insightful queries
+- Label matching is crucial for successful metric joining
+- Vector matching and operations are the primary tools for joining in PromQL
+- Consider performance implications when joining large or high-cardinality metrics
+- Practice and experimentation are key to mastering metric joining in Prometheus
+
+## FAQs
+
+### What is the difference between inner and outer joins in PromQL?
+
+PromQL doesn't have explicit inner and outer join operations. Instead, it uses vector matching with modifiers like `group_left` and `group_right` to achieve similar results. The default behavior is similar to an inner join, where only matching elements are included in the result.
+
+### Can I join more than two metrics in a single Prometheus query?
+
+Yes, you can join multiple metrics by chaining operations. For example:
+
+```
+(metric1 / metric2) * metric3
+```
+
+### How do I handle time alignment when joining metrics with different scrape intervals?
+
+Use the `timestamp()` function to align time series before joining. For example:
+
+```
+metric1 and timestamp(metric2)
+```
+
+### Are there any performance concerns when joining high-cardinality metrics?
+
+Yes, joining high-cardinality metrics can lead to performance issues and increased resource usage. To mitigate this:
+
+1. Use aggregation to reduce the number of time series before joining
+2. Apply filters to limit the scope of the join
+3. Consider using recording rules for frequently used joins
+
+## Enhance Your Monitoring with SigNoz
+
+While Prometheus offers powerful monitoring capabilities, managing retention and scaling can become challenging as your infrastructure grows. SigNoz provides a comprehensive monitoring solution that builds upon Prometheus' strengths while addressing its limitations.
+
+<GetStartedSigNoz />
+
+With SigNoz, you can:
+- Scale your monitoring infrastructure effortlessly
+- Access advanced querying and visualization capabilities
+- Benefit from integrated tracing and logging alongside metrics.
+- Get high performance with the clickhouse database
+- Take advantage of SigNoz's exceptional exception monitoring capabilities
