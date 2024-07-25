@@ -14,6 +14,7 @@ import { TrySigNozCTA } from '@/components/try-signoz-cta'
 import WhySelectSignoz from '@/components/why-select-signoz'
 import { Testimonials } from '@/components/testimonials'
 import MonthlyEstimate from '@/components/Monthly-estimate/MonthlyEstimate'
+import {GetStarted} from '@/components/GetStarted'
 import Link from 'next/link'
 import Divider from '@/components/ui/Divider'
 import Heading from '@/components/ui/Heading'
@@ -87,6 +88,7 @@ function Pricing() {
         {/* Give a Try CTA */}
         {/* <TrySigNozCTA /> */}
         <Testimonials />
+        <GetStarted/>
       </div>
     </div>
   )
