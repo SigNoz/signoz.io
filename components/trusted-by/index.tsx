@@ -20,7 +20,8 @@ const COMPANIES = [
   { image: '/img/users/wombo.svg', imageDesc: 'wombo logo' },
 ]
 
-export const TrustedByTeams = () => {
+export const TrustedByTeams = ({page}) => {
+  const customerStoriesId = `btn-customer-stories-${page}-hero`
   return (
     <section
       className={`${styles.used_by} !m-0 !mx-auto !w-[100vw]  border !border-b-0 border-dashed border-signoz_slate-400 md:!w-[80vw]`}
@@ -49,6 +50,7 @@ export const TrustedByTeams = () => {
         >
           <div className="mb-5 flex flex-col items-center text-center">
               <Button
+                id={customerStoriesId}
                 className=" button-background relative z-[1] flex h-8 items-center justify-center gap-1.5 truncate rounded-full py-2 pl-4 pr-3 text-center text-sm font-medium not-italic leading-5 text-white no-underline outline-none hover:text-white"
               >
             <Link href="/case-study/" className="z-[1] mx-2 flex-center">
