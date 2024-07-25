@@ -588,7 +588,7 @@ const PricingPlans = () => {
                     className="w-full"
                     type={Button.TYPES.SECONDARY}
                     onClick={() => {
-                      const element = document.getElementById('monthly-estimate')
+                      const element = document.getElementById('estimate-your-monthly-bill')
                       element?.scrollIntoView({
                         behavior: 'smooth',
                       })
