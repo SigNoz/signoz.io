@@ -1,0 +1,323 @@
+---
+
+title: How Does Prometheus Work?
+slug: how-does-prometheus-work
+date: 2024-07-12
+tags: [faq, prometheus]
+authors: [daniel]
+description: Prometheus periodically scrapes metrics from configured targets (such as applications, services, or infrastructure components) using HTTP endpoints. These targets expose metrics in a specific format that Prometheus understands.
+keywords: [prometheus,monitor,monitoring,metrics]
+
+---
+
+<head>
+<script
+    type="application/ld+json"
+    dangerouslySetInnerHTML={{ __html: JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "How does Prometheus Work?",
+  "description": "Prometheus periodically scrapes metrics from configured targets (such as applications, services, or infrastructure components) using HTTP endpoints. These targets expose metrics in a specific format that Prometheus understands.",
+  "keywords": ["prometheus", "monitor", "monitoring", "metrics"],
+  "author": {
+    "@type": "Person",
+    "name": "Daniel"
+  },
+  "datePublished": "2024-07-12T00:00:00Z",
+  "publisher": {
+    "@type": "Organization",
+    "name": "SigNoz",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://signoz.io/img/SigNozLogo-orange.svg"
+    }
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://signoz.io/guides/how-does-prometheus-work/"
+  },
+  "articleSection": "Technology",
+  "inLanguage": "en",
+  "about": [
+    {
+      "@type": "Thing",
+      "name": "Prometheus",
+      "description": "An open-source monitoring and alerting toolkit"
+    },
+    {
+      "@type": "Thing",
+      "name": "Monitoring",
+      "description": "The process of collecting, analyzing, and using information to track a system's progress and performance"
+    }
+  ],
+  "educationalLevel": "Intermediate",
+  "isAccessibleForFree": true,
+  "image": {
+    "@type": "ImageObject",
+    "url": "https://signoz.io/img/guides/2024/07/how-does-prometheus-work-Untitled.webp",
+    "caption": "How Prometheus works"
+  },
+  "hasPart": [
+    {
+      "@type": "HowTo",
+      "name": "Quick Start with Prometheus",
+      "step": [
+        {
+          "@type": "HowToStep",
+          "name": "Download Prometheus",
+          "text": "Visit the Prometheus download page and download the appropriate package for your operating system."
+        },
+        {
+          "@type": "HowToStep",
+          "name": "Configure prometheus.yml file",
+          "text": "Open the prometheus.yml file in a text editor and configure the targets to monitor."
+        },
+        {
+          "@type": "HowToStep",
+          "name": "Start Prometheus server",
+          "text": "Navigate to the Prometheus directory and start the server using the command: ./prometheus --config.file=prometheus.yml"
+        },
+        {
+          "@type": "HowToStep",
+          "name": "Access the Prometheus UI",
+          "text": "Open a web browser and visit localhost:9090 to access the Prometheus UI."
+        }
+      ]
+    }
+  ],
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How does Prometheus work?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Prometheus works by scraping metrics from configured endpoints at specified intervals. These targets include applications, servers, databases, and more. They expose their metrics in a format Prometheus understands. Once Prometheus pulls metrics from these endpoints, it stores them for querying and retrieval when needed."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What are the main components of the Prometheus server?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The Prometheus server consists of three main components: 1) Time Series Database for storing metrics data, 2) Data Retriever (Scraper) for pulling metrics from various sources, and 3) HTTP Server API for querying the stored metrics data."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How does Prometheus collect metrics?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Prometheus collects metrics by periodically scraping targets. A target is any system or service that exposes metrics via an HTTP endpoint, typically at the /metrics path. These endpoints provide the current state of the target in a plain text format that Prometheus can understand."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is an exporter in Prometheus?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "An exporter is a service that retrieves metrics from targets and transforms them into a format compatible with Prometheus. These converted metrics are then exposed at the exporter's /metrics endpoint, where Prometheus can scrape them."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How does Prometheus handle alerting?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Prometheus includes a built-in alerting mechanism that allows users to define alerting rules based on PromQL queries. These rules evaluate metrics at regular intervals. When conditions are met, alerts are sent to the Alertmanager, which handles routing the alert to configured receiver integrations (e.g., email, Slack, PagerDuty)."
+      }
+    }
+  ]
+}) }}
+  />
+</head>
+
+Prometheus works by scraping metrics from configured endpoints at specified intervals. These targets include applications, servers, databases, and more. They expose their metrics in a format Prometheus understands. Once Prometheus pulls metrics from these endpounts, it stores them for querying and retrieval when needed.
+
+## How Does Prometheus Work?
+
+The architecture diagram below provides a summary of how Prometheus works as a monitoring tool.
+
+<Figure src="/img/guides/2024/07/how-does-prometheus-work-Untitled.webp" alt="How Prometheus works" caption="How Prometheus works" />
+
+
+### The Prometheus Server
+
+Prometheus has a core component called the Prometheus server, which does the main monitoring work. This server is composed of three parts:
+
+1. Time Series Database: This stores the collected metrics data (e.g., CPU usage, request latency) in a highly efficient format optimized for time-based queries.
+2. Data Retriever (Scraper): This worker actively pulls metrics from various sources, including applications, databases, servers, and containers. It then sends the collected data to the time series database for storage.
+3. HTTP Server API: This provides a way to query the stored metrics data. This API allows users to retrieve and visualize metrics through tools like the Prometheus dashboard, SigNoz, or Grafana.
+
+### Metrics Collection
+
+Prometheus collects metrics by periodically scraping targets. A target is any system or service that exposes metrics via an HTTP endpoint. Each target provides units of monitoring specific to its domain. For instance, in an application, metrics might include request latency or number of exceptions, while for a server, metrics could be CPU usage or memory consumption. These units are known as Metrics.
+
+For Prometheus to pull metrics from a target, the target must expose a specific HTTP endpoint, typically at the `/metrics` path. The HTTP endpoints follow the format; `hostaddress/metrics`. This endpoint provides the current state of the target in a plain text format that Prometheus can understand.
+
+<Figure src="/img/guides/2024/07/how-does-prometheus-work-Untitled%201.webp" alt="Metrics displayed from an HTTP endpoint (localhost:8080/metrics)" caption="Metrics displayed from an HTTP endpoint (localhost:8080/metrics)" />
+
+
+### Exporters
+
+While some systems expose Prometheus endpoints by default, others don’t and require an exporter. An exporter is a service that retrieves metrics from targets and transforms them into a format compatible with Prometheus. These converted metrics are then exposed at the exporter's `/metrics` endpoint, where Prometheus can scrape them. 
+
+Prometheus has <a href="https://prometheus.io/docs/instrumenting/exporters/" rel="noopener noreferrer nofollow" target="_blank">exporters</a> for different services including MySQL, Elasticssearch, etc. It also provides client libraries for <a href="https://prometheus.io/docs/instrumenting/clientlibs/" rel="noopener noreferrer nofollow" target="_blank">applications</a> that convert metrics data in a Prometheus readable format.
+
+### Scrape Config File
+
+Prometheus has a configuration file, usually named `prometheus.yml` that defines which targets to scrape and how often. For example:
+
+```yaml
+scrape_configs:
+  - job_name: 'my-app'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['localhost:8080']
+```
+
+In the above scrape config, Prometheus is set to scrape metrics from an application running on `localhost` at port `8080`, under the job name `my-app`. It will do this every 5 seconds.
+
+### Data Storage
+
+Once metrics are collected, Prometheus stores them in its time-series database (TSDB). This TSDB is optimized for storing and querying time series data efficiently. It handles millions of metrics with ease and stores data in a compressed format to save space.
+
+The data is stored locally, providing fast query performance and reliability. Each metric is stored along with a set of labels, which are key-value pairs that identify the metric's characteristics.
+
+### Data Query
+
+The stored metrics data can be queried when needed for visualization through the Prometheus web UI or a monitoring tool. 
+
+<Figure src="/img/guides/2024/07/how-does-prometheus-work-Untitled%202.webp" alt="Prometheus web UI" caption="Prometheus web UI" />
+
+
+Prometheus provides a powerful query language called PromQL (Prometheus Query Language) to retrieve and manipulate time-series data. PromQL allows users to perform complex queries, aggregations, and transformations on the collected metrics.
+
+Example of a PromQL query:
+
+<Figure src="/img/guides/2024/07/how-does-prometheus-work-Untitled%203.webp" alt="PromQL query" caption="PromQL query" />
+
+
+This query checks the status of targets (Prometheus, node_exporter, cadvisor, or mysqld_exporter) and returns whether they are up (1) or down (0).
+
+### Alerting
+
+For effective monitoring, Prometheus includes a built-in alerting mechanism that allows users to define alerting rules based on PromQL queries. Alerting rules are defined to specify conditions under which alerts should be triggered. These rules evaluate metrics at regular intervals.
+
+For example:
+
+```jsx
+groups:
+  - name: example-alert
+    rules:
+       - alert: ContainerKilled
+        expr: 'time() - container_last_seen > 60'
+        for: 0m
+        labels:
+          severity: warning
+        annotations:
+          summary: Container killed (instance {{ $labels.instance }})
+          description: "A container has disappeared\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+```
+
+The above alerting rule checks if a container has not been seen in the last 60 seconds and triggers an alert immediately with a warning severity, providing a summary and description with relevant details.
+
+An alert can be in one of three states:
+
+- Inactive: This is the default state of an alert. It means that the condition specified in the alerting rule is not currently met. No actions are taken when an alert is inactive.
+- Pending: The is when the condition specified in the alerting rule has been met, but the `for` clause hasn't expired yet. The `for` clause specifies a duration for which the condition must remain true before the alert fires. This acts as a buffer to prevent alerts from triggering due to transient spikes or temporary issues.
+- Firing: The alert transitions to this state if the condition specified in the alerting rule remains true for the duration specified in the `for` clause.
+
+<Figure src="/img/guides/2024/07/how-does-prometheus-work-Untitled%204.webp" alt="Alerting rules in Prometheus" caption="Alerting rules in Prometheus" />
+
+*Alerting rules in Prometheus*
+
+Alerts in the firing state are sent out the alert to Alertmanager, which then handles routing the alert to the configured receiver integrations (e.g., email, Slack, PagerDuty). 
+
+<Figure src="/img/guides/2024/07/how-does-prometheus-work-4830d151-e3d5-441d-9aa9-f263c75bc007.webp" alt="Alert manager UI" caption="Alert manager UI" />
+
+
+
+### Service Discovery
+
+Prometheus also supports various service discovery mechanisms to find targets automatically. This is particularly useful in dynamic environments like Kubernetes, where services may start and stop frequently. If you also deploy a new application or service in such environments, Prometheus immediately discovers it and starts monitoring it.
+
+<Figure src="/img/guides/2024/07/how-does-prometheus-work-Untitled%205.webp" alt="Prometheus service discovery" caption="Prometheus service discovery" />
+
+
+
+Example of how service discovery is configured for Kubernetes:
+
+```yaml
+scrape_configs:
+  - job_name: 'kubernetes-apiservers'
+    kubernetes_sd_configs:
+      - role: endpoints
+```
+
+Other supported service discovery mechanisms include static configuration, DNS, Consul, Marathon, and more.
+
+## Quick Start with Prometheus
+
+This quick start guide will help you get Prometheus up and running in a few simple steps.
+
+1. Download Prometheus
+
+To download Prometheus on your system, visit the <a href="https://prometheus.io/download/" rel="noopener noreferrer nofollow" target="_blank">Prometheus download</a> page. Set your system architecture and identify the appropriate package for your operating system (Linux, macOS, Windows). Click on the download link for the latest stable release.
+
+<Figure src="/img/guides/2024/07/how-does-prometheus-work-Screenshot_2024-07-12_at_07.23.50.webp" alt="Download Prometheus" caption="Download Prometheus" />
+
+
+
+1. Configure `prometheus.yml` file
+
+After downloading Prometheus, extract the tarball downloaded file. You'll find a file named `prometheus.yml` in the extracted directory.
+
+<Figure src="/img/guides/2024/07/how-does-prometheus-work-Screenshot_2024-07-12_at_07.45.09.webp" alt="Extracted Prometheus folder" caption="Extracted Prometheus folder" />
+
+
+
+Prometheus uses a configuration file named `prometheus.yml` to specify which targets to monitor and how to scrape them. Open `prometheus.yml` in a text editor.
+
+<Figure src="/img/guides/2024/07/how-does-prometheus-work-Screenshot_2024-07-12_at_07.25.29.webp" alt="Prometheus.yml file" caption="Prometheus.yml file" />
+
+
+
+In the `prometheus.yml` file, you will see that Prometheus is configured to scrape metrics from itself. You can add other scrape configurations for Prometheus to scrape metrics from different targets on your system.
+
+1. Start Prometheus server
+
+Navigate to the directory where you extracted Prometheus and execute the following command to start Prometheus:
+
+```jsx
+./prometheus --config.file=prometheus.yml
+```
+
+This command will start Prometheus and use the specified configuration file to determine which targets to scrape.
+
+<Figure src="/img/guides/2024/07/how-does-prometheus-work-Screenshot_2024-07-12_at_07.42.25.webp" alt="Prometheus started" caption="Prometheus started" />
+
+
+
+1. Access the Prometheus UI
+
+Once Prometheus has started, in your browser, visit [localhost:9090](http://localhost:9090) to access the Prometheus UI:
+
+<Figure src="/img/guides/2024/07/how-does-prometheus-work-Screenshot_2024-07-12_at_07.43.47.webp" alt="Prometheus UI" caption="Prometheus UI" />
+
+
+
+<Figure src="/img/guides/2024/07/how-does-prometheus-work-Screenshot_2024-07-12_at_07.45.59.webp" alt="Prometheus targets" caption="Prometheus targets" />
+
+
+
+## Conclusion
+
+This article discussed how monitoring in Prometheus works. It highlighted some of the key components of Prometheus and their roles in monitoring.
+
+Key takeaways:
+
+- Prometheus collects metrics by scraping HTTP target endpoints exposing metrics in a Prometheus format.
+- Exporters are used in converting metrics to Prometheus formats.
+- Prometheus stores data in its time series database for retrieval at any time.
+- Metrics data can be queried using PromQL, the Prometheus query language.
+- Prometheus has a built-in Alert Manager component for alerting and routing

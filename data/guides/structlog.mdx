@@ -1,0 +1,730 @@
+---
+
+title: Complete Guide to Logging with StructLog in Python
+slug: structlog
+date: 2024-07-12
+tags: [logging]
+authors: [sushant_gaurav]
+description: Discover how to leverage StructLog for advanced logging in Python. Learn setup, configuration, and best practices for structured logging to enhance your application's observability.
+keywords: [structlog, structlog github, structlog python, structlog vs logging, structlog fastapi]
+
+---
+
+<head>
+<script
+    type="application/ld+json"
+    dangerouslySetInnerHTML={{ __html: JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Complete Guide to Logging with StructLog in Python",
+  "alternativeHeadline": "Master structured logging in Python with StructLog - Learn setup, configuration, and best practices",
+  "author": {
+    "@type": "Person",
+    "name": "Sushant Gaurav"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SigNoz",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://signoz.io/img/SigNozLogo-orange.svg"
+    }
+  },
+  "datePublished": "2024-07-12T00:00:00Z",
+  "dateModified": "2024-07-12T00:00:00Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://signoz.io/guides/structlog/"
+  },
+  "description": "Discover how to leverage StructLog for advanced logging in Python. Learn setup, configuration, and best practices for structured logging to enhance your application's observability.",
+  "keywords": "structlog, structlog github, structlog python, structlog vs logging, structlog fastapi",
+  "articleSection": "Technology",
+  "inLanguage": "en",
+  "isPartOf": {
+    "@type": "Blog",
+    "name": "SigNoz Blog",
+    "url": "https://signoz.io/blog/"
+  },
+  "about": [
+    {
+      "@type": "Thing",
+      "name": "StructLog",
+      "description": "A structured logging package for Python"
+    },
+    {
+      "@type": "Thing",
+      "name": "Python",
+      "description": "A high-level programming language"
+    },
+    {
+      "@type": "Thing",
+      "name": "Structured Logging",
+      "description": "A logging approach that treats log entries as data structures rather than plain text"
+    }
+  ],
+  "mentions": [
+    {
+      "@type": "SoftwareApplication",
+      "name": "SigNoz",
+      "applicationCategory": "Monitoring Software"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "name": "FastAPI",
+      "applicationCategory": "Web Framework"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "name": "Django",
+      "applicationCategory": "Web Framework"
+    }
+  ],
+  "mainEntity": {
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What does StructLog do?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "StructLog is a Python logging package that simplifies structured logging. It enables developers to log detailed data rather than plain text messages, resulting in improved log analysis and troubleshooting."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is a structured log?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "A structured log entry contains key-value pairs rather than unstructured, plain text. This format facilitates the programmatic parsing, searching, and analysis of log data."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What are the benefits of structured logging?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Structured logging has various advantages, including greater searchability, better integration with log analysis tools, simpler debugging, and improved monitoring capabilities. It enables more exact filtering and querying of log data."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is the best format for a structured log?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The most suitable format for structured logs is frequently determined by the application and log analysis tools. JSON is a popular format because it is human-readable and can be easily interpreted by most logging and monitoring systems."
+        }
+      }
+    ]
+  },
+  "tutorial": {
+    "@type": "HowTo",
+    "name": "How to Use StructLog in Python",
+    "step": [
+      {
+        "@type": "HowToStep",
+        "name": "Install StructLog",
+        "text": "Install StructLog using pip: pip install structlog"
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Configure StructLog",
+        "text": "Set up StructLog with desired processors and renderers"
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Create a Logger",
+        "text": "Create a logger instance using structlog.get_logger()"
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Add Context to Logs",
+        "text": "Use bound loggers or context variables to add persistent context to logs"
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Log Messages",
+        "text": "Use logger methods like info(), error() to log structured messages"
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Integrate with Frameworks",
+        "text": "Integrate StructLog with web frameworks like FastAPI or Django"
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Monitor Logs",
+        "text": "Send logs to a monitoring tool like SigNoz for analysis and alerting"
+      }
+    ]
+  }
+}) }}
+  />
+</head>
+
+Logging is an essential component of software development. It helps developers understand how programs behave and identify potential errors. A well-structured logging procedures are essential for debugging, monitoring, performance optimization, and regulatory compliance. 
+
+StructLog is a Python library that provides an innovative approach to structured logging in Python, improving the logging experience with powerful features and flexibility. This article goes into the complexities of StructLog, demonstrating how it can be efficiently used in Python programs.
+
+## What is StructLog?
+
+StructLog is a structured logging package for Python designed to make logging easier and more powerful. Traditional logging often produces unordered logs, making the generated data difficult to understand. StructLog addresses this issue by creating structured, easy-to-read, and searchable logs. It allows developers to associate metadata with logs, which improves debugging and monitoring.
+
+A question that may come to our mind at this stage is: What is Structured Logging? Let's answer this first.
+
+Structured logging involves formatting log messages in a structured data format, like JSON, where each piece of information is represented in the format of a key-value pair. This approach contrasts with traditional plain-text logging, where log messages are free-form strings.
+
+Let us now look at some of the key features and advantages of creating a well-structured log using StructLog.
+
+To learn more about logging in Python, you can check out the article: [Complete Guide to Logging in Python](https://signoz.io/guides/logging-in-python/).
+
+### Key Features
+
+- Structured Data: Logs are more than just strings. They include structured data, making it easier to search and analyze.
+- Flexible Formatting: Multiple output formats are supported, including JSON, plain text, and more.
+- Contextual Logging: Add context to logs easily, helping to keep logs informative and relevant.
+- Asynchronous Support: StructLog can be used with asynchronous frameworks and libraries.
+- Ease of Integration: Works seamlessly with existing logging systems and can be integrated with other libraries.
+
+### Advantages
+
+- Enhanced Readability: Structured logs are easier to read and parse, reducing the time spent on troubleshooting.
+- Better Debugging: Contextual information in logs helps in faster debugging and pinpointing issues.
+- Integration with Monitoring Tools: Easily integrate with tools like SigNoz for enhanced observability.
+- Consistency: Ensures consistency in log formats across different parts of the application.
+
+## Setting Up StructLog in Python
+
+### Installation
+
+To install StructLog, you can use `pip` which is the package installer for Python. StructLog is available on `PyPI`, so it can be installed easily:
+
+```
+pip install structlog
+```
+
+### Basic Configuration
+
+A simple setup with StructLog involves configuring the logging format and defining a logger. The configuration can be customized to suit the needs of your application.
+
+```python
+import structlog
+
+# Configure structlog to output in JSON format
+structlog.configure(
+    processors=[
+        structlog.processors.JSONRenderer()
+    ]
+)
+
+logger = structlog.get_logger()
+
+# Log a more detailed message with additional context
+logger.info("User login attempt", user="Sushant", success=True, ip_address="192.168.1.1")
+```
+
+In this example, we log a user login attempt with additional context such as the username, success status, and IP address. This structured logging provides more valuable information that can be easily analyzed and searched, making it more useful than a simple string message.
+
+Example: Simple Logging with StructLog
+
+Here’s a basic example that logs a simple message. In this example, we configure StructLog to use a `JSON` renderer and then log a message with some additional context.
+
+```python
+import structlog
+
+# Configure structlog to output in JSON format
+structlog.configure(
+    processors=[
+        structlog. processors.JSONRenderer()
+    ]
+)
+
+# Create a logger instance
+logger = structlog.get_logger()
+
+# Log a message with additional context
+logger.info("user_logged_in", user="sushant", status="success")
+```
+
+In this example, the log entry will be structured as a `JSON` object, making it easy to parse and analyze.
+
+## Advanced Configuration
+
+Let us now look at some advanced configurations and how we can customize our log outputs.
+
+### Customizing Log Output
+
+StructLog allows you to customize the log output to meet your specific needs. You can use custom processors to alter log data before it is produced. For example, you could wish to include a user ID with each log entry.
+
+```python
+import structlog
+
+# Custom processor to add user_id to log entries
+def add_user_id(_, __, event_dict):
+    event_dict['user_id'] = '12345'
+    return event_dict
+
+# Configure structlog with the custom processor
+structlog.configure(
+    processors=[
+        add_user_id,
+        structlog.processors.JSONRenderer()
+    ]
+)
+
+logger = structlog.get_logger()
+
+# Log a message
+logger.info("custom_log", action="test_action")
+```
+
+Explanation
+
+1. Custom Processor Function:
+    - `add_user_id(_, __, event_dict)`: This function adds a `user_id` key with a value of `'12345'` to the `event_dict`, which represents the log entry.
+2. Configuration:
+    - `processors=[add_user_id, structlog.processors.JSONRenderer()]`: The `structlog.configure` function is called with a list of processors. The first processor is our custom `add_user_id` function, and the second is `JSONRenderer`, which outputs logs in JSON format.
+3. Logging a Message:
+    - `logger.info("custom_log", action="test_action")`: This line logs a message with an additional `action` context. The custom processor automatically includes `user_id` in the log entry.
+
+The resulting log output will be in JSON format and include the `user_id`, making it more informative and easier to analyze.
+
+### Using Different Formatters
+
+StructLog supports multiple formatters, such as JSON and plain text. You can switch between them as needed. This flexibility allows you to adapt the log format to the requirements of your application or environment.
+
+```python
+import structlog
+
+# Configure structlog to use KeyValueRenderer for plain text output
+structlog.configure(
+    processors=[
+        structlog.processors.KeyValueRenderer(key_order=["event", "user", "status"])
+    ]
+)
+
+logger = structlog.get_logger()
+
+# Log a message with additional context
+logger.info("custom_log", user="sushant", status="success")
+```
+
+### Adding Context to Logs
+
+Contextual logging involves adding persistent data to logs. `StructLog` makes this easy with binders. A binder attaches additional context to a logger, which is included in every log entry made with that logger.
+
+```python
+import structlog
+
+# Create a logger and bind user context
+logger = structlog.get_logger().bind(user="sushant")
+
+# Log messages with the bound context
+logger.info("user_action", action="login")
+logger.info("user_action", action="view_profile")
+```
+
+In this example, the user context (`user="sushant"`) is included in both log entries.
+
+Output:
+
+<Figure src="/img/guides/2024/07/structlog-Untitled.webp" alt="Untitled" caption="Output" />
+
+### Bound Loggers
+
+Bound loggers are used to bind context to loggers, ensuring that particular information appears in each log entry. This is especially handy in web applications where you may wish to include request-specific information in all logs associated with that request.
+
+```python
+import structlog
+
+# Create a logger and bind request context
+logger = structlog.get_logger().bind(request_id="abc123")
+
+# Log messages with the bound context
+logger.info("request_started")
+logger.info("request_ended")
+```
+
+In this example, the request context (`request_id="abc123"`) is included in both log entries.
+
+Explanation:
+
+1. Creating a Bound Logger:
+    - `logger = structlog.get_logger().bind(request_id="abc123")`: Creates a logger and binds the `request_id` context to it.
+2. Logging Messages:
+    - `logger.info("request_started")` and `logger.info("request_ended")`: Logs messages with the bound context. The `request_id` is included in each log entry automatically.
+
+### Combining Contexts
+
+We can even combine dynamic context with bound loggers to create more detailed log entries.
+
+### Example: Combining Bound and Dynamic Contexts
+
+```python
+import structlog
+
+# Create a logger and bind request context
+logger = structlog.get_logger().bind(request_id="abc123")
+
+# Log a message with additional dynamic context
+logger.info("user_action", user_id="12345", action="clicked_button")
+```
+
+### Explanation
+
+1. Bound Logger:
+    - `logger = structlog.get_logger().bind(request_id="abc123")`: Binds the `request_id` to the logger.
+2. Dynamic Context:
+    - `logger.info("user_action", user_id="12345", action="clicked_button")`: Logs a message with additional context such as `user_id` and `action`, alongside the bound `request_id`.
+
+We can use both the bound loggers and dynamic context to ensure that critical information is consistently included in the logs. It still allows for the flexibility to add context-specific details.
+
+### Log Filtering Using StructLog
+
+Logs can be filtered based on conditions using custom processors. This is useful for controlling the quality of logs or excluding certain log entries from being output.
+
+```python
+import structlog
+
+# Custom processor to filter out non-error logs
+def filter_errors(_, __, event_dict):
+    if event_dict.get("level") == "error":
+        return event_dict
+    else:
+        return None
+
+# Configure structlog with the custom processor
+structlog.configure(
+    processors=[
+        filter_errors,
+        structlog.processors.JSONRenderer()
+    ]
+)
+
+logger = structlog.get_logger()
+
+# Log messages with different levels
+logger.error("error_log", message="This is an error")
+logger.info("info_log", message="This should not appear")
+```
+
+In this example, only the error log entry will be output, while the info log entry will be filtered out.
+
+## Preprocessors
+
+Preprocessors change log entries before they are prepared and printed. They are handy for adding or modifying log data. For example, you can choose to include the server's hostname in each log entry.
+
+```python
+import structlog
+
+# Custom processor to add hostname to log entries
+def add_hostname(_, __, event_dict):
+    event_dict['hostname'] = 'my_server'
+    return event_dict
+
+# Configure structlog with the custom processor
+structlog.configure(
+    processors=[
+        add_hostname,
+        structlog.processors.JSONRenderer()
+    ]
+)
+
+logger = structlog.get_logger()
+
+# Log a message with the custom processor
+logger.info("log_with_hostname", event="sample_event")
+```
+
+In this example, the hostname (`hostname="my_server"`) is added to the log entry.
+
+## Context Variables
+
+Context variables allow you to maintain state across numerous sections of your program. This is important in online applications where requests may require a specific context, which should be included in all logs associated with that request.
+
+```python
+import structlog
+from contextvars import ContextVar
+
+# Create a context variable for request_id
+request_id = ContextVar("request_id")
+
+# Custom processor to add request_id to log entries
+def add_request_id(_, __, event_dict):
+    event_dict["request_id"] = request_id.get()
+    return event_dict
+
+# Configure structlog with the custom processor
+structlog.configure(
+    processors=[
+        add_request_id,
+        structlog.processors.JSONRenderer()
+    ]
+)
+
+logger = structlog.get_logger()
+
+# Set the context variable for the current request
+request_id.set("abc123")
+
+# Log a message with the custom processor
+logger.info("log_with_context_var", log_message="sample_event")
+```
+
+In this example, the request ID (`request_id="abc123"`) is included in the log entry.
+
+## Exceptions Transformations and Console Rendering
+
+StructLog can transform exceptions and render them in a console-friendly format. This is useful for debugging and monitoring applications while they are being developed.
+
+```python
+import structlog
+
+# Configure structlog to handle exceptions and render logs to the console
+structlog.configure(
+    processors=[
+        structlog.processors.TimeStamper(fmt="ISO"),
+        structlog.processors.StackInfoRenderer(),
+        structlog.processors.format_exc_info,
+        structlog.dev.ConsoleRenderer()
+    ]
+)
+
+logger = structlog.get_logger()
+
+try:
+    1 / 0
+except ZeroDivisionError:
+    logger.error("exception_occurred", exc_info=True)
+```
+
+In this example, the exception details are included in the log entry, and the log is rendered to the console in a readable format.
+
+## Integrating StructLog with Other Libraries
+
+### StructLog with FastAPI
+
+Integrating StructLog with FastAPI for structured logging in web applications is simple. You can configure StructLog in your FastAPI application to log-structured data for each request.
+
+Note: 
+
+FastAPI is a modern, fast (high-performance) web framework that is used for building APIs with Python (version 3.7+). FastAPI is designed for quick development and it offers numerous features like asynchronous request handling, automatic interactive API documentation, and excellent performance that is close to languages like: NodeJS and Go. So, FastAPI can be an ideal choice for high-performance applications.
+
+Now, to use StructLog with FastAPI, we need to install both the `fastapi` and `uvicorn` modules. We can use pip to install these modules:
+
+```bash
+pip install fastapi uvicorn
+```
+
+Integrating StructLog with FastAPI involves setting up StructLog, configuring it to work with FastAPI, and then using it to log requests and responses.
+
+```python
+from fastapi import FastAPI
+import structlog
+
+# Create a FastAPI application
+app = FastAPI()
+
+# Configure structlog
+structlog.configure(
+    processors=[
+        structlog.processors.JSONRenderer()
+    ]
+)
+
+# Create a logger instance
+logger = structlog.get_logger()
+
+@app.get("/")
+async def root():
+    logger.info("fastapi_root", message="Root endpoint accessed")
+    return {"message": "Hello World"}
+```
+
+In this example, every time the root endpoint is accessed, a log entry is created with structured data.
+
+### StructLog with Django
+
+StructLog provides structured logging features that ordinary logging in Python does not. This makes it an ideal solution for advanced applications that require contextual and organized logs. Standard logging in Python generally generates unstructured log entries that are difficult to read and analyze.
+
+Note:
+
+Django is a high-level Python web framework. Django provides numerous built-in features like an ORM, authentication, and an admin interface, making it an ideal choice for quickly and efficiently developing complex, database-driven websites. It promotes the reuse of code and best practices as well.
+
+```python
+# settings.py
+import structlog
+
+# Configure structlog
+structlog.configure(
+    processors=[
+        structlog.processors.JSONRenderer()
+    ]
+)
+
+# views.py
+import structlog
+
+# Create a logger instance
+logger = structlog.get_logger()
+
+def home_view(request):
+    logger.info("django_home", message="Home page accessed")
+    return HttpResponse("Hello World")
+```
+
+In this example, a structured log entry is created whenever the home view is accessed.
+
+## StructLog vs. Standard Logging
+
+StructLog provides structured logging features that ordinary logging in Python does not. This makes it an ideal solution for sophisticated applications that require contextual and organized logs. Standard logging in Python generally generates unstructured log entries that are difficult to read and analyze.
+
+```python
+import logging
+
+# Standard logging setup
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+
+# Log a message with standard logging
+logger.info('This is an info message')
+
+# StructLog setup
+import structlog
+
+structlog.configure(
+    processors=[
+        structlog.processors.JSONRenderer()
+    ]
+)
+
+logger = structlog.get_logger()
+
+# Log a message with StructLog
+logger.info("user_logged_in", user="sushant", status="success")
+```
+
+In this example, the log entry created with StructLog is structured as a JSON object, which is easier to understand and analyze than the unstructured log entry created with normal logging.
+
+## StructLog in a Production Environment
+
+### Best Practices for Using StructLog in Production
+
+When using StructLog in a production environment, observe these recommended practices to ensure effective and efficient logging.
+
+- Use JSON Format: JSON logs are easier to parse and integrate with log management tools.
+- Include Context: Always include relevant context in your logs to make them more informative.
+- Error Handling: Ensure errors and exceptions are logged appropriately with sufficient details.
+- Asynchronous Logging: For high-throughput applications, consider using asynchronous logging to minimize performance impact.
+- Log Rotation: Implement log rotation to manage log file sizes and prevent disk space issues.
+
+### Handling Exceptions and Errors
+
+Ensure that exceptions are logged with sufficient information for debugging. StructLog allows you to incorporate exception details in log entries easily.
+
+```python
+import structlog
+
+# Create a logger instance
+logger = structlog.get_logger()
+
+try:
+    1 / 0
+except ZeroDivisionError:
+    logger.error("division_error", exc_info=True)
+```
+
+In this example, the log entry contains the exception information, making it easy to comprehend and diagnose the error.
+
+### Logging Performance Considerations
+
+While StructLog is efficient, you should always consider the performance implications of logging in high-throughput applications. To reduce the impact on application performance, use asynchronous logging as needed.
+
+```python
+import structlog
+import asyncio
+
+# Asynchronous logging example
+async def log_async():
+    logger = structlog.get_logger()
+    logger.info("async_log", message="This is an asynchronous log message")
+
+# Run the asynchronous log function
+asyncio.run(log_async())
+```
+
+In this example, an asynchronous log entry is created, which can help improve performance in high-throughput applications.
+
+## Sending StructLog Logs to Monitoring Tools
+
+So far, we have implemented logging in Python. However, simply logging events is not enough to ensure the health and performance of your application. Monitoring these logs is crucial to gaining real-time insights, detecting issues promptly, and maintaining the overall stability of your system.
+
+### Why Monitoring Logs is Important
+
+Here are the key reasons why monitoring logs is important:
+
+1. Issue detection and troubleshooting
+2. Performance monitoring
+3. Security and Compliance
+4. Operational insights
+5. Automation and alerts
+6. Historical analysis
+7. Proactive maintenance
+8. Support and customer service
+
+To cover all the above major components, you can make use of tools like [SigNoz](https://signoz.io/). 
+
+StructLog is easily connected with a variety of monitoring systems to improve observability. This allows you to better understand your application's behaviour and performance.
+
+## Sending Logs to SigNoz
+
+SigNoz is a full-stack open-source application performance monitoring and observability tool that can be used in place of DataDog and New Relic. SigNoz is built to give a SaaS-like user experience combined with the perks of open-source software. Developer tools should be developed first, and SigNoz was built by developers to address the gap between SaaS vendors and open-source software.
+
+Key architecture features:
+
+- Logs, Metrics, and traces under a single dashboard
+    
+    SigNoz provides logs, metrics, and traces all under a single dashboard. You can also correlate these telemetry signals to debug your application issues quickly.
+    
+- Native OpenTelemetry support
+    
+    SigNoz is built to support <a href="https://opentelemetry.io/" rel="noopener noreferrer nofollow" target="_blank">OpenTelemetry</a> natively, which is quietly becoming the world standard for generating and managing telemetry data.
+    
+
+### Setup SigNoz
+
+<GetStartedSigNoz />
+
+For detailed steps and configurations on how to send logs to SigNoz, refer to the [following official blog by SigNoz engineer Srikanth Chekuri](https://signoz.io/opentelemetry/logging-in-python/).
+
+## Conclusion
+
+- StructLog enhances Python logging by providing structured, contextual logs.
+- It improves readability, better debugging, and easy integration with monitoring tools.
+- Implement StructLog in your projects to gain better insights and control over your application's logging.
+- Adding context to logs helps in faster debugging and pinpointing issues which makes the development process smoother.
+- StructLog can be easily integrated with various monitoring tools like SigNoz, hence it enhances the observability to an extent.
+- It also ensures consistency in log formats across different parts of the application which leads to uniformity and better log management.
+
+### Resources
+
+- <a href="https://www.structlog.org/" rel="noopener noreferrer nofollow" target="_blank">`StructLog` Documentation</a>
+- [SigNoz Documentation](https://signoz.io/docs/)
+- <a href="https://opentelemetry.io/" rel="noopener noreferrer nofollow" target="_blank">OpenTelemetry Documentation</a>
+
+## FAQs
+
+### What does StructLog do?
+
+StructLog is a Python logging package that simplifies structured logging. It enables developers to log detailed data rather than plain text messages, resulting in improved log analysis and troubleshooting.
+
+### What is a structured log?
+
+A structured log entry contains key-value pairs rather than unstructured, plain text. This format facilitates the programmatic parsing, searching, and analysis of log data.
+
+### What are the benefits of structured logging?
+
+Structured logging has various advantages, including greater searchability, better integration with log analysis tools, simpler debugging, and improved monitoring capabilities. It enables more exact filtering and querying of log data.
+
+### What is the best format for a structured log?
+
+The most suitable format for structured logs is frequently determined by the application and log analysis tools. JSON is a popular format because it is human-readable and can be easily interpreted by most logging and monitoring systems.

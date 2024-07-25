@@ -4,8 +4,7 @@ const Admonition = ({ type, title, children }) => {
   return (
     <div className={`admonition ${getAdmonitionStyles(type)}`}>
       <div className="flex items-center mb-2">
-        <span className="mr-2 text-xl">{getIcon(type)}</span>
-        <span className="font-bold text-white">{title}</span>
+        <span className="font-bold mr-2 text-xl text-white">{getIcon(type)} {title || getTitle(type)}</span>
       </div>
       <div className="text-gray-300">
         {children}
@@ -34,15 +33,30 @@ const getAdmonitionStyles = (type) => {
 const getIcon = (type) => {
   switch(type) {
     case 'tip':
-      return '💡 Tip';
+      return '💡';
     case 'warning':
-      return '⚠️ Warning';
+      return '⚠️';
     case 'danger':
-      return '❗Danger';
+      return '❗';
     case 'info':
-      return '✅ Info';
+      return '✅';
     default:
-      return '📝 Note';
+      return '📝';
+  }
+};
+
+const getTitle = (type) => {
+  switch(type) {
+    case 'tip':
+      return 'Tip';
+    case 'warning':
+      return 'Warning';
+    case 'danger':
+      return 'Danger';
+    case 'info':
+      return 'Info';
+    default:
+      return 'Note';
   }
 };
 
