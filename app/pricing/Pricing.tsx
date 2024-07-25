@@ -65,7 +65,7 @@ function Pricing() {
           <PricingPlans />
         </div>
         {/* All Features */}
-        <TrustedByTeams />
+        <TrustedByTeams page="pricing" />
         {/* Cost Comparison Graph */}
         <ExploreAllFeature />
         {/* Companies Logo */}
@@ -87,8 +87,8 @@ function Pricing() {
         {/* <UserReview /> */}
         {/* Give a Try CTA */}
         {/* <TrySigNozCTA /> */}
-        <Testimonials />
-        <GetStarted/>
+        <Testimonials page="pricing"/>
+        <GetStarted page="pricing"/>
       </div>
     </div>
   )
