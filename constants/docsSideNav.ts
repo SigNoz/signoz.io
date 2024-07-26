@@ -1300,12 +1300,48 @@ const docsSideNav = [
       {
         type: 'category',
         isExpanded: false,
+        label: 'Bootstrapping',
+        route: '/docs/gcp-monitoring/bootstrapping',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/gcp-monitoring/bootstrapping/pubsub-topic-creation',
+            label: 'Creating Pub/Sub Topic',
+          },
+          {
+            type: 'doc',
+            route: '/docs/gcp-monitoring/bootstrapping/log-router-setup',
+            label: 'Log Router Setup',
+          },
+          {
+            type: 'doc',
+            route: '/docs/gcp-monitoring/bootstrapping/gce-creation',
+            label: 'Creating Compute Engine',
+          },
+        ],
+      },
+      {
+        type: 'category',
+        isExpanded: false,
         label: 'Cloud Functions',
         route: '/docs/gcp-monitoring/gcp-fns',
         items: [
           {
             type: 'doc',
             route: '/docs/gcp-monitoring/gcp-fns/logging',
+            label: 'Logging',
+          }
+        ],
+      },
+      {
+        type: 'category',
+        isExpanded: false,
+        label: 'App Engine',
+        route: '/docs/gcp-monitoring/app-engine',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/gcp-monitoring/app-engine/logging',
             label: 'Logging',
           }
         ],
