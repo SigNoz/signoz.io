@@ -235,7 +235,14 @@ const MobileEstimate = () => {
                   { value: MIN_VALUE, label: "0GB" },
                   { value: MAX_VALUE, label: "200TB" },
                 ]}
-                classNames={{ base: "mt-2" }}
+                renderThumb={(props) => (
+                  <div
+                    {...props}
+                    className="group top-1/2 bg-background border-small border-signoz_vanilla-100 shadow-medium rounded-full cursor-grab data-[dragging=true]:cursor-grabbing"
+                  >
+                    <span className="transition-transform bg-signoz_robin-500 rounded-full w-5 h-5 block group-data-[dragging=true]:scale-80" />
+                  </div>
+                )}
                 value={tracesValue}
                 onChange={handleChangeTraces}
               />
@@ -291,7 +298,14 @@ const MobileEstimate = () => {
                   { value: MIN_VALUE, label: "0GB" },
                   { value: MAX_VALUE, label: "200TB" },
                 ]}
-                classNames={{ base: "mt-2" }}
+                renderThumb={(props) => (
+                  <div
+                    {...props}
+                    className="group top-1/2 bg-background border-small border-signoz_vanilla-100 shadow-medium rounded-full cursor-grab data-[dragging=true]:cursor-grabbing"
+                  >
+                    <span className="transition-transform bg-signoz_sakura-500 rounded-full w-5 h-5 block group-data-[dragging=true]:scale-80" />
+                  </div>
+                )}
                 value={logsValue}
                 onChange={handleChangeLogs}
               />
@@ -347,7 +361,14 @@ const MobileEstimate = () => {
                   { value: MIN_VALUE, label: "0M" },
                   { value: MAX_VALUE, label: "200B" },
                 ]}
-                classNames={{ base: "mt-2" }}
+                renderThumb={(props) => (
+                  <div
+                    {...props}
+                    className="group top-1/2 bg-background border-small border-signoz_vanilla-100 shadow-medium rounded-full cursor-grab data-[dragging=true]:cursor-grabbing"
+                  >
+                    <span className="transition-transform bg-signoz_amber-500 rounded-full w-5 h-5 block group-data-[dragging=true]:scale-80" />
+                  </div>
+                )}
                 value={metricsValue}
                 onChange={handleChangeMetrics}
               />
