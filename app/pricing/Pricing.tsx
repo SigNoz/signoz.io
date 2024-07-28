@@ -14,6 +14,7 @@ import { TrySigNozCTA } from '@/components/try-signoz-cta'
 import WhySelectSignoz from '@/components/why-select-signoz'
 import { Testimonials } from '@/components/testimonials'
 import MonthlyEstimate from '@/components/Monthly-estimate/MonthlyEstimate'
+import MonthlyEstimateMobile from '@/components/Monthly-estimate/MonthlyEstimateMobile'
 import { GetStarted } from '@/components/GetStarted'
 import Link from 'next/link'
 import Divider from '@/components/ui/Divider'
@@ -54,6 +55,7 @@ import VimeoPlayer from '@/components/VimeoPlayer/VimeoPlayer'
 
 const CloseButton = () => <div className="absolute right-0 top-0">Close</div>
 
+
 function Pricing() {
   return (
     <div className="relative bg-signoz_ink-500">
@@ -81,6 +83,9 @@ function Pricing() {
         <div className="max-sm:hidden">
           <MonthlyEstimate />
         </div>
+        <div className='visible sm:hidden'>
+        <MonthlyEstimateMobile />
+        </div>
         <WhySelectSignoz isInPricingPage />
         <FAQ />
         {/* User Review */}
@@ -95,6 +100,7 @@ function Pricing() {
 }
 
 export default Pricing
+
 
 function FAQ() {
   return (
@@ -563,7 +569,7 @@ const PricingPlans = () => {
                       <li className="mb-3 flex items-center gap-3">
                         {' '}
                         <CircleCheckSolid /> Visualize very large traces
-                        <span className="rounded-full border border-none bg-signoz_slate-400 px-2 py-1 text-xs uppercase text-signoz_vanilla-400">
+                        <span className="rounded-full border border-none bg-signoz_slate-400 px-2 py-1 !text-[10px] uppercase text-signoz_vanilla-400 text-center">
                           &gt;10k spans
                         </span>
                       </li>
@@ -589,7 +595,7 @@ const PricingPlans = () => {
                   </Button>
                 </div>
 
-                <div className="mt-3 hidden md:block">
+                <div className="my-3 hidden md:block">
                   <Button
                     id="btn-estimate-monthly-bill-pricing-teams"
                     className="w-full"
@@ -604,9 +610,23 @@ const PricingPlans = () => {
                     Estimate your monthly bill
                     <ArrowDown size={14} />
                   </Button>
-                  <div>
-                    <br></br>
-                  </div>
+                </div>
+
+                <div className="mt-3 visible sm:hidden">
+                  <Button
+                    id="btn-estimate-monthly-bill-pricing-teams"
+                    className="w-full"
+                    type={Button.TYPES.SECONDARY}
+                    onClick={() => {
+                      const element = document.getElementById('estimate-your-monthly-bill-mobile')
+                      element?.scrollIntoView({
+                        behavior: 'smooth',
+                      })
+                    }}
+                  >
+                    Estimate your monthly bill
+                    <ArrowDown size={14} />
+                  </Button>
                 </div>
               </div>
               <div className="pricing-card !mb-0 border !border-b-0 !border-r-0 border-dashed border-signoz_slate-400 bg-opacity-5 px-4 py-5 max-sm:!border-l-0 md:px-8">
@@ -974,7 +994,7 @@ const PricingPlans = () => {
                       <li className="mb-3 flex items-center gap-3">
                         {' '}
                         <CircleCheckSolid /> Visualize very large traces
-                        <span className="rounded-full border border-none bg-signoz_slate-400 px-2 py-1 text-xs uppercase text-signoz_vanilla-400">
+                        <span className="rounded-full border border-none bg-signoz_slate-400 px-2 py-1 !text-[10px] uppercase text-signoz_vanilla-400 text-center">
                           &gt;10k spans
                         </span>
                       </li>
