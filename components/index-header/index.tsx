@@ -71,8 +71,9 @@ export const Header = () => {
                   />
                 </div>
               </div>
-              <Modal size={'5xl'} backdrop="blur" isOpen={isOpen} onOpenChange={onOpenChange}>
-                <ModalContent className="bg-transparen">
+
+              <Modal size={'5xl'} backdrop="blur" isOpen={isOpen} onOpenChange={onOpenChange} className='self-center'>
+                <ModalContent className="bg-transparent">
                   {() => (
                     <>
                       <ModalBody className="py-6">
@@ -82,10 +83,10 @@ export const Header = () => {
                   )}
                 </ModalContent>
               </Modal>
+              </div>
             </div>
           </div>
         </div>
-      </div>
     </header>
   )
 }

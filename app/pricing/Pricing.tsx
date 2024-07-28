@@ -441,7 +441,7 @@ const PricingPlans = () => {
                         </span>
                       </div>
                     </div>
-                    <Modal size={'5xl'} backdrop="blur" isOpen={isOpen} onOpenChange={onOpenChange}>
+                    <Modal size={'5xl'} backdrop="blur" isOpen={isOpen} onOpenChange={onOpenChange} className='self-center'>
                       <ModalContent className="bg-transparent">
                         {() => (
                           <>
