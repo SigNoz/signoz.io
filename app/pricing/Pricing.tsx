@@ -58,7 +58,7 @@ const CloseButton = () => <div className="absolute right-0 top-0">Close</div>
 
 function Pricing() {
 
-  const [width, setWidth] = useState<number>(window.innerWidth);
+  const [width, setWidth] = useState<number>(typeof window !== 'undefined' ? window.innerWidth : 0);
 
   function handleWindowSizeChange() {
     setWidth(window.innerWidth);
@@ -240,7 +240,7 @@ const PricingPlans = () => {
 
   const { isOpen, onOpen, onOpenChange } = useDisclosure()
 
-  const [width, setWidth] = useState<number>(window.innerWidth);
+  const [width, setWidth] = useState<number>(typeof window !== 'undefined' ? window.innerWidth : 0);
 
   function handleWindowSizeChange() {
     setWidth(window.innerWidth);
