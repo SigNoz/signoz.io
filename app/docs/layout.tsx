@@ -9,6 +9,7 @@ import SectionContainer from '@/components/SectionContainer'
 import { ProgressBar } from '@/components/ProgressBar/ProgressBar'
 import React from 'react'
 import DocsSidebar from '@/components/DocsSidebar/DocsSidebar'
+import { useEffect } from 'react'
 
 export interface tocItemProps {
   url: string
@@ -22,6 +23,24 @@ interface LayoutProps {
 
 export default function DocLayout({ children }: LayoutProps) {
   const mainRef = useRef<HTMLElement | null>(null)
+
+  const scrollToHash = () => {
+    if (window.location.hash) {
+      const element = document.querySelector(window.location.hash)
+      
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' })
+      }
+    }
+  }
+
+  useEffect(() => {
+    const rIC = window.requestIdleCallback ?? setTimeout
+
+    rIC(() => {
+        scrollToHash()
+    });
+  }, [])
 
   return (
     <main ref={mainRef} className="">
