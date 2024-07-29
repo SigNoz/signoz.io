@@ -1,8 +1,38 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Slider, Tooltip } from "@nextui-org/react";
 import { ArrowUpRight } from 'lucide-react';
 import Button from '@/components/Button/Button';
+
+const scrollToSection = (id) => {
+  const element = document.getElementById(id);
+  if (element) {
+    element.scrollIntoView({
+      block: "start",
+      behavior: "smooth",
+    });
+    window.location.hash = `#${id}`;
+  }
+};
+
+const useHash = () => {
+  const [hash, setHash] = useState("");
+
+  useEffect(() => {
+    const handleHashChange = () => {
+      setHash(window.location.hash);
+    };
+
+    setHash(window.location.hash);
+
+    window.addEventListener("hashchange", handleHashChange);
+    return () => {
+      window.removeEventListener("hashchange", handleHashChange);
+    };
+  }, []);
+
+  return hash;
+};
 
 const formatNumber = (number) => number.toLocaleString(undefined, { maximumFractionDigits: 2, minimumFractionDigits: 0 });
 
@@ -126,12 +156,24 @@ const MobileEstimate = () => {
 
   const [activeTab, setActiveTab] = useState('traces');
 
+  const hash = useHash();
+
+  useEffect(() => {
+    const section = hash.replace("#", "");
+    if (section) scrollToSection(section);
+  }, [hash]);
+
+  const copyLinkToClipboard = () => {
+    navigator.clipboard.writeText("https://signoz.io/pricing/#estimate-your-monthly-bill");
+  };
+
   return (
-    <section id="estimate-your-monthly-bill-mobile">
+    <section id="estimate-your-monthly-bill">
       <div className="section-container w-[90vw] mx-[auto] border border-signoz_slate-400 border-dashed">
         <div className="flex flex-col gap-2 pt-6">
           <span className="text-signoz_vanilla-100 text-2xl font-semibold font-semibold pl-1 relative group">
             Estimate your monthly bill
+            <a href="#estimate-your-monthly-bill" onClick={copyLinkToClipboard} className="ml-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200"/>
           </span>
           <span className="text-signoz_vanilla-400 text-sm pl-1 mb-4">
             You can also set data ingestion limits so you never get a surprise bill.
