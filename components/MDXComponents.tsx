@@ -18,6 +18,7 @@ import DocCard from './DocCard'
 import DocCardContainer from './DocCardContainer'
 import NextCarousel from './Carousel/Carousel'
 import Figure from './Figure/Figure'
+import PageFeedback from './PageFeedback/PageFeedback'
 
 export const components: MDXComponents = {
   Image,
@@ -39,4 +40,5 @@ export const components: MDXComponents = {
   DocCardContainer,
   NextCarousel,
   Figure,
+  PageFeedback,
 }
