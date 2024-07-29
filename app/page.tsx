@@ -38,7 +38,7 @@ export default async function Page() {
       <div className="relative mt-[-56px] bg-signoz_ink-500 ">
         <div className="absolute left-0 right-0 top-0 h-screen bg-[url('/img/background_blur/Perlin_noise.png')] bg-[length:55%] bg-[center_top_4rem] sm:bg-no-repeat " />
         <div className="absolute left-0 right-0 top-0 h-screen bg-[url('/img/background_blur/Circle.png')] bg-[length:110%] bg-no-repeat sm:bg-[center_top_-50rem]" />
-        <main className="landing-section relative z-[1] pt-12 sm:pt-0">
+        <main className="landing-section relative z-[1]">
           <Header />
           <TrustedByTeams page="homepage" />
           <SigNozFeatures />

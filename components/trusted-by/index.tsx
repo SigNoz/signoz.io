@@ -32,11 +32,11 @@ export const TrustedByTeams = ({page}) => {
             Trusted by the <span className="text-signoz_vanilla-100">best platform teams</span>
           </div>
         </div>
-        <div className="mb-8 mt-8 grid grid-cols-2 place-content-center gap-8 pl-0 sm:grid-cols-4 md:mt-0 md:grid-cols-6 ">
+        <div className="mb-12 mt-12 grid grid-cols-2 place-content-center gap-y-8 sm:gap-x-8 sm:gap-y-14 px-2  sm:grid-cols-4 md:mt-0 md:grid-cols-6 ">
           {COMPANIES.map((company, idx) => (
             <div key={`${idx}-${company.image}`} className="flex items-center justify-center">
               <img
-                className="h-[20px] w-[60px] md:h-[40px] md:w-[120px]"
+                className="h-[40px] w-[100px] md:h-[40px] md:w-[120px]"
                 src={company.image}
                 alt={company.imageDesc}
               />

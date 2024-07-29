@@ -79,10 +79,10 @@ export const SigNozFeatures = () => {
 
   return (
     <>
-      <section className="mx-auto w-[100vw] border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 bg-[url('/img/background_blur/Ellipse_388.webp')] bg-[center_top_calc(-78px)] md:w-[80vw] ">
+      <section className="mx-auto w-[100vw] border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 bg-[url('/img/background_blur/Ellipse_388.png')] bg-[center_top_calc(-78px)] md:w-[80vw] ">
         <div className={`container pb-16`}>
-          <div className="flex flex-col gap-6 pb-20 ">
-            <div className="mx-auto flex max-w-4xl flex-col items-center text-center">
+          <div className="flex flex-col gap-6 pb-32 ">
+            <div className="mx-auto mt-[50px] flex max-w-4xl flex-col items-center text-center">
               <div className="text-[32px] font-medium leading-[3.25rem] text-signoz_sienna-100">
                 The one-stop observability tool
               </div>
