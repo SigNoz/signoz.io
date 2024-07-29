@@ -66,7 +66,7 @@ export default function TopNav() {
   return (
     <div className="fixed left-0 right-0 z-30">
 
-      <Banner/>
+      <Banner />
 
       <header
         className={`header-bg mx-auto box-border flex h-[56px] w-full items-center border-b border-signoz_slate-500 px-4 text-signoz_vanilla-100 backdrop-blur-[20px] dark:text-signoz_vanilla-100 md:px-8 lg:px-8`}
@@ -76,21 +76,23 @@ export default function TopNav() {
           aria-label="Global"
         >
           <div className="flex justify-start gap-x-6">
-            <Link
-              href="/"
-              className="-m-1.5 flex items-center gap-2 p-1.5"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              <Image
-                className="h-5 w-auto"
-                src="/img/SigNozLogo-orange.svg"
-                width={160}
-                height={60}
-                alt=""
-              />
+            <button>
+              <Link
+                href="/"
+                className="-m-1.5 flex items-center gap-2 p-1.5"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <Image
+                  className="h-5 w-auto"
+                  src="/img/SigNozLogo-orange.svg"
+                  width={160}
+                  height={60}
+                  alt=""
+                />
 
-              <span className="text-[17.111px] font-medium">SigNoz</span>
-            </Link>
+                <span className="text-[17.111px] font-medium">SigNoz</span>
+              </Link>
+            </button>
             <Popover.Group className="hidden items-center gap-x-6 lg:flex">
               <Link
                 href="/docs"
@@ -139,16 +141,18 @@ export default function TopNav() {
 
           <div className="hidden gap-3 lg:flex lg:flex-1 lg:justify-end" >
             <SearchButton />
+            <button>
             <GitHubStars />
+            </button>
 
-              <Button
-                id="btn-get-started-website-navbar"
-                className="start-free-trial-btn h-8 pr-3 pl-4 px-4 py-2 rounded-full text-sm flex items-center justify-center gap-1.5 not-italic truncate text-center font-medium leading-5 text-white no-underline outline-none hover:text-white mx-2"
-              >
-            <Link href="/teams" className="flex-center">
+            <Button
+              id="btn-get-started-website-navbar"
+              className="start-free-trial-btn h-8 pr-3 pl-4 px-4 py-2 rounded-full text-sm flex items-center justify-center gap-1.5 not-italic truncate text-center font-medium leading-5 text-white no-underline outline-none hover:text-white mx-2"
+            >
+              <Link href="/teams" className="flex-center">
                 Try SigNoz Cloud <ArrowRight size={14} />
-            </Link>
-              </Button>
+              </Link>
+            </Button>
           </div>
         </nav>
         <Dialog as="div" className="lg:hidden" open={mobileMenuOpen} onClose={setMobileMenuOpen}>
