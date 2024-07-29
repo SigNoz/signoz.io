@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 
 import FAQBody from '../../components/FAQPricing'
 import styles from './styles.module.css'
@@ -57,6 +57,21 @@ const CloseButton = () => <div className="absolute right-0 top-0">Close</div>
 
 
 function Pricing() {
+
+  const [width, setWidth] = useState<number>(typeof window !== 'undefined' ? window.innerWidth : 0);
+
+  function handleWindowSizeChange() {
+    setWidth(window.innerWidth);
+  }
+  useEffect(() => {
+    window.addEventListener('resize', handleWindowSizeChange);
+    return () => {
+      window.removeEventListener('resize', handleWindowSizeChange);
+    }
+  }, []);
+
+  const isMobile = width <= 768;
+
   return (
     <div className="relative bg-signoz_ink-500">
       <div className="absolute left-0 right-0 top-0 h-screen bg-[url('/img/background_blur/Perlin_noise.png')] bg-[length:55%] bg-[center_top_4rem] sm:bg-no-repeat " />
@@ -80,12 +95,11 @@ function Pricing() {
         {/* More Options */}
         {/* <CommunityEdition /> */}
         {/* FAQ section */}
-        <div className="max-sm:hidden">
+        {isMobile ? (
+          <MonthlyEstimateMobile />
+        ) : (
           <MonthlyEstimate />
-        </div>
-        <div className='visible sm:hidden'>
-        <MonthlyEstimateMobile />
-        </div>
+        )}
         <WhySelectSignoz isInPricingPage />
         <FAQ />
         {/* User Review */}
@@ -225,6 +239,20 @@ const PricingPlans = () => {
   const [tab, setTab] = useState('cloud')
 
   const { isOpen, onOpen, onOpenChange } = useDisclosure()
+
+  const [width, setWidth] = useState<number>(typeof window !== 'undefined' ? window.innerWidth : 0);
+
+  function handleWindowSizeChange() {
+    setWidth(window.innerWidth);
+  }
+  useEffect(() => {
+    window.addEventListener('resize', handleWindowSizeChange);
+    return () => {
+      window.removeEventListener('resize', handleWindowSizeChange);
+    }
+  }, []);
+
+  const isMobile = width <= 768;
 
   return (
     <section className={`${styles.pricing} relative`}>
@@ -595,39 +623,41 @@ const PricingPlans = () => {
                   </Button>
                 </div>
 
-                <div className="my-3 hidden md:block">
-                  <Button
-                    id="btn-estimate-monthly-bill-pricing-teams"
-                    className="w-full"
-                    type={Button.TYPES.SECONDARY}
-                    onClick={() => {
-                      const element = document.getElementById('estimate-your-monthly-bill')
-                      element?.scrollIntoView({
-                        behavior: 'smooth',
-                      })
-                    }}
-                  >
-                    Estimate your monthly bill
-                    <ArrowDown size={14} />
-                  </Button>
-                </div>
-
-                <div className="mt-3 visible sm:hidden">
-                  <Button
-                    id="btn-estimate-monthly-bill-pricing-teams"
-                    className="w-full"
-                    type={Button.TYPES.SECONDARY}
-                    onClick={() => {
-                      const element = document.getElementById('estimate-your-monthly-bill-mobile')
-                      element?.scrollIntoView({
-                        behavior: 'smooth',
-                      })
-                    }}
-                  >
-                    Estimate your monthly bill
-                    <ArrowDown size={14} />
-                  </Button>
-                </div>
+                {isMobile ? (
+                  <div className="mt-3">
+                    <Button
+                      id="btn-estimate-monthly-bill-pricing-teams"
+                      className="w-full"
+                      type={Button.TYPES.SECONDARY}
+                      onClick={() => {
+                        const element = document.getElementById('estimate-your-monthly-bill')
+                        element?.scrollIntoView({
+                          behavior: 'smooth',
+                        })
+                      }}
+                    >
+                      Estimate your monthly bill
+                      <ArrowDown size={14} />
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="my-3">
+                    <Button
+                      id="btn-estimate-monthly-bill-pricing-teams"
+                      className="w-full"
+                      type={Button.TYPES.SECONDARY}
+                      onClick={() => {
+                        const element = document.getElementById('estimate-your-monthly-bill')
+                        element?.scrollIntoView({
+                          behavior: 'smooth',
+                        })
+                      }}
+                    >
+                      Estimate your monthly bill
+                      <ArrowDown size={14} />
+                    </Button>
+                  </div>
+                )}
               </div>
               <div className="pricing-card !mb-0 border !border-b-0 !border-r-0 border-dashed border-signoz_slate-400 bg-opacity-5 px-4 py-5 max-sm:!border-l-0 md:px-8">
                 <div>
