@@ -12,7 +12,7 @@ const siteMetadata = {
   siteLogo: '/img/logo.svg',
   socialBanner: '/img/signoz-meta-image.webp',
   mastodon: 'https://mastodon.social/@mastodonuser',
-  email: 'address@yoursite.com',
+  email: 'hello@signoz.io',
   github: 'https://github.com/SigNoz',
   x: 'https://x.com/SigNozHQ',
   youtube: 'https://www.youtube.com/@signoz',

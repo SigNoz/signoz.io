@@ -1,0 +1,959 @@
+---
+
+title: Zap Logger - Complete Guide to Golang Zap Logger
+slug: zap-logger
+date: 2024-07-17
+tags: [logging]
+authors: [eromosele]
+description: This article covers logging in software development using Zap, including installation, setup, log levels, customization, encoding formats, and output destinations. It also delves into advanced techniques, best practices, and compares Zap with other solutions. Finally, it guides setting up Zap logs for Signoz with benefits, setup instructions, configuration steps, example code, and deployment.
+keywords: [log, logging, golang, zap, zap logger, benchmark, structured logging]
+
+---
+
+<head>
+<script
+    type="application/ld+json"
+    dangerouslySetInnerHTML={{ __html: JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Zap Logger - Complete Guide to Golang Zap Logger",
+  "alternativeHeadline": "This article covers logging in software development using Zap, including installation, setup, log levels, customization, encoding formats, and output destinations. It also delves into advanced techniques, best practices, and compares Zap with other solutions. Finally, it guides setting up Zap logs for Signoz with benefits, setup instructions, configuration steps, example code, and deployment.",
+  "author": {
+    "@type": "Person",
+    "name": "Eromosele"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SigNoz",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://signoz.io/img/SigNozLogo-orange.svg"
+    }
+  },
+  "datePublished": "2024-07-17T00:00:00Z",
+  "dateModified": "2024-07-17T00:00:00Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://signoz.io/guides/zap-logger/"
+  },
+  "description": "This article covers logging in software development using Zap, including installation, setup, log levels, customization, encoding formats, and output destinations. It also delves into advanced techniques, best practices, and compares Zap with other solutions. Finally, it guides setting up Zap logs for Signoz with benefits, setup instructions, configuration steps, example code, and deployment.",
+  "keywords": ["log", "logging", "golang", "zap", "zap logger", "benchmark", "structured logging"],
+  "articleSection": "Technology",
+  "inLanguage": "en",
+  "isPartOf": {
+    "@type": "Blog",
+    "name": "SigNoz Blog",
+    "url": "https://signoz.io/blog/"
+  },
+  "about": [
+    {
+      "@type": "Thing",
+      "name": "Zap Logger",
+      "description": "Complete guide to using Zap Logger in Golang, including installation, setup, and advanced configurations."
+    },
+    {
+      "@type": "Thing",
+      "name": "Logging",
+      "description": "Techniques and best practices for logging in software development using Zap Logger in Golang."
+    },
+    {
+      "@type": "Thing",
+      "name": "Golang",
+      "description": "Using Zap Logger in Golang for efficient and structured logging."
+    }
+  ],
+  "mentions": [
+    {
+      "@type": "SoftwareApplication",
+      "name": "Zap",
+      "applicationCategory": "Logging Library"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "name": "SigNoz",
+      "applicationCategory": "Observability Platform"
+    }
+  ],
+  "mainEntity": {
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What is Zap Logger?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Zap Logger is a fast, structured logging library for Go. It provides high-performance logging with support for multiple output formats."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can Zap Logger be used in a concurrent environment?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, Zap Logger is designed to be safe for concurrent use by multiple goroutines."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I handle log rotation with Zap Logger?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Zap Logger supports log rotation through third-party libraries or by implementing custom solutions using its API."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is Zap Logger suitable for production use?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, Zap Logger is suitable for production use due to its performance, reliability, and feature set."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I benchmark the performance of Zap Logger?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Use built-in benchmarks or custom benchmarks to measure Zap Logger's performance against your application's requirements."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I use Zap Logger with other logging libraries?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, Zap Logger can be used alongside other logging libraries in Go applications."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Where can I find the documentation and examples for Zap Logger?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Documentation and examples for Zap Logger are available on its GitHub repository and the official Uber Engineering Blog."
+        }
+      }
+    ]
+  }
+}) }} />
+</head>
+
+Logging is the practice of recording or storing information and messages that provide insights into the behavior and execution of a program.
+
+Zap is a high-performance, structured logging library for Go developed by Uber. 
+
+It is designed to offer both speed and flexibility, making it a popular choice for applications that require efficient logging capabilities without compromising on features. 
+
+This article will provide an overview of how to use Zap loggers, explore its key features and advanced configurations, and demonstrate how to track logs produced by the Zap logger using Signoz.
+
+## Prerequisites
+
+- Go Installation: Ensure that Go is installed on your system. You can download and install it from the official <a href="https://golang.org/" rel="noopener noreferrer nofollow" target="_blank">Go website</a>.
+- Basic familiarity with [Logging in GoLang](https://signoz.io/guides/golang-log/)
+
+## Getting Started with Zap
+
+### Installation
+
+To use `zap` in your Go application, you need to install it using `go get` on your Terminal /PowerShell:
+
+```bash
+go get -u go.uber.org/zap
+```
+
+After installation,  import `zap` into your Go code (if there is an error run `go mod tidy`):
+
+```go
+import (
+    "go.uber.org/zap"
+)
+```
+
+### Basic Usage
+
+Let’s explore an example of using the `zap` package to log events in your application: 
+
+```go
+package main
+
+import (
+    "go.uber.org/zap"
+)
+
+func main() {
+    // Create a logger
+    logger, _ := zap.NewProduction()
+    defer logger.Sync() // Flushes buffer, if any
+
+    // Log some simple messages
+    logger.Info("This is an info message")
+ 
+}
+```
+
+Output
+
+```json
+{"level":"info","ts":1721163003.793889,"caller":"Signoz-Article/main.go:13","msg":"This is an info message"}
+```
+
+- `zap.NewProduction()` creates a logger configured for production use, which outputs JSON-formatted logs.
+- `defer logger.Sync()` ensures that any buffered log entries are flushed before the program exits.
+
+## Configuring Zap Logger
+
+### Level Configurations
+
+Zap supports multiple logging levels, which allow you to control the verbosity of the logs. The logging levels, from most to least verbose, are:
+
+- DEBUG
+    
+    The `Debug` level is the most verbose logging level. It includes detailed information that is useful during development and debugging.
+    
+    Use Case: Use `Debug` logs to output diagnostic information that can help developers understand the flow of execution and the state of variables. 
+    
+- INFO
+    
+    The `Info` level is used for informational messages that highlight the progress of the application at a high level.
+    
+    Use Case:Use `Info` logs to record key events in the application's lifecycle, such as startup, shutdown, or significant transactions. 
+    
+- WARN
+    
+    The `Warn` level indicates potentially harmful situations that are not immediately detrimental but might lead to errors if not addressed.
+    
+    Use Case: Use `Warn` logs to highlight issues that are concerning but not critical. This might include deprecated API usage, recoverable errors, or unusual behavior that should be investigated.
+    
+- ERROR
+    
+    The `Error` level logs error events that might still allow the application to continue running but indicate a failure in a particular operation.
+    
+    Use Case: Use `Error` logs to capture errors that require attention but do not necessarily stop the application from running. 
+    
+- DPANIC
+    
+    The `DPanic` level stands for "development panic." In development mode, the logger panics after writing the log message. In production, it behaves like an `Error` level.
+    
+    Use Case: Use `DPanic` logs to capture critical errors that you want to be highly visible during development. 
+    
+- PANIC
+    
+    The `Panic` level logs a message and then panics, which means it stops the ordinary flow of the program and begins to unwind the stack.
+    
+    Use Case: Use `Panic` logs for critical errors from which the application cannot or should not recover.
+    
+- FATAL
+    
+    The `Fatal` level logs a message and then calls `os.Exit(1)`, which immediately terminates the program.
+    
+    Use Case: Use `Fatal` logs for errors that are so severe that the program must immediately terminate.
+    
+
+By setting the logging level, you can filter out less important log messages and focus on the ones that matter most for your application.
+
+To configure the logging level, you can use the `zap.Config` struct:
+
+```go
+package main
+
+import (
+    "go.uber.org/zap"
+)
+
+func main() {
+    config := zap.NewProductionConfig()
+    config.Level = zap.NewAtomicLevelAt(zap.DebugLevel)
+
+    logger, err := config.Build()
+    if err != nil {
+        panic(err)
+    }
+    defer logger.Sync()
+
+    logger.Debug("This is a debug message")
+    logger.Info("This is an info message")
+    logger.Warn("This is a warning message")
+    logger.DPanic("This is a panic message")
+    logger.Panic("This is a panic message")
+    logger.Fatal("This is a fatal message")
+}
+```
+
+Output:
+
+```
+{"level":"debug","ts":1721165086.336249,"caller":"Signoz-Article/main.go:17","msg":"This is a debug message"}
+{"level":"info","ts":1721165086.336344,"caller":"Signoz-Article/main.go:18","msg":"This is an info message"}
+{"level":"warn","ts":1721165086.336359,"caller":"Signoz-Article/main.go:19","msg":"This is a warning message"}
+{"level":"dpanic","ts":1721165086.33637,"caller":"Signoz-Article/main.go:20","msg":"This is a panic message","stacktrace":"main.main\n\t/Users/macbook/Desktop/API Project in Go/Signoz-Article/main.go:20\nruntime.main\n\t/usr/local/Cellar/go/1.22.1/libexec/src/runtime/proc.go:271"}
+{"level":"panic","ts":1721165086.336419,"caller":"Signoz-Article/main.go:21","msg":"This is a panic message","stacktrace":"main.main\n\t/Users/macbook/Desktop/API Project in Go/Signoz-Article/main.go:21\nruntime.main\n\t/usr/local/Cellar/go/1.22.1/libexec/src/runtime/proc.go:271"}
+panic: This is a panic message
+
+goroutine 1 [running]:
+go.uber.org/zap/zapcore.CheckWriteAction.OnWrite(0x0?, 0x0?, {0x0?, 0x0?, 0xc000034160?})
+        /Users/macbook/go/pkg/mod/go.uber.org/zap@v1.27.0/zapcore/entry.go:196 +0x54
+go.uber.org/zap/zapcore.(*CheckedEntry).Write(0xc00010cf70, {0x0, 0x0, 0x0})
+        /Users/macbook/go/pkg/mod/go.uber.org/zap@v1.27.0/zapcore/entry.go:262 +0x24e
+go.uber.org/zap.(*Logger).Panic(0xc00001426c?, {0xfeb14ff?, 0xc000012210?}, {0x0, 0x0, 0x0})
+        /Users/macbook/go/pkg/mod/go.uber.org/zap@v1.27.0/logger.go:285 +0x51
+main.main()
+        /Users/macbook/Desktop/API Project in Go/Signoz-Article/main.go:21 +0x1c5
+exit status 2
+```
+
+### Logger Configurations
+
+Zap provides several built-in configurations for creating a logger, such as `NewProductionConfig` and `NewDevelopmentConfig`. These configurations are tailored for production and development environments, respectively.
+
+You can also create custom configurations by modifying the `zap.Config` struct:
+
+```go
+package main
+
+import (
+    "go.uber.org/zap"
+)
+
+func main() {
+    config := zap.Config{
+        Level:            zap.NewAtomicLevelAt(zap.InfoLevel),
+        Development:      false,
+        Encoding:         "json",
+        EncoderConfig:    zap.NewDevelopmentEncoderConfig(),
+        OutputPaths:      []string{"stdout", "logfile"},
+        ErrorOutputPaths: []string{"stderr"},
+    }
+
+    logger, err := config.Build()
+    if err != nil {
+        panic(err)
+    }
+    defer logger.Sync()
+
+    logger.Info("Custom logger initialized")
+}
+```
+
+Output:
+
+```json
+{"L":"INFO","T":"2024-07-16T22:56:42.529+0100","C":"Signoz-Article/main.go:23","M":"Custom logger initialized"}
+```
+
+In this example, we create a custom logger configuration that logs `Info` level messages and above, outputs logs in JSON format to both the console and a file, and directs error messages to `stderr`.
+
+### Encoder Configurations
+
+Encoders in Zap determine how log entries are formatted. Zap provides two built-in encoders: `json` and `console`. You can customize the encoder configuration to suit your needs:
+
+```go
+package main
+
+import (
+    "go.uber.org/zap"
+    "go.uber.org/zap/zapcore"
+)
+
+func main() {
+    encoderConfig := zapcore.EncoderConfig{
+        TimeKey:        "timestamp",
+        LevelKey:       "level",
+        NameKey:        "logger",
+        CallerKey:      "caller",
+        MessageKey:     "message",
+        StacktraceKey:  "stacktrace",
+        LineEnding:     zapcore.DefaultLineEnding,
+        EncodeLevel:    zapcore.CapitalLevelEncoder,
+        EncodeTime:     zapcore.ISO8601TimeEncoder,
+        EncodeDuration: zapcore.StringDurationEncoder,
+        EncodeCaller:   zapcore.ShortCallerEncoder,
+    }
+
+    config := zap.Config{
+        Level:            zap.NewAtomicLevelAt(zap.DebugLevel),
+        Development:      true,
+        Encoding:         "console",
+        EncoderConfig:    encoderConfig,
+        OutputPaths:      []string{"stdout"},
+        ErrorOutputPaths: []string{"stderr"},
+    }
+
+    logger, err := config.Build()
+    if err != nil {
+        panic(err)
+    }
+    defer logger.Sync()
+
+    logger.Debug("Debug message with custom encoder")
+}
+```
+
+Output:
+
+```
+2024-07-16T23:00:31.613+0100    DEBUG   Signoz-Article/main.go:38       Debug message with custom encoder
+```
+
+### Output Configurations
+
+Zap allows you to configure multiple output paths for your logs. By default, logs can be sent to the console (`stdout`) or standard error (`stderr`), but you can also direct logs to files or custom sinks.
+
+```go
+package main
+
+import (
+    "go.uber.org/zap"
+)
+
+func main() {
+    config := zap.NewProductionConfig()
+    config.OutputPaths = []string{
+        "stdout",
+        "/Users/macbook/Desktop/API Project in Go/Signoz-Article/myapp.log",
+    }
+
+    logger, err := config.Build()
+    if err != nil {
+        panic(err)
+    }
+    defer logger.Sync()
+
+    logger.Info("This message will be logged to multiple outputs")
+}
+```
+
+Output(myapp.log):
+
+```json
+{"level":"info","ts":1721168784.654409,"caller":"Signoz-Article/main.go:20","msg":"This message will be logged to multiple outputs"}
+```
+
+In this example, we configure the logger to write logs to both the console and a file located at `/Users/macbook/Desktop/API Project in Go/Signoz-Article/myapp.log`.
+
+## Enhanced Logging Techniques
+
+Enhancing your logging techniques can greatly improve the clarity and usefulness of your logs. Here, we'll explore structured logging and contextual logging using the Zap logging library.
+
+### Structured Logging
+
+Structured logging involves logging messages with additional fields that provide more context about the event being logged. This approach makes it easier to search, filter, and analyze logs, especially in distributed systems.
+
+Logging with Fields
+
+In Zap, you can add fields to your log messages to include structured data. This can help you log additional context, such as user IDs, request IDs, or other relevant metadata.
+
+Example:
+
+```go
+package main
+
+import (
+    "go.uber.org/zap"
+)
+
+func main() {
+    logger, _ := zap.NewProduction()
+    defer logger.Sync()
+
+    // Log an info message with additional fields
+    logger.Info("User logged in",
+        zap.String("username", "johndoe"),
+        zap.Int("user_id", 42),
+        zap.String("role", "admin"),
+    )
+
+    // Log an error message with additional fields
+    logger.Error("Failed to process request",
+        zap.String("request_id", "12345"),
+    )
+}
+```
+
+Output:
+
+```json
+{"level":"info","ts":1721169479.883689,"caller":"Signoz-Article/main.go:12","msg":"User logged in","username":"johndoe","user_id":42,"role":"admin"}
+{"level":"error","ts":1721169479.883787,"caller":"Signoz-Article/main.go:19","msg":"Failed to process request","request_id":"12345","stacktrace":"main.main\n\t/Users/macbook/Desktop/API Project in Go/Signoz-Article/main.go:19\nruntime.main\n\t/usr/local/Cellar/go/1.22.1/libexec/src/runtime/proc.go:271"}
+```
+
+In this example, we log an info message with fields such as `username`, `user_id`, and `role`, and an error message with a `request_id` and the error itself.
+
+### Contextual Logging
+
+Contextual logging lets you add extra information to your loggers, so you can include the same details in multiple log messages. This is especially helpful in applications where each request should have consistent information (like a request ID) in all related log messages.
+
+Adding Context to Logs Using `With` and `WithOptions`
+
+You can create a new logger that includes additional context using the `With` method. This method returns a new logger that includes the specified fields in all subsequent log entries.
+
+Example:
+
+```go
+package main
+
+import (
+    "errors"
+    "go.uber.org/zap"
+)
+
+func main() {
+    logger, _ := zap.NewProduction()
+    defer logger.Sync()
+
+    // Simulate an error for demonstration purposes
+    err := errors.New("timeout while processing request")
+
+    // Create a logger with context
+    requestLogger := logger.With(
+        zap.String("request_id", "12345"),
+        zap.String("user_id", "42"),
+    )
+
+    // Use the contextual logger to log messages
+    requestLogger.Info("Processing request")
+    requestLogger.Warn("Request took too long")
+    requestLogger.Error("Failed to process request", zap.Error(err))
+}
+```
+
+Output:
+
+```json
+{"level":"info","ts":1721169926.2557518,"caller":"Signoz-Article/main.go:22","msg":"Processing request","request_id":"12345","user_id":"42"}
+{"level":"warn","ts":1721169926.255857,"caller":"Signoz-Article/main.go:23","msg":"Request took too long","request_id":"12345","user_id":"42"}
+{"level":"error","ts":1721169926.2558908,"caller":"Signoz-Article/main.go:24","msg":"Failed to process request","request_id":"12345","user_id":"42","error":"timeout while processing request","stacktrace":"main.main\n\t/Users/macbook/Desktop/API Project in Go/Signoz-Article/main.go:24\nruntime.main\n\t/usr/local/Cellar/go/1.22.1/libexec/src/runtime/proc.go:271"}
+```
+
+In this example, `requestLogger` is a new logger that includes the `request_id` and `user_id` fields. All log messages produced by `requestLogger` will automatically include these fields.
+
+You can also use `WithOptions` to configure additional settings for the logger, such as adding hooks or modifying the encoder configuration.
+
+```go
+package main
+
+import (
+    "os"
+    "go.uber.org/zap"
+    "go.uber.org/zap/zapcore"
+)
+
+func main() {
+    logger, _ := zap.NewProduction()
+    defer logger.Sync()
+
+    // Create a custom encoder configuration
+    encoderConfig := zapcore.EncoderConfig{
+        TimeKey:        "timestamp",
+        LevelKey:       "level",
+        NameKey:        "logger",
+        CallerKey:      "caller",
+        MessageKey:     "message",
+        StacktraceKey:  "stacktrace",
+        LineEnding:     zapcore.DefaultLineEnding,
+        EncodeLevel:    zapcore.CapitalLevelEncoder,
+        EncodeTime:     zapcore.ISO8601TimeEncoder,
+        EncodeDuration: zapcore.StringDurationEncoder,
+        EncodeCaller:   zapcore.ShortCallerEncoder,
+    }
+
+    // Apply the custom encoder configuration using WithOptions
+    customLogger := logger.WithOptions(zap.WrapCore(func(c zapcore.Core) zapcore.Core {
+        return zapcore.NewCore(
+            zapcore.NewJSONEncoder(encoderConfig), // Custom encoder
+            zapcore.AddSync(os.Stdout),            // Sync to stdout
+            c, // Use the same level as the original core
+        )
+    }))
+
+    // Use the custom logger to log messages
+    customLogger.Info("Custom logger initialized")
+    customLogger.Warn("This is a warning message")
+}
+```
+
+Output:
+
+```json
+{"level":"INFO","timestamp":"2024-07-17T00:13:54.396+0100","caller":"Signoz-Article/main.go:38","message":"Custom logger initialized"}
+{"level":"WARN","timestamp":"2024-07-17T00:13:54.397+0100","caller":"Signoz-Article/main.go:39","message":"This is a warning message"}
+```
+
+In this example:
+
+- `zapcore.AddSync(zapcore.Lock(os.Stdout))` is used to create a `zapcore.WriteSyncer` that writes to `stdout`.
+
+## Best Practices
+
+Implementing logging best practices is crucial to ensure efficient and reliable log management. Below, we discuss some key areas to consider:
+
+### Performance Considerations
+
+Benchmarks and Performance Comparison
+
+When choosing a logging library, it's important to consider its performance, especially in high-load applications. Zap is known for its high performance due to its zero-allocation approach for common logging patterns.
+
+- Benchmarking Tools: Use benchmarking tools to measure the performance of different logging libraries in your specific use case. Go’s `testing` package provides tools for writing benchmarks.
+- Comparison Metrics: Focus on metrics such as throughput (logs per second), latency (time taken to log a message), and memory usage.
+
+Example benchmark for Zap:
+
+```go
+package main
+
+import (
+    "testing"
+    "go.uber.org/zap"
+)
+
+func BenchmarkZapLogger(b *testing.B) {
+    logger, _ := zap.NewProduction()
+    defer logger.Sync()
+
+    b.ResetTimer()
+    for i := 0; i < b.N; i++ {
+        logger.Info("Benchmark log message", zap.Int("iteration", i))
+    }
+}
+```
+
+Best Practices for High-Performance Logging
+
+- Use Buffered Logging: Buffer logs to reduce I/O overhead. Zap’s `BufferedWriteSyncer` can help.
+- Avoid Synchronous Logging: Use asynchronous logging where possible to avoid blocking your application.
+- Log Levels: Adjust log levels appropriately. Avoid logging at the debug level in production environments.
+- Batching: Log messages in batches to improve throughput.
+
+### Error Handling
+
+Handling Logging Errors
+
+Errors during logging should be handled gracefully to ensure they don’t crash the application or cause significant slowdowns.
+
+- Fallback Loggers: Use fallback loggers to handle cases where the primary logger fails.
+- Error Monitoring: Monitor and alert on logging errors to ensure they are addressed promptly.
+
+Example:
+
+```go
+package main
+
+import (
+    "log"
+    "go.uber.org/zap"
+)
+
+func main() {
+    logger, err := zap.NewProduction()
+    if err != nil {
+        log.Fatalf("Failed to initialize logger: %v", err)
+    }
+    defer logger.Sync()
+
+    logger.Info("Logger initialized successfully")
+    }
+
+```
+
+Output:
+
+```json
+{"level":"info","ts":1721173746.537836,"caller":"Signoz-Article/main.go:15","msg":"Logger initialized successfully"}
+```
+
+Ensuring Log Reliability
+
+- Retry Mechanisms: Implement retry mechanisms for transient errors.
+- Fail-Safe Logging: Ensure critical log messages are always captured, possibly to a local file if remote logging fails.
+
+### Log Management
+
+Log Rotation and Retention
+
+Managing log files is essential to prevent disk space issues and maintain log relevance.
+
+- Log Rotation: Rotate logs based on size or time to ensure they don’t grow indefinitely. Libraries like `lumberjack`can assist with this.
+- Log Retention Policies: Define retention policies to delete old logs that are no longer needed.
+
+Example using `lumberjack`:
+
+```go
+package main
+
+import (
+    "go.uber.org/zap"
+    "gopkg.in/natefinch/lumberjack.v2"
+    "go.uber.org/zap/zapcore"
+)
+
+func main() {
+    w := zapcore.AddSync(&lumberjack.Logger{
+        Filename:   "/Users/macbook/Desktop/API Project in Go/Signoz-Article/myapp.log",
+        MaxSize:    100, // megabytes
+        MaxBackups: 3,
+        MaxAge:     28, // days
+    })
+
+    core := zapcore.NewCore(
+        zapcore.NewJSONEncoder(zap.NewProductionEncoderConfig()),
+        w,
+        zap.InfoLevel,
+    )
+
+    logger := zap.New(core)
+    defer logger.Sync()
+
+    logger.Info("Logger with log rotation initialized")
+}
+```
+
+Output (myapp.log):
+
+```json
+{"level":"info","ts":1721173904.548351,"msg":"Logger with log rotation initialized"}
+```
+
+Using External Log Management Systems
+
+- Centralized Logging: Use systems like ELK Stack (Elasticsearch, Logstash, Kibana), Splunk, or cloud-based solutions like AWS CloudWatch, Google Cloud Logging, or Azure Monitor.
+- Log Aggregation: Aggregate logs from multiple sources to a central location for easier analysis.
+- Alerting and Monitoring: Set up alerting and monitoring to get notified about important log events.
+
+### Zap vs Other Logging Libraries
+
+When choosing a logging library, it’s helpful to compare Zap with other popular options:
+
+- Zap vs Logrus: Zap is generally faster due to its zero-allocation design. Logrus is easier to use with a more user-friendly API.
+- Zap vs Stdlib log: The standard library `log` is simple and lightweight but lacks structured logging and advanced features like log levels and JSON encoding.
+- Zap vs Zerolog: Zerolog is also designed for high performance with zero allocations. It’s smaller and simpler than Zap but less feature-rich.
+- Zap vs Apex Logs: Apex Logs is a simple structured logging library, but it’s not as performant as Zap and lacks some advanced features.
+
+## Sending Zap Logs to Signoz
+
+Implementing logging in your Golang application with zap is just the first step. To truly leverage the power of logs, sending them to an observability platform like SigNoz can provide numerous benefits, let’s see how to setup SigNoz:
+
+Step 1: Setting up Signoz in your Environment:
+
+<GetStartedSigNoz />
+
+Step 2: Building the Application:
+
+Create a new file named `main.go` and paste the following code block into it:
+
+```go
+package main
+
+import (
+	"fmt"
+	"net/http"
+	"os"
+
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
+)
+
+var (
+	logger *zap.Logger
+)
+
+func initLogger() *zap.Logger {
+	// Configure Zap logger
+	config := zap.NewProductionConfig()
+	logFile, err := os.OpenFile("application.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		panic(err)
+	}
+	config.OutputPaths = []string{logFile.Name()}
+	config.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
+	config.EncoderConfig.EncodeLevel = zapcore.CapitalLevelEncoder
+
+	// Initialize logger
+	l, err := config.Build()
+	if err != nil {
+		panic(err)
+	}
+	return l
+}
+
+func main() {
+	logger = initLogger()
+	defer logger.Sync()
+
+	http.HandleFunc("/", handleIndex)
+	http.HandleFunc("/log", handleLog)
+	http.HandleFunc("/data", handleData)
+	http.HandleFunc("/error", handleError)
+
+	fmt.Println("Server starting on <http://localhost:8080>")
+	if err := http.ListenAndServe(":8080", nil); err != nil {
+		logger.Fatal("Failed to start server", zap.Error(err))
+	}
+}
+
+func handleIndex(w http.ResponseWriter, r *http.Request) {
+	logger.Info("Accessing index page",
+		zap.String("method", r.Method),
+	)
+	fmt.Fprintln(w, "Welcome to the Go Application!")
+}
+
+func handleLog(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case "GET":
+		logger.Info("Handled GET request on /log",
+			zap.String("Method", "GET"),
+			zap.String("Path", r.URL.Path),
+		)
+		fmt.Fprintln(w, "Received a GET request at /log.")
+	case "POST":
+		logger.Info("Handled POST request on /log",
+			zap.String("Method", "POST"),
+			zap.String("Path", r.URL.Path),
+		)
+		fmt.Fprintln(w, "Received a POST request at /log.")
+	default:
+		http.Error(w, "Unsupported HTTP method", http.StatusMethodNotAllowed)
+	}
+}
+
+func handleData(w http.ResponseWriter, r *http.Request) {
+	logger.Info("Data endpoint hit",
+		zap.String("method", r.Method),
+		zap.String("endpoint", "/data"),
+	)
+	fmt.Fprintln(w, "This is the data endpoint. Method used:", r.Method)
+}
+
+func handleError(w http.ResponseWriter, r *http.Request) {
+	logger.Error("Error endpoint accessed",
+		zap.String("method", r.Method),
+		zap.String("endpoint", "/error"),
+	)
+	http.Error(w, "You have reached the error endpoint", http.StatusInternalServerError)
+}
+
+```
+
+This Go code sets up a basic HTTP server that logs events to a file (`application.log`) using the  `zap` package. It demonstrates how to configure logging output and format, define HTTP request handlers, start an HTTP server, and handle errors. Each HTTP handler logs relevant information about incoming requests and responds with appropriate messages or errors to clients. This setup is useful for monitoring and debugging web applications in a structured manner.
+
+After running your application you should see the following output on `localhost:8080/`:
+
+<Figure src="/img/guides/2024/07/zap-logger-Screenshot_2024-07-01_at_14.15.51.webp" alt="Output after running the Go Application" caption="Output after running the Go Application" /> 
+
+Step 3: Setting up the Logs Pipeline in Otel Collector
+
+The above code also generates a log file named `application.log` on the execution of the code. To export logs from the log file generated, an OpenTelemetry Collector needs to be integrated.
+
+You can set up the complete pipeline following this [guide](https://signoz.io/docs/userguide/collect_logs_from_file/). Here is the complete configuration for the above go code:
+
+```yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+  hostmetrics:
+    collection_interval: 60s
+    scrapers:
+      cpu: {}
+      disk: {}
+      load: {}
+      filesystem: {}
+      memory: {}
+      network: {}
+      paging: {}
+      process:
+        mute_process_name_error: true
+        mute_process_exe_error: true
+        mute_process_io_error: true
+      processes: {}
+  prometheus:
+    config:
+      global:
+        scrape_interval: 60s
+      scrape_configs:
+        - job_name: otel-collector-binary
+          static_configs:
+            - targets:
+              # - localhost:8888
+  filelog/app:
+    include: [ <path-to-log-file> ] #include the full path to your log file
+    start_at: end
+processors:
+  batch:
+    send_batch_size: 1000
+    timeout: 10s
+  # Ref: <https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/resourcedetectionprocessor/README.md>
+  resourcedetection:
+    detectors: [env, system] # Before system detector, include ec2 for AWS, gcp for GCP and azure for Azure.
+    # Using OTEL_RESOURCE_ATTRIBUTES envvar, env detector adds custom labels.
+    timeout: 2s
+    system:
+      hostname_sources: [os] # alternatively, use [dns,os] for setting FQDN as host.name and os as fallback
+extensions:
+  health_check: {}
+  zpages: {}
+exporters:
+  otlp:
+    endpoint: "<https://ingest>.{region}.signoz.cloud:443"
+    tls:
+      insecure: false
+    headers:
+      "signoz-access-token": "<SIGNOZ_INGESTION_KEY>"
+  logging:
+    verbosity: normal
+service:
+  telemetry:
+    metrics:
+      address: 0.0.0.0:8888
+  extensions: [health_check, zpages]
+  pipelines:
+    logs:
+      receivers: [otlp, filelog/app]
+      processors: [batch]
+      exporters: [otlp]
+```
+
+Step 4: Viewing Logs in SigNoz
+
+After running the above application and making the correct configurations, you can navigate to the SigNoz logs dashboard to see all the logs sent to SigNoz.
+
+<Figure src="/img/guides/2024/07/zap-logger-Screenshot_2024-07-06_at_02.29.06.webp" alt="Signoz Log Output" caption="Signoz Log Output" /> 
+
+## Conclusion
+
+- Effective Logging Implementation: Logging plays a crucial role in software development, offering insights into application behavior and aiding in debugging and monitoring processes.
+- Zap Logger: Introduced as a powerful logging library, Zap provides robust features for configuring log levels, formats, and outputs, enhancing the overall logging experience.
+- Best Practices and Performance: Adhering to best practices ensures optimal performance and reliability, including considerations for error handling, log management, and performance benchmarks.
+- Integration with SigNoz: By integrating with SigNoz, developers can leverage advanced monitoring capabilities, ensuring comprehensive observability across distributed systems.
+
+## FAQS
+
+### What is Zap Logger?
+
+Zap Logger is a fast, structured logging library for Go. It provides high-performance logging with support for multiple output formats.
+
+### Can Zap Logger be used in a concurrent environment?
+
+Yes, Zap Logger is designed to be safe for concurrent use by multiple goroutines.
+
+### How do I handle log rotation with Zap Logger?
+
+Zap Logger supports log rotation through third-party libraries or by implementing custom solutions using its API.
+
+### Is Zap Logger suitable for production use?
+
+Yes, Zap Logger is suitable for production use due to its performance, reliability, and feature set.
+
+### How do I benchmark the performance of Zap Logger?
+
+Use built-in benchmarks or custom benchmarks to measure Zap Logger's performance against your application's requirements.
+
+### Can I use Zap Logger with other logging libraries?
+
+Yes, Zap Logger can be used alongside other logging libraries in Go applications.
+
+### Where can I find the documentation and examples for Zap Logger?
+
+Documentation and examples for Zap Logger are available on its <a href="https://github.com/uber-go/zap" rel="noopener noreferrer nofollow" target="_blank">GitHub repository</a> and the official Uber Engineering Blog.

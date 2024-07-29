@@ -1,7 +1,7 @@
 ---
-title: Complete Guide to Logging in Python
+title: Python Logging - From Setup to Monitoring with Best Practices
 slug: logging-in-python
-date: 2024-07-03
+date: 2024-07-18
 tags: [logging]
 authors: [sushant_gaurav]
 description: Master Python Logging with this Comprehensive Guide on Loggers, Handlers, Formatters, Filters, Configurations, and Best Practices for Debugging, Monitoring, and Performance.
@@ -16,11 +16,12 @@ keywords:
 ---
 
 <head>
-  <script type="application/ld+json">
-    {`{
+<script
+    type="application/ld+json"
+    dangerouslySetInnerHTML={{ __html: JSON.stringify({
   "@context": "https://schema.org",
-  "@type": "BlogPosting",
-  "headline": "Complete Guide to Logging in Python",
+  "@type": "TechArticle",
+  "headline": "Python Logging - From Setup to Monitoring with Best Practices",
   "alternativeHeadline": "Master Python Logging with this Comprehensive Guide on Loggers, Handlers, Formatters, Filters, Configurations, and Best Practices for Debugging, Monitoring, and Performance",
   "author": {
     "@type": "Person",
@@ -34,8 +35,8 @@ keywords:
       "url": "https://signoz.io/img/SigNozLogo-orange.svg"
     }
   },
-  "datePublished": "2024-07-03",
-  "dateModified": "2024-07-03",
+  "datePublished": "2024-07-03T00:00:00Z",
+  "dateModified": "2024-07-03T00:00:00Z",
   "mainEntityOfPage": {
     "@type": "WebPage",
     "@id": "https://signoz.io/guides/logging-in-python/"
@@ -154,8 +155,8 @@ keywords:
       }
     ]
   }
-}`}
-  </script>
+}) }}
+  />
 </head>
 
 Logging is essential in software development. It helps developers understand how applications behave and spot any issues. Good logging practices are key for debugging, monitoring, optimizing performance, and staying compliant with regulations.
@@ -894,6 +895,20 @@ def performance_critical_function():
 
 performance_critical_function()
 ```
+
+## Optimizing Python Logging for Performance
+While logging is crucial for debugging and monitoring, it's important to optimize it for performance, especially in high-throughput applications. Here are some key strategies:
+
+- Use Log Levels Wisely: Reserve DEBUG logs for development. In production, use INFO and above to reduce logging overhead.
+- Lazy Logging: Use lazy evaluation for expensive operations in log messages.
+- Buffered Logging: For high-volume logs, use a buffering handler to reduce I/O operations:
+  ```
+  handler = logging.handlers.MemoryHandler(capacity=1000, flushLevel=logging.ERROR)
+  logger.addHandler(handler)
+  ```
+- Asynchronous Logging: Consider using libraries like concurrent-log-handler for non-blocking log writes.
+- Sampling: In very high-volume scenarios, implement log sampling to log only a percentage of events.
+By implementing these optimizations, you can maintain comprehensive logging while minimizing the performance impact on your Python applications.
 
 ## Conclusion
 

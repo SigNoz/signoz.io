@@ -3,7 +3,8 @@ import Heading from '../../components/ui/Heading'
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
 
-export const Testimonials = () => {
+export const Testimonials = ({page}) => {
+  const customerStoriesId = `btn-customer-stories-testimonials-${page}`
   const TESTIMONIALS_LIST = [
     [
       {
@@ -226,12 +227,16 @@ export const Testimonials = () => {
             </div>
           ))}
         </div>
-        <Link href="/case-study/" className="shadow-[-10px_-250px_200px_370px_rgba(11,12,14,0.9)]">
-          <button className="button-background flex h-8 items-center justify-center gap-1.5 truncate rounded-full px-4 py-2 pl-4 pr-3 text-center text-sm font-medium not-italic leading-5 text-white no-underline outline-none hover:text-white">
+        <div className="w-[52vw] shadow-[-4px_-40px_80px_146px_rgba(11,12,14,0.8)]">
+        <Link href="/case-study/" className='flex justify-center'>
+          <button 
+          id={customerStoriesId}
+          className="button-background flex h-8 items-center justify-center gap-1.5 truncate rounded-full px-4 py-2 pl-4 pr-3 text-center text-sm font-medium not-italic leading-5 text-white no-underline outline-none hover:text-white">
             Read customer stories
             <ArrowRight size={14} />
           </button>
         </Link>
+        </div>
       </div>
     </section>
   )

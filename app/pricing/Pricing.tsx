@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 
 import FAQBody from '../../components/FAQPricing'
 import styles from './styles.module.css'
@@ -14,6 +14,8 @@ import { TrySigNozCTA } from '@/components/try-signoz-cta'
 import WhySelectSignoz from '@/components/why-select-signoz'
 import { Testimonials } from '@/components/testimonials'
 import MonthlyEstimate from '@/components/Monthly-estimate/MonthlyEstimate'
+import MonthlyEstimateMobile from '@/components/Monthly-estimate/MonthlyEstimateMobile'
+import { GetStarted } from '@/components/GetStarted'
 import Link from 'next/link'
 import Divider from '@/components/ui/Divider'
 import Heading from '@/components/ui/Heading'
@@ -53,7 +55,23 @@ import VimeoPlayer from '@/components/VimeoPlayer/VimeoPlayer'
 
 const CloseButton = () => <div className="absolute right-0 top-0">Close</div>
 
+
 function Pricing() {
+
+  const [width, setWidth] = useState<number>(typeof window !== 'undefined' ? window.innerWidth : 0);
+
+  function handleWindowSizeChange() {
+    setWidth(window.innerWidth);
+  }
+  useEffect(() => {
+    window.addEventListener('resize', handleWindowSizeChange);
+    return () => {
+      window.removeEventListener('resize', handleWindowSizeChange);
+    }
+  }, []);
+
+  const isMobile = width <= 768;
+
   return (
     <div className="relative bg-signoz_ink-500">
       <div className="absolute left-0 right-0 top-0 h-screen bg-[url('/img/background_blur/Perlin_noise.png')] bg-[length:55%] bg-[center_top_4rem] sm:bg-no-repeat " />
@@ -64,7 +82,7 @@ function Pricing() {
           <PricingPlans />
         </div>
         {/* All Features */}
-        <TrustedByTeams />
+        <TrustedByTeams page="pricing" />
         {/* Cost Comparison Graph */}
         <ExploreAllFeature />
         {/* Companies Logo */}
@@ -77,22 +95,26 @@ function Pricing() {
         {/* More Options */}
         {/* <CommunityEdition /> */}
         {/* FAQ section */}
-        <div className="max-sm:hidden">
+        {isMobile ? (
+          <MonthlyEstimateMobile />
+        ) : (
           <MonthlyEstimate />
-        </div>
+        )}
         <WhySelectSignoz isInPricingPage />
         <FAQ />
         {/* User Review */}
         {/* <UserReview /> */}
         {/* Give a Try CTA */}
         {/* <TrySigNozCTA /> */}
-        <Testimonials />
+        <Testimonials page="pricing" />
+        <GetStarted page="pricing" />
       </div>
     </div>
   )
 }
 
 export default Pricing
+
 
 function FAQ() {
   return (
@@ -103,11 +125,8 @@ function FAQ() {
         <div className="row mx-auto">
           <div className="flex w-full flex-col sm:flex-row">
             <div className="!w-[300px] flex-1">
-              <p className="pl-12 pt-10 text-4xl font-semibold leading-[3.5rem] text-signoz_vanilla-100 sm:text-[44px]">
-                Frequently
-                <br />
-                Asked <br />
-                Questions
+              <p className="pl-12 pt-10 text-4xl font-semibold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-[44px]">
+                Frequently <br /> Asked <br /> Questions
               </p>
             </div>
             <div className="card-demo left-0 flex-[2_2_0%] border !border-b-0 !border-r-0 !border-t-0 border-dashed border-signoz_slate-400">
@@ -221,6 +240,20 @@ const PricingPlans = () => {
 
   const { isOpen, onOpen, onOpenChange } = useDisclosure()
 
+  const [width, setWidth] = useState<number>(typeof window !== 'undefined' ? window.innerWidth : 0);
+
+  function handleWindowSizeChange() {
+    setWidth(window.innerWidth);
+  }
+  useEffect(() => {
+    window.addEventListener('resize', handleWindowSizeChange);
+    return () => {
+      window.removeEventListener('resize', handleWindowSizeChange);
+    }
+  }, []);
+
+  const isMobile = width <= 768;
+
   return (
     <section className={`${styles.pricing} relative`}>
       <div
@@ -241,11 +274,12 @@ const PricingPlans = () => {
                   {' '}
                   Tired of unpredictable pricing and complex billing structure? Save up to{' '}
                 </span>
-                <Link href="https://signoz.io/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/">
-                  <span className="mx-0 rounded-none border !border-l-0 !border-r-0 !border-t-0 border-dashed border-signoz_robin-300 px-0 py-0.5 text-signoz_robin-300">
-                    80% on your Datadog bill <br />
-                  </span>
-                </Link>
+                <span className="mx-0 rounded-none border !border-l-0 !border-r-0 !border-t-0 border-dashed border-signoz_robin-300 px-0 py-0.5 text-signoz_robin-300">
+                  <Link href="https://signoz.io/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/">
+                    80% on your Datadog bill
+                  </Link>
+                  <br />
+                </span>
                 <span> with SigNoz. No user-based and host-based pricing. </span>
               </div>
               <div className="my-5 flex justify-center">
@@ -254,23 +288,25 @@ const PricingPlans = () => {
                     className={`flex items-center space-x-2 rounded-sm border border-signoz_slate-400`}
                   >
                     <button
+                      id="btn-signoz-cloud-pricing"
                       type="button"
                       className={`relative z-[2] cursor-pointer border-none bg-signoz_slate-400 px-4 py-2 text-xs text-white`}
                       onClick={() => setTab('cloud')}
                     >
                       <div className="flex gap-1.5">
                         <Cloud size={14} />
-                        SigNoz Cloud
+                        SigNoz cloud
                       </div>
                     </button>
                     <button
+                      id="btn-hosted-in-your-infra-pricing"
                       type="button"
                       className={`ml-0 cursor-pointer border-none px-4 py-2 text-xs text-signoz_vanilla-400`}
                       onClick={() => setTab('self-managed')}
                     >
                       <div className="relative z-[3] flex gap-1.5">
                         <Server size={14} />
-                        SELF-HOSTED
+                        Hosted in your infra
                       </div>
                     </button>
                   </nav>
@@ -295,13 +331,14 @@ const PricingPlans = () => {
                     </div>
                   </div>
                   <div>
-                    <Link
-                      id="btn-pricing-signoz-cloud-1"
-                      className={`flex h-10 items-center justify-center gap-1.5 rounded-full bg-signoz_robin-500 py-2 pl-4 pr-3 text-sm`}
-                      href={'/teams/'}
-                    >
-                      Get started with SigNoz Cloud <ArrowRight size={14} />
-                    </Link>
+                    <Button
+                      id="btn-get-started-pricing-teams-top"
+                      className="w-full">
+                      <Link href={'/teams/'} className='flex-center'>
+                        Get started with SigNoz Cloud
+                        <ArrowRight size={14} />
+                      </Link>
+                    </Button>
                   </div>
                 </div>
 
@@ -401,9 +438,8 @@ const PricingPlans = () => {
                             <option
                               key={`${option.months}-${idx}`}
                               value={option.months}
-                            >{`${option.months} ${
-                              option.months === 1 ? 'month' : 'months'
-                            }`}</option>
+                            >{`${option.months} ${option.months === 1 ? 'month' : 'months'
+                              }`}</option>
                           ))}
                         </select>
                       </span>
@@ -433,7 +469,7 @@ const PricingPlans = () => {
                         </span>
                       </div>
                     </div>
-                    <Modal size={'5xl'} backdrop="blur" isOpen={isOpen} onOpenChange={onOpenChange}>
+                    <Modal size={'5xl'} backdrop="blur" isOpen={isOpen} onOpenChange={onOpenChange} className='self-center'>
                       <ModalContent className="bg-transparent">
                         {() => (
                           <>
@@ -475,7 +511,7 @@ const PricingPlans = () => {
                     <div>
                       <div className="gap-3">
                         <CircleCheckSolid color="fill-signoz_sienna-400" />
-                        <span className="text-signoz_vanilla-400">Community Slack</span>
+                        <span className="text-signoz_vanilla-400">In-Product Chat Support</span>
                       </div>
                     </div>
                     <div>
@@ -487,9 +523,18 @@ const PricingPlans = () => {
                     <div>
                       <div className="gap-3">
                         <CircleCheckSolid color="fill-signoz_sienna-400" />
+                        <span className="text-signoz_vanilla-400">Support for Migrating DataDog Dashboards</span>
+                        <span className="rounded-full border border-none bg-signoz_slate-400 px-2 py-1 text-center !text-[10px] uppercase text-signoz_vanilla-400 sm:text-xs">
+                          On spends above $999 per month
+                        </span>
+                      </div>
+                    </div>
+                    <div>
+                      <div className="gap-3">
+                        <CircleCheckSolid color="fill-signoz_sienna-400" />
                         <span className="text-signoz_vanilla-400">Dedicated Slack Channel</span>
                         <span className="rounded-full border border-none bg-signoz_slate-400 px-2 py-1 text-center !text-[10px] uppercase text-signoz_vanilla-400 sm:text-xs">
-                          On spends above $999
+                          On spends above $999 per month
                         </span>
                       </div>
                     </div>
@@ -552,7 +597,7 @@ const PricingPlans = () => {
                       <li className="mb-3 flex items-center gap-3">
                         {' '}
                         <CircleCheckSolid /> Visualize very large traces
-                        <span className="rounded-full border border-none bg-signoz_slate-400 px-2 py-1 text-xs uppercase text-signoz_vanilla-400">
+                        <span className="rounded-full border border-none bg-signoz_slate-400 px-2 py-1 !text-[10px] uppercase text-signoz_vanilla-400 text-center">
                           &gt;10k spans
                         </span>
                       </li>
@@ -568,32 +613,51 @@ const PricingPlans = () => {
                   </div>
                 </div>
                 <div className="">
-                  <Link href={'/teams/'}>
-                    <Button className="w-full">
+                  <Button
+                    id="btn-get-started-pricing-teams-bottom"
+                    className="w-full">
+                    <Link href={'/teams/'} className='flex-center'>
                       Get started with SigNoz Cloud
                       <ArrowRight size={14} />
-                    </Button>
-                  </Link>
+                    </Link>
+                  </Button>
                 </div>
 
-                <div className="mt-3 hidden md:block">
-                  <Button
-                    className="w-full"
-                    type={Button.TYPES.SECONDARY}
-                    onClick={() => {
-                      const element = document.getElementById('monthly-estimate')
-                      element?.scrollIntoView({
-                        behavior: 'smooth',
-                      })
-                    }}
-                  >
-                    Estimate your monthly bill
-                    <ArrowDown size={14} />
-                  </Button>
-                  <div>
-                    <br></br>
+                {isMobile ? (
+                  <div className="mt-3">
+                    <Button
+                      id="btn-estimate-monthly-bill-pricing-teams"
+                      className="w-full"
+                      type={Button.TYPES.SECONDARY}
+                      onClick={() => {
+                        const element = document.getElementById('estimate-your-monthly-bill')
+                        element?.scrollIntoView({
+                          behavior: 'smooth',
+                        })
+                      }}
+                    >
+                      Estimate your monthly bill
+                      <ArrowDown size={14} />
+                    </Button>
                   </div>
-                </div>
+                ) : (
+                  <div className="my-3">
+                    <Button
+                      id="btn-estimate-monthly-bill-pricing-teams"
+                      className="w-full"
+                      type={Button.TYPES.SECONDARY}
+                      onClick={() => {
+                        const element = document.getElementById('estimate-your-monthly-bill')
+                        element?.scrollIntoView({
+                          behavior: 'smooth',
+                        })
+                      }}
+                    >
+                      Estimate your monthly bill
+                      <ArrowDown size={14} />
+                    </Button>
+                  </div>
+                )}
               </div>
               <div className="pricing-card !mb-0 border !border-b-0 !border-r-0 border-dashed border-signoz_slate-400 bg-opacity-5 px-4 py-5 max-sm:!border-l-0 md:px-8">
                 <div>
@@ -608,13 +672,12 @@ const PricingPlans = () => {
                     <p className="m-0">Flexible Pricing for scale and long term commitments</p>
                   </div>
                   <div>
-                    <Link
-                      id="btn-pricing-signoz-enterprise-1"
-                      className={`button-background flex h-10 items-center justify-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium`}
-                      href={'/enterprise-cloud/'}
-                    >
-                      Contact Us <ArrowRight size={14} />
-                    </Link>
+                    <Button className="w-full" type={Button.TYPES.SECONDARY} id="btn-contact-us-pricing-enterprise-top">
+                      <Link href={'/enterprise-cloud/'} className='flex-center'>
+                        Contact us
+                        <ArrowRight size={14} />
+                      </Link>
+                    </Button>
                   </div>
                 </div>
                 <div className="__card__body">
@@ -645,6 +708,14 @@ const PricingPlans = () => {
                       <li className="mb-2 flex items-center gap-3 text-signoz_vanilla-400">
                         {' '}
                         <CircleCheckSolid color="fill-signoz_sienna-400" /> Dedicated Slack Channel
+                      </li>
+                      <li className="mb-2 flex items-center gap-3 text-signoz_vanilla-400">
+                        {' '}
+                        <CircleCheckSolid color="fill-signoz_sienna-400" /> In-Product Chat Support
+                      </li>
+                      <li className="mb-2 flex items-center gap-3 text-signoz_vanilla-400">
+                        {' '}
+                        <CircleCheckSolid color="fill-signoz_sienna-400" /> Support for Migrating DataDog Dashboards
                       </li>
                       <li className="mb-2 flex items-center gap-3 text-signoz_vanilla-400">
                         {' '}
@@ -720,12 +791,12 @@ const PricingPlans = () => {
                   </div>
                 </div>
                 <div className={`__card__footer ${styles.card__footer}`}>
-                  <Link href={'/enterprise-cloud/'}>
-                    <Button className="w-full" type={Button.TYPES.SECONDARY}>
+                  <Button className="w-full" type={Button.TYPES.SECONDARY} id="btn-contact-us-pricing-enterprise-bottom">
+                    <Link href={'/enterprise-cloud/'} className='flex-center'>
                       Contact us
                       <ArrowRight size={14} />
-                    </Button>
-                  </Link>
+                    </Link>
+                  </Button>
                 </div>
               </div>
             </div>
@@ -747,27 +818,27 @@ const PricingPlans = () => {
                     className={`flex items-center space-x-2 rounded-sm border border-signoz_slate-400`}
                   >
                     <button
+                      id="btn-signoz-cloud-pricing"
                       type="button"
-                      className={`relative z-[2] cursor-pointer border-none bg-signoz_slate-400 px-4 py-2 text-xs text-signoz_vanilla-400 ${
-                        tab === 'cloud' ? ' ' : 'bg-transparent'
-                      }`}
+                      className={`relative z-[2] cursor-pointer border-none bg-signoz_slate-400 px-4 py-2 text-xs text-signoz_vanilla-400 ${tab === 'cloud' ? ' ' : 'bg-transparent'
+                        }`}
                       onClick={() => setTab('cloud')}
                     >
                       <div className="flex gap-1.5">
                         <Cloud size={14} />
-                        SigNoz Cloud
+                        SigNoz cloud
                       </div>
                     </button>
                     <button
+                      id="btn-hosted-in-your-infra-pricing"
                       type="button"
-                      className={`relative z-[2] !ml-0 cursor-pointer bg-signoz_slate-400 px-4 py-2 text-xs text-white ${
-                        tab === 'self-managed' ? ' ' : 'bg-transparent'
-                      }`}
+                      className={`relative z-[2] !ml-0 cursor-pointer bg-signoz_slate-400 px-4 py-2 text-xs text-white ${tab === 'self-managed' ? ' ' : 'bg-transparent'
+                        }`}
                       onClick={() => setTab('self-managed')}
                     >
                       <div className="flex gap-1.5">
                         <Server size={14} />
-                        Self-Hosted
+                        Hosted in your infra
                       </div>
                     </button>
                   </nav>
@@ -786,9 +857,12 @@ const PricingPlans = () => {
                     <p>Install in your infra</p>
                   </div>
                   <div>
-                    <Link href={'/docs/install/'}>
-                      <Button className="w-full">Documentation</Button>
-                    </Link>
+                    <Button className="w-full" id="btn-documentation-pricing-community-edition-top">
+                      <Link href={'/docs/install/'} className='flex-center'>
+                        Documentation
+                        <ArrowRight size={14} />
+                      </Link>
+                    </Button>
                   </div>
                 </div>
                 <div></div>
@@ -825,10 +899,6 @@ const PricingPlans = () => {
                         {' '}
                         <CircleCheckSolid /> Alerts Management
                       </li>
-                      <li className="mb-3 flex items-center gap-3">
-                        {' '}
-                        <CircleCheckSolid /> SSO and SAML Support
-                      </li>
                       <li className="mb-6 flex items-center gap-3">
                         {' '}
                         <CircleCheckSolid /> Service Dependency Visualization
@@ -836,10 +906,13 @@ const PricingPlans = () => {
                     </ul>
                   </div>
                 </div>
-                <div className={`__card__footer ${styles.card__footer}`}>
-                  <Link href={'/docs/install/'}>
-                    <Button className="w-full">Documentation</Button>
-                  </Link>
+                <div>
+                  <Button className="w-full" id="btn-documentation-pricing-community-edition-top">
+                    <Link href={'/docs/install/'} className='flex-center'>
+                      Documentation
+                      <ArrowRight size={14} />
+                    </Link>
+                  </Button>
                 </div>
               </div>
               <div className="pricing-card !mb-0 border !border-b-0 !border-r-0 border-dashed border-signoz_slate-400 bg-opacity-5 px-4 py-5 max-sm:!border-l-0 md:px-8">
@@ -855,18 +928,17 @@ const PricingPlans = () => {
                     <div className="w-3/5 border-b border-dashed border-signoz_slate-400" />
                     <div className="flex items-center gap-1.5">
                       <span className="text-base font-medium text-signoz_robin-300">
-                        $2500/Month*
+                        $2500/Month
                       </span>
-                      <CircleInfoSolid height="16" width="16" />
                     </div>
                   </div>
                   <div>
-                    <Link href={'/enterprise/'}>
-                      <Button className="w-full" type={Button.TYPES.SECONDARY}>
+                    <Button className="w-full" type={Button.TYPES.SECONDARY} id="btn-contact-us-pricing-enterprise-edition-top">
+                      <Link href={'/enterprise/'} className='flex-center'>
                         Contact us
                         <ArrowRight size={14} />
-                      </Button>
-                    </Link>
+                      </Link>
+                    </Button>
                   </div>
 
                   <p className="mb-4 text-base leading-relaxed text-gray-400"></p>
@@ -913,6 +985,10 @@ const PricingPlans = () => {
                       </li>
                       <li className="mb-2 flex items-center gap-3 text-signoz_vanilla-400">
                         {' '}
+                        <CircleCheckSolid color="fill-signoz_sienna-400" /> Support for Migrating DataDog Dashboards
+                      </li>
+                      <li className="mb-2 flex items-center gap-3 text-signoz_vanilla-400">
+                        {' '}
                         <CircleCheckSolid color="fill-signoz_sienna-400" /> Team Training
                       </li>
                       <li className="mb-2 flex items-center gap-3 text-signoz_vanilla-400">
@@ -948,7 +1024,7 @@ const PricingPlans = () => {
                       <li className="mb-3 flex items-center gap-3">
                         {' '}
                         <CircleCheckSolid /> Visualize very large traces
-                        <span className="rounded-full border border-none bg-signoz_slate-400 px-2 py-1 text-xs uppercase text-signoz_vanilla-400">
+                        <span className="rounded-full border border-none bg-signoz_slate-400 px-2 py-1 !text-[10px] uppercase text-signoz_vanilla-400 text-center">
                           &gt;10k spans
                         </span>
                       </li>
@@ -993,12 +1069,12 @@ const PricingPlans = () => {
                   </div>
                 </div>
                 <div className={`__card__footer ${styles.card__footer}`}>
-                  <Link href={'/enterprise/'}>
-                    <Button className="w-full" type={Button.TYPES.SECONDARY}>
+                  <Button className="w-full" type={Button.TYPES.SECONDARY} id="btn-contact-us-pricing-enterprise-edition-bottom">
+                    <Link href={'/enterprise/'} className='flex-center'>
                       Contact us
                       <ArrowRight size={14} />
-                    </Button>
-                  </Link>
+                    </Link>
+                  </Button>
                 </div>
               </div>
             </div>
@@ -1020,6 +1096,7 @@ const ExploreAllFeature = () => {
         desc: '$0 ⎯ host in your infra',
         action: (
           <Link
+            id='btn-documentation-pricing-table'
             href={'/docs/introduction'}
             className="button-background flex h-8 w-full items-center justify-center gap-1.5 truncate rounded-full px-4 py-2 text-center text-[7px] font-medium leading-5 text-white sm:text-sm"
           >
@@ -1032,6 +1109,7 @@ const ExploreAllFeature = () => {
         desc: 'Cloud ⎯ starts at $199/mo',
         action: (
           <Link
+            id="btn-get-started-pricing-table"
             href={'/teams/'}
             className="flex h-8 w-full items-center justify-center gap-1.5 truncate rounded-full bg-signoz_robin-500 px-4 py-2 text-center text-[9px] font-medium leading-5 text-white sm:text-sm"
           >
@@ -1044,6 +1122,7 @@ const ExploreAllFeature = () => {
         desc: 'Cloud /  Self-Hosted',
         action: (
           <Link
+            id="btn-contact-us-pricing-table"
             href={'/enterprise-cloud/'}
             className="button-background flex h-8 w-full items-center justify-center gap-1.5 rounded-full px-4 py-2 text-center text-[9px] font-medium text-white sm:text-sm"
           >
@@ -1242,7 +1321,7 @@ const ExploreAllFeature = () => {
             feature: 'Support for Multiple Ingestion Keys',
             inCommunity: <CrossSolid />,
             inTeams: <CheckSolid />,
-            inEnterprise: <CheckSolid/>,
+            inEnterprise: <CheckSolid />,
           },
           {
             feature: 'Support for Rate Limits based on Ingestion keys',
@@ -1269,7 +1348,7 @@ const ExploreAllFeature = () => {
             inEnterprise: (
               <div className="flex items-center">
                 <ServerSolid />
-                <span className="ml-1.5 text-[10px] max-sm:text-[8px]">ENTERPRISE SELF-HOSTED</span>
+                <span className="ml-1.5 text-[10px] max-sm:text-[8px]">ENTERPRISE SELF-MANAGED</span>
               </div>
             ),
           },
@@ -1280,7 +1359,7 @@ const ExploreAllFeature = () => {
             inEnterprise: (
               <div className="flex items-center">
                 <ServerSolid />
-                <span className="ml-1.5 text-[10px] max-sm:text-[8px]">ENTERPRISE SELF-HOSTED</span>
+                <span className="ml-1.5 text-[10px] max-sm:text-[8px]">ENTERPRISE SELF-MANAGED</span>
               </div>
             ),
           },
@@ -1336,7 +1415,7 @@ const ExploreAllFeature = () => {
           {
             feature: 'Multi-tenancy',
             inCommunity: <CrossSolid />,
-            inTeams:  <CrossSolid />,
+            inTeams: <CrossSolid />,
             inEnterprise: (
               <div className="flex items-center">
                 <ClockSolid height="15" width="15" />
@@ -1366,12 +1445,31 @@ const ExploreAllFeature = () => {
             feature: 'In product chat support',
             inCommunity: <CrossSolid />,
             inTeams: <CheckSolid />,
+            inEnterprise: (
+              <div className="flex items-center">
+                <CloudSolid />
+                <span className="ml-1.5 text-[8px] sm:text-xs">ENTERPRISE CLOUD</span>
+              </div>
+            ),
+          },
+          {
+            feature: 'Support for Migrating DataDog Dashboards',
+            inCommunity: <CrossSolid />,
+            inTeams: (
+              <div className="flex items-center">
+                <span className="ml-1.5 text-[8px] sm:text-xs uppercase"> for spends above $999</span>
+              </div>
+            ),
             inEnterprise: <CheckSolid />,
           },
           {
             feature: 'Dedicated Slack Channel',
             inCommunity: <CrossSolid />,
-            inTeams: <CrossSolid />,
+            inTeams: (
+              <div className="flex items-center">
+                <span className="ml-1.5 text-[8px] sm:text-xs uppercase"> for spends above $999</span>
+              </div>
+            ),
             inEnterprise: <CheckSolid />,
           },
           {
@@ -1418,13 +1516,12 @@ const ExploreAllFeature = () => {
               return (
                 <div
                   key={idx}
-                  className={`${
-                    idx === 2
-                      ? `flex flex-col justify-between rounded-lg !rounded-b-none bg-signoz_ink-500 p-3 sm:bg-[#16181d]`
-                      : idx !== 0
-                        ? `flex flex-col justify-between rounded-lg p-3 ${Opacity[idx]}`
-                        : 'hidden md:block'
-                  }`}
+                  className={`${idx === 2
+                    ? `flex flex-col justify-between rounded-lg !rounded-b-none bg-signoz_ink-500 p-3 sm:bg-[#16181d]`
+                    : idx !== 0
+                      ? `flex flex-col justify-between rounded-lg p-3 ${Opacity[idx]}`
+                      : 'hidden md:block'
+                    }`}
                 >
                   <div className="flex flex-col gap-1">
                     <h2 className="m-0 text-sm max-sm:h-16 md:text-base">{h.heading}</h2>
