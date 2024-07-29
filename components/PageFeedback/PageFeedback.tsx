@@ -89,12 +89,12 @@ const SubmitButton = styled(Button)`
 `;
 
 const PageFeedback = () => {
-  const [helpful, setHelpful] = useState(null);
-  const [reason, setReason] = useState('');
-  const [email, setEmail] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
+  const [helpful, setHelpful] = useState<boolean | null>(null);
+  const [reason, setReason] = useState<string>('');
+  const [email, setEmail] = useState<boolean>(false);
+  const [submitted, setSubmitted] = useState<boolean>(false);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
     const data = {
