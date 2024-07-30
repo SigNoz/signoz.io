@@ -28,6 +28,27 @@ enum TAB_PATHNAMES {
   OPENTELEMETRY = '/resource-center/opentelemetry'
 }
 
+const SigNozLogoLink = ({ setMobileMenuOpen }) => {
+  return (
+    <>
+      <Image
+        className="h-5 w-auto"
+        src="/img/SigNozLogo-orange.svg"
+        width={160}
+        height={60}
+        alt="SigNoz Logo"
+      />
+      <Link
+        href="/"
+        className="-m-1.5 flex items-center gap-2 p-1.5"
+        onClick={() => setMobileMenuOpen(false)}
+      >
+        <span className="text-[17.111px] font-medium">SigNoz</span>
+      </Link>
+    </>
+  )
+}
+
 export default function TopNav() {
   const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -76,23 +97,7 @@ export default function TopNav() {
           aria-label="Global"
         >
           <div className="flex justify-start gap-x-6">
-            <button>
-              <Link
-                href="/"
-                className="-m-1.5 flex items-center gap-2 p-1.5"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                <Image
-                  className="h-5 w-auto"
-                  src="/img/SigNozLogo-orange.svg"
-                  width={160}
-                  height={60}
-                  alt=""
-                />
-
-                <span className="text-[17.111px] font-medium">SigNoz</span>
-              </Link>
-            </button>
+            <SigNozLogoLink setMobileMenuOpen={setMobileMenuOpen} />
             <Popover.Group className="hidden items-center gap-x-6 lg:flex">
               <Link
                 href="/docs"
@@ -141,9 +146,7 @@ export default function TopNav() {
 
           <div className="hidden gap-3 lg:flex lg:flex-1 lg:justify-end" >
             <SearchButton />
-            <button>
             <GitHubStars />
-            </button>
 
             <Button
               id="btn-get-started-website-navbar"
