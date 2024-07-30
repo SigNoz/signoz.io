@@ -103,14 +103,14 @@ const MonthlyEstimate = () => {
     RETENTION_PERIOD.METRICS[0].months
   );
 
-  const [tracesValue, setTracesValue] = React.useState<SliderValue>(2);
-  const [inputTracesValue, setInputTracesValue] = React.useState<string>("2");
+  const [tracesValue, setTracesValue] = React.useState<SliderValue>(0);
+  const [inputTracesValue, setInputTracesValue] = React.useState<string>("0");
 
-  const [logsValue, setLogsValue] = React.useState<SliderValue>(2);
-  const [inputLogsValue, setInputLogsValue] = React.useState<string>("2");
+  const [logsValue, setLogsValue] = React.useState<SliderValue>(0);
+  const [inputLogsValue, setInputLogsValue] = React.useState<string>("0");
 
-  const [metricsValue, setMetricsValue] = React.useState<SliderValue>(2);
-  const [inputMetricsValue, setInputMetricsValue] = React.useState<string>("2");
+  const [metricsValue, setMetricsValue] = React.useState<SliderValue>(0);
+  const [inputMetricsValue, setInputMetricsValue] = React.useState<string>("0");
 
   const MIN_VALUE = 1;
   const MAX_VALUE = 200000;
