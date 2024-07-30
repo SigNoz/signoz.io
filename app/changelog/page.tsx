@@ -1,7 +1,20 @@
+import React from 'react';
 import { fetchChangelogEntries } from '../../utils/strapi';
 
-const Changelog = async () => {
-  const changelogEntries = await fetchChangelogEntries();
+interface ChangelogEntry {
+  id: string;
+  attributes: {
+    title: string;
+    description: string;
+    date: string;
+    createdAt: string;
+    updatedAt: string;
+  };
+}
+
+const Changelog: React.FC = async () => {
+  const changelogEntries: ChangelogEntry[] = await fetchChangelogEntries();
+
   return (
     <div className="max-w-4xl mx-auto p-6">
       <h1 className="text-5xl font-bold text-center my-12">Changelog</h1>
@@ -14,10 +27,29 @@ const Changelog = async () => {
               <span className="text-sm font-normal text-gray-400 dark:text-gray-500">{new Date(entry.attributes.date).toLocaleDateString()}</span>
             </div>
             <div className="p-6 bg-white rounded-lg shadow dark:bg-gray-800">
-              <div className="text-gray-600 dark:text-gray-400" dangerouslySetInnerHTML={{ __html: entry.attributes.description }} />
+              <p className="text-gray-600 dark:text-gray-400">
+                Checkout the complete changelog of <a
+                  href={`https://github.com/SigNoz/signoz/releases/tag/${entry.attributes.title}`}
+                  className="text-blue-500 hover:underline"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {entry.attributes.title}
+                </a>
+              </p>
             </div>
           </div>
         ))}
+      </div>
+      <div className="text-center mt-12">
+        <a
+          href="https://github.com/SigNoz/signoz/releases"
+          className="text-blue-500 hover:underline"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Checkout the complete changelog!
+        </a>
       </div>
     </div>
   );
