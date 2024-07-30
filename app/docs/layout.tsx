@@ -46,7 +46,7 @@ export default function DocLayout({ children }: LayoutProps) {
     <main ref={mainRef} className="">
       <SectionContainer>
         <ProgressBar target={mainRef} />
-        <div className="doc overflow-clip">
+        <div className="max-sm:px-4 doc overflow-clip">
           <div className="doc-sidenav border-r border-signoz_slate-500">
             <DocsSidebar />
           </div>
