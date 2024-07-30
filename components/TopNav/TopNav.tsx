@@ -66,7 +66,7 @@ export default function TopNav() {
   return (
     <div className="fixed left-0 right-0 z-30">
 
-      {/* <Banner/> */}
+      <Banner/>
 
       <header
         className={`header-bg mx-auto box-border flex h-[56px] w-full items-center border-b border-signoz_slate-500 px-4 text-signoz_vanilla-100 backdrop-blur-[20px] dark:text-signoz_vanilla-100 md:px-8 lg:px-8`}
@@ -82,7 +82,7 @@ export default function TopNav() {
               onClick={() => setMobileMenuOpen(false)}
             >
               <Image
-                className="h-6 w-auto"
+                className="h-5 w-auto"
                 src="/img/SigNozLogo-orange.svg"
                 width={160}
                 height={60}
@@ -141,14 +141,14 @@ export default function TopNav() {
             <SearchButton />
             <GitHubStars />
 
-            <Link href="/teams" className="mx-2">
               <Button
                 id="btn-get-started-website-navbar"
-                className="start-free-trial-btn h-8 pr-3 pl-4 px-4 py-2 rounded-full text-sm flex items-center justify-center gap-1.5 not-italic truncate text-center font-medium leading-5 text-white no-underline outline-none hover:text-white"
+                className="start-free-trial-btn h-8 pr-3 pl-4 px-4 py-2 rounded-full text-sm flex items-center justify-center gap-1.5 not-italic truncate text-center font-medium leading-5 text-white no-underline outline-none hover:text-white mx-2"
               >
+            <Link href="/teams" className="flex-center">
                 Try SigNoz Cloud <ArrowRight size={14} />
-              </Button>
             </Link>
+              </Button>
           </div>
         </nav>
         <Dialog as="div" className="lg:hidden" open={mobileMenuOpen} onClose={setMobileMenuOpen}>
@@ -189,17 +189,18 @@ export default function TopNav() {
                       <GitHubStars />
                     </div>
 
-                    <Link
-                      href="/teams"
+                    <Button
+                      id="btn-get-started-website-navbar"
                       className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 hover:bg-signoz_ink-200"
                     >
-                      <Button
-                        id="btn-get-started-website-navbar"
+                      <Link
+                        href="/teams"
                         className="start-free-trial-btn font-heading flex items-center justify-center gap-1 truncate rounded-md border-none px-4 py-2 text-center text-sm text-xs  font-bold leading-4 text-white no-underline outline-none hover:text-white"
+                        onClick={() => setMobileMenuOpen(false)}
                       >
                         Try SigNoz Cloud <ArrowRight size={14} />
-                      </Button>
-                    </Link>
+                      </Link>
+                    </Button>
                   </div>
                 )}
                 <div className="hidden py-6 md:block">
