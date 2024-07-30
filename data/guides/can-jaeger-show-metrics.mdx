@@ -1,0 +1,302 @@
+---
+
+title: Can Jaeger Show Metrics? - How to Monitor and Visualize Performance
+slug: can-jaeger-show-metrics
+date: 2024-07-30
+tags: [faq, jaeger]
+authors: [ankit_anand]
+description: Discover Jaeger's metrics capabilities, learn how to enable and visualize performance data, and integrate with other monitoring tools for comprehensive system insights.
+keywords: [Jaeger metrics, performance monitoring, distributed tracing, Prometheus, OpenTelemetry, service performance monitoring]
+
+---
+
+<head>
+<script
+  type="application/ld+json"
+  dangerouslySetInnerHTML={{ __html: JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Can Jaeger Show Metrics? - How to Monitor and Visualize Performance",
+    "alternativeHeadline": "Discover Jaeger's Metrics Capabilities and Integrations for Comprehensive Performance Monitoring",
+    "author": {
+      "@type": "Person",
+      "name": "Ankit Anand"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "SigNoz",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://signoz.io/img/SigNozLogo-orange.svg"
+      }
+    },
+    "datePublished": "2024-07-30T00:00:00Z",
+    "dateModified": "2024-07-30T00:00:00Z",
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": "https://signoz.io/guides/can-jaeger-show-metrics/"
+    },
+    "description": "Discover Jaeger's metrics capabilities, learn how to enable and visualize performance data, and integrate with other monitoring tools for comprehensive system insights.",
+    "keywords": "Jaeger metrics, performance monitoring, distributed tracing, Prometheus, OpenTelemetry, service performance monitoring",
+    "articleSection": "Technology",
+    "inLanguage": "en",
+    "isPartOf": {
+      "@type": "Blog",
+      "name": "SigNoz Blog",
+      "url": "https://signoz.io/blog/"
+    },
+    "about": [
+      {
+        "@type": "Thing",
+        "name": "Jaeger",
+        "description": "An open-source, end-to-end distributed tracing system."
+      },
+      {
+        "@type": "Thing",
+        "name": "Prometheus",
+        "description": "An open-source monitoring and alerting toolkit designed for reliability and scalability."
+      },
+      {
+        "@type": "Thing",
+        "name": "OpenTelemetry",
+        "description": "A collection of tools, APIs, and SDKs for instrumenting, generating, collecting, and exporting telemetry data such as metrics, logs, and traces."
+      },
+      {
+        "@type": "Thing",
+        "name": "Service Performance Monitoring",
+        "description": "Monitoring the performance of various services to ensure they meet performance and availability standards."
+      }
+    ],
+    "mentions": [
+      {
+        "@type": "SoftwareApplication",
+        "name": "Jaeger",
+        "applicationCategory": "Distributed Tracing"
+      },
+      {
+        "@type": "SoftwareApplication",
+        "name": "Prometheus",
+        "applicationCategory": "Monitoring Tool"
+      },
+      {
+        "@type": "SoftwareApplication",
+        "name": "OpenTelemetry",
+        "applicationCategory": "Observability Framework"
+      },
+      {
+        "@type": "SoftwareApplication",
+        "name": "SigNoz",
+        "applicationCategory": "Observability Platform"
+      }
+    ],
+    "mainEntity": {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "How do I enable metrics collection in Jaeger?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Enable metrics collection in Jaeger by starting its components with the appropriate flags, such as `--metrics-backend prometheus` for Prometheus integration."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can Jaeger replace dedicated metrics monitoring tools?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "While Jaeger can expose metrics, it's not designed to replace dedicated metrics monitoring tools. It's best used in conjunction with specialized metrics solutions for comprehensive monitoring."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What's the difference between Jaeger's metrics and traditional APM metrics?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Jaeger's metrics focus on its internal operations and trace-related data, while traditional APM metrics often cover a broader range of application and infrastructure performance indicators."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How can I correlate Jaeger traces with application metrics?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Use a unified observability framework like OpenTelemetry to collect both traces and metrics. This allows you to link trace IDs with corresponding metric timestamps for correlation."
+          }
+        }
+      ]
+    },
+    "tutorial": {
+      "@type": "HowTo",
+      "name": "Using Jaeger for Metrics and Tracing",
+      "step": [
+        {
+          "@type": "HowToStep",
+          "name": "Enable Metrics in Jaeger",
+          "text": "Start the Jaeger agent with Prometheus metrics enabled using the command `jaeger-agent --metrics-backend prometheus`."
+        },
+        {
+          "@type": "HowToStep",
+          "name": "Set Up Prometheus",
+          "text": "Set up Prometheus in your environment and configure it to scrape Jaeger's metrics endpoint."
+        },
+        {
+          "@type": "HowToStep",
+          "name": "Create Grafana Dashboards",
+          "text": "Use Grafana to create dashboards for visualizing Jaeger metrics."
+        },
+        {
+          "@type": "HowToStep",
+          "name": "Enable Service Performance Monitoring (SPM)",
+          "text": "Set the `-query.max-clock-skew-adjustment` flag when starting the Jaeger query service and configure your Jaeger client to send necessary metadata with spans."
+        },
+        {
+          "@type": "HowToStep",
+          "name": "Use OpenTelemetry for Unified Observability",
+          "text": "Implement OpenTelemetry to collect both traces and metrics, providing a comprehensive view of system performance."
+        }
+      ]
+    }
+  }) }}
+/>
+</head>
+
+Jaeger can show metrics, but it's not its primary function. Jaeger is primarily a distributed tracing system that exposes metrics in Prometheus format. To use Jaeger for metrics, you need to configure it properly and set up a compatible backend. Let's explore how you can leverage Jaeger's metrics capabilities and integrate them with other monitoring tools for comprehensive performance visualization.
+
+## Understanding Jaeger's Capabilities in Metrics Monitoring
+
+Jaeger's main purpose is distributed tracing — tracking requests as they flow through your microservices architecture. However, it also exposes some built-in metrics in Prometheus format. These metrics provide insights into Jaeger's internal operations and the traces it collects.
+
+To enable metrics reporting in Jaeger, you use specific command-line options when starting the Jaeger components. The metrics exposed by Jaeger are different from the traces it collects: metrics are aggregated numerical data points, while traces represent detailed information about individual requests.
+
+### Types of Metrics Available in Jaeger
+
+Jaeger offers several types of metrics:
+
+1. **Runtime metrics**: These include memory usage and CPU utilization of Jaeger components.
+2. **Tracing-specific metrics**: Span counts, latency distributions, and other trace-related data points fall into this category.
+3. **Custom application metrics**: With some additional configuration, you can integrate your application's custom metrics into Jaeger's metrics pipeline.
+
+## Enabling Metrics in Jaeger
+
+To start collecting metrics with Jaeger, follow these steps:
+
+1. Choose a metrics backend — Prometheus is a popular and well-supported option.
+2. Configure Jaeger to use the selected backend. For Prometheus, use the `-metrics-backend prometheus` flag when starting Jaeger components.
+3. Set up your metrics backend to scrape the Jaeger metrics endpoint.
+
+Here's an example of how to start the Jaeger agent with Prometheus metrics enabled:
+
+```bash
+jaeger-agent --metrics-backend prometheus
+
+```
+
+After configuration, verify that the metrics endpoint is accessible. For Prometheus, this is typically at `/metrics` on the configured port.
+
+## Visualizing Jaeger Metrics
+
+While Jaeger's UI primarily focuses on trace visualization, you have several options for visualizing the metrics it exposes:
+
+1. **Jaeger UI**: Offers basic metrics visualization capabilities, mainly for Jaeger's internal operations.
+2. **Grafana dashboards**: Provide more advanced and customizable visualizations for Jaeger metrics.
+3. **Existing monitoring solutions**: Integrate Jaeger metrics into your current monitoring setup for a unified view.
+
+To create meaningful metrics dashboards:
+
+- Focus on key performance indicators relevant to your system.
+- Combine Jaeger-specific metrics with application and infrastructure metrics for a comprehensive view.
+- Use consistent naming conventions and units across your dashboards.
+
+### Service Performance Monitoring (SPM) in Jaeger
+
+Jaeger's Service Performance Monitoring (SPM) feature offers additional insights into your services' performance. SPM provides key performance indicators such as request rates, error rates, and latency percentiles.
+
+To enable SPM in Jaeger:
+
+1. Set the `-query.max-clock-skew-adjustment` flag when starting the Jaeger query service.
+2. Configure your Jaeger client to send the necessary metadata with spans.
+
+Interpreting SPM data helps identify performance bottlenecks and optimize your services. Look for patterns in latency spikes, error rate increases, or unusual request volumes to guide your optimization efforts.
+
+## Combining Tracing and Metrics for Comprehensive Monitoring
+
+The real power of Jaeger's metrics capabilities shines when combined with its tracing functionality. This combination provides a holistic view of your system's performance:
+
+- Traces offer detailed insights into individual requests.
+- Metrics provide aggregated performance data over time.
+
+To achieve this synergy:
+
+1. Use OpenTelemetry for unified observability data collection. It supports both tracing and metrics, seamlessly integrating with Jaeger.
+2. Correlate trace data with metrics for root cause analysis. For example, link a latency spike in your metrics to specific slow traces.
+
+Here's a basic example of using OpenTelemetry to send both traces and metrics to Jaeger:
+
+```python
+from opentelemetry import trace
+from opentelemetry.exporter.jaeger import JaegerExporter
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+
+# Set up the Jaeger exporter
+jaeger_exporter = JaegerExporter(
+    agent_host_name="localhost",
+    agent_port=6831,
+)
+
+# Set up the tracer
+trace.set_tracer_provider(TracerProvider())
+tracer = trace.get_tracer(__name__)
+
+# Create a span processor
+span_processor = BatchSpanProcessor(jaeger_exporter)
+
+# Add the span processor to the tracer
+trace.get_tracer_provider().add_span_processor(span_processor)
+
+# Now you can create spans and they will be exported to Jaeger
+with tracer.start_as_current_span("my_span"):
+    print("Hello, World!")
+
+```
+
+## Key Takeaways
+
+- Jaeger can show metrics, primarily by exposing them in Prometheus format.
+- Enabling metrics in Jaeger requires specific configuration and backend setup.
+- Visualization options include Jaeger UI, Grafana, and custom dashboards.
+- Combining tracing and metrics provides a holistic view of system performance.
+
+## FAQs
+
+### How do I enable metrics collection in Jaeger?
+
+Enable metrics collection in Jaeger by starting its components with the appropriate flags, such as `--metrics-backend prometheus` for Prometheus integration.
+
+### Can Jaeger replace dedicated metrics monitoring tools?
+
+While Jaeger can expose metrics, it's not designed to replace dedicated metrics monitoring tools. It's best used in conjunction with specialized metrics solutions for comprehensive monitoring.
+
+### What's the difference between Jaeger's metrics and traditional APM metrics?
+
+Jaeger's metrics focus on its internal operations and trace-related data, while traditional APM metrics often cover a broader range of application and infrastructure performance indicators.
+
+### How can I correlate Jaeger traces with application metrics?
+
+Use a unified observability framework like OpenTelemetry to collect both traces and metrics. This allows you to link trace IDs with corresponding metric timestamps for correlation.
+
+## **Consider SigNoz as an Alternative to Jaeger**
+
+While Jaeger is a popular choice for distributed tracing, it's worth considering SigNoz as an alternative solution. SigNoz is an open-source application performance monitoring (APM) and observability platform that offers:
+
+- Integrated metrics, traces, and logs in a single platform
+- Built-in support for ClickHouse as the storage backend, providing excellent query performance and data compression
+- User-friendly interface for visualizing and analyzing trace data
+- Easy setup and configuration, with both self-hosted and cloud options available
+
+<GetStartedSigNoz />
+
+If you're looking for a comprehensive observability solution that goes beyond just distributed tracing, SigNoz might be the right fit for your needs. It provides a seamless experience for developers and operations teams, combining the power of metrics, traces, and logs in one tool.
+
+To learn more about how SigNoz compares to Jaeger and how it can enhance your observability stack, visit [https://signoz.io](https://signoz.io/).
