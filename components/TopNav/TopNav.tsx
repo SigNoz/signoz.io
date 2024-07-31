@@ -13,6 +13,7 @@ import DocsSidebar from '../DocsSidebar/DocsSidebar'
 import { usePathname } from 'next/navigation'
 import Banner from '../Banner/Banner'
 import Tabs from '../../app/resource-center/Shared/Tabs'
+import { useRouter } from 'next/navigation'
 
 enum TABS {
   BLOG = 'blog-tab',
@@ -28,27 +29,6 @@ enum TAB_PATHNAMES {
   OPENTELEMETRY = '/resource-center/opentelemetry'
 }
 
-const SigNozLogoLink = ({ setMobileMenuOpen }) => {
-  return (
-    <>
-      <Image
-        className="h-5 w-auto"
-        src="/img/SigNozLogo-orange.svg"
-        width={160}
-        height={60}
-        alt="SigNoz Logo"
-      />
-      <Link
-        href="/"
-        className="-m-1.5 flex items-center gap-2 p-1.5"
-        onClick={() => setMobileMenuOpen(false)}
-      >
-        <span className="text-[17.111px] font-medium">SigNoz</span>
-      </Link>
-    </>
-  )
-}
-
 export default function TopNav() {
   const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -56,6 +36,15 @@ export default function TopNav() {
   const [showMainMenu, setShowMainMenu] = useState(false)
   const [activeTab, setActiveTab] = useState(TABS.GUIDES);
   const [shouldShowTabs, setShouldShowTabs] = useState(false);
+
+  const router = useRouter()
+
+  const handleClick = () => {
+    setMobileMenuOpen(false);
+
+    router.push('/')
+
+  }
 
   useEffect(() => {
     const isDocsBasePath = pathname.startsWith('/docs')
@@ -97,7 +86,21 @@ export default function TopNav() {
           aria-label="Global"
         >
           <div className="flex justify-start gap-x-6">
-            <SigNozLogoLink setMobileMenuOpen={setMobileMenuOpen} />
+            <Link
+              href="/"
+              className="-m-1.5 flex items-center gap-2 p-1.5"
+              onClick={handleClick}
+            >
+              <Image
+                className="h-5 w-auto"
+                src="/img/SigNozLogo-orange.svg"
+                width={160}
+                height={60}
+                alt=""
+              />
+
+              <span className="text-[17.111px] font-medium">SigNoz</span>
+            </Link>
             <Popover.Group className="hidden items-center gap-x-6 lg:flex">
               <Link
                 href="/docs"
