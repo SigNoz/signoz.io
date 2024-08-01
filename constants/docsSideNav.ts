@@ -923,6 +923,11 @@ const docsSideNav = [
         route: '/docs/alerts-management/exceptions-based-alerts',
         label: 'Exceptions based Alert',
       },
+      {
+        type: 'doc',
+        route: '/docs/alerts-management/planned-maintenance',
+        label: 'Planned Maintenance',
+      },
     ],
   },
   {
