@@ -192,15 +192,46 @@ receivers:
         enabled: true
       container.network.io.usage.tx_packets:
         enabled: true
+    hostmetrics:
+    collection_interval: 60s
+    scrapers:
+      cpu: {}
+      disk: {}
+      load: {}
+      filesystem: {}
+      memory: {}
+      network: {}
+      paging: {}
+      process:
+        mute_process_name_error: true
+        mute_process_exe_error: true
+        mute_process_io_error: true
+      processes: {}
+  prometheus:
+    config:
+      global:
+        scrape_interval: 60s
+      scrape_configs:
+        - job_name: otel-collector-binary
+          static_configs:
+            - targets:
+              # - localhost:8888
 processors:
   batch:
     send_batch_size: 1000
     timeout: 10s
-  resourcedetection:
-    detectors: [env, system]
+  resourcedetection/env:
+    detectors: [env]
     timeout: 2s
+    override: false
+  resourcedetection/system:
+    detectors: ["system"]
     system:
-      hostname_sources: [os]
+      hostname_sources: ["dns", "os"]
+  resourcedetection/docker:
+    detectors: [env, docker]
+    timeout: 2s
+    override: false
 exporters:
   otlp:
     endpoint: "ingest.{region}.signoz.cloud:443"
@@ -216,6 +247,10 @@ service:
     metrics:
       receivers: [otlp, docker_stats]
       processors: [resourcedetection, batch]
+      exporters: [otlp]
+    metrics/internal:
+      receivers: [prometheus, hostmetrics]
+      processors: [resourcedetection/env, resourcedetection/system, batch]
       exporters: [otlp]
 ```
 
