@@ -19,6 +19,8 @@ import rehypePresetMinify from 'rehype-preset-minify'
 import siteMetadata from './data/siteMetadata'
 import blogRelatedArticles from './constants/blogRelatedArticles.json'
 import comparisonsRelatedArticles from './constants/comparisonsRelatedArticles.json'
+import guidesRelatedArticles from './constants/guidesRelatedArticles.json'
+import opentelemetryRelatedArticles from './constants/opentelemetryRelatedArticles.json'
 import allAuthors from './constants/authors.json'
 
 const isProduction = process.env.NODE_ENV === 'production'
@@ -336,6 +338,10 @@ export const Opentelemetry = defineDocumentType(() => ({
   },
   computedFields: {
     ...computedFields,
+    relatedArticles: {
+      type: 'json',
+      resolve: (doc) => getRelatedArticles(doc, opentelemetryRelatedArticles),
+    },
     structuredData: {
       type: 'json',
       resolve: (doc) => ({
@@ -388,6 +394,10 @@ export const Guide = defineDocumentType(() => ({
   },
   computedFields: {
     ...computedFields,
+    relatedArticles: {
+      type: 'json',
+      resolve: (doc) => getRelatedArticles(doc, guidesRelatedArticles),
+    },
     structuredData: {
       type: 'json',
       resolve: (doc) => ({
