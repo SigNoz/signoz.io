@@ -877,6 +877,20 @@ const docsSideNav = [
     ],
   },
   {
+    label: 'Frontend Monitoring',
+    type: 'category',
+    className: 'new-doc',
+    // route: '',
+    items: [
+      //     'userguide/overview',
+      {
+        type: 'doc',
+        route: '/docs/frontend-monitoring/web-vitals',
+        label: 'Web Vitals',
+      },
+    ],
+  },
+  {
     type: 'doc',
     route: '/docs/monitor-http-endpoints',
     label: 'Monitor HTTP Endpoints',
