@@ -28,9 +28,42 @@ Based on your application environment, you can choose the setup below to send tr
 From VMs, there are two ways to send data to SigNoz Cloud.
 
 - [Send traces directly to SigNoz Cloud](#send-traces-directly-to-signoz-cloud)
+  - [No Code Automatic Instrumentation](#send-traces-directly-to-signoz-cloud---no-code-automatic-instrumentation-recommended) (recommended)
+  - [Code Level Automatic Instrumentation](#send-traces-directly-to-signoz-cloud---code-level-automatic-instrumentation)
 - [Send traces via OTel Collector binary](#send-traces-via-otel-collector-binary) (recommended)
+  - [No Code Automatic Instrumentation](#send-traces-via-otel-collector-binary---no-code-automatic-instrumentation) (recommended)
+  - [Code Level Automatic Instrumentation](#send-traces-via-otel-collector-binary---code-level-automatic-instrumentation)
 
-#### Send traces directly to SigNoz Cloud
+#### Send traces directly to SigNoz Cloud - No Code Automatic Instrumentation (recommended)
+
+**Step 1.** Install OpenTelemetry packages
+
+```bash
+npm install --save @opentelemetry/api
+npm install --save @opentelemetry/auto-instrumentations-node
+```
+
+**Step 2.** Run the application
+
+```bash
+export OTEL_TRACES_EXPORTER="otlp"
+export OTEL_EXPORTER_OTLP_ENDPOINT="<SIGNOZ_ENDPOINT>"
+export OTEL_NODE_RESOURCE_DETECTORS="env,host,os"
+export OTEL_SERVICE_NAME="<APP_NAME>"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-access-token=<SIGNOZ_ACCESS_TOKEN>"
+export NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
+<your_run_command>
+```
+
+| Variable              | Description                                               |
+|-----------------------|-----------------------------------------------------|
+| APP_NAME *      | Name you want to give to your rust application  |
+| SIGNOZ_ENDPOINT  *     | This is ingestion URL which you must have got in mail after registering on SigNoz cloud  |
+| SIGNOZ_ACCESS_TOKEN *  | This is Ingestion Key which you must have got in mail after registering on SigNoz cloud                                     |
+
+replace `<your_run_command>` with the run command of your application
+
+#### Send traces directly to SigNoz Cloud - Code Level Automatic Instrumentation
 
 **Step 1.** Install OpenTelemetry packages
 
@@ -143,7 +176,46 @@ In case you encounter an issue where all applications do not get listed in the s
 
 ---
 
-#### Send traces via OTel Collector binary
+#### Send traces via OTel Collector binary - No Code Automatic Instrumentation
+
+OTel Collector binary helps to collect logs, hostmetrics, resource and infra attributes. It is recommended to install Otel Collector binary to collect and send traces to SigNoz cloud. You can correlate signals and have rich contextual data through this way.
+
+<Admonition>
+  You can find instructions to install OTel Collector binary
+  [here](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) in your VM.
+  Once you are done setting up your OTel Collector binary, you can follow the below steps for
+  instrumenting your Javascript application.
+</Admonition>
+
+
+#### Send traces directly to SigNoz Cloud - No Code Automatic Instrumentation (recommended)
+
+**Step 1.** Install OpenTelemetry packages
+
+```bash
+npm install --save @opentelemetry/api
+npm install --save @opentelemetry/auto-instrumentations-node
+```
+
+**Step 2.** Run the application
+
+```bash
+export OTEL_TRACES_EXPORTER="otlp"
+export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318/v1/traces"
+export OTEL_NODE_RESOURCE_DETECTORS="env,host,os"
+export OTEL_SERVICE_NAME="<APP_NAME>"
+export NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
+<your_run_command>
+```
+
+| Variable              | Description                                               |
+|-----------------------|-----------------------------------------------------|
+| APP_NAME *      | Name you want to give to your rust application  |
+
+replace `<your_run_command>` with the run command of your application
+
+
+#### Send traces via OTel Collector binary - Code Level Automatic Instrumentation
 
 OTel Collector binary helps to collect logs, hostmetrics, resource and infra attributes. It is recommended to install Otel Collector binary to collect and send traces to SigNoz cloud. You can correlate signals and have rich contextual data through this way.
 
@@ -250,7 +322,43 @@ In case you encounter an issue where all applications do not get listed in the s
 
 For Javascript application deployed on Kubernetes, you need to install OTel Collector agent in your k8s infra to collect and send traces to SigNoz Cloud. You can find the instructions to install OTel Collector agent [here](/docs/tutorial/kubernetes-infra-metrics/).
 
-Once you have set up OTel Collector agent, you can proceed with OpenTelemetry Javascript instrumentation by following the below steps:
+Once you have set up OTel Collector agent, you can proceed with OpenTelemetry Javascript instrumentation by following either of the two:
+
+1. [No Code Automatic Instrumentation](#no-code-automatic-instrumentation-recommended) (recommended)
+2. [Code Level Automatic Instrumentation](#code-level-automatic-instrumentation)
+
+### No Code Automatic Instrumentation (recommended)
+
+
+#### Send traces directly to SigNoz Cloud - No Code Automatic Instrumentation (recommended)
+
+**Step 1.** Install OpenTelemetry packages
+
+```bash
+npm install --save @opentelemetry/api
+npm install --save @opentelemetry/auto-instrumentations-node
+```
+
+**Step 2.** Run the application
+
+```bash
+export OTEL_TRACES_EXPORTER="otlp"
+export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318/v1/traces"
+export OTEL_NODE_RESOURCE_DETECTORS="env,host,os"
+export OTEL_SERVICE_NAME="<APP_NAME>"
+export NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
+<your_run_command>
+```
+
+| Variable              | Description                                               |
+|-----------------------|-----------------------------------------------------|
+| APP_NAME *      | Name you want to give to your rust application  |
+
+replace `<your_run_command>` with the run command of your application
+
+In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#troubleshooting-your-installation).
+
+### Code Level Automatic Instrumentation
 
 **Step 1.** Install OpenTelemetry packages
 
@@ -352,9 +460,42 @@ In case you encounter an issue where all applications do not get listed in the s
 From Windows, there are two ways to send data to SigNoz Cloud.
 
 - [Send traces directly to SigNoz Cloud](#send-traces-directly-to-signoz-cloud)
+  - [No Code Automatic Instrumentation](#send-traces-directly-to-signoz-cloud---no-code-automatic-instrumentation-recommended-3) (recommended)
+  - [Code Level Automatic Instrumentation](#send-traces-directly-to-signoz-cloud---code-level-automatic--instrumentation)
 - [Send traces via OTel Collector binary](#send-traces-via-otel-collector-binary) (recommended)
+  - [No Code Automatic Instrumentation](#send-traces-directly-to-signoz-cloud---no-code-automatic-instrumentation-recommended-4) (recommended)
+  - [Code Level Automatic Instrumentation](#send-traces-via-otel-collector-binary---code-level-automatic-instrumentation-1)
 
-#### Send traces directly to SigNoz Cloud
+#### Send traces directly to SigNoz Cloud - No Code Automatic Instrumentation (recommended)
+
+**Step 1.** Install OpenTelemetry packages
+
+```bash
+npm install --save @opentelemetry/api
+npm install --save @opentelemetry/auto-instrumentations-node
+```
+
+**Step 2.** Run the application
+
+```bash
+export OTEL_TRACES_EXPORTER="otlp"
+export OTEL_EXPORTER_OTLP_ENDPOINT="<SIGNOZ_ENDPOINT>"
+export OTEL_NODE_RESOURCE_DETECTORS="env,host,os"
+export OTEL_SERVICE_NAME="<APP_NAME>"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-access-token=<SIGNOZ_ACCESS_TOKEN>"
+export NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
+<your_run_command>
+```
+
+| Variable              | Description                                               |
+|-----------------------|-----------------------------------------------------|
+| APP_NAME *      | Name you want to give to your rust application  |
+| SIGNOZ_ENDPOINT  *     | This is ingestion URL which you must have got in mail after registering on SigNoz cloud  |
+| SIGNOZ_ACCESS_TOKEN *  | This is Ingestion Key which you must have got in mail after registering on SigNoz cloud                                     |
+
+replace `<your_run_command>` with the run command of your application
+
+#### Send traces directly to SigNoz Cloud - Code Level Automatic  Instrumentation
 
 **Step 1.** Install OpenTelemetry packages
 
@@ -470,7 +611,46 @@ In case you encounter an issue where all applications do not get listed in the s
 
 ---
 
-#### Send traces via OTel Collector binary
+#### Send traces via OTel Collector binary - No Code Automatic Instrumentation
+
+OTel Collector binary helps to collect logs, hostmetrics, resource and infra attributes. It is recommended to install Otel Collector binary to collect and send traces to SigNoz cloud. You can correlate signals and have rich contextual data through this way.
+
+<Admonition>
+  You can find instructions to install OTel Collector binary
+  [here](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) in your VM.
+  Once you are done setting up your OTel Collector binary, you can follow the below steps for
+  instrumenting your Javascript application.
+</Admonition>
+
+
+#### Send traces directly to SigNoz Cloud - No Code Automatic Instrumentation (recommended)
+
+**Step 1.** Install OpenTelemetry packages
+
+```bash
+npm install --save @opentelemetry/api
+npm install --save @opentelemetry/auto-instrumentations-node
+```
+
+**Step 2.** Run the application
+
+```bash
+export OTEL_TRACES_EXPORTER="otlp"
+export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318/v1/traces"
+export OTEL_NODE_RESOURCE_DETECTORS="env,host,os"
+export OTEL_SERVICE_NAME="<APP_NAME>"
+export NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
+<your_run_command>
+```
+
+| Variable              | Description                                               |
+|-----------------------|-----------------------------------------------------|
+| APP_NAME *      | Name you want to give to your rust application  |
+
+replace `<your_run_command>` with the run command of your application
+
+
+#### Send traces via OTel Collector binary - Code Level Automatic Instrumentation
 
 OTel Collector binary helps to collect logs, hostmetrics, resource and infra attributes. It is recommended to install Otel Collector binary to collect and send traces to SigNoz cloud. You can correlate signals and have rich contextual data through this way.
 
