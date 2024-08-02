@@ -20,38 +20,7 @@ GKE (Google Kubernetes Engine) is a managed Kubernetes service provided by Googl
 
 ## Quick Start
 
-First, we need to check if `helm` and `kubectl` tools are installed. Use these commands to verify: 
-
-* `helm` version
-
-<figure data-zoomable align="left">
-    <img
-        src="/img/docs/gcp-monitoring/gke/helm-version.webp"
-        alt="Helm version"
-    />
-<figcaption>
-<i>
-Helm version
-</i>
-</figcaption>
-</figure>
-
-* `kubectl` version
-
-
-<figure data-zoomable align="left">
-    <img
-        src="/img/docs/gcp-monitoring/gke/kubectl-version.webp"
-        alt="kubectl version"
-    />
-<figcaption>
-<i>
-`kubectl` version
-</i>
-</figcaption>
-</figure>
-
-Then, check the GKE cluster status:
+Check that the nodes in your GKE clusters are in `Ready` state:
 
 <figure data-zoomable align="left">
     <img
@@ -65,20 +34,20 @@ GKE cluster status
 </figcaption>
 </figure>
 
-**Step 1:** Now you can add SigNoz helm repo using this command
+**Step 1:** Add the SigNoz helm repo using this command
 
-```sh
-helm repo add SigNoz https://charts.signoz.io
-```
+    ```sh
+    helm repo add SigNoz https://charts.signoz.io
+    ```
 
-**Step 2:** Install Otel collector using Helm chat 
+**Step 2:** Install Otel Agent and Deployment using `signoz/k8s-infra` Helm chart. 
 
-```sh
-helm install -n signoz  --create-namespace kubelet-otel signoz/k8s-infra \
---set signozApiKey=INGESTION_KEY_HERE --set otelCollectorEndpoint="ingest.<REGION>.signoz.cloud:443" --set otelInsecure=false
-```
+    ```sh
+    helm install -n signoz  --create-namespace kubelet-otel signoz/k8s-infra \\
+    --set signozApiKey=<ingestionKey> --set otelCollectorEndpoint="ingest.&lt;region>.signoz.cloud:443" --set otelInsecure=false
+    ```
 
-After, applying the above commands, check whether the SigNoz namespace pods are running successfully or not:
+After applying the above commands, check whether the `signoz` namespace pods are running successfully or not:
 
 <figure data-zoomable align="left">
     <img
@@ -94,34 +63,7 @@ Resources status
 
 If running, it should start sending logs and metrics to SigNoz.
 
-Check the logs of the OTel agent and deployment pods, to ensure the OTel agent is running:
-
-<figure data-zoomable align="left">
-    <img
-        src="/img/docs/gcp-monitoring/gke/otel-agent-logs-1.webp"
-        alt="OTel agent and deployment pods logs"
-    />
-<figcaption>
-<i>
-OTel agent and deployment pods logs
-</i>
-</figcaption>
-</figure>
-
-<figure data-zoomable align="left">
-    <img
-        src="/img/docs/gcp-monitoring/gke/otel-agent-logs-2.webp"
-        alt="OTel agent and deployment pods logs"
-    />
-<figcaption>
-<i>
-OTel agent and deployment pods logs
-</i>
-</figcaption>
-</figure>
-
-
-Afterward, you could to create some pod to check to validate whether the logs and metrics are being sent successfully to SigNoz Cloud.
+Afterward, you could create a pod to check to validate whether the logs and metrics are being sent successfully to SigNoz Cloud.
 
 ```sh
 kubectl run -n signoz test –image=nginx –port=80
@@ -129,7 +71,8 @@ kubectl run -n signoz test –image=nginx –port=80
 
 ## Visualize the logs and metrics in Signoz Cloud
 
-**To view logs**: 
+
+**To visualize logs**:
 
 Go to your SigNoz UI, and navigate to the SigNoz dashboard. Click on the Logs section to view the logs
 
@@ -145,13 +88,13 @@ View logs in SigNoz dashboard
 </figcaption>
 </figure>
 
-**To view metrics**:
+**For metrics**:
 
     1. Log in to your SigNoz cloud account.
     2. Navigate to the Dashboards, and add a dashboard
     3. Add a Timeseries Panel
     4. In Metrics, select any metric
-    5. In Filter put name = mention service name 
+    5. In Filter, put name = mention service name 
     6. Hit “Save Changes”.
                                       
 <figure data-zoomable align="left">
@@ -211,44 +154,14 @@ If you encounter any issues while setting up logging and metrics for your GKE cl
 
 ## Prerequisites
 
-* GKE cluster 
+* [GKE cluster](https://cloud.google.com/kubernetes-engine) 
 * Install [`kubectl`](https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/) to access the GKE cluster.
 * [Install Helm](https://helm.sh/docs/intro/install/)
-* [Self-Hosted Signoz in GKE Cluster](https://signoz.io/docs/install/kubernetes/gcp/) (If you are hosting SigNoz in Google Kubernetes Engine (GKE), you should refer to the specific guide that outlines the minimum requirements and provides details for the override-values.yaml ) OR if you're hosting SigNoz on VM, follow [self-hosted SigNoz on VM ](https://signoz.io/docs/install/docker/).
+* [Self-Hosted Signoz in GKE Cluster](https://signoz.io/docs/install/kubernetes/gcp/) (If you are hosting SigNoz in Google Kubernetes Engine (GKE), you should refer to the specific guide that outlines the minimum requirements and provides details for the override-values.yaml OR if you're hosting SigNoz on VM, follow [self-hosted SigNoz on VM ](https://signoz.io/docs/install/docker/)).
 
 ## Quick Start
 
-First, we need to check if `helm` and `kubectl` tools are installed. Use these commands to verify: 
-
-* `helm` version
-
-<figure data-zoomable align="left">
-    <img
-        src="/img/docs/gcp-monitoring/gke/helm-version.webp"
-        alt="Helm version"
-    />
-<figcaption>
-<i>
-Helm version
-</i>
-</figcaption>
-</figure>
-
-* `kubectl` version
-
-<figure data-zoomable align="left">
-    <img
-        src="/img/docs/gcp-monitoring/gke/kubectl-version.webp"
-        alt="kubectl version"
-    />
-<figcaption>
-<i>
-`kubectl` version
-</i>
-</figcaption>
-</figure>
-
-Then check the GKE cluster status:
+Check that the nodes in your GKE clusters are in `Ready` state:
 
 <figure data-zoomable align="left">
     <img
@@ -262,33 +175,35 @@ GKE cluster status
 </figcaption>
 </figure>
 
-**Step 1:** Now you can add SigNoz helm repo using this command
+**Step 1:** Add the SigNoz helm repo using this command
 
-    ```sh
-    helm repo add SigNoz https://charts.signoz.io
-    ```
+```sh
+helm repo add SigNoz https://charts.signoz.io
+```
 
 <Tabs>
+<TabItem value="self-hosted-on-gke-cluster" label="For self-hosted SigNoz in GKE cluster" default>
 
-<TabItem value="self-hosted-on-gke-cluster" label="For Self-hosted SigNoz in GKE Cluster" default>
-
-**Step 2:** Install the OTel collector and SigNoz self-hosted using helm chart in GKE Cluster
+**Step 2:** Install the Otel Collector agent in GKE where SigNoz is running in a Self-hosted VM.
 
     ```sh
-    helm --namespace platform install my-release signoz/signoz -f override-values.yaml
+    helm install -n signoz  --create-namespace kubelet-otel signoz/k8s-infra \\
+    otelCollectorEndpoint="<self-host-signoz-otel-collector-service-fqdn>:4317" --set otelInsecure=true
     ```
 
 </TabItem>
+<TabItem value="self-host-signoz-in-vm" label="For self-hosted SigNoz in a VM">
 
-<TabItem value="self-host-signoz-in-vm" label="For Self-hosted SigNoz in a VM">
-
-**Step 2:** Install the OTel Collector agent in GKE cluster where SigNoz is running in a self-hosted VM.
+**Step 2:** Install the Otel Collector agent in GKE where SigNoz is running in a Self-hosted VM.
 
     ```sh
-    helm install -n signoz  --create-namespace kubelet-otel signoz/k8s-infra \
-    otelCollectorEndpoint="<self-hosted SigNoz VM IP>:4317" --set otelInsecure=true
+    helm install -n signoz  --create-namespace kubelet-otel signoz/k8s-infra \\
+    otelCollectorEndpoint="<self-host-signoz-vm-ip>:4317" --set otelInsecure=true
     ```
 
+<Admonition type="note">
+The `otelCollectorEndpoint` can be different from the VM IP, based on how you have set up your infrastructure.
+</Admonition>
 </TabItem>
 </Tabs>
 
@@ -306,35 +221,9 @@ Resources status
 </figcaption>
 </figure>
 
-If running, this should start sending logs and metrics to SigNoz.
+If running,This should start sending logs and metrics to SigNoz.
 
-Check the logs of the OTel agent and deployment pods :
-
-<figure data-zoomable align="left">
-    <img
-        src="/img/docs/gcp-monitoring/gke/otel-agent-logs-1.webp"
-        alt="OTel agent and deployment pods logs"
-    />
-<figcaption>
-<i>
-OTel agent and deployment pods logs
-</i>
-</figcaption>
-</figure>
-
-<figure data-zoomable align="left">
-    <img
-        src="/img/docs/gcp-monitoring/gke/otel-agent-logs-2.webp"
-        alt="OTel agent and deployment pods logs"
-    />
-<figcaption>
-<i>
-OTel agent and deployment pods logs
-</i>
-</figcaption>
-</figure>
-
-After you need to create some pods to check the logs and metrics are sending successfully to SigNoz Cloud:
+Now, create some pods to check that the logs and metrics are being sent successfully to SigNoz Self-Host:
 
 ```sh
 kubectl run -n signoz test –image=nginx –port=80
@@ -342,7 +231,7 @@ kubectl run -n signoz test –image=nginx –port=80
 
 ## Visualize the logs and metrics in Signoz Cloud
 
-**To view logs**: 
+**For logs**: 
 
 <figure data-zoomable align="left">
     <img
@@ -358,13 +247,13 @@ Visualize logs in SigNoz dashboard
 
 Go to your SigNoz UI, and navigate to the SigNoz dashboard. Click on the Logs section to view the logs
 
-**To view metrics**:
+**For metrics**:
 
     1. Log in to your SigNoz cloud account.
     2. Navigate to the Dashboards, and add a dashboard
     3. Add a Timeseries Panel
     4. In Metrics, select any metric
-    5. In Filter say name = mention service name 
+    5. In Filter, say name = mention service name 
     6. Hit “Save Changes”.
 
 <figure data-zoomable align="left">
@@ -423,9 +312,12 @@ If you encounter any issues while setting up logging and metrics for your GKE cl
     *Check if the required pods, services, and config maps are running and in a healthy state.*
 
 4. Verify network connectivity:
-    
-    * Ensure that the GKE cluster has network access to the SigNoz ingestion endpoint (`<Self-Hosted SigNoz VM IP:4317>`).
+
+    * Ensure that the GKE cluster has network access to the SigNoz ingestion endpoint (Self-Hosted SigNoz VM IP:4317).
     * Check if there are any network security groups or firewalls blocking the required ports.
+
+5. Check the SigNoz Self-Host VM
+    * Confirm that all the SigNoz related services are running properly on the VM or not.
 
 </TabItem>
 </Tabs>
