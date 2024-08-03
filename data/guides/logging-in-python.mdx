@@ -1,0 +1,975 @@
+---
+title: Python Logging - From Setup to Monitoring with Best Practices
+slug: logging-in-python
+date: 2024-07-18
+tags: [logging]
+authors: [sushant_gaurav]
+description: Master Python Logging with this Comprehensive Guide on Loggers, Handlers, Formatters, Filters, Configurations, and Best Practices for Debugging, Monitoring, and Performance.
+keywords:
+  [
+    logging in python,
+    python logging example,
+    python logging to file,
+    python logging to the console,
+    python logging best practices,
+  ]
+---
+
+<head>
+<script
+    type="application/ld+json"
+    dangerouslySetInnerHTML={{ __html: JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Python Logging - From Setup to Monitoring with Best Practices",
+  "alternativeHeadline": "Master Python Logging with this Comprehensive Guide on Loggers, Handlers, Formatters, Filters, Configurations, and Best Practices for Debugging, Monitoring, and Performance",
+  "author": {
+    "@type": "Person",
+    "name": "Sushant Gaurav"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SigNoz",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://signoz.io/img/SigNozLogo-orange.svg"
+    }
+  },
+  "datePublished": "2024-07-03T00:00:00Z",
+  "dateModified": "2024-07-03T00:00:00Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://signoz.io/guides/logging-in-python/"
+  },
+  "description": "Master Python Logging with this Comprehensive Guide on Loggers, Handlers, Formatters, Filters, Configurations, and Best Practices for Debugging, Monitoring, and Performance.",
+  "keywords": "logging in python, python logging example, python logging to file, python logging to the console, python logging best practices",
+  "articleSection": "Technology",
+  "inLanguage": "en",
+  "isPartOf": {
+    "@type": "Blog",
+    "name": "SigNoz Blog",
+    "url": "https://signoz.io/blog/"
+  },
+  "about": [
+    {
+      "@type": "Thing",
+      "name": "Python",
+      "description": "A high-level programming language"
+    },
+    {
+      "@type": "Thing",
+      "name": "Logging",
+      "description": "The process of recording events, messages, and data during software execution"
+    },
+    {
+      "@type": "Thing",
+      "name": "SigNoz",
+      "description": "An open-source observability platform for monitoring applications"
+    }
+  ],
+  "mentions": [
+    {
+      "@type": "SoftwareApplication",
+      "name": "OpenTelemetry",
+      "applicationCategory": "Observability Framework"
+    }
+  ],
+  "mainEntity": {
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What is logging in Python?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Logging in Python refers to the process of recording messages that provide insights into the operation of a program. These messages can include information, debugging details, warnings, and error messages."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How to create a log in Python?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "In Python, you can create a log using the logging module. This involves configuring a logger, setting a logging level, and then using logger methods like debug(), info(), warning(), error(), and critical() to log messages."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is the benefit of logging in Python?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Logging helps in monitoring and debugging applications by providing a way to track events and issues that occur during execution. It aids in diagnosing problems, understanding application flow, and maintaining a history of events."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "When to use Python logging?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Python logging should be used to record important events and errors that occur during the execution of a program. It is particularly useful for debugging, monitoring the application's performance, and auditing purposes."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What are the 3 types of logging?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "There are three main types of logging: 1) Error Logging: capturing error messages and exceptions. 2) Transaction Logging: recording business or user transactions and interactions. 3) Performance Logging: tracking performance metrics like execution time and resource usage."
+        }
+      }
+    ]
+  },
+  "tutorial": {
+    "@type": "HowTo",
+    "name": "Setting Up Python Logging",
+    "step": [
+      {
+        "@type": "HowToStep",
+        "name": "Import logging module",
+        "text": "Import the logging module in your Python script."
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Configure basic logging",
+        "text": "Use logging.basicConfig() to set up basic logging configuration."
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Create a logger",
+        "text": "Create a logger using logging.getLogger(__name__)."
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Set logging level",
+        "text": "Set the logging level using logger.setLevel()."
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Add handlers",
+        "text": "Add handlers to direct log output to desired destinations."
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Use logging methods",
+        "text": "Use logger methods like debug(), info(), warning(), error(), and critical() to log messages."
+      }
+    ]
+  }
+}) }}
+  />
+</head>
+
+Logging is essential in software development. It helps developers understand how applications behave and spot any issues. Good logging practices are key for debugging, monitoring, optimizing performance, and staying compliant with regulations.
+
+Python's logging module is a powerful tool that gives developers a lot of flexibility in how they handle logging. This guide dives deep into Python logging, offering advanced tips and insights for developers.
+
+## Getting Started with Python Logging
+
+Let's start with setting up a basic logger and then move on to more advanced configurations. To use logging in Python, you first need to import the logging module:
+
+```python
+import logging
+```
+
+### Setting Up a Simple Logger
+
+A basic logger setup involves defining the logging level and format using the `basicConfig()` function, which provides a quick way to configure the logging system.
+
+```python
+import logging
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+
+logger.info('This is an info message')
+```
+
+### Default Logging Levels
+
+Python's logging module defines several standard levels indicating the severity of events:
+
+- **DEBUG**: Detailed information, typically useful only when diagnosing problems.
+- **INFO**: Confirmation that things are working as expected.
+- **WARNING**: An indication that something unexpected happened or could happen soon.
+- **ERROR**: A more serious problem that has prevented the software from performing some functions.
+- **CRITICAL**: A severe error indicating that the program itself may be unable to continue running.
+
+### Basic Configuration with `logging.basicConfig()`
+
+The `basicConfig()` function allows for quick setup of the logging system. It can be used to configure the logging level, output file, and log message format.
+
+```python
+logging.basicConfig(level=logging.DEBUG, filename='app.log', filemode='w',
+                    format='%(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger('basicLogger')
+
+logger.debug('This is a debug message')
+```
+
+Let’s dive deep into the logging module in Python.
+
+## Python's Logging Module and Its Components
+
+Let us look at the components of the Logging module.
+
+### Loggers
+
+Loggers are the main interface for generating log messages in Python's logging module. Each logger has a unique name, which is a hierarchical and dot-separated string (e.g., 'my_app.module'). This naming allows loggers to be organized in a hierarchy, where loggers can inherit settings from their parent loggers. The top-level logger in this hierarchy is known as the root logger.
+
+**Key Concepts**:
+
+1. **Logger Names**: Each logger has a unique name that typically reflects the module hierarchy of the application. For example, `my_app` might be the root logger and `my_app.module` could be a child logger.
+2. **Hierarchical, Dot-Separated Names**: Logger names are dot-separated strings that reflect the structure of the application. For example, `my_app.module.submodule` indicates a hierarchy where the `submodule` is a child of the `module`, which is a child of `my_app`.
+3. **Root Logger**: The root logger is the ultimate parent of all loggers. If a logger doesn't handle a log message, it propagates the message to its parent, eventually reaching the root logger if no other logger handles it.
+4. **Message Propagation**: When a logger produces a log message, it can propagate the message up to its parent logger if it doesn't handle the message itself. This propagation continues up the hierarchy until the message is either handled or reaches the root logger.
+
+**Example**:
+
+```python
+import logging
+
+# Create a logger with a hierarchical name
+logger = logging.getLogger('my_app.module')
+
+# Set the log level for this logger
+logger.setLevel(logging.DEBUG)
+
+# Create a console handler
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.DEBUG)
+
+# Create a formatter and set it for the handler
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+console_handler.setFormatter(formatter)
+
+# Add the handler to the logger
+logger.addHandler(console_handler)
+
+# Produce log messages
+logger.debug('This is a debug message')
+logger.info('This is an informational message')
+logger.warning('This is a warning message')
+logger.error('This is an error message')
+logger.critical('This is a critical message')
+```
+
+In this example:
+
+- We create a logger named `my_app.module`.
+- We set the log level for this logger to `DEBUG`.
+- We create a console handler to output log messages to the console.
+- We create a formatter to define the format of the log messages.
+- We add the handler to the logger.
+- We produce log messages at various log levels (`DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL`).
+
+This setup demonstrates how to configure a logger with a hierarchical name, set log levels, and add handlers to direct log messages to appropriate destinations. The example also shows how log messages can be formatted and produced, reflecting the concepts of logger names, hierarchy, and message propagation.
+
+### Handlers
+
+Handlers are responsible for dispatching the log records created by loggers to the expected destination, such as the console, files, or remote servers. By adding different handlers to a logger, you can direct log messages to multiple destinations simultaneously.
+
+```python
+import logging
+
+# Create a logger
+logger = logging.getLogger('my_app')
+logger.setLevel(logging.DEBUG)
+
+# Create handlers
+console_handler = logging.StreamHandler()
+file_handler = logging.FileHandler('app.log')
+
+# Add handlers to the logger
+logger.addHandler(console_handler)
+logger.addHandler(file_handler)
+```
+
+**Explanation**:
+
+1. **StreamHandler**: This handler sends log messages to the console (standard output).
+2. **FileHandler**: This handler writes log messages to a specified file (`app.log` in this case).
+
+The `addHandler` method attaches the specified handler to the logger, allowing it to dispatch log records to the designated destination.
+
+By using handlers, you can control where your log messages go. For example, you might want to send debug messages to the console during development, but write error messages to a file for later analysis.
+
+To learn more about different types of handlers and how to configure them, see the "Configuring Multiple Handlers" section below.
+
+### Formatters
+
+Formatters specify the layout of the log messages. They determine how the log records should be presented.
+
+**Example**:
+
+```python
+import logging
+
+# Create a logger
+logger = logging.getLogger('my_app')
+logger.setLevel(logging.DEBUG)
+
+# Create handlers
+console_handler = logging.StreamHandler()
+file_handler = logging.FileHandler('app.log')
+
+# Create a formatter and set it for the handlers
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+console_handler.setFormatter(formatter)
+file_handler.setFormatter(formatter)
+
+# Add handlers to the logger
+logger.addHandler(console_handler)
+logger.addHandler(file_handler)
+```
+
+**Explanation**:
+
+1. **Formatter**: The `logging.Formatter` class is used to create a formatter object. In this example, the formatter is defined with a specific format string:
+
+   - `%(asctime)s`: Timestamp when the log record was created.
+   - `%(name)s`: Name of the logger that produced the log message.
+   - `%(levelname)s`: Log level of the message (e.g., DEBUG, INFO, WARNING, ERROR, CRITICAL).
+   - `%(message)s`: The actual log message.
+
+   The format string specifies that each log message will include the timestamp, logger name, log level, and message, separated by hyphens.
+
+2. **setFormatter**: The `setFormatter` method is used to assign the formatter to a handler. This tells the handler to use the specified format for all log messages it handles.
+   - `console_handler.setFormatter(formatter)`: Sets the formatter for the `StreamHandler`, which sends log messages to the console.
+   - `file_handler.setFormatter(formatter)`: Sets the same formatter for the `FileHandler`, which writes log messages to the specified file (`app.log`).
+
+By defining a formatter and setting it for the handlers, you ensure that log messages are consistently formatted, making them easier to read and analyze.
+
+### Filters
+
+Filters provide a finer-grained control over which log records are passed from loggers to handlers. They can be used to filter log records based on specific attributes or custom criteria. This allows you to include or exclude certain log messages without changing the logger's configuration or the handlers attached to it.
+
+**Need and Use Case**:
+Filters are useful when you want to selectively log messages based on specific conditions. For example, you might want to log only messages that contain a certain keyword or come from a specific part of your application. This can help you focus on relevant log messages and reduce the volume of logs for easier analysis.
+
+**Example**:
+Consider a scenario where you only want to log messages that contain the word "specific".
+
+```python
+import logging
+
+class SpecificFilter(logging.Filter):
+    def filter(self, record):
+        return 'specific' in record.getMessage()
+
+# Create a logger
+logger = logging.getLogger('my_app')
+logger.setLevel(logging.DEBUG)
+
+# Create a console handler
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.DEBUG)
+
+# Create and set a formatter
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+console_handler.setFormatter(formatter)
+
+# Add the filter to the logger
+logger.addFilter(SpecificFilter())
+
+# Add the handler to the logger
+logger.addHandler(console_handler)
+
+# Produce log messages
+logger.debug('This is a debug message')
+logger.info('This message contains specific keyword')
+logger.warning('Another message without the keyword')
+
+```
+
+**Explanation**:
+
+1. **SpecificFilter**: The `SpecificFilter` class inherits from `logging.Filter` and override the `filter` method. This method is where the custom filtering logic is implemented. It takes a `record` argument, which represents a log record, and returns `True` if the log message should be passed to the handlers, and `False` otherwise.
+   - In this example, the filter method checks if the word "specific" is in the log message using `record.getMessage()`.
+2. **Adding the Filter**: The `addFilter` method is used to add the `SpecificFilter` to the logger. This ensures that only log messages passing the filter criteria are dispatched to the handlers.
+   - `logger.addFilter(SpecificFilter())`: Adds an instance of `SpecificFilter` to the logger.
+3. **Filter Method Invocation**: The `filter` method is invoked automatically by the logger for each log record it processes. When a log message is generated, the logger passes the log record through all its filters. If a filter returns `False`, the log record is not passed to the handlers.
+
+In this example, only the message "This message contains a specific keyword" will be logged to the console because it passes the filter criteria. The other messages are ignored.
+
+Filters provide a powerful mechanism to control logging behaviour based on dynamic conditions, making them an essential tool for managing complex logging requirements.
+
+## Advanced Configuration
+
+### Creating Custom Loggers
+
+To enhance the efficiency of more complex applications, it is beneficial to create custom loggers. This allows different parts of the application to log messages independently according to their requirements, which can then be handled in a centralized manner. Custom loggers enable better organization and control over logging in large applications.
+
+**Example**:
+Consider an application with different modules such as authentication and payment processing. We can create custom loggers for each module to handle logging independently.
+
+```python
+import logging
+
+# Create custom loggers for different modules
+auth_logger = logging.getLogger('my_app.auth')
+payment_logger = logging.getLogger('my_app.payment')
+
+# Set logging levels
+auth_logger.setLevel(logging.INFO)
+payment_logger.setLevel(logging.DEBUG)
+
+# Create handlers
+console_handler = logging.StreamHandler()
+file_handler = logging.FileHandler('app.log')
+
+# Create a formatter and set it for the handlers
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+console_handler.setFormatter(formatter)
+file_handler.setFormatter(formatter)
+
+# Add handlers to the logger
+auth_logger.addHandler(console_handler)
+auth_logger.addHandler(file_handler)
+
+payment_logger.addHandler(console_handler)
+payment_logger.addHandler(file_handler)
+
+# Log messages from different modules
+auth_logger.info('User login successful')
+auth_logger.warning('User login attempt failed')
+
+payment_logger.debug('Payment processing started')
+payment_logger.error('Payment processing failed due to insufficient funds')
+
+```
+
+**Explanation**:
+
+1. **Creating Custom Loggers**:
+   - `auth_logger = logging.getLogger('my_app.auth')`: Creates a custom logger for the authentication module.
+   - `payment_logger = logging.getLogger('my_app.payment')`: Creates a custom logger for the payment processing module.
+   - The hierarchical naming (dot-separated) indicates that these loggers are sub-loggers of a parent logger `my_app`.
+2. **Setting Logging Levels**:
+   - `auth_logger.setLevel(logging.INFO)`: Sets the logging level to `INFO` for the authentication logger.
+   - `payment_logger.setLevel(logging.DEBUG)`: Sets the logging level to `DEBUG` for the payment logger.
+3. **Creating and Configuring Handlers**:
+   - `console_handler = logging.StreamHandler()`: Creates a handler to send log messages to the console.
+   - `file_handler = logging.FileHandler('app.log')`: Creates a handler to write log messages to a file (`app.log`).
+4. **Creating and Setting Formatters**:
+   - `formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')`: Defines the format for log messages.
+   - `console_handler.setFormatter(formatter)`: Sets the formatter for the console handler.
+   - `file_handler.setFormatter(formatter)`: Sets the formatter for the file handler.
+5. **Adding Handlers to Loggers**:
+   - `auth_logger.addHandler(console_handler)`: Adds the console handler to the authentication logger.
+   - `auth_logger.addHandler(file_handler)`: Adds the file handler to the authentication logger.
+   - `payment_logger.addHandler(console_handler)`: Adds the console handler to the payment logger.
+   - `payment_logger.addHandler(file_handler)`: Adds the file handler to the payment logger.
+6. **Logging Messages**:
+   - `auth_logger.info('User login successful')`: Logs an informational message from the authentication module.
+   - `auth_logger.warning('User login attempt failed')`: Logs a warning message from the authentication module.
+   - `payment_logger.debug('Payment processing started')`: Logs a debug message from the payment processing module.
+   - `payment_logger.error('Payment processing failed due to insufficient funds')`: Logs an error message from the payment processing module.
+
+By creating custom loggers, you can better organize your logging strategy and have more control over which messages are logged by different parts of your application. This approach enhances modularity and makes it easier to debug and maintain your code.
+
+### Configuring Multiple Handlers
+
+Handlers are utilized for routing log messages to multiple destinations. In this section, we will learn about the different kinds of handlers.
+
+### StreamHandler
+
+`StreamHandler` is used to send the log messages to the console (`stderr` by default).
+
+```python
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.WARNING)
+custom_logger.addHandler(console_handler)
+```
+
+### FileHandler
+
+`FileHandler` is used to write the log messages to a specified file.
+
+```python
+file_handler = logging.FileHandler('custom.log')
+file_handler.setLevel(logging.ERROR)
+custom_logger.addHandler(file_handler)
+```
+
+### RotatingFileHandler
+
+`RotatingFileHandler` is used to write the log records to a set of files and rotate them when they reach a certain size. When we say `rotates them`, it means that once the current log file reaches the specified size (`maxBytes`), it is closed and renamed to include a number suffix (e.g., `rotating.log.1`), and a new log file is created. This process continues, and older log files are either deleted or rotated further based on the `backupCount`.
+
+```python
+import logging
+import logging.handlers
+
+# Create a RotatingFileHandler
+rotating_handler = logging.handlers.RotatingFileHandler('rotating.log', maxBytes=2000, backupCount=5)
+
+# Add the handler to the logger
+custom_logger = logging.getLogger('customLogger')
+custom_logger.addHandler(rotating_handler)
+
+# Example log messages to demonstrate the rotation
+for i in range(100):
+    custom_logger.info(f'This is log message number {i}')
+```
+
+In this example:
+
+- A `RotatingFileHandler` is created with `maxBytes` set to 2000 and `backupCount` set to 5.
+- The handler will write log records to `rotating.log`.
+- When `rotating.log` reaches approximately 2000 bytes, it will be rotated to `rotating.log.1`, and a new `rotating.log` file will be created.
+- This process continues, with old log files being renamed and rotated up to `rotating.log.5`. When the 6th log file reaches the limit, `rotating.log.5` will be deleted, and the sequence will continue.
+
+### TimedRotatingFileHandler
+
+`TimedRotatingFileHandler` rotates log files at specific intervals, such as midnight or hourly.
+
+```python
+timed_handler = logging.handlers.TimedRotatingFileHandler('timed.log', when='midnight', interval=1, backupCount=7)
+custom_logger.addHandler(timed_handler)
+
+```
+
+### SMTPHandler
+
+`SMTPHandler` sends log messages via email, useful for critical alerts.
+
+```python
+smtp_handler = logging.handlers.SMTPHandler(mailhost=('smtp.example.com', 587),
+                                            fromaddr='log@example.com',
+                                            toaddrs=['admin@example.com'],
+                                            subject='Application Error')
+smtp_handler.setLevel(logging.CRITICAL)
+custom_logger.addHandler(smtp_handler)
+
+```
+
+### Customizing Log Formats
+
+Customizing the log format can make log messages more informative and easier to read.
+
+### Using Formatters
+
+Formatters define the layout of log messages.
+
+```python
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+console_handler.setFormatter(formatter)
+file_handler.setFormatter(formatter)
+```
+
+**Explanation**:
+
+- **`logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')`**:
+  - `%(asctime)s`: The timestamp when the log message was created.
+  - `%(name)s`: The name of the logger that generated the log message.
+  - `%(levelname)s`: The log level (e.g., DEBUG, INFO, WARNING, ERROR, CRITICAL) of the log message.
+  - `%(message)s`: The actual log message.
+- **`console_handler.setFormatter(formatter)`** and **`file_handler.setFormatter(formatter)`**:
+  - These lines set the formatter for the console handler and the file handler, respectively. This means that all log messages handled by these handlers will be formatted according to the specified layout.
+
+### Adding Contextual Information
+
+Including additional contextual information such as timestamps, module names, and function names can greatly enhance the efficiency of issue diagnosis.
+
+```python
+import logging
+
+# Create a logger
+logger = logging.getLogger('detailedLogger')
+logger.setLevel(logging.DEBUG)
+
+# Create a detailed formatter with additional contextual information
+detailed_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(funcName)s - %(message)s')
+
+# Create handlers
+console_handler = logging.StreamHandler()
+file_handler = logging.FileHandler('detailed_app.log')
+
+# Set the detailed formatter for the handlers
+console_handler.setFormatter(detailed_formatter)
+file_handler.setFormatter(detailed_formatter)
+
+# Add handlers to the logger
+logger.addHandler(console_handler)
+logger.addHandler(file_handler)
+
+# Example functions to generate log messages
+def example_function():
+    logger.debug('This is a debug message from example_function')
+
+def another_example_function():
+    logger.info('This is an info message from another_example_function')
+
+# Call the example functions to generate log messages
+example_function()
+another_example_function()
+```
+
+**Explanation:**
+
+- A logger named `detailedLogger` is created and its logging level is set to `DEBUG`.
+- A formatter is created that includes the timestamp (`%(asctime)s`), logger name (`%(name)s`), log level (`%(levelname)s`), function name (`%(funcName)s`), and the log message (`%(message)s`).
+- Two handlers are created: one for outputting log messages to the console and another for writing log messages to a file named `detailed_app.log`.
+- The detailed format is assigned to both the console and file handlers, ensuring that log messages handled by these handlers will include additional contextual information.
+- The handlers are added to the logger, enabling it to use both handlers to process log messages.
+- Two example functions (`example_function` and `another_example_function`) are defined, each generating a log message. When these functions are called, the log messages include the timestamp, logger name, log level, function name, and the message itself.
+
+## Logging in Different Environments
+
+### Development vs. Production Logging
+
+Logging configurations commonly vary between development and production environments. While both environments can use various log levels, the purpose and configuration often differ. In development, logging is usually more verbose to aid in debugging and development activities. In production, the focus often shifts towards warnings and errors to monitor the system's health and issues.
+
+In a development environment, you might want detailed logs, including debug information to understand the application flow and catch issues early.
+
+In a production environment, while detailed logs can still be useful, the volume of logs needs to be manageable, and the focus is on capturing warnings, errors, and critical issues to ensure the application runs smoothly.
+
+```python
+import logging
+
+# Create a logger
+logger = logging.getLogger('envLogger')
+
+# Environment variable (can be set to 'development' or 'production')
+ENV = 'development'  # This would typically come from environment settings
+
+if ENV == 'development':
+    # Development environment configuration
+    logger.setLevel(logging.DEBUG)
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(logging.DEBUG)
+    console_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    console_handler.setFormatter(console_formatter)
+    logger.addHandler(console_handler)
+
+    # Optional: File handler for development logs
+    file_handler = logging.FileHandler('development.log')
+    file_handler.setLevel(logging.DEBUG)
+    file_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    file_handler.setFormatter(file_formatter)
+    logger.addHandler(file_handler)
+else:
+    # Production environment configuration
+    logger.setLevel(logging.WARNING)
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(logging.WARNING)
+    console_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    console_handler.setFormatter(console_formatter)
+    logger.addHandler(console_handler)
+
+    # Optional: File handler for production logs
+    file_handler = logging.FileHandler('production.log')
+    file_handler.setLevel(logging.WARNING)
+    file_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    file_handler.setFormatter(file_formatter)
+    logger.addHandler(file_handler)
+
+# Example log messages
+logger.debug('This is a debug message')
+logger.info('This is an info message')
+logger.warning('This is a warning message')
+logger.error('This is an error message')
+logger.critical('This is a critical message')
+```
+
+**Explanation**:
+
+- A logger named `envLogger` is created.
+- An environment variable `ENV` is set to determine the logging configuration. This would typically be set in the actual environment configuration (e.g., environment variables).
+- In a development environment, the log level is set to `DEBUG`, allowing detailed log messages. Both console and file handlers are configured to capture debug-level logs and above.
+- In a production environment, the log level is set to `WARNING`, capturing only warnings and more severe log messages. Both console and file handlers are configured to capture warning-level logs and above.
+- Example log messages are generated to demonstrate the different log levels. In a development environment, all messages will be logged, while in production, only warnings and above will be logged.
+
+### Logging in Multi-threaded Applications
+
+Logging in Python is designed to be thread-safe, which makes it well-suited for applications that involve multiple threads.
+
+```python
+import threading
+import logging
+
+# Define a worker function that logs a message
+def worker():
+    logger = logging.getLogger('multiThreadLogger')
+    logger.debug('Debug message from worker thread')
+
+# Create a thread that runs the worker function
+thread = threading.Thread(target=worker)
+thread.start()
+thread.join()
+
+```
+
+**Explanation:**
+
+- The `logging` module is imported for logging functionality, and the `threading` module is imported to create and manage threads.
+- The `worker` function is defined to demonstrate logging within a thread. It retrieves a logger named `multiThreadLogger` and logs a debug message.
+- A new thread is created with the `worker` function as its target. The `start` method is called to begin execution of the `worker` function in a separate thread.
+- The `join` method is called to wait for the thread to complete its execution before the main program continues. This ensures that the log message from the `worker` thread is captured and displayed.
+
+### Using SysLogHandler for Centralized Logging
+
+`SysLogHandler` sends logs to a centralized syslog server.
+
+A syslog server is a centralized logging server that collects and stores log messages from various sources, including applications, devices, and operating systems. It operates over the User Datagram Protocol (UDP) or Transmission Control Protocol (TCP) network protocols.
+
+**Use Case:**
+
+- Syslog servers provide a single point for collecting logs from multiple sources across a network, making it easier to manage and analyze logs.
+- They support auditing requirements by providing a comprehensive record of activities and events.
+
+**Advantages:**
+
+- It simplifies log management by aggregating logs from various sources into one location.
+- It can handle large volumes of log data efficiently.
+- It reduces the risk of log loss due to centralized storage.
+
+**Disadvantages:**
+
+- It relies on network connectivity; if the network fails, logging may be disrupted.
+- Without proper configuration, syslog traffic could be intercepted or modified.
+- Setting up and configuring a syslog server and ensuring compatibility with various devices and applications can be complex.
+
+**Example:**
+
+```python
+syslog_handler = logging.handlers.SysLogHandler(address=('localhost', 514))
+custom_logger.addHandler(syslog_handler)
+custom_logger.info('This log will be sent to the syslog server')
+```
+
+## Best Practices
+
+Let us now take a look at Python logging best practices.
+
+### Structuring Log Messages
+
+Structured log messages enhance readability and usefulness by organizing log data into well-defined formats, such as JSON or key-value pairs. This makes it easier to parse, analyze, and search log messages programmatically.
+
+**What is Structured Logging?**
+
+Structured logging involves formatting log messages in a structured data format, like JSON, where each piece of information is represented by a key-value pair. This approach contrasts with traditional plain-text logging, where log messages are free-form strings.
+
+```python
+import json
+
+def structured_log(logger, level, message, **kwargs):
+    log_message = json.dumps({'message': message, **kwargs})
+    logger.log(level, log_message)
+
+structured_log(custom_logger, logging.INFO, 'User login', user_id=123, status='success')
+```
+
+**Explanation**
+
+- **Function Definition**: `structured_log(logger, level, message, **kwargs)`: Takes a logger object (`logger`), log level (`level`), a main log message (`message`), and additional keyword arguments (`kwargs`) representing key-value pairs.
+- **JSON Formatting**: `log_message = json.dumps({'message': message, **kwargs})`: Constructs a JSON object where `'message'` is the main log message and `*kwargs` are additional fields passed as key-value pairs.
+- **Logging**: `logger.log(level, log_message)`: Logs the formatted JSON message at the specified log level (`level`) using the provided logger (`logger`).
+
+### Avoiding Common Pitfalls
+
+### Overlogging
+
+Excessive logging can degrade performance and fill up storage, impacting both the logging system's storage and potentially the console where logs are displayed.
+
+```python
+# Example of setting appropriate logging levels
+custom_logger.setLevel(logging.ERROR)
+```
+
+**Impact of Overlogging:**
+
+1. Logging System's Storage:
+   - **Disk Space:** Excessive logging can consume disk space on the server where log files are stored. This is particularly relevant when logs are saved to files (`FileHandler` in Python's logging module) or a database.
+   - **Performance:** Writing too many logs to disk can degrade system performance, especially in high-throughput applications or systems with limited disk I/O bandwidth.
+2. Console (Output) Display:
+   - **User Interface:** In environments where logs are displayed in real-time on a console or terminal, excessive logging can overwhelm the display, making it difficult to read and follow important log messages.
+   - **User Experience:** Continuous output of non-critical or verbose logs can distract or obscure critical information for developers or operators monitoring the system.
+
+### Sensitive Information in Logs
+
+Avoid logging sensitive data to prevent security risks.
+
+```python
+# Redact sensitive information
+sensitive_info = 'password123'
+custom_logger.info('User login', extra={'username': 'user', 'password': '***'})
+
+```
+
+### Performance Impacts
+
+Optimize logging to avoid performance degradation, especially in high-throughput applications.
+
+To optimize the logging, we can:
+
+- Use the appropriate logging level (`DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL`) based on the importance of the message. Avoid logging verbose or unnecessary information at lower levels (`DEBUG`) in production environments.
+- Wrap debug-level logging statements in conditional checks to ensure they are only executed when needed, minimizing unnecessary logging overhead.
+  **Example**:
+
+```python
+if custom_logger.isEnabledFor(logging.DEBUG):
+    custom_logger.debug('Detailed debug information')
+```
+
+- Use buffered handlers (`BufferingHandler`) to accumulate log messages and write them out in batches. This reduces the frequency of I/O operations, which can be a bottleneck in high-throughput scenarios.
+- Employ asynchronous logging handlers (`AsyncHandler`) that offload log writing operations to separate threads or processes. This allows the main application thread to continue executing without waiting for I/O operations to complete.
+  **Example**:
+
+```python
+async_handler = logging.handlers.AsyncHandler()
+custom_logger.addHandler(async_handler)
+```
+
+## Monitoring Logs with an Observability Tool
+
+So far, we have implemented logging in Python. However, simply logging events is not enough to ensure the health and performance of your application. Monitoring these logs is crucial to gaining real-time insights, detecting issues promptly, and maintaining the overall stability of your system.
+
+### Why Monitoring Logs is Important
+
+Here are the key reasons why monitoring logs is important:
+
+1. **Issue detection and troubleshooting**
+2. **Performance monitoring**
+3. **Security and Compliance**
+4. **Operational insights**
+5. **Automation and alerts**
+6. **Historical analysis**
+7. **Proactive maintenance**
+8. **Support and customer service**
+
+To cover all the above major components, you can make use of tools like [**SigNoz**](https://signoz.io/).
+
+**SigNoz** is a full-stack open-source application performance monitoring and observability tool that can be used in place of DataDog and New Relic. SigNoz is built to give SaaS-like user experience combined with the perks of open-source software. Developer tools should be developed first, and SigNoz was built by developers to address the gap between SaaS vendors and open-source software.
+
+**Key architecture features:**
+
+- **Logs, Metrics, and traces under a single dashboard**
+  SigNoz provides logs, metrics, and traces all under a single dashboard. You can also correlate these telemetry signals to debug your application issues quickly.
+- **Native OpenTelemetry support**
+  SigNoz is built to support [**OpenTelemetry**](https://opentelemetry.io/) natively, which is quietly becoming the world standard for generating and managing telemetry data.
+
+### **Setup SigNoz**
+
+<GetStartedSigNoz />
+
+For detailed steps and configurations on how to send logs to SigNoz, refer to the [following official blog by SigNoz engineer Srikanth Chekuri](https://signoz.io/opentelemetry/logging-in-python/).
+
+## Real-world Examples and Use Cases
+
+### Debugging Complex Issues
+
+Logs provide detailed insights during debugging, especially for complex issues.
+
+```python
+def complex_function():
+    try:
+        # Some complex code
+        pass
+    except Exception as e:
+        custom_logger.error('An error occurred in complex_function', exc_info=True)
+```
+
+### Auditing and Compliance
+
+Logging is crucial for auditing user actions and ensuring compliance with regulatory standards.
+
+```python
+def user_action(user_id, action):
+    custom_logger.info('User action', extra={'user_id': user_id, 'action': action})
+
+user_action(123, 'login')
+```
+
+### Performance Monitoring
+
+Logs can be used to monitor application performance and identify bottlenecks.
+
+```python
+import time
+
+def performance_critical_function():
+    start_time = time.time()
+    # Some performance-critical code
+    end_time = time.time()
+    custom_logger.info('Performance metrics', extra={'duration': end_time - start_time})
+
+performance_critical_function()
+```
+
+## Optimizing Python Logging for Performance
+While logging is crucial for debugging and monitoring, it's important to optimize it for performance, especially in high-throughput applications. Here are some key strategies:
+
+- Use Log Levels Wisely: Reserve DEBUG logs for development. In production, use INFO and above to reduce logging overhead.
+- Lazy Logging: Use lazy evaluation for expensive operations in log messages.
+- Buffered Logging: For high-volume logs, use a buffering handler to reduce I/O operations:
+  ```
+  handler = logging.handlers.MemoryHandler(capacity=1000, flushLevel=logging.ERROR)
+  logger.addHandler(handler)
+  ```
+- Asynchronous Logging: Consider using libraries like concurrent-log-handler for non-blocking log writes.
+- Sampling: In very high-volume scenarios, implement log sampling to log only a percentage of events.
+By implementing these optimizations, you can maintain comprehensive logging while minimizing the performance impact on your Python applications.
+
+## Conclusion
+
+- Robust software development relies heavily on efficient logging practices.
+- Python's logging module, when combined with tools such as OpenTelemetry and SigNoz, provides developers with a deep understanding of their applications.
+- This combination enables faster problem-solving and improved performance tracking.
+- This guide offers a thorough exploration of Python logging, helping developers implement efficient logging techniques in their software.
+
+## Resources
+
+- [Python Logging Documentation](https://docs.python.org/3/library/logging.html).
+- [SigNoz Documentation](https://signoz.io/docs/).
+
+## FAQs
+
+### What is logging in Python?
+
+Logging in Python refers to the process of recording messages that provide insights into the operation of a program. These messages can include information, debugging details, warnings, and error messages.
+
+### How to create a log in Python?
+
+In Python, you can create a log using the `logging` module. This involves configuring a logger, setting a logging level, and then using logger methods like `debug()`, `info()`, `warning()`, `error()`, and `critical()` to log messages.
+
+### What is the benefit of logging in Python?
+
+Logging helps in monitoring and debugging applications by providing a way to track events and issues that occur during execution. It aids in diagnosing problems, understanding application flow, and maintaining a history of events.
+
+### When to use Python logging?
+
+Python logging should be used to record important events and errors that occur during the execution of a program. It is particularly useful for debugging, monitoring the application’s performance, and auditing purposes.
+
+### What is a logging library?
+
+A logging library is a tool or module that provides functionalities to log messages from a program. In Python, the built-in `logging` module is the standard logging library used for this purpose.
+
+### Why is logging used?
+
+Logging is used to track and record significant events that occur during the execution of a program. It helps in identifying issues, understanding the behavior of the program, and maintaining records of program execution.
+
+### Why is logging important?
+
+Logging is important because it provides a systematic way to track events, diagnose issues, and ensure that the application is running as expected. It is crucial for debugging, performance monitoring, and maintaining application stability.
+
+### What is logging and debugging?
+
+Logging is the process of recording information about a program’s execution. Debugging, on the other hand, is the process of finding and fixing defects in the program. Logging aids in debugging by providing detailed information about the program’s behaviour and state at different points in time.
+
+### **What are the 3 types of logging?**
+
+There are three main types of logging:
+
+- **Error Logging**: Error Logging means capturing the error messages and exceptions.
+- **Transaction Logging**: Transaction Logging records the business or user transactions and interactions.
+- **Performance Logging**: Tracking performance metrics like execution time and resource usage.
+
+### **What is the process of logging?**
+
+The process of logging includes:
+
+1. **Configuring Loggers**: Configure loggers with specific options like log levels and handlers.
+2. **Generating Log Messages**: Use loggers to create log messages throughout the code.
+3. **Directing Log Output**: Handlers direct log messages to the appropriate destinations, such as files, consoles, or other systems.
+4. **Formatting Log Messages**: Formatters specify the structure and content of log messages.
+5. **Filtering Log Messages**: Filters select which log messages to record depending on criteria such as severity or source.

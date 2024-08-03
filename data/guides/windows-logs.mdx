@@ -1,0 +1,435 @@
+---
+title: Complete Guide to Checking Window Logs
+slug: windows-logs
+date: 2024-07-03
+tags: [logging]
+authors: [nitin_gouda]
+description: Discover the importance of Windows logs for system monitoring, troubleshooting, and security. Learn to access, interpret, and utilize logs effectively for efficient problem-solving.
+keywords: [windows logs, event viewer, logging]
+---
+
+<head>
+<script
+    type="application/ld+json"
+    dangerouslySetInnerHTML={{ __html: JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Windows Logs",
+  "alternativeHeadline": "Understanding and Utilizing Windows Event Logs for System Monitoring and Troubleshooting",
+  "author": {
+    "@type": "Person",
+    "name": "Nitin Gouda"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SigNoz",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://signoz.io/img/SigNozLogo-orange.svg"
+    }
+  },
+  "datePublished": "2024-07-03T00:00:00Z",
+  "dateModified": "2024-07-03T00:00:00Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://signoz.io/guides/windows-logs/"
+  },
+  "description": "Discover the importance of Windows logs for system monitoring, troubleshooting, and security. Learn to access, interpret, and utilize logs effectively for efficient problem-solving.",
+  "keywords": "windows logs, event viewer, logging",
+  "articleSection": "Technology",
+  "inLanguage": "en",
+  "isPartOf": {
+    "@type": "Blog",
+    "name": "SigNoz Blog",
+    "url": "https://signoz.io/blog/"
+  },
+  "about": [
+    {
+      "@type": "Thing",
+      "name": "Windows Event Logs",
+      "description": "A feature in Windows that records system, security, and application events"
+    },
+    {
+      "@type": "Thing",
+      "name": "Event Viewer",
+      "description": "A tool in Windows used to view and manage event logs"
+    },
+    {
+      "@type": "Thing",
+      "name": "System Monitoring",
+      "description": "The process of observing and analyzing a computer system's performance and activities"
+    }
+  ],
+  "mentions": [
+    {
+      "@type": "SoftwareApplication",
+      "name": "Windows",
+      "operatingSystem": "Windows"
+    }
+  ],
+  "mainEntity": {
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How to view Windows logs?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "To view Windows logs, use the built-in Event Viewer: 1. Press Win + R, type eventvwr, and press Enter. 2. Navigate through the console tree to find the log you want to view (e.g., Windows Logs > Application)."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Where are Microsoft logs?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Microsoft logs, including Windows logs, can be found in the Event Viewer under sections like Application, Security, and System. Log files are also located in the C:\\Windows\\System32\\winevt\\Logs directory."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I audit Windows logs?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "To audit Windows logs: 1. Open Event Viewer. 2. Navigate to Security logs under Windows Logs. 3. Configure auditing policies via the Local Security Policy or Group Policy Management Console."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I check my Windows activity log?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Check your Windows activity log by viewing the Security logs in Event Viewer. These logs record user logins, logoffs, and other security-related activities."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Why are Windows logs important?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Windows logs are important because they provide detailed information about system operations, security events, and application behavior, which is crucial for troubleshooting, auditing, and ensuring system integrity."
+        }
+      }
+    ]
+  },
+  "tutorial": {
+    "@type": "HowTo",
+    "name": "How to Access and Use Windows Event Viewer",
+    "step": [
+      {
+        "@type": "HowToStep",
+        "name": "Open Event Viewer",
+        "text": "Open Event Viewer using the Start Menu, Run Dialog, or Control Panel."
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Navigate to Log Categories",
+        "text": "Navigate through the console tree to find different log categories like System, Application, and Security."
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Understand Event Entries",
+        "text": "Learn to interpret event entries, including date, time, source, event ID, and severity level."
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Filter Events",
+        "text": "Use filtering options to narrow down events based on criteria like date, event level, or source."
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Create Custom Views",
+        "text": "Create custom views to focus on specific types of events or combinations of criteria."
+      }
+    ]
+  }
+}) }}
+  />
+</head>
+
+If you’re using a Windows server and want to know what happened to your machine, Windows logs are an essential resource. Windows logs record various system activities, errors, and other significant events, providing valuable information for troubleshooting, auditing, and ensuring system integrity. Understanding how to access, interpret, and utilise these logs enables efficient, problem solving, enables security measures and ensures the smooth operation of your system.
+
+In this guide, you will learn about Windows event logs, its different categories, how to filter and create Custom Views.
+
+## What is a Windows Event Log?
+
+A Windows event log is a file that keeps track of system events and errors, application issues, and security events. Windows Event log can also provide insights into an application's behavior by tracking its interactions with other processes and services. With the right knowledge of the information stored in these logs, you can easily diagnose and easily resolve issues within your system and applications.
+
+You can access the windows events logs as follows:
+
+Using the Start Menu:
+
+- Click on the Start button or press the Windows key.
+- Type `Event Viewer` in the search box and select it from the search results.
+
+Using the Run Dialog:
+
+- Press `Windows + R` to open the Run dialog.
+- Type `eventvwr` and press Enter.
+
+Using the Control Panel:
+
+- Open the Command Prompt and run as administrator.
+- Type `eventvwr` and press Enter.
+
+You can see the detailed steps below. Now let’s discuss and understand windows events logs in detail.
+
+## Understanding Windows Event Logs categories & Types
+
+There are different Windows logs, each serving a specific purpose in tracking and recording events related to your system, applications, and security. They include:
+
+- System Events: System events log information is about the core operations of your Windows operating system. System events are essential for maintaining your system's health and functionality because it records events related to the system's hardware and software components. Some system events are as follows:
+  - Hardware Failures: Logs any issues related to hardware components, such as disc failures or memory errors.
+  - Driver Issues: Records events related to the loading, unloading, or malfunctioning of device drivers. This helps in identifying driver-related problems that could affect system stability.
+  - System Startups and Shutdowns: Tracks the times when the system starts up or shuts down. This can be useful for understanding system uptime and diagnosing issues related to improper shutdowns or startup failures.
+- Application Events: Data related to software applications running on the system includes application errors, warnings, and informational messages. If you are using a Windows server to run your production-level application, you can use the application errors, warnings, and messages provided here to solve the issue. There are different types of Application events some are as follows:
+  - Application Errors: Application errors are events generated by software applications when they encounter issues that prevent them from functioning correctly.
+  - Warnings: Logs warnings from applications about potential issues that might not be critical but could lead to problems if not addressed.
+  - Informational Messages: Provides general information about application activities, such as successful operations or status updates, helping to understand the normal functioning of applications.
+- Security Events: Security events are logs that capture all security-related activities on your Windows system. They are essential for monitoring, maintaining, and auditing the security of your system. These events help detect unauthorised access attempts, monitor access to sensitive resources, and track changes to system policies. Some security events are as follows:
+  - Successful and Failed Login Attempts: Successful and failed login attempts are critical events that are logged by a system to monitor access and ensure security. These logs provide valuable insights into user activity, helping to detect unauthorised access attempts and identify potential security threats.
+  - Resource Access: These events log attempts to access protected resources such as files, folders, or system settings. Monitoring these logs ensures that sensitive data is accessed appropriately and helps identify unauthorised access attempts.
+  - System Policy Changes: These logs record any changes to system policies, including modifications to user permissions or security settings. This is important for auditing purposes and ensuring compliance with security policies, helping to maintain the integrity and security of the system.
+- Setup Events: Setup events are logs that contain detailed information about the installation and setup processes on your Windows system. These logs are valuable for diagnosing and resolving issues that occur during the installation or configuration of software and system components. Some Setup events are as follows:
+  - Installation Processes: Installation processes refer to the series of steps and operations carried out to install software, updates, or system components on a Windows system. It contains log details about software installation, updates, or system components. This helps in diagnosing issues related to incomplete or failed installations.
+  - Setup Configurations: Records information about system configurations during the setup process. This can be useful for understanding your system's initial setup and configuration.
+- Forwarded Events: Forwarded events are logs sent from other computers to a centralised logging server. This is particularly useful in larger environments where centralised log management is needed. They include:
+  - Logs from Remote Systems: Collects event logs from multiple systems, allowing for centralised monitoring and management.
+  - Centralised Logging Scenarios: Useful for organisations that need to aggregate logs from various systems to a single location for easier analysis and monitoring.
+
+## Accessing the Windows Event Viewer
+
+Windows Event Viewer is a Windows application that lets you see your computer's logs, warnings, and other events. Each application you open generates entries that are recorded in an activity log, which can be viewed from the Event Viewer.
+
+There are several ways to access the Windows Event Viewer. Here are some of them:
+
+1. Using the Start Menu:
+
+   - Click on the Start button or press the Windows key.
+   - Type `Event Viewer` in the search box.
+
+   <Figure
+     src="/img/guides/2024/07/windows-logs-77731785-467c-46db-8102-6d00474dfe03.webp"
+     alt="Using start menu to open Event viewer"
+     caption="Using start menu to open Event viewer"
+   />
+   <br></br>- Select Event Viewer from the search results which will popup something like this.
+
+   <Figure
+     src="/img/guides/2024/07/windows-logs-Untitled.webp"
+     alt="Event Viewer main page"
+     caption="Event Viewer main page"
+   />
+   <br></br>2. Using the Run Dialog: - Press `Windows + R` to open the Run dialog. - Type `eventvwr`
+   and press Enter.
+   <Figure
+     src="/img/guides/2024/07/windows-logs-run_Event_Viewer.webp"
+     alt="Windows Run App to open Event Viewer"
+     caption="Windows Run App to open Event Viewer"
+   />
+   <br></br>
+   <Figure
+     src="/img/guides/2024/07/windows-logs-Untitled%201.webp"
+     alt="Windows Event viewer landing page"
+     caption="Windows Event viewer landing page"
+   />
+   <br></br>3. Using Control Panel: - Open the Command Prompt and run as administrator
+
+   <Figure
+     src="/img/guides/2024/07/windows-logs-29b6dd44-f920-429f-af6c-0ba817fbb16c.webp"
+     alt="Open CMD as Administrator from start menu"
+     caption="Open CMD as Administrator from start menu"
+   />
+   <br></br>- Once open, type ``eventvwr`` and press enter, and you will be redirected to Event
+   Viewer page.
+
+   <Figure
+     src="/img/guides/2024/07/windows-logs-Untitled%202.webp"
+     alt="CMD terminal"
+     caption="CMD terminal"
+   />
+   <br></br>
+
+### Windows Log Location
+
+Windows event logs are stored in files located in the `C:\\Windows\\System32\\winevt\\Logs` directory. Each log file corresponds to a specific log category, such as System, Application, or Security. It may differ depending on which version of Windows you are using.
+
+The main event log files are:
+
+1. Application.evtx: Logs events from applications and programs.
+2. Security.evtx: Logs security events like successful or failed logins.
+3. System.evtx: Logs events related to Windows system components and drivers
+
+<Figure
+  src="/img/guides/2024/07/windows-logs-Untitled%203.webp"
+  alt="Windows Event Viewer logs"
+  caption="Windows Event Viewer logs"
+/>
+<br></br>You can find many other log files which could be related to system operations & other
+processes that are happening inside the Windows System. Windows 11uses the `.evtx` format rather
+than using the classic `EVT` format.
+
+## Understanding Event Viewer Entries
+
+Event Viewer entries provide detailed information about each logged event. It is like a log book for your Windows system. They record important happenings within the system, including applications, systems, security, failed events, etc. Understanding these entries is key to effective log management.
+
+The key components of an Event Viewer entry are:
+
+1. Date and Time: When the event occurred.
+2. Source: The application or system component that generated the event.
+3. Event ID: A unique identifier for the event type.
+4. Level: The severity of the event (Information, Warning, Error, Critical).
+5. User: The user account under which the event occurred.
+6. Computer: The name of the computer where the event was logged.
+7. Description: Detailed information about the event.
+
+Each event in the Event Viewer has a severity level, indicating the importance and type of the event:
+
+- Information (Green Light): These events resemble a green traffic light, signifying smooth sailing. They indicate successful operations or occurrences within your system.
+- Warning (Yellow Light): Treat these entries with caution, like a yellow traffic light. They signal potential issues that warrant attention but might not cause immediate problems.
+- Error (Orange Light): Think of error entries as an orange traffic light; proceed with care. They denote significant problems that could affect system functionality. Imagine an error message indicating a driver failure.
+- Critical (Red Light): Critical entries are akin to a red traffic light; stop and address the situation immediately. They represent severe errors that have caused a major failure. A critical event might report a complete system shutdown or a critical service crashing.
+
+<Figure
+  src="/img/guides/2024/07/windows-logs-Untitled%204.webp"
+  alt="Severity levels for events"
+  caption="Severity levels for events"
+/>
+<br></br>
+<Figure
+  src="/img/guides/2024/07/windows-logs-Untitled%205.webp"
+  alt="System Event logs page"
+  caption="System Event logs page"
+/>
+<br></br>
+
+### Filtering and Custom Views
+
+Event Viewer allows you to filter events using a variety of parameters, including date, event level, source, and more. Consider the following scenario: your system exhibits weird behaviour, but the Event Viewer is overflowing with hundreds, if not thousands, of entries. Filtering steps and generating custom views can significantly reduce the workload. You may also construct custom views to focus on specific kinds of events:
+
+1. In the Event Viewer, you’ll see Administrative Events, to create special logs right-click on "Custom Views" and select "Create Custom View."
+
+<Figure
+  src="/img/guides/2024/07/windows-logs-Untitled%206.webp"
+  alt="Opening Administrative events"
+  caption="Opening Administrative events"
+/>
+<br></br>
+<Figure
+  src="/img/guides/2024/07/windows-logs-Untitled%207.webp"
+  alt="Custom View page from Admin Events"
+  caption="Custom View page from Admin Events"
+/>
+<br></br>1. In the Custom View page, you can see `logged` drop down, choose a preferred time or it
+gives you an option to create a custom time to set. 2. On the Event Level choose an appropriate
+level for your custom view, You can choose among the 5 levels.{' '}
+
+<Figure
+  src="/img/guides/2024/07/windows-logs-Untitled%208.webp"
+  alt="Selecting Event Levels"
+  caption="Selecting Event Levels"
+/>
+<br></br>1. Once done, choose how you want the events to be filtered, `By log` or `By source`.
+
+<Figure
+  src="/img/guides/2024/07/windows-logs-Untitled%209.webp"
+  alt="Filtering using: By log"
+  caption="Filtering using: By log"
+/>
+<br></br>
+<Figure
+  src="/img/guides/2024/07/windows-logs-Untitled%2010.webp"
+  alt="Filtering using: By Source"
+  caption="Filtering using: By Source"
+/>
+<br></br>Once everything is set up according to your needs, save all events in Custom View as{' '}
+
+from the drop-down menu and choose an appropriate location to save the logs. Click on the Save button. (A log file with the extension `.evtx` will be saved on your device).
+
+## Conclusion
+
+This blog provides an understanding how you can use the Windows Event Viewer which is provided by the Windows in default and using it to monitor Windows logs.
+
+- Main event log files are stored in `C:\\Windows\\System32\\winevt\\Logs`.
+- Windows logs are crucial for understanding the activities, errors, and significant events on your machine. They provide valuable information for troubleshooting, auditing, and ensuring system integrity.
+- They record a variety of system activities, errors, and other significant events, providing valuable information for troubleshooting, auditing, and ensuring system integrity.
+- We learnt how to setup Filtering and Custom Views to optimise what we see and solve the problems and where it happened.
+
+By grasping the significance of different event types such as System, Application, Security, Setup, and Forwarded Events, and knowing how to filter and export logs, you can effectively manage your Windows system.
+
+## FAQ’s
+
+### How to view Windows logs?
+
+To view Windows logs, use the built-in Event Viewer:
+
+1. Press `Win + R`, type `eventvwr`, and press Enter.
+2. Navigate through the console tree to find the log you want to view (e.g., Windows Logs > Application).
+
+### Where are Microsoft logs?
+
+Microsoft logs, including Windows logs, can be found in the Event Viewer under sections like Application, Security, and System. Log files are also located in the `C:\Windows\System32\winevt\Logs` directory.
+
+### How do I audit Windows logs?
+
+To audit Windows logs:
+
+1. Open Event Viewer.
+2. Navigate to Security logs under Windows Logs.
+3. Configure auditing policies via the Local Security Policy or Group Policy Management Console.
+
+### How do I check my Windows activity log
+
+Check your Windows activity log by viewing the Security logs in Event Viewer. These logs record user logins, logoffs, and other security-related activities.
+
+### Which is Windows log key?
+
+The Windows log key, often referred to as the Windows key, is the key on your keyboard with the Windows logo. It is used in various shortcuts to open system tools, including Event Viewer (`Win + X` > Event Viewer).
+
+### Where is the logs folder?
+
+The logs folder is located at `C:\Windows\System32\winevt\Logs`. This folder contains all the event log files in .evtx format.
+
+### Why are Windows logs important?
+
+Windows logs are important because they provide detailed information about system operations, security events, and application behavior, which is crucial for troubleshooting, auditing, and ensuring system integrity.
+
+### How to view log files?
+
+View log files using Event Viewer:
+
+1. Open Event Viewer (`Win + R`, type `eventvwr`, press Enter).
+2. Expand the Windows Logs section and select the log you want to view.
+
+### Where are login logs?
+
+Login logs are located in the Security logs section of Event Viewer. They record all login attempts, both successful and failed.
+
+### What are system logs?
+
+System logs contain information about the core operations of the Windows operating system, including hardware events, driver issues, and system startups and shutdowns. They are found under the System section in Event Viewer.
+
+### How do I find Windows log files?
+
+Find Windows log files in the Event Viewer or directly in the `C:\Windows\System32\winevt\Logs` directory.
+
+### How do I view user logs in Windows 10?
+
+View user logs in Windows 10 through the Event Viewer:
+
+1. Open Event Viewer.
+2. Go to Windows Logs > Security to see logs related to user activities, including logins and logoffs.
+
+### How do I view Windows setup logs?
+
+To view Windows setup logs:
+
+1. Open Event Viewer.
+2. Navigate to Applications and Services Logs > Microsoft > Windows > Setup.
+
+### How do I view Windows app logs?
+
+To view Windows application logs:
+
+1. Open Event Viewer.
+2. Navigate to Windows Logs > Application to see logs related to software applications running on your system.
