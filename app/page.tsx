@@ -15,14 +15,19 @@ import { Testimonials } from '@/components/testimonials'
 import { TrustedByTeams } from '@/components/trusted-by'
 import { WhyOpenTelemetry } from '@/components/why-opentelemetry'
 import WhySelectSignoz from '@/components/why-select-signoz'
+import {GetStarted} from '@/components/GetStarted'
 import { NextUIProvider } from '@nextui-org/react'
-import { genPageMetadata } from './seo'
+import { Metadata } from 'next'
 
-export const metadata = genPageMetadata({
-  title: 'The Open Source Datadog Alternative',
+export const metadata: Metadata = {
+  title: 'SigNoz | The Open Source Datadog Alternative',
+  openGraph: {
+    title: 'SigNoz | The Open Source Datadog Alternative',
+    description: 'SigNoz is an open-source observability tool powered by OpenTelemetry. Get APM, logs, traces, metrics, exceptions, & alerts in a single tool.',
+  },
   description:
     'SigNoz is an open-source observability tool powered by OpenTelemetry. Get APM, logs, traces, metrics, exceptions, & alerts in a single tool.',
-})
+}
 
 export default async function Page() {
   const sortedPosts = sortPosts(allBlogs)
@@ -33,15 +38,16 @@ export default async function Page() {
       <div className="relative mt-[-56px] bg-signoz_ink-500 ">
         <div className="absolute left-0 right-0 top-0 h-screen bg-[url('/img/background_blur/Perlin_noise.png')] bg-[length:55%] bg-[center_top_4rem] sm:bg-no-repeat " />
         <div className="absolute left-0 right-0 top-0 h-screen bg-[url('/img/background_blur/Circle.png')] bg-[length:110%] bg-no-repeat sm:bg-[center_top_-50rem]" />
-        <main className="landing-section relative z-[1] pt-12 sm:pt-0">
+        <main className="landing-section relative z-[1]">
           <Header />
-          <TrustedByTeams />
+          <TrustedByTeams page="homepage" />
           <SigNozFeatures />
           <BuildForDevelopers />
           <WhyOpenTelemetry />
           <WhySelectSignoz />
           <SigNozStats />
-          <Testimonials />
+          <Testimonials page="homepage"/>
+          <GetStarted page="homepage" />
         </main>
       </div>
     </NextUIProvider>
