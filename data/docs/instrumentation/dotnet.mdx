@@ -37,7 +37,32 @@ Based on your application environment, you can choose the setup below to send tr
 Tthere are two ways to send data to SigNoz Cloud.
 
 - [Send traces directly to SigNoz Cloud](#send-traces-directly-to-signoz-cloud)
+  - [No Code Automatic Instrumentation](#send-traces-directly-to-signoz-cloud---no-code-automatic-instrumentation-recommended) (recommended)
+  - [Code Level Automatic Instrumentation](#send-traces-directly-to-signoz-cloud---code-level-automatic-instrumentation)
 - [Send traces via OTel Collector binary](#send-traces-via-otel-collector-binary) (recommended)
+  - [No Code Automatic Instrumentation](#send-traces-via-otel-collector-binary---no-code-automatic-instrumentation) (recommended)
+  - [Code Level Automatic Instrumentation](#send-traces-via-otel-collector-binary---code-level-automatic-instrumentation)
+
+#### Send traces directly to SigNoz Cloud - No Code Automatic Instrumentation (recommended)
+
+**Step 1: Create a shell script with the following content**
+
+```bash
+# Download the bash script
+curl -sSfL https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/latest/download/otel-dotnet-auto-install.sh -O
+
+# Install core files
+sh ./otel-dotnet-auto-install.sh
+
+# Enable execution for the instrumentation script
+chmod +x $HOME/.otel-dotnet-auto/instrument.sh
+
+# Setup the instrumentation for the current shell session
+. $HOME/.otel-dotnet-auto/instrument.sh
+
+# Run your application with instrumentation
+OTEL_SERVICE_NAME=myapp OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf OTEL_RESOURCE_ATTRIBUTES=deployment.environment=staging,service.version=1.0.0 OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<REGION>.signoz.cloud:443 OTEL_EXPORTER_OTLP_HEADERS=signoz-access-token=<SIGNOZ_INGESTION_KEY> ./MyNetApp
+```
 
 ### Send traces directly to SigNoz Cloud
 
