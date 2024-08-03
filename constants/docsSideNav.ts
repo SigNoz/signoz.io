@@ -487,6 +487,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/userguide/windows-events-log',
+            label: 'Windows Events',
+          },
+          {
+            type: 'doc',
             route: '/docs/userguide/heroku_logs_to_signoz',
             label: 'Heroku logs',
           },
