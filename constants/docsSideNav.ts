@@ -946,6 +946,11 @@ const docsSideNav = [
         route: '/docs/integrations/postgresql',
         label: 'PostgreSQL',
       },
+      {
+        type: 'doc',
+        route: '/docs/integrations/nginx',
+        label: 'Nginx',
+      },
     ],
   },
   {
