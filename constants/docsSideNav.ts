@@ -581,6 +581,12 @@ const docsSideNav = [
               '/docs/logs-management/send-logs/vector-logs-to-signoz',
             label: 'Vector',
           },
+          {
+            type: 'doc',
+            route: '/docs/logs-management/send-logs/windows-events-log',
+            label: 'Windows Event logs',
+            className: 'new-doc',
+          },
         ],
       },
       {
