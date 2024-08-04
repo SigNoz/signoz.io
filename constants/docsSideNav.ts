@@ -931,6 +931,19 @@ const docsSideNav = [
     ],
   },
   {
+    label: 'Integrations',
+    type: 'category',
+    isExpanded: false,
+    className: 'new-doc',
+    items: [
+      {
+        type: 'doc',
+        route: '/docs/integrations/redis',
+        label: 'Redis',
+      },
+    ],
+  },
+  {
     type: 'doc',
     route: '/docs/monitor-http-endpoints',
     label: 'Monitor HTTP Endpoints',
