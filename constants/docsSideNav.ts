@@ -941,6 +941,11 @@ const docsSideNav = [
         route: '/docs/integrations/redis',
         label: 'Redis',
       },
+      {
+        type: 'doc',
+        route: '/docs/integrations/postgresql',
+        label: 'PostgreSQL',
+      },
     ],
   },
   {
