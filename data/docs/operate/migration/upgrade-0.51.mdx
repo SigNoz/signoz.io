@@ -1,0 +1,38 @@
+---
+date: 2024-08-01
+id: upgrade-0.51
+title: Upgrade to v0.51 from SigNoz versions older than v0.49.0
+---
+
+If you are upgrading from SigNoz version < v0.49.0 directly to version >= 0.51.0 please follow this guide.
+
+* Exec into the ClickHouse container.
+
+   On Docker:
+   ```bash
+   docker exec -it signoz-clickhouse bash
+   ```
+
+   On Kubernetes:
+   ```bash
+   kubectl -n platform exec -it pod/chi-signoz-cluster-0-0-0 -- bash
+   ```
+* Start the ClickHouse client by running `clickhouse client`
+* Drop the body index 
+   ```sql
+   ALTER TABLE signoz_logs.logs ON CLUSTER {{.SIGNOZ_CLUSTER}} DROP INDEX IF EXISTS body_idx
+   ```
+   Don't worry if the query timeout's, it will keep running in the background, you can proceed to the next step and wait.
+
+* Wait for the mutation to complete, you can check by running the below command
+   ```sql
+   select * from system.mutations where is_done=0;
+   ```
+   Wait until the `DROP INDEX` mutation is complete. If the above query return's empty result you can proceed to the next step.
+* Add the new body index
+   ```sql
+   ALTER TABLE signoz_logs.logs ON CLUSTER {{.SIGNOZ_CLUSTER}} ADD INDEX IF NOT EXISTS body_idx lower(body) TYPE ngrambf_v1(4, 60000, 5, 0) GRANULARITY 1
+   ```
+
+
+If you face any issue please reach out to us on [slack](https://signoz.io/slack). 
