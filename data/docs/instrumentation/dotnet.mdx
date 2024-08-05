@@ -46,6 +46,7 @@ Tthere are two ways to send data to SigNoz Cloud.
 #### Send traces directly to SigNoz Cloud - No Code Automatic Instrumentation (recommended)
 
 **Step 1: Create a shell script with the following content**
+You can either create a bash script with the following content or paste this directly into your terminal after replacing `SERVICE_NAME`, `SIGNOZ_ENDPOINT` and `SIGNOZ_INGESTION_KEY` .
 
 ```bash
 # Download the bash script
@@ -61,10 +62,27 @@ chmod +x $HOME/.otel-dotnet-auto/instrument.sh
 . $HOME/.otel-dotnet-auto/instrument.sh
 
 # Run your application with instrumentation
-OTEL_SERVICE_NAME=myapp OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf OTEL_RESOURCE_ATTRIBUTES=deployment.environment=staging,service.version=1.0.0 OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<REGION>.signoz.cloud:443 OTEL_EXPORTER_OTLP_HEADERS=signoz-access-token=<SIGNOZ_INGESTION_KEY> ./MyNetApp
+OTEL_SERVICE_NAME=<SERVICE_NAME> OTEL_TRACES_EXPORTER=otlp OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf OTEL_RESOURCE_ATTRIBUTES=deployment.environment=staging,service.version=1.0.0 OTEL_EXPORTER_OTLP_ENDPOINT=<SIGNOZ_ENDPOINT> OTEL_EXPORTER_OTLP_HEADERS=signoz-access-token=<SIGNOZ_INGESTION_KEY> ./MyNetApp
 ```
 
-### Send traces directly to SigNoz Cloud
+
+| Variable              | Description                                               |
+|-----------------------|-----------------------------------------------------|
+| SERVICE_NAME *      | Name you want to give to your rust application  |
+| SIGNOZ_ENDPOINT  *     | This is ingestion URL which you must have got in mail after registering on SigNoz cloud  |
+| SIGNOZ_ACCESS_TOKEN *  | This is Ingestion Key which you must have got in mail after registering on SigNoz cloud                                     |
+
+
+<Admonition>
+If you are doing it on mac os , you will need to install `coreutils`, you can do it by using the following command
+
+```bash
+brew install coreutils
+```
+</Admonition>
+
+
+#### Send traces directly to SigNoz Cloud - Code Level Automatic Instrumentation
 
 **Step 1: Installing the OpenTelemetry dependency packages:**
 
@@ -172,6 +190,44 @@ In the SigNoz account, open the `Services` tab. Hit the `Refresh` button on 
 ---
 
 ### Send traces via OTel Collector binary
+
+#### Send traces via OTel Collector binary - No Code Automatic Instrumentation
+
+**Step 1: Create a shell script with the following content**
+You can either create a bash script with the following content or paste this directly into your terminal after replacing `SERVICE_NAME`, `SIGNOZ_ENDPOINT` and `SIGNOZ_INGESTION_KEY` .
+
+```bash
+# Download the bash script
+curl -sSfL https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/latest/download/otel-dotnet-auto-install.sh -O
+
+# Install core files
+sh ./otel-dotnet-auto-install.sh
+
+# Enable execution for the instrumentation script
+chmod +x $HOME/.otel-dotnet-auto/instrument.sh
+
+# Setup the instrumentation for the current shell session
+. $HOME/.otel-dotnet-auto/instrument.sh
+
+# Run your application with instrumentation
+OTEL_SERVICE_NAME=<SERVICE_NAME> OTEL_TRACES_EXPORTER=otlp OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf OTEL_RESOURCE_ATTRIBUTES=deployment.environment=staging,service.version=1.0.0 OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318/v1/traces ./MyNetApp
+```
+
+
+| Variable              | Description                                               |
+|-----------------------|-----------------------------------------------------|
+| SERVICE_NAME *      | Name you want to give to your rust application  |
+
+
+<Admonition>
+If you are doing it on mac os , you will need to install `coreutils`, you can do it by using the following command
+
+```bash
+brew install coreutils
+```
+</Admonition>
+
+#### Send traces via OTel Collector binary - Code Level Automatic Instrumentation
 
 **Step 1: Setting up OpenTelemetry Collector binary as an agent in your machine**
 
@@ -265,9 +321,46 @@ In the SigNoz account, open the `Services` tab. Hit the `Refresh` button on 
 
 For .NET application deployed on Kubernetes, you need to install OTel Collector agent in your k8s infra to collect and send traces to SigNoz Cloud. You can find the instructions to install OTel Collector agent [here](/docs/tutorial/kubernetes-infra-metrics/).
 
-Once you have set up OTel Collector agent, you can proceed with OpenTelemetry .NET instrumentation by following the below steps:
+Once you have set up OTel Collector agent, you can proceed with OpenTelemetry .NET instrumentation by following either of the two:
 
-**Step 2: Installing the OpenTelemetry dependency packages:**
+1. [No Code Automatic Instrumentation](#no-code-automatic-instrumentation-recommended) (recommended)
+2. [Code Level Automatic Instrumentation](#code-level-automatic-instrumentation)
+
+
+### No Code Automatic Instrumentation (recommended)
+
+
+#### Send traces directly to SigNoz Cloud - No Code Automatic Instrumentation (recommended)
+
+**Step 1: Create a shell script with the following content**
+You can either create a bash script with the following content or paste this directly into your terminal after replacing `SERVICE_NAME`, `SIGNOZ_ENDPOINT` and `SIGNOZ_INGESTION_KEY` .
+
+```bash
+# Download the bash script
+curl -sSfL https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/latest/download/otel-dotnet-auto-install.sh -O
+
+# Install core files
+sh ./otel-dotnet-auto-install.sh
+
+# Enable execution for the instrumentation script
+chmod +x $HOME/.otel-dotnet-auto/instrument.sh
+
+# Setup the instrumentation for the current shell session
+. $HOME/.otel-dotnet-auto/instrument.sh
+
+# Run your application with instrumentation
+OTEL_SERVICE_NAME=<SERVICE_NAME> OTEL_TRACES_EXPORTER=otlp OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf OTEL_RESOURCE_ATTRIBUTES=deployment.environment=staging,service.version=1.0.0 OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318/v1/traces ./MyNetApp
+```
+
+
+| Variable              | Description                                               |
+|-----------------------|-----------------------------------------------------|
+| SERVICE_NAME *      | Name you want to give to your rust application  |
+
+
+### Code Level Automatic Instrumentation
+
+**Step 1: Installing the OpenTelemetry dependency packages:**
 
 Install the following dependencies in your application. 
 
@@ -355,9 +448,61 @@ In the SigNoz account, open the `Services` tab. Hit the `Refresh` button on 
 There are two ways to send data to SigNoz Cloud.
 
 - [Send traces directly to SigNoz Cloud](#send-traces-directly-to-signoz-cloud)
-- [Send traces via OTel Collector binary](#send-traces-via-otel-collector-binary) (recommended)
+  - [No Code Automatic Instrumentation](#send-traces-directly-to-signoz-cloud---no-code-automatic-instrumentation-recommended-2) (recommended)
+  - [Code Level Automatic Instrumentation](#send-traces-directly-to-signoz-cloud---code-level-automatic-instrumentation-1)
+- [Send traces via OTel Collector binary](#send-traces-via-otel-collector-binary-1) (recommended)
+  - [No Code Automatic Instrumentation](#send-traces-via-otel-collector-binary---no-code-automatic-instrumentation-1) (recommended)
+  - [Code Level Automatic Instrumentation](#send-traces-via-otel-collector-binary---code-level-automatic-instrumentation-1)
 
 ### Send traces directly to SigNoz Cloud
+
+#### Send traces directly to SigNoz Cloud - No Code Automatic Instrumentation (recommended)
+
+**Step 1: Download installation scripts**
+
+```powershell
+$module_url = "https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/latest/download/OpenTelemetry.DotNet.Auto.psm1"
+$download_path = Join-Path $env:temp "OpenTelemetry.DotNet.Auto.psm1"
+Invoke-WebRequest -Uri $module_url -OutFile $download_path -UseBasicParsing
+```
+
+**Step 2: Execute following script to download automatic instrumentation for your development environment**
+
+```powershell
+Import-Module $download_path
+Install-OpenTelemetryCore
+```
+
+**Step 3: Set variables and execute auto instrumentation**
+
+```powershell
+$env:OTEL_TRACES_EXPORTER="otlp"
+$env:OTEL_EXPORTER_OTLP_ENDPOINT="<SIGNOZ_ENDPOINT>"
+$env:OTEL_SERVICE_NAME="<APP_NAME>"
+$env:OTEL_EXPORTER_OTLP_HEADERS="signoz-access-token=<SIGNOZ_ACCESS_TOKEN>"
+$env:OTEL_DOTNET_AUTO_TRACES_CONSOLE_EXPORTER_ENABLED="true"
+$env:OTEL_DOTNET_AUTO_LOGS_CONSOLE_EXPORTER_ENABLED="true"
+Register-OpenTelemetryForCurrentSession -OTelServiceName "<APP_NAME>"
+dotnet run
+```
+
+| Variable              | Description                                               |
+|-----------------------|-----------------------------------------------------|
+| APP_NAME *      | Name you want to give to your rust application  |
+| SIGNOZ_ENDPOINT  *     | This is ingestion URL which you must have got in mail after registering on SigNoz cloud  |
+| SIGNOZ_ACCESS_TOKEN *  | This is Ingestion Key which you must have got in mail after registering on SigNoz cloud                                     |
+
+Depending on the choice of your region for SigNoz cloud, the ingest endpoint will vary according to this table.
+
+| Region | Endpoint |
+| --- | --- |
+| US | ingest.us.signoz.cloud:443 |
+| IN | ingest.in.signoz.cloud:443 |
+| EU | ingest.eu.signoz.cloud:443 |
+
+replace `dotnet run` with the run command of your application
+
+#### Send traces directly to SigNoz Cloud - Code Level Automatic Instrumentation
 
 **Step 1: Installing the OpenTelemetry dependency packages:**
 
@@ -465,6 +610,51 @@ In the SigNoz account, open the `Services` tab. Hit the `Refresh` button on 
 ---
 
 ### Send traces via OTel Collector binary
+
+#### Send traces via OTel Collector binary - No Code Automatic Instrumentation
+
+**Step 1: Setting up OpenTelemetry Collector binary as an agent in your machine**
+
+OpenTelemetry Collector binary helps to collect logs, hostmetrics, resource and infra attributes. It is recommended to install OTel Collector binary to collect and send traces to SigNoz cloud. You can correlate signals and have rich contextual data through this way.
+
+
+Go to [setup OTel Collector binary](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) to install Otel Collector as agent that will collect telemetry data from your sample dotnet app and send it to SigNoz cloud.  
+
+
+**Step 2: Download installation scripts**
+
+```powershell
+$module_url = "https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/latest/download/OpenTelemetry.DotNet.Auto.psm1"
+$download_path = Join-Path $env:temp "OpenTelemetry.DotNet.Auto.psm1"
+Invoke-WebRequest -Uri $module_url -OutFile $download_path -UseBasicParsing
+```
+
+**Step 3: Execute following script to download automatic instrumentation for your development environment**
+
+```powershell
+Import-Module $download_path
+Install-OpenTelemetryCore
+```
+
+**Step 4: Set variables and execute auto instrumentation**
+
+```powershell
+$env:OTEL_TRACES_EXPORTER="otlp"
+$env:OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318/v1/traces"
+$env:OTEL_DOTNET_AUTO_TRACES_CONSOLE_EXPORTER_ENABLED="true"
+$env:OTEL_DOTNET_AUTO_LOGS_CONSOLE_EXPORTER_ENABLED="true"
+Register-OpenTelemetryForCurrentSession -OTelServiceName "<APP_NAME>"
+dotnet run
+```
+
+| Variable              | Description                                               |
+|-----------------------|-----------------------------------------------------|
+| APP_NAME *      | Name you want to give to your rust application  |
+
+
+replace `dotnet run` with the run command of your application
+
+#### Send traces via OTel Collector binary - Code Level Automatic Instrumentation
 
 **Step 1: Setting up OpenTelemetry Collector binary as an agent in your machine**
 
