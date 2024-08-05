@@ -1,4 +1,5 @@
 const API_URL = process.env.SIGNOZ_CMS_API_URL;
+const API_PATH = process.env.SIGNOZ_CMS_CHANGELOG_PATH;
 
 interface ChangelogEntry {
   id: string;
@@ -17,7 +18,7 @@ interface ChangelogResponse {
 
 export const fetchChangelogEntries = async (): Promise<ChangelogEntry[]> => {
   try {
-    const response = await fetch(`${API_URL}/api/changelogs?sort[0]=createdAt:desc&pagination[limit]=5`, {
+    const response = await fetch(`${API_URL}${API_PATH}`, {
       headers: {
         'Cache-Control': 'no-store', // Avoid caching
         'Pragma': 'no-cache',
