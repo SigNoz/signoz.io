@@ -942,7 +942,6 @@ const docsSideNav = [
     className: 'new-doc',
     // route: '',
     items: [
-      //     'userguide/overview',
       {
         type: 'doc',
         route: '/docs/frontend-monitoring/web-vitals',
