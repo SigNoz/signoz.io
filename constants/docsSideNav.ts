@@ -581,6 +581,12 @@ const docsSideNav = [
               '/docs/logs-management/send-logs/vector-logs-to-signoz',
             label: 'Vector',
           },
+          {
+            type: 'doc',
+            route: '/docs/logs-management/send-logs/windows-events-log',
+            label: 'Windows Event logs',
+            className: 'new-doc',
+          },
         ],
       },
       {
@@ -922,6 +928,11 @@ const docsSideNav = [
         type: 'doc',
         route: '/docs/alerts-management/exceptions-based-alerts',
         label: 'Exceptions based Alert',
+      },
+      {
+        type: 'doc',
+        route: '/docs/alerts-management/planned-maintenance',
+        label: 'Planned Maintenance',
       },
     ],
   },
@@ -1358,6 +1369,11 @@ const docsSideNav = [
         // slug: '/docs/operate/migration/migration',
         // },
         items: [
+          {
+            type: 'doc',
+            route: '/docs/operate/migration/upgrade-0.51',
+            label: 'Upgrade to v0.51',
+          },
           {
             type: 'doc',
             route: '/docs/operate/migration/upgrade-0.49',
