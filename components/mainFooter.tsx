@@ -63,6 +63,9 @@ function Footer() {
                   </Link>
                   <ArrowUpRight size={16} />
                 </div>
+                <div className="mt-5 flex items-center gap-2 pr-7 hover:underline max-md:pr-5">
+                  <Link href="/changelog">Changelog</Link>
+                </div>
               </div>
             </div>
             <div className="ml-5 flex w-3/12 flex-col max-md:ml-0 max-md:w-full">
@@ -113,10 +116,6 @@ function Footer() {
 
                 <Link href="https://trust.signoz.io/" target="_blank" className="mt-5 hover:underline">
                   Security & Compliance
-                </Link>
-
-                <Link href="/changelog" target="_blank" className="mt-5 hover:underline">
-                  Changelog
                 </Link>
               </div>
             </div>
