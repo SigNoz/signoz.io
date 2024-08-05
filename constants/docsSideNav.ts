@@ -951,6 +951,11 @@ const docsSideNav = [
         route: '/docs/integrations/nginx',
         label: 'Nginx',
       },
+      {
+        type: 'doc',
+        route: '/docs/integrations/mongodb',
+        label: 'MongoDB',
+      },
     ],
   },
   {
