@@ -956,6 +956,11 @@ const docsSideNav = [
         route: '/docs/integrations/mongodb',
         label: 'MongoDB',
       },
+      {
+        type: 'doc',
+        route: '/docs/integrations/clickhouse',
+        label: 'Clickhouse',
+      },
     ],
   },
   {
