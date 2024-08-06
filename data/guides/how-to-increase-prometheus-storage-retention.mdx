@@ -171,33 +171,56 @@ Before modifying retention settings, it's crucial to verify the current configur
 4. Use the Prometheus API to query retention information:
 
 ```bash
-curl -X GET <http://localhost:9090/api/v1/status/config> | jq '.data.storage.tsdb.retention'
+curl -s http://localhost:9090/api/v1/status/runtimeinfo | jq '.data.storageRetention'
 ```
 
 ## Step-by-Step Guide to Increase Prometheus Storage Retention
 
 Follow these steps to extend Prometheus storage retention:
 
-1. Open the Prometheus configuration file in a text editor.
-2. Locate or add the `-storage.tsdb.retention.time` flag.
-3. Set the desired retention period (e.g., `30d` for 30 days, `720h` for 30 days, or `1y` for 1 year).
-4. Save the changes and restart Prometheus to apply the new settings.
+1. Open the ****Prometheus service file. It is usually located at `/etc/systemd/system/prometheus.service`.
+
+```jsx
+vi /etc/systemd/system/prometheus.service
+```
+
+1. Locate or add the `-storage.tsdb.retention.time` flag.
+2. Set the desired retention period (e.g., `30d` for 30 days, `720h` for 30 days, or `1y` for 1 year).
+3. Save the changes and restart Prometheus to apply the new settings.
 
 Example configuration:
 
-```yaml
-global:
-  scrape_interval: 15s
+```jsx
+[Unit]
+Description=Prometheus
+Wants=network-online.target
+After=network-online.target
+[Service]
+User=prometheus
+ExecStart=/usr/local/bin/prometheus \
+    --config.file /etc/prometheus/prometheus.yml \
+    --storage.tsdb.path /var/lib/prometheus/ \
+    --web.console.templates=/etc/prometheus/consoles \
+    --web.console.libraries=/etc/prometheus/console_libraries
+    --storage.tsdb.retention.time=60d
+[Install]
+WantedBy=default.target
+```
 
-storage:
-  tsdb:
-    retention.time: 30d
+If you have Prometheus installed on macOS using Homebrew:
 
-scrape_configs:
-  - job_name: 'prometheus'
-    static_configs:
-      - targets: ['localhost:9090']
+1. Confirm the location of your `prometheus.yml` file. It is usually located at `/opt/homebrew/etc/prometheus.yml`.
 
+```jsx
+ls /opt/homebrew/etc/prometheus.yml
+```
+
+1. When starting Prometheus, explicitly state the location of the configuration file and pass in the `--storage.tsdb.retention.time` flag. Set this to your desired retention period.
+
+Example configuration:
+
+```jsx
+/opt/homebrew/opt/prometheus/bin/prometheus --config.file=/opt/homebrew/etc/prometheus.yml --storage.tsdb.retention.time=30d
 ```
 
 ### Increasing Retention for Dockerized Prometheus
@@ -279,7 +302,5 @@ With SigNoz, you can:
 - Scale your monitoring infrastructure effortlessly
 - Access advanced querying and visualization capabilities
 - Benefit from integrated tracing and logging alongside metrics
-- Get high performance with the clickhouse database
-- Take advantage of SigNoz's exceptional exception monitoring capabilities
 
 By leveraging SigNoz, you can focus on deriving insights from your monitoring data rather than managing the underlying infrastructure. Whether you choose the cloud offering or the open-source version, SigNoz empowers you to take your monitoring to the next level.
