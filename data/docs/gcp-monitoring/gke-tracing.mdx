@@ -50,8 +50,8 @@ helm repo add SigNoz https://charts.signoz.io
 **Step 2:** Install OTel Agent and Deployment using `signoz/k8s-infra` Helm chart 
 
 ```sh
-helm install -n signoz  --create-namespace kubelet-otel signoz/k8s-infra \\
---set signozApiKey=<ingestionKey> --set otelCollectorEndpoint="ingest.<region>.signoz.cloud:443" --set OtelInsecure=false
+helm install -n signoz kubelet-otel signoz/k8s-infra \\
+--set signozApiKey=<ingestionKey> --set otelCollectorEndpoint="ingest.<region>.signoz.cloud:443" --set OtelInsecure=false --create-namespace
 ```
 
 After applying the above commands, check whether the `signoz` namespace pods are running successfully or not:
@@ -598,8 +598,8 @@ helm repo add SigNoz https://charts.signoz.io
 **Step 2:** Install the OTel Collector agent in GKE where SigNoz is running in GKE cluster
 
 ```sh
-helm install -n signoz  --create-namespace kubelet-otel signoz/k8s-infra \\
-otelCollectorEndpoint="<self-host-signoz-otel-collector-service-fqdn>:4317 " --set otelInsecure=true
+helm install -n signoz kubelet-otel signoz/k8s-infra \\
+otelCollectorEndpoint="<self-host-signoz-otel-collector-service-fqdn>:4317 " --set otelInsecure=true --create-namespace
 ```
 
 </TabItem>
@@ -1136,7 +1136,7 @@ If you encounter any issues while setting up logging and metrics for your GKE cl
 4. Confirm that the necessary Kubernetes resources are created:
 
     ```sh
-    kubectl get pods,services,configmaps -n platform
+    kubectl get pods,services,configmaps -n signoz
     ```
 
     Check if the required pods, services, and config maps are running and in a healthy state.
