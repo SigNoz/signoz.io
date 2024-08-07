@@ -937,6 +937,54 @@ const docsSideNav = [
     ],
   },
   {
+    label: 'Integrations',
+    type: 'category',
+    isExpanded: false,
+    className: 'new-doc',
+    items: [
+      {
+        type: 'doc',
+        route: '/docs/integrations/redis',
+        label: 'Redis',
+      },
+      {
+        type: 'doc',
+        route: '/docs/integrations/postgresql',
+        label: 'PostgreSQL',
+      },
+      {
+        type: 'doc',
+        route: '/docs/integrations/nginx',
+        label: 'Nginx',
+      },
+      {
+        type: 'doc',
+        route: '/docs/integrations/mongodb',
+        label: 'MongoDB',
+      },
+      {
+        type: 'doc',
+        route: '/docs/integrations/clickhouse',
+        label: 'Clickhouse',
+      },
+      {
+        type: 'doc',
+        route: '/docs/integrations/aws-rds-postgres',
+        label: 'AWS RDS PostgreSQL',
+      },
+      {
+        type: 'doc',
+        route: '/docs/integrations/aws-rds-mysql',
+        label: 'AWS RDS MySQL',
+      },
+      {
+        type: 'doc',
+        route: '/docs/integrations/aws-elasticache-redis',
+        label: 'AWS Elasticache Redis',
+      },
+    ],
+  },
+  {
     type: 'doc',
     route: '/docs/monitor-http-endpoints',
     label: 'Monitor HTTP Endpoints',
