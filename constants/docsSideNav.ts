@@ -966,6 +966,11 @@ const docsSideNav = [
         route: '/docs/integrations/aws-rds-postgres',
         label: 'AWS RDS PostgreSQL',
       },
+      {
+        type: 'doc',
+        route: '/docs/integrations/aws-rds-mysql',
+        label: 'AWS RDS MySQL',
+      },
     ],
   },
   {
