@@ -2,7 +2,7 @@
 'use client'
 
 import React, { useEffect, useRef, useState } from 'react'
-import { ChevronDown, ChevronRight, File, FileText } from 'lucide-react'
+import { ChevronDown, ChevronRight, FileText } from 'lucide-react'
 import Link from 'next/link'
 import { NavItem, Doc, Category } from './types'
 import docsSideNav from 'constants/docsSideNav'
@@ -70,9 +70,7 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
     // Normalize the currentRoute by stripping the trailing slash if it exists
     const normalizedRoute = currentRoute.endsWith('/') ? currentRoute.slice(0, -1) : currentRoute
 
-    const parents = getParents(docsSideNav, normalizedRoute)
-
-    console.log('parents', parents)
+    const parents = getParents(docsSideNav, normalizedRoute);
 
     for (const parent of parents) {
       toggleIsExpandedByLabel(parent, true)
@@ -81,18 +79,19 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
     const rIC = window.requestIdleCallback ?? setTimeout
 
     rIC(() => {
-      const elementId = `#${pathname.substring(0, pathname.length - 1)}`
-      const element = document.getElementById(elementId)
+      const element = document.getElementById(normalizedRoute);
 
-      console.log('element', elementId)
+      if (element && sidebarRef.current) {
+        const sidebar = sidebarRef.current;
+        const elementTop = element.getBoundingClientRect().top + sidebar.scrollTop;
+        const offset = 50; 
 
-      if (element) {
-        element.scrollIntoView({
+        sidebar.scrollTo({
+          top: elementTop - offset,
           behavior: 'smooth',
-          block: 'center',
-        })
+        });
       }
-    })
+    });
   }, [pathname])
 
   const renderDoc = (doc: Doc) => {
@@ -101,13 +100,13 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
     return (
       <li
         key={doc.route}
-        id={`#${doc.route}`}
+        id={doc.route}
         className={`doc flex cursor-pointer truncate pl-[16px] pt-[8px] text-lg font-normal ${
           isActiveRoute
             ? 'active-route text-white'
             : 'text-gray-300 hover:text-white hover:underline'
         }`}
-        onClick={() => onNavItemClick && typeof onNavItemClick == 'function' && onNavItemClick()}
+        onClick={() => onNavItemClick && typeof onNavItemClick === 'function' && onNavItemClick()}
       >
         <Link
           href={doc.route}
