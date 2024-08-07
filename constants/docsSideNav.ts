@@ -961,6 +961,11 @@ const docsSideNav = [
         route: '/docs/integrations/clickhouse',
         label: 'Clickhouse',
       },
+      {
+        type: 'doc',
+        route: '/docs/integrations/aws-rds-postgres',
+        label: 'AWS RDS PostgreSQL',
+      },
     ],
   },
   {
