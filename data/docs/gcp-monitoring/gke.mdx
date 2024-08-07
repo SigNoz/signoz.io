@@ -187,26 +187,8 @@ helm repo add SigNoz https://charts.signoz.io
 **Step 2:** Install the Otel Collector agent in GKE where SigNoz is running in a Self-hosted VM.
 
     ```sh
-    helm install -n signoz  --create-namespace kubelet-otel signoz/k8s-infra \\
-    otelCollectorEndpoint="<self-host-signoz-otel-collector-service-fqdn>:4317" --set otelInsecure=true
+    helm --namespace signoz install my-release signoz/signoz -f override-values.yaml
     ```
-
-</TabItem>
-<TabItem value="self-host-signoz-in-vm" label="For self-hosted SigNoz in a VM">
-
-**Step 2:** Install the Otel Collector agent in GKE where SigNoz is running in a Self-hosted VM.
-
-    ```sh
-    helm install -n signoz  --create-namespace kubelet-otel signoz/k8s-infra \\
-    otelCollectorEndpoint="<self-host-signoz-vm-ip>:4317" --set otelInsecure=true
-    ```
-
-<Admonition type="note">
-The `otelCollectorEndpoint` can be different from the VM IP, based on how you have set up your infrastructure.
-</Admonition>
-</TabItem>
-</Tabs>
-
 After applying the above commands, check whether the pods are running successfully or not
 
 <figure data-zoomable align="left">
@@ -222,6 +204,39 @@ Resources status
 </figure>
 
 If running,This should start sending logs and metrics to SigNoz.
+
+</TabItem>
+<TabItem value="self-host-signoz-in-vm" label="For self-hosted SigNoz in a VM">
+
+**Step 2:** Install the Otel Collector agent in GKE where SigNoz is running in a Self-hosted VM.
+
+    ```sh
+    helm install -n signoz  --create-namespace kubelet-otel signoz/k8s-infra \\
+    otelCollectorEndpoint="<self-host-signoz-vm-ip>:4317" --set otelInsecure=true
+    ```
+
+<Admonition type="note">
+The `otelCollectorEndpoint` can be different from the VM IP, based on how you have set up your infrastructure.
+</Admonition>
+
+After applying the above commands, check whether the pods are running successfully or not
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/gke/k8s-resources-cloud.webp"
+        alt="Resources status"
+    />
+<figcaption>
+<i>
+Resources status
+</i>
+</figcaption>
+</figure>
+
+If running,This should start sending logs and metrics to SigNoz.
+
+</TabItem>
+</Tabs>
 
 Now, create some pods to check that the logs and metrics are being sent successfully to SigNoz Self-Host:
 
