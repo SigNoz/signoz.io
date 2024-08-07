@@ -971,6 +971,11 @@ const docsSideNav = [
         route: '/docs/integrations/aws-rds-mysql',
         label: 'AWS RDS MySQL',
       },
+      {
+        type: 'doc',
+        route: '/docs/integrations/aws-elasticache-redis',
+        label: 'AWS Elasticache Redis',
+      },
     ],
   },
   {
