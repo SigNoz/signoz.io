@@ -937,6 +937,20 @@ const docsSideNav = [
     ],
   },
   {
+    label: 'Frontend Monitoring',
+    type: 'category',
+    className: 'new-doc',
+    isExpanded: false,
+    // route: '',
+    items: [
+      {
+        type: 'doc',
+        route: '/docs/frontend-monitoring/web-vitals',
+        label: 'Web Vitals',
+      },
+     ],
+  },
+  {
     label: 'Integrations',
     type: 'category',
     isExpanded: false,
