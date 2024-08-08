@@ -1,7 +1,7 @@
 ---
-title: Datadog Pricing - Beware These Surprises in 2024
+title: Datadog Pricing Guide - Beware These Surprises in 2024
 slug: datadog-pricing
-date: 2023-10-26
+date: 2024-08-08
 tags: [Observability]
 authors: [nicamellifera]
 description: This piece explores two ways that Datadog’s pricing is often much larger than expected for small and mid-size engineering teams. The first is the per-host pricing that affects microservice architectures, and the second is custom metrics that can quickly get out of control and inflate your Datadog bill.
@@ -11,7 +11,152 @@ keywords: [observability,budget]
 ---
 
 <head>
-  <link rel="canonical" href="https://signoz.io/blog/datadog-pricing/"/>
+  <script
+    type="application/ld+json"
+    dangerouslySetInnerHTML={{ __html: JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Datadog Pricing - Beware These Surprises in 2024",
+  "alternativeHeadline": "Understanding the Hidden Costs of Datadog's Per-Host and Custom Metrics Pricing",
+  "author": {
+    "@type": "Person",
+    "name": "nicamellifera"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SigNoz",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://signoz.io/img/SigNozLogo-orange.svg"
+    }
+  },
+  "datePublished": "2024-08-08T00:00:00Z",
+  "dateModified": "2024-08-08T00:00:00Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://signoz.io/blog/datadog-pricing/"
+  },
+  "description": "This piece explores two ways that Datadog's pricing is often much larger than expected for small and mid-size engineering teams: per-host pricing affecting microservice architectures and custom metrics that can quickly inflate your Datadog bill.",
+  "keywords": "datadog pricing, observability costs, custom metrics pricing, per-host pricing, microservice architecture costs, OpenTelemetry alternatives",
+  "articleSection": "Technology",
+  "inLanguage": "en",
+  "isPartOf": {
+    "@type": "Blog",
+    "name": "SigNoz Blog",
+    "url": "https://signoz.io/blog/"
+  },
+  "about": [
+    {
+      "@type": "Thing",
+      "name": "Datadog",
+      "description": "A monitoring and analytics platform for IT infrastructure, application performance, and logs"
+    },
+    {
+      "@type": "Thing",
+      "name": "Observability",
+      "description": "The ability to measure the internal states of a system by examining its outputs"
+    },
+    {
+      "@type": "Thing",
+      "name": "Microservices",
+      "description": "An architectural style that structures an application as a collection of loosely coupled services"
+    }
+  ],
+  "mentions": [
+    {
+      "@type": "SoftwareApplication",
+      "name": "Datadog",
+      "applicationCategory": "Monitoring and Analytics Platform"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "name": "OpenTelemetry",
+      "applicationCategory": "Observability Framework"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "name": "SigNoz",
+      "applicationCategory": "Observability Platform"
+    }
+  ],
+  "mainEntity": {
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What are the main pricing concerns with Datadog?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Datadog's pricing can be unexpectedly high due to two main factors: per-host pricing that affects microservice architectures, and custom metrics pricing that can quickly escalate costs."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How does Datadog's per-host pricing affect microservice architectures?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Datadog charges per host, which can be costly for microservice architectures. Each host running a part of the service counts towards pricing, even if it's a small or inactive host. This can lead to monitoring costs that rival or exceed operational costs."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What issues can arise with Datadog's custom metrics pricing?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Datadog's custom metrics pricing can get out of control due to data cardinality and integrations. Dynamic keys can create a huge metric space quickly, and integrations with other tools can significantly increase the number of custom metrics without built-in limits."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What alternatives are there to Datadog for more cost-effective observability?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "OpenTelemetry offers a cost-effective alternative to Datadog. It's open-source, eliminates licensing costs, reduces vendor lock-in, and allows companies to choose cost-efficient backends and visualization tools like SigNoz, Grafana, or Loki."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How much more expensive can Datadog be compared to alternatives?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "According to the article, Datadog can cost up to 9 times more than using OpenTelemetry with SigNoz for similar observability capabilities."
+        }
+      }
+    ]
+  },
+  "tutorial": {
+    "@type": "HowTo",
+    "name": "How to Manage Datadog Costs",
+    "step": [
+      {
+        "@type": "HowToStep",
+        "name": "Understand Per-Host Pricing",
+        "text": "Analyze your microservice architecture and identify potential cost impacts of Datadog's per-host pricing model."
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Monitor Custom Metrics",
+        "text": "Be aware of how custom metrics are generated and limit high-cardinality metrics to control costs."
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Review Integrations",
+        "text": "Carefully review and configure integrations to prevent unexpected increases in custom metrics."
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Consider Alternatives",
+        "text": "Explore open-source alternatives like OpenTelemetry for more cost-effective observability solutions."
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Optimize Metric Collection",
+        "text": "Implement strategies to reduce the number of unique metrics while maintaining necessary observability."
+      }
+    ]
+  }
+}) }}
+  />
 </head>
 
 Datadog has a huge product footprint with a sophisticated user experience, but any discussion of its usefulness must include a consideration of its significant costs. Datadog pricing is complex and has a lot of SKUs that a customer needs to understand. If you're not careful, you might end up blowing your Datadog bill.
@@ -29,11 +174,85 @@ DataDog should have faster queries+ drastically lower storage costs yet for many
 
 This piece explores two ways that Datadog’s pricing is often much larger than expected for small and mid-size engineering teams. The first is the per-host pricing that affects microservice architectures, and the second is custom metrics that can quickly get out of control and inflate your Datadog bill.
 
-## Datadog's Per host Pricing and its discontents
+## Understanding Datadog's Pricing Model
+
+Before getting into why Datadog's pricing might not work for everyone, let's take a look at how Datadog's pricing model works.
+
+Datadog uses a tiered pricing structure that can be challenging to navigate. The platform divides its services into several main categories:
+
+1. Infrastructure monitoring
+2. Application Performance Monitoring (APM)
+3. Log Management
+4. Real User Monitoring (RUM)
+5. Synthetic Monitoring
+
+Each category has its own pricing model, which can be either per-host or per-GB. This multi-faceted approach allows for flexibility but also increases complexity.
+
+### Key Pricing Components
+
+Let's break down the core components of Datadog's pricing:
+
+- **Infrastructure monitoring**: Charges per host, with prices varying based on the number of hosts and retention period.
+- **APM**: Priced per host for the Pro plan, with additional charges for ingested spans in the Enterprise plan.
+- **Log management**: Billed per GB of ingested logs, with costs increasing for longer retention periods.
+- **RUM and Synthetic monitoring**: Priced based on the number of sessions or tests performed.
+
+## Datadog Pricing Plans: A Comprehensive Breakdown
+
+Datadog offers three main plans: Free, Pro, and Enterprise. Here's a detailed look at each:
+
+### Free Plan
+
+The Free plan is suitable for small projects or individuals looking to test Datadog's capabilities. It includes:
+
+- Up to 5 hosts
+- 1-day metric retention
+- Basic dashboarding and alerting
+
+Limitations:
+- No log management
+- Limited APM features
+- No custom metrics
+
+### Pro Plan
+
+The Pro plan is Datadog's most popular option, designed for small to medium-sized businesses. Key features include:
+
+- Full infrastructure monitoring
+- APM for unlimited hosts
+- Log management (15-day retention)
+- Network performance monitoring
+
+Pricing:
+- Starts at $15 per host per month for infrastructure monitoring
+- APM: $31 per host per month
+- Logs: $0.10 per GB ingested
+
+### Enterprise Plan
+
+The Enterprise plan offers the full suite of Datadog features with customizable options. It includes:
+
+- All Pro plan features
+- Longer data retention periods
+- Advanced security features
+- Dedicated support
+
+Pricing for the Enterprise plan is custom and requires contacting Datadog's sales team.
+
+## Factors Influencing Datadog Costs
+
+Several factors can significantly impact your Datadog expenses:
+
+1. **Data retention**: Longer retention periods increase costs, especially for log management.
+2. **Custom metrics**: High cardinality metrics can quickly escalate costs.
+3. **Integration choices**: Some integrations may require additional data ingestion, affecting overall expenses.
+4. **Configuration**: Improper setup can lead to unexpected charges due to excessive data collection.
+
+## Datadog's Per Host Pricing and Its Discontents
 
 Datadog's pricing is tied directly to the number of hosts monitored. In dynamic environments, especially those with microservices, the amount of data can fluctuate significantly. This makes it challenging to predict costs. Datadog's per-host pricing model can be particularly challenging for architectures that rely heavily on microservices. Here's why:
 
-### Tiny hosts? Inactive hosts? They all cost under Datadog
+### Tiny hosts? Inactive hosts? They All Cost Under Datadog
 
 In a microservices architecture, services are often distributed across multiple hosts for scalability and fault tolerance. Each host running a part of the service counts toward the per-host pricing, increasing the overall cost. Some users report that <a href = "https://news.ycombinator.com/item?id=35837330#35865473" rel="noopener noreferrer nofollow" target="_blank">Datadog costs more to monitor your AWS t3.medium instance than the actual instance.</a> This pricing structure tends to favor users who use larger, higher-resource instances which often don’t make sense for a proper microservice system. For users using straightforward, even medium sized AWS instances, you can again find observability costs outstripping infrastructure costs.
 
@@ -44,7 +263,7 @@ They recommended I use modern infrastructure which means Docker."/>
     <figcaption><i>It's generally not great to be changing your architecture just to make observability affordable.</i></figcaption>
 </figure>
 
-### Dynamic Scaling can make the situation worse
+### Dynamic Scaling Can Make The Situation Worse
 
 Microservices often use dynamic scaling to handle varying loads, which can lead to a fluctuating number of hosts. This makes it difficult to predict costs accurately. Further, in some containerized environments, you have a choice to lose the accurate hostname or accept that every auto-scaled host will have a direct pricing impact.
 
@@ -60,13 +279,13 @@ A number of comments all over Reddit and Hacker News, mention that Datadog’s b
 
 In reality this cost can get out-of-control easily through two very common patterns:
 
-### Cause #1 of huge custom metric bills: data cardinality
+### Cause #1 of Huge Custom Metric Bills: Data Cardinality
 
 Often, we’re encouraged to start with custom metrics by manually adding calls to create metrics, which seems like an inherently limited technique. But what happens if I start sending a metric like `{user.path:status.code}`? If the key is dynamic, I can create a huge metric space very quickly. Ideally, I’d limit this somewhat to make sure my data is useful, but there are plenty of reasons why we’d want to store a space of tens of thousands of possible keys. Worse, there’s no built-in system in Datadog to clamp metric explosion automatically.
 
 This is all a significant issue since in general it’s very bad if Operations teams are looking at a big bill and the only way to improve the situation is to commit code changes to the core application. Not only is this a difficult feedback process, it’s another time when we end up punishing our coders for trying to add observability data. It would be much better if there were some way to do ops-level config to clamp cardinality, as there is with the OpenTelemetry Collector.
 
-### Huge custom metrics bill culprit #2: Integrations
+### Huge Custom Metrics Bill Culprit #2: Integrations
 
 Even more surprising than our own custom metrics’ ability to swell observability bills, is integrations with other tools. Interactions with plug-ins’ and integrations code and your own production data can cause custom metrics to increase significantly. The list of integrations which by default send unpredictable numbers of custom metrics is quite a list:
 
@@ -79,13 +298,13 @@ MySQL /Oracle /Postgres /SQL Server
 
 Finally, cloud integrations with AWS can also send custom metrics. It’s hard to imagine running a modern service without using some of the resources listed above, and wanting to monitor them with your Observability tool.
 
-### How custom metrics are counted and how it punishes microservices
+### How Custom Metrics are Counted and How it Punishes Microservices
 
 In a theoretical example with custom metrics, we often start with a single call generated a large number of metrics due to having a large space for possible keys. In reality, the situation is much worse if you have a modern microservice architecture. We’ve discussed previously how host-based pricing penalizes smaller, lighter containers. Here with custom metrics, we get another nasty shock: custom metrics are counted by unique keys, values, and tags. One of the most basic tags is the host, so every single container that generates custom metrics is creating unique metrics and will quickly impact your budget.
 
 You may want to sample your metrics at the cost of sending more metrics. It would be tempting to try sampling your data and sending distribution metrics instead. But since Datadog charges not by the number of metric values but rather by their keys, sending distribution metrics _increases the number of metrics used five-fold._ As each metric now also includes count, sum, min, max, and avg.
 
-### Doing the math on Datadog’s Custom metrics
+### Doing the Math on Datadog’s Custom Metrics
 
 The Datadog documentation site is quick to point out that you will only be charged for custom metrics if you purchase the appropriate SKU, and without that SKU you can send 300 metrics for free (well, included in the cost of your other products but still, no additional cost). Let’s review a scenario to see how a single latency metric can use up all 300 of those metrics:
 
@@ -111,14 +330,67 @@ What would that math look like if you had just a moderately complex application,
 
 The story gets worse from there, the documented prices are just for _collecting_ metrics, not for _indexing_ them, so you can't query these metrics, and the cost of metrics indexing varies by contract and isn't published by datadog.
 
-### Why are Datadog custom metrics so expensive?
+### Why are Datadog Custom Metrics So Expensive?
 
 There are a variety of possible reasons why the pricing for Datadog’s custom metrics are so high. It may be that their data backend struggles with high cardinality keys. However, a slightly more sinister explanation has to do with vendor lock in. While integrations and other plug ins can produce custom metrics, the primary way these metrics are created are by inserting custom calls into your application code to send metrics to the Datadog agent.
 
 These custom metrics calls within your code do not use any open standard or library, and as such they can only ever report data to the Datadog agent. As such, when you start reporting custom metrics you are signaling to Datadog that you’re ‘locked in’ and planning to stay with Datadog as your observability platform in the long term. This makes your organization less sensitive to price increases.
 
-## You can do better than Datadog, OpenTelemetry can help
+## You Can Do Better Than Datadog, OpenTelemetry Can Help
 
 OpenTelemetry offers a cost-effective alternative to Datadog. Being an open-source project, it eliminates the licensing costs associated with proprietary solutions like Datadog. Another advantage of OpenTelemetry is that it reduces vendor lock-in, offering greater flexibility to switch between different observability solutions without undergoing a massive overhaul of the existing setup. Companies can choose to store their observability data in cost-efficient backends, and they have the flexibility to select from a range of open-source storage and visualization tools like SigNoz, Grafana, or Loki.
 
 To go further, read a comprehensive price breakdown of how Datadog can cost <a href = "https://signoz.io/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/#no-limits-on-custom-metrics-with-signoz" rel="noopener noreferrer nofollow" target="_blank">9x more than OpenTelemetry and SigNoz.</a>
+
+SigNoz offers an open-source solution with many features similar to Datadog:
+
+- Full-stack observability (metrics, traces, logs)
+- Custom dashboards and alerts
+- Long-term data retention
+
+SigNoz Cloud provides a managed service that can significantly reduce costs compared to Datadog, especially for growing businesses.
+
+<GetStartedSigNoz />
+
+
+## FAQs
+
+### How does Datadog calculate per-host pricing?
+
+Datadog counts a billable host as any physical or virtual OS instance that sends metrics to Datadog. This includes cloud instances, on-premises servers, and containers.
+
+### Can I mix different Datadog plans for various services?
+
+Yes, Datadog allows you to mix and match different plans for various services. For example, you could use the Pro plan for infrastructure monitoring and the Enterprise plan for APM.
+
+### What are the most common causes of unexpected Datadog charges?
+
+Unexpected charges often result from:
+1. Unintentional collection of high-cardinality metrics
+2. Excessive log ingestion
+3. Forgotten or unused integrations continuing to send data
+
+### How does Datadog's pricing compare to other APM tools?
+
+Datadog is generally considered to be on the higher end of the pricing spectrum compared to tools like New Relic or Dynatrace. However, its unified platform approach can potentially reduce overall tooling costs for some organizations.
+
+### What are the main pricing concerns with Datadog?
+Datadog's pricing can be unexpectedly high due to two main factors: per-host pricing that affects microservice architectures, and custom metrics pricing that can quickly escalate costs.
+
+### How does Datadog's per-host pricing affect microservice architectures?
+Datadog charges per host, which can be costly for microservice architectures. Each host running a part of the service counts towards pricing, even if it's a small or inactive host. This can lead to monitoring costs that rival or exceed operational costs.
+
+### What issues can arise with Datadog's custom metrics pricing?
+Datadog's custom metrics pricing can get out of control due to data cardinality and integrations. Dynamic keys can create a huge metric space quickly, and integrations with other tools can significantly increase the number of custom metrics without built-in limits.
+
+### How does Datadog count custom metrics?
+Datadog counts custom metrics by unique keys, values, and tags. The host is considered a basic tag, so each container generating custom metrics creates unique metrics, impacting the budget. Distribution metrics increase the metric count five-fold.
+
+### What alternatives are there to Datadog for more cost-effective observability?
+OpenTelemetry offers a cost-effective alternative to Datadog. It's open-source, eliminates licensing costs, reduces vendor lock-in, and allows companies to choose cost-efficient backends and visualization tools like SigNoz, Grafana, or Loki.
+
+### How much more expensive can Datadog be compared to alternatives?
+According to the article, Datadog can cost up to 9 times more than using OpenTelemetry with SigNoz for similar observability capabilities.
+
+### Can Datadog's pricing model punish efforts to improve observability?
+Yes, Datadog's pricing model can inadvertently punish efforts to improve observability. Adding custom metrics or instrumenting more hosts can lead to unexpected cost increases, potentially discouraging teams from fully implementing observability practices.

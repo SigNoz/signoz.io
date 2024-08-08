@@ -1,13 +1,108 @@
 ---
 title: Sending and Filtering Python Logs with OpenTelemetry
 slug: sending-and-filtering-python-logs-with-opentelemetry
-date: 2023-09-22
+date: 2024-08-07
 tags: [guides, OpenTelemetry, Python]
 authors: [nicamellifera]
-description: This guide describes how to send logs to the OpenTelemetry Collector, and how to configure the collector to filter and transform your data.
 image: /img/blog/2023/08/python-logs.jpg
-keywords: [opentelemetry,signoz,observability]
+description: Learn how to effectively send and filter Python logs using OpenTelemetry. This guide covers instrumentation, advanced techniques, and best practices.
+keywords: [OpenTelemetry, Python logging, log filtering, observability, log management, OpenTelemetry Collector, SigNoz]
+
 ---
+
+<head>
+  <script
+    type="application/ld+json"
+    dangerouslySetInnerHTML={{ __html: JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Sending and Filtering Python Logs with OpenTelemetry",
+  "alternativeHeadline": "A comprehensive guide to using OpenTelemetry for Python logging and log filtering",
+  "author": {
+    "@type": "Person",
+    "name": "nicamellifera"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SigNoz",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://signoz.io/img/SigNozLogo-orange.svg"
+    }
+  },
+  "datePublished": "2024-08-07T00:00:00Z",
+  "dateModified": "2024-08-07T00:00:00Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://signoz.io/guides/sending-and-filtering-python-logs-with-opentelemetry/"
+  },
+  "description": "Learn how to send logs from Python applications using OpenTelemetry, configure the OpenTelemetry Collector for log filtering and transformation, and optimize your logging pipeline.",
+  "keywords": "opentelemetry, python logging, log filtering, observability, signoz, otel collector",
+  "articleSection": "Technology",
+  "inLanguage": "en",
+  "isPartOf": {
+    "@type": "Blog",
+    "name": "SigNoz Blog",
+    "url": "https://signoz.io/blog/"
+  },
+  "about": [
+    {
+      "@type": "Thing",
+      "name": "OpenTelemetry",
+      "description": "An observability framework for cloud-native software"
+    },
+    {
+      "@type": "Thing",
+      "name": "Python",
+      "description": "A high-level programming language"
+    },
+    {
+      "@type": "Thing",
+      "name": "Logging",
+      "description": "The process of recording application events and data"
+    }
+  ],
+  "mentions": [
+    {
+      "@type": "SoftwareApplication",
+      "name": "OpenTelemetry Collector",
+      "applicationCategory": "Observability Tool"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "name": "SigNoz",
+      "applicationCategory": "Observability Platform"
+    }
+  ],
+  "mainEntity": {
+    "@type": "HowTo",
+    "name": "How to Send and Filter Python Logs with OpenTelemetry",
+    "step": [
+      {
+        "@type": "HowToStep",
+        "name": "Instrument your Python application",
+        "text": "Add OpenTelemetry dependencies to your project and run the OpenTelemetry agent."
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Send Logs",
+        "text": "Use the Bridge API or manually add OpenTelemetry to your application to send logs."
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Configure the Collector",
+        "text": "Set up the OpenTelemetry Collector to receive and process logs."
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Transform and filter log attributes",
+        "text": "Use the OpenTelemetry Transformation Language (OTTL) to modify and filter log data."
+      }
+    ]
+  }
+}) }}
+  />
+</head>
 
 While support for logging in the [OpenTelemetry Python project](https://opentelemetry.io/docs/instrumentation/python/) is listed as 'experimental,' it's completely possible to send logs from your Python application. The Opentelemetry Collector has support for numerous existing logging systems, effectively exporting log data from wherever you were sending logs currently; you can also use the [filelog receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/filelogreceiver) to tail and send logs from files. The only 'experimental' portion of the Python SDK is [sending logs directly from code-level](https://github.com/open-telemetry/opentelemetry-python/blob/d8490c5f557dd7005badeb800095cb51b553c98c/docs/examples/logs/README.rst) instrumentation.
 
@@ -228,8 +323,56 @@ logs:
 
 Notably it *is* possible that we will wish we had a `userID` for this log, but if so we should parse it out as its own attribute in the next section. Keeping ID’s in an `[http.target](http://http.target)` attribute will make it impossible to do any collation of data. Transformations can be a key step in normalizing our data.
 
+### Automatic vs Manual Instrumentation
+
+OpenTelemetry supports both automatic and manual instrumentation:
+
+- **Automatic instrumentation** uses the `opentelemetry-bootstrap` command to instrument your application without modifying the code. It's quick to set up but offers less control.
+
+- **Manual instrumentation** requires you to add OpenTelemetry calls to your code explicitly. It provides more flexibility and allows you to capture custom metrics and events.
+
+For most applications, a hybrid approach works best: use automatic instrumentation for common libraries and frameworks, and add manual instrumentation for critical business logic.
+
 ## Conclusion
 
 In the future, as OpenTelemetry grows into the de facto standard for all observability in microservice architectures, logs will be a part of a cohesive 'braid' of telemetry signals. Offering structured information on events with included unstructured components, logs will help tell the detailed story of individual events within your application.
 
 Today, prepare for the future by learning the process of collecting and processing logs in Python with OpenTelemetry. For further reading, see the [OpenTelemetry processor operations](https://opentelemetry.io/docs/collector/transforming-telemetry/) documentation.
+
+
+## FAQs
+
+### How does OpenTelemetry improve Python logging compared to traditional methods?
+
+OpenTelemetry provides a unified approach to observability, combining logs, metrics, and traces. This integration allows for better context and easier debugging compared to standalone logging solutions.
+
+### Can I use OpenTelemetry with existing Python logging libraries?
+
+Yes, OpenTelemetry can integrate with popular logging libraries like `logging`. You can use bridges or exporters to send logs from these libraries to OpenTelemetry.
+
+### What are the performance implications of using OpenTelemetry for logging?
+
+While OpenTelemetry adds some overhead, it's generally minimal. The batching and asynchronous processing features help minimize the impact on application performance.
+
+### How can I troubleshoot common issues when sending logs with OpenTelemetry?
+
+Common troubleshooting steps include:
+1. Verify your OpenTelemetry configuration
+2. Check network connectivity to your log backend
+3. Enable debug logging for the OpenTelemetry SDK
+4. Use the OpenTelemetry Collector to diagnose issues in the logging pipeline
+
+### What are the three main signals in OpenTelemetry?
+The three main signals in OpenTelemetry are traces, metrics, and logs. Traces provide a detailed view of request paths, metrics are numerical values recorded over time, and logs are textual or binary records generated by system components.
+
+### How can I send logs from a Python application using OpenTelemetry?
+You can send logs from a Python application using OpenTelemetry by either using the Bridge API to connect existing logging with OpenTelemetry, or by manually adding OpenTelemetry to your application and creating an export path for your logger to OpenTelemetry using the OTLP protocol.
+
+### What is the OpenTelemetry Collector, and why is it important for logging?
+The OpenTelemetry Collector is a component that receives, processes, and exports telemetry data. It's important for logging because it allows you to centralize the collection of logs, apply filters and transformations, and forward the data to various backends or analysis tools.
+
+### How can I filter out unwanted logs in the OpenTelemetry Collector?
+You can filter out unwanted logs in the OpenTelemetry Collector by using the `filter` processor in the collector's configuration file. This allows you to define expressions to match and exclude specific log entries based on their attributes or content.
+
+### What is the OpenTelemetry Transformation Language (OTTL), and how is it used in log processing?
+The OpenTelemetry Transformation Language (OTTL) is a domain-specific language used to transform and filter telemetry data in the OpenTelemetry Collector. It's used in log processing to add, modify, or remove attributes from log entries, change log severity levels, or perform other transformations on the log data before it's exported.

@@ -1,15 +1,141 @@
 ---
 title: Implementing OpenTelemetry in a Gin application 
 slug: opentelemetry-gin
-date: 2023-07-28
+date: 2024-08-07
 tags: [OpenTelemetry Instrumentation, Go / Golang]
 authors: [nitya, ankit_anand]
 description:  It is essential to monitor your Gin apps in Go(Golang). OpenTelemetry can help instrument Gin apps and provide you with end-to-end tracing. In this guide, we will demonstrate how to instrument your Gin app with OpenTelemetry...
 image: /img/blog/2023/07/opentelemetry_gin_cover-min.jpg
 keywords: [opentelemetry,gin,opentelemetry gin,opentelemetry gin middleware,opentelemetry gin example,opentelemetry gorm,gorm,golang,apm tools,application performance monitoring]
 ---
+
 <head>
-  <link rel="canonical" href="https://signoz.io/blog/opentelemetry-gin/"/>
+  <script
+    type="application/ld+json"
+    dangerouslySetInnerHTML={{ __html: JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Implementing OpenTelemetry in a Gin application",
+  "alternativeHeadline": "How to use OpenTelemetry for tracing and monitoring Gin applications in Go",
+  "author": {
+    "@type": "Person",
+    "name": "Nitya"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SigNoz",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://signoz.io/img/SigNozLogo-orange.svg"
+    }
+  },
+  "datePublished": "2023-07-28T00:00:00Z",
+  "dateModified": "2024-08-07T00:00:00Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://signoz.io/blog/opentelemetry-gin/"
+  },
+  "description": "Learn how to implement OpenTelemetry in a Gin application for end-to-end tracing and monitoring. This guide covers instrumenting Gin and GORM with OpenTelemetry and visualizing data using SigNoz.",
+  "keywords": "opentelemetry, gin, opentelemetry gin, opentelemetry gin middleware, opentelemetry gin example, opentelemetry gorm, gorm, golang, apm tools, application performance monitoring",
+  "articleSection": "Technology",
+  "inLanguage": "en",
+  "isPartOf": {
+    "@type": "Blog",
+    "name": "SigNoz Blog",
+    "url": "https://signoz.io/blog/"
+  },
+  "about": [
+    {
+      "@type": "Thing",
+      "name": "OpenTelemetry",
+      "description": "An open-source observability framework for cloud-native software"
+    },
+    {
+      "@type": "Thing",
+      "name": "Gin",
+      "description": "A web framework written in Go"
+    },
+    {
+      "@type": "Thing",
+      "name": "Application Performance Monitoring",
+      "description": "The practice of monitoring software applications to detect and diagnose performance issues"
+    }
+  ],
+  "mentions": [
+    {
+      "@type": "SoftwareApplication",
+      "name": "OpenTelemetry",
+      "applicationCategory": "Observability Framework"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "name": "Gin",
+      "applicationCategory": "Web Framework"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "name": "GORM",
+      "applicationCategory": "ORM Library"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "name": "SigNoz",
+      "applicationCategory": "Application Performance Monitoring"
+    }
+  ],
+  "mainEntity": {
+    "@type": "HowTo",
+    "name": "How to Implement OpenTelemetry in a Gin Application",
+    "step": [
+      {
+        "@type": "HowToStep",
+        "name": "Install SigNoz",
+        "text": "Install SigNoz as the backend analysis tool for OpenTelemetry data"
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Get sample Gin app",
+        "text": "Clone a sample Go application with Gin framework"
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Configure OpenTelemetry",
+        "text": "Declare variables for configuring OpenTelemetry in your Gin application"
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Instrument Gin with OpenTelemetry",
+        "text": "Add OpenTelemetry instrumentation to your Gin application"
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Add OpenTelemetry Gin middleware",
+        "text": "Implement the OpenTelemetry middleware in your Gin application"
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Set environment variables",
+        "text": "Set the necessary environment variables for OpenTelemetry data export"
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Generate sample data",
+        "text": "Create and retrieve books using the sample Gin application to generate telemetry data"
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Visualize data in SigNoz",
+        "text": "Access the SigNoz UI to visualize and analyze the collected telemetry data"
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Monitor GORM with OpenTelemetry",
+        "text": "Instrument the GORM database client with OpenTelemetry for database query tracing"
+      }
+    ]
+  }
+}) }}
+  />
 </head>
 
 OpenTelemetry can be used to trace Gin applications for performance issues and bugs. OpenTelemetry is an open-source project under the Cloud Native Computing Foundation (<a href = "https://www.cncf.io/" rel="noopener noreferrer nofollow" target="_blank">CNCF</a>) that aims to standardize the generation and collection of telemetry data like logs, metrics, and traces.
@@ -321,6 +447,20 @@ Now run your application and execute the curl requests again. You will be able t
     <figcaption><i>You can also monitor GORM database client using OpenTelemetry and SigNoz</i></figcaption>
 </figure>
 
+## Best Practices and Common Pitfalls
+
+To get the most out of OpenTelemetry in your Gin application:
+
+- **Use sampling**: For high-traffic applications, implement trace sampling to reduce data volume and costs.
+- **Secure sensitive data**: Be cautious about what information you include in spans and logs to protect user privacy.
+- **Monitor performance impact**: While OpenTelemetry is designed to be lightweight, monitor its impact on your application's performance.
+- **Implement error handling**: Ensure your instrumentation code handles errors gracefully to avoid impacting your application's reliability.
+
+Common pitfalls to avoid:
+
+- Over-instrumenting: Start with basic instrumentation and add more as needed.
+- Ignoring context propagation: Ensure you're properly passing context through your application to maintain trace continuity.
+- Neglecting to update dependencies: Keep your OpenTelemetry libraries up-to-date to benefit from performance improvements and bug fixes.
 
 ## Conclusion
 
@@ -333,6 +473,64 @@ SigNoz is an open-source observability tool that comes with a SaaS-like experien
 [![SigNoz GitHub repo](/img/blog/common/signoz_github.webp)](https://github.com/SigNoz/signoz)
 
 If you want to get started quickly, try [SigNoz cloud](https://signoz.io/teams/).
+
+## FAQs
+
+### How does OpenTelemetry impact Gin application performance?
+
+OpenTelemetry is designed to have minimal impact on application performance. However, the exact impact depends on factors like the amount of data collected and the sampling rate. Monitor your application's performance before and after implementing OpenTelemetry to assess the impact.
+
+### Can I use OpenTelemetry with existing monitoring tools in my Gin app?
+
+Yes, OpenTelemetry is designed to be vendor-neutral. Many existing monitoring tools support OpenTelemetry data, allowing you to integrate it with your current observability stack.
+
+### What are the best practices for securing sensitive data in OpenTelemetry traces?
+
+To secure sensitive data:
+1. Use sampling to reduce the amount of data collected.
+2. Implement data scrubbing to remove sensitive information from spans and logs.
+3. Use attribute limits to prevent accidentally logging large amounts of potentially sensitive data.
+4. Ensure your chosen backend implements proper access controls and encryption.
+
+### How can I correlate traces across multiple Gin-based microservices?
+
+OpenTelemetry supports distributed tracing out of the box. Ensure you're propagating the trace context between services, either manually or using OpenTelemetry's automatic context propagation features. This allows you to view a single trace spanning multiple services in your chosen backend.
+
+### What is OpenTelemetry and how does it work with Gin applications?
+OpenTelemetry is an open-source observability framework that provides a set of APIs, libraries, and tools to instrument, generate, collect, and export telemetry data (metrics, logs, and traces). When used with Gin applications, OpenTelemetry can help you trace HTTP requests, monitor performance, and identify bottlenecks in your Go web applications.
+
+### How do I instrument my Gin application with OpenTelemetry?
+To instrument your Gin application with OpenTelemetry:
+1. Install the necessary OpenTelemetry packages
+2. Initialize a tracer in your main function
+3. Add the OpenTelemetry Gin middleware to your application
+4. Set environment variables for the OpenTelemetry exporter
+5. Run your application and generate some data
+
+### Can I monitor database calls with OpenTelemetry in a Gin application?
+Yes, you can monitor database calls using OpenTelemetry in a Gin application. For GORM, you can use the `otelgorm` plugin to trace database operations. This allows you to see detailed information about your database queries within the same tracing context as your HTTP requests.
+
+### What backend tool can I use to visualize OpenTelemetry data from my Gin application?
+While OpenTelemetry is vendor-agnostic, this article recommends using SigNoz as the backend analysis tool. SigNoz is an open-source APM tool that natively supports OpenTelemetry data formats and provides visualization for metrics, traces, and logs.
+
+### How does OpenTelemetry help in monitoring microservices-based applications?
+OpenTelemetry is particularly useful for microservices-based applications as it provides distributed tracing capabilities. This allows you to track requests as they move through different services, helping you understand the flow of requests, identify performance bottlenecks, and debug issues across your entire system.
+
+### What are the benefits of using OpenTelemetry with Gin compared to other monitoring solutions?
+Using OpenTelemetry with Gin offers several advantages:
+1. Open-source and vendor-agnostic, giving you flexibility in choosing backend tools
+2. Standardized approach to instrumentation across different languages and frameworks
+3. Comprehensive observability with metrics, logs, and traces in a single framework
+4. Active community support and ongoing development
+5. Easy integration with various backend analysis tools
+
+### How can I customize the data collected by OpenTelemetry in my Gin application?
+You can customize the data collected by OpenTelemetry in your Gin application by:
+1. Adding custom attributes to spans
+2. Creating custom spans for specific operations
+3. Configuring sampling rates
+4. Implementing custom exporters
+5. Using context propagation to pass additional information between services
 
 ---
 
