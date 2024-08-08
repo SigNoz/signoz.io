@@ -950,6 +950,7 @@ const docsSideNav = [
       },
      ],
   },
+  {
     label: 'Integrations',
     type: 'category',
     isExpanded: false,
