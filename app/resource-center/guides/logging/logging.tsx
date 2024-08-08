@@ -2,8 +2,8 @@
 
 import { allGuides } from 'contentlayer/generated'
 import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer'
-import React, { useState, useMemo, useEffect } from 'react'
-import { useRouter, useParams } from 'next/navigation'
+import React, { useState, useMemo } from 'react'
+import { useRouter } from 'next/router'
 import BlogPostCard from '../../Shared/BlogPostCard'
 import { filterData } from 'app/utils/common'
 import SearchInput from '../../Shared/Search'
@@ -54,21 +54,21 @@ const GuidesHeader = ({
 export default function TopicGuides() {
   const posts = allCoreContent(sortPosts(allGuides))
   const router = useRouter()
-  const { topic } = useParams()  // Correctly extract the topic from the URL
+  const { topic } = router.query
   const [searchQuery, setSearchQuery] = useState('')
   const POST_PER_PAGE = 20
   const pageNumber = 1
 
-  // Ensure the activeItem is correctly set to the current topic
-  const activeItem = topic as GUIDES_TOPICS || GUIDES_TOPICS.ALL
 
-  // Filter posts based on the current topic
+  const activeItem = GUIDES_TOPICS.LOGGING
+
   const filteredPosts = useMemo(() => {
-    if (!topic) return posts
+    if (!topic) return []
 
     const filtered = posts.filter((post) =>
       post.tags?.some(
-        (tag) => tag.toLowerCase().replace(/\s+/g, '') === topic.toLowerCase()
+        (tag) =>
+          tag.toLowerCase().replace(/\s+/g, '') === topic.toString().toLowerCase()
       )
     )
 
@@ -79,23 +79,12 @@ export default function TopicGuides() {
   }, [searchQuery, posts, topic])
 
   const handleCategoryClick = (category) => {
-    if (category === GUIDES_TOPICS.ALL) {
-      router.push('/resource-center/guides')
-    } else {
-      router.push(`/resource-center/guides/${category}`)
-    }
+    router.push(`/resource-center/guides/${category}`)
   }
 
   const handleSearch = (e) => {
     setSearchQuery(e.target.value)
   }
-
-  // Ensure URL is correct when navigating back to all guides
-  useEffect(() => {
-    if (activeItem === GUIDES_TOPICS.ALL && router.pathname !== '/resource-center/guides') {
-      router.replace('/resource-center/guides')
-    }
-  }, [activeItem, router])
 
   const pagination = {
     currentPage: pageNumber,
@@ -106,9 +95,9 @@ export default function TopicGuides() {
   return (
     <div>
       <GuidesHeader
-        title={`${topic.charAt(0).toUpperCase() + topic.slice(1)} Guides`}
-        description={`Explore our ${topic} guides and tutorials to enhance your skills.`}
-        searchPlaceholder={`Search ${topic} guides...`}
+        title="SigNoz Guides"
+        description="Level up your engineering skills with great resources, tutorials, and guides on monitoring, observability, Opentelemetry, and more."
+        searchPlaceholder="Search for guides..."
         onSearch={handleSearch}
       />
 

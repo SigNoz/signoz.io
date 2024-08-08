@@ -3,7 +3,7 @@
 import { allGuides } from 'contentlayer/generated'
 import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer'
 import React, { useState, useMemo, useEffect } from 'react'
-import { useRouter, useParams } from 'next/navigation'
+import { useRouter } from 'next/router'
 import BlogPostCard from '../../Shared/BlogPostCard'
 import { filterData } from 'app/utils/common'
 import SearchInput from '../../Shared/Search'
@@ -54,21 +54,20 @@ const GuidesHeader = ({
 export default function TopicGuides() {
   const posts = allCoreContent(sortPosts(allGuides))
   const router = useRouter()
-  const { topic } = useParams()  // Correctly extract the topic from the URL
+  const { topic } = router.query // Extract the topic from the URL
   const [searchQuery, setSearchQuery] = useState('')
   const POST_PER_PAGE = 20
   const pageNumber = 1
 
-  // Ensure the activeItem is correctly set to the current topic
-  const activeItem = topic as GUIDES_TOPICS || GUIDES_TOPICS.ALL
+  const activeItem = GUIDES_TOPICS.KUBERNETES
 
-  // Filter posts based on the current topic
   const filteredPosts = useMemo(() => {
-    if (!topic) return posts
+    if (!topic) return []
 
     const filtered = posts.filter((post) =>
       post.tags?.some(
-        (tag) => tag.toLowerCase().replace(/\s+/g, '') === topic.toLowerCase()
+        (tag) =>
+          tag.toLowerCase().replace(/\s+/g, '') === topic.toString().toLowerCase()
       )
     )
 
@@ -90,30 +89,30 @@ export default function TopicGuides() {
     setSearchQuery(e.target.value)
   }
 
-  // Ensure URL is correct when navigating back to all guides
   useEffect(() => {
     if (activeItem === GUIDES_TOPICS.ALL && router.pathname !== '/resource-center/guides') {
-      router.replace('/resource-center/guides')
+      router.replace(`/resource-center/guides`)
     }
   }, [activeItem, router])
+
 
   const pagination = {
     currentPage: pageNumber,
     totalPages: Math.ceil(filteredPosts.length / POST_PER_PAGE),
-    pageRoute: `guide/${topic}`
+    pageRoute: `guides/${topic}`
   }
 
   return (
     <div>
       <GuidesHeader
-        title={`${topic.charAt(0).toUpperCase() + topic.slice(1)} Guides`}
-        description={`Explore our ${topic} guides and tutorials to enhance your skills.`}
-        searchPlaceholder={`Search ${topic} guides...`}
+        title="SigNoz Guides"
+        description="Level up your engineering skills with great resources, tutorials, and guides on monitoring, observability, Opentelemetry, and more."
+        searchPlaceholder="Search for guides..."
         onSearch={handleSearch}
       />
 
       <div className="relative xl:-mr-16 xl:pr-16 mt-16 flex flex-col md:flex-row gap-20">
-        <SideBar onCategoryClick={handleCategoryClick} activeItem={activeItem} />
+        <SideBar onCategoryClick={handleCategoryClick} activeItem={GUIDES_TOPICS.KUBERNETES} />
         <div className="flex-1">
           {filteredPosts && filteredPosts.length <= 0 && (
             <div className="no-blogs my-8 flex items-center gap-4 font-mono font-bold">

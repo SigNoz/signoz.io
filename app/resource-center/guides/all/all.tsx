@@ -1,12 +1,13 @@
+// /resource-center/guides/all.tsx
+
 'use client'
 
 import { allGuides } from 'contentlayer/generated'
 import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer'
-import React, { useState, useMemo, useEffect } from 'react'
-import { useRouter, useParams } from 'next/navigation'
-import BlogPostCard from '../../Shared/BlogPostCard'
+import React, { useState, useMemo } from 'react'
+import BlogPostCard from '../Shared/BlogPostCard'
 import { filterData } from 'app/utils/common'
-import SearchInput from '../../Shared/Search'
+import SearchInput from '../Shared/Search'
 import { Frown } from 'lucide-react'
 import SideBar, { GUIDES_TOPICS } from '@/components/SideBar'
 import { Pagination } from '@/layouts/GridLayout'
@@ -51,80 +52,51 @@ const GuidesHeader = ({
   )
 }
 
-export default function TopicGuides() {
+export default function Guides() {
   const posts = allCoreContent(sortPosts(allGuides))
-  const router = useRouter()
-  const { topic } = useParams()  // Correctly extract the topic from the URL
   const [searchQuery, setSearchQuery] = useState('')
   const POST_PER_PAGE = 20
   const pageNumber = 1
 
-  // Ensure the activeItem is correctly set to the current topic
-  const activeItem = topic as GUIDES_TOPICS || GUIDES_TOPICS.ALL
-
-  // Filter posts based on the current topic
-  const filteredPosts = useMemo(() => {
-    if (!topic) return posts
-
-    const filtered = posts.filter((post) =>
-      post.tags?.some(
-        (tag) => tag.toLowerCase().replace(/\s+/g, '') === topic.toLowerCase()
-      )
-    )
-
+  const blogs = useMemo(() => {
     if (searchQuery) {
-      return filterData(filtered, searchQuery)
+      return filterData(posts, searchQuery)
     }
-    return filtered
-  }, [searchQuery, posts, topic])
-
-  const handleCategoryClick = (category) => {
-    if (category === GUIDES_TOPICS.ALL) {
-      router.push('/resource-center/guides')
-    } else {
-      router.push(`/resource-center/guides/${category}`)
-    }
-  }
+    return posts
+  }, [searchQuery, posts])
 
   const handleSearch = (e) => {
     setSearchQuery(e.target.value)
   }
 
-  // Ensure URL is correct when navigating back to all guides
-  useEffect(() => {
-    if (activeItem === GUIDES_TOPICS.ALL && router.pathname !== '/resource-center/guides') {
-      router.replace('/resource-center/guides')
-    }
-  }, [activeItem, router])
-
   const pagination = {
     currentPage: pageNumber,
-    totalPages: Math.ceil(filteredPosts.length / POST_PER_PAGE),
-    pageRoute: `guide/${topic}`
+    totalPages: Math.ceil(posts.length / POST_PER_PAGE),
+    pageRoute: 'guide'
   }
 
   return (
     <div>
       <GuidesHeader
-        title={`${topic.charAt(0).toUpperCase() + topic.slice(1)} Guides`}
-        description={`Explore our ${topic} guides and tutorials to enhance your skills.`}
-        searchPlaceholder={`Search ${topic} guides...`}
+        title="SigNoz Guides"
+        description="Level up your engineering skills with great resources, tutorials, and guides on monitoring, observability, Opentelemetry, and more."
+        searchPlaceholder="Search for guides..."
         onSearch={handleSearch}
       />
 
       <div className="relative xl:-mr-16 xl:pr-16 mt-16 flex flex-col md:flex-row gap-20">
-        <SideBar onCategoryClick={handleCategoryClick} activeItem={activeItem} />
+        <SideBar activeItem={GUIDES_TOPICS.ALL} />
         <div className="flex-1">
-          {filteredPosts && filteredPosts.length <= 0 && (
+          {blogs && Array.isArray(blogs) && blogs.length <= 0 && (
             <div className="no-blogs my-8 flex items-center gap-4 font-mono font-bold">
               <Frown size={16} /> No Guides found
             </div>
           )}
 
           <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-2">
-            {filteredPosts.map((post) => (
-              <BlogPostCard key={post.slug} blog={post} />
-            ))}
+            {blogs.map((post) => {
+              return <BlogPostCard key={post.slug} blog={post} />
+            })}
           </div>
         </div>
       </div>
@@ -134,7 +106,7 @@ export default function TopicGuides() {
         totalPages={pagination.totalPages}
         pageRoute={pagination.pageRoute}
         postsPerPage={POST_PER_PAGE}
-        totalPosts={filteredPosts.length}
+        totalPosts={posts.length}
       />
     </div>
   )

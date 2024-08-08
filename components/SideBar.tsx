@@ -1,16 +1,17 @@
 'use client'
 
 import React from 'react'
+import { useRouter } from 'next/navigation'
 import { SidebarIcons } from '@/components/sidebar-icons/icons'
 
 export enum GUIDES_TOPICS{
-  ALL = '#all',
+  ALL = 'all',
   // OPENTELEMETRY = '#opentelemetry',
-  KUBERNETES = '#kubernetes' ,
-  FAQs = '#faq' ,
-  LOGGING = '#logging' ,
-  PROMETHEUS = '#prometheus' ,
-  APM = '#apm',
+  KUBERNETES = 'kubernetes' ,
+  FAQs = 'faq' ,
+  LOGGING = 'logging' ,
+  PROMETHEUS = 'prometheus' ,
+  APM = 'apm',
   // DISTRIBUTED = '#distributed-tracing',
   // OBSERVABILITY = '#observability',
   // LOGS = '#logs',
@@ -36,6 +37,21 @@ const sidebarItems = [
 ]
 
 const SideBar = ({ onCategoryClick, activeItem }) => {
+  const router = useRouter()
+
+  const handleClick = (href) => {
+    if (href === GUIDES_TOPICS.ALL) {
+      router.push('/resource-center/guides')
+    } else {
+      router.push(`/resource-center/guides/${href}`)
+    }
+
+
+    if (onCategoryClick) {
+      onCategoryClick(href)
+    }
+  }
+
   return (
     <div className="h-full w-64">
       <ul className="pl-0">
@@ -44,7 +60,7 @@ const SideBar = ({ onCategoryClick, activeItem }) => {
           const isActive = activeItem === item.href
           return (
             <li key={index} className={`rounded-md py-2 pl-3 ${isActive ? 'bg-signoz_ink-200' : 'hover:bg-signoz_ink-400'}`}>
-              <div onClick={() => onCategoryClick(item.href)} className="flex items-center text-white cursor-pointer">
+              <div onClick={() => handleClick(item.href)} className="flex items-center text-white cursor-pointer">
                 <Icon />
                 <span className="pl-2.5">{item.label}</span>
               </div>
