@@ -1,141 +1,63 @@
 'use client'
 
-import { allGuides } from 'contentlayer/generated'
-import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer'
-import React, { useState, useMemo, useEffect } from 'react'
-import { useRouter, useParams } from 'next/navigation'
-import BlogPostCard from '../../Shared/BlogPostCard'
-import { filterData } from 'app/utils/common'
-import SearchInput from '../../Shared/Search'
-import { Frown } from 'lucide-react'
-import SideBar, { GUIDES_TOPICS } from '@/components/SideBar'
-import { Pagination } from '@/layouts/GridLayout'
+import '../../css/doc.css'
 
-interface HeadingProps {
-  tag: string
-  text: string
-  className?: string
+import { ReactNode, useRef } from 'react'
+import { CoreContent } from 'pliny/utils/contentlayer'
+import type { Doc } from 'contentlayer/generated'
+import SectionContainer from '@/components/SectionContainer'
+import { ProgressBar } from '@/components/ProgressBar/ProgressBar'
+import React from 'react'
+import DocsSidebar from '@/components/DocsSidebar/DocsSidebar'
+import { useEffect } from 'react'
+
+export interface tocItemProps {
+  url: string
+  depth: number
+  value: string
 }
 
-const Heading: React.FC<HeadingProps> = ({ tag, text, className = '' }) => {
-  const Tag = tag as keyof JSX.IntrinsicElements
-  return <Tag className={className}>{text}</Tag>
+interface LayoutProps {
+  children: ReactNode
 }
 
-interface GuidesHeaderProps {
-  title: string
-  description: string
-  searchPlaceholder?: string
-  onSearch: (e: React.ChangeEvent<HTMLInputElement>) => void
-}
+export default function DocLayout({ children }: LayoutProps) {
+  const mainRef = useRef<HTMLElement | null>(null)
 
-const GuidesHeader = ({
-  title,
-  description,
-  searchPlaceholder,
-  onSearch,
-}: GuidesHeaderProps) => {
-  return (
-    <section className="flex max-w-[697px] flex-col leading-[143%] mb-[72px]">
-      <h2 className="self-start text-center text-sm font-medium uppercase tracking-wider text-signoz_sakura-500 dark:text-signoz_sakura-400 mb-0">
-        resources
-      </h2>
-      <h1 className="mt-3 my-0 self-start text-3xl font-semibold text-indigo-500 dark:text-indigo-200">
-        {title}
-      </h1>
-      <p className="my-4  w-full text-lg leading-8 tracking-normal text-stone-700 dark:text-stone-300 max-md:max-w-full">
-        {description}
-      </p>
-      <SearchInput placeholder={searchPlaceholder || ''} onSearch={onSearch} />
-    </section>
-  )
-}
-
-export default function TopicGuides() {
-  const posts = allCoreContent(sortPosts(allGuides))
-  const router = useRouter()
-  const { topic } = useParams()  // Correctly extract the topic from the URL
-  const [searchQuery, setSearchQuery] = useState('')
-  const POST_PER_PAGE = 20
-  const pageNumber = 1
-
-  // Ensure the activeItem is correctly set to the current topic
-  const activeItem = topic as GUIDES_TOPICS || GUIDES_TOPICS.ALL
-
-  // Filter posts based on the current topic
-  const filteredPosts = useMemo(() => {
-    if (!topic) return posts
-
-    const filtered = posts.filter((post) =>
-      post.tags?.some(
-        (tag) => tag.toLowerCase().replace(/\s+/g, '') === topic.toLowerCase()
-      )
-    )
-
-    if (searchQuery) {
-      return filterData(filtered, searchQuery)
-    }
-    return filtered
-  }, [searchQuery, posts, topic])
-
-  const handleCategoryClick = (category) => {
-    if (category === GUIDES_TOPICS.ALL) {
-      router.push('/resource-center/guides')
-    } else {
-      router.push(`/resource-center/guides/${category}`)
+  const scrollToHash = () => {
+    if (window.location.hash) {
+      const element = document.querySelector(window.location.hash)
+      
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' })
+      }
     }
   }
 
-  const handleSearch = (e) => {
-    setSearchQuery(e.target.value)
-  }
-
-  // Ensure URL is correct when navigating back to all guides
   useEffect(() => {
-    if (activeItem === GUIDES_TOPICS.ALL && router.pathname !== '/resource-center/guides') {
-      router.replace('/resource-center/guides')
-    }
-  }, [activeItem, router])
+    const rIC = window.requestIdleCallback ?? setTimeout
 
-  const pagination = {
-    currentPage: pageNumber,
-    totalPages: Math.ceil(filteredPosts.length / POST_PER_PAGE),
-    pageRoute: `guide/${topic}`
-  }
+    rIC(() => {
+        scrollToHash()
+    });
+  }, [])
 
   return (
-    <div>
-      <GuidesHeader
-        title={`${topic.charAt(0).toUpperCase() + topic.slice(1)} Guides`}
-        description={`Explore our ${topic} guides and tutorials to enhance your skills.`}
-        searchPlaceholder={`Search ${topic} guides...`}
-        onSearch={handleSearch}
-      />
+    <main ref={mainRef} className="">
+      <SectionContainer>
+        <ProgressBar target={mainRef} />
+        <div className="max-sm:px-4 doc overflow-clip">
+          <div className="doc-sidenav border-r border-signoz_slate-500">
+            <DocsSidebar />
+          </div>
 
-      <div className="relative xl:-mr-16 xl:pr-16 mt-16 flex flex-col md:flex-row gap-20">
-        <SideBar onCategoryClick={handleCategoryClick} activeItem={activeItem} />
-        <div className="flex-1">
-          {filteredPosts && filteredPosts.length <= 0 && (
-            <div className="no-blogs my-8 flex items-center gap-4 font-mono font-bold">
-              <Frown size={16} /> No Guides found
-            </div>
-          )}
-
-          <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-2">
-            {filteredPosts.map((post) => (
-              <BlogPostCard key={post.slug} blog={post} />
-            ))}
+          <div className="doc-content md:px-0 lg:px-4">
+            <article className="prose prose-slate max-w-none py-6 dark:prose-invert">
+              {children}
+            </article>
           </div>
         </div>
-      </div>
-
-      <Pagination
-        currentPage={pagination.currentPage}
-        totalPages={pagination.totalPages}
-        pageRoute={pagination.pageRoute}
-        postsPerPage={POST_PER_PAGE}
-        totalPosts={filteredPosts.length}
-      />
-    </div>
+      </SectionContainer>
+    </main>
   )
 }
