@@ -1,0 +1,497 @@
+---
+date: 2024-08-03
+id: aws-rds-mysql
+title: AWS RDS (MySQL) Metrics and Logs
+---
+## Overview
+
+This integration helps you monitor key AWS RDS (MySQL) metrics and logs, view them with an out-of-the-box dashboards, and parse MySQL logs for better querying and aggregation.
+
+## Prerequisites
+
+Before you begin, ensure you have:
+
+1. AWS Credentials and Permissions:
+   - Set up proper AWS credentials (e.g., `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` environment variables)
+   - Required IAM permissions:
+     - `cloudwatch:ListMetrics`
+     - `cloudwatch:GetMetricStatistics`
+     - `cloudwatch:GetMetricData`
+     - `tag:GetResources` (if aws_tag_select feature is used)
+     - `logs:DescribeLogGroups`
+     - `logs:FilterLogEvents`
+
+2. Java Runtime Environment (JRE) version 11 or newer for the CloudWatch Exporter
+   (Not required if using the Docker container)
+
+3. An OpenTelemetry (OTEL) Collector (v0.88.0+):
+   - [Install the OTEL Collector](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) (v0.88.0+) if not already done
+   - Ensure you can provide config files and set environment variables for the collector
+
+4. OTEL collector access to the MySQL server (optional, for MySQL engine metrics)
+
+## Collecting RDS MySQL Metrics
+
+### Step 1: Set up the Prometheus CloudWatch Exporter
+
+1. Download the exporter:
+   ```sh
+   curl -sLSO https://github.com/prometheus/cloudwatch_exporter/releases/download/v0.15.5/cloudwatch_exporter-0.15.5-jar-with-dependencies.jar
+   ```
+2. Configure the Prometheus exporter
+Save the following config for collecting AWS RDS metrics in a file named `aws-rds-mysql-metrics.yaml` and update the region key with relevant value.
+
+```yaml
+---
+region: us-east-1
+metrics:
+ - aws_namespace: AWS/RDS
+   aws_metric_name: BinLogDiskUsage
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_statistics: [Average]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: BurstBalance
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_statistics: [Average]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: CheckpointLag
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_statistics: [Average, Maximum]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: ConnectionAttempts
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_statistics: [Average, Maximum]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: CPUUtilization
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_statistics: [Average, Maximum]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: DatabaseConnections
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_statistics: [Average, Maximum]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: DiskQueueDepth
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_statistics: [Average]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: DiskQueueDepthLogVolume
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_statistics: [Average]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: EBSByteBalance%
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_statistics: [Average]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: EBSIOBalance%
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_statistics: [Average]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: FreeableMemory
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_statistics: [Average, Maximum]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: FreeLocalStorage
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_statistics: [Average]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: FreeStorageSpace
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_statistics: [Average]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: FreeStorageSpaceLogVolume
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_statistics: [Average]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: MaximumUsedTransactionIDs
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_statistics: [Average]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: NetworkReceiveThroughput
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_statistics: [Average, Maximum]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: NetworkTransmitThroughput
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_statistics: [Average, Maximum]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: OldestReplicationSlotLag
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_statistics: [Average, Maximum]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: ReadIOPS
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_statistics: [Average, Maximum]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: ReadIOPSLocalStorage
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_statistics: [Average, Maximum]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: ReadIOPSLogVolume
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_statistics: [Average, Maximum]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: ReadLatency
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_statistics: [Average, Maximum]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: ReadLatencyLocalStorage
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_statistics: [Average, Maximum]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: ReadLatencyLogVolume
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_statistics: [Average, Maximum]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: ReadThroughput
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_statistics: [Average, Maximum]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: ReadThroughputLogVolume
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_statistics: [Average, Maximum]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: ReplicaLag
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_statistics: [Average, Maximum]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: ReplicationChannelLag
+   aws_dimensions: [DBInstanceIdentifier]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: ReplicationSlotDiskUsage
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_statistics: [Average]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: TransactionLogsDiskUsage
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_statistics: [Average]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: TransactionLogsGeneration
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_statistics: [Average]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: WriteIOPS
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_statistics: [Average, Maximum]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: WriteLatency
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_statistics: [Average, Maximum]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: WriteThroughput
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_statistics: [Average, Maximum]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: SwapUsage
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_statistics: [Average, Maximum]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: DBLoad
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_statistics: [Average, Maximum]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: DBLoadCPU
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_statistics: [Average, Maximum]
+
+ - aws_namespace: AWS/RDS
+   aws_metric_name: DBLoadNonCPU
+   aws_dimensions: [DBInstanceIdentifier]
+   aws_statistics: [Average, Maximum]
+```
+
+3. Run the following command:
+
+```sh
+java -jar cloudwatch_exporter-0.15.5-jar-with-dependencies.jar 9106 aws-rds-mysql-metrics.yaml
+```
+
+### Step 2: Create the OTEL Collector Config File
+
+Create `mysql-metrics-collection-config.yaml`:
+
+```yaml
+receivers:
+  mysql:
+    # The hostname and port of the MySQL instance, separated by a colon.
+    endpoint: ${env:MYSQL_ENDPOINT}
+    # The username used to access the MySQL instance.
+    username: ${env:MYSQL_USERNAME}
+    # The password used to access the MySQL instance.
+    password: ${env:MYSQL_PASSWORD}
+    # The frequency at which to collect metrics from the Redis instance.
+    collection_interval: 60s
+    # Additional configuration for query to build mysql.statement_events.count and mysql.statement_events.wait.time metrics
+    statement_events:
+      digest_text_limit: 120
+      time_limit: 24h
+      limit: 250
+    # tls:
+    #   insecure: false
+    #   ca_file: /etc/ssl/certs/ca-certificates.crt
+    #   cert_file: /etc/ssl/certs/redis.crt
+    #   key_file: /etc/ssl/certs/redis.key
+    metrics:
+      mysql.client.network.io:
+        enabled: true
+      mysql.commands:
+        enabled: true
+      mysql.connection.count:
+        enabled: true
+      mysql.connection.errors:
+        enabled: true
+      mysql.joins:
+        enabled: true
+      mysql.query.count:
+        enabled: true
+      mysql.query.slow.count:
+        enabled: true
+      mysql.replica.sql_delay:
+        enabled: true
+      mysql.replica.time_behind_source:
+        enabled: true
+
+  # Collecting cloudwatch metrics
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: 'aws-cloudwatch-metrics'
+          scrape_timeout: 120s
+          scrape_interval: 300s
+          static_configs:
+            - targets: ['0.0.0.0:9106']
+
+exporters:
+  # export to local collector
+  otlp/local:
+    endpoint: "localhost:4317"
+    tls:
+      insecure: true
+  # export to SigNoz cloud
+  otlp/signoz:
+    endpoint: "${env:OTLP_DESTINATION_ENDPOINT}"
+    tls:
+      insecure: false
+    headers:
+      "signoz-access-token": "${env:SIGNOZ_INGESTION_KEY}"
+
+service:
+  pipelines:
+    metrics/mysql:
+      receivers: [mysql, prometheus]
+      processors: []
+      exporters: [otlp/signoz]
+```
+
+### Step 3: Set Environment Variables
+
+```bash
+
+
+# The accessible endpoint where MySQL server is running
+export MYSQL_ENDPOINT="<mysql-server-endpoint>"
+
+export MYSQL_USERNAME="<username>"
+
+# The password to use for accessing mysql instance
+export MYSQL_PASSWORD="<PASSWORD>"
+
+# region specific SigNoz cloud ingestion endpoint
+export OTLP_DESTINATION_ENDPOINT="ingest.{REGION}.signoz.cloud:443"
+
+# your SigNoz ingestion key
+export SIGNOZ_INGESTION_KEY="signoz-ingestion-key"
+```
+
+You can find more details about ingestion keys and Regions [here](https://signoz.io/docs/ingestion/signoz-cloud/overview/)
+
+### Step 3: Use the Collector Config File
+
+Add the following flag to your collector run command:
+```bash
+--config mysql-metrics-collection-config.yaml
+```
+
+**Note:** The collector can use multiple config files by specifying multiple `--config` flags.
+
+## Collecting RDS Logs
+
+The log collection of RDS instance requires specifying the list of log group names. From the AWS CloudWatch console, please find the log group(s) relevant to the integration.
+
+### Step 1: Create the Collector Config File
+
+Create `mysql-logs-collection-config.yaml`:
+```yaml
+receivers:
+  awscloudwatch/rds_mysql_logs:
+    region: us-east-1
+    logs:
+      poll_interval: 1m
+      groups:
+        named:
+          # replace the following name with your log group for RDS logs
+          /aws/rds/:
+
+processors:
+  attributes/add_source_mysql:
+    actions:
+      - key: source
+        value: "rds_mysql"
+        action: insert
+  batch:
+    send_batch_size: 10000
+    send_batch_max_size: 11000
+    timeout: 10s
+
+exporters:
+  # export to SigNoz cloud
+  otlp/mysql_logs:
+    endpoint: "${env:OTLP_DESTINATION_ENDPOINT}"
+    tls:
+      insecure: false
+    headers:
+      "signoz-access-token": "${env:SIGNOZ_INGESTION_KEY}"
+
+  # export to local collector
+  otlp/local:
+    endpoint: "localhost:4317"
+    tls:
+      insecure: true
+
+service:
+  pipelines:
+    logs/mysql:
+      receivers: [awscloudwatch/rds_mysql_logs]
+      processors: [attributes/add_source_mysql, batch]
+      exporters: [otlp/mysql_logs]
+```
+
+### Step 2: Set Environment Variables
+
+```bash
+# region specific SigNoz cloud ingestion endpoint
+export OTLP_DESTINATION_ENDPOINT="ingest.{REGION}.signoz.cloud:443"
+
+# your SigNoz ingestion key
+export SIGNOZ_INGESTION_KEY="signoz-ingestion-key"
+```
+
+You can find more details about ingestion keys and Regions [here](https://signoz.io/docs/ingestion/signoz-cloud/overview/)
+
+### Step 3: Run the Collector
+
+Add to your collector run command:
+
+```bash
+--config mysql-logs-collection-config.yaml
+```
+
+**Note:** The collector can use multiple config files by specifying multiple `--config` flags.
+
+## Connect AWS RDS (MySQL)
+
+Once you're done with setting up AWS RDS (MySQL) for collecting metrics and logs, head over to the intergrations tab 
+in SigNoz and search for the AWS RDS (MySQL) integration.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/integrations/aws-rds-mysql/aws-rds-mysql-integration-search.webp" alt="Search for AWS RDS (MySQL) in Integrations tab"/>
+    <figcaption><i>Search for AWS RDS (MySQL) in Integrations tab</i></figcaption>
+</figure>
+
+Click on the `Connect AWS RDS (MySQL)` Button, and select **I have already configured**, this will start listening for data from your AWS RDS (MySQL) instance. 
+To stop this, you can select the `Remove from SigNoz` button.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/integrations/aws-rds-mysql/aws-rds-mysql-integration-connect.webp" alt="Connect AWS RDS (MySQL)"/>
+    <figcaption><i>Connect AWS RDS (MySQL)</i></figcaption>
+</figure>
+
+&nbsp;
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/integrations/aws-rds-mysql/aws-rds-mysql-integration-listening.webp" alt="Listening for data from RedAWS RDS (MySQL)is"/>
+    <figcaption><i>Listening for data from AWS RDS (MySQL)</i></figcaption>
+</figure>
+
+
+## AWS RDS (MySQL) dashboard
+Once SigNoz has started listening to your AWS RDS (MySQL) data, head over to the Dashboards tab and search for mysql, this will show you two newly created dashboard which shows
+differnet AWS RDS (MySQL) metrics.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/integrations/aws-rds-mysql/aws-rds-mysql-integration-dashboard.webp" alt="Dashboard for monitoring AWS RDS (MySQL) Metrics"/>
+    <figcaption><i>Dashboards for monitoring AWS RDS (MySQL) Metrics</i></figcaption>
+</figure>
+
+### Dashboard asset
+
+You can also manually create the above Dashboards by importing the JSON files available [here](https://github.com/SigNoz/signoz/tree/a5d58008713c23431fba26200a68ce7d9fc49e1e/pkg/query-service/app/integrations/builtin_integrations/aws_rds_mysql/assets/dashboards).
+To learn how to create Dashboards, checkout this [documentation](https://signoz.io/docs/userguide/manage-dashboards/#steps-to-create-a-custom-dashboard).
+
+
+## Data Collected
+
+When you switch to the **Data Collected** tab of your AWS RDS (MySQL) Integrations, it shows you details about the different logs attributes and the metrics types that you
+can monitor for your AWS RDS (MySQL) instance. The tables below gives you a list of the different logs attributes and metrics available.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/integrations/aws-rds-mysql/aws-rds-mysql-integration-data-collected.webp" alt="Log attributes and metrics details for AWS RDS (MySQL)"/>
+    <figcaption><i>Log attributes and metrics details for AWS RDS (MySQL)</i></figcaption>
+</figure>
+
+### AWS RDS (MySQL) log attributes
+
+- **Name**: The name of the log attribute.
+- **Path**: The specific location or attribute within a log entry where the corresponding data can be found.
+- **Type**: The data type of the log attribute.
+
+| Name       | Path       | Type      |
+|------------|------------|-----------|
+| Timestamp  | timestamp  | timestamp |
+| Body       | body       | string    |
+
+### AWS RDS (MySQL) metrics
+
+- **Name**: The name of the metric.
+- **Type**: The type of the metric (e.g., Sum, Gauge).
+- **Unit**: The unit of measurement for the metric.
+- **Description**: A brief description of what the metric represents.
+
+To find a complete list of metrics you can checkout this [link](https://github.com/SigNoz/signoz/blob/a5d58008713c23431fba26200a68ce7d9fc49e1e/pkg/query-service/app/integrations/builtin_integrations/aws_rds_mysql/integration.json#L58)
+or the **Data Collected** tab.
+
