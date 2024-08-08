@@ -214,6 +214,34 @@ const APM = () => {
   )
 }
 
+const Monitoring = () => {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+    <path
+      d="M11.0714 2.85718L13.0104 8.29925L17.8571 10L13.0104 11.7008L11.0714 17.1429L9.13236 11.7008L4.28564 10L9.13236 8.29925L11.0714 2.85718Z"
+      stroke="white"
+      stroke-width="1.66666"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+    <path
+      d="M3.80949 2.5V5.83334M2.14282 4.16666H5.47616"
+      stroke="white"
+      stroke-width="1.66666"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+    <path
+      d="M3.80949 14.1666V17.4999M2.14282 15.8333H5.47616"
+      stroke="white"
+      stroke-width="1.66666"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+  </svg>
+  )
+}
+
 const Distributed = () => {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -372,6 +400,7 @@ export const SidebarIcons = {
   LOGGING,
   PROMETHEUS,
   APM,
+  Monitoring,
   Distributed,
   Observability,
   Logs,
