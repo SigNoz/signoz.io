@@ -940,6 +940,7 @@ const docsSideNav = [
     label: 'Frontend Monitoring',
     type: 'category',
     className: 'new-doc',
+    isExpanded: false,
     // route: '',
     items: [
       {
