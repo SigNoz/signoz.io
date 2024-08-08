@@ -188,20 +188,6 @@ Prometheus provides several label matchers:
 - `=~`: Regex match
 - `!~`: Regex not match
 
-To extract label values, use the `label()` function:
-
-```
-label(metric_name, "label_name")
-
-```
-
-For instance, to get all unique values of the `method` label for HTTP requests:
-
-```
-label(http_requests_total, "method")
-
-```
-
 You can combine multiple label conditions:
 
 ```
@@ -211,7 +197,7 @@ http_requests_total{method="GET", status="200"}
 
 ### Advanced Label Querying Techniques
 
-For more complex queries, use the `group()` function to group by label values:
+To aggregate metrics and view sums grouped by a label, use the `by` clause:
 
 ```
 sum(http_requests_total) by (method)
@@ -235,6 +221,27 @@ When performing operations on metrics with different label sets, use `on()` to s
 ```
 
 This calculates the ratio of total requests to successful requests for each method and endpoint combination.
+
+### Using Prometheus HTTP API
+
+To get all label names:
+
+```jsx
+GET /api/v1/labels
+```
+
+To get all values for a specific label:
+
+```
+GET /api/v1/label/<label_name>/values
+```
+
+For example, using curl:
+
+```jsx
+curl 'http://localhost:9090/api/v1/labels'
+curl 'http://localhost:9090/api/v1/label/method/values'
+```
 
 ## Visualizing Label Values in Grafana
 
