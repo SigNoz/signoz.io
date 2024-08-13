@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 
 import FAQBody from '../../components/FAQPricing'
 import styles from './styles.module.css'
@@ -14,7 +14,8 @@ import { TrySigNozCTA } from '@/components/try-signoz-cta'
 import WhySelectSignoz from '@/components/why-select-signoz'
 import { Testimonials } from '@/components/testimonials'
 import MonthlyEstimate from '@/components/Monthly-estimate/MonthlyEstimate'
-import {GetStarted} from '@/components/GetStarted'
+import MonthlyEstimateMobile from '@/components/Monthly-estimate/MonthlyEstimateMobile'
+import { GetStarted } from '@/components/GetStarted'
 import Link from 'next/link'
 import Divider from '@/components/ui/Divider'
 import Heading from '@/components/ui/Heading'
@@ -54,7 +55,23 @@ import VimeoPlayer from '@/components/VimeoPlayer/VimeoPlayer'
 
 const CloseButton = () => <div className="absolute right-0 top-0">Close</div>
 
+
 function Pricing() {
+
+  const [width, setWidth] = useState<number>(typeof window !== 'undefined' ? window.innerWidth : 0);
+
+  function handleWindowSizeChange() {
+    setWidth(window.innerWidth);
+  }
+  useEffect(() => {
+    window.addEventListener('resize', handleWindowSizeChange);
+    return () => {
+      window.removeEventListener('resize', handleWindowSizeChange);
+    }
+  }, []);
+
+  const isMobile = width <= 768;
+
   return (
     <div className="relative bg-signoz_ink-500">
       <div className="absolute left-0 right-0 top-0 h-screen bg-[url('/img/background_blur/Perlin_noise.png')] bg-[length:55%] bg-[center_top_4rem] sm:bg-no-repeat " />
@@ -65,7 +82,7 @@ function Pricing() {
           <PricingPlans />
         </div>
         {/* All Features */}
-        <TrustedByTeams />
+        <TrustedByTeams page="pricing" />
         {/* Cost Comparison Graph */}
         <ExploreAllFeature />
         {/* Companies Logo */}
@@ -78,23 +95,26 @@ function Pricing() {
         {/* More Options */}
         {/* <CommunityEdition /> */}
         {/* FAQ section */}
-        <div className="max-sm:hidden">
+        {isMobile ? (
+          <MonthlyEstimateMobile />
+        ) : (
           <MonthlyEstimate />
-        </div>
+        )}
         <WhySelectSignoz isInPricingPage />
         <FAQ />
         {/* User Review */}
         {/* <UserReview /> */}
         {/* Give a Try CTA */}
         {/* <TrySigNozCTA /> */}
-        <Testimonials />
-        <GetStarted/>
+        <Testimonials page="pricing" />
+        <GetStarted page="pricing" />
       </div>
     </div>
   )
 }
 
 export default Pricing
+
 
 function FAQ() {
   return (
@@ -220,6 +240,20 @@ const PricingPlans = () => {
 
   const { isOpen, onOpen, onOpenChange } = useDisclosure()
 
+  const [width, setWidth] = useState<number>(typeof window !== 'undefined' ? window.innerWidth : 0);
+
+  function handleWindowSizeChange() {
+    setWidth(window.innerWidth);
+  }
+  useEffect(() => {
+    window.addEventListener('resize', handleWindowSizeChange);
+    return () => {
+      window.removeEventListener('resize', handleWindowSizeChange);
+    }
+  }, []);
+
+  const isMobile = width <= 768;
+
   return (
     <section className={`${styles.pricing} relative`}>
       <div
@@ -254,6 +288,7 @@ const PricingPlans = () => {
                     className={`flex items-center space-x-2 rounded-sm border border-signoz_slate-400`}
                   >
                     <button
+                      id="btn-signoz-cloud-pricing"
                       type="button"
                       className={`relative z-[2] cursor-pointer border-none bg-signoz_slate-400 px-4 py-2 text-xs text-white`}
                       onClick={() => setTab('cloud')}
@@ -264,6 +299,7 @@ const PricingPlans = () => {
                       </div>
                     </button>
                     <button
+                      id="btn-hosted-in-your-infra-pricing"
                       type="button"
                       className={`ml-0 cursor-pointer border-none px-4 py-2 text-xs text-signoz_vanilla-400`}
                       onClick={() => setTab('self-managed')}
@@ -295,7 +331,9 @@ const PricingPlans = () => {
                     </div>
                   </div>
                   <div>
-                    <Button className="w-full">
+                    <Button
+                      id="btn-get-started-pricing-teams-top"
+                      className="w-full">
                       <Link href={'/teams/'} className='flex-center'>
                         Get started with SigNoz Cloud
                         <ArrowRight size={14} />
@@ -431,7 +469,7 @@ const PricingPlans = () => {
                         </span>
                       </div>
                     </div>
-                    <Modal size={'5xl'} backdrop="blur" isOpen={isOpen} onOpenChange={onOpenChange}>
+                    <Modal size={'5xl'} backdrop="blur" isOpen={isOpen} onOpenChange={onOpenChange} className='self-center'>
                       <ModalContent className="bg-transparent">
                         {() => (
                           <>
@@ -559,7 +597,7 @@ const PricingPlans = () => {
                       <li className="mb-3 flex items-center gap-3">
                         {' '}
                         <CircleCheckSolid /> Visualize very large traces
-                        <span className="rounded-full border border-none bg-signoz_slate-400 px-2 py-1 text-xs uppercase text-signoz_vanilla-400">
+                        <span className="rounded-full border border-none bg-signoz_slate-400 px-2 py-1 !text-[10px] uppercase text-signoz_vanilla-400 text-center">
                           &gt;10k spans
                         </span>
                       </li>
@@ -575,7 +613,9 @@ const PricingPlans = () => {
                   </div>
                 </div>
                 <div className="">
-                  <Button className="w-full">
+                  <Button
+                    id="btn-get-started-pricing-teams-bottom"
+                    className="w-full">
                     <Link href={'/teams/'} className='flex-center'>
                       Get started with SigNoz Cloud
                       <ArrowRight size={14} />
@@ -583,24 +623,41 @@ const PricingPlans = () => {
                   </Button>
                 </div>
 
-                <div className="mt-3 hidden md:block">
-                  <Button
-                    className="w-full"
-                    type={Button.TYPES.SECONDARY}
-                    onClick={() => {
-                      const element = document.getElementById('estimate-your-monthly-bill')
-                      element?.scrollIntoView({
-                        behavior: 'smooth',
-                      })
-                    }}
-                  >
-                    Estimate your monthly bill
-                    <ArrowDown size={14} />
-                  </Button>
-                  <div>
-                    <br></br>
+                {isMobile ? (
+                  <div className="mt-3">
+                    <Button
+                      id="btn-estimate-monthly-bill-pricing-teams"
+                      className="w-full"
+                      type={Button.TYPES.SECONDARY}
+                      onClick={() => {
+                        const element = document.getElementById('estimate-your-monthly-bill')
+                        element?.scrollIntoView({
+                          behavior: 'smooth',
+                        })
+                      }}
+                    >
+                      Estimate your monthly bill
+                      <ArrowDown size={14} />
+                    </Button>
                   </div>
-                </div>
+                ) : (
+                  <div className="my-3">
+                    <Button
+                      id="btn-estimate-monthly-bill-pricing-teams"
+                      className="w-full"
+                      type={Button.TYPES.SECONDARY}
+                      onClick={() => {
+                        const element = document.getElementById('estimate-your-monthly-bill')
+                        element?.scrollIntoView({
+                          behavior: 'smooth',
+                        })
+                      }}
+                    >
+                      Estimate your monthly bill
+                      <ArrowDown size={14} />
+                    </Button>
+                  </div>
+                )}
               </div>
               <div className="pricing-card !mb-0 border !border-b-0 !border-r-0 border-dashed border-signoz_slate-400 bg-opacity-5 px-4 py-5 max-sm:!border-l-0 md:px-8">
                 <div>
@@ -615,7 +672,7 @@ const PricingPlans = () => {
                     <p className="m-0">Flexible Pricing for scale and long term commitments</p>
                   </div>
                   <div>
-                    <Button className="w-full" type={Button.TYPES.SECONDARY}>
+                    <Button className="w-full" type={Button.TYPES.SECONDARY} id="btn-contact-us-pricing-enterprise-top">
                       <Link href={'/enterprise-cloud/'} className='flex-center'>
                         Contact us
                         <ArrowRight size={14} />
@@ -734,7 +791,7 @@ const PricingPlans = () => {
                   </div>
                 </div>
                 <div className={`__card__footer ${styles.card__footer}`}>
-                  <Button className="w-full" type={Button.TYPES.SECONDARY}>
+                  <Button className="w-full" type={Button.TYPES.SECONDARY} id="btn-contact-us-pricing-enterprise-bottom">
                     <Link href={'/enterprise-cloud/'} className='flex-center'>
                       Contact us
                       <ArrowRight size={14} />
@@ -761,6 +818,7 @@ const PricingPlans = () => {
                     className={`flex items-center space-x-2 rounded-sm border border-signoz_slate-400`}
                   >
                     <button
+                      id="btn-signoz-cloud-pricing"
                       type="button"
                       className={`relative z-[2] cursor-pointer border-none bg-signoz_slate-400 px-4 py-2 text-xs text-signoz_vanilla-400 ${tab === 'cloud' ? ' ' : 'bg-transparent'
                         }`}
@@ -772,6 +830,7 @@ const PricingPlans = () => {
                       </div>
                     </button>
                     <button
+                      id="btn-hosted-in-your-infra-pricing"
                       type="button"
                       className={`relative z-[2] !ml-0 cursor-pointer bg-signoz_slate-400 px-4 py-2 text-xs text-white ${tab === 'self-managed' ? ' ' : 'bg-transparent'
                         }`}
@@ -798,8 +857,10 @@ const PricingPlans = () => {
                     <p>Install in your infra</p>
                   </div>
                   <div>
-                    <Button className="w-full">Documentation
+                    <Button className="w-full" id="btn-documentation-pricing-community-edition-top">
                       <Link href={'/docs/install/'} className='flex-center'>
+                        Documentation
+                        <ArrowRight size={14} />
                       </Link>
                     </Button>
                   </div>
@@ -845,9 +906,11 @@ const PricingPlans = () => {
                     </ul>
                   </div>
                 </div>
-                <div className={`__card__footer ${styles.card__footer}`}>
-                  <Button className="w-full">Documentation
+                <div>
+                  <Button className="w-full" id="btn-documentation-pricing-community-edition-top">
                     <Link href={'/docs/install/'} className='flex-center'>
+                      Documentation
+                      <ArrowRight size={14} />
                     </Link>
                   </Button>
                 </div>
@@ -870,7 +933,7 @@ const PricingPlans = () => {
                     </div>
                   </div>
                   <div>
-                    <Button className="w-full" type={Button.TYPES.SECONDARY}>
+                    <Button className="w-full" type={Button.TYPES.SECONDARY} id="btn-contact-us-pricing-enterprise-edition-top">
                       <Link href={'/enterprise/'} className='flex-center'>
                         Contact us
                         <ArrowRight size={14} />
@@ -961,7 +1024,7 @@ const PricingPlans = () => {
                       <li className="mb-3 flex items-center gap-3">
                         {' '}
                         <CircleCheckSolid /> Visualize very large traces
-                        <span className="rounded-full border border-none bg-signoz_slate-400 px-2 py-1 text-xs uppercase text-signoz_vanilla-400">
+                        <span className="rounded-full border border-none bg-signoz_slate-400 px-2 py-1 !text-[10px] uppercase text-signoz_vanilla-400 text-center">
                           &gt;10k spans
                         </span>
                       </li>
@@ -1006,7 +1069,7 @@ const PricingPlans = () => {
                   </div>
                 </div>
                 <div className={`__card__footer ${styles.card__footer}`}>
-                  <Button className="w-full" type={Button.TYPES.SECONDARY}>
+                  <Button className="w-full" type={Button.TYPES.SECONDARY} id="btn-contact-us-pricing-enterprise-edition-bottom">
                     <Link href={'/enterprise/'} className='flex-center'>
                       Contact us
                       <ArrowRight size={14} />
@@ -1033,6 +1096,7 @@ const ExploreAllFeature = () => {
         desc: '$0 ⎯ host in your infra',
         action: (
           <Link
+            id='btn-documentation-pricing-table'
             href={'/docs/introduction'}
             className="button-background flex h-8 w-full items-center justify-center gap-1.5 truncate rounded-full px-4 py-2 text-center text-[7px] font-medium leading-5 text-white sm:text-sm"
           >
@@ -1045,6 +1109,7 @@ const ExploreAllFeature = () => {
         desc: 'Cloud ⎯ starts at $199/mo',
         action: (
           <Link
+            id="btn-get-started-pricing-table"
             href={'/teams/'}
             className="flex h-8 w-full items-center justify-center gap-1.5 truncate rounded-full bg-signoz_robin-500 px-4 py-2 text-center text-[9px] font-medium leading-5 text-white sm:text-sm"
           >
@@ -1057,6 +1122,7 @@ const ExploreAllFeature = () => {
         desc: 'Cloud /  Self-Hosted',
         action: (
           <Link
+            id="btn-contact-us-pricing-table"
             href={'/enterprise-cloud/'}
             className="button-background flex h-8 w-full items-center justify-center gap-1.5 rounded-full px-4 py-2 text-center text-[9px] font-medium text-white sm:text-sm"
           >

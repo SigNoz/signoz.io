@@ -336,6 +336,7 @@ const MetricsCostEstimation = () => {
         isOpen={isOpen}
         onClose={() => setSelectedVideoID(null)}
         onOpenChange={onOpenChange}
+        className='self-center'
       >
         <ModalContent className="bg-transparent">
           {() => (

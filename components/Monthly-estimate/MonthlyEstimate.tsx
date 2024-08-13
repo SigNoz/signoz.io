@@ -103,14 +103,14 @@ const MonthlyEstimate = () => {
     RETENTION_PERIOD.METRICS[0].months
   );
 
-  const [tracesValue, setTracesValue] = React.useState<SliderValue>(2);
-  const [inputTracesValue, setInputTracesValue] = React.useState<string>("2");
+  const [tracesValue, setTracesValue] = React.useState<SliderValue>(0);
+  const [inputTracesValue, setInputTracesValue] = React.useState<string>("0");
 
-  const [logsValue, setLogsValue] = React.useState<SliderValue>(2);
-  const [inputLogsValue, setInputLogsValue] = React.useState<string>("2");
+  const [logsValue, setLogsValue] = React.useState<SliderValue>(0);
+  const [inputLogsValue, setInputLogsValue] = React.useState<string>("0");
 
-  const [metricsValue, setMetricsValue] = React.useState<SliderValue>(2);
-  const [inputMetricsValue, setInputMetricsValue] = React.useState<string>("2");
+  const [metricsValue, setMetricsValue] = React.useState<SliderValue>(0);
+  const [inputMetricsValue, setInputMetricsValue] = React.useState<string>("0");
 
   const MIN_VALUE = 1;
   const MAX_VALUE = 200000;
@@ -480,7 +480,7 @@ const MonthlyEstimate = () => {
             Reach out to us for custom pricing and retention for high volume
           </span>
           <div className="w-2/5 border-b border-signoz_slate-400 border-dashed" />
-          <Button>
+          <Button id="btn-contact-us-pricing-monthly-estimate">
             <Link href={'https://share.hsforms.com/1AZy88ajlRsCPZUP0kSMb2gda5af'} className='flex-center'>
               Contact us
             </Link>
