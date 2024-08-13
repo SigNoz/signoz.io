@@ -1,39 +1,189 @@
 ---
-title: Kubectl Top Pod/Node | How to get & read resource utilization metrics of K8s?
+
+title: Kubectl Top Pod/Node - Monitor K8s Resource Usage
 slug: kubectl-top
-date: 2024-05-07
+date: 2024-08-13
 tags: [Tech Tutorial]
 authors: [daniel, ankit_anand]
-description: Kubectl Top command can be used to retrieve snapshots of resource utilization of pods/nodes in your Kubernetes cluster. You can even retrieve metrics information about specific pods or nodes by specifying a namespace...
+description: Learn how to use kubectl top to monitor resource usage in Kubernetes clusters. Master node and pod monitoring for optimal performance.
 image: /img/blog/2022/06/kubectl_top_cover.jpeg
-keywords:
-  [
-    kubectl,
-    kubernetes,
-    kubectl top,
-    kubectl top node,
-    kubectl top pod,
-    pod,
-    node,
-    k8s metrics,
-    kubernetes metrics,
-    resource utilization,
-  ]
+keywords: [kubectl,kubernetes,kubectl top,kubectl top node,kubectl top pod,pod,node,k8s metrics,kubernetes metrics,resource utilization]
+
 ---
 
 <head>
-  <link rel="canonical" href="https://signoz.io/blog/kubectl-top/" />
+<script
+type="application/ld+json"
+dangerouslySetInnerHTML={{ __html: JSON.stringify({
+"@context": "[https://schema.org](https://schema.org/)",
+"@type": "TechArticle",
+"headline": "Kubectl Top Pod/Node | How to get & read resource utilization metrics of K8s?",
+"alternativeHeadline": "Master Kubernetes resource monitoring with kubectl top - Learn setup, usage, and best practices for efficient cluster management",
+"author": {
+"@type": "Person",
+"name": "Daniel"
+},
+"publisher": {
+"@type": "Organization",
+"name": "SigNoz",
+"logo": {
+"@type": "ImageObject",
+"url": "https://signoz.io/img/SigNozLogo-orange.svg"
+}
+},
+"datePublished": "2024-05-07T00:00:00Z",
+"dateModified": "2024-05-07T00:00:00Z",
+"mainEntityOfPage": {
+"@type": "WebPage",
+"@id": "https://signoz.io/blog/kubectl-top/"
+},
+"description": "Learn how to use kubectl top command to monitor resource utilization in Kubernetes. Understand CPU and memory metrics for pods and nodes, and optimize your cluster performance.",
+"keywords": "kubectl, kubernetes, kubectl top, kubectl top node, kubectl top pod, pod, node, k8s metrics, kubernetes metrics, resource utilization",
+"articleSection": "Technology",
+"inLanguage": "en",
+"isPartOf": {
+"@type": "Blog",
+"name": "SigNoz Blog",
+"url": "https://signoz.io/blog/"
+},
+"about": [
+{
+"@type": "Thing",
+"name": "Kubectl",
+"description": "Command-line tool for interacting with Kubernetes clusters"
+},
+{
+"@type": "Thing",
+"name": "Kubernetes",
+"description": "Open-source container orchestration platform"
+},
+{
+"@type": "Thing",
+"name": "Resource Monitoring",
+"description": "Tracking and analyzing resource usage in computer systems"
+}
+],
+"mentions": [
+{
+"@type": "SoftwareApplication",
+"name": "Kubernetes",
+"applicationCategory": "Container Orchestration Platform"
+},
+{
+"@type": "SoftwareApplication",
+"name": "SigNoz",
+"applicationCategory": "Observability Platform"
+}
+],
+"mainEntity": {
+"@type": "FAQPage",
+"mainEntity": [
+{
+"@type": "Question",
+"name": "What is the kubectl top command used for?",
+"acceptedAnswer": {
+"@type": "Answer",
+"text": "The kubectl top command is used to retrieve snapshots of resource utilization metrics for pods and nodes in a Kubernetes cluster. It provides real-time insights into CPU and memory usage, helping with monitoring and performance optimization."
+}
+},
+{
+"@type": "Question",
+"name": "How do I monitor node resources using kubectl top?",
+"acceptedAnswer": {
+"@type": "Answer",
+"text": "To monitor node resources, use the command `kubectl top node`. This will display CPU and memory usage for each node in your Kubernetes cluster."
+}
+},
+{
+"@type": "Question",
+"name": "Can I view resource usage for specific pods?",
+"acceptedAnswer": {
+"@type": "Answer",
+"text": "Yes, you can view resource usage for specific pods using the command `kubectl top pod`. You can also use flags like `-n <namespace>` to specify a particular namespace or `-l <label-selector>` to filter pods based on labels."
+}
+},
+{
+"@type": "Question",
+"name": "What do the CPU values mean in kubectl top output?",
+"acceptedAnswer": {
+"@type": "Answer",
+"text": "In kubectl top output, CPU is measured in cores or millicores. For example, '338m' means 338 millicores, which is equivalent to 33.8% of 1 CPU core."
+}
+},
+{
+"@type": "Question",
+"name": "How can I view container-level metrics within a pod?",
+"acceptedAnswer": {
+"@type": "Answer",
+"text": "To view container-level metrics within a pod, use the command `kubectl top pod --containers`. This will display CPU and memory usage for each container in the pods."
+}
+}
+]
+},
+"tutorial": {
+"@type": "HowTo",
+"name": "How to Use kubectl top for Kubernetes Resource Monitoring",
+"step": [
+{
+"@type": "HowToStep",
+"name": "Install Metrics Server",
+"text": "Ensure Metrics Server is installed in your Kubernetes cluster"
+},
+{
+"@type": "HowToStep",
+"name": "Monitor Node Resources",
+"text": "Use `kubectl top node` to view CPU and memory usage of nodes"
+},
+{
+"@type": "HowToStep",
+"name": "Monitor Pod Resources",
+"text": "Use `kubectl top pod` to view CPU and memory usage of pods"
+},
+{
+"@type": "HowToStep",
+"name": "Filter Pods by Namespace",
+"text": "Use `kubectl top pod -n <namespace>` to view pods in a specific namespace"
+},
+{
+"@type": "HowToStep",
+"name": "View Container-level Metrics",
+"text": "Use `kubectl top pod --containers` to see metrics for individual containers"
+},
+{
+"@type": "HowToStep",
+"name": "Analyze Resource Usage",
+"text": "Compare actual usage with resource requests and limits to optimize allocation"
+},
+{
+"@type": "HowToStep",
+"name": "Implement Regular Monitoring",
+"text": "Set up automated checks or use a dedicated monitoring tool like SigNoz for continuous observation"
+}
+]
+}
+}) }}
+/>
 </head>
 
-`Kubectl Top` command can be used to retrieve snapshots of resource utilization of pods or nodes in your Kubernetes cluster. Resource utilization is an important thing to monitor for Kubernetes cluster owners. In order to monitor resource utilization, you can keep track of things like CPU, memory, and storage.
+Kubernetes clusters can quickly become complex, making resource monitoring a critical task for maintaining optimal performance. Enter `kubectl top` — a powerful command-line tool that provides real-time insights into your cluster's resource usage.
 
-![Cover Image](/img/blog/2022/06/kubectl_top_cover.webp)
+`Kubectl Top` command can be used to retrieve snapshots of resource utilization of pods or nodes in your Kubernetes cluster. 
 
 In this article, we will see how to use `kubectl Top` command to get and read metrics about pods and nodes. We will also breakdown the output to understand what it means.
 
-But before we get down to learn about Kubectl Top command, let’s have a brief overview of a few concepts in Kubernetes.
+![/img/blog/2024/01/kubectl-logs-try-signoz-cloud.webp](/img/blog/2024/01/kubectl-logs-try-signoz-cloud.webp)
 
-[![Try SigNoz Cloud CTA](/img/blog/2024/01/kubectl-logs-try-signoz-cloud.webp)](https://signoz.io/teams/)
+## Quick Guide: How to Use kubectl top Command
+
+Before diving into the details, here's a quick reference for using `kubectl top`:
+
+1. Monitor node resources: `kubectl top node`
+2. Track pod resource usage: `kubectl top pod`
+3. View specific namespace: `kubectl top pod -n <namespace>`
+4. Sort by CPU usage: `kubectl top pod --sort-by=cpu`
+5. Sort by memory usage: `kubectl top pod --sort-by=memory`
+
+These commands give you a snapshot of resource utilization across your cluster. Let's explore each in more depth.
 
 ## What is kubectl?
 
@@ -53,19 +203,41 @@ Nodes are where Kubernetes pods run. Nodes can be virtual machines, bare metal s
 
 A single node can have multiple pods separated by namespaces.
 
-## What is kubectl Top command?
+## What is kubectl top and Why is it Essential?
 
 As mentioned before, `kubectl` - pronounced (Kube: c-t-l) - is a CLI for running commands that can help you interact with a Kubernetes interface or resources in a k8 cluster. These resources include pods, deploy, replica set, etc.
 
-A **kubectl top** is a command used to list all the running nodes and pods along with their resource utilization. It provides you a snapshot of resource utilization metrics like CPU, memory, and storage on each running node.
+It's essential for several reasons:
+
+- **Real-time monitoring**: Get instant insights into CPU and memory usage.
+- **Performance optimization**: Identify resource bottlenecks and overutilized components.
+- **Capacity planning**: Make informed decisions about scaling and resource allocation.
+- **Troubleshooting**: Quickly spot abnormal resource consumption patterns.
 
 Each node in Kubernetes comes with cAdvisor, which is an open-source agent that monitors resource usage about containers. `kubectl` command gets resource utilization metrics from cAdvisor via the metrics-server.
+
+### Understanding Kubernetes Resource Metrics
+
+Before diving deeper into `kubectl top`, it's crucial to understand the metrics it provides:
+
+- **CPU**: Measured in cores or millicores (1 core = 1000 millicores).
+- **Memory**: Typically measured in bytes (B, KiB, MiB, GiB).
+
+Kubernetes distinguishes between:
+
+- **Requests**: The minimum amount of resources guaranteed to a container.
+- **Limits**: The maximum amount of resources a container can use.
+- **Actual usage**: The real-time consumption of resources.
+
+`kubectl top` shows the actual usage, helping you compare it against the requests and limits to optimize your resource allocation.
 
 To obtain these metrics, you need to run the `kubectl top` command which shows the CPU, memory, and network utilization for the containers, pods, or nodes. For the `kubectl top` command to work, you need to have metrics API installed. You can find instructions to install metrics API <a href = "https://github.com/kubernetes-sigs/metrics-server" rel="noopener noreferrer nofollow" target="_blank">here</a>.
 
 Now that you have a brief understanding of the concepts let’s see how the `kubectl top` command operates.
 
-## Using kubectl top node
+## How to Use kubectl top: A Comprehensive Guide
+
+### Monitoring Node Resources with kubectl top node
 
 Running the `kubectl top node` command lists metrics of the current node which would look like this:
 
@@ -74,6 +246,7 @@ kubectl top node
 
 NAME                 CPU(cores)   CPU%   MEMORY(bytes)   MEMORY%
 kind-control-plane   338m         4%     1662Mi          10%
+
 ```
 
 ### How to read the output from kubectl top?
@@ -81,19 +254,20 @@ kind-control-plane   338m         4%     1662Mi          10%
 The output from `kubectl top node` gives you information about CPU(cores), CPU%, memory, and memory%. Let’s see what these terms mean:
 
 - CPU(cores)<br></br>
-  `338m` means 338 millicpu. `1000m` is equal to 1 CPU, hence 338m means 33.8% of 1 CPU.
+`338m` means 338 millicpu. `1000m` is equal to 1 CPU, hence 338m means 33.8% of 1 CPU.
 - CPU%<br></br>
-  It is displayed only for nodes, and it stands for the total CPU usage percentage of that node.
+It is displayed only for nodes, and it stands for the total CPU usage percentage of that node.
 - Memory<br></br>
-  Memory being used by that node
+Memory being used by that node
 - Memory%<br></br>
-  It is also displayed only for nodes, and it stands for total memory usage percentage of that node.
+It is also displayed only for nodes, and it stands for total memory usage percentage of that node.
 
 Running the `kubectl top node <node-name>`  command lists metrics for a specific node:
 
 ```
 NAME                 CPU(cores)   CPU%   MEMORY(bytes)   MEMORY%
 kind-control-plane   338m         4%     1662Mi          10%
+
 ```
 
 Running the `kubectl top node <node-name> -containers` command lists metrics for each container running on a specific node:
@@ -102,6 +276,7 @@ Running the `kubectl top node <node-name> -containers` command lists metrics fo
 NAME                     CPU(cores)   CPU%   MEMORY(bytes)   MEMORY%
 nginx-653c7b42sd-4g5ce   20m          12%    14Mi            18%
 nginx-653c7b42sd-7c9ae   15m          7%     12Mi            12%
+
 ```
 
 Running the `kubectl top node <node-name> -containers -n namespace` command lists metrics for each container running on a specific node in a specific namespace:
@@ -111,9 +286,10 @@ NAME                     CPU(cores)   CPU%   MEMORY(bytes)   MEMORY%
 nginx-653c7b42sd-4g5ce   22m          12%    12Mi            19%
 nginx-653c7b42sd-7c9ae   16m          7%     10Mi            16%
 webserver-container      13m          5%     10Mi            15%
+
 ```
 
-## Using kubectl top pod command
+### Tracking Pod Resource Consumption with kubectl top pod
 
 Running the `kubectl top pod` command displays the metrics about pods from the `default` namespace which looks like this:
 
@@ -123,6 +299,7 @@ NAME                     CPU(Cores)   MEMORY(Bytes)
 nginx                    3m           1Mi
 nginx-653c7b42sd-4g5ce   3m           1Mi
 nginx-653c7b42sd-7c9ae	 3m	          1Mi
+
 ```
 
 Here `Mi` under memory stands for mebibytes.
@@ -150,6 +327,7 @@ platform             my-release-signoz-otel-collector-cbf578f44-69twr           
 platform             my-release-signoz-otel-collector-metrics-5dcb767c77-5bgpt   4m           38Mi
 platform             my-release-signoz-query-service-0                           3m           57Mi
 platform             my-release-zookeeper-0                                      5m           90Mi
+
 ```
 
 You can also use the `--namespace` flag to get information about pods from a particular namespace. For example, in the below snapshot, we can see details about pods from the `platform` namespace.
@@ -165,6 +343,7 @@ my-release-signoz-otel-collector-cbf578f44-69twr            5m           54Mi
 my-release-signoz-otel-collector-metrics-5dcb767c77-5bgpt   5m           38Mi
 my-release-signoz-query-service-0                           3m           57Mi
 my-release-zookeeper-0                                      4m           91Mi
+
 ```
 
 Running the `kubectl top pod -l <label-selector>`  command lists metrics for pods that match a specific label selector:
@@ -173,6 +352,7 @@ Running the `kubectl top pod -l <label-selector>`  command lists metrics for p
 NAME                       CPU(Cores)   MEMORY(Bytes)
 webserver-1                3m           1Mi
 webserver-2                5m           3Mi
+
 ```
 
 Running the `kubectl top pod <pod-name> -containers` command lists metrics for each container running in a specific pod:
@@ -181,6 +361,7 @@ Running the `kubectl top pod <pod-name> -containers` command lists metrics for 
 NAME                     CPU(cores)   CPU%   MEMORY(bytes)   MEMORY%
 nginx-653c7b42sd-4g5ce   20m          12%    14Mi            18%
 nginx-653c7b42sd-7c9ae   15m          7%     12Mi            12%
+
 ```
 
 Running the `kubectl top pod -n <namespace> -containers` command lists metrics for each container running in pods in a specific namespace:
@@ -189,6 +370,7 @@ Running the `kubectl top pod -n <namespace> -containers` command lists metrics 
 NAME                     CPU(cores)   CPU%   MEMORY(bytes)   MEMORY%
 nginx-653c7b42sd-4g5ce   20m          12%    14Mi            18%
 nginx-653c7b42sd-7c9ae   15m          7%     12Mi            12%
+
 ```
 
 Running the `kubectl top pod -l <label-selector> -containers` command lists metrics for each container running in pods that match a specific label selector:
@@ -197,6 +379,7 @@ Running the `kubectl top pod -l <label-selector> -containers` command lists met
 NAME           CPU(cores)    CPU%   MEMORY(bytes)   MEMORY%
 webserver-1    50m           15%    40Mi            30%
 mwebserver-2   26m           8%     15Mi            16%
+
 ```
 
 ## Use Cases of kubectl top pod/node command
@@ -206,18 +389,68 @@ Here are some use cases where `kubectl top pod` or `kubectl top node` command ca
 Use cases of `kubectl top node` command:
 
 1. **Node Health Monitoring:** Monitoring the resource usage of nodes to ensure they are not overburdened, which is crucial for maintaining cluster health.
-
 2. **Load Balancing:** Identifying under-utilized or over-utilized nodes, which can inform decisions on workload distribution and node scaling.
-
 3. **Preventive Maintenance:** Detecting nodes with consistently high resource usage, potentially indicating the need for maintenance or upgrade.
 
 Use cases of `kubectl top pod` command:
 
 1. **Resource Optimization:** Identifying pods consuming excessive CPU or memory resources, enabling optimization of pod resource allocation.
-
 2. **Troubleshooting:** Helping diagnose issues in applications by monitoring pod resource usage, especially when pods are not performing as expected.
-
 3. **Capacity Planning:** Assisting in understanding current pod resource usage, facilitating better decisions for scaling and infrastructure planning.
+
+## Advanced kubectl top Usage
+
+`kubectl top` becomes even more powerful when combined with other kubectl commands and options:
+
+1. **Use labels and selectors**: Filter pods based on labels:
+    
+    ```bash
+    kubectl top pod -l app=nginx
+    
+    ```
+    
+2. **Monitor individual containers**: View container-level metrics within a pod:
+    
+    ```bash
+    kubectl top pod --containers
+    
+    ```
+    
+3. **Combine with other kubectl commands**: Use `kubectl get` with `kubectl top`:
+    
+    ```bash
+    kubectl get pods | grep running | cut -d' ' -f1 | xargs kubectl top pod
+    
+    ```
+    
+    This command shows resource usage for all running pods.
+    
+
+Best practices for regular monitoring include:
+
+- Set up automated checks using `kubectl top` in scripts
+- Establish baseline metrics for your applications
+- Regularly compare current usage against historical data
+
+## Troubleshooting Common kubectl top Issues
+
+When using `kubectl top`, you might encounter some common issues:
+
+1. **"Metrics not available" error**: Ensure the Metrics Server is properly installed and running:
+    
+    ```bash
+    kubectl get deployment metrics-server -n kube-system
+    
+    ```
+    
+2. **Delayed metrics**: The Metrics Server aggregates data every 15 seconds by default. Allow some time for metrics to populate.
+3. **Permission issues**: Verify your RBAC settings allow access to the Metrics API:
+    
+    ```bash
+    kubectl auth can-i get pods.metrics.k8s.io
+    
+    ```
+    
 
 ## Monitoring Kubernetes in Production
 
@@ -228,10 +461,10 @@ Though the `kubectl top` command gives you basic metrics about resource utilizat
 But if you're using Kubernetes in production, you can't rely on manual spot-checks to monitor your system's health and performance. **Kubernetes provides us with a smarter way to manage our resources for scaling cloud-native applications on demand**. You need to monitor your Kubernetes resources effectively. If you want to dive deeper into Kubernetes monitoring, you can check out [SigNoz](https://signoz.io/blog/using-signoz-to-monitor-your-kubernetes-cluster).
 
 <figure data-zoomable align="center">
-  <img src="/img/blog/2022/06/k8s_node_monitoring.webp" alt="Node metrics monitoring with SigNoz" />
-  <figcaption>
-    <i>Kubernetes node metrics monitoring with SigNoz</i>
-  </figcaption>
+<img src="/img/blog/2022/06/k8s_node_monitoring.webp" alt="Node metrics monitoring with SigNoz" />
+<figcaption>
+<i>Kubernetes node metrics monitoring with SigNoz</i>
+</figcaption>
 </figure>
 
 <a href = "https://signoz.io/">SigNoz</a> is a full-stack open-source APM tool that can help you monitor your Kubernetes cluster. It uses <a href = "https://opentelemetry.io/" rel="noopener noreferrer nofollow" target="_blank" >OpenTelemetry</a>  to collect metrics from your K8s cluster for monitoring. OpenTelemetry is becoming the world standard for instrumentation of cloud-native applications, and it is backed by <a href = "https://www.cncf.io/" rel="noopener noreferrer nofollow" target="_blank" >CNCF</a> foundation, the same foundation under which Kubernetes graduated.
@@ -240,7 +473,16 @@ But if you're using Kubernetes in production, you can't rely on manual spot-chec
 
 <GetStartedSigNoz />
 
-## Conclusion
+## Kubectl top Best Practices and Tips
+
+To make the most of `kubectl top`, consider these best practices:
+
+1. **Establish monitoring routines**: Regularly check resource usage to catch issues early.
+2. **Combine with other tools**: Use `kubectl top` alongside tools like SigNoz for a holistic view.
+3. **Use for capacity planning**: Analyze trends to make informed scaling decisions.
+4. **Automate checks**: Incorporate `kubectl top` into your CI/CD pipelines for continuous monitoring.
+
+## Key Takeaways
 
 - The kubectl top command provides snapshots of resource utilization metrics for pods and nodes in a Kubernetes cluster.
 - This command is essential for monitoring the health and performance of your Kubernetes infrastructure.
@@ -248,10 +490,59 @@ But if you're using Kubernetes in production, you can't rely on manual spot-chec
 - The kubectl top pod command displays resource usage for individual pods, aiding in resource optimization and troubleshooting.
 - For more in-depth and continuous monitoring in a production environment, tools like SigNoz, which leverage OpenTelemetry, are recommended.
 
+## FAQs
+
+### How often should I run kubectl top to monitor my cluster?
+
+Run `kubectl top` at regular intervals, such as every 5-15 minutes, for ongoing monitoring. For more frequent checks, consider using a monitoring solution like SigNoz.
+
+### Can kubectl top show historical data or trends?
+
+No, `kubectl top` only shows current usage. For historical data and trends, use a dedicated monitoring tool like SigNoz.
+
+### What's the difference between kubectl top and kubectl describe when it comes to resource information?
+
+`kubectl top` shows real-time resource usage, while `kubectl describe` provides static configuration information, including resource requests and limits.
+
+### How can I use kubectl top to identify pods that are approaching their resource limits?
+
+Compare the output of `kubectl top pod` with the resource limits set in your pod specifications. If usage is consistently close to the limits, consider adjusting your resource allocation.
+
+### What is the kubectl top command used for?
+
+The kubectl top command is used to retrieve snapshots of resource utilization metrics for pods and nodes in a Kubernetes cluster. It provides real-time insights into CPU and memory usage, helping with monitoring and performance optimization.
+
+### How do I monitor node resources using kubectl top?
+
+To monitor node resources, use the command `kubectl top node`. This will display CPU and memory usage for each node in your Kubernetes cluster.
+
+### Can I view resource usage for specific pods?
+
+Yes, you can view resource usage for specific pods using the command `kubectl top pod`. You can also use flags like `-n <namespace>` to specify a particular namespace or `-l <label-selector>` to filter pods based on labels.
+
+### What do the CPU values mean in kubectl top output?
+
+In kubectl top output, CPU is measured in cores or millicores. For example, "338m" means 338 millicores, which is equivalent to 33.8% of 1 CPU core.
+
+### How can I view container-level metrics within a pod?
+
+To view container-level metrics within a pod, use the command `kubectl top pod --containers`. This will display CPU and memory usage for each container in the pods.
+
+### Does kubectl top show historical data or trends?
+
+No, kubectl top only shows current usage data. For historical data and trends, you need to use a dedicated monitoring tool like SigNoz or set up your own metrics collection and storage system.
+
+### How often should I run kubectl top for effective monitoring?
+
+For basic monitoring, running kubectl top every 5-15 minutes can be effective. However, for more frequent checks and comprehensive monitoring, it's recommended to use a dedicated monitoring solution that continuously collects and analyzes data.
+
+### What's required for kubectl top to work properly?
+
+For kubectl top to work, you need to have the Metrics API installed in your Kubernetes cluster. This typically involves deploying the Metrics Server, which collects resource usage data from kubelets and makes it available through the Metrics API.
+
 ---
 
 **Related Posts**
 
 - [Using Kubectl Logs | How to view Kubernetes Pod Logs?](https://signoz.io/blog/kubectl-logs/)
-
 - [Kubernetes monitoring with OpenTelemetry and SigNoz](https://signoz.io/blog/kubernetes-monitoring/)
