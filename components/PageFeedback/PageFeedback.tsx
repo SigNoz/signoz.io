@@ -1,136 +1,63 @@
 'use client';
 
 import React, { useState } from 'react';
-import styled from 'styled-components';
+import styles from './PageFeedback.module.css';
 
-const FeedbackContainer = styled.div`
-  font-family: Arial, sans-serif;
-  max-width: 500px;
-  margin: 20px auto;
-  padding: 20px;
-  background-color: #2a2a2a;
-  border: 1px solid #444;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-  color: #e0e0e0;
-`;
+interface AdditionalDetails {
+  [key: string]: string;
+}
 
-const Title = styled.h3`
-  margin-top: 0;
-  color: #ffffff;
-`;
-
-const ButtonGroup = styled.div`
-  display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
-`;
-
-const Button = styled.button`
-  padding: 8px 16px;
-  border: 1px solid #555;
-  border-radius: 4px;
-  background-color: #3a3a3a;
-  color: #ffffff;
-  cursor: pointer;
-  transition: background-color 0.3s;
-
-  &:hover {
-    background-color: #4a4a4a;
-  }
-`;
-
-const Form = styled.form`
-  display: flex;
-  flex-direction: column;
-`;
-
-const OptionGroup = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-bottom: 20px;
-`;
-
-const Option = styled.label`
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  cursor: pointer;
-`;
-
-const OptionText = styled.span`
-  display: flex;
-  flex-direction: column;
-`;
-
-const OptionDescription = styled.span`
-  font-size: 0.9em;
-  color: #aaa;
-`;
-
-const Checkbox = styled.label`
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 20px;
-  cursor: pointer;
-`;
-
-const SubmitButton = styled(Button)`
-  align-self: flex-start;
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-
-  &:hover {
-    background-color: #45a049;
-  }
-`;
-
-const PageFeedback = () => {
+const PageFeedback: React.FC = () => {
   const [helpful, setHelpful] = useState<boolean | null>(null);
   const [reason, setReason] = useState<string>('');
-  const [email, setEmail] = useState<boolean>(false);
+  const [positiveFeedback, setPositiveFeedback] = useState<string>('');
+  const [additionalDetails, setAdditionalDetails] = useState<AdditionalDetails>({});
   const [submitted, setSubmitted] = useState<boolean>(false);
+
+  const handleTextAreaChange = (option: string, value: string) => {
+    setAdditionalDetails({
+      ...additionalDetails,
+      [option]: value,
+    });
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    
+
     const data = {
       helpful,
       reason: helpful === false ? reason : '',
-      email: helpful === false && email,
+      positiveFeedback: helpful === true ? positiveFeedback : '',
+      additionalDetails,
+      page: window.location.href,
     };
 
     console.log('Submitting data:', data);
-
-    // TODO: Replace with actual API call to your backend
-    // await fetch('your-api-endpoint', {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify(data),
-    // });
 
     setSubmitted(true);
   };
 
   if (submitted) {
-    return <FeedbackContainer>Thank you for your feedback!</FeedbackContainer>;
+    return <div className={styles.feedbackContainer}>Thank you for your feedback!</div>;
   }
 
   return (
-    <FeedbackContainer>
-      <Title>Was this page helpful?</Title>
-      <ButtonGroup>
-        <Button onClick={() => setHelpful(true)}>👍 Yes</Button>
-        <Button onClick={() => setHelpful(false)}>👎 No</Button>
-      </ButtonGroup>
+    <div className={styles.feedbackContainer}>
+      <div className={styles.separatorLine}></div>
+      {helpful === null && (
+        <>
+          <h3 className={styles.title}>Was this page helpful?</h3>
+          <div className={styles.buttonGroup}>
+            <button className={styles.button} onClick={() => setHelpful(true)}>👍 Yes</button>
+            <button className={styles.button} onClick={() => setHelpful(false)}>👎 No</button>
+          </div>
+        </>
+      )}
       
       {helpful === false && (
-        <Form onSubmit={handleSubmit}>
-          <Title>What went wrong?</Title>
-          <OptionGroup>
+        <form className={styles.form} onSubmit={handleSubmit}>
+          <h3 className={styles.title}>What went wrong?</h3>
+          <div className={styles.optionGroup}>
             {[
               { value: 'Inaccurate', description: "Doesn't accurately describe the product or feature." },
               { value: "Couldn't find what I was looking for", description: "Missing important information." },
@@ -138,32 +65,69 @@ const PageFeedback = () => {
               { value: 'Code sample errors', description: "One or more code samples are incorrect." },
               { value: 'Another reason', description: "" },
             ].map((option) => (
-              <Option key={option.value}>
+              <label className={styles.option} key={option.value}>
                 <input
                   type="radio"
                   name="reason"
                   value={option.value}
                   onChange={(e) => setReason(e.target.value)}
                 />
-                <OptionText>
+                <span className={styles.optionText}>
                   {option.value}
-                  {option.description && <OptionDescription>{option.description}</OptionDescription>}
-                </OptionText>
-              </Option>
+                  {option.description && <span className={styles.optionDescription}>{option.description}</span>}
+                </span>
+                {reason === option.value && (
+                  <textarea
+                    className={styles.textArea}
+                    placeholder="Optional: Provide more details..."
+                    value={additionalDetails[option.value] || ''}
+                    onChange={(e) => handleTextAreaChange(option.value, e.target.value)}
+                  />
+                )}
+              </label>
             ))}
-          </OptionGroup>
-          <Checkbox>
-            <input
-              type="checkbox"
-              checked={email}
-              onChange={(e) => setEmail(e.target.checked)}
-            />
-            Yes, it's okay to follow up by email
-          </Checkbox>
-          <SubmitButton type="submit">Submit</SubmitButton>
-        </Form>
+          </div>
+          <button className={styles.submitButton} type="submit">Submit</button>
+        </form>
       )}
-    </FeedbackContainer>
+
+      {helpful === true && (
+        <form className={styles.form} onSubmit={handleSubmit}>
+          <h3 className={styles.title}>What did you like?</h3>
+          <div className={styles.optionGroup}>
+            {[
+              { value: 'Accurate', description: "Accurately describes the product or feature." },
+              { value: 'Solved my problem', description: "Helped me resolve an issue." },
+              { value: 'Easy to understand', description: "Easy to follow and comprehend." },
+              { value: 'Helped me decide to use the product', description: "Convinced me to adopt the product or feature." },
+              { value: 'Another reason', description: "" },
+            ].map((option) => (
+              <label className={styles.option} key={option.value}>
+                <input
+                  type="radio"
+                  name="positiveFeedback"
+                  value={option.value}
+                  onChange={(e) => setPositiveFeedback(e.target.value)}
+                />
+                <span className={styles.optionText}>
+                  {option.value}
+                  {option.description && <span className={styles.optionDescription}>{option.description}</span>}
+                </span>
+                {positiveFeedback === option.value && (
+                  <textarea
+                    className={styles.textArea}
+                    placeholder="Optional: Provide more details..."
+                    value={additionalDetails[option.value] || ''}
+                    onChange={(e) => handleTextAreaChange(option.value, e.target.value)}
+                  />
+                )}
+              </label>
+            ))}
+          </div>
+          <button className={styles.submitButton} type="submit">Submit</button>
+        </form>
+      )}
+    </div>
   );
 };
 
