@@ -4,6 +4,7 @@ import Link from 'next/link';
 import Button from '@/components/Button/Button';
 
 type CardProps = {
+  number?: string,
   icon?: string,
   iconTag?: string,
   title?: string;
@@ -21,7 +22,7 @@ type CardProps = {
   border?: Boolean
 };
 
-const Card: React.FC<CardProps> = ({ iconTag, title, subTitle, stats, description, text, buttonText, buttonLink, logo, img, logoSize = 16, subTitleSize = 1 }) => {
+const Card: React.FC<CardProps> = ({ number, iconTag, title, subTitle, stats, description, text, buttonText, buttonLink, logo, img, logoSize = 16, subTitleSize = 1 }) => {
   const logoSizeClassnames = useMemo(() => {
     if (logoSize === 16) {
       return 'w-4 h-4 fill-signoz_vanilla-400';
@@ -53,6 +54,7 @@ const Card: React.FC<CardProps> = ({ iconTag, title, subTitle, stats, descriptio
       </div>
 
       <div>
+        <span className='text-2xl font-normal text-signoz_slate-50 font-mono'>{number}</span>
         {subTitle ? <p className={`${subTitleSizeClassnames} text-signoz_vanilla-100 pt-4 m-0`}>{subTitle}</p> : null}
       </div>
 

@@ -6,32 +6,26 @@ import VimeoPlayer from '@/components/VimeoPlayer/VimeoPlayer'
 import Link from 'next/link'
 import { ArrowRight, BookOpen } from 'lucide-react'
 import Button from '@/components/Button/Button'
+import { useInView } from 'react-intersection-observer';
 import Card from '@/components/Card/card'
 import Image from 'next/image'
-import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  useDisclosure,
-} from '@nextui-org/react'
+
 
 function LogsManagement() {
   return (
     <main className='mb-auto !mt-[-80px]'>
-    <div className='relative bg-signoz_ink-500'>
-      <div className="absolute left-0 right-0 top-0 h-screen bg-[url('/img/background_blur/Perlin_noise.png')] bg-[length:55%] bg-[center_top_4rem] sm:bg-no-repeat " />
-      <div className="absolute left-0 right-0 top-0 h-screen bg-[url('/img/background_blur/Circle.png')] bg-[length:110%] bg-no-repeat sm:bg-[center_top_-50rem]" />
-      <Header />
-      <TrustedByTeams page="LogsManagement" />
-      <SigNozFeatures />
-      <SigNozUsage />
-      <UsageBasedPricing />
-      <ExploreDocs />
-      <SigNozStats />
-      <GetStarted page="LogsManagement" />
-    </div>
+      <div className='relative bg-signoz_ink-500'>
+        <div className="absolute left-0 right-0 top-0 h-screen bg-[url('/img/background_blur/Perlin_noise.png')] bg-[length:55%] bg-[center_top_4rem] sm:bg-no-repeat " />
+        <div className="absolute left-0 right-0 top-0 h-screen bg-[url('/img/background_blur/Circle.png')] bg-[length:110%] bg-no-repeat sm:bg-[center_top_-50rem]" />
+        <Header />
+        <TrustedByTeams page="LogsManagement" />
+        <SigNozFeatures />
+        <SigNozUsage />
+        <UsageBasedPricing />
+        <ExploreDocs />
+        <SigNozStats />
+        <GetStarted page="LogsManagement" />
+      </div>
     </main>
   )
 }
@@ -120,12 +114,12 @@ const Header = () => {
       <div className="relative !mx-auto flex !w-[100vw] flex-col items-center border !border-b-0 border-dashed border-signoz_slate-400 px-2 pb-4 pt-12 text-center md:!w-[80vw] md:px-5 md:pt-[8.5rem]">
         <div className="absolute left-0 top-[96px] z-[0] h-14 !w-[100vw] border !border-l-0 !border-r-0 border-dashed border-signoz_slate-400 md:top-[205px] md:!w-[80vw]" />
         <Image
-                className="h-9 w-auto"
-                src="/svgs/icons/Logs-Management.svg"
-                width={36}
-                height={36}
-                alt=""
-              />
+          className="h-9 w-auto"
+          src="/svgs/icons/Logs-Management.svg"
+          width={36}
+          height={36}
+          alt=""
+        />
         <Hero>
           Log Management at any Scale
         </Hero>
@@ -153,7 +147,7 @@ const Header = () => {
           </Link>
         </Button>
       </div>
-      <div className="section-container !mx-auto !mt-0 !w-[90vw] border !border-b-0 !border-t-0 border-none border-signoz_slate-400 md:!w-[80vw] md:border-dashed -mb-[9rem]">
+      <div className="section-container !mx-auto !mt-0 !w-[90vw] border !border-b-0 !border-t-0 border-none border-signoz_slate-400 md:!w-[80vw] md:border-dashed max-sm:-mb-[3rem] -mb-[9rem]">
         <div className="w-100 mx-[-28px]">
           <div className="product-explainer-video hero-figure rounded-lg p-3">
             <div className="embed-container">
@@ -234,6 +228,40 @@ const TrustedByTeams = ({ page }) => {
 
 const SigNozFeatures = () => {
 
+  const [currentImage, setCurrentImage] = useState("/img/graphics/homepage/feature-graphic-5.webp");
+
+  const { ref: firstContainer, inView: firstInView } = useInView({
+    threshold: 0,
+    rootMargin: '-10px 0px 0px 0px',
+    onChange: (inView) => {
+      if (inView) setCurrentImage("/img/graphics/homepage/feature-graphic-5.webp");
+    },
+  });
+
+  const { ref: secondContainer, inView: secondInView } = useInView({
+    threshold: 0,
+    rootMargin: '-1000px 0px 0px 0px',
+    onChange: (inView) => {
+      if (inView) setCurrentImage("/img/graphics/homepage/feature-graphic-4.webp");
+    },
+  });
+
+  const { ref: thirdContainer, inView: thirdInView } = useInView({
+    threshold: 0,
+    rootMargin: '-1000px 0px 0px 0px',
+    onChange: (inView) => {
+      if (inView) setCurrentImage("/img/graphics/homepage/feature-graphic-2.webp");
+    },
+  });
+
+  const { ref: fourthContainer, inView: fourthInView } = useInView({
+    threshold: 0,
+    rootMargin: '-1000px 0px 0px 0px',
+    onChange: (inView) => {
+      if (inView) setCurrentImage("/img/graphics/homepage/feature-graphic-3.webp");
+    },
+  });
+
 
   const sections = [
     {
@@ -269,6 +297,31 @@ const SigNozFeatures = () => {
     },
   ]
 
+ const scrollsections = [
+  {
+    number: '00.',
+    title: 'Easy Setup',
+    desc: "TGet access to observability at any scale with advanced security and compliance.",
+    buttonText: 'learn more'
+  },
+  {
+    number: '01.',
+    title: 'Logs Pipelines powered by OTel Opamp',
+    desc: "Transform logs before they get ingested to SigNoz to suit your querying and aggregation needs. Powered by OpenTelemetry Opamp, log pipelines enable you to unleash the full potential of your logs by pre-processing them to suit your needs before they get stored. This unlocks valuable logs based queries and dashboards that wouldn't be possible otherwise.",
+    buttonText: 'learn more'
+  },
+  {
+    number: '02.',
+    title: 'Quick Search & Filter',
+    desc: "Get access to observability at any scale with advanced security and compliance."
+  },
+  {
+    number: '03.',
+    title: 'Click & Run Query Builder',
+    desc: "Get access to observability at any scale with advanced security and compliance."
+  },
+  
+ ]
   return (
     <>
       <div className="bg-[url('/img/background_blur/Frame_1862.png')] bg-[length:65%] bg-[center_top_5rem] sm:bg-no-repeat">
@@ -298,9 +351,57 @@ const SigNozFeatures = () => {
           ))}
         </div>
       </div>
+
+      <div className='!mx-auto grid !w-[100vw] grid-cols-1 border !border-b-0 !border-l-0 !border-t-0 border-dashed border-signoz_slate-400 sm:grid-cols-2 md:!w-[80vw]'>
+        <div className='flex flex-col relative'>
+          <div>
+            <div ref={firstContainer}>
+              <Card
+                number={scrollsections[0].number}
+                subTitle={scrollsections[0].title}
+                description={scrollsections[0].desc}
+                buttonText={scrollsections[0].buttonText}
+                subTitleSize={2}
+              />
+            </div>
+            <div ref={secondContainer}>
+              <Card
+                number={scrollsections[1].number}
+                subTitle={scrollsections[1].title}
+                description={scrollsections[1].desc}
+                buttonText={scrollsections[1].buttonText}
+                subTitleSize={2}
+              />
+            </div>
+            <div ref={thirdContainer}>
+              <Card
+                number={scrollsections[2].number}
+                subTitle={scrollsections[2].title}
+                description={scrollsections[2].desc}
+                buttonText={scrollsections[2].buttonText}
+                subTitleSize={2}
+              />
+            </div>
+            <div ref={fourthContainer}>
+              <Card
+                number={scrollsections[3].number}
+                subTitle={scrollsections[3].title}
+                description={scrollsections[3].desc}
+                buttonText={scrollsections[3].buttonText}
+                subTitleSize={2}
+              />
+            </div>
+          </div>
+        </div>
+        <div className="sticky top-20 h-max justify-center items-start">
+          <img src={currentImage} alt="Scroll Section Image" className='h-auto w-auto' />
+        </div>
+      </div>
     </>
   )
 }
+
+
 
 const SigNozUsage = () => {
   return (
