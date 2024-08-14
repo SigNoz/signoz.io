@@ -1,0 +1,109 @@
+---
+date: 2024-06-06
+id: planned-maintenance
+title: Planned Maintenance/Downtime
+---
+
+
+## Overview
+
+Use planned maintenance to schedule maintenance windows for your services. This helps you to avoid alerting during maintenance windows and to resume alerts after the maintenance window is over. The alert evaluation is paused during the maintenance window.
+
+## Create a Maintenance Window
+
+To create a maintenance window, navigate to the **Configuration** tab in the **Alerts** section. Click on the **`+ New downtime`** button at the top right corner and fill in the details.
+
+### Types of maintenance windows
+
+SigNoz supports two types of maintenance schedules:
+
+- **One-time**: A maintenance window that is scheduled at a specific time for a fixed duration.
+- **Recurring**: A maintenance window that is scheduled at a specific time and repeats at a regular interval. Optionally, you can specify an end date for the maintenance window.
+
+### One-time Maintenance Window
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/alerts/one-time.png" alt="one-time maintenance window"/>
+    <figcaption><i>One-time maintenance window</i></figcaption>
+</figure>
+
+Create a one-time maintenance window by clicking on the **`+ New downtime`** button at the top right corner. Since this is a one-time maintenance window, leave the *Repeats every* field with default value `Does not repeat`.
+
+The following fields are required to create a one-time maintenance window:
+
+- **Name**: A descriptive name for the maintenance window.
+- **Start Time**: The start time of the maintenance window in the selected timezone.
+- **End Time**: The end time of the maintenance window in the selected timezone.
+- **Timezone**: The timezone of the maintenance window. This is the timezone in which the maintenance window is scheduled.
+
+Example:
+
+```
+Start time: 2024-08-01 22:00:00
+End time: 2024-08-01 23:00:00
+Timezone: America/New_York
+```
+
+This means that the maintenance window is scheduled for 22:00:00 to 23:00:00 in the America/New_York timezone.
+
+The following fields are optional:
+
+- **Silence Alerts**: The alerts that are silenced during the maintenance window. If nothing is selected, all alerts are silenced.
+
+### Recurring Maintenance Window
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/product-features/alerts/recurring-daily.png" alt="recurring maintenance window"/>
+    <figcaption><i>Recurring maintenance window</i></figcaption>
+</figure>
+
+Create a recurring maintenance window by clicking on the **`+ New downtime`** button at the top right corner. Since this is a recurring maintenance window, select the *Repeats every* field with the desired repetition type.
+
+There are three types of repetition types available:
+
+- **Daily**: The maintenance window repeats every day.
+- **Weekly**: The maintenance window repeats every week on a specific day(s) of the week. The weekly repetition type allows you to select the days of the week on which the maintenance window repeats.
+- **Monthly**: The maintenance window repeats every month on a specific day of the month.
+
+The following fields are required to create a recurring maintenance window:
+
+- **Name**: A descriptive name for the maintenance window.
+- **Start Time**: The start time of the maintenance window.
+- **Duration**: The duration of the maintenance window.
+- **Timezone**: The timezone of the maintenance window.
+- **Repeats every**: The type of repetition.
+
+The following fields are optional:
+
+- **Ends**: The end date of the maintenance window.
+- **Silence Alerts**: The alerts that are silenced during the maintenance window. If nothing is selected, all alerts are silenced.
+
+Examples:
+
+1. Daily maintenance window that repeats every day for 1 hour starting from 22:00:00 in the America/New_York timezone.
+
+```
+Start time: 2024-08-01 22:00:00
+Repeats every: Daily
+Duration: 1 hour
+Timezone: America/New_York
+```
+
+2. Weekly maintenance window that repeats every week on Monday for 1 hour starting from 22:00:00 in the America/New_York timezone.
+
+```
+Start time: 2024-08-01 22:00:00
+Repeats every: Weekly
+Weekly Occurence: [Monday]
+Duration: 1 hour
+Timezone: America/New_York
+```
+
+3. Monthly maintenance window that repeats every month on the 12th day of the month for 1 hour starting from 22:00:00 in the America/New_York timezone.
+
+```
+Start time: 2024-08-12 22:00:00
+Repeats every: Monthly
+Duration: 1 hour
+Timezone: America/New_York
+```
