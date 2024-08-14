@@ -299,16 +299,10 @@ const SigNozFeatures = () => {
 
  const scrollsections = [
   {
-    number: '00.',
-    title: 'Easy Setup',
-    desc: "TGet access to observability at any scale with advanced security and compliance.",
-    buttonText: 'learn more'
-  },
-  {
     number: '01.',
     title: 'Logs Pipelines powered by OTel Opamp',
     desc: "Transform logs before they get ingested to SigNoz to suit your querying and aggregation needs. Powered by OpenTelemetry Opamp, log pipelines enable you to unleash the full potential of your logs by pre-processing them to suit your needs before they get stored. This unlocks valuable logs based queries and dashboards that wouldn't be possible otherwise.",
-    buttonText: 'learn more'
+    buttonText: 'Learn more'
   },
   {
     number: '02.',
