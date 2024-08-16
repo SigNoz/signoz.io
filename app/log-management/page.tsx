@@ -112,7 +112,7 @@ const Header = () => {
     <header className="relative !mx-auto mt-16 !w-[100vw] md:!w-[80vw]">
       <div className="absolute bottom-0 left-[12px] right-[12px] top-0 z-[-1] border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 md:left-[24px] md:right-[24px] z-[0]" />
       <div className="relative !mx-auto flex !w-[100vw] flex-col items-center border !border-b-0 border-dashed border-signoz_slate-400 px-2 pb-4 pt-12 text-center md:!w-[80vw] md:px-5 md:pt-[8.5rem]">
-        <div className="absolute left-0 top-[96px] z-[0] h-14 !w-[100vw] border !border-l-0 !border-r-0 border-dashed border-signoz_slate-400 md:top-[205px] md:!w-[80vw]" />
+        <div className="absolute left-0 top-[96px] z-[0] h-14 !w-[100vw] border !border-l-0 !border-r-0 border-dashed border-signoz_slate-400 md:top-[260px] md:!w-[80vw]" />
         <Image
           className="h-9 w-auto"
           src="/svgs/icons/Logs-Management.svg"
@@ -121,7 +121,7 @@ const Header = () => {
           alt=""
         />
         <Hero>
-          Log Management at any Scale
+          Log Management at any Scale <br/>Powered by ClickHouse
         </Hero>
         <p className="m-0 p-3 text-lg leading-8 font-normal sm:p-0 text-signoz_vanilla-400">
           Ingest logs from anywhere, quickly search and analyze with a powerful query builder, and correlate your
@@ -250,7 +250,7 @@ const SigNozFeatures = () => {
     threshold: 0,
     rootMargin: '-1000px 0px 0px 0px',
     onChange: (inView) => {
-      if (inView) setCurrentImage("/img/graphics/homepage/feature-graphic-2.webp");
+      if (inView) setCurrentImage("/img/features/logs/quick-search-filter.webp");
     },
   });
 
@@ -258,7 +258,71 @@ const SigNozFeatures = () => {
     threshold: 0,
     rootMargin: '-1000px 0px 0px 0px',
     onChange: (inView) => {
-      if (inView) setCurrentImage("/img/graphics/homepage/feature-graphic-3.webp");
+      if (inView) setCurrentImage("/img/features/logs/powerful-query-builder.webp");
+    },
+  });
+
+  const { ref: fifthContainer, inView: fifthInView } = useInView({
+    threshold: 0,
+    rootMargin: '-1000px 0px 0px 0px',
+    onChange: (inView) => {
+      if (inView) setCurrentImage("/img/features/logs/log-visualizations.webp");
+    },
+  });
+  const { ref: sixthContainer, inView: sixthInView } = useInView({
+    threshold: 0,
+    rootMargin: '-1000px 0px 0px 0px',
+    onChange: (inView) => {
+      if (inView) setCurrentImage("/img/features/logs/logs-in-detail.webp");
+    },
+  });
+  const { ref: seventhContainer, inView: seventhInView } = useInView({
+    threshold: 0,
+    rootMargin: '-1000px 0px 0px 0px',
+    onChange: (inView) => {
+      if (inView) setCurrentImage("/img/features/logs/logs-in-context.webp");
+    },
+  });
+  const { ref: eighthContainer, inView: eighthInView } = useInView({
+    threshold: 0,
+    rootMargin: '-1000px 0px 0px 0px',
+    onChange: (inView) => {
+      if (inView) setCurrentImage("/img/features/logs/saved-views.webp");
+    },
+  });
+  const { ref: ninthContainer, inView: ninthInView } = useInView({
+    threshold: 0,
+    rootMargin: '-1000px 0px 0px 0px',
+    onChange: (inView) => {
+      if (inView) setCurrentImage("/img/features/logs/json-logs.webp");
+    },
+  });
+  const { ref: tenthContainer, inView: tenthInView } = useInView({
+    threshold: 0,
+    rootMargin: '-1000px 0px 0px 0px',
+    onChange: (inView) => {
+      if (inView) setCurrentImage("");
+    },
+  });
+  const { ref: eleventhContainer, inView: eleventhInView } = useInView({
+    threshold: 0,
+    rootMargin: '-1000px 0px 0px 0px',
+    onChange: (inView) => {
+      if (inView) setCurrentImage("/img/features/logs/live-logs.webp");
+    },
+  });
+  const { ref: twelfthContainer, inView: twelfthInView } = useInView({
+    threshold: 0,
+    rootMargin: '-1000px 0px 0px 0px',
+    onChange: (inView) => {
+      if (inView) setCurrentImage("/img/features/logs/correlation-of-signals.webp");
+    },
+  });
+  const { ref: thirteenthContainer, inView: thirteenthInView } = useInView({
+    threshold: 0,
+    rootMargin: '-1000px 0px 0px 0px',
+    onChange: (inView) => {
+      if (inView) setCurrentImage("/img/features/logs/add-to-dashboards-logs.webp");
     },
   });
 
@@ -266,11 +330,15 @@ const SigNozFeatures = () => {
   const sections = [
     {
       title: 'Logs at any scale powered by ClickHouse',
-      desc: ['SigNoz uses ClickHouse (used by likes of Uber & Cloudflare) as datastore ⎯ an extremely fast and highly optimized storage for logs data.',
-        'It is a column-oriented database built for complex analytical queries ⎯ they are atleast 1000 times faster in processing most queries. Aggregation and filtering are lightning-fast on log data. For ingestion, we found SigNoz to be 2.5x faster than ELK and about 13 times faster than ELK for aggregation queries. (Logs Perf Benchmark)',
-      ],
+      desc: (
+        <>
+          SigNoz uses ClickHouse (used by likes of Uber & Cloudflare) as datastore ⎯ an extremely fast and highly optimized storage for logs data.<p/>
+          It is a column-oriented database built for complex analytical queries ⎯ they are at least 1000 times faster in processing most queries. Aggregation and filtering are lightning-fast on log data. For ingestion, we found SigNoz to be 2.5x faster than ELK and about 13 times faster than ELK for aggregation queries. 
+          <a href="https://signoz.io/blog/logs-performance-benchmark/" target="_blank" className='text-signoz_robin-300'> (Logs Perf Benchmark).</a>
+        </>
+      ),
       figure: '/img/landing/property-no-vendor-lock-in.webp',
-      logo: '/img/index_features/key.svg',
+      logo: '/img/log-management/logs.svg',
     },
     {
       title: 'Fast troubleshooting with Query Builder',
@@ -278,14 +346,15 @@ const SigNozFeatures = () => {
         'Get a list of common filters for your logs data and quickly filter your required logs. Apply various aggregations, such as count, sum, and average, and group your trace data based on selected attributes. Utilize multiple queries and formulas to dive deeper into your logs data and uncover valuable insights.',
       ],
       figure: '/img/landing/property-ease-of-use.webp',
-      logo: '/img/index_features/future.svg',
+      logo: '/img/log-management/fast.svg',
     },
     {
       title: 'Cost-effective long-term storage of logs',
       desc: 'You can store your logs in long-term storage for compliance and auditing purposes. You can either forward the logs to your own S3/ Google cloud storage or object storage in SigNoz cloud. The data is stored in ClickHouse native format and you can query it whenever you want. Log forwarding cost is only $0.25 per GB.',
       figure: '/img/landing/property-covers-all-use-cases.webp',
-      logo: '/img/index_features/cases.svg',
-      buttonText: 'learn more'
+      logo: '/img/log-management/wallet.svg',
+      buttonText: 'learn more',
+      buttonLink: 'https://signoz.io/docs/logs-management/long-term-storage/'
     },
     {
       title: 'Identify Root Cause with Correlated Signals',
@@ -293,11 +362,16 @@ const SigNozFeatures = () => {
         'You can correlate your logs with traces and vice-versa to gain better insights while debugging. Powered by OpenTelemetry semantic conventions, correlated signals can help you understand your applications better and identify the root cause of issues faster.',
       ],
       figure: '/img/landing/property-standardize-observability.webp',
-      logo: '/img/index_features/easy-to-use.svg',
+      logo: '/img/log-management/signals.svg',
     },
   ]
 
  const scrollsections = [
+  {
+    number: '00.',
+    title: 'Easy Setup',
+    desc: "Collect log data from any source. Easily connect your existing logging pipelines like FluentD, FluentBit, & Logstash and send it to an OTel collector to receive logs in SigNoz.",
+  },
   {
     number: '01.',
     title: 'Logs Pipelines powered by OTel Opamp',
@@ -307,13 +381,61 @@ const SigNozFeatures = () => {
   {
     number: '02.',
     title: 'Quick Search & Filter',
-    desc: "Get access to observability at any scale with advanced security and compliance."
+    desc: "Get a list of common filters for your logs data and quickly filter your required logs."
   },
   {
     number: '03.',
-    title: 'Click & Run Query Builder',
-    desc: "Get access to observability at any scale with advanced security and compliance."
+    title: 'Powerful Query Builder',
+    desc: "Apply various aggregations, such as count, sum, and average, and group your trace data based on selected attributes. Utilize multiple queries and formulas to dive deeper into your logs data and uncover valuable insights."
   },
+  {
+    number: '04.',
+    title: 'Log Visualizations',
+    desc: "Our logs explorer comes packed with different visualizations to simplify troubleshooting and finding patterns."
+  },
+  {
+    number: '05.',
+    title: 'Logs in Detail',
+    desc: "Get a comprehensive view of your logs with a detailed view of logs. See overview, search for attributes, filters based on JSON data, and more to let you explore your logs in detail."
+  },
+  {
+    number: '06.',
+    title: 'Logs in Context',
+    desc: "Get more context around a log entry with Context view. For example, view logs of the same service, which might be running on different hosts."
+  },
+  {
+    number: '07.',
+    title: 'Saved Views',
+    desc: "Save views that matter - Apply complex queries and save that view for future reference. Your teammates can also access them if they need to."
+  },
+  {
+    number: '08.',
+    title: 'JSON Search',
+    desc: "Quickly apply filters on JSON data present inside the logs body."
+  },
+  {
+    number: '09.',
+    title: 'Optimizing Complex Queries',
+    desc: "Get suggestions on optimizing complex queries."
+  },
+  {
+    number: '10.',
+    title: 'Live Tailing',
+    desc: "View logs in real-time with live tail logging."
+  },
+  {
+    number: '11.',
+    title: 'Correlation with other signals',
+    desc: "Correlate your logs with traces and vice-versa to get a much richer context while debugging. Using OpenTelemetry for application observability can unlock the true potential of your telemetry data."
+  },
+  {
+    number: '12.',
+    title: 'Add to dashboards & Create Alerts',
+    desc: "Anything that you query can be added to dashboards for continued monitoring and visualization."
+  },
+
+
+
   
  ]
   return (
@@ -339,6 +461,7 @@ const SigNozFeatures = () => {
               subTitle={section.title}
               description={section.desc}
               buttonText={section.buttonText}
+              buttonLink={section.buttonLink}
               logoSize={24}
               subTitleSize={2}
             />
@@ -354,7 +477,6 @@ const SigNozFeatures = () => {
                 number={scrollsections[0].number}
                 subTitle={scrollsections[0].title}
                 description={scrollsections[0].desc}
-                buttonText={scrollsections[0].buttonText}
                 subTitleSize={2}
               />
             </div>
@@ -372,7 +494,6 @@ const SigNozFeatures = () => {
                 number={scrollsections[2].number}
                 subTitle={scrollsections[2].title}
                 description={scrollsections[2].desc}
-                buttonText={scrollsections[2].buttonText}
                 subTitleSize={2}
               />
             </div>
@@ -381,7 +502,79 @@ const SigNozFeatures = () => {
                 number={scrollsections[3].number}
                 subTitle={scrollsections[3].title}
                 description={scrollsections[3].desc}
-                buttonText={scrollsections[3].buttonText}
+                subTitleSize={2}
+              />
+            </div>
+            <div ref={fifthContainer}>
+              <Card
+                number={scrollsections[4].number}
+                subTitle={scrollsections[4].title}
+                description={scrollsections[4].desc}
+                buttonText={scrollsections[4].buttonText}
+                subTitleSize={2}
+              />
+            </div>
+            <div ref={sixthContainer}>
+              <Card
+                number={scrollsections[5].number}
+                subTitle={scrollsections[5].title}
+                description={scrollsections[5].desc}
+                subTitleSize={2}
+              />
+            </div>
+            <div ref={seventhContainer}>
+              <Card
+                number={scrollsections[6].number}
+                subTitle={scrollsections[6].title}
+                description={scrollsections[6].desc}
+                subTitleSize={2}
+              />
+            </div>
+            <div ref={eighthContainer}>
+              <Card
+                number={scrollsections[7].number}
+                subTitle={scrollsections[7].title}
+                description={scrollsections[7].desc}
+                subTitleSize={2}
+              />
+            </div>
+            <div ref={ninthContainer}>
+              <Card
+                number={scrollsections[8].number}
+                subTitle={scrollsections[8].title}
+                description={scrollsections[8].desc}
+                subTitleSize={2}
+              />
+            </div>
+            <div ref={tenthContainer}>
+              <Card
+                number={scrollsections[9].number}
+                subTitle={scrollsections[9].title}
+                description={scrollsections[9].desc}
+                subTitleSize={2}
+              />
+            </div>
+            <div ref={eleventhContainer}>
+              <Card
+                number={scrollsections[10].number}
+                subTitle={scrollsections[10].title}
+                description={scrollsections[10].desc}
+                subTitleSize={2}
+              />
+            </div>
+            <div ref={twelfthContainer}>
+              <Card
+                number={scrollsections[11].number}
+                subTitle={scrollsections[11].title}
+                description={scrollsections[11].desc}
+                subTitleSize={2}
+              />
+            </div>
+            <div ref={thirteenthContainer}>
+              <Card
+                number={scrollsections[12].number}
+                subTitle={scrollsections[12].title}
+                description={scrollsections[12].desc}
                 subTitleSize={2}
               />
             </div>
