@@ -29,19 +29,19 @@ In this section, we will see how to export Traefik metrics and traces to SigNoz 
 
 For metrics, we will have to set the following CLI flags in Traefik:
 
-- `--metrics.openTelemetry=true`
-- `--metrics.openTelemetry.grpc=true`
-- `--metrics.openTelemetry.address=ingest.{region}.signoz.cloud:443`
-- `--metrics.openTelemetry.insecure=false`
-- `--metrics.openTelemetry.headers.signoz-access-token=SIGNOZ_INGESTION_KEY`
+- `--metrics.otlp=true`
+- `--metrics.otlp.grpc=true`
+- `--metrics.otlp.address=ingest.{region}.signoz.cloud:443`
+- `--metrics.otlp.insecure=false`
+- `--metrics.otlp.headers.signoz-access-token=SIGNOZ_INGESTION_KEY`
 
 For traces, we will have to set the following CLI flags in Traefik:
 
-- `--tracing.openTelemetry=true`
-- `--tracing.openTelemetry.grpc=true`
-- `--tracing.openTelemetry.address=ingest.{region}.signoz.cloud:443`
-- `--tracing.openTelemetry.insecure=false`
-- `--tracing.openTelemetry.headers.signoz-access-token=SIGNOZ_INGESTION_KEY`
+- `--tracing.otlp=true`
+- `--tracing.otlp.grpc=true`
+- `--tracing.otlp.address=ingest.{region}.signoz.cloud:443`
+- `--tracing.otlp.insecure=false`
+- `--tracing.otlp.headers.signoz-access-token=SIGNOZ_INGESTION_KEY`
 
 We will take an example `docker-compose.yaml` with a simple `hello-app` running behind Traefik.
 
@@ -53,22 +53,22 @@ We will take an example `docker-compose.yaml` with a simple `hello-app` running 
 version: '3'
 services:
   reverse-proxy:
-    image: traefik:v3.0.0-beta3
+    image: traefik:latest
     extra_hosts:
       - signoz:host-gateway
     command:
       - --api.insecure=true
       - --providers.docker
-      - --metrics.openTelemetry=true
-      - --metrics.openTelemetry.grpc=true
-      - --metrics.openTelemetry.insecure=false
-      - --metrics.openTelemetry.address=ingest.{region}.signoz.cloud:443
-      - --metrics.openTelemetry.headers.signoz-access-token=SIGNOZ_INGESTION_KEY
-      - --tracing.openTelemetry=true
-      - --tracing.openTelemetry.grpc=true
-      - --tracing.openTelemetry.insecure=false
-      - --tracing.openTelemetry.address=ingest.{region}.signoz.cloud:443
-      - --tracing.openTelemetry.headers.signoz-access-token=SIGNOZ_INGESTION_KEY
+      - --metrics.otlp=true
+      - --metrics.otlp.grpc=true
+      - --metrics.otlp.insecure=false
+      - --metrics.otlp.address=ingest.{region}.signoz.cloud:443
+      - --metrics.otlp.headers.signoz-access-token=SIGNOZ_INGESTION_KEY
+      - --tracing.otlp=true
+      - --tracing.otlp.grpc=true
+      - --tracing.otlp.insecure=false
+      - --tracing.otlp.address=ingest.{region}.signoz.cloud:443
+      - --tracing.otlp.headers.signoz-access-token=SIGNOZ_INGESTION_KEY
     ports:
       - "80:80"
       - "8080:8080"
@@ -105,17 +105,17 @@ In this section, we will see how to export Traefik metrics and traces to SigNoz.
 
 For metrics, we will have to set the following CLI flags in Traefik:
 
-- `--metrics.openTelemetry=true`
-- `--metrics.openTelemetry.grpc=true`
-- `--metrics.openTelemetry.address=<SigNoz OtelCollector IP>:4317`
-- `--metrics.openTelemetry.insecure=true`
+- `--metrics.otlp=true`
+- `--metrics.otlp.grpc=true`
+- `--metrics.otlp.address=<SigNoz OtelCollector IP>:4317`
+- `--metrics.otlp.insecure=true`
 
 For traces, we will have to set the following CLI flags in Traefik:
 
-- `--tracing.openTelemetry=true`
-- `--tracing.openTelemetry.grpc=true`
-- `--tracing.openTelemetry.address=<SigNoz OtelCollector IP>:4317`
-- `--tracing.openTelemetry.insecure=true`
+- `--tracing.otlp=true`
+- `--tracing.otlp.grpc=true`
+- `--tracing.otlp.address=<SigNoz OtelCollector IP>:4317`
+- `--tracing.otlp.insecure=true`
 
 <Admonition>
 Replace `<SigNoz OtelCollector IP>` with the IP address or hostname of the host running SigNoz OtelCollector.
@@ -129,20 +129,20 @@ docker-compose.yaml
 version: '3'
 services:
   reverse-proxy:
-    image: traefik:v3.0.0-beta3
+    image: traefik:latest
     extra_hosts:
       - signoz:host-gateway
     command:
       - --api.insecure=true
       - --providers.docker
-      - --metrics.openTelemetry=true
-      - --metrics.openTelemetry.grpc=true
-      - --metrics.openTelemetry.insecure=true
-      - --metrics.openTelemetry.address=signoz:4317
-      - --tracing.openTelemetry=true
-      - --tracing.openTelemetry.grpc=true
-      - --tracing.openTelemetry.insecure=true
-      - --tracing.openTelemetry.address=signoz:4317
+      - --metrics.otlp=true
+      - --metrics.otlp.grpc=true
+      - --metrics.otlp.insecure=true
+      - --metrics.otlp.address=signoz:4317
+      - --tracing.otlp=true
+      - --tracing.otlp.grpc=true
+      - --tracing.otlp.insecure=true
+      - --tracing.otlp.address=signoz:4317
     ports:
       - "80:80"
       - "8080:8080"
