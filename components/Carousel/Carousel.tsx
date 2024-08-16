@@ -31,9 +31,9 @@ export default function NextCarousel({ items }) {
   return (
     <div className="next-carousel">
       <Carousel responsive={responsive}>
-        {items.map((item) => {
+        {items.map((item, index) => {
           return (
-            <div className="carousel-image">
+            <div className="carousel-image" key={index}>
               <img src={item} />
             </div>
           )
