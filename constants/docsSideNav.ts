@@ -509,16 +509,12 @@ const docsSideNav = [
             type: 'category',
             isExpanded: false,
             label: 'Application Logs',
+            route: '/docs/logs-management/send-logs/application-logs',
             items: [
               {
                 type: 'doc',
                 route: '/docs/userguide/collect_logs_from_file',
                 label: 'From Log File',
-              },
-              {
-                type: 'doc',
-                route: '/docs/userguide/parse-multiline-logs',
-                label: 'Parse Multiline Logs',
               },
               {
                 type: 'doc',
@@ -699,6 +695,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/logs-management/guides/pii-scrubbing',
             label: 'PII Scrubbing'
+          },
+          {
+            type: 'doc',
+            route: '/docs/userguide/parse-multiline-logs',
+            label: 'Parse Multiline Logs',
           },
         ]
       },
@@ -933,6 +934,69 @@ const docsSideNav = [
         type: 'doc',
         route: '/docs/alerts-management/planned-maintenance',
         label: 'Planned Maintenance',
+      },
+    ],
+  },
+  {
+    label: 'Frontend Monitoring',
+    type: 'category',
+    className: 'new-doc',
+    isExpanded: false,
+    // route: '',
+    items: [
+      {
+        type: 'doc',
+        route: '/docs/frontend-monitoring/web-vitals',
+        label: 'Web Vitals',
+      },
+     ],
+  },
+  {
+    label: 'Integrations',
+    type: 'category',
+    isExpanded: false,
+    className: 'new-doc',
+    route: '/docs/integrations/integrations-list',
+    items: [
+      {
+        type: 'doc',
+        route: '/docs/integrations/redis',
+        label: 'Redis',
+      },
+      {
+        type: 'doc',
+        route: '/docs/integrations/postgresql',
+        label: 'PostgreSQL',
+      },
+      {
+        type: 'doc',
+        route: '/docs/integrations/nginx',
+        label: 'Nginx',
+      },
+      {
+        type: 'doc',
+        route: '/docs/integrations/mongodb',
+        label: 'MongoDB',
+      },
+      {
+        type: 'doc',
+        route: '/docs/integrations/clickhouse',
+        label: 'Clickhouse',
+      },
+      {
+        type: 'doc',
+        route: '/docs/integrations/aws-rds-postgres',
+        label: 'AWS RDS PostgreSQL',
+      },
+      {
+        type: 'doc',
+        route: '/docs/integrations/aws-rds-mysql',
+        label: 'AWS RDS MySQL',
+      },
+      {
+        type: 'doc',
+        route: '/docs/integrations/aws-elasticache-redis',
+        label: 'AWS Elasticache Redis',
       },
     ],
   },
