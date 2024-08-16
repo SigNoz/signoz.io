@@ -12,6 +12,13 @@ const config = {
     name: '@storybook/nextjs',
     options: {},
   },
+  reactDocgen: false,
+  typescript: {
+    check: false,
+    checkOptions: {
+      eslint: false,
+    },
+  },
   staticDirs: ['../public'],
 }
 export default config
