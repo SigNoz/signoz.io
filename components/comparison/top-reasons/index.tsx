@@ -43,6 +43,7 @@ const TopReasons = (props) => {
             return (
               <div
                 className={`row ${styles.reasonRow} ${!(index % 2) ? styles.shouldImageFirst : ''}`}
+                key={index}
               >
                 {index % 2 ? (
                   <div className={`col col--6 margin-vert--md ${styles.reasonImageCol}`}>
