@@ -8,6 +8,7 @@ const config = {
     '@storybook/addon-interactions',
     'storybook-dark-mode',
   ],
+  staticDirs: ['../public'],
   framework: {
     name: '@storybook/nextjs',
     options: {},
@@ -19,6 +20,5 @@ const config = {
       eslint: false,
     },
   },
-  staticDirs: ['../public'],
 }
 export default config
