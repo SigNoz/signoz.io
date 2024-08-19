@@ -10,7 +10,7 @@ type CardProps = {
   title?: string;
   subTitle?: string;
   stats?: string;
-  description?: string | string[];
+  description?: string | string[] | React.ReactNode;
   text?: string;
   info?: string;
   buttonText?: string;
