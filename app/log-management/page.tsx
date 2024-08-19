@@ -1,14 +1,11 @@
 'use client'
 
-import React, { useState } from 'react'
-import Hero from '@/components/ui/Hero'
-import VimeoPlayer from '@/components/VimeoPlayer/VimeoPlayer'
+import React from 'react'
 import Link from 'next/link'
 import { ArrowRight, BookOpen } from 'lucide-react'
 import Button from '@/components/Button/Button'
-import { useInView } from 'react-intersection-observer';
 import Card from '@/components/Card/card'
-import Image from 'next/image'
+import FeatureCard from '@/components/FeatureCard/FeatureCard'
 
 
 function LogsManagement() {
@@ -22,7 +19,7 @@ function LogsManagement() {
         <SigNozFeatures />
         <SigNozUsage />
         <UsageBasedPricing />
-        <ExploreDocs />
+        {/* <ExploreDocs /> */}
         <SigNozStats />
         <GetStarted page="LogsManagement" />
       </div>
@@ -110,19 +107,15 @@ const Header = () => {
 
   return (
     <header className="relative !mx-auto mt-16 !w-[100vw] md:!w-[80vw]">
-      <div className="absolute bottom-0 left-[12px] right-[12px] top-0 z-[-1] border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 md:left-[24px] md:right-[24px] z-[0]" />
+      <div className="absolute bottom-0 left-[12px] right-[12px] top-0 z-[0] border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 md:left-[24px] md:right-[24px]" />
       <div className="relative !mx-auto flex !w-[100vw] flex-col items-center border !border-b-0 border-dashed border-signoz_slate-400 px-2 pb-4 pt-12 text-center md:!w-[80vw] md:px-5 md:pt-[8.5rem]">
-        <div className="absolute left-0 top-[96px] z-[0] h-14 !w-[100vw] border !border-l-0 !border-r-0 border-dashed border-signoz_slate-400 md:top-[260px] md:!w-[80vw]" />
-        <Image
-          className="h-9 w-auto"
-          src="/svgs/icons/Logs-Management.svg"
-          width={36}
-          height={36}
-          alt=""
-        />
-        <Hero>
-          Log Management at any Scale <br/>Powered by ClickHouse
-        </Hero>
+
+        <div className="absolute left-0 top-[96px] h-14 !w-[100vw] border !border-l-0 !border-r-0 border-dashed border-signoz_slate-400 top-[80px] md:top-[225px] md:!w-[80vw]" />
+
+        <h1 className="my-4 text-2xl !p-3 sm:my-2 sm:text-3xl font-semibold tracking-tight dark:text-white sm:my-5 md:leading-[3.5rem] lg:text-[44px] text-gradient">
+          Log Management at any Scale <br />Powered by ClickHouse
+        </h1>
+        
         <p className="m-0 p-3 text-lg leading-8 font-normal sm:p-0 text-signoz_vanilla-400">
           Ingest logs from anywhere, quickly search and analyze with a powerful query builder, and correlate your
           <br className="hidden lg:inline" />
@@ -131,8 +124,7 @@ const Header = () => {
           suited for storing logs at scale.
         </p>
       </div>
-      {/* <div className='!w-[80vw] h-12 !mx-auto border border-signoz_slate-400 border-dashed !border-t-0 !border-b-0' /> */}
-      <div className="!mx-auto mx-2 flex !w-[100vw] flex-col items-center justify-center gap-3 border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 pb-12 pt-4 md:mx-5 md:!w-[80vw] md:flex-row">
+      <div className="relative z-[1] !mx-auto mx-2 flex !w-[100vw] flex-col items-center justify-center gap-3 border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 pb-12 pt-4 md:mx-5 md:!w-[80vw] md:flex-row">
         <Button id="btn-get-started-homepage-hero">
           <Link href="/teams/" className="flex-center">
             Start your free trial
@@ -228,112 +220,15 @@ const TrustedByTeams = ({ page }) => {
 
 const SigNozFeatures = () => {
 
-  const [currentImage, setCurrentImage] = useState("/img/graphics/homepage/feature-graphic-5.webp");
-
-  const { ref: firstContainer, inView: firstInView } = useInView({
-    threshold: 0,
-    rootMargin: '-10px 0px 0px 0px',
-    onChange: (inView) => {
-      if (inView) setCurrentImage("/img/graphics/homepage/feature-graphic-5.webp");
-    },
-  });
-
-  const { ref: secondContainer, inView: secondInView } = useInView({
-    threshold: 0,
-    rootMargin: '-1000px 0px 0px 0px',
-    onChange: (inView) => {
-      if (inView) setCurrentImage("/img/graphics/homepage/feature-graphic-4.webp");
-    },
-  });
-
-  const { ref: thirdContainer, inView: thirdInView } = useInView({
-    threshold: 0,
-    rootMargin: '-1000px 0px 0px 0px',
-    onChange: (inView) => {
-      if (inView) setCurrentImage("/img/features/logs/quick-search-filter.webp");
-    },
-  });
-
-  const { ref: fourthContainer, inView: fourthInView } = useInView({
-    threshold: 0,
-    rootMargin: '-1000px 0px 0px 0px',
-    onChange: (inView) => {
-      if (inView) setCurrentImage("/img/features/logs/powerful-query-builder.webp");
-    },
-  });
-
-  const { ref: fifthContainer, inView: fifthInView } = useInView({
-    threshold: 0,
-    rootMargin: '-1000px 0px 0px 0px',
-    onChange: (inView) => {
-      if (inView) setCurrentImage("/img/features/logs/log-visualizations.webp");
-    },
-  });
-  const { ref: sixthContainer, inView: sixthInView } = useInView({
-    threshold: 0,
-    rootMargin: '-1000px 0px 0px 0px',
-    onChange: (inView) => {
-      if (inView) setCurrentImage("/img/features/logs/logs-in-detail.webp");
-    },
-  });
-  const { ref: seventhContainer, inView: seventhInView } = useInView({
-    threshold: 0,
-    rootMargin: '-1000px 0px 0px 0px',
-    onChange: (inView) => {
-      if (inView) setCurrentImage("/img/features/logs/logs-in-context.webp");
-    },
-  });
-  const { ref: eighthContainer, inView: eighthInView } = useInView({
-    threshold: 0,
-    rootMargin: '-1000px 0px 0px 0px',
-    onChange: (inView) => {
-      if (inView) setCurrentImage("/img/features/logs/saved-views.webp");
-    },
-  });
-  const { ref: ninthContainer, inView: ninthInView } = useInView({
-    threshold: 0,
-    rootMargin: '-1000px 0px 0px 0px',
-    onChange: (inView) => {
-      if (inView) setCurrentImage("/img/features/logs/json-logs.webp");
-    },
-  });
-  const { ref: tenthContainer, inView: tenthInView } = useInView({
-    threshold: 0,
-    rootMargin: '-1000px 0px 0px 0px',
-    onChange: (inView) => {
-      if (inView) setCurrentImage("");
-    },
-  });
-  const { ref: eleventhContainer, inView: eleventhInView } = useInView({
-    threshold: 0,
-    rootMargin: '-1000px 0px 0px 0px',
-    onChange: (inView) => {
-      if (inView) setCurrentImage("/img/features/logs/live-logs.webp");
-    },
-  });
-  const { ref: twelfthContainer, inView: twelfthInView } = useInView({
-    threshold: 0,
-    rootMargin: '-1000px 0px 0px 0px',
-    onChange: (inView) => {
-      if (inView) setCurrentImage("/img/features/logs/correlation-of-signals.webp");
-    },
-  });
-  const { ref: thirteenthContainer, inView: thirteenthInView } = useInView({
-    threshold: 0,
-    rootMargin: '-1000px 0px 0px 0px',
-    onChange: (inView) => {
-      if (inView) setCurrentImage("/img/features/logs/add-to-dashboards-logs.webp");
-    },
-  });
-
-
   const sections = [
     {
       title: 'Logs at any scale powered by ClickHouse',
       desc: (
         <>
-          SigNoz uses ClickHouse (used by likes of Uber & Cloudflare) as datastore ⎯ an extremely fast and highly optimized storage for logs data.<p/>
-          It is a column-oriented database built for complex analytical queries ⎯ they are at least 1000 times faster in processing most queries. Aggregation and filtering are lightning-fast on log data. For ingestion, we found SigNoz to be 2.5x faster than ELK and about 13 times faster than ELK for aggregation queries. 
+        
+          SigNoz uses ClickHouse (used by likes of Uber & Cloudflare) as datastore ⎯ an extremely fast and highly optimized storage for logs data.<p />
+          It is a column-oriented database built for complex analytical queries ⎯ they are at least 1000 times faster in processing most queries. Aggregation and filtering are lightning-fast on log data. For ingestion, we found SigNoz to be 2.5x faster than ELK and about 13 times faster than ELK for aggregation queries.
+
           <a href="https://signoz.io/blog/logs-performance-benchmark/" target="_blank" className='text-signoz_robin-300'> (Logs Perf Benchmark).</a>
         </>
       ),
@@ -366,78 +261,64 @@ const SigNozFeatures = () => {
     },
   ]
 
- const scrollsections = [
-  {
-    number: '00.',
-    title: 'Easy Setup',
-    desc: "Collect log data from any source. Easily connect your existing logging pipelines like FluentD, FluentBit, & Logstash and send it to an OTel collector to receive logs in SigNoz.",
-  },
-  {
-    number: '01.',
-    title: 'Logs Pipelines powered by OTel Opamp',
-    desc: "Transform logs before they get ingested to SigNoz to suit your querying and aggregation needs. Powered by OpenTelemetry Opamp, log pipelines enable you to unleash the full potential of your logs by pre-processing them to suit your needs before they get stored. This unlocks valuable logs based queries and dashboards that wouldn't be possible otherwise.",
-    buttonText: 'Learn more'
-  },
-  {
-    number: '02.',
-    title: 'Quick Search & Filter',
-    desc: "Get a list of common filters for your logs data and quickly filter your required logs."
-  },
-  {
-    number: '03.',
-    title: 'Powerful Query Builder',
-    desc: "Apply various aggregations, such as count, sum, and average, and group your trace data based on selected attributes. Utilize multiple queries and formulas to dive deeper into your logs data and uncover valuable insights."
-  },
-  {
-    number: '04.',
-    title: 'Log Visualizations',
-    desc: "Our logs explorer comes packed with different visualizations to simplify troubleshooting and finding patterns."
-  },
-  {
-    number: '05.',
-    title: 'Logs in Detail',
-    desc: "Get a comprehensive view of your logs with a detailed view of logs. See overview, search for attributes, filters based on JSON data, and more to let you explore your logs in detail."
-  },
-  {
-    number: '06.',
-    title: 'Logs in Context',
-    desc: "Get more context around a log entry with Context view. For example, view logs of the same service, which might be running on different hosts."
-  },
-  {
-    number: '07.',
-    title: 'Saved Views',
-    desc: "Save views that matter - Apply complex queries and save that view for future reference. Your teammates can also access them if they need to."
-  },
-  {
-    number: '08.',
-    title: 'JSON Search',
-    desc: "Quickly apply filters on JSON data present inside the logs body."
-  },
-  {
-    number: '09.',
-    title: 'Optimizing Complex Queries',
-    desc: "Get suggestions on optimizing complex queries."
-  },
-  {
-    number: '10.',
-    title: 'Live Tailing',
-    desc: "View logs in real-time with live tail logging."
-  },
-  {
-    number: '11.',
-    title: 'Correlation with other signals',
-    desc: "Correlate your logs with traces and vice-versa to get a much richer context while debugging. Using OpenTelemetry for application observability can unlock the true potential of your telemetry data."
-  },
-  {
-    number: '12.',
-    title: 'Add to dashboards & Create Alerts',
-    desc: "Anything that you query can be added to dashboards for continued monitoring and visualization."
-  },
+
+  const scrollsections = [
+    {
+      title: 'Quick Search & Filter',
+      desc: "Get a list of common filters for your logs data and quickly filter your required logs.",
+      image: "/img/features/logs/quick-search-filter.webp",
+    },
+    {
+      title: 'Powerful Query Builder',
+      desc: "Apply various aggregations, such as count, sum, and average, and group your trace data based on selected attributes. Utilize multiple queries and formulas to dive deeper into your logs data and uncover valuable insights.",
+      image: "/img/features/logs/powerful-query-builder.webp",
+      buttonText: 'Learn more'
+    },
+    {
+      title: 'Log Visualizations',
+      desc: "Our logs explorer comes packed with different visualizations to simplify troubleshooting and finding patterns.",
+      image: "/img/features/logs/log-visualizations.webp"
+    },
+    {
+      title: 'Logs in Detail',
+      desc: "Get a comprehensive view of your logs with a detailed view of logs. See overview, search for attributes, filters based on JSON data, and more to let you explore your logs in detail.",
+      image: "/img/features/logs/logs-in-detail.webp"
+    },
+    {
+      title: 'Logs in Context',
+      desc: "Get more context around a log entry with Context view. For example, view logs of the same service, which might be running on different hosts.",
+      image: "/img/features/logs/logs-in-context.webp"
+    },
+    {
+      title: 'Saved Views',
+      desc: "Save views that matter - Apply complex queries and save that view for future reference. Your teammates can also access them if they need to.",
+      image: "/img/features/logs/saved-views.webp"
+    },
+    {
+      title: 'JSON Search',
+      desc: "Quickly apply filters on JSON data present inside the logs body.",
+      image: "/img/features/logs/json-logs.webp"
+    },
+    {
+      title: 'Live Tailing',
+      desc: "View logs in real-time with live tail logging.",
+      image: "/img/features/logs/live-logs.webp"
+    },
+    {
+      title: 'Correlation with other signals',
+      desc: "Correlate your logs with traces and vice-versa to get a much richer context while debugging. Using OpenTelemetry for application observability can unlock the true potential of your telemetry data.",
+      image: "/img/features/logs/correlation-of-signals.webp"
+    },
+    {
+      title: 'Add to dashboards & Create Alerts',
+      desc: "Anything that you query can be added to dashboards for continued monitoring and visualization.",
+      image: "/img/features/logs/add-to-dashboards-logs.webp"
+    },
 
 
 
-  
- ]
+
+  ]
   return (
     <>
       <div className="bg-[url('/img/background_blur/Frame_1862.png')] bg-[length:65%] bg-[center_top_5rem] sm:bg-no-repeat">
@@ -469,120 +350,16 @@ const SigNozFeatures = () => {
         </div>
       </div>
 
-      <div className='!mx-auto grid !w-[100vw] grid-cols-1 border !border-b-0 !border-l-0 !border-t-0 border-dashed border-signoz_slate-400 sm:grid-cols-2 md:!w-[80vw]'>
-        <div className='flex flex-col relative'>
-          <div>
-            <div ref={firstContainer}>
-              <Card
-                number={scrollsections[0].number}
-                subTitle={scrollsections[0].title}
-                description={scrollsections[0].desc}
-                subTitleSize={2}
-              />
-            </div>
-            <div ref={secondContainer}>
-              <Card
-                number={scrollsections[1].number}
-                subTitle={scrollsections[1].title}
-                description={scrollsections[1].desc}
-                buttonText={scrollsections[1].buttonText}
-                subTitleSize={2}
-              />
-            </div>
-            <div ref={thirdContainer}>
-              <Card
-                number={scrollsections[2].number}
-                subTitle={scrollsections[2].title}
-                description={scrollsections[2].desc}
-                subTitleSize={2}
-              />
-            </div>
-            <div ref={fourthContainer}>
-              <Card
-                number={scrollsections[3].number}
-                subTitle={scrollsections[3].title}
-                description={scrollsections[3].desc}
-                subTitleSize={2}
-              />
-            </div>
-            <div ref={fifthContainer}>
-              <Card
-                number={scrollsections[4].number}
-                subTitle={scrollsections[4].title}
-                description={scrollsections[4].desc}
-                buttonText={scrollsections[4].buttonText}
-                subTitleSize={2}
-              />
-            </div>
-            <div ref={sixthContainer}>
-              <Card
-                number={scrollsections[5].number}
-                subTitle={scrollsections[5].title}
-                description={scrollsections[5].desc}
-                subTitleSize={2}
-              />
-            </div>
-            <div ref={seventhContainer}>
-              <Card
-                number={scrollsections[6].number}
-                subTitle={scrollsections[6].title}
-                description={scrollsections[6].desc}
-                subTitleSize={2}
-              />
-            </div>
-            <div ref={eighthContainer}>
-              <Card
-                number={scrollsections[7].number}
-                subTitle={scrollsections[7].title}
-                description={scrollsections[7].desc}
-                subTitleSize={2}
-              />
-            </div>
-            <div ref={ninthContainer}>
-              <Card
-                number={scrollsections[8].number}
-                subTitle={scrollsections[8].title}
-                description={scrollsections[8].desc}
-                subTitleSize={2}
-              />
-            </div>
-            <div ref={tenthContainer}>
-              <Card
-                number={scrollsections[9].number}
-                subTitle={scrollsections[9].title}
-                description={scrollsections[9].desc}
-                subTitleSize={2}
-              />
-            </div>
-            <div ref={eleventhContainer}>
-              <Card
-                number={scrollsections[10].number}
-                subTitle={scrollsections[10].title}
-                description={scrollsections[10].desc}
-                subTitleSize={2}
-              />
-            </div>
-            <div ref={twelfthContainer}>
-              <Card
-                number={scrollsections[11].number}
-                subTitle={scrollsections[11].title}
-                description={scrollsections[11].desc}
-                subTitleSize={2}
-              />
-            </div>
-            <div ref={thirteenthContainer}>
-              <Card
-                number={scrollsections[12].number}
-                subTitle={scrollsections[12].title}
-                description={scrollsections[12].desc}
-                subTitleSize={2}
-              />
-            </div>
-          </div>
-        </div>
-        <div className="sticky top-20 h-max justify-center items-start">
-          <img src={currentImage} alt="Scroll Section Image" className='h-auto w-auto' />
-        </div>
+
+      <div className="!mx-auto grid !w-[100vw] grid-cols-1 border !border-l-0 !border-t-0 border-dashed border-signoz_slate-400 sm:grid-cols-2 md:!w-[80vw]">
+        {scrollsections.map((scrollsections, index) => (
+          <FeatureCard
+            title={scrollsections.title}
+            description={scrollsections.desc}
+            buttonText={scrollsections.buttonText}
+            img={scrollsections.image}
+          />
+        ))}
       </div>
     </>
   )
