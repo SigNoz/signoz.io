@@ -59,7 +59,7 @@ const Card: React.FC<CardProps> = ({ number, iconTag, title, subTitle, stats, de
       </div>
 
       <div>
-        {text ? <span className='text-signoz_vanilla-400 text-xl font-semibold leading-9 block my-3 max-w-md'>{text}</span>: null}
+        {text ? <span className='text-signoz_vanilla-400 text-xl font-semibold leading-9 block my-3 max-w-md'>{text}</span> : null}
       </div>
 
       <div>
@@ -69,15 +69,15 @@ const Card: React.FC<CardProps> = ({ number, iconTag, title, subTitle, stats, de
       {descriptionArray.map((desc, index) => (
         <p key={index} className="text-signoz_vanilla-400 text-base font-normal leading-9 mt-2 mb-3">{desc}</p>
       ))}
+      {img ? <img src={img} className="card-background border-none w-auto h-auto" /> : null}
 
       {buttonText ? (
-        <Link href={buttonLink ? buttonLink: ''} >
-          <Button type={Button.TYPES.SECONDARY} className='mt-8 mb-4'>
+        <Link href={buttonLink ? buttonLink : ''} >
+          <Button type={Button.TYPES.SECONDARY} className='mt-6 mb-4'>
             {buttonText} <ArrowRight size={14} />
           </Button>
         </Link>
       ) : null}
-      {img ? <img src={img} className="card-background border-none w-auto h-auto" /> : null}
     </div>
   );
 };

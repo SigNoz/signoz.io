@@ -18,13 +18,16 @@ const FeatureCard: React.FC<CardProps> = ({ title, img, description, buttonText,
         <p className='text-3xl font-semibold text-signoz_vanilla-100'>{title}</p>
         {img ? <img src={img} className='card-background border-none w-auto h-auto' /> : null}
         <p className='text-signoz_vanilla-400 text-base font-normal leading-9 mt-2 mb-3'>{description}</p>
-        {buttonText ? (
-          <Button type={Button.TYPES.SECONDARY} className='mt-8 mb-4 max-w-fit'>
-            <Link href={buttonLink ? buttonLink : ''} className="flex-center" >
-              {buttonText} <ArrowRight size={14} />
-            </Link>
-          </Button>
-        ) : null}
+      </div>
+      <div className='mt-4'>
+
+      {buttonText ? (
+        <Button type={Button.TYPES.SECONDARY} className='mt-4 mb-4 max-w-fit'>
+          <Link href={buttonLink ? buttonLink : ''} className="flex-center" target="_blank">
+            {buttonText} <ArrowRight size={14} />
+          </Link>
+        </Button>
+      ) : null}
       </div>
     </div>
   )

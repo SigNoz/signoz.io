@@ -29,49 +29,50 @@ export const SigNozFeatures = () => {
     {
       iconTag: 'INGEST DATA',
       text: 'Ingest data from 50+ sources — send your data and start monitoring.',
-      buttonText: 'Explore',
+      // buttonText: 'Explore',
       logo: '/img/index_features/bar-chart-2.svg',
       img: '/img/graphics/homepage/feature-graphic-1.webp',
     },
     {
       iconTag: 'APPLICATION PERFORMANCE MONITORING',
       text: 'Monitor & troubleshoot your application performance with APM.',
-      buttonText: 'Explore',
+      // buttonText: 'Explore',
       logo: '/img/index_features/bar-chart-2.svg',
       img: '/img/graphics/homepage/feature-graphic-2.webp',
     },
     {
       iconTag: 'DISTRIBUTED TRACING',
       text: 'Track user requests across services to identify bottlenecks.',
-      buttonText: 'Learn more',
+      // buttonText: 'Learn more',
       logo: '/img/index_features/drafting-compass.svg',
       img: '/img/graphics/homepage/feature-graphic-3.webp',
     },
     {
       iconTag: 'LOG MANAGEMENT',
       text: 'Ingest, search, and analyze your logs at any scale.',
-      buttonText: 'Learn more',
+      buttonText: 'Explore More',
+      buttonLink: "/log-management/",
       logo: '/img/index_features/logs.svg',
       img: '/img/graphics/homepage/feature-graphic-4.webp',
     },
     {
       iconTag: 'EXCEPTIONS',
       text: 'Record exceptions automatically with stack trace & linked span data.',
-      buttonText: 'Explore',
+      // buttonText: 'Explore',
       logo: '/img/index_features/bug.svg',
       img: '/img/graphics/homepage/feature-graphic-5.webp',
     },
     {
       iconTag: 'METRICS & DASHBOARDS',
       text: 'Infrastructure monitoring, custom metrics & configurable dashboards to fit any use case.',
-      buttonText: 'Explore',
+      // buttonText: 'Explore',
       logo: '/img/index_features/layout-grid.svg',
       img: '/img/graphics/homepage/feature-graphic-6.webp',
     },
     {
       iconTag: 'ALERTS',
       text: 'Get actionable alerts in your preferred notification channel.',
-      buttonText: 'Learn more',
+      // buttonText: 'Learn more',
       logo: '/img/index_features/concierge-bell.svg',
       img: '/img/graphics/homepage/feature-graphic-7.webp',
     },
@@ -158,7 +159,8 @@ export const SigNozFeatures = () => {
           <Card
             iconTag={section.iconTag}
             text={section.text}
-            // buttonText={section.buttonText}
+            buttonText={section.buttonText}
+            buttonLink={section.buttonLink}
             logo={section.logo}
             img={section.img}
           />
