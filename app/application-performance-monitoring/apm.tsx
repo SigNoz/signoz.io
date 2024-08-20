@@ -8,26 +8,26 @@ import Card from '@/components/Card/card'
 import FeatureCard from '@/components/FeatureCard/FeatureCard'
 
 
-function LogsManagement() {
+function Apm() {
   return (
     <main className='mb-auto !mt-[-80px]'>
       <div className='relative bg-signoz_ink-500'>
         <div className="absolute left-0 right-0 top-0 h-screen bg-[url('/img/background_blur/Perlin_noise.png')] bg-[length:55%] bg-[center_top_4rem] sm:bg-no-repeat " />
         <div className="absolute left-0 right-0 top-0 h-screen bg-[url('/img/background_blur/Circle.png')] bg-[length:110%] bg-no-repeat sm:bg-[center_top_-50rem]" />
         <Header />
-        <TrustedByTeams page="LogsManagement" />
+        <TrustedByTeams page="apm" />
         <SigNozFeatures />
         <SigNozUsage />
         <UsageBasedPricing />
         {/* <ExploreDocs /> */}
         <SigNozStats />
-        <GetStarted page="LogsManagement" />
+        <GetStarted page="apm" />
       </div>
     </main>
   )
 }
 
-export default LogsManagement
+export default Apm
 
 const PlatformCard = ({ title, description }) => {
   return (
@@ -40,10 +40,12 @@ const PlatformCard = ({ title, description }) => {
 
 const FeatureList = () => {
   const features = [
-    { title: 'Use correlated logs and traces to debug applications.', description: 'Use traces to identify performance bottlenecks and then debug it with logs associated with that trace.' },
-    { title: 'Create alerts from logs.', description: 'For example, create alerts on error logs in the last 5 minutes based on a threshold.' },
-    { title: 'Create dashboards to view all the error logs from different services.', description: 'Query logs for specific conditions and add them to dashboards for continuous monitoring.' },
-    { title: 'Share specific log lines with your teammates while troubleshooting', description: 'Improved collaboration with your teammates while debugging by sharing specific log lines.' },
+    { title: 'Real-Time Monitoring', description: ' Get real-time insights and alerts on application performance issues, enabling rapid response and resolution.' },
+    { title: 'End-point monitoring/Transaction monitoring', description: 'Monitor top API end-points of your services for latency, number of calls, and error rate.' },
+    { title: 'Database Monitoring', description: 'Monitor the performance of database queries and transactions made from your application.' },
+    { title: 'External API monitoring', description: 'Track the performance and reliability of third-party APIs. Monitor the latency, error rates, and response times of external API calls.' },
+    { title: 'Root Cause Analysis', description: 'Quickly identify and diagnose the root causes of performance issues and errors in applications with the ability to view traces around high latencies.' },
+    { title: 'Service Dependency Mapping', description: 'Visualize service dependencies and understand how different services interact within the application architecture.' },
   ];
 
   return (
@@ -61,7 +63,7 @@ const FeatureList = () => {
 
 const UsageList = () => {
   const Usage = [
-    { title: 'Pay only for data you send', description: 'We don’t have any SKU-based pricing. Get access to all features in the plan selected and only pay for the data you send. Pay only $0.3 per GB of ingested logs.' },
+    { title: 'Pay only for data you send', description: 'We don’t have any SKU-based pricing. Get access to all features in the plan selected and only pay for the data you send. Pay only $0.3 per GB of ingested traces.' },
     { title: 'Add unlimited team members', description: 'Observability should be available to every developer at your company. After all, anyone can need debugging. That’s why we don’t charge for user seats, and you can add as many team members as you want.' },
     { title: 'No Host (container or node) based pricing', description: 'For modern cloud-based applications it doesn’t make sense to charge on the basis of number of hosts or containers. You don’t need to worry about auto-scaling during peak hours. Only pay for the amount of data sent no matter the number of hosts.' },
   ]
@@ -111,15 +113,15 @@ const Header = () => {
         <div className="absolute left-0 top-[96px] h-14 !w-[100vw] border !border-l-0 !border-r-0 border-dashed border-signoz_slate-400 top-[80px] md:top-[225px] md:!w-[80vw]" />
 
         <h1 className="my-4 text-2xl !p-3 sm:my-2 sm:text-3xl font-semibold tracking-tight dark:text-white sm:my-5 md:leading-[3.5rem] lg:text-[44px] text-gradient">
-          Log Management at any Scale <br />Powered by ClickHouse
+        Application Performance Monitoring <br />Powered by OpenTelemetry
         </h1>
         
         <p className="m-0 p-3 text-lg leading-8 font-normal sm:p-0 text-signoz_vanilla-400">
-          Ingest logs from anywhere, quickly search and analyze with a powerful query builder, and correlate your
+         SigNoz APM comes with out-of-box charts for key application metrics powered by OpenTelemetry. 
           <br className="hidden lg:inline" />
-          logs with other signals. Logs at SigNoz is powered by ClickHouse - a lightning-fast columnar datastore
+          Get latency, requests per second, error percentage, apdex & other key metrics 
           <br className="hidden lg:inline" />
-          suited for storing logs at scale.
+          to understand your application performance.
         </p>
       </div>
       <div className="relative z-[1] !mx-auto mx-2 flex !w-[100vw] flex-col items-center justify-center gap-3 border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 pb-12 pt-4 md:mx-5 md:!w-[80vw] md:flex-row">
@@ -143,7 +145,7 @@ const Header = () => {
             <div className="embed-container">
               <div className="absolute">
                 <img
-                  src="/img/platform/LogsManagementHero.webp"
+                  src="/img/features/apm/apm-cover.webp"
                   alt="Custom Thumbnail"
                   className="w-full rounded-lg"
                 />
@@ -220,117 +222,87 @@ const SigNozFeatures = () => {
 
   const sections = [
     {
-      title: 'Logs at any scale powered by ClickHouse',
-      desc: (
-        <>
-        
-          SigNoz uses ClickHouse (used by likes of Uber & Cloudflare) as datastore ⎯ an extremely fast and highly optimized storage for logs data.<p />
-          It is a column-oriented database built for complex analytical queries ⎯ they are at least 1000 times faster in processing most queries. Aggregation and filtering are lightning-fast on log data. For ingestion, we found SigNoz to be 2.5x faster than ELK and about 13 times faster than ELK for aggregation queries.
-
-          <a href="https://signoz.io/blog/logs-performance-benchmark/" target="_blank" className='text-signoz_robin-300'> (Logs Perf Benchmark).</a>
-        </>
-      ),
-      figure: '/img/landing/property-no-vendor-lock-in.webp',
-      logo: '/img/log-management/logs.svg',
-    },
-    {
-      title: 'Fast troubleshooting with Query Builder',
-      desc: ['Query your logs quickly with our powerful logs query builder. No need to learn any complex query language, just select some dropdowns and hit Run.',
-        'Get a list of common filters for your logs data and quickly filter your required logs. Apply various aggregations, such as count, sum, and average, and group your log data based on selected attributes. Utilize multiple queries and formulas to dive deeper into your logs data and uncover valuable insights.',
+      title: 'Faster Analytics powered by ClickHouse',
+      desc: ['We use ClickHouse as our datastore. ClickHouse is a very fast and resource-efficient database for real-time analytics. Big companies like Uber and Cloudflare power their observability with ClickHouse as the database. It provides best-in-class ingestion rates and great compression ratios for efficient storage.',
       ],
       figure: '/img/landing/property-ease-of-use.webp',
       logo: '/img/log-management/fast.svg',
-      buttonText: 'Learn More',
-      buttonLink: 'https://signoz.io/docs/userguide/query-builder/'
     },
     {
-      title: 'Cost-effective long-term storage of logs',
-      desc: 'You can store your logs in long-term storage for compliance and auditing purposes. You can either forward the logs to your own S3/ Google cloud storage or object storage in SigNoz cloud. The data is stored in ClickHouse native format and you can query it whenever you want. Log forwarding cost is only $0.25 per GB.',
+      title: 'Correlation with other signals',
+      desc: 'We provide traces, metrics, and logs under a single pane of glass powered by OpenTelemetry SDKs. You can correlate your signals for a much richer context while debugging. Generate metrics from trace data, jump from traces to logs and vice-versa.',
       figure: '/img/landing/property-covers-all-use-cases.webp',
-      logo: '/img/log-management/wallet.svg',
-      buttonText: 'Learn More',
-      buttonLink: 'https://signoz.io/docs/logs-management/long-term-storage/'
+      logo: '/img/log-management/signals.svg',
     },
     {
-      title: 'Identify Root Cause with Correlated Signals',
-      desc: ['We provide logs, metrics, and traces under a single pane of glass powered by OpenTelemetry SDKs.',
-        'You can correlate your logs with traces and vice-versa to gain better insights while debugging. Powered by OpenTelemetry semantic conventions, correlated signals can help you understand your applications better and identify the root cause of issues faster.',
-      ],
-      figure: '/img/landing/property-standardize-observability.webp',
-      logo: '/img/log-management/signals.svg',
+      title: 'Out-of-box charts for key application metrics',
+      desc: 'Get key application metrics charts like p99, p90, p50 latency, request rate, error rates, Apdex and others with minimal code changes. Use auto-instrumentation libraries provided by OpenTelemetry to get started with observability quickly.',
+      figure: '/img/landing/property-covers-all-use-cases.webp',
+      logo: '/img/features/apm/chart-column-big.svg',
+      buttonText: 'Instrument your application',
+      buttonLink: 'https://signoz.io/docs/instrumentation/'
     },
   ]
 
 
   const scrollsections = [
     {
-      title: 'Powerful Query Builder',
-      desc: "Apply various aggregations, such as count, sum, and average, and group your log data based on selected attributes. Utilize multiple queries and formulas to dive deeper into your logs data and uncover valuable insights.",
-      image: "/img/features/logs/powerful-query-builder.webp",
+      title: 'Support for all popular languages',
+      desc: "SigNoz supports a wide range of popular languages for application monitoring. Instrument your application code with OpenTelemetry, and start sending data to SigNoz.",
+      image: "/img/features/apm/apm-language-supported.webp",
       buttonText: 'Learn More',
-      buttonLink: 'https://signoz.io/docs/userguide/query-builder/',
+      buttonLink: 'https://signoz.io/docs/instrumentation/',
     },
     {
-      title: 'Parse Logs with Log Pipelines',
-      desc: "Transform logs before they get ingested to SigNoz to suit your querying and aggregation needs. Powered by OpenTelemetry Opamp, log pipelines enable you to unleash the full potential of your logs by pre-processing them to suit your needs before they get stored. This unlocks valuable logs based queries and dashboards that wouldn't be possible otherwise.",
-      image: "/img/features/logs/logs-pipeline.webp",
+      title: 'Monitor all your services',
+      desc: "Be on top of your application performance with out-of-box charts for latency, error rate, operations per second, and other critical metrics of all your services.",
+      image: "/img/features/apm/apm-services.webp",
+    },
+    {
+      title: 'Out-of-box APM Charts',
+      desc: "For each of your services, monitor p99, p90, p50 latencies, rate (ops/s), and error rate with out-of-the-box application metrics charts.",
+      image: "/img/features/apm/apm-charts.webp",
+    },
+    {
+      title: 'Apdex',
+      desc: "Apdex score indicates the end user’s level of satisfaction from 0(least satisfied) to 1(most satisfied) with application performance. It helps developers gauge their application's performance from the user's perspective.",
+      image: "/img/features/apm/apdex.webp",
       buttonText: 'Learn More',
-      buttonLink: 'https://signoz.io/docs/logs-pipelines/introduction/',
+      buttonLink: 'https://signoz.io/docs/userguide/metrics/#what-are-application-metrics',
     },
     {
-      title: 'Quick Search & Filter',
-      desc: "Get a list of common filters for your logs data and quickly filter your required logs with operators like conatins, in, not_in, like, not_like, etc. ",
-      image: "/img/features/logs/quick-search-filter.webp",
+      title: 'Database Call Metrics',
+      desc: "If your application makes any database calls, you can monitor them under DB Call Metrics . Monitor the number of database calls per second and their average duration.",
+      image: "/img/features/apm/database-call-metrics.webp",
       buttonText: 'Learn More',
-      buttonLink: 'https://signoz.io/docs/product-features/logs-explorer/',
+      buttonLink: 'https://signoz.io/docs/userguide/metrics/#database-calls-in-signoz',
     },
     {
-      title: 'Log Visualizations',
-      desc: "Our logs explorer comes packed with different visualizations to simplify troubleshooting and finding patterns.",
-      image: "/img/features/logs/log-visualizations.webp",
+      title: 'Monitor the Top Endpoints of your service',
+      desc: "Get a list of key endpoints and important metrics about them. It helps you quickly identify slow endpoints of your application.",
+      image: "/img/features/apm/top-endpoints.webp",
       buttonText: 'Learn More',
-      buttonLink: 'https://signoz.io/docs/product-features/logs-explorer/#views',
+      buttonLink: 'https://signoz.io/docs/application-monitoring/api-monitoring/#key-operations-section-in-service-page',
     },
     {
-      title: 'Logs in Detail',
-      desc: "Get a comprehensive view of your logs with a detailed view of logs. See overview, search for attributes, filters based on JSON data, and more to let you explore your logs in detail.",
-      image: "/img/features/logs/logs-in-detail.webp",
+      title: 'External Call Metrics',
+      desc: "External call metrics allow you to track the external services on which your application depends. Monitor things like the percentage of external calls that resulted in errors.",
+      image: "/img/features/apm/external-call-metrics.webp",
       buttonText: 'Learn More',
-      buttonLink: 'https://signoz.io/docs/product-features/logs-explorer/#log-details',
+      buttonLink: 'https://signoz.io/docs/userguide/metrics/#external-calls-in-signoz',
     },
     {
-      title: 'Logs in Context',
-      desc: "Get more context around a log entry with Context view. For example, for a particular service view logs of the specific host, while that service might be running on multiple hosts.",
-      image: "/img/features/logs/logs-in-context.webp"
+      title: 'Service Map',
+      desc: "With the Service Map, you can get a complete overview of all the services in your application. It gives developers an idea of how the services are interconnected and shows p99 latency, request rate, and error rate between two services.",
+      image: "/img/features/apm/service-maps.webp",
+      buttonText: 'Learn More',
+      buttonLink: 'https://signoz.io/docs/userguide/service-map/',
     },
     {
-      title: 'Saved Views',
-      desc: "Save views that matter - Apply complex queries and save that view for future reference. Your teammates can also access them if they need to.",
-      image: "/img/features/logs/saved-views.webp"
+      title: 'Application Metrics to Traces',
+      desc: "SigNoz APM allows you to view your application's traces from APM charts at any time stamp. You can click on data points with high latencies to view traces around those timestamps.",
+      image: "/img/features/apm/apm-view-traces.webp"
     },
-    {
-      title: 'JSON Search',
-      desc: "Quickly apply filters on JSON data present inside the logs body.",
-      image: "/img/features/logs/json-logs.webp"
-    },
-    {
-      title: 'Live Logs',
-      desc: "View logs in real-time with Live Logs.",
-      image: "/img/features/logs/live-logs.webp"
-    },
-    {
-      title: 'Correlation with other signals',
-      desc: "Correlate your logs with traces and vice-versa to get a much richer context while debugging. Using OpenTelemetry for application observability can unlock the true potential of your telemetry data.",
-      image: "/img/features/logs/correlation-of-signals.webp"
-    },
-    {
-      title: 'Add to dashboards & Create Alerts',
-      desc: "Anything that you query can be added to dashboards for continued monitoring and visualization.",
-      image: "/img/features/logs/add-to-dashboards-logs.webp"
-    },
-
-
-
 
   ]
   return (
@@ -341,7 +313,7 @@ const SigNozFeatures = () => {
             <div className="flex flex-col gap-6 pb-44 pt-28 ">
               <div className="mx-auto mt-[50px] flex max-w-4xl flex-col items-center text-center">
                 <div className="text-[44px] font-semibold leading-[3.25rem] text-signoz_sienna-100">
-                  Why use SigNoz for <br /> Log Management?
+                  Why use SigNoz for <br /> Application Performance Monitoring?
                 </div>
               </div>
             </div>
@@ -371,7 +343,7 @@ const SigNozFeatures = () => {
             <div className="flex flex-col gap-6 pb-44 pt-28 ">
               <div className="mx-auto mt-[50px] flex max-w-4xl flex-col items-center text-center">
                 <div className="text-[44px] font-semibold leading-[3.25rem] text-signoz_sienna-100">
-                  SigNoz Log Management <br /> Overview
+                  SigNoz Application Performance <br /> Monitoring Overview
                 </div>
               </div>
             </div>
@@ -404,7 +376,7 @@ const SigNozUsage = () => {
       <div className="flex flex-col sm:flex-row">
         <div className="!w-[100%]  flex-1 md:!w-[300px]">
           <p className="sticky top-[100px] px-10 pl-0 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-[44px] md:px-0 md:pl-12">
-            Use SigNoz<br /> Logs for...
+            Use SigNoz<br /> APM for...
           </p>
         </div>
         <div className="flex-[2_2_0%]">
