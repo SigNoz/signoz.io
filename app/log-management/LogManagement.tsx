@@ -271,7 +271,7 @@ const SigNozFeatures = () => {
       buttonLink: 'https://signoz.io/docs/userguide/query-builder/',
     },
     {
-      title: 'Logs Pipelines powered by OTel Opamp',
+      title: 'Parse Logs with Log Pipelines',
       desc: "Transform logs before they get ingested to SigNoz to suit your querying and aggregation needs. Powered by OpenTelemetry Opamp, log pipelines enable you to unleash the full potential of your logs by pre-processing them to suit your needs before they get stored. This unlocks valuable logs based queries and dashboards that wouldn't be possible otherwise.",
       image: "/img/features/logs/logs-pipeline.webp",
       buttonText: 'Learn More',
