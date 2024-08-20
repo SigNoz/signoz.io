@@ -66,6 +66,7 @@ export const WhyOpenTelemetry = () => {
             subTitle={section.title}
             description={section.desc}
             logoSize={24}
+            key={section.title}
           />
         ))}
       </div>

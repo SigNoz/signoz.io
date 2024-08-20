@@ -50,7 +50,12 @@ const BuildForDevelopers = () => {
             </div>
             <div className="homepage-build-dev-container grid grid-cols-1 sm:grid-cols-2">
               {REASONS.map((section, index) => (
-                <Card title={section.title} description={section.desc} img={section.figure} />
+                <Card
+                  title={section.title}
+                  description={section.desc}
+                  img={section.figure}
+                  key={section.title}
+                />
               ))}
             </div>
           </div>
