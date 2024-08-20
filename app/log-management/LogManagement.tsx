@@ -314,8 +314,8 @@ const SigNozFeatures = () => {
       image: "/img/features/logs/json-logs.webp"
     },
     {
-      title: 'Live Tailing',
-      desc: "View logs in real-time with live tail logging.",
+      title: 'Live Logs',
+      desc: "View logs in real-time with Live Logs.",
       image: "/img/features/logs/live-logs.webp"
     },
     {
