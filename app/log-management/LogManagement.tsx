@@ -271,6 +271,13 @@ const SigNozFeatures = () => {
       buttonLink: 'https://signoz.io/docs/userguide/query-builder/',
     },
     {
+      title: 'Logs Pipelines powered by OTel Opamp',
+      desc: "Transform logs before they get ingested to SigNoz to suit your querying and aggregation needs. Powered by OpenTelemetry Opamp, log pipelines enable you to unleash the full potential of your logs by pre-processing them to suit your needs before they get stored. This unlocks valuable logs based queries and dashboards that wouldn't be possible otherwise.",
+      image: "/img/features/logs/logs-pipeline.webp",
+      buttonText: 'Learn More',
+      buttonLink: 'https://signoz.io/docs/logs-pipelines/introduction/',
+    },
+    {
       title: 'Quick Search & Filter',
       desc: "Get a list of common filters for your logs data and quickly filter your required logs with operators like conatins, in, not_in, like, not_like, etc. ",
       image: "/img/features/logs/quick-search-filter.webp",
@@ -467,7 +474,7 @@ const SigNozStats = () => {
       name: 'OSS Downloads',
       value: '10 million+',
     },
-    { id: 2, logo: '/img/index_features/github.svg', name: 'GitHub Stars', value: '17k+' },
+    { id: 2, logo: '/img/index_features/github.svg', name: 'GitHub Stars', value: '18k+' },
     { id: 3, logo: '/img/index_features/contributions.svg', name: 'Contributors', value: '140+' },
     { id: 4, logo: '/img/index_features/community.svg', name: 'Community Members', value: '4.5k+' },
   ]
