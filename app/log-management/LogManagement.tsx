@@ -40,12 +40,10 @@ const PlatformCard = ({ title, description }) => {
 
 const FeatureList = () => {
   const features = [
-    { title: 'Monitor all logs from your K8s applications', description: 'Add as many team members as you want.' },
-    { title: 'Create metrics from logs', description: 'Add as many team members as you want.' },
-    { title: 'Database Monitoring', description: 'Add as many team members as you want.' },
-    { title: 'External API Monitoring', description: 'Add as many team members as you want.' },
-    { title: 'Root Cause Analysis', description: 'Add as many team members as you want.' },
-    { title: 'Service Dependency Mapping', description: 'Add as many team members as you want.' },
+    { title: 'Use correlated logs and traces to debug applications.', description: 'Use traces to identify performance bottlenecks and then debug it with logs associated with that trace.' },
+    { title: 'Create alerts from logs.', description: 'For example, create alerts on error logs in the last 5 minutes based on a threshold.' },
+    { title: 'Create dashboards to view all the error logs from different services.', description: 'Query logs for specific conditions and add them to dashboards for continuous monitoring.' },
+    { title: 'Share specific log lines with your teammates while troubleshooting', description: 'Improved collaboration with your teammates while debugging by sharing specific log lines.' },
   ];
 
   return (
@@ -238,17 +236,19 @@ const SigNozFeatures = () => {
     {
       title: 'Fast troubleshooting with Query Builder',
       desc: ['Query your logs quickly with our powerful logs query builder. No need to learn any complex query language, just select some dropdowns and hit Run.',
-        'Get a list of common filters for your logs data and quickly filter your required logs. Apply various aggregations, such as count, sum, and average, and group your trace data based on selected attributes. Utilize multiple queries and formulas to dive deeper into your logs data and uncover valuable insights.',
+        'Get a list of common filters for your logs data and quickly filter your required logs. Apply various aggregations, such as count, sum, and average, and group your log data based on selected attributes. Utilize multiple queries and formulas to dive deeper into your logs data and uncover valuable insights.',
       ],
       figure: '/img/landing/property-ease-of-use.webp',
       logo: '/img/log-management/fast.svg',
+      buttonText: 'Learn More',
+      buttonLink: 'https://signoz.io/docs/userguide/query-builder/'
     },
     {
       title: 'Cost-effective long-term storage of logs',
       desc: 'You can store your logs in long-term storage for compliance and auditing purposes. You can either forward the logs to your own S3/ Google cloud storage or object storage in SigNoz cloud. The data is stored in ClickHouse native format and you can query it whenever you want. Log forwarding cost is only $0.25 per GB.',
       figure: '/img/landing/property-covers-all-use-cases.webp',
       logo: '/img/log-management/wallet.svg',
-      buttonText: 'learn more',
+      buttonText: 'Learn More',
       buttonLink: 'https://signoz.io/docs/logs-management/long-term-storage/'
     },
     {
@@ -264,29 +264,36 @@ const SigNozFeatures = () => {
 
   const scrollsections = [
     {
-      title: 'Quick Search & Filter',
-      desc: "Get a list of common filters for your logs data and quickly filter your required logs.",
-      image: "/img/features/logs/quick-search-filter.webp",
+      title: 'Powerful Query Builder',
+      desc: "Apply various aggregations, such as count, sum, and average, and group your log data based on selected attributes. Utilize multiple queries and formulas to dive deeper into your logs data and uncover valuable insights.",
+      image: "/img/features/logs/powerful-query-builder.webp",
+      buttonText: 'Learn More',
+      buttonLink: 'https://signoz.io/docs/userguide/query-builder/',
     },
     {
-      title: 'Powerful Query Builder',
-      desc: "Apply various aggregations, such as count, sum, and average, and group your trace data based on selected attributes. Utilize multiple queries and formulas to dive deeper into your logs data and uncover valuable insights.",
-      image: "/img/features/logs/powerful-query-builder.webp",
-      buttonText: 'Learn more'
+      title: 'Quick Search & Filter',
+      desc: "Get a list of common filters for your logs data and quickly filter your required logs with operators like conatins, in, not_in, like, not_like, etc. ",
+      image: "/img/features/logs/quick-search-filter.webp",
+      buttonText: 'Learn More',
+      buttonLink: 'https://signoz.io/docs/product-features/logs-explorer/',
     },
     {
       title: 'Log Visualizations',
       desc: "Our logs explorer comes packed with different visualizations to simplify troubleshooting and finding patterns.",
-      image: "/img/features/logs/log-visualizations.webp"
+      image: "/img/features/logs/log-visualizations.webp",
+      buttonText: 'Learn More',
+      buttonLink: 'https://signoz.io/docs/product-features/logs-explorer/#views',
     },
     {
       title: 'Logs in Detail',
       desc: "Get a comprehensive view of your logs with a detailed view of logs. See overview, search for attributes, filters based on JSON data, and more to let you explore your logs in detail.",
-      image: "/img/features/logs/logs-in-detail.webp"
+      image: "/img/features/logs/logs-in-detail.webp",
+      buttonText: 'Learn More',
+      buttonLink: 'https://signoz.io/docs/product-features/logs-explorer/#log-details',
     },
     {
       title: 'Logs in Context',
-      desc: "Get more context around a log entry with Context view. For example, view logs of the same service, which might be running on different hosts.",
+      desc: "Get more context around a log entry with Context view. For example, for a particular service view logs of the specific host, while that service might be running on multiple hosts.",
       image: "/img/features/logs/logs-in-context.webp"
     },
     {
@@ -327,7 +334,7 @@ const SigNozFeatures = () => {
             <div className="flex flex-col gap-6 pb-44 pt-28 ">
               <div className="mx-auto mt-[50px] flex max-w-4xl flex-col items-center text-center">
                 <div className="text-[44px] font-semibold leading-[3.25rem] text-signoz_sienna-100">
-                  Why use SigNoz for <br /> Logs management?
+                  Why use SigNoz for <br /> Log Management?
                 </div>
               </div>
             </div>
@@ -348,6 +355,20 @@ const SigNozFeatures = () => {
             />
           ))}
         </div>
+      </div>
+
+      <div className="bg-[url('/img/background_blur/Frame_1862.png')] bg-[length:65%] bg-[center_top_5rem] sm:bg-no-repeat">
+        <section className="mx-auto w-[100vw] border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 bg-[url('/img/background_blur/Ellipse_388.png')] bg-[center_top_calc(-78px)] md:w-[80vw] ">
+          <div className={`container pb-16`}>
+            <div className="flex flex-col gap-6 pb-44 pt-28 ">
+              <div className="mx-auto mt-[50px] flex max-w-4xl flex-col items-center text-center">
+                <div className="text-[44px] font-semibold leading-[3.25rem] text-signoz_sienna-100">
+                  SigNoz Log Management <br /> Overview
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
       </div>
 
 
@@ -373,7 +394,7 @@ const SigNozUsage = () => {
       <div className="flex flex-col sm:flex-row">
         <div className="!w-[100%]  flex-1 md:!w-[300px]">
           <p className="sticky top-[100px] px-10 pl-0 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-[44px] md:px-0 md:pl-12">
-            You can use <br /> SigNoz to...
+            Use SigNoz<br /> Logs for...
           </p>
         </div>
         <div className="flex-[2_2_0%]">
