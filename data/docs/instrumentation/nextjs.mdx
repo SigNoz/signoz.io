@@ -1,5 +1,5 @@
 ---
-date: 2024-06-19
+date: 2024-08-20
 id: nextjs
 title: Nextjs OpenTelemetry Instrumentation
 description:  Learn how to instrument your Nextjs application with OpenTelemetry and send telemetry data to SigNoz
@@ -17,40 +17,79 @@ Based on your application environment, you can choose the setup below to send tr
 From VMs, there are two ways to send data to SigNoz Cloud.
 
 - [Send traces directly to SigNoz Cloud](#send-traces-directly-to-signoz-cloud)
-  - [No Code Automatic Instrumentation](#send-traces-directly-to-signoz-cloud---no-code-automatic-instrumentation-recommended) (recommended)
-  - [Code Level Automatic Instrumentation](#send-traces-directly-to-signoz-cloud---code-level-automatic-instrumentation)
+  - [Using vercel otel](#send-traces-directly-to-signoz-cloud---Using-vercel-otel) (recommended)
+  - [OpenTelemetry instrument (only works for nodejs runtime)](#send-traces-directly-to-signoz-cloud---OpenTelemetry-instrument)
 - [Send traces via OTel Collector binary](#send-traces-via-otel-collector-binary) (recommended)
-  - [No Code Automatic Instrumentation](#send-traces-via-otel-collector-binary---no-code-automatic-instrumentation) (recommended)
-  - [Code Level Automatic Instrumentation](#send-traces-via-otel-collector-binary---code-level-automatic-instrumentation)
+  - [Using vercel otel](#send-traces-via-otel-collector-binary---Using-vercel-otel) (recommended)
+  - [OpenTelemetry instrument (only works for nodejs runtime)](#send-traces-via-otel-collector-binary---OpenTelemetry-instrument)
 
-#### Send traces directly to SigNoz Cloud - No Code Automatic Instrumentation (recommended)
+#### Send traces directly to SigNoz Cloud - Using vercel otel
 
 **Step 1.** Install OpenTelemetry packages
 
 ```bash
-npm install --save @opentelemetry/api
-npm install --save @opentelemetry/auto-instrumentations-node
+npm install @vercel/otel @opentelemetry/sdk-logs @opentelemetry/api-logs @opentelemetry/instrumentation @opentelemetry/exporter-trace-otlp-http
 ```
 
-**Step 2.** Run the application
+**Step 2.** Update `next.config.mjs` to include instrumentationHook
+```tsx
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+    // include instrumentationHook experimental feature
+    experimental: {
+        instrumentationHook: true,
+    },
+};
 
-```bash
-export OTEL_TRACES_EXPORTER="otlp"
-export OTEL_EXPORTER_OTLP_ENDPOINT="<SIGNOZ_ENDPOINT>"
-export OTEL_NODE_RESOURCE_DETECTORS="env,host,os"
-export OTEL_SERVICE_NAME="<APP_NAME>"
-export OTEL_EXPORTER_OTLP_HEADERS="signoz-access-token=<SIGNOZ_ACCESS_TOKEN>"
-export NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
-<your_run_command>
+export default nextConfig;
 ```
 
-| Variable              | Description                                               |
-|-----------------------|-----------------------------------------------------|
-| APP_NAME *      | Name you want to give to your rust application  |
-| SIGNOZ_ENDPOINT  *     | This is ingestion URL which you must have got in mail after registering on SigNoz cloud  |
-| SIGNOZ_ACCESS_TOKEN *  | This is Ingestion Key which you must have got in mail after registering on SigNoz cloud                                     |
+**Step 3.** Create `instrumentation.node.ts` file<br></br>
+You need to configure the endpoint for SigNoz cloud in this file.
 
-replace `<your_run_command>` with the run command of your application
+```tsx
+'use strict'
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
+
+// Add otel logging
+import { diag, DiagConsoleLogger, DiagLogLevel } from '@opentelemetry/api';
+diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.ERROR); // set diaglog level to DEBUG when debugging
+
+const exporterOptions = {
+  url: 'https://ingest.[data_region].signoz.cloud:443/v1/traces', // Set your own data region or set to http://localhost:4318/v1/traces if using selfhost SigNoz
+  headers: { 'signoz-access-token': 'SIGNOZ_INGESTION_KEY' }, // Set if you are using SigNoz Cloud
+}
+
+export const traceExporter = new OTLPTraceExporter(exporterOptions);
+```
+
+- `SIGNOZ_INGESTION_KEY` : You can find your ingestion key from SigNoz cloud account details sent on your email.
+
+Depending on the choice of your region for SigNoz cloud, the ingest endpoint will vary according to this table.
+
+| Region | Endpoint |
+| --- | --- |
+| US |	ingest.us.signoz.cloud:443/v1/traces |
+| IN |	ingest.in.signoz.cloud:443/v1/traces |
+| EU | ingest.eu.signoz.cloud:443/v1/traces |
+
+
+**Step 4.** Create `instrumentation.ts` file<br></br>
+```tsx
+import { registerOTel } from '@vercel/otel';
+import { traceExporter } from './instrumentation.node';
+
+export function register() {
+  registerOTel({
+    serviceName: 'Sample Next.js App',
+    traceExporter: traceExporter,
+  });
+}
+```
+
+**Step 5.** Once you're done configuring the exporter options, try running your application and validate if your application is sending traces to SigNoz cloud [here](#validating-instrumentation-by-checking-for-traces).
+
+You can also check the sample application at this <a href = "https://github.com/SigNoz/sample-nextjs-app/tree/vercel-otel" rel="noopener noreferrer nofollow" target="_blank">GitHub repo</a>.
 
 #### Send traces directly to SigNoz Cloud - Code Level Automatic Instrumentation
 
@@ -77,16 +116,7 @@ const nextConfig = {
 export default nextConfig;
 ```
 
-**Step 3.** Create `instrumentation.ts` file<br></br>
-```tsx
-export async function register() {
-  if (process.env.NEXT_RUNTIME === 'nodejs') {
-    await import('./instrumentation.node')
-  }
-}
-```
-
-**Step 4.** Create `instrumentation.node.ts` file<br></br>
+**Step 3.** Create `instrumentation.node.ts` file<br></br>
 You need to configure the endpoint for SigNoz cloud in this file.
 
 ```tsx
@@ -98,9 +128,9 @@ import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http'
 import { Resource } from '@opentelemetry/resources'
 import { SEMRESATTRS_SERVICE_NAME } from '@opentelemetry/semantic-conventions'
  
-// Add otel logging when debugging
-// import { diag, DiagConsoleLogger, DiagLogLevel } from '@opentelemetry/api';
-// diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.DEBUG);
+// Add otel logging
+import { diag, DiagConsoleLogger, DiagLogLevel } from '@opentelemetry/api';
+diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.ERROR); // set diaglog level to DEBUG when debugging
 
 const exporterOptions = {
   url: 'https://ingest.[region].signoz.cloud:443/v1/traces', // use your own data region 
@@ -138,6 +168,15 @@ Depending on the choice of your region for SigNoz cloud, the ingest endpoint wil
 | US |	ingest.us.signoz.cloud:443/v1/traces |
 | IN |	ingest.in.signoz.cloud:443/v1/traces |
 | EU | ingest.eu.signoz.cloud:443/v1/traces |
+
+**Step 4.** Create `instrumentation.ts` file<br></br>
+```tsx
+export async function register() {
+  if (process.env.NEXT_RUNTIME === 'nodejs') {
+    await import('./instrumentation.node')
+  }
+}
+```
 
 **Step 5.** Once you're done configuring the exporter options, try running your application and validate if your application is sending traces to SigNoz cloud [here](#validating-instrumentation-by-checking-for-traces).
 
@@ -225,16 +264,7 @@ const nextConfig = {
 export default nextConfig;
 ```
 
-**Step 4.** Create `instrumentation.ts` file<br></br>
-```tsx
-export async function register() {
-  if (process.env.NEXT_RUNTIME === 'nodejs') {
-    await import('./instrumentation.node')
-  }
-}
-```
-
-**Step 5.** Create `instrumentation.node.ts` file<br></br>
+**Step 4.** Create `instrumentation.node.ts` file<br></br>
 You need to configure the endpoint for SigNoz cloud in this file.
 
 ```tsx
@@ -246,9 +276,9 @@ import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http'
 import { Resource } from '@opentelemetry/resources'
 import { SEMRESATTRS_SERVICE_NAME } from '@opentelemetry/semantic-conventions'
  
-// Add otel logging when debugging
-// import { diag, DiagConsoleLogger, DiagLogLevel } from '@opentelemetry/api';
-// diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.DEBUG);
+// Add otel logging
+import { diag, DiagConsoleLogger, DiagLogLevel } from '@opentelemetry/api';
+diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.ERROR); // set diaglog level to DEBUG when debugging
 
 const exporterOptions = {
   url: 'http://localhost:4318/v1/traces',
@@ -274,6 +304,15 @@ process.on('SIGTERM', () => {
     .catch((error) => console.log('Error terminating tracing', error))
     .finally(() => process.exit(0));
 });
+```
+
+**Step 5.** Create `instrumentation.ts` file<br></br>
+```tsx
+export async function register() {
+  if (process.env.NEXT_RUNTIME === 'nodejs') {
+    await import('./instrumentation.node')
+  }
+}
 ```
 
 **Step 6.** Once we are done with the above configurations, you can run the collector service with the following command:
