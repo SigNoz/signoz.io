@@ -378,6 +378,7 @@ const SigNozFeatures = () => {
             title={scrollsections.title}
             description={scrollsections.desc}
             buttonText={scrollsections.buttonText}
+            buttonLink={scrollsections.buttonLink}
             img={scrollsections.image}
           />
         ))}
@@ -423,7 +424,14 @@ const UsageBasedPricing = () => {
             </div>
             <p className='text-signoz_vanilla-400 text-base font-normal'>Tired of Datadog’s unpredictable bills or New Relic’s user-based pricing?<br />We’re here for you.</p>
             <UsageList />
+          <Button id="btn-get-started-homepage-hero" className="mt-5">
+          <Link href="/pricing/" className="flex-center">
+            Check Pricing
+            <ArrowRight size={14} />
+          </Link>
+        </Button>
           </div>
+
         </div>
       </div>
     </div>
