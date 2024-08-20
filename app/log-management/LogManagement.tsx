@@ -345,6 +345,7 @@ const SigNozFeatures = () => {
         <div className="!mx-auto grid !w-[100vw] grid-cols-1 border !border-b-0 !border-l-0 !border-t-0 border-dashed border-signoz_slate-400 sm:grid-cols-2 md:!w-[80vw]">
           {sections.map((section, index) => (
             <Card
+              key ={index}
               logo={section.logo}
               subTitle={section.title}
               description={section.desc}
@@ -375,6 +376,7 @@ const SigNozFeatures = () => {
       <div className="!mx-auto grid !w-[100vw] grid-cols-1 border !border-l-0 !border-t-0 border-dashed border-signoz_slate-400 sm:grid-cols-2 md:!w-[80vw]">
         {scrollsections.map((scrollsections, index) => (
           <FeatureCard
+          key ={index}
             title={scrollsections.title}
             description={scrollsections.desc}
             buttonText={scrollsections.buttonText}
@@ -484,8 +486,8 @@ const SigNozStats = () => {
 
           <div className="flex flex-[2_2_0%] flex-col">
             <div className="grid grid-cols-1 text-left sm:grid-cols-2">
-              {STATS_LIST.map((stat) => (
-                <Card logo={stat.logo} stats={stat.value} description={stat.name} logoSize={24} />
+              {STATS_LIST.map((stat, index) => (
+                <Card logo={stat.logo} stats={stat.value} description={stat.name} logoSize={24} key={index} />
               ))}
             </div>
             <div className="flex flex-col items-center gap-3 border !border-b-0 !border-r-0 border-dashed border-signoz_slate-400 py-6 sm:flex-row sm:py-6 sm:pl-10">
