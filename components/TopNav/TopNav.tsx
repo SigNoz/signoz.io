@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { Button, Dialog, Popover } from '@headlessui/react'
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
 import Image from 'next/image'
@@ -65,6 +65,20 @@ export default function TopNav() {
   }, [pathname])
 
   const [isOpen, setIsOpen] = useState(false);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null); 
+
+  const handleMouseEnter = () => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    setIsOpen(true);
+  };
+
+  const handleMouseLeave = () => {
+    timeoutRef.current = setTimeout(() => {
+      setIsOpen(false);
+    }, 1);
+  };
 
   return (
     <div className="fixed left-0 right-0 z-30">
@@ -95,6 +109,11 @@ export default function TopNav() {
               <span className="text-[17.111px] font-medium">SigNoz</span>
             </Link>
             <Popover.Group className="hidden items-center gap-x-6 lg:flex">
+              <div
+                  onMouseEnter={handleMouseEnter}
+                  onMouseLeave={handleMouseLeave}
+              >
+
               <Dropdown isOpen={isOpen}>
                 <DropdownTrigger>
                   <Button
@@ -200,6 +219,7 @@ export default function TopNav() {
                   </DropdownItem>
                 </DropdownMenu>
               </Dropdown>
+              </div>
 
               <Link
                 href="/docs"
