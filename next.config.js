@@ -180,11 +180,6 @@ module.exports = () => {
           permanent: true,
         },
         {
-          source: '/distributed-tracing/',
-          destination: '/blog/distributed-tracing/',
-          permanent: true,
-        },
-        {
           source: '/blog/signoz-benchmarks/',
           destination: '/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/',
           permanent: true,
