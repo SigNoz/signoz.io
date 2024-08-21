@@ -8,26 +8,26 @@ import Card from '@/components/Card/card'
 import FeatureCard from '@/components/FeatureCard/FeatureCard'
 
 
-function Apm() {
+function DistributedTracing() {
   return (
     <main className='mb-auto !mt-[-80px]'>
       <div className='relative bg-signoz_ink-500'>
         <div className="absolute left-0 right-0 top-0 h-screen bg-[url('/img/background_blur/Perlin_noise.png')] bg-[length:55%] bg-[center_top_4rem] sm:bg-no-repeat " />
         <div className="absolute left-0 right-0 top-0 h-screen bg-[url('/img/background_blur/Circle.png')] bg-[length:110%] bg-no-repeat sm:bg-[center_top_-50rem]" />
         <Header />
-        <TrustedByTeams page="apm" />
+        <TrustedByTeams page="DistributedTracing" />
         <SigNozFeatures />
         <SigNozUsage />
         <UsageBasedPricing />
         {/* <ExploreDocs /> */}
         <SigNozStats />
-        <GetStarted page="apm" />
+        <GetStarted page="DistributedTracing" />
       </div>
     </main>
   )
 }
 
-export default Apm
+export default DistributedTracing
 
 const PlatformCard = ({ title, description }) => {
   return (
@@ -40,12 +40,11 @@ const PlatformCard = ({ title, description }) => {
 
 const FeatureList = () => {
   const features = [
-    { title: 'Real-Time Monitoring', description: ' Get real-time insights and alerts on application performance issues, enabling rapid response and resolution.' },
-    { title: 'End-point monitoring/Transaction monitoring', description: 'Monitor top API end-points of your services for latency, number of calls, and error rate.' },
-    { title: 'Database Monitoring', description: 'Monitor the performance of database queries and transactions made from your application.' },
-    { title: 'External API monitoring', description: 'Track the performance and reliability of third-party APIs. Monitor the latency, error rates, and response times of external API calls.' },
-    { title: 'Root Cause Analysis', description: 'Quickly identify and diagnose the root causes of performance issues and errors in applications with the ability to view traces around high latencies.' },
-    { title: 'Service Dependency Mapping', description: 'Visualize service dependencies and understand how different services interact within the application architecture.' },
+    { title: 'Advanced Trace analytics', description: 'You can write ClickHouse queries on your trace data. It enables users to write queries for advanced use cases like finding average latency between two spans of interest.' },
+    { title: 'Detecting N+1 Query Problems', description: 'Identify N+1 query with the help of traces which can show patterns of single request fanning out multiple database requests' },
+    { title: 'Get logs associated with a particular span', description: 'Identify performance bottlenecks quickly with flamegraphs and then debug with associated logs data.' },
+    { title: 'Improve response times', description: ' Track and optimize the time taken by each service or database query, ensuring faster response times and better user experiences.' },
+    { title: 'Optimize database queries', description: 'Identify slow database queries with quick filters and flamegraphs and then optimize their response times.' },
   ];
 
   return (
@@ -110,24 +109,24 @@ const Header = () => {
       <div className="absolute bottom-0 left-[12px] right-[12px] top-0 z-[0] border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 md:left-[24px] md:right-[24px]" />
       <div className="relative !mx-auto flex !w-[100vw] flex-col items-center border !border-b-0 border-dashed border-signoz_slate-400 px-2 pb-4 pt-12 text-center md:!w-[80vw] md:px-5 md:pt-[8.5rem]">
 
-        <div className="absolute left-0 top-[101px] z-0 h-9 sm:h-14 !w-[100vw] border !border-l-0 !border-r-0 border-dashed border-signoz_slate-400 md:top-[225px] md:!w-[80vw]" />
+        <div className="absolute left-0 top-[96px] h-14 !w-[100vw] border !border-l-0 !border-r-0 border-dashed border-signoz_slate-400 top-[80px] md:top-[225px] md:!w-[80vw]" />
 
-        <h1 className="my-4 text-2xl !p-3 sm:my-2 sm:text-3xl font-semibold tracking-tight dark:text-white sm:my-5 md:leading-[3.5rem] lg:text-[44px] text-gradient z-[1]">
-          Application Performance Monitoring <br />Powered by OpenTelemetry
+        <h1 className="my-4 text-2xl !p-3 sm:my-2 sm:text-3xl font-semibold tracking-tight dark:text-white sm:my-5 md:leading-[3.5rem] lg:text-[44px] text-gradient">
+        Distributed Tracing For Finding Root Cause <br />of Application Performance Issues Quickly
         </h1>
-
+        
         <p className="m-0 p-3 text-lg leading-8 font-normal sm:p-0 text-signoz_vanilla-400">
-          SigNoz APM comes with out-of-box charts for key application metrics powered by OpenTelemetry.
+        Implement distributed tracing in your microservices-based applications powered by OpenTelemetry SDKs. 
           <br className="hidden lg:inline" />
-          Get latency, requests per second, error percentage, apdex & other key metrics
+          Track user requests across services to help you identify performance bottlenecks. 
           <br className="hidden lg:inline" />
-          to understand your application performance.
+          Correlated your traces with logs for quick debugging.
         </p>
       </div>
       <div className="relative z-[1] !mx-auto mx-2 flex !w-[100vw] flex-col items-center justify-center gap-3 border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 pb-12 pt-4 md:mx-5 md:!w-[80vw] md:flex-row">
         <Button id="btn-get-started-homepage-hero">
           <Link href="/teams/" className="flex-center">
-            Start your free trial
+            Get started with distributed tracing
             <ArrowRight size={14} />
           </Link>
         </Button>
@@ -145,7 +144,7 @@ const Header = () => {
             <div className="embed-container">
               <div className="absolute">
                 <img
-                  src="/img/features/apm/apm-cover.webp"
+                  src="/img/features/distributed-tracing/distributed-tracing-cover.webp"
                   alt="Custom Thumbnail"
                   className="w-full rounded-lg"
                 />
@@ -222,81 +221,75 @@ const SigNozFeatures = () => {
 
   const sections = [
     {
-      title: 'Faster Analytics powered by ClickHouse',
-      desc: ['We use ClickHouse as our datastore. ClickHouse is a very fast and resource-efficient database for real-time analytics. Big companies like Uber and Cloudflare power their observability with ClickHouse as the database. It provides best-in-class ingestion rates and great compression ratios for efficient storage.',
-      ],
+      title: 'Application Metrics to Traces to Logs for Fast Troubleshooting',
+      desc: ['SigNoz provides logs, metrics, and traces under a single pane of glass. You can go from application metrics to traces to related logs with just 3 clicks. It helps you to debug application issues quickly. Powered by OpenTelemetry SDKs, you can set up tracing in your applications with just a few lines of code.',],
       figure: '/img/landing/property-ease-of-use.webp',
-      logo: '/img/log-management/fast.svg',
-    },
-    {
-      title: 'Correlation with other signals',
-      desc: 'We provide traces, metrics, and logs under a single pane of glass powered by OpenTelemetry SDKs. You can correlate your signals for a much richer context while debugging. Generate metrics from trace data, jump from traces to logs and vice-versa.',
-      figure: '/img/landing/property-covers-all-use-cases.webp',
       logo: '/img/log-management/signals.svg',
     },
     {
-      title: 'Out-of-box charts for key application metrics',
-      desc: 'Get key application metrics charts like p99, p90, p50 latency, request rate, error rates, Apdex and others with minimal code changes. Use auto-instrumentation libraries provided by OpenTelemetry to get started with observability quickly.',
+      title: 'Quick analysis with Filters, Aggregates & Querying on Trace data',
+      desc: 'Trace data is full of rich context - that’s why we give you the power of quick analysis on your trace data with the ability to apply quick filters, create aggregates, and write complex queries. Our trace explorer comes packed with powerful features to analyze trace data quickly.',
+      figure: '/img/landing/property-covers-all-use-cases.webp',
+      logo: '/img/log-management/fast.svg',
+    },
+    {
+      title: 'Advanced Trace Analytics powered by ClickHouse Queries',
+      desc: 'We use ClickHouse as a datastore for traces, and you can really go deep into your trace data by writing ClickHouse queries. For example, you can find out the average latency between two spans of interest in a trace. You can also create alerts on your trace data. With the power of writing ClickHouse Queries on your trace data, the possibilities are limitless.',
       figure: '/img/landing/property-covers-all-use-cases.webp',
       logo: '/img/features/apm/chart-column-big.svg',
-      buttonText: 'Instrument your application',
-      buttonLink: 'https://signoz.io/docs/instrumentation/'
+      buttonText: 'Learn More',
+      buttonLink: 'https://signoz.io/docs/tutorial/writing-clickhouse-queries-in-dashboard/#avg-latency-between-2-spans-of-interest-part-of-the-trace-tree'
+    },
+    {
+      title: 'Exceptions from Trace data',
+      desc: 'Record exceptions automatically with a stack trace and linked span data.  By leveraging OpenTelemetry, we show you exceptions & errors in your application from trace data. OpenTelemetry auto-instrumentation libraries in Python, Java, Ruby, and Javascript can help you capture exceptions automatically.',
+      figure: '/img/landing/property-covers-all-use-cases.webp',
+      logo: '/img/features/distributed-tracing/exceptions-logo.svg',
+      buttonText: 'Learn More',
+      buttonLink: 'https://signoz.io/docs/userguide/exceptions/'
     },
   ]
 
 
   const scrollsections = [
     {
-      title: 'Support for all popular languages',
-      desc: "SigNoz supports a wide range of popular languages for application monitoring. Instrument your application code with OpenTelemetry, and start sending data to SigNoz.",
-      image: "/img/features/apm/apm-language-supported.webp",
+      title: 'Quick Filters of Spans',
+      desc: "Quick filters let you see spans corresponding to specific status codes, service names, operations, RPC methods, etc.",
+      image: "/img/features/distributed-tracing/quick-filters-traces.webp",
+    },
+    {
+      title: 'Trace Query Builder',
+      desc: "Apply various aggregations, such as count, sum, and average, and group your trace data based on selected attributes. Utilize multiple queries and formulas to dive deeper into your trace data and uncover valuable insights.",
+      image: "/img/features/distributed-tracing/trace-query-builder.webp",
+    },
+    {
+      title: 'Different Compact views',
+      desc: "See your trace data in different views based on your use cases, like list view, root spans, time series, and table view.",
+      image: "/img/features/distributed-tracing/traces-time-series.webp",
       buttonText: 'Learn More',
-      buttonLink: 'https://signoz.io/docs/instrumentation/',
+      buttonLink: 'https://signoz.io/docs/product-features/trace-explorer/'
     },
     {
-      title: 'Monitor all your services',
-      desc: "Be on top of your application performance with out-of-box charts for latency, error rate, operations per second, and other critical metrics of all your services.",
-      image: "/img/features/apm/apm-services.webp",
+      title: 'Saved View',
+      desc: "Saved views enable you to access your favorite queries quickly. Create complex queries and save them for future reference.",
+      image: "/img/features/distributed-tracing/saved-views.webp",
     },
     {
-      title: 'Out-of-box APM Charts',
-      desc: "For each of your services, monitor p99, p90, p50 latencies, rate (ops/s), and error rate with out-of-the-box application metrics charts.",
-      image: "/img/features/apm/apm-charts.webp",
+      title: 'Flamegraphs & Gantt Chart view of Traces',
+      desc: "See user requests in a detailed breakdown with the help of Flamegraphs and Gantt Charts. Click on any span to see the entire trace represented beautifully to help you make sense of where it actually occurred in the flow of requests.",
+      image: "/img/features/distributed-tracing/traces-flamegraphs.webp",
     },
     {
-      title: 'Apdex',
-      desc: "Apdex score indicates the end user’s level of satisfaction from 0(least satisfied) to 1(most satisfied) with application performance. It helps developers gauge their application's performance from the user's perspective.",
-      image: "/img/features/apm/apdex.webp",
+      title: 'Correlation with logs',
+      desc: "Correlate your traces with logs to get a much richer context while debugging. Using OpenTelemetry and SigNoz can help you uncover insights faster with correlated signals.",
+      image: "/img/features/distributed-tracing/traces-go-to-related-logs.webp",
+    },
+    {
+      title: 'Access to Trace data through API',
+      desc: "Accessing trace data efficiently through our Trace API allows you to manage and analyze it efficiently. This opens up many opportunities for integration with other tools, programmatic analysis of trace data, and customized data handling, enhancing overall observability and operational efficiency.",
       buttonText: 'Learn More',
-      buttonLink: 'https://signoz.io/docs/userguide/metrics/#what-are-application-metrics',
+      buttonLink: 'https://signoz.io/docs/traces-management/trace-api/overview/',
     },
-    {
-      title: 'Database Call Metrics',
-      desc: "If your application makes any database calls, you can monitor them under DB Call Metrics. Monitor the number of database calls per second and their average duration.",
-      image: "/img/features/apm/database-call-metrics.webp",
-      buttonText: 'Learn More',
-      buttonLink: 'https://signoz.io/docs/userguide/metrics/#database-calls-in-signoz',
-    },
-    {
-      title: 'Monitor the Top Endpoints of your service',
-      desc: "Get a list of key endpoints and important metrics about them. It helps you quickly identify slow endpoints of your application.",
-      image: "/img/features/apm/top-endpoints.webp",
-      buttonText: 'Learn More',
-      buttonLink: 'https://signoz.io/docs/application-monitoring/api-monitoring/#key-operations-section-in-service-page',
-    },
-    {
-      title: 'External Call Metrics',
-      desc: "External call metrics allow you to track the external services on which your application depends. Monitor things like the percentage of external calls that resulted in errors.",
-      image: "/img/features/apm/external-call-metrics.webp",
-      buttonText: 'Learn More',
-      buttonLink: 'https://signoz.io/docs/userguide/metrics/#external-calls-in-signoz',
-    },
-    {
-      title: 'Application Metrics to Traces',
-      desc: "SigNoz APM allows you to view your application's traces from APM charts at any time stamp. You can click on data points with high latencies to view traces around those timestamps.",
-      image: "/img/features/apm/apm-view-traces.webp"
-    },
-
   ]
   return (
     <>
@@ -306,7 +299,7 @@ const SigNozFeatures = () => {
             <div className="flex flex-col gap-6 pb-44 pt-28 ">
               <div className="mx-auto mt-[50px] flex max-w-4xl flex-col items-center text-center">
                 <div className="text-[44px] font-semibold leading-[3.25rem] text-signoz_sienna-100">
-                  Why use SigNoz for <br /> Application Performance Monitoring?
+                  Why use SigNoz for <br /> Distributed Tracing?
                 </div>
               </div>
             </div>
@@ -317,7 +310,7 @@ const SigNozFeatures = () => {
         <div className="!mx-auto grid !w-[100vw] grid-cols-1 border !border-b-0 !border-l-0 !border-t-0 border-dashed border-signoz_slate-400 sm:grid-cols-2 md:!w-[80vw]">
           {sections.map((section, index) => (
             <Card
-              key={index}
+              key ={index}
               logo={section.logo}
               subTitle={section.title}
               description={section.desc}
@@ -336,7 +329,7 @@ const SigNozFeatures = () => {
             <div className="flex flex-col gap-6 pb-44 pt-28 ">
               <div className="mx-auto mt-[50px] flex max-w-4xl flex-col items-center text-center">
                 <div className="text-[44px] font-semibold leading-[3.25rem] text-signoz_sienna-100">
-                  SigNoz Application Performance <br /> Monitoring Overview
+                  SigNoz Distributed <br /> Tracing Overview
                 </div>
               </div>
             </div>
@@ -348,7 +341,7 @@ const SigNozFeatures = () => {
       <div className="!mx-auto grid !w-[100vw] grid-cols-1 border !border-l-0 !border-t-0 border-dashed border-signoz_slate-400 sm:grid-cols-2 md:!w-[80vw]">
         {scrollsections.map((scrollsections, index) => (
           <FeatureCard
-            key={index}
+          key ={index}
             title={scrollsections.title}
             description={scrollsections.desc}
             buttonText={scrollsections.buttonText}
@@ -369,7 +362,7 @@ const SigNozUsage = () => {
       <div className="flex flex-col sm:flex-row">
         <div className="!w-[100%]  flex-1 md:!w-[300px]">
           <p className="sticky top-[100px] px-10 pl-0 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-[44px] md:px-0 md:pl-12">
-            Use SigNoz<br /> APM for...
+            Use SigNoz<br /> Distributed Tracing for...
           </p>
         </div>
         <div className="flex-[2_2_0%]">
@@ -398,12 +391,12 @@ const UsageBasedPricing = () => {
             </div>
             <p className='text-signoz_vanilla-400 text-base font-normal'>Tired of Datadog’s unpredictable bills or New Relic’s user-based pricing?<br />We’re here for you.</p>
             <UsageList />
-            <Button id="btn-get-started-homepage-hero" className="mt-5">
-              <Link href="/pricing/" className="flex-center">
-                Check Pricing
-                <ArrowRight size={14} />
-              </Link>
-            </Button>
+          <Button id="btn-get-started-homepage-hero" className="mt-5">
+          <Link href="/pricing/" className="flex-center">
+            Check Pricing
+            <ArrowRight size={14} />
+          </Link>
+        </Button>
           </div>
 
         </div>
