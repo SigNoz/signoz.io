@@ -110,16 +110,16 @@ const Header = () => {
       <div className="absolute bottom-0 left-[12px] right-[12px] top-0 z-[0] border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 md:left-[24px] md:right-[24px]" />
       <div className="relative !mx-auto flex !w-[100vw] flex-col items-center border !border-b-0 border-dashed border-signoz_slate-400 px-2 pb-4 pt-12 text-center md:!w-[80vw] md:px-5 md:pt-[8.5rem]">
 
-        <div className="absolute left-0 top-[96px] h-14 !w-[100vw] border !border-l-0 !border-r-0 border-dashed border-signoz_slate-400 top-[80px] md:top-[225px] md:!w-[80vw]" />
+        <div className="absolute left-0 top-[101px] z-0 h-9 sm:h-14 !w-[100vw] border !border-l-0 !border-r-0 border-dashed border-signoz_slate-400 md:top-[225px] md:!w-[80vw]" />
 
-        <h1 className="my-4 text-2xl !p-3 sm:my-2 sm:text-3xl font-semibold tracking-tight dark:text-white sm:my-5 md:leading-[3.5rem] lg:text-[44px] text-gradient">
-        Application Performance Monitoring <br />Powered by OpenTelemetry
+        <h1 className="my-4 text-2xl !p-3 sm:my-2 sm:text-3xl font-semibold tracking-tight dark:text-white sm:my-5 md:leading-[3.5rem] lg:text-[44px] text-gradient z-[1]">
+          Application Performance Monitoring <br />Powered by OpenTelemetry
         </h1>
-        
+
         <p className="m-0 p-3 text-lg leading-8 font-normal sm:p-0 text-signoz_vanilla-400">
-         SigNoz APM comes with out-of-box charts for key application metrics powered by OpenTelemetry. 
+          SigNoz APM comes with out-of-box charts for key application metrics powered by OpenTelemetry.
           <br className="hidden lg:inline" />
-          Get latency, requests per second, error percentage, apdex & other key metrics 
+          Get latency, requests per second, error percentage, apdex & other key metrics
           <br className="hidden lg:inline" />
           to understand your application performance.
         </p>
@@ -272,7 +272,7 @@ const SigNozFeatures = () => {
     },
     {
       title: 'Database Call Metrics',
-      desc: "If your application makes any database calls, you can monitor them under DB Call Metrics . Monitor the number of database calls per second and their average duration.",
+      desc: "If your application makes any database calls, you can monitor them under DB Call Metrics. Monitor the number of database calls per second and their average duration.",
       image: "/img/features/apm/database-call-metrics.webp",
       buttonText: 'Learn More',
       buttonLink: 'https://signoz.io/docs/userguide/metrics/#database-calls-in-signoz',
@@ -290,13 +290,6 @@ const SigNozFeatures = () => {
       image: "/img/features/apm/external-call-metrics.webp",
       buttonText: 'Learn More',
       buttonLink: 'https://signoz.io/docs/userguide/metrics/#external-calls-in-signoz',
-    },
-    {
-      title: 'Service Map',
-      desc: "With the Service Map, you can get a complete overview of all the services in your application. It gives developers an idea of how the services are interconnected and shows p99 latency, request rate, and error rate between two services.",
-      image: "/img/features/apm/service-maps.webp",
-      buttonText: 'Learn More',
-      buttonLink: 'https://signoz.io/docs/userguide/service-map/',
     },
     {
       title: 'Application Metrics to Traces',
@@ -324,7 +317,7 @@ const SigNozFeatures = () => {
         <div className="!mx-auto grid !w-[100vw] grid-cols-1 border !border-b-0 !border-l-0 !border-t-0 border-dashed border-signoz_slate-400 sm:grid-cols-2 md:!w-[80vw]">
           {sections.map((section, index) => (
             <Card
-              key ={index}
+              key={index}
               logo={section.logo}
               subTitle={section.title}
               description={section.desc}
@@ -355,7 +348,7 @@ const SigNozFeatures = () => {
       <div className="!mx-auto grid !w-[100vw] grid-cols-1 border !border-l-0 !border-t-0 border-dashed border-signoz_slate-400 sm:grid-cols-2 md:!w-[80vw]">
         {scrollsections.map((scrollsections, index) => (
           <FeatureCard
-          key ={index}
+            key={index}
             title={scrollsections.title}
             description={scrollsections.desc}
             buttonText={scrollsections.buttonText}
@@ -405,12 +398,12 @@ const UsageBasedPricing = () => {
             </div>
             <p className='text-signoz_vanilla-400 text-base font-normal'>Tired of Datadog’s unpredictable bills or New Relic’s user-based pricing?<br />We’re here for you.</p>
             <UsageList />
-          <Button id="btn-get-started-homepage-hero" className="mt-5">
-          <Link href="/pricing/" className="flex-center">
-            Check Pricing
-            <ArrowRight size={14} />
-          </Link>
-        </Button>
+            <Button id="btn-get-started-homepage-hero" className="mt-5">
+              <Link href="/pricing/" className="flex-center">
+                Check Pricing
+                <ArrowRight size={14} />
+              </Link>
+            </Button>
           </div>
 
         </div>
