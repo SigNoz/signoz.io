@@ -45,7 +45,7 @@ export const SigNozFeatures = () => {
       iconTag: 'DISTRIBUTED TRACING',
       text: 'Track user requests across services to identify bottlenecks.',
       buttonText: 'Explore More',
-      buttonLink: "/disributed-tracing/",
+      buttonLink: "/distributed-tracing/",
       logo: '/img/index_features/drafting-compass.svg',
       img: '/img/graphics/homepage/feature-graphic-3.webp',
     },
