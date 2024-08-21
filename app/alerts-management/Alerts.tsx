@@ -8,26 +8,26 @@ import Card from '@/components/Card/card'
 import FeatureCard from '@/components/FeatureCard/FeatureCard'
 
 
-function DistributedTracing() {
+function Alerts() {
   return (
     <main className='mb-auto !mt-[-80px]'>
       <div className='relative bg-signoz_ink-500'>
         <div className="absolute left-0 right-0 top-0 h-screen bg-[url('/img/background_blur/Perlin_noise.png')] bg-[length:55%] bg-[center_top_4rem] sm:bg-no-repeat " />
         <div className="absolute left-0 right-0 top-0 h-screen bg-[url('/img/background_blur/Circle.png')] bg-[length:110%] bg-no-repeat sm:bg-[center_top_-50rem]" />
         <Header />
-        <TrustedByTeams page="DistributedTracing" />
+        <TrustedByTeams page="Alerts" />
         <SigNozFeatures />
-        <SigNozUsage />
+        {/* <SigNozUsage /> */}
         <UsageBasedPricing />
         {/* <ExploreDocs /> */}
         <SigNozStats />
-        <GetStarted page="DistributedTracing" />
+        <GetStarted page="Alerts" />
       </div>
     </main>
   )
 }
 
-export default DistributedTracing
+export default Alerts
 
 const PlatformCard = ({ title, description }) => {
   return (
@@ -40,11 +40,10 @@ const PlatformCard = ({ title, description }) => {
 
 const FeatureList = () => {
   const features = [
-    { title: 'Advanced Trace analytics', description: 'You can write ClickHouse queries on your trace data. It enables users to write queries for advanced use cases like finding average latency between two spans of interest.' },
-    { title: 'Detecting N+1 Query Problems', description: 'Identify N+1 query with the help of traces which can show patterns of single request fanning out multiple database requests' },
-    { title: 'Get logs associated with a particular span', description: 'Identify performance bottlenecks quickly with flamegraphs and then debug with associated logs data.' },
-    { title: 'Improve response times', description: ' Track and optimize the time taken by each service or database query, ensuring faster response times and better user experiences.' },
-    { title: 'Optimize database queries', description: 'Identify slow database queries with quick filters and flamegraphs and then optimize their response times.' },
+    { title: 'Host Monitoring', description: 'Monitor any hosts such as VM, physical machines, containers, etc.' },
+    { title: 'Build dashboards for application metrics', description: 'You can create customized dashboards for your application metrics' },
+    { title: 'Kubernetes Infrastructure Monitoring', description: 'Query logs for specific conditions and add them to dashboards for continuous monitoring.' },
+    { title: 'Share log lines', description: 'Improved collaboration with your teammates while debugging by sharing specific log lines.' },
   ];
 
   return (
@@ -62,7 +61,8 @@ const FeatureList = () => {
 
 const UsageList = () => {
   const Usage = [
-    { title: 'Pay only for data you send', description: 'We don’t have any SKU-based pricing. Get access to all features in the plan selected and only pay for the data you send. Pay only $0.3 per GB of ingested traces.' },
+    { title: 'Pay only for data you send', description: 'We don’t have any SKU-based pricing. Get access to all features in the plan selected and only pay for the data you send. Pay only $0.1 per million samples for metrics.' },
+    { title: 'No special pricing for custom metrics', description: 'Vendors like Datadog charge $0.05 per custom metric, which limits a team’s ability to send and analyze custom metrics for monitoring. SigNoz does not treat custom metrics any differently. The charges remain $0.1 per million samples no matter what type of metrics you send.' },
     { title: 'Add unlimited team members', description: 'Observability should be available to every developer at your company. After all, anyone can need debugging. That’s why we don’t charge for user seats, and you can add as many team members as you want.' },
     { title: 'No Host (container or node) based pricing', description: 'For modern cloud-based applications it doesn’t make sense to charge on the basis of number of hosts or containers. You don’t need to worry about auto-scaling during peak hours. Only pay for the amount of data sent no matter the number of hosts.' },
   ]
@@ -109,24 +109,22 @@ const Header = () => {
       <div className="absolute bottom-0 left-[12px] right-[12px] top-0 z-[0] border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 md:left-[24px] md:right-[24px]" />
       <div className="relative !mx-auto flex !w-[100vw] flex-col items-center border !border-b-0 border-dashed border-signoz_slate-400 px-2 pb-4 pt-12 text-center md:!w-[80vw] md:px-5 md:pt-[8.5rem]">
 
-      <div className="absolute left-0 top-[101px] z-0 h-9 sm:h-14 !w-[100vw] border !border-l-0 !border-r-0 border-dashed border-signoz_slate-400 md:top-[225px] md:!w-[80vw]" />
+        <div className="absolute left-0 top-[101px] h-9 sm:h-14 !w-[100vw] border !border-l-0 !border-r-0 border-dashed border-signoz_slate-400 md:top-[225px] md:!w-[80vw] z-[0]" />
 
-      <h1 className="my-4 text-2xl !p-3 sm:my-2 sm:text-3xl font-semibold tracking-tight dark:text-white sm:my-5 md:leading-[3.5rem] lg:text-[44px] text-gradient z-[1]">
-        Distributed Tracing For Finding Root Cause <br />of Application Performance Issues Quickly
+        <h1 className="my-4 text-2xl !p-3 sm:my-2 sm:text-3xl font-semibold tracking-tight dark:text-white sm:my-5 md:leading-[3.5rem] lg:text-[44px] text-gradient z-[1]">
+        Set Alerts on all Types of Observability Data
         </h1>
         
         <p className="m-0 p-3 text-lg leading-8 font-normal sm:p-0 text-signoz_vanilla-400">
-        Implement distributed tracing in your microservices-based applications powered by OpenTelemetry SDKs. 
+        Create actionable alerts on metrics, logs, traces and exceptions and get notified in your preferred channel.
           <br className="hidden lg:inline" />
-          Track user requests across services to help you identify performance bottlenecks. 
-          <br className="hidden lg:inline" />
-          Correlated your traces with logs for quick debugging.
+          Creating alerts in SigNoz is easy - just 3 simple steps.
         </p>
       </div>
       <div className="relative z-[1] !mx-auto mx-2 flex !w-[100vw] flex-col items-center justify-center gap-3 border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 pb-12 pt-4 md:mx-5 md:!w-[80vw] md:flex-row">
         <Button id="btn-get-started-homepage-hero">
           <Link href="/teams/" className="flex-center">
-            Get started with distributed tracing
+            Start your free trial
             <ArrowRight size={14} />
           </Link>
         </Button>
@@ -144,7 +142,7 @@ const Header = () => {
             <div className="embed-container">
               <div className="absolute">
                 <img
-                  src="/img/features/distributed-tracing/distributed-tracing-cover.webp"
+                  src="/img/features/alerts/alerts-management-signoz.png"
                   alt="Custom Thumbnail"
                   className="w-full rounded-lg"
                 />
@@ -221,78 +219,70 @@ const SigNozFeatures = () => {
 
   const sections = [
     {
-      title: 'Application Metrics to Traces to Logs for Fast Troubleshooting',
-      desc: ['SigNoz provides logs, metrics, and traces under a single pane of glass. You can go from application metrics to traces to related logs with just 3 clicks. It helps you to debug application issues quickly. Powered by OpenTelemetry SDKs, you can set up tracing in your applications with just a few lines of code.',],
-      figure: '/img/landing/property-ease-of-use.webp',
-      logo: '/img/log-management/signals.svg',
-    },
-    {
-      title: 'Quick analysis with Filters, Aggregates & Querying on Trace data',
-      desc: 'Trace data is full of rich context - that’s why we give you the power of quick analysis on your trace data with the ability to apply quick filters, create aggregates, and write complex queries. Our trace explorer comes packed with powerful features to analyze trace data quickly.',
-      figure: '/img/landing/property-covers-all-use-cases.webp',
+      title: 'Step 1. Define the metrics',
+      desc: ['You can create alerts on any kind of telemetry signal - logs, metrics, traces and exceptions. You can create complex queries to get the required metrics that you want to monitor with alerts.',
+        'Alerts are powered by the same query builder that is used for logs, metrics, and trace explorer. You can add multiple queries and write formulae to query exactly what you want.'
+      ],
       logo: '/img/log-management/fast.svg',
     },
     {
-      title: 'Advanced Trace Analytics powered by ClickHouse Queries',
-      desc: 'We use ClickHouse as a datastore for traces, and you can really go deep into your trace data by writing ClickHouse queries. For example, you can find out the average latency between two spans of interest in a trace. You can also create alerts on your trace data. With the power of writing ClickHouse Queries on your trace data, the possibilities are limitless.',
-      figure: '/img/landing/property-covers-all-use-cases.webp',
-      logo: '/img/features/apm/chart-column-big.svg',
-      buttonText: 'Learn More',
-      buttonLink: 'https://signoz.io/docs/tutorial/writing-clickhouse-queries-in-dashboard/#avg-latency-between-2-spans-of-interest-part-of-the-trace-tree'
+      title: 'Step 2. Define alert conditions',
+      desc: 'Define your alert conditions with a simple and intuitive UI. Define the specific conditions that trigger the alert and the notification frequency. Specify when the metric should trigger the notification, how condition should be evaluated, the evaluation window, alert threshold, etc.',
+      logo: '/img/log-management/fast.svg',
     },
     {
-      title: 'Exceptions from Trace data',
-      desc: 'Record exceptions automatically with a stack trace and linked span data.  By leveraging OpenTelemetry, we show you exceptions & errors in your application from trace data. OpenTelemetry auto-instrumentation libraries in Python, Java, Ruby, and Javascript can help you capture exceptions automatically.',
-      figure: '/img/landing/property-covers-all-use-cases.webp',
-      logo: '/img/features/distributed-tracing/exceptions-logo.svg',
+      title: 'Step 3. Configure your alert',
+      desc: ['In this step, you set the alerts metadata, including severity, name, and description. Set severity level of the alert like ‘warning’, or ‘critical’, set alert name and description. You can also add labels to your alerts. Then finally, set a notification channel to be notified.',
+      ],
+      logo: '/img/log-management/fast.svg',
       buttonText: 'Learn More',
-      buttonLink: 'https://signoz.io/docs/userguide/exceptions/'
+      buttonLink: 'https://signoz.io/docs/alerts/'
+    },
+    {
     },
   ]
 
 
   const scrollsections = [
     {
-      title: 'Quick Filters of Spans',
-      desc: "Quick filters let you see spans corresponding to specific status codes, service names, operations, RPC methods, etc.",
-      image: "/img/features/distributed-tracing/quick-filters-traces.webp",
-    },
-    {
-      title: 'Trace Query Builder',
-      desc: "Apply various aggregations, such as count, sum, and average, and group your trace data based on selected attributes. Utilize multiple queries and formulas to dive deeper into your trace data and uncover valuable insights.",
-      image: "/img/features/distributed-tracing/trace-query-builder.webp",
-    },
-    {
-      title: 'Different Compact Views',
-      desc: "See your trace data in different views based on your use cases, like list view, root spans, time series, and table view.",
-      image: "/img/features/distributed-tracing/traces-time-series.webp",
+      title: 'Metrics Based Alert',
+      desc: "A Metric-based alert in SigNoz allows you to define conditions based on metric data and trigger alerts when these conditions are met.",
+      image: "/img/features/alerts/metric-based-alert.webp",
       buttonText: 'Learn More',
-      buttonLink: 'https://signoz.io/docs/product-features/trace-explorer/'
+      buttonLink: 'https://signoz.io/docs/alerts-management/metrics-based-alerts/'
     },
     {
-      title: 'Saved View',
-      desc: "Saved views enable you to access your favorite queries quickly. Create complex queries and save them for future reference.",
-      image: "/img/features/distributed-tracing/saved-views.webp",
-    },
-    {
-      title: 'Flamegraphs & Gantt Chart view of Traces',
-      desc: "See user requests in a detailed breakdown with the help of Flamegraphs and Gantt Charts. Click on any span to see the entire trace represented beautifully to help you make sense of where it actually occurred in the flow of requests.",
-      image: "/img/features/distributed-tracing/traces-flamegraphs.webp",
-    },
-    {
-      title: 'Correlation with logs',
-      desc: "Correlate your traces with logs to get a much richer context while debugging. Using OpenTelemetry and SigNoz can help you uncover insights faster with correlated signals.",
-      image: "/img/features/distributed-tracing/traces-go-to-related-logs.webp",
-    },
-    {
-      title: 'Access to Trace data through API',
-      desc: "Accessing trace data through our Trace API allows you to manage and analyze it efficiently. This opens up many opportunities for integration with other tools, programmatic analysis of trace data, and customized data handling.",
+      title: 'Log Based Alerts',
+      desc: "A Log-based alert allows you to define conditions based on log data, triggering alerts when these conditions are met.",
+      image: "/img/features/alerts/log-based-alert.webp",
       buttonText: 'Learn More',
-      buttonLink: 'https://signoz.io/docs/traces-management/trace-api/overview/',
+      buttonLink: 'https://signoz.io/docs/alerts-management/log-based-alerts/'
     },
     {
-      
+      title: 'Trace Based Alerts',
+      desc: "A Trace-based alert in SigNoz allows you to define conditions based on trace data, triggering alerts when these conditions are met.",
+      image: "/img/features/alerts/trace-based-alert.webp",
+      buttonText: 'Learn More',
+      buttonLink: 'https://signoz.io/docs/alerts-management/trace-based-alerts/'
+    },
+    {
+      title: 'Exceptions Based Alerts',
+      desc: "An Exceptions-based alert in SigNoz allows you to define conditions based on exception data, triggering alerts when these conditions are met.",
+      image: "/img/features/alerts/exception-based-alert.webp",
+      buttonText: 'Learn More',
+      buttonLink: 'https://signoz.io/docs/alerts-management/exceptions-based-alerts/'
+    },
+    {
+      title: 'Notification in your preferred channel',
+      desc: "Configure alerts to get notified in your preferred channel. We support popular channels like Slack, PagerDuty, Opsgenie, MS Teams, emails & and more. You can also use webhooks to configure alert notifications in whole array of different channels.",
+      image: "/img/features/alerts/notification-channel.webp",
+      buttonText: 'Learn More',
+      buttonLink: 'https://signoz.io/docs/setup-alerts-notification/'
+    },
+    {
+
     }
+
   ]
   return (
     <>
@@ -302,7 +292,7 @@ const SigNozFeatures = () => {
             <div className="flex flex-col gap-6 pb-44 pt-28 ">
               <div className="mx-auto mt-[50px] flex max-w-4xl flex-col items-center text-center">
                 <div className="text-[44px] font-semibold leading-[3.25rem] text-signoz_sienna-100">
-                  Why use SigNoz for <br /> Distributed Tracing?
+                Set Alerts in <br /> 3 Simple Steps
                 </div>
               </div>
             </div>
@@ -332,7 +322,7 @@ const SigNozFeatures = () => {
             <div className="flex flex-col gap-6 pb-44 pt-28 ">
               <div className="mx-auto mt-[50px] flex max-w-4xl flex-col items-center text-center">
                 <div className="text-[44px] font-semibold leading-[3.25rem] text-signoz_sienna-100">
-                  SigNoz Distributed <br /> Tracing Overview
+                Alerts Management <br /> Overview
                 </div>
               </div>
             </div>
@@ -365,7 +355,7 @@ const SigNozUsage = () => {
       <div className="flex flex-col sm:flex-row">
         <div className="!w-[100%]  flex-1 md:!w-[300px]">
           <p className="sticky top-[100px] px-10 pl-0 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-[44px] md:px-0 md:pl-12">
-            Use SigNoz<br /> Distributed Tracing for...
+            Use SigNoz<br /> Metrics & Dashboards for...
           </p>
         </div>
         <div className="flex-[2_2_0%]">
