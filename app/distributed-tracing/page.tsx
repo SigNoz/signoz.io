@@ -1,5 +1,5 @@
 import React from 'react'
-import Apm from './DistributedTracing'
+import DistributedTracing from './DistributedTracing'
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -20,6 +20,6 @@ export const metadata: Metadata = {
   }
 }
 
-export default function apmPage() {
-  return <Apm />
+export default function Page() {
+  return <DistributedTracing />
 }
