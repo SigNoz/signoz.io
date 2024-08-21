@@ -223,16 +223,18 @@ const SigNozFeatures = () => {
       desc: ['You can create alerts on any kind of telemetry signal - logs, metrics, traces and exceptions. You can create complex queries to get the required metrics that you want to monitor with alerts.',
         'Alerts are powered by the same query builder that is used for logs, metrics, and trace explorer. You can add multiple queries and write formulae to query exactly what you want.'
       ],
+      logo: '/img/log-management/fast.svg',
     },
     {
       title: 'Step 2. Define alert conditions',
       desc: 'Define your alert conditions with a simple and intuitive UI. Define the specific conditions that trigger the alert and the notification frequency. Specify when the metric should trigger the notification, how condition should be evaluated, the evaluation window, alert threshold, etc.',
-      
+      logo: '/img/log-management/fast.svg',
     },
     {
       title: 'Step 3. Configure your alert',
       desc: ['In this step, you set the alerts metadata, including severity, name, and description. Set severity level of the alert like ‘warning’, or ‘critical’, set alert name and description. You can also add labels to your alerts. Then finally, set a notification channel to be notified.',
       ],
+      logo: '/img/log-management/fast.svg',
       buttonText: 'Learn More',
       buttonLink: 'https://signoz.io/docs/alerts/'
     },

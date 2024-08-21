@@ -222,15 +222,18 @@ const SigNozFeatures = () => {
       title: 'Monitor Exceptions with no-code changes',
       desc: ['Monitor exceptions automatically in Python, Java, Ruby, and Javascript. For other languages, just drop in a few lines of code and start monitoring exceptions.',
       ],
+      logo: '/img/log-management/fast.svg',
     },
     {
       title: 'See detailed Stacktraces',
       desc: 'See detailed stacktrace for all exceptions caught from your application. You can also log in custom attributes to add more context to your exceptions. For example, you can add attributes to identify users for which exceptions occurred.',
+      logo: '/img/log-management/fast.svg',
     },
     {
       title: 'Exceptions to Traces',
       desc: ['We capture exceptions from trace data powered by OpenTelemetry. See your exception in the trace graph to get a richer context for debugging your exceptions. Traces will make it clear where the exception occurred in the request flow—one of the perks of using OpenTelemetry.',
       ],
+      logo: '/img/log-management/fast.svg',
       buttonText: 'Learn More',
       buttonLink: 'https://signoz.io/docs/userguide/exceptions/'     
     },
