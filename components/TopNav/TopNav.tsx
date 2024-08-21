@@ -64,6 +64,8 @@ export default function TopNav() {
     }
   }, [pathname])
 
+  const [isOpen, setIsOpen] = useState(false);
+
   return (
     <div className="fixed left-0 right-0 z-30">
 
@@ -93,10 +95,16 @@ export default function TopNav() {
               <span className="text-[17.111px] font-medium">SigNoz</span>
             </Link>
             <Popover.Group className="hidden items-center gap-x-6 lg:flex">
-              <Dropdown>
+              <Dropdown isOpen={isOpen}>
                 <DropdownTrigger>
                   <Button
                     className="truncate px-1.5 py-1 text-sm font-normal hover:text-signoz_robin-500"
+                    onMouseEnter={() => {
+                      setIsOpen(true);
+                    }}
+                    onMouseLeave={() => {
+                      setIsOpen(false);
+                    }}
                   >
                     <div className='flex items-center'>
 
