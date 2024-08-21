@@ -100,7 +100,7 @@ export default function TopNav() {
                   >
                     <div className='flex items-center'>
 
-                      Products
+                      Product
                       <ChevronDown size={12} className='ml-1' />
                     </div>
                   </Button>
