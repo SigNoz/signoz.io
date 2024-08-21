@@ -96,7 +96,7 @@ export default function TopNav() {
               <Dropdown>
                 <DropdownTrigger>
                   <Button
-                    variant="bordered" className="truncate px-1.5 py-1 text-sm font-normal hover:text-signoz_robin-500"
+                    className="truncate px-1.5 py-1 text-sm font-normal hover:text-signoz_robin-500"
                   >
                     <div className='flex items-center'>
 
@@ -267,7 +267,7 @@ export default function TopNav() {
                     <Dropdown onClick={() => setMobileMenuOpen(false)}>
                       <DropdownTrigger>
                         <Button
-                          variant="bordered" className="truncate px-1.5 py-1 text-sm font-normal hover:text-signoz_robin-500"
+                          className="truncate px-1.5 py-1 text-sm font-normal hover:text-signoz_robin-500"
                         >
                           <div className='flex items-center -mx-4 block rounded-lg px-3 py-2 text-base font-semibold leading-7 hover:bg-signoz_ink-200'>
 
