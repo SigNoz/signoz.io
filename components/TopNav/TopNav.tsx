@@ -105,7 +105,7 @@ export default function TopNav() {
                     </div>
                   </Button>
                 </DropdownTrigger>
-                <DropdownMenu aria-label="Static Actions">
+                <DropdownMenu aria-label="Static Actions" classNames={{list:"pl-1"}}>
                   <DropdownItem
                     key="apm"
                     href='/application-performance-monitoring/'
