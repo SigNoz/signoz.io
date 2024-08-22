@@ -50,8 +50,8 @@ export default function PostLayout({ content, authors, children, toc }: LayoutPr
           key={slug}
         />
         <ProgressBar target={mainRef} />
-        <div className="post container overflow-clip">
-          <div className="post-toc">
+        <div className="post container flex flex-row-reverse overflow-clip">
+          <div className="post-toc ml-4 w-1/4">
             {toc.map((tocItem: tocItemProps) => {
               return (
                 <div className="post-toc-item" key={tocItem.url}>
@@ -63,7 +63,7 @@ export default function PostLayout({ content, authors, children, toc }: LayoutPr
             })}
           </div>
 
-          <div className="post-content">
+          <div className="post-content w-3/4 pr-4">
             <article className="prose prose-slate max-w-none py-6 dark:prose-invert">
               {children}
             </article>
