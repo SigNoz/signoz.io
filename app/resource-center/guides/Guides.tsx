@@ -7,9 +7,7 @@ import BlogPostCard from '../Shared/BlogPostCard'
 import { filterData } from 'app/utils/common'
 import SearchInput from '../Shared/Search'
 import { Frown } from 'lucide-react'
-import SideBar, {GUIDES_TOPICS }from '@/components/SideBar'
-import { Pagination } from '@/layouts/GridLayout'
-
+import SideBar, { GUIDES_TOPICS } from '@/components/SideBar'
 
 interface HeadingProps {
   tag: string
@@ -29,14 +27,13 @@ interface GuidesHeaderProps {
   onSearch: (e) => void
 }
 
-
 const GuidesHeader = ({ title, description, searchPlaceholder, onSearch }) => {
   return (
-    <section className="flex max-w-[697px] flex-col leading-[143%] mb-[72px]">
-      <h2 className="self-start text-center text-sm font-medium uppercase tracking-wider text-signoz_sakura-500 dark:text-signoz_sakura-400 mb-0">
+    <section className="mb-[16px] flex max-w-[697px] flex-col leading-[143%]">
+      <h2 className="mb-0 self-start text-center text-sm font-medium uppercase tracking-wider text-signoz_sakura-500 dark:text-signoz_sakura-400">
         resources
       </h2>
-      <h1 className="mt-3 my-0 self-start text-3xl font-semibold text-indigo-500 dark:text-indigo-200">
+      <h1 className="my-0 mt-3 self-start text-3xl font-semibold text-indigo-500 dark:text-indigo-200">
         {title}
       </h1>
       <p className="my-4  w-full text-lg leading-8 tracking-normal text-stone-700 dark:text-stone-300 max-md:max-w-full">
@@ -50,7 +47,7 @@ const GuidesHeader = ({ title, description, searchPlaceholder, onSearch }) => {
 export default function Guides() {
   const posts = allCoreContent(sortPosts(allGuides))
   const [activeItem, setActiveItem] = useState(GUIDES_TOPICS.ALL)
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState('')
   const POST_PER_PAGE = 20
   const pageNumber = 1
 
@@ -59,11 +56,11 @@ export default function Guides() {
       return
     }
 
-    const activeItemToSet: GUIDES_TOPICS = window.location.hash as GUIDES_TOPICS || GUIDES_TOPICS.ALL;
+    const activeItemToSet: GUIDES_TOPICS =
+      (window.location.hash as GUIDES_TOPICS) || GUIDES_TOPICS.ALL
 
     setActiveItem(activeItemToSet)
-  }, [window]);
-
+  }, [window])
 
   const blogs = useMemo(() => {
     if (searchQuery) {
@@ -77,10 +74,9 @@ export default function Guides() {
     const formattedActiveItem = activeItem.replace('#', '').toLowerCase().replace(/\s+/g, '')
 
     return posts.filter((post) => {
-      const postTags = post.tags?.map(tag => tag.toLowerCase().replace(/\s+/g, ''))
+      const postTags = post.tags?.map((tag) => tag.toLowerCase().replace(/\s+/g, ''))
       return postTags?.includes(formattedActiveItem)
     })
-
   }, [searchQuery, activeItem])
 
   const handleCategoryClick = (category) => {
@@ -96,7 +92,7 @@ export default function Guides() {
   const pagination = {
     currentPage: pageNumber,
     totalPages: Math.ceil(posts.length / POST_PER_PAGE),
-    pageRoute: 'guide'
+    pageRoute: 'guide',
   }
 
   return (
@@ -108,32 +104,22 @@ export default function Guides() {
         onSearch={handleSearch}
       />
 
-      <div className="relative xl:-mr-16 xl:pr-16 mt-16 flex flex-col md:flex-row gap-20">
+      <div className="relative mt-8 flex flex-col gap-8 xl:-mr-16 xl:pr-16">
         <SideBar onCategoryClick={handleCategoryClick} activeItem={activeItem} />
         <div className="flex-1">
-
           {blogs && Array.isArray(blogs) && blogs.length <= 0 && (
             <div className="no-blogs my-8 flex items-center gap-4 font-mono font-bold">
               <Frown size={16} /> No Guides found
             </div>
           )}
 
-          <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-2">
+          <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
             {blogs.map((post) => {
               return <BlogPostCard key={post.slug} blog={post} />
             })}
           </div>
         </div>
-     
       </div>
-
-      <Pagination
-        currentPage={pagination.currentPage}
-        totalPages={pagination.totalPages}
-        pageRoute={pagination.pageRoute}
-        postsPerPage={POST_PER_PAGE}
-        totalPosts={posts.length}
-      />  
     </div>
   )
 }
