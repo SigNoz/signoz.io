@@ -109,7 +109,15 @@ export default function TopNav() {
                     </div>
                   </Button>
                 </DropdownTrigger>
-                <DropdownMenu aria-label="Static Actions" classNames={{ list: "pl-1 grid grid-cols-2 w-[400px] gap-3 items-center" }}>
+                <DropdownMenu
+                  aria-label="Static Actions"
+                  classNames={{ list: "pl-1 grid grid-cols-2 w-max gap-3 items-center" }}
+                  topContent={
+                    <div className="text-[13px] leading-5 font-semibold text-signoz_vanilla-100 px-4 py-2 uppercase text-[#3C4152]">
+                      Product
+                    </div>
+                  }
+                >
                   <DropdownItem
                     key="apm"
                     href='/application-performance-monitoring/'
