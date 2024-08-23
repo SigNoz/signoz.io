@@ -93,7 +93,7 @@ export default function TopNav() {
               <span className="text-[17.111px] font-medium">SigNoz</span>
             </Link>
             <Popover.Group className="hidden items-center gap-x-6 lg:flex">
-              <Dropdown>
+              <Dropdown className='px-4' placement='bottom-start' classNames={{base: "top-[9px]"}}>
                 <DropdownTrigger>
                   <Button
                     className="truncate px-1.5 py-1 text-sm font-normal hover:text-signoz_robin-500"
@@ -105,7 +105,7 @@ export default function TopNav() {
                     </div>
                   </Button>
                 </DropdownTrigger>
-                <DropdownMenu aria-label="Static Actions" classNames={{list:"pl-1"}}>
+                <DropdownMenu aria-label="Static Actions" classNames={{list:"pl-1 grid grid-cols-2 w-[400px] gap-3 items-center"}}>
                   <DropdownItem
                     key="apm"
                     href='/application-performance-monitoring/'
@@ -114,25 +114,25 @@ export default function TopNav() {
                       alt="Bar Chart Icon"
                       width={20}
                       height={20}
-                      className='mr-4'
+                      className='mr-2'
                     />}
                     description="Monitor your applications"
                   >
                     APM
                   </DropdownItem>
                   <DropdownItem
-                    key="LogManagement"
-                    href='/log-management/'
+                    key="Alerts"
+                    href='/alerts-management/'
                     startContent={<Image
-                      src="/img/index_features/logs_feature.svg"
-                      alt="Logs Icon"
+                      src="/img/index_features/concierge-bell_feature.svg"
+                      alt="Drafting Compass Icon"
                       width={20}
                       height={20}
-                      className='mr-4'
+                      className='mr-2'
                     />}
-                    description="Unlock insights from logs"
+                    description="Stay aware with alerts"
                   >
-                    Log Management
+                    Alerts
                   </DropdownItem>
                   <DropdownItem
                     key="DistributedTracing"
@@ -142,7 +142,7 @@ export default function TopNav() {
                       alt="Drafting Compass Icon"
                       width={20}
                       height={20}
-                      className='mr-4'
+                      className='mr-2'
                     />}
                     description="Track requests across services"
                   >
@@ -156,25 +156,25 @@ export default function TopNav() {
                       alt="Drafting Compass Icon"
                       width={20}
                       height={20}
-                      className='mr-4'
+                      className='mr-2'
                     />}
                     description="Monitor metrics & build dashboards"
                   >
                     Metrics & Dashboards
                   </DropdownItem>
                   <DropdownItem
-                    key="Alerts"
-                    href='/alerts-management/'
+                    key="LogManagement"
+                    href='/log-management/'
                     startContent={<Image
-                      src="/img/index_features/concierge-bell_feature.svg"
-                      alt="Drafting Compass Icon"
+                      src="/img/index_features/logs_feature.svg"
+                      alt="Logs Icon"
                       width={20}
                       height={20}
-                      className='mr-4'
+                      className='mr-2'
                     />}
-                    description="Stay aware with alerts"
+                    description="Unlock insights from logs"
                   >
-                    Alerts
+                    Log Management
                   </DropdownItem>
                   <DropdownItem
                     key="Exceptions"
@@ -184,7 +184,7 @@ export default function TopNav() {
                       alt="Drafting Compass Icon"
                       width={20}
                       height={20}
-                      className='mr-4'
+                      className='mr-2'
                     />}
                     description="Record exceptions automatically"
                   >
