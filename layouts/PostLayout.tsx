@@ -2,7 +2,7 @@
 
 import '../css/post.css'
 
-import { ReactNode, useRef } from 'react'
+import { ReactNode, useRef, useState, useEffect } from 'react'
 import { CoreContent } from 'pliny/utils/contentlayer'
 import type { Blog, Authors } from 'contentlayer/generated'
 import SectionContainer from '@/components/SectionContainer'
@@ -35,6 +35,36 @@ interface LayoutProps {
 export default function PostLayout({ content, authors, children, toc }: LayoutProps) {
   const { slug, date, title, tags, readingTime, relatedArticles } = content
   const mainRef = useRef<HTMLElement | null>(null)
+  const [isTocVisible, setIsTocVisible] = useState(true)
+  const lastScrollY = useRef(0)
+  const scrollDirection = useRef<'up' | 'down'>('up')
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY
+      const viewportHeight = window.innerHeight
+      const scrollThreshold = viewportHeight * 0.3 // 30% of viewport height
+
+      // Determine scroll direction
+      if (currentScrollY > lastScrollY.current) {
+        scrollDirection.current = 'down'
+      } else if (currentScrollY < lastScrollY.current) {
+        scrollDirection.current = 'up'
+      }
+
+      // Update TOC visibility based on scroll position and direction
+      if (scrollDirection.current === 'down' && currentScrollY > scrollThreshold) {
+        setIsTocVisible(false)
+      } else if (scrollDirection.current === 'up') {
+        setIsTocVisible(true)
+      }
+
+      lastScrollY.current = currentScrollY
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
 
   return (
     <main ref={mainRef} className="container mx-auto">
@@ -50,8 +80,12 @@ export default function PostLayout({ content, authors, children, toc }: LayoutPr
           key={slug}
         />
         <ProgressBar target={mainRef} />
-        <div className="post container overflow-clip">
-          <div className="post-toc">
+        <div className="post container flex flex-row-reverse overflow-clip">
+          <div
+            className={`post-toc ml-4 w-1/4 transition-opacity duration-1000 ${
+              isTocVisible ? 'opacity-100' : 'opacity-30'
+            } hover:opacity-100`}
+          >
             {toc.map((tocItem: tocItemProps) => {
               return (
                 <div className="post-toc-item" key={tocItem.url}>
@@ -63,7 +97,7 @@ export default function PostLayout({ content, authors, children, toc }: LayoutPr
             })}
           </div>
 
-          <div className="post-content">
+          <div className="post-content w-3/4 pr-4">
             <article className="prose prose-slate max-w-none py-6 dark:prose-invert">
               {children}
             </article>
