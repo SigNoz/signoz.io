@@ -9,10 +9,14 @@ interface AdditionalDetails {
 
 const PageFeedback: React.FC = () => {
   const [helpful, setHelpful] = useState<boolean | null>(null);
-  const [reason, setReason] = useState<string>('');
+  const [needsImprovement, setNeedsImprovement] = useState<string>('');
   const [positiveFeedback, setPositiveFeedback] = useState<string>('');
   const [additionalDetails, setAdditionalDetails] = useState<AdditionalDetails>({});
   const [submitted, setSubmitted] = useState<boolean>(false);
+
+  // Use environment variables
+  const apiUrl = process.env.NEXT_PUBLIC_SIGNOZ_CMS_API_URL;
+  const feedbackPath = process.env.NEXT_PUBLIC_SIGNOZ_CMS_FEEDBACK_PATH;
 
   const handleTextAreaChange = (option: string, value: string) => {
     setAdditionalDetails({
@@ -26,15 +30,29 @@ const PageFeedback: React.FC = () => {
 
     const data = {
       helpful,
-      reason: helpful === false ? reason : '',
+      needsImprovement: helpful === false ? needsImprovement : '',
       positiveFeedback: helpful === true ? positiveFeedback : '',
       additionalDetails,
       page: window.location.href,
     };
 
-    console.log('Submitting data:', data);
+    try {
+      const response = await fetch(`${apiUrl}${feedbackPath}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ data }),
+      });
 
-    setSubmitted(true);
+      if (response.ok) {
+        setSubmitted(true);
+      } else {
+        console.error('Error submitting feedback:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Error submitting feedback:', error);
+    }
   };
 
   if (submitted) {
@@ -56,7 +74,7 @@ const PageFeedback: React.FC = () => {
       
       {helpful === false && (
         <form className={styles.form} onSubmit={handleSubmit}>
-          <h3 className={styles.title}>What went wrong?</h3>
+          <h3 className={styles.title}>What needs improvement?</h3>
           <div className={styles.optionGroup}>
             {[
               { value: 'Inaccurate', description: "Doesn't accurately describe the product or feature." },
@@ -65,18 +83,20 @@ const PageFeedback: React.FC = () => {
               { value: 'Code sample errors', description: "One or more code samples are incorrect." },
               { value: 'Another reason', description: "" },
             ].map((option) => (
-              <label className={styles.option} key={option.value}>
-                <input
-                  type="radio"
-                  name="reason"
-                  value={option.value}
-                  onChange={(e) => setReason(e.target.value)}
-                />
-                <span className={styles.optionText}>
-                  {option.value}
-                  {option.description && <span className={styles.optionDescription}>{option.description}</span>}
-                </span>
-                {reason === option.value && (
+              <div className={styles.option} key={option.value}>
+                <label className={styles.optionLabel}>
+                  <input
+                    type="radio"
+                    name="needsImprovement"
+                    value={option.value}
+                    onChange={(e) => setNeedsImprovement(e.target.value)}
+                  />
+                  <span className={styles.optionText}>{option.value}</span>
+                </label>
+                {option.description && (
+                  <span className={styles.optionDescription}>{option.description}</span>
+                )}
+                {needsImprovement === option.value && (
                   <textarea
                     className={styles.textArea}
                     placeholder="Optional: Provide more details..."
@@ -84,7 +104,7 @@ const PageFeedback: React.FC = () => {
                     onChange={(e) => handleTextAreaChange(option.value, e.target.value)}
                   />
                 )}
-              </label>
+              </div>
             ))}
           </div>
           <button className={styles.submitButton} type="submit">Submit</button>
@@ -102,17 +122,19 @@ const PageFeedback: React.FC = () => {
               { value: 'Helped me decide to use the product', description: "Convinced me to adopt the product or feature." },
               { value: 'Another reason', description: "" },
             ].map((option) => (
-              <label className={styles.option} key={option.value}>
-                <input
-                  type="radio"
-                  name="positiveFeedback"
-                  value={option.value}
-                  onChange={(e) => setPositiveFeedback(e.target.value)}
-                />
-                <span className={styles.optionText}>
-                  {option.value}
-                  {option.description && <span className={styles.optionDescription}>{option.description}</span>}
-                </span>
+              <div className={styles.option} key={option.value}>
+                <label className={styles.optionLabel}>
+                  <input
+                    type="radio"
+                    name="positiveFeedback"
+                    value={option.value}
+                    onChange={(e) => setPositiveFeedback(e.target.value)}
+                  />
+                  <span className={styles.optionText}>{option.value}</span>
+                </label>
+                {option.description && (
+                  <span className={styles.optionDescription}>{option.description}</span>
+                )}
                 {positiveFeedback === option.value && (
                   <textarea
                     className={styles.textArea}
@@ -121,7 +143,7 @@ const PageFeedback: React.FC = () => {
                     onChange={(e) => handleTextAreaChange(option.value, e.target.value)}
                   />
                 )}
-              </label>
+              </div>
             ))}
           </div>
           <button className={styles.submitButton} type="submit">Submit</button>
