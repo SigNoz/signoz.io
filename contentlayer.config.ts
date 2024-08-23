@@ -254,6 +254,64 @@ export const Newsroom = defineDocumentType(() => ({
   },
 }))
 
+export const Handbook = defineDocumentType(() => ({
+  name: 'Handbook',
+  filePathPattern: 'handbook/**/*.mdx',
+  contentType: 'mdx',
+  fields: {
+    title: { type: 'string', required: true },
+    date: { type: 'date', required: true },
+    tags: { type: 'list', of: { type: 'string' }, default: [] },
+    lastmod: { type: 'date' },
+    draft: { type: 'boolean' },
+    summary: { type: 'string' },
+    description: { type: 'string' },
+    images: { type: 'json' },
+    image: { type: 'string' },
+    authors: { type: 'list', of: { type: 'string' } },
+    layout: { type: 'string' },
+    bibliography: { type: 'string' },
+    canonicalUrl: { type: 'string' },
+    keywords: { type: 'list', of: { type: 'string' }, required: false },
+    slug: { type: 'string', required: false },
+    hide_table_of_contents: { type: 'boolean', required: false },
+    toc_min_heading_level: { type: 'number', required: false },
+    toc_max_heading_level: { type: 'number', required: false },
+  },
+  computedFields: {
+    ...computedFields,
+    structuredData: {
+      type: 'json',
+      resolve: (doc) => ({
+        '@context': 'https://schema.org',
+        '@type': 'BlogPosting',
+        mainEntityOfPage: {
+          '@type': 'WebPage',
+          '@id': `https://signoz.io/handbook/${doc.slug}`,
+        },
+        author: {
+          '@type': 'Organization',
+          name: 'SigNoz',
+        },
+        publisher: {
+          '@type': 'Organization',
+          name: 'SigNoz',
+          logo: {
+            '@type': 'ImageObject',
+            url: 'https://signoz.io/img/SigNozLogo-orange.svg',
+          },
+        },
+        headline: doc.title,
+        datePublished: doc.date,
+        dateModified: doc.lastmod || doc.date,
+        description: doc.description,
+        image: `${siteMetadata.siteUrl}${doc.image || (doc.images ? doc.images[0] : siteMetadata.socialBanner)}`,
+        url: `${siteMetadata.siteUrl}/${doc._raw.flattenedPath}`,
+      }),
+    },
+  },
+}))
+
 export const Comparison = defineDocumentType(() => ({
   name: 'Comparison',
   filePathPattern: 'comparisons/*.mdx',
@@ -510,7 +568,7 @@ export const CaseStudy = defineDocumentType(() => ({
 
 export default makeSource({
   contentDirPath: 'data',
-  documentTypes: [Blog, Authors, Comparison, Guide, Opentelemetry, Doc, Newsroom, CaseStudy],
+  documentTypes: [Blog, Authors, Comparison, Guide, Opentelemetry, Doc, Newsroom, Handbook, CaseStudy],
   mdx: {
     cwd: process.cwd(),
     remarkPlugins: [
