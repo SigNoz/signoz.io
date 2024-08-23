@@ -605,9 +605,18 @@ const PricingPlans = () => {
                         {' '}
                         <CircleCheckSolid /> Data centers available in the US, EU & India
                       </li>
-                      <li className="mb-6 flex items-center gap-3">
+                    </ul>
+                  </div>
+                  <div className={styles.packageDetailBlock}>
+                    <h4 className={`mt-7 ${styles.packageDetailTitle}`}>Compliance</h4>
+                    <ul className="ul-no-padding">
+                      <li className="mb-3 flex items-center gap-3">
                         {' '}
                         <CircleCheckSolid /> SOC2 Type 1 Compliant
+                      </li>
+                      <li className="mb-6 flex items-center gap-3">
+                        {' '}
+                        <CircleCheckSolid /> HIPAA Compliant
                       </li>
                     </ul>
                   </div>
@@ -744,13 +753,13 @@ const PricingPlans = () => {
                         {' '}
                         <CircleCheckSolid /> Includes all features in Teams plan
                       </li>
-                      <li className="mb-3 flex items-center gap-3">
+                      {/* <li className="mb-3 flex items-center gap-3">
                         {' '}
                         <CircleCheckSolid /> Custom integration for metrics and logs
-                        {/* <div className="!mb-0 rounded-[50px] border border-none bg-signoz_aqua-400 px-1.5 py-px text-[10px] font-semibold uppercase text-signoz_ink-400">
+                        <div className="!mb-0 rounded-[50px] border border-none bg-signoz_aqua-400 px-1.5 py-px text-[10px] font-semibold uppercase text-signoz_ink-400">
                           new
-                        </div> */}
-                      </li>
+                        </div>
+                      </li> */}
                       <li className="mb-3 flex items-center gap-3">
                         {' '}
                         <CircleCheckSolid /> AWS Private Link
@@ -765,6 +774,18 @@ const PricingPlans = () => {
                       <li className="mb-3 flex items-center gap-3">
                         {' '}
                         <CircleCheckSolid /> Query API Keys (access data from anywhere)
+                      </li>
+                    </ul>
+                  </div>
+                  <div className={styles.packageDetailBlock}>
+                    <h4 className={`mb-4 mt-7 ${styles.packageDetailTitle}`}>Compliance</h4>
+                    <ul className="ul-no-padding">
+                      <li className="mb-3 flex items-center gap-3">
+                        {' '}
+                        <CircleCheckSolid /> BAA Agreement
+                        <span className="rounded-full border border-none bg-signoz_slate-400 px-2 py-1 text-center !text-[10px] uppercase text-signoz_vanilla-400 sm:text-xs">
+                          Add On
+                        </span>
                       </li>
                     </ul>
                   </div>
