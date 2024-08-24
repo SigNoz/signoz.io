@@ -66,6 +66,7 @@ export default function TopNav() {
 
 
   const [isOpen, setIsOpen] = useState(false);
+  const [isOpenResources, setIsOpenResources] = useState(false);
 
   return (
     <div className="fixed left-0 right-0 z-30">
@@ -104,7 +105,7 @@ export default function TopNav() {
                   >
                     <div className='flex items-center'>
 
-                      Products
+                      Product
                       <ChevronDown size={12} className={`ml-1 transform transition-transform duration-300 ease-in-out ${isOpen ? 'rotate-180' : 'rotate-0'}`} />
                     </div>
                   </Button>
@@ -113,7 +114,7 @@ export default function TopNav() {
                   aria-label="Static Actions"
                   classNames={{ list: "pl-1 grid grid-cols-2 w-max gap-3 items-center" }}
                   topContent={
-                    <div className="text-[13px] leading-5 font-semibold text-signoz_vanilla-100 px-4 py-2 uppercase text-[#3C4152]">
+                    <div className="text-[13px] leading-5 font-semibold px-4 py-2 uppercase text-[#3C4152]">
                       Product
                     </div>
                   }
@@ -212,12 +213,59 @@ export default function TopNav() {
                 Documentation
               </Link>
 
-              <Link
-                href="/resource-center/blog"
-                className={`truncate px-1.5 py-1 text-sm font-normal hover:text-signoz_robin-500`}
-              >
-                Resources
-              </Link>
+
+              <Dropdown className='px-4' placement='bottom-start' classNames={{ base: "top-[6px]" }}>
+                <DropdownTrigger>
+                  <Button
+                    className="truncate px-1.5 py-1 text-sm !font-normal leading-7 text-signoz_vanilla-100 hover:text-signoz_robin-500"
+                    onClick={() => setIsOpenResources(!isOpenResources)}
+                  >
+                    <div className='flex items-center'>
+
+                      Resources
+                      <ChevronDown size={12} className={`ml-1 transform transition-transform duration-300 ease-in-out ${isOpenResources ? 'rotate-180' : 'rotate-0'}`} />
+                    </div>
+                  </Button>
+                </DropdownTrigger>
+                <DropdownMenu
+                  aria-label="Static Actions"
+                  classNames={{ list: "pl-0 w-max gap-3 items-center" }}
+                  topContent={
+                    <div className="text-[13px] leading-5 font-semibold pl-2 pr-4 py-2 uppercase text-[#3C4152]">
+                      Resources
+                    </div>
+                  }
+                >
+                  <DropdownItem
+                    key="blog"
+                    href='/resource-center/blog/'
+                    description="News, ideas, and insights on observability"
+                  >
+                    Blog
+                  </DropdownItem>
+                  <DropdownItem
+                    key="comparisons"
+                    href='/resource-center/comparisons/'
+                    description="Compare observability tools"
+                  >
+                    Comparisons
+                  </DropdownItem>
+                  <DropdownItem
+                    key="guides"
+                    href='/resource-center/guides/'
+                    description="How-to guides and tutorials"
+                  >
+                    Guides
+                  </DropdownItem>
+                  <DropdownItem
+                    key="examples"
+                    href='/resource-center/opentelemetry/'
+                    description="OpenTelemetry concepts and its use cases"
+                  >
+                    OpenTelemetry
+                  </DropdownItem>
+                </DropdownMenu>
+              </Dropdown>
 
               <Link
                 href="/pricing"
@@ -279,16 +327,25 @@ export default function TopNav() {
                     <Dropdown onClick={() => setMobileMenuOpen(false)}>
                       <DropdownTrigger>
                         <Button
-                          className="truncate px-1.5 py-1 text-base font-medium leading-7 text-signoz_vanilla-500 hover:text-signoz_robin-500"
+                          className="truncate px-1.5 py-1 text-base !font-normal leading-7 text-signoz_vanilla-500 hover:text-signoz_robin-500"
+                          onClick={() => setIsOpen(!isOpen)}
                         >
                           <div className='flex items-center -mx-4 block rounded-lg pl-2.5 pr-3 py-2 leading-7 hover:bg-signoz_ink-200'>
 
-                            Products
-                            <ChevronDown size={12} className='ml-1' />
+                            Product
+                            <ChevronDown size={12} className={`ml-1 transform transition-transform duration-300 ease-in-out ${isOpen ? 'rotate-180' : 'rotate-0'}`} />
                           </div>
                         </Button>
                       </DropdownTrigger>
-                      <DropdownMenu aria-label="Static Actions">
+                      <DropdownMenu
+                        aria-label="Static Actions"
+                        classNames={{ list: "pl-1 w-max gap-3 items-center" }}
+                        topContent={
+                          <div className="text-[13px] leading-5 font-semibold px-4 py-2 uppercase text-[#3C4152]">
+                            Product
+                          </div>
+                        }
+                      >
                         <DropdownItem
                           key="apm"
                           href='/application-performance-monitoring/'
@@ -386,13 +443,66 @@ export default function TopNav() {
                     >
                       Documentation
                     </Link>
-                    <Link
+                    {/* <Link
                       href="/resource-center/blog"
                       className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold  leading-7 hover:bg-signoz_ink-200 sm:text-sm"
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       Resources
-                    </Link>
+                    </Link> */}
+
+                    <Dropdown onClick={() => setMobileMenuOpen(false)}>
+                      <DropdownTrigger>
+                        <Button
+                          className="truncate pl-0 pr-1.5 py-1 text-base font-normal leading-7 text-signoz_vanilla-100 hover:text-signoz_robin-500"
+                          onClick={() => setIsOpenResources(!isOpenResources)}
+                        >
+                          <div className='flex items-center'>
+
+                            Resources
+                            <ChevronDown size={12} className={`ml-1 transform transition-transform duration-300 ease-in-out ${isOpenResources ? 'rotate-180' : 'rotate-0'}`} />
+                          </div>
+                        </Button>
+                      </DropdownTrigger>
+                      <DropdownMenu
+                        aria-label="Static Actions"
+                        classNames={{ list: "pl-0 w-max gap-3 items-center" }}
+                        topContent={
+                          <div className="text-[13px] leading-5 font-semibold pl-2 pr-4 py-2 uppercase text-[#3C4152]">
+                            Resources
+                          </div>
+                        }
+                      >
+                        <DropdownItem
+                          key="blog"
+                          href='/resource-center/blog/'
+                          description="News, ideas, and insights on observability"
+                        >
+                          Blog
+                        </DropdownItem>
+                        <DropdownItem
+                          key="comparisons"
+                          href='/resource-center/comparisons/'
+                          description="Compare observability tools"
+                        >
+                          Comparisons
+                        </DropdownItem>
+                        <DropdownItem
+                          key="guides"
+                          href='/resource-center/guides/'
+                          description="How-to guides and tutorials"
+                        >
+                          Guides
+                        </DropdownItem>
+                        <DropdownItem
+                          key="examples"
+                          href='/resource-center/opentelemetry/'
+                          description="OpenTelemetry concepts and its use cases"
+                        >
+                          OpenTelemetry
+                        </DropdownItem>
+                      </DropdownMenu>
+                    </Dropdown>
                     <Link
                       href="/pricing"
                       className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 hover:bg-signoz_ink-200"
