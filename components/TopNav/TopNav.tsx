@@ -64,6 +64,9 @@ export default function TopNav() {
     }
   }, [pathname])
 
+
+  const [isOpen, setIsOpen] = useState(false);
+
   return (
     <div className="fixed left-0 right-0 z-30">
 
@@ -93,19 +96,28 @@ export default function TopNav() {
               <span className="text-[17.111px] font-medium">SigNoz</span>
             </Link>
             <Popover.Group className="hidden items-center gap-x-6 lg:flex">
-              <Dropdown className='px-4' placement='bottom-start' classNames={{base: "top-[9px]"}}>
+              <Dropdown className='px-4' placement='bottom-start' classNames={{ base: "top-[9px]" }}>
                 <DropdownTrigger>
                   <Button
-                    className="truncate px-1.5 py-1 text-sm font-normal hover:text-signoz_robin-500"
+                    className="truncate px-1.5 py-1 text-sm font-light hover:text-signoz_robin-500 "
+                    onClick={() => setIsOpen(!isOpen)}
                   >
                     <div className='flex items-center'>
 
                       Products
-                      <ChevronDown size={12} className='ml-1' />
+                      <ChevronDown size={12} className={`ml-1 transform transition-transform duration-300 ease-in-out ${isOpen ? 'rotate-180' : 'rotate-0'}`} />
                     </div>
                   </Button>
                 </DropdownTrigger>
-                <DropdownMenu aria-label="Static Actions" classNames={{list:"pl-1 grid grid-cols-2 w-[400px] gap-3 items-center"}}>
+                <DropdownMenu
+                  aria-label="Static Actions"
+                  classNames={{ list: "pl-1 grid grid-cols-2 w-max gap-3 items-center" }}
+                  topContent={
+                    <div className="text-[13px] leading-5 font-semibold text-signoz_vanilla-100 px-4 py-2 uppercase text-[#3C4152]">
+                      Product
+                    </div>
+                  }
+                >
                   <DropdownItem
                     key="apm"
                     href='/application-performance-monitoring/'
@@ -267,9 +279,9 @@ export default function TopNav() {
                     <Dropdown onClick={() => setMobileMenuOpen(false)}>
                       <DropdownTrigger>
                         <Button
-                          className="truncate px-1.5 py-1 text-sm font-normal hover:text-signoz_robin-500"
+                          className="truncate px-1.5 py-1 text-base font-medium leading-7 text-signoz_vanilla-500 hover:text-signoz_robin-500"
                         >
-                          <div className='flex items-center -mx-4 block rounded-lg px-3 py-2 text-base font-semibold leading-7 hover:bg-signoz_ink-200'>
+                          <div className='flex items-center -mx-4 block rounded-lg pl-2.5 pr-3 py-2 leading-7 hover:bg-signoz_ink-200'>
 
                             Products
                             <ChevronDown size={12} className='ml-1' />
@@ -388,7 +400,7 @@ export default function TopNav() {
                     >
                       Pricing
                     </Link>
-                    
+
                     <Link
                       href="/case-study"
                       className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 hover:bg-signoz_ink-200"
