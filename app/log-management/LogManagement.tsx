@@ -6,11 +6,13 @@ import { ArrowRight, BookOpen } from 'lucide-react'
 import Button from '@/components/Button/Button'
 import Card from '@/components/Card/card'
 import FeatureCard from '@/components/FeatureCard/FeatureCard'
+import ProductNav from '@/components/ProductNav/ProductNav'
 
 
 function LogsManagement() {
   return (
-    <main className='mb-auto !mt-[-80px]'>
+    <main className='mb-auto !mt-[-10px]'>
+      <ProductNav/>
       <div className='relative bg-signoz_ink-500'>
         <div className="absolute left-0 right-0 top-0 h-screen bg-[url('/img/background_blur/Perlin_noise.png')] bg-[length:55%] bg-[center_top_4rem] sm:bg-no-repeat " />
         <div className="absolute left-0 right-0 top-0 h-screen bg-[url('/img/background_blur/Circle.png')] bg-[length:110%] bg-no-repeat sm:bg-[center_top_-50rem]" />
@@ -327,6 +329,9 @@ const SigNozFeatures = () => {
       title: 'Add to dashboards & Create Alerts',
       desc: "Anything that you query can be added to dashboards for continued monitoring and visualization.",
       image: "/img/features/logs/add-to-dashboards-logs.webp"
+    },
+    {
+      title: '',
     },
 
   ]
