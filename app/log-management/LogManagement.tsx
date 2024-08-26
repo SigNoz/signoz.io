@@ -330,6 +330,9 @@ const SigNozFeatures = () => {
       desc: "Anything that you query can be added to dashboards for continued monitoring and visualization.",
       image: "/img/features/logs/add-to-dashboards-logs.webp"
     },
+    {
+      title: '',
+    },
 
   ]
   return (
