@@ -59,7 +59,7 @@ export default function BlogHeader({
         </Link> */}
       </div>
       <article className="flex max-w-[969px] flex-col leading-[150%]">
-        <div className="flex gap-2 self-start whitespace-nowrap text-xs font-medium uppercase tracking-wide text-stone-700 dark:text-stone-300">
+        <div className="flex flex-wrap gap-2 self-start whitespace-nowrap text-xs font-medium uppercase tracking-wide text-stone-700 dark:text-stone-300">
           {tags.map((tag) => (
             <Tag key={tag}>{tag}</Tag>
           ))}
