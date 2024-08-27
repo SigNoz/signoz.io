@@ -97,7 +97,12 @@ export default function TopNav() {
               <span className="text-[17.111px] font-medium">SigNoz</span>
             </Link>
             <Popover.Group className="hidden items-center gap-x-6 lg:flex">
-              <Dropdown className='px-4' placement='bottom-start' classNames={{ base: "top-[9px]" }}>
+              <Dropdown 
+              className='px-4' 
+              placement='bottom-start' 
+              classNames={{ base: "top-[9px]" }}
+              onClose={() => setIsOpen(false)}
+              >
                 <DropdownTrigger>
                   <Button
                     className="truncate px-1.5 py-1 text-sm font-light hover:text-signoz_robin-500 "
@@ -106,7 +111,9 @@ export default function TopNav() {
                     <div className='flex items-center'>
 
                       Product
-                      <ChevronDown size={12} className={`ml-1 transform transition-transform duration-300 ease-in-out ${isOpen ? 'rotate-180' : 'rotate-0'}`} />
+                      <ChevronDown 
+                      size={12} 
+                      className={`ml-1 transform transition-transform duration-300 ease-in-out ${isOpen ? 'rotate-180' : 'rotate-0'}`} />
                     </div>
                   </Button>
                 </DropdownTrigger>
@@ -214,7 +221,11 @@ export default function TopNav() {
               </Link>
 
 
-              <Dropdown className='px-4' placement='bottom-start' classNames={{ base: "top-[6px]" }}>
+              <Dropdown 
+              className='px-4' 
+              placement='bottom-start' 
+              classNames={{ base: "top-[6px]" }}
+              onClose={() => setIsOpenResources(false)}>
                 <DropdownTrigger>
                   <Button
                     className="truncate px-1.5 py-1 text-sm !font-normal leading-7 text-signoz_vanilla-100 hover:text-signoz_robin-500"
