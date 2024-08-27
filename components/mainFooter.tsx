@@ -175,12 +175,20 @@ function Footer() {
                     <Youtube />
                   </Link>
                 </div>
-                <div className='mt-5'>
+                <div className='mt-5 flex flex-row gap-8'>
+                <img
+                    className="opacity-60 hover:opacity-100"
+                    src="/svgs/icons/hipaa.svg"
+                    width={90}
+                    height={90}
+                    alt=""
+                    onClick={()=> window.open("https://trust.signoz.io/", "_blank")}
+                  />
                 <img
                     className="shadow-[0px_0_40px_0_rgba(255,255,255,0.27)] rounded-full opacity-60 hover:opacity-100 transition-opacity cursor-pointer"
                     src="/svgs/icons/SOC-2.svg"
-                    width={90}
-                    height={90}
+                    width={60}
+                    height={60}
                     alt=""
                     onClick={()=> window.open("https://trust.signoz.io/", "_blank")}
                   />
