@@ -177,7 +177,7 @@ function Footer() {
                 </div>
                 <div className='mt-5 flex flex-row gap-8'>
                 <img
-                    className="opacity-60 hover:opacity-100"
+                    className="opacity-60 hover:opacity-100 cursor-pointer"
                     src="/svgs/icons/hipaa.svg"
                     width={90}
                     height={90}
