@@ -6,9 +6,20 @@ import Button from '@/components/Button/Button';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'SigNoz Customer Stories',
-  description: 'SigNoz Customer Stories',
-};
+  title: {
+    absolute: 'Customer Stories | SigNoz',
+  },
+  openGraph: {
+    title: 'Customer Stories | SigNoz',
+    description: 'See how SigNoz empowers engineering teams of all sizes to build resilient applications.',
+  },
+  description:
+    'See how SigNoz empowers engineering teams of all sizes to build resilient applications.',
+  twitter:{
+    title: 'Customer Stories | SigNoz',
+    description: 'See how SigNoz empowers engineering teams of all sizes to build resilient applications.',
+  }
+}
 
 type CardProps = {
   logo?: string,
@@ -101,10 +112,10 @@ export default caseStudies;
 const CustomerCard: React.FC<CardProps> = ({ logo, title, name, position, href }) => {
   return (
     <Link href={href}>
-      <div className='p-12 bg-signoz_ink-400 border border-signoz_slate-400 rounded cursor-pointer hover:bg-signoz_ink-300 min-h-72'>
+      <div className='p-12 bg-signoz_ink-400 border border-signoz_slate-400 rounded cursor-pointer hover:bg-signoz_ink-300 min-h-[19rem]'>
         <div className='flex flex-col gap-3'>
-          <div className='mb-4'>
-            <img src={logo} className='max-h-14 max-w-28 items-start'/>
+        <div className='flex items-start h-12 mb-4'> {/* Set fixed height for logo area */}
+            <img src={logo} className='object-contain max-h-10 max-w-32' />
           </div>
           <div className='text-base font-semibold'>{title}</div>
           <div>
