@@ -11,14 +11,16 @@ const PricingCTA: React.FC = () => {
           <p className="text-gray-600 dark:text-gray-300 text-base mb-6">
             SigNoz provides up to 9X ROI compared to DataDog, with no user-based or host-based pricing.
           </p>
-          <Link
-            href="https://signoz.io/pricing/#estimate-your-monthly-bill"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-primary hover:bg-primary-dark transition duration-150 ease-in-out no-underline"
-          >
-            Estimate Your Monthly Bill &rarr;
-          </Link>
+          <div className="flex justify-start">
+            <Link
+              href="https://signoz.io/pricing/#estimate-your-monthly-bill"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center px-6 py-2 border border-primary text-base font-medium rounded-md text-primary bg-white hover:bg-gray-50 transition duration-150 ease-in-out no-underline"
+            >
+              Estimate Your Monthly Bill &rarr;
+            </Link>
+          </div>
         </div>
         <div className="w-full sm:w-1/2">
           <Image
@@ -27,7 +29,7 @@ const PricingCTA: React.FC = () => {
             width={400}
             height={223}
             layout="responsive"
-            className="rounded-lg"
+            className="rounded-md p-1 bg-black"
           />
         </div>
       </div>
