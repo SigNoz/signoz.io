@@ -20,60 +20,46 @@ type CardProps = {
 
 const cardDetails = [
   {
-    logo: "/svgs/customer_stories/tableflow-logo.svg",
+    logo: "/img/case_study/logos/tableflow-logo.png",
     title: "How TableFlow Uses SigNoz to Improve Service Reliability and Resolve Issues Quickly",
-    name: "John Collison",
-    position: "Founder & Chairman, Stripe",
-    href: "/pricing/"
+    name: "Eric Ciminelli",
+    position: "Co-founder, Tableflow",
+    href: "/case-study/tableflow/"
   },
   {
-    logo: "/svgs/customer_stories/tableflow-logo.svg",
-    title: "How TableFlow Uses SigNoz to Improve Service Reliability and Resolve Issues Quickly",
-    name: "John Collison",
-    position: "Founder & Chairman, Stripe",
-    href: "/pricing/"
+    logo: "/img/case_study/logos/instasafe-logo.png",
+    title: "How InstaSafe chose SigNoz over Grafana and Elastic APM to power their observability needs",
+    name: "Bhaswanth Gattineni",
+    position: "Software Architect, Instasafe",
+    href: "/case-study/instasafe/"
   },
   {
-    logo: "/svgs/customer_stories/tableflow-logo.svg",
-    title: "How TableFlow Uses SigNoz to Improve Service Reliability and Resolve Issues Quickly",
-    name: "John Collison",
-    position: "Founder & Chairman, Stripe",
-    href: "/pricing/"
+    logo: "/img/users/blip_logo.webp",
+    title: "How Blip uses SigNoz to improve their issue resolution time by 14x",
+    name: "Nate Bohman",
+    position: "Senior DevOps Engineer, Blip",
+    href: "/case-study/blip/"
   },
   {
-    logo: "/svgs/customer_stories/tableflow-logo.svg",
-    title: "How TableFlow Uses SigNoz to Improve Service Reliability and Resolve Issues Quickly",
-    name: "John Collison",
-    position: "Founder & Chairman, Stripe",
-    href: "/pricing/"
+    logo: "/img/users/outplay.svg",
+    title: "How Outplay uses SigNoz to improve their backend API response time by 35%",
+    name: "Vijay Perumal",
+    position: "Technical Lead",
+    href: "/case-study/outplay/"
   },
   {
-    logo: "/svgs/customer_stories/tableflow-logo.svg",
-    title: "How TableFlow Uses SigNoz to Improve Service Reliability and Resolve Issues Quickly",
-    name: "John Collison",
-    position: "Founder & Chairman, Stripe",
-    href: "/pricing/"
+    logo: "/img/case_study/logos/WomboLogo.svg",
+    title: "How Wombo AI provides great experience to its 5mn MAU using SigNoz for Observability",
+    name: "Abhinav Ramana",
+    position: "Senior Software Engineer",
+    href: "/case-study/wombo/"
   },
   {
-    logo: "/svgs/customer_stories/tableflow-logo.svg",
-    title: "How TableFlow Uses SigNoz to Improve Service Reliability and Resolve Issues Quickly",
-    name: "John Collison",
-    position: "Founder & Chairman, Stripe",
-    href: "/pricing/"
-  },
-  {
-    logo: "/svgs/customer_stories/tableflow-logo.svg",
-    title: "How TableFlow Uses SigNoz to Improve Service Reliability and Resolve Issues Quickly",
-    name: "John Collison",
-    position: "Founder & Chairman, Stripe",
-    href: "/pricing/"
-  },
-  {
-    logo: "/svgs/customer_stories/tableflow-logo.svg",
-    title: "How TableFlow Uses SigNoz to Improve Service Reliability and Resolve Issues Quickly",
-    name: "John Collison",
-    position: "Founder & Chairman, Stripe",
-    href: "/pricing/"
+    logo: "/img/case_study/logos/HTTPSCOUT.svg",
+    title: "Democratizing Observability - How SigNoz Empowers Solo Entrepreneurs and Small Teams",
+    name: "Shey Sewani",
+    position: "Founder, HTTPSCOUT",
+    href: "/case-study/observability-for-small-teams-and-solopreneurs/"
   },
 ]
 
@@ -115,10 +101,10 @@ export default caseStudies;
 const CustomerCard: React.FC<CardProps> = ({ logo, title, name, position, href }) => {
   return (
     <Link href={href}>
-      <div className='p-12 bg-signoz_ink-400 border border-signoz_slate-400 rounded cursor-pointer hover:bg-signoz_ink-300'>
+      <div className='p-12 bg-signoz_ink-400 border border-signoz_slate-400 rounded cursor-pointer hover:bg-signoz_ink-300 min-h-72'>
         <div className='flex flex-col gap-3'>
           <div className='mb-4'>
-            <img src={logo} />
+            <img src={logo} className='max-h-14 max-w-28 items-start'/>
           </div>
           <div className='text-base font-semibold'>{title}</div>
           <div>
