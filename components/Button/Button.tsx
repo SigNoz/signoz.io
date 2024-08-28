@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 
 export enum BUTTON_TYPES {
   PRIMARY = 'PRIMARY',
@@ -23,5 +24,9 @@ function Button(props) {
 }
 
 Button.TYPES = BUTTON_TYPES
+
+Button.propTypes = {
+  label: PropTypes.string,
+}
 
 export default Button
