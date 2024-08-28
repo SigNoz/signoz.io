@@ -74,7 +74,7 @@ export default function ProductComparisons() {
       <div className="my-8 flex flex-wrap">
         {comparisons.map((comparison) => {
           return (
-            <div className="col col--6">
+            <div className="col col--6" key={comparison.id}>
               <div className="card-demo margin--md">
                 <Link href={comparison.url}>
                   <div className="card-dark min-h-[240px] rounded-sm border p-4">
