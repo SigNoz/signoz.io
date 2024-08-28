@@ -1,0 +1,595 @@
+---
+
+title: How to Log Function, File, and Line in Python - A Guide
+slug: python-logging-function-name-file-name-line-number-using-a-single-file
+date: 2024-08-28
+tags: [logging, faq]
+authors: [sushant_gaurav]
+description: Learn how to implement comprehensive Python logging, capturing function names, file names, and line numbers for effective debugging and error tracking.
+keywords: [Python logging, debugging, error tracking, log configuration, function name, file name, line number]
+
+---
+
+Effective logging is essential for troubleshooting and maintaining Python applications. A good logging system does more than just record messages; it also collects contextual information like as function names, file names, and line numbers, which can greatly help in debugging. This article will walk you through the process of configuring complete logging in Python, with a focus on capturing these crucial details using a single file.
+
+## Understanding Python Logging Basics
+
+Python's built-in 'logging' module is a strong utility that offers a versatile framework for creating log messages in your applications. It provides various benefits over using plain print statements, including:
+
+1. Severity Levels: Python logging supports multiple levels of severity, such as `DEBUG`, `INFO`, `WARNING`, `ERROR`, and `CRITICAL`, allowing you to categorize and filter log messages effectively.
+2. Formatted Output: You can customize log messages to include information like timestamps, file names, line numbers, and function names, which adds valuable context to your logs.
+3. Configurability: The logging module allows you to direct log messages to various destinations, including the console, files, or even remote servers.
+
+Here's a basic logging setup in Python:
+
+```python
+import logging
+
+# Basic configuration for logging
+logging.basicConfig(
+    level=logging.INFO,  # Set the logging level to INFO
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'  # Define log message format
+)
+
+# Create a logger object
+logger = logging.getLogger(__name__)  # Use __name__ to get a logger named after the current module
+
+# Log an informational message
+logger.info("This is an info message")
+```
+
+Output:
+
+```
+2024-08-24 12:00:00,000 - __main__ - INFO - This is an info message
+```
+
+Explanation:
+
+- `level=logging.INFO`: This will configure the logger to handle `INFO` level messages and higher.
+- `format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'`: This format string includes a timestamp (`asctime`), the logger's name (`name`), the log level (`levelname`), and the log message (`message`).
+- `logger.getLogger(__name__)`: It will retrieve a logger object named after the current module. Using `__name__` allows for module-specific logging configurations, which is useful in larger applications.
+
+To learn more about logging in Python with its best practices and examples, you can check out our other articles:
+
+1. [Python Logging - From Setup to Monitoring with Best Practices](https://signoz.io/guides/logging-in-python/)
+2. [Python Logging Best Practices - Expert Tips with Practical Examples](https://signoz.io/guides/python-logging-best-practices/)
+
+## Why Log Function, File, and Line Information?
+
+Including function names, file names, and line numbers in your logs provides several key benefits. Let us look at some of the benefits:
+
+- Improves Debugging: By logging the exact place (file, line number, and function) where an error occurs, you may rapidly detect and repair errors without having to search through code manually.
+- Improves Traceability: In complicated applications, it is easier to monitor the flow of execution across different modules and functions, which helps you understand how data moves through your code.
+- Improves Error Resolution: Detailed logs with contextual information enable you to diagnose issues faster and more accurately, decreasing the time spent troubleshooting.
+- Supports Maintenance: Detailed logs speed up code reviews and future changes by offering insight into how the code is performed, which is especially beneficial when working on legacy systems or cooperating in teams.
+
+## Configuring Logging to Capture Function, File, and Line Details
+
+Including function names, file names, and line numbers in your logs is critical for effective debugging and traceability. To accomplish this, you must change the log format in Python. Let's take an example for more clarity.
+
+```python
+import logging
+
+# Configure logging with custom format
+logging.basicConfig(
+    level=logging.DEBUG,  # Set the logging level to DEBUG
+    format='%(asctime)s - %(name)s - %(levelname)s - %(filename)s:%(lineno)d - %(funcName)s() - %(message)s'  # Custom format
+)
+
+# Create a logger
+logger = logging.getLogger(__name__)
+
+def example_function():
+    logger.debug("This is a debug message with detailed context")
+
+# Call the example function
+example_function()
+
+```
+
+Explanation:
+
+- `%(asctime)s`: Adding a timestamp to each log entry, showing when the event occurred.
+- `%(name)s`: Capturing the logger's name, typically the module name, which helps in identifying the source of the log entry.
+- `%(levelname)s`: Specifying the severity level (DEBUG, INFO, WARNING, ERROR, or CRITICAL).
+- `%(filename)s`: Specifying the current file name where the log call was made.
+- `%(lineno)d`: Specifying the line number in the file where the log statement was executed.
+- `%(funcName)s`: Specifying the function name where the log call was made.
+- `%(message)s`: It is used to log the actual log message provided by the developer.
+
+Output Example:
+
+```
+2024-08-24 10:15:30,123 - __main__ - DEBUG - example.py:12 - example_function() - This is a debug message with detailed context
+```
+
+### Creating a Reusable Logging Configuration
+
+For larger projects or applications with several modules, you should use a reusable logging setup that can be used throughout the codebase. Let us take an example to create a reusable logger:
+
+```python
+import logging
+from logging.handlers import RotatingFileHandler
+
+def setup_logger(name, log_file, level=logging.INFO):
+    """
+    Sets up a logger with a rotating file handler and a custom format.
+
+    Args:
+        name (str): The name of the logger.
+        log_file (str): The file path for the log file.
+        level: The logging level (default is INFO).
+
+    Returns:
+        logging.Logger: Configured logger object.
+    """
+    # Define a custom formatter including file, function, and line details
+    formatter = logging.Formatter(
+        '%(asctime)s - %(name)s - %(levelname)s - %(filename)s:%(lineno)d - %(funcName)s() - %(message)s'
+    )
+
+    # Set up a rotating file handler (log rotation)
+    handler = RotatingFileHandler(log_file, maxBytes=1024*1024, backupCount=5)  # Rotate logs when they reach 1MB, and keep the last 5 backups
+    handler.setFormatter(formatter)
+
+    # Create the logger with the specified name and level
+    logger = logging.getLogger(name)
+    logger.setLevel(level)
+    logger.addHandler(handler)
+
+    return logger
+
+# Usage example
+logger = setup_logger('my_app', 'app.log')
+logger.info("Application has started")
+```
+
+Explanation:
+
+- `setup_logger` Function: This function configures a logger with a rotating file handler, which stops log files from increasing forever by rotating them when they reach a specified size (1MB in this case).
+- Custom Formatter: Each log entry has comprehensive contextual information such as the file name, line number, and function name.
+- Log Rotation: Manages disk capacity by retaining only the last five backup log files.
+
+Output Example in `app.log`:
+
+```
+INFO:my_app:Application has started
+```
+
+## Implementing Logging in Your Python Code
+
+To effectively integrate logging into your Python code, you need to take care of some of the best practices:
+
+1. Log at appropriate levels.: You should select the appropriate logging level based on the severity and purpose of the log message. There are mainly 5 types of logging levels:
+    - DEBUG: It provides comprehensive diagnostic information.
+    - INFO: It can be used for general operating messages (such as application startup).
+    - WARNING: It can be used for scenarios that may cause problems (such as deprecated features).
+    - ERROR: It can be used for major issues that need quick action.
+    - CRITICAL: It can be used for the fatal errors that could cause the program to crash.
+2. Log Exceptions Effectively: When you are dealing with exceptions, you should use the `logger.exception()` method to automatically include the whole stack trace in the log. This provides precise information on what produced the exception.
+    - Example:
+        
+        ```python
+        try:
+            # Example risky operation
+            risky_operation()
+        except Exception as e:
+            logger.exception("An error occurred during risky_operation")
+        ```
+        
+    - Explanation: The `logger.exception()` method logs an `ERROR` level message with the exception’s stack trace, making it easier to debug the issue.
+    - Output Sample:
+        
+        ```
+        2024-08-24 10:45:00,001 - my_app - ERROR - example.py:48 - <module>() - An error occurred during risky_operation
+        Traceback (most recent call last):
+        File "example.py", line 46, in <module>
+            risky_operation()
+        File "example.py", line 44, in risky_operation
+            raise ValueError("Something went wrong")
+        ValueError: Something went wrong
+        ```
+        
+3. Use Context Managers for Temporary Logging Changes: Sometimes you may need to temporarily adjust the logging level for a specific block of code. You can utilize this using a context manager.
+    - Example:
+        
+        ```python
+        import logging
+        import contextlib
+        
+        # Create and configure the logger
+        logger = logging.getLogger(__name__)
+        logger.setLevel(logging.INFO)  # Set the default logging level to INFO
+        
+        # Configure the logger to output to the console
+        console_handler = logging.StreamHandler()
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        console_handler.setFormatter(formatter)
+        logger.addHandler(console_handler)
+        
+        @contextlib.contextmanager
+        def temporary_log_level(logger, level):
+            """
+            Temporarily change the logging level within a context.
+        
+            Args:
+                logger (logging.Logger): The logger whose level is to be changed.
+                level: The new logging level to be set temporarily.
+            """
+            old_level = logger.level
+            logger.setLevel(level)
+            try:
+                yield
+            finally:
+                logger.setLevel(old_level)
+        
+        # Usage example
+        with temporary_log_level(logger, logging.DEBUG):
+            logger.debug("This DEBUG message will be logged")
+        logger.debug("This won't be logged if the default level is higher than DEBUG")
+        ```
+        
+    - Explanation: Within the `with` block of the Context Manager (`temporary_log_level`), the logger is temporarily set to a different level, which is then restored after the block is executed.
+    - Output Sample:
+        
+        ```
+        DEBUG:my_app:This DEBUG message will be logged
+        ```
+        
+
+## Advanced Logging Techniques
+
+As your application expands, you may require more advanced logging configurations to efficiently manage log files and guarantee that relevant data is captured without exhausting your storage. Let us look at some of the advanced logging techniques:
+
+### 1. Using `LoggerAdapter` to Add Context.
+
+When you need to include more contextual information in your logs (such as user identifiers or session IDs), `LoggerAdapter` is a useful tool. It allows you to provide more context in your log messages without changing your basic logging algorithm.
+
+```python
+import logging
+
+class CustomAdapter(logging.LoggerAdapter):
+    def process(self, msg, kwargs):
+        """
+        Preprocess the message to include extra context information.
+        """
+        return f'[{self.extra["user"]}] {msg}', kwargs
+
+# Initialize the logger
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)  # Ensure the logger is set to capture DEBUG (or INFO) level messages
+
+# Configure the logger to output to the console
+console_handler = logging.StreamHandler()
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+console_handler.setFormatter(formatter)
+logger.addHandler(console_handler)
+
+# Create an adapted logger with additional context
+adapted_logger = CustomAdapter(logger, {'user': 'John'})
+
+# Log a message with the user context
+adapted_logger.info("This message includes the user context")
+```
+
+Explanation:
+
+- `CustomAdapter` Class: This class extends `LoggerAdapter` class and overrides the `process` function to include a specific context (such as user information) with each log message.
+- Extra Parameter: A dictionary containing context data, such as the user's name, which is appended to the log messages.
+
+Output Example:
+
+```
+2024-08-24 11:30:12,345 - __main__ - INFO - [John] This message includes the user context
+```
+
+### 2. Implementing Custom Log Levels
+
+Python's built-in logging levels (`DEBUG`, `INFO`, `WARNING`, `ERROR`, and `CRITICAL`) handle the majority of use cases, but you may need a custom level, such as `VERBOSE`, for more granularity.
+
+```python
+import logging
+
+# Define a custom logging level
+VERBOSE_LEVEL_NUM = 15
+logging.addLevelName(VERBOSE_LEVEL_NUM, "VERBOSE")
+
+def verbose(self, message, *args, **kwargs):
+    """
+    Custom logging method for the VERBOSE level.
+    """
+    if self.isEnabledFor(VERBOSE_LEVEL_NUM):
+        self._log(VERBOSE_LEVEL_NUM, message, args, **kwargs)
+
+# Add the custom method to the logger
+logging.Logger.verbose = verbose
+
+# Initialize the logger
+logger = logging.getLogger(__name__)
+
+# Set the logger level to VERBOSE
+logger.setLevel(VERBOSE_LEVEL_NUM)
+
+# Configure the logger to output to the console
+console_handler = logging.StreamHandler()
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+console_handler.setFormatter(formatter)
+logger.addHandler(console_handler)
+
+# Log a verbose message
+logger.verbose("This is a verbose message")
+```
+
+Explanation:
+
+- Custom Level Definition: `logging.addLevelName(15, "VERBOSE")` defines a new logging level named `VERBOSE` with a numeric value of 15. This allows you to log messages at a level between `DEBUG` (10) and `INFO` (20).
+- `verbose` Method: It is a custom method that is added to the `Logger` class that logs messages at the `VERBOSE` level. This method checks if the logger is enabled for the `VERBOSE` level and logs the message accordingly.
+
+Output Example:
+
+```
+2024-08-24 10:15:45,365 - __main__ - VERBOSE - This is a verbose message
+```
+
+### 3. Using Filters to Control Log Output
+
+Filters in Python logging allow you to choose which log records are processed depending on certain criteria, such as the originating module.
+
+```python
+import logging
+
+class ModuleFilter(logging.Filter):
+    def __init__(self, module):
+        super().__init__()
+        self.module = module
+
+    def filter(self, record):
+        """
+        Only allow records from the specified module.
+        """
+        return record.module == self.module
+
+# Initialize the logger
+logger = logging.getLogger(__name__)
+
+# Add a filter to only log messages from 'my_module'
+logger.addFilter(ModuleFilter('my_module'))
+```
+
+Explanation:
+
+- `ModuleFilter` Class: It is a custom filter that limits log messages to those that come from a certain module.
+- Filtering Logs: By including this filter in the logger, you ensure that only log messages from `my_module` are captured.
+
+## Improving logging performance
+
+Logging is important but can cause performance overhead, particularly in high-throughput applications. Let us look at some techniques to optimize logging while maintaining its benefits:
+
+### 1. Use Lazy Evaluation for Expensive Operations
+
+When you are logging messages that involve computationally expensive operations (e.g., complex computations, data retrieval, or formatting large amounts of data), it's important to ensure that these operations are only performed if the log level actually requires them. You can achieve this by using lazy evaluation, which defers the execution of these operations until it is certain they are needed.
+
+```python
+# Instead of directly calling the function, pass it as a lambda for lazy evaluation
+logger.debug("User data: %s", lambda: expensive_function())
+```
+
+Explanation: Normally, when you pass arguments to a logging function like `logger.debug`, the arguments are evaluated immediately, even if the log level is set such that the message won't be logged. By using a lambda function, the function `expensive_function()` is wrapped in a callable that is only executed if the `DEBUG` level is enabled. If the logger level is set higher (e.g., to `INFO` or `WARNING`), the lambda function isn't invoked, saving the time and resources that would otherwise be spent on the unnecessary operation.
+
+### 2. Check the Log Level Before Processing
+
+Before executing costly logging operations, check that the logger is configured to a level that records the message.
+
+```python
+if logger.isEnabledFor(logging.DEBUG):
+    logger.debug("Expensive debug info: %s", expensive_function())
+```
+
+Explanation: Before running the log statement, `isEnabledFor` method checks to see if the logger is enabled at the specified level.
+
+### 3. Asynchronous Logging for High-Performance Needs
+
+If your applications is dealing with high logging throughput, synchronous logging might become a bottleneck. Asynchronous logging allows log messages to be processed in the background, minimizing their impact on the application's main execution flow.
+
+```python
+import asyncio
+import logging
+from concurrent.futures import ThreadPoolExecutor
+
+class AsyncHandler(logging.Handler):
+    def __init__(self):
+        super().__init__()
+        self.queue = asyncio.Queue()
+        self.executor = ThreadPoolExecutor(max_workers=1)
+        self._shutdown_event = asyncio.Event()
+
+    async def run(self):
+        while True:
+            record = await self.queue.get()
+            if record is None:  # Stop signal received
+                break
+            self.executor.submit(self.format_and_write, record)
+
+    def emit(self, record):
+        asyncio.get_event_loop().call_soon_threadsafe(self.queue.put_nowait, record)
+
+    def format_and_write(self, record):
+        msg = self.format(record)
+        print(msg)  # Simulate writing to a file or external service
+
+    async def shutdown(self):
+        await self.queue.put(None)  # Send stop signal to the run loop
+        self.executor.shutdown(wait=True)
+        self._shutdown_event.set()
+
+async def main():
+    logger = logging.getLogger(__name__)
+    async_handler = AsyncHandler()
+    logger.addHandler(async_handler)
+    logger.setLevel(logging.INFO)
+
+    # Start the async handler's run loop
+    asyncio.create_task(async_handler.run())
+
+    # Log a message
+    logger.info("This is an asynchronously logged message")
+
+    # Wait a bit to ensure the message is processed
+    await asyncio.sleep(1)
+
+    # Shut down the async handler properly
+    await async_handler.shutdown()
+
+if __name__ == "__main__":
+    asyncio.run(main())
+```
+
+Explanation:
+
+- `AsyncHandler` Class: It is a custom logging handler that processes log records asynchronously via an `asyncio.Queue` and a thread pool.
+- Asynchronous Processing: The log records are enqueued and processed in the background, allowing the main application to continue without interruption until the log activity is completed.
+
+Output Example:
+
+```
+2024-08-24 12:00:15,001 - __main__ - INFO - example.py:85 - <module>() - This is an asynchronously logged message
+```
+
+## Monitoring and Analyzing Python Logs Using SigNoz
+
+[SigNoz](https://signoz.io/) is an open-source application performance monitoring (APM) and observability platform that includes comprehensive tools for organizing and analyzing log data. Integrating Python logging with SigNoz allows you to view logs with traces and metrics, set up alerts based on log patterns, and use powerful querying features to acquire a better understanding of your application's performance.
+
+SigNoz provides a holistic view of your application's performance by correlating logs, traces, and analytics.
+
+- Set Up Alerts Based on Log Patterns: Configure alerts to be triggered by certain log patterns or thresholds.
+- Use Effective Querying Capabilities: Use SigNoz's query language to filter, search, and analyze logs effectively.
+
+<GetStartedSigNoz />
+
+For detailed implementation steps, refer to SigNoz's guide on logging in Python with OpenTelemetry [here](https://signoz.io/opentelemetry/logging-in-python/). This guide will provide specific instructions tailored to integrate Python logging with SigNoz's observability platform using OpenTelemetry.
+
+<Figure src="/img/guides/2024/08/python-logging-function-name-file-name-line-number-using-a-single-file-image.webp" alt="image.webp" caption="image.webp" />
+
+## Key Takeaways
+
+- Effective logging is essential for debugging and sustaining your applications. A well-structured logging configuration provides insights into application activity and helps to discover issues immediately.
+- Adding details like the function name, file, and line number to your logs improves their usefulness for troubleshooting. Contextual logs can greatly reduce the time required to trace and resolve issues.
+- By customizing your log format and output destinations, you can guarantee that logs match your specific requirements, whether they are for monitoring, troubleshooting, or auditing.
+- In performance-critical contexts, optimize your logging by using lazy evaluation, validating log levels before logging, and investigating asynchronous logging methods.
+- SigNoz offers strong tools for visualizing, analyzing, and acting on your logs. Integrating such platforms improves your capacity to monitor and maintain your applications efficiently.
+
+## FAQs
+
+### How Do I Log the Current Function Name in Python?
+
+To include the current function name in your logs, use the format specifier `%(funcName)s` in your logging setup.
+
+```python
+import logging
+
+logging.basicConfig(format='%(funcName)s: %(message)s')
+
+def example_function():
+    logging.info("This log includes the function name")
+
+example_function()
+```
+
+Output Example
+
+```
+example_function: This log includes the function name
+```
+
+### Can I Log in to Multiple Destinations Simultaneously?
+
+Yes, you can log in to multiple places by creating different handlers for your logger. For example, you can log in to both the console and a file.
+
+```python
+import logging
+
+# Initialize the logger
+logger = logging.getLogger(__name__)
+
+# Add a handler for console output
+logger.addHandler(logging.StreamHandler())
+
+# Add a handler for file output
+logger.addHandler(logging.FileHandler('app.log'))
+
+# Example log message
+logger.info("This log is written to both the console and the file")
+```
+
+Output: The log message will appear in both the console and `app.log`.
+
+### What's the Best Way to Handle Sensitive Information in Logs?
+
+To protect sensitive information in your logs, consider these practices:
+
+1. Use Appropriate Log Levels: Avoid logging sensitive data at levels like DEBUG or INFO unless necessary. Use higher levels like `ERROR` or `WARNING` for critical data.
+2. Implement Custom Redaction Logic: Create a custom formatter to redact sensitive information from your logs:
+    
+    ```python
+    import logging
+    import re
+    
+    def redact_sensitive_info(log_message):
+        """
+        Redact sensitive information such as credit card numbers or SSNs.
+        """
+        patterns = {
+            'credit_card': r'\\b(?:\\d{4}[-\\s]?){3}\\d{4}\\b',
+            'ssn': r'\\b\\d{3}-\\d{2}-\\d{4}\\b'
+        }
+        for key, pattern in patterns.items():
+            log_message = re.sub(pattern, f'[REDACTED {key.upper()}]', log_message)
+        return log_message
+    
+    class RedactingFormatter(logging.Formatter):
+        def format(self, record):
+            message = super().format(record)
+            return redact_sensitive_info(message)
+    
+    # Example of setting the redacting formatter
+    formatter = RedactingFormatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    handler = logging.StreamHandler()
+    handler.setFormatter(formatter)
+    
+    logger = logging.getLogger(__name__)
+    logger.addHandler(handler)
+    
+    # Example log message with sensitive information
+    logger.info("User's SSN is 123-45-6789")
+    ```
+    
+    Output Example:
+    
+    ```
+    2024-08-24 04:52:01,662 - __main__ - INFO - <ipython-input-4-fb697e744496>:30 - <cell line: 30>() - User's SSN is 123-45-6789
+    2024-08-24 04:52:01,662 - __main__ - INFO - User's SSN is 123-45-6789
+    INFO:__main__:User's SSN is 123-45-6789
+    ```
+    
+
+### How Can I Integrate Python Logging with Third-Party Libraries?
+
+Most third-party libraries in Python use the built-in logging module, so their logs can be captured by configuring the root logger. Here’s how to manage third-party library logs:
+
+1. Configure the Root Logger: Set the logging level for all libraries by configuring the root logger:
+    
+    ```python
+    import logging
+    
+    logging.basicConfig(level=logging.INFO)
+    ```
+    
+2. Adjust Specific Loggers: If you want to control the logging level for specific libraries, adjust their loggers:
+    
+    ```python
+    import logging
+    
+    # Set the logging level for the 'requests' library
+    logging.getLogger('requests').setLevel(logging.WARNING)
+    ```
