@@ -170,6 +170,7 @@ const MetricsCostEstimation = () => {
                         ]}
                         classNames={{
                           label: 'text-medium',
+                          step: "h-[0.6rem] w-[0.15rem]",
                         }}
                         renderThumb={(props) => (
                           <div
