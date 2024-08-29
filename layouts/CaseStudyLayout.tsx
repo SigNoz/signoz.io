@@ -24,57 +24,58 @@ interface CaseStudyLayoutProps {
 
 
 export default function CaseStudyLayout({ content, children, toc }: CaseStudyLayoutProps) {
-  const { title} = content
+  const { title } = content
 
   return (
-    <div className="container mx-auto">
-      <div className="post container overflow-clip">
-        <div className="post-content mt-8">
-          <PageTitle>{title}</PageTitle>
-          <article className="prose prose-slate max-w-none py-6 dark:prose-invert">
-            {children}
-          </article>
-        </div>
-
-        <div className="post-toc w-full md:w-[300px] py-4 bg-signoz_ink-400 border border-signoz_slate-400 rounded">
-          {content.logo && (
-            <div className="mb-4">
-              <img src={content.logo} alt={`${title} logo`} className="object-contain h-12 w-auto mx-auto p-1" />
-            </div>
-          )}
-          <div className='border-t border-signoz_slate-500'>
-
-          <div className='flex flex-col gap-4 px-4'>
-            <div>
-              <div className='uppercase text-signoz_slate-50 text-xs font-medium mb-1 mt-4'>About</div>
-              <div className='text-sm font-medium'>{content.summary}</div>
-            </div>
-
-            <div>
-              <div className='uppercase text-signoz_slate-50 text-xs font-medium mb-1'>Founded</div>
-              <div className='text-sm font-medium'>{content.founded}</div>
-            </div>
-
-            <div>
-              <div className='uppercase text-signoz_slate-50 text-xs font-medium mb-1'>Using Signoz Since</div>
-              <div className='text-sm font-medium mb-1.5'>{content.usage}</div>
-            </div>
+    <>
+      <div className="container mx-auto">
+        <div className="post container overflow-clip">
+          <div className="post-content mt-8">
+            <PageTitle>{title}</PageTitle>
+            <article className="prose prose-slate max-w-none py-6 dark:prose-invert">
+              {children}
+            </article>
           </div>
 
-          <div className='flex justify-between mt-2 border-t border-signoz_slate-500 group'>
-            <div className='flex gap-1.5 items-center mt-4 px-4'>
-              <Globe size={14} /> <a href={content.website} target='_blank' className='text-sm'>{content.website}</a>
+          <div className="post-toc w-full md:w-[300px] py-4 bg-signoz_ink-400 border border-signoz_slate-400 rounded">
+            {content.logo && (
+              <div className="mb-4">
+                <img src={content.logo} alt={`${title} logo`} className="object-contain h-12 w-auto mx-auto p-1" />
+              </div>
+            )}
+            <div className='border-t border-signoz_slate-500'>
+
+              <div className='flex flex-col gap-4 px-4'>
+                <div>
+                  <div className='uppercase text-signoz_slate-50 text-xs font-medium mb-1 mt-4'>About</div>
+                  <div className='text-sm font-medium'>{content.summary}</div>
+                </div>
+
+                <div>
+                  <div className='uppercase text-signoz_slate-50 text-xs font-medium mb-1'>Founded</div>
+                  <div className='text-sm font-medium'>{content.founded}</div>
+                </div>
+
+                <div>
+                  <div className='uppercase text-signoz_slate-50 text-xs font-medium mb-1'>Using Signoz Since</div>
+                  <div className='text-sm font-medium mb-1.5'>{content.usage}</div>
+                </div>
+              </div>
+
+              <div className='flex justify-between mt-2 border-t border-signoz_slate-500 group'>
+                <div className='flex gap-1.5 items-center mt-4 px-4'>
+                  <Globe size={14} /> <a href={content.website} target='_blank' className='text-sm'>{content.website}</a>
+                </div>
+                <div className='mt-auto flex justify-end px-4'>
+                  <ArrowRight size={14} className='transform transition-transform group-hover:translate-x-1' />
+                </div>
+              </div>
             </div>
-            <div className='mt-auto flex justify-end px-4'>
-              <ArrowRight size={14} className='transform transition-transform group-hover:translate-x-1'/>
-            </div>
-          </div>        
           </div>
         </div>
       </div>
-
       <GetStarted page='case-study' />
-    </div>
+    </>
   )
 }
 
@@ -85,7 +86,7 @@ export const GetStarted = ({ page }) => {
 
   return (
     <div className="bg-[url('/img/background_blur/Frame_2185.png')] bg-[length:55%] bg-[width:50%] bg-[center_top_4rem] sm:bg-no-repeat">
-      <section className='!mx-auto !w-[100vw] md:!w-[80vw]'>
+      <section className=''>
         <div className="bg-[url('/img/background_blur/Ellipse_206.png')] bg-[center_top_calc(-250px)] bg-no-repeat">
           <div className='flex flex-col gap-16'>
             <div className='flex flex-col gap-12'>
