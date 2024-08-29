@@ -12,6 +12,7 @@ import siteMetadata from '@/data/siteMetadata'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { SidebarIcons } from '@/components/sidebar-icons/icons'
+import PageFeedback from '../../../components/PageFeedback/PageFeedback'
 import React from 'react'
 
 const defaultLayout = 'PostLayout'
@@ -122,6 +123,7 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
         toc={post.toc}
       >
         <MDXLayoutRenderer code={post.body.code} components={components} toc={post.toc} />
+        <PageFeedback />
       </Layout>
     </>
   )
