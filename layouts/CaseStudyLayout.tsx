@@ -64,7 +64,9 @@ export default function CaseStudyLayout({ content, children, toc }: CaseStudyLay
 
               <div className='flex justify-between mt-2 border-t border-signoz_slate-500 group'>
                 <div className='flex gap-1.5 items-center mt-4 px-4'>
-                  <Globe size={14} /> <a href={content.website} target='_blank' className='text-sm'>{content.website}</a>
+                  <Globe size={14} />    <a href={`//${content.website}`} target='_blank' rel='noopener noreferrer' className='text-sm'>
+                    {content.website}
+                  </a>
                 </div>
                 <div className='mt-auto flex justify-end px-4'>
                   <ArrowRight size={14} className='transform transition-transform group-hover:translate-x-1' />
