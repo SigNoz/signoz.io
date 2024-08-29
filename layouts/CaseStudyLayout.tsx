@@ -6,8 +6,9 @@ import PageTitle from '@/components/PageTitle'
 import React from 'react'
 import { CaseStudy } from '../.contentlayer/generated'
 import Button from '@/components/Button/Button'
-import { ArrowRight, BookOpen } from 'lucide-react'
+import { ArrowRight, BookOpen, Globe } from 'lucide-react'
 import Link from 'next/link'
+
 
 export interface tocItemProps {
   url: string
@@ -21,8 +22,9 @@ interface CaseStudyLayoutProps {
   toc: tocItemProps[]
 }
 
+
 export default function CaseStudyLayout({ content, children, toc }: CaseStudyLayoutProps) {
-  const { title } = content
+  const { title} = content
 
   return (
     <div className="container mx-auto">
@@ -34,28 +36,47 @@ export default function CaseStudyLayout({ content, children, toc }: CaseStudyLay
           </article>
         </div>
 
-        {/* <div className="post-toc">
-          {toc.map((tocItem: tocItemProps) => {
-            return (
-              <div className="post-toc-item" key={tocItem.url}>
-                <a data-level={tocItem.depth} href={tocItem.url} className="line-clamp-2">
-                  {tocItem.value}
-                </a>
-              </div>
-            )
-          })}
-        </div> */}
+        <div className="post-toc w-full md:w-[300px] py-4 bg-signoz_ink-400 border border-signoz_slate-400 rounded">
+          {content.logo && (
+            <div className="mb-4">
+              <img src={content.logo} alt={`${title} logo`} className="object-contain h-12 w-auto mx-auto p-1" />
+            </div>
+          )}
+          <div className='border-t border-signoz_slate-500'>
 
+          <div className='flex flex-col gap-4 px-4'>
+            <div>
+              <div className='uppercase text-signoz_slate-50 text-xs font-medium mb-1 mt-4'>About</div>
+              <div className='text-sm font-medium'>{content.summary}</div>
+            </div>
 
+            <div>
+              <div className='uppercase text-signoz_slate-50 text-xs font-medium mb-1'>Founded</div>
+              <div className='text-sm font-medium'>{content.founded}</div>
+            </div>
 
+            <div>
+              <div className='uppercase text-signoz_slate-50 text-xs font-medium mb-1'>Using Signoz Since</div>
+              <div className='text-sm font-medium mb-1.5'>{content.usage}</div>
+            </div>
+          </div>
 
+          <div className='flex justify-between mt-2 border-t border-signoz_slate-500 group'>
+            <div className='flex gap-1.5 items-center mt-4 px-4'>
+              <Globe size={14} /> <a href={content.website} target='_blank' className='text-sm'>{content.website}</a>
+            </div>
+            <div className='mt-auto flex justify-end px-4'>
+              <ArrowRight size={14} className='transform transition-transform group-hover:translate-x-1'/>
+            </div>
+          </div>        
+          </div>
+        </div>
       </div>
+
       <GetStarted page='case-study' />
     </div>
   )
 }
-
-
 
 
 export const GetStarted = ({ page }) => {
