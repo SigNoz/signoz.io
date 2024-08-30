@@ -1426,6 +1426,19 @@ const docsSideNav = [
           }
         ],
       },
+      {
+        type: 'category',
+        isExpanded: false,
+        label: 'Compute Engine',
+        route: '/docs/gcp-monitoring/compute-engine',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/gcp-monitoring/compute-engine/logging',
+            label: 'Logging',
+          }
+        ],
+      },
     ],
   },
   {
