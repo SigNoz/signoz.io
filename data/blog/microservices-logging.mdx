@@ -1,82 +1,267 @@
 ---
-title: A Practical Guide to Logging in Microservices [Includes Best Practices]
+
+title: Mastering Microservices Logging - Best Practices Guide
 slug: microservices-logging
-date: 2024-02-01
+date: 2024-08-29
 tags: [Tech Tutorial, Log Management]
 authors: [vaishnavi]
-description: Microservices logging is the practice of tracking and recording the activities of specific services in a distributed microservices architecture. Logging is an important aspect of any software system, and it is more critical for a microservices architecture as there are many small, independent services interacting with each other....
+description: Discover essential best practices for microservices logging. Learn how to implement effective logging strategies, overcome challenges, and enhance system observability.
 image: /img/blog/2023/01/microservices_logging_cover-min.jpg
 keywords: [microservices logging,logging,trace,log analytics]
+
 ---
+
 <head>
-  <link rel="canonical" href="https://signoz.io/blog/microservices-logging/"/>
+  <script
+    type="application/ld+json"
+    dangerouslySetInnerHTML={{ __html: JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Mastering Microservices Logging - Best Practices Guide",
+  "alternativeHeadline": "Essential best practices for implementing effective logging in microservices architectures",
+  "author": {
+    "@type": "Person",
+    "name": "Vaishnavi"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SigNoz",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://signoz.io/img/SigNozLogo-orange.svg"
+    }
+  },
+  "datePublished": "2024-08-29T00:00:00Z",
+  "dateModified": "2024-08-29T00:00:00Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://signoz.io/blog/microservices-logging/"
+  },
+  "description": "Discover essential best practices for microservices logging. Learn how to implement effective logging strategies, overcome challenges, and enhance system observability.",
+  "keywords": "microservices logging, logging, trace, log analytics, distributed systems, observability",
+  "articleSection": "Technology",
+  "inLanguage": "en",
+  "isPartOf": {
+    "@type": "Blog",
+    "name": "SigNoz Blog",
+    "url": "https://signoz.io/blog/"
+  },
+  "about": [
+    {
+      "@type": "Thing",
+      "name": "Microservices",
+      "description": "An architectural style that structures an application as a collection of loosely coupled services"
+    },
+    {
+      "@type": "Thing",
+      "name": "Logging",
+      "description": "The practice of recording events, operations, and data flows within a software system"
+    },
+    {
+      "@type": "Thing",
+      "name": "Observability",
+      "description": "The ability to measure the internal states of a system by examining its outputs"
+    }
+  ],
+  "mentions": [
+    {
+      "@type": "SoftwareApplication",
+      "name": "OpenTelemetry",
+      "applicationCategory": "Observability Framework"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "name": "SigNoz",
+      "applicationCategory": "Observability Platform"
+    }
+  ],
+  "mainEntity": {
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What is microservices logging and why is it important?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Microservices logging is the practice of capturing and managing log data in a distributed system composed of independent, loosely coupled services. It's crucial for maintaining visibility, diagnosing issues, monitoring performance, ensuring security, and achieving compliance in complex distributed environments."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What are some best practices for microservices logging?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Key best practices include: implementing standardized log formats, using structured logging in JSON format, utilizing log levels consistently, using unique correlation IDs for each request, including contextual data in logs, avoiding logging sensitive information, and implementing a centralized logging solution."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How does centralized logging benefit microservices architectures?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Centralized logging provides a unified view of logs from all services, simplifies log correlation and analysis, enhances security through centralized access control, enables advanced querying and visualization capabilities, and facilitates easier troubleshooting and performance optimization."
+        }
+      }
+    ]
+  },
+  "tutorial": {
+    "@type": "HowTo",
+    "name": "How to Implement Effective Microservices Logging",
+    "step": [
+      {
+        "@type": "HowToStep",
+        "name": "Standardize Log Formats",
+        "text": "Implement a consistent log format across all services, including timestamp, service name, log level, message, and contextual data."
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Use Structured Logging",
+        "text": "Adopt structured logging, preferably in JSON format, to make logs easier to parse and analyze programmatically."
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Implement Correlation IDs",
+        "text": "Use unique correlation IDs for each request to trace it across multiple services."
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Set Up Centralized Logging",
+        "text": "Implement a centralized logging solution to collect, store, and analyze logs from all services in one place."
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Integrate with Observability Tools",
+        "text": "Use tools like OpenTelemetry to correlate logs with other telemetry data such as traces and metrics."
+      }
+    ]
+  }
+}) }}
+  />
 </head>
 
-Microservices logging is the practice of tracking and recording the activities of specific services in a distributed microservices architecture. Logging is an important aspect of any software system, and it is more critical for a microservices architecture as there are many small, independent services interacting with each other.
+Microservices architectures have revolutionized software development, enabling scalability and flexibility. However, they also introduce complexities in system monitoring and troubleshooting. Effective logging is crucial for maintaining visibility and diagnosing issues in these distributed environments. This comprehensive guide explores best practices for microservices logging, helping you navigate the challenges and implement robust logging strategies. From standardized formats to advanced techniques, you'll learn how to master logging in microservices and enhance your system's observability.
 
+<Figure src="/img/blog/2024/08/microservices-logging-CleanShot_2024-08-29_at_14.11.122x.webp" alt="Microservices logging" caption="Microservices logging" />
 
-
-![Cover Image](/img/blog/2023/01/microservices_logging_cover.webp)
-
-## What are microservices?
+## What is Microservices Logging and Why is it Critical?
 
 Microservices architecture is a software design approach in which a large application is built as a collection of small, independent services. The goal of microservices architecture is to improve the scalability and maintainability of a software system by making it easier to develop, test, and deploy individual services independently.
 
 One of the main benefits of microservices architecture is that it allows for a more granular and fine-grained approach to building and evolving a software system. This can make it easier to make changes to individual parts of the system without affecting the entire system.
 
-## Importance of Logging in Microservices
+Microservices logging refers to the practice of capturing and managing log data in a distributed system composed of independent, loosely coupled services.
 
-Logging is an important aspect of any software system. It is especially important in a microservices architecture, where there may be many different services running concurrently and interacting with each other.
+### Importance of Logging in Microservices
 
-In a microservices system, it is important to log events and errors at the service level so that it is possible to track and debug issues that may arise within a specific service. It is also important to have a centralized logging system that can collect and store log messages from all of the different services so that it is possible to get a holistic view of the system and identify patterns or trends that may not be apparent from looking at the logs of a single service.
+Logging is critical in microservices architectures for several reasons:
 
+1. **Distributed Debugging**: Logs help trace requests across multiple services, essential for identifying the root cause of issues.
+2. **Performance Monitoring**: Log data provides insights into service performance and helps identify bottlenecks.
+3. **Security Auditing**: Logs are crucial for detecting and investigating security incidents across the distributed system.
+4. **Compliance**: Many industries require comprehensive logging for regulatory compliance.
 
-## Here are a few microservices logging best practices:
+The key differences between monolithic and microservices logging include:
 
-1. **What to Log**<br></br>
-   Events and Transactions: Capture actions, occurrences, and business or system transactions to provide insights into the system's behavior.
-   Errors: Log errors, exceptions, and stack traces to aid in troubleshooting and understanding failure points within the system.
+- **Volume**: Microservices generate significantly more log data due to their distributed nature.
+- **Consistency**: Maintaining consistent log formats across diverse services is challenging but essential.
+- **Correlation**: Tracing requests across services requires sophisticated log correlation techniques.
 
-2. **Use Log Levels**<br></br>
-   Utilize various levels of logging (DEBUG, INFO, WARN, ERROR, FATAL) to categorize logs by severity and importance, helping in filtering and focusing on the most critical issues first.
+Effective microservices logging directly impacts system observability—the ability to understand internal states based on external outputs. It enables faster troubleshooting, proactive issue detection, and informed decision-making for system improvements.
 
-3. **Use Structured logging**<br></br>
-   Instead of logging unstructured messages, consider using a structured logging format such as JSON. This will make it easier to search and analyze your logs and will also make it easier to send your logs to a centralized logging solution. In the centralized location, you can make searches, such as those that seek logs with an "HTTP code" of 500 or higher. To provide your microservices logs with a consistent yet adaptable format, use structured logging.
+## Essential Microservices Logging Best Practices
 
+To implement effective logging in your microservices architecture, follow these best practices:
 
-4. **Use an unique correlation ID per request**<br></br>
-   Imagine a situation where a large number of microservices produce millions of log entries every hour. If something odd happened, it would be challenging to identify the underlying cause. An invaluable tool in this kind of circumstance is a correlation ID. For each request sent to a server, a correlation request ID would be inserted. The identifier is passed back and forth between each service needed to fulfill the request. If you're trying to debug a problem, the first thing you should do is locate the special identification that was given along with the request. Even better would be to use the special ID when handling errors in the error log.
+### What to Log
 
+Events and Transactions: Capture actions, occurrences, and business or system transactions to provide insights into the system's behavior.
+Errors: Log errors, exceptions, and stack traces to aid in troubleshooting and understanding failure points within the system.
 
-5. **Add contextual data in your logs**<br></br>
-   Make sure to include enough context in your logs to be able to understand the events that lead up to an error or debugging issue. This might include information such as the request URL, request parameters, and user ID.
+### Implement Standardized Log Formats
 
-6. **Do not log sensitive data**<br></br>
-   Avoid logging personally identifiable information (PII). PII includes things like passwords, account numbers, and social security numbers. There is a privacy concern because it is possible that individual developers may need to examine logs for debugging needs. If your company wants to evaluate user behavior, take into account how certain types of sensitive data may be aggregated through logging to maintain user anonymity.
+Use a consistent log format across all services to simplify log parsing and analysis. A standardized format should include:
 
-7. **Provide informative application logs**<br></br>
-   The log should have all the information required to understand the error when it occurs. We can troubleshoot more effectively and more quickly the more information that is accessible from the microservices logs.
-   
-   At the very least, logs need to contain the following details:
-   
-   - Service name
-   - UserID
-   - Hostname
-   - Correlation ID (can be in the form of traceid)
-   - RequestID
-   - Time Stamp
-   - Overall duration (at the end of a request)
-   - Method name
-   - Call stack (line number of the log)
-   - Request Method
-   - Request URI
+- Timestamp
+- Service name
+- Log level
+- Message
+- Contextual data (e.g., user ID, request ID)
 
-8. **Centralized logging solution**<br></br>
-   In a microservices architecture, it can be difficult to keep track of logs if they are scattered across multiple services. Using a centralized logging solution such as SigNoz or Elastic can help you to collect, query, and view logs from all your services in one place. Logs analytics tool like SigNoz provide dashboards to visually present logs data in an easily digestible format.
+Example of a standardized log entry:
 
-9. **Logging performance metrics**<br></br>
-   In addition to logging events and errors, consider also logging performance metrics such as response times and resource utilization. This will allow you to monitor the performance of your services and identify any potential issues.
+```json
+	{
+  "timestamp": "2023-05-30T10:15:30.123Z",
+  "service": "user-service",
+  "level": "INFO",
+  "message": "User login successful",
+  "userId": "12345",
+  "requestId": "abc-123-xyz"
+}
 
+```
+
+### Use Log Levels
+
+Use standardized logging levels across all services:
+
+- **DEBUG**: Detailed information for debugging purposes
+- **INFO**: General operational information
+- **WARN**: Non-critical issues or unexpected events
+- **ERROR**: Error conditions that require attention
+- **FATAL**: Critical errors that may lead to service failure
+
+Ensure all team members understand and correctly use these levels to maintain consistency.
+
+### Use Structured logging
+
+Structured logging, particularly in JSON format, offers several advantages:
+
+- Easier to parse and analyze programmatically
+- Supports complex data structures
+- Facilitates integration with log management tools
+
+Implement structured logging in your services using libraries like Winston (Node.js) or Logback (Java).
+
+### Use an unique correlation ID per request  
+
+Imagine a situation where a large number of microservices produce millions of log entries every hour. If something odd happened, it would be challenging to identify the underlying cause. 
+
+An invaluable tool in this kind of circumstance is a correlation ID. For each request sent to a server, a correlation request ID would be inserted. The identifier is passed back and forth between each service needed to fulfill the request. If you're trying to debug a problem, the first thing you should do is locate the special identification that was given along with the request. Even better would be to use the special ID when handling errors in the error log.
+
+### Add contextual data in your logs
+
+Make sure to include enough context in your logs to be able to understand the events that lead up to an error or debugging issue. This might include information such as the request URL, request parameters, and user ID.
+
+### Do not log sensitive data
+
+Avoid logging personally identifiable information (PII). PII includes things like passwords, account numbers, and social security numbers. There is a privacy concern because it is possible that individual developers may need to examine logs for debugging needs. If your company wants to evaluate user behavior, take into account how certain types of sensitive data may be aggregated through logging to maintain user anonymity.
+
+### Provide informative application logs
+
+The log should have all the information required to understand the error when it occurs. We can troubleshoot more effectively and more quickly the more information that is accessible from the microservices logs.
+
+At the very least, logs need to contain the following details:
+
+- Service name
+- UserID
+- Hostname
+- Correlation ID (can be in the form of traceid)
+- RequestID
+- Time Stamp
+- Overall duration (at the end of a request)
+- Method name
+- Call stack (line number of the log)
+- Request Method
+- Request URI
+
+### Centralized logging solution
+
+In a microservices architecture, it can be difficult to keep track of logs if they are scattered across multiple services. Using a centralized logging solution such as SigNoz or Elastic can help you to collect, query, and view logs from all your services in one place. Logs analytics tool like SigNoz provide dashboards to visually present logs data in an easily digestible format.
+
+### Logging performance metrics
+
+In addition to logging events and errors, consider also logging performance metrics such as response times and resource utilization. This will allow you to monitor the performance of your services and identify any potential issues.
 
 ## The need for a Centralized Logging Service
 
@@ -84,13 +269,85 @@ A single centralized logging service that aggregates logs from all the services 
 
 When one or more services fail, we need to know which service experienced an issue and why. It's also difficult to decipher the complete request flow in microservices. For instance, which services have been called? And in what sequence and frequency are that service called?
 
-## Integrating Observability in logs
+Benefits of centralized logging include:
 
-If the application logs contained request context identifiers (such as trace ids, span ids, traceflags or user-defined baggage based on <a href = "https://www.w3.org/TR/trace-context/#traceparent-header" rel="noopener noreferrer nofollow" target="_blank" >w3c trace context recommendation</a>) it would result in a much richer correlation between logs and traces, as well as correlation between logs emitted by different components of a distributed system. This would make logs significantly more valuable in distributed systems.
+- **Unified view**: Access logs from all services in one place
+- **Easier correlation**: Simplifies tracing requests across services
+- **Advanced analysis**: Enables complex queries and pattern recognition
+- **Improved security**: Centralized access control and audit trails
+
+Key features to look for in a log management solution:
+
+1. **Scalability**: Ability to handle high log volumes
+2. **Real-time ingestion and search**: Quick access to recent logs
+3. **Advanced querying**: Support for complex search queries
+4. **Visualization**: Dashboards and charts for log data analysis
+5. **Alerting**: Automated notifications for specific log patterns
+
+## Advanced Techniques for Effective Microservices Logging
+
+### Distributed Tracing
+
+Distributed tracing provides end-to-end visibility of requests as they traverse multiple services. It helps identify performance bottlenecks and understand service dependencies.
+
+Implement distributed tracing using tools like Jaeger or Zipkin. These systems work by propagating trace context between services and collecting timing data for each span of a request.
+
+Example of adding tracing to a Node.js application using OpenTelemetry:
+
+```jsx
+const { NodeTracerProvider } = require('@opentelemetry/node');
+const { SimpleSpanProcessor } = require('@opentelemetry/tracing');
+const { JaegerExporter } = require('@opentelemetry/exporter-jaeger');
+
+const provider = new NodeTracerProvider();
+const exporter = new JaegerExporter({ serviceName: 'my-service' });
+provider.addSpanProcessor(new SimpleSpanProcessor(exporter));
+provider.register();
+
+// Your application code here
+
+```
+
+### Log Aggregation and Correlation
+
+Use log aggregation to collect and correlate logs from multiple services. This technique helps in understanding the flow of requests and identifying issues that span across services.
+
+Implement log correlation by including correlation IDs in all log entries and using a centralized logging system to aggregate and analyze logs based on these IDs.
+
+### Log Sampling
+
+In high-volume environments, log sampling can help manage the amount of data while still providing valuable insights. Implement intelligent sampling techniques that capture a representative subset of logs, including all error logs and a percentage of other log levels.
+
+Example of log sampling in Python:
+
+```python
+import random
+
+def should_log(level):
+    if level in ['ERROR', 'FATAL']:
+        return True
+    return random.random() < 0.1  # 10% sampling for non-error logs
+
+def log(level, message):
+    if should_log(level):
+        # Proceed with logging
+        pass
+
+```
+
+### Automated Log Analysis and Alerting
+
+Implement automated log analysis to detect patterns, anomalies, and potential issues. Set up alerts based on specific log patterns or thresholds to proactively address problems.
+
+Use machine learning algorithms for advanced log analysis, such as clustering similar log messages or detecting anomalies in log patterns.
+
+### Integrating Observability in logs
+
+If the application logs contained request context identifiers (such as trace ids, span ids, traceflags or user-defined baggage based on <a href="https://www.w3.org/TR/trace-context/#traceparent-header" rel="noopener noreferrer nofollow" target="_blank">w3c trace context recommendation</a>) it would result in a much richer correlation between logs and traces, as well as correlation between logs emitted by different components of a distributed system. This would make logs significantly more valuable in distributed systems.
 
 But before we go further, let’s have brief overview of what is observability.
 
-### What is observability?
+**What is observability?**
 
 We believe the aim of observability is to solve customer issues quickly. Creating monitoring dashboards is useless if it can’t help engineering teams quickly identify the root causes of performance issues.
 
@@ -98,17 +355,17 @@ A modern distributed software system has a lot of moving components. So while se
 
 Observability enables application owners to get answers to any question that might arise while debugging application issues.
 
-### Logs, metrics, and traces as pillars of observability
+**Logs, metrics, and traces as pillars of observability**
 
-Logs, metrics, and traces are commonly referred to as [three pillars of observability](https://signoz.io/blog/three-pillars-of-observability/). These three telemetry signals when correlated can drive application insights faster. 
+Logs, metrics, and traces are commonly referred to as [three pillars of observability](https://signoz.io/blog/three-pillars-of-observability/). These three telemetry signals when correlated can drive application insights faster.
 
 For robust observability, having a seamless way to correlate your telemetry signals is critical. For example, if you see that the latency of a particular service is high at the moment, can you deep-dive into relevant logs quickly? Can you correlate your metrics with traces to figure out where in the request journey the problem occurred?
 
 Now the question is how do we generate, collect, and store telemetry signals so that they can be easily correlated and analyzed together. That’s where OpenTelemetry comes into the picture.
 
-## What is OpenTelemetry?
+**What is OpenTelemetry?**
 
-<a href = "https://opentelemetry.io/" rel="noopener noreferrer nofollow" target="_blank" >OpenTelemetry</a> is a set of API, SDKs, libraries, and integrations aiming to standardize the generation, collection, and management of telemetry data(logs, metrics, and traces). OpenTelemetry is a Cloud Native Computing Foundation project created after the merger of OpenCensus(from Google) and OpenTracing(From Uber).
+<a href="https://opentelemetry.io/" rel="noopener noreferrer nofollow" target="_blank">OpenTelemetry</a> is a set of API, SDKs, libraries, and integrations aiming to standardize the generation, collection, and management of telemetry data(logs, metrics, and traces). OpenTelemetry is a Cloud Native Computing Foundation project created after the merger of OpenCensus(from Google) and OpenTracing(From Uber).
 
 The data you collect with OpenTelemetry is vendor-agnostic and can be exported in many formats. Telemetry data has become critical to observe the state of distributed systems. With microservices and polyglot architectures, there was a need to have a global standard. OpenTelemetry aims to fill that space and is doing a great job at it thus far.
 
@@ -116,11 +373,11 @@ SigNoz is built to support OpenTelemetry natively.
 
 We emit logs, traces, and metrics in a way that is compliant with OpenTelemetry data models, and send the data through SigNoz collector, where it can be enriched and processed uniformly.
 
-OpenTelemetry defines a <a href = "https://opentelemetry.io/docs/specs/otel/logs/data-model/" rel="noopener noreferrer nofollow" target="_blank" >log data model</a>. The purpose of the data model is to have a common understanding of what a LogRecord is, what data needs to be recorded, transferred, stored, and interpreted by a logging system. Newly designed logging systems are expected to emit logs according to OpenTelemetry’s log data model.
+OpenTelemetry defines a <a href="https://opentelemetry.io/docs/specs/otel/logs/data-model/" rel="noopener noreferrer nofollow" target="_blank">log data model</a>. The purpose of the data model is to have a common understanding of what a LogRecord is, what data needs to be recorded, transferred, stored, and interpreted by a logging system. Newly designed logging systems are expected to emit logs according to OpenTelemetry’s log data model.
 
 Now let’s look at a practical example of correlating logs with traces.
 
-## How do you add Context information in logs in a simple Go Application?
+**How do you add Context information in logs in a simple Go Application?**
 
 We have implemented the correlation of logs and traces in a sample Golang Application.
 
@@ -152,8 +409,8 @@ func SetupLog() {
 	)
 	logger = zap.New(core, zap.AddCaller(), zap.AddStacktrace(zapcore.ErrorLevel))
 }
-```
 
+```
 
 **Step 2:** Secondly, we wrap the zap logger and a context for use to add trace context information in the log messages.
 
@@ -189,20 +446,22 @@ func (log *LoggerWithCtx) Info(msg string, fields ...zap.Field) {
 	fieldsWithTraceCtx := log.logFields(*log.context, fields)
 	log.Logger.Info(msg, fieldsWithTraceCtx...)
 }
+
 ```
 
 **Step 3:** The services which intends to use this log method needs to pass the request context object which adds trace_id, span_id and trace_flags field to structured log messages. This option is only useful with backends that don't support OTLP and instead parse log messages to extract structured information.
 
 ```
 import log "github.com/vabira200/golang-instrumentation/logger"
+
 ```
 
 ```
 log.Ctx(r.Context()).Info("Order controller called", metadata...)
+
 ```
 
-
-**Step 4:** With the integration of wrapper with the zap library, this is how our logs look like(with traceid, spanid and traceflags). This follows the <a href = "https://opentelemetry.io/docs/specs/otel/logs/data-model/" rel="noopener noreferrer nofollow" target="_blank" >log data model</a> from OpenTelemetry. For comparison, let’s look at logs with and without the integration of the wrapper.
+**Step 4:** With the integration of wrapper with the zap library, this is how our logs look like(with traceid, spanid and traceflags). This follows the <a href="https://opentelemetry.io/docs/specs/otel/logs/data-model/" rel="noopener noreferrer nofollow" target="_blank">log data model</a> from OpenTelemetry. For comparison, let’s look at logs with and without the integration of the wrapper.
 
 **Before Integration:**
 
@@ -221,6 +480,7 @@ log.Ctx(r.Context()).Info("Order controller called", metadata...)
     "userId": "4538"
 
 }
+
 ```
 
 **After Integration:**
@@ -241,18 +501,18 @@ log.Ctx(r.Context()).Info("Order controller called", metadata...)
     "traceflags": 1,
     "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36",
     "userId": "4538"
-    
+
 }
+
 ```
 
 ## OpenTelemetry Log Collection with SigNoz
 
 In this example, we will configure our application to write the logs to a log file. Then the SigNoz OpenTelemetry collector collects logs from the log file and exports them to `clickhouselogsexporter` which shows up the logs in the SigNoz UI.
 
-
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2023/01/microservices-logging-signoz-working.webp" alt="How Telemetry signals are collected and correlated with SigNoz."/>
-    <figcaption><i>How Telemetry signals are collected and correlated with SigNoz.</i></figcaption>
+<img src="/img/blog/2023/01/microservices-logging-signoz-working.webp" alt="How Telemetry signals are collected and correlated with SigNoz."/>
+<figcaption><i>How Telemetry signals are collected and correlated with SigNoz.</i></figcaption>
 </figure>
 
 **Steps to collect Application Logs with OpenTelemetry**
@@ -262,10 +522,15 @@ Clone the SigNoz github repository:
 ```
 Start the signoz server following the instructions:
 
-git clone -b main https://github.com/SigNoz/signoz.git
+git clone -b main <https://github.com/SigNoz/signoz.git>
 cd signoz/deploy/
 ./install.sh
+
 ```
+
+Or Setup SigNoz Cloud
+
+<GetStartedSigNoz />
 
 Modify the `docker-compose.yaml` file present inside `deploy/docker/clickhouse-setup` by adding volumes for the application log file.
 
@@ -278,6 +543,7 @@ otel-collector:
       - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
       - /<path_to_application_log_file>/application.log:/tmp/application.log
+
 ```
 
 Add the filelog receivers in the `otel-collector-config.yaml` which is present inside `deploy/docker/clickhouse-setup`
@@ -297,11 +563,12 @@ receivers:
         to: body
       - type: remove
         field: attributes.time
+
 ```
 
 Here we are collecting the logs and moving message from attributes to body using operators that are available. You can read more about operators [here](https://signoz.io/docs/userguide/logs/#operators-for-parsing-and-manipulating-logs).
 
-For more configurations that are available for filelog receiver please check <a href = "https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/filelogreceiver" rel="noopener noreferrer nofollow" target="_blank" >here</a>.
+For more configurations that are available for filelog receiver please check <a href="https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/filelogreceiver" rel="noopener noreferrer nofollow" target="_blank">here</a>.
 
 Next we will modify our pipeline inside `otel-collector-config.yaml` to include the receiver we have created above.
 
@@ -317,39 +584,194 @@ receivers: [otlp, filelog]
 processors: [batch]
 
 exporters: [clickhouselogsexporter]
+
 ```
 
 Now we can restart the OTel collector container so that new changes are applied, and the logs are read from the application log file. If you look at the traces tab, we can see the traces available with the traceID and span.
 
-
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2023/01/microservices-logging-trace.webp" alt="Trace data visualized as flamegraphs in SigNoz."/>
-    <figcaption><i>Trace data visualized as flamegraphs in SigNoz.</i></figcaption>
+<img src="/img/blog/2023/01/microservices-logging-trace.webp" alt="Trace data visualized as flamegraphs in SigNoz."/>
+<figcaption><i>Trace data visualized as flamegraphs in SigNoz.</i></figcaption>
 </figure>
 
 Now we need to switch to the logs tab and check for the equivalent log to the above trace.
 
-
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2023/01/microservices-logging-log.webp" alt="Log tab in the SigNoz dashboard."/>
-    <figcaption><i>Log tab in the SigNoz dashboard.</i></figcaption>
+<img src="/img/blog/2023/01/microservices-logging-log.webp" alt="Log tab in the SigNoz dashboard."/>
+<figcaption><i>Log tab in the SigNoz dashboard.</i></figcaption>
 </figure>
 
 We can see the complete log of the above trace with traceid, spanid and traceflags.
 
-
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2023/01/microservices-logging-log-complete.webp" alt="We can see complete log information along with traceID, spanID, and traceflags."/>
-    <figcaption><i>We can see complete log information along with traceID, spanID, and traceflags.</i></figcaption>
+<img src="/img/blog/2023/01/microservices-logging-log-complete.webp" alt="We can see complete log information along with traceID, spanID, and traceflags."/>
+<figcaption><i>We can see complete log information along with traceID, spanID, and traceflags.</i></figcaption>
 </figure>
 
-## Conclusion
+## Security Considerations in Microservices Logging
 
-It is a difficult task to handle logs at scale. A microservices architecture emits millions of log lines per minute. Having a structured approach to logging, adding observability to your software systems, and making it easy for developers to analyze and drive insights from logs data is key to having high-performing applications.
+Securing log data is crucial in microservices architectures. Implement these practices to ensure log security:
 
-Having a unique logging model with centralized logging ensures that all developers use the same fields in their log messages. Furthermore, by enhancing our logs with contextual information like traceID, we can better correlate them with other telemetry signals.
+1. **Protect Sensitive Data**: Avoid logging sensitive information like passwords or personal data. Use masking techniques for partial logging of sensitive fields.
+2. **Encrypt Log Transmission**: Use secure protocols (e.g., TLS) when transmitting logs from services to the central log management system.
+3. **Secure Log Storage**: Encrypt logs at rest and implement access controls to prevent unauthorized access.
+4. **Implement Audit Trails**: Log all access to the logging system itself to maintain an audit trail of who viewed or modified log data.
+5. **Compliance Adherence**: Ensure your logging practices comply with relevant data protection regulations like GDPR or CCPA.
+
+Example of masking sensitive data in logs:
+
+```python
+import re
+
+def mask_sensitive_data(log_message):
+    # Mask credit card numbers
+    log_message = re.sub(r'\\b(?:\\d{4}[-\\s]?){3}\\d{4}\\b', 'XXXX-XXXX-XXXX-XXXX', log_message)
+    # Mask email addresses
+    log_message = re.sub(r'\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\\b', 'XXXX@XXXX.XXX', log_message)
+    return log_message
+
+# Use this function before logging
+logger.info(mask_sensitive_data("User email: john@example.com, CC: 1234-5678-9012-3456"))
+
+```
+
+## Overcoming Common Microservices Logging Challenges
+
+Microservices logging presents unique challenges. Here's how to address some common issues:
+
+1. **Managing Log Volume**:
+    - Implement log rotation and compression
+    - Use log sampling for high-volume services
+    - Set appropriate retention policies
+2. **Ensuring Consistency Across Polyglot Services**:
+    - Define and enforce logging standards across teams
+    - Use language-agnostic logging formats (e.g., JSON)
+    - Implement centralized logging configuration management
+3. **Handling Containerized and Serverless Environments**:
+    - Use container-aware logging drivers (e.g., Docker's json-file driver)
+    - Implement structured logging for easier parsing
+    - Leverage cloud-native logging solutions for serverless functions
+4. **Troubleshooting Complex Service Interactions**:
+    - Implement distributed tracing
+    - Use correlation IDs consistently across all services
+    - Leverage log aggregation and analysis tools for end-to-end visibility
+
+## Key Takeaways
+
+Mastering microservices logging is essential for maintaining observable and manageable distributed systems. Remember these key points:
+
+- Standardize log formats and implement structured logging for consistency
+- Use correlation IDs and distributed tracing to track requests across services
+- Centralize logs for easier management, analysis, and correlation
+- Implement robust security measures to protect sensitive log data
+- Leverage integrated observability tools like SigNoz for comprehensive monitoring
+
+It is a difficult task to handle logs at scale. A microservices architecture emits millions of log lines per minute. By following these best practices and continuously refining your logging strategy, you'll be well-equipped to handle the complexities of microservices architectures and maintain highly observable, performant systems.
 
 When your code ditches you, logs become your best friend!
+
+## FAQs
+
+### What are the main differences between monolithic and microservices logging?
+
+The main differences include:
+
+1. **Volume**: Microservices generate more logs due to their distributed nature.
+2. **Complexity**: Correlating logs across services is more challenging in microservices.
+3. **Consistency**: Maintaining uniform logging practices across diverse services is difficult.
+4. **Tools**: Microservices often require specialized tools for log aggregation and analysis.
+
+### How can I implement distributed tracing in my microservices architecture?
+
+To implement distributed tracing:
+
+1. Choose a tracing framework (e.g., Jaeger, Zipkin)
+2. Instrument your services to generate trace data
+3. Propagate trace context between services
+4. Set up a centralized collector to aggregate trace data
+5. Use a visualization tool to analyze traces
+
+### What security measures should I consider for microservices logging?
+
+Key security measures include:
+
+1. Encrypting log data in transit and at rest
+2. Implementing access controls for log data
+3. Masking or excluding sensitive information from logs
+4. Maintaining audit trails for log access
+5. Ensuring compliance with data protection regulations
+
+### How does centralized logging benefit microservices architectures?
+
+Centralized logging offers several benefits:
+
+1. Provides a unified view of logs from all services
+2. Simplifies log correlation and analysis
+3. Enhances security through centralized access control
+4. Enables advanced querying and visualization capabilities
+5. Facilitates easier troubleshooting and performance optimization
+
+### What is microservices logging and why is it important?
+
+Microservices logging is the practice of capturing and managing log data in a distributed system composed of independent, loosely coupled services. It's crucial for maintaining visibility, diagnosing issues, monitoring performance, ensuring security, and achieving compliance in complex distributed environments.
+
+### What are the key differences between monolithic and microservices logging?
+
+The main differences include:
+
+1. Volume: Microservices generate significantly more log data due to their distributed nature.
+2. Consistency: Maintaining consistent log formats across diverse services is challenging but essential.
+3. Correlation: Tracing requests across services requires sophisticated log correlation techniques.
+4. Complexity: Debugging and troubleshooting in a distributed system is more complex.
+5. Tools: Specialized tools for log aggregation and analysis are often required for microservices.
+
+### What are some best practices for microservices logging?
+
+Key best practices include:
+
+1. Implement standardized log formats across all services.
+2. Use structured logging, preferably in JSON format.
+3. Utilize log levels consistently (DEBUG, INFO, WARN, ERROR, FATAL).
+4. Use unique correlation IDs for each request to trace across services.
+5. Include contextual data in logs (e.g., service name, user ID, request ID).
+6. Avoid logging sensitive information.
+7. Implement a centralized logging solution for easier management and analysis.
+
+### How can I implement distributed tracing in my microservices architecture?
+
+To implement distributed tracing:
+
+1. Choose a tracing framework (e.g., Jaeger, Zipkin, or OpenTelemetry).
+2. Instrument your services to generate trace data.
+3. Propagate trace context between services using headers or metadata.
+4. Set up a centralized collector to aggregate trace data.
+5. Use a visualization tool to analyze and explore traces.
+
+### What security considerations should I keep in mind for microservices logging?
+
+Important security considerations include:
+
+1. Encrypt log data both in transit and at rest.
+2. Implement strict access controls for log data.
+3. Mask or exclude sensitive information from logs.
+4. Maintain audit trails for log access and modifications.
+5. Ensure compliance with data protection regulations like GDPR or CCPA.
+6. Regularly review and update logging practices to address emerging security threats.
+
+### How does centralized logging benefit microservices architectures?
+
+Centralized logging offers several benefits:
+
+1. Provides a unified view of logs from all services.
+2. Simplifies log correlation and analysis across the entire system.
+3. Enhances security through centralized access control and monitoring.
+4. Enables advanced querying and visualization capabilities.
+5. Facilitates easier troubleshooting and performance optimization.
+6. Supports better scalability and log retention management.
+
+### What is OpenTelemetry and how does it relate to microservices logging?
+
+OpenTelemetry is an open-source observability framework that provides a standardized way to generate, collect, and manage telemetry data (logs, metrics, and traces) in distributed systems. It helps in creating a consistent approach to instrumentation across different services and technologies in a microservices architecture, making it easier to correlate logs with other observability data.
 
 ---
 
