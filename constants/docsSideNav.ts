@@ -336,6 +336,11 @@ const docsSideNav = [
             route: '/docs/userguide/metrics',
           },
           {
+            type: 'doc',
+            label: 'APM Dashboards/Alerts',
+            route: '/docs/userguide/custom-apm-dashboards-alerts',
+          },
+          {
             type: 'category',
             isExpanded: false,
             label: 'View Traces',
@@ -353,7 +358,7 @@ const docsSideNav = [
           },
           {
             type: 'doc',
-            label: 'Service Map',
+            label: 'Service Map (Beta)',
             route: '/docs/userguide/service-map',
           },
         ],
