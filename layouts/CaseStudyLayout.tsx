@@ -37,7 +37,7 @@ export default function CaseStudyLayout({ content, children, toc }: CaseStudyLay
             </article>
           </div>
 
-          <div className="post-toc w-full md:w-[300px] py-4 bg-signoz_ink-400 border border-signoz_slate-400 rounded">
+          <div className="customer-toc w-full md:w-[300px] py-4 bg-signoz_ink-400 border border-signoz_slate-400 rounded">
             {content.logo && (
               <div className="mb-4">
                 <img src={content.logo} alt={`${title} logo`} className="object-contain h-12 w-auto mx-auto p-1" />
