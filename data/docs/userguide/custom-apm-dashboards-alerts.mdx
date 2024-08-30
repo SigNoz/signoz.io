@@ -1,0 +1,101 @@
+---
+date: 2024-06-06
+id: custom-apm-dashboards-alerts
+title: APM Dashboards and Alerts
+---
+
+## Auto Generated APM Metrics
+
+SigNoz automatically generates the following APM/RED (Rate, Error, Duration) metrics from traces:
+
+1. `signoz_calls_total`
+   - Information on all calls to your services
+   - Used to calculate Request Rate and Error Rate for each service, operation, environment, etc.
+
+2. `signoz_latency_sum`
+   - Tracks the **total sum of all latency values** recorded
+   - Example: If three requests took 1s, 2s, and 3s, the sum would be 6s
+
+3. `signoz_latency_count`
+   - Tracks the **number of latency measurements** recorded
+   - Example: If 100 requests have been processed, this count would be 100
+   - Used in conjunction with `signoz_latency_sum` to calculate average latency (average request duration) by dividing `signoz_latency_sum` by `signoz_latency_count`
+
+4. `signoz_latency_bucket`
+   - Tracks how many requests fall into specific latency ranges (buckets)
+   - Default buckets: [2ms, 4ms, 6ms, 8ms, 10ms, ... 15s]
+   - Counts requests with latency less than or equal to each bucket's value
+   - Helps understand how request latencies are distributed across various ranges
+
+5. `signoz_db_latency_sum`
+   - Represents the **total sum of all latencies** for database-related operations
+   - Helps track the total time spent on database operations
+
+6. `signoz_db_latency_count`
+   - Counts the **number of database operations** measured
+   - When combined with `signoz_db_latency_sum`, allows calculation of average latency per database operation
+
+7. `signoz_external_call_latency_sum`
+   - Tracks the **total sum of latencies** for all external calls
+   - Helps track the total time spent waiting for external services
+
+8. `signoz_external_call_latency_count`
+   - Counts the **number of external calls** made
+   - Combined with `signoz_external_call_latency_sum`, helps calculate the average latency of external calls
+
+Common attributes across these metrics:
+- `operation`
+- `service_name`
+- `span_kind`
+- `http_status_code`
+- `status_code`
+- `deployment_environment`
+- `service_namespace`
+
+## APM Metrics Dashboard
+
+SigNoz provides a dashboard template based on the auto-generated metrics. You can import this [JSON dashboard](https://github.com/SigNoz/dashboards/blob/main/apm/apm-metrics.json) into your SigNoz instance.
+
+The dashboard includes the following charts:
+- Latency
+- Request Rate
+- Error Percentage
+- Top operations
+- DB Calls RPS
+- DB Calls Avg Duration
+- Top External Calls
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/dashboards/templates/apm-metrics.png" alt="APM Metrics dashboard"/>
+    <figcaption><i> APM Metrics dashboard </i></figcaption>
+</figure>
+
+## HTTP API Monitoring Dashboard
+
+This dashboard template is built on top of available [HTTP attributes](https://opentelemetry.io/docs/specs/semconv/attributes-registry/http/) from OpenTelemetry. You can import this [JSON dashboard](https://github.com/SigNoz/dashboards/blob/main/apm/http-api-monitoring.json) into your SigNoz instance.
+
+The dashboard includes the following charts:
+- Latency(P90) chart for each Endpoint
+- HTTP Status code distribution
+- Top HTTP Endpoints
+- External HTTP APIs
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/dashboards/templates/http-api-monitoring.png" alt="HTTP API Monitoring Dashboard"/>
+    <figcaption><i> HTTP API Monitoring Dashboard </i></figcaption>
+</figure>
+
+## DB Calls Monitoring Dashboard
+
+This dashboard template is built on top of available [DB client call attributes](https://opentelemetry.io/docs/specs/semconv/attributes-registry/db/) from OpenTelemetry. You can import this [JSON dashboard](https://github.com/SigNoz/dashboards/blob/main/apm/db-calls-monitoring.json) into your SigNoz instance.
+
+The dashboard includes the following charts:
+- DB Transaction Rate
+- Top DB calls
+- Slowest DB calls
+- DB Call error rate
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/dashboards/templates/db-calls-monitoring.png" alt="DB Calls Monitoring Dashboard"/>
+    <figcaption><i> DB Calls Monitoring Dashboard </i></figcaption>
+</figure>
