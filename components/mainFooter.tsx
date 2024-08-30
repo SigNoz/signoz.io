@@ -63,6 +63,9 @@ function Footer() {
                   </Link>
                   <ArrowUpRight size={16} />
                 </div>
+                <div className="mt-5 flex items-center gap-2 pr-7 hover:underline max-md:pr-5">
+                  <Link href="/changelog">Changelog</Link>
+                </div>
               </div>
             </div>
             <div className="ml-5 flex w-3/12 flex-col max-md:ml-0 max-md:w-full">
@@ -172,12 +175,20 @@ function Footer() {
                     <Youtube />
                   </Link>
                 </div>
-                <div className='mt-5'>
+                <div className='mt-5 flex flex-row gap-8'>
+                <img
+                    className="opacity-60 hover:opacity-100 cursor-pointer"
+                    src="/svgs/icons/hipaa.svg"
+                    width={90}
+                    height={90}
+                    alt=""
+                    onClick={()=> window.open("https://trust.signoz.io/", "_blank")}
+                  />
                 <img
                     className="shadow-[0px_0_40px_0_rgba(255,255,255,0.27)] rounded-full opacity-60 hover:opacity-100 transition-opacity cursor-pointer"
                     src="/svgs/icons/SOC-2.svg"
-                    width={90}
-                    height={90}
+                    width={60}
+                    height={60}
                     alt=""
                     onClick={()=> window.open("https://trust.signoz.io/", "_blank")}
                   />

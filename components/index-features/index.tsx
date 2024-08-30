@@ -29,49 +29,55 @@ export const SigNozFeatures = () => {
     {
       iconTag: 'INGEST DATA',
       text: 'Ingest data from 50+ sources — send your data and start monitoring.',
-      buttonText: 'Explore',
+      // buttonText: 'Explore',
       logo: '/img/index_features/bar-chart-2.svg',
       img: '/img/graphics/homepage/feature-graphic-1.webp',
     },
     {
       iconTag: 'APPLICATION PERFORMANCE MONITORING',
       text: 'Monitor & troubleshoot your application performance with APM.',
-      buttonText: 'Explore',
+      buttonText: 'Explore More',
+      buttonLink: "/application-performance-monitoring/",
       logo: '/img/index_features/bar-chart-2.svg',
       img: '/img/graphics/homepage/feature-graphic-2.webp',
     },
     {
       iconTag: 'DISTRIBUTED TRACING',
       text: 'Track user requests across services to identify bottlenecks.',
-      buttonText: 'Learn more',
+      buttonText: 'Explore More',
+      buttonLink: "/distributed-tracing/",
       logo: '/img/index_features/drafting-compass.svg',
       img: '/img/graphics/homepage/feature-graphic-3.webp',
     },
     {
       iconTag: 'LOG MANAGEMENT',
       text: 'Ingest, search, and analyze your logs at any scale.',
-      buttonText: 'Learn more',
+      buttonText: 'Explore More',
+      buttonLink: "/log-management/",
       logo: '/img/index_features/logs.svg',
       img: '/img/graphics/homepage/feature-graphic-4.webp',
     },
     {
-      iconTag: 'EXCEPTIONS',
-      text: 'Record exceptions automatically with stack trace & linked span data.',
-      buttonText: 'Explore',
-      logo: '/img/index_features/bug.svg',
-      img: '/img/graphics/homepage/feature-graphic-5.webp',
-    },
-    {
       iconTag: 'METRICS & DASHBOARDS',
       text: 'Infrastructure monitoring, custom metrics & configurable dashboards to fit any use case.',
-      buttonText: 'Explore',
+      buttonText: 'Explore More',
+      buttonLink: "/metrics-and-dashboards/",
       logo: '/img/index_features/layout-grid.svg',
       img: '/img/graphics/homepage/feature-graphic-6.webp',
     },
     {
+      iconTag: 'EXCEPTIONS',
+      text: 'Record exceptions automatically with stack trace & linked span data.',
+      buttonText: 'Explore More',
+      buttonLink: "/exceptions-monitoring/",
+      logo: '/img/index_features/bug.svg',
+      img: '/img/graphics/homepage/feature-graphic-5.webp',
+    },
+    {
       iconTag: 'ALERTS',
       text: 'Get actionable alerts in your preferred notification channel.',
-      buttonText: 'Learn more',
+      buttonText: 'Explore More',
+      buttonLink: "/alerts-management/",
       logo: '/img/index_features/concierge-bell.svg',
       img: '/img/graphics/homepage/feature-graphic-7.webp',
     },
@@ -79,10 +85,10 @@ export const SigNozFeatures = () => {
 
   return (
     <>
-      <section className="mx-auto w-[100vw] border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 bg-[url('/img/background_blur/Ellipse_388.webp')] bg-[center_top_calc(-78px)] md:w-[80vw] ">
+      <section className="mx-auto w-[100vw] border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 bg-[url('/img/background_blur/Ellipse_388.png')] bg-[center_top_calc(-78px)] md:w-[80vw] ">
         <div className={`container pb-16`}>
-          <div className="flex flex-col gap-6 pb-20 ">
-            <div className="mx-auto flex max-w-4xl flex-col items-center text-center">
+          <div className="flex flex-col gap-6 pb-32 ">
+            <div className="mx-auto mt-[50px] flex max-w-4xl flex-col items-center text-center">
               <div className="text-[32px] font-medium leading-[3.25rem] text-signoz_sienna-100">
                 The one-stop observability tool
               </div>
@@ -158,9 +164,11 @@ export const SigNozFeatures = () => {
           <Card
             iconTag={section.iconTag}
             text={section.text}
-            // buttonText={section.buttonText}
+            buttonText={section.buttonText}
+            buttonLink={section.buttonLink}
             logo={section.logo}
             img={section.img}
+            key={section.text}
           />
         ))}
       </div>

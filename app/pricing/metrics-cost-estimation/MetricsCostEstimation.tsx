@@ -11,20 +11,6 @@ import { Modal, ModalContent, ModalBody, useDisclosure } from '@nextui-org/react
 const formatNumber = (number: Number) =>
   number.toLocaleString(undefined, { maximumFractionDigits: 2, minimumFractionDigits: 0 })
 
-const linearToLog = (value, minLog, maxLog) => {
-  const minValue = Math.log(minLog)
-  const maxValue = Math.log(maxLog)
-  const scale = (maxValue - minValue) / (maxLog - minLog)
-  return Math.round(Math.exp(minValue + scale * (value - minLog)))
-}
-
-const logToLinear = (value, minLog, maxLog) => {
-  const minValue = Math.log(minLog)
-  const maxValue = Math.log(maxLog)
-  const scale = (maxLog - minLog) / (maxValue - minValue)
-  return Math.round(minLog + scale * (Math.log(value) - minValue))
-}
-
 const MetricsCostEstimation = () => {
   const METRICS_PRICES = {
     1: 0.1,
@@ -45,7 +31,7 @@ const MetricsCostEstimation = () => {
   const { isOpen, onOpen, onOpenChange } = useDisclosure()
 
   const MIN_VALUE = 1
-  const MAX_VALUE = 2000000
+  const MAX_VALUE = 6
 
   const [metricsValue, setMetricsValue] = React.useState<SliderValue>(1)
   const [inputMetricsValue, setinputMetricsValue] = React.useState<string>('1')
@@ -56,18 +42,20 @@ const MetricsCostEstimation = () => {
   const [selectedVideoID, setSelectedVideoID] = useState<string | null>(null)
 
   const handleChangeMetrics = (value: SliderValue) => {
-    if (isNaN(Number(value))) return
+    if (Array.isArray(value)) {
+        value = value[0];
+    }
 
-    const logValue = linearToLog(value, MIN_VALUE, MAX_VALUE)
+    if (isNaN(Number(value))) return;
 
-    setMetricsValue(value)
-    setinputMetricsValue(logValue.toString())
-  }
+    setMetricsValue(value);
+    setinputMetricsValue(value.toString());
+};
 
   const [inputValue, setInputValue] = useState('0.1')
 
   const totalSamplesMonthly =
-    Number(inputValue) * Number(linearToLog(metricsValue, MIN_VALUE, MAX_VALUE)) * 30 * 60 * 24
+    Number(inputValue) * Number(metricsValue) * 30 * 60 * 24
 
   const monthlyEstimate = totalSamplesMonthly * METRICS_PRICES[metricsRetentionPeriod]
 
@@ -75,6 +63,8 @@ const MetricsCostEstimation = () => {
     setSelectedVideoID(videoId)
     onOpen()
   }
+
+  const MAX_INPUT_VALUE = 10000;
 
   return (
     <div className="relative mt-[-56px] bg-signoz_ink-500">
@@ -105,10 +95,16 @@ const MetricsCostEstimation = () => {
                         className="block w-full rounded-sm border border-signoz_slate-400 bg-signoz_ink-300 px-1.5 py-3 text-sm font-normal text-signoz_vanilla-100 "
                         type="number"
                         value={inputValue}
-                        onChange={(e) => setInputValue(e.target.value)}
+                        onChange={(e) => {
+                          let value = parseFloat(e.target.value);
+                          if (value > MAX_INPUT_VALUE) {
+                            value = MAX_INPUT_VALUE;
+                          }
+                          setInputValue(value.toString());
+                        }}
                         onKeyDown={(e) => {
                           if (e.key === '-' || e.key === 'e') {
-                            e.preventDefault()
+                            e.preventDefault();
                           }
                         }}
                       />
@@ -131,7 +127,7 @@ const MetricsCostEstimation = () => {
                 <div>
                   <div className="flex flex-col gap-7">
                     <div className="flex justify-between text-sm text-signoz_vanilla-100">
-                      <div className=""> # of datapoints per minute </div>
+                      <div className=""> # of datapoints per minute in a time-series</div>
                       <div className=""> {inputMetricsValue} </div>
                     </div>
                     <div>
@@ -140,9 +136,10 @@ const MetricsCostEstimation = () => {
                         step={1}
                         maxValue={MAX_VALUE}
                         minValue={MIN_VALUE}
+                        showSteps={true}
                         showTooltip={true}
                         tooltipProps={{
-                          content: formatNumber(linearToLog(metricsValue, MIN_VALUE, MAX_VALUE))
+                          content: formatNumber(Array.isArray(metricsValue) ? metricsValue[0] : metricsValue)
                         }}
                         color="secondary"
                         marks={[
@@ -151,12 +148,29 @@ const MetricsCostEstimation = () => {
                             label: `${MIN_VALUE}`,
                           },
                           {
+                            value: 2,
+                            label: `2`,
+                          },
+                          {
+                            value: 3,
+                            label: `3`,
+                          },
+                          {
+                            value: 4,
+                            label: `4`,
+                          },
+                          {
+                            value: 5,
+                            label: `5`,
+                          },
+                          {
                             value: MAX_VALUE,
-                            label: `${formatNumber(MAX_VALUE)}`,
+                            label: `${MAX_VALUE}`,
                           },
                         ]}
                         classNames={{
                           label: 'text-medium',
+                          step: "h-[0.6rem] w-[0.15rem]",
                         }}
                         renderThumb={(props) => (
                           <div
@@ -179,9 +193,7 @@ const MetricsCostEstimation = () => {
                                 }}
                                 onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
                                   if (e.key === 'Enter' && !isNaN(Number(inputMetricsValue))) {
-                                    setMetricsValue(
-                                      logToLinear(Number(inputMetricsValue), MIN_VALUE, MAX_VALUE)
-                                    )
+                                    setMetricsValue(Number(inputMetricsValue))
                                   }
                                 }}
                               />
@@ -336,6 +348,7 @@ const MetricsCostEstimation = () => {
         isOpen={isOpen}
         onClose={() => setSelectedVideoID(null)}
         onOpenChange={onOpenChange}
+        className='self-center'
       >
         <ModalContent className="bg-transparent">
           {() => (
