@@ -1,0 +1,128 @@
+---
+date: 2024-06-06
+id: log-router-setup
+title: Log Router Setup
+---
+
+## Overview
+
+In order to log routes from GCP services to Signoz, we use the [Log Router](https://cloud.google.com/logging/docs/routing/overview). This document details the steps to be taken for setting up the log router.
+
+### Creating Log Router
+
+Follow these steps to setup the Log Router to the newly created Pub/Sub topic:
+
+Step 1: On the GCP console, search for Logs and go to Logs Explorer. Select an appropriate relative time.
+
+You will start seeing the recent logs.
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/cloud-logs/functions-log-explorer.webp"
+        alt="Logs Explorer"
+    />
+<figcaption>
+<i>
+Log Explorer
+</i>
+</figcaption>
+</figure>
+
+Step 2: Put appropriate filter conditions in the `Query` textbox to filter out only the desired logs.
+
+Step 3: With the log filters in place, click on `More actions` dropdown below the Query text box, and select `Create sink` option from the dropdown.
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/cloud-logs/functions-create-sink.webp"
+        alt="Create Log Sink"
+    />
+<figcaption>
+<i>
+Create Log Sink
+</i>
+</figcaption>
+</figure>
+
+Step 4: Provide appropriate sink name and description, and click `Next`.
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/cloud-logs/functions-sink-details.webp"
+        alt="Provide Sink Details"
+    />
+<figcaption>
+<i>
+Provide Sink Details
+</i>
+</figcaption>
+</figure>
+
+Step 5: In the "Sink destination" section, select `Cloud Pub/Sub topic` from the "Select sink service" dropdown, and in the "Select a Cloud Pub/Sub topic" dropdown, select the appropriate Pub/Sub topic where you want to rouet the logs. Click on `Next`.
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/cloud-logs/functions-sink-destination.webp"
+        alt="Provide Sink Destination"
+    />
+<figcaption>
+<i>
+Provide Sink Destination
+</i>
+</figcaption>
+</figure>
+
+Step 6: In the "Choose logs to include in sink" section, ensure appropriate log filtering query is present. Click on `Next`.
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/cloud-logs/functions-log-sink-filter.webp"
+        alt="Provide Log Filter Rules"
+    />
+<figcaption>
+<i>
+Provide Log Filter Rules
+</i>
+</figcaption>
+</figure>
+
+
+Step 7: We need not make any change in the `Choose logs to filter out of sink` section, and click on `Create sink` at the bottom.
+
+Step 8: With this, the log router sink will be created. You will get the message `Your log sink was successfully created. Data should be available soon.` on the page.
+
+You can also go to this sink at later point of time by navigating to the `Log router` from the left navigation menu in the GCP Logging service.
+
+### Provide permissions to Log Router Sink
+
+- On the GCP console, search for Log Router, and navigate to Logs Router in the GCP Logging service.
+- Click on the 3 dots to the right of the Log Router sink that we created in the earlier steps, and select `View sink details` from the dropdown.
+- From the sink details, copy the `Writer identity` and keep it with you. We will require this in the upcoming steps.
+- In order to provide the Log Router sink with the permissions to write to the Pub/Sub topic, navigate to the Pub/Sub service, and click on the 3 dots to the right of the Pub/Sub topic where the router is going to sink the logs. Select `View permissions` from this dropdown.
+- Click on **APP PRINCIPAL** button on the top. In the `New principals` textbox, copy the value from the `Writer identity` (remove the `serviceAccount:` prefix from the value), and select any value from the dropdown that appears. In the `Select a role` dropdown, search for `Pub/Sub Publisher` and select it.
+- Click on `Save`. With this, the Log Router sink now has the permission to write to the Pub/Sub topic.
+- Wait for ~1 minute for the permissions to take effect, and now invoke the corresponding GCP service a few times to generate some logs. You should see the Log Router's volume increasing, as well as Pub/Sub topic's metrics showing up published requests.
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/cloud-logs/functions-log-router-metrics.webp"
+        alt="Log Router Metrics"
+    />
+<figcaption>
+<i>
+Log Router Metrics
+</i>
+</figcaption>
+</figure>
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/cloud-logs/functions-pubsub-topic-metrics.webp"
+        alt="Pub/Sub Topic Metrics"
+    />
+<figcaption>
+<i>
+Pub/Sub Topic Metrics
+</i>
+</figcaption>
+</figure>
