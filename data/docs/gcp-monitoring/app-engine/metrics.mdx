@@ -1,0 +1,456 @@
+---
+date: 2024-07-27
+id: metrics
+title: App Engine Metrics
+hide_table_of_contents: true
+---
+
+
+## Overview
+
+This document provides a detailed walkthrough on how to send Google App Engine metrics to SigNoz. By the end of this guide, you will have a setup that sends your App Engine metrics to SigNoz.
+
+<Tabs>
+<TabItem value="cloud" label="SigNoz Cloud" default>
+
+**Here's a quick summary of what we will be doing in this guide**
+
+* Create and configure App Engine service to generate the metrics
+* Invoke the App Engine service
+* Deploy Telegraf to fetch the metrics from Google Cloud monitoring
+* Deploy OpenTelemetry to scrape the metrics from Telegraf
+* Send and Visualize the metrics obtained by OpenTelemetry in SigNoz Cloud
+
+## Prerequisites
+
+* A [Google Cloud account](https://console.cloud.google.com/) with administrative privileges or App Engine Admin privileges
+* A [SigNoz Cloud account](https://signoz.io/teams/) (used for this demonstration). You'll need the ingestion details. To obtain your Ingestion Key and Ingestion URL, log in to your SigNoz Cloud account and navigate to Settings >> Ingestion Settings
+* Access to a project in Google Cloud Platform (GCP)
+* [Cloud Build API](https://console.cloud.google.com/flows/enableapi?apiid=cloudbuild.googleapis.com) is enabled
+
+## Setup
+
+### Get started with App Engine Configuration
+
+Create the App Engine service using the following steps:
+
+Step 1: [Install](https://cloud.google.com/sdk/docs/install) the Google Cloud CLI.
+
+Step 2: To [initialize](https://cloud.google.com/sdk/docs/initializing) the gcloud CLI, run the following command:
+
+```
+gcloud init
+```
+
+Step 3: Run the following `gcloud` command to enable App Engine and create the associated application resources. Note that the [location](https://cloud.google.com/appengine/docs/standard/python3/building-app/creating-gcp-project#creating_a_gcp_project) you select cannot be changed later.
+
+```
+gcloud app create
+```
+
+Step 4: In this example, we will be building the Python 3 application. For this,
+
+1. Download the sample application repository using [Git](https://git-scm.com/):
+
+```
+git clone https://github.com/GoogleCloudPlatform/python-docs-samples
+```
+
+Alternatively, you can [download the sample](https://github.com/GoogleCloudPlatform/python-docs-samples/archive/master.zip) as a zip file and then extract it.
+
+2. Navigate to the directory that contains a copy of the files from the previous step:
+
+```
+cd python-docs-samples/appengine/standard_python3/hello_world
+```
+
+Note that we have `app.yaml` file located in this folder.
+
+3. When on this folder which contains `app.yaml`, you can deploy your service using the command:
+
+```
+gcloud app deploy
+```
+
+4. On running the above command, the service will get deployed on the App Engine, and you will get the logs containing the endpoint which can be used to trigger the deployed service (highlighted in red in the screenshot).
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/cloud-logs/app-engine/app-engine-deploy-logs.webp"
+        alt="App Engine Deploy Logs"
+    />
+<figcaption>
+<i>
+App Engine Deploy Logs
+</i>
+</figcaption>
+</figure>
+
+Open the URL in the new browser which will invoke the App Engine service.
+
+## Deploy Telegraf to fetch the metrics from Google Cloud Monitoring
+
+We will be using Compute Engine instance to install Telegraf. You can follow the instructions in the [Creating Copmute Engine](/docs/gcp-monitoring/bootstrapping/gce-creation) document to create the Compute Engine instance. In this tutorial, we will be using the same instance for installing OTel Collector as well. You may choose a different instance as well.
+
+**Step 1:** Install [`telegraf`](https://github.com/influxdata/telegraf) which will collect metrics from Google Cloud Monitoring for App Engine, see the [available metrics for App Engine](https://cloud.google.com/monitoring/api/metrics_gcp#gcp-appengine). The installation process for the respective operating system can be found in official [documentation](https://docs.influxdata.com/telegraf/v1/install/).
+
+After successful installation, the Telegraf status should be active and running. You can check the Telegraf status by running the command `service telegraf status`.
+
+<Admonition type="info">
+Note that we are using Ubuntu operating system in Compute Engine. The Telegraf commands might slightly differ for other operating systems.
+</Admonition>
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/app-engine/metrics/telegraf-status.webp"
+        alt="Telegraf running status"
+    />
+<figcaption>
+<i>
+`telegraf` running status
+</i>
+</figcaption>
+</figure>
+
+The configuration file for telegraf can be found here:
+
+```sh
+/etc/telegraf/telegraf.conf
+```
+
+**Step 2:** Configure the Telegraf input and output plugin by adding configurations to the `telegraf.conf` file.
+
+```txt
+# Gather timeseries from Google Cloud Platform v3 monitoring API
+[[inputs.stackdriver]]
+  ## GCP Project
+  project = "omni-new"
+  ## Include timeseries that start with the given metric type.
+  metric_type_prefix_include = [
+    "appengine.googleapis.com",
+  ]
+  ## Most metrics are updated no more than once per minute; it is recommended
+  ## to override the agent level interval with a value of 1m or greater.
+  interval = "1m"
+# Send OpenTelemetry metrics over gRPC
+[[outputs.opentelemetry]]
+  ## Override the default (localhost:4317) OpenTelemetry gRPC service
+  ## address:port
+  service_address = "localhost:4317"
+```
+
+The `service_address` is using `localhost` as we will be deploying OTelCollector in the same Compute Engine instance. You can replace it with the appropriate IP address in case you choose to deploy OTel Collector on a different instance.
+
+## Deploy OpenTelemetry to scrape the metrics from Telegraf
+
+**Step 1:** Install and configure OpenTelemetry for scraping the metrics from Telegraf. Follow [OpenTelemetry Binary Usage in Virtual Machine](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) guide for detailed instructions.
+
+**Step 2:** After successful configuration start the OTel Collector using following command:
+
+```sh
+./otelcol-contrib --config ./config.yaml &> otelcol-output.log & echo "$!" > otel-pid
+```
+
+**Step 3:** Restart the Telegraf service using the command `service telegraf restart`.
+
+**Step 4:** If the configurations are configured correctly with Telegraf and we can see the output logs from OpenTelemetry as follows:
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/app-engine/metrics/otel-logs.webp"
+        alt="OTel Collector Logs"
+    />
+<figcaption>
+<i>
+Viewing OTel Collector Logs
+</i>
+</figcaption>
+</figure>
+
+## Send and Visualize the metrics obtained by OpenTelemetry in SigNoz
+
+**Step 1:** Go to the SigNoz Cloud URL and head over to the dashboard.
+
+**Step 2:** If not already created, create a new dashboard and select Time Series.
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/app-engine/metrics/new-panel.webp"
+        alt="Creating new panel"
+    />
+<figcaption>
+<i>
+Creating new panel in dashboard
+</i>
+</figcaption>
+</figure>
+
+**Step 3:** Select metric for App Engine 
+
+All metrics starting with `appengine_googleapis_com_` have been collected from App Engine.
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/app-engine/metrics/plot-metrics-signoz-cloud.webp"
+        alt="Plot metrics"
+    />
+<figcaption>
+<i>
+App Engine Metrics
+</i>
+</figcaption>
+</figure>
+
+## Troubleshooting
+
+If you run into any problems while setting up monitoring for your App Engine's metrics with SigNoz, consider these troubleshooting steps:
+
+
+* **Verify Configuration**: Double-check your `config.yaml` file to ensure all settings, including the ingestion key and endpoint, are correct.
+* **Review Logs**: Look at the logs of both App Engine and the OpenTelemetry Collector to identify any error messages or warnings that might provide insights into what’s going wrong.
+* **Update Dependencies**: Ensure all relevant packages and dependencies are up-to-date to avoid compatibility issues.
+* **Consult Documentation**: Review the SigNoz, OpenTelemetry, and Telegraf documentation for any additional troubleshooting of the common issues.
+
+</TabItem>
+
+<TabItem value="self-host" label="Self-Host">
+
+**Here’s a quick summary of what we will be doing in this guide**
+
+* Create and configure App Engine to generate the metrics
+* Deploy Telegraf to fetch the metrics from Google Cloud monitoring
+* Deploy the self-hosted **SigNoz**
+* Invoke the App Engine
+* Visualize the metrics in the **SigNoz** dashboard
+
+## Prerequisites
+
+* A [Google Cloud account](https://console.cloud.google.com/) with administrative privileges or App Engine Admin privileges
+* Access to a project in Google Cloud Platform (GCP)
+* [Cloud Build API](https://console.cloud.google.com/flows/enableapi?apiid=cloudbuild.googleapis.com) is enabled
+
+## Setup
+
+### Get started with App Engine Configuration
+
+Create the App Engine service using the following steps:
+
+Step 1: [Install](https://cloud.google.com/sdk/docs/install) the Google Cloud CLI.
+
+Step 2: To [initialize](https://cloud.google.com/sdk/docs/initializing) the gcloud CLI, run the following command:
+
+```
+gcloud init
+```
+
+Step 3: Run the following `gcloud` command to enable App Engine and create the associated application resources. Note that the [location](https://cloud.google.com/appengine/docs/standard/python3/building-app/creating-gcp-project#creating_a_gcp_project) you select cannot be changed later.
+
+```
+gcloud app create
+```
+
+Step 4: In this example, we will be building the Python 3 application. For this,
+
+1. Download the sample application repository using [Git](https://git-scm.com/):
+
+```
+git clone https://github.com/GoogleCloudPlatform/python-docs-samples
+```
+
+Alternatively, you can [download the sample](https://github.com/GoogleCloudPlatform/python-docs-samples/archive/master.zip) as a zip file and then extract it.
+
+2. Navigate to the directory that contains a copy of the files from the previous step:
+
+```
+cd python-docs-samples/appengine/standard_python3/hello_world
+```
+
+Note that we have `app.yaml` file located in this folder.
+
+3. When on this folder which contains `app.yaml`, you can deploy your service using the command:
+
+```
+gcloud app deploy
+```
+
+4. On running the above command, the service will get deployed on the App Engine, and you will get the logs containing the endpoint which can be used to trigger the deployed service (highlighted in red in the screenshot).
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/cloud-logs/app-engine/app-engine-deploy-logs.webp"
+        alt="App Engine Deploy Logs"
+    />
+<figcaption>
+<i>
+App Engine Deploy Logs
+</i>
+</figcaption>
+</figure>
+
+Open the URL in the new browser which will invoke the App Engine service.
+
+## Deploying a Self-Hosted SigNoz in a Docker container
+
+**Step 1:** The deployment process of the Self-Hosted `SigNoz` can be found in official [documentation](https://signoz.io/docs/install/docker/).
+
+**Step 2:** Make sure all the containers are running in a **Healthy** state.
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/app-engine/signoz-self-host-docker-ps.webp"
+        alt="SigNoz Self-Hosted using Docker"
+    />
+<figcaption>
+<i>
+SigNoz Self-Hosted using Docker
+</i>
+</figcaption>
+</figure>
+
+<Tabs>
+<TabItem value="self-hosted-otel" label="Directly send to self-hosted SigNoz">
+
+The self-hosted SigNoz setup also includes the OTel collector in the bundle. Docker will deploy the OTel collector beside SigNoz as a container. The same OTel collector can be used to directly receive any signals, otherwise, if one more OTel Collector is required for a more granular collection, we can add an additional independent OTel collector, see Using Central OTel collector in between tab.
+
+</TabItem>
+
+<TabItem value="addon-otel" label="Using central OTel collector in between">
+
+Apart from using the native OTel collector present in the docker from the previous method, we can also deploy an additional independent OTel collector which can act as an additional collector in this setup for more granular metrics collection. Here we are considering OTel and Telegraf being set up in different VMs.
+
+**Step 1:** Install and configure OpenTelemetry to scrape the metrics from Telegraf. Add the following code block to the OpenTelemetry configuration file. Under exporters, we should have an exporter pointing to our SigNoz self-host setup. For example, in the below snippet, the endpoint-ip would be the address of the VM in which the SigNoz self-host setup is present.
+
+```yaml
+exporters:
+  otlp:
+	endpoint: "<endpoint-ip>:4317"
+	tls:
+  	   insecure: true
+  logging:
+	verbosity: normal
+```
+<Admonition type="info">
+We can use the default receiver configurations for OTel.
+```yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+```
+</Admonition>
+
+**Step 2:** After successful configuration, start the OTel service.
+
+<Admonition type="note">
+Please make appropriate changes to the networking connections (adding network to security groups, opening ports, etc.) on your VMs as per your setup.
+</Admonition>
+
+</TabItem>
+
+</Tabs>
+
+## Deploy Telegraf to fetch the metrics from Google Cloud Monitoring
+
+We will be using Compute Engine instance to install Telegraf. You can follow the instructions in the [Creating Copmute Engine](/docs/gcp-monitoring/bootstrapping/gce-creation) document to create the Compute Engine instance. In this tutorial, we will be using the same instance for installing OTel Collector as well. You may choose a different instance as well.
+
+**Step 1:** Install [`telegraf`](https://github.com/influxdata/telegraf) which will collect metrics from Google Cloud Monitoring for App Engine, see the [available metrics for App Engine](https://cloud.google.com/monitoring/api/metrics_gcp#gcp-appengine). The installation process for the respective operating system can be found in official [documentation](https://docs.influxdata.com/telegraf/v1/install/).
+
+After successful installation, the Telegraf status should be active and running. You can check the Telegraf status by running the command `service telegraf status`.
+
+<Admonition type="info">
+Note that we are using Ubuntu operating system in Compute Engine. The Telegraf commands might slightly differ for other operating systems.
+</Admonition>
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/app-engine/metrics/telegraf-status.webp"
+        alt="Telegraf running status"
+    />
+<figcaption>
+<i>
+`telegraf` running status
+</i>
+</figcaption>
+</figure>
+
+The configuration file for telegraf can be found here:
+
+```sh
+/etc/telegraf/telegraf.conf
+```
+
+**Step 2:** Configure the Telegraf input and output plugin by adding configurations to the `telegraf.conf` file.
+
+```txt
+[[inputs.stackdriver]]
+  ## GCP Project
+  project = "omni-new"
+  ## Include timeseries that start with the given metric type.
+  metric_type_prefix_include = [
+    "appengine.googleapis.com",
+  ]
+  ## Most metrics are updated no more than once per minute; it is recommended
+  ## to override the agent level interval with a value of 1m or greater.
+  interval = "1m"
+# Send OpenTelemetry metrics over gRPC
+[[outputs.opentelemetry]]
+  ## Override the default (localhost:4317) OpenTelemetry gRPC service
+  ## address:port
+  service_address = "localhost:4317"
+```
+
+The `service_address` is using `localhost` as we will be deploying OTelCollector in the same Compute Engine instance. You can replace it with the appropriate IP address in case you choose to deploy OTel Collector on a different instance.
+
+**Step 3:** Restart the Telegraf service using the command `service telegraf restart`.
+
+**Step 4:** If the configurations are configured correctly with Telegraf and we can see the output logs from OpenTelemetry as follows:
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/app-engine/metrics/otel-logs.webp"
+        alt="OTel Collector Logs"
+    />
+<figcaption>
+<i>
+Viewing OTel Collector Logs
+</i>
+</figcaption>
+</figure>
+
+## Visualize the metrics in Self-Hosted SigNoz
+
+**Step 1:** Go to your Self-Hosted SigNoz UI, and navigate to the Self-Hosted SigNoz dashboard. Click on the **Dashboards** section to view the metrics. Create a new dashboard (If not already present ). The default Self-Hosted SigNoz dashboard endpoint would be `http://<Self-Hosted SigNoz-host-ip>:3301`, however, the URL can be different based on how you have set up the infrastructure.
+
+**Step 2:** If not already created, create a new dashboard and select Time Series.
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/app-engine/metrics/new-panel.webp"
+        alt="Creating new panel"
+    />
+<figcaption>
+<i>
+Creating new panel in dashboard
+</i>
+</figcaption>
+</figure>
+
+**Step 3:** Select metric for App Engine 
+
+All metrics starting with `appengine_googleapis_com_` have been collected from App Engine.
+
+## Troubleshooting
+
+If you run into any problems while setting up monitoring for your Cloud Function's metrics with SigNoz, consider these troubleshooting steps:
+
+* **Verify Configuration**: Double-check your `config.yaml` file to ensure all settings, including the ingestion key and endpoint, are correct.
+* **Verify Docker container logs:** Check if all the containers are running properly, and not unexpectedly crashed.
+* **Review Logs**: Look at the logs of both App Engine and the OpenTelemetry Collector to identify any error messages or warnings that might provide insights into what’s going wrong.
+* **Update Dependencies**: Ensure all relevant packages and dependencies are up-to-date to avoid compatibility issues.
+* **Consult Documentation**: Review the SigNoz, OpenTelemetry, and Telegraf documentation for any additional troubleshooting of the common issues.
+
+</TabItem>
+</Tabs>
