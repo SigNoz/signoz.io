@@ -1459,6 +1459,19 @@ const docsSideNav = [
           }
         ],
       },
+      {
+        type: 'category',
+        isExpanded: false,
+        label: 'Cloud Storage',
+        route: '/docs/gcp-monitoring/gcs',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/gcp-monitoring/gcs/logging',
+            label: 'Logging',
+          }
+        ],
+      },
     ],
   },
   {
