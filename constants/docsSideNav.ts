@@ -1429,6 +1429,11 @@ const docsSideNav = [
             route: '/docs/gcp-monitoring/app-engine/metrics',
             label: 'Metrics',
           },
+          {
+            type: 'doc',
+            route: '/docs/gcp-monitoring/app-engine/tracing',
+            label: 'APM & Tracing',
+          },
         ],
       },
       {
