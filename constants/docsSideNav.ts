@@ -1449,6 +1449,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/gcp-monitoring/compute-engine/metrics',
+            label: 'Metrics',
+          },
+          {
+            type: 'doc',
             route: '/docs/gcp-monitoring/compute-engine/tracing',
             label: 'APM & Tracing',
           }
