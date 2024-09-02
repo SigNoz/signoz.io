@@ -580,10 +580,6 @@ const PricingPlans = () => {
                       </li>
                       <li className="mb-3 flex items-center gap-3">
                         {' '}
-                        <CircleCheckSolid /> Run aggregates on ingested spans
-                      </li>
-                      <li className="mb-3 flex items-center gap-3">
-                        {' '}
                         <CircleCheckSolid /> Live Tail Logging
                       </li>
                       <li className="mb-3 flex items-center gap-3">
