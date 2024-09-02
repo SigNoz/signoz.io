@@ -1510,6 +1510,19 @@ const docsSideNav = [
           }
         ],
       },
+      {
+        type: 'category',
+        isExpanded: false,
+        label: 'Cloud Load Balancer',
+        route: '/docs/gcp-monitoring/gcp-clb',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/gcp-monitoring/gcp-clb/metrics',
+            label: 'Metrics',
+          }
+        ],
+      },
     ],
   },
   {
