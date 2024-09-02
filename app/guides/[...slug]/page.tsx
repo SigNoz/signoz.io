@@ -1,11 +1,9 @@
-
-
 import 'css/prism.css'
 import { components } from '@/components/MDXComponents'
 import { MDXLayoutRenderer } from 'pliny/mdx-components'
 import { sortPosts, coreContent, allCoreContent } from 'pliny/utils/contentlayer'
-import { allGuides, allAuthors,} from 'contentlayer/generated'
-import type { Authors, Blog, Guide} from 'contentlayer/generated'
+import { allGuides, allAuthors } from 'contentlayer/generated'
+import type { Authors, Blog, Guide } from 'contentlayer/generated'
 import PostSimple from '@/layouts/PostSimple'
 import PostLayout from '@/layouts/PostLayout'
 import PostBanner from '@/layouts/PostBanner'
@@ -14,6 +12,8 @@ import siteMetadata from '@/data/siteMetadata'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { SidebarIcons } from '@/components/sidebar-icons/icons'
+import PageFeedback from '../../../components/PageFeedback/PageFeedback'
+import React from 'react'
 
 const defaultLayout = 'PostLayout'
 const layouts = {
@@ -98,13 +98,6 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
   })
   const mainContent = coreContent(post)
   const jsonLd = post.structuredData
-  jsonLd['author'] = authorDetails.map((author) => {
-    return {
-      '@type': 'Person',
-      name: author.name,
-    }
-  })
-
   const Layout = layouts[post.layout || defaultLayout]
 
   return (
@@ -114,17 +107,14 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      <div className='container mx-auto'>
-          <Link href={`/resource-center/guides/`}>
-            
-            <button className='flex items-center ml-3.5 mt-10'>
-              <SidebarIcons.ArrowLeft/> 
-              <span className='text-sm pl-1.5'>
-              Back to Guides
-              </span>
-            </button>
-          </Link>
-        </div>
+      <div className="container mx-auto">
+        <Link href={`/resource-center/guides/`}>
+          <button className="ml-3.5 mt-10 flex items-center">
+            <SidebarIcons.ArrowLeft />
+            <span className="pl-1.5 text-sm">Back to Guides</span>
+          </button>
+        </Link>
+      </div>
 
       <Layout
         content={mainContent}
@@ -132,8 +122,8 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
         authors={post?.authors}
         toc={post.toc}
       >
-        
         <MDXLayoutRenderer code={post.body.code} components={components} toc={post.toc} />
+        <PageFeedback />
       </Layout>
     </>
   )

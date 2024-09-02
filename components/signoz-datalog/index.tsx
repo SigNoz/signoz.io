@@ -11,10 +11,11 @@ export const SignozDatalog = () => {
           <div>
             <p className='text-2xl font-semibold text-signoz_vanilla-100'>SigNoz provides up to 9X ROI than DataDog</p>
             <p className='text-signoz_vanilla-400 text-base font-normal leading-9'>You can also set data ingestion limits so you never get a surprise bill.
-              <Link href={"https://signoz.io/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/"}>
-              <span className='text-signoz_robin-400 font-medium'> Learn more<ArrowUpRight className='inline' size={16} />
+              <span className='text-signoz_robin-400 font-medium'>
+                <Link href={"https://signoz.io/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/"}>
+                &nbsp;Learn more<ArrowUpRight className='inline' size={16} />
+                </Link>
               </span>
-              </Link>
             </p>
           </div>
           <img src="/img/graphics/homepage/feature-graphic-data-protection-2.webp" alt="" />

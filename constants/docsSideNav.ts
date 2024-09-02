@@ -336,6 +336,11 @@ const docsSideNav = [
             route: '/docs/userguide/metrics',
           },
           {
+            type: 'doc',
+            label: 'APM Dashboards/Alerts',
+            route: '/docs/userguide/custom-apm-dashboards-alerts',
+          },
+          {
             type: 'category',
             isExpanded: false,
             label: 'View Traces',
@@ -353,7 +358,7 @@ const docsSideNav = [
           },
           {
             type: 'doc',
-            label: 'Service Map',
+            label: 'Service Map (Beta)',
             route: '/docs/userguide/service-map',
           },
         ],
@@ -509,16 +514,12 @@ const docsSideNav = [
             type: 'category',
             isExpanded: false,
             label: 'Application Logs',
+            route: '/docs/logs-management/send-logs/application-logs',
             items: [
               {
                 type: 'doc',
                 route: '/docs/userguide/collect_logs_from_file',
                 label: 'From Log File',
-              },
-              {
-                type: 'doc',
-                route: '/docs/userguide/parse-multiline-logs',
-                label: 'Parse Multiline Logs',
               },
               {
                 type: 'doc',
@@ -580,6 +581,12 @@ const docsSideNav = [
             route:
               '/docs/logs-management/send-logs/vector-logs-to-signoz',
             label: 'Vector',
+          },
+          {
+            type: 'doc',
+            route: '/docs/logs-management/send-logs/windows-events-log',
+            label: 'Windows Event logs',
+            className: 'new-doc',
           },
         ],
       },
@@ -693,6 +700,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/logs-management/guides/pii-scrubbing',
             label: 'PII Scrubbing'
+          },
+          {
+            type: 'doc',
+            route: '/docs/userguide/parse-multiline-logs',
+            label: 'Parse Multiline Logs',
           },
         ]
       },
@@ -922,6 +934,74 @@ const docsSideNav = [
         type: 'doc',
         route: '/docs/alerts-management/exceptions-based-alerts',
         label: 'Exceptions based Alert',
+      },
+      {
+        type: 'doc',
+        route: '/docs/alerts-management/planned-maintenance',
+        label: 'Planned Maintenance',
+      },
+    ],
+  },
+  {
+    label: 'Frontend Monitoring',
+    type: 'category',
+    className: 'new-doc',
+    isExpanded: false,
+    // route: '',
+    items: [
+      {
+        type: 'doc',
+        route: '/docs/frontend-monitoring/web-vitals',
+        label: 'Web Vitals',
+      },
+     ],
+  },
+  {
+    label: 'Integrations',
+    type: 'category',
+    isExpanded: false,
+    className: 'new-doc',
+    route: '/docs/integrations/integrations-list',
+    items: [
+      {
+        type: 'doc',
+        route: '/docs/integrations/redis',
+        label: 'Redis',
+      },
+      {
+        type: 'doc',
+        route: '/docs/integrations/postgresql',
+        label: 'PostgreSQL',
+      },
+      {
+        type: 'doc',
+        route: '/docs/integrations/nginx',
+        label: 'Nginx',
+      },
+      {
+        type: 'doc',
+        route: '/docs/integrations/mongodb',
+        label: 'MongoDB',
+      },
+      {
+        type: 'doc',
+        route: '/docs/integrations/clickhouse',
+        label: 'Clickhouse',
+      },
+      {
+        type: 'doc',
+        route: '/docs/integrations/aws-rds-postgres',
+        label: 'AWS RDS PostgreSQL',
+      },
+      {
+        type: 'doc',
+        route: '/docs/integrations/aws-rds-mysql',
+        label: 'AWS RDS MySQL',
+      },
+      {
+        type: 'doc',
+        route: '/docs/integrations/aws-elasticache-redis',
+        label: 'AWS Elasticache Redis',
       },
     ],
   },
@@ -1300,6 +1380,34 @@ const docsSideNav = [
       {
         type: 'category',
         isExpanded: false,
+        label: 'Bootstrapping',
+        route: '/docs/gcp-monitoring/bootstrapping',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/gcp-monitoring/bootstrapping/pubsub-topic-creation',
+            label: 'Creating Pub/Sub Topic',
+          },
+          {
+            type: 'doc',
+            route: '/docs/gcp-monitoring/bootstrapping/log-router-setup',
+            label: 'Log Router Setup',
+          },
+          {
+            type: 'doc',
+            route: '/docs/gcp-monitoring/bootstrapping/gce-creation',
+            label: 'Creating Compute Engine',
+          },
+          {
+            type: 'doc',
+            route: '/docs/gcp-monitoring/bootstrapping/cloud-sql-creation',
+            label: 'Creating Cloud SQL',
+          },
+        ],
+      },
+      {
+        type: 'category',
+        isExpanded: false,
         label: 'Cloud Functions',
         route: '/docs/gcp-monitoring/gcp-fns',
         items: [
@@ -1317,6 +1425,88 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/gcp-monitoring/gcp-fns/fns-metrics',
             label: 'Cloud Function Metrics',
+          },
+          {
+            type: 'doc',
+            route: '/docs/gcp-monitoring/gcp-fns/tracing',
+            label: 'APM & Tracing',
+          },
+        ],
+      },
+      {
+        type: 'category',
+        isExpanded: false,
+        label: 'App Engine',
+        route: '/docs/gcp-monitoring/app-engine',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/gcp-monitoring/app-engine/logging',
+            label: 'Logging',
+          },
+          {
+            type: 'doc',
+            route: '/docs/gcp-monitoring/app-engine/metrics',
+            label: 'Metrics',
+          },
+          {
+            type: 'doc',
+            route: '/docs/gcp-monitoring/app-engine/tracing',
+            label: 'APM & Tracing',
+          },
+        ],
+      },
+      {
+        type: 'category',
+        isExpanded: false,
+        label: 'Compute Engine',
+        route: '/docs/gcp-monitoring/compute-engine',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/gcp-monitoring/compute-engine/logging',
+            label: 'Logging',
+          },
+          {
+            type: 'doc',
+            route: '/docs/gcp-monitoring/compute-engine/metrics',
+            label: 'Metrics',
+          },
+          {
+            type: 'doc',
+            route: '/docs/gcp-monitoring/compute-engine/tracing',
+            label: 'APM & Tracing',
+          }
+        ],
+      },
+      {
+        type: 'category',
+        isExpanded: false,
+        label: 'Cloud Storage',
+        route: '/docs/gcp-monitoring/gcs',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/gcp-monitoring/gcs/logging',
+            label: 'Logging',
+          },
+          {
+            type: 'doc',
+            route: '/docs/gcp-monitoring/gcs/metrics',
+            label: 'Metrics',
+          },
+        ],
+      },
+      {
+        type: 'category',
+        isExpanded: false,
+        label: 'Cloud SQL',
+        route: '/docs/gcp-monitoring/cloud-sql',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/gcp-monitoring/cloud-sql/logging',
+            label: 'Logging',
           }
         ],
       },
@@ -1368,6 +1558,11 @@ const docsSideNav = [
         // slug: '/docs/operate/migration/migration',
         // },
         items: [
+          {
+            type: 'doc',
+            route: '/docs/operate/migration/upgrade-0.51',
+            label: 'Upgrade to v0.51',
+          },
           {
             type: 'doc',
             route: '/docs/operate/migration/upgrade-0.49',

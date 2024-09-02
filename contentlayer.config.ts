@@ -10,7 +10,6 @@ import {
   remarkExtractFrontmatter,
   remarkCodeTitles,
   remarkImgToJsx,
-  extractTocHeadings,
 } from 'pliny/mdx-plugins/index.js'
 // Rehype packages
 import rehypeSlug from 'rehype-slug'
@@ -20,9 +19,10 @@ import rehypePresetMinify from 'rehype-preset-minify'
 import siteMetadata from './data/siteMetadata'
 import blogRelatedArticles from './constants/blogRelatedArticles.json'
 import comparisonsRelatedArticles from './constants/comparisonsRelatedArticles.json'
-import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer.js'
+import guidesRelatedArticles from './constants/guidesRelatedArticles.json'
+import opentelemetryRelatedArticles from './constants/opentelemetryRelatedArticles.json'
+import allAuthors from './constants/authors.json'
 
-const root = process.cwd()
 const isProduction = process.env.NODE_ENV === 'production'
 
 // heroicon mini link
@@ -116,6 +116,23 @@ function getRelatedArticles(doc, relatedArticles) {
   }
 }
 
+const getAuthorDetails = (authorID) => {
+  if (allAuthors[authorID]) {
+    return allAuthors[authorID]
+  }
+
+  return {}
+}
+
+function getAuthors(doc) {
+  const authorsArr = doc?.authors._array || ['SigNoz Team']
+
+  return authorsArr.map((author) => ({
+    '@type': 'Person',
+    name: getAuthorDetails(author).name || 'SigNoz Team',
+  }))
+}
+
 export const Page = defineDocumentType(() => ({
   name: 'Page',
   filePathPattern: 'blog/**/*.mdx',
@@ -136,7 +153,7 @@ export const Blog = defineDocumentType(() => ({
     description: { type: 'string' },
     images: { type: 'json' },
     image: { type: 'string' },
-    authors: { type: 'list', of: { type: 'string' } },
+    authors: { type: 'list', of: { type: 'string' }, required: true },
     layout: { type: 'string' },
     bibliography: { type: 'string' },
     canonicalUrl: { type: 'string' },
@@ -157,11 +174,24 @@ export const Blog = defineDocumentType(() => ({
       resolve: (doc) => ({
         '@context': 'https://schema.org',
         '@type': 'BlogPosting',
+        mainEntityOfPage: {
+          '@type': 'WebPage',
+          '@id': `https://signoz.io/blog/${doc.slug}`,
+        },
+        author: getAuthors(doc),
+        publisher: {
+          '@type': 'Organization',
+          name: 'SigNoz',
+          logo: {
+            '@type': 'ImageObject',
+            url: 'https://signoz.io/img/SigNozLogo-orange.svg',
+          },
+        },
         headline: doc.title,
         datePublished: doc.date,
         dateModified: doc.lastmod || doc.date,
         description: doc.description,
-        image: doc.image || (doc.images ? doc.images[0] : siteMetadata.socialBanner),
+        image: `${siteMetadata.siteUrl}${doc.image || (doc.images ? doc.images[0] : siteMetadata.socialBanner)}`,
         url: `${siteMetadata.siteUrl}/${doc._raw.flattenedPath}`,
       }),
     },
@@ -199,11 +229,27 @@ export const Newsroom = defineDocumentType(() => ({
       resolve: (doc) => ({
         '@context': 'https://schema.org',
         '@type': 'BlogPosting',
+        mainEntityOfPage: {
+          '@type': 'WebPage',
+          '@id': `https://signoz.io/newsroom/${doc.slug}`,
+        },
+        author: {
+          '@type': 'Organization',
+          name: 'SigNoz',
+        },
+        publisher: {
+          '@type': 'Organization',
+          name: 'SigNoz',
+          logo: {
+            '@type': 'ImageObject',
+            url: 'https://signoz.io/img/SigNozLogo-orange.svg',
+          },
+        },
         headline: doc.title,
         datePublished: doc.date,
         dateModified: doc.lastmod || doc.date,
         description: doc.description,
-         image: doc.image || (doc.images ? doc.images[0] : siteMetadata.socialBanner),
+        image: `${siteMetadata.siteUrl}${doc.image || (doc.images ? doc.images[0] : siteMetadata.socialBanner)}`,
         url: `${siteMetadata.siteUrl}/${doc._raw.flattenedPath}`,
       }),
     },
@@ -244,12 +290,25 @@ export const Comparison = defineDocumentType(() => ({
       type: 'json',
       resolve: (doc) => ({
         '@context': 'https://schema.org',
-        '@type': 'ComparisonPosting',
+        '@type': 'BlogPosting',
+        mainEntityOfPage: {
+          '@type': 'WebPage',
+          '@id': `https://signoz.io/comparisons/${doc.slug}`,
+        },
+        author: getAuthors(doc),
+        publisher: {
+          '@type': 'Organization',
+          name: 'SigNoz',
+          logo: {
+            '@type': 'ImageObject',
+            url: 'https://signoz.io/img/SigNozLogo-orange.svg',
+          },
+        },
         headline: doc.title,
         datePublished: doc.date,
         dateModified: doc.lastmod || doc.date,
         description: doc.description,
-         image: doc.image || (doc.images ? doc.images[0] : siteMetadata.socialBanner),
+        image: `${siteMetadata.siteUrl}${doc.image || (doc.images ? doc.images[0] : siteMetadata.socialBanner)}`,
         url: `${siteMetadata.siteUrl}/${doc._raw.flattenedPath}`,
       }),
     },
@@ -279,16 +338,33 @@ export const Opentelemetry = defineDocumentType(() => ({
   },
   computedFields: {
     ...computedFields,
+    relatedArticles: {
+      type: 'json',
+      resolve: (doc) => getRelatedArticles(doc, opentelemetryRelatedArticles),
+    },
     structuredData: {
       type: 'json',
       resolve: (doc) => ({
         '@context': 'https://schema.org',
-        '@type': 'OpentelemetryPosting',
+        '@type': 'BlogPosting',
+        mainEntityOfPage: {
+          '@type': 'WebPage',
+          '@id': `https://signoz.io/opentelemetry/${doc.slug}`,
+        },
+        author: getAuthors(doc),
+        publisher: {
+          '@type': 'Organization',
+          name: 'SigNoz',
+          logo: {
+            '@type': 'ImageObject',
+            url: 'https://signoz.io/img/SigNozLogo-orange.svg',
+          },
+        },
         headline: doc.title,
         datePublished: doc.date,
         dateModified: doc.lastmod || doc.date,
         description: doc.description,
-         image: doc.image || (doc.images ? doc.images[0] : siteMetadata.socialBanner),
+        image: `${siteMetadata.siteUrl}${doc.image || (doc.images ? doc.images[0] : siteMetadata.socialBanner)}`,
         url: `${siteMetadata.siteUrl}/${doc._raw.flattenedPath}`,
       }),
     },
@@ -318,16 +394,33 @@ export const Guide = defineDocumentType(() => ({
   },
   computedFields: {
     ...computedFields,
+    relatedArticles: {
+      type: 'json',
+      resolve: (doc) => getRelatedArticles(doc, guidesRelatedArticles),
+    },
     structuredData: {
       type: 'json',
       resolve: (doc) => ({
         '@context': 'https://schema.org',
-        '@type': 'GuidePosting',
+        '@type': 'BlogPosting',
+        mainEntityOfPage: {
+          '@type': 'WebPage',
+          '@id': `https://signoz.io/guides/${doc.slug}`,
+        },
+        author: getAuthors(doc),
+        publisher: {
+          '@type': 'Organization',
+          name: 'SigNoz',
+          logo: {
+            '@type': 'ImageObject',
+            url: 'https://signoz.io/img/SigNozLogo-orange.svg',
+          },
+        },
         headline: doc.title,
         datePublished: doc.date,
         dateModified: doc.lastmod || doc.date,
         description: doc.description,
-         image: doc.image || (doc.images ? doc.images[0] : siteMetadata.socialBanner),
+        image: `${siteMetadata.siteUrl}${doc.image || (doc.images ? doc.images[0] : siteMetadata.socialBanner)}`,
         url: `${siteMetadata.siteUrl}/${doc._raw.flattenedPath}`,
       }),
     },
@@ -363,12 +456,28 @@ export const Doc = defineDocumentType(() => ({
       type: 'json',
       resolve: (doc) => ({
         '@context': 'https://schema.org',
-        '@type': 'DocPosting',
+        '@type': 'TechArticle',
+        mainEntityOfPage: {
+          '@type': 'WebPage',
+          '@id': `https://signoz.io/docs/${doc.slug}`,
+        },
+        author: {
+          '@type': 'Organization',
+          name: 'SigNoz',
+        },
+        publisher: {
+          '@type': 'Organization',
+          name: 'SigNoz',
+          logo: {
+            '@type': 'ImageObject',
+            url: 'https://signoz.io/img/SigNozLogo-orange.svg',
+          },
+        },
         headline: doc.title,
         datePublished: doc.date || 'Thu Jun 06 2024', // Setting it Jun 06, 2024 as date metadat doesn't exist for docs, TODO: add date to all exisiting doc files
         dateModified: doc.lastmod || doc.date || 'Thu Jun 06 2024',
         description: doc.description,
-         image: doc.image || (doc.images ? doc.images[0] : siteMetadata.socialBanner),
+        image: `${siteMetadata.siteUrl}${doc.image || (doc.images ? doc.images[0] : siteMetadata.socialBanner)}`,
         url: `${siteMetadata.siteUrl}/${doc._raw.flattenedPath}`,
       }),
     },
@@ -377,10 +486,13 @@ export const Doc = defineDocumentType(() => ({
 
 export const Authors = defineDocumentType(() => ({
   name: 'Authors',
-  filePathPattern: 'authors/**/*.mdx',
+  filePathPattern: 'constants/authors.json',
   contentType: 'mdx',
   fields: {
     name: { type: 'string', required: true },
+    title: { type: 'string' },
+    url: { type: 'string' },
+    image_url: { type: 'string' },
     avatar: { type: 'string' },
     occupation: { type: 'string' },
     company: { type: 'string' },

@@ -10,6 +10,7 @@ import siteMetadata from '@/data/siteMetadata'
 import React from 'react'
 import { tocItemProps } from '../layout'
 import DocsPrevNext from '../../../components/DocsPrevNext/DocsPrevNext'
+import PageFeedback from '../../../components/PageFeedback/PageFeedback'
 
 export async function generateMetadata({
   params,
@@ -48,7 +49,7 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
   const post = allDocs.find((p) => p.slug === slug) as Doc
   const mainContent = coreContent(post)
   const toc = post?.toc || []
-  const { title } = mainContent
+  const { title, hide_table_of_contents } = mainContent
 
   return (
     <>
@@ -56,10 +57,11 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
         <div className="doc-content">
           <h2 className="mt-2 text-3xl">{title}</h2>
           <MDXLayoutRenderer code={post.body.code} components={components} toc={post.toc || []} />
+          <PageFeedback />
           <DocsPrevNext />
         </div>
 
-        {toc && Array.isArray(toc) && toc.length > 0 && (
+        {!hide_table_of_contents && toc && Array.isArray(toc) && toc.length > 0 && (
           <div className="doc-toc">
             <div className="mb-3 text-xs uppercase"> On this page </div>
 

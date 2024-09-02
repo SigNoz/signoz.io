@@ -302,6 +302,7 @@ const Teams: React.FC<SignUpPageProps> = () => {
                       {regions.map((region) => (
                         <button
                           type="button"
+                          key={region.id}
                           className={`flex min-w-44 gap-4 self-start whitespace-nowrap rounded-sm border border-solid p-3 text-sm leading-[129%] tracking-normal ${region.id === formData.dataRegion ? 'border-[#4e74f866] bg-[#4e74f833]' : 'border-signoz_slate-400 bg-signoz_ink-300'}`}
                           onClick={() => {
                             handleRegionChange(region.id)
