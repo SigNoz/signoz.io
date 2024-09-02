@@ -6,11 +6,14 @@ import { ArrowRight, BookOpen } from 'lucide-react'
 import Button from '@/components/Button/Button'
 import Card from '@/components/Card/card'
 import FeatureCard from '@/components/FeatureCard/FeatureCard'
+import ProductNav from '@/components/ProductNav/ProductNav'
+
 
 
 function DistributedTracing() {
   return (
-    <main className='mb-auto !mt-[-80px]'>
+    <main className='mb-auto !mt-[-10px]'>
+      <ProductNav/>
       <div className='relative bg-signoz_ink-500'>
         <div className="absolute left-0 right-0 top-0 h-screen bg-[url('/img/background_blur/Perlin_noise.png')] bg-[length:55%] bg-[center_top_4rem] sm:bg-no-repeat " />
         <div className="absolute left-0 right-0 top-0 h-screen bg-[url('/img/background_blur/Circle.png')] bg-[length:110%] bg-no-repeat sm:bg-[center_top_-50rem]" />
@@ -109,9 +112,9 @@ const Header = () => {
       <div className="absolute bottom-0 left-[12px] right-[12px] top-0 z-[0] border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 md:left-[24px] md:right-[24px]" />
       <div className="relative !mx-auto flex !w-[100vw] flex-col items-center border !border-b-0 border-dashed border-signoz_slate-400 px-2 pb-4 pt-12 text-center md:!w-[80vw] md:px-5 md:pt-[8.5rem]">
 
-        <div className="absolute left-0 top-[96px] h-14 !w-[100vw] border !border-l-0 !border-r-0 border-dashed border-signoz_slate-400 top-[80px] md:top-[225px] md:!w-[80vw]" />
+      <div className="absolute left-0 top-[101px] z-0 h-9 sm:h-14 !w-[100vw] border !border-l-0 !border-r-0 border-dashed border-signoz_slate-400 md:top-[225px] md:!w-[80vw]" />
 
-        <h1 className="my-4 text-2xl !p-3 sm:my-2 sm:text-3xl font-semibold tracking-tight dark:text-white sm:my-5 md:leading-[3.5rem] lg:text-[44px] text-gradient">
+      <h1 className="my-4 text-2xl !p-3 sm:my-2 sm:text-3xl font-semibold tracking-tight dark:text-white sm:my-5 md:leading-[3.5rem] lg:text-[44px] text-gradient z-[1]">
         Distributed Tracing For Finding Root Cause <br />of Application Performance Issues Quickly
         </h1>
         
