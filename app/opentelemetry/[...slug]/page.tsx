@@ -13,6 +13,8 @@ import PostBanner from '@/layouts/PostBanner'
 import { Metadata } from 'next'
 import siteMetadata from '@/data/siteMetadata'
 import { notFound } from 'next/navigation'
+import React from 'react'
+import PageFeedback from '../../../components/PageFeedback/PageFeedback'
 
 const defaultLayout = 'PostLayout'
 const layouts = {
@@ -98,12 +100,6 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
   })
   const mainContent = coreContent(post)
   const jsonLd = post.structuredData
-  jsonLd['author'] = authorDetails.map((author) => {
-    return {
-      '@type': 'Person',
-      name: author.name,
-    }
-  })
 
   const Layout = layouts[post.layout || defaultLayout]
 
@@ -120,6 +116,7 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
         toc={post.toc}
       >
         <MDXLayoutRenderer code={post.body.code} components={components} toc={post.toc} />
+        <PageFeedback />
       </Layout>
     </>
   )
