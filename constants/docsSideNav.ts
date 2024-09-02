@@ -1497,6 +1497,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/gcp-monitoring/cloud-sql/logging',
             label: 'Logging',
+          },
+          {
+            type: 'doc',
+            route: '/docs/gcp-monitoring/cloud-sql/metrics',
+            label: 'Metrics',
           }
         ],
       },
