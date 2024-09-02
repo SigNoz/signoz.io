@@ -1,0 +1,286 @@
+---
+date: 2024-07-27
+id: metrics
+title: VPC Metrics
+hide_table_of_contents: true
+---
+
+
+## Overview
+
+This document provides a detailed walkthrough on how to send Serverless VPC Access Connector metrics to SigNoz. By the end of this guide, you will have a setup that sends your VPC access metrics to SigNoz.
+
+<Tabs>
+<TabItem value="cloud" label="SigNoz Cloud" default>
+
+**Here's a quick summary of what we will be doing in this guide**
+
+* Create Serverless VPC Access Connector
+* Create and configure Compute Engine VM instance to deploy Telegraf and OpenTelemetry Collector
+* Deploy Telegraf to fetch the metrics from Google Cloud monitoring
+* Deploy OpenTelemetry Collector to scrape the metrics from Telegraf
+* Send and Visualize the metrics in SigNoz Cloud
+
+## Prerequisites
+
+* [Google Cloud account](https://console.cloud.google.com/) with administrative privilege, or Serverless VPC Access Admin and Compute Engine Admin privilege. You might also require access to create Cloud Function in case you are following the tutorial to create Serverless VPC Connector.
+* [SigNoz Cloud Account](https://signoz.io/teams/) (we are using SigNoz Cloud for this demonstration, we will also need ingestion details. To get your **Ingestion Key** and **Ingestion URL,** sign-in to your SigNoz Cloud Account and go to **Settings** >> **Ingestion Settings**)
+* Access to a project in GCP
+
+## Setup
+
+### Create Serverless VPC Access Connector
+
+Follow the [Creating Serverless VPC Access Connector](/docs/gcp-monitoring/vpc/vpc-connector-creation) document to create the serverless VPC access connector.
+
+## Deploy Telegraf to fetch the metrics from Google Cloud Monitoring
+
+We will be using Compute Engine instance to install Telegraf. You can follow the instructions in the [Creating Copmute Engine](/docs/gcp-monitoring/bootstrapping/gce-creation) document to create the Compute Engine instance. In this tutorial, we will be using the same instance for installing OTel Collector as well. You may choose a different instance as well.
+
+**Step 1:** Install [`telegraf`](https://github.com/influxdata/telegraf) which will collect metrics from Google Cloud Monitoring for App Engine, see the [available metrics for App Engine](https://cloud.google.com/monitoring/api/metrics_gcp#gcp-appengine). The installation process for the respective operating system can be found in official [documentation](https://docs.influxdata.com/telegraf/v1/install/).
+
+After successful installation, the Telegraf status should be active and running. You can check the Telegraf status by running the command `service telegraf status`.
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/vpc/metrics/telegraf-status.webp"
+        alt="Telegraf running status"
+    />
+<figcaption>
+<i>
+`telegraf` running status
+</i>
+</figcaption>
+</figure>
+
+The configuration file for telegraf can be found here:
+
+```sh
+/etc/telegraf/telegraf.conf
+```
+
+**Step 2:** Configure the Telegraf input and output plugin by adding configurations to the `telegraf.conf` file.
+
+```txt
+# Gather timeseries from Google Cloud Platform v3 monitoring API
+[[inputs.stackdriver]]
+  ## GCP Project
+  project = "omni-new"
+  ## Include timeseries that start with the given metric type.
+  metric_type_prefix_include = [
+    "vpcaccess.googleapis.com",
+  ]
+  ## Most metrics are updated no more than once per minute; it is recommended
+  ## to override the agent level interval with a value of 1m or greater.
+  interval = "1m"
+# Send OpenTelemetry metrics over gRPC
+[[outputs.opentelemetry]]
+  ## Override the default (localhost:4317) OpenTelemetry gRPC service
+  ## address:port
+  service_address = "localhost:4317"
+```
+
+We are assuming that the OTel Collector is running on the same machine as Telegraf. If that is not the case, you will have to change the `service_address` in the `outputs.opentelemetry` section accordingly.
+
+## Deploy OpenTelemetry to scrape the metrics from Telegraf
+
+**Step 1:** Install and configure OpenTelemetry for scraping the metrics from Telegraf. Follow [OpenTelemetry Binary Usage in Virtual Machine](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) guide for detailed instructions.
+
+**Step 2:** After successful configuration start the OTel Collector using following command:
+
+```sh
+./otelcol-contrib --config ./config.yaml &> otelcol-output.log & echo "$!" > otel-pid
+```
+
+**Step 3:** Restart the Telegraf service
+
+**Step 4:** If the configurations are configured correctly with Telegraf and we can see the output logs from OpenTelemetry as follows:
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/vpc/metrics/otel-logs.webp"
+        alt="OTel Collector Logs"
+    />
+<figcaption>
+<i>
+Viewing OTel Collector Logs
+</i>
+</figcaption>
+</figure>
+
+## Send and Visualize the metrics obtained by OpenTelemetry in SigNoz
+
+**Step 1:** Go to the SigNoz Cloud URL and head over to the dashboard.
+
+**Step 2:** If not already created, create a new dashboard and select Time Series.
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/vpc/metrics/new-panel.webp"
+        alt="Creating new panel"
+    />
+<figcaption>
+<i>
+Creating new panel in dashboard
+</i>
+</figcaption>
+</figure>
+
+**Step 3:** Select metric for VPC Connector
+
+All metrics starting with `vpcaccess_googleapis_com_` have been collected from Serveless VPC Access Connector.
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/vpc/metrics/plot-metrics-signoz-cloud.webp"
+        alt="Plot metrics"
+    />
+<figcaption>
+<i>
+Serveless VPC Access Connector Metrics
+</i>
+</figcaption>
+</figure>
+
+## Troubleshooting
+
+If you run into any problems while setting up monitoring for your Serverless VPC Access Connector metrics with SigNoz, consider these troubleshooting steps:
+
+
+* **Verify Configuration**: Double-check your `config.yaml` file to ensure all settings, including the ingestion key and endpoint, are correct.
+* **Review Logs**: Look at the logs of both Telegraf and the OpenTelemetry Collector to identify any error messages or warnings that might provide insights into what’s going wrong.
+* **Update Dependencies**: Ensure all relevant packages and dependencies are up-to-date to avoid compatibility issues.
+* **Consult Documentation**: Review the SigNoz, OpenTelemetry, and Telegraf documentation for any additional troubleshooting of the common issues.
+
+</TabItem>
+
+<TabItem value="self-host" label="Self-Host">
+
+**Here’s a quick summary of what we will be doing in this guide**
+
+* Create Serverless VPC Access Connector
+* Create and configure Compute Engine VM instance to deploy Telegraf and OpenTelemetry Collector
+* Deploy Telegraf to fetch the metrics from Google Cloud monitoring
+* Deploy OpenTelemetry Collector to scrape the metrics from Telegraf
+* Send and Visualize the metrics in SigNoz dashboard
+
+## Prerequisites
+
+* [Google Cloud account](https://console.cloud.google.com/) with administrative privilege, or Serverless VPC Access Admin and Compute Engine Admin privilege. You might also require access to create Cloud Function in case you are following the tutorial to create Serverless VPC Connector.
+* Access to a project in GCP
+* Self-hosted SigNoz
+
+## Setup
+
+### Create Serverless VPC Access Connector
+
+Follow the [Creating Serverless VPC Access Connector](/docs/gcp-monitoring/vpc/vpc-connector-creation) document to create the serverless VPC access connector.
+
+## Deploy Telegraf to fetch the metrics from Google Cloud Monitoring
+
+We will be using Compute Engine instance to install Telegraf. You can follow the instructions in the [Creating Copmute Engine](/docs/gcp-monitoring/bootstrapping/gce-creation) document to create the Compute Engine instance. In this tutorial, we will be using the same instance for installing OTel Collector as well. You may choose a different instance as well.
+
+**Step 1:** Install [`telegraf`](https://github.com/influxdata/telegraf) which will collect metrics from Google Cloud Monitoring for App Engine, see the [available metrics for App Engine](https://cloud.google.com/monitoring/api/metrics_gcp#gcp-appengine). The installation process for the respective operating system can be found in official [documentation](https://docs.influxdata.com/telegraf/v1/install/).
+
+After successful installation, the Telegraf status should be active and running. You can check the Telegraf status by running the command `service telegraf status`.
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/vpc/metrics/telegraf-status.webp"
+        alt="Telegraf running status"
+    />
+<figcaption>
+<i>
+`telegraf` running status
+</i>
+</figcaption>
+</figure>
+
+The configuration file for telegraf can be found here:
+
+```sh
+/etc/telegraf/telegraf.conf
+```
+
+**Step 2:** Configure the Telegraf input and output plugin by adding configurations to the `telegraf.conf` file.
+
+```txt
+# Gather timeseries from Google Cloud Platform v3 monitoring API
+[[inputs.stackdriver]]
+  ## GCP Project
+  project = "omni-new"
+  ## Include timeseries that start with the given metric type.
+  metric_type_prefix_include = [
+    "vpcaccess.googleapis.com",
+  ]
+  ## Most metrics are updated no more than once per minute; it is recommended
+  ## to override the agent level interval with a value of 1m or greater.
+  interval = "1m"
+# Send OpenTelemetry metrics over gRPC
+[[outputs.opentelemetry]]
+  ## Override the default (localhost:4317) OpenTelemetry gRPC service
+  ## address:port
+  service_address = "localhost:4317"
+```
+
+We are assuming that the OTel Collector is running on the same machine as Telegraf. If that is not the case, you will have to change the `service_address` in the `outputs.opentelemetry` section accordingly.
+
+## Deploy OpenTelemetry to scrape the metrics from Telegraf
+
+**Step 1:** Install and configure OpenTelemetry for scraping the metrics from Telegraf. Follow [OpenTelemetry Binary Usage in Virtual Machine](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) guide for detailed instructions.
+
+**Step 2:** After successful configuration start the OTel Collector using following command:
+
+```sh
+./otelcol-contrib --config ./config.yaml &> otelcol-output.log & echo "$!" > otel-pid
+```
+
+**Step 3:** Restart the Telegraf service
+
+**Step 4:** If the configurations are configured correctly with Telegraf and we can see the output logs from OpenTelemetry as follows:
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/vpc/metrics/otel-logs.webp"
+        alt="OTel Collector Logs"
+    />
+<figcaption>
+<i>
+Viewing OTel Collector Logs
+</i>
+</figcaption>
+</figure>
+
+## Send and Visualize the metrics obtained by OpenTelemetry in SigNoz
+
+**Step 1:** Go to SigNoz and head over to the dashboard.
+
+**Step 2:** If not already created, create a new dashboard and select Time Series.
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/vpc/metrics/new-panel.webp"
+        alt="Creating new panel"
+    />
+<figcaption>
+<i>
+Creating new panel in dashboard
+</i>
+</figcaption>
+</figure>
+
+**Step 3:** Select metric for VPC Connector
+
+All metrics starting with `vpcaccess_googleapis_com_` have been collected from Serveless VPC Access Connector.
+
+## Troubleshooting
+
+If you run into any problems while setting up monitoring for your Serveless VPC Access Connector metrics with SigNoz, consider these troubleshooting steps:
+
+* **Verify Configuration**: Double-check your `config.yaml` file to ensure all settings, including the ingestion key and endpoint, are correct.
+* **Review Logs**: Look at the logs of both Telegraf and the OpenTelemetry Collector to identify any error messages or warnings that might provide insights into what’s going wrong.
+* **Update Dependencies**: Ensure all relevant packages and dependencies are up-to-date to avoid compatibility issues.
+* **Consult Documentation**: Review the SigNoz, OpenTelemetry, and Telegraf documentation for any additional troubleshooting of the common issues.
+
+</TabItem>
+</Tabs>
