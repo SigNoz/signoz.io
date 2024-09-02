@@ -1047,10 +1047,6 @@ const PricingPlans = () => {
                       </li>
                       <li className="mb-3 flex items-center gap-3">
                         {' '}
-                        <CircleCheckSolid /> Run aggregates on ingested spans
-                      </li>
-                      <li className="mb-3 flex items-center gap-3">
-                        {' '}
                         <CircleCheckSolid /> Security tightening for on-prem installation
                       </li>
                       <li className="mb-3 flex items-center gap-3">
