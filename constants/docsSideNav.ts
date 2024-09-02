@@ -1398,6 +1398,11 @@ const docsSideNav = [
             route: '/docs/gcp-monitoring/bootstrapping/gce-creation',
             label: 'Creating Compute Engine',
           },
+          {
+            type: 'doc',
+            route: '/docs/gcp-monitoring/bootstrapping/cloud-sql-creation',
+            label: 'Creating Cloud SQL',
+          },
         ],
       },
       {
@@ -1423,7 +1428,17 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/gcp-monitoring/app-engine/logging',
             label: 'Logging',
-          }
+          },
+          {
+            type: 'doc',
+            route: '/docs/gcp-monitoring/app-engine/metrics',
+            label: 'Metrics',
+          },
+          {
+            type: 'doc',
+            route: '/docs/gcp-monitoring/app-engine/tracing',
+            label: 'APM & Tracing',
+          },
         ],
       },
       {
@@ -1435,6 +1450,47 @@ const docsSideNav = [
           {
             type: 'doc',
             route: '/docs/gcp-monitoring/compute-engine/logging',
+            label: 'Logging',
+          },
+          {
+            type: 'doc',
+            route: '/docs/gcp-monitoring/compute-engine/metrics',
+            label: 'Metrics',
+          },
+          {
+            type: 'doc',
+            route: '/docs/gcp-monitoring/compute-engine/tracing',
+            label: 'APM & Tracing',
+          }
+        ],
+      },
+      {
+        type: 'category',
+        isExpanded: false,
+        label: 'Cloud Storage',
+        route: '/docs/gcp-monitoring/gcs',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/gcp-monitoring/gcs/logging',
+            label: 'Logging',
+          },
+          {
+            type: 'doc',
+            route: '/docs/gcp-monitoring/gcs/metrics',
+            label: 'Metrics',
+          },
+        ],
+      },
+      {
+        type: 'category',
+        isExpanded: false,
+        label: 'Cloud SQL',
+        route: '/docs/gcp-monitoring/cloud-sql',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/gcp-monitoring/cloud-sql/logging',
             label: 'Logging',
           }
         ],
