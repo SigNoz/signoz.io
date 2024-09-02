@@ -1418,9 +1418,19 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/gcp-monitoring/gcp-fns/custom-metrics',
+            label: 'Custom Metrics',
+          },
+          {
+            type: 'doc',
+            route: '/docs/gcp-monitoring/gcp-fns/fns-metrics',
+            label: 'Cloud Function Metrics',
+          },
+          {
+            type: 'doc',
             route: '/docs/gcp-monitoring/gcp-fns/tracing',
-            label: 'Tracing',
-          }
+            label: 'APM & Tracing',
+          },
         ],
       },
       {
