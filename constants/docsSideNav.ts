@@ -1514,9 +1514,17 @@ const docsSideNav = [
         ],
       },
       {
-        type: 'doc',
-        route: '/docs/gcp-monitoring/gke-tracing',
-        label: 'Tracing in GKE',
+        label: 'GKE',
+        type: 'category',
+        isExpanded: false,
+        route: '/docs/gcp-monitoring/gke',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/gcp-monitoring/gke/gke-tracing',
+            label: 'APM & Tracing',
+          },
+        ],
       },
     ],
   },
