@@ -1554,6 +1554,11 @@ const docsSideNav = [
         items: [
           {
             type: 'doc',
+            route: '/docs/gcp-monitoring/gke/gke-tracing',
+            label: 'APM & Tracing',
+          },
+          {
+            type: 'doc', 
             route: '/docs/gcp-monitoring/gke/gke-logging-and-metrics',
             label: 'Logs and Metrics',
           },
