@@ -1543,7 +1543,20 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/gcp-monitoring/vpc/metrics',
             label: 'Metrics',
-          }
+          },
+         ],
+       },
+      {
+        label: 'GKE',
+        type: 'category',
+        isExpanded: false,
+        route: '/docs/gcp-monitoring/gke',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/gcp-monitoring/gke/gke-logging-and-metrics',
+            label: 'Logs and Metrics',
+          },
         ],
       },
     ],
