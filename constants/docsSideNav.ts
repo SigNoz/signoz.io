@@ -1529,6 +1529,24 @@ const docsSideNav = [
         ],
       },
       {
+        type: 'category',
+        isExpanded: false,
+        label: 'Serverless VPC Access Connector',
+        route: '/docs/gcp-monitoring/vpc',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/gcp-monitoring/vpc/vpc-connector-creation',
+            label: 'Creating Serverless VPC Access Connector',
+          },
+          {
+            type: 'doc',
+            route: '/docs/gcp-monitoring/vpc/metrics',
+            label: 'Metrics',
+          },
+         ],
+       },
+      {
         label: 'GKE',
         type: 'category',
         isExpanded: false,
