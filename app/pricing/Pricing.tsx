@@ -580,10 +580,6 @@ const PricingPlans = () => {
                       </li>
                       <li className="mb-3 flex items-center gap-3">
                         {' '}
-                        <CircleCheckSolid /> Run aggregates on ingested spans
-                      </li>
-                      <li className="mb-3 flex items-center gap-3">
-                        {' '}
                         <CircleCheckSolid /> Live Tail Logging
                       </li>
                       <li className="mb-3 flex items-center gap-3">
@@ -1048,10 +1044,6 @@ const PricingPlans = () => {
                         <span className="rounded-full border border-none bg-signoz_slate-400 px-2 py-1 !text-[10px] uppercase text-signoz_vanilla-400 text-center">
                           &gt;10k spans
                         </span>
-                      </li>
-                      <li className="mb-3 flex items-center gap-3">
-                        {' '}
-                        <CircleCheckSolid /> Run aggregates on ingested spans
                       </li>
                       <li className="mb-3 flex items-center gap-3">
                         {' '}
