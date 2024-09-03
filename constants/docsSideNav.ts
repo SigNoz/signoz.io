@@ -1418,9 +1418,19 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/gcp-monitoring/gcp-fns/custom-metrics',
+            label: 'Custom Metrics',
+          },
+          {
+            type: 'doc',
+            route: '/docs/gcp-monitoring/gcp-fns/fns-metrics',
+            label: 'Cloud Function Metrics',
+          },
+          {
+            type: 'doc',
             route: '/docs/gcp-monitoring/gcp-fns/tracing',
-            label: 'Tracing',
-          }
+            label: 'APM & Tracing',
+          },
         ],
       },
       {
@@ -1497,6 +1507,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/gcp-monitoring/cloud-sql/logging',
             label: 'Logging',
+          },
+          {
+            type: 'doc',
+            route: '/docs/gcp-monitoring/cloud-sql/metrics',
+            label: 'Metrics',
           }
         ],
       },
@@ -1514,6 +1529,24 @@ const docsSideNav = [
         ],
       },
       {
+        type: 'category',
+        isExpanded: false,
+        label: 'Serverless VPC Access Connector',
+        route: '/docs/gcp-monitoring/vpc',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/gcp-monitoring/vpc/vpc-connector-creation',
+            label: 'Creating Serverless VPC Access Connector',
+          },
+          {
+            type: 'doc',
+            route: '/docs/gcp-monitoring/vpc/metrics',
+            label: 'Metrics',
+          },
+         ],
+       },
+      {
         label: 'GKE',
         type: 'category',
         isExpanded: false,
@@ -1523,6 +1556,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/gcp-monitoring/gke/gke-tracing',
             label: 'APM & Tracing',
+          },
+          {
+            type: 'doc', 
+            route: '/docs/gcp-monitoring/gke/gke-logging-and-metrics',
+            label: 'Logs and Metrics',
           },
         ],
       },
