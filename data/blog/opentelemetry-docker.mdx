@@ -196,11 +196,18 @@ processors:
   batch:
     send_batch_size: 1000
     timeout: 10s
-  resourcedetection:
-    detectors: [env, system]
+  resourcedetection/env:
+    detectors: [env]
     timeout: 2s
+    override: false
+  resourcedetection/system:
+    detectors: ["system"]
     system:
-      hostname_sources: [os]
+      hostname_sources: ["dns", "os"]
+  resourcedetection/docker:
+    detectors: [env, docker]
+    timeout: 2s
+    override: false
 exporters:
   otlp:
     endpoint: "ingest.{region}.signoz.cloud:443"
@@ -215,7 +222,7 @@ service:
   pipelines:
     metrics:
       receivers: [otlp, docker_stats]
-      processors: [resourcedetection, batch]
+      processors: [resourcedetection/docker, batch]
       exporters: [otlp]
 ```
 
