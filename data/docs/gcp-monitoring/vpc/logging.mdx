@@ -1,37 +1,87 @@
 ---
-date: 2024-07-27
+date: 2024-08-27
 id: logging
-title: Cloud SQL Logging
+title: VPC Logging
 hide_table_of_contents: true
 ---
 
 
 ## Overview
 
-This documentation provides a detailed walkthrough to send the Google Cloud SQL logs directly to SigNoz. By the end of this guide, you will have a setup that automatically sends your Cloud SQL logs to SigNoz.
+This document provides a detailed walkthrough on how to send Serverless VPC Access Connector logs to SigNoz. By the end of this guide, you will have a setup that sends your VPC access logs to SigNoz.
 
 <Tabs>
 <TabItem value="cloud" label="SigNoz Cloud" default>
+
 **Here's a quick summary of what we will be doing in this guide**
 
-* Create and configure Cloud SQL
+* Create Serverless VPC Access Connector
+* Enable Flow Logs
 * Create Pub/Sub topic
-* Create Log Router to route the Cloud SQL logs to SigNoz
-* Create Compute Engine instance
-* Create OTel Collector to route logs from Pub/Sub topic to SigNoz Cloud
+* Create Log Router to route the Cloud Storage logs to SigNoz
+* Create OTel Collector on Compute Engine instance to route logs from Pub/Sub topic to SigNoz Cloud
 * Send and Visualize the logs in SigNoz Cloud
 
 ## Prerequisites
 
-* [Google Cloud account](https://console.cloud.google.com/) with administrative privilege or Cloud SQL Admin privilege.
+* [Google Cloud account](https://console.cloud.google.com/) with administrative privilege, or Serverless VPC Access Admin and Compute Engine Admin privilege. You might also require access to create Cloud Function in case you are following the tutorial to create Serverless VPC Connector.
 * [SigNoz Cloud Account](https://signoz.io/teams/) (we are using SigNoz Cloud for this demonstration, we will also need ingestion details. To get your **Ingestion Key** and **Ingestion URL,** sign-in to your SigNoz Cloud Account and go to **Settings** >> **Ingestion Settings**)
 * Access to a project in GCP
 
 ## Setup
 
-### Get started with Cloud SQL Configuration
+### Create Serverless VPC Access Connector
 
-Follow the steps mentioned in the [Creating Cloud SQL](/docs/gcp-monitoring/cloud-sql/cloud-sql-creation) document to create Cloud SQL instance.
+Follow the [Creating Serverless VPC Access Connector](/docs/gcp-monitoring/vpc/vpc-connector-creation) document to create the serverless VPC access connector.
+
+### Enable Flow Logs
+
+Step 1: On the GCP Console, search for VPC, and select **VPC networks**.
+
+Step 2: Enter the network where the traffic is being directed. In this case, the network on which the Compute Engine instance running the NodeJS is hosted.
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/vpc/logging/enter-vpc-network.webp"
+        alt="Enter into VPC network"
+    />
+<figcaption>
+<i>
+Enter into VPC network
+</i>
+</figcaption>
+</figure>
+
+Step 3: Select the **Subnets** tab from the top, and enter into the subnet corresponding to the region whose flow logs you want to capture. In this case, it will be the region in which the Compute Engine instance running the NodeJS is hosted.
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/vpc/logging/navigate-to-subnets-tab.webp"
+        alt="Navigate to Subnets tab"
+    />
+<figcaption>
+<i>
+Navigate to Subnets tab
+</i>
+</figcaption>
+</figure>
+
+
+Step 4: Select **EDIT** on the top, and click on the `On` radio button under the **Flow logs**.
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/vpc/logging/turn-on-flow-logs.webp"
+        alt="Turn on Flow Logs"
+    />
+<figcaption>
+<i>
+Turn on Flow Logs
+</i>
+</figcaption>
+</figure>
+
+Step 5: Click on **SAVE**. The flow logs are now enabled for the network in the corresponding region.
 
 ### Create PubSub Topic
 
@@ -41,10 +91,10 @@ Follow the steps mentioned in the [Creating Pub/Sub Topic](/docs/gcp-monitoring/
 
 Follow the steps mentioned in the [Log Router Setup](/docs/gcp-monitoring/bootstrapping/log-router-setup) document to create the Log Router.
 
-To ensure you filter out only the Cloud SQL logs, use the following filter conditions:
+To ensure you filter out only the Compute Engine logs, use the following filter conditions:
 
 ```
-resource.type="cloudsql_database"
+resource.type="gce_subnetwork"
 ```
 
 ### Setup OTel Collector
@@ -144,50 +194,95 @@ If you want to see the output of the logs you’ve just set up for the backgroun
 tail -f -n 50 otelcol-output.log
 ```
 
-## Visualize the logs in SigNoz Cloud
+### Visualize the Logs obtained by OpenTelemetry in SigNoz Cloud
 
-You can now start seeing the Cloud SQL logs on SigNoz Cloud.
+You can now visualize the logs corresponding to the traffic being sent on this VPC network.
 
 <figure data-zoomable align="left">
     <img
-        src="/img/docs/gcp-monitoring/cloud-sql/logging/cloud-sql-signoz-cloud-logs.webp"
-        alt="Cloud SQL Logs in SigNoz Cloud"
+        src="/img/docs/gcp-monitoring/vpc/logging/vpc-logs.webp"
+        alt="Network Logs"
     />
 <figcaption>
 <i>
-Cloud SQL Logs in SigNoz Cloud
+Network Logs
 </i>
 </figcaption>
 </figure>
 
 </TabItem>
 
-<TabItem value="self-host" label="Self-Host" default>
-**Here's a quick summary of what we will be doing in this guide**
+<TabItem value="self-host" label="Self-Host">
 
-* Create and configure Cloud SQL
+**Here’s a quick summary of what we will be doing in this guide**
+
+* Create Serverless VPC Access Connector
+* Enable Flow Logs
 * Create Pub/Sub topic
-* Create Log Router to route the Cloud SQL logs to SigNoz
-* Self-Host SigNoz
-* Create Compute Engine instance
-* Create OTel Collector to route logs from Pub/Sub topic to SigNoz Cloud
+* Create Log Router to route the Cloud Storage logs to SigNoz
+* Create OTel Collector on Compute Engine instance to route logs from Pub/Sub topic to SigNoz
 * Send and Visualize the logs in SigNoz
 
 ## Prerequisites
 
-* [Google Cloud account](https://console.cloud.google.com/) with administrative privilege or Cloud SQL Admin privilege.
+* [Google Cloud account](https://console.cloud.google.com/) with administrative privilege, or Serverless VPC Access Admin and Compute Engine Admin privilege. You might also require access to create Cloud Function in case you are following the tutorial to create Serverless VPC Connector.
 * Access to a project in GCP
-* [Self-Hosted SigNoz](https://signoz.io/docs/install/docker/) 
-
-<Admonition type="info">
-For more details on how to configure Self-Hosted SigNoz for Logs, check [official documentation by Self-Hosted SigNoz](https://signoz.io/docs/userguide/send-logs-http/#send-logs-to-self-hosted-signoz) and navigate to the "Send Logs to Self-Hosted SigNoz" section.
-</Admonition>
+* Self-hosted SigNoz
 
 ## Setup
 
-### Get started with Cloud SQL Configuration
+### Create Serverless VPC Access Connector
 
-Follow the steps mentioned in the [Creating Cloud SQL](/docs/gcp-monitoring/cloud-sql/cloud-sql-creation) document to create Cloud SQL instance.
+Follow the [Creating Serverless VPC Access Connector](/docs/gcp-monitoring/vpc/vpc-connector-creation) document to create the serverless VPC access connector.
+
+### Enable Flow Logs
+
+Step 1: On the GCP Console, search for VPC, and select **VPC networks**.
+
+Step 2: Enter the network where the traffic is being directed. In this case, the network on which the Compute Engine instance running the NodeJS is hosted.
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/vpc/logging/enter-vpc-network.webp"
+        alt="Enter into VPC network"
+    />
+<figcaption>
+<i>
+Enter into VPC network
+</i>
+</figcaption>
+</figure>
+
+Step 3: Select the **Subnets** tab from the top, and enter into the subnet corresponding to the region whose flow logs you want to capture. In this case, it will be the region in which the Compute Engine instance running the NodeJS is hosted.
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/vpc/logging/navigate-to-subnets-tab.webp"
+        alt="Navigate to Subnets tab"
+    />
+<figcaption>
+<i>
+Navigate to Subnets tab
+</i>
+</figcaption>
+</figure>
+
+
+Step 4: Select **EDIT** on the top, and click on the `On` radio button under the **Flow logs**.
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/vpc/logging/turn-on-flow-logs.webp"
+        alt="Turn on Flow Logs"
+    />
+<figcaption>
+<i>
+Turn on Flow Logs
+</i>
+</figcaption>
+</figure>
+
+Step 5: Click on **SAVE**. The flow logs are now enabled for the network in the corresponding region.
 
 ### Create PubSub Topic
 
@@ -197,10 +292,10 @@ Follow the steps mentioned in the [Creating Pub/Sub Topic](/docs/gcp-monitoring/
 
 Follow the steps mentioned in the [Log Router Setup](/docs/gcp-monitoring/bootstrapping/log-router-setup) document to create the Log Router.
 
-To ensure you filter out only the Cloud SQL logs, use the following filter conditions:
+To ensure you filter out only the Compute Engine logs, use the following filter conditions:
 
 ```
-resource.type="cloudsql_database"
+resource.type="gce_subnetwork"
 ```
 
 ### Setup OTel Collector
@@ -296,9 +391,9 @@ If you want to see the output of the logs you’ve just set up for the backgroun
 tail -f -n 50 otelcol-output.log
 ```
 
-### Visualize the logs in SigNoz
+### Visualize the Logs obtained by OpenTelemetry in SigNoz
 
-This will generate the Cloud SQL logs which you can now see on SigNoz.
+You can now visualize the logs corresponding to the traffic being sent on this VPC network.
 
 </TabItem>
 </Tabs>
