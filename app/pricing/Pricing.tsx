@@ -608,7 +608,7 @@ const PricingPlans = () => {
                     <ul className="ul-no-padding">
                       <li className="mb-3 flex items-center gap-3">
                         {' '}
-                        <CircleCheckSolid /> SOC2 Type 1 Compliant
+                        <CircleCheckSolid /> SOC2 Type II Compliant
                       </li>
                       <li className="mb-6 flex items-center gap-3">
                         {' '}

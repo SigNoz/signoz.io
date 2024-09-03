@@ -31,6 +31,13 @@ type CardProps = {
 
 const cardDetails = [
   {
+    logo: "/img/case_study/thehindu-logo.png",
+    title: "How The Hindu uses SigNoz APM to Optimize Application Performance",
+    name: "Poonkuyilan V",
+    position: "IT Infrastructure Lead, The Hindu",
+    href: "/case-study/thehindu/"
+  },
+  {
     logo: "/img/case_study/logos/tableflow-logo.png",
     title: "How TableFlow Uses SigNoz to Improve Service Reliability and Resolve Issues Quickly",
     name: "Eric Ciminelli",
