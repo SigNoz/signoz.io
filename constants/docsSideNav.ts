@@ -1398,11 +1398,6 @@ const docsSideNav = [
             route: '/docs/gcp-monitoring/bootstrapping/gce-creation',
             label: 'Creating Compute Engine',
           },
-          {
-            type: 'doc',
-            route: '/docs/gcp-monitoring/bootstrapping/cloud-sql-creation',
-            label: 'Creating Cloud SQL',
-          },
         ],
       },
       {
@@ -1505,6 +1500,11 @@ const docsSideNav = [
         items: [
           {
             type: 'doc',
+            route: '/docs/gcp-monitoring/cloud-sql/cloud-sql-creation',
+            label: 'Creating Cloud SQL',
+          },
+          {
+            type: 'doc',
             route: '/docs/gcp-monitoring/cloud-sql/logging',
             label: 'Logging',
           },
@@ -1538,6 +1538,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/gcp-monitoring/vpc/vpc-connector-creation',
             label: 'Creating Serverless VPC Access Connector',
+          },
+          {
+            type: 'doc',
+            route: '/docs/gcp-monitoring/vpc/logging',
+            label: 'Logging',
           },
           {
             type: 'doc',
