@@ -99,13 +99,13 @@ export default function TopNav() {
             <Popover.Group className="hidden items-center gap-x-6 lg:flex">
               <div
                 onMouseEnter={() => setIsOpen(true)}
-                onMouseLeave={() => setIsOpen(false)}
                 >
                 <Dropdown
                   className='px-4'
                   placement='bottom-start'
                   classNames={{ base: "top-[9px]" }}
                   isOpen={isOpen}
+                  onMouseLeave={() => setIsOpen(false)}
                 >
                   <DropdownTrigger>
                     <Button
@@ -226,13 +226,13 @@ export default function TopNav() {
               </Link>
 
               <div
-                onMouseEnter={() => setIsOpenResources(true)}
-                onMouseLeave={() => setIsOpenResources(false)}>
+                onMouseEnter={() => setIsOpenResources(true)}>
                 <Dropdown
                   className='px-4'
                   placement='bottom-start'
                   classNames={{ base: "top-[6px]" }}
                   isOpen={isOpenResources}
+                  onMouseLeave={() => setIsOpenResources(false)}
                   >
                   <DropdownTrigger>
                     <Button
