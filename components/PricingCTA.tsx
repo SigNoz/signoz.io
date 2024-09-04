@@ -15,10 +15,10 @@ const PricingCTA: React.FC = () => {
             <h3 className="text-xl font-semibold mb-3">Why choose SigNoz?</h3>
             <ul className="space-y-2 pl-0">
               {[
-                'No user-based or host-based pricing',
-                'Transparent, predictable pricing',
-                'No hidden fees or surprises',
-                'Scale without breaking the bank'
+                'No user-based pricing',
+                'No host (container or nodes) based pricing',
+                'Simple usage-based pricing',
+                'No special pricing for custom metrics'
               ].map((item, index) => (
                 <li key={index} className="flex items-center">
                   <CheckCircle className="text-green-500 mr-2 flex-shrink-0" size={16} />
@@ -29,7 +29,7 @@ const PricingCTA: React.FC = () => {
             <p className="mt-0 text-gray-400 text-base">Just pay for what you use.</p>
           </div>
           
-          <div className="flex-1">
+          <div className="flex-1 hidden md:block">
             <div className="relative">
               <Image
                 src="/img/graphics/homepage/feature-graphic-data-protection-2.webp"
