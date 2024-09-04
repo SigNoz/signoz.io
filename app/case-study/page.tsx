@@ -31,6 +31,13 @@ type CardProps = {
 
 const cardDetails = [
   {
+    logo: "/img/case_study/thehindu-logo.png",
+    title: "How The Hindu uses SigNoz APM to Optimize Application Performance",
+    name: "Poonkuyilan V",
+    position: "IT Infrastructure Lead, The Hindu",
+    href: "/case-study/thehindu/"
+  },
+  {
     logo: "/img/case_study/logos/tableflow-logo.png",
     title: "How TableFlow Uses SigNoz to Improve Service Reliability and Resolve Issues Quickly",
     name: "Eric Ciminelli",
@@ -112,9 +119,9 @@ export default caseStudies;
 const CustomerCard: React.FC<CardProps> = ({ logo, title, name, position, href }) => {
   return (
     <Link href={href}>
-      <div className='p-12 bg-signoz_ink-400 border border-signoz_slate-400 rounded cursor-pointer hover:bg-signoz_ink-300 min-h-[19rem]'>
+      <div className='p-12 bg-signoz_ink-400 border border-signoz_slate-400 rounded cursor-pointer hover:bg-signoz_ink-300 min-h-[19rem] group'>
         <div className='flex flex-col gap-3'>
-        <div className='flex items-start h-12 mb-4'> {/* Set fixed height for logo area */}
+        <div className='flex items-start h-12 mb-4'>
             <img src={logo} className='object-contain max-h-10 max-w-32' />
           </div>
           <div className='text-base font-semibold'>{title}</div>
@@ -124,7 +131,7 @@ const CustomerCard: React.FC<CardProps> = ({ logo, title, name, position, href }
                 <div className='text-sm font-medium text-[#C0C1C3]'>{name}</div>
                 <div className='text-xs font-medium text-signoz_slate-50'>{position}</div>
               </div>
-              <div className='mt-auto flex justify-end'>
+              <div className='mt-auto flex justify-end transform transition-transform group-hover:translate-x-2'>
                 <ArrowRight size={14} className="text-signoz_robin-100" />
               </div>
             </div>
