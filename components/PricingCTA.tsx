@@ -6,7 +6,7 @@ import { ArrowRight, CheckCircle } from 'lucide-react'
 const PricingCTA: React.FC = () => {
   return (
     <div className="my-2 mx-auto max-w-3xl">
-      <div className="bg-gray-900 text-white rounded-lg shadow-lg overflow-hidden px-6 py-7">
+      <div className="bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 text-white rounded-lg shadow-lg overflow-hidden px-6 py-7">
         <h2 className="text-2xl font-bold my-0">Tired of Unpredictable Pricing with DataDog?</h2>
         <p className="text-base text-gray-400 mt-1 mb-4">SigNoz offers up to 9X ROI compared to DataDog</p>
         
@@ -54,7 +54,7 @@ const PricingCTA: React.FC = () => {
             style={{color: 'white'}}
             className="inline-flex items-center justify-center px-6 py-2 bg-blue-600 text-white text-base font-medium rounded-md hover:bg-blue-700 transition duration-150 ease-in-out no-underline"
           >
-            Calculate Your Savings Now <ArrowRight size={16} className="ml-2" />
+            Calculate Your Savings with SigNoz Now <ArrowRight size={16} className="ml-2" />
           </Link>
         </div>
       </div>
