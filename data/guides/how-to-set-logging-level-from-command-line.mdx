@@ -1,0 +1,579 @@
+---
+
+title: How to Set Logging Levels via Command Line in Python - A Quick Guide
+slug: how-to-set-logging-level-from-command-line
+date: 2024-09-04
+tags: [faq]
+authors: [sushant_gaurav]
+description: Learn how to set logging levels from the command line in Python. This guide covers basic to advanced techniques for flexible logging control.
+keywords: [python logging, command line logging, set log level, argparse, debugging, application monitoring]
+
+---
+
+Logging is a very important tool in software development as it helps you to gather critical insights related to an application's behaviour and also helps in efficient debugging. The `logging` module of Python provides a lot of robust features, you can also adjust the logging levels dynamically i.e. during runtime. This article will help to learn about how to set logging levels directly from the command line in Python and will help you in making your debugging and monitoring processes more efficient and flexible.
+
+## Understanding Python Logging Levels
+
+Python logging supports multiple levels of severity, such as `DEBUG`, `INFO`, `WARNING`, `ERROR`, and `CRITICAL`, allowing you to categorize and filter log messages effectively.
+
+1. DEBUG: It is used for detailed information for diagnosing problems. It is typically used for development and debugging.
+2. INFO: `INFO` is used for general information that confirms the program is working as expected.
+3. WARNING: It is used to indicate that something unexpected has occurred. `WARNING` is the default logging level.
+4. ERROR: When you need to log a serious issue that didn't stop the program but needs attention, you can use `ERROR`.
+5. CRITICAL: When you need to log a severe error indicating the program may not be able to continue running, you can use the `CRITICAL` level.
+
+To learn more about logging in Python, different levels of logging, etc. in more detail, you can refer to this article [Python Logging - From Setup to Monitoring with Best Practices](https://signoz.io/guides/logging-in-python/). You can also check out [Python Logging Best Practices - Expert Tips with Practical Examples](https://signoz.io/guides/python-logging-best-practices/).
+
+## Quick Guide: Setting Logging Level from the Command Line
+
+When you are running Python scripts, especially in development or production environments, you might want to dynamically control the logging level without modifying the script itself. This can be achieved by setting the logging level directly from the command line using Python's `argparse` module.
+
+```python
+import argparse
+import logging
+
+# Initialize the ArgumentParser object
+parser = argparse.ArgumentParser(description="Set the logging level via command line")
+
+# Add a command-line argument for the logging level
+parser.add_argument('--log', default='WARNING', help='Set the logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)')
+
+# Parse the command-line arguments
+args = parser.parse_args()
+
+# Configure the logging level based on the parsed argument
+logging.basicConfig(level=args.log.upper(), format='%(levelname)s: %(message)s')
+
+# Example logging statements
+logging.debug('This is a debug message')    # Will only be logged if level is DEBUG
+logging.info('This is an info message')     # Will only be logged if level is INFO or lower
+logging.warning('This is a warning message')# Will always be logged by default
+```
+
+Explanation:
+
+- ArgumentParser Object: It will handle the command-line arguments passed to the script.
+- Logging Argument: The `--log` flag accepts a logging level as input, it has a default value of `WARNING`.
+- Logging Configuration: The `logging.basicConfig()` function will set the logging level based on the user's input and it ensures that messages at that level or higher are logged.
+
+Sample Output:
+
+```
+WARNING: This is a warning message
+```
+
+If you run the script with the DEBUG level:
+
+```bash
+python your_script.py --log=DEBUG
+```
+
+<Figure src="/img/guides/2024/09/how-to-set-logging-level-from-command-line-image.webp" alt="Sample Terminal Output with command" caption="Sample Terminal Output with command" />
+
+You'll see the following output:
+
+```
+DEBUG: This is a debug message
+INFO: This is an info message
+WARNING: This is a warning message
+```
+
+In this way, you can easily control the verbosity of your application's logs without modifying the code.
+
+### Dealing with online notebooks
+
+When running the script in environments like Google Colab, additional arguments may be passed automatically, which can cause errors. To handle this, you can modify the script to ignore unrecognized arguments using the `parse_known_args()` method.
+
+Example:
+
+```python
+import argparse
+import logging
+
+# Initialize the ArgumentParser object
+parser = argparse.ArgumentParser(description="Set the logging level via command line")
+
+# Add a command-line argument for the logging level
+parser.add_argument('--log', default='WARNING', help='Set the logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)')
+
+# Parse the command-line arguments, ignoring unknown ones
+args, unknown = parser.parse_known_args()
+
+# Configure the logging level based on the parsed argument
+logging.basicConfig(level=args.log.upper(), format='%(levelname)s: %(message)s')
+
+# Example logging statements
+logging.debug('This is a debug message')    # Will only be logged if level is DEBUG
+logging.info('This is an info message')     # Will only be logged if level is INFO or lower
+logging.warning('This is a warning message')# Will always be logged by default
+```
+
+If you're running the script in Google Colab, you can execute it like this (on you can simply run by clicking `Shift` + `Enter` ):
+
+```python
+!python script_name.py --log=DEBUG
+```
+
+Sample Output:
+
+<Figure src="/img/guides/2024/09/how-to-set-logging-level-from-command-line-image%201.webp" alt="Sample Output with code on Google Collab" caption="Sample Output with code on Google Collab" />
+
+### Common Logging Level Arguments
+
+When you are configuring logging levels from the command line then you can use some of the most commonly used arguments to adjust the verbosity:
+
+- `-log=DEBUG` (or `l DEBUG`): It will set the logging level to `DEBUG`. It is the most verbose and it includes detailed diagnostic information.
+- `-verbose` (or `v`): It is often used to increase verbosity, typically setting the logging level to `INFO`.
+- `-quiet` (or `q`): It decreases verbosity, usually setting the logging level to `ERROR` or `CRITICAL`, suppressing less severe messages.
+
+These arguments help you to gain flexible control over the logging output. You can utilize them according to the needs during the execution of your Python script.
+
+Example 
+
+```python
+import argparse
+import logging
+
+# Function to parse command-line arguments
+def parse_args():
+    parser = argparse.ArgumentParser(description="A script demonstrating logging control.")
+
+    # Adding the --log argument to set a specific logging level
+    parser.add_argument('--log', '-l', default='WARNING', help='Set the logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)')
+
+    # Adding the --verbose argument to increase verbosity
+    parser.add_argument('--verbose', '-v', action='count', default=0, help='Increase verbosity level')
+
+    # Adding the --quiet argument to decrease verbosity
+    parser.add_argument('--quiet', '-q', action='store_true', help='Suppress non-error messages')
+
+    return parser.parse_args()
+
+# Function to configure logging based on parsed arguments
+def configure_logging(args):
+    if args.quiet:
+        log_level = logging.ERROR  # Set logging to only show errors and critical issues
+    elif args.verbose > 0:
+        # Increase verbosity based on how many times --verbose (-v) is used
+        log_level = max(logging.DEBUG, logging.WARNING - args.verbose * 10)
+    else:
+        log_level = getattr(logging, args.log.upper(), logging.WARNING)  # Set logging level based on --log argument
+
+    logging.basicConfig(level=log_level, format='%(levelname)s: %(message)s')
+
+# Main function
+def main():
+    args = parse_args()
+    configure_logging(args)
+
+    # Example log messages at different levels
+    logging.debug("This is a debug message")
+    logging.info("This is an info message")
+    logging.warning("This is a warning message")
+    logging.error("This is an error message")
+    logging.critical("This is a critical message")
+
+if __name__ == "__main__":
+    main()
+```
+
+Running the Script
+
+1. Default Behavior (No Arguments)
+    - Command: `python file_name.py`
+    - Output:
+        
+        ```
+        WARNING: This is a warning message
+        ERROR: This is an error message
+        CRITICAL: This is a critical message
+        ```
+        
+2. Using `-log=DEBUG` or `l DEBUG`
+    - Command: `python file_name.py --log=DEBUG`
+    - Output:
+        
+        ```
+        DEBUG: This is a debug message
+        INFO: This is an info message
+        WARNING: This is a warning message
+        ERROR: This is an error message
+        CRITICAL: This is a critical message
+        ```
+        
+3. Using `-verbose` or `v`
+    - Command: `python file_name.py --verbose`
+    - Output:
+        
+        ```
+        INFO: This is an info message
+        WARNING: This is a warning message
+        ERROR: This is an error message
+        CRITICAL: This is a critical message
+        ```
+        
+    - Command: `python logging_example.py -vv` (Using `v` twice)
+    - Output:
+        
+        ```
+        DEBUG: This is a debug message
+        INFO: This is an info message
+        WARNING: This is a warning message
+        ERROR: This is an error message
+        CRITICAL: This is a critical message
+        ```
+        
+4. Using `-quiet` or `q`
+    - Command: `python logging_example.py --quiet`
+    - Output:
+        
+        ```
+        ERROR: This is an error message
+        CRITICAL: This is a critical message
+        ```
+        
+
+Explanation:
+
+- `-log=DEBUG` (or `l DEBUG`): Sets the logging level to `DEBUG`, displaying all messages including detailed diagnostic information.
+- `-verbose` (or `v`): Increases verbosity by lowering the logging level to `INFO` or `DEBUG`, depending on how many times it's used.
+- `-quiet` (or `q`): Decreases verbosity by setting the logging level to `ERROR`, suppressing all but the most severe messages.
+
+## Implementing Logging Level Control in Your Python Script
+
+Now if you want to implement logging level control with the command-line arguments, you should follow these steps:
+
+### 1. Import Necessary Modules
+
+You can begin by importing the required modules - `argparse` and `logging` modules. These modules are needed for parsing command-line arguments and configuring the logging level:
+
+```python
+import argparse
+import logging
+```
+
+### 2. Create an ArgumentParser Object and Add the Logging Level Argument
+
+After importing the libraries and modules, you need to create an `ArgumentParser` object to handle the command-line arguments. Then you should add an argument for the logging level (with a default value of `WARNING`):
+
+```python
+# Initialize ArgumentParser to handle command-line inputs
+parser = argparse.ArgumentParser(description="Control logging levels from the command line")
+
+# Add an argument for logging level with a default of WARNING
+parser.add_argument('--log', default='WARNING', help='Set the logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)')
+```
+
+### 3. Parse Arguments and Set the Log Level
+
+After importing and defining the argument, you need to parse the input from the command line and configure the logging level according to the arguments passed. The `logging.basicConfig()` function helps you to apply the chosen log level:
+
+```python
+# Parse the command-line arguments
+args = parser.parse_args()
+
+# Set the logging level based on the command-line input
+logging.basicConfig(level=args.log.upper(), format='%(levelname)s: %(message)s')
+
+# Example log statements to demonstrate the effect of different log levels
+logging.debug('This is a debug message')    # Visible if log level is DEBUG
+logging.info('This is an info message')     # Visible if log level is INFO or lower
+logging.warning('This is a warning message')# Visible at all levels by default
+logging.error('This is an error message')   # Visible at ERROR level or higher
+logging.critical('This is a critical message') # Visible at CRITICAL level
+```
+
+Explanation:
+
+- `argparse.ArgumentParser()`: It creates an object that can parse command-line arguments.
+- `parser.add_argument('--log', ...)`: It adds a command-line argument `-log` to set the logging level, with a default value of `WARNING`.
+- `logging.basicConfig(...)`: It configures the logging system with the specified log level and a simple message format.
+
+Sample Output:
+
+```python
+WARNING: This is a warning message
+ERROR: This is an error message
+CRITICAL: This is a critical message
+```
+
+Running the script with different log levels:
+
+DEBUG Command:
+
+```bash
+python your_script.py --log=DEBUG
+```
+
+DEBUG Output:
+
+```
+DEBUG: This is a debug message
+INFO: This is an info message
+WARNING: This is a warning message
+ERROR: This is an error message
+CRITICAL: This is a critical message
+```
+
+ERROR Command:
+
+```bash
+python your_script.py --log=ERROR
+```
+
+ERROR Output:
+
+```
+ERROR: This is an error message
+CRITICAL: This is a critical message
+```
+
+### Best Practices for Command-Line Logging Control
+
+When you are implementing command-line logging control, you must follow the best practices to ensure that your script is robust, user-friendly, and adaptable. Let us look at some key practices to take care of while using the command line:
+
+- Use Default Values: You should set a sensible default logging level, such as `WARNING`, which is used to prevent overly verbose logs.
+- Clear Help Messages: You should provide helpful descriptions for logging-related arguments to guide other users.
+- Gracefully Handle Invalid Inputs: You should ensure that your script can handle invalid log-level inputs without crashing.
+- Combine with Other Options: You should integrate logging arguments with other command-line options for a better user experience.
+
+Let’s take an example to see how to incorporate these practices into your Python script:
+
+```python
+import argparse
+import logging
+
+# Function to validate and return the log level
+def valid_log_level(level):
+    try:
+        return logging.getLevelName(level.upper())
+    except ValueError:
+        raise argparse.ArgumentTypeError(f"Invalid log level: {level}")
+
+# Initialize ArgumentParser
+parser = argparse.ArgumentParser(description='Your script description')
+
+# Add logging-related arguments
+parser.add_argument('--log', type=valid_log_level, default='WARNING',
+                    help='Set the logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)')
+parser.add_argument('--verbose', '-v', action='count', default=0,
+                    help='Increase verbosity (can be used multiple times)')
+parser.add_argument('--quiet', '-q', action='store_true',
+                    help='Suppress all output except errors')
+
+# Parse arguments
+args = parser.parse_args()
+
+# Determine logging level based on parsed arguments
+if args.quiet:
+    log_level = logging.ERROR
+elif args.verbose:
+    log_level = max(logging.DEBUG, logging.WARNING - args.verbose * 10)
+else:
+    log_level = args.log
+
+# Configure logging
+logging.basicConfig(level=log_level, format='%(levelname)s: %(message)s')
+
+# Your application code here
+```
+
+Explanation:
+
+- `valid_log_level` Function: It validates and normalizes the log-level input to ensure that it matches one of the predefined levels.
+- Command-Line Arguments: The `-log` flag sets the logging level. `-verbose` increases verbosity, and `-quiet` suppresses non-error output.
+- Dynamic Log Level Adjustment: The script dynamically adjusts the logging level based on user input, offering a flexible and intuitive logging experience.
+
+### Example Usage:
+
+- Increase Verbosity:  In command-line applications, verbosity refers to the amount of information the script outputs during execution. By default, scripts may only show warnings and errors, but you can increase the amount of information (i.e., increase verbosity) by using the `-v` option. When you use the `-v` flag with your command, it typically increases the level of detail in the logs. The more times you use `-v`, the more verbose the output becomes, moving from less detailed logs (e.g., only showing warnings) to more detailed logs (e.g., including debug information).
+
+```bash
+python your_script.py -v -v
+```
+
+- Suppress Output: If you want to suppress all output except errors, you can do so with the help of the `q` flag:
+    
+    ```bash
+    python your_script.py -q
+    ```
+    
+
+## Advanced Techniques for Flexible Logging Control
+
+As your application expands, you may require more advanced logging control and configurations to efficiently manage log files. You can consider these advanced techniques to enhance flexibility and customization:
+
+### 1. Using Environment Variables with Command-Line Arguments
+
+You can combine environment variables with command-line arguments to provide default logging levels that can be overridden by the user:
+
+```python
+import os
+
+# Set log level from environment variable or fallback to default
+log_level = os.environ.get('LOG_LEVEL', 'WARNING')
+parser.add_argument('--log', default=log_level, help='Set the logging level')
+```
+
+### 2. Implementing Log Level Aliases
+
+You can also create shortcuts or aliases for logging levels to simplify command-line usage:
+
+```python
+def parse_log_level(level):
+    aliases = {'d': 'DEBUG', 'i': 'INFO', 'w': 'WARNING', 'e': 'ERROR', 'c': 'CRITICAL'}
+    return aliases.get(level.lower(), level.upper())
+
+# Add argument with aliases
+parser.add_argument('--log', type=parse_log_level, default='WARNING', help='Set the logging level')
+```
+
+### 3. Creating Custom Log Levels
+
+Python's logging module comes with five predefined log levels: `DEBUG` (10), `INFO` (20), `WARNING` (30), `ERROR` (40), and `CRITICAL` (50). The numeric values associated with these log levels determine their severity, with lower numbers representing more detailed information. You can define custom log levels depending on the specific needs, such as a `VERBOSE` level between `DEBUG` and `INFO`:
+
+```python
+# Add a custom logging level
+logging.addLevelName(15, 'VERBOSE')
+# 15 is chosen as it fits between 10 and 20
+logging.VERBOSE = 15
+logging.verbose = lambda msg, *args, kwargs: logging.log(logging.VERBOSE, msg, *args, kwargs)
+
+# Example usage
+logging.verbose('This is a verbose message')
+```
+
+Here, the number `15` is given because it logically fits between the standard levels of `DEBUG` (10) and `INFO` (20). This placement allows `VERBOSE` messages to be displayed when the log level is set to `VERBOSE` or lower, without overwhelming the output with `DEBUG`-level details.
+
+### 4. Applying Different Log Levels to Different Modules
+
+You can also configure different logging levels for various parts of your application for more granular level-control:
+
+```python
+# Set root logger level
+root_logger = logging.getLogger()
+root_logger.setLevel(args.log)
+
+# Set a specific logging level for a module
+module_logger = logging.getLogger('my_module')
+module_logger.setLevel(logging.DEBUG)
+```
+
+## Debugging with Dynamic Log Levels
+
+You can change the log level of your script during run time (dynamically changing log levels). It is a very powerful tool for debugging and you can implement this feature to adjust the verbosity of your logs based on specific conditions. Let’s take an example for more clarity.
+
+```python
+import logging
+
+def change_log_level(new_level):
+    # Dynamically change the log level
+    logging.getLogger().setLevel(new_level)
+
+# Initial log level
+logging.info("This won't be displayed initially")
+
+# Change log level during runtime
+change_log_level(logging.DEBUG)
+logging.debug("This will be displayed after changing the log level")
+```
+
+### Tips for Effective Debugging:
+
+- Strategic Logging: You should use different log levels strategically to isolate issues in specific parts of your code.
+- Performance Considerations: You need to be mindful of performance—excessive logging, especially at lower levels like `DEBUG`, can slow down your application.
+- Security: You should always avoid logging sensitive information, particularly at verbose levels, as it will help you to protect user data.
+
+## Integrating Logging with Application Monitoring
+
+In distributed systems or complex applications, centralized logging is very important. It helps in effective monitoring and troubleshooting. You can use tools like SigNoz which is an open-source application performance monitoring (APM) platform, SigNoz offers robust log management and analysis capabilities which makes it easier to monitor your application's health and performance in real-time.
+
+SigNoz provides a holistic view of your application's performance by correlating logs, traces, and analytics.
+
+1. Set Up Alerts Based on Log Patterns: Configure alerts to be triggered by certain log patterns or thresholds.
+2. Use Effective Querying Capabilities: Use SigNoz's query language to filter, search, and analyze logs effectively.
+
+<GetStartedSigNoz />
+
+<Figure src="/img/guides/2024/09/how-to-set-logging-level-from-command-line-image%202.webp" alt="" caption="" />### Benefits of Using SigNoz with Dynamic Log Levels
+
+Let’s look at the several benefits of integrating SigNoz with your Python application:
+
+- Centralized Log Storage and Analysis: SigNoz provides a centralized platform for storing and analyzing logs which makes it easier to manage and review logs from multiple services.
+- Real-Time Log Streaming and Alerting: You can stream your logs in real-time with SigNoz. You can also set up alerts based on specific log patterns or thresholds. It allows you to respond quickly to potential issues.
+- Correlation of Logs with Traces and Metrics: SigNoz enables you to correlate logs with traces and metrics and provides a comprehensive view of your application's performance and behaviour.
+- Advanced Querying and Visualization: The SigNoz platform offers powerful querying capabilities and visualization tools which makes it easier to explore and analyze logs to identify trends, bottlenecks, and errors.
+
+For detailed implementation steps, refer to SigNoz's guide on logging in Python with OpenTelemetry [here](https://signoz.io/opentelemetry/logging-in-python/). This guide will provide specific instructions tailored to integrate Python logging with SigNoz's observability platform using OpenTelemetry.
+
+Now, if you want to learn more about the integration of SigNoz in your application in detail, you can check out the articles of our platform:
+
+- [Python Performance Monitoring - Implementation, Tools and Best Practices](https://signoz.io/guides/python-performance-monitoring/)
+- [Monitor your Python application with OpenTelemetry and SigNoz](https://signoz.io/opentelemetry/python/)
+- [Monitor your Python application with full stack open source APM tool - SigNoz](https://signoz.io/blog/python-application-monitoring/)
+
+## Key Takeaways
+
+- You should set up the logging levels via the command line to gain greater flexibility in debugging and monitoring your application.
+- You can use the `argparse` module to simplify the process of implementing command-line logging controls, making your script more user-friendly and versatile.
+- You should follow the best practices like using default values, providing clear help messages, and handling invalid inputs to ensure that your logging system is robust and reliable.
+- You should use techniques like using environment variables, log level aliases, and custom log levels to allow for more granular and flexible logging control.
+- Integrate your application with APM tools like SigNoz to improve your application's observability. SigNoz offers centralized log management, real-time alerts, and powerful analysis capabilities.
+
+## FAQs
+
+### How do I set a default logging level in my Python script?
+
+If you want to set a default logging level, you can use the `logging.basicConfig()` function at the start of your script. The `logging.basicConfig()` function configures the root logger and ensures that all log messages at or above the specified level are captured.
+
+```python
+import logging
+
+logging.basicConfig(level=logging.WARNING)
+```
+
+### Can I change the logging level while my Python program is running?
+
+Yes, you can dynamically change the logging level at runtime using the `setLevel()` method on a logger. Changing the logging level during run time allows you to adjust the verbosity of your logs without restarting your application.
+
+```python
+import logging
+
+logging.getLogger().setLevel(logging.DEBUG)
+```
+
+### What's the difference between using `argparse` and `sys.argv` for logging arguments?
+
+You can use both the `argparse` and `sys.argv` to handle command-line arguments, The `argparse` offers significant advantages. It provides features like a robust and user-friendly interface, automatic help message generation, type conversion handling, and input validation. You should prefer using the `argparse` in your application to utilize these benefits.
+
+```python
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--log', default='WARNING', help='Set the logging level')
+args = parser.parse_args()
+```
+
+### How can I set different logging levels for different modules in my application?
+
+You can create separate loggers for each module in your application and set their logging levels independently. Using a separate logger allows you to control the verbosity of logs on a per-module basis, which is especially useful in larger applications.
+
+```python
+import logging
+
+# Logger for module1
+logger1 = logging.getLogger('module1')
+logger1.setLevel(logging.INFO)
+
+# Logger for module2
+logger2 = logging.getLogger('module2')
+logger2.setLevel(logging.DEBUG)
+```
+
+In this example, `module1` will log messages at the `INFO` level and above, while `module2` will log more detailed messages at the `DEBUG` level and above.
+
+## Resources
+
+- <a href="https://docs.python.org/3/library/logging.html" rel="noopener noreferrer nofollow" target="_blank">Python Official Logging Documentation</a>
+- [Python Logging - From Setup to Monitoring with Best Practices](https://signoz.io/guides/logging-in-python/)
+- [SigNoz Python Application Monitoring Guide](https://signoz.io/blog/python-application-monitoring/)
