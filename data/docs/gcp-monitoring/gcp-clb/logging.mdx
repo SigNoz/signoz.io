@@ -32,75 +32,13 @@ Here's a quick summary of what we will be doing in this guide
 
 ### Create a Pub/Sub topic
 
-Follow these steps to create the Pub/Sub topic:
-
-**Step 1:** Go to your GCP console and search for Pub/Sub, go to Pub/Sub, and click on CREATE TOPIC.
-
-<figure data-zoomable align="center">
-    <img
-        src="/img/docs/gcp-monitoring/clb-logs/search.webp"
-        alt="Search for Pub/Sub"
-    />
-<figcaption>
-<i>
-Search for Pub/Sub in GCP
-</i>
-</figcaption>
-</figure>
-
-**Step 2:** Create the Pub/Sub topic
-
-<figure data-zoomable align="center">
-    <img
-        src="/img/docs/gcp-monitoring/clb-logs/create-topic.webp"
-        alt="Create Pub/Sub Topic"
-    />
-<figcaption>
-<i>
-Create Pub/Sub Topic
-</i>
-</figcaption>
-</figure>
-
-Provide an appropriate Pub/Sub topic ID. Select `Add a default subscription` checkbox. Under Encryption, let the default selection of `Google-managed encryption key` as it is. Click on `CREATE`.
-
-**Step 3:** Ensure the Pub/Sub topic and its subscription is created.
-
-Once you click the `Create` button in **Step 2**, you will land on the newly created Pub/Sub topic's page. Ensure that the default subscription is made as well. The subscription will be of the form `<topic-name>-sub`.
-
-<figure data-zoomable align="center">
-    <img
-        src="/img/docs/gcp-monitoring/clb-logs/topic-and-subscription.webp"
-        alt="Create Pub/Sub Topic"
-    />
-<figcaption>
-<i>
-Pub/Sub Topic and subscription
-</i>
-</figcaption>
-</figure>
+Follow the steps mentioned in the [Creating Pub/Sub Topic](https://signoz.io/docs/gcp-monitoring/bootstrapping/pubsub-topic-creation/) document to create the Pub/Sub topic.
 
 ### Create Log Router to Pub/Sub Topic
 
-The GCP Log Router processes and routes logs within Google Cloud. It uses sinks to filter and direct logs to destinations like Cloud Storage, Pub/Sub, and BigQuery based on user-defined rules. This allows for efficient log management, storage, and analysis.
+Follow the steps mentioned in the [Log Router Setup](https://signoz.io/docs/gcp-monitoring/bootstrapping/log-router-setup/) document to create the Log Router.
 
-Follow these steps to create the Log Router to the newly created Pub/Sub topic:
-
-**Step 1:** On the GCP console, search for Logs and go to _Logs Explorer_. Select an appropriate relative time. After selection, you should start looking at the recent logs.
-
-**Step 2:** To ensure you see only Load Balancer logs, add the following query in the _Query_ textbox:
-
-<figure data-zoomable align="center">
-    <img
-        src="/img/docs/gcp-monitoring/clb-logs/log-explorer.webp"
-        alt="GCP Log Explorer"
-    />
-<figcaption>
-<i>
-GCP Log Explorer
-</i>
-</figcaption>
-</figure>
+To ensure you filter out only the Load Balancer logs, use the following filter conditions:
 
 ```sh
 resource.type="Application Load Balancer"
@@ -112,56 +50,6 @@ In case you want the logs only from a particular Load Balancer, you can add the 
 resource.type="load balancer"
 resource.labels.service_name="<FORWARDING RULE NAME>"
 ```
-
-**Step 3:** With the log filters in place, click on the _More actions_ dropdown below the _Query_ text box, and select the _Create sink_ option from the dropdown.
-
-<figure data-zoomable align="center">
-    <img
-        src="/img/docs/gcp-monitoring/clb-logs/create-sink.webp"
-        alt="Create Sink button"
-    />
-<figcaption>
-<i>
-Create Sink
-</i>
-</figcaption>
-</figure>
-
-**Step 4:** Provide the appropriate sink name and description, and click Next.
-
-**Step 5:** In the "Sink destination" section, select Cloud Pub/Sub topic from the "_Select sink service_" dropdown, and in the "_Select a Cloud Pub/Sub topic_" dropdown, select the Pub/Sub topic that we had created in the earlier section. Click on _Next_.
-
-<figure data-zoomable align="center">
-    <img
-        src="/img/docs/gcp-monitoring/clb-logs/sink-details.webp"
-        alt="Sink details"
-    />
-<figcaption>
-<i>
-Add Sink details
-</i>
-</figcaption>
-</figure>
-
-**Step 6:** In the "_Choose logs to include in the sink_" section, ensure an appropriate log filtering query is present. Click on _Next_.
-
-<figure data-zoomable align="center">
-    <img
-        src="/img/docs/gcp-monitoring/clb-logs/include-logs.webp"
-        alt="Choose Logs to include in the sink"
-    />
-<figcaption>
-<i>
-Choose Logs to include in the sink
-</i>
-</figcaption>
-</figure>
-
-**Step 7:** We need not make any change in the Choose logs to filter out of the sink section, and click on Create sink at the bottom.
-
-**Step 8:** With this, the log router sink will be created. You will get the message Your log sink was successfully created. Data should be available on the page soon.
-
-You can also go to this sink at a later point of time by navigating to the Log router from the left navigation menu in the GCP Logging service.
 
 ### Provide permissions to Log Router Sink
 
