@@ -237,84 +237,22 @@ By following this guide, you should be able to easily send the logs from your Go
 
 ## Prerequisites
 
-1. Google Cloud account with administrative privilege or load balancer Admin privilege.
+1. [Google Cloud account](https://console.cloud.google.com/) with administrative privilege or load balancer Admin privilege.
 2. Cloud Load Balancer (logging should be enabled)
-3. [Self-Hosted SigNoz](https://signoz.io/docs/install/docker/) & [opentelemetry-collector-contrib](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/)
-4. Access to a project in GCP
-5. Google Cloud Load Balancer APIs enabled
+3. [Self-Hosted SigNoz](https://signoz.io/docs/install/docker/)
+5. [Google Cloud Monitoring API](https://console.cloud.google.com/apis/api/monitoring.googleapis.com) enabled
 
 ## Setup
 
 ### Create a Pub/Sub topic
 
-Follow these steps to create the Pub/Sub topic:
-
-**Step 1:** Go to your GCP console and search for Pub/Sub, go to Pub/Sub, and click on _CREATE TOPIC_.
-
-
-<figure data-zoomable align="center">
-    <img
-        src="/img/docs/gcp-monitoring/clb-logs/search.webp"
-        alt="Search for Pub/Sub"
-    />
-<figcaption>
-<i>
-Search for Pub/Sub in GCP
-</i>
-</figcaption>
-</figure>
-
-**Step 2:** Create the Pub/Sub topic
-
-<figure data-zoomable align="center">
-    <img
-        src="/img/docs/gcp-monitoring/clb-logs/create-topic.webp"
-        alt="Create Pub/Sub Topic"
-    />
-<figcaption>
-<i>
-Create Pub/Sub Topic
-</i>
-</figcaption>
-</figure>
-
-Provide an appropriate Pub/Sub topic ID. Select `Add a default subscription` checkbox. Under _Encryption_, let the default selection of `Google-managed encryption key` as it is. Click on _CREATE_.
-
-**Step 3:** Ensure the Pub/Sub topic and its subscription is created.
-
-Once you click on the `Create` button in Step 2, you will land on the newly created Pub/Sub topic page. Ensure that the default subscription is created as well. The subscription will be of the form `<topic-name>-sub`.
-
-<figure data-zoomable align="center">
-    <img
-        src="/img/docs/gcp-monitoring/clb-logs/topic-and-subscription.webp"
-        alt="Create Pub/Sub Topic"
-    />
-<figcaption>
-<i>
-Pub/Sub Topic and subscription
-</i>
-</figcaption>
-</figure>
+Follow the steps mentioned in the [Creating Pub/Sub Topic](https://signoz.io/docs/gcp-monitoring/bootstrapping/pubsub-topic-creation/) document to create the Pub/Sub topic.
 
 ### Create Log Router to Pub/Sub Topic
 
-Follow these steps to create the Log Router to the newly created Pub/Sub topic:
+Follow the steps mentioned in the [Log Router Setup](https://signoz.io/docs/gcp-monitoring/bootstrapping/log-router-setup/) document to create the Log Router.
 
-**Step 1:** On the GCP console, search for Logs and go to _Logs Explorer_. Select an appropriate relative time. You will start seeing the recent logs.
-
-**Step 2:** To ensure you see only Load Balancer logs, add the following query in the _Query_ textbox:
-
-<figure data-zoomable align="center">
-    <img
-        src="/img/docs/gcp-monitoring/clb-logs/log-explorer.webp"
-        alt="GCP Log Explorer"
-    />
-<figcaption>
-<i>
-GCP Log Explorer
-</i>
-</figcaption>
-</figure>
+To ensure you filter out only the Load Balancer logs, use the following filter conditions:
 
 ```sh
 resource.type="Application Load Balancer"
@@ -326,57 +264,6 @@ In case you want the logs only from a particular Load Balancer, you can add the 
 resource.type="load balancer"
 resource.labels.service_name="<FORWARDING RULE NAME>"
 ```
-
-**Step 3:** With the log filters in place, click on the _More actions_ dropdown below the _Query_ text box, and select the _Create sink_ option from the dropdown.
-
-<figure data-zoomable align="center">
-    <img
-        src="/img/docs/gcp-monitoring/clb-logs/create-sink.webp"
-        alt="Create Sink button"
-    />
-<figcaption>
-<i>
-Create Sink
-</i>
-</figcaption>
-</figure>
-
-
-**Step 4:** Provide the appropriate sink name and description, and click Next.
-
-**Step 5:** In the "_Sink destination_" section, select _Cloud Pub/Sub topic_ from the "_Select sink service_" dropdown, and in the "_Select a Cloud Pub/Sub topic_" dropdown, select the Pub/Sub topic that we had created in the earlier section. Click on _Next_.
-
-<figure data-zoomable align="center">
-    <img
-        src="/img/docs/gcp-monitoring/clb-logs/sink-details.webp"
-        alt="Sink details"
-    />
-<figcaption>
-<i>
-Add Sink details
-</i>
-</figcaption>
-</figure>
-
-**Step 6:** In the "_Choose logs to include in the sink_" section, ensure an appropriate log filtering query is present. Click on _Next_.
-
-<figure data-zoomable align="center">
-    <img
-        src="/img/docs/gcp-monitoring/clb-logs/include-logs.webp"
-        alt="Choose Logs to include in the sink"
-    />
-<figcaption>
-<i>
-Choose Logs to include in the sink
-</i>
-</figcaption>
-</figure>
-
-**Step 7:** We need not make any change in the Choose logs to filter out of the sink section, and click on _Create sink_ at the bottom.
-
-**Step 8:** With this, the log router sink will be created. You will get the message Your log sink was successfully created. Data should be available soon on the page.
-
-You can also go to this sink at a later point of time by navigating to the Log router from the left navigation menu in the GCP Logging service.
 
 ### Provide permissions to Log Router Sink
 
@@ -442,12 +329,37 @@ Verify log router getting volume upon any trigger of CLB.
 After the log router configuration and permission, let’s configure the OTel collector to receive these logs.
 
 ### OTel Collector Configuration
+Follow the steps mentioned in the [Creating Compute Engine](/docs/gcp-monitoring/bootstrapping/gce-creation) document to create the Compute Engine instance. 
 
-**Step 1: **Install SigNoz Using Docker Compose
+#### Install OTel Collector as agent
 
-**Step 2:** We will use _otel-collector-contrib_ to pull logs from gcp using googlecloudpubsubrecevier.
+Firstly, we will establish the authentication using the following commands:
 
-**Step 3:** Install [otel-collector-contrib](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) on the same host.
+1. Initialize `gcloud`:
+
+```
+gcloud init
+```
+
+2. Authenticate into GCP:
+
+```
+gcloud auth application-default login
+```
+
+Let us now proceed to the OTel Collector installation:
+
+**Step 1:** Download otel-collector tar.gz for your architecture
+
+```bash
+wget https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.88.0/otelcol-contrib_0.88.0_linux_amd64.tar.gz
+```
+
+**Step 2:** Extract otel-collector tar.gz to the otelcol-contrib folder
+
+```bash
+mkdir otelcol-contrib && tar xvzf otelcol-contrib_0.88.0_linux_amd64.tar.gz -C otelcol-contrib
+```
 
 **Step 4:** Replace _otel-collector-contrib’s_ default configuration with the following config in  `/etc/otelcol-contrib/config.yaml`.
 
@@ -455,7 +367,7 @@ After the log router configuration and permission, let’s configure the OTel co
 receivers:
   googlecloudpubsub/logs:
     project: omni-new
-    subscription: projects/omni-new/subscriptions/lb-logs-signoz-sub-new-9-aug
+    subscription: projects/<your-project-id>/subscriptions/<name-of-the-pub-sub-subscription>
     encoding: cloud_logging # Make sure to use cloud_logging for logs
 exporters:
   logging:
