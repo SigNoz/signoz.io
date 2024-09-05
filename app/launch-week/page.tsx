@@ -40,7 +40,7 @@ const MainSection: React.FC = () => {
             <div className="flex max-w-full flex-col mt-10">
               <div className='flex flex-col sm:flex-row justify-between gap-6'>
               <div className="text-xl pl-2 max-w-full font-mono text-signoz_vanilla-400 max-md:max-w-full">
-                // Sept 16 ⎯ 20
+                {`// Sept 16 ⎯ 20`}
               </div>
               <div className='flex flex-row items-center gap-4'>
               <div className='inline-block w-3 h-3 bg-signoz_cherry-500 rounded-sm'/>
