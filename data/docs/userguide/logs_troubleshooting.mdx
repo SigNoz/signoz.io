@@ -7,6 +7,30 @@ description: Instructions that should resolve most issues with logs
 
 This troubleshooting guide includes step-by-step instructions that should resolve most issues with logs.
 
+## v0.53.0: Docker: Schema Migrator: Dirty database version
+If you are migrating from older version of SigNoz to `V0.53.0`,  you might encounter issue with `signoz-schema-migrator` where it fails to run in Docker deployments.
+```
+clickhouse migrate failed to run, error: Dirty database version 14. Fix and force version.
+```
+
+Here are the steps on how to resolve it.
+* Check if these [change](https://github.com/SigNoz/signoz/pull/5760/files#diff-2de5366e6dceb05f9da1a69de2e241edd4b744f62617de4c1a8a3be6205becf5L653) is present,
+i.e macro is uncommented in the `clickhouse-config.xml` file.
+```
+ <macros>
+    <shard>01</shard>
+    <replica>example01-01-1</replica>
+</macros>
+```
+* Make sure clickhouse has restarted after the above change, you can restart it by running `docker container restart signoz-clickhouse`.
+If you try to run `./install.sh` or `docker compose up -d` the migrator will fail again but it's fine, we will fix it in the next step.
+* Exec into the clickhouse container `docker exec -it signoz-clickhouse /bin/bash`
+* Run the client `clickhouse client`
+* Delete the migration entry by running this SQL command `delete from signoz_logs.schema_migrations where version=14;`
+* Now you can run `./install.sh` or `docker compose up -d`, and the migrator will run successfully.
+
+If you face any issue please reach out to us on [slack](https://signoz.io/slack).
+
 ## Schema Migrator: Dirty database version
 
 If you are migrating from older version of SigNoz to `V0.49.1` or `V0.50.0`, you might encounter issue with `signoz-schema-migrator` where it fails to run
