@@ -19,8 +19,8 @@ const Banner = () => {
     return (
         <div className="w-full bg-indigo-500 flex items-center justify-center py-2">
             <div className="w-full flex justify-between items-center px-4 md:justify-center">
-                <Link href="https://lu.ma/1z2jr0yy" className="text-base font-medium text-white leading-5">
-                    Join our next community call on 11th September 🚀
+                <Link href="/launch-week/" className="text-base font-medium text-white leading-5">
+                    Join us for a week of exciting new features - SigNoz Launch Week 2.0 🚀
                 </Link>
                 <button className="text-white md:absolute md:right-4" onClick={() => setVisible(false)}>
                     <X size={16} />
