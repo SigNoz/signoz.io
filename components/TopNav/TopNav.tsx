@@ -110,7 +110,7 @@ export default function TopNav() {
                 >
                   <DropdownTrigger>
                     <Button
-                      className="truncate px-1.5 py-1 text-sm font-light hover:text-signoz_robin-500 "
+                      className="truncate px-1.5 py-1 text-sm font-extralight hover:text-signoz_robin-500 "
                       onMouseEnter={() => setIsOpen(true)}
                     >
                       <div className='flex items-center'>
@@ -238,7 +238,7 @@ export default function TopNav() {
                   >
                   <DropdownTrigger>
                     <Button
-                      className="truncate px-1.5 py-1 text-sm !font-normal leading-7 text-signoz_vanilla-100 hover:text-signoz_robin-500"
+                      className="truncate px-1.5 py-1 text-sm !font-extralight leading-7 text-signoz_vanilla-100 hover:text-signoz_robin-500"
                       onMouseEnter={() => setIsOpenResources(true)}
                     >
                       <div className='flex items-center'>
