@@ -1,0 +1,646 @@
+---
+
+title: Python Logging - How to Insert Newlines Correctly
+slug: how-to-insert-newline-in-python-logging
+date: 2024-09-06
+tags: [faq]
+authors: [soumya_gupta]
+description: Learn how to insert newlines in Python logging correctly. Improve log readability, avoid common pitfalls, and explore advanced techniques for effective logging.
+keywords: [Python logging, newline insertion, log formatting, log readability, Python newline, logging best practices]
+
+---
+
+Python's logging module is a powerful tool for tracking events and debugging applications. However, formatting logs for optimal readability often requires inserting newlines — a task that can be trickier than it appears. This guide explores various methods to insert newlines in Python logging, from basic techniques to advanced strategies. You'll learn how to enhance log clarity, avoid common pitfalls, and leverage modern logging solutions for improved efficiency.
+
+## Understanding Python Logging and Newlines
+
+Python's logging module provides a flexible framework for generating log messages from your applications. It allows you to output log messages to various destinations, including console, files, and even remote servers. Newlines play a crucial role in log formatting, separating distinct pieces of information and improving overall readability.
+
+A newline, represented by `\n` in Python, is a special character that indicates the end of a line. In logging, newlines help structure log messages, especially when dealing with multi-line entries or when you need to separate different components of a log record.
+
+Common challenges when inserting newlines in log messages include:
+
+1. Inconsistent formatting across different handlers: When you use multiple logging handlers, like a `StreamHandler` for console output and a `FileHandler` for file logging, adding newlines in your log messages can sometimes mess with the formatting across these handlers. Because each handler might process the log data differently, you could end up with inconsistent appearances between what you see in the console and what’s written to the log file. For Example:
+    
+    Output in the Console (`StreamHandler`)
+    
+    ```powershell
+    2024-08-29 12:18:32,320 - multiHandlerLogger - WARNING - This is a warning message.
+    Details: Unable to connect to the server.
+    ```
+    
+    Output in the Log File (`FileHandler`)
+    
+    ```powershell
+    2024-08-29 12:18:32,320 - multiHandlerLogger - WARNING - This is a warning message.
+    2024-08-29 12:18:32,320 - multiHandlerLogger - WARNING - Details: Unable to connect to the server.
+    ```
+    
+    In the console, newlines typically work as you’d expect, so your log message appears spread across two lines. But in the log file, things can get tricky. The newline might be interpreted differently, making it look like two separate log entries. This can happen if the file handler or formatter processes newlines in a unique way, possibly causing timestamps to repeat or logs to be split unexpectedly.
+    
+2. Unexpected behavior in log rotation: When log messages include newlines, they can make your log file larger than anticipated, which might trigger log rotation sooner than you'd like. This isn't usually a concern for single-line entries, but for multi-line messages, it can cause the log file to become fragmented. This fragmentation can make it tricky to follow and correlate logs across different rotated files.
+3. Improper handling in log parsers: Log parsers are tools or scripts that handle logs to extract, format, or analyze data. When a log message includes newlines, it can throw off the parser’s ability to accurately read the log’s structure, especially if the parser is built for single-line entries. This might result in parsing errors, incorrect data extraction, or even the log message being split into multiple entries.
+4. Multiline Log Aggregation Issues: It's generally best to avoid using newlines in log messages because many log aggregators interpret each new line as a separate entry. This can create issues with how logs are aggregated and displayed. Especially stack traces, they often contain newlines when printed. Ensure these are logged as a single message to avoid breaking them into multiple entries. For example:
+    
+    ```jsx
+    2024–08–29 12:18:32,320 - appLog - WARNING - Request failed with:
+    2024–08–29 12:18:32,348 - appLog - INFO - User login: 986
+    Unable to read from pipe.
+    2024–08–29 12:18:32,485 - appLog - INFO - User logout: 986
+    ```
+    
+    The newline in the `WARNING` log splits the message, making `Unable to read from pipe` appear without a timestamp. This split indicates that the message wasn’t logged as a single entry, which can confuse the log’s sequence, especially when mixed with other messages.
+    
+    To avoid this, we need to ensure that the entire `WARNING` message is logged in one line, keeping all relevant information together and maintaining clear context.
+    
+    ```jsx
+    2024–08–29 12:18:32,320 - appLog - WARNING - Request failed with: Unable to read from pipe.
+    ```
+    
+
+## Quick Guide: Inserting Newlines in Python Logging
+
+Let's explore some straightforward methods to insert newlines in your Python logs:
+
+1. Using the '\n' escape character:
+    
+    The simplest way to add a newline is by including `\n` in your log message:
+    
+
+```python
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+logger.info("This is line 1. \nThis is line 2.")
+
+```
+
+Output:
+
+```
+INFO:__main__:This is line 1.
+This is line 2.
+
+```
+
+1. Modifying the `StreamHandler`'s terminator: 
+    
+    You can change the default line ending for a `StreamHandler`:
+    
+
+```python
+import logging
+import sys
+
+logger = logging.getLogger(__name__)
+handler = logging.StreamHandler(sys.stdout)
+# Double newline
+handler.terminator = "\n\n"  
+logger.addHandler(handler)
+
+logger.setLevel(logging.INFO)
+
+logger.info("Message 1")
+logger.info("Message 2")
+```
+
+Output:
+
+```
+Message 1
+
+Message 2
+
+```
+
+1. Employing triple quotes for multi-line messages:
+    
+    For complex multi-line messages, use triple quotes:
+    
+
+```python
+logger.info("""
+This is a multi-line
+log message with
+preserved formatting.
+""")
+```
+
+1. Customize Log Format
+    
+    If you want to add newlines between different log entries, you can customize the logging format to append a newline character to the end of each message.
+    
+
+```python
+import logging
+
+# Configure the logger with a custom format
+logging.basicConfig(level=logging.DEBUG, format='%(message)s\n')
+
+# Log messages
+logging.info("This is the first message.")
+logging.info("This is the second message.")
+```
+
+Output
+
+```
+This is the first message.
+
+This is the second message.
+```
+
+## Best practices for consistent newline insertion
+
+- Use a consistent method throughout your application: A single approach for inserting newlines ensures consistent log output, simplifying parsing and analysis. Whether you modify log messages directly or adjust handler attributes, maintaining consistency helps prevent confusion and errors when interpreting logs.
+- Consider the impact on log parsers and analyzers: Log parsers and analysis tools depend on specific formats and delimiters to extract meaningful data. Adding inconsistent or excessive newlines can disrupt this process, causing misinterpretation or missing log entries. It's important to consider how your newline strategy will impact these downstream tools and to ensure that it doesn’t interfere with the expected log structure.
+- Test logging output across different platforms to ensure consistency:  Newline characters can vary between operating systems such as Windows uses `\r\n`, while Unix-based systems use `\n`. Testing your logging output across different platforms helps catch and fix formatting issues, ensuring that logs are consistent no matter the environment. This cross-platform testing is crucial for applications that run in diverse settings or are distributed to users with different system configurations.
+- Encrypt sensitive log data: Encrypt logs that contain sensitive information to safeguard against unauthorized access. This practice is crucial for maintaining data confidentiality and integrity. Also ensure that encryption keys are stored securely and are rotated regularly to minimize the risk of compromise.
+- Use role-based access control for log files: Implement role-based access control for log files, ensuring only authorized personnel can view or modify logs based on their assigned roles.
+- Sanitize log entries before storage: To prevent sensitive data exposure, you can sanitize log entries by removing or masking sensitive information like passwords, credit card numbers, and personally identifiable information (PII).
+- Implement secure log transmission: Make sure that logs are transmitted securely over networks by using encrypted channels such as TLS (Transport Layer Security).
+
+## Advanced Techniques for Newline Insertion in Logging
+
+For more control over newline insertion, consider these advanced techniques:
+
+1. Customizing log formatters: 
+    
+    Creating a custom log formatter allows you to insert newlines dynamically based on criteria like message content or length. Unlike basic configurations, a custom formatter offers the flexibility to programmatically adjust formatting rules, giving you more control over how your logs is structured.
+    
+
+```python
+import logging
+
+class NewlineFormatter(logging.Formatter):
+    def format(self, record):
+        # Get the base formatted message
+        message = super().format(record)
+        return message.replace('\\n', '\n    ')
+
+# Configure the formatter
+formatter = NewlineFormatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+handler = logging.StreamHandler()
+handler.setFormatter(formatter)
+
+logger = logging.getLogger(__name__)
+logger.addHandler(handler)
+logger.setLevel(logging.INFO)
+
+# Log message with escaped newlines
+logger.info("Line 1\\nLine 2\\nLine 3")
+```
+
+In this example, `NewlineFormatter` extends `logging.Formatter` and overrides the `format` method. The line `message.replace('\\n', '\n ')` replaces each occurrence of the literal `\n` in the log message with an actual newline followed by an indentation, helping to improve readability in the logs.
+
+Output:
+
+```
+2024–08–29 12:20:32 - __main__ - INFO - Line 1
+    Line 2
+    Line 3
+
+```
+
+As you can see, `\\n` in the log message is replaced by actual newlines, with each subsequent line being indented by 4 spaces. This makes multi-line log messages easier to read and visually structured.
+
+1. Implementing newline-aware log handlers
+
+It involves creating a custom log handler to manage newlines in a specific way. This approach is useful when you need to format log output with custom line breaks or delimiters. You can design a custom handler that handles newlines according to your requirements. 
+
+Here’s how you can create such a handler:
+
+```python
+import logging
+
+class NewlineHandler(logging.Handler):
+    def emit(self, record):
+        try:
+            # Format the log message
+            msg = self.format(record)
+            # Print the formatted message with the specified terminator
+            print(msg, end=self.terminator)
+        except Exception:
+            self.handleError(record)
+
+# Create a logger
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)  # Set the logging level to INFO
+
+# Create and configure the custom handler
+handler = NewlineHandler()
+handler.setLevel(logging.INFO)  # Set the handler level to INFO
+
+# Define a formatter for the handler
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
+
+# Set terminator to add double newlines between log entries
+handler.terminator = '\n\n'
+
+# Add the custom handler to the logger
+logger.addHandler(handler)
+
+# Log some example messages
+logger.info("Message with\\nmultiple lines")
+logger.info("Another message")
+
+```
+
+The `emit(self, record)` method is overridden to control how each log message is output. In this implementation, the message is formatted and printed with the specified terminator. By setting `handler.terminator = '\n\n'`, each log entry is separated by two newline characters, which provides clear visual separation between entries.
+
+Output
+
+```python
+2024-08-29 22:33:42,806 - __main__ - INFO - Message with\nmultiple lines
+
+2024-08-29 22:33:42,807 - __main__ - INFO - Another message
+```
+
+1. Using string formatting for complex log structures
+
+We can also use the concept of f-strings or the `format()` method for intricate log messages. The `f"""..."""` syntax is highly readable and preserves formatting. This technique is used for making well-structured, multi-line log messages, making them easier to understand and maintain.
+
+```python
+import logging
+
+logger = logging.getLogger(__name__)
+
+def log_user_action(user, action, details):
+    logger.info(f"""
+User Action:
+    User: {user}
+    Action: {action}
+    Details: {details}
+    """)
+
+log_user_action("Alice", "Login", "IP: 192.168.1.1")
+
+```
+
+Output
+
+```python
+2024-08-29 22:30:38,939 - __main__ - INFO - 
+User Action:
+    User: Alice
+    Action: Login
+    Details: IP: 192.168.1.1
+```
+
+1. Using Super Method with Conditional Formatting
+    
+    Alternatively, you can call the superclass method to handle the basic formatting and then modify the result to insert newlines or other formatting changes as needed. Let’s take an example:
+    
+
+```python
+class MyFormatter(logging.Formatter):
+    def format(self, record):
+        # Call the superclass method to get the base formatted message
+        formatted_message = super(MyFormatter, self).format(record)
+        # Example criteria: Insert a newline if the message length exceeds a threshold
+        if len(formatted_message) > 50:
+            formatted_message = f"\n{formatted_message}\n"
+        return formatted_message
+
+# Log messages
+logger.info("Short message.")
+logger.info("A much longer message that exceeds the length threshold and should be followed by extra newlines in the output.")
+```
+
+In this approach, `MyFormatter` uses the superclass's `format` method to generate the initial formatted log message. It then checks the length of the message and, if it exceeds a specified threshold, adds extra newlines. This method enables dynamic post-processing based on the content of the log message.
+
+## Security Considerations for Newline Insertion
+
+While newlines enhance log readability, they can pose security risks if not handled properly, especially in applications exposed to user inputs. Below are some key threats to keep in mind and common ways to address them:
+
+1. Log injection attacks: Malicious users might inject newlines to manipulate log structure by splitting a log entry into multiple lines thereby making it harder to analyze log information for the purpose of obscuring important information. They can also disrupt log file formats causing errors and preventing proper detection of security incidents. Always sanitize user input before logging. You can also use libraries or functions that escape or remove potentially dangerous characters from user input.
+    
+    ```python
+    def sanitize_input(input_string):
+        # Remove potentially dangerous characters from input
+        return re.sub(r'[\r\n]', '', input_string)
+    ```
+    
+2. Quoting newlines in formatters: Use `repr()` to safely represent strings with newlines, ensuring that log messages are recorded in a safe and predictable format. This method helps to clearly show the presence of newlines and other special characters in your logs. Such as a string with escape sequences would be represented with it as: `'hello\tworld\n"quotes"'`
+    
+    Let’s take an example,
+    
+    ```python
+    import logging
+    
+    class SafeFormatter(logging.Formatter):
+        def format(self, record):
+            # Use repr() to safely represent the log message
+            record.msg = repr(record.msg)
+            return super().format(record)
+    
+    # Create a formatter with the SafeFormatter class
+    formatter = SafeFormatter('%(asctime)s - %(message)s')
+    handler = logging.StreamHandler()
+    handler.setFormatter(formatter)
+    
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.INFO)  # Set the log level to INFO
+    logger.addHandler(handler)
+    
+    # Log a message with special characters
+    logger.info("Potentially\nmalicious\nuser input")
+    ```
+    
+    Output:
+    
+    ```powershell
+    2024-09-03 11:56:07,075 - 'Potentially\nmalicious\nuser input'
+    ```
+    
+    Here, `repr()` ensures that newlines and other special characters in log messages are safely represented which might not be immediately visible. This helps prevent logs from being misinterpreted or tampered with, providing a clearer and more secure log output.
+    
+3. Implement safeguards: To enhance security, implement a whitelist approach for characters allowed in log messages, especially when dealing with user-generated content. This strategy helps prevent the logging of harmful or unwanted input that could misuse newline characters. By specifying acceptable character sets and filtering out any non-conforming input, you minimize the risk of log injection and other security issues.
+    
+    ```python
+    def filter_message(message):
+        allowed_characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 "
+        return ''.join(char for char in message if char in allowed_characters)
+    ```
+    
+
+## Troubleshooting Newline Issues in Python Logging
+
+Common pitfalls when inserting newlines in logs include:
+
+1. Inconsistent line endings: Different platforms and tools use various line endings such as Unix/Linux uses `\n`, Windows uses `\r\n`, and old Mac systems use `\r`. To ensure consistent line endings across different environments, use `os.linesep`, which aligns with the operating system’s conventions and maintains uniformity in your logs.
+    
+    ```python
+    # Log message with consistent line endings
+    message = f"Line 1{os.linesep}Line 2{os.linesep}Line 3"
+    logger.info(message)
+    ```
+    
+    Output
+    
+    ```python
+    2024-08-29 22:42:25,380 - __main__ - INFO - Line 1
+    Line 2
+    Line 3
+    ```
+    
+2. Unexpected formatting in log files: Some log rotation tools might not handle multi-line entries correctly. Test your logging setup with your chosen rotation mechanism.
+3. Issues with log parsers: Ensure your log parsing tools can handle multi-line log entries. This may require configuring regular expressions or developing custom parsers capable of processing log messages that span multiple lines.
+
+## Debugging Techniques for Newline Issues:
+
+- Use a `logging.Formatter` with `%(message)s` to see raw messages. This formatter displays raw log messages without additional formatting, helping identify issues with newline characters.
+    
+    ```python
+    import logging
+    
+    # Configure logger
+    logger = logging.getLogger(__name__)
+    handler = logging.StreamHandler()
+    formatter = logging.Formatter('%(message)s')  # Use raw message format
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+    logger.setLevel(logging.INFO)
+    
+    # Log multi-line message
+    logger.info("Start\nIntermediate\nEnd")
+    
+    ```
+    
+    Output
+    
+    ```python
+    Start
+    Intermediate
+    End
+    ```
+    
+- Inspect log files with a hex editor to identify hidden characters. By using a hex editor, you can see the exact byte representation of log files, which is useful for spotting hidden characters or unexpected byte sequences that might affect how newlines are handled. This technique helps diagnose issues related to unusual characters or formatting. To use a hex editor, follow the mentioned steps:
+    - Select a Hex Editor best suited for your system
+        - Windows: <a href="https://hxd.en.lo4d.com/windows" rel="noopener noreferrer nofollow" target="_blank">HxD</a>
+        - Mac: <a href="https://hexfiend.com/" rel="noopener noreferrer nofollow" target="_blank">Hex Fiend</a>
+        - Linux: <a href="https://github.com/afrantzis/bless" rel="noopener noreferrer nofollow" target="_blank">Bless</a>
+    - Open your log file in the hex editor, the file will be displayed as a series of hexadecimal values in the `hexadecimal view` pane alongside their `ASCII` representation in the `ASCII view` pane. Each byte would be represented by a set of hexadecimal digits
+    - Analyze the sequence of bytes that might highlight problems with newline handling where newline characters are represented according to the type of system such as `0A` in Unix/Linux, `0D` in Mac systems and `0D0A` in Windows. Here `0A` represents line feed and `0D` represents carriage return.
+    - Edit the file accordingly to resolve issues and save after changes are made.
+- Test logging on different platforms to ensure consistency.
+    
+    ```python
+    import logging
+    import os
+    
+    # Configure logger
+    logger = logging.getLogger(__name__)
+    handler = logging.StreamHandler()
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+    logger.setLevel(logging.INFO)
+    
+    # Log message with platform-specific line endings
+    message = f"Log entry on {os.name}\nLine 1{os.linesep}Line 2"
+    logger.info(message)
+    
+    ```
+    
+    This ensures that logs are formatted correctly across different operating systems, which is essential for maintaining consistent logging behavior.
+    
+    Output
+    
+    ```python
+    2024-08-29 22:59:25,870 - __main__ - INFO - Log entry on nt
+    Line 1
+    Line 2
+    ```
+    
+
+## Eliminating Newlines in Python Logging
+
+During logging in python when we capture error messages from modules like requests, newline characters can sometimes sneak into your logs, cluttering the output and making it harder to read or parse. Let’s take a look at different ways by which we can eliminate newlines in python logging: 
+
+1. Using `str.replace()`
+    
+    One approach is to explicitly replace newline characters with spaces, ensuring that your logs remain on a single line.
+    
+    ```python
+    logger.error(
+        "There was a problem importing the uploaded file: "
+        f"{response.text}".replace("\n", " ")
+    )
+    ```
+    
+    The `str.replace("\n", " ")` ensures that all newline characters in the error message are replaced with spaces, keeping the log entry compact and readable. However, doing this repeatedly can make your code less clean and harder to maintain.
+    
+2. Using `str.strip()`
+If the newlines are only at the beginning or end of the log message, you could use the `strip()` method: 
+    
+    ```python
+    logger.error(
+        "There was a problem importing the uploaded file: "
+        f"{response.text.strip()}"
+    )
+    ```
+    
+    This method trims any leading or trailing whitespace, including newlines, but won’t remove newlines within the text itself.
+    
+3. Custom Logging Formatter
+    
+    We can also use a custom logging formatter that automatically strips or replaces newlines in every log message. Let’s take an example:
+    
+    ```python
+    import logging
+    
+    class SingleLineFormatter(logging.Formatter):
+        def format(self, record):
+            original = super().format(record)
+            return original.replace("\n", " ")
+    
+    handler = logging.StreamHandler()
+    handler.setFormatter(SingleLineFormatter())
+    logger = logging.getLogger()
+    logger.addHandler(handler)
+    logger.setLevel(logging.ERROR)
+    
+    logger.error("There was a problem importing the uploaded file: "
+                 f"{response.text}")
+    ```
+    
+    In this example, the `SingleLineFormatter` ensures that every log message has its newline characters replaced with spaces. This approach centralizes the newline handling, making your logging cleaner and less repetitive.
+    
+4. Modifying `handler.terminator`
+You can set the `terminator` attribute of a `StreamHandler` to an empty string for preventing newlines from being added at the end of log messages. 
+    
+    ```python
+    handler = logging.StreamHandler()
+    handler.terminator = ""
+    ```
+    
+    This method can be useful if you want to keep your log output on a single line but still allow for newlines within the message body.
+    
+
+## Optimizing Log Readability with Strategic Newline Usage
+
+Strategic use of newlines can significantly improve log readability:
+
+1. Design log formats leveraging newlines: Structuring log messages with newlines can help organize detailed information, making logs more readable and easier to parse.
+    
+    ```python
+    logger.info(f"""
+    Transaction Details:
+    ID: {transaction_id}
+    Amount: ${amount:.2f}
+    Status: {status}
+    """)
+    ```
+    
+2. Balance verbosity and conciseness:
+    - Use newlines to separate logical sections of complex log messages. For system health checks or other intricate logs, newlines effectively delineate different sections, enhancing readability.
+    - Avoid overusing newlines for simple, single-line logs. For straightforward entries, such as system start-up messages, extra newlines are unnecessary and may clutter the output.
+3. Implement log rotation with newline consideration:
+    - Ensure your log rotation tool respects multi-line entries.
+    - Consider using a custom log rotator that understands your newline usage.
+
+## Enhancing Logging with SigNoz: A Modern Approach
+
+While traditional Python logging methods offer flexibility, modern solutions like SigNoz provide advanced features that simplify complex logging scenarios.
+
+SigNoz is an open-source APM (Application Performance Monitoring) tool that offers comprehensive logging and monitoring capabilities. It handles newlines and log formatting seamlessly, providing a user-friendly interface for log analysis.
+
+<Figure src="/img/guides/2024/09/how-to-insert-newline-in-python-logging-image.webp" alt="Logging in SigNoz" caption="Logging in SigNoz" /> 
+
+Key benefits of using SigNoz for logging:
+
+- Automatic parsing of structured logs: SigNoz automatically parses structured logs by extracting valuable fields and data points without manual intervention. This approach enables easier analysis and also ensures that critical information is consistently available for monitoring and troubleshooting.
+- Real-time log searching and filtering: Users can search and filter logs in real-time, allowing for swift identification of issues as they occur. This capability is crucial for maintaining system uptime and resolving incidents quickly, especially in complex, distributed environments.
+- Correlation of logs with traces and metrics: This integrated approach simplifies root cause analysis by linking specific log entries to related traces and metrics, helping you understand the context of issues more effectively.
+- Advanced visualization options for log data: SigNoz offers advanced visualization options, enabling you to create custom dashboards that provide clear insights into log data. These visualizations help in identifying trends, anomalies, and patterns, making it easier to monitor.
+
+<GetStartedSigNoz />
+
+By leveraging SigNoz, you can focus on writing meaningful log messages without worrying about the intricacies of newline handling and log formatting.
+
+## Key Takeaways
+
+- Newlines are crucial for log readability but require careful implementation
+- Use `\n` or modify `StreamHandler` for basic newline insertion
+- Consider security implications when handling newlines in logs
+- Advanced techniques like custom formatters can enhance log structure
+- Modern tools like SigNoz simplify complex logging scenarios, offering advanced features beyond traditional methods
+
+## FAQs
+
+### How do I add a newline between two log messages in Python?
+
+To add a newline between log messages, you can either:
+
+1. Modify the `StreamHandler`'s terminator:
+    
+    ```python
+    handler = logging.StreamHandler()
+    handler.terminator = '\\n\\n'
+    
+    ```
+    
+2. Use a custom formatter that adds an extra newline:
+    
+    ```python
+    class DoubleNewlineFormatter(logging.Formatter):
+        def format(self, record):
+            return super().format(record) + '\\n'
+    
+    ```
+    
+
+### Can newlines in log messages pose security risks?
+
+Yes, newlines can pose security risks, particularly in the context of log injection attacks. Malicious users might insert newlines to manipulate log structure or inject false entries. Always sanitize user input and consider using safe formatting techniques to mitigate these risks.
+
+### What's the best way to handle multi-line log entries in Python?
+
+For multi-line log entries, consider:
+
+1. Using triple quotes for readability in code
+2. Implementing a custom formatter to handle indentation
+3. Employing JSON logging for structured, easily parseable logs
+
+Example:
+
+```python
+import json
+import logging
+
+class JsonFormatter(logging.Formatter):
+    def format(self, record):
+        log_data = {
+            'timestamp': self.formatTime(record),
+            'level': record.levelname,
+            'message': record.getMessage(),
+            'module': record.module
+        }
+        return json.dumps(log_data)
+
+formatter = JsonFormatter()
+handler = logging.StreamHandler()
+handler.setFormatter(formatter)
+
+logger = logging.getLogger(__name__)
+logger.addHandler(handler)
+
+logger.info("Multi-line\\nlog message")
+
+```
+
+### How does SigNoz improve upon traditional Python logging methods?
+
+SigNoz enhances traditional Python logging in several ways:
+
+1. Centralized logging: Collects logs from multiple services in one place
+2. Advanced querying: Offers powerful search and filter capabilities
+3. Context-rich logs: Correlates logs with traces and metrics for better debugging
+4. Visualization: Provides intuitive dashboards for log analysis
+5. Alerting: Enables setting up alerts based on log patterns or anomalies
+
+These features allow developers to gain deeper insights from their logs and troubleshoot issues more efficiently compared to traditional logging methods.
