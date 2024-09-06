@@ -1808,7 +1808,7 @@ const docsSideNav = [
     label: 'Troubleshooting',
     type: 'category',
     isExpanded: false,
-    route: '/docs/faqs',
+    // route: '/docs/faqs',
     // link: {
     // type: 'generated-index',
     // title: 'Frequently Asked Questions',
@@ -1841,6 +1841,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/troubleshooting/signoz-cloud/metrics-troubleshooting',
             label: 'Metrics Troubleshooting',
+          },
+          {
+            type: 'doc',
+            route: '/docs/troubleshooting/signoz-cloud/ingestion-troubleshooting',
+            label: 'Ingestion Troubleshooting',
           },
         ],
       },
