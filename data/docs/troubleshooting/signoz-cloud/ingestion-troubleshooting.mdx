@@ -3,65 +3,99 @@ title: Ingestion Troubleshooting
 id: ingestion-troubleshooting
 ---
 
-# OTLP Troubleshooting Guide
-
 ## General Troubleshooting
 
-When encountering issues with OTLP data ingestion, follow these steps to diagnose and potentially resolve the problem:
+When encountering issues with ingestion, follow these steps to diagnose and potentially resolve the problem:
 
-1. **Enable diagnostic logs**: Configure your OTLP client to log detailed error information. The method for enabling logs varies by implementation, so consult the relevant documentation for your specific setup.
+1. **Enable diagnostic logs**: To enhance error tracking, configure your OTLP client to capture comprehensive diagnostic logs by following the instructions listed [below](#collect-diagnostic-logs).
 
-2. **Verify endpoint connectivity**: Use a simple shell command like `curl signoz cloud endpoint` from the machine in question to determine if there are any local network configuration issues (such as firewall restrictions) preventing connectivity to the ingestion endpoint.
+2. **Verify endpoint connectivity**: Use a simple shell command like `curl <endpoint>` from the machine in question to determine if there are any local network configuration issues (such as firewall restrictions) preventing connectivity to the ingestion endpoint. You can find your endpoint [here](/docs/ingestion/signoz-cloud/overview/).
 
-{/* 3. **Check for integration error events**: Query for `SigNozIntegrationError` events in your monitoring system. The ingestion process performs minimal validation synchronously before returning a success status code. If you don't see indications of export errors in your application logs, but data isn't appearing in your monitoring dashboard, these events may provide insights into issues detected during asynchronous validation. */}
+3. **Validate Ingestion Key**: Ensure your Ingestion key is valid and properly set. Invalid or missing Ingestion keys are a common issue that typically present with HTTP 403 or 401 status codes, or gRPC Unauthenticated or PermissionDenied status codes. If you encounter these, double-check that your Ingestion key is valid, correctly configured and has not expired.
 
-3. **Isolate the problem**: Often, errors are localized to a specific application or environment. Evaluate the differences between problematic and properly functioning areas to narrow down potential causes.
-
-4. **Validate API key**: Ensure your API key is valid and properly set. Invalid or missing API keys are a common issue that typically present with HTTP 403 or 401 status codes, or gRPC Unauthenticated or PermissionDenied status codes. If you encounter these, double-check that your API key is valid and correctly configured.
+4. **Validate Ingestion Limits**: Incorrect Ingestion key limits may inadvertently restrict your data flow. Verify your current Ingestion limits to ensure optimal data throughput. For a comprehensive understanding of how these limits function, refer to our [Ingestion Key Limits documentation](/docs/ingestion/signoz-cloud/keys/).
 
 5. **Evaluate retry success**: Confirm if exports succeed after retry attempts. While occasional transient errors are expected, persistent failures may indicate a more significant issue. If you suspect that transient errors are occurring more frequently than expected, please reachout to SigNoz support.
 
 6. **Monitor non-retried errors**: Be on the lookout for scenarios where transient errors are not being retried. Despite best efforts, there may be corner cases where the ingestion endpoint returns non-retriable status codes for transient errors. If you believe you've encountered this scenario, please reachout to SigNoz support.
 
-By systematically working through these steps, you can often identify and resolve common OTLP ingestion issues. For persistent problems that you can't resolve through these methods, please reachout to SigNoz support.
+## Collect Diagnostic Logs
+Diagnostic Logs capture critical information that helps identify root causes of issues and provides essential context for troubleshooting, whether performed by you or the SigNoz Support team.
+
+### Opentelemetry Collector
+In order to enable detailed log information, add the following snippet to your collector configuration:
+```
+service:
+  telemetry:
+    logs:
+      level: DEBUG
+```
+
+### Language SDKs
+Refer to the SigNoz [instrumentation docs](/docs/instrumentation/) for language-specific details.
+
 ## Issues Catalog
 
 <Tabs>
 <TabItem value="http" label="HTTP Protocol" default>
 
 <Tabs>
-<TabItem value="401" label="Unauthorized Access (401)" default>
+<TabItem value="400" label="Bad Request" default>
+**Root Cause:**
+  - Payload is malformed
 
-- **Error Message:** 
-  - Java: `Failed to export spans. Server responded with HTTP status code 401.`
-  - Collector: `Exporting failed. The error is not retryable. Dropping data. {"kind": "exporter", "data_type": "traces", "name": "otlphttp", "error": "Permanent error: error exporting items, request to [endpoint] responded with HTTP Status Code 401, Message=, Details=[]", "dropped_items": 4}`
-  - Go: `failed to upload metrics: failed to send metrics to [endpoint]: 401 Unauthorized`
-- **Resolution:** Configure API key properly
-- **Context:** Ensure API key is included in headers
+**Resolution:** 
+  - Depending upon the endpoint, consult the relevant documenation to verify the payload schema.
 
 </TabItem>
-<TabItem value="403" label="Access Forbidden (403)">
 
-- **Error Message:**
-  - Java: `Failed to export spans. Server responded with HTTP status code 403.`
-  - Collector: `Exporting failed. The error is not retryable. Dropping data. {"kind": "exporter", "data_type": "traces", "name": "otlphttp", "error": "Permanent error: error exporting items, request to [endpoint] responded with HTTP Status Code 403, Message=, Details=[]", "dropped_items": 14}`
-  - Go: `traces export: failed to send to [endpoint]: 403 Forbidden`
-  - .NET: `Exporter failed send data to collector to {0} endpoint. Data will not be sent. Exception: {1}{[endpoint]}{System.Net.Http.HttpRequestException: Response status code does not indicate success: 403 (Forbidden).`
-- **Resolution:** Verify API key validity
-- **Context:** Check for correct API permissions
+<TabItem value="401" label="Unauthorized" default>
+**Root Cause:**
+  - Ingestion key is invalid or malformed.
+  - Ingestion key has expired.
+
+**Resolution:** 
+  - Ensure Ingestion key is properly included in headers. 
+  - Ensure Ingestion key has not expired.
+
+Refer to our [Ingestion Key documentation](/docs/ingestion/signoz-cloud/keys/) for more information.
+</TabItem>
+
+<TabItem value="404" label="Not Found" default>
+**Root Cause:**
+  - Ingestion key does not exist.
+  - Ingestion endpoint does not exist. 
+  - Trailing slashes are being used. eg.`/logs/json/`
+
+**Resolution:** 
+  - Ensure Ingestion key does not have any typo. 
+  - Ensure the Ingestion endpoint exists in SigNoz.
+  - Remove the trailing slash.
 
 </TabItem>
-<TabItem value="timeout" label="Request Timeout">
 
-- **Error Message:**
-  - Java: `Failed to export spans. The request could not be executed. Full error message: timeout`
-  - Collector: `max elapsed time expired failed to make an HTTP request: Post "[endpoint]": context deadline exceeded (Client.Timeout exceeded while awaiting headers)`
-  - Go: `failed to upload metrics: context deadline exceeded: retry-able request failure`
-- **Resolution:** Adjust batch size and timeout settings
-- **Context:** Review network conditions and client configuration
+<TabItem value="408" label="Request Timeout">
+**Root Cause:**
+  - Payloads are large.
+  - Networks are slower.
+
+**Resolution:** 
+Refer to the [Important Considerations](/docs/ingestion/signoz-cloud/overview/#important-considerations) section of our Ingestion documentation.
 
 </TabItem>
-<TabItem value="429" label="Rate Limiting (429)">
+
+<TabItem value="413" label="Content Too Large">
+**Root Cause:**
+  - Payloads are larger than the permissible limits.
+
+**Resolution:** 
+  - Ensure payloads are within permissible limits.
+
+Refer to the [Important Considerations](/docs/ingestion/signoz-cloud/overview/#important-considerations) section of our Ingestion documentation.
+
+</TabItem>
+
+<TabItem value="429" label="Too Many Requests">
 
 - **Error Message:**
   - Collector: `Exporting failed. Will retry the request after interval. {"kind": "exporter", "data_type": "metrics", "name": "otlphttp", "error": "Throttle (29s), error: error exporting items, request to [endpoint] responded with HTTP Status Code 429", "interval": "29s"}`
@@ -69,6 +103,27 @@ By systematically working through these steps, you can often identify and resolv
 - **Context:** Reduce request frequency
 
 </TabItem>
+
+<TabItem value="499" label="Client closed the connection">
+**Root Cause:**
+  - Payloads are large.
+  - Networks are slower.
+
+**Resolution:** 
+Refer to the [Important Considerations](/docs/ingestion/signoz-cloud/overview/#important-considerations) section of our Ingestion documentation.
+
+</TabItem>
+
+<TabItem value="503|504" label="Service Unavailable|Gateway Timeout">
+**Root Cause:**
+  - Payloads are large.
+  - Networks are slower.
+
+**Resolution:** 
+Refer to the [Important Considerations](/docs/ingestion/signoz-cloud/overview/#important-considerations) section of our Ingestion documentation.
+
+</TabItem>
+
 </Tabs>
 
 </TabItem>
@@ -200,4 +255,4 @@ By systematically working through these steps, you can often identify and resolv
 </TabItem>
 </Tabs>
 
-For persistent issues, please contact our support team with detailed information about your setup and the problems encountered.
+By systematically working through these steps, you can often identify and resolve common Ingestion issues. For persistent problems that you can't resolve through these methods, please reachout to SigNoz support.
