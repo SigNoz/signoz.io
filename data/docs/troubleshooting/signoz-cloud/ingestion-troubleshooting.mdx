@@ -1,0 +1,203 @@
+---
+title: Ingestion Troubleshooting
+id: ingestion-troubleshooting
+---
+
+# OTLP Troubleshooting Guide
+
+## General Troubleshooting
+
+When encountering issues with OTLP data ingestion, follow these steps to diagnose and potentially resolve the problem:
+
+1. **Enable diagnostic logs**: Configure your OTLP client to log detailed error information. The method for enabling logs varies by implementation, so consult the relevant documentation for your specific setup.
+
+2. **Verify endpoint connectivity**: Use a simple shell command like `curl signoz cloud endpoint` from the machine in question to determine if there are any local network configuration issues (such as firewall restrictions) preventing connectivity to the ingestion endpoint.
+
+{/* 3. **Check for integration error events**: Query for `SigNozIntegrationError` events in your monitoring system. The ingestion process performs minimal validation synchronously before returning a success status code. If you don't see indications of export errors in your application logs, but data isn't appearing in your monitoring dashboard, these events may provide insights into issues detected during asynchronous validation. */}
+
+3. **Isolate the problem**: Often, errors are localized to a specific application or environment. Evaluate the differences between problematic and properly functioning areas to narrow down potential causes.
+
+4. **Validate API key**: Ensure your API key is valid and properly set. Invalid or missing API keys are a common issue that typically present with HTTP 403 or 401 status codes, or gRPC Unauthenticated or PermissionDenied status codes. If you encounter these, double-check that your API key is valid and correctly configured.
+
+5. **Evaluate retry success**: Confirm if exports succeed after retry attempts. While occasional transient errors are expected, persistent failures may indicate a more significant issue. If you suspect that transient errors are occurring more frequently than expected, please reachout to SigNoz support.
+
+6. **Monitor non-retried errors**: Be on the lookout for scenarios where transient errors are not being retried. Despite best efforts, there may be corner cases where the ingestion endpoint returns non-retriable status codes for transient errors. If you believe you've encountered this scenario, please reachout to SigNoz support.
+
+By systematically working through these steps, you can often identify and resolve common OTLP ingestion issues. For persistent problems that you can't resolve through these methods, please reachout to SigNoz support.
+## Issues Catalog
+
+<Tabs>
+<TabItem value="http" label="HTTP Protocol" default>
+
+<Tabs>
+<TabItem value="401" label="Unauthorized Access (401)" default>
+
+- **Error Message:** 
+  - Java: `Failed to export spans. Server responded with HTTP status code 401.`
+  - Collector: `Exporting failed. The error is not retryable. Dropping data. {"kind": "exporter", "data_type": "traces", "name": "otlphttp", "error": "Permanent error: error exporting items, request to [endpoint] responded with HTTP Status Code 401, Message=, Details=[]", "dropped_items": 4}`
+  - Go: `failed to upload metrics: failed to send metrics to [endpoint]: 401 Unauthorized`
+- **Resolution:** Configure API key properly
+- **Context:** Ensure API key is included in headers
+
+</TabItem>
+<TabItem value="403" label="Access Forbidden (403)">
+
+- **Error Message:**
+  - Java: `Failed to export spans. Server responded with HTTP status code 403.`
+  - Collector: `Exporting failed. The error is not retryable. Dropping data. {"kind": "exporter", "data_type": "traces", "name": "otlphttp", "error": "Permanent error: error exporting items, request to [endpoint] responded with HTTP Status Code 403, Message=, Details=[]", "dropped_items": 14}`
+  - Go: `traces export: failed to send to [endpoint]: 403 Forbidden`
+  - .NET: `Exporter failed send data to collector to {0} endpoint. Data will not be sent. Exception: {1}{[endpoint]}{System.Net.Http.HttpRequestException: Response status code does not indicate success: 403 (Forbidden).`
+- **Resolution:** Verify API key validity
+- **Context:** Check for correct API permissions
+
+</TabItem>
+<TabItem value="timeout" label="Request Timeout">
+
+- **Error Message:**
+  - Java: `Failed to export spans. The request could not be executed. Full error message: timeout`
+  - Collector: `max elapsed time expired failed to make an HTTP request: Post "[endpoint]": context deadline exceeded (Client.Timeout exceeded while awaiting headers)`
+  - Go: `failed to upload metrics: context deadline exceeded: retry-able request failure`
+- **Resolution:** Adjust batch size and timeout settings
+- **Context:** Review network conditions and client configuration
+
+</TabItem>
+<TabItem value="429" label="Rate Limiting (429)">
+
+- **Error Message:**
+  - Collector: `Exporting failed. Will retry the request after interval. {"kind": "exporter", "data_type": "metrics", "name": "otlphttp", "error": "Throttle (29s), error: error exporting items, request to [endpoint] responded with HTTP Status Code 429", "interval": "29s"}`
+- **Resolution:** Optimize batching configuration
+- **Context:** Reduce request frequency
+
+</TabItem>
+</Tabs>
+
+</TabItem>
+<TabItem value="grpc" label="gRPC Protocol">
+
+<Tabs>
+<TabItem value="code2" label="Unknown Error (Code 2)" default>
+
+<Tabs>
+<TabItem value="timeout" label="Timeout" default>
+
+- **Error Message:**
+  - Java: `io.opentelemetry.exporter.internal.grpc.GrpcExporter - Failed to export spans. Server responded with gRPC status code 2. Error message: timeout`
+- **Resolution:** Tune batching/timeout settings
+- **Context:** Occurs after export times out. Check timeout settings and client network status. If you've ruled out client-side network and configuration, open a support case.
+
+</TabItem>
+<TabItem value="http500" label="HTTP 500">
+
+- **Error Message:**
+  - Collector: `rpc error: code = Unknown desc = unexpected HTTP status code received from server: 500 (Internal Server Error); malformed header: missing HTTP content-type`
+- **Resolution:** Monitor and report if persistent
+- **Context:** Networking vendor produced non-retriable status code for transient error. If this happens repeatedly, open a support case.
+
+</TabItem>
+<TabItem value="http530" label="HTTP 530">
+
+- **Error Message:**
+  - Collector: `rpc error: code = Unknown desc = unexpected HTTP status code received from server: 530 (); transport: received unexpected content-type "text/html; charset=UTF-8"`
+- **Resolution:** Monitor and report if persistent
+- **Context:** Networking vendor produced non-retriable status code for transient error. If this happens repeatedly, open a support case.
+
+</TabItem>
+</Tabs>
+
+</TabItem>
+<TabItem value="code4" label="Deadline Exceeded (Code 4)">
+
+- **Error Message:**
+  - Collector: `rpc error: code = DeadlineExceeded desc = context deadline exceeded`
+- **Resolution:** Adjust timeout settings
+- **Context:** Check client network status and configuration
+
+</TabItem>
+<TabItem value="code7" label="Authentication Failure (Code 7)">
+
+- **Error Message:**
+  - Java: `Failed to export spans. Server responded with gRPC status code 7.`
+  - .NET: `Exporter failed send data to collector to {0} endpoint. Data will not be sent. Exception: {1}{[endpoint]}{Grpc.Core.RpcException: Status(StatusCode="Unauthenticated", Detail="")}`
+- **Resolution:** Set up API key correctly
+- **Context:** Confirm API key presence in metadata
+
+</TabItem>
+<TabItem value="code8" label="Resource Exhaustion (Code 8)">
+
+- **Error Message:**
+  - Collector: `rpc error: code = ResourceExhausted desc = Too many requests", "dropped_items": 1024`
+- **Resolution:** Fine-tune batching parameters
+- **Context:** Adjust to stay within rate limits
+
+</TabItem>
+<TabItem value="code13" label="Internal Error (Code 13)">
+
+<Tabs>
+<TabItem value="server" label="Server" default>
+
+- **Error Message:**
+  - Java: `Failed to export spans. Server responded with gRPC status code 13.`
+- **Resolution:** Contact support if persistent
+- **Context:** May indicate temporary service issues **Context:** Occurs after export times out. Check timeout settings and client network status. If you've ruled out client-side network and configuration, open a support case.
+
+</TabItem>
+
+<TabItem value="http400" label="HTTP 400" default>
+
+- **Error Message:**
+  - Collector: `rpc error: code = Internal desc = unexpected HTTP status code received from server: 400 (Bad Request)`
+- **Resolution:** Contact support if persistent
+- **Context:** Should solve with retry. Ensure collector has sufficient resources to handle retry backpressure.
+
+</TabItem>
+
+</Tabs>
+</TabItem>
+<TabItem value="code14" label="Service Unavailable (Code 14)">
+
+<Tabs>
+<TabItem value="connectionreset" label="Connection Reset" default>
+
+- **Error Message:**
+  - Collector: `rpc error: code = Unavailable desc = error reading from server: read tcp [IP:PORT]: read: connection reset by peer`
+- **Resolution:** Implement robust retry logic
+- **Context:** Should solve with retry. Ensure collector sufficient resources for retry handling
+
+</TabItem>
+
+<TabItem value="http502" label="HTTP 502" default>
+
+- **Error Message:**
+  - Collector: `rpc error: code = Unavailable desc = unexpected HTTP status code received from server: 502 (Bad Gateway); transport: received unexpected content-type "text/html"`
+- **Resolution:** Implement robust retry logic
+- **Context:** Should solve with retry. Ensure collector sufficient resources for retry handling
+
+</TabItem>
+
+<TabItem value="http503" label="HTTP 503" default>
+
+- **Error Message:**
+  - Collector: `rpc error: code = Unavailable desc = unexpected HTTP status code received from server: 503 (Service Unavailable)`
+- **Resolution:** Implement robust retry logic
+- **Context:** Should solve with retry. Ensure collector sufficient resources for retry handling
+
+</TabItem>
+
+</Tabs>
+
+</TabItem>
+<TabItem value="code16" label="Permission Denied (Code 16)">
+
+- **Error Message:**
+  - Java: `Failed to export spans. Server responded with gRPC status code 16.`
+  - .NET: `Exporter failed send data to collector to {0} endpoint. Data will not be sent. Exception: {1}{[endpoint]}{Grpc.Core.RpcException: Status(StatusCode="PermissionDenied", Detail="")}`
+- **Resolution:** Validate API key permissions
+- **Context:** Ensure API key has necessary access rights
+
+</TabItem>
+</Tabs>
+
+</TabItem>
+</Tabs>
+
+For persistent issues, please contact our support team with detailed information about your setup and the problems encountered.
