@@ -352,7 +352,7 @@ export default function TopNav() {
                         { icon: '/img/index_features/bar-chart-2_feature.svg', name: 'APM', url: '/application-performance-monitoring/', description: 'Monitor your applications'  },
                         { icon: '/img/index_features/logs_feature.svg', name: 'Log Management', url: '/log-management/', description: 'Unlock insights from logs' },
                         { icon: '/img/index_features/drafting-compass_feature.svg', name: 'Distributed Tracing', url: '/distributed-tracing/', description: 'Track requests across services' },
-                        { icon: '/img/index_features/layout-grid_feature.svg', name: 'Metrics & Dashboards', url: '/product/edge-functions', description: 'Monitor metrics & build dashboards' },
+                        { icon: '/img/index_features/layout-grid_feature.svg', name: 'Metrics & Dashboards', url: '/metrics-and-dashboards/', description: 'Monitor metrics & build dashboards' },
                         { icon: '/img/index_features/concierge-bell_feature.svg', name: 'Alerts', url: '/alerts-management/', description: 'Stay aware with alerts' },
                         { icon: '/img/index_features/bug_feature.svg', name: 'Exceptions', url: '/exceptions-monitoring/', description: 'Record exceptions automatically' }
                       ]}
@@ -370,8 +370,8 @@ export default function TopNav() {
                       subtopics={[
                         { name: 'Blog', url: '/resource-center/blog/', description: 'News, ideas, and insights on observability'  },
                         { name: 'Comaprisons', url: '/resource-center/comparisons/', description: 'Compare observability tools' },
-                        { name: 'Guide', url: '/resource-center/guides/', description: 'How-to guides and tutorials' },
-                        { name: 'Opentelemtery', url: '/resource-center/opentelemetry/', description: 'OpenTelemetry concepts and its use cases' },
+                        { name: 'Guides', url: '/resource-center/guides/', description: 'How-to guides and tutorials' },
+                        { name: 'Opentelemetery', url: '/resource-center/opentelemetry/', description: 'OpenTelemetry concepts and its use cases' },
                       ]}
                     />
                     <Link
