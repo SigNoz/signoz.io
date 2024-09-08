@@ -32,7 +32,7 @@ enum TAB_PATHNAMES {
 const productDropdownItems = [
   {
     key: 'apm',
-    href: '/application-performance-monitoring/',
+    url: '/application-performance-monitoring',
     icon: '/img/index_features/bar-chart-2_feature.svg',
     description: 'Monitor your applications',
     name: 'APM',
@@ -40,7 +40,7 @@ const productDropdownItems = [
   },
   {
     key: 'Alerts',
-    href: '/alerts-management/',
+    url: '/alerts-management',
     icon: '/img/index_features/concierge-bell_feature.svg',
     description: 'Stay aware with alerts',
     name: 'Alerts',
@@ -48,7 +48,7 @@ const productDropdownItems = [
   },
   {
     key: 'DistributedTracing',
-    href: '/distributed-tracing/',
+    url: '/distributed-tracing',
     icon: '/img/index_features/drafting-compass_feature.svg',
     description: 'Track requests across services',
     name: 'Distributed Tracing',
@@ -56,7 +56,7 @@ const productDropdownItems = [
   },
   {
     key: 'MetricsDashboards',
-    href: '/metrics-and-dashboards/',
+    url: '/metrics-and-dashboards',
     icon: '/img/index_features/layout-grid_feature.svg',
     description: 'Monitor metrics & build dashboards',
     name: 'Metrics & Dashboards',
@@ -64,7 +64,7 @@ const productDropdownItems = [
   },
   {
     key: 'LogManagement',
-    href: '/log-management/',
+    url: '/log-management',
     icon: '/img/index_features/logs_feature.svg',
     description: 'Unlock insights from logs',
     name: 'Log Management',
@@ -72,7 +72,7 @@ const productDropdownItems = [
   },
   {
     key: 'Exceptions',
-    href: '/exceptions-monitoring/',
+    url: '/exceptions-monitoring',
     icon: '/img/index_features/bug_feature.svg',
     description: 'Record exceptions automatically',
     name: 'Exceptions',
@@ -86,25 +86,25 @@ const productDropdownItemsForMobile = [...productDropdownItems].sort((a, b) => a
 const resourcesDropdownItems = [
   {
     key: 'blog',
-    href: '/resource-center/blog/',
+    url: '/resource-center/blog',
     description: 'News, ideas, and insights on observability',
     name: 'Blog',
   },
   {
     key: 'comparisons',
-    href: '/resource-center/comparisons/',
+    url: '/resource-center/comparisons',
     description: 'Compare observability tools',
     name: 'Comparisons',
   },
   {
     key: 'guides',
-    href: '/resource-center/guides/',
+    url: '/resource-center/guides',
     description: 'How-to guides and tutorials',
     name: 'Guides',
   },
   {
     key: 'examples',
-    href: '/resource-center/opentelemetry/',
+    url: '/resource-center/opentelemetry',
     description: 'OpenTelemetry concepts and its use cases',
     name: 'OpenTelemetry',
   },
@@ -214,7 +214,7 @@ export default function TopNav() {
                     {productDropdownItems.map((item) => (
                       <DropdownItem
                         key={item.key}
-                        href={item.href}
+                        href={item.url}
                         className="h-auto"
                         startContent={
                           <Image
@@ -277,7 +277,7 @@ export default function TopNav() {
                     }
                   >
                     {resourcesDropdownItems.map((item) => (
-                      <DropdownItem key={item.key} href={item.href} description={item.description}>
+                      <DropdownItem key={item.key} href={item.url} description={item.description}>
                         {item.name}
                       </DropdownItem>
                     ))}
