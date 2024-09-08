@@ -212,22 +212,14 @@ export default function TopNav() {
                     }
                   >
                     {productDropdownItems.map((item) => (
-                      <DropdownItem
-                        key={item.key}
-                        href={item.url}
-                        className="h-auto"
-                        startContent={
-                          <Image
-                            src={item.icon}
-                            alt={`${item.name} Icon`}
-                            width={20}
-                            height={20}
-                            className="mr-2"
-                          />
-                        }
-                        description={item.description}
-                      >
-                        {item.name}
+                      <DropdownItem key={item.key} className="h-auto">
+                        <Link href={item.url} className="flex items-center gap-4">
+                          <Image src={item.icon} alt={`${item.name} Icon`} width={20} height={20} />
+                          <div>
+                            <div>{item.name}</div>
+                            <div className="text-xs text-gray-400">{item.description}</div>
+                          </div>
+                        </Link>
                       </DropdownItem>
                     ))}
                   </DropdownMenu>
@@ -277,8 +269,11 @@ export default function TopNav() {
                     }
                   >
                     {resourcesDropdownItems.map((item) => (
-                      <DropdownItem key={item.key} href={item.url} description={item.description}>
-                        {item.name}
+                      <DropdownItem key={item.key} className="h-auto">
+                        <Link href={item.url} className="flex flex-col">
+                          <div>{item.name}</div>
+                          <div className="text-xs text-gray-400">{item.description}</div>
+                        </Link>
                       </DropdownItem>
                     ))}
                   </DropdownMenu>
