@@ -122,7 +122,7 @@ const CustomerCard: React.FC<CardProps> = ({ logo, title, name, position, href }
       <div className='p-12 bg-signoz_ink-400 border border-signoz_slate-400 rounded cursor-pointer hover:bg-signoz_ink-300 min-h-[19rem] group'>
         <div className='flex flex-col gap-3'>
         <div className='flex items-start h-12 mb-4'>
-            <img src={logo} className='object-contain max-h-10 max-w-32' />
+            <img src={logo} className='object-contain min-h-10 max-w-32' />
           </div>
           <div className='text-base font-semibold'>{title}</div>
           <div>

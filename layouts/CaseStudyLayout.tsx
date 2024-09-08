@@ -37,10 +37,10 @@ export default function CaseStudyLayout({ content, children, toc }: CaseStudyLay
             </article>
           </div>
 
-          <div className="customer-toc w-full md:w-[300px] py-4 bg-signoz_ink-400 border border-signoz_slate-400 rounded">
+          <div className="customer-toc w-full md:w-[300px] pt-4 bg-signoz_ink-400 border border-signoz_slate-400 rounded">
             {content.logo && (
               <div className="mb-4">
-                <img src={content.logo} alt={`${title} logo`} className="object-contain h-12 w-auto mx-auto p-1" />
+                <img src={content.logo} alt={`${title} logo`} className="object-contain min-h-16 max-w-56 mx-auto p-1 " />
               </div>
             )}
             <div className='border-t border-signoz_slate-500'>
@@ -62,19 +62,18 @@ export default function CaseStudyLayout({ content, children, toc }: CaseStudyLay
                 </div>
               </div>
 
-              <div className='flex justify-between mt-2 border-t border-signoz_slate-500 group'>
-                <div className='flex gap-1.5 items-center mt-4 px-4'>
-                  <Globe size={14} />    <a href={`//${content.website}`} target='_blank' rel='noopener noreferrer' className='text-sm'>
+                <a href={`//${content.website}`} target='_blank' className='text-sm flex justify-between border-t border-signoz_slate-500 group hover:bg-signoz_ink-300 py-4'>
+                  <div className='flex gap-1.5 items-center px-4'>
+                    <Globe size={14} />
                     {content.website}
-                  </a>
-                </div>
-                <div className='mt-auto flex justify-end px-4'>
-                  <ArrowRight size={14} className='transform transition-transform group-hover:translate-x-1' />
-                </div>
+                  </div>
+                  <div className='flex items-center px-4 cursor-pointer'>
+                    <ArrowRight size={14} className='transform transition-transform group-hover:translate-x-1' />
+                  </div>
+                </a>
               </div>
             </div>
           </div>
-        </div>
       </div>
       <GetStarted page='case-study' />
     </>
