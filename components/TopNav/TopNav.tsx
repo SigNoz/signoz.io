@@ -81,7 +81,7 @@ const productDropdownItems = [
 ]
 
 // Sort the productDropdownItems based on the 'order' property
-const sortedLinksData = [...productDropdownItems].sort((a, b) => a.order - b.order)
+const productDropdownItemsForMobile = [...productDropdownItems].sort((a, b) => a.order - b.order)
 
 const resourcesDropdownItems = [
   {
@@ -340,7 +340,7 @@ export default function TopNav() {
               <div className="-my-6 divide-y divide-gray-500/10">
                 {showMainMenu && (
                   <div className="space-y-2 py-8">
-                    <Accordion topic="Product" subtopics={sortedLinksData} />
+                    <Accordion topic="Product" subtopics={productDropdownItemsForMobile} />
                     <Link
                       href="/docs"
                       className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 hover:bg-signoz_ink-200"
