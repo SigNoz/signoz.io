@@ -1569,6 +1569,24 @@ const docsSideNav = [
           },
         ],
       },
+      {
+        label: 'Cloud Run',
+        type: 'category',
+        isExpanded: false,
+        route: '/docs/gcp-monitoring/cloud-run',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/gcp-monitoring/cloud-run/cloud-run-setup',
+            label: 'Cloud Run Service Setup',
+          },
+          {
+            type: 'doc', 
+            route: '/docs/gcp-monitoring/cloud-run/logging',
+            label: 'Logging',
+          },
+        ],
+      },
     ],
   },
   {
