@@ -1,11 +1,11 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Button, Dialog, Popover } from '@headlessui/react'
+import { Button, Dialog } from '@headlessui/react'
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
 import Image from 'next/image'
 import Link from 'next/link'
-import { ArrowBigLeft, ArrowDown, ArrowRight, ChevronDown, MoveLeft } from 'lucide-react'
+import { ArrowBigLeft, ArrowRight, ChevronDown } from 'lucide-react'
 import SearchButton from '../SearchButton'
 import GitHubStars from '../GithubStars/GithubStars'
 import React from 'react'
@@ -13,30 +13,110 @@ import DocsSidebar from '../DocsSidebar/DocsSidebar'
 import { usePathname } from 'next/navigation'
 import Banner from '../Banner/Banner'
 import Tabs from '../../app/resource-center/Shared/Tabs'
-import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, } from "@nextui-org/react";
-import Accordion from '../Accordion/Accordion';
+import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from '@nextui-org/react'
+import Accordion from '../Accordion/Accordion'
 
 enum TABS {
   BLOG = 'blog-tab',
   COMPARISONS = 'comparisons-tab',
   GUIDES = 'guides-tab',
-  OPENTELEMETRY = 'openTelemetry-tab'
+  OPENTELEMETRY = 'openTelemetry-tab',
 }
 
 enum TAB_PATHNAMES {
   BLOG = '/resource-center/blog',
   COMPARISONS = '/resource-center/comparisons',
   GUIDES = '/resource-center/guides',
-  OPENTELEMETRY = '/resource-center/opentelemetry'
+  OPENTELEMETRY = '/resource-center/opentelemetry',
 }
+const productDropdownItems = [
+  {
+    key: 'apm',
+    url: '/application-performance-monitoring',
+    icon: '/img/index_features/bar-chart-2_feature.svg',
+    description: 'Monitor your applications',
+    name: 'APM',
+    order: 1,
+  },
+  {
+    key: 'Alerts',
+    url: '/alerts-management',
+    icon: '/img/index_features/concierge-bell_feature.svg',
+    description: 'Stay aware with alerts',
+    name: 'Alerts',
+    order: 5,
+  },
+  {
+    key: 'DistributedTracing',
+    url: '/distributed-tracing',
+    icon: '/img/index_features/drafting-compass_feature.svg',
+    description: 'Track requests across services',
+    name: 'Distributed Tracing',
+    order: 3,
+  },
+  {
+    key: 'MetricsDashboards',
+    url: '/metrics-and-dashboards',
+    icon: '/img/index_features/layout-grid_feature.svg',
+    description: 'Monitor metrics & build dashboards',
+    name: 'Metrics & Dashboards',
+    order: 4,
+  },
+  {
+    key: 'LogManagement',
+    url: '/log-management',
+    icon: '/img/index_features/logs_feature.svg',
+    description: 'Unlock insights from logs',
+    name: 'Log Management',
+    order: 2,
+  },
+  {
+    key: 'Exceptions',
+    url: '/exceptions-monitoring',
+    icon: '/img/index_features/bug_feature.svg',
+    description: 'Record exceptions automatically',
+    name: 'Exceptions',
+    order: 6,
+  },
+]
+
+// Sort the productDropdownItems based on the 'order' property
+const productDropdownItemsForMobile = [...productDropdownItems].sort((a, b) => a.order - b.order)
+
+const resourcesDropdownItems = [
+  {
+    key: 'blog',
+    url: '/resource-center/blog',
+    description: 'News, ideas, and insights on observability',
+    name: 'Blog',
+  },
+  {
+    key: 'comparisons',
+    url: '/resource-center/comparisons',
+    description: 'Compare observability tools',
+    name: 'Comparisons',
+  },
+  {
+    key: 'guides',
+    url: '/resource-center/guides',
+    description: 'How-to guides and tutorials',
+    name: 'Guides',
+  },
+  {
+    key: 'examples',
+    url: '/resource-center/opentelemetry',
+    description: 'OpenTelemetry concepts and its use cases',
+    name: 'OpenTelemetry',
+  },
+]
 
 export default function TopNav() {
   const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [isDocsBasePath, setIsDocsBasePath] = useState(false)
   const [showMainMenu, setShowMainMenu] = useState(false)
-  const [activeTab, setActiveTab] = useState(TABS.GUIDES);
-  const [shouldShowTabs, setShouldShowTabs] = useState(false);
+  const [activeTab, setActiveTab] = useState(TABS.GUIDES)
+  const [shouldShowTabs, setShouldShowTabs] = useState(false)
 
   useEffect(() => {
     const isDocsBasePath = pathname.startsWith('/docs')
@@ -50,35 +130,33 @@ export default function TopNav() {
 
     if (pathname.startsWith(TAB_PATHNAMES.BLOG)) {
       setActiveTab(TABS.BLOG)
-      setShouldShowTabs(true);
+      setShouldShowTabs(true)
     } else if (pathname.startsWith(TAB_PATHNAMES.COMPARISONS)) {
       setActiveTab(TABS.COMPARISONS)
-      setShouldShowTabs(true);
+      setShouldShowTabs(true)
     } else if (pathname.startsWith(TAB_PATHNAMES.GUIDES)) {
       setActiveTab(TABS.GUIDES)
-      setShouldShowTabs(true);
+      setShouldShowTabs(true)
     } else if (pathname.startsWith(TAB_PATHNAMES.OPENTELEMETRY)) {
       setActiveTab(TABS.OPENTELEMETRY)
-      setShouldShowTabs(true);
+      setShouldShowTabs(true)
     } else {
-      setShouldShowTabs(false);
+      setShouldShowTabs(false)
     }
   }, [pathname])
 
-
-  const [isOpen, setIsOpen] = useState(false);
-  const [isOpenResources, setIsOpenResources] = useState(false);
+  const [isOpen, setIsOpen] = useState(false)
+  const [isOpenResources, setIsOpenResources] = useState(false)
 
   return (
     <div className="fixed left-0 right-0 z-30">
-
       <Banner />
 
       <header
         className={`header-bg mx-auto box-border flex h-[56px] w-full items-center border-b border-signoz_slate-500 px-4 text-signoz_vanilla-100 backdrop-blur-[20px] dark:text-signoz_vanilla-100 md:px-8 lg:px-8`}
       >
         <nav
-          className="flex w-full justify-between text-signoz_vanilla-100 dark:text-signoz_vanilla-100 container"
+          className="container flex w-full justify-between text-signoz_vanilla-100 dark:text-signoz_vanilla-100"
           aria-label="Global"
         >
           <div className="flex justify-start gap-x-6">
@@ -97,15 +175,16 @@ export default function TopNav() {
 
               <span className="text-[17.111px] font-medium">SigNoz</span>
             </Link>
-            <Popover.Group className="hidden items-center gap-x-6 lg:flex">
+            <div className="hidden items-center gap-x-6 lg:flex">
               <div
                 onMouseEnter={() => setIsOpen(true)}
                 onMouseLeave={() => setIsOpen(false)}
+                className="flex items-center"
               >
                 <Dropdown
-                  className='px-4'
-                  placement='bottom-start'
-                  classNames={{ base: "top-[9px]" }}
+                  className="px-4"
+                  placement="bottom-start"
+                  classNames={{ base: 'top-[9px]' }}
                   isOpen={isOpen}
                   onMouseLeave={() => setIsOpen(false)}
                 >
@@ -114,126 +193,55 @@ export default function TopNav() {
                       className="truncate px-1.5 py-1 text-sm font-extralight hover:text-signoz_robin-500 "
                       onMouseEnter={() => setIsOpen(true)}
                     >
-                      <div className='flex items-center'>
-
+                      <div className="flex items-center">
                         Product
                         <ChevronDown
                           size={12}
-                          className={`ml-1 transform transition-transform duration-300 ease-in-out ${isOpen ? 'rotate-180' : 'rotate-0'}`} />
+                          className={`ml-1 transform transition-transform duration-300 ease-in-out ${isOpen ? 'rotate-180' : 'rotate-0'}`}
+                        />
                       </div>
                     </Button>
                   </DropdownTrigger>
                   <DropdownMenu
                     aria-label="Static Actions"
-                    classNames={{ list: "pl-1 grid grid-cols-2 w-max gap-3 items-center" }}
+                    classNames={{ list: 'pl-1 grid grid-cols-2 w-max gap-3 items-center h-auto' }}
                     topContent={
-                      <div className="text-[13px] leading-5 font-semibold px-4 py-2 uppercase text-[#3C4152]">
+                      <div className="px-4 py-2 text-[13px] font-semibold uppercase leading-5 text-[#3C4152]">
                         Product
                       </div>
                     }
                   >
-                    <DropdownItem
-                      key="apm"
-                      href='/application-performance-monitoring/'
-                      startContent={<Image
-                        src="/img/index_features/bar-chart-2_feature.svg"
-                        alt="Bar Chart Icon"
-                        width={20}
-                        height={20}
-                        className='mr-2'
-                      />}
-                      description="Monitor your applications"
-                    >
-                      APM
-                    </DropdownItem>
-                    <DropdownItem
-                      key="Alerts"
-                      href='/alerts-management/'
-                      startContent={<Image
-                        src="/img/index_features/concierge-bell_feature.svg"
-                        alt="Drafting Compass Icon"
-                        width={20}
-                        height={20}
-                        className='mr-2'
-                      />}
-                      description="Stay aware with alerts"
-                    >
-                      Alerts
-                    </DropdownItem>
-                    <DropdownItem
-                      key="DistributedTracing"
-                      href='/distributed-tracing/'
-                      startContent={<Image
-                        src="/img/index_features/drafting-compass_feature.svg"
-                        alt="Drafting Compass Icon"
-                        width={20}
-                        height={20}
-                        className='mr-2'
-                      />}
-                      description="Track requests across services"
-                    >
-                      Distributed Tracing
-                    </DropdownItem>
-                    <DropdownItem
-                      key="MetricsDashboards"
-                      href='/metrics-and-dashboards/'
-                      startContent={<Image
-                        src="/img/index_features/layout-grid_feature.svg"
-                        alt="Drafting Compass Icon"
-                        width={20}
-                        height={20}
-                        className='mr-2'
-                      />}
-                      description="Monitor metrics & build dashboards"
-                    >
-                      Metrics & Dashboards
-                    </DropdownItem>
-                    <DropdownItem
-                      key="LogManagement"
-                      href='/log-management/'
-                      startContent={<Image
-                        src="/img/index_features/logs_feature.svg"
-                        alt="Logs Icon"
-                        width={20}
-                        height={20}
-                        className='mr-2'
-                      />}
-                      description="Unlock insights from logs"
-                    >
-                      Log Management
-                    </DropdownItem>
-                    <DropdownItem
-                      key="Exceptions"
-                      href='/exceptions-monitoring/'
-                      startContent={<Image
-                        src="/img/index_features/bug_feature.svg"
-                        alt="Drafting Compass Icon"
-                        width={20}
-                        height={20}
-                        className='mr-2'
-                      />}
-                      description="Record exceptions automatically"
-                    >
-                      Exceptions
-                    </DropdownItem>
+                    {productDropdownItems.map((item) => (
+                      <DropdownItem key={item.key} className="h-auto">
+                        <Link href={item.url} className="flex items-center gap-4">
+                          <Image src={item.icon} alt={`${item.name} Icon`} width={20} height={20} />
+                          <div>
+                            <div>{item.name}</div>
+                            <div className="text-xs text-gray-400">{item.description}</div>
+                          </div>
+                        </Link>
+                      </DropdownItem>
+                    ))}
                   </DropdownMenu>
                 </Dropdown>
               </div>
 
               <Link
                 href="/docs"
-                className={`truncate px-1.5 py-1  text-sm font-normal hover:text-signoz_robin-500`}
+                className="flex items-center truncate px-1.5 py-1 text-sm font-normal hover:text-signoz_robin-500"
               >
                 Documentation
               </Link>
 
               <div
                 onMouseEnter={() => setIsOpenResources(true)}
-                onMouseLeave={() => setIsOpenResources(false)}>
+                onMouseLeave={() => setIsOpenResources(false)}
+                className="flex items-center"
+              >
                 <Dropdown
-                  className='px-4'
-                  placement='bottom-start'
-                  classNames={{ base: "top-[6px]" }}
+                  className="px-4"
+                  placement="bottom-start"
+                  classNames={{ base: 'top-[6px]' }}
                   isOpen={isOpenResources}
                   onMouseLeave={() => setIsOpenResources(false)}
                 >
@@ -242,67 +250,49 @@ export default function TopNav() {
                       className="truncate px-1.5 py-1 text-sm !font-extralight leading-7 text-signoz_vanilla-100 hover:text-signoz_robin-500"
                       onMouseEnter={() => setIsOpenResources(true)}
                     >
-                      <div className='flex items-center'>
-
+                      <div className="flex items-center">
                         Resources
-                        <ChevronDown size={12} className={`ml-1 transform transition-transform duration-300 ease-in-out ${isOpenResources ? 'rotate-180' : 'rotate-0'}`} />
+                        <ChevronDown
+                          size={12}
+                          className={`ml-1 transform transition-transform duration-300 ease-in-out ${isOpenResources ? 'rotate-180' : 'rotate-0'}`}
+                        />
                       </div>
                     </Button>
                   </DropdownTrigger>
                   <DropdownMenu
                     aria-label="Static Actions"
-                    classNames={{ list: "pl-0 w-max gap-3 items-center" }}
+                    classNames={{ list: 'pl-0 w-max gap-3 items-center' }}
                     topContent={
-                      <div className="text-[13px] leading-5 font-semibold pl-2 pr-4 py-2 uppercase text-[#3C4152]">
+                      <div className="py-2 pl-2 pr-4 text-[13px] font-semibold uppercase leading-5 text-[#3C4152]">
                         Resources
                       </div>
                     }
                   >
-                    <DropdownItem
-                      key="blog"
-                      href='/resource-center/blog/'
-                      description="News, ideas, and insights on observability"
-                    >
-                      Blog
-                    </DropdownItem>
-                    <DropdownItem
-                      key="comparisons"
-                      href='/resource-center/comparisons/'
-                      description="Compare observability tools"
-                    >
-                      Comparisons
-                    </DropdownItem>
-                    <DropdownItem
-                      key="guides"
-                      href='/resource-center/guides/'
-                      description="How-to guides and tutorials"
-                    >
-                      Guides
-                    </DropdownItem>
-                    <DropdownItem
-                      key="examples"
-                      href='/resource-center/opentelemetry/'
-                      description="OpenTelemetry concepts and its use cases"
-                    >
-                      OpenTelemetry
-                    </DropdownItem>
+                    {resourcesDropdownItems.map((item) => (
+                      <DropdownItem key={item.key} className="h-auto">
+                        <Link href={item.url} className="flex flex-col">
+                          <div>{item.name}</div>
+                          <div className="text-xs text-gray-400">{item.description}</div>
+                        </Link>
+                      </DropdownItem>
+                    ))}
                   </DropdownMenu>
                 </Dropdown>
               </div>
 
               <Link
                 href="/pricing"
-                className={`truncate px-1.5 py-1 text-sm font-normal hover:text-signoz_robin-500`}
+                className="flex items-center truncate px-1.5 py-1 text-sm font-normal hover:text-signoz_robin-500"
               >
                 Pricing
               </Link>
               <Link
                 href="/case-study"
-                className={`truncate px-1.5 py-1 text-sm font-normal hover:text-signoz_robin-500`}
+                className="flex items-center truncate px-1.5 py-1 text-sm font-normal hover:text-signoz_robin-500"
               >
                 Customer Stories
               </Link>
-            </Popover.Group>
+            </div>
           </div>
           <div className="flex justify-end lg:hidden">
             <button
@@ -319,14 +309,13 @@ export default function TopNav() {
             </button>
           </div>
 
-
-          <div className="hidden gap-3 lg:flex lg:flex-1 lg:justify-end" >
+          <div className="hidden gap-3 lg:flex lg:flex-1 lg:justify-end">
             <SearchButton />
             <GitHubStars />
 
             <Button
               id="btn-get-started-website-navbar"
-              className="start-free-trial-btn h-8 pr-3 pl-4 px-4 py-2 rounded-full text-sm flex items-center justify-center gap-1.5 not-italic truncate text-center font-medium leading-5 text-white no-underline outline-none hover:text-white mx-2"
+              className="start-free-trial-btn mx-2 flex h-8 items-center justify-center gap-1.5 truncate rounded-full px-4 py-2 pl-4 pr-3 text-center text-sm font-medium not-italic leading-5 text-white no-underline outline-none hover:text-white"
             >
               <Link href="/teams" className="flex-center">
                 Try SigNoz Cloud <ArrowRight size={14} />
@@ -346,17 +335,7 @@ export default function TopNav() {
               <div className="-my-6 divide-y divide-gray-500/10">
                 {showMainMenu && (
                   <div className="space-y-2 py-8">
-                    <Accordion
-                      topic="Product"
-                      subtopics={[
-                        { icon: '/img/index_features/bar-chart-2_feature.svg', name: 'APM', url: '/application-performance-monitoring/', description: 'Monitor your applications'  },
-                        { icon: '/img/index_features/logs_feature.svg', name: 'Log Management', url: '/log-management/', description: 'Unlock insights from logs' },
-                        { icon: '/img/index_features/drafting-compass_feature.svg', name: 'Distributed Tracing', url: '/distributed-tracing/', description: 'Track requests across services' },
-                        { icon: '/img/index_features/layout-grid_feature.svg', name: 'Metrics & Dashboards', url: '/metrics-and-dashboards/', description: 'Monitor metrics & build dashboards' },
-                        { icon: '/img/index_features/concierge-bell_feature.svg', name: 'Alerts', url: '/alerts-management/', description: 'Stay aware with alerts' },
-                        { icon: '/img/index_features/bug_feature.svg', name: 'Exceptions', url: '/exceptions-monitoring/', description: 'Record exceptions automatically' }
-                      ]}
-                    />
+                    <Accordion topic="Product" subtopics={productDropdownItemsForMobile} />
                     <Link
                       href="/docs"
                       className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 hover:bg-signoz_ink-200"
@@ -365,15 +344,7 @@ export default function TopNav() {
                       Documentation
                     </Link>
 
-                    <Accordion
-                      topic="Resources"
-                      subtopics={[
-                        { name: 'Blog', url: '/resource-center/blog/', description: 'News, ideas, and insights on observability'  },
-                        { name: 'Comaprisons', url: '/resource-center/comparisons/', description: 'Compare observability tools' },
-                        { name: 'Guides', url: '/resource-center/guides/', description: 'How-to guides and tutorials' },
-                        { name: 'Opentelemetery', url: '/resource-center/opentelemetry/', description: 'OpenTelemetry concepts and its use cases' },
-                      ]}
-                    />
+                    <Accordion topic="Resources" subtopics={resourcesDropdownItems} />
                     <Link
                       href="/pricing"
                       className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 hover:bg-signoz_ink-200"
@@ -431,11 +402,7 @@ export default function TopNav() {
         </Dialog>
       </header>
 
-      {
-        shouldShowTabs ?
-          <Tabs activeTab={activeTab} /> : null
-      }
+      {shouldShowTabs ? <Tabs activeTab={activeTab} /> : null}
     </div>
   )
 }
-
