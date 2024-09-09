@@ -1,0 +1,157 @@
+---
+date: 2024-08-20
+id: cloud-sql-creation
+title: Creating Cloud SQL
+hide_table_of_contents: true
+---
+
+## Overview
+
+This document guides you on how to launch the Cloud SQL instance on GCP.
+
+### Launch Cloud SQL instance
+
+- On the GCP Console, search for `SQL`, and navigate to the `SQL` GCP service. Click on **CREATE INSTANCE** button.
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/cloud-sql/cloud-sql-creation/create-instance.webp"
+        alt="Create Cloud SQL Instance"
+    />
+<figcaption>
+<i>
+Create Cloud SQL Instance
+</i>
+</figcaption>
+</figure>
+
+- You can choose any database engine of your choice: MySQL, PostgreSQL or SQL Server. In this case, we will choose MySQL. Click on **Choose MySQL** button.
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/cloud-sql/cloud-sql-creation/choose-mysql.webp"
+        alt="Choose MySQL"
+    />
+<figcaption>
+<i>
+Choose MySQL
+</i>
+</figcaption>
+</figure>
+
+- Choose an appropriate **Cloud SQL edition** as per your requirements. Same for **Edition Preset**.
+- It is recommended to choose the latest Database version. We are choosing **MySQL 8.0**.
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/cloud-sql/cloud-sql-creation/create-instance-part1.webp"
+        alt="Create Cloud SQL Instance"
+    />
+<figcaption>
+<i>
+Create Cloud SQL Instance
+</i>
+</figcaption>
+</figure>
+
+- Provide an appropriate **Instance ID** for your instance. This is the name of your database instance.
+- Provide an appropriate **Password** for the root user. Note this password with you as this would be required later for connecting to the root user.
+- Choose **Region** and **Zonal availability** as per your requirement.
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/cloud-sql/cloud-sql-creation/create-instance-part2.webp"
+        alt="Create Cloud SQL Instance Continued.."
+    />
+<figcaption>
+<i>
+Create Cloud SQL Instance Continued..
+</i>
+</figcaption>
+</figure>
+
+- Click on **SHOW CONFIGURATION OPTIONS** tab on the bottom.
+- Click on the **Connections** dropdown, and ensure that **Public IP** is enabled.
+- In the **Connections** section itself, click on **ADD A NETWORK** button, and in the textboxes that show up, provide a name to the network, say `public`, and in the **Network** textbox, put the value as `0.0.0.0/0`.
+With this we will be accepting the connections from all the IP addresses. Click on **Done**.
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/cloud-sql/cloud-sql-creation/add-network.webp"
+        alt="Add a Network"
+    />
+<figcaption>
+<i>
+Add a Network
+</i>
+</figcaption>
+</figure>
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/cloud-sql/cloud-sql-creation/provide-network-config.webp"
+        alt="Provide Network Configuration"
+    />
+<figcaption>
+<i>
+Provide Network Configuration
+</i>
+</figcaption>
+</figure>
+
+- In case you want the logs related to all the statements being executed on the database, you need to turn on the **general_log** flag.
+For this, click on the **Flags** dropdown. From **Choose a flag** dropdown, choose `general_log`, and ensure the **Value** is `On`. Click on **Done**.
+
+<Admonition type="warning">
+Turning the `general_log` flag on will start logging all the queries made to the database including the heartbeat queries. This might lead to a huge increase in the number of logs impacting the cost.
+</Admonition>
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/cloud-sql/cloud-sql-creation/add-database-flag.webp"
+        alt="Add Database Flag"
+    />
+<figcaption>
+<i>
+Add Database Flag
+</i>
+</figcaption>
+</figure>
+
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/cloud-sql/cloud-sql-creation/add-general-log-flag.webp"
+        alt="Add general_log Flag"
+    />
+<figcaption>
+<i>
+Add `general_log` Flag
+</i>
+</figcaption>
+</figure>
+  
+- Click on **CREATE INSTANCE** button at the bottom of the page to create the Cloud SQL instance.
+- It might take around 5 minutes to create the Cloud SQL instance.
+
+### Connecting to Cloud SQL instance
+
+- Go the Cloud SQL instance's page.
+- The `Public IP` mentioned on this page can be used as the host.
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/cloud-sql/cloud-sql-creation/instance-public-ip.webp"
+        alt="Public IP of the Cloud SQL Instance"
+    />
+<figcaption>
+<i>
+Public IP of the Cloud SQL Instance
+</i>
+</figcaption>
+</figure>
+
+- The port for connecting to the MySQL instance will be `3306`.
+- For user `root`, the password will be the one provided by you while creating the CloudSQL instance.
+- You can create more users by going to the `Users` page from the left navigation menu.
+- You can look for the available databases in this instance by navigating to the `Databases` page from the left navigation menu. You can also choose to create a new database on this page.

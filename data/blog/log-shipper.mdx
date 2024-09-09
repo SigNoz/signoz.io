@@ -1,30 +1,27 @@
 ---
-title: What is a log shipper - Top 7 Log Shippers that you can use
+
+title: Log Shipper - What Is It and Top 7 Tools
 slug: log-shipper
-date: 2022-12-20
+date: 2024-09-03
 tags: [Tech Tutorial]
 authors: [satyam]
-description: Choosing a log shipper for your log analytics pipeline? Here's a guide to log shippers, why we need them and a list of top 7 log shippers..
+description: Discover the power of log shippers for efficient data collection. Learn about types, features, and best practices in this comprehensive guide.
 image: /img/blog/2022/12/log_shipper_cover.webp
 keywords: [log shipper,log management,log analytics]
+
 ---
-<head>
-  <link rel="canonical" href="https://signoz.io/blog/log-shipper/"/>
-</head>
 
 Centralizing logs (arranging all records in one place) is often challenging as we need to decide whether to use a log shipper or directly log from the application.
 
 If you are not familiar with a log shipper, logging directly from the library might be a suitable option for development (it is easy to configure). However, in production, you'll likely want to use one of the available log shippers, mainly due to buffers, since blocking the application or dropping data (immediately) may not be an option.
 
-
-
-![Cover Image](/img/blog/2022/12/log_shipper_cover.webp)
-
 In this article, you will see what log shippers are, why you should use them, and a list of top log shippers that you can use.
 
 ## What is a Log Shipper?
 
-Log shippers are tools used for `collecting and sending logs` to a final destination. They send logs (or log files) easily and reliably from a file-based data source to a supported output destination. 
+Log shippers are tools used for `collecting and sending logs` to a final destination. They send logs (or log files) easily and reliably from a file-based data source to a supported output destination.
+
+They act as the middlemen between your log-generating applications and your log storage or analysis platform.
 
 You will either write your logs to a file or a socket. Log shippers are responsible for transporting raw logs to log management tools.
 
@@ -37,6 +34,83 @@ There are some reasons to use log shippers.
 - **Enriching:** The log shipper can process additional data, such as pulling hostnames or tagging IPs with the location.
 - **Performance:** A log shipper can process data and send it to log management tools in bulk.
 - **Fanout:** Log shippers make it easy to send logs to multiple destinations.
+
+By using log shippers, you simplify log management, improve system observability, and enable faster problem resolution.
+
+## The Anatomy of a Log Shipper: Key Components
+
+To understand how log shippers work, let's break down their key components:
+
+1. **Input Plugins**: These components collect data from various sources, such as log files, syslog, metrics, or application APIs.
+2. **Processing Pipeline**: This stage parses, filters, and transforms the collected data. It may include operations like:
+    - Parsing unstructured logs into structured formats
+    - Filtering out unnecessary data
+    - Enriching logs with additional metadata
+3. **Output Plugins**: These components forward the processed data to one or more destinations, such as Elasticsearch, Logstash, or cloud storage services.
+4. **Configuration**: Log shippers use configuration files to define input sources, processing rules, and output destinations.
+5. **Buffer**: Many log shippers include a buffer to temporarily store data in case of network issues or high data volumes.
+
+Understanding these components helps you configure and optimize your log shipper for your specific needs.
+
+## Types of Log Shippers: Push vs. Pull Models
+
+Log shippers generally fall into two categories: push-based and pull-based models.
+
+### Push-based Log Shippers
+
+Push-based log shippers actively send log data to a central collection point. They typically run as agents on the source systems and forward logs as they are generated.
+
+**Pros:**
+
+- Real-time log forwarding
+- Lower latency in log collection
+- Easier to implement for distributed systems
+
+**Cons:**
+
+- Requires installation and management of agents on all source systems
+- May increase network traffic
+
+**Use cases:**
+
+- Real-time monitoring and alerting
+- Distributed systems with many log sources
+
+### Pull-based Log Shippers
+
+Pull-based log shippers retrieve logs from source systems on a scheduled basis or when triggered externally.
+
+**Pros:**
+
+- Centralized control over log collection
+- No need to install agents on source systems
+- Can reduce network load by batching log transfers
+
+**Cons:**
+
+- Potential for increased latency in log collection
+- May miss logs if the collection interval is too long
+
+**Use cases:**
+
+- Compliance and audit logging
+- Batch processing of logs
+
+The choice between push and pull models depends on your specific requirements for latency, network utilization, and system architecture.
+
+## Factors to Consider When Choosing a Log Shipper
+
+Selecting the right log shipper is crucial for effective log management. Consider these factors:
+
+1. **Compatibility**: Ensure the log shipper supports your existing infrastructure, including log sources and destination systems.
+2. **Performance**: Evaluate the log shipper's ability to handle your expected log volume without significant resource consumption.
+3. **Scalability**: Choose a solution that can grow with your infrastructure and handle increasing data volumes.
+4. **Ease of Use**: Consider the complexity of configuration and maintenance required for each log shipper.
+5. **Security**: Look for features like encryption, authentication, and access control to protect your log data.
+6. **Flexibility**: Opt for a log shipper that supports a wide range of input sources and output destinations to future-proof your setup.
+7. **Community Support**: A strong community and good documentation can be invaluable when troubleshooting or extending your log shipper.
+
+By carefully evaluating these factors, you can choose a log shipper that best fits your organization's needs and technical capabilities.
 
 ## Top 7 Log Shippers that you can consider
 
@@ -52,26 +126,23 @@ Below is the list of the top log shippers:
 
 Let’s discuss them one by one.
 
-
 ### Fluentd
 
-<a href = "https://docs.fluentd.org/" rel="noopener noreferrer nofollow" target="_blank" >Fluentd</a> is an open-source unified log collector which means it collects logs from various sources like system logs, app logs, etc., and unifies them into one `logging layer`. It allows you to ship log data to various systems such as SigNoz, Elasticsearch, Hadoop, AWS, etc. 
+<a href = "https://docs.fluentd.org/" rel="noopener noreferrer nofollow" target="_blank" >Fluentd</a> is an open-source unified log collector which means it collects logs from various sources like system logs, app logs, etc., and unifies them into one `logging layer`. It allows you to ship log data to various systems such as SigNoz, Elasticsearch, Hadoop, AWS, etc.
 
 With Fluentd, you can collect all the data, regardless of where it came from. It transforms them into a unified format all in one place so that you can use the data again for compliance or debugging, etc. Fluentd does this reliably, which means if there is a network outage or data spikes, this shouldn’t mess up data collection.
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2022/12/fluentd_architecture.webp" alt="FluentD architecture"/>
-    <figcaption><i>Architecture of FluentD</i></figcaption>
+<img src="/img/blog/2022/12/fluentd_architecture.webp" alt="FluentD architecture"/>
+<figcaption><i>Architecture of FluentD</i></figcaption>
 </figure>
-
 
 Fluentd scrapes all logs from a given source, converts them to a structured data format, and then forwards them to services, such as SigNoz, Elasticsearch, etc.
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2022/12/fluentd_working.webp" alt="Working of FluentD"/>
-    <figcaption><i>Use ClickHouse queries to set alerts on logs, metrics, and traces</i></figcaption>
+<img src="/img/blog/2022/12/fluentd_working.webp" alt="Working of FluentD"/>
+<figcaption><i>Use ClickHouse queries to set alerts on logs, metrics, and traces</i></figcaption>
 </figure>
-
 
 ### Filebeat
 
@@ -89,38 +160,35 @@ Filebeat has two components:
 The below diagram is the architecture of Filebeat.
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2022/12/filebeat.webp" alt="Filebeat architecture"/>
-    <figcaption><i>The architecture of Filebeat (Source: elastic.co)</i></figcaption>
+<img src="/img/blog/2022/12/filebeat.webp" alt="Filebeat architecture"/>
+<figcaption><i>The architecture of Filebeat (Source: [elastic.co](http://elastic.co/))</i></figcaption>
 </figure>
-
 
 ### Rsyslog
 
-<a href = "https://www.rsyslog.com/" rel="noopener noreferrer nofollow" target="_blank" >RSYSLOG</a> is a rocket-fast system for log processing. It’s an open-source software that forwards log messages over IP networks. It takes input from many sources and outputs it to many destinations. 
+<a href = "https://www.rsyslog.com/" rel="noopener noreferrer nofollow" target="_blank" >RSYSLOG</a> is a rocket-fast system for log processing. It’s an open-source software that forwards log messages over IP networks. It takes input from many sources and outputs it to many destinations.
 
 RSYSLOG has a modular design, offers excellent security, and provides high performance. It is capable of sending over `one million messages per second` to a local destination when limited processing is used.
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2022/12/rsyslog_architecture.webp" alt="Alert based on ClickHouse query"/>
-    <figcaption><i>Rsyslog can take input from many sources and send it over to a final destination</i></figcaption>
+<img src="/img/blog/2022/12/rsyslog_architecture.webp" alt="Alert based on ClickHouse query"/>
+<figcaption><i>Rsyslog can take input from many sources and send it over to a final destination</i></figcaption>
 </figure>
-
 
 ### Syslog
 
-SYSLOG (System Logging Protocol) allows *Linux/Unix/Windows* systems and devices (such as routers, switches, etc.) to deliver log and event information to a central log/event message collector, which is called a *`Syslog server`*.
+SYSLOG (System Logging Protocol) allows *Linux/Unix/Windows* systems and devices (such as routers, switches, etc.) to deliver log and event information to a central log/event message collector, which is called a `*Syslog server*`.
 
-The Syslog server allows all of its network devices to send their log information to one centralized place. The log message will be sent on *`UDP port 514`* to the Syslog server. Syslog servers are also known as collectors or receivers.
+The Syslog server allows all of its network devices to send their log information to one centralized place. The log message will be sent on `*UDP port 514*` to the Syslog server. Syslog servers are also known as collectors or receivers.
 
 Syslog is capable of generating a large number of messages, and it forwards these messages as quickly as they are generated. A Syslog server is capable of filtering and responding to Syslog messages.
 
 One of the *disadvantages of the Syslog protocol* is that it does not provide any form of security mechanism, and there is no built-in mechanism for identifying incoming messages.
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2022/12/syslog_server.webp" alt="Architecture of Syslog Server"/>
-    <figcaption><i>Architecture of Syslog Server</i></figcaption>
+<img src="/img/blog/2022/12/syslog_server.webp" alt="Architecture of Syslog Server"/>
+<figcaption><i>Architecture of Syslog Server</i></figcaption>
 </figure>
-
 
 ### Logstash
 
@@ -135,10 +203,9 @@ Logstash includes more than `200` plugins, and you can also write your own very 
 3. The data is then output to a storage destination, such as Elasticsearch or a file.
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2022/12/logstash_basic_architecture.webp" alt="Basic Architecture of Logstash"/>
-    <figcaption><i>Basic Architecture of Logstash</i></figcaption>
+<img src="/img/blog/2022/12/logstash_basic_architecture.webp" alt="Basic Architecture of Logstash"/>
+<figcaption><i>Basic Architecture of Logstash</i></figcaption>
 </figure>
-
 
 ### Elasticbeat
 
@@ -155,60 +222,149 @@ A key benefit of Elasticbeat is that it can `run on multiple servers` and collec
 3. It sends the processed and enriched data to Elasticsearch for indexing and storage. Then, the collected data can be accessed and analyzed.
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2022/12/elastic_beats.webp" alt="Elastic Beats architecture"/>
-    <figcaption><i>Basic Architecture of Elasticbeat</i></figcaption>
+<img src="/img/blog/2022/12/elastic_beats.webp" alt="Elastic Beats architecture"/>
+<figcaption><i>Basic Architecture of Elasticbeat</i></figcaption>
 </figure>
-
 
 ### OpenTelemetry Collector
 
-OpenTelemetry Collector is one of the newest entrants in log collection tools. OpenTelemetry is an open source observability framework that aims to standardize the generation, collection, and management of telemetry data (logs, metrics, and traces). 
+OpenTelemetry Collector is one of the newest entrants in log collection tools. OpenTelemetry is an open source observability framework that aims to standardize the generation, collection, and management of telemetry data (logs, metrics, and traces).
 
 OpenTelemetry is a collection of client libraries, APIs, and SDKs that help in generating telemetry data. It provides [OpenTelemetry Collectors](https://signoz.io/blog/opentelemetry-collector-complete-guide/) as a stand-alone service. OpenTelemetry Collectors can be used to collect logs and send them to a final destination like [SigNoz](https://signoz.io/).
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2022/09/collector_pipeline.webp" alt="Architecture of OpenTelemetry Collector"/>
-    <figcaption><i>Architecture of OpenTelemetry Collector with receivers, processors and exporters.</i></figcaption>
+<img src="/img/blog/2022/09/collector_pipeline.webp" alt="Architecture of OpenTelemetry Collector"/>
+<figcaption><i>Architecture of OpenTelemetry Collector with receivers, processors and exporters.</i></figcaption>
 </figure>
-
 
 OpenTelemetry Collectors can collect logs from applications via file or stdout logs. It has different receivers like Filelog receivers to receive various kinds of logs. OpenTelemetry is quietly becoming the world standard for instrumentation, and it is a good choice to set up log collection.
 
 Once the logs are collected, you need to send them to a log management tool. You can use SigNoz, an open source APM that provides logs, metrics, and traces under a single pane of glass.
 
+## Setting Up Your First Log Shipper: A Step-by-Step Guide
+
+Let's walk through setting up a basic log shipping pipeline using Filebeat as an example:
+
+1. **Choose and Install Filebeat**:
+Download and install Filebeat from the official Elastic website.
+    
+    ```bash
+    curl -L -O <https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-7.12.0-linux-x86_64.tar.gz>
+    tar xzvf filebeat-7.12.0-linux-x86_64.tar.gz
+    
+    ```
+    
+2. **Configure Filebeat**:
+Edit the `filebeat.yml` configuration file to specify input sources and output destinations.
+    
+    ```yaml
+    filebeat.inputs:
+    - type: log
+      enabled: true
+      paths:
+        - /var/log/*.log
+    
+    output.elasticsearch:
+      hosts: ["localhost:9200"]
+    
+    ```
+    
+3. **Start Filebeat**:
+Run Filebeat to begin collecting and shipping logs.
+    
+    ```bash
+    ./filebeat -e -c filebeat.yml
+    
+    ```
+    
+4. **Verify Log Shipping**:
+Check your Elasticsearch instance to ensure logs are being received.
+
+This basic setup demonstrates the simplicity of getting started with log shipping. As you become more comfortable, you can explore advanced features and configurations.
+
+## Best Practices for Log Shipping
+
+To ensure efficient and reliable log shipping, follow these best practices:
+
+1. **Implement Log Rotation**: Use log rotation to manage file sizes and prevent disk space issues.
+2. **Use Structured Logging**: Encourage the use of structured logging in your applications to simplify parsing and analysis.
+3. **Monitor Your Log Shippers**: Set up monitoring for your log shipping process to quickly identify and resolve issues.
+4. **Implement Buffering**: Configure your log shipper to buffer data locally in case of network issues or downstream system failures.
+5. **Secure Your Log Data**: Use encryption for data in transit and implement access controls for your log storage.
+6. **Optimize Performance**: Tune your log shipper configuration to balance between real-time delivery and system resource usage.
+7. **Plan for Scalability**: Design your log shipping architecture to handle growth in log volume and sources.
+
+By following these practices, you can create a robust and efficient log shipping pipeline that scales with your needs.
+
+## Common Challenges in Log Shipping and How to Overcome Them
+
+Despite its benefits, log shipping can present some challenges. Here's how to address common issues:
+
+1. **High-Volume Log Streams**:
+    - Implement log sampling or filtering to reduce volume
+    - Use a log shipper with efficient resource usage, like Vector or Fluent Bit
+2. **Multi-Source and Multi-Destination Setups**:
+    - Choose a flexible log shipper that supports multiple inputs and outputs
+    - Use a centralized configuration management system for consistency
+3. **Data Security and Compliance**:
+    - Implement encryption for data in transit and at rest
+    - Use access controls and audit logging for your log shipping infrastructure
+4. **Connectivity and Configuration Issues**:
+    - Implement robust error handling and retry mechanisms
+    - Use a configuration management tool to ensure consistent setups across your infrastructure
+
+By anticipating these challenges and implementing appropriate solutions, you can create a more resilient log shipping system.
+
 ## Log Analytics with SigNoz
 
 [SigNoz](https://signoz.io/) is a full-stack open source APM that provides log management as one of its core features. It uses a columnar database ClickHouse to store logs, which is very efficient at ingesting and storing logs data. Columnar databases like ClickHouse are very effective in storing log data and making it available for analysis.
 
+<GetStartedSigNoz />
+
 The logs tab in SigNoz has advanced features like a log query builder, search across multiple fields, structured table view, JSON view, etc.
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/common/signoz_logs.webp" alt="Log management in SigNoz"/>
-    <figcaption><i>Log management in SigNoz</i></figcaption>
+<img src="/img/blog/common/signoz_logs.webp" alt="Log management in SigNoz"/>
+<figcaption><i>Log management in SigNoz</i></figcaption>
 </figure>
-
 
 You can also view logs in real time with live tail logging.
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2022/10/signoz_live_logs.webp" alt="Live Tail Logging in SigNoz"/>
-    <figcaption><i>Live Tail Logging in SigNoz</i></figcaption>
+<img src="/img/blog/2022/10/signoz_live_logs.webp" alt="Live Tail Logging in SigNoz"/>
+<figcaption><i>Live Tail Logging in SigNoz</i></figcaption>
 </figure>
-
 
 With advanced Log Query Builder, you can filter out logs quickly with a mix and match of fields.
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2022/10/signoz_log_query_builder.webp" alt="Advanced Log Query Builder in SigNoz"/>
-    <figcaption><i>Advanced Log Query Builder in SigNoz</i></figcaption>
+<img src="/img/blog/2022/10/signoz_log_query_builder.webp" alt="Advanced Log Query Builder in SigNoz"/>
+<figcaption><i>Advanced Log Query Builder in SigNoz</i></figcaption>
 </figure>
-
 
 ## Conclusion - choosing a log shipper of your choice
 
 In this article, we discussed what log shippers are and why we need them. Among the log shippers, Syslog and Rsyslog can be used for collecting and sending system logs to a centralized log management tool. FluentD and Logstash can be used when you need a data processing pipeline. While Logstash is mainly used along with the ELK stack, FluentD has wider community adoption.
 
 Elastic Beats can be used if you are using the ELK stack. OpenTelemetry Collector is one of the emerging log shippers that can be used if you plan to collect other telemetry signals with a single solution. Log shippers provide a reliable and easy means to send logs (or log files) from a file-based data source to a supported output destination. Log shippers offer a high level of reliability and flexibility.
+
+## FAQs
+
+### What is the difference between a log shipper and a log aggregator?
+
+A log shipper focuses on collecting and forwarding logs from various sources, while a log aggregator concentrates on centralizing, storing, and analyzing logs. Log shippers are often used in conjunction with log aggregators to create a complete log management solution.
+
+### Can log shippers handle encrypted or compressed log files?
+
+Yes, many log shippers support processing encrypted or compressed log files. However, this capability may vary depending on the specific log shipper and its configuration. Always check the documentation of your chosen log shipper for supported file formats and encryption methods.
+
+### How do log shippers impact system performance?
+
+Log shippers are designed to have minimal impact on system performance. However, the exact impact depends on factors such as the volume of logs processed, the complexity of processing rules, and the resources available on the system. It's important to monitor resource usage and tune your log shipper configuration accordingly.
+
+### Are there any regulatory compliance considerations when using log shippers?
+
+Yes, depending on your industry and location, there may be regulatory requirements related to log management. Common considerations include data retention periods, access controls, and data privacy. Ensure that your log shipping setup complies with relevant regulations such as GDPR, HIPAA, or PCI DSS.
 
 ---
 

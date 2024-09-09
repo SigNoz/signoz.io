@@ -336,6 +336,11 @@ const docsSideNav = [
             route: '/docs/userguide/metrics',
           },
           {
+            type: 'doc',
+            label: 'APM Dashboards/Alerts',
+            route: '/docs/userguide/custom-apm-dashboards-alerts',
+          },
+          {
             type: 'category',
             isExpanded: false,
             label: 'View Traces',
@@ -353,7 +358,7 @@ const docsSideNav = [
           },
           {
             type: 'doc',
-            label: 'Service Map',
+            label: 'Service Map (Beta)',
             route: '/docs/userguide/service-map',
           },
         ],
@@ -530,6 +535,11 @@ const docsSideNav = [
                 type: 'doc',
                 route: '/docs/userguide/collecting_application_logs_otel_sdk_java',
                 label: 'Using OTel Java SDK',
+              },
+              {
+                type: 'doc',
+                route: '/docs/logs-management/send-logs/aws-lambda-nodejs',
+                label: 'AWS Lambda Node.js logs',
               },
             ],
           },
@@ -1375,6 +1385,29 @@ const docsSideNav = [
       {
         type: 'category',
         isExpanded: false,
+        label: 'Bootstrapping',
+        route: '/docs/gcp-monitoring/bootstrapping',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/gcp-monitoring/bootstrapping/pubsub-topic-creation',
+            label: 'Creating Pub/Sub Topic',
+          },
+          {
+            type: 'doc',
+            route: '/docs/gcp-monitoring/bootstrapping/log-router-setup',
+            label: 'Log Router Setup',
+          },
+          {
+            type: 'doc',
+            route: '/docs/gcp-monitoring/bootstrapping/gce-creation',
+            label: 'Creating Compute Engine',
+          },
+        ],
+      },
+      {
+        type: 'category',
+        isExpanded: false,
         label: 'Cloud Functions',
         route: '/docs/gcp-monitoring/gcp-fns',
         items: [
@@ -1382,6 +1415,108 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/gcp-monitoring/gcp-fns/logging',
             label: 'Logging',
+          },
+          {
+            type: 'doc',
+            route: '/docs/gcp-monitoring/gcp-fns/custom-metrics',
+            label: 'Custom Metrics',
+          },
+          {
+            type: 'doc',
+            route: '/docs/gcp-monitoring/gcp-fns/fns-metrics',
+            label: 'Cloud Function Metrics',
+          },
+          {
+            type: 'doc',
+            route: '/docs/gcp-monitoring/gcp-fns/tracing',
+            label: 'APM & Tracing',
+          },
+        ],
+      },
+      {
+        type: 'category',
+        isExpanded: false,
+        label: 'App Engine',
+        route: '/docs/gcp-monitoring/app-engine',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/gcp-monitoring/app-engine/logging',
+            label: 'Logging',
+          },
+          {
+            type: 'doc',
+            route: '/docs/gcp-monitoring/app-engine/metrics',
+            label: 'Metrics',
+          },
+          {
+            type: 'doc',
+            route: '/docs/gcp-monitoring/app-engine/tracing',
+            label: 'APM & Tracing',
+          },
+        ],
+      },
+      {
+        type: 'category',
+        isExpanded: false,
+        label: 'Compute Engine',
+        route: '/docs/gcp-monitoring/compute-engine',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/gcp-monitoring/compute-engine/logging',
+            label: 'Logging',
+          },
+          {
+            type: 'doc',
+            route: '/docs/gcp-monitoring/compute-engine/metrics',
+            label: 'Metrics',
+          },
+          {
+            type: 'doc',
+            route: '/docs/gcp-monitoring/compute-engine/tracing',
+            label: 'APM & Tracing',
+          }
+        ],
+      },
+      {
+        type: 'category',
+        isExpanded: false,
+        label: 'Cloud Storage',
+        route: '/docs/gcp-monitoring/gcs',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/gcp-monitoring/gcs/logging',
+            label: 'Logging',
+          },
+          {
+            type: 'doc',
+            route: '/docs/gcp-monitoring/gcs/metrics',
+            label: 'Metrics',
+          },
+        ],
+      },
+      {
+        type: 'category',
+        isExpanded: false,
+        label: 'Cloud SQL',
+        route: '/docs/gcp-monitoring/cloud-sql',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/gcp-monitoring/cloud-sql/cloud-sql-creation',
+            label: 'Creating Cloud SQL',
+          },
+          {
+            type: 'doc',
+            route: '/docs/gcp-monitoring/cloud-sql/logging',
+            label: 'Logging',
+          },
+          {
+            type: 'doc',
+            route: '/docs/gcp-monitoring/cloud-sql/metrics',
+            label: 'Metrics',
           }
         ],
       },
@@ -1395,7 +1530,71 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/gcp-monitoring/gcp-clb/logging',
             label: 'Logging',
-          }
+          },
+          {
+            type: 'doc',
+            route: '/docs/gcp-monitoring/gcp-clb/metrics',
+            label: 'Metrics',
+          },
+        ],
+      },
+      {
+        type: 'category',
+        isExpanded: false,
+        label: 'Serverless VPC Access Connector',
+        route: '/docs/gcp-monitoring/vpc',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/gcp-monitoring/vpc/vpc-connector-creation',
+            label: 'Creating Serverless VPC Access Connector',
+          },
+          {
+            type: 'doc',
+            route: '/docs/gcp-monitoring/vpc/logging',
+            label: 'Logging',
+          },
+          {
+            type: 'doc',
+            route: '/docs/gcp-monitoring/vpc/metrics',
+            label: 'Metrics',
+          },
+         ],
+       },
+      {
+        label: 'GKE',
+        type: 'category',
+        isExpanded: false,
+        route: '/docs/gcp-monitoring/gke',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/gcp-monitoring/gke/gke-tracing',
+            label: 'APM & Tracing',
+          },
+          {
+            type: 'doc', 
+            route: '/docs/gcp-monitoring/gke/gke-logging-and-metrics',
+            label: 'Logs and Metrics',
+          },
+        ],
+      },
+      {
+        label: 'Cloud Run',
+        type: 'category',
+        isExpanded: false,
+        route: '/docs/gcp-monitoring/cloud-run',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/gcp-monitoring/cloud-run/cloud-run-setup',
+            label: 'Cloud Run Service Setup',
+          },
+          {
+            type: 'doc', 
+            route: '/docs/gcp-monitoring/cloud-run/logging',
+            label: 'Logging',
+          },
         ],
       },
     ],
@@ -1637,7 +1836,7 @@ const docsSideNav = [
     label: 'Troubleshooting',
     type: 'category',
     isExpanded: false,
-    route: '/docs/faqs',
+    // route: '/docs/faqs',
     // link: {
     // type: 'generated-index',
     // title: 'Frequently Asked Questions',
@@ -1670,6 +1869,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/troubleshooting/signoz-cloud/metrics-troubleshooting',
             label: 'Metrics Troubleshooting',
+          },
+          {
+            type: 'doc',
+            route: '/docs/troubleshooting/signoz-cloud/ingestion-troubleshooting',
+            label: 'Ingestion Troubleshooting',
           },
         ],
       },
