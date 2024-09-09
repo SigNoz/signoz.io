@@ -536,6 +536,11 @@ const docsSideNav = [
                 route: '/docs/userguide/collecting_application_logs_otel_sdk_java',
                 label: 'Using OTel Java SDK',
               },
+              {
+                type: 'doc',
+                route: '/docs/logs-management/send-logs/aws-lambda-nodejs',
+                label: 'AWS Lambda Node.js logs',
+              },
             ],
           },
           {

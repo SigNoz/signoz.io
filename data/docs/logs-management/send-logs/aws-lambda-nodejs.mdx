@@ -1,0 +1,85 @@
+---
+date: 2024-09-04
+title: Send traces and logs from AWS Lambda Node.js functions to SigNoz
+id: aws-lambda-nodejs
+---
+
+OpenTelemetry has autoinstrumentation support for Node.js lambda functions.
+With autoinstrumentation you will be able to send traces and logs easily.
+
+In this example we will create a simple Node.js lambda function and deploy it.
+1. Create a new Node.js application using `yarn init -y`
+2. Add the following packages
+```
+yarn add @opentelemetry/api
+```
+
+2. Add the following code to index.js
+```
+const { trace } = require("@opentelemetry/api");
+const logsAPI = require('@opentelemetry/api-logs');
+
+const provider = logsAPI.logs.getLoggerProvider()
+const logger = provider.getLogger('default', '1.0.0');
+const { flush } = require("./instrumentation")
+
+const tracer = trace.getTracer("test", "0.1");
+
+exports.handler = async (event) => {
+  const parentSpan = tracer.startSpan('main');
+  tracer.startActiveSpan('testSpan', (parentSpan) => {
+    logger.emit({
+      severityText: 'info',
+      body: 'this is a log body example',
+      attributes: { 'log.type': 'custom' },
+    });
+    parentSpan.end();
+  });
+
+  const response = {
+    statusCode: 200,
+    body: JSON.stringify('Hello from Lambda!'),
+  };
+
+  provider.forceFlush();
+  return response;
+};
+```
+
+Here we are creating a span, emitting a log line and then flushing the loggerProvider.
+Please note that it is important to flush the loggerProvider to not miss any log lines.
+
+Here is the [link](https://github.com/SigNoz/nodejs-lambda) to the github repository.
+
+3. Zip the folder using `zip -r deploy.zip ./`
+4. Upload the zip to aws lambda by going to `Code` and selecting Upload from .zip file.
+5. Add the following environment variables by going to `Configuration` and selecting `Environment Variables`
+```
+AWS_LAMBDA_EXEC_WRAPPER=/opt/otel-handler
+OTEL_EXPORTER_OTLP_ENDPOINT=<SIGNOZ_ENDPOINT>
+OTEL_EXPORTER_OTLP_HEADERS=signoz-access-token=<INGESTION_KEY>
+OTEL_RESOURCE_ATTRIBUTES=service.name=<SERVICE_NAME>
+
+```
+- The value of `SIGNOZ_ENDPOINT` will be `https://ingest.{region}.signoz.cloud:443` where depending on the choice of your region for SigNoz cloud, the otlp endpoint will vary according to this table.
+
+| Region | Endpoint                   |
+| ------ | -------------------------- |
+| US     | ingest.us.signoz.cloud:443 |
+| IN     | ingest.in.signoz.cloud:443 |
+| EU     | ingest.eu.signoz.cloud:443 |
+
+- The value of `INGESTION_KEY`  is your ingestion key.
+- The value of SERVICE_NAME will be the name of the lambda function.
+
+
+6. In the `Layers` section add a new layer, i.e the otel lambda layer 
+
+```
+arn:aws:lambda:<region>:184161586896:layer:opentelemetry-nodejs-0_9_0:4
+```
+
+- replace `<region>` with the region where your function is running.
+You can find the latest version [here](https://github.com/open-telemetry/opentelemetry-lambda/releases)
+
+7. Now you can test the function and you will be able to see the corresponding logs and traces in SigNoz
