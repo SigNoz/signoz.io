@@ -1528,9 +1528,14 @@ const docsSideNav = [
         items: [
           {
             type: 'doc',
+            route: '/docs/gcp-monitoring/gcp-clb/logging',
+            label: 'Logging',
+          },
+          {
+            type: 'doc',
             route: '/docs/gcp-monitoring/gcp-clb/metrics',
             label: 'Metrics',
-          }
+          },
         ],
       },
       {
