@@ -1595,6 +1595,11 @@ const docsSideNav = [
             route: '/docs/gcp-monitoring/cloud-run/logging',
             label: 'Logging',
           },
+          {
+            type: 'doc', 
+            route: '/docs/gcp-monitoring/cloud-run/metrics',
+            label: 'Metrics',
+          },
         ],
       },
     ],
