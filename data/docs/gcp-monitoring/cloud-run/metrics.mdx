@@ -1,49 +1,51 @@
 ---
-date: 2024-08-20
+date: 2024-09-08
 id: metrics
-title: Cloud SQL Metrics
+title: Cloud Run Metrics
 hide_table_of_contents: true
 ---
 
 
 ## Overview
 
-This document provides a detailed walkthrough on how to send Google Cloud SQL metrics to SigNoz. By the end of this guide, you will have a setup that sends your Cloud SQL metrics to SigNoz.
+This documentation provides a detailed walkthrough on how to set up Cloud Run to send the metrics directly to SigNoz. By the end of this guide, you will have a setup that automatically sends your Cloud Run metrics to SigNoz.
 
 <Tabs>
 <TabItem value="cloud" label="SigNoz Cloud" default>
-
 **Here's a quick summary of what we will be doing in this guide**
 
-* Create and configure Cloud SQL
-* Create and configure Compute Engine VM instance to deploy Telegraf and OpenTelemetry Collector
+* Create and configure Cloud Run
 * Deploy Telegraf to fetch the metrics from Google Cloud monitoring
-* Deploy OpenTelemetry Collector to scrape the metrics from Telegraf
-* Send and Visualize the metrics in SigNoz Cloud
+* Deploy OpenTelemetry to scrape the metrics from Telegraf
+* Send and Visualize the metrics obtained by OpenTelemetry in SigNoz Cloud
 
 ## Prerequisites
 
-* [Google Cloud account](https://console.cloud.google.com/) with administrative privilege or Cloud SQL Admin privilege.
+* [Google Cloud account](https://console.cloud.google.com/) with administrative privilege or Cloud Run Admin and Compute Engine Admin privileges.
 * [SigNoz Cloud Account](https://signoz.io/teams/) (we are using SigNoz Cloud for this demonstration, we will also need ingestion details. To get your **Ingestion Key** and **Ingestion URL,** sign-in to your SigNoz Cloud Account and go to **Settings** >> **Ingestion Settings**)
 * Access to a project in GCP
 
 ## Setup
 
-### Get started with Cloud SQL Configuration
+### Get started with Cloud Run service setup
 
-Follow the steps mentioned in the [Creating Cloud SQL](/docs/gcp-monitoring/cloud-sql/cloud-sql-creation) document to create Cloud SQL instance.
+Follow the steps mentioned in the [Cloud Run Service Setup](/docs/gcp-monitoring/cloud-run/cloud-run-setup) page to create Cloud Run Service.
 
 ## Deploy Telegraf to fetch the metrics from Google Cloud Monitoring
 
-You will need a Compute Engine instance to install Telegraf and OTel Collector. You can follow the instructions on the [Creating Compute Engine](/docs/gcp-monitoring/bootstrapping/gce-creation) document to create the Compute Engine instance.
+We will be using Compute Engine instance to install Telegraf. You can follow the instructions in the [Creating Copmute Engine](/docs/gcp-monitoring/bootstrapping/gce-creation) document to create the Compute Engine instance. In this tutorial, we will be using the same instance for installing OTel Collector as well. You may choose a different instance as well.
 
-**Step 1:** Install [`telegraf`](https://github.com/influxdata/telegraf) which will collect metrics from Google Cloud Monitoring for Cloud SQL, see the [available metrics for Cloud SQL](https://cloud.google.com/monitoring/api/metrics_gcp#gcp-cloudsql). The installation process for the respective operating system can be found in official [documentation](https://docs.influxdata.com/telegraf/v1/install/).
+**Step 1:** Install [`telegraf`](https://github.com/influxdata/telegraf) which will collect metrics from Google Cloud Monitoring for Cloud Run, see the [available metrics for Cloud Run](https://cloud.google.com/monitoring/api/metrics_gcp#gcp-run). The installation process for the respective operating system can be found in official [documentation](https://docs.influxdata.com/telegraf/v1/install/).
 
-After successful installation, the `telegraf` status should be active and running.
+After successful installation, the Telegraf status should be active and running. You can check the Telegraf status by running the command `service telegraf status`.
+
+<Admonition type="info">
+Note that we are using Ubuntu operating system in Compute Engine. The Telegraf commands might slightly differ for other operating systems.
+</Admonition>
 
 <figure data-zoomable align="left">
     <img
-        src="/img/docs/gcp-monitoring/cloud-sql/metrics/telegraf-status.webp"
+        src="/img/docs/gcp-monitoring/cloud-run/metrics/telegraf-status.webp"
         alt="Telegraf running status"
     />
 <figcaption>
@@ -68,7 +70,7 @@ The configuration file for telegraf can be found here:
   project = "omni-new"
   ## Include timeseries that start with the given metric type.
   metric_type_prefix_include = [
-    "cloudsql.googleapis.com",
+    "run.googleapis.com",
   ]
   ## Most metrics are updated no more than once per minute; it is recommended
   ## to override the agent level interval with a value of 1m or greater.
@@ -80,7 +82,7 @@ The configuration file for telegraf can be found here:
   service_address = "localhost:4317"
 ```
 
-We are assuming that the OTel Collector is running on the same machine as Telegraf. If that is not the case, you will have to change the `service_address` in the `outputs.opentelemetry` section accordingly.
+The `service_address` is using `localhost` as we will be deploying OTelCollector in the same Compute Engine instance. You can replace it with the appropriate IP address in case you choose to deploy OTel Collector on a different instance.
 
 ## Deploy OpenTelemetry to scrape the metrics from Telegraf
 
@@ -92,13 +94,13 @@ We are assuming that the OTel Collector is running on the same machine as Telegr
 ./otelcol-contrib --config ./config.yaml &> otelcol-output.log & echo "$!" > otel-pid
 ```
 
-**Step 3:** Restart the Telegraf service
+**Step 3:** Restart the Telegraf service using the command `service telegraf restart`.
 
 **Step 4:** If the configurations are configured correctly with Telegraf and we can see the output logs from OpenTelemetry as follows:
 
 <figure data-zoomable align="left">
     <img
-        src="/img/docs/gcp-monitoring/cloud-sql/metrics/otel-logs.webp"
+        src="/img/docs/gcp-monitoring/cloud-run/metrics/otel-logs.webp"
         alt="OTel Collector Logs"
     />
 <figcaption>
@@ -116,7 +118,7 @@ Viewing OTel Collector Logs
 
 <figure data-zoomable align="left">
     <img
-        src="/img/docs/gcp-monitoring/cloud-sql/metrics/new-panel.webp"
+        src="/img/docs/gcp-monitoring/cloud-run/metrics/new-panel.webp"
         alt="Creating new panel"
     />
 <figcaption>
@@ -126,25 +128,25 @@ Creating new panel in dashboard
 </figcaption>
 </figure>
 
-**Step 3:** Select metric for Cloud SQL
+**Step 3:** Select metric for Cloud Run
 
-All metrics starting with `cloudsql_googleapis_com_` have been collected from Cloud SQL database.
+All metrics starting with `run_googleapis_com_` have been collected from Cloud Run.
 
 <figure data-zoomable align="left">
     <img
-        src="/img/docs/gcp-monitoring/cloud-sql/metrics/plot-metrics-signoz-cloud.webp"
-        alt="Plot Cloud SQL Metrics"
+        src="/img/docs/gcp-monitoring/cloud-run/metrics/plot-metrics-signoz-cloud.webp"
+        alt="Plot metrics"
     />
 <figcaption>
 <i>
-Plot Cloud SQL Metrics
+Cloud Run Metrics
 </i>
 </figcaption>
 </figure>
 
 ## Troubleshooting
 
-If you run into any problems while setting up monitoring for your Cloud SQL's metrics with SigNoz, consider these troubleshooting steps:
+If you run into any problems while setting up monitoring for Cloud Run metrics with SigNoz, consider these troubleshooting steps:
 
 
 * **Verify Configuration**: Double-check your `config.yaml` file to ensure all settings, including the ingestion key and endpoint, are correct.
@@ -154,39 +156,41 @@ If you run into any problems while setting up monitoring for your Cloud SQL's me
 
 </TabItem>
 
-<TabItem value="self-host" label="Self-Host">
+<TabItem value="self-host" label="Self-Host" default>
+**Here's a quick summary of what we will be doing in this guide**
 
-**Here’s a quick summary of what we will be doing in this guide**
-
-* Create and configure Cloud SQL
-* Create and configure Compute Engine VM instance to deploy Telegraf and OpenTelemetry Collector
+* Create and configure Cloud Run
 * Deploy Telegraf to fetch the metrics from Google Cloud monitoring
-* Deploy OpenTelemetry Collector to scrape the metrics from Telegraf
-* Visualize the metrics in SigNoz dashboard
+* Deploy the self-hosted **SigNoz**
+* Visualize the metrics in the **SigNoz** dashboard
 
 ## Prerequisites
 
-* [Google Cloud account](https://console.cloud.google.com/) with administrative privilege or Cloud SQL Admin privilege.
+* [Google Cloud account](https://console.cloud.google.com/) with administrative privilege or Cloud Run Admin and Compute Engine Admin privileges.
 * Access to a project in GCP
-* Self-hosted SigNoz
+* [Self-Hosted SigNoz](https://signoz.io/docs/install/docker/) 
+
+<Admonition type="info">
+For more details on how to configure Self-Hosted SigNoz for Logs, check [official documentation by Self-Hosted SigNoz](https://signoz.io/docs/userguide/send-logs-http/#send-logs-to-self-hosted-signoz) and navigate to the "Send Logs to Self-Hosted SigNoz" section.
+</Admonition>
 
 ## Setup
 
-### Get started with Cloud SQL Configuration
+### Get started with Cloud Run service setup
 
-Follow the steps mentioned in the [Creating Cloud SQL](/docs/gcp-monitoring/cloud-sql/cloud-sql-creation) document to create Cloud SQL instance.
+Follow the steps mentioned in the [Cloud Run Service Setup](/docs/gcp-monitoring/cloud-run/cloud-run-setup) page to create Cloud Run Service.
 
 ## Deploy Telegraf to fetch the metrics from Google Cloud Monitoring
 
 You will need a Compute Engine instance to install Telegraf and OTel Collector. You can follow the instructions on the [Creating Compute Engine](/docs/gcp-monitoring/bootstrapping/gce-creation) document to create the Compute Engine instance.
 
-**Step 1:** Install [`telegraf`](https://github.com/influxdata/telegraf) which will collect metrics from Google Cloud Monitoring for Cloud SQL, see the [available metrics for Cloud SQL](https://cloud.google.com/monitoring/api/metrics_gcp#gcp-cloudsql). The installation process for the respective operating system can be found in official [documentation](https://docs.influxdata.com/telegraf/v1/install/).
+**Step 1:** Install [`telegraf`](https://github.com/influxdata/telegraf) which will collect metrics from Google Cloud Monitoring for Cloud Run, see the [available metrics for Cloud Run](https://cloud.google.com/monitoring/api/metrics_gcp#gcp-run). The installation process for the respective operating system can be found in official [documentation](https://docs.influxdata.com/telegraf/v1/install/).
 
 After successful installation, the `telegraf` status should be active and running.
 
 <figure data-zoomable align="left">
     <img
-        src="/img/docs/gcp-monitoring/cloud-sql/metrics/telegraf-status.webp"
+        src="/img/docs/gcp-monitoring/cloud-run/metrics/telegraf-status.webp"
         alt="Telegraf running status"
     />
 <figcaption>
@@ -211,7 +215,7 @@ The configuration file for telegraf can be found here:
   project = "omni-new"
   ## Include timeseries that start with the given metric type.
   metric_type_prefix_include = [
-    "cloudsql.googleapis.com",
+    "run.googleapis.com",
   ]
   ## Most metrics are updated no more than once per minute; it is recommended
   ## to override the agent level interval with a value of 1m or greater.
@@ -241,7 +245,7 @@ We are assuming that the OTel Collector is running on the same machine as Telegr
 
 <figure data-zoomable align="left">
     <img
-        src="/img/docs/gcp-monitoring/cloud-sql/metrics/otel-logs.webp"
+        src="/img/docs/gcp-monitoring/cloud-run/metrics/otel-logs.webp"
         alt="OTel Collector Logs"
     />
 <figcaption>
@@ -259,7 +263,7 @@ Viewing OTel Collector Logs
 
 <figure data-zoomable align="left">
     <img
-        src="/img/docs/gcp-monitoring/cloud-sql/metrics/new-panel.webp"
+        src="/img/docs/gcp-monitoring/cloud-run/metrics/new-panel.webp"
         alt="Creating new panel"
     />
 <figcaption>
@@ -269,13 +273,13 @@ Creating new panel in dashboard
 </figcaption>
 </figure>
 
-**Step 3:** Select metric for Cloud SQL
+**Step 3:** Select metric for Cloud Run
 
-All metrics starting with `cloudsql_googleapis_com_` have been collected from Cloud SQL database.
+All metrics starting with `run_googleapis_com_` have been collected from Cloud Run.
 
 ## Troubleshooting
 
-If you run into any problems while setting up monitoring for your Cloud SQL's metrics with SigNoz, consider these troubleshooting steps:
+If you run into any problems while setting up monitoring for your Cloud Run's metrics with SigNoz, consider these troubleshooting steps:
 
 
 * **Verify Configuration**: Double-check your `config.yaml` file to ensure all settings, including the ingestion key and endpoint, are correct.
