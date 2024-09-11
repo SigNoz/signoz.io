@@ -1,0 +1,440 @@
+---
+date: 2024-08-14
+id: logging
+title: Cloud Load Balancer Logging
+hide_table_of_contents: true
+---
+
+## Overview
+
+This documentation provides a detailed walkthrough on how to set up a Pub/Sub to collect Cloud Load Balancer (CLB) logs and forward them to SigNoz. By the end of this guide, you will have a setup that automatically sends your CLB logs to SigNoz, enabling you to visualize and monitor your application's load-balancing performance and health.
+
+Here's a quick summary of what we will be doing in this guide      
+
+* Create a Pub/Sub topic.
+* Create a Log Router to route the Cloud Load Balancer logs to SigNoz.
+* Create OTel Collector to route logs from Pub/Sub topic to SigNoz.
+* Send and Visualize the logs in SigNoz.
+
+<Tabs>
+<TabItem value="cloud" label="SigNoz Cloud" default>
+
+## Prerequisites
+
+1. [Google Cloud account](https://console.cloud.google.com/) with administrative privilege or load balancer Admin privilege.
+2. Cloud Load Balancer (logging should be enabled)
+3. [SigNoz Cloud Account](https://signoz.io/teams/) (we are using SigNoz Cloud for this demonstration, we will also need ingestion details. To get your Ingestion Key and Ingestion URL, sign in to your SigNoz Cloud Account and go to Settings >> Ingestion Settings)
+4. Access to a project in GCP
+5. [Google Cloud Monitoring API](https://console.cloud.google.com/apis/api/monitoring.googleapis.com) enabled
+
+## Setup
+
+### Create a Pub/Sub topic
+
+Follow the steps mentioned in the [Creating Pub/Sub Topic](https://signoz.io/docs/gcp-monitoring/bootstrapping/pubsub-topic-creation/) document to create the Pub/Sub topic.
+
+### Create Log Router to Pub/Sub Topic
+
+Follow the steps mentioned in the [Log Router Setup](https://signoz.io/docs/gcp-monitoring/bootstrapping/log-router-setup/) document to create the Log Router.
+
+To ensure you filter out only the Load Balancer logs, use the following filter conditions:
+
+```sh
+resource.type="Application Load Balancer"
+```
+
+In case you want the logs only from a particular Load Balancer, you can add the following query to the Query text box:
+
+```sh
+resource.type="load balancer"
+resource.labels.service_name="<FORWARDING RULE NAME>"
+```
+
+### Provide permissions to Log Router Sink
+
+* On the GCP console, search for _Log Router_, and navigate to Logs Router in the GCP Logging service.
+* Click on the 3 dots to the right of the Log Router sink that we created in the earlier steps, and select_ View sink details_ from the dropdown.
+
+<figure data-zoomable align="center">
+    <img
+        src="/img/docs/gcp-monitoring/clb-logs/view-sink-details.webp"
+        alt="View sink details"
+    />
+<figcaption>
+<i>
+View Sink details
+</i>
+</figcaption>
+</figure>
+
+* From the sink details, copy the _Writer_ identity and keep it with you. We will require this in the upcoming steps.
+
+<figure data-zoomable align="center">
+    <img
+        src="/img/docs/gcp-monitoring/clb-logs/writer-identity.webp"
+        alt="Copy Writer Identity"
+    />
+<figcaption>
+<i>
+Copy Writer Identity
+</i>
+</figcaption>
+</figure>
+
+* In order to provide the Log Router sink with the permissions to write to the Pub/Sub topic, navigate to the Pub/Sub service, and click on the 3 dots to the right of the Pub/Sub topic where the router is going to sink the logs. Select _View permissions_ from this dropdown.
+* Click on the _APP PRINCIPAL_ button on the top. In the New principal's textbox, copy the value from the _Writer_ identity (remove the serviceAccount: prefix from the value), and select any value from the dropdown that appears. In the _Select a role_ dropdown, search for _Pub/Sub Publisher_ and select it. 
+
+<figure data-zoomable align="center">
+    <img
+        src="/img/docs/gcp-monitoring/clb-logs/grant-access.webp"
+        alt="Grant Access to Log Router Sink"
+    />
+<figcaption>
+<i>
+Grant Access to Log Router Sink
+</i>
+</figcaption>
+</figure>
+
+* Click on _Save_. With this, the Log Router sink now has permission to write to the Pub/Sub topic.
+* Wait for ~1 minute for the permissions to take effect, and now trigger the Cloud Load Balancer a few times. You should see the Log Router's volume increasing, as well as the Pub/Sub topic's metrics showing up published requests.
+
+<figure data-zoomable align="center">
+    <img
+        src="/img/docs/gcp-monitoring/clb-logs/verify-log-router-permission.webp"
+        alt="Verify log router getting volume upon any trigger of cloud load balancer"
+    />
+<figcaption>
+<i>
+Verify log router getting volume upon any trigger of CLB.
+</i>
+</figcaption>
+</figure>
+
+After the log router configuration and permission is done, let’s configure the OTel collector to receive these logs.
+
+### OTel Collector Configuration
+Follow the steps mentioned in the [Creating Compute Engine](/docs/gcp-monitoring/bootstrapping/gce-creation) document to create the Compute Engine instance. 
+
+#### Install OTel Collector as agent
+
+Firstly, we will establish the authentication using the following commands:
+
+1. Initialize `gcloud`:
+
+```
+gcloud init
+```
+
+2. Authenticate into GCP:
+
+```
+gcloud auth application-default login
+```
+
+Let us now proceed to the OTel Collector installation:
+
+**Step 1:** Download otel-collector tar.gz for your architecture
+
+```bash
+wget https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.88.0/otelcol-contrib_0.88.0_linux_amd64.tar.gz
+```
+
+**Step 2:** Extract otel-collector tar.gz to the otelcol-contrib folder
+
+```bash
+mkdir otelcol-contrib && tar xvzf otelcol-contrib_0.88.0_linux_amd64.tar.gz -C otelcol-contrib
+```
+
+**Step 3:** Create config.yaml in the folder _otelcol-contrib_ with the below content in it. Replace `<region>` with the appropriate SigNoz Cloud region. Replace `"<SIGNOZ_INGESTION_KEY>"` with what is provided by SigNoz:
+
+```yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+  googlecloudpubsub:
+    project: <gcp-project-id>
+    subscription: projects/<gcp-project-id>/subscriptions/lb-logs-signoz-sub-new-9-aug
+    encoding: raw_text
+processors:
+  batch: {}
+exporters:
+  otlp:
+    endpoint: "ingest.<region>.signoz.cloud:443"
+    tls:
+      insecure: false
+    headers:
+      "signoz-access-token": "<SigNoz-Key>"
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp]
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp]
+    logs:
+      receivers: [otlp, googlecloudpubsub]
+      processors: [batch]
+      exporters: [otlp]
+```
+
+**Step 4:** Once we are done with the above configurations, we can now run the collector service.
+  
+  *If you want to run otel collector process in the background*:
+
+```sh
+./otelcol-contrib --config ./config.yaml &> otelcol-output.log & echo "$!" > otel-pid
+```
+
+You can now trigger the Cloud Load Balancer a few times, and see the logs from the GCP Cloud Load Balancer on SigNoz.
+
+### Visualize the logs in SigNoz Cloud
+
+<figure data-zoomable align="center">
+    <img
+        src="/img/docs/gcp-monitoring/clb-logs/logs-in-dashboard.webp"
+        alt="Logs captured by the SigNoz"
+    />
+<figcaption>
+<i>
+Logs captured by the SigNoz
+</i>
+</figcaption>
+</figure>
+
+<figure data-zoomable align="center">
+    <img
+        src="/img/docs/gcp-monitoring/clb-logs/detailed-view-log.webp"
+        alt="Detailed overview of the particular log"
+    />
+<figcaption>
+<i>
+Detailed overview of the particular log
+</i>
+</figcaption>
+</figure>
+                       
+That's it! You have successfully set up monitoring for your Cloud Load Balancer logs with SigNoz Cloud.
+
+# Troubleshooting
+
+If you encounter any issues while setting up monitoring for your Cloud Load Balancer logs with SigNoz cloud, here are a few troubleshooting steps you can try:
+
+* Verify that your Cloud Load Balancer is configured correctly and is accessible.
+*  Ensure you have the necessary permissions to access the logs in your Load Balancer.
+*  Check and mention the correct URL and access key for SigNoz Cloud, along with the OpenTelemetry (OTel) configuration and routing details.
+
+By following this guide, you should be able to easily send the logs from your Google Cloud Load Balancer to SigNoz Cloud and gain valuable insights in case any issues arise.
+</TabItem>
+<TabItem value="self-host" label="Self-Host">
+
+## Prerequisites
+
+1. [Google Cloud account](https://console.cloud.google.com/) with administrative privilege or load balancer Admin privilege.
+2. Cloud Load Balancer (logging should be enabled)
+3. [Self-Hosted SigNoz](https://signoz.io/docs/install/docker/)
+5. [Google Cloud Monitoring API](https://console.cloud.google.com/apis/api/monitoring.googleapis.com) enabled
+
+## Setup
+
+### Create a Pub/Sub topic
+
+Follow the steps mentioned in the [Creating Pub/Sub Topic](https://signoz.io/docs/gcp-monitoring/bootstrapping/pubsub-topic-creation/) document to create the Pub/Sub topic.
+
+### Create Log Router to Pub/Sub Topic
+
+Follow the steps mentioned in the [Log Router Setup](https://signoz.io/docs/gcp-monitoring/bootstrapping/log-router-setup/) document to create the Log Router.
+
+To ensure you filter out only the Load Balancer logs, use the following filter conditions:
+
+```sh
+resource.type="Application Load Balancer"
+```
+
+In case you want the logs only from a particular Load Balancer, you can add the following query to the Query text box:
+
+```sh
+resource.type="load balancer"
+resource.labels.service_name="<FORWARDING RULE NAME>"
+```
+
+### Provide permissions to Log Router Sink
+
+* On the GCP console, search for _Log Router_, and navigate to Logs Router in the GCP Logging service.
+* Click on the 3 dots to the right of the Log Router sink that we created in the earlier steps, and select _View sink details_ from the dropdown.
+
+<figure data-zoomable align="center">
+    <img
+        src="/img/docs/gcp-monitoring/clb-logs/view-sink-details.webp"
+        alt="View sink details"
+    />
+<figcaption>
+<i>
+View Sink details
+</i>
+</figcaption>
+</figure>
+
+* From the sink details, copy the _Writer_ identity and keep it with you. We will require this in the upcoming steps.
+
+<figure data-zoomable align="center">
+    <img
+        src="/img/docs/gcp-monitoring/clb-logs/writer-identity.webp"
+        alt="Copy Writer Identity"
+    />
+<figcaption>
+<i>
+Copy Writer Identity
+</i>
+</figcaption>
+</figure>
+
+* In order to provide the Log Router sink with the permissions to write to the Pub/Sub topic, navigate to the _Pub/Sub service_, and click on the 3 dots to the right of the Pub/Sub topic where the router is going to sink the logs. Select _View permissions_ from this dropdown.
+* Click on the _APP PRINCIPAL_ button on the top. In the New principal's textbox, copy the value from the _Writer_ identity (remove the serviceAccount: prefix from the value), and select any value from the dropdown that appears. In the _Select a role_ dropdown, search for _Pub/Sub Publisher_ and select it.
+
+<figure data-zoomable align="center">
+    <img
+        src="/img/docs/gcp-monitoring/clb-logs/grant-access.webp"
+        alt="Grant Access to Log Router Sink"
+    />
+<figcaption>
+<i>
+Grant Access to Log Router Sink
+</i>
+</figcaption>
+</figure>
+
+* Click on _Save_. With this, the Log Router sink now has permission to write to the Pub/Sub topic.
+* Wait for ~1 minute for the permissions to take effect, and now trigger the Cloud Load Balancer a few times. You should see the Log Router's volume increasing, as well as Pub/Sub topic's metrics showing published requests.
+
+<figure data-zoomable align="center">
+    <img
+        src="/img/docs/gcp-monitoring/clb-logs/verify-log-router-permission.webp"
+        alt="Verify log router getting volume upon any trigger of cloud load balancer"
+    />
+<figcaption>
+<i>
+Verify log router getting volume upon any trigger of CLB.
+</i>
+</figcaption>
+</figure>
+
+After the log router configuration and permission, let’s configure the OTel collector to receive these logs.
+
+### OTel Collector Configuration
+Follow the steps mentioned in the [Creating Compute Engine](/docs/gcp-monitoring/bootstrapping/gce-creation) document to create the Compute Engine instance. 
+
+#### Install OTel Collector as agent
+
+Firstly, we will establish the authentication using the following commands:
+
+1. Initialize `gcloud`:
+
+```
+gcloud init
+```
+
+2. Authenticate into GCP:
+
+```
+gcloud auth application-default login
+```
+
+Let us now proceed to the OTel Collector installation:
+
+**Step 1:** Download otel-collector tar.gz for your architecture
+
+```bash
+wget https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.88.0/otelcol-contrib_0.88.0_linux_amd64.tar.gz
+```
+
+**Step 2:** Extract otel-collector tar.gz to the otelcol-contrib folder
+
+```bash
+mkdir otelcol-contrib && tar xvzf otelcol-contrib_0.88.0_linux_amd64.tar.gz -C otelcol-contrib
+```
+
+**Step 4:** Replace _otel-collector-contrib’s_ default configuration with the following config in  `/etc/otelcol-contrib/config.yaml`.
+
+```yaml
+receivers:
+  googlecloudpubsub/logs:
+    project: omni-new
+    subscription: projects/<your-project-id>/subscriptions/<name-of-the-pub-sub-subscription>
+    encoding: cloud_logging # Make sure to use cloud_logging for logs
+exporters:
+  logging:
+    loglevel: debug  # Options: debug, info, warn, error
+  otlphttp:
+    endpoint: "http://localhost:4318"  # Replace with your SigNoz OTLP HTTP endpoint
+    compression: "gzip"
+service:
+  pipelines:
+    logs:
+      receivers: [googlecloudpubsub/logs]
+      exporters: [logging,otlphttp]        
+```
+
+Here `localhost:4318` is pointing to SigNoz's collector, use VM IP address or domain name in case of running `otel-collector-contrib` on some other host.
+
+**Step 5:** Restart otel-collecotor-contrib with
+
+```sh
+systemctl restart otelcol-contrib
+```
+
+You can now trigger the Load Balancer a few times, and see the logs from the GCP Cloud Load Balancer on SigNoz.
+
+### Visualize the logs in Self-Hosted SigNoz
+<figure data-zoomable align="center">
+    <img
+        src="/img/docs/gcp-monitoring/clb-logs/logs-in-dashboard-self-hosted.webp"
+        alt="Logs captured by the SigNoz"
+    />
+<figcaption>
+<i>
+Logs captured by the SigNoz
+</i>
+</figcaption>
+</figure>
+
+<figure data-zoomable align="center">
+    <img
+        src="/img/docs/gcp-monitoring/clb-logs/detailed-view-log-self-hosted.webp"
+        alt="Detailed overview of the particular log"
+    />
+<figcaption>
+<i>
+Detailed overview of the particular log
+</i>
+</figcaption>
+</figure>
+
+That's it! You have successfully set up monitoring for your Cloud Load Balancer logs with Self-Hosted SigNoz.   
+
+## Troubleshooting      
+
+If you encounter any issues while setting up monitoring for your Cloud Load Balancer logs with Self-Hosted SigNoz, here are a few troubleshooting steps you can try:
+
+* Verify that your Cloud Load Balancer is configured correctly and is accessible.
+* Ensure you have the necessary permissions to access the logs in your Load Balancer.
+* Check and mention the correct URL for Self-Hosted SigNoz, along with the OpenTelemetry (OTel) configuration and routing details.
+
+    ```sh
+    journalctl -u otelcol-contrib.service --since "15 min  ago"
+    ```
+By following this guide, you should be able to easily send the logs from your Google Cloud Load Balancer to Self-Hosted SigNoz and gain valuable insights in case any issues arise.
+
+</TabItem>
+</Tabs>
+
+
+
+

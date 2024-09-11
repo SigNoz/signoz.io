@@ -536,6 +536,11 @@ const docsSideNav = [
                 route: '/docs/userguide/collecting_application_logs_otel_sdk_java',
                 label: 'Using OTel Java SDK',
               },
+              {
+                type: 'doc',
+                route: '/docs/logs-management/send-logs/aws-lambda-nodejs',
+                label: 'AWS Lambda Node.js logs',
+              },
             ],
           },
           {
@@ -1523,9 +1528,14 @@ const docsSideNav = [
         items: [
           {
             type: 'doc',
+            route: '/docs/gcp-monitoring/gcp-clb/logging',
+            label: 'Logging',
+          },
+          {
+            type: 'doc',
             route: '/docs/gcp-monitoring/gcp-clb/metrics',
             label: 'Metrics',
-          }
+          },
         ],
       },
       {
@@ -1566,6 +1576,24 @@ const docsSideNav = [
             type: 'doc', 
             route: '/docs/gcp-monitoring/gke/gke-logging-and-metrics',
             label: 'Logs and Metrics',
+          },
+        ],
+      },
+      {
+        label: 'Cloud Run',
+        type: 'category',
+        isExpanded: false,
+        route: '/docs/gcp-monitoring/cloud-run',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/gcp-monitoring/cloud-run/cloud-run-setup',
+            label: 'Cloud Run Service Setup',
+          },
+          {
+            type: 'doc', 
+            route: '/docs/gcp-monitoring/cloud-run/logging',
+            label: 'Logging',
           },
         ],
       },
