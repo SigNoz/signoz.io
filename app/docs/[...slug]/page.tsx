@@ -11,6 +11,7 @@ import React from 'react'
 import { tocItemProps } from '../layout'
 import DocsPrevNext from '../../../components/DocsPrevNext/DocsPrevNext'
 import PageFeedback from '../../../components/PageFeedback/PageFeedback'
+import { notFound } from 'next/navigation'
 
 export async function generateMetadata({
   params,
@@ -47,6 +48,11 @@ export const generateStaticParams = async () => {
 export default async function Page({ params }: { params: { slug: string[] } }) {
   const slug = decodeURI(params.slug.join('/'))
   const post = allDocs.find((p) => p.slug === slug) as Doc
+
+  if (!post) {
+    notFound()
+  }
+
   const mainContent = coreContent(post)
   const toc = post?.toc || []
   const { title, hide_table_of_contents } = mainContent

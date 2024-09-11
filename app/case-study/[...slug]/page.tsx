@@ -47,6 +47,11 @@ export const generateStaticParams = async () => {
 export default async function Page({ params }: { params: { slug: string[] } }) {
   const slug = decodeURI(params.slug.join('/'))
   const post = allCaseStudies.find((p) => p.slug === slug) as CaseStudy
+
+  if (!post) {
+    notFound()
+  }
+
   const mainContent = coreContent(post)
   const Layout = CaseStudyLayout
 
