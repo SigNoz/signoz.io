@@ -4,6 +4,7 @@ import Button from '@/components/Button/Button';
 import Link from 'next/link';
 import { ArrowRight, BookOpen } from 'lucide-react';
 import CountdownTimer from '@/components/Timer';
+import { Linkedin } from '@/components/social-icons/SolidIcons';
 
 export const metadata: Metadata = {
   title: {
@@ -70,10 +71,16 @@ const MainSection: React.FC = () => {
           <div className='flex flex-col sm:flex-row justify-between py-6 px-6 border-b border-t border-signoz_slate-100 border-dashed'>
             <div className='flex flex-col justify-between gap-4 pr-4'>
               <div className='text-base uppercase text-signoz_vanilla-400'>Monday ⎯ Sept 16</div>
-              <Link href="" target='_blank' id="btn-watch-youtube-video" className='flex px-3 py-2 mb-4 sm:mb-0 justify-center items-center gap-2 rounded-full button-background'>
+              <div className='flex flex-col gap-2'>
+              <Link href="" target='_blank' id="btn-linkedin-live" className='flex px-3 py-2 mb-4 sm:mb-0 w-fit items-center gap-2 rounded-full button-background'>
+                <Linkedin className='w-4 h-4'/>
+                <span className='text-[#F7F7F8] text-sm font-medium whitespace-nowrap'>LinkedIn Live</span>
+              </Link>
+              <Link href="" target='_blank' id="btn-watch-youtube-video" className='flex px-3 py-2 sm:mb-0 w-fit items-center gap-2 rounded-full button-background'>
                 <img src='/svgs/icons/watch-video.svg' alt='watch video icon' />
                 <span className='text-[#F7F7F8] text-sm font-medium whitespace-nowrap'>Watch the video</span>
               </Link>
+              </div>
             </div>
             <Link href="" target='_blank' className='flex justify-between max-w-full py-4 px-5 launch-week-card-background hover:bg-[#121317] transition-colors duration-300 w-[864px] rounded-md border border-signoz_slate-500'>
               <div><img src='/img/graphics/homepage/feature-graphic-2.webp' height={240} width={400} className='pr-2 sm:pr-0' /></div>
