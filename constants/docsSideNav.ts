@@ -1600,6 +1600,11 @@ const docsSideNav = [
             route: '/docs/gcp-monitoring/cloud-run/metrics',
             label: 'Metrics',
           },
+          {
+            type: 'doc', 
+            route: '/docs/gcp-monitoring/cloud-run/tracing',
+            label: 'APM & Tracing',
+          },
         ],
       },
     ],
