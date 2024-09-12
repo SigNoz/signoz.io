@@ -1,76 +1,343 @@
 ---
-title: LLM Observability with OpenTelemetry and SigNoz
+
+title: Understanding LLM Observability - Key Insights, Best Practices, & Tools
 slug: llm-observability
-date: 2024-01-04
+date: 2024-09-12
 tags: [OpenTelemetry, LLM]
 authors: [jaikanth]
-description: Unlock the secrets of LLM observability - Follow this guide to seamlessly integrate OpenTelemetry with your LLM application and elevate observability with SigNoz....
+description: Discover the essentials of LLM Observability, including key pillars, best practices, and tools to optimize your AI applications' performance and reliability.
 image: /img/blog/2024/01/llm-observability-cover.jpeg
 hide_table_of_contents: false
-keywords: [opentelemetry,signoz,observability,llm]
+keywords: [LLM Observability, AI monitoring, machine learning, performance optimization, SigNoz, model evaluation, prompt engineering, opentelemetry]
+
 ---
 
 <head>
-  <link rel="canonical" href="https://signoz.io/blog/llm-observability/"/>
+  <script
+    type="application/ld+json"
+    dangerouslySetInnerHTML={{ __html: JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Understanding LLM Observability - Key Insights, Best Practices, & Tools",
+  "alternativeHeadline": "Discover the essentials of LLM Observability to optimize AI applications' performance and reliability",
+  "author": {
+    "@type": "Person",
+    "name": "jaikanth"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SigNoz",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://signoz.io/img/SigNozLogo-orange.svg"
+    }
+  },
+  "datePublished": "2024-09-12T00:00:00Z",
+  "dateModified": "2024-09-12T00:00:00Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://signoz.io/blog/llm-observability/"
+  },
+  "description": "Discover the essentials of LLM Observability, including key pillars, best practices, and tools to optimize your AI applications' performance and reliability.",
+  "keywords": "LLM Observability, AI monitoring, machine learning, performance optimization, SigNoz, model evaluation, prompt engineering, opentelemetry",
+  "articleSection": "Technology",
+  "inLanguage": "en",
+  "isPartOf": {
+    "@type": "Blog",
+    "name": "SigNoz Blog",
+    "url": "https://signoz.io/blog/"
+  },
+  "about": [
+    {
+      "@type": "Thing",
+      "name": "LLM Observability",
+      "description": "End-to-end visibility into the performance and behavior of Large Language Model applications"
+    },
+    {
+      "@type": "Thing",
+      "name": "OpenTelemetry",
+      "description": "An open-source observability framework for cloud-native software"
+    },
+    {
+      "@type": "Thing",
+      "name": "AI Monitoring",
+      "description": "The practice of monitoring artificial intelligence systems to ensure optimal performance and reliability"
+    }
+  ],
+  "mentions": [
+    {
+      "@type": "SoftwareApplication",
+      "name": "SigNoz",
+      "applicationCategory": "Observability Platform"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "name": "OpenTelemetry",
+      "applicationCategory": "Observability Framework"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "name": "LangChain",
+      "applicationCategory": "AI Development Framework"
+    }
+  ],
+  "mainEntity": {
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What is LLM Observability?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "LLM Observability refers to the end-to-end visibility into the performance and behavior of Large Language Model applications. It extends beyond traditional machine learning monitoring by focusing on the unique aspects of LLMs, such as prompt engineering, retrieval-augmented generation, and fine-tuning processes."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What are the five pillars of LLM Observability?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The five pillars of LLM Observability are: 1. LLM Evaluation, 2. Traces and Spans, 3. Retrieval Augmented Generation (RAG), 4. Fine-tuning Observability, and 5. Prompt Engineering Insights."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How can OpenTelemetry be used for LLM Observability?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "OpenTelemetry provides a unified framework for collecting telemetry data (logs, metrics, and traces) from LLM applications. It can be used to instrument LLM apps manually or automatically, providing detailed insights into performance and behavior."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What tools can be used for implementing LLM Observability?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Some tools for implementing LLM Observability include SigNoz (an open-source, comprehensive APM tool), Datadog, Arize AI, Weights & Biases, and MLflow. SigNoz stands out for its balance of features, ease of use, and cost-effectiveness, especially for teams already working with open-source technologies."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What are some best practices for implementing LLM Observability?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Best practices for implementing LLM Observability include defining clear metrics, implementing comprehensive logging, setting up real-time monitoring, conducting regular audits, establishing feedback loops, integrating with development workflows, and practicing data-driven optimization."
+        }
+      }
+    ]
+  },
+  "tutorial": {
+    "@type": "HowTo",
+    "name": "How to Implement LLM Observability with SigNoz and OpenTelemetry",
+    "step": [
+      {
+        "@type": "HowToStep",
+        "name": "Set up SigNoz",
+        "text": "Create a SigNoz Cloud account and set up the backend for storing and visualizing OpenTelemetry data."
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Install OpenTelemetry SDK",
+        "text": "Install the OpenTelemetry SDK in your LLM application using pip."
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Configure Environment Variables",
+        "text": "Set the necessary environment variables to send data to SigNoz, including the protocol, endpoint, and access token."
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Instrument Your Application",
+        "text": "Manually instrument your application using OpenTelemetry or use OpenLLMetry for automated instrumentation of LangChain applications."
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Create Dashboards in SigNoz",
+        "text": "Use the SigNoz dashboard to create custom panels and visualizations for monitoring your LLM application's performance and costs."
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Set Up Alerts",
+        "text": "Configure alerts in SigNoz to receive notifications for critical conditions in your LLM application."
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Use Pre-built Dashboards",
+        "text": "Optionally, import pre-built JSON dashboards for quick setup of performance and cost monitoring for your LangChain app."
+      }
+    ]
+  }
+}) }}
+  />
 </head>
 
 In the rapidly evolving world of Large Language Models (LLMs), ensuring peak performance and reliability is more critical than ever. This is where the concept of 'LLM Observability' comes into play. It's not just about monitoring outputs; it's about gaining deep insights into the internal workings of these complex systems.
 
-Large Language Models (LLMs) represent a transformative advancement in artificial intelligence, offering a wide range of capabilities for solving problems through sophisticated language understanding and generation.
+This comprehensive guide delves into the core concepts, best practices, and tools that define LLM Observability. You'll learn how to gain deep insights into your LLM applications, address common issues, and implement effective monitoring strategies to elevate your AI projects.
 
+For those eager to dive into practical implementation, you can jump directly to the section on [implementing LLM Observability with SigNoz and OpenTelemetry](#implementing-llm-observability-with-signoz-and-opentelemetry).
 
+## What is LLM Observability and Why It Matters
 
-![Cover Image](/img/blog/2024/01/llm-observability-cover.webp)
+LLM Observability refers to the end-to-end visibility into the performance and behavior of Large Language Model applications. It extends beyond traditional machine learning monitoring by focusing on the unique aspects of LLMs, such as prompt engineering, retrieval-augmented generation, and fine-tuning processes.
 
-Langchain is one of the popular frameworks for building LLM Apps, which has integrations with popular LLM Model APIs like OpenAI’s GPT-4, Google’s Gemini, Meta’s Llama2 or Anthropic’s Claude, etc. It also integrates with Vector Databases and provides a nice chain abstraction to make agent-like implementations.
-
-Speaking of cost-effective monitoring solutions, embedding high cardinality custom metrics such as accuracy, latency, or detailed model attributes is invaluable. High cardinality metrics refer to data with a vast and unique range of values, which can significantly enhance trace analysis. However, the costs associated with traditional observability platforms can be prohibitive, often akin to an implicit "data tax."
-
-OpenTelemetry, paired with solutions like SigNoz, offers an attractive and economical alternative for incorporating these granular insights. Costs for [high cardinality custom metrics can go out of control](https://signoz.io/blog/datadog-pricing/#datadogs-custom-metrics-pricing-can-get-out-of-control-quickly) in tools like Datadog. OpenTelemetry and SigNoz makes a perfect combo for setting up robust LLM observability.
-
-In this post, we cover:
-
-- [Why do we need LLM Observability?](#why-do-we-need-llm-observability)
-- [OpenTelemetry For LLM Observability](#opentelemetry-for-llm-observability)
-- [OpenTelemetry & SigNoz - The Perfect Combo for LLM Observability](#opentelemetry--signoz---the-perfect-combo-for-llm-observability)
-- [Prerequisites](#prerequisites)
-- [Setting up SigNoz](#setting-up-signoz)
-- [Approaches to Instrumenting a LangChain LLM App](#approaches-to-instrumenting-a-langchain-llm-app)
-- [Manual Instrumentation Using OpenTelemetry SDK](#manual-instrumentation-using-opentelemetry-sdk)
-- [Automatic Instrumentation using OpenLLMetry](#automatic-instrumentation-using-openllmetry)
-- [Monitoring with SigNoz Dashboard](#monitoring-with-signoz-dashboard)
-- [Conclusion](#conclusion)
-
-## Why do we need LLM Observability?
+**Why does LLM Observability matter?** 
 
 LLMs are intricate systems where countless processes occur simultaneously. Without proper observability, understanding these internal dynamics becomes a guessing game, leading to inefficiencies and potential errors.
 
-We need LLM observability for the following use cases:
+Consider these key points:
 
+- **Complexity Management**: LLMs involve intricate chains of operations; observability helps you understand and optimize each step.
+- **Quality Assurance**: It enables you to detect and mitigate issues like hallucinations or inaccuracies in LLM outputs.
+- **Performance Optimization**: By monitoring key metrics, you can identify bottlenecks and improve response times.
+- **Cost Control**: Observability allows you to track and optimize token usage, directly impacting operational costs.
+- **Resource Utilization and Efficiency:** Identifies computational demands and inefficiencies, optimizing resource allocation to enhance cost-effectiveness and system throughput.
 - **Model Performance and Accuracy Insights:** Provides critical data on LLM accuracy and processing capabilities, guiding refinements for superior model reliability and performance.
 - **Real-time Performance Tracking:** Enables instantaneous feedback on LLM operations, ensuring peak system efficiency and adaptation to varying performance requirements.
-- **Resource Utilization and Efficiency:** Identifies computational demands and inefficiencies, optimizing resource allocation to enhance cost-effectiveness and system throughput.
 - **Issue Detection and Troubleshooting:** Facilitates quick identification and resolution of complex issues within LLM infrastructures, reducing downtime and improving user experience.
 
-In this tutorial, we will use OpenTelemetry and SigNoz to set up LLM observability. Before we start, let’s have a brief overview of OpenTelemetry.
+<Figure src="/img/blog/2024/09/llm-observability-image.webp" alt="" caption="" />Unlike traditional ML monitoring, which often focuses on model accuracy and data drift, LLM Observability tackles challenges specific to language models. These include evaluating the quality of generated text, assessing the relevance of retrieved information, and optimizing prompt effectiveness.
 
-## OpenTelemetry For LLM Observability
+## The Five Pillars of LLM Observability
 
-OpenTelemetry is a set of APIs, SDKs, libraries, and integrations aiming to standardize the generation, collection, and management of telemetry data(logs, metrics, and traces). It is backed by the Cloud Native Computing Foundation and is the leading open-source project in the observability domain.
+To implement effective LLM Observability, focus on these five crucial pillars:
 
-OpenTelemetry is perfectly suited to instrument LLM applications for observability because of its comprehensive and flexible approach to telemetry data collection. It offers a unified solution for gathering and managing metrics, logs, and traces, which are crucial for observing complex systems like LLMs.
+### 1. LLM Evaluation
 
-Some of the key benefits of using OpenTelemetry for LLM observability are as follows:
+LLM evaluation involves assessing the quality and accuracy of the model's outputs. Key aspects include:
 
-1. **Unified Instrumentation**: OpenTelemetry provides a single, unified solution for collecting a full range of telemetry data. This unified approach simplifies the instrumentation process, making it easier to maintain and update.
-2. **Vendor Neutrality**: One of the key benefits of OpenTelemetry is its vendor-neutral design. This means that it works with a wide range of monitoring and analytics platforms. This flexibility allows organizations to switch between different backends without having to re-instrument their applications.
-3. **Community-Driven and Open Source**: Being community-driven and open source, OpenTelemetry benefits from contributions from a wide range of developers and companies. This leads to continuous improvements, innovative features, and a robust, well-tested product.
-4. **Customization and Extensibility**: OpenTelemetry is designed to be extensible, allowing developers to customize it to meet their specific needs. This includes adding new telemetry sources, integrating with other tools, and modifying data collection and processing behaviors.
-5. **Future-Proofing**: As technology and standards evolve, OpenTelemetry's active development and wide adoption ensure that it remains up-to-date with the latest trends and practices in software monitoring and telemetry.
+- **Automated Metrics**: Implement automated scoring systems using metrics like BLEU or ROUGE for text quality assessment.
+- **Human-in-the-Loop Feedback**: Incorporate mechanisms for human evaluators to rate and provide feedback on LLM responses.
+- **Consistency Checks**: Monitor the consistency of LLM outputs across similar inputs to detect potential issues.
+
+Example evaluation workflow:
+
+1. Generate responses to a set of test prompts.
+2. Apply automated metrics to score outputs.
+3. Route low-scoring responses for human review.
+4. Aggregate feedback to identify patterns and areas for improvement.
+
+### 2. Traces and Spans
+
+Tracing in LLM applications provides visibility into the entire request-response cycle. Key benefits include:
+
+- **Performance Insights**: Identify bottlenecks in your LLM pipeline by tracking latency across different stages.
+- **Error Detection**: Pinpoint where errors occur in complex LLM chains.
+- **Resource Utilization**: Monitor token usage and compute resources for cost optimization.
+
+Implement tracing by:
+
+1. Instrumenting your code to create spans for each significant operation.
+2. Collecting relevant metadata such as prompt details and token counts.
+3. Visualizing traces to understand the flow and performance of your LLM application.
+
+### 3. Retrieval Augmented Generation (RAG)
+
+RAG systems enhance LLM outputs by incorporating external knowledge. Observability for RAG focuses on:
+
+- **Retrieval Quality**: Monitor the relevance of retrieved information to the given query.
+- **Integration Efficiency**: Assess how well the retrieved information is incorporated into the LLM's response.
+- **Source Tracking**: Keep track of the sources used in generating responses for transparency and fact-checking.
+
+Implement RAG observability by:
+
+1. Logging retrieved documents and their relevance scores.
+2. Comparing LLM outputs with and without RAG to measure impact.
+3. Tracking the frequency and utility of different knowledge sources.
+
+### 4. Fine-tuning Observability
+
+When fine-tuning LLMs for specific tasks, observability becomes crucial. Key areas to monitor include:
+
+- **Training Metrics**: Track loss, accuracy, and other relevant metrics during the fine-tuning process.
+- **Model Drift**: Compare the performance of fine-tuned models against the base model over time.
+- **Task-Specific Evaluation**: Develop and monitor metrics tailored to your specific use case.
+
+Implement fine-tuning observability by:
+
+1. Setting up logging for training metrics and model checkpoints.
+2. Creating a benchmark dataset to evaluate models consistently.
+3. Implementing A/B testing between different model versions in production.
+
+### 5. Prompt Engineering Insights
+
+Effective prompt engineering is critical for LLM performance. Observability in this area includes:
+
+- **Prompt Effectiveness**: Measure how different prompts affect the quality and relevance of LLM outputs.
+- **Prompt Optimization**: Use data-driven approaches to refine and improve prompts over time.
+- **Version Control**: Track changes in prompts and their impact on model performance.
+
+Implement prompt engineering observability by:
+
+1. Creating a system to version and track different prompts.
+2. Measuring the performance of each prompt variant against defined metrics.
+3. Implementing A/B testing for prompt optimization in live environments.
+
+## Common Issues in LLM Applications and How Observability Helps
+
+LLM applications face several challenges that observability can help address:
+
+1. **Hallucinations and Inaccuracies**
+    - Problem: LLMs may generate false or misleading information.
+    - Solution: Implement fact-checking mechanisms and track the frequency of detected hallucinations.
+2. **Performance Bottlenecks**
+    - Problem: Slow response times due to inefficient processing.
+    - Solution: Use tracing to identify time-consuming operations and optimize accordingly.
+3. **Cost Management**
+    - Problem: High operational costs due to excessive token usage.
+    - Solution: Monitor token consumption patterns and implement usage limits or optimizations.
+4. **Security and Privacy Concerns**
+    - Problem: Potential exposure of sensitive information in LLM outputs.
+    - Solution: Implement content filtering and track instances of potential data leakage.
+
+## Best Practices for Implementing LLM Observability
+
+To maximize the benefits of LLM Observability, follow these best practices:
+
+1. **Define Clear Metrics**: Establish key performance indicators (KPIs) specific to your LLM application, such as response quality, latency, and cost per query.
+2. **Implement Comprehensive Logging**: Capture detailed logs of LLM interactions, including prompts, raw outputs, and post-processing steps.
+3. **Set Up Real-time Monitoring**: Use dashboards and alerting systems to track critical metrics and detect issues promptly.
+4. **Conduct Regular Audits**: Perform periodic reviews of your LLM application's performance, security, and compliance with relevant standards.
+5. **Establish Feedback Loops**: Create mechanisms for continuous improvement based on observability data and user feedback.
+6. **Integrate with Development Workflow**: Incorporate observability checks into your CI/CD pipeline to catch issues early.
+7. **Practice Data-Driven Optimization**: Use insights from observability to guide improvements in prompts, model selection, and system architecture.
+
+## Tools and Frameworks for LLM Observability
+
+Several tools can help you implement effective LLM Observability:
+
+<Figure src="/img/blog/2024/09/llm-observability-image%201.webp" alt="" caption="" />
+1. [**SigNoz**](https://signoz.io/): A comprehensive open-source APM tool that offers robust LLM monitoring capabilities. It provides end-to-end tracing, metrics, and logs in a single platform, making it an excellent choice for teams looking for a unified observability solution.
+2. **Datadog**: Offers comprehensive monitoring solutions with specific features for LLM applications. However, its pricing can be steep for smaller teams or projects.
+3. **Arize AI**: Provides specialized tools for ML observability, including LLM-specific metrics. While powerful, it may have a steeper learning curve for those new to ML observability.
+4. **Weights & Biases**: Offers experiment tracking and model monitoring capabilities. It's great for research and development, but may lack some production-focused features.
+5. **MLflow**: An open-source platform for the complete machine learning lifecycle, including model tracking and evaluation. While versatile, it may require more setup and configuration compared to managed solutions.
+
+When choosing a tool, consider factors such as integration capabilities, scalability, and support for LLM-specific metrics. SigNoz stands out for its balance of features, ease of use, and cost-effectiveness, especially for teams already working with open-source technologies.
+
+Let's see how we can implement LLM Observability with SigNoz and OpenTelemetry &rarr;
+
+## Implementing LLM Observability with SigNoz and OpenTelemetry
+
+SigNoz together with OpenTelemetry stands out as a powerful, open-source observability platform that's well-suited for LLM applications.
+
+### What is OpenTelemetry?
+
+OpenTelemetry is an open-source, vendor-neutral set of tools, APIs, and SDKs used to create and manage telemetry data (logs, metrics, and traces). Backed by the Cloud Native Computing Foundation, it's the leading project in the observability domain.
+
+**Key Benefits for LLM Observability:**
+
+1. **Unified Instrumentation**: Simplifies collection of metrics, logs, and traces.
+2. **Vendor Neutrality**: Works with various monitoring platforms, allowing easy backend switches.
+3. **Community-Driven**: Benefits from wide-ranging contributions, ensuring continuous improvement.
+4. **Customization**: Extensible to meet specific needs.
+5. **Future-Proof**: Stays current with evolving technology and standards.
+
+OpenTelemetry is well-suited for LLM applications due to its comprehensive approach to telemetry data collection. While the collected data is vendor-agnostic, choosing the right backend for OpenTelemetry is crucial for effective observability.
 
 The data you collect with OpenTelemetry is vendor-agnostic and can be exported to any backend, but which backend is best suited for OpenTelemetry?
 
-## OpenTelemetry & SigNoz - The Perfect Combo for LLM Observability
+### OpenTelemetry & SigNoz - The Perfect Combo for LLM Observability
 
 OpenTelemetry does not provide any backend. After generating telemetry data, it needs to be sent to a backend for storage and visualization. SigNoz is an [OpenTelemetry-native APM](https://signoz.io/blog/opentelemetry-apm/) built to support OpenTelemetry from day 1.
 
@@ -80,25 +347,23 @@ SigNoz is also open-source, and if you’re using OpenTelemetry and SigNoz, your
 
 Enough context, now let’s get started with the demo.
 
-## Prerequisites
+### Prerequisites
 
-- Langchain App: If you just want to play around to understand SigNoz's capabilities, here’s a <a href = "https://github.com/SigNoz/langchain-sample-app" rel="noopener noreferrer nofollow" target="_blank" >sample Langchain application</a>.
+- Langchain App: If you just want to play around to understand SigNoz's capabilities, here’s a [sample Langchain application](https://github.com/SigNoz/langchain-sample-app).
 - [SigNoz Cloud Account](https://signoz.io/teams/)
 
-## Setting up SigNoz
+### Setting up SigNoz
 
 You need a backend to which you can send the collected data for monitoring and visualization. [SigNoz](https://signoz.io/) is an OpenTelemetry-native APM that is well-suited for visualizing OpenTelemetry data.
 
-SigNoz cloud is the easiest way to run SigNoz. You can sign up [here](https://signoz.io/teams/) for a free account and get 30 days of unlimited access to all features.
+<GetStartedSigNoz />
 
-You can also install and self-host SigNoz yourself. Check out the [docs](https://signoz.io/docs/install/) for installing self-host SigNoz.
-
-## Approaches to Instrumenting a LangChain LLM App
+### Approaches to Instrumenting a LangChain LLM App
 
 - **Manual Instrumentation using OpenTelemetry SDK**: Allows for granular control and insights but is time-consuming to implement.
-- **Automated Instrumentation using OpenLLMetry SDK**: In addition to automatic instrumentation of API and DB calls, this version of the SDK instruments Langchain App, like OpenAI calls and Vector DB retrievals. A big shoutout to our friends at <a href = "https://www.traceloop.com/blog/openllmetry" rel="noopener noreferrer nofollow" target="_blank" >Traceloop</a> for building OpenLLMetry.
+- **Automated Instrumentation using OpenLLMetry SDK**: In addition to automatic instrumentation of API and DB calls, this version of the SDK instruments Langchain App, like OpenAI calls and Vector DB retrievals. A big shoutout to our friends at <a href="https://www.traceloop.com/blog/openllmetry" rel="noopener noreferrer nofollow" target="_blank">Traceloop</a> for building OpenLLMetry.
 
-## Manual Instrumentation Using OpenTelemetry SDK
+### Manual Instrumentation Using OpenTelemetry SDK
 
 OpenTelemetry is an open-source observability framework for cloud-native software. It provides tools for capturing traces, metrics, and logs, which are essential for understanding the behavior of your application. Below is a guide to manually integrate OpenTelemetry into an LLM application.
 
@@ -106,6 +371,7 @@ OpenTelemetry is an open-source observability framework for cloud-native softwar
 
 ```bash
 pip install opentelemetry-sdk
+
 ```
 
 **Setup:** Environment Variables to set to send data to SigNoz:
@@ -114,15 +380,15 @@ pip install opentelemetry-sdk
 export OTEL_EXPORTER_OTLP_PROTOCOL=grpc
 export OTEL_EXPORTER_OTLP_ENDPOINT="ingest.{region}.signoz.cloud"
 export OTEL_EXPORTER_OTLP_HEADERS="signoz-access-token=<SIGNOZ_INGESTION_KEY>"
+
 ```
 
 You can get the ingestion details for your SigNoz cloud account under settings —> ingestion settings.
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/common/ingestion-key-details.webp" alt="Ingestion details in SigNoz"/>
-    <figcaption><i>Ingestion details in SigNoz.</i></figcaption>
+<img src="/img/blog/common/ingestion-key-details.webp" alt="Ingestion details in SigNoz"/>
+<figcaption><i>Ingestion details in SigNoz.</i></figcaption>
 </figure>
-
 
 **Integration**: Once you have the SDK, you'll need to incorporate the OpenTelemetry libraries into your app's codebase. This involves creating traces and spans that represent the operations your app performs. Here's a snippet demonstrating how to create a span around an API request to the OpenAI service:
 
@@ -141,14 +407,15 @@ with tracer.start_span("OpenAI_API_Request", kind=SpanKind.CLIENT) as span:
 
 In this code block, we're creating a new span with the `start_span` method. The span is named "OpenAI_API_Request", indicating the action it represents. Within the span's context, we make the API request and then record the response status code as an attribute of the span. This level of granularity allows for in-depth monitoring and troubleshooting.
 
-## Automatic Instrumentation using OpenLLMetry
+### Automatic Instrumentation using OpenLLMetry
 
-While manual instrumentation provides fine-grained control, it can be time-consuming. That's where automatic instrumentation steps in. Our friends at <a href = "https://www.traceloop.com/blog/openllmetry" rel="noopener noreferrer nofollow" target="_blank" >Traceloop</a> have built OpenLLMetry, an OpenTelemetry library to instrument Langchain applications quickly. For our purposes, let's imagine that OpenLLMetry is OpenTelemetry with inbuilt capabilities to instrument components from the LLM ecosystem.
+While manual instrumentation provides fine-grained control, it can be time-consuming. That's where automatic instrumentation steps in. Our friends at <a href="https://www.traceloop.com/blog/openllmetry" rel="noopener noreferrer nofollow" target="_blank">Traceloop</a> have built OpenLLMetry, an OpenTelemetry library to instrument Langchain applications quickly. For our purposes, let's imagine that OpenLLMetry is OpenTelemetry with inbuilt capabilities to instrument components from the LLM ecosystem.
 
 **Installation**: To get started with OpenLLMetry, install the SDK and initialize it within your application:
 
 ```
 pip install traceloop-sdk
+
 ```
 
 **Setup**: Set the following environment variables or add them to a dotenv file.
@@ -156,6 +423,7 @@ pip install traceloop-sdk
 ```bash
 export TRACELOOP_BASE_URL=ingest.{region}.signoz.cloud
 export TRACELOOP_HEADERS="signoz-access-token=<SIGNOZ_INGESTION_KEY>"
+
 ```
 
 Initialize the SDK at the start of your application entry point.
@@ -164,6 +432,7 @@ Initialize the SDK at the start of your application entry point.
 from traceloop import Traceloop
 
 Traceloop.init(app_name="Signoz PDF Chat")
+
 ```
 
 **Setting Up Properties**: With OpenLLMetry, you can set association properties that help in correlating traces with specific users or sessions. Here's how you might do it:
@@ -180,6 +449,7 @@ async def ask(question: str, user: User):
 	})
   chain = load_qa_chain(ChatOpenAI(temperature=0), chain_type="stuff")
 	return chain.run(input_documents=docs, question=query)
+
 ```
 
 This code associates the current tracing context with a user ID and a unique chat session ID. This kind of metadata is invaluable for debugging issues that are user or session-specific.
@@ -223,29 +493,28 @@ for queryroot in queries:
         chain = load_qa_chain(ChatOpenAI(temperature=0), chain_type="stuff")
         output = chain.run(input_documents=docs, question=query)
         print(output)
+
 ```
 
-For more information and to enrich the workflow with names other than the function name, refer to <a href = "https://www.traceloop.com/docs/openllmetry/tracing/annotations" rel="noopener noreferrer nofollow" target="_blank" >OpenLLMetry documentation</a>.
+For more information and to enrich the workflow with names other than the function name, refer to <a href="https://www.traceloop.com/docs/openllmetry/tracing/annotations" rel="noopener noreferrer nofollow" target="_blank">OpenLLMetry documentation</a>.
 
-## Monitoring with SigNoz Dashboard
+### Monitoring with SigNoz Dashboard
 
 Once the above setup is done, you will be able to access the metrics in the SigNoz dashboard. You can go to the `Dashboards` tab and try adding a new panel. You can learn how to create dashboards in SigNoz [here](https://signoz.io/docs/userguide/manage-dashboards-and-panels/).
 
 You can easily create charts with [query builder](https://signoz.io/docs/userguide/create-a-custom-query/#sample-examples-to-create-custom-query) in SigNoz. Here are the [steps](https://signoz.io/docs/userguide/manage-panels/#steps-to-add-a-panel-to-a-dashboard) to add a new panel to the dashboard.
 
 <figure data-zoomable align='center'>
-    <img className="box-shadowed-image" src="/img/blog/2024/01/llm-observability-performance-dashboard.webp" alt="LLM observability setup with SigNoz"/>
-    <figcaption><i>A dashboard set up to measure the performance of the Langchain app showing important metrics like total LLM calls, latency, token throughput, etc.</i></figcaption>
+<img className="box-shadowed-image" src="/img/blog/2024/01/llm-observability-performance-dashboard.webp" alt="LLM observability setup with SigNoz"/>
+<figcaption><i>A dashboard set up to measure the performance of the Langchain app showing important metrics like total LLM calls, latency, token throughput, etc.</i></figcaption>
 </figure>
-
 
 You can also create dashboards to monitor the cost of running the Langchain application.
 
 <figure data-zoomable align='center'>
-    <img className="box-shadowed-image" src="/img/blog/2024/01/llm-observability-cost-monitor-dashboard.webp" alt="LLM observability dashboard for cost"/>
-    <figcaption><i>Dashboard to monitor the cost of running the Langchain application..</i></figcaption>
+<img className="box-shadowed-image" src="/img/blog/2024/01/llm-observability-cost-monitor-dashboard.webp" alt="LLM observability dashboard for cost"/>
+<figcaption><i>Dashboard to monitor the cost of running the Langchain application..</i></figcaption>
 </figure>
-
 
 ### Dynamic Dashboard Views with Variables
 
@@ -254,10 +523,9 @@ To accommodate the needs of diverse teams, SigNoz supports dynamic dashboard vie
 To utilize this feature, you can create variables and corresponding options (see [Manage Variables](https://signoz.io/docs/userguide/manage-variables/)). The sample Dashboard JSONs attached to this article have good examples as well.
 
 <figure data-zoomable align='center'>
-    <img className="box-shadowed-image" src="/img/blog/2024/01/llm-observability-dynamic-filter-dashboard.webp" alt="Dynamic dashboard in SigNoz where you can filter for specific service or user"/>
-    <figcaption><i>Dynamic dashboard in SigNoz where you can filter for specific service or user.</i></figcaption>
+<img className="box-shadowed-image" src="/img/blog/2024/01/llm-observability-dynamic-filter-dashboard.webp" alt="Dynamic dashboard in SigNoz where you can filter for specific service or user"/>
+<figcaption><i>Dynamic dashboard in SigNoz where you can filter for specific service or user.</i></figcaption>
 </figure>
-
 
 Learn how to create variables in Dashboards [here](https://signoz.io/docs/userguide/manage-variables/)
 
@@ -266,42 +534,66 @@ Learn how to create variables in Dashboards [here](https://signoz.io/docs/usergu
 To help operators quickly identify critical points, you can set threshold values on your visualizations within the SigNoz dashboard. These thresholds can serve as benchmarks for acceptable performance levels or as warnings for potential issues.
 
 <figure data-zoomable align='center'>
-    <img className="box-shadowed-image" src="/img/blog/2024/01/llm-observability-threshold.webp" alt="Set thresholds to serve as benchmarks for acceptable performance levels"/>
-    <figcaption><i>Set thresholds to serve as benchmarks for acceptable performance levels.</i></figcaption>
+<img className="box-shadowed-image" src="/img/blog/2024/01/llm-observability-threshold.webp" alt="Set thresholds to serve as benchmarks for acceptable performance levels"/>
+<figcaption><i>Set thresholds to serve as benchmarks for acceptable performance levels.</i></figcaption>
 </figure>
-
 
 ### Alerting
 
 Enhance your monitoring by creating alerts for any metric. SigNoz enables you to send notifications through various channels like Slack, Teams, or PagerDuty, ensuring rapid response times to critical conditions. Learn the process of setting up alerts in the comprehensive guide [here](https://signoz.io/docs/userguide/alerts-management/).
 
 <figure data-zoomable align='center'>
-    <img className="box-shadowed-image" src="/img/blog/2024/01/llm-observability-alerts.webp" alt="Set alerts on important metrics to get notified in your preferred notification channel."/>
-    <figcaption><i>Set alerts on important metrics to get notified in your preferred notification channel.</i></figcaption>
+<img className="box-shadowed-image" src="/img/blog/2024/01/llm-observability-alerts.webp" alt="Set alerts on important metrics to get notified in your preferred notification channel."/>
+<figcaption><i>Set alerts on important metrics to get notified in your preferred notification channel.</i></figcaption>
 </figure>
-
 
 ### Pre-built Dashboards
 
-If you want to get started quickly with monitoring your Langchain app, you can use SigNoz's two pre-built dashboards: _Performance Dashboard_ and _Cost Dashboard_. You can load SigNoz dashboard using the Import JSON button and get started.
+If you want to get started quickly with monitoring your Langchain app, you can use SigNoz's two pre-built dashboards: *Performance Dashboard* and *Cost Dashboard*. You can load SigNoz dashboard using the Import JSON button and get started.
 
-<a href = "https://github.com/SigNoz/dashboards/blob/main/llm-observability/sample-chatpdf-performance-metrics.json" rel="noopener noreferrer nofollow" target="_blank" >JSON for Langchain App Performance Dashboard</a>
+[JSON for Langchain App Performance Dashboard](https://github.com/SigNoz/dashboards/blob/main/llm-observability/sample-chatpdf-performance-metrics.json)
 
-<a href = "https://github.com/SigNoz/dashboards/blob/main/llm-observability/sample-chatpdf-cost-dashboard.json" rel="noopener noreferrer nofollow" target="_blank" >JSON for Langchain App Cost Dashboard</a>
-
-
+[JSON for Langchain App Cost Dashboard](https://github.com/SigNoz/dashboards/blob/main/llm-observability/sample-chatpdf-cost-dashboard.json)
 
 <Admonition>
-Performance dashboard works with any Langchain App. The _Cost dashboard_’s 'Cost by User' panel works only when the `user_id` property is transmitted. For more details, refer to the example app or sample code on how to set associated properties.
+Performance dashboard works with any Langchain App. The *Cost dashboard*’s 'Cost by User' panel works only when the `user_id` property is transmitted. For more details, refer to the example app or sample code on how to set associated properties.
 </Admonition>
 
-## Conclusion
+## Future Trends in LLM Observability
 
-In this article, we explored the importance of LLM observability and introduced OpenTelemetry. We demonstrated how to instrument a sample Langchain application with both manual and automatic OpenTelemetry instrumentation. For setting up LLM observability, we chose SigNoz, a full-stack, open-source tool that consolidates logs, metrics, and traces in one interface.
+As LLM technology evolves, observability practices will adapt. Keep an eye on these emerging trends:
 
-OpenTelemetry is rapidly emerging as the global standard for open-source observability. Its use offers several benefits, including a unified standard for all telemetry signals and freedom from vendor lock-in, making it an ideal choice for LLM applications.
+1. **Advanced Evaluation Techniques**: Expect more sophisticated methods for assessing LLM outputs, potentially leveraging other AI models for evaluation.
+2. **Explainable AI Integration**: Tools that provide insights into LLM decision-making processes will become more prevalent.
+3. **Automated Prompt Optimization**: Systems that can automatically refine and test prompts based on observability data will emerge.
+4. **Regulatory Compliance Tools**: As AI regulations develop, observability solutions will incorporate features to ensure compliance and auditability.
+5. **Real-time Adaptation**: Future systems may use observability data to dynamically adjust LLM behavior in real-time. 
 
-SigNoz is an open-source, [OpenTelemetry-native APM](https://signoz.io/blog/opentelemetry-apm/), serving as a comprehensive backend solution for all your observability needs.
+## Key Takeaways
+
+- LLM Observability is essential for maintaining reliable, accurate, and efficient AI applications.
+- Focus on the five pillars: evaluation, tracing, RAG, fine-tuning, and prompt engineering.
+- Address common issues like inaccuracies and performance bottlenecks through comprehensive monitoring.
+- Implement best practices and choose the right tools to establish effective LLM observability.
+- Stay informed about emerging trends to future-proof your observability strategy.
+
+## FAQs
+
+### What's the difference between LLM Observability and traditional ML monitoring?
+
+LLM Observability focuses on language model-specific aspects like prompt engineering and text generation quality, while traditional ML monitoring typically deals with model accuracy and data drift for structured data models.
+
+### How can LLM Observability help reduce costs in AI applications?
+
+By monitoring token usage, response times, and resource utilization, LLM Observability helps identify opportunities for optimization, such as prompt refinement or model downsizing, leading to reduced operational costs.
+
+### What are the key metrics to monitor in an LLM application?
+
+Key metrics include response quality, latency, token consumption, retrieval relevance (for RAG systems), and task-specific performance indicators relevant to your application's goals.
+
+### How does LLM Observability address privacy and security concerns?
+
+LLM Observability helps detect potential data leaks, monitor for unauthorized information disclosure, and ensure compliance with data protection regulations by tracking and analyzing LLM inputs and outputs.
 
 ---
 
