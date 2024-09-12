@@ -1,0 +1,869 @@
+---
+
+title: How to Log All Spring Boot Requests and Responses - A Guide
+slug: spring-boot-how-to-log-all-requests-and-responses-with-exceptions-in-single-place
+date: 2024-09-11
+tags: [faq]
+authors: [nilesh_sinha]
+description: Learn how to implement comprehensive logging for all requests, responses, and exceptions in Spring Boot applications. A step-by-step guide with advanced techniques.
+keywords: [Spring Boot logging, request logging, response logging, exception handling, centralized logging, observability, SigNoz integration]
+
+---
+
+Logging is a critical aspect of any robust Spring Boot application. It provides invaluable insights into application behavior, aids in debugging, and enhances overall system observability. But how do you effectively log all requests, responses, and exceptions in a single place? This guide walks you through the process, from basic setup to advanced techniques, ensuring you have a comprehensive logging strategy for your Spring Boot application.
+
+## Understanding the Importance of Logging in Spring Boot Applications
+
+Logging serves as the eyes and ears of your application. It captures crucial information about requests, responses, and system events, making it indispensable for:
+
+1. Debugging: Quickly identify and resolve issues by tracing request flows.
+2. Performance Monitoring: Track response times and system resource usage.
+3. Security Auditing: Detect and investigate suspicious activities.
+4. Compliance: Meet regulatory requirements for data handling and privacy.
+
+Spring Boot provides built-in logging capabilities, but to log all requests and responses with exceptions in a single place, you'll need to implement custom solutions.
+
+Now let’s have a look at some of the benefits of comprehensive logging for debugging and monitoring:
+
+Improved Debugging:
+
+- Error Tracking: Captures errors and stack traces for easier bug identification.
+- Reproduce Issues: Helps replicate issues with detailed logs.
+- Reduced Time to Resolve: Speeds up root cause analysis.
+
+Enhanced Monitoring:
+
+- System Health: Provides real-time insights into performance.
+- Usage Patterns: Identifies trends in user behavior.
+- Compliance and Security: Tracks access and ensures security compliance.
+
+Proactive Issue Resolution:
+
+- Alerting: Enables proactive management through log-based alerts.
+- Performance Tuning: Identifies and resolves bottlenecks.
+
+Better Accountability:
+
+- Audit Trails: Maintains a record of actions for accountability.
+- Traceability: Tracks the history of events for analysis.
+
+There could be some caveats when it comes to logging requests and responses. Let's list some of them out:
+
+- Performance Overhead: Logging can slow down the system if not optimized, especially with high volumes of requests.
+- Data Sensitivity: Sensitive information (e.g., passwords, personal data) might be exposed in logs if not properly masked or encrypted.
+- Log Management: Managing, storing, and analyzing large volumes of log data can be challenging, requiring robust tools and strategies.
+
+## Setting Up Logging Configuration in Spring Boot
+
+To start, configure your `logback.xml` file for customized logging:
+
+```xml
+<configuration>
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/application.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>logs/application-%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="FILE" />
+    </root>
+</configuration>
+
+```
+
+- `%d{HH:mm:ss.SSS}`: The timestamp of the log event, formatted to display hours, minutes, seconds, and milliseconds (e.g., `15:45:30.123`).
+- `[%thread]`: The name of the thread that generated the log event, enclosed in square brackets (e.g., `[main]`).
+- `%-5level`: The log level (e.g., INFO, DEBUG, ERROR), left-aligned and padded to a width of 5 characters.
+- `%logger{36}`: The logger's name, truncated to 36 characters if it's longer.
+- `%msg%n`: The log message itself, followed by a newline
+
+This configuration sets up console and file logging with daily log rotation. Adjust log levels based on the environment your application is running in:
+
+- Use `DEBUG` for development to capture detailed information.
+- Stick to `INFO` or `WARN` for production to balance information and performance.
+
+Choosing the right log levels for different environments is essential for balancing visibility and performance. Here’s how you can approach it:
+
+Development Environment:
+
+- Log Level: DEBUG
+- Purpose: Capture detailed information to assist in troubleshooting and development.
+- Content: All actions, data flows, and error messages.
+
+Testing/Staging Environment:
+
+- Log Level: INFO or DEBUG
+- Purpose: Validate functionality and performance while still capturing sufficient details for troubleshooting.
+- Content: Key actions, state changes, and potential warnings.
+
+Production Environment:
+
+- Log Level: INFO and ERROR
+- Purpose: Monitor the system’s health and capture errors without overwhelming the system with logs.
+- Content: High-level actions, significant events, and error messages.
+
+Critical Environments (e.g., Security-sensitive applications):
+
+- Log Level: WARN and ERROR
+- Purpose: Focus on logging potential security risks, warnings, and errors to minimize performance impact.
+- Content: Warnings, errors, and any unusual behavior that might indicate security issues.
+
+Moreover, we also need to structure our log output for easy parsing and analysis. Here’s how we can do it:
+
+Consistent Format:
+
+- Use a Structured Format: JSON or XML formats are ideal for structured logging, as they are easily parsed by log analysis tools. JSON is often preferred due to its readability and compatibility with most log analysis tools.
+- Timestamp: Include a precise timestamp (e.g., ISO 8601) for each log entry to track events chronologically.
+
+Clear Log Levels:
+
+- Standardized Levels: Use standard log levels (e.g., DEBUG, INFO, WARN, ERROR) consistently to categorize log entries by severity.
+
+Unique Identifiers:
+
+- Correlation IDs: Include unique identifiers like request IDs or transaction IDs to correlate related log entries across different components.
+
+## Implementing a Custom Request/Response Interceptor
+
+We can make use of custom interceptors to capture and log both incoming requests and outgoing REST calls, while also handling multipart requests and large payloads efficiently.
+
+To log all requests and responses, create a custom interceptor:
+
+```java
+@Component  // Registers this class as a Spring component
+public class LoggingInterceptor implements HandlerInterceptor {
+
+// Logger for this class
+    private static final Logger logger = LoggerFactory.getLogger(LoggingInterceptor.class);  
+
+    @Override
+    // Logs HTTP method and URI before the request is handled
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
+        logger.info("Request: {} {}", request.getMethod(), request.getRequestURI());
+        return true;  // Allows the request to proceed
+    }
+
+    @Override
+    // Logs response status and URI after request completion. Logs exceptions if any
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
+        logger.info("Response: {} {}", response.getStatus(), request.getRequestURI());
+        if (ex != null) {
+        // Logs any exception
+            logger.error("Exception: ", ex); 
+        }
+    }
+}
+```
+
+Register this interceptor in your WebMvc configuration:
+
+```java
+@Configuration
+public class WebConfig implements WebMvcConfigurer {
+
+    @Autowired
+    private LoggingInterceptor loggingInterceptor;
+
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(loggingInterceptor);
+    }
+}
+
+```
+
+You may achieve thorough request/response logging in a Spring Boot application by extending `OncePerRequestFilter`. This filter is a perfect area to implement thorough logging because it guarantees that a specific request is only processed once per request.
+
+```java
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+
+@Component  // Registers this filter as a Spring component.
+public class LoggingFilter extends OncePerRequestFilter {
+
+    private static final Logger logger = LoggerFactory.getLogger(LoggingFilter.class);  // Logger instance for logging.
+
+    @Override
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
+        
+        // Log request details before processing the request.
+        logger.info("Request: Method={}, URI={}, Headers={}", 
+                    request.getMethod(), 
+                    request.getRequestURI(), 
+                    getRequestHeaders(request));
+
+        long startTime = System.currentTimeMillis();  // Capture the start time to measure processing duration.
+
+        try {
+            filterChain.doFilter(request, response);  // Continue with the next filter in the chain.
+        } finally {
+            long duration = System.currentTimeMillis() - startTime;  // Calculate how long the request took.
+
+            // Log response details after request processing.
+            logger.info("Response: Status={}, URI={}, Duration={}ms, Headers={}", 
+                        response.getStatus(), 
+                        request.getRequestURI(), 
+                        duration,
+                        getResponseHeaders(response));
+
+            // Log any exceptions that occurred during processing.
+            if (request.getAttribute("javax.servlet.error.exception") != null) {
+                logger.error("Exception during request processing", 
+                             (Exception) request.getAttribute("javax.servlet.error.exception"));
+            }
+        }
+    }
+
+    // Utility method to extract request headers for logging.
+    private String getRequestHeaders(HttpServletRequest request) {
+        return request.getHeaderNames().asIterator()
+                      .asIterator()
+                      .forEachRemaining(header -> logger.info("Request Header: {}={}", header, request.getHeader(header)));
+    }
+
+    // Utility method to extract response headers for logging.
+    private String getResponseHeaders(HttpServletResponse response) {
+        return response.getHeaderNames().stream()
+                      .forEach(header -> logger.info("Response Header: {}={}", header, response.getHeader(header)));
+    }
+}
+```
+
+- `doFilterInternal` Method: This is where the main logic of the filter resides. It logs the request details (HTTP method, URI, headers), measures the processing time, and logs the response details (status, headers) after the request is processed.
+- Request and Response Headers: Utility methods (`getRequestHeaders` and `getResponseHeaders`) are used to extract and log all headers from the incoming request and outgoing response.
+
+Output:
+
+```java
+INFO Request: Method=GET, URI=/api/example, Headers={User-Agent=Mozilla/5.0, Accept=*/*}
+INFO Response: Status=200, URI=/api/example, Duration=123ms, Headers={Content-Type=application/json}
+INFO Request Header: User-Agent=Mozilla/5.0
+INFO Request Header: Accept=*/*
+INFO Response Header: Content-Type=application/json
+```
+
+Implementing `ClientHttpRequestInterceptor` for Outgoing REST Calls
+
+`ClientHttpRequestInterceptor` is used to intercept and modify HTTP requests and responses when making REST calls in a Spring application. It allows you to add custom logic such as logging, authentication, or header modification.
+
+```java
+public class CustomClientHttpRequestInterceptor implements ClientHttpRequestInterceptor {
+
+    @Override
+    public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution) throws IOException {
+        // Modify the request (e.g., add headers)
+        request.getHeaders().add("Custom-Header", "value");
+
+        // Log the outgoing request
+        logger.info("Outgoing request: URI={}, Method={}, Headers={}",
+                    request.getURI(), request.getMethod(), request.getHeaders());
+
+        // Proceed with the request execution
+        return execution.execute(request, body);
+    }
+}
+```
+
+The interceptor adds a custom header to the outgoing request and logs details like URI, method, and headers.
+
+Handling Multipart Requests and Large Payloads Efficiently
+
+Multipart Requests:
+
+- When handling file uploads or multipart data, ensure that your application processes large files efficiently to avoid memory issues.
+
+```java
+MultipartFile file = request.getFile("file");
+if (file != null && !file.isEmpty()) {
+    // Save or process the file
+    file.transferTo(new File("/path/to/save/" + file.getOriginalFilename()));
+}
+```
+
+The above code safely handles a file upload by saving it to disk, which prevents large files from being fully loaded into memory.
+
+For large payloads, consider using streaming techniques to process data in chunks, reducing memory usage.
+
+The code below reads a large payload from the request input stream and writes it to a file in chunks, which is efficient for handling large data.
+
+```java
+InputStream inputStream = request.getInputStream();
+OutputStream outputStream = new FileOutputStream("/path/to/save/largeFile.dat");
+
+byte[] buffer = new byte[8192];  // 8KB buffer size
+int bytesRead;
+while ((bytesRead = inputStream.read(buffer)) != -1) {
+    outputStream.write(buffer, 0, bytesRead);
+}
+
+outputStream.close();
+inputStream.close();
+```
+
+### Logging Request Details
+
+Capturing HTTP Method, URL, and Headers
+
+- Method & URL: Log the HTTP method (GET, POST, etc.) and the requested URL (URI) to understand what action the client is attempting.
+- Headers: Extract and log headers to provide context, such as `User-Agent`, `Authorization` (if required), and custom headers.
+
+```java
+logger.info("Request: Method={}, URL={}, Headers={}",
+            request.getMethod(),
+            request.getRequestURI(),
+            getRequestHeaders(request));
+```
+
+Safely Logging Request Bodies Without Compromising Security
+
+- Sensitive Data Redaction: Identify and redact or mask sensitive fields (e.g., passwords, credit card numbers) in the request body.
+
+```java
+String requestBody = getRequestBody(request);
+String sanitizedBody = sanitizeSensitiveData(requestBody);  // Implement sanitization logic.
+logger.info("Request Body: {}", sanitizedBody);
+```
+
+Generating Unique Request IDs for Traceability
+
+- Request ID Generation: Generate a unique identifier (UUID) for each request and log it. Pass this ID across services to correlate logs.
+- Include in Response: Ensure the request ID is also included in the response headers for full-cycle traceability.
+
+```java
+String requestId = UUID.randomUUID().toString();
+request.setAttribute("RequestID", requestId);
+logger.info("Request ID: {}", requestId);
+```
+
+Enhance the `preHandle` method to capture more request details:
+
+```java
+@Override
+public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
+    String requestId = UUID.randomUUID().toString();
+    MDC.put("requestId", requestId);
+
+    logger.info("Request: {} {} (ID: {})", request.getMethod(), request.getRequestURI(), requestId);
+    logger.debug("Headers: {}", getHeadersAsString(request));
+
+    if (isContentTypeAllowed(request.getContentType())) {
+        logger.debug("Body: {}", getRequestBody(request));
+    }
+
+    return true;
+}
+```
+
+Handling Different Content Types (JSON, XML, Form Data):
+
+Different content types like JSON, XML, and form data require different handling when logging. Ensure your logging mechanism can parse and log these content types correctly.
+
+```java
+@Override
+public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
+    String requestId = UUID.randomUUID().toString();
+    MDC.put("requestId", requestId);
+
+    logger.info("Request: {} {} (ID: {})", request.getMethod(), request.getRequestURI(), requestId);
+    logger.debug("Headers: {}", getHeadersAsString(request));
+
+    if (isContentTypeAllowed(request.getContentType())) {
+        logger.debug("Body: {}", getRequestBody(request));
+    }
+
+    return true;
+}
+```
+
+The above example shows how to handle different content types, logging only when the content type is allowed and properly processing each type for logging.
+
+### Logging Response Details
+
+- Status Codes: Logging the response status code provides immediate feedback on the outcome of the request.
+- Headers: Logging response headers give additional context about the response, such as content type, authentication details, and other metadata.
+
+```java
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+
+@Component
+public class LoggingFilter extends OncePerRequestFilter {
+
+    private static final Logger logger = LoggerFactory.getLogger(LoggingFilter.class);
+
+    @Override
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
+        
+        try {
+            filterChain.doFilter(request, response);
+        } finally {
+            // Log the HTTP response status code
+            int statusCode = response.getStatus();
+            logger.info("Response Status: {}", statusCode);
+
+            // Log the response headers
+            response.getHeaderNames().forEach(headerName -> {
+                String headerValue = response.getHeader(headerName);
+                logger.info("Response Header: {}={}", headerName, headerValue);
+            });
+        }
+    }
+}
+```
+
+Efficiently Logging Response Bodies of Varying Sizes:
+
+When logging response bodies, especially large ones, consider logging only summaries or truncated versions for efficiency. This reduces log clutter and improves performance while still providing useful insights.
+
+The example here logs either the full response body or a truncated version if the body is large, balancing detail with log size.
+
+```java
+String responseBody = getResponseBody(response);
+if (responseBody.length() > 1000) {
+    logger.info("Response Body (truncated): {}", responseBody.substring(0, 1000) + "...");
+} else {
+    logger.info("Response Body: {}", responseBody);
+}
+```
+
+Measuring and Logging Response Times:
+
+Measuring the time taken to process and deliver responses helps in identifying performance bottlenecks. Log these times alongside other response details to maintain a comprehensive performance log.
+
+Here’s how you can measure the time taken to handle a request and log the execution time.
+
+```java
+long startTime = System.currentTimeMillis();
+Object result = joinPoint.proceed(); // Process the request
+long executionTime = System.currentTimeMillis() - startTime;
+logger.info("Response time: {} ms", executionTime);
+```
+
+Handling Streaming Responses and Partial Content
+
+1. Streaming Responses:
+    - Log Initial Response Information: Log basic details like status and URI before the stream starts.
+    - Track Streaming Progress:  For long-running streams, consider logging periodic updates to track progress. However, be cautious about how often you log these updates, as excessive logging can degrade performance. Rate-limiting your logging (e.g., every few seconds or after certain data thresholds) can help balance the need for information with performance. It has been explained later in the upcoming section how you can ensure logging updates are done in a better way.
+    
+    ```java
+    logger.info("Streaming response started: Status={}, URI={}", response.getStatus(), request.getRequestURI());
+    ```
+    
+2. Partial Content:
+When serving partial content (e.g., large file downloads or video streaming), the HTTP 206 status code is used, often accompanied by the `Content-Range` header. Logging this information is crucial for understanding what portion of the content was delivered, especially in case of errors or interruptions.
+    
+    ```java
+    String contentRange = response.getHeader("Content-Range");
+    if (contentRange != null) {
+        logger.info("Partial Content: Range={}", contentRange);
+    }
+    ```
+    
+     Logging partial content is particularly important in scenarios like large file transfers or video streaming, where only a portion of the content is sent at a time. This helps in debugging issues related to incomplete or interrupted content delivery.
+    
+
+## Exception Handling and Logging
+
+Exception handling and logging are essential for keeping applications robust and reliable by ensuring errors are effectively captured, logged, and reported, simplifying diagnosis and resolution.
+
+### Implement a Global Exception Handler:
+
+A global exception handler centralizes the handling of exceptions across your application, ensuring consistent error handling. You can create a global exception handler using the `@ControllerAdvice` and `@ExceptionHandler` annotations.
+
+```java
+@ControllerAdvice
+public class GlobalExceptionHandler {
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<String> handleException(Exception ex) {
+        // Log the exception
+        logger.error("An error occurred: ", ex);
+        // Return a custom error response
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred");
+    }
+}
+```
+
+As in the above example, using a `GlobalExceptionHandler`  ensures that all exceptions are handled uniformly, improving the maintainability and reliability of your application.
+
+### Logging Stack Traces and Custom Error Messages:
+
+When an exception occurs, logging the stack trace along with a custom error message provides detailed insights into the cause and location of the error.
+You can use try-catch block to examine if the exception gets handled correctly.
+
+```java
+try {
+    // Code that might throw an exception
+} catch (Exception ex) {
+    logger.error("Error processing request: {}", ex.getMessage(), ex);
+}
+```
+
+### Implementing a Consistent Error Response Format:
+
+A consistent error response format improves the user experience and simplifies error handling on the client side. This often includes a standard structure with fields like `timestamp`, `status`, `error`, and `message`.
+
+The example here shows how a consistent error response format ensures that clients receive predictable and useful error information
+
+```java
+public class ErrorResponse {
+    private String timestamp;
+    private int status;
+    private String error;
+    private String message;
+
+    // Getters and Setters
+}
+
+// Usage in GlobalExceptionHandler
+ErrorResponse errorResponse = new ErrorResponse(LocalDateTime.now(), HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal Server Error", ex.getMessage());
+```
+
+### Correlating Exceptions with Their Corresponding Requests:
+
+Correlating exceptions with the requests that caused them helps in tracing issues back to specific user actions or inputs. This can be achieved using unique identifiers like request IDs.
+
+```java
+String requestId = MDC.get("requestId"); // Assuming MDC is set up
+logger.error("Request ID {}: Exception occurred", requestId, ex);
+```
+
+Here’s how you can use the combination of the above key points to handle exceptions in your application.
+
+```java
+
+@ControllerAdvice
+public class GlobalExceptionHandler {
+
+    private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handleException(HttpServletRequest request, Exception ex) {
+        // Correlate request with exception using MDC
+        String requestId = UUID.randomUUID().toString();
+        MDC.put("requestId", requestId);
+
+        // Log the exception with stack trace and custom message
+        logger.error("Request ID {}: Error processing request from {}: {}", requestId, request.getRemoteAddr(), ex.getMessage(), ex);
+
+        // Create a consistent error response format
+        ErrorResponse errorResponse = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                "Internal Server Error",
+                "An unexpected error occurred. Please try again later.",
+                requestId
+        );
+
+        // Clear MDC to prevent data leaks
+        MDC.clear();
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    public static class ErrorResponse {
+        private String timestamp;
+        private int status;
+        private String error;
+        private String message;
+        private String requestId;
+
+        public ErrorResponse(LocalDateTime timestamp, int status, String error, String message, String requestId) {
+            this.timestamp = timestamp.toString();
+            this.status = status;
+            this.error = error;
+            this.message = message;
+            this.requestId = requestId;
+        }
+
+        // Getters and Setters for the ErrorResponse class
+    }
+}
+```
+
+## Advanced Logging Techniques
+
+It is important to enhance your logging strategy to improve traceability, performance, and maintainability in complex applications. Techniques like Aspect-Oriented Programming (AOP), Mapped Diagnostic Context (MDC), etc. can significantly enhance the quality and utility of your logs, enabling better debugging and monitoring in distributed systems.
+
+### Using Aspect-Oriented Programming (AOP)
+
+AOP is a programming paradigm that allows you to separate cross-cutting concerns, such as logging, from your main business logic. It helps in applying the same behavior (like logging or security) across multiple methods or classes without duplicating code.
+
+AOP allows you to add logging behavior to your methods without modifying their code. Here’s an example for it where we have used `ProceedingJoinPoint` interface that extends `JoinPoint` . 
+A `JoinPoint` is a specific point in the execution of a program where an aspect's advice can be applied. `ProceedingJoinPoint` is a key object in Aspect-Oriented Programming (AOP) used in Spring. It provides access to the method that is being advised and allows you to control its execution.
+
+```java
+@Aspect
+@Component
+public class LoggingAspect {
+
+    private static final Logger logger = LoggerFactory.getLogger(LoggingAspect.class);
+
+    @Around("execution(* com.package.controllers.*.*(..))")
+    public Object logAround(ProceedingJoinPoint joinPoint) throws Throwable {
+        String methodName = joinPoint.getSignature().getName();
+        logger.info("Entering method: {}", methodName);
+
+        long start = System.currentTimeMillis();
+        Object result = joinPoint.proceed();
+        long executionTime = System.currentTimeMillis() - start;
+
+        logger.info("Exiting method: {} (execution time: {}ms)", methodName, executionTime);
+        return result;
+    }
+}
+
+```
+
+Here’s the explanation for the key components used above:
+
+- `@Aspect`: Indicates that this class is an aspect that contains cross-cutting concerns.
+- `@Component`: Marks the class as a Spring component so that it can be managed by the Spring container.
+- `Logger`: Used to log messages. `LoggerFactory.getLogger()` creates a logger for this aspect.
+- `@Around`: An advice type that runs both before and after the method execution. It wraps the target method execution.
+- `ProceedingJoinPoint`: Provides access to the method being advised. `joinPoint.proceed()` executes the target method.
+- `execution(* com.package.controllers.*.*(..))`: A pointcut expression that matches all methods in the specified package.
+
+### Implementing Mapped Diagnostic Context (MDC)
+
+Mapped Diagnostic Context (MDC) is a feature in logging frameworks like Logback and Log4j that allows you to enrich log messages with additional, contextual information.
+
+MDC allows you to enrich log messages with contextual information. The following example comprises filter that adds unique request and user IP information to logs, helping to trace and debug requests more effectively.
+
+```java
+public class MDCFilter extends OncePerRequestFilter {
+
+    @Override
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
+        MDC.put("requestId", UUID.randomUUID().toString());
+        MDC.put("userIp", request.getRemoteAddr());
+
+        try {
+            filterChain.doFilter(request, response);
+        } finally {
+            MDC.clear();
+        }
+    }
+}
+```
+
+Here’s an explanation of the key components:
+
+- `MDC.put()`: Adds contextual data (like `requestId` and `userIp`) to each log entry.
+- `filterChain.doFilter()`: Continues processing the request.
+- `MDC.clear()`: Removes the context after the request to prevent leakage to other requests.
+
+### Asynchronous Logging for Improved Performance
+
+Asynchronous logging helps boost application performance by writing log entries in the background, reducing the impact on the main thread.
+
+Highlights:
+
+- Non-Blocking: Log messages are handled in a separate thread, preventing delays in the main application flow.
+- Configuration: In Logback, use `AsyncAppender` to enable asynchronous logging.
+
+```xml
+<appender name="ASYNC" class="ch.qos.logback.classic.AsyncAppender">
+    <appender-ref ref="FILE"/>
+</appender>
+
+<appender name="FILE" class="ch.qos.logback.core.FileAppender">
+    <file>logs/myapp.log</file>
+    <encoder>
+        <pattern>%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n</pattern>
+    </encoder>
+</appender>
+```
+
+The pattern `%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n` formats log messages to include the timestamp (`%d{yyyy-MM-dd HH:mm:ss}`), log level padded to 5 characters (`%-5level`), logger name up to 36 characters (`%logger{36}`), and the actual log message (`%msg`).
+
+### Integrating with Distributed Tracing Systems
+
+Distributed tracing provides a way to track requests across multiple services, helping to understand performance bottlenecks and service interactions.
+
+- Integrate with systems like Jaeger or Zipkin to pass trace IDs across service boundaries.
+- Use libraries or frameworks that support distributed tracing to automatically capture and report trace data.
+
+## Monitoring and Analyzing Logs with SigNoz
+
+SigNoz offers powerful tools for log analysis and correlation with traces. To integrate SigNoz with your Spring Boot application:
+
+1. Add the SigNoz Java agent to your application's JVM arguments.
+2. Configure the agent to send data to your SigNoz server.
+3. Use SigNoz's dashboard to analyze logs, traces, and metrics in one place.
+
+<GetStartedSigNoz />
+
+## Performance Considerations and Optimization
+
+1. Balancing Logging Detail with Application Performance: Maintain the right balance between the amount of logging detail and application performance is crucial. Excessive logging can degrade performance due to increased I/O operations and processing overhead.
+For instance, logging every method entry and exit might slow down the application, especially in high-throughput systems. To optimize, log only essential information and use appropriate logging levels (e.g., `INFO`, `DEBUG`, `ERROR`).
+2. Implementing Log Sampling for High-Traffic Applications: To handle high traffic without overloading your logging system, you can log a small percentage of events. Here's how you can do it:
+    
+    ```java
+    // Log sampling example: 1% of events
+    import java.util.Random;
+    
+    public class LogSampler {
+        private static final double SAMPLING_RATE = 0.01; // 1% chance
+        private static final Random RANDOM = new Random();
+        private static final Logger logger = LoggerFactory.getLogger(LogSampler.class);
+    
+        public void handleRequest(String requestData) {
+            if (RANDOM.nextDouble() < SAMPLING_RATE) {
+                logger.info("Sampled request: {}", requestData);
+            }
+        }
+    }
+    ```
+    
+    Here, `RANDOM.nextDouble()` checks if a request should be logged based on a 1% probability. This approach helps keep the log volume manageable while still capturing important events.
+    
+3. Using Buffered Logging to Reduce I/O Overhead: Buffered logging boosts performance by temporarily storing log entries in memory and writing them to disk in chunks. This reduces the number of I/O operations, which can slow down your application. 
+    
+    Here’s how you can set it up in Logback:
+    
+    ```xml
+    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+        <file>logs/myapp.log</file>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+        <bufferSize>8192</bufferSize> <!-- 8KB buffer -->
+    </appender>
+    ```
+    
+    This configuration uses an 8KB buffer to collect logs before writing them to disk, improving overall performance.
+    
+4. Optimizing Log Storage and Retrieval: In order to keep your logs manageable, you should use tools that support efficient indexing and querying. Regularly archive old logs and ensure your system handles your log volume and access needs. Using structured formats like JSON makes logs easier to search and analyze.
+
+## Security and Compliance in Logging
+
+1. Mask Sensitive Data: Always mask or redact personally identifiable information (PII), passwords, tokens, and other sensitive data before logging to prevent exposure.
+Let’s consider an example of a `request` that represents an instance of `HttpServletRequest`, which is provided by the servlet container in a Java web application. It encapsulates all the information related to an HTTP request made by the client.
+    
+    Here’s how you can mask sensitive data while logging:
+    
+    ```java
+    // Mask sensitive data before logging
+    String password = request.getParameter("password");
+    String maskedPassword = password != null ? "**" : null;
+    
+    // Log the request with the masked password
+    logger.info("User login attempt: username={}, password={}", username, maskedPassword);
+    ```
+    
+    The `password` is masked by replacing it with asterisks (`**`) before logging.
+    
+2. Implementing Log Encryption: Encrypt logs in transit and at rest in sensitive areas to prevent unwanted access and guarantee data integrity.
+    
+    Here’s a simple example using Base64 encoding to simulate encryption. However, in a real application, you would require a stronger encryption method.
+    
+    ```java
+    // Encrypt the log message before logging
+    String logMessage = "Sensitive data to log";
+    String encryptedMessage = Base64.getEncoder().encodeToString(logMessage.getBytes());
+    
+    // Log the encrypted message
+    logger.info("Encrypted log: {}", encryptedMessage);
+    ```
+    
+    The method `Base64.getEncoder().encodeToString(logMessage.getBytes())` is used to encode a string into its Base64 representation.
+    Output:
+    
+    ```java
+    U2Vuc2l0aXZlIGRhdGEgdG8gbG9n
+    ```
+    
+    The encrypted message is logged, ensuring sensitive data is protected.
+    
+3. Making Sure There’s Compliance: Adhere to GDPR, HIPAA, and other relevant regulations by limiting the data logged, obtaining necessary consent, and providing the ability to delete logs containing personal data if required.
+4. Log Retention Policies: Establish clear log retention policies that define how long logs are stored, ensuring they are securely archived and eventually purged according to compliance requirements.
+    
+    Here’s a way to establish log retention policies using `Logback` in `logback-spring.xml` :
+    
+    ```xml
+    <configuration>
+        <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+            <file>logs/myapp.log</file>
+            <encoder>
+                <pattern>%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n</pattern>
+            </encoder>
+            <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                <fileNamePattern>logs/myapp-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+                <maxHistory>30</maxHistory> <!-- Retain logs for 30 days -->
+                <totalSizeCap>5GB</totalSizeCap> <!-- Maximum size of log files -->
+            </rollingPolicy>
+        </appender>
+    
+        <root level="INFO">
+            <appender-ref ref="FILE"/>
+        </root>
+    </configuration>
+    ```
+    
+    This configuration ensures that logs are rolled daily and retains them for 30 days, with a total size cap of 5GB.
+    The `<maxHistory>` setting ensures that only the logs from the past 30 days are retained. Logs older than 30 days will be automatically deleted.
+    The `<totalSizeCap>` setting limits the combined size of all log files. If the total exceeds 5GB, older logs will be purged to stay within this limit.
+    
+
+## Key Takeaways
+
+- Implement a custom interceptor to log all requests and responses.
+- Use a global exception handler for comprehensive exception logging.
+- Leverage AOP and MDC for advanced logging capabilities.
+- Consider performance and security implications of your logging strategy.
+- Utilize tools like SigNoz for efficient log analysis and correlation.
+- Ensure sensitive information is redacted or excluded from logs to maintain security and compliance.
+
+By following this guide, you'll have a robust logging system in place for your Spring Boot application, capturing all requests, responses, and exceptions in a single, manageable location.
+
+## FAQs
+
+### How can I log request and response bodies without impacting performance?
+
+Use asynchronous logging to minimize performance impact. Log only essential parts of the body and avoid logging large payloads or sensitive data. Consider using a logging library with minimal overhead.
+
+### What's the best way to handle logging in a microservices architecture?
+
+Implement centralized logging using tools like ELK Stack or Prometheus with Grafana. Ensure each service includes trace IDs in logs for easy correlation across services.
+
+### How do I ensure my logging practices are GDPR compliant?
+
+Mask or omit sensitive personal data in logs. Ensure logs are stored securely and are accessible only to authorized personnel. Implement data retention policies to delete logs after a certain period.
+
+### Can I use the same logging approach for both monoliths and microservices?
+
+The basic principles remain the same, but microservices require centralized and correlated logging across services. In monoliths, local logging might suffice, but distributed tracing becomes essential in microservices.
