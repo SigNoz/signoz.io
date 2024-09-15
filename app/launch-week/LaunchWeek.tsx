@@ -60,14 +60,14 @@ const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
 
           <div className='flex flex-col sm:flex-row justify-between py-6 px-6 border-b border-t border-signoz_slate-100 border-dashed'>
-            <div className='flex flex-col justify-between gap-4 pr-4'>
+            <div className='flex flex-col justify-between gap-4 sm:pr-4'>
               <div className='text-base uppercase text-signoz_vanilla-400'>Monday ⎯ Sept 16</div>
               <div className='flex flex-col gap-2'>
-                <Link href="" target='_blank' id="btn-linkedin-live" className='flex px-3 py-2 sm:mb-0 w-fit items-center gap-2 rounded-full button-background'>
+                <Link href="" target='_blank' id="btn-linkedin-live" className='flex px-3 py-2 sm:mb-0 w-full items-center gap-2 rounded-full button-background justify-center'>
                   <Linkedin className='w-4 h-4' />
                   <span className='text-[#F7F7F8] text-sm font-medium whitespace-nowrap'>LinkedIn Live</span>
                 </Link>
-                <div id="btn-watch-youtube-video" className='flex px-3 py-2 mb-2 sm:mb-0 w-fit items-center gap-2 rounded-full button-background cursor-pointer' onClick={onOpen}>
+                <div id="btn-watch-youtube-video" className='flex px-3 py-2 mb-2 sm:mb-0 w-full items-center gap-2 rounded-full button-background cursor-pointer justify-center' onClick={onOpen}>
                   <img src='/svgs/icons/watch-video.svg' alt='watch video icon' />
                   <span className='text-[#F7F7F8] text-sm font-medium whitespace-nowrap'>Watch the video</span>
                 </div>
