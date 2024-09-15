@@ -32,7 +32,7 @@ const CountdownTimer: React.FC<TimerProps> = ({ eventDate }) => {
         <div className="text-signoz_vanilla-400 w-[68%]">
             {timeLeft > 0 ? (
                 <>
-                    <span className="text-signoz_slate-50 font-mono font-bold">COMING UP IN :</span> 
+                    <span className="text-sm sm:text-base text-signoz_slate-50 font-mono font-bold">COMING UP IN :</span> 
                     <span className="font-mono ml-2 ">{timeLeft}</span>
                 </>
             ) : (
