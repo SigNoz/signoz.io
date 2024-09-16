@@ -244,6 +244,9 @@ const SigNozFeatures = () => {
       buttonText: 'Instrument your application',
       buttonLink: 'https://signoz.io/docs/instrumentation/'
     },
+    {
+      title: '',
+    },
   ]
 
 
