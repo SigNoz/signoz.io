@@ -63,7 +63,7 @@ const MainSection: React.FC = () => {
             <div className='flex flex-col justify-between gap-4 sm:pr-4'>
               <div className='text-base uppercase text-signoz_vanilla-400'>Monday ⎯ Sept 16</div>
               <div className='flex flex-col gap-2'>
-                <Link href="" target='_blank' id="btn-linkedin-live" className='flex px-3 py-2 sm:mb-0 w-full items-center gap-2 rounded-full button-background justify-center'>
+                <Link href="https://www.linkedin.com/events/signozlaunchweek2-0-day1-ingest7239997437791064064/theater/" target='_blank' id="btn-linkedin-live" className='flex px-3 py-2 sm:mb-0 w-full items-center gap-2 rounded-full button-background justify-center'>
                   <Linkedin className='w-4 h-4' />
                   <span className='text-[#F7F7F8] text-sm font-medium whitespace-nowrap'>LinkedIn Live</span>
                 </Link>
@@ -73,12 +73,12 @@ const MainSection: React.FC = () => {
                 </div>
               </div>
             </div>
-            <Link href="" className='flex justify-between max-w-full py-4 px-5 launch-week-card-background hover:bg-[#121317] transition-colors duration-300 w-[864px] rounded-md border border-signoz_slate-500 cursor-pointer'>
-              <div><img src='/img/graphics/homepage/feature-graphic-2.webp' height={240} width={400} className='pr-2 sm:pr-0' /></div>
+            <Link href="/blog/introducing-ingest-guard-feature/" className='flex justify-between max-w-full py-4 px-5 launch-week-card-background hover:bg-[#121317] transition-colors duration-300 w-[864px] rounded-md border border-signoz_slate-500 cursor-pointer'>
+              <div><img src='/img/launch-week/launch-week-2/day-1-ingest-gaurd-cover.webp' height={240} width={400} className='pr-2 sm:pr-0' /></div>
               <div className='flex flex-col justify-between group'>
                 <div>
-                  <div className='text-base font-eedium mb-2'>Monitoring Messaging queues</div>
-                  <div className='text-sm font-medium text-signoz_vanilla-400'>Our metrics are charged simple at $0.1 per million samples.</div>
+                  <div className='text-base font-eedium mb-2'>Introducing Ingest Guard</div>
+                  <div className='text-sm font-medium text-signoz_vanilla-400'>A game changer for Observability cost control</div>
                 </div>
                 <div className='flex justify-end'>
                   <div className='rounded-full button-background p-2 flex items-center justify-center w-fit h-fit transform transition-transform group-hover:translate-x-2.5 mt-2 sm:mt-0'>
