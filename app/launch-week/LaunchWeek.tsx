@@ -73,8 +73,8 @@ const MainSection: React.FC = () => {
                 </div>
               </div>
             </div>
-            <Link href="/blog/introducing-ingest-guard-feature/" className='flex justify-between max-w-full py-4 px-5 launch-week-card-background hover:bg-[#121317] transition-colors duration-300 w-[864px] rounded-md border border-signoz_slate-500 cursor-pointer'>
-              <div><img src='/img/launch-week/launch-week-2/day-1-ingest-gaurd-cover.webp' height={240} width={400} className='pr-2 sm:pr-0' /></div>
+            <Link href="/blog/introducing-ingest-guard-feature/" className='flex sm:flex-row flex-col justify-between max-w-full py-4 px-5 launch-week-card-background hover:bg-[#121317] transition-colors duration-300 w-[864px] rounded-md border border-signoz_slate-500 cursor-pointer'>
+              <img src='/img/launch-week/launch-week-2/day-1-ingest-gaurd-cover.webp' className=' w-auto sm:w-3/5 h-auto pr-2 sm:pr-0 mb-4 sm:mb-0' />
               <div className='flex flex-col justify-between group'>
                 <div>
                   <div className='text-base font-eedium mb-2'>Introducing Ingest Guard</div>
