@@ -78,6 +78,14 @@ const productDropdownItems = [
     name: 'Exceptions',
     order: 6,
   },
+  {
+    key: 'ingest',
+    url: '/blog/introducing-ingest-guard-feature/',
+    icon: '/img/index_features/shield-plus.svg',
+    description: 'Control Observability Costs',
+    name: 'Ingest Guard',
+    order: 7,
+  },
 ]
 
 // Sort the productDropdownItems based on the 'order' property
