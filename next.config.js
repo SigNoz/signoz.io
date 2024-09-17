@@ -66,6 +66,10 @@ module.exports = () => {
       dirs: ['app', 'components', 'layouts', 'scripts'],
     },
     trailingSlash: true,
+    productionBrowserSourceMaps: false,
+    experimental: {
+      serverSourceMaps: false,
+    },
     images: {
       remotePatterns: [
         {
@@ -232,12 +236,18 @@ module.exports = () => {
         },
       ]
     },
-    webpack: (config, options) => {
+    webpack: (config, { buildId, dev, isServer, defaultLoaders, nextRuntime, webpack }) => {
       config.module.rules.push({
         test: /\.svg$/,
         use: ['@svgr/webpack'],
       })
 
+      if (config.cache && !dev) {
+        config.cache = Object.freeze({
+          type: 'memory',
+        })
+      }
+      // Important: return the modified config
       return config
     },
   })
