@@ -52,7 +52,7 @@ const productDropdownItems = [
     icon: '/img/index_features/drafting-compass_feature.svg',
     description: 'Track requests across services',
     name: 'Distributed Tracing',
-    order: 3,
+    order: 2,
   },
   {
     key: 'MetricsDashboards',
@@ -60,7 +60,7 @@ const productDropdownItems = [
     icon: '/img/index_features/layout-grid_feature.svg',
     description: 'Monitor metrics & build dashboards',
     name: 'Metrics & Dashboards',
-    order: 4,
+    order: 6,
   },
   {
     key: 'LogManagement',
@@ -68,7 +68,7 @@ const productDropdownItems = [
     icon: '/img/index_features/logs_feature.svg',
     description: 'Unlock insights from logs',
     name: 'Log Management',
-    order: 2,
+    order: 3,
   },
   {
     key: 'Exceptions',
@@ -76,7 +76,7 @@ const productDropdownItems = [
     icon: '/img/index_features/bug_feature.svg',
     description: 'Record exceptions automatically',
     name: 'Exceptions',
-    order: 6,
+    order: 7,
   },
   {
     key: 'ingest',
@@ -84,7 +84,7 @@ const productDropdownItems = [
     icon: '/img/index_features/shield-plus.svg',
     description: 'Control Observability Costs',
     name: 'Ingest Guard',
-    order: 7,
+    order: 4,
   },
 ]
 
