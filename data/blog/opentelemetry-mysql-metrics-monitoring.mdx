@@ -217,6 +217,11 @@ receivers:
     collection_interval: 10s
     initial_delay: 10s
 processors:
+  resource/env:
+    attributes:
+    - key: deployment.environment
+      value: staging
+      action: upsert
   batch:
     send_batch_size: 1000
     timeout: 10s
@@ -236,7 +241,7 @@ service:
   pipelines:
     metrics:
       receivers: [otlp, mysql]
-      processors: [batch]
+      processors: [resource/env, batch]
       exporters: [otlp]
 ```
 
@@ -273,6 +278,11 @@ receivers:
     collection_interval: 10s
     initial_delay: 10s
 processors:
+  resource/env:
+    attributes:
+    - key: deployment.environment
+      value: staging
+      action: upsert
   batch:
     send_batch_size: 1000
     timeout: 10s
@@ -292,7 +302,7 @@ service:
   pipelines:
     metrics:
       receivers: [otlp, mysql, mysql/2]
-      processors: [batch]
+      processors: [resource/env, batch]
       exporters: [otlp]
 ```
 
