@@ -102,9 +102,6 @@ const MainSection: React.FC = () => {
           </div>
 
 
-
-
-
           <div className='flex flex-col sm:flex-row justify-between py-6 px-6 border-b border-t border-signoz_slate-100 border-dashed'>
             <div className='flex flex-col justify-between gap-4 sm:pr-4'>
               <div className='text-base uppercase text-signoz_vanilla-400'>Tuesday ⎯ Sept 17</div>
@@ -148,7 +145,7 @@ const MainSection: React.FC = () => {
 
 
 
-
+          {/* Timer  */}
           {['Wednesday ⎯ Sept 18', 'Thursday ⎯ Sept 19', 'Friday ⎯ Sept 20'].map((day, index) => (
             <div key={index} className="flex flex-grow items-center py-2 px-6 justify-between border-b border-dashed border-signoz_slate-100">
               <div className="text-sm sm:text-base font-mono font-medium text-signoz_vanilla-400 uppercase w-[32%]">
@@ -159,7 +156,20 @@ const MainSection: React.FC = () => {
               </div>
             </div>
           ))}
+
+
+          {/* Cards */}
+          <div className='flex flex-col gap-7 px-4 mt-12 mb-20'>
+            <div className='font-mono uppercase text-signoz_vanilla-400 self-stretch'>More Announcement</div>
+            <div className='flex flex-col sm:flex-row gap-6'>
+              {cardData.map((card, index) => (
+                <Card key={index} title={card.title} description={card.description} url={card.url} />
+              ))}
+            </div>
+          </div>
+
         </div>
+
       </section>
       <GetStarted page="launch-week" />
     </>
@@ -167,6 +177,43 @@ const MainSection: React.FC = () => {
 }
 
 export default MainSection
+
+
+const cardData = [
+  {
+    title: 'Monitoring Messaging queues',
+    description: 'Our metrics are charged simple at $0.1 per million samples.',
+    url: '/'
+  },
+  {
+    title: 'Monitoring Messaging queues',
+    description: 'Our metrics are charged simple at $0.1 per million samples.',
+    url: '/'
+  },
+  {
+    title: 'Monitoring Messaging queues',
+    description: 'Our metrics are charged simple at $0.1 per million samples.',
+    url: '/'
+  },
+];
+
+
+const Card = ({ title, description, url }) => {
+  return (
+    <Link href={url} target="_blank" className='flex flex-col justify-between group py-4 px-5 cursor-pointer launch-week-card-background hover:bg-[#121317] rounded-md border border-signoz_slate-500'>
+      <div>
+        <div className='text-base font-medium mb-2'>{title}</div>
+        <div className='text-sm font-medium text-signoz_vanilla-400 mb-10'>{description}</div>
+      </div>
+      <div className='flex'>
+        <div className='rounded-full button-background p-2 flex items-center justify-center w-fit h-fit transform transition-transform group-hover:translate-x-2.5'>
+          <ArrowRight size={14} />
+        </div>
+      </div>
+    </Link>
+  );
+};
+
 
 
 const GetStarted = ({ page }) => {
