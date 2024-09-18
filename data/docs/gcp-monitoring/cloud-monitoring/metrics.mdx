@@ -1,0 +1,445 @@
+---
+date: 2024-09-13
+id: metrics
+title: Cloud Monitoring Metrics
+hide_table_of_contents: true
+---
+
+
+## Overview
+
+Google Cloud Monitoring provides visibility into the performance, uptime, and overall health of cloud-powered applications. It collects metrics, events, and metadata from Google Cloud, hosted uptime probes, and application instrumentation.
+
+This document provides a detailed walkthrough on how to send Google Cloud Monitoring metrics to SigNoz. By the end of this guide, you will have a setup that sends your Cloud Monitoring metrics to SigNoz.
+
+<Tabs>
+<TabItem value="cloud" label="SigNoz Cloud" default>
+
+**Here's a quick summary of what we will be doing in this guide**
+
+* Create uptime check for Cloud Run service
+* Create and configure Compute Engine VM instance to deploy Telegraf and OpenTelemetry Collector
+* Deploy Telegraf to fetch the metrics from Google Cloud Monitoring
+* Deploy OpenTelemetry Collector to scrape the metrics from Telegraf
+* Send and Visualize the metrics in SigNoz Cloud
+
+## Prerequisites
+
+* [Google Cloud account](https://console.cloud.google.com/) with administrative privilege or Monitoring Admin and Compute Engine Admin privilege
+* Cloud Run Admin and Artifact Registry Admin in case you want to setup Cloud Run service to create an uptime check
+* [SigNoz Cloud Account](https://signoz.io/teams/) (we are using SigNoz Cloud for this demonstration, we will also need ingestion details. To get your **Ingestion Key** and **Ingestion URL,** sign-in to your SigNoz Cloud Account and go to **Settings** >> **Ingestion Settings**)
+* Access to a project in GCP
+
+## Setup
+
+### Create Uptime Check for Cloud Run service
+
+In case you want to create a Cloud Run service, follow the [Cloud Run Service Setup](/docs/gcp-monitoring/cloud-run/cloud-run-setup) document for detailed steps.
+
+To setup uptime check on the Cloud Run service:
+
+Step 1: On the GCP console, search for "Uptime checks", and naviagte to `Uptime checks` under the Monitoring service from the dropdown.
+
+Step 2: On the `Uptime checks` page, click on **Create uptime check** button at the top.
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/cloud-monitoring/metrics/create-uptime-check-button.webp"
+        alt="Click on Create uptime check button"
+    />
+<figcaption>
+<i>
+Click on **Create uptime check** button
+</i>
+</figcaption>
+</figure>
+
+Step 3: Select the **Protocol** as `HTTPS`, **Resource type** as `Cloud Run Service`. From the `Cloud Run Service` dropdown that appears, choose the appropriate service. 
+In the **Path** provide `/`. **Frequency** can be adjusted as per your requirement. In this case, we will go with the default `1 minute`. Click on `Continue`.
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/cloud-monitoring/metrics/create-uptime-check-select-resource.webp"
+        alt="Create uptime check - Select Resource"
+    />
+<figcaption>
+<i>
+Create uptime check - Select Resource
+</i>
+</figcaption>
+</figure>
+
+Step 4: No changes are required on this page. Click on `Continue`.
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/cloud-monitoring/metrics/create-uptime-check-response-codes.webp"
+        alt="Create uptime check - Response Codes"
+    />
+<figcaption>
+<i>
+Create uptime check - Response Codes
+</i>
+</figcaption>
+</figure>
+
+Step 5: In this example, we won't set any alert. Hence, toggle off the **Create an alert** option, and click on `Continue`.
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/cloud-monitoring/metrics/create-uptime-check-alert-creation.webp"
+        alt="Create uptime check - Alert Creation"
+    />
+<figcaption>
+<i>
+Create uptime check - Alert Creation
+</i>
+</figcaption>
+</figure>
+
+Step 6: Give an appropriate title to the uptime check. Click on `Test`. The uptime check should be successful with 200 response.
+Once tested, you can create the uptime check.
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/cloud-monitoring/metrics/create-uptime-check-test.webp"
+        alt="Test the uptime check"
+    />
+<figcaption>
+<i>
+Test the uptime check
+</i>
+</figcaption>
+</figure>
+
+The uptime check is created, and from here on, the metrics will start getting emitted for Cloud Run service's uptime check.
+
+### Deploy Telegraf to fetch the metrics from Google Cloud Monitoring
+
+You will need a Compute Engine instance to install Telegraf and OTel Collector. You can follow the instructions on the [Creating Compute Engine](/docs/gcp-monitoring/bootstrapping/gce-creation) document to create the Compute Engine instance.
+
+**Step 1:** Install [`telegraf`](https://github.com/influxdata/telegraf) which will collect metrics from Google Cloud Monitoring. The installation process for the respective operating system can be found in official [documentation](https://docs.influxdata.com/telegraf/v1/install/).
+
+After successful installation, the `telegraf` status should be active and running.
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/cloud-monitoring/metrics/telegraf-status.webp"
+        alt="Telegraf running status"
+    />
+<figcaption>
+<i>
+`telegraf` running status
+</i>
+</figcaption>
+</figure>
+
+The configuration file for telegraf can be found here:
+
+```sh
+/etc/telegraf/telegraf.conf
+```
+
+**Step 2:** Configure the Telegraf input and output plugin by adding configurations to the `telegraf.conf` file.
+
+```txt
+# Gather timeseries from Google Cloud Platform v3 monitoring API
+[[inputs.stackdriver]]
+  ## GCP Project
+  project = "omni-new"
+  ## Include timeseries that start with the given metric type.
+  metric_type_prefix_include = [
+    "monitoring.googleapis.com",
+  ]
+  ## Most metrics are updated no more than once per minute; it is recommended
+  ## to override the agent level interval with a value of 1m or greater.
+  interval = "1m"
+# Send OpenTelemetry metrics over gRPC
+[[outputs.opentelemetry]]
+  ## Override the default (localhost:4317) OpenTelemetry gRPC service
+  ## address:port
+  service_address = "localhost:4317"
+```
+
+We are assuming that the OTel Collector is running on the same machine as Telegraf. If that is not the case, you will have to change the `service_address` in the `outputs.opentelemetry` section accordingly.
+
+## Deploy OpenTelemetry to scrape the metrics from Telegraf
+
+**Step 1:** Install and configure OpenTelemetry for scraping the metrics from Telegraf. Follow [OpenTelemetry Binary Usage in Virtual Machine](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) guide for detailed instructions.
+
+**Step 2:** After successful configuration start the OTel Collector using following command:
+
+```sh
+./otelcol-contrib --config ./config.yaml &> otelcol-output.log & echo "$!" > otel-pid
+```
+
+**Step 3:** Restart the Telegraf service
+
+**Step 4:** If the configurations are configured correctly with Telegraf and we can see the output logs from OpenTelemetry as follows:
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/cloud-monitoring/metrics/otel-logs.webp"
+        alt="OTel Collector Logs"
+    />
+<figcaption>
+<i>
+Viewing OTel Collector Logs
+</i>
+</figcaption>
+</figure>
+
+## Send and Visualize the metrics obtained by OpenTelemetry in SigNoz
+
+**Step 1:** Go to the SigNoz Cloud URL and head over to the dashboard.
+
+**Step 2:** If not already created, create a new dashboard and select Time Series.
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/cloud-monitoring/metrics/new-panel.webp"
+        alt="Creating new panel"
+    />
+<figcaption>
+<i>
+Creating new panel in dashboard
+</i>
+</figcaption>
+</figure>
+
+**Step 3:** Select metric for Cloud Monitoring
+
+All metrics starting with `mointoring_googleapis_com_` have been collected from Cloud Monitoring.
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/cloud-monitoring/metrics/monitoring-plot-metrics-signoz-cloud.webp"
+        alt="Plot Cloud Monitoring Metrics"
+    />
+<figcaption>
+<i>
+Plot Cloud Monitoring Metrics
+</i>
+</figcaption>
+</figure>
+
+## Troubleshooting
+
+If you run into any problems while setting up monitoring for your Cloud Monitoring's metrics with SigNoz, consider these troubleshooting steps:
+
+* **Verify Configuration**: Double-check your `config.yaml` file to ensure all settings, including the ingestion key and endpoint, are correct.
+* **Review Logs**: Look at the logs of both Telegraf and the OpenTelemetry Collector to identify any error messages or warnings that might provide insights into what’s going wrong.
+* **Update Dependencies**: Ensure all relevant packages and dependencies are up-to-date to avoid compatibility issues.
+* **Consult Documentation**: Review the SigNoz, OpenTelemetry, and Telegraf documentation for any additional troubleshooting of the common issues.
+
+</TabItem>
+
+<TabItem value="self-host" label="Self-Host">
+
+**Here’s a quick summary of what we will be doing in this guide**
+
+* Create uptime check for Cloud Run service
+* Create and configure Compute Engine VM instance to deploy Telegraf and OpenTelemetry Collector
+* Deploy Telegraf to fetch the metrics from Google Cloud monitoring
+* Deploy OpenTelemetry Collector to scrape the metrics from Telegraf
+* Visualize the metrics in SigNoz dashboard
+
+## Prerequisites
+
+* [Google Cloud account](https://console.cloud.google.com/) with administrative privilege or Monitoring Admin and Compute Engine Admin privilege
+* Cloud Run Admin and Artifact Registry Admin in case you want to setup Cloud Run service to create an uptime check
+* Access to a project in GCP
+* Self-hosted SigNoz
+
+## Setup
+
+### Create Uptime Check for Cloud Run service
+
+In case you want to create a Cloud Run service, follow the [Cloud Run Service Setup](/docs/gcp-monitoring/cloud-run/cloud-run-setup) document for detailed steps.
+
+To setup uptime check on the Cloud Run service:
+
+Step 1: On the GCP console, search for "Uptime checks", and naviagte to `Uptime checks` under the Monitoring service from the dropdown.
+
+Step 2: On the `Uptime checks` page, click on **Create uptime check** button at the top.
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/cloud-monitoring/metrics/create-uptime-check-button.webp"
+        alt="Click on Create uptime check button"
+    />
+<figcaption>
+<i>
+Click on **Create uptime check** button
+</i>
+</figcaption>
+</figure>
+
+Step 3: Select the **Protocol** as `HTTPS`, **Resource type** as `Cloud Run Service`. From the `Cloud Run Service` dropdown that appears, choose the appropriate service. 
+In the **Path** provide `/`. **Frequency** can be adjusted as per your requirement. In this case, we will go with the default `1 minute`. Click on `Continue`.
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/cloud-monitoring/metrics/create-uptime-check-select-resource.webp"
+        alt="Create uptime check - Select Resource"
+    />
+<figcaption>
+<i>
+Create uptime check - Select Resource
+</i>
+</figcaption>
+</figure>
+
+Step 4: No changes are required on this page. Click on `Continue`.
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/cloud-monitoring/metrics/create-uptime-check-response-codes.webp"
+        alt="Create uptime check - Response Codes"
+    />
+<figcaption>
+<i>
+Create uptime check - Response Codes
+</i>
+</figcaption>
+</figure>
+
+Step 5: In this example, we won't set any alert. Hence, toggle off the **Create an alert** option, and click on `Continue`.
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/cloud-monitoring/metrics/create-uptime-check-alert-creation.webp"
+        alt="Create uptime check - Alert Creation"
+    />
+<figcaption>
+<i>
+Create uptime check - Alert Creation
+</i>
+</figcaption>
+</figure>
+
+Step 6: Give an appropriate title to the uptime check. Click on `Test`. The uptime check should be successful with 200 response.
+Once tested, you can create the uptime check.
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/cloud-monitoring/metrics/create-uptime-check-test.webp"
+        alt="Test the uptime check"
+    />
+<figcaption>
+<i>
+Test the uptime check
+</i>
+</figcaption>
+</figure>
+
+The uptime check is created, and from here on, the metrics will start getting emitted for Cloud Run service's uptime check.
+
+## Deploy Telegraf to fetch the metrics from Google Cloud Monitoring
+
+You will need a Compute Engine instance to install Telegraf and OTel Collector. You can follow the instructions on the [Creating Compute Engine](/docs/gcp-monitoring/bootstrapping/gce-creation) document to create the Compute Engine instance.
+
+**Step 1:** Install [`telegraf`](https://github.com/influxdata/telegraf) which will collect metrics from Google Cloud Monitoring. The installation process for the respective operating system can be found in official [documentation](https://docs.influxdata.com/telegraf/v1/install/).
+
+After successful installation, the `telegraf` status should be active and running.
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/cloud-monitoring/metrics/telegraf-status.webp"
+        alt="Telegraf running status"
+    />
+<figcaption>
+<i>
+`telegraf` running status
+</i>
+</figcaption>
+</figure>
+
+The configuration file for telegraf can be found here:
+
+```sh
+/etc/telegraf/telegraf.conf
+```
+
+**Step 2:** Configure the Telegraf input and output plugin by adding configurations to the `telegraf.conf` file.
+
+```txt
+# Gather timeseries from Google Cloud Platform v3 monitoring API
+[[inputs.stackdriver]]
+  ## GCP Project
+  project = "omni-new"
+  ## Include timeseries that start with the given metric type.
+  metric_type_prefix_include = [
+    "monitoring.googleapis.com",
+  ]
+  ## Most metrics are updated no more than once per minute; it is recommended
+  ## to override the agent level interval with a value of 1m or greater.
+  interval = "1m"
+# Send OpenTelemetry metrics over gRPC
+[[outputs.opentelemetry]]
+  ## Override the default (localhost:4317) OpenTelemetry gRPC service
+  ## address:port
+  service_address = "localhost:4317"
+```
+
+We are assuming that the OTel Collector is running on the same machine as Telegraf. If that is not the case, you will have to change the `service_address` in the `outputs.opentelemetry` section accordingly.
+
+## Deploy OpenTelemetry to scrape the metrics from Telegraf
+
+**Step 1:** Install and configure OpenTelemetry for scraping the metrics from Telegraf. Follow [OpenTelemetry Binary Usage in Virtual Machine](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) guide for detailed instructions.
+
+**Step 2:** After successful configuration start the OTel Collector using following command:
+
+```sh
+./otelcol-contrib --config ./config.yaml &> otelcol-output.log & echo "$!" > otel-pid
+```
+
+**Step 3:** Restart the Telegraf service
+
+**Step 4:** If the configurations are configured correctly with Telegraf and we can see the output logs from OpenTelemetry as follows:
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/cloud-monitoring/metrics/otel-logs.webp"
+        alt="OTel Collector Logs"
+    />
+<figcaption>
+<i>
+Viewing OTel Collector Logs
+</i>
+</figcaption>
+</figure>
+
+## Send and Visualize the metrics obtained by OpenTelemetry in SigNoz
+
+**Step 1:** Go to SigNoz and head over to the dashboard.
+
+**Step 2:** If not already created, create a new dashboard and select Time Series.
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/cloud-monitoring/metrics/new-panel.webp"
+        alt="Creating new panel"
+    />
+<figcaption>
+<i>
+Creating new panel in dashboard
+</i>
+</figcaption>
+</figure>
+
+**Step 3:** Select metric for Cloud Monitoring
+
+All metrics starting with `monitoring_googleapis_com_` have been collected from Cloud Monitoring.
+
+## Troubleshooting
+
+If you run into any problems while setting up monitoring for your Cloud Monitoring's metrics with SigNoz, consider these troubleshooting steps:
+
+* **Verify Configuration**: Double-check your `config.yaml` file to ensure all settings, including the ingestion key and endpoint, are correct.
+* **Review Logs**: Look at the logs of both Telegraf and the OpenTelemetry Collector to identify any error messages or warnings that might provide insights into what’s going wrong.
+* **Update Dependencies**: Ensure all relevant packages and dependencies are up-to-date to avoid compatibility issues.
+* **Consult Documentation**: Review the SigNoz, OpenTelemetry, and Telegraf documentation for any additional troubleshooting of the common issues.
+
+</TabItem>
+</Tabs>
