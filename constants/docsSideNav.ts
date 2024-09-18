@@ -1607,6 +1607,19 @@ const docsSideNav = [
           },
         ],
       },
+      {
+        label: 'Cloud Monitoring',
+        type: 'category',
+        isExpanded: false,
+        route: '/docs/gcp-monitoring/cloud-monitoring',
+        items: [
+          {
+            type: 'doc', 
+            route: '/docs/gcp-monitoring/cloud-monitoring/metrics',
+            label: 'Metrics',
+          },
+        ],
+      },
     ],
   },
   {
