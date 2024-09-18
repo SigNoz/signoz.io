@@ -1,0 +1,485 @@
+---
+
+title: What is Python's Default Logging Formatter?
+slug: what-is-pythons-default-logging-formatter
+date: 2024-09-18
+tags: [faq]
+authors: [sushant_gaurav]
+description: Discover Python's default logging formatter, its limitations, and how to customize it for better log management in your applications.
+keywords: [Python logging, default formatter, log customization, logging module, log formatting, Python development]
+
+---
+
+Python’s logging system is an extremely helpful tool for logging errors, keeping track of events, and debugging your code. The default logging formatter, which controls the appearance of your log messages, is an essential component of this system. Gaining an understanding of the default formatter's operation will improve your ability to handle and evaluate logs.
+
+## Understanding Python's Logging System
+
+The logging module is a built-in Python library that provides a systematic approach for creating log messages in your applications. Python's built-in logging module is designed to give developers flexible logging options. It offers numerous benefits over using print statements.
+
+The logging module comprises four main components that work together to facilitate logging:
+
+- Loggers: These are the points of entry for logging in your application. Each logger captures log messages, which can subsequently be routed to one of several outputs depending on the handlers that have been set.
+- Handlers: Handlers specify the destination of log messages. Some of the most common handlers are `StreamHandler` (for console output) and `FileHandler` (for logging into a file). You can set up numerous handlers for a single logger to send logs to different destinations.
+- Formatters: Formatters control the layout and content of log messages. They govern how timestamps, log levels, and messages are shown in the logs.
+- Levels: Logging levels (such as `DEBUG`, `INFO`, `WARNING`, `ERROR`, and `CRITICAL`) help you manage the logs better. Setting a specified log level allows you to filter out less important messages and focus on what matters.
+
+<Figure src="/img/guides/2024/09/what-is-pythons-default-logging-formatter-image.webp" alt="four main components of logging module" caption="four main components of logging module" />
+
+To learn about logging in Python, different levels of logging, formatters, etc. in more detail, you can refer to this article [Python Logging - From Setup to Monitoring with Best Practices](https://signoz.io/guides/logging-in-python/). You can also check out [Python Logging Best Practices - Expert Tips with Practical Examples](https://signoz.io/guides/python-logging-best-practices/).
+
+## What is a Logging Formatter in Python?
+
+The log messages are defined by a logging formatter. It serves as a template, organizing important data like:
+
+1. Timestamps which is the exact moment the event happened.
+2. Log Level which denotes message severity, such as `DEBUG`, `INFO`, or `WARNING`.
+3. Message Content which is the text of the log message itself.
+
+Formatters work with handlers in a way that handlers select the destination for the log (such as a file or console), while formatters set the format of the log. You can adjust your logging configuration to meet your requirements thanks to this division.
+
+### Example of a Simple Logging Formatter:
+
+Let’s see how a basic formatter works:
+
+```python
+import logging
+
+# Set up a basic logger
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+# Create a handler to output logs to the console
+console_handler = logging.StreamHandler()
+
+# Define a basic formatter
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+
+# Add the formatter to the handler
+console_handler.setFormatter(formatter)
+
+# Add the handler to the logger
+logger.addHandler(console_handler)
+
+# Log a simple message
+logger.info("This is a sample log message.")
+```
+
+Output:
+
+```
+2024-09-06 21:40:30,395 - INFO - This is a sample log message.
+```
+
+Explanation:
+
+- `%(asctime)s`: It inserts the current time when the log message is recorded.
+- `%(levelname)s`: It displays the log level (`INFO`, `DEBUG`, etc.).
+- `%(message)s`: It outputs the actual log message.
+
+## Python's Default Logging Formatter Explained
+
+Python's default logging formatter is simple and efficient, but it's designed to be easily customized. If no specific format is provided, Python uses a basic format string automatically.
+
+```python
+"%(message)s"
+```
+
+The timestamp, log level, and log source are among the additional helpful contexts that are not included in this default format string; it simply contains the message content. Although this works well for very simple logging, it is sometimes lacking in important details that are needed for bigger system maintenance or debugging.
+
+### Breakdown of the Default Format String
+
+- `%`: It indicates the beginning of a placeholder, which tells Python to substitute values in the log message.
+- `(message)`: It refers to the log message content itself. The message could be a warning, error, or any other relevant information.
+- `s`: The `s` specifies that the placeholder which should be formatted as a string.
+
+This simple format is efficient for scenarios where only the message itself matters, but in practice, more detailed logs are typically required. For example, to effectively debug a problem, it could potentially be helpful to know the timestamp of when the log was generated, the log level, and the source of the message.
+
+### Why the Default Logging Formatter Is Minimal
+
+By default, the built-in logging formatter is meant to be lightweight. It makes it quick and simple to start logging messages in small applications or scripts because it enables basic logging without any additional configuration. However, it allows for customisation, so developers may simply improve their logs when apps get more complicated.
+
+## Default Formatter Behaviour in Different Scenarios
+
+The behaviour of Python's default logging formatter varies slightly depending on how you configure logging. Let us look at a few examples:
+
+### 1. Using `logging.basicConfig()`
+
+The `logging.basicConfig()` function provides a simple way to configure logging with minimal code. If you don’t specify any formatting options, it applies a default format with more information than the bare `"%(message)s"` format. Specifically, it adds the log level and the logger name.
+
+Example:
+
+```python
+import logging
+
+logging.basicConfig()  # Configuring logging with default settings
+logging.warning("This is a warning")
+```
+
+Output:
+
+```
+WARNING:root:This is a warning
+```
+
+Explanation:
+
+- `WARNING`: The message's log level indicates its severity.
+- `root`: The default logger name. Because we did not specifically create a logger in this scenario, it falls back to the default logger, 'root'.
+- `This is a warning`: The actual log message text.
+
+## 2. Using StreamHandler
+
+When you manually build a `StreamHandler` without specifying a formatter, Python uses the simplest format:
+
+```python
+import logging
+import sys
+
+handler = logging.StreamHandler(sys.stdout)  # Output logs to stdout
+logger = logging.getLogger()
+logger.addHandler(handler)
+
+logger.warning("This is a warning")
+```
+
+Output:
+
+```
+This is a warning
+```
+
+Explanation: In this case, only the log message is output without any additional context such as the log level or logger name. This is the bare-bones logging format where Python defaults to `"%(message)s"`.
+
+### 3. Behaviour Across Python Versions
+
+Python's default logging behaviour has remained largely consistent in recent versions, but significant updates have been, especially concerning advanced capabilities like logging configuration and structured logging.
+
+Python `3.8` (Improved Logging Configuration)
+
+Python `3.8` introduced new capabilities, such as support for f-string formatting within log messages, making it easier to create dynamic log outputs.
+
+```python
+# Python 3.8+ (Supports f-strings in log messages)
+import logging
+
+name = "Aadyaa"
+logging.basicConfig(level=logging.INFO)
+logging.info(f"User {name} has logged in.")
+```
+
+In older versions (pre-3.8), you would have to rely on string formatting like this:
+
+```python
+# Python 3.7 and below
+logging.info("User %s has logged in." % name)
+```
+
+Python `3.9` (Enhanced Structured Logging)
+
+Python `3.9` improved support for more structured logging, allowing greater flexibility when working with custom logging formats. This version introduced better handling of dictionaries within log messages.
+
+```python
+# Python 3.9+ (Supports dictionary unpacking in log messages)
+user_info = {"name": "Aadyaa", "action": "login"}
+logging.info("User details: %(name)s has %(action)s", user_info)
+```
+
+Earlier versions like Python `3.8` and below would require manual extraction of dictionary keys:
+
+```python
+# Python 3.8 and below
+logging.info("User details: %s has %s" % (user_info["name"], user_info["action"]))
+```
+
+Default Formatter in StreamHandler Across Versions
+
+Regardless of the improvements in each version, the default formatter remains the minimalist `'%(message)s'` format. This is applicable whether you're using `StreamHandler` or if no specific formatter is assigned.
+
+```python
+# Default formatter example
+import logging
+
+logging.warning("This is a warning")
+# Output: This is a warning (applies across Python versions)
+```
+
+Differences in Older Versions (Python `2.x` and Early `3.x`)
+
+In older Python versions (e.g., Python `2.x`), the logging module was less feature-rich, lacking support for more advanced configurations and structured logging. For example, using dictionary-based log messages or f-string formatting wasn't possible.
+
+```python
+# Python 2.x logging usage
+import logging
+logging.basicConfig(level=logging.WARNING)
+logging.warning("This is a warning in Python 2.x")
+```
+
+### Why You Might Want to Customize the Formatter
+
+The default formatter can be limiting, especially when your application scales, because as the system grows and handles more complex tasks, more detailed and structured logs are needed to effectively monitor, troubleshoot, and manage the increased volume of data. Customizing the formatter to add timestamps, file names, and log levels can greatly improve the quality and utility of your logs. A well-structured log assists in determining not only what happened, but also when, where, and how it occurred, which is critical for debugging and monitoring.
+
+Customizing the logging formatter can provide the following benefits:
+
+1. Better Debugging: Using timestamps and severity levels allows you to pinpoint the exact moment and nature of problems.
+2. Detailed Log Tracking: You can trace logs across modules and systems by including more contextual information (e.g., module or function name).
+3. Easy Maintenance: Well-formatted logs allow teams to analyze and respond to issues more quickly, especially in production systems.
+
+## How to Customize Python's Logging Formatter
+
+While the default logging formatter provides basic functionality, most real-world applications require specialized formatting. A custom formatter can contain extra contextual information like timestamps, log levels, and module names, making your logs considerably more valuable for troubleshooting and analysis.
+
+Example:
+
+```python
+import logging
+
+# Create a custom formatter with multiple log fields
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
+# Create a StreamHandler and set the custom formatter
+handler = logging.StreamHandler()
+handler.setFormatter(formatter)
+
+# Create a logger, attach the handler to it
+logger = logging.getLogger(__name__)
+logger.addHandler(handler)
+
+# Log a warning message
+logger.warning("This is a warning message")
+```
+
+Output:
+
+```
+2024-09-06 21:41:44,815 - __main__ - WARNING - This is a warning message
+```
+
+Explanation:
+
+- `%(asctime)s`: It inserts the current timestamp (e.g., "2023-05-30 14:30:10").
+- `%(name)s`: It inserts the name of the logger, in this case, `__main__` (the default logger when no specific name is provided).
+- `%(levelname)s`: It denotes the logging level, in this case, `WARNING`.
+- `%(message)s`: It denotes the actual log message, "This is a warning message."
+
+### Why Customize Your Formatter?
+
+Customizing log formatters allows you to make your logs more descriptive. Timestamps indicate when events occur, log levels (such as `INFO` and `ERROR`) allow you to filter for specific types of messages, and the logger's name identifies where the log originated within your codebase.
+
+When complicated applications or systems are deployed over several modules, adding such context dramatically increases your capacity to monitor and debug the program.
+
+## Advanced Logging Formatter Techniques
+
+As your logging requirements evolve, you may need to use advanced formatting approaches. Python's logging module offers numerous techniques to increase the capability of its formatters.
+
+### 1. Applying `LogRecord` Attributes
+
+`LogRecord` classes in Python's logging system store precise information about each log entry. You can utilize attributes in your formatter to incorporate more specific information, such as the filename, line number, or function name from whence the log was generated.
+
+Example of how to include the filename and line number in your log output:
+
+```python
+import logging
+
+formatter = logging.Formatter('%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s')
+
+handler = logging.StreamHandler()
+handler.setFormatter(formatter)
+
+logger = logging.getLogger(__name__)
+logger.addHandler(handler)
+
+logger.error("This is an error message")
+```
+
+Output:
+
+```
+2024-09-06 21:42:22,170 - test.py:11 - ERROR - This is an error message
+```
+
+Explanation:
+
+- `%(filename)s`: It inserts the name of the file where the log was generated.
+- `%(lineno)d`: It adds the line number in the code where the log was triggered.
+
+### 2. Creating Custom Formatter Classes
+
+You can create your own `Formatter` class by subclassing `logging.Formatter` for even more control over how logs are formatted. This allows you to customize log formatting based on specific conditions, such as the log level or message content.
+
+For example, you might want to mark error logs with a special prefix to make them stand out:
+
+```python
+import logging
+
+# Create a custom formatter class
+class CustomFormatter(logging.Formatter):
+    def format(self, record):
+        # Add "URGENT:" prefix to error-level logs
+        if record.levelno == logging.ERROR:
+            record.msg = f"URGENT: {record.msg}"
+        return super().format(record)
+
+# Apply the custom formatter
+formatter = CustomFormatter('%(asctime)s - %(levelname)s - %(message)s')
+handler = logging.StreamHandler()
+handler.setFormatter(formatter)
+
+logger = logging.getLogger(__name__)
+logger.addHandler(handler)
+
+logger.error("This is an error")
+```
+
+Output:
+
+```
+2024-09-06 21:42:42,931 - ERROR - URGENT: This is an error
+```
+
+Explanation: This example modifies the log output to include the word `URGENT` before any error-level log messages, highlighting significant concerns for faster attention.
+
+### 3. Handling Multi-Line Log Messages
+
+Some log messages may span numerous lines, particularly when logging stack traces or complex data. Custom formatters can be created to handle multi-line messages gracefully while keeping them easy to read.
+
+```python
+import logging
+
+# Create a custom formatter with multi-line message support
+formatter = logging.Formatter('%(asctime)s - %(levelname)s\n%(message)s\n')
+
+# Create and configure a handler
+handler = logging.StreamHandler()
+handler.setFormatter(formatter)
+
+# Create a logger and set the logging level to INFO
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)  # Set the logger level to INFO
+logger.addHandler(handler)
+
+# Use the logger
+logger.info("This is a multi-line log message\nLine 2 of the message")
+```
+
+Output:
+
+```
+2024-09-06 21:44:22,653 - INFO
+This is a multi-line log message
+Line 2 of the message
+```
+
+Explanation: This style of logging isolates log metadata (timestamp and log level) from message content, making multi-line logs easier to read visually.
+
+### 4. Formatting for Different Destinations
+
+In some cases you might want to send logs to multiple destinations (for example, a file and the console) and format them differently for each. For example, you may want more thorough logs written to a file, but console logs can be more concise.
+
+```python
+import logging
+
+# Create formatters: simpler for console, detailed for file
+console_formatter = logging.Formatter('%(levelname)s: %(message)s')
+file_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
+# Set up console handler and assign the console formatter
+console_handler = logging.StreamHandler()
+console_handler.setFormatter(console_formatter)
+
+# Set up file handler and assign the file formatter
+file_handler = logging.FileHandler('app.log')
+file_handler.setFormatter(file_formatter)
+
+# Create a logger and set its level to INFO
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+# Add both handlers to the logger
+logger.addHandler(console_handler)
+logger.addHandler(file_handler)
+
+# Log an INFO message that will be output to both console and file
+logger.info("This log goes to both console and file")
+```
+
+Explanation: The console output will be basic and clear, however, the log saved to the file will include more detailed information such as timestamps and logger names.
+
+Output (on the console):
+
+```
+INFO: This log goes to both console and file
+```
+
+Output (in the `app.log` file):
+
+```
+2024-09-06 21:47:19,616 - __main__ - INFO - This log goes to both console and file
+```
+
+## Improved Logging with SigNoz
+
+Python's built-in logging is effective, but for large-scale applications, particularly distributed systems, an observability platform such as [SigNoz](https://signoz.io/) may elevate your logging to new heights. SigNoz is an open-source APM and observability tool that works well with Python's logging package.
+
+### Advantages of SigNoz for Logging
+
+1. Structured Logging: SigNoz supports structured logging, which formats logs as JSON objects for better parsing, searching, and analysis.
+2. Centralized Log Management: It collects logs from multiple microservices and stores them in a central location.
+3. Log Correlation: SigNoz correlates logs with traces and metrics, providing a holistic view of your system for better debugging and help with performance monitoring.
+
+<GetStartedSigNoz />
+
+For detailed implementation steps, refer to SigNoz's guide on logging in Python with OpenTelemetry [here](https://signoz.io/opentelemetry/logging-in-python/). This guide will provide specific instructions tailored to integrate Python logging with SigNoz's observability platform using OpenTelemetry.
+
+## Key Takeaways
+
+- Python's default logging formatter is simple but effective for small programs and projects.
+- Customizing your logging format for production-grade applications improves clarity and traceability, which aids debugging and monitoring.
+- Formatting logs with timestamps, log levels, file names, and line numbers improves their informativeness and actionability.
+- Custom formatters and LogRecord properties provide granular control over log message structure and can be adapted to specific use cases.
+- You can assign multiple formatters to different handlers (console, file, or external services) to ensure that logs are presented effectively at each destination.
+- Tools like SigNoz help to adapt Python logging for modern, distributed systems by providing centralized log management and enhanced monitoring features.
+
+## FAQs
+
+### How do I change the default logging format in Python?
+
+To change the default logging format, you can use `logging.basicConfig()` with a custom format string.
+Example:
+
+```python
+import logging
+logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s', level=logging.INFO)
+```
+
+### Can I use many formatters in the same Python application?
+
+Yes, you can use different formatters for each handler or logger in your application. This enables you to format logs differently depending on where they are sent (console, file, or remote server).
+
+### What is the distinction between a formatter and a handler in Python logging?
+
+A Formatter specifies how the log message is organized (for example, whether it contains timestamps or log levels). A Handler, on the other hand, controls where the log message is sent (e.g., console, file, or an external service such as SigNoz).
+
+### How can I add timestamps to my log messages?
+
+To add timestamps to your log messages, include the `%(asctime)s` attribute in your format string.
+
+Example:
+
+```python
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+```
+
+### How do I log exceptions in Python?
+
+Using the `logger.exception()` method in Python's 'logging' module, you can conveniently log exceptions. This approach automatically inserts a traceback into the log message, which can be quite useful for debugging issues.
+
+```python
+import logging
+
+logger = logging.getLogger(__name__)
+
+try:
+    1 / 0
+except ZeroDivisionError:
+    logger.exception("An error occurred")
+```
