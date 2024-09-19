@@ -251,7 +251,7 @@ SELECT
     resources_string_value[indexOf(resources_string_key, 'k8s_cluster_name')] as k8s_cluster_name,
     toFloat64(count()) AS value 
 FROM 
-    signoz_logs.distributed_logs  
+    signoz_logs.distributed_logs_v2  
 WHERE 
     (timestamp >= {{.start_timestamp_nano}} AND timestamp <= {{.end_timestamp_nano}}) AND 
     mapContains(resources_string, 'k8s_cluster_name')
@@ -272,7 +272,7 @@ SELECT
     resources_string_value[indexOf(resources_string_key, 'service_name')] as service_name,
     toFloat64(count()) AS value 
 FROM 
-    signoz_logs.distributed_logs  
+    signoz_logs.distributed_logs_v2  
 WHERE 
     (timestamp >= {{.start_timestamp_nano}} AND timestamp <= {{.end_timestamp_nano}}) AND 
     severity_text='ERROR' AND
