@@ -161,7 +161,7 @@ const MainSection: React.FC = () => {
 
           {/* Cards */}
           <div className='flex flex-col gap-7 px-6 mt-12 mb-20'>
-            <div className='font-mono uppercase text-signoz_vanilla-400 self-stretch'>More Announcement</div>
+            <div className='font-mono uppercase text-signoz_vanilla-400 self-stretch'>More From Launch Week</div>
             <div className='flex flex-col sm:flex-row gap-6'>
               {cardData.map((card, index) => (
                 <Card key={index} title={card.title} description={card.description} url={card.url} />
@@ -182,15 +182,10 @@ export default MainSection
 
 const cardData = [
   {
-    title: 'Monitoring Messaging queues',
-    description: 'Our metrics are charged simple at $0.1 per million samples.',
-    url: '/'
+    title: 'SOC2 Type II and HIPAA Compliant',
+    description: 'SigNoz is now SOC2 Type II and HIPAA compliant',
+    url: '/blog/signoz-is-soc2-type2-and-hipaa-compliant/'
   },
-  {
-    title: 'Monitoring Messaging queues',
-    description: 'Our metrics are charged simple at $0.1 per million samples.',
-    url: '/'
-  }
 ];
 
 
