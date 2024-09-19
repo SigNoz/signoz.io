@@ -26,21 +26,21 @@ const MainSection: React.FC = () => {
           <div className="flex w-full flex-col max-md:max-w-full">
             <div className="flex max-w-full flex-col mt-10">
               <div className='flex flex-col sm:flex-row justify-between gap-6'>
-                <div className="text-xl px-4 max-w-full font-mono text-signoz_vanilla-400 max-md:max-w-full">
+                <div className="text-xl px-6 max-w-full font-mono text-signoz_vanilla-400 max-md:max-w-full">
                   {`// Sept 16 ⎯ 20`}
                 </div>
-                <div className='flex flex-row items-center gap-4 px-4'>
+                <div className='flex flex-row items-center gap-4 px-6'>
                   <div className='inline-block w-3 h-3 bg-signoz_forest-500 rounded-sm' />
                   <div className="pr-2 text-lg sm:text-xl uppercase font-mono text-signoz_vanilla-400 max-md:max-w-full">
                     ONLINE — WORLDWIDE, 9AM PT
                   </div>
                 </div>
               </div>
-              <div className="mt-8 px-4 text-5xl uppercase font-medium text-signoz_vanilla-100 max-w-full max-md:max-w-full max-md:text-4xl border-b border-dashed border-signoz_slate-100">
+              <div className="mt-8 px-6 text-5xl uppercase font-medium text-signoz_vanilla-100 max-w-full max-md:max-w-full max-md:text-4xl border-b border-dashed border-signoz_slate-100">
                 Launch Week <span className="text-signoz_cherry-500">2.0</span>
               </div>
             </div>
-            <div className="mt-11 px-4 text-base font-mono leading-8 font-medium self-stretch text-signoz_vanilla-400 max-md:mt-10 max-md:max-w-full z-10 border-b border-dashed border-signoz_slate-100">
+            <div className="mt-11 px-6 text-base font-mono leading-8 font-medium self-stretch text-signoz_vanilla-400 max-md:mt-10 max-md:max-w-full z-10 border-b border-dashed border-signoz_slate-100">
               Join us for a week of new features and find new ways
               <br className='hidden sm:block' />
               {' '}to level up on your observability goals.
@@ -103,8 +103,6 @@ const MainSection: React.FC = () => {
 
 
 
-
-
           <div className='flex flex-col sm:flex-row justify-between py-6 px-6 border-b border-t border-signoz_slate-100 border-dashed'>
             <div className='flex flex-col justify-between gap-4 sm:pr-4'>
               <div className='text-base uppercase text-signoz_vanilla-400'>Tuesday ⎯ Sept 17</div>
@@ -145,9 +143,8 @@ const MainSection: React.FC = () => {
               </ModalContent>
             </Modal>
           </div>
-
-
-
+          
+          
           <div className='flex flex-col sm:flex-row justify-between py-6 px-6 border-b border-t border-signoz_slate-100 border-dashed'>
             <div className='flex flex-col justify-between gap-4 sm:pr-4'>
               <div className='text-base uppercase text-signoz_vanilla-400'>Wednesday ⎯ Sept 18</div>
@@ -192,6 +189,8 @@ const MainSection: React.FC = () => {
 
 
 
+
+           {/* Timer  */}
           {['Thursday ⎯ Sept 19', 'Friday ⎯ Sept 20'].map((day, index) => (
             <div key={index} className="flex flex-grow items-center py-2 px-6 justify-between border-b border-dashed border-signoz_slate-100">
               <div className="text-sm sm:text-base font-mono font-medium text-signoz_vanilla-400 uppercase w-[32%]">
@@ -202,7 +201,20 @@ const MainSection: React.FC = () => {
               </div>
             </div>
           ))}
+
+
+          {/* Cards */}
+          <div className='flex flex-col gap-7 px-6 mt-12 mb-20'>
+            <div className='font-mono uppercase text-signoz_vanilla-400 self-stretch'>More From Launch Week</div>
+            <div className='flex flex-col sm:flex-row gap-6'>
+              {cardData.map((card, index) => (
+                <Card key={index} title={card.title} description={card.description} url={card.url} />
+              ))}
+            </div>
+          </div>
+
         </div>
+
       </section>
       <GetStarted page="launch-week" />
     </>
@@ -210,6 +222,33 @@ const MainSection: React.FC = () => {
 }
 
 export default MainSection
+
+
+const cardData = [
+  {
+    title: 'SOC2 Type II and HIPAA Compliant',
+    description: 'SigNoz is now SOC2 Type II and HIPAA compliant',
+    url: '/blog/signoz-is-soc2-type2-and-hipaa-compliant/'
+  },
+];
+
+
+const Card = ({ title, description, url }) => {
+  return (
+    <Link href={url} target="_blank" className='flex flex-col group py-4 px-5 max-w-96 cursor-pointer launch-week-card-background hover:bg-[#121317] rounded-md border border-signoz_slate-500'>
+      <div>
+        <div className='text-base font-medium mb-2'>{title}</div>
+        <div className='text-sm font-medium text-signoz_vanilla-400 mb-10'>{description}</div>
+      </div>
+      <div className='flex'>
+        <div className='rounded-full button-background p-2 flex items-center justify-center w-fit h-fit transform transition-transform group-hover:translate-x-2.5'>
+          <ArrowRight size={14} />
+        </div>
+      </div>
+    </Link>
+  );
+};
+
 
 
 const GetStarted = ({ page }) => {
