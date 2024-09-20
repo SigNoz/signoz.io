@@ -1358,7 +1358,7 @@ const docsSideNav = [
       {
         type: 'category',
         isExpanded: false,
-        label: 'Azure Blog Storage',
+        label: 'Azure Blob Storage',
         route: '/docs/azure-monitoring/az-blob-storage',
         items: [
           {
