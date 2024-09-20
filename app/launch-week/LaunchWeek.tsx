@@ -1,6 +1,7 @@
 'use client'
 
 import * as React from 'react'
+import { useState } from 'react';
 import type { Metadata } from 'next';
 import Button from '@/components/Button/Button';
 import Link from 'next/link';
@@ -18,6 +19,12 @@ import {
 const MainSection: React.FC = () => {
 
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const [videoId, setVideoId] = useState<string>('');
+
+  const handleOpenModal = (id: string) => {
+    setVideoId(id);
+    onOpen(); 
+  };
 
   return (
     <>
@@ -67,7 +74,7 @@ const MainSection: React.FC = () => {
                   <Linkedin className='w-4 h-4' />
                   <span className='text-[#F7F7F8] text-sm font-medium whitespace-nowrap'>LinkedIn Live</span>
                 </Link>
-                <div id="btn-watch-youtube-video" className='flex px-3 py-2 mb-2 sm:mb-0 w-full items-center gap-2 rounded-full button-background cursor-pointer justify-center' onClick={onOpen}>
+                <div id="btn-watch-youtube-video" className='flex px-3 py-2 mb-2 sm:mb-0 w-full items-center gap-2 rounded-full button-background cursor-pointer justify-center' onClick={() => handleOpenModal('SJ7H82wbXJo')} >
                   <img src='/svgs/icons/watch-video.svg' alt='watch video icon' />
                   <span className='text-[#F7F7F8] text-sm font-medium whitespace-nowrap'>Watch the video</span>
                 </div>
@@ -86,19 +93,7 @@ const MainSection: React.FC = () => {
                   </div>
                 </div>
               </div>
-            </Link>
-            <Modal size={'5xl'} backdrop="blur" isOpen={isOpen} onOpenChange={onOpenChange} className='self-center'>
-              <ModalContent className="bg-transparent">
-                {() => (
-                  <>
-                    <ModalBody className="py-10">
-                      <Youtube id="SJ7H82wbXJo" />
-                    </ModalBody>
-                  </>
-                )}
-              </ModalContent>
-            </Modal>
-
+            </Link> 
           </div>
 
 
@@ -111,7 +106,7 @@ const MainSection: React.FC = () => {
                   <Linkedin className='w-4 h-4' />
                   <span className='text-[#F7F7F8] text-sm font-medium whitespace-nowrap'>LinkedIn Live</span>
                 </Link>
-                <div id="btn-watch-youtube-video" className='flex px-3 py-2 mb-2 sm:mb-0 w-full items-center gap-2 rounded-full button-background cursor-pointer justify-center' onClick={onOpen}>
+                <div id="btn-watch-youtube-video" className='flex px-3 py-2 mb-2 sm:mb-0 w-full items-center gap-2 rounded-full button-background cursor-pointer justify-center' onClick={() => handleOpenModal('uvXNZxAd4w0')}>
                   <img src='/svgs/icons/watch-video.svg' alt='watch video icon' />
                   <span className='text-[#F7F7F8] text-sm font-medium whitespace-nowrap'>Watch the video</span>
                 </div>
@@ -131,17 +126,6 @@ const MainSection: React.FC = () => {
                 </div>
               </div>
             </Link>
-            <Modal size={'5xl'} backdrop="blur" isOpen={isOpen} onOpenChange={onOpenChange} className='self-center'>
-              <ModalContent className="bg-transparent">
-                {() => (
-                  <>
-                    <ModalBody className="py-10">
-                      <Youtube id="uvXNZxAd4w0" />
-                    </ModalBody>
-                  </>
-                )}
-              </ModalContent>
-            </Modal>
           </div>
           
           
@@ -153,7 +137,7 @@ const MainSection: React.FC = () => {
                   <Linkedin className='w-4 h-4' />
                   <span className='text-[#F7F7F8] text-sm font-medium whitespace-nowrap'>LinkedIn Live</span>
                 </Link>
-                <div id="btn-watch-youtube-video" className='flex px-3 py-2 mb-2 sm:mb-0 w-full items-center gap-2 rounded-full button-background cursor-pointer justify-center' onClick={onOpen}>
+                <div id="btn-watch-youtube-video" className='flex px-3 py-2 mb-2 sm:mb-0 w-full items-center gap-2 rounded-full button-background cursor-pointer justify-center' onClick={() => handleOpenModal('_Mpbv1imSEE')}>
                   <img src='/svgs/icons/watch-video.svg' alt='watch video icon' />
                   <span className='text-[#F7F7F8] text-sm font-medium whitespace-nowrap'>Watch the video</span>
                 </div>
@@ -173,17 +157,6 @@ const MainSection: React.FC = () => {
                 </div>
               </div>
             </Link>
-            <Modal size={'5xl'} backdrop="blur" isOpen={isOpen} onOpenChange={onOpenChange} className='self-center'>
-              <ModalContent className="bg-transparent">
-                {() => (
-                  <>
-                    <ModalBody className="py-10">
-                      <Youtube id="_Mpbv1imSEE" />
-                    </ModalBody>
-                  </>
-                )}
-              </ModalContent>
-            </Modal>
           </div>
 
 
@@ -195,7 +168,7 @@ const MainSection: React.FC = () => {
                   <Linkedin className='w-4 h-4' />
                   <span className='text-[#F7F7F8] text-sm font-medium whitespace-nowrap'>LinkedIn Live</span>
                 </Link>
-                <div id="btn-watch-youtube-video" className='flex px-3 py-2 mb-2 sm:mb-0 w-full items-center gap-2 rounded-full button-background cursor-pointer justify-center' onClick={onOpen}>
+                <div id="btn-watch-youtube-video" className='flex px-3 py-2 mb-2 sm:mb-0 w-full items-center gap-2 rounded-full button-background cursor-pointer justify-center' onClick={() => handleOpenModal('7mNB715Ul0Y')}>
                   <img src='/svgs/icons/watch-video.svg' alt='watch video icon' />
                   <span className='text-[#F7F7F8] text-sm font-medium whitespace-nowrap'>Watch the video</span>
                 </div>
@@ -215,17 +188,6 @@ const MainSection: React.FC = () => {
                 </div>
               </div>
             </Link>
-            <Modal size={'5xl'} backdrop="blur" isOpen={isOpen} onOpenChange={onOpenChange} className='self-center'>
-              <ModalContent className="bg-transparent">
-                {() => (
-                  <>
-                    <ModalBody className="py-10">
-                      <Youtube id="7mNB715Ul0Y" />
-                    </ModalBody>
-                  </>
-                )}
-              </ModalContent>
-            </Modal>
           </div>
 
 
@@ -237,7 +199,7 @@ const MainSection: React.FC = () => {
                   <Linkedin className='w-4 h-4' />
                   <span className='text-[#F7F7F8] text-sm font-medium whitespace-nowrap'>LinkedIn Live</span>
                 </Link>
-                <div id="btn-watch-youtube-video" className='flex px-3 py-2 mb-2 sm:mb-0 w-full items-center gap-2 rounded-full button-background cursor-pointer justify-center' onClick={onOpen}>
+                <div id="btn-watch-youtube-video" className='flex px-3 py-2 mb-2 sm:mb-0 w-full items-center gap-2 rounded-full button-background cursor-pointer justify-center' onClick={() => handleOpenModal('n9Kq_l4EeCw')}>
                   <img src='/svgs/icons/watch-video.svg' alt='watch video icon' />
                   <span className='text-[#F7F7F8] text-sm font-medium whitespace-nowrap'>Watch the video</span>
                 </div>
@@ -257,22 +219,20 @@ const MainSection: React.FC = () => {
                 </div>
               </div>
             </Link>
+
+
             <Modal size={'5xl'} backdrop="blur" isOpen={isOpen} onOpenChange={onOpenChange} className='self-center'>
               <ModalContent className="bg-transparent">
                 {() => (
                   <>
                     <ModalBody className="py-10">
-                      <Youtube id="n9Kq_l4EeCw&t" />
+                      <Youtube id={videoId} />
                     </ModalBody>
                   </>
                 )}
               </ModalContent>
             </Modal>
           </div>
-
-
-      
-
 
 
 
