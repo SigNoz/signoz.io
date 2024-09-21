@@ -14,6 +14,7 @@ import Link from 'next/link'
 import { SidebarIcons } from '@/components/sidebar-icons/icons'
 import PageFeedback from '../../../components/PageFeedback/PageFeedback'
 import React from 'react'
+import ScrollForm from '@/components/ScrollForm'
 
 const defaultLayout = 'PostLayout'
 const layouts = {
@@ -100,6 +101,26 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
   const jsonLd = post.structuredData
   const Layout = layouts[post.layout || defaultLayout]
 
+  // Check if the post has the "faq" tag
+  const hasFaqTag = post.tags && post.tags.includes('faq')
+
+  // Define the custom ScrollForm props
+  const scrollFormProps = {
+    question: "Are you facing issues with your observability setup?",
+    options: [
+      "Too high pricing",
+      "Difficult to manage multiple tools",
+      "Vendor lock-in?",
+      "I am not looking to change right now"
+    ],
+    optionBehaviors: {
+      "Too high pricing": { action: 'showCTA' },
+      "Difficult to manage multiple tools": { action: 'showCTA' },
+      "Vendor lock-in?": { action: 'showCTA' },
+      "I am not looking to change right now": { action: 'close' }
+    }
+  }
+
   return (
     <>
       <script
@@ -125,6 +146,9 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
         <MDXLayoutRenderer code={post.body.code} components={components} toc={post.toc} />
         <PageFeedback />
       </Layout>
+
+      {/* Render ScrollForm with custom props if the post has the "faq" tag */}
+      {hasFaqTag && <ScrollForm {...scrollFormProps} />}
     </>
   )
 }

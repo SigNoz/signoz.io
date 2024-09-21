@@ -5,7 +5,32 @@ import Button from '@/components/ui/Button';
 import Link from 'next/link';
 import { ArrowRight, CheckCircle } from 'lucide-react';
 
-const ScrollForm = () => {
+interface OptionBehavior {
+  action: 'close' | 'showCTA';
+}
+
+interface ScrollFormProps {
+  question?: string;
+  options?: string[];
+  valueProps?: string[];
+  optionBehaviors?: Record<string, OptionBehavior>;
+}
+
+const ScrollForm: React.FC<ScrollFormProps> = ({
+  question = "What are you looking for?",
+  options = ['Casually exploring', 'Setting up a new observability product', 'Understanding SigNoz offerings', 'Migrating from datadog/newrelic'],
+  valueProps = [
+    'Open-source observability platform',
+    'Unified view of metrics, traces, and logs',
+    'Cost-effective alternative to proprietary solutions'
+  ],
+  optionBehaviors = {
+    'Casually exploring': { action: 'close' },
+    'Setting up a new observability product': { action: 'showCTA' },
+    'Understanding SigNoz offerings': { action: 'showCTA' },
+    'Migrating from datadog/newrelic': { action: 'showCTA' }
+  }
+}) => {
   const [isVisible, setIsVisible] = useState(false);
   const [selectedOption, setSelectedOption] = useState('');
   const [showValueProps, setShowValueProps] = useState(false);
@@ -29,7 +54,8 @@ const ScrollForm = () => {
 
   const handleOptionSelect = (option: string) => {
     setSelectedOption(option);
-    if (option !== 'Casually exploring') {
+    const behavior = optionBehaviors[option];
+    if (behavior.action === 'showCTA') {
       setShowValueProps(true);
     } else {
       handleDismiss();
@@ -49,12 +75,6 @@ const ScrollForm = () => {
     transform: isVisible ? 'translateY(0)' : 'translateY(20px)',
   };
 
-  const valueProps = [
-    'Open-source observability platform',
-    'Unified view of metrics, traces, and logs',
-    'Cost-effective alternative to proprietary solutions'
-  ];
-
   return (
     <div 
       style={formStyle}
@@ -62,9 +82,9 @@ const ScrollForm = () => {
     >
       {!showValueProps ? (
         <>
-          <h3 className="text-signoz_sienna-100 text-lg font-semibold mb-2">What are you looking for?</h3>
+          <h3 className="text-signoz_sienna-100 text-lg font-semibold mb-2">{question}</h3>
           <div className="space-y-2">
-            {['Casually exploring', 'Setting up a new observability product', 'Understanding SigNoz offerings', 'Migrating from datadog/newrelic'].map((option) => (
+            {options.map((option) => (
               <button
                 key={option}
                 className="block w-full text-left px-3 py-2 text-sm text-signoz_vanilla-100 hover:bg-signoz_slate-400 rounded transition duration-150 ease-in-out"
@@ -107,3 +127,23 @@ const ScrollForm = () => {
 };
 
 export default ScrollForm;
+
+// To use this component, you need to import it and pass the required props.
+// import ScrollForm from '@/components/ScrollForm';
+
+// // In your parent component
+// const customOptionBehaviors = {
+//   'Option 1': { action: 'close' },
+//   'Option 2': { action: 'showCTA' },
+//   'Option 3': { action: 'showCTA' },
+//   'Option 4': { action: 'close' }
+// };
+
+// // In your JSX
+// <ScrollForm 
+//   question="Custom question?"
+//   options={['Option 1', 'Option 2', 'Option 3', 'Option 4']}
+//   optionBehaviors={customOptionBehaviors}
+// />
+
+// When nothing is passed, it will use the default props.
