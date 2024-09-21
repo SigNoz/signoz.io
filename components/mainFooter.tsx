@@ -63,6 +63,12 @@ function Footer() {
                   </Link>
                   <ArrowUpRight size={16} />
                 </div>
+                <div className="mt-5 flex items-center gap-2 whitespace-nowrap pr-8 hover:underline max-md:pr-5">
+                  <Link href="/launch-week/" target="_blank">
+                    Launch Week
+                  </Link>
+                  <ArrowUpRight size={16} />
+                </div>
                 <div className="mt-5 flex items-center gap-2 pr-7 hover:underline max-md:pr-5">
                   <Link href="/changelog">Changelog</Link>
                 </div>
