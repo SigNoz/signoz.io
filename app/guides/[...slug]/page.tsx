@@ -114,10 +114,10 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
       "I am not looking to change right now"
     ],
     optionBehaviors: {
-      "Too high pricing": { action: 'showCTA' },
-      "Difficult to manage multiple tools": { action: 'showCTA' },
-      "Vendor lock-in?": { action: 'showCTA' },
-      "I am not looking to change right now": { action: 'close' }
+      "Too high pricing": { action: 'showCTA' as const },
+      "Difficult to manage multiple tools": { action: 'showCTA' as const },
+      "Vendor lock-in?": { action: 'showCTA' as const },
+      "I am not looking to change right now": { action: 'close' as const }
     }
   }
 
