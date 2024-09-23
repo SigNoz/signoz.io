@@ -80,7 +80,7 @@ const MainSection: React.FC = () => {
                 </div>
               </div>
             </div>
-            <Link href="/blog/introducing-ingest-guard-feature/" className='flex sm:flex-row flex-col justify-between max-w-full py-4 px-5 launch-week-card-background hover:bg-[#121317] transition-colors duration-300 w-[864px] rounded-md border border-signoz_slate-500 cursor-pointer'>
+            <Link href="/blog/introducing-ingest-guard-feature/" className='flex sm:flex-row flex-col gap-6 max-w-full py-4 px-5 launch-week-card-background hover:bg-[#121317] transition-colors duration-300 w-[864px] rounded-md border border-signoz_slate-500 cursor-pointer'>
               <img src='/img/launch-week/launch-week-2/day-1-ingest-gaurd-cover.webp' className=' w-auto sm:w-3/5 h-auto pr-2 sm:pr-0 mb-4 sm:mb-0' />
               <div className='flex flex-col justify-between group'>
                 <div>
@@ -112,10 +112,10 @@ const MainSection: React.FC = () => {
                 </div>
               </div>
             </div>
-            <Link href="/blog/introducing-anomaly-detection-for-smarter-alerts/" className='flex sm:flex-row flex-col justify-between max-w-full py-4 px-5 launch-week-card-background hover:bg-[#121317] transition-colors duration-300 w-[864px] rounded-md border border-signoz_slate-500 cursor-pointer'>
+            <Link href="/blog/introducing-anomaly-detection-for-smarter-alerts/" className='flex sm:flex-row flex-col gap-6 max-w-full py-4 px-5 launch-week-card-background hover:bg-[#121317] transition-colors duration-300 w-[864px] rounded-md border border-signoz_slate-500 cursor-pointer'>
               <img src='/img/launch-week/launch-week-2/anomaly-detection-blog-poster.webp' className=' w-auto sm:w-3/5 h-auto pr-2 sm:pr-0 mb-4 sm:mb-0' />
               <div className='flex flex-col justify-between group'>
-                <div>
+                <div className='min-w-[306px]'>
                   <div className='text-base font-eedium mb-2'>Introducing Anomaly Detection</div>
                   <div className='text-sm font-medium text-signoz_vanilla-400'>Create smarter alerts for dynamic metrics</div>
                 </div>
@@ -143,7 +143,7 @@ const MainSection: React.FC = () => {
                 </div>
               </div>
             </div>
-            <Link href="/blog/introducing-correlation-of-signals/" className='flex sm:flex-row flex-col justify-between max-w-full py-4 px-5 launch-week-card-background hover:bg-[#121317] transition-colors duration-300 w-[864px] rounded-md border border-signoz_slate-500 cursor-pointer'>
+            <Link href="/blog/introducing-correlation-of-signals/" className='flex sm:flex-row flex-col gap-6 max-w-full py-4 px-5 launch-week-card-background hover:bg-[#121317] transition-colors duration-300 w-[864px] rounded-md border border-signoz_slate-500 cursor-pointer'>
               <img src='/img/blog/2024/09/introducing-correlation-of-signals-correlation-blog-poster.webp' className=' w-auto sm:w-3/5 h-auto pr-2 sm:pr-0 mb-4 sm:mb-0' />
               <div className='flex flex-col justify-between group'>
                 <div>
@@ -174,7 +174,7 @@ const MainSection: React.FC = () => {
                 </div>
               </div>
             </div>
-            <Link href="/blog/introducing-alerts-history-and-scheduled-maintenance/" className='flex sm:flex-row flex-col justify-between max-w-full py-4 px-5 launch-week-card-background hover:bg-[#121317] transition-colors duration-300 w-[864px] rounded-md border border-signoz_slate-500 cursor-pointer'>
+            <Link href="/blog/introducing-alerts-history-and-scheduled-maintenance/" className='flex sm:flex-row flex-col gap-6 max-w-full py-4 px-5 launch-week-card-background hover:bg-[#121317] transition-colors duration-300 w-[864px] rounded-md border border-signoz_slate-500 cursor-pointer'>
               <img src='/img/launch-week/launch-week-2/blog-poster.webp' className=' w-auto sm:w-3/5 h-auto pr-2 sm:pr-0 mb-4 sm:mb-0' />
               <div className='flex flex-col justify-between group'>
                 <div>
@@ -205,7 +205,7 @@ const MainSection: React.FC = () => {
                 </div>
               </div>
             </div>
-            <Link href="/blog/improvements-to-logs-search-and-filter/" className='flex sm:flex-row flex-col justify-between max-w-full py-4 px-5 launch-week-card-background hover:bg-[#121317] transition-colors duration-300 w-[864px] rounded-md border border-signoz_slate-500 cursor-pointer'>
+            <Link href="/blog/improvements-to-logs-search-and-filter/" className='flex sm:flex-row flex-col gap-6 max-w-full py-4 px-5 launch-week-card-background hover:bg-[#121317] transition-colors duration-300 w-[864px] rounded-md border border-signoz_slate-500 cursor-pointer'>
               <img src='/img/launch-week/launch-week-2/logs-ui-day-5-cover.webp' className=' w-auto sm:w-3/5 h-auto pr-2 sm:pr-0 mb-4 sm:mb-0' />
               <div className='flex flex-col justify-between group'>
                 <div>
