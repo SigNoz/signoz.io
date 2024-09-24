@@ -53,7 +53,6 @@ export default async function Page() {
           <GetStarted page="homepage" />
         </main>
       </div>
-      <ScrollForm /> 
     </NextUIProvider>
   )
 }
