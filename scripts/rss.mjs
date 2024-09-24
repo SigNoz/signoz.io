@@ -13,17 +13,25 @@ import {
 } from '../.contentlayer/generated/index.mjs'
 import { sortPosts } from 'pliny/utils/contentlayer.js'
 
-const generateRssItem = (config, post) => `
+const generateRssItem = (config, post) => {
+  let urlPath = 'blog'
+  if (post._raw.sourceFilePath.startsWith('docs/')) urlPath = 'docs'
+  else if (post._raw.sourceFilePath.startsWith('comparisons/')) urlPath = 'comparisons'
+  else if (post._raw.sourceFilePath.startsWith('guides/')) urlPath = 'guides'
+  else if (post._raw.sourceFilePath.startsWith('opentelemetry/')) urlPath = 'opentelemetry'
+
+  return `
   <item>
-    <guid>${config.siteUrl}/blog/${post.slug}</guid>
+    <guid>${config.siteUrl}/${urlPath}/${post.slug}</guid>
     <title>${escape(post.title)}</title>
-    <link>${config.siteUrl}/blog/${post.slug}</link>
-    ${post.summary && `<description>${escape(post.summary)}</description>`}
+    <link>${config.siteUrl}/${urlPath}/${post.slug}</link>
+    ${post.summary ? `<description>${escape(post.summary)}</description>` : ''}
     <pubDate>${new Date(post.date).toUTCString()}</pubDate>
     <author>${config.email} (${config.author})</author>
-    ${post.tags && post.tags.map((t) => `<category>${t}</category>`).join('')}
+    ${post.tags ? post.tags.map((t) => `<category>${t}</category>`).join('') : ''}
   </item>
 `
+}
 
 const generateRss = (config, posts, page = 'feed.xml') => `
   <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
