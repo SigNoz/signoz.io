@@ -1,0 +1,148 @@
+---
+date: 2024-09-24
+title: Metrics API Payload Model
+id: metrics-payload-model
+---
+
+The SigNoz Metrics API uses a JSON payload for querying metrics, which includes various fields and nested fields. This document provides a detailed explanation of each field to help users construct effective queries.
+
+### Top-level  
+
+The top-level of the payload model has the following fields:
+
+|  NAME  | DESCRIPTION  |
+|---|---|
+|start| Epoch timestamp marking the start of the query range (in milliseconds) |
+|end | Epoch timestamp marking the end of the query range (in milliseconds) |
+|compositeQuery | This contains the [**compositeQuery**](#composite-query) which is explained below |
+|variables| Map of key-value pairs to replace variables in the query |
+|noCache| If true, the query result is not cached |
+
+### Composite Query
+
+The `compositeQuery` field consists of:
+
+|  NAME  | DESCRIPTION  |
+|---|---|
+|queryType| Type of query (e.g., builder, clickhouse_sql, promql).Scope of this documentation is limited to **builder** type|
+|panelType| Type of panel (e.g., value, graph (use for time series data), table) |
+|builderQueries | Map of [**builderQuery**](#builder-query) |
+|chQueries | Map of [**chQuery**](#ch-query) |
+|promQueries | Map of [**promQuery**](#prom-query) |
+|fillGaps | If true, fills the gaps in the time series data |
+
+### Builder Query
+
+A `builderQuery` consists of:
+
+|  NAME  | DESCRIPTION  |
+|---|---|
+|queryName| Name of the query, should match the key to this map value, e.g., A |
+|stepInterval| Aggregation interval for query in seconds, e.g., 60 |
+|dataSource| Source of data, should be `metrics` |
+|aggregateAttribute| The [**attribute**](#attribute) against which the time and span aggregation is applied, e.g., {`key`: `container_cpu_usage_total`} |
+|temporality| Temporality of the metric, e.g., cumulative, delta - optional |
+|filters| Array of [**filter**](#filter) used for filtering data, e.g., {`items`: [], `op`: `AND`} |
+|groupBy| Array  of [**attribute**](#attribute) used for groupBy, e.g., {`key`: `container_id`} |
+|expression| Will be same as query name except in case of formulas, e.g., A |
+|disabled| Specifies if the query is disabled, e.g., false |
+|having| Array of [**having**](#having) used for having data, e.g., {`columnName`: `SUM(signoz_calls_total)`, `op`: `>`, `value`: `100`} |
+|limit| Limit on the result series, e.g., 100 |
+|orderBy| Array of [**orderBy**](#order-by) used for ordering the results, e.g., {`columnName`: `service_name`, `order`: `desc`} |
+|reduceTo| Reduce the result to a single value for each group, One of (`max`, `min`, `avg`, `sum`, `last`) |
+|timeAggregation| Time aggregation for the query, e.g., avg, sum, min, max, rate, increase, etc. |
+|spanAggregation| Span aggregation for the query, e.g., avg, sum, min, max|
+|functions| Array of [**function**](#function) used for transforming data|
+
+
+### Filter
+
+A `filter` consists of:
+
+|  NAME  | DESCRIPTION  |
+|---|---|
+|items| Array of [**filterItem**](#filter-item)|
+|op| Operator defining how filter items are joined (e.g., AND).
+
+### Group By
+
+A `groupBy` consists of:
+
+|  NAME  | DESCRIPTION  |
+|---|---|
+|key| Name of the key |
+|dataType| Data type of the key (e.g., string, int64, float64, bool) |
+|type| Type of the key, i.e., tag/resource |
+
+### Filter Item
+
+The `filterItem` includes:
+
+|  NAME  | DESCRIPTION  |
+|---|---|
+|key | Corresponding [**attribute**](#attribute) |
+|op| Operators -  =, !=, >, >=, \<, \<=, in, nin, contains, ncontains, regex, nregex, like, nlike, exists, nexists |
+|value | Value for the filter, can be empty for some **op** |
+
+<Admonition>
+The `value` parameter will be empty for `exists` and `nexists`.
+</Admonition>
+
+### Attribute 
+
+An `attribute` consists of:
+
+|  NAME  | DESCRIPTION  |
+|---|---|
+|key| Name of the key |
+|type| Type of the key, i.e., tag/resource. It is empty for top level fields. (e.g., tag = method, resource = k8s_deployment_name, (empty) = trace_id) |
+|dataType| Data type of the key (e.g., string, int64, float64, bool) |
+
+
+### Having
+
+A `having` consists of:
+
+|  NAME  | DESCRIPTION  |
+|---|---|
+|columnName| Name of the column to apply having, there is only one column for all having cases |
+|op| Operators -  =, !=, >, >=, \<, \<=, in, nin |
+|value | Value for the filter |
+
+### Order By
+
+An `orderBy` consists of:
+
+|  NAME  | DESCRIPTION  |
+|---|---|
+|columnName| Name of the column, for aggreation result column name will be `#SIGNOZ_VALUE` |
+|order| Order of the column, e.g., asc, desc |
+
+### Function
+
+A `function` consists of:
+
+|  NAME  | DESCRIPTION  |
+|---|---|
+|name| Name of the function, One of (`cutOffMin`, `cutOffMax`, `clampMin`, `clampMax`, `absolute`, `runningDiff`, `log{2,10}`, `cumSum`, `ewma{3,5,7}`, `median{3,5,7}`, `timeShift`) |
+|args| List of arguments for the function |
+|namedArgs| Map of named arguments for the function |
+
+### Ch Query
+
+A `chQuery` consists of:
+
+|  NAME  | DESCRIPTION  |
+|---|---|
+|query| Clickhouse SQL query |
+|disabled| Specifies if the query is disabled |
+
+
+### Prom Query
+
+A `promQuery` consists of:
+
+|  NAME  | DESCRIPTION  |
+|---|---|
+|query| PromQL query |
+|disabled| Specifies if the query is disabled |

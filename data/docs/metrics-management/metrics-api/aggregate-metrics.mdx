@@ -1,0 +1,167 @@
+---
+date: 2024-09-24
+title: Query Metrics
+id: query-metrics
+---
+
+This section demonstrates various examples of how to query metrics using the SigNoz Metrics API.
+
+## Example 1: Request rate per second for web service
+
+### Payload
+
+```json
+{
+  "start": 1727150692000,
+  "end": 1727152492000,
+  "step": 60,
+  "variables": {},
+  "compositeQuery": {
+    "queryType": "builder",
+    "panelType": "graph",
+    "fillGaps": false,
+    "builderQueries": {
+      "A": {
+        "dataSource": "metrics",
+        "queryName": "A",
+        "aggregateAttribute": {
+          "key": "signoz_calls_total",
+          "dataType": "float64",
+          "type": "Sum",
+        },
+        "timeAggregation": "rate",
+        "spaceAggregation": "sum",
+        "functions": [],
+        "filters": {
+          "items": [
+            {
+              "key": {
+                "key": "span_kind",
+                "dataType": "string",
+                "type": "tag",
+              },
+              "op": "=",
+              "value": "SPAN_KIND_SERVER"
+            }
+          ],
+          "op": "AND"
+        },
+        "expression": "A",
+        "disabled": false,
+        "stepInterval": 60,
+        "having": [
+          {
+            "columnName": "SUM(signoz_calls_total)",
+            "op": ">",
+            "value": 1
+          }
+        ],
+        "limit": 10,
+        "orderBy": [],
+        "groupBy": [
+          {
+            "key": "service_name",
+            "dataType": "string",
+            "type": "tag",
+          }
+        ],
+      }
+    }
+  }
+}
+```
+
+## Example 2: Error rate per second for web service
+
+### Payload
+
+```json
+{
+  "start": 1727150976000,
+  "end": 1727152776000,
+  "step": 60,
+  "variables": {},
+  "compositeQuery": {
+    "queryType": "builder",
+    "panelType": "graph",
+    "fillGaps": false,
+    "builderQueries": {
+      "A": {
+        "dataSource": "metrics",
+        "queryName": "A",
+        "aggregateAttribute": {
+          "key": "signoz_calls_total",
+          "dataType": "float64",
+          "type": "Sum",
+        },
+        "timeAggregation": "rate",
+        "spaceAggregation": "sum",
+        "functions": [],
+        "filters": {
+          "items": [
+            {
+              "key": {
+                "key": "status_code",
+                "dataType": "string",
+                "type": "tag",
+              },
+              "op": "=",
+              "value": "STATUS_CODE_ERROR"
+            }
+          ],
+          "op": "AND"
+        },
+        "expression": "A",
+        "disabled": true,
+        "stepInterval": 60,
+        "having": [],
+        "limit": null,
+        "orderBy": [],
+        "groupBy": [
+          {
+            "key": "service_name",
+            "dataType": "string",
+            "type": "tag",
+          }
+        ],
+      },
+      "B": {
+        "dataSource": "metrics",
+        "queryName": "B",
+        "aggregateAttribute": {
+          "key": "signoz_calls_total",
+          "dataType": "float64",
+          "type": "Sum",
+        },
+        "timeAggregation": "rate",
+        "spaceAggregation": "sum",
+        "functions": [],
+        "filters": {
+          "items": [],
+          "op": "AND"
+        },
+        "expression": "B",
+        "disabled": true,
+        "stepInterval": 60,
+        "having": [],
+        "limit": null,
+        "orderBy": [],
+        "groupBy": [
+          {
+            "key": "service_name",
+            "dataType": "string",
+            "type": "tag",
+          }
+        ],
+        "legend": "",
+        "reduceTo": "avg"
+      },
+      "F1": {
+        "queryName": "F1",
+        "expression": "A/B",
+        "disabled": false,
+      }
+    }
+  }
+}
+```
