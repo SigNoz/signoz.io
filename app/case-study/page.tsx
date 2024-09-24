@@ -31,6 +31,13 @@ type CardProps = {
 
 const cardDetails = [
   {
+    logo: "/img/case_study/cedana-logo.svg",
+    title: "How Cedana Leverages SigNoz to Ensure Uptime in Real-Time Compute Operations",
+    name: "Niranjan Ravichandra",
+    position: "Co-founder & CTO, Cedana",
+    href: "/case-study/cedana/"
+  },
+  {
     logo: "/img/case_study/thehindu-logo.png",
     title: "How The Hindu uses SigNoz APM to Optimize Application Performance",
     name: "Poonkuyilan V",
