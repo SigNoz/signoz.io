@@ -26,18 +26,14 @@ SigNoz is an OpenTelemetry Native, Open Source alternative to Datadog and New Re
 traces, metrics, exceptions, & alerts in a single pane of Glass.
 
 
-## Who is this for ?
+// ## Who is this for ?
 
-The SigNoz TEchnical Documentation Program is open to developers and technical writers who:
+// The SigNoz TEchnical Documentation Program is open to developers and technical writers who:
 
-- Possess strong technical writing skills, with the ability to explain complex concepts clearly and concisely in a structured manner.
-- Have hands-on experience with observability tools 
-- Developers who have familiarity with OpenTelemetry 
-- Developers who have a good understanding of backend technologies, DevOps, or observability practices.
-
-
-
-
+// - Possess strong technical writing skills, with the ability to explain complex concepts clearly and concisely in a structured manner.
+// - Have hands-on experience with observability tools 
+// - Developers who have familiarity with OpenTelemetry 
+// - Developers who have a good understanding of backend technologies, DevOps, or observability practices.
 
 `
 
