@@ -1,0 +1,124 @@
+---
+date: 2024-09-23
+id: upgrade-0.55
+title: Upgrade to v0.55 from earlier versions
+---
+
+This setup assumes you've installed SigNoz version `>=0.53` && `<v0.55` and have kept it running for at least 15 days (the default retention period). 
+If your retention period exceeds 15 days, please make the adjustments outlined in the following step before upgrading to v0.55. The upgrade will continue writing to both tables, 
+and you can remove these flags after the system has run for the duration specified in your retention settings.
+
+## Config to Keep Using Old Table
+
+<Admonition >
+You can skip this step if didn't change the retention setting and you kept SigNoz version version `>=0.53` && `<v0.55` running for at least 15 days.
+</Admonition>
+
+The changes outlined in this step will make sure that data is written to both the new and old table and the queries are redirected to the old table. 
+
+* Query Service 
+  ```
+  queryService:
+    additionalArgs:
+      - --use-logs-new-schema=false
+  ```
+* Otel collector
+  ```
+  otelCollector:
+    config:
+      exporters:
+        clickhouselogsexporter:
+          use_new_schema: false
+  ```
+
+
+## Migrating The Existing Materialized Columns and TTL Settings.
+After upgrading to SigNoz version v0.55 i.e. SigNoz chart version v0.53.0, you need to run the migration script to copy the TTL settings and materialized columns from the old table.
+
+
+Changes include:-
+* It will migrate the materialized columns from the old table to the new one.
+* It will migrate the TTL settings from the old table to the new one.
+
+In the last update we made sure that SigNoz writes to both the old and new table so that after certain days you can switch to new one i.e this release without moving old data.
+
+
+## Steps to Run Migration Script:
+
+## First upgrade to v0.55
+
+Follow the platform specific instructions to upgrade to 0.55 and above.
+
+Note that the past exceptions/error data will not be visible on the new application until you run the migration script.
+
+- [Docker Standalone](https://signoz.io/docs/operate/docker-standalone/#upgrade)
+- [Kubernetes](https://signoz.io/docs/operate/kubernetes/#upgrade)
+
+
+### For Docker
+```bash
+docker run --name signoz-migrate-55 --network clickhouse-setup_default \
+  -it -d signoz/migrate:0.55 -host=clickhouse -port=9000
+```
+
+Steps to check logs:
+
+```bash
+docker logs -f signoz-migrate-55
+```
+
+In case of failure and have to run again, make sure to cleanup the container before running the migration script again.
+
+```bash
+docker stop signoz-migrate-55
+
+docker rm signoz-migrate-55
+```
+
+
+### For Kubernetes
+
+```bash
+RELEASE=my-release
+ADMIN_PASSWORD=$(
+  kubectl -n platform get clickhouseinstallations.clickhouse.altinity.com $RELEASE-clickhouse \
+  -o jsonpath --template '{.spec.configuration.users.admin/password}'
+)
+
+kubectl -n platform run -i -t signoz-migrate-55 --image=signoz/migrate:0.55 --restart='Never' \
+  -- -host=$RELEASE-clickhouse -port=9000 -userName=admin -password=$ADMIN_PASSWORD
+```
+
+Steps to check logs:
+
+```bash
+kubectl -n platform logs -f signoz-migrate-55
+```
+
+In case of failure and have to run again, make sure to cleanup the pod before running the migration script again.
+
+```bash
+kubectl -n platform delete pod signoz-migrate-55
+```
+
+
+## In case of Upgrade Failure
+
+If you face any issue, reach out to us at [Slack](https://signoz.io/slack).
+
+## Command-Line Interface (CLI) Flags
+
+There are some custom flags which can be enabled based on different use-cases.
+All the flags below are `optional`.
+
+Flags:
+
+- `-port` : Specify port of clickhouse. `default=9000`
+- `-host` : Specify host of clickhouse. `default=127.0.0.1`
+- `-userName` : Specify user name of clickhouse. `default=default`
+- `-password` : Specify password of clickhouse. `default=""`
+
+
+### Please update the clickhouse queries in dashboards and alerts by following the guide [here](/docs/userguide/logs_clickhouse_queries/#migrating-logs-clickhouse-queries).
+
+
