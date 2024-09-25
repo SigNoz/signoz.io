@@ -94,25 +94,26 @@ docker rm signoz-migrate-55
 
 ```bash
 RELEASE=my-release
+NAMESPACE=platform
 ADMIN_PASSWORD=$(
-  kubectl -n platform get clickhouseinstallations.clickhouse.altinity.com $RELEASE-clickhouse \
+  kubectl -n $NAMESPACE get clickhouseinstallations.clickhouse.altinity.com $RELEASE-clickhouse \
   -o jsonpath --template '{.spec.configuration.users.admin/password}'
 )
 
-kubectl -n platform run -i -t signoz-migrate-55 --image=signoz/migrate:0.55 --restart='Never' \
+kubectl -n $NAMESPACE run -i -t signoz-migrate-55 --image=signoz/migrate:0.55 --restart='Never' \
   -- -host=$RELEASE-clickhouse -port=9000 -userName=admin -password=$ADMIN_PASSWORD
 ```
 
 Steps to check logs:
 
 ```bash
-kubectl -n platform logs -f signoz-migrate-55
+kubectl -n $NAMESPACE logs -f signoz-migrate-55
 ```
 
 In case of failure and have to run again, make sure to cleanup the pod before running the migration script again.
 
 ```bash
-kubectl -n platform delete pod signoz-migrate-55
+kubectl -n $NAMESPACE delete pod signoz-migrate-55
 ```
 
 
