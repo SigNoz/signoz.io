@@ -3,12 +3,24 @@
 import React, { useState } from 'react';
 
 const Tabs = ({ children }) => {
-  const [activeTab, setActiveTab] = useState(children[0].props.value);
+  // Ensure children is always an array
+  const childrenArray = React.Children.toArray(children);
+  
+  // Type guard to check if the element is a valid React element
+  const isValidElement = (element: any): element is React.ReactElement => {
+    return React.isValidElement(element);
+  };
+
+  // Find the first valid React element to set as the initial active tab
+  const firstValidChild = childrenArray.find(isValidElement);
+  const initialActiveTab = firstValidChild ? firstValidChild.props.value : null;
+  const [activeTab, setActiveTab] = useState(initialActiveTab);
 
   return (
     <div className="w-full">
       <div className="flex border-b border-gray-200 dark:border-gray-700">
-        {children.map((child) => {
+        {childrenArray.map((child) => {
+          if (!isValidElement(child)) return null;
           const { value, label } = child.props;
           return (
             <button
@@ -26,7 +38,8 @@ const Tabs = ({ children }) => {
         })}
       </div>
       <div className="p-4">
-        {children.map((child) => {
+        {childrenArray.map((child) => {
+          if (!isValidElement(child)) return null;
           if (child.props.value === activeTab) return <div key={child.props.value}>{child.props.children}</div>;
           return null;
         })}
