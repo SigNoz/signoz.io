@@ -7,6 +7,24 @@ id: logs_clickhouse_queries
 At SigNoz we store our data on ClickHouse. In this documentation, we will go through the schema of the logs table and see how we can write clickhouse queries to create different dashboard panels from Logs Data.
 
 
+## Migrating Logs ClickHouse Queries
+
+If you are migrating from older version of SigNoz to version `>=0.53.0` here are the following changes you need to make in your clickhouse queries.
+* Change table name from `signoz_logs.distributed_logs` to `signoz_logs.distributed_logs_v2`
+* Attributes and Resources data type is changed from array to map.
+    * `attributes_string_key`, `attributes_string_value` is now a single map `attributes_string`
+    * `attributes_int64_key`, `attributes_int64_value` is now a single map `attributes_number`
+    * `attributes_float64_key`, `attributes_float64_value` is now a single map `attributes_number`
+    * `attributes_bool_key`, `attributes_bool_value` is now a single map `attributes_bool`
+    * `resources_string_key`, `resources_string_value` is now a single map `resources_string`
+
+    Eg:- 
+        * `attributes_string_value[indexOf(attributes_string_key, 'method')]` will change to `attributes_string['method']`
+        * `resources_string_value[indexOf(resources_string_key, 'service_name')]` will change to `resources_string['service_name']`
+        * `indexOf(attributes_string_key, 'method') !=0` will change to `mapContains(attributes_string, 'method')`
+        * `indexOf(resources_string_key, 'host') !=0` will change to `mapContains(resources_string, 'host')`
+
+
 ## Logs Schema V2
 
 <Admonition type="warning" >
