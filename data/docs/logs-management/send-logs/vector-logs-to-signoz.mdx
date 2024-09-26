@@ -2,10 +2,11 @@
 date: 2024-06-06
 title: Send Logs from Vector to SigNoz
 id: vector-logs-to-signoz
+toc_min_heading_level: 3
+toc_max_heading_level: 1
 ---
 
-If you have [Vector](https://vector.dev/) running on your system, you can forward logs from Vector to SigNoz by following this guide. 
-
+This guide explains how to forward logs from [Vector](https://vector.dev/) to SigNoz.
 
 ## Send Logs from Vector to SigNoz in SigNoz Cloud
 
@@ -23,61 +24,67 @@ If you have [Vector](https://vector.dev/) running on your system, you can forwar
           signoz-access-token: "<SIGNOZ_INGESTION_KEY>"
     ```
 
-  Set the values of `<SOURCE_NAME>`, `<REGION>`  and  `<SIGNOZ_INGESTION_KEY>`.
+`<SOURCE_NAME>`: The name of your [Vector source](https://vector.dev/docs/reference/configuration/sources/) (e.g., docker)
 
-  `<SOURCE_NAME>` is the name of the source eg:- `docker` . Read about sources [here](https://vector.dev/docs/reference/configuration/sources/).
+`<REGION>`: Region of your SigNoz Cloud tenant
 
-  `<SIGNOZ_INGESTION_KEY>` is the ingestion key for SigNoz.
+`<SIGNOZ_INGESTION_KEY>`: SigNoz Cloud ingestion key
 
-  Depending on the choice of your region for SigNoz cloud, the URI will vary according to this table.
-
-  | Region | Endpoint                   |
-  | ------ | -------------------------- |
-  | US     | ingest.us.signoz.cloud     |
-  | IN     | ingest.in.signoz.cloud     |
-  | EU     | ingest.eu.signoz.cloud     |
-
-* Once the changes are applied, data will be sent to SigNoz from Vector.
+Save the configuration file and restart Vector to apply the changes.
 
 
-# Mapping for SigNoz
+## Log Mapping for SigNoz
 
-* Any logs that you send, the `timestamp` will be parsed and the `source_type` will be moved to resource attributes.
-* The `message` key will be mapped to `body`.
-* You can transform your logs at Vector level to convert it to OTEL schema which will look like this.
-  ```
-  {
-    "trace_id": <hex string>,
-    "span_id": <hex string>,
-    "trace_flags": <int>
-    "severity_text": <string>,
-    "severity_number": <int>,
-    "attributes": <map>,
-    "resources": <map>,
-    "source_type": <string>,
-    "message": <string>
-  }
-  ```
+SigNoz processes incoming logs from Vector as follows:
 
-  Eg:-
-  ```
-  {
-    "trace_id": "000000000000000018c51935df0b93b9",
-    "span_id": "18c51935df0b93b9",
-    "trace_flags": 0,
-    "severity_text": "info",
-    "severity_number": 4,
-    "attributes": {
-        "method": "GET",
-        "path": "/api/users"
-    },
-    "resources": {
-        "host": "myhost",
-        "namespace": "prod"
-    },
-    "source_type": "docker",
-    "message": "This is a log line"
-  }
-  ```
-* Any other keys which are not present in the above schema will be moved to log attributes.
-* If you don't want to transform using Vector, you can transform using SigNoz [pipelines](https://signoz.io/docs/logs-pipelines/introduction/).
+- The `timestamp` field is automatically parsed.
+- The `source_type` is moved to resource attributes.
+- The `message` key is mapped to the `body` field.
+
+### OpenTelemetry (OTEL) Schema Transformation
+
+You can consider transforming your logs to the OpenTelemetry schema at the Vector level. The OTEL schema structure is as follows:
+```
+{
+  "trace_id": "<hex string>",
+  "span_id": "<hex string>",
+  "trace_flags": "<int>",
+  "severity_text": "<string>",
+  "severity_number": "<int>",
+  "attributes": "<map>",
+  "resources": "<map>",
+  "source_type": "<string>",
+  "message": "<string>"
+}
+```
+
+Example of a transformed log entry:
+```
+{
+  "trace_id": "000000000000000018c51935df0b93b9",
+  "span_id": "18c51935df0b93b9",
+  "trace_flags": 0,
+  "severity_text": "info",
+  "severity_number": 4,
+  "attributes": {
+      "method": "GET",
+      "path": "/api/users"
+  },
+  "resources": {
+      "host": "myhost",
+      "namespace": "prod"
+  },
+  "source_type": "docker",
+  "message": "This is a log line"
+}
+```
+
+**Note:** Any fields not included in the OTEL schema will be automatically moved to log attributes by SigNoz.
+
+
+If you prefer not to transform logs at Vector level, you can use SigNoz [pipelines](https://signoz.io/docs/logs-pipelines/introduction/) for processing the logs.
+
+</TabItem>
+
+
+</Tabs>
