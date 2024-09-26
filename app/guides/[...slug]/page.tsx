@@ -108,16 +108,16 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
   const scrollFormProps = {
     question: "Are you facing issues with your observability setup?",
     options: [
-      "Too high pricing",
+      "Unpredictable pricing",
       "Difficult to manage multiple tools",
-      "Vendor lock-in?",
-      "I am not looking to change right now"
+      "Lack of OpenTelemetry-native support",
+      "No issues right now"
     ],
     optionBehaviors: {
-      "Too high pricing": { action: 'showCTA' as const },
+      "Unpredictable pricing": { action: 'showCTA' as const },
       "Difficult to manage multiple tools": { action: 'showCTA' as const },
-      "Vendor lock-in?": { action: 'showCTA' as const },
-      "I am not looking to change right now": { action: 'close' as const }
+      "Lack of OpenTelemetry-native support": { action: 'showCTA' as const },
+      "No issues right now": { action: 'close' as const }
     }
   }
 
