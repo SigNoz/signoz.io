@@ -55,15 +55,6 @@ const siteMetadata = {
     },
   },
   search: {
-    provider: 'algolia', // kbar or algolia
-    kbarConfig: {
-      searchDocumentsPath: 'search.json', // path to load documents to search
-    },
-    algoliaConfig: {
-      appId: 'E88QYIQ6K4',
-      apiKey: '1061c173ae001d5f5aaa4f0354e373a0',
-      indexName: 'signoz',
-    },
   },
 }
 
