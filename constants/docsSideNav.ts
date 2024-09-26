@@ -1358,7 +1358,7 @@ const docsSideNav = [
       {
         type: 'category',
         isExpanded: false,
-        label: 'Azure Blog Storage',
+        label: 'Azure Blob Storage',
         route: '/docs/azure-monitoring/az-blob-storage',
         items: [
           {
@@ -1668,6 +1668,11 @@ const docsSideNav = [
         // slug: '/docs/operate/migration/migration',
         // },
         items: [
+          {
+            type: 'doc',
+            route: '/docs/operate/migration/upgrade-0.55',
+            label: 'Upgrade to v0.55',
+          },
           {
             type: 'doc',
             route: '/docs/operate/migration/upgrade-0.51',

@@ -1,6 +1,7 @@
 'use client'
 
 import * as React from 'react'
+import { useState } from 'react';
 import type { Metadata } from 'next';
 import Button from '@/components/Button/Button';
 import Link from 'next/link';
@@ -18,6 +19,12 @@ import {
 const MainSection: React.FC = () => {
 
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const [videoId, setVideoId] = useState<string>('');
+
+  const handleOpenModal = (id: string) => {
+    setVideoId(id);
+    onOpen(); 
+  };
 
   return (
     <>
@@ -67,13 +74,13 @@ const MainSection: React.FC = () => {
                   <Linkedin className='w-4 h-4' />
                   <span className='text-[#F7F7F8] text-sm font-medium whitespace-nowrap'>LinkedIn Live</span>
                 </Link>
-                <div id="btn-watch-youtube-video" className='flex px-3 py-2 mb-2 sm:mb-0 w-full items-center gap-2 rounded-full button-background cursor-pointer justify-center' onClick={onOpen}>
+                <div id="btn-watch-youtube-video" className='flex px-3 py-2 mb-2 sm:mb-0 w-full items-center gap-2 rounded-full button-background cursor-pointer justify-center' onClick={() => handleOpenModal('SJ7H82wbXJo')} >
                   <img src='/svgs/icons/watch-video.svg' alt='watch video icon' />
                   <span className='text-[#F7F7F8] text-sm font-medium whitespace-nowrap'>Watch the video</span>
                 </div>
               </div>
             </div>
-            <Link href="/blog/introducing-ingest-guard-feature/" className='flex sm:flex-row flex-col justify-between max-w-full py-4 px-5 launch-week-card-background hover:bg-[#121317] transition-colors duration-300 w-[864px] rounded-md border border-signoz_slate-500 cursor-pointer'>
+            <Link href="/blog/introducing-ingest-guard-feature/" className='flex sm:flex-row flex-col gap-6 max-w-full py-4 px-5 launch-week-card-background hover:bg-[#121317] transition-colors duration-300 w-[864px] rounded-md border border-signoz_slate-500 cursor-pointer'>
               <img src='/img/launch-week/launch-week-2/day-1-ingest-gaurd-cover.webp' className=' w-auto sm:w-3/5 h-auto pr-2 sm:pr-0 mb-4 sm:mb-0' />
               <div className='flex flex-col justify-between group'>
                 <div>
@@ -86,19 +93,7 @@ const MainSection: React.FC = () => {
                   </div>
                 </div>
               </div>
-            </Link>
-            <Modal size={'5xl'} backdrop="blur" isOpen={isOpen} onOpenChange={onOpenChange} className='self-center'>
-              <ModalContent className="bg-transparent">
-                {() => (
-                  <>
-                    <ModalBody className="py-10">
-                      <Youtube id="SJ7H82wbXJo" />
-                    </ModalBody>
-                  </>
-                )}
-              </ModalContent>
-            </Modal>
-
+            </Link> 
           </div>
 
 
@@ -111,16 +106,16 @@ const MainSection: React.FC = () => {
                   <Linkedin className='w-4 h-4' />
                   <span className='text-[#F7F7F8] text-sm font-medium whitespace-nowrap'>LinkedIn Live</span>
                 </Link>
-                <div id="btn-watch-youtube-video" className='flex px-3 py-2 mb-2 sm:mb-0 w-full items-center gap-2 rounded-full button-background cursor-pointer justify-center' onClick={onOpen}>
+                <div id="btn-watch-youtube-video" className='flex px-3 py-2 mb-2 sm:mb-0 w-full items-center gap-2 rounded-full button-background cursor-pointer justify-center' onClick={() => handleOpenModal('uvXNZxAd4w0')}>
                   <img src='/svgs/icons/watch-video.svg' alt='watch video icon' />
                   <span className='text-[#F7F7F8] text-sm font-medium whitespace-nowrap'>Watch the video</span>
                 </div>
               </div>
             </div>
-            <Link href="/blog/introducing-anomaly-detection-for-smarter-alerts/" className='flex sm:flex-row flex-col justify-between max-w-full py-4 px-5 launch-week-card-background hover:bg-[#121317] transition-colors duration-300 w-[864px] rounded-md border border-signoz_slate-500 cursor-pointer'>
+            <Link href="/blog/introducing-anomaly-detection-for-smarter-alerts/" className='flex sm:flex-row flex-col gap-6 max-w-full py-4 px-5 launch-week-card-background hover:bg-[#121317] transition-colors duration-300 w-[864px] rounded-md border border-signoz_slate-500 cursor-pointer'>
               <img src='/img/launch-week/launch-week-2/anomaly-detection-blog-poster.webp' className=' w-auto sm:w-3/5 h-auto pr-2 sm:pr-0 mb-4 sm:mb-0' />
               <div className='flex flex-col justify-between group'>
-                <div>
+                <div className='min-w-[306px]'>
                   <div className='text-base font-eedium mb-2'>Introducing Anomaly Detection</div>
                   <div className='text-sm font-medium text-signoz_vanilla-400'>Create smarter alerts for dynamic metrics</div>
                 </div>
@@ -131,17 +126,6 @@ const MainSection: React.FC = () => {
                 </div>
               </div>
             </Link>
-            <Modal size={'5xl'} backdrop="blur" isOpen={isOpen} onOpenChange={onOpenChange} className='self-center'>
-              <ModalContent className="bg-transparent">
-                {() => (
-                  <>
-                    <ModalBody className="py-10">
-                      <Youtube id="uvXNZxAd4w0" />
-                    </ModalBody>
-                  </>
-                )}
-              </ModalContent>
-            </Modal>
           </div>
           
           
@@ -153,13 +137,13 @@ const MainSection: React.FC = () => {
                   <Linkedin className='w-4 h-4' />
                   <span className='text-[#F7F7F8] text-sm font-medium whitespace-nowrap'>LinkedIn Live</span>
                 </Link>
-                <div id="btn-watch-youtube-video" className='flex px-3 py-2 mb-2 sm:mb-0 w-full items-center gap-2 rounded-full button-background cursor-pointer justify-center' onClick={onOpen}>
+                <div id="btn-watch-youtube-video" className='flex px-3 py-2 mb-2 sm:mb-0 w-full items-center gap-2 rounded-full button-background cursor-pointer justify-center' onClick={() => handleOpenModal('_Mpbv1imSEE')}>
                   <img src='/svgs/icons/watch-video.svg' alt='watch video icon' />
                   <span className='text-[#F7F7F8] text-sm font-medium whitespace-nowrap'>Watch the video</span>
                 </div>
               </div>
             </div>
-            <Link href="/blog/introducing-correlation-of-signals/" className='flex sm:flex-row flex-col justify-between max-w-full py-4 px-5 launch-week-card-background hover:bg-[#121317] transition-colors duration-300 w-[864px] rounded-md border border-signoz_slate-500 cursor-pointer'>
+            <Link href="/blog/introducing-correlation-of-signals/" className='flex sm:flex-row flex-col gap-6 max-w-full py-4 px-5 launch-week-card-background hover:bg-[#121317] transition-colors duration-300 w-[864px] rounded-md border border-signoz_slate-500 cursor-pointer'>
               <img src='/img/blog/2024/09/introducing-correlation-of-signals-correlation-blog-poster.webp' className=' w-auto sm:w-3/5 h-auto pr-2 sm:pr-0 mb-4 sm:mb-0' />
               <div className='flex flex-col justify-between group'>
                 <div>
@@ -173,35 +157,24 @@ const MainSection: React.FC = () => {
                 </div>
               </div>
             </Link>
-            <Modal size={'5xl'} backdrop="blur" isOpen={isOpen} onOpenChange={onOpenChange} className='self-center'>
-              <ModalContent className="bg-transparent">
-                {() => (
-                  <>
-                    <ModalBody className="py-10">
-                      <Youtube id="_Mpbv1imSEE" />
-                    </ModalBody>
-                  </>
-                )}
-              </ModalContent>
-            </Modal>
           </div>
 
 
           <div className='flex flex-col sm:flex-row justify-between py-6 px-6 border-b border-t border-signoz_slate-100 border-dashed'>
             <div className='flex flex-col justify-between gap-4 sm:pr-4'>
-              <div className='text-base uppercase text-signoz_vanilla-400'>Wednesday ⎯ Sept 18</div>
+              <div className='text-base uppercase text-signoz_vanilla-400'>Thursday ⎯ Sept 19</div>
               <div className='flex flex-col gap-2'>
                 <Link href="https://www.linkedin.com/events/signozlaunchweek2-0-day4-alerts7242170689032519680/theater/" target='_blank' id="btn-linkedin-live" className='flex px-3 py-2 sm:mb-0 w-full items-center gap-2 rounded-full button-background justify-center'>
                   <Linkedin className='w-4 h-4' />
                   <span className='text-[#F7F7F8] text-sm font-medium whitespace-nowrap'>LinkedIn Live</span>
                 </Link>
-                <div id="btn-watch-youtube-video" className='flex px-3 py-2 mb-2 sm:mb-0 w-full items-center gap-2 rounded-full button-background cursor-pointer justify-center' onClick={onOpen}>
+                <div id="btn-watch-youtube-video" className='flex px-3 py-2 mb-2 sm:mb-0 w-full items-center gap-2 rounded-full button-background cursor-pointer justify-center' onClick={() => handleOpenModal('7mNB715Ul0Y')}>
                   <img src='/svgs/icons/watch-video.svg' alt='watch video icon' />
                   <span className='text-[#F7F7F8] text-sm font-medium whitespace-nowrap'>Watch the video</span>
                 </div>
               </div>
             </div>
-            <Link href="/blog/introducing-alerts-history-and-scheduled-maintenance/" className='flex sm:flex-row flex-col justify-between max-w-full py-4 px-5 launch-week-card-background hover:bg-[#121317] transition-colors duration-300 w-[864px] rounded-md border border-signoz_slate-500 cursor-pointer'>
+            <Link href="/blog/introducing-alerts-history-and-scheduled-maintenance/" className='flex sm:flex-row flex-col gap-6 max-w-full py-4 px-5 launch-week-card-background hover:bg-[#121317] transition-colors duration-300 w-[864px] rounded-md border border-signoz_slate-500 cursor-pointer'>
               <img src='/img/launch-week/launch-week-2/blog-poster.webp' className=' w-auto sm:w-3/5 h-auto pr-2 sm:pr-0 mb-4 sm:mb-0' />
               <div className='flex flex-col justify-between group'>
                 <div>
@@ -215,12 +188,45 @@ const MainSection: React.FC = () => {
                 </div>
               </div>
             </Link>
+          </div>
+
+
+          <div className='flex flex-col sm:flex-row justify-between py-6 px-6 border-b border-t border-signoz_slate-100 border-dashed'>
+            <div className='flex flex-col justify-between gap-4 sm:pr-4'>
+              <div className='text-base uppercase text-signoz_vanilla-400'>Friday ⎯ Sept 20</div>
+              <div className='flex flex-col gap-2'>
+                <Link href="https://www.linkedin.com/events/signozlaunchweek2-0-day5-logsim7242530405214527488/theater/" target='_blank' id="btn-linkedin-live" className='flex px-3 py-2 sm:mb-0 w-full items-center gap-2 rounded-full button-background justify-center'>
+                  <Linkedin className='w-4 h-4' />
+                  <span className='text-[#F7F7F8] text-sm font-medium whitespace-nowrap'>LinkedIn Live</span>
+                </Link>
+                <div id="btn-watch-youtube-video" className='flex px-3 py-2 mb-2 sm:mb-0 w-full items-center gap-2 rounded-full button-background cursor-pointer justify-center' onClick={() => handleOpenModal('n9Kq_l4EeCw')}>
+                  <img src='/svgs/icons/watch-video.svg' alt='watch video icon' />
+                  <span className='text-[#F7F7F8] text-sm font-medium whitespace-nowrap'>Watch the video</span>
+                </div>
+              </div>
+            </div>
+            <Link href="/blog/improvements-to-logs-search-and-filter/" className='flex sm:flex-row flex-col gap-6 max-w-full py-4 px-5 launch-week-card-background hover:bg-[#121317] transition-colors duration-300 w-[864px] rounded-md border border-signoz_slate-500 cursor-pointer'>
+              <img src='/img/launch-week/launch-week-2/logs-ui-day-5-cover.webp' className=' w-auto sm:w-3/5 h-auto pr-2 sm:pr-0 mb-4 sm:mb-0' />
+              <div className='flex flex-col justify-between group'>
+                <div>
+                  <div className='text-base font-eedium mb-2'>Logs Search & Filter</div>
+                  <div className='text-sm font-medium text-signoz_vanilla-400'>Taking Quick Analysis of Logs to the Next Level</div>
+                </div>
+                <div className='flex justify-end'>
+                  <div className='rounded-full button-background p-2 flex items-center justify-center w-fit h-fit transform transition-transform group-hover:translate-x-2.5 mt-2 sm:mt-0'>
+                    <ArrowRight size={14} />
+                  </div>
+                </div>
+              </div>
+            </Link>
+
+
             <Modal size={'5xl'} backdrop="blur" isOpen={isOpen} onOpenChange={onOpenChange} className='self-center'>
               <ModalContent className="bg-transparent">
                 {() => (
                   <>
                     <ModalBody className="py-10">
-                      <Youtube id="7mNB715Ul0Y" />
+                      <Youtube id={videoId} />
                     </ModalBody>
                   </>
                 )}
@@ -231,9 +237,8 @@ const MainSection: React.FC = () => {
 
 
 
-
            {/* Timer  */}
-          {['Friday ⎯ Sept 20'].map((day, index) => (
+          {/* {['Friday ⎯ Sept 20'].map((day, index) => (
             <div key={index} className="flex flex-grow items-center py-2 px-6 justify-between border-b border-dashed border-signoz_slate-100">
               <div className="text-sm sm:text-base font-mono font-medium text-signoz_vanilla-400 uppercase w-[32%]">
                 {day}
@@ -242,7 +247,7 @@ const MainSection: React.FC = () => {
                 <CountdownTimer eventDate={`2024-09-${20 + index} 21:30:00`} />
               </div>
             </div>
-          ))}
+          ))} */}
 
 
           {/* Cards */}
