@@ -1011,6 +1011,20 @@ const docsSideNav = [
     ],
   },
   {
+    label: 'Messaging Queues',
+    type: 'category',
+    className: 'new-doc',
+    isExpanded: false,
+    // route: '',
+    items: [
+      {
+        type: 'doc',
+        route: '/docs/messaging-queues/kafka',
+        label: 'Kafka',
+      },
+     ],
+  },
+  {
     type: 'doc',
     route: '/docs/monitor-http-endpoints',
     label: 'Monitor HTTP Endpoints',

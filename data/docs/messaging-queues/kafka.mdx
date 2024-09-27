@@ -1,0 +1,240 @@
+---
+date: 2024-06-06
+title: Messaging Queues
+id: kafka
+---
+
+Welcome to the Messaging Queues feature guide for our observability product. This documentation provides a comprehensive, ready-to-use guide to set up client-side instrumentation and metrics collection for Kafka using OpenTelemetry and SigNoz. You will learn how to monitor brokers, topics, consumers, producers, and client interactions effectively.
+
+![Kafka OpenTelemetry SigNoz Integration](assets/kafka-otel-signoz.png)
+
+**Note:**
+1. This guide serves as a reference for production-grade Kafka monitoring and instrumentation. It is intended to help you understand the complexities involved.
+2. All tools used are open source and licensed under the Apache and MIT licenses.
+
+---
+
+## Table of Contents
+
+1. [Introduction](#introduction)
+2. [Prerequisites](#prerequisites)
+3. [Steps to Follow](#steps-to-follow)
+    - [Step 1: Kafka Setup](#step-1-kafka-setup)
+    - [Step 2: OpenTelemetry Java Agent Installation](#step-2-opentelemetry-java-agent-installation)
+    - [Step 3: Java Producer-Consumer App Setup](#step-3-java-producer-consumer-app-setup)
+    - [Step 4: SigNoz Setup](#step-4-signoz-setup)
+    - [Step 5: OpenTelemetry Collector Setup](#step-5-opentelemetry-collector-setup)
+4. [Troubleshooting](#troubleshooting)
+5. [Contributing](#contributing)
+6. [Additional Resources](#additional-resources)
+
+---
+
+## Introduction
+
+This guide provides step-by-step instructions to set up Kafka with OpenTelemetry and SigNoz for comprehensive metrics collection and monitoring. Soon, we will introduce deep correlation and insights with producer and consumer spans with minimal configurations, enabling users to gain deep insights into their Kafka clusters down to every request.
+
+---
+
+## Prerequisites
+
+Before you begin, ensure you have the following:
+
+- **Kafka**: Installed on your system (VM, container, or local machine).
+- **Java Development Kit (JDK)**: Installed and configured.
+- **Maven**: For building Java applications.
+- **SigNoz Account**: [Sign up for SigNoz Cloud](https://signoz.io/docs/cloud/) or prepare a local SigNoz setup.
+- **OpenTelemetry Collector**: Familiarity with OpenTelemetry components.
+
+---
+
+## Steps to Follow
+
+This guide follows these primary steps:
+
+1. [Kafka Setup](#step-1-kafka-setup)
+2. [OpenTelemetry Java Agent Installation](#step-2-opentelemetry-java-agent-installation)
+3. [Java Producer-Consumer App Setup](#step-3-java-producer-consumer-app-setup)
+4. [SigNoz Setup](#step-4-signoz-setup)
+5. [OpenTelemetry Collector Setup](#step-5-opentelemetry-collector-setup)
+
+For simplicity, Steps 1, 2, and 3 are assumed to be performed on the same host (VM, laptop, or containerized environment).
+
+---
+
+### Step 1: Kafka Setup
+
+#### 1.1 Kafka Installation
+
+[Download the latest](https://www.apache.org/dyn/closer.cgi?path=/kafka/3.7.0/kafka_2.13-3.7.0.tgz) Kafka release and extract it:
+
+{/* Should this be latest release or the one mentioned in the README - https://github.com/shivanshuraj1333/kafka-opentelemetry-instrumentation/blob/vm-setup/README.md#step-1-kafka-setup */}
+
+```bash
+# Download Kafka
+
+# Extract the downloaded Kafka folder
+tar -xzf kafka_2.13-3.7.0.tgz
+cd kafka_2.13-3.7.0
+
+```
+
+#### 1.2 Start Kafka 
+
+Kafka can be started using ZooKeeper or KRaft. We will use ZooKeeper:
+
+```bash
+bin/zookeeper-server-start.sh config/zookeeper.properties
+```
+
+#### 1.3 Configure and Start Brokers
+
+Create two server properties files `s1.properties` and `s2.properties`to start two brokers:
+
+```bash
+cp config/server.properties config/s1.properties
+cp config/server.properties config/s2.properties
+```
+
+Edit `s1.properties`:
+
+```bash
+vi config/s1.properties
+```
+
+Add the following configurations:
+
+```
+broker.id=0
+listeners=PLAINTEXT://localhost:9092
+log.dirs=/tmp/kafka_logs-1
+```
+
+Edit `s2.properties`:
+
+```bash
+vi config/s2.properties
+```
+
+Add the following configurations:
+
+```
+broker.id=1
+listeners=PLAINTEXT://localhost:9093
+log.dirs=/tmp/kafka_logs-2
+```
+
+Start Broker 1 with JMX port enabled:
+```bash
+JMX_PORT=2020 bin/kafka-server-start.sh config/s1.properties
+```
+
+Start Broker 2 in a new terminal with JMX port enabled:
+```bash
+JMX_PORT=2021 bin/kafka-server-start.sh config/s2.properties
+```
+
+#### 1.4 Create Kafka Topics
+
+Create two Kafka topics:
+
+```bash
+bin/kafka-topics.sh --create --topic topic1 --bootstrap-server localhost:9092 --replication-factor 2 --partitions 2
+bin/kafka-topics.sh --create --topic topic2 --bootstrap-server localhost:9092 --replication-factor 2 --partitions 1
+```
+
+#### 1.5 Verify Kafka Setup
+
+List the Kafka topics and their partitions:
+
+```bash
+bin/kafka-topics.sh --describe --topic topic1 --bootstrap-server localhost:9092
+bin/kafka-topics.sh --describe --topic topic2 --bootstrap-server localhost:9092
+```
+
+#### 1.6 Test Kafka Setup
+
+**Produce Messages:**
+
+```bash
+bin/kafka-console-producer.sh --topic topic1 --bootstrap-server localhost:9092
+```
+
+Type some messages and press `Enter` to send.
+
+**Consume Messages:**
+
+Open a new terminal and run:
+
+```bash
+bin/kafka-console-consumer.sh --topic topic1 --from-beginning --bootstrap-server localhost:9092
+```
+
+You should see the messages you produced.
+
+### Step 2: OpenTelemetry Java Agent Installation
+
+#### 2.1 Java Agent Setup
+
+Ensure the OpenTelemetry Java agent is present:
+
+{/* We have to tell the user to clone the repository at the start itself ? - https://github.com/shivanshuraj1333/kafka-opentelemetry-instrumentation/tree/vm-setup */}
+
+```bash
+cd kafka-opentelemetry-instrumentation/opentelemetry-javagent
+ls | grep opentelemetry-javaagent.jar
+# Expected output: opentelemetry-javaagent.jar
+```
+
+#### 2.2 (Optional) Install the Latest Java Agent
+
+If you prefer to use the latest version of the Java agent:
+
+```bash
+cd kafka-opentelemetry-instrumentation/opentelemetry-javagent
+rm -f opentelemetry-javaagent.jar
+curl -L -o opentelemetry-javaagent.jar https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar
+```
+
+#### 2.3 (Optional) Configure OpenTelemetry Java Agent
+
+Refer to the [OpenTelemetry Java Agent configurations](https://opentelemetry.io/docs/zero-code/java/agent/) for advanced setup options.
+
+### Step 3: Java Producer-Consumer App Setup
+
+#### 3.1 Running the Producer and Consumer Apps with OpenTelemetry Java Agent
+
+You can either use the JAR files present in the `target` directories of `kafka-app-otel` or build them yourself. 
+Ensure you have Java and Maven installed.
+
+**Navigate to Project Root:**
+
+```bash
+cd kafka-opentelemetry-instrumentation
+```
+
+**Run Producer App with Java Agent:**
+
+```bash
+java -javaagent:${PWD}/opentelemetry-javagent/opentelemetry-javaagent.jar \
+     -Dotel.service.name=producer-svc \
+     -Dotel.traces.exporter=otlp \
+     -Dotel.metrics.exporter=otlp \
+     -Dotel.logs.exporter=otlp \
+     -jar ${PWD}/kafka-app-otel/kafka-producer/target/kafka-producer-1.0-SNAPSHOT-jar-with-dependencies.jar
+```
+
+**Run Consumer App with Java Agent:**
+
+```bash
+java -javaagent:${PWD}/opentelemetry-javagent/opentelemetry-javaagent.jar \
+     -Dotel.service.name=consumer-svc \
+     -Dotel.traces.exporter=otlp \
+     -Dotel.metrics.exporter=otlp \
+     -Dotel.logs.exporter=otlp \
+     -Dotel.instrumentation.kafka.producer-propagation.enabled=true \
+     -Dotel.instrumentation.kafka.experimental-span-attributes=true \
+     -Dotel.instrumentation.kafka.metric-reporter.enabled=true \
+     -jar ${PWD}/kafka-app-otel/kafka-consumer/target/kafka-consumer-1.0-SNAPSHOT-jar-with-dependencies.jar
+```
+
