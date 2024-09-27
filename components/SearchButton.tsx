@@ -1,20 +1,48 @@
-import { AlgoliaButton } from 'pliny/search/AlgoliaButton'
-import { KBarButton } from 'pliny/search/KBarButton'
 import siteMetadata from '@/data/siteMetadata'
-import { SearchIcon } from 'lucide-react'
+import { TrieveModalSearch, TrieveSDK } from 'trieve-search-component'
+import 'trieve-search-component/dist/index.css'
+
+const trieve = new TrieveSDK({
+  apiKey: 'tr-UPjrAOp35kGrJWM1IvODj4zVWTdGgQxI',
+  datasetId: '4650e231-7857-45aa-beb1-cb52006a2460',
+})
 
 const SearchButton = () => {
-  if (
-    siteMetadata.search &&
-    (siteMetadata.search.provider === 'algolia' || siteMetadata.search.provider === 'kbar')
-  ) {
-    const SearchButtonWrapper =
-      siteMetadata.search.provider === 'algolia' ? AlgoliaButton : KBarButton
-
+  if (siteMetadata.search) {
     return (
-      <SearchButtonWrapper aria-label="Search" className="px-2 py-2 bg-signoz_slate-500 rounded-full">
-        <SearchIcon size={16} />
-      </SearchButtonWrapper>
+      <TrieveModalSearch
+        theme="dark"
+        trieve={trieve}
+        openKeyCombination={[
+          {
+            key: '/',
+          },
+        ]}
+        ButtonEl={() => (
+          <div className="-mt-1 flex min-h-8 items-center justify-between rounded-full bg-signoz_slate-500 px-4 py-1">
+            <div className="mr-4 flex items-center gap-2">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <circle cx="11" cy="11" r="8"></circle>
+                <path d="m21 21-4.3-4.3"></path>
+              </svg>
+              <span className="text-sm text-signoz_vanilla-400">Search...</span>
+            </div>
+            <div className=" flex h-5 w-5 items-center justify-center rounded-sm border-1.5 border-b-2 border-signoz_ink-200 text-[10px] font-bold">
+              /
+            </div>
+          </div>
+        )}
+      />
     )
   }
 }

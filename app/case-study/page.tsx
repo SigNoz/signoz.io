@@ -31,6 +31,27 @@ type CardProps = {
 
 const cardDetails = [
   {
+    logo: "/img/case_study/logos/gokiwi-logo.png",
+    title: "How Kiwi Reduced API Response Times from 20 Seconds to Milliseconds Using SigNoz",
+    name: "Khushhal Reddy",
+    position: "Senior Backend Engineer, Kiwi",
+    href: "/case-study/kiwi/"
+  },
+  {
+    logo: "/img/case_study/logos/bands-logo.png",
+    title: "How Bands Monitors 50+ Integrations for Thousands of Musicians Using SigNoz",
+    name: "Shiv Ansal",
+    position: "Co-founder & CTO, Bands",
+    href: "/case-study/bands/"
+  },
+  {
+    logo: "/img/case_study/cedana-logo.svg",
+    title: "How Cedana Leverages SigNoz to Ensure Uptime in Real-Time Compute Operations",
+    name: "Niranjan Ravichandra",
+    position: "Co-founder & CTO, Cedana",
+    href: "/case-study/cedana/"
+  },
+  {
     logo: "/img/case_study/thehindu-logo.png",
     title: "How The Hindu uses SigNoz APM to Optimize Application Performance",
     name: "Poonkuyilan V",

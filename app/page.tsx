@@ -18,6 +18,9 @@ import WhySelectSignoz from '@/components/why-select-signoz'
 import {GetStarted} from '@/components/GetStarted'
 import { NextUIProvider } from '@nextui-org/react'
 import { Metadata } from 'next'
+import dynamic from 'next/dynamic'
+
+const ScrollForm = dynamic(() => import('@/components/ScrollForm'), { ssr: false })
 
 export const metadata: Metadata = {
   title: 'SigNoz | The Open Source Datadog Alternative',
