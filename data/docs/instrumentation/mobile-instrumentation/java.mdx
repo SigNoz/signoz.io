@@ -1,0 +1,224 @@
+---
+date: 2024-09-22
+id: java-mobile-app
+title: Android App in Java Instrumentation
+description: Instrument your Android application built with Java using OpenTelemetry and send data to SigNoz
+---
+
+import InstrumentationFAQ from '@/components/shared/instrumentation-faq.md'
+
+This documentation contains instructions on how to set up OpenTelemetry(OTel) instrumentation in your Android mobile application built using Java. OpenTelemetry, also known as OTel for short, is an open-source observability framework that can help you generate and collect telemetry data - traces, metrics, and logs from your Java application.
+
+Once the telemetry data is generated, you can configure an exporter to send the data to SigNoz for monitoring and visualization.
+
+There are three major steps to using OpenTelemetry:
+
+- Instrumenting your android application with OpenTelemetry
+- Configuring the exporter to send data to SigNoz
+- Validating the configuration to ensure that data is being sent as expected.
+
+In this tutorial, we will instrument a Java Mobile application (Android) for traces and send it to SigNoz.
+
+## Requirements
+
+Java 8 or higher
+
+### Send traces directly to SigNoz cloud
+
+<Admonition type="info">
+You can test sample application for [Java](https://github.com/SigNoz/mobile-monitoring-sample-apps/tree/main/android-java)
+</Admonition>
+
+**Step 1 : Instrument your application with OpenTelemetry**
+
+To configure your Java application to send traces to OpenTelemetry you need to add the following dependencies to the build.gradle file of a module or project
+
+For that, paste the following inside `build.gradle` of your project.
+
+```
+implementation platform('io.opentelemetry:opentelemetry-bom:1.25.0')
+implementation "io.opentelemetry:opentelemetry-api"
+implementation "io.opentelemetry:opentelemetry-context"
+implementation 'io.opentelemetry:opentelemetry-exporter-otlp'
+implementation 'io.opentelemetry:opentelemetry-exporter-logging'
+implementation 'io.opentelemetry:opentelemetry-extension-kotlin'
+implementation 'io.opentelemetry:opentelemetry-sdk'
+implementation 'io.opentelemetry:opentelemetry-semconv'
+```
+
+**Step 2: Configure network settings**
+
+Create a file named `network_security_config.xml` in the `app/res/xml` directory and add the following content to the file
+
+```
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">ingest.[REGION].signoz.cloud</domain>
+    </domain-config>
+</network-security-config>
+```
+
+Add the following content to the `app/src/main/AndroidManifest.xml` file to allow the application to access the network
+
+```
+<?xml version="1.0" encoding="utf-8"?>
+<manifest ...>
+  <!-- Add the following line to grant network access permissions. -->
+  <uses-permission android:name="android.permission.INTERNET" />
+
+  <application
+    ...
+    <!-- Add the following line to configure the network for the domain name to which you want to report data. -->
+    android:networkSecurityConfig="@xml/network_security_config"
+    ...>
+
+    ...
+  </application>
+
+</manifest>
+```
+
+Create a file named OpentelemetryUtl.java with the following content
+
+```java
+package com.example.androidjavademo;
+
+import io.opentelemetry.api.OpenTelemetry;
+import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator;
+import io.opentelemetry.context.propagation.ContextPropagators;
+import io.opentelemetry.exporter.logging.LoggingSpanExporter;
+import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter;
+import io.opentelemetry.sdk.OpenTelemetrySdk;
+import io.opentelemetry.sdk.resources.Resource;
+import io.opentelemetry.sdk.trace.SdkTracerProvider;
+import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
+import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
+import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
+
+public class OpenTelemetryUtil {
+    public static void init() {
+        Resource otelResource = Resource.getDefault().merge(
+            Resource.create(
+                Attributes.of(
+                    ResourceAttributes.SERVICE_NAME, "<SERVICE_NAME>",
+                    ResourceAttributes.HOST_NAME, "<SERVICE_NAME>"
+                )
+            )
+        );
+
+        SdkTracerProvider sdkTracerProvider = SdkTracerProvider.builder()
+                .addSpanProcessor(SimpleSpanProcessor.create(LoggingSpanExporter.create()))
+                .addSpanProcessor(BatchSpanProcessor.builder(
+                    OtlpGrpcSpanExporter.builder()
+                        .setEndpoint("ingest.[REGION].signoz.cloud:<PORT>/v1/traces")
+                        .addHeader("signoz-access-token", "<SIGNOZ_INGESTION_KEY>")
+                        .build()).build()
+                )
+                .setResource(otelResource)
+                .build();
+
+        OpenTelemetry openTelemetry = OpenTelemetrySdk.builder()
+                .setTracerProvider(sdkTracerProvider)
+                .setPropagators(ContextPropagators.create(W3CTraceContextPropagator.getInstance()))
+                .buildAndRegisterGlobal();
+
+        tracer = openTelemetry.getTracer("android-tracer", "1.0.0");
+    }
+
+    private static Tracer tracer;
+
+    public static Tracer getTracer() {
+        return tracer;
+    }
+}
+```
+
+Replace `<SERVICE_NAME>` with the name of app, you will see this name in SigNoz Services section.
+
+Ensure to replace `<SIGNOZ_INGESTION_KEY>`, `<PORT>`, and `<REGION>` with your actual SigNoz ingestion key, Port, and Region, respectively.
+
+You can find your Ingestion Key in the following places:
+-  mail which you recieved from SigNoz after signing up.
+- inside settings on SigNoz dashboard
+
+Depending on the choice of your region for SigNoz cloud, the ingest endpoint will vary according to this table.
+
+| Region | Endpoint |
+| --- | --- |
+| US |	ingest.us.signoz.cloud:443/v1/traces |
+| IN |	ingest.in.signoz.cloud:443/v1/traces |
+| EU | ingest.eu.signoz.cloud:443/v1/traces |
+
+
+These are the variables you need to replace :
+
+| Placeholder                | Description                                 |
+|----------------------------|---------------------------------------------|
+| `<SIGNOZ_INGESTION_KEY>`   | Your SigNoz ingestion key                   |
+| `<PORT>`                    | Port (default: 443)                         |
+| `<REGION>`   | Region for SigNoz ingestion url                   |
+
+Inside MainActivity.java file, initialize the util
+
+```java
+public class MainActivity extends AppCompatActivity {
+	...
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        // Add the following line to initialize OpenTelemetry. 
+        OpenTelemetryUtil.init();
+        ...
+    }
+    ...
+}
+```
+
+**Step 3: Send Telemetry data to SigNoz**
+
+Import these at top 
+
+```
+import io.opentelemetry.api.common.AttributeKey;
+import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.StatusCode;
+import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.context.Scope;
+```
+
+Use this to do the Manual Instrumentation
+
+```
+public void parentSpan() {
+        Tracer tracer = OpenTelemetryUtil.getTracer();
+        Span span = tracer.spanBuilder("Parent Span").startSpan();
+        try (Scope scope = span.makeCurrent()) {
+            System.out.println(span.getSpanContext().getTraceId());
+            System.out.println(span.getSpanContext().getSpanId());
+            childSpan();
+        } finally {
+            span.end();
+        }
+    }
+
+    public void childSpan() {
+        Tracer tracer = OpenTelemetryUtil.getTracer();
+        Span span = tracer.spanBuilder("Child Span").startSpan();
+        try (Scope scope = span.makeCurrent()) {
+            System.out.println(span.getSpanContext().getTraceId());
+            System.out.println(span.getSpanContext().getSpanId());
+        } finally {
+            span.end();
+        }
+    }
+```
+
+Call the above functions to add spans.
+
+**Step 4: Run app**
+
+Run your application from Android Studio to see the output & you can verify the sent span in SigNoz .
