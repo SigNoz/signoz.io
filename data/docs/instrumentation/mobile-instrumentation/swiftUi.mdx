@@ -81,14 +81,13 @@ import StdoutExporter
 
 struct OpenTelemetrySetup {
     static func configureOpenTelemetry() {
-        let resources = DefaultResources().get()
+        let resource = DefaultResources().get().merging(other: Resource(attributes: [
+            "service.name": AttributeValue.string("anukul-swift-test"), 
+        ]))
         
-        let instrumentationScopeName = "SwiftExample"
-        let instrumentationScopeVersion = "semver:0.1.0"
+        let otlpConfiguration: OtlpConfiguration = OtlpConfiguration(timeout: TimeInterval(10), headers: [("signoz-access-token", "xxxxxxx")])
         
-        let otlpConfiguration: OtlpConfiguration = OtlpConfiguration(timeout: TimeInterval(10), headers: [("signoz-access-token", "<SIGNOZ_INGESTION_KEY>")])
-        
-        let grpcChannel = ClientConnection.usingPlatformAppropriateTLS(for: MultiThreadedEventLoopGroup(numberOfThreads: 1)).connect(host: "<SIGNOZ_INGESTION_URL>", port: <PORT>)
+        let grpcChannel = ClientConnection.usingPlatformAppropriateTLS(for: MultiThreadedEventLoopGroup(numberOfThreads: 1)).connect(host: "ingest.[region].signoz.cloud", port: 443)
         
         let otlpTraceExporter = OtlpTraceExporter(channel: grpcChannel, config: otlpConfiguration)
         let stdoutExporter = StdoutExporter()
@@ -96,9 +95,11 @@ struct OpenTelemetrySetup {
         let spanExporter = MultiSpanExporter(spanExporters: [otlpTraceExporter, stdoutExporter])
         
         let spanProcessor = SimpleSpanProcessor(spanExporter: spanExporter)
+        
         OpenTelemetry.registerTracerProvider(tracerProvider:
             TracerProviderBuilder()
                 .add(spanProcessor: spanProcessor)
+                .with(resource: resource)
                 .build()
         )
     }
