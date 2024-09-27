@@ -327,7 +327,7 @@ const docsSideNav = [
             isExpanded: false,
             label: 'Mobile Instrumentation',
             route: '/docs/mobile-instrumentation',
-            className: 'new-doc',
+            // className: 'new-doc',
             // route: '',
             // link: {
             // type: 'doc',
