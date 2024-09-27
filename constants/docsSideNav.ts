@@ -324,8 +324,10 @@ const docsSideNav = [
           },
           {
             type: 'category',
-            isExpanded: true,
+            isExpanded: false,
             label: 'Mobile Instrumentation',
+            route: '/docs/mobile-instrumentation',
+            className: 'new-doc',
             // route: '',
             // link: {
             // type: 'doc',
@@ -335,21 +337,25 @@ const docsSideNav = [
                     type: 'doc',
                     label: 'Swift UI',
                     route: '/docs/instrumentation/mobile-instrumentation/swiftUi',
+                    className: 'new-doc',
                   },
                   {
                     type: 'doc',
                     label: 'Java',
                     route: '/docs/instrumentation/mobile-instrumentation/java',
+                    className: 'new-doc',
                   },
                   {
                     type: 'doc',
                     label: 'Kotlin',
                     route: '/docs/instrumentation/mobile-instrumentation/kotlin',
+                    className: 'new-doc',
                   },
                   {
                     type: 'doc',
                     label: 'Flutter',
                     route: '/docs/instrumentation/mobile-instrumentation/flutter',
+                    className: 'new-doc',
                   },
             ],
           },
