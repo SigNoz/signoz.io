@@ -54,7 +54,7 @@ Create a file named `network_security_config.xml` in the `app/res/xml` directory
 <?xml version="1.0" encoding="utf-8"?>
 <network-security-config>
     <domain-config cleartextTrafficPermitted="true">
-        <domain includeSubdomains="true"><SIGNOZ_INGESTION_URL></domain>
+        <domain includeSubdomains="true">ingest.[REGION].signoz.cloud</domain>
     </domain-config>
 </network-security-config>
 ```
@@ -116,7 +116,7 @@ class OpenTelemetryUtil {
                 .addSpanProcessor(
                     BatchSpanProcessor.builder(
                         OtlpGrpcSpanExporter.builder()
-                            .setEndpoint("<SIGNOZ_INGESTION_URL>:<PORT>/v1/traces")
+                            .setEndpoint("ingest.[REGION].signoz.cloud:<PORT>/v1/traces")
                             .addHeader("signoz-access-token", "<SIGNOZ_INGESTION_KEY>")
                             .build()
                     ).build()
@@ -145,7 +145,7 @@ class OpenTelemetryUtil {
 
 Replace `<SERVICE_NAME>` with the name of app, you will see this name in SigNoz Services section.
 
-Ensure to replace `<SIGNOZ_INGESTION_KEY>`, `<PORT>`, and `<SIGNOZ_INGESTION_URL>` with your actual SigNoz ingestion key, Port, and URL, respectively.
+Ensure to replace `<SIGNOZ_INGESTION_KEY>`, `<PORT>`, and `<REGION>` with your actual SigNoz ingestion key, Port, and region, respectively.
 
 You can find your Ingestion Key in the following places:
 -  mail which you recieved from SigNoz after signing up.
@@ -153,11 +153,11 @@ You can find your Ingestion Key in the following places:
 
 Depending on the choice of your region for SigNoz cloud, the ingest endpoint will vary according to this table.
 
-| Region | Endpoint |
+| Region | ID |
 | --- | --- |
-| US |	ingest.us.signoz.cloud:443/v1/traces |
-| IN |	ingest.in.signoz.cloud:443/v1/traces |
-| EU | ingest.eu.signoz.cloud:443/v1/traces |
+| US |	us |
+| IN |	in |
+| EU | eu |
 
 
 These are the variables you need to replace :
@@ -166,7 +166,7 @@ These are the variables you need to replace :
 |----------------------------|---------------------------------------------|
 | `<SIGNOZ_INGESTION_KEY>`   | Your SigNoz ingestion key                   |
 | `<PORT>`                    | Port (default: 443)                         |
-| `<SIGNOZ_INGESTION_URL>`   | URL for SigNoz ingestion                    |
+| `<REGION>`   | Region for SigNoz ingestion                    |
 
 Inside MainActivity.kt file, initialize the util
 
