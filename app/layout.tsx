@@ -1,6 +1,5 @@
 import 'css/tailwind.css'
 import 'css/global.css'
-import 'pliny/search/algolia.css'
 
 import { GoogleTagManager } from '@next/third-parties/google'
 import { SearchProvider, SearchConfig } from 'pliny/search'
