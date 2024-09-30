@@ -330,7 +330,7 @@ export default function TopNav() {
               </Link>
             </div>
           </div>
-          <div className="flex justify-end lg:hidden">
+          <div className="flex justify-end lg:hidden gap-1.5">
             <SearchButton />
             <button
               type="button"
