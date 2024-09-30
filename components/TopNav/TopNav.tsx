@@ -330,14 +330,15 @@ export default function TopNav() {
               </Link>
             </div>
           </div>
-          <div className="flex justify-end lg:hidden gap-1.5">
-            <SearchButton />
+          <div className="flex justify-end lg:hidden">
+            {!mobileMenuOpen && (
+              <SearchButton />
+            )}
             <button
               type="button"
               className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             >
-
               <span className="sr-only">Open main menu</span>
               {mobileMenuOpen ? (
                 <XMarkIcon className="h-6 w-6" aria-hidden="true" />
