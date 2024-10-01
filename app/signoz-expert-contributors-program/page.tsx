@@ -52,7 +52,7 @@ Compensation Range: **$150 - $300/dashboard**
 
 ### Comprehensive Documentation:
 
-Develop in-depth technical documentation, tutorials, product explanation and also test new documentation created by other contributors.
+Develop in-depth technical documentation, tutorials, and product explanations and also test new documentation created by other contributors.
 
 Compensation Range: **Upto $500/contribution**
 
@@ -92,12 +92,7 @@ Compensation Range: **Upto $500/contribution**
 
 Click the "Apply Now" button below 👇 and complete the form. If your profile aligns with our requirements, our team will reach out to you with the next steps.
 
-[![Apply for SigNoz Technical Writing Program](/img/ecp-cta.webp)](https://forms.gle/f2TogL5GZ7CZ7rUY9)
-
-
-## Resources
-
-
+[![Apply for SigNoz Expert Controbutors Program](/img/ecp-cta.webp)](https://forms.gle/f2TogL5GZ7CZ7rUY9)
 
 
 `
