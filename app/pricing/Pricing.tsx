@@ -610,9 +610,16 @@ const PricingPlans = () => {
                         {' '}
                         <CircleCheckSolid /> SOC2 Type II Compliant
                       </li>
-                      <li className="mb-6 flex items-center gap-3">
+                      <li className="mb-3 flex items-center gap-3">
                         {' '}
                         <CircleCheckSolid /> HIPAA Compliant
+                      </li>
+                      <li className="mb-6 flex items-center gap-3">
+                        {' '}
+                        <CircleCheckSolid /> BAA Agreement
+                        <span className="rounded-full border border-none bg-signoz_slate-400 px-2 py-1 text-center !text-[10px] uppercase text-signoz_vanilla-400 sm:text-xs">
+                          Add On
+                        </span>
                       </li>
                     </ul>
                   </div>
@@ -773,7 +780,7 @@ const PricingPlans = () => {
                       </li>
                     </ul>
                   </div>
-                  <div className={styles.packageDetailBlock}>
+                  {/* <div className={styles.packageDetailBlock}>
                     <h4 className={`mb-4 mt-7 ${styles.packageDetailTitle}`}>Compliance</h4>
                     <ul className="ul-no-padding">
                       <li className="mb-3 flex items-center gap-3">
@@ -784,7 +791,7 @@ const PricingPlans = () => {
                         </span>
                       </li>
                     </ul>
-                  </div>
+                  </div> */}
                   <div className={styles.packageDetailBlock}>
                     <h4 className={`mt-7 ${styles.packageDetailTitle}`}>Coming soon</h4>
                     <ul className="ul-no-padding">
