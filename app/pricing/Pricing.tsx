@@ -55,27 +55,25 @@ import VimeoPlayer from '@/components/VimeoPlayer/VimeoPlayer'
 
 const CloseButton = () => <div className="absolute right-0 top-0">Close</div>
 
-
 function Pricing() {
-
-  const [width, setWidth] = useState<number>(typeof window !== 'undefined' ? window.innerWidth : 0);
+  const [width, setWidth] = useState<number>(typeof window !== 'undefined' ? window.innerWidth : 0)
 
   function handleWindowSizeChange() {
-    setWidth(window.innerWidth);
+    setWidth(window.innerWidth)
   }
   useEffect(() => {
-    window.addEventListener('resize', handleWindowSizeChange);
+    window.addEventListener('resize', handleWindowSizeChange)
     return () => {
-      window.removeEventListener('resize', handleWindowSizeChange);
+      window.removeEventListener('resize', handleWindowSizeChange)
     }
-  }, []);
+  }, [])
 
-  const isMobile = width <= 768;
+  const isMobile = width <= 768
 
   return (
     <div className="relative bg-signoz_ink-500">
-      <div className="absolute left-0 right-0 top-0 h-screen bg-[url('/img/background_blur/Perlin_noise.png')] bg-[length:55%] bg-[center_top_4rem] sm:bg-no-repeat " />
-      <div className="absolute left-0 right-0 top-0 h-screen bg-[url('/img/background_blur/Circle.png')] bg-[length:110%] bg-no-repeat sm:bg-[center_top_-50rem]" />
+      <div className="bg-dot-pattern masked-dots absolute top-0 flex h-screen w-full items-center justify-center" />
+      <div className="absolute left-0 right-0 top-0 mx-auto h-[450px] w-full  flex-shrink-0 rounded-[956px] bg-gradient-to-b from-[rgba(190,107,241,1)] to-[rgba(69,104,220,0)] bg-[length:110%] bg-no-repeat opacity-30 blur-[300px] sm:bg-[center_-500px] md:h-[956px]" />
       <div title="SigNoz Plans">
         {/* Plans */}
         <div className="relative !mx-auto flex !w-[100vw] flex-col items-center border !border-b-0 border-dashed border-signoz_slate-400 px-0 pt-12 md:!w-[80vw] md:px-5 md:pt-24">
@@ -95,11 +93,7 @@ function Pricing() {
         {/* More Options */}
         {/* <CommunityEdition /> */}
         {/* FAQ section */}
-        {isMobile ? (
-          <MonthlyEstimateMobile />
-        ) : (
-          <MonthlyEstimate />
-        )}
+        {isMobile ? <MonthlyEstimateMobile /> : <MonthlyEstimate />}
         <WhySelectSignoz isInPricingPage />
         <FAQ />
         {/* User Review */}
@@ -114,7 +108,6 @@ function Pricing() {
 }
 
 export default Pricing
-
 
 function FAQ() {
   return (
@@ -240,19 +233,19 @@ const PricingPlans = () => {
 
   const { isOpen, onOpen, onOpenChange } = useDisclosure()
 
-  const [width, setWidth] = useState<number>(typeof window !== 'undefined' ? window.innerWidth : 0);
+  const [width, setWidth] = useState<number>(typeof window !== 'undefined' ? window.innerWidth : 0)
 
   function handleWindowSizeChange() {
-    setWidth(window.innerWidth);
+    setWidth(window.innerWidth)
   }
   useEffect(() => {
-    window.addEventListener('resize', handleWindowSizeChange);
+    window.addEventListener('resize', handleWindowSizeChange)
     return () => {
-      window.removeEventListener('resize', handleWindowSizeChange);
+      window.removeEventListener('resize', handleWindowSizeChange)
     }
-  }, []);
+  }, [])
 
-  const isMobile = width <= 768;
+  const isMobile = width <= 768
 
   return (
     <section className={`${styles.pricing} relative`}>
@@ -331,10 +324,8 @@ const PricingPlans = () => {
                     </div>
                   </div>
                   <div>
-                    <Button
-                      id="btn-get-started-pricing-teams-top"
-                      className="w-full">
-                      <Link href={'/teams/'} className='flex-center'>
+                    <Button id="btn-get-started-pricing-teams-top" className="w-full">
+                      <Link href={'/teams/'} className="flex-center">
                         Get started with SigNoz Cloud
                         <ArrowRight size={14} />
                       </Link>
@@ -438,8 +429,9 @@ const PricingPlans = () => {
                             <option
                               key={`${option.months}-${idx}`}
                               value={option.months}
-                            >{`${option.months} ${option.months === 1 ? 'month' : 'months'
-                              }`}</option>
+                            >{`${option.months} ${
+                              option.months === 1 ? 'month' : 'months'
+                            }`}</option>
                           ))}
                         </select>
                       </span>
@@ -469,7 +461,13 @@ const PricingPlans = () => {
                         </span>
                       </div>
                     </div>
-                    <Modal size={'5xl'} backdrop="blur" isOpen={isOpen} onOpenChange={onOpenChange} className='self-center'>
+                    <Modal
+                      size={'5xl'}
+                      backdrop="blur"
+                      isOpen={isOpen}
+                      onOpenChange={onOpenChange}
+                      className="self-center"
+                    >
                       <ModalContent className="bg-transparent">
                         {() => (
                           <>
@@ -523,7 +521,9 @@ const PricingPlans = () => {
                     <div>
                       <div className="gap-3">
                         <CircleCheckSolid color="fill-signoz_sienna-400" />
-                        <span className="text-signoz_vanilla-400">Support for Migrating DataDog Dashboards</span>
+                        <span className="text-signoz_vanilla-400">
+                          Support for Migrating DataDog Dashboards
+                        </span>
                         <span className="rounded-full border border-none bg-signoz_slate-400 px-2 py-1 text-center !text-[10px] uppercase text-signoz_vanilla-400 sm:text-xs">
                           On spends above $999 per month
                         </span>
@@ -593,7 +593,7 @@ const PricingPlans = () => {
                       <li className="mb-3 flex items-center gap-3">
                         {' '}
                         <CircleCheckSolid /> Visualize very large traces
-                        <span className="rounded-full border border-none bg-signoz_slate-400 px-2 py-1 !text-[10px] uppercase text-signoz_vanilla-400 text-center">
+                        <span className="rounded-full border border-none bg-signoz_slate-400 px-2 py-1 text-center !text-[10px] uppercase text-signoz_vanilla-400">
                           &gt;10k spans
                         </span>
                       </li>
@@ -625,10 +625,8 @@ const PricingPlans = () => {
                   </div>
                 </div>
                 <div className="">
-                  <Button
-                    id="btn-get-started-pricing-teams-bottom"
-                    className="w-full">
-                    <Link href={'/teams/'} className='flex-center'>
+                  <Button id="btn-get-started-pricing-teams-bottom" className="w-full">
+                    <Link href={'/teams/'} className="flex-center">
                       Get started with SigNoz Cloud
                       <ArrowRight size={14} />
                     </Link>
@@ -684,8 +682,12 @@ const PricingPlans = () => {
                     <p className="m-0">Flexible Pricing for scale and long term commitments</p>
                   </div>
                   <div>
-                    <Button className="w-full" type={Button.TYPES.SECONDARY} id="btn-contact-us-pricing-enterprise-top">
-                      <Link href={'/enterprise-cloud/'} className='flex-center'>
+                    <Button
+                      className="w-full"
+                      type={Button.TYPES.SECONDARY}
+                      id="btn-contact-us-pricing-enterprise-top"
+                    >
+                      <Link href={'/enterprise-cloud/'} className="flex-center">
                         Contact us
                         <ArrowRight size={14} />
                       </Link>
@@ -727,7 +729,8 @@ const PricingPlans = () => {
                       </li>
                       <li className="mb-2 flex items-center gap-3 text-signoz_vanilla-400">
                         {' '}
-                        <CircleCheckSolid color="fill-signoz_sienna-400" /> Support for Migrating DataDog Dashboards
+                        <CircleCheckSolid color="fill-signoz_sienna-400" /> Support for Migrating
+                        DataDog Dashboards
                       </li>
                       <li className="mb-2 flex items-center gap-3 text-signoz_vanilla-400">
                         {' '}
@@ -815,8 +818,12 @@ const PricingPlans = () => {
                   </div>
                 </div>
                 <div className={`__card__footer ${styles.card__footer}`}>
-                  <Button className="w-full" type={Button.TYPES.SECONDARY} id="btn-contact-us-pricing-enterprise-bottom">
-                    <Link href={'/enterprise-cloud/'} className='flex-center'>
+                  <Button
+                    className="w-full"
+                    type={Button.TYPES.SECONDARY}
+                    id="btn-contact-us-pricing-enterprise-bottom"
+                  >
+                    <Link href={'/enterprise-cloud/'} className="flex-center">
                       Contact us
                       <ArrowRight size={14} />
                     </Link>
@@ -844,8 +851,9 @@ const PricingPlans = () => {
                     <button
                       id="btn-signoz-cloud-pricing"
                       type="button"
-                      className={`relative z-[2] cursor-pointer border-none bg-signoz_slate-400 px-4 py-2 text-xs text-signoz_vanilla-400 ${tab === 'cloud' ? ' ' : 'bg-transparent'
-                        }`}
+                      className={`relative z-[2] cursor-pointer border-none bg-signoz_slate-400 px-4 py-2 text-xs text-signoz_vanilla-400 ${
+                        tab === 'cloud' ? ' ' : 'bg-transparent'
+                      }`}
                       onClick={() => setTab('cloud')}
                     >
                       <div className="flex gap-1.5">
@@ -856,8 +864,9 @@ const PricingPlans = () => {
                     <button
                       id="btn-hosted-in-your-infra-pricing"
                       type="button"
-                      className={`relative z-[2] !ml-0 cursor-pointer bg-signoz_slate-400 px-4 py-2 text-xs text-white ${tab === 'self-managed' ? ' ' : 'bg-transparent'
-                        }`}
+                      className={`relative z-[2] !ml-0 cursor-pointer bg-signoz_slate-400 px-4 py-2 text-xs text-white ${
+                        tab === 'self-managed' ? ' ' : 'bg-transparent'
+                      }`}
                       onClick={() => setTab('self-managed')}
                     >
                       <div className="flex gap-1.5">
@@ -882,7 +891,7 @@ const PricingPlans = () => {
                   </div>
                   <div>
                     <Button className="w-full" id="btn-documentation-pricing-community-edition-top">
-                      <Link href={'/docs/install/'} className='flex-center'>
+                      <Link href={'/docs/install/'} className="flex-center">
                         Documentation
                         <ArrowRight size={14} />
                       </Link>
@@ -932,7 +941,7 @@ const PricingPlans = () => {
                 </div>
                 <div>
                   <Button className="w-full" id="btn-documentation-pricing-community-edition-top">
-                    <Link href={'/docs/install/'} className='flex-center'>
+                    <Link href={'/docs/install/'} className="flex-center">
                       Documentation
                       <ArrowRight size={14} />
                     </Link>
@@ -957,8 +966,12 @@ const PricingPlans = () => {
                     </div>
                   </div>
                   <div>
-                    <Button className="w-full" type={Button.TYPES.SECONDARY} id="btn-contact-us-pricing-enterprise-edition-top">
-                      <Link href={'/enterprise/'} className='flex-center'>
+                    <Button
+                      className="w-full"
+                      type={Button.TYPES.SECONDARY}
+                      id="btn-contact-us-pricing-enterprise-edition-top"
+                    >
+                      <Link href={'/enterprise/'} className="flex-center">
                         Contact us
                         <ArrowRight size={14} />
                       </Link>
@@ -1009,7 +1022,8 @@ const PricingPlans = () => {
                       </li>
                       <li className="mb-2 flex items-center gap-3 text-signoz_vanilla-400">
                         {' '}
-                        <CircleCheckSolid color="fill-signoz_sienna-400" /> Support for Migrating DataDog Dashboards
+                        <CircleCheckSolid color="fill-signoz_sienna-400" /> Support for Migrating
+                        DataDog Dashboards
                       </li>
                       <li className="mb-2 flex items-center gap-3 text-signoz_vanilla-400">
                         {' '}
@@ -1048,7 +1062,7 @@ const PricingPlans = () => {
                       <li className="mb-3 flex items-center gap-3">
                         {' '}
                         <CircleCheckSolid /> Visualize very large traces
-                        <span className="rounded-full border border-none bg-signoz_slate-400 px-2 py-1 !text-[10px] uppercase text-signoz_vanilla-400 text-center">
+                        <span className="rounded-full border border-none bg-signoz_slate-400 px-2 py-1 text-center !text-[10px] uppercase text-signoz_vanilla-400">
                           &gt;10k spans
                         </span>
                       </li>
@@ -1089,8 +1103,12 @@ const PricingPlans = () => {
                   </div>
                 </div>
                 <div className={`__card__footer ${styles.card__footer}`}>
-                  <Button className="w-full" type={Button.TYPES.SECONDARY} id="btn-contact-us-pricing-enterprise-edition-bottom">
-                    <Link href={'/enterprise/'} className='flex-center'>
+                  <Button
+                    className="w-full"
+                    type={Button.TYPES.SECONDARY}
+                    id="btn-contact-us-pricing-enterprise-edition-bottom"
+                  >
+                    <Link href={'/enterprise/'} className="flex-center">
                       Contact us
                       <ArrowRight size={14} />
                     </Link>
@@ -1116,7 +1134,7 @@ const ExploreAllFeature = () => {
         desc: '$0 ⎯ host in your infra',
         action: (
           <Link
-            id='btn-documentation-pricing-table'
+            id="btn-documentation-pricing-table"
             href={'/docs/introduction'}
             className="button-background flex h-8 w-full items-center justify-center gap-1.5 truncate rounded-full px-4 py-2 text-center text-[7px] font-medium leading-5 text-white sm:text-sm"
           >
@@ -1368,7 +1386,9 @@ const ExploreAllFeature = () => {
             inEnterprise: (
               <div className="flex items-center">
                 <ServerSolid />
-                <span className="ml-1.5 text-[10px] max-sm:text-[8px]">ENTERPRISE SELF-MANAGED</span>
+                <span className="ml-1.5 text-[10px] max-sm:text-[8px]">
+                  ENTERPRISE SELF-MANAGED
+                </span>
               </div>
             ),
           },
@@ -1379,7 +1399,9 @@ const ExploreAllFeature = () => {
             inEnterprise: (
               <div className="flex items-center">
                 <ServerSolid />
-                <span className="ml-1.5 text-[10px] max-sm:text-[8px]">ENTERPRISE SELF-MANAGED</span>
+                <span className="ml-1.5 text-[10px] max-sm:text-[8px]">
+                  ENTERPRISE SELF-MANAGED
+                </span>
               </div>
             ),
           },
@@ -1477,7 +1499,10 @@ const ExploreAllFeature = () => {
             inCommunity: <CrossSolid />,
             inTeams: (
               <div className="flex items-center">
-                <span className="ml-1.5 text-[8px] sm:text-xs uppercase"> for spends above $999</span>
+                <span className="ml-1.5 text-[8px] uppercase sm:text-xs">
+                  {' '}
+                  for spends above $999
+                </span>
               </div>
             ),
             inEnterprise: <CheckSolid />,
@@ -1487,7 +1512,10 @@ const ExploreAllFeature = () => {
             inCommunity: <CrossSolid />,
             inTeams: (
               <div className="flex items-center">
-                <span className="ml-1.5 text-[8px] sm:text-xs uppercase"> for spends above $999</span>
+                <span className="ml-1.5 text-[8px] uppercase sm:text-xs">
+                  {' '}
+                  for spends above $999
+                </span>
               </div>
             ),
             inEnterprise: <CheckSolid />,
@@ -1536,12 +1564,13 @@ const ExploreAllFeature = () => {
               return (
                 <div
                   key={idx}
-                  className={`${idx === 2
-                    ? `flex flex-col justify-between rounded-lg !rounded-b-none bg-signoz_ink-500 p-3 sm:bg-[#16181d]`
-                    : idx !== 0
-                      ? `flex flex-col justify-between rounded-lg p-3 ${Opacity[idx]}`
-                      : 'hidden md:block'
-                    }`}
+                  className={`${
+                    idx === 2
+                      ? `flex flex-col justify-between rounded-lg !rounded-b-none bg-signoz_ink-500 p-3 sm:bg-[#16181d]`
+                      : idx !== 0
+                        ? `flex flex-col justify-between rounded-lg p-3 ${Opacity[idx]}`
+                        : 'hidden md:block'
+                  }`}
                 >
                   <div className="flex flex-col gap-1">
                     <h2 className="m-0 text-sm max-sm:h-16 md:text-base">{h.heading}</h2>
