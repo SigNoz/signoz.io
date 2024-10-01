@@ -54,7 +54,7 @@ Compensation Range: **$150 - $300/dashboard**
 
 Develop in-depth technical documentation, tutorials, product explanation and also test new documentation created by other contributors.
 
-Compensation Range: Upto **$500/contribution**
+Compensation Range: **Upto $500/contribution**
 
 &nbsp;
 
