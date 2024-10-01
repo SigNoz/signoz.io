@@ -26,7 +26,6 @@ If you're an expert eager to showcase your skills, contribute to a leading open-
 
 **Showcase Your Skills:** Your dashboards and documentation will be featured on the SigNoz platform, reaching a global audience and potential employers or clients.
 
-**Influence the Industry:** Play a pivotal role in shaping the future of observability tools and best practices.
 
 &nbsp;
 
@@ -42,26 +41,20 @@ If you're an expert eager to showcase your skills, contribute to a leading open-
 
 ## Areas of Contribution
 
+&nbsp;
+
 ### Advanced Dashboards:
 
 Create sophisticated dashboards tailored for specific technologies, industries, or use cases.
 Optimize existing dashboards for better performance and user experience.
 
-Compensation Range: $150 - $300
+Compensation Range: **$150 - $300/dashboard**
 
 ### Comprehensive Documentation:
 
-Develop in-depth technical documentation, tutorials, product explanation.
+Develop in-depth technical documentation, tutorials, product explanation and also test new documentation created by other contributors.
 
-Compensation Range: Upto $500
-
-
-### Beta test new features 
-
-Test out new features and documentation and give feedback. 
-
-
-Compensation range: Variable
+Compensation Range: Upto **$500/contribution**
 
 &nbsp;
 
@@ -69,15 +62,15 @@ Compensation range: Variable
 
 ### Application Process:
 
-○ Submit [your application](https://example.com) along with your portfolio or examples of previous work.
+○ Submit your application along with your portfolio or examples of previous work.
 
-○ Our team will review your expertise and align your skills with our project needs.
+○ Our team will review your expertise and align your skills with the task needs.
 
 ### Task Assignment
 
 ○ Receive tasks with specific deliverables and timelines.
 
-○ Agree on compensation terms before project commencement.
+○ Agree on compensation terms before contribution.
 
 ### Contribution and Review
 
@@ -88,7 +81,7 @@ Compensation range: Variable
 
 ### Recognition and Payment:
 
-○ Earn your SigNoz Expert Badge upon successful project completion. 
+○ Earn your SigNoz Expert Badge upon successful contribution.
 
 ○ Receive prompt payment for your contributions.
 
@@ -100,6 +93,10 @@ Compensation range: Variable
 Click the "Apply Now" button below 👇 and complete the form. If your profile aligns with our requirements, our team will reach out to you with the next steps.
 
 [![Apply for SigNoz Technical Writing Program](/img/ecp-cta.webp)](https://forms.gle/f2TogL5GZ7CZ7rUY9)
+
+
+## Resources
+
 
 
 
