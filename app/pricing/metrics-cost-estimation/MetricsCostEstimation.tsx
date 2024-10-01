@@ -43,19 +43,18 @@ const MetricsCostEstimation = () => {
 
   const handleChangeMetrics = (value: SliderValue) => {
     if (Array.isArray(value)) {
-        value = value[0];
+      value = value[0]
     }
 
-    if (isNaN(Number(value))) return;
+    if (isNaN(Number(value))) return
 
-    setMetricsValue(value);
-    setinputMetricsValue(value.toString());
-};
+    setMetricsValue(value)
+    setinputMetricsValue(value.toString())
+  }
 
   const [inputValue, setInputValue] = useState('0.1')
 
-  const totalSamplesMonthly =
-    Number(inputValue) * Number(metricsValue) * 30 * 60 * 24
+  const totalSamplesMonthly = Number(inputValue) * Number(metricsValue) * 30 * 60 * 24
 
   const monthlyEstimate = totalSamplesMonthly * METRICS_PRICES[metricsRetentionPeriod]
 
@@ -64,12 +63,12 @@ const MetricsCostEstimation = () => {
     onOpen()
   }
 
-  const MAX_INPUT_VALUE = 10000;
+  const MAX_INPUT_VALUE = 10000
 
   return (
     <div className="relative mt-[-56px] bg-signoz_ink-500">
-      <div className="absolute left-0 right-0 top-0 h-screen bg-[url('/img/background_blur/Perlin_noise.png')] bg-[length:55%] bg-[center_top_4rem] bg-no-repeat " />
-      <div className="absolute left-0 right-0 top-0 h-screen bg-[url('/img/background_blur/Circle.png')] bg-[length:110%] bg-[center_top_-50rem] bg-no-repeat" />
+      <div className="bg-dot-pattern masked-dots absolute top-0 flex h-screen w-full items-center justify-center" />
+      <div className="absolute left-0 right-0 top-0 mx-auto h-[450px] w-full  flex-shrink-0 rounded-[956px] bg-gradient-to-b from-[rgba(190,107,241,1)] to-[rgba(69,104,220,0)] bg-[length:110%] bg-no-repeat opacity-30 blur-[300px] sm:bg-[center_-500px] md:h-[956px]" />
       <main className="landing-section relative z-[1] pt-12 sm:pt-0">
         <div className="">
           <div className="flex flex-col md:flex-row">
@@ -96,15 +95,15 @@ const MetricsCostEstimation = () => {
                         type="number"
                         value={inputValue}
                         onChange={(e) => {
-                          let value = parseFloat(e.target.value);
+                          let value = parseFloat(e.target.value)
                           if (value > MAX_INPUT_VALUE) {
-                            value = MAX_INPUT_VALUE;
+                            value = MAX_INPUT_VALUE
                           }
-                          setInputValue(value.toString());
+                          setInputValue(value.toString())
                         }}
                         onKeyDown={(e) => {
                           if (e.key === '-' || e.key === 'e') {
-                            e.preventDefault();
+                            e.preventDefault()
                           }
                         }}
                       />
@@ -139,7 +138,9 @@ const MetricsCostEstimation = () => {
                         showSteps={true}
                         showTooltip={true}
                         tooltipProps={{
-                          content: formatNumber(Array.isArray(metricsValue) ? metricsValue[0] : metricsValue)
+                          content: formatNumber(
+                            Array.isArray(metricsValue) ? metricsValue[0] : metricsValue
+                          ),
                         }}
                         color="secondary"
                         marks={[
@@ -170,7 +171,7 @@ const MetricsCostEstimation = () => {
                         ]}
                         classNames={{
                           label: 'text-medium',
-                          step: "h-[0.6rem] w-[0.15rem]",
+                          step: 'h-[0.6rem] w-[0.15rem]',
                         }}
                         renderThumb={(props) => (
                           <div
@@ -256,13 +257,13 @@ const MetricsCostEstimation = () => {
                 </div>
                 <div className="flex flex-col gap-4">
                   <Button className="w-full">
-                    <Link href={'/teams'} className='flex-center'>
+                    <Link href={'/teams'} className="flex-center">
                       Start your free 30-day trial
                       <ArrowRight size={14} />
                     </Link>
                   </Button>
                   <Button className="w-full" type={Button.TYPES.SECONDARY}>
-                    <Link href={'/docs/introduction/'} className='flex-center'>
+                    <Link href={'/docs/introduction/'} className="flex-center">
                       Read the docs
                       <ArrowRight size={14} />
                     </Link>
@@ -348,7 +349,7 @@ const MetricsCostEstimation = () => {
         isOpen={isOpen}
         onClose={() => setSelectedVideoID(null)}
         onOpenChange={onOpenChange}
-        className='self-center'
+        className="self-center"
       >
         <ModalContent className="bg-transparent">
           {() => (
