@@ -155,7 +155,31 @@ export default function TopNav() {
 
   const [isOpen, setIsOpen] = useState(false)
   const [isOpenResources, setIsOpenResources] = useState(false)
+  const [timeoutId, setTimeoutId] = useState<any>(null)
+  const [timeoutIdResources, setTimeoutIdResources] = useState<any>(null)
+  const delay = 500
 
+  // Product dropdown handlers
+  const handleMouseEnterProduct = () => {
+    clearTimeout(timeoutId)
+    setIsOpen(true)
+  }
+
+  const handleMouseLeaveProduct = () => {
+    const id = setTimeout(() => setIsOpen(false), delay)
+    setTimeoutId(id)
+  }
+
+  // Resources dropdown handlers
+  const handleMouseEnterResources = () => {
+    clearTimeout(timeoutIdResources)
+    setIsOpenResources(true)
+  }
+
+  const handleMouseLeaveResources = () => {
+    const id = setTimeout(() => setIsOpenResources(false), delay)
+    setTimeoutIdResources(id)
+  }
   return (
     <div className="fixed left-0 right-0 z-30">
       <Banner />
@@ -185,8 +209,8 @@ export default function TopNav() {
             </Link>
             <div className="hidden items-center gap-x-6 lg:flex">
               <div
-                onMouseEnter={() => setIsOpen(true)}
-                onMouseLeave={() => setIsOpen(false)}
+                onMouseEnter={handleMouseEnterProduct}
+                onMouseLeave={handleMouseLeaveProduct}
                 className="flex items-center"
               >
                 <Dropdown
@@ -213,6 +237,8 @@ export default function TopNav() {
                   <DropdownMenu
                     aria-label="Static Actions"
                     classNames={{ list: 'pl-1 grid grid-cols-2 w-max gap-3 items-center h-auto' }}
+                    onMouseEnter={handleMouseEnterProduct}
+                    onMouseLeave={handleMouseLeaveProduct}
                     topContent={
                       <div className="px-4 py-2 text-[13px] font-semibold uppercase leading-5 text-[#3C4152]">
                         Product
@@ -238,12 +264,12 @@ export default function TopNav() {
                 href="/docs"
                 className="flex items-center truncate px-1.5 py-1 text-sm font-normal hover:text-signoz_robin-500"
               >
-                Documentation
+                Docs
               </Link>
 
               <div
-                onMouseEnter={() => setIsOpenResources(true)}
-                onMouseLeave={() => setIsOpenResources(false)}
+                onMouseEnter={handleMouseEnterResources}
+                onMouseLeave={handleMouseLeaveResources}
                 className="flex items-center"
               >
                 <Dropdown
@@ -270,6 +296,8 @@ export default function TopNav() {
                   <DropdownMenu
                     aria-label="Static Actions"
                     classNames={{ list: 'pl-0 w-max gap-3 items-center' }}
+                    onMouseEnter={handleMouseEnterResources}
+                    onMouseLeave={handleMouseLeaveResources}
                     topContent={
                       <div className="py-2 pl-2 pr-4 text-[13px] font-semibold uppercase leading-5 text-[#3C4152]">
                         Resources
@@ -303,6 +331,7 @@ export default function TopNav() {
             </div>
           </div>
           <div className="flex justify-end lg:hidden">
+            {!mobileMenuOpen && <SearchButton />}
             <button
               type="button"
               className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5"
@@ -386,9 +415,6 @@ export default function TopNav() {
                     </Button>
                   </div>
                 )}
-                <div className="hidden py-6 md:block">
-                  <SearchButton />
-                </div>
 
                 {isDocsBasePath && !showMainMenu && (
                   <div className="docs-sidebar-mobile-nav">

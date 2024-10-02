@@ -117,7 +117,7 @@ const docsSideNav = [
         type: 'doc',
         route: '/docs/product-features/saved-view',
         label: 'Saved View',
-        className: 'new-doc', // Add this if you want to add a new tag in sidebar
+        // className: 'new-doc', // Add this if you want to add a new tag in sidebar
       },
       {
         type: 'doc',
@@ -322,6 +322,20 @@ const docsSideNav = [
               },
             ],
           },
+          // {
+          //   type: 'category',
+          //   isExpanded: false,
+          //   label: 'Mobile Instrumentation',
+          //   route: '/docs/mobile-instrumentation',
+          //   // className: 'new-doc',
+          //   // route: '',
+          //   // link: {
+          //   // type: 'doc',
+          //   // },
+          //   items: [
+                  
+          //   ],
+          // },
         ],
       },
       {
@@ -591,7 +605,7 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/logs-management/send-logs/windows-events-log',
             label: 'Windows Event logs',
-            className: 'new-doc',
+            // className: 'new-doc',
           },
         ],
       },
@@ -948,16 +962,36 @@ const docsSideNav = [
     ],
   },
   {
-    label: 'Frontend Monitoring',
+    label: 'Frontend & Mobile Monitoring',
     type: 'category',
-    className: 'new-doc',
     isExpanded: false,
-    // route: '',
+    className: 'new-doc',
+    route: '/docs/frontend-and-mobile-monitoring',
     items: [
       {
         type: 'doc',
         route: '/docs/frontend-monitoring/web-vitals',
         label: 'Web Vitals',
+      },
+      {
+        type: 'doc',
+        label: 'Swift UI',
+        route: '/docs/instrumentation/mobile-instrumentation/swiftUi',
+      },
+      {
+        type: 'doc',
+        label: 'Java',
+        route: '/docs/instrumentation/mobile-instrumentation/java',
+      },
+      {
+        type: 'doc',
+        label: 'Kotlin',
+        route: '/docs/instrumentation/mobile-instrumentation/kotlin',
+      },
+      {
+        type: 'doc',
+        label: 'Flutter',
+        route: '/docs/instrumentation/mobile-instrumentation/flutter',
       },
      ],
   },
@@ -1227,7 +1261,7 @@ const docsSideNav = [
     label: 'Azure Monitoring',
     type: 'category',
     isExpanded: false,
-    className: 'new-doc',
+    // className: 'new-doc',
     // route: '',
     items: [
       {
@@ -1358,7 +1392,7 @@ const docsSideNav = [
       {
         type: 'category',
         isExpanded: false,
-        label: 'Azure Blog Storage',
+        label: 'Azure Blob Storage',
         route: '/docs/azure-monitoring/az-blob-storage',
         items: [
           {
@@ -1379,7 +1413,7 @@ const docsSideNav = [
     label: 'GCP Monitoring',
     type: 'category',
     isExpanded: false,
-    className: 'new-doc',
+    // className: 'new-doc',
     // route: '',
     items: [
       {
@@ -1668,6 +1702,11 @@ const docsSideNav = [
         // slug: '/docs/operate/migration/migration',
         // },
         items: [
+          {
+            type: 'doc',
+            route: '/docs/operate/migration/upgrade-0.55',
+            label: 'Upgrade to v0.55',
+          },
           {
             type: 'doc',
             route: '/docs/operate/migration/upgrade-0.51',
