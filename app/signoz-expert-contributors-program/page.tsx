@@ -74,9 +74,9 @@ learn new tools, and broaden your technical expertise with every contribution yo
 
 &nbsp;
 
-👇 Checkout dashboards example
+👇 Checkout dashboard examples
 
-[![Dashboards GitHub](/img/ecp-dashboard-examples.webp)](https://github.com/SigNoz/dashboards) 
+[![Dashboards GitHub](/img/ecp-example-dashboard.svg)](https://github.com/SigNoz/dashboards) 
 
 &nbsp;
 
@@ -90,7 +90,7 @@ learn new tools, and broaden your technical expertise with every contribution yo
 
 👇 Checkout SigNoz documentation
 
-[![SigNoz Documentation](/img/ecp-signoz-documentation.webp)](https://signoz.io/docs/introduction/) 
+[![SigNoz Documentation](/img/ecp-signoz-documentation.svg)](https://signoz.io/docs/introduction/) 
 
 &nbsp;
 
