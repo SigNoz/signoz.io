@@ -153,33 +153,33 @@ export default function TopNav() {
     }
   }, [pathname])
 
-  const [isOpen, setIsOpen] = useState(false);
-  const [isOpenResources, setIsOpenResources] = useState(false);
-  const [timeoutId, setTimeoutId] = useState<any>(null);
-  const [timeoutIdResources, setTimeoutIdResources] = useState<any>(null);
-  const delay = 500;
+  const [isOpen, setIsOpen] = useState(false)
+  const [isOpenResources, setIsOpenResources] = useState(false)
+  const [timeoutId, setTimeoutId] = useState<any>(null)
+  const [timeoutIdResources, setTimeoutIdResources] = useState<any>(null)
+  const delay = 500
 
   // Product dropdown handlers
   const handleMouseEnterProduct = () => {
-    clearTimeout(timeoutId);
-    setIsOpen(true);
-  };
+    clearTimeout(timeoutId)
+    setIsOpen(true)
+  }
 
   const handleMouseLeaveProduct = () => {
-    const id = setTimeout(() => setIsOpen(false), delay);
-    setTimeoutId(id);
-  };
+    const id = setTimeout(() => setIsOpen(false), delay)
+    setTimeoutId(id)
+  }
 
   // Resources dropdown handlers
   const handleMouseEnterResources = () => {
-    clearTimeout(timeoutIdResources);
-    setIsOpenResources(true);
-  };
+    clearTimeout(timeoutIdResources)
+    setIsOpenResources(true)
+  }
 
   const handleMouseLeaveResources = () => {
-    const id = setTimeout(() => setIsOpenResources(false), delay);
-    setTimeoutIdResources(id);
-  };
+    const id = setTimeout(() => setIsOpenResources(false), delay)
+    setTimeoutIdResources(id)
+  }
   return (
     <div className="fixed left-0 right-0 z-30">
       <Banner />
@@ -264,7 +264,7 @@ export default function TopNav() {
                 href="/docs"
                 className="flex items-center truncate px-1.5 py-1 text-sm font-normal hover:text-signoz_robin-500"
               >
-                Documentation
+                Docs
               </Link>
 
               <div
@@ -331,6 +331,7 @@ export default function TopNav() {
             </div>
           </div>
           <div className="flex justify-end lg:hidden">
+            {!mobileMenuOpen && <SearchButton />}
             <button
               type="button"
               className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5"
@@ -414,9 +415,6 @@ export default function TopNav() {
                     </Button>
                   </div>
                 )}
-                <div className="hidden py-6 md:block">
-                  <SearchButton />
-                </div>
 
                 {isDocsBasePath && !showMainMenu && (
                   <div className="docs-sidebar-mobile-nav">
@@ -442,4 +440,3 @@ export default function TopNav() {
     </div>
   )
 }
-
