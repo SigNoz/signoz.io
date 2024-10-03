@@ -1,36 +1,198 @@
 ---
-title: OpenTelemetry Nginx Tutorial - Instrument and visualize traces
+
+title: Implementing OpenTelemetry with Nginx - Instrument and visualize traces
 slug: opentelemetry-nginx
-date: 2023-02-24
+date: 2024-09-28
 tags: [OpenTelemetry, Distributed Tracing]
 authors: [adnan]
-description: In this tutorial, you will learn how to instrument your nginx web servers with OpenTelemetry. Steps to instrument nginx web server with OpenTelemetry....
+description: Learn how to implement OpenTelemetry with Nginx for enhanced observability. This guide covers setup, configuration, and best practices for effective monitoring.
 image: /img/blog/2023/02/opentelemetry_nginx_cover-min.jpg
 hide_table_of_contents: false
 keywords: [opentelemetry,opentelemetry nginx,signoz]
+
 ---
 
 <head>
-  <link rel="canonical" href="https://signoz.io/blog/opentelemetry-nginx/"/>
+  <script
+    type="application/ld+json"
+    dangerouslySetInnerHTML={{ __html: JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Implementing OpenTelemetry with Nginx - Instrument and visualize traces",
+  "alternativeHeadline": "A comprehensive guide to setting up OpenTelemetry with Nginx for enhanced observability",
+  "author": {
+    "@type": "Person",
+    "name": "adnan"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SigNoz",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://signoz.io/img/SigNozLogo-orange.svg"
+    }
+  },
+  "datePublished": "2024-09-28T00:00:00Z",
+  "dateModified": "2024-09-28T00:00:00Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://signoz.io/blog/opentelemetry-nginx/"
+  },
+  "description": "Learn how to implement OpenTelemetry with Nginx for enhanced observability. This guide covers setup, configuration, and best practices for effective monitoring.",
+  "keywords": "opentelemetry, opentelemetry nginx, signoz, distributed tracing, observability",
+  "articleSection": "Technology",
+  "inLanguage": "en",
+  "image": {
+    "@type": "ImageObject",
+    "url": "https://signoz.io/img/blog/2023/02/opentelemetry_nginx_cover-min.jpg",
+    "width": 1200,
+    "height": 630
+  },
+  "isPartOf": {
+    "@type": "Blog",
+    "name": "SigNoz Blog",
+    "url": "https://signoz.io/blog/"
+  },
+  "about": [
+    {
+      "@type": "Thing",
+      "name": "OpenTelemetry",
+      "description": "An open-source observability framework for cloud-native software"
+    },
+    {
+      "@type": "Thing",
+      "name": "Nginx",
+      "description": "A web server that can also be used as a reverse proxy, load balancer, mail proxy and HTTP cache"
+    },
+    {
+      "@type": "Thing",
+      "name": "Distributed Tracing",
+      "description": "A method used to profile and monitor applications, especially those built using a microservices architecture"
+    }
+  ],
+  "mentions": [
+    {
+      "@type": "SoftwareApplication",
+      "name": "OpenTelemetry",
+      "applicationCategory": "Observability Framework"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "name": "Nginx",
+      "applicationCategory": "Web Server"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "name": "SigNoz",
+      "applicationCategory": "Observability Platform"
+    }
+  ],
+  "mainEntity": {
+    "@type": "HowTo",
+    "name": "Implementing OpenTelemetry with Nginx",
+    "step": [
+      {
+        "@type": "HowToStep",
+        "name": "Install SigNoz",
+        "text": "Deploy SigNoz using Helm charts on a Kubernetes cluster"
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Build Nginx with OpenTelemetry module",
+        "text": "Create a Docker image of Nginx with the OpenTelemetry module installed"
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Configure OpenTelemetry for Nginx",
+        "text": "Set up the OpenTelemetry configuration for Nginx to export traces"
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Build and deploy backend application",
+        "text": "Create and deploy a Go backend application with tracing enabled"
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Visualize traces",
+        "text": "Use SigNoz to inspect and analyze the collected traces"
+      }
+    ]
+  }
+}) }}
+  />
 </head>
 
 OpenTelemetry is an open-source standard for instrumenting cloud-native applications for generating different types of telemetry data. A robust observability framework set up using OpenTelemetry can help tremendously while troubleshooting software in production.
 
-
-
-![Cover Image](/img/blog/2023/02/opentelemetry_nginx_cover.webp)
-
 Nginx is one of the most widely adopted web servers. Most often, nginx is used as a reverse proxy. It serves the frontend or backend applications behind the reverse proxy. In this tutorial, we will learn how to instrument nginx web servers with OpenTelemetry for traces. We will illustrate how to use the OpenTelemetry module, build an nginx container image, deploy it to Kubernetes, and view the traces using SigNoz.
+
+## What is OpenTelemetry and Why Use it with Nginx?
+
+OpenTelemetry is an open-source observability framework that provides a standardized way to collect and export telemetry data. It combines distributed tracing, metrics collection, and logging into a single, cohesive system.
+
+Nginx, a high-performance web server and reverse proxy, plays a critical role in many web architectures. By integrating OpenTelemetry with Nginx, you gain:
+
+<Figure src="/img/blog/2024/09/opentelemetry-nginx-image.webp" alt="" caption="" />1. **Enhanced visibility**: Track requests as they flow through your Nginx servers and into your application services.
+2. **Performance insights**: Identify bottlenecks and optimize your Nginx configuration based on real-time data.
+3. **Simplified troubleshooting**: Quickly pinpoint issues in complex, distributed systems.
+4. **Standardized observability**: Use a single, vendor-neutral framework for all your monitoring needs.
+
+## Quick Start Guide: OpenTelemetry with Nginx
+
+Follow these steps to quickly set up OpenTelemetry with Nginx:
+
+1. **Install OpenTelemetry module for Nginx**
+   ```bash
+   apt-get update && apt-get install -y nginx-otel-module
+   ```
+
+2. **Configure Nginx with OpenTelemetry**
+   Add the following to your `nginx.conf`:
+   ```nginx
+   load_module modules/ngx_http_opentelemetry_module.so;
+
+   http {
+     opentelemetry_config /etc/nginx/opentelemetry_config.yaml;
+   }
+   ```
+
+3. **Create OpenTelemetry configuration**
+   In `/etc/nginx/opentelemetry_config.yaml`:
+   ```yaml
+   service_name: nginx-service
+   sampler:
+     type: always_on
+   exporter:
+     otlp:
+       endpoint: http://localhost:4317
+   ```
+
+4. **Start OpenTelemetry Collector**
+   ```bash
+   otelcol --config=/etc/otel-collector-config.yaml
+   ```
+
+5. **Restart Nginx**
+   ```bash
+   systemctl restart nginx
+   ```
+
+6. **Verify setup**
+   Check Nginx error logs for OpenTelemetry initialization messages:
+   ```bash
+   tail -f /var/log/nginx/error.log
+   ```
+
+You should now see OpenTelemetry data being collected from your Nginx server!
 
 ## The architecture of the setup
 
 The architecture of the setup used for the tutorial is given below.
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2023/02/architecture_nginx_backend_signoz.webp" alt="Architecture of the setup consisting of nginx, backend and SigNoz"/>
-    <figcaption><i>Architecture of the setup consisting of nginx, backend and SigNoz</i></figcaption>
+<img src="/img/blog/2023/02/architecture_nginx_backend_signoz.webp" alt="Architecture of the setup consisting of nginx, backend and SigNoz"/>
+<figcaption><i>Architecture of the setup consisting of nginx, backend and SigNoz</i></figcaption>
 </figure>
-
 
 The setup consists of:
 
@@ -43,11 +205,11 @@ At the end of the tutorial, setup will be able to track the request from nginx t
 
 ## Installing SigNoz
 
+<GetStartedSigNoz />
+
 We will install SigNoz by [deploying it with Helm charts](https://signoz.io/docs/install/kubernetes/others/).
 
-[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/)
-
-Pre-requisites:
+<Figure src="/img/blog/2024/09/opentelemetry-nginx-deploy_docker_documentation.webp" alt="" caption="" />Pre-requisites:
 
 - Running Kubernetes cluster (>= 1.21 version)
 - 8GB of memory
@@ -63,9 +225,10 @@ Navigate to the root of the repository and hit the next commands (for Linux).
 
 ```jsx
 snap install multipass
-git clone https://github.com/SigNoz/opentelemetry-nginx-tutorial.git
+git clone <https://github.com/SigNoz/opentelemetry-nginx-tutorial.git>
 cd opentelemetry-nginx-tutorial
 ./start.sh
+
 ```
 
 After a while, you will have a fully functional SigNoz platform installed on Kubernetes in the multipass machine.
@@ -83,6 +246,7 @@ signoz-otel-collector-d69d59d68-nqx48               1/1     Running   0         
 signoz-otel-collector-metrics-789475976f-w86bz      1/1     Running   0          38h
 signoz-alertmanager-0                               1/1     Running   0          38h
 signoz-frontend-57bb96c66f-ch22x                    1/1     Running   0          38h
+
 ```
 
 Now let's see how to build the nginx container image with the OpenTelemetry module.
@@ -94,16 +258,17 @@ All the container images are located in `package/docker` directory. Let's inspec
 ```jsx
 FROM nginx:1.23.1
 RUN apt-get update ; apt-get install unzip
-ADD https://github.com/open-telemetry/opentelemetry-cpp-contrib/releases/download/webserver%2Fv1.0.3/opentelemetry-webserver-sdk-x64-linux.tgz /opt
+ADD <https://github.com/open-telemetry/opentelemetry-cpp-contrib/releases/download/webserver%2Fv1.0.3/opentelemetry-webserver-sdk-x64-linux.tgz> /opt
 RUN cd /opt; tar xvzf opentelemetry-webserver-sdk-x64-linux.tgz
 RUN cd /opt/opentelemetry-webserver-sdk; ./install.sh
 ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/opentelemetry-webserver-sdk/sdk_lib/lib
-RUN echo "load_module /opt/opentelemetry-webserver-sdk/WebServerModule/Nginx/1.23.1/ngx_http_opentelemetry_module.so;\n$(cat /etc/nginx/nginx.conf)" > /etc/nginx/nginx.conf
+RUN echo "load_module /opt/opentelemetry-webserver-sdk/WebServerModule/Nginx/1.23.1/ngx_http_opentelemetry_module.so;\\n$(cat /etc/nginx/nginx.conf)" > /etc/nginx/nginx.conf
 COPY opentelemetry_module.conf /etc/nginx/conf.d
 COPY nginx.conf /etc/nginx/conf.d/default.conf
+
 ```
 
-This is the example taken from the OpenTelemetry docs on how to [instrument nginx with OpenTelemetry](https://opentelemetry.io/blog/2022/instrument-nginx/).
+This is the example taken from the OpenTelemetry docs on how to <a href="https://opentelemetry.io/blog/2022/instrument-nginx/" rel="noopener noreferrer nofollow" target="_blank">instrument nginx with OpenTelemetry</a>.
 
 The lines we are interested in are:
 
@@ -121,6 +286,7 @@ NginxModuleServiceNamespace nginx;
 NginxModuleServiceInstanceId NginxInstanceId;
 NginxModuleResolveBackends ON;
 NginxModuleTraceAsError ON;
+
 ```
 
 We are using otlp exporter and exporting the traces to the SigNoz collector already installed in the platform namespace at `signoz-otel-collector.platform:4317`. That's the place where the SigNoz collector is living in our setup.
@@ -129,6 +295,7 @@ Building this docker image is easy as a docker build. If you want to build an ng
 
 ```jsx
 docker build --tag nginx-otel:latest .
+
 ```
 
 Otherwise, to be able to use it in our local Kubernetes instance, you can run `build.sh` and then `deploy.sh` from the multipass machine.
@@ -139,6 +306,7 @@ It will deploy the custom-built docker nginx image to the nginx namespace.
 ubuntu@k3s:~/opentelemetry-nginx-tutorial$ k get pods -n nginx
 NAME                     READY   STATUS    RESTARTS   AGE
 nginx-845947d9f8-g2rhc   1/1     Running   0          3s
+
 ```
 
 ## Building Go backend with tracing enabled
@@ -176,15 +344,15 @@ k3s                     Running           10.117.145.50    Ubuntu 22.04 LTS
                                           10.42.0.0
                                           10.42.0.1
 ➜  ~ sudo -- /bin/sh -c ' echo "10.117.145.50 signoz.local" >> /etc/hosts'
+
 ```
 
 Since we are using Traefik and ingresses for the distinction on the cluster we will expose signoz.local as the entry point for the SigNoz frontend.
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2023/02/nginx_go_services.webp" alt="nginx and go backend in the list of applications monitored on SigNoz"/>
-    <figcaption><i>nginx and go backend in the list of applications monitored on SigNoz</i></figcaption>
+<img src="/img/blog/2023/02/nginx_go_services.webp" alt="nginx and go backend in the list of applications monitored on SigNoz"/>
+<figcaption><i>nginx and go backend in the list of applications monitored on SigNoz</i></figcaption>
 </figure>
-
 
 As you can see on the SigNoz UI we have two services:
 
@@ -202,48 +370,136 @@ k3s                     Running           10.117.145.50    Ubuntu 22.04 LTS
                                           10.42.0.1
 ➜  ~ curl 10.117.145.50/nginx/getEntries/1
 Entry doesn't exists.
+
 ```
 
 Let's inspect the traces on the SigNoz UI.
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2023/02/nginx_traces.webp" alt="Traces on SigNoz dashboard"/>
-    <figcaption><i>Traces on the SigNoz dashboard shows requests traveling through nginx to the backend application.</i></figcaption>
+<img src="/img/blog/2023/02/nginx_traces.webp" alt="Traces on SigNoz dashboard"/>
+<figcaption><i>Traces on the SigNoz dashboard shows requests traveling through nginx to the backend application.</i></figcaption>
 </figure>
-
 
 As can be seen in the picture, the requests are traveling through the nginx to the backend application. The distributed tracing shows 14 spans for a single request. Spans are fundamental building blocks of distributed tracing. A single trace in distributed tracing consists of a series of tagged time intervals known as [spans](https://signoz.io/blog/distributed-tracing-span/).
 
 It returns the 500 error since the API returns 500 for nonexistent entries.
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2023/02/nginx_500_traces.webp" alt="spans with http status codes in attributes"/>
-    <figcaption><i>http_status_code is 500 in case of non-existent entries</i></figcaption>
+<img src="/img/blog/2023/02/nginx_500_traces.webp" alt="spans with http status codes in attributes"/>
+<figcaption><i>http_status_code is 500 in case of non-existent entries</i></figcaption>
 </figure>
-
 
 If we’re hitting the right endpoint, the `http_status_code` shows 200.
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2023/02/nginx_200_traces.webp" alt="spans with http status codes in attributes"/>
-    <figcaption><i>http_status_code is 200 in case of hitting the right endpoint</i></figcaption>
+<img src="/img/blog/2023/02/nginx_200_traces.webp" alt="spans with http status codes in attributes"/>
+<figcaption><i>http_status_code is 200 in case of hitting the right endpoint</i></figcaption>
 </figure>
-
 
 Traces give you a detailed view of how requests are performing across each
 
 As you can see you can easily navigate and find your traces in the UI to inspect the outcome of the steps you have an interest in.
 
-## Conclusion
+## Troubleshooting Common Issues in OpenTelemetry Nginx Setup
 
-OpenTelemetry is quietly becoming the world standard for instrumenting cloud-native applications. You can instrument all components of your software system with OpenTelemetry. It is rapidly growing and being widely adopted by users. Backed by CNCF, OpenTelemetry is the best open-source standard that you can use to set up your observability framework.
+When implementing OpenTelemetry with Nginx, you might encounter some challenges. Here are solutions to common issues:
 
-Also, there is no vendor lock-in. You can send the collected data to an observability backend of your choice. An OpenTelemetry-native APM like SigNoz is suited to visualize the data collected by OpenTelemetry.
+1. **Module compatibility problems**: Ensure your Nginx version is compatible with the OpenTelemetry module. If you're using a custom-built Nginx, rebuild it with the `-add-dynamic-module` option pointing to the OpenTelemetry module source.
+2. **Configuration errors**: Double-check your `nginx.conf` and OpenTelemetry configuration files for syntax errors. Use `nginx -t` to test your Nginx configuration before restarting the service.
+3. **Trace context propagation issues**: Verify that the `opentelemetry_propagate` directive is correctly set in your Nginx configuration. Ensure that your backend services are properly extracting and injecting trace context headers.
+4. **Performance optimization**: For high-traffic scenarios, consider:
+    - Adjusting the sampling rate in your OpenTelemetry configuration
+    - Using batch processing for trace and metric exports
+    - Optimizing your Nginx configuration for performance (e.g., worker processes, keepalive connections)
+
+## Best Practices for OpenTelemetry Implementation with Nginx
+
+To ensure a robust and effective OpenTelemetry setup with Nginx:
+
+1. **Secure your implementation**:
+    - Use TLS for all communications between Nginx, the OpenTelemetry Collector, and your backend
+    - Implement proper access controls for your observability data
+2. **Scale for large deployments**:
+    - Use a distributed tracing backend that can handle your data volume
+    - Consider using a separate OpenTelemetry Collector cluster for data processing and forwarding
+3. **Implement effective sampling strategies**:
+    - Use tail-based sampling for more representative trace collection
+    - Adjust sampling rates based on your traffic patterns and observability needs
+4. **Continuously monitor and improve**:
+    - Regularly review your traces and metrics to identify optimization opportunities
+    - Keep your OpenTelemetry components and configurations up to date
+
+By following these practices, you'll create a robust, scalable observability solution that provides deep insights into your Nginx-based infrastructure.
+
+# OpenTelemetry vs Other Observability Solutions for Nginx
+
+When choosing an observability solution for Nginx, it's important to consider various factors. Here's a comparison of OpenTelemetry with other popular options:
+
+| Feature | OpenTelemetry | Nginx Plus | Datadog | ELK Stack |
+|---------|---------------|------------|---------|-----------|
+| Open Source | Yes | No | No | Yes |
+| Vendor Neutral | Yes | No | No | Partially |
+| Distributed Tracing | Yes | Limited | Yes | Yes (with APM) |
+| Metrics Collection | Yes | Yes | Yes | Yes |
+| Log Management | Yes | Yes | Yes | Yes |
+| Custom Instrumentation | Yes | Limited | Yes | Yes |
+| Language Support | Extensive | N/A | Extensive | Extensive |
+| Ease of Integration | Moderate | Easy | Easy | Moderate |
+| Scalability | High | Moderate | High | High |
+| Community Support | Strong | Limited | Strong | Strong |
+| Cloud-Native Support | Excellent | Good | Excellent | Good |
+| Cost | Free (excl. backend) | Paid | Paid | Free (self-hosted) |
+
+Key Takeaways:
+- OpenTelemetry offers the most flexibility and vendor neutrality
+    - SigNoz, an open-source APM built on OpenTelemetry, provides powerful visualization and analysis capabilities for Nginx monitoring
+- Nginx Plus provides tight integration but is limited to Nginx-specific monitoring
+- Datadog offers a comprehensive SaaS solution but at a higher cost
+- ELK Stack provides a powerful open-source alternative but requires more setup
+
+Choose the solution that best fits your specific needs, considering factors like existing infrastructure, budget, and required features.
+
+## Key Takeaways
+
+- OpenTelemetry provides a unified approach to observability for Nginx
+- Proper setup and configuration are crucial for effective monitoring
+- Distributed tracing offers insights into complex microservices architectures
+- Metrics collection helps in performance monitoring and capacity planning
+- SigNoz simplifies visualization and analysis of OpenTelemetry data
+
+## FAQs
+
+### What are the system requirements for implementing OpenTelemetry with Nginx?
+
+OpenTelemetry with Nginx requires:
+
+- Nginx version 1.18.0 or higher
+- A compatible OpenTelemetry Collector
+- Sufficient system resources to handle the additional processing (exact requirements depend on your traffic volume)
+
+### How does OpenTelemetry impact Nginx performance?
+
+The performance impact is generally minimal, typically less than 3% overhead. However, this can vary based on your configuration and traffic volume. Use sampling and optimize your setup to minimize any performance impact.
+
+### Can OpenTelemetry be used with Nginx in containerized environments?
+
+Yes, OpenTelemetry works well in containerized environments. You can include the OpenTelemetry module in your Nginx container image and configure it to send data to a Collector running as a separate service in your container orchestration platform.
+
+### How does OpenTelemetry compare to other observability solutions for Nginx?
+
+OpenTelemetry provides a more comprehensive and standardized approach compared to traditional solutions. It offers:
+
+- A unified framework for traces, metrics, and logs
+- Vendor-neutral data collection and export
+- Extensive language and framework support
+- A growing ecosystem of tools and integrations
+
+This makes OpenTelemetry a more flexible and future-proof choice for Nginx observability.
 
 ---
 
 **Related Posts**
 
-**[SigNoz - An open source OpenTelemetry APM](https://signoz.io/blog/opentelemetry-apm/)**
+[**SigNoz - An open source OpenTelemetry APM**](https://signoz.io/blog/opentelemetry-apm/)
 
-**[OpenTelemetry Collector Complete Guide](https://signoz.io/blog/opentelemetry-collector-complete-guide/)**
+[**OpenTelemetry Collector Complete Guide**](https://signoz.io/blog/opentelemetry-collector-complete-guide/)
