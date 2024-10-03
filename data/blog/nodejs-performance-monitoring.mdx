@@ -1,69 +1,324 @@
 ---
-title: Nodejs Performance Monitoring | Monitor a full-stack Nodejs application with open-source tools
+
+title: Mastering NodeJS Performance Monitoring - A Practical Guide using Open Source Tools
 slug: nodejs-performance-monitoring
-date: 2023-03-05
+date: 2024-09-30
 tags: [OpenTelemetry Instrumentation, JavaScript]
 authors: [ankit_anand, sai_deepesh]
-description: Nodejs performance monitoring can give you actionable insights into the performance of your Nodejs application. In this tutorial, we will use two open-source tools - SigNoz and OpenTelemetry to monitor a full-stack nodejs application...
+description: Learn essential techniques for Node.js performance monitoring. Optimize your applications with key metrics, tools, and best practices.
 image: /img/blog/2022/06/nodesj_performance_monitoring_cover.webp
 hide_table_of_contents: false
-keywords: [nodejs,nodejs performance monitoring,full-stack monitoring,vuejs,mongodb,express,mevn monitoring,mevn stack,open-source,apm tools,application performance monitoring]
+keywords: [NodeJS,NodeJS performance monitoring,full-stack monitoring,vuejs,mongodb,express,mevn monitoring,mevn stack,open-source,apm tools,application performance monitoring]
+
 ---
 
 <head>
-  <link rel="canonical" href="https://signoz.io/blog/nodejs-performance-monitoring/"/>
+  <script
+    type="application/ld+json"
+    dangerouslySetInnerHTML={{ __html: JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Mastering NodeJS Performance Monitoring - A Practical Guide using Open Source Tools",
+  "alternativeHeadline": "Learn essential techniques for Node.js performance monitoring and optimize your applications with key metrics, tools, and best practices",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "Ankit Anand"
+    },
+    {
+      "@type": "Person",
+      "name": "Sai Deepesh"
+    }
+  ],
+  "publisher": {
+    "@type": "Organization",
+    "name": "SigNoz",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://signoz.io/img/SigNozLogo-orange.svg"
+    }
+  },
+  "datePublished": "2024-09-30T00:00:00Z",
+  "dateModified": "2024-09-30T00:00:00Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://signoz.io/blog/nodejs-performance-monitoring/"
+  },
+  "description": "Learn essential techniques for Node.js performance monitoring. Optimize your applications with key metrics, tools, and best practices.",
+  "keywords": "NodeJS, NodeJS performance monitoring, full-stack monitoring, vuejs, mongodb, express, mevn monitoring, mevn stack, open-source, apm tools, application performance monitoring",
+  "articleSection": "Technology",
+  "inLanguage": "en",
+  "isPartOf": {
+    "@type": "Blog",
+    "name": "SigNoz Blog",
+    "url": "https://signoz.io/blog/"
+  },
+  "about": [
+    {
+      "@type": "Thing",
+      "name": "Node.js",
+      "description": "A JavaScript runtime built on Chrome's V8 JavaScript engine for server-side programming"
+    },
+    {
+      "@type": "Thing",
+      "name": "Performance Monitoring",
+      "description": "The practice of tracking and analyzing application performance metrics to ensure optimal functionality"
+    },
+    {
+      "@type": "Thing",
+      "name": "OpenTelemetry",
+      "description": "An observability framework for cloud-native software"
+    }
+  ],
+  "mentions": [
+    {
+      "@type": "SoftwareApplication",
+      "name": "OpenTelemetry",
+      "applicationCategory": "Observability Framework"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "name": "SigNoz",
+      "applicationCategory": "Application Performance Monitoring"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "name": "MongoDB",
+      "applicationCategory": "Database"
+    }
+  ],
+  "mainEntity": {
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What is Node.js performance monitoring?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Node.js performance monitoring is the practice of tracking, measuring, and analyzing various aspects of a Node.js application's behavior and resource usage. It involves collecting data on key performance indicators (KPIs) to ensure optimal application health and user experience."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Why is Node.js performance monitoring critical?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Node.js performance monitoring is critical because it helps identify and resolve issues like event loop blocking, memory leaks, and scaling problems before they impact users. It enables proactive management of application health, ensuring better user experience and preventing potential revenue loss."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What are the essential metrics for Node.js performance monitoring?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Essential metrics for Node.js performance monitoring include CPU usage, memory consumption, event loop lag, network I/O, and database query performance. Advanced metrics to consider are garbage collection, clustering efficiency, external service dependencies, and custom application metrics."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How can I implement Node.js performance monitoring?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "You can implement Node.js performance monitoring by using built-in tools, integrating third-party libraries, and implementing custom metrics. OpenTelemetry and SigNoz provide a comprehensive solution for end-to-end application monitoring, including instrumentation, data collection, storage, and visualization."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What are some best practices for effective Node.js monitoring?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Best practices for effective Node.js monitoring include establishing performance baselines, setting meaningful alerts, implementing proper error handling, conducting regular performance audits, and balancing monitoring granularity with overhead. It's also important to adapt your monitoring strategy for different deployment models, such as microservices or serverless architectures."
+        }
+      }
+    ]
+  },
+  "tutorial": {
+    "@type": "HowTo",
+    "name": "How to Implement Node.js Performance Monitoring",
+    "step": [
+      {
+        "@type": "HowToStep",
+        "name": "Set up OpenTelemetry",
+        "text": "Install OpenTelemetry dependencies and create a tracing configuration file for your Node.js application."
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Instrument your application",
+        "text": "Use OpenTelemetry to instrument your Node.js application, including frontend, backend, and database components."
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Configure SigNoz",
+        "text": "Set up SigNoz as your backend analysis tool and configure it to receive data from OpenTelemetry."
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Monitor performance metrics",
+        "text": "Use SigNoz dashboards to monitor key performance metrics, analyze traces, and identify bottlenecks in your Node.js application."
+      },
+      {
+        "@type": "HowToStep",
+        "name": "Implement best practices",
+        "text": "Apply best practices such as setting baselines, configuring alerts, and conducting regular performance audits to maintain optimal application performance."
+      }
+    ]
+  }
+}) }}
+  />
 </head>
 
-Nodejs tops the list of most widely used frameworks for server-side programming by developers. Powered by Google’s V8 engine, its performance is incredible. As a result, Nodejs has now become a critical part of the technology stack of large-scale enterprises and startups. And as nodejs is based on Javascript, it is also easier to learn and begin with.
+Node.js is one of the most popular frameworks for server-side programming. As it's based on JavaScript, it's easy to learn and widely used by both enterprises and startups. However, Node.js applications can be prone to issues like memory leaks and high CPU loads due to its dynamically typed, single-threaded nature.
 
+<Figure src="/img/blog/2024/09/NodeJS-performance-monitoring-image.webp" alt="" caption="NodeJS Performance Monitoring" />This makes performance monitoring crucial for Node.js applications. But monitoring just the web servers isn't enough - you need visibility into your entire application stack for robust performance management.
 
+In this tutorial, we'll demonstrate how to implement full-stack monitoring for a MEVN (MongoDB, Express, Vue, Node) application using OpenTelemetry and SigNoz. We'll cover:
 
-![Cover Image](/img/blog/2022/06/nodesj_performance_monitoring_cover.webp)
+- Instrumenting the sample Node.js app components
+- Monitoring Node.js performance with SigNoz dashboards
 
-Nodejs is a dynamically typed single-threaded programming language. There is a lot of freedom for the interpreter and runtime to make decisions that can easily lead to memory leaks and high CPU loads. As such, monitoring your nodejs application for performance issues is important.
+> Learn how to build a CRUD application using Vue 3, Node, Express, and MongoDB.
+> 
+> 
+> [Complete MEVN stack tutorial](https://signoz.io/blog/mevn-stack-tutorial/)
+> 
 
-But it’s not enough to monitor your nodejs web servers only. You need to monitor your entire application stack for robust application performance. In this tutorial, the sample application that we will monitor is built using the MEVN stack.
+Let's get started by learning about OpenTelemetry and SigNoz, the key tools we'll use for end-to-end application monitoring.
 
-> Learn how to build a CRUD application using Vue 3, Node, Express, and MongoDB. 
+## What is Node.js Performance Monitoring?
 
-[Complete MEVN stack tutorial](https://signoz.io/blog/mevn-stack-tutorial/)
+Node.js performance monitoring is the practice of tracking, measuring, and analyzing various aspects of a Node.js application's behavior and resource usage. It involves collecting data on key performance indicators (KPIs) to ensure optimal application health and user experience.
 
-Nodejs performance monitoring is essential to maintain and improve the application’s performance to meet increasing users’ expectations. When a user clicks on an application’s interface, the request travels from the frontend to the web servers initiating any database calls if required.
+Key components of Node.js performance monitoring include:
 
-In this tutorial, we will use OpenTelemetry and SigNoz to monitor a full-stack application. The sample app is built using these four components:
+1. **Resource usage**: CPU, memory, and disk utilization
+2. **Response times**: How quickly your application responds to requests
+3. **Error rates**: The frequency and types of errors occurring in your application
+4. **Throughput**: The number of requests your application can handle
 
-- Vue 3
-- Express
-- Nodejs
-- MongoDB
+<Figure src="/img/blog/2024/09/NodeJS-performance-monitoring-image%201.webp" alt="" caption="Key Metrics for NodeJS Performance Monitoring" />Performance monitoring differs from application logging in its focus and purpose. While logging captures specific events or errors for debugging, performance monitoring provides a broader view of your application's health and efficiency.
 
-Using OpenTelemetry and SigNoz, you can trace a user request end-to-end from the frontend to the web servers, including the database calls. Before we demonstrate how to do this with OpenTelemetry and SigNoz, let’s learn a bit about them.
+In the DevOps landscape, Node.js performance monitoring is a critical part of observability — the ability to understand your system's internal state based on its external outputs.
 
-## OpenTelemetry and SigNoz
+## Why is Node.js Performance Monitoring Critical?
 
-[OpenTelemetry](https://opentelemetry.io/) is a vendor-agnostic set of tools, APIs, and SDKs used to instrument applications to create and manage telemetry data(logs, metrics, and traces). It aims to make telemetry data a built-in feature of cloud-native software applications.
+Imagine you're running an e-commerce site during a major sale. Suddenly, response times spike, and customers start complaining about slow page loads. Without proper monitoring, you're flying blind — unable to identify or resolve the issue quickly.
+
+Node.js applications face unique challenges:
+
+1. **Event loop blocking**: Long-running operations can stall the entire application
+2. **Memory leaks**: Improper memory management can lead to crashes and poor performance
+3. **Scaling issues**: Node.js's single-threaded nature requires careful monitoring as traffic increases
+
+Proactive monitoring helps you catch these issues before they impact users. For example, monitoring helped one company identify a memory leak causing periodic crashes, saving them potential revenue loss and reputational damage.
+
+## Essential Metrics for Node.js Performance Monitoring
+
+To effectively monitor your Node.js application, focus on these key metrics:
+
+1. **CPU Usage**: High CPU usage can indicate inefficient code or the need for scaling.
+2. **Memory Consumption**: Track memory usage patterns to identify potential leaks.
+3. **Event Loop Lag**: Measures how long operations wait in the event queue — a key indicator of application responsiveness.
+4. **Network I/O**: Monitor incoming and outgoing network traffic to identify bottlenecks.
+5. **Database Query Performance**: Slow queries can significantly impact overall application performance.
+
+### Advanced Metrics to Consider
+
+As you deepen your monitoring practices, consider these advanced metrics:
+
+1. **Garbage Collection**: Frequent or long-running garbage collection can impact performance.
+2. **Clustering Efficiency**: In multi-core environments, ensure your clusters are utilized effectively.
+3. **External Service Dependencies**: Monitor the performance of APIs or services your application relies on.
+4. **Custom Application Metrics**: Track business-specific KPIs relevant to your application's goals.
+
+## How to Implement Node.js Performance Monitoring
+
+Implementing performance monitoring in your Node.js application involves several steps:
+
+1. **Use Built-in Tools**: Node.js provides basic monitoring capabilities out of the box. For example, you can use `process.memoryUsage()` to track memory consumption:
+    
+    ```jsx
+    console.log(process.memoryUsage());
+    // Output: { rss: 4935680, heapTotal: 1826816, heapUsed: 650472, external: 49879 }
+    
+    ```
+    
+2. **Integrate Third-party Libraries**: Libraries like `prom-client` can help you collect and expose metrics:
+    
+    ```jsx
+    const client = require('prom-client');
+    const counter = new client.Counter({
+      name: 'my_request_counter',
+      help: 'Number of requests processed'
+    });
+    
+    // Increment the counter in your request handler
+    app.get('/', (req, res) => {
+      counter.inc();
+      res.send('Hello World!');
+    });
+    
+    ```
+    
+3. **Implement Custom Metrics**: Track business-specific KPIs that matter to your application:
+    
+    ```jsx
+    const userSignups = new client.Counter({
+      name: 'user_signups_total',
+      help: 'Total number of user signups'
+    });
+    
+    // Increment in your signup route
+    app.post('/signup', (req, res) => {
+      // ... signup logic
+      userSignups.inc();
+    });
+    
+    ```
+    
+4. **Best Practices**:
+    - Instrument code carefully to avoid impacting performance
+    - Use sampling for high-volume metrics
+    - Aggregate data where possible to reduce storage and processing overhead
+
+## Using OpenTelemetry and SigNoz for NodeJS Performance Monitoring
+
+<a href="https://opentelemetry.io/" rel="noopener noreferrer nofollow" target="_blank">OpenTelemetry</a> is a vendor-agnostic set of tools, APIs, and SDKs used to instrument applications to create and manage telemetry data(logs, metrics, and traces). It aims to make telemetry data a built-in feature of cloud-native software applications.
 
 OpenTelemetry provides the instrumentation layer to generate and export your telemetry data to a backend. Then, you need to choose a backend tool that will provide the data storage and visualization for your telemetry data. That’s where SigNoz comes into the picture.
 
-[SigNoz](https://signoz.io/) is a full-stack open-source APM tool that provides metrics monitoring and [distributed tracing](https://signoz.io/blog/distributed-tracing-in-microservices/).
+SigNoz is an open-source application performance monitoring (APM) tool that provides comprehensive monitoring for Node.js applications. It offers features like distributed tracing, metrics monitoring, and log management in a single platform.
 
-OpenTelemetry is the way forward for cloud-native application owners who want to set up a robust observability framework. It also provides you the freedom to choose any backend analysis tool. SigNoz is built to support OpenTelemetry natively, thus making a great combo.
+<GetStartedSigNoz />
 
-## Nodejs Performance monitoring with OpenTelemetry and SigNoz
+Key features of SigNoz for Node.js performance monitoring include:
 
-To monitor the nodejs application for performance issues, we need good telemetry data. Telemetry data can be anything that tells us how the application is performing while processing user requests. Once we have that telemetry data, it needs to be visualized for actionable insights.
+1. **Auto-instrumentation**: Easily instrument your Node.js application with minimal code changes
+2. **Custom dashboards**: Create tailored views of your application's performance
+3. **Alerts**: Set up notifications for when metrics exceed defined thresholds
+4. **Trace analysis**: Identify bottlenecks in your application with detailed transaction traces
 
-OpenTelemetry helps you to generate telemetry data, as mentioned before. And SigNoz helps to store, visualize and run queries on the data. Together, OpenTelemetry and SigNoz make a great combo to monitor nodejs applications for performance issues.
+Compared to other open-source alternatives, SigNoz supports OpenTelemetry natively and offers a more integrated solution, combining metrics, traces, and logs in one platform
+
+> **Want to dive deeper into OpenTelemetry with Node.js?**
+
+Check out our comprehensive [Node.js OpenTelemetry Tutorial](https://signoz.io/opentelemetry/nodejs-tutorial-overview/). This step-by-step guide covers everything from basic instrumentation to advanced topics, helping you master OpenTelemetry implementation in Node.js applications.
+> 
+
+## NodeJS Performance Monitoring with OpenTelemetry and SigNoz
+
+To monitor the NodeJS application for performance issues, we need good telemetry data. Telemetry data can be anything that tells us how the application is performing while processing user requests. Once we have that telemetry data, it needs to be visualized for actionable insights.
+
+OpenTelemetry helps you to generate telemetry data, as mentioned before. And SigNoz helps to store, visualize and run queries on the data. Together, OpenTelemetry and SigNoz make a great combo to monitor NodeJS applications for performance issues.
 
 The first step is to instrument your application with OpenTelemetry client libraries. Instrumentation is the process of enabling your application code to generate telemetry data.
 
 We will divide the tutorial into two parts:
 
-- Instrumenting the sample nodejs app
-  - Instrumenting the frontend application made with Vuejs
-  - Instrumenting node/express server
-  - Instrumenting MongoDB database calls
-- Monitor nodejs performance with SigNoz dashboards
+- Instrumenting the sample NodeJS app
+    - Instrumenting the frontend application made with Vuejs
+    - Instrumenting node/express server
+    - Instrumenting MongoDB database calls
+- Monitor NodeJS performance with SigNoz dashboards
 
 ## Installing SigNoz
 
@@ -71,36 +326,35 @@ First of all, you need to install SigNoz. OpenTelemetry does not provide any sto
 
 SigNoz can be installed on macOS or Linux computers in just three steps by using a simple installation script.
 
-The install script automatically installs Docker Engine on Linux. However, on macOS, you must manually install [Docker Engine](https://docs.docker.com/engine/install/) before running the install script.
+The install script automatically installs Docker Engine on Linux. However, on macOS, you must manually install <a href="https://docs.docker.com/engine/install/" rel="noopener noreferrer nofollow" target="_blank">Docker Engine</a> before running the install script.
 
 ```bash
-git clone -b main https://github.com/SigNoz/signoz.git
+git clone -b main <https://github.com/SigNoz/signoz.git>
 cd signoz/deploy/
 ./install.sh
+
 ```
 
 You can visit our documentation for instructions on how to install SigNoz using Docker Swarm and Helm Charts.
 
-[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/)
-
-When you are done installing SigNoz, you can access the UI at [http://localhost:3301](http://localhost:3301/application)
+<Figure src="/img/blog/2024/09/NodeJS-performance-monitoring-deploy_docker_documentation.webp" alt="" caption="" />When you are done installing SigNoz, you can access the UI at <a href="http://localhost:3301/" rel="noopener noreferrer nofollow" target="_blank">http://localhost:3301</a>
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/common/signoz_dashboard_homepage.webp" alt="SigNoz dashboard"/>
-    <figcaption><i>SigNoz dashboard - It shows services from a sample app that comes bundled with the application</i></figcaption>
+<img src="/img/blog/common/signoz_dashboard_homepage.webp" alt="SigNoz dashboard"/>
+<figcaption><i>SigNoz dashboard - It shows services from a sample app that comes bundled with the application</i></figcaption>
 </figure>
-
 
 You can remove the sample applications from SigNoz by following the instructions [here](https://signoz.io/docs/operate/docker-standalone/#remove-the-sample-application).
 
 ## Instrumenting the full-stack application with OpenTelemetry
 
-In this section, we will be monitoring the API calls made from the frontend Vuejs application through the express and nodejs server and finally to Mongodb with OpenTelemetry.
+In this section, we will be monitoring the API calls made from the frontend Vuejs application through the express and NodeJS server and finally to Mongodb with OpenTelemetry.
 
 You can find the application code instrumented with OpenTelemetry and ready to be monitored with SigNoz [here](https://github.com/SigNoz/mevn-opentelemetry-example). Get it to your local by cloning the GitHub repo:
 
 ```bash
-git clone https://github.com/SigNoz/mevn-opentelemetry-example.git
+git clone <https://github.com/SigNoz/mevn-opentelemetry-example.git>
+
 ```
 
 In the sample app repo, the SigNoz folder is also included. You can keep your SigNoz folder anywhere you want. The section below explains how to go about setting up the MEVN application for monitoring.
@@ -115,6 +369,7 @@ Get into `/client` application and install the OpenTelemetry dependencies by run
 
 ```bash
 npm i @opentelemetry/api @opentelemetry/sdk-trace-web @opentelemetry/resources @opentelemetry/sdk-trace-base @opentelemetry/exporter-collector @opentelemetry/context-zone @opentelemetry/instrumentation-fetch @opentelemetry/instrumentation
+
 ```
 
 Now create a file called `tracing.js` in the `/src` folder, and in that file, we will be adding the required setup to enable frontend tracing.
@@ -137,7 +392,7 @@ const resource = new Resource({ "service.name": serviceName });
 const provider = new WebTracerProvider({ resource });
 
 const collector = new CollectorTraceExporter({
-  url: "http://localhost:4318/v1/traces",
+  url: "<http://localhost:4318/v1/traces>",
 });
 
 provider.addSpanProcessor(new SimpleSpanProcessor(collector));
@@ -200,6 +455,7 @@ export function traceSpan(name, func) {
     }
   });
 }
+
 ```
 
 Now import the `traceSpan` function from the `src/tracing.js` file and use it with the functions that you're using to make API calls.
@@ -235,6 +491,7 @@ methods: {
       await traceSpan("removeTodo", this.removeTodo(todo, i));
     }
   }
+
 ```
 
 Inside the `<template>` section in `App.vue`, remove `addTodo()` & `removeTodo` and use `handleAddTodo()` & `handleRemoveTodo()`:
@@ -264,6 +521,7 @@ Inside the `<template>` section in `App.vue`, remove `addTodo()` & `removeTodo` 
   </div>
   </div>
 </template>
+
 ```
 
 Now, enable CORS in the OpenTelemetry Receiver.Under SigNoz folder, open the `otel-collector-config.yaml` file. The file is located at `deploy/docker/clickhouse-setup/otel-collector-config.yaml`
@@ -274,7 +532,8 @@ You can view the file at [SigNoz GitHub repo](https://github.com/SigNoz/signoz/
 http:
   cors:
     allowed_origins:
-      - https://netflix.com  # URL of your Frontend application
+      - <https://netflix.com>  # URL of your Frontend application
+
 ```
 
 Update the URL in the config file to match your frontend application URL. For this tutorial, we will be running our frontend application on `http://localhost:8080`.
@@ -283,16 +542,16 @@ Update the URL in the config file to match your frontend application URL. For th
 http:
   cors:
     allowed_origins:
-      - http://localhost:8080
+      - <http://localhost:8080>
+
 ```
 
 {/* Here’s a snapshot from the GitHub repo. You can find the file [here](https://github.com/SigNoz/mevn-opentelemetry-example/blob/main/signoz/deploy/docker/clickhouse-setup/otel-collector-config.yaml).
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2022/06/enable_cors.webp" alt="Enabling CORS"/>
-    <figcaption><i>Enabling CORS</i></figcaption>
+<img src="/img/blog/2022/06/enable_cors.webp" alt="Enabling CORS"/>
+<figcaption><i>Enabling CORS</i></figcaption>
 </figure> */}
-
 
 After adding the changes, you need to restart the SigNoz Docker containers.
 
@@ -300,12 +559,14 @@ After adding the changes, you need to restart the SigNoz Docker containers.
 
 ```
 sudo docker compose -f docker/clickhouse-setup/docker-compose.yaml stop
+
 ```
 
 **To start/resume the running SigNoz cluster:**
 
 ```
 sudo docker compose -f docker/clickhouse-setup/docker-compose.yaml start
+
 ```
 
 <Admonition>
@@ -324,6 +585,7 @@ Now, get into `/server` and follow the below steps
 npm install --save @opentelemetry/sdk-node
 npm install --save @opentelemetry/auto-instrumentations-node
 npm install --save @opentelemetry/exporter-trace-otlp-http
+
 ```
 
 **Step 2: Create `tracing.js` file**
@@ -365,6 +627,7 @@ process.on("SIGTERM", () => {
     .catch((error) => console.log("Error terminating tracing", error))
     .finally(() => process.exit(0));
 });
+
 ```
 
 **Pass the necessary environment variable**
@@ -373,7 +636,8 @@ Once the file is created, you only need to run one last command at your terminal
 
 ```jsx
 export OTEL_EXPORTER_OTLP_ENDPOINT="<IP of SigNoz>:4318"
-export OTEL_RESOURCE_ATTRIBUTES=service.name=<service_name> \
+export OTEL_RESOURCE_ATTRIBUTES=service.name=<service_name> \\
+
 ```
 
 Replacing the placeholders in the above command for localhost:
@@ -385,8 +649,9 @@ Replacing the placeholders in the above command for localhost:
 So the final command is:
 
 ```jsx
-export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318"
+export OTEL_EXPORTER_OTLP_ENDPOINT="<http://localhost:4318>"
 export OTEL_RESOURCE_ATTRIBUTES=service.name=mevn-signoz
+
 ```
 
 Change the `scripts` of `package.json` on `server` to initiate tracing of the API calls:
@@ -396,17 +661,19 @@ Change the `scripts` of `package.json` on `server` to initiate tracing of the AP
 "scripts": {
     "start:server": "node -r ./tracing.js index.js",
     "start:client": "npm run serve --prefix '../client/'",
-    "dev": "concurrently \"npm run start:server\" \"npm run start:client\""
+    "dev": "concurrently \\"npm run start:server\\" \\"npm run start:client\\""
   },
+
 ```
 
 Now run both client & server:
 
 ```jsx
 npm run dev
+
 ```
 
-Now, the `client` should be running on [`http://localhost:8080`](http://localhost:8080/) while the `server`
+Now, the `client` should be running on <a href="http://localhost:8080/" rel="noopener noreferrer nofollow" target="_blank">`http://localhost:8080`</a> while the `server`
 runs on `http://localhost:3000`
 
 Interact with the application a bit to generate some dummy data, and wait for the application to be visible on the SigNoz dashboard.
@@ -414,64 +681,121 @@ Interact with the application a bit to generate some dummy data, and wait for th
 Below we can find the `mevn-signoz` in the list of applications being monitored.
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2022/06/mevn_signoz_dashboard.webp" alt="MEVN Example Application on Signoz"/>
-    <figcaption><i>MEVN Example Application on Signoz</i></figcaption>
+<img src="/img/blog/2022/06/mevn_signoz_dashboard.webp" alt="MEVN Example Application on Signoz"/>
+<figcaption><i>MEVN Example Application on Signoz</i></figcaption>
 </figure>
 
-
-## Monitor full-stack Nodejs application performance with SigNoz
+## Monitor full-stack NodeJS application performance with SigNoz
 
 You can monitor calls from your frontend application under the `Traces` tab of SigNoz.
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2022/06/nodejs_perf_frontend.webp" alt="Frontned monitoring on SigNoz"/>
-    <figcaption><i>Function calls from frontend being monitored on SigNoz</i></figcaption>
+<img src="/img/blog/2022/06/NodeJS_perf_frontend.webp" alt="Frontned monitoring on SigNoz"/>
+<figcaption><i>Function calls from frontend being monitored on SigNoz</i></figcaption>
 </figure>
-
 
 SigNoz comes with out-of-box charts for monitoring application metrics. You can monitor key application metrics like application latency, requests per second, error rate, etc. You can also see the list of top endpoints from your application.
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2022/06/nodejs_perf_app_metrics.webp" alt="Application metrics on SigNoz"/>
-    <figcaption><i>Monitor application metrics like latency, requests per second, error percentage, etc. with out-of-box charts</i></figcaption>
+<img src="/img/blog/2022/06/NodeJS_perf_app_metrics.webp" alt="Application metrics on SigNoz"/>
+<figcaption><i>Monitor application metrics like latency, requests per second, error percentage, etc. with out-of-box charts</i></figcaption>
 </figure>
 
-
-The `Traces` tab of SigNoz helps you analyze the tracing data collected from your nodejs application. SigNoz also lets you correlate your metrics with traces. If you want to investigate metrics of a particular endpoint, you can click on it to see the traces captured for it.
+The `Traces` tab of SigNoz helps you analyze the tracing data collected from your NodeJS application. SigNoz also lets you correlate your metrics with traces. If you want to investigate metrics of a particular endpoint, you can click on it to see the traces captured for it.
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2022/06/nodejs_perf_traces.webp" alt="Traces tab on SigNoz"/>
-    <figcaption><i>Traces of the /GET endpoint for one of the requests</i></figcaption>
+<img src="/img/blog/2022/06/NodeJS_perf_traces.webp" alt="Traces tab on SigNoz"/>
+<figcaption><i>Traces of the /GET endpoint for one of the requests</i></figcaption>
 </figure>
-
 
 SigNoz provides [Flamegraphs and Gantt charts](https://signoz.io/blog/flamegraphs/) to visualize the complete journey of user requests or transactions.
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2022/06/nodejs_perf_flamegraphs.webp" alt="Flamegraphs and Gantt Charts on SigNoz"/>
-    <figcaption><i>Flamegraphs and Gantt charts on SigNoz dashboard help you visualize the complete journey of a user request</i></figcaption>
+<img src="/img/blog/2022/06/NodeJS_perf_flamegraphs.webp" alt="Flamegraphs and Gantt Charts on SigNoz"/>
+<figcaption><i>Flamegraphs and Gantt charts on SigNoz dashboard help you visualize the complete journey of a user request</i></figcaption>
 </figure>
-
 
 SigNoz helps you trace database calls too. In the flamegraphs, you can see the calls made to the MongoDB database in the sample app.
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2022/06/nodejs_perf_mongodb.webp" alt="Trace database calls on SigNoz"/>
-    <figcaption><i>Trace Mongodb database calls with SigNoz</i></figcaption>
+<img src="/img/blog/2022/06/NodeJS_perf_mongodb.webp" alt="Trace database calls on SigNoz"/>
+<figcaption><i>Trace Mongodb database calls with SigNoz</i></figcaption>
 </figure>
 
+## Comparison of Popular Node.js Monitoring Tools
 
-## Conclusion
+When choosing a monitoring solution for your Node.js application, it's crucial to understand the strengths and limitations of each tool. Here's a comprehensive comparison of some popular Node.js monitoring tools:
 
-Nodejs performance monitoring can enable engineering teams to take the right action while troubleshooting performance issues. With SigNoz and OpenTelemetry, you can set up performance monitoring for a full-stack application using nodejs as the server-side language.
+| Tool | Type | Key Features | Pricing | Ease of Setup | Best For | Limitations |
+|------|------|--------------|---------|---------------|----------|-------------|
+| SigNoz | Open-source | - Full-stack observability<br />- Distributed tracing<br />- Custom dashboards<br />- Alerts<br />- OpenTelemetry native | Free (self-hosted)<br />Cloud option available | Moderate | Teams wanting a customizable, cost-effective solution with full control | Requires setup and maintenance for self-hosted option |
+| Datadog | Commercial | - APM<br />- Infrastructure monitoring<br />- Log management<br />- Real-time alerts<br />- ML-powered insights | Subscription-based<br />Free tier available | Easy | Large enterprises with complex, multi-cloud environments | Can be expensive for high data volumes |
+| New Relic | Commercial | - APM<br />- Distributed tracing<br />- Error tracking<br />- AI-powered insights<br />- Extensive integrations | Subscription-based<br />Free tier available | Easy | Teams needing advanced analytics and AI-driven insights | Learning curve can be steep for advanced features |
+| Prometheus + Grafana | Open-source | - Metrics collection and storage<br />- Flexible visualization<br />- Alerting<br />- Large ecosystem | Free (self-hosted) | Complex | Teams with existing Kubernetes infrastructure and strong technical expertise | Requires additional setup for distributed tracing and log management |
+| Elastic APM | Open-source<br />(Commercial features available) | - Distributed tracing<br />- Real-time monitoring<br />- Integration with ELK stack<br />- Machine learning features | Free (basic)<br />Paid features available | Moderate | Teams already using Elasticsearch or requiring strong log analysis capabilities | Can be resource-intensive and complex to set up |
+| AppDynamics | Commercial | - Business transaction monitoring<br />- Auto-discovery of app topology<br />- AI-powered root cause analysis<br />- End-user monitoring | Subscription-based | Moderate | Large enterprises requiring deep performance insights tied to business metrics | Can be expensive and complex for smaller teams |
+| Dynatrace | Commercial | - AI-powered monitoring<br />- Automatic dependency mapping<br />- Real-time business insights<br />- Extensive cloud integrations | Subscription-based | Easy | Large-scale, cloud-native applications requiring advanced AIOps capabilities | Can be overkill for smaller applications |
+| PM2 | Open-source<br />(Plus version available) | - Process management<br />- Basic monitoring<br />- Load balancing<br />- Log management | Free (open-source)<br />Plus version subscription | Easy | Small to medium-sized applications, especially in development | Limited APM features compared to dedicated monitoring tools |
 
-SigNoz provides distributed tracing, using which you can trace transactions from the frontend application to web servers along with database calls. This type of visibility is required to debug performance issues in modern applications that use distributed architectures like microservices-based architecture or serverless.
+### Factors to Consider When Choosing a Tool:
 
-OpenTelemetry makes it very convenient to instrument a full-stack application. Moreover, openTelemetry supports a wide range of web frameworks and programming languages. It is backed by [Cloud Native Computing Foundation](https://www.cncf.io/), the same foundation that incubated Kubernetes.
+1. **Application Size and Complexity**: Larger, more complex applications may benefit from more robust commercial solutions, while smaller projects might find open-source tools sufficient.
 
-If you try out SigNoz to instrument your nodejs application and face any issues, feel free to ping us in the #support channel.
+2. **Budget**: Consider both immediate costs and long-term expenses as your application scales.
 
-[![SigNoz Slack community](/img/blog/common/join_slack_cta.webp)](https://signoz.io/slack)
+3. **Team Expertise**: Some tools require more technical expertise to set up and maintain than others.
+
+4. **Integration Requirements**: Ensure the tool integrates well with your existing tech stack and other monitoring systems.
+
+5. **Scalability**: Choose a solution that can grow with your application and handle increasing data volumes.
+
+6. **Specific Monitoring Needs**: Some tools excel in particular areas like distributed tracing or log analysis. Prioritize based on your most critical monitoring requirements.
+
+By carefully evaluating these factors and the features of each tool, you can select the Node.js monitoring solution that best fits your project's needs and your team's capabilities.
+
+## Best Practices for Effective Node.js Monitoring
+
+To get the most out of your monitoring efforts:
+
+1. **Establish performance baselines**: Know what "normal" looks like for your application.
+2. **Set meaningful alerts**: Configure notifications for significant deviations from your baselines.
+3. **Implement proper error handling**: Ensure errors are caught and logged appropriately.
+4. **Conduct regular performance audits**: Periodically review your application's performance and optimize as needed.
+5. **Balance monitoring granularity with overhead**: Collect enough data to be useful without significantly impacting performance.
+
+## Common Challenges in Node.js Performance Monitoring
+
+As you implement monitoring, you may encounter these challenges:
+
+1. **Microservices complexity**: Distributed systems require distributed tracing to understand request flows.
+2. **High-volume data**: Implement sampling and aggregation to manage large amounts of monitoring data.
+3. **Root cause analysis**: Correlate metrics, logs, and traces to quickly identify the source of issues.
+4. **Serverless monitoring**: Adapt your monitoring strategy for serverless Node.js deployments, which have unique characteristics.
+
+## Key Takeaways
+
+- Node.js performance monitoring is essential for maintaining application health and user satisfaction
+- Focus on key metrics like CPU usage, memory consumption, event loop lag, and I/O performance
+- Implement monitoring using a combination of built-in tools, third-party libraries, and best practices
+- Regular performance audits and proactive monitoring lead to better application reliability and scalability
+
+## FAQs
+
+### What are the most important metrics to monitor in a Node.js application?
+
+The most critical metrics include CPU usage, memory consumption, event loop lag, and I/O performance. These provide a comprehensive view of your application's health and performance.
+
+### How often should I review my Node.js application's performance data?
+
+Review your performance data regularly — daily for critical applications, and at least weekly for less critical ones. Set up alerts for immediate notification of significant issues.
+
+### Can Node.js performance monitoring impact my application's performance?
+
+While monitoring does add some overhead, modern tools and best practices minimize this impact. The benefits of early issue detection typically outweigh the slight performance cost.
+
+### How do I choose between different Node.js monitoring tools and platforms?
+
+Consider your specific needs, budget, and technical requirements. Evaluate factors like ease of use, integration capabilities, scalability, and support. Open-source solutions like SigNoz offer a good balance of features and flexibility for many teams.
 
 ---
 
