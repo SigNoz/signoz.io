@@ -1122,6 +1122,11 @@ const docsSideNav = [
     items: [
       {
         type: 'doc',
+        route: '/docs/migration/migrate-from-datadog',
+        label: 'Migrate From Datadog',
+      },
+      {
+        type: 'doc',
         route: '/docs/tutorial/jvm-metrics',
         label: 'Spring Boot JVM Metrics',
       },
