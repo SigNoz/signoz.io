@@ -1,4 +1,4 @@
-"use client";  // To ensure client-side interactivity
+"use client"; // To ensure client-side interactivity
 
 import React, { useState, useEffect } from 'react';
 import { ClipboardIcon, ArrowDownTrayIcon } from '@heroicons/react/24/solid';
@@ -87,12 +87,23 @@ const Dashboards = () => {
 
   return (
     <div className="container mx-auto px-4 py-12 bg-black-900">
-      {/* Page Heading and Description */}
-      <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold text-white mb-2">SigNoz Dashboards</h1>
-        <p className="text-lg text-gray-400">
-          Explore and download a variety of SigNoz dashboards in JSON format for monitoring your infrastructure.
-        </p>
+      {/* Page Heading with Request Button */}
+      <div className="flex justify-between items-center mb-8">
+        <div className="text-left">
+          <h1 className="text-4xl font-bold text-white mb-2">SigNoz Dashboards</h1>
+          <p className="text-lg text-gray-400">
+            Browse a collection of pre-built SigNoz dashboards designed to monitor and gain insights about your infrastructure
+          </p>
+        </div>
+        <div>
+          <a
+            href="https://github.com/SigNoz/dashboards/issues/new"
+            target="_blank"
+            className="bg-gray-600 hover:bg-gray-500 text-gray-300 font-semibold py-2 px-4 rounded-lg text-sm transition-colors duration-200 ease-in-out border border-gray-500"
+          >
+            Request a Dashboard
+          </a>
+        </div>
       </div>
 
       {/* Search Bar */}
@@ -116,21 +127,21 @@ const Dashboards = () => {
       {/* Conditional Rendering for No Dashboards Found */}
       {filteredDashboards.length === 0 ? (
         <div className="flex flex-col items-center justify-center mt-8">
-            <div className="p-6 border border-gray-700 bg-gray-800 text-center rounded-lg">
+          <div className="p-6 border border-gray-700 bg-gray-800 text-center rounded-lg">
             <p className="text-xl font-semibold text-white mb-4">
-                No Dashboard Found
+              No Dashboard Found
             </p>
             <p className="text-gray-400 mb-6">
-                Request a {' '}
-                <a
+              You can create an issue to request a new dashboard on our{' '}
+              <a
                 href="https://github.com/SigNoz/dashboards/issues/new"
                 target="_blank"
                 className="text-blue-500 hover:text-blue-400"
-                >
-                new Dashboard
-                </a>
+              >
+                GitHub repository
+              </a>.
             </p>
-            </div>
+          </div>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -151,7 +162,7 @@ const Dashboards = () => {
               )}
 
               {/* Icon Group */}
-              <div className="flex space-x-4 mt-auto">
+              <div className="flex justify-end space-x-4 mt-auto">
                 {/* Download Button */}
                 <div className="group relative">
                   <button
