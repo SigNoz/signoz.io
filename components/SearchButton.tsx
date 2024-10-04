@@ -3,7 +3,7 @@ import { TrieveModalSearch, TrieveSDK } from 'trieve-search-component'
 import 'trieve-search-component/dist/index.css'
 
 const trieve = new TrieveSDK({
-  apiKey: 'tr-UPjrAOp35kGrJWM1IvODj4zVWTdGgQxI',
+  apiKey: 'tr-cK2MylVI0my78NUoafAiTvvmpdktntO3',
   datasetId: '4650e231-7857-45aa-beb1-cb52006a2460',
 })
 
@@ -18,6 +18,19 @@ const SearchButton = () => {
             key: '/',
           },
         ]}
+        defaultSearchQueries={[
+          "App Service Diagnostic Settings EventHub",
+          "Logstash to SigNoz configuration tutorial",
+          "EventHub and App Service logging integration",
+        ]}
+        defaultAiQuestions={[
+          "What is SigNoz?",
+          "How to change retention period?",
+          "How do I install SigNoz?",
+        ]}
+        brandColor="#E75536"
+        brandName='SigNoz'
+        brandLogoImgSrcUrl="https://avatars.githubusercontent.com/u/76905799?s=200&v=4"
         ButtonEl={() => (
           <div className="-mt-1 flex min-h-8 items-center justify-between rounded-full sm:bg-signoz_slate-500 pl-4 pr-0 sm:pr-4 pt-1 pb-0 sm:pb-1">
             <div className="mr-4 flex items-center gap-2">
