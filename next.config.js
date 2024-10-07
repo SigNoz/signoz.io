@@ -13,7 +13,8 @@ const ContentSecurityPolicy = `
   media-src *;
   connect-src *;
   font-src * 'self';
-  frame-src * giscus.app youtube.com
+  frame-src * giscus.app youtube.com;
+  frame-ancestors 'self' http://localhost:3301 https://signoz.io;
 `
 
 const securityHeaders = [
