@@ -1,18 +1,25 @@
 ---
 date: 2024-06-06
-title: Messaging Queues
+title: Monitor Kafka Service
 id: kafka
 ---
 
-Welcome to the Messaging Queues feature guide for our observability product. This documentation provides a comprehensive, ready-to-use guide to set up client-side instrumentation and metrics collection for Kafka using OpenTelemetry and SigNoz. You will learn how to monitor brokers, topics, consumers, producers, and client interactions effectively.
+{/* This documentation provides a comprehensive, ready-to-use guide to set up client-side instrumentation and metrics collection for Kafka using OpenTelemetry and 
+SigNoz. You will learn how to monitor brokers, topics, consumers, producers, and client interactions effectively. */}
 
-![Kafka OpenTelemetry SigNoz Integration](assets/kafka-otel-signoz.png)
 
-**Note:**
-1. This guide serves as a reference for production-grade Kafka monitoring and instrumentation. It is intended to help you understand the complexities involved.
-2. All tools used are open source and licensed under the Apache and MIT licenses.
+<figure data-zoomable align="center">
+    <img
+      src="/img/blog/2024/05/kafka-monitoring/request_flow.png"
+      alt="A general request flow in a Kafka setup"
+    />
+    <figcaption>
+      <i>
+        General request flow in a Kafka setup
+      </i>
+    </figcaption>
+</figure>
 
----
 
 ## Table of Contents
 
@@ -32,19 +39,56 @@ Welcome to the Messaging Queues feature guide for our observability product. Thi
 
 ## Introduction
 
-This guide provides step-by-step instructions to set up Kafka with OpenTelemetry and SigNoz for comprehensive metrics collection and monitoring. Soon, we will introduce deep correlation and insights with producer and consumer spans with minimal configurations, enabling users to gain deep insights into their Kafka clusters down to every request.
+{/* Description about kafka and its different components */}
+
+Kafka is a widely-used distributed messaging system designed to handle large volumes of real-time data. It is commonly employed for building scalable, 
+fault-tolerant data pipelines and stream processing systems. Kafka allows producers to send messages to topics, which are partitioned to support scalability, 
+and consumers to subscribe and process these messages asynchronously. 
+
+Key components of Kafka include:
+
+- **Producers**: Applications that publish messages to Kafka topics.
+- **Consumers**: Applications that subscribe to topics and consume messages.
+- **Brokers**: Kafka servers that manage data flow and ensure message persistence.
+- **Topics**: Categories to which producers send messages and consumers subscribe to.
+- **Partitions**: Divisions within a topic to ensure scalability and parallel processing.
+- **Consumer Groups**: Groups of consumers that allow load distribution across multiple instances.
+- **ZooKeeper/KRaft**: Manages coordination between brokers (in older Kafka versions, ZooKeeper is used; newer versions use KRaft).
+
+
+In this documentation, we will guide you through setting up Kafka monitoring with OpenTelemetry and SigNoz. You'll learn how to instrument Kafka's 
+components—producers, consumers, topics, and brokers—so that you can collect key metrics, traces and logs. This will help you gain deep insights into the 
+performance and behavior of your Kafka cluster.
+
+
+
+<figure data-zoomable align="center">
+    <img
+      src="/img/blog/2024/05/kafka-monitoring/kafka-otel-signoz.png"
+      alt="Kafka integrated with OpenTelemetry for collecting metrics, traces and logs, visualized in SigNoz"
+    />
+    <figcaption>
+      <i>
+       Kafka integrated with OpenTelemetry for collecting metrics, traces and logs, visualized in SigNoz
+      </i>
+    </figcaption>
+</figure>
+
 
 ---
 
 ## Prerequisites
 
-Before you begin, ensure you have the following:
+Before you begin, ensure the following prerequisites are met:
 
-- **Kafka**: Installed on your system (VM, container, or local machine).
-- **Java Development Kit (JDK)**: Installed and configured.
-- **Maven**: For building Java applications.
-- **SigNoz Account**: [Sign up for SigNoz Cloud](https://signoz.io/docs/cloud/) or prepare a local SigNoz setup.
-- **OpenTelemetry Collector**: Familiarity with OpenTelemetry components.
+1. **Java Development Kit (JDK)**: Ensure that JDK 8 or higher is installed on your system.
+2. **Apache Kafka**: Kafka should be installed and running for your environment.
+3. **Kafka Producer and Consumer Applications**: You will need Kafka producer and consumer applications in Java (Support for other languages will be added soon).
+4. **Kafka Client Library**: Make sure the Kafka client libraries are included in your project. You can find the official Kafka client libraries from Apache [here](https://mvnrepository.com/artifact/org.apache.kafka/kafka-clients).
+5. **OpenTelemetry Java Agent**: Download the OpenTelemetry Java auto-instrumentation agent JAR. Follow the setup guide from the official OpenTelemetry documentation [here](https://opentelemetry.io/docs/zero-code/java/agent/getting-started/) or directly download the latest agent JAR from [here](https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar).
+
+Once these are set up, you will be ready to proceed with Kafka monitoring and instrumentation.
+
 
 ---
 
@@ -58,20 +102,25 @@ This guide follows these primary steps:
 4. [SigNoz Setup](#step-4-signoz-setup)
 5. [OpenTelemetry Collector Setup](#step-5-opentelemetry-collector-setup)
 
-For simplicity, Steps 1, 2, and 3 are assumed to be performed on the same host (VM, laptop, or containerized environment).
+{/* For simplicity, Steps 1, 2, and 3 are assumed to be performed on the same host (VM, laptop, or containerized environment). */}
 
----
+
+<Tabs>
+<TabItem value="Local" label="Local" default>
+
+
+<Admonition type="info">
+The below steps are valid for Linux and MacOS.
+</Admonition>
 
 ### Step 1: Kafka Setup
 
 #### 1.1 Kafka Installation
 
-[Download the latest](https://www.apache.org/dyn/closer.cgi?path=/kafka/3.7.0/kafka_2.13-3.7.0.tgz) Kafka release and extract it:
+[Download the latest](https://kafka.apache.org/quickstart#quickstart_download) Kafka release and extract it.
 
-{/* Should this be latest release or the one mentioned in the README - https://github.com/shivanshuraj1333/kafka-opentelemetry-instrumentation/blob/vm-setup/README.md#step-1-kafka-setup */}
-
+For example, if the latest release is `2.13-3.7.0` then you can extract it using the follwing command:
 ```bash
-# Download Kafka
 
 # Extract the downloaded Kafka folder
 tar -xzf kafka_2.13-3.7.0.tgz
@@ -81,7 +130,7 @@ cd kafka_2.13-3.7.0
 
 #### 1.2 Start Kafka 
 
-Kafka can be started using ZooKeeper or KRaft. We will use ZooKeeper:
+Kafka can be started using ZooKeeper or [KRaft](https://kafka.apache.org/quickstart#quickstart_startserver). We will use ZooKeeper:
 
 ```bash
 bin/zookeeper-server-start.sh config/zookeeper.properties
@@ -91,7 +140,13 @@ bin/zookeeper-server-start.sh config/zookeeper.properties
 
 Create two server properties files `s1.properties` and `s2.properties`to start two brokers:
 
+<Admonition type="info">
+Make sure you are inside the kafka folder that you extracted in the step before.
+</Admonition>
+
 ```bash
+# make sure you are inside the extracted kafka folder
+
 cp config/server.properties config/s1.properties
 cp config/server.properties config/s2.properties
 ```
@@ -105,9 +160,10 @@ vi config/s1.properties
 Add the following configurations:
 
 ```
-broker.id=0
+broker.id=1
 listeners=PLAINTEXT://localhost:9092
 log.dirs=/tmp/kafka_logs-1
+zookeeper.connect=localhost:2181
 ```
 
 Edit `s2.properties`:
@@ -119,9 +175,10 @@ vi config/s2.properties
 Add the following configurations:
 
 ```
-broker.id=1
+broker.id=2
 listeners=PLAINTEXT://localhost:9093
 log.dirs=/tmp/kafka_logs-2
+zookeeper.connect=localhost:2181
 ```
 
 Start Broker 1 with JMX port enabled:
@@ -176,58 +233,41 @@ You should see the messages you produced.
 
 #### 2.1 Java Agent Setup
 
-Ensure the OpenTelemetry Java agent is present:
-
-{/* We have to tell the user to clone the repository at the start itself ? - https://github.com/shivanshuraj1333/kafka-opentelemetry-instrumentation/tree/vm-setup */}
+Install the latest OpneTelemetry Java Agent:
 
 ```bash
-cd kafka-opentelemetry-instrumentation/opentelemetry-javagent
-ls | grep opentelemetry-javaagent.jar
-# Expected output: opentelemetry-javaagent.jar
+wget https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar
 ```
 
-#### 2.2 (Optional) Install the Latest Java Agent
-
-If you prefer to use the latest version of the Java agent:
-
-```bash
-cd kafka-opentelemetry-instrumentation/opentelemetry-javagent
-rm -f opentelemetry-javaagent.jar
-curl -L -o opentelemetry-javaagent.jar https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar
-```
-
-#### 2.3 (Optional) Configure OpenTelemetry Java Agent
+#### 2.2 (Optional) Configure OpenTelemetry Java Agent
 
 Refer to the [OpenTelemetry Java Agent configurations](https://opentelemetry.io/docs/zero-code/java/agent/) for advanced setup options.
+
 
 ### Step 3: Java Producer-Consumer App Setup
 
 #### 3.1 Running the Producer and Consumer Apps with OpenTelemetry Java Agent
 
-You can either use the JAR files present in the `target` directories of `kafka-app-otel` or build them yourself. 
 Ensure you have Java and Maven installed.
 
-**Navigate to Project Root:**
 
-```bash
-cd kafka-opentelemetry-instrumentation
-```
+**Compile your Java producer and consumer applications:** Ensure your producer and consumer apps are compiled and ready to run.
 
 **Run Producer App with Java Agent:**
 
 ```bash
-java -javaagent:${PWD}/opentelemetry-javagent/opentelemetry-javaagent.jar \
+java -javaagent:/path/to/opentelemetry-javaagent.jar \
      -Dotel.service.name=producer-svc \
      -Dotel.traces.exporter=otlp \
      -Dotel.metrics.exporter=otlp \
      -Dotel.logs.exporter=otlp \
-     -jar ${PWD}/kafka-app-otel/kafka-producer/target/kafka-producer-1.0-SNAPSHOT-jar-with-dependencies.jar
+     -jar /path/to/your/producer.jar
 ```
 
 **Run Consumer App with Java Agent:**
 
 ```bash
-java -javaagent:${PWD}/opentelemetry-javagent/opentelemetry-javaagent.jar \
+java -javaagent:/path/to/opentelemetry-javaagent.jar \
      -Dotel.service.name=consumer-svc \
      -Dotel.traces.exporter=otlp \
      -Dotel.metrics.exporter=otlp \
@@ -235,6 +275,33 @@ java -javaagent:${PWD}/opentelemetry-javagent/opentelemetry-javaagent.jar \
      -Dotel.instrumentation.kafka.producer-propagation.enabled=true \
      -Dotel.instrumentation.kafka.experimental-span-attributes=true \
      -Dotel.instrumentation.kafka.metric-reporter.enabled=true \
-     -jar ${PWD}/kafka-app-otel/kafka-consumer/target/kafka-consumer-1.0-SNAPSHOT-jar-with-dependencies.jar
+     -jar /path/to/your/consumer.jar
 ```
 
+### Step 4: OpenTelemetry Collector Setup
+
+Set up the OpenTelemetry Collector to collect JMX metrics from Kafka and spans from producer and consumer clients, then forward them to SigNoz.
+
+4.1 **Download the JMX Metrics Collector**
+
+Download the JMX metrics collector necessary for Kafka metrics collection. 
+Download the 
+
+4.2 Install the OpenTelemetry Collector
+Install the local OpenTelemetry Collector Contrib using the provided configuration.
+
+**Using the Binary:**
+
+Download the OpenTelemetry Collector Contrib binary from the official releases.
+
+Place the binary in the root of your project directory.
+
+Run the collector with the provided configuration:
+
+```bash
+./otelcol-contrib --config ${PWD}/collector/collector-contrib-config.yaml
+```
+
+</TabItem>
+
+</Tabs>
