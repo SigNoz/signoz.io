@@ -1127,6 +1127,11 @@ const docsSideNav = [
       },
       {
         type: 'doc',
+        route: '/docs/userguide/otel-dd-receiver',
+        label: 'Using Datadog Receiver',
+      },
+      {
+        type: 'doc',
         route: '/docs/tutorial/jvm-metrics',
         label: 'Spring Boot JVM Metrics',
       },
