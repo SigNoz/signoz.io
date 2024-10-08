@@ -1122,16 +1122,6 @@ const docsSideNav = [
     items: [
       {
         type: 'doc',
-        route: '/docs/migration/migrate-from-datadog',
-        label: 'Migrate From Datadog',
-      },
-      {
-        type: 'doc',
-        route: '/docs/userguide/otel-dd-receiver',
-        label: 'Using Datadog Receiver',
-      },
-      {
-        type: 'doc',
         route: '/docs/tutorial/jvm-metrics',
         label: 'Spring Boot JVM Metrics',
       },
@@ -1264,6 +1254,19 @@ const docsSideNav = [
         type: 'doc',
         route: '/docs/aws-monitoring/lambda-logs',
         label: 'AWS Lambda',
+      },
+    ],
+  },
+  {
+    label: 'Migrate From Datadog',
+    type: 'category',
+    isExpanded: false,
+    route: '/docs/migration/migrate-from-datadog',
+    items: [
+      {
+        type: 'doc',
+        route: '/docs/migration/opentelemetry-datadog-receiver',
+        label: 'Using Datadog OTLP receiver',
       },
     ],
   },
