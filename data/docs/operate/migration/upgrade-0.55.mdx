@@ -139,7 +139,7 @@ Flags:
 - `-password` : Specify password of clickhouse. `default=""`
 
 
-## Migrate Data From Old Table to New Table.
+## Migrate Data from Old Table to New Table
 
 If you already kept SigNoz version `>=0.53` && `<v0.55` running for at-least 15 days i.e the default retention period this is not required as data will already be backfilled.
 
@@ -155,11 +155,11 @@ For migrating the data you will need to get the start and end timestamp which is
   clickhouse client
   ```
 * Get the starting timestamp 
-  ```
+  ```sql
   select timestamp from signoz_logs.distributed_logs order by timestamp asc limit 1
   ```
 * Get the ending timestamp
-  ```
+  ```sql
   select timestamp from signoz_logs.distributed_logs_v2 order by timestamp asc limit 1
   ```
   Incase you find empty response for the above query, please make sure that you upgraded to version `>=0.53` first.
@@ -167,17 +167,17 @@ For migrating the data you will need to get the start and end timestamp which is
 ### For Kubernetes
 
 - Exec into your clickhouse container
-    ```bash
-    kubectl exec -n platform -it chi-my-release-clickhouse-cluster-0-0-0 -- sh
+  ```bash
+  kubectl exec -n platform -it chi-my-release-clickhouse-cluster-0-0-0 -- sh
 
-    clickhouse client
-    ```
+  clickhouse client
+  ```
 * Get the starting timestamp 
-   ```
+  ```sql
   select timestamp from signoz_logs.distributed_logs order by timestamp asc limit 1
   ```
 * Get the ending timestamp
-  ```
+  ```sql
   select timestamp from signoz_logs.distributed_logs_v2 order by timestamp asc limit 1
   ```
   Incase you find empty response for the above query, please make sure that you upgraded to version `>=0.53` first.
@@ -194,11 +194,10 @@ docker run --name signoz-migrate-55-data --network clickhouse-setup_default \
 
 Please replace `<START_TIMESTAMP>` and `<END_TIMESTAMP>`
 
-Here 
-* **start_ts** is the starting timestamp for the logs data to be migrated
-* **end_ts** is the ending timestamp for the logs data to be migrated
-* **batch_duration** is the window size of the data that will be fetched from the old table
-* **batch_size** is the size of the batches that will be written to the new table
+
+<Admonition >
+For more info on the args please check [this](#data-migrator-command-line-interface-cli-flags).
+</Admonition>
 
 Steps to check logs:
 
@@ -206,10 +205,10 @@ Steps to check logs:
 docker logs -f signoz-migrate-55-data
 ```
 
-In case of failure and you have to run the script again, 
+In case of any failure, you have to run the script again with updated ending timestamp.
 
 * Get the updated ending timestamp
-  ```
+  ```sql
   select timestamp from signoz_logs.distributed_logs_v2 order by timestamp asc limit 1
   ```
 * Make sure to cleanup the container before running the migration script again. 
@@ -224,7 +223,7 @@ In case of failure and you have to run the script again,
 
 * Create a `pod.yaml` file
 
-```
+```yaml
 apiVersion: v1
 kind: Pod
 metadata:
@@ -235,8 +234,8 @@ spec:
     - name: signoz-migrate-data
       image: signoz/migrate:0.55-data
       args:
-        - "-host=my-release-clickhouse"
-        - "-dest_host=my-release-clickhouse"
+        - "-host=<RELEASE>-clickhouse"
+        - "-dest_host=<RELEASE>-clickhouse"
         - "-username=admin"
         - "-dest_username=admin"
         - "-password=<ADMIN_PASSWORD>"
@@ -251,7 +250,12 @@ spec:
           memory: 1Gi
 ```
 
-Please replace `<ADMIN_PASSWORD>`, `<START_TIMESTAMP>` and `<END_TIMESTAMP>`
+Please replace `<RELEASE>`, `<ADMIN_PASSWORD>`, `<START_TIMESTAMP>` and `<END_TIMESTAMP>`
+
+<Admonition >
+For more info on the args please check [this](#data-migrator-command-line-interface-cli-flags).
+</Admonition>
+
 
 To get the `<ADMIN_PASSWORD>`
 ```bash
@@ -265,11 +269,13 @@ ADMIN_PASSWORD=$(
 echo $<ADMIN_PASSWORD>
 ```
 
-Here 
-* **start_ts** is the starting timestamp for the logs data to be migrated
-* **end_ts** is the ending timestamp for the logs data to be migrated
-* **batch_duration** is the window size of the data that will be fetched from the old table
-* **batch_size** is the size of the batches that will be written to the new table
+
+Now, create the `signoz-migrate-data` pod using the YAML:
+
+  ```yaml
+  kubectl -n <NAMESPACE> apply -f pod.yaml
+  ```
+
 
 Steps to check logs:
 
@@ -277,9 +283,9 @@ Steps to check logs:
 kubectl -n $NAMESPACE logs -f signoz-migrate-data
 ```
 
-In case of failure and you have to run the script again, 
+In case of any failure, you have to run the script again with updated ending timestamp.
 * Get the updated ending timestamp
-  ```
+  ```sql
   select timestamp from signoz_logs.distributed_logs_v2 order by timestamp asc limit 1
   ```
 * Make sure to cleanup the container before running the migration script again. 
@@ -291,3 +297,23 @@ In case of failure and you have to run the script again,
 ## In case of Upgrade Failure
 
 If you face any issue, reach out to us on [Slack](https://signoz.io/slack).
+
+
+## Data Migrator Command-Line Interface (CLI) Flags
+
+There are the flags for data migrator which can be customized based on different use-cases.
+
+Flags:
+
+- `-port` : Specify port of clickhouse. `default=9000`
+- `-host` : Specify host of clickhouse. `default=127.0.0.1`
+- `-username` : Specify user name of clickhouse. `default=default`
+- `-password` : Specify password of clickhouse. `default=""`
+- `-dest_port` : Specify dest port of clickhouse. `default=9000`
+- `-dest_host` : Specify dest host of clickhouse. `default=127.0.0.1`
+- `-dest_username` : Specify dest user name of clickhouse. `default=default`
+- `-dest_password` : Specify dest password of clickhouse. `default=""`
+- `-start_ts` : Specify starting timestamp for the logs data to be migrated
+- `-end_ts` : Specify ending timestamp for the logs data to be migrated
+- `-batch_duration` : Specify window size of the data that will be fetched from the old table
+- `-batch_size` : Specify size of the batches that will be written to the new table
