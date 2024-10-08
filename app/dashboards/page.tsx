@@ -2,13 +2,11 @@
 
 import React, { useState } from 'react';
 import { ClipboardIcon, ArrowDownTrayIcon } from '@heroicons/react/24/solid';
-import dashboards from './dashboards-list.json'; // Importing the dashboards list from the local JSON file
+import dashboards from './dashboards-list.json'; 
 
-// Accessing environment variables
 const API_URL = process.env.NEXT_PUBLIC_SIGNOZ_CMS_API_URL;
 const DASHBOARD_API_PATH = process.env.NEXT_PUBLIC_SIGNOZ_CMS_DASHBOARD_PATH;
 
-// Function to send search query to Strapi (Dashboard Search collection type)
 const logSearchQueryToStrapi = async (query: string) => {
   try {
     const response = await fetch(`${API_URL}${DASHBOARD_API_PATH}`, {
@@ -32,44 +30,42 @@ const logSearchQueryToStrapi = async (query: string) => {
   }
 };
 
-// Function to check if the JSON exists by making a HEAD request
 const checkJSONExists = async (url: string) => {
   try {
     const response = await fetch(url, { method: 'HEAD' });
-    return response.ok; // Returns true if the file exists, false otherwise
+    return response.ok; 
   } catch (error) {
     console.error("Error checking JSON existence:", error);
     return false;
   }
 };
 
-// Function to fetch the JSON and trigger download
 const downloadJSON = async (url: string, filename: string, setError: (message: string | null) => void) => {
-  const jsonExists = await checkJSONExists(url); // Check if the file exists
+  const jsonExists = await checkJSONExists(url); 
 
   if (!jsonExists) {
-    setError("JSON doesn't exist for this dashboard."); // If file doesn't exist, show error
+    setError("JSON doesn't exist for this dashboard."); 
     return;
   }
 
   try {
     const response = await fetch(url);
-    const data = await response.blob(); // Fetch the data as a Blob (binary large object)
-    const urlObject = window.URL.createObjectURL(data); // Create a URL for the Blob
+    const data = await response.blob(); 
+    const urlObject = window.URL.createObjectURL(data); 
 
-    // Create an invisible download link
+    
     const link = document.createElement('a');
     link.href = urlObject;
     link.download = filename;
 
-    // Append the link to the document and trigger the click
+
     document.body.appendChild(link);
     link.click();
 
-    // Cleanup
+    
     document.body.removeChild(link);
     window.URL.revokeObjectURL(urlObject);
-    setError(null); // Clear the error message after successful download
+    setError(null); 
   } catch (error) {
     console.error('Error downloading the JSON file:', error);
     setError('Error downloading the JSON file.');
@@ -78,29 +74,26 @@ const downloadJSON = async (url: string, filename: string, setError: (message: s
 
 const Dashboards = () => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [copiedNotification, setCopiedNotification] = useState<{ [key: string]: boolean }>({}); // Track which card has the copied notification
+  const [copiedNotification, setCopiedNotification] = useState<{ [key: string]: boolean }>({}); 
   const [errorMessages, setErrorMessages] = useState<{ [key: string]: string | null }>({});
-  const [hasLogged, setHasLogged] = useState(false); // Track whether the search has already been logged
+  const [hasLogged, setHasLogged] = useState(false); 
 
   const filteredDashboards = dashboards.filter((dashboard) =>
     dashboard.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Function to log search query when user presses "Enter" or input loses focus
   const handleSearchSubmit = (event) => {
     if ((event.key === 'Enter' || event.type === 'blur') && !hasLogged) {
       if (searchQuery.trim()) {
         logSearchQueryToStrapi(searchQuery);
-        setHasLogged(true); // Set flag to true after logging the query
+        setHasLogged(true); 
       }
     }
   };
 
-  // Reset the logged state when the search query changes
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
-    setHasLogged(false); // Allow logging again when the search query changes
-  };
+    setHasLogged(false); 
 
   const handleSetErrorMessage = (id: number, message: string | null) => {
     setErrorMessages((prev) => ({ ...prev, [id]: message }));
@@ -112,8 +105,8 @@ const Dashboards = () => {
       const json = await response.json();
 
       await navigator.clipboard.writeText(JSON.stringify(json, null, 2));
-      setCopiedNotification((prev) => ({ ...prev, [dashboardId]: true })); // Set the notification for the relevant card
-      setTimeout(() => setCopiedNotification((prev) => ({ ...prev, [dashboardId]: false })), 2000); // Clear notification after 2 seconds
+      setCopiedNotification((prev) => ({ ...prev, [dashboardId]: true })); 
+      setTimeout(() => setCopiedNotification((prev) => ({ ...prev, [dashboardId]: false })), 2000); 
     } catch (error) {
       handleSetErrorMessage(dashboardId, "JSON doesn't exists.");
     }
@@ -147,9 +140,9 @@ const Dashboards = () => {
           placeholder="Search dashboards"
           className="w-full max-w-lg p-3 rounded-lg border border-gray-700 bg-gray-800 text-gray-300 placeholder-gray-500"
           value={searchQuery}
-          onChange={handleSearchChange} // Track the search query
-          onKeyDown={handleSearchSubmit} // Log search query when pressing "Enter"
-          onBlur={handleSearchSubmit} // Log search query when the input loses focus
+          onChange={handleSearchChange} 
+          onKeyDown={handleSearchSubmit} 
+          onBlur={handleSearchSubmit} 
         />
       </div>
 
