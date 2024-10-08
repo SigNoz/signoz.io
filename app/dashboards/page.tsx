@@ -4,11 +4,9 @@ import React, { useState } from 'react';
 import { ClipboardIcon, ArrowDownTrayIcon } from '@heroicons/react/24/solid';
 import dashboards from './dashboards-list.json'; // Importing the dashboards list from the local JSON file
 
-// Use environment variables for API URL and path
 const API_URL = process.env.NEXT_PUBLIC_SIGNOZ_CMS_API_URL;
 const DASHBOARD_API_PATH = process.env.NEXT_PUBLIC_SIGNOZ_CMS_DASHBOARD_PATH;
 
-// Function to send search query to Strapi (Dashboard Search collection type)
 const logSearchQueryToStrapi = async (query) => {
   try {
     const response = await fetch(`${API_URL}${DASHBOARD_API_PATH}`, {
@@ -36,26 +34,24 @@ const Dashboards = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [notification, setNotification] = useState<string | null>(null);
   const [errorMessages, setErrorMessages] = useState<{ [key: string]: string | null }>({});
-  const [hasLogged, setHasLogged] = useState(false); // Track whether the search has already been logged
+  const [hasLogged, setHasLogged] = useState(false); 
 
   const filteredDashboards = dashboards.filter((dashboard) =>
     dashboard.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Function to log search query when user presses "Enter" or input loses focus
   const handleSearchSubmit = (event) => {
     if ((event.key === 'Enter' || event.type === 'blur') && !hasLogged) {
       if (searchQuery.trim()) {
         logSearchQueryToStrapi(searchQuery);
-        setHasLogged(true); // Set flag to true after logging the query
+        setHasLogged(true); 
       }
     }
   };
 
-  // Reset the logged state when the search query changes
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
-    setHasLogged(false); // Allow logging again when the search query changes
+    setHasLogged(false); 
   };
 
   return (
