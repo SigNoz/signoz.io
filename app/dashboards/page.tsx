@@ -58,7 +58,7 @@ const downloadJSON = async (url: string, filename: string, setError: (message: s
     link.href = urlObject;
     link.download = filename;
 
-
+    
     document.body.appendChild(link);
     link.click();
 
@@ -94,6 +94,7 @@ const Dashboards = () => {
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
     setHasLogged(false); 
+  };
 
   const handleSetErrorMessage = (id: number, message: string | null) => {
     setErrorMessages((prev) => ({ ...prev, [id]: message }));
