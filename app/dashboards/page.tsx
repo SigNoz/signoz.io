@@ -134,6 +134,33 @@ const Dashboards = () => {
         </div>
       </div>
 
+    {/* Video and Text Section */}
+      {/* <div className="flex flex-col lg:flex-row justify-between items-center mb-8 lg:space-x-12 space-y-8 lg:space-y-0">
+        <div className="w-full lg:w-1/2 flex justify-center">
+          <iframe
+            width="360"  // Adjust the width of the video for better scaling
+            height="200"  // Adjust the height proportionally
+            src="https://www.youtube.com/embed/lwRSrDo6N48?si=g9Fz9XJcGPGwau_7" // Replace with your actual YouTube video link
+            title="How to use a SigNoz dashboard template"
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+            className="rounded-lg shadow-lg"
+          ></iframe>
+        </div> */}
+
+        {/* Text Description */}
+        {/* <div className="w-full lg:w-1/2">
+          <h2 className="text-2xl font-semibold text-white mb-4">What are dashboards?</h2>
+          <p className="text-gray-400 mb-4">
+            Dashboards are visual representations of your system's performance and health. They provide key metrics and panels for monitoring various services and infrastructure.
+          </p>
+          <p className="text-gray-400">
+          Dashboards in SigNoz allow you to observe real-time data, manage performance, and track logs using customizable panels. With a variety of options, you can monitor different aspects of your infrastructure using specific panels tailored to your needs.
+          </p>
+        </div>
+      </div> */}
+
       {/* Search Bar */}
       <div className="mb-8 text-center">
         <input
@@ -141,9 +168,9 @@ const Dashboards = () => {
           placeholder="Search dashboards"
           className="w-full max-w-lg p-3 rounded-lg border border-gray-700 bg-gray-800 text-gray-300 placeholder-gray-500"
           value={searchQuery}
-          onChange={handleSearchChange} 
-          onKeyDown={handleSearchSubmit} 
-          onBlur={handleSearchSubmit} 
+          onChange={handleSearchChange} // Track the search query
+          onKeyDown={handleSearchSubmit} // Log search query when pressing "Enter"
+          onBlur={handleSearchSubmit} // Log search query when the input loses focus
         />
       </div>
 
