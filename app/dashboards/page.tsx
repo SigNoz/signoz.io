@@ -1,88 +1,61 @@
 "use client"; // To ensure client-side interactivity
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { ClipboardIcon, ArrowDownTrayIcon } from '@heroicons/react/24/solid';
 import dashboards from './dashboards-list.json'; // Importing the dashboards list from the local JSON file
 
-// Function to check if the JSON exists by making a HEAD request
-const checkJSONExists = async (url: string) => {
+// Use environment variables for API URL and path
+const API_URL = process.env.NEXT_PUBLIC_SIGNOZ_CMS_API_URL;
+const DASHBOARD_API_PATH = process.env.NEXT_PUBLIC_SIGNOZ_CMS_DASHBOARD_PATH;
+
+// Function to send search query to Strapi (Dashboard Search collection type)
+const logSearchQueryToStrapi = async (query) => {
   try {
-    const response = await fetch(url, { method: 'HEAD' });
-    return response.ok;
+    const response = await fetch(`${API_URL}${DASHBOARD_API_PATH}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        data: { 
+          query, 
+          timestamp: new Date().toISOString() 
+        },
+      }),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to log search query');
+    }
+    console.log('Search query logged successfully in Strapi');
   } catch (error) {
-    console.error("Error checking JSON existence:", error);
-    return false;
-  }
-};
-
-// Function to fetch the JSON and trigger download
-const downloadJSON = async (url: string, filename: string, setError: (message: string | null) => void) => {
-  const jsonExists = await checkJSONExists(url);
-
-  if (!jsonExists) {
-    setError("JSON doesn't exist for this dashboard.");
-    return;
-  }
-
-  try {
-    const response = await fetch(url);
-    const data = await response.blob(); // Fetch the data as a Blob (binary large object)
-    const urlObject = window.URL.createObjectURL(data); // Create a URL for the Blob
-
-    // Create an invisible download link
-    const link = document.createElement('a');
-    link.href = urlObject;
-    link.download = filename;
-
-    // Append the link to the document and trigger the click
-    document.body.appendChild(link);
-    link.click();
-
-    // Cleanup
-    document.body.removeChild(link);
-    window.URL.revokeObjectURL(urlObject);
-    setError(null); // Clear the error message
-  } catch (error) {
-    console.error('Error downloading the JSON file:', error);
-  }
-};
-
-// Function to fetch and copy the JSON to clipboard
-const copyJSONToClipboard = async (url: string, setNotification: (message: string | null) => void, setError: (message: string | null) => void) => {
-  const jsonExists = await checkJSONExists(url);
-
-  if (!jsonExists) {
-    setError("JSON doesn't exist for this dashboard.");
-    return;
-  }
-
-  try {
-    const response = await fetch(url);
-    const json = await response.json(); // Fetch the JSON data as text
-
-    // Copy JSON to clipboard
-    await navigator.clipboard.writeText(JSON.stringify(json, null, 2)); // Indent JSON for better readability in clipboard
-
-    // Show a notification instead of an alert
-    setNotification("JSON copied to clipboard!");
-    setTimeout(() => setNotification(null), 2000); // Clear notification after 2 seconds
-    setError(null); // Clear the error message
-  } catch (error) {
-    console.error('Error copying JSON:', error);
+    console.error('Error logging search query:', error);
   }
 };
 
 const Dashboards = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [notification, setNotification] = useState<string | null>(null);
-  const [errorMessages, setErrorMessages] = useState<{ [key: string]: string | null }>({}); // Track errors for each dashboard
+  const [errorMessages, setErrorMessages] = useState<{ [key: string]: string | null }>({});
+  const [hasLogged, setHasLogged] = useState(false); // Track whether the search has already been logged
 
   const filteredDashboards = dashboards.filter((dashboard) =>
     dashboard.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleSetErrorMessage = (id: number, message: string | null) => {
-    setErrorMessages((prev) => ({ ...prev, [id]: message }));
+  // Function to log search query when user presses "Enter" or input loses focus
+  const handleSearchSubmit = (event) => {
+    if ((event.key === 'Enter' || event.type === 'blur') && !hasLogged) {
+      if (searchQuery.trim()) {
+        logSearchQueryToStrapi(searchQuery);
+        setHasLogged(true); // Set flag to true after logging the query
+      }
+    }
+  };
+
+  // Reset the logged state when the search query changes
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
+    setHasLogged(false); // Allow logging again when the search query changes
   };
 
   return (
@@ -92,7 +65,7 @@ const Dashboards = () => {
         <div className="text-left">
           <h1 className="text-4xl font-bold text-white mb-2">SigNoz Dashboards</h1>
           <p className="text-lg text-gray-400">
-            Browse a collection of pre-built SigNoz dashboards designed to monitor and gain insights about your infrastructure
+            Browse a collection of pre-built SigNoz dashboards designed to monitor and gain insights about your infrastructure.
           </p>
         </div>
         <div>
@@ -113,7 +86,9 @@ const Dashboards = () => {
           placeholder="Search dashboards"
           className="w-full max-w-lg p-3 rounded-lg border border-gray-700 bg-gray-800 text-gray-300 placeholder-gray-500"
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          onChange={handleSearchChange} // Track the search query
+          onKeyDown={handleSearchSubmit} // Log search query when pressing "Enter"
+          onBlur={handleSearchSubmit} // Log search query when the input loses focus
         />
       </div>
 
