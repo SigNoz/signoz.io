@@ -24,6 +24,9 @@ function Footer() {
                 <Link href="/docs/contributing/" className="mt-5 hover:underline">
                   Contributing
                 </Link>
+                <Link href="/docs/migration/migrate-from-datadog" className="mt-5 hover:underline">
+                  Migrate from Datadog
+                </Link>
                 <div className="mt-5 flex items-center gap-2 pr-7 hover:underline max-md:pr-5">
                   <Link href="https://knowledgebase.signoz.io/kb" target="_blank">
                     Knowledge Base
