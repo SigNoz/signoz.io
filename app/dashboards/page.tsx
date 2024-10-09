@@ -125,7 +125,7 @@ const Dashboards = () => {
         </div>
         <div>
           <a
-            href="https://github.com/SigNoz/dashboards/issues/new?template=dashboard_request_template.md"
+            href="https://github.com/SigNoz/signoz/issues/new?assignees=&labels=dashboard-template&p[…]s=&template=request_dashboard.md&title=%5BDashboard+Request%5D+"
             target="_blank"
             className="bg-gray-600 hover:bg-gray-500 text-gray-300 font-semibold py-2 px-4 rounded-lg text-sm transition-colors duration-200 ease-in-out border border-gray-500"
           >
@@ -182,7 +182,7 @@ const Dashboards = () => {
             <p className="text-gray-400 mb-6">
               You can create an issue to {' '}
               <a
-                href="https://github.com/SigNoz/dashboards/issues/new?template=dashboard_request_template.md"
+                href="https://github.com/SigNoz/signoz/issues/new?assignees=&labels=dashboard-template&p[…]s=&template=request_dashboard.md&title=%5BDashboard+Request%5D+"
                 target="_blank"
                 className="text-blue-500 hover:text-blue-400"
               >
