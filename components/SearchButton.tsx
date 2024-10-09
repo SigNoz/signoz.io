@@ -1,18 +1,14 @@
 import siteMetadata from '@/data/siteMetadata'
-import { TrieveModalSearch, TrieveSDK } from 'trieve-search-component'
+import { TrieveModalSearch } from 'trieve-search-component'
 import 'trieve-search-component/dist/index.css'
-
-const trieve = new TrieveSDK({
-  apiKey: 'tr-cK2MylVI0my78NUoafAiTvvmpdktntO3',
-  datasetId: '4650e231-7857-45aa-beb1-cb52006a2460',
-})
 
 const SearchButton = () => {
   if (siteMetadata.search) {
     return (
       <TrieveModalSearch
         theme="dark"
-        trieve={trieve}
+        apiKey='tr-cK2MylVI0my78NUoafAiTvvmpdktntO3'
+        datasetId='4650e231-7857-45aa-beb1-cb52006a2460'
         openKeyCombination={[
           {
             key: '/',
