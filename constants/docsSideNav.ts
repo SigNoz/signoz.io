@@ -1258,6 +1258,19 @@ const docsSideNav = [
     ],
   },
   {
+    label: 'Migrate From Datadog',
+    type: 'category',
+    isExpanded: false,
+    route: '/docs/migration/migrate-from-datadog',
+    items: [
+      {
+        type: 'doc',
+        route: '/docs/migration/opentelemetry-datadog-receiver',
+        label: 'Using Datadog OTLP receiver',
+      },
+    ],
+  },
+  {
     label: 'Azure Monitoring',
     type: 'category',
     isExpanded: false,
