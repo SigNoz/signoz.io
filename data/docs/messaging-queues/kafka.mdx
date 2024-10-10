@@ -106,11 +106,11 @@ This guide follows these primary steps:
 
 
 <Tabs>
-<TabItem value="Local" label="Local" default>
+<TabItem value="Local" label="Local/VM" default>
 
 
 <Admonition type="info">
-The below steps are valid for Linux and MacOS.
+The 
 </Admonition>
 
 ### Step 1: Kafka Setup
@@ -285,21 +285,134 @@ Set up the OpenTelemetry Collector to collect JMX metrics from Kafka and spans f
 4.1 **Download the JMX Metrics Collector**
 
 Download the JMX metrics collector necessary for Kafka metrics collection. 
-Download the 
 
-4.2 Install the OpenTelemetry Collector
+
+4.2 **Install the OpenTelemetry Collector**
 Install the local OpenTelemetry Collector Contrib using the provided configuration.
+You can download the latest `.jar file` for the opentelemetry jmx metrics using 
+this [release link](https://github.com/open-telemetry/opentelemetry-java-contrib/releases).
 
 **Using the Binary:**
 
-Download the OpenTelemetry Collector Contrib binary from the official releases.
+Download the OpenTelemetry Collector Contrib binary. You can [follow this doc](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) to 
+download the binary for you particular Operating System.
 
 Place the binary in the root of your project directory.
 
-Run the collector with the provided configuration:
+**Update config file**
+
+Update you collector config with the follwing:
+
+<Tabs>
+<TabItem value="SigNoz Cloud" label="SigNoz Cloud" default>
+
+```yaml
+receivers:
+  kafkametrics:
+    brokers:
+      - localhost:9092
+      - localhost:9093
+      - localhost:9094
+    protocol_version: 2.0.0
+    scrapers:
+      - brokers
+      - topics
+      - consumers
+  jmx/1:
+    # configure the path where you installed opentelemetry-jmx-metrics jar
+    jar_path: path/to/opentelemetry-jmx-metrics.jar #change this to the path to you opentelemetry-jmx-metrics jar file you downloaded above
+    endpoint: service:jmx:rmi:///jndi/rmi://localhost:9991/jmxrmi
+    target_system: jvm,kafka,kafka-consumer,kafka-producer
+    collection_interval: 10s
+    log_level: info
+    resource_attributes:
+      broker.name: broker1
+  jmx/2:
+    jar_path: ${PWD}/opentelemetry-jmx-metrics.jar
+    endpoint: service:jmx:rmi:///jndi/rmi://localhost:9992/jmxrmi
+    target_system: jvm,kafka,kafka-consumer,kafka-producer
+    collection_interval: 10s
+    log_level: info
+    resource_attributes:
+      broker.name: broker2
+exporters:
+  otlp:
+    endpoint: "ingest.{region}.signoz.cloud:443"
+    tls:
+      insecure: false
+    headers:
+      "signoz-access-token": "<SIGNOZ_INGESTION_KEY>"
+  debug:
+    verbosity: detailed
+
+service:
+  pipelines:
+    metrics:
+      receivers: [kafkametrics, jmx/1, jmx/2]
+      exporters: [otlp]
+```
+
+</TabItem>
+
+<TabItem value="Self-Hosted" label="Self-Hosted" default>
+
+```yaml
+receivers:
+  kafkametrics:
+    brokers:
+      - localhost:9092
+      - localhost:9093
+      - localhost:9094
+    protocol_version: 2.0.0
+    scrapers:
+      - brokers
+      - topics
+      - consumers
+  jmx/1:
+    # configure the path where you installed opentelemetry-jmx-metrics jar
+    jar_path: path/to/opentelemetry-jmx-metrics.jar #change this to the path to you opentelemetry-jmx-metrics jar file you downloaded above
+    endpoint: service:jmx:rmi:///jndi/rmi://localhost:9991/jmxrmi
+    target_system: jvm,kafka,kafka-consumer,kafka-producer
+    collection_interval: 10s
+    log_level: info
+    resource_attributes:
+      broker.name: broker1
+  jmx/2:
+    jar_path: ${PWD}/opentelemetry-jmx-metrics.jar
+    endpoint: service:jmx:rmi:///jndi/rmi://localhost:9992/jmxrmi
+    target_system: jvm,kafka,kafka-consumer,kafka-producer
+    collection_interval: 10s
+    log_level: info
+    resource_attributes:
+      broker.name: broker2
+exporters:
+   otlp:
+     endpoint: "<IP of machine hosting SigNoz>:4317"
+     tls:
+       insecure: true
+  debug:
+    verbosity: detailed
+
+service:
+  pipelines:
+    metrics:
+      receivers: [kafkametrics, jmx/1, jmx/2]
+      exporters: [otlp]
+```
+
+</TabItem>
+</Tabs>
+The config file ets up the OpenTelemetry Collector to gather Kafka and JVM metrics from multiple brokers(2 brokers in the above config) via Kafka metrics scraping 
+and JMX, and exports the telemetry data to SigNoz using the OTLP exporter. 
+
+**Run the collector** 
+
+**Note:** make sure you have
+
+Run the collector with the above configuration. :
 
 ```bash
-./otelcol-contrib --config ${PWD}/collector/collector-contrib-config.yaml
+./otelcol-contrib --config path/to/config.yaml
 ```
 
 </TabItem>
