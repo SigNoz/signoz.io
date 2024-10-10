@@ -84,6 +84,9 @@ const MainSection: React.FC = () => {
               <div className="group flex flex-col justify-between">
                 <div>
                   <div className="font-medium mb-2 text-base">Enhancing Asynchronous Communication Observability with OpenTelemetry</div>
+                  <div className="text-sm font-medium text-signoz_vanilla-400">
+                  - By Shivanshu Raj Shrivastava, SigNoz & Liudmila Molkova, Microsoft
+                  </div>
                 </div>
                 <div className="flex justify-end">
                   <div className="button-background mt-2 flex h-fit w-fit transform items-center justify-center rounded-full p-2 transition-transform group-hover:translate-x-2.5 sm:mt-0">
@@ -132,6 +135,9 @@ const MainSection: React.FC = () => {
               <div className="group flex flex-col justify-between">
                 <div>
                   <div className="font-medium mb-2 text-base">Decentralized Federated Machine Learning &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</div>
+                  <div className="text-sm font-medium text-signoz_vanilla-400">
+                  - By Ekansh Gupta, SigNoz & Haardik Dharma, Civo
+                  </div>
                 </div>
                 <div className="flex justify-end">
                   <div className="button-background mt-2 flex h-fit w-fit transform items-center justify-center rounded-full p-2 transition-transform group-hover:translate-x-2.5 sm:mt-0">
@@ -180,6 +186,9 @@ const MainSection: React.FC = () => {
               <div className="group flex flex-col justify-between">
                 <div>
                   <div className="font-medium mb-2 text-base">Is OpenTelemetry too complicated to get started &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</div>
+                  <div className="text-sm font-medium text-signoz_vanilla-400">
+                  - By Pranay Prateek, SigNoz
+                  </div>
                 </div>
                 <div className="flex justify-end">
                   <div className="button-background mt-2 flex h-fit w-fit transform items-center justify-center rounded-full p-2 transition-transform group-hover:translate-x-2.5 sm:mt-0">
@@ -228,6 +237,9 @@ const MainSection: React.FC = () => {
               <div className="group flex flex-col justify-between">
                 <div>
                   <div className="font-medium mb-2 text-base">Orchestrating Scalable DAGs on Argo Workflows Using Fabric8s</div>
+                  <div className="text-sm font-medium text-signoz_vanilla-400">
+                  - By Ekansh Gupta, SigNoz & Shivay Lamba, Couchbase
+                  </div>
                 </div>
                 <div className="flex justify-end">
                   <div className="button-background mt-2 flex h-fit w-fit transform items-center justify-center rounded-full p-2 transition-transform group-hover:translate-x-2.5 sm:mt-0">
@@ -326,6 +338,9 @@ const MainSection: React.FC = () => {
               <div className="group flex flex-col justify-between">
                 <div>
                   <div className="font-medium mb-2 text-base">Using OpenTelemetry for Deep Observability Within Messaging Queues</div>
+                  <div className="text-sm font-medium text-signoz_vanilla-400">
+                  - By Ekansh Gupta, SigNoz & Shivanshu Raj Shrivastava, SigNoz
+                  </div>
                 </div>
                 <div className="flex justify-end">
                   <div className="button-background mt-2 flex h-fit w-fit transform items-center justify-center rounded-full p-2 transition-transform group-hover:translate-x-2.5 sm:mt-0">
@@ -374,6 +389,9 @@ const MainSection: React.FC = () => {
               <div className="group flex flex-col justify-between">
                 <div>
                   <div className="font-medium mb-2 text-base">Understanding How OpenTelemetry Network Uses eBPF for Network Observability</div>
+                  <div className="text-sm font-medium text-signoz_vanilla-400">                 
+                  - By Shivanshu Raj Shrivastava, SigNoz & Jonathan Perry, PerfPod
+                  </div>
                 </div>
                 <div className="flex justify-end">
                   <div className="button-background mt-2 flex h-fit w-fit transform items-center justify-center rounded-full p-2 transition-transform group-hover:translate-x-2.5 sm:mt-0">
