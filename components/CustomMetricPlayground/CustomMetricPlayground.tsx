@@ -7,6 +7,7 @@ const CustomMetricPlayground: React.FC = () => {
   const [regions, setRegions] = useState(5);
   const [products, setProducts] = useState(10);
   const [payments, setPayments] = useState(6);
+  const [showTooltip, setShowTooltip] = useState(false);
 
   const fullCardinality = regions * products * payments * 0.05;
   const optimized = regions * products * 0.05;
@@ -33,13 +34,44 @@ const CustomMetricPlayground: React.FC = () => {
   ];
 
   return (
-    <div className="p-4 max-w-4xl mx-auto bg-gray-900 text-gray-100 rounded-lg shadow-lg">
-      <h1 className="text-xl font-bold mb-4">Metric: order_processing_time</h1>
+    <div className="p-4 max-w-4xl mx-auto bg-gray-900 text-gray-100 rounded-lg shadow-lg relative">
+      <div className="flex justify-between items-top mb-4">
+        <h1 className="text-xl font-bold">Metric: order_processing_time</h1>
+        <div className="relative">
+          <button
+            className="text-sm text-gray-800 bg-gray-300 px-2 py-1 rounded hover:text-gray-900 hover:bg-gray-100"
+            onMouseEnter={() => setShowTooltip(true)}
+          >
+            How to use this tool?
+          </button>
+          {showTooltip && (
+            <div 
+              className="absolute right-0 mt-2 p-4 bg-white text-gray-800 rounded shadow-lg z-10 w-80"
+              onMouseEnter={() => setShowTooltip(true)}
+              onMouseLeave={() => setShowTooltip(false)}
+            >
+              <p className="text-sm mb-2">This playground allows you to experiment with different combinations of tag cardinality for regions, product categories, and payment methods. As you adjust the sliders, you'll see how the number of unique tag combinations affects your monthly costs for both full cardinality and optimized scenarios.</p>
+              <p className="text-sm font-bold mb-1">Here's how to use it:</p>
+              <ol className="text-sm list-decimal list-inside">
+                <li>Adjust the sliders for each tag type (region, product category, payment method) to set their cardinality.</li>
+                <li>Observe how the monthly cost changes in the bar chart for both full cardinality and optimized scenarios.</li>
+                <li>Compare the example metrics shown below the chart to see how tag combinations differ between the two approaches.</li>
+                <li>Experiment with different combinations to understand how reducing high-cardinality tags can significantly impact your costs.</li>
+              </ol>
+              <p className="text-sm mt-2">This visualization helps illustrate why it's crucial to carefully consider your tagging strategy and avoid unnecessary high-cardinality tags in your custom metrics.</p>
+            </div>
+          )}
+        </div>
+      </div>
       
       <div className="grid grid-cols-3 gap-4 mb-4">
         {['region', 'product_category', 'payment_method'].map((tag, index) => (
           <div key={tag} className="bg-gray-800 rounded p-2">
-            <h2 className="text-sm mb-1">{tag}</h2>
+            <div className="flex justify-between">
+              <h2 className="text-sm my-1">{tag}</h2>
+              <p className="text-xs my-1 text-gray-300">tag</p>
+            </div>
+            
             <input
               type="range"
               min="1"
@@ -53,7 +85,9 @@ const CustomMetricPlayground: React.FC = () => {
               }}
               className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
             />
-            <p className="text-xs mt-1">{index === 0 ? regions : index === 1 ? products : payments}</p>
+            
+            <p className="text-xs my-1">{index === 0 ? regions : index === 1 ? products : payments}</p>
+            
           </div>
         ))}
       </div>
