@@ -21,6 +21,7 @@ import Figure from './Figure/Figure'
 import PricingCTA from './PricingCTA'
 import PageFeedback from './PageFeedback/PageFeedback'
 import CustomMetricPlayground from './CustomMetricPlayground/CustomMetricPlayground'
+import VerticalTabs from './VerticalTabs/VerticalTabs'
 
 export const components: MDXComponents = {
   Image,
@@ -45,4 +46,5 @@ export const components: MDXComponents = {
   PricingCTA,
   PageFeedback,
   CustomMetricPlayground,
+  VerticalTabs,
 }

@@ -399,153 +399,573 @@ It's important to match the solution to your performance requirements and consid
 
 ### Log Monitoring
 
-- **Pricing**: Volume-based pricing, charged per GB of ingested, indexed, and stored logs.
-    - **Log Billing Breakdown**:
-        - **Ingestion**: Starting at $0.10 per ingested or scanned GB per month (billed annually or $0.10 on-demand). Ingest, process, enrich, live tail, and archive all your logs with out-of-the-box parsing for 200+ log sources.
-        - **Standard Indexing**: $1.70 per million log events per month (billed annually or $2.55 on-demand). Offers 15-day retention for real-time exploration, alerting, and dashboards with mission-critical logs.
-        - **Flex Storage**: Starting at $0.05 per million events stored per month (billed annually or $0.075 on-demand). Flexible long-term retention up to 15 months for historical investigations or security, audit, and compliance use cases.
-        - **Flex Logs Starter**: Starting at $0.60 per million events stored per month (billed annually or $0.90 on-demand). Retention options of 6, 12, or 15 months for long-term log retention without the need to rehydrate.
-        - **Log Forwarding to Custom Destinations**: Starting at $0.25 per GB outbound per destination per month for centralizing log processing, enrichment, and routing to multiple destinations.
-        - **Rehydration**: Logs stored beyond the initial retention period can be rehydrated if needed at $0.10 per compressed GB scanned, plus the indexing cost for the selected retention period.
-    
-    Importantly, costs are incurred for logs even if they are not actively used, as long as they are processed, stored, or indexed by Datadog.
-    
-- **Features**: Real-time log analysis, customizable alerts, centralized logging, out-of-the-box parsing for 200+ log sources, log-based metrics, dynamic routing, and flexible retention options. Supports PCI and HIPAA compliance, real-time alerting, unlimited sources, and full-text search.
-- **Challenges**: Log volume can increase unexpectedly, leading to unpredictable costs. Retention periods also add to the expense if not managed well.
-- **Solutions**: Use log filtering and sampling to reduce the volume of ingested logs. Set retention policies that align with your business requirements.
-- **Alternatives**: **Elastic Stack** (open-source, flexible, but requires self-management), **Splunk** (more expensive, but robust for large-scale enterprises), **SigNoz** (cost-effective, open-source with better control over pricing).
-- **Common Questions**
-    
-    **Can I reduce log ingestion costs without losing critical data?**
-    
-    Yes, Datadog provides ways to reduce costs through **log filtering** and **log sampling**. By filtering out unnecessary logs and sampling a fraction of high-volume log sources, you can reduce ingestion costs while keeping critical logs for analysis.
-    
-    **What happens if my needs change during my annual commitment?**
-    
-    You can make adjustments to your plan as your needs evolve. For example, you can request an increase in your committed volume, upgrade features, or adjust retention policies. Contact your Datadog sales representative to modify your plan.
-    
-    **How can I estimate the cost of my usage more accurately?**
-    
-    The best way to estimate costs is to perform a trial period, track the volume of logs ingested, indexed, and stored over time, and apply the Datadog pricing model. Datadog provides tools and dashboards to help you visualize log volume and estimate monthly costs.
-    
-    **What can I do if my logs exceed the committed ingestion volume?**
-    
-    If your logs exceed your committed volume, you will not lose data or visibility. Datadog bills the additional volume at +50% of the annual price for logs that exceed the commitment.
-    
+<VerticalTabs tabData={{
+  "Pricing": (
+    <>
+      <p>Volume-based pricing, charged per GB of ingested, indexed, and stored logs.</p>
+      
+      <p><strong>Log Billing Breakdown</strong>:</p>
+      <ul>
+        <li><strong>Ingestion</strong>: Starting at $0.10 per ingested or scanned GB per month (billed annually or $0.10 on-demand).</li>
+        <li><strong>Standard Indexing</strong>: $1.70 per million log events per month (billed annually or $2.55 on-demand).</li>
+        <li><strong>Flex Storage</strong>: Starting at $0.05 per million events stored per month (billed annually or $0.075 on-demand).</li>
+        <li><strong>Flex Logs Starter</strong>: Starting at $0.60 per million events stored per month (billed annually or $0.90 on-demand).</li>
+        <li><strong>Log Forwarding to Custom Destinations</strong>: Starting at $0.25 per GB outbound per destination per month.</li>
+        <li><strong>Rehydration</strong>: $0.10 per compressed GB scanned, plus indexing cost for the selected retention period.</li>
+      </ul>
+
+      <p><strong>Important Note</strong>: Costs are incurred for logs even if they are not actively used, as long as they are processed, stored, or indexed by Datadog.</p>
+    </>
+  ),
+  "Features": (
+    <ul>
+      <li>Real-time log analysis</li>
+      <li>Customizable alerts</li>
+      <li>Centralized logging</li>
+      <li>Out-of-the-box parsing for 200+ log sources</li>
+      <li>Log-based metrics</li>
+      <li>Dynamic routing</li>
+      <li>Flexible retention options</li>
+      <li>PCI and HIPAA compliance support</li>
+      <li>Real-time alerting</li>
+      <li>Unlimited sources</li>
+      <li>Full-text search</li>
+    </ul>
+  ),
+  "Challenges": (
+    <ul>
+      <li>Log volume can increase unexpectedly, leading to unpredictable costs.</li>
+      <li>Retention periods also add to the expense if not managed well.</li>
+    </ul>
+  ),
+  "Solutions": (
+    <ul>
+      <li>Use log filtering and sampling to reduce the volume of ingested logs.</li>
+      <li>Set retention policies that align with your business requirements.</li>
+    </ul>
+  ),
+  "Alternatives": (
+    <ul>
+      <li><strong>Elastic Stack</strong>: Open-source, flexible, but requires self-management</li>
+      <li><strong>Splunk</strong>: More expensive, but robust for large-scale enterprises</li>
+      <li><strong>SigNoz</strong>: Cost-effective, open-source with better control over pricing</li>
+      <div className="my-2"> </div>
+      <GetStartedSigNoz />
+    </ul>
+  ),
+  "Common Questions": (
+    <>
+      <ol>
+        <li>
+          <strong>Can I reduce log ingestion costs without losing critical data?</strong><br />
+          Yes, through log filtering and log sampling. Filter out unnecessary logs and sample high-volume log sources to reduce ingestion costs while keeping critical logs for analysis.
+        </li>
+        <li>
+          <strong>What happens if my needs change during my annual commitment?</strong><br />
+          You can make adjustments to your plan as your needs evolve. Contact your Datadog sales representative to modify your plan.
+        </li>
+        <li>
+          <strong>How can I estimate the cost of my usage more accurately?</strong><br />
+          Perform a trial period, track log volumes over time, and apply the Datadog pricing model. Datadog provides tools and dashboards to help visualize log volume and estimate monthly costs.
+        </li>
+        <li>
+          <strong>What can I do if my logs exceed the committed ingestion volume?</strong><br />
+          You will not lose data or visibility. Datadog bills the additional volume at +50% of the annual price for logs that exceed the commitment.
+        </li>
+      </ol>
+    </>
+  )
+}} />
 
 ### APM (Application Performance Monitoring)
 
-- **Pricing**: Host-based pricing, starting at $31 per host per month (billed annually) or $36 on-demand. Various plans are available:
-    - **APM**: Includes end-to-end distributed traces, service health metrics, and 15-day historical search & analytics. Starting at $31 per host per month.
-    - **APM Pro**: Includes everything in APM plus Data Streams Monitoring for $35 per host per month (billed annually).
-    - **APM Enterprise**: Includes APM Pro features along with Continuous Profiler for deeper code-level insights, starting at $40 per host per month.
-    - **APM DevSecOps**: Adds OSS vulnerability detection with Software Composition Analysis (SCA) for $36 per host per month.
-    - **APM DevSecOps Pro and Enterprise**: Builds on the respective plans with SCA for enhanced security monitoring, starting at $40 and $45 per host per month respectively.
-- **Features**: Distributed tracing, service maps, code-level visibility, anomaly detection, automatic dependency mapping, end-to-end latency metrics, CPU and memory profiling, and OSS vulnerability detection.
-- **Challenges**: High cardinality can increase costs rapidly. Autoscaling during high traffic periods can lead to spikes in host count, resulting in higher bills.
-- **Solutions**: Limit high-cardinality metrics by optimizing tags. Commit to the minimum host requirement and adjust dynamically to avoid high on-demand rates.
-- **Alternatives**: **New Relic** (similar feature set, competitive for enterprises), **Dynatrace** (AI-driven insights but more expensive), **SigNoz** (predictable pricing with open-source benefits).
-- **Common Questions**:
-    - **What counts as a billable APM host?**: A host that is actively generating traces submitted to the Datadog platform.
-    - **What kind of billing plan is required?**: Every APM host requires Pro or Enterprise Infrastructure Monitoring.
-    - **Can I switch plans?**: Yes, existing customers can switch plans.
-    - **Is Pro or Enterprise Infrastructure Monitoring required on every APM Host?**: Yes.
-    - **What languages does APM support?**: Java, Python, Ruby, Go, Node, .NET, and PHP.
-    - **Can I run APM with containers?**: Yes, containerized environments and AWS Fargate are supported.
-    - **What is the difference between ingestion and retention?**: Ingestion allows all traces to be available for live search, while retention stores selected traces for longer analysis.
-    - **Can I add custom instrumentation?**: Yes, custom instrumentation is supported.
-    - **Does trace sampling impact RED metrics?**: No, RED metrics are calculated based on 100% of traffic.
+
+
+<VerticalTabs tabData={{
+  "Pricing": (
+    <ul>
+      <li>Host-based pricing, starting at $31 per host per month (billed annually) or $36 on-demand</li>
+      <li>Various plans available:
+        <ul>
+          <li>APM: $31 per host per month</li>
+          <li>APM Pro: $35 per host per month</li>
+          <li>APM Enterprise: $40 per host per month</li>
+          <li>APM DevSecOps: $36 per host per month</li>
+          <li>APM DevSecOps Pro: $40 per host per month</li>
+          <li>APM DevSecOps Enterprise: $45 per host per month</li>
+        </ul>
+      </li>
+    </ul>
+  ),
+  "Features": (
+    <ul>
+      <li>Distributed tracing</li>
+      <li>Service maps</li>
+      <li>Code-level visibility</li>
+      <li>Anomaly detection</li>
+      <li>Automatic dependency mapping</li>
+      <li>End-to-end latency metrics</li>
+      <li>CPU and memory profiling</li>
+      <li>OSS vulnerability detection</li>
+    </ul>
+  ),
+  "Challenges": (
+    <ul>
+      <li>High cardinality can increase costs rapidly</li>
+      <li>Autoscaling during high traffic periods can lead to spikes in host count, resulting in higher bills</li>
+    </ul>
+  ),
+  "Solutions": (
+    <ul>
+      <li>Limit high-cardinality metrics by optimizing tags</li>
+      <li>Commit to the minimum host requirement and adjust dynamically to avoid high on-demand rates</li>
+    </ul>
+  ),
+  "Alternatives": (
+    <ul>
+      <li><strong>New Relic</strong>: Similar feature set, competitive for enterprises</li>
+      <li><strong>Dynatrace</strong>: AI-driven insights but more expensive</li>
+      <li><strong>SigNoz</strong>: Predictable pricing with open-source benefits</li>
+      <div className="my-2"> </div>
+      <GetStartedSigNoz />
+    </ul>
+  ),
+  "Common Questions": (
+    <>
+      <ol>
+        <li>
+          <strong>What counts as a billable APM host?</strong><br />
+          A host that is actively generating traces submitted to the Datadog platform.
+        </li>
+        <li>
+          <strong>What kind of billing plan is required?</strong><br />
+          Every APM host requires Pro or Enterprise Infrastructure Monitoring.
+        </li>
+        <li>
+          <strong>Can I switch plans?</strong><br />
+          Yes, existing customers can switch plans.
+        </li>
+        <li>
+          <strong>Is Pro or Enterprise Infrastructure Monitoring required on every APM Host?</strong><br />
+          Yes.
+        </li>
+        <li>
+          <strong>What languages does APM support?</strong><br />
+          Java, Python, Ruby, Go, Node, .NET, and PHP.
+        </li>
+        <li>
+          <strong>Can I run APM with containers?</strong><br />
+          Yes, containerized environments and AWS Fargate are supported.
+        </li>
+        <li>
+          <strong>What is the difference between ingestion and retention?</strong><br />
+          Ingestion allows all traces to be available for live search, while retention stores selected traces for longer analysis.
+        </li>
+        <li>
+          <strong>Can I add custom instrumentation?</strong><br />
+          Yes, custom instrumentation is supported.
+        </li>
+        <li>
+          <strong>Does trace sampling impact RED metrics?</strong><br />
+          No, RED metrics are calculated based on 100% of traffic.
+        </li>
+      </ol>
+    </>
+  )
+}} />
+
 
 ### Infrastructure Monitoring
 
-- **Pricing**: Host-based, starting at $15 per host per month (billed annually) or $18 on-demand. Three pricing tiers are available:
-    - **Free**: Includes core collection and visualization features for up to 5 hosts, with 1-day metric retention.
-    - **Pro**: Starting at $15 per host per month. Offers centralized monitoring of systems, services, and serverless functions, including full-resolution data retention for 15 months, alerts, container monitoring, custom metrics, SSO with SAML, and outlier detection.
-    - **Enterprise**: Starting at $23 per host per month (billed annually). Adds advanced administrative features, automated insights with Watchdog, anomaly detection, forecast monitoring, live processes, and more.
-- **Features**: Real-time monitoring of servers, containers, and cloud infrastructure, customizable dashboards, out-of-the-box dashboards for 750+ integrations, alerts, enterprise-grade security, full-resolution data retention, anomaly detection, and automated insights.
-- **Challenges**: Monitoring ephemeral infrastructure can lead to unpredictable costs as containers and instances spin up and down frequently.
-- **Solutions**: Monitor only critical infrastructure. Set dynamic policies for scaling and focus on essential metrics to control costs.
-- **Alternatives**: **Prometheus + Grafana** (requires more manual setup but is cost-effective), **Zabbix** (open-source but less advanced features).
-- **Common Questions**:
-    - **How do you define a host?**: A host is any physical or virtual OS instance monitored with Datadog, such as a server, VM, node, or App Service Plan instance.
-    - **How do I monitor containers?**: The Datadog Agent runs in a container alongside other containers on a host, collecting metrics from neighboring containers and the host itself.
-    - **What is a custom metric?**: Custom metrics allow you to monitor your own applications and business metrics, such as ad revenue or shopping cart abandonment.
-    - **How many custom metrics are allotted per host?**: Datadog offers 100 custom metrics for Infrastructure Pro and 200 for Infrastructure Enterprise per host.
-    - **How do I get charged for additional custom metrics?**: Additional custom metrics are charged at $1 per 100 metrics per month.
-    - **What compliance frameworks does DevSecOps support?**: DevSecOps Pro and Enterprise support over 15 industry benchmarks, including CIS, PCI DSS, and SOC 2.
-    - **Are there other billing options?**: Annual, monthly, and hourly plans are available, and billing plans can be customized to meet specific needs.
+<VerticalTabs tabData={{
+  "Pricing": (
+    <>
+      <p>Host-based, starting at $15 per host per month (billed annually) or $18 on-demand. Three pricing tiers are available:</p>
+      <ul>
+        <li><strong>Free</strong>: Includes core collection and visualization features for up to 5 hosts, with 1-day metric retention.</li>
+        <li><strong>Pro</strong>: Starting at $15 per host per month. Offers centralized monitoring of systems, services, and serverless functions, including full-resolution data retention for 15 months, alerts, container monitoring, custom metrics, SSO with SAML, and outlier detection.</li>
+        <li><strong>Enterprise</strong>: Starting at $23 per host per month (billed annually). Adds advanced administrative features, automated insights with Watchdog, anomaly detection, forecast monitoring, live processes, and more.</li>
+      </ul>
+    </>
+  ),
+  "Features": (
+    <ul>
+      <li>Real-time monitoring of servers, containers, and cloud infrastructure</li>
+      <li>Customizable dashboards</li>
+      <li>Out-of-the-box dashboards for 750+ integrations</li>
+      <li>Alerts</li>
+      <li>Enterprise-grade security</li>
+      <li>Full-resolution data retention</li>
+      <li>Anomaly detection</li>
+      <li>Automated insights</li>
+    </ul>
+  ),
+  "Challenges": (
+    <p>Monitoring ephemeral infrastructure can lead to unpredictable costs as containers and instances spin up and down frequently.</p>
+  ),
+  "Solutions": (
+    <ul>
+      <li>Monitor only critical infrastructure</li>
+      <li>Set dynamic policies for scaling</li>
+      <li>Focus on essential metrics to control costs</li>
+    </ul>
+  ),
+  "Alternatives": (
+    <ul>
+      <li><strong>Prometheus + Grafana</strong>: Requires more manual setup but is cost-effective</li>
+      <li><strong>Zabbix</strong>: Open-source but less advanced features</li>
+    </ul>
+  ),
+  "Common Questions": (
+    <>
+      <ol>
+        <li>
+          <strong>How do you define a host?</strong><br />
+          A host is any physical or virtual OS instance monitored with Datadog, such as a server, VM, node, or App Service Plan instance.
+        </li>
+        <li>
+          <strong>How do I monitor containers?</strong><br />
+          The Datadog Agent runs in a container alongside other containers on a host, collecting metrics from neighboring containers and the host itself.
+        </li>
+        <li>
+          <strong>What is a custom metric?</strong><br />
+          Custom metrics allow you to monitor your own applications and business metrics, such as ad revenue or shopping cart abandonment.
+        </li>
+        <li>
+          <strong>How many custom metrics are allotted per host?</strong><br />
+          Datadog offers 100 custom metrics for Infrastructure Pro and 200 for Infrastructure Enterprise per host.
+        </li>
+        <li>
+          <strong>How do I get charged for additional custom metrics?</strong><br />
+          Additional custom metrics are charged at $1 per 100 metrics per month.
+        </li>
+        <li>
+          <strong>What compliance frameworks does DevSecOps support?</strong><br />
+          DevSecOps Pro and Enterprise support over 15 industry benchmarks, including CIS, PCI DSS, and SOC 2.
+        </li>
+        <li>
+          <strong>Are there other billing options?</strong><br />
+          Annual, monthly, and hourly plans are available, and billing plans can be customized to meet specific needs.
+        </li>
+      </ol>
+    </>
+  )
+}} />
 
 ### Database Monitoring
 
-- **Pricing**: Starting at $70 per database host per month (billed annually) or $84 on-demand.
-    - Track normalized query performance trends using database-generated metrics.
-    - Correlate query performance with database infrastructure metrics.
-    - Extract valuable data without compromising database security.
-    - Access insights for database hosts, clusters, and applications.
-- **Features**: Query performance analysis, anomaly detection, in-depth explain plans, out-of-the-box slow query detection, tag-based query filtering, access to hundreds of relevant database metrics, unlimited user accounts, and total visibility into databases (Postgres, MySQL, SQL Server, Oracle).
-- **Challenges**: High database activity can lead to increased monitoring costs.
-- **Solutions**: Optimize queries and monitor only critical databases. Set query thresholds to reduce unnecessary monitoring.
-- **Alternatives**: **Percona Monitoring and Management** (open-source), **SolarWinds Database Performance Analyzer** (more feature-rich but costly).
-- **Common Questions**:
-    - **How do you define a database host?**: A database host is any physical or virtual instance hosting your database that you monitor with Datadog.
-    - **What databases are supported?**: Datadog supports Postgres (9.6+), MySQL (5.6+), SQL Server (2012, 2014, 2016, 2017, 2019), and Oracle (11g, 12c, 18c, 19c, 21c).
-    - **Can I purchase Database Monitoring (DBM) standalone?**: No, you need to be an existing Infrastructure Monitoring customer to purchase DBM.
-    - **What are (query) explain plans and how are they useful?**: Explain plans describe the steps used to access data, enabling you to locate hotspots in your queries.
-    - **How long is DBM data retained?**: Query metrics are retained for 3 months, while explain plans and query samples are retained for 15 days.
-    - **Does DBM require an additional agent?**: No, it works with the existing Datadog Agent.
-    - **What are normalized queries?**: Identical queries with different parameters are grouped by obfuscating the parameters, referred to as normalized queries.
-    - **Can I exceed the allotment of normalized queries?**: Yes, Datadog can accommodate additional normalized queries for an extra charge.
-    - **Are there other billing options?**: Annual and monthly plans are available, and plans can be customized to meet specific needs.
+<VerticalTabs tabData={{
+  "Pricing": (
+    <>
+      <p>Starting at $70 per database host per month (billed annually) or $84 on-demand.</p>
+      <ul>
+        <li>Track normalized query performance trends using database-generated metrics.</li>
+        <li>Correlate query performance with database infrastructure metrics.</li>
+        <li>Extract valuable data without compromising database security.</li>
+        <li>Access insights for database hosts, clusters, and applications.</li>
+      </ul>
+    </>
+  ),
+  "Features": (
+    <ul>
+      <li>Query performance analysis</li>
+      <li>Anomaly detection</li>
+      <li>In-depth explain plans</li>
+      <li>Out-of-the-box slow query detection</li>
+      <li>Tag-based query filtering</li>
+      <li>Access to hundreds of relevant database metrics</li>
+      <li>Unlimited user accounts</li>
+      <li>Total visibility into databases (Postgres, MySQL, SQL Server, Oracle)</li>
+    </ul>
+  ),
+  "Challenges": (
+    <p>High database activity can lead to increased monitoring costs.</p>
+  ),
+  "Solutions": (
+    <ul>
+      <li>Optimize queries and monitor only critical databases.</li>
+      <li>Set query thresholds to reduce unnecessary monitoring.</li>
+    </ul>
+  ),
+  "Alternatives": (
+    <ul>
+      <li><strong>Percona Monitoring and Management</strong> (open-source)</li>
+      <li><strong>SolarWinds Database Performance Analyzer</strong> (more feature-rich but costly)</li>
+    </ul>
+  ),
+  "Common Questions": (
+    <>
+      <ol>
+        <li>
+          <strong>How do you define a database host?</strong><br />
+          A database host is any physical or virtual instance hosting your database that you monitor with Datadog.
+        </li>
+        <li>
+          <strong>What databases are supported?</strong><br />
+          Datadog supports Postgres (9.6+), MySQL (5.6+), SQL Server (2012, 2014, 2016, 2017, 2019), and Oracle (11g, 12c, 18c, 19c, 21c).
+        </li>
+        <li>
+          <strong>Can I purchase Database Monitoring (DBM) standalone?</strong><br />
+          No, you need to be an existing Infrastructure Monitoring customer to purchase DBM.
+        </li>
+        <li>
+          <strong>What are (query) explain plans and how are they useful?</strong><br />
+          Explain plans describe the steps used to access data, enabling you to locate hotspots in your queries.
+        </li>
+        <li>
+          <strong>How long is DBM data retained?</strong><br />
+          Query metrics are retained for 3 months, while explain plans and query samples are retained for 15 days.
+        </li>
+        <li>
+          <strong>Does DBM require an additional agent?</strong><br />
+          No, it works with the existing Datadog Agent.
+        </li>
+        <li>
+          <strong>What are normalized queries?</strong><br />
+          Identical queries with different parameters are grouped by obfuscating the parameters, referred to as normalized queries.
+        </li>
+        <li>
+          <strong>Can I exceed the allotment of normalized queries?</strong><br />
+          Yes, Datadog can accommodate additional normalized queries for an extra charge.
+        </li>
+        <li>
+          <strong>Are there other billing options?</strong><br />
+          Annual and monthly plans are available, and plans can be customized to meet specific needs.
+        </li>
+      </ol>
+    </>
+  )
+}} />
 
 ### Real User Monitoring (RUM)
 
-- **Pricing**: Session-based, charged per 1,000 sessions. Starting at $1.50 per 1,000 sessions per month (billed annually) or $2.20 on-demand.
-    - **RUM & Session Replay**: Starting at $1.80 per 1,000 sessions per month (billed annually) or $2.60 on-demand. Includes video-like replays of user sessions and heatmaps.
-- **Features**: User journey tracking, performance metrics, session replays, funnel analysis, frustration signals, error tracking, automatic and custom tracking of page views and user actions, visual replay of user sessions, heatmaps.
-- **Challenges**: Costs can escalate with high user traffic, especially during peak periods.
-- **Solutions**: Use sampling to reduce session volume. Track only important user interactions to optimize usage.
-- **Alternatives**: **Google Analytics** (free but limited in observability), **PostHog** (Powerful and affordable solution)
-- **Common Questions**:
-    - **How is a session defined?**: A session is a user journey on your web application. It expires after 15 minutes of inactivity and lasts up to 4 hours.
-    - **What data does Datadog's RUM collect?**: Events across browser and mobile applications, including page views, actions, resources, and long tasks. Custom events can also be instrumented.
-    - **How does Session Replay work?**: It captures changes in the web page code (DOM and DOM-mutations) to recreate a user’s experience in real-time in the browser.
-    - **What mobile languages are supported for instrumentation?**: Android (Java, Kotlin), iOS (Swift, Objective-C), React Native, and Flutter.
-    - **Can I view logs from my browser or mobile app in RUM?**: Yes, these logs are automatically tied to the corresponding RUM session.
-    - **How can I begin setting up for RUM?**: Setup steps can be found in Datadog's documentation for Browser, Session Replay, and Mobile RUM.
+<VerticalTabs tabData={{
+  "Pricing": (
+    <>
+      <p>Session-based, charged per 1,000 sessions. Starting at $1.50 per 1,000 sessions per month (billed annually) or $2.20 on-demand.</p>
+      <p><strong>RUM & Session Replay</strong>: Starting at $1.80 per 1,000 sessions per month (billed annually) or $2.60 on-demand. Includes video-like replays of user sessions and heatmaps.</p>
+    </>
+  ),
+  "Features": (
+    <ul>
+      <li>User journey tracking</li>
+      <li>Performance metrics</li>
+      <li>Session replays</li>
+      <li>Funnel analysis</li>
+      <li>Frustration signals</li>
+      <li>Error tracking</li>
+      <li>Automatic and custom tracking of page views and user actions</li>
+      <li>Visual replay of user sessions</li>
+      <li>Heatmaps</li>
+    </ul>
+  ),
+  "Challenges": (
+    <p>Costs can escalate with high user traffic, especially during peak periods.</p>
+  ),
+  "Solutions": (
+    <ul>
+      <li>Use sampling to reduce session volume.</li>
+      <li>Track only important user interactions to optimize usage.</li>
+    </ul>
+  ),
+  "Alternatives": (
+    <ul>
+      <li><strong>Google Analytics</strong> (free but limited in observability)</li>
+      <li><strong>PostHog</strong> (Powerful and affordable solution)</li>
+    </ul>
+  ),
+  "Common Questions": (
+    <>
+      <ol>
+        <li>
+          <strong>How is a session defined?</strong><br />
+          A session is a user journey on your web application. It expires after 15 minutes of inactivity and lasts up to 4 hours.
+        </li>
+        <li>
+          <strong>What data does Datadog's RUM collect?</strong><br />
+          Events across browser and mobile applications, including page views, actions, resources, and long tasks. Custom events can also be instrumented.
+        </li>
+        <li>
+          <strong>How does Session Replay work?</strong><br />
+          It captures changes in the web page code (DOM and DOM-mutations) to recreate a user's experience in real-time in the browser.
+        </li>
+        <li>
+          <strong>What mobile languages are supported for instrumentation?</strong><br />
+          Android (Java, Kotlin), iOS (Swift, Objective-C), React Native, and Flutter.
+        </li>
+        <li>
+          <strong>Can I view logs from my browser or mobile app in RUM?</strong><br />
+          Yes, these logs are automatically tied to the corresponding RUM session.
+        </li>
+        <li>
+          <strong>How can I begin setting up for RUM?</strong><br />
+          Setup steps can be found in Datadog's documentation for Browser, Session Replay, and Mobile RUM.
+        </li>
+      </ol>
+    </>
+  )
+}} />
 
 ### Synthetic Monitoring
 
-- **Pricing**: Volume-based, charged per synthetic check. Starting at $5 per 10,000 API test runs per month (billed annually) or $7.20 on-demand. Browser testing starts at $12 per 1,000 test runs per month. Mobile App Testing starts at $50 per 100 test runs per month.
-- **Features**: Uptime monitoring, API checks, browser automation for user scenarios, proactive visibility, mobile app testing on real devices, continuous testing for CI environments.
-- **Challenges**: High frequency of synthetic checks can lead to increased costs.
-- **Solutions**: Reduce the frequency of non-critical tests and prioritize key user paths.
-- **Alternatives**: **Checkly** (affordable synthetic monitoring), **Pingdom** (good for website uptime monitoring).
-- **Common Questions**:
-    - **What’s the difference between API Tests and Browser Tests?**: API Tests monitor single endpoints or URLs, whereas Browser Tests monitor web user journeys that may involve several actions and pages. Multistep API tests are available to chain several API requests together.
-    - **Are you able to alert on Synthetic monitors?**: Yes, alerts are built in and triggered automatically when tests fail. Datadog integrates with collaboration tools like Slack, PagerDuty, and ServiceNow.
-    - **Can I view endpoint requests end-to-end?**: Yes, with the APM integration, synthetic tests can be linked to corresponding back-end, code-level insights for minimal mean time to resolution.
-    - **Is there any extra charge for using private locations?**: No, there are no additional costs to set up a private location. All test runs are billed as if run from managed locations.
-    - **What counts as a test run?**: Each hit on your endpoint or full transaction (25 steps) counts as one run. Multistep API tests count each step as an individual run.
-    - **Does Mobile App Testing use real devices?**: Yes, Mobile App Testing uses real devices, providing realistic testing conditions. Tests run sequentially by default but can run in parallel with additional concurrency slots.
-    - **What is Continuous Testing?**: A toolkit that offers integration testing with CI providers like GitHub Actions and Jenkins. Tests can be run in parallel to reduce pipeline durations.
+<VerticalTabs tabData={{
+  "Pricing": (
+    <>
+      <p>Volume-based, charged per synthetic check. Starting at $5 per 10,000 API test runs per month (billed annually) or $7.20 on-demand. Browser testing starts at $12 per 1,000 test runs per month. Mobile App Testing starts at $50 per 100 test runs per month.</p>
+    </>
+  ),
+  "Features": (
+    <ul>
+      <li>Uptime monitoring</li>
+      <li>API checks</li>
+      <li>Browser automation for user scenarios</li>
+      <li>Proactive visibility</li>
+      <li>Mobile app testing on real devices</li>
+      <li>Continuous testing for CI environments</li>
+    </ul>
+  ),
+  "Challenges": (
+    <p>High frequency of synthetic checks can lead to increased costs.</p>
+  ),
+  "Solutions": (
+    <ul>
+      <li>Reduce the frequency of non-critical tests</li>
+      <li>Prioritize key user paths</li>
+    </ul>
+  ),
+  "Alternatives": (
+    <ul>
+      <li><strong>Checkly</strong> (affordable synthetic monitoring)</li>
+      <li><strong>Pingdom</strong> (good for website uptime monitoring)</li>
+    </ul>
+  ),
+  "Common Questions": (
+    <>
+      <ol>
+        <li>
+          <strong>What's the difference between API Tests and Browser Tests?</strong><br />
+          API Tests monitor single endpoints or URLs, whereas Browser Tests monitor web user journeys that may involve several actions and pages. Multistep API tests are available to chain several API requests together.
+        </li>
+        <li>
+          <strong>Are you able to alert on Synthetic monitors?</strong><br />
+          Yes, alerts are built in and triggered automatically when tests fail. Datadog integrates with collaboration tools like Slack, PagerDuty, and ServiceNow.
+        </li>
+        <li>
+          <strong>Can I view endpoint requests end-to-end?</strong><br />
+          Yes, with the APM integration, synthetic tests can be linked to corresponding back-end, code-level insights for minimal mean time to resolution.
+        </li>
+        <li>
+          <strong>Is there any extra charge for using private locations?</strong><br />
+          No, there are no additional costs to set up a private location. All test runs are billed as if run from managed locations.
+        </li>
+        <li>
+          <strong>What counts as a test run?</strong><br />
+          Each hit on your endpoint or full transaction (25 steps) counts as one run. Multistep API tests count each step as an individual run.
+        </li>
+        <li>
+          <strong>Does Mobile App Testing use real devices?</strong><br />
+          Yes, Mobile App Testing uses real devices, providing realistic testing conditions. Tests run sequentially by default but can run in parallel with additional concurrency slots.
+        </li>
+        <li>
+          <strong>What is Continuous Testing?</strong><br />
+          A toolkit that offers integration testing with CI providers like GitHub Actions and Jenkins. Tests can be run in parallel to reduce pipeline durations.
+        </li>
+      </ol>
+    </>
+  )
+}} />
 
 ### Cloud Security Management
 
-- **Pricing**: Host-based pricing depending on the services monitored. Starting at $10 per host per month for Pro (billed annually or $12 on-demand), or $25 per host per month for Enterprise (billed annually or $30 on-demand).
-    - **Cloud Workload Security (stand-alone)**: Starting at $15 per host per month (billed annually or $18 on-demand).
-- **Features**:
-    - **Pro**: Continuous scanning for misconfigurations, resource inventory, vulnerability management for container images, Kubernetes Security Posture Management (KSPM), and workflows to automate remediation.
-    - **Enterprise**: Includes everything in Pro, plus vulnerability management for hosts, infrastructure entitlement management (CIEM), real-time threat detection, case management, and increased container allotment (20 containers per host).
-    - **Cloud Workload Security (CWS)**: Stand-alone threat detection across Linux, Windows, Kubernetes, Docker, and AWS Fargate ECS/EKS, including file integrity monitoring, deep file & process activity monitoring, and network anomaly detection.
-- **Common Questions**:
-    - **Who is this for?**: CSM Pro is built to support multiple teams in discovering their existing cloud infrastructure, identifying issues that require attention, and evaluating their compliance readiness with cloud security posture management, all while providing guidance on how to address those gaps effectively.
-    - **Can I purchase CSM Pro for some hosts, and CSM Enterprise for the rest of my hosts?**: No, you may either purchase CSM Pro or CSM Enterprise for your organization, but not both.
-    - **What kind of billing plan do I need to run CSM Pro or Enterprise?**: Every billable CSM Pro or CSM Enterprise host requires the purchase of Pro or Enterprise Infrastructure Monitoring.
-    - **What counts as a billable host?**: A host is any physical or virtual OS instance that you monitor with Datadog. It could be a server, VM, node (in the case of Kubernetes), or App Service Plan instance (in the case of Azure App Services).
-    - **What capabilities are included in CSM Pro?**: Continuous scanning for misconfigurations, vulnerability management for container images, a full inventory of your cloud resources, case management, and 5 workflow executions per host per license.
-    - **What capabilities are included in CSM Enterprise?**: Includes continuous scanning for misconfigurations, vulnerability management for container images and hosts, real-time threat detection, cloud infrastructure entitlement management, anomalous workload profile detection, a full inventory of your cloud resources, case management, 20 workflow executions per host, and 20 containers included per host license.
-    - **Why are CWS and CSM Pro listed on my bill?**: If you are using CSM Enterprise on demand, your bill will temporarily show the line items CSM Pro and Cloud Workload Security. Those will be transitioned out by the end of the year and replaced by a line item for CSM Enterprise only.
-    - **What environments does CWS support?**: We support most major Linux distributions, Windows Servers, and container runtimes including Docker and Kubernetes to provide unparalleled visibility into your workloads.
+<VerticalTabs tabData={{
+  "Pricing": (
+    <>
+      <p>Host-based pricing depending on the services monitored. Starting at $10 per host per month for Pro (billed annually or $12 on-demand), or $25 per host per month for Enterprise (billed annually or $30 on-demand).</p>
+      <p><strong>Cloud Workload Security (stand-alone)</strong>: Starting at $15 per host per month (billed annually or $18 on-demand).</p>
+    </>
+  ),
+  "Features": (
+    <>
+      <p><strong>Pro</strong>:</p>
+      <ul>
+        <li>Continuous scanning for misconfigurations</li>
+        <li>Resource inventory</li>
+        <li>Vulnerability management for container images</li>
+        <li>Kubernetes Security Posture Management (KSPM)</li>
+        <li>Workflows to automate remediation</li>
+      </ul>
+      <p><strong>Enterprise</strong>:</p>
+      <ul>
+        <li>Includes everything in Pro, plus:</li>
+        <li>Vulnerability management for hosts</li>
+        <li>Infrastructure entitlement management (CIEM)</li>
+        <li>Real-time threat detection</li>
+        <li>Case management</li>
+        <li>Increased container allotment (20 containers per host)</li>
+      </ul>
+      <p><strong>Cloud Workload Security (CWS)</strong>:</p>
+      <ul>
+        <li>Stand-alone threat detection across Linux, Windows, Kubernetes, Docker, and AWS Fargate ECS/EKS</li>
+        <li>File integrity monitoring</li>
+        <li>Deep file & process activity monitoring</li>
+        <li>Network anomaly detection</li>
+      </ul>
+    </>
+  ),
+  "Challenges": (
+    <p>High monitoring costs for extensive cloud infrastructure.</p>
+  ),
+  "Solutions": (
+    <ul>
+      <li>Monitor only critical services</li>
+      <li>Optimize security policies to reduce unnecessary alerts</li>
+    </ul>
+  ),
+  "Alternatives": (
+    <ul>
+      <li><strong>AWS Security Hub</strong></li>
+      <li><strong>Azure Security Center</strong></li>
+    </ul>
+  ),
+  "Common Questions": (
+    <>
+      <ol>
+        <li>
+          <strong>Who is this for?</strong><br />
+          CSM Pro is built to support multiple teams in discovering their existing cloud infrastructure, identifying issues that require attention, and evaluating their compliance readiness with cloud security posture management, all while providing guidance on how to address those gaps effectively.
+        </li>
+        <li>
+          <strong>Can I purchase CSM Pro for some hosts, and CSM Enterprise for the rest of my hosts?</strong><br />
+          No, you may either purchase CSM Pro or CSM Enterprise for your organization, but not both.
+        </li>
+        <li>
+          <strong>What kind of billing plan do I need to run CSM Pro or Enterprise?</strong><br />
+          Every billable CSM Pro or CSM Enterprise host requires the purchase of Pro or Enterprise Infrastructure Monitoring.
+        </li>
+        <li>
+          <strong>What counts as a billable host?</strong><br />
+          A host is any physical or virtual OS instance that you monitor with Datadog. It could be a server, VM, node (in the case of Kubernetes), or App Service Plan instance (in the case of Azure App Services).
+        </li>
+        <li>
+          <strong>What capabilities are included in CSM Pro?</strong><br />
+          Continuous scanning for misconfigurations, vulnerability management for container images, a full inventory of your cloud resources, case management, and 5 workflow executions per host per license.
+        </li>
+        <li>
+          <strong>What capabilities are included in CSM Enterprise?</strong><br />
+          Includes continuous scanning for misconfigurations, vulnerability management for container images and hosts, real-time threat detection, cloud infrastructure entitlement management, anomalous workload profile detection, a full inventory of your cloud resources, case management, 20 workflow executions per host, and 20 containers included per host license.
+        </li>
+        <li>
+          <strong>Why are CWS and CSM Pro listed on my bill?</strong><br />
+          If you are using CSM Enterprise on demand, your bill will temporarily show the line items CSM Pro and Cloud Workload Security. Those will be transitioned out by the end of the year and replaced by a line item for CSM Enterprise only.
+        </li>
+        <li>
+          <strong>What environments does CWS support?</strong><br />
+          We support most major Linux distributions, Windows Servers, and container runtimes including Docker and Kubernetes to provide unparalleled visibility into your workloads.
+        </li>
+      </ol>
+    </>
+  )
+}} />
 
 | Product | Pricing Model | Key Features | Challenges | Solutions | Alternatives |
 | --- | --- | --- | --- | --- | --- |
