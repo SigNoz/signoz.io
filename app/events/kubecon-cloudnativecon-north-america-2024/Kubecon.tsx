@@ -45,53 +45,6 @@ const MainSection: React.FC = () => {
             talks from <span className="text-signoz_cherry-500"> Signoz team</span>
           </div>
 
-          <div className="flex flex-col-reverse justify-between border-b  border-dashed border-signoz_slate-100 px-6 py-6 sm:flex-row">
-          <div className="flex flex-col justify-between gap-4 mt-6 sm:pr-4 sm:mt-0">
-              <div className='flex gap-1.5'>
-              <Calendar size={16} className='min-w-4 mt-1' color='#C0C1C3' />
-              <div className="text-base uppercase text-signoz_vanilla-400 max-w-[217px]">Tuesday
-                Nov 12, 2024 <br/>
-                10:41am - 10:46am MST</div>
-              </div>
-              <div className='flex gap-1.5'>
-                <MapPin size={16} className='min-w-4 mt-1' color='#C0C1C3'/>
-                <div className="text-base uppercase text-signoz_vanilla-400">Hyatt Regency, Level 4 <br/> Regency Ballroom BCD</div>
-              </div>
-              <div className="flex flex-col gap-2">
-                <Link
-                  href="https://sched.co/1iW8k"
-                  target="_blank"
-                  id="btn-register-event"
-                  className="button-background flex sm:max-w-fit w-full items-center justify-center gap-2 rounded-full px-3 py-2 mb-6 sm:mb-0"
-                >
-                  <Megaphone size={16} />
-                  <span className="whitespace-nowrap text-sm font-medium text-[#F7F7F8]">
-                    Register to attend
-                  </span>
-                </Link>
-              </div>
-            </div>
-            <Link
-              href="https://sched.co/1iW8k"
-              target='_blank'
-              className="launch-week-card-background flex w-[864px] max-w-full cursor-pointer flex-col gap-6 rounded-md border border-signoz_slate-500 px-5 py-4 transition-colors duration-300 hover:bg-[#121317] sm:flex-row"
-            >
-              <img
-                src="/img/kubecon/talk-1.webp"
-                className=" mb-4  h-auto sm:h-56 w-auto pr-2 sm:mb-0 sm:pr-0"
-              />
-              <div className="group flex flex-col justify-between">
-                <div>
-                  <div className="font-medium mb-2 text-base">OpenTelemetry: Understanding How OpenTelemetry Network Uses eBPF for Network Observability | Project Lightning Talk</div>
-                </div>
-                <div className="flex justify-end">
-                  <div className="button-background mt-2 flex h-fit w-fit transform items-center justify-center rounded-full p-2 transition-transform group-hover:translate-x-2.5 sm:mt-0">
-                    <ArrowRight size={14} />
-                  </div>
-                </div>
-              </div>
-            </Link>
-          </div>
 
           <div className="flex flex-col-reverse justify-between border-b  border-dashed border-signoz_slate-100 px-6 py-6 sm:flex-row">
             <div className="flex flex-col justify-between gap-4 mt-6 sm:pr-4 sm:mt-0">
@@ -131,6 +84,9 @@ const MainSection: React.FC = () => {
               <div className="group flex flex-col justify-between">
                 <div>
                   <div className="font-medium mb-2 text-base">Enhancing Asynchronous Communication Observability with OpenTelemetry</div>
+                  <div className="text-sm font-medium text-signoz_vanilla-400">
+                  - By Shivanshu Raj Shrivastava, SigNoz & Liudmila Molkova, Microsoft
+                  </div>
                 </div>
                 <div className="flex justify-end">
                   <div className="button-background mt-2 flex h-fit w-fit transform items-center justify-center rounded-full p-2 transition-transform group-hover:translate-x-2.5 sm:mt-0">
@@ -179,6 +135,9 @@ const MainSection: React.FC = () => {
               <div className="group flex flex-col justify-between">
                 <div>
                   <div className="font-medium mb-2 text-base">Decentralized Federated Machine Learning &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</div>
+                  <div className="text-sm font-medium text-signoz_vanilla-400">
+                  - By Ekansh Gupta, SigNoz & Haardik Dharma, Civo
+                  </div>
                 </div>
                 <div className="flex justify-end">
                   <div className="button-background mt-2 flex h-fit w-fit transform items-center justify-center rounded-full p-2 transition-transform group-hover:translate-x-2.5 sm:mt-0">
@@ -227,6 +186,9 @@ const MainSection: React.FC = () => {
               <div className="group flex flex-col justify-between">
                 <div>
                   <div className="font-medium mb-2 text-base">Is OpenTelemetry too complicated to get started &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</div>
+                  <div className="text-sm font-medium text-signoz_vanilla-400">
+                  - By Pranay Prateek, SigNoz
+                  </div>
                 </div>
                 <div className="flex justify-end">
                   <div className="button-background mt-2 flex h-fit w-fit transform items-center justify-center rounded-full p-2 transition-transform group-hover:translate-x-2.5 sm:mt-0">
@@ -275,6 +237,9 @@ const MainSection: React.FC = () => {
               <div className="group flex flex-col justify-between">
                 <div>
                   <div className="font-medium mb-2 text-base">Orchestrating Scalable DAGs on Argo Workflows Using Fabric8s</div>
+                  <div className="text-sm font-medium text-signoz_vanilla-400">
+                  - By Ekansh Gupta, SigNoz & Shivay Lamba, Couchbase
+                  </div>
                 </div>
                 <div className="flex justify-end">
                   <div className="button-background mt-2 flex h-fit w-fit transform items-center justify-center rounded-full p-2 transition-transform group-hover:translate-x-2.5 sm:mt-0">
@@ -284,6 +249,56 @@ const MainSection: React.FC = () => {
               </div>
             </Link>
           </div>
+
+
+          <div className="flex flex-col-reverse justify-between border-b  border-dashed border-signoz_slate-100 px-6 py-6 sm:flex-row">
+          <div className="flex flex-col justify-between gap-4 mt-6 sm:pr-4 sm:mt-0">
+              <div className='flex gap-1.5'>
+              <Calendar size={16} className='min-w-4 mt-1' color='#C0C1C3' />
+              <div className="text-base uppercase text-signoz_vanilla-400 max-w-[217px]">Tuesday
+                Nov 12, 2024 <br/>
+                10:41am - 10:46am MST</div>
+              </div>
+              <div className='flex gap-1.5'>
+                <MapPin size={16} className='min-w-4 mt-1' color='#C0C1C3'/>
+                <div className="text-base uppercase text-signoz_vanilla-400">Hyatt Regency, Level 4 <br/> Regency Ballroom BCD</div>
+              </div>
+              <div className="flex flex-col gap-2">
+                <Link
+                  href="https://sched.co/1iW8k"
+                  target="_blank"
+                  id="btn-register-event"
+                  className="button-background flex sm:max-w-fit w-full items-center justify-center gap-2 rounded-full px-3 py-2 mb-6 sm:mb-0"
+                >
+                  <Megaphone size={16} />
+                  <span className="whitespace-nowrap text-sm font-medium text-[#F7F7F8]">
+                    Register to attend
+                  </span>
+                </Link>
+              </div>
+            </div>
+            <Link
+              href="https://sched.co/1iW8k"
+              target='_blank'
+              className="launch-week-card-background flex w-[864px] max-w-full cursor-pointer flex-col gap-6 rounded-md border border-signoz_slate-500 px-5 py-4 transition-colors duration-300 hover:bg-[#121317] sm:flex-row"
+            >
+              <img
+                src="/img/kubecon/talk-1.webp"
+                className=" mb-4  h-auto sm:h-56 w-auto pr-2 sm:mb-0 sm:pr-0"
+              />
+              <div className="group flex flex-col justify-between">
+                <div>
+                  <div className="font-medium mb-2 text-base">OpenTelemetry: The Future of Network Monitoring, eBPF for Low-Level Insights | Project Lightning Talk</div>
+                </div>
+                <div className="flex justify-end">
+                  <div className="button-background mt-2 flex h-fit w-fit transform items-center justify-center rounded-full p-2 transition-transform group-hover:translate-x-2.5 sm:mt-0">
+                    <ArrowRight size={14} />
+                  </div>
+                </div>
+              </div>
+            </Link>
+          </div>
+          
 
           <div className="flex flex-col-reverse justify-between border-b  border-dashed border-signoz_slate-100 px-6 py-6 sm:flex-row">
           <div className="flex flex-col justify-between gap-4 mt-6 sm:pr-4 sm:mt-0">
@@ -323,6 +338,9 @@ const MainSection: React.FC = () => {
               <div className="group flex flex-col justify-between">
                 <div>
                   <div className="font-medium mb-2 text-base">Using OpenTelemetry for Deep Observability Within Messaging Queues</div>
+                  <div className="text-sm font-medium text-signoz_vanilla-400">
+                  - By Ekansh Gupta, SigNoz & Shivanshu Raj Shrivastava, SigNoz
+                  </div>
                 </div>
                 <div className="flex justify-end">
                   <div className="button-background mt-2 flex h-fit w-fit transform items-center justify-center rounded-full p-2 transition-transform group-hover:translate-x-2.5 sm:mt-0">
@@ -371,6 +389,9 @@ const MainSection: React.FC = () => {
               <div className="group flex flex-col justify-between">
                 <div>
                   <div className="font-medium mb-2 text-base">Understanding How OpenTelemetry Network Uses eBPF for Network Observability</div>
+                  <div className="text-sm font-medium text-signoz_vanilla-400">                 
+                  - By Shivanshu Raj Shrivastava, SigNoz & Jonathan Perry, PerfPod
+                  </div>
                 </div>
                 <div className="flex justify-end">
                   <div className="button-background mt-2 flex h-fit w-fit transform items-center justify-center rounded-full p-2 transition-transform group-hover:translate-x-2.5 sm:mt-0">
