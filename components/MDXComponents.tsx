@@ -22,6 +22,7 @@ import PricingCTA from './PricingCTA'
 import PageFeedback from './PageFeedback/PageFeedback'
 import CustomMetricPlayground from './CustomMetricPlayground/CustomMetricPlayground'
 import VerticalTabs from './VerticalTabs/VerticalTabs'
+import FAQAccordion from './FAQAccordion/FAQAccordion'
 
 export const components: MDXComponents = {
   Image,
@@ -47,4 +48,5 @@ export const components: MDXComponents = {
   PageFeedback,
   CustomMetricPlayground,
   VerticalTabs,
+  FAQAccordion,
 }
