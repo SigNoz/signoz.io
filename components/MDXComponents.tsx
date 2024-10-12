@@ -23,6 +23,7 @@ import PageFeedback from './PageFeedback/PageFeedback'
 import CustomMetricPlayground from './CustomMetricPlayground/CustomMetricPlayground'
 import VerticalTabs from './VerticalTabs/VerticalTabs'
 import FAQAccordion from './FAQAccordion/FAQAccordion'
+import Button from './Button/Button'
 
 export const components: MDXComponents = {
   Image,
@@ -49,4 +50,5 @@ export const components: MDXComponents = {
   CustomMetricPlayground,
   VerticalTabs,
   FAQAccordion,
+  Button
 }
