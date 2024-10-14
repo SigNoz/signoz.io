@@ -24,6 +24,7 @@ import CustomMetricPlayground from './CustomMetricPlayground/CustomMetricPlaygro
 import VerticalTabs from './VerticalTabs/VerticalTabs'
 import FAQAccordion from './FAQAccordion/FAQAccordion'
 import Button from './Button/Button'
+import DatadogPricingCalculator from './DatadogPricingCalculator/DatadogPricingCalculator'
 
 export const components: MDXComponents = {
   Image,
@@ -50,5 +51,6 @@ export const components: MDXComponents = {
   CustomMetricPlayground,
   VerticalTabs,
   FAQAccordion,
-  Button
+  Button,
+  DatadogPricingCalculator
 }
