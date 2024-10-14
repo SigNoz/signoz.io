@@ -5,6 +5,7 @@ import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recha
 import { Info } from 'lucide-react';
 
 const DatadogPricingCalculator = () => {
+  const [activeTab, setActiveTab] = useState('logs');
   const [logPlan, setLogPlan] = useState('ingestion');
   const [logVolume, setLogVolume] = useState(100);
   const [apmPlan, setApmPlan] = useState('apm');
@@ -20,7 +21,6 @@ const DatadogPricingCalculator = () => {
     let infraCost = 0;
 
     // Log cost calculation
-    // Assuming 15 day retention and no on-demand usage
     switch (logPlan) {
       case 'ingestion':
         logCost = logVolume * 0.10;
@@ -94,12 +94,10 @@ const DatadogPricingCalculator = () => {
     return null;
   };
 
-  return (
-    <div className="bg-gray-900 text-white p-6 rounded-lg shadow-lg">
-      <h2 className="text-2xl font-bold mb-4 mt-2">Datadog Pricing Calculator</h2>
-      
-      <div className="flex flex-col md:flex-row">
-        <div className="md:w-2/3 pr-4">
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case 'logs':
+        return (
           <div className="mb-6">
             <h3 className="text-xl mb-2">Log Monitoring</h3>
             <p className="text-sm mb-2">Assuming 15 day retention and no on-demand usage</p>
@@ -154,7 +152,9 @@ const DatadogPricingCalculator = () => {
               className="bg-gray-700 text-white p-1 rounded w-20 inline-block"
             /> {logPlan === 'ingestion' ? 'GB' : 'million events'}</p>
           </div>
-
+        );
+      case 'apm':
+        return (
           <div className="mb-6">
             <h3 className="text-xl mb-2">APM</h3>
             <p className="text-sm mb-2">Assuming no additional span ingestion.</p>
@@ -215,7 +215,9 @@ const DatadogPricingCalculator = () => {
               className="bg-gray-700 text-white p-1 rounded w-20 inline-block"
             /></p>
           </div>
-
+        );
+      case 'infra':
+        return (
           <div className="mb-6">
             <h3 className="text-xl mb-2">Infrastructure Monitoring</h3>
             <p className="text-sm mb-2">Assuming no container, custom metric, and custom event usage</p>
@@ -274,6 +276,40 @@ const DatadogPricingCalculator = () => {
               className="bg-gray-700 text-white p-1 rounded w-20 inline-block"
             /></p>
           </div>
+        );
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="bg-gray-900 text-white p-6 rounded-lg shadow-lg">
+      <h2 className="text-2xl font-bold mb-4 mt-2">Datadog Pricing Calculator</h2>
+      
+      <div className="flex mb-4">
+        <button
+          className={`mr-2 px-4 py-2 rounded ${activeTab === 'logs' ? 'bg-blue-600' : 'bg-gray-700'}`}
+          onClick={() => setActiveTab('logs')}
+        >
+          Logs
+        </button>
+        <button
+          className={`mr-2 px-4 py-2 rounded ${activeTab === 'apm' ? 'bg-blue-600' : 'bg-gray-700'}`}
+          onClick={() => setActiveTab('apm')}
+        >
+          APM
+        </button>
+        <button
+          className={`px-4 py-2 rounded ${activeTab === 'infra' ? 'bg-blue-600' : 'bg-gray-700'}`}
+          onClick={() => setActiveTab('infra')}
+        >
+          Infrastructure
+        </button>
+      </div>
+
+      <div className="flex flex-col md:flex-row">
+        <div className="md:w-2/3 pr-4">
+          {renderTabContent()}
         </div>
 
         <div className="md:w-1/3 pl-4">
