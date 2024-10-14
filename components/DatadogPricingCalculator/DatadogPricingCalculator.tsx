@@ -231,7 +231,7 @@ const DatadogPricingCalculator = () => {
         </div>
 
         <div className="md:w-1/3 pl-4">
-          <div className="mb-4">
+          <div className="mb-4 h-20">
             <h3 className="text-lg mb-1 mt-0">Total Estimated Cost</h3>
             <p className="text-2xl font-bold my-2">${totalCost.toFixed(2)} / month</p>
           </div>
