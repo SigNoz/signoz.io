@@ -44,6 +44,15 @@ const DatadogPricingCalculator = () => {
       case 'apmEnterprise':
         apmCost = apmHosts * 40;
         break;
+      case 'apmDevSecOps':
+        apmCost = apmHosts * 36;
+        break;
+      case 'apmDevSecOpsPro':
+        apmCost = apmHosts * 40;
+        break;
+      case 'apmDevSecOpsEnterprise':
+        apmCost = apmHosts * 45;
+        break;
     }
 
     // Infrastructure cost calculation
@@ -122,17 +131,24 @@ const DatadogPricingCalculator = () => {
 
           <div className="mb-6">
             <h3 className="text-xl mb-2">APM</h3>
-            <div className="flex gap-4 mb-2">
-              {['apm', 'apmPro', 'apmEnterprise'].map((plan) => (
-                <label key={plan} className="flex items-center">
+            <div className="flex flex-wrap gap-4 mb-2">
+              {[
+                { value: 'apm', label: 'APM' },
+                { value: 'apmPro', label: 'APM Pro' },
+                { value: 'apmEnterprise', label: 'APM Enterprise' },
+                { value: 'apmDevSecOps', label: 'APM DevSecOps' },
+                { value: 'apmDevSecOpsPro', label: 'APM DevSecOps Pro' },
+                { value: 'apmDevSecOpsEnterprise', label: 'APM DevSecOps Enterprise' }
+              ].map((plan) => (
+                <label key={plan.value} className="flex items-center">
                   <input
                     type="radio"
-                    value={plan}
-                    checked={apmPlan === plan}
+                    value={plan.value}
+                    checked={apmPlan === plan.value}
                     onChange={(e) => setApmPlan(e.target.value)}
                     className="mr-2"
                   />
-                  {plan === 'apm' ? 'APM' : plan === 'apmPro' ? 'APM Pro' : 'APM Enterprise'}
+                  {plan.label}
                 </label>
               ))}
             </div>
