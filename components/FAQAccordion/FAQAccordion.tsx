@@ -13,12 +13,12 @@ const FAQItem = ({ question, answer }) => {
         className="flex justify-between items-center w-full py-4 text-left"
         onClick={() => setIsOpen(!isOpen)}
       >
-        <span className="font-medium text-lg">{question}</span>
+        <span className="font-medium text-base sm:text-lg">{question}</span>
         <motion.div
           animate={{ rotate: isOpen ? 180 : 0 }}
           transition={{ duration: 0.3 }}
         >
-          <ChevronDown className="w-5 h-5" />
+          <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5" />
         </motion.div>
       </button>
       <AnimatePresence>
@@ -30,7 +30,7 @@ const FAQItem = ({ question, answer }) => {
             transition={{ duration: 0.3 }}
           >
             <div className="py-2">
-              <p>{answer}</p>
+              <p className="text-sm sm:text-base">{answer}</p>
             </div>
           </motion.div>
         )}
@@ -41,7 +41,7 @@ const FAQItem = ({ question, answer }) => {
 
 const FAQAccordion = ({ faqs }) => {
   return (
-    <div>
+    <div className="w-full max-w-lg mx-auto px-4 sm:px-6 lg:px-8">
       {faqs.map((faq, index) => (
         <FAQItem key={index} question={faq.question} answer={faq.answer} />
       ))}

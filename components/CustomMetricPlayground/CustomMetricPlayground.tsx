@@ -35,18 +35,19 @@ const CustomMetricPlayground: React.FC = () => {
 
   return (
     <div className="p-4 max-w-4xl mx-auto bg-gray-900 text-gray-100 rounded-lg shadow-lg relative">
-      <div className="flex justify-between items-top mb-4">
-        <h1 className="text-xl font-bold">Metric: order_processing_time</h1>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4">
+        <h1 className="text-xl font-bold mb-2 sm:mb-0">Metric: order_processing_time</h1>
         <div className="relative">
           <button
             className="text-sm text-gray-800 bg-gray-300 px-2 py-1 rounded hover:text-gray-900 hover:bg-gray-100"
             onMouseEnter={() => setShowTooltip(true)}
+            onClick={() => setShowTooltip(!showTooltip)}
           >
             How to use this tool?
           </button>
           {showTooltip && (
             <div 
-              className="absolute right-0 mt-2 p-4 bg-white text-gray-800 rounded shadow-lg z-10 w-80"
+              className="absolute right-0 mt-2 p-4 bg-white text-gray-800 rounded shadow-lg z-10 w-full sm:w-80"
               onMouseEnter={() => setShowTooltip(true)}
               onMouseLeave={() => setShowTooltip(false)}
             >
@@ -64,7 +65,7 @@ const CustomMetricPlayground: React.FC = () => {
         </div>
       </div>
       
-      <div className="grid grid-cols-3 gap-4 mb-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-4">
         {['region', 'product_category', 'payment_method'].map((tag, index) => (
           <div key={tag} className="bg-gray-800 rounded p-2">
             <div className="flex justify-between">
@@ -105,7 +106,7 @@ const CustomMetricPlayground: React.FC = () => {
         </ResponsiveContainer>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="bg-gray-800 rounded px-4 py-1">
           <h3 className="font-semibold mt-1 mb-1">Full Cardinality</h3>
           <p className="text-xs">Cost = (Regions * Products * Payments) * $0.05</p>
