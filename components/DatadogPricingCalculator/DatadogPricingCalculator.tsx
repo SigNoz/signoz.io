@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { Info } from 'lucide-react';
 
 const DatadogPricingCalculator = () => {
   const [activeTab, setActiveTab] = useState('logs');
@@ -13,7 +12,6 @@ const DatadogPricingCalculator = () => {
   const [infraPlan, setInfraPlan] = useState('pro');
   const [infraHosts, setInfraHosts] = useState(20);
   const [totalCost, setTotalCost] = useState(0);
-  const [showTooltip, setShowTooltip] = useState('');
 
   const calculateCost = () => {
     let logCost = 0;
@@ -124,9 +122,10 @@ const DatadogPricingCalculator = () => {
               max={logPlan === 'ingestion' ? 1000 : 100}
               value={logVolume}
               onChange={(e) => setLogVolume(Number(e.target.value))}
-              className="w-full mb-2"
+              className="w-full my-2"
             />
             <p className="text-sm">Log Volume: {logVolume} {logPlan === 'ingestion' ? 'GB' : 'million events'}</p>
+            <p className="text-xs mb-2">(Assuming 15 day retention and no on-demand usage)</p>
           </div>
         );
       case 'apm':
@@ -159,9 +158,10 @@ const DatadogPricingCalculator = () => {
               max="100"
               value={apmHosts}
               onChange={(e) => setApmHosts(Number(e.target.value))}
-              className="w-full mb-2"
+              className="w-full my-2"
             />
             <p className="text-sm">APM Hosts: {apmHosts}</p>
+            <p className="text-xs mb-2">(Assuming no additional span ingestion.)</p>
           </div>
         );
       case 'infra':
@@ -190,9 +190,10 @@ const DatadogPricingCalculator = () => {
               max="200"
               value={infraHosts}
               onChange={(e) => setInfraHosts(Number(e.target.value))}
-              className="w-full mb-2"
+              className="w-full my-2"
             />
             <p className="text-sm">Infrastructure Hosts: {infraHosts}</p>
+            <p className="text-xs mb-2">(Assuming no container, custom metric, and custom event usage)</p>
           </div>
         );
       default:
