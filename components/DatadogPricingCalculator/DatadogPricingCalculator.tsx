@@ -157,25 +157,47 @@ const DatadogPricingCalculator = () => {
 
           <div className="mb-6">
             <h3 className="text-xl mb-2">APM</h3>
+            <p className="text-sm mb-2">Assuming no additional span ingestion.</p>
             <div className="flex flex-wrap gap-4 mb-2">
               {[
-                { value: 'apm', label: 'APM' },
-                { value: 'apmPro', label: 'APM Pro' },
-                { value: 'apmEnterprise', label: 'APM Enterprise' },
-                { value: 'apmDevSecOps', label: 'APM DevSecOps' },
-                { value: 'apmDevSecOpsPro', label: 'APM DevSecOps Pro' },
-                { value: 'apmDevSecOpsEnterprise', label: 'APM DevSecOps Enterprise' }
+                { value: 'apm', label: 'APM', description: '$31 per host per month, includes end-to-end distributed traces, service health metrics, and 15-day historical search & analytics.' },
+                { value: 'apmPro', label: 'APM Pro', description: '$35 per host per month, includes everything in APM plus Data Streams Monitoring.' },
+                { value: 'apmEnterprise', label: 'APM Enterprise', description: '$40 per host per month, includes APM Pro features along with Continuous Profiler for deeper code-level insights.' },
+                { value: 'apmDevSecOps', label: 'APM DevSecOps', description: '$36 per host per month, adds OSS vulnerability detection with Software Composition Analysis (SCA).' },
+                { value: 'apmDevSecOpsPro', label: 'APM DevSecOps Pro', description: '$40 per host per month, builds on the respective plans with SCA for enhanced security monitoring.' },
+                { value: 'apmDevSecOpsEnterprise', label: 'APM DevSecOps Enterprise', description: '$45 per host per month.' }
               ].map((plan) => (
-                <label key={plan.value} className="flex items-center">
-                  <input
-                    type="radio"
-                    value={plan.value}
-                    checked={apmPlan === plan.value}
-                    onChange={(e) => setApmPlan(e.target.value)}
-                    className="mr-2"
-                  />
-                  {plan.label}
-                </label>
+                <div key={plan.value} className="relative">
+                  <label className="flex items-center">
+                    <input
+                      type="radio"
+                      value={plan.value}
+                      checked={apmPlan === plan.value}
+                      onChange={(e) => setApmPlan(e.target.value)}
+                      className="mr-2"
+                    />
+                    <span>{plan.label}</span>
+                    <Info 
+                      className="ml-1 text-blue-400 cursor-pointer" 
+                      size={16}
+                      onMouseEnter={() => setShowTooltip(plan.value)}
+                      onClick={() => setShowTooltip(showTooltip === plan.value ? '' : plan.value)}
+                    />
+                  </label>
+                  {showTooltip === plan.value && (
+                    <div 
+                      className="absolute left-0 mt-2 p-4 bg-gray-800 text-white rounded shadow-lg z-10 w-64 sm:w-80"
+                      onMouseEnter={() => setShowTooltip(plan.value)}
+                      onMouseLeave={() => setShowTooltip('')}
+                    >
+                      <p className="text-sm">{plan.description}</p>
+                      <p className="text-sm mt-2">Additional Pricing Details:</p>
+                      <ul className="text-sm list-disc list-inside mt-1">
+                        <li>Additional span ingestion: $0.10/GB beyond the included 150GB per APM host</li>
+                      </ul>
+                    </div>
+                  )}
+                </div>
               ))}
             </div>
             <input
@@ -196,18 +218,45 @@ const DatadogPricingCalculator = () => {
 
           <div className="mb-6">
             <h3 className="text-xl mb-2">Infrastructure Monitoring</h3>
+            <p className="text-sm mb-2">Assuming no container, custom metric, and custom event usage</p>
             <div className="flex gap-4 mb-2">
-              {['pro', 'enterprise'].map((plan) => (
-                <label key={plan} className="flex items-center">
-                  <input
-                    type="radio"
-                    value={plan}
-                    checked={infraPlan === plan}
-                    onChange={(e) => setInfraPlan(e.target.value)}
-                    className="mr-2"
-                  />
-                  {plan === 'pro' ? 'Pro' : 'Enterprise'}
-                </label>
+              {[
+                { value: 'pro', label: 'Pro', description: 'Starting at $15 per host per month. Offers centralized monitoring of systems, services, and serverless functions, including full-resolution data retention for 15 months, alerts, container monitoring, custom metrics, SSO with SAML, and outlier detection.' },
+                { value: 'enterprise', label: 'Enterprise', description: 'Starting at $23 per host per month (billed annually). Adds advanced administrative features, automated insights with Watchdog, anomaly detection, forecast monitoring, live processes, and more.' }
+              ].map((plan) => (
+                <div key={plan.value} className="relative">
+                  <label className="flex items-center">
+                    <input
+                      type="radio"
+                      value={plan.value}
+                      checked={infraPlan === plan.value}
+                      onChange={(e) => setInfraPlan(e.target.value)}
+                      className="mr-2"
+                    />
+                    {plan.label}
+                    <Info 
+                      className="ml-1 text-blue-400 cursor-pointer" 
+                      size={16}
+                      onMouseEnter={() => setShowTooltip(plan.value)}
+                      onClick={() => setShowTooltip(showTooltip === plan.value ? '' : plan.value)}
+                    />
+                  </label>
+                  {showTooltip === plan.value && (
+                    <div 
+                      className="absolute left-0 mt-2 p-4 bg-gray-800 text-white rounded shadow-lg z-10 w-64 sm:w-80"
+                      onMouseEnter={() => setShowTooltip(plan.value)}
+                      onMouseLeave={() => setShowTooltip('')}
+                    >
+                      <p className="text-sm">{plan.description}</p>
+                      <p className="text-sm mt-2">Additional Pricing Details:</p>
+                      <ul className="text-sm list-disc list-inside mt-1">
+                        <li>Container monitoring: 5-10 free containers per host license. Additional containers at $0.002 per container per hour or $1 per container per month prepaid.</li>
+                        <li>Custom metrics: 100 for Pro, 200 for Enterprise per host. Additional at $1 per 100 metrics per month.</li>
+                        <li>Custom events: 500 for Pro, 1000 for Enterprise per host. Additional at $2 per 100,000 events (annual) or $3 (on-demand).</li>
+                      </ul>
+                    </div>
+                  )}
+                </div>
               ))}
             </div>
             <input
