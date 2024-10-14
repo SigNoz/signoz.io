@@ -28,7 +28,7 @@ import Button from './Button/Button'
 export const components: MDXComponents = {
   Image,
   TOCInline,
-  a: CustomLink
+  a: CustomLink,
   pre: Pre,
   table: TableWrapper,
   BlogNewsletterForm,
