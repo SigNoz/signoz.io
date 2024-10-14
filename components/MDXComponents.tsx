@@ -20,6 +20,7 @@ import NextCarousel from './Carousel/Carousel'
 import Figure from './Figure/Figure'
 import PricingCTA from './PricingCTA'
 import PageFeedback from './PageFeedback/PageFeedback'
+import Button from './Button/Button'
 
 export const components: MDXComponents = {
   Image,
@@ -43,4 +44,5 @@ export const components: MDXComponents = {
   Figure,
   PricingCTA,
   PageFeedback,
+  Button
 }
