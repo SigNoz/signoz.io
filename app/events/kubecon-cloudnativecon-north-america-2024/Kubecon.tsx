@@ -48,15 +48,15 @@ const MainSection: React.FC = () => {
 
           <div className="flex flex-col-reverse justify-between border-b  border-dashed border-signoz_slate-100 px-6 py-6 sm:flex-row">
             <div className="flex flex-col justify-between gap-4 mt-6 sm:pr-4 sm:mt-0">
-            <div className='flex gap-1.5'>
-              <Calendar size={16} className='min-w-4 mt-1' color='#C0C1C3' />
-              <div className="text-base uppercase text-signoz_vanilla-400 max-w-[217px]">Tuesday
-                Nov 12, 2024 <br/>
-                2:05pm - 2:30pm MST</div>
+              <div className='flex gap-1.5'>
+                <Calendar size={16} className='min-w-4 mt-1' color='#C0C1C3' />
+                <div className="text-base uppercase text-signoz_vanilla-400 max-w-[217px]">Tuesday
+                  Nov 12, 2024 <br />
+                  2:05pm - 2:30pm MST</div>
               </div>
               <div className='flex gap-1.5'>
-                <MapPin size={16} className='min-w-4 mt-1' color='#C0C1C3'/>
-                <div className="text-base uppercase text-signoz_vanilla-400">Hyatt Regency, Level 2 <br/> 255 BC</div>
+                <MapPin size={16} className='min-w-4 mt-1' color='#C0C1C3' />
+                <div className="text-base uppercase text-signoz_vanilla-400">Hyatt Regency, Level 2 <br /> 255 BC</div>
               </div>
               <div className="flex flex-col gap-2">
                 <Link
@@ -84,9 +84,27 @@ const MainSection: React.FC = () => {
               <div className="group flex flex-col justify-between">
                 <div>
                   <div className="font-medium mb-2 text-base">Enhancing Asynchronous Communication Observability with OpenTelemetry</div>
-                  <div className="text-sm font-medium text-signoz_vanilla-400">
-                  - By Shivanshu Raj Shrivastava, SigNoz & Liudmila Molkova, Microsoft
+                  <div className="text-sm italic font-bold py-2.5">
+                    Speakers
                   </div>
+                  <div className='flex flex-col gap-5'>
+                    <div className='flex flex-row gap-3 items-center'>
+                      <img src='/img/speakers/Liudmila.jpg' className='rounded-full h-10 w-10'></img>
+                      <div className='flex flex-col'>
+                        <div className='text-sm font-bold'>Liudmila Molkova</div>
+                        <div className='text-xs'>Principal Software Engineer <br /> Microsoft</div>
+                      </div>
+                    </div>
+
+                    <div className='flex flex-row gap-3 items-center'>
+                      <img src='/img/speakers/Shivanshu.jpg' className='rounded-full h-10 w-10'></img>
+                      <div className='flex flex-col'>
+                        <div className='text-sm font-bold'>Shivansu Raj Shrivastava</div>
+                        <div className='text-xs'>Founding Engineer <br /> SigNoz </div>
+                      </div>
+                    </div>
+                  </div>
+
                 </div>
                 <div className="flex justify-end">
                   <div className="button-background mt-2 flex h-fit w-fit transform items-center justify-center rounded-full p-2 transition-transform group-hover:translate-x-2.5 sm:mt-0">
@@ -97,17 +115,19 @@ const MainSection: React.FC = () => {
             </Link>
           </div>
 
+
+
           <div className="flex flex-col-reverse justify-between border-b  border-dashed border-signoz_slate-100 px-6 py-6 sm:flex-row">
-          <div className="flex flex-col justify-between gap-4 mt-6 sm:pr-4 sm:mt-0">
-            <div className='flex gap-1.5'>
-              <Calendar size={16} className='min-w-4 mt-1' color='#C0C1C3' />
-              <div className="text-base uppercase text-signoz_vanilla-400 max-w-[217px]">Tuesday
-                Nov 12, 2024 <br/>
-                3:20pm - 3:45pm MST</div>
+            <div className="flex flex-col justify-between gap-4 mt-6 sm:pr-4 sm:mt-0">
+              <div className='flex gap-1.5'>
+                <Calendar size={16} className='min-w-4 mt-1' color='#C0C1C3' />
+                <div className="text-base uppercase text-signoz_vanilla-400 max-w-[217px]">Tuesday
+                  Nov 12, 2024 <br />
+                  3:20pm - 3:45pm MST</div>
               </div>
               <div className='flex gap-1.5'>
-                <MapPin size={16} className='min-w-4 mt-1' color='#C0C1C3'/>
-                <div className="text-base uppercase text-signoz_vanilla-400">Salt Palace, Level 2 <br/>250 A</div>
+                <MapPin size={16} className='min-w-4 mt-1' color='#C0C1C3' />
+                <div className="text-base uppercase text-signoz_vanilla-400">Salt Palace, Level 2 <br />250 A</div>
               </div>
               <div className="flex flex-col gap-2">
                 <Link
@@ -135,9 +155,28 @@ const MainSection: React.FC = () => {
               <div className="group flex flex-col justify-between">
                 <div>
                   <div className="font-medium mb-2 text-base">Decentralized Federated Machine Learning &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</div>
-                  <div className="text-sm font-medium text-signoz_vanilla-400">
-                  - By Ekansh Gupta, SigNoz & Haardik Dharma, Civo
+                  <div className="text-sm italic font-bold py-2.5">
+                    Speakers
                   </div>
+
+                  <div className='flex flex-col gap-5'>
+                    <div className='flex flex-row gap-3 items-center'>
+                      <img src='/img/speakers/Haardik.jpg' className='rounded-full h-10 w-10'></img>
+                      <div className='flex flex-col'>
+                        <div className='text-sm font-bold'>Haardik Dharma</div>
+                        <div className='text-xs'>Developer <br /> Civo</div>
+                      </div>
+                    </div>
+
+                    <div className='flex flex-row gap-3 items-center'>
+                      <img src='/img/speakers/Ekansh.jpg' className='rounded-full h-10 w-10'></img>
+                      <div className='flex flex-col'>
+                        <div className='text-sm font-bold'>Ekansh Gupta</div>
+                        <div className='text-xs'>SDE <br /> SigNoz </div>
+                      </div>
+                    </div>
+                  </div>
+
                 </div>
                 <div className="flex justify-end">
                   <div className="button-background mt-2 flex h-fit w-fit transform items-center justify-center rounded-full p-2 transition-transform group-hover:translate-x-2.5 sm:mt-0">
@@ -149,16 +188,16 @@ const MainSection: React.FC = () => {
           </div>
 
           <div className="flex flex-col-reverse justify-between border-b  border-dashed border-signoz_slate-100 px-6 py-6 sm:flex-row">
-          <div className="flex flex-col justify-between gap-4 mt-6 sm:pr-4 sm:mt-0">
-            <div className='flex gap-1.5'>
-              <Calendar size={16} className='min-w-4 mt-1' color='#C0C1C3' />
-              <div className="text-base uppercase text-signoz_vanilla-400 max-w-[217px]">Tuesday
-                Nov 12, 2024 <br/>
-                5:00pm - 5:10pm MST</div>
+            <div className="flex flex-col justify-between gap-4 mt-6 sm:pr-4 sm:mt-0">
+              <div className='flex gap-1.5'>
+                <Calendar size={16} className='min-w-4 mt-1' color='#C0C1C3' />
+                <div className="text-base uppercase text-signoz_vanilla-400 max-w-[217px]">Tuesday
+                  Nov 12, 2024 <br />
+                  5:00pm - 5:10pm MST</div>
               </div>
               <div className='flex gap-1.5'>
-                <MapPin size={16} className='min-w-4 mt-1' color='#C0C1C3'/>
-                <div className="text-base uppercase text-signoz_vanilla-400">Salt Palace, Level 2 <br/>255 E</div>
+                <MapPin size={16} className='min-w-4 mt-1' color='#C0C1C3' />
+                <div className="text-base uppercase text-signoz_vanilla-400">Salt Palace, Level 2 <br />255 E</div>
               </div>
               <div className="flex flex-col gap-2">
                 <Link
@@ -186,8 +225,18 @@ const MainSection: React.FC = () => {
               <div className="group flex flex-col justify-between">
                 <div>
                   <div className="font-medium mb-2 text-base">Is OpenTelemetry too complicated to get started &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</div>
-                  <div className="text-sm font-medium text-signoz_vanilla-400">
-                  - By Pranay Prateek, SigNoz
+                  <div className="text-sm italic font-bold py-2.5">
+                    Speakers
+                  </div>
+
+                  <div className='flex flex-col gap-5'>
+                    <div className='flex flex-row gap-3 items-center'>
+                      <img src='/img/speakers/Pranay.jpg' className='rounded-full h-10 w-10'></img>
+                      <div className='flex flex-col'>
+                        <div className='text-sm font-bold'>Pranay Prateek</div>
+                        <div className='text-xs'>Maintainer <br /> SigNoz</div>
+                      </div>
+                    </div>
                   </div>
                 </div>
                 <div className="flex justify-end">
@@ -200,16 +249,16 @@ const MainSection: React.FC = () => {
           </div>
 
           <div className="flex flex-col-reverse justify-between border-b  border-dashed border-signoz_slate-100 px-6 py-6 sm:flex-row">
-          <div className="flex flex-col justify-between gap-4 mt-6 sm:pr-4 sm:mt-0">
-            <div className='flex gap-1.5'>
-              <Calendar size={16} className='min-w-4 mt-1' color='#C0C1C3' />
-              <div className="text-base uppercase text-signoz_vanilla-400 max-w-[217px]">Tuesday
-                Nov 12, 2024 <br/>
-                5:15pm - 5:25pm MST</div>
+            <div className="flex flex-col justify-between gap-4 mt-6 sm:pr-4 sm:mt-0">
+              <div className='flex gap-1.5'>
+                <Calendar size={16} className='min-w-4 mt-1' color='#C0C1C3' />
+                <div className="text-base uppercase text-signoz_vanilla-400 max-w-[217px]">Tuesday
+                  Nov 12, 2024 <br />
+                  5:15pm - 5:25pm MST</div>
               </div>
               <div className='flex gap-1.5'>
-                <MapPin size={16} className='min-w-4 mt-1' color='#C0C1C3'/>
-                <div className="text-base uppercase text-signoz_vanilla-400">Salt Palace, Level 2 <br/>254 B</div>
+                <MapPin size={16} className='min-w-4 mt-1' color='#C0C1C3' />
+                <div className="text-base uppercase text-signoz_vanilla-400">Salt Palace, Level 2 <br />254 B</div>
               </div>
               <div className="flex flex-col gap-2">
                 <Link
@@ -237,8 +286,26 @@ const MainSection: React.FC = () => {
               <div className="group flex flex-col justify-between">
                 <div>
                   <div className="font-medium mb-2 text-base">Orchestrating Scalable DAGs on Argo Workflows Using Fabric8s</div>
-                  <div className="text-sm font-medium text-signoz_vanilla-400">
-                  - By Ekansh Gupta, SigNoz & Shivay Lamba, Couchbase
+                  <div className="text-sm italic font-bold py-2.5">
+                    Speakers
+                  </div>
+
+                  <div className='flex flex-col gap-5'>
+                    <div className='flex flex-row gap-3 items-center'>
+                      <img src='/img/speakers/Shivay.jpg' className='rounded-full h-10 w-10'></img>
+                      <div className='flex flex-col'>
+                        <div className='text-sm font-bold'>Shivay Lamba</div>
+                        <div className='text-xs'>Developer Relations Engineer <br /> Couchbase</div>
+                      </div>
+                    </div>
+
+                    <div className='flex flex-row gap-3 items-center'>
+                      <img src='/img/speakers/Ekansh.jpg' className='rounded-full h-10 w-10'></img>
+                      <div className='flex flex-col'>
+                        <div className='text-sm font-bold'>Ekansh Gupta</div>
+                        <div className='text-xs'>SDE <br /> SigNoz </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
                 <div className="flex justify-end">
@@ -250,18 +317,17 @@ const MainSection: React.FC = () => {
             </Link>
           </div>
 
-
           <div className="flex flex-col-reverse justify-between border-b  border-dashed border-signoz_slate-100 px-6 py-6 sm:flex-row">
-          <div className="flex flex-col justify-between gap-4 mt-6 sm:pr-4 sm:mt-0">
+            <div className="flex flex-col justify-between gap-4 mt-6 sm:pr-4 sm:mt-0">
               <div className='flex gap-1.5'>
-              <Calendar size={16} className='min-w-4 mt-1' color='#C0C1C3' />
-              <div className="text-base uppercase text-signoz_vanilla-400 max-w-[217px]">Tuesday
-                Nov 12, 2024 <br/>
-                10:41am - 10:46am MST</div>
+                <Calendar size={16} className='min-w-4 mt-1' color='#C0C1C3' />
+                <div className="text-base uppercase text-signoz_vanilla-400 max-w-[217px]">Tuesday
+                  Nov 12, 2024 <br />
+                  10:41am - 10:46am MST</div>
               </div>
               <div className='flex gap-1.5'>
-                <MapPin size={16} className='min-w-4 mt-1' color='#C0C1C3'/>
-                <div className="text-base uppercase text-signoz_vanilla-400">Hyatt Regency, Level 4 <br/> Regency Ballroom BCD</div>
+                <MapPin size={16} className='min-w-4 mt-1' color='#C0C1C3' />
+                <div className="text-base uppercase text-signoz_vanilla-400">Hyatt Regency, Level 4 <br /> Regency Ballroom BCD</div>
               </div>
               <div className="flex flex-col gap-2">
                 <Link
@@ -298,19 +364,19 @@ const MainSection: React.FC = () => {
               </div>
             </Link>
           </div>
-          
+
 
           <div className="flex flex-col-reverse justify-between border-b  border-dashed border-signoz_slate-100 px-6 py-6 sm:flex-row">
-          <div className="flex flex-col justify-between gap-4 mt-6 sm:pr-4 sm:mt-0">
-            <div className='flex gap-1.5'>
-              <Calendar size={16} className='min-w-4 mt-1' color='#C0C1C3' />
-              <div className="text-base uppercase text-signoz_vanilla-400 max-w-[217px]">Wednesday
-                Nov 13, 2024 <br/>
-                3:25pm - 4:00pm MST</div>
+            <div className="flex flex-col justify-between gap-4 mt-6 sm:pr-4 sm:mt-0">
+              <div className='flex gap-1.5'>
+                <Calendar size={16} className='min-w-4 mt-1' color='#C0C1C3' />
+                <div className="text-base uppercase text-signoz_vanilla-400 max-w-[217px]">Wednesday
+                  Nov 13, 2024 <br />
+                  3:25pm - 4:00pm MST</div>
               </div>
               <div className='flex gap-1.5'>
-                <MapPin size={16} className='min-w-4 mt-1' color='#C0C1C3'/>
-                <div className="text-base uppercase text-signoz_vanilla-400">Salt Palace, Level 1 <br/> Grand Ballroom HJ</div>
+                <MapPin size={16} className='min-w-4 mt-1' color='#C0C1C3' />
+                <div className="text-base uppercase text-signoz_vanilla-400">Salt Palace, Level 1 <br /> Grand Ballroom HJ</div>
               </div>
               <div className="flex flex-col gap-2">
                 <Link
@@ -338,9 +404,28 @@ const MainSection: React.FC = () => {
               <div className="group flex flex-col justify-between">
                 <div>
                   <div className="font-medium mb-2 text-base">Using OpenTelemetry for Deep Observability Within Messaging Queues</div>
-                  <div className="text-sm font-medium text-signoz_vanilla-400">
-                  - By Ekansh Gupta, SigNoz & Shivanshu Raj Shrivastava, SigNoz
+                  <div className="text-sm italic font-bold py-2.5">
+                    Speakers
                   </div>
+
+                  <div className='flex flex-col gap-5'>
+                    <div className='flex flex-row gap-3 items-center'>
+                      <img src='/img/speakers/Ekansh.jpg' className='rounded-full h-10 w-10'></img>
+                      <div className='flex flex-col'>
+                        <div className='text-sm font-bold'>Ekansh Gupta</div>
+                        <div className='text-xs'>SDE<br /> SigNoz</div>
+                      </div>
+                    </div>
+
+                    <div className='flex flex-row gap-3 items-center'>
+                      <img src='/img/speakers/Shivanshu.jpg' className='rounded-full h-10 w-10'></img>
+                      <div className='flex flex-col'>
+                        <div className='text-sm font-bold'>Shivansu Raj Shrivastava</div>
+                        <div className='text-xs'>Founding Engineer <br /> SigNoz </div>
+                      </div>
+                    </div>
+                  </div>
+
                 </div>
                 <div className="flex justify-end">
                   <div className="button-background mt-2 flex h-fit w-fit transform items-center justify-center rounded-full p-2 transition-transform group-hover:translate-x-2.5 sm:mt-0">
@@ -352,16 +437,16 @@ const MainSection: React.FC = () => {
           </div>
 
           <div className="flex flex-col-reverse justify-between border-b  border-dashed border-signoz_slate-100 px-6 py-6 sm:flex-row">
-          <div className="flex flex-col justify-between gap-4 mt-6 sm:pr-4 sm:mt-0">
-            <div className='flex gap-1.5'>
-              <Calendar size={16} className='min-w-4 mt-1' color='#C0C1C3' />
-              <div className="text-base uppercase text-signoz_vanilla-400 max-w-[217px]">Wednesday
-                Nov 13, 2024 <br/>
-                4:30pm - 5:05pm MST</div>
+            <div className="flex flex-col justify-between gap-4 mt-6 sm:pr-4 sm:mt-0">
+              <div className='flex gap-1.5'>
+                <Calendar size={16} className='min-w-4 mt-1' color='#C0C1C3' />
+                <div className="text-base uppercase text-signoz_vanilla-400 max-w-[217px]">Wednesday
+                  Nov 13, 2024 <br />
+                  4:30pm - 5:05pm MST</div>
               </div>
               <div className='flex gap-1.5'>
-                <MapPin size={16} className='min-w-4 mt-1' color='#C0C1C3'/>
-                <div className="text-base uppercase text-signoz_vanilla-400">Hyatt Regency, Level 4 <br/>Regency Ballroom A</div>
+                <MapPin size={16} className='min-w-4 mt-1' color='#C0C1C3' />
+                <div className="text-base uppercase text-signoz_vanilla-400">Hyatt Regency, Level 4 <br />Regency Ballroom A</div>
               </div>
               <div className="flex flex-col gap-2">
                 <Link
@@ -389,8 +474,26 @@ const MainSection: React.FC = () => {
               <div className="group flex flex-col justify-between">
                 <div>
                   <div className="font-medium mb-2 text-base">Understanding How OpenTelemetry Network Uses eBPF for Network Observability</div>
-                  <div className="text-sm font-medium text-signoz_vanilla-400">                 
-                  - By Shivanshu Raj Shrivastava, SigNoz & Jonathan Perry, PerfPod
+                  <div className="text-sm italic font-bold py-2.5">
+                    Speakers
+                  </div>
+
+                  <div className='flex flex-col gap-5'>
+                    <div className='flex flex-row gap-3 items-center'>
+                      <img src='/img/speakers/Jonathan.jpg' className='rounded-full h-10 w-10'></img>
+                      <div className='flex flex-col'>
+                        <div className='text-sm font-bold'>Jonathan Perry</div>
+                        <div className='text-xs'>Founder & CEO <br /> PerfPod</div>
+                      </div>
+                    </div>
+
+                    <div className='flex flex-row gap-3 items-center'>
+                      <img src='/img/speakers/Shivanshu.jpg' className='rounded-full h-10 w-10'></img>
+                      <div className='flex flex-col'>
+                        <div className='text-sm font-bold'>Shivansu Raj Shrivastava</div>
+                        <div className='text-xs'>Founding Engineer <br /> SigNoz </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
                 <div className="flex justify-end">
@@ -422,8 +525,8 @@ const GetStarted = ({ page }) => {
           <div className="bg-[url('/img/background_blur/Ellipse_206.png')] bg-[length:110%] bg-[center_top_calc(-250px)] bg-no-repeat">
             <div className="flex flex-col gap-12">
               <p className="mb-0 mt-20 text-center text-3xl sm:text-4xl font-bold">
-              OpenTelemetry-Native Logs, 
-              <br /> Metrics and Traces in a single pane
+                OpenTelemetry-Native Logs,
+                <br /> Metrics and Traces in a single pane
               </p>
               <div className="mb-10 flex items-center justify-center gap-3 pt-4 max-sm:flex-col">
                 <Button id={getStartedId}>
