@@ -551,7 +551,7 @@ const GetStarted = ({ page }) => {
                 <div className="flex items-center justify-center gap-3 pt-4 max-sm:flex-col">
                   <Button id={getStartedId}>
                     <Link href="/teams/" className="flex-center">
-                      Try SigNoz Cloud
+                      Get Started - Free
                       <ArrowRight size={14} />
                     </Link>
                   </Button>

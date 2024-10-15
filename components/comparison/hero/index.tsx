@@ -22,7 +22,7 @@ const Hero = (props) => {
             className={`button primary-gradient bg-signoz_vanilla-300 text-signoz_ink-300`}
             href="/teams"
           >
-            Try SigNoz Cloud
+            Get Started - Free
           </Link>
         )}
         {selfHost.isVisible && (

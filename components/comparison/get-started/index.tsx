@@ -49,7 +49,7 @@ const GetStartedSection = (props) => {
         </h3>
         <p className={styles.desc}>SigNoz Cloud is the easiest way to run SigNoz</p>
         <Link className={`button button--secondary ${styles.trySigNozCtaBtn}`} href="/teams/">
-          Try SigNoz Cloud
+          Get Started - Free
         </Link>
       </div>
     </div>

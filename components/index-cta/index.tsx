@@ -35,7 +35,7 @@ const CTA = () => {
               to={'/teams/'}
               id="btn-get-started-homepage-bottom"
             >
-              Try SigNoz Cloud
+              Get Started - Free
             </Button>
             <Button
               isButton
