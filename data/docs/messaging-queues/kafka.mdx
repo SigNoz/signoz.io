@@ -30,6 +30,8 @@ SigNoz. You will learn how to monitor brokers, topics, consumers, producers, and
     - [Step 2: OpenTelemetry Java Agent Installation](#step-2-opentelemetry-java-agent-installation)
     - [Step 3: Java Producer-Consumer App Setup](#step-3-java-producer-consumer-app-setup)
     - [Step 4: OpenTelemetry Collector Setup](#step-4-opentelemetry-collector-setup)
+    - [Step 5: Visualise Data in SigNoz](#step-5-visualize-data-in-signoz)
+
 
 ---
 
@@ -302,6 +304,7 @@ Update you collector config with the follwing:
 
 ```yaml
 receivers:
+  # Read more about kafka metrics receiver - https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/kafkametricsreceiver/README.md
   kafkametrics:
     brokers:
       - localhost:9092
@@ -312,6 +315,7 @@ receivers:
       - brokers
       - topics
       - consumers
+  # Read more about jmx receiver - https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/jmxreceiver/README.md
   jmx/1:
     # configure the path where you installed opentelemetry-jmx-metrics jar
     jar_path: path/to/opentelemetry-jmx-metrics.jar #change this to the path to you opentelemetry-jmx-metrics jar file you downloaded above
@@ -352,6 +356,7 @@ service:
 
 ```yaml
 receivers:
+  # Read more about kafka metrics receiver - https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/kafkametricsreceiver/README.md
   kafkametrics:
     brokers:
       - localhost:9092
@@ -362,6 +367,7 @@ receivers:
       - brokers
       - topics
       - consumers
+  # Read more about jmx receiver - https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/jmxreceiver/README.md
   jmx/1:
     # configure the path where you installed opentelemetry-jmx-metrics jar
     jar_path: path/to/opentelemetry-jmx-metrics.jar #change this to the path to you opentelemetry-jmx-metrics jar file you downloaded above
@@ -396,7 +402,7 @@ service:
 
 </TabItem>
 </Tabs>
-The config file ets up the OpenTelemetry Collector to gather Kafka and JVM metrics from multiple brokers(2 brokers in the above config) via Kafka metrics scraping 
+The config file sets up the OpenTelemetry Collector to gather Kafka and JVM metrics from multiple brokers(2 brokers in the above config) via Kafka metrics scraping 
 and JMX, and exports the telemetry data to SigNoz using the OTLP exporter. 
 
 **Run the collector** 
@@ -410,3 +416,40 @@ Run the collector with the above configuration :
 </TabItem>
 
 </Tabs>
+
+### Step 5: Visualize data in SigNoz
+
+**To see your Producer and Consumer app traces:**
+
+- Head over to **Services** tab in your SigNoz instance.
+- You should be able to see your apps in the list along with some [application metrics](https://signoz.io/docs/userguide/metrics/).
+- Click on the service of your choice to see more detailed application metrics and [related traces](https://signoz.io/docs/userguide/traces/).
+
+<figure data-zoomable align="center">
+    <img
+      src="/img/docs/messaging-queues/kafka/kafka-services-tabs.webp"
+      alt="Kafka Producer app in Services Tab of SigNoz"
+    />
+    <figcaption>
+      <i>
+        Kafka Producer app in Services tab of SigNoz
+      </i>
+    </figcaption>
+</figure>
+
+**To see the Kafka Metrics:**
+
+- Head over to **Messaging Queues** tab in your SigNoz instance.
+- You will get different Options like **Consumer Lag View** etc., to see various kafka related metrics.
+
+<figure data-zoomable align="center">
+    <img
+      src="/img/docs/messaging-queues/kafka/kafka-metrics.webp"
+      alt="Messaging Queues tab in SigNoz"
+    />
+    <figcaption>
+      <i>
+        Messaging Queues tab in SigNoz
+      </i>
+    </figcaption>
+</figure>
