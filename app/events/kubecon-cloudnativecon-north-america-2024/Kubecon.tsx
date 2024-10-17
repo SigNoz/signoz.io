@@ -78,7 +78,7 @@ const MainSection: React.FC = () => {
               className="launch-week-card-background flex w-[864px] max-w-full cursor-pointer flex-col gap-6 rounded-md border border-signoz_slate-500 px-5 py-4 transition-colors duration-300 hover:bg-[#121317] sm:flex-row"
             >
               <img
-                src="/img/kubecon/talk-2.webp"
+                src="/img/events/kubecon/KubeConNA24_CoLoSnackables-ObservabilityDay.webp"
                 className=" mb-4  h-auto sm:h-56 w-auto pr-2 sm:mb-0   sm:pr-0"
               />
               <div className="group flex flex-col justify-between">
@@ -149,7 +149,7 @@ const MainSection: React.FC = () => {
               className="launch-week-card-background flex w-[864px] max-w-full cursor-pointer flex-col gap-6 rounded-md border border-signoz_slate-500 px-5 py-4 transition-colors duration-300 hover:bg-[#121317] sm:flex-row"
             >
               <img
-                src="/img/kubecon/talk-5.webp"
+                src="/img/events/kubecon/KubeConNA24_CoLoSnackables-KubernetesonEdgeDay.webp"
                 className=" mb-4  h-auto sm:h-56 w-auto pr-2 sm:mb-0   sm:pr-0"
               />
               <div className="group flex flex-col justify-between">
@@ -219,7 +219,7 @@ const MainSection: React.FC = () => {
               className="launch-week-card-background flex w-[864px] max-w-full cursor-pointer flex-col gap-6 rounded-md border border-signoz_slate-500 px-5 py-4 transition-colors duration-300 hover:bg-[#121317] sm:flex-row"
             >
               <img
-                src="/img/kubecon/talk-7.webp"
+                src="/img/events/kubecon/KubeConNA24_CoLoSnackables-ObservabilityDay.webp"
                 className=" mb-4  h-auto sm:h-56 w-auto pr-2 sm:mb-0 sm:pr-0"
               />
               <div className="group flex flex-col justify-between">
@@ -280,7 +280,7 @@ const MainSection: React.FC = () => {
               className="launch-week-card-background flex w-[864px] max-w-full cursor-pointer flex-col gap-6 rounded-md border border-signoz_slate-500 px-5 py-4 transition-colors duration-300 hover:bg-[#121317] sm:flex-row"
             >
               <img
-                src="/img/kubecon/talk-6.webp"
+                src="/img/events/kubecon/KubeConNA24_CoLoSnackables-ArgoCon.webp"
                 className=" mb-4  h-auto sm:h-56 w-auto pr-2 sm:mb-0   sm:pr-0"
               />
               <div className="group flex flex-col justify-between">
@@ -349,7 +349,7 @@ const MainSection: React.FC = () => {
               className="launch-week-card-background flex w-[864px] max-w-full cursor-pointer flex-col gap-6 rounded-md border border-signoz_slate-500 px-5 py-4 transition-colors duration-300 hover:bg-[#121317] sm:flex-row"
             >
               <img
-                src="/img/kubecon/talk-1.webp"
+                src="/img/events/kubecon/kubecon-na.webp"
                 className=" mb-4  h-auto sm:h-56 w-auto pr-2 sm:mb-0 sm:pr-0"
               />
               <div className="group flex flex-col justify-between">
@@ -398,7 +398,7 @@ const MainSection: React.FC = () => {
               className="launch-week-card-background flex w-[864px] max-w-full cursor-pointer flex-col gap-6 rounded-md border border-signoz_slate-500 px-5 py-4 transition-colors duration-300 hover:bg-[#121317] sm:flex-row"
             >
               <img
-                src="/img/kubecon/talk-3.webp"
+                src="/img/events/kubecon/kubecon-na.webp"
                 className=" mb-4  h-auto sm:h-56 w-auto pr-2 sm:mb-0   sm:pr-0"
               />
               <div className="group flex flex-col justify-between">
@@ -468,7 +468,7 @@ const MainSection: React.FC = () => {
               className="launch-week-card-background flex w-[864px] max-w-full cursor-pointer flex-col gap-6 rounded-md border border-signoz_slate-500 px-5 py-4 transition-colors duration-300 hover:bg-[#121317] sm:flex-row"
             >
               <img
-                src="/img/kubecon/talk-4.webp"
+                src="/img/events/kubecon/kubecon-na.webp"
                 className=" mb-4  h-auto sm:h-56 w-auto pr-2 sm:mb-0   sm:pr-0"
               />
               <div className="group flex flex-col justify-between">
