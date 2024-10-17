@@ -2,7 +2,7 @@ const docsSideNav = [
   {
     type: 'category',
     isExpanded: false,
-    label: 'Get Started',
+    label: 'Introduction',
     route: '/docs',
     items: [
       {
@@ -13,13 +13,13 @@ const docsSideNav = [
       {
         type: 'category',
         isExpanded: false,
-        label: 'Installation',
+        label: 'Get Started',
         route: '/docs/install',
         items: [
           {
             type: 'doc',
             route: '/docs/cloud',
-            label: 'Setup SigNoz Cloud',
+            label: 'SigNoz Cloud',
           },
           {
             type: 'category',
