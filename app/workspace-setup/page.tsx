@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { Suspense, useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import WorkspaceReady from './workspace-ready'
 import WorkspaceSetup from './workspace-setup'
@@ -88,13 +88,13 @@ function SetupWorkspace() {
   }, [isEmailVerified])
 
   return (
-    <>
+    <Suspense>
       {isWorkspaceReady ? (
         <WorkspaceReady workspaceData={workspaceData} userEmail={email} />
       ) : (
         <WorkspaceSetup isWorkspaceSetupDelayed={isWorkspaceSetupDelayed} />
       )}
-    </>
+    </Suspense>
   )
 }
 
