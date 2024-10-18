@@ -230,6 +230,21 @@ module.exports = () => {
           destination: '/api-reference/',
           permanent: true,
         },
+        {
+          source: '/users',
+          destination: '/workspace-setup/',
+          permanent: false,
+          has: [
+            {
+              type: 'query',
+              key: 'code',
+            },
+            {
+              type: 'query',
+              key: 'email',
+            },
+          ],
+        },
       ]
     },
     webpack: (config, options) => {

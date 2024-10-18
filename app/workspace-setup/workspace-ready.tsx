@@ -10,7 +10,11 @@ import {
 import React from 'react'
 import Link from 'next/link'
 
-function WorkspaceReady({ userName }: { userName: string }) {
+function WorkspaceReady({ workspaceData, userEmail }: { workspaceData: any; userEmail: string }) {
+  const handleCopyWorkspaceLink = () => {
+    navigator.clipboard.writeText(workspaceData?.invite_link)
+  }
+
   return (
     <div className="welcome-container mx-auto flex max-w-[640px] flex-col items-center py-32">
       <CheckCircleIcon size={56} className="text-signoz_robin-500" />
@@ -18,9 +22,7 @@ function WorkspaceReady({ userName }: { userName: string }) {
       <div className="mt-[28px] bg-neutral-950 text-2xl"> Your workspace is ready! </div>
 
       <div className="text-md mt-[28px] rounded-[6px] border border-[#1D212D] bg-signoz_ink-300 p-[24px]">
-        <div className="flex items-center gap-4 text-sm"> Hey {userName}, </div>
-
-        <div className="mt-[12px] flex items-center gap-4 text-sm">
+        <div className="flex items-center gap-4 text-sm">
           Your SigNoz cloud account is ready to be used. The following details have also been
           emailed to you.
         </div>
@@ -33,11 +35,16 @@ function WorkspaceReady({ userName }: { userName: string }) {
 
         <div className="flex w-full flex-col items-center gap-4 px-[16px] py-[24px] text-sm">
           <div className="flex w-full items-center justify-between">
-            <div className="flex items-center gap-2 text-sm">
+            <div className="flex flex-1 items-center gap-2 text-sm">
               <Link2 size={16} /> Tenant URL
             </div>
-            <div className="flex items-center gap-2 text-sm text-signoz_robin-500">
-              cloud.signoz.io <CopyIcon size={16} />
+
+            <div className="flex flex-1 items-center gap-4 text-sm text-signoz_robin-500">
+              <span className="flex-1">{workspaceData?.invite_link}</span>
+
+              <span className="cursor-pointer" onClick={handleCopyWorkspaceLink}>
+                <CopyIcon size={16} />
+              </span>
             </div>
           </div>
 
@@ -45,7 +52,7 @@ function WorkspaceReady({ userName }: { userName: string }) {
             <div className="flex items-center gap-2 text-sm">
               <AtSignIcon size={16} /> Sign-up email
             </div>
-            <div className="text-sm text-signoz_robin-500">{userName}@signoz.io</div>
+            <div className="text-sm text-signoz_robin-500">{userEmail}</div>
           </div>
         </div>
       </div>
@@ -63,7 +70,7 @@ function WorkspaceReady({ userName }: { userName: string }) {
         <a
           type="submit"
           className="mt-[28px] flex h-[40px] w-full items-center justify-center gap-4 rounded-full bg-signoz_robin-500 px-[16px] py-[8px] text-sm font-medium"
-          href="https://cloud.signoz.io"
+          href={workspaceData?.invite_link}
         >
           <span className="flex text-xs leading-5">Go to my workspace</span>
           <ArrowRight size={14} />
