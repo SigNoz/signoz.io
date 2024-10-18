@@ -10,7 +10,13 @@ import {
 import React from 'react'
 import Link from 'next/link'
 
-function WorkspaceReady({ workspaceData, userEmail }: { workspaceData: any; userEmail: string }) {
+function WorkspaceReady({
+  workspaceData,
+  userEmail,
+}: {
+  workspaceData: any
+  userEmail: string | null
+}) {
   const handleCopyWorkspaceLink = () => {
     navigator.clipboard.writeText(workspaceData?.invite_link)
   }

@@ -19,8 +19,6 @@ function SetupWorkspace() {
   const code = searchParams.get('code')
   const email = searchParams.get('email')
 
-  const decodedEmail = email ? decodeURIComponent(email) : ''
-
   const verifyEmail = async () => {
     const res = await fetch(`${WORKSPACE_SETUP_URL}/users/verify`, {
       cache: 'no-store',
@@ -30,7 +28,7 @@ function SetupWorkspace() {
       method: 'PUT',
       body: JSON.stringify({
         code,
-        email: decodedEmail,
+        email: email,
       }),
     })
 
@@ -48,7 +46,13 @@ function SetupWorkspace() {
   }
 
   const verifyWorkspaceSetup = async () => {
-    const verifyWorkSpaceSetupURL = `${WORKSPACE_SETUP_URL}/deployments/cesearch?code=${code}&email=${email}`
+    const encodedEmail = email ? encodeURIComponent(email) : ''
+
+    if (!code || !encodedEmail) {
+      return
+    }
+
+    const verifyWorkSpaceSetupURL = `${WORKSPACE_SETUP_URL}/deployments/cesearch?code=${code}&email=${encodedEmail}`
 
     const res = await fetch(verifyWorkSpaceSetupURL)
     const data = await res.json()
@@ -86,7 +90,7 @@ function SetupWorkspace() {
   return (
     <>
       {isWorkspaceReady ? (
-        <WorkspaceReady workspaceData={workspaceData} userEmail={decodedEmail} />
+        <WorkspaceReady workspaceData={workspaceData} userEmail={email} />
       ) : (
         <WorkspaceSetup isWorkspaceSetupDelayed={isWorkspaceSetupDelayed} />
       )}
