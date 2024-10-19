@@ -15,9 +15,8 @@ This document provides a detailed walkthrough on how to send Google Cloud Functi
 
 * Create and configure a Cloud Function to generate the metrics.
 * Invoke the Cloud Function.
-* Deploy Telegraf to fetch the metrics from Google Cloud monitoring.
-* Deploy OpenTelemetry to scrape the metrics from Telegraf. 
-* Send and Visualize the metrics obtained by OpenTelemetry in SigNoz
+* Deploy OpenTelemetry Collector to scrape the metrics from Google Cloud Monitoring. 
+* Send and Visualize the metrics obtained by OpenTelemetry in SigNoz.
 
 ## Prerequisites
 
@@ -163,80 +162,69 @@ Trigger Cloud function.
 </figcaption>
 </figure>
 
-## Deploy Telegraf to fetch the metrics from Google Cloud Monitoring.
+## Deploy OpenTelemetry to scrape the metrics from Google Cloud Monitoring
 
-**Step 1:** Install [`telegraf`](https://github.com/influxdata/telegraf) which will collect metrics from Google Cloud Monitoring for Cloud Function, see the [available metrics for Cloud Function](https://cloud.google.com/monitoring/api/metrics_gcp#gcp-cloudfunctions). The installation process for the respective operating system can be found in official [documentation](https://docs.influxdata.com/telegraf/v1/install/).
+**Step 1:** Install and configure OpenTelemetry for scraping the metrics from Google Cloud Monitoring. Follow [OpenTelemetry Binary Usage in Virtual Machine](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) guide for detailed instructions.
 
-After successful installation, the `telegraf` status should be active and running.
+<Admonition type="note">
+Note that `googlecloudmonitoring` receiver is supported only from version 0.112.0 and above of opentelemetry-collector. So, ensure you download and use the appropriate release.
+</Admonition>
 
-<figure data-zoomable align="left">
-    <img
-        src="/img/docs/gcp-monitoring/fns-metrics/telegraf-status.webp"
-        alt="Telegraf running status"
-    />
-<figcaption>
-<i>
-`telegraf` running status
-</i>
-</figcaption>
-</figure>
+**Step 2:** Create `config.yaml`. 
 
-The configuration file for telegraf can be found here:
+Under the `googlecloudmonitoring` receiver, you need to specify the metrics that you want to capture in the `metrics_list`. You can include all the metrics that you would like to capture for Cloud Function, see the [available metrics for Cloud Function](https://cloud.google.com/monitoring/api/metrics_gcp#gcp-cloudfunctions).
 
-```sh
-/etc/telegraf/telegraf.conf
-```
-
-**Step 2:** Configure the Telegraf input and output plugin by adding configurations to the `telegraf.conf` file.
-
-```txt
-# Gather timeseries from Google Cloud Platform v3 monitoring API
-
-[[inputs.stackdriver]]
-
-  ## GCP Project
-
-  project = "omni-new"
-
-  ## Include timeseries that start with the given metric type.
-
-  metric_type_prefix_include = [
-
-    "cloudfunctions.googleapis.com",
-
-  ]
-
-  ## Most metrics are updated no more than once per minute; it is recommended
-
-  ## to override the agent level interval with a value of 1m or greater.
-
-  interval = "1m"
-
-# Send OpenTelemetry metrics over gRPC
-
-[[outputs.opentelemetry]]
-
-  ## Override the default (localhost:4317) OpenTelemetry gRPC service
-
-  ## address:port
-
-  service_address = "localhost:4317"
+Here is the `config.yaml` file for capturing Cloud Function metrics:
 
 ```
+receivers:
+  googlecloudmonitoring:
+    collection_interval: 5m # Can be specified in seconds (s), minutes (m), or hours (h)
+    project_id: my-project-id
+    metrics_list:
+      - metric_name: "cloudfunctions.googleapis.com/function/execution_count"
+      - metric_name: "cloudfunctions.googleapis.com/function/execution_times"
+      - metric_name: "cloudfunctions.googleapis.com/function/instance_count"
+      - metric_name: "cloudfunctions.googleapis.com/function/network_egress"
+      - metric_name: "cloudfunctions.googleapis.com/function/user_memory_bytes"
+      - metric_name: "cloudfunctions.googleapis.com/function/active_instances"
+processors:
+  resource/env:
+    attributes:
+    - key: deployment.environment
+      value: prod
+      action: upsert
+  batch: {}
+exporters:
+  otlp:
+    endpoint: "ingest.{region}.signoz.cloud:443"
+    tls:
+      insecure: false
+    headers:
+      "signoz-access-token": "<SIGNOZ_INGESTION_KEY>"
+service:
+  pipelines:
+    metrics:
+      receivers: [googlecloudmonitoring]
+      processors: [resource/env,batch]
+      exporters: [otlp]
+```
 
-## Deploy OpenTelemetry to scrape the metrics from Telegraf
+Depending on the choice of your region for SigNoz cloud, the otlp endpoint will vary according to this table.
 
-**Step 1:** Install and configure OpenTelemetry for scraping the metrics from Telegraf. Follow [OpenTelemetry Binary Usage in Virtual Machine](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) guide for detailed instructions.
+| Region	| Endpoint |
+| --- | --- |
+| US | ingest.us.signoz.cloud:443 |
+| IN | ingest.in.signoz.cloud:443 |
+| EU | ingest.eu.signoz.cloud:443 |
 
-**Step 2:** After successful configuration start the OTel Collector using following command:
+After successful configuration start the OTel Collector using following command:
 
 ```sh
 ./otelcol-contrib --config ./config.yaml &> otelcol-output.log & echo "$!" > otel-pid
 ```
 
-**Step 3:** Restart the Telegraf service
-
-**Step 4:** If the configurations are configured correctly with Telegraf and we can see the output logs from OpenTelemtry as follows:
+**Step 3:** If the configurations are configured correctly, you can see the output logs from OpenTelemtry as follows:
 
 <figure data-zoomable align="left">
     <img
@@ -254,32 +242,24 @@ Viewing OTel Collector Logs
 
 **Step 1:** Go to the SigNoz Cloud URL and head over to the dashboard.
 
-**Step 2:** If not already created, create a new dashboard and select Time Series.
+**Step 2:** If not already created, create a new dashboard. You can create the dashboard and multiple panel under it by following the instructions [here](/docs/userguide/manage-Dashboards).
+
+**Step 3:** While creating the panel, select metric for Cloud Function.
+
+All metrics starting with `cloudfunctions_googleapis_com_` have been collected from Cloud Function.
+
+For example, `cloudfunctions_googleapis_com_function_execution_times` is one of the metrics which is collected.
+
+Here is the sample dashboard for Cloud Function:
 
 <figure data-zoomable align="left">
     <img
-        src="/img/docs/gcp-monitoring/fns-metrics/new-panel.webp"
-        alt="Creating new panel"
+        src="/img/docs/gcp-monitoring/fns-metrics/dashboard-cloud-function.webp"
+        alt="GCP Cloud Function dashboard"
     />
 <figcaption>
 <i>
-Creating new panel in dashboard
-</i>
-</figcaption>
-</figure>
-
-**Step 3:** Select metric for cloud function 
-
-For example- `cloudfunctions_googleapis_com_function_execution_times_bucket` is one of the metrics which is collected.
-
-<figure data-zoomable align="left">
-    <img
-        src="/img/docs/gcp-monitoring/fns-metrics/plot-metrics-signoz-cloud.webp"
-        alt="Plot metrics"
-    />
-<figcaption>
-<i>
-Metrics for the selected function.
+GCP Cloud Function dashboard
 </i>
 </figcaption>
 </figure>
@@ -292,7 +272,7 @@ If you run into any problems while setting up monitoring for your Cloud Function
 * **Verify Configuration**: Double-check your `config.yaml` file to ensure all settings, including the ingestion key and endpoint, are correct.
 * **Review Logs**: Look at the logs of both your Cloud Function and the OpenTelemetry Collector to identify any error messages or warnings that might provide insights into what’s going wrong.
 * **Update Dependencies**: Ensure all relevant packages and dependencies are up-to-date to avoid compatibility issues.
-* **Consult Documentation**: Review the SigNoz, OpenTelemetry, and Telegraf documentation for any additional troubleshooting of the common issues.s
+* **Consult Documentation**: Review the SigNoz and OpenTelemetry documentation for any additional troubleshooting of the common issues.s
 
 </TabItem>
 
@@ -301,7 +281,7 @@ If you run into any problems while setting up monitoring for your Cloud Function
 **Here’s a quick summary of what we will be doing in this guide**
 
 * Create and configure a Cloud Function to generate the metrics.
-* Deploy Telegraf to fetch the metrics from Google Cloud monitoring.
+* Deploy OpenTelemetry Collector to fetch the metrics from Google Cloud Monitoring.
 * Deploy the self-hosted **SigNoz.**
 * Invoke the Cloud Function.
 * Visualize the metrics in the **SigNoz** dashboard.
@@ -420,7 +400,7 @@ def hello_http(request):
     * The function returns a greeting message: 'Hello &#123;name&#125;!', where '&#123;name&#125;' is replaced with the determined name.
 
 
-## Testing your cloud function
+## Testing your Cloud Function
 
 **Step 1:** After completing the deployment, navigate to the **TRIGGER** section to obtain the URL to invoke the function.
 
@@ -468,6 +448,10 @@ SigNoz Self-Hosted using Docker.
 </figcaption>
 </figure>
 
+<Admonition type="note">
+Note that `googlecloudmonitoring` receiver is supported only from version 0.112.0 and above of opentelemetry-collector. So, ensure you download and use the appropriate release.
+</Admonition>
+
 <Tabs>
 <TabItem value="self-hosted-otel" label="Directly send to self-hosted SigNoz">
 
@@ -477,9 +461,9 @@ The self-hosted SigNoz setup also includes the OTel collector in the bundle. Doc
 
 <TabItem value="addon-otel" label="Using central OTel collector in between">
 
-Apart from using the native OTel collector present in the docker from the previous method, we can also deploy an additional independent OTel collector which can act as an additional collector in this setup for more granular metrics collection. Here we are considering OTel and Telegraf being set up in different VMs.
+Apart from using the native OTel collector present in the docker from the previous method, we can also deploy an additional independent OTel collector which can act as an additional collector in this setup for more granular metrics collection.
 
-**Step 1:** Install and configure OpenTelemetry to scrape the metrics from Telegraf. Add the following code block to the OpenTelemetry configuration file. Under exporters, we should have an exporter pointing to our SigNoz self-host setup. For example, in the below snippet, the endpoint-ip would be the address of the VM in which the SigNoz self-host setup is present.
+**Step 1:** Install and configure OpenTelemetry to scrape the metrics from Google Cloud Monitoring. Add the following code block to the OpenTelemetry configuration file. Under exporters, we should have an exporter pointing to our SigNoz self-host setup. For example, in the below snippet, the endpoint-ip would be the address of the VM in which the SigNoz self-host setup is present.
 
 ```yaml
 exporters:
@@ -490,18 +474,6 @@ exporters:
   logging:
 	verbosity: normal
 ```
-<Admonition type="info">
-We can use the default receiver configurations for OTel.
-```yaml
-receivers:
-  otlp:
-    protocols:
-      grpc:
-        endpoint: 0.0.0.0:4317
-      http:
-        endpoint: 0.0.0.0:4318
-```
-</Admonition>
 
 **Step 2:** After successful configuration, start the OTel service.
 
@@ -513,100 +485,82 @@ Please make appropriate changes to the networking connections (adding network to
 
 </Tabs>
 
-## Deploy Telegraf to fetch the metrics from Google Cloud Monitoring.
+## Configuring config.yaml
 
-**Step 1:** Install [`telegraf`](https://github.com/influxdata/telegraf) which will collect metrics from Google Cloud Monitoring for Cloud Function, see the [available metrics for Cloud Function](https://cloud.google.com/monitoring/api/metrics_gcp#gcp-cloudfunctions). The installation process for the respective operating system can be found in official [documentation](https://docs.influxdata.com/telegraf/v1/install/).
+Here is the `config.yaml` file for capturing Cloud Function metrics:
 
-After successful installation, the `telegraf` status should be active and running.
+```
+receivers:
+  googlecloudmonitoring:
+    collection_interval: 5m # Can be specified in seconds (s), minutes (m), or hours (h)
+    project_id: my-project-id
+    metrics_list:
+      - metric_name: "cloudfunctions.googleapis.com/function/execution_count"
+      - metric_name: "cloudfunctions.googleapis.com/function/execution_times"
+      - metric_name: "cloudfunctions.googleapis.com/function/instance_count"
+      - metric_name: "cloudfunctions.googleapis.com/function/network_egress"
+      - metric_name: "cloudfunctions.googleapis.com/function/user_memory_bytes"
+      - metric_name: "cloudfunctions.googleapis.com/function/active_instances"
+processors:
+  resource/env:
+    attributes:
+    - key: deployment.environment
+      value: prod
+      action: upsert
+  batch: {}
+exporters:
+  otlp:
+	endpoint: "<endpoint-ip>:4317"
+	tls:
+  	   insecure: true
+  logging:
+	verbosity: normal
+service:
+  pipelines:
+    metrics:
+      receivers: [googlecloudmonitoring]
+      processors: [resource/env,batch]
+      exporters: [otlp]
+```
+
+You can include all the metrics that you would like to capture for Cloud Function, see the [available metrics for Cloud Function](https://cloud.google.com/monitoring/api/metrics_gcp#gcp-cloudfunctions).
+
+If the configurations are configured correctly, you can see the output logs from OpenTelemtry as follows:
 
 <figure data-zoomable align="left">
     <img
-        src="/img/docs/gcp-monitoring/fns-metrics/telegraf-status.webp"
-        alt="Telegraf running status"
+        src="/img/docs/gcp-monitoring/fns-metrics/otel-logs.webp"
+        alt="OTel Collector Logs"
     />
 <figcaption>
 <i>
-`telegraf` running status
+Viewing OTel Collector Logs
 </i>
 </figcaption>
 </figure>
-
-The configuration file for telegraf can be found here:
-
-```sh
-/etc/telegraf/telegraf.conf
-
-```
-
-**Step 2:** Configure the Telegraf input and output plugin by adding configurations to the `telegraf.conf` file.
-
-## Gather timeseries from Google Cloud Platform v3 monitoring API
-
-```txt
-[[inputs.stackdriver]]
-
-  ## GCP Project
-
-  project = "omni-new"
-
-  ## Include timeseries that start with the given metric type.
-
-  metric_type_prefix_include = [
-
-    "cloudfunctions.googleapis.com",
-
-  ]
-
-  ## Most metrics are updated no more than once per minute; it is recommended
-
-  ## to override the agent level interval with a value of 1m or greater.
-
-  interval = "1m"
-
-# Send OpenTelemetry metrics over gRPC
-
-[[outputs.opentelemetry]]
-
-  ## Override the default (localhost:4317) OpenTelemetry gRPC service
-
-  ## address:port
-
-  service_address = "<endpoint-otel>:4317"
-```
-
-**Step 3:** Restart the [`telegraf`](https://github.com/influxdata/telegraf) service.
-
 
 ## Visualize the metrics in Self-Hosted SigNoz
 
 **Step 1:** Go to your Self-Hosted SigNoz UI, and navigate to the Self-Hosted SigNoz dashboard. Click on the **Dashboards** section to view the metrics. Create a new dashboard (If not already present ). The default Self-Hosted SigNoz dashboard endpoint would be `http://<Self-Hosted SigNoz-host-ip>:3301`, however, the URL can be different based on how you have set up the infrastructure.
 
-**Step 2:** If not already created, create a new dashboard and select Time Series.
+**Step 2:** If not already created, create a new dashboard. You can create the dashboard and multiple panel under it by following the instructions [here](/docs/userguide/manage-Dashboards).
+
+**Step 3:** While creating the panel, select metric for Cloud Function.
+
+All metrics starting with `cloudfunctions_googleapis_com_` have been collected from Cloud Function.
+
+For example, `cloudfunctions_googleapis_com_function_execution_times` is one of the metrics which is collected.
+
+Here is the sample dashboard for Cloud Function:
 
 <figure data-zoomable align="left">
     <img
-        src="/img/docs/gcp-monitoring/fns-metrics/new-panel.webp"
-        alt="Creating new panel"
+        src="/img/docs/gcp-monitoring/fns-metrics/dashboard-cloud-function.webp"
+        alt="GCP Cloud Function dashboard"
     />
 <figcaption>
 <i>
-Creating new panel in dashboard
-</i>
-</figcaption>
-</figure>
-
-**Step 3:** Select metric for cloud function 
-
-For example, `cloudfunctions_googleapis_com_function_execution_times_bucket` is one of the metrics which is collected.
-
-<figure data-zoomable align="left">
-    <img
-        src="/img/docs/gcp-monitoring/fns-metrics/plot-metrics-signoz-self-host.webp"
-        alt="Plot metrics"
-    />
-<figcaption>
-<i>
-Metrics for the selected function.
+GCP Cloud Function dashboard
 </i>
 </figcaption>
 </figure>
@@ -619,7 +573,7 @@ If you run into any problems while setting up monitoring for your Cloud Function
 * **Verify Docker container logs:** Check if all the containers are running properly, and not unexpectedly crashed.
 * **Review Logs**: Look at the logs of both your Cloud Function and the OpenTelemetry Collector to identify any error messages or warnings that might provide insights into what’s going wrong.
 * **Update Dependencies**: Ensure all relevant packages and dependencies are up-to-date to avoid compatibility issues.
-* **Consult Documentation**: Review the SigNoz, OpenTelemetry, and Telegraf documentation for any additional troubleshooting of the common issues.
+* **Consult Documentation**: Review the SigNoz and OpenTelemetry documentation for any additional troubleshooting of the common issues.
 
 </TabItem>
 </Tabs>
