@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import Image from 'next/image';
 
 const DatadogPricingCalculator = () => {
   const [activeTab, setActiveTab] = useState('logs');
@@ -12,6 +13,7 @@ const DatadogPricingCalculator = () => {
   const [infraPlan, setInfraPlan] = useState('pro');
   const [infraHosts, setInfraHosts] = useState(20);
   const [totalCost, setTotalCost] = useState(0);
+  const [showCTA, setShowCTA] = useState(false);
 
   const calculateCost = () => {
     let logCost = 0;
@@ -124,7 +126,15 @@ const DatadogPricingCalculator = () => {
               onChange={(e) => setLogVolume(Number(e.target.value))}
               className="w-full my-2"
             />
-            <p className="text-sm">Log Volume: {logVolume} {logPlan === 'ingestion' ? 'GB' : 'million events'}</p>
+            <p className="text-sm">Log Volume: 
+              <input 
+                type="number" 
+                value={logVolume} 
+                onChange={(e) => setLogVolume(Number(e.target.value))}
+                className="bg-transparent p-0 border-0 border-b border-white w-24 mx-2 text-center focus:outline-none"
+              />
+              {logPlan === 'ingestion' ? 'GB' : 'million events'}
+            </p>
             <p className="text-xs mb-2">(Assuming 15 day retention and no on-demand usage)</p>
           </div>
         );
@@ -160,7 +170,14 @@ const DatadogPricingCalculator = () => {
               onChange={(e) => setApmHosts(Number(e.target.value))}
               className="w-full my-2"
             />
-            <p className="text-sm">APM Hosts: {apmHosts}</p>
+            <p className="text-sm">APM Hosts: 
+              <input 
+                type="number" 
+                value={apmHosts} 
+                onChange={(e) => setApmHosts(Number(e.target.value))}
+                className="bg-transparent p-0 border-0 border-b border-white w-24 mx-2 text-center focus:outline-none"
+              />
+            </p>
             <p className="text-xs mb-2">(Assuming no additional span ingestion.)</p>
           </div>
         );
@@ -192,7 +209,14 @@ const DatadogPricingCalculator = () => {
               onChange={(e) => setInfraHosts(Number(e.target.value))}
               className="w-full my-2"
             />
-            <p className="text-sm">Infrastructure Hosts: {infraHosts}</p>
+            <p className="text-sm">Infrastructure Hosts: 
+              <input 
+                type="number" 
+                value={infraHosts} 
+                onChange={(e) => setInfraHosts(Number(e.target.value))}
+                className="bg-transparent p-0 border-0 border-b border-white w-24 mx-2 text-center focus:outline-none"
+              />
+            </p>
             <p className="text-xs mb-2">(Assuming no container, custom metric, and custom event usage)</p>
           </div>
         );
@@ -202,7 +226,7 @@ const DatadogPricingCalculator = () => {
   };
 
   return (
-    <div className="bg-gray-900 text-white p-6 rounded-lg shadow-lg">
+    <div className="bg-gray-900 text-white p-6 rounded-lg shadow-lg relative">
       <h2 className="text-2xl font-bold mb-6 mt-0">Datadog Pricing Calculator</h2>
       
       <div className="flex flex-col md:flex-row p-2">
@@ -259,6 +283,26 @@ const DatadogPricingCalculator = () => {
           </div>
         </div>
       </div>
+
+      <div className="absolute bottom-4 left-4 cursor-pointer" onClick={() => setShowCTA(!showCTA)}>
+        <Image className='my-0' src="/img/SigNozLogo-orange.svg" alt="SigNoz Logo" width={40} height={40} />
+      </div>
+
+      {showCTA && (
+        <div className="absolute bottom-16 py-6 left-4 bg-gradient-to-r from-gray-800 to-gray-900 rounded-xl px-4 shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out transform hover:-translate-y-1">
+          <h3 className="text-lg font-bold text-white mt-0 mb-2">Ready to Optimize Your Observability Costs?</h3>
+          <p className="text-gray-300 text-sm mb-3">
+            Discover how SigNoz offers comparable features with significant cost savings.
+          </p>
+          <a
+            href="/product-comparison/signoz-vs-datadog/"
+            style={{color: 'white', textDecoration: 'none'}}
+            className="inline-block bg-blue-600 text-white px-4 py-2 mt-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors duration-300"
+          >
+            Compare SigNoz vs. Datadog
+          </a>
+        </div>
+      )}
     </div>
   );
 };
