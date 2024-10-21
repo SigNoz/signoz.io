@@ -254,6 +254,14 @@ module.exports = () => {
         use: ['@svgr/webpack'],
       })
 
+      // this is to avoid caching for webpack
+      // reference https://nextjs.org/docs/app/building-your-application/optimizing/memory-usage#disable-webpack-cache
+      if (config.cache && !options.dev) {
+        config.cache = Object.freeze({
+          type: 'memory',
+        })
+      }
+
       return config
     },
   })
