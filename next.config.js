@@ -66,6 +66,7 @@ module.exports = () => {
       dirs: ['app', 'components', 'layouts', 'scripts'],
     },
     trailingSlash: true,
+    swcMinify: true,
     images: {
       remotePatterns: [
         {
@@ -229,6 +230,21 @@ module.exports = () => {
           source: '/api_reference/',
           destination: '/api-reference/',
           permanent: true,
+        },
+        {
+          source: '/users',
+          destination: '/workspace-setup/',
+          permanent: false,
+          has: [
+            {
+              type: 'query',
+              key: 'code',
+            },
+            {
+              type: 'query',
+              key: 'email',
+            },
+          ],
         },
       ]
     },

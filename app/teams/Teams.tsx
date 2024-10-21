@@ -8,6 +8,7 @@ import TestimonialSection from './TestimonialSection'
 
 import { ArrowRight, Loader2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 
 interface ErrorsProps {
   fullName?: string
@@ -22,24 +23,24 @@ interface SignUpPageProps {}
 interface Region {
   name: string
   id: string
-  icon: string
+  iconURL: string
 }
 
 const regions: Region[] = [
   {
     name: 'United States',
     id: 'us',
-    icon: 'https://cdn.builder.io/api/v1/image/assets/TEMP/44f4c9d9e985811462284a9c78f1329f266b11e61e2cf31ce3ad02e3a287724f?apiKey=f0103e73688241f896979b7df0e7cb45&',
+    iconURL: '/svgs/icons/us.svg',
   },
   {
     name: 'Europe',
     id: 'eu',
-    icon: 'https://cdn.builder.io/api/v1/image/assets/TEMP/35d8a36941c626b5d602c85007d13b3b62beb9ec97347c26000df6facf7f8862?apiKey=f0103e73688241f896979b7df0e7cb45&',
+    iconURL: '/svgs/icons/eu.svg',
   },
   {
     name: 'India',
     id: 'in',
-    icon: 'https://cdn.builder.io/api/v1/image/assets/TEMP/0299de6dc4fde15e9fe969685b353970462dfc10b1842c5e5ef387b901cb92e5?apiKey=f0103e73688241f896979b7df0e7cb45&',
+    iconURL: '/svgs/icons/india.svg',
   },
 ]
 
@@ -70,18 +71,10 @@ const Teams: React.FC<SignUpPageProps> = () => {
   const validateForm = () => {
     let errors = {}
 
-    if (!formData.fullName.trim()) {
-      errors['fullName'] = 'Full name is required'
-    }
-
     if (!formData.workEmail.trim()) {
       errors['workEmail'] = 'Work email is required'
     } else if (!isValidCompanyEmail(formData.workEmail)) {
       errors['workEmail'] = 'Please enter a valid company email'
-    }
-
-    if (!formData.companyName.trim()) {
-      errors['companyName'] = 'Company name is required'
     }
 
     setErrors(errors)
@@ -156,15 +149,14 @@ const Teams: React.FC<SignUpPageProps> = () => {
     setSubmitFailed(false)
 
     const payload = {
-      name: formData.fullName,
       email: formData.workEmail,
-      company_name: formData.companyName,
-      data_region: formData.dataRegion,
-      source: formData.source,
+      region: {
+        name: formData.dataRegion,
+      },
     }
 
     try {
-      const response = await fetch('https://signup.signoz.cloud/api/register', {
+      const response = await fetch('https://api.signoz.cloud/v2/users', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -204,7 +196,7 @@ const Teams: React.FC<SignUpPageProps> = () => {
       <div className="m-auto max-w-[1440px]">
         <div className="flex items-stretch max-lg:flex-col max-md:gap-0">
           <section className="signup-form-section flex w-full flex-col bg-signoz_ink-500 max-md:ml-0 max-md:w-full lg:w-[70%] xl:w-[60%]">
-            <div className="flex w-full grow flex-col px-8 py-4 text-sm leading-5 text-white max-md:mt-10 max-md:max-w-full lg:px-12 lg:py-8 xl:px-36 xl:py-8">
+            <div className="flex w-full grow flex-col justify-center px-8 py-4 text-sm leading-5 text-white max-md:mt-10 max-md:max-w-full lg:px-12 lg:py-8 xl:px-36 xl:py-8">
               <h1 className="mt-11 text-2xl font-semibold leading-8 max-md:mt-10 max-md:max-w-full">
                 Sign up for SigNoz Cloud
               </h1>
@@ -235,25 +227,6 @@ const Teams: React.FC<SignUpPageProps> = () => {
               ) : (
                 <form className="w-100 mt-[24px]">
                   <div className="mb-[28px]">
-                    <label htmlFor="fullName" className="mb-2 block font-medium">
-                      Your full name
-                    </label>
-                    <input
-                      type="text"
-                      id="fullName"
-                      disabled={isSubmitting}
-                      name="fullName"
-                      onChange={handleInputChange}
-                      autoComplete="off"
-                      placeholder="E.g. Bart Simpson"
-                      className="w-full rounded-sm border border-solid border-signoz_slate-400 bg-signoz_ink-300 px-3 py-1.5 text-sm tracking-normal text-stone-300"
-                    />
-
-                    {errors?.fullName && (
-                      <div className="mt-2 text-xs text-red-400">{errors.fullName}</div>
-                    )}
-                  </div>
-                  <div className="mb-[28px]">
                     <label htmlFor="workEmail" className="mb-2 block font-medium">
                       Work email
                     </label>
@@ -273,26 +246,6 @@ const Teams: React.FC<SignUpPageProps> = () => {
                     )}
                   </div>
 
-                  <div className="mb-[28px]">
-                    <label htmlFor="workEmail" className="mb-2 block font-medium">
-                      Company name
-                    </label>
-                    <input
-                      type="text"
-                      id="companyName"
-                      disabled={isSubmitting}
-                      name="companyName"
-                      autoComplete="off"
-                      onChange={handleInputChange}
-                      placeholder="E.g. Simpson's Inc"
-                      className="w-full rounded-sm border border-solid border-signoz_slate-400 bg-signoz_ink-300 px-3 py-1.5 text-sm tracking-normal text-stone-300"
-                    />
-
-                    {errors?.companyName && (
-                      <div className="mt-2 text-xs text-red-400">{errors.companyName}</div>
-                    )}
-                  </div>
-
                   <div className="data-regions mb-[28px]">
                     <label className="mb-2 block font-medium" htmlFor="dataRegion">
                       Data region
@@ -308,11 +261,13 @@ const Teams: React.FC<SignUpPageProps> = () => {
                             handleRegionChange(region.id)
                           }}
                         >
-                          <img
+                          <Image
                             loading="lazy"
-                            src={region.icon}
+                            src={region.iconURL}
                             alt={`${region} flag`}
                             className="aspect-square w-5 shrink-0"
+                            width={20}
+                            height={20}
                           />
                           <span className="">{region.name}</span>
                         </button>
@@ -320,19 +275,6 @@ const Teams: React.FC<SignUpPageProps> = () => {
                     </div>
                   </div>
 
-                  <div className="mb-[28px]">
-                    <label htmlFor="message" className="mb-2 block text-sm font-medium">
-                      Where did you hear about us?
-                    </label>
-                    <textarea
-                      id="source"
-                      name="source"
-                      disabled={isSubmitting}
-                      rows={4}
-                      className={`w-full resize-none rounded-sm border border-signoz_slate-400 bg-signoz_ink-300 p-2.5 text-sm text-sm`}
-                      onChange={handleInputChange}
-                    ></textarea>
-                  </div>
                   <button
                     disabled={isSubmitting}
                     onClick={handleSubmit}
@@ -344,14 +286,9 @@ const Teams: React.FC<SignUpPageProps> = () => {
                         <Loader2 size={16} className="animate-spin" />{' '}
                       </div>
                     ) : (
-                      <span className="flex gap-1.5 px-px text-sm">
+                      <span className="flex items-center gap-1.5 px-px text-sm">
                         Start your free 30-day trial
-                        <img
-                          loading="lazy"
-                          src="https://cdn.builder.io/api/v1/image/assets/TEMP/44c996783a625e59376c8cc6b7c935b91fe2d1c6aa7896be7b042f710e7d7814?apiKey=f0103e73688241f896979b7df0e7cb45&"
-                          className="my-auto aspect-square w-3.5 shrink-0"
-                          alt=""
-                        />
+                        <ArrowRight size={16} />
                       </span>
                     )}
                   </button>
