@@ -124,7 +124,15 @@ const DatadogPricingCalculator = () => {
               onChange={(e) => setLogVolume(Number(e.target.value))}
               className="w-full my-2"
             />
-            <p className="text-sm">Log Volume: {logVolume} {logPlan === 'ingestion' ? 'GB' : 'million events'}</p>
+            <p className="text-sm">Log Volume: 
+              <input 
+                type="number" 
+                value={logVolume} 
+                onChange={(e) => setLogVolume(Number(e.target.value))}
+                className="bg-transparent p-0 border-0 border-b border-white w-24 mx-2 text-center focus:outline-none"
+              />
+              {logPlan === 'ingestion' ? 'GB' : 'million events'}
+            </p>
             <p className="text-xs mb-2">(Assuming 15 day retention and no on-demand usage)</p>
           </div>
         );
@@ -160,7 +168,14 @@ const DatadogPricingCalculator = () => {
               onChange={(e) => setApmHosts(Number(e.target.value))}
               className="w-full my-2"
             />
-            <p className="text-sm">APM Hosts: {apmHosts}</p>
+            <p className="text-sm">APM Hosts: 
+              <input 
+                type="number" 
+                value={apmHosts} 
+                onChange={(e) => setApmHosts(Number(e.target.value))}
+                className="bg-transparent p-0 border-0 border-b border-white w-24 mx-2 text-center focus:outline-none"
+              />
+            </p>
             <p className="text-xs mb-2">(Assuming no additional span ingestion.)</p>
           </div>
         );
@@ -192,7 +207,14 @@ const DatadogPricingCalculator = () => {
               onChange={(e) => setInfraHosts(Number(e.target.value))}
               className="w-full my-2"
             />
-            <p className="text-sm">Infrastructure Hosts: {infraHosts}</p>
+            <p className="text-sm">Infrastructure Hosts: 
+              <input 
+                type="number" 
+                value={infraHosts} 
+                onChange={(e) => setInfraHosts(Number(e.target.value))}
+                className="bg-transparent p-0 border-0 border-b border-white w-24 mx-2 text-center focus:outline-none"
+              />
+            </p>
             <p className="text-xs mb-2">(Assuming no container, custom metric, and custom event usage)</p>
           </div>
         );
