@@ -238,6 +238,12 @@ module.exports = () => {
         use: ['@svgr/webpack'],
       })
 
+      if (config.cache && !options.dev) {
+        config.cache = Object.freeze({
+          type: 'memory',
+        })
+      }
+
       return config
     },
   })
