@@ -195,7 +195,7 @@ const COMPANIES = [
   { image: '/img/users/hyperface.svg', imageDesc: 'hyperface logo' },
   { image: '/img/users/salesforce.svg', imageDesc: 'salesforce logo' },
   { image: '/img/users/rattle.svg', imageDesc: 'rattle logo' },
-  { image: '/img/users/webstaurantstore.svg', imageDesc: 'webstaurant logo' },
+  { image: '/img/users/brainfish-icon.svg', imageDesc: 'brainfish logo' },
   { image: '/img/users/gokiwi.svg', imageDesc: 'GoKiwi logo' },
   { image: '/img/users/outplay.svg', imageDesc: 'outplay logo' },
   { image: '/img/users/tuneai.svg', imageDesc: 'tune logo' },
