@@ -27,8 +27,8 @@ function WorkspaceSetupHome() {
       },
       method: 'PUT',
       body: JSON.stringify({
-        code,
-        email: email,
+        code: code,
+        email: decodeURIComponent(email || ''),
       }),
     })
 
@@ -66,8 +66,8 @@ function WorkspaceSetupHome() {
   }
 
   useEffect(() => {
-    if (retryCount < 5) {
-      setTimeout(verifyWorkspaceSetup, 1000 * 60)
+    if (retryCount < 30) {
+      setTimeout(verifyWorkspaceSetup, 1000 * 3)
     } else {
       setIsWorkspaceSetupDelayed(true)
     }
