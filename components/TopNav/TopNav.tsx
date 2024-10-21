@@ -355,7 +355,7 @@ export default function TopNav() {
               className="start-free-trial-btn mx-2 flex h-8 items-center justify-center gap-1.5 truncate rounded-full px-4 py-2 pl-4 pr-3 text-center text-sm font-medium not-italic leading-5 text-white no-underline outline-none hover:text-white"
             >
               <Link href="/teams" className="flex-center">
-                Try SigNoz Cloud <ArrowRight size={14} />
+               Get Started - Free<ArrowRight size={14} />
               </Link>
             </Button>
           </div>
@@ -410,7 +410,7 @@ export default function TopNav() {
                         className="start-free-trial-btn font-heading flex items-center justify-center gap-1 truncate rounded-md border-none px-4 py-2 text-center text-sm text-xs  font-bold leading-4 text-white no-underline outline-none hover:text-white"
                         onClick={() => setMobileMenuOpen(false)}
                       >
-                        Try SigNoz Cloud <ArrowRight size={14} />
+                       Get Started - Free<ArrowRight size={14} />
                       </Link>
                     </Button>
                   </div>

@@ -202,7 +202,7 @@ const COMPANIES = [
   { image: '/img/users/hyperface.svg', imageDesc: 'hyperface logo' },
   { image: '/img/users/salesforce.svg', imageDesc: 'salesforce logo' },
   { image: '/img/users/rattle.svg', imageDesc: 'rattle logo' },
-  { image: '/img/users/webstaurantstore.svg', imageDesc: 'webstaurant logo' },
+  { image: '/img/users/brainfish-icon.svg', imageDesc: 'brainfish logo' },
   { image: '/img/users/gokiwi.svg', imageDesc: 'GoKiwi logo' },
   { image: '/img/users/outplay.svg', imageDesc: 'outplay logo' },
   { image: '/img/users/tuneai.svg', imageDesc: 'tune logo' },
@@ -551,7 +551,7 @@ const GetStarted = ({ page }) => {
                 <div className="flex items-center justify-center gap-3 pt-4 max-sm:flex-col">
                   <Button id={getStartedId}>
                     <Link href="/teams/" className="flex-center">
-                      Try SigNoz Cloud
+                      Get Started - Free
                       <ArrowRight size={14} />
                     </Link>
                   </Button>

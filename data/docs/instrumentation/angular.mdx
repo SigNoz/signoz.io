@@ -864,8 +864,354 @@ Again, `http://localhost:4318/v1/traces` is the default url for sending your tra
 ## Sample Angular App
 - [Sample Angular App](https://github.com/SigNoz/angular-otel-native) - contains `instrument.ts` file with placeholder for URL and Ingestion Details (For SigNoz Cloud)
 
-_The below Frequently Asked Questions (FAQs) are specifically meant for users who are using SigNoz as Self-Hosted._
-<InstrumentationFAQ />
+## Best Practices for Configuring OpenTelemetry in Production Angular Environments
+
+When deploying Angular applications instrumented with OpenTelemetry to production, it's crucial to optimize for performance, reliability, and security. Here are some best practices to consider:
+
+1. Implement Proper Sampling
+
+- Use intelligent sampling to reduce data volume without losing important information.
+- Consider using a parent-based sampler to maintain consistency across traces.
+
+Example configuration:
+
+```typescript
+import { ParentBasedSampler, TraceIdRatioBasedSampler } from '@opentelemetry/core';
+
+const sampler = new ParentBasedSampler({
+  root: new TraceIdRatioBasedSampler(0.1), // Sample 10% of traces
+});
+
+const provider = new WebTracerProvider({
+  sampler,
+  // other config...
+});
+```
+
+2. Use Batch Processing
+
+- Implement batch processing to reduce network overhead and improve performance.
+
+Example:
+
+```typescript
+import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base';
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
+
+const exporter = new OTLPTraceExporter({
+  url: 'https://your-collector-endpoint',
+});
+
+const provider = new WebTracerProvider();
+provider.addSpanProcessor(new BatchSpanProcessor(exporter, {
+  maxQueueSize: 100,
+  maxExportBatchSize: 10,
+  scheduledDelayMillis: 500,
+}));
+```
+
+3. Secure Your Data
+
+- Use HTTPS for all communication with your collector.
+- Implement proper authentication for your collector endpoints.
+- Be cautious about what data you include in spans, avoiding sensitive information.
+
+4. Optimize Performance
+
+- Use async operations where possible to avoid blocking the main thread.
+- Implement custom spans judiciously, focusing on critical paths and operations.
+
+Example of an optimized custom span:
+
+```typescript
+import { trace } from '@opentelemetry/api';
+
+async function performCriticalOperation() {
+  const span = trace.getTracer('critical-ops').startSpan('criticalOperation');
+  try {
+    // Perform operation
+    const result = await someAsyncOperation();
+    span.setAttributes({ 'operation.result': result });
+    return result;
+  } catch (error) {
+    span.recordException(error);
+    throw error;
+  } finally {
+    span.end();
+  }
+}
+```
+
+5. Implement Proper Error Handling
+
+- Ensure all exceptions are properly caught and recorded in spans.
+- Use span events to record important application events.
+
+6. Use Resource Detection
+
+- Implement resource detection to automatically capture environment information.
+
+Example:
+
+```typescript
+import { Resource } from '@opentelemetry/resources';
+import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
+
+const resource = Resource.default().merge(
+  new Resource({
+    [SemanticResourceAttributes.SERVICE_NAME]: 'my-angular-app',
+    [SemanticResourceAttributes.SERVICE_VERSION]: '1.0.0',
+    environment: 'production',
+  })
+);
+
+const provider = new WebTracerProvider({
+  resource: resource,
+  // other config...
+});
+```
+
+7. Monitor Your Monitoring
+
+- Implement health checks for your OpenTelemetry pipeline.
+- Set up alerts for issues with data collection or exporting.
+
+## Troubleshooting
+
+When implementing OpenTelemetry in Angular applications, you may encounter several challenges. Here are some common issues and their solutions:
+
+1. Context Propagation Issues
+
+**Challenge:** Traces not connecting properly across different services or components.
+
+**Solution:** 
+- Ensure that the `W3CTraceContextPropagator` is properly configured in your `app.module.ts`.
+- Use the `@opentelemetry/context-zone` package to manage context in Angular's Zone.js.
+
+Example configuration:
+
+```typescript
+import { W3CTraceContextPropagator } from '@opentelemetry/core';
+import { ZoneContextManager } from '@opentelemetry/context-zone';
+
+// In your OpenTelemetry configuration
+const provider = new WebTracerProvider({
+  // ... other config
+});
+
+provider.register({
+  propagator: new W3CTraceContextPropagator(),
+  contextManager: new ZoneContextManager()
+});
+```
+
+2. Performance Overhead
+
+**Challenge:** Noticeable performance degradation after implementing OpenTelemetry.
+
+**Solution:**
+- Use sampling to reduce the volume of telemetry data.
+- Optimize your instrumentation by focusing on critical paths.
+
+Example of configuring a sampler:
+
+```typescript
+import { ParentBasedSampler, TraceIdRatioBasedSampler } from '@opentelemetry/core';
+
+const sampler = new ParentBasedSampler({
+  root: new TraceIdRatioBasedSampler(0.5), // Sample 50% of traces
+});
+
+const provider = new WebTracerProvider({
+  sampler,
+  // ... other config
+});
+```
+
+3. Asynchronous Operations Not Being Traced
+
+**Challenge:** Traces not capturing asynchronous operations correctly.
+
+**Solution:**
+- Ensure that Zone.js is properly integrated with OpenTelemetry.
+- Manually create spans for complex asynchronous operations.
+
+Example of manually creating a span:
+
+```typescript
+import { trace } from '@opentelemetry/api';
+
+async function complexOperation() {
+  const span = trace.getTracer('my-tracer').startSpan('complexOperation');
+  try {
+    // Perform async operation
+    await someAsyncTask();
+    span.end();
+  } catch (error) {
+    span.recordException(error);
+    span.end();
+    throw error;
+  }
+}
+```
+
+4. Incorrect Configuration of Exporters
+
+**Challenge:** Telemetry data not reaching the backend (e.g., SigNoz).
+
+**Solution:**
+- Double-check the exporter configuration, especially the endpoint URLs.
+- Ensure that CORS is properly configured if your collector is on a different domain.
+
+Example of configuring the OTLPTraceExporter:
+
+```typescript
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
+
+const exporter = new OTLPTraceExporter({
+  url: 'http://your-collector-url:4318/v1/traces', // Adjust this URL
+});
+
+const provider = new WebTracerProvider();
+provider.addSpanProcessor(new BatchSpanProcessor(exporter));
+```
+
+5. Handling Third-Party Libraries
+
+**Challenge:** Difficulty in tracing operations within third-party libraries.
+
+**Solution:**
+- Use auto-instrumentation packages when available.
+- For libraries without auto-instrumentation, wrap their methods with custom spans.
+
+Example of wrapping a third-party library method:
+
+```typescript
+import { trace } from '@opentelemetry/api';
+
+function wrapThirdPartyMethod(originalMethod) {
+  return function(...args) {
+    const span = trace.getTracer('my-tracer').startSpan('thirdPartyOperation');
+    try {
+      const result = originalMethod.apply(this, args);
+      span.end();
+      return result;
+    } catch (error) {
+      span.recordException(error);
+      span.end();
+      throw error;
+    }
+  }
+}
+
+// Usage
+thirdPartyLibrary.someMethod = wrapThirdPartyMethod(thirdPartyLibrary.someMethod);
+```
+
+By being aware of these common challenges and their solutions, you can more effectively implement and troubleshoot OpenTelemetry in your Angular applications.
+
+## FAQs
+
+**The below FAQs are for general trouble shooting for an Angular application:**
+
+1. How does OpenTelemetry differ from other Angular monitoring solutions?
+
+OpenTelemetry stands out due to its vendor-neutral approach and comprehensive coverage of both frontend and backend operations. Unlike some Angular-specific solutions, OpenTelemetry allows for standardized instrumentation across your entire stack.
+
+2. Can OpenTelemetry impact my Angular app's performance?
+
+While OpenTelemetry does add some overhead, it's designed to be lightweight. With proper configuration and use of sampling techniques, the impact on your application's performance should be minimal.
+
+3. Is it possible to use OpenTelemetry with existing monitoring tools?
+
+Yes, OpenTelemetry is designed to be compatible with many existing monitoring solutions. You can often export OpenTelemetry data to your current tools, allowing for a gradual transition or hybrid approach.
+
+4. How can I troubleshoot common OpenTelemetry issues in Angular?
+
+Common issues often relate to context propagation or incorrect configuration. Start by verifying your setup, checking console outputs, and ensuring Zone Context is properly integrated. If problems persist, the OpenTelemetry community forums are an excellent resource for troubleshooting.
+
+**The below Frequently Asked Questions (FAQs) are for SigNoz Self-Hosted and Cloud:**
+
+1. How to find what to use in `IP of SigNoz` if I have installed SigNoz in Kubernetes cluster?
+
+    Based on where you have installed your application and where you have installed SigNoz, you need to find the right value for this. Please use [this grid](/docs/instrumentation/troubleshoot-instrumentation/) to find the value you should use for `IP of SigNoz`
+
+2. I am sending data from my application to SigNoz, but I don't see any events or graphs in the SigNoz dashboard. What should I do?
+
+    This could be because of one of the following reasons:
+
+    1. *Your application is generating telemetry data, but not able to connect with SigNoz installation*
+
+        Please use this [troubleshooting guide](/docs/install/troubleshooting/) to find if your application is able to access SigNoz installation and send data to it.
+
+    2. *Your application is not actually generating telemetry data*
+
+        Please check if the application is generating telemetry data first. You can use `Console Exporter` to just print your telemetry data in console first. Join our [Slack Community](https://signoz.io/slack/) if you need help on how to export your telemetry data in console
+
+    3. *Your SigNoz installation is not running or behind a firewall*
+
+        Please double check if the pods in SigNoz installation are running fine. `docker ps` or `kubectl get pods -n platform` are your friends for this. 
+
+#### What Cloud Endpoint Should I Use?
+
+The primary method for sending data to SigNoz Cloud is through OTLP exporters. You can either send the data directly from your application using the exporters available in SDKs/language agents or send the data to a collector agent, which batches/enriches telemetry and sends it to the Cloud.
+
+#### My Collector Sends Data to SigNoz Cloud
+
+**Using gRPC Exporter**
+
+The endpoint should be `ingest.{region}.signoz.cloud:443`, where `{region}` should be replaced with `in`, `us`, or `eu`. Note that the exporter endpoint doesn't require a scheme for the gRPC exporter in the collector.
+
+```yaml
+# Sample config with `us` region
+exporters:
+    otlp:
+        endpoint: "ingest.us.signoz.cloud:443"
+        tls:
+            insecure: false
+        headers:
+            "signoz-access-token": "<SIGNOZ_INGESTION_KEY>"
+```
+
+**Using HTTP Exporter**
+
+The endpoint should be `https://ingest.{region}.signoz.cloud:443`, where `{region}` should be replaced with `in`, `us`, or `eu`. Note that the endpoint includes the scheme `https` for the HTTP exporter in the collector.
+
+```yaml
+# Sample config with `us` region
+exporters:
+    otlphttp:
+        endpoint: "https://ingest.us.signoz.cloud:443"
+        tls:
+            insecure: false
+        headers:
+            "signoz-access-token": "<SIGNOZ_INGESTION_KEY>"
+```
+
+#### My Application Sends Data to SigNoz Cloud
+
+The endpoint should be configured either with environment variables or in the SDK setup code.
+
+#### Using Environment Variables
+
+**Using gRPC Exporter**
+
+Examples with `us` region
+
+- `OTEL_EXPORTER_OTLP_PROTOCOL=grpc OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.us.signoz.cloud:443 OTEL_EXPORTER_OTLP_HEADERS=signoz-access-token=<SIGNOZ_INGESTION_KEY>`
+
+**Using HTTP Exporter**
+
+- `OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.us.signoz.cloud:443 OTEL_EXPORTER_OTLP_HEADERS=signoz-access-token=<SIGNOZ_INGESTION_KEY>`
+
+#### Configuring Endpoint in Code
+
+Please refer to the agent documentation.
+
+#### Sending Data from a Third-Party Service
+
+The endpoint configuration here depends on the export protocol supported by the third-party service. They may support either gRPC, HTTP, or both. Generally, you will need to adjust the host and port. The host address should be `ingest.{region}.signoz.cloud:443`, where `{region}` should be replaced with `in`, `us`, or `eu`, and port `443` should be used.
+
 
 ## Conclusion
 
