@@ -12,6 +12,7 @@ import { tocItemProps } from '../layout'
 import DocsPrevNext from '../../../components/DocsPrevNext/DocsPrevNext'
 import PageFeedback from '../../../components/PageFeedback/PageFeedback'
 import { notFound } from 'next/navigation'
+import TrySigNozFloatingCard from '@/components/TrySigNozFloatingCard/TrySigNozFloatingCard';
 
 export async function generateMetadata({
   params,
@@ -88,9 +89,8 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
             </div>
           </div>
         )}
+        <TrySigNozFloatingCard />
       </div>
-
-      {/* </DocLayout> */}
     </>
   )
 }
