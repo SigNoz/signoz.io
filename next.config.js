@@ -391,6 +391,11 @@ module.exports = () => {
           destination: '/docs/instrumentation/mobile-instrumentation/opentelemetry-kotlin/',
           permanent: true,
         },
+        {
+          source: '/docs/frontend-monitoring/web-vitals/',
+          destination: '/docs/frontend-monitoring/opentelemetry-web-vitals/',
+          permanent: true,
+        },
       ]
     },
     webpack: (config, options) => {
