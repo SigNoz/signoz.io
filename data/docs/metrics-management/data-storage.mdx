@@ -1,0 +1,163 @@
+---
+date: 2024-10-22
+title: Metric reporting and storage
+id: data-storage
+---
+
+This page describes how metrics are reported and stored in SigNoz.
+
+### Metric types
+
+#### Gauge
+
+Say you have a commerce website and you want to track the number of active users on your website. You can create a gauge metric to track the number of active users. The following is the pseudo code to create a gauge metric:
+
+```python
+gauge = Gauge('active_users', 'Number of active users')
+```
+
+When a user logs in, you increment the gauge metric by 1:
+
+```python
+gauge.add(1)
+```
+
+And when a user logs out, you decrement the gauge metric by 1:
+
+```python
+gauge.add(-1)
+```
+
+When you add or subtract from a gauge metric, you can optionally provide a list of tags to add to the metric. For example:
+
+```python
+gauge.add(1, attributes={'user_type': 'paid'})
+```
+
+This will create a gauge metric with the name `active_users` and the tag `user_type:paid`. The tags help you filter and group metrics in the UI. The metrics SDK reports the metric with the tag `user_type:paid` to the backend. The more tags you add, the more granular the metric data becomes and the more data is sent to the backend. The following is the simplified representation of the metric data that is reported to the backend:
+
+```
+active_users,user_type=paid;1;timestamp=1729430400
+```
+
+There are two components to the metric data:
+
+- **Time series**: This is the metric name and the tags. In the example above, the time series is `active_users,user_type=paid`.
+- **Sample**: This is the value of the metric and the timestamp. In the example above, the sample is `1;timestamp=1729430400`.
+
+Once a time series is created, the metrics SDK continues to report the metric data to the backend until the process restarts. Continuing with the example above, the following is the metric data that is reported to the backend:
+
+```
+active_users,user_type=paid;1;timestamp=1729430400
+active_users,user_type=paid;1;timestamp=1729430460
+active_users,user_type=paid;1;timestamp=1729430520
+active_users,user_type=paid;1;timestamp=1729430580
+active_users,user_type=paid;1;timestamp=1729430640
+active_users,user_type=paid;1;timestamp=1729430700
+active_users,user_type=paid;1;timestamp=1729430760
+active_users,user_type=paid;1;timestamp=1729430820
+active_users,user_type=paid;1;timestamp=1729430880
+active_users,user_type=paid;1;timestamp=1729430940
+active_users,user_type=paid;1;timestamp=1729431000
+active_users,user_type=paid;1;timestamp=1729431060
+active_users,user_type=paid;1;timestamp=1729431120
+```
+
+Here the value of the metric is 1 and the timestamp is the time when the metric was reported. The metrics SDK reports the metric data to the backend at a regular interval which is determined by the `reporting_interval` configuration. The default reporting interval is 1 minute. As you can see, the same value is reported multiple times with different timestamps. This is because the metrics SDK reports the metric data to the backend at a regular interval for each unique time series recorded.
+
+How does the SigNoz backend store this data?
+
+There are two versions of the metric data tables in the SigNoz backend:
+
+#### v2 (legacy but continues to be supported for backward compatibility)
+
+There are two tables in the backend database that store the metric data:
+
+- **samples_v2**: This table stores the metric values.
+- **timeseries_v2**: This table stores the metadata of the time series such as the metric name, tags, and description.
+
+The `samples_v2` table has the following columns:
+
+- **metric_name**: This is the name of the metric.
+- **fingerprint**: This is the hash of the metric name and the tags.
+- **value**: This is the value of the metric.
+- **timestamp_ms**: This is the timestamp when the metric value was reported in milliseconds.
+
+The `timeseries_v2` table has the following columns:
+
+- **metric_name**: This is the name of the metric.
+- **fingerprint**: This is the hash of the metric name and the tags.
+- **labels**: This is the tags of the time series.
+- **timestamp_ms**: This is the timestamp when the time series was seen for the first time in milliseconds by SigNoz ingestior component since it started. There can be multiple replicas of ingestior components which are independent of each other. This means that the same time series can be reported multiple times from different replicas.
+
+Note: some columns are not shown in the table above for brevity.
+
+The above two tables are joined on the `fingerprint` column to get the metric data. Continuing with the example above, the following is the data that is stored in the `samples_v2` and `timeseries_v2` tables:
+
+
+**samples_v2 table**
+
+| metric_name | fingerprint | value | timestamp_ms |
+| --- | --- | --- | --- |
+| active_users | 1234567890 | 1 | 1729430400000 |
+| active_users | 1234567890 | 1 | 1729430460000 |
+| active_users | 1234567890 | 1 | 1729430520000 |
+| active_users | 1234567890 | 1 | 1729430580000 |
+| active_users | 1234567890 | 1 | 1729430640000 |
+| active_users | 1234567890 | 1 | 1729430700000 |
+| active_users | 1234567890 | 1 | 1729430760000 |
+| active_users | 1234567890 | 1 | 1729430820000 |
+| active_users | 1234567890 | 1 | 1729430880000 |
+| active_users | 1234567890 | 1 | 1729430940000 |
+| active_users | 1234567890 | 1 | 1729431000000 |
+| active_users | 1234567890 | 1 | 1729431060000 |
+| active_users | 1234567890 | 1 | 1729431120000 |
+
+**timeseries_v2 table**
+
+| metric_name | fingerprint | labels | timestamp_ms |
+| --- | --- | --- | --- |
+| active_users | 1234567890 | user_type=paid | 1729430400000 |
+
+#### v4
+
+There are two tables in the backend database that store the metric data:
+
+- **samples_v4**: This table stores the metric values.
+- **timeseries_v4**: This table stores the metadata of the time series such as the metric name, tags, and description.
+
+The `samples_v4` table has the following columns:
+
+- **metric_name**: This is the name of the metric.
+- **fingerprint**: This is the hash of the metric name and the tags.
+- **value**: This is the value of the metric.
+- **unix_milli**: This is the timestamp when the metric value was reported in milliseconds.
+
+The `timeseries_v4` table has the following columns:
+
+- **metric_name**: This is the name of the metric.
+- **fingerprint**: This is the hash of the metric name and the tags.
+- **labels**: This is the tags of the time series.
+- **unix_milli**: This is the timestamp rounded to the nearest hour when the metric value was reported i.e there will be one entry for every hour for a given time series.
+
+Note: some columns are not shown in the table above for brevity.
+
+The above two tables are joined on the `fingerprint` column to get the metric data. Continuing with the example above, the following is the data that is stored in the `samples_v4` and `timeseries_v4` tables:
+
+**samples_v4 table**
+
+| metric_name | fingerprint | value | unix_milli |
+| --- | --- | --- | --- |
+| active_users | 1234567890 | 1 | 1729430400000 |
+| active_users | 1234567890 | 1 | 1729430460000 |
+| active_users | 1234567890 | 1 | 1729430520000 |
+| ... | ... | ... | ... |
+
+**timeseries_v4 table**
+
+| metric_name | fingerprint | labels | unix_milli |
+| --- | --- | --- | --- |
+| active_users | 1234567890 | user_type=paid | 1729429200000 |
+| ... | ... | ... | ... |
+
+As you can see, the `timeseries_v4` table has one entry for every hour for a given time series. If the same series is continued to be reported, a new entry is added for the next hour and so on.

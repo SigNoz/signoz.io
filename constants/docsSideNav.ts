@@ -755,6 +755,11 @@ const docsSideNav = [
         route: '/docs/metrics-management/types-and-aggregation',
         label: 'Types and Aggregation',
       },
+      {
+        type: 'doc',
+        route: '/docs/metrics-management/data-storage',
+        label: 'Metrics Tables',
+      },
     ],
   },
   {
