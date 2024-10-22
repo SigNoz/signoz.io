@@ -1,14 +1,29 @@
 'use client'
 
-import React, { useState } from 'react'
-import { ArrowRight, Loader2, Mail } from 'lucide-react'
+import React, { useEffect, useState } from 'react'
+import { ArrowRight, CheckCircleIcon, Frown, Loader2, Mail } from 'lucide-react'
 
 function VerifyEmail() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitSuccess, setSubmitSuccess] = useState(false)
   const [submitFailed, setSubmitFailed] = useState(false)
 
-  const workEmail = localStorage.getItem('workEmail')
+  const [workEmail, setWorkEmail] = useState<string | null>(null)
+
+  useEffect(() => {
+    try {
+      localStorage.getItem('workEmail')
+      if (workEmail) {
+        setWorkEmail(workEmail)
+      } else {
+        setSubmitFailed(true)
+      }
+    } catch (error) {
+      console.error('Error fetching work email from local storage', error)
+      setWorkEmail(null)
+      setSubmitFailed(true)
+    }
+  }, [])
 
   const handleResendVerificationEmail = async () => {
     setIsSubmitting(true)
@@ -38,20 +53,10 @@ function VerifyEmail() {
         // To do, handle other errors apart from invalid email
         if (response.status === 400) {
           setSubmitFailed(true)
-
-          setTimeout(() => {
-            setSubmitSuccess(false)
-            setSubmitFailed(false)
-          }, 5000)
         }
       }
     } catch (error) {
       setSubmitFailed(true)
-
-      setTimeout(() => {
-        setSubmitSuccess(false)
-        setSubmitFailed(false)
-      }, 5000)
     } finally {
       setIsSubmitting(false)
     }
@@ -68,24 +73,27 @@ function VerifyEmail() {
       </div>
 
       {submitFailed && (
-        <div className="mt-[28px] w-full text-center text-xs text-signoz_cherry-500">
-          We're sorry, it looks like something didn't go as planned. <br /> Please reach out to us
+        <div className="mt-[28px] flex w-full items-center justify-center gap-2 text-center text-xs text-signoz_cherry-500">
+          <Frown size={16} /> It looks like something didn't go as planned. Please reach out to us
           for assistance.
         </div>
       )}
 
       {submitSuccess && (
-        <div className="mt-[28px] w-full text-center text-xs text-signoz_forest-500">
-          Verification email sent! Please check your email for the next steps.
+        <div className="mt-[28px] flex w-full items-center justify-center gap-2 text-center text-xs text-signoz_forest-500">
+          <CheckCircleIcon size={16} /> Verification email sent! Please check your email for the
+          next steps.
         </div>
       )}
 
       <div className="flex w-full flex-col">
         <button
           type="submit"
-          className="mt-[28px] flex h-[40px] w-full items-center justify-center gap-4 rounded-full bg-signoz_ink-300 px-[16px] py-[8px]"
+          className={`mt-[28px] flex h-[40px] w-full items-center justify-center gap-4 rounded-full bg-signoz_ink-300 px-[16px] py-[8px] ${
+            isSubmitting || !workEmail || submitFailed ? 'cursor-not-allowed opacity-50' : ''
+          }`}
           onClick={handleResendVerificationEmail}
-          disabled={isSubmitting}
+          disabled={isSubmitting || !workEmail || submitFailed}
         >
           <span className="flex text-xs leading-5">Resend verification email</span>
 
