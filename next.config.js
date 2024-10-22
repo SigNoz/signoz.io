@@ -371,6 +371,26 @@ module.exports = () => {
           destination: '/docs/instrumentation/manual-instrumentation/javascript/opentelemetry-nodejs/',
           permanent: true,
         },
+        {
+          source: '/docs/instrumentation/mobile-instrumentation/swiftUi/',
+          destination: '/docs/instrumentation/mobile-instrumentation/opentelemetry-swiftui/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/mobile-instrumentation/flutter/',
+          destination: '/docs/instrumentation/mobile-instrumentation/opentelemetry-flutter/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/mobile-instrumentation/java/',
+          destination: '/docs/instrumentation/mobile-instrumentation/opentelemetry-java/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/mobile-instrumentation/kotlin/',
+          destination: '/docs/instrumentation/mobile-instrumentation/opentelemetry-kotlin/',
+          permanent: true,
+        },
       ]
     },
     webpack: (config, options) => {
