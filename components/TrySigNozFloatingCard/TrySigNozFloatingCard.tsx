@@ -22,7 +22,7 @@ const TrySigNozFloatingCard: React.FC = () => {
   if (!isVisible) return null;
 
   return (
-    <div className="fixed bottom-8 right-8 w-64 bg-gradient-to-r from-gray-800 to-gray-900 rounded-xl px-4 py-6 shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out transform hover:-translate-y-1">
+    <div className="fixed bottom-8 right-8 w-64 bg-gradient-to-r from-gray-800 to-gray-900 rounded-xl px-4 py-6 shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 hidden lg:block">
       <button
         onClick={handleClose}
         className="absolute top-2 right-2 text-gray-400 hover:text-white"
