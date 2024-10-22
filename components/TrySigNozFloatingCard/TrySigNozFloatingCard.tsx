@@ -33,6 +33,7 @@ const TrySigNozFloatingCard: React.FC = () => {
       <h3 className="text-lg font-bold text-white mt-0 mb-2">Try SigNoz Cloud for FREE</h3>
       <p className="text-gray-300 text-sm mb-3">Instant setup, predictable pricing, and advanced features without infrastructure hassles.</p>
       <Link 
+        id='try-signoz-cloud-floating-card-cta'
         href="/teams/" 
         style={{color: 'white', textDecoration: 'none'}}
         className="inline-block bg-blue-600 text-white px-4 py-2 mt-6 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors duration-300 flex items-center justify-between"
