@@ -11,6 +11,7 @@ function WorkspaceSetupHome() {
   const [isWorkspaceReady, setIsWorkspaceReady] = useState(false)
   const [isWorkspaceSetupDelayed, setIsWorkspaceSetupDelayed] = useState(false)
   const [isPollingEnabled, setIsPollingEnabled] = useState(false)
+  const [pollingInterval, setPollingInterval] = useState(3000) // initial polling interval - 3 seconds
   const [isEmailVerified, setIsEmailVerified] = useState(false)
   const [retryCount, setRetryCount] = useState(1)
   const [workspaceData, setWorkspaceData] = useState(null)
@@ -66,8 +67,18 @@ function WorkspaceSetupHome() {
   }
 
   useEffect(() => {
-    if (retryCount < 30) {
-      setTimeout(verifyWorkspaceSetup, 1000 * 3)
+    // poll every 3s for the first minute, then every 15s for the next 4 minutes
+    // total polling time is 5 minutes
+    // 3s * 20 * 1 = 1 minute (20 polls)
+    // 15s * 4 * 4 = 4 minutes (16 polls)
+    if (retryCount <= 36) {
+      if (retryCount <= 20) {
+        setPollingInterval(3000)
+      } else {
+        setPollingInterval(15000)
+      }
+
+      setTimeout(verifyWorkspaceSetup, pollingInterval)
     } else {
       setIsWorkspaceSetupDelayed(true)
     }
