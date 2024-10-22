@@ -1,67 +1,108 @@
-import React from 'react'
-import Link from 'next/link'
-import { ArrowRight } from 'lucide-react'
+'use client'
 
-function verifyemail() {
+import React, { useState } from 'react'
+import { ArrowRight, Loader2, Mail } from 'lucide-react'
+
+function VerifyEmail() {
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitSuccess, setSubmitSuccess] = useState(false)
+  const [submitFailed, setSubmitFailed] = useState(false)
+
+  const workEmail = localStorage.getItem('workEmail')
+
+  const handleResendVerificationEmail = async () => {
+    setIsSubmitting(true)
+    setSubmitFailed(false)
+
+    const payload = {
+      email: workEmail,
+    }
+
+    try {
+      const response = await fetch('https://api.signoz.cloud/v2/users/notify', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      })
+
+      if (response.ok) {
+        setSubmitSuccess(true)
+
+        setTimeout(() => {
+          setSubmitSuccess(false)
+          setSubmitFailed(false)
+        }, 5000)
+      } else {
+        // To do, handle other errors apart from invalid email
+        if (response.status === 400) {
+          setSubmitFailed(true)
+
+          setTimeout(() => {
+            setSubmitSuccess(false)
+            setSubmitFailed(false)
+          }, 5000)
+        }
+      }
+    } catch (error) {
+      setSubmitFailed(true)
+
+      setTimeout(() => {
+        setSubmitSuccess(false)
+        setSubmitFailed(false)
+      }, 5000)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
   return (
-    <div className="welcome-container mx-auto flex max-w-[520px] flex-col items-center py-32">
-      <svg
-        width="56"
-        height="56"
-        viewBox="0 0 56 56"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <circle cx="28" cy="28" r="20" fill="#7190F9" fill-opacity="0.1" />
-        <circle cx="28" cy="28" r="20" fill="#7190F9" fill-opacity="0.1" />
-        <path
-          d="M28.0003 51.3337C40.8873 51.3337 51.3337 40.8873 51.3337 28.0003C51.3337 15.1133 40.8873 4.66699 28.0003 4.66699C15.1133 4.66699 4.66699 15.1133 4.66699 28.0003C4.66699 40.8873 15.1133 51.3337 28.0003 51.3337Z"
-          fill="#4E74F8"
-          stroke="#4E74F8"
-          stroke-width="4.66667"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        />
-        <path
-          d="M16 27L23.9615 36L39 22"
-          stroke="#121317"
-          stroke-width="4.66667"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        />
-      </svg>
+    <div className="welcome-container mx-auto flex min-h-[96vh] max-w-[520px] flex-col items-center justify-center py-32">
+      <Mail className="text-signoz_robin-500" size={56} />
+      <div className="mt-[28px] text-xl"> First, let's verify your email </div>
 
-      <div className="mt-[28px] bg-neutral-950 text-2xl"> Welcome to SigNoz </div>
-
-      <div className="text-md mt-[28px] rounded-[6px] border border-[#1D212D] bg-signoz_ink-300 p-[24px]">
-        <div>
-          {' '}
-          Thank you for signing up for SigNoz Cloud. Please check your email for the next steps.{' '}
-        </div>
-
-        <div className="mt-[28px]">
-          If you do not find the email in your inbox within the next few minutes, please check your
-          spam folder.
-        </div>
+      <div className="mt-[28px] rounded-[6px] border border-[#1D212D] bg-signoz_ink-300 p-[24px] text-sm">
+        Check your email for the next steps. If you don't see the email, check your spam folder or
+        try resending the verification email.
       </div>
 
-      <a
-        type="submit"
-        className="mt-[28px] flex w-full items-center justify-center gap-4 rounded-full bg-signoz_robin-500 px-[16px] py-[8px] text-sm font-medium"
-        href="mailto:cloud-support@signoz.io"
-      >
-        <span className="flex text-xs leading-5">Contact cloud support</span>
-        <ArrowRight size={14} />
-      </a>
+      {submitFailed && (
+        <div className="mt-[28px] w-full text-center text-xs text-signoz_cherry-500">
+          We're sorry, it looks like something didn't go as planned. <br /> Please reach out to us
+          for assistance.
+        </div>
+      )}
 
-      <Link href="/docs" className="w-full">
-        <button className="mt-[12px] flex w-full items-center justify-center gap-4 rounded-full bg-signoz_ink-300 px-[16px] py-[8px] text-sm font-medium">
-          <span className="flex text-xs leading-5">Read the docs </span>
-          <ArrowRight size={14} />
+      {submitSuccess && (
+        <div className="mt-[28px] w-full text-center text-xs text-signoz_forest-500">
+          Verification email sent! Please check your email for the next steps.
+        </div>
+      )}
+
+      <div className="flex w-full flex-col">
+        <button
+          type="submit"
+          className="mt-[28px] flex h-[40px] w-full items-center justify-center gap-4 rounded-full bg-signoz_ink-300 px-[16px] py-[8px]"
+          onClick={handleResendVerificationEmail}
+          disabled={isSubmitting}
+        >
+          <span className="flex text-xs leading-5">Resend verification email</span>
+
+          {isSubmitting ? <Loader2 size={14} className="animate-spin" /> : <ArrowRight size={14} />}
         </button>
-      </Link>
+
+        <a
+          type="submit"
+          className="mt-[12px] flex h-[40px] w-full items-center justify-center gap-4 rounded-full bg-signoz_ink-300 px-[16px] py-[8px]"
+          href="mailto:cloud-support@signoz.io"
+        >
+          <span className="flex text-xs leading-5">Contact cloud support</span>
+          <ArrowRight size={14} />
+        </a>
+      </div>
     </div>
   )
 }
 
-export default verifyemail
+export default VerifyEmail

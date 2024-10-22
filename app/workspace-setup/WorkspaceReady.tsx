@@ -46,7 +46,9 @@ function WorkspaceReady({
             </div>
 
             <div className="flex flex-1 items-center gap-4 text-sm text-signoz_robin-500">
-              <span className="flex-1">{workspaceData?.invite_link}</span>
+              <a className="flex-1" href={workspaceData?.invite_link} target="_blank">
+                {workspaceData?.invite_link}
+              </a>
 
               <span className="cursor-pointer" onClick={handleCopyWorkspaceLink}>
                 <CopyIcon size={16} />
