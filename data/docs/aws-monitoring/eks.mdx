@@ -1,0 +1,120 @@
+---
+date: 2024-10-06
+id: eks
+title: Monitor EKS Logs and Metrics using SigNoz
+---
+
+# Monitoring AWS EKS Metrics with SigNoz
+
+This document will walk you through the steps to monitor AWS EKS (Elastic Kubernetes Service) logs and metrics 
+using SigNoz.
+
+## Prerequisites
+
+- An EKS cluster running
+- Helm installed on your machine
+- [SigNoz Cloud account](https://signoz.io/teams/))
+  
+## Setup
+
+### Step 1: Add SigNoz Helm repository
+
+To add the SigNoz Helm repository to your helm client, run the following command:
+
+```bash
+helm repo add signoz https://charts.signoz.io
+```
+
+### Step 2 (Optional): Update charts
+
+If the chart is already present, update to the latest version using the below command:
+
+```bash
+helm repo update
+```
+
+### Step 3: Configuration file
+
+Create `overrides-value.yaml` file with the follwoing configuration
+
+```yaml
+global:
+  cloud: aws
+  clusterName: <CLUSTER_NAME>
+  deploymentEnvironment: <DEPLOYMENT_ENVIRONMENT>
+otelCollectorEndpoint: ingest.{region}.signoz.cloud:443
+otelInsecure: false
+signozApiKey: <SIGNOZ_INGESTION_KEY>
+presets:
+  otlpExporter:
+    enabled: true
+  loggingExporter:
+    enabled: false
+  resourceDetection:
+    detectors:
+      - eks
+      - system
+```
+
+`<CLUSTER_NAME>`- Name of the Kubernetes cluster or a unique identifier of the cluster.
+`<DEPLOYMENT_ENVIRONMENT>` -  Deployment environment of your application. Example: "staging", "production", etc.
+
+`{region}` - [Ingestion region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint) of your SigNoz Cloud instance. Can be `us`, `eu` or `in`.
+`<SIGNOZ_INGESTION_KEY>` - [Ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/) for your SigNoz Cloud instance.
+
+### Step 4: Install k8s-infra chart
+
+Install install the k8s-infra chart with the configuration mentioned in the previous step, run the below command:
+
+```bash
+helm install my-release signoz/k8s-infra -f override-values.yaml
+```
+
+## Visualise metrics and logs
+
+### Logs 
+
+Once you're done with the Setup, you should be able to see your EKS logs in the [Logs explorer](https://signoz.io/docs/product-features/logs-explorer/) under the 
+Logs tab of your SigNoz Cloud instance.
+
+
+### Metrics
+
+To visualise metrics, you can either
+
+#### Use pre-built dashboards
+
+You can use the pre-built dashboards for monitroing your EKS cluster. Here's list of dashboards you can use:
+
+1. **Import Dashboard with PVC Metrics**
+
+   You can import dashboard with PVC metrics of Kubernetes cluster
+   from [here](https://github.com/SigNoz/dashboards/blob/main/k8s-infra-metrics/kubernetes-pvc-metrics.json).
+
+2. **Import Dashboard with Overall EKS pods Metrics**
+
+   You can import dashboard with the general Kubernetes pods metrics of your K8s cluster from [here](https://github.com/SigNoz/dashboards/blob/main/k8s-infra-metrics/kubernetes-pod-metrics-overall.json).
+
+3. **Import Dashboard with Detailed EKS pods Metrics**
+
+   You can import dashboard with more detailed granular Kubernetes pods metrics of your K8s cluster from [here](https://github.com/SigNoz/dashboards/blob/main/k8s-infra-metrics/kubernetes-pod-metrics-detailed.json).
+
+4. **Import Dashboard with Overall EKS Node Metrics**
+
+   You can import dashboard with the general Kubernetes node metrics of your K8s cluster from [here](https://github.com/SigNoz/dashboards/blob/main/k8s-infra-metrics/kubernetes-node-metrics-overall.json).
+
+5. **Import Dashboard with Detailed EKS Node Metrics**
+
+   You can import dashboard with more detailed granular Kubernetes node metrics of your K8s cluster from [here](https://github.com/SigNoz/dashboards/blob/main/k8s-infra-metrics/kubernetes-node-metrics-detailed.json).
+
+6. **Import Dashboard with Detailed EKS Cluster Metrics**
+
+    You can import dashboard with more detailed granular Kubernetes node metrics of your K8s cluster from [here](https://github.com/SigNoz/dashboards/blob/main/k8s-infra-metrics/kubernetes-cluster-metrics.json).
+
+You can check a complete list of Dashboards for Kubernetes Monitroing [here](https://github.com/SigNoz/dashboards/tree/main/k8s-infra-metrics).
+
+#### Create your own Dashboard
+
+To create your own Dashboard in SigNoz, checkout this [documentation](https://signoz.io/docs/userguide/manage-dashboards/).
+
+You can find the complete list of availbe Kubernetes Metrics [here](https://signoz.io/docs/tutorial/kubernetes-infra-metrics/#kubernetes-metrics---kubeletstats-and-k8s_cluster). 
