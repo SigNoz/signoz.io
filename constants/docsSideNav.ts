@@ -941,6 +941,11 @@ const docsSideNav = [
       },
       {
         type: 'doc',
+        route: '/docs/alerts-management/anomaly-based-alerts',
+        label: 'Anomaly based Alert',
+      },
+      {
+        type: 'doc',
         route: '/docs/alerts-management/metrics-based-alerts',
         label: 'Metrics based Alert',
       },
