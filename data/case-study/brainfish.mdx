@@ -1,0 +1,159 @@
+---
+
+title: How Brainfish leveraged SigNoz for effective Kubernetes monitoring & Logs management
+slug: brainfish
+image: /img/case_study/brainfish-cover.webp
+authors: [ankit_anand]
+
+---
+
+<head>
+<link rel="canonical" href="[https://signoz.io/case-study/brainfish/](https://signoz.io/case-study/brainfish/)"/>
+<meta property="og:image" content="[https://signoz.io/img/case_study/brainfish-cover.webp](https://signoz.io/img/case_study/brainfish-cover.webp)"/>
+<meta name="twitter:image" content="[https://signoz.io/img/case_study/brainfish-cover.webp](https://signoz.io/img/case_study/brainfish-cover.webp)"/>
+</head>
+
+<div class="avatar">
+<a
+class="avatar__photo-link avatar__photo avatar__photo--lg"
+href="[https://www.linkedin.com/in/ankit-anand-686a53a1/](https://www.linkedin.com/in/ankit-anand-686a53a1/)">
+<img
+alt="Ankit Profile"
+src="/img/users/ankit-anand.webp" />
+</a>
+<div class="avatar__intro">
+<div class="avatar__name">Ankit Anand</div>
+<small class="avatar__subtitle">
+Maintainer, SigNoz
+</small>
+</div>
+</div>
+
+## About Brainfish
+
+<a href = "https://www.brainfi.sh/" rel="noopener noreferrer nofollow" target="_blank" >Brainfish</a> is an AI platform that enhances customer experience by providing intelligent product onboarding and support solutions. Leveraging large language and visual models, Brainfish aims to build an autopilot for SaaS products, enabling seamless user interactions without human interference. Their mission is to empower businesses to offer self-service product discovery, reducing the load on customer support teams and improving overall user satisfaction.
+
+
+## The Challenge: Ensuring High-Quality Software Delivery and Developer Productivity
+
+As a rapidly growing startup, Brainfish faced the challenge of maintaining high-quality software delivery while ensuring developer productivity. With a microservices architecture deployed on Kubernetes, the team needed robust observability to monitor their systems effectively.
+
+<YouTube id="rpK2-paK3OY" mute={false} />
+
+Some of the critical challenges that the Brainfish team faced were:
+
+- **Complex Monitoring Needs:** Monitoring Kubernetes workloads, including CPU usage, memory leaks, pod restarts, and custom metrics.
+- **Inefficient Tools:** The initial use of Elastic Cloud for observability was cumbersome, complex, and not cost-effective.
+- **Alert Fatigue:** Manual monitoring was time-consuming, and the team required an efficient alerting system to identify and resolve issues quickly.
+- **Resource Constraints:** As a small team, they needed a solution that was easy to implement and maintain without dedicating extensive resources.
+
+## Implementing SigNoz for Enhanced Observability and Improved Developer Experience
+
+Brainfish chose SigNoz as its observability platform due to its ease of integration, open-source nature, and comprehensive feature set, which met its complex monitoring needs.
+
+*"I was tasked to evaluate the next-generation observability tools for the whole organization. To be honest, I've studied more than 10 tools in the market. We eventually landed on SigNoz, which says a lot."*
+
+- Charlie Shen, Lead DevOps Engineer, Brainfish
+
+
+Brainfish conducted thorough research and evaluated over ten solutions, including Datadog, before identifying SigNoz as the most suitable option.
+
+### Enhanced Developer Experience with SigNoz vs. Elastic Cloud for observability
+
+*"The experience of getting started with SigNoz was straightforward. Especially coming from the background of Elastic Cloud—my gosh, compared to that, it's a breeze with SigNoz. Elastic is a versatile tool and not particularly tied to observability. In SigNoz, you know exactly what you’re doing, and getting things like K8s monitoring set up was pretty easy.”*
+
+- Charlie Shen, Lead DevOps Engineer, Brainfish
+
+Before selecting SigNoz, Brainfish initially used Elastic Cloud for its observability needs. Although Elastic is a versatile tool, it is not specifically tied down to observability. Hence, the team at Brainfish faced several challenges while performing observability with Elastic Cloud.
+
+<YouTube id="bi-5KbMXeM0" mute={false} />
+
+
+Some of the things that the Brainfish team liked about getting started with SigNoz: 
+
+- **Straightforward Onboarding:** SigNoz provided a clean and intuitive interface, making it easy for the team to get started.
+- **OpenTelemetry Support:** Leveraging OpenTelemetry allowed Brainfish to implement a vendor-agnostic approach, ensuring flexibility and future-proofing their observability stack.
+- **Responsive Support:** The SigNoz engineering team was highly responsive, assisting with any questions and ensuring a smooth onboarding process.
+
+## Using SigNoz for Comprehensive Observability
+
+Brainfish leverages SigNoz to monitor critical AI-related metrics for their platform's performance. As Charlie mentioned:
+
+*"Running an AI company means you will use different large language models, and SigNoz can help to track token usage and large language model allocation. Because we allow customers to choose the model for themselves, we can see how much traffic goes to each model and adjust our priorities accordingly."*
+
+- Charlie Shen, Lead DevOps Engineer, Brainfish
+
+By utilizing SigNoz's dashboards and custom metrics, Brainfish effectively monitors token usage and model allocation, enabling them to optimize resource allocation and enhance customer experience.
+
+### Monitoring Kubernetes Workloads Effectively
+
+Brainfish relies heavily on Kubernetes to deploy its microservices. SigNoz enabled them to monitor Kubernetes workloads efficiently.
+
+<YouTube id="Uipl4CbEvhU" mute={false} />
+
+
+With SigNoz, the team monitors:
+
+- **Pod Restart Alerts:** Set up alerts for pod restarts to catch issues like memory leaks or mishandled exceptions.
+- **Infrastructure Metrics:** Monitored CPU usage, memory allocation, and pod statuses without needing to access AWS Console frequently.
+- **Custom Dashboards:** Created dashboards using ClickHouse queries to visualize custom metrics, such as token usage for different large language models.
+
+*"We monitor Kubernetes workloads and use SigNoz to draw diagrams so that we can have something pretty and increase the engagement of engineers."*
+
+- Charlie Shen, Lead DevOps Engineer, Brainfish
+
+### Troubleshooting Workflow at Brainfish
+
+When an issue arises, such as a pod restarting due to a memory leak, Brainfish follows a structured troubleshooting workflow leveraging SigNoz.
+
+<YouTube id="M_zXN7TLYiw" mute={false} />
+
+Here’s a step-by-step breakdown of how the Brainfish team troubleshoots an issue to keep its users happy.
+
+1. **Alert Reception:** An alert is received in Slack from SigNoz, indicating the issue.
+2. **Initial Assessment:** The team correlates alerts and recognizes it's an infrastructure-related problem.
+3. **Infrastructure Analysis:** Charlie accesses SigNoz & Cloudwatch metrics to examine critical metrics like memory usage and CPU allocation, identifying patterns or spikes.
+4. **Log Analysis with SigNoz:** Using SigNoz's advanced filtering, they narrow down relevant logs by selecting specific deployments, versions, and applications.
+5. **Code Review:** They check recent code changes in GitHub to identify potential causes, such as a new dependency causing memory leaks.
+6. **Decision Making:** If necessary, they roll back to a previous stable version using their deployment pipeline.
+7. **Issue Documentation:** A ticket is created for the responsible developer to fix the issue.
+8. **Monitoring Post-Fix:** After deploying the fix, they continue to monitor the system using SigNoz to ensure the issue is resolved.
+
+### Enhanced Logging and Correlation Features
+
+*"SigNoz helps us to decentralize logs across multiple pods. By selecting the deployment, Kubernetes deployment version, and applications, we can quickly narrow down relevant logs. This significantly reduces troubleshooting time."*
+
+- Charlie Shen, Lead DevOps Engineer, Brainfish
+
+SigNoz's improved logs feature allows for centralized logging across multiple pods, aiding in troubleshooting.
+
+- **Quickly Narrowing Down Relevant Logs:** By filtering logs based on deployment names, versions, and applications, the team can focus on the exact components experiencing issues.
+- **Correlation with Metrics:** The ability to correlate logs with infrastructure metrics and traces simplifies debugging.
+
+## Results: Increased Efficiency and Developer Productivity
+
+The Brainfish team were able to resolve issues faster and experienced an improved developer experience, leading to increased productivity among its developers.
+
+Some
+
+- **Automated Alerts:** Eliminated the need for frequent manual checks, freeing up developer time.
+- **Quick Identification:** Enhanced observability led to quicker identification and resolution of issues, minimizing downtime.
+- **Improved Software Quality:** The quality of software in production improved significantly.
+- **Improved Developer Experience:** A user-friendly interface and powerful features increased engagement and productivity among engineers.
+- **Cost-Effective Solution:** Choosing SigNoz over other solutions like Datadog resulted in significant cost savings without sacrificing features.
+
+By implementing SigNoz, Brainfish successfully enhanced its observability, streamlined incident response, and improved overall software quality. The transition to SigNoz provided it with a cost-effective, efficient, and developer-friendly solution that met its complex monitoring needs.
+
+With SigNoz, Brainfish can focus on its mission to revolutionize customer experience through AI-driven solutions, confident that its infrastructure is robustly monitored and its engineering team is empowered.
+
+*"We are pretty happy with SigNoz. The quality of the software has increased, and it's important to me that the software we deliver to customers makes them happy."*
+
+- Charlie Shen, Lead DevOps Engineer, Brainfish
+
+---
+
+**SigNoz Cloud** is the easiest way to run SigNoz. You can sign up [here](https://signoz.io/teams/) for a free account and get 30 days of unlimited access to all features.
+
+[![Get Started - Free CTA](/img/launch_week/try-signoz-cloud-blog-cta.png)](https://signoz.io/teams/)
+
+---
