@@ -272,6 +272,13 @@ const SigNozFeatures = () => {
 
   const scrollsections = [
     {
+      title: 'Anomaly Based Alert',
+      desc: 'An Anomaly-based alert in SigNoz allows you to define conditions based on metric data and trigger alerts when the metric data deviates from the expected behavior.',
+      image: '/img/features/alerts/anomaly-based-alert.webp',
+      buttonText: 'Learn More',
+      buttonLink: 'https://signoz.io/docs/alerts-management/anomaly-based-alerts/',
+    },
+    {
       title: 'Metrics Based Alert',
       desc: 'A Metric-based alert in SigNoz allows you to define conditions based on metric data and trigger alerts when these conditions are met.',
       image: '/img/features/alerts/metric-based-alert.webp',
