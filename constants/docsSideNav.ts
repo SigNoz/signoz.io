@@ -1261,11 +1261,6 @@ const docsSideNav = [
       },
       {
         type: 'doc',
-        route: '/docs/aws-monitoring/eks',
-        label: 'EKS',
-      },
-      {
-        type: 'doc',
         route: '/docs/aws-monitoring/elb-logs',
         label: 'ELB',
       },
