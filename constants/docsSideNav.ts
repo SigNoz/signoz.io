@@ -755,6 +755,11 @@ const docsSideNav = [
         route: '/docs/metrics-management/types-and-aggregation',
         label: 'Types and Aggregation',
       },
+      {
+        type: 'doc',
+        route: '/docs/metrics-management/data-storage',
+        label: 'Metrics Tables',
+      },
     ],
   },
   {
@@ -933,6 +938,11 @@ const docsSideNav = [
             label: 'Email',
           },
         ],
+      },
+      {
+        type: 'doc',
+        route: '/docs/alerts-management/anomaly-based-alerts',
+        label: 'Anomaly based Alert',
       },
       {
         type: 'doc',

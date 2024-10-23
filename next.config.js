@@ -227,6 +227,11 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/guides/',
+          destination: '/resource-center/guides/',
+          permanent: true,
+        },
+        {
           source: '/api_reference/',
           destination: '/api-reference/',
           permanent: true,
@@ -245,6 +250,151 @@ module.exports = () => {
               key: 'email',
             },
           ],
+        },
+        {
+          source: '/docs/instrumentation/angular/',
+          destination: '/docs/instrumentation/opentelemetry-angular/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/celery/',
+          destination: '/docs/instrumentation/opentelemetry-celery/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/django/',
+          destination: '/docs/instrumentation/opentelemetry-django/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/dotnet/',
+          destination: '/docs/instrumentation/opentelemetry-dotnet/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/elixir/',
+          destination: '/docs/instrumentation/opentelemetry-elixir/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/express/',
+          destination: '/docs/instrumentation/opentelemetry-express/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/falcon/',
+          destination: '/docs/instrumentation/opentelemetry-falcon/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/fastapi/',
+          destination: '/docs/instrumentation/opentelemetry-fastapi/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/flask/',
+          destination: '/docs/instrumentation/opentelemetry-flask/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/golang/',
+          destination: '/docs/instrumentation/opentelemetry-golang/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/hypercorn-unicorn-support/',
+          destination: '/docs/instrumentation/opentelemetry-hypercorn-unicorn-support/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/java/',
+          destination: '/docs/instrumentation/opentelemetry-java/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/javascript/',
+          destination: '/docs/instrumentation/opentelemetry-javascript/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/jboss/',
+          destination: '/docs/instrumentation/opentelemetry-jboss/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/nestjs/',
+          destination: '/docs/instrumentation/opentelemetry-nestjs/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/nextjs/',
+          destination: '/docs/instrumentation/opentelemetry-nextjs/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/php/',
+          destination: '/docs/instrumentation/opentelemetry-php/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/python/',
+          destination: '/docs/instrumentation/opentelemetry-python/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/ruby-on-rails/',
+          destination: '/docs/instrumentation/opentelemetry-ruby-on-rails/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/rust/',
+          destination: '/docs/instrumentation/opentelemetry-rust/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/springboot/',
+          destination: '/docs/instrumentation/opentelemetry-springboot/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/swift/',
+          destination: '/docs/instrumentation/opentelemetry-swift/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/tomcat/',
+          destination: '/docs/instrumentation/opentelemetry-tomcat/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/manual-instrumentation/javascript/nodejs/',
+          destination: '/docs/instrumentation/manual-instrumentation/javascript/opentelemetry-nodejs/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/mobile-instrumentation/swiftUi/',
+          destination: '/docs/instrumentation/mobile-instrumentation/opentelemetry-swiftui/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/mobile-instrumentation/flutter/',
+          destination: '/docs/instrumentation/mobile-instrumentation/opentelemetry-flutter/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/mobile-instrumentation/java/',
+          destination: '/docs/instrumentation/mobile-instrumentation/opentelemetry-java/',
+          permanent: true,
+        },
+        {
+          source: '/docs/instrumentation/mobile-instrumentation/kotlin/',
+          destination: '/docs/instrumentation/mobile-instrumentation/opentelemetry-kotlin/',
+          permanent: true,
+        },
+        {
+          source: '/docs/frontend-monitoring/web-vitals/',
+          destination: '/docs/frontend-monitoring/opentelemetry-web-vitals/',
+          permanent: true,
         },
       ]
     },
