@@ -10,11 +10,11 @@ export const metadata = {
 
 export default function DatadogPricingCalculatorPage() {
   return (
-    <div className="relative bg-signoz_ink-500">
+    <div className="relative bg-signoz_ink-500 p-8">
       <div className="bg-dot-pattern masked-dots absolute top-0 flex h-screen w-full items-center justify-center" />
       <div className="absolute left-0 right-0 top-0 mx-auto h-[450px] w-full flex-shrink-0 rounded-[956px] bg-gradient-to-b from-[rgba(190,107,241,1)] to-[rgba(69,104,220,0)] bg-[length:110%] bg-no-repeat opacity-30 blur-[300px] sm:bg-[center_-500px] md:h-[956px]" />
-      <div className="relative z-[1] container mx-auto px-4 py-12 max-w-5xl">
-        <div className="mb-12">
+      <div className="relative z-[1] container mx-auto max-w-5xl">
+        <div className="mb-8">
           <h1 className="text-4xl md:text-5xl font-bold mb-4 text-white">
             Datadog Pricing Calculator
           </h1>
@@ -23,25 +23,27 @@ export default function DatadogPricingCalculatorPage() {
           </p>
         </div>
 
-        <p className="my-4">
-        Understanding Datadog pricing can be complex due to its various components and usage-based model. 
-        This calculator helps you estimate costs for different Datadog services including infrastructure 
-        monitoring, APM, and log management.
-      </p>
-      <p className="mb-6">
-        For a comprehensive breakdown of Datadog's pricing structure and optimization strategies, 
-        check out our <Link href="/blog/datadog-pricing" className="text-blue-600 hover:underline">
-          detailed guide on Datadog pricing
-        </Link>.
-      </p>
+        <div className="mb-8">
+          <p className="mb-4">
+            Understanding Datadog pricing can be complex due to its various components and usage-based model. 
+            This calculator helps you estimate costs for different Datadog services including infrastructure 
+            monitoring, APM, and log management.
+          </p>
+          <p>
+            For a comprehensive breakdown of Datadog's pricing structure and optimization strategies, 
+            check out our <Link href="/blog/datadog-pricing" className="text-blue-600 hover:underline">
+              detailed guide on Datadog pricing
+            </Link>.
+          </p>
+        </div>
 
         <DatadogPricingCalculator />
 
-        <div className="bg-gray-800 rounded-xl p-8 shadow-lg hover:shadow-xl transition-all mx-auto my-12">
+        <div className="bg-gray-800 rounded-xl p-8 shadow-lg hover:shadow-xl transition-all my-8">
           <div className="grid md:grid-cols-2 gap-8">
             <div>
               <h2 className="text-2xl font-bold mb-4 text-white">Why Use This Calculator?</h2>
-              <ul className="space-y-3 text-gray-300">
+              <ul className="space-y-3 pl-0 text-gray-300">
                 {[
                   'Get instant cost estimates for your Datadog setup',
                   'Compare different usage scenarios',
@@ -68,7 +70,7 @@ export default function DatadogPricingCalculatorPage() {
           </div>
         </div>
 
-        <div className="mb-12">
+        <div className="mb-8">
           <h2 className="text-2xl font-bold mb-6 text-white">
             Datadog Plans and Pricing Summary
             <Link href="/blog/datadog-pricing" className="text-sm text-blue-400 hover:underline ml-2">
@@ -128,15 +130,16 @@ export default function DatadogPricingCalculatorPage() {
                 note: 'Incident tracking and response coordination'
               }
             ].map((plan, index) => (
-              <div key={index} className="p-4 border border-gray-700 rounded-lg bg-gray-850 hover:border-blue-500 transition-all">
+              <div key={index} className="p-6 border border-gray-700 rounded-lg bg-gray-850 hover:border-blue-500 transition-all">
                 <h3 className="font-semibold text-lg mb-2 text-white">{plan.title}</h3>
-                <p className="text-2xl font-bold text-blue-400 mb-1">{plan.price}</p>
+                <p className="text-2xl font-bold text-blue-400 mb-2">{plan.price}</p>
                 <p className="text-sm text-gray-400">{plan.note}</p>
               </div>
             ))}
           </div>
         </div>
-        <div className="my-8">
+
+        <div className="mb-8">
           <h3 className="text-2xl font-bold text-white mb-4">Common Challenges with Datadog Pricing</h3>
           
           <div className="space-y-4 text-gray-300">
@@ -144,7 +147,7 @@ export default function DatadogPricingCalculatorPage() {
               While Datadog offers powerful observability features, its pricing model can be complex and challenging to predict. Some key issues include:
             </p>
 
-            <ul className="list-disc list-inside space-y-2 ml-4">
+            <ul className="list-disc list-inside pl-0 space-y-2 ml-4">
               <li>
                 <span className="font-semibold">Multiple Pricing Models:</span> Different products use different pricing models (host-based, volume-based, user-based), making total cost estimation difficult
               </li>
@@ -156,7 +159,7 @@ export default function DatadogPricingCalculatorPage() {
               </li>
             </ul>
 
-            <p className="mt-4">
+            <p>
               For a detailed breakdown of Datadog's pricing models and optimization strategies,{' '}
               <Link href="/blog/datadog-pricing" className="text-blue-400 hover:underline">
                 read our comprehensive guide on Datadog Pricing
@@ -165,7 +168,7 @@ export default function DatadogPricingCalculatorPage() {
           </div>
         </div>
 
-        <div className="bg-gradient-to-r my-8 from-gray-800 to-gray-900 rounded-xl p-8 shadow-lg">
+        <div className="bg-gradient-to-r from-gray-800 to-gray-900 rounded-xl p-8 shadow-lg mb-8">
           <div className="space-y-6">
             <h3 className="text-3xl font-bold text-white">Ready to Optimize Your Observability Costs?</h3>
             <p className="text-lg text-gray-300">
@@ -186,7 +189,7 @@ export default function DatadogPricingCalculatorPage() {
           </div>
         </div>
 
-        <p className="text-gray-400 mt-8">
+        <p className="text-gray-400">
           Note: This calculator provides estimates. For precise pricing, please consult{' '}
           <Link href="https://www.datadoghq.com/pricing/" className="text-blue-400 hover:underline">
             Datadog's official pricing page
