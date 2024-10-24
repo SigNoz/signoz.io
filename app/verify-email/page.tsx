@@ -74,15 +74,15 @@ function VerifyEmail() {
 
       {submitFailed && (
         <div className="mt-[28px] flex w-full items-center justify-center gap-2 text-center text-xs text-signoz_cherry-500">
-          <Frown size={16} /> It looks like something didn't go as planned. Please reach out to us
-          for assistance.
+          <Frown size={16} /> Resend failed. Please check your internet connection or try again
+          later. If the issue persists, contact support for assistance.
         </div>
       )}
 
       {submitSuccess && (
         <div className="mt-[28px] flex w-full items-center justify-center gap-2 text-center text-xs text-signoz_forest-500">
-          <CheckCircleIcon size={16} /> Verification email sent! Please check your email for the
-          next steps.
+          <CheckCircleIcon size={16} /> Verification email resent! Please check your inbox (and spam
+          folder) for the new verification link.
         </div>
       )}
 
