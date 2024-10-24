@@ -16,9 +16,8 @@ This document provides a detailed walkthrough on how to send Google Compute Engi
 **Here's a quick summary of what we will be doing in this guide**
 
 * Create and configure Compute Engine VM instance(whose metrics you want to observe in SigNoz)
-* Create and configure Compute Engine VM instance to deploy Telegraf and OpenTelemetry Collector
-* Deploy Telegraf to fetch the metrics from Google Cloud monitoring
-* Deploy OpenTelemetry Collector to scrape the metrics from Telegraf
+* Create and configure Compute Engine VM instance to deploy OpenTelemetry Collector
+* Deploy OpenTelemetry Collector to scrape the metrics from Google Cloud Monitoring
 * Send and Visualize the metrics in SigNoz Cloud
 
 ## Prerequisites
@@ -67,66 +66,69 @@ With this, the Compute Engine instance is created.
 In case you want two different Compute Engine instances, one where you will be deploying your application, and another where you will be deploying Telegrah and OTel Collector, you can create one more Compute Engine instance following the same steps as above.
 
 
-## Deploy Telegraf to fetch the metrics from Google Cloud Monitoring
+## Deploy OpenTelemetry to scrape the metrics from Google Cloud Monitoring
 
-**Step 1:** Install [`telegraf`](https://github.com/influxdata/telegraf) which will collect metrics from Google Cloud Monitoring for Compute Engine, see the [available metrics for App Engine](https://cloud.google.com/monitoring/api/metrics_gcp#gcp-appengine). The installation process for the respective operating system can be found in official [documentation](https://docs.influxdata.com/telegraf/v1/install/).
+**Step 1:** Install and configure OpenTelemetry for scraping the metrics from Google Cloud Monitoring. Follow [OpenTelemetry Binary Usage in Virtual Machine](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) guide for detailed instructions.
 
-After successful installation, the `telegraf` status should be active and running.
+<Admonition type="note">
+Note that `googlecloudmonitoring` receiver is supported only from version 0.112.0 and above of opentelemetry-collector. So, ensure you download and use the appropriate release.
+</Admonition>
 
-<figure data-zoomable align="left">
-    <img
-        src="/img/docs/gcp-monitoring/compute-engine/metrics/telegraf-status.webp"
-        alt="Telegraf running status"
-    />
-<figcaption>
-<i>
-`telegraf` running status
-</i>
-</figcaption>
-</figure>
+**Step 2:** Create `config.yaml`.
 
-The configuration file for telegraf can be found here:
+Under the `googlecloudmonitoring` receiver, you need to specify the metrics that you want to capture in the `metrics_list`. You can include all the metrics that you would like to capture for Compute Engine, see the [available metrics for Compute Engine](https://cloud.google.com/monitoring/api/metrics_gcp#gcp-compute).
 
-```sh
-/etc/telegraf/telegraf.conf
+Here is the `config.yaml` file for capturing Compute Engine metrics:
+
+```
+receivers:
+  googlecloudmonitoring:
+    collection_interval: 5m # Can be specified in seconds (s), minutes (m), or hours (h)
+    project_id: my-project-id
+    metrics_list:
+      - metric_name: "compute.googleapis.com/instance/cpu/usage_time"
+      - metric_name: "compute.googleapis.com/instance/cpu/utilization"
+      - metric_name: "compute.googleapis.com/instance/disk/read_ops_count"
+      - metric_name: "compute.googleapis.com/instance/disk/write_ops_count"
+      - metric_name: "compute.googleapis.com/instance/network/received_bytes_count"
+      - metric_name: "compute.googleapis.com/instance/network/sent_bytes_count"
+processors:
+  resource/env:
+    attributes:
+    - key: deployment.environment
+      value: prod
+      action: upsert
+  batch: {}
+exporters:
+  otlp:
+    endpoint: "ingest.{region}.signoz.cloud:443"
+    tls:
+      insecure: false
+    headers:
+      "signoz-access-token": "<SIGNOZ_INGESTION_KEY>"
+service:
+  pipelines:
+    metrics:
+      receivers: [googlecloudmonitoring]
+      processors: [resource/env, batch]
+      exporters: [otlp]
 ```
 
-**Step 2:** Configure the Telegraf input and output plugin by adding configurations to the `telegraf.conf` file.
+Depending on the choice of your region for SigNoz cloud, the otlp endpoint will vary according to this table.
 
-```txt
-# Gather timeseries from Google Cloud Platform v3 monitoring API
-[[inputs.stackdriver]]
-  ## GCP Project
-  project = "omni-new"
-  ## Include timeseries that start with the given metric type.
-  metric_type_prefix_include = [
-    "compute.googleapis.com",
-  ]
-  ## Most metrics are updated no more than once per minute; it is recommended
-  ## to override the agent level interval with a value of 1m or greater.
-  interval = "1m"
-# Send OpenTelemetry metrics over gRPC
-[[outputs.opentelemetry]]
-  ## Override the default (localhost:4317) OpenTelemetry gRPC service
-  ## address:port
-  service_address = "localhost:4317"
-```
+| Region	| Endpoint |
+| --- | --- |
+| US | ingest.us.signoz.cloud:443 |
+| IN | ingest.in.signoz.cloud:443 |
+| EU | ingest.eu.signoz.cloud:443 |
 
-We are assuming that the OTel Collector is running on the same machine as Telegraf. If that is not the case, you will have to change the `service_address` in the `outputs.opentelemetry` section accordingly.
-
-## Deploy OpenTelemetry to scrape the metrics from Telegraf
-
-**Step 1:** Install and configure OpenTelemetry for scraping the metrics from Telegraf. Follow [OpenTelemetry Binary Usage in Virtual Machine](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) guide for detailed instructions.
-
-**Step 2:** After successful configuration start the OTel Collector using following command:
+After successful configuration start the OTel Collector using following command:
 
 ```sh
 ./otelcol-contrib --config ./config.yaml &> otelcol-output.log & echo "$!" > otel-pid
 ```
 
-**Step 3:** Restart the Telegraf service
-
-**Step 4:** If the configurations are configured correctly with Telegraf and we can see the output logs from OpenTelemetry as follows:
+**Step 3:** If the configurations are configured correctly, you can see the output logs from OpenTelemtry as follows:
 
 <figure data-zoomable align="left">
     <img
@@ -144,45 +146,35 @@ Viewing OTel Collector Logs
 
 **Step 1:** Go to the SigNoz Cloud URL and head over to the dashboard.
 
-**Step 2:** If not already created, create a new dashboard and select Time Series.
+**Step 2:** If not already created, create a new dashboard. You can create the dashboard and multiple panel under it by following the instructions [here](/docs/userguide/manage-Dashboards).
+
+**Step 3:** While creating the panel, select metric for Compute Engine.
+
+All metrics starting with `compute_googleapis_com_` have been collected from Compute Engine.
+
+Here is the sample dashboard for Compute Engine:
 
 <figure data-zoomable align="left">
     <img
-        src="/img/docs/gcp-monitoring/compute-engine/metrics/new-panel.webp"
-        alt="Creating new panel"
+        src="/img/docs/gcp-monitoring/compute-engine/metrics/dashboard-compute-engine.webp"
+        alt="GCP Compute Engine Dashboard"
     />
 <figcaption>
 <i>
-Creating new panel in dashboard
-</i>
-</figcaption>
-</figure>
-
-**Step 3:** Select metric for Compute Engine 
-
-All metrics starting with `compute_googleapis_com_` have been collected from Compute Engine instances.
-
-<figure data-zoomable align="left">
-    <img
-        src="/img/docs/gcp-monitoring/compute-engine/metrics/plot-metrics-signoz-cloud.webp"
-        alt="Plot metrics"
-    />
-<figcaption>
-<i>
-Compute Engine Metrics
+GCP Compute Engine Dashboard
 </i>
 </figcaption>
 </figure>
 
 ## Troubleshooting
 
-If you run into any problems while setting up monitoring for your App Engine's metrics with SigNoz, consider these troubleshooting steps:
+If you run into any problems while setting up monitoring for your Compute Engine's metrics with SigNoz, consider these troubleshooting steps:
 
 
 * **Verify Configuration**: Double-check your `config.yaml` file to ensure all settings, including the ingestion key and endpoint, are correct.
 * **Review Logs**: Look at the logs of both Compute Engine and the OpenTelemetry Collector to identify any error messages or warnings that might provide insights into what’s going wrong.
 * **Update Dependencies**: Ensure all relevant packages and dependencies are up-to-date to avoid compatibility issues.
-* **Consult Documentation**: Review the SigNoz, OpenTelemetry, and Telegraf documentation for any additional troubleshooting of the common issues.
+* **Consult Documentation**: Review the SigNoz and OpenTelemetry documentation for any additional troubleshooting of the common issues.
 
 </TabItem>
 
@@ -191,9 +183,8 @@ If you run into any problems while setting up monitoring for your App Engine's m
 **Here’s a quick summary of what we will be doing in this guide**
 
 * Create and configure Compute Engine VM instance(whose metrics you want to observe in SigNoz)
-* Create and configure Compute Engine VM instance to deploy Telegraf and OpenTelemetry Collector
-* Deploy Telegraf to fetch the metrics from Google Cloud monitoring
-* Deploy OpenTelemetry Collector to scrape the metrics from Telegraf
+* Create and configure Compute Engine VM instance to deploy OpenTelemetry Collector
+* Deploy OpenTelemetry Collector to scrape the metrics from Google Cloud Monitoring
 * Visualize the metrics in SigNoz dashboard
 
 ## Prerequisites
@@ -239,69 +230,61 @@ Compute Engine Instance Settings
 
 With this, the Compute Engine instance is created.
 
-In case you want two different Compute Engine instances, one where you will be deploying your application, and another where you will be deploying Telegrah and OTel Collector, you can create one more Compute Engine instance following the same steps as above.
+In case you want two different Compute Engine instances, one where you will be deploying your application, and another where you will be deploying OTel Collector, you can create one more Compute Engine instance following the same steps as above.
 
+## Deploy OpenTelemetry to scrape the metrics from Google Cloud Monitoring
 
-## Deploy Telegraf to fetch the metrics from Google Cloud Monitoring
+**Step 1:** Install and configure OpenTelemetry for scraping the metrics from Google Cloud Monitoring. Follow [OpenTelemetry Binary Usage in Virtual Machine](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) guide for detailed instructions.
 
-**Step 1:** Install [`telegraf`](https://github.com/influxdata/telegraf) which will collect metrics from Google Cloud Monitoring for Compute Engine, see the [available metrics for App Engine](https://cloud.google.com/monitoring/api/metrics_gcp#gcp-appengine). The installation process for the respective operating system can be found in official [documentation](https://docs.influxdata.com/telegraf/v1/install/).
+<Admonition type="note">
+Note that `googlecloudmonitoring` receiver is supported only from version 0.112.0 and above of opentelemetry-collector. So, ensure you download and use the appropriate release.
+</Admonition>
 
-After successful installation, the `telegraf` status should be active and running.
+**Step 2:** Create `config.yaml`.
 
-<figure data-zoomable align="left">
-    <img
-        src="/img/docs/gcp-monitoring/compute-engine/metrics/telegraf-status.webp"
-        alt="Telegraf running status"
-    />
-<figcaption>
-<i>
-`telegraf` running status
-</i>
-</figcaption>
-</figure>
+Under the `googlecloudmonitoring` receiver, you need to specify the metrics that you want to capture in the `metrics_list`. You can include all the metrics that you would like to capture for Compute Engine, see the [available metrics for Compute Engine](https://cloud.google.com/monitoring/api/metrics_gcp#gcp-compute).
 
-The configuration file for telegraf can be found here:
+Here is the `config.yaml` file for capturing Compute Engine metrics:
 
-```sh
-/etc/telegraf/telegraf.conf
+```
+receivers:
+  googlecloudmonitoring:
+    collection_interval: 5m # Can be specified in seconds (s), minutes (m), or hours (h)
+    project_id: my-project-id
+    metrics_list:
+      - metric_name: "compute.googleapis.com/instance/cpu/usage_time"
+      - metric_name: "compute.googleapis.com/instance/cpu/utilization"
+      - metric_name: "compute.googleapis.com/instance/disk/read_ops_count"
+      - metric_name: "compute.googleapis.com/instance/disk/write_ops_count"
+      - metric_name: "compute.googleapis.com/instance/network/received_bytes_count"
+      - metric_name: "compute.googleapis.com/instance/network/sent_bytes_count"
+processors:
+  resource/env:
+    attributes:
+    - key: deployment.environment
+      value: prod
+      action: upsert
+  batch: {}
+exporters:
+  otlp:
+    endpoint: "<IP of machine hosting SigNoz>:4317"
+    tls:
+      insecure: true
+service:
+  pipelines:
+    metrics:
+      receivers: [googlecloudmonitoring]
+      processors: [resource/env, batch]
+      exporters: [otlp]
 ```
 
-**Step 2:** Configure the Telegraf input and output plugin by adding configurations to the `telegraf.conf` file.
-
-```txt
-# Gather timeseries from Google Cloud Platform v3 monitoring API
-[[inputs.stackdriver]]
-  ## GCP Project
-  project = "omni-new"
-  ## Include timeseries that start with the given metric type.
-  metric_type_prefix_include = [
-    "compute.googleapis.com",
-  ]
-  ## Most metrics are updated no more than once per minute; it is recommended
-  ## to override the agent level interval with a value of 1m or greater.
-  interval = "1m"
-# Send OpenTelemetry metrics over gRPC
-[[outputs.opentelemetry]]
-  ## Override the default (localhost:4317) OpenTelemetry gRPC service
-  ## address:port
-  service_address = "localhost:4317"
-```
-
-We are assuming that the OTel Collector is running on the same machine as Telegraf. If that is not the case, you will have to change the `service_address` in the `outputs.opentelemetry` section accordingly.
-
-## Deploy OpenTelemetry to scrape the metrics from Telegraf
-
-**Step 1:** Install and configure OpenTelemetry for scraping the metrics from Telegraf. Follow [OpenTelemetry Binary Usage in Virtual Machine](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) guide for detailed instructions.
-
-**Step 2:** After successful configuration start the OTel Collector using following command:
+After successful configuration start the OTel Collector using following command:
 
 ```sh
 ./otelcol-contrib --config ./config.yaml &> otelcol-output.log & echo "$!" > otel-pid
 ```
 
-**Step 3:** Restart the Telegraf service
-
-**Step 4:** If the configurations are configured correctly with Telegraf and we can see the output logs from OpenTelemetry as follows:
+**Step 3:** If the configurations are configured correctly, you can see the output logs from OpenTelemtry as follows:
 
 <figure data-zoomable align="left">
     <img
@@ -319,33 +302,35 @@ Viewing OTel Collector Logs
 
 **Step 1:** Go to SigNoz and head over to the dashboard.
 
-**Step 2:** If not already created, create a new dashboard and select Time Series.
+**Step 2:** If not already created, create a new dashboard. You can create the dashboard and multiple panel under it by following the instructions [here](/docs/userguide/manage-Dashboards).
+
+**Step 3:** While creating the panel, select metric for Compute Engine.
+
+All metrics starting with `compute_googleapis_com_` have been collected from Compute Engine.
+
+Here is the sample dashboard for Compute Engine:
 
 <figure data-zoomable align="left">
     <img
-        src="/img/docs/gcp-monitoring/compute-engine/metrics/new-panel.webp"
-        alt="Creating new panel"
+        src="/img/docs/gcp-monitoring/compute-engine/metrics/dashboard-compute-engine.webp"
+        alt="GCP Compute Engine Dashboard"
     />
 <figcaption>
 <i>
-Creating new panel in dashboard
+GCP Compute Engine Dashboard
 </i>
 </figcaption>
 </figure>
 
-**Step 3:** Select metric for Compute Engine 
-
-All metrics starting with `compute_googleapis_com_` have been collected from Compute Engine instances.
-
 ## Troubleshooting
 
-If you run into any problems while setting up monitoring for your App Engine's metrics with SigNoz, consider these troubleshooting steps:
+If you run into any problems while setting up monitoring for your Compute Engine's metrics with SigNoz, consider these troubleshooting steps:
 
 
 * **Verify Configuration**: Double-check your `config.yaml` file to ensure all settings, including the ingestion key and endpoint, are correct.
 * **Review Logs**: Look at the logs of both Compute Engine and the OpenTelemetry Collector to identify any error messages or warnings that might provide insights into what’s going wrong.
 * **Update Dependencies**: Ensure all relevant packages and dependencies are up-to-date to avoid compatibility issues.
-* **Consult Documentation**: Review the SigNoz, OpenTelemetry, and Telegraf documentation for any additional troubleshooting of the common issues.
+* **Consult Documentation**: Review the SigNoz and OpenTelemetry documentation for any additional troubleshooting of the common issues.
 
 </TabItem>
 </Tabs>
