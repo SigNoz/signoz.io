@@ -40,6 +40,13 @@ const cardDetails = [
     href: '/case-study/kiwi/',
   },
   {
+    logo: '/img/case_study/brainfish-icon.svg',
+    title: 'How Brainfish leveraged SigNoz for effective Kubernetes monitoring & Logs management',
+    name: 'Charlie Shen',
+    position: 'Lead DevOps Engineer, Brainfish',
+    href: '/case-study/brainfish/',
+  },
+  {
     logo: '/img/case_study/logos/bands-logo.png',
     title: 'How Bands Monitors 50+ Integrations for Thousands of Musicians Using SigNoz',
     name: 'Shiv Ansal',
