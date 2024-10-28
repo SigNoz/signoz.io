@@ -1,0 +1,69 @@
+---
+date: 2024-10-28
+title: Configure k8s-infra otelDeployment to collect metrics from receivers
+id: k8s-deployment-override
+---
+
+The k8s-infra chart runs two kind of otel collectors:
+
+- otelAgent: This collector is deployed as a daemonset and collects metrics/logs from the pods on the node. One agent is deployed per node.
+- otelDeployment: This collector is deployed as a deployment and collects metrics/logs of the cluster. One deployment is deployed per cluster.
+
+The `otelDeployment` collector is configured to collect cluster metrics and events by default. There are some use cases where you might want to collect metrics from components other than the ones that are being collected by default. For example, you might want to collect metrics from a redis server or a postgres database. This page describes how to override the default configuration of the `otelDeployment` collector to collect metrics from additional components. The override-values.yaml file contains the configurations that you can override.
+
+### Example 1: Configuring a redis receiver running inside a namespace "redis-ns" with the name "redis-server" and port 6379
+
+The following configuration shows how to configure the `otelDeployment` collector to collect metrics from a redis server running inside a namespace "redis-ns" with the name "redis-server" and port 6379.
+
+```yaml
+otelDeployment:
+  config:
+    receivers:
+      redis:
+        endpoint: redis-server.redis-ns.svc.cluster.local:6379
+    service:
+      pipelines:
+        metrics/internal:
+          receivers: [redis]
+          processors: [batch]
+          exporters: []
+```
+
+### Example 2: Configuring a postgres receiver running inside a namespace "postgres-ns" with the name "postgres-server" and port 5432
+
+```yaml
+otelDeployment:
+  config:
+    postgres:
+      endpoint: postgres-server.postgres-ns.svc.cluster.local:5432
+    service:
+      pipelines:
+        metrics/internal:
+          receivers: [postgres]
+          processors: [batch]
+          exporters: []
+```
+
+### Example 3: Configuring a redis receiver running inside a namespace "redis-ns" with the name "redis-server" and port 6379 and a postgres receiver running inside a namespace "postgres-ns" with the name "postgres-server" and port 5432
+
+```yaml
+otelDeployment:
+  config:
+    receivers:
+      redis:
+        endpoint: redis-server.redis-ns.svc.cluster.local:6379
+      postgres:
+        endpoint: postgres-server.postgres-ns.svc.cluster.local:5432
+    service:
+      pipelines:
+        metrics/internal:
+          receivers: [redis, postgres]
+          processors: [batch]
+          exporters: []
+```
+
+The above examples are simple and show how to configure the `otelDeployment` collector to collect metrics from a single component. However, in a real-world scenario, you might have to configure the receiver with a username and password and other configurations.
+
+## Why `otelDeployment`?
+
+The `otelAgent` collector is deployed as a daemonset, it results in duplicate metrics if the same component is running on multiple nodes. The `otelDeployment` collector solves this problem by collecting metrics from the cluster and not from the individual nodes.
