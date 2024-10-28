@@ -21,7 +21,8 @@ function WorkspaceSetup({ isWorkspaceSetupDelayed }) {
             isWorkspaceSetupDelayed ? 'text-signoz_amber-500' : ''
           }`}
         >
-          <Loader2 size={24} /> Preparing your cloud workspace, This may take a few minutes ...
+          <Loader2 size={24} className="animate-spin" /> Preparing your cloud workspace, This may
+          take a few minutes ...
         </div>
       </div>
 
