@@ -760,6 +760,11 @@ const docsSideNav = [
         route: '/docs/metrics-management/data-storage',
         label: 'Metrics Tables',
       },
+      {
+        type: 'doc',
+        route: '/docs/metrics-management/configure-custom-buckets',
+        label: 'Configure custom buckets for histograms',
+      },
     ],
   },
   {
