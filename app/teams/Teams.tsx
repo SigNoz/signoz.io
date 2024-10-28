@@ -175,6 +175,8 @@ const Teams: React.FC<SignUpPageProps> = () => {
           source: '',
         })
 
+        localStorage.setItem('workEmail', formData.workEmail)
+
         router.push('/verify-email')
       } else {
         // To do, handle other errors apart from invalid email
