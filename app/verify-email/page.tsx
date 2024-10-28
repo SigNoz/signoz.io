@@ -12,9 +12,10 @@ function VerifyEmail() {
 
   useEffect(() => {
     try {
-      localStorage.getItem('workEmail')
-      if (workEmail) {
-        setWorkEmail(workEmail)
+      const workEmailFromLocalStorage = localStorage.getItem('workEmail')
+
+      if (workEmailFromLocalStorage) {
+        setWorkEmail(workEmailFromLocalStorage)
       } else {
         setSubmitFailed(true)
       }
@@ -45,12 +46,12 @@ function VerifyEmail() {
       if (response.ok) {
         setSubmitSuccess(true)
 
+        // show the success message for 5 seconds
         setTimeout(() => {
           setSubmitSuccess(false)
           setSubmitFailed(false)
         }, 5000)
       } else {
-        // To do, handle other errors apart from invalid email
         if (response.status === 400) {
           setSubmitFailed(true)
         }
