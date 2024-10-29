@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Button from '../Button/Button';
+import { BookOpen } from 'lucide-react';
 
 interface Question {
   id: string;
@@ -469,8 +470,9 @@ const DatadogAlternativeFinder: React.FC = () => {
                               target="_blank" 
                               rel="noopener noreferrer"
                               style={{ textDecoration: 'none', color: 'inherit' }}
+                              className="flex items-center gap-2"
                             >
-                              Read Documentation
+                              <BookOpen size={14} />Read Documentation
                             </a>
                           </Button>
                           <Button
