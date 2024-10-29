@@ -17,6 +17,8 @@ function WorkspaceReady({
   workspaceData: any
   userEmail: string | null
 }) {
+  const decodedEmail = decodeURIComponent(userEmail || '')
+
   const handleCopyWorkspaceLink = () => {
     navigator.clipboard.writeText(workspaceData?.invite_link)
   }
@@ -46,7 +48,9 @@ function WorkspaceReady({
             </div>
 
             <div className="flex flex-1 items-center gap-4 text-sm text-signoz_robin-500">
-              <span className="flex-1">{workspaceData?.invite_link}</span>
+              <a className="flex-1" href={workspaceData?.invite_link} target="_blank">
+                {workspaceData?.invite_link}
+              </a>
 
               <span className="cursor-pointer" onClick={handleCopyWorkspaceLink}>
                 <CopyIcon size={16} />
@@ -58,7 +62,7 @@ function WorkspaceReady({
             <div className="flex items-center gap-2 text-sm">
               <AtSignIcon size={16} /> Sign-up email
             </div>
-            <div className="text-sm text-signoz_robin-500">{userEmail}</div>
+            <div className="text-sm text-signoz_robin-500">{decodedEmail}</div>
           </div>
         </div>
       </div>
