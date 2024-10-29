@@ -431,7 +431,15 @@ const DatadogAlternativeFinder: React.FC = () => {
               </div>
             ) : (
               <div>
-                <h3 className="text-xl font-semibold mb-4 text-white">Recommended Alternatives</h3>
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-xl mt-0 font-semibold text-white">Recommended DataDog Alternatives</h3>
+                  <button
+                    onClick={resetQuiz}
+                    className="px-3 py-1.5 text-sm bg-gray-700 text-gray-300 rounded-lg hover:bg-gray-600 transition-colors"
+                  >
+                    See a Demo
+                  </button>
+                </div>
                 <div className="space-y-6">
                   {results.map(tool => (
                     <div key={tool.name} className="border border-gray-600 p-4 rounded-lg bg-gray-700">
@@ -481,13 +489,27 @@ const DatadogAlternativeFinder: React.FC = () => {
                       )}
                     </div>
                   ))}
+                  {!results.some(tool => tool.name === 'SigNoz') && (
+                    <div className="mt-8 p-4 border border-blue-500 rounded-lg bg-gray-800 bg-opacity-50">
+                      <h4 className="text-lg mt-0 font-semibold text-white">Have You Considered SigNoz?</h4>
+                      <p className="text-gray-300 mt-2">
+                        SigNoz offers a cost-effective, open-source alternative with full-stack observability and native OpenTelemetry support. Perfect for teams looking for flexible deployment options and simple pricing.
+                      </p>
+                      <div className="mt-4 flex flex-col sm:flex-row gap-4">
+                        <Button>
+                          <a 
+                            href="https://signoz.io/"
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            style={{ textDecoration: 'none', color: 'inherit' }}
+                          >
+                            Learn More
+                          </a>
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                 </div>
-                <button
-                  onClick={resetQuiz}
-                  className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-                >
-                  Start Over
-                </button>
               </div>
             )}
           </div>
