@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState } from 'react';
+import Button from '../Button/Button';
 
 interface Question {
   id: string;
@@ -340,11 +341,11 @@ const DatadogAlternativeFinder: React.FC = () => {
   return (
     <>
       {/* Banner */}
-      <div className="sticky top-0 w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded px-6 shadow-lg">
+      <div className="sticky top-0 w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 rounded px-7 shadow-lg">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div>
-            <h2 className="text-lg mt-0 mb-2 font-bold">Find Your Perfect Datadog Alternative</h2>
-            <p className="text-xs mb-0 opacity-90">Answer a few questions to get personalized recommendations in 30 seconds</p>
+            <h2 className="text-xl mt-0 mb-2 font-bold">Find Your Perfect Datadog Alternative</h2>
+            <p className="text-sm mb-0 opacity-90">Answer a few questions to get personalized recommendations in 30 seconds</p>
           </div>
           <button
             onClick={() => {
@@ -434,7 +435,7 @@ const DatadogAlternativeFinder: React.FC = () => {
                 <div className="space-y-6">
                   {results.map(tool => (
                     <div key={tool.name} className="border border-gray-600 p-4 rounded-lg bg-gray-700">
-                      <h4 className="text-lg font-semibold text-white">{tool.name}</h4>
+                      <h4 className="text-lg mt-0 font-semibold text-white">{tool.name}</h4>
                       <p className="text-gray-300 mt-2">{tool.description}</p>
                       <div className="mt-3">
                         <h5 className="font-medium text-white">Best For:</h5>
@@ -452,6 +453,32 @@ const DatadogAlternativeFinder: React.FC = () => {
                           ))}
                         </ul>
                       </div>
+                      {tool.name === 'SigNoz' && (
+                        <div className="mt-4 flex flex-col sm:flex-row gap-4">
+                          <Button>
+                            <a 
+                              href="https://signoz.io/docs/cloud/"
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              style={{ textDecoration: 'none', color: 'inherit' }}
+                            >
+                              Read Documentation
+                            </a>
+                          </Button>
+                          <Button
+                            type={Button.TYPES.SECONDARY}
+                          >
+                            <a
+                              href="https://signoz.io/application-performance-monitoring/"
+                              target="_blank"
+                              rel="noopener noreferrer" 
+                              style={{ textDecoration: 'none', color: 'inherit' }}
+                            >
+                              Explore Features &rarr;
+                            </a>
+                          </Button>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
