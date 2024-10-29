@@ -765,6 +765,11 @@ const docsSideNav = [
         route: '/docs/metrics-management/configure-custom-buckets',
         label: 'Configure custom buckets for histograms',
       },
+      {
+        type: 'doc',
+        route: '/docs/metrics-management/k8s-deployment-override',
+        label: 'Configure k8s-infra otelDeployment to collect metrics from receivers',
+      },
     ],
   },
   {
