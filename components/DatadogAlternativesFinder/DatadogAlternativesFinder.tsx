@@ -437,7 +437,7 @@ const DatadogAlternativeFinder: React.FC = () => {
                     onClick={resetQuiz}
                     className="px-3 py-1.5 text-sm bg-gray-700 text-gray-300 rounded-lg hover:bg-gray-600 transition-colors"
                   >
-                    See a Demo
+                    Start Over
                   </button>
                 </div>
                 <div className="space-y-6">
@@ -503,7 +503,7 @@ const DatadogAlternativeFinder: React.FC = () => {
                             rel="noopener noreferrer"
                             style={{ textDecoration: 'none', color: 'inherit' }}
                           >
-                            Learn More
+                            See a Demo &rarr;
                           </a>
                         </Button>
                       </div>
