@@ -281,6 +281,7 @@ const tools: Tool[] = [
 ];
 
 const DatadogAlternativeFinder: React.FC = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string | string[]>>({});
   const [results, setResults] = useState<Tool[]>([]);
@@ -330,108 +331,142 @@ const DatadogAlternativeFinder: React.FC = () => {
     setResults(matchedTools);
   };
 
+  const resetQuiz = () => {
+    setCurrentStep(0);
+    setAnswers({});
+    setResults([]);
+  };
+
   return (
-    <div className="w-full my-8">
-      <div className="bg-gradient-to-r from-gray-800 to-gray-900 rounded-xl p-8 shadow-lg hover:shadow-xl transition-all duration-300">
-        <p className="text-gray-300 mt-0 mb-6">Tell us your requirements and we will sortlist the top datadog alternatives tailored for your needs</p>
-        {currentStep < questions.length ? (
+    <>
+      {/* Banner */}
+      <div className="sticky top-0 w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded px-6 shadow-lg">
+        <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div>
-            <h3 className="text-xl mt-0 font-semibold mb-4 text-white">{questions[currentStep].text}</h3>
-            <div className="space-y-3">
-              {questions[currentStep].type === 'single' ? (
-                questions[currentStep].options.map(option => (
-                  <button
-                    key={option}
-                    onClick={() => {
-                      handleAnswer(questions[currentStep].id, option);
-                      setCurrentStep(prev => prev + 1);
-                      if (currentStep === questions.length - 1) {
-                        calculateResults();
-                      }
-                    }}
-                    className="w-full p-3 text-left border border-gray-600 rounded-lg bg-gray-700 text-gray-200 hover:bg-gray-600 transition-colors"
-                  >
-                    {option}
-                  </button>
-                ))
-              ) : (
-                <>
-                  {questions[currentStep].options.map(option => (
-                    <label key={option} className="flex items-center space-x-3 text-gray-200">
-                      <input
-                        type="checkbox"
-                        onChange={(e) => {
-                          const currentAnswers = (answers[questions[currentStep].id] as string[]) || [];
-                          if (e.target.checked) {
-                            handleAnswer(questions[currentStep].id, [...currentAnswers, option]);
-                          } else {
-                            handleAnswer(
-                              questions[currentStep].id,
-                              currentAnswers.filter(a => a !== option)
-                            );
+            <h2 className="text-lg mt-0 mb-2 font-bold">Find Your Perfect Datadog Alternative</h2>
+            <p className="text-xs mb-0 opacity-90">Answer a few questions to get personalized recommendations in 30 seconds</p>
+          </div>
+          <button
+            onClick={() => {
+              setIsModalOpen(true);
+              resetQuiz();
+            }}
+            className="px-4 py-1.5 bg-white text-blue-600 rounded-full font-semibold hover:bg-opacity-90 transition-all"
+          >
+            Start Now
+          </button>
+        </div>
+      </div>
+
+      {/* Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-gradient-to-r from-gray-800 to-gray-900 rounded-xl p-8 shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-end">
+              <button 
+                onClick={() => setIsModalOpen(false)}
+                className="text-gray-400 hover:text-white"
+              >
+                ✕
+              </button>
+            </div>
+            
+            {currentStep < questions.length ? (
+              <div>
+                <h3 className="text-xl mt-0 font-semibold mb-4 text-white">{questions[currentStep].text}</h3>
+                <div className="space-y-3">
+                  {questions[currentStep].type === 'single' ? (
+                    questions[currentStep].options.map(option => (
+                      <button
+                        key={option}
+                        onClick={() => {
+                          handleAnswer(questions[currentStep].id, option);
+                          setCurrentStep(prev => prev + 1);
+                          if (currentStep === questions.length - 1) {
+                            calculateResults();
                           }
                         }}
-                        className="form-checkbox text-blue-500"
-                      />
-                      <span>{option}</span>
-                    </label>
-                  ))}
-                  <button
-                    onClick={() => {
-                      setCurrentStep(prev => prev + 1);
-                      if (currentStep === questions.length - 1) {
-                        calculateResults();
-                      }
-                    }}
-                    className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-                  >
-                    Next
-                  </button>
-                </>
-              )}
-            </div>
-          </div>
-        ) : (
-          <div>
-            <h3 className="text-xl font-semibold mb-4 text-white">Recommended Alternatives</h3>
-            <div className="space-y-6">
-              {results.map(tool => (
-                <div key={tool.name} className="border border-gray-600 p-4 rounded-lg bg-gray-700">
-                  <h4 className="text-lg font-semibold text-white">{tool.name}</h4>
-                  <p className="text-gray-300 mt-2">{tool.description}</p>
-                  <div className="mt-3">
-                    <h5 className="font-medium text-white">Best For:</h5>
-                    <ul className="list-disc list-inside text-gray-300">
-                      {tool.bestFor.map(item => (
-                        <li key={item}>{item}</li>
+                        className="w-full p-3 text-left border border-gray-600 rounded-lg bg-gray-700 text-gray-200 hover:bg-gray-600 transition-colors"
+                      >
+                        {option}
+                      </button>
+                    ))
+                  ) : (
+                    <>
+                      {questions[currentStep].options.map(option => (
+                        <label key={option} className="flex items-center space-x-3 text-gray-200">
+                          <input
+                            type="checkbox"
+                            onChange={(e) => {
+                              const currentAnswers = (answers[questions[currentStep].id] as string[]) || [];
+                              if (e.target.checked) {
+                                handleAnswer(questions[currentStep].id, [...currentAnswers, option]);
+                              } else {
+                                handleAnswer(
+                                  questions[currentStep].id,
+                                  currentAnswers.filter(a => a !== option)
+                                );
+                              }
+                            }}
+                            className="form-checkbox text-blue-500"
+                          />
+                          <span>{option}</span>
+                        </label>
                       ))}
-                    </ul>
-                  </div>
-                  <div className="mt-3">
-                    <h5 className="font-medium text-white">Key Features:</h5>
-                    <ul className="list-disc list-inside text-gray-300">
-                      {tool.keyFeatures.map(feature => (
-                        <li key={feature}>{feature}</li>
-                      ))}
-                    </ul>
-                  </div>
+                      <button
+                        onClick={() => {
+                          setCurrentStep(prev => prev + 1);
+                          if (currentStep === questions.length - 1) {
+                            calculateResults();
+                          }
+                        }}
+                        className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                      >
+                        Next
+                      </button>
+                    </>
+                  )}
                 </div>
-              ))}
-            </div>
-            <button
-              onClick={() => {
-                setCurrentStep(0);
-                setAnswers({});
-                setResults([]);
-              }}
-              className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-            >
-              Start Over
-            </button>
+              </div>
+            ) : (
+              <div>
+                <h3 className="text-xl font-semibold mb-4 text-white">Recommended Alternatives</h3>
+                <div className="space-y-6">
+                  {results.map(tool => (
+                    <div key={tool.name} className="border border-gray-600 p-4 rounded-lg bg-gray-700">
+                      <h4 className="text-lg font-semibold text-white">{tool.name}</h4>
+                      <p className="text-gray-300 mt-2">{tool.description}</p>
+                      <div className="mt-3">
+                        <h5 className="font-medium text-white">Best For:</h5>
+                        <ul className="list-disc list-inside text-gray-300">
+                          {tool.bestFor.map(item => (
+                            <li key={item}>{item}</li>
+                          ))}
+                        </ul>
+                      </div>
+                      <div className="mt-3">
+                        <h5 className="font-medium text-white">Key Features:</h5>
+                        <ul className="list-disc list-inside text-gray-300">
+                          {tool.keyFeatures.map(feature => (
+                            <li key={feature}>{feature}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <button
+                  onClick={resetQuiz}
+                  className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                >
+                  Start Over
+                </button>
+              </div>
+            )}
           </div>
-        )}
-      </div>
-    </div>
+        </div>
+      )}
+    </>
   );
 };
 
