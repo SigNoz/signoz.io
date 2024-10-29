@@ -395,26 +395,33 @@ const DatadogAlternativeFinder: React.FC = () => {
                     ))
                   ) : (
                     <>
+                    <div>
                       {questions[currentStep].options.map(option => (
-                        <label key={option} className="flex items-center space-x-3 text-gray-200">
-                          <input
-                            type="checkbox"
-                            onChange={(e) => {
-                              const currentAnswers = (answers[questions[currentStep].id] as string[]) || [];
-                              if (e.target.checked) {
-                                handleAnswer(questions[currentStep].id, [...currentAnswers, option]);
-                              } else {
-                                handleAnswer(
-                                  questions[currentStep].id,
-                                  currentAnswers.filter(a => a !== option)
-                                );
-                              }
-                            }}
-                            className="form-checkbox text-blue-500"
-                          />
-                          <span>{option}</span>
-                        </label>
-                      ))}
+                        <button
+                          key={option}
+                          onClick={() => {
+                            const currentAnswers = (answers[questions[currentStep].id] as string[]) || [];
+                            const isSelected = currentAnswers.includes(option);
+                            
+                            if (!isSelected) {
+                              handleAnswer(questions[currentStep].id, [...currentAnswers, option]);
+                            } else {
+                              handleAnswer(
+                                questions[currentStep].id,
+                                currentAnswers.filter(a => a !== option)
+                              );
+                            }
+                          }}
+                          className={`px-4 py-2 mx-2 my-2 rounded-full font-medium transition-all ${
+                            (answers[questions[currentStep].id] as string[] || []).includes(option)
+                              ? 'bg-blue-500 text-white'
+                              : 'bg-gray-700 text-gray-200 hover:bg-gray-600'
+                          }`}
+                        >
+                          {option}
+                        </button>
+                        ))}
+                      </div>    
                       <button
                         onClick={() => {
                           setCurrentStep(prev => prev + 1);
