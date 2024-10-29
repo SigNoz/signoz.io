@@ -26,6 +26,7 @@ import FAQAccordion from './FAQAccordion/FAQAccordion'
 import Button from './Button/Button'
 import DatadogPricingCalculator from './DatadogPricingCalculator/DatadogPricingCalculator'
 import DatadogVsSigNoz from './DatadogVsSigNoz/DatadogVsSigNoz' 
+import DatadogAlternativesFinder from './DatadogAlternativesFinder/DatadogAlternativesFinder'
 
 export const components: MDXComponents = {
   Image,
@@ -54,5 +55,6 @@ export const components: MDXComponents = {
   FAQAccordion,
   Button,
   DatadogPricingCalculator,
-  DatadogVsSigNoz
+  DatadogVsSigNoz,
+  DatadogAlternativesFinder,
 }
