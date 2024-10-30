@@ -47,13 +47,11 @@ function WorkspaceSetupHome() {
   }
 
   const verifyWorkspaceSetup = async () => {
-    const encodedEmail = email ? encodeURIComponent(email) : ''
-
-    if (!code || !encodedEmail) {
+    if (!code || !email) {
       return
     }
 
-    const verifyWorkSpaceSetupURL = `${WORKSPACE_SETUP_URL}/deployments/cesearch?code=${code}&email=${encodedEmail}`
+    const verifyWorkSpaceSetupURL = `${WORKSPACE_SETUP_URL}/deployments/cesearch?code=${code}&email=${email}`
 
     const res = await fetch(verifyWorkSpaceSetupURL)
     const data = await res.json()

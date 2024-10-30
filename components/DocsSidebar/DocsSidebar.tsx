@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { NavItem, Doc, Category } from './types'
 import docsSideNav from 'constants/docsSideNav'
 import { usePathname } from 'next/navigation'
+import { Tooltip } from '@nextui-org/react'
 
 interface DocsSidebarProps {
   onNavItemClick?: () => void
@@ -113,8 +114,10 @@ const DocsSidebar: React.FC<DocsSidebarProps> = ({ onNavItemClick }) => {
           href={doc.route}
           className={`line-clamp-2 flex w-full items-center gap-2 ${doc.className}`}
         >
-          <FileText size={12} />
-          <div className="sidebar-label line-clamp-2 text-sm"> {doc.label} </div>
+          <FileText className="flex-none" size={12} />
+          <Tooltip content={doc.label}>
+            <div className="sidebar-label line-clamp-2 text-sm"> {doc.label} </div>
+          </Tooltip>
         </Link>
       </li>
     )
