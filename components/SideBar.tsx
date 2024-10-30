@@ -5,7 +5,7 @@ import { SidebarIcons } from '@/components/sidebar-icons/icons'
 
 export enum GUIDES_TOPICS {
   ALL = '#all',
-  // OPENTELEMETRY = '#opentelemetry',
+  OPENTELEMETRY = '#opentelemetry',
   KUBERNETES = '#kubernetes',
   FAQs = '#faq',
   LOGGING = '#logging',
@@ -23,11 +23,12 @@ export enum GUIDES_TOPICS {
 
 const sidebarItems = [
   { href: GUIDES_TOPICS.ALL, icon: SidebarIcons.All, label: 'All' },
-  // { href: GUIDES_TOPICS.OPENTELEMETRY, icon: SidebarIcons.Opentelemetry, label: 'Opentelemetry' },
+ 
   { href: GUIDES_TOPICS.KUBERNETES, icon: SidebarIcons.Kubernetes, label: 'Kubernetes Monitoring' },
   { href: GUIDES_TOPICS.FAQs, icon: SidebarIcons.FAQs, label: 'FAQs' },
   { href: GUIDES_TOPICS.LOGGING, icon: SidebarIcons.LOGGING, label: 'Logging' },
   { href: GUIDES_TOPICS.PROMETHEUS, icon: SidebarIcons.PROMETHEUS, label: 'Prometheus' },
+  { href: GUIDES_TOPICS.OPENTELEMETRY, icon: SidebarIcons.Opentelemetry, label: 'Opentelemetry' },
   { href: GUIDES_TOPICS.APM, icon: SidebarIcons.APM, label: 'APM' },
   { href: GUIDES_TOPICS.Monitoring, icon: SidebarIcons.Monitoring, label: 'Monitoring' },
   { href: GUIDES_TOPICS.Observability, icon: SidebarIcons.Observability, label: 'Observability' },
