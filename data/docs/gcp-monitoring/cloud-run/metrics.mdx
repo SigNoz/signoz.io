@@ -15,8 +15,7 @@ This documentation provides a detailed walkthrough on how to set up Cloud Run to
 **Here's a quick summary of what we will be doing in this guide**
 
 * Create and configure Cloud Run
-* Deploy Telegraf to fetch the metrics from Google Cloud monitoring
-* Deploy OpenTelemetry to scrape the metrics from Telegraf
+* Deploy OpenTelemetry Collector to fetch the metrics from Google Cloud Monitoring
 * Send and Visualize the metrics obtained by OpenTelemetry in SigNoz Cloud
 
 ## Prerequisites
@@ -31,72 +30,71 @@ This documentation provides a detailed walkthrough on how to set up Cloud Run to
 
 Follow the steps mentioned in the [Cloud Run Service Setup](/docs/gcp-monitoring/cloud-run/cloud-run-setup) page to create Cloud Run Service.
 
-## Deploy Telegraf to fetch the metrics from Google Cloud Monitoring
+## Deploy OpenTelemetry Collector to fetch the metrics from Google Cloud Monitoring
 
-We will be using Compute Engine instance to install Telegraf. You can follow the instructions in the [Creating Copmute Engine](/docs/gcp-monitoring/bootstrapping/gce-creation) document to create the Compute Engine instance. In this tutorial, we will be using the same instance for installing OTel Collector as well. You may choose a different instance as well.
+You will need a Compute Engine instance to install OpenTelemetry Collector. You can follow the instructions on the [Creating Compute Engine](/docs/gcp-monitoring/bootstrapping/gce-creation) document to create the Compute Engine instance.
 
-**Step 1:** Install [`telegraf`](https://github.com/influxdata/telegraf) which will collect metrics from Google Cloud Monitoring for Cloud Run, see the [available metrics for Cloud Run](https://cloud.google.com/monitoring/api/metrics_gcp#gcp-run). The installation process for the respective operating system can be found in official [documentation](https://docs.influxdata.com/telegraf/v1/install/).
+**Step 1:** Install and configure OpenTelemetry for scraping the metrics from Google Cloud Run. Follow [OpenTelemetry Binary Usage in Virtual Machine](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) guide for detailed instructions.
 
-After successful installation, the Telegraf status should be active and running. You can check the Telegraf status by running the command `service telegraf status`.
-
-<Admonition type="info">
-Note that we are using Ubuntu operating system in Compute Engine. The Telegraf commands might slightly differ for other operating systems.
+<Admonition type="note">
+Note that `googlecloudmonitoring` receiver is supported only from version 0.112.0 and above of opentelemetry-collector. So, ensure you download and use the appropriate release.
 </Admonition>
 
-<figure data-zoomable align="left">
-    <img
-        src="/img/docs/gcp-monitoring/cloud-run/metrics/telegraf-status.webp"
-        alt="Telegraf running status"
-    />
-<figcaption>
-<i>
-`telegraf` running status
-</i>
-</figcaption>
-</figure>
+**Step 2:** Create `config.yaml`.
 
-The configuration file for telegraf can be found here:
+Under the `googlecloudmonitoring` receiver, you need to specify the metrics that you want to capture in the `metrics_list`. You can include all the metrics that you would like to capture from Cloud Run, see the [available metrics for Cloud Run](https://cloud.google.com/monitoring/api/metrics_gcp#gcp-run).
 
-```sh
-/etc/telegraf/telegraf.conf
+Here is the `config.yaml` file for capturing Cloud Run metrics:
+
+```
+receivers:
+  googlecloudmonitoring:
+    collection_interval: 5m # Can be specified in seconds (s), minutes (m), or hours (h)
+    project_id: gcp-project-id
+    metrics_list:
+      - metric_name: "run.googleapis.com/container/billable_instance_time"
+      - metric_name: "run.googleapis.com/container/containers"
+      - metric_name: "run.googleapis.com/request_count"
+      - metric_name: "run.googleapis.com/request_latencies"
+      - metric_name: "run.googleapis.com/container/network/received_bytes_count"
+      - metric_name: "run.googleapis.com/container/network/sent_bytes_count"
+processors:
+  resource/env:
+    attributes:
+    - key: deployment.environment
+      value: prod
+      action: upsert
+  batch: {}
+exporters:
+  otlp:
+    endpoint: "ingest.{region}.signoz.cloud:443"
+    tls:
+      insecure: false
+    headers:
+      "signoz-access-token": "<SIGNOZ_INGESTION_KEY>"
+service:
+  pipelines:
+    metrics:
+      receivers: [googlecloudmonitoring]
+      processors: [resource/env,batch]
+      exporters: [otlp]
 ```
 
-**Step 2:** Configure the Telegraf input and output plugin by adding configurations to the `telegraf.conf` file.
+Depending on the choice of your region for SigNoz cloud, the otlp endpoint will vary according to this table.
 
-```txt
-# Gather timeseries from Google Cloud Platform v3 monitoring API
-[[inputs.stackdriver]]
-  ## GCP Project
-  project = "omni-new"
-  ## Include timeseries that start with the given metric type.
-  metric_type_prefix_include = [
-    "run.googleapis.com",
-  ]
-  ## Most metrics are updated no more than once per minute; it is recommended
-  ## to override the agent level interval with a value of 1m or greater.
-  interval = "1m"
-# Send OpenTelemetry metrics over gRPC
-[[outputs.opentelemetry]]
-  ## Override the default (localhost:4317) OpenTelemetry gRPC service
-  ## address:port
-  service_address = "localhost:4317"
-```
+| Region	| Endpoint |
+| --- | --- |
+| US | ingest.us.signoz.cloud:443 |
+| IN | ingest.in.signoz.cloud:443 |
+| EU | ingest.eu.signoz.cloud:443 |
 
-The `service_address` is using `localhost` as we will be deploying OTelCollector in the same Compute Engine instance. You can replace it with the appropriate IP address in case you choose to deploy OTel Collector on a different instance.
-
-## Deploy OpenTelemetry to scrape the metrics from Telegraf
-
-**Step 1:** Install and configure OpenTelemetry for scraping the metrics from Telegraf. Follow [OpenTelemetry Binary Usage in Virtual Machine](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) guide for detailed instructions.
-
-**Step 2:** After successful configuration start the OTel Collector using following command:
+After successful configuration start the OpenTelemetry Collector using following command:
 
 ```sh
 ./otelcol-contrib --config ./config.yaml &> otelcol-output.log & echo "$!" > otel-pid
 ```
 
-**Step 3:** Restart the Telegraf service using the command `service telegraf restart`.
-
-**Step 4:** If the configurations are configured correctly with Telegraf and we can see the output logs from OpenTelemetry as follows:
+**Step 3:** If the configurations are configured correctly, you can see the output logs from OpenTelemtry as follows:
 
 <figure data-zoomable align="left">
     <img
@@ -114,32 +112,22 @@ Viewing OTel Collector Logs
 
 **Step 1:** Go to the SigNoz Cloud URL and head over to the dashboard.
 
-**Step 2:** If not already created, create a new dashboard and select Time Series.
-
-<figure data-zoomable align="left">
-    <img
-        src="/img/docs/gcp-monitoring/cloud-run/metrics/new-panel.webp"
-        alt="Creating new panel"
-    />
-<figcaption>
-<i>
-Creating new panel in dashboard
-</i>
-</figcaption>
-</figure>
+**Step 2:** If not already created, create a new dashboard. You can create the dashboard and multiple panel under it by following the instructions [here](/docs/userguide/manage-Dashboards).
 
 **Step 3:** Select metric for Cloud Run
 
 All metrics starting with `run_googleapis_com_` have been collected from Cloud Run.
 
+For example `run_googleapis_com_request_count` is one of the metrics that was collected.
+
 <figure data-zoomable align="left">
     <img
-        src="/img/docs/gcp-monitoring/cloud-run/metrics/plot-metrics-signoz-cloud.webp"
-        alt="Plot metrics"
+        src="/img/docs/gcp-monitoring/cloud-run/metrics/dashboard-cloud-run.webp"
+        alt="GCP Cloud Run dashboard"
     />
 <figcaption>
 <i>
-Cloud Run Metrics
+GCP Cloud Run dashboard
 </i>
 </figcaption>
 </figure>
@@ -148,11 +136,10 @@ Cloud Run Metrics
 
 If you run into any problems while setting up monitoring for Cloud Run metrics with SigNoz, consider these troubleshooting steps:
 
-
 * **Verify Configuration**: Double-check your `config.yaml` file to ensure all settings, including the ingestion key and endpoint, are correct.
-* **Review Logs**: Look at the logs of both Telegraf and the OpenTelemetry Collector to identify any error messages or warnings that might provide insights into what’s going wrong.
+* **Review Logs**: Look at the logs of the OpenTelemetry Collector to identify any error messages or warnings that might provide insights into what’s going wrong.
 * **Update Dependencies**: Ensure all relevant packages and dependencies are up-to-date to avoid compatibility issues.
-* **Consult Documentation**: Review the SigNoz, OpenTelemetry, and Telegraf documentation for any additional troubleshooting of the common issues.
+* **Consult Documentation**: Review the SigNoz and OpenTelemetry documentation for any additional troubleshooting of the common issues.
 
 </TabItem>
 
@@ -160,7 +147,7 @@ If you run into any problems while setting up monitoring for Cloud Run metrics w
 **Here's a quick summary of what we will be doing in this guide**
 
 * Create and configure Cloud Run
-* Deploy Telegraf to fetch the metrics from Google Cloud monitoring
+* Deploy OpenTelemetry Collector to fetch the metrics from Google Cloud Monitoring
 * Deploy the self-hosted **SigNoz**
 * Visualize the metrics in the **SigNoz** dashboard
 
@@ -180,68 +167,61 @@ For more details on how to configure Self-Hosted SigNoz for Logs, check [officia
 
 Follow the steps mentioned in the [Cloud Run Service Setup](/docs/gcp-monitoring/cloud-run/cloud-run-setup) page to create Cloud Run Service.
 
-## Deploy Telegraf to fetch the metrics from Google Cloud Monitoring
+## Deploy OpenTelemetry Collector to fetch the metrics from Google Cloud Monitoring
 
-You will need a Compute Engine instance to install Telegraf and OTel Collector. You can follow the instructions on the [Creating Compute Engine](/docs/gcp-monitoring/bootstrapping/gce-creation) document to create the Compute Engine instance.
+You will need a Compute Engine instance to install OpenTelemetry Collector. You can follow the instructions on the [Creating Compute Engine](/docs/gcp-monitoring/bootstrapping/gce-creation) document to create the Compute Engine instance.
 
-**Step 1:** Install [`telegraf`](https://github.com/influxdata/telegraf) which will collect metrics from Google Cloud Monitoring for Cloud Run, see the [available metrics for Cloud Run](https://cloud.google.com/monitoring/api/metrics_gcp#gcp-run). The installation process for the respective operating system can be found in official [documentation](https://docs.influxdata.com/telegraf/v1/install/).
+**Step 1:** Install and configure OpenTelemetry for scraping the metrics from Google Cloud Monitoring. Follow [OpenTelemetry Binary Usage in Virtual Machine](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) guide for detailed instructions.
 
-After successful installation, the `telegraf` status should be active and running.
+<Admonition type="note">
+Note that `googlecloudmonitoring` receiver is supported only from version 0.112.0 and above of opentelemetry-collector. So, ensure you download and use the appropriate release.
+</Admonition>
 
-<figure data-zoomable align="left">
-    <img
-        src="/img/docs/gcp-monitoring/cloud-run/metrics/telegraf-status.webp"
-        alt="Telegraf running status"
-    />
-<figcaption>
-<i>
-`telegraf` running status
-</i>
-</figcaption>
-</figure>
+**Step 2:** Create `config.yaml`.
 
-The configuration file for telegraf can be found here:
+Under the `googlecloudmonitoring` receiver, you need to specify the metrics that you want to capture in the `metrics_list`. You can include all the metrics that you would like to capture from Cloud Run, see the [available metrics for Cloud Run](https://cloud.google.com/monitoring/api/metrics_gcp#gcp-run).
 
-```sh
-/etc/telegraf/telegraf.conf
+Here is the `config.yaml` file for capturing Cloud Run metrics:
+
+```
+receivers:
+  googlecloudmonitoring:
+    collection_interval: 5m # Can be specified in seconds (s), minutes (m), or hours (h)
+    project_id: gcp-project-id
+    metrics_list:
+      - metric_name: "run.googleapis.com/container/billable_instance_time"
+      - metric_name: "run.googleapis.com/container/containers"
+      - metric_name: "run.googleapis.com/request_count"
+      - metric_name: "run.googleapis.com/request_latencies"
+      - metric_name: "run.googleapis.com/container/network/received_bytes_count"
+      - metric_name: "run.googleapis.com/container/network/sent_bytes_count"
+processors:
+  resource/env:
+    attributes:
+    - key: deployment.environment
+      value: prod
+      action: upsert
+  batch: {}
+exporters:
+  otlp:
+    endpoint: "<IP of machine hosting SigNoz>:4317"
+    tls:
+      insecure: true
+service:
+  pipelines:
+    metrics:
+      receivers: [googlecloudmonitoring]
+      processors: [resource/env,batch]
+      exporters: [otlp]
 ```
 
-**Step 2:** Configure the Telegraf input and output plugin by adding configurations to the `telegraf.conf` file.
-
-```txt
-# Gather timeseries from Google Cloud Platform v3 monitoring API
-[[inputs.stackdriver]]
-  ## GCP Project
-  project = "omni-new"
-  ## Include timeseries that start with the given metric type.
-  metric_type_prefix_include = [
-    "run.googleapis.com",
-  ]
-  ## Most metrics are updated no more than once per minute; it is recommended
-  ## to override the agent level interval with a value of 1m or greater.
-  interval = "1m"
-# Send OpenTelemetry metrics over gRPC
-[[outputs.opentelemetry]]
-  ## Override the default (localhost:4317) OpenTelemetry gRPC service
-  ## address:port
-  service_address = "localhost:4317"
-```
-
-We are assuming that the OTel Collector is running on the same machine as Telegraf. If that is not the case, you will have to change the `service_address` in the `outputs.opentelemetry` section accordingly.
-
-## Deploy OpenTelemetry to scrape the metrics from Telegraf
-
-**Step 1:** Install and configure OpenTelemetry for scraping the metrics from Telegraf. Follow [OpenTelemetry Binary Usage in Virtual Machine](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) guide for detailed instructions.
-
-**Step 2:** After successful configuration start the OTel Collector using following command:
+After successful configuration start the OpenTelemetry Collector using following command:
 
 ```sh
 ./otelcol-contrib --config ./config.yaml &> otelcol-output.log & echo "$!" > otel-pid
 ```
 
-**Step 3:** Restart the Telegraf service
-
-**Step 4:** If the configurations are configured correctly with Telegraf and we can see the output logs from OpenTelemetry as follows:
+**Step 3:** If the configurations are configured correctly, you can see the output logs from OpenTelemtry as follows:
 
 <figure data-zoomable align="left">
     <img
@@ -259,23 +239,25 @@ Viewing OTel Collector Logs
 
 **Step 1:** Go to SigNoz and head over to the dashboard.
 
-**Step 2:** If not already created, create a new dashboard and select Time Series.
-
-<figure data-zoomable align="left">
-    <img
-        src="/img/docs/gcp-monitoring/cloud-run/metrics/new-panel.webp"
-        alt="Creating new panel"
-    />
-<figcaption>
-<i>
-Creating new panel in dashboard
-</i>
-</figcaption>
-</figure>
+**Step 2:** If not already created, create a new dashboard. You can create the dashboard and multiple panel under it by following the instructions [here](/docs/userguide/manage-Dashboards).
 
 **Step 3:** Select metric for Cloud Run
 
 All metrics starting with `run_googleapis_com_` have been collected from Cloud Run.
+
+For example `run_googleapis_com_request_count` is one of the metrics that was collected.
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/gcp-monitoring/cloud-run/metrics/dashboard-cloud-run.webp"
+        alt="GCP Cloud Run dashboard"
+    />
+<figcaption>
+<i>
+GCP Cloud Run dashboard
+</i>
+</figcaption>
+</figure>
 
 ## Troubleshooting
 
@@ -283,9 +265,9 @@ If you run into any problems while setting up monitoring for your Cloud Run's me
 
 
 * **Verify Configuration**: Double-check your `config.yaml` file to ensure all settings, including the ingestion key and endpoint, are correct.
-* **Review Logs**: Look at the logs of both Telegraf and the OpenTelemetry Collector to identify any error messages or warnings that might provide insights into what’s going wrong.
+* **Review Logs**: Look at the logs of the OpenTelemetry Collector to identify any error messages or warnings that might provide insights into what’s going wrong.
 * **Update Dependencies**: Ensure all relevant packages and dependencies are up-to-date to avoid compatibility issues.
-* **Consult Documentation**: Review the SigNoz, OpenTelemetry, and Telegraf documentation for any additional troubleshooting of the common issues.
+* **Consult Documentation**: Review the SigNoz and OpenTelemetry documentation for any additional troubleshooting of the common issues.
 
 </TabItem>
 </Tabs>
