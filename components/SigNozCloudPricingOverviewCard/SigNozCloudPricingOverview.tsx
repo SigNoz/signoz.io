@@ -20,7 +20,7 @@ const SigNozCloudPricingOverview = ({ className = '' }: SigNozCloudPricingOvervi
       <div className="mb-6">
         <div className="flex items-center justify-between">
           <div className="flex flex-col justify-center text-left">
-            <h3 className="mx-0 mt-0 mb-1 p-0 text-lg font-semibold">SigNoz Cloud / Teams</h3>
+            <h3 className="mx-0 mt-0 mb-1 p-0 text-lg font-semibold">SigNoz Cloud</h3>
             <p className="text-sm m-0 text-gray-400">For teams that need no-hassle setup</p>
           </div>
           <div className="flex items-center">
@@ -52,9 +52,17 @@ const SigNozCloudPricingOverview = ({ className = '' }: SigNozCloudPricingOvervi
           {() => (
             <ModalBody className="py-6">
               <VimeoPlayer videoId="968489758" />
-              <p className="text-center text-signoz_vanilla-400 mt-4">
+              <p className="text-center text-signoz_vanilla-400 mb-0 mt-4">
                 Note: Usage-based pricing applies after crossing the $199 mark
               </p>
+              <div className="mt-3 flex justify-center">
+                <Link href="#estimate-your-monthly-bill" onClick={onOpenChange}>
+                  <Button variant="primary" size="sm">
+                    Estimate Your Bill
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </Link>
+              </div>
             </ModalBody>
           )}
         </ModalContent>
@@ -107,14 +115,14 @@ const SigNozCloudPricingOverview = ({ className = '' }: SigNozCloudPricingOvervi
       </div>
 
       <div className="space-y-3">
-        <Link href="/teams">
+        <Link id='pricing-page-get-started-card-cta' href="/teams">
           <Button className="w-full flex items-center justify-center font-bold">
             Get Started with SigNoz Cloud for Free
             <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
         </Link>
         
-        <button className="w-full opacity-80 px-4 py-2 text-signoz_robin-300 hover:text-signoz_robin-400 bg-transparent transition-colors duration-200">
+        <button id='pricing-page-estimate-your-monthly-bill-card-cta' className="w-full opacity-80 px-4 py-2 text-signoz_robin-300 hover:text-signoz_robin-400 bg-transparent transition-colors duration-200">
           <Link href="#estimate-your-monthly-bill" className="flex items-center justify-center">
             Estimate Your Monthly Bill with Pricing Calculator
             <ArrowRight className="ml-2 h-4 w-4" />

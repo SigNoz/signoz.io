@@ -480,6 +480,9 @@ const PricingPlans = () => {
                           <>
                             <ModalBody className="py-6">
                               <VimeoPlayer videoId="968489758" />
+                              <p className="text-center text-signoz_vanilla-400 mt-4">
+                                Note: Usage-based pricing applies after crossing the $199 mark
+                              </p>
                             </ModalBody>
                           </>
                         )}
