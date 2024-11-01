@@ -254,59 +254,62 @@ const PricingPlans = () => {
       >
         <div className="absolute bottom-0 left-[24px] right-[24px] top-[-95px] z-[-1] border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400" />
 
+        {/* Common heading section for both tabs */}
+        <div className="mx-auto mb-5 flex max-w-4xl flex-col items-center text-center">
+          <div className="absolute top-[-80px] z-[0] h-[7rem] !w-[80vw] border !border-l-0 !border-r-0 !border-t-0 border-dashed border-signoz_slate-400" />
+          <Heading type={1} className="z-[1]">
+            Pricing
+          </Heading>
+          <div className="inline-block text-sm md:text-lg">
+            <span> Tired of unpredictable pricing and complex billing structure? Save up to </span>
+            <span className="mx-0 rounded-none border !border-l-0 !border-r-0 !border-t-0 border-dashed border-signoz_robin-300 px-0 py-0.5 text-signoz_robin-300">
+              <Link href="https://signoz.io/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/">
+                80% on your Datadog bill
+              </Link>
+              <br />
+            </span>
+            <span> with SigNoz. No user-based and host-based pricing. </span>
+          </div>
+          <div className="my-5 flex justify-center">
+            <div className="flex">
+              <nav className={`flex items-center space-x-2 rounded-sm border border-signoz_slate-400`}>
+                <button
+                  id="btn-signoz-cloud-pricing"
+                  type="button"
+                  className={`relative z-[2] cursor-pointer border-none ${
+                    tab === 'cloud' ? 'bg-signoz_slate-400' : ''
+                  } px-4 py-2 text-xs ${tab === 'cloud' ? 'text-white' : 'text-signoz_vanilla-400'}`}
+                  onClick={() => setTab('cloud')}
+                >
+                  <div className="flex gap-1.5">
+                    <Cloud size={14} />
+                    SigNoz cloud
+                  </div>
+                </button>
+                <button
+                  id="btn-hosted-in-your-infra-pricing"
+                  type="button"
+                  className={`ml-0 cursor-pointer border-none ${
+                    tab === 'self-managed' ? 'bg-signoz_slate-400' : ''
+                  } px-4 py-2 text-xs ${
+                    tab === 'self-managed' ? 'text-white' : 'text-signoz_vanilla-400'
+                  }`}
+                  onClick={() => setTab('self-managed')}
+                >
+                  <div className="relative z-[3] flex gap-1.5">
+                    <Server size={14} />
+                    Hosted in your infra
+                  </div>
+                </button>
+              </nav>
+            </div>
+          </div>
+        </div>
+
         {tab === 'cloud' ? (
+          // Cloud pricing content
           <>
             {/* Cloud Plan */}
-            <div className="mx-auto mb-5 flex max-w-4xl flex-col items-center text-center">
-              <div className="absolute top-[-80px] z-[0] h-[7rem] !w-[80vw] border !border-l-0 !border-r-0 !border-t-0 border-dashed border-signoz_slate-400" />
-              <Heading type={1} className="z-[1]">
-                Pricing
-              </Heading>
-              <div className="inline-block text-sm md:text-lg">
-                <span>
-                  {' '}
-                  Tired of unpredictable pricing and complex billing structure? Save up to{' '}
-                </span>
-                <span className="mx-0 rounded-none border !border-l-0 !border-r-0 !border-t-0 border-dashed border-signoz_robin-300 px-0 py-0.5 text-signoz_robin-300">
-                  <Link href="https://signoz.io/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/">
-                    80% on your Datadog bill
-                  </Link>
-                  <br />
-                </span>
-                <span> with SigNoz. No user-based and host-based pricing. </span>
-              </div>
-              <div className="my-5 flex justify-center">
-                <div className="flex">
-                  <nav
-                    className={`flex items-center space-x-2 rounded-sm border border-signoz_slate-400`}
-                  >
-                    <button
-                      id="btn-signoz-cloud-pricing"
-                      type="button"
-                      className={`relative z-[2] cursor-pointer border-none bg-signoz_slate-400 px-4 py-2 text-xs text-white`}
-                      onClick={() => setTab('cloud')}
-                    >
-                      <div className="flex gap-1.5">
-                        <Cloud size={14} />
-                        SigNoz cloud
-                      </div>
-                    </button>
-                    <button
-                      id="btn-hosted-in-your-infra-pricing"
-                      type="button"
-                      className={`ml-0 cursor-pointer border-none px-4 py-2 text-xs text-signoz_vanilla-400`}
-                      onClick={() => setTab('self-managed')}
-                    >
-                      <div className="relative z-[3] flex gap-1.5">
-                        <Server size={14} />
-                        Hosted in your infra
-                      </div>
-                    </button>
-                  </nav>
-                </div>
-              </div>
-            </div>
-
             <div className="pricing-plans mx-[8px] grid !max-w-[100%] grid-cols-1 justify-center gap-y-10 md:!max-w-[calc(80vw-24px)] md:max-w-md lg:max-w-6xl lg:grid-cols-2">
               <div className="pricing-card !mb-0 border !border-b-0 !border-l-0 !border-r-0 border-dashed border-signoz_slate-400 bg-opacity-5 px-4 py-5 md:px-8">
                 <div>
@@ -833,58 +836,12 @@ const PricingPlans = () => {
             </div>
           </>
         ) : (
+          // Self-managed pricing content
           <>
-            <div className="mx-auto mb-5 flex max-w-4xl flex-col items-center text-center">
-              <div className="absolute top-[-80px] h-[7rem] !w-[80vw] border !border-l-0 !border-r-0 !border-t-0 border-dashed border-signoz_slate-400" />
-              <Heading type={1} className="z-[1]">
-                Run SigNoz within your infrastructure
-              </Heading>
-              <div className="text-sm md:text-lg">
-                Get started with Community Edition and upgrade for enterprise-ready features or get
-                it managed by SigNoz in your cloud (BYOC)
-              </div>
-              <div className="my-5 flex justify-center">
-                <div className="flex rounded-3xl">
-                  <nav
-                    className={`flex items-center space-x-2 rounded-sm border border-signoz_slate-400`}
-                  >
-                    <button
-                      id="btn-signoz-cloud-pricing"
-                      type="button"
-                      className={`relative z-[2] cursor-pointer border-none bg-signoz_slate-400 px-4 py-2 text-xs text-signoz_vanilla-400 ${
-                        tab === 'cloud' ? ' ' : 'bg-transparent'
-                      }`}
-                      onClick={() => setTab('cloud')}
-                    >
-                      <div className="flex gap-1.5">
-                        <Cloud size={14} />
-                        SigNoz cloud
-                      </div>
-                    </button>
-                    <button
-                      id="btn-hosted-in-your-infra-pricing"
-                      type="button"
-                      className={`relative z-[2] !ml-0 cursor-pointer bg-signoz_slate-400 px-4 py-2 text-xs text-white ${
-                        tab === 'self-managed' ? ' ' : 'bg-transparent'
-                      }`}
-                      onClick={() => setTab('self-managed')}
-                    >
-                      <div className="flex gap-1.5">
-                        <Server size={14} />
-                        Hosted in your infra
-                      </div>
-                    </button>
-                  </nav>
-                </div>
-              </div>
-            </div>
-
             <div className="pricing-plans mx-[8px] grid max-w-[100vw] grid-cols-1 justify-center gap-y-10 md:!max-w-[calc(80vw-24px)] lg:max-w-6xl lg:grid-cols-2">
               <div className="pricing-card !mb-0 border !border-b-0 !border-l-0 !border-r-0 border-dashed border-signoz_slate-400 bg-opacity-5 px-4 py-5 md:px-8 ">
                 <div>
-                  <h3 className="font-heading pinkish-gradient text-2xl  font-bold">
-                    Community Edition
-                  </h3>
+                  <h3 className="font-heading pinkish-gradient text-2xl font-bold">Community Edition</h3>
                   <p className="mb-4 text-base leading-relaxed text-gray-400">Free to Self Host</p>
                   <div className="flex items-center gap-3">
                     <p>Install in your infra</p>
