@@ -68,7 +68,12 @@ const tools: Tool[] = [
   {
     name: 'SigNoz',
     description: 'Open-source observability platform with native OpenTelemetry support',
-    bestFor: ['Open-source enthusiasts', 'Cost-conscious teams', 'OpenTelemetry users'],
+    bestFor: [
+      'Having logs, metrics, and traces under a single pane',
+      'Opentelemetry-native visualizations', 
+      'cost-efficient at scale',
+      'Users who want to use open-source tools'
+    ],
     keyFeatures: [
       'Full-stack observability',
       'Native OpenTelemetry support',
@@ -388,7 +393,7 @@ const DatadogAlternativeFinder: React.FC = () => {
                             calculateResults();
                           }
                         }}
-                        className="w-full p-3 text-left border border-gray-600 rounded-lg bg-gray-700 text-gray-200 hover:bg-gray-600 transition-colors"
+                        className="w-full p-3 text-left border border-gray-600 rounded-lg bg-gray-700 text-gray-200 hover:bg-gray-600 transition-colors break-words"
                       >
                         {option}
                       </button>
