@@ -12,7 +12,7 @@ interface SigNozCloudPricingOverviewProps {
 
 const SigNozCloudPricingOverview = ({ className = '' }: SigNozCloudPricingOverviewProps) => {
   return (
-    <div className={`rounded-lg border border-signoz_slate-400 bg-signoz_ink-400/40 p-6 shadow-[0_12px_32px_-6px_rgba(255,255,255,0.06)] transition-all duration-300 hover:shadow-[0_16px_48px_-6px_rgba(255,255,255,0.1)] hover:-translate-y-1 ${className}`}>
+    <div className={`rounded-lg border border-signoz_slate-400 bg-signoz_ink-400/30 p-6 shadow-[0_12px_32px_-6px_rgba(255,255,255,0.06)] transition-all duration-300 hover:shadow-[0_16px_48px_-6px_rgba(255,255,255,0.1)] hover:-translate-y-1 ${className}`}>
       <div className="mb-6">
         <div className="flex items-center justify-between">
           <div className="flex flex-col justify-center text-left">
