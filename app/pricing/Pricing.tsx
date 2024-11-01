@@ -1284,18 +1284,8 @@ const ExploreAllFeature = () => {
           {
             feature: 'Support for Cold Storage for long term data archival',
             inCommunity: <CheckSolid />,
-            inTeams: (
-              <div className="flex items-center">
-                <FlameSolid />
-                <span className="ml-1.5 text-[8px] sm:text-xs">EARLY ACCESS</span>
-              </div>
-            ),
-            inEnterprise: (
-              <div className="flex items-center">
-                <FlameSolid />
-                <span className="ml-1.5 text-[8px] sm:text-xs">EARLY ACCESS</span>
-              </div>
-            ),
+            inTeams: <CheckSolid />,
+            inEnterprise: <CheckSolid />,
           },
         ],
       },
