@@ -271,7 +271,9 @@ const PricingPlans = () => {
             </span>
             <span> with SigNoz. No user-based and host-based pricing. </span>
           </div>
-          <SigNozCloudPricingOverview className='my-6 w-full'/>
+          <div className="hidden md:block">
+            <SigNozCloudPricingOverview className='my-6 w-full'/>
+          </div>
           <div className="my-5 flex justify-center">
             <div className="flex">
               <nav className={`flex items-center space-x-2 rounded-sm border border-signoz_slate-400`}>
