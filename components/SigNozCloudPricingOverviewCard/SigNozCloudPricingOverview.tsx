@@ -5,12 +5,16 @@ import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
 import Button from '@/components/Button/Button'
 import { Info, Zap, CircleCheck, Flame, Server } from 'lucide-react'
+import { Modal, ModalContent, ModalBody, useDisclosure } from '@nextui-org/react'
+import VimeoPlayer from '@/components/VimeoPlayer/VimeoPlayer'
 
 interface SigNozCloudPricingOverviewProps {
   className?: string
 }
 
 const SigNozCloudPricingOverview = ({ className = '' }: SigNozCloudPricingOverviewProps) => {
+  const { isOpen, onOpen, onOpenChange } = useDisclosure()
+
   return (
     <div className={`rounded-lg border border-signoz_slate-400 bg-signoz_ink-400/30 p-6 shadow-[0_12px_32px_-6px_rgba(255,255,255,0.06)] transition-all duration-300 hover:shadow-[0_16px_48px_-6px_rgba(255,255,255,0.1)] hover:-translate-y-1 ${className}`}>
       <div className="mb-6">
@@ -27,18 +31,40 @@ const SigNozCloudPricingOverview = ({ className = '' }: SigNozCloudPricingOvervi
               </div>
               <div className="text-sm text-gray-400">/month</div>
             </div>
-            <button className="ml-2 flex items-center justify-center rounded-full p-1 hover:bg-signoz_slate-500">
+            <button 
+              onClick={onOpen}
+              className="ml-2 flex items-center justify-center rounded-full p-1 hover:bg-signoz_slate-500"
+            >
               <Info className="h-4 w-4 text-gray-400" />
             </button>
           </div>
         </div>
       </div>
 
+      <Modal
+        size={'5xl'}
+        backdrop="blur"
+        isOpen={isOpen}
+        onOpenChange={onOpenChange}
+        className="self-center"
+      >
+        <ModalContent className="bg-transparent">
+          {() => (
+            <ModalBody className="py-6">
+              <VimeoPlayer videoId="968489758" />
+              <p className="text-center text-signoz_vanilla-400 mt-4">
+                Note: Usage-based pricing applies after crossing the $199 mark
+              </p>
+            </ModalBody>
+          )}
+        </ModalContent>
+      </Modal>
+
       <div className="my-14 space-y-4">
         <div className="flex justify-around mb-10 relative">
           <div className="absolute top-16 left-1/2 -translate-x-1/2">
             <span className="inline-block rounded-full bg-signoz_slate-400 px-3 py-1 text-xs text-signoz_vanilla-400">
-              Prices after consuming $199
+              Prices after consuming $199/month
             </span>
           </div>
           <div className="text-left">
