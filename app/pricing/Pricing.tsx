@@ -52,6 +52,7 @@ import {
   useDisclosure,
 } from '@nextui-org/react'
 import VimeoPlayer from '@/components/VimeoPlayer/VimeoPlayer'
+import SigNozCloudPricingOverview from '@/components/SigNozCloudPricingOverviewCard/SigNozCloudPricingOverview'
 
 const CloseButton = () => <div className="absolute right-0 top-0">Close</div>
 
@@ -270,6 +271,7 @@ const PricingPlans = () => {
             </span>
             <span> with SigNoz. No user-based and host-based pricing. </span>
           </div>
+          <SigNozCloudPricingOverview className='my-6 w-full'/>
           <div className="my-5 flex justify-center">
             <div className="flex">
               <nav className={`flex items-center space-x-2 rounded-sm border border-signoz_slate-400`}>
