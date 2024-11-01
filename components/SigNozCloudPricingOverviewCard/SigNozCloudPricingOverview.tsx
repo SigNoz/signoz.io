@@ -36,19 +36,24 @@ const SigNozCloudPricingOverview = ({ className = '' }: SigNozCloudPricingOvervi
 
       <div className="my-14 space-y-4">
         <div className="flex justify-around mb-10 relative">
+          <div className="absolute top-16 left-1/2 -translate-x-1/2">
+            <span className="inline-block rounded-full bg-signoz_slate-400 px-3 py-1 text-xs text-signoz_vanilla-400">
+              Prices after consuming $199
+            </span>
+          </div>
           <div className="text-left">
             <h4 className="font-medium text-2xl mb-1">Logs</h4>
-            <p className="text-sm text-gray-400">0.3/GB ingested</p>
+            <p className="text-sm text-gray-400">$0.3/GB ingested</p>
           </div>
           <div className="absolute left-[25%] top-[1.25rem] w-[15%] border-t border-dashed border-gray-400/30"></div>
           <div className="text-left">
             <h4 className="font-medium text-2xl mb-1">Traces</h4>
-            <p className="text-sm text-gray-400">0.3/GB ingested</p>
+            <p className="text-sm text-gray-400">$0.3/GB ingested</p>
           </div>
           <div className="absolute left-[60%] top-[1.25rem] w-[15%] border-t border-dashed border-gray-400/30"></div>
           <div className="text-left">
             <h4 className="font-medium text-2xl mb-1">Metrics</h4>
-            <p className="text-sm text-gray-400">0.1/mil samples</p>
+            <p className="text-sm text-gray-400">$0.1/mil samples</p>
           </div>
         </div>
 
@@ -84,8 +89,8 @@ const SigNozCloudPricingOverview = ({ className = '' }: SigNozCloudPricingOvervi
         </Link>
         
         <button className="w-full opacity-80 px-4 py-2 text-signoz_robin-300 hover:text-signoz_robin-400 bg-transparent transition-colors duration-200">
-          <Link href="#estimate-your-monthly-bill" className="flex items-center justify-end">
-            Estimate Your Bill with Pricing Calculator
+          <Link href="#estimate-your-monthly-bill" className="flex items-center justify-center">
+            Estimate Your Monthly Bill with Pricing Calculator
             <ArrowRight className="ml-2 h-4 w-4" />
           </Link>
         </button>
