@@ -33,6 +33,13 @@ type CardProps = {
 
 const cardDetails = [
   {
+    logo: '/img/case_study/mailmodo-logo-white.svg',
+    title: 'How Mailmodo streamlined monitoring of 200GB+ daily logs from 200+ microservices with SigNoz',
+    name: 'Avneesh Kumar',
+    position: 'VP of Engineering, Mailmodo',
+    href: '/case-study/mailmodo/',
+  },
+  {
     logo: '/img/case_study/logos/gokiwi-logo.png',
     title: 'How Kiwi Reduced API Response Times from 20 Seconds to Milliseconds Using SigNoz',
     name: 'Khushhal Reddy',
