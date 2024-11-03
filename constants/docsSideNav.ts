@@ -979,6 +979,11 @@ const docsSideNav = [
         route: '/docs/alerts-management/planned-maintenance',
         label: 'Planned Maintenance',
       },
+      {
+        type: 'doc',
+        route: '/docs/alerts-management/alerts-history',
+        label: 'Alerts History',
+      },
     ],
   },
   {
