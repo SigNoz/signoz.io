@@ -762,6 +762,11 @@ const docsSideNav = [
       },
       {
         type: 'doc',
+        route: '/docs/metrics-management/cloud-provider-metric-delay',
+        label: 'Cloud provider metric delay',
+      },
+      {
+        type: 'doc',
         route: '/docs/metrics-management/configure-custom-buckets',
         label: 'Configure custom buckets for histograms',
       },
