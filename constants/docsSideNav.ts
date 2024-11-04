@@ -772,7 +772,7 @@ const docsSideNav = [
       },
       {
         type: 'doc',
-        route: '/docs/metrics-management/k8s-deployment-override',
+        route: '/docs/metrics-management/k8s-infra-otel-config',
         label: 'Configure k8s-infra otelDeployment to collect metrics from receivers',
       },
     ],
