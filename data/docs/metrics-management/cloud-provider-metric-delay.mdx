@@ -1,0 +1,20 @@
+---
+date: 2024-11-03
+title: Cloud provider metric delay
+id: cloud-provider-metric-delay
+---
+
+When using cloud provider metrics, you might notice a delay in the metrics being reflected in SigNoz. This is because the metrics are collected from the cloud provider's API and there is a delay in the metrics being available in the API.
+
+### AWS
+
+AWS provides metrics in two resolutions:
+
+1. 5-minute metrics
+2. 1-minute metrics
+
+- If you send 5-minute metrics from CloudWatch, there can be ~5-15 minute delay in receiving your metrics. This is because CloudWatch makes your data available with a 5-10 minute delay. Additionally, CloudWatch API limitations can introduce another 5 minutes of delay.
+- If you send 1-minute metrics with CloudWatch, there can be ~2-3 minute delay in receiving your metrics.
+
+
+The CloudWatch API only enables you to collect one metric for each request. This means that if you are collecting multiple metrics, this means that multiple requests are made to the CloudWatch API. This can introduce additional delay. The availability of the metrics also depends on the account level.
