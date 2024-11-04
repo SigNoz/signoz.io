@@ -36,7 +36,7 @@ const TrySigNozFloatingCard: React.FC = () => {
         id='try-signoz-cloud-floating-card-cta'
         href="/teams/" 
         style={{color: 'white', textDecoration: 'none'}}
-        className="inline-block bg-blue-600 text-white px-4 py-2 mt-6 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors duration-300 flex items-center justify-between"
+        className="inline-block bg-signoz_robin-500 hover:bg-signoz_robin-600 text-white px-4 py-2 mt-6 rounded-lg text-sm font-semibold transition-colors duration-300 flex items-center justify-between"
       >
         <span>Get Started</span>
         <ArrowRight size={16} />
