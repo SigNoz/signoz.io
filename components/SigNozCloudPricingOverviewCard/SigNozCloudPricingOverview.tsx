@@ -12,6 +12,16 @@ interface SigNozCloudPricingOverviewProps {
   className?: string;
 }
 
+interface TracesAndLogsRetention {
+  days: number;
+  price: number;
+}
+
+interface MetricsRetention {
+  months: number;
+  price: number;
+}
+
 const SigNozCloudPricingOverview: React.FC<SigNozCloudPricingOverviewProps> = ({ className = '' }) => {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
@@ -21,13 +31,13 @@ const SigNozCloudPricingOverview: React.FC<SigNozCloudPricingOverviewProps> = ({
       { days: 30, price: 0.4 }, 
       { days: 90, price: 0.6 },
       { days: 180, price: 0.8 }
-    ],
+    ] as TracesAndLogsRetention[],
     METRICS: [
       { months: 1, price: 0.1 },
       { months: 3, price: 0.12 },
       { months: 6, price: 0.15 },
       { months: 13, price: 0.18 }
-    ]
+    ] as MetricsRetention[]
   };
 
   const [tracesRetentionPeriod, setTracesRetentionPeriod] = useState(RETENTION_PERIOD.TRACES_AND_LOGS[0].days);
@@ -36,8 +46,13 @@ const SigNozCloudPricingOverview: React.FC<SigNozCloudPricingOverviewProps> = ({
 
   const getPrice = (type: 'TRACES_AND_LOGS' | 'METRICS', period: number) => {
     const prices = RETENTION_PERIOD[type];
-    const price = prices.find(p => type === 'TRACES_AND_LOGS' ? p.days === period : p.months === period);
-    return price?.price || prices[0].price;
+    if (type === 'TRACES_AND_LOGS') {
+      const price = (prices as TracesAndLogsRetention[]).find(p => p.days === period);
+      return price?.price || prices[0].price;
+    } else {
+      const price = (prices as MetricsRetention[]).find(p => p.months === period);
+      return price?.price || prices[0].price;
+    }
   };
 
   return (
