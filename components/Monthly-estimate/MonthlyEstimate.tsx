@@ -479,7 +479,7 @@ const MonthlyEstimate = () => {
         <div className="mt-3 flex justify-end">
           <Link id='pricing-page-get-started-card-cta' href="/teams">
             <Button className="flex items-center justify-center font-bold">
-              Get Started with SigNoz Cloud for Free
+              Get Started - Free
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </Link>
