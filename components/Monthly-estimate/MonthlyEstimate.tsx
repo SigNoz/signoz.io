@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { Slider, Tooltip, SliderValue } from "@nextui-org/react";
 import { ArrowUpRight } from 'lucide-react';
 import Button from '@/components/Button/Button';
+import { ArrowRight } from 'lucide-react';
 
 const scrollToSection = (id) => {
   const element = document.getElementById(id);
@@ -475,7 +476,18 @@ const MonthlyEstimate = () => {
           <div className="w-3/5 border-b border-signoz_slate-400 border-dashed" />
           <div>${formatNumber(totalEstimate)}</div>
         </div>
-        <div className={`flex justify-between items-center mt-3 mb-6 px-3 py-4 bg-[#4E74F81A] border border-dashed rounded-md ${isHighVolume ? 'border-signoz_robin-500' : 'border-transparent'}`}>
+        <div className="mt-3 flex justify-end">
+          <Link id='pricing-page-get-started-card-cta' href="/teams">
+            <Button className="flex items-center justify-center font-bold">
+              Get Started - Free
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </Link>
+        </div>
+        <div className="mt-3 mb-3 flex justify-end pr-12">
+          <span className="text-signoz_vanilla-400">Or</span>
+        </div>
+        <div className={`flex justify-between items-center mb-6 px-3 py-4 bg-[#4E74F81A] border border-dashed rounded-md ${isHighVolume ? 'border-signoz_robin-500' : 'border-transparent'}`}>
           <span className="text-signoz_vanilla-100 text-base font-medium">
             Reach out to us for custom pricing and retention for high volume
           </span>
