@@ -262,18 +262,8 @@ const PricingPlans = () => {
           Simple Usage-based Predictable 
           Observability Costs
           </Heading>
-          <div className="inline-block text-sm md:text-lg">
-            <span> Tired of unpredictable pricing and complex billing structure? Save up to </span>
-            <span className="mx-0 rounded-none border !border-l-0 !border-r-0 !border-t-0 border-dashed border-signoz_robin-300 px-0 py-0.5 text-signoz_robin-300">
-              <Link href="https://signoz.io/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/">
-                80% on your Datadog bill
-              </Link>
-              <br />
-            </span>
-            <span> with SigNoz. No user-based and host-based pricing. </span>
-          </div>
           <div className="hidden md:block">
-            <SigNozCloudPricingOverview className='my-6 w-full'/>
+            <SigNozCloudPricingOverview className='w-full'/>
           </div>
           <div className="my-5 flex justify-center">
             <div className="flex">
