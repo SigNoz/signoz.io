@@ -259,7 +259,8 @@ const PricingPlans = () => {
         <div className="mx-auto mb-5 flex max-w-4xl flex-col items-center text-center">
           <div className="absolute top-[-80px] z-[0] h-[7rem] !w-[80vw] border !border-l-0 !border-r-0 !border-t-0 border-dashed border-signoz_slate-400" />
           <Heading type={1} className="z-[1]">
-            Pricing
+          Simple Usage-based Predictable 
+          Observability Costs
           </Heading>
           <div className="inline-block text-sm md:text-lg">
             <span> Tired of unpredictable pricing and complex billing structure? Save up to </span>
