@@ -31,7 +31,7 @@ const MainSection: React.FC = () => {
           </div>
 
           <div className="z-[1] my-6 ml-5 flex min-h-[40px] w-fit items-center justify-center gap-1.5 overflow-hidden rounded-sm bg-white px-4 py-2 text-sm leading-none text-signoz_ink-500">
-            <Link href="https://lu.ma/meqaxbjl" target="_blank" id="launch-page-subscribe">
+            <Link href="https://lu.ma/8uws6qyr" target="_blank" id="launch-page-subscribe">
               <div className="flex items-center gap-1.5">
                 <Handshake size={14} />
                 <span className="px-2 py-1 text-sm font-medium leading-none text-neutral-950">
@@ -495,6 +495,72 @@ const MainSection: React.FC = () => {
                       </div>
                     </div>
                   </div>
+                </div>
+                <div className="flex justify-end">
+                  <div className="button-background mt-2 flex h-fit w-fit transform items-center justify-center rounded-full p-2 transition-transform group-hover:translate-x-2.5 sm:mt-0">
+                    <ArrowRight size={14} />
+                  </div>
+                </div>
+              </div>
+            </Link>
+          </div>
+
+
+          <div className="flex flex-col-reverse justify-between border-b  border-dashed border-signoz_slate-100 px-6 py-6 sm:flex-row">
+            <div className="flex flex-col justify-between gap-4 mt-6 sm:pr-4 sm:mt-0">
+              <div className='flex gap-1.5'>
+                <Calendar size={16} className='min-w-4 mt-1' color='#C0C1C3' />
+                <div className="text-base uppercase text-signoz_vanilla-400 max-w-[217px]">Tuesday
+                  Nov 12, 2024 <br />
+                  4:30pm - 7:30pm MST</div>
+              </div>
+              <div className='flex gap-1.5'>
+                <MapPin size={16} className='min-w-4 mt-1' color='#C0C1C3' />
+                <div className="text-base uppercase text-signoz_vanilla-400">Studio at Soundwell<br />149 W 200 S, Salt Lake City</div>
+              </div>
+              <div className="flex flex-col gap-2">
+                <Link
+                  href="https://lu.ma/8uws6qyr"
+                  target="_blank"
+                  id="btn-register-event"
+                  className="button-background flex sm:max-w-fit w-full items-center justify-center gap-2 rounded-full px-3 py-2 mb-6 sm:mb-0"
+                >
+                  <Megaphone size={16} />
+                  <span className="whitespace-nowrap text-sm font-medium text-[#F7F7F8]">
+                    Register to attend
+                  </span>
+                </Link>
+              </div>
+            </div>
+            <Link
+              href="https://lu.ma/8uws6qyr"
+              target='_blank'
+              className="launch-week-card-background flex w-[864px] max-w-full cursor-pointer flex-col gap-6 rounded-md border border-signoz_slate-500 px-5 py-4 transition-colors duration-300 hover:bg-[#121317] sm:flex-row"
+            >
+              <img
+                src="/img/events/kubecon/happy-hrs-kubecon.webp"
+                className=" mb-4  h-auto sm:h-56 w-auto pr-2 sm:mb-0   sm:pr-0"
+              />
+
+
+              <div className="group flex flex-col justify-between">
+                <div>
+                  <div className="font-medium mb-2 text-base">SigNoz + GrowthBook Happy Hour @ KubeCon NA 2024</div>
+                  <div className="text-sm italic font-bold py-2.5">
+                    Host
+                  </div>
+
+
+    
+
+                  <div className='flex flex-col gap-5'>
+                    <div className='flex flex-row gap-3 items-center'>
+                      <div className='flex flex-col'>
+                        <div className='text-sm font-bold'>SigNoz & Growthbook</div>
+                      </div>
+                    </div>
+                    </div>
+
                 </div>
                 <div className="flex justify-end">
                   <div className="button-background mt-2 flex h-fit w-fit transform items-center justify-center rounded-full p-2 transition-transform group-hover:translate-x-2.5 sm:mt-0">
