@@ -1,8 +1,6 @@
 'use client'
 
 import React from 'react'
-import { useSearchParams } from 'next/navigation'
-import { QUERY_PARAMS } from '../../constants/queryParams'
 import { ONBOARDING_SOURCE } from '../../constants/globals'
 interface TocItemProps {
   url: string
@@ -13,12 +11,10 @@ interface TocItemProps {
 interface TableOfContentsProps {
   toc: TocItemProps[]
   hideTableOfContents: boolean
+  source: string
 }
 
-const TableOfContents: React.FC<TableOfContentsProps> = ({ toc, hideTableOfContents }) => {
-  const searchParams = useSearchParams()
-  const source = searchParams.get(QUERY_PARAMS.SOURCE)
-
+const TableOfContents: React.FC<TableOfContentsProps> = ({ toc, hideTableOfContents, source }) => {
   if (
     hideTableOfContents ||
     !toc ||
