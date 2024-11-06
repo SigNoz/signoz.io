@@ -4,7 +4,7 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'About us - SigNoz',
-  description: 'About us - SigNoz',
+  description: 'Learn about SigNoz, our mission, vision, and the principles that guide us.',
 }
 
 function aboutus() {
@@ -12,108 +12,82 @@ function aboutus() {
     <div title="About Us">
       <section>
         <div className="container" style={{ marginTop: '4rem', marginBottom: '4rem' }}>
+          {/* Introduction */}
+          <h1 className="text--center margin-vert--lg">About SigNoz</h1>
           <p className="text--center margin-vert--lg">
-            {' '}
-            Some of you may wonder, what does SigNoz mean? As engineers we are obsessed with the
-            idea of signal vs noise. How do devops engineers find signals which they can act on from
-            the various sources of noise they encounter from their observability systems? This is
-            one idea we obsess over and seems important enough to continually strive towards.
-            <br></br>
-            <br></br>
-            And, hence the name Sig.Noz ( Signal vs Noise) 🤓
+            SigNoz was created with a simple yet powerful purpose: to bring clarity and insight to developers and DevOps engineers
+            through effective observability tools. Observability, at its core, is about understanding the inner workings of a
+            system, and our mission is to provide this understanding in a way that cuts through complexity and noise.
           </p>
-          <div className="row">
-            <div className="col col--6">
-              <div className="card-demo margin--md">
-                <div className="card-dark bg-signoz_slate-500">
-                  <div className="avatar margin--md">
-                    <img
-                      className="avatar__photo avatar__photo--lg"
-                      src="/img/504541.webp"
-                      alt="Profile pic of Pranay Prateek"
-                    />
-                    <div className="avatar__intro">
-                      <h4 className="avatar__name">Pranay Prateek</h4>
-                      <small className="avatar__subtitle">Co-founder & CEO </small>
-                    </div>
-                  </div>
-                  <div className="card__body">
-                    <p>
-                      After spending a lot of time in college reading philosophy, I got interested
-                      in technology. Biometric & image recognition was especially interesting to me.
-                      Led product teams in startups & MNCs like Microsoft, before stumbling into the
-                      domain of observability.
-                      <br></br>
-                      <br></br>
-                      Reducing noise in developers' and devops engineers' life is my current passion
-                      :)
-                    </p>
-                  </div>
-                  <div className="card__footer">
-                    <Link
-                      className="button button--secondary button--outline"
-                      href={'https://twitter.com/pranay01'}
-                    >
-                      <div className=""> Twitter </div>
-                    </Link>
 
-                    <a
-                      className="button button--link"
-                      style={{ color: 'white' }}
-                      href="mailto:pranay@signoz.io"
-                    >
-                      pranay at signoz dot io
-                    </a>
+          {/* Mission Section */}
+          <div className="mission-section" style={{ padding: '2rem 0', textAlign: 'center' }}>
+            <h2>Our Mission</h2>
+            <p>
+              Our mission is to empower engineering teams with robust, user-friendly observability tools that allow them to
+              diagnose and solve performance issues quickly and effectively. We envision a future where every organization can
+              achieve seamless observability across distributed systems without needing to rely on costly, complex setups.
+            </p>
+          </div>
 
-                    {/* <button className="button button--secondary button--outline button--link" href="https://twitter.com/pranay01">Twitter</button> */}
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="col col--6">
-              <div className="card-demo margin--md">
-                <div className="card-dark bg-signoz_slate-500">
-                  <div className="avatar margin--md">
-                    <img
-                      className="avatar__photo avatar__photo--lg"
-                      src="/img/12460410.webp"
-                      alt="Profile pic of Ankit Nayan"
-                    />
-                    <div className="avatar__intro">
-                      <h4 className="avatar__name">Ankit Nayan</h4>
-                      <small className="avatar__subtitle"> Co-Founder & CTO </small>
-                    </div>
-                  </div>
-                  <div className="card__body">
-                    <p>
-                      Playing Badminton professionally was my dream at one time. But that seemed too
-                      tough, so I started coding. I have delved in all sorts of technologies
-                      including crypto when it was exciting.
-                      <br></br> <br></br>
-                      Always interested in solving interesting problems with technology.
-                      Microservices & Distributed systems is what I am most interested in these
-                      days.{' '}
-                    </p>
-                  </div>
-                  <div className="card__footer">
-                    <Link
-                      className="button button--secondary button--outline text-white"
-                      href={'https://twitter.com/ankitnayan'}
-                    >
-                      <div className=""> Twitter </div>
-                    </Link>
+          {/* Vision Section */}
+          <div className="vision-section" style={{ padding: '2rem 0', textAlign: 'center' }}>
+            <h2>Our Vision</h2>
+            <p>
+              We believe that observability should be an accessible, integral part of the software development process.
+              As software systems grow more intricate, gaining visibility into these systems shouldn’t become a daunting or expensive task.
+              Our vision is to build an ecosystem where engineering teams of all sizes can gain immediate, actionable insights into
+              their applications’ health and performance, fostering a world where software reliability is prioritized and achievable.
+            </p>
+          </div>
 
-                    <a
-                      className="button button--link"
-                      style={{ color: 'white' }}
-                      href="mailto:pranay@signoz.io"
-                    >
-                      ankit at signoz dot io
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </div>
+          {/* Core Values Section */}
+          <div className="values-section" style={{ padding: '2rem 0', textAlign: 'center' }}>
+            <h2>Core Values</h2>
+            <ul style={{ listStyleType: 'circle', textAlign: 'left', display: 'inline-block', maxWidth: '600px', margin: '0 auto' }}>
+              <li><strong>Transparency:</strong> We embrace open-source values and prioritize transparent communication, both internally and with our community.</li>
+              <li><strong>Continuous Improvement:</strong> Innovation is in our DNA. We believe in iterating, learning, and improving every aspect of our product and processes.</li>
+              <li><strong>Empathy:</strong> Understanding our users’ needs and challenges is at the heart of our approach. We design tools that are intuitive, powerful, and tailored to real-world use cases.</li>
+              <li><strong>Community-Driven Development:</strong> We view our community as partners in development, incorporating feedback and evolving our platform in response to real-world needs.</li>
+              <li><strong>Reliability:</strong> We are dedicated to providing tools that developers and DevOps engineers can trust. Reliability is not just a feature; it’s our commitment.</li>
+            </ul>
+          </div>
+
+          {/* Why SigNoz Section */}
+          <div className="why-signoz" style={{ padding: '2rem 0', textAlign: 'center' }}>
+            <h2>Why SigNoz?</h2>
+            <p>
+              SigNoz was built from the ground up to address gaps in existing observability solutions. With many monitoring tools being
+              prohibitively expensive or overly complex, we set out to create a solution that is both cost-effective and easy to use, without
+              sacrificing powerful insights. SigNoz is open-source, giving users the flexibility to deploy it on their own infrastructure while
+              benefitting from a community-driven ecosystem. We aim to create a streamlined experience that allows engineering teams to monitor,
+              troubleshoot, and optimize their applications with minimal setup and maximum impact.
+            </p>
+          </div>
+
+          {/* Getting Involved */}
+          <div className="get-involved" style={{ padding: '2rem 0', textAlign: 'center' }}>
+            <h2>Getting Involved</h2>
+            <p>
+              As an open-source project, we welcome contributions from developers and observability enthusiasts worldwide. Whether it’s contributing
+              code, sharing insights, or joining discussions, there are many ways to get involved and help us make SigNoz even better. 
+              We believe that community collaboration is the key to innovation, and we’re excited to build the future of observability together.
+            </p>
+            <Link href="/community" className="button button--secondary button--outline">
+              Join Our Community
+            </Link>
+          </div>
+
+          {/* Contact Section */}
+          <div className="contact-section" style={{ padding: '2rem 0', textAlign: 'center' }}>
+            <h2>Contact Us</h2>
+            <p>
+              We love hearing from users, contributors, and fellow engineers passionate about observability. Feel free to reach out
+              with questions, ideas, or feedback. Together, we can build a better experience for engineering teams everywhere.
+            </p>
+            <p>
+              <a href="mailto:contact@signoz.io" style={{ color: 'blue', textDecoration: 'underline' }}>contact@signoz.io</a>
+            </p>
           </div>
         </div>
       </section>
