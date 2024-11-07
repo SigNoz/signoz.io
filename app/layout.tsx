@@ -10,7 +10,7 @@ import { Metadata } from 'next'
 import MainFooter from '@/components/mainFooter'
 import TopNav from '@/components/TopNav/TopNav'
 import { Inter } from 'next/font/google'
-import React from 'react'
+import React, { Suspense } from 'react'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -80,15 +80,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </noscript>
 
         <ThemeProviders>
-          <SectionContainer>
-            <div className="relative flex h-screen flex-col justify-between ">
-              <SearchProvider searchConfig={siteMetadata.search as SearchConfig}>
-                <TopNav />
-                <main className="mb-auto mt-[48px]">{children}</main>
-              </SearchProvider>
-              <MainFooter />
-            </div>
-          </SectionContainer>
+          <Suspense>
+            <SectionContainer>
+              <div className="relative flex h-screen flex-col justify-between ">
+                <SearchProvider searchConfig={siteMetadata.search as SearchConfig}>
+                  <TopNav />
+                  <main className="mb-auto mt-[48px]">{children}</main>
+                </SearchProvider>
+                <MainFooter />
+              </div>
+            </SectionContainer>
+          </Suspense>
         </ThemeProviders>
       </body>
     </html>
