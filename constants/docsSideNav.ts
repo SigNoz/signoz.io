@@ -762,12 +762,17 @@ const docsSideNav = [
       },
       {
         type: 'doc',
+        route: '/docs/metrics-management/cloud-provider-metric-delay',
+        label: 'Cloud provider metric delay',
+      },
+      {
+        type: 'doc',
         route: '/docs/metrics-management/configure-custom-buckets',
         label: 'Configure custom buckets for histograms',
       },
       {
         type: 'doc',
-        route: '/docs/metrics-management/k8s-deployment-override',
+        route: '/docs/metrics-management/k8s-infra-otel-config',
         label: 'Configure k8s-infra otelDeployment to collect metrics from receivers',
       },
     ],
@@ -978,6 +983,11 @@ const docsSideNav = [
         type: 'doc',
         route: '/docs/alerts-management/planned-maintenance',
         label: 'Planned Maintenance',
+      },
+      {
+        type: 'doc',
+        route: '/docs/alerts-management/alerts-history',
+        label: 'Alerts History',
       },
     ],
   },
