@@ -3,10 +3,12 @@
 import React, { useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { QUERY_PARAMS } from '@/constants/queryParams'
+import { ONBOARDING_SOURCE } from '@/constants/globals'
 const Tabs = ({ children, entityName }) => {
   const searchParams = useSearchParams()
 
   const environment = searchParams.get(QUERY_PARAMS.ENVIRONMENT)
+  const source = searchParams.get(QUERY_PARAMS.SOURCE)
 
   // Ensure children is always an array
   const childrenArray = React.Children.toArray(children)
@@ -18,8 +20,8 @@ const Tabs = ({ children, entityName }) => {
 
   const firstValidChild = childrenArray.find(isValidElement)
   const initialActiveTab = firstValidChild ? firstValidChild.props.value : null
-
   const [activeTab, setActiveTab] = useState(environment || initialActiveTab)
+  const hideSelfHostTab = source === ONBOARDING_SOURCE && entityName === 'plans'
 
   return (
     <div className="w-full">
@@ -27,6 +29,8 @@ const Tabs = ({ children, entityName }) => {
         {childrenArray.map((child) => {
           if (!isValidElement(child)) return null
           const { value, label } = child.props
+
+          if (hideSelfHostTab && value === 'self-host') return null
           return (
             <button
               key={value}
@@ -44,7 +48,10 @@ const Tabs = ({ children, entityName }) => {
       </div>
       <div className="p-4">
         {childrenArray.map((child) => {
-          if (!isValidElement(child)) return null
+          if (!isValidElement(child) || (hideSelfHostTab && child.props.value === 'self-host')) {
+            return null
+          }
+
           if (child.props.value === activeTab)
             return <div key={child.props.value}>{child.props.children}</div>
           return null
