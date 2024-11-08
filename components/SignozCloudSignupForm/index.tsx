@@ -127,7 +127,7 @@ export default function SignozCloudSignUpForm() {
     }
 
     try {
-      const response = await fetch('https://signup.signoz.cloud/api/register', {
+      const response = await fetch('https://api.signoz.cloud/api/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
