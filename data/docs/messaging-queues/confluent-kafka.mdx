@@ -1,0 +1,677 @@
+---
+date: 2024-11-09
+title: Monitor Confluent Kafka
+id: confluent-kafka
+---
+
+{/* This documentation provides a comprehensive, ready-to-use guide to set up metrics collection for Confluent Kafka using OpenTelemetry and SigNoz. */}
+
+
+## Introduction
+
+{/* Description about Confluent Cloud and its features */}
+
+Confluent Kafka comes with two offerings: **Confluent Cloud** and **Confluent Platform**.
+
+Confluent Cloud is a fully managed, cloud-native service that provides Apache Kafka as a service, enabling 
+organizations to easily stream data in real-time without the need to manage the complexity of self-hosting 
+and maintaining Kafka clusters. Confluent Cloud offers a fully managed, scalable, and highly available event 
+streaming platform that handles the operational overhead of Kafka, allowing you to focus on building 
+applications with real-time data pipelines.
+
+Some of the key components of Confluent Cloud include:
+- Kafka Clusters
+- Kafka Connect
+- Confluent Schema Registry
+- KSQL (Kafka SQL)
+- Stream Processing
+- Confluent Control Center
+
+Confluent Platform is a self-managed distribution of Apache Kafka that offers enhanced features and APIs 
+beyond the open-source version. Organizations can deploy and maintain Confluent Platform on their own 
+infrastructure, giving them complete control over their environment. Since it builds upon Apache Kafka's 
+core capabilities, Confluent Platform supports all Kafka use cases.
+
+<Tabs>
+{/* <TabItem value="confluent-cloud" label="Confluent Cloud" default>
+
+## Prerequisites
+
+You need to satisfy the following pre-requisites: 
+1. **Confluent Cloud:** You should have a Confluent Cloud account.
+2. **Kafka Cluster:** Ensure you have an Environment in Confluent Cloud, and have a Kafka Cluster running in it.
+
+---
+
+## Steps to Follow
+
+This guide follows these primary steps:
+
+1. [Confluent Cloud Setup](#step-1-confluent-cloud-setup)
+2. [OpenTelemetry Collector Setup](#step-2-opentelemetry-collector-setup)
+3. [Visualize Data in SigNoz](#step-3-visualize-data-in-signoz)
+
+### Step 1: Confluent Cloud Setup
+
+We will be using the [Confluent Cloud Metrics API(V2)](https://api.telemetry.confluent.cloud/docs#tag/Version-2) to collect the Confluent Cloud metrics. 
+You need to have a Cloud API Key in order to use this Metrics API.
+
+In order to create the Cloud API Key, click on the hamburger menu on the top right corner on the Confluent Cloud console, and navigate to **API Keys** from the menu bar.
+
+<figure data-zoomable align="center">
+    <img
+      src="/img/docs/messaging-queues/confluent-kafka/navigate-to-api-keys.webp"
+      alt="Navigate to API Keys"
+    />
+    <figcaption>
+      <i>
+        Navigate to API Keys
+      </i>
+    </figcaption>
+</figure>
+
+On the **API Keys** page, click on the **Add API Key** button.
+
+On the **Create API key -> Account** page, select **My account** and click on **Next**.
+
+<Admonition type="info">
+You should select **Service Account** when you are ready to productionize the OpenTelemetry Collector 
+config (where the API Key and Secret is going to be used), and use the service account's API Key and Secret.
+</Admonition>
+
+<figure data-zoomable align="center">
+    <img
+      src="/img/docs/messaging-queues/confluent-kafka/select-my-account.webp"
+      alt="Select My Account"
+    />
+    <figcaption>
+      <i>
+        Select My Account
+      </i>
+    </figcaption>
+</figure>
+
+On the next page **Create API key -> Resource scope**, select **Cloud resource management** box, and click **Next**.
+
+<figure data-zoomable align="center">
+    <img
+      src="/img/docs/messaging-queues/confluent-kafka/select-cloud-resource-management.webp"
+      alt="Select Cloud Resource Management"
+    />
+    <figcaption>
+      <i>
+        Select Cloud Resource Management
+      </i>
+    </figcaption>
+</figure>
+
+On the next page **Create API key -> API key detail**, provide an appropriate name and description for the key, and click on **Create API key** button at the bottom of the page.
+
+<figure data-zoomable align="center">
+    <img
+      src="/img/docs/messaging-queues/confluent-kafka/set-api-key-detail.webp"
+      alt="Set API Key Detail"
+    />
+    <figcaption>
+      <i>
+        Set API Key Detail
+      </i>
+    </figcaption>
+</figure>
+
+On the page that follows, you will have the **Key** and **Secret** of the generate API key. Note down the key and secret as we will need it later.
+You can also download the API key and secret by clicking on **Download API key** button at the bottom of the page. Click on **Complete**.
+
+<figure data-zoomable align="center">
+    <img
+      src="/img/docs/messaging-queues/confluent-kafka/generated-api-key.webp"
+      alt="Generated API Key"
+    />
+    <figcaption>
+      <i>
+        API Key is generated
+      </i>
+    </figcaption>
+</figure>
+
+With this, we have created the Cloud API key.
+
+### Step 2: OpenTelemetry Collector Setup
+
+Install and configure OpenTelemetry for scraping the metrics from Confluent Cloud. Follow [OpenTelemetry Binary Usage in Virtual Machine](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) guide for detailed instructions.
+
+Create a file `config.yaml`. Here, we will setup the OpenTelemetry Collector config where we will use prometheus receiver which will scrape the metrics from the Confluent Cloud Metrics API.
+
+Here are the contents of the `config.yaml` file:
+
+<Tabs>
+<TabItem value="cloud" label="SigNoz Cloud" default>
+
+```yaml
+receivers:
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: 'confluent-cloud'
+          scrape_interval: 1m
+          scrape_timeout: 1m
+          honor_timestamps: true
+          metrics_path: "/v2/metrics/cloud/export"  # The endpoint for the metrics
+          static_configs:
+            - targets:
+              - api.telemetry.confluent.cloud  # Confluent Cloud Metrics API URL
+          scheme: https
+          basic_auth:
+            username: <Cloud API Key>
+            password: <Cloud API Secret>
+          params:
+            "resource.kafka.id":
+              - <Kafka Cluster ID, starts with `lkc-`>
+              - <Another Kafka Cluster ID, starts with `lkc-`>
+processors:
+  resource/env:
+    attributes:
+    - key: deployment.environment
+      value: prod
+      action: upsert
+  batch: {}
+exporters:
+  otlp:
+    endpoint: "ingest.{region}.signoz.cloud:443"
+    tls:
+      insecure: false
+    headers:
+      "signoz-access-token": "<SIGNOZ_INGESTION_KEY>"
+service:
+  pipelines:
+    metrics:
+      receivers: [prometheus]
+      processors: [resource/env,batch]
+      exporters: [otlp]
+```
+
+Refer to this [SigNoz Cloud Overview page](/docs/ingestion/signoz-cloud/overview/) for more details.
+
+</TabItem>
+<TabItem value="self-host" label="Self-Host">
+
+```yaml
+receivers:
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: 'confluent-cloud'
+          scrape_interval: 1m
+          scrape_timeout: 1m
+          honor_timestamps: true
+          metrics_path: "/v2/metrics/cloud/export"  # The endpoint for the metrics
+          static_configs:
+            - targets:
+              - api.telemetry.confluent.cloud  # Confluent Cloud Metrics API URL
+          scheme: https
+          basic_auth:
+            username: <Cloud API Key>
+            password: <Cloud API Secret>
+          params:
+            "resource.kafka.id":
+              - <Kafka Cluster ID, starts with `lkc-`>
+              - <Another Kafka Cluster ID, starts with `lkc-`>
+processors:
+  resource/env:
+    attributes:
+    - key: deployment.environment
+      value: prod
+      action: upsert
+  batch: {}
+exporters:
+  otlp:
+    endpoint: "<IP of machine hosting SigNoz>:4317"
+    tls:
+      insecure: true
+service:
+  pipelines:
+    metrics:
+      receivers: [prometheus]
+      processors: [resource/env,batch]
+      exporters: [otlp]
+```
+
+</TabItem>
+</Tabs>
+
+After successful configuration start the OpenTelemetry Collector using following command:
+
+```sh
+./otelcol-contrib --config ./config.yaml &> otelcol-output.log & echo "$!" > otel-pid
+```
+
+**Step 3:** If the configurations are configured correctly, you can see the output logs from OpenTelemtry as follows:
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/messaging-queues/confluent-kafka/otel-logs.webp"
+        alt="OpenTelemetry Collector Logs"
+    />
+<figcaption>
+<i>
+Viewing OpenTelemetry Collector Logs
+</i>
+</figcaption>
+</figure>
+
+### Step 3: Visualize Data in SigNoz
+
+**Step 1:** Go to SigNoz and head over to the dashboard.
+
+**Step 2:** If not already created, create a new dashboard. You can create the dashboard and multiple panel under it by following the instructions [here](/docs/userguide/manage-Dashboards).
+
+**Step 3:** Select metric for Confluent Cloud.
+
+All metrics starting with `confluent_kafka_server_` have been collected from Confluent Cloud.
+
+For example `confluent_kafka_server_received_records` is one of the metrics that was collected.
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/messaging-queues/confluent-kafka/sample-metric.webp"
+        alt="Sample Metric from Confluent Cloud"
+    />
+<figcaption>
+<i>
+Sample Metric from Confluent Cloud
+</i>
+</figcaption>
+</figure>
+
+## Troubleshooting
+
+If you run into any problems while setting up monitoring for your Confluent Cloud metrics with SigNoz, consider these troubleshooting steps:
+
+* **Verify API Key Setup**: Double-check that you have followed the steps to create API Key as shown above.
+* **Verify Configuration**: Double-check your `config.yaml` file to ensure all settings, including the ingestion key and endpoint, are correct.
+* **Review Logs**: Look at the logs of the OpenTelemetry Collector to identify any error messages or warnings that might provide insights into what’s going wrong.
+* **Consult Documentation**: Review the Confluent Cloud, SigNoz and OpenTelemetry documentation for any additional troubleshooting of the common issues.
+
+</TabItem> */}
+<TabItem value="confluent-platform" label="Confluent Platform" default>
+
+## Steps to Follow
+
+This guide follows these primary steps:
+
+1. [Confluent Platform Setup](#step-1-confluent-platform-setup)
+2. [OpenTelemetry Java Agent Installation](#step-2-opentelemetry-java-agent-installation)
+3. [Java Producer-Consumer App Setup](#step-3-java-producer-consumer-app-setup)
+4. [OpenTelemetry Collector Setup](#step-4-opentelemetry-collector-setup)
+5. [Visualize data in SigNoz](#step-5-visualize-data-in-signoz)
+
+### Step 1: Confluent Platform Setup
+
+#### 1.1 Confluent Self-Managed Setup
+
+Go to [Confluent Get Started](https://www.confluent.io/get-started/) page, and select **SELF-MANAGED**. Fill in the appropriate details, and click on **Download Free**.
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/messaging-queues/confluent-kafka/confluent-self-managed.webp"
+        alt="Confluent Self-Managed"
+    />
+<figcaption>
+<i>
+Confluent Self-Managed
+</i>
+</figcaption>
+</figure>
+
+In the **Choose An Installation Type** page that opens, download the appropraite installation as per your requirement. 
+In this case, we will be downloading tar installation for local machine.
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/messaging-queues/confluent-kafka/tar-installation-download.webp"
+        alt="TAR installation download"
+    />
+<figcaption>
+<i>
+TAR installation download
+</i>
+</figcaption>
+</figure>
+
+You can move the downloaded tar file to an appropriate directory if required. Once in the appropriate directory, we will untar the file and cd into the confluent folder.
+
+```bash
+$ tar -xvzf confluent-7.7.1.tar
+$ cd confluent-7.7.1
+```
+
+<Admonition type="info">
+Replace the version `7.7.1` version in the above commands with the version of the jar that you have downloaded.
+</Admonition>
+
+#### 1.2 Start Kafka 
+
+Kafka can be started using ZooKeeper or [KRaft](https://kafka.apache.org/quickstart#quickstart_startserver). We will use ZooKeeper:
+
+```bash
+bin/zookeeper-server-start.sh config/zookeeper.properties
+```
+
+#### 1.3 Configure and Start Brokers
+
+Create two server properties files `s1.properties` and `s2.properties`to start two brokers:
+
+<Admonition type="info">
+Make sure you are inside the confluent folder that you extracted in the step before.
+</Admonition>
+
+```bash
+# make sure you are inside the extracted kafka folder
+
+cp etc/kafka/server.properties etc/kafka/s1.properties
+cp etc/kafka/server.properties etc/kafka/s2.properties
+```
+
+Edit `s1.properties`:
+
+```bash
+vi etc/kafka/s1.properties
+```
+
+Add the following configurations:
+
+```
+broker.id=1
+listeners=PLAINTEXT://localhost:9092
+log.dirs=/tmp/kafka_logs-1
+zookeeper.connect=localhost:2181
+confluent.metadata.server.listeners=http://localhost:8090
+```
+
+Edit `s2.properties`:
+
+```bash
+vi etc/kafka/s2.properties
+```
+
+Add the following configurations:
+
+```
+broker.id=2
+listeners=PLAINTEXT://localhost:9093
+log.dirs=/tmp/kafka_logs-2
+zookeeper.connect=localhost:2181
+confluent.metadata.server.listeners=http://localhost:8091
+```
+
+Start Broker 1 with JMX port enabled:
+```bash
+JMX_PORT=2020 bin/kafka-server-start etc/kafka/s1.properties
+```
+
+Start Broker 2 in a new terminal with JMX port enabled:
+```bash
+JMX_PORT=2021 bin/kafka-server-start etc/kafka/s2.properties
+```
+
+#### 1.4 Create Kafka Topics
+
+Create two Kafka topics:
+
+```bash
+bin/kafka-topics --create --topic topic1 --bootstrap-server localhost:9092 --replication-factor 2 --partitions 1
+bin/kafka-topics --create --topic topic2 --bootstrap-server localhost:9092 --replication-factor 2 --partitions 3
+```
+
+#### 1.5 Verify Kafka Setup
+
+List the Kafka topics and their partitions:
+
+```bash
+bin/kafka-topics --describe --topic topic1 --bootstrap-server localhost:9092
+bin/kafka-topics --describe --topic topic2 --bootstrap-server localhost:9092
+```
+
+#### 1.6 Test Kafka Setup
+
+**Produce Messages:**
+
+```bash
+bin/kafka-console-producer --topic topic1 --bootstrap-server localhost:9092
+```
+
+Type some messages and press `Enter` to send.
+
+**Consume Messages:**
+
+Open a new terminal and run:
+
+```bash
+bin/kafka-console-consumer --topic topic1 --from-beginning --bootstrap-server localhost:9092
+```
+
+You should see the messages you produced.
+
+### Step 2: OpenTelemetry Java Agent Installation
+
+#### 2.1 Java Agent Setup
+
+Install the latest OpenTelemetry Java Agent:
+
+```bash
+wget https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar
+```
+
+#### 2.2 (Optional) Configure OpenTelemetry Java Agent
+
+Refer to the [OpenTelemetry Java Agent configurations](https://opentelemetry.io/docs/zero-code/java/agent/) for advanced setup options.
+
+
+### Step 3: Java Producer-Consumer App Setup
+
+#### 3.1 Running the Producer and Consumer Apps with OpenTelemetry Java Agent
+
+Ensure you have Java and Maven installed.
+
+
+**Compile your Java producer and consumer applications:** Ensure your producer and consumer apps are compiled and ready to run.
+
+**Run Producer App with Java Agent:**
+
+```bash
+java -javaagent:/path/to/opentelemetry-javaagent.jar \
+     -Dotel.service.name=producer-svc \
+     -Dotel.traces.exporter=otlp \
+     -Dotel.metrics.exporter=otlp \
+     -Dotel.logs.exporter=otlp \
+     -jar /path/to/your/producer.jar
+```
+
+**Run Consumer App with Java Agent:**
+
+```bash
+java -javaagent:/path/to/opentelemetry-javaagent.jar \
+     -Dotel.service.name=consumer-svc \
+     -Dotel.traces.exporter=otlp \
+     -Dotel.metrics.exporter=otlp \
+     -Dotel.logs.exporter=otlp \
+     -Dotel.instrumentation.kafka.producer-propagation.enabled=true \
+     -Dotel.instrumentation.kafka.experimental-span-attributes=true \
+     -Dotel.instrumentation.kafka.metric-reporter.enabled=true \
+     -jar /path/to/your/consumer.jar
+```
+
+### Step 4: OpenTelemetry Collector Setup
+
+Set up the OpenTelemetry Collector to collect JMX metrics from Kafka and spans from producer and consumer clients, then forward them to SigNoz.
+
+4.1 **Download the JMX Metrics Collector**
+
+Download the JMX metrics collector necessary for Kafka metrics collection. 
+
+You can download the latest `.jar file` for the opentelemetry jmx metrics using 
+this [release link](https://github.com/open-telemetry/opentelemetry-java-contrib/releases).
+
+4.2 **Install the OpenTelemetry Collector**
+
+Install the local OpenTelemetry Collector Contrib.
+
+
+**Using the Binary:**
+
+Download the OpenTelemetry Collector Contrib binary. You can [follow this doc](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) to 
+download the binary for your Operating System.
+
+Place the binary in the root of your project directory.
+
+**Update config file**
+
+Update you collector config with the follwing:
+
+<Tabs>
+<TabItem value="SigNoz Cloud" label="SigNoz Cloud" default>
+
+```yaml
+receivers:
+  # Read more about kafka metrics receiver - https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/kafkametricsreceiver/README.md
+  kafkametrics:
+    brokers:
+      - localhost:9092
+      - localhost:9093
+      - localhost:9094
+    protocol_version: 2.0.0
+    scrapers:
+      - brokers
+      - topics
+      - consumers
+  # Read more about jmx receiver - https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/jmxreceiver/README.md
+  jmx/1:
+    # configure the path where you installed opentelemetry-jmx-metrics jar
+    jar_path: path/to/opentelemetry-jmx-metrics.jar #change this to the path to you opentelemetry-jmx-metrics jar file you downloaded above
+    endpoint: service:jmx:rmi:///jndi/rmi://localhost:2020/jmxrmi
+    target_system: jvm,kafka,kafka-consumer,kafka-producer
+    collection_interval: 10s
+    log_level: info
+    resource_attributes:
+      broker.name: broker1
+  jmx/2:
+    jar_path: ${PWD}/opentelemetry-jmx-metrics.jar
+    endpoint: service:jmx:rmi:///jndi/rmi://localhost:2021/jmxrmi
+    target_system: jvm,kafka,kafka-consumer,kafka-producer
+    collection_interval: 10s
+    log_level: info
+    resource_attributes:
+      broker.name: broker2
+exporters:
+  otlp:
+    endpoint: "ingest.{region}.signoz.cloud:443"
+    tls:
+      insecure: false
+    headers:
+      "signoz-access-token": "<SIGNOZ_INGESTION_KEY>"
+  debug:
+    verbosity: detailed
+
+service:
+  pipelines:
+    metrics:
+      receivers: [kafkametrics, jmx/1, jmx/2]
+      exporters: [otlp]
+```
+
+Refer to this [SigNoz Cloud Overview page](/docs/ingestion/signoz-cloud/overview/) for more details.
+
+</TabItem>
+
+<TabItem value="Self-Hosted" label="Self-Hosted">
+
+```yaml
+receivers:
+  # Read more about kafka metrics receiver - https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/kafkametricsreceiver/README.md
+  kafkametrics:
+    brokers:
+      - localhost:9092
+      - localhost:9093
+      - localhost:9094
+    protocol_version: 2.0.0
+    scrapers:
+      - brokers
+      - topics
+      - consumers
+  # Read more about jmx receiver - https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/jmxreceiver/README.md
+  jmx/1:
+    # configure the path where you installed opentelemetry-jmx-metrics jar
+    jar_path: path/to/opentelemetry-jmx-metrics.jar #change this to the path to you opentelemetry-jmx-metrics jar file you downloaded above
+    endpoint: service:jmx:rmi:///jndi/rmi://localhost:2020/jmxrmi
+    target_system: jvm,kafka,kafka-consumer,kafka-producer
+    collection_interval: 10s
+    log_level: info
+    resource_attributes:
+      broker.name: broker1
+  jmx/2:
+    jar_path: ${PWD}/opentelemetry-jmx-metrics.jar
+    endpoint: service:jmx:rmi:///jndi/rmi://localhost:2021/jmxrmi
+    target_system: jvm,kafka,kafka-consumer,kafka-producer
+    collection_interval: 10s
+    log_level: info
+    resource_attributes:
+      broker.name: broker2
+exporters:
+   otlp:
+     endpoint: "<IP of machine hosting SigNoz>:4317"
+     tls:
+       insecure: true
+  debug:
+    verbosity: detailed
+
+service:
+  pipelines:
+    metrics:
+      receivers: [kafkametrics, jmx/1, jmx/2]
+      exporters: [otlp]
+```
+
+</TabItem>
+</Tabs>
+
+The config file sets up the OpenTelemetry Collector to gather Kafka and JVM metrics from multiple brokers(2 brokers in the above config) via Kafka metrics scraping 
+and JMX, and exports the telemetry data to SigNoz using the OTLP exporter. 
+
+**Run the collector** 
+
+Run the collector with the above configuration :
+
+```bash
+./otelcol-contrib --config path/to/config.yaml
+```
+
+### Step 5: Visualize data in SigNoz
+
+**To see the Kafka Metrics:**
+
+- Head over to **Messaging Queues** tab in your SigNoz instance.
+- You will get different Options like **Consumer Lag View** etc., to see various kafka related metrics.
+
+<figure data-zoomable align="center">
+    <img
+      src="/img/docs/messaging-queues/confluent-kafka/kafka-metrics.webp"
+      alt="Messaging Queues tab in SigNoz"
+    />
+    <figcaption>
+      <i>
+        Messaging Queues tab in SigNoz
+      </i>
+    </figcaption>
+</figure>
+
+## Troubleshooting
+
+If you run into any problems while setting up monitoring for your Confluent Platform metrics with SigNoz, consider these troubleshooting steps:
+
+* **Verify Confluent Platform Setup**: Double-check that you have followed the steps for setting up Kafka Cluster as shown above.
+* **Verify Configuration**: Double-check your `config.yaml` file to ensure all settings, including the ingestion key and endpoint, are correct.
+* **Review Logs**: Look at the logs of the OpenTelemetry Collector to identify any error messages or warnings that might provide insights into what’s going wrong.
+* **Consult Documentation**: Review the SigNoz and OpenTelemetry documentation for any additional troubleshooting of the common issues.
+
+</TabItem>
+</Tabs>
