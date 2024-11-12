@@ -1086,6 +1086,11 @@ const docsSideNav = [
         route: '/docs/messaging-queues/kafka',
         label: 'Kafka',
       },
+      {
+        type: 'doc',
+        route: '/docs/messaging-queues/confluent-kafka',
+        label: 'Confluent Kafka',
+      },
      ],
   },
   {
