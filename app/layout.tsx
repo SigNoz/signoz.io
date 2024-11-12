@@ -85,7 +85,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
         <ThemeProviders>
           <SectionContainer>
-            <div className="relative flex h-screen flex-col justify-between ">
+            <div className="relative flex h-screen flex-col justify-between overflow-y-scroll no-scrollbar">
               <SearchProvider searchConfig={siteMetadata.search as SearchConfig}>
                 <TopNav />
                 <main className="mb-auto mt-[48px]">{children}</main>
