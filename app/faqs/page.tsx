@@ -3,9 +3,15 @@
 import { allFAQs } from 'contentlayer/generated'
 import Link from 'next/link'
 import { useState } from 'react'
+import { TrieveModalSearch, TrieveSDK } from 'trieve-search-component'
+import 'trieve-search-component/dist/index.css'
+
+const trieve = new TrieveSDK({
+  apiKey: 'tr-cK2MylVI0my78NUoafAiTvvmpdktntO3',
+  datasetId: '4650e231-7857-45aa-beb1-cb52006a2460',
+})
 
 export default function FAQsPage() {
-  const [searchTerm, setSearchTerm] = useState('')
   const [selectedTags, setSelectedTags] = useState<string[]>([])
 
   // Get unique tags from all FAQs
@@ -17,14 +23,12 @@ export default function FAQsPage() {
     )
   ).sort()
 
-  // Filter out drafts, sort by date, and filter by search term and tags
+  // Filter only by tags now since search is handled by Trieve
   const faqs = allFAQs
     .filter((faq) => !faq.draft)
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
     .filter((faq) => 
-      (faq.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      faq.description.toLowerCase().includes(searchTerm.toLowerCase())) &&
-      (selectedTags.length === 0 || selectedTags.some(tag => faq.tags?.includes(tag)))
+      selectedTags.length === 0 || selectedTags.some(tag => faq.tags?.includes(tag))
     )
 
   const toggleTag = (tag: string) => {
@@ -49,13 +53,42 @@ export default function FAQsPage() {
             Find answers to common questions about SigNoz's features, capabilities, and implementation
           </p>
           
-          <div className="mx-auto mt-6 sm:mt-8 w-full max-w-xl px-4">
-            <input
-              type="text"
-              placeholder="Search FAQs..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full rounded-lg border border-signoz_slate-400 bg-signoz_ink-400 px-4 py-2 text-signoz_vanilla-100 placeholder-signoz_vanilla-400 focus:border-primary-500 focus:outline-none"
+          <div className="mx-auto mt-6 sm:mt-8 w-full max-w-xl px-4 flex flex-col">
+            <TrieveModalSearch
+              theme="dark"
+              trieve={trieve}
+              defaultSearchQueries={[
+                "How does SigNoz ensure data security and privacy?",
+                "Who uses SigNoz in production?",
+                "Can SigNoz handle large-scale production environments effectively?",
+              ]}
+              defaultAiQuestions={[
+                "What is SigNoz?",
+                "How to change retention period?",
+                "How do I install SigNoz?",
+              ]}
+              brandColor="#E75536"
+              brandName='SigNoz'
+              brandLogoImgSrcUrl="https://avatars.githubusercontent.com/u/76905799?s=200&v=4"
+              ButtonEl={() => (
+                <div className="w-full rounded-lg border border-signoz_slate-400 bg-signoz_ink-400 px-4 py-2 text-signoz_vanilla-100 placeholder-signoz_vanilla-400 focus:border-primary-500 focus:outline-none flex items-center gap-2">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.3-4.3"></path>
+                  </svg>
+                  <span className="text-signoz_vanilla-400">Ask a question about SigNoz</span>
+                </div>
+              )}
             />
 
             <div className="mt-4 flex flex-wrap gap-2 justify-center">
