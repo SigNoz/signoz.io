@@ -1,5 +1,5 @@
 import { MetadataRoute } from 'next'
-import { allBlogs, allComparisons, allOpentelemetries, allDocs, allGuides } from 'contentlayer/generated'
+import { allBlogs, allAuthors, allComparisons, allGuides, allOpentelemetries, allDocs, allFAQs } from 'contentlayer/generated'
 import siteMetadata from '@/data/siteMetadata'
 
 const mapChangeFrequency = (
@@ -68,6 +68,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.7,
     }))
 
+  const faqRoutes = allFAQs.map((faq) => ({
+    url: `${siteUrl}/faqs/${faq.slug}`,
+    lastModified: faq.lastmod || faq.date,
+  }))
+
   const routes = [
     '',
     'blog',
@@ -82,11 +87,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     'support',
     'teams',
     'guides', // Add the main guides page
+    'faqs', // Add the main FAQs page
   ].map((route) => ({
     url: `${siteUrl}/${route}`,
     lastModified: new Date().toISOString().split('T')[0],
     changeFrequency: mapChangeFrequency('weekly'),
   }))
 
-  return [...routes, ...blogRoutes, ...comparisonRoutes, ...opentelemetryRoutes, ...docRoutes, ...guideRoutes]
+  return [...routes, ...blogRoutes, ...comparisonRoutes, ...opentelemetryRoutes, ...docRoutes, ...guideRoutes, ...faqRoutes]
 }
