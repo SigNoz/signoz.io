@@ -77,15 +77,15 @@ export default function FAQsPage() {
         </div>
 
         <div className="w-full py-8 sm:py-10">
-          <ul className="grid gap-4 p-2 sm:gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+          <ul className="space-y-4 p-2 sm:space-y-6">
             {faqs.map((faq) => (
               <li key={faq.slug}>
                 <Link
                   href={`/faqs/${faq.slug}`}
-                  className="block h-full transform rounded-lg border border-signoz_slate-400 bg-signoz_ink-400 p-4 sm:p-6 shadow-md transition duration-500 hover:shadow-lg"
+                  className="block transform rounded-lg border border-signoz_slate-400 bg-signoz_ink-400 p-4 sm:p-6 shadow-md transition duration-500 hover:shadow-lg"
                 >
-                  <article className="flex flex-col h-full">
-                    <div className="flex-grow">
+                  <article>
+                    <div>
                       <h2 className="mb-2 sm:mb-3 text-lg sm:text-xl font-bold leading-snug tracking-tight text-signoz_vanilla-100">
                         {faq.title}
                       </h2>
@@ -93,7 +93,7 @@ export default function FAQsPage() {
                         {faq.description}
                       </p>
                     </div>
-                    <div className="text-sm sm:text-base font-medium leading-6 text-primary-500 hover:text-primary-400 mt-auto">
+                    <div className="text-sm sm:text-base font-medium leading-6 text-primary-500 hover:text-primary-400">
                       Read more &rarr;
                     </div>
                   </article>
