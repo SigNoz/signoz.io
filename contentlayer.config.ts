@@ -518,9 +518,45 @@ export const CaseStudy = defineDocumentType(() => ({
   computedFields,
 }))
 
+export const FAQ = defineDocumentType(() => ({
+  name: 'FAQ',
+  filePathPattern: 'faqs/**/*.mdx',
+  contentType: 'mdx',
+  fields: {
+    title: { type: 'string', required: true },
+    date: { type: 'date', required: true },
+    tags: { type: 'list', of: { type: 'string' }, default: [] },
+    lastmod: { type: 'date' },
+    draft: { type: 'boolean' },
+    summary: { type: 'string' },
+    description: { type: 'string', required: true },
+    slug: { type: 'string', required: true },
+    authors: { type: 'list', of: { type: 'string' }, required: true },
+  },
+  computedFields: {
+    ...computedFields,
+    structuredData: {
+      type: 'json',
+      resolve: (doc) => ({
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: {
+          '@type': 'Question',
+          name: doc.title,
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: doc.description
+          }
+        },
+        url: `${siteMetadata.siteUrl}/faqs/${doc.slug}`,
+      }),
+    },
+  },
+}))
+
 export default makeSource({
   contentDirPath: 'data',
-  documentTypes: [Blog, Authors, Comparison, Guide, Opentelemetry, Doc, Newsroom, CaseStudy],
+  documentTypes: [Blog, Authors, Comparison, Guide, Opentelemetry, Doc, Newsroom, CaseStudy, FAQ],
   mdx: {
     cwd: process.cwd(),
     remarkPlugins: [
