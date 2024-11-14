@@ -91,32 +91,48 @@ const productDropdownItems = [
 // Sort the productDropdownItems based on the 'order' property
 const productDropdownItemsForMobile = [...productDropdownItems].sort((a, b) => a.order - b.order)
 
-const resourcesDropdownItems = [
-  {
-    key: 'blog',
-    url: '/resource-center/blog',
-    description: 'News, ideas, and insights on observability',
-    name: 'Blog',
-  },
-  {
-    key: 'comparisons',
-    url: '/resource-center/comparisons',
-    description: 'Compare observability tools',
-    name: 'Comparisons',
-  },
-  {
-    key: 'guides',
-    url: '/resource-center/guides',
-    description: 'How-to guides and tutorials',
-    name: 'Guides',
-  },
-  {
-    key: 'examples',
-    url: '/resource-center/opentelemetry',
-    description: 'OpenTelemetry concepts and its use cases',
-    name: 'OpenTelemetry',
-  },
-]
+const resourcesDropdownItems = {
+  learn: [
+    {
+      key: 'blog',
+      url: '/resource-center/blog',
+      description: 'News, ideas, and insights on observability',
+      name: 'Blog',
+    },
+    {
+      key: 'comparisons',
+      url: '/resource-center/comparisons',
+      description: 'Compare observability tools',
+      name: 'Comparisons',
+    },
+    {
+      key: 'guides',
+      url: '/resource-center/guides',
+      description: 'How-to guides and tutorials',
+      name: 'Guides',
+    },
+    {
+      key: 'opentelemetry',
+      url: '/resource-center/opentelemetry',
+      description: 'OpenTelemetry concepts and its use cases',
+      name: 'OpenTelemetry',
+    },
+  ],
+  explore: [
+    {
+      key: 'faqs',
+      url: '/faqs',
+      description: 'Frequently asked questions about SigNoz',
+      name: 'Product FAQs',
+    },
+    {
+      key: 'migrations',
+      url: '/docs/migration/migrate-from-datadog',
+      description: 'Guides for migrating to SigNoz',
+      name: 'Migrations',
+    },
+  ],
+}
 
 export default function TopNav() {
   const pathname = usePathname()
@@ -295,23 +311,45 @@ export default function TopNav() {
                   </DropdownTrigger>
                   <DropdownMenu
                     aria-label="Static Actions"
-                    classNames={{ list: 'pl-0 w-max gap-3 items-center' }}
+                    classNames={{
+                      list: 'pl-0 w-max grid grid-cols-2 min-w-[600px]',
+                      base: 'py-0',
+                      item: 'data-[hover=true]:bg-transparent'
+                    }}
                     onMouseEnter={handleMouseEnterResources}
                     onMouseLeave={handleMouseLeaveResources}
-                    topContent={
-                      <div className="py-2 pl-2 pr-4 text-[13px] font-semibold uppercase leading-5 text-[#3C4152]">
-                        Resources
-                      </div>
-                    }
                   >
-                    {resourcesDropdownItems.map((item) => (
-                      <DropdownItem key={item.key} className="h-auto">
-                        <Link href={item.url} className="flex flex-col">
-                          <div>{item.name}</div>
-                          <div className="text-xs text-gray-400">{item.description}</div>
-                        </Link>
-                      </DropdownItem>
-                    ))}
+                    <DropdownItem className="h-auto items-start data-[hover=true]:bg-transparent">
+                      <div className="px-1 pt-2 pb-0">
+                        <div className="mb-2 text-[13px] font-semibold uppercase text-[#3C4152]">
+                          Learn
+                        </div>
+                        {resourcesDropdownItems.learn.map((item) => (
+                          <Link key={item.key} href={item.url} className="flex items-center gap-4 px-2 py-2 rounded-small group hover:bg-default hover:text-default-foreground transition-colors">
+                            <div>
+                              <div>{item.name}</div>
+                              <div className="text-xs text-gray-400">{item.description}</div>
+                            </div>
+                          </Link>
+                        ))}
+                      </div>
+                    </DropdownItem>
+                    
+                    <DropdownItem className="h-auto items-start data-[hover=true]:bg-transparent">
+                      <div className="px-1 pt-2 pb-0">
+                        <div className="mb-2 text-[13px] font-semibold uppercase text-[#3C4152]">
+                          Explore
+                        </div>
+                        {resourcesDropdownItems.explore.map((item) => (
+                          <Link key={item.key} href={item.url} className="flex items-center gap-4 px-2 py-2 rounded-small group hover:bg-default hover:text-default-foreground transition-colors">
+                            <div>
+                              <div>{item.name}</div>
+                              <div className="text-xs text-gray-400">{item.description}</div>
+                            </div>
+                          </Link>
+                        ))}
+                      </div>
+                    </DropdownItem>
                   </DropdownMenu>
                 </Dropdown>
               </div>
@@ -381,7 +419,7 @@ export default function TopNav() {
                       Documentation
                     </Link>
 
-                    <Accordion topic="Resources" subtopics={resourcesDropdownItems} />
+                    <Accordion topic="Resources" subtopics={[...resourcesDropdownItems.learn, ...resourcesDropdownItems.explore]} />
                     <Link
                       href="/pricing"
                       className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 hover:bg-signoz_ink-200"
