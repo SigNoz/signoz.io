@@ -1,0 +1,193 @@
+---
+
+title: How to Filter Out Zero Values in Prometheus Queries
+slug: prometheus-exclude-0-values-from-query-result
+date: 2024-11-14
+tags: [prometheus, faq]
+authors: [simran_kumari]
+description: Learn how to effectively filter zero values from Prometheus queries. Step-by-step guide covering basic to advanced filtering techniques with practical examples.
+keywords: [prometheus queries, zero values filter, promql, metrics filtering, prometheus monitoring, grafana visualization, time series data]
+
+---
+
+In Prometheus, zero values in metrics can clutter data visualizations, making it challenging to get clear insights. Filtering out these zero values can improve the clarity of your metrics, making monitoring and alerting more effective. This article walks you through techniques to filter zero values, advanced Prometheus query (PromQL) methods, and tips for implementing zero value filtering.
+
+## Understanding Zero Values in Prometheus
+
+Zero values in Prometheus time series data represent moments when a metric reports a value of exactly 0. Zero values are not considered errors or gaps; rather, they signal that the measured metric was indeed zero during that time frame. These values appear in several scenarios:
+
+- Idle states in resources like CPU or memory usage
+- Downtime of services or applications
+- Counter resets, where values drop to zero after reaching a peak
+- Non-occurrence of events, like a request counter for an inactive endpoint
+
+### Impact of Zero Values on Monitoring and Alerting
+
+When working with zero values in monitoring, it's crucial to ensure they don't mislead your metrics analysis or alerting logic. Here’s a deeper dive into the impact of zero values on monitoring and alerting:
+
+- Alerting: If not carefully handled, zero values can trigger alerts for metrics that occasionally dip to zero. For example, a drop in `http_requests_total` to zero could signal a service issue, but it might also just mean no requests were received.
+- Visualization: In Grafana or other dashboards, zero values can skew averages, and affect graphs and other visualizations, sometimes making it appear as though activity or events completely stopped. Without considering zero values properly, the averages may suggest low activity levels when actual activity is simply intermittent.
+
+### Difference Between Null Values and Zero Values
+
+Understanding the distinction between null values and zero values is essential for interpreting time series data accurately, as each conveys a unique type of information about the state and continuity of your metrics:
+
+- Null Values: These indicate missing data, which often happens when no data is collected during a scrape. This could be due to a failed scrape, a network issue, or the absence of any metric emission at that time. Null values reflect a data gap, which can signal collection issues or periods without metric data.
+- Zero Values: In contrast, zero values represent actual data points that explicitly show a count of zero. They are meaningful within the context of the metric, providing insights into periods of inactivity or a lack of change. Unlike nulls, which imply missing data, zero values indicate a recorded state that can influence monitoring outcomes, alerting, and trend analysis.
+
+## Methods to Filter Zero Values
+
+Prometheus offers several ways to filter zero values, depending on your use case and data type. Here are some common techniques:
+
+### Using `!= 0` Operator in PromQL
+
+The `!= 0` operator is a straightforward way to filter out zero values in Prometheus queries. Rshyntax for using the operator is `metric !=0`. For example:
+
+```toml
+prometheus_http_requests_total != 0 
+```
+
+This filters out any metric values that are exactly zero.
+
+<Figure src="/img/guides/2024/11/prometheus-exclude-0-values-from-query-result-image.webp" alt="Counts of metric prometheus_http_requests_total" caption="Counts of metric prometheus_http_requests_total" />
+
+<Figure src="/img/guides/2024/11/prometheus-exclude-0-values-from-query-result-image%201.webp" alt="Counts of metric prometheus_http_requests_total excluding zeros" caption="Counts of metric prometheus_http_requests_total excluding zeros" />
+
+### Using Conditional Expressions
+
+In some cases, you may want to apply filters with expressions that exclude zero values based on specific thresholds or conditions:
+
+```
+prometheus_http_requests_total > 0
+```
+
+This returns only those time series where the metric value is greater than zero, filtering out zeros from your visualizations.
+
+<Figure src="/img/guides/2024/11/prometheus-exclude-0-values-from-query-result-image%202.webp" alt="Excluding zeros using Conditional Expressions" caption="Excluding zeros using Conditional Expressions" />
+
+Here are key best practices for filtering zero values in monitoring:
+
+1. Conditional Filtering: Apply `> 0` or similar conditions only for metrics where zeroes aren’t meaningful. Example: `http_requests_total > 0`.
+2. Minimum Thresholds: Set a small threshold, like `> 0.1`, to capture meaningful low values without noise.
+3. Averaging Over Time: Use moving averages or `avg_over_time()` to smooth out brief zeroes and reveal true trends.
+4. Consecutive Zero Alerts: Alert only if zeroes persist over time (e.g., `count_over_time(...[5m]) == 0`) to avoid false positives.
+
+## Advanced Filtering Techniques
+
+Prometheus provides flexibility to create advanced filters, which help refine metrics for more complex observability requirements. Here are some advanced techniques for filtering:
+
+1. Using Boolean Operators for Complex Queries
+    
+    Combining zero filtering with Boolean operators allows you to create nuanced queries. For instance, to filter out zeros but include only values between a threshold:
+    
+    ```sql
+    prometheus_http_requests_total > 0 and prometheus_http_requests_total < 100
+    ```
+    
+    The above query filters results to include only metrics where `prometheus_http_requests_total` is greater than 0 and less than 100. This range ensures that only non-zero, low-traffic values are captured, effectively excluding zero values and any high spikes that could distort analysis of low-level traffic patterns.
+    
+    <Figure src="/img/guides/2024/11/prometheus-exclude-0-values-from-query-result-image%203.webp" alt="Boolean Operators for Complex Queries" caption="Boolean Operators for Complex Queries" />
+    
+2. Combining Multiple Filters
+    
+    Filtering zero values alongside other conditions (like job labels, status codes etc) refines data further:
+    
+    ```sql
+    prometheus_http_requests_total{code="400"} > 0
+    ```
+    
+    This example filters out zero values and includes only specific status codes.
+    
+    <Figure src="/img/guides/2024/11/prometheus-exclude-0-values-from-query-result-image%204.webp" alt="Combining Multiple Filters" caption="Combining Multiple Filters" />
+    
+3. Handling Edge Cases with Zero Values
+    
+    Some cases might involve intermittent zero values or spikes. Experiment with filtering thresholds or `rate()` functions to smooth data, such as:
+    
+    ```prolog
+    rate(prometheus_http_requests_total[5m]) != 0
+    ```
+    
+    The above query calculates the per-second rate of `prometheus_http_requests_total` over the last 5 minutes and filters out any instances where the rate is zero. This approach ensures that only active traffic is displayed, excluding any periods with no requests, which can help focus on times when the service is actively receiving traffic.
+    
+    <Figure src="/img/guides/2024/11/prometheus-exclude-0-values-from-query-result-image%205.webp" alt="Handling Edge Cases with Zero Values" caption="Handling Edge Cases with Zero Values" />
+    
+4. Time-Based Filtering
+    
+    To exclude zeros over a particular period, apply time-based filters:
+    
+    ```
+    sum_over_time(prometheus_http_requests_total[10m]) > 0
+    ```
+    
+    This approach aggregates data over a time range, excluding any series that stayed at zero throughout the period.
+    
+    <Figure src="/img/guides/2024/11/prometheus-exclude-0-values-from-query-result-image%206.webp" alt="Time-Based Filtering" caption="Time-Based Filtering" />
+    
+
+## Implementing Zero Value Filtering in Grafana
+
+Filtering out zero values in Grafana helps keep dashboards focused on meaningful data, removing noise from metrics with no activity. For Prometheus,  it can be achieved directly in the query editor. For instance, using a query like `rate(metric_name[5m]) != 0` will exclude zero-rate values.
+
+Follow these steps to set up zero-value filtering for your metrics in Grafana:
+
+1. Open your Grafana dashboard
+2. Edit the panel containing your Prometheus metrics
+3. Add the filter in the Metrics browser:
+    
+    ```
+    your_metric != 0
+    ```
+    
+    <Figure src="/img/guides/2024/11/prometheus-exclude-0-values-from-query-result-image%207.webp" alt="Grafana graph with zero values" caption="Grafana graph with zero values" />
+    
+    <Figure src="/img/guides/2024/11/prometheus-exclude-0-values-from-query-result-image%208.webp" alt="Grafana graph filtering out zero values" caption="Grafana graph filtering out zero values" />
+    
+
+## Alternative Approach: Using SigNoz
+
+When managing metrics, clean and focused visualizations are key for effective monitoring. [SigNoz](https://signoz.io), an open-source observability platform, offers a powerful alternative to Prometheus and Grafana. 
+Built to support OpenTelemetry, SigNoz provides seamless integrations for metrics, traces, and logs within a single platform. Its intuitive UI and query builder simplify the process of setting up visualizations and reduce the need for complex filtering—making it easier to create actionable dashboards.
+
+Here are a few reasons why SigNoz can be particularly helpful for filtering out zero values in metrics:
+
+1. Simplified Querying for Zero-Value Filtering: SigNoz’s user-friendly query builder allows for straightforward filtering, making it easier to exclude zero values without complex PromQL syntax. 
+    
+    <Figure src="/img/guides/2024/11/prometheus-exclude-0-values-from-query-result-query-builder-filtering.gif" alt="Simplified Querying for Zero-Value Filtering" caption="Simplified Querying for Zero-Value Filtering" />
+    
+2. Integrated Observability for Contextual Filtering: With SigNoz, metrics, traces, and logs are all integrated into one platform. This context allows for more targeted zero-value filtering based on correlated data, enabling users to focus on relevant metrics alongside related traces or logs.
+    
+    <Figure src="/img/guides/2024/11/prometheus-exclude-0-values-from-query-result-image%209.webp" alt="Integrated Observability for Contextual Filtering" caption="Integrated Observability for Contextual Filtering" />
+    
+3. Flexible Dashboard Customization: SigNoz provides more intuitive options for setting dynamic thresholds and visual cues, helping users to automatically hide zero-value data or highlight only active metrics. This leads to more streamlined visualizations without needing extensive manual adjustments.
+    
+    <Figure src="/img/guides/2024/11/prometheus-exclude-0-values-from-query-result-image%2010.webp" alt="Flexible Dashboard Customization" caption="Flexible Dashboard Customization" />
+    
+
+<GetStartedSigNoz />
+
+For users looking to streamline the monitoring of zero-value metrics and improve overall clarity, SigNoz delivers a robust, user-friendly experience right out of the box.
+
+## Key Takeaways
+
+- Filtering zero values improves the clarity of Prometheus metrics and helps reduce alert noise.
+- Use PromQL operators like `!= 0`, `> 0` to filter zero values based on your needs.
+- Apply filtering with consideration for performance, especially in high-volume data environments.
+
+## FAQs
+
+### How do zero values affect Prometheus metrics?
+
+Zero values can skew averages and make visualizations less readable. They often mask important trends in your data when included in aggregations.
+
+### What's the difference between filtering nulls and zeros?
+
+Null values represent missing data points, while zero values are actual measurements. Filtering zeros removes specific measurements, while null handling affects data gaps.
+
+### Can filtering zeros impact alerting rules?
+
+Yes, removing zeros can reduce noise but may also suppress signals, especially in counters. Test filters before applying them to alerting.
+
+### How to handle intermittent zero values?
+
+Use time-based aggregations with the `rate()` function to smooth out intermittent zeros. Example : `rate(metric[5m]) > 0`.
