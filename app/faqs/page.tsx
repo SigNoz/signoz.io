@@ -6,15 +6,34 @@ import { useState } from 'react'
 
 export default function FAQsPage() {
   const [searchTerm, setSearchTerm] = useState('')
+  const [selectedTags, setSelectedTags] = useState<string[]>([])
 
-  // Filter out drafts, sort by date, and filter by search term
+  // Get unique tags from all FAQs
+  const allTags = Array.from(
+    new Set(
+      allFAQs
+        .filter((faq) => !faq.draft)
+        .flatMap((faq) => faq.tags || [])
+    )
+  ).sort()
+
+  // Filter out drafts, sort by date, and filter by search term and tags
   const faqs = allFAQs
     .filter((faq) => !faq.draft)
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
     .filter((faq) => 
-      faq.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      faq.description.toLowerCase().includes(searchTerm.toLowerCase())
+      (faq.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      faq.description.toLowerCase().includes(searchTerm.toLowerCase())) &&
+      (selectedTags.length === 0 || selectedTags.some(tag => faq.tags?.includes(tag))) // Changed to some() for OR logic
     )
+
+  const toggleTag = (tag: string) => {
+    setSelectedTags(prev =>
+      prev.includes(tag)
+        ? prev.filter(t => t !== tag)
+        : [...prev, tag]
+    )
+  }
 
   return (
     <div className="relative bg-signoz_ink-500">
@@ -30,7 +49,7 @@ export default function FAQsPage() {
             Find answers to common questions about SigNoz's features, capabilities, and implementation
           </p>
           
-          <div className="mx-auto mt-6 max-w-xl">
+          <div className="mx-auto mt-8 max-w-xl">
             <input
               type="text"
               placeholder="Search FAQs..."
@@ -38,6 +57,22 @@ export default function FAQsPage() {
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full rounded-lg border border-signoz_slate-400 bg-signoz_ink-400 px-4 py-2 text-signoz_vanilla-100 placeholder-signoz_vanilla-400 focus:border-primary-500 focus:outline-none"
             />
+
+            <div className="mt-4 flex flex-wrap gap-2 justify-center">
+              {allTags.map((tag) => (
+                <button
+                  key={tag}
+                  onClick={() => toggleTag(tag)}
+                  className={`rounded-full px-3 py-1 text-sm font-medium transition-colors ${
+                    selectedTags.includes(tag)
+                      ? 'bg-primary-500 text-signoz_vanilla-100'
+                      : 'bg-signoz_ink-400 text-signoz_vanilla-400 hover:bg-signoz_ink-300'
+                  } border border-signoz_slate-400`}
+                >
+                  {tag}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
