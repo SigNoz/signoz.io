@@ -4,13 +4,12 @@ import { MDXLayoutRenderer } from 'pliny/mdx-components'
 import { sortPosts, coreContent, allCoreContent } from 'pliny/utils/contentlayer'
 import { allFAQs, allAuthors } from 'contentlayer/generated'
 import type { Authors } from 'contentlayer/generated'
-import PostLayout from '@/layouts/PostLayout'
+import FAQLayout from '@/layouts/FAQLayout'
 import { Metadata } from 'next'
 import siteMetadata from '@/data/siteMetadata'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { SidebarIcons } from '@/components/sidebar-icons/icons'
-import PageFeedback from '@/components/PageFeedback/PageFeedback'
 
 export async function generateMetadata({
   params,
@@ -96,7 +95,7 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
         </Link>
       </div>
 
-      <PostLayout 
+      <FAQLayout 
         content={mainContent} 
         authorDetails={authorDetails} 
         authors={post?.authors}
@@ -107,8 +106,7 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
           components={components} 
           toc={post.toc}
         />
-        <PageFeedback />
-      </PostLayout>
+      </FAQLayout>
     </>
   )
 }
