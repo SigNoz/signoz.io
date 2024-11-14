@@ -313,8 +313,7 @@ export default function TopNav() {
                     aria-label="Static Actions"
                     classNames={{
                       list: 'pl-0 w-max grid grid-cols-2 min-w-[600px]',
-                      base: 'py-0',
-                      item: 'data-[hover=true]:bg-transparent'
+                      base: 'py-0'
                     }}
                     onMouseEnter={handleMouseEnterResources}
                     onMouseLeave={handleMouseLeaveResources}
