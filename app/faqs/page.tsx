@@ -1,21 +1,20 @@
+'use client'
+
 import { allFAQs } from 'contentlayer/generated'
 import Link from 'next/link'
-import { Metadata } from 'next'
-import siteMetadata from '@/data/siteMetadata'
-
-export const metadata: Metadata = {
-  title: 'Frequently Asked Questions about SigNoz',
-  description: 'Find answers to common questions about SigNoz - the open-source observability platform.',
-  alternates: {
-    canonical: `${siteMetadata.siteUrl}/faqs`,
-  },
-}
+import { useState } from 'react'
 
 export default function FAQsPage() {
-  // Filter out drafts and sort by date
+  const [searchTerm, setSearchTerm] = useState('')
+
+  // Filter out drafts, sort by date, and filter by search term
   const faqs = allFAQs
     .filter((faq) => !faq.draft)
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    .filter((faq) => 
+      faq.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      faq.description.toLowerCase().includes(searchTerm.toLowerCase())
+    )
 
   return (
     <div className="relative bg-signoz_ink-500">
@@ -30,6 +29,16 @@ export default function FAQsPage() {
           <p className="text-center text-lg leading-7 text-signoz_vanilla-400">
             Find answers to common questions about SigNoz's features, capabilities, and implementation
           </p>
+          
+          <div className="mx-auto mt-6 max-w-xl">
+            <input
+              type="text"
+              placeholder="Search FAQs..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full rounded-lg border border-signoz_slate-400 bg-signoz_ink-400 px-4 py-2 text-signoz_vanilla-100 placeholder-signoz_vanilla-400 focus:border-primary-500 focus:outline-none"
+            />
+          </div>
         </div>
 
         <div className="w-full py-10">
