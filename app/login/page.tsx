@@ -2,7 +2,7 @@
 
 import './login.styles.css'
 
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { ArrowRight, ArrowUpRight, Dot, Loader2, Pencil } from 'lucide-react'
 
@@ -157,14 +157,16 @@ export default function Login() {
     router.push(`/teams?q=${workEmail}`)
   }
 
+  const isValid = useMemo(() => isValidCompanyEmail(workEmail), [workEmail])
+
   return (
     <main className="login-container relative bg-signoz_ink-500">
       <div className="bg-dot-pattern masked-dots absolute top-0 flex h-full w-full items-center justify-center" />
       <div className="relative m-auto h-full max-w-[1440px]">
         <div className="flex items-center justify-center max-lg:flex-col max-md:gap-0">
-          <section className="login-form-section x-md:ml-0 flex w-full flex-col py-16 max-md:w-full lg:w-[50%] xl:w-[60%]">
-            <div className="flex w-full grow flex-col justify-center px-8 py-4 text-sm leading-5 text-white max-md:mt-10 max-md:max-w-full lg:px-12 lg:py-8 xl:px-36 xl:py-8">
-              <h1 className="text-2xl font-semibold leading-8 max-md:mt-10 max-md:max-w-full">
+          <section className="login-form-section x-md:ml-0 flex w-full flex-col py-16 max-md:w-full lg:w-[50%] xl:w-[60%] ">
+            <div className="flex w-full grow flex-col justify-center bg-signoz_ink-500 px-8 py-4 text-sm leading-5 text-signoz_vanilla-100 max-md:mt-10 max-md:max-w-full lg:px-12 lg:py-8 xl:px-36 xl:py-8">
+              <h1 className="mb-[8px] text-2xl font-semibold leading-8 max-md:mt-10 max-md:max-w-full">
                 Log in to your SigNoz account.
               </h1>
               <div className="w-100 text-sm leading-6 text-signoz_vanilla-400 max-md:max-w-full">
@@ -173,17 +175,22 @@ export default function Login() {
 
               {!isSubmitting && submitFailed ? (
                 <div className="welcome-container mt-[32px] flex flex-col items-center">
-                  <div className="text-md rounded-[6px] border border-[#1D212D] bg-signoz_ink-300 p-[24px]">
-                    <div>
-                      {' '}
-                      We're sorry, it looks like something didn't go as planned. Please reach out to
-                      us for assistance.
-                    </div>
+                  <div className="text-md error-container rounded-[4px] border p-[24px]">
+                    We couldn't complete your request. Please try refreshing the page or contact
+                    cloud support for assistance.
                   </div>
+
+                  <button
+                    type="submit"
+                    className="btn-primary mt-[24px] flex w-full items-center justify-center gap-4 rounded-full px-[16px] py-[8px] text-sm font-medium"
+                    onClick={() => window.location.reload()}
+                  >
+                    <span className="text-xs leading-5">Refresh page</span>
+                  </button>
 
                   <a
                     type="submit"
-                    className="mt-[28px] flex w-full items-center justify-center gap-4 rounded-full bg-signoz_cherry-500 px-[16px] py-[8px] text-sm font-medium"
+                    className="btn-secondary mt-3 flex w-full items-center justify-center gap-4 rounded-full px-[16px] py-[8px] text-sm font-medium"
                     href="mailto:cloud-support@signoz.io"
                   >
                     <span className="text-xs leading-5">Contact cloud support</span>
@@ -269,9 +276,9 @@ export default function Login() {
 
                   {!submitSuccess && (
                     <button
-                      disabled={isSubmitting}
+                      disabled={isSubmitting || !isValid}
                       onClick={handleSubmit}
-                      className={`mb-[16px] flex w-full items-center justify-center rounded-full bg-signoz_robin-500 py-2 pl-4 pr-3 font-medium ${isSubmitting ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}
+                      className={`mb-[16px] flex w-full items-center justify-center rounded-full bg-signoz_robin-500 py-2 pl-4 pr-3 font-medium ${isSubmitting || !isValid ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}
                     >
                       <span className="flex items-center gap-1.5 px-px text-sm">
                         Next

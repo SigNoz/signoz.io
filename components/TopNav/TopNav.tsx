@@ -10,7 +10,7 @@ import SearchButton from '../SearchButton'
 import GitHubStars from '../GithubStars/GithubStars'
 import React from 'react'
 import DocsSidebar from '../DocsSidebar/DocsSidebar'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import Banner from '../Banner/Banner'
 import Tabs from '../../app/resource-center/Shared/Tabs'
 import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from '@nextui-org/react'
@@ -125,6 +125,7 @@ export default function TopNav() {
   const [showMainMenu, setShowMainMenu] = useState(false)
   const [activeTab, setActiveTab] = useState(TABS.GUIDES)
   const [shouldShowTabs, setShouldShowTabs] = useState(false)
+  const router = useRouter()
 
   const loginRoute = '/login/'
   const signupRoute = '/teams/'
@@ -361,18 +362,21 @@ export default function TopNav() {
                 <GitHubStars />
 
                 <Button
+                  className="-ml-1 box-border flex h-8 items-center gap-2 rounded-full bg-signoz_slate-500 px-4 py-2 pl-2 pr-2.5 text-sm font-normal not-italic leading-5 text-signoz_vanilla-100 no-underline outline-none hover:text-white"
+                  onClick={() => router.push('/login')}
+                >
+                  Sign In
+                </Button>
+
+                <Button
                   id="btn-get-started-website-navbar"
-                  className="start-free-trial-btn mx-2 flex h-8 items-center justify-center gap-1.5 truncate rounded-full px-4 py-2 pl-4 pr-3 text-center text-sm font-medium not-italic leading-5 text-white no-underline outline-none hover:text-white"
+                  className="start-free-trial-btn flex h-8 items-center justify-center gap-1.5 truncate rounded-full px-4 py-2 pl-4 pr-3 text-center text-sm font-medium not-italic leading-5 text-white no-underline outline-none hover:text-white"
                 >
                   <Link href="/teams" className="flex-center">
                     Get Started - Free
                     <ArrowRight size={14} />
                   </Link>
                 </Button>
-
-                <Link href="/login" className="flex items-center gap-1 text-sm">
-                  Sign In
-                </Link>
               </>
             )}
 
@@ -385,16 +389,16 @@ export default function TopNav() {
                 <Button
                   id="btn-get-started-website-navbar"
                   className="flex h-8 min-w-24 items-center justify-center gap-1.5 truncate rounded-sm border border-signoz_slate-300 bg-signoz_slate-500 px-4 py-2 pl-2 pr-2.5 text-center text-xs font-normal not-italic leading-5  text-signoz_vanilla-400 no-underline outline-none hover:text-white"
+                  onClick={() => router.push('/teams')}
                 >
-                  <Link href="/teams" className="flex items-center gap-2">
-                    <PenSquare size={12} /> Signup
-                  </Link>
+                  <PenSquare size={12} /> Signup
                 </Button>
 
-                <Button className="flex h-8 min-w-24 items-center justify-center gap-2 truncate rounded-sm border border-signoz_slate-300 bg-signoz_slate-500 px-4 py-2 pl-4 pr-3 text-center text-xs font-normal not-italic leading-5 text-signoz_vanilla-400 no-underline outline-none hover:text-white">
-                  <Link href="/docs" className="flex items-center gap-2">
-                    <BookOpenText size={12} /> Docs
-                  </Link>
+                <Button
+                  className="flex h-8 min-w-24 items-center justify-center gap-2 truncate rounded-sm border border-signoz_slate-300 bg-signoz_slate-500 px-4 py-2 pl-4 pr-3 text-center text-xs font-normal not-italic leading-5 text-signoz_vanilla-400 no-underline outline-none hover:text-white"
+                  onClick={() => router.push('/docs')}
+                >
+                  <BookOpenText size={12} /> Docs
                 </Button>
               </div>
             )}
@@ -444,11 +448,11 @@ export default function TopNav() {
                     {!isSignupRoute && (
                       <Button
                         id="btn-get-started-website-navbar"
-                        className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 hover:bg-signoz_ink-200"
+                        className="block rounded-lg px-3 py-2 text-base font-semibold leading-7 hover:bg-signoz_ink-200"
                       >
                         <Link
                           href="/teams"
-                          className="start-free-trial-btn font-heading flex items-center justify-center gap-1 truncate rounded-md border-none px-4 py-2 text-center text-sm text-xs  font-bold leading-4 text-white no-underline outline-none hover:text-white"
+                          className="start-free-trial-btn font-heading flex items-center justify-center gap-1 truncate rounded-md border-none px-4 py-2 text-center text-sm font-bold leading-4 text-white no-underline outline-none hover:text-white"
                           onClick={() => setMobileMenuOpen(false)}
                         >
                           Get Started - Free
