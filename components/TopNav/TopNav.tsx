@@ -121,16 +121,22 @@ const resourcesDropdownItems = {
   explore: [
     {
       key: 'faqs',
-      url: '/faqs',
+      url: '/faqs/',
       description: 'Frequently asked questions about SigNoz',
       name: 'Product FAQs',
     },
     {
       key: 'migrations',
-      url: '/docs/migration/migrate-from-datadog',
+      url: '/docs/migration/migrate-from-datadog/',
       description: 'Guides for migrating to SigNoz',
       name: 'Migrations',
     },
+    {
+      key: 'dashboards',
+      url: '/dashboards/',
+      description: 'Explore dashboard templates for your use cases',
+      name: 'Dashboard Templates',
+    }
   ],
 }
 
