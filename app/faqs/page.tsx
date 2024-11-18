@@ -3,13 +3,8 @@
 import { allFAQs } from 'contentlayer/generated'
 import Link from 'next/link'
 import { useState } from 'react'
-import { TrieveModalSearch, TrieveSDK } from 'trieve-search-component'
+import { TrieveModalSearch } from 'trieve-search-component'
 import 'trieve-search-component/dist/index.css'
-
-const trieve = new TrieveSDK({
-  apiKey: 'tr-cK2MylVI0my78NUoafAiTvvmpdktntO3',
-  datasetId: '4650e231-7857-45aa-beb1-cb52006a2460',
-})
 
 export default function FAQsPage() {
   const [selectedTags, setSelectedTags] = useState<string[]>([])
@@ -56,7 +51,8 @@ export default function FAQsPage() {
           <div className="mx-auto mt-6 sm:mt-8 w-full max-w-xl px-4 flex flex-col">
             <TrieveModalSearch
               theme="dark"
-              trieve={trieve}
+              apiKey='tr-cK2MylVI0my78NUoafAiTvvmpdktntO3'
+              datasetId='4650e231-7857-45aa-beb1-cb52006a2460'
               defaultSearchQueries={[
                 "How does SigNoz ensure data security and privacy?",
                 "Who uses SigNoz in production?",
