@@ -5,12 +5,12 @@ import { Button, Dialog } from '@headlessui/react'
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
 import Image from 'next/image'
 import Link from 'next/link'
-import { ArrowBigLeft, ArrowRight, ChevronDown } from 'lucide-react'
+import { ArrowBigLeft, ArrowRight, BookOpenText, ChevronDown, PenSquare } from 'lucide-react'
 import SearchButton from '../SearchButton'
 import GitHubStars from '../GithubStars/GithubStars'
 import React from 'react'
 import DocsSidebar from '../DocsSidebar/DocsSidebar'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import Banner from '../Banner/Banner'
 import Tabs from '../../app/resource-center/Shared/Tabs'
 import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from '@nextui-org/react'
@@ -147,6 +147,12 @@ export default function TopNav() {
   const [showMainMenu, setShowMainMenu] = useState(false)
   const [activeTab, setActiveTab] = useState(TABS.GUIDES)
   const [shouldShowTabs, setShouldShowTabs] = useState(false)
+  const router = useRouter()
+
+  const loginRoute = '/login/'
+  const signupRoute = '/teams/'
+  const isLoginRoute = pathname === loginRoute
+  const isSignupRoute = pathname === signupRoute
 
   useEffect(() => {
     const isDocsBasePath = pathname.startsWith('/docs')
@@ -229,65 +235,67 @@ export default function TopNav() {
 
               <span className="text-[17.111px] font-medium">SigNoz</span>
             </Link>
-            <div className="hidden items-center gap-x-6 lg:flex">
-              <div
-                onMouseEnter={handleMouseEnterProduct}
-                onMouseLeave={handleMouseLeaveProduct}
-                className="flex items-center"
-              >
-                <Dropdown
-                  className="px-4"
-                  placement="bottom-start"
-                  classNames={{ base: 'top-[9px]' }}
-                  isOpen={isOpen}
-                  onMouseLeave={() => setIsOpen(false)}
-                >
-                  <DropdownTrigger>
-                    <Button
-                      className="truncate px-1.5 py-1 text-sm font-extralight hover:text-signoz_robin-500 "
-                      onMouseEnter={() => setIsOpen(true)}
-                    >
-                      <div className="flex items-center">
-                        Product
-                        <ChevronDown
-                          size={12}
-                          className={`ml-1 transform transition-transform duration-300 ease-in-out ${isOpen ? 'rotate-180' : 'rotate-0'}`}
-                        />
-                      </div>
-                    </Button>
-                  </DropdownTrigger>
-                  <DropdownMenu
-                    aria-label="Static Actions"
-                    classNames={{ list: 'pl-1 grid grid-cols-2 w-max gap-3 items-center h-auto' }}
-                    onMouseEnter={handleMouseEnterProduct}
-                    onMouseLeave={handleMouseLeaveProduct}
-                    topContent={
-                      <div className="px-4 py-2 text-[13px] font-semibold uppercase leading-5 text-[#3C4152]">
-                        Product
-                      </div>
-                    }
-                  >
-                    {productDropdownItems.map((item) => (
-                      <DropdownItem key={item.key} className="h-auto">
-                        <Link href={item.url} className="flex items-center gap-4">
-                          <Image src={item.icon} alt={`${item.name} Icon`} width={20} height={20} />
-                          <div>
-                            <div>{item.name}</div>
-                            <div className="text-xs text-gray-400">{item.description}</div>
-                          </div>
-                        </Link>
-                      </DropdownItem>
-                    ))}
-                  </DropdownMenu>
-                </Dropdown>
-              </div>
 
-              <Link
-                href="/docs"
-                className="flex items-center truncate px-1.5 py-1 text-sm font-normal hover:text-signoz_robin-500"
-              >
-                Docs
-              </Link>
+            {!isLoginRoute && (
+              <div className="hidden items-center gap-x-6 lg:flex">
+                <div
+                  onMouseEnter={handleMouseEnterProduct}
+                  onMouseLeave={handleMouseLeaveProduct}
+                  className="flex items-center"
+                >
+                  <Dropdown
+                    className="px-4"
+                    placement="bottom-start"
+                    classNames={{ base: 'top-[9px]' }}
+                    isOpen={isOpen}
+                    onMouseLeave={() => setIsOpen(false)}
+                  >
+                    <DropdownTrigger>
+                      <Button
+                        className="truncate px-1.5 py-1 text-sm font-extralight hover:text-signoz_robin-500 "
+                        onMouseEnter={() => setIsOpen(true)}
+                      >
+                        <div className="flex items-center">
+                          Product
+                          <ChevronDown
+                            size={12}
+                            className={`ml-1 transform transition-transform duration-300 ease-in-out ${isOpen ? 'rotate-180' : 'rotate-0'}`}
+                          />
+                        </div>
+                      </Button>
+                    </DropdownTrigger>
+                    <DropdownMenu
+                      aria-label="Static Actions"
+                      classNames={{ list: 'pl-1 grid grid-cols-2 w-max gap-3 items-center h-auto' }}
+                      onMouseEnter={handleMouseEnterProduct}
+                      onMouseLeave={handleMouseLeaveProduct}
+                      topContent={
+                        <div className="px-4 py-2 text-[13px] font-semibold uppercase leading-5 text-[#3C4152]">
+                          Product
+                        </div>
+                      }
+                    >
+                      {productDropdownItems.map((item) => (
+                        <DropdownItem key={item.key} className="h-auto">
+                          <Link href={item.url} className="flex items-center gap-4">
+                            <Image src={item.icon} alt={`${item.name}`} width={20} height={20} />
+                            <div>
+                              <div>{item.name}</div>
+                              <div className="text-xs text-gray-400">{item.description}</div>
+                            </div>
+                          </Link>
+                        </DropdownItem>
+                      ))}
+                    </DropdownMenu>
+                  </Dropdown>
+                </div>
+
+                <Link
+                  href="/docs"
+                  className="flex items-center truncate px-1.5 py-1 text-sm font-normal hover:text-signoz_robin-500"
+                >
+                  Docs
+                </Link>
 
               <div
                 onMouseEnter={handleMouseEnterResources}
@@ -359,19 +367,20 @@ export default function TopNav() {
                 </Dropdown>
               </div>
 
-              <Link
-                href="/pricing"
-                className="flex items-center truncate px-1.5 py-1 text-sm font-normal hover:text-signoz_robin-500"
-              >
-                Pricing
-              </Link>
-              <Link
-                href="/case-study"
-                className="flex items-center truncate px-1.5 py-1 text-sm font-normal hover:text-signoz_robin-500"
-              >
-                Customer Stories
-              </Link>
-            </div>
+                <Link
+                  href="/pricing"
+                  className="flex items-center truncate px-1.5 py-1 text-sm font-normal hover:text-signoz_robin-500"
+                >
+                  Pricing
+                </Link>
+                <Link
+                  href="/case-study"
+                  className="flex items-center truncate px-1.5 py-1 text-sm font-normal hover:text-signoz_robin-500"
+                >
+                  Customer Stories
+                </Link>
+              </div>
+            )}
           </div>
           <div className="flex justify-end lg:hidden">
             {!mobileMenuOpen && <SearchButton />}
@@ -389,18 +398,53 @@ export default function TopNav() {
             </button>
           </div>
 
-          <div className="hidden gap-3 lg:flex lg:flex-1 lg:justify-end">
-            <SearchButton />
-            <GitHubStars />
+          <div className="hidden items-center gap-3 lg:flex lg:flex-1 lg:justify-end">
+            {!isLoginRoute && (
+              <>
+                <SearchButton />
+                <GitHubStars />
 
-            <Button
-              id="btn-get-started-website-navbar"
-              className="start-free-trial-btn mx-2 flex h-8 items-center justify-center gap-1.5 truncate rounded-full px-4 py-2 pl-4 pr-3 text-center text-sm font-medium not-italic leading-5 text-white no-underline outline-none hover:text-white"
-            >
-              <Link href="/teams" className="flex-center">
-               Get Started - Free<ArrowRight size={14} />
-              </Link>
-            </Button>
+                <Button
+                  className="-ml-1 box-border flex h-8 items-center gap-2 rounded-full bg-signoz_slate-500 px-4 py-2 pl-2 pr-2.5 text-sm font-normal not-italic leading-5 text-signoz_vanilla-100 no-underline outline-none hover:text-white"
+                  onClick={() => router.push('/login')}
+                >
+                  Sign In
+                </Button>
+
+                <Button
+                  id="btn-get-started-website-navbar"
+                  className="start-free-trial-btn flex h-8 items-center justify-center gap-1.5 truncate rounded-full px-4 py-2 pl-4 pr-3 text-center text-sm font-medium not-italic leading-5 text-white no-underline outline-none hover:text-white"
+                >
+                  <Link href="/teams" className="flex-center">
+                    Get Started - Free
+                    <ArrowRight size={14} />
+                  </Link>
+                </Button>
+              </>
+            )}
+
+            {isLoginRoute && (
+              <div className="flex items-center gap-2">
+                <Link href="mailto:cloud-support@signoz.io" className="flex-center mr-8 text-xs">
+                  Need help? <span className="text-signoz_robin-500">Contact support</span>
+                </Link>
+
+                <Button
+                  id="btn-get-started-website-navbar"
+                  className="flex h-8 min-w-24 items-center justify-center gap-1.5 truncate rounded-sm border border-signoz_slate-300 bg-signoz_slate-500 px-4 py-2 pl-2 pr-2.5 text-center text-xs font-normal not-italic leading-5  text-signoz_vanilla-400 no-underline outline-none hover:text-white"
+                  onClick={() => router.push('/teams')}
+                >
+                  <PenSquare size={12} /> Signup
+                </Button>
+
+                <Button
+                  className="flex h-8 min-w-24 items-center justify-center gap-2 truncate rounded-sm border border-signoz_slate-300 bg-signoz_slate-500 px-4 py-2 pl-4 pr-3 text-center text-xs font-normal not-italic leading-5 text-signoz_vanilla-400 no-underline outline-none hover:text-white"
+                  onClick={() => router.push('/docs')}
+                >
+                  <BookOpenText size={12} /> Docs
+                </Button>
+              </div>
+            )}
           </div>
         </nav>
         <Dialog as="div" className="lg:hidden" open={mobileMenuOpen} onClose={setMobileMenuOpen}>
@@ -444,18 +488,21 @@ export default function TopNav() {
                       <GitHubStars />
                     </div>
 
-                    <Button
-                      id="btn-get-started-website-navbar"
-                      className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 hover:bg-signoz_ink-200"
-                    >
-                      <Link
-                        href="/teams"
-                        className="start-free-trial-btn font-heading flex items-center justify-center gap-1 truncate rounded-md border-none px-4 py-2 text-center text-sm text-xs  font-bold leading-4 text-white no-underline outline-none hover:text-white"
-                        onClick={() => setMobileMenuOpen(false)}
+                    {!isSignupRoute && (
+                      <Button
+                        id="btn-get-started-website-navbar"
+                        className="block rounded-lg px-3 py-2 text-base font-semibold leading-7 hover:bg-signoz_ink-200"
                       >
-                       Get Started - Free<ArrowRight size={14} />
-                      </Link>
-                    </Button>
+                        <Link
+                          href="/teams"
+                          className="start-free-trial-btn font-heading flex items-center justify-center gap-1 truncate rounded-md border-none px-4 py-2 text-center text-sm font-bold leading-4 text-white no-underline outline-none hover:text-white"
+                          onClick={() => setMobileMenuOpen(false)}
+                        >
+                          Get Started - Free
+                          <ArrowRight size={14} />
+                        </Link>
+                      </Button>
+                    )}
                   </div>
                 )}
 
