@@ -26,7 +26,7 @@ const BASE_URL = 'https://api.signoz.cloud/v2'
 const trustBadges = [
   {
     icon: '/svgs/icons/hipaa.svg',
-    text: 'HIPPA',
+    text: 'HIPAA',
   },
   {
     icon: '/svgs/icons/SOC-2.svg',
