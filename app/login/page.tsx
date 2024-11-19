@@ -156,7 +156,7 @@ export default function Login() {
   }
 
   const handleGetStarted = () => {
-    router.push(`/teams?q=${workEmail}`)
+    router.push(`/teams?q=${encodeURIComponent(workEmail)}`)
   }
 
   const isValid = useMemo(() => isValidCompanyEmail(workEmail), [workEmail])
