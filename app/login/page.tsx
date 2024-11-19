@@ -116,7 +116,9 @@ export default function Login() {
     setIsSubmitting(true)
     setSubmitFailed(false)
 
-    const verifyWorkSpaceSetupURL = `${BASE_URL}/deployments/esearch?q=${workEmail}`
+    const verifyWorkSpaceSetupURL = `${BASE_URL}/deployments/esearch?q=${encodeURIComponent(
+      workEmail
+    )}`
 
     const res = await fetch(verifyWorkSpaceSetupURL)
     const data = await res.json()
