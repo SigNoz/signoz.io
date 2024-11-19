@@ -25,7 +25,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const blogRoutes = allBlogs
     .filter((post) => !post.draft)
     .map((post) => ({
-      url: `${siteUrl}/${post.path}`,
+      url: `${siteUrl}/${post.path}/`,
       lastModified: post.lastmod || post.date,
       changeFrequency: mapChangeFrequency('weekly'),
       priority: 0.5,
@@ -34,7 +34,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const docRoutes = allDocs
     .filter((post) => !post.draft)
     .map((post) => ({
-      url: `${siteUrl}/${post.path}`,
+      url: `${siteUrl}/${post.path}/`,
       lastModified: post.lastmod || post.date,
       changeFrequency: mapChangeFrequency('weekly'),
       priority: 0.5,
@@ -43,7 +43,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const comparisonRoutes = allComparisons
     .filter((post) => !post.draft)
     .map((post) => ({
-      url: `${siteUrl}/${post.path}`,
+      url: `${siteUrl}/${post.path}/`,
       lastModified: post.lastmod || post.date,
       changeFrequency: mapChangeFrequency('weekly'),
       priority: 0.5,
@@ -52,7 +52,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const opentelemetryRoutes = allOpentelemetries
     .filter((post) => !post.draft)
     .map((post) => ({
-      url: `${siteUrl}/${post.path}`,
+      url: `${siteUrl}/${post.path}/`,
       lastModified: post.lastmod || post.date,
       changeFrequency: mapChangeFrequency('weekly'),
       priority: 0.5,
@@ -62,7 +62,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const guideRoutes = allGuides
     .filter((guide) => !guide.draft)
     .map((guide) => ({
-      url: `${siteUrl}/guides/${guide.slug}`,
+      url: `${siteUrl}/${guide.path}/`,
       lastModified: guide.lastmod || guide.date,
       changeFrequency: mapChangeFrequency('weekly'),
       priority: 0.7,
@@ -83,7 +83,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     'teams',
     'guides', // Add the main guides page
   ].map((route) => ({
-    url: `${siteUrl}/${route}`,
+    url: `${siteUrl}/${route}/`,
     lastModified: new Date().toISOString().split('T')[0],
     changeFrequency: mapChangeFrequency('weekly'),
   }))
