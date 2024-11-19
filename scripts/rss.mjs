@@ -10,6 +10,7 @@ import {
   allComparisons,
   allGuides,
   allOpentelemetries,
+  allFAQs,
 } from '../.contentlayer/generated/index.mjs'
 import { sortPosts } from 'pliny/utils/contentlayer.js'
 
@@ -19,13 +20,14 @@ const generateRssItem = (config, post) => {
   else if (post._raw.sourceFilePath.startsWith('comparisons/')) urlPath = 'comparisons'
   else if (post._raw.sourceFilePath.startsWith('guides/')) urlPath = 'guides'
   else if (post._raw.sourceFilePath.startsWith('opentelemetry/')) urlPath = 'opentelemetry'
+  else if (post._raw.sourceFilePath.startsWith('faqs/')) urlPath = 'faqs'
 
   return `
   <item>
     <guid>${config.siteUrl}/${urlPath}/${post.slug}</guid>
     <title>${escape(post.title)}</title>
     <link>${config.siteUrl}/${urlPath}/${post.slug}</link>
-    ${post.summary ? `<description>${escape(post.summary)}</description>` : ''}
+    ${post.summary || post.description ? `<description>${escape(post.summary || post.description)}</description>` : ''}
     <pubDate>${new Date(post.date).toUTCString()}</pubDate>
     <author>${config.email} (${config.author})</author>
     ${post.tags ? post.tags.map((t) => `<category>${t}</category>`).join('') : ''}
@@ -69,7 +71,7 @@ async function generateRSS(config, allBlogs, page = 'feed.xml') {
 }
 
 const rss = () => {
-  generateRSS(siteMetadata, [...allBlogs, ...allComparisons, ...allGuides, ...allOpentelemetries, ...allDocs])
+  generateRSS(siteMetadata, [...allBlogs, ...allComparisons, ...allGuides, ...allOpentelemetries, ...allDocs, ...allFAQs])
   console.log('RSS feed generated...')
 }
 
