@@ -2,12 +2,12 @@
 
 import './teams.styles.css'
 
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import ReactGA from 'react-ga4'
 import TestimonialSection from './TestimonialSection'
 
 import { ArrowRight, Loader2 } from 'lucide-react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 
 interface ErrorsProps {
@@ -58,6 +58,9 @@ const Teams: React.FC<SignUpPageProps> = () => {
   const [submitSuccess, setSubmitSuccess] = useState(false)
   const [submitFailed, setSubmitFailed] = useState(false)
   const router = useRouter()
+
+  const searchParams = useSearchParams()
+  const workEmailFromParams = searchParams.get('q')
 
   const handleInputChange = (event) => {
     const { name, value } = event.target
@@ -193,6 +196,14 @@ const Teams: React.FC<SignUpPageProps> = () => {
     }
   }
 
+  // Set the work email from the URL params to the form data
+  useEffect(() => {
+    if (workEmailFromParams) {
+      setFormData({ ...formData, workEmail: decodeURIComponent(workEmailFromParams) })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [workEmailFromParams])
+
   return (
     <main className="bg-signoz_ink-500">
       <div className="m-auto max-w-[1440px]">
@@ -237,6 +248,7 @@ const Teams: React.FC<SignUpPageProps> = () => {
                       id="workEmail"
                       disabled={isSubmitting}
                       name="workEmail"
+                      value={formData.workEmail}
                       autoComplete="off"
                       onChange={handleInputChange}
                       placeholder="E.g. bart@simpsonmail.com"
