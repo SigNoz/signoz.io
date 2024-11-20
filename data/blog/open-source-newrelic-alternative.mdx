@@ -1,11 +1,11 @@
 ---
 title: SigNoz - Open-source alternative to New Relic
 slug: open-source-newrelic-alternative
-date: 2023-12-20
+date: 2024-11-20
 tags: [SigNoz, Open Source]
 authors: [ankit_anand]
 description: If you're looking for an open-source alternative to New Relic, then you're at the right place. SigNoz is a perfect open-source alternative to New Relic. SigNoz provides a unified UI for metrics, traces and logs with advanced tagging and filtering capabilities...
-image: /img/blog/2023/03/open_source_new_relic_alternative_cover-min.jpg
+image: /img/blog/2024/11/os-new-relic-alternative-cover.webp
 keywords: [new relic,new relic alternative,new relic open source alternative,apm tools,microservice architecture,application performance monitoring]
 ---
 
@@ -171,8 +171,7 @@ keywords: [new relic,new relic alternative,new relic open source alternative,apm
 If you're looking for an open-source alternative to New Relic, then you're at the right place. SigNoz is a perfect open-source alternative to New Relic. SigNoz provides a unified UI for metrics, traces and logs with advanced tagging and filtering capabilities.
 
 
-
-![cover image](/img/blog/2023/03/open_source_new_relic_alternative_cover.webp)
+![cover image](/img/blog/2024/11/os-new-relic-alternative-cover.webp)
 
 In today's digital economy, more and more companies are shifting to cloud-native and microservice architecture to support global scale and distributed teams. But distributed systems also make it impossible for engineering teams to track how user requests perform across services. Application performance monitoring tools provide the visibility needed to resolve performance issues quickly in distributed systems.
 
@@ -182,24 +181,12 @@ Some of the challenges with tools like New Relic includes:
 
 - It is cloud-only, so not suitable for companies that have concerns with sending data outside their infra
 - For any small feature, you are dependent on their roadmap. We think this is an unnecessary restriction for a product which developers use. A product used by developers should be extendible
+- User-based pricing. New Relic charges based on user seats which can get very expensive in case of large engineering teams.
 - Pricing plans of enterprise tools can sometimes leave you in a lurch with frequent changes.
 
-<a href="https://www.reddit.com/r/sysadmin/comments/n6zzwn/what_is_the_catch_with_new_relic/" rel="noopener noreferrer nofollow" target="_blank">Users discussing pain points with New Relic.</a>
 
 
-
-<figure data-zoomable align='center'>
-    <img className="box-shadowed-image"
-    alt="Reddit post discussing issues about pricing model of New Relic"
-    
-    src="/img/blog/2021/09/issue_with_newrelic-min.webp"
-    />
-<figcaption><i>What's the catch with New Relic? (Source: Reddit)</i></figcaption>
-</figure>
-
-
-
-A relatively newer concept in the field of application performance monitoring is observability. Making a system observable is the pursuit of achieving a state of proactiveness to solve unknown issues. Logs, metrics, and traces are usually considered the three pillars of observability.
+<Figure src="/img/blog/2024/11/new-relic-unethical-billing.webp" alt="New Relic's unethical billing" caption="User complaining about unethical billing practices from New Relic (Source: Reddit)" />
 
 Some of the key features of good observability tools are:
 
@@ -239,117 +226,121 @@ And that's where SigNoz shines. It is very simple to get started, supports multi
 
 Some of our key features which makes SigNoz vastly superior to current open-source products and a great alternative to New Relic are:
 
-- Visualise Traces, Metrics, and Logs in a single pane of glass
-- Monitor application metrics like p99 latency, error rates for your services, external API calls, and individual endpoints.
-- Find the root cause of the problem by going to the exact traces which are causing the problem and see detailed [flamegraphs](https://signoz.io/blog/flamegraphs/) of individual request traces.
-- Run aggregates on trace data to get business-relevant metrics
-- Filter and query logs, build dashboards and alerts based on attributes in logs
-- Monitor infrastructure metrics such as CPU utilization or memory usage
-- Record exceptions automatically in Python, Java, Ruby, and Javascript
-- Easy to set alerts with DIY query builder
+- Metrics, traces, and logs under a [single pane of glass](https://signoz.io/blog/single-pane-of-glass-monitoring/)
+- Opentelemetry-native
+- Correlation of telemetry signals based on OpenTelemetry's semantic conventions
+- Out of the box charts for application metrics
+- Seamless flow between metrics, traces & logs
+- Distributed tracing with Flamegraphs & Gantt charts to visualize user requests
+- Filtering based on tags & attributes
+- Custom aggregates on filtered traces
+- Monitoring of messaging queues
+- Infrastructure dashboards
+- Exceptions monitoring
+- Transparent usage data & pricing
 
 
 ### Application metrics
 
-Get p90, p99 latencies, RPS, Error rates, and top endpoints for a service out of the box.
+Get out of the box p90, p99 latencies, RPS, Error rates and top endpoints for a service out of the box.
 
 <figure data-zoomable>
-    <img src="/img/blog/common/signoz_charts_application_metrics.webp" alt="SigNoz dashboard showing popular RED metrics"/>
-    <figcaption><i>SigNoz UI showing application overview metrics like RPS, 50th/90th/99th Percentile latencies, and Error Rate</i></figcaption>
+    <img className="box-shadowed-image" src="/img/blog/common/signoz_charts_application_metrics.webp" alt="SigNoz dashboard showing popular RED metrics"/>
+    <figcaption><i>SigNoz UI showing application overview metrics like 50th/90th/99th Percentile latencies, request rate and Apdex</i></figcaption>
 </figure>
 
-### Seamless flow between application metrics & traces
+### Seamless flow between telemetry signals
 
-Found something suspicious in a metric, just click that point in the graph & get details of traces that may be causing the issues. Seamless, Intuitive.
+Powered by OpenTelemetry's [semantic conventions](https://opentelemetry.io/docs/concepts/semantic-conventions/), you can quickly jump between telemetry signals in SigNoz. Found something suspicious in a metric, just click that point in the graph & get details of traces which may be causing the issues. Seamless, Intuitive.
 
-{/* <!-- <figure data-zoomable align='center'>
-    <img className="box-shadowed-image"
-    alt="Seamless flow between metrics and traces"
+Similarly, we have enabled correlation between other telemetry signals.
+
+#### APM Metrics to Traces & Logs
     
-    src="/img/blog/2021/08/metrics_to_traces_signoz-min.webp"
-    />
-<figcaption><i>Move from metrics to traces at any point of time which needs more analysis"
-    </figure>
- --> */}
+<Figure src="/img/blog/2024/09/introducing-correlation-of-signals-apm-charts-to-logs.webp" alt="APM metrics to Traces & Logs" caption="Quickly jump from APM metrics to traces or logs to investigate issues further" />
 
-<figure data-zoomable align='center'>
-    <img src="/img/blog/common/application_metrics_to_traces.webp" alt="Seamless flow between metrics and traces"/>
-    <figcaption><i>Move from metrics to traces at any point of time which needs more analysis</i></figcaption>
-</figure>
 
-{/* <!-- ### Filtering based on tags
+#### Traces to Logs
 
-For example, you can find latency experienced by customers who have customer_type set as `premium`.
+If you see a API call taking more time than usual, you can go to related logs to investigate further.
 
-<figure data-zoomable align='center'>
-    <img className="box-shadowed-image"
-    alt="Filtering based on tags"
-    
-    src="/img/blog/2021/08/tags_based_filtering_signoz-min.webp"
-    />
-<figcaption><i>Filter traces for a specific user group using tags"
-    </figure>
- --> */}
+<Figure src="/img/blog/common/traces-to-logs.webp" alt="Traces to related logs" caption="Go from traces to related logs to get more context in debugging performance issues" />
 
-### Advanced filters on trace data
+Similarly you can click on detailed view of logs and then go to related trace ID to see the flow of user requests.
 
-Under our traces tab, you can analyze the traces data using filters based on tags, status codes, service names, operation, etc.
+<Figure src="/img/blog/common/logs-to-trace.webp" alt="Logs to traces" caption="Go from logs to related trace ID in flamegraph view to see the flow of user requests" />
 
-Using tags, you can find latency experienced by customers who have customer_type set as `premium`.
 
-<figure data-zoomable align='center'>
-    <img src="/img/blog/common/filters_trace_data.webp" alt="Filters on trace data"/>
-    <figcaption><i>Use advanced filters to analyze your trace data</i></figcaption>
-</figure>
+#### Logs with Infrastructure metrics
 
-### Custom aggregates
+While troubleshooting with logs, you can investigate the related infrastructure metrics to see if issues are happening becuase of that.
 
-Create custom metrics from filtered traces to find metrics of any type of request. Want to find p99 latency of customer_type: premium who are seeing status_code:400. Just set the filters, and you have the graph.
+<Figure src="/img/blog/2024/09/introducing-correlation-of-signals-logs-to-infra-metrics.webp" alt="Logs to infra metrics" caption="Check Pod and Node metrics while troubleshooting with logs" />
 
-<figure data-zoomable align='center'>
-    <img src="/img/blog/common/traces_custom_aggregates.webp" alt="Custom aggregates on filtered traces"/>
-    <figcaption><i>Find custom aggregates on filtered traces</i></figcaption>
-</figure>
+### Quick filers & Advanced Query Builder for all telemetry signals
+
+For all telemetry signals, there are quick filters to quickly filter out the data needed. We have built customized query builders for each signal to make your troublshooting work easier.
+
+For example, query builder for traces allows you to create queries for finding the p99 latency of services.
+
+<Figure src="/img/blog/common/trace-query-builder.webp" alt="Trace Query Builder" caption="Create queries on your trace data by using various aggregate functions and group by options" />
+
+Similarly, use quick filters to quickly filter the data that you need.
+
+<Figure src="/img/blog/common/logs-quick-filter.webp" alt="Logs quick filter" caption="Use quick filter in logs to quickly filter out specific logs based on your use case" />
+
+You can create custom metrics from filtered traces to find metrics of any type of request. Want to find p99 latency of `customer_type: premium` who are seeing `status_code:400`. Just set the filters, and you have the graph. Boom!
+
 
 ### Flamegraphs & Gantt charts
 
-Detailed flamegraph & Gantt charts to find the exact cause of the issue and which underlying requests are causing the problem. Is it a SQL query gone rogue or a Redis operation is causing an issue?
+Detailed flamegraph & Gantt charts to find the exact cause of the issue and which underlying requests are causing the problem. Is it a SQL query gone rogue or a Redis operation is causing an issue? Get more context on your spans with tags and events.
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/common/signoz_flamegraphs.webp" alt="Detailed Flamegraphs & Gantt charts"/>
+    <img className="box-shadowed-image" src="/img/blog/common/signoz_flamegraphs.webp" alt="Detailed Flamegraphs & Gantt charts"/>
     <figcaption><i>Spans of a trace visualized with the help of flamegraphs and gantt charts in SigNoz dashboard</i></figcaption>
 </figure>
 
 ### Logs Management
 
-SigNoz provides Logs management with advanced log query builder. You can also monitor your logs in real-time using live tailing. 
+SigNoz provides Logs management with advanced log query builder. You can also monitor your logs in real-time using live tailing. SigNoz uses a columnar database ClickHouse to store logs, which is [very efficient at ingesting and storing logs data](https://signoz.io/blog/logs-performance-benchmark/). Columnar databases like ClickHouse are very effective in storing log data and making it available for analysis.
 
 <figure data-zoomable align='center'>
     <img src="/img/blog/common/signoz_logs.webp" alt="Logs tab in SigNoz"/>
     <figcaption><i>Logs tab in SigNoz comes equipped with advanced logs query builder and live tailing</i></figcaption>
 </figure>
 
-### Transparent usage Data
 
-You can drill down details of how many events is each application sending or at what granularity so that you can adjust your sampling rate as needed and not get a shock at the end of the month (case with SaaS vendors many times)
+### Metrics & Dashboards
+
+Monitor any metrics important to you. Ingest metrics from your infrastructure or applications and create customized dashboards to monitor them.
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/common/signoz_usage_explorer.webp" alt="Transparent usage data"/>
-    <figcaption><i>SigNoz provides usage explorer so that you are always informed about your usage</i></figcaption>
+    <img src="/img/blog/2024/11/metrics-n-dashboards.webp" alt="A hostmetrics dashboard"/>
+    <figcaption><i>You can create any kind of customized dashboards using different visualization panel types and an advanced query builder</i></figcaption>
+</figure>
+
+### Exceptions Monitoring
+
+Monitor exceptions automatically in Python, Java, Ruby, and Javascript. For other languages, just drop in a few lines of code and start monitoring exceptions.
+
+<figure data-zoomable align='center'>
+    <img src="/img/features/exceptions/exceptions-overview.webp" alt="Exceptions Monitoring in SigNoz"/>
+    <figcaption><i>Exceptions Monitoring in SigNoz</i></figcaption>
 </figure>
 
 
-### Native OpenTelemetry support
 
-SigNoz is built to support OpenTelemetry natively. OpenTelemetry is becoming the world standard when it comes to generating and managing telemetry data(logs, metrics, and traces). 
+### Simple usage-based pricing with cost control features
 
-Some of the key advantages of using OpenTelemetry are:
+Open-source SigNoz is free to self-host and use. SigNoz cloud is the easiest way of running SigNoz without any hassle of maintenance. For cloud, we have a simple usage-based pricing based on amount of data sent.
 
-- Reduces performance overhead on your application to generate and manage telemetry data
-- Supports multiple popular programming languages like Java, Javascript, C++, Go, Python, etc.
-- Provides libraries and agents to auto-instrument popular libraries and frameworks requiring minimal changes to your codebase
-- Backed by technology giants like Google, Microsoft, and other big cloud vendors.
-- No vendor lock-in. Freedom to switch to new backend analysis tools by using relevant exporters
+- Logs: $0.3/GB ingested
+- Traces: $0.3/GB ingested
+- Metrics: $0.1/mil samples
+
+Check out our [pricing plans](/pricing/) for more details. You can also estimate your monthly bill using the [pricing calculator](https://signoz.io/pricing/#estimate-your-monthly-bill).
+
 
 ## Getting started with SigNoz
 
