@@ -329,12 +329,13 @@ export default function Login() {
                   />
                 )}
 
-                <span className="text-xs text-signoz_vanilla-400">{badge.text}</span>
-
-                {badge.url && (
-                  <a href={badge.url} target="_blank">
+                {badge.url ? (
+                  <a href={badge.url} className="flex items-center gap-2" target="_blank">
+                    <span className="text-xs text-signoz_vanilla-400">{badge.text}</span>
                     <ArrowUpRight size={12} />
                   </a>
+                ) : (
+                  <span className="text-xs text-signoz_vanilla-400">{badge.text}</span>
                 )}
 
                 {index < trustBadges.length - 1 && (
