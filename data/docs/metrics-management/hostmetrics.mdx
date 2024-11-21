@@ -1,0 +1,84 @@
+---
+date: 2024-11-15
+title: Hostmetrics
+id: hostmetrics
+---
+
+## Hostmetrics receiver
+
+The hostmetrics receiver collects metrics from the host machine. It collects metrics from the following sources:
+
+- CPU
+- Memory
+- Disk
+- Network
+- Paging
+- Swap
+- System
+
+For more information about the metrics collected by the hostmetrics receiver, see documentation [here](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/hostmetricsreceiver/README.md).
+
+### Collect host metrics from k8s nodes
+
+To collect host metrics from k8s nodes, you can use the SigNoz Helm chart `k8s-infra` to deploy the `hostmetrics` receiver. The chart runs an agent on each k8s node and collects host metrics. Host metrics collection is enabled by default in the `k8s-infra` Helm chart. Configuring the host metrics collection using the `hostMetrics` preset. It allows you to enable/disable metrics collection, configure the collection frequency, and configure the scrapers.
+
+The following example shows how to configure the `hostMetrics` preset to collect metrics every 60 seconds and enable the CPU scraper to collect optional metrics:
+
+```yaml
+hostMetrics:
+  collectionInterval: 60s
+  scrapers:
+    cpu:
+      metrics:
+        system.cpu.logical.count:
+          enabled: true
+        system.cpu.physical.count:
+          enabled: true
+```
+
+### Collect host metrics from virtual machines (VMs)
+
+To collect host metrics from virtual machines (VMs), you need to run otel collector on each VM and configure the hostmetrics receiver to collect metrics from the VM. The following example shows how to configure the hostmetrics receiver to collect metrics from a VM:
+
+```yaml
+receivers:
+  # Ref: https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/hostmetricsreceiver/README.md
+  hostmetrics:
+    collection_interval: 60s
+    scrapers:
+      cpu:
+      load:
+      memory:
+      disk:
+      filesystem:
+      network:
+processors:
+  # Ref: https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/resourcedetectionprocessor/README.md
+  resourcedetection:
+    detectors: [env, system] # Before system detector, include ec2 for AWS, gcp for GCP and azure for Azure.
+    # Using OTEL_RESOURCE_ATTRIBUTES envvar, env detector adds custom labels.
+    system:
+      hostname_sources: [os] # alternatively, use [dns,os] for setting FQDN as host.name and os as fallback
+extensions:
+  health_check:
+  zpages:
+exporters:
+  otlp:
+    endpoint: "ingest.{region}.signoz.cloud:443"
+    tls:
+      insecure: false
+    headers:
+      "signoz-access-token": "${env:SIGNOZ_INGESTION_KEY}"
+service:
+  telemetry:
+    metrics:
+      address: 0.0.0.0:8888
+  extensions: [health_check, zpages]
+  pipelines:
+    metrics/hostmetrics:
+      receivers: [hostmetrics]
+      processors: [resourcedetection]
+      exporters: [otlp]
+```
+
+Note: replace the `{region}` placeholder with the region of your SigNoz instance and make sure to set the `SIGNOZ_INGESTION_KEY` environment variable with the ingestion key of your SigNoz instance.
