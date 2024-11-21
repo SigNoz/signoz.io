@@ -158,7 +158,7 @@ const Header = () => {
       <div className="relative z-[1] !mx-auto mx-2 flex !w-[100vw] flex-col items-center justify-center gap-3 border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 pb-12 pt-4 md:mx-5 md:!w-[80vw] md:flex-row">
         <Button id="btn-get-started-homepage-hero">
           <Link href="/teams/" className="flex-center">
-            Get started with distributed tracing
+            Get Started - Free
             <ArrowRight size={14} />
           </Link>
         </Button>
