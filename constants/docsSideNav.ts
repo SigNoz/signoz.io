@@ -463,11 +463,6 @@ const docsSideNav = [
       },
       {
         type: 'doc',
-        route: '/docs/userguide/hostmetrics',
-        label: 'Hostmetrics Dashboard',
-      },
-      {
-        type: 'doc',
         route: '/docs/userguide/collecting-ecs-logs-and-metrics',
         label: 'ECS Infra Metrics & Logs',
       },
