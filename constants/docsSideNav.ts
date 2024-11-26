@@ -464,7 +464,7 @@ const docsSideNav = [
       {
         type: 'doc',
         route: '/docs/userguide/hostmetrics',
-        label: 'Hostmetrics Dashboard',
+        label: 'Sending Host Metrics to SigNoz',
       },
       {
         type: 'doc',
@@ -774,11 +774,6 @@ const docsSideNav = [
         type: 'doc',
         route: '/docs/metrics-management/k8s-infra-otel-config',
         label: 'Configure k8s-infra otelDeployment to collect metrics from receivers',
-      },
-      {
-        type: 'doc',
-        route: '/docs/metrics-management/hostmetrics',
-        label: 'Send Hostmetrics to SigNoz',
       },
     ],
   },
