@@ -38,7 +38,7 @@ const TrySigNozFloatingCard: React.FC = () => {
         style={{color: 'white', textDecoration: 'none'}}
         className="inline-block bg-signoz_robin-500 hover:bg-signoz_robin-600 text-white px-4 py-2 mt-6 rounded-lg text-sm font-semibold transition-colors duration-300 flex items-center justify-between"
       >
-        <span>Get Started</span>
+        <span>Get Started - Free</span>
         <ArrowRight size={16} />
       </Link>
     </div>

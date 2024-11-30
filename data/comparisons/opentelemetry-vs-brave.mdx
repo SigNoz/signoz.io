@@ -1,0 +1,638 @@
+---
+
+title: OpenTelemetry vs Brave - A Practical Comparison Guide
+slug: opentelemetry-vs-brave
+date: 2024-11-29
+tags: [opentelemetry]
+authors: [bhavya_sachdeva]
+description: Compare OpenTelemetry and Brave for distributed tracing. Learn key differences, migration strategies, and how to choose the right solution for your needs.
+keywords: [opentelemetry vs brave, distributed tracing comparison, spring boot tracing, brave tracer, opentelemetry implementation]
+
+---
+
+Choosing between OpenTelemetry and Brave for distributed tracing is a significant decision that can shape the way you monitor and debug your applications. Distributed tracing is essential in understanding microservices' performance and dependencies,  as it provides the visibility necessary to troubleshoot latency issues and optimize resource usage, especially in complex and distributed systems. While both OpenTelemetry and Brave provide robust tracing capabilities, each tool has unique features, advantages, and trade-offs that suit different use cases.
+
+In this comprehensive guide, we’ll delve into the key differences, pros and cons, implementation strategies, and practical insights to help you decide on the right tracing solution for your applications.
+
+## Quick Comparison Table
+
+| Feature/Criteria | OpenTelemetry | Brave | Best Use Case |
+| --- | --- | --- | --- |
+| Tracing Protocols | Supports OTLP (OpenTelemetry Protocol), gRPC, HTTP, and more. | Focuses on Zipkin protocol and integrations. | Large-scale distributed systems requiring diverse protocol support. |
+| Instrumentation | Extensive auto-instrumentation libraries for multiple languages. | Limited auto-instrumentation; manual setup often required. | Applications requiring language-specific instrumentation. |
+| Ecosystem Support | Broad compatibility with numerous observability and APM tools. | Primarily integrates with Zipkin-compatible systems. | Organizations with existing Zipkin infrastructure. |
+| Customization | Highly flexible, supports custom collectors and pipelines. | Limited customization options. | Complex observability pipelines needing tailored data flows. |
+| Community Support | Large, active open-source community. | Smaller but dedicated user base. | Teams seeking community-backed solutions with fast updates. |
+| Best Use Case | Observing and managing complex, heterogeneous environments. | Lightweight tracing for Zipkin-focused setups. | See individual cells for ideal usage. |
+
+## Why Distributed Tracing Matters
+
+Modern applications often follow a microservices architecture, where different parts of an application run as independent services. While this design makes applications more scalable and easier to manage, it also makes troubleshooting issues more complicated. For example, when a request fails or becomes slow, identifying the exact service causing the problem can feel like finding a needle in a haystack.
+
+This is where distributed tracing steps in. It helps you track the path of a request as it moves through different services, providing insights into where bottlenecks or errors occur. With this visibility, developers and operations teams can quickly resolve issues, improve performance, and ensure reliable user experiences.
+
+However, not all tracing tools are the same. Two popular options, OpenTelemetry and Brave, take different approaches to distributed tracing, catering to different needs.
+
+Both OpenTelemetry and Brave offer solutions for tracing, but they come with different methodologies:
+
+1. OpenTelemetry: Designed to support a wide array of observability signals, including metrics, traces, and logs, in a unified framework. OpenTelemetry is the result of a merger between OpenTracing and OpenCensus and is now widely accepted as an industry standard backed by the Cloud Native Computing Foundation (CNCF).
+    
+    Key Features:
+    
+    - Works with multiple programming languages.
+    - Easily integrates with existing tools like Prometheus, Grafana, or Jaeger.
+    - Supports advanced use cases like tracing requests across hybrid environments (cloud and on-premises).
+    
+    Best For: Teams looking for a flexible, future-proof solution that works across diverse systems and observability needs.
+    
+2. Brave: A high-performance tracing tool specifically tailored for Java applications, designed to work closely with Zipkin for tracing data visualization. Brave’s performance is optimized to work with low overhead, making it a solid choice for Java-based systems where Zipkin is already implemented.
+    
+    Key Features:
+    
+    - Optimized for Java-based systems.
+    - Minimal overhead to ensure performance isn’t impacted.
+    - Out-of-the-box integration with Zipkin for fast setup and visualization.
+    
+    Best For: Teams heavily invested in Java and Zipkin who prioritize efficiency and simplicity over broad feature sets.
+    
+
+---
+
+## Understanding the Fundamentals of Brave and OpenTelemetry
+
+Distributed tracing tools can be thought of as navigational systems for complex highways. Imagine trying to map the journey of a package as it travels through a network of shipping hubs. Each hub represents a service, and the tracing tool acts like a GPS tracker, providing a detailed log of where the package has been, how long it stayed at each hub, and where delays occurred.
+
+Brave and OpenTelemetry are like two GPS systems, each built with a different philosophy and use case in mind.
+
+### Brave’s Connection to Zipkin
+
+If Brave were a GPS tracker, it would be a high-performance, specialized device for a particular type of vehicle—say, delivery trucks made by a specific manufacturer (Java-based systems). It’s tightly integrated with Zipkin, which is like the mapping platform where all the tracking data is visualized.
+
+### Key Features of Brave:
+
+- Native Java Instrumentation:
+    
+    Brave is purpose-built for Java applications. This specialization allows it to be lightweight and efficient, much like a GPS designed only for delivery trucks—optimized for speed and reliability without unnecessary features.
+    
+- Built-in Zipkin Compatibility:
+    
+    Brave integrates seamlessly with Zipkin, a widely-used distributed tracing system originally developed by Twitter. If Zipkin is your map, Brave is the tracker feeding it data. This combination ensures that latency and trace data can be easily captured and visualized with minimal setup.
+    
+- Proven in Production:
+    
+    Brave is designed for high-performance environments where system overhead must be minimal, making it ideal for real-time delivery routes (production systems) that cannot afford delays.
+    
+
+### Strengths of Brave:
+
+- Stability: It has been tested and proven in large-scale, real-world systems, offering reliability you can trust.
+- Quick Setup with Zipkin: Organizations already using Zipkin can benefit from Brave’s seamless integration, reducing the time to start monitoring.
+
+Best Use Case: If your application is primarily Java-based and you already use Zipkin, Brave is the go-to choice. It’s like adding a specialized GPS to your existing logistics system—fast, effective, and tailored to your needs.
+
+### OpenTelemetry’s Evolution
+
+On the other hand, OpenTelemetry is like a multi-purpose GPS and analytics system for all types of vehicles. Whether you’re tracking delivery trucks, passenger cars, or drones (services written in multiple programming languages), OpenTelemetry provides a unified solution.
+
+### Key Features of OpenTelemetry:
+
+- A Unified Observability Standard:
+    
+    Unlike Brave, OpenTelemetry isn’t just about traces. It’s like a GPS system that also tracks fuel consumption (metrics) and driver logs (logs), providing a complete picture of the journey.
+    
+- Multi-Signal Support:
+    
+    OpenTelemetry doesn’t stop at tracing. It integrates with tools to monitor logs and metrics, enabling a broader observability strategy. This is invaluable for teams that want a holistic understanding of their system's performance.
+    
+- Vendor-Neutral Approach:
+    
+    Data collected through OpenTelemetry can be exported to a wide range of tools, including Prometheus, Jaeger, Datadog, and others. This vendor-neutral design means you’re not locked into a specific ecosystem, giving you the freedom to choose the tools that best fit your needs.
+    
+- Broad Language Support:
+    
+    With support for 11+ programming languages, OpenTelemetry is highly versatile, making it the preferred choice for teams with a diverse tech stack. It’s like having a GPS that works for trucks, cars, motorcycles, and even bicycles.
+    
+
+### Strengths of OpenTelemetry:
+
+- CNCF Backing and Community Support: As one of the fastest-growing projects under the Cloud Native Computing Foundation (CNCF), OpenTelemetry benefits from strong community and enterprise support.
+- Cloud-Native Integrations: OpenTelemetry works seamlessly with modern cloud-native tools, making it ideal for teams adopting Kubernetes or serverless architectures.
+- Future-Proof Design: Its multi-signal observability approach positions OpenTelemetry as a forward-thinking solution for evolving system needs.
+
+Best Use Case: If your systems span multiple languages and you want a modern, unified observability framework that adapts to different tools and environments, OpenTelemetry is the way to go. It’s like having a state-of-the-art GPS that works for any vehicle and integrates with advanced analytics platforms.
+
+### Choosing the Right Tool
+
+Think of Brave as a specialist—a tool designed for a specific job (Java with Zipkin), offering efficiency and simplicity. In contrast, OpenTelemetry is a generalist, providing versatility and a wide array of features that suit diverse environments.
+
+- Use Brave if your system is Java-based, already uses Zipkin, and prioritizes low-overhead tracing.
+- Choose OpenTelemetry if you need a flexible, vendor-neutral solution that supports multiple signals and works across many programming languages.
+
+This comparison ensures that whether you’re managing a specialized fleet or a diverse transportation network, you’ll have the right GPS to keep your operations running smoothly.
+
+## Core Architectural Differences
+
+### Brave Architecture Overview
+
+Brave is designed around Zipkin’s tracing model, emphasizing simplicity and low overhead. It is best suited for applications where high performance and minimal configuration are priorities. The architectures of OpenTelemetry and Brave differ significantly in terms of design philosophy and implementation approach. Let’s examine the core components of each:
+
+```java
+// Brave implementation
+Tracing tracing = Tracing.newBuilder()
+    .localServiceName("my-service")
+    .spanReporter(spanReporter)
+    .build();
+
+```
+
+### OpenTelemetry Architecture Overview
+
+OpenTelemetry’s architecture is more flexible and powerful, accommodating complex use cases and high configurability. It incorporates multiple components, such as the OpenTelemetry Collector and Instrumentation Libraries, to capture various observability signals.
+
+```java
+// OpenTelemetry implementation
+SdkTracerProvider sdkTracerProvider = SdkTracerProvider.builder()
+    .addSpanProcessor(BatchSpanProcessor.builder(otlpExporter).build())
+    .setResource(Resource.getDefault())
+    .build();
+
+```
+
+Steps for Brave Implementation:
+
+1. Install Dependencies: Add Brave’s core and reporter dependencies to your project’s `pom.xml`.
+2. Configure Tracer: Create a configuration class to set up `Tracing` with your service name and span reporter.
+3. Manual Instrumentation: Use `tracer.nextSpan()` to create spans for specific operations.
+
+### Key Differences in Implementation
+
+- Configuration Complexity: OpenTelemetry offers more configurations but requires setup through multiple components, such as tracers, exporters, and processors.
+- Performance: While OpenTelemetry can have a marginally higher performance impact, its flexibility allows for adjustments in sampling and data handling to optimize resource usage.
+- Compatibility: Brave is tightly integrated with Zipkin and may require additional steps to be compatible with other tracing systems. OpenTelemetry is vendor-neutral and designed to work across various backends.
+
+---
+
+## Technical Deep Dive: Comparing Instrumentation
+
+### Instrumentation Approach in OpenTelemetry
+
+OpenTelemetry supports automatic and manual instrumentation across a wide range of languages and frameworks. This flexibility allows for easier onboarding and adaptability across various environments.
+
+Example of OpenTelemetry Manual Instrumentation:
+
+```java
+@WithSpan
+public void processOrder(Order order) {
+    Span span = tracer.spanBuilder("process-order")
+        .setAttribute("orderId", order.getId())
+        .startSpan();
+    try {
+        // Business logic
+    } finally {
+        span.end();
+    }
+}
+```
+
+Steps for Manual Instrumentation:
+
+1. Annotate Methods: Use `@WithSpan` to create spans for method invocations.
+2. Create Custom Spans:
+    - Use `tracer.spanBuilder()` to name and configure spans.
+    - Add attributes like `orderId` for contextual data.
+3. Handle Span Lifecycle:
+    - Call `startSpan()` at the beginning of the operation.
+    - Call `span.end()` after completing the operation.
+
+### Instrumentation Approach in Brave
+
+Brave primarily relies on manual instrumentation and is more suited for experienced developers familiar with Zipkin-style tracing.
+
+Example of Brave Manual Instrumentation:
+
+```java
+public void processOrder(Order order) {
+    Span span = tracer.nextSpan().name("process-order")
+        .tag("orderId", order.getId().toString())
+        .start();
+    try (Tracer.SpanInScope ws = tracer.withSpanInScope(span)) {
+        // Business logic
+    } finally {
+        span.finish();
+    }
+}
+
+```
+
+Steps for Manual Instrumentation:
+
+1. Create a Span: Use `tracer.nextSpan()` to start a span.
+2. Set Tags and Metadata: Add contextual information like `orderId` using `tag()`.
+3. Manage Scope: Use `Tracer.SpanInScope` to ensure the span is active for the operation.
+4. Close the Span: Always call `span.finish()` to mark the operation’s end.
+
+### Comparative Analysis
+
+- Auto vs. Manual Instrumentation: OpenTelemetry’s auto-instrumentation can save time and effort, especially for teams managing large, complex applications.
+- Overhead Considerations: Brave’s lightweight design ensures minimal resource consumption, whereas OpenTelemetry’s configuration flexibility can add a slight performance impact if not optimized properly.
+
+---
+
+## Spring Boot Integration Specifics
+
+For applications built using Spring Boot, distributed tracing support varies depending on whether you’re using OpenTelemetry or Brave. Here’s a look at the specifics.
+
+### Spring Cloud Sleuth with Brave
+
+Brave integrates seamlessly with Spring Boot using Spring Cloud Sleuth, which provides out-of-the-box tracing for common operations.
+
+```yaml
+spring:
+  sleuth:
+    brave:
+      enabled: true
+    sampler:
+      probability: 1.0
+
+```
+
+Steps to Integrate:
+
+1. Add Sleuth Dependency:
+    
+    ```xml
+    <dependency>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-starter-sleuth</artifactId>
+        <version>3.1.6</version>
+    </dependency>
+    
+    ```
+    
+2. Enable Brave Tracing: Configure Sleuth to use Brave in `application.yml`.
+3. Customize Sampling: Set the `sampler.probability` for desired trace coverage.
+
+### Spring Boot with OpenTelemetry
+
+OpenTelemetry offers native support through Micrometer in Spring Boot 3.x, making it a strong choice for Spring Boot-based applications moving towards modern observability stacks.
+
+```yaml
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+    opentelemetry:
+      enabled: true
+
+```
+
+Steps to Integrate:
+
+1. Add Micrometer Dependency:
+    
+    ```xml
+    <dependency>
+        <groupId>io.micrometer</groupId>
+        <artifactId>micrometer-tracing-bridge-otel</artifactId>
+        <version>1.1.0</version>
+    </dependency>
+    
+    ```
+    
+2. Enable OpenTelemetry Tracing: Configure `management.tracing` in `application.yml`.
+3. Adjust Sampling: Set `sampling.probability` to control trace data volume.
+
+### Key Comparison
+
+- Compatibility with Spring Boot 3.x: OpenTelemetry’s integration with Spring Boot 3.x provides native support, whereas Brave integration remains available through Spring Cloud Sleuth.
+- Observability Breadth: OpenTelemetry supports both tracing and metrics natively, giving it an edge in broader observability coverage in Spring applications.
+
+---
+
+## Implementation Guide for Brave and OpenTelemetry
+
+### Brave Setup
+
+Brave is a lightweight, Zipkin-based tracing library designed for simplicity and performance. Follow these steps to set up Brave in your application:
+
+---
+
+### Step 1: Add Dependencies
+
+To use Brave, include the required dependencies in your `pom.xml`:
+
+```xml
+<dependency>
+    <groupId>io.zipkin.brave</groupId>
+    <artifactId>brave</artifactId>
+    <version>5.15.1</version>
+</dependency>
+<dependency>
+    <groupId>io.zipkin.reporter2</groupId>
+    <artifactId>zipkin-reporter</artifactId>
+    <version>2.16.3</version>
+</dependency>
+
+```
+
+Explanation:
+
+- `brave`: Core library for distributed tracing.
+- `zipkin-reporter`: Allows spans to be sent to a Zipkin server.
+
+---
+
+### Step 2: Configure Tracer
+
+Set up the `Tracing` bean in a Spring configuration class to enable tracing for your application:
+
+```java
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import brave.Tracing;
+import brave.sampler.Sampler;
+
+@Configuration
+public class BraveConfig {
+
+    @Bean
+    public Tracing tracing() {
+        return Tracing.newBuilder()
+            .localServiceName("my-service") // Identifies your service in the trace data
+            .sampler(Sampler.ALWAYS_SAMPLE) // Always sample traces (useful for testing)
+            .build();
+    }
+}
+
+```
+
+Detailed Explanation:
+
+1. `localServiceName`:
+    - Sets the name of the service for identification in Zipkin.
+    - Example: Use names like `"order-service"` or `"payment-service"` to represent different modules.
+2. `Sampler.ALWAYS_SAMPLE`:
+    - Configures all requests to be sampled (useful during development and testing).
+    - In production, you can adjust this to sample a percentage of requests (e.g., `Sampler.create(0.1f)` for 10%).
+
+---
+
+### Step 3: Add Manual Instrumentation
+
+Use Brave’s `Tracer` to manually create spans and record trace information for specific operations:
+
+```java
+import brave.Tracer;
+import brave.Span;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+@Service
+public class OrderService {
+
+    @Autowired
+    private Tracer tracer;
+
+    public void processOrder(String orderId) {
+        Span span = tracer.nextSpan().name("process-order").tag("orderId", orderId).start();
+        try (Tracer.SpanInScope ws = tracer.withSpanInScope(span)) {
+            // Business logic
+            System.out.println("Processing order: " + orderId);
+        } finally {
+            span.finish(); // End the span after operation
+        }
+    }
+}
+
+```
+
+Detailed Explanation:
+
+1. `tracer.nextSpan()`:
+    - Creates a new span with a custom name (`"process-order"`) to track a specific operation.
+2. `tag()`:
+    - Adds metadata to the span, such as `orderId` for contextual tracing.
+3. `Tracer.SpanInScope`:
+    - Ensures the span is active for the current thread, allowing child spans to link correctly.
+4. `span.finish()`:
+    - Marks the end of the operation, completing the trace.
+
+---
+
+### OpenTelemetry Setup
+
+OpenTelemetry is a vendor-neutral observability framework that supports distributed tracing, metrics, and logging. Follow these steps to set up OpenTelemetry:
+
+---
+
+### Step 1: Add Dependencies
+
+Include the OpenTelemetry SDK and an exporter in your `pom.xml`:
+
+```xml
+<dependency>
+    <groupId>io.opentelemetry</groupId>
+    <artifactId>opentelemetry-sdk</artifactId>
+    <version>1.14.0</version>
+</dependency>
+<dependency>
+    <groupId>io.opentelemetry</groupId>
+    <artifactId>opentelemetry-exporter-otlp</artifactId>
+    <version>1.14.0</version>
+</dependency>
+
+```
+
+Explanation:
+
+- `opentelemetry-sdk`: Core library for OpenTelemetry.
+- `opentelemetry-exporter-otlp`: Sends spans to an OpenTelemetry Collector or compatible backend.
+
+---
+
+### Step 2: Configure TracerProvider
+
+Create a configuration class to set up OpenTelemetry’s `SdkTracerProvider` and exporter:
+
+```java
+import io.opentelemetry.api.GlobalOpenTelemetry;
+import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.sdk.OpenTelemetrySdk;
+import io.opentelemetry.sdk.resources.Resource;
+import io.opentelemetry.sdk.trace.SdkTracerProvider;
+import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
+import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class OpenTelemetryConfig {
+
+    @Bean
+    public Tracer tracer() {
+        // Configure OTLP Exporter
+        OtlpGrpcSpanExporter otlpExporter = OtlpGrpcSpanExporter.builder()
+            .setEndpoint("http://localhost:4317") // Replace with your collector's endpoint
+            .build();
+
+        // Set up SDK Tracer Provider
+        SdkTracerProvider sdkTracerProvider = SdkTracerProvider.builder()
+            .addSpanProcessor(BatchSpanProcessor.builder(otlpExporter).build())
+            .setResource(Resource.getDefault().toBuilder()
+                .put("service.name", "my-service") // Identifies your service in the trace
+                .build())
+            .build();
+
+        // Initialize OpenTelemetry SDK
+        OpenTelemetrySdk openTelemetry = OpenTelemetrySdk.builder()
+            .setTracerProvider(sdkTracerProvider)
+            .build();
+
+        // Register globally
+        GlobalOpenTelemetry.set(openTelemetry);
+
+        return openTelemetry.getTracer("my-service");
+    }
+}
+
+```
+
+Detailed Explanation:
+
+1. `OtlpGrpcSpanExporter`:
+    - Configures the exporter to send trace data to an OpenTelemetry Collector using the OTLP protocol.
+    - Replace `http://localhost:4317` with your collector’s actual endpoint.
+2. `SdkTracerProvider`:
+    - Sets up the tracing provider and attaches a span processor for batching and exporting spans.
+3. `Resource`:
+    - Defines metadata like `service.name` to identify your service in the trace.
+4. `GlobalOpenTelemetry.set()`:
+    - Registers the SDK globally, making the tracer available throughout your application.
+
+---
+
+### Step 3: Add Manual Instrumentation
+
+Use OpenTelemetry’s `Tracer` to create custom spans for specific operations:
+
+```java
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.Tracer;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+@Service
+public class OrderService {
+
+    @Autowired
+    private Tracer tracer;
+
+    public void processOrder(String orderId) {
+        Span span = tracer.spanBuilder("process-order")
+            .setAttribute("orderId", orderId)
+            .startSpan();
+        try {
+            // Business logic
+            System.out.println("Processing order: " + orderId);
+        } finally {
+            span.end(); // End the span after operation
+        }
+    }
+}
+
+```
+
+Detailed Explanation:
+
+1. `spanBuilder()`:
+    - Starts building a new span with a name (`"process-order"`) and attributes.
+2. `setAttribute()`:
+    - Adds metadata to the span, such as the `orderId`.
+3. `span.end()`:
+    - Ends the span after the operation is complete.
+
+---
+
+## Choosing the Right Solution: OpenTelemetry vs Brave
+
+---
+
+### When to Choose OpenTelemetry
+
+- Multi-language and multi-signal observability needs:
+    - Use OpenTelemetry if your application requires tracing, metrics, and logs across different programming languages.
+- Vendor-neutral integrations:
+    - OpenTelemetry integrates with multiple backends like Jaeger, Zipkin, Prometheus, and others.
+- Future-proofing:
+    - OpenTelemetry is the industry standard for modern observability stacks, with growing support.
+
+---
+
+### When to Choose Brave
+
+- Java-only applications:
+    - Brave is optimized for Java applications and tightly integrates with Zipkin.
+- High-performance requirements with minimal overhead:
+    - Choose Brave if performance is critical and resource usage must be minimal.
+- Established observability stack:
+    - If your organization already uses Zipkin, Brave is a natural fit with minimal setup.
+
+## Implementing Efficient Tracing with SigNoz
+
+SigNoz is an open-source, OpenTelemetry-native Application Performance Monitoring (APM) tool designed for seamless observability. With support for both gRPC and HTTP protocols for data ingestion, SigNoz empowers developers to monitor, analyze, and optimize application performance efficiently.
+
+SigNoz is an open-source, OpenTelemetry-native Application Performance Monitoring (APM) tool that supports both gRPC and HTTP protocols for data ingestion. This flexibility allows you to choose the best protocol for your needs while benefiting from SigNoz's powerful analysis and visualization capabilities.
+
+Key features of SigNoz:
+
+- Full support for OpenTelemetry data formats
+- Real-time monitoring and alerting
+- Customizable dashboards
+- Distributed tracing visualization
+- Exception tracking and error monitoring
+
+To set up SigNoz for efficient tracing:
+
+1. Install SigNoz using Docker or Kubernetes.
+2. Configure your application to send telemetry data to SigNoz.
+3. For OpenTelemetry Users:
+    - Use OpenTelemetry Protocol (OTLP) exporters to send telemetry data directly to SigNoz.
+    - Configure the endpoint to match the SigNoz OTLP ingestion URL.
+    - Ensure that traces, metrics, and logs are appropriately instrumented in your application.
+4. For Brave Users:
+    - Configure Brave to send traces via a Zipkin-compatible endpoint.
+    - Ensure the Zipkin endpoint in your Brave configuration points to SigNoz.
+    - Verify that your tracing spans are reaching SigNoz for visualization.
+5. Use the SigNoz UI to analyze your traces, metrics, and logs.
+
+<GetStartedSigNoz />
+
+By setting up SigNoz with OpenTelemetry or Brave, you can enhance your observability stack and ensure your applications perform at their best. For a deeper understanding and advanced configurations, visit the [SigNoz Documentation](https://signoz.io/docs/).
+
+## Key Takeaways
+
+- OpenTelemetry provides a robust, multi-signal, multi-language observability solution.
+- Brave offers an efficient and lightweight tracing solution optimized for Java-based applications.
+- OpenTelemetry is ideal for heterogeneous systems requiring flexibility and vendor neutrality.
+- Brave is best suited for setups with existing Zipkin infrastructure and minimal overhead needs.
+- Aligning the choice with your application's architecture and goals ensures effective tracing implementation.
+- A well-suited tracing tool enhances understanding, troubleshooting, and performance optimization.
+
+## FAQs
+
+### 1. What is distributed tracing?
+
+Distributed tracing helps track requests as they move through different services in a distributed system, making it easier to debug and optimize application performance.
+
+### 2. How is OpenTelemetry different from Brave?
+
+- OpenTelemetry supports tracing, metrics, and logs across multiple languages.
+- Brave focuses solely on tracing for Java applications, with tight integration with Zipkin.
+
+### 3. Which tool has auto-instrumentation?
+
+OpenTelemetry provides extensive auto-instrumentation libraries, while Brave primarily relies on manual instrumentation.
+
+### 4. Which tool is more suitable for modern applications?
+
+OpenTelemetry is better for modern applications requiring diverse observability needs, while Brave is ideal for simpler setups focusing on Java-based tracing.

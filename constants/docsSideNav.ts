@@ -464,7 +464,7 @@ const docsSideNav = [
       {
         type: 'doc',
         route: '/docs/userguide/hostmetrics',
-        label: 'Hostmetrics Dashboard',
+        label: 'Sending Host Metrics to SigNoz',
       },
       {
         type: 'doc',
@@ -1095,7 +1095,12 @@ const docsSideNav = [
         type: 'doc',
         route: '/docs/messaging-queues/strimzi',
         label: 'Strimzi',
-      }
+      },
+      {
+        type: 'doc',
+        route: '/docs/messaging-queues/confluent-kafka',
+        label: 'Confluent Kafka',
+      },
      ],
   },
   {
