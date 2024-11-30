@@ -1084,8 +1084,18 @@ const docsSideNav = [
       {
         type: 'doc',
         route: '/docs/messaging-queues/kafka',
-        label: 'Kafka',
+        label: 'Self-Hosted Kafka',
       },
+      {
+        type: 'doc',
+        route: '/docs/messaging-queues/msk',
+        label: 'Amazon MSK',
+      },
+      {
+        type: 'doc',
+        route: '/docs/messaging-queues/strimzi',
+        label: 'Strimzi',
+      }
      ],
   },
   {
