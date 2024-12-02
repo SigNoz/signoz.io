@@ -155,7 +155,9 @@ You just need to reach out to writing@signoz.io with an interesting idea and a s
 - We pay based on the expertise required for the article. Clarify the exact amount with us before starting to work on the article. We pay via PayPal for international transfers, and via bank accounts for Indian transfers.
 
 - **When do I get paid?**<br></br>
-  Payment is processed after the article is published. You will need to submit a receipt. You can use this [free tool](https://www.zoho.com/in/invoice/free-invoice-generator.html) to generate a receipt. We will share a sample receipt when we collaborate. It can take 3-7 working days to reflect in your account.
+  Payment is processed after the article is published. You will need to submit a receipt. You can use this [free tool](https://www.zoho.com/in/invoice/free-invoice-generator.html) to generate a receipt. We will share a sample receipt when we collaborate. It can take 3-7 working days to reflect in your account. 
+
+  Note: We only support payments to Indian or US based accounts as of now.
   
 - **How long should the article be?**<br></br>
   We expect the articles to be somewhere between 1000-1500 words. But depending on the requirements of the article, it can be shorter or longer.
@@ -166,7 +168,7 @@ You just need to reach out to writing@signoz.io with an interesting idea and a s
 - **Where will I write the article? How is the review process?**<br></br>
   We will give you access to a Notion page for writing the article. We will get back with comments within 4-5 business days on the article and will try to keep the back and forth to the minimum.
 
-[![Apply for SigNoz Technical Writing Program](/img/blog/2023/11/apply-signoz-twp.webp)](https://forms.gle/2zxwVgajMWU5L1fHA)
+[![Apply for SigNoz Technical Writing Program](/img/blog/2023/11/apply-signoz-twp.webp)](https://docs.google.com/forms/d/e/1FAIpQLSewSYXbfwBUxJ-aoFItC4oHUM7D2WxqIS7kkQBTogU51YdsSg/viewform)
 
 
 </div>
