@@ -670,6 +670,11 @@ const docsSideNav = [
             route: '/docs/userguide/logs_query_builder',
             label: 'Logs Query Builder',
           },
+          {
+            type: 'doc',
+            route: '/docs/userguide/logs_quick_filters',
+            label: 'Logs Quick Filters',
+          },
         ],
       },
       {
