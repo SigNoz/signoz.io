@@ -333,7 +333,7 @@ const docsSideNav = [
           //   // type: 'doc',
           //   // },
           //   items: [
-                  
+
           //   ],
           // },
         ],
@@ -597,8 +597,7 @@ const docsSideNav = [
           },
           {
             type: 'doc',
-            route:
-              '/docs/logs-management/send-logs/vector-logs-to-signoz',
+            route: '/docs/logs-management/send-logs/vector-logs-to-signoz',
             label: 'Vector',
           },
           {
@@ -672,7 +671,7 @@ const docsSideNav = [
           },
           {
             type: 'doc',
-            route: '/docs/userguide/logs_quick_filters',
+            route: '/docs/logs-management/features/logs-quick-filters',
             label: 'Logs Quick Filters',
           },
         ],
@@ -723,14 +722,14 @@ const docsSideNav = [
           {
             type: 'doc',
             route: '/docs/logs-management/guides/pii-scrubbing',
-            label: 'PII Scrubbing'
+            label: 'PII Scrubbing',
           },
           {
             type: 'doc',
             route: '/docs/userguide/parse-multiline-logs',
             label: 'Parse Multiline Logs',
           },
-        ]
+        ],
       },
       {
         type: 'doc',
@@ -1028,7 +1027,7 @@ const docsSideNav = [
         label: 'Flutter',
         route: '/docs/instrumentation/mobile-instrumentation/flutter',
       },
-     ],
+    ],
   },
   {
     label: 'Integrations',
@@ -1106,7 +1105,7 @@ const docsSideNav = [
         route: '/docs/messaging-queues/confluent-kafka',
         label: 'Confluent Kafka',
       },
-     ],
+    ],
   },
   {
     type: 'doc',
@@ -1592,7 +1591,7 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/gcp-monitoring/compute-engine/tracing',
             label: 'APM & Tracing',
-          }
+          },
         ],
       },
       {
@@ -1633,7 +1632,7 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/gcp-monitoring/cloud-sql/metrics',
             label: 'Metrics',
-          }
+          },
         ],
       },
       {
@@ -1675,8 +1674,8 @@ const docsSideNav = [
             route: '/docs/gcp-monitoring/vpc/metrics',
             label: 'Metrics',
           },
-         ],
-       },
+        ],
+      },
       {
         label: 'GKE',
         type: 'category',
@@ -1689,7 +1688,7 @@ const docsSideNav = [
             label: 'APM & Tracing',
           },
           {
-            type: 'doc', 
+            type: 'doc',
             route: '/docs/gcp-monitoring/gke/gke-logging-and-metrics',
             label: 'Logs and Metrics',
           },
@@ -1707,17 +1706,17 @@ const docsSideNav = [
             label: 'Cloud Run Service Setup',
           },
           {
-            type: 'doc', 
+            type: 'doc',
             route: '/docs/gcp-monitoring/cloud-run/logging',
             label: 'Logging',
           },
           {
-            type: 'doc', 
+            type: 'doc',
             route: '/docs/gcp-monitoring/cloud-run/metrics',
             label: 'Metrics',
           },
           {
-            type: 'doc', 
+            type: 'doc',
             route: '/docs/gcp-monitoring/cloud-run/tracing',
             label: 'APM & Tracing',
           },
@@ -1730,7 +1729,7 @@ const docsSideNav = [
         route: '/docs/gcp-monitoring/cloud-monitoring',
         items: [
           {
-            type: 'doc', 
+            type: 'doc',
             route: '/docs/gcp-monitoring/cloud-monitoring/metrics',
             label: 'Metrics',
           },
