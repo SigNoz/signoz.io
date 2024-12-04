@@ -62,3 +62,43 @@ service:
       processors: [resourcedetection/docker]
 ```
 
+## Sending Docker metrics to SigNoz
+
+You will also need to configure `exporters` in the OTel Collector config file to send metrics to SigNoz. The configuration will be different based on whether you are using a SigNoz Cloud account or a Self-Hosted SigNoz instance.
+
+### Configuring the exporter
+
+<Tabs>
+
+<TabItem value="cloud" label="SigNoz Cloud" default>
+
+```yaml
+exporters:
+  otlp:
+    endpoint: "ingest.{region}.signoz.cloud:443"
+    tls:
+      insecure: false
+    headers:
+      signoz-access-token: "{signoz-token}"
+```
+
+You would need to replace `region` and `signoz-token` in the above file with the region of your choice and token obtained from Signoz Cloud → Settings → Ingestion Settings.
+</TabItem>
+
+<TabItem value="self-host" label="Self-Host" default>
+</TabItem>
+
+</Tabs>
+
+### Updating the pipelines
+
+You will also need to ensure that this exporter is enabled in the `pipelines` section of the OTel Collector config file:
+
+```yaml {5}
+service:
+  pipelines:
+    metrics:
+      receivers: [docker_stats]
+      exporters: [otlp]
+```
+
