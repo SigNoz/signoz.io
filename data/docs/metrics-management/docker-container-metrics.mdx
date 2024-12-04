@@ -50,6 +50,18 @@ If you are running OTel Collector on the same machine as Docker daemon, you can 
 
 The receiver also supports additional parameters like `initial_delay`, `collection_interval`, `timeout` and others. For more details, refer to the [official receiver documentation](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/dockerstatsreceiver/README.md#configuration).
 
+### Configuring the processor
+
+To enrich the collected metrics with additional metadata like hostname and OS, you will need to configure Docker Resource Detection Processor by adding the following configuration to the OTel Collector config file:
+
+```yaml {2-5}
+processors:
+  resourcedetection/docker:
+    detectors: [env, docker]
+    timeout: 2s
+    override: false
+```
+
 ### Configuring the pipelines
 
 Once the receiver and processor is configured, make sure to also enable them in the `pipelines` section of the OTel Collector config file:
