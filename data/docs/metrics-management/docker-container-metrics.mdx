@@ -13,3 +13,52 @@ This document provides an explains how to monitor Docker container Metrics using
 - Linux (`docker_stats` receiver does not work on Windows or Mac).
 - Either a [SigNoz Cloud account](/docs/cloud/) or a [Self-Hosted SigNoz instance](/docs/install/docker/).
 
+## Collecting Docker metrics
+
+You will need to configure [`docker_stats` OpenTelemetry receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/dockerstatsreceiver/README.md) for collecting Docker metrics. The receiver queries the local Docker daemon's container stats API for all desired running containers on a configured interval.
+
+### Configuring the receiver
+
+Edit the OTel Collector config file to configure the `docker_stats` receiver as shown below:
+
+```yaml {2-23}
+receivers:
+  docker_stats:
+    endpoint: unix:///var/run/docker.sock
+    metrics:
+      container.cpu.utilization:
+        enabled: true
+      container.memory.percent:
+        enabled: true
+      container.network.io.usage.rx_bytes:
+        enabled: true
+      container.network.io.usage.tx_bytes:
+        enabled: true
+      container.network.io.usage.rx_dropped:
+        enabled: true
+      container.network.io.usage.tx_dropped:
+        enabled: true
+      container.memory.usage.limit:
+        enabled: true
+      container.memory.usage.total:
+        enabled: true
+      container.blockio.io_service_bytes_recursive:
+        enabled: true
+```
+
+If you are running OTel Collector on the same machine as Docker daemon, you can remove the `endpoint` line. In case you are running OTel Collector inside a Docker container, make sure you mount the Docker socket from the host machine to the container (`-v /var/run/docker.sock:/var/run/docker.sock`).
+
+The receiver also supports additional parameters like `initial_delay`, `collection_interval`, `timeout` and others. For more details, refer to the [official receiver documentation](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/dockerstatsreceiver/README.md#configuration).
+
+### Configuring the pipelines
+
+Once the receiver and processor is configured, make sure to also enable them in the `pipelines` section of the OTel Collector config file:
+
+```yaml {3-4}
+service:
+  pipelines:
+    metrics:
+      receivers: [docker_stats]
+      processors: [resourcedetection/docker]
+```
+
