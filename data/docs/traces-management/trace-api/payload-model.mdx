@@ -195,7 +195,7 @@ This sample payload contains the different fields that we looked at above. It qu
         "panelType": "table",
         "chQueries": {
             "A": {
-                "query": "SELECT stringTagMap['service.name'] AS `service.name`, toFloat64(avg(durationNano)) AS value FROM signoz_traces.distributed_signoz_index_v2 WHERE timestamp BETWEEN {{.start_datetime}} AND {{.end_datetime}} GROUP BY (`service.name`) order by (`service.name`) ASC;"
+                "query": "SELECT resource_string_service$$name AS `service.name`, toFloat64(avg(durationNano)) AS value FROM signoz_traces.distributed_signoz_index_v3 WHERE timestamp BETWEEN {{.start_datetime}} AND {{.end_datetime}} AND ts_bucket_start BETWEEN {{.start_timestamp}} - 1800 AND {{.end_timestamp}} GROUP BY (`service.name`) order by (`service.name`) ASC;"
             }
         }
     }
