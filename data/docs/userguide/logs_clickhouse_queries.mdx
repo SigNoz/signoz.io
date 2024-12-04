@@ -20,7 +20,7 @@ If you are migrating from older version of SigNoz to version `>=0.53.0` here are
 
     Eg:- 
         * `attributes_string_value[indexOf(attributes_string_key, 'method')]` will change to `attributes_string['method']`
-        * `resources_string_value[indexOf(resources_string_key, 'service_name')]` will change to `resources_string['service_name']`
+        * `resources_string_value[indexOf(resources_string_key, 'service.name')]` will change to `resources_string['service.name']`
         * `indexOf(attributes_string_key, 'method') !=0` will change to `mapContains(attributes_string, 'method')`
         * `indexOf(resources_string_key, 'host') !=0` will change to `mapContains(resources_string, 'host')`
 
@@ -180,7 +180,7 @@ GROUP BY ts
 ORDER BY ts ASC;
 ```
 
-#### Count of log lines per minute where `severity_text = 'INFO'` ,  `method = 'GET'` , `service_name = 'demo'`. Here `method` is an attribute while `service_name` is a resource attribute.
+#### Count of log lines per minute where `severity_text = 'INFO'` ,  `method = 'GET'` , `service.name = 'demo'`. Here `method` is an attribute while `service.name` is a resource attribute.
 ```sql
 SELECT 
     toStartOfInterval(fromUnixTimestamp64Nano(timestamp), INTERVAL 1 MINUTE) AS ts, 
@@ -191,13 +191,13 @@ WHERE
     (timestamp >= {{.start_timestamp_nano}} AND timestamp <= {{.end_timestamp_nano}}) AND
     severity_text='INFO' AND
     attributes_string['method'] = 'GET' AND 
-    resources_string['service_name'] = 'demo' AND
+    resources_string['service.name'] = 'demo' AND
     ts_bucket_start BETWEEN {{.start_timestamp}} - 1800 AND {{.end_timestamp}}
 GROUP BY ts 
 ORDER BY ts ASC;
 ```
 
-#### Count of log lines per minute where `severity_text = 'INFO'` ,  `method = 'GET'` , `service_name = 'demo'`. Here `method` is an attribute while `service_name` is a resource attribute and both `method` and `service_name` is [selected field](#selected-attributesresources-).
+#### Count of log lines per minute where `severity_text = 'INFO'` ,  `method = 'GET'` , `service.name = 'demo'`. Here `method` is an attribute while `service.name` is a resource attribute and both `method` and `service_name` is [selected field](#selected-attributesresources-).
 
 ```sql
 SELECT 
@@ -222,7 +222,7 @@ You can reduce your end result to either average, latest, sum, min, or max.
 
 #### Examples
 
-#### Average count of log lines where `severity_text = 'INFO'` ,  `method = 'GET'` , `service_name = 'demo'`. Here `method` is an attribute while `service_name` is a resource attribute.
+#### Average count of log lines where `severity_text = 'INFO'` ,  `method = 'GET'` , `service.name = 'demo'`. Here `method` is an attribute while `service.name` is a resource attribute.
 
 ```sql
 SELECT 
@@ -244,7 +244,7 @@ SELECT
     )
 ```
 <Admonition>
-`attributes_string['method']` will change to `attribute_string_method` if `method` is a [selected field](#selected-attributesresources-) and `resources_string['service_name']` will change to `resource_string_service_name` if `service_name` is a [selected field](#selected-attributesresources-).
+`attributes_string['method']` will change to `attribute_string_method` if `method` is a [selected field](#selected-attributesresources-) and `resources_string['service.name']` will change to `resource_string_service$$name` if `service.name` is a [selected field](#selected-attributesresources-).
 </Admonition>
 
 ### Table
@@ -255,11 +255,11 @@ The query is similar to timeseries query but instead of using time interval we u
 
 #### Examples
 
-#### Count of log lines where `severity_text = 'INFO'` ,  `method = 'GET'`  group by  `service_name`. Here `method` is an attribute while `service_name` is a resource attribute.
+#### Count of log lines where `severity_text = 'INFO'` ,  `method = 'GET'`  group by  `service.name`. Here `method` is an attribute while `service.name` is a resource attribute.
 ```sql
 SELECT 
     now() as ts,
-    resources_string['service_name'] as service_name,
+    resources_string['service.name'] as service_name,
     toFloat64(count()) AS value 
 FROM 
     signoz_logs.distributed_logs_v2  
@@ -273,7 +273,7 @@ ORDER BY ts ASC;
 ```
 
 <Admonition>
-`attributes_string['method']` will change to `attribute_string_method` if `method` is a [selected field](#selected-attributesresources-) and `resources_string['service_name']` will change to `resource_string_service_name` if `service_name` is a [selected field](#selected-attributesresources-).
+`attributes_string['method']` will change to `attribute_string_method` if `method` is a [selected field](#selected-attributesresources-) and `resources_string['service.name']` will change to `resource_string_service$$name` if `service.name` is a [selected field](#selected-attributesresources-).
 </Admonition>
 
 ## Real Life Use Cases Example
@@ -319,8 +319,8 @@ ORDER BY ts ASC;
 ```
 
 <Admonition>
-`resources_string['service_name']` will change to `resource_string_service_name` if `service_name` is a [selected field](#selected-attributesresources-) and
-`mapContains(resources_string, 'service_name')` will change to `resource_string_service_name_exists = true`
+`resources_string['service.name']` will change to `resource_string_service$$name` if `service.name` is a [selected field](#selected-attributesresources-) and
+`mapContains(resources_string, 'service.name')` will change to `resource_string_service$$name_exists = true`
 </Admonition>
 
 ## Panel Time preference
