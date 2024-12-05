@@ -84,7 +84,7 @@ You will also need to configure `exporters` in the OTel Collector config file to
 
 <TabItem value="cloud" label="SigNoz Cloud" default>
 
-```yaml
+```yaml {2-7}
 exporters:
   otlp:
     endpoint: "ingest.{region}.signoz.cloud:443"
@@ -94,10 +94,20 @@ exporters:
       signoz-access-token: "{signoz-token}"
 ```
 
-You would need to replace `region` and `signoz-token` in the above file with the region of your choice and token obtained from Signoz Cloud → Settings → Ingestion Settings.
+You would need to replace `{region}` and `{signoz-token}` in the above file with the region of your choice and token obtained from Signoz Cloud → Settings → Ingestion Settings.
 </TabItem>
 
 <TabItem value="self-host" label="Self-Host" default>
+
+```yaml {2-5}
+exporters:
+   otlp:
+     endpoint: "{signoz-instance}:4317"
+     tls:
+       insecure: true
+```
+
+You would need to replace `{signoz-instance}` with the IP address or FQDN of the machine hosting SigNoz.
 </TabItem>
 
 </Tabs>
