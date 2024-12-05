@@ -120,8 +120,8 @@ Once you have configured OTel Collector to send Docker metrics to SigNoz, you ca
 
 You can use the pre-configured dashboard for Docker metrics or [create your own custom dashboard](/docs/userguide/manage-dashboards/#steps-to-create-a-custom-dashboard). To use the pre-configured dashboard, download the dashboard JSON from [here](https://github.com/SigNoz/dashboards/blob/main/container-metrics/docker/container-metrics-by-host.json) and import it to SigNoz by clicking Dashboards → New dashboard → Import JSON:
 
-<figure align='center'>
-    <img src="/img/docs/metrics/docker/importing_dashboard.webp" width="100%" alt="Importing a pre-configured Dashboard"/>
+<figure data-zoomable align='center'>
+    <img src="/img/docs/metrics/docker/importing_dashboard.webp" width="80%" alt="Importing a pre-configured Dashboard"/>
     <figcaption><i>Importing a pre-configured Dashboard</i></figcaption>
 </figure>
 
@@ -134,11 +134,53 @@ The pre-defined `Container Metrics` enables you to select the Docker host from a
 
 ### CPU Metrics
 
+The dashboard contains a panel that shows the percentage of CPU usage (`container_cpu_utilization`) of the containers:
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/metrics/docker/cpu_percent.webp" width="80%" alt="CPU Usage"/>
+    <figcaption><i>CPU Usage Panel</i></figcaption>
+</figure>
+
 ### Memory Metrics
+
+There are couple of panels related to memory. The first panel shows the percentage of memory usage (`container_memory_percent`) of the containers:
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/metrics/docker/memory_percent.webp" width="80%" alt="Memory Usage"/>
+    <figcaption><i>Memory Usage Panel</i></figcaption>
+</figure>
+
+The second panel related to memory shows the memory limits (`container_memory_usage_limit`) and usage (`container_memory_usage_total`) of the containers. This is useful to understand if the containers are hitting the memory limits and might need more resources:
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/metrics/docker/memory_limits.webp" width="80%" alt="Memory Limits"/>
+    <figcaption><i>Memory Limits Panel</i></figcaption>
+</figure>
 
 ### Network Metrics
 
+There are two panels that display Network Bytes received and sent by the containers. The panels uses `container_network_io_usage_rx_bytes` and `container_network_io_usage_tx_bytes` metrics respectively:
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/metrics/docker/network_bytes.webp" width="80%" alt="Network Bytes"/>
+    <figcaption><i>Network Bytes Panels</i></figcaption>
+</figure>
+
+Additionally, there's a panel that shows the number of packets dropped by the containers, which uses `container_network_io_usage_rx_dropped` and `container_network_io_usage_tx_dropped` metrics:
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/metrics/docker/network_packets_dropped.webp" width="80%" alt="Network Packets Dropped"/>
+    <figcaption><i>Network Packets Dropped Panels</i></figcaption>
+</figure>
+
 ### Disk Metrics
+
+The dashboard also includes a "Block IO" panel based on `container.blockio.io_serviced_recursive` metric that shows the number of IOs (bio) issued to the block device per second as well as the type of IO operations (read/write):
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/metrics/docker/block_io.webp" width="80%" alt="Block IO"/>
+    <figcaption><i>Block IO Panel</i></figcaption>
+</figure>
 
 ## Conclusion
 
