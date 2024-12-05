@@ -292,6 +292,7 @@ SELECT
             signoz_traces.distributed_signoz_index_v3
         WHERE 
             timestamp BETWEEN {{.start_datetime}} AND {{.end_datetime}} AND
+            ts_bucket_start BETWEEN {{.start_timestamp}} - 1800 AND {{.end_timestamp}} AND
             http_method = 'POST' AND 
             resource_string_service$$name = 'sample-service'
         GROUP BY ts 
