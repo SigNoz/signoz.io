@@ -565,7 +565,19 @@ const PricingPlans = () => {
                       </li>
                       <li className="mb-3 flex items-center gap-3">
                         {' '}
+                        <CircleCheckSolid /> OTel-Native Messaging Queue Monitoring
+                      </li>
+                      <li className="mb-3 flex items-center gap-3">
+                        {' '}
+                        <CircleCheckSolid /> Correlation of Signals
+                      </li>
+                      <li className="mb-3 flex items-center gap-3">
+                        {' '}
                         <CircleCheckSolid /> SSO and SAML Support
+                      </li>
+                      <li className="mb-3 flex items-center gap-3">
+                        {' '}
+                        <CircleCheckSolid /> Anomaly Detection
                       </li>
                       <li className="mb-3 flex items-center gap-3">
                         {' '}
@@ -585,7 +597,7 @@ const PricingPlans = () => {
                       </li>
                       <li className="mb-3 flex items-center gap-3">
                         {' '}
-                        <CircleCheckSolid /> Unlimited Logs & Traces based Dashboards
+                        <CircleCheckSolid /> Unlimited Logs, Metrics & Traces based Dashboards
                       </li>
                       <li className="mb-3 flex items-center gap-3">
                         {' '}
@@ -1256,6 +1268,12 @@ const ExploreAllFeature = () => {
             inEnterprise: <CheckSolid />,
           },
           {
+            feature: 'Anomaly Detection',
+            inCommunity: <CrossSolid />,
+            inTeams: <CheckSolid />,
+            inEnterprise: <CheckSolid />,
+          },
+          {
             feature: 'Alert as Code',
             inCommunity: <CrossSolid />,
             inTeams: <CheckSolid />,
@@ -1267,6 +1285,47 @@ const ExploreAllFeature = () => {
             inTeams: <CheckSolid />,
             inEnterprise: <CheckSolid />,
           },
+        ],
+      },
+      {
+        section: 'OTel-native Messaging Queue Monitoring',
+        features: [
+          {
+            feature: 'Producer Latency, Consumer Lag, Partition Latency Views',
+            inCommunity: <CheckSolid />,
+            inTeams: <CheckSolid />,
+            inEnterprise: <CheckSolid />,
+          },
+        ],
+      },
+      {
+        section: 'Correlation of Signals',
+        features: [
+          {
+            feature: 'APM metrics to traces',
+            inCommunity: <CheckSolid />,
+            inTeams: <CheckSolid />,
+            inEnterprise: <CheckSolid />,
+          },
+          {
+            feature: 'Traces to logs',
+            inCommunity: <CheckSolid />,
+            inTeams: <CheckSolid />,
+            inEnterprise: <CheckSolid />,
+          },
+          {
+            feature: 'Logs to traces',
+            inCommunity: <CheckSolid />,
+            inTeams: <CheckSolid />,
+            inEnterprise: <CheckSolid />,
+          },
+          {
+            feature: 'Logs to infrastructure metrics',
+            inCommunity: <CheckSolid />,
+            inTeams: <CheckSolid />,
+            inEnterprise: <CheckSolid />,
+          },
+
         ],
       },
       {
