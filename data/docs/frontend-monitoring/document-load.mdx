@@ -1,0 +1,337 @@
+---
+date: 2024-12-04
+id: document-load
+title: Document Load
+hide_table_of_contents: true
+---
+
+## Overview
+
+This documentation will cover how to use OpenTelemetry to auto-instrument your web application to collect document load data. Also, you will learn how to use SigNoz to visualize and act on the collected data by setting useful alerts on the data.
+
+<Tabs>
+<TabItem value="cloud" label="SigNoz Cloud" default>
+**Here's a quick summary of what you will be doing in this guide**
+
+* Auto-Instrument a Web Application to collect Document Load Data.
+* Send Telemetry Data to SigNoz.
+* Setup Useful Alerts on Document Trace Data.
+
+## Prerequisites
+
+* A [SigNoz](https://signoz.io/teams/) Cloud Account.
+* A Web Application for capturing document load data.
+
+### Step 1: Download the Sample Web Application
+
+You can download and use the sample React application. If you have a web application to use, you can skip this step.
+
+```bash
+git clone https://github.com/SigNoz/sample-reactjs-app.git
+```
+
+### Step 2: Create an Instrumentation file
+
+In the `src` directory of your web application, create a new JavaScript file (e.g., `otel-setup.js`) and paste the code below.
+
+```javascript
+import { WebTracerProvider } from '@opentelemetry/sdk-trace-web';
+import { DocumentLoadInstrumentation } from '@opentelemetry/instrumentation-document-load';
+import { registerInstrumentations } from '@opentelemetry/instrumentation';
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
+import { SimpleSpanProcessor } from '@opentelemetry/sdk-trace-base';
+import { Resource } from '@opentelemetry/resources';
+
+// Initialize the provider
+const provider = new WebTracerProvider({ resource: new Resource({ "service.name": "<SERVICE_NAME>" }) // Set the SigNoz Cloud collector URL
+
+// create an OTLP exporter configured to send trace data to your SigNoz Cloud
+const otlpExporter = new OTLPTraceExporter({
+  url: `https://ingest.${REGION}.signoz.cloud:${PORT}/v1/traces`,
+  headers: { 'signoz-access-token': "<SIGNOZ_INGESTION_KEY>" });
+
+// Add the exporter to the span processor
+provider.addSpanProcessor(new SimpleSpanProcessor(otlpExporter));
+
+// Register the provider
+provider.register();
+
+// Register automatic instrumentation for document load
+registerInstrumentations({
+  instrumentations: [
+    new DocumentLoadInstrumentation()
+  ],
+});
+
+console.log('OpenTelemetry instrumentation initialized');
+```
+
+Ensure to replace the placeholders for `<SERVICE_NAME>`, `<REGION>`,  `<PORT>`, and `<SIGNOZ_INGESTION_KEY>` with your actual service name, region, port, and SigNoz ingestion key, respectively.
+
+You can find your ingestion key in the following places:
+
+* The mail which you received from SigNoz after signing up.
+* Inside settings on SigNoz dashboard.
+
+Depending on the choice of your region for SigNoz cloud, the ingest endpoint will vary according to this table.
+
+| Region | Endpoint |
+| --- | --- |
+| US | ingest.us.signoz.cloud:443/v1/traces |
+| IN | ingest.in.signoz.cloud:443/v1/traces |
+| EU | ingest.eu.signoz.cloud:443/v1/traces |
+
+These are the variables you need to replace:
+
+| Placeholder | Description |
+| --- | --- |
+| `<SIGNOZ_INGESTION_KEY>` | Your SigNoz ingestion key |
+| `<PORT>` | Port (default: 443) |
+| `<REGION>` | Region for SigNoz ingestion URL |
+
+### Step 3: Send Telemetry data to SigNoz
+
+To send Telemetry data to SigNoz, import `otel-setup.js` into  `index.js` and save the changes.
+
+### Step 4: Start the App
+
+Go to the root folder of your web application, and run the following command:
+
+```bash
+npm start
+```
+
+Congratulations! You have successfully integrated OpenTelemetry Auto-instrumentation into your web application. It’s time to see the collected data.
+
+Visit your running SigNoz Cloud Instance. Navigate to the **Services** section in the sidebar to view your service.
+
+<figure data-zoomable align='center'>
+<img className="box-shadowed-image" src="/img/docs/frontend-monitoring/document-load-services-section-image.webp" alt="SigNoz Services Interface"/>
+<figcaption><i>SigNoz Services Interface</i></figcaption>
+</figure>
+
+### Step 5: Document Load Trace Data
+
+The document load data is automatically captured in the **Traces** section of the SigNoz dashboard as soon as your application is loaded.
+
+<figure data-zoomable align='center'>
+<img className="box-shadowed-image" src="/img/docs/frontend-monitoring/document-load-traces-section.webp" alt="Trace Data on Document Load"/>
+<figcaption><i>Trace Data on Document Load</i></figcaption>
+</figure>
+
+## Why is the Data Collected Useful?
+
+Using OpenTelemetry to capture data on **document load** is useful because it allows you to monitor your application's key performance metrics. This data is essential for:
+
+1. **Page Load Sequence**: Traces give you insight into the sequence of operations during document load, helping identify slow resources or inefficient processes that may delay rendering.
+2.  **Content Delivery**: By understanding where delays occur (such as in external resource fetches or script execution), you can take specific actions to improve how content is delivered to users.
+3. **Slow Resources**: Trace data reveals third-party services or external APIs that may cause slowdowns, enabling decisions to cache, optimize, or delay the loading of those resources.
+4. **Proactive Monitoring**: Continuously tracking document load traces helps identify bottlenecks before they affect a large portion of users, allowing for preemptive performance tuning.
+5. **Latency Causes**: Pinpointing delays in content load allow for targeted optimizations, whether caused by large assets, server issues, or inefficient scripts.
+
+## Setup Alerts
+
+You can create **trace-based alerts** by using the `Create an Alert` button in the **Traces** section.  Alternatively, you can directly create it from the **Alerts** section. To create and manage trace-based alerts, follow [this guide](https://signoz.io/docs/alerts-management/trace-based-alerts/).
+
+You can set alerts on document load key indicators such as **`documentLoad`**, **`documentFetch`**, and **`resourceFetch`.**  SigNoz also provides options allowing you to filter document trace data by `status code`, `HTTP URL`, `HTTP method`, etc. Below is an example of how to set useful alerts on document load trace data.
+
+### Create an Alert
+
+<figure data-zoomable align='center'>
+<img className="box-shadowed-image" src="/img/docs/frontend-monitoring/resource-fetch-alert-sample.webp" alt="Resource Alert Fetch Sample"/>
+<figcaption><i>ResourceFetch Trace Alert Sample</i></figcaption>
+</figure>
+
+To create an alert, you will use the `Create an Alert` button in the **Traces** section. In this example, you will be setting up an alert for `ResourceFetch`. Resource Fetch reports all the resources, including external scripts, images, style sheets, fonts, and other assets, that are required to render a webpage. Knowing the time it takes to fetch resources will be useful in helping you take proactive action to optimize your application using caching or other optimization strategies.
+
+In the `Traces Based Alerts` page, set the `Traces` field to `service.name = <SERVICE_NAME>`  and `name = resourceFetch` . Next, set the `Y-axis units` to seconds. You can also set the `Legend Format` to `Resource Fetch`. Save and run the query.
+
+<figure data-zoomable align='center'>
+<img className="box-shadowed-image" src="/img/docs/frontend-monitoring/define-the-metric.webp" alt="Define the Metric"/>
+<figcaption><i>Set the Traces Field to filter ResourceFetch Data</i></figcaption>
+</figure>
+
+### Define Alert Condition
+
+Next, you will define an alert condition. Set the `Send a notification when ...`  field to read as **Send a notification when `A` is `above` the threshold `at least once` during the last `5 mins`.** Next, set the `Alert Thresholds` field to `10 seconds`.
+
+<figure data-zoomable align='center'>
+<img className="box-shadowed-image" src="/img/docs/frontend-monitoring/alert-conditions.webp" alt="Set Alert Condition"/>
+<figcaption><i>Set the Alert Condition</i></figcaption>
+</figure>
+
+### Set Alert Configuration
+
+Here, set the severity field to `critical`. Next, set the `Alert Name` field to `ResourceFetch`. Next, turn on the alert all notification channel field. Lastly, save the rule and test the notification.
+
+<figure data-zoomable align='center'>
+<img className="box-shadowed-image" src="/img/docs/frontend-monitoring/alert-configuration.webp" alt="Set Alert Configuration"/>
+<figcaption><i>Set the Alert Configuration</i></figcaption>
+</figure>
+
+With that, you have successfully integrated OpenTelemetry to auto-instrument your web application for collecting document load data. You have also learned how to set useful alerts on the data.
+
+<figure data-zoomable align='center'>
+<img className="box-shadowed-image" src="/img/docs/frontend-monitoring/alert-rules.webp" alt="Alert Rules"/>
+<figcaption><i>ResourceFetch Alert Rule is OK</i></figcaption>
+</figure>
+
+</TabItem>
+
+<TabItem value="self-host" label="Self-Host" default>
+**Here's a quick summary of what you will be doing in this guide**
+
+* Auto-Instrument a Web Application to collect Document Load Data.
+* Send Telemetry Data to SigNoz.
+* Setup Useful Alerts on Document Trace Data.
+
+## Prerequisites
+
+* A [Self-Hosted](https://signoz.io/docs/install/docker/) SigNoz.
+* A Web Application for capturing document load data.
+
+### Step 1: Download the Sample Web Application
+
+You can download and use the sample React application. If you have a web application to use, you can skip this step.
+
+```bash
+git clone https://github.com/SigNoz/sample-reactjs-app.git
+```
+
+### Step 2: Create an Instrumentation file
+
+In the `src` directory of your web application, create a new JavaScript file (e.g., `otel-setup.js`) and paste the code below.
+
+```javascript
+import { WebTracerProvider } from '@opentelemetry/sdk-trace-web';
+import { DocumentLoadInstrumentation } from '@opentelemetry/instrumentation-document-load';
+import { registerInstrumentations } from '@opentelemetry/instrumentation';
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
+import { SimpleSpanProcessor } from '@opentelemetry/sdk-trace-base';
+import { Resource } from '@opentelemetry/resources';
+
+// Initialize the provider
+const provider = new WebTracerProvider({ resource: new Resource({ "service.name": "<SERVICE_NAME>" }) // Set the SigNoz Cloud collector URL
+
+// create an OTLP exporter configured to send trace data to your Self-Hosted SigNoz
+const otlpExporter = new OTLPTraceExporter({
+  url: '/v1/traces',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// Add the exporter to the span processor
+provider.addSpanProcessor(new SimpleSpanProcessor(otlpExporter));
+
+// Register the provider
+provider.register();
+
+// Register automatic instrumentation for document load
+registerInstrumentations({
+  instrumentations: [
+    new DocumentLoadInstrumentation()
+  ],
+});
+
+console.log('OpenTelemetry instrumentation initialized');
+```
+
+Ensure to replace the placeholders for `<SERVICE_NAME>` with your actual service name. Set a proxy in your `package.json` pointing to to the SigNoz OTLP HTTP endpoint. This is an easier temporary setup to bypass CORS issues. You can use [this documentation](https://signoz.io/docs/userguide/otlp-http-enable-cors/) to guide you on dealing with CORS issues for a permanent setup.
+
+```bash
+{
+      "proxy": "http://localhost:4318"
+}
+```
+
+### Step 3: Send Telemetry data to SigNoz
+
+To send Telemetry data to SigNoz, import `otel-setup.js` into  `index.js` and save the changes.
+
+### Step 4: Start the App
+
+Go to the root folder of your web application, and run the following command:
+
+```bash
+npm start
+```
+
+Congratulations! You have successfully integrated OpenTelemetry Auto-instrumentation into your web application. It’s time to see the collected data.
+
+Visit your running SigNoz Cloud Instance. Navigate to the **Services** section in the sidebar to view your service.
+
+<figure data-zoomable align='center'>
+<img className="box-shadowed-image" src="/img/docs/frontend-monitoring/document-load-services-section-image.webp" alt="SigNoz Services Interface"/>
+<figcaption><i>SigNoz Services Interface</i></figcaption>
+</figure>
+
+### Step 5: Document Load Trace Data
+
+The document load data is automatically captured in the **Traces** section of the SigNoz dashboard as soon as your application is loaded.
+
+<figure data-zoomable align='center'>
+<img className="box-shadowed-image" src="/img/docs/frontend-monitoring/document-load-traces-section.webp" alt="Trace Data on Document Load"/>
+<figcaption><i>Trace Data on Document Load</i></figcaption>
+</figure>
+
+## Why is the Data Collected Useful?
+
+Using OpenTelemetry to capture data on **document load** is useful because it allows you to monitor your application's key performance metrics. This data is essential for:
+
+1. **Page Load Sequence**: Traces give you insight into the sequence of operations during document load, helping identify slow resources or inefficient processes that may delay rendering.
+2.  **Content Delivery**: By understanding where delays occur (such as in external resource fetches or script execution), you can take specific actions to improve how content is delivered to users.
+3. **Slow Resources**: Trace data reveals third-party services or external APIs that may cause slowdowns, enabling decisions to cache, optimize, or delay the loading of those resources.
+4. **Proactive Monitoring**: Continuously tracking document load traces helps identify bottlenecks before they affect a large portion of users, allowing for preemptive performance tuning.
+5. **Latency Causes**: Pinpointing delays in content load allow for targeted optimizations, whether caused by large assets, server issues, or inefficient scripts.
+
+## Setup Alerts
+
+You can create **trace-based alerts** by using the `Create an Alert` button in the **Traces** section.  Alternatively, you can directly create it from the **Alerts** section. To create and manage trace-based alerts, follow [this guide](https://signoz.io/docs/alerts-management/trace-based-alerts/).
+
+You can set alerts on document load key indicators such as **`documentLoad`**, **`documentFetch`**, and **`resourceFetch`.**  SigNoz also provides options allowing you to filter document trace data by `status code`, `HTTP URL`, `HTTP method`, etc. Below is an example of how to set useful alerts on document load trace data.
+
+### Create an Alert
+
+<figure data-zoomable align='center'>
+<img className="box-shadowed-image" src="/img/docs/frontend-monitoring/resource-fetch-alert-sample.webp" alt="Resource Alert Fetch Sample"/>
+<figcaption><i>ResourceFetch Trace Alert Sample</i></figcaption>
+</figure>
+
+To create an alert, you will use the `Create an Alert` button in the **Traces** section. In this example, you will be setting up an alert for `ResourceFetch`. Resource Fetch reports all the resources, including external scripts, images, style sheets, fonts, and other assets, that are required to render a webpage. Knowing the time it takes to fetch resources will be useful in helping you take proactive action to optimize your application using caching or other optimization strategies.
+
+In the `Traces Based Alerts` page, set the `Traces` field to `service.name = <TabItem>`  and `name = resourceFetch` . Next, set the `Y-axis units` to seconds. You can also set the `Legend Format` to `Resource Fetch`. Save and run the query.
+
+<figure data-zoomable align='center'>
+<img className="box-shadowed-image" src="/img/docs/frontend-monitoring/define-the-metric.webp" alt="Define the Metric"/>
+<figcaption><i>Set the Traces Field to filter ResourceFetch Data</i></figcaption>
+</figure>
+
+### Define Alert Condition
+
+Next, you will define an alert condition. Set the `Send a notification when ...`  field to read as **Send a notification when `A` is `above` the threshold `at least once` during the last `5 mins`.** Next, set the `Alert Thresholds` field to `10 seconds`.
+
+<figure data-zoomable align='center'>
+<img className="box-shadowed-image" src="/img/docs/frontend-monitoring/alert-conditions.webp" alt="Set Alert Condition"/>
+<figcaption><i>Set the Alert Condition</i></figcaption>
+</figure>
+
+### Set Alert Configuration
+
+Here, set the severity field to `critical`. Next, set the `Alert Name` field to `ResourceFetch`. Next, turn on the alert all notification channel field. Lastly, save the rule and test the notification.
+
+<figure data-zoomable align='center'>
+<img className="box-shadowed-image" src="/img/docs/frontend-monitoring/alert-configuration.webp" alt="Set Alert Configuration"/>
+<figcaption><i>Set the Alert Configuration</i></figcaption>
+</figure>
+
+With that, you have successfully integrated OpenTelemetry to auto-instrument your web application for collecting document load data. You have also learned how to set useful alerts on the data.
+
+<figure data-zoomable align='center'>
+<img className="box-shadowed-image" src="/img/docs/frontend-monitoring/alert-rules.webp" alt="Alert Rules"/>
+<figcaption><i>ResourceFetch Alert Rule is OK</i></figcaption>
+</figure>
+
+</TabItem>
+
+</Tabs>
