@@ -61,12 +61,14 @@ An example of a ClickHouse query:
 
 ```sql
 SELECT toStartOfInterval(timestamp, INTERVAL 1 MINUTE) AS interval,
-stringTagMap['peer.service'] AS op_name,
+resource_string_service$$name AS service,
+attributes_string['http.method'] AS method,
 toFloat64(avg(durationNano)) AS value
-FROM signoz_traces.distributed_signoz_index_v2
-WHERE stringTagMap['peer.service']!=''
+FROM signoz_traces.distributed_signoz_index_v3
+WHERE resource_string_service$$name!=''
 AND timestamp > now() - INTERVAL 30 MINUTE
-GROUP BY (op_name, interval) order by (op_name, interval) ASC;
+AND ts_bucket_start >= toUInt64(toUnixTimestamp(now() - toIntervalMinute(30))) - 1800
+GROUP BY (service, method, interval) order by (service, method, interval) ASC;
 ```
 
 With the above query, you can GroupBy a tag/attribute in distributed tracing data. Read our docs for more [sample ClickHouse queries](https://signoz.io/docs/tutorial/writing-clickhouse-queries-in-dashboard/).

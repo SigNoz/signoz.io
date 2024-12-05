@@ -8,20 +8,10 @@ description: Example clickhouse queries to run analytics on observability data
 SigNoz gives you the ability to write powerful ClickHouse queries to plot charts. You can run SQL queries supported by ClickHouse to extract immense value out of your distributed tracing data or logs data. 
 
 <Admonition type="info">
-The distributed tables in ClickHouse have been named by prefixing `distributed_` to existing single shard table names. If you want to use ClickHouse queries in dashboard or alerts, you should use the distributed table names. Eg, `signoz_index_v2` now corresponds to the table of a single shard. To query all the shards, query against `distributed_signoz_index_v2`. 
+The distributed tables in ClickHouse have been named by prefixing `distributed_` to existing single shard table names. If you want to use ClickHouse queries in dashboard or alerts, you should use the distributed table names. Eg, `signoz_index_v3` now corresponds to the table of a single shard. To query all the shards, query against `distributed_signoz_index_v3`. 
 </Admonition>
 
 <br />
-
-<Admonition type="warning" >
-
-- The tagMap column of type Map(String, String) in signoz_traces.distributed_signoz_index_v2 has been divided into stringTagMap of type Map(String, String), numberTagMap of type Map(String, Float64) and boolTagMap of type Map(String, bool).
-  - All attributes with string values will be present in stringTagMap, attributes with number values will be present in numberTagMap and attributes with boolean values will be present in boolTagMap.
-- The gRPCMethod column has been replaced by rpcMethod column.
-- The gRPCCode and httpCode column has been replaced by responseStatusCode column.
-
-The gRPCMethod, gRPCCode, httpCode and tagMap column will be deprecated in future releases so it recommended to replace dashboard queries with new columns.
-</Admonition>
 
 Sharing a few examples of some queries which might be helpful in building dashboards.
 
@@ -29,12 +19,13 @@ Sharing a few examples of some queries which might be helpful in building dashbo
 
 ```sql
 SELECT toStartOfInterval(timestamp, INTERVAL 1 MINUTE) AS interval, 
-stringTagMap['peer.service'] AS op_name, 
+attributes_string['http.method'] AS method,
 toFloat64(avg(durationNano)) AS value 
-FROM signoz_traces.distributed_signoz_index_v2
-WHERE stringTagMap['peer.service']!='' 
-AND timestamp > now() - INTERVAL 30 MINUTE  
-GROUP BY (op_name, interval) order by (op_name, interval) ASC;
+FROM signoz_traces.distributed_signoz_index_v3
+WHERE attributes_string['http.method']!=''
+AND timestamp > now() - INTERVAL 30 MINUTE
+AND ts_bucket_start >= toUInt64(toUnixTimestamp(now() - toIntervalMinute(30))) - 1800
+GROUP BY (method, interval) order by (method, interval) ASC;
 ```
 
 ### Show count of each `customer_id` which is present as attribute of a span event
@@ -43,7 +34,7 @@ GROUP BY (op_name, interval) order by (op_name, interval) ASC;
 WITH arrayFilter(x -> JSONExtractString(x, 'name')='Getting customer', events) AS filteredEvents
 SELECT toStartOfInterval(timestamp, INTERVAL 1 MINUTE) AS interval, toFloat64(count()) AS count, 
 arrayJoin(arrayMap(x -> JSONExtractString(JSONExtractString(x, 'attributeMap'), 'customer_id'), filteredEvents)) AS resultArray 
-FROM signoz_traces.distributed_signoz_index_v2
+FROM signoz_traces.distributed_signoz_index_v3
 WHERE not empty(filteredEvents) 
 AND timestamp > toUnixTimestamp(now() - INTERVAL 30 MINUTE) 
 GROUP BY (resultArray, interval) order by (resultArray, interval) ASC;
@@ -66,10 +57,10 @@ FROM
         SELECT
             toStartOfInterval(timestamp, toIntervalMinute(1)) AS interval,
             traceID,
-            minIf(timestamp, if(serviceName='driver', if(name = '/driver.DriverService/FindNearest', if((stringTagMap['component']) = 'gRPC', true, false), false), false)) AS startTime1,
-            minIf(timestamp, if(serviceName='route', if(name = 'HTTP GET /route', true, false), false)) AS startTime2
-        FROM signoz_traces.distributed_signoz_index_v2
-        WHERE (timestamp BETWEEN {{.start_datetime}} AND {{.end_datetime}}) AND (serviceName IN ('driver', 'route'))
+            minIf(timestamp, if(resource_string_service$$name='driver', if(name = '/driver.DriverService/FindNearest', if((resources_string['component']) = 'gRPC', true, false), false), false)) AS startTime1,
+            minIf(timestamp, if(resource_string_service$$name='route', if(name = 'HTTP GET /route', true, false), false)) AS startTime2
+        FROM signoz_traces.distributed_signoz_index_v3
+        WHERE (timestamp BETWEEN {{.start_datetime}} AND {{.end_datetime}}) AND (ts_bucket_start BETWEEN {{.start_timestamp}} - 1800 AND {{.end_timestamp}}) AND (resource_string_service$$name IN ('driver', 'route'))
         GROUP BY (interval, traceID)
         ORDER BY (interval, traceID) ASC
     )
@@ -86,8 +77,9 @@ ORDER BY interval ASC;
 WITH arrayFilter(x -> JSONExtractString(x, 'name')='Getting customer', events) AS filteredEvents
 SELECT toStartOfInterval(timestamp, INTERVAL 1 MINUTE) AS interval, toFloat64(sum(toInt32(resultArray))) AS sum, 
 arrayJoin(arrayMap(x -> JSONExtractString(JSONExtractString(x, 'attributeMap'), 'customer_id'), filteredEvents)) AS resultArray 
-FROM signoz_traces.distributed_signoz_index_v2
+FROM signoz_traces.distributed_signoz_index_v3
 WHERE not empty(filteredEvents) and timestamp > toUnixTimestamp(now() - INTERVAL 30 MINUTE) 
+AND ts_bucket_start >= toUInt64(toUnixTimestamp(now() - toIntervalMinute(30))) - 1800
 GROUP BY (resultArray, interval) order by (resultArray, interval) ASC;
 ```
 
@@ -101,10 +93,11 @@ SELECT fromUnixTimestamp64Milli(intDiv( toUnixTimestamp64Milli ( timestamp ), 10
 toFloat64(count()) AS count 
 FROM (
  SELECT timestamp 
- FROM signoz_traces.distributed_signoz_index_v2
- WHERE serviceName='frontend' 
+ FROM signoz_traces.distributed_signoz_index_v3
+ WHERE resource_string_service$$name='frontend' 
  AND durationNano>=50*exp10(6) 
- AND timestamp > now() - INTERVAL 1 MINUTE) GROUP BY interval 
+ AND timestamp > now() - INTERVAL 1 MINUTE AND ts_bucket_start >= toUInt64(toUnixTimestamp(now() - toIntervalMinute(1))) - 1800)
+ GROUP BY interval 
  ORDER BY interval ASC;
 ```
 
@@ -114,7 +107,8 @@ FROM (
 SELECT toStartOfInterval(fromUnixTimestamp64Nano(timestamp), INTERVAL 1 MINUTE) AS interval, 
 toFloat64(count()) AS value 
 FROM signoz_logs.distributed_logs_v2
-WHERE timestamp > toUnixTimestamp64Nano(now64() - INTERVAL 30 MINUTE)  
+WHERE timestamp > toUnixTimestamp64Nano(now64() - INTERVAL 30 MINUTE) 
+AND ts_bucket_start >= toUInt64(toUnixTimestamp(now() - toIntervalMinute(30))) - 1800
 GROUP BY interval 
 ORDER BY interval ASC;
 ```

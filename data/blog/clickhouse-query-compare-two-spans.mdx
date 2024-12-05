@@ -48,10 +48,10 @@ FROM
         SELECT
             toStartOfInterval(timestamp, toIntervalMinute(1)) AS interval,
             traceID,
-            minIf(timestamp, if(serviceName='driver', if(name = '/driver.DriverService/FindNearest', if((stringTagMap['component']) = 'gRPC', true, false), false), false)) AS startTime1,
-            minIf(timestamp, if(serviceName='route', if(name = 'HTTP GET /route', true, false), false)) AS startTime2
-        FROM signoz_traces.distributed_signoz_index_v2
-        WHERE (timestamp BETWEEN {{.start_datetime}} AND {{.end_datetime}}) AND (serviceName IN ('driver', 'route'))
+            minIf(timestamp, if(resource_string_service$$name='driver', if(name = '/driver.DriverService/FindNearest', if((resources_string['component']) = 'gRPC', true, false), false), false)) AS startTime1,
+            minIf(timestamp, if(resource_string_service$$name='route', if(name = 'HTTP GET /route', true, false), false)) AS startTime2
+        FROM signoz_traces.distributed_signoz_index_v3
+        WHERE (timestamp BETWEEN {{.start_datetime}} AND {{.end_datetime}}) AND (ts_bucket_start BETWEEN {{.start_timestamp}} - 1800 AND {{.end_timestamp}}) AND (resource_string_service$$name IN ('driver', 'route'))
         GROUP BY (interval, traceID)
         ORDER BY (interval, traceID) ASC
     )
