@@ -79,11 +79,7 @@ This is primary table of Traces which is queried to fetch spans and apply aggreg
     INDEX resources_string_idx_key mapKeys(resources_string) TYPE tokenbf_v1(1024, 2, 0) GRANULARITY 1,
     INDEX resources_string_idx_val mapValues(resources_string) TYPE ngrambf_v1(4, 5000, 2, 0) GRANULARITY 1
 )
-ENGINE = ReplicatedMergeTree('/clickhouse/tables/{uuid}/{shard}', '{replica}')
-PARTITION BY toDate(timestamp)
 ORDER BY (ts_bucket_start, resource_fingerprint, has_error, name, timestamp)
-TTL toDateTime(timestamp) + toIntervalSecond(1295000)
-SETTINGS index_granularity = 8192, ttl_only_drop_parts = 1
 ```
 
 #### Columns in the distributed_signoz_index_v3 table
@@ -136,8 +132,8 @@ In the new schema for traces i.e `distributed_signoz_index_v3`, we have a new co
 `ts_bucket_start` which is used to store the start timestamp of the bucket. This is used for faster filtering on timestamp attribute.
 
 How to use this column in the queries?
-If your timestamp query is `timestamp BETWEEN {{.start_datetime}} - 1800 AND {{.end_datetime}}` then you will have to add 
- `ts_bucket_start BETWEEN {{.start_timestamp}} AND {{.end_timestamp}}`
+If your timestamp query is `timestamp BETWEEN {{.start_datetime}} AND {{.end_datetime}}` then you will have to add 
+ `ts_bucket_start BETWEEN {{.start_timestamp}} - 1800 AND {{.end_timestamp}}`
 
 We have added -1800, as bucketing is done in 30 minute intervals.
 
@@ -272,7 +268,7 @@ FROM (
  WHERE resource_string_service$$name='frontend' 
  AND duration_nano>=50*exp10(6) 
  AND timestamp BETWEEN {{.start_datetime}} AND {{.end_datetime}}
- AND ts_bucket_start BETWEEN {{.start_timestamp}} AND {{.end_timestamp}})
+ AND ts_bucket_start BETWEEN {{.start_timestamp}} - 1800 AND {{.end_timestamp}})
  GROUP BY interval ORDER BY interval ASC;
 ```
 
@@ -319,6 +315,6 @@ attributes_string['example_string_attribute'] AS attribute_name,
 toFloat64(avg(duration_nano)) AS value 
 FROM signoz_traces.distributed_signoz_index_v3  
 WHERE timestamp BETWEEN {{.start_datetime}} AND {{.end_datetime}}
-AND ts_bucket_start BETWEEN {{.start_timestamp}} AND {{.end_timestamp}}
+AND ts_bucket_start BETWEEN {{.start_timestamp}} - 1800 AND {{.end_timestamp}}
 GROUP BY (attribute_name, ts) order by (attribute_name, ts) ASC;
 ```
