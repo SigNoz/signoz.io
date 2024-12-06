@@ -558,9 +558,17 @@ const docsSideNav = [
             ],
           },
           {
-            type: 'doc',
-            route: '/docs/userguide/collecting_nodejs_winston_logs',
-            label: 'NodeJS Winston logs',
+            type: 'category',
+            isExpanded: false,
+            label: 'Node js',
+            route: '/docs/logs-management/send-logs/node-js',
+            items: [
+              {
+                type: 'doc',
+                route: '/docs/userguide/collecting_nodejs_winston_logs',
+                label: 'Winston',
+              },
+            ],
           },
           {
             type: 'doc',
