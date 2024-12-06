@@ -103,8 +103,9 @@ quarkus.log.file.format=%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p traceId=%X{traceId}, pa
 quarkus.otel.resource.attributes=${OTEL_RESOURCE_ATTRIBUTES}
 ```
 
-## Send Traces, Metrics, and Logs to SigNoz Cloud
-Quarkus Extensions and the libraries they provide, are directly instrumented, use of OpenTelemetry Agent is not required not recommended.
+<Tabs>
+<TabItem value="cloud" label="SigNoz Cloud" default>
+Quarkus Extensions and the libraries they provide, are directly instrumented, use of OpenTelemetry Agent is not required nor recommended.
 
 Based on your application environment, you can choose the setup below to instrument your application via SigNoz Cloud.
 <Tabs>
@@ -258,8 +259,9 @@ In case you encounter an issue where all applications do not get listed in the s
 
 </TabItem>
 </Tabs>
+</TabItem>
 
-## Send Traces, Metrics, and Logs to Self-Hosted SigNoz
+<TabItem value="self-hosted" label="Self-Hosted SigNoz">
 
 1. Set the `OTEL_RESOURCE_ATTRIBUTES` environment variable to the name of your application
 2. Update the `OTEL_EXPORTER_OTLP_ENDPOINT` environment variable with `https://<URL of SigNoz Backend>:4318`
@@ -289,8 +291,10 @@ Here’s a handy [grid](https://signoz.io/docs/instrumentation/troubleshoot-inst
 💡 Remember to allow incoming requests to port 4318 of the machine where SigNoz backend is hosted.
 </Admonition>
 
-In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#Troubleshooting).
+</TabItem>
+</Tabs>
 
+In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#Troubleshooting).
 
 ## Validating Instrumentation
 
