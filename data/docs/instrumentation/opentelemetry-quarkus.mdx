@@ -1,0 +1,340 @@
+---
+date: 2024-12-06
+id: quarkus
+title: Quarkus OpenTelemetry Instrumentation
+description: Instrument your Quarkus application with OpenTelemetry and send data to SigNoz
+---
+
+import InstrumentationFAQ from '@/components/shared/instrumentation-faq.md'
+
+This document contains instructions on how to set up OpenTelemetry instrumentation in your Quarkus applications. OpenTelemetry, also known as OTel for short, is an open source observability framework that helps generate and collect telemetry data (traces, metrics, and logs) from your Quarkus application.
+
+OpenTelemetry's Java implementation integrates seamlessly with Quarkus through its extension system, providing automatic instrumentation with minimal configuration.
+
+There are two steps to using OpenTelemetry with Quarkus:
+
+- Instrumenting your Quarkus application with OpenTelemetry
+- Validating the configuration to ensure data is being sent as expected
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/opentelemetry_java_instrument.webp" alt="OpenTelemetry helps to generate and collect telemetry data from your application which is then sent to an observability backend like SigNoz"/>
+    <figcaption><i>OpenTelemetry helps generate and collect telemetry data from Quarkus applications which can then be sent to SigNoz for storage, visualization, and analysis.</i></figcaption>
+</figure>
+
+After completing this guide, you will have:
+
+- A Quarkus application sending traces, metrics, and logs to SigNoz
+- Real-time visibility into your application's performance
+- Ability to troubleshoot issues using distributed tracing
+- Monitoring dashboards for your application metrics
+
+Let's understand how to install and run OpenTelemetry in your Quarkus application.
+
+## Requirements
+
+- A Quarkus REST application with basic endpoints.
+- Java 17 or higher environment
+- Docker (if using Docker and Kubernetes)
+- OpenTelemetry extension added to your project:
+
+```bash
+# Using Quarkus CLI
+quarkus extension add opentelemetry
+```
+
+```bash
+# Using Maven command
+./mvnw quarkus:add-extension -Dextensions="opentelemetry"
+```
+
+```bash
+# Using gradle, add the following to your build.gradle file
+implementation 'io.quarkus:quarkus-opentelemetry:3.17.2'
+```
+
+## Configuration Steps
+
+ - Update `application.properties`
+
+```properties:src/main/resources/application.properties
+# Application name and version
+quarkus.application.name=quarkus-app
+quarkus.application.version=1.0.0
+
+# Ingestion key for authentication
+quarkus.otel.exporter.otlp.headers=${OTEL_EXPORTER_OTLP_HEADERS}
+
+# Enable OpenTelemetry
+quarkus.otel.sdk.disabled=false
+
+# Traces Configuration
+quarkus.otel.traces.enabled=true
+quarkus.otel.traces.sampler=parentbased_always_on
+quarkus.otel.traces.sampler.arg=1.0
+quarkus.otel.traces.exporter=otlp
+
+# OTLP Exporter Configuration
+quarkus.otel.exporter.otlp.endpoint=${OTEL_EXPORTER_OTLP_ENDPOINT}
+quarkus.otel.exporter.otlp.traces.endpoint=${OTEL_EXPORTER_OTLP_ENDPOINT}/v1/traces
+quarkus.otel.exporter.otlp.protocol=http/protobuf
+
+# Metrics Configuration
+quarkus.otel.metrics.enabled=true
+quarkus.otel.exporter.otlp.metrics.endpoint=${OTEL_EXPORTER_OTLP_ENDPOINT}/v1/metrics
+quarkus.otel.metrics.exporter=otlp
+
+# Logging Configuration
+quarkus.otel.logs.enabled=true
+quarkus.otel.exporter.otlp.logs.endpoint=${OTEL_EXPORTER_OTLP_ENDPOINT}/v1/logs
+quarkus.otel.logs.exporter=otlp
+
+quarkus.log.level=INFO
+quarkus.log.category."io.opentelemetry".level=INFO
+
+# Console logging with trace context
+quarkus.log.console.format=%d{HH:mm:ss} %-5p traceId=%X{traceId}, parentId=%X{parentId}, spanId=%X{spanId} [%c{2.}] (%t) %s%e%n
+
+# File logging with trace context (optional)
+quarkus.log.file.enable=true
+quarkus.log.file.path=logs/application.log
+quarkus.log.file.format=%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p traceId=%X{traceId}, parentId=%X{parentId}, spanId=%X{spanId} [%c{3.}] (%t) %s%e%n
+
+# Resource Attributes
+quarkus.otel.resource.attributes=${OTEL_RESOURCE_ATTRIBUTES}
+```
+
+## Send Traces, Metrics, and Logs to SigNoz Cloud
+Quarkus Extensions and the libraries they provide, are directly instrumented, use of OpenTelemetry Agent is not required not recommended.
+
+Based on your application environment, you can choose the setup below to instrument your application via SigNoz Cloud.
+<Tabs>
+<TabItem value="vm" label="VM" default>
+
+1. Export the OTEL Environment variables:
+
+  ```bash
+  export OTEL_RESOURCE_ATTRIBUTES=service.name=<app-name>
+  export OTEL_EXPORTER_OTLP_HEADERS="signoz-access-token=SIGNOZ_INGESTION_KEY"
+  export OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.{region}.signoz.cloud:443
+  ```
+
+- `<app_name>` is the name for your application
+- `SIGNOZ_INGESTION_KEY` is the API token provided by SigNoz. You can find your ingestion key from SigNoz cloud account details sent on your email.
+
+Depending on the choice of your region for SigNoz cloud, the ingest endpoint will vary according to this table.
+
+| Region | Endpoint |
+|--------|----------|
+| US | ingest.us.signoz.cloud:443 |
+| IN | ingest.in.signoz.cloud:443 |
+| EU | ingest.eu.signoz.cloud:443 |
+
+2. Build and run your application:
+
+```bash
+# Using Quarkus CLI
+quarkus build
+java -jar build/quarkus-run.jar
+```
+
+```bash
+# Using maven
+./mvnw package
+java -jar target/quarkus-app/quarkus-run.jar
+```
+
+```bash
+# Using gradle
+./gradlew build
+java -jar build/libs/quarkus-app.jar
+```
+
+In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#Troubleshooting).
+
+</TabItem>
+
+<TabItem value="k8s" label="Kubernetes">
+
+1. Create a docker image for your application or publish your application to a container registry:
+
+```bash
+docker build -t <app_name> .
+```
+
+2. Create a `deployment.yaml`:
+
+```yaml:deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: quarkus-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: quarkus-app
+  template:
+    metadata:
+      labels:
+        app: quarkus-app
+    spec:
+      containers:
+      - name: quarkus-app
+        image: <my-app>:latest
+        imagePullPolicy: Never # If you have built the image locally
+        ports:
+        - containerPort: 8080
+        env:
+        - name: OTEL_RESOURCE_ATTRIBUTES
+          value: "service.name=<app_name>"
+        - name: OTEL_EXPORTER_OTLP_HEADERS
+          value: "signoz-access-token=SIGNOZ_INGESTION_KEY"
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          value: "https://ingest.{region}.signoz.cloud:443"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: quarkus-app
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 8080
+    targetPort: 8080
+  selector:
+    app: quarkus-app
+```
+
+- `<app_name>` is the name for your application
+- `SIGNOZ_INGESTION_KEY` is the API token provided by SigNoz. You can find your ingestion key from SigNoz cloud account details sent on your email.
+
+Depending on the choice of your region for SigNoz cloud, the ingest endpoint will vary according to this table.
+
+| Region | Endpoint |
+|--------|----------|
+| US | ingest.us.signoz.cloud:443 |
+| IN | ingest.in.signoz.cloud:443 |
+| EU | ingest.eu.signoz.cloud:443 |
+
+2. Deploy to Kubernetes:
+
+```bash
+kubectl apply -f deployment.yaml
+```
+
+You can verify the deployment by running `kubectl get pods` and checking the status of the pod.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/instrumentation/quarkus-k8s-deployment.webp" alt="Quarkus application deployed on Kubernetes"/>
+    <figcaption><i>Quarkus application deployed on Kubernetes</i></figcaption>
+</figure>
+
+In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#Troubleshooting).
+
+</TabItem>
+
+<TabItem value="windows" label="Windows">
+
+Set environment variables and run your application:
+
+```cmd
+setx OTEL_RESOURCE_ATTRIBUTES "service.name=<app_name>"
+setx OTEL_EXPORTER_OTLP_HEADERS "signoz-access-token=SIGNOZ_INGESTION_KEY"
+setx OTEL_EXPORTER_OTLP_ENDPOINT "https://ingest.{region}.signoz.cloud:443"
+java -jar target/quarkus-app/quarkus-run.jar
+```
+- `<app_name>` is the name for your application
+- `SIGNOZ_INGESTION_KEY` is the API token provided by SigNoz. You can find your ingestion key from SigNoz cloud account details sent on your email.
+
+Depending on the choice of your region for SigNoz cloud, the ingest endpoint will vary according to this table.
+
+| Region | Endpoint |
+|--------|----------|
+| US | ingest.us.signoz.cloud:443 |
+| IN | ingest.in.signoz.cloud:443 |
+| EU | ingest.eu.signoz.cloud:443 |
+
+In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#Troubleshooting).
+
+</TabItem>
+</Tabs>
+
+## Send Traces, Metrics, and Logs to Self-Hosted SigNoz
+
+1. Set the `OTEL_RESOURCE_ATTRIBUTES` environment variable to the name of your application
+2. Update the `OTEL_EXPORTER_OTLP_ENDPOINT` environment variable with `https://<URL of SigNoz Backend>:4318`
+3. Run your application
+
+```bash
+export OTEL_RESOURCE_ATTRIBUTES=service.name=<app-name>
+export OTEL_EXPORTER_OTLP_ENDPOINT=https://<URL of SigNoz Backend>:4318
+java -jar target/quarkus-app/quarkus-run.jar
+```
+
+Things to note about the command:
+
+`OTEL_EXPORTER_OTLP_ENDPOINT` - This is the endpoint of the machine where SigNoz is installed.
+
+If you have installed SigNoz on your localhost and your Java JAR is saved at `/Users/john/Downloads/`, then the final command looks like:
+
+```bash
+export OTEL_RESOURCE_ATTRIBUTES=service.name=quarkus-app
+export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
+java -jar /Users/john/Downloads/quarkus-app.jar
+```
+
+Here’s a handy [grid](https://signoz.io/docs/instrumentation/troubleshoot-instrumentation/) to figure out which address to use to send data to SigNoz.
+
+<Admonition>
+💡 Remember to allow incoming requests to port 4318 of the machine where SigNoz backend is hosted.
+</Admonition>
+
+In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#Troubleshooting).
+
+
+## Validating Instrumentation
+
+To verify your instrumentation is working:
+
+1. Trigger an action in your app that generates a web request. Hit the endpoint a number of times to generate some data. Then, wait for some time. Ex:
+```bash
+curl http://localhost:8080/hello
+```
+<figure data-zoomable align='center'>
+    <img src="/img/docs/instrumentation/quarkus-k8s-deployment.webp" alt="Quarkus application deployed on Kubernetes"/>
+    <figcaption><i>Triggering an action in your app that generates a web request</i></figcaption>
+</figure>
+
+2. Check the Services tab in SigNoz UI for your application
+<figure data-zoomable align='center'>
+    <img src="/img/docs/instrumentation/quarkus-services-in-signoz.webp" alt="Services tab in SigNoz UI"/>
+    <figcaption><i>Services tab in SigNoz UI</i></figcaption>
+</figure>
+
+3. Navigate to the Traces tab to see detailed traces
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/instrumentation/quarkus-traces-in-signoz.webp" alt="Traces from a Quarkus application in SigNoz UI"/>
+    <figcaption><i>Traces from your Quarkus application visible in SigNoz UI</i></figcaption>
+</figure>
+
+4. Check logs in the Logs tab
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/instrumentation/quarkus-logs-in-signoz.webp" alt="Logs from a Quarkus application in SigNoz UI"/>
+    <figcaption><i>Logs from your Quarkus application visible in SigNoz UI</i></figcaption>
+</figure>
+
+## Troubleshooting
+
+If traces are not appearing:
+- Verify your configuration in `application.properties`
+- Check application logs for OpenTelemetry-related errors
+- Try enabling debug logging by setting `quarkus.log.category."io.opentelemetry".level=DEBUG`
+- Ensure your application can reach the SigNoz endpoint
+
+## Sample Application
+- We have included a sample application at:
+  - [Sample Quarkus App Github Repo](https://github.com/Creator54/quarkus-demo-app)
+
+<InstrumentationFAQ />
