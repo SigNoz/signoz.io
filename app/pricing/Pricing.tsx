@@ -690,6 +690,15 @@ const PricingPlans = () => {
                   <p className="mb-4 text-base leading-relaxed text-gray-400">
                     For larger orgs with advanced security, compliance and support.
                   </p>
+                  <div className="mb-6 flex items-center justify-between">
+                    <p className="m-0 min-w-[72px]">Starts at</p>
+                    <div className="w-3/5 border-b border-dashed border-signoz_slate-400" />
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-base font-medium text-signoz_robin-300">
+                        $4000/Month
+                      </span>
+                    </div>
+                  </div>
                   <div className="mb-6 flex items-center gap-3">
                     <ZapSolid />
                     <p className="m-0">Flexible Pricing for scale and long term commitments</p>
