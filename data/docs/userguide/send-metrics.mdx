@@ -183,32 +183,6 @@ To enable a Prometheus receiver, follow the steps below:
       - [Jobs and Instances][6]
 3. <SaveChangesRestart />
 
-## Find Metrics available in SigNoz
-
-You can connect to SigNoz's ClickHouse instance and find the metrics SigNoz is storing.
-As of now this is bit of manual process, we are bringing capabilities to auto-suggest
-available metrics soon.
-
-You can follow the below steps:
-
-1. [Install ClickHouse client][7]
-
-2. Connect to the ClickHouse container
-  ````bash
-  docker exec -it signoz-clickhouse bash
-  ````
-3. Run the clickhouse-client command to connect to the database service
-  ````bash
-  clickhouse client --host <SigNoz IP>  --port 9000
-  ````
-4. Run the query to list metrics
-  ````bash
-  select DISTINCT(JSONExtractString(time_series_v2.labels,'__name__')) as metrics from signoz_metrics.distributed_time_series_v2
-  ````
-5. If needed, dump in a csv file and parse it locally
-  ```bash
-  select DISTINCT(labels) from signoz_metrics.distributed_time_series_v2 INTO OUTFILE 'output.csv'
-  ```
 
 You can use this metrics to plot in the [Dashboard][8] section.
 
