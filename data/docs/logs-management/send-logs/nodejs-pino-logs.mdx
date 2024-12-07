@@ -1,0 +1,322 @@
+---
+date: 2024-12-07
+title: Send logs from Node.js Pino without requiring Otel collectors to SigNoz Cloud and Self-hosted
+id: nodejs-pino-logs
+---
+
+## Overview
+
+This guide demonstrates how to configure Pino to send logs directly to SigNoz Cloud or Self-hosted SigNoz without using OpenTelemetry collectors. Following this documentation will enable you to stream your Node.js application logs directly to your SigNoz dashboard.
+<Tabs>
+<TabItem value="cloud" label="SigNoz Cloud" default>
+**Here's a quick summary of what we will be doing in this guide**
+
+* Create Node.js application with pino logger
+* Configure pino logger to send logs to SigNoz Cloud
+* Send and Visualize the logs in SigNoz Cloud
+
+## Prerequisites
+
+Before starting ensure you have:
+
+- A SigNoz Cloud account with active subscription
+- Access to your SigNoz Cloud:
+    - Ingestion endpoint URL
+    - Ingestion Key
+
+* See [SigNoz Cloud Configuration Guide](https://signoz.io/docs/ingestion/signoz-cloud/keys/) for details on finding your ingestion URL and access token
+
+## Required Dependencies
+
+Install the necessary packages:
+
+```bash
+npm i pino-opentelemetry-transport
+```
+
+## Setup
+
+### Step 1. Configure Pino Logger
+
+```jsx
+//tracing.js
+const pino = require('pino')
+
+const transport = pino.transport({
+  target: 'pino-opentelemetry-transport'
+})
+
+const logger = pino(transport)
+
+module.exports = logger
+```
+
+### Step 2. Configure Application Logging
+
+```jsx
+//app.js
+const logger = require('./tracing');
+
+// Basic logging
+logger.info('Hello, World! from pino');
+
+// Structured logging with metadata
+logger.info('User authentication', {
+    userId: 'user123',
+    action: 'login',
+    timestamp: new Date().toISOString()
+});
+
+// Error handling example
+try {
+    throw new Error('Something went wrong');
+} catch (error) {
+    logger.error({
+        msg: 'Error occurred',
+        error: error.message,
+        stack: error.stack
+    });
+}
+```
+
+### Step 3. Run Your Application
+
+Execute your application with the SigNoz access token:
+
+```jsx
+OTEL_EXPORTER_OTLP_HEADERS="signoz-access-token=your_signoz_ingestion_token" OTEL_EXPORTER_OTLP_LOGS_ENDPOINT=https://ingest.{region}.signoz.cloud:443/v1/logs OTEL_RESOURCE_ATTRIBUTES="service.name=my-service,service.version=1.2.3" node -r ./tracing.js app.js
+```
+
+## Usage Examples
+
+### Basic Logging
+
+```jsx
+logger.info('Server started on port 3000');
+logger.warn('High memory usage detected');
+logger.error('Failed to process request');
+```
+
+## Output
+
+After successful implementation, your logs will appear in your SigNoz Cloud dashboard where you can:
+
+- Monitor logs in real-time
+- Filter logs by level and custom attributes
+- Search through log contents
+- Create alerts based on log patterns
+- Visualize log trends and patterns
+
+{/* Image placeholder - in a real MDX file, you'd use an import or relative path */}
+{/* <img src="/path/to/screenshot.png" alt="SigNoz Dashboard Log View" /> */}
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/logs-management/send-logs/nodejs-pino-logs-cloud.png"
+        alt="Node.js Pino Logs"
+    />
+<figcaption>
+<i>
+Node.js Pino Logs
+</i>
+</figcaption>
+</figure>
+
+*Log from SigNoz dashboard*
+
+## Troubleshooting
+If logs are not appearing in SigNoz:
+
+1. Verify your Ingestion Keys and endpoint URL
+2. Ensure the transport is properly configured
+3. Review SigNoz dashboard filters
+4. Check Pino log level settings
+
+## Additional Resources
+
+- [Pino OpenTelemetry Transport](https://github.com/pinojs/pino-opentelemetry-transport)
+
+</TabItem>
+<TabItem value="self-hosted" label="Self-hosted SigNoz">
+**Here's a quick summary of what we will be doing in this guide**
+
+* Create Node.js application with pino logger
+* Containerize the application
+* If your using Kubernetes, create a deployment
+* Send and Visualize the logs in Self-hosted SigNoz
+
+## Prerequisites
+
+Before starting ensure you have:
+* Your Self-hosted SigNoz is ready
+* See [Self-hosted SigNoz Configuration Guide for docker](https://signoz.io/docs/install/docker/)
+* See [Self-hosted SigNoz Configuration Guide for kubernetes](https://signoz.io/docs/install/kubernetes/)
+
+## Required Dependencies
+
+Install the necessary packages:
+
+```bash
+npm i pino-opentelemetry-transport
+```
+
+## Setup
+
+### Step 1. Configure Pino Logger
+
+```jsx
+//tracing.js
+const pino = require('pino')
+
+const transport = pino.transport({
+  target: 'pino-opentelemetry-transport'
+})
+
+const logger = pino(transport)
+
+module.exports = logger
+```
+
+### Step 2. Configure Application Logging
+
+```jsx
+//app.js
+const logger = require('./tracing');
+
+// Basic logging
+logger.info('Logs from pino');
+
+// Structured logging with metadata
+logger.info('User authentication', {
+    userId: 'user123',
+    action: 'login',
+    timestamp: new Date().toISOString()
+});
+
+// Error handling example
+try {
+    throw new Error('Something went wrong');
+} catch (error) {
+    logger.error({
+        msg: 'Error occurred',
+        error: error.message,
+        stack: error.stack
+    });
+}
+```
+
+### Step 3. Containerize the application
+
+Create a Dockerfile for your application:
+```Dockerfile
+# Dockerfile
+FROM node:16-alpine
+
+# Create app directory
+WORKDIR /usr/src/app
+
+# Install dependencies
+COPY package*.json ./
+RUN npm install
+
+# Copy application code
+COPY tracing.js ./
+COPY app.js ./
+
+# Set environment variables (can be overridden in Kubernetes deployment)
+ENV OTEL_EXPORTER_OTLP_LOGS_PROTOCOL=grpc
+ENV OTEL_EXPORTER_OTLP_LOGS_ENDPOINT=http://otel-collector:4317
+ENV OTEL_RESOURCE_ATTRIBUTES=service.name=pino-service,service.version=1.0.0,deployment.environment=production
+
+# Command to run the application
+CMD ["node", "app.js"]
+```
+
+### Step 2. Run with Docker
+
+```bash
+docker build -t my-pino-app .
+docker run -d my-pino-app
+```
+
+### Step 3. Deploy to Kubernetes (Optional)
+
+* Create a deployment and add the environment variables using either ConfigMap or Secrets based on your security requirements
+```yaml
+# deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pino-logger
+  labels:
+    app: pino-logger
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pino-logger
+  template:
+    metadata:
+      labels:
+        app: pino-logger
+    spec:
+      containers:
+      - name: pino-logger
+        image: your-registry/your-image:latest
+        imagePullPolicy: Always
+        env:
+        - name: OTEL_EXPORTER_OTLP_LOGS_PROTOCOL
+          value: 'grpc'
+        - name: OTEL_EXPORTER_OTLP_LOGS_ENDPOINT
+          value: 'http://<service-name>.<namespace>.svc.cluster.local:4317'
+        - name: OTEL_RESOURCE_ATTRIBUTES
+          value: 'service.name=pino-logger,service.version=1.0.0'
+
+```
+
+## Usage Examples
+
+### Basic Logging
+
+```jsx
+logger.info('Server started on port 3000');
+logger.warn('High memory usage detected');
+logger.error('Failed to process request');
+```
+
+## Output
+
+After successful implementation, your logs will appear in your Self-hosted SigNoz dashboard where you can:
+
+- Monitor logs in real-time
+- Filter logs by level and custom attributes
+- Search through log contents
+- Create alerts based on log patterns
+- Visualize log trends and patterns
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/logs-management/send-logs/nodejs-pino-logs-self-hosted.png"
+        alt="Node.js Pino Logs"
+    />
+<figcaption>
+<i>
+Log from SigNoz dashboard
+</i>
+</figcaption>
+</figure>
+
+## Troubleshooting
+
+If logs are not appearing in SigNoz:
+
+1. Verify endpoint URL
+2. Ensure the transport is properly configured
+3. Review SigNoz dashboard filters
+4. Check Pino log level settings
+
+## Additional Resources
+
+- [Pino OpenTelemetry Transport](https://github.com/pinojs/pino-opentelemetry-transport)
+</TabItem>
+</Tabs>

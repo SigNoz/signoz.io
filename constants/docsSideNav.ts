@@ -495,6 +495,18 @@ const docsSideNav = [
         label: 'Send Logs to SigNoz',
         items: [
           {
+            type: 'category',
+            isExpanded: false,
+            label: 'NodeJs',
+            items: [
+              {
+                type: 'doc',
+                route: '/docs/logs-management/send-logs/nodejs-pino-logs',
+                label: 'Pino',
+              },
+            ],
+          },
+          {
             type: 'doc',
             route: '/docs/userguide/collect_kubernetes_pod_logs',
             label: 'Kubernetes pod logs',
