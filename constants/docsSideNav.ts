@@ -993,6 +993,11 @@ const docsSideNav = [
         route: '/docs/alerts-management/alerts-history',
         label: 'Alerts History',
       },
+      {
+        type: 'doc',
+        route: '/docs/alerts-management/terraform-provider-signoz',
+        label: 'Terraform Provider',
+      },
     ],
   },
   {
