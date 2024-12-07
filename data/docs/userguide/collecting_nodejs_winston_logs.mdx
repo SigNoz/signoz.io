@@ -24,7 +24,7 @@ const logger = winston.createLogger({
 
 For sending logs to SigNoz cloud, while running the above example set the below environment variables
 
-- The value of `OTEL_EXPORTER_OTLP_ENDPOINT` environment variable will be `https://ingest.{region}.signoz.cloud:443` where depending on the choice of your region for SigNoz cloud, the otlp endpoint will vary according to this table.
+- The value of `OTEL_EXPORTER_OTLP_ENDPOINT` environment variable will be `https://ingest.{region}.signoz.cloud:443/v1/logs` where depending on the choice of your region for SigNoz cloud, the otlp endpoint will vary according to this table.
 
   | Region | Endpoint                   |
   | ------ | -------------------------- |
@@ -39,7 +39,7 @@ For sending logs to SigNoz cloud, while running the above example set the below 
 - First we will install a few dependencies using npm
 
   ```
-  npm install @opentelemetry/api-logs @opentelemetry/sdk-logs @opentelemetry/exporter-logs-otlp-http @opentelemetry/winston-transport winston dotenv
+  npm install @opentelemetry/api-logs @opentelemetry/sdk-logs @opentelemetry/exporter-logs-otlp-http @opentelemetry/winston-transport @opentelemetry/resources winston dotenv
   ```
 
 - logger.js
@@ -49,11 +49,18 @@ For sending logs to SigNoz cloud, while running the above example set the below 
   const { LoggerProvider, SimpleLogRecordProcessor } = require('@opentelemetry/sdk-logs')
   const { OTLPLogExporter } = require('@opentelemetry/exporter-logs-otlp-http')
   const { OpenTelemetryTransportV3 } = require('@opentelemetry/winston-transport')
+  const { Resource } = require('@opentelemetry/resources')
   const winston = require('winston')
   require('dotenv').config()
 
   // Initialize the Logger provider
-  const loggerProvider = new LoggerProvider()
+  const loggerProvider = new LoggerProvider({
+    resource: new Resource({
+      'service.name': 'winston-logger',
+      'service.version': '1.0.0',
+      'deployment.environment': process.env.NODE_ENV || 'development',
+    }),
+  })
 
   // Configure OTLP exporter for SigNoz
   const otlpExporter = new OTLPLogExporter({
@@ -83,9 +90,6 @@ For sending logs to SigNoz cloud, while running the above example set the below 
       environment: process.env.NODE_ENV || 'development',
     },
     transports: [
-      new winston.transports.Console({
-        format: winston.format.combine(winston.format.colorize(), winston.format.simple()),
-      }),
       new OpenTelemetryTransportV3({
         loggerProvider,
         logAttributes: {
@@ -99,15 +103,42 @@ For sending logs to SigNoz cloud, while running the above example set the below 
   module.exports = logger
   ```
 
-  - index.js
+  - example index.js
 
   ```javascript
+  const express = require('express')
   const logger = require('./logger')
+  const PORT = process.env.PORT || '5555'
+  const app = express()
 
-  // Log different levels
-  logger.info('Server started', { port: 3000 })
-  logger.debug('Debug information')
-  logger.error('Error occurred', { error: 'Something went wrong' })
+  app.use(express.json())
+
+  app.get('/', (req, res) => {
+    logger.log('debug', 'Hello, World!') //debug level as first param
+    logger.debug("The is the home '/' route.")
+    // using debug method directly
+    res.json({ method: req.method, message: 'Hello World', ...req.body })
+  })
+
+  app.get('/404', (req, res) => {
+    logger.error('404 error') //error method
+    logger.debug('The is the 404 route.')
+    res.sendStatus(404)
+  })
+
+  app.get('/user', (req, res) => {
+    try {
+      throw new Error('Invalid user')
+    } catch (error) {
+      logger.error('Auth Error: invalid user')
+      logger.debug('The is the user route.')
+      res.status(500).send('Error!')
+    }
+  })
+
+  app.listen(parseInt(PORT, 10), () => {
+    console.log(`Listening on http://localhost:${PORT}`)
+  })
   ```
 
 - We will modify the `OTLPLogExporter` to
@@ -156,3 +187,26 @@ logger.add(
 ```
 
 By using these configuration options, you can fine-tune how your logs are output and collected when deployed in containerized environments like Docker or Kubernetes.
+
+## Collecting Nodejs logs when application is deployed on a Host
+
+When you run your application directly on the host, you will be required to add a intermediary medium ex:- a file, where you can export your logs and the otel-collector can read them and push to signoz.
+
+You can add a file transport very easily as stated <a href="https://github.com/winstonjs/winston/blob/master/docs/transports.md#file-transport" rel="noopener noreferrer nofollow" target="_blank">here</a>.
+
+```
+logger.add(new winston.transports.File({
+  filename: path.join(process.cwd(), 'logs', 'application.log'),
+  level: 'debug',
+  handleExceptions: true,
+  maxsize: 5242880, // 5MB
+  maxFiles: 5,
+  tailable: true,
+}));
+```
+
+Once you run your application and the logs are added to a file, you can configure otel collector to read from that file.
+
+For configuring it you can follow the guide [here](/docs/userguide/collect_logs_from_file).
+
+Once you configure the otel collector the logs will be visible on the UI.
