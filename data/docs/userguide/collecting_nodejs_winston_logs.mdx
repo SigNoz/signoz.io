@@ -20,7 +20,8 @@ const logger = winston.createLogger({
 
 </Admonition>
 
-## For SigNoz Cloud
+<Tabs>
+<TabItem value="cloud" label="SigNoz Cloud" default>
 
 For sending logs to SigNoz cloud, while running the above example set the below environment variables
 
@@ -33,6 +34,33 @@ For sending logs to SigNoz cloud, while running the above example set the below 
   | EU     | ingest.eu.signoz.cloud:443 |
 
 - The value of `SIGNOZ_ACCESS_TOKEN` environment variable will be `<SIGNOZ_INGESTION_KEY>` where `<SIGNOZ_INGESTION_KEY>` is your ingestion key
+
+</TabItem>
+
+<TabItem value="self-host" label="Self-Host" default>
+For sending logs to Self hosted Signoz, we need it's running instance. You can follow these steps to [install](https://signoz.io/docs/install/docker/) signoz and set the below environment variables
+
+- The value of `OTEL_EXPORTER_OTLP_ENDPOINT` environment variable will be `https://localhost:4318/v1/logs` and here we don't need `SIGNOZ_ACCESS_TOKEN`
+
+```javascript
+const otlpExporter = new OTLPTraceExporter({
+  url: 'https://localhost:4318/v1/logs',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+})
+```
+
+Set a proxy in your `package.json` pointing to to the SigNoz OTLP HTTP endpoint. This is an easier temporary setup to bypass CORS issues. You can use [this documentation](https://signoz.io/docs/userguide/otlp-http-enable-cors/) to guide you on dealing with CORS issues for a permanent setup.
+
+```bash
+{
+      "proxy": "http://localhost:4318"
+}
+```
+
+</TabItem>
+</Tabs>
 
 ## How to collect logs from Node.js Winston without the requiring Otel collectors
 
@@ -103,52 +131,138 @@ For sending logs to SigNoz cloud, while running the above example set the below 
   module.exports = logger
   ```
 
-  - example index.js
+- example index.js
 
   ```javascript
   const express = require('express')
   const logger = require('./logger')
-  const PORT = process.env.PORT || '5555'
+  const { v4: uuidv4 } = require('uuid')
+
+  const PORT = process.env.PORT || 5555
   const app = express()
+
+  app.use((req, res, next) => {
+    const requestId = uuidv4()
+    req.requestId = requestId
+
+    logger.info({
+      message: 'Incoming Request',
+      method: req.method,
+      path: req.path,
+      requestId: requestId,
+      ipAddress: req.ip,
+      userAgent: req.get('User-Agent'),
+    })
+
+    req.startTime = Date.now()
+
+    res.on('finish', () => {
+      const duration = Date.now() - req.startTime
+
+      logger.info({
+        message: 'Request Processed',
+        method: req.method,
+        path: req.path,
+        requestId: requestId,
+        statusCode: res.statusCode,
+        responseTime: `${duration}ms`,
+      })
+    })
+
+    next()
+  })
 
   app.use(express.json())
 
   app.get('/', (req, res) => {
-    logger.log('debug', 'Hello, World!') //debug level as first param
-    logger.debug("The is the home '/' route.")
-    // using debug method directly
-    res.json({ method: req.method, message: 'Hello World', ...req.body })
+    try {
+      logger.debug({
+        message: 'Accessing root endpoint',
+        requestId: req.requestId,
+      })
+
+      res.json({
+        method: req.method,
+        message: 'Hello World',
+        timestamp: new Date().toISOString(),
+        requestId: req.requestId,
+      })
+    } catch (error) {
+      logger.error({
+        message: 'Error in root endpoint',
+        error: error.message,
+        stack: error.stack,
+        requestId: req.requestId,
+      })
+      res.status(500).json({ error: 'Internal Server Error' })
+    }
   })
 
   app.get('/404', (req, res) => {
-    logger.error('404 error') //error method
-    logger.debug('The is the 404 route.')
-    res.sendStatus(404)
+    logger.warn({
+      message: '404 Route Accessed',
+      requestId: req.requestId,
+    })
+
+    res.status(404).json({
+      error: 'Not Found',
+      requestId: req.requestId,
+    })
   })
 
   app.get('/user', (req, res) => {
     try {
-      throw new Error('Invalid user')
+      // Simulating an authentication failure
+      throw new Error('Authentication Failed')
     } catch (error) {
-      logger.error('Auth Error: invalid user')
-      logger.debug('The is the user route.')
-      res.status(500).send('Error!')
+      logger.error({
+        message: 'User Authentication Error',
+        error: error.message,
+        stack: error.stack,
+        requestId: req.requestId,
+      })
+
+      res.status(401).json({
+        error: 'Unauthorized',
+        requestId: req.requestId,
+      })
     }
   })
 
-  app.listen(parseInt(PORT, 10), () => {
+  app.use((err, req, res, next) => {
+    logger.error({
+      message: 'Unhandled Error',
+      error: err.message,
+      stack: err.stack,
+      requestId: req.requestId || 'unknown',
+    })
+
+    res.status(500).json({
+      error: 'Unexpected Server Error',
+      requestId: req.requestId || 'unknown',
+    })
+  })
+
+  const server = app.listen(PORT, () => {
+    logger.info({
+      message: 'Server Started',
+      port: PORT,
+      environment: process.env.NODE_ENV || 'development',
+    })
+
     console.log(`Listening on http://localhost:${PORT}`)
   })
-  ```
 
-- We will modify the `OTLPLogExporter` to
+  process.on('SIGTERM', () => {
+    logger.warn('SIGTERM received. Shutting down gracefully.')
+    server.close(() => {
+      logger.info('Server closed. Process terminating.')
+      process.exit(0)
+    })
+  })
 
+  module.exports = app
   ```
-  OTLPLogExporter(url="0.0.0.0:4317")
-  ```
-
-  Here we are using `0.0.0.0` as our host since we are running this application in the same machine where SigNoz is running, for other configurations please check the
-  [troubleshooting](/docs/install/troubleshooting#signoz-otel-collector-address-grid) guide.
 
 - Now you can run your application by running `node index.js`
 - If there are no errors your logs will be visible on SigNoz UI.
@@ -210,3 +324,14 @@ Once you run your application and the logs are added to a file, you can configur
 For configuring it you can follow the guide [here](/docs/userguide/collect_logs_from_file).
 
 Once you configure the otel collector the logs will be visible on the UI.
+
+<figure data-zoomable align="center">
+  <img
+    className="box-shadowed-image"
+    src="/img/docs/logs-management/send-logs/node-winston-logs.webp"
+    alt="Send Nodejs winston logs to Signoz"
+  />
+  <figcaption>
+    <i>Send Nodejs winston logs to Signoz</i>
+  </figcaption>
+</figure>
