@@ -277,7 +277,7 @@ To run the sample app with Gunicorn, we have added a file named `gunicorn.config
 ```bash
 OTEL_RESOURCE_ATTRIBUTES=service.name=<service_name> \
 OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.{region}.signoz.cloud:443" \
-OTEL_EXPORTER_OTLP_HEADERS="signoz-access-token=SIGNOZ_INGESTION_KEY" \
+OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=SIGNOZ_INGESTION_KEY" \
 OTEL_EXPORTER_OTLP_PROTOCOL=grpc \
 opentelemetry-instrument <your_run_command>
 ```
@@ -303,7 +303,7 @@ For our sample django application, the run command will look like:
 ```bash
 OTEL_RESOURCE_ATTRIBUTES=service.name=sample-django-app \
 OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.{region}.signoz.cloud:443" \
-OTEL_EXPORTER_OTLP_HEADERS="signoz-access-token=SIGNOZ_INGESTION_KEY" \
+OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=SIGNOZ_INGESTION_KEY" \
 OTEL_EXPORTER_OTLP_PROTOCOL=grpc \
 opentelemetry-instrument gunicorn mysite.wsgi -c gunicorn.config.py --workers 2 --threads 2 --reload
 ```
@@ -349,7 +349,7 @@ docker run -d --name django-container \
 -e OTEL_METRICS_EXPORTER='none' \
 -e OTEL_RESOURCE_ATTRIBUTES='service.name=djangoApp' \
 -e OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.{region}.signoz.cloud:443" \
--e OTEL_EXPORTER_OTLP_HEADERS="signoz-access-token=SIGNOZ_INGESTION_KEY" \
+-e OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=SIGNOZ_INGESTION_KEY" \
 -e OTEL_EXPORTER_OTLP_PROTOCOL=grpc \
 -p 8000:8000 sample-django-app
 ```
@@ -367,7 +367,7 @@ docker run -d --name django-container \
 -e OTEL_METRICS_EXPORTER='none' \
 -e OTEL_RESOURCE_ATTRIBUTES='service.name=djangoApp' \
 -e OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.{region}.signoz.cloud:443" \
--e OTEL_EXPORTER_OTLP_HEADERS="signoz-access-token=SIGNOZ_INGESTION_KEY" \
+-e OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=SIGNOZ_INGESTION_KEY" \
 -e OTEL_EXPORTER_OTLP_PROTOCOL=grpc \
 -p 8000:8000 sample-django-app
 ```
