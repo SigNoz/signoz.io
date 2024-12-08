@@ -119,7 +119,7 @@ env OTEL_PHP_AUTOLOAD_ENABLED=true \
     OTEL_TRACES_EXPORTER=otlp \
     OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf \
     OTEL_EXPORTER_OTLP_ENDPOINT=<SIGNOZ_ENDPOINT> \
-    OTEL_EXPORTER_OTLP_HEADERS=signoz-access-token=<INGESTION_KEY> \
+    OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<INGESTION_KEY> \
     OTEL_PROPAGATORS=baggage,tracecontext \
     php -S localhost:8080 app.php
 ```
@@ -130,7 +130,7 @@ You can change the env vars value by referencing values from the following looku
 |-------------------------------|----------------------------------------------|
 | OTEL_SERVICE_NAME              | `<SERVICE_NAME>` replace it with name of your app                         |
 | OTEL_EXPORTER_OTLP_ENDPOINT    | `<SIGNOZ_ENDPOINT>` replace this with SigNoz cloud endpoint                       |
-| OTEL_EXPORTER_OTLP_HEADERS     | signoz-access-token=`<INGESTION_KEY>` replace this with the ingestion key which you must have received in mail        |
+| OTEL_EXPORTER_OTLP_HEADERS     | signoz-ingestion-key=`<INGESTION_KEY>` replace this with the ingestion key which you must have received in mail        |
 | php -S localhost:8080 app.php             | you can replace this with the run command of your PHP application                        |
 
 
@@ -437,7 +437,7 @@ function initOpenTelemetry()
 
 
  $headers = [
- 'signoz-access-token' => "<INGESTION_KEY>",
+ 'signoz-ingestion-key' => "<INGESTION_KEY>",
  ];
  $transport = (new GrpcTransportFactory())->create('<SIGNOZ_ENDPOINT>' . OtlpUtil::method(Signals::TRACE), 'application/x-protobuf', $headers);
  $spanExporter = new SpanExporter($transport);
@@ -467,7 +467,7 @@ You can change the env vars value by referencing values from the following looku
 |-------------------------------|----------------------------------------------|
 | OTEL_SERVICE_NAME              | `<SERVICE_NAME>` replace it with name of your app                         |
 | OTEL_EXPORTER_OTLP_ENDPOINT    | `<SIGNOZ_ENDPOINT>` replace this with SigNoz cloud endpoint                       |
-| OTEL_EXPORTER_OTLP_HEADERS     | signoz-access-token=`<INGESTION_KEY>` replace this with the ingestion key which you must have received in mail        |
+| OTEL_EXPORTER_OTLP_HEADERS     | signoz-ingestion-key=`<INGESTION_KEY>` replace this with the ingestion key which you must have received in mail        |
 | php -S localhost:8080 app.php             | you can replace this with the run command of your PHP application                        |
 
 **Step 5: Set environment variables and run app**

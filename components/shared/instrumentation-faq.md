@@ -38,7 +38,7 @@ exporters:
         tls:
             insecure: false
         headers:
-            "signoz-access-token": "<SIGNOZ_INGESTION_KEY>"
+            "signoz-ingestion-key": "<SIGNOZ_INGESTION_KEY>"
 ```
 
 #### Using HTTP Exporter
@@ -53,7 +53,7 @@ exporters:
         tls:
             insecure: false
         headers:
-            "signoz-access-token": "<SIGNOZ_INGESTION_KEY>"
+            "signoz-ingestion-key": "<SIGNOZ_INGESTION_KEY>"
 ```
 
 ### My Application Sends Data to SigNoz Cloud
@@ -66,11 +66,11 @@ The endpoint should be configured either with environment variables or in the SD
 
 Examples with `us` region
 
-- `OTEL_EXPORTER_OTLP_PROTOCOL=grpc OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.us.signoz.cloud:443 OTEL_EXPORTER_OTLP_HEADERS=signoz-access-token=<SIGNOZ_INGESTION_KEY>`
+- `OTEL_EXPORTER_OTLP_PROTOCOL=grpc OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.us.signoz.cloud:443 OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>`
 
 ##### Using HTTP Exporter
 
-- `OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.us.signoz.cloud:443 OTEL_EXPORTER_OTLP_HEADERS=signoz-access-token=<SIGNOZ_INGESTION_KEY>`
+- `OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.us.signoz.cloud:443 OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>`
 
 #### Configuring Endpoint in Code
 
