@@ -6,35 +6,61 @@ id: vercel_logs_to_signoz
 
 If you are running your applications on [Vercel](https://vercel.com/), you can stream logs from Vercel to SigNoz using [log drains](https://vercel.com/docs/observability/log-drains-overview/log-drains#configure-a-log-drain).
 
-Log Drains are only supported in Vercel Pro and Enterprise accounts.
+## Prerequisite
+- Vercel Pro or Enterprise accounts 
 
-## Stream Vercel logs to SigNoz in SigNoz cloud
-* From the Vercel dashboard, go to Team Settings > Log Drains.
-* Select sources to collect logs
-  ![Vercel sources](/img/logs/vercel/sources.webp)
-* Choose delivery format as `JSON`
-* Choose your target projects
-* Enter the endpoint.
-    It will be 
-    ```
-    https://ingest.<REGION>.signoz.cloud:443/logs/json
-    ```
+## Setup
 
-  Depending on the choice of your region for SigNoz cloud, the otlp endpoint will vary according to this table.
+<Tabs>
+<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
 
-  | Region | Endpoint                   |
-  | ------ | -------------------------- |
-  | US     | ingest.us.signoz.cloud:443 |
-  | IN     | ingest.in.signoz.cloud:443 |
-  | EU     | ingest.eu.signoz.cloud:443 |
+Follow the steps below to send your logs from Vercel to SigNoz Cloud:
 
-* Enable custom headers and add the headers `signoz-access-token` and `x-vercel-verify`
-  The value of `x-vercel-verify` will be visible on the screen and `signoz-access-token` will be the token you use for sending data to SigNoz
-  ![Vercel Custom Headers](/img/logs/vercel/headers.webp)
+1. **Open the Vercel Dashboard**  
+   Navigate to **Team Settings** > **Log Drains**.
 
-* Click on `Test Log Drain` , if successful you will see sample logs on SigNoz UI (Might take some time).
-  ![Sample Logs](/img/logs/vercel/sample-logs.webp)
+2. **Select Sources**  
+   Choose the relevant sources from which you want to collect logs.  
+   ![Vercel sources](/img/logs/vercel/sources.webp)
 
-* Click on `Verify` button and then `Add Log Drain` in Vercel.
+3. **Choose Delivery Format**  
+   Set the delivery format to `JSON`.
 
-Now your logs will be sent to SigNoz.
+4. **Select Target Projects**  
+   Choose the specific projects for which you want to stream logs.
+
+5. **Set the Endpoint**  
+   Use the following endpoint format:  
+
+`https://ingest.<REGION>.signoz.cloud:443/logs/json`
+
+
+Refer to the table below for the endpoint based on your chosen region:
+
+| Region | Endpoint                     |
+|--------|------------------------------|
+| US     | ingest.us.signoz.cloud:443   |
+| IN     | ingest.in.signoz.cloud:443   |
+| EU     | ingest.eu.signoz.cloud:443   |
+
+6. **Add Custom Headers**  
+Enable **Custom Headers** and add the following headers:
+
+- `signoz-access-token`: Use the token from your SigNoz Cloud instance for data authentication.
+- `x-vercel-verify`: The value of this header will be provided in the Vercel UI.
+
+![Vercel Custom Headers](/img/logs/vercel/headers.webp)
+
+7. **Test the Log Drain**  
+Click on **Test Log Drain**. If successful, you will start to see sample logs on the SigNoz UI.  
+*Note: It might take some time for the logs to appear.*  
+![Sample Logs](/img/logs/vercel/sample-logs.webp)
+
+8. **Verify and Add the Log Drain**  
+After successful testing, click **Verify** and then **Add Log Drain** in your Vercel dashboard.
+
+Your Vercel logs will now be streamed to SigNoz Cloud.
+
+</TabItem>
+</Tabs>
+
