@@ -61,8 +61,8 @@ implementation 'io.quarkus:quarkus-opentelemetry:3.17.2'
 quarkus.application.name=quarkus-app
 quarkus.application.version=1.0.0
 
-# Ingestion key for authentication
-quarkus.otel.exporter.otlp.headers=${OTEL_EXPORTER_OTLP_HEADERS}
+# Ingestion key for authentication(Only if using Signoz Cloud)
+quarkus.otel.exporter.otlp.headers=${OTEL_EXPORTER_OTLP_HEADERS:}
 
 # Enable OpenTelemetry
 quarkus.otel.sdk.disabled=false
@@ -150,8 +150,6 @@ java -jar target/quarkus-app/quarkus-run.jar
 java -jar build/libs/quarkus-app.jar
 ```
 
-In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#Troubleshooting).
-
 </TabItem>
 
 <TabItem value="k8s" label="Kubernetes">
@@ -229,9 +227,6 @@ You can verify the deployment by running `kubectl get pods` and checking the sta
     <img src="/img/docs/instrumentation/quarkus-k8s-deployment.webp" alt="Quarkus application deployed on Kubernetes"/>
     <figcaption><i>Quarkus application deployed on Kubernetes</i></figcaption>
 </figure>
-
-In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#Troubleshooting).
-
 </TabItem>
 
 <TabItem value="windows" label="Windows">
@@ -255,13 +250,14 @@ Depending on the choice of your region for SigNoz cloud, the ingest endpoint wil
 | IN | ingest.in.signoz.cloud:443 |
 | EU | ingest.eu.signoz.cloud:443 |
 
-In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#Troubleshooting).
-
 </TabItem>
 </Tabs>
 </TabItem>
 
 <TabItem value="self-hosted" label="Self-Hosted SigNoz">
+Based on your application environment, you can choose the setup below to instrument your application via SigNoz Cloud.
+<Tabs>
+<TabItem value="vm" label="VM" default>
 
 1. Set the `OTEL_RESOURCE_ATTRIBUTES` environment variable to the name of your application
 2. Update the `OTEL_EXPORTER_OTLP_ENDPOINT` environment variable with `https://<URL of SigNoz Backend>:4318`
@@ -284,17 +280,96 @@ export OTEL_RESOURCE_ATTRIBUTES=service.name=quarkus-app
 export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
 java -jar /Users/john/Downloads/quarkus-app.jar
 ```
+</TabItem>
+<TabItem value="k8s" label="Kubernetes">
 
-Here’s a handy [grid](https://signoz.io/docs/instrumentation/troubleshoot-instrumentation/) to figure out which address to use to send data to SigNoz.
+1. Create a docker image for your application or publish your application to a container registry:
+
+```bash
+docker build -t <app_name> .
+```
+
+2. Create a `deployment.yaml`:
+
+```yaml:deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: quarkus-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: quarkus-app
+  template:
+    metadata:
+      labels:
+        app: quarkus-app
+    spec:
+      containers:
+      - name: quarkus-app
+        image: <my-app>:latest
+        imagePullPolicy: Never # If you have built the image locally
+        ports:
+        - containerPort: 8080
+        env:
+        - name: OTEL_RESOURCE_ATTRIBUTES
+          value: "service.name=<app_name>"
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          value: "https://<URL of SigNoz Backend>:4318" # This is the endpoint of the machine where SigNoz is installed.
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: quarkus-app
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 8080
+    targetPort: 8080
+  selector:
+    app: quarkus-app
+```
+
+- `<app_name>` is the name for your application
+- `OTEL_EXPORTER_OTLP_ENDPOINT` is the endpoint of the machine where SigNoz is installed.
+
+
+2. Deploy to Kubernetes:
+
+```bash
+kubectl apply -f deployment.yaml
+```
+
+You can verify the deployment by running `kubectl get pods` and checking the status of the pod.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/instrumentation/quarkus-k8s-deployment.webp" alt="Quarkus application deployed on Kubernetes"/>
+    <figcaption><i>Quarkus application deployed on Kubernetes</i></figcaption>
+</figure>
+</TabItem>
+
+<TabItem value="windows" label="Windows">
+
+Set environment variables and run your application:
+
+```cmd
+setx OTEL_RESOURCE_ATTRIBUTES "service.name=<app_name>"
+setx OTEL_EXPORTER_OTLP_ENDPOINT "https://<URL of SigNoz Backend>:4318"
+java -jar target/quarkus-app/quarkus-run.jar
+```
+- `<app_name>` is the name for your application
+- `OTEL_EXPORTER_OTLP_ENDPOINT` is the endpoint of the machine where SigNoz is installed.
+</TabItem>
+</Tabs>
 
 <Admonition>
 💡 Remember to allow incoming requests to port 4318 of the machine where SigNoz backend is hosted.
 </Admonition>
-
 </TabItem>
 </Tabs>
 
-In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#Troubleshooting).
+In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#troubleshooting).
 
 ## Validating Instrumentation
 
