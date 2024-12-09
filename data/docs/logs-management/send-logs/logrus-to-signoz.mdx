@@ -96,18 +96,15 @@ To add the Span and Trace ID fields to your structured logs:
 
 ```
 import (
-    .....
    "go.opentelemetry.io/otel"
    sdktrace "go.opentelemetry.io/otel/sdk/trace"
    oteltrace "go.opentelemetry.io/otel/trace"
-    .....
 )
 ```
 
 ### Step 2: Fetch the current Span and Trace ID from context with the OpenTelemetry Trace library
 
 ```
-   .....
    
    otel.SetTracerProvider(
        sdktrace.NewTracerProvider(
@@ -120,7 +117,6 @@ import (
    _, span := tracer.Start(context.Background(), "signoz-tracer")
    defer span.End()
    
-   .....
 ```
 
 ### Step 3:  Create a function to add the Span and Trace ID values to your Logrus fields 
@@ -145,36 +141,37 @@ To send Logrus logs to your SigNoz cloud account:
 
 1. Add logs to your application.
     ```
-    logrus.WithFields(LogrusFields(span)).Info("Logrus logs with span id and trace id")
+    logrus.WithFields(LogrusFields(span)).Info("Logrus logs message")
     ```
 2. Run your Golang application with your Signoz credentials.
     ```bash
-	SERVICE_NAME=<SIGNOZ_SERVICE_NAME> INSECURE_MODE=false OTEL_EXPORTER_OTLP_HEADERS=signoz-access-token=<SIGNOZ_ACCESS_TOKEN> OTEL_EXPORTER_OTLP_ENDPOINT=<SIGNOZ_OPENTELEMETRY_ENDPOINT> go run main.go
+	INSECURE_MODE=false OTEL_EXPORTER_OTLP_HEADERS=signoz-access-token=<SIGNOZ_ACCESS_TOKEN> OTEL_EXPORTER_OTLP_ENDPOINT=<SIGNOZ_OPENTELEMETRY_ENDPOINT> go run main.go
 	```
 
-`<SIGNOZ_SERVICE_NAME>`: Your SigNoz service name.
+	Input the following values:
+	
+    - `<SIGNOZ_ACCESS_TOKEN>`: Your SigNoz cloud ingestion token.
+    - `<SIGNOZ_OPENTELEMETRY_ENDPOINT>`: Your SigNoz cloud ingestion URL. The value is `https://ingest.{region}.signoz.cloud:443` where `{region}` is the choice region in SigNoz cloud.
 
-`<SIGNOZ_ACCESS_TOKEN>`: Your SigNoz cloud ingestion token.
+Run your Golang application as specified above and wait some minutes for the logs to be sent to your SigNoz cloud dashboard.  You can view the logs in the **Logs** section of your dashboard.
+</TabItem>
 
-`<SIGNOZ_OPENTELEMETRY_ENDPOINT>`: Your SigNoz cloud ingestion URL. The value is `https://ingest.{region}.signoz.cloud:443` where `{region}` is the choice region in SigNoz cloud.
-
-Run your Golang application as specified above and wait some minutes for the logs to be sent to your SigNoz cloud dashboard.
-
-</TabItem value="self-hosted" label="Self-hosted SigNoz">
+<TabItem value="self" label="Self-hosted SigNoz">
 
 To send Logrus logs to your Self-hosted SigNoz dashboard:
 
 1. Add logs to your application.
     ```
-    logrus.WithFields(LogrusFields(span)).Info("Logrus logs with span id and trace id")
+    logrus.WithFields(LogrusFields(span)).Info("Logrus logs message")
     ```
 2. Run your Golang application with your Signoz credentials.
     ```bash
 	INSECURE_MODE=true OTEL_EXPORTER_OTLP_ENDPOINT=<SIGNOZ_OPENTELEMETRY_ENDPOINT> go run main.go
 	```
 
-Change `<SIGNOZ_OPENTELEMETRY_ENDPOINT>` to your SigNoz `otlp` receiver endpoint, change `INSECURE_MODE` to `true` or `false` depending on if your connection is secured or not.
+    Change `<SIGNOZ_OPENTELEMETRY_ENDPOINT>` to your SigNoz `otlp` receiver endpoint, change `INSECURE_MODE` to `true` or `false` depending on if your connection is secured or not.
 
-Run your Golang application as specified above and wait some minutes for the logs to be sent to your SigNoz dashboard.
+Run your Golang application as specified above and wait some minutes for the logs to be sent to your SigNoz dashboard. You can view the logs in the **Logs** section of your dashboard.
+</TabItem>
 
 </Tabs>
