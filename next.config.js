@@ -141,6 +141,13 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/careers/',
+          destination:
+            'https://jobs.gem.com/signoz',
+          basePath: false,
+          permanent: true,
+        },
+        {
           source: '/docs/deployment/docker/',
           destination: '/docs/install/docker',
           permanent: true,
