@@ -6,127 +6,138 @@ id: writing-clickhouse-traces-query
 
 ## Traces Schema
 
-Traces has 6 tables used for different usecases
-
-All Traces table follows [OpenTelemetry Trace Semantic conventions](https://github.com/open-telemetry/semantic-conventions/blob/main/docs/general/trace.md)
-
 <Admonition type="info">
 The distributed tables in clickhouse have been named by prefixing distributed_ to existing single shard table names. If you want to use clickhouse queries in dashboard or alerts, you should use the distributed table names. 
-Eg, signoz_index_v2 now corresponds to the table of a single shard. To query all the shards, query against distributed_signoz_index_v2.
+Eg, signoz_index_v3 now corresponds to the table of a single shard. To query all the shards, query against distributed_signoz_index_v3.
 </Admonition>
 
-### distributed_signoz_index_v2
+### distributed_signoz_index_v3
 
 This is primary table of Traces which is queried to fetch spans and apply aggregation on spans. It has over 30 different columns which helps in faster filtering on most common attributes following [OpenTelemetry Trace Semantic conventions](https://github.com/open-telemetry/semantic-conventions/blob/main/docs/general/trace.md).
 
 ```sql
 (
+    `ts_bucket_start` UInt64 CODEC(DoubleDelta, LZ4),
+    `resource_fingerprint` String CODEC(ZSTD(1)),
     `timestamp` DateTime64(9) CODEC(DoubleDelta, LZ4),
-    `traceID` FixedString(32) CODEC(ZSTD(1)),
-    `spanID` String CODEC(ZSTD(1)),
-    `parentSpanID` String CODEC(ZSTD(1)),
-    `serviceName` LowCardinality(String) CODEC(ZSTD(1)),
+    `trace_id` FixedString(32) CODEC(ZSTD(1)),
+    `span_id` String CODEC(ZSTD(1)),
+    `trace_state` String CODEC(ZSTD(1)),
+    `parent_span_id` String CODEC(ZSTD(1)),
+    `flags` UInt32 CODEC(T64, ZSTD(1)),
     `name` LowCardinality(String) CODEC(ZSTD(1)),
     `kind` Int8 CODEC(T64, ZSTD(1)),
-    `durationNano` UInt64 CODEC(T64, ZSTD(1)),
-    `statusCode` Int16 CODEC(T64, ZSTD(1)),
-    `component` LowCardinality(String) CODEC(ZSTD(1)),
-    `dbSystem` LowCardinality(String) CODEC(ZSTD(1)),
-    `dbName` LowCardinality(String) CODEC(ZSTD(1)),
-    `dbOperation` LowCardinality(String) CODEC(ZSTD(1)),
-    `peerService` LowCardinality(String) CODEC(ZSTD(1)),
+    `kind_string` String CODEC(ZSTD(1)),
+    `duration_nano` UInt64 CODEC(T64, ZSTD(1)),
+    `status_code` Int16 CODEC(T64, ZSTD(1)),
+    `status_message` String CODEC(ZSTD(1)),
+    `status_code_string` String CODEC(ZSTD(1)),
+    `attributes_string` Map(LowCardinality(String), String) CODEC(ZSTD(1)),
+    `attributes_number` Map(LowCardinality(String), Float64) CODEC(ZSTD(1)),
+    `attributes_bool` Map(LowCardinality(String), Bool) CODEC(ZSTD(1)),
+    `resources_string` Map(LowCardinality(String), String) CODEC(ZSTD(1)),
     `events` Array(String) CODEC(ZSTD(2)),
-    `httpMethod` LowCardinality(String) CODEC(ZSTD(1)),
-    `httpUrl` LowCardinality(String) CODEC(ZSTD(1)),
-    `httpRoute` LowCardinality(String) CODEC(ZSTD(1)),
-    `httpHost` LowCardinality(String) CODEC(ZSTD(1)),
-    `msgSystem` LowCardinality(String) CODEC(ZSTD(1)),
-    `msgOperation` LowCardinality(String) CODEC(ZSTD(1)),
-    `hasError` Bool CODEC(T64, ZSTD(1)),
-    `rpcSystem` LowCardinality(String) CODEC(ZSTD(1)),
-    `rpcService` LowCardinality(String) CODEC(ZSTD(1)),
-    `rpcMethod` LowCardinality(String) CODEC(ZSTD(1)),
-    `responseStatusCode` LowCardinality(String) CODEC(ZSTD(1)),
-    `stringTagMap` Map(String, String) CODEC(ZSTD(1)),
-    `numberTagMap` Map(String, Float64) CODEC(ZSTD(1)),
-    `boolTagMap` Map(String, Bool) CODEC(ZSTD(1)),
-    `resourceTagsMap` Map(LowCardinality(String), String) CODEC(ZSTD(1)),
-    INDEX idx_service serviceName TYPE bloom_filter GRANULARITY 4,
-    INDEX idx_name name TYPE bloom_filter GRANULARITY 4,
+    `links` String CODEC(ZSTD(1)),
+    `response_status_code` LowCardinality(String) CODEC(ZSTD(1)),
+    `external_http_url` LowCardinality(String) CODEC(ZSTD(1)),
+    `http_url` LowCardinality(String) CODEC(ZSTD(1)),
+    `external_http_method` LowCardinality(String) CODEC(ZSTD(1)),
+    `http_method` LowCardinality(String) CODEC(ZSTD(1)),
+    `http_host` LowCardinality(String) CODEC(ZSTD(1)),
+    `db_name` LowCardinality(String) CODEC(ZSTD(1)),
+    `db_operation` LowCardinality(String) CODEC(ZSTD(1)),
+    `has_error` Bool CODEC(T64, ZSTD(1)),
+    `is_remote` LowCardinality(String) CODEC(ZSTD(1)),
+    `resource_string_service$$name` LowCardinality(String) DEFAULT resources_string['service.name'] CODEC(ZSTD(1)),
+    `attribute_string_http$$route` LowCardinality(String) DEFAULT attributes_string['http.route'] CODEC(ZSTD(1)),
+    `attribute_string_messaging$$system` LowCardinality(String) DEFAULT attributes_string['messaging.system'] CODEC(ZSTD(1)),
+    `attribute_string_messaging$$operation` LowCardinality(String) DEFAULT attributes_string['messaging.operation'] CODEC(ZSTD(1)),
+    `attribute_string_db$$system` LowCardinality(String) DEFAULT attributes_string['db.system'] CODEC(ZSTD(1)),
+    `attribute_string_rpc$$system` LowCardinality(String) DEFAULT attributes_string['rpc.system'] CODEC(ZSTD(1)),
+    `attribute_string_rpc$$service` LowCardinality(String) DEFAULT attributes_string['rpc.service'] CODEC(ZSTD(1)),
+    `attribute_string_rpc$$method` LowCardinality(String) DEFAULT attributes_string['rpc.method'] CODEC(ZSTD(1)),
+    `attribute_string_peer$$service` LowCardinality(String) DEFAULT attributes_string['peer.service'] CODEC(ZSTD(1)),
+    INDEX idx_trace_id trace_id TYPE tokenbf_v1(10000, 5, 0) GRANULARITY 1,
+    INDEX idx_span_id span_id TYPE tokenbf_v1(5000, 5, 0) GRANULARITY 1,
+    INDEX idx_duration duration_nano TYPE minmax GRANULARITY 1,
+    INDEX idx_name name TYPE ngrambf_v1(4, 5000, 2, 0) GRANULARITY 1,
     INDEX idx_kind kind TYPE minmax GRANULARITY 4,
-    INDEX idx_duration durationNano TYPE minmax GRANULARITY 1,
-    INDEX idx_hasError hasError TYPE set(2) GRANULARITY 1,
-    INDEX idx_httpRoute httpRoute TYPE bloom_filter GRANULARITY 4,
-    INDEX idx_httpUrl httpUrl TYPE bloom_filter GRANULARITY 4,
-    INDEX idx_httpHost httpHost TYPE bloom_filter GRANULARITY 4,
-    INDEX idx_httpMethod httpMethod TYPE bloom_filter GRANULARITY 4,
+    INDEX idx_http_route `attribute_string_http$$route` TYPE bloom_filter GRANULARITY 4,
+    INDEX idx_http_url http_url TYPE bloom_filter GRANULARITY 4,
+    INDEX idx_http_host http_host TYPE bloom_filter GRANULARITY 4,
+    INDEX idx_http_method http_method TYPE bloom_filter GRANULARITY 4,
     INDEX idx_timestamp timestamp TYPE minmax GRANULARITY 1,
-    INDEX idx_rpcMethod rpcMethod TYPE bloom_filter GRANULARITY 4,
-    INDEX idx_responseStatusCode responseStatusCode TYPE set(0) GRANULARITY 1,
-    INDEX idx_resourceTagsMapKeys mapKeys(resourceTagsMap) TYPE bloom_filter(0.01) GRANULARITY 64,
-    INDEX idx_resourceTagsMapValues mapValues(resourceTagsMap) TYPE bloom_filter(0.01) GRANULARITY 64,
-    PROJECTION timestampSort
-    (
-        SELECT *
-        ORDER BY timestamp
-    )
+    INDEX idx_rpc_method `attribute_string_rpc$$method` TYPE bloom_filter GRANULARITY 4,
+    INDEX idx_response_statusCode response_status_code TYPE set(0) GRANULARITY 1,
+    INDEX idx_status_code_string status_code_string TYPE set(3) GRANULARITY 4,
+    INDEX idx_kind_string kind_string TYPE set(5) GRANULARITY 4,
+    INDEX attributes_string_idx_key mapKeys(attributes_string) TYPE tokenbf_v1(1024, 2, 0) GRANULARITY 1,
+    INDEX attributes_string_idx_val mapValues(attributes_string) TYPE ngrambf_v1(4, 5000, 2, 0) GRANULARITY 1,
+    INDEX attributes_number_idx_key mapKeys(attributes_number) TYPE tokenbf_v1(1024, 2, 0) GRANULARITY 1,
+    INDEX attributes_number_idx_val mapValues(attributes_number) TYPE bloom_filter GRANULARITY 1,
+    INDEX attributes_bool_idx_key mapKeys(attributes_bool) TYPE tokenbf_v1(1024, 2, 0) GRANULARITY 1,
+    INDEX resources_string_idx_key mapKeys(resources_string) TYPE tokenbf_v1(1024, 2, 0) GRANULARITY 1,
+    INDEX resources_string_idx_val mapValues(resources_string) TYPE ngrambf_v1(4, 5000, 2, 0) GRANULARITY 1
 )
+ORDER BY (ts_bucket_start, resource_fingerprint, has_error, name, timestamp)
 ```
 
-#### Columns in the distributed_signoz_index_v2 table
+#### Columns in the distributed_signoz_index_v3 table
 
 |  NAME  | DESCRIPTION  |
 |---|---|
+|**ts_bucket_start** | Start timestamp of the bucket|
+|**resource_fingerprint** | Fingerprint of the resource, generated by combining all the resource attributes|
 |**timestamp** | Time when the span generated at the source|
-|**traceID** | Trace ID. [W3C Trace Context](https://www.w3.org/TR/trace-context/#trace-id)|
-|**spanID** | Span ID |
-|**parentSpanID** | Parent Span ID |
-|**serviceName** | Name of the service |
+|**trace_id** | Trace ID. [W3C Trace Context](https://www.w3.org/TR/trace-context/#trace-id)|
+|**span_id** | Span ID |
+|**trace_state** | Trace state of the span|
+|**parent_span_id** | Parent Span ID |
+|**flags** | Flags of the span|
 |**name** | Name of the span |
 |**kind** | Kind of the span. [OpenTelemetry Span Kind](https://opentelemetry.io/docs/concepts/signals/traces/#span-kind)|
-|**durationNano** | Duration of the span in nanoseconds |
-|**statusCode** | Status code of the span. [OpenTelemetry Status Code](https://opentelemetry.io/docs/concepts/signals/traces/#span-status)
-|**component** | Component of the span. Eg: `http`, `grpc` etc. Derived from `component` attribute of a span|
-|**dbSystem** | Database system of the span. Eg: `mysql`, `postgres` etc. Derived from `db.system` attribute of a span|
-|**dbName** | Database name of the span. Derived from `db.name` attribute of a span|
-|**dbOperation** | Database operation of the span. Derived from `db.operation` attribute of a span|
-|**peerService** | Peer service of the span. Derived from `peer.service` attribute of a span|
+|**kind_string** | String representation of the kind of the span|
+|**duration_nano** | Duration of the span in nanoseconds |
+|**status_code** | Status code of the span. [OpenTelemetry Status Code](https://opentelemetry.io/docs/concepts/signals/traces/#span-status)
+|**status_message** | Status message of the span|
+|**status_code_string** | String representation of the status code of the span|
+|**attributes_string** | Map of all string tags/attributes of the span|
+|**attributes_number** | Map of all number tags/attributes of the span|
+|**attributes_bool** | Map of all bool tags/attributes of the span|
+|**resources_string** | Map of all resource tags/attributes of the span|
 |**events** | Events of the span. It is an array of stringified json of span events|
-|**httpMethod** | HTTP method of the span. Derived from `http.method` attribute of a span|
-|**httpUrl** | HTTP url of the span. Derived from `http.url` attribute of a span|
-|**httpRoute** | HTTP route of the span. Derived from `http.route` attribute of a span|
-|**httpHost** | HTTP host of the span. Derived from `http.host` attribute of a span|
-|**msgSystem** | Messaging system of the span. Derived from `messaging.system` attribute of a span|
-|**msgOperation** | Messaging operation of the span. Derived from `messaging.operation` attribute of a span|
-|**hasError** | Whether the span has error or not|
-|**rpcSystem** | RPC system of the span. Derived from `rpc.system` attribute of a span|
-|**rpcService** | RPC service of the span. Derived from `rpc.service` attribute of a span|
-|**rpcMethod** | RPC method of the span. Derived from `rpc.method` attribute of a span|
-|**responseStatusCode** | Response status code of the span. Derived from `http.status_code`, `rpc.grpc.status_code` and `rpc.jsonrpc.error_code` attribute of a span|
-|**stringTagMap** | Map of all string tags/attributes of the span|
-|**numberTagMap** | Map of all number tags/attributes of the span|
-|**boolTagMap** | Map of all bool tags/attributes of the span|
-|**resourceTagsMap** | Map of all resource tags/attributes of the span|
+|**links** | Links of the span. It is a stringified json of span links|
+|**response_status_code** | Response status code of the span. Derived from `http.status_code`, `rpc.grpc.status_code` and `rpc.jsonrpc.error_code` attribute of a span|
+|**external_http_url** | External HTTP url of the span|
+|**http_url** | HTTP url of the span|
+|**external_http_method** | External HTTP method of the span|
+|**http_method** | HTTP method of the span|
+|**http_host** | HTTP host of the span|
+|**db_name** | Database name of the span. Derived from `db.name` attribute of a span|
+|**db_operation** | Database operation of the span. Derived from `db.operation` attribute of a span|
+|**has_error** | Whether the span has error or not|
+|**is_remote** | Whether the span is remote or not|
+|**resource_string_service$$name** | Name of the service. Derived from `resources_string['service.name']` attribute of a span|
+|**attribute_string_http$$route** | HTTP route of the span. Derived from `attributes_string['http.route']` attribute of a span|
+|**attribute_string_messaging$$system** | Messaging system of the span. Derived from `attributes_string['messaging.system']` attribute of a span|
+|**attribute_string_messaging$$operation** | Messaging operation of the span. Derived from `attributes_string['messaging.operation']` attribute of a span|
+|**attribute_string_db$$system** | Database system of the span. Derived from `attributes_string['db.system']` attribute of a span|
+|**attribute_string_rpc$$system** | RPC system of the span. Derived from `attributes_string['rpc.system']` attribute of a span|
+|**attribute_string_rpc$$service** | RPC service of the span. Derived from `attributes_string['rpc.service']` attribute of a span|
+|**attribute_string_rpc$$method** | RPC method of the span. Derived from `attributes_string['rpc.method']` attribute of a span|
+|**attribute_string_peer$$service** | Peer service of the span. Derived from `attributes_string['peer.service']` attribute of a span|
 
-### distributed_signoz_spans
+## Timestamp Bucketing
+In the new schema for traces i.e `distributed_signoz_index_v3`, we have a new column 
+`ts_bucket_start` which is used to store the start timestamp of the bucket. This is used for faster filtering on timestamp attribute.
 
-This table stores span json model which is used to create trace tree and displayed on trace detail page.
+How to use this column in the queries?
+If your timestamp query is `timestamp BETWEEN {{.start_datetime}} AND {{.end_datetime}}` then you will have to add 
+ `ts_bucket_start BETWEEN {{.start_timestamp}} - 1800 AND {{.end_timestamp}}`
 
-```sql
-(
-    `timestamp` DateTime64(9) CODEC(DoubleDelta, LZ4),
-    `traceID` FixedString(32) CODEC(ZSTD(1)),
-    `model` String CODEC(ZSTD(9))
-)
-```
+We have added -1800, as bucketing is done in 30 minute intervals.
 
-#### Columns in the distributed_signoz_spans table
 
-|  NAME  | DESCRIPTION  |
-|---|---|
-|**timestamp** | Time when the span generated at the source|
-|**traceID** | Trace ID. [W3C Trace Context](https://www.w3.org/TR/trace-context/#trace-id)|
-|**model** | Stringified json of the span|
 
 ### distributed_signoz_error_index_v2
 
@@ -253,10 +264,11 @@ SELECT fromUnixTimestamp64Milli(intDiv( toUnixTimestamp64Milli ( timestamp ), 10
 toFloat64(count()) AS count 
 FROM (
  SELECT timestamp 
- FROM signoz_traces.distributed_signoz_index_v2 
- WHERE serviceName='frontend' 
- AND durationNano>=50*exp10(6) 
- AND timestamp BETWEEN {{.start_datetime}} AND {{.end_datetime}})
+ FROM signoz_traces.distributed_signoz_index_v3
+ WHERE resource_string_service$$name='frontend' 
+ AND duration_nano>=50*exp10(6) 
+ AND timestamp BETWEEN {{.start_datetime}} AND {{.end_datetime}}
+ AND ts_bucket_start BETWEEN {{.start_timestamp}} - 1800 AND {{.end_timestamp}})
  GROUP BY interval ORDER BY interval ASC;
 ```
 
@@ -277,11 +289,12 @@ SELECT
             toStartOfInterval((timestamp), INTERVAL 1 MINUTE) AS ts, 
             toFloat64(count()) AS value 
         FROM 
-            signoz_traces.distributed_signoz_index_v2
+            signoz_traces.distributed_signoz_index_v3
         WHERE 
             timestamp BETWEEN {{.start_datetime}} AND {{.end_datetime}} AND
-            httpMethod = 'POST' AND 
-            serviceName = 'sample-service'
+            ts_bucket_start BETWEEN {{.start_timestamp}} - 1800 AND {{.end_timestamp}} AND
+            http_method = 'POST' AND 
+            resource_string_service$$name = 'sample-service'
         GROUP BY ts 
         ORDER BY ts ASC
     )
@@ -299,9 +312,10 @@ The query is similar to timeseries query but instead of using time interval we u
 
 ```sql
 SELECT now() as ts, 
-stringTagMap['example_string_attribute'] AS attribute_name, 
-toFloat64(avg(durationNano)) AS value 
-FROM signoz_traces.distributed_signoz_index_v2  
+attributes_string['example_string_attribute'] AS attribute_name, 
+toFloat64(avg(duration_nano)) AS value 
+FROM signoz_traces.distributed_signoz_index_v3  
 WHERE timestamp BETWEEN {{.start_datetime}} AND {{.end_datetime}}
+AND ts_bucket_start BETWEEN {{.start_timestamp}} - 1800 AND {{.end_timestamp}}
 GROUP BY (attribute_name, ts) order by (attribute_name, ts) ASC;
 ```

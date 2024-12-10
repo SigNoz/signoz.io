@@ -47,16 +47,16 @@ export OTEL_TRACES_EXPORTER="otlp"
 export OTEL_EXPORTER_OTLP_ENDPOINT="<SIGNOZ_ENDPOINT>"
 export OTEL_NODE_RESOURCE_DETECTORS="env,host,os"
 export OTEL_SERVICE_NAME="<APP_NAME>"
-export OTEL_EXPORTER_OTLP_HEADERS="signoz-access-token=<SIGNOZ_ACCESS_TOKEN>"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<SIGNOZ_ACCESS_TOKEN>"
 export NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
 <your_run_command>
 ```
 
 | Variable              | Description                                               |
 |-----------------------|-----------------------------------------------------|
-| APP_NAME *      | Name you want to give to your rust application  |
-| SIGNOZ_ENDPOINT  *     | This is ingestion URL which you must have got in mail after registering on SigNoz cloud  |
-| SIGNOZ_ACCESS_TOKEN *  | This is Ingestion Key which you must have got in mail after registering on SigNoz cloud                                     |
+| APP_NAME      | Name you want to give to your rust application  |
+| SIGNOZ_ENDPOINT     | This is ingestion URL which you must have got in mail after registering on SigNoz cloud  |
+| SIGNOZ_ACCESS_TOKEN  | This is Ingestion Key which you must have got in mail after registering on SigNoz cloud                                     |
 
 replace `<your_run_command>` with the run command of your application
 
@@ -107,7 +107,7 @@ provider.addSpanProcessor(
     new OTLPTraceExporter({
       url: 'https://ingest.{REGION}.signoz.cloud:443/v1/traces',
       headers: {
-        'signoz-access-token': '{SIGNOZ_INGESTION_KEY}',
+        'signoz-ingestion-key': '{SIGNOZ_INGESTION_KEY}',
       },
     })
   )
@@ -470,7 +470,7 @@ $env:OTEL_TRACES_EXPORTER="otlp"
 $env:OTEL_EXPORTER_OTLP_ENDPOINT="<SIGNOZ_ENDPOINT>"
 $env:OTEL_NODE_RESOURCE_DETECTORS="env,host,os"
 $env:OTEL_SERVICE_NAME="<APP_NAME>"
-$env:OTEL_EXPORTER_OTLP_HEADERS="signoz-access-token=<SIGNOZ_ACCESS_TOKEN>"
+$env:OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<SIGNOZ_ACCESS_TOKEN>"
 $env:NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
 <your_run_command>
 ```
@@ -530,7 +530,7 @@ provider.addSpanProcessor(
     new OTLPTraceExporter({
       url: 'https://ingest.{REGION}.signoz.cloud:443/v1/traces',
       headers: {
-        'signoz-access-token': '<signoz_ingestion_key>',
+        'signoz-ingestion-key': '<signoz_ingestion_key>',
       },
     })
   )
@@ -1170,7 +1170,7 @@ exporters:
         tls:
             insecure: false
         headers:
-            "signoz-access-token": "<SIGNOZ_INGESTION_KEY>"
+            "signoz-ingestion-key": "<SIGNOZ_INGESTION_KEY>"
 ```
 
 **Using HTTP Exporter**
@@ -1185,7 +1185,7 @@ exporters:
         tls:
             insecure: false
         headers:
-            "signoz-access-token": "<SIGNOZ_INGESTION_KEY>"
+            "signoz-ingestion-key": "<SIGNOZ_INGESTION_KEY>"
 ```
 
 #### My Application Sends Data to SigNoz Cloud
@@ -1198,11 +1198,11 @@ The endpoint should be configured either with environment variables or in the SD
 
 Examples with `us` region
 
-- `OTEL_EXPORTER_OTLP_PROTOCOL=grpc OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.us.signoz.cloud:443 OTEL_EXPORTER_OTLP_HEADERS=signoz-access-token=<SIGNOZ_INGESTION_KEY>`
+- `OTEL_EXPORTER_OTLP_PROTOCOL=grpc OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.us.signoz.cloud:443 OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>`
 
 **Using HTTP Exporter**
 
-- `OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.us.signoz.cloud:443 OTEL_EXPORTER_OTLP_HEADERS=signoz-access-token=<SIGNOZ_INGESTION_KEY>`
+- `OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.us.signoz.cloud:443 OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>`
 
 #### Configuring Endpoint in Code
 
