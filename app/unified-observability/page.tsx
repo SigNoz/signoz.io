@@ -228,7 +228,7 @@ const UnifiedObservability = () => {
           <h2 className="mb-8 text-left text-2xl font-bold lg:text-3xl">
             SigNoz: Unified Observability Platform Powered by OpenTelemetry
           </h2>
-          <div className="relative flex flex-wrap items-center gap-8">
+          <div className="relative mb-4 flex flex-wrap items-center gap-8">
             <div className="flex-1 text-gray-300">
               <p className="text-lg">
                 Unified observability is more than just monitoring—it's about gaining a
@@ -267,7 +267,7 @@ const UnifiedObservability = () => {
                   height={533}
                   className="rounded-xl shadow-2xl"
                 />
-                <figcaption className="mt-2 text-center text-sm text-gray-400">
+                <figcaption className="mb-4 mt-2 text-center text-sm text-gray-400">
                   SigNoz unified observability platform bringing metrics, traces and logs together
                 </figcaption>
               </figure>
