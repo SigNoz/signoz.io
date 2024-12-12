@@ -1,7 +1,7 @@
 ---
 title: Implementing OpenTelemetry in Spring Boot - A Practical Guide
 slug: opentelemetry-spring-boot
-date: 2024-08-22
+date: 2024-12-12
 tags: [OpenTelemetry, Spring Boot, Observability, Distributed Tracing, Monitoring, Java]
 authors: [ankit_anand]
 description: Learn how to implement OpenTelemetry in Spring Boot applications. This guide covers setup, tracing, metrics, and advanced techniques for effective observability.
@@ -235,14 +235,14 @@ The Spring PetClinic application is a well-known sample application used to demo
 **Git clone the repository and go to the root folder:**
 
 ```bash
-git clone <https://github.com/SigNoz/spring-petclinic.git>
+git clone https://github.com/SigNoz/spring-petclinic.git
 cd spring-petclinic
 
 ```
 
 **Run the application using the following commands:**
 
-```
+```bash
 ./mvnw package
 java -jar target/*.jar
 
@@ -266,10 +266,12 @@ Once you ensure that your application runs fine, stop it with `ctrl + c` on mac,
 
 Download the [latest Java agent JAR](https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar). You will need the path of this file, so note it down somewhere. You can also use the terminal to get this file using the following command:
 
-```
-wget <https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar>
+```bash
+wget https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar
 
 ```
+
+Note: You will need the path to this file while running your application. A good practice is to create a folder named 'java-agent' inside your project and save the agent there.
 
 OpenTelemetry Java agent JAR can be attached to any Java 8+ application. The agent JAR can detect a number of <a href = "https://github.com/open-telemetry/opentelemetry-java-instrumentation/blob/main/docs/supported-libraries.md" rel="noopener noreferrer nofollow" target="_blank" >popular libraries and frameworks</a> and instrument it right out of the box. You don't need to add any code for that.
 
@@ -288,6 +290,14 @@ OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.{region}.signoz.cloud:443 \\
 java -javaagent:java-agent/opentelemetry-javaagent.jar -jar target/*.jar
 
 ```
+
+```bash
+OTEL_RESOURCE_ATTRIBUTES=service.name=<app_name> \
+OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=SIGNOZ_INGESTION_KEY" \
+OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.in.signoz.cloud:443 \
+java -javaagent:/Users/ashu/Downloads/opentelemetry-javaagent.jar -jar target/*.jar
+```
+
 
 You can get SigNoz ingestion key and region from your SigNoz cloud account in Settings --> Ingestion Settings.
 
