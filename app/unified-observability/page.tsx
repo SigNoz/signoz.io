@@ -471,22 +471,19 @@ const UnifiedObservability = () => {
             Best Practices for Unified Observability
           </h2>
 
-          <div className="space-y-16">
+          <div className="grid gap-8 lg:grid-cols-3">
             {/* First Practice */}
             <div className="rounded-xl bg-gradient-to-br from-gray-800 to-gray-900 p-8 shadow-xl">
               <div className="mb-8">
-                <h3 className="text-2xl font-bold">
-                  1. Implement the THREE PILLARS of Observability
-                </h3>
+                <h3 className="text-2xl font-bold">1. The Three Pillars</h3>
                 <p className="mt-2 text-gray-400">
-                  Each pillar provides unique insights that, when combined, offer complete system
-                  visibility
+                  Implement metrics, traces and logs for complete visibility
                 </p>
               </div>
 
-              <div className="flex flex-wrap gap-8">
-                <div className="min-w-[250px] flex-1">
-                  <h4 className="mb-4 text-xl font-bold text-blue-400">Metrics</h4>
+              <div className="space-y-6">
+                <div>
+                  <h4 className="mb-3 text-lg font-bold text-blue-400">Metrics</h4>
                   <ul className="list-inside list-disc space-y-2 text-gray-300">
                     <li>Monitor system-level indicators</li>
                     <li>Track business KPIs</li>
@@ -494,8 +491,8 @@ const UnifiedObservability = () => {
                   </ul>
                 </div>
 
-                <div className="min-w-[250px] flex-1">
-                  <h4 className="mb-4 text-xl font-bold text-purple-400">Traces</h4>
+                <div>
+                  <h4 className="mb-3 text-lg font-bold text-purple-400">Traces</h4>
                   <ul className="list-inside list-disc space-y-2 text-gray-300">
                     <li>Track request flows across services</li>
                     <li>Identify performance bottlenecks</li>
@@ -503,8 +500,8 @@ const UnifiedObservability = () => {
                   </ul>
                 </div>
 
-                <div className="min-w-[250px] flex-1">
-                  <h4 className="mb-4 text-xl font-bold text-green-400">Logs</h4>
+                <div>
+                  <h4 className="mb-3 text-lg font-bold text-green-400">Logs</h4>
                   <ul className="list-inside list-disc space-y-2 text-gray-300">
                     <li>Capture detailed system events</li>
                     <li>Debug application issues</li>
@@ -513,7 +510,7 @@ const UnifiedObservability = () => {
                 </div>
               </div>
 
-              <div className="mt-4 text-right">
+              <div className="mt-6">
                 <Link
                   href="https://signoz.io/blog/observability-net/"
                   className="text-sm text-blue-400 hover:text-blue-300"
@@ -526,7 +523,7 @@ const UnifiedObservability = () => {
             {/* Second Practice */}
             <div className="rounded-xl bg-gradient-to-br from-gray-800 to-gray-900 p-8 shadow-xl">
               <div className="mb-8">
-                <h3 className="text-2xl font-bold">2. Follow Observability-Driven Development</h3>
+                <h3 className="text-2xl font-bold">2. Observability-Driven Development</h3>
                 <p className="mt-2 text-gray-400">
                   Build observability into your development process from day one
                 </p>
@@ -537,27 +534,25 @@ const UnifiedObservability = () => {
                   <div className="rounded-full bg-blue-400/20 p-2">
                     <CheckCircle className="h-5 w-5 text-blue-400" />
                   </div>
-                  <p className="mb-0">
-                    Selecting the right tools and integrations for the environment
-                  </p>
+                  <p className="mb-0">Select the right tools and integrations</p>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="rounded-full bg-blue-400/20 p-2">
                     <CheckCircle className="h-5 w-5 text-blue-400" />
                   </div>
-                  <p className="mb-0">Design with observability in mind from the start</p>
+                  <p className="mb-0">Design with observability in mind</p>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="rounded-full bg-blue-400/20 p-2">
                     <CheckCircle className="h-5 w-5 text-blue-400" />
                   </div>
-                  <p className="mb-0">Instrument code properly using OpenTelemetry</p>
+                  <p className="mb-0">Instrument using OpenTelemetry</p>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="rounded-full bg-blue-400/20 p-2">
                     <CheckCircle className="h-5 w-5 text-blue-400" />
                   </div>
-                  <p className="mb-0">Create meaningful custom metrics and spans</p>
+                  <p className="mb-0">Create meaningful metrics and spans</p>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="rounded-full bg-blue-400/20 p-2">
@@ -571,9 +566,9 @@ const UnifiedObservability = () => {
             {/* Third Practice */}
             <div className="rounded-xl bg-gradient-to-br from-gray-800 to-gray-900 p-8 shadow-xl">
               <div className="mb-8">
-                <h3 className="text-2xl font-bold">3. Establish Clear Processes</h3>
+                <h3 className="text-2xl font-bold">3. Clear Processes</h3>
                 <p className="mt-2 text-gray-400">
-                  Define and maintain consistent observability practices across your organization
+                  Define and maintain consistent observability practices
                 </p>
               </div>
 
@@ -594,22 +589,22 @@ const UnifiedObservability = () => {
                   <div className="rounded-full bg-purple-400/20 p-2">
                     <ArrowRight className="h-5 w-5 text-purple-400" />
                   </div>
-                  <p className="mb-0">Implement alert thresholds thoughtfully</p>
+                  <p className="mb-0">Implement thoughtful alert thresholds</p>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="rounded-full bg-purple-400/20 p-2">
                     <ArrowRight className="h-5 w-5 text-purple-400" />
                   </div>
-                  <p className="mb-0">Regular review and optimization of observability practices</p>
+                  <p className="mb-0">Regular review and optimization</p>
                 </div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* AI Section */}
+        {/* Role of AI in Unified Observability */}
         <section className="container mx-auto py-16">
-          <h2 className="mb-8 text-left text-2xl font-bold lg:text-3xl">
+          <h2 className="mb-12 text-left text-2xl font-bold lg:text-3xl">
             Role of AI in Unified Observability
           </h2>
           <div className="relative flex flex-wrap items-center gap-8">
