@@ -138,7 +138,9 @@ Before the demo begins, let's have a brief overview of OpenTelemetry.
 
 ## What is OpenTelemetry?
 
-<a href="https://opentelemetry.io/" rel="noopener noreferrer nofollow" target="_blank">OpenTelemetry</a> is a set of API, SDKs, libraries, and integrations aiming to standardize the generation,
+<a href="https://opentelemetry.io/" rel="noopener noreferrer nofollow" target="_blank">
+  OpenTelemetry
+</a> is a set of API, SDKs, libraries, and integrations aiming to standardize the generation,
 collection, and management of telemetry data(logs, metrics, and traces). OpenTelemetry is a Cloud
 Native Computing Foundation project created after the merger of OpenCensus(from Google) and
 OpenTracing(From Uber).
@@ -169,9 +171,6 @@ Typically, here's how an application architecture instrumented with OpenTelemetr
     </i>
   </figcaption>
 </figure>
-
-
-
 
 OpenTelemetry provides client libraries and agents for most of the popular programming languages. There are two types of instrumentation:
 
@@ -263,7 +262,6 @@ If your application runs successfully, you will be able to access the applicatio
   </figcaption>
 </figure>
 
-
 Once you ensure that your application runs fine, stop it with `ctrl + c` on mac, as we will be launching the application with the Java agent downloaded from OpenTelemetry.
 
 ## Step 3: Downloading OpenTelemetry Java Agent JAR
@@ -287,7 +285,6 @@ You will also be able to capture logs with it and send it to SigNoz.
 
 You need to run your Spring Boot application along with the instrumentation agent. The below command will auto-instrument your application for traces and logs.
 
-
 ```bash
 OTEL_RESOURCE_ATTRIBUTES=service.name=<app_name> \
 OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=SIGNOZ_INGESTION_KEY" \
@@ -296,12 +293,13 @@ OTEL_LOGS_EXPORTER=otlp \
 java -javaagent:/path/opentelemetry-javaagent.jar -jar target/*.jar
 ```
 
-
 You can get SigNoz ingestion key and region from your SigNoz cloud account in Settings --> Ingestion Settings.
 
-<figure data-zoomable align='center'>
-<img src="/img/blog/2024/12/ingestion-settings.webp" alt="ingestion settings"/>
-<figcaption><i>Ingestion details for your SigNoz cloud account</i></figcaption>
+<figure data-zoomable align="center">
+  <img src="/img/blog/2024/12/ingestion-settings.webp" alt="ingestion settings" />
+  <figcaption>
+    <i>Ingestion details for your SigNoz cloud account</i>
+  </figcaption>
 </figure>
 
 Your final command might look like this:
@@ -369,13 +367,19 @@ And you can monitor all of this without any code change, just by integrating you
 
 The best thing about OpenTelemetry is correlated signals for getting better context while troubleshooting. From application metrics, you can jump directly to logs and traces for troubleshooting.
 
-<Figure src="/img/blog/2024/12/apm-metric-to-logs-and-traces.webp" alt="APM metrics to logs and traces in SigNoz" caption="To investigate any potential issues highlighted in RED metrics, you can directly jump to logs and traces to get more context" />
+<Figure
+  src="/img/blog/2024/12/apm-metric-to-logs-and-traces.webp"
+  alt="APM metrics to logs and traces in SigNoz"
+  caption="To investigate any potential issues highlighted in RED metrics, you can directly jump to logs and traces to get more context"
+/>
 
 SigNoz provides a trace explorer where you can analyze spans in great detail with the help of quick filters and an advanced query builder.
 
-
-<Figure src="/img/blog/2024/12/java-app-traces.webp" alt="Trace Explorer showing data from Spring Boot Application" caption="Using the trace explorer, you can analyze spans collected from your Spring Boot application" />
-
+<Figure
+  src="/img/blog/2024/12/java-app-traces.webp"
+  alt="Trace Explorer showing data from Spring Boot Application"
+  caption="Using the trace explorer, you can analyze spans collected from your Spring Boot application"
+/>
 
 You can also visualize your trace data with [flamegraphs and Gantt charts](https://signoz.io/blog/flamegraphs/) to see the flow of requests. This comes in very handy while debugging performance related issues.
 
@@ -426,28 +430,21 @@ The logs explorer of SigNoz provides a lot of features like quick filters, query
 
 ## Choosing Between Agent and Starter
 
-When implementing OpenTelemetry in Spring Boot, you have two main options: using the OpenTelemetry Java agent or the OpenTelemetry Spring Boot starter. Each approach has its pros and cons:
+When implementing OpenTelemetry in Spring Boot, you have two main options: using the OpenTelemetry Java agent or the OpenTelemetry Spring Boot starter.
 
-OpenTelemetry Java Agent:
+The OpenTelemetry Java agent is the default choice for instrumenting Spring Boot applications:
 
-- Pros:
-  - Easy to set up with minimal code changes
-  - Provides automatic instrumentation for many libraries
-- Cons:
-  - Less flexibility for custom instrumentation
-  - May introduce a slight performance overhead
+- Provides more out-of-the-box instrumentation compared to the OpenTelemetry starter
+- Uses bytecode instrumentation for automatic monitoring
 
-OpenTelemetry Spring Boot Starter:
+The OpenTelemetry Spring Boot starter is recommended when:
 
-- Pros:
-  - Offers more control over instrumentation
-  - Allows for easier custom instrumentation
-- Cons:
-  - Requires more configuration and code changes
-  - May miss some automatic instrumentations provided by the agent
+- Building Spring Boot Native image applications where the OpenTelemetry Java agent doesn't work.
+- The startup overhead of the OpenTelemetry Java agent exceeds your requirements.
+- You're already using another Java monitoring agent that may conflict with the OpenTelemetry Java agent.
+- You need to configure OpenTelemetry using Spring Boot configuration files which doesn't work with the Java agent.
 
 While the default choice of instrumentation is the OpenTelemetry Java agent, you can use the starter in case it fits your requirement. You can read more about it [here](https://opentelemetry.io/docs/zero-code/java/spring-boot-starter/)
-
 
 ## Advanced OpenTelemetry Techniques for Spring Boot
 
