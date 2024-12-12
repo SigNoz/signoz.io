@@ -31,7 +31,7 @@ const UnifiedObservability = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            className="mb-10 lg:mb-0 lg:w-1/2"
+            className="mb-10 lg:mb-0 lg:w-2/5"
           >
             <h1 className="mb-6 bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-5xl font-bold text-transparent lg:text-6xl">
               Unified Observability
@@ -56,7 +56,7 @@ const UnifiedObservability = () => {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8 }}
-            className="lg:w-1/2"
+            className="px-8 lg:w-3/5"
           >
             <div className="overflow-hidden rounded-xl shadow-2xl">
               <video width="820" height="540" autoPlay muted loop className="w-full">
