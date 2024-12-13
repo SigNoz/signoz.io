@@ -46,9 +46,15 @@ const UnifiedObservability = () => {
                   Get Started - Free <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
-              <p className="mb-0 ml-2 text-sm text-gray-400">
-                Where Metrics, Traces, and Logs Unite for Faster Resolution
-              </p>
+              <div className="ml-2 flex flex-col gap-1">
+                <p className="mb-0 text-sm text-gray-400">
+                  Where Metrics, Traces, and Logs Unite for Faster Resolution
+                </p>
+                <p className="mb-0 flex items-center gap-1 text-sm text-gray-400">
+                  <CheckCircle className="h-3.5 w-3.5" />
+                  No credit card required
+                </p>
+              </div>
             </div>
           </motion.div>
 
@@ -56,12 +62,12 @@ const UnifiedObservability = () => {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8 }}
-            className="px-8 lg:w-3/5"
+            className="relative -right-8 lg:w-3/5"
           >
             <div className="overflow-hidden rounded-xl shadow-2xl">
-              <video width="820" height="540" autoPlay muted loop className="w-full">
+              <video autoPlay muted loop className="w-[120%]">
                 <source
-                  src="/img/blog/2024/06/correlating-traces-logs-metrics-nodejs-video-interaction.mov"
+                  src="/img/unified-observability/showcase.mp4"
                   type="video/mp4"
                 />
                 Your browser does not support the video tag.
