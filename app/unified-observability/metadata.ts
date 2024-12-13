@@ -2,7 +2,7 @@ import { Metadata } from 'next'
 import siteMetadata from '../../data/siteMetadata.js' 
 
 export const metadata: Metadata = {
-  title: 'Unified Observability Platform | SigNoz',
+  title: 'Unified Observability Platform',
   description: "Transform your monitoring from fragmented silos to seamless insights with SigNoz's single-pane unified observability platform. Combine metrics, traces, and logs for complete system visibility.",
   openGraph: {
     title: 'Unified Observability Platform | SigNoz',
