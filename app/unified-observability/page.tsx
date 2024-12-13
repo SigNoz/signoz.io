@@ -711,107 +711,183 @@ const UnifiedObservability = () => {
               </div>
             </div>
           </div>
-          <div className="relative my-12 w-full overflow-hidden">
-            <div
-              className="flex snap-x snap-mandatory space-x-4 overflow-x-auto scroll-smooth"
-              style={{ maxWidth: '100%' }}
-            >
-              <div className="w-full flex-shrink-0 snap-start md:w-8/12">
-                <h4 className="mb-2 text-lg font-semibold">Application Performance Monitoring</h4>
-                <Image
-                  src="/img/unified-observability/unified-observability-apm.webp"
-                  alt="Application Performance Monitoring in SigNoz"
-                  width={600}
-                  height={400}
-                  className="w-full rounded-xl shadow-2xl"
-                />
-                <p className="mt-4 text-center text-gray-400">
-                  Monitor application metrics like latency, error rates and request rates
-                </p>
+          <div className="section-container !mx-auto !w-[100vw] border !border-b-0 border-dashed border-signoz_slate-400 !px-0 md:!w-[80vw]">
+            <div className="flex flex-col sm:flex-row">
+              <div className="!w-[100%] flex-1 md:!w-[300px]">
+                <div className="space-y-[10vh]">
+                  <div className="h-screen">
+                    <div className="sticky top-[100px] space-y-4">
+                      <p className="px-8 pl-0 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-[44px] md:px-0 md:pl-12">
+                        Application Performance Monitoring
+                      </p>
+                      <Link href="/teams" className="ml-8 inline-flex items-center gap-2 rounded-lg bg-signoz_button-500 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-signoz_button-400">
+                        Get Started with APM
+                        <ArrowRight className="h-4 w-4" />
+                      </Link>
+                    </div>
+                  </div>
+                  <div className="h-screen">
+                    <div className="sticky top-[100px] space-y-4">
+                      <p className="px-8 pl-0 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-[44px] md:px-0 md:pl-12">
+                        Log Management
+                      </p>
+                      <Link href="/teams" className="ml-8 inline-flex items-center gap-2 rounded-lg bg-signoz_button-500 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-signoz_button-400">
+                        Get Started with Logs
+                        <ArrowRight className="h-4 w-4" />
+                      </Link>
+                    </div>
+                  </div>
+                  <div className="h-screen">
+                    <div className="sticky top-[100px] space-y-4">
+                      <p className="px-8 pl-0 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-[44px] md:px-0 md:pl-12">
+                        Distributed Tracing
+                      </p>
+                      <Link href="/teams" className="ml-8 inline-flex items-center gap-2 rounded-lg bg-signoz_button-500 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-signoz_button-400">
+                        Get Started with Distributed Tracing
+                        <ArrowRight className="h-4 w-4" />
+                      </Link>
+                    </div>
+                  </div>
+                  <div className="h-screen">
+                    <div className="sticky top-[100px] space-y-4">
+                      <p className="px-8 pl-0 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-[44px] md:px-0 md:pl-12">
+                        Infrastructure Monitoring
+                      </p>
+                      <Link href="/teams" className="ml-8 inline-flex items-center gap-2 rounded-lg bg-signoz_button-500 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-signoz_button-400">
+                        Get Started with Infrastructure Monitoring
+                        <ArrowRight className="h-4 w-4" />
+                      </Link>
+                    </div>
+                  </div>
+                  <div className="h-screen">
+                    <div className="sticky top-[100px] space-y-4">
+                      <p className="px-8 pl-0 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-[44px] md:px-0 md:pl-12">
+                        Metrics and Dashboards
+                      </p>
+                      <Link href="/teams" className="ml-8 inline-flex items-center gap-2 rounded-lg bg-signoz_button-500 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-signoz_button-400">
+                        Get Started with Dashboards
+                        <ArrowRight className="h-4 w-4" />
+                      </Link>
+                    </div>
+                  </div>
+                  <div className="h-screen">
+                    <div className="sticky top-[100px] space-y-4">
+                      <p className="px-8 pl-0 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-[44px] md:px-0 md:pl-12">
+                        Alerts
+                      </p>
+                      <Link href="/teams" className="ml-8 inline-flex items-center gap-2 rounded-lg bg-signoz_button-500 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-signoz_button-400">
+                        Get Started with Alerts
+                        <ArrowRight className="h-4 w-4" />
+                      </Link>
+                    </div>
+                  </div>
+                  <div className="h-screen">
+                    <div className="sticky top-[100px] space-y-4">
+                      <p className="px-8 pl-0 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-[44px] md:px-0 md:pl-12">
+                        Exceptions Monitoring
+                      </p>
+                      <Link href="/teams" className="ml-8 inline-flex items-center gap-2 rounded-lg bg-signoz_button-500 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-signoz_button-400">
+                        Get Started with Exceptions Monitoring
+                        <ArrowRight className="h-4 w-4" />
+                      </Link>
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              <div className="w-full flex-shrink-0 snap-start md:w-8/12">
-                <h4 className="mb-2 text-lg font-semibold">Log Management</h4>
-                <Image
-                  src="/img/unified-observability/unified-observability-logs.webp"
-                  alt="Logs Management in SigNoz"
-                  width={600}
-                  height={400}
-                  className="w-full rounded-xl shadow-2xl"
-                />
-                <p className="mt-4 text-center text-gray-400">
-                  Ingest, search and analyze your logs at any scale
-                </p>
-              </div>
+              <div className="flex-[2_2_0%]">
+                <div className="space-y-[20vh]">
+                  <div className="h-screen pt-[100px]">
+                    <Image
+                      src="/img/unified-observability/unified-observability-apm.webp"
+                      alt="Application Performance Monitoring in SigNoz"
+                      width={800}
+                      height={533}
+                      className="rounded-xl shadow-2xl"
+                    />
+                    <p className="mt-4 text-center text-gray-400">
+                      Monitor application metrics like latency, error rates and request rates
+                    </p>
+                  </div>
 
-              <div className="w-full flex-shrink-0 snap-start md:w-8/12">
-                <h4 className="mb-2 text-lg font-semibold">Distributed Tracing</h4>
-                <Image
-                  src="/img/unified-observability/unified-observability-traces.webp"
-                  alt="Distributed Tracing in SigNoz"
-                  width={600}
-                  height={400}
-                  className="w-full rounded-xl shadow-2xl"
-                />
-                <p className="mt-4 text-center text-gray-400">
-                  Track user requests across services to identify bottlenecks
-                </p>
-              </div>
+                  <div className="h-screen pt-[100px]">
+                    <Image
+                      src="/img/unified-observability/unified-observability-logs.webp"
+                      alt="Logs Management in SigNoz"
+                      width={800}
+                      height={533}
+                      className="rounded-xl shadow-2xl"
+                    />
+                    <p className="mt-4 text-center text-gray-400">
+                      Ingest, search and analyze your logs at any scale
+                    </p>
+                  </div>
 
-              <div className="w-full flex-shrink-0 snap-start md:w-8/12">
-                <h4 className="mb-2 text-lg font-semibold">Infrastructure Monitoring</h4>
-                <Image
-                  src="/img/unified-observability/unified-observability-infrastructure-monitoring.webp"
-                  alt="Infrastructure Monitoring in SigNoz"
-                  width={600}
-                  height={400}
-                  className="w-full rounded-xl shadow-2xl"
-                />
-                <p className="mt-4 text-center text-gray-400">
-                  Monitor your infrastructure metrics like CPU, memory, and network
-                </p>
-              </div>
+                  <div className="h-screen pt-[100px]">
+                    <Image
+                      src="/img/unified-observability/unified-observability-traces.webp"
+                      alt="Distributed Tracing in SigNoz"
+                      width={800}
+                      height={533}
+                      className="rounded-xl shadow-2xl"
+                    />
+                    <p className="mt-4 text-center text-gray-400">
+                      Track user requests across services to identify bottlenecks
+                    </p>
+                  </div>
 
-              <div className="w-full flex-shrink-0 snap-start md:w-8/12">
-                <h4 className="mb-2 text-lg font-semibold">Metrics and Dashboards</h4>
-                <Image
-                  src="/img/unified-observability/unified-observability-metrics-and-dashboards.webp"
-                  alt="Metrics and Dashboards in SigNoz"
-                  width={600}
-                  height={400}
-                  className="w-full rounded-xl shadow-2xl"
-                />
-                <p className="mt-4 text-center text-gray-400">
-                  Monitor your metrics and create custom dashboards
-                </p>
-              </div>
+                  <div className="h-screen pt-[100px]">
+                    <Image
+                      src="/img/unified-observability/unified-observability-infrastructure-monitoring.webp"
+                      alt="Infrastructure Monitoring in SigNoz"
+                      width={800}
+                      height={533}
+                      className="rounded-xl shadow-2xl"
+                    />
+                    <p className="mt-4 text-center text-gray-400">
+                      Monitor your infrastructure metrics like CPU, memory, and network
+                    </p>
+                  </div>
 
-              <div className="w-full flex-shrink-0 snap-start md:w-8/12">
-                <h4 className="mb-2 text-lg font-semibold">Alerts</h4>
-                <Image
-                  src="/img/unified-observability/unified-observability-alerts.webp"
-                  alt="Alerts in SigNoz"
-                  width={600}
-                  height={400}
-                  className="w-full rounded-xl shadow-2xl"
-                />
-                <p className="mt-4 text-center text-gray-400">
-                  Set up alerts for your metrics and logs
-                </p>
-              </div>
+                  <div className="h-screen pt-[100px]">
+                    <Image
+                      src="/img/unified-observability/unified-observability-metrics-and-dashboards.webp"
+                      alt="Metrics and Dashboards in SigNoz"
+                      width={800}
+                      height={533}
+                      className="rounded-xl shadow-2xl"
+                    />
+                    <p className="mt-4 text-center text-gray-400">
+                      Monitor your metrics and create custom dashboards
+                    </p>
+                  </div>
 
-              <div className="w-full flex-shrink-0 snap-start md:w-8/12">
-                <h4 className="mb-2 text-lg font-semibold">Exceptions Monitoring</h4>
-                <Image
-                  src="/img/unified-observability/unified-observability-exceptions.webp"
-                  alt="Exceptions Monitoring in SigNoz"
-                  width={600}
-                  height={400}
-                  className="w-full rounded-xl shadow-2xl"
-                />
-                <p className="mt-4 text-center text-gray-400">
-                  Monitor your exceptions and errors
-                </p>
+                  <div className="h-screen pt-[100px]">
+                    <Image
+                      src="/img/unified-observability/unified-observability-alerts.webp"
+                      alt="Alerts in SigNoz"
+                      width={800}
+                      height={533}
+                      className="rounded-xl shadow-2xl"
+                    />
+                    <p className="mt-4 text-center text-gray-400">
+                      Set up alerts for your metrics and logs
+                    </p>
+                  </div>
+
+                  <div className="h-screen pt-[100px]">
+                    <Image
+                      src="/img/unified-observability/unified-observability-exceptions.webp"
+                      alt="Exceptions Monitoring in SigNoz"
+                      width={800}
+                      height={533}
+                      className="rounded-xl shadow-2xl"
+                    />
+                    <p className="mt-4 text-center text-gray-400">
+                      Monitor your exceptions and errors
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
