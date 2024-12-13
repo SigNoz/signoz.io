@@ -298,6 +298,14 @@ const UnifiedObservability = () => {
                 <li>Extensive language support with SDKs for all major programming languages.</li>
                 <li>Active community and industry backing from major cloud providers.</li>
               </ul>
+              <div className="mt-8 flex items-center gap-4">
+                <Link href="/teams/">
+                  <Button className="flex items-center gap-2">
+                    Get Started with OpenTelemetry
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </Link>
+              </div>
             </div>
           </section>
 
@@ -747,6 +755,62 @@ const UnifiedObservability = () => {
                 />
                 <p className="mt-4 text-center text-gray-400">
                   Track user requests across services to identify bottlenecks
+                </p>
+              </div>
+
+              <div className="w-full flex-shrink-0 snap-start md:w-8/12">
+                <h4 className="mb-2 text-lg font-semibold">Infrastructure Monitoring</h4>
+                <Image
+                  src="/img/unified-observability/unified-observability-infrastructure-monitoring.webp"
+                  alt="Infrastructure Monitoring in SigNoz"
+                  width={600}
+                  height={400}
+                  className="w-full rounded-xl shadow-2xl"
+                />
+                <p className="mt-4 text-center text-gray-400">
+                  Monitor your infrastructure metrics like CPU, memory, and network
+                </p>
+              </div>
+
+              <div className="w-full flex-shrink-0 snap-start md:w-8/12">
+                <h4 className="mb-2 text-lg font-semibold">Metrics and Dashboards</h4>
+                <Image
+                  src="/img/unified-observability/unified-observability-metrics-and-dashboards.webp"
+                  alt="Metrics and Dashboards in SigNoz"
+                  width={600}
+                  height={400}
+                  className="w-full rounded-xl shadow-2xl"
+                />
+                <p className="mt-4 text-center text-gray-400">
+                  Monitor your metrics and create custom dashboards
+                </p>
+              </div>
+
+              <div className="w-full flex-shrink-0 snap-start md:w-8/12">
+                <h4 className="mb-2 text-lg font-semibold">Alerts</h4>
+                <Image
+                  src="/img/unified-observability/unified-observability-alerts.webp"
+                  alt="Alerts in SigNoz"
+                  width={600}
+                  height={400}
+                  className="w-full rounded-xl shadow-2xl"
+                />
+                <p className="mt-4 text-center text-gray-400">
+                  Set up alerts for your metrics and logs
+                </p>
+              </div>
+
+              <div className="w-full flex-shrink-0 snap-start md:w-8/12">
+                <h4 className="mb-2 text-lg font-semibold">Exceptions Monitoring</h4>
+                <Image
+                  src="/img/unified-observability/unified-observability-exceptions.webp"
+                  alt="Exceptions Monitoring in SigNoz"
+                  width={600}
+                  height={400}
+                  className="w-full rounded-xl shadow-2xl"
+                />
+                <p className="mt-4 text-center text-gray-400">
+                  Monitor your exceptions and errors
                 </p>
               </div>
             </div>
