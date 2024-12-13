@@ -212,16 +212,16 @@ const UnifiedObservability = () => {
                 unified observability.
               </p>
             </div>
-            <div className="relative flex-shrink-0 lg:w-3/5">
-              <figure>
+            <div className="relative flex-shrink-0 w-full lg:w-3/5">
+              <figure className="mx-auto max-w-[800px]">
                 <Image
                   src="/img/unified-observability/unified-observability-fragmented-setup.webp"
                   alt="Fragmented Tools Diagram"
                   width={800}
                   height={533}
-                  className="rounded-xl shadow-2xl"
+                  className="rounded-xl shadow-2xl w-full h-auto"
                 />
-                <figcaption className="mt-2 text-center text-sm text-gray-400">
+                <figcaption className="mt-2 text-center text-sm text-gray-400 px-4">
                   Traditional fragmented setup with disconnected monitoring tools
                 </figcaption>
               </figure>
@@ -264,16 +264,16 @@ const UnifiedObservability = () => {
                 </div>
               </div>
             </div>
-            <div className="relative flex-shrink-0 lg:w-3/5">
+            <div className="relative flex-shrink-0 w-full lg:w-3/5">
               <figure>
                 <Image
                   src="/img/unified-observability/unified-observability-unified-setup.webp"
-                  alt="SigNoz Platform"
+                  alt="SigNoz Platform" 
                   width={800}
                   height={533}
-                  className="rounded-xl shadow-2xl"
+                  className="w-full h-auto rounded-xl shadow-2xl"
                 />
-                <figcaption className="mb-4 mt-2 text-center text-sm text-gray-400">
+                <figcaption className="mb-4 mt-2 text-center text-sm text-gray-400 px-4 sm:px-8">
                   SigNoz unified observability platform bringing metrics, traces and logs together
                 </figcaption>
               </figure>
@@ -657,14 +657,14 @@ const UnifiedObservability = () => {
                 fixed thresholds.
               </p>
             </div>
-            <div className="relative flex-shrink-0 lg:w-3/5">
+            <div className="relative flex-shrink-0 w-full lg:w-3/5">
               <figure>
                 <Image
                   src="/img/unified-observability/unified-observability-anomaly-detection.webp"
-                  alt="Anomaly Detection in SigNoz"
+                  alt="Anomaly Detection in SigNoz" 
                   width={800}
                   height={533}
-                  className="rounded-xl shadow-2xl"
+                  className="rounded-xl shadow-2xl w-full h-auto"
                 />
                 <figcaption className="mt-2 text-center text-sm text-gray-400">
                   Anamoly Detection Alert in SigNoz
