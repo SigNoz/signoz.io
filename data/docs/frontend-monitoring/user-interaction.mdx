@@ -1,0 +1,252 @@
+---
+date: 2024-12-13
+title: Frontend Monitoring - User Interactions
+id: user-interaction
+---
+
+This documentation will provide detailed steps to capture the user interaction of one web application using [OpenTelemetry](https://opentelemetry.io/docs/what-is-opentelemetry/)'s `@opentelemetry/instrumentation-user-interaction` [package](https://github.com/open-telemetry/opentelemetry-js-contrib/tree/main/plugins/web/opentelemetry-instrumentation-user-interaction) and visualize the data in **[Signoz](https://signoz.io/)**.
+## Overview
+This documentation will walk users through:
+* How to instrument web applications with OpenTelemetry to capture user interactions.
+* How to send collected telemetry data to **Signoz** for monitoring.
+* How to analyze the collected data and set alerts based on it.
+
+By following this guide, users will be able to:
+* Automatically capture user interaction such as clicks and more.
+* Visualize and query traces in Signoz to monitor the web application performance and user behaviour. 
+* Set alerts to get notifications about performance issues. 
+
+## Pre-requisites
+💡 Tip
+The easiest way to run **SigNoz** is to use **SigNoz Cloud** - no installation, maintenance, or scaling needed.
+
+New users get 30 days of unlimited access to all features.
+1. **SigNoz Cloud Setup:** (Recommended)
+    * Ensure you [sign up](https://signoz.io/teams/) for SigNoz Cloud.
+    * Obtain your **SigNoz** access token key in the **Settings**.
+
+*SigNoz Ingestion Settings: View and manage ingestion keys used to send telemetry data to SigNoz (your access token key)*
+
+
+SigNoz also can run locally. Check out this link to have more [information](https://signoz.io/docs/install/docker/)
+
+
+2. **Basic Requirements:**
+    * [Node.js](https://nodejs.org/en/download/package-manager) installed in your local machine.
+
+## Step-by-Step Setup
+##### Step 1: Create a small project including HTML and JavaScript Files
+* Create `index.html`
+```html!
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenTelemetry User Interaction</title>
+</head>
+<body>
+    <h1>OpenTelemetry User Interaction Demo</h1>
+    <script type="module" src="./setup.js"></script>
+</body>
+</html>
+```
+* Create `setup.js` in the same directory:
+```javascript!
+import { ConsoleSpanExporter, SimpleSpanProcessor } from '@opentelemetry/sdk-trace-base';
+import { WebTracerProvider } from '@opentelemetry/sdk-trace-web';
+import { UserInteractionInstrumentation } from '@opentelemetry/instrumentation-user-interaction';
+import { ZoneContextManager } from '@opentelemetry/context-zone';
+import { registerInstrumentations } from '@opentelemetry/instrumentation';
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
+import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base';
+import { Resource } from '@opentelemetry/resources';
+import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
+
+const provider = new WebTracerProvider({
+    resource: new Resource({
+        [SemanticResourceAttributes.SERVICE_NAME]: 'user-interaction-tracker',
+    }),
+});
+
+
+const exporter = new OTLPTraceExporter({
+    url: 'https://ingest.us.signoz.cloud:443/v1/traces',
+    headers: {
+        "signoz-access-token": "<your-signoz-access-token>",
+    },
+});
+
+
+provider.addSpanProcessor(new BatchSpanProcessor(exporter));
+provider.addSpanProcessor(new SimpleSpanProcessor(new ConsoleSpanExporter()));
+
+// Register the context manager separately
+provider.register({
+    contextManager: new ZoneContextManager(), // Register context manager here
+});
+
+registerInstrumentations({
+  instrumentations: [
+    new UserInteractionInstrumentation(),
+  ],
+});
+
+// and some test
+console.log('OpenTelemetry setup started');
+
+const btn1 = document.createElement('button');
+btn1.append(document.createTextNode('btn1'));
+btn1.addEventListener('click', () => {
+  console.log('clicked');
+});
+document.querySelector('body').append(btn1);
+
+const btn2 = document.createElement('button');
+btn2.append(document.createTextNode('btn2'));
+btn2.addEventListener('click', () => {
+  getData('https://httpbin.org/get').then(() => {
+    getData('https://httpbin.org/get').then(() => {
+      console.log('data downloaded 2');
+    });
+    getData('https://httpbin.org/get').then(() => {
+      console.log('data downloaded 3');
+    });
+    console.log('data downloaded 1');
+  });
+});
+document.querySelector('body').append(btn2);
+
+function getData(url) {
+  return new Promise(async (resolve) => {
+    const req = new XMLHttpRequest();
+    req.open('GET', url, true);
+    req.setRequestHeader('Content-Type', 'application/json');
+    req.setRequestHeader('Accept', 'application/json');
+    req.send();
+    req.onload = function () {
+      resolve();
+    };
+  });
+}
+
+// now click on buttons
+```
+This is a step for capturing user behaviour by setting up OpenTelemetry's instrumentation user interaction and sending the telemetry data to SigNoz. 
+
+```javascript!
+...
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
+...
+const exporter = new OTLPTraceExporter({
+    url: 'https://ingest.us.signoz.cloud:443/v1/traces',
+    headers: {
+        "signoz-access-token": "<your-signoz-access-token>",
+    },
+});
+
+provider.addSpanProcessor(new BatchSpanProcessor(exporter));
+```
+The above code block plays a role in sending all captured user interaction data to SigNoz for visualization.
+
+:::info
+If you're running SigNoz locally. Ensure that the ports **3301**, **4317** and **4318** are open on the machine where you install SigNoz. Replace the following code:
+```javascript!
+const exporter = new OTLPTraceExporter({
+    url: 'http://localhost:4318/v1/traces'
+});
+
+``` 
+http://localhost:4318/v1/traces is the default url for sending your tracing data. We are assuming you have installed SigNoz on your localhost. Based on your environment, you can update it accordingly. It should be in the following format:
+``` bash
+http://<IP of SigNoz backend>:4318/v1/traces
+```
+:::
+##### Step 2: Install required packages
+* Install necessary OpenTelemetry packages:
+```bash!
+npm install @opentelemetry/sdk-trace-web @opentelemetry/instrumentation-user-interaction @opentelemetry/context-zone @opentelemetry/sdk-trace-base @opentelemetry/resources @opentelemetry/semantic-conventions @opentelemetry/exporter-trace-otlp-http @opentelemetry/instrumentation
+```
+* Install **Vite** bundler to bundle and serve our **JavaScript** code.
+    * ``npm install --save-dev vite``
+    * Add the following script in `package.json`    
+        * `"scripts": {
+    "dev": "vite"
+  },`
+  
+##### Step 3: Start the Vite Develoopment Server
+1. **Run Vite**:
+```bash!
+npm run dev
+```
+2. **Access the Web Application**:
+Open your browser and visit the URL provided by Vite: `http://localhost:5173/`
+
+*Sample Browser: A simple web page where users interact with*
+
+Whenever users hit these two buttons, it will be captured and sent to **SigNoz** for visualizing data.
+##### Step 4: Verify the data in SigNoz:
+1. **Open your SigNoz dashboard**
+2. Navigate to the **Traces** and **Services** to verify that the user interactions (buttons clicks) are being captured.
+
+
+*SigNoz Trace Explorer view: Monitoring user interactions with detailed telemetry data such as operation name, timestamp, and the duration for how long it takes for an operation process.*
+
+*SigNoz Detailed Service Dashboard: Visualize latency, request rates, and Apdex scores for operations over time. Key metrics such as p50, p90, and p99 latencies provide insight into response times of a critial event "click".*
+## How to Use Collected Data for Monitoring
+From the above guideline, the project could be extended more operations to track user actions such as form submissions, page transitions, or other interactions.
+
+Collecting user interaction telemetry data provides the insight into performance, behaviour, and issue in the web application:
+
+1. **A real-time Monitoring of User Behaviour**
+This trace in SigNoz can show which features are accessed most frequently. Also, we can track feature usage and priortize development efforts based on real user data.
+2. **Monitor Performance and Latency of User Interactions**
+In SigNoz, users can monitor how long it takes for a single interaction to complete. This will help users can quickly identify bottlenecks or unresponsive features causing poor user experiences.
+
+With SigNoz functionalities, users can use a great dashboard provided by SigNoz to visualize the interaction times and durations, frequency of specific events, and connection between user actions and how the system performs.
+
+## How to Set [Alerts](https://signoz.io/docs/alerts/) on SigNoz
+
+### Why we need to set Alerts?
+Alert will help us identify and address issues before they affect end-users and ensure optimal application performance. Some useful alerts:
+- **High Interaction Latency**: Trigger alerts if one of the interactions in the app exceeds a specific latency threshold
+- **Error Rates in Interactions**: Trigger alerts for high error rates in user interactions.
+
+### Guideline for SigNoz alert setup
+1. **Create a New Alert Channel**:
+    * Go to the **Setting** and navigate to **Alert Channel**.
+    * Set the type that you want to receive an alert through (email or Slack and more).
+
+
+*Alert Channels Setting: View and Manage your alert channel*
+
+*Alert Channels Detailed Setting: Set up your desirable receive type.*
+
+2. **Setup the Alert**:
+
+    * Navigate to `+NEW ALERT` to create an alert
+
+*Alert Dashboard: View and mange your alerts*
+
+### The following images are the sample setup of trace-based Alert
+
+***Alert Rules in SigNoz**: Visualizing button click events with a threshold-based alert. This graph tracks the number of button clicks over time, with a warning alert triggered when clicks exceed the defined threshold of 10*
+
+***Alert Rules in SigNoz**: Define the metric to display in the graph.*
+
+***Alert Rules in SigNoz**: Setup the Threshold of 10 and the information for users when they receive an email alert.*
+
+For the alert in SigNoz, a maintainer will be notified of which operations are used the most in the web application. Furthermore, they will be able to create more useful alerts to track API call frequency, interaction latency, and so on.
+
+
+
+## Conclusion
+By following this guide, you will be able to **automatically capture** user interactions, **send telemetry data to SigNoz** for visualization and monitoring, **analyze user behaviour**, **detect issues** using SigNoz dashboards, and **set alerts** to monitor important events and resolve issues as soon as possible. 
+
+With this setup, you can enhance the observability of your web applications, and improve user traffic and user experience. 
+
+For more information:
+- Understand more about OpenTelemetry. Check out this link: https://opentelemetry.io/docs/what-is-opentelemetry/
+- Understand more about SigNoz. Check out this link:
+https://signoz.io/docs/introduction/
+
