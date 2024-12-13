@@ -62,10 +62,10 @@ const UnifiedObservability = () => {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8 }}
-            className="relative -right-8 lg:w-3/5"
+            className="relative lg:-right-8 lg:w-3/5"
           >
             <div className="overflow-hidden rounded-xl shadow-2xl">
-              <video autoPlay muted loop className="w-[120%]">
+              <video autoPlay muted loop className="lg:w-[120%]">
                 <source
                   src="/img/unified-observability/showcase.mp4"
                   type="video/mp4"
@@ -711,7 +711,7 @@ const UnifiedObservability = () => {
               </div>
             </div>
           </div>
-          <div className="section-container !mx-auto !w-[100vw] border !border-b-0 border-dashed border-signoz_slate-400 !px-0 md:!w-[80vw]">
+          <div className="section-container !mx-auto !w-[100vw] border !border-b-0 border-dashed border-signoz_slate-400 !px-0 md:!w-[80vw] hidden sm:block">
             <div className="flex flex-col sm:flex-row">
               <div className="!w-[100%] flex-1 md:!w-[300px]">
                 <div className="space-y-[10vh]">
