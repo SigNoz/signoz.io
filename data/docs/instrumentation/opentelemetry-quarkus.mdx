@@ -7,7 +7,7 @@ description: Instrument your Quarkus application with OpenTelemetry and send dat
 
 import InstrumentationFAQ from '@/components/shared/instrumentation-faq.md'
 
-This document contains instructions on how to set up OpenTelemetry instrumentation in your Quarkus applications. OpenTelemetry, also known as OTel for short, is an open source observability framework that helps generate and collect telemetry data (traces, metrics, and logs) from your Quarkus application.
+This document contains instructions on how to set up OpenTelemetry instrumentation in your Quarkus applications and view your application traces in SigNoz.  
 
 OpenTelemetry's Java implementation integrates seamlessly with Quarkus through its extension system, providing automatic instrumentation with minimal configuration.
 
@@ -21,18 +21,12 @@ There are two steps to using OpenTelemetry with Quarkus:
     <figcaption><i>OpenTelemetry helps generate and collect telemetry data from Quarkus applications which can then be sent to SigNoz for storage, visualization, and analysis.</i></figcaption>
 </figure>
 
-After completing this guide, you will have:
 
-- A Quarkus application sending traces, metrics, and logs to SigNoz
-- Real-time visibility into your application's performance
-- Ability to troubleshoot issues using distributed tracing
-- Monitoring dashboards for your application metrics
 
-Let's understand how to install and run OpenTelemetry in your Quarkus application.
 
-## Requirements
+## Prerequisite
 
-- A Quarkus REST application with basic endpoints.
+- A Quarkus REST application with basic endpoints
 - Java 17 or higher environment
 - Docker (if using Docker and Kubernetes)
 - OpenTelemetry extension added to your project:
@@ -115,12 +109,12 @@ Based on your application environment, you can choose the setup below to instrum
 
   ```bash
   export OTEL_RESOURCE_ATTRIBUTES=service.name=<app-name>
-  export OTEL_EXPORTER_OTLP_HEADERS="signoz-access-token=SIGNOZ_INGESTION_KEY"
+  export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=SIGNOZ_INGESTION_KEY"
   export OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.{region}.signoz.cloud:443
   ```
 
 - `<app_name>` is the name for your application
-- `SIGNOZ_INGESTION_KEY` is the API token provided by SigNoz. You can find your ingestion key from SigNoz cloud account details sent on your email.
+- `SIGNOZ_INGESTION_KEY` is the [Ingestion Key provided by SigNoz](https://signoz.io/docs/ingestion/signoz-cloud/keys/). 
 
 Depending on the choice of your region for SigNoz cloud, the ingest endpoint will vary according to this table.
 
@@ -205,7 +199,7 @@ spec:
 ```
 
 - `<app_name>` is the name for your application
-- `SIGNOZ_INGESTION_KEY` is the API token provided by SigNoz. You can find your ingestion key from SigNoz cloud account details sent on your email.
+- `SIGNOZ_INGESTION_KEY` is the [Ingestion Key provided by SigNoz](https://signoz.io/docs/ingestion/signoz-cloud/keys/). 
 
 Depending on the choice of your region for SigNoz cloud, the ingest endpoint will vary according to this table.
 
@@ -240,7 +234,7 @@ setx OTEL_EXPORTER_OTLP_ENDPOINT "https://ingest.{region}.signoz.cloud:443"
 java -jar target/quarkus-app/quarkus-run.jar
 ```
 - `<app_name>` is the name for your application
-- `SIGNOZ_INGESTION_KEY` is the API token provided by SigNoz. You can find your ingestion key from SigNoz cloud account details sent on your email.
+- `SIGNOZ_INGESTION_KEY` is the [Ingestion Key provided by SigNoz](https://signoz.io/docs/ingestion/signoz-cloud/keys/). 
 
 Depending on the choice of your region for SigNoz cloud, the ingest endpoint will vary according to this table.
 
