@@ -292,6 +292,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            label: 'C++',
+            route: '/docs/instrumentation/cpp',
+          },
+          {
+            type: 'doc',
             label: 'Swift',
             route: '/docs/instrumentation/swift',
           },
