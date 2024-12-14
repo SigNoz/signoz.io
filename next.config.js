@@ -357,11 +357,6 @@ module.exports = () => {
           permanent: true,
         },
         {
-          source: '/docs/instrumentation/quarkus/',
-          destination: '/docs/instrumentation/opentelemetry-quarkus/',
-          permanent: true,
-        },
-        {
           source: '/docs/instrumentation/swift/',
           destination: '/docs/instrumentation/opentelemetry-swift/',
           permanent: true,
