@@ -305,7 +305,7 @@ You're almost done. In the last step, you just need to configure a few environme
 ```bash
 OTEL_RESOURCE_ATTRIBUTES=service.name=<service_name> \\
 OTEL_EXPORTER_OTLP_ENDPOINT="<https://ingest>.{region}.signoz.cloud:443" \\
-OTEL_EXPORTER_OTLP_HEADERS="signoz-access-token=SIGNOZ_INGESTION_KEY" \\
+OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=SIGNOZ_INGESTION_KEY" \\
 OTEL_EXPORTER_OTLP_PROTOCOL=grpc \\
 opentelemetry-instrument <your_run_command>
 
@@ -331,7 +331,7 @@ For our sample FastAPI application, the run command will look like:
 ```bash
 OTEL_RESOURCE_ATTRIBUTES=service.name=sample-fastapi-app \\
 OTEL_EXPORTER_OTLP_ENDPOINT="<https://ingest>.{region}.signoz.cloud:443" \\
-OTEL_EXPORTER_OTLP_HEADERS="signoz-access-token=SIGNOZ_INGESTION_KEY" \\
+OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=SIGNOZ_INGESTION_KEY" \\
 OTEL_EXPORTER_OTLP_PROTOCOL=grpc \\
 opentelemetry-instrument uvicorn main:app --host localhost --port 5002
 
@@ -348,7 +348,7 @@ In that case, the final command will be:
 ```bash
 OTEL_RESOURCE_ATTRIBUTES=service.name=sample-fastapi-app \\
 OTEL_EXPORTER_OTLP_ENDPOINT="<https://ingest>.{region}.signoz.cloud:443" \\
-OTEL_EXPORTER_OTLP_HEADERS="signoz-access-token=SIGNOZ_INGESTION_KEY" \\
+OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=SIGNOZ_INGESTION_KEY" \\
 OTEL_EXPORTER_OTLP_PROTOCOL=grpc \\
 opentelemetry-instrument gunicorn main:app --workers 2 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000
 
@@ -400,7 +400,7 @@ docker run -d --name fastapi-container \\
 -e OTEL_METRICS_EXPORTER='none' \\
 -e OTEL_RESOURCE_ATTRIBUTES='service.name=fastapiApp' \\
 -e OTEL_EXPORTER_OTLP_ENDPOINT="<https://ingest>.{region}.signoz.cloud:443" \\
--e OTEL_EXPORTER_OTLP_HEADERS="signoz-access-token=SIGNOZ_INGESTION_KEY" \\
+-e OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=SIGNOZ_INGESTION_KEY" \\
 -e OTEL_EXPORTER_OTLP_PROTOCOL=grpc \\
 -p 5002:5002 sample-fastapi-app
 
@@ -418,7 +418,7 @@ docker run -d --name fastapi-container \\
 -e OTEL_METRICS_EXPORTER='none' \\
 -e OTEL_RESOURCE_ATTRIBUTES='service.name=fastapiApp' \\
 -e OTEL_EXPORTER_OTLP_ENDPOINT="<https://ingest>.{region}.signoz.cloud:443" \\
--e OTEL_EXPORTER_OTLP_HEADERS="signoz-access-token=SIGNOZ_INGESTION_KEY" \\
+-e OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=SIGNOZ_INGESTION_KEY" \\
 -e OTEL_EXPORTER_OTLP_PROTOCOL=grpc \\
 -p 5002:5002 sample-fastapi-app
 

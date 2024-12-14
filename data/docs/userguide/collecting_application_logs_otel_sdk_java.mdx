@@ -18,7 +18,11 @@ To sends logs from a Java application you will have to add the agent and add the
 ## For Sending Logs To SigNoz Cloud
 
 ```bash
-OTEL_LOGS_EXPORTER=otlp OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.{region}.signoz.cloud:443" OTEL_EXPORTER_OTLP_HEADERS=signoz-access-token=<SIGNOZ_INGESTION_KEY> OTEL_RESOURCE_ATTRIBUTES=service.name=<app_name> java -javaagent:/path/opentelemetry-javaagent.jar -jar  <myapp>.jar
+OTEL_RESOURCE_ATTRIBUTES=service.name=<app_name> \
+OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=SIGNOZ_INGESTION_KEY" \
+OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.{region}.signoz.cloud:443 \
+OTEL_LOGS_EXPORTER=otlp \
+java -javaagent:/path/opentelemetry-javaagent.jar -jar target/*.jar
 ```
 
 You will have to add `<SIGNOZ_INGESTION_KEY>` and depending on the choice of your region for SigNoz cloud, the otlp endpoint will vary according to this table.
@@ -30,8 +34,17 @@ You will have to add `<SIGNOZ_INGESTION_KEY>` and depending on the choice of you
 | EU     | ingest.eu.signoz.cloud:443 |
 
 ## For Sending Logs To SigNoz Hosted Locally
+
+
 ```bash
 OTEL_LOGS_EXPORTER=otlp OTEL_EXPORTER_OTLP_ENDPOINT="http://<IP of SigNoz Backend>:4317" OTEL_RESOURCE_ATTRIBUTES=service.name=<app_name> java -javaagent:/path/opentelemetry-javaagent.jar -jar  <myapp>.jar
+```
+
+```bash
+OTEL_RESOURCE_ATTRIBUTES=service.name=<app_name> \
+OTEL_EXPORTER_OTLP_ENDPOINT="http://<IP of SigNoz Backend>:4317" \
+OTEL_LOGS_EXPORTER=otlp \
+java -javaagent:/path/opentelemetry-javaagent.jar -jar target/*.jar
 ```
 
 ## Settings for Appender instrumentation based on the logging library
@@ -75,7 +88,7 @@ In the below example we will configure a java application to send logs to SigNoz
 
 ### For SigNoz Cloud
 ```
-OTEL_LOGS_EXPORTER=otlp OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.{region}.signoz.cloud:443" OTEL_EXPORTER_OTLP_HEADERS=signoz-access-token=<SIGNOZ_INGESTION_KEY> OTEL_RESOURCE_ATTRIBUTES=service.name=myapp java -javaagent:/path/opentelemetry-javaagent.jar -jar target/*.jar
+OTEL_LOGS_EXPORTER=otlp OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.{region}.signoz.cloud:443" OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<SIGNOZ_INGESTION_KEY> OTEL_RESOURCE_ATTRIBUTES=service.name=myapp java -javaagent:/path/opentelemetry-javaagent.jar -jar target/*.jar
 ```
 
 You will have to replace the value of `{region}` according to region of your cloud account and also add `<SIGNOZ_INGESTION_KEY>`
@@ -97,7 +110,7 @@ Let's say we want to enable `-Dotel.instrumentation.logback-appender.experimenta
 ### For SigNoz Cloud
 
 ```
-OTEL_LOGS_EXPORTER=otlp OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.{region}.signoz.cloud:443" OTEL_EXPORTER_OTLP_HEADERS=signoz-access-token=<SIGNOZ_INGESTION_KEY> OTEL_RESOURCE_ATTRIBUTES=service.name=myapp java -javaagent:/path/opentelemetry-javaagent.jar -Dotel.instrumentation.logback-appender.experimental-log-attributes=true -jar target/*.jar
+OTEL_LOGS_EXPORTER=otlp OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.{region}.signoz.cloud:443" OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<SIGNOZ_INGESTION_KEY> OTEL_RESOURCE_ATTRIBUTES=service.name=myapp java -javaagent:/path/opentelemetry-javaagent.jar -Dotel.instrumentation.logback-appender.experimental-log-attributes=true -jar target/*.jar
 ```
 
 You will have to replace the value of `{region}` according to the region of your cloud account and also replace `<SIGNOZ_INGESTION_KEY>` with your SigNoz Cloud Ingestion key.
