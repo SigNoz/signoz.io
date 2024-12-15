@@ -177,86 +177,20 @@ terraform validate
 If the resource is defined correctly, you will see the message: `Success! The configuration is valid.`
 
 In case you get any error, fix your definition by referencing the console output:
-```bash
-$ terraform validate
-terraform validate
-╷
-│ Error: Missing required argument
-│
-│   on main.tf line 14, in resource "signoz_alert" "example":
-│   14: resource "signoz_alert" "example" {
-│
-│ The argument "alert_type" is required, but no definition was found.
-╵
-╷
-│ Error: Unsupported argument
-│
-│   on main.tf line 16, in resource "signoz_alert" "example":
-│   16:   alert_typ = "METRIC_BASED_ALERT"
-│
-│ An argument named "alert_typ" is not expected here. Did you mean "alert_type"?
-```
+
+![Validate error](../../../public/img/blog/common/terraform_provider_validate_error.webp)
 
 ### Step 6: Provision SigNoz Alert to SigNoz Cloud
 
 When you're ready, `plan` your Terraform module to see diffs between your code and resources on the remote (SigNoz Cloud):
-```bash
-terraform plan
 
-Terraform used the selected providers to generate the following execution plan. Resource actions are indicated with the following symbols:
-  + create
+![Plan](../../../public/img/blog/common/alerts_terraform_provider_plan.webp)
 
-Terraform will perform the following actions:
-
-  # signoz_alert.example alert will be created
-  + resource "signoz_alert" "example" {
-      + alert              = "Example alert"
-      + alert_type         = "METRIC_BASED_ALERT"
-      + broadcast_to_all   = false
-      + condition          = jsonencode(
-
----- snip ----
-
-      + version            = "v4"
-    }
-
-Plan: 1 to add, 0 to change, 0 to destroy.
-
-────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-
-Note: You didn't use the -out option to save this plan, so Terraform can't guarantee to take exactly these actions if you run "terraform apply" now.
-```
 The output indicates that it plans to create a new resource(`signoz_alert`)  with specified attributes like `alert`, `alert_type`, and `version`. The plan shows **1 resource to add**, with no changes or deletions.
 
 Once you're satisfied that the diffs are as intended, `apply` your code for provisioning:
-``` bash
-terraform apply
+![Apply](../../../public/img/blog/common/alerts_terraform_provider_apply.webp)
 
-Terraform used the selected providers to generate the following execution plan. Resource actions are indicated with the following symbols:
-  + create
-
-Terraform will perform the following actions:
-
-  # signoz_alert.example will be created
-  + resource "signoz_alert" "example" {
-      + alert              = "Example alert"
-      + alert_type         = "METRIC_BASED_ALERT"
-      + broadcast_to_all   = false
-      + condition          = jsonencode(
-
----- snip ----
-
-      + version            = "v4"
-    }
-
-Plan: 1 to add, 0 to change, 0 to destroy.
-
-Do you want to perform these actions?
-  Terraform will perform the actions described above.
-  Only 'yes' will be accepted to approve.
-
-  Enter a value:
-```
 Terraform will wait for your confirmation before applying the change to the remote.
 
 Review the diffs on the console again and type `yes` to confirm:
