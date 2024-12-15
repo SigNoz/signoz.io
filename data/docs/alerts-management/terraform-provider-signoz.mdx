@@ -11,7 +11,7 @@ By defining SigNoz alerts as Terraform code, it is possible to manage changes to
 ## Overview
 
 SigNoz alert notifies you of the change in the state of your service.
-Although getting alerts that work wisely often requires complex configuration, Terraform 'signoz' provider will help you manage SigNoz alerts as reviewable codes.
+Although setting smart, effective alerts can be achieved using [SigNoz UI](https://signoz.io/docs/userguide/alerts-management/), **Terraform 'signoz' provider** will help you manage SigNoz alerts as reviewable codes.
 
 This document will show you how to:
 - configure the provider
@@ -27,7 +27,7 @@ This document will show you how to:
   - endpoint URL
   - access token
 
-## Create SigNoz Alert using Terraform
+## Configure Terraform Provider
 
 ### Step 1: Configure Terraform environment
 
@@ -38,7 +38,7 @@ terraform {
 }
 ```
 
-### Step 2: Install Terraform sinoz Provider
+### Step 2: Install Terraform signoz Provider
 
 Add specification block for the signoz provider as follows:
 ```diff
@@ -54,9 +54,9 @@ terraform {
 }
 ```
 
-Running `terraform init` will create `.terraform.lock.hcl`.
+Running `terraform init` will create `.terraform.lock.hcl` file, which locks the provider version for consistent usage.
 
-### Step 3: Configure sinoz Provider
+### Step 3: Configure signoz Provider
 
 Add `provider {}` block to the `.tf` file as follows:
 ```hcl
@@ -66,17 +66,17 @@ provider "signoz" {}
 By setting the environmental variables below, the signoz provider will automatically read these variables and authorize with your SigNoz Cloud account:
 ``` bash
 SIGNOZ_ACCESS_TOKEN="your-access-token"
-SIGNOZ_ENDPOINT="http://your-signoz-endpoint:3301"
+SIGNOZ_ENDPOINT="https://your-signoz-endpoint"
 ```
 
-Although you can explicitly set these variables in `provider {}` as below, do not type your access token directly if you're going to push your `.tf` files to the online version control system.
+You can explicitly set these variables in the `provider {}` block as shown below, but avoid hardcoding your access token if you plan to commit your `.tf` files to an online version control system.
 ```hcl
 provider "signoz" {
-  endpoint="http://your-signoz-endpoint:3301"
+  endpoint="https://your-signoz-endpoint"
   access_token="your-access-token"  # Do not type your token directly if you push codes online
 }
 ```
-
+## Create new alert
 ### Step 4: Define SigNoz Alert as Code
 
 Define your alert using the `signoz_alert` resource type as follows:
@@ -163,16 +163,15 @@ resource "signoz_alert" "example" {
   }
 }
    ```
-Refer to the [provider's documentation](https://registry.terraform.io/providers/SigNoz/signoz/latest/docs/resources/alert) for the latest information because the API schema of the provider may be updated.
+Refer to the [provider's documentation](https://registry.terraform.io/providers/SigNoz/signoz/latest/docs/resources/alert) for the latest information about the API schema.
 
 ### Step 5: Check Correctness of Definition
 
 After defining your alert, validate its syntax by running `validate` command:
 ```bash
-$ terraform validate
-Success! The configuration is valid.
+terraform validate
 ```
-You'll get a success message if the resource is defined properly.
+If the resource is defined correctly, you will see the message: `Success! The configuration is valid.`
 
 In case you get any error, fix your definition by referencing the console output:
 ```bash
@@ -199,7 +198,7 @@ terraform validate
 
 When you're ready, `plan` your Terraform module to see diffs between your code and resources on the remote (SigNoz Cloud):
 ```bash
-$ terraform plan
+terraform plan
 
 Terraform used the selected providers to generate the following execution plan. Resource actions are indicated with the following symbols:
   + create
@@ -224,11 +223,11 @@ Plan: 1 to add, 0 to change, 0 to destroy.
 
 Note: You didn't use the -out option to save this plan, so Terraform can't guarantee to take exactly these actions if you run "terraform apply" now.
 ```
-The output from the example code above says you're going to create an alert named "Example alert" on the remote.
+The output indicates that it plans to create a new resource(`signoz_alert`)  with specified attributes like `alert`, `alert_type`, and `version`. The plan shows **1 resource to add**, with no changes or deletions.
 
 Once you're satisfied that the diffs are as intended, `apply` your code for provisioning:
 ``` bash
-$ terraform apply
+terraform apply
 
 Terraform used the selected providers to generate the following execution plan. Resource actions are indicated with the following symbols:
   + create
@@ -273,7 +272,7 @@ After getting the success message on the console, you'll find the alert provisio
 
 ## Manage Preexistent Alert as Terraform Resource
 
-In Terraform v1.5.0 and later, you can use an `import {}` block to import a preexistent SigNoz alert.
+In **Terraform v1.5.0 and later**, you can use an `import {}` block to import a preexistent SigNoz alert.
 
 Define the target alert as a Terraform resource as explained in the previous section, and relate it to the resource on remote.
 
@@ -285,12 +284,12 @@ import {
 }
 ```
 
-Of course, you can do the same by the command:
+You can do the same by the command:
 ``` bash
-$ terraform import signoz_alert.example 123
+terraform import signoz_alert.example 123
 ```
 
 ## Conclusion
 
-Using Terraform, you can manage both new- and preexistent- SigNoz alert as code.
+Using Terraform, you can manage both new and pre-existent SigNoz alert as code.
 The IaC practice enables you to introduce change process management of SigNoz alert and will contribute to the improvement of the operation process of your service.
