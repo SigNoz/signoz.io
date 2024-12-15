@@ -180,6 +180,21 @@ In case you get any error, fix your definition by referencing the console output
 
 ![Validate error](../../../public/img/blog/common/terraform_provider_validate_error.webp)
 
+The error indicates that:
+- the required argument alert_type` was not found.
+- an unexpected argument `alert_typ was passed.
+
+Fix the typo that caused this error:
+```diff
+ resource "signoz_alert" "example" {
+   alert      = "Example alert"
+-  alert_typ = "METRIC_BASED_ALERT"
++  alert_type = "METRIC_BASED_ALERT"
+   condition = jsonencode(
+     {
+       "absentFor" : 10,
+```
+
 ### Step 6: Provision SigNoz Alert to SigNoz Cloud
 
 When you're ready, `plan` your Terraform module to see diffs between your code and resources on the remote (SigNoz Cloud):
