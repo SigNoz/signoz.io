@@ -1,5 +1,5 @@
 import { Metadata } from 'next'
-import siteMetadata from '@/data/siteMetadata'
+import siteMetadata from '../../data/siteMetadata.js' 
 
 export const metadata: Metadata = {
   title: 'Frequently Asked Questions about SigNoz',
