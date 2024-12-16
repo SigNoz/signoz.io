@@ -42,7 +42,7 @@ export OTEL_TRACES_EXPORTER="otlp"
 export OTEL_EXPORTER_OTLP_ENDPOINT="<SIGNOZ_ENDPOINT>"
 export OTEL_NODE_RESOURCE_DETECTORS="env,host,os"
 export OTEL_SERVICE_NAME="<APP_NAME>"
-export OTEL_EXPORTER_OTLP_HEADERS="signoz-access-token=<SIGNOZ_ACCESS_TOKEN>"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<SIGNOZ_ACCESS_TOKEN>"
 export NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
 <your_run_command>
 ```
@@ -124,7 +124,7 @@ Depending on the choice of your region for SigNoz cloud, the ingest endpoint wil
 Make sure you set the `OTEL_EXPORTER_OTLP_HEADERS` env as follows
 
 ```bash
-OTEL_EXPORTER_OTLP_HEADERS="signoz-access-token=<SIGNOZ_INGESTION_KEY>" node -r ./tracing.js app.js
+OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>" node -r ./tracing.js app.js
 ```
 
 `SIGNOZ_INGESTION_KEY` is the API token provided by SigNoz. You can find your ingestion key from SigNoz cloud account details sent on your email.
@@ -377,7 +377,7 @@ $env:OTEL_TRACES_EXPORTER="otlp"
 $env:OTEL_EXPORTER_OTLP_ENDPOINT="<SIGNOZ_ENDPOINT>"
 $env:OTEL_NODE_RESOURCE_DETECTORS="env,host,os"
 $env:OTEL_SERVICE_NAME="<APP_NAME>"
-$env:OTEL_EXPORTER_OTLP_HEADERS="signoz-access-token=<SIGNOZ_ACCESS_TOKEN>"
+$env:OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<SIGNOZ_ACCESS_TOKEN>"
 $env:NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
 <your_run_command>
 ```
@@ -420,7 +420,7 @@ const { SemanticResourceAttributes } = require('@opentelemetry/semantic-conventi
 // highlight-start
 const exporterOptions = {
   url: 'https://ingest.{region}.signoz.cloud:443/v1/traces',
-  headers: { 'signoz-access-token': process.env.SIGNOZ_INGESTION_KEY },
+  headers: { 'signoz-ingestion-key': process.env.SIGNOZ_INGESTION_KEY },
 }
 // highlight-end
 
