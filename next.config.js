@@ -142,8 +142,7 @@ module.exports = () => {
         },
         {
           source: '/careers/',
-          destination:
-            'https://jobs.gem.com/signoz',
+          destination: 'https://jobs.gem.com/signoz',
           basePath: false,
           permanent: true,
         },
@@ -402,6 +401,11 @@ module.exports = () => {
         {
           source: '/docs/frontend-monitoring/web-vitals/',
           destination: '/docs/frontend-monitoring/opentelemetry-web-vitals/',
+          permanent: true,
+        },
+        {
+          source: '/guides/unified-observability/',
+          destination: '/unified-observability/',
           permanent: true,
         },
       ]
