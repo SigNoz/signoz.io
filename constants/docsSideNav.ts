@@ -215,6 +215,12 @@ const docsSideNav = [
               },
               {
                 type: 'doc',
+                route: '/docs/instrumentation/opentelemetry-quarkus',
+                label: 'Quarkus',
+                className: 'new-doc',
+              },
+              {
+                type: 'doc',
                 route: '/docs/instrumentation/tomcat',
                 label: 'Tomcat',
               },
