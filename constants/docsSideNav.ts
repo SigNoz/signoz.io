@@ -785,6 +785,12 @@ const docsSideNav = [
         route: '/docs/metrics-management/k8s-infra-otel-config',
         label: 'Configure k8s-infra otelDeployment to collect metrics from receivers',
       },
+      {
+        type: 'doc',
+        className: 'new-doc',
+        route: '/docs/metrics-management/docker-container-metrics',
+        label: 'Docker container metrics',
+      },
     ],
   },
   {
