@@ -194,13 +194,13 @@ Now run `cargo run` in terminal to start the application!
 
 ### Send traces via OTel Collector binary
 
-OTel Collector binary helps to collect logs, hostmetrics, resource and infra attributes. It is recommended to install Otel Collector binary to collect and send traces to SigNoz cloud. You can correlate signals and have rich contextual data through this way.
+**Step 1. Install OTel Collector binary**
 
-<Admonition>
-You can find instructions to install OTel Collector binary [here](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) in your VM. Once you are done setting up your OTel Collector binary, you can follow the below steps for instrumenting your Rust application.
-</Admonition>
+OTel Collector binary helps to collect logs, hostmetrics, resource and infra attributes.
 
-**Step 1 : Instrument your application with OpenTelemetry**
+You can find instructions to install OTel Collector binary [here](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) in your VM.
+
+**Step 2 : Instrument your application with OpenTelemetry**
 
 To configure our Rust application to send traces we need to initialize OpenTelemetry, Otel has already created some crates which you need to add into your `Cargo.toml` file, just below `[dependencies]` section.
 
@@ -227,7 +227,7 @@ use opentelemetry_otlp::WithExportConfig;
 use tonic::metadata::{MetadataMap, MetadataValue};
 ```
 
-**Step 2: Initialize the tracer and create env file**
+**Step 3: Initialize the tracer and create env file**
 
 Add this function in main.rs file, `init_tracer` is initializing an OpenTelemetry tracer with the OpenTelemetry OTLP exporter which is sending data to SigNoz Cloud. 
 
@@ -245,7 +245,7 @@ fn init_tracer() -> Result<sdktrace::Tracer, TraceError> {
 }
 ```
 
-**Step 3: Add the OpenTelemetry instrumentation for your Rust app**
+**Step 4: Add the OpenTelemetry instrumentation for your Rust app**
 
 You need call init_tracer function inside `main()` at starting so that as soon as your rust application starts, tracer will be available globally.
 ```rust 
@@ -286,7 +286,7 @@ Now comes the most interesting part, Sending data to SigNoz to get sense of your
     shutdown_tracer_provider()
 ```
 
-**Step 4: Set environment variables and run app**
+**Step 5: Set environment variables and run app**
 
 
 | Variable                        | Description                                                                                                                                                                 |
@@ -571,13 +571,13 @@ Now run `cargo run` in terminal to start the application!
 
 ### Send traces via OTel Collector binary
 
-OTel Collector binary helps to collect logs, hostmetrics, resource and infra attributes. It is recommended to install Otel Collector binary to collect and send traces to SigNoz cloud. You can correlate signals and have rich contextual data through this way.
+**Step 1 : Install OTel Collector binary**
 
-<Admonition>
-You can find instructions to install OTel Collector binary [here](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) in your Windows Machine. Once you are done setting up your OTel Collector binary, you can follow the below steps for instrumenting your Rust application.
-</Admonition>
+OTel Collector binary helps to collect logs, hostmetrics, resource and infra attributes.
 
-**Step 1 : Instrument your application with OpenTelemetry**
+You can find instructions to install OTel Collector binary [here](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) in your VM.
+
+**Step 2 : Instrument your application with OpenTelemetry**
 
 To configure our Rust application to send traces we need to initialize OpenTelemetry, Otel has already created some crates which you need to add into your `Cargo.toml` file, just below `[dependencies]` section.
 
@@ -604,7 +604,7 @@ use opentelemetry_otlp::WithExportConfig;
 use tonic::metadata::{MetadataMap, MetadataValue};
 ```
 
-**Step 2: Initialize the tracer and create env file**
+**Step 3: Initialize the tracer and create env file**
 
 Add this function in main.rs file, `init_tracer` is initializing an OpenTelemetry tracer with the OpenTelemetry OTLP exporter which is sending data to SigNoz Cloud. 
 
@@ -631,7 +631,7 @@ fn init_tracer() -> Result<sdktrace::Tracer, TraceError> {
 }
 ```
 
-**Step 3: Add the OpenTelemetry instrumentation for your Rust app**
+**Step 4: Add the OpenTelemetry instrumentation for your Rust app**
 
 You need call init_tracer function inside `main()` at starting so that as soon as your rust application starts, tracer will be available globally.
 ```rust 
@@ -672,7 +672,7 @@ Now comes the most interesting part, Sending data to SigNoz to get sense of your
     shutdown_tracer_provider()
 ```
 
-**Step 4: Set environment variables and run app**
+**Step 5: Set environment variables and run app**
 
 Create a `.env` file in root of project , the structure should look like this.
 ```

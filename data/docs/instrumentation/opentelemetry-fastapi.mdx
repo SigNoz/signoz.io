@@ -111,18 +111,20 @@ In case you encounter an issue where all applications do not get listed in the s
 
 #### Send traces via OTel Collector binary
 
-OTel Collector binary helps to collect logs, hostmetrics, resource and infra attributes. It is recommended to install Otel Collector binary to collect and send traces to SigNoz cloud. You can correlate signals and have rich contextual data through this way.
+**Step 1.** Install OTel Collector binary<br></br>
 
-You can find instructions to install OTel Collector binary [here](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) in your VM. Once you are done setting up your OTel Collector binary, you can follow the below steps for instrumenting your Python application.
+OTel Collector binary helps to collect logs, hostmetrics, resource and infra attributes.
 
-**Step 1.** Create a virtual environment<br></br>
+You can find instructions to install OTel Collector binary [here](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) in your VM.
+
+**Step 2.** Create a virtual environment<br></br>
     
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
 ```
 
-**Step 2.** Install the OpenTelemetry dependencies
+**Step 3.** Install the OpenTelemetry dependencies
 
 ```bash
 pip install opentelemetry-distro==0.43b0
@@ -146,7 +148,7 @@ The dependencies included are briefly explained below:
 The `opentelemetry-exporter-otlp-proto-grpc` package installs the gRPC exporter which depends on the `grpcio` package. The installation of `grpcio` may fail on some platforms for various reasons. If you run into such issues, or you don't want to use gRPC, you can install the HTTP exporter instead by installing the `opentelemetry-exporter-otlp-proto-http` package. You need to set the `OTEL_EXPORTER_OTLP_PROTOCOL` environment variable to `http/protobuf` to use the HTTP exporter.
 </Admonition>
 
-**Step 3.** Add automatic instrumentation
+**Step 4.** Add automatic instrumentation
 
 ```bash
 opentelemetry-bootstrap --action=install
