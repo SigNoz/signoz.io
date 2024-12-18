@@ -1,12 +1,12 @@
 ---
 date: 2024-12-17
-id: upgrade-0.63
-title: Upgrade to v0.63.1 from earlier versions
+id: upgrade-0.64
+title: Upgrade to v0.64 from earlier versions
 ---
 
-This setup assumes you've installed SigNoz version `>=0.60.0` && `<v0.63.1` and have kept it running for at least 15 days (the default retention period). 
+This setup assumes you've installed SigNoz version `>=0.60.0` && `<v0.64` and have kept it running for at least 15 days (the default retention period). 
 
-If you changed the default retention period, please make the adjustments outlined in the [following step](#config-to-keep-using-old-table) before upgrading to v0.63.1. 
+If you changed the default retention period, please make the adjustments outlined in the [following step](#config-to-keep-using-old-table) before upgrading to v0.64.0. 
 
 You can remove these flags after the system has run for the duration specified in your retention settings.
 
@@ -20,7 +20,7 @@ If you want to use the new schema and don't want to wait for data to be backfill
 ## Config to Keep Using Old Table
 
 <Admonition >
-You can skip this step if the retention setting is default and SigNoz version `>=0.53` && `<v0.55` was running for at least 15 days.
+You can skip this step if the retention setting is default and SigNoz version `>=0.60.0` && `<v0.64` was running for at least 15 days.
 </Admonition>
 
 ### For Docker
@@ -60,7 +60,7 @@ You can skip this step if the retention setting is default and SigNoz version `>
 
 ## Migrating the Existing TTL Settings
 
-After upgrading to SigNoz version v0.63.1 i.e. SigNoz chart version v0.61.1, you need to run the migration script to copy the TTL settings and materialized columns from the old table.
+After upgrading to SigNoz version v0.64.0 i.e. SigNoz chart version v0.62.0, you need to run the migration script to copy the TTL settings and materialized columns from the old table.
 
 Migration changes include:
 * materialized columns from the old table to the new table
@@ -68,9 +68,9 @@ Migration changes include:
 
 ## Steps to Run Migration Script
 
-## First Upgrade to v0.63.1
+## First Upgrade to v0.64.0
 
-Follow the platform specific instructions to upgrade to 0.55 and above.
+Follow the platform specific instructions to upgrade to 0.64 and above.
 
 - [Docker Standalone](https://signoz.io/docs/operate/docker-standalone/#upgrade)
 - [Kubernetes](https://signoz.io/docs/operate/kubernetes/#upgrade)
@@ -78,22 +78,22 @@ Follow the platform specific instructions to upgrade to 0.55 and above.
 
 ### For Docker
 ```bash
-docker run --name signoz-migrate-63 --network clickhouse-setup_default \
-  -it -d signoz/migrate:0.63 -host=clickhouse -port=9000
+docker run --name signoz-migrate-64 --network clickhouse-setup_default \
+  -it -d signoz/migrate:0.64 -host=clickhouse -port=9000
 ```
 
 Steps to check logs:
 
 ```bash
-docker logs -f signoz-migrate-63
+docker logs -f signoz-migrate-64
 ```
 
 In case of failure and have to run again, make sure to cleanup the container before running the migration script again.
 
 ```bash
-docker stop signoz-migrate-63
+docker stop signoz-migrate-64
 
-docker rm signoz-migrate-63
+docker rm signoz-migrate-64
 ```
 
 
@@ -107,20 +107,20 @@ ADMIN_PASSWORD=$(
   -o jsonpath --template '{.spec.configuration.users.admin/password}'
 )
 
-kubectl -n $NAMESPACE run -i -t signoz-migrate-63 --image=signoz/migrate:0.63 --restart='Never' \
+kubectl -n $NAMESPACE run -i -t signoz-migrate-64 --image=signoz/migrate:0.64 --restart='Never' \
   -- -host=$RELEASE-clickhouse -port=9000 -userName=admin -password=$ADMIN_PASSWORD
 ```
 
 Steps to check logs:
 
 ```bash
-kubectl -n $NAMESPACE logs -f signoz-migrate-63
+kubectl -n $NAMESPACE logs -f signoz-migrate-64
 ```
 
 In case of failure and have to run again, make sure to cleanup the pod before running the migration script again.
 
 ```bash
-kubectl -n $NAMESPACE delete pod signoz-migrate-63
+kubectl -n $NAMESPACE delete pod signoz-migrate-64
 ```
 
 
@@ -143,7 +143,7 @@ Flags:
 
 ## Migrate Data from Old Table to New Table
 
-If you already kept SigNoz version `>=0.60.0` && `<v0.63.1` running for at-least 15 days i.e the default retention period this is not required as data will already be backfilled.
+If you already kept SigNoz version `>=0.60.0` && `<v0.64.0` running for at-least 15 days i.e the default retention period this is not required as data will already be backfilled.
 
 This guide will help migrate the data from old table to new table.
 
@@ -164,7 +164,7 @@ For migrating the data you will need to get the start and end timestamp which is
   ```sql
   select toUnixTimestamp64Nano(timestamp) from signoz_traces.distributed_signoz_index_v3 order by ts_bucket_start asc, timestamp asc limit 1;
   ```
-  In case of empty response from the above query, please make sure that you upgraded to version `>=0.53` first.
+  In case of empty response from the above query, please make sure that you upgraded to version `>=0.` first.
 * Create a temporary spans table
   ```sql
   CREATE TABLE signoz_traces.tmp_signoz_spans on cluster cluster
@@ -213,7 +213,7 @@ For migrating the data you will need to get the start and end timestamp which is
   ```sql
   select toUnixTimestamp64Nano(timestamp) from signoz_traces.distributed_signoz_index_v3 order by ts_bucket_start asc, timestamp asc limit 1;
   ```
-  In case of empty response from the above query, please make sure that you upgraded to version `>=0.53` first.
+  In case of empty response from the above query, please make sure that you upgraded to version `>=0.64` first.
 * Create a temporary spans table
   ```sql
   CREATE TABLE signoz_traces.tmp_signoz_spans on cluster cluster
@@ -251,8 +251,8 @@ Next we will run the migrator with arguments that will copy the data from the ol
 ### For Docker
 
 ```bash
-docker run --name signoz-migrate-55-data --network clickhouse-setup_default \
-  -it -d signoz/migrate:0.63-data -host=clickhouse -port=9000 -dest_host=clickhouse -dest_port=9000 -start_ts=<START_TIMESTAMP> -end_ts=<END_TIMESTAMP> -batch_size=40000 -batch_duration=5 -count_delta_allowed=10000
+docker run --name signoz-migrate-64-data --network clickhouse-setup_default \
+  -it -d signoz/migrate:0.64-data -host=clickhouse -port=9000 -dest_host=clickhouse -dest_port=9000 -start_ts=<START_TIMESTAMP> -end_ts=<END_TIMESTAMP> -batch_size=40000 -batch_duration=5 -count_delta_allowed=10000
 ```
 
 Please replace `<START_TIMESTAMP>` and `<END_TIMESTAMP>`
@@ -265,7 +265,7 @@ For more info on the args please check [this](#data-migrator-command-line-interf
 Steps to check logs:
 
 ```bash
-docker logs -f signoz-migrate-63-data
+docker logs -f signoz-migrate-64-data
 ```
 
 In case of any failure, you have to run the script again with updated ending timestamp.
@@ -276,9 +276,9 @@ In case of any failure, you have to run the script again with updated ending tim
   ```
 * Make sure to cleanup the container before running the migration script again. 
   ```bash
-  docker stop signoz-migrate-63-data
+  docker stop signoz-migrate-64-data
 
-  docker rm signoz-migrate-63-data
+  docker rm signoz-migrate-64-data
   ```
 
 
@@ -290,12 +290,12 @@ In case of any failure, you have to run the script again with updated ending tim
 apiVersion: v1
 kind: Pod
 metadata:
-  name: signoz-migrate-data-63
+  name: signoz-migrate-data-64
 spec:
   restartPolicy: Never
   containers:
     - name: signoz-migrate-data
-      image: signoz/migrate:0.63-data
+      image: signoz/migrate:0.64-data
       args:
         - "-host=<RELEASE>-clickhouse"
         - "-dest_host=<RELEASE>-clickhouse"
@@ -334,7 +334,7 @@ echo $<ADMIN_PASSWORD>
 ```
 
 
-Now, create the `signoz-migrate-data-63` pod using the YAML:
+Now, create the `signoz-migrate-data-64` pod using the YAML:
 
   ```yaml
   kubectl -n <NAMESPACE> apply -f pod.yaml
@@ -344,7 +344,7 @@ Now, create the `signoz-migrate-data-63` pod using the YAML:
 Steps to check logs:
 
 ```bash
-kubectl -n $NAMESPACE logs -f signoz-migrate-data-63
+kubectl -n $NAMESPACE logs -f signoz-migrate-data-64
 ```
 
 In case of any failure, you have to run the script again with updated ending timestamp.
@@ -354,7 +354,7 @@ In case of any failure, you have to run the script again with updated ending tim
   ```
 * Make sure to cleanup the container before running the migration script again. 
   ```bash
-  kubectl -n $NAMESPACE delete pod signoz-migrate-data-63
+  kubectl -n $NAMESPACE delete pod signoz-migrate-data-64
   ```
 
 
