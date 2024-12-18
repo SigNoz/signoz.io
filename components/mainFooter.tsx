@@ -156,7 +156,9 @@ function Footer() {
                   <div className="font-satoshi-bold font-medium">SigNoz</div>
                 </div>
                 <div className="mt-5 items-end justify-center rounded text-sm leading-5 text-emerald-300">
+                  <Link href="https://status.signoz.io/" target="_blank">
                   All systems operational
+                  </Link>
                 </div>
                 <div className="footer-icons mt-5 flex items-end justify-between gap-4 py-2">
                   <Link
