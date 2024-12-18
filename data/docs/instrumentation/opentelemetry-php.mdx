@@ -8,9 +8,11 @@ hide_table_of_contents: true
 
 import InstrumentationFAQ from '@/components/shared/instrumentation-faq.md'
 
+This document contains instructions on how to set up OpenTelemetry instrumentation in your PHP applications and view your application traces in SigNoz.
+
 {/* This doc contains instructions about how to set up OpenTelemetry(OTel) instrumentation in your PHP application.  */}
 
-OpenTelemetry, also known as OTel for short, is an open-source observability framework that can help you generate and collect telemetry data - traces, metrics, and logs from your PHP application.
+{/* OpenTelemetry, also known as OTel for short, is an open-source observability framework that can help you generate and collect telemetry data - traces, metrics, and logs from your PHP application. */}
 {/* 
 Once the telemetry data is generated, you can configure an exporter to send the data to SigNoz for monitoring and visualization.
 
@@ -123,21 +125,15 @@ env OTEL_PHP_AUTOLOAD_ENABLED=true \
     OTEL_SERVICE_NAME=<SERVICE_NAME> \
     OTEL_TRACES_EXPORTER=otlp \
     OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf \
-    OTEL_EXPORTER_OTLP_ENDPOINT=<SIGNOZ_ENDPOINT> \
+    OTEL_EXPORTER_OTLP_ENDPOINT=ingest.<region>.signoz.cloud:443 \
     OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<INGESTION_KEY> \
     OTEL_PROPAGATORS=baggage,tracecontext \
     php -S localhost:8080 app.php
 ```
 
-You can change the env vars value by referencing values from the following lookup table
-
-| Environment Variable                  | Value                                        |
-|-------------------------------|----------------------------------------------|
-| OTEL_SERVICE_NAME              | `<SERVICE_NAME>` replace it with name of your app                         |
-| OTEL_EXPORTER_OTLP_ENDPOINT    | `<SIGNOZ_ENDPOINT>` replace this with SigNoz cloud endpoint                       |
-| OTEL_EXPORTER_OTLP_HEADERS     | signoz-ingestion-key=`<INGESTION_KEY>` replace this with the ingestion key which you must have received in mail        |
-| php -S localhost:8080 app.php             | you can replace this with the run command of your PHP application                        |
-
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service_name>` is name of your service
 
 
 #### Send traces via OTel Collector binary
@@ -442,7 +438,7 @@ function initOpenTelemetry()
  $headers = [
  'signoz-ingestion-key' => "<INGESTION_KEY>",
  ];
- $transport = (new GrpcTransportFactory())->create('<SIGNOZ_ENDPOINT>' . OtlpUtil::method(Signals::TRACE), 'application/x-protobuf', $headers);
+ $transport = (new GrpcTransportFactory())->create('ingest.<region>.signoz.cloud:443' . OtlpUtil::method(Signals::TRACE), 'application/x-protobuf', $headers);
  $spanExporter = new SpanExporter($transport);
 
 
@@ -464,14 +460,18 @@ function initOpenTelemetry()
 ?>
 ```
 
-You can change the env vars value by referencing values from the following lookup table
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service_name>` is name of your service
+
+{/* You can change the env vars value by referencing values from the following lookup table
 
 | Environment Variable                  | Value                                        |
 |-------------------------------|----------------------------------------------|
 | OTEL_SERVICE_NAME              | `<SERVICE_NAME>` replace it with name of your app                         |
 | OTEL_EXPORTER_OTLP_ENDPOINT    | `<SIGNOZ_ENDPOINT>` replace this with SigNoz cloud endpoint                       |
 | OTEL_EXPORTER_OTLP_HEADERS     | signoz-ingestion-key=`<INGESTION_KEY>` replace this with the ingestion key which you must have received in mail        |
-| php -S localhost:8080 app.php             | you can replace this with the run command of your PHP application                        |
+| php -S localhost:8080 app.php             | you can replace this with the run command of your PHP application                        | */}
 
 **Step 5: Set environment variables and run app**
 
@@ -694,21 +694,16 @@ Run your application using:
 
 ```
 env OTEL_PHP_AUTOLOAD_ENABLED=true \
-    OTEL_SERVICE_NAME=<SERVICE_NAME> \
+    OTEL_SERVICE_NAME=<service_name> \
     OTEL_TRACES_EXPORTER=otlp \
     OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf \
-    OTEL_EXPORTER_OTLP_ENDPOINT=<SIGNOZ_ENDPOINT> \
+    OTEL_EXPORTER_OTLP_ENDPOINT=<self-host-ip> \
     OTEL_PROPAGATORS=baggage,tracecontext \
     php -S localhost:8080 app.php
 ```
 
-You can change the env vars value by referencing values from the following lookup table
-
-| Environment Variable                  | Value                                        |
-|-------------------------------|----------------------------------------------|
-| OTEL_SERVICE_NAME              | `<SERVICE_NAME>` replace it with name of your app                         |
-| OTEL_EXPORTER_OTLP_ENDPOINT    | `<SIGNOZ_ENDPOINT>` replace this with the url where you have hosted SigNoz                     |
-| php -S localhost:8080 app.php             | you can replace this with the run command of your PHP application                        |
+- Set the `<self-host-ip>` as the IP of Self-Hosted SigNoz.
+- `<service_name>` is name of your service
 
 </TabItem>
 </Tabs>

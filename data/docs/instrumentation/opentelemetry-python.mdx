@@ -8,8 +8,10 @@ hide_table_of_contents: true
 
 import InstrumentationFAQ from '@/components/shared/instrumentation-faq.md'
 
+This document contains instructions on how to set up OpenTelemetry instrumentation in your Python applications and view your application traces in SigNoz.
+
 {/* This document contains instructions on how to set up OpenTelemetry instrumentation in your Python applications.  */}
-OpenTelemetry, also known as OTel for short, is an open source observability framework that can help you generate and collect telemetry data - traces, metrics, and logs from your Python application.
+{/* OpenTelemetry, also known as OTel for short, is an open source observability framework that can help you generate and collect telemetry data - traces, metrics, and logs from your Python application. */}
 {/* 
 Once the telemetry data is collected, you can configure an exporter to send the data to SigNoz.
 
@@ -72,22 +74,14 @@ opentelemetry-bootstrap --action=install
 ```bash
 OTEL_RESOURCE_ATTRIBUTES=service.name=<service_name> \
 OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.{region}.signoz.cloud:443" \
-OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=SIGNOZ_INGESTION_KEY" \
+OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>" \
 OTEL_EXPORTER_OTLP_PROTOCOL=grpc \
 opentelemetry-instrument <your_run_command>
 ```
 
-- *`<service_name>`* is the name of the service you want
-- *`<your_run_command>`* can be `python3 app.py` or `flask run`
-- Replace `SIGNOZ_INGESTION_KEY` with the api token provided by SigNoz. You can find it in the email sent by SigNoz with your cloud account details.
-
-Depending on the choice of your region for SigNoz cloud, the ingest endpoint will vary according to this table.
-
-| Region | Endpoint |
-| --- | --- |
-| US |	ingest.us.signoz.cloud:443 |
-| IN |	ingest.in.signoz.cloud:443 |
-| EU | ingest.eu.signoz.cloud:443 |
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service_name>` is name of your service
 
 **Step 5.** Validate if your application is sending traces to SigNoz cloud by following the instructions [here](#validating-instrumentation-by-checking-for-traces).
 
@@ -127,7 +121,7 @@ opentelemetry-instrument <your_run_command>
 
 where,
 
-- *`<service_name>`* is the name of the service you want
+- `<service_name>` is name of your service
 - *`<your_run_command>`* can be `python3 app.py` or `flask run`
 
 In case you have OtelCollector Agent in different VM, replace localhost:4317 with `<IP Address of the VM>:4317`.
@@ -193,7 +187,7 @@ EXPOSE 5000
 # Set environment variables for OpenTelemetry
 ENV OTEL_RESOURCE_ATTRIBUTES=service.name=<service-name>
 ENV OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317
-ENV OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<SIGNOZ-INGESTION-KEY>
+ENV OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<your-ingestion-key>
 ENV OTEL_EXPORTER_OTLP_PROTOCOL=grpc
 
 # Run app.py with OpenTelemetry instrumentation when the container launches
@@ -218,9 +212,8 @@ docker run -p 5000:5000 <your-image-name>
 
 The Docker run command starts a container in detached mode (-d) and maps port 5000 of the host to port 5000 of the container. 
 
-- *`<service-name>`* is name of your service or application
 - *`<your-image-name>`* is the name of your docker image
-- Replace `<SIGNOZ_INGESTION_KEY>` with the ingestion key provided by SigNoz. You can find it in the email sent by SigNoz with your cloud account details.
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 
 You can validate if your application is sending traces to SigNoz cloud by following the instructions [here](#validating-instrumentation-by-checking-for-traces).
 
@@ -264,7 +257,7 @@ Set the env variables
 ```bash
     setx OTEL_RESOURCE_ATTRIBUTES "service.name=<service_name>"
     setx OTEL_EXPORTER_OTLP_ENDPOINT "https://ingest.{region}.signoz.cloud:443"
-    setx OTEL_EXPORTER_OTLP_HEADERS "signoz-ingestion-key=SIGNOZ_INGESTION_KEY"
+    setx OTEL_EXPORTER_OTLP_HEADERS "signoz-ingestion-key=<your-ingestion-key>"
     setx OTEL_EXPORTER_OTLP_PROTOCOL "grpc"
 ```
 
@@ -272,17 +265,9 @@ Set the env variables
 opentelemetry-instrument <your_run_command>
 ```
 
-- *`<service_name>`* is the name of the service you want
-- *`<your_run_command>`* can be `python3 app.py` or `flask run`
-- Replace `SIGNOZ_INGESTION_KEY` with the api token provided by SigNoz. You can find it in the email sent by SigNoz with your cloud account details.
-
-Depending on the choice of your region for SigNoz cloud, the ingest endpoint will vary according to this table.
-
-| Region | Endpoint |
-| --- | --- |
-| US |	ingest.us.signoz.cloud:443 |
-| IN |	ingest.in.signoz.cloud:443 |
-| EU | ingest.eu.signoz.cloud:443 |
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service_name>` is name of your service
 
 **Step 5.** Validate if your application is sending traces to SigNoz cloud by following the instructions [here](#validating-instrumentation-by-checking-for-traces).
 
@@ -372,8 +357,8 @@ EXPOSE 5000
 
 # Set environment variables for OpenTelemetry
 ENV OTEL_RESOURCE_ATTRIBUTES=service.name=<service-name>
-ENV OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.{REGION}.signoz.cloud:443
-ENV OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<SIGNOZ-INGESTION-KEY>
+ENV OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443
+ENV OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<your-ingestion-key>
 ENV OTEL_EXPORTER_OTLP_PROTOCOL=grpc
 
 # Run app.py with OpenTelemetry instrumentation when the container launches
@@ -390,17 +375,9 @@ Build your docker image
 docker build -t <your-image-name> .
 ```
 
-- *`<service-name>`* is name of your service or application
-- *`<your-image-name>`* is the name of your docker image
-- Replace `<SIGNOZ_INGESTION_KEY>` with the ingestion key provided by SigNoz. You can find it in the email sent by SigNoz with your cloud account details.
-
-Depending on the choice of your region for SigNoz cloud, the ingest endpoint will vary according to this table.
-
-| Region | Endpoint |
-| --- | --- |
-| US |	ingest.us.signoz.cloud:443 |
-| IN |	ingest.in.signoz.cloud:443 |
-| EU | ingest.eu.signoz.cloud:443 |
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service_name>` is name of your service
 
 **Step 3.** Run your Docker container
 
@@ -457,7 +434,6 @@ EXPOSE 5000
 # Set environment variables for OpenTelemetry
 ENV OTEL_RESOURCE_ATTRIBUTES=service.name=<service-name>
 ENV OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317
-ENV OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<SIGNOZ-INGESTION-KEY>
 ENV OTEL_EXPORTER_OTLP_PROTOCOL=grpc
 
 # Run app.py with OpenTelemetry instrumentation when the container launches
@@ -479,9 +455,10 @@ Build your docker image
 docker build -t <your-image-name> .
 ```
 
-- *`<service-name>`* is name of your service or application
 - *`<your-image-name>`* is the name of your docker image
-- Replace `<SIGNOZ_INGESTION_KEY>` with the ingestion key provided by SigNoz. You can find it in the email sent by SigNoz with your cloud account details.
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service_name>` is name of your service
 
 **Step 3.** Run your Docker container
 

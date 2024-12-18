@@ -8,10 +8,11 @@ hide_table_of_contents: true
 
 import InstrumentationFAQ from '@/components/shared/instrumentation-faq.md'
 
+This document contains instructions on how to set up OpenTelemetry instrumentation in your Java applications and view your application traces in SigNoz.
 
-OpenTelemetry, also known as OTel for short, is an open source observability framework that can help you generate and collect telemetry data - traces, metrics, and logs from your Java application.
-
-OpenTelemetry Java is the language-specific implementation of OpenTelemetry in Java.
+{/* OpenTelemetry, also known as OTel for short, is an open source observability framework that can help you generate and collect telemetry data - traces, metrics, and logs from your Java application.
+*/}
+OpenTelemetry Java is the language-specific implementation of OpenTelemetry in Java. 
 {/* 
 Once the telemetry data is collected, you can configure an exporter to send the data to SigNoz.
 
@@ -75,21 +76,15 @@ wget https://github.com/open-telemetry/opentelemetry-java-instrumentation/releas
 **Step 2.** Run your application
 
 ```bash
-OTEL_RESOURCE_ATTRIBUTES=service.name=<app_name> \
-OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=SIGNOZ_INGESTION_KEY" \
-OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.{region}.signoz.cloud:443 \
+OTEL_RESOURCE_ATTRIBUTES=service.name=<service_name> \
+OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>" \
+OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443 \
 java -javaagent:$PWD/opentelemetry-javaagent.jar -jar <my-app>.jar
 ```
-- `<app_name>` is the name for your application
-- `SIGNOZ_INGESTION_KEY` is the API token provided by SigNoz. You can find your ingestion key from SigNoz cloud account details sent on your email.
 
-Depending on the choice of your region for SigNoz cloud, the ingest endpoint will vary according to this table.
-
-| Region | Endpoint |
-| --- | --- |
-| US |	ingest.us.signoz.cloud:443 |
-| IN |	ingest.in.signoz.cloud:443 |
-| EU | ingest.eu.signoz.cloud:443 |
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service_name>` is name of your service
 
 In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#troubleshooting-your-installation).
 

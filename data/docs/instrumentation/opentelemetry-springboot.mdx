@@ -10,9 +10,10 @@ hide_table_of_contents: true
 
 import InstrumentationFAQ from '@/components/shared/instrumentation-faq.md'
 
+This document contains instructions on how to set up OpenTelemetry instrumentation in your Spring Boot applications and view your application traces in SigNoz.
 
 {/* This document contains instructions on how to set up OpenTelemetry instrumentation in your Spring Boot applications.  */}
-OpenTelemetry, also known as OTel for short, is an open source observability framework that can help you generate and collect telemetry data - traces, metrics, and logs from your Spring Boot application.
+{/* OpenTelemetry, also known as OTel for short, is an open source observability framework that can help you generate and collect telemetry data - traces, metrics, and logs from your Spring Boot application. */}
 {/* 
 OpenTelemetry Java is the language-specific implementation of OpenTelemetry in Java that can be used to instrument Spring Boot applications.
 
@@ -74,21 +75,15 @@ wget https://github.com/open-telemetry/opentelemetry-java-instrumentation/releas
 **Step 2.** Run your application
 
 ```bash
-OTEL_RESOURCE_ATTRIBUTES=service.name=<app_name> \
-OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=SIGNOZ_INGESTION_KEY" \
+OTEL_RESOURCE_ATTRIBUTES=service.name=<service_name> \
+OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>" \
 OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.{region}.signoz.cloud:443 \
 java -javaagent:$PWD/opentelemetry-javaagent.jar -jar <my-app>.jar
 ```
-- `<app_name>` is the name for your application
-- `SIGNOZ_INGESTION_KEY` is the API token provided by SigNoz. You can find your ingestion key from SigNoz cloud account details sent on your email.
 
-Depending on the choice of your region for SigNoz cloud, the ingest endpoint will vary according to this table.
-
-| Region | Endpoint |
-| --- | --- |
-| US |	ingest.us.signoz.cloud:443 |
-| IN |	ingest.in.signoz.cloud:443 |
-| EU | ingest.eu.signoz.cloud:443 |
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service_name>` is name of your service
 
 In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#troubleshooting-your-installation).
 
@@ -166,25 +161,18 @@ wget https://github.com/open-telemetry/opentelemetry-java-instrumentation/releas
 **Step 2.** Run your application
 
 ```bash
-setx OTEL_RESOURCE_ATTRIBUTES=service.name=<app_name> 
-setx OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=SIGNOZ_INGESTION_KEY" 
-setx OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.{region}.signoz.cloud:443 
+setx OTEL_RESOURCE_ATTRIBUTES=service.name=<service_name> 
+setx OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>" 
+setx OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443 
 ```
 
 ```bash
 java -javaagent:$PWD/opentelemetry-javaagent.jar -jar <my-app>.jar
 ```
 
-- `<app_name>` is the name for your application
-- `SIGNOZ_INGESTION_KEY` is the API token provided by SigNoz. You can find your ingestion key from SigNoz cloud account details sent on your email.
-
-Depending on the choice of your region for SigNoz cloud, the ingest endpoint will vary according to this table.
-
-| Region | Endpoint |
-| --- | --- |
-| US |	ingest.us.signoz.cloud:443 |
-| IN |	ingest.in.signoz.cloud:443 |
-| EU | ingest.eu.signoz.cloud:443 |
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service_name>` is name of your service
 
 In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#troubleshooting-your-installation).
 
@@ -239,10 +227,11 @@ You can use OpenTelemetry Java to send your traces directly to SigNoz. OpenTelem
    If you run your Spring Boot application as a JAR file, run your application using the following command:
     
     ```bash
-    OTEL_EXPORTER_OTLP_ENDPOINT="http://<IP of SigNoz Backend>:4317" OTEL_RESOURCE_ATTRIBUTES=service.name=<app_name> java -javaagent:/path/to/opentelemetry-javaagent.jar -jar  <myapp>.jar
+    OTEL_EXPORTER_OTLP_ENDPOINT="http://<IP of SigNoz Backend>:4317" OTEL_RESOURCE_ATTRIBUTES=service.name=<service_name> java -javaagent:/path/to/opentelemetry-javaagent.jar -jar  <myapp>.jar
     ```
     
-    where `<app_name>` is the name you want to set for your application. `path` should be updated to the path of the downloaded Java JAR agent.
+    - `<service_name>` is name of your service
+    -  `path` should be updated to the path of the downloaded Java JAR agent.
     
     
     In the above command, we are configuring the exporter to send data to SigNoz backend. By default, OpenTelemetry Java agent uses [OTLP exporter](https://github.com/open-telemetry/opentelemetry-java/tree/main/exporters/otlp) configured to send data.<br></br>
@@ -266,7 +255,7 @@ You can use OpenTelemetry Java to send your traces directly to SigNoz. OpenTelem
     ```bash
     java -javaagent:/path/opentelemetry-javaagent.jar \
         -Dotel.exporter.otlp.endpoint=http://<IP of SigNoz Backend>:4317 \
-        -Dotel.resource.attributes=service.name=<app_name> \
+        -Dotel.resource.attributes=service.name=<service_name> \
         -jar <myapp>.jar
     ```
     

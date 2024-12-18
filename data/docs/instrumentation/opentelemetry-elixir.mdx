@@ -69,34 +69,26 @@ end
 You need to configure your application to send telemtry data by adding the follwing config to your `runtime.exs` file:
 
 ```elixir
-config :opentelemetry, :resource, service: %{name: "YOUR_APP_NAME"}
+config :opentelemetry, :resource, service: %{name: "<service_name>"}
 
 config :opentelemetry, :processors,
   otel_batch_processor: %{
     exporter: {
       :opentelemetry_exporter,
       %{
-        endpoints: ["https://ingest.{region}.signoz.cloud:443"],
+        endpoints: ["https://ingest.<region>.signoz.cloud:443"],
         headers: [
-          {"signoz-ingestion-key", SIGNOZ_ACCESS_TOKEN}
+          {"signoz-ingestion-key", <your-ingestion-key>}
         ]
       }
     }
   }
 ```
-`YOUR_APP_NAME`: Your application or service name.
 
-`SIGNOZ_INGESTION_KEY` : The ingestion key sent by SigNoz over email. It can also be found in the `settings` section of your SigNoz Cloud UI.
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service_name>` is name of your service
 
-Depending on the choice of your region for SigNoz cloud, the ingest endpoint will vary according to this table.
-
-| Region | Endpoint |
-| --- | --- |
-| US |	ingest.us.signoz.cloud:443 |
-| IN |	ingest.in.signoz.cloud:443 |
-| EU | ingest.eu.signoz.cloud:443 |
-
----
 ### Send traces via OTel Collector binary
 
 **Step 1.** Install OTel Collector binary<br></br>
@@ -267,23 +259,16 @@ config :opentelemetry, :processors,
       %{
         endpoints: ["https://ingest.{region}.signoz.cloud:443"],
         headers: [
-          {"signoz-ingestion-key", SIGNOZ_ACCESS_TOKEN}
+          {"signoz-ingestion-key", <your-ingestion-key>}
         ]
       }
     }
   }
 ```
-`YOUR_APP_NAME`: Your application or service name.
 
-`SIGNOZ_INGESTION_KEY` : The ingestion key sent by SigNoz over email. It can also be found in the `settings` section of your SigNoz Cloud UI.
-
-Depending on the choice of your region for SigNoz cloud, the ingest endpoint will vary according to this table.
-
-| Region | Endpoint |
-| --- | --- |
-| US |	ingest.us.signoz.cloud:443 |
-| IN |	ingest.in.signoz.cloud:443 |
-| EU | ingest.eu.signoz.cloud:443 |
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service_name>` is name of your service
 
 ---
 ### Send traces via OTel Collector binary

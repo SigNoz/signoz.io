@@ -10,7 +10,7 @@ hide_table_of_contents: true
 
 import InstrumentationFAQ from '@/components/shared/instrumentation-faq.md'
 
-OpenTelemetry, also known as OTel for short, is an open source observability framework that can help you generate and collect telemetry data - traces, metrics, and logs from your Falcon application.
+This document contains instructions on how to set up OpenTelemetry instrumentation in your Falcon applications and view your application traces in SigNoz.
 
 ## Requirements
 
@@ -77,23 +77,16 @@ Please make sure that you have installed all the dependencies of your applicatio
 
 ```bash
 OTEL_RESOURCE_ATTRIBUTES=service.name=<service_name> \
-OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.{region}.signoz.cloud:443" \
-OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=SIGNOZ_INGESTION_KEY" \
+OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443" \
+OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>" \
 OTEL_EXPORTER_OTLP_PROTOCOL=grpc \
 opentelemetry-instrument <your_run_command>
 ```
 
-- *`<service_name>`* is the name of the service you want
-- *`<your_run_command>`* can be `python3 app.py` or `flask run`
-- Replace `SIGNOZ_INGESTION_KEY` with the api token provided by SigNoz. You can find it in the email sent by SigNoz with your cloud account details.
-
-Depending on the choice of your region for SigNoz cloud, the ingest endpoint will vary according to this table.
-
-| Region | Endpoint |
-| --- | --- |
-| US |	ingest.us.signoz.cloud:443 |
-| IN |	ingest.in.signoz.cloud:443 |
-| EU | ingest.eu.signoz.cloud:443 |
+- `<your_run_command>` can be `python3 app.py` or `flask run`
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service_name>` is name of your service
 
 <Admonition>
 Don’t run app in reloader/hot-reload mode as it breaks instrumentation.
@@ -380,7 +373,7 @@ You might see other dummy applications if you’re using SigNoz for the first ti
     <figcaption><i>Python Application in the list of services being monitored in SigNoz</i></figcaption>
 </figure>
 
-
+{/* 
 ## Database Instrumentation
 
 Make sure that the DB client library you are using has the corresponding instrumentation library, and the version of the DB client library is supported by OpenTelemetry.
@@ -418,7 +411,7 @@ You can check the supported versions [here](https://github.com/open-telemetry/op
 
 </Admonition>
 
-
+ */}
 
 
 ## Running applications with Gunicorn, uWSGI

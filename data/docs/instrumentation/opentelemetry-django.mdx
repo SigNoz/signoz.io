@@ -8,9 +8,11 @@ hide_table_of_contents: true
 
 import InstrumentationFAQ from '@/components/shared/instrumentation-faq.md'
 
+This document contains instructions on how to set up OpenTelemetry instrumentation in your Django applications and view your application traces in SigNoz.
+
 {/* This document contains instructions on how to set up OpenTelemetry instrumentation in your Django applications. */}
 
-OpenTelemetry, also known as OTel for short, is an open source observability framework that can help you generate and collect telemetry data - traces, metrics, and logs from your Django application.
+{/* OpenTelemetry, also known as OTel for short, is an open source observability framework that can help you generate and collect telemetry data - traces, metrics, and logs from your Django application. */}
 {/* 
 Once the telemetry data is collected, you can configure an exporter to send the data to SigNoz.
 
@@ -103,22 +105,14 @@ Please make sure that you have installed all the dependencies of your applicatio
 ```bash
 OTEL_RESOURCE_ATTRIBUTES=service.name=<service_name> \
 OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.{region}.signoz.cloud:443" \
-OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=SIGNOZ_INGESTION_KEY" \
+OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>" \
 OTEL_EXPORTER_OTLP_PROTOCOL=grpc \
 opentelemetry-instrument <your_run_command>
 ```
 
-- `<service_name>` is the name of the service you want
-- `<your_run_command>` can be `python3 app.py` or `python manage.py runserver --noreload`
-- Replace `SIGNOZ_INGESTION_KEY` with the api token provided by SigNoz. You can find it in the email sent by SigNoz with your cloud account details.
-
-Depending on the choice of your region for SigNoz cloud, the ingest endpoint will vary according to this table.
-
-| Region | Endpoint |
-| --- | --- |
-| US |	ingest.us.signoz.cloud:443 |
-| IN |	ingest.in.signoz.cloud:443 |
-| EU | ingest.eu.signoz.cloud:443 |
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service_name>` is name of your service
 
 <Admonition>
 Don’t run app in reloader/hot-reload mode as it breaks instrumentation. For example, you can disable the auto reload with `--noreload`.
@@ -166,7 +160,7 @@ OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4317" \
 OTEL_EXPORTER_OTLP_PROTOCOL=grpc opentelemetry-instrument <your run command>
 ```
 
-*`<service_name>`* is the name of service you want
+- `<service_name>` is name of your service
 
 *`<your_run_command>`* can be `python3 app.py` or `python manage.py runserver --noreload`
 
@@ -217,7 +211,7 @@ OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4317" \
 OTEL_EXPORTER_OTLP_PROTOCOL=grpc opentelemetry-instrument <your run command>
 ```
 
-*`<service_name>`* is the name of service you want
+- `<service_name>` is name of your service
 
 *`<your_run_command>`* can be `python3 app.py` or `python manage.py runserver --noreload`
 
@@ -304,7 +298,7 @@ You can use OpenTelemetry to send your traces directly to SigNoz. OpenTelemetry 
      OTEL_RESOURCE_ATTRIBUTES=service.name=<service_name> OTEL_EXPORTER_OTLP_ENDPOINT="http://<IP of SigNoz Backend>:4317" OTEL_EXPORTER_OTLP_PROTOCOL=grpc opentelemetry-instrument <your run command>
      ```
 
-     *`<service_name>`* is the name of service you want
+     - `<service_name>` is name of your service
 
      *`<your_run_command>`* can be `python3 app.py` or `python manage.py runserver --noreload`
 

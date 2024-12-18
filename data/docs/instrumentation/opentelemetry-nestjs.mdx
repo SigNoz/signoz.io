@@ -16,6 +16,8 @@ import NestjsPinnedVersions from '@/components/shared/nestjs-version-pin.mdx'
 
 - `>=4.0.0`
 
+This document contains instructions on how to set up OpenTelemetry instrumentation in your Nestjs applications and view your application traces in SigNoz.
+
 <Tabs entityName="plans">
 <TabItem value="cloud" label="SigNoz Cloud" default>
 ## Send traces to SigNoz Cloud
@@ -47,21 +49,18 @@ npm install --save @opentelemetry/auto-instrumentations-node
 
 ```bash
 export OTEL_TRACES_EXPORTER="otlp"
-export OTEL_EXPORTER_OTLP_ENDPOINT="<SIGNOZ_ENDPOINT>"
+export OTEL_EXPORTER_OTLP_ENDPOINT="ingest.<region>.signoz.cloud:443"
 export OTEL_NODE_RESOURCE_DETECTORS="env,host,os"
 export OTEL_SERVICE_NAME="<APP_NAME>"
-export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<SIGNOZ_ACCESS_TOKEN>"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
 export NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
 <your_run_command>
 ```
 
-| Variable              | Description                                               |
-|-----------------------|-----------------------------------------------------|
-| APP_NAME *      | Name you want to give to your rust application  |
-| SIGNOZ_ENDPOINT  *     | This is ingestion URL which you must have got in mail after registering on SigNoz cloud  |
-| SIGNOZ_ACCESS_TOKEN *  | This is Ingestion Key which you must have got in mail after registering on SigNoz cloud                                     |
-
-replace `<your_run_command>` with the run command of your application
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service_name>` is name of your service
+- mreplace `<your_run_command>` with the run command of your application
 
 #### Send traces directly to SigNoz Cloud - Code Level Automatic Instrumentation
 
@@ -118,17 +117,8 @@ process.on('SIGTERM', () => {
 
 export default sdk;
 ```
-- `<service_name>` : Name of your service.
-
-Depending on the choice of your region for SigNoz cloud, the ingest endpoint will vary according to this table.
-
-| Region | Endpoint |
-| --- | --- |
-| US |	ingest.us.signoz.cloud:443/v1/traces |
-| IN |	ingest.in.signoz.cloud:443/v1/traces |
-| EU | ingest.eu.signoz.cloud:443/v1/traces |
-
-
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<service_name>` is name of your service
 
 **Step 3.** On `main.ts` file or file where your app starts import tracer using below command.
   <Admonition type="info">
@@ -151,7 +141,7 @@ import { AppModule } from './app.module';
   // OpenTelemetry automatic instrumentation must go here.
 
 async function bootstrap() {
-    // highlight-start
+  // highlight-start
     await tracer.start();
     //highlight-end
     const app = await NestFactory.create(AppModule);
@@ -163,12 +153,12 @@ async function bootstrap() {
 **Step 5.** Run the application
 
 ```
-OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>" nest start
+OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>" nest start
 ```
 
-The data captured with OpenTelemetry from your application should start showing on the SigNoz dashboard.
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 
-`SIGNOZ_INGESTION_KEY` is the API token provided by SigNoz. You can find your ingestion key from SigNoz cloud account details sent on your email.
+The data captured with OpenTelemetry from your application should start showing on the SigNoz dashboard.
 
 **Step 6.** You can validate if your application is sending traces to SigNoz cloud [here](#validating-instrumentation-by-checking-for-traces).
 
@@ -479,19 +469,17 @@ npm install --save @opentelemetry/auto-instrumentations-node
 
 ```bash
 $env:OTEL_TRACES_EXPORTER="otlp"
-$env:OTEL_EXPORTER_OTLP_ENDPOINT="<SIGNOZ_ENDPOINT>"
+$env:OTEL_EXPORTER_OTLP_ENDPOINT="ingest.<region>.signoz.cloud:443"
 $env:OTEL_NODE_RESOURCE_DETECTORS="env,host,os"
-$env:OTEL_SERVICE_NAME="<APP_NAME>"
-$env:OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<SIGNOZ_ACCESS_TOKEN>"
+$env:OTEL_SERVICE_NAME="<service_name>"
+$env:OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
 $env:NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
 <your_run_command>
 ```
 
-| Variable              | Description                                               |
-|-----------------------|-----------------------------------------------------|
-| APP_NAME *      | Name you want to give to your rust application  |
-| SIGNOZ_ENDPOINT  *     | This is ingestion URL which you must have got in mail after registering on SigNoz cloud  |
-| SIGNOZ_ACCESS_TOKEN *  | This is Ingestion Key which you must have got in mail after registering on SigNoz cloud                                     |
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service_name>` is name of your service
 
 replace `<your_run_command>` with the run command of your application
 
@@ -522,8 +510,8 @@ import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
 // Enable all auto-instrumentations from the meta package
 const exporterOptions = {
   //highlight-start
-  url: 'https://ingest.{region}.signoz.cloud:443/v1/traces',
-  headers: { 'signoz-ingestion-key': '<signoz_ingestion_key>' },
+  url: 'https://ingest.<region>.signoz.cloud:443/v1/traces',
+  headers: { 'signoz-ingestion-key': '<your-ingestion-key>' },
   //highlight-end
 };
 
@@ -551,19 +539,12 @@ process.on('SIGTERM', () => {
 
 export default sdk;
 ```
-- `<service_name>` : Name of your service.
-- `<signoz_ingestion_key>` : API token provided by SigNoz. You can find your ingestion key from SigNoz cloud account details sent on your email.
+
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service_name>` is name of your service
 
 OpenTelemetry Node SDK currently does not detect the headers from `.env` files as of today. That’s why we need to include the variables in the `tracer.js` file itself.
-
-Depending on the choice of your region for SigNoz cloud, the ingest endpoint will vary according to this table.
-
-| Region | Endpoint |
-| --- | --- |
-| US |	ingest.us.signoz.cloud:443/v1/traces |
-| IN |	ingest.in.signoz.cloud:443/v1/traces |
-| EU | ingest.eu.signoz.cloud:443/v1/traces |
-
 
 
 **Step 3.** On `main.ts` file or file where your app starts import tracer using below command.

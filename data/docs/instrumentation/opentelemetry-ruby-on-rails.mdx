@@ -9,6 +9,8 @@ hide_table_of_contents: true
 
 import InstrumentationFAQ from '@/components/shared/instrumentation-faq.md'
 
+This document contains instructions on how to set up OpenTelemetry instrumentation in your Ruby on Rails applications and view your application traces in SigNoz.
+
 <Tabs entityName="plans">
 <TabItem value="cloud" label="SigNoz Cloud" default>
 ## Send Traces to SigNoz Cloud
@@ -71,21 +73,14 @@ Run the application using the below:
 ```jsx
 OTEL_EXPORTER=otlp \
 OTEL_SERVICE_NAME=<service_name> \
-OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.{region}.signoz.cloud:443 \
-OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=SIGNOZ_INGESTION_KEY \
+OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443 \
+OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<your-ingestion-key> \
 rails server
 ```
 
-- `<service_name>` : Name of service. For example, `sampleRailsApp`
-- `SIGNOZ_INGESTION_KEY` : The ingestion key sent by SigNoz over email. It can also be found in the `settings` section of your SigNoz Cloud UI.
-
-Depending on the choice of your region for SigNoz cloud, the ingest endpoint will vary according to this table.
-
-| Region | Endpoint |
-| --- | --- |
-| US |	ingest.us.signoz.cloud:443 |
-| IN |	ingest.in.signoz.cloud:443 |
-| EU | ingest.eu.signoz.cloud:443 |
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service_name>` is name of your service
 
 ---
 ### Send traces via OTel Collector binary
@@ -259,15 +254,15 @@ OpenTelemetry::SDK.configure do |c|
   c.add_span_processor(
     OpenTelemetry::SDK::Trace::Export::BatchSpanProcessor.new(
       OpenTelemetry::Exporter::OTLP::Exporter.new(
-        endpoint: '<SIGNOZ_URL>',
-        headers: { 'signoz-ingestion-key' => '<SIGNOZ_INGESTION_KEY>' } 
+        endpoint: 'ingest.<region>.signoz.cloud:443',
+        headers: { 'signoz-ingestion-key' => '<your-ingestion-key>' } 
       )
     )
   )
   c.resource = OpenTelemetry::SDK::Resources::Resource.create({
     OpenTelemetry::SemanticConventions::Resource::HOST_NAME => '<your-host-name>',
   })
-  c.service_name = '<YOUR_SERVICE_NAME>'    # The name of the application.
+  c.service_name = '<service_name>'    # The name of the application.
   c.use_all()    # The libraries supported by automatic OpenTelemetry observation. 
 end
 ```
@@ -280,16 +275,9 @@ Run the application using the below:
 rails server
 ```
 
-- `<YOUR_SERVICE_NAME>` : Name of service. For example, `sampleRailsApp`
-- `<SIGNOZ_INGESTION_KEY>` : The ingestion key sent by SigNoz over email. It can also be found in the `settings` section of your SigNoz Cloud UI.
-
-- `<SIGNOZ_URL>` : Depending on the choice of your region for SigNoz cloud, the ingest endpoint will vary according to this table.
-
-| Region | Endpoint |
-| --- | --- |
-| US |	ingest.us.signoz.cloud:443 |
-| IN |	ingest.in.signoz.cloud:443 |
-| EU | ingest.eu.signoz.cloud:443 |
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service_name>` is name of your service
 
 ---
 ### Send traces via OTel Collector binary
@@ -344,7 +332,7 @@ OpenTelemetry::SDK.configure do |c|
   c.resource = OpenTelemetry::SDK::Resources::Resource.create({
     OpenTelemetry::SemanticConventions::Resource::HOST_NAME => '<your-host-name>',
   })
-  c.service_name = '<YOUR_SERVICE_NAME>'    # The name of the application.
+  c.service_name = '<service_name>'    # The name of the application.
   c.use_all()    # The libraries supported by automatic OpenTelemetry observation. 
 end
 ```
@@ -357,7 +345,7 @@ Run the application using the below:
 rails server
 ```
 
-- `<service_name>` : Name of service. For example, `sampleRailsApp`
+- `<service_name>` is name of your service
 
 In case you have OtelCollector Agent in different VM, replace localhost:4318 with `<IP Address of the VM>:4318`.
 
