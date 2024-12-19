@@ -1,7 +1,7 @@
 ---
 title: Monitoring your Nextjs application using OpenTelemetry 
 slug: opentelemetry-nextjs
-date: 2024-08-20
+date: 2024-12-18
 tags: [OpenTelemetry Instrumentation, JavaScript]
 authors: [sai_deepesh, vishal]
 description: OpenTelemetry can help instrument Nextjs applications and provide you with end-to-end tracing. In this guide, we will demonstrate how to instrument your Nextjs app with OpenTelemetry...
@@ -17,147 +17,169 @@ keywords: [opentelemetry,nextjs,opentelemetry nextjs,javascript,apm tools,applic
 
 Nextjs is a production-ready React framework for building single-page web applications. It enables you to build fast and user-friendly static websites, as well as web applications using Reactjs. Using OpenTelemetry Nextjs libraries, you can set up end-to-end tracing for your Nextjs applications.
 
-
-
-![Cover Image](/img/blog/2022/04/opentelemetry_nextjs_cover.webp)
+<figure data-zoomable align='center'>
+    <img src="/img/blog/2024/12/opentelemetry-nextjs-cover.webp" alt="Monitor your Nextjs applications with SigNoz"/>
+</figure>
 
 Nextjs has its own monitoring feature, but it is only limited to measuring the metrics like core web vitals and real-time analytics of the application. It doesn’t have end-to-end tracing, monitoring the database calls, etc. That’s where OpenTelemetry comes in.
 
-OpenTelemetry is an open-source standard under Cloud Native Computing Foundation (<a href = "https://www.cncf.io/" rel="noopener noreferrer nofollow" target="_blank">CNCF</a>) used for instrumenting applications for generating telemetry data. You can monitor your Nextjs application using OpenTelemetry and a tracing backend of your choice.
+OpenTelemetry is an open-source standard under the Cloud Native Computing Foundation ([**CNCF**](https://www.cncf.io/)) used for instrumenting applications for generating telemetry data. You can monitor your Nextjs application using OpenTelemetry and a tracing backend of your choice.
 
-> What is OpenTelemetry Nextjs instrumentation?
-Instrumentation is the process of enabling your application code to generate telemetry data like logs, metrics, and traces. Using OpenTelemetry Nextjs client libraries, you can generate end-to-end tracing data from your Nextjs application.
+> What is OpenTelemetry Nextjs instrumentation? Instrumentation is the process of enabling your application code to generate telemetry data like logs, metrics, and traces. Using OpenTelemetry Nextjs client libraries, you can generate end-to-end tracing data from your Nextjs application.
 > 
 
-OpenTelemetry provides client libraries to take care of instrumentation. You then need to send the collected data to an analysis backend. In this tutorial, we will be using [SigNoz](https://signoz.io/) to store and visualize the telemetry data collected by OpenTelemetry from the sample Nextjs application
+OpenTelemetry provides client libraries to take care of instrumentation. You then need to send the collected data to an analysis backend. In this tutorial, we will be using [**SigNoz**](https://signoz.io/) to store and visualize the telemetry data collected by OpenTelemetry from the sample Nextjs application.
 
-Before we demonstrate how to implement the OpenTelemetry Nextjs libraries, let’s have a brief overview of OpenTelmetry.
+Before we demonstrate how to implement the OpenTelemetry Nextjs libraries, let’s have a brief overview of OpenTelemetry.
 
 ## What is OpenTelemetry?
 
-<a href = "https://opentelemetry.io/" rel="noopener noreferrer nofollow" target="_blank">OpenTelemetry</a> is an open-source vendor-agnostic set of tools, APIs, and SDKs used to instrument applications to create and manage telemetry data(logs, metrics, and traces). It aims to make telemetry data(logs, metrics, and traces) a built-in feature of cloud-native software applications.
+[**OpenTelemetry**](https://opentelemetry.io/) is an open-source vendor-agnostic set of tools, APIs, and SDKs used to instrument applications to create and manage telemetry data(logs, metrics, and traces). It aims to make telemetry data(logs, metrics, and traces) a built-in feature of cloud-native software applications.
 
 The telemetry data is then sent to an observability tool for storage and visualization.
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2022/04/how_opentelemetry_fits.webp" alt="How opentelemetry fits with an application"/>
-    <figcaption><i>OpenTelemetry libraries instrument application code to generate telemetry data that is then sent to an observability tool for storage & visualization</i></figcaption>
+<img src="/img/blog/2022/09/opentelemetry_architecture.webp" alt="OpenTelemetry libraries"/>
+<figcaption><i>OpenTelemetry libraries instrument application code to generate telemetry data that is then sent to an observability tool for storage & visualization</i></figcaption>
 </figure>
-
 
 OpenTelemetry is the bedrock for setting up an observability framework. It also provides you the freedom to choose a backend analysis tool of your choice. You will never get locked in with any vendor if you use OpenTelemetry for your instrumentation layer.
 
 ## OpenTelemetry and SigNoz
 
-In this tutorial, we will use SigNoz as our backend analysis tool. SigNoz is a full-stack open-source APM tool that can be used for storing and visualizing the telemetry data collected with OpenTelemetry. It is built natively on OpenTelemetry and works on the OTLP data formats.
-
-SigNoz provides query and visualization capabilities for the end-user and comes with out-of-box charts for application metrics and traces.
-
-<figure data-zoomable align='center'>
-    <img src="/img/blog/common/signoz_charts_application_metrics.webp" alt="Application metrics charts on SigNoz dashboard"/>
-    <figcaption><i>SigNoz comes with out-of-box visualization for metrics and traces collected with OpenTelemetry</i></figcaption>
-</figure>
-
+In this tutorial, we will use SigNoz as our backend analysis tool. SigNoz is a full-stack open-source APM tool that can be used for storing and visualizing the telemetry data collected with OpenTelemetry. It is built natively on OpenTelemetry and works on the OTLP data formats. SigNoz provides query and visualization capabilities for the end-user and comes with out-of-box charts for application metrics and traces.
 
 Now let’s get down to how to implement OpenTelemetry Nextjs libraries for a sample Nextjs application and then visualize the collected data in SigNoz.
 
-## Running a Nextjs application with OpenTelemetry
+## Creating a SigNoz cloud account
 
-First of all, we need to install SigNoz for data collection then this data will be sent to OpenTelemetry for storage and visualization
+SigNoz cloud is the easiest way to run SigNoz. You can sign up [**here**](https://signoz.io/teams/) for a free account and get 30 days of unlimited access to all features.
 
-### Installing SigNoz
+[![try-signoz-cloud-blog-cta.png](https://signoz.io/img/launch_week/try-signoz-cloud-blog-cta.png)](https://signoz.io/teams)
 
-First, you need to install SigNoz so that OpenTelemetry can send the data to it.
+After you sign up and verify your email, you will be provided with details of your SigNoz cloud instance. Once you set up your password and log in, you will be greeted with the following onboarding screen.
 
-SigNoz cloud is the easiest way to run SigNoz. [Sign up](https://signoz.io/teams/) for a free account and get 30 days of unlimited access to all features.
+## Creating a sample Nextjs application
 
-You can also decide to self-host SigNoz. It can be installed on macOS or Linux computers in just three steps by using a simple install script. The install script automatically installs Docker Engine on Linux. However, on macOS, you must manually install <a href = "https://docs.docker.com/engine/install/" rel="noopener noreferrer nofollow" target="_blank">Docker Engine</a> before running the install script.
+Before instrumenting your application, you'll need a Next.js app to work with. If you already have one, you can skip to the next section. Otherwise, follow these steps to create a new Next.js application or check out the sample application at this [**GitHub repo**](https://github.com/SigNoz/sample-nextjs-app).
+
+### Prerequisites
+
+- **Node.js:** Ensure you have [**Node.js 12.22.0 or later**](https://nodejs.org/en/download/) installed on your machine. You can verify your Node.js version by running:
+    
+    ```bash
+    node -v
+    ```
+    
+- **Package Manager:** You can use `npm`, `yarn`, or `pnpm` as your package manager.
+
+### Steps to Create a New Next.js Application
+
+To get started with building a Next.js application, follow these steps to quickly set up your project using the official `create-next-app` CLI tool. It automates the setup process, ensuring you have everything you need to begin developing.
+
+**Step 1: Create a New project** 
+
+Use one of the following commands based on your preferred package manager:
+
+- Using `npx` with npm:
+    
+    ```bash
+    npx create-next-app@latest
+    ```
+    
+- Using Yarn:
+    
+    ```bash
+    yarn create next-app
+    ```
+    
+- Using pnpm:
+    
+    ```bash
+    pnpm create next-app
+    ```
+    
+
+**Step 2: Follow the Interactive Prompts**
+
+The CLI will prompt you for information such as the project name, template selection, and whether to use TypeScript, ESLint, etc. Fill in the details as per your requirements.
+
+**Step 3: Navigate to the Project Directory:**
 
 ```bash
-git clone -b main https://github.com/SigNoz/signoz.git
-cd signoz/deploy/
-./install.sh
+cd your-project-name
 ```
 
-You can visit our documentation for instructions on how to install SigNoz using Docker Swarm and Helm Charts.
+**Step 4: Start the Development Server**
 
-[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/)
+Use the appropriate command based on your package manager:
 
-When you are done installing SigNoz, you can access the UI at [http://localhost:3301](http://localhost:3301/application)
+- npm:
+    
+    ```bash
+    npm run dev
+    ```
+    
+- yarn
+    
+    ```bash
+    yarn dev
+    ```
+    
+- pnpm
+    
+    ```bash
+    pnpm dev
+    ```
+    
 
-### Creating a sample Nextjs application
+**Step 5: Verify the Application is Running**
 
-To install and run a Nextjs application you need to have Nodejs 12.22.0 or later. You can also check the sample application at this <a href = "https://github.com/SigNoz/sample-nextjs-app" rel="noopener noreferrer nofollow" target="_blank">GitHub repo</a>.
-
-<a href = "https://nodejs.org/en/download/" rel="noopener noreferrer nofollow" target="_blank">Download the latest version of Nodejs</a>
-
-To create a new Nextjs app, you can use `create-next-app` which sets up everything automatically for you.
-
-Steps to get the app set up and ready:
-
-**Step 1: Create a project using any of these commands**
-
-```
-npx create-next-app@latest
-```
-OR
-```
-yarn create next-app
-```
-OR
-```
-pnpm create next-app
-```
-
-**Step2: Check if the application is running**
-
-Start the development server.
-
-```bash
-npm run dev
-```
-OR
-```
-yarn dev
-```
-OR
-```
-pnpm dev
-```
-
-You can check if your app is up and running on [http://localhost:3000](http://localhost:3000)
+Open your browser and navigate to [**http://localhost:3000**](http://localhost:3000/). You should see the default Next.js welcome page.
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2022/04/nextjs_app_running.webp" alt="Nextjs app running in your local"/>
-    <figcaption><i>Nextjs app running at port 3000</i></figcaption>
+<img src="/img/blog/2024/12/nextjs-app-running.webp" alt="Next app running"/>
+<figcaption><i>Nextjs app running</i></figcaption>
 </figure>
 
+## Instrumenting the Nextjs application with OpenTelemetry
 
-### Instrumenting the Nextjs application with OpenTelemetry
+Instrumenting your application involves integrating OpenTelemetry libraries to collect telemetry data (metrics, logs, traces) and configuring exporters to send this data to SigNoz for analysis.
 
-#### Using vercel otel
+There are two primary methods to instrument a Next.js application:
 
-**Step 1.** Install OpenTelemetry packages
+1. **Using Vercel OTEL Integration**
+2. **Using OpenTelemetry SDK (Node.js Runtime Only)**
 
-```bash
+We'll cover both options in detail.
+
+### Option 1: Using Vercel OTEL Integration
+
+**Vercel OTEL Integration** simplifies the process of adding OpenTelemetry to your Next.js application by providing a streamlined setup. This method is suitable if you're deploying your application on Vercel or prefer an easier integration process.
+
+**Step 1: Install Required Packages**
+
+Begin by installing the necessary OpenTelemetry and Vercel OTEL packages.
+
+```tsx
 npm install @vercel/otel @opentelemetry/sdk-logs @opentelemetry/api-logs @opentelemetry/instrumentation @opentelemetry/exporter-trace-otlp-http
 ```
 
-**Step 2.** Update `next.config.mjs` to include instrumentationHook
-```tsx
-/** @type {import('next').NextConfig} */
-const nextConfig = {
-    // include instrumentationHook experimental feature
-    experimental: {
-        instrumentationHook: true,
-    },
-};
+Where:
 
-export default nextConfig;
-```
+- `@vercel/otel`: Vercel's OpenTelemetry integration package.
+- `@opentelemetry/sdk-logs`: SDK for handling log data.
+- `@opentelemetry/api-logs`: API for log instrumentation.
+- `@opentelemetry/instrumentation`: Core instrumentation utilities.
+- `@opentelemetry/exporter-trace-otlp-http`: Exporter for sending trace data via OTLP over HTTP.
 
-**Step 3.** Create `instrumentation.node.ts` file<br></br>
-You need to configure the endpoint for SigNoz cloud in this file.
+**Alternative with Yarn or pnpm:**
+
+If you prefer using Yarn or pnpm, replace `npm install` with `yarn add` or `pnpm add`
+
+**Step 2: Configure the Trace Exporter**
+
+Create a file named `instrumentation.node.ts` at the root of your project. This file configures the OpenTelemetry trace exporter, which sends trace data to SigNoz.
 
 ```tsx
 'use strict'
@@ -168,26 +190,31 @@ import { diag, DiagConsoleLogger, DiagLogLevel } from '@opentelemetry/api';
 diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.ERROR); // set diaglog level to DEBUG when debugging
 
 const exporterOptions = {
-  url: 'https://ingest.[data_region].signoz.cloud:443/v1/traces', // Set your own data region or set to http://localhost:4318/v1/traces if using selfhost SigNoz
-  headers: { 'signoz-ingestion-key': 'SIGNOZ_INGESTION_KEY' }, // Set if you are using SigNoz Cloud
+  url: 'https://ingest.[region].signoz.cloud:443/v1/traces', // Set your own data region or set to http://localhost:4318/v1/traces if using selfhost SigNoz
+  headers: { 'signoz-ingestion-keys': '[YOUR-SIGNOZ-INGESTION-KEY]' }, // Set if you are using SigNoz Cloud
 }
 
 export const traceExporter = new OTLPTraceExporter(exporterOptions);
 ```
 
-- `SIGNOZ_INGESTION_KEY` : You can find your ingestion key from SigNoz cloud account details sent on your email.
+- **Diagnostics Configuration:**
+    - **`diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.ERROR);`**: Sets up a console logger for OpenTelemetry diagnostics. The `DiagLogLevel.ERROR` ensures that only error messages are logged. For debugging purposes, you can set this to `DiagLogLevel.DEBUG` to receive more verbose logs.
+- **Exporter Options:**
+    - **`url`**: The endpoint where trace data will be sent. The full URL format is `https://ingest.[region].signoz.cloud:443/v1/traces`. Depending on the choice of your region for SigNoz cloud, the ingest endpoint will vary according to this table.
+        
+        
+        | Region | Endpoint |
+        | --- | --- |
+        | US | ingest.us.signoz.cloud:443/v1/traces |
+        | IN | ingest.in.signoz.cloud:443/v1/traces |
+        | EU | ingest.eu.signoz.cloud:443/v1/traces |
+    - **`headers`**: Contains the **`signoz-ingestion-keys`**, which is your SigNoz ingestion key. This key authenticates your application with SigNoz and ensures that data is sent securely. If you haven't created one yet, you can follow [this guide](https://signoz.io/docs/ingestion/signoz-cloud/keys/) to generate your ingestion key.
 
-Depending on the choice of your region for SigNoz cloud, the ingest endpoint will vary according to this table.
+**Step 3. Register Instrumentation**
 
-| Region | Endpoint |
-| --- | --- |
-| US |	ingest.us.signoz.cloud:443/v1/traces |
-| IN |	ingest.in.signoz.cloud:443/v1/traces |
-| EU | ingest.eu.signoz.cloud:443/v1/traces |
+Create another file named `instrumentation.ts` at the root of your project. This file registers the OpenTelemetry instrumentation with Vercel's OTEL integration.
 
-
-**Step 4.** Create `instrumentation.ts` file<br></br>
-```tsx
+```bash
 import { registerOTel } from '@vercel/otel';
 import { traceExporter } from './instrumentation.node';
 
@@ -199,19 +226,51 @@ export function register() {
 }
 ```
 
-**Step 5.** Once you're done configuring the exporter options, try running your application and validate if your application is sending traces to SigNoz cloud [here](#validating-instrumentation-by-checking-for-traces).
+- **`registerOTel`:** A function provided by `@vercel/otel` that initializes OpenTelemetry with the given configurations.
+- **`serviceName`:** A unique name for your application. This name will appear in the SigNoz dashboard, helping you identify traces from different services.
+- **`traceExporter`:** The exporter instance we configured in `instrumentation.node.ts` that sends trace data to SigNoz.
 
-<Admonition>
-The instrumentation file should be in the root of your project and not inside the app or pages directory. If you're using the src folder, then place the file inside src alongside pages and app.
-</Admonition>
+💡 **Note**: Ensure that both `instrumentation.node.ts` and `instrumentation.ts` are placed in the root directory of your project. If you use a `src` folder, place them inside `src` alongside other directories like `pages` and `app`.
+You can also check the sample application at this [**GitHub repo**](https://github.com/SigNoz/sample-nextjs-app/tree/vercel-otel).
 
-You can also check the sample application at this <a href = "https://github.com/SigNoz/sample-nextjs-app/tree/vercel-otel" rel="noopener noreferrer nofollow" target="_blank">GitHub repo</a>.
+**Step 4. Run and Validate**
 
-#### Using OpenTelemetry instrument (only works for nodejs runtime)
+Once you're done configuring the exporter options, try running your application and validate if your application is sending traces to SigNoz cloud [**here**](https://signoz.io/blog/opentelemetry-nextjs/#validating-instrumentation-by-checking-for-traces).
 
-**Step 1.** Install the OpenTelemetry packages
+- npm
+    
+    ```bash
+    npm run dev
+    ```
+    
+- yarn
+    
+    ```bash
+    yarn dev
+    ```
+    
+- pnpm
+    
+    ```bash
+    pnpm dev
+    ```
+    
 
-```bash
+### Generate Telemetry Data
+
+To begin generating telemetry data for analysis, open your browser and navigate to [**http://localhost:3000**](http://localhost:3000/). Ensure that your application is running and accessible. 
+
+Hit the URL a couple of times to generate some dummy data which can later be visualized and monitored in SigNoz.
+
+### Option 2: Using OpenTelemetry SDK (Node.js Runtime Only)
+
+This method provides more granular control over the OpenTelemetry setup and is ideal for advanced use cases or self-hosted environments. It involves manually configuring the OpenTelemetry SDK without relying on Vercel's OTEL integration.
+
+**Step 1: Install Required Packages**
+
+Install the necessary OpenTelemetry packages for Node.js instrumentation.
+
+```tsx
 npm i @opentelemetry/sdk-node
 npm i @opentelemetry/auto-instrumentations-node
 npm i @opentelemetry/exporter-trace-otlp-http
@@ -219,21 +278,17 @@ npm i @opentelemetry/resources
 npm i @opentelemetry/semantic-conventions
 ```
 
-**Step 2.** Update `next.config.mjs` to include instrumentationHook
-```tsx
-/** @type {import('next').NextConfig} */
-const nextConfig = {
-    // include instrumentationHook experimental feature
-    experimental: {
-        instrumentationHook: true,
-    },
-};
+Where:
 
-export default nextConfig;
-```
+- `@opentelemetry/sdk-node`: Provides the core SDK for Node.js applications.
+- `@opentelemetry/auto-instrumentations-node`: Automatically instruments supported Node.js libraries and frameworks.
+- `@opentelemetry/exporter-trace-otlp-http`: Exporter for sending trace data via OTLP over HTTP.
+- `@opentelemetry/resources`: Allows defining resource attributes (like service name).
+- `@opentelemetry/semantic-conventions`: Provides standard semantic attributes for resources and spans.
 
-**Step 3.** Create `instrumentation.node.ts` file<br></br>
-You need to configure the endpoint for SigNoz cloud in this file.
+**Step 2: Configure the OpenTelemetry SDK**
+
+Create a file named `instrumentation.node.ts` at the root of your project. This file sets up the OpenTelemetry SDK, configures automatic instrumentation for the Node.js backend (which powers Next.js), and defines the trace exporter for sending telemetry data to SigNoz.
 
 ```tsx
 'use strict'
@@ -275,18 +330,27 @@ process.on('SIGTERM', () => {
 });
 ```
 
-- `SIGNOZ_INGESTION_KEY` : You can find your ingestion key from SigNoz cloud account details sent on your email.
+This setup ensures that OpenTelemetry traces are sent to SigNoz for your Next.js application’s backend (Node.js). It:
 
-Depending on the choice of your region for SigNoz cloud, the ingest endpoint will vary according to this table.
+- Automatically instruments your Node.js backend (Next.js API routes, server-side rendering, etc.).
+- Sends trace data to SigNoz, where you can analyze performance metrics.
+- Logs OpenTelemetry diagnostic information at the error level.
+- Gracefully shuts down the SDK when your application terminates, ensuring that traces are properly exported before exit.
 
-| Region | Endpoint |
-| --- | --- |
-| US |	ingest.us.signoz.cloud:443/v1/traces |
-| IN |	ingest.in.signoz.cloud:443/v1/traces |
-| EU | ingest.eu.signoz.cloud:443/v1/traces |
+💡 **Note**: Be sure to replace `'SIGNOZ_INGESTION_KEY'` with your actual SigNoz ingestion key. If you haven't created one yet, follow [this guide](https://signoz.io/docs/ingestion/signoz-cloud/keys/) to generate your ingestion key.
+Make sure to update the URL with the correct SigNoz ingestion endpoint for your region, as explained in the previous step.
 
-**Step 4.** Create `instrumentation.ts` file<br></br>
+**Step 3: Register Instrumentation**
+
+Create another file named `instrumentation.ts` at the root of your project. This file conditionally imports the Node.js instrumentation based on the runtime environment.
+
 ```tsx
+/**
+ * Registers OpenTelemetry instrumentation based on the runtime environment.
+ * 
+ * - If running in Node.js, it imports and initializes the Node.js instrumentation.
+ */
+
 export async function register() {
   if (process.env.NEXT_RUNTIME === 'nodejs') {
     await import('./instrumentation.node')
@@ -294,47 +358,73 @@ export async function register() {
 }
 ```
 
-**Step 5.** Once you're done configuring the exporter options, try running your application and validate if your application is sending traces to SigNoz cloud [here](#validating-instrumentation-by-checking-for-traces).
+**Conditional Import:**
 
-<Admonition>
-The instrumentation file should be in the root of your project and not inside the app or pages directory. If you're using the src folder, then place the file inside src alongside pages and app.
-</Admonition>
+- The function `register` checks if the application is running in the Node.js runtime environment by examining the `NEXT_RUNTIME` environment variable.
+- If true, it dynamically imports the `instrumentation.node.ts` file, initializing the OpenTelemetry SDK for Node.js.
 
-Run the application, and your application should be available on [http://localhost:8080](http://localhost:8080/) .
+**Step 5: Run and Validate**
 
-Hit the URL a couple of times to generate some dummy data and wait for the `SigNoz-Nextjs-Example` application to be visible on the SigNoz dashboard.
+With the SDK configured, proceed to run your application and verify that telemetry data is being sent to SigNoz cloud [**here**](https://signoz.io/blog/opentelemetry-nextjs/#validating-instrumentation-by-checking-for-traces).
+
+- npm
+    
+    ```bash
+    npm run dev
+    ```
+    
+- yarn
+    
+    ```bash
+    yarn dev
+    ```
+    
+- pnpm
+    
+    ```bash
+    pnpm dev
+    ```
+    
+
+### Generate Telemetry Data
+
+To begin generating telemetry data for analysis, open your browser and navigate to [**http://localhost:3000**](http://localhost:3000/). Ensure that your application is running and accessible. 
+
+Hit the URL a couple of times to generate some dummy data which can later be visualized and monitored in SigNoz.
+
+## Monitoring your Application in SigNoz
+
+Once your Next.js application is instrumented and running and telemetry data is being generated, the next step is to validate that this data is being received in SigNoz and begin monitoring your application's performance.
+
+To get started, log in to your SigNoz cloud account. Under the `Services` tab on the SigNoz dashboard, you should see your application listed among other services.
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2022/04/sample_nextjs_signoz_dashboard.webp" alt="Sample Nextjs app being monitored on SigNoz dashboard"/>
-    <figcaption><i>Sample Nextjs application being monitored on the SigNoz dashboard. The other applications in the dashboard are from a sample application that comes bundled with SigNoz installation.</i></figcaption>
+<img src="/img/blog/2024/12/Services-tab-nextjs.webp" alt="Next app running"/>
+<figcaption><i>Sample Nextjs application being monitored on the SigNoz dashboard. The other applications in the dashboard are from a sample application that comes bundled with SigNoz installation.</i></figcaption>
 </figure>
 
-
-You can use the dashboard to see application metrics like application latency, requests per sec, and error percentage.
+Click on your application to access the `Metrics` page. This page provides out-of-the-box, pre-built dashboards displaying critical application metrics such as application latency, requests per second, and error percentages.
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2022/04/otel_nextjs_metrics.webp" alt="Nextjs application metrics captured with OpenTelemetry and visualized on SigNoz dashboard"/>
-    <figcaption><i>Visualize application metrics captured with OpenTelemetry in the SigNoz dashboard</i></figcaption>
+<img src="/img/blog/2024/12/metrics-page.webp" alt="Metrics page"/>
+<figcaption><i>Visualize application metrics captured with OpenTelemetry in the SigNoz dashboard</i></figcaption>
 </figure>
 
+OpenTelemetry also captures tracing data, which is invaluable for visualizing how user requests flow through various services, especially in multi-service architectures. To visualize your application’s tracing data, navigate to the `Traces` section via the left sidebar of the SigNoz dashboard. 
 
-OpenTelemetry captures tracing data from your Nextjs application as well. Tracing data can help you visualize how user requests perform across services in a multi-service application.
-
-In the `Traces` tab of SigNoz, you can analyze the tracing data using filters based on tags, status codes, service names, operations, etc.
+In the `Traces` tab, you can filter tracing data by tags, status codes, service names, operations, and more. This filtering capability makes it easier to isolate and analyze specific requests or identify performance bottlenecks.
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2022/04/nextjs_traces_tab.webp" alt="Traces tab on SigNoz dashboard"/>
-    <figcaption><i>Use powerful filters to analyze your tracing data</i></figcaption>
+<img src="/img/blog/2024/12/traces-tab.webp" alt="Traces tab"/>
+<figcaption><i>Use powerful filters to analyze your tracing data</i></figcaption>
 </figure>
 
-
-You can also visualize the tracing data with the help of flamegraphs and Gantt charts. These visualizations makes it easier for users to see how requests performed acrosee different services in a multi-service application.
+Tracing data can also be visualized using flamegraphs and Gantt charts, which provide a clear picture of how requests are handled across services. These visualizations make it easy to pinpoint inefficiencies and understand the end-to-end performance of your application.
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2022/04/otel_nextjs_signoz_dashboard.webp" alt="Sample Nextjs app being monitored on SigNoz dashboard"/>
-    <figcaption><i>See end-to-end traces from your Nextjs application to downstream services</i></figcaption>
+<img src="/img/blog/2024/12/trace-details.webp" alt="Drill down traces"/>
+<figcaption><i>See end-to-end traces from your Nextjs application to downstream services</i></figcaption>
 </figure>
-
 
 ## Conclusion
 
@@ -342,25 +432,16 @@ Using OpenTelemetry libraries, you can instrument your Nextjs applications for e
 
 OpenTelemetry is the future for setting up observability for cloud-native apps. It is backed by a huge community and covers a wide variety of technology and frameworks. Using OpenTelemetry, engineering teams can instrument polyglot and distributed applications and be assured about compatibility with a lot of technologies.
 
-SigNoz is an open-source observability tool that comes with a SaaS-like experience. You can check out SigNoz by visiting its GitHub repo 👇
+SigNoz cloud is the easiest way to run SigNoz. You can sign up [**here**](https://signoz.io/teams/) for a free account and get 30 days of unlimited access to all features.
 
-[![SigNoz GitHub repo](/img/blog/common/signoz_github.webp)](https://github.com/SigNoz/signoz)
-
-If you are someone who understands more from video, then you can watch the below video tutorial on the same with SigNoz.
-
-
-
-<YouTube id="sC1xNIcItTM" mute={false} />
-
-
-
+[![try-signoz-cloud-blog-cta.png](https://signoz.io/img/launch_week/try-signoz-cloud-blog-cta.png)](https://signoz.io/teams)
 
 If you face any issues while trying out SigNoz, you can reach out with your questions in #support channel 👇
 
-[![SigNoz Slack community](/img/blog/common/join_slack_cta.webp)](https://signoz.io/slack)
+[![https://signoz.io/img/blog/common/join_slack_cta.webp](https://signoz.io/img/blog/common/join_slack_cta.webp)](https://signoz.io/docs/community/#slack)
 
 **Further Reading**
 
-[Implementing OpenTelemetry in Angular application](https://signoz.io/blog/opentelemetry-angular/)
+[**Implementing OpenTelemetry in Angular application**](https://signoz.io/blog/opentelemetry-angular/)
 
-[Monitor your Nodejs application with OpenTelemetry and SigNoz](https://signoz.io/opentelemetry/nodejs/)
+[**Monitor your Nodejs application with OpenTelemetry and SigNoz**](https://signoz.io/opentelemetry/nodejs/)
