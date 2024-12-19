@@ -1,7 +1,7 @@
 ---
 title: Implementing OpenTelemetry in a Rust application for performance monitoring 
 slug: opentelemetry-rust
-date: 2023-10-11
+date: 2024-12-18
 tags: [OpenTelemetry Instrumentation, Rust]
 authors: [srikanth]
 description: OpenTelemetry can be used to instrument Rust applications in production for performance monitoring. OpenTelemetry provides libraries, APIs, and SDKs to collect telemetry data(logs, metrics, and traces), using which you can monitor and debug your Rust application for...
@@ -15,11 +15,11 @@ keywords: [opentelemetry,rust,opentelemetry rust,apm tools,application performan
   <link rel="canonical" href="https://signoz.io/blog/opentelemetry-rust/"/>
 </head>
 
-OpenTelemetry can be used to trace Rust applications for performance issues and bugs. OpenTelemetry is an open-source project under the Cloud Native Computing Foundation (<a href = "https://www.cncf.io/" rel="noopener noreferrer nofollow" target="_blank">CNCF</a>) that aims to standardize the generation and collection of telemetry data. Telemetry data includes logs, metrics, and traces.
+OpenTelemetry can be used to trace Rust applications for performance issues and bugs. OpenTelemetry is an open-source project under the Cloud Native Computing Foundation ([**CNCF**](https://www.cncf.io/)) that aims to standardize the generation and collection of telemetry data. Telemetry data includes logs, metrics, and traces.
 
-
-
-![Cover Image](/img/blog/2022/05/opentelemetry_rust_cover.webp)
+<figure data-zoomable align='center'>
+    <img src="/img/blog/2024/12/opentelemetry-rust-cover.webp" alt="Monitor your Rust applications with SigNoz"/>
+</figure>
 
 Rust is a multi-paradigm, general-purpose programming language designed for performance and safety, especially safe concurrency. In this tutorial, we will demonstrate how to use the OpenTelemetry to generate end-to-end tracing.
 
@@ -27,21 +27,20 @@ Before we demonstrate how to implement the OpenTelemetry libraries, let’s have
 
 ## What is OpenTelemetry?
 
-<a href = "https://opentelemetry.io/" rel="noopener noreferrer nofollow" target="_blank">OpenTelemetry</a> is an open-source vendor-agnostic set of tools, APIs, and SDKs used to [instrument applications](https://signoz.io/docs/instrumentation/) to create and manage telemetry data(logs, metrics, and traces). It aims to make telemetry data(logs, metrics, and traces) a built-in feature of cloud-native software applications.
+[**OpenTelemetry**](https://opentelemetry.io/) is an open-source vendor-agnostic set of tools, APIs, and SDKs used to [**instrument applications**](https://signoz.io/docs/instrumentation/) to create and manage telemetry data(logs, metrics, and traces). It aims to make telemetry data(logs, metrics, and traces) a built-in feature of cloud-native software applications.
 
 The telemetry data is then sent to an observability tool for storage and visualization.
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2022/09/opentelemetry_architecture.webp" alt="OpenTelemetry Architecture"/>
-    <figcaption><i>OpenTelemetry libraries instrument application code to generate telemetry data that is then sent to an observability tool for storage & visualization</i></figcaption>
+<img src="/img/blog/2022/09/opentelemetry_architecture.webp" alt="OpenTelemetry libraries"/>
+<figcaption><i>OpenTelemetry libraries instrument application code to generate telemetry data that is then sent to an observability tool for storage & visualization</i></figcaption>
 </figure>
-
 
 OpenTelemetry is the bedrock for setting up an observability framework. It also provides you the freedom to choose a backend analysis tool of your choice.
 
 ## OpenTelemetry and SigNoz
 
-In this tutorial, we will use [SigNoz](https://signoz.io/) as our backend analysis tool. SigNoz is a full-stack open-source APM tool that can be used for storing and visualizing the telemetry data collected with OpenTelemetry. It is built natively on OpenTelemetry and works on the OTLP data formats.
+In this tutorial, we will use [**SigNoz**](https://signoz.io/) as our backend analysis tool. SigNoz is a full-stack open-source APM tool that can be used for storing and visualizing the telemetry data collected with OpenTelemetry. It is built natively on OpenTelemetry and works on the OTLP data formats.
 
 SigNoz provides query and visualization capabilities for the end-user and comes with out-of-box charts for application metrics, logs and traces.
 
@@ -49,131 +48,265 @@ Now let’s get down to how to implement OpenTelemetry in Rust applications and 
 
 ## Running Rust application with OpenTelemetry
 
-**Step 1: Install SigNoz**<br></br>
+In this section, you’ll learn to instrument your Rust application with OpenTelemetry, enabling you to collect and send telemetry data to SigNoz for monitoring and performance insights.
 
-First, you need to install SigNoz so that OpenTelemetry can send the data to it.
+### Create a SigNoz cloud account
 
-SigNoz can be installed on macOS or Linux computers in just three steps by using a simple install script.
+To begin monitoring your applications, create a [SigNoz Cloud account](https://signoz.io/teams/). SigNoz cloud is the easiest way to run SigNoz. [**Sign up**](https://signoz.io/teams/) for a free account and get 30 days of unlimited access to all features.
 
-The install script automatically installs Docker Engine on Linux. However, on macOS, you must manually install <a href = "https://docs.docker.com/engine/install/" rel="noopener noreferrer nofollow" target="_blank">Docker Engine</a> before running the install script.
+[![try-signoz-cloud-blog-cta.png](https://signoz.io/img/launch_week/try-signoz-cloud-blog-cta.png)](https://signoz.io/teams)
 
-```bash
-git clone -b main https://github.com/SigNoz/signoz.git
-cd signoz/deploy/
-./install.sh
+You can also install and self-host SigNoz yourself since it is open-source. With 19,000+ GitHub stars, [**open-source SigNoz**](https://github.com/signoz/signoz) is loved by developers. Find the [**instructions**](https://signoz.io/docs/install/) to self-host SigNoz.
+
+Once your account setup is complete, you’ll receive an email with a URL to access the SigNoz UI. Use this URL to log in and access your personalized dashboard.
+
+### Get a sample Rust application
+
+If you already have a Rust application, you can skip this step and move on to the next section. However, if you don't have a Rust application or want to quickly get started, we have provided a [**sample Rust application**](https://github.com/SigNoz/sample-rust-app) that is already instrumented with OpenTelemetry.
+
+### Instrument your application with OpenTelemetry
+
+To integrate OpenTelemetry into your Rust application, follow these steps:
+
+**Step 1: Update your `Cargo.toml` file**
+
+To enable OpenTelemetry in your Rust application, you need to include the necessary dependencies in the **`Cargo.toml`** file. These crates, provided by OpenTelemetry, will help collect and send telemetry data from your application.
+
+Add the following dependencies under the **`[dependencies]`** section of your **`Cargo.toml`** file:
+
+```rust
+opentelemetry = { version = "0.18.0", features = ["rt-tokio", "metrics", "trace"] }
+opentelemetry-otlp = { version = "0.11.0", features = ["trace", "metrics"] }
+opentelemetry-semantic-conventions = { version = "0.10.0" }
+opentelemetry-proto = { version = "0.1.0"}
+tokio = { version = "1", features = ["full"] }
+tonic = { version = "0.8.2", features = ["tls-roots"] }
 ```
 
-You can visit our documentation for instructions on how to install SigNoz using Docker Swarm and Helm Charts.
+Explanation:
 
-[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/)
+- **`opentelemetry`**: This crate provides core OpenTelemetry functionality for tracing, metrics, and more.
+- **`opentelemetry-otlp`**: The OpenTelemetry Protocol (OTLP) exporter, which sends trace data to SigNoz or other monitoring tools.
+- **`opentelemetry-semantic-conventions`**: Defines standard attribute names for traces, such as `service.name` and `service.version`.
+- **`tokio`**: A runtime for asynchronous Rust code, required for OpenTelemetry's asynchronous operations.
+- **`tonic`**: Used to send trace data over gRPC.
+- **`dotenv`**: Loads environment variables from a `.env` file to keep sensitive information secure and easily configurable.
 
-When you are done installing SigNoz, you can access the UI at [http://localhost:3301](http://localhost:3301/application)
+After adding these dependencies, you need to use them in your application.
 
-<figure data-zoomable align='center'>
-    <img src="/img/blog/2022/02/signoz_dashboard.webp" alt="SigNoz dashboard"/>
-    <figcaption><i>SigNoz dashboard - It shows services from a sample app that comes bundled with the installation</i></figcaption>
-</figure>
+**Step 2: Import required modules in `main.rs`**
 
+In the entry point of your application, which is usually the **`main.rs`** file, import the added dependencies (OpenTelemetry crates):
 
-**Step 2: Get sample Rust application**<br></br>
-If you have your own Rust application, follow along the steps mentioned below. We have prepared a <a href = "https://github.com/SigNoz/sample-rust-app" rel="noopener noreferrer nofollow" target="_blank">sample Rust application</a> which is already instrumented with OpenTelemetry.
-
-**Step 3:  Instrument your application with OpenTelemetry**<br></br>
-To configure your application to send data we will need a function to initialize OpenTelemetry. Add the following snippet of code in your `main.rs` file.
-
-```jsx
+```rust
+use opentelemetry::global::shutdown_tracer_provider;
 use opentelemetry::sdk::Resource;
 use opentelemetry::trace::TraceError;
-use opentelemetry::{global, sdk::trace as sdktrace};
-use opentelemetry::{trace::Tracer};
+use opentelemetry::{
+    global, sdk::trace as sdktrace,
+    trace::{TraceContextExt, Tracer},
+    Context, Key, KeyValue,
+};
 use opentelemetry_otlp::WithExportConfig;
+use tonic::metadata::{MetadataMap, MetadataValue};
+```
 
+**Step 3: Initialize the tracer**
 
+Now, create a function to initialize OpenTelemetry. This function sets up the OTLP exporter to send the telemetry data to SigNoz, adds metadata, and configures the trace settings.
+
+Add the below `init_tracer` function in your `main.rs` file:
+
+```rust
 fn init_tracer() -> Result<sdktrace::Tracer, TraceError> {
+    let signoz_ingestion_key = std::env::var("SIGNOZ_INGESTION_KEY").expect("SIGNOZ_INGESTION_KEY not set");
+    let mut metadata = MetadataMap::new();
+    metadata.insert(
+        "signoz-ingestion-key",
+        MetadataValue::from_str(&signoz_ingestion_key).unwrap(),
+    );
     opentelemetry_otlp::new_pipeline()
         .tracing()
-        .with_exporter(opentelemetry_otlp::new_exporter().tonic().with_env())
+        .with_exporter(
+            opentelemetry_otlp::new_exporter()
+                .tonic()
+                .with_metadata(metadata)
+                .with_endpoint(std::env::var("SIGNOZ_ENDPOINT").expect("SIGNOZ_ENDPOINT not set")),
+        )
         .with_trace_config(
-            sdktrace::config().with_resource(Resource::default()),
+            sdktrace::config().with_resource(Resource::new(vec![
+                KeyValue::new(
+                    opentelemetry_semantic_conventions::resource::SERVICE_NAME,
+                    std::env::var("APP_NAME").expect("APP_NAME not set"),
+                ),
+            ])),
         )
         .install_batch(opentelemetry::runtime::Tokio)
 }
 ```
 
-**Step 4:  Initialize the tracer in main.rs**<br></br>
-Modify the main function to initialise the tracer  in `main.rs`
+Explanation:
 
-```jsx
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn Error + Send + Sync + 'static>> {
-    let _ = init_tracer()?;
+- **`signoz_ingestion_key`**: Retrieves the SigNoz ingestion key from your environment variables.
+- **`MetadataMap`**: Adds custom metadata (such as the ingestion key) to the telemetry data.
+- **`opentelemetry_otlp::new_pipeline()`**: Creates a new telemetry pipeline with the OTLP exporter.
+- **`with_exporter`**: Configures the exporter to send data to SigNoz.
+- **`with_trace_config`**: Configures additional trace settings, including setting the service name.
+- **`install_batch`**: Installs the tracer in batch mode, which uses Tokio as the async runtime.
 
-    ...
-}
+**Step 4: Create a `.env` file**
+
+Create a `.env` file in the root of your project to store sensitive information, such as the SigNoz endpoint, ingestion key, and app name. The `.env` file structure should look like this:
+
+```bash
+project_root/
+|-- Cargo.toml
+|-- src/
+|   |-- main.rs
+|-- .env
 ```
 
-**Step 5:  Add the OpenTelemetry instrumentation for your sample Rust app**<br></br>
+Paste these in `.env` file:
 
-```jsx
-    let parent_cx = global::get_text_map_propagator(|propagator| {
-        propagator.extract(&HeaderExtractor(req.headers()))
+```bash
+PORT=1337
+APP_NAME=rust-sample
+SIGNOZ_ENDPOINT=https://ingest.[region].signoz.cloud:443/v1/traces
+SIGNOZ_INGESTION_KEY=XXXXXXXXXX
+```
+
+Where:
+
+- **`PORT`**: The port your application runs on
+- **`APP_NAME`**: The name you want to give your rust application
+- **`SIGNOZ_INGESTION_KEY`**: This is an ingestion key provided by SigNoz that authenticates your application with your SigNoz cloud account and ensures that data is sent securely. Follow [this guide](https://signoz.io/docs/ingestion/signoz-cloud/keys/) to generate your SigNoz ingestion key.
+- **`SIGNOZ_ENDPOINT`**: The endpoint where trace data will be sent. The full URL format is `https://ingest.[region].signoz.cloud:443/v1/traces`. Depending on the choice of your region for SigNoz cloud, the ingest endpoint will vary according to this table.
+    
+    
+    | Region | Endpoint |
+    | --- | --- |
+    | US | ingest.us.signoz.cloud:443/v1/traces |
+    | IN | ingest.in.signoz.cloud:443/v1/traces |
+    | EU | ingest.eu.signoz.cloud:443/v1/traces |
+
+**Step 6: Add the `dotenv` crate**
+
+The `dotenv` crate helps load environment variables from the `.env` file into the Rust application. This is crucial because it allows you to manage sensitive information securely and dynamically, without hardcoding values into the source code.
+
+Open your `Cargo.toml` file and paste these below `[dependencies]`:
+
+```rust
+dotenv = "0.15.0"
+```
+
+In your `main.rs` file, import it at top so you can use variables from the **`.env`** file
+
+```rust
+use dotenv::dotenv;
+```
+
+**Step 7: Initialize the environment and tracer**
+
+After adding the `dotenv` crate in your `Cargo.toml` file , you need to call it inside the `main()` function in your `main.rs` file to load the environment variables from the `.env` file. The `init_tracer()` function is then called to initialize the OpenTelemetry pipeline, enabling the application to start collecting telemetry data and sending it to SigNoz:
+
+```rust
+dotenv().ok();
+let _ = init_tracer();
+```
+
+Also change:
+
+```rust
+fn main(){
+    *//rest of the code*}
+```
+
+to
+
+```rust
+*#[tokio::main]*async fn main() {
+    *//rest of the code*}
+```
+
+**Step 8: Add span creation for telemetry data**
+
+To trace operations, you need to create spans in your application. Add the below just after the `let _ = init_tracer();`:
+
+```rust
+  let tracer = global::tracer("global_tracer");
+    let _cx = Context::new();
+  
+    tracer.in_span("operation", |cx| {
+        let span = cx.span();
+        span.set_attribute(Key::new("KEY").string("value"));
+
+        span.add_event(
+            format!("Operations"),
+            vec![
+                Key::new("SigNoz is").string("Awesome"),
+            ],
+        );
     });
-    tracer.start_with_context("fibonacci", &parent_cx);
+    shutdown_tracer_provider()
 ```
 
-**Step 6: Set environment variables and run your Rust application**<br></br>
-Now that you have instrumented your Rust application with OpenTelemetry, you need to set some environment variables to send data to SigNoz backend:
+- **`tracer.in_span`**: This creates a new span named `"operation"`, which represents an operation being performed within the application. Spans are the core of tracing, as they record the details of operations as they occur.
+- **`span.set_attribute`**: This sets additional attributes on the span, such as `"KEY": "value"`. These attributes help provide more context to your traces and can be used for filtering or grouping in the monitoring tool.
+- **`span.add_event`**: This adds an event to the span, which can include custom messages or metadata. Events can help track specific points in time during the span's lifecycle.
+- **`shutdown_tracer_provider`**: This shuts down the tracer and sends any remaining data to the configured exporter. This is important for ensuring all trace data is sent before the application exits.
 
-`OTEL_RESOURCE_ATTRIBUTES`: service.name=rust-app (you can name it whatever you want)
+**Step 9: Run your application**
 
-`OTEL_EXPORTER_OTLP_ENDPOINT`: http://localhost:4317
+Run the application by executing the following command:
 
-Since, we have installed SigNoz on our local machine, we use the above IP. If you install SigNoz on a different machine, you can update it with the relevant IP.
-
-Hence, the final run command looks like this:
-
-```jsx
-OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317 OTEL_RESOURCE_ATTRIBUTES=service.name=rust-app cargo run
+```bash
+cargo run
 ```
 
-**Step 7:** **Generate some data**<br></br>
-In order to monitor your Rust application with SigNoz, you first need to generate some data.
+Open [localhost:1337](http://localhost:1337) in your browser and you should see your application running.
 
-Visit home page of your Rust application at [http://localhost:1337](http://localhost:1337) and enter some details. Alternatively you can just send curl request
+<figure data-zoomable align='center'>
+<img src="/img/blog/2024/12/rust-app-running.webp" alt="Rust app running"/>
+<figcaption><i>Rust app running</i></figcaption>
+</figure>
 
-```jsx
+
+### Generate Telemetry Data
+
+To monitor your Rust application with SigNoz, you need to generate telemetry data. Visit your application's homepage at [http://localhost:1337](http://localhost:1337/) and enter some details, or send a `curl` request like this:
+
+```bash
 curl -d "name=Baymax&number=42" \
 -H "Content-Type: application/x-www-form-urlencoded" \
 -X POST http://localhost:1337/post
 ```
-        
 
-**Step 8: Visualize the collected data in SigNoz**<br></br>
-Access the signoz UI on [http://localhost:3301/application](http://localhost:3301/application). You will find your sample Rust application in the list of applications being monitored by SigNoz.
+## Monitor and Visualize your application in SigNoz
 
-<figure data-zoomable align='center'>
-    <img src="/img/blog/2022/05/rust_application_signoz_dashboard.webp" alt="Rust app being monitored on SigNoz dashboard"/>
-    <figcaption><i>Rust application being monitored on the SigNoz dashboard. The other applications are sample apps that come bundled with SigNoz installation.</i></figcaption>
-</figure>
+After instrumenting your Rust application with OpenTelemetry, you can access the SigNoz UI to monitor and visualize your application's performance in real-time.
 
-
-Go to `Traces` and choose `rust-app` from the list of services to see the tracing data of your application. Tracing data can help you visualize how user requests perform across services in a multi-service application.
-
-In the `Traces` tab of SigNoz, you can analyze the tracing data using filters based on tags, status codes, service names, operations, etc.
+Under the `Services` tab, you will find your sample Rust application in the list of applications being monitored by SigNoz.
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2022/05/rust_application_traces_tab.webp" alt="Traces tab of SigNoz dashboard"/>
-    <figcaption><i>Use powerful filters to analyze the tracing data of your Rust application</i></figcaption>
+<img src="/img/blog/2024/12/services-tab-rust.webp" alt="Rust application being monitored on the SigNoz dashboard"/>
+<figcaption><i>Rust application being monitored on the SigNoz dashboard</i></figcaption>
 </figure>
 
-
-You can see a complete breakdown of the request with Flamegraphs and Gantt charts. You can click on any span in the [spans](https://signoz.io/blog/distributed-tracing-span/) table to access it.
+Navigate to the **`Traces`** tab in SigNoz and select your **`rust-app`** from the list of services to view trace data. Tracing data can help you visualize how user requests perform across services in a multi-service application. You can use various filters such as tags, status codes, service names, and operations to drill down into specific aspects of your application's tracing data.
 
 <figure data-zoomable align='center'>
-    <img src="/img/blog/2022/05/rust_application_flamegraphs.webp" alt="Flamegraphs and Gantt charts in SigNoz dashboard"/>
-    <figcaption><i>You can see the complete breakdown of your requests with details like how much time each operation took, span attributes, etc</i></figcaption>
+<img src="/img/blog/2024/12/traces-tab-rust.webp" alt="Use filters to analyze the tracing data of your Rust application"/>
+<figcaption><i>Use filters to analyze the tracing data of your Rust application</i></figcaption>
 </figure>
 
+Additionally, SigNoz provides Flamegraphs and Gantt charts for a detailed breakdown of request execution, including the time taken by each operation and span attributes.
+
+By clicking on any [span](https://signoz.io/blog/distributed-tracing-span/) in the **`Spans`** table, you can dive deeper into the trace details and get a clearer view of your application's performance across different operations and services.
+
+<figure data-zoomable align='center'>
+<img src="/img/blog/2024/12/flamegraphs-rust.webp" alt="Flamegraphs for detailed trace analysis"/>
+<figcaption><i>You can see the complete breakdown of your requests with details like how much time each operation took, span attributes, etc</i></figcaption>
+</figure>
 
 ## Conclusion
 
@@ -181,22 +314,18 @@ Using OpenTelemetry libraries, you can instrument your Rust applications for end
 
 OpenTelemetry is the future for setting up observability for cloud-native apps. It is backed by a huge community and covers a wide variety of technology and frameworks. Using OpenTelemetry, engineering teams can instrument polyglot and distributed applications with peace of mind.
 
-If you are someone who understands more from video, then you can watch the below video tutorial on the same with SigNoz.
-
-
-
-<YouTube id="yPt1Pc3_tls" mute={false} />
-
-
-
-
 ## Getting started with SigNoz
 
-<GetStartedSigNoz />
+SigNoz cloud is the easiest way to run SigNoz. [**Sign up**](https://signoz.io/teams/) for a free account and get 30 days of unlimited access to all features.
+
+[![try-signoz-cloud-blog-cta.png](https://signoz.io/img/launch_week/try-signoz-cloud-blog-cta.png)](https://signoz.io/teams)
+
+You can also install and self-host SigNoz yourself since it is open-source. With 19,000+ GitHub stars, [**open-source SigNoz**](https://github.com/signoz/signoz) is loved by developers. Find the [**instructions**](https://signoz.io/docs/install/) to self-host SigNoz.
 
 ---
 
 **Further Reading**
 
-**[OpenTelemetry Collector - Complete Guide](https://signoz.io/blog/opentelemetry-collector-complete-guide/)**<br></br>
-**[OpenTelemetry Tracing - things you need to know](https://signoz.io/blog/opentelemetry-tracing/)**<br></br>
+[**OpenTelemetry Collector - Complete Guide**](https://signoz.io/blog/opentelemetry-collector-complete-guide/)
+
+[**OpenTelemetry Tracing - things you need to know**](https://signoz.io/blog/opentelemetry-tracing/)
