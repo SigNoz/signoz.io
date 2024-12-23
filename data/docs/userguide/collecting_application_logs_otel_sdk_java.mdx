@@ -16,44 +16,21 @@ To send logs from a Java application, you will need to add the agent and set the
 
 <TabItem value="signoz-cloud" label="SigNoz Cloud" default>
 
-## Sending Logs to SigNoz Cloud
-
 ```bash
 OTEL_LOGS_EXPORTER=otlp \
-OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.{region}.signoz.cloud:443" \
+OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443" \
 OTEL_EXPORTER_OTLP_HEADERS=signoz-access-token=<SIGNOZ_INGESTION_KEY> \
 OTEL_RESOURCE_ATTRIBUTES=service.name=<app_name> \
 java -javaagent:/path/opentelemetry-javaagent.jar -jar <myapp>.jar
 ```
 
-- Replace `<SIGNOZ_INGESTION_KEY>` with your SigNoz Cloud ingestion key.
-- Replace `{region}` with the appropriate region for your cloud account:
+- Replace `<SIGNOZ_INGESTION_KEY>` with your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- Set the `<region>` to match your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 
-| Region | Endpoint                   |
-| ------ | -------------------------- |
-| US     | ingest.us.signoz.cloud:443 |
-| IN     | ingest.in.signoz.cloud:443 |
-| EU     | ingest.eu.signoz.cloud:443 |
-
-### Example with Experimental Attributes
-
-To enable settings like experimental log attributes, pass additional arguments:
-
-```bash
-OTEL_LOGS_EXPORTER=otlp \
-OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.{region}.signoz.cloud:443" \
-OTEL_EXPORTER_OTLP_HEADERS=signoz-access-token=<SIGNOZ_INGESTION_KEY> \
-OTEL_RESOURCE_ATTRIBUTES=service.name=myapp \
-java -javaagent:/path/opentelemetry-javaagent.jar \
--Dotel.instrumentation.logback-appender.experimental-log-attributes=true \
--jar target/*.jar
-```
 
 </TabItem>
 
 <TabItem value="self-hosted" label="Self-Host">
-
-## Sending Logs to SigNoz Hosted Locally
 
 ```bash
 OTEL_LOGS_EXPORTER=otlp \
@@ -64,19 +41,6 @@ java -javaagent:/path/opentelemetry-javaagent.jar -jar <myapp>.jar
 
 - Replace `<IP of SigNoz Backend>` with the IP address or hostname of your SigNoz backend.
 - For local setups, use `0.0.0.0` if SigNoz runs on the same host.
-
-### Example with Experimental Attributes
-
-To enable settings like experimental log attributes, pass additional arguments:
-
-```bash
-OTEL_LOGS_EXPORTER=otlp \
-OTEL_EXPORTER_OTLP_ENDPOINT="http://<host>:4317" \
-OTEL_RESOURCE_ATTRIBUTES=service.name=myapp \
-java -javaagent:/path/opentelemetry-javaagent.jar \
--Dotel.instrumentation.logback-appender.experimental-log-attributes=true \
--jar target/*.jar
-```
 
 </TabItem>
 
@@ -139,6 +103,18 @@ OTEL_RESOURCE_ATTRIBUTES=service.name=myapp \
 java -javaagent:/path/opentelemetry-javaagent.jar -jar target/*.jar
 ```
 
+To enable settings like experimental log attributes, pass additional arguments:
+
+```bash
+OTEL_LOGS_EXPORTER=otlp \
+OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.{region}.signoz.cloud:443" \
+OTEL_EXPORTER_OTLP_HEADERS=signoz-access-token=<SIGNOZ_INGESTION_KEY> \
+OTEL_RESOURCE_ATTRIBUTES=service.name=myapp \
+java -javaagent:/path/opentelemetry-javaagent.jar \
+-Dotel.instrumentation.logback-appender.experimental-log-attributes=true \
+-jar target/*.jar
+```
+
 </TabItem>
 
 <TabItem value="self-hosted" label="Self-Host">
@@ -148,6 +124,17 @@ OTEL_LOGS_EXPORTER=otlp \
 OTEL_EXPORTER_OTLP_ENDPOINT="http://<host>:4317" \
 OTEL_RESOURCE_ATTRIBUTES=service.name=myapp \
 java -javaagent:/path/opentelemetry-javaagent.jar -jar target/*.jar
+```
+
+To enable settings like experimental log attributes, pass additional arguments:
+
+```bash
+OTEL_LOGS_EXPORTER=otlp \
+OTEL_EXPORTER_OTLP_ENDPOINT="http://<host>:4317" \
+OTEL_RESOURCE_ATTRIBUTES=service.name=myapp \
+java -javaagent:/path/opentelemetry-javaagent.jar \
+-Dotel.instrumentation.logback-appender.experimental-log-attributes=true \
+-jar target/*.jar
 ```
 
 </TabItem>

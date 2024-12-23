@@ -16,9 +16,9 @@ OTEL_PYTHON_LOGGING_AUTO_INSTRUMENTATION_ENABLED=true
 ```
 
 ## Example application 
-Here is a sample python application
+Here is a sample python application.
 
-1. Create a file named main.py and paste the following code
+1. Create a file named `main.py` and paste the following code:
     ```python
     from flask import Flask
     import logging
@@ -62,36 +62,28 @@ Here is a sample python application
 
 You will be able to see the otel logs on the console once you visit `http://localhost:5000`
 
-If you want to send data to SigNoz cloud or self host SigNoz the run command will change and will be described in the next steps
+Run the below command to start sending your traces to SigNoz.
 
 
-<Tabs>
+<Tabs entityName="plans">
 <TabItem value="cloud" label="SigNoz Cloud" default>
 
-For SigNoz Cloud the run command will be
 
 ```bash
 OTEL_PYTHON_LOGGING_AUTO_INSTRUMENTATION_ENABLED=true \
-OTEL_EXPORTER_OTLP_ENDPOINT=<SIGNOZ_ENDPOINT> \
+OTEL_EXPORTER_OTLP_ENDPOINT=ingest.<region>.signoz.cloud:443 \
 OTEL_EXPORTER_OTLP_HEADERS=signoz-access-token=<INGESTION_KEY> \
 opentelemetry-instrument --traces_exporter otlp --metrics_exporter otlp --logs_exporter otlp python main.py
 ```
 
-- The value of `SIGNOZ_ENDPOINT` will be `https://ingest.{region}.signoz.cloud:443` where depending on the choice of your region for SigNoz cloud, the otlp endpoint will vary according to this table.
+- Replace `<INGESTION_KEY>` with your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- Set the `<region>` to match your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 
-| Region | Endpoint                   |
-| ------ | -------------------------- |
-| US     | ingest.us.signoz.cloud:443 |
-| IN     | ingest.in.signoz.cloud:443 |
-| EU     | ingest.eu.signoz.cloud:443 |
-
-- The value of `INGESTION_KEY`  is your ingestion key.
 
 </TabItem>
 
 <TabItem value="self-host" label="Self-Host">
 
-For SigNoz Cloud the run command will be
 
 ```bash
 OTEL_PYTHON_LOGGING_AUTO_INSTRUMENTATION_ENABLED=true \
