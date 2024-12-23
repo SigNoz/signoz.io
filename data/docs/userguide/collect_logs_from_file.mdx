@@ -7,8 +7,8 @@ hide_table_of_contents: true
 
 ## Overview
 
-This guide provides detailed instructions on configuring the OpenTelemetry Collector to read logs from a file and push them to SigNoz, enabling you to analyze your 
-application logs effectively.
+This documentation provides detailed instructions on configuring the OpenTelemetry Collector to read logs from a file and push them to SigNoz, enabling you to 
+analyze your application logs effectively.
 
 ## Sample Log File
 
@@ -26,11 +26,7 @@ This file represents a log file of your application. You can choose any file tha
 
 <TabItem value="signoz-cloud" label="SigNoz Cloud" default>
 
-### Prerequisite
-
-- SigNoz [cloud](https://signoz.io/teams/) account
-
-### Steps
+### Setup
 
 #### 1. Install OpenTelemetry Collector
 
@@ -49,9 +45,9 @@ receivers:
     start_at: end
 ```
 
-:::admonition
+<Admonition>
 The `start_at: end` configuration ensures that only newly added logs are transmitted. To include historical logs, set `start_at` to `beginning`.
-:::
+</Admonition>
 
 #### 3. Update Pipeline Configuration
 
@@ -70,7 +66,7 @@ Restart the OpenTelemetry Collector for the changes to take effect. Follow [this
 
 #### 4. Verify Export
 
-The logs will be visible in the SigNoz UI. Adding more entries to `app.log` will reflect in the UI.
+The logs will be visible in the Logs Tab of SigNoz. As more entires are added to `app.log` it will reflect Logs tab.
 
 <figure data-zoomable align='center'>
     <img src="/img/docs/application-logs-output.webp" alt="Logs of the dummy app.log file visible in SigNoz"/>
@@ -111,9 +107,9 @@ receivers:
     start_at: end
 ```
 
-:::admonition
+<Admonition>
 The `start_at: end` configuration ensures only newly added logs are transmitted. To include historical logs, set `start_at` to `beginning`.
-:::
+</Admonition>
 
 ##### Update Pipeline Configuration
 
@@ -159,9 +155,9 @@ service:
       exporters: [otlp/log]
 ```
 
-:::admonition
+<Admonition>
 To use `https`, provide the certificate and key. Refer to [this guide](https://github.com/open-telemetry/opentelemetry-collector/blob/main/exporter/otlpexporter/README.md) for details.
-:::
+</Admonition>
 
 ##### Mount Log File and Run Collector
 
