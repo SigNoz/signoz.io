@@ -76,11 +76,11 @@ Add this function in main.rs file, `init_tracer` is initializing an OpenTelemetr
 
 ```rust
 fn init_tracer() -> Result<sdktrace::Tracer, TraceError> {
-    let signoz_access_token = std::env::var("SIGNOZ_ACCESS_TOKEN").expect("SIGNOZ_ACCESS_TOKEN not set");
+    let SIGNOZ_INGESTION_KEY = std::env::var("SIGNOZ_INGESTION_KEY").expect("SIGNOZ_INGESTION_KEY not set");
     let mut metadata = MetadataMap::new();
     metadata.insert(
-        "signoz-access-token",
-        MetadataValue::from_str(&signoz_access_token).unwrap(),
+        "signoz-ingestion-key",
+        MetadataValue::from_str(&SIGNOZ_INGESTION_KEY).unwrap(),
     );
     opentelemetry_otlp::new_pipeline()
         .tracing()
@@ -116,7 +116,7 @@ Paste these in `.env` file
 PORT=3000
 APP_NAME=rust-sample
 SIGNOZ_ENDPOINT=https://ingest.[region].signoz.cloud:443/v1/traces
-SIGNOZ_ACCESS_TOKEN=XXXXXXXXXX
+SIGNOZ_INGESTION_KEY=XXXXXXXXXX
 ```
 
 | Variable              | Description                                               |
@@ -124,7 +124,7 @@ SIGNOZ_ACCESS_TOKEN=XXXXXXXXXX
 | PORT (Optional)      | If it is a web app pass port or else you can ignore this variable  |
 | APP_NAME *      | Name you want to give to your rust application  |
 | SIGNOZ_ENDPOINT  *     | This is ingestion URL which you must have got in mail after registering on SigNoz cloud  |
-| SIGNOZ_ACCESS_TOKEN *  | This is Ingestion Key which you must have got in mail after registering on SigNoz cloud                                     |
+| SIGNOZ_INGESTION_KEY *  | This is Ingestion Key which you must have got in mail after registering on SigNoz cloud                                     |
 
 
 **Step 3: Add the OpenTelemetry instrumentation for your Rust app**
@@ -184,7 +184,7 @@ Now comes the most interesting part, Sending data to SigNoz to get sense of your
 Go to your `.env` file and update the value of required variables i.e
 `APP_NAME`,
 `SIGNOZ_ENDPOINT` and
-`SIGNOZ_ACCESS_TOKEN`
+`SIGNOZ_INGESTION_KEY`
 
 Now run `cargo run` in terminal to start the application!
 
@@ -453,11 +453,11 @@ Add this function in main.rs file, `init_tracer` is initializing an OpenTelemetr
 
 ```rust
 fn init_tracer() -> Result<sdktrace::Tracer, TraceError> {
-    let signoz_access_token = std::env::var("SIGNOZ_ACCESS_TOKEN").expect("SIGNOZ_ACCESS_TOKEN not set");
+    let SIGNOZ_INGESTION_KEY = std::env::var("SIGNOZ_INGESTION_KEY").expect("SIGNOZ_INGESTION_KEY not set");
     let mut metadata = MetadataMap::new();
     metadata.insert(
-        "signoz-access-token",
-        MetadataValue::from_str(&signoz_access_token).unwrap(),
+        "signoz-ingestion-key",
+        MetadataValue::from_str(&SIGNOZ_INGESTION_KEY).unwrap(),
     );
     opentelemetry_otlp::new_pipeline()
         .tracing()
@@ -493,7 +493,7 @@ Paste these in `.env` file
 PORT=3000
 APP_NAME=rust-sample
 SIGNOZ_ENDPOINT=https://ingest.[region].signoz.cloud:443/v1/traces
-SIGNOZ_ACCESS_TOKEN=XXXXXXXXXX
+SIGNOZ_INGESTION_KEY=XXXXXXXXXX
 ```
 
 | Variable              | Description                                               |
@@ -501,7 +501,7 @@ SIGNOZ_ACCESS_TOKEN=XXXXXXXXXX
 | PORT (Optional)      | If it is a web app pass port or else you can ignore this variable  |
 | APP_NAME *      | Name you want to give to your rust application  |
 | SIGNOZ_ENDPOINT  *     | This is ingestion URL which you must have got in mail after registering on SigNoz cloud  |
-| SIGNOZ_ACCESS_TOKEN *  | This is Ingestion Key which you must have got in mail after registering on SigNoz cloud                                     |
+| SIGNOZ_INGESTION_KEY *  | This is Ingestion Key which you must have got in mail after registering on SigNoz cloud                                     |
 
 
 **Step 3: Add the OpenTelemetry instrumentation for your Rust app**
@@ -561,7 +561,7 @@ Now comes the most interesting part, Sending data to SigNoz to get sense of your
 Go to your `.env` file and update the value of required variables i.e
 `APP_NAME`,
 `SIGNOZ_ENDPOINT` and
-`SIGNOZ_ACCESS_TOKEN`
+`SIGNOZ_INGESTION_KEY`
 
 Now run `cargo run` in terminal to start the application!
 

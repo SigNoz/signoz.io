@@ -50,7 +50,7 @@ export OTEL_TRACES_EXPORTER="otlp"
 export OTEL_EXPORTER_OTLP_ENDPOINT="<SIGNOZ_ENDPOINT>"
 export OTEL_NODE_RESOURCE_DETECTORS="env,host,os"
 export OTEL_SERVICE_NAME="<APP_NAME>"
-export OTEL_EXPORTER_OTLP_HEADERS="signoz-access-token=<SIGNOZ_ACCESS_TOKEN>"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>"
 export NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
 <your_run_command>
 ```
@@ -59,7 +59,7 @@ export NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/registe
 |-----------------------|-----------------------------------------------------|
 | APP_NAME *      | Name you want to give to your rust application  |
 | SIGNOZ_ENDPOINT  *     | This is ingestion URL which you must have got in mail after registering on SigNoz cloud  |
-| SIGNOZ_ACCESS_TOKEN *  | This is Ingestion Key which you must have got in mail after registering on SigNoz cloud                                     |
+| SIGNOZ_INGESTION_KEY *  | This is Ingestion Key which you must have got in mail after registering on SigNoz cloud                                     |
 
 replace `<your_run_command>` with the run command of your application
 
@@ -163,7 +163,7 @@ async function bootstrap() {
 **Step 5.** Run the application
 
 ```
-OTEL_EXPORTER_OTLP_HEADERS="signoz-access-token=<SIGNOZ_INGESTION_KEY>" nest start
+OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>" nest start
 ```
 
 The data captured with OpenTelemetry from your application should start showing on the SigNoz dashboard.
@@ -482,7 +482,7 @@ $env:OTEL_TRACES_EXPORTER="otlp"
 $env:OTEL_EXPORTER_OTLP_ENDPOINT="<SIGNOZ_ENDPOINT>"
 $env:OTEL_NODE_RESOURCE_DETECTORS="env,host,os"
 $env:OTEL_SERVICE_NAME="<APP_NAME>"
-$env:OTEL_EXPORTER_OTLP_HEADERS="signoz-access-token=<SIGNOZ_ACCESS_TOKEN>"
+$env:OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>"
 $env:NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
 <your_run_command>
 ```
@@ -491,7 +491,7 @@ $env:NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
 |-----------------------|-----------------------------------------------------|
 | APP_NAME *      | Name you want to give to your rust application  |
 | SIGNOZ_ENDPOINT  *     | This is ingestion URL which you must have got in mail after registering on SigNoz cloud  |
-| SIGNOZ_ACCESS_TOKEN *  | This is Ingestion Key which you must have got in mail after registering on SigNoz cloud                                     |
+| SIGNOZ_INGESTION_KEY *  | This is Ingestion Key which you must have got in mail after registering on SigNoz cloud                                     |
 
 replace `<your_run_command>` with the run command of your application
 
@@ -523,7 +523,7 @@ import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
 const exporterOptions = {
   //highlight-start
   url: 'https://ingest.{region}.signoz.cloud:443/v1/traces',
-  headers: { 'signoz-access-token': '<signoz_ingestion_key>' },
+  headers: { 'signoz-ingestion-key': '<signoz_ingestion_key>' },
   //highlight-end
 };
 

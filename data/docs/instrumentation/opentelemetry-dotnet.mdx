@@ -62,7 +62,7 @@ chmod +x $HOME/.otel-dotnet-auto/instrument.sh
 . $HOME/.otel-dotnet-auto/instrument.sh
 
 # Run your application with instrumentation
-OTEL_SERVICE_NAME=<SERVICE_NAME> OTEL_TRACES_EXPORTER=otlp OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf OTEL_RESOURCE_ATTRIBUTES=deployment.environment=staging,service.version=1.0.0 OTEL_EXPORTER_OTLP_ENDPOINT=<SIGNOZ_ENDPOINT> OTEL_EXPORTER_OTLP_HEADERS=signoz-access-token=<SIGNOZ_INGESTION_KEY> ./MyNetApp
+OTEL_SERVICE_NAME=<SERVICE_NAME> OTEL_TRACES_EXPORTER=otlp OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf OTEL_RESOURCE_ATTRIBUTES=deployment.environment=staging,service.version=1.0.0 OTEL_EXPORTER_OTLP_ENDPOINT=<SIGNOZ_ENDPOINT> OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<SIGNOZ_INGESTION_KEY> ./MyNetApp
 ```
 
 
@@ -70,7 +70,7 @@ OTEL_SERVICE_NAME=<SERVICE_NAME> OTEL_TRACES_EXPORTER=otlp OTEL_EXPORTER_OTLP_PR
 |-----------------------|-----------------------------------------------------|
 | SERVICE_NAME *      | Name you want to give to your rust application  |
 | SIGNOZ_ENDPOINT  *     | This is ingestion URL which you must have got in mail after registering on SigNoz cloud  |
-| SIGNOZ_ACCESS_TOKEN *  | This is Ingestion Key which you must have got in mail after registering on SigNoz cloud                                     |
+| SIGNOZ_INGESTION_KEY *  | This is Ingestion Key which you must have got in mail after registering on SigNoz cloud                                     |
 
 
 <Admonition>
@@ -127,7 +127,7 @@ builder.Services.AddOpenTelemetry()
             otlpOptions.Protocol = OtlpExportProtocol.Grpc;
 						
 						//SigNoz Cloud account Ingestion key
-            string headerKey = "signoz-access-token";
+            string headerKey = "signoz-ingestion-key";
             string headerValue = "<SIGNOZ_INGESTION_KEY>";
 
             string formattedHeader = $"{headerKey}={headerValue}";
@@ -479,7 +479,7 @@ Install-OpenTelemetryCore
 $env:OTEL_TRACES_EXPORTER="otlp"
 $env:OTEL_EXPORTER_OTLP_ENDPOINT="<SIGNOZ_ENDPOINT>"
 $env:OTEL_SERVICE_NAME="<APP_NAME>"
-$env:OTEL_EXPORTER_OTLP_HEADERS="signoz-access-token=<SIGNOZ_ACCESS_TOKEN>"
+$env:OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>"
 $env:OTEL_DOTNET_AUTO_TRACES_CONSOLE_EXPORTER_ENABLED="true"
 $env:OTEL_DOTNET_AUTO_LOGS_CONSOLE_EXPORTER_ENABLED="true"
 Register-OpenTelemetryForCurrentSession -OTelServiceName "<APP_NAME>"
@@ -490,7 +490,7 @@ dotnet run
 |-----------------------|-----------------------------------------------------|
 | APP_NAME *      | Name you want to give to your rust application  |
 | SIGNOZ_ENDPOINT  *     | This is ingestion URL which you must have got in mail after registering on SigNoz cloud  |
-| SIGNOZ_ACCESS_TOKEN *  | This is Ingestion Key which you must have got in mail after registering on SigNoz cloud                                     |
+| SIGNOZ_INGESTION_KEY *  | This is Ingestion Key which you must have got in mail after registering on SigNoz cloud                                     |
 
 Depending on the choice of your region for SigNoz cloud, the ingest endpoint will vary according to this table.
 
@@ -547,7 +547,7 @@ builder.Services.AddOpenTelemetry()
             otlpOptions.Protocol = OtlpExportProtocol.Grpc;
 						
 						//SigNoz Cloud account Ingestion key
-            string headerKey = "signoz-access-token";
+            string headerKey = "signoz-ingestion-key";
             string headerValue = "<SIGNOZ_INGESTION_KEY>";
 
             string formattedHeader = $"{headerKey}={headerValue}";
@@ -783,7 +783,7 @@ builder.Services.AddOpenTelemetry()
             otlpOptions.Protocol = OtlpExportProtocol.Grpc;
 						
 						//SigNoz Cloud account Ingestion key
-            string headerKey = "signoz-access-token";
+            string headerKey = "signoz-ingestion-key";
             string headerValue = "<SIGNOZ_INGESTION_KEY>";
 
             string formattedHeader = $"{headerKey}={headerValue}";
