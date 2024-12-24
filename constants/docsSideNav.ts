@@ -215,6 +215,12 @@ const docsSideNav = [
               },
               {
                 type: 'doc',
+                route: '/docs/instrumentation/opentelemetry-quarkus',
+                label: 'Quarkus',
+                className: 'new-doc',
+              },
+              {
+                type: 'doc',
                 route: '/docs/instrumentation/tomcat',
                 label: 'Tomcat',
               },
@@ -779,6 +785,12 @@ const docsSideNav = [
         route: '/docs/metrics-management/k8s-infra-otel-config',
         label: 'Configure k8s-infra otelDeployment to collect metrics from receivers',
       },
+      {
+        type: 'doc',
+        className: 'new-doc',
+        route: '/docs/metrics-management/docker-container-metrics',
+        label: 'Docker container metrics',
+      },
     ],
   },
   {
@@ -992,6 +1004,11 @@ const docsSideNav = [
         type: 'doc',
         route: '/docs/alerts-management/alerts-history',
         label: 'Alerts History',
+      },
+      {
+        type: 'doc',
+        route: '/docs/alerts-management/terraform-provider-signoz',
+        label: 'Terraform Provider',
       },
     ],
   },
@@ -1783,6 +1800,11 @@ const docsSideNav = [
         // slug: '/docs/operate/migration/migration',
         // },
         items: [
+          {
+            type: 'doc',
+            route: '/docs/operate/migration/upgrade-0.64',
+            label: 'Upgrade to v0.64',
+          },
           {
             type: 'doc',
             route: '/docs/operate/migration/upgrade-0.55',

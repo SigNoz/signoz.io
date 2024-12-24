@@ -1,0 +1,239 @@
+---
+date: 2024-12-05
+id: terraform-provider-signoz
+title: Terraform Provider
+---
+# Creating SigNoz Alert using Terraform 
+
+The configuration of alerts for a monitoring target is the very definition of what the team perceives as a “problem” and should be managed as properly as the application code.
+By defining SigNoz alerts as Terraform code, it is possible to manage changes to the alert settings.
+
+## Overview
+
+SigNoz alert notifies you of the change in the state of your service.
+Although setting smart, effective alerts can be achieved using [SigNoz UI](https://signoz.io/docs/userguide/alerts-management/), **Terraform 'signoz' provider** will help you manage SigNoz alerts as reviewable codes.
+
+This document will show you how to:
+- configure the provider
+- create a new alert on SigNoz Cloud
+- start managing preexistent alerts using Terraform
+
+## Prerequisites
+
+- Terraform
+  - version of Terraform runtime: [v0.13.0](https://github.com/hashicorp/terraform/releases/tag/v0.13.0) or later
+  - version of signoz provider: [0.0.4](https://github.com/SigNoz/terraform-provider-signoz/releases/tag/v0.0.4) or later
+- SigNoz Cloud
+  - endpoint URL
+  - api key
+
+## Configure Terraform Provider
+
+### Step 1: Configure Terraform environment
+
+Create `.tf` file with an arbitrary name (`main.tf` is commonly used) and add the following content:
+```hcl
+terraform {
+  required_version = ">= 0.13"
+}
+```
+
+### Step 2: Install Terraform signoz Provider
+
+Add specification block for the signoz provider as follows:
+```diff
+terraform {
+  required_version = ">= 0.13"
+
++ required_providers {
++   signoz = {
++     source = "Signoz/signoz"
++     version = "~>0.0.4"
++   }
++ }
+}
+```
+
+Running `terraform init` will create `.terraform.lock.hcl` file, which locks the provider version for consistent usage.
+
+### Step 3: Configure signoz Provider
+
+Add `provider {}` block to the `.tf` file as follows:
+```hcl
+provider "signoz" {}
+```
+
+By setting the environmental variables below, the signoz provider will automatically read these variables and authorize with your SigNoz Cloud account:
+``` bash
+SIGNOZ_ACCESS_TOEKN="your-api-key"
+SIGNOZ_ENDPOINT="https://your-signoz-endpoint"
+```
+
+You can explicitly set these variables in the `provider {}` block as shown below, but avoid hardcoding your API key if you plan to commit your `.tf` files to an online version control system.
+```hcl
+provider "signoz" {
+  endpoint="https://your-signoz-endpoint"
+  access_token = <api_key>  # Do not type your token directly if you push codes online
+}
+```
+## Create new alert
+### Step 1: Define SigNoz Alert as Code
+
+Define your alert using the `signoz_alert` resource type as follows:
+```hcl
+resource "signoz_alert" "example" {
+  alert      = "Example alert"
+  alert_type = "METRIC_BASED_ALERT"
+  condition = jsonencode(
+    {
+      "absentFor" : 10,
+      "alertOnAbsent" : true,
+      "compositeQuery" : {
+        "builderQueries" : {
+          "A" : {
+            "IsAnomaly" : false,
+            "QueriesUsedInFormula" : null,
+            "ShiftBy" : 0,
+            "aggregateAttribute" : {
+              "dataType" : "float64",
+              "isColumn" : true,
+              "isJSON" : false,
+              "key" : "k8s_node_memory_rss",
+              "type" : "Gauge"
+            },
+            "aggregateOperator" : "avg",
+            "dataSource" : "metrics",
+            "disabled" : false,
+            "expression" : "A",
+            "filters" : {
+              "items" : [],
+              "op" : "AND"
+            },
+            "groupBy" : [
+              {
+                "dataType" : "string",
+                "isColumn" : false,
+                "isJSON" : false,
+                "key" : "k8s_node_name",
+                "type" : "tag"
+              }
+            ],
+            "limit" : 0,
+            "offset" : 0,
+            "pageSize" : 0,
+            "queryName" : "A",
+            "reduceTo" : "avg",
+            "spaceAggregation" : "avg",
+            "stepInterval" : 60,
+            "timeAggregation" : "avg"
+          }
+        },
+        "chQueries" : {
+          "A" : {
+            "disabled" : false,
+            "query" : ""
+          }
+        },
+        "panelType" : "graph",
+        "promQueries" : {
+          "A" : {
+            "disabled" : false,
+            "query" : ""
+          }
+        },
+        "queryType" : "builder",
+        "unit" : "bytes"
+      },
+      "matchType" : "1",
+      "op" : "1",
+      "selectedQueryName" : "A",
+      "target" : 10,
+      "targetUnit" : "gbytes"
+    }
+  )
+  severity           = "info"
+  broadcast_to_all   = false
+  preferred_channels = []
+  rule_type          = "threshold_rule"
+  description        = "An example alert created by Terraform"
+  eval_window        = "5m0s"
+  frequency          = "1m0s"
+  labels = {
+    "environment" = "test"
+  }
+}
+   ```
+This configuration defines:
+- condition: Trigger alerts if `k8s_node_memory_rss` is missing for 10 seconds.
+- metric: Aggregates the average value of the `k8s_node_memory_rss` metric grouped by Kubernetes node name.
+- interval: Evaluates the metric every 1 minutes with 5-minutes evaluation window.
+
+### Step 2: Check Correctness of Definition
+
+After defining your alert, validate its syntax by running `validate` command:
+```bash
+terraform validate
+```
+If the resource is defined correctly, you will see the message: `Success! The configuration is valid.`
+
+In case you get any error, fix your definition by referencing the console output:
+
+<Figure src="/img/docs/alerts/terraform-provider-validate-error.webp" alt="Error message returned from `terraform validate`" caption="Error message returned from `terraform validate`" />
+
+The error indicates that:
+- the required argument alert_type` was not found.
+- an unexpected argument `alert_typ was passed.
+
+Fix the typo that caused this error:
+```diff
+ resource "signoz_alert" "example" {
+   alert      = "Example alert"
+-  alert_typ = "METRIC_BASED_ALERT"
++  alert_type = "METRIC_BASED_ALERT"
+   condition = jsonencode(
+     {
+       "absentFor" : 10,
+```
+
+### Step 3: Provision SigNoz Alert to SigNoz Cloud
+
+When you're ready, `plan` your Terraform module to see diffs between your code and resources on the remote (SigNoz Cloud):
+
+<Figure src="/img/docs/alerts/terraform-provider-plan.webp" alt="Successful output from `terraform plan`" caption="Successful output from `terraform plan`" />
+
+The output indicates that it plans to create a new resource(`signoz_alert`)  with specified attributes like `alert`, `alert_type`, and `version`. The plan shows **1 resource to add**, with no changes or deletions.
+
+Once you're satisfied that the diffs are as intended, `apply` your code for provisioning:
+<Figure src="/img/docs/alerts/terraform-provider-apply.webp" alt="Confirmation prompt during `terraform apply`" caption="Confirmation prompt during `terraform apply`" />
+
+Terraform will wait for your confirmation before applying the change to the remote.
+
+Review the diffs on the console again and type `yes` to confirm:
+<Figure src="/img/docs/alerts/terraform-provider-apply-complete.webp" alt="Successful output from `terraform apply`" caption="Successful output from `terraform apply`" />
+
+After getting the success message on the console, you'll find the alert provisioned on the remote:
+<Figure src="/img/docs/alerts/terraform-provider-created-resource.webp" alt="The alert created by Terraform" caption="The alert created by Terraform" />
+
+## Manage Preexistent Alert as Terraform Resource
+
+In **Terraform v1.5.0 and later**, you can use an `import {}` block to import a preexistent SigNoz alert.
+
+Define the target alert as a Terraform resource as explained in the previous section, and relate it to the resource on remote.
+
+Specify the id of the target alert to the `id` field:
+```hcl
+import {
+  to = signoz_alert.example
+  id = "123"
+}
+```
+
+You can do the same by the command:
+``` bash
+terraform import signoz_alert.example 123
+```
+
+## Conclusion
+
+Using Terraform, you can manage both new and pre-existent SigNoz alert as code.
+The IaC practice enables you to introduce change process management of SigNoz alert and will contribute to the improvement of the operation process of your service.

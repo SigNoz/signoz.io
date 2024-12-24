@@ -82,11 +82,11 @@ Add this function in main.rs file, `init_tracer` is initializing an OpenTelemetr
 
 ```rust
 fn init_tracer() -> Result<sdktrace::Tracer, TraceError> {
-    let signoz_access_token = std::env::var("SIGNOZ_ACCESS_TOKEN").expect("SIGNOZ_ACCESS_TOKEN not set");
+    let SIGNOZ_INGESTION_KEY = std::env::var("SIGNOZ_INGESTION_KEY").expect("SIGNOZ_INGESTION_KEY not set");
     let mut metadata = MetadataMap::new();
     metadata.insert(
         "signoz-ingestion-key",
-        MetadataValue::from_str(&signoz_access_token).unwrap(),
+        MetadataValue::from_str(&SIGNOZ_INGESTION_KEY).unwrap(),
     );
     opentelemetry_otlp::new_pipeline()
         .tracing()
@@ -128,6 +128,7 @@ SIGNOZ_ACCESS_TOKEN=<your-ingestion-key>
 - Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<service_name>` is name of your service
+- PORT (Optional) - If it is a web app pass port or else you can ignore this variable
 
 **Step 3: Add the OpenTelemetry instrumentation for your Rust app**
 
@@ -186,7 +187,7 @@ Now comes the most interesting part, Sending data to SigNoz to get sense of your
 Go to your `.env` file and update the value of required variables i.e
 `APP_NAME`,
 `SIGNOZ_ENDPOINT` and
-`SIGNOZ_ACCESS_TOKEN`
+`SIGNOZ_INGESTION_KEY`
 
 Now run `cargo run` in terminal to start the application!
 
@@ -455,11 +456,11 @@ Add this function in main.rs file, `init_tracer` is initializing an OpenTelemetr
 
 ```rust
 fn init_tracer() -> Result<sdktrace::Tracer, TraceError> {
-    let signoz_access_token = std::env::var("SIGNOZ_ACCESS_TOKEN").expect("SIGNOZ_ACCESS_TOKEN not set");
+    let SIGNOZ_INGESTION_KEY = std::env::var("SIGNOZ_INGESTION_KEY").expect("SIGNOZ_INGESTION_KEY not set");
     let mut metadata = MetadataMap::new();
     metadata.insert(
         "signoz-ingestion-key",
-        MetadataValue::from_str(&signoz_access_token).unwrap(),
+        MetadataValue::from_str(&SIGNOZ_INGESTION_KEY).unwrap(),
     );
     opentelemetry_otlp::new_pipeline()
         .tracing()
@@ -501,6 +502,7 @@ SIGNOZ_ACCESS_TOKEN=XXXXXXXXXX
 - Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<service_name>` is name of your service
+- PORT (Optional) - If it is a web app pass port or else you can ignore this variable
 
 **Step 3: Add the OpenTelemetry instrumentation for your Rust app**
 
@@ -559,7 +561,7 @@ Now comes the most interesting part, Sending data to SigNoz to get sense of your
 Go to your `.env` file and update the value of required variables i.e
 `APP_NAME`,
 `SIGNOZ_ENDPOINT` and
-`SIGNOZ_ACCESS_TOKEN`
+`SIGNOZ_INGESTION_KEY`
 
 Now run `cargo run` in terminal to start the application!
 
