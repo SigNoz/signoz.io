@@ -1,12 +1,14 @@
 ---
-date: 2024-06-06
+date: 2024-12-19
 id: aks
 title: AKS Metrics & Logging
+hide_table_of_contents: true
 ---
 
 ## Overview
 
-[AKS (Azure Kubernetes Service)](https://learn.microsoft.com/en-us/azure/aks/what-is-aks) is a managed Kubernetes service provided by Microsoft Azure that simplifies the deployment, management, and operations of Kubernetes clusters.
+[AKS (Azure Kubernetes Service)](https://learn.microsoft.com/en-us/azure/aks/what-is-aks) is a managed Kubernetes service provided by Microsoft Azure that 
+simplifies the deployment, management, and operations of Kubernetes clusters.
 
 ## Prerequisites
 
@@ -14,7 +16,10 @@ title: AKS Metrics & Logging
 - `kubectl` installed and logged in to the AKS cluster
 - Helm
 
-## Quick Start
+<Tabs entityName="plans">
+<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
+
+## Setup
 
 This setup is similar to the central collector but with a different function.
 
@@ -26,7 +31,7 @@ helm install -n signoz  --create-namespace kubelet-otel signoz/k8s-infra \\
 This should start sending logs and metrics to SigNoz.
 
 
-## Tracing
+{/* ## Tracing
 
 ### eBPF Tracing 
 
@@ -48,13 +53,15 @@ For example, Pixie can be configured by following the instructions in the respec
 
 <Admonition>
 These solutions may not be suitable for all use cases, and are still may not be production-ready. It is recommended to evaluate  solutions and choose the one that best fits your needs.
-</Admonition>
+</Admonition> */}
 
 ### Application-Level Tracing
 
-For application-level tracing, you can use the OpenTelemetry SDKs integrated with your application. These SDKs will automatically collect and forward traces to the Central Collector.
+For application-level tracing, you can use the OpenTelemetry SDKs integrated with your application. These SDKs will automatically collect and forward traces to the 
+Central Collector.
 
-Please refer to our [SigNoz Tutorials](../../instrumentation/) or [Blog](https://signoz.io/blog/) to find information on how to instrument your application like Spring, FastAPI, NextJS, Langchain, Node.js, Flask, Django, etc.
+Please refer to our [SigNoz Tutorials](../../instrumentation/) or [Blog](https://signoz.io/blog/) to find information on how to instrument your application like 
+Spring, FastAPI, NextJS, Node.js, Flask, Django, etc.
 
 ```bash
 # Node.js example
@@ -108,3 +115,6 @@ If you encounter any issues while setting up logging and metrics for your AKS cl
     - Check if there are any network security groups or firewalls blocking the required ports.
 5. Double-check the SigNoz API key:
     - Confirm that the provided `signozApiKey` is correct and has the necessary permissions to ingest data.
+
+</TabItem>
+</Tabs>
