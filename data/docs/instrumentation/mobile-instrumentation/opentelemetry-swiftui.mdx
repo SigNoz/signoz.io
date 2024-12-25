@@ -5,9 +5,12 @@ title: iOS App in Swift UI Instrumentation
 description: Instrument your Swift UI iOS application with OpenTelemetry and send data to SigNoz
 ---
 
-import InstrumentationFAQ from '@/components/shared/instrumentation-faq.md'
+{/* import InstrumentationFAQ from '@/components/shared/instrumentation-faq.md' */}
 
-This documentation contains instructions on how to set up OpenTelemetry(OTel) instrumentation in your iOS mobile application built using Swift UI. OpenTelemetry, also known as OTel for short, is an open-source observability framework that can help you generate and collect telemetry data - traces, metrics, and logs from your Swift UI application.
+This document contains instructions on how to set up OpenTelemetry instrumentation in your iOS applications built using Swift and view your application traces in SigNoz.
+
+
+{/* This documentation contains instructions on how to set up OpenTelemetry(OTel) instrumentation in your iOS mobile application built using Swift UI. OpenTelemetry, also known as OTel for short, is an open-source observability framework that can help you generate and collect telemetry data - traces, metrics, and logs from your Swift UI application.
 
 Once the telemetry data is generated, you can configure an exporter to send the data to SigNoz for monitoring and visualization.
 
@@ -17,12 +20,14 @@ There are three major steps to using OpenTelemetry:
 - Configuring the exporter to send data to SigNoz
 - Validating the configuration to ensure that data is being sent as expected.
 
-In this tutorial, we will instrument a Swift Mobile application for traces and send it to SigNoz.
+In this tutorial, we will instrument a Swift Mobile application for traces and send it to SigNoz. */}
 
 ## Requirements
 
 [Swift](https://www.swift.org/getting-started/#installing-swift)
 
+<Tabs entityName="plans">
+<TabItem value="cloud" label="SigNoz Cloud" default>
 ### Send traces directly to SigNoz cloud
 
 <Admonition type="info">
@@ -42,7 +47,7 @@ For that, paste the following inside `Package.swift` of your project.
     ],
     targets: [
         .executableTarget(
-            name: "<NAME_OF_APP>",
+            name: "<service_name>",
             dependencies: [
                 .product(name: "OpenTelemetryApi", package: "opentelemetry-swift"),
                 .product(name: "OpenTelemetrySdk", package: "opentelemetry-swift"),
@@ -58,7 +63,7 @@ For that, paste the following inside `Package.swift` of your project.
     ]
 ```
 
-Replace `NAME_OF_APP` with the name of app, you will see this name in SigNoz Services section.
+`<service_name>` is name of your service
 
 **Step 2: Initialize the tracer**
 
@@ -80,12 +85,12 @@ import StdoutExporter
 struct OpenTelemetrySetup {
     static func configureOpenTelemetry() {
         let resource = DefaultResources().get().merging(other: Resource(attributes: [
-            "service.name": AttributeValue.string("<YOUR_APP_NAME>"), 
+            "service.name": AttributeValue.string("<service_name>"), 
         ]))
         
-        let otlpConfiguration: OtlpConfiguration = OtlpConfiguration(timeout: TimeInterval(10), headers: [("signoz-ingestion-key", "<SIGNOZ_INGESTION_KEY>")])
+        let otlpConfiguration: OtlpConfiguration = OtlpConfiguration(timeout: TimeInterval(10), headers: [("signoz-ingestion-key", "<your-ingestion-key>")])
         
-        let grpcChannel = ClientConnection.usingPlatformAppropriateTLS(for: MultiThreadedEventLoopGroup(numberOfThreads: 1)).connect(host: "ingest.[REGION].signoz.cloud", port: 443)
+        let grpcChannel = ClientConnection.usingPlatformAppropriateTLS(for: MultiThreadedEventLoopGroup(numberOfThreads: 1)).connect(host: "ingest.<region>.signoz.cloud", port: 443)
         
         let otlpTraceExporter = OtlpTraceExporter(channel: grpcChannel, config: otlpConfiguration)
         let stdoutExporter = StdoutExporter()
@@ -104,28 +109,9 @@ struct OpenTelemetrySetup {
 }
 ```
 
-Ensure to replace `<SIGNOZ_INGESTION_KEY>`, `<PORT>`, and `<REGION>` with your actual SigNoz ingestion key, Port, and region, respectively.
-
-You can find your Ingestion Key in the following places:
--  mail which you recieved from SigNoz after signing up.
-- inside settings on SigNoz dashboard
-
-Depending on the choice of your region for SigNoz cloud, the ingest endpoint will vary according to this table.
-
-| Region | Endpoint |
-| --- | --- |
-| US |	ingest.us.signoz.cloud:443/v1/traces |
-| IN |	ingest.in.signoz.cloud:443/v1/traces |
-| EU | ingest.eu.signoz.cloud:443/v1/traces |
-
-
-These are the variables you need to replace :
-
-| Placeholder                | Description                                 |
-|----------------------------|---------------------------------------------|
-| `<SIGNOZ_INGESTION_KEY>`   | Your SigNoz ingestion key                   |
-| `<PORT>`                    | Port (default: 443)                         |
-| `<REGION>`   | Region for SigNoz ingestion                    |
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service_name>` is name of your service
 
 Once you replace the content of the file, you need to add `init` in the `<project_name>.swift file` 
 
@@ -171,3 +157,5 @@ let tracer = OpenTelemetry.instance.tracerProvider.get(instrumentationName: "Swi
 **Step 4: Run app**
 
 Run your application from X Code to see the output & you can verify the sent span in SigNoz .
+</TabItem>
+</Tabs>

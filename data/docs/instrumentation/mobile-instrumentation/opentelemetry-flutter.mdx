@@ -5,8 +5,11 @@ title: Android/iOS App in Flutter Instrumentation
 description: Instrument your Android/iOS application built with Flutter using OpenTelemetry and send data to SigNoz
 ---
 
-import InstrumentationFAQ from '@/components/shared/instrumentation-faq.md'
+{/* import InstrumentationFAQ from '@/components/shared/instrumentation-faq.md' */}
 
+This document contains instructions on how to set up OpenTelemetry instrumentation in your Flutter applications and view your application traces in SigNoz.
+
+{/* 
 This documentation contains instructions on how to set up OpenTelemetry(OTel) instrumentation in your Android/iOS mobile application built using Flutter. OpenTelemetry, also known as OTel for short, is an open-source observability framework that can help you generate and collect telemetry data - traces, metrics, and logs from your Flutter application.
 
 Once the telemetry data is generated, you can configure an exporter to send the data to SigNoz for monitoring and visualization.
@@ -15,7 +18,7 @@ There are three major steps to using OpenTelemetry:
 
 - Instrumenting your iOS application with OpenTelemetry
 - Configuring the exporter to send data to SigNoz
-- Validating the configuration to ensure that data is being sent as expected.
+- Validating the configuration to ensure that data is being sent as expected. */}
 
 <Admonition type="info">
 The package which we are using here is [Unofficial](https://pub.dev/packages/opentelemetry) Implementation of OpenTelemetry Packages. 
@@ -28,6 +31,9 @@ In this tutorial, we will instrument an Android/iOS Mobile application for trace
 
 [Flutter](https://docs.flutter.dev/get-started/install)
 
+
+<Tabs entityName="plans">
+<TabItem value="cloud" label="SigNoz Cloud" default>
 ### Send traces directly to SigNoz cloud
 
 
@@ -62,12 +68,12 @@ Put the following in `main.dart` file.
 ```
 final headers = {
     //INGESTION KEY HERE VARIABLE
-    'signoz-ingestion-key': '<SIGNOZ_INGESTION_KEY>',
+    'signoz-ingestion-key': '<your-ingestion-key>',
   };
 
   final exporter = CollectorExporter(
     //enter ingestion url here VARIABLE
-    Uri.parse('ingest.[REGION].signoz.cloud:<PORT>/v1/traces'),
+    Uri.parse('ingest.<region>.signoz.cloud:443/v1/traces'),
     headers: headers,
   );
 
@@ -76,7 +82,7 @@ final headers = {
   final provider = TracerProviderBase(
     processors: [processor],
     //enter service name here VARIABLE
-    resource: Resource( [Attribute.fromString("service.name", "<SERVICE_NAME>")]),
+    resource: Resource( [Attribute.fromString("service.name", "<service_name>")]),
   );
 
   registerGlobalTracerProvider(provider);
@@ -120,27 +126,9 @@ final headers = {
 
 ```
 
-Ensure to replace `<SIGNOZ_INGESTION_KEY>`, `<PORT>`, and `<REGION>` with your actual SigNoz ingestion key, Port, and region, respectively.
-
-You can find your Ingestion Key in the following places:
--  mail which you recieved from SigNoz after signing up.
-- inside settings on SigNoz dashboard
-
-Depending on the choice of your region for SigNoz cloud, the ingest endpoint will vary according to this table.
-
-| Region | Endpoint |
-| --- | --- |
-| US |	ingest.us.signoz.cloud:443/v1/traces |
-| IN |	ingest.in.signoz.cloud:443/v1/traces |
-| EU | ingest.eu.signoz.cloud:443/v1/traces |
-
-These are the variables you need to replace :
-
-| Placeholder                | Description                                 |
-|----------------------------|---------------------------------------------|
-| `<SIGNOZ_INGESTION_KEY>`   | Your SigNoz ingestion key                   |
-| `<PORT>`                    | Port (default: 443)                         |
-| `<REGION>`   | Region for SigNoz ingestion URL                  |
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service_name>` is name of your service
 
 **Step 3: Send Telemetry data to SigNoz**
 
@@ -153,3 +141,5 @@ _createSpan()
 **Step 4: Run app**
 
 Run your application from Android Studio to see the output & you can verify the sent span in SigNoz .
+</TabItem>
+</Tabs>

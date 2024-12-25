@@ -3,14 +3,16 @@ date: 2024-06-06
 id: dotnet
 title: .NET OpenTelemetry Instrumentation
 description: Send events from your .NET application to SigNoz
-
+hide_table_of_contents: true
 ---
 
-import InstrumentationFAQ from '@/components/shared/instrumentation-faq.md'
+{/* import InstrumentationFAQ from '@/components/shared/instrumentation-faq.md' */}
 
+This document contains instructions on how to set up OpenTelemetry instrumentation in your .NET applications and view your application traces in SigNoz.
 
-This document contains instructions on how to set up OpenTelemetry(OTel) instrumentation in your .NET application. OpenTelemetry, also known as OTel for short, is an open-source observability framework that can help you generate and collect telemetry data - traces, metrics, and logs from your .NET application.
-
+{/* This document contains instructions on how to set up OpenTelemetry(OTel) instrumentation in your .NET application.  */}
+{/* OpenTelemetry, also known as OTel for short, is an open-source observability framework that can help you generate and collect telemetry data - traces, metrics, and logs from your .NET application. */}
+{/* 
 OpenTelemetry .NET is the language-specific implementation of OpenTelemetry in .NET.
 
 Once the telemetry data is generated, you can configure an exporter to send the data to SigNoz for monitoring and visualization.
@@ -21,12 +23,14 @@ There are three major steps to using OpenTelemetry:
 - Configuring the exporter to send data to SigNoz
 - Validating that configuration to ensure that data is being sent as expected.
 
-In this tutorial, we will instrument a .NET application for traces and send it to SigNoz.
+In this tutorial, we will instrument a .NET application for traces and send it to SigNoz. */}
 
 ## Requirements
 
 [.NET SDK](https://dotnet.microsoft.com/en-us/download) (.NET 5.0 or Later)
 
+<Tabs entityName="plans">
+<TabItem value="cloud" label="SigNoz Cloud" default>
 ## Send Traces to SigNoz Cloud
 
 Based on your application environment, you can choose the setup below to send traces to SigNoz Cloud.
@@ -46,7 +50,6 @@ Tthere are two ways to send data to SigNoz Cloud.
 #### Send traces directly to SigNoz Cloud - No Code Automatic Instrumentation (recommended)
 
 **Step 1: Create a shell script with the following content**
-You can either create a bash script with the following content or paste this directly into your terminal after replacing `SERVICE_NAME`, `SIGNOZ_ENDPOINT` and `SIGNOZ_INGESTION_KEY` .
 
 ```bash
 # Download the bash script
@@ -62,16 +65,11 @@ chmod +x $HOME/.otel-dotnet-auto/instrument.sh
 . $HOME/.otel-dotnet-auto/instrument.sh
 
 # Run your application with instrumentation
-OTEL_SERVICE_NAME=<SERVICE_NAME> OTEL_TRACES_EXPORTER=otlp OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf OTEL_RESOURCE_ATTRIBUTES=deployment.environment=staging,service.version=1.0.0 OTEL_EXPORTER_OTLP_ENDPOINT=<SIGNOZ_ENDPOINT> OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<SIGNOZ_INGESTION_KEY> ./MyNetApp
+OTEL_SERVICE_NAME=<service_name> OTEL_TRACES_EXPORTER=otlp OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf OTEL_RESOURCE_ATTRIBUTES=deployment.environment=staging,service.version=1.0.0 OTEL_EXPORTER_OTLP_ENDPOINT=ingest.<region>.signoz.cloud OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<your-ingestion-key> ./MyNetApp
 ```
-
-
-| Variable              | Description                                               |
-|-----------------------|-----------------------------------------------------|
-| SERVICE_NAME *      | Name you want to give to your rust application  |
-| SIGNOZ_ENDPOINT  *     | This is ingestion URL which you must have got in mail after registering on SigNoz cloud  |
-| SIGNOZ_INGESTION_KEY *  | This is Ingestion Key which you must have got in mail after registering on SigNoz cloud                                     |
-
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service_name>` is name of your service
 
 <Admonition>
 If you are doing it on mac os , you will need to install `coreutils`, you can do it by using the following command
@@ -101,7 +99,7 @@ In your `Program.cs` file, add OpenTelemetry as a service. Here, we are configur
 
 - `serviceName` - It is the name of your service.
 - `otlpOptions.Endpoint` - It is the endpoint for SigNoz Cloud.
-- `<SIGNOZ_INGESTION_KEY>` - You will get your ingestion key when you [sign up](https://signoz.io/teams/) for SigNoz cloud.
+- `<your-ingestion-key>` - You will get your ingestion key when you [sign up](https://signoz.io/teams/) for SigNoz cloud.
 
 Here’s a sample `Program.cs` file with the configured variables.
 
@@ -122,13 +120,13 @@ builder.Services.AddOpenTelemetry()
         .AddOtlpExporter(otlpOptions =>
         {
 						//SigNoz Cloud Endpoint 
-            otlpOptions.Endpoint = new Uri("https://ingest.{region}.signoz.cloud:443");
+            otlpOptions.Endpoint = new Uri("https://ingest.<region>.signoz.cloud:443");
 
             otlpOptions.Protocol = OtlpExportProtocol.Grpc;
 						
 						//SigNoz Cloud account Ingestion key
             string headerKey = "signoz-ingestion-key";
-            string headerValue = "<SIGNOZ_INGESTION_KEY>";
+            string headerValue = "<your-ingestion-key>";
 
             string formattedHeader = $"{headerKey}={headerValue}";
             otlpOptions.Headers = formattedHeader;
@@ -142,13 +140,9 @@ app.MapGet("/", () => $"Hello World! OpenTelemetry Trace: {Activity.Current?.Id}
 app.Run();
 ```
 
-Depending on the choice of your region for SigNoz cloud, the ingest endpoint will vary according to this table.
-
-| Region | Endpoint |
-| --- | --- |
-| US | ingest.us.signoz.cloud:443 |
-| IN | ingest.in.signoz.cloud:443 |
-| EU | ingest.eu.signoz.cloud:443 |
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service_name>` is name of your service
 
 The program uses the <a href = "https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/src/OpenTelemetry.Instrumentation.AspNetCore/README.md" rel="noopener noreferrer nofollow" target="_blank" >OpenTelemetry.Instrumentation.AspNetCore</a> package to automatically create traces for incoming ASP.NET Core requests.
 
@@ -160,11 +154,11 @@ This is done by configuring an OpenTelemetry <a href = "https://github.com/open
 You can find your Signoz cloud address and ingestion key under the settings of your Signoz cloud account.
 </Admonition>
 
-
+{/* 
 <figure data-zoomable align='center'>
     <img src="/img/docs/ingestion_key_details.webp" alt="Access the ingestion key details in SigNoz UI"/>
     <figcaption><i>Access the ingestion key details in SigNoz UI</i></figcaption>
-</figure>
+</figure> */}
 
 
 **Step 3. Running the .NET application:**
@@ -182,10 +176,10 @@ In the SigNoz account, open the `Services` tab. Hit the `Refresh` button on 
 
 
 
-<figure data-zoomable align='center'>
+{/* <figure data-zoomable align='center'>
     <img src="/img/docs/sample_net_app.webp" alt="The sample .NET application is being monitored in the SigNoz ‘Services’ tab"/>
     <figcaption><i>The sample .NET application is being monitored in the SigNoz ‘Services’ tab</i></figcaption>
-</figure>
+</figure> */}
 
 ---
 
@@ -194,7 +188,6 @@ In the SigNoz account, open the `Services` tab. Hit the `Refresh` button on 
 #### Send traces via OTel Collector binary - No Code Automatic Instrumentation
 
 **Step 1: Create a shell script with the following content**
-You can either create a bash script with the following content or paste this directly into your terminal after replacing `SERVICE_NAME`, `SIGNOZ_ENDPOINT` and `SIGNOZ_INGESTION_KEY` .
 
 ```bash
 # Download the bash script
@@ -210,13 +203,11 @@ chmod +x $HOME/.otel-dotnet-auto/instrument.sh
 . $HOME/.otel-dotnet-auto/instrument.sh
 
 # Run your application with instrumentation
-OTEL_SERVICE_NAME=<SERVICE_NAME> OTEL_TRACES_EXPORTER=otlp OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf OTEL_RESOURCE_ATTRIBUTES=deployment.environment=staging,service.version=1.0.0 OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318/v1/traces ./MyNetApp
+OTEL_SERVICE_NAME=<service_name> OTEL_TRACES_EXPORTER=otlp OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf OTEL_RESOURCE_ATTRIBUTES=deployment.environment=staging,service.version=1.0.0 OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318/v1/traces ./MyNetApp
 ```
 
 
-| Variable              | Description                                               |
-|-----------------------|-----------------------------------------------------|
-| SERVICE_NAME *      | Name you want to give to your rust application  |
+- `<service_name>` is name of your service
 
 
 <Admonition>
@@ -311,10 +302,10 @@ In the SigNoz account, open the `Services` tab. Hit the `Refresh` button on 
 
 
 
-<figure data-zoomable align='center'>
+{/* <figure data-zoomable align='center'>
     <img src="/img/docs/sample_net_app.webp" alt="The sample .NET application is being monitored in the SigNoz ‘Services’ tab"/>
     <figcaption><i>The sample .NET application is being monitored in the SigNoz ‘Services’ tab</i></figcaption>
-</figure>
+</figure> */}
 
 </TabItem>
 <TabItem value="k8s" label="Kubernetes">
@@ -333,7 +324,6 @@ Once you have set up OTel Collector agent, you can proceed with OpenTelemetry .N
 #### Send traces directly to SigNoz Cloud - No Code Automatic Instrumentation (recommended)
 
 **Step 1: Create a shell script with the following content**
-You can either create a bash script with the following content or paste this directly into your terminal after replacing `SERVICE_NAME`, `SIGNOZ_ENDPOINT` and `SIGNOZ_INGESTION_KEY` .
 
 ```bash
 # Download the bash script
@@ -349,14 +339,10 @@ chmod +x $HOME/.otel-dotnet-auto/instrument.sh
 . $HOME/.otel-dotnet-auto/instrument.sh
 
 # Run your application with instrumentation
-OTEL_SERVICE_NAME=<SERVICE_NAME> OTEL_TRACES_EXPORTER=otlp OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf OTEL_RESOURCE_ATTRIBUTES=deployment.environment=staging,service.version=1.0.0 OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318/v1/traces ./MyNetApp
+OTEL_SERVICE_NAME=<service_name> OTEL_TRACES_EXPORTER=otlp OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf OTEL_RESOURCE_ATTRIBUTES=deployment.environment=staging,service.version=1.0.0 OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318/v1/traces ./MyNetApp
 ```
 
-
-| Variable              | Description                                               |
-|-----------------------|-----------------------------------------------------|
-| SERVICE_NAME *      | Name you want to give to your rust application  |
-
+- `<service_name>` is name of your service
 
 ### Code Level Automatic Instrumentation
 
@@ -435,10 +421,10 @@ In the SigNoz account, open the `Services` tab. Hit the `Refresh` button on 
 
 
 
-<figure data-zoomable align='center'>
+{/* <figure data-zoomable align='center'>
     <img src="/img/docs/sample_net_app.webp" alt="The sample .NET application is being monitored in the SigNoz ‘Services’ tab"/>
     <figcaption><i>The sample .NET application is being monitored in the SigNoz ‘Services’ tab</i></figcaption>
-</figure>
+</figure> */}
 
 
 
@@ -477,30 +463,19 @@ Install-OpenTelemetryCore
 
 ```powershell
 $env:OTEL_TRACES_EXPORTER="otlp"
-$env:OTEL_EXPORTER_OTLP_ENDPOINT="<SIGNOZ_ENDPOINT>"
-$env:OTEL_SERVICE_NAME="<APP_NAME>"
-$env:OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>"
+$env:OTEL_EXPORTER_OTLP_ENDPOINT="ingest.<region>.signoz.cloud:443"
+$env:OTEL_SERVICE_NAME="<service_name>"
+$env:OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
 $env:OTEL_DOTNET_AUTO_TRACES_CONSOLE_EXPORTER_ENABLED="true"
 $env:OTEL_DOTNET_AUTO_LOGS_CONSOLE_EXPORTER_ENABLED="true"
-Register-OpenTelemetryForCurrentSession -OTelServiceName "<APP_NAME>"
+Register-OpenTelemetryForCurrentSession -OTelServiceName "<service_name>"
 dotnet run
 ```
-
-| Variable              | Description                                               |
-|-----------------------|-----------------------------------------------------|
-| APP_NAME *      | Name you want to give to your rust application  |
-| SIGNOZ_ENDPOINT  *     | This is ingestion URL which you must have got in mail after registering on SigNoz cloud  |
-| SIGNOZ_INGESTION_KEY *  | This is Ingestion Key which you must have got in mail after registering on SigNoz cloud                                     |
-
-Depending on the choice of your region for SigNoz cloud, the ingest endpoint will vary according to this table.
-
-| Region | Endpoint |
-| --- | --- |
-| US | ingest.us.signoz.cloud:443 |
-| IN | ingest.in.signoz.cloud:443 |
-| EU | ingest.eu.signoz.cloud:443 |
-
-replace `dotnet run` with the run command of your application
+  
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service_name>` is name of your service
+- Replace `dotnet run` with the run command of your application
 
 #### Send traces directly to SigNoz Cloud - Code Level Automatic Instrumentation
 
@@ -521,7 +496,6 @@ In your `Program.cs` file, add OpenTelemetry as a service. Here, we are configur
 
 - `serviceName` - It is the name of your service.
 - `otlpOptions.Endpoint` - It is the endpoint for SigNoz Cloud.
-- `<SIGNOZ_INGESTION_KEY>` - You will get your ingestion key when you [sign up](https://signoz.io/teams/) for SigNoz cloud.
 
 Here’s a sample `Program.cs` file with the configured variables.
 
@@ -542,13 +516,13 @@ builder.Services.AddOpenTelemetry()
         .AddOtlpExporter(otlpOptions =>
         {
 						//SigNoz Cloud Endpoint 
-            otlpOptions.Endpoint = new Uri("https://ingest.{region}.signoz.cloud:443");
+            otlpOptions.Endpoint = new Uri("https://ingest.<region>.signoz.cloud:443");
 
             otlpOptions.Protocol = OtlpExportProtocol.Grpc;
 						
 						//SigNoz Cloud account Ingestion key
             string headerKey = "signoz-ingestion-key";
-            string headerValue = "<SIGNOZ_INGESTION_KEY>";
+            string headerValue = "<your-ingestion-key>";
 
             string formattedHeader = $"{headerKey}={headerValue}";
             otlpOptions.Headers = formattedHeader;
@@ -562,13 +536,9 @@ app.MapGet("/", () => $"Hello World! OpenTelemetry Trace: {Activity.Current?.Id}
 app.Run();
 ```
 
-Depending on the choice of your region for SigNoz cloud, the ingest endpoint will vary according to this table.
-
-| Region | Endpoint |
-| --- | --- |
-| US | ingest.us.signoz.cloud:443 |
-| IN | ingest.in.signoz.cloud:443 |
-| EU | ingest.eu.signoz.cloud:443 |
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service_name>` is name of your service
 
 The program uses the <a href = "https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/src/OpenTelemetry.Instrumentation.AspNetCore/README.md" rel="noopener noreferrer nofollow" target="_blank" >OpenTelemetry.Instrumentation.AspNetCore</a> package to automatically create traces for incoming ASP.NET Core requests.
 
@@ -576,15 +546,15 @@ The `OpenTelemetry.Exporter.Options` get or set the target to which the exporter
 
 This is done by configuring an OpenTelemetry <a href = "https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/docs/trace/customizing-the-sdk/README.md" rel="noopener noreferrer nofollow" target="_blank" >TracerProvider</a> using extension methods and setting it to auto-start when the host is started.
 
-<Admonition>
+{/* <Admonition>
 You can find your Signoz cloud address and ingestion key under the settings of your Signoz cloud account.
-</Admonition>
+</Admonition> */}
 
 
-<figure data-zoomable align='center'>
+{/* <figure data-zoomable align='center'>
     <img src="/img/docs/ingestion_key_details.webp" alt="Access the ingestion key details in SigNoz UI"/>
     <figcaption><i>Access the ingestion key details in SigNoz UI</i></figcaption>
-</figure>
+</figure> */}
 
 
 **Step 3. Running the .NET application:**
@@ -601,11 +571,11 @@ Once your application is running, generate some traffic by interacting with it.
 In the SigNoz account, open the `Services` tab. Hit the `Refresh` button on the top right corner, and your application should appear in the list of `Applications`. Ensure that you're checking data for the `time range filter` applied in the top right corner. You might have to wait for a few seconds before the data appears on SigNoz UI.
 
 
-
+{/* 
 <figure data-zoomable align='center'>
     <img src="/img/docs/sample_net_app.webp" alt="The sample .NET application is being monitored in the SigNoz ‘Services’ tab"/>
     <figcaption><i>The sample .NET application is being monitored in the SigNoz ‘Services’ tab</i></figcaption>
-</figure>
+</figure> */}
 
 ---
 
@@ -643,13 +613,11 @@ $env:OTEL_TRACES_EXPORTER="otlp"
 $env:OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318/v1/traces"
 $env:OTEL_DOTNET_AUTO_TRACES_CONSOLE_EXPORTER_ENABLED="true"
 $env:OTEL_DOTNET_AUTO_LOGS_CONSOLE_EXPORTER_ENABLED="true"
-Register-OpenTelemetryForCurrentSession -OTelServiceName "<APP_NAME>"
+Register-OpenTelemetryForCurrentSession -OTelServiceName "<service_name>"
 dotnet run
 ```
 
-| Variable              | Description                                               |
-|-----------------------|-----------------------------------------------------|
-| APP_NAME *      | Name you want to give to your rust application  |
+- `<service_name>` is name of your service
 
 
 replace `dotnet run` with the run command of your application
@@ -737,11 +705,14 @@ After the Otel collector is all set and running, and your too application is run
 In the SigNoz account, open the `Services` tab. Hit the `Refresh` button on the top right corner, and your application should appear in the list of `Applications`. Ensure that you're checking data for the `time range filter` applied in the top right corner. You might have to wait for a few seconds before the data appears on SigNoz UI.
 
 
-
+{/* 
 <figure data-zoomable align='center'>
     <img src="/img/docs/sample_net_app.webp" alt="The sample .NET application is being monitored in the SigNoz ‘Services’ tab"/>
     <figcaption><i>The sample .NET application is being monitored in the SigNoz ‘Services’ tab</i></figcaption>
-</figure>
+</figure> */}
+
+</TabItem>
+</Tabs>
 
 </TabItem>
 </Tabs>
@@ -778,13 +749,13 @@ builder.Services.AddOpenTelemetry()
         .AddOtlpExporter(otlpOptions =>
         {
 						//SigNoz Cloud Endpoint 
-            otlpOptions.Endpoint = new Uri("https://ingest.{region}.signoz.cloud:443");
+            otlpOptions.Endpoint = new Uri("https://ingest.<region>.signoz.cloud:443");
 
             otlpOptions.Protocol = OtlpExportProtocol.Grpc;
 						
 						//SigNoz Cloud account Ingestion key
             string headerKey = "signoz-ingestion-key";
-            string headerValue = "<SIGNOZ_INGESTION_KEY>";
+            string headerValue = "<your-ingestion-key>";
 
             string formattedHeader = $"{headerKey}={headerValue}";
             otlpOptions.Headers = formattedHeader;
@@ -839,4 +810,4 @@ Resource associated with Activity:
 ```
 
 
-<InstrumentationFAQ />
+{/* <InstrumentationFAQ /> */}

@@ -3,16 +3,19 @@ date: 2024-06-06
 id: jboss
 title: JBoss OpenTelemetry Instrumentation
 description: Instrument your JBoss application with OpenTelemetry and send data to SigNoz
-
+hide_table_of_contents: true
 ---
 
 
 
-import InstrumentationFAQ from '@/components/shared/instrumentation-faq.md'
+{/* import InstrumentationFAQ from '@/components/shared/instrumentation-faq.md' */}
 
+This document contains instructions on how to set up OpenTelemetry instrumentation in your JBoss applications and view your application traces in SigNoz.
 
-This document contains instructions on how to set up OpenTelemetry instrumentation in your JBoss applications. OpenTelemetry, also known as OTel for short, is an open source observability framework that can help you generate and collect telemetry data - traces, metrics, and logs from your JBoss application.
-
+{/* This document contains instructions on how to set up OpenTelemetry instrumentation in your JBoss applications. */}
+{/* 
+ OpenTelemetry, also known as OTel for short, is an open source observability framework that can help you generate and collect telemetry data - traces, metrics, and logs from your JBoss application. */}
+{/* 
 OpenTelemetry Java is the language-specific implementation of OpenTelemetry in Java that can be used to instrument JBoss applications.
 
 Once the telemetry data is collected, you can configure an exporter to send the data to SigNoz.
@@ -22,15 +25,15 @@ There are three major steps to using OpenTelemetry:
 - Instrumenting your JBoss application with OpenTelemetry
 - Configuring exporter to send data to SigNoz
 - Validating that configuration to ensure that data is being sent as expected.
+ */}
 
-
-<figure data-zoomable align='center'>
+{/* <figure data-zoomable align='center'>
     <img src="/img/docs/opentelemetry_java_instrument.webp" alt="OpenTelemetry helps to generate and collect telemetry data from your application which is then sent to an observability backend like SigNoz"/>
     <figcaption><i>OpenTelemetry helps generate and collect telemetry data from JBoss applications which can then be sent to SigNoz for storage, visualization, and analysis.</i></figcaption>
-    </figure>
+    </figure> */}
 
 
-There are two types of application instrumentation:
+{/* There are two types of application instrumentation:
 
 - **Auto Instrumentation**<br></br>
 A completely automatic and out of box experience, with minimal code changes. For your JBoss application, we recommend getting started with auto instrumentation.
@@ -38,13 +41,15 @@ A completely automatic and out of box experience, with minimal code changes. For
 - **Manual Instrumentation**<br></br>
 It involves writing instrumentation using OpenTelemetry SDK and API manually. You would need to get a handle to an instance of the `OpenTelemetry` interface, acquire a tracer, and create spans manually.
 
-Let’s understand how to download, install, and run OpenTelemetry in a JBoss application.
+Let’s understand how to download, install, and run OpenTelemetry in a JBoss application. */}
 
 
 ## Requirements
 
 Java 8 or higher
 
+<Tabs entityName="plans">
+<TabItem value="cloud" label="SigNoz Cloud" default>
 ## Send Traces to SigNoz Cloud
 
 OpenTelemetry provides a handy Java JAR agent that can be attached to any Java 8+ application and dynamically injects bytecode to capture telemetry from a number of popular libraries and frameworks.
@@ -80,24 +85,16 @@ Update `JAVA_OPTS` environment variable with configurations required to send dat
 
 ```bash
 JAVA_OPTS="-javaagent:/path/opentelemetry-javaagent.jar
--Dotel.exporter.otlp.endpoint=https://ingest.{region}.signoz.cloud:443
--Dotel.exporter.otlp.headers="signoz-ingestion-key=SIGNOZ_INGESTION_KEY"
--Dotel.resource.attributes="service.name=<app_name>""
+-Dotel.exporter.otlp.endpoint=https://ingest.<region>.signoz.cloud:443
+-Dotel.exporter.otlp.headers="signoz-ingestion-key=<your-ingestion-key>"
+-Dotel.resource.attributes="service.name=<service_name>""
 ```
 You need to replace the following things based on your environment:<br></br>
 
 - `path` - Update it to the path of your downloaded Java JAR agent.<br></br>
-- `<app_name>` is the name for your application
-- `SIGNOZ_INGESTION_KEY` is the API token provided by SigNoz. You can find your ingestion key from SigNoz cloud account details sent on your email.
-
-Depending on the choice of your region for SigNoz cloud, the ingest endpoint will vary according to this table.
-
-| Region | Endpoint |
-| --- | --- |
-| US |	ingest.us.signoz.cloud:443 |
-| IN |	ingest.in.signoz.cloud:443 |
-| EU | ingest.eu.signoz.cloud:443 |
-
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service_name>` is name of your service
 
 **Step 4.** [Optional] Write the output/logs of standalone.sh script to a file nohup.out as a background thread
   
@@ -109,10 +106,6 @@ In case you encounter an issue where all applications do not get listed in the s
 ---
 
 #### Send traces via OTel Collector binary
-
-OTel Collector binary helps to collect logs, hostmetrics, resource and infra attributes. It is recommended to install Otel Collector binary to collect and send traces to SigNoz cloud. You can correlate signals and have rich contextual data through this way.
-
-You can find instructions to install OTel Collector binary [here](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) in your VM. Once you are done setting up your OTel Collector binary, you can follow the below steps for instrumenting your Java application.
 
 **Step 1.** Download OTel java binary agent<br></br>
 ```bash
@@ -200,23 +193,16 @@ Update `JAVA_OPTS` environment variable with configurations required to send dat
 
 ```bash
 set JAVA_OPTS=-javaagent:C:\path\to\opentelemetry-javaagent.jar
-set JAVA_OPTS=%JAVA_OPTS% -Dotel.exporter.otlp.endpoint=https://ingest.{region}.signoz.cloud:443
-set JAVA_OPTS=%JAVA_OPTS% -Dotel.exporter.otlp.headers="signoz-ingestion-key=SIGNOZ_INGESTION_KEY"
-set JAVA_OPTS=%JAVA_OPTS% -Dotel.resource.attributes="service.name=<app_name>"
+set JAVA_OPTS=%JAVA_OPTS% -Dotel.exporter.otlp.endpoint=https://ingest.<region>.signoz.cloud:443
+set JAVA_OPTS=%JAVA_OPTS% -Dotel.exporter.otlp.headers="signoz-ingestion-key=<your-ingestion-key>"
+set JAVA_OPTS=%JAVA_OPTS% -Dotel.resource.attributes="service.name=<service_name>"
 ```
 You need to replace the following things based on your environment:<br></br>
 
 - `path` - Update it to the path of your downloaded Java JAR agent instead of `C:\path\to\opentelemetry-javaagent.jar`<br></br>
-- `<app_name>` is the name for your application
-- `SIGNOZ_INGESTION_KEY` is the API token provided by SigNoz. You can find your ingestion key from SigNoz cloud account details sent on your email.
-
-Depending on the choice of your region for SigNoz cloud, the ingest endpoint will vary according to this table.
-
-| Region | Endpoint |
-| --- | --- |
-| US |	ingest.us.signoz.cloud:443 |
-| IN |	ingest.in.signoz.cloud:443 |
-| EU | ingest.eu.signoz.cloud:443 |
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service_name>` is name of your service
 
 
 **Step 4.** [Optional] Write the output/logs of standalone.sh script to a file nohup.out as a background thread
@@ -257,6 +243,8 @@ In case you encounter an issue where all applications do not get listed in the s
 </TabItem>
 </Tabs>
 
+</TabItem>
+<TabItem value="self-host" label="Self-Host">
 ## Send Traces to Self-Hosted SigNoz
 
 You can use OpenTelemetry Java to send your traces directly to SigNoz. OpenTelemetry provides a **handy Java JAR agent** that can be attached to any Java 8+ application and dynamically injects bytecode to capture telemetry from a number of popular libraries and frameworks. 
@@ -305,6 +293,9 @@ OpenTelemetry Java auto-instrumentation supports collecting telemetry data from 
 
 In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#troubleshooting-your-installation).
 
+</TabItem>
+</Tabs>
+
 ## Validating instrumentation by checking for traces
 
 With your application running, you can verify that you’ve instrumented your application with OpenTelemetry correctly by confirming that tracing data is being reported to SigNoz.
@@ -319,10 +310,10 @@ Validate your traces in SigNoz:
 
 You might see other dummy applications if you’re using SigNoz for the first time. You can remove it by following the docs [here](https://signoz.io/docs/operate/docker-standalone/#remove-the-sample-application).
 
-<figure data-zoomable align='center'>
+{/* <figure data-zoomable align='center'>
     <img src="/img/docs/java_app_services_list.webp" alt="Java Application in the list of services being monitored in SigNoz"/>
     <figcaption><i>Java Application in the list of services being monitored in SigNoz</i></figcaption>
-    </figure>
+    </figure> */}
 
 
 ## Configuring the agent
@@ -337,7 +328,7 @@ Some instrumentations can produce too many spans and make traces very noisy. For
 - `dropwizard-metrics`, which might create very low-quality metrics data because of the lack of label/attribute support in the Dropwizard metrics API.
 
 To enable them, add the `otel.instrumentation.<name>.enabled` system property: `-Dotel.instrumentation.jdbc-datasource.enabled=true`
-
+{/* 
 ## Manual Instrumentation
 
 For manual instrumentation of Java application, refer to the docs [here](https://opentelemetry.io/docs/instrumentation/java/manual/).
@@ -426,7 +417,7 @@ Span {
   _spanProcessor: MultiSpanProcessor { _spanProcessors: [Array] }
 },
 ```
-
+ */}
 
 
 ## Sample Java Application
@@ -434,4 +425,4 @@ Span {
 - We have included a sample Java application with README.md at [Sample Java App Github Repo.](https://github.com/SigNoz/distributed-tracing-java-sample)
 
 
-<InstrumentationFAQ />
+{/* <InstrumentationFAQ /> */}
