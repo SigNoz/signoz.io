@@ -2,7 +2,7 @@
 
 title: Implementing OpenTelemetry in Angular - A Practical Guide
 slug: opentelemetry-angular
-date: 2024-09-30
+date: 2024-12-03
 tags: [OpenTelemetry Instrumentation, JavaScript]
 authors: [pranshu, ankit_anand]
 description: Learn how to implement OpenTelemetry in Angular applications for enhanced observability and performance monitoring. A comprehensive guide for developers.
@@ -173,19 +173,14 @@ keywords: [opentelemetry,angular,opentelemetry angular,opentelemetry angular int
   />
 </head>
 
-Angular applications often grow in complexity, making it challenging to monitor performance and troubleshoot issues effectively. Enter OpenTelemetry: a powerful, vendor-neutral framework for distributed tracing and metrics collection. This guide will walk you through implementing OpenTelemetry in your Angular projects, enhancing your ability to observe and optimize your applications.
+Angular applications often grow in complexity, making it challenging to monitor performance and troubleshoot issues effectively. Enter OpenTelemetry: a powerful, vendor-neutral framework for telemetry collection. This guide will walk you through implementing OpenTelemetry in your Angular projects, enhancing your ability to observe and optimize your applications.
 
 ## What is OpenTelemetry and Why Use it in Angular?
 
-<a href="https://opentelemetry.io/" rel="noopener noreferrer nofollow" target="_blank">OpenTelemetry</a> is an open-source vendor-agnostic set of tools, APIs, and SDKs used to instrument applications to create and manage telemetry data(logs, metrics, and traces). It aims to make telemetry data(logs, metrics, and traces) a built-in feature of cloud-native software applications.
+[**OpenTelemetry**](https://opentelemetry.io/) is an open-source vendor-agnostic set of tools, APIs, and SDKs used to instrument applications to create and manage telemetry data(logs, metrics, and traces). It aims to make telemetry data(logs, metrics, and traces) a built-in feature of cloud-native software applications.
 
 The telemetry data is then sent to an observability tool for storage and visualization.
 
-{ /* <!--
-
-![Implementi%20ebc9f/how_opentelemetry_fits.webp](Implementi%20ebc9f/how_opentelemetry_fits.webp)
-
---> */}
 
 <figure data-zoomable align='center'>
 <img src="/img/blog/2022/09/opentelemetry_architecture.webp" alt="How opentelemetry fits with an application" />
@@ -205,207 +200,242 @@ Compared to traditional monitoring solutions, OpenTelemetry offers greater flexi
 
 ## OpenTelemetry and SigNoz
 
-In this article, we will use [SigNoz](https://signoz.io/) as our backend analysis tool. SigNoz is a full-stack open-source APM tool that can be used for storing and visualizing the telemetry data collected with OpenTelemetry. It is built natively on OpenTelemetry and supports OTLP data formats.
+In this article, we will use [**SigNoz**](https://signoz.io/) as our backend analysis tool. SigNoz is a full-stack open-source APM tool that can be used for storing and visualizing the telemetry data collected with OpenTelemetry. It is built natively on OpenTelemetry and supports OTLP data formats.
 
-SigNoz provides query and visualization capabilities for the end-user and comes with out-of-box charts for application metrics and traces. SigNoz also provides logs management with advanced logs query builder and live tailing. With metrics, traces, and logs under a single pane of glass, SigNoz can be a one-stop open source observability platform.
+SigNoz provides query and visualization capabilities for the end-user and comes with out-of-box charts for application metrics, traces and logs. With metrics, traces, and logs under a single pane of glass, SigNoz can be a one-stop open source observability platform.
 
 Now let’s get down to how to implement OpenTelemetry Angular libraries and then visualize the collected data in SigNoz.
 
 ## Running Angular application with OpenTelemetry
 
-**Step 1: Install SigNoz**
+**Step 1: Create a SigNoz Cloud Account**
 
-First, you need to install SigNoz so that OpenTelemetry can send the data to it.
+SigNoz cloud is the easiest way to run SigNoz. You can sign up [**here**](https://signoz.io/teams/) for a free account and get 30 days of unlimited access to all features.
 
-SigNoz can be installed on macOS or Linux computers in just three steps by using a simple install script.
+![https://signoz.io/img/launch_week/try-signoz-cloud-blog-cta.png](https://signoz.io/img/launch_week/try-signoz-cloud-blog-cta.png)
 
-The install script automatically installs Docker Engine on Linux. However, on macOS, you must manually install <a href="https://docs.docker.com/engine/install/" rel="noopener noreferrer nofollow" target="_blank">Docker Engine</a> before running the install script.
+After you sign up and verify your email, you will be provided with details of your SigNoz cloud instance. Once you set up your password and log in, you will be greeted with the following onboarding screen.
 
-```bash
-git clone -b main <https://github.com/SigNoz/signoz.git>
-cd signoz/deploy/
-./install.sh
+<figure data-zoomable align='center'>
+<img src="/img/blog/2024/12/onboarding-screen.webp" alt="Onboarding screen in SigNoz" />
+<figcaption><i>Onboarding screen in SigNoz</i></figcaption>
+</figure>
 
-```
+Since we will be following instructions from the tutorial, you can skip onboarding by clicking on the SigNoz logo.
 
-You can visit our documentation for instructions on how to install SigNoz using Docker Swarm and Helm Charts.
+You will see the below screen:
 
-![/img/blog/common/deploy_docker_documentation.webp](/img/blog/common/deploy_docker_documentation.webp)
+<figure data-zoomable align='center'>
+<img src="/img/blog/2024/12/services-tab.webp" alt="Services tab in SigNoz" />
+<figcaption><i>Services tab in SigNoz</i></figcaption>
+</figure>
 
-When you are done installing SigNoz, you can access the UI at [http://localhost:3301](http://localhost:3301/)
+For sending data to SigNoz cloud, you will be needing details like ingestion key and region. You can find them under **`Ingestion Settings`** under **`Settings`**.
 
-{ /* <!--
-
-![Implementi%20ebc9f/signoz_dashboard.webp](Implementi%20ebc9f/signoz_dashboard.webp)
-
---> */}
-
-<figure data-zoomable>
-<img src="/img/blog/2022/02/signoz_dashboard.webp" alt="SigNoz dashboard" />
-<figcaption><i>SigNoz dashboard - It shows services from a sample app that comes bundled with the application</i></figcaption>
+<figure data-zoomable align='center'>
+<img src="/img/blog/2024/12/ingestion-settings.webp" alt="ingestion settings"/>
+<figcaption><i>Ingestion details for your SigNoz cloud account</i></figcaption>
 </figure>
 
 **Step 2: Get sample Angular app**
 
-We have set up two sample GitHub repos in order to demonstrate the example at hand
+If you already have a sample Angular application, you can follow the steps below to instrument it for observability. Alternatively, you can use this [sample Angular app](https://github.com/SigNoz/angular-otel-native) provided. This app includes boilerplate code with instrumentation already set up.
 
-- [Sample Angular App](https://github.com/SigNoz/sample-angular-app/tree/without-instrumentation)<br></br>
-It contains the sample boilerplate code that we will instrument. If you want to follow the tutorial, then you should follow the `without instrumentation` branch.
-- [Sample Nodejs App](https://github.com/SigNoz/sample-nodejs-app/)<br></br>
-It contains a basic backend API which we will be calling. The backend API is also instrumented with OpenTelemetry to have end-to-end tracing.
+While the app is pre-configured for instrumentation, you can follow along with the steps in this guide to replicate the instrumentation process in your own Angular applications.
 
-**Step 3: Enable CORS in the OTel Receiver**
+**Step 3:  Install OpenTelemetry packages**
 
-Enable CORS in the OTel Receiver. Under SigNoz folder, open the `otel-collector-config.yaml` file. The file is located at `deploy/docker/clickhouse-setup/otel-collector-config.yaml`
+Install the necessary OpenTelemetry packages by running the following commands:
 
-You can view the file at [SigNoz GitHub repo](https://github.com/SigNoz/signoz/blob/develop/deploy/docker/clickhouse-setup/otel-collector-config.yaml). Inside the file add the following CORS config:
-
-```go
-http:
-+        cors:
-+          allowed_origins:
-+            - <https://netflix.com>  # URL of your Frontend application
-
+```jsx
+npm install --save @opentelemetry/sdk-trace-web@^1.21.0                                                                   
+npm install --save @opentelemetry/instrumentation@^0.48.0
+npm install --save @opentelemetry/auto-instrumentations-web@^0.36.0
+npm install --save @opentelemetry/exporter-trace-otlp-http@^0.48.0
+npm install --save @opentelemetry/resources@^1.21.0
+npm install --save @opentelemetry/propagator-b3@^1.21.0
+npm install --save @opentelemetry/semantic-conventions@^1.21.0
 ```
 
-You need to update the URL of your frontend application. For this tutorial, we will be running our frontend application on `http://localhost:4200`.
-
-{ /* <!--
-
-![Implementi%20ebc9f/enabling_cors.webp](Implementi%20ebc9f/enabling_cors.webp)
-
---> */}
-
-<figure data-zoomable align="center">
-<img src="/img/blog/2022/04/enabling_cors.webp" alt="Enabling CORS" width="90%" align="center" />
-</figure>
-
-Once you make the changes, you need to restart the Docker containers.
-
-**Step 4: Instrument Angular app with OpenTelemetry**
-
-To instrument the angular app with OpenTelemetry, we need to install the OpenTelemetry dependencies.
-
-```go
-npm i @jufab/opentelemetry-angular-interceptor && npm i @opentelemetry/api @opentelemetry/sdk-trace-web @opentelemetry/sdk-trace-base @opentelemetry/core @opentelemetry/semantic-conventions @opentelemetry/resources @opentelemetry/exporter-trace-otlp-http @opentelemetry/exporter-zipkin @opentelemetry/propagator-b3 @opentelemetry/propagator-jaeger @opentelemetry/context-zone-peer-dep @opentelemetry/instrumentation @opentelemetry/instrumentation-document-load @opentelemetry/instrumentation-fetch @opentelemetry/instrumentation-xml-http-request @opentelemetry/propagator-aws-xray --save-dev
-
+```jsx
+💡 If you face issues in dependency installation, please use `npm install --force`. 
 ```
 
-**Step 5: Update `app.module.ts` file**
+**Step 4. Create an `instrument.ts` File**
 
-```go
+In the **`src/app`** directory of your project folder, create a file named **`instrument.ts`** and add the following code to configure SigNoz cloud ingestion:
+
+```jsx
+import opentelemetry from '@opentelemetry/api';
+import { registerInstrumentations } from '@opentelemetry/instrumentation';
 import {
-  OpenTelemetryInterceptorModule,
-  OtelColExporterModule,
-  CompositePropagatorModule,
-} from '@jufab/opentelemetry-angular-interceptor';
+  WebTracerProvider,
+  ConsoleSpanExporter,
+  SimpleSpanProcessor,
+  BatchSpanProcessor,
+} from '@opentelemetry/sdk-trace-web';
+import { getWebAutoInstrumentations } from '@opentelemetry/auto-instrumentations-web';
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
+import { Resource } from '@opentelemetry/resources';
+import { B3Propagator } from '@opentelemetry/propagator-b3';
+import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
+import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-http';
+import {
+  MeterProvider,
+  PeriodicExportingMetricReader,
+} from '@opentelemetry/sdk-metrics';
 
-@NgModule({
-  ...
-  imports: [
-    ...
-    OpenTelemetryInterceptorModule.forRoot({
-      commonConfig: {
-        console: true, // Display trace on console (only in DEV env)
-        production: false, // Send Trace with BatchSpanProcessor (true) or SimpleSpanProcessor (false)
-        serviceName: 'Angular Sample App', // Service name send in trace
-        probabilitySampler: '1',
+const resource = Resource.default().merge(
+  new Resource({
+    [SemanticResourceAttributes.SERVICE_NAME]: 'signoz-angular-native',
+    [SemanticResourceAttributes.SERVICE_VERSION]: '0.1.0',
+  })
+);
+
+const provider = new WebTracerProvider({ resource });
+
+provider.addSpanProcessor(new SimpleSpanProcessor(new ConsoleSpanExporter()));
+
+provider.addSpanProcessor(
+  new BatchSpanProcessor(
+    new OTLPTraceExporter({
+      url: 'https://ingest.<REGION>.signoz.cloud:443/v1/traces',
+      headers: {
+        'signoz-ingestion-key': '<SIGNOZ_INGESTION_KEY>',
       },
-      otelcolConfig: {
-        url: '<http://127.0.0.1:4318/v1/traces>', // URL of opentelemetry collector
+    })
+  )
+);
+
+provider.register({
+  propagator: new B3Propagator(),
+});
+
+registerInstrumentations({
+  instrumentations: [
+    getWebAutoInstrumentations({
+      '@opentelemetry/instrumentation-document-load': {},
+      '@opentelemetry/instrumentation-user-interaction': {},
+      '@opentelemetry/instrumentation-fetch': {
+        propagateTraceHeaderCorsUrls: /.+/,
+      },
+      '@opentelemetry/instrumentation-xml-http-request': {
+        propagateTraceHeaderCorsUrls: /.+/,
       },
     }),
-    //Insert OtelCol exporter module
-    OtelColExporterModule,
-    //Insert propagator module
-    CompositePropagatorModule,
   ],
-  ...
-})
+});
+
+const metricReader = new PeriodicExportingMetricReader({
+  exporter: new OTLPMetricExporter({
+    url: 'https://ingest.<REGION>.signoz.cloud:443/v1/metrics',
+    headers: {
+      'signoz-ingestion-key': '<SIGNOZ_INGESTION_KEY>',
+    },
+  }),
+  // Default is 60000ms (60 seconds). Set to 10 seconds for demonstrative purposes only.
+  exportIntervalMillis: 6000,
+});
+
+const myServiceMeterProvider = new MeterProvider({
+  resource,
+  readers: [metricReader],
+});
+
+// Set this MeterProvider to be global to the app being instrumented.
+opentelemetry.metrics.setGlobalMeterProvider(myServiceMeterProvider);
 
 ```
 
-Make sure to update then URL of OpenTelemetry Collector under `otelcolConfig`. In our case since we’re running SigNoz in local, the URL is `http://127.0.0.1:4318/v1/traces`.
+Replace:
 
-You can change the name of the service, and other configurations under `commonConfig`.
+- **`{REGION}`** with your SigNoz cloud region.
+- **`{SIGNOZ_INGESTION_KEY}`** with the key found in your SigNoz account settings. You can read more about it [here](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 
-**Step 6: Start the angular app and the backend API**
+Depending on the choice of your region for SigNoz cloud, the ingest endpoint will vary according to this table:
 
-For Angular app:<br></br>
-Go to the root folder of your Angular application, and run the following command:
+| Region | Endpoint |
+| --- | --- |
+| US | `ingest.us.signoz.cloud:443/v1/traces` |
+| IN | `ingest.in.signoz.cloud:443/v1/traces` |
+| EU | `ingest.eu.signoz.cloud:443/v1/traces` |
 
-```go
-yarn start
+**Step 5.** **Import `instrument.ts` in `main.ts`**
 
+Add the following line to the imports section of your **`main.ts`** file, located in **`src/main.ts`**:
+
+```jsx
+import './app/instrument';
 ```
 
-For backend API:<br></br>
-Install the dependencies
+This imports the **`instrument.ts`** file you created earlier at **`src/app/instrument.ts`** and ensures that your OpenTelemetry configuration is initialized when the application starts.
 
-```go
-yarn install
+After adding this line, your **`main.ts`** file should look like this:
 
+```jsx
+import { bootstrapApplication } from '@angular/platform-browser';
+import { appConfig } from './app/app.config';
+import { AppComponent } from './app/app.component';
+import './app/instrument';
+
+bootstrapApplication(AppComponent, appConfig)
+  .catch((err) => console.error(err));
 ```
 
-If SigNoz is installed locally, run your backend API using:
+**Step 6.** **Run the Application**
 
-```go
-yarn run start:local
+Start the Angular app:
 
+```jsx
+ng serve
 ```
 
-If SigNoz is not installed locally, then you would need to set the IP of the machine where SigNoz is installed. You can do so by using the below command:
-
-```go
-OTEL_EXPORTER_OTLP_ENDPOINT="<IP of SigNoz>:4317" OTEL_RESOURCE_ATTRIBUTES=service.name=NAME_OF_SERVICE yarn run start:custom```
-
-```
-
-Congratulations! You have successfully run your Angular application with OpenTelemetry. It’s time to see the collected data.
-
-**Step 7: Generate some data**
-
-In order to monitor your Angular application with SigNoz, you first need to generate some data.
-
-Visit http://localhost:4200/ to access your frontend application. Using the UI, make some calls to the backend API. You can check the network tab in your browser to see the requests that you have made.
-
-{ /* <!--
-
-![Implementi%20ebc9f/angular_frontend_webui.webp](Implementi%20ebc9f/angular_frontend_webui.webp)
-
---> */}
-
-<figure data-zoomable>
-<img src="/img/blog/2022/04/angular_frontend_webui.webp" alt="Angular frontend Web UI" />
-<figcaption><i>Angular Frontend Web UI</i></figcaption>
+<figure data-zoomable align='center'>
+<img src="/img/blog/2024/12/application-started.webp" alt="Application started" />
+<figcaption><i>Application started</i></figcaption>
 </figure>
 
-**Step 8: Monitor your application with SigNoz**
+You should be able to access the application at **`http://localhost:4200`**:
 
-With SigNoz you can monitor the data collected by OpenTelemetry from your sample Angular application. You can see end-to-end traces for your Angular application, starting from your frontend application to the downstream nodejs-sample-app.
-
-{ /* <!--
-
-![Implementi%20ebc9f/angular_app_trace_1.webp](Implementi%20ebc9f/angular_app_trace_1.webp)
-
---> */}
-
-<figure data-zoomable>
-<img src="/img/blog/2022/04/angular_app_trace_1.webp" alt="End-to-end tracing of Angular applications" />
-<figcaption><i>See end-to-end traces from your Angular application to downstream services</i></figcaption>
+<figure data-zoomable align='center'>
+<img src="/img/blog/2024/12/application-ui.webp" alt="Application UI" />
+<figcaption><i>Application UI</i></figcaption>
 </figure>
 
-You can also monitor errors that takes place in your Angular application. SigNoz UI also shows attributes like `http_status_code` .
+**Step 7: Generate Trace Data**
 
-{ /* <!--
+Applications will not produce traces unless they are being interacted with, and OpenTelemetry will often buffer data before sending. So you need to interact with your application and wait for some time to see your tracing data in SigNoz. For example, perform actions like triggering web requests, navigating through the app, or refreshing the page multiple times. Wait a few moments to allow traces to propagate and appear in SigNoz.
 
-![Implementi%20ebc9f/angular_app_trace_2.webp](Implementi%20ebc9f/angular_app_trace_2.webp)
+**Step 8: View Your Application in SigNoz**
 
---> */}
+Log in to your SigNoz Cloud account. Navigate to the **`Services`** tab and click the refresh button in the top-right corner. After refreshing, your application should appear in the list of services. 
 
-<figure data-zoomable>
-<img src="/img/blog/2022/04/angular_app_trace_2.webp" alt="Monitor errors in your frontend Angular applications" />
-<figcaption><i>Monitor errors in your frontend Angular application</i></figcaption>
+The displayed application service name will correspond to the name defined in your **`instrument.ts`** file.
+
+<figure data-zoomable align='center'>
+<img src="/img/blog/2024/12/services-tab-angular.webp" alt="Angular app listed under services" />
+<figcaption><i>Services tab in SigNoz</i></figcaption>
+</figure>
+
+Select your application from the list to access its metrics overview. Here, you can monitor essential details like latency, request rates, Apdex scores, and key operations.
+
+<figure data-zoomable align='center'>
+<img src="/img/blog/2024/12/metrics-overview.webp" alt="Metrics overview" />
+<figcaption><i>Metrics overview</i></figcaption>
+</figure>
+
+Switch to the **`Traces`** tab to analyze trace data for your application. Use filters to refine the results based on specific criteria, such as endpoints or timeframes.
+
+<figure data-zoomable align='center'>
+<img src="/img/blog/2024/12/traces-tab-signoz-angular.webp" alt="Traces tab in SigNoz" />
+<figcaption><i>Traces tab in SigNoz</i></figcaption>
+</figure>
+
+Click on any trace in the list to view detailed information about the operation, including its timeline, associated spans, and any errors. This allows you to analyze performance and troubleshoot issues effectively.
+
+<figure data-zoomable align='center'>
+<img src="/img/blog/2024/12/traces-details-angular.webp" alt="Trace details" />
+<figcaption><i>Trace details</i></figcaption>
 </figure>
 
 ## Benefits of Using OpenTelemetry with Angular
@@ -414,67 +444,67 @@ Implementing OpenTelemetry in Angular applications offers numerous advantages fo
 
 ### 1. Comprehensive Observability
 
-**Benefit:** OpenTelemetry provides a unified approach to observability, covering traces, metrics, and logs.
+**Benefit:** OpenTelemetry provides a unified approach to observability, covering traces, metrics, and logs.
 
-**Use Case:** In a complex Angular application with multiple services and APIs, OpenTelemetry can trace user interactions from the frontend through various backend services, providing a complete picture of the application's behavior.
+**Use Case:** In a complex Angular application with multiple services and APIs, OpenTelemetry can trace user interactions from the frontend through various backend services, providing a complete picture of the application's behavior.
 
-**Performance Improvement:** Identifying bottlenecks across the entire application stack, potentially reducing end-to-end response times by 30-50% in complex scenarios.
+**Performance Improvement:** Identifying bottlenecks across the entire application stack, potentially reducing end-to-end response times by 30-50% in complex scenarios.
 
 ### 2. Vendor Neutrality
 
-**Benefit:** OpenTelemetry's vendor-neutral approach allows you to switch between different observability backends without changing your instrumentation code.
+**Benefit:** OpenTelemetry's vendor-neutral approach allows you to switch between different observability backends without changing your instrumentation code.
 
-**Use Case:** An organization using a commercial APM tool can gradually transition to an open-source solution like SigNoz without rewriting their instrumentation, saving weeks of development time.
+**Use Case:** An organization using a commercial APM tool can gradually transition to an open-source solution like SigNoz without rewriting its instrumentation, saving weeks of development time.
 
-**Performance Improvement:** Flexibility to choose the most performant or cost-effective backend for your specific needs, potentially reducing observability costs by 40-60%.
+**Performance Improvement:** Flexibility to choose the most performant or cost-effective backend for your specific needs, potentially reducing observability costs by 40-60%.
 
 ### 3. Detailed Frontend Performance Insights
 
-**Benefit:** OpenTelemetry can provide granular insights into Angular-specific operations and user interactions.
+**Benefit:** OpenTelemetry can provide granular insights into Angular-specific operations and user interactions.
 
-**Use Case:** Tracking component render times, change detection cycles, and user interactions (like button clicks or form submissions) to identify UI performance issues.
+**Use Case:** Tracking component render times, change detection cycles, and user interactions (like button clicks or form submissions) to identify UI performance issues.
 
-**Performance Improvement:** Fine-tuning based on these insights can lead to 20-40% improvement in perceived application responsiveness.
+**Performance Improvement:** Fine-tuning based on these insights can lead to 20-40% improvement in perceived application responsiveness.
 
 ### 4. Correlation Between Frontend and Backend
 
-**Benefit:** OpenTelemetry allows for tracing requests from the user's browser through your Angular app and into backend services.
+**Benefit:** OpenTelemetry allows for tracing requests from the user's browser through your Angular app and into backend services.
 
-**Use Case:** Debugging a slow user transaction by following its path through the entire system, from UI interaction to database queries.
+**Use Case:** Debugging a slow user transaction by following its path through the entire system, from UI interaction to database queries.
 
-**Performance Improvement:** This end-to-end visibility can lead to more efficient problem resolution, reducing MTTR (Mean Time To Resolution) by up to 70%.
+**Performance Improvement:** This end-to-end visibility can lead to more efficient problem resolution, reducing MTTR (Mean Time To Resolution) by up to 70%.
 
 ### 5. Custom Business Metrics
 
-**Benefit:** OpenTelemetry allows you to define and track custom metrics that are specific to your business logic.
+**Benefit:** OpenTelemetry allows you to define and track custom metrics that are specific to your business logic.
 
-**Use Case:** In an e-commerce Angular application, you can track metrics like cart abandonment rate, checkout flow efficiency, or product search accuracy.
+**Use Case:** In an e-commerce Angular application, you can track metrics like cart abandonment rate, checkout flow efficiency, or product search accuracy.
 
-**Performance Improvement:** Insights from custom metrics can drive UX improvements, potentially increasing conversion rates by 10-20%.
+**Performance Improvement:** Insights from custom metrics can drive UX improvements, potentially increasing conversion rates by 10-20%.
 
 ### 6. Improved Error Tracking and Debugging
 
-**Benefit:** OpenTelemetry provides detailed context around errors, including the full trace leading up to the error.
+**Benefit:** OpenTelemetry provides detailed context around errors, including the full trace leading up to the error.
 
-**Use Case:** When a user reports an error, developers can see the exact sequence of events and state of the application at the time of the error.
+**Use Case:** When a user reports an error, developers can see the exact sequence of events and state of the application at the time of the error.
 
-**Performance Improvement:** This context can reduce debugging time by 40-60%, leading to faster issue resolution and improved application stability.
+**Performance Improvement:** This context can reduce debugging time by 40-60%, leading to faster issue resolution and improved application stability.
 
 ### 7. Performance Baseline and Regression Detection
 
-**Benefit:** Continuous monitoring with OpenTelemetry allows you to establish performance baselines and detect regressions quickly.
+**Benefit:** Continuous monitoring with OpenTelemetry allows you to establish performance baselines and detect regressions quickly.
 
-**Use Case:** Automatically detecting performance degradation after a new deployment, allowing for quick rollback or fixes.
+**Use Case:** Automatically detecting performance degradation after a new deployment, allowing for quick rollback or fixes.
 
-**Performance Improvement:** Early detection of performance issues can prevent 90% of performance-related user complaints before they occur.
+**Performance Improvement:** Early detection of performance issues can prevent 90% of performance-related user complaints before they occur.
 
 ### 8. Load Testing and Capacity Planning
 
-**Benefit:** OpenTelemetry data can inform load testing strategies and capacity planning.
+**Benefit:** OpenTelemetry data can inform load testing strategies and capacity planning.
 
-**Use Case:** Using production telemetry data to simulate realistic load scenarios and predict infrastructure needs for upcoming high-traffic events.
+**Use Case:** Using production telemetry data to simulate realistic load scenarios and predict infrastructure needs for upcoming high-traffic events.
 
-**Performance Improvement:** More accurate capacity planning can lead to 20-30% cost savings on infrastructure while ensuring application performance during peak loads.
+**Performance Improvement:** More accurate capacity planning can lead to 20-30% cost savings on infrastructure while ensuring application performance during peak loads.
 
 By leveraging these benefits, Angular developers can create more robust, performant, and user-friendly applications while also streamlining their development and operations processes.
 
@@ -484,22 +514,21 @@ When implementing OpenTelemetry in Angular applications, you may encounter sever
 
 ### 1. Context Propagation Issues
 
-**Challenge:** Traces not connecting properly across different services or components.
+**Challenge:** Traces not connecting properly across different services or components.
 
-**Solution:** 
-- Ensure that the `W3CTraceContextPropagator` is properly configured in your `app.module.ts`.
-- Use the `@opentelemetry/context-zone` package to manage context in Angular's Zone.js.
+**Solution:**
+
+- Ensure that the **`W3CTraceContextPropagator`** is properly configured in your **`app.module.ts`**.
+- Use the **`@opentelemetry/context-zone`** package to manage context in Angular's Zone.js.
 
 Example configuration:
 
-```typescript
+```jsx
 import { W3CTraceContextPropagator } from '@opentelemetry/core';
 import { ZoneContextManager } from '@opentelemetry/context-zone';
 
-// In your OpenTelemetry configuration
-const provider = new WebTracerProvider({
-  // ... other config
-});
+*// In your OpenTelemetry configuration*const provider = new WebTracerProvider({
+  *// ... other config*});
 
 provider.register({
   propagator: new W3CTraceContextPropagator(),
@@ -509,45 +538,44 @@ provider.register({
 
 ### 2. Performance Overhead
 
-**Challenge:** Noticeable performance degradation after implementing OpenTelemetry.
+**Challenge:** Noticeable performance degradation after implementing OpenTelemetry.
 
 **Solution:**
+
 - Use sampling to reduce the volume of telemetry data.
 - Optimize your instrumentation by focusing on critical paths.
 
 Example of configuring a sampler:
 
-```typescript
+```jsx
 import { ParentBasedSampler, TraceIdRatioBasedSampler } from '@opentelemetry/core';
 
 const sampler = new ParentBasedSampler({
-  root: new TraceIdRatioBasedSampler(0.5), // Sample 50% of traces
-});
+  root: new TraceIdRatioBasedSampler(0.5), *// Sample 50% of traces*});
 
 const provider = new WebTracerProvider({
   sampler,
-  // ... other config
-});
+  *// ... other config*});
 ```
 
 ### 3. Asynchronous Operations Not Being Traced
 
-**Challenge:** Traces not capturing asynchronous operations correctly.
+**Challenge:** Traces not capturing asynchronous operations correctly.
 
 **Solution:**
+
 - Ensure that Zone.js is properly integrated with OpenTelemetry.
 - Manually create spans for complex asynchronous operations.
 
 Example of manually creating a span:
 
-```typescript
+```jsx
 import { trace } from '@opentelemetry/api';
 
 async function complexOperation() {
   const span = trace.getTracer('my-tracer').startSpan('complexOperation');
   try {
-    // Perform async operation
-    await someAsyncTask();
+    *// Perform async operation*await someAsyncTask();
     span.end();
   } catch (error) {
     span.recordException(error);
@@ -559,20 +587,20 @@ async function complexOperation() {
 
 ### 4. Incorrect Configuration of Exporters
 
-**Challenge:** Telemetry data not reaching the backend (e.g., SigNoz).
+**Challenge:** Telemetry data not reaching the backend (e.g., SigNoz).
 
 **Solution:**
+
 - Double-check the exporter configuration, especially the endpoint URLs.
 - Ensure that CORS is properly configured if your collector is on a different domain.
 
 Example of configuring the OTLPTraceExporter:
 
-```typescript
+```jsx
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
 
 const exporter = new OTLPTraceExporter({
-  url: 'http://your-collector-url:4318/v1/traces', // Adjust this URL
-});
+  url: 'http://your-collector-url:4318/v1/traces', *// Adjust this URL*});
 
 const provider = new WebTracerProvider();
 provider.addSpanProcessor(new BatchSpanProcessor(exporter));
@@ -580,15 +608,16 @@ provider.addSpanProcessor(new BatchSpanProcessor(exporter));
 
 ### 5. Handling Third-Party Libraries
 
-**Challenge:** Difficulty in tracing operations within third-party libraries.
+**Challenge:** Difficulty in tracing operations within third-party libraries.
 
 **Solution:**
+
 - Use auto-instrumentation packages when available.
 - For libraries without auto-instrumentation, wrap their methods with custom spans.
 
 Example of wrapping a third-party library method:
 
-```typescript
+```jsx
 import { trace } from '@opentelemetry/api';
 
 function wrapThirdPartyMethod(originalMethod) {
@@ -606,7 +635,7 @@ function wrapThirdPartyMethod(originalMethod) {
   }
 }
 
-// Usage
+*// Usage*
 thirdPartyLibrary.someMethod = wrapThirdPartyMethod(thirdPartyLibrary.someMethod);
 ```
 
@@ -614,55 +643,55 @@ By being aware of these common challenges and their solutions, you can more effe
 
 ## Comparison: OpenTelemetry vs Other Monitoring Solutions for Angular
 
-When choosing a monitoring solution for Angular applications, developers have several options. Here's how OpenTelemetry compares to other popular monitoring solutions:
+Developers have several options when choosing a monitoring solution for Angular applications. Here's how OpenTelemetry compares to other popular monitoring solutions:
 
 ### OpenTelemetry vs Google Analytics
 
-| Feature | OpenTelemetry | Google Analytics |
-|---------|---------------|-------------------|
+| Item | OpenTelemetry | Google Analytics |
+| --- | --- | --- |
 | Primary Focus | Application Performance | User Behavior |
 | Customizability | Highly customizable | Limited customization |
 | Data Ownership | Self-hosted or choice of backend | Google-hosted |
 | Technical Depth | Deep technical insights | Surface-level technical data |
 | Cost | Open-source, backend costs vary | Free tier available, paid for advanced features |
 
-**Key Difference:** OpenTelemetry provides deep technical insights into application performance, while Google Analytics focuses on user behavior and high-level metrics.
+**Key Difference:** OpenTelemetry provides deep technical insights into application performance, while Google Analytics focuses on user behavior and high-level metrics.
 
 ### OpenTelemetry vs New Relic
 
 | Feature | OpenTelemetry | New Relic |
-|---------|---------------|-----------|
+| --- | --- | --- |
 | Vendor Lock-in | No lock-in | Proprietary solution |
 | Setup Complexity | Moderate | Low |
 | Customizability | Highly customizable | Customizable within platform limits |
 | Cost | Open-source, backend costs vary | Subscription-based, can be expensive at scale |
 | Out-of-the-box Features | Requires configuration | Many features available immediately |
 
-**Key Difference:** OpenTelemetry offers more flexibility and avoids vendor lock-in, while New Relic provides a more turnkey solution with a steeper cost curve.
+**Key Difference:** OpenTelemetry offers more flexibility and avoids vendor lock-in, while New Relic provides a more turnkey solution with a steeper cost curve.
 
 ### OpenTelemetry vs Sentry
 
 | Feature | OpenTelemetry | Sentry |
-|---------|---------------|--------|
+| --- | --- | --- |
 | Primary Focus | Comprehensive observability | Error tracking and performance |
 | Language Support | Wide language support | Wide language support |
 | Integration Effort | Moderate | Low |
 | Real User Monitoring | Possible with custom implementation | Built-in RUM features |
 | Cost | Open-source, backend costs vary | Free tier, paid plans for advanced features |
 
-**Key Difference:** OpenTelemetry provides a more comprehensive observability solution, while Sentry excels in error tracking and offers easier integration for basic use cases.
+**Key Difference:** OpenTelemetry provides a more comprehensive observability solution, while Sentry excels in error tracking and offers easier integration for basic use cases.
 
 ### OpenTelemetry vs Custom Logging Solution
 
 | Feature | OpenTelemetry | Custom Logging |
-|---------|---------------|-----------------|
+| --- | --- | --- |
 | Standards Compliance | Industry standard | Custom implementation |
 | Community Support | Large community | No community support |
 | Integration with Tools | Wide range of integrations | Limited to custom integrations |
 | Development Time | Reduced development time | Significant development time |
 | Scalability | Designed for scale | Depends on implementation |
 
-**Key Difference:** OpenTelemetry provides a standardized, scalable solution with community support, while custom logging offers maximum control but requires significant development effort.
+**Key Difference:** OpenTelemetry provides a standardized, scalable solution with community support, while custom logging offers maximum control but requires significant development effort.
 
 ## Best Practices for Configuring OpenTelemetry in Production Angular Environments
 
@@ -675,17 +704,15 @@ When deploying Angular applications instrumented with OpenTelemetry to productio
 
 Example configuration:
 
-```typescript
+```jsx
 import { ParentBasedSampler, TraceIdRatioBasedSampler } from '@opentelemetry/core';
 
 const sampler = new ParentBasedSampler({
-  root: new TraceIdRatioBasedSampler(0.1), // Sample 10% of traces
-});
+  root: new TraceIdRatioBasedSampler(0.1), *// Sample 10% of traces*});
 
 const provider = new WebTracerProvider({
   sampler,
-  // other config...
-});
+  *// other config...*});
 ```
 
 ### 2. Use Batch Processing
@@ -694,7 +721,7 @@ const provider = new WebTracerProvider({
 
 Example:
 
-```typescript
+```jsx
 import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
 
@@ -723,14 +750,13 @@ provider.addSpanProcessor(new BatchSpanProcessor(exporter, {
 
 Example of an optimized custom span:
 
-```typescript
+```jsx
 import { trace } from '@opentelemetry/api';
 
 async function performCriticalOperation() {
   const span = trace.getTracer('critical-ops').startSpan('criticalOperation');
   try {
-    // Perform operation
-    const result = await someAsyncOperation();
+    *// Perform operation*const result = await someAsyncOperation();
     span.setAttributes({ 'operation.result': result });
     return result;
   } catch (error) {
@@ -753,7 +779,7 @@ async function performCriticalOperation() {
 
 Example:
 
-```typescript
+```jsx
 import { Resource } from '@opentelemetry/resources';
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 
@@ -767,8 +793,7 @@ const resource = Resource.default().merge(
 
 const provider = new WebTracerProvider({
   resource: resource,
-  // other config...
-});
+  *// other config...*});
 ```
 
 ### 7. Monitor Your Monitoring
@@ -778,58 +803,29 @@ const provider = new WebTracerProvider({
 
 ## Conclusion
 
-OpenTelemetry stands out for its:
-1. Vendor neutrality and flexibility
-2. Comprehensive observability (traces, metrics, and logs)
-3. Strong community support and ongoing development
-4. Potential for deep, customized insights into application performance
-
-However, it may require more initial setup and configuration compared to some out-of-the-box solutions.
-
-The choice between OpenTelemetry and other solutions depends on factors such as:
-- The need for customization and depth of insights
-- Available development resources
-- Long-term scalability requirements
-- Budget constraints
-- Existing tool integrations
-
-For many Angular applications, especially those with complex architectures or high scalability needs, OpenTelemetry provides a powerful and flexible foundation for observability that can grow with your application.
-
-## Conclusion
-
-Using OpenTelemetry Angular libraries, you can instrument your frontend applications for end-to-end tracing. You can then use an open-source APM tool like SigNoz to ensure the smooth performance of your Angular apps.
+Using OpenTelemetry Angular libraries, you can instrument your frontend applications for end-to-end tracing. You can then use an open-source APM tool like [SigNoz](https://signoz.io/) to ensure the smooth performance of your Angular apps.
 
 OpenTelemetry is the future for setting up observability for cloud-native apps. It is backed by a huge community and covers a wide variety of technology and frameworks. Using OpenTelemetry, engineering teams can instrument polyglot and distributed applications with peace of mind.
 
-SigNoz is an open-source observability tool that comes with a SaaS-like experience. You can try out SigNoz by visiting its GitHub repo 👇
+Using SigNoz to monitor your Angular applications offers several advantages:
 
-{ /* <!-- [signoz_github.webp](https://www.notion.so/signoz/Implementi%20ebc9f/signoz_github.webp) --> */}
+- **Real-Time Insights**: Track critical performance metrics such as success rates, execution durations, and failure counts in real-time.
+- **Intuitive Dashboards**: SigNoz provides visually appealing dashboards that make it easy to analyze key metrics, pinpoint issues, and optimize application performance.
+    
+    ![SigNoz: metrics and dashboards](https://signoz.io/img/guides/2024/11/is-there-a-way-to-monitor-kube-cron-jobs-using-prometheus-image%207.webp)
+    
+    SigNoz: metrics and dashboards
+    
+- **Proactive Monitoring**: With advanced [**alerting capabilities**](https://signoz.io/alerts-management/), SigNoz notifies you of critical failures or performance bottlenecks, empowering faster troubleshooting and maintaining smooth operations.
+    
+    ![SigNoz alerting capabilities](https://signoz.io/img/guides/2024/11/is-there-a-way-to-monitor-kube-cron-jobs-using-prometheus-image%208.webp)
+    
+    SigNoz alerting capabilities
+    
 
-![/img/blog/common/signoz_github.webp](/img/blog/common/signoz_github.webp)
+By combining OpenTelemetry and SigNoz, you can establish a powerful observability framework, ensuring your Angular applications are performant.
 
-If you are someone who understands more from video, then you can watch the our video tutorial on how to implement OpenTelemetry Angular libraries and monitor the application with SigNoz.
-
-<YouTube id="g-I-v1FtMoM" mute={false} />
-
-{ /* <!-- https://www.youtube.com/watch?v=g-I-v1FtMoM&t --> */}
-
-If you face any issues while trying out SigNoz, you can reach out with your questions in #support channel 👇
-
-{ /* <!--
-
-![Implementi%20ebc9f/join_slack_cta.webp](Implementi%20ebc9f/join_slack_cta.webp)
-
---> */}
-
-![/img/blog/common/join_slack_cta.webp](/img/blog/common/join_slack_cta.webp)
-
-### Key Takeaways
-
-- OpenTelemetry provides a standardized approach to observability in Angular applications.
-- Proper setup and configuration, including Zone Context integration, are crucial for effective tracing.
-- Custom instrumentation allows you to gain insights into Angular-specific operations.
-- SigNoz offers a comprehensive solution for visualizing and analyzing OpenTelemetry data.
-- Advanced techniques can significantly enhance your application performance insights.
+<GetStartedSigNoz />
 
 ## FAQs
 
@@ -853,6 +849,6 @@ Common issues often relate to context propagation or incorrect configuration. St
 
 **Further Reading**
 
-[Monitor gRPC calls with OpenTelemetry](https://signoz.io/blog/opentelemetry-grpc-golang/)
+[**Monitor gRPC calls with OpenTelemetry**](https://signoz.io/blog/opentelemetry-grpc-golang/)
 
-[Distributed Tracing for a nodejs application](https://signoz.io/blog/distributed-tracing-nodejs/)
+[**Distributed Tracing for a nodejs application**](https://signoz.io/blog/distributed-tracing-nodejs/)

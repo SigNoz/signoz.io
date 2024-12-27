@@ -1,5 +1,5 @@
 import { MetadataRoute } from 'next'
-import { allBlogs, allComparisons, allOpentelemetries, allDocs, allGuides } from 'contentlayer/generated'
+import { allBlogs, allAuthors, allComparisons, allGuides, allOpentelemetries, allDocs, allFAQs } from 'contentlayer/generated'
 import siteMetadata from '@/data/siteMetadata'
 
 const mapChangeFrequency = (
@@ -25,7 +25,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const blogRoutes = allBlogs
     .filter((post) => !post.draft)
     .map((post) => ({
-      url: `${siteUrl}/${post.path}`,
+      url: `${siteUrl}/${post.path}/`,
       lastModified: post.lastmod || post.date,
       changeFrequency: mapChangeFrequency('weekly'),
       priority: 0.5,
@@ -34,7 +34,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const docRoutes = allDocs
     .filter((post) => !post.draft)
     .map((post) => ({
-      url: `${siteUrl}/${post.path}`,
+      url: `${siteUrl}/${post.path}/`,
       lastModified: post.lastmod || post.date,
       changeFrequency: mapChangeFrequency('weekly'),
       priority: 0.5,
@@ -43,7 +43,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const comparisonRoutes = allComparisons
     .filter((post) => !post.draft)
     .map((post) => ({
-      url: `${siteUrl}/${post.path}`,
+      url: `${siteUrl}/${post.path}/`,
       lastModified: post.lastmod || post.date,
       changeFrequency: mapChangeFrequency('weekly'),
       priority: 0.5,
@@ -52,7 +52,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const opentelemetryRoutes = allOpentelemetries
     .filter((post) => !post.draft)
     .map((post) => ({
-      url: `${siteUrl}/${post.path}`,
+      url: `${siteUrl}/${post.path}/`,
       lastModified: post.lastmod || post.date,
       changeFrequency: mapChangeFrequency('weekly'),
       priority: 0.5,
@@ -62,11 +62,16 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const guideRoutes = allGuides
     .filter((guide) => !guide.draft)
     .map((guide) => ({
-      url: `${siteUrl}/guides/${guide.slug}`,
+      url: `${siteUrl}/${guide.path}/`,
       lastModified: guide.lastmod || guide.date,
       changeFrequency: mapChangeFrequency('weekly'),
       priority: 0.7,
     }))
+
+  const faqRoutes = allFAQs.map((faq) => ({
+    url: `${siteUrl}/${faq.path}/`,
+    lastModified: faq.lastmod || faq.date,
+  }))
 
   const routes = [
     '',
@@ -82,11 +87,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     'support',
     'teams',
     'guides', // Add the main guides page
+    'faqs', // Add the main FAQs page
   ].map((route) => ({
-    url: `${siteUrl}/${route}`,
+    url: `${siteUrl}/${route}${route ? '/' : ''}`,
     lastModified: new Date().toISOString().split('T')[0],
     changeFrequency: mapChangeFrequency('weekly'),
   }))
 
-  return [...routes, ...blogRoutes, ...comparisonRoutes, ...opentelemetryRoutes, ...docRoutes, ...guideRoutes]
+  return [...routes, ...blogRoutes, ...comparisonRoutes, ...opentelemetryRoutes, ...docRoutes, ...guideRoutes, ...faqRoutes]
 }

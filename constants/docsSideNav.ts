@@ -215,6 +215,12 @@ const docsSideNav = [
               },
               {
                 type: 'doc',
+                route: '/docs/instrumentation/opentelemetry-quarkus',
+                label: 'Quarkus',
+                className: 'new-doc',
+              },
+              {
+                type: 'doc',
                 route: '/docs/instrumentation/tomcat',
                 label: 'Tomcat',
               },
@@ -333,7 +339,7 @@ const docsSideNav = [
           //   // type: 'doc',
           //   // },
           //   items: [
-                  
+
           //   ],
           // },
         ],
@@ -464,7 +470,7 @@ const docsSideNav = [
       {
         type: 'doc',
         route: '/docs/userguide/hostmetrics',
-        label: 'Hostmetrics Dashboard',
+        label: 'Sending Host Metrics to SigNoz',
       },
       {
         type: 'doc',
@@ -597,8 +603,7 @@ const docsSideNav = [
           },
           {
             type: 'doc',
-            route:
-              '/docs/logs-management/send-logs/vector-logs-to-signoz',
+            route: '/docs/logs-management/send-logs/vector-logs-to-signoz',
             label: 'Vector',
           },
           {
@@ -670,6 +675,11 @@ const docsSideNav = [
             route: '/docs/userguide/logs_query_builder',
             label: 'Logs Query Builder',
           },
+          {
+            type: 'doc',
+            route: '/docs/logs-management/features/logs-quick-filters',
+            label: 'Logs Quick Filters',
+          },
         ],
       },
       {
@@ -718,14 +728,14 @@ const docsSideNav = [
           {
             type: 'doc',
             route: '/docs/logs-management/guides/pii-scrubbing',
-            label: 'PII Scrubbing'
+            label: 'PII Scrubbing',
           },
           {
             type: 'doc',
             route: '/docs/userguide/parse-multiline-logs',
             label: 'Parse Multiline Logs',
           },
-        ]
+        ],
       },
       {
         type: 'doc',
@@ -774,6 +784,12 @@ const docsSideNav = [
         type: 'doc',
         route: '/docs/metrics-management/k8s-infra-otel-config',
         label: 'Configure k8s-infra otelDeployment to collect metrics from receivers',
+      },
+      {
+        type: 'doc',
+        className: 'new-doc',
+        route: '/docs/metrics-management/docker-container-metrics',
+        label: 'Docker container metrics',
       },
     ],
   },
@@ -989,6 +1005,11 @@ const docsSideNav = [
         route: '/docs/alerts-management/alerts-history',
         label: 'Alerts History',
       },
+      {
+        type: 'doc',
+        route: '/docs/alerts-management/terraform-provider-signoz',
+        label: 'Terraform Provider',
+      },
     ],
   },
   {
@@ -1023,7 +1044,7 @@ const docsSideNav = [
         label: 'Flutter',
         route: '/docs/instrumentation/mobile-instrumentation/flutter',
       },
-     ],
+    ],
   },
   {
     label: 'Integrations',
@@ -1084,14 +1105,24 @@ const docsSideNav = [
       {
         type: 'doc',
         route: '/docs/messaging-queues/kafka',
-        label: 'Kafka',
+        label: 'Self-Hosted Kafka',
+      },
+      {
+        type: 'doc',
+        route: '/docs/messaging-queues/msk',
+        label: 'Amazon MSK',
+      },
+      {
+        type: 'doc',
+        route: '/docs/messaging-queues/strimzi',
+        label: 'Strimzi',
       },
       {
         type: 'doc',
         route: '/docs/messaging-queues/confluent-kafka',
         label: 'Confluent Kafka',
       },
-     ],
+    ],
   },
   {
     type: 'doc',
@@ -1577,7 +1608,7 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/gcp-monitoring/compute-engine/tracing',
             label: 'APM & Tracing',
-          }
+          },
         ],
       },
       {
@@ -1618,7 +1649,7 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/gcp-monitoring/cloud-sql/metrics',
             label: 'Metrics',
-          }
+          },
         ],
       },
       {
@@ -1660,8 +1691,8 @@ const docsSideNav = [
             route: '/docs/gcp-monitoring/vpc/metrics',
             label: 'Metrics',
           },
-         ],
-       },
+        ],
+      },
       {
         label: 'GKE',
         type: 'category',
@@ -1674,7 +1705,7 @@ const docsSideNav = [
             label: 'APM & Tracing',
           },
           {
-            type: 'doc', 
+            type: 'doc',
             route: '/docs/gcp-monitoring/gke/gke-logging-and-metrics',
             label: 'Logs and Metrics',
           },
@@ -1692,17 +1723,17 @@ const docsSideNav = [
             label: 'Cloud Run Service Setup',
           },
           {
-            type: 'doc', 
+            type: 'doc',
             route: '/docs/gcp-monitoring/cloud-run/logging',
             label: 'Logging',
           },
           {
-            type: 'doc', 
+            type: 'doc',
             route: '/docs/gcp-monitoring/cloud-run/metrics',
             label: 'Metrics',
           },
           {
-            type: 'doc', 
+            type: 'doc',
             route: '/docs/gcp-monitoring/cloud-run/tracing',
             label: 'APM & Tracing',
           },
@@ -1715,7 +1746,7 @@ const docsSideNav = [
         route: '/docs/gcp-monitoring/cloud-monitoring',
         items: [
           {
-            type: 'doc', 
+            type: 'doc',
             route: '/docs/gcp-monitoring/cloud-monitoring/metrics',
             label: 'Metrics',
           },
@@ -1769,6 +1800,11 @@ const docsSideNav = [
         // slug: '/docs/operate/migration/migration',
         // },
         items: [
+          {
+            type: 'doc',
+            route: '/docs/operate/migration/upgrade-0.64',
+            label: 'Upgrade to v0.64',
+          },
           {
             type: 'doc',
             route: '/docs/operate/migration/upgrade-0.55',

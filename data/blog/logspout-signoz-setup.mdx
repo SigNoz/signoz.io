@@ -1,0 +1,97 @@
+---
+
+title: Rich Logs Collector for Docker Compose Services with SigNoz
+slug: logspout-signoz-setup
+date: 2024-11-18
+tags: [Log Management, Docker, SigNoz, Observability]
+authors: [pavan_kumar]
+description: Learn how to set up `logspout-signoz` for effective log collection, labeling, and forwarding from Docker containers to SigNoz. Simplify your log management and improve observability.
+keywords: [Docker Logs, Logspout, SigNoz, Log Management, Observability, DevOps, Log Labeling]
+
+---
+
+Our production services run on a Linux machine using Docker Compose, keeping our infrastructure simple and manageable. Docker Compose allows us to easily define and manage multi-container applications, providing a straightforward way to orchestrate services, which helps reduce complexity in our infrastructure.
+
+Recently, we decided to switch to SigNoz to gain more flexibility and control over our observability stack. Following the SigNoz setup guide, we used `logspout` to collect and forward logs. Initially, logs from different services needed additional configuration to label them by service name and severity. This minor adjustment allowed for better customization and control over log labeling, enhancing our observability.
+
+This experience inspired me to create an extension for `logspout` called `logspout-signoz`, which simplifies the process by automatically labeling logs with the correct service name and severity level, providing a seamless experience without the need for extra configuration compared to the initial setup.
+
+<Figure src="/img/blog/2024/11/logspout-signoz-setup-Screenshot_2024-11-05_at_7.52.42_PM.webp" alt="" caption="" />
+
+## Logspout 101
+
+Logspout is a lightweight log router for Docker containers. It allows you to easily collect logs from all running Docker containers and forward them to a central logging service or endpoint. By attaching to the Docker socket, Logspout can automatically detect and route logs from newly started containers, making it a powerful and convenient tool for log management in Docker-based environments.
+
+For more detailed guidance on collecting Docker container logs with SigNoz, refer to the <a href="https://signoz.io/docs/userguide/collect_docker_logs/" rel="noopener noreferrer nofollow" target="_blank">official documentation on how to send Docker container logs</a>
+
+## Key Features of logspout-signoz
+
+`logspout-signoz` offers several enhancements over the standard logspout setup, making log management more efficient and user-friendly:
+
+1. Direct Posting to SigNoz: Logs are sent directly to SigNoz’s HTTP endpoint, capturing more detailed information such as log levels, timestamps, service names, and environment details.
+2. Automatic Service Name Detection:
+    1. For JSON logs, it picks the service name from the `service` field.
+    2. Otherwise, it defaults to the Docker Compose service name or Docker image name.
+3. Automatic Environment Detection:
+    1. For JSON logs, it reads the environment name from the `env` field.
+    2. Otherwise, it uses the `ENV` variable from `logspout-signoz`.
+4. Automatic JSON Parsing:
+    1. Known JSON log attributes like `level` are mapped to relevant SigNoz fields (e.g., `SeverityText`).
+    2. Additional JSON attributes are packed into the `attributes` key in SigNoz’s log payload.
+
+## How to configure and run logspout-signoz
+
+Here’s how to set up logspout-signoz to forward logs and automatically labels logs with the service name, severity level and environment name:
+
+1. Enable the `httplogreceiver/json` Receiver in SigNoz:
+    - In `otel-collector-config.yaml`, add the `httplogreceiver/json` under `receivers`:
+        
+        ```
+        receivers:
+          httplogreceiver/json:
+            endpoint: 0.0.0.0:8082
+            source: json
+        ```
+        
+    - Add `httplogreceiver/json` to the `service.pipelines.logs.receivers` section:
+        
+        ```
+        service:
+          pipelines:
+            logs:
+              receivers: [otlp, tcplog/docker, httplogreceiver/json]
+              processors: [batch]
+              exporters: [clickhouselogsexporter]
+        ```
+        
+    - Map container port 8082 to the host to enable SigNoz to receive logs:
+        
+        ```
+        services:
+          otel-collector:
+            image: signoz/signoz-otel-collector:${OTELCOL_TAG:-0.102.10}
+            container_name: signoz-otel-collector
+            ports:
+              - "8082:8082" # SigNoz logs
+        ```
+        
+2. Run the `logspout-signoz` Container:
+    - On the host machine where Docker Compose services are running, execute:
+        
+        ```
+        docker run -d \
+            --volume=/var/run/docker.sock:/var/run/docker.sock \
+            -e 'SIGNOZ_LOG_ENDPOINT=http://1.2.3.4:8082' \
+            -e 'ENV=prod' \
+            pavanputhra/logspout-signoz \
+            signoz://localhost:8082
+        ```
+        
+
+You should now be seeing logs from all Docker containers on your host machine!
+
+## Key Takeaways
+
+- Simplified Log Management: `logspout-signoz` streamlines the process of forwarding and labeling logs, making it easier to manage observability for Docker-based environments.
+- Automatic Labeling: Logs are automatically enriched with service name, severity, and environment details, reducing manual configuration and ensuring consistency.
+- Enhanced Observability: With direct posting to SigNoz, logs contain detailed metadata, providing deeper insights and improved monitoring capabilities.

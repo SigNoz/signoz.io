@@ -5,13 +5,18 @@ import Link from 'next/link'
 import { ArrowUpRight } from 'lucide-react'
 import Image from 'next/image'
 import { Github, Linkedin, Slack, Twitter, Youtube } from '@/components/social-icons/SolidIcons'
+import { usePathname } from 'next/navigation'
 
-/**
- * Footer component
- */
 function Footer() {
+  const pathname = usePathname()
+  const isLoginRoute = pathname === '/login/'
+
+  if (isLoginRoute) {
+    return null
+  }
+
   return (
-    <div className="flex flex-col justify-center border-t border-solid border-gray-900 z-[10] bg-signoz_ink-500 backdrop-blur-md bg-opacity-70">
+    <div className="z-[10] flex flex-col justify-center border-t border-solid border-gray-900 bg-signoz_ink-500 bg-opacity-70 backdrop-blur-md">
       <div className="flex w-full items-center justify-center bg-opacity-70 px-16 py-14 max-md:max-w-full max-md:px-5">
         <div className="container w-full max-w-[1200px] justify-between max-md:max-w-full">
           <div className="flex gap-5 max-md:flex-col max-md:gap-0">
@@ -129,7 +134,11 @@ function Footer() {
                   Privacy
                 </Link>
 
-                <Link href="https://trust.signoz.io/" target="_blank" className="mt-5 hover:underline">
+                <Link
+                  href="https://trust.signoz.io/"
+                  target="_blank"
+                  className="mt-5 hover:underline"
+                >
                   Security & Compliance
                 </Link>
               </div>
@@ -147,9 +156,11 @@ function Footer() {
                   <div className="font-satoshi-bold font-medium">SigNoz</div>
                 </div>
                 <div className="mt-5 items-end justify-center rounded text-sm leading-5 text-emerald-300">
+                  <Link href="https://status.signoz.io/" target="_blank">
                   All systems operational
+                  </Link>
                 </div>
-                <div className="mt-5 flex items-end justify-between gap-4 py-2 footer-icons">
+                <div className="footer-icons mt-5 flex items-end justify-between gap-4 py-2">
                   <Link
                     href={'https://github.com/SigNoz'}
                     target="_blank"
@@ -190,22 +201,22 @@ function Footer() {
                     <Youtube />
                   </Link>
                 </div>
-                <div className='mt-5 flex flex-row gap-8'>
-                <img
-                    className="opacity-60 hover:opacity-100 cursor-pointer"
+                <div className="mt-5 flex flex-row gap-8">
+                  <img
+                    className="cursor-pointer opacity-60 hover:opacity-100"
                     src="/svgs/icons/hipaa.svg"
                     width={90}
                     height={90}
                     alt=""
-                    onClick={()=> window.open("https://trust.signoz.io/", "_blank")}
+                    onClick={() => window.open('https://trust.signoz.io/', '_blank')}
                   />
-                <img
-                    className="shadow-[0px_0_40px_0_rgba(255,255,255,0.27)] rounded-full opacity-60 hover:opacity-100 transition-opacity cursor-pointer"
+                  <img
+                    className="cursor-pointer rounded-full opacity-60 shadow-[0px_0_40px_0_rgba(255,255,255,0.27)] transition-opacity hover:opacity-100"
                     src="/svgs/icons/SOC-2.svg"
                     width={60}
                     height={60}
                     alt=""
-                    onClick={()=> window.open("https://trust.signoz.io/", "_blank")}
+                    onClick={() => window.open('https://trust.signoz.io/', '_blank')}
                   />
                 </div>
               </div>

@@ -790,17 +790,17 @@ From the SigNoz Cloud Dashboard, navigate to Settings > Ingestion Settings and C
 
 The SigNoz Cloud Dashboard demonstrates user navigation through its interface.
 
-Add URL to `url` and ingestion key to `access_token` in the following code:
+Add URL to `url` and ingestion key to `INGESTION_KEY` in the following code:
 
 ```python
 from loguru import logger
 import requests
 import time
 import json
-# SigNoz ingestion URL and access token
+# SigNoz ingestion URL and ingestion key
 url = 'SIGNOZ_INGESTION_URL'
 # replace with your actual token
-access_token = 'SIGNOZ_ACCESS_TOKEN'
+INGESTION_KEY = 'SIGNOZ_INGESTION_KEY'
 def send_log_to_signoz(message, level, **kwargs):
     timestamp = int(time.time() * 1e9)
     log_payload = [
@@ -821,7 +821,7 @@ def send_log_to_signoz(message, level, **kwargs):
     ]
     headers = {
         'Content-Type': 'application/json',
-        'signoz-access-token': access_token
+        'signoz-ingestion-key': INGESTION_KEY
     }
     response = requests.post(url, headers=headers, data=json.dumps(log_payload))
     print(f'Status Code: {response.status_code}')

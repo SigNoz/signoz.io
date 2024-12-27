@@ -1,14 +1,17 @@
 ---
-date: 2024-06-06
+date: 2024-12-19
 id: lambda-logs
 title: Send your AWS Lambda logs to SigNoz
+hide_table_of_contents: true
 ---
 
 ## Overview
 
-This documentation provides a detailed walkthrough on how to set up an AWS Lambda function to collect AWS Lambda logs stored in an AWS S3 bucket and forward them to SigNoz. By the end of this guide, you will have a setup that automatically sends your Lambda logs to SigNoz, enabling you to visualize and monitor your application's load balancing performance and health.
+This documentation provides a detailed walkthrough on how to set up an AWS Lambda function to collect AWS Lambda logs stored in an AWS S3 bucket and forward them to 
+SigNoz. This will enable you to automatically sends your Lambda logs to SigNoz, enabling you to visualize and monitor your application's 
+load balancing performance and health.
 
-**Here’s a quick summary of what we’ll be doing in this detailed article.** 
+**Here’s a quick summary of what we’ll be doing in this detailed documentation.** 
 
 - [Creating / Configuring your S3 bucket](#creating--configuring-your-s3-bucket)
 - [Understanding how lambda function work](#understanding-how-lambda-function-work)
@@ -20,8 +23,9 @@ This documentation provides a detailed walkthrough on how to set up an AWS Lambd
 ## Prerequisites
 
 - AWS account with administrative privilege.
-- [SigNoz Cloud Account](https://signoz.io/teams/)
 
+<Tabs entityName="plans">
+<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
 
 ## Creating / Configuring your S3 bucket
 
@@ -310,7 +314,7 @@ def lambda_handler(event, context):
             log_data = data.replace("'", '"')
             
             req_headers = {
-                     'signoz-access-token': '<SIGNOZ_INGESTION_KEY>',
+                     'signoz-ingestion-key': '<SIGNOZ_INGESTION_KEY>',
                      'Content-Type': 'application/json'
                 }
             # Specify the HTTP endpoint for sending the data
@@ -459,3 +463,5 @@ Upon accessing the SigNoz logs section, you will notice a considerable influx of
     <figcaption><i>A sample log line of the logs sent from AWS Lambda (SAMPLE ONLY)</i></figcaption>
 </figure>
 
+</TabItem>
+</Tabs>

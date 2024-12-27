@@ -27,7 +27,7 @@ In this tutorial, we will cover:
 - How to Set Up Prometheus Monitoring on a Kubernetes Cluster
 - Visualizing Metrics in SigNoz
 
-If you want to jump straight into implementation, start with the <a href="https://www.notion.so/How-to-Monitor-Kubernetes-Clusters-using-Prometheus-59729faf32e0430a912bcae05340f764?pvs=21" rel="noopener noreferrer nofollow" target="_blank">prerequisites</a> section.
+If you want to jump straight into implementation, start with the [prerequisites section](/guides/kubernetes-monitoring-prometheus/#prerequisites).
 
 ## What is Prometheus?
 
@@ -162,7 +162,7 @@ Now that Prometheus has been set up in the cluster and is scraping cluster metri
 
 Setting up SigNoz
 
-SigNoz can be <a href="https://www.notion.so/Kubernetes-Monitoring-54b4239ad88b4d27ac8ffb6c6b2556c5?pvs=21" rel="noopener noreferrer nofollow" target="_blank">installed</a> and self-hosted directly in your cluster. If you do not want to manage your own SigNoz instance, you can use the SigNoz cloud version, which is hosted in the cloud and managed by SigNoz. It is the easiest way to run SigNoz. For this article, we will be utilizing SigNoz cloud.
+SigNoz can be installed and self-hosted directly in your cluster. If you do not want to manage your own SigNoz instance, you can use the SigNoz cloud version, which is hosted in the cloud and managed by SigNoz. It is the easiest way to run SigNoz. For this article, we will be utilizing SigNoz cloud.
 
 You can sign up [here](https://signoz.io/teams/) for a free account and get 30 days of unlimited access to all features.
 
@@ -327,7 +327,7 @@ data:
           insecure: false
         timeout: 20s
         headers:
-          signoz-access-token: "<SigNoz Token>"
+          signoz-ingestion-key: "<SigNoz Ingestion Key>"
 
     service:
       pipelines:
@@ -339,10 +339,10 @@ data:
 Breakdown of what this Config Map does:
 
 - Prometheus Receiver: It's set up to collect metrics from a Prometheus instance running within your cluster (the Prometheus server deployed using the `prometheus-community/kube-prometheus-stack` chart ).
-- OpenTelemetry (OTLP) Exporter: It's configured to send the collected metrics to an external service called SigNoz. The SigNoz access token specifies and grants access to the particular SigNoz cloud account the collected metrics should be exported to.
+- OpenTelemetry (OTLP) Exporter: It's configured to send the collected metrics to an external service called SigNoz. The SigNoz ingestion key specifies and grants access to the particular SigNoz cloud account the collected metrics should be exported to.
 - Pipelines: It defines a processing pipeline to gather metrics from Prometheus and then export them using the OTLP protocol.
 
-To get the access token for your SigNoz cloud account, go to settings > Ingestion settings. Copy and paste the ingestion key displayed in your config map file.
+To get the ingestion key for your SigNoz cloud account, go to settings > Ingestion settings. Copy and paste the ingestion key displayed in your config map file.
 
 Also, take note of the ingestion url. There are currently 2 regions available, EU (Europe) and IN (India). Copy the region where you have your account deployed in and paste in the config map.
 

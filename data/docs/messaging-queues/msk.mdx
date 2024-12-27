@@ -1,0 +1,249 @@
+---
+date: 2024-11-06
+title: Monitor MSK Service
+id: msk
+---
+
+## Table of Contents
+
+1. [Introduction](#introduction)
+2. [Prerequisites](#prerequisites)
+3. [Steps to Follow](#steps-to-follow)
+    - [Step 1: MSK Setup](#step-1-enable-monitoring)
+    - [Step 2: Configure OpenTelemetry Collector](#step-2-configure-opentelemetry-collector)
+    - [Step 3: Run OpenTelemetry Collector](#step-3-run-opentelemetry-collector)
+    - [Step 4: Java Producer-Consumer App Setup](#step-4-deploy-applications)
+    - [Step 5: Visualize data in SigNoz](#step-5-visualize-data-in-signoz)
+
+
+---
+
+## Introduction
+
+{/* Description about kafka and its different components */}
+
+Amazon MSK is a managed service that runs Apache Kafka on AWS. It handles the operational complexities of running Kafka clusters while giving you full access to native Kafka features. The service automates broker management, cluster scaling, and backups. You retain control over your Kafka applications and data while AWS manages the underlying infrastructure.
+
+
+In this documentation, we will guide you through setting up Amazon MSK monitoring with OpenTelemetry and SigNoz. You'll learn how to instrument MSK's 
+components—producers, consumers, topics, and brokers—so that you can collect key metrics, traces and logs. This will help you gain deep insights into the 
+performance and behavior of your MSK cluster.
+
+
+
+<figure data-zoomable align="center">
+    <img
+      src="/img/blog/2024/05/kafka-monitoring/kafka-otel-signoz.png"
+      alt="Kafka integrated with OpenTelemetry for collecting metrics, traces and logs, visualized in SigNoz"
+    />
+    <figcaption>
+      <i>
+       Kafka integrated with OpenTelemetry for collecting metrics, traces and logs, visualized in SigNoz
+      </i>
+    </figcaption>
+</figure>
+
+
+---
+
+## Prerequisites
+
+Before you begin, ensure the following prerequisites are met:
+
+1. **Java Development Kit (JDK)**: Ensure that JDK 8 or higher is installed on your system.
+2. **Amazon MSK**: You will need an Amazon MSK cluster to monitor. If you don't have one, you can create one using the [Amazon MSK console](https://docs.aws.amazon.com/msk/latest/developerguide/create-cluster.html).
+3. **Kafka Producer and Consumer Applications**: You will need Kafka producer and consumer applications in Java (Support for other languages will be added soon).
+4. **Kafka Client Library**: Make sure the Kafka client libraries are included in your project. You can find the official Kafka client libraries from Apache [here](https://mvnrepository.com/artifact/org.apache.kafka/kafka-clients).
+5. **OpenTelemetry Java Agent**: Download the OpenTelemetry Java auto-instrumentation agent JAR. Follow the setup guide from the official OpenTelemetry documentation [here](https://opentelemetry.io/docs/zero-code/java/agent/getting-started/) or directly download the latest agent JAR from [here](https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar).
+
+Once these are set up, you will be ready to proceed with Kafka monitoring and instrumentation.
+
+
+---
+
+## Steps to Follow
+
+This guide follows these primary steps:
+
+1. [MSK Setup](#step-1-enable-monitoring)
+2. [OpenTelemetry Java Agent Installation](#step-2-configure-opentelemetry-collector)
+3. [Run OpenTelemetry Collector](#step-3-run-opentelemetry-collector)
+4. [Java Producer-Consumer App Setup](#step-4-deploy-applications)
+5. [Visualise data in SigNoz](#step-5-visualize-data-in-signoz)
+
+
+### Step 1: Enable Monitoring
+
+- Go to the Amazon MSK console
+- Select the cluster
+- Click on the `Actions` > `Edit Monitoring`
+- Configure the following settings as in the screenshot below:
+
+<figure data-zoomable align="center">
+    <img
+      src="/img/docs/messaging-queues/kafka/msk-monitoring-settings.webp"
+      alt="MSK Monitoring Settings"
+    />
+    <figcaption>
+      <i>
+        MSK Monitoring Settings
+      </i>
+    </figcaption>
+</figure>
+
+
+### Step 2: Configure OpenTelemetry Collector
+
+Create a configuration file for the OpenTelemetry Collector:
+
+```yaml
+receivers:
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: 'broker'
+          file_sd_configs:
+          - files:
+            - 'targets.json'
+
+exporters:
+  otlp:
+    endpoint: "<YOUR_SIGNOZ_CLOUD_URL>"
+    tls:
+      insecure: false
+    headers:
+      "signoz-ingestion-key": "<SIGNOZ_INGESTION_KEY>"
+
+service:
+  pipelines:
+    metrics:
+      receivers: [prometheus]
+      processors: [batch]
+      exporters: [otlp]
+```
+
+
+#### Targets JSON File 
+The `targets.json` file contains the list of brokers and their ports. You can get all the broker dns by:
+- Navigating to the Amazon MSK console
+- Selecting the cluster
+- Clicking on the `Properties` tab
+
+You will find the `Broker DNS` under the `Broker details` section in the `Endpoints` column.
+
+```json
+[
+  {
+    "labels": {
+      "job": "jmx"
+    },
+    "targets": [
+      "broker_dns_1:11001",
+      "broker_dns_2:11001",
+      .
+      .
+      .
+      "broker_dns_N:11001"
+    ]
+  },
+  {
+    "labels": {
+      "job": "node"
+    },
+    "targets": [
+      "broker_dns_1:11002",
+      "broker_dns_2:11002",
+      .
+      .
+      .
+      "broker_dns_N:11002"
+    ]
+  }
+]
+```
+
+
+### Step 3: Run OpenTelemetry Collector
+
+Create an EC2 instance in the same VPC as your MSK cluster.
+
+1. Install the OpenTelemetry Collector:
+You can [follow this doc](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) to download the binary for your Operating System.
+
+Place the binary in the root of your project directory.
+
+2. Start the collector:
+```bash
+./otelcol --config config.yaml
+```
+
+### Step 4: Deploy Applications
+
+**Compile your Java producer and consumer applications:** Ensure your producer and consumer apps are compiled and ready to run.
+
+**Run Producer App with Java Agent:**
+
+```bash
+java -javaagent:/path/to/opentelemetry-javaagent.jar \
+     -Dotel.service.name=producer-svc \
+     -Dotel.traces.exporter=otlp \
+     -Dotel.metrics.exporter=otlp \
+     -Dotel.logs.exporter=otlp \
+     -jar /path/to/your/producer.jar
+```
+
+**Run Consumer App with Java Agent:**
+
+```bash
+java -javaagent:/path/to/opentelemetry-javaagent.jar \
+     -Dotel.service.name=consumer-svc \
+     -Dotel.traces.exporter=otlp \
+     -Dotel.metrics.exporter=otlp \
+     -Dotel.logs.exporter=otlp \
+     -Dotel.instrumentation.kafka.producer-propagation.enabled=true \
+     -Dotel.instrumentation.kafka.experimental-span-attributes=true \
+     -Dotel.instrumentation.kafka.metric-reporter.enabled=true \
+     -jar /path/to/your/consumer.jar
+```
+
+### Visualize data in SigNoz
+
+**To see your Producer and Consumer app traces:**
+
+- Head over to **Services** tab in your SigNoz instance.
+- You should be able to see your apps in the list along with some [application metrics](https://signoz.io/docs/userguide/metrics/).
+- Click on the service of your choice to see more detailed application metrics and [related traces](https://signoz.io/docs/userguide/traces/).
+
+<figure data-zoomable align="center">
+    <img
+      src="/img/docs/messaging-queues/kafka/kafka-metrics.webp"
+      alt="Kafka Producer app in Services Tab of SigNoz"
+    />
+    <figcaption>
+      <i>
+        Kafka Producer app in Services tab of SigNoz
+      </i>
+    </figcaption>
+</figure>
+
+**To see the Kafka Metrics:**
+
+<Admonition type="info">
+  The messaging queues tab in SigNoz only works when both the producer and consumer applications are instrumented with SigNoz, along with the Kafka cluster itself.
+</Admonition>
+
+
+- Head over to **Messaging Queues** tab in your SigNoz instance.
+- You will get different Options like **Consumer Lag View** etc., to see various kafka related metrics.
+
+<figure data-zoomable align="center">
+    <img
+      src="/img/docs/messaging-queues/kafka/msk-mq.webp"
+      alt="Messaging Queues tab in SigNoz"
+    />
+    <figcaption>
+      <i>
+        Messaging Queues tab in SigNoz
+      </i>
+    </figcaption>
+</figure>

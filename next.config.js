@@ -94,7 +94,7 @@ module.exports = () => {
     async redirects() {
       return [
         {
-          source: '/docs',
+          source: '/docs/',
           destination: '/docs/introduction',
           permanent: true,
         },
@@ -129,49 +129,55 @@ module.exports = () => {
           permanent: true,
         },
         {
-          source: '/learn/user-stories',
+          source: '/learn/user-stories/',
           destination: '/observability-user-stories',
           permanent: true,
         },
         {
-          source: '/slack',
+          source: '/slack/',
           destination:
             'https://join.slack.com/t/signoz-community/shared_invite/zt-2tgblijg2-eZCUAJnmp~G0ekNIv3se1A',
           basePath: false,
           permanent: true,
         },
         {
-          source: '/docs/deployment/docker',
+          source: '/careers/',
+          destination: 'https://jobs.gem.com/signoz',
+          basePath: false,
+          permanent: true,
+        },
+        {
+          source: '/docs/deployment/docker/',
           destination: '/docs/install/docker',
           permanent: true,
         },
         {
-          source: '/docs/deployment/docker_swarm',
+          source: '/docs/deployment/docker_swarm/',
           destination: '/docs/install/docker-swarm',
           permanent: true,
         },
         {
-          source: '/docs/deployment/helm_chart',
+          source: '/docs/deployment/helm_chart/',
           destination: '/docs/install/kubernetes',
           permanent: true,
         },
         {
-          source: '/docs/deployment/troubleshooting',
+          source: '/docs/deployment/troubleshooting/',
           destination: '/docs/install/troubleshooting',
           permanent: true,
         },
         {
-          source: '/docs/installation',
+          source: '/docs/installation/',
           destination: '/docs/install',
           permanent: true,
         },
         {
-          source: '/docs/userguide/metrics-dashboard',
+          source: '/docs/userguide/metrics-dashboard/',
           destination: '/docs/userguide/dashboards',
           permanent: true,
         },
         {
-          source: '/docs/operate/upgrade',
+          source: '/docs/operate/upgrade/',
           destination: '/docs/operate/migration/upgrade-0.8.0',
           permanent: true,
         },
@@ -191,7 +197,7 @@ module.exports = () => {
           permanent: true,
         },
         {
-          source: '/gh',
+          source: '/gh/',
           destination: 'https://github.com/SigNoz/signoz/',
           basePath: false,
           permanent: true,
@@ -237,7 +243,7 @@ module.exports = () => {
           permanent: true,
         },
         {
-          source: '/users',
+          source: '/users/',
           destination: '/workspace-setup/',
           permanent: false,
           has: [
@@ -368,7 +374,8 @@ module.exports = () => {
         },
         {
           source: '/docs/instrumentation/manual-instrumentation/javascript/nodejs/',
-          destination: '/docs/instrumentation/manual-instrumentation/javascript/opentelemetry-nodejs/',
+          destination:
+            '/docs/instrumentation/manual-instrumentation/javascript/opentelemetry-nodejs/',
           permanent: true,
         },
         {
@@ -394,6 +401,11 @@ module.exports = () => {
         {
           source: '/docs/frontend-monitoring/web-vitals/',
           destination: '/docs/frontend-monitoring/opentelemetry-web-vitals/',
+          permanent: true,
+        },
+        {
+          source: '/guides/unified-observability/',
+          destination: '/unified-observability/',
           permanent: true,
         },
       ]

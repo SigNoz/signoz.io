@@ -1,14 +1,17 @@
 ---
-date: 2024-06-06
+date: 2024-12-19
 id: rds-logs
 title: Send your RDS logs to SigNoz
+hide_table_of_contents: true
 ---
 
 ## Overview
 
-This documentation provides a detailed walkthrough on how to set up an AWS Lambda function to collect Relational Database Service (RDS) logs stored in an AWS S3 bucket and forward them to SigNoz. By the end of this guide, you will have a setup that automatically sends your RDS logs to SigNoz, enabling you to visualize and monitor your database performance and health.
+This documentation provides a detailed walkthrough on how to set up an AWS Lambda function to collect Relational Database Service (RDS) logs stored in an AWS S3 
+bucket and forward them to SigNoz. This will enable you to automatically sends your RDS logs to SigNoz, enabling you to visualize and 
+monitor your database performance and health.
 
-**Here’s a quick summary of what we’ll be doing in this detailed article.** 
+**Here’s a quick summary of what we’ll be doing in this detailed documentation** 
 
 - [Creating / Configuring your S3 bucket](#creating--configuring-your-s3-bucket)
 - [Understanding how lambda function work](#understanding-how-lambda-function-work)
@@ -20,10 +23,8 @@ This documentation provides a detailed walkthrough on how to set up an AWS Lambd
 ## Prerequisites
 
 - AWS account with administrative privilege.
-- [SigNoz Cloud Account](https://signoz.io/teams/)
 
-
-Before we dive into creating and configuring the S3 bucket and Lambda function, let's talk a little about AWS RDS () supported databases and all the expected types of logs that you will be dealing with. 
+{/* Before we dive into creating and configuring the S3 bucket and Lambda function, let's talk a little about AWS RDS () supported databases and all the expected types of logs that you will be dealing with. 
 
 ## Introduction to Database Logging in AWS RDS
 
@@ -161,7 +162,10 @@ Until MariaDB 10.1.4, the format only consisted of the date (yymmdd) and time, f
 
 <Admonition type="warning" >
 The screenshots shown below were taken to send Elastic Load Balancer logs to SigNoz, rest assured, the steps for for RDS logs to SigNoz cloud endpoint remain same. Please name the appropriate name changes against what is shown below in the screenshots (e.g. - bucket names, name fields, etc)
-</Admonition>
+</Admonition> */}
+
+<Tabs entityName="plans">
+<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
 
 ## Creating / Configuring your S3 bucket
 
@@ -454,7 +458,7 @@ def lambda_handler(event, context):
             json_data = [convert_log_line_to_json(line) for line in list_of_strings]
             
             req_headers = {
-                     'signoz-access-token': '<SIGNOZ_INGESTION_KEY>',
+                     'signoz-ingestion-key': '<SIGNOZ_INGESTION_KEY>',
                      'Content-Type': 'application/json'
                 }
             # Specify the HTTP endpoint for sending the data
@@ -552,7 +556,7 @@ def process_log_file(file_path):
         list_of_strings = json.loads(result)
         json_data = [convert_log_line_to_json(line) for line in list_of_strings]
         req_headers = {
-                     'signoz-access-token': '<SIGNOZ_INGESTION_KEY>',
+                     'signoz-ingestion-key': '<SIGNOZ_INGESTION_KEY>',
                      'Content-Type': 'application/json'
                 }
         http_url = 'https://ingest.in.signoz.cloud:443/logs/json'  # Replace with your actual URL
@@ -630,3 +634,6 @@ Upon accessing the SigNoz logs section, you will notice a considerable influx of
     <img className="box-shadowed-image" src="/img/docs/elb/elb-logs-lambda_12.webp" alt="A sample log line of the logs sent from AWS Lambda"/>
     <figcaption><i>A sample log line of the logs sent from AWS Lambda</i></figcaption>
 </figure>
+
+</TabItem>
+</Tabs>

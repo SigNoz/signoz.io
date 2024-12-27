@@ -1,0 +1,613 @@
+---
+
+title: Mastering React Monitoring - Best Practices and Tools
+slug: react-monitoring
+date: 2024-12-26
+tags: [React, Monitoring]
+authors: [sushant_gaurav]
+description: Discover essential React monitoring techniques, tools, and best practices to optimize your application's performance and user experience.
+keywords: [react monitoring, performance optimization, error tracking, user experience, web development, SigNoz, DevTools]
+
+---
+
+React has revolutionized web development, but with great power comes great responsibility. How can you optimize the performance of your React applications? What metrics should you be tracking? What tools can you utilize to ensure a seamless user experience? React monitoring provides solutions to these queries.
+
+This article explains React monitoring, focusing on optimizing performance, preventing errors, and enhancing the user experience. It covers integrating monitoring into the development workflow with SigNoz for comprehensive monitoring. The article includes case studies that showcase practical applications of React monitoring.
+
+## What is React Monitoring, and Why is it Important?
+
+React monitoring requires tracking, evaluating, and improving the performance of React apps to ensure they function properly in real-world scenarios. Unlike standard web application monitoring, React-specific monitoring focuses on characteristics such as component re-renders, virtual Document Object Model (DOM) reconciliation, and state management.
+
+### Why is React Monitoring Essential?
+
+- Performance Optimization: Identify and address challenges like lagging components or wasteful state changes to enhance load times and responsiveness.
+- Error prevention: Catch problems such as component crashes or unhandled exceptions before they affect users.
+- User Experience Enhancement: Understand how users engage with your app, whether through clicks, navigation, or form submissions and utilize data to drive changes.
+- Resource Management: Monitor memory leaks, API requests, and CPU-intensive operations to prevent lagging or unresponsive apps.
+
+### Common Challenges Without Proper Monitoring
+
+- Unexpected Crashes: A minor problem in one component might cause the entire application to fail.
+- Slow-loading Components: Without monitoring, finding and resolving performance bottlenecks is guesswork.
+- Memory Leaks: Inefficient handling of state or hooks might cause memory concerns, reducing app performance over time.
+- User Abandonment: Frustrated users are more likely to abandon your app if performance difficulties continue.
+
+## Visualizing React Monitoring: Key Features
+
+React monitoring involves four interconnected areas that work together to ensure optimal application performance. Let's break down these key features and understand how they contribute to a robust monitoring strategy:
+
+<Figure src="/img/guides/2024/12/react-monitoring-CleanShot_2024-12-26_at_15.42.092x.webp" alt="" caption="" />### 1. Performance Monitoring
+
+- Component Render Times: Track how quickly your React components render and re-render
+- Load Performance: Measure initial load times, Time to Interactive (TTI), and First Contentful Paint (FCP)
+- State Management: Monitor Redux store updates, Context API changes, and local state mutations
+- Resource Usage: Track memory consumption, CPU utilization, and network requests
+
+### 2. Error Tracking
+
+- Runtime Errors: Capture and log JavaScript exceptions and React-specific errors
+- API Failures: Monitor failed network requests and API integrations
+- Component Crashes: Track unexpected component failures and lifecycle errors
+- Memory Leaks: Detect memory leaks from unmounted components or stale closures
+
+### 3. User Experience Metrics
+
+- Interaction Events: Monitor user clicks, scrolls, and other UI interactions
+- Navigation Paths: Track how users move through your application
+- Form Submissions: Monitor form completion rates and validation errors
+- Response Times: Measure how quickly your app responds to user actions
+
+### 4. Real-time Optimization
+
+- Bottleneck Detection: Identify performance bottlenecks as they occur
+- Code Splitting: Monitor chunk loading and splitting effectiveness
+- Resource Management: Track asset loading and caching strategies
+- Cache Strategy: Monitor cache hit rates and optimization opportunities
+
+## Essential Metrics to Track in React Applications
+
+Tracking the correct metrics is essential for evaluating your app's health. Here's an overview of critical metrics:
+
+### Performance Metrics
+
+- Load Time: Load time is the time it takes for the program to load. You can use tools like Google Lighthouse or React Profiler to assess initial load times and discover ways to improve asset delivery.
+- Time to Interactive (TTI): TTI is when users start interacting with your app. High TTI values suggest that long-running JavaScript tasks are interfering with interaction.
+- First Contentful Paint (FCP): FCP depicts how rapidly the content shows on the screen. Prioritize optimizing FCP for a higher Core Web Vitals score, enhancing SEO and customer happiness.
+
+### Error Tracking
+
+- Error Types: It include React-specific failures, such as unsuccessful state changes or component crashes (e.g., dependency misconfigurations with `componentDidCatch` or `useEffect`).
+- Error Frequency: It means how frequently mistakes occur. You can use tools such as Sentry to categorize and display mistakes based on kind and frequency.
+- User Impact: You should concentrate on mistakes that interrupt essential user flows. For example, monitor form submission failures for a payment gateway.
+
+Example: Let's take an example of utilizing Error Boundary to catch component failures:
+
+```jsx
+import React from 'react';
+
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error('Error occurred:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return <h1>Something went wrong.</h1>;
+    }
+    return this.props.children;
+  }
+}
+
+export default ErrorBoundary;
+```
+
+Wrap critical components in `ErrorBoundary` to ensure seamless error recovery.
+
+- User Interactions
+    - Click Events: It means what components users interacting with.  You can collect interaction data using tools such as Google Analytics or custom logs.
+    - Formal Submissions: It checks whether users are completing forms. You can track submission rates and validation mistakes with a monitoring library or custom events.
+    - Navigation Patterns: It means how do consumers navigate around your app? You can use monitoring (tools like [SigNoz](https://signoz.io/)) to detect drop-off spots in your user experience.
+- Resource Utilization
+    - Memory Usage: Check to see if your software is using excessive memory. Tools such as Chrome DevTools Memory Profiler can assist in detecting leaks caused by unmounted components or stale states.
+    - CPU Consumption: This indicates whether CPU-intensive processes cause slowdowns. To optimize costly updates, measure processes such as virtual DOM reconciliation.
+    - Network Requests: This refers to how efficient your API calls are. To discover bottlenecks, you can monitor latency, payload size, and request frequency.
+
+## Understanding React-Specific Performance Indicators
+
+React presents unique performance issues that necessitate customized monitoring methodologies. Let's examine some of these indications and how to monitor them successfully.
+
+### Component Rendering Times
+
+Tracking component render durations is critical for identifying inefficiencies, such as needless re-renders or delayed logic.
+
+Implementation Example: React's `Profiler` API makes it easy to monitor render times:
+
+```jsx
+import { Profiler } from 'react';
+
+function onRenderCallback(
+  id, // The "id" prop of the Profiler tree
+  phase, // "mount" or "update"
+  actualDuration, // Time spent rendering the update
+  baseDuration, // Estimated render time without memoization
+  startTime, // Start time of rendering
+  commitTime, // When React committed this update
+  interactions // Set of interactions triggering the update
+) {
+  console.log(`Component ${id} rendered in ${actualDuration}ms`);
+}
+
+function MyComponent() {
+  return (
+    <Profiler id="MyComponent" onRender={onRenderCallback}>
+      <div>Component Content</div>
+    </Profiler>
+  );
+}
+```
+
+You can send this information to a monitoring provider to track trends over time. To improve visibility, integrate a monitoring dashboard. For example, a Render Tracking Workflow:
+
+<Figure src="/img/guides/2024/12/react-monitoring-image.webp" alt="Workflow of Rendering Components" caption="Workflow of Rendering Components" />
+
+### Virtual DOM Reconciliation
+
+React's reconciliation mechanism compares the virtual DOM to the actual DOM to apply minimum modifications. High reconciliation times can suggest inefficient rendering techniques, such as highly nested components or extensive DOM manipulation.
+
+Monitoring Virtual DOM Reconciliation:
+
+- Use the React DevTools Profiler to identify components with excessive reconciliation times.
+- Use methods such as memoization and code splitting to optimize these components.
+
+## React Hooks Performance
+
+React hooks are strong but can cause performance bottlenecks if not managed properly. Monitoring custom hooks with complicated states or frequent side effects is extremely critical.
+
+Custom Hook Example with Monitoring:
+
+```jsx
+import { useState, useEffect, useCallback } from 'react';
+
+function useDataFetching(url) {
+  const [data, setData] = useState(null);
+
+  const fetchData = useCallback(() => {
+    const startTime = performance.now();
+    fetch(url)
+      .then((response) => response.json())
+      .then((result) => {
+        setData(result);
+        const endTime = performance.now();
+        console.log(`Data fetched in ${endTime - startTime}ms`);
+      });
+  }, [url]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  return data;
+}
+
+// Usage
+const data = useDataFetching('/api/data');
+```
+
+Logging the fetch time allows you to track the efficiency of your hooks.
+
+## State Management Efficiency
+
+State management frameworks like Redux, MobX, and Zustand offer flexibility but can create performance overhead if not properly managed.
+
+Metrics To Monitor:
+
+- Store Update Frequency: Using Redux DevTools, check how frequently the store updates.
+- Action Processing Time: Record the time it takes for actions to complete.
+- State Tree Size: A big state tree can reduce performance, particularly in large-scale applications.
+
+Optimization Tips:
+
+- Use selectors to obtain only the relevant slice of the state.
+- Use middleware like `redux-thunk` or `redux-saga` to improve state control.
+
+## Best Practices to Implement React Monitoring
+
+More than just collecting metrics, effective React monitoring involves integrating monitoring into your development and deployment routines. Here's how to do it:
+
+### 1. Implement Error Boundaries
+
+Error boundaries help gracefully handle JavaScript errors in the component tree while capturing useful diagnostic information.
+
+Code Example:
+
+```jsx
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    logErrorToMonitoringService(error, errorInfo); // Log errors
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return <h1>Something went wrong.</h1>;
+    }
+    return this.props.children;
+  }
+}
+
+// Usage
+<ErrorBoundary>
+  <MyComponent />
+</ErrorBoundary>;
+```
+
+Diagram: Error Boundary Lifecycle
+
+<Figure src="/img/guides/2024/12/react-monitoring-image%201.webp" alt="Error Boundary Lifecycle" caption="Error Boundary Lifecycle" />
+
+### 2. Utilize React DevTools
+
+React DevTools offers a set of tools for monitoring component activity in real-time.
+
+- Profiler Tab: Track and evaluate render times.
+- Component Tree: Examine the structure for superfluous renderings.
+- Props & State: Quickly resolve prop/state-related problems.
+
+Key tip: Use the DevTools Profiler in production-like settings to record real-world use patterns.
+
+### 3. Integrate Performance Monitoring into Development Workflow
+
+- Make monitoring a part of the team's culture. Practical methods include automating performance testing using tools such as Lighthouse and PageSpeed Insights.
+- Integrating performance tests into your CI/CD workflow to detect issues before deployment.
+- Regularly evaluating performance data during retrospectives or before product releases.
+
+### 4. Set Alert Thresholds
+
+Create thresholds for important information like render times, error rates, and API response times. Automated notifications can warn your team when certain levels are exceeded.
+
+Example of Monitoring Tools:
+
+- Use Sentry for error alerts.
+- Configure SigNoz, Datadog, or New Relic to provide performance alerts.
+- Set CloudWatch alerts for API latency and error rates in serverless applications.
+
+## Tools and Techniques for Effective React Monitoring
+
+To achieve maximum performance, combine modern technology with tried-and-true strategies while monitoring your React application.
+
+- Browser Development Tools: These tools are essential for examining your app's runtime behaviour.
+    - Chrome DevTools: Select the Performance tab to capture and investigate runtime performance issues.
+    - React Developer Tools: This Chrome and Firefox addon can investigate component hierarchies, evaluate state changes, and identify needless re-renders.
+- Open-Source Monitoring Libraries: Various open-source libraries increase your capacity to monitor React apps.
+    - why-did-you-render: Notifies you of unnecessary re-renders, which helps optimize component updates.
+    - react-query-dev tools: A debugging tool for effectively monitoring and controlling server-side state.
+- Cloud-based Monitoring Solutions: These services offer real-time insights into your application's performance, making them perfect for production situations.
+    - SigNoz: [SigNoz](https://signoz.io/) is a complete, open-source observability software that provides deep insights into the performance and behaviour of your React apps.
+    - New Relic: A full-stack observability platform with React-specific metrics.
+    - Datadog: Provides real-time analytics, error tracking, and performance monitoring specifically for React apps.
+- Customized Logging and Analytics: They can be used to track component activities for specific monitoring requirements.
+
+```jsx
+const logComponentRender = (componentName) => {
+  console.log(`Component ${componentName} rendered at ${new Date().toISOString()}`);
+  // Optionally send this data to a monitoring service
+};
+
+function MyComponent() {
+  useEffect(() => {
+    logComponentRender('MyComponent');
+  }, []);
+
+  return <div>My Component Content</div>;
+}
+```
+
+## Optimizing React Performance Based on Monitoring Insights
+
+Monitoring your React application offers useful information about potential performance bottlenecks. Use this information to perform targeted improvements and enhance the user experience.
+
+### Identifying and Resolving Component Difficulties.
+
+1. Profile Component Performance: Use the React Profiler to detect which components are generating delayed renderings.
+2. Optimize Component Re-renders:
+    - Use `React.memo()` to prevent unnecessary re-renders of functional components:
+        
+        ```jsx
+        const MyComponent = React.memo(function MyComponent(props) {
+          /* render using props */
+        });
+        ```
+        
+    - Utilize the `useCallback` hook to memoize functions passed as props:
+        
+        ```jsx
+        const memoizedCallback = useCallback(() => {
+          doSomething(a, b);
+        }, [a, b]);
+        ```
+        
+
+### Strategies for Reducing Unnecessary Re-renders
+
+1. Optimize Class Components:
+    - Use `shouldComponentUpdate` or extend `React.PureComponent` to avoid re-renders caused by unchanged props or states.
+2. Utilize Memoization for Expensive Operations:
+    - Use the `useMemo` hook for computationally costly calculations:
+        
+        ```jsx
+        const memoizedValue = useMemo(() => computeExpensiveValue(a, b), [a, b]);
+        ```
+        
+
+### Optimizing State Management and Data Flow
+
+1. Avoid Overusing Context API: Excessive context utilization can cause needless re-renders. Use libraries like Recoil or Jotai to handle states more granularly and efficiently.
+2. Normalize State Updates: To decrease the overhead of state reconciliation, use state selectors in Redux or other state management frameworks.
+
+### Setting up Code Splitting and Lazy Loading
+
+To lower the size of the first bundle, split your code and load components just as needed.
+
+```jsx
+const OtherComponent = React.lazy(() => import('./OtherComponent'));
+
+function MyComponent() {
+  return (
+    <React.Suspense fallback={<div>Loading...</div>}>
+      <OtherComponent />
+    </React.Suspense>
+  );
+}
+```
+
+## Example Scenarios: React Monitoring in Practice
+
+Let's explore some common scenarios where React monitoring can help identify and resolve performance issues. These examples illustrate typical challenges and their monitoring-based solutions.
+
+### Scenario 1: E-commerce Product Listing Optimization
+
+Challenge:
+
+A product listing page shows slow load times and poor user engagement, particularly when displaying large catalogs with filtered results.
+
+Monitoring Approach:
+
+- Track component render times for product cards and filter components
+- Monitor API response times for product data fetching
+- Measure user interaction times with filters and sorting features
+- Analyze impact of image loading on page performance
+
+Potential Solutions Based on Monitoring Data:
+
+- Implement virtualized lists for large product catalogs
+- Add lazy loading for off-screen product images
+- Optimize filter component re-renders
+- Cache frequently accessed product data
+
+### Scenario 2: Dashboard Performance Management
+
+Challenge:
+
+A data-heavy dashboard with multiple charts and real-time updates experiences performance degradation over time.
+
+Monitoring Approach:
+
+- Track memory usage patterns during extended sessions
+- Monitor WebSocket connection stability
+- Measure render times for individual chart components
+- Analyze state update frequency and impact
+
+Potential Solutions Based on Monitoring Data:
+
+- Implement data polling strategies to reduce real-time updates
+- Add memoization for complex calculations
+- Optimize chart component re-renders
+- Clean up unused data subscriptions
+
+### Scenario 3: Form Submission Flow Optimization
+
+Challenge:
+
+A multi-step form process shows high abandonment rates and user frustration.
+
+Monitoring Approach:
+
+- Track user progression through form steps
+- Monitor input validation response times
+- Measure state updates during form filling
+- Analyze API call patterns during submission
+
+Potential Solutions Based on Monitoring Data:
+
+- Optimize validation logic timing
+- Implement progressive form loading
+- Add client-side data caching
+- Improve error handling feedback
+
+Each scenario demonstrates how monitoring data can guide specific optimization strategies. The key is to:
+
+1. Identify the performance bottleneck through monitoring
+2. Analyze the root cause using detailed metrics
+3. Implement targeted solutions
+4. Verify improvements through continued monitoring
+
+## Using SigNoz for React Monitoring
+
+SigNoz integrates with OpenTelemetry to provide deep insights into your React application's performance and user experience. Let's explore what you can achieve with SigNoz:
+
+### Web Vitals Monitoring and Optimization
+
+Track and optimize crucial Web Vitals metrics that directly impact your user experience and SEO:
+
+- Loading Performance
+    - Monitor Largest Contentful Paint (LCP) to ensure main content loads quickly
+    - Track First Contentful Paint (FCP) to optimize initial render times
+    - Analyze Time to First Byte (TTFB) to identify server response delays
+- Interactivity
+    - Measure First Input Delay (FID) to ensure responsive user interactions
+    - Track Total Blocking Time (TBT) to identify JavaScript execution issues
+    - Identify and fix interaction bottlenecks affecting user experience
+- Visual Stability
+    - Monitor Cumulative Layout Shift (CLS) to maintain stable page layouts
+    - Track layout shifts that could frustrate users during page load
+    - Identify problematic components causing unexpected movements
+
+<Figure src="/img/guides/2024/12/react-monitoring-image%202.webp" alt="Web Vitals Dashboard in SigNoz" caption="Web Vitals Dashboard in SigNoz" />
+
+### Performance Analytics
+
+Gain comprehensive insights into your application's behavior:
+
+- Component Performance
+    - Identify slow-rendering React components
+    - Track component mount and update times
+    - Monitor state management efficiency
+    - Analyze render cycles and optimization opportunities
+- Resource Utilization
+    - Monitor JavaScript heap usage
+    - Track memory consumption patterns
+    - Identify potential memory leaks
+    - Analyze CPU utilization
+
+### Advanced Visualization
+
+Make data-driven decisions with SigNoz's powerful visualization tools:
+
+- Custom Dashboards
+    - Create focused views for different performance aspects
+    - Set up role-specific monitoring dashboards
+    - Design executive summaries for high-level metrics
+    - Build detailed technical dashboards for debugging
+- Smart Thresholds
+    - Implement color-coded performance thresholds
+    - Set up visual indicators for performance targets
+    - Create custom threshold levels for different metrics
+    - Get instant visual feedback on performance status
+
+<Figure src="/img/guides/2024/12/react-monitoring-image%203.webp" alt="Smart thresholds in SigNoz" caption="Smart thresholds in SigNoz" />
+
+### Proactive Monitoring
+
+Stay ahead of performance issues:
+
+- Intelligent Alerting
+    - Set up threshold-based alerts for key metrics
+    - Configure trend-based anomaly detection
+    - Create custom alert rules for specific scenarios
+    - Define alert priorities and notification channels
+- Performance Forecasting
+    - Analyze performance trends over time
+    - Identify potential future bottlenecks
+    - Plan capacity based on usage patterns
+    - Make data-driven optimization decisions
+
+<Figure src="/img/guides/2024/12/react-monitoring-image%204.webp" alt="Anamoly Detection in SigNoz" caption="Anamoly Detection in SigNoz" />
+
+### Business Impact Analysis
+
+Connect performance metrics to business outcomes:
+
+- User Experience Metrics
+    - Correlate performance with user engagement
+    - Track impact of performance on conversion rates
+    - Monitor user satisfaction indicators
+    - Measure performance across user segments
+- ROI Tracking
+    - Measure the impact of performance improvements
+    - Track performance-related business metrics
+    - Analyze cost implications of performance issues
+    - Justify optimization investments
+
+To get started with SigNoz monitoring for your React application, visit our [Web Vitals Monitoring documentation](https://signoz.io/docs/frontend-monitoring/opentelemetry-web-vitals/) and [OpenTelemetry implementation guide](http://signoz.io/blog/opentelemetry-react).
+
+## Future Trends in React Monitoring
+
+React monitoring is growing in parallel with advances in software development. Here are the major trends to watch out for:
+
+- AI-driven Anomaly Detection: Machine learning algorithms will proactively uncover performance concerns, allowing for preemptive remedies.
+- Integration with Serverless and Microservices: Monitoring platforms will be extended to follow React apps in distributed and serverless contexts.
+- Advanced Visualization Techniques: More advanced tools will be developed to visualize complicated component hierarchies and application states.
+- Real-time Collaboration Tools: Developers can work together to debug and troubleshoot React apps in real-time.
+- Automatic Optimization Tools: Performance budgets and automatic repairs will help speed the optimization process by leveraging monitoring data insights.
+
+## Key Takeaways
+
+- Monitoring guarantees that your React application maintains great speed, a smooth user experience, and consistent functionality.
+- Monitor data like as load time, time to interactive (TTI), component render times, error rates, and user interaction patterns. These give actionable information for better performance.
+- Use error bounds, regular profiling with tools such as React Profiler, and performance optimization tactics (e.g., memoization, lazy loading).
+- To better understand application behaviour, combine browser DevTools with specialist solutions such as SigNoz or React-specific APM tools.
+- Monitoring is a constant activity. Use insights to continually optimize application performance, eliminate bottlenecks, and increase user engagement.
+
+## FAQs
+
+### What are the most important metrics to monitor in a React application?
+
+Key metrics include:
+
+- Load Time and TTI: Essential for gauging user experience and SEO impact.
+- Component Render Times: Identifies inefficient components that slow performance.
+- Error Rates and Types: Tracks issues to reduce crashes and improve reliability.
+- Memory and CPU Usage: Ensures optimal resource utilization for better scalability.
+- User Interaction Patterns: Monitors clicks, navigation, and engagement to improve usability.
+
+### How does React monitoring differ from traditional web application monitoring?
+
+React monitoring focuses on component-level performance, virtual DOM efficiency, and state management specific to the React design. Unlike traditional monitoring, it necessitates tools to track React's lifecycle methods, rendering processes, and state modifications.
+
+### Can React monitoring assist in boosting SEO and user engagement?
+
+Absolutely; by improving performance metrics like load time and TTI, React monitoring enhances user experience. Faster and smoother applications result in:
+
+- Better user engagement
+- Lower bounce rates
+- Higher SEO rankings due to improved Core Web Vitals.
+
+### What are the potential pitfalls of over-monitoring a React application?
+
+Over-monitoring may lead to:
+
+- Performance Overhead: Excessive logging and tracking might slow the program down.
+- Data Overload: Excessive information might obscure key insights.
+- Increased Development Complexity: Monitoring systems might become overly complex.
+- Privacy Concerns: Improper usage of user data may result in compliance concerns.
+
+### How can monitoring improve the security of a React app?
+
+Monitoring tools can help by:
+
+- Detect suspicious activities, including odd API queries and improper data access.
+- Tracking vulnerabilities in components or external dependencies.
+- Providing logs to help determine the source of prospective attacks or data breaches.
+
+### How does React monitoring differ from monitoring containers or VMs?
+
+React monitoring is primarily application-layer monitoring, focusing on the behaviour of components, state updates, and the virtual DOM. In contrast, monitoring containers or VMs involves:
+
+- Tracking resource allocation (CPU, memory, disk I/O).
+- Monitoring infrastructure health and system-level logs.
+- Observing inter-service communication in distributed systems.
+
+### What tools can be used in addition to browser DevTools for React monitoring?
+
+- SigNoz: A modern, open-source APM that monitors React apps.
+- React Profiler identifies rendering bottlenecks at the component level.
+- LogRocket monitors user sessions and front-end problems.
+- New Relic/Datadog: Integrates application and system monitoring for React-based setups.
+- OpenTelemetry: Allows for distributed tracing in applications with complicated backends.

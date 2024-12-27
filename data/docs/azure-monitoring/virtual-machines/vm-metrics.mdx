@@ -1,21 +1,25 @@
 ---
-date: 2024-06-06
+date: 2024-12-19
 id: vm-metrics
 title: VM Host Metrics & Logging
+hide_table_of_contents: true
 ---
 
 ## Overview
 
-In this guide, we'll walk you through the process of setting up an Azure Virtual Machine to send  logs, traces and metrics to SigNoz, an open-source observability platform. By following these steps, you'll be able to monitor your Azure VM's performance and troubleshoot issues using SigNoz.
+In this documentation, we'll walk you through the process of setting up an Azure Virtual Machine to send logs, traces and metrics to SigNoz, an open-source 
+observability platform. By following these steps, you'll be able to monitor your Azure VM's performance and troubleshoot issues using SigNoz.
+
+<Tabs entityName="plans">
+<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
 
 ## Prerequisites
 
 Before you begin, ensure that you have the following:
 
-1. [SigNoz Cloud Account](https://signoz.io/teams/)
-2. An Azure subscription with permissions to create and manage Virtual Machines.
-3. [Central Collector Setup](../../bootstrapping/collector-setup)
-4. Azure Linux VM with SSH access enabled. Follow [SSH Keys Guide](https://learn.microsoft.com/en-us/azure/virtual-machines/ssh-keys-portal) to enable SSH access.
+1. An Azure subscription with permissions to create and manage Virtual Machines.
+2. [Central Collector Setup](../../bootstrapping/collector-setup)
+3. Azure Linux VM with SSH access enabled. Follow [SSH Keys Guide](https://learn.microsoft.com/en-us/azure/virtual-machines/ssh-keys-portal) to enable SSH access.
 
 ## Setup
 
@@ -26,13 +30,15 @@ The [SSH Keys Guide](https://learn.microsoft.com/en-us/azure/virtual-machines/ss
 
 ### Install OpenTelemetry Collector
 
-Follow the [OpenTelemetry SigNoz Guide](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) to install the OpenTelemetry Collector. 
+Follow the [OpenTelemetry SigNoz document](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) to install the OpenTelemetry Collector. 
 
 ### Configure Collector
 
-The configuration file for the OpenTelemetry Collector is located at `/etc/otelcol-contrib/config.yaml`. We send the logs, traces and metrics to the central collector instead of SigNoz directly, in order to adopt a scalable architecture pattern. We recommend to our users to use the same pattern in your Azure subscription.
+The configuration file for the OpenTelemetry Collector is located at `/etc/otelcol-contrib/config.yaml`. We send the logs, traces and metrics to the central 
+collector instead of SigNoz directly, in order to adopt a scalable architecture pattern. We recommend to our users to use the same pattern in your Azure 
+subscription.
 
-```bash
+```yaml
 cat > /etc/otelcol-contrib/config.yaml << EOF
 receivers:
   filelog:
@@ -117,7 +123,8 @@ EOF
 ```
 
 #### OLTP Exporter Configuration
-Make sure to replace `<Central Collector DNS Name>` with the DNS name of your central collector. If you don't have a central collector yet, follow the [Central Collector Setup](../../bootstrapping/collector-setup) guide to set one up.
+Make sure to replace `<Central Collector DNS Name>` with the DNS name of your central collector. If you don't have a central collector yet, follow the 
+[Central Collector Setup](../../bootstrapping/collector-setup) document to set one up.
 
 #### File Logs Receiver Configuration
 The file logs receiver needs to be configured with the paths to the log files that you want to stream to SigNoz. You can specify multiple paths by separating them as a array.
@@ -134,9 +141,7 @@ Once we are done with the above configurations, we can now run the collector ser
 
 ### SigNoz Dashboard
 
-Once the collector is running, you can access the SigNoz dashboard to view the logs and metrics from your Azure VM.
-
-Please refer to the [Hostmetrics Dashboard](https://signoz.io/docs/userguide/hostmetrics/) for information on how to import and use the dashboard.
+Once the collector is running, you can go to the SigNoz instance to view the logs and metrics from your Azure VM.
 
 
 ## Troubleshooting
@@ -152,3 +157,6 @@ If you encounter any issues during the setup process, here are a few troubleshoo
 - Verify that the central collector is running and configured correctly.
 
 That's it! You have now successfully set up your Azure Virtual Machine to send logs and metrics to SigNoz. You can start monitoring your VM's performance and troubleshooting any issues using the SigNoz dashboard.
+
+</TabItem>
+</Tabs>

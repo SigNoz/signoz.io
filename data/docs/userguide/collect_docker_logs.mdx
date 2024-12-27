@@ -1,103 +1,130 @@
 ---
-date: 2024-06-06
-title: Collecting Docker container logs
+date: 2024-12-17
+title: Collecting Docker Container Logs
 id: collect_docker_logs
+hide_table_of_contents: true
 ---
 
-With SigNoz you can collect all your docker container logs and perform different queries on top of it.
-Below are the steps to collect docker container logs.
+You can easily collect all your Docker container logs using OpenTelemetry Collector and perform advanced queries to analyze them efficiently using SigNoz.
 
+<Tabs entityName="plans">
 
-## Collect Docker container logs in SigNoz cloud
+<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
 
-  * Clone this [repository](https://github.com/SigNoz/docker-container-logs)
-  * Update  `otel-collector-config.yaml` and set the values of `<SIGNOZ_INGESTION_KEY>` and `{region}`.
-  
-  Depending on the choice of your region for SigNoz cloud, the otlp endpoint will vary according to this table.
+## Collect Docker Container Logs in SigNoz Cloud
 
-  | Region | Endpoint                   |
-  | ------ | -------------------------- |
-  | US     | ingest.us.signoz.cloud:443 |
-  | IN     | ingest.in.signoz.cloud:443 |
-  | EU     | ingest.eu.signoz.cloud:443 |
-  
-* Start the containers `docker compose up -d`
+1. **Clone the Repository**
+   ```bash
+   git clone https://github.com/SigNoz/docker-container-logs
+   ```
+   This [repository](https://github.com/SigNoz/docker-container-logs) provides a pre-configured OpenTelemetry Collector setup with `otel-collector-config.yaml` and 
+   `docker-compose.yaml`, enabling easy log collection and forwarding to SigNoz Cloud with minimal changes and no manual configuration.
 
-* If there are no errors your logs will be exported and will be visible on the SigNoz UI.
-  
+2. **Update Environment Variables**
 
+   Update the  Environment variables in the `.env` file of `docker-container-logs` repository:
+   ```.env
+   OTEL_COLLECTOR_ENDPOINT=ingest.<region>.signoz.cloud:443
+   SIGNOZ_INGESTION_KEY=<your-ingestion-key>
+   ```
+   - Replace `<your-ingestion-key>` with your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+   - Set the `<region>` to match your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 
-## Collect Docker container logs in Self-Hosted SigNoz
+3. **Start Containers**  
+   Run the following command inside the `docker-container-logs`to start the containers:
+   ```bash
+   docker compose up -d
+   ```
 
-###  Steps for collecting logs if SigNoz is running on the same host.
-Once you deploy SigNoz in docker, it will automatically start collecting logs of all the docker containers, except for the container logs of SigNoz. 
+4. **Verify Log Export**  
+   If there are no errors, your logs will be exported and visible on the SigNoz UI.
 
-#### Disable automatic container log collection.
-You can disable automatic container logs collection by modifying the `otel-collector-config.yaml` file which is present inside `deploy/docker/clickhouse-setup`
+{/* <Admonition type="info">
+For enhanced log collection capabilities, consider using **logspout-signoz**. See [Using logspout-signoz for Enhanced Log Collection](#using-logspout-signoz-for-enhanced-log-collection).
+</Admonition> */}
 
-  ```yaml {5}
-  ...
-  service:
-    pipelines:
-      logs:
-        receivers: [otlp]
-        processors: [batch]
-        exporters: [clickhouselogsexporter]
-  ...
-  ```
-  Here we have modified the value of receivers from `[otlp, tcplog/docker]` to `[otlp]`.
-  Now you can restart SigNoz and the changes will be applied.
+</TabItem>
 
-#### Filter/Exclude logs
-If you want to exclude certain logs you can exclude them based the container name or based on pattern.
+<TabItem value="self-hosted" label="Self-Host">
 
-* **Using container name** : We will modify the `tcplog/docker` reciever in `otel-collector-config.yaml` file which is present inside `deploy/docker/clickhouse-setup` and add a new operator after `signoz_logs_filter`
-  ```yaml {2}
-  ...
-  - type: filter
-    expr: 'attributes.container_name matches "^(<container_name>|<container_name>)'
-  ...
-  ```
-  Replace `<container_name>` with the name of the containers that you want to exclude.
+## Collect Docker Container Logs in Self-Hosted SigNoz
 
-  If you want to collect logs of signoz containers you can remove the names of signoz containers from the filter operator with id `signoz_logs_filter` operator.
+### Scenario 1: SigNoz Running on the Same Host
 
-* **Based on pattern** : You can also use the filter operator to filter out logs based on a pattern
-  ```yaml {3-6}
-  ....
-    operators:
-      - type: filter
-        expr: 'body matches "^LOG: .* END$"'
-        drop_ratio: 1.0
-  ....
-  ```
-  Here we are matching logs using an expression and dropping the entire log by setting `drop_ratio: 1.0` . You can read more about the filter operator [here](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/pkg/stanza/docs/operators/filter.md)
+When SigNoz is deployed via Docker, it automatically starts collecting logs of all Docker containers except its own container logs.
 
-* Now we can restart the otel collector container so that new changes are applied and the docker container logs will be dropped for the specified containers.
+#### 1. Disable Automatic Container Log Collection
+Change `receivers` in `pipelines` from `[otlp, tcplog/docker]` to `[otlp]` in the [`otel-collector-config.yaml`](https://github.com/SigNoz/signoz/blob/develop/deploy/docker/clickhouse-setup/otel-collector-config.yaml) file:
 
-### Steps for collecting logs if SigNoz is running on a different host.
+```yaml:/deploy/docker/clickhouse-setup/otel-collector-config.yaml {5}
+...
+service:
+  pipelines:
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [clickhouselogsexporter]
+...
+```
+Restart SigNoz to apply changes.
 
-If you have a signoz running on a different host then you can run logspout on the host and send logs to SigNoz cluster.
+#### 2. Filter or Exclude Logs
 
-* Expose port `2255` of otel-collector by modifying the `docker-compose.yaml` file present inside `deploy/docker/clickhouse-setup`
-  ```yaml {6}
-  ...
-  otel-collector:
-      image: signoz/signoz-otel-collector:latest
-      command: ["--config=/etc/otel-collector-config.yaml"]
-      ports:
-        - "2255:2255"
-  ```
+- **Using Container Name**  
+   Modify the `tcplog/docker` receiver to add a [`filter`](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/pkg/stanza/docs/operators/filter.md) operator in the [`otel-collector-config.yaml`](https://github.com/SigNoz/signoz/blob/develop/deploy/docker/clickhouse-setup/otel-collector-config.yaml) file:
+   ```yaml {2}
+   ...
+   - type: filter
+     expr: 'attributes.container_name matches "^(<container_name>|<container_name>)"'
+   ...
+   ```
+   Replace `<container_name>` with the names of containers to exclude.
 
-* Run logspout 
-  ```bash
-  docker run --net=host --rm --name="logspout" \
-          --volume=/var/run/docker.sock:/var/run/docker.sock \
-          gliderlabs/logspout \
-          syslog+tcp://<host>:2255
+- **Based on Pattern**  
+   Exclude logs matching a specific pattern using the [`filter`](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/pkg/stanza/docs/operators/filter.md) operator:
+   ```yaml {3-5}
+   ...
+   operators:
+     - type: filter
+       expr: 'body matches "^LOG: .* END$"'
+       drop_ratio: 1.0
+   ...
+   ```
 
-  ```
+Restart the OTEL collector container for changes to take effect.
 
-  For finding the right host for your SigNoz cluster please follow the guide [here](/docs/install/troubleshooting#signoz-otel-collector-address-grid).  
+### Scenario 2: SigNoz Running on a Different Host
+If SigNoz is running on a different host, Logspout can be deployed on the host to send logs to the SigNoz cluster.
 
-* If there are no errors your logs will be exported and visible on the SigNoz UI. 
+1. **Expose OTEL Collector Port**  
+   Modify `docker-compose.yaml`:
+
+   ```yaml:/deploy/docker/clickhouse-setup/docker-compose-minimal.yaml {6}
+   ...
+   otel-collector:
+       image: signoz/signoz-otel-collector:latest
+       command: ["--config=/etc/otel-collector-config.yaml"]
+       ports:
+         - "2255:2255"
+   ```
+
+2. **Run Logspout**  
+   Deploy `logspout` to forward logs to the SigNoz host:
+   ```bash
+   docker run --net=host --rm --name="logspout" \
+        --volume=/var/run/docker.sock:/var/run/docker.sock \
+        gliderlabs/logspout \
+        syslog+tcp://<host>:2255
+   ```
+
+Refer to the [troubleshooting guide](https://signoz.io/docs/install/troubleshooting/#signoz-otel-collector-address-grid) for finding the correct SigNoz host address.
+
+</TabItem>
+
+</Tabs>
+
+## Using Logspout-SigNoz for Enhanced Log Collection
+
+To improve log organization and insight, especially for JSON logs containing `serviceName` and `env` fields, use the **logspout-signoz** extension. It labels logs with service names, severity levels, and environment details.
+
+For detailed setup instructions, check the [Rich Logs Collector for Docker Compose Services with SigNoz](/blog/logspout-signoz-setup) guide.
