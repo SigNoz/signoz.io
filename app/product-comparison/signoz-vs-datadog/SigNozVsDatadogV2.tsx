@@ -34,7 +34,7 @@ const SigNozVsDatadogV2 = () => {
             transition={{ duration: 0.8 }}
             className="mb-10 lg:mb-0 lg:w-2/5"
           >
-            <h1 className="mb-6 bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-5xl font-bold text-transparent lg:text-6xl">
+            <h1 className="mb-6 bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-4xl font-bold text-transparent lg:text-5xl">
               SigNoz vs Datadog
             </h1>
             <h3 className="mb-8 text-lg font-semibold text-gray-300 lg:text-xl">
@@ -95,7 +95,7 @@ const SigNozVsDatadogV2 = () => {
             Migrate from Datadog - Save up to 80% on your Datadog bill
           </h3>
           <div className="text-gray-300">
-            <p className="mb-6 text-lg">
+            <p className="mb-6 text-[1.1rem] text-gray-300">
               We provide support for migrating from Datadog to SigNoz if your monthly billing in
               Datadog is greater than 2000 USD. Request a migration from one of our experts and get
               started with SigNoz quickly.
@@ -129,10 +129,10 @@ const SigNozVsDatadogV2 = () => {
         <section className="mx-auto max-w-4xl px-6 py-16">
           <div className="flex flex-col items-center">
             <div className="mx-auto mb-8 max-w-4xl text-lg leading-relaxed text-gray-300">
-              <h2 className="mb-6 text-3xl font-bold text-white">
+              <h2 className="mb-8 text-left text-3xl font-bold text-white">
                 Why do Engineering Teams Choose SigNoz over Datadog?
               </h2>
-              <p className="mb-6">
+              <p className="mb-6 text-[1.1rem] text-gray-300">
                 SigNoz is often referred to as "Open-Source Datadog Alternative" by our users. We
                 built SigNoz to address the absence of a great one-stop observability tool in the
                 open-source ecosystem. Something that comes with the ease of a SaaS tool like
@@ -144,10 +144,10 @@ const SigNozVsDatadogV2 = () => {
 
               <div className="space-y-8">
                 <div>
-                  <h3 className="mb-3 text-xl font-semibold text-white">
+                  <h3 className="mb-4 text-2xl font-bold text-white">
                     True OpenTelemetry(OTel) - native solution
                   </h3>
-                  <p>
+                  <p className="text-[1.1rem] text-gray-300">
                     SigNoz is built from the ground up for OpenTelemetry. That means OTel-first
                     docs, visualizations, & features are meant to truly take advantage of
                     OpenTelemetry's potential. Datadog gives preference to its agent. If you want to
@@ -156,10 +156,10 @@ const SigNozVsDatadogV2 = () => {
                 </div>
 
                 <div>
-                  <h3 className="mb-3 text-xl font-semibold text-white">
+                  <h3 className="mb-4 text-2xl font-bold text-white">
                     Flexible Deployment Options
                   </h3>
-                  <p>
+                  <p className="text-[1.1rem] text-gray-300">
                     SigNoz provides both cloud & self-hosted versions. You can use the cloud,
                     enterprise self-host, or free, open-source community edition, depending on your
                     needs. Many of our users use{' '}
@@ -188,10 +188,8 @@ const SigNozVsDatadogV2 = () => {
                 </div>
 
                 <div>
-                  <h3 className="mb-3 text-xl font-semibold text-white">
-                    9x better value for money
-                  </h3>
-                  <p>
+                  <h3 className="mb-4 text-2xl font-bold text-white">9x better value for money</h3>
+                  <p className="text-[1.1rem] text-gray-300">
                     Signoz provides{' '}
                     <Link
                       href="https://signoz.io/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/"
@@ -229,27 +227,31 @@ const SigNozVsDatadogV2 = () => {
           </h2>
           <div className="relative flex flex-wrap items-center gap-8">
             <div className="flex-1 text-gray-300">
-              <p className="text-lg">
+              <p className="text-[1.1rem] text-gray-300">
                 Many organizations struggle with disconnected observability tools. Each team
                 operates in isolation:
               </p>
               <div className="my-4 space-y-3">
                 <div className="flex items-center gap-3">
                   <ChartBar className="h-5 w-5 flex-shrink-0 text-blue-400" />
-                  <p className="text-lg">Metrics team manages Prometheus without trace context.</p>
+                  <p className="text-[1.1rem] text-gray-300">
+                    Metrics team manages Prometheus without trace context.
+                  </p>
                 </div>
                 <div className="flex items-center gap-3">
                   <GitBranch className="h-5 w-5 flex-shrink-0 text-purple-400" />
-                  <p className="text-lg">
+                  <p className="text-[1.1rem] text-gray-300">
                     Tracing team runs Jaeger/Zipkin without metric correlation.
                   </p>
                 </div>
                 <div className="flex items-center gap-3">
                   <FileText className="h-5 w-5 flex-shrink-0 text-green-400" />
-                  <p className="text-lg">Logging team handles ELK/Splunk without trace linking.</p>
+                  <p className="text-[1.1rem] text-gray-300">
+                    Logging team handles ELK/Splunk without trace linking.
+                  </p>
                 </div>
               </div>
-              <p className="mb-4 text-lg">
+              <p className="mb-4 text-[1.1rem] text-gray-300">
                 <strong>Result:</strong> Slower resolution times, missed insights, and team
                 friction. <br /> In multi-cloud environments, each cloud provider has its own
                 monitoring tools, creating a need for centralized data collection to achieve true
@@ -280,7 +282,7 @@ const SigNozVsDatadogV2 = () => {
           </h2>
           <div className="relative mb-4 flex flex-wrap items-center gap-8">
             <div className="flex-1 text-gray-300">
-              <p className="text-lg">
+              <p className="text-[1.1rem] text-gray-300">
                 Unified observability is more than just monitoring—it's about gaining a
                 comprehensive understanding of your entire system's health, performance, and
                 behavior in real-time. SigNoz brings together metrics, traces, and logs into a
@@ -289,22 +291,28 @@ const SigNozVsDatadogV2 = () => {
               <div className="my-4 space-y-3">
                 <div className="flex items-center gap-3">
                   <LineChart className="h-5 w-5 flex-shrink-0 text-blue-400" />
-                  <p className="text-lg">
+                  <p className="text-[1.1rem] text-gray-300">
                     Quickly identify and resolve issues across your entire stack spanning multiple
                     clouds.
                   </p>
                 </div>
                 <div className="flex items-center gap-3">
                   <DraftingCompass className="h-5 w-5 flex-shrink-0 text-purple-400" />
-                  <p className="text-lg">Automatic correlation between different data types.</p>
+                  <p className="text-[1.1rem] text-gray-300">
+                    Automatic correlation between different data types.
+                  </p>
                 </div>
                 <div className="flex items-center gap-3">
                   <ScrollText className="h-5 w-5 flex-shrink-0 text-green-400" />
-                  <p className="text-lg">Make data-driven decisions with confidence.</p>
+                  <p className="text-[1.1rem] text-gray-300">
+                    Make data-driven decisions with confidence.
+                  </p>
                 </div>
                 <div className="flex items-center gap-3">
                   <Gauge className="h-5 w-5 flex-shrink-0 text-yellow-400" />
-                  <p className="text-lg">Reduce mean time to resolution (MTTR).</p>
+                  <p className="text-[1.1rem] text-gray-300">
+                    Reduce mean time to resolution (MTTR).
+                  </p>
                 </div>
               </div>
             </div>
@@ -328,12 +336,12 @@ const SigNozVsDatadogV2 = () => {
           <section className="container mx-auto rounded-xl bg-gradient-to-r from-blue-900/20 to-purple-900/20 py-12">
             <h3 className="mb-8 text-left text-xl font-bold lg:text-2xl">Why OpenTelemetry?</h3>
             <div className="text-gray-300">
-              <p className="mb-6 text-lg">
+              <p className="mb-6 text-[1.1rem] text-gray-300">
                 SigNoz collects telemetry with OpenTelemetry - a single open source standard for
                 instrumenting cloud native applications. Using OpenTelemetry future-proofs your
                 observability needs:
               </p>
-              <ul className="list-inside list-disc space-y-3 text-lg">
+              <ul className="list-inside list-disc space-y-3 text-[1.1rem] text-gray-300">
                 <li>Frees you from vendor lock-in.</li>
                 <li>
                   Semantic conventions ensure consistent data collection across different services
@@ -393,7 +401,7 @@ const SigNozVsDatadogV2 = () => {
                     className="w-[300px] flex-shrink-0 rounded-xl bg-gradient-to-br from-gray-800 to-gray-900 p-6 shadow-xl"
                   >
                     <h3 className="mb-4 text-xl font-bold text-blue-400">{feature.title}</h3>
-                    <p className="mb-0 text-gray-300">{feature.description}</p>
+                    <p className="mb-0 text-[1.1rem] text-gray-300">{feature.description}</p>
                   </motion.div>
                 ))}
               </div>
@@ -408,7 +416,7 @@ const SigNozVsDatadogV2 = () => {
           </h2>
           <div className="mb-4 space-y-12">
             <div className="text-gray-300">
-              <p className="mb-6 text-lg">
+              <p className="mb-6 text-[1.1rem] text-gray-300">
                 Imagine your e-commerce platform experiencing issues across multiple microservices.
                 Without a unified observability platform, identifying the root cause of service
                 outages becomes a complex challenge:
@@ -425,7 +433,7 @@ const SigNozVsDatadogV2 = () => {
                   Comparison between unified and fragmented observability approaches
                 </figcaption>
               </figure>
-              <p className="mb-8 text-lg text-gray-300">
+              <p className="mb-8 text-[1.1rem] text-gray-300">
                 Multiple services showing alerts, with Auth, API, and User services all failing.
                 There's no clear indication of which service failed first, leaving teams scrambling
                 to find the root cause.
@@ -437,7 +445,7 @@ const SigNozVsDatadogV2 = () => {
                 <h3 className="mb-4 text-xl font-bold">
                   This is the reality of modern architectures:
                 </h3>
-                <ul className="list-inside list-disc space-y-3 text-lg text-gray-300">
+                <ul className="list-inside list-disc space-y-3 text-[1.1rem] text-gray-300">
                   <li>Microservices spanning multiple clouds.</li>
                   <li>Complex container orchestration.</li>
                   <li>Serverless functions triggering in chains.</li>
@@ -446,7 +454,7 @@ const SigNozVsDatadogV2 = () => {
               </div>
               <div>
                 <h3 className="mb-4 text-xl font-bold">How it affects your users and business:</h3>
-                <ul className="list-inside list-disc space-y-3 text-lg text-gray-300">
+                <ul className="list-inside list-disc space-y-3 text-[1.1rem] text-gray-300">
                   <li>Periodic latency spikes affecting user experience.</li>
                   <li>High query response times impacting sales.</li>
                   <li>Teams working in silos with incomplete data.</li>
@@ -478,7 +486,7 @@ const SigNozVsDatadogV2 = () => {
             <div className="grid gap-12 lg:grid-cols-2">
               <div>
                 <h3 className="mb-4 text-xl font-bold text-gray-200">Platform Response:</h3>
-                <ul className="list-inside list-disc space-y-3 text-lg text-gray-300">
+                <ul className="list-inside list-disc space-y-3 text-[1.1rem] text-gray-300">
                   <li>Automatic correlation of service dependencies</li>
                   <li>Instant identification of failure points</li>
                   <li>Clear visualization of cascading impacts</li>
@@ -487,7 +495,7 @@ const SigNozVsDatadogV2 = () => {
               </div>
               <div>
                 <h3 className="mb-4 text-xl font-bold text-gray-200">Development Team Benefits:</h3>
-                <ul className="list-inside list-disc space-y-3 text-lg text-gray-300">
+                <ul className="list-inside list-disc space-y-3 text-[1.1rem] text-gray-300">
                   <li>Immediate root cause visibility</li>
                   <li>Direct correlation with code deployments</li>
                   <li>Comprehensive performance context</li>
@@ -497,7 +505,7 @@ const SigNozVsDatadogV2 = () => {
             </div>
 
             <p className="mb-4 mt-4 text-xl font-bold text-gray-200">The difference is clear:</p>
-            <div className="mb-8 space-y-3 text-lg text-gray-300">
+            <div className="mb-8 space-y-3 text-[1.1rem] text-gray-300">
               <div className="flex items-center gap-3">
                 <AlertTriangle className="h-5 w-5 flex-shrink-0 text-red-400" />
                 <p className="mb-0">
@@ -514,7 +522,7 @@ const SigNozVsDatadogV2 = () => {
               </div>
             </div>
             <p className="mb-4 text-xl font-bold text-gray-200">This unified approach means:</p>
-            <ul className="mb-0 list-inside list-disc space-y-3 text-lg text-gray-300">
+            <ul className="mb-0 list-inside list-disc space-y-3 text-[1.1rem] text-gray-300">
               <li>No more context switching between tools</li>
               <li>Instant correlation of metrics, traces, and logs</li>
               <li>Fast root cause analysis through service dependency mapping</li>
@@ -530,29 +538,37 @@ const SigNozVsDatadogV2 = () => {
           </h2>
           <div className="relative flex flex-wrap items-center gap-8">
             <div className="flex-1 text-gray-300">
-              <p className="text-lg">
+              <p className="text-[1.1rem] text-gray-300">
                 AI and machine learning have transformed observability by automating issue detection
                 and resolution in complex systems:
               </p>
               <div className="my-4 space-y-3">
                 <div className="flex items-center gap-3">
                   <ChartBar className="h-5 w-5 flex-shrink-0 text-blue-400" />
-                  <p className="text-lg">Automated Pattern Recognition and Anomaly Detection</p>
+                  <p className="text-[1.1rem] text-gray-300">
+                    Automated Pattern Recognition and Anomaly Detection
+                  </p>
                 </div>
                 <div className="flex items-center gap-3">
                   <GitBranch className="h-5 w-5 flex-shrink-0 text-purple-400" />
-                  <p className="text-lg">Predictive Analytics for Proactive Issue Prevention</p>
+                  <p className="text-[1.1rem] text-gray-300">
+                    Predictive Analytics for Proactive Issue Prevention
+                  </p>
                 </div>
                 <div className="flex items-center gap-3">
                   <FileText className="h-5 w-5 flex-shrink-0 text-green-400" />
-                  <p className="text-lg">Intelligent Alert Correlation and Noise Reduction</p>
+                  <p className="text-[1.1rem] text-gray-300">
+                    Intelligent Alert Correlation and Noise Reduction
+                  </p>
                 </div>
                 <div className="flex items-center gap-3">
                   <Gauge className="h-5 w-5 flex-shrink-0 text-yellow-400" />
-                  <p className="text-lg">Continuous Learning and Improvement of Insights</p>
+                  <p className="text-[1.1rem] text-gray-300">
+                    Continuous Learning and Improvement of Insights
+                  </p>
                 </div>
               </div>
-              <p className="text-lg">
+              <p className="text-[1.1rem] text-gray-300">
                 SigNoz offers{' '}
                 <Link
                   href="https://signoz.io/blog/introducing-anomaly-detection-for-smarter-alerts/"
@@ -594,7 +610,7 @@ const SigNozVsDatadogV2 = () => {
               </div>
               <div>
                 <h3 className="mb-4 text-2xl font-bold">2. Instrument Your Application</h3>
-                <ul className="list-inside list-disc space-y-3 text-gray-300">
+                <ul className="list-inside list-disc space-y-3 text-[1.1rem] text-gray-300">
                   <li>
                     Choose your{' '}
                     <Link
@@ -610,7 +626,7 @@ const SigNozVsDatadogV2 = () => {
               </div>
               <div>
                 <h3 className="mb-4 text-2xl font-bold">3. Start Monitoring</h3>
-                <ul className="list-inside list-disc space-y-3 text-gray-300">
+                <ul className="list-inside list-disc space-y-3 text-[1.1rem] text-gray-300">
                   <li>Access the SigNoz UI</li>
                   <li>Import pre-built dashboards</li>
                   <li>Set up initial alerts</li>
@@ -792,21 +808,21 @@ const SigNozVsDatadogV2 = () => {
             Resources to Help You Succeed
           </h3>
           <div className="text-gray-300">
-            <p className="mb-6 text-lg">
+            <p className="mb-6 text-[1.1rem] text-gray-300">
               Get started quickly with{' '}
               <Link href="https://signoz.io/docs/" className="text-blue-400 hover:text-blue-300">
                 comprehensive documentation
               </Link>
               , active community support, and detailed guides:
             </p>
-            <ul className="list-inside list-disc space-y-3 text-lg">
+            <ul className="list-inside list-disc space-y-3 text-[1.1rem] text-gray-300">
               <li>Step-by-step tutorials and integration guides</li>
               <li>Active GitHub community with regular updates</li>
               <li>Detailed API documentation and SDKs</li>
               <li>Best practices and architecture recommendations</li>
             </ul>
           </div>
-          <p className="mb-0 mt-8 text-lg">
+          <p className="mb-0 mt-8 text-[1.1rem] text-gray-300">
             Take the first step toward comprehensive observability by signing up for a free trial of
             SigNoz today.
           </p>
