@@ -29,6 +29,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts'
+import FAQAccordion from '@/components/FAQAccordion/FAQAccordion'
 
 const data = [
   {
@@ -2138,6 +2139,63 @@ const SigNozVsDatadogV2 = () => {
           </div>
         </section>
         {/* Section End */}
+
+        {/* FAQ Section */}
+        <section className="mx-auto max-w-4xl px-6 py-16">
+          <h2 className="mb-8 text-left text-2xl font-bold lg:text-3xl">FAQs</h2>
+
+          <FAQAccordion
+            faqs={[
+              {
+                question: 'Does SigNoz offer a free trial?',
+                answer: (
+                  <span>
+                    Yes, we do offer a free trial. When you{' '}
+                    <Link
+                      href="https://signoz.io/pricing/"
+                      className="text-orange-500 hover:text-orange-400"
+                    >
+                      sign up
+                    </Link>{' '}
+                    for SigNoz Cloud, you get 30 days of free trial with access to all features.
+                  </span>
+                ),
+              },
+              {
+                question: 'How do I estimate my usage in SigNoz?',
+                answer: (
+                  <span>
+                    You can use our{' '}
+                    <Link
+                      href="https://signoz.io/pricing/#estimate-your-monthly-bill"
+                      className="text-orange-500 hover:text-orange-400"
+                    >
+                      pricing calculator
+                    </Link>{' '}
+                    to estimate your monthly bill with SigNoz.
+                  </span>
+                ),
+              },
+              {
+                question: 'How is custom metric charged in SigNoz?',
+                answer: (
+                  <span>
+                    All metrics are charged at the same price in SigNoz. We do not categorize any
+                    metric as "custom" as is done by Datadog. You can estimate your metrics billing
+                    in SigNoz with this{' '}
+                    <Link
+                      href="https://signoz.io/pricing/metrics-cost-estimation/"
+                      className="text-orange-500 hover:text-orange-400"
+                    >
+                      calculator
+                    </Link>
+                    .
+                  </span>
+                ),
+              },
+            ]}
+          />
+        </section>
       </div>
     </div>
   )
