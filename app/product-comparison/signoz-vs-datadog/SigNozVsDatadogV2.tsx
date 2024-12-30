@@ -119,7 +119,7 @@ const SigNozVsDatadogV2 = () => {
             </h1>
             <h3 className="mb-8 text-lg font-semibold text-gray-300 lg:text-xl">
               For 20 APM and 50 infra hosts, SigNoz can save up to 80% of your Datadog bill - check
-              check comparison with{' '}
+              comparison with{' '}
               <Link
                 href="https://signoz.io/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/"
                 className="text-blue-400 hover:text-blue-300"
@@ -168,135 +168,77 @@ const SigNozVsDatadogV2 = () => {
             </div>
           </motion.div>
         </section>
-        {/* Migration Section */}
-        <section className="mx-auto max-w-4xl rounded-xl bg-gradient-to-r from-blue-900/20 to-purple-900/20 px-6 py-12">
-          <h3 className="mb-8 text-left text-xl font-bold lg:text-2xl">
-            Migrate from Datadog - Save up to 80% on your Datadog bill
-          </h3>
-          <div className="text-gray-300">
-            <p className="mb-6 text-[1.1rem] text-gray-300">
-              We provide support for migrating from Datadog to SigNoz if your monthly billing in
-              Datadog is greater than 2000 USD. Request a migration from one of our experts and get
-              started with SigNoz quickly.
-            </p>
-            <div className="flex flex-col gap-4 sm:flex-row">
-              <Link
-                href="https://signoz.io/product-comparison/migrate-from-datadog/"
-                className="block max-w-md"
-              >
-                <Button className="flex w-full items-center justify-center gap-2 font-bold">
-                  Request migration support <ArrowRight className="h-4 w-4" />
-                </Button>
-              </Link>
-              <Link
-                href="https://signoz.io/docs/migration/migrate-from-datadog/"
-                className="block max-w-md"
-              >
-                <Button
-                  type={Button.TYPES.SECONDARY}
-                  className="flex w-full items-center justify-center gap-2 font-bold"
-                >
-                  <BookOpen className="h-4 w-4" />
-                  Docs on migrating from Datadog
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </section>
+
         {/* Why do Engineering Teams Choose SigNoz over Datadog? */}
         <section className="mx-auto max-w-4xl px-6 py-16">
-          <div className="flex flex-col items-center">
-            <div className="mx-auto mb-8 max-w-4xl text-lg leading-relaxed text-gray-300">
-              <h2 className="mb-8 text-left text-3xl font-bold text-white">
-                Why do Engineering Teams Choose SigNoz over Datadog?
-              </h2>
-              <p className="mb-6 text-[1.1rem] text-gray-300">
-                SigNoz is often referred to as "Open-Source Datadog Alternative" by our users. We
-                built SigNoz to address the absence of a great one-stop observability tool in the
-                open-source ecosystem. Something that comes with the ease of a SaaS tool like
-                Datadog but brings along the benefits of open-source standards.
-              </p>
-              <p className="mb-8 text-lg font-semibold text-white">
-                Top reasons why developers prefer SigNoz over Datadog
-              </p>
+          <h2 className="mb-8 text-left text-3xl font-bold text-white">
+            Why do Engineering Teams Choose SigNoz over Datadog?
+          </h2>
 
-              <div className="space-y-8">
-                <div>
-                  <h3 className="mb-4 text-2xl font-bold text-white">
-                    True OpenTelemetry(OTel) - native solution
-                  </h3>
-                  <p className="text-[1.1rem] text-gray-300">
-                    SigNoz is built from the ground up for OpenTelemetry. That means OTel-first
-                    docs, visualizations, & features are meant to truly take advantage of
-                    OpenTelemetry's potential. Datadog gives preference to its agent. If you want to
-                    do OpenTelemetry, SigNoz is the best choice.
-                  </p>
-                </div>
+          <div className="mb-8">
+            <p className="text-lg text-gray-300">
+              SigNoz is often referred to as “Open-Source Datadog Alternative” by our users. We
+              built SigNoz to address the absence of a great one-stop observability tool in the
+              open-source ecosystem. Something that comes with the ease of a SaaS tool like Datadog
+              but brings along the benefits of open-source standards.
+              <br />
+              <br />
+              Top reasons why developers prefer SigNoz over Datadog
+            </p>
+          </div>
 
-                <div>
-                  <h3 className="mb-4 text-2xl font-bold text-white">
-                    Flexible Deployment Options
-                  </h3>
-                  <p className="text-[1.1rem] text-gray-300">
-                    SigNoz provides both cloud & self-hosted versions. You can use the cloud,
-                    enterprise self-host, or free, open-source community edition, depending on your
-                    needs. Many of our users use{' '}
-                    <Link
-                      href="https://signoz.io/docs/install/docker/"
-                      className="text-blue-400 hover:text-blue-300"
-                    >
-                      open-source SigNoz
-                    </Link>{' '}
-                    in dev environments and{' '}
-                    <Link
-                      href="https://signoz.io/teams/"
-                      className="text-blue-400 hover:text-blue-300"
-                    >
-                      SigNoz Cloud
-                    </Link>{' '}
-                    for production environments. Privacy-focused users prefer{' '}
-                    <Link
-                      href="https://signoz.io/pricing/"
-                      className="text-blue-400 hover:text-blue-300"
-                    >
-                      enterprise self-hosted
-                    </Link>{' '}
-                    version.
-                  </p>
-                </div>
+          <div className="space-y-8">
+            <div className="flex items-start gap-4">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-orange-500/10">
+                <GitBranch className="h-5 w-5 text-orange-500" />
+              </div>
+              <div>
+                <h3 className="mb-2 text-xl font-bold text-white">
+                  True OpenTelemetry(OTel)-native solution
+                </h3>
+                <p className="text-gray-300">
+                  SigNoz is built from the ground up for OpenTelemetry. That means OTel-first docs,
+                  visualizations, & features are meant to truly take advantage of OpenTelemetry’s
+                  potential. Datadog gives preference to its agent. If you want to do OpenTelemetry,
+                  SigNoz is the best choice.
+                </p>
+              </div>
+            </div>
 
-                <div>
-                  <h3 className="mb-4 text-2xl font-bold text-white">9x better value for money</h3>
-                  <p className="text-[1.1rem] text-gray-300">
-                    Signoz provides{' '}
-                    <Link
-                      href="https://signoz.io/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/"
-                      className="text-blue-400 hover:text-blue-300"
-                    >
-                      9x more value
-                    </Link>{' '}
-                    for your money than Datadog.{' '}
-                    <Link
-                      href="https://signoz.io/blog/datadog-pricing/"
-                      className="text-blue-400 hover:text-blue-300"
-                    >
-                      Complex billing practices
-                    </Link>
-                    , unpredictable pricing, and pricing that sometimes doesn't make sense are
-                    common issues that Datadog users highlight. SigNoz offers simple usage-based{' '}
-                    <Link
-                      href="https://signoz.io/pricing/"
-                      className="text-blue-400 hover:text-blue-300"
-                    >
-                      pricing
-                    </Link>{' '}
-                    and features that can help you take control of your observability costs better.
-                  </p>
-                </div>
+            <div className="flex items-start gap-4">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-500/10">
+                <DraftingCompass className="h-5 w-5 text-blue-500" />
+              </div>
+              <div>
+                <h3 className="mb-2 text-xl font-bold text-white">Flexible Deployment Options</h3>
+                <p className="text-gray-300">
+                  SigNoz provides both cloud & self-hosted versions. You can use the cloud,
+                  enterprise self-host, or free, open-source community edition, depending on your
+                  needs. Many of our users use open-source SigNoz in dev environments and SigNoz
+                  Cloud for production environments. Privacy-focused users prefer enterprise
+                  self-hosted version.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-4">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-green-500/10">
+                <ChartBar className="h-5 w-5 text-green-500" />
+              </div>
+              <div>
+                <h3 className="mb-2 text-xl font-bold text-white">9x better value for money</h3>
+                <p className="text-gray-300">
+                  Signoz provides 9x more value for your money than Datadog. Complex billing
+                  practices, unpredictable pricing, and pricing that sometimes doesn’t make sense
+                  are common issues that Datadog users highlight. SigNoz offers simple usage-based
+                  pricing and features that can help you take control of your observability costs
+                  better.
+                </p>
               </div>
             </div>
           </div>
         </section>
+
         {/* Product Comparison Section */}
         <section className="mx-auto max-w-4xl px-6 py-16">
           <h2 className="mb-12 text-left text-2xl font-bold lg:text-3xl">Product Comparison</h2>
@@ -2152,7 +2094,7 @@ const SigNozVsDatadogV2 = () => {
                   <span>
                     Yes, we do offer a free trial. When you{' '}
                     <Link
-                      href="https://signoz.io/pricing/"
+                      href="https://signoz.io/teams/"
                       className="text-orange-500 hover:text-orange-400"
                     >
                       sign up
@@ -2195,6 +2137,42 @@ const SigNozVsDatadogV2 = () => {
               },
             ]}
           />
+        </section>
+
+        {/* Migration Section */}
+        <section className="mx-auto max-w-4xl rounded-xl bg-gradient-to-r from-blue-900/20 to-purple-900/20 px-6 py-12">
+          <h3 className="mb-8 text-left text-xl font-bold lg:text-2xl">
+            Migrate from Datadog - Save up to 80% on your Datadog bill
+          </h3>
+          <div className="text-gray-300">
+            <p className="mb-6 text-[1.1rem] text-gray-300">
+              We provide support for migrating from Datadog to SigNoz if your monthly billing in
+              Datadog is greater than 2000 USD. Request a migration from one of our experts and get
+              started with SigNoz quickly.
+            </p>
+            <div className="flex flex-col gap-4 sm:flex-row">
+              <Link
+                href="https://signoz.io/product-comparison/migrate-from-datadog/"
+                className="block max-w-md"
+              >
+                <Button className="flex w-full items-center justify-center gap-2 font-bold">
+                  Request migration support <ArrowRight className="h-4 w-4" />
+                </Button>
+              </Link>
+              <Link
+                href="https://signoz.io/docs/migration/migrate-from-datadog/"
+                className="block max-w-md"
+              >
+                <Button
+                  type={Button.TYPES.SECONDARY}
+                  className="flex w-full items-center justify-center gap-2 font-bold"
+                >
+                  <BookOpen className="h-4 w-4" />
+                  Docs on migrating from Datadog
+                </Button>
+              </Link>
+            </div>
+          </div>
         </section>
       </div>
     </div>
