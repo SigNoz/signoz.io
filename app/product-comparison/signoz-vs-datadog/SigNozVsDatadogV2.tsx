@@ -125,102 +125,97 @@ const SigNozVsDatadogV2 = () => {
           </div>
         </section>
 
-        {/* Introduction */}
+        {/* Why do Engineering Teams Choose SigNoz over Datadog? */}
         <section className="mx-auto max-w-4xl px-6 py-16">
           <div className="flex flex-col items-center">
-            <div className="mx-auto mb-4 max-w-4xl text-lg leading-relaxed text-gray-300">
-              <p>
-                Unified observability is a comprehensive approach that consolidates various
-                monitoring data—such as logs, metrics, and traces—into a single platform. This
-                integration provides a holistic view of system health and performance, enabling
-                teams to detect and resolve issues more efficiently. By breaking down data silos,
-                unified observability facilitates better collaboration across development,
-                operations, and security teams, leading to enhanced system reliability and a
-                superior user experience.
+            <div className="mx-auto mb-8 max-w-4xl text-lg leading-relaxed text-gray-300">
+              <h2 className="mb-6 text-3xl font-bold text-white">
+                Why do Engineering Teams Choose SigNoz over Datadog?
+              </h2>
+              <p className="mb-6">
+                SigNoz is often referred to as "Open-Source Datadog Alternative" by our users. We
+                built SigNoz to address the absence of a great one-stop observability tool in the
+                open-source ecosystem. Something that comes with the ease of a SaaS tool like
+                Datadog but brings along the benefits of open-source standards.
               </p>
-            </div>
-            <div id="illustration" className="rounded-lg bg-[#0c0c0c]">
-              {/* Data Sources */}
-              <div className="mb-3 grid grid-cols-3 gap-10">
-                <div className="rounded-md border border-blue-500/20 bg-[#18181a] p-2">
-                  <div className="mb-3 flex items-center">
-                    <LineChart className="mr-2 h-4 w-4 text-blue-400" />
-                    <h3 className="mb-0 text-sm font-medium text-blue-400">Metrics</h3>
-                  </div>
-                  <p className="mb-0 text-xs text-gray-400">System performance indicators</p>
-                </div>
+              <p className="mb-8 text-lg font-semibold text-white">
+                Top reasons why developers prefer SigNoz over Datadog
+              </p>
 
-                <div className="rounded-md border border-purple-500/20 bg-[#18181a] p-2">
-                  <div className="mb-3 flex items-center">
-                    <DraftingCompass className="mr-2 h-4 w-4 text-purple-400" />
-                    <h3 className="mb-0 text-sm font-medium text-purple-400">Traces</h3>
-                  </div>
-                  <p className="mb-0 text-xs text-gray-400">Request flow tracking</p>
-                </div>
-
-                <div className="rounded-md border border-green-500/20 bg-[#18181a] p-2">
-                  <div className="mb-3 flex items-center">
-                    <ScrollText className="mr-2 h-4 w-4 text-green-400" />
-                    <h3 className="mb-0 text-sm font-medium text-green-400">Logs</h3>
-                  </div>
-                  <p className="mb-0 text-xs text-gray-400">System event records</p>
-                </div>
-              </div>
-
-              {/* Integration Arrows */}
-              <div className="mb-3 flex justify-center">
-                <ArrowDownCircle className="h-6 w-6 text-gray-600" />
-              </div>
-
-              {/* Unified Platform */}
-              <div className="mb-3 rounded-lg border border-gray-700 bg-[#18181a] p-3">
-                <h3 className="mb-4 text-center text-xl font-semibold text-gray-200">
-                  Unified Observability Platform
-                </h3>
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="flex items-center justify-center gap-2 rounded bg-[#0c0c0c] p-3">
-                    <LineChart className="h-5 w-5 text-blue-400" />
-                    <p className="mb-0 text-sm text-blue-400">Metrics</p>
-                  </div>
-                  <div className="flex items-center justify-center gap-2 rounded bg-[#0c0c0c] p-3">
-                    <DraftingCompass className="h-5 w-5 text-purple-400" />
-                    <p className="mb-0 text-sm text-purple-400">Traces</p>
-                  </div>
-                  <div className="flex items-center justify-center gap-2 rounded bg-[#0c0c0c] p-3">
-                    <ScrollText className="h-5 w-5 text-green-400" />
-                    <p className="mb-0 text-sm text-green-400">Logs</p>
-                  </div>
-                </div>
-                <p className="mb-0 mt-4 text-center text-sm text-gray-400">
-                  All Signals in One Single Pane
-                </p>
-              </div>
-
-              {/* Benefits */}
-              <div className="grid grid-cols-3 gap-10">
-                <div className="rounded-lg bg-[#18181a] p-4">
-                  <div className="mb-3 flex items-center justify-center">
-                    <Gauge className="h-5 w-5 text-blue-400" />
-                  </div>
-                  <p className="mb-0 text-center text-sm text-gray-400">
-                    Enhanced System Reliability
+              <div className="space-y-8">
+                <div>
+                  <h3 className="mb-3 text-xl font-semibold text-white">
+                    True OpenTelemetry(OTel) - native solution
+                  </h3>
+                  <p>
+                    SigNoz is built from the ground up for OpenTelemetry. That means OTel-first
+                    docs, visualizations, & features are meant to truly take advantage of
+                    OpenTelemetry's potential. Datadog gives preference to its agent. If you want to
+                    do OpenTelemetry, SigNoz is the best choice.
                   </p>
                 </div>
 
-                <div className="rounded-lg bg-[#18181a] p-4">
-                  <div className="mb-3 flex items-center justify-center">
-                    <Users className="h-5 w-5 text-purple-400" />
-                  </div>
-                  <p className="mb-0 text-center text-sm text-gray-400">
-                    Better Team Collaboration
+                <div>
+                  <h3 className="mb-3 text-xl font-semibold text-white">
+                    Flexible Deployment Options
+                  </h3>
+                  <p>
+                    SigNoz provides both cloud & self-hosted versions. You can use the cloud,
+                    enterprise self-host, or free, open-source community edition, depending on your
+                    needs. Many of our users use{' '}
+                    <Link
+                      href="https://signoz.io/docs/install/docker/"
+                      className="text-blue-400 hover:text-blue-300"
+                    >
+                      open-source SigNoz
+                    </Link>{' '}
+                    in dev environments and{' '}
+                    <Link
+                      href="https://signoz.io/teams/"
+                      className="text-blue-400 hover:text-blue-300"
+                    >
+                      SigNoz Cloud
+                    </Link>{' '}
+                    for production environments. Privacy-focused users prefer{' '}
+                    <Link
+                      href="https://signoz.io/pricing/"
+                      className="text-blue-400 hover:text-blue-300"
+                    >
+                      enterprise self-hosted
+                    </Link>{' '}
+                    version.
                   </p>
                 </div>
 
-                <div className="rounded-lg bg-[#18181a] p-4">
-                  <div className="mb-3 flex items-center justify-center">
-                    <LineChart className="h-5 w-5 text-green-400" />
-                  </div>
-                  <p className="mb-0 text-center text-sm text-gray-400">Superior User Experience</p>
+                <div>
+                  <h3 className="mb-3 text-xl font-semibold text-white">
+                    9x better value for money
+                  </h3>
+                  <p>
+                    Signoz provides{' '}
+                    <Link
+                      href="https://signoz.io/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/"
+                      className="text-blue-400 hover:text-blue-300"
+                    >
+                      9x more value
+                    </Link>{' '}
+                    for your money than Datadog.{' '}
+                    <Link
+                      href="https://signoz.io/blog/datadog-pricing/"
+                      className="text-blue-400 hover:text-blue-300"
+                    >
+                      Complex billing practices
+                    </Link>
+                    , unpredictable pricing, and pricing that sometimes doesn't make sense are
+                    common issues that Datadog users highlight. SigNoz offers simple usage-based{' '}
+                    <Link
+                      href="https://signoz.io/pricing/"
+                      className="text-blue-400 hover:text-blue-300"
+                    >
+                      pricing
+                    </Link>{' '}
+                    and features that can help you take control of your observability costs better.
+                  </p>
                 </div>
               </div>
             </div>
