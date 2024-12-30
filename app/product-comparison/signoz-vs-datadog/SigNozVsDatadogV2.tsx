@@ -1102,51 +1102,235 @@ const SigNozVsDatadogV2 = () => {
                 querying and filtering for logs at scale.
               </p>
 
-              <div className="mb-8 overflow-x-auto">
-                <table className="w-full border-collapse text-left">
+              <div className="mb-8 overflow-x-auto rounded-lg border border-gray-800 bg-gray-900/50">
+                <table className="m-0 w-full border-collapse text-left">
                   <thead>
-                    <tr className="border-b border-gray-700">
-                      <th className="py-4 pr-4"></th>
-                      <th className="px-4 py-4">SigNoz</th>
-                      <th className="px-4 py-4">Datadog</th>
-                      <th className="py-4 pl-4">Remarks</th>
+                    <tr>
+                      <th className="w-[25%] border-b border-gray-800 bg-gray-900/80 px-6 py-4 font-medium text-gray-400">
+                        Feature
+                      </th>
+                      <th className="w-[12%] border-b border-gray-800 bg-gray-900/80 px-4 py-4 font-medium text-gray-400">
+                        SigNoz
+                      </th>
+                      <th className="w-[12%] border-b border-gray-800 bg-gray-900/80 px-4 py-4 font-medium text-gray-400">
+                        Datadog
+                      </th>
+                      <th className="border-b border-gray-800 bg-gray-900/80 px-6 py-4 font-medium text-gray-400">
+                        Remarks
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="text-gray-300">
-                    <tr className="border-b border-gray-700">
-                      <td className="py-4 pr-4 font-medium">High Cardinality filtering at scale</td>
-                      <td className="px-4 py-4">✅</td>
-                      <td className="px-4 py-4">🟡</td>
-                      <td className="py-4 pl-4">
+                    <tr className="transition-colors hover:bg-gray-800/50">
+                      <td className="border-b border-gray-800/50 px-6 py-4">
+                        High Cardinality filtering at scale
+                      </td>
+                      <td className="border-b border-gray-800/50 px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          <span>Yes</span>
+                        </div>
+                      </td>
+                      <td className="border-b border-gray-800/50 px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          <AlertTriangle className="h-4 w-4 text-yellow-500" />
+                          <span>Limited</span>
+                        </div>
+                      </td>
+                      <td className="border-b border-gray-800/50 px-6 py-4">
                         Under the hood, SigNoz uses ClickHouse(used by likes of Uber) - an extremely
                         fast and highly optimized storage for observability data.
                       </td>
                     </tr>
-                    <tr className="border-b border-gray-700">
-                      <td className="py-4 pr-4 font-medium">Quick search & filter</td>
-                      <td className="px-4 py-4">✅</td>
-                      <td className="px-4 py-4">✅</td>
-                      <td className="py-4 pl-4">
+                    <tr className="transition-colors hover:bg-gray-800/50">
+                      <td className="border-b border-gray-800/50 px-6 py-4">
+                        Quick search & filter
+                      </td>
+                      <td className="border-b border-gray-800/50 px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          <span>Yes</span>
+                        </div>
+                      </td>
+                      <td className="border-b border-gray-800/50 px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          <span>Yes</span>
+                        </div>
+                      </td>
+                      <td className="border-b border-gray-800/50 px-6 py-4">
                         Quickly search and filter your logs by filling attributes, tags, etc. in
                         search bar or using the quick filter menu.
                       </td>
                     </tr>
-                    <tr className="border-b border-gray-700">
-                      <td className="py-4 pr-4 font-medium">Logs to Traces</td>
-                      <td className="px-4 py-4">✅</td>
-                      <td className="px-4 py-4">🟡 Limited for Otel Data</td>
-                      <td className="py-4 pl-4">
+                    <tr className="transition-colors hover:bg-gray-800/50">
+                      <td className="border-b border-gray-800/50 px-6 py-4">Logs to Traces</td>
+                      <td className="border-b border-gray-800/50 px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          <span>Yes</span>
+                        </div>
+                      </td>
+                      <td className="border-b border-gray-800/50 px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          <span>Limited for Otel Data</span>
+                        </div>
+                      </td>
+                      <td className="border-b border-gray-800/50 px-6 py-4">
                         Click on detailed view of logs and go to related span if trace id is present
                         in logs.
                       </td>
                     </tr>
-                    <tr className="border-b border-gray-700">
-                      <td className="py-4 pr-4 font-medium">Logs to Infra Metrics</td>
-                      <td className="px-4 py-4">✅</td>
-                      <td className="px-4 py-4">✅</td>
-                      <td className="py-4 pl-4">
+                    <tr className="transition-colors hover:bg-gray-800/50">
+                      <td className="border-b border-gray-800/50 px-6 py-4">
+                        Logs to Infra Metrics
+                      </td>
+                      <td className="border-b border-gray-800/50 px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          <span>Yes</span>
+                        </div>
+                      </td>
+                      <td className="border-b border-gray-800/50 px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          <span>Yes</span>
+                        </div>
+                      </td>
+                      <td className="border-b border-gray-800/50 px-6 py-4">
                         Click on detailed view of logs and see infra metrics from the host
                         generating the logs
+                      </td>
+                    </tr>
+                    <tr className="transition-colors hover:bg-gray-800/50">
+                      <td className="border-b border-gray-800/50 px-6 py-4">Timeseries plot</td>
+                      <td className="border-b border-gray-800/50 px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          <span>Yes</span>
+                        </div>
+                      </td>
+                      <td className="border-b border-gray-800/50 px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          <span>Yes</span>
+                        </div>
+                      </td>
+                      <td className="border-b border-gray-800/50 px-6 py-4">
+                        See timeseries plot of logs sent. In SigNoz you can apply different
+                        aggregations like count, avg., min, max, etc. In Datadog only count
+                        operation is allowed.
+                      </td>
+                    </tr>
+                    <tr className="transition-colors hover:bg-gray-800/50">
+                      <td className="border-b border-gray-800/50 px-6 py-4">Table View</td>
+                      <td className="border-b border-gray-800/50 px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          <span>Yes</span>
+                        </div>
+                      </td>
+                      <td className="border-b border-gray-800/50 px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          <span>Yes</span>
+                        </div>
+                      </td>
+                      <td className="border-b border-gray-800/50 px-6 py-4">Same as above.</td>
+                    </tr>
+                    <tr className="transition-colors hover:bg-gray-800/50">
+                      <td className="border-b border-gray-800/50 px-6 py-4">List View</td>
+                      <td className="border-b border-gray-800/50 px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          <span>Yes</span>
+                        </div>
+                      </td>
+                      <td className="border-b border-gray-800/50 px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          <span>Yes</span>
+                        </div>
+                      </td>
+                      <td className="border-b border-gray-800/50 px-6 py-4">
+                        See all your log lines in list view with options to customize the view.
+                      </td>
+                    </tr>
+                    <tr className="transition-colors hover:bg-gray-800/50">
+                      <td className="border-b border-gray-800/50 px-6 py-4">OTel-based Logs UI</td>
+                      <td className="border-b border-gray-800/50 px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          <span>Yes</span>
+                        </div>
+                      </td>
+                      <td className="border-b border-gray-800/50 px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          <AlertTriangle className="h-4 w-4 text-red-500" />
+                          <span>No</span>
+                        </div>
+                      </td>
+                      <td className="border-b border-gray-800/50 px-6 py-4">
+                        Our logs UI respects the hierarchy of OTel logs model making it easier for
+                        users to identify the type of attributes/tags they use for filtering.
+                      </td>
+                    </tr>
+                    <tr className="transition-colors hover:bg-gray-800/50">
+                      <td className="border-b border-gray-800/50 px-6 py-4">Saved Views</td>
+                      <td className="border-b border-gray-800/50 px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          <span>Yes</span>
+                        </div>
+                      </td>
+                      <td className="border-b border-gray-800/50 px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          <span>Yes</span>
+                        </div>
+                      </td>
+                      <td className="border-b border-gray-800/50 px-6 py-4">
+                        Apply filters & aggregations and save them as views for quick access later.
+                      </td>
+                    </tr>
+                    <tr className="transition-colors hover:bg-gray-800/50">
+                      <td className="border-b border-gray-800/50 px-6 py-4">Log Patterns</td>
+                      <td className="border-b border-gray-800/50 px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          <AlertTriangle className="h-4 w-4 text-red-500" />
+                          <span>No</span>
+                        </div>
+                      </td>
+                      <td className="border-b border-gray-800/50 px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          <span>Yes</span>
+                        </div>
+                      </td>
+                      <td className="border-b border-gray-800/50 px-6 py-4">
+                        Logs Patterns help you identify patterns in logs sent. We don't have this
+                        currently, but it is there in our product roadmap
+                      </td>
+                    </tr>
+                    <tr className="transition-colors hover:bg-gray-800/50">
+                      <td className="border-b border-gray-800/50 px-6 py-4">
+                        Ability to configure quick filters
+                      </td>
+                      <td className="border-b border-gray-800/50 px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          <AlertTriangle className="h-4 w-4 text-red-500" />
+                          <span>No</span>
+                        </div>
+                      </td>
+                      <td className="border-b border-gray-800/50 px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          <span>Yes</span>
+                        </div>
+                      </td>
+                      <td className="border-b border-gray-800/50 px-6 py-4">
+                        You can configure the filters in quick filter menu bar which comes handy in
+                        fast troubleshooting.
                       </td>
                     </tr>
                   </tbody>
@@ -1158,42 +1342,254 @@ const SigNozVsDatadogV2 = () => {
             <div>
               <h3 className="mb-6 text-2xl font-bold">Distributed Tracing</h3>
 
-              <div className="mb-8 overflow-x-auto">
-                <table className="w-full border-collapse text-left">
+              <div className="mb-8 overflow-x-auto rounded-lg border border-gray-800 bg-gray-900/50">
+                <table className="m-0 w-full border-collapse text-left">
                   <thead>
-                    <tr className="border-b border-gray-700">
-                      <th className="py-4 pr-4"></th>
-                      <th className="px-4 py-4">SigNoz</th>
-                      <th className="px-4 py-4">Datadog</th>
-                      <th className="py-4 pl-4">Remarks</th>
+                    <tr>
+                      <th className="w-[25%] border-b border-gray-800 bg-gray-900/80 px-6 py-4 font-medium text-gray-400">
+                        Feature
+                      </th>
+                      <th className="w-[12%] border-b border-gray-800 bg-gray-900/80 px-4 py-4 font-medium text-gray-400">
+                        SigNoz
+                      </th>
+                      <th className="w-[12%] border-b border-gray-800 bg-gray-900/80 px-4 py-4 font-medium text-gray-400">
+                        Datadog
+                      </th>
+                      <th className="border-b border-gray-800 bg-gray-900/80 px-6 py-4 font-medium text-gray-400">
+                        Remarks
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="text-gray-300">
-                    <tr className="border-b border-gray-700">
-                      <td className="py-4 pr-4 font-medium">Search on all spans</td>
-                      <td className="px-4 py-4">✅</td>
-                      <td className="px-4 py-4">🟡 Limited to live search</td>
-                      <td className="py-4 pl-4">
+                    <tr className="transition-colors hover:bg-gray-800/50">
+                      <td className="border-b border-gray-800/50 px-6 py-4">Search on all spans</td>
+                      <td className="border-b border-gray-800/50 px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          <span>Yes</span>
+                        </div>
+                      </td>
+                      <td className="border-b border-gray-800/50 px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          <span>Limited to live search</span>
+                        </div>
+                      </td>
+                      <td className="border-b border-gray-800/50 px-6 py-4">
                         Datadog allows search on only indexed spans. Live search is available for
                         all spans only for past 15 minutes.
                       </td>
                     </tr>
-                    <tr className="border-b border-gray-700">
-                      <td className="py-4 pr-4 font-medium">Quick Filters</td>
-                      <td className="px-4 py-4">✅</td>
-                      <td className="px-4 py-4">✅</td>
-                      <td className="py-4 pl-4">
+                    <tr className="transition-colors hover:bg-gray-800/50">
+                      <td className="border-b border-gray-800/50 px-6 py-4">Quick Filters</td>
+                      <td className="border-b border-gray-800/50 px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          <span>Yes</span>
+                        </div>
+                      </td>
+                      <td className="border-b border-gray-800/50 px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          <span>Yes</span>
+                        </div>
+                      </td>
+                      <td className="border-b border-gray-800/50 px-6 py-4">
                         Use the quick filter menu list to quickly zero down on spans you want to
                         see.
                       </td>
                     </tr>
-                    <tr className="border-b border-gray-700">
-                      <td className="py-4 pr-4 font-medium">Aggregations on trace data</td>
-                      <td className="px-4 py-4">✅</td>
-                      <td className="px-4 py-4">🟡 Limited to simple operations like count.</td>
-                      <td className="py-4 pl-4">
+                    <tr className="transition-colors hover:bg-gray-800/50">
+                      <td className="border-b border-gray-800/50 px-6 py-4">
+                        Aggregations on trace data
+                      </td>
+                      <td className="border-b border-gray-800/50 px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          <span>Yes</span>
+                        </div>
+                      </td>
+                      <td className="border-b border-gray-800/50 px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          <span>Limited to simple operations like count</span>
+                        </div>
+                      </td>
+                      <td className="border-b border-gray-800/50 px-6 py-4">
                         SigNoz provides a powerful query builder which allows a list of aggregations
                         like count, min, max, latency, rate_sum, rate_avg. etc.
+                      </td>
+                    </tr>
+                    <tr className="transition-colors hover:bg-gray-800/50">
+                      <td className="border-b border-gray-800/50 px-6 py-4">
+                        Arbitrary attribute-based querying & aggregations
+                      </td>
+                      <td className="border-b border-gray-800/50 px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          <span>Yes</span>
+                        </div>
+                      </td>
+                      <td className="border-b border-gray-800/50 px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          <AlertTriangle className="h-4 w-4 text-red-500" />
+                          <span>No</span>
+                        </div>
+                      </td>
+                      <td className="border-b border-gray-800/50 px-6 py-4">
+                        You can choose any arbitrary attribute to create aggregations in SigNoz.
+                        Datadog only allows it on some top level attributes.
+                      </td>
+                    </tr>
+                    <tr className="transition-colors hover:bg-gray-800/50">
+                      <td className="border-b border-gray-800/50 px-6 py-4">List View</td>
+                      <td className="border-b border-gray-800/50 px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          <span>Yes</span>
+                        </div>
+                      </td>
+                      <td className="border-b border-gray-800/50 px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          <span>Yes</span>
+                        </div>
+                      </td>
+                      <td className="border-b border-gray-800/50 px-6 py-4">
+                        See all your spans in list view with options to customize the view.
+                      </td>
+                    </tr>
+                    <tr className="transition-colors hover:bg-gray-800/50">
+                      <td className="border-b border-gray-800/50 px-6 py-4">Time Series</td>
+                      <td className="border-b border-gray-800/50 px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          <span>Yes</span>
+                        </div>
+                      </td>
+                      <td className="border-b border-gray-800/50 px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          <span>Yes</span>
+                        </div>
+                      </td>
+                      <td className="border-b border-gray-800/50 px-6 py-4">
+                        See all your spans in list view with options to customize the view.
+                      </td>
+                    </tr>
+                    <tr className="transition-colors hover:bg-gray-800/50">
+                      <td className="border-b border-gray-800/50 px-6 py-4">Table View</td>
+                      <td className="border-b border-gray-800/50 px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          <span>Yes</span>
+                        </div>
+                      </td>
+                      <td className="border-b border-gray-800/50 px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          <span>Yes</span>
+                        </div>
+                      </td>
+                      <td className="border-b border-gray-800/50 px-6 py-4">
+                        Apply filters based on attributes and apply aggregations like count, min,
+                        max, latency and see results in table view. Datadog allows only the count
+                        operation.
+                      </td>
+                    </tr>
+                    <tr className="transition-colors hover:bg-gray-800/50">
+                      <td className="border-b border-gray-800/50 px-6 py-4">See Root Spans</td>
+                      <td className="border-b border-gray-800/50 px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          <span>Yes</span>
+                        </div>
+                      </td>
+                      <td className="border-b border-gray-800/50 px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          <span>Yes</span>
+                        </div>
+                      </td>
+                      <td className="border-b border-gray-800/50 px-6 py-4">
+                        Root spans are the entry point for any trace. In SigNoz you can view them in
+                        a different panel.
+                      </td>
+                    </tr>
+                    <tr className="transition-colors hover:bg-gray-800/50">
+                      <td className="border-b border-gray-800/50 px-6 py-4">
+                        Tree Map & Pie Chart View
+                      </td>
+                      <td className="border-b border-gray-800/50 px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          <AlertTriangle className="h-4 w-4 text-red-500" />
+                          <span>No</span>
+                        </div>
+                      </td>
+                      <td className="border-b border-gray-800/50 px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          <span>Yes</span>
+                        </div>
+                      </td>
+                      <td className="border-b border-gray-800/50 px-6 py-4">
+                        Datadog provides more visualization options for your trace data.
+                      </td>
+                    </tr>
+                    <tr className="transition-colors hover:bg-gray-800/50">
+                      <td className="border-b border-gray-800/50 px-6 py-4">Flamegraphs</td>
+                      <td className="border-b border-gray-800/50 px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          <span>Yes</span>
+                        </div>
+                      </td>
+                      <td className="border-b border-gray-800/50 px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          <span>Yes</span>
+                        </div>
+                      </td>
+                      <td className="border-b border-gray-800/50 px-6 py-4">
+                        Flamegraphs are used to commonly to represent trace data.
+                      </td>
+                    </tr>
+                    <tr className="transition-colors hover:bg-gray-800/50">
+                      <td className="border-b border-gray-800/50 px-6 py-4">Trace Waterfall</td>
+                      <td className="border-b border-gray-800/50 px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          <span>Yes</span>
+                        </div>
+                      </td>
+                      <td className="border-b border-gray-800/50 px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          <span>Yes</span>
+                        </div>
+                      </td>
+                      <td className="border-b border-gray-800/50 px-6 py-4">
+                        Trace waterfall shows the how order of operations cascades across the total
+                        execution time of that trace.
+                      </td>
+                    </tr>
+                    <tr className="transition-colors hover:bg-gray-800/50">
+                      <td className="border-b border-gray-800/50 px-6 py-4">
+                        Spans to related logs
+                      </td>
+                      <td className="border-b border-gray-800/50 px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          <span>Yes</span>
+                        </div>
+                      </td>
+                      <td className="border-b border-gray-800/50 px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          <span>Yes</span>
+                        </div>
+                      </td>
+                      <td className="border-b border-gray-800/50 px-6 py-4">
+                        Both SigNoz and Datadog shows related logs with a span. The UX might be
+                        different in each case.
                       </td>
                     </tr>
                   </tbody>
@@ -1205,48 +1601,177 @@ const SigNozVsDatadogV2 = () => {
             <div>
               <h3 className="mb-6 text-2xl font-bold">Infrastructure Monitoring</h3>
               <p className="mb-6 text-[1.1rem] text-gray-300">
-                Datadog is a better choice if you're looking to do only infrastructure monitoring.
-                But if you're looking to use OpenTelemetry, SigNoz is a better choice.
+                Datadog is a better choice if you’re looking to do only infrastructure monitoring.{' '}
+                <br /> <br />
+                But if you're looking to use OpenTelemetry, SigNoz is a better choice. OpenTelemetry
+                Collector has a{' '}
+                <Link
+                  href="https://signoz.io/docs/userguide/hostmetrics/"
+                  className="text-blue-400 hover:text-blue-300"
+                >
+                  hostmetrics
+                </Link>{' '}
+                receiver that allows you to collect important infra metrics. <br /> <br />
+                The resource attributes collected with OTel follows the semantic conventions, which
+                means it can be correlated easily with other signals like logs and traces.
               </p>
 
-              <div className="mb-8 overflow-x-auto">
-                <table className="w-full border-collapse text-left">
+              <div className="mb-8 overflow-x-auto rounded-lg border border-gray-800 bg-gray-900/50">
+                <table className="m-0 w-full border-collapse text-left">
                   <thead>
-                    <tr className="border-b border-gray-700">
-                      <th className="py-4 pr-4"></th>
-                      <th className="px-4 py-4">SigNoz</th>
-                      <th className="px-4 py-4">Datadog</th>
-                      <th className="py-4 pl-4">Remarks</th>
+                    <tr>
+                      <th className="w-[25%] border-b border-gray-800 bg-gray-900/80 px-6 py-4 font-medium text-gray-400">
+                        Feature
+                      </th>
+                      <th className="w-[12%] border-b border-gray-800 bg-gray-900/80 px-4 py-4 font-medium text-gray-400">
+                        SigNoz
+                      </th>
+                      <th className="w-[12%] border-b border-gray-800 bg-gray-900/80 px-4 py-4 font-medium text-gray-400">
+                        Datadog
+                      </th>
+                      <th className="border-b border-gray-800 bg-gray-900/80 px-6 py-4 font-medium text-gray-400">
+                        Remarks
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="text-gray-300">
-                    <tr className="border-b border-gray-700">
-                      <td className="py-4 pr-4 font-medium">K8s Cluster Monitoring</td>
-                      <td className="px-4 py-4">✅</td>
-                      <td className="px-4 py-4">✅</td>
-                      <td className="py-4 pl-4">
+                    <tr className="transition-colors hover:bg-gray-800/50">
+                      <td className="border-b border-gray-800/50 px-6 py-4">
+                        K8s Cluster Monitoring
+                      </td>
+                      <td className="border-b border-gray-800/50 px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          <span>Yes</span>
+                        </div>
+                      </td>
+                      <td className="border-b border-gray-800/50 px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          <span>Yes</span>
+                        </div>
+                      </td>
+                      <td className="border-b border-gray-800/50 px-6 py-4">
                         Get charts for monitoring common resource metrics like CPU, memory, etc.
                         from K8s pods & nodes.
                       </td>
                     </tr>
-                    <tr className="border-b border-gray-700">
-                      <td className="py-4 pr-4 font-medium">VM Monitoring</td>
-                      <td className="px-4 py-4">✅</td>
-                      <td className="px-4 py-4">✅</td>
-                      <td className="py-4 pl-4">
+                    <tr className="transition-colors hover:bg-gray-800/50">
+                      <td className="border-b border-gray-800/50 px-6 py-4">VM Monitoring</td>
+                      <td className="border-b border-gray-800/50 px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          <span>Yes</span>
+                        </div>
+                      </td>
+                      <td className="border-b border-gray-800/50 px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          <span>Yes</span>
+                        </div>
+                      </td>
+                      <td className="border-b border-gray-800/50 px-6 py-4">
                         Get charts for monitoring common resource metrics like CPU, memory, etc.
                         from VMs.
                       </td>
                     </tr>
-                    <tr className="border-b border-gray-700">
-                      <td className="py-4 pr-4 font-medium">Infra metrics to logs</td>
-                      <td className="px-4 py-4">✅</td>
-                      <td className="px-4 py-4">✅</td>
-                      <td className="py-4 pl-4">Correlate your infra metrics with logs.</td>
+                    <tr className="transition-colors hover:bg-gray-800/50">
+                      <td className="border-b border-gray-800/50 px-6 py-4">
+                        Infra metrics to logs
+                      </td>
+                      <td className="border-b border-gray-800/50 px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          <span>Yes</span>
+                        </div>
+                      </td>
+                      <td className="border-b border-gray-800/50 px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          <span>Yes</span>
+                        </div>
+                      </td>
+                      <td className="border-b border-gray-800/50 px-6 py-4">
+                        Correlate your infra metrics with logs.
+                      </td>
+                    </tr>
+                    <tr className="transition-colors hover:bg-gray-800/50">
+                      <td className="border-b border-gray-800/50 px-6 py-4">
+                        Infra metrics to traces
+                      </td>
+                      <td className="border-b border-gray-800/50 px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          <span>Yes</span>
+                        </div>
+                      </td>
+                      <td className="border-b border-gray-800/50 px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          <span>Yes</span>
+                        </div>
+                      </td>
+                      <td className="border-b border-gray-800/50 px-6 py-4">
+                        Correlate your infra metrics with traces.
+                      </td>
+                    </tr>
+                    <tr className="transition-colors hover:bg-gray-800/50">
+                      <td className="border-b border-gray-800/50 px-6 py-4">
+                        Host & Container Maps
+                      </td>
+                      <td className="border-b border-gray-800/50 px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          <AlertTriangle className="h-4 w-4 text-red-500" />
+                          <span>No</span>
+                        </div>
+                      </td>
+                      <td className="border-b border-gray-800/50 px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          <span>Yes</span>
+                        </div>
+                      </td>
+                      <td className="border-b border-gray-800/50 px-6 py-4">
+                        Get a map of your machinces/containers in your infra for a comprehensive
+                        view.
+                      </td>
+                    </tr>
+                    <tr className="transition-colors hover:bg-gray-800/50">
+                      <td className="border-b border-gray-800/50 px-6 py-4">
+                        Control Infra Monitoring Cost
+                      </td>
+                      <td className="border-b border-gray-800/50 px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          <span>Yes</span>
+                        </div>
+                      </td>
+                      <td className="border-b border-gray-800/50 px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          <AlertTriangle className="h-4 w-4 text-red-500" />
+                          <span>No</span>
+                        </div>
+                      </td>
+                      <td className="border-b border-gray-800/50 px-6 py-4">
+                        In Datadog you cannot control the metrics you send for Infra monitoring,
+                        while in SigNoz you will have granular controls on what metrics you want to
+                        send from any host.
+                      </td>
                     </tr>
                   </tbody>
                 </table>
               </div>
+              <p className="mb-6 text-[1.1rem] text-gray-300">
+                Datadog has a vast array of capabilities when it comes to infrastructure monitoring.
+                You can check out more details about their infrastructure monitoring capabilities on
+                their{' '}
+                <Link
+                  href="https://www.datadoghq.com/product/infrastructure-monitoring/"
+                  className="text-blue-400 hover:text-blue-300"
+                >
+                  website.
+                </Link>
+              </p>
             </div>
 
             {/* Other Platform Capabilities Section */}
@@ -1257,35 +1782,100 @@ const SigNozVsDatadogV2 = () => {
                 a good choice.
               </p>
 
-              <div className="mb-8 overflow-x-auto">
-                <table className="w-full border-collapse text-left">
+              <div className="mb-8 overflow-x-auto rounded-lg border border-gray-800 bg-gray-900/50">
+                <table className="m-0 w-full border-collapse text-left">
                   <thead>
-                    <tr className="border-b border-gray-700">
-                      <th className="py-4 pr-4"></th>
-                      <th className="px-4 py-4">SigNoz</th>
-                      <th className="px-4 py-4">Datadog</th>
+                    <tr>
+                      <th className="w-[25%] border-b border-gray-800 bg-gray-900/80 px-6 py-4 font-medium text-gray-400">
+                        Feature
+                      </th>
+                      <th className="w-[12%] border-b border-gray-800 bg-gray-900/80 px-4 py-4 font-medium text-gray-400">
+                        SigNoz
+                      </th>
+                      <th className="w-[12%] border-b border-gray-800 bg-gray-900/80 px-4 py-4 font-medium text-gray-400">
+                        Datadog
+                      </th>
+                      <th className="border-b border-gray-800 bg-gray-900/80 px-6 py-4 font-medium text-gray-400">
+                        Remarks
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="text-gray-300">
-                    <tr className="border-b border-gray-700">
-                      <td className="py-4 pr-4 font-medium">Real User Monitoring</td>
-                      <td className="px-4 py-4">❌</td>
-                      <td className="px-4 py-4">✅</td>
+                    <tr className="transition-colors hover:bg-gray-800/50">
+                      <td className="border-b border-gray-800/50 px-6 py-4">
+                        Real User Monitoring
+                      </td>
+                      <td className="border-b border-gray-800/50 px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          <AlertTriangle className="h-4 w-4 text-red-500" />
+                          <span>No</span>
+                        </div>
+                      </td>
+                      <td className="border-b border-gray-800/50 px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          <span>Yes</span>
+                        </div>
+                      </td>
+                      <td className="border-b border-gray-800/50 px-6 py-4">
+                        Monitor real user interactions and frontend performance
+                      </td>
                     </tr>
-                    <tr className="border-b border-gray-700">
-                      <td className="py-4 pr-4 font-medium">Session Replays</td>
-                      <td className="px-4 py-4">❌</td>
-                      <td className="px-4 py-4">✅</td>
+                    <tr className="transition-colors hover:bg-gray-800/50">
+                      <td className="border-b border-gray-800/50 px-6 py-4">Session Replays</td>
+                      <td className="border-b border-gray-800/50 px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          <AlertTriangle className="h-4 w-4 text-red-500" />
+                          <span>No</span>
+                        </div>
+                      </td>
+                      <td className="border-b border-gray-800/50 px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          <span>Yes</span>
+                        </div>
+                      </td>
+                      <td className="border-b border-gray-800/50 px-6 py-4">
+                        Replay user sessions to debug issues
+                      </td>
                     </tr>
-                    <tr className="border-b border-gray-700">
-                      <td className="py-4 pr-4 font-medium">Synthetic Monitoring & Testing</td>
-                      <td className="px-4 py-4">❌</td>
-                      <td className="px-4 py-4">✅</td>
+                    <tr className="transition-colors hover:bg-gray-800/50">
+                      <td className="border-b border-gray-800/50 px-6 py-4">
+                        Synthetic Monitoring & Testing
+                      </td>
+                      <td className="border-b border-gray-800/50 px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          <AlertTriangle className="h-4 w-4 text-red-500" />
+                          <span>No</span>
+                        </div>
+                      </td>
+                      <td className="border-b border-gray-800/50 px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          <span>Yes</span>
+                        </div>
+                      </td>
+                      <td className="border-b border-gray-800/50 px-6 py-4">
+                        Simulate and monitor user flows
+                      </td>
                     </tr>
-                    <tr className="border-b border-gray-700">
-                      <td className="py-4 pr-4 font-medium">Cloud SIEM</td>
-                      <td className="px-4 py-4">❌</td>
-                      <td className="px-4 py-4">✅</td>
+                    <tr className="transition-colors hover:bg-gray-800/50">
+                      <td className="border-b border-gray-800/50 px-6 py-4">Cloud SIEM</td>
+                      <td className="border-b border-gray-800/50 px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          <AlertTriangle className="h-4 w-4 text-red-500" />
+                          <span>No</span>
+                        </div>
+                      </td>
+                      <td className="border-b border-gray-800/50 px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          <span>Yes</span>
+                        </div>
+                      </td>
+                      <td className="border-b border-gray-800/50 px-6 py-4">
+                        Security information and event management
+                      </td>
                     </tr>
                   </tbody>
                 </table>
@@ -1293,6 +1883,200 @@ const SigNozVsDatadogV2 = () => {
             </div>
           </div>
         </section>
+
+        {/* SigNoz is 9x more value than Datadog */}
+        <section className="mx-auto max-w-4xl px-6 py-16">
+          <h2 className="mb-8 text-left text-2xl font-bold lg:text-3xl">
+            SigNoz is 9x more value for money than Datadog
+          </h2>
+
+          <p className="mb-8 text-[1.1rem] text-gray-300">
+            Datadog has a very complex pricing tier which makes Datadog bills unpredictable. For 20
+            APM hosts, 50 infra hosts, and 2500 GB logs data, SigNoz can provide up to 9x more value
+            than Datadog. (
+            <Link
+              href="https://signoz.io/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/"
+              className="text-blue-400 hover:text-blue-300"
+            >
+              Learn More
+            </Link>
+            )
+          </p>
+
+          <p className="mb-8 text-xl font-semibold text-gray-200">Check Pricing</p>
+
+          <div className="mb-12">
+            <Image
+              src="/img/9x-more-value-with-signoz.webp"
+              alt="9x more value with SigNoz"
+              width={800}
+              height={400}
+              className="rounded-lg"
+            />
+          </div>
+
+          <p className="mb-8 text-[1.1rem] text-gray-300">
+            Some of the highlights of why our pricing plan is better suited at scale are mentioned
+            below.
+          </p>
+
+          <div className="space-y-12">
+            <div>
+              <h3 className="mb-4 text-xl font-bold">Simple usage-based pricing</h3>
+              <p className="text-[1.1rem] text-gray-300">
+                Datadog has complex{' '}
+                <Link
+                  href="https://signoz.io/blog/datadog-pricing/"
+                  className="text-blue-400 hover:text-blue-300"
+                >
+                  SKU-based pricing
+                </Link>
+                , which is difficult to break down and predict costs. The complex billing structure
+                makes it hard to predict how much you will be charged at the end of the month.
+              </p>
+              <p className="mt-4 text-[1.1rem] text-gray-300">
+                We offer a simple usage-based pricing plan based on the amount of data that you send
+                to SigNoz.
+              </p>
+              <div className="mt-6">
+                <Link
+                  href="https://signoz.io/pricing/"
+                  className="text-lg font-medium text-blue-400 hover:text-blue-300"
+                >
+                  Check SigNoz Pricing Plans
+                </Link>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="mb-4 text-xl font-bold">No special pricing for custom metrics</h3>
+              <p className="mb-6 text-[1.1rem] text-gray-300">
+                Datadog's custom metrics pricing is insane. It charges $0.05 per custom metric. You
+                can end up with unpredictable bills, and custom metrics pricing can constitute up to
+                52% of your bill for a large engineering team. SigNoz does not treat custom metrics
+                differently and charges only $0.1 per million samples.{' '}
+                <Link
+                  href="https://signoz.io/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/#no-limits-on-custom-metrics-with-signoz"
+                  className="text-blue-400 hover:text-blue-300"
+                >
+                  Learn more.
+                </Link>
+              </p>
+              <Image
+                src="/img/datadog-no-pricing-for-custom-metic.webp"
+                alt="No special pricing for custom metrics"
+                width={800}
+                height={400}
+                className="rounded-lg"
+              />
+            </div>
+
+            <div>
+              <h3 className="mb-4 text-xl font-bold">Better controls on infra monitoring cost</h3>
+              <p className="text-[1.1rem] text-gray-300">
+                In Datadog, you don't have any controls on the type of metrics sent to monitor your
+                infrastructure. Hence, you can't optimize your infrastructure monitoring bill in
+                Datadog. Each infrastructure host is charged at $18 per month.
+              </p>
+              <p className="mt-4 text-[1.1rem] text-gray-300">
+                SigNoz lets you collect infra metrics through the hostmetrics receiver in
+                OpenTelemetry Collector, with which you can control what metrics to send.
+              </p>
+            </div>
+
+            <div>
+              <h3 className="mb-4 text-xl font-bold">No Host (container or node) based pricing</h3>
+              <p className="mb-6 text-[1.1rem] text-gray-300">
+                Because of Datadog's host-based pricing, some users are actually trying to optimize
+                their microservices architecture to reduce the cost. The fact that they charge based
+                on a number of hosts trips up many teams - and leads to many teams packing more
+                services in a single host to keep their DataDog bill under control.
+              </p>
+              <figure>
+                <Image
+                  src="/img/host-based-pricing-issue.png"
+                  alt="Host based pricing issue"
+                  width={800}
+                  height={400}
+                  className="rounded-lg"
+                />
+                <figcaption className="mt-2 text-sm text-gray-400">
+                  A user discussing how they optimized their architecture to control Datadog costs.
+                  (
+                  <Link
+                    href="https://www.reddit.com/r/sre/comments/1f35d9m/comment/lkcwd8d/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button"
+                    className="text-blue-400 hover:text-blue-300"
+                  >
+                    Source
+                  </Link>
+                  )
+                </figcaption>
+              </figure>
+            </div>
+
+            <div>
+              <h3 className="mb-4 text-xl font-bold">
+                Ability to create data ingestion limits with Ingest Guard
+              </h3>
+              <p className="mb-4 text-[1.1rem] text-gray-300">
+                Our{' '}
+                <Link
+                  href="https://signoz.io/blog/introducing-ingest-guard-feature/"
+                  className="text-blue-400 hover:text-blue-300"
+                >
+                  Ingest Guard feature
+                </Link>{' '}
+                can help you control observability costs by providing granular controls over data
+                ingestion. You can set data ingestion limits with our ingestion keys.
+              </p>
+              <p className="mb-4 text-[1.1rem] text-gray-300">
+                It enables a number of use cases around control of data ingestion and observability
+                costs:
+              </p>
+              <ul className="mb-4 list-inside list-disc space-y-2 text-[1.1rem] text-gray-300">
+                <li>
+                  Set data ingestion limits based on the type of signal. For example, a daily limit
+                  of 100GB on logs data ingestion.
+                </li>
+                <li>
+                  Set data ingestion limits based on engineering teams. For example, you can allot
+                  100GBs per day to Team A and 200GBs per day to Team B based on the use case.
+                </li>
+                <li>
+                  Create separate ingestion keys for various environments (e.g., production,
+                  staging, development) to control data sent from each environment individually.
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="mt-12">
+            <p className="mb-4 text-[1.1rem] italic text-gray-300">
+              Listen to Shiv Ansal, CTO at Bands, explaining why he chose SigNoz over Datadog for
+              his startup, Bands.
+            </p>
+            <iframe
+              width="100%"
+              height="315"
+              src="https://www.youtube.com/embed/lwRSrDo6N48"
+              title="YouTube video player"
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              className="rounded-lg"
+            ></iframe>
+          </div>
+
+          <div className="mt-12">
+            <Link
+              href="https://signoz.io/signup"
+              className="text-xl font-semibold text-blue-400 hover:text-blue-300"
+            >
+              Get Started with SigNoz for Free
+            </Link>
+          </div>
+        </section>
+        {/* Section End */}
 
         <section className="mx-auto max-w-4xl px-6 py-16">
           <h2 className="mb-8 text-left text-2xl font-bold lg:text-3xl">
