@@ -44,10 +44,14 @@ const MigrationFloatingCard: React.FC = () => {
     localStorage.setItem('migrationCardClosed', 'true')
   }
 
-  if (!isVisible || isClosed) return null
-
   return (
-    <div className="fixed bottom-8 left-8 z-50 hidden w-72 transform rounded-xl bg-gradient-to-r from-blue-900/90 to-purple-900/90 p-6 shadow-lg backdrop-blur-sm transition-all duration-300 ease-in-out hover:-translate-y-1 hover:shadow-xl lg:block">
+    <div
+      className={`fixed bottom-8 left-8 z-50 hidden w-72 transform rounded-xl bg-gradient-to-r from-blue-900/90 to-purple-900/90 p-6 shadow-lg backdrop-blur-sm transition-all duration-500 ease-in-out hover:-translate-y-1 hover:shadow-xl lg:block ${
+        isVisible && !isClosed
+          ? 'translate-y-0 opacity-100'
+          : 'pointer-events-none translate-y-8 opacity-0'
+      }`}
+    >
       <button
         onClick={handleClose}
         className="absolute right-2 top-2 text-gray-400 hover:text-white"
@@ -55,6 +59,7 @@ const MigrationFloatingCard: React.FC = () => {
       >
         <X size={16} />
       </button>
+
       <h3 className="mb-3 text-xl font-bold text-white">Save up to 80% on your Datadog bill</h3>
       <p className="mb-4 text-sm text-gray-300">
         We provide migration support if your monthly Datadog bill is over $2000. Get started with
