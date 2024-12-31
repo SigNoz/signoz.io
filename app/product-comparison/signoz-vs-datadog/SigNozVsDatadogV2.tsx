@@ -31,6 +31,7 @@ import {
 } from 'recharts'
 import FAQAccordion from '@/components/FAQAccordion/FAQAccordion'
 import MigrationFloatingCard from '@/components/MigrationFloatingCard/MigrationFloatingCard'
+import FloatingTableOfContents from '@/components/TableOfContents/FloatingTableOfContents'
 
 const data = [
   {
@@ -53,7 +54,7 @@ const data = [
 const ValueComparisonChart = () => {
   return (
     <div className="w-full rounded-lg bg-gray-900 p-6">
-      <h2 className="mb-4 text-xl text-white">Get up to 9x more value for money with SigNoz</h2>
+      <h3 className="mb-4 text-xl text-white">Get up to 9x more value for money with SigNoz</h3>
       <div className="h-96">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
@@ -105,6 +106,7 @@ const SigNozVsDatadogV2 = () => {
   return (
     <div className="relative min-h-screen bg-[#0A0A0A]">
       <MigrationFloatingCard />
+      <FloatingTableOfContents />
       <div className="bg-dot-pattern masked-dots absolute top-0 flex h-full w-full items-center justify-center" />
       <div className="absolute left-0 right-0 top-0 mx-auto h-[300px] w-full flex-shrink-0 rounded-[956px] bg-gradient-to-b from-[rgba(190,107,241,1)] to-[rgba(69,104,220,0)] bg-[length:110%] bg-no-repeat opacity-30 blur-[300px] sm:h-[450px] sm:bg-[center_-500px] md:h-[956px]" />
       <div className="relative mx-auto max-w-7xl px-6 pb-24 pt-20 sm:pb-32 lg:px-8 lg:pt-32">
@@ -2143,9 +2145,9 @@ const SigNozVsDatadogV2 = () => {
 
         {/* Migration Section */}
         <section className="mx-auto max-w-4xl rounded-xl bg-gradient-to-r from-blue-900/20 to-purple-900/20 px-6 py-12">
-          <h3 className="mb-8 text-left text-xl font-bold lg:text-2xl">
+          <h2 className="mb-8 text-left text-xl font-bold lg:text-2xl">
             Migrate from Datadog - Save up to 80% on your Datadog bill
-          </h3>
+          </h2>
           <div className="text-gray-300">
             <p className="mb-6 text-[1.1rem] text-gray-300">
               We provide support for migrating from Datadog to SigNoz if your monthly billing in
