@@ -13,6 +13,28 @@ interface TOCItem {
 const FloatingTableOfContents: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false)
   const [tocItems, setTocItems] = useState<TOCItem[]>([])
+  const [isVisible, setIsVisible] = useState(true)
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY
+      const windowHeight = window.innerHeight
+      const documentHeight = document.documentElement.scrollHeight
+
+      // Hide when near the bottom section (adjust 800px based on your needs)
+      const hideThreshold = documentHeight - windowHeight - 800
+
+      if (scrollPosition < hideThreshold) {
+        setIsVisible(true)
+      } else {
+        setIsVisible(false)
+        setIsOpen(false) // Also close the menu if it's open
+      }
+    }
+
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
 
   useEffect(() => {
     // Function to get text content without nested elements
@@ -68,7 +90,11 @@ const FloatingTableOfContents: React.FC = () => {
   }
 
   return (
-    <div className="fixed bottom-8 right-8 z-50">
+    <div
+      className={`fixed bottom-8 right-8 z-50 transition-all duration-300 ${
+        isVisible ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-8 opacity-0'
+      }`}
+    >
       {/* Menu Items */}
       <div
         className={`absolute bottom-16 right-0 min-w-[240px] rounded-lg bg-gray-800/95 p-3 shadow-xl backdrop-blur-sm transition-all duration-300 ${
