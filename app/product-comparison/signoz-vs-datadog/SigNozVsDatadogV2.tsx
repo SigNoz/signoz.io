@@ -30,6 +30,7 @@ import {
   ResponsiveContainer,
 } from 'recharts'
 import FAQAccordion from '@/components/FAQAccordion/FAQAccordion'
+import MigrationFloatingCard from '@/components/MigrationFloatingCard/MigrationFloatingCard'
 
 const data = [
   {
@@ -103,6 +104,7 @@ const ValueComparisonChart = () => {
 const SigNozVsDatadogV2 = () => {
   return (
     <div className="relative min-h-screen bg-[#0A0A0A]">
+      <MigrationFloatingCard />
       <div className="bg-dot-pattern masked-dots absolute top-0 flex h-full w-full items-center justify-center" />
       <div className="absolute left-0 right-0 top-0 mx-auto h-[300px] w-full flex-shrink-0 rounded-[956px] bg-gradient-to-b from-[rgba(190,107,241,1)] to-[rgba(69,104,220,0)] bg-[length:110%] bg-no-repeat opacity-30 blur-[300px] sm:h-[450px] sm:bg-[center_-500px] md:h-[956px]" />
       <div className="relative mx-auto max-w-7xl px-6 pb-24 pt-20 sm:pb-32 lg:px-8 lg:pt-32">
@@ -177,7 +179,7 @@ const SigNozVsDatadogV2 = () => {
 
           <div className="mb-8">
             <p className="text-lg text-gray-300">
-              SigNoz is often referred to as “Open-Source Datadog Alternative” by our users. We
+              SigNoz is often referred to as "Open-Source Datadog Alternative" by our users. We
               built SigNoz to address the absence of a great one-stop observability tool in the
               open-source ecosystem. Something that comes with the ease of a SaaS tool like Datadog
               but brings along the benefits of open-source standards.
@@ -198,7 +200,7 @@ const SigNozVsDatadogV2 = () => {
                 </h3>
                 <p className="text-gray-300">
                   SigNoz is built from the ground up for OpenTelemetry. That means OTel-first docs,
-                  visualizations, & features are meant to truly take advantage of OpenTelemetry’s
+                  visualizations, & features are meant to truly take advantage of OpenTelemetry's
                   potential. Datadog gives preference to its agent. If you want to do OpenTelemetry,
                   SigNoz is the best choice.
                 </p>
@@ -229,7 +231,7 @@ const SigNozVsDatadogV2 = () => {
                 <h3 className="mb-2 text-xl font-bold text-white">9x better value for money</h3>
                 <p className="text-gray-300">
                   Signoz provides 9x more value for your money than Datadog. Complex billing
-                  practices, unpredictable pricing, and pricing that sometimes doesn’t make sense
+                  practices, unpredictable pricing, and pricing that sometimes doesn't make sense
                   are common issues that Datadog users highlight. SigNoz offers simple usage-based
                   pricing and features that can help you take control of your observability costs
                   better.
