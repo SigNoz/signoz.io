@@ -54,7 +54,7 @@ const data = [
 const ValueComparisonChart = () => {
   return (
     <div className="w-full rounded-lg bg-gray-900 p-6">
-      <h3 className="mb-4 text-xl text-white">Get up to 9x more value for money with SigNoz</h3>
+      <h4 className="mb-4 text-xl text-white">Get up to 9x more value for money with SigNoz</h4>
       <div className="h-96">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
@@ -204,9 +204,9 @@ const SigNozVsDatadogV2 = () => {
                 <GitBranch className="h-5 w-5 text-orange-500" />
               </div>
               <div>
-                <h3 className="mb-8 text-3xl font-bold leading-normal text-white">
+                <h4 className="mb-8 text-3xl font-bold leading-normal text-white">
                   True OpenTelemetry(OTel)-native solution
-                </h3>
+                </h4>
                 <p className="text-gray-300">
                   SigNoz is built from the ground up for OpenTelemetry. That means OTel-first docs,
                   visualizations, & features are meant to truly take advantage of OpenTelemetry's
@@ -221,9 +221,9 @@ const SigNozVsDatadogV2 = () => {
                 <DraftingCompass className="h-5 w-5 text-blue-500" />
               </div>
               <div>
-                <h3 className="mb-8 text-3xl font-bold leading-normal text-white">
+                <h4 className="mb-8 text-3xl font-bold leading-normal text-white">
                   Flexible Deployment Options
-                </h3>
+                </h4>
                 <p className="text-gray-300">
                   SigNoz provides both cloud & self-hosted versions. You can use the cloud,
                   enterprise self-host, or free, open-source community edition, depending on your
@@ -239,9 +239,9 @@ const SigNozVsDatadogV2 = () => {
                 <ChartBar className="h-5 w-5 text-green-500" />
               </div>
               <div>
-                <h3 className="mb-8 text-3xl font-bold leading-normal text-white">
+                <h4 className="mb-8 text-3xl font-bold leading-normal text-white">
                   9x better value for money
-                </h3>
+                </h4>
                 <p className="text-gray-300">
                   Signoz provides 9x more value for your money than Datadog. Complex billing
                   practices, unpredictable pricing, and pricing that sometimes doesn't make sense
