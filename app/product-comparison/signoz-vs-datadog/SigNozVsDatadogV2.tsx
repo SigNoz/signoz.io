@@ -2222,7 +2222,6 @@ const SigNozVsDatadogV2 = () => {
               <Link
                 href="https://signoz.io/product-comparison/migrate-from-datadog/"
                 className="block max-w-md"
-                target="_blank"
               >
                 <Button className="flex w-full items-center justify-center gap-2 font-bold">
                   Request migration support <ArrowRight className="h-4 w-4" />
