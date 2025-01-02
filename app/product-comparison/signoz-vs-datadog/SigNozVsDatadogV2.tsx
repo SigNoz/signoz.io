@@ -118,7 +118,7 @@ const SigNozVsDatadogV2 = () => {
             transition={{ duration: 0.8 }}
             className="mb-10 lg:mb-0 lg:w-2/5"
           >
-            <h1 className="mb-6 bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-5xl font-bold leading-tight text-transparent lg:text-6xl">
+            <h1 className="mb-6 bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-5xl font-bold leading-[1.3] text-transparent lg:text-6xl lg:leading-[1.3]">
               SigNoz vs Datadog
             </h1>
             <h3 className="mb-8 text-lg font-semibold text-gray-300 lg:text-xl">
