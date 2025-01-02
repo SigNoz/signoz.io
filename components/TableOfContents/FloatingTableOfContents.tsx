@@ -91,13 +91,13 @@ const FloatingTableOfContents: React.FC = () => {
 
   return (
     <div
-      className={`fixed bottom-8 right-8 z-50 transition-all duration-300 ${
+      className={`fixed bottom-8 left-8 z-50 transition-all duration-300 ${
         isVisible ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-8 opacity-0'
       }`}
     >
       {/* Menu Items */}
       <div
-        className={`absolute bottom-16 right-0 min-w-[240px] rounded-lg bg-gray-800/95 p-3 shadow-xl backdrop-blur-sm transition-all duration-300 ${
+        className={`absolute bottom-16 left-0 min-w-[240px] rounded-lg bg-gray-800/95 p-3 shadow-xl backdrop-blur-sm transition-all duration-300 ${
           isOpen
             ? 'pointer-events-auto translate-y-0 opacity-100'
             : 'pointer-events-none translate-y-4 opacity-0'
