@@ -107,6 +107,9 @@ const FloatingTableOfContents: React.FC = () => {
   const handleItemClick = (id: string) => {
     const element = document.getElementById(id)
     if (element) {
+      // Update URL without causing a page reload
+      window.history.pushState({}, '', `#${id}`)
+
       element.scrollIntoView({ behavior: 'smooth' })
       setIsOpen(false)
     }
