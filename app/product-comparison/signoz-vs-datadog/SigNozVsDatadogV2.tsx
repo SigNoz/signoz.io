@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { motion } from 'framer-motion'
 import GetStartedSigNoz from '@/components/GetStartedSigNoz/GetStartedSigNoz'
 import Button from '@/components/Button/Button'
-import { ArrowRight, BookOpen } from 'lucide-react'
+import { ArrowRight, BookOpen, Link as LinkIcon } from 'lucide-react'
 import {
   LineChart,
   DraftingCompass,
@@ -177,10 +177,11 @@ const SigNozVsDatadogV2 = () => {
         {/* Why do Engineering Teams Choose SigNoz over Datadog? */}
         <section className="mx-auto max-w-4xl px-4 py-16 sm:px-6">
           <h2
-            className="mb-12 text-left text-4xl font-bold leading-normal text-white lg:text-5xl lg:leading-normal"
+            className="group relative mb-12 text-left text-4xl font-bold leading-normal text-white lg:text-5xl lg:leading-normal"
             id="why-choose-signoz"
           >
-            <Link href="#why-choose-signoz" className="hover:text-gray-300">
+            <Link href="#why-choose-signoz" className="flex items-center hover:text-gray-300">
+              <LinkIcon className="absolute -left-8 h-6 w-6 text-blue-400 opacity-0 transition-opacity group-hover:opacity-100" />
               Why do Engineering Teams Choose SigNoz over Datadog?
             </Link>
           </h2>
@@ -256,10 +257,11 @@ const SigNozVsDatadogV2 = () => {
         {/* Product Comparison Section */}
         <section className="mx-auto max-w-4xl px-4 py-16 sm:px-6">
           <h2
-            className="mb-12 text-left text-4xl font-bold leading-normal text-white lg:text-5xl lg:leading-normal"
+            className="group relative mb-12 text-left text-4xl font-bold leading-normal text-white lg:text-5xl lg:leading-normal"
             id="product-comparison"
           >
-            <Link href="#product-comparison" className="hover:text-gray-300">
+            <Link href="#product-comparison" className="flex items-center hover:text-gray-300">
+              <LinkIcon className="absolute -left-8 h-6 w-6 text-blue-400 opacity-0 transition-opacity group-hover:opacity-100" />
               Product Comparison
             </Link>
           </h2>
@@ -268,10 +270,14 @@ const SigNozVsDatadogV2 = () => {
             {/* OpenTelemetry Support */}
             <div>
               <h3
-                className="mb-8 text-3xl font-bold leading-normal text-white"
+                className="group relative mb-8 text-3xl font-bold leading-normal text-white"
                 id="opentelemetry-support"
               >
-                <Link href="#opentelemetry-support" className="hover:text-gray-300">
+                <Link
+                  href="#opentelemetry-support"
+                  className="flex items-center hover:text-gray-300"
+                >
+                  <LinkIcon className="absolute -left-7 h-5 w-5 text-blue-400 opacity-0 transition-opacity group-hover:opacity-100" />
                   OpenTelemetry-Native Support
                 </Link>
               </h3>
@@ -833,8 +839,12 @@ const SigNozVsDatadogV2 = () => {
 
             {/* Application Performance Monitoring Section */}
             <div>
-              <h3 className="mb-8 text-3xl font-bold leading-normal text-white" id="apm">
-                <Link href="#apm" className="hover:text-gray-300">
+              <h3
+                className="group relative mb-8 text-3xl font-bold leading-normal text-white"
+                id="apm"
+              >
+                <Link href="#apm" className="flex items-center hover:text-gray-300">
+                  <LinkIcon className="absolute -left-7 h-5 w-5 text-blue-400 opacity-0 transition-opacity group-hover:opacity-100" />
                   Application Performance Monitoring (APM)
                 </Link>
               </h3>
@@ -1181,8 +1191,12 @@ const SigNozVsDatadogV2 = () => {
 
             {/* Log Management Section */}
             <div>
-              <h3 className="mb-8 text-3xl font-bold leading-normal text-white" id="log-management">
-                <Link href="#log-management" className="hover:text-gray-300">
+              <h3
+                className="group relative mb-8 text-3xl font-bold leading-normal text-white"
+                id="log-management"
+              >
+                <Link href="#log-management" className="flex items-center hover:text-gray-300">
+                  <LinkIcon className="absolute -left-7 h-5 w-5 text-blue-400 opacity-0 transition-opacity group-hover:opacity-100" />
                   Log Management
                 </Link>
               </h3>
@@ -1435,10 +1449,11 @@ const SigNozVsDatadogV2 = () => {
             {/* Distributed Tracing Section */}
             <div>
               <h3
-                className="mb-8 text-3xl font-bold leading-normal text-white"
+                className="group relative mb-8 text-3xl font-bold leading-normal text-white"
                 id="distributed-tracing"
               >
-                <Link href="#distributed-tracing" className="hover:text-gray-300">
+                <Link href="#distributed-tracing" className="flex items-center hover:text-gray-300">
+                  <LinkIcon className="absolute -left-7 h-5 w-5 text-blue-400 opacity-0 transition-opacity group-hover:opacity-100" />
                   Distributed Tracing
                 </Link>
               </h3>
@@ -1705,10 +1720,14 @@ const SigNozVsDatadogV2 = () => {
             {/* Infrastructure Monitoring Section */}
             <div>
               <h3
-                className="mb-8 text-3xl font-bold leading-normal text-white"
+                className="group relative mb-8 text-3xl font-bold leading-normal text-white"
                 id="infrastructure-monitoring"
               >
-                <Link href="#infrastructure-monitoring" className="hover:text-gray-300">
+                <Link
+                  href="#infrastructure-monitoring"
+                  className="flex items-center hover:text-gray-300"
+                >
+                  <LinkIcon className="absolute -left-7 h-5 w-5 text-blue-400 opacity-0 transition-opacity group-hover:opacity-100" />
                   Infrastructure Monitoring
                 </Link>
               </h3>
@@ -1893,10 +1912,14 @@ const SigNozVsDatadogV2 = () => {
             {/* Other Platform Capabilities Section */}
             <div>
               <h3
-                className="mb-8 text-3xl font-bold leading-normal text-white"
+                className="group relative mb-8 text-3xl font-bold leading-normal text-white"
                 id="platform-capabilities"
               >
-                <Link href="#platform-capabilities" className="hover:text-gray-300">
+                <Link
+                  href="#platform-capabilities"
+                  className="flex items-center hover:text-gray-300"
+                >
+                  <LinkIcon className="absolute -left-7 h-5 w-5 text-blue-400 opacity-0 transition-opacity group-hover:opacity-100" />
                   Other Platform Capabilities
                 </Link>
               </h3>
@@ -2012,10 +2035,11 @@ const SigNozVsDatadogV2 = () => {
         {/* SigNoz is 9x more value than Datadog */}
         <section className="mx-auto max-w-4xl px-4 py-16 sm:px-6">
           <h2
-            className="mb-12 text-left text-4xl font-bold leading-normal text-white lg:text-5xl lg:leading-normal"
+            className="group relative mb-12 text-left text-4xl font-bold leading-normal text-white lg:text-5xl lg:leading-normal"
             id="value-for-money"
           >
-            <Link href="#value-for-money" className="hover:text-gray-300">
+            <Link href="#value-for-money" className="flex items-center hover:text-gray-300">
+              <LinkIcon className="absolute -left-8 h-6 w-6 text-blue-400 opacity-0 transition-opacity group-hover:opacity-100" />
               SigNoz is 9x More Value for Money than Datadog
             </Link>
           </h2>
@@ -2045,10 +2069,11 @@ const SigNozVsDatadogV2 = () => {
           <div className="space-y-12">
             <div>
               <h3
-                className="mb-8 text-3xl font-bold leading-normal text-white"
+                className="group relative mb-8 text-3xl font-bold leading-normal text-white"
                 id="usage-based-pricing"
               >
-                <Link href="#usage-based-pricing" className="hover:text-gray-300">
+                <Link href="#usage-based-pricing" className="flex items-center hover:text-gray-300">
+                  <LinkIcon className="absolute -left-7 h-5 w-5 text-blue-400 opacity-0 transition-opacity group-hover:opacity-100" />
                   Simple usage-based pricing
                 </Link>
               </h3>
@@ -2080,8 +2105,12 @@ const SigNozVsDatadogV2 = () => {
             </div>
 
             <div>
-              <h3 className="mb-8 text-3xl font-bold leading-normal text-white" id="custom-metrics">
-                <Link href="#custom-metrics" className="hover:text-gray-300">
+              <h3
+                className="group relative mb-8 text-3xl font-bold leading-normal text-white"
+                id="custom-metrics"
+              >
+                <Link href="#custom-metrics" className="flex items-center hover:text-gray-300">
+                  <LinkIcon className="absolute -left-7 h-5 w-5 text-blue-400 opacity-0 transition-opacity group-hover:opacity-100" />
                   No special pricing for custom metrics
                 </Link>
               </h3>
@@ -2102,10 +2131,14 @@ const SigNozVsDatadogV2 = () => {
 
             <div>
               <h3
-                className="mb-8 text-3xl font-bold leading-normal text-white"
+                className="group relative mb-8 text-3xl font-bold leading-normal text-white"
                 id="infra-monitoring-cost"
               >
-                <Link href="#infra-monitoring-cost" className="hover:text-gray-300">
+                <Link
+                  href="#infra-monitoring-cost"
+                  className="flex items-center hover:text-gray-300"
+                >
+                  <LinkIcon className="absolute -left-7 h-5 w-5 text-blue-400 opacity-0 transition-opacity group-hover:opacity-100" />
                   Better controls on infra monitoring cost
                 </Link>
               </h3>
@@ -2122,10 +2155,11 @@ const SigNozVsDatadogV2 = () => {
 
             <div>
               <h3
-                className="mb-8 text-3xl font-bold leading-normal text-white"
+                className="group relative mb-8 text-3xl font-bold leading-normal text-white"
                 id="no-host-pricing"
               >
-                <Link href="#no-host-pricing" className="hover:text-gray-300">
+                <Link href="#no-host-pricing" className="flex items-center hover:text-gray-300">
+                  <LinkIcon className="absolute -left-7 h-5 w-5 text-blue-400 opacity-0 transition-opacity group-hover:opacity-100" />
                   No Host (container or node) based pricing
                 </Link>
               </h3>
@@ -2159,8 +2193,12 @@ const SigNozVsDatadogV2 = () => {
             </div>
 
             <div>
-              <h3 className="mb-8 text-3xl font-bold leading-normal text-white" id="ingest-guard">
-                <Link href="#ingest-guard" className="hover:text-gray-300">
+              <h3
+                className="group relative mb-8 text-3xl font-bold leading-normal text-white"
+                id="ingest-guard"
+              >
+                <Link href="#ingest-guard" className="flex items-center hover:text-gray-300">
+                  <LinkIcon className="absolute -left-7 h-5 w-5 text-blue-400 opacity-0 transition-opacity group-hover:opacity-100" />
                   Ability to create data ingestion limits with Ingest Guard
                 </Link>
               </h3>
@@ -2227,10 +2265,11 @@ const SigNozVsDatadogV2 = () => {
         {/* FAQ Section */}
         <section className="mx-auto max-w-4xl px-4 py-16 sm:px-6">
           <h2
-            className="mb-12 text-left text-4xl font-bold leading-normal text-white lg:text-5xl lg:leading-normal"
+            className="group relative mb-12 text-left text-4xl font-bold leading-normal text-white lg:text-5xl lg:leading-normal"
             id="faqs"
           >
-            <Link href="#faqs" className="hover:text-gray-300">
+            <Link href="#faqs" className="flex items-center hover:text-gray-300">
+              <LinkIcon className="absolute -left-8 h-6 w-6 text-blue-400 opacity-0 transition-opacity group-hover:opacity-100" />
               FAQs
             </Link>
           </h2>

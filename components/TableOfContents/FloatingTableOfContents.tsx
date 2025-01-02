@@ -39,6 +39,17 @@ const FloatingTableOfContents: React.FC = () => {
   useEffect(() => {
     // Function to get text content without nested elements
     const getTextContent = (element: Element): string => {
+      // Find the Link element inside the heading
+      const linkElement = element.querySelector('a')
+      if (linkElement) {
+        // Get all text nodes within the link, excluding the LinkIcon
+        return Array.from(linkElement.childNodes)
+          .filter((node) => node.nodeType === Node.TEXT_NODE)
+          .map((node) => node.textContent)
+          .join('')
+          .trim()
+      }
+      // Fallback to original behavior
       return Array.from(element.childNodes)
         .filter((node) => node.nodeType === Node.TEXT_NODE)
         .map((node) => node.textContent)
@@ -53,14 +64,16 @@ const FloatingTableOfContents: React.FC = () => {
       let currentH2: TOCItem | null = null
 
       headings.forEach((heading) => {
-        const id = heading.id || heading.textContent?.toLowerCase().replace(/\s+/g, '-') || ''
+        const text = getTextContent(heading)
+        // Restore the ID generation logic while keeping existing IDs
+        const id = heading.id || text.toLowerCase().replace(/\s+/g, '-') || ''
         if (!heading.id) {
           heading.id = id
         }
 
         const item: TOCItem = {
           id,
-          text: getTextContent(heading),
+          text,
           level: parseInt(heading.tagName[1]),
         }
 
@@ -78,7 +91,17 @@ const FloatingTableOfContents: React.FC = () => {
       setTocItems(items)
     }
 
+    // Initial build
     buildTOC()
+
+    // Re-run buildTOC when the DOM changes
+    const observer = new MutationObserver(buildTOC)
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+    })
+
+    return () => observer.disconnect()
   }, [])
 
   const handleItemClick = (id: string) => {
