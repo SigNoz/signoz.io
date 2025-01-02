@@ -443,8 +443,8 @@ const SigNozVsDatadogV2 = () => {
                         </td>
                         <td className="border-b border-gray-800/50 px-4 py-4">
                           <div className="flex items-center gap-2">
-                            <CheckCircle className="h-4 w-4 text-blue-500" />
-                            <span>In Roadmap</span>
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          <span>Yes</span>
                           </div>
                         </td>
                         <td className="border-b border-gray-800/50 px-4 py-4">
@@ -454,8 +454,14 @@ const SigNozVsDatadogV2 = () => {
                           </div>
                         </td>
                         <td className="border-b border-gray-800/50 px-6 py-4">
-                          OpenTelemetry data can power features like feature flags which we plan to
-                          leverage to enable feature flagging in SigNoz.
+                        Native support for openfeature feature flag. {' '}
+                          <Link
+                            href="https://www.youtube.com/watch?v=RZSEi8csXK0"
+                            className="text-blue-400 hover:text-blue-300"
+                            target="_blank"
+                          >
+                            Learn More
+                          </Link>{' '}
                         </td>
                       </tr>
                       <tr className="transition-colors hover:bg-gray-800/50">
@@ -2337,7 +2343,7 @@ const SigNozVsDatadogV2 = () => {
           <div className="text-gray-300">
             <p className="mb-6 text-[1.1rem] text-gray-300">
               We provide support for migrating from Datadog to SigNoz if your monthly billing in
-              Datadog is greater than 2000 USD. Request a migration from one of our experts and get
+              Datadog is greater than 1000 USD. Request a migration from one of our experts and get
               started with SigNoz quickly.
             </p>
             <div className="flex flex-col gap-4 sm:flex-row">
