@@ -127,6 +127,7 @@ const SigNozVsDatadogV2 = () => {
               <Link
                 href="https://signoz.io/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/"
                 className="text-blue-400 hover:text-blue-300"
+                target="_blank"
               >
                 detailed spreadsheet
               </Link>
@@ -330,6 +331,7 @@ const SigNozVsDatadogV2 = () => {
                         <Link
                           href="https://signoz.io/exceptions-monitoring/"
                           className="text-blue-400 hover:text-blue-300"
+                          target="_blank"
                         >
                           Exceptions tab
                         </Link>{' '}
@@ -442,6 +444,7 @@ const SigNozVsDatadogV2 = () => {
                             <Link
                               href="https://github.com/open-telemetry/opentelemetry-demo"
                               className="text-blue-400 hover:text-blue-300"
+                              target="_blank"
                             >
                               OpenTelemetry demo app
                             </Link>{' '}
@@ -472,6 +475,7 @@ const SigNozVsDatadogV2 = () => {
                   <Link
                     href="https://signoz.io/blog/is-opentelemetry-a-first-class-citizen-in-your-dashboard-a-datadog-and-newrelic-comparison/"
                     className="text-lg font-medium text-blue-400 hover:text-blue-300"
+                    target="_blank"
                   >
                     Comparing Datadog and New Relic's support for OpenTelemetry data →
                   </Link>
@@ -509,6 +513,7 @@ const SigNozVsDatadogV2 = () => {
                     <Link
                       href="https://signoz.io/docs/instrumentation/opentelemetry-java/"
                       className="text-blue-400 hover:text-blue-300"
+                      target="_blank"
                     >
                       Java APM docs
                     </Link>
@@ -534,6 +539,7 @@ const SigNozVsDatadogV2 = () => {
                       <Link
                         href="https://stackoverflow.com/questions/78851383/is-there-a-good-option-to-run-the-otel-collector-for-lambdas"
                         className="text-blue-400 hover:text-blue-300"
+                        target="_blank"
                       >
                         Source
                       </Link>
@@ -548,6 +554,7 @@ const SigNozVsDatadogV2 = () => {
                   <div className="mb-8 grid grid-cols-2 gap-4 md:grid-cols-4">
                     <Link
                       href="/docs/instrumentation/opentelemetry-java/"
+                      target="_blank"
                       className="rounded-lg bg-gray-800 p-4 transition-colors hover:bg-gray-700"
                     >
                       <div className="flex items-center justify-between font-medium">
@@ -557,6 +564,7 @@ const SigNozVsDatadogV2 = () => {
                     </Link>
                     <Link
                       href="/docs/instrumentation/javascript/"
+                      target="_blank"
                       className="rounded-lg bg-gray-800 p-4 transition-colors hover:bg-gray-700"
                     >
                       <div className="flex items-center justify-between font-medium">
@@ -566,6 +574,7 @@ const SigNozVsDatadogV2 = () => {
                     </Link>
                     <Link
                       href="/docs/instrumentation/python/"
+                      target="_blank"
                       className="rounded-lg bg-gray-800 p-4 transition-colors hover:bg-gray-700"
                     >
                       <div className="flex items-center justify-between font-medium">
@@ -575,6 +584,7 @@ const SigNozVsDatadogV2 = () => {
                     </Link>
                     <Link
                       href="/docs/instrumentation/golang/"
+                      target="_blank"
                       className="rounded-lg bg-gray-800 p-4 transition-colors hover:bg-gray-700"
                     >
                       <div className="flex items-center justify-between font-medium">
@@ -584,6 +594,7 @@ const SigNozVsDatadogV2 = () => {
                     </Link>
                     <Link
                       href="/docs/ec2-monitoring/"
+                      target="_blank"
                       className="rounded-lg bg-gray-800 p-4 transition-colors hover:bg-gray-700"
                     >
                       <div className="flex items-center justify-between font-medium">
@@ -593,6 +604,7 @@ const SigNozVsDatadogV2 = () => {
                     </Link>
                     <Link
                       href="/docs/gcp-monitoring/bootstrapping/"
+                      target="_blank"
                       className="rounded-lg bg-gray-800 p-4 transition-colors hover:bg-gray-700"
                     >
                       <div className="flex items-center justify-between font-medium">
@@ -602,6 +614,7 @@ const SigNozVsDatadogV2 = () => {
                     </Link>
                     <Link
                       href="/docs/azure-monitoring/bootstrapping/"
+                      target="_blank"
                       className="rounded-lg bg-gray-800 p-4 transition-colors hover:bg-gray-700"
                     >
                       <div className="flex items-center justify-between font-medium">
@@ -611,6 +624,7 @@ const SigNozVsDatadogV2 = () => {
                     </Link>
                     <Link
                       href="/docs/"
+                      target="_blank"
                       className="rounded-lg bg-gray-800 p-4 transition-colors hover:bg-gray-700"
                     >
                       <div className="flex items-center justify-between font-medium">
@@ -650,13 +664,13 @@ const SigNozVsDatadogV2 = () => {
                 </figure>
 
                 <div className="mb-6 flex flex-wrap gap-4">
-                  <Link href="/teams/" className="block">
+                  <Link href="/teams/" target="_blank" className="block">
                     <Button className="flex items-center gap-2">
                       Start Monitoring Kafka
                       <ArrowRight className="h-4 w-4" />
                     </Button>
                   </Link>
-                  <Link href="/docs/messaging-queues/kafka/" className="block">
+                  <Link href="/docs/messaging-queues/kafka/" target="_blank" className="block">
                     <Button type={Button.TYPES.SECONDARY} className="flex items-center gap-2">
                       <BookOpen className="h-4 w-4" />
                       Read Kafka Monitoring Documentation
@@ -673,6 +687,7 @@ const SigNozVsDatadogV2 = () => {
                 <div className="mb-8 rounded-lg border border-gray-800 bg-gray-900/50 p-4">
                   <Link
                     href="https://signoz.io/blog/kafka-monitoring-opentelemetry/"
+                    target="_blank"
                     className="text-lg font-medium text-blue-400 hover:text-blue-300"
                   >
                     Read about some common debugging scenarios in Kafka and how OpenTelemetry +
@@ -693,6 +708,7 @@ const SigNozVsDatadogV2 = () => {
                   <Link
                     href="https://opentelemetry.io/docs/concepts/semantic-conventions/"
                     className="text-blue-400 hover:text-blue-300"
+                    target="_blank"
                   >
                     semantic conventions
                   </Link>{' '}
@@ -731,6 +747,7 @@ const SigNozVsDatadogV2 = () => {
                   <Link
                     href="https://signoz.io/docs/instrumentation/overview/"
                     className="text-lg font-medium text-blue-400 hover:text-blue-300"
+                    target="_blank"
                   >
                     Get started with correlated telemetry →
                   </Link>
@@ -750,6 +767,7 @@ const SigNozVsDatadogV2 = () => {
                   <Link
                     href="https://signoz.io/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/#no-limits-on-custom-metrics-with-signoz"
                     className="text-blue-400 hover:text-blue-300"
+                    target="_blank"
                   >
                     very expensive
                   </Link>{' '}
@@ -769,6 +787,7 @@ const SigNozVsDatadogV2 = () => {
                     <Link
                       href="https://news.ycombinator.com/item?id=38292553"
                       className="text-blue-400 hover:text-blue-300"
+                      target="_blank"
                     >
                       Source
                     </Link>
@@ -785,6 +804,7 @@ const SigNozVsDatadogV2 = () => {
                   <Link
                     href="https://signoz.io/pricing/"
                     className="text-lg font-medium text-blue-400 hover:text-blue-300"
+                    target="_blank"
                   >
                     Check SigNoz's Pricing Plans →
                   </Link>
@@ -1655,6 +1675,7 @@ const SigNozVsDatadogV2 = () => {
                 <Link
                   href="https://signoz.io/docs/userguide/hostmetrics/"
                   className="text-blue-400 hover:text-blue-300"
+                  target="_blank"
                 >
                   hostmetrics
                 </Link>{' '}
@@ -1815,6 +1836,7 @@ const SigNozVsDatadogV2 = () => {
                 <Link
                   href="https://www.datadoghq.com/product/infrastructure-monitoring/"
                   className="text-blue-400 hover:text-blue-300"
+                  target="_blank"
                 >
                   website.
                 </Link>
@@ -1971,6 +1993,7 @@ const SigNozVsDatadogV2 = () => {
                 <Link
                   href="https://signoz.io/blog/datadog-pricing/"
                   className="text-blue-400 hover:text-blue-300"
+                  target="_blank"
                 >
                   SKU-based pricing
                 </Link>
@@ -1985,6 +2008,7 @@ const SigNozVsDatadogV2 = () => {
                 <Link
                   href="https://signoz.io/pricing/"
                   className="text-lg font-medium text-blue-400 hover:text-blue-300"
+                  target="_blank"
                 >
                   Check SigNoz Pricing Plans →
                 </Link>
@@ -2003,6 +2027,7 @@ const SigNozVsDatadogV2 = () => {
                 <Link
                   href="https://signoz.io/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/#no-limits-on-custom-metrics-with-signoz"
                   className="text-blue-400 hover:text-blue-300"
+                  target="_blank"
                 >
                   (Learn more)
                 </Link>
@@ -2048,6 +2073,7 @@ const SigNozVsDatadogV2 = () => {
                   <Link
                     href="https://www.reddit.com/r/sre/comments/1f35d9m/comment/lkcwd8d/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button"
                     className="text-blue-400 hover:text-blue-300"
+                    target="_blank"
                   >
                     Source
                   </Link>
@@ -2065,6 +2091,7 @@ const SigNozVsDatadogV2 = () => {
                 <Link
                   href="https://signoz.io/blog/introducing-ingest-guard-feature/"
                   className="text-blue-400 hover:text-blue-300"
+                  target="_blank"
                 >
                   Ingest Guard feature
                 </Link>{' '}
@@ -2109,6 +2136,7 @@ const SigNozVsDatadogV2 = () => {
               ></iframe>
               <Link
                 href="https://signoz.io/teams/"
+                target="_blank"
                 className="block w-full bg-gray-800 py-4 text-center text-lg font-semibold text-white transition-colors hover:bg-gray-700"
               >
                 Get Started with SigNoz for Free →
@@ -2149,6 +2177,7 @@ const SigNozVsDatadogV2 = () => {
                     <Link
                       href="https://signoz.io/pricing/#estimate-your-monthly-bill"
                       className="text-orange-500 hover:text-orange-400"
+                      target="_blank"
                     >
                       pricing calculator
                     </Link>{' '}
@@ -2166,6 +2195,7 @@ const SigNozVsDatadogV2 = () => {
                     <Link
                       href="https://signoz.io/pricing/metrics-cost-estimation/"
                       className="text-orange-500 hover:text-orange-400"
+                      target="_blank"
                     >
                       calculator
                     </Link>
@@ -2192,6 +2222,7 @@ const SigNozVsDatadogV2 = () => {
               <Link
                 href="https://signoz.io/product-comparison/migrate-from-datadog/"
                 className="block max-w-md"
+                target="_blank"
               >
                 <Button className="flex w-full items-center justify-center gap-2 font-bold">
                   Request migration support <ArrowRight className="h-4 w-4" />
@@ -2200,6 +2231,7 @@ const SigNozVsDatadogV2 = () => {
               <Link
                 href="https://signoz.io/docs/migration/migrate-from-datadog/"
                 className="block max-w-md"
+                target="_blank"
               >
                 <Button
                   type={Button.TYPES.SECONDARY}
