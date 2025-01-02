@@ -118,7 +118,7 @@ const SigNozVsDatadogV2 = () => {
             transition={{ duration: 0.8 }}
             className="mb-10 lg:mb-0 lg:w-2/5"
           >
-            <h1 className="mb-6 bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-4xl font-bold text-transparent lg:text-5xl">
+            <h1 className="mb-6 bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-5xl font-bold leading-tight text-transparent lg:text-6xl">
               SigNoz vs Datadog
             </h1>
             <h3 className="mb-8 text-lg font-semibold text-gray-300 lg:text-xl">
@@ -175,7 +175,7 @@ const SigNozVsDatadogV2 = () => {
 
         {/* Why do Engineering Teams Choose SigNoz over Datadog? */}
         <section className="mx-auto max-w-4xl px-6 py-16">
-          <h2 className="mb-8 text-left text-3xl font-bold text-white">
+          <h2 className="mb-12 text-left text-4xl font-bold leading-normal text-white lg:text-5xl lg:leading-normal">
             Why do Engineering Teams Choose SigNoz over Datadog?
           </h2>
 
@@ -197,7 +197,7 @@ const SigNozVsDatadogV2 = () => {
                 <GitBranch className="h-5 w-5 text-orange-500" />
               </div>
               <div>
-                <h3 className="mb-2 text-xl font-bold text-white">
+                <h3 className="mb-8 text-3xl font-bold leading-normal text-white">
                   True OpenTelemetry(OTel)-native solution
                 </h3>
                 <p className="text-gray-300">
@@ -214,7 +214,9 @@ const SigNozVsDatadogV2 = () => {
                 <DraftingCompass className="h-5 w-5 text-blue-500" />
               </div>
               <div>
-                <h3 className="mb-2 text-xl font-bold text-white">Flexible Deployment Options</h3>
+                <h3 className="mb-8 text-3xl font-bold leading-normal text-white">
+                  Flexible Deployment Options
+                </h3>
                 <p className="text-gray-300">
                   SigNoz provides both cloud & self-hosted versions. You can use the cloud,
                   enterprise self-host, or free, open-source community edition, depending on your
@@ -230,7 +232,9 @@ const SigNozVsDatadogV2 = () => {
                 <ChartBar className="h-5 w-5 text-green-500" />
               </div>
               <div>
-                <h3 className="mb-2 text-xl font-bold text-white">9x better value for money</h3>
+                <h3 className="mb-8 text-3xl font-bold leading-normal text-white">
+                  9x better value for money
+                </h3>
                 <p className="text-gray-300">
                   Signoz provides 9x more value for your money than Datadog. Complex billing
                   practices, unpredictable pricing, and pricing that sometimes doesn't make sense
@@ -245,12 +249,16 @@ const SigNozVsDatadogV2 = () => {
 
         {/* Product Comparison Section */}
         <section className="mx-auto max-w-4xl px-6 py-16">
-          <h2 className="mb-12 text-left text-2xl font-bold lg:text-3xl">Product Comparison</h2>
+          <h2 className="mb-12 text-left text-4xl font-bold leading-normal text-white lg:text-5xl lg:leading-normal">
+            Product Comparison
+          </h2>
 
           <div className="space-y-16">
             {/* OpenTelemetry Support */}
             <div>
-              <h3 className="mb-6 text-2xl font-bold">OpenTelemetry-Native Support</h3>
+              <h3 className="mb-8 text-3xl font-bold leading-normal text-white">
+                OpenTelemetry-Native Support
+              </h3>
               <p className="mb-6 text-[1.1rem] text-gray-300">
                 SigNoz offers the best-in-class support for OpenTelemetry data. Datadog prioritizes
                 support for its own agent. If you're using OpenTelemetry or planning to use it,
@@ -477,7 +485,7 @@ const SigNozVsDatadogV2 = () => {
               <div>
                 {/* OpenTelemetry-first docs & visualization */}
                 <div>
-                  <h4 className="mb-4 text-xl font-bold">
+                  <h4 className="mb-6 text-2xl font-bold leading-snug text-white">
                     OpenTelemetry-first docs & visualization
                   </h4>
 
@@ -609,7 +617,7 @@ const SigNozVsDatadogV2 = () => {
 
               {/* Messaging queue monitoring powered by OpenTelemetry */}
               <div>
-                <h4 className="mb-4 text-xl font-bold">
+                <h4 className="mb-6 text-2xl font-bold leading-snug text-white">
                   Messaging queue monitoring powered by OpenTelemetry
                 </h4>
 
@@ -668,7 +676,7 @@ const SigNozVsDatadogV2 = () => {
 
               {/* Powerful correlation between different telemetry signals collected with OpenTelemetry */}
               <div>
-                <h4 className="mb-4 text-xl font-bold">
+                <h4 className="mb-6 text-2xl font-bold leading-snug text-white">
                   Powerful correlation between different telemetry signals collected with
                   OpenTelemetry
                 </h4>
@@ -724,7 +732,7 @@ const SigNozVsDatadogV2 = () => {
 
               {/* Metrics sent by OpenTelemetry are charged as custom metrics in Datadog */}
               <div>
-                <h4 className="mb-4 text-xl font-bold">
+                <h4 className="mb-6 text-2xl font-bold leading-snug text-white">
                   Metrics sent by OpenTelemetry are charged as custom metrics in Datadog
                 </h4>
 
@@ -781,7 +789,9 @@ const SigNozVsDatadogV2 = () => {
 
             {/* Application Performance Monitoring Section */}
             <div>
-              <h3 className="mb-6 text-2xl font-bold">Application Performance Monitoring (APM)</h3>
+              <h3 className="mb-8 text-3xl font-bold leading-normal text-white">
+                Application Performance Monitoring (APM)
+              </h3>
               <p className="mb-6 text-[1.1rem] text-gray-300">
                 Our APM capabilities are on par with those of Datadog. With a simplified user
                 interface, lots of users find SigNoz to be much easier to operate and monitor their
@@ -1122,7 +1132,7 @@ const SigNozVsDatadogV2 = () => {
 
             {/* Log Management Section */}
             <div>
-              <h3 className="mb-6 text-2xl font-bold">Log Management</h3>
+              <h3 className="mb-8 text-3xl font-bold leading-normal text-white">Log Management</h3>
               <p className="mb-6 text-[1.1rem] text-gray-300">
                 Our logs module, powered by ClickHouse and in-house optimizations, delivers fast
                 querying and filtering for logs at scale.
@@ -1366,7 +1376,9 @@ const SigNozVsDatadogV2 = () => {
 
             {/* Distributed Tracing Section */}
             <div>
-              <h3 className="mb-6 text-2xl font-bold">Distributed Tracing</h3>
+              <h3 className="mb-8 text-3xl font-bold leading-normal text-white">
+                Distributed Tracing
+              </h3>
 
               <div className="mb-8 overflow-x-auto rounded-lg border border-gray-800 bg-gray-900/50">
                 <table className="m-0 w-full border-collapse text-left">
@@ -1625,7 +1637,9 @@ const SigNozVsDatadogV2 = () => {
 
             {/* Infrastructure Monitoring Section */}
             <div>
-              <h3 className="mb-6 text-2xl font-bold">Infrastructure Monitoring</h3>
+              <h3 className="mb-8 text-3xl font-bold leading-normal text-white">
+                Infrastructure Monitoring
+              </h3>
               <p className="mb-6 text-[1.1rem] text-gray-300">
                 Datadog is a better choice if you're looking to do only infrastructure monitoring.{' '}
                 <br /> <br />
@@ -1802,7 +1816,9 @@ const SigNozVsDatadogV2 = () => {
 
             {/* Other Platform Capabilities Section */}
             <div>
-              <h3 className="mb-6 text-2xl font-bold">Other Platform Capabilities</h3>
+              <h3 className="mb-8 text-3xl font-bold leading-normal text-white">
+                Other Platform Capabilities
+              </h3>
               <p className="mb-6 text-[1.1rem] text-gray-300">
                 Some of the platform capabilities that we don't offer today and for which Datadog is
                 a good choice.
@@ -1912,7 +1928,7 @@ const SigNozVsDatadogV2 = () => {
 
         {/* SigNoz is 9x more value than Datadog */}
         <section className="mx-auto max-w-4xl px-6 py-16">
-          <h2 className="mb-8 text-left text-2xl font-bold lg:text-3xl">
+          <h2 className="mb-12 text-left text-4xl font-bold leading-normal text-white lg:text-5xl lg:leading-normal">
             SigNoz is 9x More Value for Money than Datadog
           </h2>
 
@@ -1940,7 +1956,9 @@ const SigNozVsDatadogV2 = () => {
 
           <div className="space-y-12">
             <div>
-              <h3 className="mb-4 text-xl font-bold">Simple usage-based pricing</h3>
+              <h3 className="mb-8 text-3xl font-bold leading-normal text-white">
+                Simple usage-based pricing
+              </h3>
               <p className="text-[1.1rem] text-gray-300">
                 Datadog has complex{' '}
                 <Link
@@ -1967,7 +1985,9 @@ const SigNozVsDatadogV2 = () => {
             </div>
 
             <div>
-              <h3 className="mb-4 text-xl font-bold">No special pricing for custom metrics</h3>
+              <h3 className="mb-8 text-3xl font-bold leading-normal text-white">
+                No special pricing for custom metrics
+              </h3>
               <p className="mb-6 text-[1.1rem] text-gray-300">
                 Datadog's custom metrics pricing is insane. It charges $0.05 per custom metric. You
                 can end up with unpredictable bills, and custom metrics pricing can constitute up to
@@ -1983,7 +2003,9 @@ const SigNozVsDatadogV2 = () => {
             </div>
 
             <div>
-              <h3 className="mb-4 text-xl font-bold">Better controls on infra monitoring cost</h3>
+              <h3 className="mb-8 text-3xl font-bold leading-normal text-white">
+                Better controls on infra monitoring cost
+              </h3>
               <p className="text-[1.1rem] text-gray-300">
                 In Datadog, you don't have any controls on the type of metrics sent to monitor your
                 infrastructure. Hence, you can't optimize your infrastructure monitoring bill in
@@ -1996,7 +2018,9 @@ const SigNozVsDatadogV2 = () => {
             </div>
 
             <div>
-              <h3 className="mb-4 text-xl font-bold">No Host (container or node) based pricing</h3>
+              <h3 className="mb-8 text-3xl font-bold leading-normal text-white">
+                No Host (container or node) based pricing
+              </h3>
               <p className="mb-6 text-[1.1rem] text-gray-300">
                 Because of Datadog's host-based pricing, some users are actually trying to optimize
                 their microservices architecture to reduce the cost. The fact that they charge based
@@ -2026,7 +2050,7 @@ const SigNozVsDatadogV2 = () => {
             </div>
 
             <div>
-              <h3 className="mb-4 text-xl font-bold">
+              <h3 className="mb-8 text-3xl font-bold leading-normal text-white">
                 Ability to create data ingestion limits with Ingest Guard
               </h3>
               <p className="mb-4 text-[1.1rem] text-gray-300">
@@ -2089,7 +2113,9 @@ const SigNozVsDatadogV2 = () => {
 
         {/* FAQ Section */}
         <section className="mx-auto max-w-4xl px-6 py-16">
-          <h2 className="mb-8 text-left text-2xl font-bold lg:text-3xl">FAQs</h2>
+          <h2 className="mb-12 text-left text-4xl font-bold leading-normal text-white lg:text-5xl lg:leading-normal">
+            FAQs
+          </h2>
 
           <FAQAccordion
             faqs={[
