@@ -164,7 +164,7 @@ const SigNozVsDatadogV2 = () => {
             transition={{ duration: 0.8 }}
             className="relative lg:-right-8 lg:w-3/5"
           >
-            <div className="overflow-hidden rounded-xl shadow-2xl">
+            <div className="overflow-hidden rounded-xl shadow-2xl shadow-amber-400/20">
               <video autoPlay muted loop className="lg:w-[120%]">
                 <source src="/img/unified-observability/showcase.mp4" type="video/mp4" />
                 Your browser does not support the video tag.
