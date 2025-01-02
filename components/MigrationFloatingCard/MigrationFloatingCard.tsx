@@ -62,7 +62,7 @@ const MigrationFloatingCard: React.FC = () => {
 
       <h3 className="mb-2 text-lg font-bold text-white">Save up to 80% on your Datadog bill</h3>
       <p className="mb-3 text-xs text-gray-300">
-        We provide migration support if your monthly Datadog bill is over $2000. Get started with
+        We provide migration support if your monthly Datadog bill is over $1000. Get started with
         SigNoz quickly.
       </p>
       <div className="flex flex-col gap-2">
