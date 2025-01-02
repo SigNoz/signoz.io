@@ -176,8 +176,13 @@ const SigNozVsDatadogV2 = () => {
 
         {/* Why do Engineering Teams Choose SigNoz over Datadog? */}
         <section className="mx-auto max-w-4xl px-4 py-16 sm:px-6">
-          <h2 className="mb-12 text-left text-4xl font-bold leading-normal text-white lg:text-5xl lg:leading-normal">
-            Why do Engineering Teams Choose SigNoz over Datadog?
+          <h2
+            className="mb-12 text-left text-4xl font-bold leading-normal text-white lg:text-5xl lg:leading-normal"
+            id="why-choose-signoz"
+          >
+            <Link href="#why-choose-signoz" className="hover:text-gray-300">
+              Why do Engineering Teams Choose SigNoz over Datadog?
+            </Link>
           </h2>
 
           <div className="mb-8">
@@ -250,15 +255,25 @@ const SigNozVsDatadogV2 = () => {
 
         {/* Product Comparison Section */}
         <section className="mx-auto max-w-4xl px-4 py-16 sm:px-6">
-          <h2 className="mb-12 text-left text-4xl font-bold leading-normal text-white lg:text-5xl lg:leading-normal">
-            Product Comparison
+          <h2
+            className="mb-12 text-left text-4xl font-bold leading-normal text-white lg:text-5xl lg:leading-normal"
+            id="product-comparison"
+          >
+            <Link href="#product-comparison" className="hover:text-gray-300">
+              Product Comparison
+            </Link>
           </h2>
 
           <div className="space-y-16">
             {/* OpenTelemetry Support */}
             <div>
-              <h3 className="mb-8 text-3xl font-bold leading-normal text-white">
-                OpenTelemetry-Native Support
+              <h3
+                className="mb-8 text-3xl font-bold leading-normal text-white"
+                id="opentelemetry-support"
+              >
+                <Link href="#opentelemetry-support" className="hover:text-gray-300">
+                  OpenTelemetry-Native Support
+                </Link>
               </h3>
               <p className="mb-6 text-[1.1rem] text-gray-300">
                 SigNoz offers the best-in-class support for OpenTelemetry data. Datadog prioritizes
@@ -818,8 +833,10 @@ const SigNozVsDatadogV2 = () => {
 
             {/* Application Performance Monitoring Section */}
             <div>
-              <h3 className="mb-8 text-3xl font-bold leading-normal text-white">
-                Application Performance Monitoring (APM)
+              <h3 className="mb-8 text-3xl font-bold leading-normal text-white" id="apm">
+                <Link href="#apm" className="hover:text-gray-300">
+                  Application Performance Monitoring (APM)
+                </Link>
               </h3>
               <p className="mb-6 text-[1.1rem] text-gray-300">
                 Our APM capabilities are on par with those of Datadog. With a simplified user
@@ -1164,7 +1181,11 @@ const SigNozVsDatadogV2 = () => {
 
             {/* Log Management Section */}
             <div>
-              <h3 className="mb-8 text-3xl font-bold leading-normal text-white">Log Management</h3>
+              <h3 className="mb-8 text-3xl font-bold leading-normal text-white" id="log-management">
+                <Link href="#log-management" className="hover:text-gray-300">
+                  Log Management
+                </Link>
+              </h3>
               <p className="mb-6 text-[1.1rem] text-gray-300">
                 Our logs module, powered by ClickHouse and in-house optimizations, delivers fast
                 querying and filtering for logs at scale.
@@ -1413,8 +1434,13 @@ const SigNozVsDatadogV2 = () => {
 
             {/* Distributed Tracing Section */}
             <div>
-              <h3 className="mb-8 text-3xl font-bold leading-normal text-white">
-                Distributed Tracing
+              <h3
+                className="mb-8 text-3xl font-bold leading-normal text-white"
+                id="distributed-tracing"
+              >
+                <Link href="#distributed-tracing" className="hover:text-gray-300">
+                  Distributed Tracing
+                </Link>
               </h3>
 
               <div className="mb-8 overflow-x-auto rounded-lg border border-gray-800 bg-gray-900/50">
@@ -1678,8 +1704,13 @@ const SigNozVsDatadogV2 = () => {
 
             {/* Infrastructure Monitoring Section */}
             <div>
-              <h3 className="mb-8 text-3xl font-bold leading-normal text-white">
-                Infrastructure Monitoring
+              <h3
+                className="mb-8 text-3xl font-bold leading-normal text-white"
+                id="infrastructure-monitoring"
+              >
+                <Link href="#infrastructure-monitoring" className="hover:text-gray-300">
+                  Infrastructure Monitoring
+                </Link>
               </h3>
               <p className="mb-6 text-[1.1rem] text-gray-300">
                 Datadog is a better choice if you're looking to do only infrastructure monitoring.{' '}
@@ -1861,8 +1892,13 @@ const SigNozVsDatadogV2 = () => {
 
             {/* Other Platform Capabilities Section */}
             <div>
-              <h3 className="mb-8 text-3xl font-bold leading-normal text-white">
-                Other Platform Capabilities
+              <h3
+                className="mb-8 text-3xl font-bold leading-normal text-white"
+                id="platform-capabilities"
+              >
+                <Link href="#platform-capabilities" className="hover:text-gray-300">
+                  Other Platform Capabilities
+                </Link>
               </h3>
               <p className="mb-6 text-[1.1rem] text-gray-300">
                 Some of the platform capabilities that we don't offer today and for which Datadog is
@@ -1975,8 +2011,13 @@ const SigNozVsDatadogV2 = () => {
 
         {/* SigNoz is 9x more value than Datadog */}
         <section className="mx-auto max-w-4xl px-4 py-16 sm:px-6">
-          <h2 className="mb-12 text-left text-4xl font-bold leading-normal text-white lg:text-5xl lg:leading-normal">
-            SigNoz is 9x More Value for Money than Datadog
+          <h2
+            className="mb-12 text-left text-4xl font-bold leading-normal text-white lg:text-5xl lg:leading-normal"
+            id="value-for-money"
+          >
+            <Link href="#value-for-money" className="hover:text-gray-300">
+              SigNoz is 9x More Value for Money than Datadog
+            </Link>
           </h2>
 
           <p className="mb-8 text-[1.1rem] text-gray-300">
@@ -2003,8 +2044,13 @@ const SigNozVsDatadogV2 = () => {
 
           <div className="space-y-12">
             <div>
-              <h3 className="mb-8 text-3xl font-bold leading-normal text-white">
-                Simple usage-based pricing
+              <h3
+                className="mb-8 text-3xl font-bold leading-normal text-white"
+                id="usage-based-pricing"
+              >
+                <Link href="#usage-based-pricing" className="hover:text-gray-300">
+                  Simple usage-based pricing
+                </Link>
               </h3>
               <p className="text-[1.1rem] text-gray-300">
                 Datadog has complex{' '}
@@ -2034,8 +2080,10 @@ const SigNozVsDatadogV2 = () => {
             </div>
 
             <div>
-              <h3 className="mb-8 text-3xl font-bold leading-normal text-white">
-                No special pricing for custom metrics
+              <h3 className="mb-8 text-3xl font-bold leading-normal text-white" id="custom-metrics">
+                <Link href="#custom-metrics" className="hover:text-gray-300">
+                  No special pricing for custom metrics
+                </Link>
               </h3>
               <p className="mb-6 text-[1.1rem] text-gray-300">
                 Datadog's custom metrics pricing is insane. It charges $0.05 per custom metric. You
@@ -2053,8 +2101,13 @@ const SigNozVsDatadogV2 = () => {
             </div>
 
             <div>
-              <h3 className="mb-8 text-3xl font-bold leading-normal text-white">
-                Better controls on infra monitoring cost
+              <h3
+                className="mb-8 text-3xl font-bold leading-normal text-white"
+                id="infra-monitoring-cost"
+              >
+                <Link href="#infra-monitoring-cost" className="hover:text-gray-300">
+                  Better controls on infra monitoring cost
+                </Link>
               </h3>
               <p className="text-[1.1rem] text-gray-300">
                 In Datadog, you don't have any controls on the type of metrics sent to monitor your
@@ -2068,8 +2121,13 @@ const SigNozVsDatadogV2 = () => {
             </div>
 
             <div>
-              <h3 className="mb-8 text-3xl font-bold leading-normal text-white">
-                No Host (container or node) based pricing
+              <h3
+                className="mb-8 text-3xl font-bold leading-normal text-white"
+                id="no-host-pricing"
+              >
+                <Link href="#no-host-pricing" className="hover:text-gray-300">
+                  No Host (container or node) based pricing
+                </Link>
               </h3>
               <p className="mb-6 text-[1.1rem] text-gray-300">
                 Because of Datadog's host-based pricing, some users are actually trying to optimize
@@ -2101,8 +2159,10 @@ const SigNozVsDatadogV2 = () => {
             </div>
 
             <div>
-              <h3 className="mb-8 text-3xl font-bold leading-normal text-white">
-                Ability to create data ingestion limits with Ingest Guard
+              <h3 className="mb-8 text-3xl font-bold leading-normal text-white" id="ingest-guard">
+                <Link href="#ingest-guard" className="hover:text-gray-300">
+                  Ability to create data ingestion limits with Ingest Guard
+                </Link>
               </h3>
               <p className="mb-4 text-[1.1rem] text-gray-300">
                 Our{' '}
@@ -2166,8 +2226,13 @@ const SigNozVsDatadogV2 = () => {
 
         {/* FAQ Section */}
         <section className="mx-auto max-w-4xl px-4 py-16 sm:px-6">
-          <h2 className="mb-12 text-left text-4xl font-bold leading-normal text-white lg:text-5xl lg:leading-normal">
-            FAQs
+          <h2
+            className="mb-12 text-left text-4xl font-bold leading-normal text-white lg:text-5xl lg:leading-normal"
+            id="faqs"
+          >
+            <Link href="#faqs" className="hover:text-gray-300">
+              FAQs
+            </Link>
           </h2>
 
           <FAQAccordion
