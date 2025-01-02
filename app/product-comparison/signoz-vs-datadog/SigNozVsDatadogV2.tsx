@@ -326,8 +326,15 @@ const SigNozVsDatadogV2 = () => {
                         </div>
                       </td>
                       <td className="border-b border-gray-800/50 px-6 py-4">
-                        SigNoz provides a tab for Exceptions which lists down all exceptions
-                        captured automatically from an OTel instrumented application.
+                        SigNoz provides a dedicated{' '}
+                        <Link
+                          href="https://signoz.io/exceptions-monitoring/"
+                          className="text-blue-400 hover:text-blue-300"
+                        >
+                          Exceptions tab
+                        </Link>{' '}
+                        that automatically lists down all exceptions captured automatically from an
+                        OTel instrumented application.
                       </td>
                     </tr>
                     <tr className="transition-colors hover:bg-gray-800/50">
