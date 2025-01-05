@@ -1336,9 +1336,21 @@ const docsSideNav = [
         label: 'RDS',
       },
       {
-        type: 'doc',
-        route: '/docs/aws-monitoring/lambda-logs',
+        type: 'category',
+        isExpanded: false,
         label: 'AWS Lambda',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/aws-monitoring/lambda/lambda-logs',
+            label: 'Logging',
+          },
+          {
+            type: 'doc',
+            route: '/docs/aws-monitoring/lambda/lambda-traces',
+            label: 'APM & Tracing',
+          },
+        ],
       },
     ],
   },
