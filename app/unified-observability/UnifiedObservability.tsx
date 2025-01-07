@@ -66,10 +66,7 @@ const UnifiedObservability = () => {
           >
             <div className="overflow-hidden rounded-xl shadow-2xl">
               <video autoPlay muted loop className="lg:w-[120%]">
-                <source
-                  src="/img/unified-observability/showcase.mp4"
-                  type="video/mp4"
-                />
+                <source src="/img/unified-observability/showcase.mp4" type="video/mp4" />
                 Your browser does not support the video tag.
               </video>
             </div>
@@ -212,16 +209,16 @@ const UnifiedObservability = () => {
                 unified observability.
               </p>
             </div>
-            <div className="relative flex-shrink-0 w-full lg:w-3/5">
+            <div className="relative w-full flex-shrink-0 lg:w-3/5">
               <figure className="mx-auto max-w-[800px]">
                 <Image
                   src="/img/unified-observability/unified-observability-fragmented-setup.webp"
                   alt="Fragmented Tools Diagram"
                   width={800}
                   height={533}
-                  className="rounded-xl shadow-2xl w-full h-auto"
+                  className="h-auto w-full rounded-xl shadow-2xl"
                 />
-                <figcaption className="mt-2 text-center text-sm text-gray-400 px-4">
+                <figcaption className="mt-2 px-4 text-center text-sm text-gray-400">
                   Traditional fragmented setup with disconnected monitoring tools
                 </figcaption>
               </figure>
@@ -264,16 +261,16 @@ const UnifiedObservability = () => {
                 </div>
               </div>
             </div>
-            <div className="relative flex-shrink-0 w-full lg:w-3/5">
+            <div className="relative w-full flex-shrink-0 lg:w-3/5">
               <figure>
                 <Image
                   src="/img/unified-observability/unified-observability-unified-setup.webp"
-                  alt="SigNoz Platform" 
+                  alt="SigNoz Platform"
                   width={800}
                   height={533}
-                  className="w-full h-auto rounded-xl shadow-2xl"
+                  className="h-auto w-full rounded-xl shadow-2xl"
                 />
-                <figcaption className="mb-4 mt-2 text-center text-sm text-gray-400 px-4 sm:px-8">
+                <figcaption className="mb-4 mt-2 px-4 text-center text-sm text-gray-400 sm:px-8">
                   SigNoz unified observability platform bringing metrics, traces and logs together
                 </figcaption>
               </figure>
@@ -657,14 +654,14 @@ const UnifiedObservability = () => {
                 fixed thresholds.
               </p>
             </div>
-            <div className="relative flex-shrink-0 w-full lg:w-3/5">
+            <div className="relative w-full flex-shrink-0 lg:w-3/5">
               <figure>
                 <Image
                   src="/img/unified-observability/unified-observability-anomaly-detection.webp"
-                  alt="Anomaly Detection in SigNoz" 
+                  alt="Anomaly Detection in SigNoz"
                   width={800}
                   height={533}
-                  className="rounded-xl shadow-2xl w-full h-auto"
+                  className="h-auto w-full rounded-xl shadow-2xl"
                 />
                 <figcaption className="mt-2 text-center text-sm text-gray-400">
                   Anamoly Detection Alert in SigNoz
@@ -711,7 +708,7 @@ const UnifiedObservability = () => {
               </div>
             </div>
           </div>
-          <div className="section-container !mx-auto !w-[100vw] border !border-b-0 border-dashed border-signoz_slate-400 !px-0 md:!w-[80vw] hidden sm:block">
+          <div className="section-container !mx-auto hidden !w-[100vw] border !border-b-0 border-dashed border-signoz_slate-400 !px-0 sm:block md:!w-[80vw]">
             <div className="flex flex-col sm:flex-row">
               <div className="!w-[100%] flex-1 md:!w-[300px]">
                 <div className="space-y-[10vh]">
@@ -720,7 +717,10 @@ const UnifiedObservability = () => {
                       <p className="px-8 pl-0 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-[44px] md:px-0 md:pl-12">
                         Application Performance Monitoring
                       </p>
-                      <Link href="/teams" className="ml-8 inline-flex items-center gap-2 rounded-lg bg-signoz_button-500 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-signoz_button-400">
+                      <Link
+                        href="/teams"
+                        className="bg-signoz_button-500 hover:bg-signoz_button-400 ml-8 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-all"
+                      >
                         Get Started with APM
                         <ArrowRight className="h-4 w-4" />
                       </Link>
@@ -731,7 +731,10 @@ const UnifiedObservability = () => {
                       <p className="px-8 pl-0 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-[44px] md:px-0 md:pl-12">
                         Log Management
                       </p>
-                      <Link href="/teams" className="ml-8 inline-flex items-center gap-2 rounded-lg bg-signoz_button-500 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-signoz_button-400">
+                      <Link
+                        href="/teams"
+                        className="bg-signoz_button-500 hover:bg-signoz_button-400 ml-8 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-all"
+                      >
                         Get Started with Logs
                         <ArrowRight className="h-4 w-4" />
                       </Link>
@@ -742,7 +745,10 @@ const UnifiedObservability = () => {
                       <p className="px-8 pl-0 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-[44px] md:px-0 md:pl-12">
                         Distributed Tracing
                       </p>
-                      <Link href="/teams" className="ml-8 inline-flex items-center gap-2 rounded-lg bg-signoz_button-500 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-signoz_button-400">
+                      <Link
+                        href="/teams"
+                        className="bg-signoz_button-500 hover:bg-signoz_button-400 ml-8 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-all"
+                      >
                         Get Started with Distributed Tracing
                         <ArrowRight className="h-4 w-4" />
                       </Link>
@@ -753,7 +759,10 @@ const UnifiedObservability = () => {
                       <p className="px-8 pl-0 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-[44px] md:px-0 md:pl-12">
                         Infrastructure Monitoring
                       </p>
-                      <Link href="/teams" className="ml-8 inline-flex items-center gap-2 rounded-lg bg-signoz_button-500 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-signoz_button-400">
+                      <Link
+                        href="/teams"
+                        className="bg-signoz_button-500 hover:bg-signoz_button-400 ml-8 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-all"
+                      >
                         Get Started with Infrastructure Monitoring
                         <ArrowRight className="h-4 w-4" />
                       </Link>
@@ -764,7 +773,10 @@ const UnifiedObservability = () => {
                       <p className="px-8 pl-0 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-[44px] md:px-0 md:pl-12">
                         Metrics and Dashboards
                       </p>
-                      <Link href="/teams" className="ml-8 inline-flex items-center gap-2 rounded-lg bg-signoz_button-500 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-signoz_button-400">
+                      <Link
+                        href="/teams"
+                        className="bg-signoz_button-500 hover:bg-signoz_button-400 ml-8 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-all"
+                      >
                         Get Started with Dashboards
                         <ArrowRight className="h-4 w-4" />
                       </Link>
@@ -775,7 +787,10 @@ const UnifiedObservability = () => {
                       <p className="px-8 pl-0 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-[44px] md:px-0 md:pl-12">
                         Alerts
                       </p>
-                      <Link href="/teams" className="ml-8 inline-flex items-center gap-2 rounded-lg bg-signoz_button-500 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-signoz_button-400">
+                      <Link
+                        href="/teams"
+                        className="bg-signoz_button-500 hover:bg-signoz_button-400 ml-8 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-all"
+                      >
                         Get Started with Alerts
                         <ArrowRight className="h-4 w-4" />
                       </Link>
@@ -786,7 +801,10 @@ const UnifiedObservability = () => {
                       <p className="px-8 pl-0 pt-10 text-4xl font-bold !leading-[3.5rem] text-signoz_vanilla-100 sm:text-[44px] md:px-0 md:pl-12">
                         Exceptions Monitoring
                       </p>
-                      <Link href="/teams" className="ml-8 inline-flex items-center gap-2 rounded-lg bg-signoz_button-500 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-signoz_button-400">
+                      <Link
+                        href="/teams"
+                        className="bg-signoz_button-500 hover:bg-signoz_button-400 ml-8 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-all"
+                      >
                         Get Started with Exceptions Monitoring
                         <ArrowRight className="h-4 w-4" />
                       </Link>
