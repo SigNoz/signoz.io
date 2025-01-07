@@ -10,11 +10,11 @@ export default function DatadogVsSigNoz() {
       <div className="transform rounded-xl bg-gradient-to-r from-blue-900/90 to-purple-900/90 p-8 shadow-lg backdrop-blur-sm transition-all duration-300 ease-in-out hover:-translate-y-1 hover:shadow-xl">
         <div className="space-y-4">
           <h3 className="my-0 text-2xl font-bold text-white">
-            Ready to Optimize Your Observability Costs?
+            Cut Your Observability Spend by 80%—Here’s How
           </h3>
           <p className="text-gray-300">
             Discover how SigNoz offers a seamless migration path from Datadog with comparable
-            features and upto <b>80% cost savings</b>.
+            features and up to <b>80% cost savings</b>.
           </p>
           <div className="flex flex-col gap-4 sm:flex-row">
             <Button>
