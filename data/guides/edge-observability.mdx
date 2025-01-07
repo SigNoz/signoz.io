@@ -1,24 +1,36 @@
 ---
-
 title: What is Edge Observability - A Guide to Modern System Monitoring
 slug: edge-observability
 date: 2024-11-20
 tags: [observability, faq]
 authors: [soumya_gupta]
 description: Learn how edge observability helps monitor distributed systems at the edge. Discover implementation strategies, best practices, and tools for effective edge monitoring.
-keywords: [edge observability, edge monitoring, distributed systems, edge computing, system monitoring, observability tools, edge metrics, edge tracing]
-
+keywords:
+  [
+    edge observability,
+    edge monitoring,
+    distributed systems,
+    edge computing,
+    system monitoring,
+    observability tools,
+    edge metrics,
+    edge tracing,
+  ]
 ---
 
 Edge observability lets you monitor and understand system behavior at edge locations in real-time. It extends traditional monitoring capabilities to the network edge—where your applications interact directly with users and devices. Unlike centralized monitoring, edge observability focuses on collecting and analyzing telemetry data at distributed edge locations.
 
 ## Understanding Edge Observability
 
-Edge computing moves processing and data storage closer to where data originates. This shift requires a new approach to monitoring. 
+Edge computing moves processing and data storage closer to where data originates. This shift requires a new approach to monitoring.
 
 Edge observability combines three key telemetry types:
 
-<Figure src="/img/guides/2024/11/edge-observability-image.webp" alt="Telemetry data" caption="Telemetry data" />
+<Figure
+  src="/img/guides/2024/11/edge-observability-image.webp"
+  alt="Telemetry data"
+  caption="Telemetry data"
+/>
 
 - Metrics: Numerical measurements of system performance (like CPU utilization, memory usage, or response times). Metrics provide a quick overview of health and performance and help detect real-time anomalies.
 - Logs: Records of events, errors, and transactions that occur at the edge. Logs capture detailed information on each step of a process, enabling deeper troubleshooting and audit trails for events that might impact performance.
@@ -28,7 +40,11 @@ Edge observability combines three key telemetry types:
 
 Traditional monitoring focuses on centralized data centers, while edge observability extends monitoring to distributed edge locations like:
 
-<Figure src="/img/guides/2024/11/edge-observability-image%201.webp" alt="Distributed edge locations for Edge Observability Monitoring" caption="Distributed edge locations for Edge Observability Monitoring" />
+<Figure
+  src="/img/guides/2024/11/edge-observability-image%201.webp"
+  alt="Distributed edge locations for Edge Observability Monitoring"
+  caption="Distributed edge locations for Edge Observability Monitoring"
+/>
 
 - Fog Computing Environments: Fog computing extends cloud capabilities to the edge, enabling local data processing and storage. Observability in fog computing ensures the health and performance of distributed edge nodes, tracks data movement across the network, and identifies network bottlenecks or failures that could disrupt real-time applications.
 - IoT Gateways: IoT gateways serve as intermediaries between IoT devices and cloud or edge platforms, aggregating and processing data. Observability at the edge tracks device health, data flow, and potential failures at the gateway level, ensuring reliable device connectivity and data integrity across large IoT networks.
@@ -41,16 +57,16 @@ Traditional monitoring focuses on centralized data centers, while edge observabi
 
 ## Traditional v/s Edge Observability
 
-Traditional observability focuses on centralized systems monitoring, whereas edge observability extends this to decentralized environments, ensuring insights closer to the source. 
+Traditional observability focuses on centralized systems monitoring, whereas edge observability extends this to decentralized environments, ensuring insights closer to the source.
 
 A comparison of traditional observability versus edge observability is shown in the table below.
 
-| Factors | Traditional Observability | Edge Observability |
-| --- | --- | --- |
-| Proximity | Traditional observability relies on collecting and analyzing data in a centralized system, typically located far from where the data is generated | Edge observability deals with devices, sensors, and servers situated near data sources. This proximity allows for faster response times and reduced bandwidth needs, as data processing happens closer to the source. |
-| Data Volume | In traditional observability, more data relative to edge observability is sent to a central location for comprehensive analysis, such as detailed logs, high-frequency metrics, and full-trace data from all devices, often without filtering or aggregation | In edge observability, much of the data processing is done locally, sending only critical or aggregated information such as anomaly alerts, summary statistics, and trend insights back to the central system to reduce bandwidth and storage requirements |
-| Network Dependency | Traditional observability relies on stable connections to transmit data to central servers. | Edge observability often functions independently of central network connections, which is critical in cases of intermittent connectivity.  |
-| Latency | Traditional observability can introduce latency, as data has to be transmitted over a network before analysis. | Edge observability reduces latency by processing data close to its source, ideal for applications requiring near-instantaneous insights (e.g., real-time industrial automation).  |
+| Factors            | Traditional Observability                                                                                                                                                                                                                                    | Edge Observability                                                                                                                                                                                                                                         |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Proximity          | Traditional observability relies on collecting and analyzing data in a centralized system, typically located far from where the data is generated                                                                                                            | Edge observability deals with devices, sensors, and servers situated near data sources. This proximity allows for faster response times and reduced bandwidth needs, as data processing happens closer to the source.                                      |
+| Data Volume        | In traditional observability, more data relative to edge observability is sent to a central location for comprehensive analysis, such as detailed logs, high-frequency metrics, and full-trace data from all devices, often without filtering or aggregation | In edge observability, much of the data processing is done locally, sending only critical or aggregated information such as anomaly alerts, summary statistics, and trend insights back to the central system to reduce bandwidth and storage requirements |
+| Network Dependency | Traditional observability relies on stable connections to transmit data to central servers.                                                                                                                                                                  | Edge observability often functions independently of central network connections, which is critical in cases of intermittent connectivity.                                                                                                                  |
+| Latency            | Traditional observability can introduce latency, as data has to be transmitted over a network before analysis.                                                                                                                                               | Edge observability reduces latency by processing data close to its source, ideal for applications requiring near-instantaneous insights (e.g., real-time industrial automation).                                                                           |
 
 ## Core Components of Edge Observability
 
@@ -60,9 +76,13 @@ Edge observability involves monitoring and analyzing performance data from distr
 
 Distributed tracing allows you to track the journey of a request as it moves through various services, including those at the edge. At the edge, each service or device (like IoT sensors, mobile network servers, or POS systems) processes a portion of the data. Tracing helps to understand the end-to-end flow and time taken across each stage.
 
-<Figure src="/img/guides/2024/11/edge-observability-56646277-3e3d-45c1-b37a-05fd5f1a5339.webp" alt="Trace Request Flow Diagram" caption="Trace Request Flow Diagram" />
+<Figure
+  src="/img/guides/2024/11/edge-observability-56646277-3e3d-45c1-b37a-05fd5f1a5339.webp"
+  alt="Trace Request Flow Diagram"
+  caption="Trace Request Flow Diagram"
+/>
 
-Let’s see how we can propagate trace context in a distributed system through the following code snippet: 
+Let’s see how we can propagate trace context in a distributed system through the following code snippet:
 
 ```python
 # Example trace context propagation
@@ -120,9 +140,9 @@ logger.config({
 
 ```
 
-In this example, 
+In this example,
 
-`local_storage: True` enables logs to be stored directly on the device, reducing the need for continuous network communication.  
+`local_storage: True` enables logs to be stored directly on the device, reducing the need for continuous network communication.
 
 `compression: True` saves storage by compressing log files.
 
@@ -145,26 +165,30 @@ Edge observability provides critical benefits:
 
 Edge environments present unique monitoring challenges such as:
 
-| Challenges | Descriptions | Sub-Issues | Details |
-| --- | --- | --- | --- |
-| Network Issues | It's tough to keep a steady connection in remote areas, which can cause delays and bandwidth problems. | Intermittent Connectivity | Edge environments frequently experience inconsistent network connectivity, disrupting the flow of observability data back to central systems for analysis, making it harder to get a complete picture of performance. |
-|  |  | Variable Latency | Due to varying distances from central systems and fluctuations in network quality, latency can impact real-time data collection and timely response. |
-|  |  | Limited Bandwidth |  Edge environments often operate with constrained bandwidth, which can limit the amount of data transferred to centralized systems and impact overall data quality. |
-| Data Management | Managing all that data from different devices can be tricky, especially when it comes to keeping it organized and accessible. | High Volume of Telemetry Data | Edge applications generate large volumes of telemetry data across numerous sites, complicating data aggregation, storage, and analysis in central monitoring solutions. |
-|  |  | Storage Constraints | Many edge devices have limited storage capacity, making it challenging to store extensive telemetry data locally without frequent offloading. |
-|  |  | Data Synchronization Needs | Synchronizing data from distributed devices to ensure consistency is challenging, especially when network issues or connectivity constraints are frequent. |
-|  |  | Heterogeneous Infrastructure | Edge environments typically involve diverse devices and platforms, making it difficult to track dependencies, normalize data, and monitor performance consistently across different systems. |
-| Security | Keeping everything secure at the edge is a real challenge, especially with limited resources and higher risks of cyberattacks. | Distributed Attack Surface |  With a broader and more dispersed infrastructure, edge environments present a larger attack surface, making them more vulnerable to security threats. |
-|  |  | Local Data Protection | Sensitive data may be processed and stored on-site, requiring strict security measures to prevent unauthorized access and ensure compliance. |
-|  |  | Access Control Across Locations | Managing access to devices and data across multiple locations is complex, especially with the need to secure credentials and maintain compliance with security standards. |
-| User-Reported Issues | User-reported issues refer to the common problems or complaints that customers or users share about a product or service, highlighting areas that need improvement or fixing. | Delayed Detection | Often, issues are detected by end users rather than monitoring tools, resulting in delayed acknowledgment and response, which can negatively impact application performance and user experience. |
-|  |  | Reactive Monitoring | Depending on user reports as the primary source of issue detection can hinder proactive monitoring efforts, delaying troubleshooting and resolution. |
+| Challenges           | Descriptions                                                                                                                                                                  | Sub-Issues                      | Details                                                                                                                                                                                                               |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Network Issues       | It's tough to keep a steady connection in remote areas, which can cause delays and bandwidth problems.                                                                        | Intermittent Connectivity       | Edge environments frequently experience inconsistent network connectivity, disrupting the flow of observability data back to central systems for analysis, making it harder to get a complete picture of performance. |
+|                      |                                                                                                                                                                               | Variable Latency                | Due to varying distances from central systems and fluctuations in network quality, latency can impact real-time data collection and timely response.                                                                  |
+|                      |                                                                                                                                                                               | Limited Bandwidth               | Edge environments often operate with constrained bandwidth, which can limit the amount of data transferred to centralized systems and impact overall data quality.                                                    |
+| Data Management      | Managing all that data from different devices can be tricky, especially when it comes to keeping it organized and accessible.                                                 | High Volume of Telemetry Data   | Edge applications generate large volumes of telemetry data across numerous sites, complicating data aggregation, storage, and analysis in central monitoring solutions.                                               |
+|                      |                                                                                                                                                                               | Storage Constraints             | Many edge devices have limited storage capacity, making it challenging to store extensive telemetry data locally without frequent offloading.                                                                         |
+|                      |                                                                                                                                                                               | Data Synchronization Needs      | Synchronizing data from distributed devices to ensure consistency is challenging, especially when network issues or connectivity constraints are frequent.                                                            |
+|                      |                                                                                                                                                                               | Heterogeneous Infrastructure    | Edge environments typically involve diverse devices and platforms, making it difficult to track dependencies, normalize data, and monitor performance consistently across different systems.                          |
+| Security             | Keeping everything secure at the edge is a real challenge, especially with limited resources and higher risks of cyberattacks.                                                | Distributed Attack Surface      | With a broader and more dispersed infrastructure, edge environments present a larger attack surface, making them more vulnerable to security threats.                                                                 |
+|                      |                                                                                                                                                                               | Local Data Protection           | Sensitive data may be processed and stored on-site, requiring strict security measures to prevent unauthorized access and ensure compliance.                                                                          |
+|                      |                                                                                                                                                                               | Access Control Across Locations | Managing access to devices and data across multiple locations is complex, especially with the need to secure credentials and maintain compliance with security standards.                                             |
+| User-Reported Issues | User-reported issues refer to the common problems or complaints that customers or users share about a product or service, highlighting areas that need improvement or fixing. | Delayed Detection               | Often, issues are detected by end users rather than monitoring tools, resulting in delayed acknowledgment and response, which can negatively impact application performance and user experience.                      |
+|                      |                                                                                                                                                                               | Reactive Monitoring             | Depending on user reports as the primary source of issue detection can hinder proactive monitoring efforts, delaying troubleshooting and resolution.                                                                  |
 
 ## Implementing Edge Observability
 
-Implementing edge observability involves setting up the necessary infrastructure, defining key performance indicators, and establishing monitoring protocols to ensure visibility into the health and performance of distributed edge environments. 
+Implementing edge observability involves setting up the necessary infrastructure, defining key performance indicators, and establishing monitoring protocols to ensure visibility into the health and performance of distributed edge environments.
 
-<Figure src="/img/guides/2024/11/edge-observability-image%202.webp" alt="Steps to implement edge observability" caption="Steps to implement edge observability" />
+<Figure
+  src="/img/guides/2024/11/edge-observability-image%202.webp"
+  alt="Steps to implement edge observability"
+  caption="Steps to implement edge observability"
+/>
 
 The following steps are crucial for successfully adopting edge observability:
 
@@ -173,9 +197,7 @@ The following steps are crucial for successfully adopting edge observability:
 This first step focuses on establishing the fundamental architecture for monitoring at the edge.
 
 - Deploy Collectors at Edge Locations: Edge collectors are lightweight agents or services deployed on edge devices to capture telemetry data. After gathering data locally, these collectors either send it to a central system or process it on-site, depending on the needs.
-    
-    For example, you could deploy a collector on each edge node to monitor CPU and memory usage, log specific events, and trace requests as they flow through the edge system.
-    
+  For example, you could deploy a collector on each edge node to monitor CPU and memory usage, log specific events, and trace requests as they flow through the edge system.
 - Configure Data Retention Policies: Given the limited storage capacity of edge devices, data retention policies are important to ensure that only relevant data is stored locally for the appropriate amount of time. It's crucial to determine how long data should be kept (e.g., logs from the past 7 days) before it is either archived or deleted.
 - Establish Secure Communication Channels: Secure protocols (e.g., TLS) should transmit data between edge devices and central systems to protect sensitive data like logs and metrics from unauthorized access. Encrypted channels can also be used to prevent data breaches by safeguarding traces and logs sent to the central observability system
 
@@ -194,66 +216,87 @@ Establishing baselines for what is considered "normal" helps to identify anomali
 - Monitor Normal Patterns: By tracking historical data for a period, you can establish baseline patterns for the metrics you've defined. This helps you recognize what typical performance looks like for each edge device, application, or service. To take an example, if you monitor memory usage over the course of a week, you may find that most devices consume 50% of their memory. This gives you a baseline for comparison in case of spikes.
 - Establish Alert Thresholds: Once baselines are defined, it’s crucial to set up alerting mechanisms. Alerts should trigger when metric values deviate significantly from the baseline, such as CPU usage consistently exceeding 90%). Setting up thresholds based on normal patterns will help you catch issues early and minimize downtime.
 - Define Performance Targets: To ensure optimal performance, it's important to set performance targets that align with your business objectives. These targets can be based on things like:
-    - Response Time: The time it takes for a system to respond to a request (e.g., requests should be processed in under 100ms).
-    - Uptime: The percentage of time a system is operational and available (e.g., 99.9% availability).
-    - Resource Utilization: The amount of system resources, such as CPU or memory, being used (e.g., CPU usage should stay below 75%).
-    
+  - Response Time: The time it takes for a system to respond to a request (e.g., requests should be processed in under 100ms).
+  - Uptime: The percentage of time a system is operational and available (e.g., 99.9% availability).
+  - Resource Utilization: The amount of system resources, such as CPU or memory, being used (e.g., CPU usage should stay below 75%).
     As an example, in a content delivery system, the target might be that content load times should be under 3 seconds for 95% of users.
-    
 
 ## Strategic Approaches for Effective Edge Monitoring
 
-| Goal | Approach |
-| --- | --- |
-| Proactively detect issues before they impact end users to enhance response times and improve user experience. | Shift-Left Approach: This involves moving observability practices earlier in the development process, allowing for proactive issue detection rather than relying solely on post-deployment monitoring |
-| Reduce unnecessary data collection to save bandwidth and lower processing costs. | Adaptive sampling: It means selectively collecting data rather than monitoring everything continuously. By analyzing traffic patterns, you can capture data only when certain thresholds are crossed or when unusual activity occurs. |
-| Minimize latency and improve issue response times by reducing dependency on central systems. | Local Intelligence: Deploying localized monitoring solutions that can analyze data on-site reduces dependency on central systems and improves response times to issues |
-|  Align alerts with the unique and dynamic behaviors of edge environments to ensure accurate, actionable notifications. | Real-Time Alerting: Implementing systems that provide immediate alerts upon detecting anomalies ensures that teams can act swiftly to mitigate potential problems before they escalate |
-| Ensure data continuity and integrity by safeguarding it during outages, allowing for seamless processing once connectivity is restored. | Establish Failover and Redundancy: In edge environments where network connectivity can be inconsistent, setting up failover mechanisms and local storage redundancy |
-| Optimize monitoring resource usage to avoid impacting the performance of edge devices. | Optimize Resources: Choose lightweight monitoring solutions and limit monitoring frequency to minimize impact on edge devices' performance.
-
- |
+| Goal                                                                                                                                    | Approach                                                                                                                                                                                                                              |
+| --------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Proactively detect issues before they impact end users to enhance response times and improve user experience.                           | Shift-Left Approach: This involves moving observability practices earlier in the development process, allowing for proactive issue detection rather than relying solely on post-deployment monitoring                                 |
+| Reduce unnecessary data collection to save bandwidth and lower processing costs.                                                        | Adaptive sampling: It means selectively collecting data rather than monitoring everything continuously. By analyzing traffic patterns, you can capture data only when certain thresholds are crossed or when unusual activity occurs. |
+| Minimize latency and improve issue response times by reducing dependency on central systems.                                            | Local Intelligence: Deploying localized monitoring solutions that can analyze data on-site reduces dependency on central systems and improves response times to issues                                                                |
+| Align alerts with the unique and dynamic behaviors of edge environments to ensure accurate, actionable notifications.                   | Real-Time Alerting: Implementing systems that provide immediate alerts upon detecting anomalies ensures that teams can act swiftly to mitigate potential problems before they escalate                                                |
+| Ensure data continuity and integrity by safeguarding it during outages, allowing for seamless processing once connectivity is restored. | Establish Failover and Redundancy: In edge environments where network connectivity can be inconsistent, setting up failover mechanisms and local storage redundancy                                                                   |
+| Optimize monitoring resource usage to avoid impacting the performance of edge devices.                                                  | Optimize Resources: Choose lightweight monitoring solutions and limit monitoring frequency to minimize impact on edge devices' performance.                                                                                           |
 
 ## Getting Started with SigNoz for Edge Monitoring
 
-SigNoz provides comprehensive edge observability features:
+Implementing edge observability is crucial for maintaining the health and performance of distributed systems. SigNoz Cloud offers a streamlined approach to achieve this without the complexities of self-hosting.
 
-1. Install SigNoz: Make sure that SigNoz is installed on your system. 
-    
-    <GetStartedSigNoz />
-    
-2. Configure edge collectors: After installing SigNoz, the next step is configuring edge collectors. These collectors gather telemetry data from your edge devices and send it to SigNoz. Below is an example configuration for two edge devices:
+### Getting Started with SigNoz Cloud for Edge Monitoring
 
-```yaml
-collectors:
-  edge:
-    enabled: true
-    endpoints:
-      - name: retail-pos
-        url: <http://pos-system:4317>
-      - name: warehouse-iot
-        url: <http://iot-gateway:4317>
-```
+SigNoz Cloud provides a hassle-free setup, enabling you to focus on monitoring your edge applications effectively.
 
-The `enabled: true` flag activates edge collectors, while the `endpoints` section defines edge devices—such as retail POS systems or IoT gateways—by specifying each device's `name` and `url` for telemetry data collection. Additional edge devices can be added to the configuration as needed, each with a unique `name` and `url`.
+<GetStartedSigNoz />
 
-1. Create custom dashboards for edge metrics: SigNoz allows you to visualize the performance of your edge systems through custom dashboards. To get the most out of your edge observability, you can create dashboards that display metrics specific to your edge devices.
-    
-    For example, you can create dashboards to monitor:
-    
-    - IoT sensor data (e.g., temperature, humidity)
-    - POS system health (e.g., transaction volume, error rates)
-    - Network performance (e.g., latency, packet loss)
-    
-    These dashboards will give you a real-time view of the health and performance of your edge systems, making it easier to detect issues and optimize operations.
-    
-2. Set up automated alerts: To ensure you are always informed of potential issues, you can configure SigNoz to automatically send alerts when predefined conditions are met. These alerts could be based on metrics like:
-    - High CPU usage
-    - Increased error rates
-    - Network latency
-    
-    For example, you can set a threshold for CPU usage at 85% for more than 5 minutes, and SigNoz will trigger an alert if this condition is met. You can configure alerts to be sent via email, Slack, or other communication channels.
-    
+1. Sign Up for SigNoz Cloud
+
+Create an Account: Visit the SigNoz Cloud sign-up page to register for a free trial, which offers 30 days of unlimited access to all features.
+
+Access the Dashboard: Upon registration, log in to access the SigNoz Cloud dashboard, your centralized hub for monitoring and observability.
+
+2. Instrument Your Edge Applications with OpenTelemetry
+
+To monitor your edge applications, integrate OpenTelemetry to collect telemetry data.
+
+- Integrate OpenTelemetry SDKs: Incorporate the appropriate OpenTelemetry SDKs into your edge applications based on the programming languages in use.
+- Configure Exporters: Set up the OpenTelemetry exporters in your edge applications to send telemetry data to the SigNoz backend.
+
+Here are some popular language-specific OpenTelemetry instrumentation guides to help you get started:
+
+- [Java](/docs/instrumentation/opentelemetry-java/)
+- [Javascript](/docs/instrumentation/javascript/)
+- [Python](/docs/instrumentation/python/)
+- [Golang](/docs/instrumentation/golang/)
+- [AWS Monitoring](/docs/ec2-monitoring/)
+- [GCP Monitoring](/docs/gcp-monitoring/bootstrapping/)
+- [Azure Monitoring](/docs/azure-monitoring/bootstrapping/)
+- [View all documentation →](/docs/)
+
+3. Configure Data Transmission
+
+Ensure secure and efficient data flow from your edge devices to SigNoz Cloud.
+
+- Set Up the OpenTelemetry Collector: Deploy the OpenTelemetry Collector to receive, process, and export telemetry data from your edge applications to SigNoz Cloud.
+- Implement Secure Communication: Use secure protocols to transmit data, safeguarding it against unauthorized access.
+- Optimize Data Transfer: Configure data compression and set appropriate retry policies to handle intermittent connectivity, ensuring reliable data transmission.
+
+4. Visualize and Analyze Edge Telemetry in SigNoz Cloud
+
+Leverage SigNoz Cloud's features to gain insights into your edge environments.
+
+- Create Custom Dashboards: Utilize SigNoz's dashboarding capabilities to visualize metrics, traces, and logs from your edge applications, enabling real-time monitoring of performance and health.
+
+<Figure
+  src="/img/unified-observability/unified-observability-metrics-and-dashboards.webp"
+  alt="metrics and dashboards"
+  caption="metrics and dashboards"
+/>
+
+- Set Up Alerts: Configure alerts in SigNoz to notify your team of any anomalies or performance issues detected in your edge environments.
+
+<Figure
+  src="/img/guides/2024/12/incident-response-cycle-alerts-management-signoz.webp"
+  alt="setting alerts"
+  caption="setting alerts"
+/>
+
+By following these steps, you can effectively monitor and observe your edge applications using SigNoz Cloud, gaining comprehensive visibility into your edge deployments and facilitating proactive issue detection and resolution.
+
+For more detailed guidance, refer to the official SigNoz documentation and resources.
 
 ## Key Takeaways
 
