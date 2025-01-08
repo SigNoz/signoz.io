@@ -1,4 +1,4 @@
-import SigNozVSGrafana from './SigNozVsGrafana'
+import SigNozVSGrafanaV2 from './SigNozVsGrafanaV2'
 
 import { Metadata } from 'next'
 
@@ -7,5 +7,5 @@ export const metadata: Metadata = {
 }
 
 export default function SigNozVSGrafanaPage() {
-  return <SigNozVSGrafana />
+  return <SigNozVSGrafanaV2 />
 }
