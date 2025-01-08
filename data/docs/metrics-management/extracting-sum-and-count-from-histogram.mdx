@@ -1,0 +1,41 @@
+---
+date: 2025-01-07
+title: Extracting sum and count metrics from histogram
+id: docker-container-metrics
+---
+
+This documentation explains how to extract summary metrics (sum and count) from histogram-type metrics while excluding the original bucket data. This transformation is particularly useful for calculating averages.
+
+## Overview
+
+The transformation configuration allows you to:
+
+1. Extract count and sum metrics from histogram data
+2. Filter out the original histogram buckets
+3. Use the resulting metrics for average calculations
+
+```yaml
+transform:
+  error_mode: ignore
+  metric_statements:
+    - context:
+        metric:
+          conditions:
+            - name == "myApp_latency_bucket"
+          statements:
+            - extract_count_metric(true)
+            - extract_sum_metric(true)
+  filter:
+    metrics:
+      exclude:
+        match_type: strict
+        metric_names:
+          - myApp_latency_bucket
+```
+
+## Generated Metrics
+
+The transformation will create two new metrics:
+
+1. myApp_latency_bucket_count: Total number of observations
+2. myApp_latency_bucket_sum: Sum of all observations
