@@ -10,84 +10,118 @@ This document explains how to configure Pino to stream Node.js application logs 
 <Tabs>
 <TabItem value="cloud" label="SigNoz Cloud" default>
 
-
-## Prerequisites
-
-
-
-
-## Required Dependencies
-
-Install the necessary packages:
+### Step 1. Install the necessary packages:
 
 ```bash
 npm i pino-opentelemetry-transport
 ```
 
-## Setup
-
-### Step 1. Configure Pino Logger
-
+### Step 2. Configure Pino Logger
+Add the following code to your application:
+<Tabs>
+<TabItem value="js" label="JavaScript">
 ```jsx
-//tracing.js
-const pino = require('pino')
+const pino = require('pino');
 
 const transport = pino.transport({
   target: 'pino-opentelemetry-transport'
-})
-
-const logger = pino(transport)
-
-module.exports = logger
-```
-
-### Step 2. Configure Application Logging
-
-```jsx
-//app.js
-const logger = require('./tracing');
-
-// Basic logging
-logger.info('Hello, World! from pino');
-
-// Structured logging with metadata
-logger.info('User authentication', {
-    userId: 'user123',
-    action: 'login',
-    timestamp: new Date().toISOString()
 });
 
-// Error handling example
-try {
-    throw new Error('Something went wrong');
-} catch (error) {
-    logger.error({
-        msg: 'Error occurred',
-        error: error.message,
-        stack: error.stack
-    });
-}
-```
+const logger = pino(transport);
 
-### Step 3. Run Your Application
+logger.info('Hello, World! from pino');
+```
+</TabItem>
+<TabItem value="ts" label="TypeScript">
+```ts
+import pino from 'pino';
+
+const transport = pino.transport({
+  target: 'pino-opentelemetry-transport'
+});
+
+const logger = pino(transport);
+
+logger.info('Hello, World! from pino');
+```
+</TabItem>
+</Tabs>
+
+### Step 2. Run Your Application
 
 Execute your application with OpenTelemetry Environment variables:
 
-```jsx
-OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>" OTEL_EXPORTER_OTLP_LOGS_ENDPOINT=https://ingest.<region>.signoz.cloud:443/v1/logs OTEL_RESOURCE_ATTRIBUTES="service.name=<service_name>,service.version=1.2.3" node -r ./tracing.js app.js
+```Bash
+OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>" OTEL_EXPORTER_OTLP_LOGS_ENDPOINT=https://ingest.<region>.signoz.cloud:443/v1/logs OTEL_RESOURCE_ATTRIBUTES="service.name=<service_name>,service.version=1.2.3" node app.js
 ```
-- Set the <region> to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
-- Replace <your-ingestion-key> with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
-- <service_name> is name of your service
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service_name>` is name of your service
 ## Usage Examples
+The below examples show how to log messages with different severity levels and include structured metadata that can be used for filtering and analysis in SigNoz.
 
 ### Basic Logging
 
 ```jsx
-logger.info('Server started on port 3000');
+logger.info('Hello, World! from pino');
+```
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/logs-management/send-logs/info-logs.png"
+        alt="Node.js Pino Logs"
+    />
+<figcaption>
+<i>
+Severity Level: INFO
+</i>
+</figcaption>
+</figure>
+```jsx
 logger.warn('High memory usage detected');
+```
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/logs-management/send-logs/warn-logs.png"
+        alt="Node.js Pino Logs"
+    />
+<figcaption>
+<i>
+Severity Level: WARN
+</i>
+</figcaption>
+</figure>
+```jsx
 logger.error('Failed to process request');
 ```
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/logs-management/send-logs/error-logs.png"
+        alt="Node.js Pino Logs"
+    />
+<figcaption>
+<i>
+Severity Level: ERROR
+</i>
+</figcaption>
+</figure>
+```jsx
+logger.error({
+    msg: 'Error occurred',
+    error: error.message,
+    stack: error.stack
+});
+```
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/logs-management/send-logs/error-log-details.png"
+        alt="Node.js Pino Logs"
+    />
+<figcaption>
+<i>
+Severity Level: ERROR
+</i>
+</figcaption>
+</figure>
 
 ## Output
 
@@ -99,12 +133,11 @@ After successful implementation, your logs will appear in your SigNoz Logs secti
 - Create [alerts based on log](https://signoz.io/docs/alerts-management/log-based-alerts/) patterns
 - Visualize log trends and patterns
 
-{/* Image placeholder - in a real MDX file, you'd use an import or relative path */}
-{/* <img src="/path/to/screenshot.png" alt="SigNoz Dashboard Log View" /> */}
+
 
 <figure data-zoomable align="left">
     <img
-        src="/img/docs/logs-management/send-logs/nodejs-pino-logs-cloud.png"
+        src="/img/docs/logs-management/send-logs/nodejs-pino-logs.png"
         alt="Node.js Pino Logs"
     />
 <figcaption>
@@ -135,135 +168,120 @@ If logs are not appearing in SigNoz:
 
 - Self-hosted SigNoz instance
 
-## Required Dependencies
-
-Install the necessary packages:
+### Step 1. Install the necessary packages:
 
 ```bash
 npm i pino-opentelemetry-transport
 ```
 
-## Setup
-
-### Step 1. Configure Pino Logger
-
+### Step 2. Configure Pino Logger
+Add the following code to your application:
+<Tabs>
+<TabItem value="js" label="JavaScript">
 ```jsx
-//tracing.js
-const pino = require('pino')
+const pino = require('pino');
 
 const transport = pino.transport({
   target: 'pino-opentelemetry-transport'
-})
-
-const logger = pino(transport)
-
-module.exports = logger
-```
-
-### Step 2. Configure Application Logging
-
-```jsx
-//app.js
-const logger = require('./tracing');
-
-// Basic logging
-logger.info('Logs from pino');
-
-// Structured logging with metadata
-logger.info('User authentication', {
-    userId: 'user123',
-    action: 'login',
-    timestamp: new Date().toISOString()
 });
 
-// Error handling example
-try {
-    throw new Error('Something went wrong');
-} catch (error) {
-    logger.error({
-        msg: 'Error occurred',
-        error: error.message,
-        stack: error.stack
-    });
-}
+const logger = pino(transport);
+
+logger.info('Hello, World! from pino');
 ```
+</TabItem>
+<TabItem value="ts" label="TypeScript">
+```ts
+import pino from 'pino';
 
+const transport = pino.transport({
+  target: 'pino-opentelemetry-transport'
+});
 
-Create a Dockerfile for your application:
-```Dockerfile
-# Dockerfile
-FROM node:16-alpine
+const logger = pino(transport);
 
-# Create app directory
-WORKDIR /usr/src/app
-
-# Install dependencies
-COPY package*.json ./
-RUN npm install
-
-# Copy application code
-COPY tracing.js ./
-COPY app.js ./
-
-# Set environment variables (can be overridden in Kubernetes deployment)
-ENV OTEL_EXPORTER_OTLP_LOGS_PROTOCOL=grpc
-ENV OTEL_EXPORTER_OTLP_LOGS_ENDPOINT=http://otel-collector:4317
-ENV OTEL_RESOURCE_ATTRIBUTES=service.name=pino-service,service.version=1.0.0,deployment.environment=production
-
-# Command to run the application
-CMD ["node", "app.js"]
+logger.info('Hello, World! from pino');
 ```
+</TabItem>
+</Tabs>
 
+### Step 2. Run Your Application
 
-```bash
-docker build -t my-pino-app .
-docker run -d my-pino-app
+Execute your application with OpenTelemetry Environment variables:
+
+```Bash
+OTEL_EXPORTER_OTLP_LOGS_ENDPOINT=http://localhost:4317/v1/logs OTEL_RESOURCE_ATTRIBUTES="service.name=<service_name>,service.version=1.2.3" node app.js
 ```
-
-
-* Create a deployment and add the environment variables using either ConfigMap or Secrets based on your security requirements
-```yaml
-# deployment.yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: pino-logger
-  labels:
-    app: pino-logger
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: pino-logger
-  template:
-    metadata:
-      labels:
-        app: pino-logger
-    spec:
-      containers:
-      - name: pino-logger
-        image: your-registry/your-image:latest
-        imagePullPolicy: Always
-        env:
-        - name: OTEL_EXPORTER_OTLP_LOGS_PROTOCOL
-          value: 'grpc'
-        - name: OTEL_EXPORTER_OTLP_LOGS_ENDPOINT
-          value: 'http://<service-name>.<namespace>.svc.cluster.local:4317'
-        - name: OTEL_RESOURCE_ATTRIBUTES
-          value: 'service.name=pino-logger,service.version=1.0.0'
-
-```
-
+- Replace `<service_name>` with name of your service
 ## Usage Examples
+The below examples show how to log messages with different severity levels and include structured metadata that can be used for filtering and analysis in SigNoz.
 
 ### Basic Logging
 
 ```jsx
-logger.info('Server started on port 3000');
+logger.info('Hello, World! from pino');
+```
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/logs-management/send-logs/info-logs.png"
+        alt="Node.js Pino Logs"
+    />
+<figcaption>
+<i>
+Severity Level: INFO
+</i>
+</figcaption>
+</figure>
+```jsx
 logger.warn('High memory usage detected');
-logger.error('Failed to process request');
 ```
 
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/logs-management/send-logs/warn-logs.png"
+        alt="Node.js Pino Logs"
+    />
+<figcaption>
+<i>
+Severity Level: WARN
+</i>
+</figcaption>
+</figure>
+
+
+```jsx
+logger.error('Failed to process request');
+```
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/logs-management/send-logs/error-logs.png"
+        alt="Node.js Pino Logs"
+    />
+<figcaption>
+<i>
+Severity Level: ERROR
+</i>
+</figcaption>
+</figure>
+
+```jsx
+logger.error({
+    msg: 'Error occurred',
+    error: error.message,
+    stack: error.stack
+});
+```
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/logs-management/send-logs/error-log-details.png"
+        alt="Node.js Pino Logs"
+    />
+<figcaption>
+<i>
+Severity Level: ERROR
+</i>
+</figcaption>
+</figure>
 ## Output
 
 After successful implementation, your logs will appear in your SigNoz Logs Section where you can:
