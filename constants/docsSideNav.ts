@@ -526,7 +526,7 @@ const docsSideNav = [
           },          {
             type: 'doc',
             route: '/docs/logs-management/send-logs/logrus-to-signoz',
-            label: 'OpenTelemetry Bridge for Logrus',
+            label: 'Logrus',
           },
           {
             type: 'category',
