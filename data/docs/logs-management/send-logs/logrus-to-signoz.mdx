@@ -14,19 +14,7 @@ This document explains how to collect log data from [Logrus](https://github.com/
 
 ## Setup
 
-### Step 1: Get the sample Golang application.
-
-Navigate to https://github.com/SigNoz/sample-golang-app to clone the SigNoz `sample-golang-app` application.
-
-After cloning the repository, switch to the `without-instrumentation` branch to complete the tutorial.
-
-```bash
-git checkout without-instrumentation
-```
-
 ### Step 1: Install dependencies
-
-Install all the required dependencies to implement the OpenTelemetry Logrus Log Bridge. 
 
 Navigate to the root folder of your golang application and run the below command to install the required dependencies.
 
@@ -42,7 +30,7 @@ github.com/sirupsen/logrus
 
 ### Step 2: Instrument OpenTelemetry Logrus Log Bridge in your Golang application
 
-To instrument your Go application with the OpenTelemetry Logrus Log Bridge, add the following code to your sample-golang-app `main.go` file.
+To instrument your Go application with the OpenTelemetry Logrus Log Bridge, add the following code to your golang application `main.go` file.
 
 ```golang
 import (
@@ -86,11 +74,13 @@ func main() {
 }
 ```
 
+In this code, we initialized an OpenTelemetry Protocol (OTLP) Log provider using the OTLP log exporter and OTLP Batch processor. The OTLP Log provider is then used to create a global Logrus hook using the `otellogrus` package.
+
 ### Step 3 (Optional): Inject Trace and Span ID fields to your logs
 
-To add the Span and Trace ID fields to your structured logs:
+Trace and span IDs in structured logs provide a way to correlate logs, track requests across services, and diagnose issues effectively. To add the Span and Trace ID fields to your structured logs:
 
-### Step 1: Import the OpenTelemetry Trace library
+**Import the OpenTelemetry Trace library to your code file**
 
 ```golang
 import (
@@ -100,7 +90,7 @@ import (
 )
 ```
 
-**Fetch current Span and Trace ID from context** 
+**Fetch current Span and Trace ID from context using the OTLP TracerProvider** 
 
 ```golang
    otel.SetTracerProvider(
@@ -109,12 +99,12 @@ import (
        ),
    )
 
-
    tracer := otel.GetTracerProvider().Tracer("signoz-tracer")
    _, span := tracer.Start(context.Background(), "signoz-tracer")
    defer span.End()
    
 ```
+This code implements an OTLP TracerProvider. The OTLP TracerProvider is responsible for creating Spans which help to trace an operation.
 
 **Create a function to add Span and Trace ID values to your Logrus fields** 
 
@@ -126,7 +116,7 @@ func LogrusFields(span oteltrace.Span) logrus.Fields {
    }
 }
 ```
-
+This function extracts the context span and trace IDs and adds the IDs as fields to the Logrus structured log.
 
 ### Step 4: Send Logrus logs to SigNoz 
 
@@ -136,9 +126,13 @@ func LogrusFields(span oteltrace.Span) logrus.Fields {
 
 To send Logrus logs to your SigNoz cloud account:
 
-1. Add logs to your application.
-    ```
-    logrus.WithFields(LogrusFields(span)).Info("Logrus logs message")
+1. Add logs to your code.
+    ```golang
+    # with span and trace ids
+    logrus.WithFields(LogrusFields(span)).Info("Logrus logs with span id and trace id 004")
+
+    # without span and trace ids
+    logrus.Info("Logrus logs with span id and trace id 004")
     ```
 2. Run your Golang application with your SigNoz credentials
     ```bash
@@ -157,9 +151,13 @@ Run your Golang application as specified above and wait some minutes for the log
 
 To send Logrus logs to your Self-hosted SigNoz dashboard:
 
-1. Add logs to your application.
-    ```
-    logrus.WithFields(LogrusFields(span)).Info("Logrus logs message")
+1. Add logs to your code.
+    ```golang
+    # with span and trace ids
+    logrus.WithFields(LogrusFields(span)).Info("Logrus logs with span id and trace id 004")
+
+    # without span and trace ids
+    logrus.Info("Logrus logs with span id and trace id 004")
     ```
 2. Run your Golang application with your Signoz credentials
     ```bash
@@ -172,3 +170,8 @@ Run your Golang application as specified above and wait some minutes for the log
 </TabItem>
 
 </Tabs>
+
+<figure data-zoomable align='center'>
+<img src="/img/blog/2024/12/logrus-logs.png" alt="Logrus logs" />
+<figcaption><i>Logrus logs</i></figcaption>
+</figure>
