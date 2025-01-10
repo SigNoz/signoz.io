@@ -1021,6 +1021,11 @@ const docsSideNav = [
     items: [
       {
         type: 'doc',
+        route: '/docs/frontend-monitoring/user-interaction',
+        label: 'User Interaction',
+      },
+      {
+        type: 'doc',
         route: '/docs/frontend-monitoring/web-vitals',
         label: 'Web Vitals',
       },
