@@ -408,6 +408,11 @@ module.exports = () => {
           destination: '/unified-observability/',
           permanent: true,
         },
+        {
+          source: '/docs/aws-monitoring/lambda-logs',
+          destination: '/docs/aws-monitoring/lambda/lambda-logs',
+          permanent: true,
+        },
       ]
     },
     webpack: (config, options) => {
