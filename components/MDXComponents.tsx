@@ -25,14 +25,15 @@ import VerticalTabs from './VerticalTabs/VerticalTabs'
 import FAQAccordion from './FAQAccordion/FAQAccordion'
 import Button from './Button/Button'
 import DatadogPricingCalculator from './DatadogPricingCalculator/DatadogPricingCalculator'
-import DatadogVsSigNoz from './DatadogVsSigNoz/DatadogVsSigNoz' 
+import DatadogVsSigNoz from './DatadogVsSigNoz/DatadogVsSigNoz'
 import DatadogAlternativesFinder from './DatadogAlternativesFinder/DatadogAlternativesFinder'
+import KeyPointCallout from './KeyPointCallout/KeyPointCallout'
 
 export const components: MDXComponents = {
   Image,
   TOCInline,
   a: CustomLink,
-  pre: Pre,   
+  pre: Pre,
   table: TableWrapper,
   BlogNewsletterForm,
   YouTube,
@@ -57,4 +58,5 @@ export const components: MDXComponents = {
   DatadogPricingCalculator,
   DatadogVsSigNoz,
   DatadogAlternativesFinder,
+  KeyPointCallout,
 }
