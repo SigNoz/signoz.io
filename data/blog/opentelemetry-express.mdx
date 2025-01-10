@@ -1,7 +1,7 @@
 ---
 title: Monitoring your Express application using OpenTelemetry
 slug: opentelemetry-express
-date: 2024-08-07
+date: 2024-12-18
 tags: [OpenTelemetry Instrumentation, JavaScript]
 authors: [ankit_anand]
 description: Learn how to implement OpenTelemetry in Express.js applications. This comprehensive guide covers setup, instrumentation, and best practices for improved monitoring.
@@ -119,301 +119,267 @@ keywords: [OpenTelemetry, Express.js, observability, instrumentation, monitoring
 
 Nodejs is a popular Javascript runtime environment that executes Javascript code outside of a web browser. Express is the most popular web frameworks that sits on top of Nodejs and adds functionalities like middleware, routing, etc. to Nodejs.
 
-
-
-![Cover Image](/img/blog/2021/11/monitor_express_cover.webp)
+<figure data-zoomable align='center'>
+    <img src="/img/blog/2024/12/opentelemetry-express-cover.webp" alt="Monitor your Expressjs applications with SigNoz"/>
+</figure>
 
 You can monitor your express application using OpenTelemetry and a tracing backend of your choice. OpenTelemetry is the leading open-source standard under the Cloud Native Computing Foundation that aims to standardize the process of instrumentation across multiple languages.
 
-In this article, we will be using [SigNoz](https://signoz.io/) to store and visualize the telemetry data collected by OpenTelemetry from a sample Expressjs application.
+In this article, we will be using [**SigNoz**](https://signoz.io/) to store and visualize the telemetry data collected by OpenTelemetry from a sample Express.js application.
 
-## Running an Express application with OpenTelemetry
+Steps to get started with OpenTelemetry for an Express.js application:
 
-OpenTelemetry is a set of tools, APIs, and SDKs used to instrument applications to create and manage telemetry data(logs, metrics, and traces).
+- Creating a SigNoz cloud account
+- Creating a sample express application
+- Setting up OpenTelemetry and sending data to SigNoz
+- Monitoring your Application in SigNoz
 
-### Install SigNoz
+## Creating a SigNoz cloud account
 
-You can get started with SigNoz using just three commands at your terminal.
+SigNoz cloud is the easiest way to run SigNoz. You can sign up [**here**](https://signoz.io/teams/) for a free account and get 30 days of unlimited access to all features.
 
-```jsx
-git clone -b main https://github.com/SigNoz/signoz.git
-cd signoz/deploy/
-./install.sh
-```
+[![try-signoz-cloud-blog-cta.png](https://signoz.io/img/launch_week/try-signoz-cloud-blog-cta.png)](https://signoz.io/teams)
 
+After you sign up and verify your email, you will be provided with details of your SigNoz cloud instance. Once you set up your password and log in, you will be greeted with the following onboarding screen.
 
-For detailed instructions, you can visit our documentation.
+## Creating a Sample Express Application
 
-[![Deployment Docs](/img/blog/common/deploy_docker_documentation.webp)](https://signoz.io/docs/install/)
+This section guides you through setting up a basic Express.js application, instrumenting it with OpenTelemetry, and sending telemetry data to SigNoz.
 
-When you are done installing SigNoz, you can access the UI at: [http://localhost:3301](http://localhost:3301/application)
+### Prerequisites
 
-The application list shown in the dashboard is from a sample app called HOT R.O.D that comes bundled with the SigNoz installation package.
+- Node.js version 12 or newer. Download the latest version of Node.js [**here**](https://nodejs.org/en/download/).
 
+### Quick Start
 
+To avoid manual setup, clone the [sample Express.js app repository](https://github.com/SigNoz/sample-nodejs-app), which is pre-configured with OpenTelemetry instrumentation. However, to fully understand the process, you are recommended to follow the steps below.
+
+### Steps to Build the Application
+
+For the sample application, let's create a basic 'hello world' express.js application.
+
+1. **Verify Node installation**
+    
+    Check if Node.js is installed:
+    
+    ```jsx
+    node - v
+    ```
+    
+2. **Make a directory and install Express**
+    
+    Make a directory for your sample app on your machine. Then open up the terminal, navigate to the directory path and install Express with the following command:
+    
+    ```jsx
+    npm i express
+    ```
+    
+3. **Create index.js**
+    
+    Create a file called **`index.js`** in your directory, and with any text editor, setup your 'Hello World' file with the code below:
+    
+    ```jsx
+    const express = require("express");
+    const cors = require("cors");
+    const PORT = process.env.PORT || "5555";
+    const app = express();
+    
+    app.use(cors());
+    app.use(express.json());
+    
+    app.all("/", (req, res) => {
+      res.json({ method: req.method, message: "Hello World", ...req.body });
+    });
+    
+    app.get("/404", (req, res) => {
+      res.sendStatus(404);
+    });
+    
+    app.listen(parseInt(PORT, 10), () => {
+      console.log(`Listening for requests on http://localhost:${PORT}`);
+    });
+    ```
+    
+4. **Check if your application is working**
+    
+    Run your application using the command below on your terminal.
+    
+    ```jsx
+    node index.js
+    ```
+    
+    You can check if your app is working by visiting [**http://localhost:5555/**](http://localhost:5555/)
+
+    <figure data-zoomable align='center'>
+    <img src="/img/blog/2024/12/node-app-running.webp" alt="Express App started successfully"/>
+    <figcaption><i>Express application running</i></figcaption>
+    </figure>
+    
+    Once you are finished checking, exit the application by using **`Ctrl + C`** on your terminal.
+    
+
+## Setting up OpenTelemetry and sending data to SigNoz
+
+SigNoz offers various [instrumentation methods](https://signoz.io/docs/instrumentation/opentelemetry-javascript/#send-traces-to-signoz-cloud) to help you send telemetry data from your application to SigNoz Cloud for comprehensive monitoring and analysis. In this tutorial, we will utilize the [No Code Automatic Instrumentation](https://signoz.io/docs/instrumentation/opentelemetry-javascript/#send-traces-directly-to-signoz-cloud---no-code-automatic-instrumentation-recommended) method, which simplifies the process by collecting telemetry data without requiring code changes.
+
+1. **Install OpenTelemetry Packages**
+    
+    To enable telemetry data collection for your application, you need to install the necessary OpenTelemetry packages. Use the following commands:
+    
+    ```jsx
+    npm install --save @opentelemetry/api
+    npm install --save @opentelemetry/auto-instrumentations-node
+    ```
+    
+    These libraries enable automatic instrumentation and interaction with the OpenTelemetry API:
+    
+    - **`@opentelemetry/sdk-node`** - This package provides the full OpenTelemetry SDK for Node.js including tracing and metrics.
+    - **`@opentelemetry/auto-instrumentations-node`** - This module provides a simple way to initialize multiple Node instrumentations.
+    - **`@opentelemetry/exporter-trace-otlp-http`** - This module provides the exporter to be used with OTLP (**`http/json`**) compatible receivers.
+    
+    💡 **Note**: If you run into any error, you might want to use these pinned versions of OpenTelemetry libraries used in [this](https://github.com/SigNoz/sample-nodejs-app/blob/master/package.json).
+    
+2. **Configure Environment Variables**
+    
+    To configure OpenTelemetry for your application, export the necessary environment variables. These variables define the data export settings and identify your application in SigNoz.
+    
+    Run the below in your terminal:
+    
+    ```jsx
+    export OTEL_TRACES_EXPORTER="otlp"
+    export OTEL_EXPORTER_OTLP_TRACES_ENDPOINT="<SIGNOZ_ENDPOINT>"
+    export OTEL_NODE_RESOURCE_DETECTORS="env,host,os"
+    export OTEL_SERVICE_NAME="<APP_NAME>"
+    export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>"
+    export NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
+    ```
+    
+    Here is a breakdown of the environment variables used:
+    
+    | **Variable** | **Description** |
+    | --- | --- |
+    | **`OTEL_TRACES_EXPORTER`** | Specifies the traces exporter. Set to `"otlp"` to use the OpenTelemetry Protocol (OTLP) for exporting trace data. |
+    | **`OTEL_EXPORTER_OTLP_TRACES_ENDPOINT`** | The SigNoz ingestion URL. You should have received this URL via email after registering with SigNoz Cloud. |
+    | **`OTEL_NODE_RESOURCE_DETECTORS`** | Identifies additional resource metadata such as environment, host, and OS for better trace context. |
+    | **`OTEL_SERVICE_NAME`** | The name of your application. This will appear in SigNoz as the service being monitored. |
+    | **`OTEL_EXPORTER_OTLP_HEADERS`** | Contains authentication headers, including your SigNoz ingestion key. |
+    | **`NODE_OPTIONS`** | Configures the Node.js runtime to preload OpenTelemetry's auto-instrumentation library. |
+    
+    Be sure to replace `<SIGNOZ_INGESTION_KEY>` with your actual SigNoz ingestion key. If you haven't created one yet, you can follow [this guide](https://signoz.io/docs/ingestion/signoz-cloud/keys/) to generate your ingestion key.
+    
+    <figure data-zoomable align='center'>
+    <img src="/img/blog/2024/12/variable-config.webp" alt="Variable config"/>
+    <figcaption><i>Variable config</i></figcaption>
+    </figure>
+    
+3. **Start the Application**
+    
+    After setting the environment variables, start your application by running:
+    
+    ```jsx
+    node index.js
+    ```
+    
+    You can check your application running at [**http://localhost:5555/**](http://localhost:5555/). 
+    
+    You need to generate some load in order to see data reported on SigNoz dashboard. Refresh the endpoint for 10-20 times, and wait for 2-3 mins.
+    
+
+## Monitoring your Application in SigNoz
+
+[SigNoz](http://signoz.io/) is an open-source, full-stack Application Performance Management (APM) tool that simplifies the process of visualizing telemetry data, including metrics, traces, and logs. Built on OpenTelemetry, SigNoz helps you monitor, troubleshoot, and optimize the performance of your applications by providing powerful visualizations and insights into your application's behaviour and health. With its easy-to-use dashboard, SigNoz makes it effortless to capture and analyze telemetry data from your applications in real-time.
+
+Once your application is running and has generated some traffic, you can start monitoring its performance in your SigNoz Cloud account. Navigate to the **`Services`** tab, and you should see your application listed.
 
 <figure data-zoomable align='center'>
-    <img className="box-shadowed-image"
-    alt="SigNoz dashboard home"
-    
-    src="/img/blog/common/signoz_dashboard_homepage.webp"
-    />
-<figcaption><i>List of applications shown as an example on SigNoz dashboard</i></figcaption>
-</figure>
-
-
-### Creating a sample express application
-
-You need to ensure that you have **Node.js version 12 or newer**. You can download the latest version of Node.js [here](https://nodejs.org/en/download/). For the sample application, let's create a basic 'hello world' express.js application.
-
-If you do not want to follow these steps manually, you can directly check out the <a href="https://github.com/SigNoz/sample-nodejs-app" rel="noopener noreferrer nofollow" target="_blank">GitHub repo</a> of the sample application. You can run the app directly after cloning it and start sending data to SigNoz. The code is already instrumented with OpenTelemetry libraries.
-
-But, it would be better if you follow these steps to understand what's happening.
-
-Check if node is installed on your machine by using the below command:
-
-```jsx
-node - v;
-```
-
-Steps to get the app set up and running:
-
-1. **Make a directory and install express**<br></br>
-   Make a directory for your sample app on your machine. Then open up the terminal, navigate to the directory path and install express with the following command:
-
-   ```
-   npm i express
-   ```
-
-2. **Create index.js**<br></br>
-   Create a file called `index.js` in your directory and with any text editor setup your 'Hello World' file with the code below:
-
-   ```jsx
-   const express = require("express");
-   const cors = require("cors");
-   const PORT = process.env.PORT || "5555";
-   const app = express();
-
-   app.use(cors());
-   app.use(express.json());
-
-   app.all("/", (req, res) => {
-     res.json({ method: req.method, message: "Hello World", ...req.body });
-   });
-
-   app.get("/404", (req, res) => {
-     res.sendStatus(404);
-   });
-
-   app.listen(parseInt(PORT, 10), () => {
-     console.log(`Listening for requests on http://localhost:${PORT}`);
-   });
-   ```
-
-3. **Check if your application is working**<br></br>
-   Run your application by using the below command at your terminal.
-
-   ```jsx
-   node index.js
-   ```
-
-   You can check if your app is working by visiting: [http://localhost:5555/](http://localhost:5555/)
-
-   Once you are finished checking, exit the application by using `Ctrl + C` on your terminal.
-
-## Set up OpenTelemetry and send data to SigNoz
-
-1. **Install OpenTelemetry packages**<br></br>
-   You will need the following OpenTelemetry packages for this sample application.
-
-   ```jsx
-   npm install --save @opentelemetry/sdk-node
-   npm install --save @opentelemetry/auto-instrumentations-node
-   npm install --save @opentelemetry/exporter-trace-otlp-http
-   ```
-
-   The dependencies included are briefly explained below:<br></br>
-
-   `@opentelemetry/sdk-node` - This package provides the full OpenTelemetry SDK for Node.js including tracing and metrics.<br></br>
-
-   `@opentelemetry/auto-instrumentations-node` - This module provides a simple way to initialize multiple Node instrumentations.<br></br>
-
-   `@opentelemetry/exporter-trace-otlp-http` - This module provides the exporter to be used with OTLP (`http/json`) compatible receivers.<br></br>
-
-      <VersionPin />
-
-2. **Create `tracing.js` file**<br></br>
-   Instantiate tracing by creating a `tracing.js` file and using the below code.
-
-   ```jsx
-   // tracing.js
-   "use strict";
-   const process = require("process");
-   const opentelemetry = require("@opentelemetry/sdk-node");
-   const {
-     getNodeAutoInstrumentations,
-   } = require("@opentelemetry/auto-instrumentations-node");
-   const {
-     OTLPTraceExporter,
-   } = require("@opentelemetry/exporter-trace-otlp-http");
-   const { Resource } = require("@opentelemetry/resources");
-   const {
-     SemanticResourceAttributes,
-   } = require("@opentelemetry/semantic-conventions");
-
-   const exporterOptions = {
-     url: "http://localhost:4318/v1/traces",
-   };
-
-   const traceExporter = new OTLPTraceExporter(exporterOptions);
-   const sdk = new opentelemetry.NodeSDK({
-     traceExporter,
-     instrumentations: [getNodeAutoInstrumentations()],
-     resource: new Resource({
-       [SemanticResourceAttributes.SERVICE_NAME]: "node_app",
-     }),
-   });
-
-   // initialize the SDK and register with the OpenTelemetry API
-   // this enables the API to record telemetry
-
-   sdk.start();
-
-   // gracefully shut down the SDK on process exit
-   process.on("SIGTERM", () => {
-     sdk
-       .shutdown()
-       .then(() => console.log("Tracing terminated"))
-       .catch((error) => console.log("Error terminating tracing", error))
-       .finally(() => process.exit(0));
-   });
-   ```
-
-   [OpenTelemetry Node](https://signoz.io/opentelemetry/nodejs/) SDK currently does not detect the `OTEL_RESOURCE_ATTRIBUTES` from `.env` files as of today. That’s why we need to include the variables in the `tracing.js` file itself.
-
-   About environment variables:
-
-   `service_name`: name of the service you want to monitor
-
-   `environment`: dev, prod, staging, etc.
-
-   `http://localhost:4318/v1/traces` is the default url for sending your tracing data. We are assuming you have installed SigNoz on your `localhost`. Based on your environment, you can update it accordingly. It should be in the following format:
-
-   `http://<IP of SigNoz backend>:4318/v1/traces`
-
-   <Admonition>
-   Remember to allow incoming requests to port 4318 of machine where SigNoz backend is hosted.
-   </Admonition>
-
-3. **Run your application**<br></br>
-   Now when you run your application, OpenTelemetry captures telemetry data from it and send it to SigNoz.
-
-   ```jsx
-   node -r ./tracing.js index.js
-   ```
-
-   You can check your application running at [http://localhost:5555/](http://localhost:5555/). You need to generate some load in order to see data reported on SigNoz dashboard. Refresh the endpoint for 10-20 times, and wait for 2-3 mins.
-
-And, congratulations! You have instrumented your sample Node.js app. You can now access the SigNoz dashboard at [http://localhost:3301](http://localhost:3301) to monitor your app for performance metrics.
-
-<figure data-zoomable align='center'>
-    <img className="box-shadowed-image"
-    alt="Express app in the list of applications"
-    
-    src="/img/blog/2021/11/express_list_apps.webp"
-    />
+<img src="/img/blog/2024/12/services-tab-express.webp" alt="Express app in the list of applications"/>
 <figcaption><i>Express app in the list of applications</i></figcaption>
 </figure>
 
+SigNoz provides out-of-the-box visualizations for key performance metrics, known as RED metrics:
 
-SigNoz is open-source, and a full-stack APM. It comes with charts of RED metrics and a seamless transition from metrics to traces.
+- **Rate of Requests**: How many requests are being processed?
+- **Error Rate**: The percentage of requests that result in errors.
+- **Duration**: How long does each request take to process?
 
-## Open-source tool to visualize telemetry data
-
-SigNoz makes it easy to visualize metrics and traces captured through OpenTelemetry instrumentation.
-
-SigNoz comes with out of box RED metrics charts and visualization. RED metrics stands for:
-
-- Rate of requests
-- Error rate of requests
-- Duration taken by requests
+Click on your application listed in the Services tab to be redirected to the Metrics page. Here, you will find pre-built visualizations that provide insights into your application's performance.
 
 <figure data-zoomable align='center'>
-    <img className="box-shadowed-image"
-    alt="SigNoz charts and metrics"
-    
-    src="/img/blog/common/signoz_charts_application_metrics.webp"
-    />
-<figcaption><i>Measure things like application latency, requests per sec, error percentage and see your top endpoints with SigNoz.</i></figcaption>
+<img src="/img/blog/2024/12/signoz_charts_application_metrics.webp" alt="Metrics tab"/>
+<figcaption><i>Measure things like application latency, requests per sec, error percentage and see your top endpoints with SigNoz</i></figcaption>
 </figure>
 
-
-You can then choose a particular timestamp where latency is high to drill down to traces around that timestamp.
+To explore traces, navigate to the **`Traces`** tab. You can choose a particular timestamp where latency is high and investigate traces from those moments to pinpoint performance bottlenecks.
 
 <figure data-zoomable align='center'>
-    <img className="box-shadowed-image"
-    alt="List of traces on SigNoz dashboard"
-    
-    src="/img/blog/common/signoz_list_of_traces_hc.webp"
-    />
-<figcaption><i>View of traces at a particular timestamp</i></figcaption>
+<img src="/img/blog/2024/12/traces-tab-express.webp" alt="Traces tab"/>
+<figcaption><i>Apply filters to analyze traces</i></figcaption>
 </figure>
 
-
-You can use flamegraphs to exactly identify the issue causing the latency.
+For further analysis, click on a trace to investigate performance issues or latency. SigNoz provides Flamegraphs that allow you to identify the root cause of latency by visualizing the time spent on each part of the request. This helps pinpoint which specific operations or services are causing delays and enables you to optimize your application's performance.
 
 <figure data-zoomable align='center'>
-    <img className="box-shadowed-image"
-    alt="Flamegraphs used to visualize spans of distributed tracing in SigNoz UI"
-    
-    src="/img/blog/common/signoz_flamegraphs.webp"
-    />
-<figcaption><i>View of traces at a particular timestamp</i></figcaption>
+<img src="/img/blog/2024/12/flamegraphs-express.webp" alt="View traces at a particular timestamp"/>
+<figcaption><i>View traces at a particular timestamp</i></figcaption>
 </figure>
-
-
-You can also build custom metrics dashboard for your infrastructure.
-
-<figure data-zoomable align='center'>
-    <img className="box-shadowed-image"
-    alt="Custom metrics dashboard"
-    
-    src="/img/blog/common/signoz_custom_dashboard-min.webp"
-    />
-<figcaption><i>You can also build a custom metrics dashboard for your infrastructure</i></figcaption>
-</figure>
-
 
 ## Conclusion
 
 OpenTelemetry makes it very convenient to instrument your Express application. You can then use an open-source APM tool like SigNoz to analyze the performance of your app. As SigNoz offers a full-stack observability tool, you don't have to use multiple tools for your monitoring needs.
 
+## Getting started with SigNoz
+
+SigNoz cloud is the easiest way to run SigNoz. [**Sign up**](https://signoz.io/teams/) for a free account and get 30 days of unlimited access to all features.
+
+[![try-signoz-cloud-blog-cta.png](https://signoz.io/img/launch_week/try-signoz-cloud-blog-cta.png)](https://signoz.io/teams)
+
+You can also install and self-host SigNoz yourself since it is open-source. With 19,000+ GitHub stars, [**open-source SigNoz**](https://github.com/signoz/signoz) is loved by developers. Find the [**instructions**](https://signoz.io/docs/install/) to self-host SigNoz.
+
+If you have any questions or need any help in setting things up, join our Slack community and ping us in the **`#support`** channel.
+
+[![https://signoz.io/img/blog/common/join_slack_cta.webp](https://signoz.io/img/blog/common/join_slack_cta.webp)](https://signoz.io/docs/community/#slack)
+
+---
+
+If you want to read more about SigNoz 👇
+
+[**Golang Application Monitoring with OpenTelemetry and SigNoz**](https://signoz.io/opentelemetry/go/)
+
+[**OpenTelemetry collector - full guide**](https://signoz.io/blog/opentelemetry-collector-complete-guide/)
+
 ## FAQs
 
-### What is OpenTelemetry and how does it relate to Express applications?
+### What is OpenTelemetry, and how does it relate to Express applications?
+
 OpenTelemetry is an open-source standard for instrumentation that allows you to collect telemetry data (logs, metrics, and traces) from your applications. For Express applications, OpenTelemetry can be used to monitor performance, track requests, and gather insights into your app's behavior.
 
 ### How do I set up OpenTelemetry for my Express application?
+
 To set up OpenTelemetry for an Express application:
+
 1. Install necessary OpenTelemetry packages (SDK, auto-instrumentations, and exporter).
-2. Create a `tracing.js` file to initialize the OpenTelemetry SDK.
-3. Configure the SDK with your desired service name and exporter URL.
-4. Run your application with the tracing file.
+2. Configure environment variables.
+3. Run your application.
 
 ### What is SigNoz and how does it work with OpenTelemetry?
+
 SigNoz is an open-source, full-stack Application Performance Monitoring (APM) tool. It can be used as a backend to store and visualize telemetry data collected by OpenTelemetry from your Express application. SigNoz provides dashboards for metrics, distributed tracing, and custom visualizations.
 
 ### What are the benefits of using OpenTelemetry with Express?
+
 Benefits include:
+
 - Standardized instrumentation across multiple languages and frameworks
 - Vendor-agnostic approach, allowing you to switch between different observability backends
 - Automatic instrumentation for many common libraries and frameworks
-- Ability to collect detailed telemetry data for better understanding of application performance
+- Ability to collect detailed telemetry data for a better understanding of application performance
 
 ### How can I visualize the data collected by OpenTelemetry from my Express app?
+
 You can visualize the data using an observability platform like SigNoz. SigNoz provides out-of-the-box visualizations for RED metrics (Rate, Error, and Duration), distributed traces, and allows you to create custom dashboards for your specific needs.
 
-### What are RED metrics and why are they important for monitoring Express apps?
+### What are RED metrics, and why are they important for monitoring Express apps?
+
 RED metrics stand for Rate (requests per second), Error rate (percentage of failed requests), and Duration (latency of requests). These metrics are crucial for monitoring Express apps as they provide a quick overview of your application's health and performance, allowing you to identify issues rapidly.
 
 ### How does OpenTelemetry differ from other monitoring solutions for Express.js?
@@ -431,31 +397,8 @@ While OpenTelemetry does introduce some overhead, it's generally minimal. The im
 ### How can I troubleshoot common issues when implementing OpenTelemetry in Express.js?
 
 Common troubleshooting steps include:
+
 - Verifying correct configuration of the SDK and exporters
 - Checking for conflicting instrumentation libraries
 - Ensuring proper context propagation in asynchronous code
 - Reviewing logs for any OpenTelemetry-related errors or warnings
-
-You can try out SigNoz by visiting its GitHub repo 👇
-
-[![SigNoz GitHub repo](/img/blog/common/signoz_github.webp)](https://github.com/SigNoz/signoz)
-
-If you are someone who understands more from video, then you can watch the below video tutorial on the same with SigNoz.
-
-
-
-<YouTube id="AKu1rlP6j_w" mute={false} />
-
-
-
-If you have any questions or need any help in setting things up, join our slack community and ping us in `#support` channel.
-
-[![SigNoz Slack community](/img/blog/common/join_slack_cta.webp)](https://signoz.io/slack)
-
----
-
-If you want to read more about SigNoz 👇
-
-[Golang Aplication Monitoring with OpenTelemetry and SigNoz](https://signoz.io/opentelemetry/go/)
-
-[OpenTelemetry collector - full guide](https://signoz.io/blog/opentelemetry-collector-complete-guide/)

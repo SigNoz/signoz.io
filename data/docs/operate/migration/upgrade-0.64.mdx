@@ -1,0 +1,384 @@
+---
+date: 2024-12-17
+id: upgrade-0.64
+title: Upgrade to v0.64 from earlier versions
+---
+
+This setup assumes you've installed SigNoz version `>=0.60.0` && `<v0.64` and have kept it running for at least 15 days (the default retention period). 
+
+If you changed the default retention period, please make the adjustments outlined in the [following step](#config-to-keep-using-old-table) before upgrading to v0.64.0. 
+
+You can remove these flags after the system has run for the duration specified in your retention settings.
+
+Please update the clickhouse queries in dashboards and alerts by following the docs [here](/docs/userguide/writing-clickhouse-traces-query/).
+
+
+<Admonition >
+If you want to use the new schema and don't want to wait for data to be backfilled you can migrate the old data by following these [steps](#migrate-data-from-old-table-to-new-table) after upgrade. 
+</Admonition>
+
+## Config to Keep Using Old Table
+
+<Admonition >
+You can skip this step if the retention setting is default and SigNoz version `>=0.60.0` && `<v0.64` was running for at least 15 days.
+</Admonition>
+
+### For Docker
+
+* In your [docker-compose.yaml](https://github.com/SigNoz/signoz/blob/main/deploy/docker/clickhouse-setup/docker-compose.yaml), add the following: 
+  ```
+  query-service:
+    command:
+      [
+        "-config=/root/config/prometheus.yml",
+        "--use-logs-new-schema=true",
+        "--use-trace-new-schema=false"
+      ]
+  ```
+* In your [otel-collector-config.yaml](https://github.com/SigNoz/signoz/blob/main/deploy/docker/clickhouse-setup/otel-collector-config.yaml), add the following:
+  ```
+  exporters:
+    clickhousetraces:
+      use_new_schema: false
+  ```
+
+### For Kubernetes
+
+* In your `override-values.yaml`, add the following:
+  ```
+  queryService:
+    additionalArgs:
+      - --use-logs-new-schema=true
+      - --use-trace-new-schema=false
+  otelCollector:
+    config:
+      exporters:
+        clickhousetraces:
+          use_new_schema: false
+  ```
+
+
+## Migrating the Existing TTL Settings
+
+After upgrading to SigNoz version v0.64.0 i.e. SigNoz chart version v0.62.0, you need to run the migration script to copy the TTL settings and materialized columns from the old table.
+
+Migration changes include:
+* materialized columns from the old table to the new table
+* TTL settings from the old table to the new table
+
+## Steps to Run Migration Script
+
+## First Upgrade to v0.64.0
+
+Follow the platform specific instructions to upgrade to 0.64 and above.
+
+- [Docker Standalone](https://signoz.io/docs/operate/docker-standalone/#upgrade)
+- [Kubernetes](https://signoz.io/docs/operate/kubernetes/#upgrade)
+
+
+### For Docker
+```bash
+docker run --name signoz-migrate-64 --network clickhouse-setup_default \
+  -it -d signoz/migrate:0.64 -host=clickhouse -port=9000
+```
+
+Steps to check logs:
+
+```bash
+docker logs -f signoz-migrate-64
+```
+
+In case of failure and have to run again, make sure to cleanup the container before running the migration script again.
+
+```bash
+docker stop signoz-migrate-64
+
+docker rm signoz-migrate-64
+```
+
+
+### For Kubernetes
+
+```bash
+RELEASE=my-release
+NAMESPACE=platform
+ADMIN_PASSWORD=$(
+  kubectl -n $NAMESPACE get clickhouseinstallations.clickhouse.altinity.com $RELEASE-clickhouse \
+  -o jsonpath --template '{.spec.configuration.users.admin/password}'
+)
+
+kubectl -n $NAMESPACE run -i -t signoz-migrate-64 --image=signoz/migrate:0.64 --restart='Never' \
+  -- -host=$RELEASE-clickhouse -port=9000 -userName=admin -password=$ADMIN_PASSWORD
+```
+
+Steps to check logs:
+
+```bash
+kubectl -n $NAMESPACE logs -f signoz-migrate-64
+```
+
+In case of failure and have to run again, make sure to cleanup the pod before running the migration script again.
+
+```bash
+kubectl -n $NAMESPACE delete pod signoz-migrate-64
+```
+
+
+## In case of Upgrade Failure
+
+If you face any issue, reach out to us at [Slack](https://signoz.io/slack).
+
+## Command-Line Interface (CLI) Flags
+
+There are some custom flags which can be enabled based on different use-cases.
+All the flags below are `optional`.
+
+Flags:
+
+- `-port` : Specify port of clickhouse. `default=9000`
+- `-host` : Specify host of clickhouse. `default=127.0.0.1`
+- `-userName` : Specify user name of clickhouse. `default=default`
+- `-password` : Specify password of clickhouse. `default=""`
+
+
+## Migrate Data from Old Table to New Table
+
+If you already kept SigNoz version `>=0.60.0` && `<v0.64.0` running for at-least 15 days i.e the default retention period this is not required as data will already be backfilled.
+
+This guide will help migrate the data from old table to new table.
+
+For migrating the data you will need to get the start and end timestamp which is the duration of trace data that you want to migrate from the old table to the new table.
+
+#### For Docker
+* Exec into clickhouse container
+  ```bash
+  docker exec -it signoz-clickhouse /bin/bash
+  
+  clickhouse client
+  ```
+* Get the starting timestamp 
+  ```sql
+  select toUnixTimestamp64Nano(timestamp) from signoz_traces.distributed_signoz_index_v2 order by timestamp asc limit 1;
+  ```
+* Get the ending timestamp
+  ```sql
+  select toUnixTimestamp64Nano(timestamp) from signoz_traces.distributed_signoz_index_v3 order by ts_bucket_start asc, timestamp asc limit 1;
+  ```
+  In case of empty response from the above query, please make sure that you upgraded to version `>=0.` first.
+* Create a temporary spans table
+  ```sql
+  CREATE TABLE signoz_traces.tmp_signoz_spans on cluster cluster
+  (
+      `timestamp` DateTime64(9) CODEC(DoubleDelta, LZ4),
+      `traceID` FixedString(32) CODEC(ZSTD(1)),
+      `model` String CODEC(ZSTD(9))
+  )
+  ENGINE = MergeTree
+  PARTITION BY toDate(timestamp)
+  ORDER BY timestamp
+  TTL toDateTime(timestamp) + toIntervalSecond(2592000)
+  SETTINGS index_granularity = 1024, ttl_only_drop_parts = 1
+  ```
+
+  ```sql
+  CREATE TABLE signoz_traces.distributed_tmp_signoz_spans on cluster cluster
+  (
+      `timestamp` DateTime64(9) CODEC(DoubleDelta, LZ4),
+      `traceID` FixedString(32) CODEC(ZSTD(1)),
+      `model` String CODEC(ZSTD(9))
+  )
+  ENGINE = Distributed('cluster', 'signoz_traces', 'tmp_signoz_spans', cityHash64(traceID))
+  ```
+* Copy data from `distributed_signoz_spans` to the temporary spans table
+  ```
+  insert into signoz_traces.distributed_tmp_signoz_spans select * from signoz_traces.distributed_signoz_spans where timestamp <= fromUnixTimestamp64Nano(<END_TIMESTAMP>) settings max_threads=8;
+  ```
+  replace `<END_TIMESTAMP>` with the value from the previous query.
+
+  Please note that this query might take time depending on the amount of existing data you have.
+
+### For Kubernetes
+
+- Exec into your clickhouse container
+  ```bash
+  kubectl exec -n platform -it chi-my-release-clickhouse-cluster-0-0-0 -- sh
+
+  clickhouse client
+  ```
+* Get the starting timestamp 
+  ```sql
+  select toUnixTimestamp64Nano(timestamp) from signoz_traces.distributed_signoz_index_v2 order by timestamp asc limit 1;
+  ```
+* Get the ending timestamp
+  ```sql
+  select toUnixTimestamp64Nano(timestamp) from signoz_traces.distributed_signoz_index_v3 order by ts_bucket_start asc, timestamp asc limit 1;
+  ```
+  In case of empty response from the above query, please make sure that you upgraded to version `>=0.64` first.
+* Create a temporary spans table
+  ```sql
+  CREATE TABLE signoz_traces.tmp_signoz_spans on cluster cluster
+  (
+      `timestamp` DateTime64(9) CODEC(DoubleDelta, LZ4),
+      `traceID` FixedString(32) CODEC(ZSTD(1)),
+      `model` String CODEC(ZSTD(9))
+  )
+  ENGINE = MergeTree
+  PARTITION BY toDate(timestamp)
+  ORDER BY timestamp
+  TTL toDateTime(timestamp) + toIntervalSecond(2592000)
+  SETTINGS index_granularity = 1024, ttl_only_drop_parts = 1
+  ```
+
+  ```sql
+  CREATE TABLE signoz_traces.distributed_tmp_signoz_spans on cluster cluster
+  (
+      `timestamp` DateTime64(9) CODEC(DoubleDelta, LZ4),
+      `traceID` FixedString(32) CODEC(ZSTD(1)),
+      `model` String CODEC(ZSTD(9))
+  )
+  ENGINE = Distributed('cluster', 'signoz_traces', 'tmp_signoz_spans', cityHash64(traceID))
+  ```
+* Copy data from `distributed_signoz_spans` to the temporary spans table
+  ```
+  insert into signoz_traces.distributed_tmp_signoz_spans select * from signoz_traces.distributed_signoz_spans where timestamp <= fromUnixTimestamp64Nano(<END_TIMESTAMP>) settings max_threads=8;
+  ```
+  replace `<END_TIMESTAMP>` with the value from the previous query.
+
+  Please note that this query might take time depending on the amount of existing data you have. 
+
+Next we will run the migrator with arguments that will copy the data from the old to the new table.
+
+### For Docker
+
+```bash
+docker run --name signoz-migrate-64-data --network clickhouse-setup_default \
+  -it -d signoz/migrate:0.64-data -host=clickhouse -port=9000 -dest_host=clickhouse -dest_port=9000 -start_ts=<START_TIMESTAMP> -end_ts=<END_TIMESTAMP> -batch_size=40000 -batch_duration=5 -count_delta_allowed=10000
+```
+
+Please replace `<START_TIMESTAMP>` and `<END_TIMESTAMP>`
+
+
+<Admonition >
+For more info on the args please check [this](#data-migrator-command-line-interface-cli-flags).
+</Admonition>
+
+Steps to check logs:
+
+```bash
+docker logs -f signoz-migrate-64-data
+```
+
+In case of any failure, you have to run the script again with updated ending timestamp.
+
+* Get the updated ending timestamp
+  ```sql
+  select toUnixTimestamp64Nano(timestamp) from signoz_traces.distributed_signoz_index_v3 order by ts_bucket_start asc, timestamp asc limit 1;
+  ```
+* Make sure to cleanup the container before running the migration script again. 
+  ```bash
+  docker stop signoz-migrate-64-data
+
+  docker rm signoz-migrate-64-data
+  ```
+
+
+### For Kubernetes
+
+* Create a `pod.yaml` file
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: signoz-migrate-data-64
+spec:
+  restartPolicy: Never
+  containers:
+    - name: signoz-migrate-data
+      image: signoz/migrate:0.64-data
+      args:
+        - "-host=<RELEASE>-clickhouse"
+        - "-dest_host=<RELEASE>-clickhouse"
+        - "-username=admin"
+        - "-dest_username=admin"
+        - "-password=<ADMIN_PASSWORD>"
+        - "-dest_password=<ADMIN_PASSWORD>"
+        - "-start_ts=<START_TIMESTAMP>"
+        - "-end_ts=<END_TIMESTAMP>"
+        - "-batch_size=40000"
+        - "-batch_duration=5"
+        - "count_delta_allowed=10000"
+      resources:
+        requests:
+          cpu: 2000m
+          memory: 4Gi
+```
+
+Please replace `<RELEASE>`, `<ADMIN_PASSWORD>`, `<START_TIMESTAMP>` and `<END_TIMESTAMP>`
+
+<Admonition >
+For more info on the args please check [this](#data-migrator-command-line-interface-cli-flags).
+</Admonition>
+
+
+To get the `<ADMIN_PASSWORD>`
+```bash
+RELEASE=my-release
+NAMESPACE=platform
+ADMIN_PASSWORD=$(
+  kubectl -n $NAMESPACE get clickhouseinstallations.clickhouse.altinity.com $RELEASE-clickhouse \
+  -o jsonpath --template '{.spec.configuration.users.admin/password}'
+)
+
+echo $<ADMIN_PASSWORD>
+```
+
+
+Now, create the `signoz-migrate-data-64` pod using the YAML:
+
+  ```yaml
+  kubectl -n <NAMESPACE> apply -f pod.yaml
+  ```
+
+
+Steps to check logs:
+
+```bash
+kubectl -n $NAMESPACE logs -f signoz-migrate-data-64
+```
+
+In case of any failure, you have to run the script again with updated ending timestamp.
+* Get the updated ending timestamp
+  ```sql
+  select toUnixTimestamp64Nano(timestamp) from signoz_traces.distributed_signoz_index_v3 order by ts_bucket_start asc, timestamp asc limit 1;
+  ```
+* Make sure to cleanup the container before running the migration script again. 
+  ```bash
+  kubectl -n $NAMESPACE delete pod signoz-migrate-data-64
+  ```
+
+
+## In case of Upgrade Failure
+
+If you face any issue, reach out to us on [Slack](https://signoz.io/slack).
+
+
+## Data Migrator Command-Line Interface (CLI) Flags
+
+There are the flags for data migrator which can be customized based on different use-cases.
+
+Flags:
+
+- `-port` : Specify port of clickhouse. `default=9000`
+- `-host` : Specify host of clickhouse. `default=127.0.0.1`
+- `-username` : Specify user name of clickhouse. `default=default`
+- `-password` : Specify password of clickhouse. `default=""`
+- `-dest_port` : Specify dest port of clickhouse. `default=9000`
+- `-dest_host` : Specify dest host of clickhouse. `default=127.0.0.1`
+- `-dest_username` : Specify dest user name of clickhouse. `default=default`
+- `-dest_password` : Specify dest password of clickhouse. `default=""`
+- `-start_ts` : Specify starting timestamp for the trace data to be migrated
+- `-end_ts` : Specify ending timestamp for the trace data to be migrated
+- `-batch_duration` : Specify window size of the data that will be fetched from the old table
+- `-batch_size` : Specify size of the batches that will be written to the new table
+- `-count_delta_allowed` : The difference number of spans allowed between `distributed_signoz_spans` and `distributed_signoz_index_v3`. 

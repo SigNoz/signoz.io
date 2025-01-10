@@ -215,6 +215,12 @@ const docsSideNav = [
               },
               {
                 type: 'doc',
+                route: '/docs/instrumentation/opentelemetry-quarkus',
+                label: 'Quarkus',
+                className: 'new-doc',
+              },
+              {
+                type: 'doc',
                 route: '/docs/instrumentation/tomcat',
                 label: 'Tomcat',
               },
@@ -783,6 +789,12 @@ const docsSideNav = [
         route: '/docs/metrics-management/k8s-infra-otel-config',
         label: 'Configure k8s-infra otelDeployment to collect metrics from receivers',
       },
+      {
+        type: 'doc',
+        className: 'new-doc',
+        route: '/docs/metrics-management/docker-container-metrics',
+        label: 'Docker container metrics',
+      },
     ],
   },
   {
@@ -997,6 +1009,11 @@ const docsSideNav = [
         route: '/docs/alerts-management/alerts-history',
         label: 'Alerts History',
       },
+      {
+        type: 'doc',
+        route: '/docs/alerts-management/terraform-provider-signoz',
+        label: 'Terraform Provider',
+      },
     ],
   },
   {
@@ -1006,6 +1023,11 @@ const docsSideNav = [
     className: 'new-doc',
     route: '/docs/frontend-and-mobile-monitoring',
     items: [
+      {
+        type: 'doc',
+        route: '/docs/frontend-monitoring/document-load',
+        label: 'Document Load',
+      },
       {
         type: 'doc',
         route: '/docs/frontend-monitoring/web-vitals',
@@ -1323,9 +1345,21 @@ const docsSideNav = [
         label: 'RDS',
       },
       {
-        type: 'doc',
-        route: '/docs/aws-monitoring/lambda-logs',
+        type: 'category',
+        isExpanded: false,
         label: 'AWS Lambda',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/aws-monitoring/lambda/lambda-logs',
+            label: 'Logging',
+          },
+          {
+            type: 'doc',
+            route: '/docs/aws-monitoring/lambda/lambda-traces',
+            label: 'APM & Tracing',
+          },
+        ],
       },
     ],
   },
@@ -1787,6 +1821,11 @@ const docsSideNav = [
         // slug: '/docs/operate/migration/migration',
         // },
         items: [
+          {
+            type: 'doc',
+            route: '/docs/operate/migration/upgrade-0.64',
+            label: 'Upgrade to v0.64',
+          },
           {
             type: 'doc',
             route: '/docs/operate/migration/upgrade-0.55',

@@ -3,14 +3,17 @@ date: 2024-06-06
 id: rust
 title: Rust Opentelemetry Instrumentation
 description: Send events from your Rust application to SigNoz
-
+hide_table_of_contents: true
 ---
+{/* 
 
+import InstrumentationFAQ from '@/components/shared/instrumentation-faq.md' */}
 
-import InstrumentationFAQ from '@/components/shared/instrumentation-faq.md'
+This document contains instructions on how to set up OpenTelemetry instrumentation in your Rust applications and view your application traces in SigNoz.
 
-This doc contains instructions on how to set up OpenTelemetry(OTel) instrumentation in your Rust application. OpenTelemetry, also known as OTel for short, is an open-source observability framework that can help you generate and collect telemetry data - traces, metrics, and logs from your Rust application.
-
+{/* This doc contains instructions on how to set up OpenTelemetry(OTel) instrumentation in your Rust application. */}
+{/* OpenTelemetry, also known as OTel for short, is an open-source observability framework that can help you generate and collect telemetry data - traces, metrics, and logs from your Rust application. */}
+{/* 
 Once the telemetry data is generated, you can configure an exporter to send the data to SigNoz for monitoring and visualization.
 
 There are three major steps to using OpenTelemetry:
@@ -19,11 +22,14 @@ There are three major steps to using OpenTelemetry:
 - Configuring the exporter to send data to SigNoz
 - Validating that configuration to ensure that data is being sent as expected.
 
-In this tutorial, we will instrument a Rust application for traces and send it to SigNoz.
+In this tutorial, we will instrument a Rust application for traces and send it to SigNoz. */}
 
 ## Requirements
 
 [Rust](https://www.rust-lang.org/tools/install)
+
+<Tabs entityName="plans">
+<TabItem value="cloud" label="SigNoz Cloud" default>
 
 ## Send traces to SigNoz Cloud
 Based on your application environment, you can choose the setup below to send traces to SigNoz Cloud.
@@ -76,11 +82,11 @@ Add this function in main.rs file, `init_tracer` is initializing an OpenTelemetr
 
 ```rust
 fn init_tracer() -> Result<sdktrace::Tracer, TraceError> {
-    let signoz_access_token = std::env::var("SIGNOZ_ACCESS_TOKEN").expect("SIGNOZ_ACCESS_TOKEN not set");
+    let SIGNOZ_INGESTION_KEY = std::env::var("SIGNOZ_INGESTION_KEY").expect("SIGNOZ_INGESTION_KEY not set");
     let mut metadata = MetadataMap::new();
     metadata.insert(
         "signoz-ingestion-key",
-        MetadataValue::from_str(&signoz_access_token).unwrap(),
+        MetadataValue::from_str(&SIGNOZ_INGESTION_KEY).unwrap(),
     );
     opentelemetry_otlp::new_pipeline()
         .tracing()
@@ -114,18 +120,15 @@ project_root/
 Paste these in `.env` file 
 ```bash
 PORT=3000
-APP_NAME=rust-sample
-SIGNOZ_ENDPOINT=https://ingest.[region].signoz.cloud:443/v1/traces
-SIGNOZ_ACCESS_TOKEN=XXXXXXXXXX
+APP_NAME=<service_name>
+SIGNOZ_ENDPOINT=https://ingest.<region>.signoz.cloud:443/v1/traces
+SIGNOZ_ACCESS_TOKEN=<your-ingestion-key>
 ```
 
-| Variable              | Description                                               |
-|-----------------------|-----------------------------------------------------|
-| PORT (Optional)      | If it is a web app pass port or else you can ignore this variable  |
-| APP_NAME *      | Name you want to give to your rust application  |
-| SIGNOZ_ENDPOINT  *     | This is ingestion URL which you must have got in mail after registering on SigNoz cloud  |
-| SIGNOZ_ACCESS_TOKEN *  | This is Ingestion Key which you must have got in mail after registering on SigNoz cloud                                     |
-
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service_name>` is name of your service
+- PORT (Optional) - If it is a web app pass port or else you can ignore this variable
 
 **Step 3: Add the OpenTelemetry instrumentation for your Rust app**
 
@@ -184,19 +187,19 @@ Now comes the most interesting part, Sending data to SigNoz to get sense of your
 Go to your `.env` file and update the value of required variables i.e
 `APP_NAME`,
 `SIGNOZ_ENDPOINT` and
-`SIGNOZ_ACCESS_TOKEN`
+`SIGNOZ_INGESTION_KEY`
 
 Now run `cargo run` in terminal to start the application!
 
 ### Send traces via OTel Collector binary
 
-OTel Collector binary helps to collect logs, hostmetrics, resource and infra attributes. It is recommended to install Otel Collector binary to collect and send traces to SigNoz cloud. You can correlate signals and have rich contextual data through this way.
+**Step 1. Install OTel Collector binary**
 
-<Admonition>
-You can find instructions to install OTel Collector binary [here](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) in your VM. Once you are done setting up your OTel Collector binary, you can follow the below steps for instrumenting your Rust application.
-</Admonition>
+OTel Collector binary helps to collect logs, hostmetrics, resource and infra attributes.
 
-**Step 1 : Instrument your application with OpenTelemetry**
+You can find instructions to install OTel Collector binary [here](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) in your VM.
+
+**Step 2 : Instrument your application with OpenTelemetry**
 
 To configure our Rust application to send traces we need to initialize OpenTelemetry, Otel has already created some crates which you need to add into your `Cargo.toml` file, just below `[dependencies]` section.
 
@@ -223,7 +226,7 @@ use opentelemetry_otlp::WithExportConfig;
 use tonic::metadata::{MetadataMap, MetadataValue};
 ```
 
-**Step 2: Initialize the tracer and create env file**
+**Step 3: Initialize the tracer and create env file**
 
 Add this function in main.rs file, `init_tracer` is initializing an OpenTelemetry tracer with the OpenTelemetry OTLP exporter which is sending data to SigNoz Cloud. 
 
@@ -241,7 +244,7 @@ fn init_tracer() -> Result<sdktrace::Tracer, TraceError> {
 }
 ```
 
-**Step 3: Add the OpenTelemetry instrumentation for your Rust app**
+**Step 4: Add the OpenTelemetry instrumentation for your Rust app**
 
 You need call init_tracer function inside `main()` at starting so that as soon as your rust application starts, tracer will be available globally.
 ```rust 
@@ -282,7 +285,7 @@ Now comes the most interesting part, Sending data to SigNoz to get sense of your
     shutdown_tracer_provider()
 ```
 
-**Step 4: Set environment variables and run app**
+**Step 5: Set environment variables and run app**
 
 
 | Variable                        | Description                                                                                                                                                                 |
@@ -453,11 +456,11 @@ Add this function in main.rs file, `init_tracer` is initializing an OpenTelemetr
 
 ```rust
 fn init_tracer() -> Result<sdktrace::Tracer, TraceError> {
-    let signoz_access_token = std::env::var("SIGNOZ_ACCESS_TOKEN").expect("SIGNOZ_ACCESS_TOKEN not set");
+    let SIGNOZ_INGESTION_KEY = std::env::var("SIGNOZ_INGESTION_KEY").expect("SIGNOZ_INGESTION_KEY not set");
     let mut metadata = MetadataMap::new();
     metadata.insert(
         "signoz-ingestion-key",
-        MetadataValue::from_str(&signoz_access_token).unwrap(),
+        MetadataValue::from_str(&SIGNOZ_INGESTION_KEY).unwrap(),
     );
     opentelemetry_otlp::new_pipeline()
         .tracing()
@@ -491,18 +494,15 @@ project_root/
 Paste these in `.env` file 
 ```bash
 PORT=3000
-APP_NAME=rust-sample
-SIGNOZ_ENDPOINT=https://ingest.[region].signoz.cloud:443/v1/traces
+APP_NAME=<service_name>
+SIGNOZ_ENDPOINT=https://ingest.<region>.signoz.cloud:443/v1/traces
 SIGNOZ_ACCESS_TOKEN=XXXXXXXXXX
 ```
 
-| Variable              | Description                                               |
-|-----------------------|-----------------------------------------------------|
-| PORT (Optional)      | If it is a web app pass port or else you can ignore this variable  |
-| APP_NAME *      | Name you want to give to your rust application  |
-| SIGNOZ_ENDPOINT  *     | This is ingestion URL which you must have got in mail after registering on SigNoz cloud  |
-| SIGNOZ_ACCESS_TOKEN *  | This is Ingestion Key which you must have got in mail after registering on SigNoz cloud                                     |
-
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service_name>` is name of your service
+- PORT (Optional) - If it is a web app pass port or else you can ignore this variable
 
 **Step 3: Add the OpenTelemetry instrumentation for your Rust app**
 
@@ -561,19 +561,19 @@ Now comes the most interesting part, Sending data to SigNoz to get sense of your
 Go to your `.env` file and update the value of required variables i.e
 `APP_NAME`,
 `SIGNOZ_ENDPOINT` and
-`SIGNOZ_ACCESS_TOKEN`
+`SIGNOZ_INGESTION_KEY`
 
 Now run `cargo run` in terminal to start the application!
 
 ### Send traces via OTel Collector binary
 
-OTel Collector binary helps to collect logs, hostmetrics, resource and infra attributes. It is recommended to install Otel Collector binary to collect and send traces to SigNoz cloud. You can correlate signals and have rich contextual data through this way.
+**Step 1 : Install OTel Collector binary**
 
-<Admonition>
-You can find instructions to install OTel Collector binary [here](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) in your Windows Machine. Once you are done setting up your OTel Collector binary, you can follow the below steps for instrumenting your Rust application.
-</Admonition>
+OTel Collector binary helps to collect logs, hostmetrics, resource and infra attributes.
 
-**Step 1 : Instrument your application with OpenTelemetry**
+You can find instructions to install OTel Collector binary [here](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) in your VM.
+
+**Step 2 : Instrument your application with OpenTelemetry**
 
 To configure our Rust application to send traces we need to initialize OpenTelemetry, Otel has already created some crates which you need to add into your `Cargo.toml` file, just below `[dependencies]` section.
 
@@ -600,7 +600,7 @@ use opentelemetry_otlp::WithExportConfig;
 use tonic::metadata::{MetadataMap, MetadataValue};
 ```
 
-**Step 2: Initialize the tracer and create env file**
+**Step 3: Initialize the tracer and create env file**
 
 Add this function in main.rs file, `init_tracer` is initializing an OpenTelemetry tracer with the OpenTelemetry OTLP exporter which is sending data to SigNoz Cloud. 
 
@@ -627,7 +627,7 @@ fn init_tracer() -> Result<sdktrace::Tracer, TraceError> {
 }
 ```
 
-**Step 3: Add the OpenTelemetry instrumentation for your Rust app**
+**Step 4: Add the OpenTelemetry instrumentation for your Rust app**
 
 You need call init_tracer function inside `main()` at starting so that as soon as your rust application starts, tracer will be available globally.
 ```rust 
@@ -668,7 +668,7 @@ Now comes the most interesting part, Sending data to SigNoz to get sense of your
     shutdown_tracer_provider()
 ```
 
-**Step 4: Set environment variables and run app**
+**Step 5: Set environment variables and run app**
 
 Create a `.env` file in root of project , the structure should look like this.
 ```
@@ -702,6 +702,8 @@ in terminal to start the application!
 
 </Tabs>
 
+</TabItem>
+<TabItem value="self-host" label="Self-Host">
 ## Send Traces to Self-Hosted SigNoz
 
 **Step 1 : Instrument your application with OpenTelemetry**
@@ -803,6 +805,9 @@ OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317 OTEL_RESOURCE_ATTRIBUTES=servi
 ```
 in terminal to start the application!
 
+</TabItem>
+</Tabs>
+
 ## Sample Rust Application
 
 We have included a sample Rust application at [Sample Rust App Github Repo](https://github.com/SigNoz/sample-rust-app), 
@@ -810,5 +815,5 @@ We have included a sample Rust application at [Sample Rust App Github Repo](http
 ## Tutorial 
 
 Here's a [tutorial](https://signoz.io/blog/opentelemetry-rust/) with step by step guide on how to install SigNoz and start monitoring a sample Rust app. 
-
-<InstrumentationFAQ />
+{/* 
+<InstrumentationFAQ /> */}

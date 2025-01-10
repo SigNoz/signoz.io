@@ -141,6 +141,12 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/careers/',
+          destination: 'https://jobs.gem.com/signoz',
+          basePath: false,
+          permanent: true,
+        },
+        {
           source: '/docs/deployment/docker/',
           destination: '/docs/install/docker',
           permanent: true,
@@ -395,6 +401,16 @@ module.exports = () => {
         {
           source: '/docs/frontend-monitoring/web-vitals/',
           destination: '/docs/frontend-monitoring/opentelemetry-web-vitals/',
+          permanent: true,
+        },
+        {
+          source: '/guides/unified-observability/',
+          destination: '/unified-observability/',
+          permanent: true,
+        },
+        {
+          source: '/docs/aws-monitoring/lambda-logs',
+          destination: '/docs/aws-monitoring/lambda/lambda-logs',
           permanent: true,
         },
       ]
