@@ -8,20 +8,19 @@ hide_table_of_contents: true
 
 ## Overview
 
-This documentation provides a detailed walkthrough on how to set up Google App Engine to send the traces directly to SigNoz. By the end of this guide, you will have a setup that automatically sends your App Engine traces to SigNoz.
+This documentation provides a detailed walkthrough on how to set up Google App Engine to send the traces directly to SigNoz. 
 
-<Tabs>
+<Tabs entityName="plans">
 <TabItem value="cloud" label="SigNoz Cloud" default>
-**Here's a quick summary of what we will be doing in this guide**
+{/* **Here's a quick summary of what we will be doing in this guide**
 
 * Create and configure App Engine
 * Invoke the deployed App Engine service to generate traces
-* Send and Visualize the traces in SigNoz Cloud
+* Send and Visualize the traces in SigNoz Cloud */}
 
 ## Prerequisites
 
 * [Google Cloud account](https://console.cloud.google.com/) with administrative privilege or App Engine Admin privilege.
-* [SigNoz Cloud Account](https://signoz.io/teams/) (we are using SigNoz Cloud for this demonstration, we will also need ingestion details. To get your **Ingestion Key** and **Ingestion URL,** sign-in to your SigNoz Cloud Account and go to **Settings** >> **Ingestion Settings**)
 * Access to a project in GCP
 * [Cloud Build API](https://console.cloud.google.com/flows/enableapi?apiid=cloudbuild.googleapis.com) is enabled
 
@@ -168,7 +167,7 @@ With these changes, the start script for the application is `node -r ./tracing.j
 runtime: nodejs20
 
 env_variables:
-  OTEL_EXPORTER_OTLP_HEADERS: "signoz-access-token=<SIGNOZ_INGESTION_KEY>"
+  OTEL_EXPORTER_OTLP_HEADERS: "signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>"
 ```
 
 Put the appropriate `SIGNOZ_INGESTION_KEY`. It is the API token provided by SigNoz. You can find your ingestion key from SigNoz cloud account details sent on your email.
@@ -213,19 +212,18 @@ App Engine Traces in SigNoz Cloud
 
 </TabItem>
 
-<TabItem value="self-host" label="Self-Host" default>
-**Here's a quick summary of what we will be doing in this guide**
+<TabItem value="self-host" label="Self-Host">
+{/* **Here's a quick summary of what we will be doing in this guide**
 
 * Create and configure App Engine
 * Invoke the deployed App Engine service to generate traces
-* Send and Visualize the traces in SigNoz
+* Send and Visualize the traces in SigNoz */}
 
 ## Prerequisites
 
 * [Google Cloud account](https://console.cloud.google.com/) with administrative privilege or App Engine Admin privilege
 * Access to a project in GCP
 * [Cloud Build API](https://console.cloud.google.com/flows/enableapi?apiid=cloudbuild.googleapis.com) is enabled
-* [Self-Hosted SigNoz](https://signoz.io/docs/install/docker/) 
 
 <Admonition type="info">
 For more details on how to configure Self-Hosted SigNoz for Logs, check [official documentation by Self-Hosted SigNoz](https://signoz.io/docs/userguide/send-logs-http/#send-logs-to-self-hosted-signoz) and navigate to the "Send Logs to Self-Hosted SigNoz" section.

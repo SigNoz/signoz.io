@@ -7,11 +7,11 @@ import Image from 'next/image';
 const DatadogPricingCalculator = () => {
   const [activeTab, setActiveTab] = useState('logs');
   const [logPlan, setLogPlan] = useState('ingestion');
-  const [logVolume, setLogVolume] = useState(100);
+  const [logVolume, setLogVolume] = useState(300);
   const [apmPlan, setApmPlan] = useState('apm');
-  const [apmHosts, setApmHosts] = useState(10);
+  const [apmHosts, setApmHosts] = useState(1);
   const [infraPlan, setInfraPlan] = useState('pro');
-  const [infraHosts, setInfraHosts] = useState(20);
+  const [infraHosts, setInfraHosts] = useState(2);
   const [totalCost, setTotalCost] = useState(0);
   const [showCTA, setShowCTA] = useState(false);
 
@@ -68,17 +68,21 @@ const DatadogPricingCalculator = () => {
         break;
     }
 
-    setTotalCost(logCost + apmCost + infraCost);
+    return { logCost, apmCost, infraCost }; // Only return the costs
   };
 
+  const [costs, setCosts] = useState({ logCost: 0, apmCost: 0, infraCost: 0 });
+
   useEffect(() => {
-    calculateCost();
+    const newCosts = calculateCost();
+    setCosts(newCosts);
+    setTotalCost(newCosts.logCost + newCosts.apmCost + newCosts.infraCost);
   }, [logPlan, logVolume, apmPlan, apmHosts, infraPlan, infraHosts]);
 
   const chartData = [
-    { name: 'Logs', value: (totalCost * (logVolume / (logVolume + apmHosts + infraHosts))) },
-    { name: 'APM', value: (totalCost * (apmHosts / (logVolume + apmHosts + infraHosts))) },
-    { name: 'Infrastructure', value: (totalCost * (infraHosts / (logVolume + apmHosts + infraHosts))) },
+    { name: 'Logs', value: costs.logCost },
+    { name: 'APM', value: costs.apmCost },
+    { name: 'Infrastructure', value: costs.infraCost },
   ];
 
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28'];

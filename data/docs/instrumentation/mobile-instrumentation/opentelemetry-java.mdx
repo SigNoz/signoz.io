@@ -5,9 +5,12 @@ title: Android App in Java Instrumentation
 description: Instrument your Android application built with Java using OpenTelemetry and send data to SigNoz
 ---
 
-import InstrumentationFAQ from '@/components/shared/instrumentation-faq.md'
+{/* import InstrumentationFAQ from '@/components/shared/instrumentation-faq.md' */}
 
-This documentation contains instructions on how to set up OpenTelemetry(OTel) instrumentation in your Android mobile application built using Java. OpenTelemetry, also known as OTel for short, is an open-source observability framework that can help you generate and collect telemetry data - traces, metrics, and logs from your Java application.
+This document contains instructions on how to set up OpenTelemetry instrumentation in your Android Mobile applications built using Java and view your application traces in SigNoz.
+
+
+{/* This documentation contains instructions on how to set up OpenTelemetry(OTel) instrumentation in your Android mobile application built using Java. OpenTelemetry, also known as OTel for short, is an open-source observability framework that can help you generate and collect telemetry data - traces, metrics, and logs from your Java application.
 
 Once the telemetry data is generated, you can configure an exporter to send the data to SigNoz for monitoring and visualization.
 
@@ -17,12 +20,14 @@ There are three major steps to using OpenTelemetry:
 - Configuring the exporter to send data to SigNoz
 - Validating the configuration to ensure that data is being sent as expected.
 
-In this tutorial, we will instrument a Java Mobile application (Android) for traces and send it to SigNoz.
+In this tutorial, we will instrument a Java Mobile application (Android) for traces and send it to SigNoz. */}
 
 ## Requirements
 
 Java 8 or higher
 
+<Tabs entityName="plans">
+<TabItem value="cloud" label="SigNoz Cloud" default>
 ### Send traces directly to SigNoz cloud
 
 <Admonition type="info">
@@ -54,7 +59,7 @@ Create a file named `network_security_config.xml` in the `app/res/xml` directory
 <?xml version="1.0" encoding="utf-8"?>
 <network-security-config>
     <domain-config cleartextTrafficPermitted="true">
-        <domain includeSubdomains="true">ingest.[REGION].signoz.cloud</domain>
+        <domain includeSubdomains="true">ingest.<region>.signoz.cloud</domain>
     </domain-config>
 </network-security-config>
 ```
@@ -103,8 +108,8 @@ public class OpenTelemetryUtil {
         Resource otelResource = Resource.getDefault().merge(
             Resource.create(
                 Attributes.of(
-                    ResourceAttributes.SERVICE_NAME, "<SERVICE_NAME>",
-                    ResourceAttributes.HOST_NAME, "<SERVICE_NAME>"
+                    ResourceAttributes.SERVICE_NAME, "<service_name>",
+                    ResourceAttributes.HOST_NAME, "<service_name>"
                 )
             )
         );
@@ -113,8 +118,8 @@ public class OpenTelemetryUtil {
                 .addSpanProcessor(SimpleSpanProcessor.create(LoggingSpanExporter.create()))
                 .addSpanProcessor(BatchSpanProcessor.builder(
                     OtlpGrpcSpanExporter.builder()
-                        .setEndpoint("ingest.[REGION].signoz.cloud:<PORT>/v1/traces")
-                        .addHeader("signoz-access-token", "<SIGNOZ_INGESTION_KEY>")
+                        .setEndpoint("ingest.<region>.signoz.cloud:443/v1/traces")
+                        .addHeader("signoz-ingestion-key", "<your-ingestion-key>")
                         .build()).build()
                 )
                 .setResource(otelResource)
@@ -136,30 +141,9 @@ public class OpenTelemetryUtil {
 }
 ```
 
-Replace `<SERVICE_NAME>` with the name of app, you will see this name in SigNoz Services section.
-
-Ensure to replace `<SIGNOZ_INGESTION_KEY>`, `<PORT>`, and `<REGION>` with your actual SigNoz ingestion key, Port, and Region, respectively.
-
-You can find your Ingestion Key in the following places:
--  mail which you recieved from SigNoz after signing up.
-- inside settings on SigNoz dashboard
-
-Depending on the choice of your region for SigNoz cloud, the ingest endpoint will vary according to this table.
-
-| Region | Endpoint |
-| --- | --- |
-| US |	ingest.us.signoz.cloud:443/v1/traces |
-| IN |	ingest.in.signoz.cloud:443/v1/traces |
-| EU | ingest.eu.signoz.cloud:443/v1/traces |
-
-
-These are the variables you need to replace :
-
-| Placeholder                | Description                                 |
-|----------------------------|---------------------------------------------|
-| `<SIGNOZ_INGESTION_KEY>`   | Your SigNoz ingestion key                   |
-| `<PORT>`                    | Port (default: 443)                         |
-| `<REGION>`   | Region for SigNoz ingestion url                   |
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service_name>` is name of your service
 
 Inside MainActivity.java file, initialize the util
 
@@ -222,3 +206,5 @@ Call the above functions to add spans.
 **Step 4: Run app**
 
 Run your application from Android Studio to see the output & you can verify the sent span in SigNoz .
+</TabItem>
+</Tabs>

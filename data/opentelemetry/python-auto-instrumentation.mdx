@@ -85,7 +85,7 @@ To send data to SigNoz Cloud, set up the environment variables and define the Si
 Before configuring OpenTelemetry, ensure you have the following information from SigNoz Cloud:
 
 - Region: The SigNoz Cloud region you're using.
-- Ingestion Key: The access token for sending traces to SigNoz Cloud.
+- Ingestion Key: The ingestion key for sending traces to SigNoz Cloud.
 
 You can get it from `Ingestion Settings` under `Settings` as described in the previous article.
 
@@ -97,7 +97,7 @@ Set environment variables to configure OpenTelemetry to send traces to SigNoz Cl
 # Set the service name, SigNoz endpoint, and authentication token
 OTEL_RESOURCE_ATTRIBUTES=service.name=<service_name> \
 OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.{region}.signoz.cloud:443" \
-OTEL_EXPORTER_OTLP_HEADERS="signoz-access-token=<SIGNOZ_INGESTION_KEY>" \
+OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>" \
 OTEL_EXPORTER_OTLP_PROTOCOL=grpc \
 OTEL_PYTHON_LOGGING_AUTO_INSTRUMENTATION_ENABLED=true
 ```
@@ -111,7 +111,7 @@ With the correct environment variables, start service with OpenTelemetry instrum
 ```bash
 OTEL_RESOURCE_ATTRIBUTES=service.name=my-application \
 OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.{region}.signoz.cloud:443" \
-OTEL_EXPORTER_OTLP_HEADERS="signoz-access-token=<SIGNOZ_INGESTION_KEY>" \
+OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>" \
 OTEL_EXPORTER_OTLP_PROTOCOL=grpc \
 OTEL_PYTHON_LOGGING_AUTO_INSTRUMENTATION_ENABLED=true \
 opentelemetry-instrument python lesson-3-1/app.py
@@ -141,7 +141,7 @@ You can click on the application to see useful application metrics like latency,
 ```bash
 OTEL_RESOURCE_ATTRIBUTES=service.name=my-application \
 OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.{region}.signoz.cloud:443" \
-OTEL_EXPORTER_OTLP_HEADERS="signoz-access-token=<SIGNOZ_INGESTION_KEY>" \
+OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>" \
 OTEL_EXPORTER_OTLP_PROTOCOL=grpc \
 OTEL_PYTHON_LOGGING_AUTO_INSTRUMENTATION_ENABLED=true \
 OTEL_TRACES_EXPORTER=console \

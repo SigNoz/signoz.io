@@ -163,7 +163,7 @@ data:
           insecure: false
         timeout: 20s # Adjust the timeout value as needed
         headers:
-          "signoz-access-token": "<SIGNOZ_INGESTION_KEY>"
+          "signoz-ingestion-key": "<SIGNOZ_INGESTION_KEY>"
     service:
       pipelines:
         metrics:
@@ -171,10 +171,10 @@ data:
           exporters: [debug, otlp]
         logs/entity_events:
           receivers: [k8s_cluster]
-          exporters: [debug, otlp]This above manifest sets up OpenTelemetry instrumentation for collecting Kubernetes-related metrics and logs. It uses a custom "otlp" exporter to send the collected data to a specified endpoint with additional authentication through a provided access token.
+          exporters: [debug, otlp]This above manifest sets up OpenTelemetry instrumentation for collecting Kubernetes-related metrics and logs. It uses a custom "otlp" exporter to send the collected data to a specified endpoint with additional authentication through a provided ingestion key.
 ```
 
-This configuration sets up OpenTelemetry instrumentation for collecting Kubernetes-related metrics and logs. It uses a custom "otlp" exporter to send the collected data to a specified endpoint with additional authentication through a provided access token.
+This configuration sets up OpenTelemetry instrumentation for collecting Kubernetes-related metrics and logs. It uses a custom "otlp" exporter to send the collected data to a specified endpoint with additional authentication through a provided ingestion key.
 
 Replace `{region}` with the region for your SigNoz cloud account and `<SIGNOZ_INGESTION_KEY>` with the ingestion key for your account. You can find these settings in the SigNoz dashboard under `Settings > Ingestion Settings`.
 

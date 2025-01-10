@@ -1,24 +1,21 @@
 'use client'
 
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown } from 'lucide-react';
+import React, { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { ChevronDown } from 'lucide-react'
 
 const FAQItem = ({ question, answer }) => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false)
 
   return (
-    <div className="border-b border-gray-200 my-4 last:border-b-0">
+    <div className="my-4 border-b border-gray-200 last:border-b-0">
       <button
-        className="flex justify-between items-center w-full py-4 text-left"
+        className="flex w-full items-center justify-between py-4 text-left"
         onClick={() => setIsOpen(!isOpen)}
       >
-        <span className="font-medium text-base sm:text-lg">{question}</span>
-        <motion.div
-          animate={{ rotate: isOpen ? 180 : 0 }}
-          transition={{ duration: 0.3 }}
-        >
-          <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5" />
+        <span className="text-base font-medium sm:text-lg">{question}</span>
+        <motion.div animate={{ rotate: isOpen ? 180 : 0 }} transition={{ duration: 0.3 }}>
+          <ChevronDown className="h-4 w-4 sm:h-5 sm:w-5" />
         </motion.div>
       </button>
       <AnimatePresence>
@@ -36,17 +33,17 @@ const FAQItem = ({ question, answer }) => {
         )}
       </AnimatePresence>
     </div>
-  );
-};
+  )
+}
 
 const FAQAccordion = ({ faqs }) => {
   return (
-    <div className="w-full max-w-lg mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="w-full">
       {faqs.map((faq, index) => (
         <FAQItem key={index} question={faq.question} answer={faq.answer} />
       ))}
     </div>
-  );
-};
+  )
+}
 
-export default FAQAccordion;
+export default FAQAccordion
