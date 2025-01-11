@@ -529,6 +529,10 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/userguide/collecting_syslogs',
             label: 'Syslogs',
+          },          {
+            type: 'doc',
+            route: '/docs/logs-management/send-logs/logrus-to-signoz',
+            label: 'Logrus',
           },
           {
             type: 'category',
