@@ -3,13 +3,16 @@ date: 2024-06-06
 id: cpp
 title: C++ Opentelemetry Instrumentation
 description: Send events from your C++ application to SigNoz
-
+hide_table_of_contents: true
 ---
 
 
+{/* 
 import InstrumentationFAQ from '@/components/shared/instrumentation-faq.md'
 
+
 This documentation contains instructions on how to set up OpenTelemetry(OTel) instrumentation in your C++ application. OpenTelemetry, also known as OTel for short, is an open-source observability framework that can help you generate and collect telemetry data - traces, metrics, and logs from your Swift application.
+
 
 Once the telemetry data is generated, you can configure an exporter to send the data to SigNoz for monitoring and visualization.
 
@@ -21,6 +24,10 @@ There are three major steps to using OpenTelemetry:
 
 In this tutorial, we will instrument a C++ application for traces and send it to SigNoz.
 
+*/}
+
+This document contains instructions on how to set up OpenTelemetry instrumentation in your C++ applications and view your application traces in SigNoz.
+
 ## Requirements
 
 [Bazel](https://bazel.build/)
@@ -29,17 +36,13 @@ In this tutorial, we will instrument a C++ application for traces and send it to
 
 Based on your application environment, you can choose the setup below to send traces to SigNoz.
 
-<Tabs>
-<TabItem value="SigNoz-Cloud" label="SigNoz Cloud" default>
+<Tabs entityName="plans">
+<TabItem value="cloud" label="SigNoz Cloud" default>
 ### Send traces to SigNoz Cloud via OTel Collector binary
 
 **Step 1 : Install OTel Collector**
 
-OTel Collector binary helps to collect logs, hostmetrics, resource and infra attributes. It is recommended to install Otel Collector binary to collect and send traces to SigNoz cloud. You can correlate signals and have rich contextual data through this way.
-
-<Admonition>
-You can find instructions to install OTel Collector binary [here](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) in your VM. Once you are done setting up your OTel Collector binary, you can follow the below steps for instrumenting your C++ application.
-</Admonition>
+OTel Collector binary helps to collect logs, hostmetrics, resource and infra attributes. You can find instructions to install OTel Collector binary [here](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) in your VM.
 
 **Step 2 : Build opentelemetry-cpp locally**
 
@@ -154,6 +157,8 @@ int main()
   CleanupTracer();
 }
 ```
+
+This code sets up OpenTelemetry tracing in your C++ application, initializes a tracer with an OTLP HTTP exporter, processes spans, and sends trace data to a SigNoz.
 
 **Step 4: Run app**
 
@@ -163,6 +168,8 @@ Execute your application by issuing the run command:
 bazel run <name>
 ```
 
+`<name>` refers to the name of the binary target for your application, which you define in the `BUILD` file.
+
 </TabItem>
 <TabItem value="SigNoz-Self-Hosted" label="Self Hosted">
 ### Send Traces to Self-Hosted SigNoz via Otel Collector
@@ -170,11 +177,7 @@ bazel run <name>
 
 **Step 1 : Install OTel Collector**
 
-OTel Collector binary helps to collect logs, hostmetrics, resource and infra attributes. It is recommended to install Otel Collector binary to collect and send traces to SigNoz cloud. You can correlate signals and have rich contextual data through this way.
-
-<Admonition>
-You can find instructions to install OTel Collector binary [here](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) in your VM. Once you are done setting up your OTel Collector binary, you can follow the below steps for instrumenting your C++ application.
-</Admonition>
+OTel Collector binary helps to collect logs, hostmetrics, resource and infra attributes. You can find instructions to install OTel Collector binary [here](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) in your VM.
 
 **Step 2 : Build opentelemetry-cpp locally**
 
@@ -289,6 +292,8 @@ int main()
   CleanupTracer();
 }
 ```
+
+This code sets up OpenTelemetry tracing in your C++ application, initializes a tracer with an OTLP HTTP exporter, processes spans, and sends trace data to a SigNoz.
 
 **Step 4: Run app**
 
@@ -301,4 +306,4 @@ bazel run <name>
 </TabItem>
 </Tabs>
 
-<InstrumentationFAQ />
+{/* <InstrumentationFAQ /> */}
