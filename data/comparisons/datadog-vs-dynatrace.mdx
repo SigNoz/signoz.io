@@ -1,7 +1,7 @@
 ---
-title: Datadog vs Dynatrace - In-Depth Comparison 2024 [Hands-On Testing]
+title: Datadog vs Dynatrace - In-Depth Comparison 2025 [Hands-On Testing]
 slug: datadog-vs-dynatrace
-date: 2024-03-12
+date: 2025-01-02
 tags: [tools-comparison]
 authors: [debanjan]
 description: Datadog and Dynatrace are both popular monitoring and observability tools. Datadog was easier to start with, but Dynatrace provided more granular insights about the application...
@@ -9,46 +9,47 @@ image: /img/blog/2024/03/datadog-vs-dynatrace-cover.webp
 hide_table_of_contents: false
 toc_min_heading_level: 2
 toc_max_heading_level: 2
-keywords: [datadog-vs-dynatrace,datadog,dynatrace,opentelemetry,open-source,monitoring-tools,signoz]
+keywords:
+  [datadog-vs-dynatrace, datadog, dynatrace, opentelemetry, open-source, monitoring-tools, signoz]
 ---
 
 <head>
-  <link rel="canonical" href="https://signoz.io/comparisons/datadog-vs-dynatrace/"/>
+  <link rel="canonical" href="https://signoz.io/comparisons/datadog-vs-dynatrace/" />
 </head>
-
-
 
 Datadog and Dynatrace are popular tools when it comes to monitoring and observability. In this article I have compared Datadog and Dynatrace across different aspects like getting started, infrastructure monitoring, log monitoring, pricing, etc.
 
 <Admonition type="info">
-💡 This article is my personal take based on the experience I had when integrating Datadog and Dynatrace. Some takeaways are subjective based on my personal preference
+  💡 This article is my personal take based on the experience I had when integrating Datadog and
+  Dynatrace. Some takeaways are subjective based on my personal preference
 </Admonition>
 
-
-
-<figure data-zoomable align='center'>
-    <img className="box-shadowed-image" src="/img/blog/2024/03/datadog-vs-dynatrace-cover.webp" alt="Datadog vs Dynatrace cover image"/>
+<figure data-zoomable align="center">
+  <img
+    className="box-shadowed-image"
+    src="/img/blog/2024/03/datadog-vs-dynatrace-cover.webp"
+    alt="Datadog vs Dynatrace cover image"
+  />
 </figure>
-
 
 ## Datadog vs Dynatrace: Overview
 
 Here’s a comparison of the main features between Datadog and Dynatrace.
 
-| Feature | Datadog | Dynatrace |
-| --- | --- | --- |
-| Infrastructure monitoring | ✅  | ✅  |
-| APM | ✅  | ✅  |
-| Log monitoring | ✅  | ✅  |
-| Real-User monitoring | ✅  | ✅  |
-| SLA Monitoring | ✅ | ✅ |
-| OpenTelemetry support | 🟡 | ✅ |
-| Free tier | ❌ | ❌ |
-| On premise | ❌ | ✅ |
-| Cloud SIEM | ✅ | 🟡 |
-| Workflow Automation | ✅ | ✅ |
-| AIOps | ✅ | ✅ |
-| Access control | ✅ | ✅ |
+| Feature                   | Datadog | Dynatrace |
+| ------------------------- | ------- | --------- |
+| Infrastructure monitoring | ✅      | ✅        |
+| APM                       | ✅      | ✅        |
+| Log monitoring            | ✅      | ✅        |
+| Real-User monitoring      | ✅      | ✅        |
+| SLA Monitoring            | ✅      | ✅        |
+| OpenTelemetry support     | 🟡      | ✅        |
+| Free tier                 | ❌      | ❌        |
+| On premise                | ❌      | ✅        |
+| Cloud SIEM                | ✅      | 🟡        |
+| Workflow Automation       | ✅      | ✅        |
+| AIOps                     | ✅      | ✅        |
+| Access control            | ✅      | ✅        |
 
 ✅ - Available
 
@@ -70,11 +71,16 @@ Going to the Datadog website, I was prompted to create an account by providing m
 
 Proceeding from here, it took me directly to the Agent Setup page. I’ll talk about this process shortly.
 
-<figure data-zoomable align='center'>
-    <img className="box-shadowed-image" src="/img/blog/2024/03/datadog-vs-dynatrace-signup-page.webp" alt="The Datadog signup page asked me about the stack I was going to monitor"/>
-    <figcaption><i>The Datadog signup page asked me about the stack I was going to monitor</i></figcaption>
+<figure data-zoomable align="center">
+  <img
+    className="box-shadowed-image"
+    src="/img/blog/2024/03/datadog-vs-dynatrace-signup-page.webp"
+    alt="The Datadog signup page asked me about the stack I was going to monitor"
+  />
+  <figcaption>
+    <i>The Datadog signup page asked me about the stack I was going to monitor</i>
+  </figcaption>
 </figure>
-
 
 ### Dynatrace
 
@@ -84,11 +90,16 @@ One thing to note about Dynatrace is that unlike Datadog, the account creation i
 
 Once completed, I was taken to the landing page. But I didn’t find the UI very intuitive. Moreover, the Dynatrace Hub takes a very long time to load. Once the Hub was loaded, it showed direct integration with AWS. But that needs IAM role for access and would monitor my entire AWS account. That wasn’t my plan. And it took quite some time for me to figure out how to proceed from there. More on that later.
 
-<figure data-zoomable align='center'>
-    <img className="box-shadowed-image" src="/img/blog/2024/03/datadog-vs-dynatrace-signup.webp" alt="Dynatrace signup took quite some time to load"/>
-    <figcaption><i>Dynatrace signup took quite some time to load</i></figcaption>
+<figure data-zoomable align="center">
+  <img
+    className="box-shadowed-image"
+    src="/img/blog/2024/03/datadog-vs-dynatrace-signup.webp"
+    alt="Dynatrace signup took quite some time to load"
+  />
+  <figcaption>
+    <i>Dynatrace signup took quite some time to load</i>
+  </figcaption>
 </figure>
-
 
 ## Agent Installation
 
@@ -96,37 +107,57 @@ Once completed, I was taken to the landing page. But I didn’t find the UI very
 
 As part of the sign-up process, I was taken to the Agent Installation page. I selected Amazon Linux on the left, and it gave me the required command to run.
 
-<figure data-zoomable align='center'>
-    <img className="box-shadowed-image" src="/img/blog/2024/03/datadog-agent-installation.webp" alt="Datadog has easy to follow instructions for setting up the agent"/>
-    <figcaption><i>Datadog has easy to follow instructions for setting up the agent</i></figcaption>
+<figure data-zoomable align="center">
+  <img
+    className="box-shadowed-image"
+    src="/img/blog/2024/03/datadog-agent-installation.webp"
+    alt="Datadog has easy to follow instructions for setting up the agent"
+  />
+  <figcaption>
+    <i>Datadog has easy to follow instructions for setting up the agent</i>
+  </figcaption>
 </figure>
-
 
 I went to my Datadog EC2 and ran the command. After downloading and installing the necessary packages, the Datadog Agent was up and running on my machine. That was easy.
 
-<figure data-zoomable align='center'>
-    <img className="box-shadowed-image" src="/img/blog/2024/03/datadog-vs-dynatrace-agent-install.webp" alt="Datadog agent installation"/>
-    <figcaption><i>Datadog agent installation</i></figcaption>
+<figure data-zoomable align="center">
+  <img
+    className="box-shadowed-image"
+    src="/img/blog/2024/03/datadog-vs-dynatrace-agent-install.webp"
+    alt="Datadog agent installation"
+  />
+  <figcaption>
+    <i>Datadog agent installation</i>
+  </figcaption>
 </figure>
-
 
 Once the Agent had started, I came back to the website to check. As expected, I could see that Datadog had started monitoring 1 host. This showed me all the infrastructure metrics.
 
-<figure data-zoomable align='center'>
-    <img className="box-shadowed-image" src="/img/blog/2024/03/datadog-vs-dynatrace-landing-page.webp" alt="Datadog landing page after agent is connected"/>
-    <figcaption><i>Datadog landing page after agent is connected</i></figcaption>
+<figure data-zoomable align="center">
+  <img
+    className="box-shadowed-image"
+    src="/img/blog/2024/03/datadog-vs-dynatrace-landing-page.webp"
+    alt="Datadog landing page after agent is connected"
+  />
+  <figcaption>
+    <i>Datadog landing page after agent is connected</i>
+  </figcaption>
 </figure>
-
 
 But Datadog did not start auto capturing the application metrics. I was prompted to install another application-specific Agent. For Python, I had to install the Datadog client `*ddtrace*`.
 
 Next, in order to start with the instrumentation, I had to pass additional arguments to my application startup command. The UI provided all the necessary steps to build the final command.
 
-<figure data-zoomable align='center'>
-    <img className="box-shadowed-image" src="/img/blog/2024/03/datadog-vs-dynatrace-app-specific.webp" alt="Datadog application specific agent installation page"/>
-    <figcaption><i>Datadog application specific agent installation page</i></figcaption>
+<figure data-zoomable align="center">
+  <img
+    className="box-shadowed-image"
+    src="/img/blog/2024/03/datadog-vs-dynatrace-app-specific.webp"
+    alt="Datadog application specific agent installation page"
+  />
+  <figcaption>
+    <i>Datadog application specific agent installation page</i>
+  </figcaption>
 </figure>
-
 
 ### Dynatrace
 
@@ -134,39 +165,61 @@ I didn’t find the Dynatrace UI to be intuitive or user-friendly. It kept showi
 
 For Dynatrace, you need the OneAgent. Since I am running a Linux instance, I navigated to the corresponding page. I was asked to generate a PaaS token (since I didn’t have one already). It then showed me a set of commands that I had to run.
 
-<figure data-zoomable align='center'>
-    <img className="box-shadowed-image" src="/img/blog/2024/03/datadog-vs-dynatrace-one-agent.webp" alt="Dynatrace UI for installing OneAgent"/>
-    <figcaption><i>Dynatrace UI for installing OneAgent</i></figcaption>
+<figure data-zoomable align="center">
+  <img
+    className="box-shadowed-image"
+    src="/img/blog/2024/03/datadog-vs-dynatrace-one-agent.webp"
+    alt="Dynatrace UI for installing OneAgent"
+  />
+  <figcaption>
+    <i>Dynatrace UI for installing OneAgent</i>
+  </figcaption>
 </figure>
-
 
 The first command downloads the installer. The second one verifies the signature. I could run those without any issues.
 
-<figure data-zoomable align='center'>
-    <img className="box-shadowed-image" src="/img/blog/2024/03/datadog-vs-dynatrace-install-oneagent.webp" alt="Downloading and verifying OneAgent"/>
-    <figcaption><i>Downloading and verifying OneAgent</i></figcaption>
+<figure data-zoomable align="center">
+  <img
+    className="box-shadowed-image"
+    src="/img/blog/2024/03/datadog-vs-dynatrace-install-oneagent.webp"
+    alt="Downloading and verifying OneAgent"
+  />
+  <figcaption>
+    <i>Downloading and verifying OneAgent</i>
+  </figcaption>
 </figure>
-
 
 Next, it was time to run the OneAgent. I had to run the command with `*sudo*` as it required root privileges. Took a minute, and then it showed that the OneAgent was successfully connected to Dynatrace.
 
-<figure data-zoomable align='center'>
-    <img className="box-shadowed-image" src="/img/blog/2024/03/datadog-vs-dynatrace-oneagent-connected.webp" alt="OneAgent connected with Dynatrace"/>
-    <figcaption><i>OneAgent connected with Dynatrace</i></figcaption>
+<figure data-zoomable align="center">
+  <img
+    className="box-shadowed-image"
+    src="/img/blog/2024/03/datadog-vs-dynatrace-oneagent-connected.webp"
+    alt="OneAgent connected with Dynatrace"
+  />
+  <figcaption>
+    <i>OneAgent connected with Dynatrace</i>
+  </figcaption>
 </figure>
-
 
 I went to the Dynatrace website to check. The OneAgent tab showed that I had one host connected, and it was being monitored.
 
-<figure data-zoomable align='center'>
-    <img className="box-shadowed-image" src="/img/blog/2024/03/datadog-vs-dynatrace-ec2-host.webp" alt="Dynatrace OneAgent showing a single EC2 host"/>
-    <figcaption><i>Dynatrace OneAgent showing a single EC2 host</i></figcaption>
+<figure data-zoomable align="center">
+  <img
+    className="box-shadowed-image"
+    src="/img/blog/2024/03/datadog-vs-dynatrace-ec2-host.webp"
+    alt="Dynatrace OneAgent showing a single EC2 host"
+  />
+  <figcaption>
+    <i>Dynatrace OneAgent showing a single EC2 host</i>
+  </figcaption>
 </figure>
 
-
-Unlike Datadog, I didn’t have to install anything additional (for now). Dynatrace automatically started monitoring both the Python application, and the MongoDB I was running. 
+Unlike Datadog, I didn’t have to install anything additional (for now). Dynatrace automatically started monitoring both the Python application, and the MongoDB I was running.
 
 I will talk about the monitoring aspects next.
+
+<DatadogVsSigNoz />
 
 ## Infrastructure Monitoring: Both provide detailed views
 
@@ -176,29 +229,44 @@ Datadog presented an easy-to-follow dashboard for my EC2 instance. It showed the
 
 APM isn’t a part of this dashboard. That resides as a separate tab.
 
-<figure data-zoomable align='center'>
-    <img className="box-shadowed-image" src="/img/blog/2024/03/datadog-vs-dynatrace-ec2-monitoring-dd.webp" alt="Datadog dashboard for EC2 monitoring"/>
-    <figcaption><i>Datadog dashboard for EC2 monitoring</i></figcaption>
+<figure data-zoomable align="center">
+  <img
+    className="box-shadowed-image"
+    src="/img/blog/2024/03/datadog-vs-dynatrace-ec2-monitoring-dd.webp"
+    alt="Datadog dashboard for EC2 monitoring"
+  />
+  <figcaption>
+    <i>Datadog dashboard for EC2 monitoring</i>
+  </figcaption>
 </figure>
-
 
 ### Dynatrace
 
 Dynatrace provided a single window where all the metrics were present. As I scrolled down the page, I could find all the necessary metrics that one might need to get started with.
 
-<figure data-zoomable align='center'>
-    <img className="box-shadowed-image" src="/img/blog/2024/03/datadog-vs-dynatrace-ec2-monitoring-dt.webp" alt="Dynatrace dashboard for EC2 monitoring"/>
-    <figcaption><i>Dynatrace dashboard for EC2 monitoring</i></figcaption>
+<figure data-zoomable align="center">
+  <img
+    className="box-shadowed-image"
+    src="/img/blog/2024/03/datadog-vs-dynatrace-ec2-monitoring-dt.webp"
+    alt="Dynatrace dashboard for EC2 monitoring"
+  />
+  <figcaption>
+    <i>Dynatrace dashboard for EC2 monitoring</i>
+  </figcaption>
 </figure>
-
 
 One major differentiator with Datadog is the fact that in Dynatrace I could navigate to the APM from this dashboard itself. The **Process analysis** section showed all the processes that were running on the EC2 instance.
 
-<figure data-zoomable align='center'>
-    <img className="box-shadowed-image" src="/img/blog/2024/03/datadog-vs-dynatrace-process-analysis.webp" alt="Dynatrace dashboard offers a single view where you can see the Process analysis"/>
-    <figcaption><i>Dynatrace dashboard offers a single view where you can see the Process analysis</i></figcaption>
+<figure data-zoomable align="center">
+  <img
+    className="box-shadowed-image"
+    src="/img/blog/2024/03/datadog-vs-dynatrace-process-analysis.webp"
+    alt="Dynatrace dashboard offers a single view where you can see the Process analysis"
+  />
+  <figcaption>
+    <i>Dynatrace dashboard offers a single view where you can see the Process analysis</i>
+  </figcaption>
 </figure>
-
 
 On clicking the Python app, I was taken to a detailed view where it not only showed the application metrics but also showed how it was connected to the MongoDB process. I found this rather interesting.
 
@@ -210,27 +278,42 @@ Datadog has a separate tab for APM. On navigating there, I could see both my Pyt
 
 Clicking on the app opened up a quick view of the Performance metrics. This included Requests and Errors, Latency, and % of time spent across services.
 
-<figure data-zoomable align='center'>
-    <img className="box-shadowed-image" src="/img/blog/2024/03/datadog-vs-dynatrace-apm-dd.webp" alt="APM in Datadog"/>
-    <figcaption><i>APM in Datadog</i></figcaption>
+<figure data-zoomable align="center">
+  <img
+    className="box-shadowed-image"
+    src="/img/blog/2024/03/datadog-vs-dynatrace-apm-dd.webp"
+    alt="APM in Datadog"
+  />
+  <figcaption>
+    <i>APM in Datadog</i>
+  </figcaption>
 </figure>
-
 
 The app specific service page provided detailed view for the monitored metrics.
 
-<figure data-zoomable align='center'>
-    <img className="box-shadowed-image" src="/img/blog/2024/03/datadog-vs-dynatrace-expanded-apm.webp" alt="Expanded APM in Datadog"/>
-    <figcaption><i>Expanded APM in Datadog</i></figcaption>
+<figure data-zoomable align="center">
+  <img
+    className="box-shadowed-image"
+    src="/img/blog/2024/03/datadog-vs-dynatrace-expanded-apm.webp"
+    alt="Expanded APM in Datadog"
+  />
+  <figcaption>
+    <i>Expanded APM in Datadog</i>
+  </figcaption>
 </figure>
-
 
 Even the database monitoring for MongoDB showed important metrics, including the database resources being called, along with latency and errors.
 
-<figure data-zoomable align='center'>
-    <img className="box-shadowed-image" src="/img/blog/2024/03/datadog-vs-dynatrace-mongodb.webp" alt="APM for MongoDB in Datadog"/>
-    <figcaption><i>APM for MongoDB in Datadog</i></figcaption>
+<figure data-zoomable align="center">
+  <img
+    className="box-shadowed-image"
+    src="/img/blog/2024/03/datadog-vs-dynatrace-mongodb.webp"
+    alt="APM for MongoDB in Datadog"
+  />
+  <figcaption>
+    <i>APM for MongoDB in Datadog</i>
+  </figcaption>
 </figure>
-
 
 Although everything had a separate panel, it was detailed enough to check all the necessary metrics thoroughly.
 
@@ -246,21 +329,31 @@ With these in place, I had to install the python packages for opentelemetry. Aft
 
 Back in the Dynatrace UI, I had to look for the Distributed Traces option. Finally, I could see the traces being generated.
 
-<figure data-zoomable align='center'>
-    <img className="box-shadowed-image" src="/img/blog/2024/03/datadog-vs-dynatrace-traces-captured.webp" alt="Traces captured via OTel in Dynatrace"/>
-    <figcaption><i>Traces captured via OTel in Dynatrace</i></figcaption>
+<figure data-zoomable align="center">
+  <img
+    className="box-shadowed-image"
+    src="/img/blog/2024/03/datadog-vs-dynatrace-traces-captured.webp"
+    alt="Traces captured via OTel in Dynatrace"
+  />
+  <figcaption>
+    <i>Traces captured via OTel in Dynatrace</i>
+  </figcaption>
 </figure>
-
 
 The UI is quite detailed. Clicking on any trace shows the relevant calls, as well as the option to see the logs for the trace.
 
 Setting up the Request tracking for the REST endpoints needed additional configuration.
 
-<figure data-zoomable align='center'>
-    <img className="box-shadowed-image" src="/img/blog/2024/03/datadog-vs-dynatrace-detaield-traces.webp" alt="Detailed traces in Dynatrace"/>
-    <figcaption><i>Detailed traces in Dynatrace</i></figcaption>
+<figure data-zoomable align="center">
+  <img
+    className="box-shadowed-image"
+    src="/img/blog/2024/03/datadog-vs-dynatrace-detaield-traces.webp"
+    alt="Detailed traces in Dynatrace"
+  />
+  <figcaption>
+    <i>Detailed traces in Dynatrace</i>
+  </figcaption>
 </figure>
-
 
 ## Logs Monitoring: Easier Setup with Dynatrace
 
@@ -290,13 +383,18 @@ logs:
     source: python
 ```
 
-I restarted my application. Using the *`datadog-agent` status* command, I could see that the Logs Agent was active and that it was sending logs from the log file.
+I restarted my application. Using the _`datadog-agent` status_ command, I could see that the Logs Agent was active and that it was sending logs from the log file.
 
-<figure data-zoomable align='center'>
-    <img className="box-shadowed-image" src="/img/blog/2024/03/datadog-vs-dynatrace-sending-logs.webp" alt="Datadog agent sending logs"/>
-    <figcaption><i>Datadog agent sending logs</i></figcaption>
+<figure data-zoomable align="center">
+  <img
+    className="box-shadowed-image"
+    src="/img/blog/2024/03/datadog-vs-dynatrace-sending-logs.webp"
+    alt="Datadog agent sending logs"
+  />
+  <figcaption>
+    <i>Datadog agent sending logs</i>
+  </figcaption>
 </figure>
-
 
 ### Dynatrace
 
@@ -304,19 +402,29 @@ In contrast to Datadog, Dynatrace started capturing logs by default. In order to
 
 From the Hosts Classic page, I opened the Settings for my EC2 instance. Scrolling down, I found the Log Monitoring option, inside which was the option for custom log sources. Here, I just had to provide the full file path for my `server.log` file.
 
-<figure data-zoomable align='center'>
-    <img className="box-shadowed-image" src="/img/blog/2024/03/datadog-vs-dynatrace-custom-logs.webp" alt="Dynatrace UI for setting custom log sources"/>
-    <figcaption><i>Dynatrace UI for setting custom log sources</i></figcaption>
+<figure data-zoomable align="center">
+  <img
+    className="box-shadowed-image"
+    src="/img/blog/2024/03/datadog-vs-dynatrace-custom-logs.webp"
+    alt="Dynatrace UI for setting custom log sources"
+  />
+  <figcaption>
+    <i>Dynatrace UI for setting custom log sources</i>
+  </figcaption>
 </figure>
-
 
 With this, I was able to see the application logs.
 
-<figure data-zoomable align='center'>
-    <img className="box-shadowed-image" src="/img/blog/2024/03/datadog-vs-dynatrace-event-and-logs.webp" alt="Dynatrace UI showing events and logs"/>
-    <figcaption><i>Dynatrace UI showing events and logs</i></figcaption>
+<figure data-zoomable align="center">
+  <img
+    className="box-shadowed-image"
+    src="/img/blog/2024/03/datadog-vs-dynatrace-event-and-logs.webp"
+    alt="Dynatrace UI showing events and logs"
+  />
+  <figcaption>
+    <i>Dynatrace UI showing events and logs</i>
+  </figcaption>
 </figure>
-
 
 ## Pricing
 
@@ -329,21 +437,31 @@ Datadog has two major pricing options:
 
 You have to manually take into account the price of every single component that you will be monitoring. While it might be intuitive if you have a very limited set of applications, this becomes complicated once that number increases.
 
-<figure data-zoomable align='center'>
-    <img className="box-shadowed-image" src="/img/blog/2024/03/datadog-vs-dynatrace-pricing-dd.webp" alt="Datadog pricing page"/>
-    <figcaption><i>Datadog pricing page</i></figcaption>
+<figure data-zoomable align="center">
+  <img
+    className="box-shadowed-image"
+    src="/img/blog/2024/03/datadog-vs-dynatrace-pricing-dd.webp"
+    alt="Datadog pricing page"
+  />
+  <figcaption>
+    <i>Datadog pricing page</i>
+  </figcaption>
 </figure>
-
 
 ### Dynatrace
 
 For Dynatrace, there is the option of opting for full-stack monitoring. But do note that not everything is covered under this, and you might need to opt additional things, or go for a custom plan by talking to the sales team.
 
-<figure data-zoomable align='center'>
-    <img className="box-shadowed-image" src="/img/blog/2024/03/datadog-vs-dynatrace-pricing-dt.webp" alt="Dynatrace pricing page"/>
-    <figcaption><i>Dynatrace pricing page</i></figcaption>
+<figure data-zoomable align="center">
+  <img
+    className="box-shadowed-image"
+    src="/img/blog/2024/03/datadog-vs-dynatrace-pricing-dt.webp"
+    alt="Dynatrace pricing page"
+  />
+  <figcaption>
+    <i>Dynatrace pricing page</i>
+  </figcaption>
 </figure>
-
 
 ## Documentation: Datadog is better
 

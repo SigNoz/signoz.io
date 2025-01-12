@@ -4,6 +4,10 @@ title: Ingestion Overview
 id: ingestion-overview
 ---
 
+<Admonition type="info">
+You don't need ingestion keys for self-hosted/community edition of SigNoz. Ingestion keys are only applicable for cloud account of SigNoz.
+</Admonition>
+
 ## Overview
 
 SigNoz is designed with an OpenTelemetry-first approach, natively supporting the [OpenTelemetry Protocol](https://github.com/open-telemetry/opentelemetry-proto/blob/main/docs/specification.md). In addition to OpenTelemetry compatibility, SigNoz also provides custom in-house endpoints for enhanced functionality.
@@ -80,10 +84,10 @@ The following endpoints are deprecated:
 
 ## Authentication Methods
 
-All endpoints are protected by header based key authentication. The header `signoz-access-token` must be set to the ** value of your ingestion key** in order to successfully ingest data. Additionally, SigNoz also supports basic authentication which means that the header `authorization` may also additionally be used to ingest data.
+All endpoints are protected by header based key authentication. The header `signoz-ingestion-key` must be set to the **value of your ingestion key** in order to successfully ingest data. Additionally, SigNoz also supports basic authentication which means that the header `authorization` may also additionally be used to ingest data.
 
 ### Language SDK Configuration
-The mechanism to configure headers will vary, but OpenTelemetry language SDKs generally support setting the `OTEL_EXPORTER_OTLP_HEADERS=signoz-access-token=<key>` environment variable. Refer to the SigNoz [instrumentation docs](/docs/instrumentation/) for language-specific details.
+The mechanism to configure headers will vary, but OpenTelemetry language SDKs generally support setting the `OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<key>` environment variable. Refer to the SigNoz [instrumentation docs](/docs/instrumentation/) for language-specific details.
 
 ### OpenTelemetry Collector Configuration
 Configure the OpenTelemetry [exporter](https://opentelemetry.io/docs/specs/otel/protocol/exporter/) in your collector configuration with the appropriate header values.
@@ -92,11 +96,12 @@ Configure the OpenTelemetry [exporter](https://opentelemetry.io/docs/specs/otel/
 exporters:
   <otlp|otlphttp>:
     headers:
-      signoz-access-token: <key>
+      signoz-ingestion-key: <key>
 ```
 
 <Admonition type="warning" title="Deprecation Notice">
 The following ways of authentication are deprecated:
+* Using the `signoz-access-token` header with the value set to your Ingestion key.
 * Using the `signoz-access-token` header with the value set `Bearer <key>` to your Ingestion key. 
 * Using the `signoz-access-token` header for basic authentication. 
 * Using the `authorization` header with the value set `Bearer <key>` to your Ingestion key. 

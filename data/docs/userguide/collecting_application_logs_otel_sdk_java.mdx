@@ -1,109 +1,147 @@
 ---
-date: 2024-06-06
+date: 2024-12-18
 title: Collecting Application Logs Using OTEL Java Agent
 id: collecting_application_logs_otel_sdk_java
+hide_table_of_contents: true
 ---
 
-# Collecting Application Logs Using OTEL Java Agent
-
 You can directly send your application logs to SigNoz using [Java Agent provided by OpenTelemetry](https://signoz.io/docs/instrumentation/java/).
-In this doc we will run a sample java application with the OpenTelemetry Java agent to send logs to SigNoz.
+In this documentation, we will run a sample Java application with the OpenTelemetry Java agent to send logs to SigNoz.
 
+For collecting logs, download the Java agent from [here](https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar).
 
-For collecting logs we will have to download the java agent from [here](https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar).
+To send logs from a Java application, you will need to add the agent and set the appropriate environment variables.
 
+<Tabs entityName="plans">
 
-To sends logs from a Java application you will have to add the agent and add the environment variables for the agent.
-
-## For Sending Logs To SigNoz Cloud
+<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
 
 ```bash
-OTEL_LOGS_EXPORTER=otlp OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.{region}.signoz.cloud:443" OTEL_EXPORTER_OTLP_HEADERS=signoz-access-token=<SIGNOZ_INGESTION_KEY> OTEL_RESOURCE_ATTRIBUTES=service.name=<app_name> java -javaagent:/path/opentelemetry-javaagent.jar -jar  <myapp>.jar
+OTEL_LOGS_EXPORTER=otlp \
+OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443" \
+OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>" \
+  OTEL_RESOURCE_ATTRIBUTES=service.name=<app_name> \
+java -javaagent:/path/opentelemetry-javaagent.jar -jar <myapp>.jar
 ```
 
-You will have to add `<SIGNOZ_INGESTION_KEY>` and depending on the choice of your region for SigNoz cloud, the otlp endpoint will vary according to this table.
+- Replace `<SIGNOZ_INGESTION_KEY>` with your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- Set the `<region>` to match your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 
-| Region | Endpoint                   |
-| ------ | -------------------------- |
-| US     | ingest.us.signoz.cloud:443 |
-| IN     | ingest.in.signoz.cloud:443 |
-| EU     | ingest.eu.signoz.cloud:443 |
 
-## For Sending Logs To SigNoz Hosted Locally
+</TabItem>
+
+<TabItem value="self-hosted" label="Self-Host">
+
 ```bash
-OTEL_LOGS_EXPORTER=otlp OTEL_EXPORTER_OTLP_ENDPOINT="http://<IP of SigNoz Backend>:4317" OTEL_RESOURCE_ATTRIBUTES=service.name=<app_name> java -javaagent:/path/opentelemetry-javaagent.jar -jar  <myapp>.jar
+OTEL_LOGS_EXPORTER=otlp \
+OTEL_EXPORTER_OTLP_ENDPOINT="http://<IP of SigNoz Backend>:4317" \
+OTEL_RESOURCE_ATTRIBUTES=service.name=<app_name> \
+java -javaagent:/path/opentelemetry-javaagent.jar -jar <myapp>.jar
 ```
 
-## Settings for Appender instrumentation based on the logging library
+- Replace `<IP of SigNoz Backend>` with the IP address or hostname of your SigNoz backend.
+- For local setups, use `0.0.0.0` if SigNoz runs on the same host.
 
-You can use appender settings by passing it as an argument in the  `-D<property>=<value>` format.
+</TabItem>
 
-ex:- `-Dotel.instrumentation.logback-appender.experimental-log-attributes=true`
+</Tabs>
 
-### Logback
+## Settings for Appender Instrumentation
 
-LINK - [Logback](https://github.com/open-telemetry/opentelemetry-java-instrumentation/tree/main/instrumentation/logback/logback-appender-1.0/javaagent)
+You can use appender settings by passing them as arguments in the `-D<property>=<value>` format. 
 
-| System property                                                                        | Type    | Default Value | Description                                                                                                                                   |
-|----------------------------------------------------------------------------------------|---------|---------|-----------------------------------------------------------------------------------------------------------------------------------------------|
-| `otel.instrumentation.logback-appender.experimental-log-attributes`                    | Boolean | `false` | Enable the capture of experimental log attributes `thread.name` and `thread.id`.                                                              |
-| `otel.instrumentation.logback-appender.experimental.capture-code-attributes`           | Boolean | `false` | Enable the capture of [source code attributes]. Note that capturing source code attributes at logging sites might add a performance overhead. |
-| `otel.instrumentation.logback-appender.experimental.capture-marker-attribute`          | Boolean | `false` | Enable the capture of Logback markers as attributes.                                                                                          |
-| `otel.instrumentation.logback-appender.experimental.capture-key-value-pair-attributes` | Boolean | `false` | Enable the capture of Logback key value pairs as attributes.                                                                                  |
-| `otel.instrumentation.logback-appender.experimental.capture-logger-context-attributes` | Boolean | `false` | Enable the capture of Logback logger context properties as attributes.                                                                        |
-| `otel.instrumentation.logback-appender.experimental.capture-mdc-attributes`            | String  |    NA     | Comma separated list of MDC attributes to capture. Use the wildcard character `*` to capture all attributes.    
-
-### Log4j
-
-LINK - [Log4j](https://github.com/open-telemetry/opentelemetry-java-instrumentation/tree/main/instrumentation/log4j/log4j-appender-2.17/javaagent)
-
-| System property                                                                   | Type    | Default | Description                                                                                                           |
-|-----------------------------------------------------------------------------------| ------- | ------- |-----------------------------------------------------------------------------------------------------------------------|
-| `otel.instrumentation.log4j-appender.experimental-log-attributes`                 | Boolean | `false` | Enable the capture of experimental log attributes `thread.name` and `thread.id`.                                      |
-| `otel.instrumentation.log4j-appender.experimental.capture-map-message-attributes` | Boolean | `false` | Enable the capture of `MapMessage` attributes.                                                                        |
-| `otel.instrumentation.log4j-appender.experimental.capture-marker-attribute`       | Boolean | `false` | Enable the capture of Log4j markers as attributes.                                                                    |
-| `otel.instrumentation.log4j-appender.experimental.capture-mdc-attributes`         | String  |         | Comma separated list of context data attributes to capture. Use the wildcard character `*` to capture all attributes. |
-
-
-In the below example we will configure a java application to send logs to SigNoz.
-
-## [Example] How to Collect Application Logs Using OTEL Java Agent?
-
-- Clone this [repository](https://github.com/SigNoz/spring-petclinic)
-- Build the application using `./mvnw package`
-- Now run the application
-
-### For SigNoz Cloud
-```
-OTEL_LOGS_EXPORTER=otlp OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.{region}.signoz.cloud:443" OTEL_EXPORTER_OTLP_HEADERS=signoz-access-token=<SIGNOZ_INGESTION_KEY> OTEL_RESOURCE_ATTRIBUTES=service.name=myapp java -javaagent:/path/opentelemetry-javaagent.jar -jar target/*.jar
+Example:
+```bash
+-Dotel.instrumentation.logback-appender.experimental-log-attributes=true
 ```
 
-You will have to replace the value of `{region}` according to region of your cloud account and also add `<SIGNOZ_INGESTION_KEY>`
+### Logback Configuration
 
-### For SigNoz Hosted Locally
+[Logback Documentation](https://github.com/open-telemetry/opentelemetry-java-instrumentation/tree/main/instrumentation/logback/logback-appender-1.0/javaagent)
 
+| System Property                                                                        | Type    | Default | Description                                                                                                       |
+|----------------------------------------------------------------------------------------|---------|---------|-------------------------------------------------------------------------------------------------------------------|
+| `otel.instrumentation.logback-appender.experimental-log-attributes`                    | Boolean | `false` | Capture experimental log attributes like `thread.name` and `thread.id`.                                           |
+| `otel.instrumentation.logback-appender.experimental.capture-code-attributes`           | Boolean | `false` | Capture source code attributes. May impact performance.                                                           |
+| `otel.instrumentation.logback-appender.experimental.capture-marker-attribute`          | Boolean | `false` | Capture Logback markers as attributes.                                                                            |
+| `otel.instrumentation.logback-appender.experimental.capture-key-value-pair-attributes` | Boolean | `false` | Capture Logback key-value pairs as attributes.                                                                    |
+| `otel.instrumentation.logback-appender.experimental.capture-logger-context-attributes` | Boolean | `false` | Capture Logback logger context properties as attributes.                                                          |
+| `otel.instrumentation.logback-appender.experimental.capture-mdc-attributes`            | String  | NA      | Comma-separated list of MDC attributes to capture. Use `*` to capture all attributes.                             |
+
+### Log4j Configuration
+
+[Log4j Documentation](https://github.com/open-telemetry/opentelemetry-java-instrumentation/tree/main/instrumentation/log4j/log4j-appender-2.17/javaagent)
+
+| System Property                                                                   | Type    | Default | Description                                                                                                           |
+|-----------------------------------------------------------------------------------|---------|---------|-----------------------------------------------------------------------------------------------------------------------|
+| `otel.instrumentation.log4j-appender.experimental-log-attributes`                 | Boolean | `false` | Capture experimental log attributes like `thread.name` and `thread.id`.                                              |
+| `otel.instrumentation.log4j-appender.experimental.capture-map-message-attributes` | Boolean | `false` | Capture `MapMessage` attributes.                                                                                     |
+| `otel.instrumentation.log4j-appender.experimental.capture-marker-attribute`       | Boolean | `false` | Capture Log4j markers as attributes.                                                                                 |
+| `otel.instrumentation.log4j-appender.experimental.capture-mdc-attributes`         | String  | NA      | Comma-separated list of context data attributes to capture. Use `*` to capture all attributes.                        |
+
+## Example: Collecting Logs with OTEL Java Agent
+
+1. Clone the [Spring PetClinic Repository](https://github.com/SigNoz/spring-petclinic):
+   ```bash
+   git clone https://github.com/SigNoz/spring-petclinic
+   ```
+2. Build the application:
+   ```bash
+   ./mvnw package
+   ```
+3. Run the application:
+
+<Tabs entityName="plans">
+
+<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
+
+```bash
+OTEL_LOGS_EXPORTER=otlp \
+OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.{region}.signoz.cloud:443" \
+OTEL_EXPORTER_OTLP_HEADERS=signoz-access-token=<SIGNOZ_INGESTION_KEY> \
+OTEL_RESOURCE_ATTRIBUTES=service.name=myapp \
+java -javaagent:/path/opentelemetry-javaagent.jar -jar target/*.jar
 ```
-OTEL_LOGS_EXPORTER=otlp OTEL_EXPORTER_OTLP_ENDPOINT="http://<host>:4317" OTEL_RESOURCE_ATTRIBUTES=service.name=myapp java -javaagent:/path/opentelemetry-javaagent.jar -jar target/*.jar
+
+To enable settings like experimental log attributes, pass additional arguments:
+
+```bash
+OTEL_LOGS_EXPORTER=otlp \
+OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.{region}.signoz.cloud:443" \
+OTEL_EXPORTER_OTLP_HEADERS=signoz-access-token=<SIGNOZ_INGESTION_KEY> \
+OTEL_RESOURCE_ATTRIBUTES=service.name=myapp \
+java -javaagent:/path/opentelemetry-javaagent.jar \
+-Dotel.instrumentation.logback-appender.experimental-log-attributes=true \
+-jar target/*.jar
 ```
 
-You will have to replace your the value of `host` as  `0.0.0.0` if SigNoz is running in the same host, for other configurations please check the  [troubleshooting](/docs/install/troubleshooting#signoz-otel-collector-address-grid) guide.
+</TabItem>
 
-- Visit `http://localhost:8090` to access the application.
-- Once you use the application logs will be visible on SigNoz UI.
-- If you want to enable settings here is how you do it.
-  
-Let's say we want to enable `-Dotel.instrumentation.logback-appender.experimental-log-attributes=true`
-  
-### For SigNoz Cloud
+<TabItem value="self-hosted" label="Self-Host">
 
-```
-OTEL_LOGS_EXPORTER=otlp OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.{region}.signoz.cloud:443" OTEL_EXPORTER_OTLP_HEADERS=signoz-access-token=<SIGNOZ_INGESTION_KEY> OTEL_RESOURCE_ATTRIBUTES=service.name=myapp java -javaagent:/path/opentelemetry-javaagent.jar -Dotel.instrumentation.logback-appender.experimental-log-attributes=true -jar target/*.jar
+```bash
+OTEL_LOGS_EXPORTER=otlp \
+OTEL_EXPORTER_OTLP_ENDPOINT="http://<host>:4317" \
+OTEL_RESOURCE_ATTRIBUTES=service.name=myapp \
+java -javaagent:/path/opentelemetry-javaagent.jar -jar target/*.jar
 ```
 
-You will have to replace the value of `{region}` according to the region of your cloud account and also replace `<SIGNOZ_INGESTION_KEY>` with your SigNoz Cloud Ingestion key.
+To enable settings like experimental log attributes, pass additional arguments:
 
-## For SigNoz Hosted Locally
+```bash
+OTEL_LOGS_EXPORTER=otlp \
+OTEL_EXPORTER_OTLP_ENDPOINT="http://<host>:4317" \
+OTEL_RESOURCE_ATTRIBUTES=service.name=myapp \
+java -javaagent:/path/opentelemetry-javaagent.jar \
+-Dotel.instrumentation.logback-appender.experimental-log-attributes=true \
+-jar target/*.jar
+```
 
-```
-OTEL_LOGS_EXPORTER=otlp OTEL_EXPORTER_OTLP_ENDPOINT="http://<host>:4317" OTEL_RESOURCE_ATTRIBUTES=service.name=myapp java -javaagent:/path/opentelemetry-javaagent.jar -Dotel.instrumentation.logback-appender.experimental-log-attributes=true -jar target/*.jar
-```
+</TabItem>
+
+</Tabs>
+
+4. Access the application at `http://localhost:8090`.
+5. Use the application to generate logs, which will be visible on the SigNoz UI.
+
+For troubleshooting, check the [troubleshooting guide](/docs/install/troubleshooting#signoz-otel-collector-address-grid).

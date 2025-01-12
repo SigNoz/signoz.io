@@ -2,27 +2,32 @@
 
 import React from 'react'
 import Button from '../Button/Button'
+import { Scale } from 'lucide-react'
 
 export default function DatadogVsSigNoz() {
   return (
-    <div className="w-full my-8">
-      <div className="bg-gradient-to-r from-gray-800 to-gray-900 rounded-xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out transform hover:-translate-y-1">
+    <div className="my-8 w-full">
+      <div className="transform rounded-xl bg-gradient-to-r from-blue-900/90 to-purple-900/90 p-8 shadow-lg backdrop-blur-sm transition-all duration-300 ease-in-out hover:-translate-y-1 hover:shadow-xl">
         <div className="space-y-4">
-          <h3 className="text-2xl my-0 font-bold text-white">Ready to Optimize Your Observability Costs?</h3>
+          <h3 className="my-0 text-2xl font-bold text-white">
+            Cut Your Observability Spend by 80%—Here’s How
+          </h3>
           <p className="text-gray-300">
-            Discover how SigNoz offers a seamless migration path from Datadog with comparable features and significant
-            cost savings.
+            Discover how SigNoz offers a seamless migration path from Datadog with comparable
+            features and up to <b>80% cost savings</b>.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex flex-col gap-4 sm:flex-row">
             <Button>
-              <a href="/product-comparison/signoz-vs-datadog/" style={{ textDecoration: 'none', color: 'inherit' }}>
+              <a
+                href="/product-comparison/signoz-vs-datadog/"
+                style={{ textDecoration: 'none', color: 'inherit' }}
+                className="flex items-center gap-2"
+              >
+                <Scale className="h-4 w-4" />
                 Compare SigNoz vs. Datadog
               </a>
             </Button>
-            <Button
-              href="/teams/"
-              type={Button.TYPES.SECONDARY}
-            >
+            <Button href="/teams/" type={Button.TYPES.SECONDARY}>
               <a href="/teams/" style={{ textDecoration: 'none', color: 'inherit' }}>
                 Try SigNoz for Free &rarr;
               </a>
