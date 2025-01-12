@@ -80,7 +80,7 @@ For sending logs to SigNoz cloud, while running the above example set the below 
 </TabItem>
 
 <TabItem value="self-host" label="Self-Host" default>
-For sending logs to Self hosted Signoz, we need it's running instance. You can follow these steps to [install](https://signoz.io/docs/install/docker/) signoz and set the below environment variables
+For sending logs to Self hosted Signoz, we need it's running instance. You can follow these steps to [install](https://signoz.io/docs/install/docker/) Signoz and set the below environment variables
 
 - The value of `OTEL_EXPORTER_OTLP_ENDPOINT` environment variable will be `https://localhost:4318/v1/logs` and here we don't need `SIGNOZ_ACCESS_TOKEN`
 
@@ -118,26 +118,28 @@ Create Winston logger with OpenTelemetry transports. Here we used `OpenTelemetry
 
 ```javascript:logger.js
 const logger = winston.createLogger({
-level: 'debug',
-format: winston.format.combine(
-winston.format.timestamp(),
-winston.format.errors({ stack: true }),
-winston.format.metadata(),
-winston.format.json()
-),
-defaultMeta: {
-service: 'winston-logger',
-environment: process.env.NODE_ENV || 'development',
-},
-transports: [
-new OpenTelemetryTransportV3({
-loggerProvider,
-logAttributes: {
-'service.name': 'winston-logger',
-'deployment.environment': process.env.NODE_ENV || 'development',
-},
-}),
-],
+    level: 'debug',
+    format: winston.format.combine(
+        winston.format.timestamp(),
+        winston.format.errors({
+            stack: true
+        }),
+        winston.format.metadata(),
+        winston.format.json()
+    ),
+    defaultMeta: {
+        service: 'winston-logger',
+        environment: process.env.NODE_ENV || 'development',
+    },
+    transports: [
+        new OpenTelemetryTransportV3({
+            loggerProvider,
+            logAttributes: {
+                'service.name': 'winston-logger',
+                'deployment.environment': process.env.NODE_ENV || 'development',
+            },
+        }),
+    ],
 })
 
 module.exports = logger
@@ -321,30 +323,32 @@ The other way is to add console transport in the list of transports while initia
 
 ```javascript:logger.js
 const logger = winston.createLogger({
-level: 'debug',
-format: winston.format.combine(
-winston.format.timestamp(),
-winston.format.errors({ stack: true }),
-winston.format.metadata(),
-winston.format.json()
-),
-defaultMeta: {
-service: 'winston-logger',
-environment: process.env.NODE_ENV || 'development',
-},
-transports: [
-new OpenTelemetryTransportV3({
-loggerProvider,
-logAttributes: {
-'service.name': 'winston-logger',
-'deployment.environment': process.env.NODE_ENV || 'development',
-},
-}),
+    level: 'debug',
+    format: winston.format.combine(
+        winston.format.timestamp(),
+        winston.format.errors({
+            stack: true
+        }),
+        winston.format.metadata(),
+        winston.format.json()
+    ),
+    defaultMeta: {
+        service: 'winston-logger',
+        environment: process.env.NODE_ENV || 'development',
+    },
+    transports: [
+        new OpenTelemetryTransportV3({
+            loggerProvider,
+            logAttributes: {
+                'service.name': 'winston-logger',
+                'deployment.environment': process.env.NODE_ENV || 'development',
+            },
+        }),
 
-// Console transport to print logs in the console
-new winston.transports.Console(),
+        // Console transport to print logs in the console
+        new winston.transports.Console(),
 
-],
+    ],
 })
 ```
 
