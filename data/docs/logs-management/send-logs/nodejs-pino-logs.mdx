@@ -1,0 +1,318 @@
+---
+date: 2024-12-07
+title: Send logs from Node.js Pino without requiring Otel collectors to SigNoz Cloud and Self-hosted
+id: nodejs-pino-logs
+---
+
+## Overview
+
+This document explains how to configure Pino to stream Node.js application logs directly to your SigNoz dashboard.
+<Tabs>
+<TabItem value="cloud" label="SigNoz Cloud" default>
+
+### Step 1. Install the necessary packages:
+
+```bash
+npm i pino-opentelemetry-transport
+```
+
+### Step 2. Configure Pino Logger
+Create a logger configuration file (e.g., logger.js) in the root or a suitable directory (such as utils or config) of your application. This file will define a reusable logger setup for logging important information, errors, and debug details across your application. You can then import this file wherever logging is needed to maintain consistency and reduce redundancy.
+<Tabs>
+<TabItem value="js" label="JavaScript">
+```jsx
+const pino = require('pino');
+
+const transport = pino.transport({
+  target: 'pino-opentelemetry-transport'
+});
+
+const logger = pino(transport);
+
+logger.info('Hello, World! from pino');
+```
+</TabItem>
+<TabItem value="ts" label="TypeScript">
+```ts
+import pino from 'pino';
+
+const transport = pino.transport({
+  target: 'pino-opentelemetry-transport'
+});
+
+const logger = pino(transport);
+
+logger.info('Hello, World! from pino');
+```
+</TabItem>
+</Tabs>
+
+### Step 2. Run Your Application
+
+Execute your application with OpenTelemetry Environment variables:
+
+```Bash
+OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>" OTEL_EXPORTER_OTLP_LOGS_ENDPOINT=https://ingest.<region>.signoz.cloud:443/v1/logs OTEL_RESOURCE_ATTRIBUTES="service.name=<service_name>,service.version=1.2.3" node app.js
+```
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- `<service_name>` is name of your service
+## Usage Examples
+The below examples show how to log messages with different severity levels and include structured metadata that can be used for filtering and analysis in SigNoz.
+
+### Basic Logging
+
+```jsx
+logger.info('Hello, World! from pino');
+```
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/logs-management/send-logs/info-logs.webp"
+        alt="Node.js Pino Logs"
+    />
+<figcaption>
+<i>
+Severity Level: INFO
+</i>
+</figcaption>
+</figure>
+```jsx
+logger.warn('High memory usage detected');
+```
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/logs-management/send-logs/warn-logs.webp"
+        alt="Node.js Pino Logs"
+    />
+<figcaption>
+<i>
+Severity Level: WARN
+</i>
+</figcaption>
+</figure>
+```jsx
+logger.error('Failed to process request');
+```
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/logs-management/send-logs/error-logs.webp"
+        alt="Node.js Pino Logs"
+    />
+<figcaption>
+<i>
+Severity Level: ERROR
+</i>
+</figcaption>
+</figure>
+```jsx
+logger.error({
+    msg: 'Error occurred',
+    error: error.message,
+    stack: error.stack
+});
+```
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/logs-management/send-logs/error-log-details.webp"
+        alt="Node.js Pino Logs"
+    />
+<figcaption>
+<i>
+Severity Level: ERROR
+</i>
+</figcaption>
+</figure>
+
+## Output
+
+After successful implementation, your logs will appear in your SigNoz Logs section where you can:
+
+- Monitor logs in [real-time](https://signoz.io/docs/product-features/logs-explorer/#live-view)
+- [Filter logs](https://signoz.io/docs/userguide/logs_query_builder/) by level and custom attributes
+- Search through log contents
+- Create [alerts based on log](https://signoz.io/docs/alerts-management/log-based-alerts/) patterns
+- Visualize log trends and patterns
+
+
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/logs-management/send-logs/nodejs-pino-logs.webp"
+        alt="Node.js Pino Logs"
+    />
+<figcaption>
+<i>
+Node.js Pino Logs in SigNoz
+</i>
+</figcaption>
+</figure>
+
+
+## Troubleshooting
+If logs are not appearing in SigNoz:
+
+1. Verify your Ingestion Keys and endpoint URL
+2. Ensure the transport is properly configured
+3. Review SigNoz Logs Section filters
+4. Check Pino log level settings
+
+## Additional Resources
+
+- [Pino OpenTelemetry Transport](https://github.com/pinojs/pino-opentelemetry-transport)
+
+</TabItem>
+<TabItem value="self-hosted" label="Self-hosted SigNoz">
+
+
+
+
+### Step 1. Install the necessary packages:
+
+```bash
+npm i pino-opentelemetry-transport
+```
+
+### Step 2. Configure Pino Logger
+Add the following code to your application:
+<Tabs>
+<TabItem value="js" label="JavaScript">
+```jsx
+const pino = require('pino');
+
+const transport = pino.transport({
+  target: 'pino-opentelemetry-transport'
+});
+
+const logger = pino(transport);
+
+logger.info('Hello, World! from pino');
+```
+</TabItem>
+<TabItem value="ts" label="TypeScript">
+```ts
+import pino from 'pino';
+
+const transport = pino.transport({
+  target: 'pino-opentelemetry-transport'
+});
+
+const logger = pino(transport);
+
+logger.info('Hello, World! from pino');
+```
+</TabItem>
+</Tabs>
+
+### Step 2. Run Your Application
+
+Execute your application with OpenTelemetry Environment variables:
+
+```Bash
+OTEL_EXPORTER_OTLP_LOGS_ENDPOINT=http://localhost:4317/v1/logs OTEL_RESOURCE_ATTRIBUTES="service.name=<service_name>,service.version=1.2.3" node app.js
+```
+- Replace `<service_name>` with name of your service
+## Usage Examples
+The below examples show how to log messages with different severity levels and include structured metadata that can be used for filtering and analysis in SigNoz.
+
+### Basic Logging
+
+```jsx
+logger.info('Hello, World! from pino');
+```
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/logs-management/send-logs/info-logs.webp"
+        alt="Node.js Pino Logs"
+    />
+<figcaption>
+<i>
+Severity Level: INFO
+</i>
+</figcaption>
+</figure>
+```jsx
+logger.warn('High memory usage detected');
+```
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/logs-management/send-logs/warn-logs.webp"
+        alt="Node.js Pino Logs"
+    />
+<figcaption>
+<i>
+Severity Level: WARN
+</i>
+</figcaption>
+</figure>
+
+
+```jsx
+logger.error('Failed to process request');
+```
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/logs-management/send-logs/error-logs.webp"
+        alt="Node.js Pino Logs"
+    />
+<figcaption>
+<i>
+Severity Level: ERROR
+</i>
+</figcaption>
+</figure>
+
+```jsx
+logger.error({
+    msg: 'Error occurred',
+    error: error.message,
+    stack: error.stack
+});
+```
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/logs-management/send-logs/error-log-details.webp"
+        alt="Node.js Pino Logs"
+    />
+<figcaption>
+<i>
+Severity Level: ERROR
+</i>
+</figcaption>
+</figure>
+## Output
+
+After successful implementation, your logs will appear in your SigNoz Logs Section where you can:
+
+- Monitor logs in [real-time](https://signoz.io/docs/product-features/logs-explorer/#live-view)
+- [Filter logs](https://signoz.io/docs/userguide/logs_query_builder/) by level and custom attributes
+- [Search](https://signoz.io/docs/product-features/logs-explorer/#search) through log contents
+-  Create [alerts based on log](https://signoz.io/docs/alerts-management/log-based-alerts/) patterns
+- Visualize log trends and patterns
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/logs-management/send-logs/nodejs-pino-logs-self-hosted.webp"
+        alt="Node.js Pino Logs"
+    />
+<figcaption>
+<i>
+Node.js Pino Logs in SigNoz
+</i>
+</figcaption>
+</figure>
+
+## Troubleshooting
+
+If logs are not appearing in SigNoz:
+
+1. Verify endpoint URL
+2. Ensure the transport is properly configured
+3. Review SigNoz Logs Section filters
+4. Check Pino log level settings
+
+## Additional Resources
+
+- [Pino OpenTelemetry Transport](https://github.com/pinojs/pino-opentelemetry-transport)
+</TabItem>
+</Tabs>

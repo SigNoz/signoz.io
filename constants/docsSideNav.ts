@@ -565,6 +565,12 @@ const docsSideNav = [
                 route: '/docs/logs-management/send-logs/aws-lambda-nodejs',
                 label: 'AWS Lambda Node.js logs',
               },
+              {
+                type: 'doc',
+                route: '/docs/logs-management/send-logs/nodejs-pino-logs',
+                label: 'Pino Node.js logs',
+              },
+    
             ],
           },
           {
