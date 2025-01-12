@@ -6,18 +6,8 @@ id: collecting_nodejs_winston_logs
 
 ## Overview
 
-In this documentation, you'll learn how to seamlessly export logs from your Node.js application to SigNoz using the `winston` logging library. `winston` provides various transports that make it easy to forward logs to external systems, and SigNoz offers you a platform for log monitoring and analysis.
+In this documentation, you'll learn how to seamlessly export logs from your Node.js application to SigNoz using the `winston` logging library. Winston provides various transports that make it easy to forward logs to external systems, and SigNoz offers you a platform for log monitoring and analysis.
 
-## Prerequisites
-
-### 1: For Signoz Cloud
-
-- SigNoz Cloud Account: Create an account on SigNoz Cloud
-- Ingestion Key: Obtain your ingestion key from the SigNoz Cloud dashboard
-
-### 2: For Self-Hosted SigNoz
-
-- Running Instance of SigNoz: Follow these steps to [install](https://signoz.io/docs/install/docker/) and run a self-hosted instance of SigNoz.
 
 ## Setup
 
@@ -29,7 +19,7 @@ In this documentation, you'll learn how to seamlessly export logs from your Node
 
 ### Step 2: Create `logger.js` file
 
-In the `src` directory of your web application, create a new JavaScript file (e.g., logger.js). The `logger.js` file is set up to provide the initial configuration for logging in your Node.js application. It creates a logger using `winston` and configures it to send logs to SigNoz for monitoring. You can use this logger as-is or customize it further based on your project’s requirements. Once set up, you can import and use it wherever logging is needed in your application.
+In the `src` directory of your web application, create a new JavaScript file `logger.js`. The `logger.js` file is set up to provide the initial configuration for logging in your Node.js application. It creates a logger using `winston` and configures it to send logs to SigNoz for monitoring. You can use this logger as-is or customize it further based on your project’s requirements. Once set up, you can import and use it wherever logging is needed in your application.
 
 ```javascript:logger.js
   const logsAPI = require('@opentelemetry/api-logs')
@@ -55,17 +45,12 @@ const loggerProvider = new LoggerProvider({
 })
 ```
 
-`OTLPLogExporter` defines the endpoint where logs are exported. It uses the environment variables `OTEL_EXPORTER_OTLP_ENDPOINT` and `SIGNOZ_ACCESS_TOKEN`
+`OTLPLogExporter` defines the endpoint where logs are exported. It uses the environment variables `OTEL_EXPORTER_OTLP_ENDPOINT` and `SIGNOZ_INGESTION_KEY`. Create a `.env` file with the environment variables needed in the following steps.
 
-```javascript:logger.js
-// Configure OTLP exporter for SigNoz
-
-const otlpExporter = new OTLPLogExporter({
-  url: process.env.OTEL_EXPORTER_OTLP_ENDPOINT,
-  headers: {
-    'signoz-access-token': process.env.SIGNOZ_ACCESS_TOKEN,
-  },
-})
+```bash
+NODE_ENV=<your-environment-name> #Ex. -> dev, prod etc.
+OTEL_EXPORTER_OTLP_ENDPOINT= https://ingest.<region>.signoz.cloud:443/v1/logs
+SIGNOZ_INGESTION_KEY=<your-ingestion-key>
 ```
 
 <Tabs entityName="plans">
@@ -75,14 +60,14 @@ For sending logs to SigNoz cloud, while running the above example set the below 
 
 - The value of `OTEL_EXPORTER_OTLP_ENDPOINT` environment variable will be `https://ingest.{region}.signoz.cloud:443/v1/logs` where depending on the choice of your region for SigNoz cloud, the otlp endpoint will vary according to this table.
 
-- The value of `SIGNOZ_ACCESS_TOKEN` environment variable will be `<SIGNOZ_INGESTION_KEY>` where `<SIGNOZ_INGESTION_KEY>` is your ingestion key
+- The value of `SIGNOZ_INGESTION_KEY` environment variable will be `<SIGNOZ_INGESTION_KEY>` where `<SIGNOZ_INGESTION_KEY>` is your ingestion key
 
 </TabItem>
 
 <TabItem value="self-host" label="Self-Host" default>
 For sending logs to Self hosted Signoz, we need it's running instance. You can follow these steps to [install](https://signoz.io/docs/install/docker/) Signoz and set the below environment variables
 
-- The value of `OTEL_EXPORTER_OTLP_ENDPOINT` environment variable will be `https://localhost:4318/v1/logs` and here we don't need `SIGNOZ_ACCESS_TOKEN`
+- The value of `OTEL_EXPORTER_OTLP_ENDPOINT` environment variable will be `https://localhost:4318/v1/logs` and here we don't need `SIGNOZ_INGESTION_KEY`
 
 ```javascript
 const otlpExporter = new OTLPTraceExporter({
@@ -103,6 +88,18 @@ Set a proxy in your `package.json` pointing to to the SigNoz OTLP HTTP endpoint.
 
 </TabItem>
 </Tabs>
+
+```javascript:logger.js
+// Configure OTLP exporter for SigNoz
+
+const otlpExporter = new OTLPLogExporter({
+  url: process.env.OTEL_EXPORTER_OTLP_ENDPOINT,
+  headers: {
+    'signoz-access-token': process.env.SIGNOZ_INGESTION_KEY,
+  },
+})
+```
+
 
 Add Log Record Processor and Set Global Logger Provider
 
@@ -156,7 +153,7 @@ To send logs to SigNoz, import `logger.js` into `index.js` and save the changes.
 
 Logging scenarios
 
-1. Request Logging Middleware - Track all incoming requests and their completion with detailed context:
+1. **Request Logging Middleware** - Track all incoming requests and their completion with detailed context:
 
 ```javascript:index.js
 app.use((req, res, next) => {
@@ -190,7 +187,7 @@ app.use((req, res, next) => {
 });
 ```
 
-2. Debug Logging - Use debug logging during development for troubleshooting:
+2. **Debug Logging** - Use debug logging during development for troubleshooting:
 
 ```javascript:index.js
 app.get('/', (req, res) => {
@@ -213,7 +210,7 @@ app.get('/', (req, res) => {
 });
 ```
 
-3. Warning Logging - Log non-critical issues that require attention:
+3. **Warning Logging** - Log non-critical issues that require attention:
 
 ```javascript:index.js
 app.get('/404', (req, res) => {
@@ -229,7 +226,7 @@ app.get('/404', (req, res) => {
 });
 ```
 
-4. Error Logging - Capture and log critical errors with full context:
+4. **Error Logging** - Capture and log critical errors with full context:
 
 ```javascript:index.js
 app.get('/user', (req, res) => {
@@ -251,7 +248,7 @@ app.get('/user', (req, res) => {
 });
 ```
 
-5. Global Error Handler - Implement a catch-all error handler:
+5. **Global Error Handler** - Implement a catch-all error handler:
 
 ```javascript:index.js
 app.use((err, req, res, next) => {
@@ -269,7 +266,7 @@ app.use((err, req, res, next) => {
 });
 ```
 
-6. Application Lifecycle Logging - Track application startup and shutdown events:
+6. **Application Lifecycle Logging** - Track application startup and shutdown events:
 
 ```javascript:index.js
 const server = app.listen(PORT, () => {
@@ -307,7 +304,7 @@ process.on('SIGTERM', () => {
   </figcaption>
 </figure>
 
-## Collecting Nodejs logs when application is deployed on Docker or Kubernetes
+## Application is deployed on Docker or Kubernetes
 
 When your application is deployed in Docker or a Kubernetes cluster, the logs from the console are automatically collected and stored in the node. The SigNoz collector will automatically collect the logs and they will be visible on the SigNoz UI but for that we need to add `Console transports` to the logger created as shown above in `logger.js`.
 
