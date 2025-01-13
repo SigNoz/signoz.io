@@ -136,7 +136,7 @@ module.exports = () => {
         {
           source: '/slack/',
           destination:
-            'https://join.slack.com/t/signoz-community/shared_invite/zt-2tgblijg2-eZCUAJnmp~G0ekNIv3se1A',
+            'https://join.slack.com/t/signoz-community/shared_invite/zt-2xvif5l9t-FjtES9tiFmSspV_bWL5zAA',
           basePath: false,
           permanent: true,
         },
