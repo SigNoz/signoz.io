@@ -570,13 +570,13 @@ const docsSideNav = [
                 route: '/docs/logs-management/send-logs/nodejs-pino-logs',
                 label: 'Pino Node.js logs',
               },
+              {
+                type: 'doc',
+                route: '/docs/logs-management/send-logs/nodejs-winston-logs',
+                label: 'Winston Node.js logs',
+              },
     
             ],
-          },
-          {
-            type: 'doc',
-            route: '/docs/userguide/collecting_nodejs_winston_logs',
-            label: 'NodeJS Winston logs',
           },
           {
             type: 'doc',
