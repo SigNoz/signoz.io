@@ -359,11 +359,6 @@ module.exports = () => {
           permanent: true,
         },
         {
-          source: '/docs/instrumentation/cpp/',
-          destination: '/docs/instrumentation/opentelemetry-cpp/',
-          permanent: true,
-        },
-        {
           source: '/docs/instrumentation/springboot/',
           destination: '/docs/instrumentation/opentelemetry-springboot/',
           permanent: true,

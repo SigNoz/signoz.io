@@ -293,7 +293,7 @@ const docsSideNav = [
           {
             type: 'doc',
             label: 'C++',
-            route: '/docs/instrumentation/cpp',
+            route: '/docs/instrumentation/opentelemetry-cpp',
           },
           {
             type: 'doc',
