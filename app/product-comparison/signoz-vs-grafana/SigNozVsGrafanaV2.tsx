@@ -118,7 +118,7 @@ const SigNozVsGrafanaV2 = () => {
             transition={{ duration: 0.8 }}
             className="mb-10 w-full lg:mb-0 lg:w-2/5"
           >
-            <h1 className="mb-6 bg-gradient-to-r from-green-400 to-blue-600 bg-clip-text text-5xl font-bold leading-[1.3] text-transparent lg:text-6xl lg:leading-[1.3]">
+            <h1 className="mb-6 bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-5xl font-bold leading-[1.3] text-transparent lg:text-6xl lg:leading-[1.3]">
               SigNoz vs Grafana
             </h1>
             <h3 className="mb-8 text-lg font-semibold text-gray-300 lg:text-xl">
@@ -159,7 +159,7 @@ const SigNozVsGrafanaV2 = () => {
             transition={{ duration: 0.8 }}
             className="relative w-full lg:-right-8 lg:w-3/5"
           >
-            <div className="overflow-hidden rounded-xl shadow-2xl shadow-green-400/20">
+            <div className="overflow-hidden rounded-xl shadow-2xl shadow-blue-400/20">
               <video autoPlay muted loop className="w-full lg:w-[120%]">
                 <source src="/img/unified-observability/showcase.mp4" type="video/mp4" />
                 Your browser does not support the video tag.
@@ -616,9 +616,9 @@ const SigNozVsGrafanaV2 = () => {
         </section>
 
         {/* Experience Seamless All-in-one Observability */}
-        <section className="mx-auto max-w-4xl rounded-xl bg-gradient-to-r from-green-900/20 to-blue-900/20 px-4 py-12 sm:px-6">
+        <section className="mx-auto max-w-4xl rounded-xl bg-gradient-to-r from-blue-900/20 to-purple-900/20 px-4 py-12 sm:px-6">
           <h2 className="mb-8 text-left text-xl font-bold lg:text-2xl">
-            Experience Seamless All-in-one Observability
+            Migrate from Grafana - Save up to 45% on your Grafana bill
           </h2>
           <div className="text-gray-300">
             <p className="mb-6 text-[1.1rem] text-gray-300">
