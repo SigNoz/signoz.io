@@ -23,7 +23,7 @@ const MigrationFloatingCard: React.FC = () => {
       const documentHeight = document.documentElement.scrollHeight
 
       // Show when past 20% of page
-      const showThreshold = documentHeight * 0.2
+      const showThreshold = documentHeight * 0.15
 
       // Hide when near the bottom section (adjust 800px based on your needs)
       const hideThreshold = documentHeight - windowHeight - 800
