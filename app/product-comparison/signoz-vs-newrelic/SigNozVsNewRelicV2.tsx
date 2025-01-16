@@ -126,7 +126,7 @@ const SigNozVsNewRelicV2 = () => {
               Tired of New Relic's user-based pricing? Even for teams of 10-15 devs, New Relic's
               pricing for user seats can be a significant portion of your monthly bill - check{' '}
               <Link
-                href="https://signoz.io/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/"
+                href="/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/"
                 className="text-blue-400 hover:text-blue-300"
                 target="_blank"
               >
@@ -252,7 +252,7 @@ const SigNozVsNewRelicV2 = () => {
                   enterprise self-host, or free, open-source community edition, depending on your
                   needs. Many of our users use{' '}
                   <Link
-                    href="https://signoz.io/docs/install/docker/"
+                    href="/docs/install/docker/"
                     className="text-blue-400 hover:text-blue-300"
                     target="_blank"
                   >
@@ -268,7 +268,7 @@ const SigNozVsNewRelicV2 = () => {
                   </Link>{' '}
                   for production environments. Privacy-focused users prefer{' '}
                   <Link
-                    href="https://signoz.io/pricing/"
+                    href="/pricing/"
                     className="text-blue-400 hover:text-blue-300"
                     target="_blank"
                   >
@@ -480,6 +480,7 @@ const SigNozVsNewRelicV2 = () => {
                             href="https://www.youtube.com/watch?v=RZSEi8csXK0"
                             className="text-blue-400 hover:text-blue-300"
                             target="_blank"
+                            rel="nofollow noreferrer"
                           >
                             Learn More
                           </Link>
@@ -494,6 +495,7 @@ const SigNozVsNewRelicV2 = () => {
                                 href="https://github.com/open-telemetry/opentelemetry-demo"
                                 className="text-blue-400 hover:text-blue-300"
                                 target="_blank"
+                                rel="nofollow noreferrer"
                               >
                                 OpenTelemetry demo app
                               </Link>{' '}
@@ -547,7 +549,7 @@ const SigNozVsNewRelicV2 = () => {
                       <ArrowRight className="h-4 w-4" />
                     </Button>
                   </Link>
-                  <Link href="/docs/messaging-queues/kafka/" target="_blank" className="block">
+                  <Link href="/docs/messaging-queues/kafka/" target="_blank">
                     <Button type={Button.TYPES.SECONDARY} className="flex items-center gap-2">
                       <BookOpen className="h-4 w-4" />
                       Read Kafka Monitoring Documentation
@@ -583,6 +585,7 @@ const SigNozVsNewRelicV2 = () => {
                   href="https://docs.newrelic.com/docs/nrql/get-started/introduction-nrql-new-relics-query-language/"
                   className="text-blue-400 hover:text-blue-300"
                   target="_blank"
+                  rel="nofollow noreferrer"
                 >
                   NRQL
                 </Link>{' '}
@@ -1337,6 +1340,7 @@ const SigNozVsNewRelicV2 = () => {
                   href="https://opentelemetry.io/docs/concepts/semantic-conventions/"
                   className="text-blue-400 hover:text-blue-300"
                   target="_blank"
+                  rel="nofollow noreferrer"
                 >
                   semantic convention
                 </Link>
@@ -1632,6 +1636,7 @@ const SigNozVsNewRelicV2 = () => {
               href="https://newrelic.com/pricing"
               className="text-blue-400 hover:text-blue-300"
               target="_blank"
+              rel="nofollow noreferrer"
             >
               user pricing
             </Link>{' '}
@@ -1655,7 +1660,7 @@ const SigNozVsNewRelicV2 = () => {
 
           <div className="mb-6 rounded-lg border border-gray-800 bg-gray-900/50 p-4">
             <Link
-              href="https://signoz.io/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/"
+              href="/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/"
               className="text-lg font-medium text-blue-400 hover:text-blue-300"
               target="_blank"
             >
