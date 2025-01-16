@@ -30,7 +30,7 @@ import {
   ResponsiveContainer,
 } from 'recharts'
 import FAQAccordion from '@/components/FAQAccordion/FAQAccordion'
-import MigrationFloatingCard from '@/components/MigrationFloatingCard/MigrationFloatingCard'
+import NewrelicMigrationFloatingCard from '@/components/MigrationFloatingCard/NewrelicMigrationFloatingCard'
 import FloatingTableOfContents from '@/components/TableOfContents/FloatingTableOfContents'
 import { XCircle } from 'lucide-react'
 
@@ -106,7 +106,7 @@ const ValueComparisonChart = () => {
 const SigNozVsNewRelicV2 = () => {
   return (
     <div className="relative min-h-screen bg-[#0A0A0A]">
-      <MigrationFloatingCard />
+      <NewrelicMigrationFloatingCard />
       <FloatingTableOfContents />
       <div className="bg-dot-pattern masked-dots absolute top-0 flex h-full w-full items-center justify-center" />
       <div className="absolute left-0 right-0 top-0 mx-auto h-[300px] w-full flex-shrink-0 rounded-[956px] bg-gradient-to-b from-[rgba(255,127,80,1)] to-[rgba(220,69,69,0)] bg-[length:110%] bg-no-repeat opacity-30 blur-[300px] sm:h-[450px] sm:bg-[center_-500px] md:h-[956px]" />
