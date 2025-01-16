@@ -106,8 +106,6 @@ const ValueComparisonChart = () => {
 const SigNozVsNewRelicV2 = () => {
   return (
     <div className="relative min-h-screen bg-[#0A0A0A]">
-      <NewrelicMigrationFloatingCard />
-      <FloatingTableOfContents />
       <div className="bg-dot-pattern masked-dots absolute top-0 flex h-full w-full items-center justify-center" />
       <div className="absolute left-0 right-0 top-0 mx-auto h-[300px] w-full flex-shrink-0 rounded-[956px] bg-gradient-to-b from-[rgba(255,127,80,1)] to-[rgba(220,69,69,0)] bg-[length:110%] bg-no-repeat opacity-30 blur-[300px] sm:h-[450px] sm:bg-[center_-500px] md:h-[956px]" />
       <div className="relative mx-auto max-w-7xl px-4 pb-24 pt-20 sm:px-6 sm:pb-32 lg:px-8 lg:pt-32">
@@ -120,7 +118,7 @@ const SigNozVsNewRelicV2 = () => {
             className="mb-10 w-full lg:mb-0 lg:w-2/5"
           >
             <h1 className="mb-6 bg-gradient-to-r from-orange-400 to-red-600 bg-clip-text text-5xl font-bold leading-[1.3] text-transparent lg:text-6xl lg:leading-[1.3]">
-              SigNoz vs New Relic
+              SigNoz <br /> vs New Relic
             </h1>
             <h3 className="mb-8 text-lg font-semibold text-gray-300 lg:text-xl">
               Tired of New Relic's user-based pricing? Even for teams of 10-15 devs, New Relic's
@@ -1699,6 +1697,8 @@ const SigNozVsNewRelicV2 = () => {
           </div>
         </section>
       </div>
+      <NewrelicMigrationFloatingCard />
+      <FloatingTableOfContents />
     </div>
   )
 }
