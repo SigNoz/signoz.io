@@ -46,7 +46,7 @@ const NewrelicMigrationFloatingCard: React.FC = () => {
 
   return (
     <div
-      className={`fixed bottom-6 right-6 z-50 hidden w-64 transform rounded-lg bg-gradient-to-r from-orange-900/90 to-red-900/90 p-4 shadow-lg backdrop-blur-sm transition-all duration-500 ease-in-out hover:-translate-y-1 hover:shadow-xl lg:block ${
+      className={`fixed bottom-6 right-6 z-50 hidden w-64 transform rounded-lg bg-gradient-to-r from-blue-900/90 to-purple-900/90 p-4 shadow-lg backdrop-blur-sm transition-all duration-500 ease-in-out hover:-translate-y-1 hover:shadow-xl lg:block ${
         isVisible && !isClosed
           ? 'translate-y-0 opacity-100'
           : 'pointer-events-none translate-y-8 opacity-0'

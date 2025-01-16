@@ -117,8 +117,8 @@ const SigNozVsNewRelicV2 = () => {
             transition={{ duration: 0.8 }}
             className="mb-10 w-full lg:mb-0 lg:w-2/5"
           >
-            <h1 className="mb-6 bg-gradient-to-r from-orange-400 to-red-600 bg-clip-text text-5xl font-bold leading-[1.3] text-transparent lg:text-6xl lg:leading-[1.3]">
-              SigNoz <br /> vs New Relic
+            <h1 className="mb-6 bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-5xl font-bold leading-[1.3] text-transparent lg:text-6xl lg:leading-[1.3]">
+              SigNoz vs New Relic
             </h1>
             <h3 className="mb-8 text-lg font-semibold text-gray-300 lg:text-xl">
               Tired of New Relic's user-based pricing? Even for teams of 10-15 devs, New Relic's
@@ -164,7 +164,7 @@ const SigNozVsNewRelicV2 = () => {
             transition={{ duration: 0.8 }}
             className="relative w-full lg:-right-8 lg:w-3/5"
           >
-            <div className="overflow-hidden rounded-xl shadow-2xl shadow-orange-400/20">
+            <div className="overflow-hidden rounded-xl shadow-2xl shadow-blue-400/20">
               <video autoPlay muted loop className="w-full lg:w-[120%]">
                 <source src="/img/unified-observability/showcase.mp4" type="video/mp4" />
                 Your browser does not support the video tag.
@@ -1668,7 +1668,7 @@ const SigNozVsNewRelicV2 = () => {
         </section>
 
         {/* Migration Section */}
-        <section className="mx-auto max-w-4xl rounded-xl bg-gradient-to-r from-orange-900/20 to-red-900/20 px-4 py-12 sm:px-6">
+        <section className="mx-auto max-w-4xl rounded-xl bg-gradient-to-r from-blue-900/20 to-purple-900/20 px-4 py-12 sm:px-6">
           <h2 className="mb-8 text-left text-xl font-bold lg:text-2xl">
             Migrate from New Relic - Save up to 67% on your New Relic bill
           </h2>
