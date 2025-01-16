@@ -1,4 +1,4 @@
-import SigNozVSNewRelic from './SigNozVsNewRelic'
+import SigNozVSNewRelicV2 from './SigNozVsNewRelicV2'
 
 import { Metadata } from 'next'
 
@@ -7,5 +7,5 @@ export const metadata: Metadata = {
 }
 
 export default function SigNozVSNewRelicPage() {
-  return <SigNozVSNewRelic />
+  return <SigNozVSNewRelicV2 />
 }
