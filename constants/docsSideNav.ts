@@ -454,6 +454,11 @@ const docsSideNav = [
     items: [
       {
         type: 'doc',
+        route: '/docs/infrastructure-monitoring/overview',
+        label: 'Overview',
+      },
+      {
+        type: 'doc',
         route: '/docs/userguide/send-metrics-cloud',
         label: 'Send Metrics to SigNoz Cloud',
       },
