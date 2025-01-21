@@ -10,13 +10,13 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Launch Week 3.0 | Feb 10 - 14 | 9 AM PT',
     description: 'Join us for a week of announcing new features at 9 AM PT daily.',
-    images: '/img/launch_week/launch-week-cover.webp',
+    images: '/img/launch_week/launch-week-meta.svg',
   },
   description: 'Join us for a week of announcing new features at 9 AM PT daily.',
   twitter: {
     title: 'Launch Week 3.0 | Feb 10 - 14 | 9 AM PT',
     description: 'Join us for a week of announcing new features at 9 AM PT daily.',
-    images: '/img/launch_week/launch-week-cover.webp',
+    images: '/img/launch_week/launch-week-meta.svg',
   },
 }
 

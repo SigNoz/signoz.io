@@ -23,7 +23,14 @@ const MainSection: React.FC = () => {
   return (
     <>
       <section className="flex w-full flex-col items-start px-20 pt-12 font-medium max-md:max-w-full max-md:px-5">
-        <div className="container !mt-[-40px] mb-0 ml-5 flex max-h-full max-w-full flex-col border-l border-r border-dashed border-signoz_slate-100 !px-0">
+        <div
+          className="container !mt-[-40px] mb-0 ml-5 flex max-h-full max-w-full flex-col border-l border-r border-dashed border-signoz_slate-100 !px-0"
+          style={{
+            backgroundImage: "url('/img/launch_week/launch-week-3-bg.svg')",
+            backgroundRepeat: 'no-repeat',
+            backgroundPosition: 'right',
+          }}
+        >
           <div className="flex w-full flex-col max-md:max-w-full">
             <div className="mt-10 flex max-w-full flex-col">
               <div className="flex flex-col justify-between gap-6 sm:flex-row">
@@ -33,12 +40,15 @@ const MainSection: React.FC = () => {
                 <div className="flex flex-row items-center gap-4 px-6">
                   <div className="inline-block h-3 w-3 rounded-sm bg-signoz_forest-500" />
                   <div className="pr-2 font-mono text-lg uppercase text-signoz_vanilla-400 max-md:max-w-full sm:text-xl">
-                    ONLINE — WORLDWIDE, 9AM PT
+                    ONLINE — WORLDWIDE, Feb 10, 9AM PT
                   </div>
                 </div>
               </div>
               <div className="mt-8 max-w-full border-b border-dashed border-signoz_slate-100 px-6 text-5xl font-medium uppercase text-signoz_vanilla-100 max-md:max-w-full max-md:text-4xl">
-                Launch Week <span className="text-signoz_cherry-500">3.0</span>
+                Launch Week{' '}
+                <span className="launch-week-counter rounded bg-signoz_cherry-500  text-signoz_vanilla-100">
+                  3
+                </span>
               </div>
             </div>
             <div className="z-10 mt-11 self-stretch border-b border-dashed border-signoz_slate-100 px-6 font-mono text-base font-medium leading-8 text-signoz_vanilla-400 max-md:mt-10 max-md:max-w-full">
@@ -47,12 +57,12 @@ const MainSection: React.FC = () => {
             </div>
           </div>
 
-          <div className="z-[1] my-6 ml-5 flex min-h-[40px] w-fit items-center justify-center gap-1.5 overflow-hidden rounded-sm bg-white px-4 py-2 text-sm leading-none text-signoz_ink-500">
+          <div className="z-[1] my-6 ml-5 flex min-h-[40px] w-fit items-center justify-center gap-1.5 overflow-hidden rounded-sm bg-white px-4 py-2 text-sm leading-none text-signoz_ink-500  ">
             <a
-              href="https://lu.ma/n4qst10q"
-              id="launch-page-subscribe"
+              href="https://lu.ma/event/evt-s7zCYuXANGch6qS"
               data-luma-action="checkout"
-              data-luma-event-id="evt-n4qst10q"
+              data-luma-event-id="evt-s7zCYuXANGch6qS"
+              id="launch-page-subscribe"
             >
               <div className="flex items-center gap-1.5">
                 <img src="/svgs/icons/subscribe.svg" alt="subscribe icon" />
@@ -270,24 +280,28 @@ const MainSection: React.FC = () => {
           </div> */}
 
           {/* Timer  */}
-          {['Monday ⎯ Feb 10', 'Tuesday ⎯ Feb 11', 'Wednesday ⎯ Feb 12', 'Thursday ⎯ Feb 13'].map(
-            (day, index) => (
-              <div
-                key={index}
-                className="flex flex-grow items-center justify-between border-b border-dashed border-signoz_slate-100 px-6 py-2"
-              >
-                <div className="w-[32%] font-mono text-sm font-medium uppercase text-signoz_vanilla-400 sm:text-base">
-                  {day}
-                </div>
-                <div className="flex w-[68%] justify-end sm:justify-start">
-                  <CountdownTimer eventDate={`2025-02-${10 + index} 21:30:00`} />
-                </div>
+          {[
+            'Monday ⎯ Feb 10',
+            'Tuesday ⎯ Feb 11',
+            'Wednesday ⎯ Feb 12',
+            'Thursday ⎯ Feb 13',
+            'Friday ⎯ Feb 14',
+          ].map((day, index) => (
+            <div
+              key={index}
+              className="flex flex-grow items-center justify-between border-b border-dashed border-signoz_slate-100 px-6 py-2"
+            >
+              <div className="w-[32%] font-mono text-sm font-medium uppercase text-signoz_vanilla-400 sm:text-base">
+                {day}
               </div>
-            )
-          )}
+              <div className="flex w-[68%] justify-end sm:justify-start">
+                <CountdownTimer eventDate={`2025-02-${10 + index} 21:30:00`} />
+              </div>
+            </div>
+          ))}
 
           {/* Cards */}
-          <div className="mb-20 mt-12 flex flex-col gap-7 px-6">
+          {/* <div className="mb-20 mt-12 flex flex-col gap-7 px-6">
             <div className="self-stretch font-mono uppercase text-signoz_vanilla-400">
               More From Launch Week
             </div>
@@ -301,7 +315,7 @@ const MainSection: React.FC = () => {
                 />
               ))}
             </div>
-          </div>
+          </div> */}
         </div>
       </section>
       <GetStarted page="launch-week" />
