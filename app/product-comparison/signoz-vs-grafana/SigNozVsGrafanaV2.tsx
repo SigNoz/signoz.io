@@ -254,7 +254,12 @@ const SigNozVsGrafanaV2 = () => {
                 </Link>)
                 </p>
                 <p className="text-gray-300">
-                In Loki, while converting attribute values in OTLP to index label values or structured metadata, any non-string values are converted to a string. While SigNoz supports indexing of attributes in string, number, and boolean. For example, in SigNoz, we can index duration, which makes querying and aggregating data faster. In Loki, if you want to perform an aggregation on such data, it happens over non-indexed data, which is slower. (Source)
+                In Loki, while converting attribute values in OTLP to index label values or structured metadata, any non-string values are converted to a string. While SigNoz supports indexing of attributes in string, number, and boolean. For example, in SigNoz, we can index duration, which makes querying and aggregating data faster. In Loki, if you want to perform an aggregation on such data, it happens over non-indexed data, which is slower.(<Link
+                href="https://grafana.com/docs/loki/latest/send-data/otel/"
+                className="text-blue-400 hover:text-blue-300"
+                >
+                Source
+                </Link>)
                 </p>
                 <p className="text-gray-300">
                 Loki, by design, is optimized for cost-effective log aggregation and storage rather than high-performance indexing. It doesn't support full-text indexing or advanced indexing on high-cardinality data like some other systems (e.g., Elasticsearch).
