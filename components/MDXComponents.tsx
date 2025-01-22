@@ -28,6 +28,7 @@ import DatadogPricingCalculator from './DatadogPricingCalculator/DatadogPricingC
 import DatadogVsSigNoz from './DatadogVsSigNoz/DatadogVsSigNoz'
 import DatadogAlternativesFinder from './DatadogAlternativesFinder/DatadogAlternativesFinder'
 import KeyPointCallout from './KeyPointCallout/KeyPointCallout'
+import GetStartedOpenTelemetryButton from './GetStartedOpenTelemetryButton/GetStartedOpenTelemetryButton'
 
 export const components: MDXComponents = {
   Image,
@@ -59,4 +60,5 @@ export const components: MDXComponents = {
   DatadogVsSigNoz,
   DatadogAlternativesFinder,
   KeyPointCallout,
+  GetStartedOpenTelemetryButton,
 }
