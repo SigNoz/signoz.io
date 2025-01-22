@@ -218,7 +218,14 @@ const SigNozVsGrafanaV2 = () => {
                   className="mb-2 rounded-lg border border-gray-800 bg-gray-900/50 p-2 shadow-[0_0_15px_rgba(0,0,0,0.5)] transition-transform duration-300 hover:scale-[1.02]"
                 />
                 <figcaption className="text-sm text-gray-400">
-                Challenges with Grafana being discussed by users (Source: HackerNews)
+                Challenges with Grafana being discussed by users (<Link
+                        href="https://news.ycombinator.com/item?id=42660321"
+                        rel="nofollow"
+                        target="_blank"
+                        className="text-blue-500 underline hover:text-blue-400"
+                      >
+                        Source: HackerNews
+                      </Link>)
                 </figcaption>
               </figure>
                 <p className="mt-4 text-gray-300">
@@ -345,7 +352,7 @@ const SigNozVsGrafanaV2 = () => {
                 </p>
               </div>
             </div>
-            
+
 
             <div className="flex items-start gap-4">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-orange-500/10">
