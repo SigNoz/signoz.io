@@ -1,19 +1,24 @@
 ---
-date: 2025-01-21
+date: 2025-01-22
 id: overview
 title: Infrastructure Monitoring 
+hide_table_of_contents: true
 ---
 
 ## Introduction
 
-The Host Monitoring System provides a comprehensive interface for monitoring and analyzing host performance, traces, and logs. 
-This document outlines the key features and functionality available through the hosts interface.
+Infrastructure Monitoring in SigNoz supports Host and Kubernetes monitoring which provides a comprehensive interface for monitoring and analyzing host and pods
+performance, traces, and logs. This document outlines the key features and functionality available in the both these interface.
 
 ## Features
 
+<Tabs>
+
+<TabItem value="Host" label="Host Interface" default>
+
 ### Host List View
 
-The main interface displays a list of all monitored hosts in your infrastructure in a tabular format.
+The main screen of the Host interface displays a list of all monitored hosts in your infrastructure along with some key metrics in a tabular format.
 
 <figure data-zoomable align='center'>
     <img className="box-shadowed-image" src="/img/docs/infrastructure-monitoring/hosts-list.webp" alt="Host List"/>
@@ -23,14 +28,14 @@ The main interface displays a list of all monitored hosts in your infrastructure
 #### Table Columns
 
 - **Host Name**: System hostname or identifier
-- **Status**: Current operational status of the host
+- **Status**: Current operational status of the host - `ACTIVE` or `INACTIVE`
 - **CPU**: CPU utilization percentage
 - **Memory**: Memory usage percentage
-- **IOWait**: Percentage of time CPU is waiting for I/O operations
-- **Load Average**: System load average value
+- **IOWait**: Percentage of time CPU is waiting for I/O operations to complete
+- **Load Average**: System load average value 
 
 **Features:**
-- A search functionality to quickly locate specific hosts
+- A search functionality to quickly locate specific hosts using different attributes
 - Paginated results for efficient navigation through large host sets
 - Sortable columns for easy comparison
 - Real-time metric updates
@@ -39,7 +44,7 @@ The main interface displays a list of all monitored hosts in your infrastructure
 
 Selecting a host opens a detailed view with three main sections: Metrics, Traces, and Logs.
 
-#### Metrics Section
+### Metrics Tab
 
 Monitor host performance metrics across customizable time periods.
 
@@ -81,9 +86,9 @@ Monitor host performance metrics across customizable time periods.
 **Time Range Selection:**
 - Choose from preset time ranges (e.g., last hour, last 24 hours)
 - Set custom time ranges using the date-time picker
-- Real-time updates for ongoing monitoring
+- Change your timezone according to your preference
 
-#### Traces Section
+### Traces Tab
 
 View and analyze distributed traces associated with the selected host.
 
@@ -96,16 +101,15 @@ View and analyze distributed traces associated with the selected host.
 - Adjustable time range selection for trace analysis
 - Advanced filtering capabilities to focus on specific trace attributes
 - Direct integration with the traces explorer for deeper analysis
-- “Explore in Traces Explorer” button opens the current trace context in the full traces interface
-- Maintains selected time ranges and filters when transitioning to the explorer
+- The "Explore in Traces Explorer" button opens the trace in the full interface, retaining time ranges and filters
 
 **Filter Options:**
-- Service name
-- Operation type
-- Status/Error codes
-- Custom attributes
+- **Service name**: Focus on traces from specific services
+- **Operation type**: Filter by specific operations or endpoints (e.g., GET, POST)
+- **Status/Error codes**: Identify traces with specific success or error statuses
+- **Custom attributes**: Refine traces using user-defined tags or metadata
 
-#### Logs Section
+### Logs Tab
 
 Access and search through host logs with powerful filtering capabilities.
 
@@ -118,11 +122,20 @@ Access and search through host logs with powerful filtering capabilities.
 - Configurable time range selection for log analysis
 - Comprehensive filtering system
 - Seamless integration with the logs explorer
-- “Explore in Logs Explorer” button transitions to the full logs interface
-- Preserves current time range and filter selections
+- The "Explore in Logs Explorer" button opens the full logs interface, keeping time ranges and filters
 
 **Filter Categories:**
-- Log levels
-- Service components
-- Message content
-- Custom fields
+- **Log Levels**: Filter logs by severity (e.g., INFO, WARN, ERROR).
+- **Service Components**: Focus on specific services or application components generating the logs.
+- **Message Content**: Search for specific keywords or patterns in log messages.
+- **Custom Fields**: Apply filters based on user-defined metadata fields for more tailored insights.
+
+</TabItem>
+
+<TabItem value="Kubernetes" label="Kubernetes Interface" default>
+
+We have launched the Kubernetes Interface. The Docs are WIP.
+
+</TabItem>
+
+</Tabs>

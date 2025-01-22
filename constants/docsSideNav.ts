@@ -457,40 +457,15 @@ const docsSideNav = [
         route: '/docs/infrastructure-monitoring/overview',
         label: 'Overview',
       },
-      {
-        type: 'doc',
-        route: '/docs/userguide/send-metrics-cloud',
-        label: 'Send Metrics to SigNoz Cloud',
-      },
-      {
-        type: 'doc',
-        route: '/docs/userguide/send-metrics',
-        label: 'Send Metrics (Self Hosted)',
-      },
-      {
-        type: 'doc',
-        route: '/docs/userguide/drop-metrics',
-        label: 'Drop Metrics',
-      },
-      {
-        type: 'doc',
-        route: '/docs/userguide/navigate-user-interface',
-        label: 'Navigate the User Interface',
-      },
+      // {
+      //   type: 'doc',
+      //   route: '/docs/userguide/navigate-user-interface',
+      //   label: 'Navigate the User Interface',
+      // },
       {
         type: 'doc',
         route: '/docs/userguide/hostmetrics',
-        label: 'Sending Host Metrics to SigNoz',
-      },
-      {
-        type: 'doc',
-        route: '/docs/userguide/collecting-ecs-logs-and-metrics',
-        label: 'ECS Infra Metrics & Logs',
-      },
-      {
-        type: 'doc',
-        route: '/docs/userguide/collecting-ecs-sidecar-infra',
-        label: 'ECS Infra Sidecar',
+        label: 'Setup',
       },
     ],
   },
@@ -782,6 +757,16 @@ const docsSideNav = [
     items: [
       {
         type: 'doc',
+        route: '/docs/userguide/send-metrics-cloud',
+        label: 'Send Metrics to SigNoz Cloud',
+      },
+      {
+        type: 'doc',
+        route: '/docs/userguide/send-metrics',
+        label: 'Send Metrics (Self Hosted)',
+      },
+      {
+        type: 'doc',
         route: '/docs/metrics-management/types-and-aggregation',
         label: 'Types and Aggregation',
       },
@@ -810,6 +795,28 @@ const docsSideNav = [
         className: 'new-doc',
         route: '/docs/metrics-management/docker-container-metrics',
         label: 'Docker container metrics',
+      },
+      {
+        type: 'doc',
+        route: '/docs/userguide/drop-metrics',
+        label: 'Drop Metrics',
+      },
+      {
+        type: 'category',
+        label: 'Guides',
+        isExpanded: false,
+        items: [
+      {
+        type: 'doc',
+        route: '/docs/userguide/collecting-ecs-logs-and-metrics',
+        label: 'ECS Infra Metrics & Logs',
+      },
+      {
+        type: 'doc',
+        route: '/docs/userguide/collecting-ecs-sidecar-infra',
+        label: 'ECS Infra Sidecar',
+      },
+        ],
       },
     ],
   },
