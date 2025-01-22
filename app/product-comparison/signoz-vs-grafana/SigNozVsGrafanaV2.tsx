@@ -327,6 +327,52 @@ const SigNozVsGrafanaV2 = () => {
               </div>
             </div>
 
+
+            <div className="flex items-start gap-4">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-orange-500/10">
+                <ChartBar className="h-5 w-5 text-orange-500" />
+              </div>
+              <div>
+                <h4 className="mb-8 text-3xl font-bold leading-normal text-white">
+                SigNoz offers a better dev experience for creating complex aggregations
+                </h4>
+                <p className="text-gray-300">
+                SigNoz allows you to query any attribute and create complex aggregations on it. Our datastore, ClickHouse is built to support aggregations over massive datasets. 
+                </p>
+                <p className="mt-4 text-gray-300">
+                SigNoz allows querying and aggregation with a simple query builder where you can create any analytical query with just a few clicks.
+                </p>
+                <p className="mt-4 text-gray-300">
+                Here's a quick demo of filtering for traces coming from a particular environment, then grouping them by k8s pod name to calculate latencies of spans from these pods.
+                </p>
+                <p className="mt-4 text-gray-300">
+                Here's a quick demo of filtering for traces coming from a particular environment, then grouping them by k8s pod name to calculate latencies of spans from these pods.
+                </p>
+                <div className="mb-8">
+                <p className="mb-4 text-[1.1rem] text-gray-300">
+                  Here's a quick demo of filtering for traces coming from a particular environment,
+                  then grouping them by k8s pod name to calculate latencies of spans from these
+                  pods.
+                </p>
+                <div className="overflow-hidden rounded-xl shadow-2xl">
+                  <video autoPlay muted loop className="w-full">
+                    <source
+                      src="/img/product-comparisons/signoz-vs-newrelic/Arbitrary Attribute-Based Querying & Aggregation.mp4"
+                      type="video/mp4"
+                    />
+                    Your browser does not support the video tag.
+                  </video>
+                </div>
+                <p className="mt-2 text-sm text-gray-400">
+                  Filtering and complex aggregations can be done with a simple query builder.
+                </p>
+              </div>
+                <p className="mt-4 text-gray-300">
+                In Grafana, you have to write complex queries which is not very intuitive.
+                </p>
+              </div>
+            </div>
+
             {/* <div className="flex items-start gap-4">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-purple-500/10">
                 <ScrollText className="h-5 w-5 text-purple-500" />
@@ -575,6 +621,42 @@ const SigNozVsGrafanaV2 = () => {
                     <td className="border-b border-gray-800/50 px-6 py-4">
                       Leveraging OTel's trace context propagation & semantic conventions, SigNoz
                       provides end-to-end observability of messaging queues like Kafka & Celery.
+                    </td>
+                  </tr>
+                  <tr className="transition-colors hover:bg-gray-800/50">
+                    <td className="border-b border-gray-800/50 px-6 py-4">Indexing on all Otel attributes</td>
+                    <td className="border-b border-gray-800/50 px-4 py-4">
+                      <div className="flex items-center gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-500" />
+                        <span>Yes</span>
+                      </div>
+                    </td>
+                    <td className="border-b border-gray-800/50 px-4 py-4">
+                      <div className="flex items-center gap-2">
+                        <AlertTriangle className="h-4 w-4 text-red-500" />
+                        <span>No</span>
+                      </div>
+                    </td>
+                    <td className="border-b border-gray-800/50 px-6 py-4">
+                    Grafana only indexes resources attributes of otel logs by default and the default limit of this resource attributes is 15. 
+                    </td>
+                  </tr>
+                  <tr className="transition-colors hover:bg-gray-800/50">
+                    <td className="border-b border-gray-800/50 px-6 py-4">Indexing of attributes in string, number, bool</td>
+                    <td className="border-b border-gray-800/50 px-4 py-4">
+                      <div className="flex items-center gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-500" />
+                        <span>Yes</span>
+                      </div>
+                    </td>
+                    <td className="border-b border-gray-800/50 px-4 py-4">
+                      <div className="flex items-center gap-2">
+                        <AlertTriangle className="h-4 w-4 text-red-500" />
+                        <span>No</span>
+                      </div>
+                    </td>
+                    <td className="border-b border-gray-800/50 px-6 py-4">
+                    Loki converts all non-string values to string while indexing. SigNoz supports indexing of attributes in string, number, or boolean.
                     </td>
                   </tr>
                 </tbody>
