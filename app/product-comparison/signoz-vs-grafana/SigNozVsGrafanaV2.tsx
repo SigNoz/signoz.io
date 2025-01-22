@@ -242,21 +242,23 @@ const SigNozVsGrafanaV2 = () => {
                  SigNoz optimizes OTel attributes for faster querying, Loki was not built to index and query high-cardinality data
                 </h4>
                 <p className="text-gray-300">
-                SigNoz indexes logs collected with OpenTelemetry across all attributes. Since we index all attributes, querying and complex aggregations are faster.
+                SigNoz allows you to index any kind of OpenTelemetry attribute. By default, we index all resource attribute regardless of its data type and cardinality.
                 </p>
                 <p className="text-gray-300">
-                Loki only indexes resource attributes of OTel logs by default, and the default limit of these resource attributes is 15.
+                Loki only indexes some of the low cardinality attributes, and the default limit of these resource attributes is 15.
                 (<Link
                 href="https://grafana.com/docs/loki/latest/send-data/otel/#loki-configuration"
                 className="text-blue-400 hover:text-blue-300"
+                target="_blank"
                 >
                 Source
                 </Link>)
                 </p>
                 <p className="text-gray-300">
-                In Loki, while converting attribute values in OTLP to index label values or structured metadata, any non-string values are converted to a string. While SigNoz supports indexing of attributes in string, number, and boolean. For example, in SigNoz, we can index duration, which makes querying and aggregating data faster. In Loki, if you want to perform an aggregation on such data, it happens over non-indexed data, which is slower.(<Link
+                In Loki, while converting attribute values in OTLP to index label values or structured metadata, any non-string values are converted to a string. While SigNoz supports indexing of attributes in string, number, and boolean. For example, in SigNoz, we can index duration, which makes querying and aggregating data faster. In Loki, if you want to perform an aggregation on such data, it happens over non-indexed data.(<Link
                 href="https://grafana.com/docs/loki/latest/send-data/otel/"
                 className="text-blue-400 hover:text-blue-300"
+                target="_blank"
                 >
                 Source
                 </Link>)
@@ -264,19 +266,18 @@ const SigNozVsGrafanaV2 = () => {
                 <p className="text-gray-300">
                 Loki, by design, is optimized for cost-effective log aggregation and storage rather than high-performance indexing. It doesn't support full-text indexing or advanced indexing on high-cardinality data like some other systems (e.g., Elasticsearch).
                 </p>
+      
                 <p className="text-gray-300">
                 Instead, Loki focuses on indexing only labels (tags or metadata), making it ideal for scenarios where structured queries based on metadata are sufficient. So, for normal cases, it will use the labels, which are streams, as the main filter and then filter on the log data that is stored.
                   
                 </p>
                 <p className="text-gray-300">
-                  Loki doesn't perform well if you want to index and query high-cardinality data.
-                  <br />
-                  <br />
                   "As a Loki user or operator, your goal should be to use the fewest labels possible
                   to store your logs." (
                   <Link
                     href="https://grafana.com/blog/2020/08/27/the-concise-guide-to-labels-in-loki/"
                     className="text-blue-400 hover:text-blue-300"
+                    target="_blank"
                   >
                     Source: Grafana
                   </Link>
@@ -295,6 +296,7 @@ const SigNozVsGrafanaV2 = () => {
                   <Link
                     href="https://signoz.io/blog/logs-performance-benchmark/"
                     className="text-lg font-medium text-blue-400 hover:text-blue-300"
+                    target="_blank"
                   >
                     Read our Logs Performance Benchmark →
                   </Link>
@@ -302,32 +304,6 @@ const SigNozVsGrafanaV2 = () => {
                 <p className="mt-4 text-gray-300">
                   SigNoz is able to perform fast aggregation queries and also has efficient resource
                   utilization during ingestion.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-4">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-orange-500/10">
-                <ChartBar className="h-5 w-5 text-orange-500" />
-              </div>
-              <div>
-                <h4 className="mb-8 text-3xl font-bold leading-normal text-white">
-                  SigNoz uses columnar database for faster ingestion & aggregation
-                </h4>
-                <p className="text-gray-300">
-                  SigNoz uses ClickHouse - a fast open-source distributed columnar database for all
-                  three types of signals - logs, metrics, and traces. It was built to do analytical
-                  queries like `Group By` fast.{' '}
-                  <Link
-                    href="https://clickhouse.com/docs/en/concepts/why-clickhouse-is-so-fast"
-                    className="text-blue-400 hover:text-blue-300"
-                  >
-                    Read more on what makes ClickHouse so fast →
-                  </Link>
-                </p>
-                <p className="mt-4 text-gray-300">
-                  Ingestion and aggregations are lightning-fast while providing best-in-class
-                  compression for economical storage.
                 </p>
               </div>
             </div>
@@ -365,10 +341,39 @@ const SigNozVsGrafanaV2 = () => {
                 </p>
               </div>
                 <p className="mt-4 text-gray-300">
-                In Grafana, you have to write complex queries which is not very intuitive.
+                In Grafana, you have to learn different query languages for different signals. For example, LogQL for logs, and traceQL for traces.
                 </p>
               </div>
             </div>
+            
+
+            <div className="flex items-start gap-4">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-orange-500/10">
+                <ChartBar className="h-5 w-5 text-orange-500" />
+              </div>
+              <div>
+                <h4 className="mb-8 text-3xl font-bold leading-normal text-white">
+                  SigNoz uses columnar database for faster ingestion & aggregation
+                </h4>
+                <p className="text-gray-300">
+                  SigNoz uses ClickHouse - a fast open-source distributed columnar database for all
+                  three types of signals - logs, metrics, and traces. It was built to do analytical
+                  queries like `Group By` fast.{' '}
+                  <Link
+                    href="https://clickhouse.com/docs/en/concepts/why-clickhouse-is-so-fast"
+                    className="text-blue-400 hover:text-blue-300"
+                    target="_blank"
+                  >
+                    Read more on what makes ClickHouse so fast →
+                  </Link>
+                </p>
+                <p className="mt-4 text-gray-300">
+                  Ingestion and aggregations are lightning-fast while providing best-in-class
+                  compression for economical storage.
+                </p>
+              </div>
+            </div>
+
 
             {/* <div className="flex items-start gap-4">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-purple-500/10">
@@ -621,7 +626,7 @@ const SigNozVsGrafanaV2 = () => {
                     </td>
                   </tr>
                   <tr className="transition-colors hover:bg-gray-800/50">
-                    <td className="border-b border-gray-800/50 px-6 py-4">Indexing on all Otel attributes</td>
+                    <td className="border-b border-gray-800/50 px-6 py-4">Indexing on all Otel resource attributes</td>
                     <td className="border-b border-gray-800/50 px-4 py-4">
                       <div className="flex items-center gap-2">
                         <CheckCircle className="h-4 w-4 text-green-500" />
