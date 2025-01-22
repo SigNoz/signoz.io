@@ -121,7 +121,7 @@ const SigNozVsGrafanaV2 = () => {
             <h1 className="mb-6 bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-5xl font-bold leading-[1.3] text-transparent lg:text-6xl lg:leading-[1.3]">
               SigNoz vs Grafana
             </h1>
-            <h3 className="mb-8 text-lg font-semibold text-gray-300 lg:text-xl">
+            <h3 className="mb-8 text-lg font-normal text-gray-300 lg:text-xl">
               Under the hood, Grafana is powered by multiple tools like Loki, Tempo, Mimir &
               Prometheus. SigNoz is powered by a single columnar datastore to serve logs, metrics,
               and traces in a single pane of glass from Day 1, which enables better context for
@@ -195,7 +195,7 @@ const SigNozVsGrafanaV2 = () => {
               </div>
               <div>
                 <h4 className="mb-8 text-3xl font-bold leading-normal text-white">
-                  SigNoz is built as a single application to serve logs, metrics, and traces
+                Single Application vs Composable Observability
                 </h4>
                 <p className="text-gray-300">
                   Grafana started as a data visualization tool. It slowly evolved into a tool that
@@ -207,13 +207,28 @@ const SigNozVsGrafanaV2 = () => {
                   maintain multiple configurations for a full-stack observability setup.
                 </p>
                 <p className="mt-4 text-gray-300">
-                  SigNoz is powered by a single columnar datastore, ClickHouse. Ingestion, storage,
-                  and querying of signals are optimized for ease of use and intelligent out-of-box
-                  correlation between the three signals.
+                The spread of tooling and configs due to different backends for each signal impacts developer experience and has a steeper learning curve.
+                </p>
+                <figure className="mb-8">
+                <Image
+                  src="/img/blog/2025/01/grafana-challenges.webp"
+                  alt="Challenges with Grafana being discussed by users (Source: HackerNews)"
+                  width={800}
+                  height={400}
+                  className="mb-2 rounded-lg border border-gray-800 bg-gray-900/50 p-2 shadow-[0_0_15px_rgba(0,0,0,0.5)] transition-transform duration-300 hover:scale-[1.02]"
+                />
+                <figcaption className="text-sm text-gray-400">
+                Challenges with Grafana being discussed by users (Source: HackerNews)
+                </figcaption>
+              </figure>
+                <p className="mt-4 text-gray-300">
+                SigNoz is powered by a single columnar datastore, ClickHouse. And SigNoz is OpenTelemetry-native. It’s easier to set up collection of all types telemetry data supported by OpenTelemetry and send it to SigNoz for visualization.
                 </p>
                 <p className="mt-4 text-gray-300">
-                  For open-source and self-hosted users of SigNoz, there is less operational
-                  overhead and a better developer experience because of using a single data store.
+                Ingestion, storage, querying, and visualization are optimized for ease of use and intelligent out-of-box correlation between the three signals.
+                </p>
+                <p className="mt-4 text-gray-300">
+                For open-source and self-hosted users of SigNoz, there is less operational overhead and a better developer experience because of using a single data store.
                 </p>
               </div>
             </div>
@@ -464,68 +479,6 @@ const SigNozVsGrafanaV2 = () => {
                       >
                         (Source)
                       </Link>
-                    </td>
-                  </tr>
-                  <tr className="transition-colors hover:bg-gray-800/50">
-                    <td className="border-b border-gray-800/50 px-6 py-4">
-                      Aggregation on span attributes
-                    </td>
-                    <td className="border-b border-gray-800/50 px-4 py-4">
-                      <div className="flex items-center gap-2">
-                        <CheckCircle className="h-4 w-4 text-green-500" />
-                        <span>Yes</span>
-                      </div>
-                    </td>
-                    <td className="border-b border-gray-800/50 px-4 py-4">
-                      <div className="flex items-center gap-2">
-                        <AlertTriangle className="h-4 w-4 text-red-500" />
-                        <span>No</span>
-                      </div>
-                    </td>
-                    <td className="border-b border-gray-800/50 px-6 py-4">
-                      SigNoz allows you create aggregations on span attributes. For example, find
-                      the p99 latency on any span attribute.
-                    </td>
-                  </tr>
-                  <tr className="transition-colors hover:bg-gray-800/50">
-                    <td className="border-b border-gray-800/50 px-6 py-4">
-                      Aggregation on Log attributes
-                    </td>
-                    <td className="border-b border-gray-800/50 px-4 py-4">
-                      <div className="flex items-center gap-2">
-                        <CheckCircle className="h-4 w-4 text-green-500" />
-                        <span>Yes</span>
-                      </div>
-                    </td>
-                    <td className="border-b border-gray-800/50 px-4 py-4">
-                      <div className="flex items-center gap-2">
-                        <AlertTriangle className="h-4 w-4 text-red-500" />
-                        <span>No</span>
-                      </div>
-                    </td>
-                    <td className="border-b border-gray-800/50 px-6 py-4">
-                      SigNoz allows you create aggregations on log attributes as well.
-                    </td>
-                  </tr>
-                  <tr className="transition-colors hover:bg-gray-800/50">
-                    <td className="border-b border-gray-800/50 px-6 py-4">
-                      Alerts on complex aggregations
-                    </td>
-                    <td className="border-b border-gray-800/50 px-4 py-4">
-                      <div className="flex items-center gap-2">
-                        <CheckCircle className="h-4 w-4 text-green-500" />
-                        <span>Yes</span>
-                      </div>
-                    </td>
-                    <td className="border-b border-gray-800/50 px-4 py-4">
-                      <div className="flex items-center gap-2">
-                        <AlertTriangle className="h-4 w-4 text-red-500" />
-                        <span>No</span>
-                      </div>
-                    </td>
-                    <td className="border-b border-gray-800/50 px-6 py-4">
-                      Create complex aggregates, add them to dashboards and create alerts to monitor
-                      discrepancies.
                     </td>
                   </tr>
                   <tr className="transition-colors hover:bg-gray-800/50">
