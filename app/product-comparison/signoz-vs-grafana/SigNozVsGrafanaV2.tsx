@@ -350,15 +350,7 @@ const SigNozVsGrafanaV2 = () => {
                 <p className="mt-4 text-gray-300">
                 Here's a quick demo of filtering for traces coming from a particular environment, then grouping them by k8s pod name to calculate latencies of spans from these pods.
                 </p>
-                <p className="mt-4 text-gray-300">
-                Here's a quick demo of filtering for traces coming from a particular environment, then grouping them by k8s pod name to calculate latencies of spans from these pods.
-                </p>
                 <div className="mb-8">
-                <p className="mb-4 text-[1.1rem] text-gray-300">
-                  Here's a quick demo of filtering for traces coming from a particular environment,
-                  then grouping them by k8s pod name to calculate latencies of spans from these
-                  pods.
-                </p>
                 <div className="overflow-hidden rounded-xl shadow-2xl">
                   <video autoPlay muted loop className="w-full">
                     <source
