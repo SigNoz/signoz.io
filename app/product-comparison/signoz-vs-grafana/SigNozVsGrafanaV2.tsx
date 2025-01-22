@@ -239,17 +239,58 @@ const SigNozVsGrafanaV2 = () => {
               </div>
               <div>
                 <h4 className="mb-8 text-3xl font-bold leading-normal text-white">
-                  True OpenTelemetry(OTel)-native solution
+                 Better indexing and dev experience for OpenTelemetry Logs
                 </h4>
                 <p className="text-gray-300">
-                  SigNoz is built from the ground up for OpenTelemetry. That means OTel-first docs,
-                  visualizations, & features are meant to truly take advantage of OpenTelemetry's
-                  potential.
+                SigNoz indexes logs collected with OpenTelemetry across all attributes. Since we index all attributes, querying and complex aggregations are faster.
+                </p>
+                <p className="text-gray-300">
+                Grafana only indexes resource attributes of OTel logs by default, and the default limit of these resource attributes is 15. (Source)
+                </p>
+                <p className="text-gray-300">
+                In Loki, while converting attribute values in OTLP to index label values or structured metadata, any non-string values are converted to a string. While SigNoz supports indexing of attributes in string, number, and boolean. For example, in SigNoz, we can index duration, which makes querying and aggregating data faster. In Loki, if you want to perform an aggregation on such data, it happens over non-indexed data, which is slower. (Source)
+                </p>
+                <p className="text-gray-300">
+                Loki, by design, is optimized for cost-effective log aggregation and storage rather than high-performance indexing. It doesn't support full-text indexing or advanced indexing on high-cardinality data like some other systems (e.g., Elasticsearch).
+                </p>
+                <p className="text-gray-300">
+                Instead, Loki focuses on indexing only labels (tags or metadata), making it ideal for scenarios where structured queries based on metadata are sufficient. So, for normal cases, it will use the labels, which are streams, as the main filter and then filter on the log data that is stored.
+                  
+                </p>
+                <p className="text-gray-300">
+                  Loki doesn't perform well if you want to index and query high-cardinality data.
+                  <br />
+                  <br />
+                  "As a Loki user or operator, your goal should be to use the fewest labels possible
+                  to store your logs." (
+                  <Link
+                    href="https://grafana.com/blog/2020/08/27/the-concise-guide-to-labels-in-loki/"
+                    className="text-blue-400 hover:text-blue-300"
+                  >
+                    Source: Grafana
+                  </Link>
+                  )
                 </p>
                 <p className="mt-4 text-gray-300">
-                  Grafana Cloud also uses OpenTelemetry for application observability but uses
-                  different databases for each signal - Loki for logs, Tempo for traces and
-                  Prometheus for metrics.
+                  We did a logs performance benchmark of open-source SigNoz with Elasticsearch and
+                  Loki. Our key findings for Loki showed:
+                </p>
+                <ul className="mt-2 list-disc pl-6 text-gray-300">
+                  <li>Ingestion is mainly limited by the number of streams that it can handle.</li>
+                  <li>Loki was not able to return the results of our test queries.</li>
+                  <li>Loki took the least amount of storage as it indexed only two keys.</li>
+                </ul>
+                <div className="mt-4 rounded-lg border border-gray-800 bg-gray-900/50 p-4">
+                  <Link
+                    href="https://signoz.io/blog/logs-performance-benchmark/"
+                    className="text-lg font-medium text-blue-400 hover:text-blue-300"
+                  >
+                    Read our Logs Performance Benchmark →
+                  </Link>
+                </div>
+                <p className="mt-4 text-gray-300">
+                  SigNoz is able to perform fast aggregation queries and also has efficient resource
+                  utilization during ingestion.
                 </p>
               </div>
             </div>
@@ -280,7 +321,7 @@ const SigNozVsGrafanaV2 = () => {
               </div>
             </div>
 
-            <div className="flex items-start gap-4">
+            {/* <div className="flex items-start gap-4">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-purple-500/10">
                 <ScrollText className="h-5 w-5 text-purple-500" />
               </div>
@@ -324,7 +365,7 @@ const SigNozVsGrafanaV2 = () => {
                   utilization during ingestion.
                 </p>
               </div>
-            </div>
+            </div> */}
 
             <div className="flex items-start gap-4">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-500/10">
