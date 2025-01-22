@@ -239,13 +239,19 @@ const SigNozVsGrafanaV2 = () => {
               </div>
               <div>
                 <h4 className="mb-8 text-3xl font-bold leading-normal text-white">
-                 Better indexing and dev experience for OpenTelemetry Logs
+                 SigNoz optimizes OTel attributes for faster querying, Loki was not built to index and query high-cardinality data
                 </h4>
                 <p className="text-gray-300">
                 SigNoz indexes logs collected with OpenTelemetry across all attributes. Since we index all attributes, querying and complex aggregations are faster.
                 </p>
                 <p className="text-gray-300">
-                Grafana only indexes resource attributes of OTel logs by default, and the default limit of these resource attributes is 15. (Source)
+                Loki only indexes resource attributes of OTel logs by default, and the default limit of these resource attributes is 15.
+                (<Link
+                href="https://grafana.com/docs/loki/latest/send-data/otel/#loki-configuration"
+                className="text-blue-400 hover:text-blue-300"
+                >
+                Source
+                </Link>)
                 </p>
                 <p className="text-gray-300">
                 In Loki, while converting attribute values in OTLP to index label values or structured metadata, any non-string values are converted to a string. While SigNoz supports indexing of attributes in string, number, and boolean. For example, in SigNoz, we can index duration, which makes querying and aggregating data faster. In Loki, if you want to perform an aggregation on such data, it happens over non-indexed data, which is slower. (Source)
