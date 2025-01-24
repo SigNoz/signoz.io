@@ -413,6 +413,11 @@ module.exports = () => {
           destination: '/docs/aws-monitoring/lambda/lambda-logs',
           permanent: true,
         },
+        {
+          source: '/docs/userguide/collecting_nodejs_winston_logs',
+          destination: '/docs/logs-management/send-logs/nodejs-winston-logs',
+          permanent: true,
+        },
       ]
     },
     webpack: (config, options) => {
