@@ -650,6 +650,11 @@ const docsSideNav = [
                 route: '/docs/logs-pipelines/guides/trace',
                 label: 'Parse Trace Information',
               },
+              {
+                type: 'doc',
+                route: '/docs/logs-pipelines/guides/resource',
+                label: 'Parse Container Name',
+              },
             ],
           },
         ],
