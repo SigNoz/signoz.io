@@ -463,6 +463,11 @@ module.exports = () => {
           destination: '/blog/ten-reasons-not-add-observability/',
           permanent: true,
         },
+        {
+          source: '/docs/self-host/install',
+          destination: '/docs/install/self-host',
+          permanent: true,
+        },
       ]
     },
     webpack: (config, options) => {
