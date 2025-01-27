@@ -422,22 +422,7 @@ module.exports = () => {
           source: '/docs/self-host/install',
           destination: '/docs/install/self-host',
           permanent: true,
-        },
-        {
-          source: '/comparisons/opentelemetry-vs-new-relic/',
-          destination: '/comparisons/opentelemetry-vs-newrelic/',
-          permanent: true,
-        },
-        {
-          source: '/blog/ten-reasons-not-to-add-observability/',
-          destination: '/blog/ten-reasons-not-add-observability/',
-          permanent: true,
-        },
-        {
-          source: '/blog/otel-webinar-opamp/',
-          destination: '/blog/opentelemetry-webinar-on-opamp/',
-          permanent: true,
-        },
+        }
       ]
     },
     webpack: (config, options) => {
