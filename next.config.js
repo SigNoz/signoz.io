@@ -418,6 +418,11 @@ module.exports = () => {
           destination: '/docs/logs-management/send-logs/nodejs-winston-logs',
           permanent: true,
         },
+        {
+          source: '/docs/self-host/install',
+          destination: '/docs/install/self-host',
+          permanent: true,
+        },
       ]
     },
     webpack: (config, options) => {
