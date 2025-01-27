@@ -134,7 +134,7 @@ Now you need to configure the OpenTelemetry Redis receiver. The collector settin
 
 Open up the otel-collector-config.yaml file located at the following address inside the installation folder of SigNoz:
 
-`deploy/docker/clickhouse-setup/otel-collector-config.yaml`
+`deploy/docker/otel-collector-config.yaml`
 
 You need to make two changes to enable OpenTelemetry Collector to receive Redis metrics:
 
@@ -163,7 +163,7 @@ You need to make two changes to enable OpenTelemetry Collector to receive Redis 
      The above pipeline sets the Redis data pipeline in which it is received as Redis metrics and exported to be written in ClickHouse, the database used by SigNoz to store telemetry data.
     
 
-You can have a look at the `otel-collector-config.yaml` file on our [GitHub repo](https://github.com/SigNoz/signoz/blob/develop/deploy/docker/clickhouse-setup/otel-collector-config.yaml). The final config file along with Redis receiver looks like below:
+You can have a look at the `otel-collector-config.yaml` file on our [GitHub repo](https://github.com/SigNoz/signoz/blob/main/deploy/docker/otel-collector-config.yaml). The final config file along with Redis receiver looks like below:
 
 <Admonition>
 We have configured the `redis endpoint` for Mac for this demo. You will need to update the endpoint based on your environment.
@@ -258,16 +258,16 @@ The password must match the password specified in the `requirepass` Redis serve
 
 Once the `yaml` configuration is done, you must restart your Docker containers to enable the OpenTelemetry Collector to scrape metrics from the Redis server.
 
-In the `deploy` folder, run the following command at your terminal to stop Docker containers:
+In the `deploy/docker` folder, run the following command at your terminal to stop Docker containers:
 
 ```bash
-docker compose -f docker/clickhouse-setup/docker-compose.yaml stop
+docker compose stop
 ```
 
 Then use the following command to restart the Docker containers:
 
 ```bash
-docker compose -f docker/clickhouse-setup/docker-compose.yaml up
+docker compose up
 ```
 
 Once the containers are running again, you can use the `Dashboards` tab of SigNoz to create customized charts for monitoring your Redis instance.

@@ -11,6 +11,7 @@ import SigNozCloud from '@/components/shared/signoz-cloud.mdx'
 ## Prerequisite
 
 - Self-Hosted [SigNoz installed](https://signoz.io/docs/install/docker/) 
+- Change directory to `deploy/docker`
 
 Once you have successfully installed SigNoz on Docker Standalone, the following sections provide an overview of the activities that are required to successfully operate SigNoz.
 
@@ -19,13 +20,13 @@ Once you have successfully installed SigNoz on Docker Standalone, the following 
 To stop SigNoz cluster:
 
 ```bash
-docker compose -f docker/clickhouse-setup/docker-compose.yaml stop
+docker compose stop
 ```
 
 To start/resume SigNoz cluster:
 
 ```bash
-docker compose -f docker/clickhouse-setup/docker-compose.yaml up -d
+docker compose up -d
 ```
 
 <Admonition>
@@ -70,18 +71,5 @@ In case you wish to upgrade the SigNoz cluster to a specific version, let's say 
 Enter the following command to uninstall SigNoz:
 
 ```bash
-docker compose -f docker/clickhouse-setup/docker-compose.yaml down -v
+docker compose down -v
 ```
-
-## Running SigNoz without Sample Application
-
-By default, `docker-compose.yaml` includes a sample application setup.
-To run SigNoz without the sample application, instead of using `docker-compose.yaml`, use `docker-compose-minimal.yaml` in all previously mentioned commands.
-
-For example,
-```bash
-docker compose -f docker/clickhouse-setup/docker-compose-minimal.yaml up -d
-```
-<Admonition>
-If you still see the HotROD services on the dashboard, wait for a few minutes, and the changes will be reflected.
-</Admonition>

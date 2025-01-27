@@ -75,9 +75,9 @@ Check the SigNoz UI for the exported logs.
 #### Scenario 1: SigNoz Running on the Same Host
 
 ##### 1. Modify Docker Compose File
-Update [`docker-compose-minimal.yaml`](https://github.com/SigNoz/signoz/blob/develop/deploy/docker/clickhouse-setup/docker-compose-minimal.yaml) to mount your log files:
+Update [`docker-compose-minimal.yaml`](https://github.com/SigNoz/signoz/blob/main/deploy/docker/docker-compose-minimal.yaml) to mount your log files:
 
-```yaml:/deploy/docker/clickhouse-setup/docker-compose-minimal.yaml 
+```yaml:/deploy/docker/docker-compose-minimal.yaml 
 otel-collector:
   image: signoz/signoz-otel-collector:0.88.11
   command: ["--config=/etc/otel-collector-config.yaml"]
@@ -87,9 +87,9 @@ otel-collector:
 ```
 
 ##### 2. Add Filelog Receiver
-Update [`otel-collector-config.yaml`](https://github.com/SigNoz/signoz/blob/develop/deploy/docker/clickhouse-setup/otel-collector-config.yaml) to include the filelog receiver:
+Update [`otel-collector-config.yaml`](https://github.com/SigNoz/signoz/blob/main/deploy/docker/otel-collector-config.yaml) to include the filelog receiver:
 
-```yaml:/deploy/docker/clickhouse-setup/otel-collector-config.yaml
+```yaml:/deploy/docker/otel-collector-config.yaml
 receivers:
   filelog/access_logs:
     include: [/<path>/localhost_access_log.*] # Path to access logs
@@ -102,7 +102,7 @@ receivers:
 ##### 3. Update Pipelines Configuration
 Modify the pipeline to include the filelog receiver:
 
-```yaml::/deploy/docker/clickhouse-setup/otel-collector-config.yaml
+```yaml::/deploy/docker/otel-collector-config.yaml
 service:
   logs:
     receivers: [otlp, filelog/access_logs, filelog/gc_logs]
