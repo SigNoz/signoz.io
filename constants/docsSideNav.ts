@@ -14,7 +14,7 @@ const docsSideNav = [
         type: 'category',
         isExpanded: false,
         label: 'Get Started',
-        route: '/docs/install',
+        route: '/docs/install/',
         items: [
           {
             type: 'doc',
@@ -25,6 +25,7 @@ const docsSideNav = [
             type: 'category',
             isExpanded: false,
             label: 'Self-Host SigNoz',
+            route: '/docs/install/self-host',
             items: [
               {
                 type: 'doc',
