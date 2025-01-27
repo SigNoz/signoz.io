@@ -422,7 +422,7 @@ module.exports = () => {
           source: '/docs/self-host/install',
           destination: '/docs/install/self-host',
           permanent: true,
-        }
+        },
       ]
     },
     webpack: (config, options) => {
