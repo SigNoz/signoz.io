@@ -428,6 +428,16 @@ module.exports = () => {
           destination: '/blog/ten-reasons-not-add-observability/',
           permanent: true,
         },
+        {
+          source: '/blog/otel-webinar-opamp/',
+          destination: '/blog/opentelemetry-webinar-on-opamp/',
+          permanent: true,
+        },
+        {
+          source: '/docs/self-host/install',
+          destination: '/docs/install/self-host',
+          permanent: true,
+        },
       ]
     },
     webpack: (config, options) => {
