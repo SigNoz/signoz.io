@@ -71,7 +71,7 @@ const GrafanaVsSigNozFloatingCard: React.FC = () => {
           Compare SigNoz vs. Grafana
           </Button>
         </Link>
-        <Link id="grafana-vs-signoz-try-signoz-button" href="/product-comparison/migrate-from-grafana/" className="w-full">
+        <Link id="grafana-vs-signoz-try-signoz-button" href="/teams/" className="w-full">
           <Button
             type={Button.TYPES.SECONDARY}
             className="flex w-full items-center justify-center gap-1 text-xs font-bold"
