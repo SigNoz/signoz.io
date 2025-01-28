@@ -13,7 +13,6 @@ import DocsSidebar from '../DocsSidebar/DocsSidebar'
 import { usePathname, useRouter } from 'next/navigation'
 import Banner from '../Banner/Banner'
 import Tabs from '../../app/resource-center/Shared/Tabs'
-import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from '@nextui-org/react'
 import { Popover, PopoverTrigger, PopoverContent } from '@nextui-org/react'
 import Accordion from '../Accordion/Accordion'
 
