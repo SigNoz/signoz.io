@@ -714,7 +714,7 @@ const SigNozVsGrafanaV2 = () => {
           <div className="text-gray-300">
             <p className="mb-6 text-[1.1rem] text-gray-300">
               Under the hood, SigNoz is powered by a single datastore for all three signals - logs,
-              metrics & traces. Unlike Grafana, it is also built for all-in-one observability from
+              metrics & traces. Unlike Grafana, SigNoz is also built for all-in-one observability from
               day 1.
             </p>
             <div className="flex flex-col gap-4 sm:flex-row">

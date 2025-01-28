@@ -26,6 +26,7 @@ import FAQAccordion from './FAQAccordion/FAQAccordion'
 import Button from './Button/Button'
 import DatadogPricingCalculator from './DatadogPricingCalculator/DatadogPricingCalculator'
 import DatadogVsSigNoz from './DatadogVsSigNoz/DatadogVsSigNoz'
+import GrafanaVsSigNoz from './GrafanaVsSigNoz/GrafanaVsSigNoz'
 import DatadogAlternativesFinder from './DatadogAlternativesFinder/DatadogAlternativesFinder'
 import KeyPointCallout from './KeyPointCallout/KeyPointCallout'
 import GetStartedOpenTelemetryButton from './GetStartedOpenTelemetryButton/GetStartedOpenTelemetryButton'
@@ -58,6 +59,7 @@ export const components: MDXComponents = {
   Button,
   DatadogPricingCalculator,
   DatadogVsSigNoz,
+  GrafanaVsSigNoz,
   DatadogAlternativesFinder,
   KeyPointCallout,
   GetStartedOpenTelemetryButton,

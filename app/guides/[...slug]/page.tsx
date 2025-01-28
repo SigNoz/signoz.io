@@ -14,7 +14,7 @@ import Link from 'next/link'
 import { SidebarIcons } from '@/components/sidebar-icons/icons'
 import PageFeedback from '../../../components/PageFeedback/PageFeedback'
 import React from 'react'
-import ScrollForm from '@/components/ScrollForm'
+import GrafanaVsSigNozFloatingCard from '@/components/GrafanaVsSigNoz/GrafanaVsSigNozFloatingCard'
 
 const defaultLayout = 'PostLayout'
 const layouts = {
@@ -101,25 +101,8 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
   const jsonLd = post.structuredData
   const Layout = layouts[post.layout || defaultLayout]
 
-  // Check if the post has the "faq" tag
-  const hasFaqTag = post.tags && post.tags.includes('faq')
-
-  // Define the custom ScrollForm props
-  const scrollFormProps = {
-    question: "Are you facing issues with your observability setup?",
-    options: [
-      "Unpredictable pricing",
-      "Difficult to manage multiple tools",
-      "Lack of OpenTelemetry-native support",
-      "No issues right now"
-    ],
-    optionBehaviors: {
-      "Unpredictable pricing": { action: 'showCTA' as const },
-      "Difficult to manage multiple tools": { action: 'showCTA' as const },
-      "Lack of OpenTelemetry-native support": { action: 'showCTA' as const },
-      "No issues right now": { action: 'close' as const }
-    }
-  }
+  // Check if the slug contains Grafana or Prometheus
+  const isGrafanaOrPrometheusArticle = slug.toLowerCase().includes('grafana') || slug.toLowerCase().includes('prometheus')
 
   return (
     <>
@@ -147,8 +130,8 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
         <PageFeedback />
       </Layout>
 
-      {/* Render ScrollForm with custom props if the post has the "faq" tag */}
-      {hasFaqTag && <ScrollForm {...scrollFormProps} />}
+      {/* Render GrafanaVsSigNozFloatingCard if the slug contains Grafana or Prometheus */}
+      {isGrafanaOrPrometheusArticle && <GrafanaVsSigNozFloatingCard />}
     </>
   )
 }
