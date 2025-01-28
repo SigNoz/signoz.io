@@ -1405,7 +1405,7 @@ const docsSideNav = [
     type: 'category',
     isExpanded: false,
     // className: 'new-doc',
-    // route: '',
+    route: '/docs/azure-monitoring',
     items: [
       {
         type: 'category',
@@ -1557,7 +1557,7 @@ const docsSideNav = [
     type: 'category',
     isExpanded: false,
     // className: 'new-doc',
-    // route: '',
+    route: '/docs/gcp-monitoring',
     items: [
       {
         type: 'category',
