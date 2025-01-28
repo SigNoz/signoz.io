@@ -18,6 +18,7 @@ export default function GrafanaVsSigNoz() {
           <div className="flex flex-col gap-4 sm:flex-row">
             <Button>
               <a
+                id="grafana-vs-signoz-compare-button"
                 href="/product-comparison/signoz-vs-grafana/"
                 style={{ textDecoration: 'none', color: 'inherit' }}
                 className="flex items-center gap-2"
@@ -27,7 +28,7 @@ export default function GrafanaVsSigNoz() {
               </a>
             </Button>
             <Button href="/teams/" type={Button.TYPES.SECONDARY}>
-              <a href="/teams/" style={{ textDecoration: 'none', color: 'inherit' }}>
+              <a id="grafana-vs-signoz-try-signoz-button" href="/teams/" style={{ textDecoration: 'none', color: 'inherit' }}>
                 Try SigNoz for Free &rarr;
               </a>
             </Button>

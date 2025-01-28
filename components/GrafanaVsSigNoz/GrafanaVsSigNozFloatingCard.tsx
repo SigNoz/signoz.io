@@ -65,13 +65,13 @@ const GrafanaVsSigNozFloatingCard: React.FC = () => {
       Tired of juggling multiple tools for observability? SigNoz gives you logs, metrics and traces in a single unified platform.  
       </p>
       <div className="flex flex-col gap-2">
-        <Link href="/product-comparison/signoz-vs-grafana/" className="w-full">
+        <Link id="grafana-vs-signoz-compare-button" href="/product-comparison/signoz-vs-grafana/" className="w-full">
           <Button className="flex w-full items-center justify-center gap-1 text-xs font-bold">
           <Scale className="h-4 w-4" />
           Compare SigNoz vs. Grafana
           </Button>
         </Link>
-        <Link href="/product-comparison/migrate-from-grafana/" className="w-full">
+        <Link id="grafana-vs-signoz-try-signoz-button" href="/product-comparison/migrate-from-grafana/" className="w-full">
           <Button
             type={Button.TYPES.SECONDARY}
             className="flex w-full items-center justify-center gap-1 text-xs font-bold"
