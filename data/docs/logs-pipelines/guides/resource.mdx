@@ -254,45 +254,45 @@ With these steps, you’ve:
 Depending on your use case, you might want to perform additional cleanup or restructuring of your logs. Here are a few ideas:
 
 1. **Remove the Raw `body` Field**  
-   - If you no longer need the original raw JSON in the top‐level `body`, you can use a **Delete** processor:  
-     ```yaml
-     - type: delete
-       name: RemoveRawBody
-       field: body
-     ```
-   - This is often helpful if you’re storing logs long-term and don’t want redundant data.
+If you no longer need the original raw JSON in the top‐level `body`, you can use a **Delete** processor:  
+```yaml
+- type: delete
+  name: RemoveRawBody
+  field: body
+```
+This is often helpful if you’re storing logs long-term and don’t want redundant data.
 
 2. **Rename or Move Other Fields**  
-   - Suppose you want to rename `host` to something like `attributes.node.host`. You could add another **Move** processor:
-     ```yaml
-     - type: move
-       name: RenameHostField
-       from: attributes.host
-       to: attributes.node.host
-     ```
-   - This helps keep your logs organized under a consistent naming structure.
+Suppose you want to rename `host` to something like `attributes.node.host`. You could add another **Move** processor:
+```yaml
+- type: move
+  name: RenameHostField
+  from: attributes.host
+  to: attributes.node.host
+```
+This helps keep your logs organized under a consistent naming structure.
 
 3. **Parse Nested JSON Fields Repeatedly**  
-   - If you have deeper nested JSON structures (for example, `attributes.properties.config` being another JSON string), you can parse them again:
-     ```yaml
-     - type: json_parser
-       name: ParseNestedConfig
-       parse_from: attributes.properties.config
-       parse_to: attributes.properties.config
-     ```
-   - This enables you to break down complex, deeply nested log data into fully structured fields.
+If you have deeper nested JSON structures (for example, `attributes.properties.config` being another JSON string), you can parse them again:
+```yaml
+- type: json_parser
+  name: ParseNestedConfig
+  parse_from: attributes.properties.config
+  parse_to: attributes.properties.config
+```
+This enables you to break down complex, deeply nested log data into fully structured fields.
 
 4. **Apply Conditional Logic**  
-   - If you only want to run certain processors on logs that meet specific criteria (e.g., logs with a certain `host` value), you can use pipeline **filters**. For example:
-     ```yaml
-     pipeline:
-       - filter:
-           match: attributes.host == "azure-vm-123"
-         processors:
-           - type: move
-             name: HostToAttributes
-             from: attributes.host
-             to: attributes.azure_host
-     ```
+If you only want to run certain processors on logs that meet specific criteria (e.g., logs with a certain `host` value), you can use pipeline **filters**. For example:
+```yaml
+pipeline:
+  - filter:
+      match: attributes.host == "azure-vm-123"
+    processors:
+      - type: move
+        name: HostToAttributes
+        from: attributes.host
+        to: attributes.azure_host
+```
 
 By combining these ideas, you can shape your logs into any structure you need, ensuring the most important fields are surfaced at the top and extraneous data is removed (or reorganized) to fit your observability needs.

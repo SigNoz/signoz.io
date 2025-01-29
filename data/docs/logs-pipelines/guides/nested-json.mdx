@@ -1,0 +1,298 @@
+---
+date: 2024-01-28
+id: nested-json
+title: Nested Json
+---
+
+## Overview
+
+Logs often contain deeply nested JSON objects, making it difficult to filter, query, or analyze specific fields. In such cases, you may need to **flatten** the 
+structure by extracting key values and promoting them to higher-level attributes.
+
+### Example Log Used in This Guide
+
+Throughout this guide, we’ll work with the following example log:
+
+```json
+{
+  "timestamp": "2025-01-25T10:00:00Z",
+  "body": "{ \"metadata\": { \"container\": { \"group_id\": \"abc123\", \"group_name\": \"backend-service\", \"image_name\": \"backend:v2\" } }, \"message\": \"Request timed out\" }"
+}
+```
+In this example:
+
+- The log message is in the `message` field but buried inside a JSON object within `body`.
+- Important metadata fields (`group_id`, `group_name`, `image_name`) are deeply nested inside `metadata.container`.
+
+### Desired Outcome
+By the end of this guide, we want to:
+
+- Parse the JSON string in `body` into structured fields under `attributes`.
+- Extract the `message` field and move it to the top‐level `body`.
+- Flatten the nested metadata fields so they are directly accessible in `attributes`.
+
+Here’s how the log should look after we apply our pipeline transformations:
+
+```json
+{
+  "timestamp": "2025-01-25T10:00:00Z",
+  "body": "Request timed out",
+  "attributes": {
+    "group_id": "abc123",
+    "group_name": "backend-service",
+    "image_name": "backend:v2"
+  }
+}
+```
+
+## Steps to Extract Nested JSON Fields and Flatten Logs
+
+To transform our example log into the desired format, we will use the following **three processors** in the SigNoz Logs Pipeline:
+
+1. **JSON Parser** – Convert the JSON string in `body` into structured fields under `attributes`.
+2. **Move Processor** – Move the `message` field from the parsed JSON into `body`.
+3. **Flatten Nested Fields** – Extract `group_id`, `group_name`, and `image_name` from `metadata.container` and move them to top-level `attributes`.
+
+Let's go through each step in detail.
+
+### Step 1. JSON Parser – Convert JSON in `body` to Structured Attributes
+
+The first step is to parse the raw JSON string inside `body` so we can access its fields directly.
+
+### Before Parsing
+
+```json
+{
+  "timestamp": "2025-01-25T10:00:00Z",
+  "body": "{ \"metadata\": { \"container\": { \"group_id\": \"abc123\", \"group_name\": \"backend-service\", \"image_name\": \"backend:v2\" } }, \"message\": \"Request timed out\" }"
+}
+```
+
+#### Processor Configuration
+
+```yaml
+- type: json_parser
+  name: ParseBodyJson
+  parse_from: body
+  parse_to: attributes
+```
+
+#### After Parsing
+
+```json
+{
+  "timestamp": "2025-01-25T10:00:00Z",
+  "body": "{ \"metadata\": { \"container\": { \"group_id\": \"abc123\", \"group_name\": \"backend-service\", \"image_name\": \"backend:v2\" } }, \"message\": \"Request timed out\" }",
+  "attributes": {
+    "metadata": {
+      "container": {
+        "group_id": "abc123",
+        "group_name": "backend-service",
+        "image_name": "backend:v2"
+      }
+    },
+    "message": "Request timed out"
+  }
+}
+```
+
+**Key Observations:**
+
+- The JSON in `body` is now structured under `attributes`, making `message` and `metadata.container` accessible as nested keys.
+- The original `body` field still contains the raw JSON string. We’ll update this in the next step.
+
+### Step 2. Move Processor – Extract `message` Field to `body`
+
+Now that `message` is available in `attributes.message`, we will **move** it to the top‐level `body`, making it the primary log message.
+
+### Before Moving `message`
+
+```json
+{
+  "timestamp": "2025-01-25T10:00:00Z",
+  "body": "{ \"metadata\": { \"container\": { \"group_id\": \"abc123\", \"group_name\": \"backend-service\", \"image_name\": \"backend:v2\" } }, \"message\": \"Request timed out\" }",
+  "attributes": {
+    "metadata": {
+      "container": {
+        "group_id": "abc123",
+        "group_name": "backend-service",
+        "image_name": "backend:v2"
+      }
+    },
+    "message": "Request timed out"
+  }
+}
+```
+
+#### Processor Configuration
+
+```yaml
+- type: move
+  name: MoveMessageToBody
+  from: attributes.message
+  to: body
+```
+
+#### After Moving Log
+
+```json
+{
+  "timestamp": "2025-01-25T10:00:00Z",
+  "body": "Request timed out",
+  "attributes": {
+    "metadata": {
+      "container": {
+        "group_id": "abc123",
+        "group_name": "backend-service",
+        "image_name": "backend:v2"
+      }
+    }
+  }
+}
+```
+
+**Key Observations:**
+
+- The `message` field has been moved from `attributes.message` to the top‐level body.
+- `attributes.message` has been removed since Move operations transfer values rather than copying them.
+- The nested `metadata.container` structure remains unchanged for now, but we will flatten it in the next step.
+
+
+### Step 3. Move Processor – Flatten `metadata.container` Fields
+
+Now, we need to **extract** `group_id`, `group_name`, and `image_name` from `attributes.metadata.container` and move them to top-level `attributes`. This makes querying and filtering easier.
+
+### Before Flattening Nested Fields
+
+```json
+{
+  "timestamp": "2025-01-25T10:00:00Z",
+  "body": "Request timed out",
+  "attributes": {
+    "metadata": {
+      "container": {
+        "group_id": "abc123",
+        "group_name": "backend-service",
+        "image_name": "backend:v2"
+      }
+    }
+  }
+}
+```
+
+#### Processor Configuration
+
+```yaml
+- type: move
+  name: MoveGroupID
+  from: attributes.metadata.container.group_id
+  to: attributes.group_id
+
+- type: move
+  name: MoveGroupName
+  from: attributes.metadata.container.group_name
+  to: attributes.group_name
+
+- type: move
+  name: MoveImageName
+  from: attributes.metadata.container.image_name
+  to: attributes.image_name
+```
+
+#### After Flattening Nested Fields
+
+```json
+{
+  "timestamp": "2025-01-25T10:00:00Z",
+  "body": "Request timed out",
+  "attributes": {
+    "group_id": "abc123",
+    "group_name": "backend-service",
+    "image_name": "backend:v2"
+  }
+}
+```
+
+**Key Observations:**
+
+- `group_id`, `group_name`, and `image_name` are now directly accessible under `attributes`, rather than being deeply nested.
+- The original `metadata.container` structure is removed, as Move operations transfer values instead of copying them.
+- The log is now cleaner and structured for easy filtering and analysis
+
+## Final Outcome
+
+After applying all three transformations, our log is now clean and structured:
+
+```json
+{
+  "timestamp": "2025-01-25T10:00:00Z",
+  "body": "Request timed out",
+  "attributes": {
+    "group_id": "abc123",
+    "group_name": "backend-service",
+    "image_name": "backend:v2"
+  }
+}
+```
+
+With these steps, you’ve:
+
+- Promoted the main log message (`message`) to the `body` field.
+- Flattened deeply nested fields for easy querying.
+- Removed unnecessary JSON hierarchy, making logs more structured and readable.
+
+## Optional Cleanup and Further Customizations
+
+Depending on your use case, you may want to apply additional cleanup steps to further refine your logs. Here are some optional transformations:
+
+1. **Remove Unused Fields**
+If you no longer need the original `body` field after extracting all necessary data, you can remove it using a **Delete** processor:
+
+```yaml
+- type: delete
+  name: RemoveRawBody
+  field: body
+```
+
+This ensures that only the structured fields remain.
+
+2. **Rename or Move Additional Fields**
+
+If you prefer different naming conventions for extracted fields, use another Move processor. For example, renaming `group_id` to `service.group_id`:
+
+```yaml
+- type: move
+  name: RenameGroupID
+  from: attributes.group_id
+  to: attributes.service.group_id
+```
+
+This makes logs more structured and easier to categorize.
+
+3. **Handle Additional Nested JSON**  
+
+If some fields still contain JSON strings, you can re-run the JSON Parser processor on them:
+
+```yaml
+- type: json_parser
+  name: ParseAdditionalJSON
+  parse_from: attributes.some_nested_field
+  parse_to: attributes.some_nested_field
+```
+This is useful if your logs contain multiple levels of nested JSON data.
+
+4. **Apply Conditional Logic**  
+To apply transformations only to specific logs (e.g., logs with a certain `group_name`), use pipeline filters:
+```yaml
+pipeline:
+  - filter:
+      match: attributes.group_name == "backend-service"
+    processors:
+      - type: move
+        name: FilteredMove
+        from: attributes.image_name
+        to: attributes.backend_image
+```
+This ensures that certain transformations are applied only to relevant logs.
+
+By combining these ideas, you can shape your logs into any structure you need, ensuring the most important fields are surfaced at the top and extraneous data is removed (or reorganized) to fit your observability needs.
