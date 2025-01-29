@@ -40,6 +40,9 @@ hostMetrics:
 
 To collect host metrics from virtual machines (VMs), you need to run otel collector on each VM and configure the hostmetrics receiver to collect metrics from the VM. The following example shows how to configure the hostmetrics receiver to collect metrics from a VM:
 
+<Tabs entityName="vm-hostmetrics">
+<TabItem value="cloud" label="SigNoz Cloud" default>
+
 ```yaml
 receivers:
   # Ref: https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/hostmetricsreceiver/README.md
@@ -82,3 +85,50 @@ service:
 ```
 
 Note: replace the `{region}` placeholder with the region of your SigNoz instance and make sure to set the `SIGNOZ_INGESTION_KEY` environment variable with the ingestion key of your SigNoz instance.
+
+</TabItem>
+<TabItem value="self-host" label="Self-Host">
+
+```yaml
+receivers:
+  # Ref: https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/hostmetricsreceiver/README.md
+  hostmetrics:
+    collection_interval: 60s
+    scrapers:
+      cpu:
+      load:
+      memory:
+      disk:
+      filesystem:
+      network:
+processors:
+  # Ref: https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/resourcedetectionprocessor/README.md
+  resourcedetection:
+    detectors: [env, system] # Before system detector, include ec2 for AWS, gcp for GCP and azure for Azure.
+    # Using OTEL_RESOURCE_ATTRIBUTES envvar, env detector adds custom labels.
+    system:
+      hostname_sources: [os] # alternatively, use [dns,os] for setting FQDN as host.name and os as fallback
+extensions:
+  health_check:
+  zpages:
+exporters:
+  otlp:
+    endpoint: "<endpoint>"
+    tls:
+      insecure: true
+service:
+  telemetry:
+    metrics:
+      address: 0.0.0.0:8888
+  extensions: [health_check, zpages]
+  pipelines:
+    metrics/hostmetrics:
+      receivers: [hostmetrics]
+      processors: [resourcedetection]
+      exporters: [otlp]
+```
+
+Note: replace the `<endpoint>` placeholder with the endpoint of your SigNoz collector endpoint address.
+</TabItem>
+
+</Tabs>
