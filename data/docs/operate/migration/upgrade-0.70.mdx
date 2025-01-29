@@ -1,0 +1,86 @@
+---
+date: 2025-01-29
+id: upgrade-0.70
+title: Upgrade to v0.70 from earlier versions of SigNoz
+---
+
+If you are upgrading from SigNoz version < v0.70.0 directly to version >= 0.70.0 please follow this guide.
+
+This upgrade is only for SigNoz installation in **Docker Standalone** and **Docker Swarm**.
+If you are using **Kubernetes** deployment, you can skip this guide.
+
+## Steps to Run the Migration Script
+
+This guide is for migrating data from bind mount to **Docker Volume**.
+
+### Docker Standalone
+
+- Navigate to the volume migration script
+
+```bash
+cd scripts/volume-migration
+```
+
+- Run the migration script
+
+```bash
+./migrate.sh -o migrate -d standalone -m all
+```
+
+- After the migration is complete, verify that you are able to see the old data using SigNoz UI
+
+- If you want to delete the old bind mount data that is no longer needed, you can run the following command:
+
+```bash
+./migrate.sh -o post-migrate -d standalone -m all
+```
+
+### Docker Swarm
+
+In case of multi-node Swarm cluster, you need to run the migration script on each node.
+You may see some errors in worker nodes, but you can ignore them.
+
+- Navigate to the volume migration script
+
+```bash
+cd scripts/volume-migration
+```
+
+- Run the migration script
+
+```bash
+./migrate.sh -o migrate -d swarm -m all
+```
+
+- After the migration is complete, verify that you are able to see the old data using SigNoz UI
+
+- If you want to delete the old bind mount data that is no longer needed, you can run the following command:
+
+```bash
+./migrate.sh -o post-migrate -d swarm -m all
+```
+
+## In case of Upgrade Failure
+
+Reach out to us at [Slack][4].
+
+## Command-Line Interface (CLI) Options
+
+There are some custom options which can be enabled based on different use cases.
+All the options below are `optional`.
+
+Options:
+
+- `-d` : Deployment type (standalone, swarm)
+- `-m` : Migration component (all, clickhouse, zookeeper, signoz, alertmanager)
+- `-o` : Operation (migrate, post-migrate)
+- `-p` : Signoz root directory - defaults to the root SigNoz directory wrt the script
+- `-s` : Silent mode (true, false) - defaults to false
+- `-h` : Show this help message
+
+---
+
+[1]: https://signoz.io/docs/operate/docker-standalone/#upgrade
+[2]: https://signoz.io/docs/operate/docker-swarm/#upgrade
+[3]: https://signoz.io/docs/operate/kubernetes/#upgrade
+[4]: https://signoz.io/slack
