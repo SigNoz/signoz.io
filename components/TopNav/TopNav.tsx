@@ -33,7 +33,7 @@ const productDropdownItems = [
   {
     key: 'apm',
     url: '/application-performance-monitoring',
-    icon: '/img/index_features/metrics.svg',
+    icon: '/img/index_features/bar-chart-2_feature.svg',
     description: 'Monitor your applications',
     name: 'APM',
     order: 1,
@@ -41,7 +41,7 @@ const productDropdownItems = [
   {
     key: 'Alerts',
     url: '/alerts-management',
-    icon: '/img/index_features/alerts.svg',
+    icon: '/img/index_features/concierge-bell_feature.svg',
     description: 'Always know what’s going on',
     name: 'Alerts',
     order: 5,
@@ -49,7 +49,7 @@ const productDropdownItems = [
   {
     key: 'DistributedTracing',
     url: '/distributed-tracing',
-    icon: '/img/index_features/traces.svg',
+    icon: '/img/index_features/drafting-compass_feature.svg',
     description: 'Track requests across your services',
     name: 'Distributed Tracing',
     order: 2,
@@ -57,7 +57,7 @@ const productDropdownItems = [
   {
     key: 'MetricsDashboards',
     url: '/metrics-and-dashboards',
-    icon: '/img/index_features/dashboards.svg',
+    icon: '/img/index_features/layout-grid_feature.svg',
     description: 'Monitor key metrics and build dashboards',
     name: 'Metrics & Dashboards',
     order: 6,
@@ -65,7 +65,7 @@ const productDropdownItems = [
   {
     key: 'LogManagement',
     url: '/log-management',
-    icon: '/img/index_features/logs-management.svg',
+    icon: '/img/index_features/logs_feature.svg',
     description: 'Unlock key insights from logs',
     name: 'Log Management',
     order: 3,
@@ -73,7 +73,7 @@ const productDropdownItems = [
   {
     key: 'Exceptions',
     url: '/exceptions-monitoring',
-    icon: '/img/index_features/exceptions.svg',
+    icon: '/img/index_features/bug_feature.svg',
     description: 'Record exceptions automatically',
     name: 'Exceptions',
     order: 7,
@@ -81,7 +81,7 @@ const productDropdownItems = [
   {
     key: 'ingest',
     url: '/blog/introducing-ingest-guard-feature/',
-    icon: '/img/index_features/ingest-guard.svg',
+    icon: '/img/index_features/shield-plus.svg',
     description: 'Control your observability costs',
     name: 'Ingest Guard',
     order: 4,
@@ -283,11 +283,11 @@ export default function TopNav() {
                     </PopoverTrigger>
                     <PopoverContent className="rounded-[4px] p-0">
                       <div className="flex flex-row">
-                        <div className="flex flex-col gap-y-5 p-6">
+                        <div className="flex flex-col gap-y-4 p-6">
                           <div className="text-[11px] font-semibold uppercase leading-[18px] tracking-[0.88px] text-[#62687C]">
                             Product Modules
                           </div>
-                          <div className="grid grid-cols-2 gap-x-[42px] gap-y-[36px]">
+                          <div className="grid grid-cols-2 gap-x-3 gap-y-5">
                             {productDropdownItems.map((item) => (
                               <Link
                                 href={item.url}
@@ -297,18 +297,18 @@ export default function TopNav() {
                                 <Image
                                   src={item.icon}
                                   alt={`${item.name}`}
-                                  width={42}
-                                  height={42}
+                                  width={20}
+                                  height={20}
                                 />
                                 <div>
                                   <div className="flex flex-row items-center gap-1">
-                                    <span className="text-[16px]">{item.name}</span>{' '}
+                                    <span>{item.name}</span>{' '}
                                     <ArrowRight
                                       size={14}
                                       className="opacity-0 group-hover:opacity-100"
                                     />
                                   </div>
-                                  <div className="line-clamp-2 max-w-[274px] text-[14px] text-[#C0C1C3]  group-hover:text-[#FFF]">
+                                  <div className="line-clamp-2 max-w-[274px] text-xs text-[#C0C1C3]  group-hover:text-[#FFF]">
                                     {item.description}
                                   </div>
                                 </div>
@@ -316,8 +316,8 @@ export default function TopNav() {
                             ))}
                           </div>
                         </div>
-                        <div className="flex flex-col justify-between rounded-r-[4px] border-l border-[#1D212D] bg-[#16181D] p-6">
-                          <div className="flex flex-col gap-[20px]">
+                        <div className="flex flex-col gap-y-6 rounded-r-[4px] border-l border-[#1D212D] bg-[#16181D] p-6">
+                          <div className="flex flex-col gap-y-4">
                             <Link
                               href={'/case-study'}
                               className="flex flex-row items-center gap-1 text-[11px] font-semibold uppercase leading-[18px] tracking-[0.88px] text-[#62687C] hover:text-[#fff]"
@@ -332,20 +332,20 @@ export default function TopNav() {
                                 <Image
                                   src={'/img/index_features/brainfish.svg'}
                                   alt={''}
-                                  width={42}
-                                  height={42}
+                                  width={20}
+                                  height={20}
                                 />
-                                <div className="font-inter line-clamp-2 max-w-[274px] text-[16px] font-medium leading-5 text-[#C0C1C3] group-hover:text-[#fff]">
+                                <div className="font-inter line-clamp-2 max-w-[274px] text-[#C0C1C3] group-hover:text-[#fff]">
                                   How Brainfish leveraged SigNoz for effective Kubernetes monitoring
                                 </div>
                               </Link>
                             </div>
                           </div>
-                          <div className="flex flex-col gap-[20px]">
+                          <div className="flex flex-col gap-y-4">
                             <div className="flex flex-row items-center gap-1 text-[11px] font-semibold uppercase leading-[18px] tracking-[0.88px] text-[#62687C]">
                               <span>Compare Signoz</span>
                             </div>
-                            <div className="font-inter flex flex-col gap-3 text-[16px] leading-5 text-[#C0C1C3]">
+                            <div className="font-inter flex flex-col gap-1 text-[#C0C1C3]">
                               {comparisionItems.map((comparisionItem) => (
                                 <Link
                                   key={comparisionItem.key}
@@ -404,7 +404,7 @@ export default function TopNav() {
                           <div className="text-[11px] font-semibold uppercase leading-[18px] tracking-[0.88px] text-[#62687C]">
                             Learn
                           </div>
-                          <div className="grid grid-cols-1 gap-x-[42px] gap-y-[36px]">
+                          <div className="grid grid-cols-1 gap-x-3 gap-y-5">
                             {resourcesDropdownItems.learn.map((item) => (
                               <Link
                                 href={item.url}
@@ -413,13 +413,13 @@ export default function TopNav() {
                               >
                                 <div>
                                   <div className="flex flex-row items-center gap-1">
-                                    <span className="text-[16px]">{item.name}</span>{' '}
+                                    <span>{item.name}</span>{' '}
                                     <ArrowRight
                                       size={14}
                                       className="opacity-0 group-hover:opacity-100"
                                     />
                                   </div>
-                                  <div className="line-clamp-2 max-w-[274px] text-[14px] text-[#C0C1C3]  group-hover:text-[#FFF]">
+                                  <div className="line-clamp-2 max-w-[274px] text-xs text-[#C0C1C3]  group-hover:text-[#FFF]">
                                     {item.description}
                                   </div>
                                 </div>
@@ -427,11 +427,11 @@ export default function TopNav() {
                             ))}
                           </div>
                         </div>
-                        <div className="flex flex-col gap-y-5 p-6">
+                        <div className="flex flex-col gap-y-4 p-6">
                           <div className="text-[11px] font-semibold uppercase leading-[18px] tracking-[0.88px] text-[#62687C]">
                             Explore
                           </div>
-                          <div className="grid grid-cols-1 gap-x-[42px] gap-y-[36px]">
+                          <div className="grid grid-cols-1 gap-x-3 gap-y-5">
                             {resourcesDropdownItems.explore.map((item) => (
                               <Link
                                 href={item.url}
@@ -440,64 +440,18 @@ export default function TopNav() {
                               >
                                 <div>
                                   <div className="flex flex-row items-center gap-1">
-                                    <span className="text-[16px]">{item.name}</span>{' '}
+                                    <span>{item.name}</span>{' '}
                                     <ArrowRight
                                       size={14}
                                       className="opacity-0 group-hover:opacity-100"
                                     />
                                   </div>
-                                  <div className="line-clamp-2 max-w-[274px] text-[14px] text-[#C0C1C3]  group-hover:text-[#FFF]">
+                                  <div className="line-clamp-2 max-w-[274px] text-xs text-[#C0C1C3]  group-hover:text-[#FFF]">
                                     {item.description}
                                   </div>
                                 </div>
                               </Link>
                             ))}
-                          </div>
-                        </div>
-                        <div className="flex flex-col justify-between rounded-r-[4px] border-l border-[#1D212D] bg-[#16181D] p-6">
-                          <div className="flex flex-col gap-[20px]">
-                            <Link
-                              href={'/case-study'}
-                              className="flex flex-row items-center gap-1 text-[11px] font-semibold uppercase leading-[18px] tracking-[0.88px] text-[#62687C] hover:text-[#fff]"
-                            >
-                              <span>Customer Stories</span> <ArrowRight size={14} />
-                            </Link>
-                            <div>
-                              <Link
-                                href={'/case-study/brainfish/'}
-                                className="group flex h-auto items-center gap-4"
-                              >
-                                <Image
-                                  src={'/img/index_features/brainfish.svg'}
-                                  alt={''}
-                                  width={42}
-                                  height={42}
-                                />
-                                <div className="font-inter line-clamp-2 max-w-[274px] text-[16px] font-medium leading-5 text-[#C0C1C3] group-hover:text-[#fff]">
-                                  How Brainfish leveraged SigNoz for effective Kubernetes monitoring
-                                </div>
-                              </Link>
-                            </div>
-                          </div>
-                          <div className="flex flex-col gap-[20px]">
-                            <div className="flex flex-row items-center gap-1 text-[11px] font-semibold uppercase leading-[18px] tracking-[0.88px] text-[#62687C]">
-                              <span>Compare Signoz</span>
-                            </div>
-                            <div className="font-inter flex flex-col gap-3 text-[16px] leading-5 text-[#C0C1C3]">
-                              {comparisionItems.map((comparisionItem) => (
-                                <Link
-                                  key={comparisionItem.key}
-                                  href={comparisionItem.url}
-                                  className="group flex flex-row items-center gap-1 hover:text-[#fff]"
-                                >
-                                  <span>{comparisionItem.name}</span>{' '}
-                                  <ArrowRight
-                                    className="opacity-0 group-hover:opacity-100"
-                                    size={14}
-                                  />
-                                </Link>
-                              ))}
-                            </div>
                           </div>
                         </div>
                       </div>
