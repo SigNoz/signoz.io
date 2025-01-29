@@ -20,7 +20,8 @@ const Tabs = ({ children, entityName }) => {
 
   const firstValidChild = childrenArray.find(isValidElement)
   const initialActiveTab = firstValidChild ? firstValidChild.props.value : null
-  const [activeTab, setActiveTab] = useState(environment || initialActiveTab)
+  const selectedTab = entityName === 'plans' ? initialActiveTab : environment || initialActiveTab
+  const [activeTab, setActiveTab] = useState(selectedTab)
   const hideSelfHostTab = source === ONBOARDING_SOURCE && entityName === 'plans'
 
   return (
