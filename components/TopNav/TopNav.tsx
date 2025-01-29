@@ -413,7 +413,7 @@ export default function TopNav() {
                     </PopoverTrigger>
                     <PopoverContent className="rounded-[4px] p-0">
                       <div className="flex flex-row">
-                        <div className="flex flex-col gap-y-5 p-6">
+                        <div className="flex flex-col gap-y-4 p-6">
                           <div className="text-[11px] font-semibold uppercase leading-[18px] tracking-[0.88px] text-[#62687C]">
                             Learn
                           </div>
