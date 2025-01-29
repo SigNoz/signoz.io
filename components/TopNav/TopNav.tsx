@@ -226,6 +226,15 @@ export default function TopNav() {
     const id = setTimeout(() => setIsOpenResources(false), delay)
     setTimeoutIdResources(id)
   }
+
+  const handleProductDropdownClick = () => {
+    setIsOpen(false)
+  }
+
+  const handleResourcesDropdownClick = () => {
+    setIsOpenResources(false)
+  }
+
   return (
     <div className="fixed left-0 right-0 z-30">
       <Banner />
@@ -293,6 +302,7 @@ export default function TopNav() {
                                 href={item.url}
                                 className="group flex h-auto items-center gap-4"
                                 key={item.key}
+                                onClick={handleProductDropdownClick}
                               >
                                 <Image
                                   src={item.icon}
@@ -321,6 +331,7 @@ export default function TopNav() {
                             <Link
                               href={'/case-study'}
                               className="flex flex-row items-center gap-1 text-[11px] font-semibold uppercase leading-[18px] tracking-[0.88px] text-[#62687C] hover:text-[#fff]"
+                              onClick={handleProductDropdownClick}
                             >
                               <span>Customer Stories</span> <ArrowRight size={14} />
                             </Link>
@@ -328,6 +339,7 @@ export default function TopNav() {
                               <Link
                                 href={'/case-study/brainfish/'}
                                 className="group flex h-auto items-center gap-4"
+                                onClick={handleProductDropdownClick}
                               >
                                 <Image
                                   src={'/img/index_features/brainfish.svg'}
@@ -351,6 +363,7 @@ export default function TopNav() {
                                   key={comparisionItem.key}
                                   href={comparisionItem.url}
                                   className="group flex flex-row items-center gap-1 hover:text-[#fff]"
+                                  onClick={handleProductDropdownClick}
                                 >
                                   <span>{comparisionItem.name}</span>{' '}
                                   <ArrowRight
@@ -410,6 +423,7 @@ export default function TopNav() {
                                 href={item.url}
                                 className="group flex h-auto items-center gap-4"
                                 key={item.key}
+                                onClick={handleResourcesDropdownClick}
                               >
                                 <div>
                                   <div className="flex flex-row items-center gap-1">
@@ -437,6 +451,7 @@ export default function TopNav() {
                                 href={item.url}
                                 className="group flex h-auto items-center gap-4"
                                 key={item.key}
+                                onClick={handleResourcesDropdownClick}
                               >
                                 <div>
                                   <div className="flex flex-row items-center gap-1">
