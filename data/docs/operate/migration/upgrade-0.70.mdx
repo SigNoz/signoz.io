@@ -9,6 +9,15 @@ If you are upgrading from SigNoz version < v0.70.0 directly to version >= 0.70.0
 This upgrade is only for SigNoz installation in **Docker Standalone** and **Docker Swarm**.
 If you are using **Kubernetes** deployment, you can skip this guide.
 
+## Prerequisites
+
+- You have an existing SigNoz installation with data.
+- **Make sure you have sufficient free disk space** to backup your data.
+  Preferably more than 50% free space of the total disk space.
+
+If you do not wish to backup your data, you can bring down the running SigNoz installation,
+delete the associated resources, and start with a fresh installation.
+
 ## Steps to Run the Migration Script
 
 This guide is for migrating data from bind mount to **Docker Volume**.
@@ -17,48 +26,80 @@ This guide is for migrating data from bind mount to **Docker Volume**.
 
 - Navigate to the volume migration script
 
-```bash
-cd scripts/volume-migration
-```
+  ```bash
+  cd scripts/volume-migration
+  ```
 
 - Run the migration script
 
-```bash
-./migrate.sh -o migrate -d standalone -m all
-```
+  ```bash
+  ./migrate.sh -o migrate -d standalone -m all
+  ```
 
-- After the migration is complete, verify that you are able to see the old data using SigNoz UI
+  If you want to migrate only a specific component, you can replace `all`
+  with the component name.
+  
+  For example, to migrate only the SQLite data, you can run:
 
-- If you want to delete the old bind mount data that is no longer needed, you can run the following command:
+  ```bash
+  ./migrate.sh -o migrate -d standalone -m signoz
+  ```
 
-```bash
-./migrate.sh -o post-migrate -d standalone -m all
-```
+- After the migration is complete, verify that Docker volumes are created and
+  you are able to see the old data using SigNoz UI
+
+  ```bash
+  docker volume ls
+  ```
+
+- (Optional) Delete the old bind mount data that is no longer needed.
+
+  To delete the old bind mount data, run the following command:
+
+  ```bash
+  ./migrate.sh -o post-migrate -d standalone -m all
+  ```
 
 ### Docker Swarm
 
 In case of multi-node Swarm cluster, you need to run the migration script on each node.
+
 You may see some errors in worker nodes, but you can ignore them.
 
 - Navigate to the volume migration script
 
-```bash
-cd scripts/volume-migration
-```
+  ```bash
+  cd scripts/volume-migration
+  ```
 
 - Run the migration script
 
-```bash
-./migrate.sh -o migrate -d swarm -m all
-```
+  ```bash
+  ./migrate.sh -o migrate -d swarm -m all
+  ```
 
-- After the migration is complete, verify that you are able to see the old data using SigNoz UI
+- After the migration is complete, verify that all the Docker volumes are created:
 
-- If you want to delete the old bind mount data that is no longer needed, you can run the following command:
+  ```bash
+  docker volume ls
+  ```
 
-```bash
-./migrate.sh -o post-migrate -d swarm -m all
-```
+  You should see output similar to the following:
+
+  ```
+  local     signoz-alertmanager
+  local     signoz-clickhouse
+  local     signoz-sqlite
+  local     signoz-zookeeper-1
+  ```
+
+- Make sure you are able to login in SigNoz UI and see the old data.
+
+- (Optional) If you want to delete the old bind mount data that is no longer needed, you can run the following command:
+
+  ```bash
+  ./migrate.sh -o post-migrate -d swarm -m all
+  ```
 
 ## In case of Upgrade Failure
 
