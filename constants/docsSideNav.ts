@@ -147,7 +147,7 @@ const docsSideNav = [
         // type: 'generated-index',
         // title: 'Instrument your Application',
         // description:
-        // 'To instrument your applications and send data to SigNoz, follow the instructions in the sections below.',
+        // 'To instrument your application with OpenTelemetry and send data to SigNoz, follow the instructions in the sections below.',
         // slug: '/docs/instrumentation/index',
         // },
         items: [
