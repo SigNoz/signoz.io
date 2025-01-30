@@ -15,6 +15,7 @@ import Banner from '../Banner/Banner'
 import Tabs from '../../app/resource-center/Shared/Tabs'
 import { Popover, PopoverTrigger, PopoverContent } from '@nextui-org/react'
 import Accordion from '../Accordion/Accordion'
+import { Color } from '@signozhq/design-tokens'
 
 enum TABS {
   BLOG = 'blog-tab',
@@ -293,7 +294,9 @@ export default function TopNav() {
                     <PopoverContent className="rounded-[4px] p-0">
                       <div className="flex flex-row">
                         <div className="flex flex-col gap-y-4 p-6">
-                          <div className="text-[11px] font-semibold uppercase leading-[18px] tracking-[0.88px] text-[#62687C]">
+                          <div
+                            className={`text-[11px] font-semibold uppercase leading-[18px] tracking-[0.88px] text-[${Color.BG_SLATE_50}]`}
+                          >
                             Product Modules
                           </div>
                           <div className="grid grid-cols-2 gap-x-3 gap-y-5">
@@ -318,7 +321,9 @@ export default function TopNav() {
                                       className="opacity-0 group-hover:opacity-100"
                                     />
                                   </div>
-                                  <div className="line-clamp-2 max-w-[274px] text-xs text-[#C0C1C3]  group-hover:text-[#FFF]">
+                                  <div
+                                    className={`line-clamp-2 max-w-[274px] text-xs text-[${Color.TEXT_VANILLA_400}]  group-hover:text-[#FFF]`}
+                                  >
                                     {item.description}
                                   </div>
                                 </div>
@@ -326,11 +331,13 @@ export default function TopNav() {
                             ))}
                           </div>
                         </div>
-                        <div className="flex flex-col gap-y-6 rounded-r-[4px] border-l border-[#1D212D] bg-[#16181D] p-6">
+                        <div
+                          className={`flex flex-col gap-y-6 rounded-r-[4px] border-l border-[${Color.BG_SLATE_400}] bg-[${Color.BG_INK_300}] p-6`}
+                        >
                           <div className="flex flex-col gap-y-4">
                             <Link
                               href={'/case-study'}
-                              className="flex flex-row items-center gap-1 text-[11px] font-semibold uppercase leading-[18px] tracking-[0.88px] text-[#62687C] hover:text-[#fff]"
+                              className={`flex flex-row items-center gap-1 text-[11px] font-semibold uppercase leading-[18px] tracking-[0.88px] text-[${Color.BG_SLATE_50}] hover:text-[#fff]`}
                               onClick={handleProductDropdownClick}
                             >
                               <span>Customer Stories</span> <ArrowRight size={14} />
@@ -347,17 +354,23 @@ export default function TopNav() {
                                   width={20}
                                   height={20}
                                 />
-                                <div className="font-inter line-clamp-2 max-w-[274px] text-[#C0C1C3] group-hover:text-[#fff]">
+                                <div
+                                  className={`font-inter line-clamp-2 max-w-[274px] text-[${Color.TEXT_VANILLA_400}] group-hover:text-[#fff]`}
+                                >
                                   How Brainfish leveraged SigNoz for effective Kubernetes monitoring
                                 </div>
                               </Link>
                             </div>
                           </div>
                           <div className="flex flex-col gap-y-4">
-                            <div className="flex flex-row items-center gap-1 text-[11px] font-semibold uppercase leading-[18px] tracking-[0.88px] text-[#62687C]">
+                            <div
+                              className={`flex flex-row items-center gap-1 text-[11px] font-semibold uppercase leading-[18px] tracking-[0.88px] text-[${Color.BG_SLATE_50}]`}
+                            >
                               <span>Compare Signoz</span>
                             </div>
-                            <div className="font-inter flex flex-col gap-1 text-[#C0C1C3]">
+                            <div
+                              className={`font-inter flex flex-col gap-1 text-[${Color.TEXT_VANILLA_400}]`}
+                            >
                               {comparisionItems.map((comparisionItem) => (
                                 <Link
                                   key={comparisionItem.key}
@@ -414,7 +427,9 @@ export default function TopNav() {
                     <PopoverContent className="rounded-[4px] p-0">
                       <div className="flex flex-row">
                         <div className="flex flex-col gap-y-4 p-6">
-                          <div className="text-[11px] font-semibold uppercase leading-[18px] tracking-[0.88px] text-[#62687C]">
+                          <div
+                            className={`text-[11px] font-semibold uppercase leading-[18px] tracking-[0.88px] text-[${Color.BG_SLATE_50}]`}
+                          >
                             Learn
                           </div>
                           <div className="grid grid-cols-1 gap-x-3 gap-y-5">
@@ -433,7 +448,9 @@ export default function TopNav() {
                                       className="opacity-0 group-hover:opacity-100"
                                     />
                                   </div>
-                                  <div className="line-clamp-2 max-w-[274px] text-xs text-[#C0C1C3]  group-hover:text-[#FFF]">
+                                  <div
+                                    className={`line-clamp-2 max-w-[274px] text-xs text-[${Color.TEXT_VANILLA_400}]  group-hover:text-[#FFF]`}
+                                  >
                                     {item.description}
                                   </div>
                                 </div>
@@ -442,7 +459,9 @@ export default function TopNav() {
                           </div>
                         </div>
                         <div className="flex flex-col gap-y-4 p-6">
-                          <div className="text-[11px] font-semibold uppercase leading-[18px] tracking-[0.88px] text-[#62687C]">
+                          <div
+                            className={`text-[11px] font-semibold uppercase leading-[18px] tracking-[0.88px] text-[${Color.BG_SLATE_50}]`}
+                          >
                             Explore
                           </div>
                           <div className="grid grid-cols-1 gap-x-3 gap-y-5">
@@ -461,7 +480,9 @@ export default function TopNav() {
                                       className="opacity-0 group-hover:opacity-100"
                                     />
                                   </div>
-                                  <div className="line-clamp-2 max-w-[274px] text-xs text-[#C0C1C3]  group-hover:text-[#FFF]">
+                                  <div
+                                    className={`line-clamp-2 max-w-[274px] text-xs text-[${Color.TEXT_VANILLA_400}]  group-hover:text-[#FFF]`}
+                                  >
                                     {item.description}
                                   </div>
                                 </div>
