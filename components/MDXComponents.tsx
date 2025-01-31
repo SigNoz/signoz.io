@@ -32,6 +32,7 @@ import KeyPointCallout from './KeyPointCallout/KeyPointCallout'
 import GetStartedOpenTelemetryButton from './GetStartedOpenTelemetryButton/GetStartedOpenTelemetryButton'
 import InterlinkCard from './InterlinkCard/InterlinkCard'
 import InArticleVideoShowcaseModal from './InArticleVideoShowcaseModal/InArticleVideoShowcaseModal'
+import GetStartedInfrastructureMonitoring from './GetStartedInfrastructureMonitoring/GetStartedInfrastructureMonitoring'
 
 export const components: MDXComponents = {
   Image,
@@ -67,4 +68,5 @@ export const components: MDXComponents = {
   GetStartedOpenTelemetryButton,
   InterlinkCard,
   InArticleVideoShowcaseModal,
+  GetStartedInfrastructureMonitoring,
 }
