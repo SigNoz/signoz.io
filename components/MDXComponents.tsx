@@ -31,6 +31,7 @@ import DatadogAlternativesFinder from './DatadogAlternativesFinder/DatadogAltern
 import KeyPointCallout from './KeyPointCallout/KeyPointCallout'
 import GetStartedOpenTelemetryButton from './GetStartedOpenTelemetryButton/GetStartedOpenTelemetryButton'
 import InterlinkCard from './InterlinkCard/InterlinkCard'
+import InArticleVideoShowcaseModal from './InArticleVideoShowcaseModal/InArticleVideoShowcaseModal'
 
 export const components: MDXComponents = {
   Image,
@@ -65,4 +66,5 @@ export const components: MDXComponents = {
   KeyPointCallout,
   GetStartedOpenTelemetryButton,
   InterlinkCard,
+  InArticleVideoShowcaseModal,
 }
