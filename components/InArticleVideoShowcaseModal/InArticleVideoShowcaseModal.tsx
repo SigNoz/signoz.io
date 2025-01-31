@@ -1,8 +1,9 @@
 'use client';
 
 import React from 'react';
-import { Play } from 'lucide-react';
+import { Play, ArrowRight } from 'lucide-react';
 import { Modal, ModalContent, ModalBody, useDisclosure } from '@nextui-org/react';
+import Button from '../Button/Button'
 
 interface InArticleVideoShowcaseModalProps {
   videoSrc: string;
@@ -10,6 +11,9 @@ interface InArticleVideoShowcaseModalProps {
   title?: string;
   subtitle?: string;
   thumbnailSrc?: string;
+  oneLiner?: string;
+  ctaText?: string;
+  ctaUrl?: string;
 }
 
 const InArticleVideoShowcaseModal: React.FC<InArticleVideoShowcaseModalProps> = ({ 
@@ -17,7 +21,10 @@ const InArticleVideoShowcaseModal: React.FC<InArticleVideoShowcaseModalProps> = 
   className = "",
   title,
   subtitle,
-  thumbnailSrc
+  thumbnailSrc,
+  oneLiner,
+  ctaText,
+  ctaUrl
 }) => {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
@@ -68,6 +75,26 @@ const InArticleVideoShowcaseModal: React.FC<InArticleVideoShowcaseModalProps> = 
                 <source src={videoSrc} type="video/mp4" />
                 Your browser does not support the video tag.
               </video>
+              {oneLiner && (
+                <p className="text-center text-signoz_vanilla-400 mt-4 mb-0">
+                  {oneLiner}
+                </p>
+              )}
+              {ctaText && ctaUrl && (
+                <div className="flex justify-center">
+                  <Button
+                    onClick={() => {
+                      onOpenChange();
+                      window.open(ctaUrl, '_blank');
+                    }}
+                  >
+                    <span className="flex items-center gap-2">
+                      {ctaText}
+                      <ArrowRight className="h-4 w-4" />
+                    </span>
+                  </Button>
+                </div>
+              )}
             </ModalBody>
           )}
         </ModalContent>
