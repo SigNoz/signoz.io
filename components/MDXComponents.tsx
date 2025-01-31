@@ -30,6 +30,7 @@ import GrafanaVsSigNoz from './GrafanaVsSigNoz/GrafanaVsSigNoz'
 import DatadogAlternativesFinder from './DatadogAlternativesFinder/DatadogAlternativesFinder'
 import KeyPointCallout from './KeyPointCallout/KeyPointCallout'
 import GetStartedOpenTelemetryButton from './GetStartedOpenTelemetryButton/GetStartedOpenTelemetryButton'
+import InterlinkCard from './InterlinkCard/InterlinkCard'
 
 export const components: MDXComponents = {
   Image,
@@ -63,4 +64,5 @@ export const components: MDXComponents = {
   DatadogAlternativesFinder,
   KeyPointCallout,
   GetStartedOpenTelemetryButton,
+  InterlinkCard,
 }
