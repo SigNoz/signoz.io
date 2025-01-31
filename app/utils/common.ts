@@ -1,5 +1,5 @@
 // Function to filter based on search value
-export function filterData(array, searchValue) {
+export function filterData(array: any[], searchValue: string) {
   return array.filter((item) =>
     Object.values(item).some(
       (value) =>

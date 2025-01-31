@@ -99,6 +99,7 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
   const mainContent = coreContent(post)
   const jsonLd = post.structuredData
 
+  // @ts-ignore
   const Layout = layouts[post.layout || defaultLayout]
 
   return (

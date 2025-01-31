@@ -6,12 +6,18 @@ import { ArrowUpRight } from 'lucide-react'
 import Image from 'next/image'
 import { Github, Linkedin, Slack, Twitter, Youtube } from '@/components/social-icons/SolidIcons'
 import { usePathname } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
+import { ONBOARDING_SOURCE } from '../constants/globals'
+import { QUERY_PARAMS } from '../constants/queryParams'
 
 function Footer() {
   const pathname = usePathname()
+  const searchParams = useSearchParams()
+  const source = searchParams.get(QUERY_PARAMS.SOURCE)
   const isLoginRoute = pathname === '/login/'
+  const isOnboardingRoute = source === ONBOARDING_SOURCE
 
-  if (isLoginRoute) {
+  if (isLoginRoute || isOnboardingRoute) {
     return null
   }
 
@@ -157,7 +163,7 @@ function Footer() {
                 </div>
                 <div className="mt-5 items-end justify-center rounded text-sm leading-5 text-emerald-300">
                   <Link href="https://status.signoz.io/" target="_blank">
-                  All systems operational
+                    All systems operational
                   </Link>
                 </div>
                 <div className="footer-icons mt-5 flex items-end justify-between gap-4 py-2">
