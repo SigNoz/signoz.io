@@ -210,9 +210,9 @@ const WhyOpenTelemetry: React.FC = () => {
       </ReasonSection>
 
       {/* Get Started Section */}
-      <section className="min-h-screen w-full flex items-center py-16 lg:h-screen lg:py-0 lg:snap-start lg:overflow-auto">
+      <section className="min-h-screen w-full flex items-center py-16 lg:h-screen lg:py-0 lg:snap-start lg:overflow-auto lg:bg-gradient-to-r lg:from-blue-900/20 lg:to-purple-900/20">
         <div className="relative mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-4xl rounded-xl bg-gradient-to-r from-blue-900/20 to-purple-900/20 p-8">
+          <div className="mx-auto max-w-4xl rounded-xl bg-gradient-to-r from-blue-900/20 to-purple-900/20 lg:bg-none lg:p-0 p-8">
             <h2 className="mb-6 text-3xl font-bold text-white">
               Get Started with OpenTelemetry
             </h2>
