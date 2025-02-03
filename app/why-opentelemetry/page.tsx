@@ -20,8 +20,8 @@ interface ReasonSectionProps {
 
 const ReasonSection: React.FC<ReasonSectionProps> = ({ id, number, title, children, image, imageAlt, imageCaption }) => {
   return (
-    <section id={id} className="min-h-screen w-full flex items-center py-16 lg:h-screen lg:py-0 lg:snap-start">
-      <div className="mx-auto max-w-4xl px-4">
+    <section id={id} className="min-h-screen w-full flex items-center py-16 lg:h-screen lg:py-0 lg:snap-start lg:overflow-auto">
+      <div className="mx-auto max-w-4xl px-4 py-8 lg:py-16">
         <div className="flex items-baseline gap-4 mb-6">
           <span className="text-2xl font-bold text-green-400">{number}</span>
           <h3 className="text-3xl font-bold text-white">{title}</h3>
@@ -49,9 +49,9 @@ const WhyOpenTelemetry: React.FC = () => {
   return (
     <div className="relative bg-[#0A0A0A] min-h-screen overflow-y-auto lg:h-screen lg:snap-y lg:snap-mandatory">
       {/* Hero + Intro Section */}
-      <section className="relative min-h-screen w-full flex flex-col justify-between py-16 lg:h-screen lg:py-0 lg:snap-start">
+      <section className="relative min-h-screen w-full flex flex-col justify-between py-16 lg:h-screen lg:py-0 lg:snap-start lg:overflow-auto">
         {/* Hero Section */}
-        <div className="relative bg-gradient-to-r from-blue-900 to-purple-900 py-16">
+        <div className="relative bg-gradient-to-r from-blue-900 to-purple-900 py-8 lg:py-16">
           <div className="bg-dot-pattern masked-dots absolute top-0 flex h-full w-full items-center justify-center" />
           
           <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -77,7 +77,7 @@ const WhyOpenTelemetry: React.FC = () => {
         </div>
 
         {/* Introduction Section */}
-        <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+        <div className="relative mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-4xl">
             <h2 className="mb-8 text-4xl font-bold text-white lg:text-5xl">
               Top Reasons to Use OpenTelemetry
@@ -86,11 +86,10 @@ const WhyOpenTelemetry: React.FC = () => {
               Whether you're starting your observability journey or have things in place already, you can use OpenTelemetry. It enables its users to use the same underlying instrumentation, data format, and wire protocol regardless of any observability backend you use.
             </p>
           </div>
-          <div className="flex justify-center my-8">
+          <div className="hidden lg:flex justify-center my-8">
             <ArrowDown className="h-8 w-8 text-gray-300 animate-bounce" />
           </div>
         </div>
-        <div className='empty-div'></div>
       </section>
 
       {/* Reason Sections */}
@@ -211,8 +210,8 @@ const WhyOpenTelemetry: React.FC = () => {
       </ReasonSection>
 
       {/* Get Started Section */}
-      <section className="min-h-screen w-full flex items-center py-16 lg:h-screen lg:py-0 lg:snap-start">
-        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <section className="min-h-screen w-full flex items-center py-16 lg:h-screen lg:py-0 lg:snap-start lg:overflow-auto">
+        <div className="relative mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-4xl rounded-xl bg-gradient-to-r from-blue-900/20 to-purple-900/20 p-8">
             <h2 className="mb-6 text-3xl font-bold text-white">
               Get Started with OpenTelemetry
