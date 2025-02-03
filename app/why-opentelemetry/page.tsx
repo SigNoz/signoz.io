@@ -4,7 +4,7 @@ import React from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
-import { ArrowRight, Server, Link as LinkIcon } from 'lucide-react'
+import { ArrowRight, Server, Link as LinkIcon, ArrowDown } from 'lucide-react'
 import Button from '@/components/Button/Button'
 import Figure from '@/components/Figure/Figure'
 
@@ -86,7 +86,11 @@ const WhyOpenTelemetry: React.FC = () => {
               Whether you're starting your observability journey or have things in place already, you can use OpenTelemetry. It enables its users to use the same underlying instrumentation, data format, and wire protocol regardless of any observability backend you use.
             </p>
           </div>
+          <div className="flex justify-center my-8">
+            <ArrowDown className="h-8 w-8 text-gray-300 animate-bounce" />
+          </div>
         </div>
+        <div className='empty-div'></div>
       </section>
 
       {/* Reason Sections */}
