@@ -20,7 +20,7 @@ interface ReasonSectionProps {
 
 const ReasonSection: React.FC<ReasonSectionProps> = ({ id, number, title, children, image, imageAlt, imageCaption }) => {
   return (
-    <section id={id} className="h-screen w-full flex items-center snap-start">
+    <section id={id} className="min-h-screen w-full flex items-center py-16 lg:h-screen lg:py-0 lg:snap-start">
       <div className="mx-auto max-w-4xl px-4">
         <div className="flex items-baseline gap-4 mb-6">
           <span className="text-2xl font-bold text-green-400">{number}</span>
@@ -47,16 +47,16 @@ const ReasonSection: React.FC<ReasonSectionProps> = ({ id, number, title, childr
 
 const WhyOpenTelemetry: React.FC = () => {
   return (
-    <div className="relative bg-[#0A0A0A] h-screen overflow-y-auto snap-y snap-mandatory">
+    <div className="relative bg-[#0A0A0A] min-h-screen overflow-y-auto lg:h-screen lg:snap-y lg:snap-mandatory">
       {/* Hero + Intro Section */}
-      <section className="relative h-screen w-full snap-start flex flex-col justify-between">
+      <section className="relative min-h-screen w-full flex flex-col justify-between py-16 lg:h-screen lg:py-0 lg:snap-start">
         {/* Hero Section */}
         <div className="relative bg-gradient-to-r from-blue-900 to-purple-900 py-16">
           <div className="bg-dot-pattern masked-dots absolute top-0 flex h-full w-full items-center justify-center" />
           
           <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-4xl">
-              <h1 className="mb-6 bg-gradient-to-r from-blue-200 to-purple-400 bg-clip-text text-5xl font-bold leading-[1.3] text-transparent lg:text-6xl lg:leading-[1.3]">
+              <h1 className="mb-6 bg-gradient-to-r from-blue-200 to-purple-400 bg-clip-text text-4xl font-bold leading-[1.3] text-transparent lg:text-6xl lg:leading-[1.3]">
                 Why OpenTelemetry?
               </h1>
               <p className="mb-8 text-lg font-normal text-gray-300 lg:text-xl">
@@ -207,7 +207,7 @@ const WhyOpenTelemetry: React.FC = () => {
       </ReasonSection>
 
       {/* Get Started Section */}
-      <section className="h-screen w-full flex items-center snap-start">
+      <section className="min-h-screen w-full flex items-center py-16 lg:h-screen lg:py-0 lg:snap-start">
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-4xl rounded-xl bg-gradient-to-r from-blue-900/20 to-purple-900/20 p-8">
             <h2 className="mb-6 text-3xl font-bold text-white">
