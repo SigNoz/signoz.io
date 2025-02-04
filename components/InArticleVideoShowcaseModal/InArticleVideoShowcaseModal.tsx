@@ -44,18 +44,18 @@ const InArticleVideoShowcaseModal: React.FC<InArticleVideoShowcaseModalProps> = 
         
         {/* Play Button */}
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-20 h-20 bg-white/10 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-            <Play size={40} className="text-white ml-1" />
+          <div className="w-12 h-12 md:w-20 md:h-20 bg-white/10 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+            <Play size={24} className="text-white ml-1 md:size-40" />
           </div>
         </div>
 
         {/* Title and Subtitle Overlay */}
-        <div className="absolute bottom-0 left-0 p-6 w-full bg-gradient-to-t from-black/80 to-transparent">
+        <div className="absolute bottom-0 left-0 p-3 md:p-6 w-full bg-gradient-to-t from-black/80 to-transparent">
           {title && (
-            <h2 className="text-3xl font-bold text-white mb-2">{title}</h2>
+            <h2 className="text-lg md:text-3xl font-bold text-white mb-1 md:mb-2">{title}</h2>
           )}
           {subtitle && (
-            <p className="text-lg text-gray-300">{subtitle}</p>
+            <p className="text-sm hidden md:block md:text-lg text-gray-300">{subtitle}</p>
           )}
         </div>
       </div>
@@ -66,17 +66,17 @@ const InArticleVideoShowcaseModal: React.FC<InArticleVideoShowcaseModalProps> = 
         backdrop="blur"
         isOpen={isOpen}
         onOpenChange={onOpenChange}
-        className="self-center"
+        className="self-center mx-2 md:mx-0"
       >
         <ModalContent className="bg-transparent">
           {() => (
-            <ModalBody className="py-6">
+            <ModalBody className="py-3 md:py-6">
               <video autoPlay controls className="w-full rounded-lg shadow-2xl">
                 <source src={videoSrc} type="video/mp4" />
                 Your browser does not support the video tag.
               </video>
               {oneLiner && (
-                <p className="text-center text-signoz_vanilla-400 mt-4 mb-0">
+                <p className="text-center text-signoz_vanilla-400 mt-2 md:mt-4 mb-0 text-sm md:text-base">
                   {oneLiner}
                 </p>
               )}
