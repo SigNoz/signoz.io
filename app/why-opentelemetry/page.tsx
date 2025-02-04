@@ -7,6 +7,7 @@ import { motion } from 'framer-motion'
 import { ArrowRight, Server, Link as LinkIcon, ArrowDown } from 'lucide-react'
 import Button from '@/components/Button/Button'
 import Figure from '@/components/Figure/Figure'
+import FloatingTableOfContents from '@/components/TableOfContents/FloatingTableOfContents'
 
 interface ReasonSectionProps {
   id: string
@@ -24,7 +25,12 @@ const ReasonSection: React.FC<ReasonSectionProps> = ({ id, number, title, childr
       <div className="mx-auto max-w-4xl px-4">
         <div className="flex items-baseline gap-4 mb-6">
           <span className="text-2xl font-bold text-green-400">{number}</span>
-          <h3 className="text-3xl font-bold text-white">{title}</h3>
+          <h3 className="group relative text-3xl font-bold text-white">
+            <Link href={`#${id}`} className="flex items-center hover:text-gray-300">
+              <LinkIcon className="absolute -left-20 h-5 w-5 text-blue-400 opacity-0 transition-opacity group-hover:opacity-100" />
+              {title}
+            </Link>
+          </h3>
         </div>
         <div className="relative">
           {image && (
@@ -48,6 +54,7 @@ const ReasonSection: React.FC<ReasonSectionProps> = ({ id, number, title, childr
 const WhyOpenTelemetry: React.FC = () => {
   return (
     <div className="relative bg-[#0A0A0A]">
+      <FloatingTableOfContents />
       {/* Hero + Intro Section */}
       <section className="relative">
         {/* Hero Section */}
@@ -56,8 +63,11 @@ const WhyOpenTelemetry: React.FC = () => {
           
           <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-4xl">
-              <h1 className="mb-6 bg-gradient-to-r from-blue-200 to-purple-400 bg-clip-text text-4xl font-bold leading-[1.3] text-transparent lg:text-6xl lg:leading-[1.3]">
-                Why OpenTelemetry?
+              <h1 className="group relative mb-6 bg-gradient-to-r from-blue-200 to-purple-400 bg-clip-text text-4xl font-bold leading-[1.3] text-transparent lg:text-6xl lg:leading-[1.3]" id="introduction">
+                <Link href="#introduction" className="flex items-center hover:text-gray-300">
+                  <LinkIcon className="absolute -left-8 h-6 w-6 text-blue-400 opacity-0 transition-opacity group-hover:opacity-100" />
+                  Why OpenTelemetry?
+                </Link>
               </h1>
               <p className="mb-8 text-lg font-normal text-gray-300 lg:text-xl">
                 OpenTelemetry is the second-largest CNCF project by number of contributors and after almost half a decade since its inception, it has been widely adopted by engineering teams of all shapes & sizes to build resilient applications.
@@ -79,8 +89,11 @@ const WhyOpenTelemetry: React.FC = () => {
         {/* Introduction Section */}
         <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-4xl">
-            <h2 className="mb-8 text-4xl font-bold text-white lg:text-5xl">
-              Top Reasons to Use OpenTelemetry
+            <h2 className="group relative mb-8 text-4xl font-bold text-white lg:text-5xl" id="top-reasons">
+              <Link href="#top-reasons" className="flex items-center hover:text-gray-300">
+                <LinkIcon className="absolute -left-8 h-6 w-6 text-blue-400 opacity-0 transition-opacity group-hover:opacity-100" />
+                Top Reasons to Use OpenTelemetry
+              </Link>
             </h2>
             <p className="text-lg text-gray-300">
               Whether you're starting your observability journey or have things in place already, you can use OpenTelemetry. It enables its users to use the same underlying instrumentation, data format, and wire protocol regardless of any observability backend you use.
@@ -210,8 +223,11 @@ const WhyOpenTelemetry: React.FC = () => {
       <section className="py-16 bg-gradient-to-r from-blue-900/20 to-purple-900/20">
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-4xl">
-            <h2 className="mb-6 text-3xl font-bold text-white">
-              Get Started with OpenTelemetry
+            <h2 className="group relative mb-6 text-3xl font-bold text-white" id="get-started">
+              <Link href="#get-started" className="flex items-center hover:text-gray-300">
+                <LinkIcon className="absolute -left-8 h-6 w-6 text-blue-400 opacity-0 transition-opacity group-hover:opacity-100" />
+                Get Started with OpenTelemetry
+              </Link>
             </h2>
             <div className="space-y-4">
               <p className="text-lg text-gray-300">
