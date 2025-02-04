@@ -20,20 +20,20 @@ interface ReasonSectionProps {
 
 const ReasonSection: React.FC<ReasonSectionProps> = ({ id, number, title, children, image, imageAlt, imageCaption }) => {
   return (
-    <section id={id} className="py-16">
+    <section id={id} className="py-8 sm:py-16">
       <div className="mx-auto max-w-4xl px-4">
-        <div className="flex items-baseline gap-4 mb-6">
-          <span className="text-2xl font-bold text-green-400">{number}</span>
-          <h3 className="group relative text-3xl font-bold text-white">
+        <div className="flex items-baseline gap-2 sm:gap-4 mb-4 sm:mb-6">
+          <span className="text-xl sm:text-2xl font-bold text-green-400">{number}</span>
+          <h3 className="group relative text-2xl sm:text-3xl font-bold text-white">
             <Link href={`#${id}`} className="flex items-center hover:text-gray-300">
-              <LinkIcon className="absolute -left-20 h-5 w-5 text-blue-400 opacity-0 transition-opacity group-hover:opacity-100" />
+              <LinkIcon className="hidden sm:block absolute -left-20 h-5 w-5 text-blue-400 opacity-0 transition-opacity group-hover:opacity-100" />
               {title}
             </Link>
           </h3>
         </div>
         <div className="relative">
           {image && (
-            <div className="float-right ml-8 mb-8 w-2/3 sm:w-1/2">
+            <div className="w-full sm:float-right sm:ml-8 sm:mb-8 mb-6 sm:w-1/2">
               <Figure
                 src={image}
                 alt={imageAlt || `${title} - OpenTelemetry with SigNoz`}
@@ -57,26 +57,26 @@ const WhyOpenTelemetry: React.FC = () => {
       {/* Hero + Intro Section */}
       <section className="relative">
         {/* Hero Section */}
-        <div className="relative bg-gradient-to-r from-blue-900 to-purple-900 py-16">
+        <div className="relative bg-gradient-to-r from-blue-900 to-purple-900 py-8 sm:py-16">
           <div className="bg-dot-pattern masked-dots absolute top-0 flex h-full w-full items-center justify-center" />
           
           <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-4xl">
-              <h1 className="group relative mb-6 bg-gradient-to-r from-blue-200 to-purple-400 bg-clip-text text-4xl font-bold leading-[1.3] text-transparent lg:text-6xl lg:leading-[1.3]" id="introduction">
+              <h1 className="group relative mb-4 sm:mb-6 bg-gradient-to-r from-blue-200 to-purple-400 bg-clip-text text-3xl sm:text-4xl font-bold leading-[1.3] text-transparent lg:text-6xl lg:leading-[1.3]" id="introduction">
                 <Link href="#introduction" className="flex items-center hover:text-gray-300">
-                  <LinkIcon className="absolute -left-8 h-6 w-6 text-blue-400 opacity-0 transition-opacity group-hover:opacity-100" />
+                  <LinkIcon className="hidden sm:block absolute -left-8 h-6 w-6 text-blue-400 opacity-0 transition-opacity group-hover:opacity-100" />
                   Why OpenTelemetry?
                 </Link>
               </h1>
-              <p className="mb-8 text-lg font-normal text-gray-300 lg:text-xl">
+              <p className="mb-6 sm:mb-8 text-base sm:text-lg font-normal text-gray-300 lg:text-xl">
                 OpenTelemetry is the second-largest CNCF project by number of contributors and after almost half a decade since its inception, it has been widely adopted by engineering teams of all shapes & sizes to build resilient applications.
               </p>
-              <p className="mb-8 text-lg font-normal text-gray-300 lg:text-xl">
+              <p className="mb-6 sm:mb-8 text-base sm:text-lg font-normal text-gray-300 lg:text-xl">
                 You can get started immediately with OpenTelemetry by signing up for SigNoz cloud. We have an onboarding module that will help you instrument your application with OpenTelemetry and send data to SigNoz for visualization.
               </p>
               <div>
                 <Link href="/teams/">
-                  <Button className="flex items-center justify-center gap-2 font-bold">
+                  <Button className="w-full sm:w-auto flex items-center justify-center gap-2 font-bold">
                     Start Using OpenTelemetry <ArrowRight className="h-4 w-4" />
                   </Button>
                 </Link>
@@ -86,15 +86,15 @@ const WhyOpenTelemetry: React.FC = () => {
         </div>
 
         {/* Introduction Section */}
-        <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+        <div className="relative mx-auto max-w-7xl px-4 py-8 sm:py-16 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-4xl">
-            <h2 className="group relative mb-8 text-4xl font-bold text-white lg:text-5xl" id="top-reasons">
+            <h2 className="group relative mb-6 sm:mb-8 text-3xl sm:text-4xl font-bold text-white lg:text-5xl" id="top-reasons">
               <Link href="#top-reasons" className="flex items-center hover:text-gray-300">
-                <LinkIcon className="absolute -left-8 h-6 w-6 text-blue-400 opacity-0 transition-opacity group-hover:opacity-100" />
+                <LinkIcon className="hidden sm:block absolute -left-8 h-6 w-6 text-blue-400 opacity-0 transition-opacity group-hover:opacity-100" />
                 Top Reasons to Use OpenTelemetry
               </Link>
             </h2>
-            <p className="text-lg text-gray-300">
+            <p className="text-base sm:text-lg text-gray-300">
               Whether you're starting your observability journey or have things in place already, you can use OpenTelemetry. It enables its users to use the same underlying instrumentation, data format, and wire protocol regardless of any observability backend you use.
             </p>
           </div>
@@ -219,17 +219,17 @@ const WhyOpenTelemetry: React.FC = () => {
       </ReasonSection>
 
       {/* Get Started Section */}
-      <section className="py-16 bg-gradient-to-r from-blue-900/20 to-purple-900/20">
+      <section className="py-8 sm:py-16 bg-gradient-to-r from-blue-900/20 to-purple-900/20">
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-4xl">
-            <h2 className="group relative mb-6 text-3xl font-bold text-white" id="get-started">
+            <h2 className="group relative mb-4 sm:mb-6 text-2xl sm:text-3xl font-bold text-white" id="get-started">
               <Link href="#get-started" className="flex items-center hover:text-gray-300">
-                <LinkIcon className="absolute -left-8 h-6 w-6 text-blue-400 opacity-0 transition-opacity group-hover:opacity-100" />
+                <LinkIcon className="hidden sm:block absolute -left-8 h-6 w-6 text-blue-400 opacity-0 transition-opacity group-hover:opacity-100" />
                 Get Started with OpenTelemetry
               </Link>
             </h2>
             <div className="space-y-4">
-              <p className="text-lg text-gray-300">
+              <p className="text-base sm:text-lg text-gray-300">
                 You can follow these docs to get started with OpenTelemetry:
               </p>
               <ul className="list-disc pl-6 text-gray-300 space-y-2">
@@ -249,17 +249,17 @@ const WhyOpenTelemetry: React.FC = () => {
                   </Link>
                 </li>
               </ul>
-              <p className="text-lg text-gray-300">
+              <p className="text-base sm:text-lg text-gray-300">
                 You need an observability backend to send your OpenTelemetry data to. We have built SigNoz from the ground up on top of OpenTelemetry. SigNoz provides logs, metrics, and traces under a single pane of glass and provides the best-in-class visualization for OpenTelemetry data.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                <Link href="/teams/">
-                  <Button className="flex items-center justify-center gap-2 font-bold">
+                <Link href="/teams/" className="w-full sm:w-auto">
+                  <Button className="w-full sm:w-auto flex items-center justify-center gap-2 font-bold">
                     Start your free trial <ArrowRight className="h-4 w-4" />
                   </Button>
                 </Link>
-                <Link href="/docs/install/self-host/">
-                  <Button type={Button.TYPES.SECONDARY} className="flex items-center justify-center gap-2 font-bold">
+                <Link href="/docs/install/self-host/" className="w-full sm:w-auto">
+                  <Button type={Button.TYPES.SECONDARY} className="w-full sm:w-auto flex items-center justify-center gap-2 font-bold">
                     <Server className="h-4 w-4" />
                     Self-Host SigNoz
                   </Button>
