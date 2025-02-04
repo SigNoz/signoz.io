@@ -26,7 +26,7 @@ export default function GetStartedInfrastructureMonitoring() {
 
             <div className="flex items-center gap-3">
               <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gray-700 text-sm font-medium">3</div>
-              <span className="text-sm text-gray-300">Access pre-built dashboards and alerts</span>
+              <span className="text-sm text-gray-300">Visualize your infrastructure data</span>
             </div>
           </div>
 
