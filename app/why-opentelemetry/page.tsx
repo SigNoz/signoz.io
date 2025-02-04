@@ -2,12 +2,13 @@
 
 import React from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
-import { motion } from 'framer-motion'
 import { ArrowRight, Server, Link as LinkIcon, ArrowDown } from 'lucide-react'
 import Button from '@/components/Button/Button'
 import Figure from '@/components/Figure/Figure'
 import FloatingTableOfContents from '@/components/TableOfContents/FloatingTableOfContents'
+import { metadata } from './metadata'
+
+export { metadata }
 
 interface ReasonSectionProps {
   id: string
