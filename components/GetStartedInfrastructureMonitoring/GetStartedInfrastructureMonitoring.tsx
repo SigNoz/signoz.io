@@ -4,6 +4,7 @@ import React from 'react'
 import Button from '../Button/Button'
 import { ArrowRight } from 'lucide-react'
 import Figure from '../Figure/Figure'
+import Link from 'next/link'
 
 interface GetStartedInfrastructureMonitoringProps {
   variant?: 'card' | 'simple' | 'showcase'
@@ -68,12 +69,14 @@ export default function GetStartedInfrastructureMonitoring({ variant = 'card' }:
             </div>
           </div>
           <div className='self-center mt-6'>
-              <Button href="/teams/">
-                <span className="flex items-center gap-2">
-                  Start Monitoring Now - Free
-                  <ArrowRight className="h-4 w-4" />
-                </span>
-              </Button>
+              <Link href="/teams/">
+                <Button>
+                  <span className="flex items-center gap-2">
+                    Start Monitoring Now - Free
+                    <ArrowRight className="h-4 w-4" />
+                  </span>
+                </Button>
+              </Link>
             </div>
         </div>
       </div>
