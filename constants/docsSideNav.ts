@@ -466,7 +466,7 @@ const docsSideNav = [
       {
         type: 'doc',
         route: '/docs/userguide/hostmetrics',
-        label: 'Hostmetrics Setup',
+        label: 'Host Setup',
       },
     ],
   },
