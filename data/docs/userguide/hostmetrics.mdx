@@ -4,9 +4,11 @@ title: Hostmetrics
 id: hostmetrics
 ---
 
-## Hostmetrics receiver
+Host metrics are fundamental performance indicators collected directly from a system's operating system. These metrics provide granular visibility into the physical
+or virtual server's resource utilization and health status. Every host system in your environment - whether physical machines, virtual machines (VMs), cloud 
+instances, or containerized nodes collects these metrics directly from its local operating system.
 
-The hostmetrics receiver collects metrics from the host machine. It collects metrics from the following sources:
+OpenTelemetry `hostmetrics` receiver is used to collect metrics from the host machine. It collects metrics from the following sources:
 
 - CPU
 - Memory
@@ -18,13 +20,36 @@ The hostmetrics receiver collects metrics from the host machine. It collects met
 
 For more information about the metrics collected by the hostmetrics receiver, see documentation [here](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/hostmetricsreceiver/README.md).
 
-### Collect host metrics from k8s nodes
+## How Collection Works
 
-To collect host metrics from k8s nodes, you can use the SigNoz Helm chart `k8s-infra` to deploy the `hostmetrics` receiver. The chart runs an agent on each k8s node and collects host metrics. Host metrics collection is enabled by default in the `k8s-infra` Helm chart. Configuring the host metrics collection using the `hostMetrics` preset. It allows you to enable/disable metrics collection, configure the collection frequency, and configure the scrapers.
+The `hostmetrics` receiver collects system metrics by interacting with the underlying data sources provided by each operating system. These data sources expose
+low-level system statistics, which are collected and processed by the receiver.
+
+Below is a table explaining the different data sources and the collection method for different operating systems:
+
+| OS      | Data Sources                      | Collection Method               |
+|---------|-----------------------------------|----------------------------------|
+| Linux   | /proc filesystem, sysfs           | Kernel-exported statistics       |
+| Windows | PDH Counters, WMI                 | Performance Monitor              |
+| macOS   | Mach APIs, sysctl                 | System framework calls           |
+
+- **Data Sources**: The specific system interfaces or files where metrics are exposed.
+- **Collection Method**:	The mechanism or API used to access the data sources and collect metrics.
+
+
+## Collect host metrics from k8s nodes
+
+To collect host metrics from k8s nodes, you can use the `k8s-infra` [SigNoz Helm chart](https://signoz.io/docs/tutorial/kubernetes-infra-metrics/) to deploy the 
+`hostmetrics` receiver. 
+
+The chart runs an agent on each k8s node and collects host metrics. 
+Host metrics collection is [enabled by default](https://github.com/SigNoz/charts/blob/f6aa926d43d316968544834347113b2b74a47d90/charts/k8s-infra/values.yaml#L148) 
+in the `k8s-infra` Helm chart and can be configured using the `hostMetrics` preset that allows you to enable/disable metrics collection, configure the collection 
+frequency, and configure the scrapers.
 
 The following example shows how to configure the `hostMetrics` preset to collect metrics every 60 seconds and enable the CPU scraper to collect optional metrics:
 
-```yaml
+```yaml:values.yaml
 hostMetrics:
   collectionInterval: 60s
   scrapers:
@@ -36,25 +61,28 @@ hostMetrics:
           enabled: true
 ```
 
-### Collect host metrics from virtual machines (VMs)
+## Collect host metrics from Virtual Machines (VMs)
 
-To collect host metrics from virtual machines (VMs), you need to run otel collector on each VM and configure the hostmetrics receiver to collect metrics from the VM. The following example shows how to configure the hostmetrics receiver to collect metrics from a VM:
+To collect host metrics from virtual machines (VMs), you need to [run OTel collector](https://signoz.io/docs/tutorial/kubernetes-infra-metrics/) on each VM and 
+configure the hostmetrics receiver to collect metrics from the VM.
 
-<Tabs entityName="vm-hostmetrics">
-<TabItem value="cloud" label="SigNoz Cloud" default>
+The below example shows how to configure the hostmetrics receiver to collect metrics from a VM:
 
-```yaml
+<Tabs entityName="plans">
+<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
+
+```yaml:config.yaml
 receivers:
   # Ref: https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/hostmetricsreceiver/README.md
   hostmetrics:
     collection_interval: 60s
     scrapers:
-      cpu:
-      load:
-      memory:
-      disk:
-      filesystem:
-      network:
+      cpu: {}
+      load: {}
+      memory: {}
+      disk: {}
+      filesystem: {}
+      network: {}
 processors:
   # Ref: https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/resourcedetectionprocessor/README.md
   resourcedetection:
@@ -67,11 +95,11 @@ extensions:
   zpages:
 exporters:
   otlp:
-    endpoint: "ingest.{region}.signoz.cloud:443"
+    endpoint: "ingest.<region>.signoz.cloud:443"
     tls:
       insecure: false
     headers:
-      "signoz-ingestion-key": "${env:SIGNOZ_INGESTION_KEY}"
+      "signoz-ingestion-key": "${env:<your-ingestion-key>}"
 service:
   telemetry:
     metrics:
@@ -84,23 +112,24 @@ service:
       exporters: [otlp]
 ```
 
-Note: replace the `{region}` placeholder with the region of your SigNoz instance and make sure to set the `SIGNOZ_INGESTION_KEY` environment variable with the ingestion key of your SigNoz instance.
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 
 </TabItem>
 <TabItem value="self-host" label="Self-Host">
 
-```yaml
+```yaml:config.yaml
 receivers:
   # Ref: https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/hostmetricsreceiver/README.md
   hostmetrics:
     collection_interval: 60s
     scrapers:
-      cpu:
-      load:
-      memory:
-      disk:
-      filesystem:
-      network:
+      cpu: {}
+      load: {}
+      memory: {}
+      disk: {}
+      filesystem: {}
+      network: {}
 processors:
   # Ref: https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/resourcedetectionprocessor/README.md
   resourcedetection:
@@ -128,7 +157,18 @@ service:
       exporters: [otlp]
 ```
 
-Note: replace the `<endpoint>` placeholder with the endpoint of your SigNoz collector endpoint address.
+- Replace the `<endpoint>` placeholder with the endpoint of your SigNoz collector endpoint address.
+
 </TabItem>
 
 </Tabs>
+
+
+## Output
+
+Once your setup is done, you should see your Hostname in the Hosts tab of **Infrastructure Monitoring** section in SigNoz.
+
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image" src="/img/docs/infrastructure-monitoring/host-setup-output.webp" alt="Host List"/>
+    <figcaption><i>Host List</i></figcaption>
+</figure>
