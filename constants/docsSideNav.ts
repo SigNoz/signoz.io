@@ -468,6 +468,11 @@ const docsSideNav = [
         route: '/docs/userguide/hostmetrics',
         label: 'Host Setup',
       },
+      {
+        type: 'doc',
+        route: '/docs/userguide/k8s-metrics',
+        label: 'Kubernetes Metrics',
+      },
     ],
   },
   {
