@@ -1,0 +1,334 @@
+---
+date: 2025-01-29
+title: K8s Metrics
+id: k8s-metrics
+---
+
+# Kubernetes Monitoring Configuration Guide
+
+This guide explains how to set up monitoring for your Kubernetes cluster using two essential OpenTelemetry receivers:
+
+- [`kubeletstats`](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/kubeletstatsreceiver/README.md): Collects metrics from individual Kubernetes nodes
+- [`k8scluster`](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/k8sclusterreceiver/README.md): Gathers cluster-wide metrics
+
+## Setting Up Kubelet Stats Monitoring
+
+### Overview
+
+The Kubelet Stats Receiver collects four types of metrics:
+- Node metrics (CPU, memory, etc.)
+- Pod metrics
+- Container metrics
+- Volume metrics
+
+These metrics are collected directly from the Kubelet API server running on each node.
+
+### Quick Start with k8s-infra Helm Chart
+
+The simplest way to get started is using the [`k8s-infra`](/docs/tutorial/kubernetes-infra-metrics/) Helm chart, which automatically:
+1. Deploys agents to all cluster nodes
+2. Configures secure API access with appropriate RBAC permissions
+3. Enables essential metrics by default
+
+Basic configuration example:
+
+```yaml
+kubeletMetrics:
+  collectionInterval: 60s  # Collect metrics every minute
+  metrics:
+    k8s.pod.cpu_request_utilization:
+      enabled: true  # Enable specific optional metrics
+```
+
+### Advanced Metrics Configuration
+
+The receiver supports many optional metrics that provide deeper insights into cluster efficiency. Key metrics include:
+
+- `k8s.node.cpu.usage`: Tracks CPU usage on the node
+- `k8s.node.uptime`: Tracks node uptime
+- `k8s.pod.cpu.usage`: Tracks CPU usage on the pod
+- `k8s.pod.cpu_limit_utilization`: Tracks CPU usage relative to configured limits
+- `k8s.pod.cpu_request_utilization`: Measures actual CPU usage against requested resources
+- `k8s.pod.memory_limit_utilization`: Tracks memory usage relative to configured limits
+- `k8s.pod.memory_request_utilization`: Monitors memory usage versus requests
+- `k8s.pod.uptime`: Tracks pod stability
+- `container.cpu.usage`: Tracks CPU usage on the container
+- `k8s.container.cpu_limit_utilization`: Tracks CPU usage relative to configured limits
+- `k8s.container.cpu_request_utilization`: Measures actual CPU usage against requested resources
+- `k8s.container.memory_limit_utilization`: Tracks memory usage relative to configured limits
+- `k8s.container.memory_request_utilization`: Monitors memory usage versus requests
+- `container.uptime`: Tracks container uptime
+
+These are enabled by default in the [`k8s-infra`](/docs/tutorial/kubernetes-infra-metrics/) Helm chart. For a complete list of available optional metrics, see the [OpenTelemetry documentation](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/kubeletstatsreceiver/documentation.md#optional-metrics).
+
+## Manual Configuration Guide
+
+If you're not using the `k8s-infra` Helm chart, follow these steps for manual setup:
+
+### 1. Configure Pod Access to Kubelet API
+
+Add the node name to your pod specification:
+
+```yaml
+env:
+  - name: K8S_NODE_NAME
+    valueFrom:
+      fieldRef:
+        fieldPath: spec.nodeName
+```
+
+### 2. Configure the Kubelet Stats Receiver
+
+Add this configuration to your collector:
+
+```yaml
+receivers:
+  kubeletstats:
+    auth_type: serviceAccount
+    collection_interval: 30s
+    endpoint: ${env:K8S_NODE_NAME}:10250
+    extra_metadata_labels:
+      - container.id
+      - k8s.volume.type
+    insecure_skip_verify: true
+    metric_groups:
+      - container
+      - pod
+      - node
+      - volume
+    metrics:
+      container.cpu.usage:
+        enabled: true
+      container.uptime:
+        enabled: true
+      k8s.container.cpu_limit_utilization:
+        enabled: true
+      k8s.container.cpu_request_utilization:
+        enabled: true
+      k8s.container.memory_limit_utilization:
+        enabled: true
+      k8s.container.memory_request_utilization:
+        enabled: true
+      k8s.node.cpu.usage:
+        enabled: true
+      k8s.node.uptime:
+        enabled: true
+      k8s.pod.cpu.usage:
+        enabled: true
+      k8s.pod.cpu_limit_utilization:
+        enabled: true
+      k8s.pod.cpu_request_utilization:
+        enabled: true
+      k8s.pod.memory_limit_utilization:
+        enabled: true
+      k8s.pod.memory_request_utilization:
+        enabled: true
+      k8s.pod.uptime:
+        enabled: true
+    node: ${env:K8S_NODE_NAME}
+```
+
+### 3. Enable Kubernetes Metadata
+
+Configure the k8sattributes processor to enrich your metrics with Kubernetes context:
+
+```yaml
+processors:
+  k8sattributes:
+    extract:
+      metadata:
+        - k8s.namespace.name
+        - k8s.deployment.name
+        - k8s.statefulset.name
+        - k8s.daemonset.name
+        - k8s.cronjob.name
+        - k8s.job.name
+        - k8s.node.name
+        - k8s.node.uid
+        - k8s.pod.name
+        - k8s.pod.uid
+        - k8s.pod.start_time
+        - k8s.container.name
+    filter:
+      node_from_env_var: K8S_NODE_NAME
+    passthrough: false
+    pod_association:
+      - sources:
+          - from: resource_attribute
+            name: k8s.pod.ip
+      - sources:
+          - from: resource_attribute
+            name: k8s.pod.uid
+      - sources:
+          - from: connection
+```
+
+### 4. Pipeline Configuration
+
+Ensure your pipeline includes both the kubeletstats receiver and k8sattributes processor:
+
+```yaml
+service:
+  pipelines:
+    metrics:
+      receivers: [kubeletstats]
+      processors: [k8sattributes]
+      exporters: [otlp] # Add your exporters here
+```
+
+Read more about the [kubeletstats receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/kubeletstatsreceiver/README.md) and [k8sattributes processor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/k8sattributesprocessor/README.md).
+
+## Setting Up K8s Cluster Monitoring
+
+### Overview
+
+The k8scluster receiver provides cluster-wide metrics by collecting data directly from the Kubernetes API server. Unlike the kubeletstats receiver which runs on each node, you only need a single instance of this receiver per cluster.
+
+### Quick Start with k8s-infra Helm Chart
+
+The k8s-infra Helm chart provides a production-ready configuration by:
+1. Deploying a single, properly configured k8scluster receiver
+2. Setting up secure API access with appropriate RBAC permissions
+3. Enabling commonly needed metrics by default
+
+Basic configuration example:
+
+```yaml
+clusterMetrics:
+  collectionInterval: 60s  # Collect metrics every minute
+  metrics:
+    k8s.node.condition:
+      enabled: true  # Enable condition monitoring
+```
+
+## Core Monitoring Features
+
+### 1. Node Conditions
+Monitor the health and status of your nodes with these key conditions:
+- `Ready`: Node's ability to accept pods (enabled by default)
+- `MemoryPressure`: Memory resource constraints
+- `DiskPressure`: Storage resource constraints
+- `PIDPressure`: Process ID availability
+- `NetworkUnavailable`: Network configuration status
+
+### 2. Resource Allocation Tracking
+Monitor resource allocation across your cluster:
+- `cpu`: CPU resource allocation (enabled by default)
+- `memory`: Memory resource allocation (enabled by default)
+- `ephemeral-storage`: Temporary storage allocation
+- `storage`: Persistent storage allocation
+
+### 3. Optional Metrics
+Key optional metrics for enhanced monitoring:
+- `k8s.node.condition`: Detailed node health status
+- `k8s.pod.status_reason`: Root cause analysis for pod states
+
+For a comprehensive list of available metrics, conditions, and resources, refer to the [k8sclusterreceiver documentation](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/k8sclusterreceiver/README.md).
+
+#### Troubleshooting
+
+1. I am using the [`k8s-infra`](/docs/tutorial/kubernetes-infra-metrics/) Helm chart, but still not seeing cluster metrics
+
+Check the logs of the collector pod to see if there are any errors.
+
+2. I am using the latest version of the [`k8s-infra`](/docs/tutorial/kubernetes-infra-metrics/) Helm chart, and there are no errors in the logs, but still not seeing cluster metrics
+
+Verify:
+   - The collector has proper RBAC permissions
+   - The node name is correctly configured
+   - The kubelet API endpoint is accessible
+
+## Manual Configuration Guide
+
+If you're not using the [`k8s-infra`](/docs/tutorial/kubernetes-infra-metrics/) Helm chart, follow this example:
+
+### 1. Configure the K8s Cluster Receiver
+
+```yaml
+receivers:
+  k8scluster:
+    collection_interval: 30s
+    node_conditions_to_report: [Ready, DiskPressure, MemoryPressure, PIDPressure, NetworkUnavailable]
+    allocatable_types_to_report: [cpu, memory, ephemeral-storage]
+    distribution: kubernetes
+    metrics:
+      k8s.node.condition:
+        enabled: true
+      k8s.pod.status_reason:
+        enabled: true
+```
+
+### 2. Enable Kubernetes Metadata
+
+Configure the k8sattributes processor to add Kubernetes context:
+
+```yaml
+processors:
+  k8sattributes:
+    extract:
+      metadata:
+        - k8s.namespace.name
+        - k8s.deployment.name
+        - k8s.statefulset.name
+        - k8s.daemonset.name
+        - k8s.cronjob.name
+        - k8s.job.name
+        - k8s.node.name
+        - k8s.node.uid
+        - k8s.pod.name
+        - k8s.pod.uid
+        - k8s.pod.start_time
+        - k8s.container.name
+    passthrough: false
+    pod_association:
+      - sources:
+          - from: resource_attribute
+            name: k8s.pod.ip
+      - sources:
+          - from: resource_attribute
+            name: k8s.pod.uid
+      - sources:
+          - from: connection
+```
+
+### 3. Pipeline Configuration
+
+Set up the metrics pipeline:
+
+```yaml
+service:
+  pipelines:
+    metrics:
+      receivers: [k8scluster]
+      processors: [k8sattributes]
+      exporters: [otlp]  # Add your exporters here
+```
+
+## Best Practices
+
+1. Start with the `k8s-infra` Helm chart if possible - it provides a tested, sensible default configuration
+2. Enable optional metrics for deeper visibility into your cluster
+3. Use the k8sattributes processor to add context to your metrics
+
+## Troubleshooting
+
+1. I am using the [`k8s-infra`](/docs/tutorial/kubernetes-infra-metrics/) Helm chart, but still not seeing cpu/memory requests/limits
+
+Check the version of the `k8s-infra` helm chart you are using. The optional metrics are enabled by default in the latest version of the helm chart. Prior to version 0.11.10, the optional metrics were not enabled by default.
+
+2. I am using the latest version of the [`k8s-infra`](/docs/tutorial/kubernetes-infra-metrics/) Helm chart, but still not seeing cpu/memory requests/limits
+
+Verify:
+   - The collector has proper RBAC permissions
+   - The node name is correctly configured
+   - The kubelet API endpoint is accessible
+
+3. I am not seeing deployments, statefulsets available/desired, daemonsets, cronjobs, jobs available/desired/succeeded/failed in the metrics
+
+Verify:
+    - Ensure the otel-deployment collector is running
+    - Check the logs of the otel-deployment collector to see if there are any errors
+
+4. Metric metadata is missing
+
+By default, the kubeletstats/k8scluster receivers do not have rich metadata. To enable rich metadata, you need to enable the `k8sattributes` processor.
