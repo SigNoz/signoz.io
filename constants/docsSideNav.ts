@@ -377,7 +377,7 @@ const docsSideNav = [
             items: [
               {
                 type: 'doc',
-                label: 'Span Details',
+                label: 'Trace Details',
                 route: '/docs/userguide/span-details',
               },
             ],
