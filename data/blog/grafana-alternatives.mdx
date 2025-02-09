@@ -43,14 +43,23 @@ If these challenges sound familiar, you’re not alone. In this article, we expl
 
 [SigNoz](https://signoz.io/product-comparison/signoz-vs-grafana/) can be a great Grafana alternative. SigNoz is also open-source, just like Grafana. So, if you want to self-host SigNoz, clone the <a href = "https://github.com/signoz/signoz/" rel="noopener noreferrer nofollow" target="_blank" >GitHub repo</a> to get started.
 
-Under the hood, Grafana is powered by multiple tools like Loki, Tempo, Mimir & Prometheus. SigNoz is built as a tool to serve logs, metrics, and traces in a single pane of glass. 
+### Architecture & Data Storage
+
+Under the hood, Grafana is powered by multiple tools like Loki, Tempo, Mimir & Prometheus. In contrast, SigNoz is built as a unified tool serving logs, metrics, and traces in a single pane of glass.
 
 SigNoz uses a single datastore - ClickHouse to power its observability stack. This makes SigNoz much better in correlating signals and driving better insights.
 
-SigNoz is built to support OpenTelemetry. <a href = "https://opentelemetry.io/" rel="noopener noreferrer nofollow" target="_blank" >OpenTelemetry</a> is an open-source standard for generating telemetry signals, which allows you to avoid vendor lock-in and provides flexibility in choosing different backends for different signals.
+### OpenTelemetry Support
+
+SigNoz is built to support OpenTelemetry. <a href = "https://opentelemetry.io/" rel="noopener noreferrer nofollow" target="_blank" >OpenTelemetry</a> is an open-source standard for generating telemetry signals, which allows you to:
+- Avoid vendor lock-in 
+- Have flexibility in choosing different backends for different signals
 
 SigNoz indexes all OpenTelemetry (OTel) attributes—whether string, number, or boolean—without the limitations imposed by tools like Loki. This means you can effortlessly query and aggregate high-cardinality data (such as detailed duration metrics) without performance penalties.
 
+### Key Features
+
+#### Application Performance Monitoring
 SigNoz comes with out-of-the-box APM charts like p90, p99 latency, request rates, and error rates. You can also monitor database calls and external calls as soon as you instrument your application with OpenTelemetry SDKs.
 
 <figure data-zoomable align='center'>
@@ -58,13 +67,13 @@ SigNoz comes with out-of-the-box APM charts like p90, p99 latency, request rates
     <figcaption><i>SigNoz UI showing application overview metrics like RPS, 50th/90th/99th Percentile latencies, and Error Rate</i></figcaption>
 </figure>
 
+#### Distributed Tracing
 SigNoz offers comprehensive insights into tracing data through visual representations like [Flamegraphs and Gantt charts](https://signoz.io/blog/flamegraphs/). The Gantt charts provide a clear visual hierarchy of services and events, easily identifying latency-causing events in a request call.
 
 <figure data-zoomable align='center'>
     <img src="/img/blog/2025/02/signoz-new-trace-view.webp" alt="Flamegraphs showing the exact duration taken by each spans - a concept of distributed tracing"/>
     <figcaption><i>Flamegraphs showing the exact duration taken by each spans - a concept of distributed tracing</i></figcaption>
 </figure>
-
 
 With SigNoz, you have the capability to perform aggregates on traces, allowing you to gain deeper insights into both your application and infrastructure.
 
@@ -73,22 +82,22 @@ With SigNoz, you have the capability to perform aggregates on traces, allowing y
     <figcaption><i>Run custom aggregates on traces to get deeper application performance insights</i></figcaption>
 </figure>
 
+#### Query & Aggregation Capabilities
 SigNoz allows you to query any attribute and create complex aggregations on it. Our datastore, ClickHouse is built to support aggregations over massive datasets.
 
-SigNoz allows querying and aggregation with a simple query builder where you can create any analytical query with just a few clicks.
+SigNoz provides a simple query builder where you can create any analytical query with just a few clicks.
 
 <figure data-zoomable align='center'>
     <img src="/img/blog/common/signoz_logs_query_builder_2.webp" alt="Logs Query Builder in SigNoz"/>
     <figcaption><i>Logs Query Builder in SigNoz</i></figcaption>
 </figure>
 
-We did a logs performance benchmark of open-source SigNoz with Elasticsearch and Loki. Our key findings for Loki showed:
+### Performance & Pricing
 
-- Ingestion is mainly limited by the number of streams that it can handle.
-- Loki was not able to return the results of our test queries.
-- Loki took the least amount of storage as it indexed only two keys.
-
-<InterlinkCard title="Logs Performance Benchmark: SigNoz vs Elasticsearch vs Loki" href="/blog/logs-performance-benchmark/" />
+We did a [logs performance benchmark of open-source SigNoz with Elasticsearch and Loki](/blog/logs-performance-benchmark). Our key findings for Loki showed:
+- Ingestion is mainly limited by the number of streams that it can handle
+- Loki was not able to return the results of our test queries
+- Loki took the least amount of storage as it indexed only two keys
 
 We also did a [pricing comparison of SigNoz with other popularity observability tools](https://signoz.io/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/) including Grafana. SigNoz can save up to 45% of your Grafana bill.
 
