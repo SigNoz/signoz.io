@@ -609,6 +609,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/logs-management/send-logs/zap-to-signoz',
+            label: 'Zap',
+          },
+          {
+            type: 'doc',
             route: '/docs/logs-management/send-logs/windows-events-log',
             label: 'Windows Event logs',
             // className: 'new-doc',
