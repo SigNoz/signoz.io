@@ -7,8 +7,8 @@ import Button from '@/components/Button/Button'
 import Link from 'next/link'
 import { ArrowRight, BookOpen } from 'lucide-react'
 import CountdownTimer from '@/components/Timer'
-// import { Linkedin } from '@/components/social-icons/SolidIcons'
-// import Youtube from '@/components/VideoPlayer/VideoPlayer'
+import { Linkedin } from '@/components/social-icons/SolidIcons'
+import Youtube from '@/components/VideoPlayer/VideoPlayer'
 import { Modal, ModalContent, ModalBody, useDisclosure } from '@nextui-org/react'
 
 const MainSection: React.FC = () => {
@@ -73,12 +73,12 @@ const MainSection: React.FC = () => {
             </a>
           </div>
 
-          {/* <div className="flex flex-col justify-between border-b border-t border-dashed border-signoz_slate-100 px-6 py-6 sm:flex-row">
+          <div className="flex flex-col justify-between border-b border-t border-dashed border-signoz_slate-100 px-6 py-6 sm:flex-row">
             <div className="flex flex-col justify-between gap-4 sm:pr-4">
               <div className="text-base uppercase text-signoz_vanilla-400">Monday ⎯ Feb 10</div>
               <div className="flex flex-col gap-2">
                 <Link
-                  href="https://www.linkedin.com/events/signozlaunchweek2-0-day1-ingest7239997437791064064/theater/"
+                  href="https://www.linkedin.com/events/opentelemetry-poweredinframonit7293267208732913666/theater/"
                   target="_blank"
                   id="btn-linkedin-live"
                   className="button-background flex w-full items-center justify-center gap-2 rounded-full px-3 py-2 sm:mb-0"
@@ -91,7 +91,7 @@ const MainSection: React.FC = () => {
                 <div
                   id="btn-watch-youtube-video"
                   className="button-background mb-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-full px-3 py-2 sm:mb-0"
-                  onClick={() => handleOpenModal('SJ7H82wbXJo')}
+                  onClick={() => handleOpenModal('qcejF2UE-oc')}
                 >
                   <img src="/svgs/icons/watch-video.svg" alt="watch video icon" />
                   <span className="whitespace-nowrap text-sm font-medium text-[#F7F7F8]">
@@ -101,18 +101,18 @@ const MainSection: React.FC = () => {
               </div>
             </div>
             <Link
-              href="/blog/introducing-ingest-guard-feature/"
+              href="/blog/opentelemetry-powered-infrastructure-monitoring/"
               className="launch-week-card-background flex w-[864px] max-w-full cursor-pointer flex-col gap-6 rounded-md border border-signoz_slate-500 px-5 py-4 transition-colors duration-300 hover:bg-[#121317] sm:flex-row"
             >
               <img
-                src="/img/launch-week/launch-week-2/day-1-ingest-gaurd-cover.webp"
+                src="/img/blog/2025/02/opentelemetry-powered-infrastructure-monitoring-infra-monitoring.webp"
                 className=" mb-4 h-auto w-auto pr-2 sm:mb-0 sm:w-3/5 sm:pr-0"
               />
               <div className="group flex flex-col justify-between">
                 <div>
-                  <div className="font-eedium mb-2 text-base">Introducing Ingest Guard</div>
+                  <div className="font-eedium mb-2 text-base">OpenTelemetry-Powered Infrastructure Monitoring</div>
                   <div className="text-sm font-medium text-signoz_vanilla-400">
-                    A game changer for Observability cost control
+                    A native OpenTelemetry experience that seamlessly integrates infrastructure metrics with application performance data.
                   </div>
                 </div>
                 <div className="flex justify-end">
@@ -122,9 +122,26 @@ const MainSection: React.FC = () => {
                 </div>
               </div>
             </Link>
+            <Modal
+              size={'5xl'}
+              backdrop="blur"
+              isOpen={isOpen}
+              onOpenChange={onOpenChange}
+              className="self-center"
+            >
+              <ModalContent className="bg-transparent">
+                {() => (
+                  <>
+                    <ModalBody className="py-10">
+                      <Youtube id={videoId} />
+                    </ModalBody>
+                  </>
+                )}
+              </ModalContent>
+            </Modal>
           </div>
 
-          <div className="flex flex-col justify-between border-b border-t border-dashed border-signoz_slate-100 px-6 py-6 sm:flex-row">
+          {/* <div className="flex flex-col justify-between border-b border-t border-dashed border-signoz_slate-100 px-6 py-6 sm:flex-row">
             <div className="flex flex-col justify-between gap-4 sm:pr-4">
               <div className="text-base uppercase text-signoz_vanilla-400">Tuesday ⎯ Feb 11</div>
               <div className="flex flex-col gap-2">
@@ -281,7 +298,7 @@ const MainSection: React.FC = () => {
 
           {/* Timer  */}
           {[
-            'Monday ⎯ Feb 10',
+            // 'Monday ⎯ Feb 10',
             'Tuesday ⎯ Feb 11',
             'Wednesday ⎯ Feb 12',
             'Thursday ⎯ Feb 13',
@@ -295,7 +312,7 @@ const MainSection: React.FC = () => {
                 {day}
               </div>
               <div className="flex w-[68%] justify-end sm:justify-start">
-                <CountdownTimer eventDate={`2025-02-${10 + index} 21:30:00`} />
+                <CountdownTimer eventDate={`2025-02-${11 + index} 21:30:00`} />
               </div>
             </div>
           ))}
