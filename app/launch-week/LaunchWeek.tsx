@@ -141,12 +141,12 @@ const MainSection: React.FC = () => {
             </Modal>
           </div>
 
-          {/* <div className="flex flex-col justify-between border-b border-t border-dashed border-signoz_slate-100 px-6 py-6 sm:flex-row">
+          <div className="flex flex-col justify-between border-b border-t border-dashed border-signoz_slate-100 px-6 py-6 sm:flex-row">
             <div className="flex flex-col justify-between gap-4 sm:pr-4">
               <div className="text-base uppercase text-signoz_vanilla-400">Tuesday ⎯ Feb 11</div>
               <div className="flex flex-col gap-2">
                 <Link
-                  href="https://www.linkedin.com/events/signozlaunchweek2-0-day2-alerts7241444501922181120/theater/"
+                  href="https://www.linkedin.com/events/traceswithoutlimits-loadamillio7293312515470503938/theater/"
                   target="_blank"
                   id="btn-linkedin-live"
                   className="button-background flex w-full items-center justify-center gap-2 rounded-full px-3 py-2 sm:mb-0"
@@ -159,7 +159,7 @@ const MainSection: React.FC = () => {
                 <div
                   id="btn-watch-youtube-video"
                   className="button-background mb-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-full px-3 py-2 sm:mb-0"
-                  onClick={() => handleOpenModal('uvXNZxAd4w0')}
+                  onClick={() => handleOpenModal('cAbQcJC58VA')}
                 >
                   <img src="/svgs/icons/watch-video.svg" alt="watch video icon" />
                   <span className="whitespace-nowrap text-sm font-medium text-[#F7F7F8]">
@@ -169,18 +169,18 @@ const MainSection: React.FC = () => {
               </div>
             </div>
             <Link
-              href="/blog/introducing-anomaly-detection-for-smarter-alerts/"
+              href="/blog/traces-without-limits/"
               className="launch-week-card-background flex w-[864px] max-w-full cursor-pointer flex-col gap-6 rounded-md border border-signoz_slate-500 px-5 py-4 transition-colors duration-300 hover:bg-[#121317] sm:flex-row"
             >
               <img
-                src="/img/launch-week/launch-week-2/anomaly-detection-blog-poster.webp"
+                src="/img/blog/2025/02/traces-without-limits-trace-updates.webp"
                 className=" mb-4 h-auto w-auto pr-2 sm:mb-0 sm:w-3/5 sm:pr-0"
               />
               <div className="group flex flex-col justify-between">
                 <div className="min-w-[306px]">
-                  <div className="font-eedium mb-2 text-base">Introducing Anomaly Detection</div>
+                  <div className="font-eedium mb-2 text-base">Traces Without Limits</div>
                   <div className="text-sm font-medium text-signoz_vanilla-400">
-                    Create smarter alerts for dynamic metrics
+                   SigNoz is now the only distributed tracing tool capable of loading a million spans seamlessly.
                   </div>
                 </div>
                 <div className="flex justify-end">
@@ -192,7 +192,7 @@ const MainSection: React.FC = () => {
             </Link>
           </div>
 
-          <div className="flex flex-col justify-between border-b border-t border-dashed border-signoz_slate-100 px-6 py-6 sm:flex-row">
+           {/*<div className="flex flex-col justify-between border-b border-t border-dashed border-signoz_slate-100 px-6 py-6 sm:flex-row">
             <div className="flex flex-col justify-between gap-4 sm:pr-4">
               <div className="text-base uppercase text-signoz_vanilla-400">Wednesday ⎯ Feb 13</div>
               <div className="flex flex-col gap-2">
@@ -299,7 +299,7 @@ const MainSection: React.FC = () => {
           {/* Timer  */}
           {[
             // 'Monday ⎯ Feb 10',
-            'Tuesday ⎯ Feb 11',
+            // 'Tuesday ⎯ Feb 11',
             'Wednesday ⎯ Feb 12',
             'Thursday ⎯ Feb 13',
             'Friday ⎯ Feb 14',
