@@ -312,7 +312,7 @@ const MainSection: React.FC = () => {
                 {day}
               </div>
               <div className="flex w-[68%] justify-end sm:justify-start">
-                <CountdownTimer eventDate={`2025-02-${11 + index} 21:30:00`} />
+                <CountdownTimer eventDate={`2025-02-${12 + index} 21:30:00`} />
               </div>
             </div>
           ))}
