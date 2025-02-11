@@ -3,7 +3,7 @@
 import React from 'react'
 import Button from '../Button/Button'
 import { Scale } from 'lucide-react'
-
+import Link from 'next/link'
 export default function GrafanaVsSigNoz() {
   return (
     <div className="my-8 w-full">
@@ -16,22 +16,25 @@ export default function GrafanaVsSigNoz() {
             Tired of juggling multiple tools for observability? SigNoz gives you logs, metrics and traces in a single unified platform - making troubleshooting simpler.
           </p>
           <div className="flex flex-col gap-4 sm:flex-row">
-            <Button>
-              <a
-                id="grafana-vs-signoz-compare-button"
-                href="/product-comparison/signoz-vs-grafana/"
-                style={{ textDecoration: 'none', color: 'inherit' }}
-                className="flex items-center gap-2"
-              >
+            <Link
+              id="grafana-vs-signoz-compare-button"
+              href="/product-comparison/signoz-vs-grafana/"
+              className="flex items-center no-underline gap-2"
+            >
+              <Button type={Button.TYPES.SECONDARY}>
                 <Scale className="h-4 w-4" />
                 Compare SigNoz vs. Grafana
-              </a>
-            </Button>
-            <Button href="/teams/" type={Button.TYPES.SECONDARY}>
-              <a id="grafana-vs-signoz-try-signoz-button" href="/teams/" style={{ textDecoration: 'none', color: 'inherit' }}>
+              </Button>
+            </Link>
+            <Link
+              id="grafana-vs-signoz-try-signoz-button" 
+              href="/teams/"
+              className="flex items-center no-underline gap-2"
+            >
+              <Button>
                 Try SigNoz for Free &rarr;
-              </a>
-            </Button>
+              </Button>
+            </Link>
           </div>
         </div>
       </div>

@@ -3,10 +3,33 @@
 import React from 'react';
 import { Play, ArrowRight } from 'lucide-react';
 import { Modal, ModalContent, ModalBody, useDisclosure } from '@nextui-org/react';
-import Button from '../Button/Button'
+import Button from '../Button/Button';
+import YouTube from '../VideoPlayer/VideoPlayer';
+
+// Example usage with YouTube:
+// <InArticleVideoShowcaseModal
+//   youtubeId="oQdjfhzz5oQ"
+//   title="SigNoz Video"
+//   subtitle="Learn more about SigNoz"
+//   oneLiner="Watch this video to learn more about SigNoz"
+//   ctaText="Visit Website"
+//   ctaUrl="https://signoz.io"
+// />
+//
+// Example usage with direct video source:
+// <InArticleVideoShowcaseModal
+//   videoSrc="https://example.com/video.mp4"
+//   title="Product Demo"
+//   subtitle="See our product in action"
+//   thumbnailSrc="/custom-thumbnail.jpg"
+//   oneLiner="A quick overview of key features"
+//   ctaText="Try Now"
+//   ctaUrl="/signup"
+// />
 
 interface InArticleVideoShowcaseModalProps {
-  videoSrc: string;
+  videoSrc?: string;
+  youtubeId?: string;
   className?: string;
   title?: string;
   subtitle?: string;
@@ -18,6 +41,7 @@ interface InArticleVideoShowcaseModalProps {
 
 const InArticleVideoShowcaseModal: React.FC<InArticleVideoShowcaseModalProps> = ({ 
   videoSrc, 
+  youtubeId,
   className = "",
   title,
   subtitle,
@@ -28,6 +52,19 @@ const InArticleVideoShowcaseModal: React.FC<InArticleVideoShowcaseModalProps> = 
 }) => {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
+  // Validate that either videoSrc or youtubeId is provided, but not both
+  if (process.env.NODE_ENV === 'development') {
+    if (!videoSrc && !youtubeId) {
+      console.warn('Either videoSrc or youtubeId must be provided to InArticleVideoShowcaseModal');
+    }
+    if (videoSrc && youtubeId) {
+      console.warn('Only one of videoSrc or youtubeId should be provided to InArticleVideoShowcaseModal');
+    }
+  }
+
+  // If no thumbnail is provided for YouTube videos, use the default YouTube thumbnail
+  const effectiveThumbnailSrc = thumbnailSrc || (youtubeId ? `https://img.youtube.com/vi/${youtubeId}/maxresdefault.jpg` : undefined);
+
   return (
     <div className={`${className}`}>
       {/* Video Thumbnail with Play Button */}
@@ -37,7 +74,7 @@ const InArticleVideoShowcaseModal: React.FC<InArticleVideoShowcaseModalProps> = 
         
         {/* Thumbnail Image */}
         <img 
-          src={thumbnailSrc}
+          src={effectiveThumbnailSrc}
           alt={title || "Video thumbnail"}
           className="w-full rounded-lg"
         />
@@ -71,10 +108,14 @@ const InArticleVideoShowcaseModal: React.FC<InArticleVideoShowcaseModalProps> = 
         <ModalContent className="bg-transparent">
           {() => (
             <ModalBody className="py-3 md:py-6">
-              <video autoPlay controls className="w-full rounded-lg shadow-2xl">
-                <source src={videoSrc} type="video/mp4" />
-                Your browser does not support the video tag.
-              </video>
+              {youtubeId ? (
+                <YouTube id={youtubeId} />
+              ) : (
+                <video autoPlay controls className="w-full rounded-lg shadow-2xl">
+                  <source src={videoSrc} type="video/mp4" />
+                  Your browser does not support the video tag.
+                </video>
+              )}
               {oneLiner && (
                 <p className="text-center text-signoz_vanilla-400 mt-2 md:mt-4 mb-0 text-sm md:text-base">
                   {oneLiner}
