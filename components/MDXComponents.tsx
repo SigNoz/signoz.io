@@ -34,6 +34,7 @@ import GetStartedOpenTelemetryButton from './GetStartedOpenTelemetryButton/GetSt
 import InterlinkCard from './InterlinkCard/InterlinkCard'
 import InArticleVideoShowcaseModal from './InArticleVideoShowcaseModal/InArticleVideoShowcaseModal'
 import GetStartedInfrastructureMonitoring from './GetStartedInfrastructureMonitoring/GetStartedInfrastructureMonitoring'
+import ImageCTA from './ImageCTA/ImageCTA'
 
 export const components: MDXComponents = {
   Image,
@@ -71,4 +72,5 @@ export const components: MDXComponents = {
   InterlinkCard,
   InArticleVideoShowcaseModal,
   GetStartedInfrastructureMonitoring,
+  ImageCTA,
 }
