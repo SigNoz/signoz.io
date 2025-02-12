@@ -15,6 +15,7 @@ function WorkspaceSetupHome() {
   const [isEmailVerified, setIsEmailVerified] = useState(false)
   const [retryCount, setRetryCount] = useState(1)
   const [workspaceData, setWorkspaceData] = useState(null)
+  const [licenseID,setLicenseID] = useState<string>("")
   const searchParams = useSearchParams()
 
   const code = searchParams.get('code')
@@ -40,6 +41,7 @@ function WorkspaceSetupHome() {
     } else if (data.status === 'success') {
       setIsEmailVerified(true)
       setIsPollingEnabled(true)
+      setLicenseID(data.id || "")
     } else if (data.status === 'error' && data.type === 'already-exists') {
       setIsEmailVerified(true)
       setIsPollingEnabled(true)
@@ -51,7 +53,7 @@ function WorkspaceSetupHome() {
       return
     }
 
-    const verifyWorkSpaceSetupURL = `${WORKSPACE_SETUP_URL}/deployments/cesearch?code=${code}&email=${email}`
+    const verifyWorkSpaceSetupURL = `${WORKSPACE_SETUP_URL}/deployments/clsearch?code=${code}&license_id=${licenseID}`
 
     const res = await fetch(verifyWorkSpaceSetupURL)
     const data = await res.json()
