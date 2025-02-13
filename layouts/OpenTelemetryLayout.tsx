@@ -163,6 +163,14 @@ const OpenTelemetryBanner = ({
           <div className="flex items-start justify-between">
             {/* Tags */}
             <div className="flex w-3/4 flex-wrap items-center gap-3">
+              <a
+                href="/resource-center/opentelemetry/"
+                target="_blank"
+                className="flex w-fit items-center gap-2 rounded-full border border-signoz_ink-300 bg-signoz_ink-300/50 px-4 py-1.5 text-sm text-gray-400 transition-colors hover:border-signoz_robin-500 hover:text-white"
+              >
+                <span>Part of OpenTelemetry Track</span>
+                <ArrowRight size={14} className="rotate-[-45deg]" />
+              </a>
               {tags.map((tag) => (
                 <div
                   key={tag}
