@@ -1,6 +1,6 @@
 'use client'
 
-import { ReactNode, useRef, useState } from 'react'
+import { ReactNode, useRef, useState, useEffect } from 'react'
 import { CoreContent } from 'pliny/utils/contentlayer'
 import type { Blog, Authors } from 'contentlayer/generated'
 import SectionContainer from '@/components/SectionContainer'
@@ -319,6 +319,54 @@ interface LayoutProps {
 export default function OpenTelemetryLayout({ content, authors, children, toc }: LayoutProps) {
   const { slug, date, title, tags, readingTime, cta_title, cta_text } = content
   const mainRef = useRef<HTMLElement | null>(null)
+  const tocRef = useRef<HTMLDivElement>(null)
+  const [activeSection, setActiveSection] = useState<string>('')
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const id = entry.target.getAttribute('id')
+            if (id) setActiveSection(`#${id}`)
+          }
+        })
+      },
+      {
+        rootMargin: '-20% 0% -35% 0%',
+        threshold: 0,
+      }
+    )
+
+    const headings = document.querySelectorAll('h2, h3')
+    headings.forEach((heading) => observer.observe(heading))
+
+    return () => {
+      headings.forEach((heading) => observer.unobserve(heading))
+    }
+  }, [])
+
+  // Effect to handle TOC scrolling
+  useEffect(() => {
+    if (!tocRef.current || !activeSection) return
+
+    const activeElement = tocRef.current.querySelector(`a[href="${activeSection}"]`)
+    if (!activeElement) return
+
+    const tocContainer = tocRef.current
+    const containerHeight = tocContainer.clientHeight
+    const activeElementTop = activeElement.getBoundingClientRect().top
+    const containerTop = tocContainer.getBoundingClientRect().top
+    const relativePosition = activeElementTop - containerTop
+
+    // If the active element is not in view, scroll to it
+    if (relativePosition < 0 || relativePosition > containerHeight) {
+      tocContainer.scrollTo({
+        top: tocContainer.scrollTop + relativePosition - containerHeight / 2,
+        behavior: 'smooth',
+      })
+    }
+  }, [activeSection])
 
   return (
     <main ref={mainRef}>
@@ -342,8 +390,12 @@ export default function OpenTelemetryLayout({ content, authors, children, toc }:
 
           {/* Table of Contents */}
           <div className="post-toc fixed right-0 top-[120px] h-screen w-64 border-l border-signoz_ink-300 pl-8">
-            <div className="flex flex-col gap-1.5">
+            <div
+              ref={tocRef}
+              className="flex h-[calc(100vh-180px)] flex-col gap-1.5 overflow-y-auto"
+            >
               {toc.map((tocItem: tocItemProps) => {
+                const isActive = activeSection === tocItem.url
                 return (
                   <div
                     className="post-toc-item"
@@ -353,7 +405,9 @@ export default function OpenTelemetryLayout({ content, authors, children, toc }:
                     <a
                       data-level={tocItem.depth}
                       href={tocItem.url}
-                      className="line-clamp-2 text-[11px] text-gray-500 transition-colors hover:text-white"
+                      className={`line-clamp-2 text-[11px] transition-colors hover:text-white ${
+                        isActive ? 'font-medium text-signoz_robin-500' : 'text-gray-500'
+                      }`}
                     >
                       {tocItem.value}
                     </a>
