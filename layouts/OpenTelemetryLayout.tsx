@@ -321,7 +321,7 @@ export default function OpenTelemetryLayout({ content, authors, children, toc }:
   const mainRef = useRef<HTMLElement | null>(null)
 
   return (
-    <main ref={mainRef} className="container mx-auto">
+    <main ref={mainRef}>
       <ScrollTopAndComment />
       <OpenTelemetryBanner
         title={title}
@@ -332,23 +332,35 @@ export default function OpenTelemetryLayout({ content, authors, children, toc }:
         tags={tags}
       />
       <SectionContainer>
-        <div className="post container flex flex-row-reverse overflow-clip">
-          <div className="post-toc ml-4 w-1/4">
-            {toc.map((tocItem: tocItemProps) => {
-              return (
-                <div className="post-toc-item" key={tocItem.url}>
-                  <a data-level={tocItem.depth} href={tocItem.url} className="line-clamp-2">
-                    {tocItem.value}
-                  </a>
-                </div>
-              )
-            })}
-          </div>
-
-          <div className="post-content w-3/4 pr-4">
+        <div className="post relative flex">
+          {/* Main content area centered in the remaining space */}
+          <div className="mx-auto w-full max-w-3xl">
             <article className="prose prose-slate max-w-none py-6 dark:prose-invert">
               {children}
             </article>
+          </div>
+
+          {/* Table of Contents */}
+          <div className="post-toc fixed right-0 top-[120px] h-screen w-64 border-l border-signoz_ink-300 pl-8">
+            <div className="flex flex-col gap-1.5">
+              {toc.map((tocItem: tocItemProps) => {
+                return (
+                  <div
+                    className="post-toc-item"
+                    key={tocItem.url}
+                    style={{ paddingLeft: `${(tocItem.depth - 1) * 12}px` }}
+                  >
+                    <a
+                      data-level={tocItem.depth}
+                      href={tocItem.url}
+                      className="line-clamp-2 text-[11px] text-gray-500 transition-colors hover:text-white"
+                    >
+                      {tocItem.value}
+                    </a>
+                  </div>
+                )
+              })}
+            </div>
           </div>
         </div>
         <PageFeedback />
