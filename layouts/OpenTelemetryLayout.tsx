@@ -50,13 +50,13 @@ interface OpenTelemetryBannerProps {
   tags?: string[]
 }
 
-const OpenTelemetryBanner = ({ 
+const OpenTelemetryBanner = ({
   title,
-  ctaTitle = "Set Up OpenTelemetry with NodeJS in 15 min With Our Guided Onboarding",
-  ctaText = "Start your free 30 day trial",
+  ctaTitle = 'Get Started with OTel in 15 min with Our Guided Onboarding',
+  ctaText = 'Start your free 30 day trial',
   date,
   readingTime,
-  tags = []
+  tags = [],
 }: OpenTelemetryBannerProps) => {
   const [formData, setFormData] = useState({
     workEmail: '',
@@ -81,7 +81,8 @@ const OpenTelemetryBanner = ({
   }
 
   function isValidCompanyEmail(email) {
-    const companyEmailPattern = /@(?!gmail|yahoo|hotmail|outlook|live|icloud)[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+    const companyEmailPattern =
+      /@(?!gmail|yahoo|hotmail|outlook|live|icloud)[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
     return isValidEmail(email) && companyEmailPattern.test(email)
   }
 
@@ -137,85 +138,116 @@ const OpenTelemetryBanner = ({
   }
 
   const scrollToContent = () => {
-    window.scrollTo({
-      top: window.innerHeight,
-      behavior: 'smooth'
-    })
+    const firstHeading = document.querySelector('.prose p')
+    if (firstHeading) {
+      const yOffset = -120 // Add a small offset from the top
+      const y = firstHeading.getBoundingClientRect().top + window.scrollY + yOffset
+      window.scrollTo({
+        top: y,
+        behavior: 'smooth',
+      })
+    }
   }
 
   return (
-    <div className="w-full bg-gradient-to-r from-gray-900 to-gray-800 py-12 px-4">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex flex-col space-y-8">
-          {/* Tags and Meta Info */}
-          <div className="flex flex-wrap gap-2 text-sm text-gray-400">
-            {tags.map((tag) => (
-              <span key={tag} className="bg-gray-800 px-3 py-1 rounded-full">
-                {tag}
-              </span>
-            ))}
-            <span className="text-gray-400">•</span>
-            <span>{date}</span>
-            <span className="text-gray-400">•</span>
-            <span>{readingTime}</span>
-          </div>
+    <div className="relative w-full px-4 py-12 md:py-16">
+      {/* Dotted background pattern */}
+      <div className="-z-10">
+        <div className="bg-dot-pattern masked-dots absolute top-0 flex h-[200vh] w-full items-center justify-center opacity-100" />
+        <div className="absolute left-0 right-0 top-0 mx-auto h-[600px] w-full flex-shrink-0 rounded-[956px] bg-gradient-to-b from-[rgba(190,107,241,1)] to-[rgba(69,104,220,0)] bg-[length:110%] bg-no-repeat opacity-30 blur-[300px] sm:bg-[center_-500px] md:h-[1200px]" />
+      </div>
 
-          {/* Title and CTA */}
-          <div className="space-y-6">
-            <h1 className="text-4xl md:text-5xl font-bold text-white">
-              {title}
-            </h1>
-            <h2 className="text-2xl md:text-3xl text-gray-300">
-              {ctaTitle}
-            </h2>
-          </div>
-
-          {/* Sign Up Form */}
-          <div className="space-y-6 max-w-2xl">
-            <div>
-              <input
-                type="email"
-                id="workEmail"
-                name="workEmail"
-                disabled={isSubmitting}
-                value={formData.workEmail}
-                onChange={handleInputChange}
-                placeholder="Enter your work email"
-                className="w-full rounded-sm border border-solid border-gray-600 bg-gray-800 px-4 py-2 text-white"
-              />
-              {errors?.workEmail && (
-                <div className="mt-2 text-xs text-red-400">{errors.workEmail}</div>
-              )}
-            </div>
-
-            <div className="flex flex-wrap gap-3">
-              {regions.map((region) => (
-                <button
-                  type="button"
-                  key={region.id}
-                  onClick={() => handleRegionChange(region.id)}
-                  className={`flex items-center gap-2 rounded-sm border px-4 py-2 ${
-                    region.id === formData.dataRegion 
-                    ? 'border-blue-400 bg-blue-900/30' 
-                    : 'border-gray-600 bg-gray-800'
-                  }`}
+      <div className="relative mx-auto max-w-7xl">
+        <div className="flex flex-col space-y-6">
+          {/* Top row with tags and meta info */}
+          <div className="flex items-start justify-between">
+            {/* Tags */}
+            <div className="flex w-3/4 flex-wrap items-center gap-3">
+              {tags.map((tag) => (
+                <div
+                  key={tag}
+                  className="flex items-center gap-2 rounded-full bg-signoz_ink-300 px-4 py-1.5"
                 >
-                  <Image
-                    src={region.iconURL}
-                    alt={`${region.name} flag`}
-                    width={20}
-                    height={20}
-                    className="w-5 h-5"
-                  />
-                  <span className="text-white">{region.name}</span>
-                </button>
+                  <span className="text-sm font-medium text-white">{tag}</span>
+                </div>
               ))}
             </div>
+
+            {/* Meta info */}
+            <div className="flex items-center gap-2 text-sm text-gray-400">
+              <span>
+                {new Date(date).toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                })}
+              </span>
+              <span>•</span>
+              <span>{readingTime}</span>
+            </div>
+          </div>
+
+          {/* Title section */}
+          <div className="py-2">
+            <h1 className="text-4xl font-bold leading-tight text-white md:text-5xl">{title}</h1>
+          </div>
+
+          {/* Sign Up Form Section */}
+          <div className="max-w-4xl space-y-6 py-2">
+            {/* CTA Title */}
+            <h2 className="text-xl leading-relaxed text-gray-300 md:text-2xl">{ctaTitle}</h2>
+
+            <div className="flex gap-4">
+              <div className="flex-1">
+                <label htmlFor="workEmail" className="mb-2 block text-sm text-gray-400">
+                  Work Email
+                </label>
+                <input
+                  type="email"
+                  id="workEmail"
+                  name="workEmail"
+                  disabled={isSubmitting}
+                  value={formData.workEmail}
+                  onChange={handleInputChange}
+                  placeholder="Enter your email"
+                  className="w-full rounded-lg border border-solid border-signoz_slate-400 bg-signoz_ink-300 px-6 py-3 text-white placeholder:text-gray-400"
+                />
+              </div>
+              <div>
+                <label className="mb-2 block text-sm text-gray-400">Data Region</label>
+                <div className="flex gap-3">
+                  {regions.map((region) => (
+                    <button
+                      type="button"
+                      key={region.id}
+                      onClick={() => handleRegionChange(region.id)}
+                      className={`flex items-center gap-3 rounded-lg border px-6 py-3 ${
+                        region.id === formData.dataRegion
+                          ? 'border-[#4e74f866] bg-[#4e74f833]'
+                          : 'border-signoz_slate-400 bg-signoz_ink-300'
+                      }`}
+                    >
+                      <Image
+                        src={region.iconURL}
+                        alt={`${region.name} flag`}
+                        width={20}
+                        height={20}
+                        className="h-5 w-5"
+                      />
+                      <span className="text-white">{region.name}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+            {errors?.workEmail && (
+              <div className="mt-2 text-xs text-red-400">{errors.workEmail}</div>
+            )}
 
             <button
               onClick={handleSubmit}
               disabled={isSubmitting}
-              className={`w-full flex items-center justify-center gap-2 bg-signoz_robin-500 py-2 pl-4 pr-3 font-medium rounded-full ${isSubmitting ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}
+              className={`flex w-full items-center justify-center gap-2 rounded-full bg-signoz_robin-500 px-6 py-3 font-medium ${isSubmitting ? 'cursor-not-allowed opacity-60' : 'cursor-pointer transition-colors hover:bg-signoz_robin-600'}`}
             >
               {isSubmitting ? (
                 <div className="flex items-center gap-2 text-sm">
@@ -232,9 +264,9 @@ const OpenTelemetryBanner = ({
           </div>
 
           {/* Read Article Button */}
-          <button 
+          <button
             onClick={scrollToContent}
-            className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
+            className="flex w-full items-center justify-center gap-2 pt-4 text-gray-400 transition-colors hover:text-white"
           >
             Read Article
             <ArrowDown size={20} />
@@ -266,7 +298,7 @@ export default function OpenTelemetryLayout({ content, authors, children, toc }:
   return (
     <main ref={mainRef} className="container mx-auto">
       <ScrollTopAndComment />
-      <OpenTelemetryBanner 
+      <OpenTelemetryBanner
         title={title}
         ctaTitle={cta_title}
         ctaText={cta_text}
@@ -299,4 +331,4 @@ export default function OpenTelemetryLayout({ content, authors, children, toc }:
       <ProgressBar target={mainRef} />
     </main>
   )
-} 
+}
