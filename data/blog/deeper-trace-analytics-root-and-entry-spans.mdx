@@ -1,0 +1,139 @@
+---
+
+title: Deeper Trace Analytics - Analyze Root & Entry Spans with Ease
+slug: deeper-trace-analytics-root-and-entry-spans
+date: 2025-02-13
+tags: [product]
+authors: [ankit_anand]
+image: /img/blog/2025/02/deeper-trace-analytics-root-and-entry-spans-trace-analytics-yt.webp
+description: With our latest Deeper Trace Analytics update, SigNoz now enables powerful filtering for root and entry spans—making it significantly easier to analyze and debug distributed traces.
+keywords: [opentelemetry, traces, root span, entry span, SigNoz]
+
+---
+
+Debugging distributed systems can often feel like searching for a needle in a haystack. When issues arise, engineers need faster ways to pinpoint critical spans within their traces.
+
+With our latest Deeper Trace Analytics update, SigNoz now enables powerful filtering for root and entry spans—making it significantly easier to analyze and debug distributed traces.
+
+
+## Watch Demo
+
+Check out this video to see our latest trace updates in action.
+
+<YouTube id="5eXoko35gqI" mute={false} />
+
+## Why Does This Matter?
+
+Tracing is a powerful tool for understanding request flows, identifying latency bottlenecks, and diagnosing failures. However, when working with large, multi-service traces, filtering through thousands of spans can be overwhelming.
+
+Teams often need to focus on specific spans that define a request’s lifecycle:
+
+- **Root spans** – The **first span** in a trace that initiates a request.
+- **Entry spans** – The **first span for each service** in a trace, marking a request's entry into that service.
+
+By introducing search and filtering for these spans, we have made it easier to:
+
+✅ **Find long-running requests faster** <br />
+✅ **Analyze service-level latency at a glance** <br />
+✅ **Quickly detect problematic endpoints** <br />
+✅ **Reduce Mean Time to Resolution (MTTR)** <br />
+
+## Understanding Root & Entry Spans
+
+### What is a Root Span?
+
+A root span is the first span in a trace, representing where a request originates. In synchronous systems, the root span’s duration is equivalent to the trace duration, making it a great indicator of overall system latency.
+
+For example, in an e-commerce system:
+
+- A user initiates a checkout process.
+- The checkout service receives the request, creating the root span.
+- The request flows through multiple services like payment processing, inventory checks, and order confirmation.
+
+### What is an Entry Span?
+
+An **entry span** is the **first span within a specific service** in a distributed trace. Since microservices often communicate asynchronously, each service sees a request as a new entry.
+
+For example:
+
+- A request starts at the **frontend service** (root span).
+- It then calls the **user service** (entry span for that service).
+- Later, it moves to a **payment service** (entry span for payment processing).
+
+By analyzing entry spans, teams can quickly diagnose **service-level latency issues** or **error rates across microservices.**
+
+## How SigNoz Enhances Trace Analytics
+
+With the new filtering options, you can now search and analyze traces based on:
+
+### 1. Finding Root Spans
+
+With a simple filter, users can search for traces where a specific service is the root span:
+
+<Figure src="/img/blog/2025/02/deeper-trace-analytics-root-and-entry-spans-root-span-filtering.webp" alt="Apply filters on root span easily by selecting root spans in the dropdown" caption="Apply filters on root span easily by selecting root spans in the dropdown" />
+
+This allows teams to focus on requests that originated from a specific service, helping them analyze request durations and overall system health.
+
+### 2. Filtering by Entry Spans
+
+To find all traces where a specific service acted as an entry point, use:
+
+<Figure src="/img/blog/2025/02/deeper-trace-analytics-root-and-entry-spans-entry-point-span.webp" alt="Apply filters on entry point span easily by selecting root spans in the dropdown" caption="Apply filters on entry point span easily by selecting root spans in the dropdown" />
+
+This helps teams monitor service-specific performance and latency, ensuring that key endpoints are functioning efficiently.
+
+### 3. Seamless UI Integration
+
+SigNoz makes it easy to apply these filters with intuitive dropdown selections in the UI:
+
+- Navigate to the Traces Explorer.
+- Select "Root Spans" or "Entry Spans" from the filter dropdown.
+- Instantly refine search results to focus on critical spans.
+
+These filtering capabilities are persistent across multiple views, including:
+
+- Trace List View – View filtered results based on root/entry spans.
+- Time Series View – Analyze performance trends over time.
+- Table View – See aggregated counts of root and entry spans.
+
+## Real-World Use Cases
+
+### 1. Detecting Slow Service Entry Points
+
+📌 *Use case:* An online travel booking platform notices checkout latency spikes. <br />
+✅ Engineers filter by entry spans for the checkout service and identify a slow database query causing the issue.
+
+### 2. Analyzing Root Span Durations
+
+📌 *Use case:* A payments system needs to monitor end-to-end request durations. <br />
+✅ By filtering for root spans of the payments service, teams quickly detect high-latency transactions.
+
+### 3. Isolating Microservice Bottlenecks
+
+📌 *Use case:* A large-scale SaaS application experiences intermittent performance drops. <br />
+✅ By grouping traces by entry spans, engineers identify the specific microservice with latency spikes, reducing debugging time.
+
+## What’s Next?
+
+We’re just getting started with advanced trace analytics! 🚀 Coming soon:
+
+- Relational span fields – deeper insights into parent-child relationships.
+- Automated anomaly detection on root spans.
+- More advanced filtering & aggregations for complex traces.
+
+## Try It Out Today
+
+With Deeper Trace Analytics, it is easier to debug distributed systems.  Find the most critical spans, analyze performance bottlenecks, and optimize your services quickly.
+
+In order to send traces to SigNoz, you will have to instrument your application with OpenTelemetry.
+
+<InterlinkCard title="Docs for instrumenting your application to send traces" href="https://signoz.io/docs/instrumentation/" />
+
+Ready to unlock deeper trace analytics?  Try out the new Root & Entry Span Filtering in SigNoz and see how it transforms your debugging workflow!
+
+[![Get Started - Free CTA](/img/launch_week/try-signoz-cloud-blog-cta.png)](https://signoz.io/teams/)
+
+## Launch Week 3.0
+
+Check out all [updates](https://signoz.io/launch-week/) of Launch Week 3.0.
+
