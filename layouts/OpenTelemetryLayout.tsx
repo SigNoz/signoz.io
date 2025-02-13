@@ -8,7 +8,7 @@ import ScrollTopAndComment from '@/components/ScrollTopAndComment'
 import { ProgressBar } from '@/components/ProgressBar/ProgressBar'
 import PageFeedback from '@/components/PageFeedback/PageFeedback'
 import Image from 'next/image'
-import { ArrowDown, ArrowRight, Loader2 } from 'lucide-react'
+import { ArrowDown, ArrowRight, Loader2, ChevronDown } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
 // Extend the Blog type to include CTA fields
@@ -244,32 +244,49 @@ const OpenTelemetryBanner = ({
               <div className="mt-2 text-xs text-red-400">{errors.workEmail}</div>
             )}
 
-            <button
-              onClick={handleSubmit}
-              disabled={isSubmitting}
-              className={`flex w-full items-center justify-center gap-2 rounded-full bg-signoz_robin-500 px-6 py-3 font-medium ${isSubmitting ? 'cursor-not-allowed opacity-60' : 'cursor-pointer transition-colors hover:bg-signoz_robin-600'}`}
-            >
-              {isSubmitting ? (
-                <div className="flex items-center gap-2 text-sm">
-                  Starting your free 30-day trial
-                  <Loader2 size={16} className="animate-spin" />
-                </div>
-              ) : (
-                <span className="flex items-center gap-1.5 px-px text-sm">
-                  {ctaText}
-                  <ArrowRight size={16} />
+            <div className="space-y-3">
+              <button
+                onClick={handleSubmit}
+                disabled={isSubmitting}
+                className={`flex w-full items-center justify-center gap-2 rounded-full bg-signoz_robin-500 px-6 py-3 font-medium ${isSubmitting ? 'cursor-not-allowed opacity-60' : 'cursor-pointer transition-colors hover:bg-signoz_robin-600'}`}
+              >
+                {isSubmitting ? (
+                  <div className="flex items-center gap-2 text-sm">
+                    Starting your free 30-day trial
+                    <Loader2 size={16} className="animate-spin" />
+                  </div>
+                ) : (
+                  <span className="flex items-center gap-1.5 px-px text-sm">
+                    {ctaText}
+                    <ArrowRight size={16} />
+                  </span>
+                )}
+              </button>
+
+              <div className="flex items-center gap-6 pl-5 text-xs text-gray-400">
+                <span className="flex items-center gap-1.5">
+                  <div className="h-1 w-1 rounded-full bg-signoz_robin-500" />
+                  No user-based pricing
                 </span>
-              )}
-            </button>
+                <span className="flex items-center gap-1.5">
+                  <div className="h-1 w-1 rounded-full bg-signoz_robin-500" />
+                  No host-based pricing
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <div className="h-1 w-1 rounded-full bg-signoz_robin-500" />
+                  No special pricing for custom metrics
+                </span>
+              </div>
+            </div>
           </div>
 
           {/* Read Article Button */}
           <button
             onClick={scrollToContent}
-            className="flex w-full items-center justify-center gap-2 pt-4 text-gray-400 transition-colors hover:text-white"
+            className="flex w-full flex-col items-center pt-4 text-gray-400 transition-colors hover:text-white"
           >
             Read Article
-            <ArrowDown size={20} />
+            <ChevronDown size={20} />
           </button>
         </div>
       </div>
