@@ -179,6 +179,7 @@ const Teams: React.FC<SignUpPageProps> = () => {
         })
 
         localStorage.setItem('workEmail', formData.workEmail)
+        localStorage.setItem('region', formData.dataRegion)
 
         router.push('/verify-email')
       } else {
