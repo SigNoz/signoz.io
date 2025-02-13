@@ -325,15 +325,20 @@ export default function OpenTelemetryLayout({ content, authors, children, toc }:
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            const id = entry.target.getAttribute('id')
-            if (id) setActiveSection(`#${id}`)
-          }
-        })
+        // Find the first element that is intersecting
+        const visibleEntries = entries.filter((entry) => entry.isIntersecting)
+        if (visibleEntries.length > 0) {
+          // Sort by their position and select the one closest to the top
+          const sortedEntries = visibleEntries.sort(
+            (a, b) => a.boundingClientRect.top - b.boundingClientRect.top
+          )
+          const id = sortedEntries[0].target.getAttribute('id')
+          if (id) setActiveSection(`#${id}`)
+        }
       },
       {
-        rootMargin: '-20% 0% -35% 0%',
+        // This creates a trigger zone near the top of the viewport
+        rootMargin: '-10% -20% -80% -20%',
         threshold: 0,
       }
     )
