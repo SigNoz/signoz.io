@@ -9,18 +9,21 @@ function VerifyEmail() {
   const [submitFailed, setSubmitFailed] = useState(false)
 
   const [workEmail, setWorkEmail] = useState<string | null>(null)
+  const [region, setRegion] = useState<string | null>(null)
 
   useEffect(() => {
     try {
       const workEmailFromLocalStorage = localStorage.getItem('workEmail')
+      const region = localStorage.getItem('region')
 
-      if (workEmailFromLocalStorage) {
+      if (workEmailFromLocalStorage && region) {
         setWorkEmail(workEmailFromLocalStorage)
+        setRegion(region)
       } else {
         setSubmitFailed(true)
       }
     } catch (error) {
-      console.error('Error fetching work email from local storage', error)
+      console.error('Error fetching work email or region from local storage', error)
       setWorkEmail(null)
       setSubmitFailed(true)
     }
@@ -32,6 +35,9 @@ function VerifyEmail() {
 
     const payload = {
       email: workEmail,
+      region: {
+        name: region,
+      },
     }
 
     try {
