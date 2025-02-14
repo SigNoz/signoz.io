@@ -296,13 +296,66 @@ const MainSection: React.FC = () => {
             </Link>
           </div>
 
+          <div className="flex flex-col justify-between border-b border-t border-dashed border-signoz_slate-100 px-6 py-6 sm:flex-row">
+            <div className="flex flex-col justify-between gap-4 sm:pr-4">
+              <div className="text-base uppercase text-signoz_vanilla-400">Thursday ⎯ Feb 14</div>
+              <div className="flex flex-col gap-2">
+                <Link
+                  href="https://www.linkedin.com/events/nativeawsintegrationswithautodi7295777503921549313/theater/"
+                  target="_blank"
+                  id="btn-linkedin-live"
+                  className="button-background flex w-full items-center justify-center gap-2 rounded-full px-3 py-2 sm:mb-0"
+                >
+                  <Linkedin className="h-4 w-4" />
+                  <span className="whitespace-nowrap text-sm font-medium text-[#F7F7F8]">
+                    LinkedIn Live
+                  </span>
+                </Link>
+                <div
+                  id="btn-watch-youtube-video"
+                  className="button-background mb-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-full px-3 py-2 sm:mb-0"
+                  onClick={() => handleOpenModal('D7KLFIWIbq4')}
+                >
+                  <img src="/svgs/icons/watch-video.svg" alt="watch video icon" />
+                  <span className="whitespace-nowrap text-sm font-medium text-[#F7F7F8]">
+                    Watch the video
+                  </span>
+                </div>
+              </div>
+            </div>
+            <Link
+              href="/blog/native-aws-integrations-with-autodiscovery/"
+              className="launch-week-card-background flex w-[864px] max-w-full cursor-pointer flex-col gap-6 rounded-md border border-signoz_slate-500 px-5 py-4 transition-colors duration-300 hover:bg-[#121317] sm:flex-row"
+            >
+              <img
+                src="/img/blog/2025/02/native-aws-integrations-with-autodiscovery-native-aws-integrations-yt.webp"
+                className=" mb-4 h-auto w-auto pr-2 sm:mb-0 sm:w-3/5 sm:pr-0"
+              />
+              <div className="group flex flex-col justify-between">
+                <div>
+                  <div className="font-eedium mb-2 text-base">
+                  Native AWS Integrations with AutoDiscovery
+                  </div>
+                  <div className="text-sm font-medium text-signoz_vanilla-400">
+                  Making AWS monitoring dead simple in SigNoz, the AWS Integration Agent automates the entire process, from setup to continuous auto-discovery, ensuring users get all their logs and metrics from AWS into SigNoz seamlessly.
+                  </div>
+                </div>
+                <div className="flex justify-end">
+                  <div className="button-background mt-2 flex h-fit w-fit transform items-center justify-center rounded-full p-2 transition-transform group-hover:translate-x-2.5 sm:mt-0">
+                    <ArrowRight size={14} />
+                  </div>
+                </div>
+              </div>
+            </Link>
+          </div>
+
           {/* Timer  */}
           {[
             // 'Monday ⎯ Feb 10',
             // 'Tuesday ⎯ Feb 11',
             // 'Wednesday ⎯ Feb 12',
             // 'Thursday ⎯ Feb 13',
-            'Friday ⎯ Feb 14',
+            // 'Friday ⎯ Feb 14',
           ].map((day, index) => (
             <div
               key={index}
