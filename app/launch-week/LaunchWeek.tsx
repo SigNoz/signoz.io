@@ -194,7 +194,7 @@ const MainSection: React.FC = () => {
 
            <div className="flex flex-col justify-between border-b border-t border-dashed border-signoz_slate-100 px-6 py-6 sm:flex-row">
             <div className="flex flex-col justify-between gap-4 sm:pr-4">
-              <div className="text-base uppercase text-signoz_vanilla-400">Wednesday ⎯ Feb 13</div>
+              <div className="text-base uppercase text-signoz_vanilla-400">Wednesday ⎯ Feb 12</div>
               <div className="flex flex-col gap-2">
                 <Link
                   href="https://www.linkedin.com/events/out-of-the-boxopentelemetry-pow7295056491584110592/theater/"
@@ -245,7 +245,7 @@ const MainSection: React.FC = () => {
 
           <div className="flex flex-col justify-between border-b border-t border-dashed border-signoz_slate-100 px-6 py-6 sm:flex-row">
             <div className="flex flex-col justify-between gap-4 sm:pr-4">
-              <div className="text-base uppercase text-signoz_vanilla-400">Thursday ⎯ Feb 14</div>
+              <div className="text-base uppercase text-signoz_vanilla-400">Thursday ⎯ Feb 13</div>
               <div className="flex flex-col gap-2">
                 <Link
                   href="https://www.linkedin.com/events/deepertraceanalytics-analyzeroo7295415096619479040/theater/"
@@ -298,7 +298,7 @@ const MainSection: React.FC = () => {
 
           <div className="flex flex-col justify-between border-b border-t border-dashed border-signoz_slate-100 px-6 py-6 sm:flex-row">
             <div className="flex flex-col justify-between gap-4 sm:pr-4">
-              <div className="text-base uppercase text-signoz_vanilla-400">Thursday ⎯ Feb 14</div>
+              <div className="text-base uppercase text-signoz_vanilla-400">FRIDAY ⎯ Feb 14</div>
               <div className="flex flex-col gap-2">
                 <Link
                   href="https://www.linkedin.com/events/nativeawsintegrationswithautodi7295777503921549313/theater/"
