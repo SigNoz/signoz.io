@@ -50,105 +50,7 @@ interface OpenTelemetryBannerProps {
   tags?: string[]
 }
 
-const OpenTelemetryBanner = ({
-  title,
-  ctaTitle = 'Get Started with OTel in 15 min with Our Guided Onboarding',
-  ctaText = 'Start your free 30 day trial',
-  date,
-  readingTime,
-  tags = [],
-}: OpenTelemetryBannerProps) => {
-  const [formData, setFormData] = useState({
-    workEmail: '',
-    dataRegion: 'us',
-  })
-  const [errors, setErrors] = useState<{ workEmail?: string }>({})
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const router = useRouter()
-
-  const handleInputChange = (event) => {
-    const { name, value } = event.target
-    setFormData({ ...formData, [name]: value })
-  }
-
-  const handleRegionChange = (selectedDataRegion: string): void => {
-    setFormData({ ...formData, dataRegion: selectedDataRegion })
-  }
-
-  const isValidEmail = (email) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    return emailRegex.test(email)
-  }
-
-  function isValidCompanyEmail(email) {
-    const companyEmailPattern =
-      /@(?!gmail|yahoo|hotmail|outlook|live|icloud)[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
-    return isValidEmail(email) && companyEmailPattern.test(email)
-  }
-
-  const validateForm = () => {
-    let errors = {}
-    if (!formData.workEmail.trim()) {
-      errors['workEmail'] = 'Work email is required'
-    } else if (!isValidCompanyEmail(formData.workEmail)) {
-      errors['workEmail'] = 'Please enter a valid company email'
-    }
-    setErrors(errors)
-    return Object.keys(errors).length === 0
-  }
-
-  const handleSubmit = async (event) => {
-    event.preventDefault()
-    const isFormValid = validateForm()
-    if (!isFormValid) return
-
-    setIsSubmitting(true)
-    const payload = {
-      email: formData.workEmail,
-      region: {
-        name: formData.dataRegion,
-      },
-    }
-
-    try {
-      const response = await fetch('https://api.signoz.cloud/v2/users', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-      })
-      if (response.ok) {
-        localStorage.setItem('workEmail', formData.workEmail)
-        router.push('/verify-email')
-      } else {
-        if (response.status === 400) {
-          setErrors({
-            workEmail: 'Please enter a valid work email.',
-          })
-        }
-      }
-    } catch (error) {
-      setErrors({
-        workEmail: 'Something went wrong. Please try again.',
-      })
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
-
-  const scrollToContent = () => {
-    const firstHeading = document.querySelector('.prose p')
-    if (firstHeading) {
-      const yOffset = -120 // Add a small offset from the top
-      const y = firstHeading.getBoundingClientRect().top + window.scrollY + yOffset
-      window.scrollTo({
-        top: y,
-        behavior: 'smooth',
-      })
-    }
-  }
-
+const OpenTelemetryBanner = ({ title, date, readingTime, tags = [] }: OpenTelemetryBannerProps) => {
   return (
     <div className="relative w-full px-4 py-12 md:py-16">
       {/* Dotted background pattern */}
@@ -199,103 +101,6 @@ const OpenTelemetryBanner = ({
           <div className="py-2">
             <h1 className="text-4xl font-bold leading-tight text-white md:text-5xl">{title}</h1>
           </div>
-
-          {/* Sign Up Form Section */}
-          <div className="max-w-4xl space-y-6 py-2">
-            {/* CTA Title */}
-            <h2 className="text-xl leading-relaxed text-gray-300 md:text-2xl">{ctaTitle}</h2>
-
-            <div className="flex gap-4">
-              <div className="flex-1">
-                <label htmlFor="workEmail" className="mb-2 block text-sm text-gray-400">
-                  Work Email
-                </label>
-                <input
-                  type="email"
-                  id="workEmail"
-                  name="workEmail"
-                  disabled={isSubmitting}
-                  value={formData.workEmail}
-                  onChange={handleInputChange}
-                  placeholder="Enter your email"
-                  className="w-full rounded-lg border border-solid border-signoz_slate-400 bg-signoz_ink-300 px-6 py-3 text-white placeholder:text-gray-400"
-                />
-              </div>
-              <div>
-                <label className="mb-2 block text-sm text-gray-400">Data Region</label>
-                <div className="flex gap-3">
-                  {regions.map((region) => (
-                    <button
-                      type="button"
-                      key={region.id}
-                      onClick={() => handleRegionChange(region.id)}
-                      className={`flex items-center gap-3 rounded-lg border px-6 py-3 ${
-                        region.id === formData.dataRegion
-                          ? 'border-[#4e74f866] bg-[#4e74f833]'
-                          : 'border-signoz_slate-400 bg-signoz_ink-300'
-                      }`}
-                    >
-                      <Image
-                        src={region.iconURL}
-                        alt={`${region.name} flag`}
-                        width={20}
-                        height={20}
-                        className="h-5 w-5"
-                      />
-                      <span className="text-white">{region.name}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-            {errors?.workEmail && (
-              <div className="mt-2 text-xs text-red-400">{errors.workEmail}</div>
-            )}
-
-            <div className="space-y-3">
-              <button
-                onClick={handleSubmit}
-                disabled={isSubmitting}
-                className={`flex w-full items-center justify-center gap-2 rounded-full bg-signoz_robin-500 px-6 py-3 font-medium ${isSubmitting ? 'cursor-not-allowed opacity-60' : 'cursor-pointer transition-colors hover:bg-signoz_robin-600'}`}
-              >
-                {isSubmitting ? (
-                  <div className="flex items-center gap-2 text-sm">
-                    Starting your free 30-day trial
-                    <Loader2 size={16} className="animate-spin" />
-                  </div>
-                ) : (
-                  <span className="flex items-center gap-1.5 px-px text-sm">
-                    {ctaText}
-                    <ArrowRight size={16} />
-                  </span>
-                )}
-              </button>
-
-              <div className="flex items-center gap-6 pl-5 text-xs text-gray-400">
-                <span className="flex items-center gap-1.5">
-                  <div className="h-1 w-1 rounded-full bg-signoz_robin-500" />
-                  No user-based pricing
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <div className="h-1 w-1 rounded-full bg-signoz_robin-500" />
-                  No host-based pricing
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <div className="h-1 w-1 rounded-full bg-signoz_robin-500" />
-                  No special pricing for custom metrics
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Read Article Button */}
-          <button
-            onClick={scrollToContent}
-            className="flex w-full flex-col items-center pt-4 text-gray-400 transition-colors hover:text-white"
-          >
-            Read Article
-            <ChevronDown size={20} />
-          </button>
         </div>
       </div>
     </div>
@@ -321,6 +126,27 @@ export default function OpenTelemetryLayout({ content, authors, children, toc }:
   const mainRef = useRef<HTMLElement | null>(null)
   const tocRef = useRef<HTMLDivElement>(null)
   const [activeSection, setActiveSection] = useState<string>('')
+  const [showSignUpStrip, setShowSignUpStrip] = useState(false)
+  const [formData, setFormData] = useState({
+    workEmail: '',
+    dataRegion: 'us',
+  })
+  const [errors, setErrors] = useState<{ workEmail?: string }>({})
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const router = useRouter()
+  const [isRegionDropdownOpen, setIsRegionDropdownOpen] = useState(false)
+
+  // Handle scroll to show/hide sign-up strip
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY
+      const showThreshold = 400 // Adjust this value to control when the strip appears
+      setShowSignUpStrip(scrollPosition > showThreshold)
+    }
+
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -373,17 +199,185 @@ export default function OpenTelemetryLayout({ content, authors, children, toc }:
     }
   }, [activeSection])
 
+  const handleInputChange = (event) => {
+    const { name, value } = event.target
+    setFormData({ ...formData, [name]: value })
+  }
+
+  const handleRegionChange = (selectedDataRegion: string): void => {
+    setFormData({ ...formData, dataRegion: selectedDataRegion })
+  }
+
+  const validateForm = () => {
+    let errors = {}
+    if (!formData.workEmail.trim()) {
+      errors['workEmail'] = 'Work email is required'
+    } else if (!isValidCompanyEmail(formData.workEmail)) {
+      errors['workEmail'] = 'Please enter a valid company email'
+    }
+    setErrors(errors)
+    return Object.keys(errors).length === 0
+  }
+
+  const isValidEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    return emailRegex.test(email)
+  }
+
+  function isValidCompanyEmail(email) {
+    const companyEmailPattern =
+      /@(?!gmail|yahoo|hotmail|outlook|live|icloud)[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+    return isValidEmail(email) && companyEmailPattern.test(email)
+  }
+
+  const handleSubmit = async (event) => {
+    event.preventDefault()
+    const isFormValid = validateForm()
+    if (!isFormValid) return
+
+    setIsSubmitting(true)
+    const payload = {
+      email: formData.workEmail,
+      region: {
+        name: formData.dataRegion,
+      },
+    }
+
+    try {
+      const response = await fetch('https://api.signoz.cloud/v2/users', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      })
+      if (response.ok) {
+        localStorage.setItem('workEmail', formData.workEmail)
+        router.push('/verify-email')
+      } else {
+        if (response.status === 400) {
+          setErrors({
+            workEmail: 'Please enter a valid work email.',
+          })
+        }
+      }
+    } catch (error) {
+      setErrors({
+        workEmail: 'Something went wrong. Please try again.',
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
   return (
     <main ref={mainRef}>
       <ScrollTopAndComment />
-      <OpenTelemetryBanner
-        title={title}
-        ctaTitle={cta_title}
-        ctaText={cta_text}
-        date={date}
-        readingTime={readingTime.text}
-        tags={tags}
-      />
+
+      {/* Floating Sign-up Strip */}
+      <div
+        className={`fixed left-0 right-0 top-0 z-50 transform bg-signoz_ink-500/95 backdrop-blur-sm transition-all duration-300 ease-in-out ${
+          showSignUpStrip ? 'translate-y-0' : '-translate-y-full'
+        }`}
+      >
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-2.5">
+          <div className="flex items-center gap-8">
+            <div className="text-sm text-gray-300">
+              {cta_title || 'Get Started with OTel in 15 min with Our Guided Onboarding'}
+            </div>
+            <div className="flex items-end gap-4">
+              <div className="flex flex-col gap-1">
+                {/* <label htmlFor="workEmail" className="text-xs font-medium text-gray-400">
+                  Work Email
+                </label> */}
+                <input
+                  type="email"
+                  id="workEmail"
+                  placeholder="name@company.com"
+                  value={formData.workEmail}
+                  onChange={handleInputChange}
+                  name="workEmail"
+                  className="w-64 rounded-md border border-signoz_ink-300 bg-signoz_ink-400/50 px-3 py-1.5 text-sm text-white placeholder:text-gray-500 focus:border-signoz_robin-500 focus:outline-none focus:ring-1 focus:ring-signoz_robin-500"
+                />
+              </div>
+              <div className="flex flex-col gap-1">
+                {/* <label className="text-xs font-medium text-gray-400">Data Region</label> */}
+                <div className="relative">
+                  <button
+                    onClick={() => setIsRegionDropdownOpen(!isRegionDropdownOpen)}
+                    className="flex items-center gap-2 rounded-md border border-signoz_ink-300 bg-signoz_ink-400/50 px-3 py-1.5 text-sm text-white"
+                  >
+                    <Image
+                      src={regions.find((r) => r.id === formData.dataRegion)?.iconURL || ''}
+                      alt="Selected region"
+                      width={16}
+                      height={16}
+                      className="h-4 w-4"
+                    />
+                    <span>{regions.find((r) => r.id === formData.dataRegion)?.name}</span>
+                    <ChevronDown
+                      size={14}
+                      className={`transition-transform ${isRegionDropdownOpen ? 'rotate-180' : ''}`}
+                    />
+                  </button>
+                  {isRegionDropdownOpen && (
+                    <div className="absolute left-0 right-0 top-full mt-1 rounded-md border border-signoz_ink-300 bg-signoz_ink-400/95 py-1 shadow-lg backdrop-blur-sm">
+                      <div className="border-b border-signoz_ink-300 px-3 pb-1 pt-0.5">
+                        <span className="text-xs font-medium text-gray-400">Data Region</span>
+                      </div>
+                      {regions.map((region) => (
+                        <button
+                          key={region.id}
+                          onClick={() => {
+                            handleRegionChange(region.id)
+                            setIsRegionDropdownOpen(false)
+                          }}
+                          className={`flex w-full items-center gap-2 px-3 py-1.5 text-sm hover:bg-signoz_ink-300 ${
+                            region.id === formData.dataRegion ? 'text-white' : 'text-gray-400'
+                          }`}
+                        >
+                          <Image
+                            src={region.iconURL}
+                            alt={`${region.name} data region`}
+                            width={16}
+                            height={16}
+                            className="h-4 w-4"
+                          />
+                          <span>{region.name}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+          <button
+            onClick={handleSubmit}
+            disabled={isSubmitting}
+            className="flex items-center gap-2 rounded-md bg-signoz_robin-500 px-4 py-1.5 text-sm font-medium text-white transition-all hover:bg-signoz_robin-600 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {isSubmitting ? (
+              <>
+                Setting up your workspace...
+                <Loader2 size={14} className="animate-spin" />
+              </>
+            ) : (
+              <>
+                {cta_text || 'Start your free 30-day trial'}
+                <ArrowRight size={14} />
+              </>
+            )}
+          </button>
+        </div>
+        {errors?.workEmail && (
+          <div className="bg-red-500/10 px-4 py-1.5 text-center text-xs text-red-400">
+            {errors.workEmail}
+          </div>
+        )}
+      </div>
+
+      <OpenTelemetryBanner title={title} date={date} readingTime={readingTime.text} tags={tags} />
       <SectionContainer>
         <div className="post relative flex">
           {/* Main content area centered in the remaining space */}
