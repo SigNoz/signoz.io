@@ -337,7 +337,7 @@ const MainSection: React.FC = () => {
                   Native AWS Integrations with AutoDiscovery
                   </div>
                   <div className="text-sm font-medium text-signoz_vanilla-400">
-                  Making AWS monitoring dead simple in SigNoz, the AWS Integration Agent automates the entire process, from setup to continuous auto-discovery, ensuring users get all their logs and metrics from AWS into SigNoz seamlessly.
+                  Making AWS monitoring dead simple in SigNoz.
                   </div>
                 </div>
                 <div className="flex justify-end">
