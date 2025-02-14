@@ -422,7 +422,6 @@ export default function OpenTelemetryLayout({ content, authors, children, toc }:
             </div>
           </div>
         </div>
-        <PageFeedback />
       </SectionContainer>
       <ProgressBar target={mainRef} />
     </main>
