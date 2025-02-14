@@ -276,7 +276,7 @@ export default function OpenTelemetryLayout({ content, authors, children, toc }:
 
       {/* Floating Sign-up Strip */}
       <div
-        className={`fixed left-0 right-0 top-0 z-50 transform bg-signoz_ink-500/95 backdrop-blur-sm transition-all duration-300 ease-in-out ${
+        className={`fixed left-0 right-0 top-0 z-40 transform bg-gradient-to-r from-[#1C1512] via-[#261A15] to-[#1C1512] transition-all duration-300 ease-in-out ${
           showSignUpStrip ? 'translate-y-0' : '-translate-y-full'
         }`}
       >
