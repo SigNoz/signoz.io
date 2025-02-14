@@ -349,7 +349,7 @@ const MainSection: React.FC = () => {
             </Link>
           </div>
 
-          {/* Timer  */}
+          {/* Timer 
           {[
             // 'Monday ⎯ Feb 10',
             // 'Tuesday ⎯ Feb 11',
@@ -368,7 +368,7 @@ const MainSection: React.FC = () => {
                 <CountdownTimer eventDate={`2025-02-${14 + index} 21:30:00`} />
               </div>
             </div>
-          ))}
+          ))} */}
 
           {/* Cards */}
           {/* <div className="mb-20 mt-12 flex flex-col gap-7 px-6">
