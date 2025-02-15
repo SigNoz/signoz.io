@@ -11,6 +11,8 @@ import OpenTelemetryBanner from '@/components/OpenTelemetryBanner/OpenTelemetryB
 import SignUpStrip from '@/components/SignUpStrip/SignUpStrip'
 import TableOfContents from '@/components/TableOfContents/TableOfContents'
 import SidebarAuthorInfo from '@/components/SidebarAuthorInfo/SidebarAuthorInfo'
+import Link from 'next/link'
+import { ArrowRight } from 'lucide-react'
 
 // Extend the Blog type to include CTA fields
 interface OpenTelemetryContent extends Blog {
@@ -106,8 +108,26 @@ export default function OpenTelemetryLayout({
 
           {/* Right sidebar - Fixed position with internal scrolling */}
           <div className="post-toc fixed right-0 top-[120px] flex h-[calc(100vh-140px)] w-64 flex-col border-l border-signoz_ink-300 pl-8">
+            {/* Learn OpenTelemetry Card */}
+            <Link
+              href="/resource-center/opentelemetry/"
+              className="group mb-6 flex flex-col rounded-lg border border-signoz_ink-300 bg-signoz_ink-400/50 p-3 transition-colors hover:border-signoz_robin-500"
+            >
+              <h3 className="text-sm font-medium text-white">Learn OpenTelemetry with SigNoz</h3>
+              {/* <p className="text-xs text-gray-400">
+                The open standard for cloud-native observability
+              </p> */}
+              <div className="flex items-center gap-1 text-[11px] text-gray-400 transition-colors group-hover:text-white">
+                <span>Explore tutorials</span>
+                <ArrowRight
+                  size={12}
+                  className="transition-transform group-hover:translate-x-0.5"
+                />
+              </div>
+            </Link>
+
             {/* TOC with internal scroll */}
-            <div ref={tocContainerRef} className="mb-4 h-[calc(100%-120px)] overflow-y-auto">
+            <div ref={tocContainerRef} className="mb-4 h-[calc(100%-180px)] overflow-y-auto">
               <h3 className="mb-2 text-[11px] font-medium uppercase tracking-wide text-gray-400">
                 On this page
               </h3>
