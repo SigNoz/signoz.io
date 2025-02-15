@@ -142,7 +142,7 @@ export default function OpenTelemetryLayout({
             {/* Author info fixed at bottom */}
             <div className="mt-auto">
               <h3 className="mb-2 text-[11px] font-medium uppercase tracking-wide text-gray-400">
-                Authors
+                {authors.length === 1 ? 'Author' : 'Authors'}
               </h3>
               <SidebarAuthorInfo authors={authors} />
             </div>
