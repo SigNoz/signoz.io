@@ -283,7 +283,9 @@ export default function OpenTelemetryLayout({ content, authors, children, toc }:
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-2.5">
           <div className="flex items-center gap-8">
             <div className="text-sm text-gray-300">
-              {cta_title || 'Get Started with OTel in 15 min with Our Guided Onboarding'}
+              <strong>
+                {cta_title || 'Get Started with OTel in 15 min with Our Guided Onboarding'}
+              </strong>
             </div>
             <div className="flex items-end gap-4">
               <div className="flex flex-col gap-1">
