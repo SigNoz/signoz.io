@@ -10,6 +10,7 @@ import { ProgressBar } from '@/components/ProgressBar/ProgressBar'
 import OpenTelemetryBanner from '@/components/OpenTelemetryBanner/OpenTelemetryBanner'
 import SignUpStrip from '@/components/SignUpStrip/SignUpStrip'
 import TableOfContents from '@/components/TableOfContents/TableOfContents'
+import SidebarAuthorInfo from '@/components/SidebarAuthorInfo/SidebarAuthorInfo'
 
 // Extend the Blog type to include CTA fields
 interface OpenTelemetryContent extends Blog {
@@ -31,9 +32,16 @@ export interface TocItemProps {
   value: string
 }
 
-export default function OpenTelemetryLayout({ content, authors, children, toc }: LayoutProps) {
+export default function OpenTelemetryLayout({
+  content,
+  authorDetails,
+  authors,
+  children,
+  toc,
+}: LayoutProps) {
   const { slug, date, title, tags, readingTime, cta_title, cta_text } = content
   const mainRef = useRef<HTMLElement | null>(null)
+  const tocContainerRef = useRef<HTMLDivElement>(null)
   const [activeSection, setActiveSection] = useState<string>('')
   const [showSignUpStrip, setShowSignUpStrip] = useState(false)
 
@@ -96,12 +104,29 @@ export default function OpenTelemetryLayout({ content, authors, children, toc }:
             </article>
           </div>
 
-          {/* Table of Contents */}
-          <TableOfContents
-            toc={toc}
-            activeSection={activeSection}
-            setActiveSection={setActiveSection}
-          />
+          {/* Right sidebar - Fixed position with internal scrolling */}
+          <div className="post-toc fixed right-0 top-[120px] flex h-[calc(100vh-140px)] w-64 flex-col border-l border-signoz_ink-300 pl-8">
+            {/* TOC with internal scroll */}
+            <div ref={tocContainerRef} className="mb-4 h-[calc(100%-120px)] overflow-y-auto">
+              <h3 className="mb-2 text-[11px] font-medium uppercase tracking-wide text-gray-400">
+                On this page
+              </h3>
+              <TableOfContents
+                toc={toc}
+                activeSection={activeSection}
+                setActiveSection={setActiveSection}
+                scrollableContainerRef={tocContainerRef}
+              />
+            </div>
+
+            {/* Author info fixed at bottom */}
+            <div className="mt-auto">
+              <h3 className="mb-2 text-[11px] font-medium uppercase tracking-wide text-gray-400">
+                Authors
+              </h3>
+              <SidebarAuthorInfo authors={authors} />
+            </div>
+          </div>
         </div>
       </SectionContainer>
       <ProgressBar target={mainRef} />
