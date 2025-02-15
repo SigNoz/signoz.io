@@ -124,92 +124,92 @@ const SignUpStrip = ({ showSignUpStrip, cta_title, cta_text }: SignUpStripProps)
       }`}
     >
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-2.5">
-        <div className="flex items-center gap-8">
+        <div className="flex items-center gap-4">
           <div className="text-sm text-gray-300">
             <strong>
-              {cta_title || 'Get Started with OTel in 15 min with Our Guided Onboarding'}
+              {cta_title || 'Get Started with OTel in 15 min with Our Guided Onboarding'.slice(0, 70)}
             </strong>
           </div>
-          <div className="flex items-end gap-4">
-            <div className="flex flex-col gap-1">
-              <input
-                type="email"
-                id="workEmail"
-                placeholder="name@company.com"
-                value={formData.workEmail}
-                onChange={handleInputChange}
-                name="workEmail"
-                className="w-64 rounded-md border border-signoz_ink-300 bg-signoz_ink-400/50 px-3 py-1.5 text-sm text-white placeholder:text-gray-500 focus:border-signoz_robin-500 focus:outline-none focus:ring-1 focus:ring-signoz_robin-500"
-              />
-            </div>
-            <div className="flex flex-col gap-1">
-              <div className="relative">
-                <button
-                  onClick={() => setIsRegionDropdownOpen(!isRegionDropdownOpen)}
-                  className="flex items-center gap-2 rounded-md border border-signoz_ink-300 bg-signoz_ink-400/50 px-3 py-1.5 text-sm text-white"
-                >
-                  <Image
-                    src={regions.find((r) => r.id === formData.dataRegion)?.iconURL || ''}
-                    alt="Selected region"
-                    width={16}
-                    height={16}
-                    className="h-4 w-4"
-                  />
-                  <span>{regions.find((r) => r.id === formData.dataRegion)?.name}</span>
-                  <ChevronDown
-                    size={14}
-                    className={`transition-transform ${isRegionDropdownOpen ? 'rotate-180' : ''}`}
-                  />
-                </button>
-                {isRegionDropdownOpen && (
-                  <div className="absolute left-0 right-0 top-full mt-1 rounded-md border border-signoz_ink-300 bg-signoz_ink-400/95 py-1 shadow-lg backdrop-blur-sm">
-                    <div className="border-b border-signoz_ink-300 px-3 pb-1 pt-0.5">
-                      <span className="text-xs font-medium text-gray-400">Data Region</span>
-                    </div>
-                    {regions.map((region) => (
-                      <button
-                        key={region.id}
-                        onClick={() => {
-                          handleRegionChange(region.id)
-                          setIsRegionDropdownOpen(false)
-                        }}
-                        className={`flex w-full items-center gap-2 px-3 py-1.5 text-sm hover:bg-signoz_ink-300 ${
-                          region.id === formData.dataRegion ? 'text-white' : 'text-gray-400'
-                        }`}
-                      >
-                        <Image
-                          src={region.iconURL}
-                          alt={`${region.name} data region`}
-                          width={16}
-                          height={16}
-                          className="h-4 w-4"
-                        />
-                        <span>{region.name}</span>
-                      </button>
-                    ))}
+        </div>
+        <div className="flex items-end gap-2">
+          <div className="flex flex-col gap-1">
+            <input
+              type="email"
+              id="workEmail"
+              placeholder="name@company.com"
+              value={formData.workEmail}
+              onChange={handleInputChange}
+              name="workEmail"
+              className="w-64 rounded-md border border-signoz_ink-300 bg-signoz_ink-400/50 px-3 py-1.5 text-sm text-white placeholder:text-gray-500 focus:border-signoz_robin-500 focus:outline-none focus:ring-1 focus:ring-signoz_robin-500"
+            />
+          </div>
+          <div className="flex flex-col gap-1">
+            <div className="relative">
+              <button
+                onClick={() => setIsRegionDropdownOpen(!isRegionDropdownOpen)}
+                className="flex items-center gap-2 rounded-md border border-signoz_ink-300 bg-signoz_ink-400/50 px-3 py-1.5 text-sm text-white"
+              >
+                <Image
+                  src={regions.find((r) => r.id === formData.dataRegion)?.iconURL || ''}
+                  alt="Selected region"
+                  width={16}
+                  height={16}
+                  className="h-4 w-4"
+                />
+                <span>{regions.find((r) => r.id === formData.dataRegion)?.name}</span>
+                <ChevronDown
+                  size={14}
+                  className={`transition-transform ${isRegionDropdownOpen ? 'rotate-180' : ''}`}
+                />
+              </button>
+              {isRegionDropdownOpen && (
+                <div className="absolute left-0 right-0 top-full mt-1 rounded-md border border-signoz_ink-300 bg-signoz_ink-400/95 py-1 shadow-lg backdrop-blur-sm">
+                  <div className="border-b border-signoz_ink-300 px-3 pb-1 pt-0.5">
+                    <span className="text-xs font-medium text-gray-400">Data Region</span>
                   </div>
-                )}
-              </div>
+                  {regions.map((region) => (
+                    <button
+                      key={region.id}
+                      onClick={() => {
+                        handleRegionChange(region.id)
+                        setIsRegionDropdownOpen(false)
+                      }}
+                      className={`flex w-full items-center gap-2 px-3 py-1.5 text-sm hover:bg-signoz_ink-300 ${
+                        region.id === formData.dataRegion ? 'text-white' : 'text-gray-400'
+                      }`}
+                    >
+                      <Image
+                        src={region.iconURL}
+                        alt={`${region.name} data region`}
+                        width={16}
+                        height={16}
+                        className="h-4 w-4"
+                      />
+                      <span>{region.name}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
+          <button
+            onClick={handleSubmit}
+            disabled={isSubmitting}
+            className="flex items-center gap-2 rounded-md bg-signoz_robin-500 px-4 py-1.5 text-sm font-medium text-white transition-all hover:bg-signoz_robin-600 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {isSubmitting ? (
+              <>
+                Setting up your workspace...
+                <Loader2 size={14} className="animate-spin" />
+              </>
+            ) : (
+              <>
+                {cta_text?.slice(0, 25) || 'Start your free 30-day trial'}
+                <ArrowRight size={14} />
+              </>
+            )}
+          </button>
         </div>
-        <button
-          onClick={handleSubmit}
-          disabled={isSubmitting}
-          className="flex items-center gap-2 rounded-md bg-signoz_robin-500 px-4 py-1.5 text-sm font-medium text-white transition-all hover:bg-signoz_robin-600 disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {isSubmitting ? (
-            <>
-              Setting up your workspace...
-              <Loader2 size={14} className="animate-spin" />
-            </>
-          ) : (
-            <>
-              {cta_text || 'Start your free 30-day trial'}
-              <ArrowRight size={14} />
-            </>
-          )}
-        </button>
       </div>
       {errors?.workEmail && (
         <div className="bg-red-500/10 px-4 py-1.5 text-center text-xs text-red-400">

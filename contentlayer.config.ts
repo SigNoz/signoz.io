@@ -163,6 +163,8 @@ export const Blog = defineDocumentType(() => ({
     hide_table_of_contents: { type: 'boolean', required: false },
     toc_min_heading_level: { type: 'number', required: false },
     toc_max_heading_level: { type: 'number', required: false },
+    cta_title: { type: 'string', required: false },
+    cta_text: { type: 'string', required: false },
   },
   computedFields: {
     ...computedFields,
@@ -222,6 +224,8 @@ export const Newsroom = defineDocumentType(() => ({
     hide_table_of_contents: { type: 'boolean', required: false },
     toc_min_heading_level: { type: 'number', required: false },
     toc_max_heading_level: { type: 'number', required: false },
+    cta_title: { type: 'string', required: false },
+    cta_text: { type: 'string', required: false },
   },
   computedFields: {
     ...computedFields,
@@ -280,6 +284,8 @@ export const Comparison = defineDocumentType(() => ({
     hide_table_of_contents: { type: 'boolean', required: false },
     toc_min_heading_level: { type: 'number', required: false },
     toc_max_heading_level: { type: 'number', required: false },
+    cta_title: { type: 'string', required: false },
+    cta_text: { type: 'string', required: false },
   },
   computedFields: {
     ...computedFields,
