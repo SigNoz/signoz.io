@@ -119,7 +119,7 @@ const SignUpStrip = ({ showSignUpStrip, cta_title, cta_text }: SignUpStripProps)
 
   return (
     <div
-      className={`fixed left-0 right-0 top-0 z-40 hidden transform bg-gradient-to-r from-[#312e81] via-[#4338ca] to-[#312e81] transition-all duration-300 ease-in-out lg:block ${
+      className={`fixed left-0 right-0 top-0 z-40 hidden transform bg-gradient-to-r from-[#312e81] via-[#4338ca] to-[#312e81] transition-all duration-400 ease-in-out lg:block ${
         showSignUpStrip ? 'translate-y-0' : '-translate-y-full'
       }`}
     >

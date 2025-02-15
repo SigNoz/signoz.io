@@ -51,7 +51,7 @@ export default function OpenTelemetryLayout({
   useEffect(() => {
     const handleScroll = () => {
       const scrollPosition = window.scrollY
-      const showThreshold = 400 // Adjust this value to control when the strip appears
+      const showThreshold = 300 // Adjust this value to control when the strip appears
       setShowSignUpStrip(scrollPosition > showThreshold)
     }
 
