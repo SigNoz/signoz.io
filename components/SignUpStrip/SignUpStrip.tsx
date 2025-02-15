@@ -5,6 +5,13 @@ import { useState } from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { ArrowRight, Loader2, ChevronDown } from 'lucide-react'
+import ReactGA from 'react-ga4'
+
+declare global {
+  interface Window {
+    dataLayer: any[];
+  }
+}
 
 interface Region {
   name: string
@@ -77,6 +84,25 @@ const SignUpStrip = ({ showSignUpStrip, cta_title, cta_text }: SignUpStripProps)
     return isValidEmail(email) && companyEmailPattern.test(email)
   }
 
+  const handleGTMCustomEventTrigger = (payload) => {
+    // GTM tracking
+    if (window && window?.dataLayer && Array.isArray(window.dataLayer)) {
+      window.dataLayer.push({
+        event: 'signoz-cloud-signup-strip-submit',
+        source: 'signup_strip',
+        ...payload,
+      })
+    }
+
+    // GA4 tracking
+    ReactGA.event({
+      category: 'Signup',
+      action: 'Submit',
+      label: 'SigNoz Cloud Signup Strip',
+      nonInteraction: false,
+    })
+  }
+
   const handleSubmit = async (event) => {
     event.preventDefault()
     const isFormValid = validateForm()
@@ -88,6 +114,7 @@ const SignUpStrip = ({ showSignUpStrip, cta_title, cta_text }: SignUpStripProps)
       region: {
         name: formData.dataRegion,
       },
+      source: 'signup_strip'
     }
 
     try {
@@ -99,6 +126,7 @@ const SignUpStrip = ({ showSignUpStrip, cta_title, cta_text }: SignUpStripProps)
         body: JSON.stringify(payload),
       })
       if (response.ok) {
+        handleGTMCustomEventTrigger(payload)
         localStorage.setItem('workEmail', formData.workEmail)
         router.push('/verify-email')
       } else {
