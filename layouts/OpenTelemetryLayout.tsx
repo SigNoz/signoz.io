@@ -152,7 +152,7 @@ export default function OpenTelemetryLayout({
           {/* Related Jobs Section */}
           <RelatedJobs />
           {/* Related Articles Section */}
-          {relatedArticles && Array.isArray(relatedArticles) && (
+          {relatedArticles && Array.isArray(relatedArticles) && relatedArticles.length > 0 && (
             <div className="pt-16">
               <div className="mx-auto flex max-w-4xl flex-col items-start justify-between lg:flex-row">
                 <h2 className="mb-6 w-full text-xl font-semibold text-white lg:mb-0 lg:w-1/3">
