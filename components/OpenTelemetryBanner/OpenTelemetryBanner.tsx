@@ -12,7 +12,7 @@ interface OpenTelemetryBannerProps {
 
 const OpenTelemetryBanner = ({ title, date, readingTime, tags = [] }: OpenTelemetryBannerProps) => {
   return (
-    <div className="relative w-full px-4 py-12 md:py-16">
+    <div className="relative w-full px-4 py-8 sm:py-12 md:py-16">
       {/* Dotted background pattern */}
       <div className="-z-10">
         <div className="bg-dot-pattern masked-dots absolute top-0 flex h-[200vh] w-full items-center justify-center opacity-100" />
@@ -22,13 +22,13 @@ const OpenTelemetryBanner = ({ title, date, readingTime, tags = [] }: OpenTeleme
       <div className="relative mx-auto max-w-7xl">
         <div className="flex flex-col space-y-6">
           {/* Top row with tags and meta info */}
-          <div className="flex items-start justify-between">
+          <div className="flex flex-col space-y-4 sm:flex-row sm:items-start sm:justify-between sm:space-y-0">
             {/* Tags */}
-            <div className="flex w-3/4 flex-wrap items-center gap-3">
+            <div className="flex flex-wrap items-center gap-2 sm:w-3/4 sm:gap-3">
               <a
                 href="/resource-center/opentelemetry/"
                 target="_blank"
-                className="flex w-fit items-center gap-2 rounded-full border border-signoz_ink-300 bg-signoz_ink-300/50 px-4 py-1.5 text-sm text-gray-400 transition-colors hover:border-signoz_robin-500 hover:text-white"
+                className="flex w-fit items-center gap-2 rounded-full border border-signoz_ink-300 bg-signoz_ink-300/50 px-3 py-1 text-xs text-gray-400 transition-colors hover:border-signoz_robin-500 hover:text-white sm:px-4 sm:py-1.5 sm:text-sm"
               >
                 <span>Part of OpenTelemetry Track</span>
                 <ArrowRight size={14} className="rotate-[-45deg]" />
@@ -36,15 +36,15 @@ const OpenTelemetryBanner = ({ title, date, readingTime, tags = [] }: OpenTeleme
               {tags.map((tag) => (
                 <div
                   key={tag}
-                  className="flex items-center gap-2 rounded-full bg-signoz_ink-300 px-4 py-1.5"
+                  className="flex items-center gap-2 rounded-full bg-signoz_ink-300 px-3 py-1 sm:px-4 sm:py-1.5"
                 >
-                  <span className="text-sm font-medium text-white">{tag}</span>
+                  <span className="text-xs font-medium text-white sm:text-sm">{tag}</span>
                 </div>
               ))}
             </div>
 
             {/* Meta info */}
-            <div className="flex items-center gap-2 text-sm text-gray-400">
+            <div className="flex items-center gap-2 text-xs text-gray-400 sm:text-sm">
               <span>
                 {new Date(date).toLocaleDateString('en-US', {
                   year: 'numeric',
@@ -59,7 +59,9 @@ const OpenTelemetryBanner = ({ title, date, readingTime, tags = [] }: OpenTeleme
 
           {/* Title section */}
           <div className="py-2">
-            <h1 className="text-4xl font-bold leading-tight text-white md:text-5xl">{title}</h1>
+            <h1 className="text-3xl font-bold leading-tight text-white sm:text-4xl md:text-5xl">
+              {title}
+            </h1>
           </div>
         </div>
       </div>

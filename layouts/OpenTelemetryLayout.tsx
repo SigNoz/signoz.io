@@ -1,4 +1,3 @@
-/** @jsxImportSource react */
 'use client'
 
 import { ReactNode, useRef, useState, useEffect } from 'react'
@@ -101,17 +100,18 @@ export default function OpenTelemetryLayout({
       <SectionContainer>
         <div className="post relative flex">
           {/* Main content area centered in the remaining space */}
-          <div className="mx-auto w-full max-w-3xl">
+          <div className="mx-auto w-full max-w-3xl px-4 md:px-6">
             <article className="prose prose-slate max-w-none py-6 dark:prose-invert">
               {children}
             </article>
           </div>
 
-          {/* Right sidebar - Fixed position with internal scrolling */}
-          <div className="post-toc fixed right-0 top-[120px] flex h-[calc(100vh-140px)] w-64 flex-col border-l border-signoz_ink-300 pl-8">
+          {/* Right sidebar - Hidden on mobile/tablet, Fixed position with internal scrolling on desktop */}
+          <div className="post-toc hidden lg:fixed lg:right-0 lg:top-[120px] lg:flex lg:h-[calc(100vh-140px)] lg:w-64 lg:flex-col lg:border-l lg:border-signoz_ink-300 lg:pl-8">
             {/* Learn OpenTelemetry Card */}
             <Link
               href="/resource-center/opentelemetry/"
+              target="_blank"
               className="group mb-6 flex flex-col rounded-lg border border-signoz_ink-300 bg-signoz_ink-400/50 p-3 transition-colors hover:border-signoz_robin-500"
             >
               <h3 className="text-sm font-medium text-white">Learn OpenTelemetry with SigNoz</h3>
@@ -148,24 +148,28 @@ export default function OpenTelemetryLayout({
         </div>
 
         {/* Bottom sections */}
-        <div className="my-12">
+        <div className="my-12 px-4 md:px-6">
           {/* Related Jobs Section */}
           <RelatedJobs />
           {/* Related Articles Section */}
           {relatedArticles && Array.isArray(relatedArticles) && (
             <div className="pt-16">
-              <div className="mx-auto flex max-w-4xl items-start justify-between">
-                <h2 className="w-1/3 text-xl font-semibold text-white">Related Articles</h2>
-                <div className="w-2/3 space-y-4">
+              <div className="mx-auto flex max-w-4xl flex-col items-start justify-between lg:flex-row">
+                <h2 className="mb-6 w-full text-xl font-semibold text-white lg:mb-0 lg:w-1/3">
+                  Related Articles
+                </h2>
+                <div className="w-full space-y-4 lg:w-2/3">
                   {relatedArticles.slice(0, 2).map((article, index) => (
                     <Link
                       key={index}
                       href={article.url}
                       target="_blank"
-                      className="group flex items-center justify-between rounded-lg border border-signoz_ink-300 bg-signoz_ink-400/50 p-6 transition-colors hover:border-signoz_robin-500"
+                      className="group flex items-center justify-between rounded-lg border border-signoz_ink-300 bg-signoz_ink-400/50 p-4 transition-colors hover:border-signoz_robin-500 md:p-6"
                     >
                       <div>
-                        <h3 className="text-lg font-medium text-white">{article.title}</h3>
+                        <h3 className="text-base font-medium text-white md:text-lg">
+                          {article.title}
+                        </h3>
                         <p className="mt-2 text-sm text-gray-400">
                           {new Date(article.publishedOn).toLocaleDateString('en-US', {
                             month: 'long',
