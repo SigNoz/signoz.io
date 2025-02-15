@@ -204,7 +204,7 @@ const SignUpStrip = ({ showSignUpStrip, cta_title, cta_text }: SignUpStripProps)
               </>
             ) : (
               <>
-                {cta_text?.slice(0, 25) || 'Start your free 30-day trial'}
+                {cta_text?.slice(0, 40) || 'Start your free 30-day trial'}
                 <ArrowRight size={14} />
               </>
             )}
