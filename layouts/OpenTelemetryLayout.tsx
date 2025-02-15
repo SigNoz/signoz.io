@@ -153,47 +153,33 @@ export default function OpenTelemetryLayout({
           <RelatedJobs />
           {/* Related Articles Section */}
           {relatedArticles && Array.isArray(relatedArticles) && (
-            <div className=" pt-16">
-              <div className="mx-auto max-w-3xl">
-                <h2 className="mb-6 text-xl font-semibold text-white">Related Articles</h2>
-                <div className="grid gap-4 md:grid-cols-2">
-                  <Link
-                    href={relatedArticles[0].url}
-                    target="_blank"
-                    className="group flex items-center justify-between rounded-lg border border-signoz_ink-300 bg-signoz_ink-400/50 p-4 transition-colors hover:border-signoz_robin-500"
-                  >
-                    <div>
-                      <h3 className="text-base font-medium text-white">
-                        {relatedArticles[0].title}
-                      </h3>
-                      <p className="mt-1 text-sm text-gray-400">{relatedArticles[0].publishedOn}</p>
-                    </div>
-                    <ExternalLink
-                      size={16}
-                      className="text-gray-400 transition-colors group-hover:text-white"
-                    />
-                  </Link>
-
-                  {relatedArticles[1] && (
+            <div className="pt-16">
+              <div className="mx-auto flex max-w-4xl items-start justify-between">
+                <h2 className="w-1/3 text-xl font-semibold text-white">Related Articles</h2>
+                <div className="w-2/3 space-y-4">
+                  {relatedArticles.slice(0, 2).map((article, index) => (
                     <Link
-                      href={relatedArticles[1].url}
+                      key={index}
+                      href={article.url}
                       target="_blank"
-                      className="group flex items-center justify-between rounded-lg border border-signoz_ink-300 bg-signoz_ink-400/50 p-4 transition-colors hover:border-signoz_robin-500"
+                      className="group flex items-center justify-between rounded-lg border border-signoz_ink-300 bg-signoz_ink-400/50 p-6 transition-colors hover:border-signoz_robin-500"
                     >
                       <div>
-                        <h3 className="text-base font-medium text-white">
-                          {relatedArticles[1].title}
-                        </h3>
-                        <p className="mt-1 text-sm text-gray-400">
-                          {relatedArticles[1].publishedOn}
+                        <h3 className="text-lg font-medium text-white">{article.title}</h3>
+                        <p className="mt-2 text-sm text-gray-400">
+                          {new Date(article.publishedOn).toLocaleDateString('en-US', {
+                            month: 'long',
+                            day: 'numeric',
+                            year: 'numeric',
+                          })}
                         </p>
                       </div>
                       <ExternalLink
-                        size={16}
+                        size={20}
                         className="text-gray-400 transition-colors group-hover:text-white"
                       />
                     </Link>
-                  )}
+                  ))}
                 </div>
               </div>
             </div>
