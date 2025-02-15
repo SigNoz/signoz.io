@@ -11,8 +11,9 @@ import OpenTelemetryBanner from '@/components/OpenTelemetryBanner/OpenTelemetryB
 import SignUpStrip from '@/components/SignUpStrip/SignUpStrip'
 import TableOfContents from '@/components/TableOfContents/TableOfContents'
 import SidebarAuthorInfo from '@/components/SidebarAuthorInfo/SidebarAuthorInfo'
+import RelatedJobs from '@/components/RelatedJobs/RelatedJobs'
 import Link from 'next/link'
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, ExternalLink } from 'lucide-react'
 
 // Extend the Blog type to include CTA fields
 interface OpenTelemetryContent extends Blog {
@@ -41,7 +42,7 @@ export default function OpenTelemetryLayout({
   children,
   toc,
 }: LayoutProps) {
-  const { slug, date, title, tags, readingTime, cta_title, cta_text } = content
+  const { slug, date, title, tags, readingTime, cta_title, cta_text, relatedArticles } = content
   const mainRef = useRef<HTMLElement | null>(null)
   const tocContainerRef = useRef<HTMLDivElement>(null)
   const [activeSection, setActiveSection] = useState<string>('')
@@ -114,9 +115,6 @@ export default function OpenTelemetryLayout({
               className="group mb-6 flex flex-col rounded-lg border border-signoz_ink-300 bg-signoz_ink-400/50 p-3 transition-colors hover:border-signoz_robin-500"
             >
               <h3 className="text-sm font-medium text-white">Learn OpenTelemetry with SigNoz</h3>
-              {/* <p className="text-xs text-gray-400">
-                The open standard for cloud-native observability
-              </p> */}
               <div className="flex items-center gap-1 text-[11px] text-gray-400 transition-colors group-hover:text-white">
                 <span>Explore tutorials</span>
                 <ArrowRight
@@ -147,6 +145,59 @@ export default function OpenTelemetryLayout({
               <SidebarAuthorInfo authors={authors} />
             </div>
           </div>
+        </div>
+
+        {/* Bottom sections */}
+        <div className="my-12">
+          {/* Related Jobs Section */}
+          <RelatedJobs />
+          {/* Related Articles Section */}
+          {relatedArticles && Array.isArray(relatedArticles) && (
+            <div className=" pt-16">
+              <div className="mx-auto max-w-3xl">
+                <h2 className="mb-6 text-xl font-semibold text-white">Related Articles</h2>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <Link
+                    href={relatedArticles[0].url}
+                    target="_blank"
+                    className="group flex items-center justify-between rounded-lg border border-signoz_ink-300 bg-signoz_ink-400/50 p-4 transition-colors hover:border-signoz_robin-500"
+                  >
+                    <div>
+                      <h3 className="text-base font-medium text-white">
+                        {relatedArticles[0].title}
+                      </h3>
+                      <p className="mt-1 text-sm text-gray-400">{relatedArticles[0].publishedOn}</p>
+                    </div>
+                    <ExternalLink
+                      size={16}
+                      className="text-gray-400 transition-colors group-hover:text-white"
+                    />
+                  </Link>
+
+                  {relatedArticles[1] && (
+                    <Link
+                      href={relatedArticles[1].url}
+                      target="_blank"
+                      className="group flex items-center justify-between rounded-lg border border-signoz_ink-300 bg-signoz_ink-400/50 p-4 transition-colors hover:border-signoz_robin-500"
+                    >
+                      <div>
+                        <h3 className="text-base font-medium text-white">
+                          {relatedArticles[1].title}
+                        </h3>
+                        <p className="mt-1 text-sm text-gray-400">
+                          {relatedArticles[1].publishedOn}
+                        </p>
+                      </div>
+                      <ExternalLink
+                        size={16}
+                        className="text-gray-400 transition-colors group-hover:text-white"
+                      />
+                    </Link>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </SectionContainer>
       <ProgressBar target={mainRef} />
