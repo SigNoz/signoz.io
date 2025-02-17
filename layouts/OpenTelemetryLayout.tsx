@@ -98,7 +98,7 @@ export default function OpenTelemetryLayout({
       <OpenTelemetryBanner title={title} date={date} readingTime={readingTime.text} tags={tags} />
 
       <SectionContainer>
-        <div className="post relative flex">
+        <div className="post relative flex lg:max-w-7xl">
           {/* Main content area centered in the remaining space */}
           <div className="mx-auto w-full max-w-3xl px-4 md:px-6">
             <article className="prose prose-slate max-w-none py-6 dark:prose-invert">
