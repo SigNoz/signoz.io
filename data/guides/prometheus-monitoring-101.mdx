@@ -22,78 +22,55 @@ Developed by SoundCloud in 2012, Prometheus was created to address the need for 
 
 Some of the key features of Prometheus include:
 
-1. Multi-Dimensional Data Model:
+1. **Multi-Dimensional Data Model:**
 Prometheus stores time-series data using a multi-dimensional model. Each metric is uniquely identified by its name and labels (key-value pairs), making it easy to filter and analyze data across various dimensions.
-2. Flexible Query Language (PromQL):
+2. **Flexible Query Language (PromQL):**
 Prometheus uses PromQL (Prometheus Query Language), a powerful query language for selecting, aggregating, and manipulating time-series data. PromQL enables complex queries for detailed insights and performance analysis.
-3. Autonomous Server Nodes:
+3. **Autonomous Server Nodes:**
 Prometheus operates with autonomous server nodes, meaning each node collects and stores its own data independently. This decentralized setup enhances scalability and ensures fault tolerance, removing the need for a centralized database.
 
 <Figure src="/img/guides/2025/02/prometheus-monitoring-101-image.webp" alt="Key Features of Prometheus" caption="Key Features of Prometheus" />
 
 Unlike traditional monitoring systems like Nagios or Zabbix, Prometheus is optimized for dynamic environments, particularly in cloud-native architectures. Prometheus uses a pull-based model for data collection, in contrast to the push-based methods used by many other systems. This gives Prometheus flexibility in monitoring services that are constantly changing, making it a powerful tool for modern infrastructure.
 
-## Why Use Prometheus for Monitoring?
+### Where is Prometheus Used?
 
-Prometheus offers several advantages that make it a compelling choice for modern monitoring needs:
+- **Server & Cloud Monitoring:** Track resource usage like CPU, memory, and network activity.
+- **Application Monitoring:** Monitor APIs, database performance, and response times.
+- **Kubernetes & Microservices:** Automatically detect and track containerized applications.
+- **Business Insights:** Measure website traffic, transactions, and system availability.
 
-1. Time-Series Database Designed for Monitoring
-    - Prometheus stores metrics as time-series data, making it highly optimized for storing and querying monitoring data.
-    - It provides efficient storage, high availability, and support for multi-dimensional data through labels.
-2. Pull-Based Model
-    - Prometheus uses a pull model to scrape metrics from targets, ensuring:
-        - Flexibility in adding/removing monitored systems.
-        - Avoiding the complexity of setting up agents on all targets.
-        - Real-time monitoring with consistent intervals.
-3. Robust Querying with PromQL
-    - PromQL (Prometheus Query Language) allows users to perform:
-        - Aggregations, filtering, and complex computations.
-        - Generating alerts directly from the queries.
-        - Building dashboards with rich visualizations.
-4. Dynamic Service Discovery
-    - Prometheus supports dynamic service discovery via integrations with platforms like Kubernetes, Consul, and more. This eliminates manual configurations and enables monitoring in dynamic, containerized environments.
-5. Alerting with Alertmanager
-    - Built-in support for alerting using rules defined in Prometheus.
-    - Alerts can be:
-        - Deduplicated, grouped, and sent to various channels (e.g., email, Slack, PagerDuty).
-        - Tailored to specific thresholds and conditions, ensuring proactive monitoring.
-6. Ecosystem and Integrations
-    - Compatible with many exporters to monitor applications, databases, Linux hosts, and more.
-    - Easily integrates with visualization tools like Grafana for advanced dashboards and SigNoz for end-to-end observability.
-7. Open Source and Active Community
-    - Prometheus is open-source, backed by the CNCF (Cloud Native Computing Foundation), ensuring:
-        - There are no licensing costs.
-        - A vibrant, active community for ongoing support and development.
-        - Frequent updates and compatibility with modern environments.
-8. Scalability and Flexibility
-    - Scales horizontally with features like federation and remote storage integrations.
-    - Suitable for both small setups (single server) and large-scale environments with multiple instances.
-9. Suitable for Cloud-Native and Microservices
-    - Designed for cloud-native architectures, with built-in support for container orchestration platforms like Kubernetes.
-    - Provides granular insights into container and microservice performance.
-10. High Reliability
-    - Prometheus operates as a standalone tool without external dependencies, ensuring:
-        - High availability even during failures.
-        - Resilience in distributed and dynamic environments.
+### Where is Prometheus Not Used?
 
-These features make Prometheus particularly well-suited for containerized environments and microservices architectures.
+Prometheus is great for time-series monitoring but not ideal for:
+
+- **Log Management:** Designed for numerical metrics, not raw logs. Use SigNoz, ELK Stack or Loki instead.
+- **Long-Term Storage:** Data retention is limited; Thanos or Cortex is needed for historical analysis.
+- **Tracing Requests:** Lacks distributed tracing; Jaeger or SigNoz with OpenTelemetry are better options.
+- **Real-Time Streaming:** Works on intervals, not real-time events. Use Kafka or Flink for that.
+
+Prometheus is best paired with other tools for a complete observability stack.
+
 
 ## How Does Prometheus Work?
 
 Prometheus operates with a straightforward yet powerful architecture designed for monitoring dynamic and large-scale systems. Here’s a breakdown of how it works:
 
-- Pull-Based Model:
-    - Prometheus uses a pull-based approach, where it actively scrapes metrics from target services (like applications and servers) over HTTP at regular intervals.
-- Data Scraping Process and Intervals:
-    - Metrics are scraped from configured endpoints, with intervals (default 15 seconds) that can be adjusted based on needs.
-    - For Prometheus to pull metrics from a target, the target must expose a specific HTTP endpoint, typically at the `/metrics` path. The HTTP endpoints follow the format; `hostaddress/metrics`. This endpoint provides the current state of the target in a plain text format that Prometheus can understand.
-        
-        <Figure src="/img/guides/2025/02/prometheus-monitoring-101-how-does-prometheus-work-Untitled201.webp" alt="Metrics displayed from an HTTP endpoint (localhost:8080/metrics)" caption="Metrics displayed from an HTTP endpoint (localhost:8080/metrics)" />
-        
-- Time Series Database (TSDB) for Efficient Storage:
-    - Collected data is stored in a Time Series Database (TSDB), where each time series is identified by a metric name and labels. Data is efficiently compressed for fast storage and retrieval.
-- Query Language (PromQL) for Data Analysis:
-    - Prometheus uses PromQL, a powerful query language, for querying, filtering, and analyzing time-series data to gain insights, create alerts, and generate reports.
+### Pull-Based Model:
+
+Prometheus uses a pull-based approach, where it actively scrapes metrics from target services (like applications and servers) over HTTP at regular intervals.
+
+### Data Scraping Process and Intervals:
+
+Metrics are scraped from configured endpoints, with intervals (default 15 seconds) that can be adjusted based on needs.<br />
+
+For Prometheus to pull metrics from a target, the target must expose a specific HTTP endpoint, typically at the `/metrics` path. The HTTP endpoints follow the format; `hostaddress/metrics`. This endpoint provides the current state of the target in a plain text format that Prometheus can understand. <br />
+
+    <Figure src="/img/guides/2025/02/prometheus-monitoring-101-how-does-prometheus-work-Untitled201.webp" alt="Metrics displayed from an HTTP endpoint (localhost:8080/metrics)" caption="Metrics displayed from an HTTP endpoint (localhost:8080/metrics)" />
+    
+Collected data is stored in a Time Series Database (TSDB), where each time series is identified by a metric name and labels. Data is efficiently compressed for fast storage and retrieval. <br />
+
+Prometheus uses PromQL, a powerful query language, for querying, filtering, and analyzing time-series data to gain insights, create alerts, and generate reports. <br />
 
 ### Core Components of Prometheus
 
@@ -154,18 +131,17 @@ Prometheus comprises several key components that work together to create a compr
     
     Grafana is the most popular tool for dashboarding, but SigNoz provides deeper observability integrations.
     
-
 6. **Remote Storage (Optional)**
-
+    
     **Purpose:** Extends Prometheus for long-term storage or external analytics.
-
+    
     **Features:**
-
+    
     - Forwarding scraped metrics to external systems (e.g., AWS S3, Thanos, Cortex).
     - Enables scalability for long-term historical data.
-
+    
     This feature is useful for environments where retaining metrics for extended periods is critical.
-
+    
 7. **Pushgateway (Optional)**
     
     **Purpose:** Collects metrics from short-lived jobs (e.g., batch jobs) that cannot be scraped directly by Prometheus.
@@ -196,8 +172,7 @@ Prometheus comprises several key components that work together to create a compr
     
     Targets are defined in the Prometheus configuration file or dynamically discovered via service discovery.
     
-
-Read more on [How Does Prometheus Work?](https://signoz.io/guides/how-does-prometheus-work/)
+<InterlinkCard title="Read more on How Does Prometheus Work?" href="/guides/how-does-prometheus-work/" />
 
 ## Setting Up Prometheus: A Quick Start Guide
 
@@ -206,7 +181,8 @@ Let's walk through the process of setting up Prometheus on a Linux system:
 1. Download the <a href="https://github.com/prometheus/prometheus/releases" rel="noopener noreferrer nofollow" target="_blank">latest Prometheus release</a>:
     
     ```bash
-    wget https://github.com/prometheus/prometheus/releases/download/v2.30.3/prometheus-2.30.3.linux-amd64.tar.gz
+    wget <https://github.com/prometheus/prometheus/releases/download/v2.30.3/prometheus-2.30.3.linux-amd64.tar.gz>
+    
     ```
     
 2. Extract the archive:
@@ -214,6 +190,7 @@ Let's walk through the process of setting up Prometheus on a Linux system:
     ```bash
     tar xvfz prometheus-*.tar.gz
     cd prometheus-*
+    
     ```
     
 3. Create a basic configuration file named `prometheus.yml`:
@@ -226,12 +203,14 @@ Let's walk through the process of setting up Prometheus on a Linux system:
       - job_name: 'prometheus'
         static_configs:
           - targets: ['localhost:9090']
+    
     ```
     
 4. Start Prometheus:
     
     ```bash
     ./prometheus --config.file=prometheus.yml
+    
     ```
     
 
@@ -265,7 +244,8 @@ Labels are key-value pairs associated with a metric that help to identify and fi
 Example:
 
 ```bash
-http_requests_total{method="GET", status="200"} 
+http_requests_total{method="GET", status="200"}
+
 ```
 
 Labels help create a multi-dimensional data model that allows efficient aggregation and filtering.
@@ -303,7 +283,7 @@ PromQL (Prometheus Query Language) is a powerful query language that allows you 
 - Labels: You can filter metrics by label values using curly braces `{}` (e.g., `http_requests_total{status="200"}`).
 - Operators: PromQL supports various operators in filtering and comparing metrics.
     - Comparison operators: `=`, `!=`, `>`, `<`, `>=`, `<=`.
-    - Arithmetic operators: `+`, `-`, `*`,`/`, `%` for operations on time-series data.
+    - Arithmetic operators: `+`, ``, ``,`/`, `%` for operations on time-series data.
     - Logical operators: `and`, `or`, `unless` for combining or excluding series.
     - Aggregation operators: `sum`, `avg`, `min`, `max`, `count`, etc.
 
@@ -311,6 +291,7 @@ Example: To query all HTTP requests with a status code of 200:
 
 ```
 http_requests_total{status="200"}
+
 ```
 
 ### Common Query Patterns and Examples
@@ -319,6 +300,7 @@ http_requests_total{status="200"}
     
     ```
     rate(http_requests_total[5m])
+    
     ```
     
     This returns the per-second rate of HTTP requests over the last 5 minutes.
@@ -327,6 +309,7 @@ http_requests_total{status="200"}
     
     ```
     sum(http_requests_total) by (method)
+    
     ```
     
     This sums the `http_requests_total` metric and groups it by the `method` label (e.g., GET, POST).
@@ -335,6 +318,7 @@ http_requests_total{status="200"}
     
     ```
     http_requests_total{status="200"}[1h]
+    
     ```
     
     This returns the `http_requests_total` metric for status "200" over the last hour.
@@ -348,24 +332,28 @@ PromQL includes a variety of functions that allow for complex aggregation and an
     
     ```
     avg(http_request_duration_seconds)
+    
     ```
     
 2. `max()`: Find the maximum value of a metric.
     
     ```
     max(http_request_duration_seconds)
+    
     ```
     
 3. `count()`: Count the number of time-series for a given metric.
     
     ```
     count(http_requests_total)
+    
     ```
     
 4. `rate()`: Calculate the rate of increase for counters (used for time-series data that only increases, like HTTP request counts).
     
     ```
     rate(http_requests_total[1m])
+    
     ```
     
 
@@ -418,6 +406,7 @@ While useful for quick checks, the expression browser lacks advanced features li
         
         ```
         rate(prometheus_http_requests_total[5m])
+        
         ```
         
     - Preview the results in the graph below.
@@ -454,6 +443,7 @@ Add an `alerting` section in the `prometheus.yml` file or include a separate rul
     ```yaml
     rule_files:
       - "alerts.yml"
+    
     ```
     
 2. Example Alerting Rule:
@@ -471,6 +461,7 @@ In `alerts.yml`, define an alert for high CPU usage:
             annotations:
               summary: "High CPU usage detected"
               description: "The average CPU usage is above 80% for the last 2 minutes."
+    
     ```
     
     - `expr`: PromQL expression to evaluate.
@@ -569,7 +560,7 @@ If no existing exporter meets your requirements, you can create custom exporters
 
 ## SigNoz: A Modern Complementary Tool for Prometheus
 
-[SigNoz](https://signoz.io) is a powerful, full-stack observability platform designed to monitor, trace, and debug modern applications seamlessly. While Prometheus excels at metrics monitoring, SigNoz extends observability by integrating metrics, logs, and distributed tracing into a unified interface, offering a comprehensive solution for modern application monitoring. Here’s how SigNoz complements Prometheus and why it could be the right choice for your full-stack observability needs:
+[SigNoz](https://signoz.io/) is a powerful, full-stack observability platform designed to monitor, trace, and debug modern applications seamlessly. While Prometheus excels at metrics monitoring, SigNoz extends observability by integrating metrics, logs, and distributed tracing into a unified interface, offering a comprehensive solution for modern application monitoring. Here’s how SigNoz complements Prometheus and why it could be the right choice for your full-stack observability needs:
 
 | Feature | Prometheus | SigNoz |
 | --- | --- | --- |
@@ -585,12 +576,12 @@ While Prometheus is an excellent tool for collecting and querying metrics, SigNo
 
 ### Sending Prometheus Metrics to SigNoz Cloud
 
-To monitor Prometheus in SigNoz Cloud, you need to install the OpenTelemetry Collector and configure it to scrape Prometheus metrics. 
+To monitor Prometheus in SigNoz Cloud, you need to install the OpenTelemetry Collector and configure it to scrape Prometheus metrics.
 
 Pre-requisites:
 
 - Create an account on [SigNoz Cloud](https://signoz.io/docs/cloud/)
-- OpenTelemetry Collector:  Refer to the [guide on installing the OpenTelemetry Collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/).
+- OpenTelemetry Collector: Refer to the [guide on installing the OpenTelemetry Collector](https://signoz.io/blog/opentelemetry-collector-complete-guide/).
 - Prometheus server running and scraping metrics.
 
 Follow these steps:
@@ -609,6 +600,7 @@ Follow these steps:
             - job_name: 'prometheus'
               static_configs:
                 - targets: ['localhost:8080'] *#update your port here*
+    
     ```
     
     - Existing Job:
@@ -617,7 +609,8 @@ Follow these steps:
     - job_name: "otel-collector"
       scrape_interval: 30s
       static_configs:
-        - targets: ["otel-collector:8889", "localhost:31000"] #update the prometheus port 
+        - targets: ["otel-collector:8889", "localhost:31000"] #update the prometheus port
+    
     ```
     
 2. Connect to SigNoz Cloud
@@ -632,13 +625,14 @@ Follow these steps:
           insecure: false
         headers:
           "signoz-ingestion-key": <SIGNOZ_INGESTION_KEY>
-          
+    
     service:
       pipelines:
         metrics:
           receivers: [prometheus]
           processors: [batch, resourcedetection]
-          exporters: [otlp] 
+          exporters: [otlp]
+    
     ```
     
 3. Apply Changes
