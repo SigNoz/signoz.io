@@ -19,6 +19,7 @@ function WorkspaceSetupHome() {
 
   const code = searchParams.get('code')
   const email = searchParams.get('email')
+  const region = searchParams.get('region')
 
   const verifyEmail = async () => {
     const res = await fetch(`${WORKSPACE_SETUP_URL}/users/verify`, {
@@ -30,6 +31,9 @@ function WorkspaceSetupHome() {
       body: JSON.stringify({
         code: code,
         email: decodeURIComponent(email || ''),
+        region: {
+          name: region,
+        },
       }),
     })
 
