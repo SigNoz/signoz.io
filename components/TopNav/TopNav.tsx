@@ -87,7 +87,7 @@ const productDropdownItems = [
     icon: '/img/index_features/boxes.svg',
     description: 'Monitor your infrastructure',
     name: 'Infrastructure Monitoring',
-    order: 8,
+    order: 4,
   },
   {
     key: 'ingest',
@@ -95,7 +95,7 @@ const productDropdownItems = [
     icon: '/img/index_features/shield-plus.svg',
     description: 'Control your observability costs',
     name: 'Ingest Guard',
-    order: 4,
+    order: 8,
   }
 ]
 
