@@ -87,7 +87,7 @@ const SignUpStrip = ({ showSignUpStrip, cta_title, cta_text }: SignUpStripProps)
     // GTM tracking
     if (window && window?.dataLayer && Array.isArray(window.dataLayer)) {
       window.dataLayer.push({
-        event: 'signoz-cloud-signup-strip-submit',
+        event: 'signoz-cloud-signup-form-submit',
         source: 'signup_strip',
         ...payload,
       })
