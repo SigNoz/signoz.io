@@ -87,6 +87,14 @@ const productDropdownItems = [
     icon: '/img/index_features/shield-plus.svg',
     description: 'Control your observability costs',
     name: 'Ingest Guard',
+    order: 8,
+  },
+  {
+    key: 'InfraMonitoring',
+    url: '/docs/infrastructure-monitoring/overview/',
+    icon: '/img/index_features/boxes.svg',
+    description: 'Monitor your infrastructure',
+    name: 'Infrastructure Monitoring',
     order: 4,
   },
 ]
