@@ -27,10 +27,10 @@ const productModules = [
   },
   {
     id: 4,
-    title: 'Infrastructure Monitoring',
-    description: 'Monitor your infrastructure',
+    title: 'Ingest Guard',
+    description: 'Control your observability costs',
     imageUrl:
-      'https://signoz.io/img/index_features/boxes.svg',
+      'https://signoz.io/img/index_features/shield-plus.svg',
   },
   {
     id: 5,
@@ -55,10 +55,10 @@ const productModules = [
   },
   {
     id: 8,
-    title: 'Ingest Guard',
-    description: 'Control your observability costs',
+    title: 'Infrastructure Monitoring',
+    description: 'Monitor your infrastructure',
     imageUrl:
-      'https://signoz.io/img/index_features/shield-plus.svg',
+      'https://signoz.io/img/index_features/boxes.svg',
   }
 ]
 
