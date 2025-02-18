@@ -5,11 +5,10 @@ import { useState } from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { ArrowRight, Loader2, ChevronDown } from 'lucide-react'
-import ReactGA from 'react-ga4'
 
 declare global {
   interface Window {
-    dataLayer: any[];
+    dataLayer?: Object[];
   }
 }
 
@@ -93,14 +92,6 @@ const SignUpStrip = ({ showSignUpStrip, cta_title, cta_text }: SignUpStripProps)
         ...payload,
       })
     }
-
-    // GA4 tracking
-    ReactGA.event({
-      category: 'Signup',
-      action: 'Submit',
-      label: 'SigNoz Cloud Signup Strip',
-      nonInteraction: false,
-    })
   }
 
   const handleSubmit = async (event) => {
