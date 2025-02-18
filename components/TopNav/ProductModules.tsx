@@ -30,7 +30,7 @@ const productModules = [
     title: 'Ingest Guard',
     description: 'Control your observability costs',
     imageUrl:
-      'https://cdn.builder.io/api/v1/image/assets/TEMP/a0958ba428675f9ac8ec035fb0be59e62d58ad6dcaee8fb057c50b436a6a418b?placeholderIfAbsent=true&apiKey=f0103e73688241f896979b7df0e7cb45',
+      'https://signoz.io/img/index_features/shield-plus.svg',
   },
   {
     id: 5,
@@ -53,6 +53,13 @@ const productModules = [
     imageUrl:
       'https://cdn.builder.io/api/v1/image/assets/TEMP/628dea6b068b58955043f3bfd4a78a8dbf11f7cd589962fd00da5bf20391756f?placeholderIfAbsent=true&apiKey=f0103e73688241f896979b7df0e7cb45',
   },
+  {
+    id: 8,
+    title: 'Infrastructure Monitoring',
+    description: 'Monitor your infrastructure',
+    imageUrl:
+      'https://signoz.io/img/index_features/boxes.svg',
+  }
 ]
 
 function ProductModules() {

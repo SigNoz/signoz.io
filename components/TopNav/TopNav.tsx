@@ -45,7 +45,7 @@ const productDropdownItems = [
     key: 'Alerts',
     url: '/alerts-management',
     icon: '/img/index_features/concierge-bell_feature.svg',
-    description: 'Always know what’s going on',
+    description: "Always know what's going on",
     name: 'Alerts',
     order: 5,
   },
@@ -82,13 +82,21 @@ const productDropdownItems = [
     order: 7,
   },
   {
+    key: 'InfraMonitoring',
+    url: '/docs/infrastructure-monitoring/overview/',
+    icon: '/img/index_features/boxes.svg',
+    description: 'Monitor your infrastructure',
+    name: 'Infrastructure Monitoring',
+    order: 4,
+  },
+  {
     key: 'ingest',
     url: '/blog/introducing-ingest-guard-feature/',
     icon: '/img/index_features/shield-plus.svg',
     description: 'Control your observability costs',
     name: 'Ingest Guard',
-    order: 4,
-  },
+    order: 8,
+  }
 ]
 
 const comparisionItems = [
