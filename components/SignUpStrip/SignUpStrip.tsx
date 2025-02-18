@@ -128,6 +128,7 @@ const SignUpStrip = ({ showSignUpStrip, cta_title, cta_text }: SignUpStripProps)
       if (response.ok) {
         handleGTMCustomEventTrigger(payload)
         localStorage.setItem('workEmail', formData.workEmail)
+        localStorage.setItem('region', formData.dataRegion)
         router.push('/verify-email')
       } else {
         if (response.status === 400) {
