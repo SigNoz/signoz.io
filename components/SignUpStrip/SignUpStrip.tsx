@@ -6,12 +6,6 @@ import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { ArrowRight, Loader2, ChevronDown } from 'lucide-react'
 
-declare global {
-  interface Window {
-    dataLayer?: Object[];
-  }
-}
-
 interface Region {
   name: string
   id: string
