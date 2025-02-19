@@ -8,6 +8,7 @@ import type { Authors, Blog } from 'contentlayer/generated'
 import PostSimple from '@/layouts/PostSimple'
 import PostLayout from '@/layouts/PostLayout'
 import PostBanner from '@/layouts/PostBanner'
+import OpenTelemetryLayout from '@/layouts/OpenTelemetryLayout'
 import { Metadata } from 'next'
 import siteMetadata from '@/data/siteMetadata'
 import { notFound } from 'next/navigation'
@@ -19,6 +20,7 @@ const layouts = {
   PostSimple,
   PostLayout,
   PostBanner,
+  OpenTelemetryLayout,
 }
 
 export async function generateMetadata({
@@ -99,8 +101,14 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
   const mainContent = coreContent(post)
   const jsonLd = post.structuredData
 
+  // Choose layout based on slug or post layout
+  let layoutName = post.layout || defaultLayout
+  if (slug.includes('opentelemetry')) {
+    layoutName = 'OpenTelemetryLayout'
+  }
+
   // @ts-ignore
-  const Layout = layouts[post.layout || defaultLayout]
+  const Layout = layouts[layoutName]
 
   return (
     <>

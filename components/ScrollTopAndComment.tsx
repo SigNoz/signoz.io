@@ -17,14 +17,14 @@ const ScrollTopAndComment = () => {
   }, [])
 
   const handleScrollTop = () => {
-    window.scrollTo({ top: 0 })
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
   const handleScrollToComment = () => {
     document.getElementById('comment')?.scrollIntoView()
   }
   return (
     <div
-      className={`fixed bottom-8 right-8 hidden flex-col gap-3 ${show ? 'md:flex' : 'md:hidden'}`}
+      className={`fixed bottom-8 right-8 z-50 hidden flex-col gap-3 ${show ? 'md:flex' : 'md:hidden'}`}
     >
       {/* {siteMetadata.comments?.provider && (
         <button
