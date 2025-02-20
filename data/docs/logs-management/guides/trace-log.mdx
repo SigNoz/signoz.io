@@ -1,0 +1,174 @@
+---
+date: 2025-02-20
+id: trace-log
+title: Guide to link traces to logs
+---
+
+import GetHelp from '@/components/shared/get-help.md'
+
+# Overview
+
+Logs and traces provide valuable insights into an app's performance. While logs capture event details with timestamps, traces track a request’s journey across different components, highlighting latency and bottlenecks. 
+Linking logs and traces using a common trace ID helps you pinpoint issues, analyze failures, and optimize performance.
+
+![An image displaying linked logs and traces to SigNoz](images/logs-traces-signoz.png)
+
+For example, consider a Flask API handling a user authentication request:
+
+1. A request reaches the `/login` endpoint.
+1. The request trace is recorded, capturing execution time and service dependencies.
+1. Logs capture events such as database queries, external API calls, and authentication steps.
+1. If the request takes too long, the linked trace reveals which operation caused the delay.
+
+This guide is focussing on linking logs and traces in REST APIs built using Flask. 
+
+## Prerequisite
+
+Ensure you have the following:
+
+* A running app.
+* A SigNoz Cloud account or a self-hosted SigNoz instance.
+* OpenTelemetry SDK or agent configured for your API framework.
+
+The required environment variables configured for OpenTelemetry.
+
+## Configure OpenTelemetry
+
+Set the following environment variables in your development environment:
+
+```bash
+export OTEL_RESOURCE_ATTRIBUTES=service.name="<name-service>"
+export OTEL_EXPORTER_OTLP_ENDPOINT="<observability_platform_endpoint>"
+export OTEL_EXPORTER_OTLP_HEADERS="<authentication_headers>"
+export OTEL_EXPORTER_OTLP_PROTOCOL=grpc
+```
+
+## Generate traces
+
+To trace a request from start to finish, you need to generate spans for each operation. OpenTelemetry provides automatic instrumentation for various frameworks.
+
+Follow these steps to generate traces:
+
+1. Configure tracing using OpenTelemetry. 
+    ```python
+    from flask import Flask, request
+    from opentelemetry import trace
+    from opentelemetry.instrumentation.flask import FlaskInstrumentor
+    from opentelemetry.sdk.trace import TracerProvider
+    from opentelemetry.sdk.trace.export import BatchSpanProcessor
+    from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+
+    app = Flask(__name__)
+    FlaskInstrumentor().instrument_app(app)  # Auto-instrument Flask
+
+    # Initialize tracing
+    tracer_provider = TracerProvider()
+    tracer = trace.get_tracer(__name__)
+    otlp_exporter = OTLPSpanExporter(endpoint="https://your-tracing-backend")
+    tracer_provider.add_span_processor(BatchSpanProcessor(otlp_exporter))
+    trace.set_tracer_provider(tracer_provider)
+    ```
+1. Create spans for each method to track its execution.
+    ```python
+    @app.route('/coffees/<int:coffee_id>', methods=['GET'])
+    def get_coffee(coffee_id):
+    with tracer.start_as_current_span("get_coffee") as span:
+        span.set_attribute("http.method", request.method)
+        
+        # Simulating processing
+        response_data = {"message": "Processing complete"}
+        span.set_status(trace.Status(trace.StatusCode.OK))
+
+        coffee = next((c for c in coffees if c["id"] == coffee_id), None)
+        if not coffee:
+            # Generating logs for this method
+            send_log_to_signoz("INFO", f"Coffee ID {coffee_id} not found")
+            return jsonify({"error": "Coffee not found"}), 404
+        return jsonify(coffee)
+    ```
+
+## Generate logs
+
+Logs provide detailed insights at different request execution stages. Include contextual details such as timestamps, severity levels, and message descriptions.
+
+1. Attach log information each method. You can optionally add logs before and after each request.
+    ```python
+    @app.before_request
+    def log_request():
+        """Log incoming HTTP request."""
+        log_message = f"Incoming request: {request.method} {request.url}"
+        logger.info(f"{log_message} - Trace ID: {get_trace_id()}")
+        send_log_to_signoz("INFO", log_message)
+
+    @app.after_request
+    def log_response(response):
+        """Log HTTP response details."""
+        log_message = f"Response: {response.status_code} for {request.url}"
+        logger.info(f"{log_message} - Trace ID: {get_trace_id()}")
+        send_log_to_signoz("INFO", log_message)
+        return response
+    ```
+1.  You can add more information to log for each method.
+
+### Link logs with traces
+
+To correlate logs with traces, include `trace_id` and `span_id` in the log.
+
+Follow these steps to link logs with traces:
+
+1. Add trace and span information in the log message.
+    ```python
+    def send_log_to_signoz(level, message):
+    """Send structured logs to SigNoz."""
+    headers = {
+        "signoz-ingestion-key": SIGNOZ_INGESTION_KEY,
+        "Content-Type": "application/json"
+    }
+
+    severity_map = {
+        "DEBUG": 1, "INFO": 4, "WARN": 8, "ERROR": 16, "CRITICAL": 24
+    }
+    
+    log_entry = {
+        "trace_id": get_trace_id(),
+        "span_id": get_span_id(),
+        "trace_flags": 1,  # Default to 1 (sampled trace)
+        "severity_text": level,
+        "severity_number": severity_map.get(level, 4),  # Default INFO=4
+        "attributes": {
+            "method": request.method,
+            "path": request.path
+        },
+        "resources": {
+            "host": os.getenv("HOSTNAME", "localhost"),
+            "namespace": "prod"
+        },
+        "message": message
+    }
+
+    try:
+        response = requests.post(SIGNOZ_LOGS_URL, headers=headers, json=[log_entry])
+        response.raise_for_status()  # Raise an error for bad responses (4xx, 5xx)
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Error sending log to SigNoz: {e}")
+    ```
+1. Send logs to SigNoz to link them with traces.
+
+![An image displaying a specifc log with traces in SigNoz](images/sample-log-coffee.png)
+
+## Configure SigNoz dashboard
+
+To view your app's logs and traces,
+
+1. Go to **Traces** in SigNoz dashboard to verify that traces are sent. You can inspect spans, latency, and different attributes of your trace.
+    ![An image displaying traces in SigNoz](images/traces-signoz-coffee.png)
+1. Go to **Logs** in the SigNoz dashboard to verify that logs are sent. Then, select a log entry to see the correlated trace details.
+    ![An image displaying logs in SigNoz](images/logs-signoz-cofee.png)
+1. You can correlate logs, traces and performance metrics in the Application Performance Monitoring (APM) Dashboard to give you an overall view of API performance. You can view key metrics:
+    ![An image displaying APM in SigNoz](images/coffeeShop-APM.png)
+
+By default, OpenTelemetry captures basic metrics, but you can add custom API-level metrics for deeper insights.
+
+## Get Help
+
+<GetHelp />
