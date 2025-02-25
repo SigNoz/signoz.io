@@ -7,7 +7,6 @@ import SectionContainer from '@/components/SectionContainer'
 import ScrollTopAndComment from '@/components/ScrollTopAndComment'
 import { ProgressBar } from '@/components/ProgressBar/ProgressBar'
 import OpenTelemetryBanner from '@/components/OpenTelemetryBanner/OpenTelemetryBanner'
-import SignUpStrip from '@/components/SignUpStrip/SignUpStrip'
 import TableOfContents from '@/components/TableOfContents/TableOfContents'
 import SidebarAuthorInfo from '@/components/SidebarAuthorInfo/SidebarAuthorInfo'
 import RelatedJobs from '@/components/RelatedJobs/RelatedJobs'
@@ -45,19 +44,6 @@ export default function OpenTelemetryLayout({
   const mainRef = useRef<HTMLElement | null>(null)
   const tocContainerRef = useRef<HTMLDivElement>(null)
   const [activeSection, setActiveSection] = useState<string>('')
-  const [showSignUpStrip, setShowSignUpStrip] = useState(false)
-
-  // Handle scroll to show/hide sign-up strip
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollPosition = window.scrollY
-      const showThreshold = 300 // Adjust this value to control when the strip appears
-      setShowSignUpStrip(scrollPosition > showThreshold)
-    }
-
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -91,9 +77,6 @@ export default function OpenTelemetryLayout({
   return (
     <main ref={mainRef}>
       <ScrollTopAndComment />
-
-      {/* Floating Sign-up Strip */}
-      <SignUpStrip showSignUpStrip={showSignUpStrip} cta_title={cta_title} cta_text={cta_text} />
 
       <OpenTelemetryBanner title={title} date={date} readingTime={readingTime.text} tags={tags} />
 
