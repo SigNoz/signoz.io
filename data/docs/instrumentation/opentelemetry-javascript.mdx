@@ -68,7 +68,8 @@ npm install --save @opentelemetry/exporter-trace-otlp-http@^0.45.0
 
 **Step 2.** Create tracing.js file<br></br>
 You need to configure the endpoint for SigNoz cloud in this file. You can find your ingestion key from SigNoz cloud account details sent on your email.
-
+<Tabs>
+<TabItem value="js" label="JS" default>
 ```js
 // tracing.js
 'use strict'
@@ -111,6 +112,48 @@ process.on('SIGTERM', () => {
     .finally(() => process.exit(0))
 })
 ```
+</TabItem>
+<TabItem value="ts" label="TS">
+```ts
+// tracing.ts
+import process from 'process';
+import { NodeSDK } from '@opentelemetry/sdk-node';
+import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
+import { Resource } from '@opentelemetry/resources';
+import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
+
+// do not set headers in exporterOptions, the OTel spec recommends setting headers through ENV variables
+// https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/protocol/exporter.md#specifying-headers-via-environment-variables
+
+const exporterOptions = {
+  url: 'https://ingest.{region}.signoz.cloud:443/v1/traces',
+};
+
+const traceExporter = new OTLPTraceExporter(exporterOptions);
+const sdk = new NodeSDK({
+  traceExporter,
+  instrumentations: [getNodeAutoInstrumentations()],
+  resource: new Resource({
+    [SemanticResourceAttributes.SERVICE_NAME]: 'node_app',
+  }),
+});
+
+// initialize the SDK and register with the OpenTelemetry API
+// this enables the API to record telemetry
+sdk.start();
+
+// gracefully shut down the SDK on process exit
+process.on('SIGTERM', () => {
+  sdk
+    .shutdown()
+    .then(() => console.log('Tracing terminated'))
+    .catch((error) => console.error('Error terminating tracing', error))
+    .finally(() => process.exit(0));
+});
+```
+</TabItem>
+</Tabs>
 
 Depending on the choice of your region for SigNoz cloud, the ingest endpoint will vary according to this table.
 
@@ -196,6 +239,8 @@ npm install --save @opentelemetry/exporter-trace-otlp-http@^0.45.0
 
 **Step 2.** Create tracing.js file<br></br>
 
+<Tabs>
+<TabItem value="js" label="JS" default>
 ```js
 // tracing.js
 'use strict'
@@ -233,6 +278,46 @@ process.on('SIGTERM', () => {
     .finally(() => process.exit(0))
 })
 ```
+</TabItem>
+<TabItem value="ts" label="TS">
+```ts
+// tracing.ts
+import process from 'process';
+import { NodeSDK } from '@opentelemetry/sdk-node';
+import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
+import { Resource } from '@opentelemetry/resources';
+import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
+
+const exporterOptions = {
+  url: process.env.OTEL_EXPORTER_OTLP_ENDPOINT || 'http://localhost:4318/v1/traces',
+}
+
+const traceExporter = new OTLPTraceExporter(exporterOptions)
+const sdk = new opentelemetry.NodeSDK({
+  traceExporter,
+  instrumentations: [getNodeAutoInstrumentations()],
+  resource: new Resource({
+    // highlight-next-line
+    [SemanticResourceAttributes.SERVICE_NAME]: 'node_app',
+  }),
+})
+
+// initialize the SDK and register with the OpenTelemetry API
+// this enables the API to record telemetry
+sdk.start()
+
+// gracefully shut down the SDK on process exit
+process.on('SIGTERM', () => {
+  sdk
+    .shutdown()
+    .then(() => console.log('Tracing terminated'))
+    .catch((error) => console.log('Error terminating tracing', error))
+    .finally(() => process.exit(0))
+})
+```
+</TabItem>
+</Tabs>
 
 **Step 3.** Run the application<br></br>
 
@@ -300,6 +385,8 @@ npm install --save @opentelemetry/exporter-trace-otlp-http@^0.45.0
 
 **Step 2.** Create tracing.js file<br></br>
 
+<Tabs>
+<TabItem value="js" label="JS" default>
 ```js
 // tracing.js
 'use strict'
@@ -337,6 +424,46 @@ process.on('SIGTERM', () => {
     .finally(() => process.exit(0))
 })
 ```
+</TabItem>
+<TabItem value="ts" label="TS">
+```ts
+// tracing.ts
+import process from 'process';
+import { NodeSDK } from '@opentelemetry/sdk-node';
+import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
+import { Resource } from '@opentelemetry/resources';
+import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
+
+const exporterOptions = {
+  url: process.env.OTEL_EXPORTER_OTLP_ENDPOINT || 'http://localhost:4318/v1/traces',
+}
+
+const traceExporter = new OTLPTraceExporter(exporterOptions)
+const sdk = new opentelemetry.NodeSDK({
+  traceExporter,
+  instrumentations: [getNodeAutoInstrumentations()],
+  resource: new Resource({
+    // highlight-next-line
+    [SemanticResourceAttributes.SERVICE_NAME]: 'node_app',
+  }),
+})
+
+// initialize the SDK and register with the OpenTelemetry API
+// this enables the API to record telemetry
+sdk.start()
+
+// gracefully shut down the SDK on process exit
+process.on('SIGTERM', () => {
+  sdk
+    .shutdown()
+    .then(() => console.log('Tracing terminated'))
+    .catch((error) => console.log('Error terminating tracing', error))
+    .finally(() => process.exit(0))
+})
+```
+</TabItem>
+</Tabs>
 
 **Step 3.** Run the application<br></br>
 
@@ -404,6 +531,8 @@ npm install --save @opentelemetry/exporter-trace-otlp-http@^0.45.0
 **Step 2.** Create tracing.js file<br></br>
 You need to configure the endpoint for SigNoz cloud in this file. You can find your ingestion key from SigNoz cloud account details sent on your email.
 
+<Tabs>
+<TabItem value="js" label="JS" default>
 ```js
 // tracing.js
 'use strict'
@@ -447,6 +576,47 @@ process.on('SIGTERM', () => {
     .finally(() => process.exit(0))
 })
 ```
+</TabItem>
+<TabItem value="ts" label="TS">
+```ts
+// tracing.ts
+import process from 'process';
+import { NodeSDK } from '@opentelemetry/sdk-node';
+import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
+import { Resource } from '@opentelemetry/resources';
+import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
+
+const exporterOptions = {
+  url: 'https://ingest.{region}.signoz.cloud:443/v1/traces',
+  headers: { 'signoz-access-token': process.env.SIGNOZ_INGESTION_KEY },
+}
+
+const traceExporter = new OTLPTraceExporter(exporterOptions)
+const sdk = new opentelemetry.NodeSDK({
+  traceExporter,
+  instrumentations: [getNodeAutoInstrumentations()],
+  resource: new Resource({
+    // highlight-next-line
+    [SemanticResourceAttributes.SERVICE_NAME]: 'node_app',
+  }),
+})
+
+// initialize the SDK and register with the OpenTelemetry API
+// this enables the API to record telemetry
+sdk.start()
+
+// gracefully shut down the SDK on process exit
+process.on('SIGTERM', () => {
+  sdk
+    .shutdown()
+    .then(() => console.log('Tracing terminated'))
+    .catch((error) => console.log('Error terminating tracing', error))
+    .finally(() => process.exit(0))
+})
+```
+</TabItem>
+</Tabs>
 
 Depending on the choice of your region for SigNoz cloud, the ingest endpoint will vary according to this table.
 
@@ -539,6 +709,8 @@ npm install --save @opentelemetry/exporter-trace-otlp-http@^0.45.0
 
 **Step 2.** Create tracing.js file<br></br>
 
+<Tabs>
+<TabItem value="js" label="JS" default>
 ```js
 // tracing.js
 'use strict'
@@ -576,12 +748,46 @@ process.on('SIGTERM', () => {
     .finally(() => process.exit(0))
 })
 ```
+</TabItem>
+<TabItem value="ts" label="TS">
+```ts
+// tracing.ts
+import process from 'process';
+import { NodeSDK } from '@opentelemetry/sdk-node';
+import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
+import { Resource } from '@opentelemetry/resources';
+import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 
-Set `OTEL_EXPORTER_OTLP_ENDPOINT` as env variable using powershell:
+const exporterOptions = {
+  url: process.env.OTEL_EXPORTER_OTLP_ENDPOINT || 'http://localhost:4318/v1/traces',
+}
 
-```bash
-$env:OTEL_EXPORTER_OTLP_ENDPOINT="<otlp_endpoint>"
+const traceExporter = new OTLPTraceExporter(exporterOptions)
+const sdk = new opentelemetry.NodeSDK({
+  traceExporter,
+  instrumentations: [getNodeAutoInstrumentations()],
+  resource: new Resource({
+    // highlight-next-line
+    [SemanticResourceAttributes.SERVICE_NAME]: 'node_app',
+  }),
+})
+
+// initialize the SDK and register with the OpenTelemetry API
+// this enables the API to record telemetry
+sdk.start()
+
+// gracefully shut down the SDK on process exit
+process.on('SIGTERM', () => {
+  sdk
+    .shutdown()
+    .then(() => console.log('Tracing terminated'))
+    .catch((error) => console.log('Error terminating tracing', error))
+    .finally(() => process.exit(0))
+})
 ```
+</TabItem>
+</Tabs>
 
 **Step 3.** Run the application<br></br>
 
@@ -671,6 +877,8 @@ The instrumentation automatically identifies the following within your applicati
 2. **Create a `tracing.js` file**<br></br>
    The `tracing.js` file will contain the tracing setup code. Notice, that we have set some environment variables in the code(highlighted). You can update these variables based on your environment.
 
+<Tabs>
+<TabItem value="js" label="JS" default>
 ```jsx
 // tracing.js
 'use strict'
@@ -710,6 +918,45 @@ process.on('SIGTERM', () => {
     .finally(() => process.exit(0))
 })
 ```
+</TabItem>
+<TabItem value="ts" label="TS">
+```ts
+// tracing.ts
+import process from 'process';
+import { NodeSDK } from '@opentelemetry/sdk-node';
+import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
+import { Resource } from '@opentelemetry/resources';
+import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
+
+const exporterOptions = {
+  url: process.env.OTEL_EXPORTER_OTLP_ENDPOINT || 'http://localhost:4318/v1/traces',
+}
+
+const traceExporter = new OTLPTraceExporter(exporterOptions)
+const sdk = new opentelemetry.NodeSDK({
+  traceExporter,
+  instrumentations: [getNodeAutoInstrumentations()],
+  resource: new Resource({
+    [SemanticResourceAttributes.SERVICE_NAME]: 'node_app',
+  }),
+})
+
+// initialize the SDK and register with the OpenTelemetry API
+// this enables the API to record telemetry
+sdk.start()
+
+// gracefully shut down the SDK on process exit
+process.on('SIGTERM', () => {
+  sdk
+    .shutdown()
+    .then(() => console.log('Tracing terminated'))
+    .catch((error) => console.log('Error terminating tracing', error))
+    .finally(() => process.exit(0))
+})
+```
+</TabItem>  
+</Tabs>
 
 OpenTelemetry Node SDK currently does not detect the `OTEL_RESOURCE_ATTRIBUTES` from `.env` files as of today. That’s why we need to include the variables in the `tracing.js` file itself.
 
@@ -813,16 +1060,18 @@ If you are using Express, the instrumentation relies on HTTP calls to also be in
    npm install --save @opentelemetry/instrumentation-http
    ```
 
-2. **Creat a `tracing.js` file**<br></br>
+2. **Create a `tracing.js` file**<br></br>
    The `tracing.js` file will contain the following tracing setup code.
 
-   ```jsx
-   // tracing.js
-   'use strict'
-   const process = require('process')
-   //OpenTelemetry
-   const opentelemetry = require('@opentelemetry/sdk-node')
-   const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-http')
+<Tabs>
+<TabItem value="js" label="JS" default>
+```jsx
+// tracing.js
+'use strict'
+const process = require('process')
+//OpenTelemetry
+const opentelemetry = require('@opentelemetry/sdk-node')
+const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-http')
    //instrumentations
    const { ExpressInstrumentation } = require('@opentelemetry/instrumentation-express')
    const { MongoDBInstrumentation } = require('@opentelemetry/instrumentation-mongodb')
@@ -861,6 +1110,49 @@ If you are using Express, the instrumentation relies on HTTP calls to also be in
        .finally(() => process.exit(0))
    })
    ```
+</TabItem>
+<TabItem value="ts" label="TS">
+```ts
+// tracing.ts
+import process from 'process';
+import { NodeSDK } from '@opentelemetry/sdk-node';
+import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
+import { Resource } from '@opentelemetry/resources';
+import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
+
+const exporterOptions = {
+  url: process.env.OTEL_EXPORTER_OTLP_ENDPOINT || 'http://localhost:4318/v1/traces',
+}
+
+const traceExporter = new OTLPTraceExporter(exporterOptions)
+const sdk = new opentelemetry.NodeSDK({
+  traceExporter,
+  instrumentations: [
+    new ExpressInstrumentation(),
+    new MongoDBInstrumentation(),
+    new HttpInstrumentation(),
+  ],
+  resource: new Resource({
+    [SemanticResourceAttributes.SERVICE_NAME]: 'node_app',
+  }),
+})
+
+// initialize the SDK and register with the OpenTelemetry API
+// this enables the API to record telemetry
+sdk.start()
+
+// gracefully shut down the SDK on process exit
+process.on('SIGTERM', () => {
+  sdk
+    .shutdown()
+    .then(() => console.log('Tracing terminated'))
+    .catch((error) => console.log('Error terminating tracing', error))
+    .finally(() => process.exit(0))
+})
+```
+</TabItem>  
+</Tabs>
 
    OpenTelemetry Node SDK currently does not detect the `OTEL_RESOURCE_ATTRIBUTES` from `.env` files as of today. That’s why we need to include the variables in the `tracing.js` file itself.
 
