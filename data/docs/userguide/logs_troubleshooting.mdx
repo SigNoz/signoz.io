@@ -130,21 +130,21 @@ There are different ways to add a resource attribute.
 
 1. By passing it as an environment variable if you are using the opentelemtry SDK or auto-instrumentation
     ```
-    OTEL_RESOURCE_ATTRIBUTES=service.name=<service_name>,hostname=<host_name>
+    OTEL_RESOURCE_ATTRIBUTES=service.name=<service_name>,host.name=<host_name>
     ```
     replace the value of `<service_name>` with the actual service name and `<host_name>` with the actual hostname
 2. If you have a otel collector running on each host you can add a processor to add the hostname.
     ```yaml
     processors:
-        attributes/add_hostname:
-            actions:
-                - key: hostname
-                  value: <hostname>
+        resource/add_hostname:
+            attributes:
+                - key: host.name
+                  value: <host_name>
                   action: upsert
     ...
     service:
         logs:
-            processors: [attributes/add_hostname, batch]
+            processors: [resource/add_hostname, batch]
     ```
     replace the value of `<host_name>` with the actual hostname
 
