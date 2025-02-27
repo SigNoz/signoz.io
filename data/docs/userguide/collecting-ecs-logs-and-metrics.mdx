@@ -25,14 +25,13 @@ send them to SigNoz.
 
 Select the type of SigNoz instance you are running: **SigNoz Cloud** or **Self-Hosted**.
 
-<Tabs>
-<TabItem value="cloud" label="SigNoz Cloud" default>
+<Tabs entityName="plans">
+<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
 
 ### Prerequisites
 
 - An ECS cluster running with at least one task definition
 - ECS cluster of launch type **EC2** or **External**
-- [SigNoz Cloud account](https://signoz.io/teams/)
 
 <Admonition>
 If you want to collect metrics and other data for Fargate launch type, checkout [this documentation](https://signoz.io/docs/userguide/collecting-ecs-sidecar-infra/).
@@ -139,12 +138,13 @@ wget https://github.com/SigNoz/benchmark/raw/main/ecs/external/daemon-template.y
 
 - Update `{region}` and `SIGNOZ_INGESTION_KEY` values in your YAML configuration file and copy the updated content of the `otelcol-sidecar.yaml` file and paste it in the value field of the `/ecs/signoz/otelcol-daemon.yaml` parameter that you created.
 
-You will be able to get `{region}` and `SIGNOZ_INGESTION_KEY` values in your [SigNoz Cloud account](https://signoz.io/teams/) under **Settings --> Ingestion Settings**.
+   - Replace `SIGNOZ_INGESTION_KEY` with your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+   - Set the `{region}` to match your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 
-<figure data-zoomable align='center'>
+{/* <figure data-zoomable align='center'>
     <img src="/img/docs/common/ingestion-key-details.webp" alt="Ingestion key details"/>
     <figcaption><i>Ingestion details in SigNoz dashboard</i></figcaption>
-</figure>
+</figure> */}
 
 
 <Admonition type="info">
@@ -243,7 +243,7 @@ aws cloudformation delete-stack --stack-name AOCECS-daemon-${CLUSTER_NAME}-${REG
 
 </TabItem>
 
-<TabItem value="self-host" label="Self-Host">
+<TabItem value='self-host' label='Self-Host'>
 
 ### Prerequisites
 
@@ -261,7 +261,7 @@ If you want to collect metrics and other data for Fargate launch type, checkout 
 
 ## Setting up Daemon Service
 
-<DSTemplateIntro name="self-host" />
+<DSTemplateIntro name='self-host' />
 
 <DSTemplateEC2 />
 </TabItem>
@@ -270,7 +270,7 @@ If you want to collect metrics and other data for Fargate launch type, checkout 
 
 ## Setting up Daemon Service
 
-<DSTemplateIntro name="self-host" />
+<DSTemplateIntro name='self-host' />
 
 <DSTemplateExternal />
 </TabItem>

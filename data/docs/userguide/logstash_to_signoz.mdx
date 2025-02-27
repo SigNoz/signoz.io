@@ -1,102 +1,140 @@
 ---
-date: 2024-06-06
+date: 2024-12-18
 title: Logstash to SigNoz
 id: logstash_to_signoz
+hide_table_of_contents: true
 ---
 
+If you use Logstash to collect logs in your stack, this tutorial will help you send logs from Logstash to SigNoz.
 
-If you use logstash to collect logs in your stack with this tutotrial you will be able to send logs from logstash to SigNoz.
+At SigNoz, we use the OpenTelemetry collector to receive logs, which supports the TCP protocol. You can forward your logs from your Logstash agent to the 
+OpenTelemetry collector.
 
-At SigNoz we use opentelemetry collector to recieve logs which supports the TCP protocol. So you can forward your logs from your logstash agent to opentelemetry collector
+<Tabs entityName="plans">
 
-### Collect Logs Using Logstash in SigNoz cloud
-  * Add otel collector binary to your VM by following this [guide](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/).
-  * Add the reciever to your `config.yaml` 
-    ```yaml
-    receivers:
-      tcplog/logstash:
-        max_log_size: 1MiB
-        listen_address: "0.0.0.0:2255"
-        attributes: {}
-        resource: {}
-        add_attributes: false
-        operators: []
-    ```
-    Here we have used port 2255 for listening in TCP protocol, but you can change it to a port you want.
-    You can read more about tcplog reciver [here](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/tcplogreceiver).
- * Modify your `config.yaml` and add the above receiver
-    ```yaml {4}
-    service:
-        ....
-        logs:
-            receivers: [otlp, tcplog/logstash]
-            processors: [batch]
-            exporters: [otlp]
-    ```
-  * Change the logstash config to forward the logs to otel collector.
-    ```
-    output {
-      tcp {
-        codec => json_lines # this is required otherwise it will send eveything in a single line
-        host => "localhost"
-        port => 2255
-      }
-    }
-    ```
-    Here we are configuring logstash to send logs to otel-collector that we ran in the previous step, which is listening on port 2255.
-    Also we are assuming that you are running the logstash binary on the host. If not, the value of `host` might change depending on your environment. 
+<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
 
-  *  Once you make this changes you can otel binary and logstash, and you will be able to see the logs in SigNoz.
-  *  To properly transform your existing log model into opentelemetry [log](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/logs/data-model.md) model you can use the different processors provided by opentelemetry [link](/docs/userguide/logs#processors-available-for-processing-logs).
+### Collect Logs Using Logstash in SigNoz Cloud
 
-## Collect Logs Using Logstash in Self-Hosted SigNoz
+1. **Add OpenTelemetry Collector Binary**
 
-* Add the reciever to your `otel-collector-config.yaml` which is present inside `deploy/docker/clickhouse-setup`
-    ```yaml
-    receivers:
-      tcplog/logstash:
-        max_log_size: 1MiB
-        listen_address: "0.0.0.0:2255"
-        attributes: {}
-        resource: {}
-        add_attributes: false
-        operators: []
-    ```
-    Here we have used port 2255 for listening in TCP protocol, but you can change it to a port you want.
-    You can read more about tcplog reciver [here](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/tcplogreceiver).
+   Add the OpenTelemetry collector binary to your VM by following this [guide](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/).
 
-* Update the pipleline for logs and make the following change in `otel-collector-config.yaml`
-    ```yaml
-    service:
-      ...
+2. **Configure the Receiver**
 
-      logs:
-        receivers: [ otlp, tcplog/logstash ]
-        processors: [ batch ]
-        exporters: [  clickhouselogsexporter ]
-    ```
-    Here we are adding our clickhouse exporter and creating a pipeline which will collect logs from `tcplog/logstash` receiver, processing it using batch processor and export it to clickhouse.
+   Add the receiver to your `config.yaml`.
+   ```yaml
+   receivers:
+     tcplog/logstash:
+       max_log_size: 1MiB
+       listen_address: "0.0.0.0:2255"
+       attributes: {}
+       resource: {}
+       add_attributes: false
+       operators: []
+   ```
+   - Port `2255` is used here for listening via the TCP protocol, but you can use a port of your choice.
+   - Learn more about the `tcplog` receiver [here](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/tcplogreceiver).
 
-* Expose the port in port for otel-collector in `docker-compose.yaml` file present in `deploy/docker/clickhouse-setup`
-  ```yaml
-  otel-collector:
-    ...
-    ports:
-      - "2255:2255"
-  ```
+3. **Modify the `config.yaml`**
 
-* Change the logstash config to forward the logs to otel collector.
-    ```
-    output {
-      tcp {
-        codec => json_lines # this is required otherwise it will send eveything in a single line
-        host => "<otel-collector-host>"
-        port => 2255
-      }
-    }
-    ```
-    In this example we are generating sample logs and then forwarding them to the otel collector which is listening on  port 2255.
-    `<otel-collector-host>` has to be replaced by the host where otel-collector is running. For more info check [troubleshooting](/docs/install/troubleshooting#signoz-otel-collector-address-grid). 
+   Update your service configuration to include the receiver:
+   ```yaml {4}
+   service:
+       ...
+       logs:
+           receivers: [otlp, tcplog/logstash]
+           processors: [batch]
+           exporters: [otlp]
+   ```
 
-*  Once you make this changes you can restart logstash and SignNoz, and you will be able to see the logs in SigNoz.
-*  To properly transform your existing log model into opentelemetry [log](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/logs/data-model.md) model you can use the different processors provided by opentelemetry. [link](/docs/userguide/logs#processors-available-for-processing-logs)
+4. **Update Logstash Configuration**
+
+   Change the Logstash config to forward logs to the OpenTelemetry collector:
+   ```
+   output {
+     tcp {
+       codec => json_lines # Ensures logs are sent in JSON format line-by-line
+       host => "localhost"
+       port => 2255
+     }
+   }
+   ```
+   - This config assumes the Logstash binary is running on the same host. Adjust the `host` value if Logstash is running elsewhere.
+
+5. **Start the Services**
+
+   Once the changes are made, start the OpenTelemetry binary and Logstash. You should see the logs in SigNoz.
+
+6. **Transform Logs**
+
+   Use OpenTelemetry processors to transform your log model into the [OpenTelemetry log data model](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/logs/data-model.md). Learn more about available processors [here](/docs/userguide/logs#processors-available-for-processing-logs).
+
+</TabItem>
+
+<TabItem value='self-host' label='Self-Host'>
+
+### Collect Logs Using Logstash in Self-Hosted SigNoz
+
+1. **Configure the Receiver**:
+   Add the receiver to your `otel-collector-config.yaml` located in `deploy/docker`:
+   ```yaml
+   receivers:
+     tcplog/logstash:
+       max_log_size: 1MiB
+       listen_address: "0.0.0.0:2255"
+       attributes: {}
+       resource: {}
+       add_attributes: false
+       operators: []
+   ```
+   - Port `2255` is used here for listening via the TCP protocol, but you can use a port of your choice.
+   - Learn more about the `tcplog` receiver [here](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/tcplogreceiver).
+
+2. **Update the Log Pipeline**
+
+   Modify the `otel-collector-config.yaml` to include the receiver in the logs pipeline:
+   ```yaml
+   service:
+     ...
+
+     logs:
+       receivers: [otlp, tcplog/logstash]
+       processors: [batch]
+       exporters: [clickhouselogsexporter]
+   ```
+
+3. **Expose the Port**:
+   Update the `docker-compose.yaml` file in `deploy/docker` to expose the port:
+   ```yaml
+   otel-collector:
+     ...
+     ports:
+       - "2255:2255"
+   ```
+
+4. **Update Logstash Configuration**
+
+   Modify the Logstash config to forward logs to the OpenTelemetry collector:
+   ```
+   output {
+     tcp {
+       codec => json_lines # Ensures logs are sent in JSON format line-by-line
+       host => "<otel-collector-host>"
+       port => 2255
+     }
+   }
+   ```
+   - Replace `<otel-collector-host>` with the actual host where the OpenTelemetry collector is running. Refer to the [troubleshooting guide](/docs/install/troubleshooting#signoz-otel-collector-address-grid) for details.
+
+5. **Start the Services**
+
+   Restart Logstash and SigNoz. You should see the logs in SigNoz.
+
+6. **Transform Logs**
+
+   Use OpenTelemetry processors to transform your log model into the [OpenTelemetry log data model](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/logs/data-model.md). Learn more about available processors [here](/docs/userguide/logs#processors-available-for-processing-logs).
+
+</TabItem>
+
+</Tabs>

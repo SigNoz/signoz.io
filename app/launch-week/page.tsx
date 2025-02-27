@@ -1,26 +1,30 @@
 import React from 'react'
 import MainSection from './LaunchWeek'
-import { Metadata } from 'next';
-
+import { Metadata } from 'next'
+import Script from 'next/script'
 
 export const metadata: Metadata = {
   title: {
-    absolute: 'Launch Week 2.0 | Sep 16 - 20 | 9 AM PT',
+    absolute: 'Launch Week 3.0 | Feb 10 - 14 | 9 AM PT',
   },
   openGraph: {
-    title: 'Launch Week 2.0 | Sep 16 - 20 | 9 AM PT',
+    title: 'Launch Week 3.0 | Feb 10 - 14 | 9 AM PT',
     description: 'Join us for a week of announcing new features at 9 AM PT daily.',
-    images: '/img/launch_week/launch-week-cover.webp'
+    images: '/img/launch_week/poster.webp',
   },
-  description:
-    'Join us for a week of announcing new features at 9 AM PT daily.',
+  description: 'Join us for a week of announcing new features at 9 AM PT daily.',
   twitter: {
-    title: 'Launch Week 2.0 | Sep 16 - 20 | 9 AM PT',
+    title: 'Launch Week 3.0 | Feb 10 - 14 | 9 AM PT',
     description: 'Join us for a week of announcing new features at 9 AM PT daily.',
-    images: '/img/launch_week/launch-week-cover.webp'
-  }
+    images: '/img/launch_week/poster.webp',
+  },
 }
 
 export default function LaunchWeekPage() {
-  return <MainSection />
-} 
+  return (
+    <>
+      <Script id="luma-checkout" src="https://embed.lu.ma/checkout-button.js" />
+      <MainSection />
+    </>
+  )
+}

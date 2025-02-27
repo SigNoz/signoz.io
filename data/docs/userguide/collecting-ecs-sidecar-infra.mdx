@@ -25,8 +25,8 @@ The sidecar container will collect metrics and forward any received OTLP data to
 
 Select the type of SigNoz instance you are running: **SigNoz Cloud** or **Self-Hosted**.
 
-<Tabs>
-<TabItem value="cloud" label="SigNoz Cloud" default>
+<Tabs entityName="plans">
+<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
 
 Below are the steps to collect your metrics and logs from ECS infrastructure:
 
@@ -42,13 +42,9 @@ Below are the steps to collect your metrics and logs from ECS infrastructure:
 
 - An ECS cluster running with at least one task definition
 - ECS cluster can be either of the launch types: **Fargate**, **EC2** or **External**
-- [SigNoz Cloud account](https://signoz.io/teams/)
-
 
 
 ## Setting up Sidecar Container
-
-
 
 ### Step 1: Create SigNoz OtelCollector Config
 
@@ -69,12 +65,13 @@ Below are the steps to collect your metrics and logs from ECS infrastructure:
 
 - Update `{region}` and `SIGNOZ_INGESTION_KEY` values in your YAML configuration file and copy the updated content of the `otelcol-sidecar.yaml` file and paste it in the value field of the `/ecs/signoz/otelcol-sidecar.yaml` parameter that you created.
 
-You will be able to get `{region}` and `SIGNOZ_INGESTION_KEY` values in your [SigNoz Cloud account](https://signoz.io/teams/) under **Settings --> Ingestion Settings**.
+   - Replace `SIGNOZ_INGESTION_KEY` with your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+   - Set the `{region}` to match your [SigNoz Cloud region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 
-<figure data-zoomable align='center'>
+{/* <figure data-zoomable align='center'>
     <img src="/img/docs/common/ingestion-key-details.webp" alt="Ingestion key details"/>
     <figcaption><i>Ingestion details in SigNoz dashboard</i></figcaption>
-</figure>
+</figure> */}
 
 
 <Admonition type="info">
@@ -93,7 +90,7 @@ and will collect ECS container metrics and send them to SigNoz Cloud.
 It also acts as a gateway to send any telemetry data from your application container to SigNoz Cloud.
 
 </TabItem>
-<TabItem value="self-host" label="Self-Host">
+<TabItem value='self-host' label='Self-Host'>
 
 Below are the steps to collect your metrics and logs from ECS infrastructure:
 

@@ -3,12 +3,16 @@ date: 2024-06-06
 id: ruby-on-rails
 title: Ruby on Rails OpenTelemetry Instrumentation
 description: Send events from your RoR application to SigNoz
-
+hide_table_of_contents: true
 ---
 
+{/* 
+import InstrumentationFAQ from '@/components/shared/instrumentation-faq.md' */}
 
-import InstrumentationFAQ from '@/components/shared/instrumentation-faq.md'
+This document contains instructions on how to set up OpenTelemetry instrumentation in your Ruby on Rails applications and view your application traces in SigNoz.
 
+<Tabs entityName="plans">
+<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
 ## Send Traces to SigNoz Cloud
 
 Based on your application environment, you can choose the setup below to send traces to SigNoz Cloud.
@@ -69,30 +73,25 @@ Run the application using the below:
 ```jsx
 OTEL_EXPORTER=otlp \
 OTEL_SERVICE_NAME=<service_name> \
-OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.{region}.signoz.cloud:443 \
-OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=SIGNOZ_INGESTION_KEY \
+OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443 \
+OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<your-ingestion-key> \
 rails server
 ```
 
-- `<service_name>` : Name of service. For example, `sampleRailsApp`
-- `SIGNOZ_INGESTION_KEY` : The ingestion key sent by SigNoz over email. It can also be found in the `settings` section of your SigNoz Cloud UI.
-
-Depending on the choice of your region for SigNoz cloud, the ingest endpoint will vary according to this table.
-
-| Region | Endpoint |
-| --- | --- |
-| US |	ingest.us.signoz.cloud:443 |
-| IN |	ingest.in.signoz.cloud:443 |
-| EU | ingest.eu.signoz.cloud:443 |
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service_name>` is name of your service
 
 ---
 ### Send traces via OTel Collector binary
 
-OTel Collector binary helps to collect logs, hostmetrics, resource and infra attributes. It is recommended to install Otel Collector binary to collect and send traces to SigNoz cloud. You can correlate signals and have rich contextual data through this way.
+**Step 1. Install OTel Collector binary**
 
-You can find instructions to install OTel Collector binary [here](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) in your VM. Once you are done setting up your OTel Collector binary, you can follow the below steps for instrumenting your Ruby on Rails application.
+OTel Collector binary helps to collect logs, hostmetrics, resource and infra attributes.
 
-**Step 1. Install dependencies**
+You can find instructions to install OTel Collector binary [here](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) in your VM.
+
+**Step 2. Install dependencies**
 
 Install dependencies related to OpenTelemetry SDK and exporter using gem.
 
@@ -116,7 +115,7 @@ Run the bundle install command:
 bundle install
 ```
 
-**Step 2. Initialize the OpenTelemetry SDK**
+**Step 3. Initialize the OpenTelemetry SDK**
 
 Initialize the otel sdk by adding below lines to `config/environment.rb` of your Ruby on Rails application.
 
@@ -131,7 +130,7 @@ end
 Rails.application.initialize!
 ```
 
-**Step 3. Running your Ruby application**
+**Step 4. Running your Ruby application**
 
 Run the application using the below:
 
@@ -213,8 +212,8 @@ rails server
 
 From Windows, there are two ways to send data to SigNoz Cloud.
 
-- [Send traces directly to SigNoz Cloud](#send-traces-directly-to-signoz-cloud)
-- [Send traces via OTel Collector binary](#send-traces-via-otel-collector-binary) (recommended)
+- Send traces directly to SigNoz Cloud
+- Send traces via OTel Collector binary (recommended)
 
 ### Send traces directly to SigNoz Cloud
 
@@ -255,15 +254,15 @@ OpenTelemetry::SDK.configure do |c|
   c.add_span_processor(
     OpenTelemetry::SDK::Trace::Export::BatchSpanProcessor.new(
       OpenTelemetry::Exporter::OTLP::Exporter.new(
-        endpoint: '<SIGNOZ_URL>',
-        headers: { 'signoz-ingestion-key' => '<SIGNOZ_INGESTION_KEY>' } 
+        endpoint: 'ingest.<region>.signoz.cloud:443',
+        headers: { 'signoz-ingestion-key' => '<your-ingestion-key>' } 
       )
     )
   )
   c.resource = OpenTelemetry::SDK::Resources::Resource.create({
     OpenTelemetry::SemanticConventions::Resource::HOST_NAME => '<your-host-name>',
   })
-  c.service_name = '<YOUR_SERVICE_NAME>'    # The name of the application.
+  c.service_name = '<service_name>'    # The name of the application.
   c.use_all()    # The libraries supported by automatic OpenTelemetry observation. 
 end
 ```
@@ -276,25 +275,20 @@ Run the application using the below:
 rails server
 ```
 
-- `<YOUR_SERVICE_NAME>` : Name of service. For example, `sampleRailsApp`
-- `<SIGNOZ_INGESTION_KEY>` : The ingestion key sent by SigNoz over email. It can also be found in the `settings` section of your SigNoz Cloud UI.
-
-- `<SIGNOZ_URL>` : Depending on the choice of your region for SigNoz cloud, the ingest endpoint will vary according to this table.
-
-| Region | Endpoint |
-| --- | --- |
-| US |	ingest.us.signoz.cloud:443 |
-| IN |	ingest.in.signoz.cloud:443 |
-| EU | ingest.eu.signoz.cloud:443 |
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service_name>` is name of your service
 
 ---
 ### Send traces via OTel Collector binary
 
-OTel Collector binary helps to collect logs, hostmetrics, resource and infra attributes. It is recommended to install Otel Collector binary to collect and send traces to SigNoz cloud. You can correlate signals and have rich contextual data through this way.
+**Step 1. Install OTel Collector binary**
 
-You can find instructions to install OTel Collector binary [here](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) in your VM. Once you are done setting up your OTel Collector binary, you can follow the below steps for instrumenting your Ruby on Rails application.
+OTel Collector binary helps to collect logs, hostmetrics, resource and infra attributes.
 
-**Step 1. Install dependencies**
+You can find instructions to install OTel Collector binary [here](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) in your VM.
+
+**Step 2. Install dependencies**
 
 Install dependencies related to OpenTelemetry SDK and exporter using gem.
 
@@ -318,7 +312,7 @@ Run the bundle install command:
 bundle install
 ```
 
-**Step 2. Initialize the OpenTelemetry SDK**
+**Step 3. Initialize the OpenTelemetry SDK**
 
 Initialize the otel sdk by adding below lines to `config/initializers/opentelemetry.rb` of your Ruby on Rails application.
 
@@ -338,12 +332,12 @@ OpenTelemetry::SDK.configure do |c|
   c.resource = OpenTelemetry::SDK::Resources::Resource.create({
     OpenTelemetry::SemanticConventions::Resource::HOST_NAME => '<your-host-name>',
   })
-  c.service_name = '<YOUR_SERVICE_NAME>'    # The name of the application.
+  c.service_name = '<service_name>'    # The name of the application.
   c.use_all()    # The libraries supported by automatic OpenTelemetry observation. 
 end
 ```
 
-**Step 3. Running your Ruby application**
+**Step 4. Running your Ruby application**
 
 Run the application using the below:
 
@@ -351,14 +345,15 @@ Run the application using the below:
 rails server
 ```
 
-- `<service_name>` : Name of service. For example, `sampleRailsApp`
+- `<service_name>` is name of your service
 
 In case you have OtelCollector Agent in different VM, replace localhost:4318 with `<IP Address of the VM>:4318`.
 
 </TabItem>
 
 </Tabs>
-
+</TabItem>
+<TabItem value='self-host' label='Self-Host'>
 ## Send Traces to Self-Hosted SigNoz
 
 You can follow these steps to send your traces directly to your Self-Host SigNoz instance.
@@ -417,13 +412,15 @@ rails server
 
 In case you have OtelCollector Agent in different VM, replace localhost:4318 with `<IP Address of the VM>:4318`.
 
+</TabItem>
+</Tabs>
 
-## Tutorials
-Here's a [tutorial](https://signoz.io/blog/opentelemetry-ruby/) with step by step guide on how to install SigNoz and start monitoring a sample Ruby on Rails app. 
+{/* ## Tutorials
+Here's a [tutorial](https://signoz.io/blog/opentelemetry-ruby/) with step by step guide on how to install SigNoz and start monitoring a sample Ruby on Rails app.  */}
 
 ## Sample Ruby on Rails application
 We have included a sample Ruby on Rails application with README.md at [Sample Rails App Github Repo.](https://github.com/SigNoz/sample-rails-app)
 
-Feel free to use this repo to test out OpenTelemetry instrumentation and how to send telemetry data to SigNoz.
-
-<InstrumentationFAQ />
+{/* Feel free to use this repo to test out OpenTelemetry instrumentation and how to send telemetry data to SigNoz. */}
+{/* 
+<InstrumentationFAQ /> */}

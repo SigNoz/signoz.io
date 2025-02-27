@@ -10,9 +10,9 @@ keywords: [OpenTelemetry, Grafana, observability, monitoring, data visualization
 
 ---
 
-In the rapidly evolving landscape of software observability, OpenTelemetry and Grafana have emerged as powerful tools, providing valuable insights into applications and infrastructure. But how do they compare? What are their strengths and weaknesses? 
+OpenTelemetry and Grafana are two essential but fundamentally different observability tools. OpenTelemetry standardizes data collection across your stack, while Grafana excels at visualization and analysis. Understanding their distinct roles and capabilities is crucial for building an effective observability strategy.
 
-This article dives deep into the OpenTelemetry vs Grafana debate, providing you with a comprehensive understanding of both tools and helping you make informed decisions for your observability needs.
+This article compares OpenTelemetry and Grafana's core features, integration capabilities, and optimal use cases to help you leverage both tools effectively.
 
 ## What are OpenTelemetry and Grafana?
 
@@ -22,11 +22,18 @@ Grafana, on the other hand, is an open-source platform for data visualization an
 
 Both tools have emerged as key players in the observability ecosystem, with OpenTelemetry focusing on data collection and Grafana on data visualization. OpenTelemetry was born from the merger of OpenCensus and OpenTracing projects in 2019, while Grafana has been around since 2014, continuously evolving its capabilities.
 
+### Can They Be Used Together?
+Yes, OpenTelemetry and Grafana work very well together:
+
+- **Instrumentation with OTel**: Use OpenTelemetry to instrument your applications and collect traces, metrics, and logs.
+- **Visualization with Grafana**: Export telemetry data from OpenTelemetry to backends like Prometheus (metrics), Loki (logs), or Tempo (traces), and use Grafana to visualize and monitor the data.
+
+
 ## Core Functionalities: OpenTelemetry vs Grafana
 
 The primary distinction between OpenTelemetry and Grafana lies in their core functionalities:
 
-OpenTelemetry
+### OpenTelemetry
 
 - Primary Function: Data collection and standardization
     
@@ -44,10 +51,11 @@ OpenTelemetry
     
     OpenTelemetry is designed to be vendor-neutral and agnostic, allowing you to export your collected telemetry data to various backend systems for analysis and visualization. This flexibility empowers you to choose the tools that best suit your needs and preferences, without being tied to a specific vendor or proprietary solution.
     
+<GetStartedOpenTelemetryButton />
 
 <Figure src="/img/comparisons/2024/10/opentelemetry-vs-grafana-image.webp" alt="OpenTelemetry Structure (Picture from: opentelemetry docs)" caption="OpenTelemetry Structure (Picture from: opentelemetry docs)" />
 
-Grafana
+### Grafana
 
 - Primary Function: Data Visualization and Dashboarding
     
@@ -98,6 +106,8 @@ rate(http_requests_total{job="api-server"}[5m])
 
 The performance impact of using OpenTelemetry is designed to be minimal. It leverages asynchronous processing and batching, ensuring that your application remains responsive even while gathering telemetry data. Whereas the performance of Grafana largely depends on the complexity of your queries and the volume of data being visualized. Simple queries against indexed data sources will be quick and efficient, while complex queries or those involving large datasets may require more time and resources.
 
+
+
 ## Use Cases and Best Practices
 
 OpenTelemetry excels in cases where you need:
@@ -113,8 +123,6 @@ Grafana shines when you require:
 - Alerting based on complex queries: You can set up alerts based on the results of complex queries, ensuring that your team is notified when things go awry before users even notice.
 
 ### Best Practices for Implementing OpenTelemetry and Grafana
-
-==intro sentence
 
 1. Set clear goals: Before jumping in, it's important to define what you need to monitor. Identify the key metrics and traces that are essential for your system’s performance. Having clear goals makes sure your setup is focused and effective, so you’re not overwhelmed with unnecessary data. This focus helps you prioritize the most critical areas, making troubleshooting faster and easier when issues arise.
 2. Keep an eye on performance impact: Make sure the process of collecting data with OpenTelemetry and visualizing it in Grafana doesn’t slow things down. To load data without sacrificing performance you can employ techniques like sampling and filtering. This ensures that your monitoring system itself doesn't become a bottleneck, allowing your applications to run smoothly while still getting the insights you need.
@@ -204,6 +212,8 @@ Both projects have active development roadmaps, with OpenTelemetry focusing on e
 ## Implementing OpenTelemetry and Grafana with SigNoz
 
 <a href="https://svey-5nsw.in.signoz.cloud/get-started" rel="noopener noreferrer nofollow" target="_blank">SigNoz</a> is a comprehensive observability platform that combines the strengths of both OpenTelemetry and Grafana-like visualizations. It leverages OpenTelemetry for data collection, providing a standardized approach to instrumentation across your services. SigNoz then offers powerful visualization capabilities similar to Grafana, allowing you to create custom dashboards and alerts.
+
+<GrafanaVsSigNoz />
 
 By using SigNoz, you can:
 

@@ -14,7 +14,7 @@ const docsSideNav = [
         type: 'category',
         isExpanded: false,
         label: 'Get Started',
-        route: '/docs/install',
+        route: '/docs/install/',
         items: [
           {
             type: 'doc',
@@ -25,6 +25,7 @@ const docsSideNav = [
             type: 'category',
             isExpanded: false,
             label: 'Self-Host SigNoz',
+            route: '/docs/install/self-host',
             items: [
               {
                 type: 'doc',
@@ -146,7 +147,7 @@ const docsSideNav = [
         // type: 'generated-index',
         // title: 'Instrument your Application',
         // description:
-        // 'To instrument your applications and send data to SigNoz, follow the instructions in the sections below.',
+        // 'To instrument your application with OpenTelemetry and send data to SigNoz, follow the instructions in the sections below.',
         // slug: '/docs/instrumentation/index',
         // },
         items: [
@@ -298,6 +299,11 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            label: 'C++',
+            route: '/docs/instrumentation/opentelemetry-cpp',
+          },
+          {
+            type: 'doc',
             label: 'Swift',
             route: '/docs/instrumentation/swift',
           },
@@ -371,7 +377,7 @@ const docsSideNav = [
             items: [
               {
                 type: 'doc',
-                label: 'Span Details',
+                label: 'Trace Details',
                 route: '/docs/userguide/span-details',
               },
             ],
@@ -449,38 +455,23 @@ const docsSideNav = [
     items: [
       {
         type: 'doc',
-        route: '/docs/userguide/send-metrics-cloud',
-        label: 'Send Metrics to SigNoz Cloud',
+        route: '/docs/infrastructure-monitoring/overview',
+        label: 'Overview',
       },
-      {
-        type: 'doc',
-        route: '/docs/userguide/send-metrics',
-        label: 'Send Metrics (Self Hosted)',
-      },
-      {
-        type: 'doc',
-        route: '/docs/userguide/drop-metrics',
-        label: 'Drop Metrics',
-      },
-      {
-        type: 'doc',
-        route: '/docs/userguide/navigate-user-interface',
-        label: 'Navigate the User Interface',
-      },
+      // {
+      //   type: 'doc',
+      //   route: '/docs/userguide/navigate-user-interface',
+      //   label: 'Navigate the User Interface',
+      // },
       {
         type: 'doc',
         route: '/docs/userguide/hostmetrics',
-        label: 'Sending Host Metrics to SigNoz',
+        label: 'Host Setup',
       },
       {
         type: 'doc',
-        route: '/docs/userguide/collecting-ecs-logs-and-metrics',
-        label: 'ECS Infra Metrics & Logs',
-      },
-      {
-        type: 'doc',
-        route: '/docs/userguide/collecting-ecs-sidecar-infra',
-        label: 'ECS Infra Sidecar',
+        route: '/docs/userguide/k8s-metrics',
+        label: 'Kubernetes Metrics',
       },
     ],
   },
@@ -529,6 +520,10 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/userguide/collecting_syslogs',
             label: 'Syslogs',
+          },          {
+            type: 'doc',
+            route: '/docs/logs-management/send-logs/logrus-to-signoz',
+            label: 'Logrus',
           },
           {
             type: 'category',
@@ -561,12 +556,18 @@ const docsSideNav = [
                 route: '/docs/logs-management/send-logs/aws-lambda-nodejs',
                 label: 'AWS Lambda Node.js logs',
               },
+              {
+                type: 'doc',
+                route: '/docs/logs-management/send-logs/nodejs-pino-logs',
+                label: 'Pino Node.js logs',
+              },
+              {
+                type: 'doc',
+                route: '/docs/logs-management/send-logs/nodejs-winston-logs',
+                label: 'Winston Node.js logs',
+              },
+    
             ],
-          },
-          {
-            type: 'doc',
-            route: '/docs/userguide/collecting_nodejs_winston_logs',
-            label: 'NodeJS Winston logs',
           },
           {
             type: 'doc',
@@ -605,6 +606,11 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/logs-management/send-logs/vector-logs-to-signoz',
             label: 'Vector',
+          },
+          {
+            type: 'doc',
+            route: '/docs/logs-management/send-logs/zap-to-signoz',
+            label: 'Zap',
           },
           {
             type: 'doc',
@@ -762,6 +768,16 @@ const docsSideNav = [
     items: [
       {
         type: 'doc',
+        route: '/docs/userguide/send-metrics-cloud',
+        label: 'Send Metrics to SigNoz Cloud',
+      },
+      {
+        type: 'doc',
+        route: '/docs/userguide/send-metrics',
+        label: 'Send Metrics (Self Hosted)',
+      },
+      {
+        type: 'doc',
         route: '/docs/metrics-management/types-and-aggregation',
         label: 'Types and Aggregation',
       },
@@ -790,6 +806,28 @@ const docsSideNav = [
         className: 'new-doc',
         route: '/docs/metrics-management/docker-container-metrics',
         label: 'Docker container metrics',
+      },
+      {
+        type: 'doc',
+        route: '/docs/userguide/drop-metrics',
+        label: 'Drop Metrics',
+      },
+      {
+        type: 'category',
+        label: 'Guides',
+        isExpanded: false,
+        items: [
+      {
+        type: 'doc',
+        route: '/docs/userguide/collecting-ecs-logs-and-metrics',
+        label: 'ECS Infra Metrics & Logs',
+      },
+      {
+        type: 'doc',
+        route: '/docs/userguide/collecting-ecs-sidecar-infra',
+        label: 'ECS Infra Sidecar',
+      },
+        ],
       },
     ],
   },
@@ -1019,6 +1057,11 @@ const docsSideNav = [
     className: 'new-doc',
     route: '/docs/frontend-and-mobile-monitoring',
     items: [
+      {
+        type: 'doc',
+        route: '/docs/frontend-monitoring/document-load',
+        label: 'Document Load',
+      },
       {
         type: 'doc',
         route: '/docs/frontend-monitoring/web-vitals',
@@ -1336,9 +1379,21 @@ const docsSideNav = [
         label: 'RDS',
       },
       {
-        type: 'doc',
-        route: '/docs/aws-monitoring/lambda-logs',
+        type: 'category',
+        isExpanded: false,
         label: 'AWS Lambda',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/aws-monitoring/lambda/lambda-logs',
+            label: 'Logging',
+          },
+          {
+            type: 'doc',
+            route: '/docs/aws-monitoring/lambda/lambda-traces',
+            label: 'APM & Tracing',
+          },
+        ],
       },
     ],
   },
@@ -1360,7 +1415,7 @@ const docsSideNav = [
     type: 'category',
     isExpanded: false,
     // className: 'new-doc',
-    // route: '',
+    route: '/docs/azure-monitoring',
     items: [
       {
         type: 'category',
@@ -1512,7 +1567,7 @@ const docsSideNav = [
     type: 'category',
     isExpanded: false,
     // className: 'new-doc',
-    // route: '',
+    route: '/docs/gcp-monitoring',
     items: [
       {
         type: 'category',
@@ -1800,6 +1855,11 @@ const docsSideNav = [
         // slug: '/docs/operate/migration/migration',
         // },
         items: [
+          {
+            type: 'doc',
+            route: '/docs/operate/migration/upgrade-0.70',
+            label: 'Upgrade to v0.70',
+          },
           {
             type: 'doc',
             route: '/docs/operate/migration/upgrade-0.64',

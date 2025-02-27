@@ -1,220 +1,179 @@
 ---
-date: 2024-06-06
-title: Collecting Application Logs from Log file
+date: 2024-12-18
+title: Collecting Application Logs from Log File
 id: collect_logs_from_file
+hide_table_of_contents: true
 ---
 
 ## Overview
 
-This guide provides detailed instructions on configuring the OpenTelemetry Collector to read logs from a file and push them to SigNoz, enabling you to analyze your application logs effectively.
+This documentation provides detailed instructions on configuring the OpenTelemetry Collector to read logs from a file and push them to SigNoz, enabling you to 
+analyze your application logs effectively.
 
 ## Sample Log File
-As an example, we can create a sample log file called `app.log` with the following dummy data: 
-  ```
-  This is log line 1
-  This is log line 2
-  This is log line 3
-  ```
-This file represents a log file of your application. You can choose any file which contains your application's log entries.
 
-## Collect Logs in SigNoz Cloud
+As an example, we can create a sample log file called `app.log` with the following dummy data:
 
-### Prerequisite
+```plaintext
+This is log line 1
+This is log line 2
+This is log line 3
+```
 
-- SigNoz [cloud](https://signoz.io/teams/) account
+This file represents a log file of your application. You can choose any file that contains your application's log entries.
 
-Sending logs to SigNoz cloud can be achieved by following these simple steps:
-- Installing OpenTelemetry Collector
-- Configuring filelog receiver
+<Tabs entityName="plans">
 
-### Install OpenTelemetry Collector 
+<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
 
-The OpenTelemetry collector provides a vendor-neutral way to collect, process, and export your telemetry data such as logs, metrics, and traces.
+### Setup
 
-You can install OpenTelemetry collector as an agent on your Virtual Machine by following this [guide](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/). 
-  
+#### 1. Install OpenTelemetry Collector
 
-### Configure filelog receiver
+The OpenTelemetry Collector provides a vendor-neutral way to collect, process, and export your telemetry data such as logs, metrics, and traces.
 
-Modify the `config.yaml` file that you created while installing OTel collector in the previous step to include the filelog receiver. This involves specifying the path to your `app.log` file and setting the `start_at` parameter, which specifies where to start reading logs from the log file. For more fields that are available for filelog receiver please check [this link](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/filelogreceiver).
+Follow this [guide](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) to install the OpenTelemetry Collector as an agent on your Virtual Machine.
 
-```yaml 
+#### 2. Configure Filelog Receiver
+
+Modify the `config.yaml` file created during the installation of the OpenTelemetry Collector to include the `filelog` receiver. Specify the path to your `app.log` file and set the `start_at` parameter.
+
+```yaml
 receivers:
-  ...
   filelog/app:
-    include: [ /tmp/app.log ] #include the full path to your log file
+    include: [ /tmp/app.log ] # Include the full path to your log file
     start_at: end
-...
 ```
 
 <Admonition>
-
-The `start_at: end` configuration ensures that only newly added logs are transmitted. If you wish to include historical logs from the file, remember to modify `start_at` to `beginning`.
-
-Log lines from the file will be visible on the SigNoz UI and you will able to filter them once new logs are added to the file while using `start_at: end`
-
+The `start_at: end` configuration ensures that only newly added logs are transmitted. To include historical logs, set `start_at` to `beginning`.
 </Admonition>
 
-{/* <!--- 
-For parsing logs of different formats you will have to use operators, you can read more about operators [here](https://signoz.io/docs/userguide/logs/#operators-for-parsing-and-manipulating-logs).
----> */}
+#### 3. Update Pipeline Configuration
 
-### Update Pipelines Configuration
+Update the pipeline settings in `config.yaml` to include the new filelog receiver:
 
-In the same `config.yaml` file, update the pipeline settings to include the new filelog receiver. This step is crucial for ensuring that the logs are correctly processed and sent to SigNoz.
-
-```yaml {4}
+```yaml
 service:
-    ....
+  pipelines:
     logs:
-        receivers: [otlp, filelog/app]
-        processors: [batch]
-        exporters: [otlp]
+      receivers: [otlp, filelog/app]
+      processors: [batch]
+      exporters: [otlp]
 ```
 
-Now restart the OTel collector so that new changes are applied. The steps to run the OTel collector can be found [here](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/)
+Restart the OpenTelemetry Collector for the changes to take effect. Follow [this guide](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) for restart instructions.
 
-### Verify Export
+#### 4. Verify Export
 
-The logs will be exported to SigNoz UI. If you add more entries to your `app.log` file they will also be visible in SigNoz UI.
+The logs will be visible in the Logs Tab of SigNoz. As more entires are added to `app.log` it will reflect Logs tab.
 
 <figure data-zoomable align='center'>
     <img src="/img/docs/application-logs-output.webp" alt="Logs of the dummy app.log file visible in SigNoz"/>
     <figcaption><i>Sample log file data shown in SigNoz Logs Explorer</i></figcaption>
 </figure>
 
-## Collecting Logs in self-hosted SigNoz
+</TabItem>
 
-Collecting logs in Self-Hosted SigNoz can have two scenarios:
-- SigNoz running on the same host
-- SigNoz running on different host
+<TabItem value='self-host' label='Self-Host'>
 
-### Running on the same host
+### Scenarios
 
-If your self-hosted SigNoz is running on the same host, then you can follow these steps to collect your application logs.
+#### Scenario 1: SigNoz on the Same Host
 
-#### Install SigNoz
+##### Install SigNoz
 
-You can install Self-Hosted SigNoz using the instructions [here](https://signoz.io/docs/install/docker/).
+Follow [this guide](https://signoz.io/docs/install/docker/) to install self-hosted SigNoz.
 
+##### Modify Docker Compose File
 
-#### Modify Docker Compose file
+Edit the `docker-compose.yaml` file in the `deploy/docker` directory to mount your application's log file to the `tmp` directory of the OpenTelemetry Collector.
 
-In your self-hosted SigNoz setup, locate and edit the `docker-compose.yaml` file found in the `deploy/docker/clickhouse-setup` directory. You'll need to mount the log file of your application to the `tmp` directory of SigNoz OTel collector. 
-  ```yaml {6}
-    ...
-    otel-collector:
-    image: signoz/signoz-otel-collector:0.88.11
-    command: ["--config=/etc/otel-collector-config.yaml"]
-    volumes:
-      - ~/<path>/app.log:/tmp/app.log
-    ....
-  ```
-
-Replace `<path>` with the path where your log file is present. Please ensure that the file path is correctly specified.
-  
-#### Add filelog receiver
-
-Add the filelog receiver to `otel-collector-config.yaml` which is present inside `deploy/docker/clickhouse-setup` directory in your self-hosted SigNoz setup. The configuration below tells the collector where to find your log file and how to start processing it.
-
-  ```yaml {3-15}
-  receivers:
-    ...
-    filelog:
-      include: [ /tmp/app.log ]
-      start_at: end
-  ...
-  ```
-
-<Admonition>
-
-The `start_at: end` configuration ensures that only newly added logs are transmitted. If you wish to include historical logs from the file, remember to modify `start_at` to `beginning`.
-
-Log lines from the file will be visible on the SigNoz UI and you will able to filter them once new logs are added to the file while using `start_at: end`
-
-</Admonition>
-
-{/* <!---
-For parsing logs of different formats you will have to use operators, you can read more about operators [here](./logs.md#operators-for-parsing-and-manipulating-logs)
----> */}
-
-For more fields that are available for filelog receiver please check [this link](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/filelogreceiver).
-
-#### Update Pipeline configuration
-
-Modify the pipeline inside `otel-collector-config.yaml` to include the filelog receiver. This step is crucial for ensuring that the logs are correctly processed and sent to SigNoz.
-
-  ```yaml {4}
-  service:
-      ....
-      logs:
-          receivers: [otlp, filelog]
-          processors: [batch]
-          exporters: [clickhouselogsexporter]
-  ```
-
-Now, restart the OTel collector so that new changes are applied. You can find instructions to run OTel collector [here](https://signoz.io/docs/install/docker/)
-
-#### Verify Export
-
-The logs will be exported to SigNoz UI if there are no errors. If you add more entries to your `app.log` file they will also be visible in SigNoz.
-
-<figure data-zoomable align='center'>
-    <img src="/img/docs/application-logs-output.webp" alt="Logs of the dummy app.log file visible in SigNoz"/>
-    <figcaption><i>Sample log file data shown in SigNoz Logs Explorer</i></figcaption>
-</figure>
-
-
-
-### Running on a different host
-
-If you have a SigNoz running on a different host then you will have to run a OTel collector to export logs from your host to the host where SigNoz is running.
-
-#### Create OTel collector configuration
-
-You need to create an `otel-collector-config.yaml` file, this file defines how the OTel collector will process and forward logs to your SigNoz instance.
-
-  ```yaml
-  receivers:
-    filelog:
-      include: [ /tmp/app.log ]
-      start_at: end
-  processors:
-    batch:
-      send_batch_size: 10000
-      send_batch_max_size: 11000
-      timeout: 10s
-  exporters:
-    otlp/log:
-      endpoint: http://<host>:<port>
-      tls:
-        insecure: true
-  service:
-    pipelines:
-      logs:
-        receivers: [filelog]
-        processors: [batch]
-        exporters: [ otlp/log ]
-  ```
-   
-{/* <!--- For parsing logs of different formats you will have to use operators, you can read more about operators [here](./logs.md#operators-for-parsing-and-manipulating-logs) ---> */}
-  
-
-The parsed logs are batched up using the batch processor and then exported to the host where SigNoz is deployed. For finding the right host and port for your SigNoz cluster please follow the guide [here](../install/troubleshooting.md#signoz-otel-collector-address-grid).  
-
-<Admonition>
-
-The `otlp/log` exporter in the above configuration file uses a `http` endpoint but if you want to use `https` you will have to provide the certificate and the key. You can read more about it [here](https://github.com/open-telemetry/opentelemetry-collector/blob/main/exporter/otlpexporter/README.md)
-
-</Admonition>
-
-#### Mount the log file
-
-Run this docker command
-
+```yaml
+volumes:
+  - ~/<path>/app.log:/tmp/app.log
 ```
+
+Replace `<path>` with the actual path of your log file.
+
+##### Add Filelog Receiver
+
+Update `otel-collector-config.yaml` with the following configuration:
+
+```yaml
+receivers:
+  filelog:
+    include: [ /tmp/app.log ]
+    start_at: end
+```
+
+<Admonition>
+The `start_at: end` configuration ensures only newly added logs are transmitted. To include historical logs, set `start_at` to `beginning`.
+</Admonition>
+
+##### Update Pipeline Configuration
+
+Modify the pipeline to include the filelog receiver:
+
+```yaml
+service:
+  pipelines:
+    logs:
+      receivers: [otlp, filelog]
+      processors: [batch]
+      exporters: [clickhouselogsexporter]
+```
+
+Restart the OpenTelemetry Collector for the changes to take effect.
+
+#### Scenario 2: SigNoz on a Different Host
+
+##### Create OTel Collector Configuration
+
+Create an `otel-collector-config.yaml` file:
+
+```yaml
+receivers:
+  filelog:
+    include: [ /tmp/app.log ]
+    start_at: end
+processors:
+  batch:
+    send_batch_size: 10000
+    send_batch_max_size: 11000
+    timeout: 10s
+exporters:
+  otlp/log:
+    endpoint: http://<host>:<port>
+    tls:
+      insecure: true
+service:
+  pipelines:
+    logs:
+      receivers: [filelog]
+      processors: [batch]
+      exporters: [otlp/log]
+```
+
+<Admonition>
+To use `https`, provide the certificate and key. Refer to [this guide](https://github.com/open-telemetry/opentelemetry-collector/blob/main/exporter/otlpexporter/README.md) for details.
+</Admonition>
+
+##### Mount Log File and Run Collector
+
+Run the following command to start the OpenTelemetry Collector in Docker:
+
+```bash
 docker run -d --name signoz-host-otel-collector --user root -v $(pwd)/app.log:/tmp/app.log:ro -v $(pwd)/otel-collector-config.yaml:/etc/otel/config.yaml signoz/signoz-otel-collector:0.88.11
 ```
-The above command runs an OpenTelemetry collector provided by SigNoz in a Docker container. It runs in the background with root privileges, mounts a log file and a configuration file from the host to the container
 
-After running the collector, if there are no errors your logs will be exported and will be visible in SigNoz.
+Adding more entries to `app.log` will make them visible in SigNoz UI.
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/application-logs-output.webp" alt="Logs of the dummy app.log file visible in SigNoz"/>
+    <figcaption><i>Sample log file data shown in SigNoz Logs Explorer</i></figcaption>
+</figure>
+
+</TabItem>
+
+</Tabs>

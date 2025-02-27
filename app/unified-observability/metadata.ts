@@ -41,15 +41,6 @@ export const metadata: Metadata = {
   ],
   alternates: {
     canonical: `${siteMetadata.siteUrl}/unified-observability/`,
-    languages: {
-      'en-US': `${siteMetadata.siteUrl}/unified-observability/`
-    },
-    types: {
-      'text/html': [
-        { url: `${siteMetadata.siteUrl}/unified-observability/` },
-        { url: `${siteMetadata.siteUrl}/guides/unified-observability/` }
-      ]
-    }
   },
   robots: {
     index: true,

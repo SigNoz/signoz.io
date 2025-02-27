@@ -8,31 +8,30 @@ hide_table_of_contents: true
 
 ## Overview
 
-This document provides a detailed walkthrough on how to send Serverless VPC Access Connector logs to SigNoz. By the end of this guide, you will have a setup that sends your VPC access logs to SigNoz.
+This document provides a detailed walkthrough on how to send Serverless VPC Access Connector logs to SigNoz. 
 
-<Tabs>
-<TabItem value="cloud" label="SigNoz Cloud" default>
+<Tabs entityName="plans">
+<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
 
-**Here's a quick summary of what we will be doing in this guide**
+{/* **Here's a quick summary of what we will be doing in this guide**
 
 * Create Serverless VPC Access Connector
 * Enable Flow Logs
 * Create Pub/Sub topic
 * Create Log Router to route the Cloud Storage logs to SigNoz
 * Create OTel Collector on Compute Engine instance to route logs from Pub/Sub topic to SigNoz Cloud
-* Send and Visualize the logs in SigNoz Cloud
+* Send and Visualize the logs in SigNoz Cloud */}
 
 ## Prerequisites
 
 * [Google Cloud account](https://console.cloud.google.com/) with administrative privilege, or Serverless VPC Access Admin and Compute Engine Admin privilege. You might also require access to create Cloud Function in case you are following the tutorial to create Serverless VPC Connector.
-* [SigNoz Cloud Account](https://signoz.io/teams/) (we are using SigNoz Cloud for this demonstration, we will also need ingestion details. To get your **Ingestion Key** and **Ingestion URL,** sign-in to your SigNoz Cloud Account and go to **Settings** >> **Ingestion Settings**)
 * Access to a project in GCP
 
 ## Setup
 
 ### Create Serverless VPC Access Connector
 
-Follow the [Creating Serverless VPC Access Connector](/docs/gcp-monitoring/vpc/vpc-connector-creation) document to create the serverless VPC access connector.
+Follow the [Creating Serverless VPC Access Connector](https://signoz.io/docs/gcp-monitoring/vpc/vpc-connector-creation/) document to create the serverless VPC access connector.
 
 ### Enable Flow Logs
 
@@ -85,11 +84,11 @@ Step 5: Click on **SAVE**. The flow logs are now enabled for the network in the 
 
 ### Create PubSub Topic
 
-Follow the steps mentioned in the [Creating Pub/Sub Topic](/docs/gcp-monitoring/bootstrapping/pubsub-topic-creation) document to create the Pub/Sub topic.
+Follow the steps mentioned in the [Creating Pub/Sub Topic](https://signoz.io/docs/gcp-monitoring/bootstrapping/pubsub-topic-creation/) document to create the Pub/Sub topic.
 
 ### Create Log Router to Pub/Sub Topic
 
-Follow the steps mentioned in the [Log Router Setup](/docs/gcp-monitoring/bootstrapping/log-router-setup) document to create the Log Router.
+Follow the steps mentioned in the [Log Router Setup](https://signoz.io/docs/gcp-monitoring/bootstrapping/log-router-setup/) document to create the Log Router.
 
 To ensure you filter out only the Compute Engine logs, use the following filter conditions:
 
@@ -99,7 +98,7 @@ resource.type="gce_subnetwork"
 
 ### Setup OTel Collector
 
-Follow the steps mentioned in the [Creating Compute Engine](/docs/gcp-monitoring/bootstrapping/gce-creation) document to create another Compute Engine instance. We will be installing OTel Collector on this instance.
+Follow the steps mentioned in the [Creating Compute Engine](https://signoz.io/docs/gcp-monitoring/bootstrapping/gce-creation/) document to create another Compute Engine instance. We will be installing OTel Collector on this instance.
 
 #### Install OTel Collector as agent
 
@@ -122,13 +121,13 @@ Let us now proceed to the OTel Collector installation:
 Step 1: Download otel-collector tar.gz for your architecture
 
 ```bash
-wget https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.88.0/otelcol-contrib_0.88.0_linux_amd64.tar.gz
+wget https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.116.0/otelcol-contrib_0.116.0_linux_amd64.tar.gz
 ```
 
 Step 2: Extract otel-collector tar.gz to the otelcol-contrib folder
 
 ```bash
-mkdir otelcol-contrib && tar xvzf otelcol-contrib_0.88.0_linux_amd64.tar.gz -C otelcol-contrib
+mkdir otelcol-contrib && tar xvzf otelcol-contrib_0.116.0_linux_amd64.tar.gz -C otelcol-contrib
 ```
 
 Step 3: Create `config.yaml` in the folder `otelcol-contrib` with the below content in it. Replace `<region>` with the appropriate SigNoz Cloud region. Replace `SIGNOZ_INGESTION_KEY` with what is provided by SigNoz:
@@ -212,28 +211,27 @@ Network Logs
 
 </TabItem>
 
-<TabItem value="self-host" label="Self-Host">
+<TabItem value='self-host' label='Self-Host'>
 
-**Here’s a quick summary of what we will be doing in this guide**
+{/* **Here’s a quick summary of what we will be doing in this guide**
 
 * Create Serverless VPC Access Connector
 * Enable Flow Logs
 * Create Pub/Sub topic
 * Create Log Router to route the Cloud Storage logs to SigNoz
 * Create OTel Collector on Compute Engine instance to route logs from Pub/Sub topic to SigNoz
-* Send and Visualize the logs in SigNoz
+* Send and Visualize the logs in SigNoz */}
 
 ## Prerequisites
 
 * [Google Cloud account](https://console.cloud.google.com/) with administrative privilege, or Serverless VPC Access Admin and Compute Engine Admin privilege. You might also require access to create Cloud Function in case you are following the tutorial to create Serverless VPC Connector.
 * Access to a project in GCP
-* Self-hosted SigNoz
 
 ## Setup
 
 ### Create Serverless VPC Access Connector
 
-Follow the [Creating Serverless VPC Access Connector](/docs/gcp-monitoring/vpc/vpc-connector-creation) document to create the serverless VPC access connector.
+Follow the [Creating Serverless VPC Access Connector](https://signoz.io/docs/gcp-monitoring/vpc/vpc-connector-creation/) document to create the serverless VPC access connector.
 
 ### Enable Flow Logs
 
@@ -286,11 +284,11 @@ Step 5: Click on **SAVE**. The flow logs are now enabled for the network in the 
 
 ### Create PubSub Topic
 
-Follow the steps mentioned in the [Creating Pub/Sub Topic](/docs/gcp-monitoring/bootstrapping/pubsub-topic-creation) document to create the Pub/Sub topic.
+Follow the steps mentioned in the [Creating Pub/Sub Topic](https://signoz.io/docs/gcp-monitoring/bootstrapping/pubsub-topic-creation/) document to create the Pub/Sub topic.
 
 ### Create Log Router to Pub/Sub Topic
 
-Follow the steps mentioned in the [Log Router Setup](/docs/gcp-monitoring/bootstrapping/log-router-setup) document to create the Log Router.
+Follow the steps mentioned in the [Log Router Setup](https://signoz.io/docs/gcp-monitoring/bootstrapping/log-router-setup/) document to create the Log Router.
 
 To ensure you filter out only the Compute Engine logs, use the following filter conditions:
 
@@ -300,7 +298,7 @@ resource.type="gce_subnetwork"
 
 ### Setup OTel Collector
 
-Follow the steps mentioned in the [Creating Compute Engine](/docs/gcp-monitoring/bootstrapping/gce-creation) document to create the Compute Engine instance. 
+Follow the steps mentioned in the [Creating Compute Engine](https://signoz.io/docs/gcp-monitoring/bootstrapping/gce-creation/) document to create the Compute Engine instance. 
 
 #### Install OTel Collector as agent
 
@@ -323,13 +321,13 @@ Let us now proceed to the OTel Collector installation:
 Step 1: Download otel-collector tar.gz for your architecture
 
 ```bash
-wget https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.88.0/otelcol-contrib_0.88.0_linux_amd64.tar.gz
+wget https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.116.0/otelcol-contrib_0.116.0_linux_amd64.tar.gz
 ```
 
 Step 2: Extract otel-collector tar.gz to the otelcol-contrib folder
 
 ```bash
-mkdir otelcol-contrib && tar xvzf otelcol-contrib_0.88.0_linux_amd64.tar.gz -C otelcol-contrib
+mkdir otelcol-contrib && tar xvzf otelcol-contrib_0.116.0_linux_amd64.tar.gz -C otelcol-contrib
 ```
 
 Step 3: Create `config.yaml` in the folder `otelcol-contrib` with the below content in it. We are using the `clickhouselogsexporter` in this case.

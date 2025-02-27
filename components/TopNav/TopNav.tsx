@@ -10,11 +10,14 @@ import SearchButton from '../SearchButton'
 import GitHubStars from '../GithubStars/GithubStars'
 import React from 'react'
 import DocsSidebar from '../DocsSidebar/DocsSidebar'
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import Banner from '../Banner/Banner'
 import Tabs from '../../app/resource-center/Shared/Tabs'
-import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from '@nextui-org/react'
+import { Popover, PopoverTrigger, PopoverContent } from '@nextui-org/react'
 import Accordion from '../Accordion/Accordion'
+import { Color } from '@signozhq/design-tokens'
+import { QUERY_PARAMS } from '@/constants/queryParams'
+import { ONBOARDING_SOURCE } from '@/constants/globals'
 
 enum TABS {
   BLOG = 'blog-tab',
@@ -42,7 +45,7 @@ const productDropdownItems = [
     key: 'Alerts',
     url: '/alerts-management',
     icon: '/img/index_features/concierge-bell_feature.svg',
-    description: 'Stay aware with alerts',
+    description: "Always know what's going on",
     name: 'Alerts',
     order: 5,
   },
@@ -50,7 +53,7 @@ const productDropdownItems = [
     key: 'DistributedTracing',
     url: '/distributed-tracing',
     icon: '/img/index_features/drafting-compass_feature.svg',
-    description: 'Track requests across services',
+    description: 'Track requests across your services',
     name: 'Distributed Tracing',
     order: 2,
   },
@@ -58,7 +61,7 @@ const productDropdownItems = [
     key: 'MetricsDashboards',
     url: '/metrics-and-dashboards',
     icon: '/img/index_features/layout-grid_feature.svg',
-    description: 'Monitor metrics & build dashboards',
+    description: 'Monitor key metrics and build dashboards',
     name: 'Metrics & Dashboards',
     order: 6,
   },
@@ -66,7 +69,7 @@ const productDropdownItems = [
     key: 'LogManagement',
     url: '/log-management',
     icon: '/img/index_features/logs_feature.svg',
-    description: 'Unlock insights from logs',
+    description: 'Unlock key insights from logs',
     name: 'Log Management',
     order: 3,
   },
@@ -79,12 +82,38 @@ const productDropdownItems = [
     order: 7,
   },
   {
+    key: 'InfraMonitoring',
+    url: '/docs/infrastructure-monitoring/overview/',
+    icon: '/img/index_features/boxes.svg',
+    description: 'Monitor your infrastructure',
+    name: 'Infrastructure Monitoring',
+    order: 4,
+  },
+  {
     key: 'ingest',
     url: '/blog/introducing-ingest-guard-feature/',
     icon: '/img/index_features/shield-plus.svg',
-    description: 'Control Observability Costs',
+    description: 'Control your observability costs',
     name: 'Ingest Guard',
-    order: 4,
+    order: 8,
+  }
+]
+
+const comparisionItems = [
+  {
+    key: 'signozvsdatadog',
+    url: '/product-comparison/signoz-vs-datadog/',
+    name: 'SigNoz vs DataDog',
+  },
+  {
+    key: 'signozvsgrafana',
+    url: '/product-comparison/signoz-vs-grafana/',
+    name: 'SigNoz vs Grafana',
+  },
+  {
+    key: 'signozvsnewrelic',
+    url: '/product-comparison/signoz-vs-newrelic/',
+    name: 'SigNoz vs New Relic',
   },
 ]
 
@@ -136,7 +165,7 @@ const resourcesDropdownItems = {
       url: '/dashboards/',
       description: 'Explore dashboard templates for your use cases',
       name: 'Dashboard Templates',
-    }
+    },
   ],
 }
 
@@ -187,6 +216,9 @@ export default function TopNav() {
   const [timeoutIdResources, setTimeoutIdResources] = useState<any>(null)
   const delay = 500
 
+  const searchParams = useSearchParams()
+  const source = searchParams.get(QUERY_PARAMS.SOURCE)
+
   // Product dropdown handlers
   const handleMouseEnterProduct = () => {
     clearTimeout(timeoutId)
@@ -208,6 +240,19 @@ export default function TopNav() {
     const id = setTimeout(() => setIsOpenResources(false), delay)
     setTimeoutIdResources(id)
   }
+
+  const handleProductDropdownClick = () => {
+    setIsOpen(false)
+  }
+
+  const handleResourcesDropdownClick = () => {
+    setIsOpenResources(false)
+  }
+
+  if (source === ONBOARDING_SOURCE) {
+    return null
+  }
+
   return (
     <div className="fixed left-0 right-0 z-30">
       <Banner />
@@ -243,14 +288,13 @@ export default function TopNav() {
                   onMouseLeave={handleMouseLeaveProduct}
                   className="flex items-center"
                 >
-                  <Dropdown
-                    className="px-4"
+                  <Popover
                     placement="bottom-start"
-                    classNames={{ base: 'top-[9px]' }}
+                    showArrow={false}
                     isOpen={isOpen}
-                    onMouseLeave={() => setIsOpen(false)}
+                    className="py-2.5"
                   >
-                    <DropdownTrigger>
+                    <PopoverTrigger>
                       <Button
                         className="truncate px-1.5 py-1 text-sm font-extralight hover:text-signoz_robin-500 "
                         onMouseEnter={() => setIsOpen(true)}
@@ -263,33 +307,108 @@ export default function TopNav() {
                           />
                         </div>
                       </Button>
-                    </DropdownTrigger>
-                    <DropdownMenu
-                      aria-label="Static Actions"
-                      classNames={{ list: 'pl-1 grid grid-cols-2 w-max gap-3 items-center h-auto' }}
-                      onMouseEnter={handleMouseEnterProduct}
-                      onMouseLeave={handleMouseLeaveProduct}
-                      topContent={
-                        <div className="px-4 py-2 text-[13px] font-semibold uppercase leading-5 text-[#3C4152]">
-                          Product
+                    </PopoverTrigger>
+                    <PopoverContent className="rounded-[4px] p-0">
+                      <div className="flex flex-row">
+                        <div className="flex flex-col gap-y-4 p-6">
+                          <div
+                            className={`text-[11px] font-semibold uppercase leading-[18px] tracking-[0.88px] text-[${Color.BG_SLATE_50}]`}
+                          >
+                            Product Modules
+                          </div>
+                          <div className="grid grid-cols-2 gap-x-3 gap-y-5">
+                            {productDropdownItems.map((item) => (
+                              <Link
+                                href={item.url}
+                                className="group flex h-auto items-center gap-4"
+                                key={item.key}
+                                onClick={handleProductDropdownClick}
+                              >
+                                <Image
+                                  src={item.icon}
+                                  alt={`${item.name}`}
+                                  width={20}
+                                  height={20}
+                                />
+                                <div>
+                                  <div className="flex flex-row items-center gap-1">
+                                    <span>{item.name}</span>{' '}
+                                    <ArrowRight
+                                      size={14}
+                                      className="opacity-0 group-hover:opacity-100"
+                                    />
+                                  </div>
+                                  <div
+                                    className={`line-clamp-2 max-w-[274px] text-xs text-[${Color.TEXT_VANILLA_400}]  group-hover:text-[#FFF]`}
+                                  >
+                                    {item.description}
+                                  </div>
+                                </div>
+                              </Link>
+                            ))}
+                          </div>
                         </div>
-                      }
-                    >
-                      {productDropdownItems.map((item) => (
-                        <DropdownItem key={item.key} className="h-auto">
-                          <Link href={item.url} className="flex items-center gap-4">
-                            <Image src={item.icon} alt={`${item.name}`} width={20} height={20} />
+                        <div
+                          className={`flex flex-col gap-y-6 rounded-r-[4px] border-l border-[${Color.BG_SLATE_400}] bg-[${Color.BG_INK_300}] p-6`}
+                        >
+                          <div className="flex flex-col gap-y-4">
+                            <Link
+                              href={'/case-study'}
+                              className={`flex flex-row items-center gap-1 text-[11px] font-semibold uppercase leading-[18px] tracking-[0.88px] text-[${Color.BG_SLATE_50}] hover:text-[#fff]`}
+                              onClick={handleProductDropdownClick}
+                            >
+                              <span>Customer Stories</span> <ArrowRight size={14} />
+                            </Link>
                             <div>
-                              <div>{item.name}</div>
-                              <div className="text-xs text-gray-400">{item.description}</div>
+                              <Link
+                                href={'/case-study/brainfish/'}
+                                className="group flex h-auto items-center gap-4"
+                                onClick={handleProductDropdownClick}
+                              >
+                                <Image
+                                  src={'/img/index_features/brainfish.svg'}
+                                  alt={''}
+                                  width={20}
+                                  height={20}
+                                />
+                                <div
+                                  className={`font-inter line-clamp-2 max-w-[274px] text-[${Color.TEXT_VANILLA_400}] group-hover:text-[#fff]`}
+                                >
+                                  How Brainfish leveraged SigNoz for effective Kubernetes monitoring
+                                </div>
+                              </Link>
                             </div>
-                          </Link>
-                        </DropdownItem>
-                      ))}
-                    </DropdownMenu>
-                  </Dropdown>
+                          </div>
+                          <div className="flex flex-col gap-y-4">
+                            <div
+                              className={`flex flex-row items-center gap-1 text-[11px] font-semibold uppercase leading-[18px] tracking-[0.88px] text-[${Color.BG_SLATE_50}]`}
+                            >
+                              <span>Compare Signoz</span>
+                            </div>
+                            <div
+                              className={`font-inter flex flex-col gap-1 text-[${Color.TEXT_VANILLA_400}]`}
+                            >
+                              {comparisionItems.map((comparisionItem) => (
+                                <Link
+                                  key={comparisionItem.key}
+                                  href={comparisionItem.url}
+                                  className="group flex flex-row items-center gap-1 hover:text-[#fff]"
+                                  onClick={handleProductDropdownClick}
+                                >
+                                  <span>{comparisionItem.name}</span>{' '}
+                                  <ArrowRight
+                                    className="opacity-0 group-hover:opacity-100"
+                                    size={14}
+                                  />
+                                </Link>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </PopoverContent>
+                  </Popover>
                 </div>
-
                 <Link
                   href="/docs"
                   className="flex items-center truncate px-1.5 py-1 text-sm font-normal hover:text-signoz_robin-500"
@@ -297,75 +416,101 @@ export default function TopNav() {
                   Docs
                 </Link>
 
-              <div
-                onMouseEnter={handleMouseEnterResources}
-                onMouseLeave={handleMouseLeaveResources}
-                className="flex items-center"
-              >
-                <Dropdown
-                  className="px-4"
-                  placement="bottom-start"
-                  classNames={{ base: 'top-[6px]' }}
-                  isOpen={isOpenResources}
-                  onMouseLeave={() => setIsOpenResources(false)}
+                <div
+                  onMouseEnter={handleMouseEnterResources}
+                  onMouseLeave={handleMouseLeaveResources}
+                  className="flex items-center"
                 >
-                  <DropdownTrigger>
-                    <Button
-                      className="truncate px-1.5 py-1 text-sm !font-extralight leading-7 text-signoz_vanilla-100 hover:text-signoz_robin-500"
-                      onMouseEnter={() => setIsOpenResources(true)}
-                    >
-                      <div className="flex items-center">
-                        Resources
-                        <ChevronDown
-                          size={12}
-                          className={`ml-1 transform transition-transform duration-300 ease-in-out ${isOpenResources ? 'rotate-180' : 'rotate-0'}`}
-                        />
-                      </div>
-                    </Button>
-                  </DropdownTrigger>
-                  <DropdownMenu
-                    aria-label="Static Actions"
-                    classNames={{
-                      list: 'pl-0 w-max grid grid-cols-2 min-w-[600px]',
-                      base: 'py-0'
-                    }}
-                    onMouseEnter={handleMouseEnterResources}
-                    onMouseLeave={handleMouseLeaveResources}
+                  <Popover
+                    placement="bottom-start"
+                    showArrow={false}
+                    isOpen={isOpenResources}
+                    className="py-2.5"
                   >
-                    <DropdownItem className="h-auto items-start data-[hover=true]:bg-transparent">
-                      <div className="px-1 pt-2 pb-0">
-                        <div className="mb-2 text-[13px] font-semibold uppercase text-[#3C4152]">
-                          Learn
+                    <PopoverTrigger>
+                      <Button
+                        className="truncate px-1.5 py-1 text-sm font-extralight hover:text-signoz_robin-500 "
+                        onMouseEnter={() => setIsOpenResources(true)}
+                      >
+                        <div className="flex items-center">
+                          Resources
+                          <ChevronDown
+                            size={12}
+                            className={`ml-1 transform transition-transform duration-300 ease-in-out ${isOpenResources ? 'rotate-180' : 'rotate-0'}`}
+                          />
                         </div>
-                        {resourcesDropdownItems.learn.map((item) => (
-                          <Link key={item.key} href={item.url} className="flex items-center gap-4 px-2 py-2 rounded-small group hover:bg-default hover:text-default-foreground transition-colors">
-                            <div>
-                              <div>{item.name}</div>
-                              <div className="text-xs text-gray-400">{item.description}</div>
-                            </div>
-                          </Link>
-                        ))}
-                      </div>
-                    </DropdownItem>
-                    
-                    <DropdownItem className="h-auto items-start data-[hover=true]:bg-transparent">
-                      <div className="px-1 pt-2 pb-0">
-                        <div className="mb-2 text-[13px] font-semibold uppercase text-[#3C4152]">
-                          Explore
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="rounded-[4px] p-0">
+                      <div className="flex flex-row">
+                        <div className="flex flex-col gap-y-4 p-6">
+                          <div
+                            className={`text-[11px] font-semibold uppercase leading-[18px] tracking-[0.88px] text-[${Color.BG_SLATE_50}]`}
+                          >
+                            Learn
+                          </div>
+                          <div className="grid grid-cols-1 gap-x-3 gap-y-5">
+                            {resourcesDropdownItems.learn.map((item) => (
+                              <Link
+                                href={item.url}
+                                className="group flex h-auto items-center gap-4"
+                                key={item.key}
+                                onClick={handleResourcesDropdownClick}
+                              >
+                                <div>
+                                  <div className="flex flex-row items-center gap-1">
+                                    <span>{item.name}</span>{' '}
+                                    <ArrowRight
+                                      size={14}
+                                      className="opacity-0 group-hover:opacity-100"
+                                    />
+                                  </div>
+                                  <div
+                                    className={`line-clamp-2 max-w-[274px] text-xs text-[${Color.TEXT_VANILLA_400}]  group-hover:text-[#FFF]`}
+                                  >
+                                    {item.description}
+                                  </div>
+                                </div>
+                              </Link>
+                            ))}
+                          </div>
                         </div>
-                        {resourcesDropdownItems.explore.map((item) => (
-                          <Link key={item.key} href={item.url} className="flex items-center gap-4 px-2 py-2 rounded-small group hover:bg-default hover:text-default-foreground transition-colors">
-                            <div>
-                              <div>{item.name}</div>
-                              <div className="text-xs text-gray-400">{item.description}</div>
-                            </div>
-                          </Link>
-                        ))}
+                        <div className="flex flex-col gap-y-4 p-6">
+                          <div
+                            className={`text-[11px] font-semibold uppercase leading-[18px] tracking-[0.88px] text-[${Color.BG_SLATE_50}]`}
+                          >
+                            Explore
+                          </div>
+                          <div className="grid grid-cols-1 gap-x-3 gap-y-5">
+                            {resourcesDropdownItems.explore.map((item) => (
+                              <Link
+                                href={item.url}
+                                className="group flex h-auto items-center gap-4"
+                                key={item.key}
+                                onClick={handleResourcesDropdownClick}
+                              >
+                                <div>
+                                  <div className="flex flex-row items-center gap-1">
+                                    <span>{item.name}</span>{' '}
+                                    <ArrowRight
+                                      size={14}
+                                      className="opacity-0 group-hover:opacity-100"
+                                    />
+                                  </div>
+                                  <div
+                                    className={`line-clamp-2 max-w-[274px] text-xs text-[${Color.TEXT_VANILLA_400}]  group-hover:text-[#FFF]`}
+                                  >
+                                    {item.description}
+                                  </div>
+                                </div>
+                              </Link>
+                            ))}
+                          </div>
+                        </div>
                       </div>
-                    </DropdownItem>
-                  </DropdownMenu>
-                </Dropdown>
-              </div>
+                    </PopoverContent>
+                  </Popover>
+                </div>
 
                 <Link
                   href="/pricing"
@@ -468,7 +613,13 @@ export default function TopNav() {
                       Documentation
                     </Link>
 
-                    <Accordion topic="Resources" subtopics={[...resourcesDropdownItems.learn, ...resourcesDropdownItems.explore]} />
+                    <Accordion
+                      topic="Resources"
+                      subtopics={[
+                        ...resourcesDropdownItems.learn,
+                        ...resourcesDropdownItems.explore,
+                      ]}
+                    />
                     <Link
                       href="/pricing"
                       className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 hover:bg-signoz_ink-200"

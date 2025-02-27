@@ -3,14 +3,12 @@ date: 2024-06-06
 id: nestjs
 title: Nestjs OpenTelemetry Instrumentation
 description: Learn how to instrument your Nestjs application with OpenTelemetry and send telemetry data to SigNoz
-
+hide_table_of_contents: true
 ---
 
-import InstrumentationFAQ from '@/components/shared/instrumentation-faq.md'
+{/* import InstrumentationFAQ from '@/components/shared/instrumentation-faq.md' */}
 import NestjsPinnedVersions from '@/components/shared/nestjs-version-pin.mdx'
 
-
-This document contains instructions on how to set up OpenTelemetry instrumentation in your Nestjs applications. OpenTelemetry, also known as OTel for short, is an open source observability framework that can help you generate and collect telemetry data - traces, metrics, and logs from your Nestjs application.
 
 ## Requirements
 
@@ -18,6 +16,10 @@ This document contains instructions on how to set up OpenTelemetry instrumentati
 
 - `>=4.0.0`
 
+This document contains instructions on how to set up OpenTelemetry instrumentation in your Nestjs applications and view your application traces in SigNoz.
+
+<Tabs entityName="plans">
+<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
 ## Send traces to SigNoz Cloud
 
 Based on your application environment, you can choose the setup below to send traces to SigNoz Cloud.
@@ -27,10 +29,10 @@ Based on your application environment, you can choose the setup below to send tr
 
 From VMs, there are two ways to send data to SigNoz Cloud.
 
-- [Send traces directly to SigNoz Cloud](#send-traces-directly-to-signoz-cloud)
+- Send traces directly to SigNoz Cloud
   - [No Code Automatic Instrumentation](#send-traces-directly-to-signoz-cloud---no-code-automatic-instrumentation-recommended) (recommended)
   - [Code Level Automatic Instrumentation](#send-traces-directly-to-signoz-cloud---code-level-automatic-instrumentation)
-- [Send traces via OTel Collector binary](#send-traces-via-otel-collector-binary) (recommended)
+- Send traces via OTel Collector binary (recommended)
   - [No Code Automatic Instrumentation](#send-traces-via-otel-collector-binary---no-code-automatic-instrumentation) (recommended)
   - [Code Level Automatic Instrumentation](#send-traces-via-otel-collector-binary---code-level-automatic-instrumentation)
 
@@ -47,21 +49,17 @@ npm install --save @opentelemetry/auto-instrumentations-node
 
 ```bash
 export OTEL_TRACES_EXPORTER="otlp"
-export OTEL_EXPORTER_OTLP_ENDPOINT="<SIGNOZ_ENDPOINT>"
+export OTEL_EXPORTER_OTLP_ENDPOINT="ingest.<region>.signoz.cloud:443"
 export OTEL_NODE_RESOURCE_DETECTORS="env,host,os"
 export OTEL_SERVICE_NAME="<APP_NAME>"
-export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
 export NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
 <your_run_command>
 ```
-
-| Variable              | Description                                               |
-|-----------------------|-----------------------------------------------------|
-| APP_NAME *      | Name you want to give to your rust application  |
-| SIGNOZ_ENDPOINT  *     | This is ingestion URL which you must have got in mail after registering on SigNoz cloud  |
-| SIGNOZ_INGESTION_KEY *  | This is Ingestion Key which you must have got in mail after registering on SigNoz cloud                                     |
-
-replace `<your_run_command>` with the run command of your application
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service_name>` is name of your service
+- replace `<your_run_command>` with the run command of your application
 
 #### Send traces directly to SigNoz Cloud - Code Level Automatic Instrumentation
 
@@ -90,7 +88,7 @@ import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
 // Enable all auto-instrumentations from the meta package
 const exporterOptions = {
   //highlight-start
-  url: 'https://ingest.{region}.signoz.cloud:443/v1/traces',
+  url: 'https://ingest.<region>.signoz.cloud:443/v1/traces',
   //highlight-end
 };
 
@@ -118,17 +116,8 @@ process.on('SIGTERM', () => {
 
 export default sdk;
 ```
-- `<service_name>` : Name of your service.
-
-Depending on the choice of your region for SigNoz cloud, the ingest endpoint will vary according to this table.
-
-| Region | Endpoint |
-| --- | --- |
-| US |	ingest.us.signoz.cloud:443/v1/traces |
-| IN |	ingest.in.signoz.cloud:443/v1/traces |
-| EU | ingest.eu.signoz.cloud:443/v1/traces |
-
-
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<service_name>` is name of your service
 
 **Step 3.** On `main.ts` file or file where your app starts import tracer using below command.
   <Admonition type="info">
@@ -151,7 +140,7 @@ import { AppModule } from './app.module';
   // OpenTelemetry automatic instrumentation must go here.
 
 async function bootstrap() {
-    // highlight-start
+  // highlight-start
     await tracer.start();
     //highlight-end
     const app = await NestFactory.create(AppModule);
@@ -163,12 +152,12 @@ async function bootstrap() {
 **Step 5.** Run the application
 
 ```
-OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>" nest start
+OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>" nest start
 ```
 
-The data captured with OpenTelemetry from your application should start showing on the SigNoz dashboard.
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 
-`SIGNOZ_INGESTION_KEY` is the API token provided by SigNoz. You can find your ingestion key from SigNoz cloud account details sent on your email.
+The data captured with OpenTelemetry from your application should start showing on the SigNoz dashboard.
 
 **Step 6.** You can validate if your application is sending traces to SigNoz cloud [here](#validating-instrumentation-by-checking-for-traces).
 
@@ -320,7 +309,7 @@ In case you encounter an issue where all applications do not get listed in the s
 </TabItem>
 <TabItem value="k8s" label="Kubernetes">
 
-For Javascript application deployed on Kubernetes, you need to install OTel Collector agent in your k8s infra to collect and send traces to SigNoz Cloud. You can find the instructions to install OTel Collector agent [here](/docs/tutorial/kubernetes-infra-metrics/).
+For Javascript application deployed on Kubernetes, you need to install OTel Collector agent in your k8s infra to collect and send traces to SigNoz Cloud. You can find the instructions to install OTel Collector agent [here](https://signoz.io/docs/tutorial/kubernetes-infra-metrics/).
 
 Once you have set up OTel Collector agent, you can proceed with OpenTelemetry Javascript instrumentation by following either of the two:
 
@@ -459,10 +448,10 @@ In case you encounter an issue where all applications do not get listed in the s
 
 From Windows, there are two ways to send data to SigNoz Cloud.
 
-- [Send traces directly to SigNoz Cloud](#send-traces-directly-to-signoz-cloud)
+- Send traces directly to SigNoz Cloud
   - [No Code Automatic Instrumentation](#send-traces-directly-to-signoz-cloud---no-code-automatic-instrumentation-recommended-3) (recommended)
   - [Code Level Automatic Instrumentation](#send-traces-directly-to-signoz-cloud---code-level-automatic--instrumentation)
-- [Send traces via OTel Collector binary](#send-traces-via-otel-collector-binary) (recommended)
+- Send traces via OTel Collector binary (recommended)
   - [No Code Automatic Instrumentation](#send-traces-directly-to-signoz-cloud---no-code-automatic-instrumentation-recommended-4) (recommended)
   - [Code Level Automatic Instrumentation](#send-traces-via-otel-collector-binary---code-level-automatic-instrumentation-1)
 
@@ -479,21 +468,17 @@ npm install --save @opentelemetry/auto-instrumentations-node
 
 ```bash
 $env:OTEL_TRACES_EXPORTER="otlp"
-$env:OTEL_EXPORTER_OTLP_ENDPOINT="<SIGNOZ_ENDPOINT>"
+$env:OTEL_EXPORTER_OTLP_ENDPOINT="ingest.<region>.signoz.cloud:443"
 $env:OTEL_NODE_RESOURCE_DETECTORS="env,host,os"
-$env:OTEL_SERVICE_NAME="<APP_NAME>"
-$env:OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>"
+$env:OTEL_SERVICE_NAME="<service_name>"
+$env:OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
 $env:NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
 <your_run_command>
 ```
 
-| Variable              | Description                                               |
-|-----------------------|-----------------------------------------------------|
-| APP_NAME *      | Name you want to give to your rust application  |
-| SIGNOZ_ENDPOINT  *     | This is ingestion URL which you must have got in mail after registering on SigNoz cloud  |
-| SIGNOZ_INGESTION_KEY *  | This is Ingestion Key which you must have got in mail after registering on SigNoz cloud                                     |
-
-replace `<your_run_command>` with the run command of your application
+  - Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service_name>` is name of your service
 
 #### Send traces directly to SigNoz Cloud - Code Level Automatic  Instrumentation
 
@@ -522,8 +507,8 @@ import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
 // Enable all auto-instrumentations from the meta package
 const exporterOptions = {
   //highlight-start
-  url: 'https://ingest.{region}.signoz.cloud:443/v1/traces',
-  headers: { 'signoz-ingestion-key': '<signoz_ingestion_key>' },
+  url: 'https://ingest.<region>.signoz.cloud:443/v1/traces',
+  headers: { 'signoz-ingestion-key': '<your-ingestion-key>' },
   //highlight-end
 };
 
@@ -551,19 +536,12 @@ process.on('SIGTERM', () => {
 
 export default sdk;
 ```
-- `<service_name>` : Name of your service.
-- `<signoz_ingestion_key>` : API token provided by SigNoz. You can find your ingestion key from SigNoz cloud account details sent on your email.
+
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service_name>` is name of your service
 
 OpenTelemetry Node SDK currently does not detect the headers from `.env` files as of today. That’s why we need to include the variables in the `tracer.js` file itself.
-
-Depending on the choice of your region for SigNoz cloud, the ingest endpoint will vary according to this table.
-
-| Region | Endpoint |
-| --- | --- |
-| US |	ingest.us.signoz.cloud:443/v1/traces |
-| IN |	ingest.in.signoz.cloud:443/v1/traces |
-| EU | ingest.eu.signoz.cloud:443/v1/traces |
-
 
 
 **Step 3.** On `main.ts` file or file where your app starts import tracer using below command.
@@ -755,7 +733,8 @@ In case you encounter an issue where all applications do not get listed in the s
 </TabItem>
 
 </Tabs>
-
+</TabItem>
+<TabItem value='self-host' label='Self-Host'>
 ## Send Traces to Self-Hosted SigNoz
 
 There are three major steps to using OpenTelemetry:
@@ -764,10 +743,10 @@ There are three major steps to using OpenTelemetry:
 - Configuring exporter to send data to SigNoz
 - Validating that configuration to ensure that data is being sent as expected.
 
-<figure data-zoomable align='center'>
+{/* <figure data-zoomable align='center'>
     <img src="/img/docs/nestjs_instrumentation.webp" alt="All in one auto instrumentation library - identifies and instruments packages used by your NestJS application"/>
     <figcaption><i>All in one auto instrumentation library - identifies and instruments packages used by your NestJS application</i></figcaption>
-  </figure>
+  </figure> */}
 
 
 You have two choices for instrumenting your NestJS application with OpenTelemetry.
@@ -887,7 +866,8 @@ Internally, it calls the specific auto-instrumentation library for components us
   
   In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#troubleshooting-your-installation).
     
-
+</TabItem>
+</Tabs>
 ### Validating instrumentation by checking for traces
 
 With your application running, you can verify that you’ve instrumented your application with OpenTelemetry correctly by confirming that tracing data is being reported to SigNoz.
@@ -900,15 +880,15 @@ Validate your traces in SigNoz:
 2. In SigNoz, open the `Services` tab. Hit the `Refresh` button on the top right corner, and your application should appear in the list of `Applications`.
 3. Go to the `Traces` tab, and apply relevant filters to see your application’s traces.
 
-You might see other dummy applications if you’re using SigNoz for the first time. You can remove it by following the docs [here](https://signoz.io/docs/operate/docker-standalone/#remove-the-sample-application).
+{/* You might see other dummy applications if you’re using SigNoz for the first time. You can remove it by following the docs [here](https://signoz.io/docs/operate/docker-standalone/#remove-the-sample-application). */}
 
-<figure data-zoomable align='center'>
+{/* <figure data-zoomable align='center'>
     <img src="/img/docs/nestjs_application_instrumented.webp" alt="Nestjs Application in the list of services being monitored in SigNoz"/>
     <figcaption><i>Nestjs Application in the list of services being monitored in SigNoz</i></figcaption>
-</figure>
+</figure> */}
 
 
-If you don't see your application reported in the list of services, try our [troubleshooting](https://signoz.io/docs/install/troubleshooting/) guide.
+{/* If you don't see your application reported in the list of services, try our [troubleshooting](https://signoz.io/docs/install/troubleshooting/) guide. */}
 
 
 ### Using a specific auto-instrumentation library
@@ -923,7 +903,7 @@ npm install --save @opentelemetry/instrumentation-nestjs-core
 In the above case, you will have to install packages for all the components that you want to instrument with OpenTelemetry individually. You can find detailed instructions [here](https://signoz.io/docs/instrumentation/javascript/#using-a-specific-auto-instrumentation-library).
 </Admonition>
 
-## Instrumentation Modules for Databases
+{/* ## Instrumentation Modules for Databases
 
 The `@opentelemetry/auto-instrumentations-node` can inititialize instrumentation for popular databases. Hence it’s recommended to [get started](#using-the-all-in-one-auto-instrumentation-library) with it.
 
@@ -990,7 +970,8 @@ Module that provides automatic instrumentation for Memcached:
 
 ```jsx
 npm install --save @opentelemetry/instrumentation-memcached
-```
+``` 
+*/}
 
 ## Troubleshooting your installation
 
@@ -1051,14 +1032,14 @@ opentelemetry.trace.getTracer('your_tracer_name').getActiveSpanProcessor().shutd
 - We have included a sample NestJs application with README.md at [Sample NestJs App Github Repo.](https://github.com/SigNoz/sample-NestJs-app)
 
 
-## Further Reading
+{/* ## Further Reading
 
 - [Nodejs Performance Monitoring](https://signoz.io/blog/nodejs-performance-monitoring/)
 - [Implementing Distributed Tracing in a Nodejs application](https://signoz.io/blog/distributed-tracing-nodejs/)
+ */}
 
 
-
-<InstrumentationFAQ />
+{/* <InstrumentationFAQ /> */}
 
 
 

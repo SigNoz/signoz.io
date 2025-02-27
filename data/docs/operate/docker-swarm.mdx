@@ -9,6 +9,11 @@ import SigNozCloud from '@/components/shared/signoz-cloud.mdx'
 
 <SigNozCloud />
 
+## Prerequisite
+
+- Self-Hosted [SigNoz installed](https://signoz.io/docs/install/docker/) 
+- Change directory to `deploy/docker-swarm`
+
 Once you have successfully installed SigNoz on Docker Swarm, the following sections provide an overview of the activities that are required to successfully operate SigNoz.
 
 ## Stop/Start SigNoz Cluster
@@ -16,13 +21,13 @@ Once you have successfully installed SigNoz on Docker Swarm, the following secti
 To stop SigNoz cluster:
 
 ```bash
-docker stack rm signoz
+docker service scale signoz_otel-collector=0 signoz_alertmanager=0 signoz_query-service=0 signoz_schema-migrator=0 signoz_init-clickhouse=0 signoz_clickhouse=0 signoz_zookeeper-1=0
 ```
 
 To start/resume SigNoz cluster:
 
 ```bash
-docker stack deploy -c docker-swarm/clickhouse-setup/docker-compose.yaml signoz
+docker stack deploy --prune -d -c docker-compose.yaml signoz
 ```
 
 <Admonition>
@@ -36,7 +41,7 @@ To upgrade, you can manually update the image tag for `query-service`, `frontend
 And run the command to start the cluster:
 
 ```bash
-docker stack deploy -c docker-swarm/clickhouse-setup/docker-compose.yaml signoz
+docker stack deploy -c docker-compose.yaml signoz
 ```
 
 <Admonition>
@@ -54,9 +59,11 @@ docker stack rm signoz
 
 ## Scale Up SigNoz Cluster
 
-SigNoz uses the [OpenTelemetry Collector](https://github.com/open-telemetry/opentelemetry-collector) to ingest data. By default, the instructions in the [Install SigNoz on Docker Swarm](/docs/install/docker-swarm) document create three replicas, and each replica can handle 50K spans per second. To handle an increased load, perform the following steps:
+SigNoz uses the [OpenTelemetry Collector](https://github.com/open-telemetry/opentelemetry-collector) to ingest data.
+By default, the instructions in the [Install SigNoz on Docker Swarm](/docs/install/docker-swarm) document create
+three replicas, and each replica can handle 50K spans per second. To handle an increased load, perform the following steps:
 
-1. Open the `deploy/docker-swarm/clickhouse-setup/docker-compose.yaml` file in a plain-text editor.
+1. Open the `deploy/docker-swarm/docker-compose.yaml` file in a plain-text editor.
 
 2. In the `services.otel-collector.deploy.replicas` field, enter the number of replicas you wish to create. The following example creates four replicas:
 
@@ -64,6 +71,6 @@ SigNoz uses the [OpenTelemetry Collector](https://github.com/open-telemetry/open
 
 3. Update the `signoz` stack by entering the following command:
 
-    ```bash
-  docker stack deploy -c docker-swarm/clickhouse-setup/docker-compose.yaml signoz
-    ```
+  ```bash
+  docker stack deploy --prune -d -c docker-compose.yaml signoz
+  ```

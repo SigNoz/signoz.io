@@ -2,161 +2,181 @@
 date: 2024-06-06
 title: FluentD to SigNoz
 id: fluentd_to_signoz
+hide_table_of_contents: true
 ---
 
+If you use FluentD to collect logs in your stack, this tutorial will help you send logs from FluentD to SigNoz.
 
+SigNoz uses the OpenTelemetry collector to receive logs, which supports the `fluentforward` protocol. You can forward your logs from your FluentD agent to the OpenTelemetry collector.
 
-If you use fluentD to collect logs in your stack with this tutotrial you will be able to send logs from fluentD to SigNoz.
+<Tabs entityName="plans">
+<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
 
-At SigNoz we use opentelemetry collector to recieve logs which supports the fluentforward protocol. So you can forward your logs from your fluentD agent to opentelemetry collector.
+### Collect Logs Using FluentD in SigNoz Cloud
 
-### Collect Logs Using FluentD in SigNoz cloud
-  * Add otel collector binary to your VM by following this [guide](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/).
+1. **Add OpenTelemetry Collector Binary**
 
-  * Add fluentforward reciever to your `config.yaml` 
-    ```yaml
-    receivers:
-      fluentforward:
-        endpoint: 0.0.0.0:24224
-    ```
-    Here we have used port 24224 for listening in fluentforward protocol, but you can change it to a port you want.
-    You can read more about fluentforward receiver [here](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/fluentforwardreceiver).
+   Follow this [guide](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) to add the OpenTelemetry collector binary to your VM.
 
-  * Modify your `config.yaml` and add the above receiver
-    ```yaml {4}
-    service:
-        ....
-        logs:
-            receivers: [otlp, fluentforward]
-            processors: [batch]
-            exporters: [otlp]
-    ```
-  
-  * Add the following to your fluentD config to forward the logs to otel collector.
-    ```
-    <match <directive>>
-      @type forward
-      send_timeout 60s
-      recover_wait 10s
-      hard_timeout 60s
+2. **Configure FluentForward Receiver**
 
-      <server>
-        name myserver1
-        host localhost
-        port 24224
-      </server>
-    </match>
-    ```
-    In this config we are matching a directive and forwarding logs to the otel collector which is listening on  port 24224. Replace `<directive>` with your directive name.
-    Also we are assuming that you are running the fluentD binary on the host. If not, the value of `host` might change depending on your environment. 
-  *  Once you make this changes you can restart fluentD and otel-binary, and you will be able to see the logs in SigNoz.
-    
-  *  To properly transform your existing log model into opentelemetry [log](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/logs/data-model.md) model you can use the different processors provided by opentelemetry. [link](/docs/userguide/logs#processors-available-for-processing-logs)
-  
-    eg:- 
-    ```yaml
-    processors:
-      logstransform:
-        operators:
-          - type: trace_parser
-            trace_id:
-              parse_from: attributes.trace_id
-            span_id:
-              parse_from: attributes.span_id
-          - type: remove
-            field: attributes.trace_id
-          - type: remove
-            field: attributes.span_id
-    ```
-    The operations in the above processor will parse the trace_id and span_id from log to opentelemetry log model and remove them from attributes.
+   Add the following to your `config.yaml`:
+   ```yaml
+   receivers:
+     fluentforward:
+       endpoint: 0.0.0.0:24224
+   ```
+  You can change the port if needed. Learn more about the `fluentforward` receiver [here](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/fluentforwardreceiver).
 
-## Collect Logs Using FluentD in Self-Hosted SigNoz
-### Steps to recieve logs from FluentD:
-* Add fluentforward reciever to your `otel-collector-config.yaml` which is present inside `deploy/docker/clickhouse-setup`
-    ```
-    receivers:
-      fluentforward:
-        endpoint: 0.0.0.0:24224
-    ```
-    Here we have used port 24224 for listening in fluentforward protocol, but you can change it to a port you want.
-    You can read more about fluentforward receiver [here](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/fluentforwardreceiver).
+3. **Modify the Service Section**
 
-* Uncomment the exporter and pipleline for logs and make the following change in `otel-collector-config.yaml`
-    ```yaml
-    exporters:
-      ...
-      
-      clickhouselogsexporter:
-      dsn: tcp://clickhouse:9000/
-      timeout: 5s
-      sending_queue:
-        queue_size: 100
-      retry_on_failure:
-        enabled: true
-        initial_interval: 5s
-        max_interval: 30s
-        max_elapsed_time: 300s
-      
-      ...
+   Update your `config.yaml`:
+   ```yaml
+   service:
+       ...
+       logs:
+           receivers: [otlp, fluentforward]
+           processors: [batch]
+           exporters: [otlp]
+   ```
 
-    service:
-      ...
+4. **Update FluentD Configuration**
 
-      logs:
-        receivers: [ otlp, fluentforward ]
-        processors: [ batch ]
-        exporters: [  clickhouselogsexporter ]
-    ```
-    Here we are adding our clickhouse exporter and creating a pipeline which will collect logs from `fluentforward` receiver, processing it using batch processor and export it to clickhouse.
+   Add the following to your FluentD configuration to forward logs to the OpenTelemetry collector:
+   ```
+   <match <directive>>
+     @type forward
+     send_timeout 60s
+     recover_wait 10s
+     hard_timeout 60s
 
-* Expose the port in port for otel-collector in `docker-compose-core.yaml` file present in `deploy/docker/clickhouse-setup`
-  ```yaml
-  otel-collector:
-    ...
-    ports:
-      - "24224:24224"
-  ```
+     <server>
+       name myserver1
+       host localhost
+       port 24224
+     </server>
+   </match>
+   ```
+   Replace `<directive>` with your directive name. If FluentD is not running on the host, adjust the `host` value accordingly.
 
-* Change the fluentD config to forward the logs to otel collector.
-    ```
-    <source>
-      @type sample
-      sample [{"message": "my log data", "source": "myhost"}, {"message": "my log data 1", "source": "myhost1"}]
-      tag sample
-      rate 10000
-    </source>
+5. **Restart Services**
 
-    <match sample>
-      @type forward
-      send_timeout 60s
-      recover_wait 10s
-      hard_timeout 60s
+   Restart FluentD and the OpenTelemetry collector binary. Logs should now appear in SigNoz.
 
-      <server>
-        name myserver1
-        host <otel-collector-host>
-        port 24224
-      </server>
-    </match>
-    ```
-    In this example we are generating sample logs and then forwarding them to the otel collector which is listening on  port 24224.
-    `<otel-collector-host>` has to be replaced by the host where otel-collector is running. For more info check [troubleshooting](/docs/install/troubleshooting#signoz-otel-collector-address-grid). 
-*  Once you make this changes you can restart fluentD and SignNoz, and you will be able to see the logs in SigNoz.
-*  To properly transform your existing log model into opentelemetry [log](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/logs/data-model.md) model you can use the different processors provided by opentelemetry. [link](/docs/userguide/logs#processors-available-for-processing-logs)
-  
-    eg:- 
-    ```yaml
-    processors:
-      logstransform:
-        operators:
-          - type: trace_parser
-            trace_id:
-              parse_from: attributes.trace_id
-            span_id:
-              parse_from: attributes.span_id
-          - type: remove
-            field: attributes.trace_id
-          - type: remove
-            field: attributes.span_id
-    ```
-    The operations in the above processor will parse the trace_id and span_id from log to opentelemetry log model and remove them from attributes.
+6. **Transform Logs to OpenTelemetry Model**
+
+   Use processors in OpenTelemetry to transform logs. Example:
+   ```yaml
+   processors:
+     logstransform:
+       operators:
+         - type: trace_parser
+           trace_id:
+             parse_from: attributes.trace_id
+           span_id:
+             parse_from: attributes.span_id
+         - type: remove
+           field: attributes.trace_id
+         - type: remove
+           field: attributes.span_id
+   ```
+
+</TabItem>
+
+<TabItem value='self-host' label='Self-Host'>
+
+### Collect Logs Using FluentD in Self-Hosted SigNoz
+
+1. **Configure FluentForward Receiver**
+   Add the following to your `otel-collector-config.yaml` (inside `deploy/docker`):
+   ```yaml
+   receivers:
+     fluentforward:
+       endpoint: 0.0.0.0:24224
+   ```
+  You can change the port if needed. Learn more about the `fluentforward` receiver [here](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/fluentforwardreceiver).
+
+2. **Update Exporter and Pipeline**
+
+   Uncomment the exporter and pipeline for logs in `otel-collector-config.yaml` and make the following changes:
+   ```yaml
+   exporters:
+     ...
+     clickhouselogsexporter:
+       dsn: tcp://clickhouse:9000/
+       timeout: 5s
+       sending_queue:
+         queue_size: 100
+       retry_on_failure:
+         enabled: true
+         initial_interval: 5s
+         max_interval: 30s
+         max_elapsed_time: 300s
+
+   service:
+     ...
+     logs:
+       receivers: [otlp, fluentforward]
+       processors: [batch]
+       exporters: [clickhouselogsexporter]
+   ```
+
+3. **Expose Collector Port**
+
+   Modify `docker-compose-core.yaml` to expose the port for the OpenTelemetry collector:
+   ```yaml
+   otel-collector:
+     ...
+     ports:
+       - "24224:24224"
+   ```
+
+4. **Update FluentD Configuration**
+   Update your FluentD configuration:
+   ```
+   <source>
+     @type sample
+     sample [{"message": "my log data", "source": "myhost"}, {"message": "my log data 1", "source": "myhost1"}]
+     tag sample
+     rate 10000
+   </source>
+
+   <match sample>
+     @type forward
+     send_timeout 60s
+     recover_wait 10s
+     hard_timeout 60s
+
+     <server>
+       name myserver1
+       host <otel-collector-host>
+       port 24224
+     </server>
+   </match>
+   ```
+   Replace `<otel-collector-host>` with the host where the OpenTelemetry collector is running. For troubleshooting, check [here](/docs/install/troubleshooting#signoz-otel-collector-address-grid).
+
+5. **Restart Services**
+
+   Restart FluentD and SigNoz. Logs should now appear in SigNoz.
+
+6. **Transform Logs to OpenTelemetry Model**
+
+   Use processors in OpenTelemetry to transform logs. Example:
+   ```yaml
+   processors:
+     logstransform:
+       operators:
+         - type: trace_parser
+           trace_id:
+             parse_from: attributes.trace_id
+           span_id:
+             parse_from: attributes.span_id
+         - type: remove
+           field: attributes.trace_id
+         - type: remove
+           field: attributes.span_id
+   ```
+
+</TabItem>
+</Tabs>

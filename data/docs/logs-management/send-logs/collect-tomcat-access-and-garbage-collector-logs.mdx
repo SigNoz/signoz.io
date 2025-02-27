@@ -1,234 +1,170 @@
 ---
-date: 2024-06-12
+date: 2024-12-17
 title: Collecting Tomcat Access and Garbage Collector Logs
 id: collect-tomcat-access-and-garbage-collector-logs
+hide_table_of_contents: true
 ---
+
 ## Overview
+You can configure OpenTelemetry Collector to read Tomcat Server Access and Garbage Collector logs and push them to SigNoz for analysis.
 
-This documentation provides detailed instructions about configuring the OpenTelemetry Collector to read Tomcat Server Access and Garbage Collector logs and push them to SigNoz, enabling you to analyze them effectively.
+<Tabs entityName="plans">
+<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
 
-## Sample Log
-Here is how the Tomcat Access logs and Garbage Collector logs look like:
+### Steps to Collect Logs in SigNoz Cloud
 
-### Sample Access Log
-```
-0:0:0:0:0:0:0:1 - - [18/Apr/2024:13:45:29 +0530] "GET /demo1/add?num1=1&num2=2 HTTP/1.1" 200 11
-0:0:0:0:0:0:0:1 - - [18/Apr/2024:13:45:30 +0530] "GET /demo1/add?num1=2&num2=3 HTTP/1.1" 200 11
-```
+#### 1. Install OpenTelemetry Collector
 
-### Sample Garbage Collector log
-```
-[0.724s][info][gc] GC(3) Concurrent Mark Cycle 6.218ms
-[0.772s][info][gc] GC(4) Pause Young (Prepare Mixed) (G1 Preventive Collection) 28M->8M(40M) 1.891ms
-[591.215s][info][gc] GC(5) Pause Young (Mixed) (G1 Evacuation Pause) 10M->8M(40M) 8.173ms
-```
+The OpenTelemetry Collector provides a vendor-neutral way to collect, process, and export telemetry data (logs, metrics, traces). 
+Follow this [installation guide](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/).
 
+#### 2. Configure Filelog Receiver
 
-## Collect Logs in SigNoz Cloud
+Modify the `config.yaml` file from the installation to include the filelog receiver:
 
-### Prerequisite
-
-- SigNoz [cloud](https://signoz.io/teams/) account
-
-Sending logs to SigNoz cloud can be achieved by following these simple steps:
-- Installing OpenTelemetry Collector
-- Configuring filelog receiver
-
-### Install OpenTelemetry Collector 
-
-The OpenTelemetry collector provides a vendor-neutral way to collect, process, and export your telemetry data such as logs, metrics, and traces.
-
-You can install OpenTelemetry collector (OTel collector) as an agent by following this [guide](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/). 
-  
-
-### Configure Filelog receiver
-
-Modify the `config.yaml` file that you created while installing OTel collector in the previous step to include the filelog receiver. This involves specifying the path to your access and garbage collector logs and setting the `start_at` parameter, which specifies where to start reading logs from the log file. For more fields that are available for filelog receiver please check [this link](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/filelogreceiver).
-
-```yaml 
+```yaml:config.yaml
 receivers:
-  ...
   filelog/access_logs:
-    include: [ /<path_to_access_log>/localhost_access_log.*] #include the path to your access logs
+    include: [/<path_to_access_log>/localhost_access_log.*] # Path to access logs
     start_at: end
   filelog/gc_logs:
-    include: [ /<path_to_garbage_collector_log>/garbage-collection.log.*] #include the path to your garbage collector logs
+    include: [/<path_to_gc_log>/garbage-collection.log.*] # Path to garbage collector logs
     start_at: end
-...
 ```
 
-<Admonition>
-The `start_at: end` configuration ensures that only newly added logs are transmitted. If you wish to include historical logs from the file, remember to modify `start_at` to `beginning`.
+<Admonition type="info">
+- Use `start_at: end` to transmit only new logs. Change to `beginning` to include historical logs.
+- Update log paths using server arguments:
+  - Access logs: `-Dcatalina.base=<new_access_logs_path>`
+  - GC logs: `-Xloggc:<new_gc_logs_path>`
 </Admonition>
 
-<Admonition>
-If you want to change the path of where your access logs are stored you can change it by adding the following in your server arguments
-`-Dcatalina.base=<new_access_logs_path>`
+#### 3. Update Pipelines Configuration
 
-If you want to change the path of where your garbage collector logs are stored you can change it by 
-`-Xloggc:<new_garbage_collection_logs_path>` 
-</Admonition>
+In the same `config.yaml`, add the receivers to the pipeline:
 
-
-### Update Pipelines Configuration
-
-In the same `config.yaml` file, update the pipeline settings to include the new filelog receiver. This step is crucial for ensuring that the logs are correctly processed and sent to SigNoz.
-
-```yaml {4}
+```yaml:config.yaml
 service:
-    ....
-    logs:
-        receivers: [otlp, filelog/access_logs, filelog/gc_logs]
-        processors: [batch]
-        exporters: [otlp]
+  logs:
+    receivers: [otlp, filelog/access_logs, filelog/gc_logs]
+    processors: [batch]
+    exporters: [otlp]
 ```
 
-Now restart the OTel collector so that new changes are applied. The steps to run the OTel collector can be found [here](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/)
+#### 4. Restart the OTel Collector
 
-### Verify Export
+Apply changes by [restarting the OTel Collector](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/). 
 
-The logs will be exported to SigNoz and will be visible in SigNoz UI.
+#### 5. Verify Export
 
-<figure data-zoomable align='center'>
-    <img src="/img/docs/logs-management/send-logs/tomcat_access_logs.webp" alt="access logs visible in SigNoz"/>
-    <figcaption><i>Sample tomcat access logs data shown in SigNoz Logs Explorer</i></figcaption>
-</figure>
-<br/>
-<figure data-zoomable align='center'>
-    <img src="/img/docs/logs-management/send-logs/tomcat_gc_logs.webp" alt="garbage logs visible in SigNoz"/>
-    <figcaption><i>Sample tomcat garbage collector logs data shown in SigNoz Logs Explorer</i></figcaption>
+Check the SigNoz UI for the exported logs.
+
+<figure align="center">
+  <img src="/img/docs/logs-management/send-logs/tomcat_access_logs.webp" alt="Access logs in SigNoz"/>
+  <figcaption>Access logs in SigNoz Logs Explorer</figcaption>
 </figure>
 
-## Collect logs in self-hosted SigNoz
+<figure align="center">
+  <img src="/img/docs/logs-management/send-logs/tomcat_gc_logs.webp" alt="GC logs in SigNoz"/>
+  <figcaption>GC logs in SigNoz Logs Explorer</figcaption>
+</figure>
 
-Collecting Tomcat Access and Garbage Collector logs in Self-Hosted SigNoz can have two scenarios:
-- SigNoz running on the same host
-- SigNoz running on different host
+</TabItem>
 
-### Running on the same host
+<TabItem value='self-host' label="Self-Hosted">
 
-If your self-hosted SigNoz is running on the same host, then you can follow these steps to collect your application logs.
+### Prerequisites
 
-#### Install SigNoz
+### Steps to Collect Logs in Self-Hosted SigNoz
 
-You can install Self-Hosted SigNoz using the instructions [here](https://signoz.io/docs/install/docker/).
+#### Scenario 1: SigNoz Running on the Same Host
 
+##### 1. Modify Docker Compose File
+Update [`docker-compose-minimal.yaml`](https://github.com/SigNoz/signoz/blob/main/deploy/docker/docker-compose-minimal.yaml) to mount your log files:
 
-#### Modify Docker Compose file
+```yaml:/deploy/docker/docker-compose-minimal.yaml 
+otel-collector:
+  image: signoz/signoz-otel-collector:0.88.11
+  command: ["--config=/etc/otel-collector-config.yaml"]
+  volumes:
+    - ~/<access_logs_path>/:/<access_logs_path>/
+    - ~/<gc_logs_path>/:/<gc_logs_path>/
+```
 
-In your self-hosted SigNoz setup, locate and edit the `docker-compose.yaml` file found in the `deploy/docker/clickhouse-setup` directory. You'll need to mount the log file of your application to the `tmp` directory of SigNoz OTel collector. 
-  ```yaml {6}
-    ...
-    otel-collector:
-    image: signoz/signoz-otel-collector:0.88.11
-    command: ["--config=/etc/otel-collector-config.yaml"]
-    volumes:
-      - ~/<access_logs_path>/:/<access_logs_path>/
-      - ~/<garbage_collector_logs_path>/:/<garbage_collector_logs_path>/
-    ....
-  ```
+##### 2. Add Filelog Receiver
+Update [`otel-collector-config.yaml`](https://github.com/SigNoz/signoz/blob/main/deploy/docker/otel-collector-config.yaml) to include the filelog receiver:
 
-Replace `<access_logs_path>` , `<garbage_collector_logs_path>` with the path where your access log and garbage collector log files are present. Please ensure that the file path is correctly specified.
-  
-#### Add Filelog receiver
+```yaml:/deploy/docker/otel-collector-config.yaml
+receivers:
+  filelog/access_logs:
+    include: [/<path>/localhost_access_log.*] # Path to access logs
+    start_at: end
+  filelog/gc_logs:
+    include: [/<path>/garbage-collection.log.*] # Path to GC logs
+    start_at: end
+```
 
-Add the filelog reciever to `otel-collector-config.yaml` which is present inside `deploy/docker/clickhouse-setup` directory in your self-hosted SigNoz setup. The configuration below tells the collector where to find your log file and how to start processing it.
+##### 3. Update Pipelines Configuration
+Modify the pipeline to include the filelog receiver:
 
-  ```yaml {3-15}
-  receivers:
-    ...
-    filelog/access_logs:
-      include: [ /<path>/localhost_access_log.*] #include the path to your access logs
-      start_at: end
-    filelog/gc_logs:
-      include: [ /<path>/garbage-collection.log.*] #include the path to your garbage collector logs
-      start_at: end
-  ...
-  ```
+```yaml::/deploy/docker/otel-collector-config.yaml
+service:
+  logs:
+    receivers: [otlp, filelog/access_logs, filelog/gc_logs]
+    processors: [batch]
+    exporters: [clickhouselogsexporter]
+```
+
+##### 4. Restart the OTel Collector
+Restart the OTel Collector to apply changes. [Guide here](https://signoz.io/docs/install/docker/).
+
+##### 5. Verify Export
+Check the SigNoz UI for the exported logs.
+
+<figure align="center">
+  <img src="/img/docs/logs-management/send-logs/tomcat_access_logs.webp" alt="Access logs in SigNoz"/>
+  <figcaption>Access logs in SigNoz Logs Explorer</figcaption>
+</figure>
+
+<figure align="center">
+  <img src="/img/docs/logs-management/send-logs/tomcat_gc_logs.webp" alt="GC logs in SigNoz"/>
+  <figcaption>GC logs in SigNoz Logs Explorer</figcaption>
+</figure>
+
+#### Scenario 2: SigNoz Running on a Different Host
+
+##### 1. Create OTel Collector Configuration
+Define `otel-collector-config.yaml`:
+
+```yaml
+receivers:
+  filelog/access_logs:
+    include: [/<path>/localhost_access_log.*]
+    start_at: end
+  filelog/gc_logs:
+    include: [/<path>/garbage-collection.log.*]
+    start_at: end
+processors:
+  batch:
+    send_batch_size: 10000
+    send_batch_max_size: 11000
+    timeout: 10s
+exporters:
+  otlp/log:
+    endpoint: http://<host>:<port>
+    tls:
+      insecure: true
+service:
+  pipelines:
+    logs:
+      receivers: [filelog/access_logs, filelog/gc_logs]
+      processors: [batch]
+      exporters: [otlp/log]
+```
 
 <Admonition>
-The `start_at: end` configuration ensures that only newly added logs are transmitted. If you wish to include historical logs from the file, remember to modify `start_at` to `beginning`.
+For HTTPS, configure certificates as per [this guide](https://github.com/open-telemetry/opentelemetry-collector/blob/main/exporter/otlpexporter/README.md).
 </Admonition>
 
-<Admonition>
-If you want to change the path of where your access logs are stored you can change it by adding the following in your server arguments
-`-Dcatalina.base=<new_access_logs_path>`
-
-If you want to change the path of where your garbage collector logs are stored you can change it by 
-`-Xloggc:<new_garbage_collection_logs_path>` 
-</Admonition>
-
-
-
-For more fields that are available for filelog receiver please check [this link](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/filelogreceiver).
-
-#### Update Pipeline configuration
-
-Modify the pipeline inside `otel-collector-config.yaml` to include the filelog receiver. This step is crucial for ensuring that the logs are correctly processed and sent to SigNoz.
-
-  ```yaml {4}
-  service:
-      ....
-      logs:
-          receivers: [otlp, filelog/access_logs, filelog/gc_logs]
-          processors: [batch]
-          exporters: [clickhouselogsexporter]
-  ```
-
-Now, restart the OTel collector so that new changes are applied. You can find instructions to run OTel collector [here](https://signoz.io/docs/install/docker/)
-
-#### Verify Export
-
-The logs will be exported to SigNoz UI if there are no errors.
-
-<figure data-zoomable align='center'>
-    <img src="/img/docs/logs-management/send-logs/tomcat_access_logs.webp" alt="Access logs visible in SigNoz"/>
-    <figcaption><i>Sample tomcat access logs data shown in SigNoz Logs Explorer</i></figcaption>
-</figure>
-<br/>
-<figure data-zoomable align='center'>
-    <img src="/img/docs/logs-management/send-logs/tomcat_gc_logs.webp" alt="garbage collector logs visible in SigNoz"/>
-    <figcaption><i>Sample tomcat garbage collector logs data shown in SigNoz Logs Explorer</i></figcaption>
-</figure>
-
-
-### Running on a different host
-
-If you have a SigNoz running on a different host then you will have to run a OTel collector to export logs from your host to the host where SigNoz is running.
-
-#### Create OTel collector configuration
-
-You need to create an `otel-collector-config.yaml` file, this file defines how the OTel collector will process and forward logs to your SigNoz instance.
-
-  ```yaml
-  receivers:
-    filelog/access_logs:
-      include: [ /<path>/localhost_access_log.*] #include the path to your access logs
-      start_at: end
-    filelog/gc_logs:
-      include: [ /<path>/garbage-collection.log.*] #include the path to your garbage collector logs
-      start_at: end
-  processors:
-    batch:
-      send_batch_size: 10000
-      send_batch_max_size: 11000
-      timeout: 10s
-  exporters:
-    otlp/log:
-      endpoint: http://<host>:<port>
-      tls:
-        insecure: true
-  service:
-    pipelines:
-      logs:
-        receivers: [filelog/access_logs, filelog/gc_logs]
-        processors: [batch]
-        exporters: [ otlp/log ]
-  ```
-   
-
-The parsed logs are batched up using the batch processor and then exported to the host where SigNoz is deployed. For finding the right host and port for your SigNoz cluster please follow the guide [here](../../install/troubleshooting.md#signoz-otel-collector-address-grid).  
-
-<Admonition>
-The `otlp/log` exporter in the above configuration file uses a `http` endpoint but if you want to use `https` you will have to provide the certificate and the key. You can read more about it [here](https://github.com/open-telemetry/opentelemetry-collector/blob/main/exporter/otlpexporter/README.md)
-</Admonition>
+</TabItem>
+</Tabs>

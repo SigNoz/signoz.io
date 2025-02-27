@@ -25,7 +25,7 @@ This document will show you how to:
   - version of signoz provider: [0.0.4](https://github.com/SigNoz/terraform-provider-signoz/releases/tag/v0.0.4) or later
 - SigNoz Cloud
   - endpoint URL
-  - access token
+  - api key
 
 ## Configure Terraform Provider
 
@@ -54,7 +54,12 @@ terraform {
 }
 ```
 
-Running `terraform init` will create `.terraform.lock.hcl` file, which locks the provider version for consistent usage.
+Run:
+```terraform
+terraform init 
+```
+
+This will create `.terraform.lock.hcl` file, which locks the provider version for consistent usage.
 
 ### Step 3: Configure signoz Provider
 
@@ -65,15 +70,15 @@ provider "signoz" {}
 
 By setting the environmental variables below, the signoz provider will automatically read these variables and authorize with your SigNoz Cloud account:
 ``` bash
-SIGNOZ_INGESTION_KEY="your-access-token"
+SIGNOZ_ACCESS_TOEKN="your-api-key"
 SIGNOZ_ENDPOINT="https://your-signoz-endpoint"
 ```
 
-You can explicitly set these variables in the `provider {}` block as shown below, but avoid hardcoding your access token if you plan to commit your `.tf` files to an online version control system.
+You can explicitly set these variables in the `provider {}` block as shown below, but avoid hardcoding your API key if you plan to commit your `.tf` files to an online version control system.
 ```hcl
 provider "signoz" {
   endpoint="https://your-signoz-endpoint"
-  access_token="your-access-token"  # Do not type your token directly if you push codes online
+  access_token = <api_key>  # Do not type your token directly if you push codes online
 }
 ```
 ## Create new alert
@@ -199,11 +204,19 @@ Fix the typo that caused this error:
 
 When you're ready, `plan` your Terraform module to see diffs between your code and resources on the remote (SigNoz Cloud):
 
+```terraform
+terraform plan
+```
+
 <Figure src="/img/docs/alerts/terraform-provider-plan.webp" alt="Successful output from `terraform plan`" caption="Successful output from `terraform plan`" />
 
 The output indicates that it plans to create a new resource(`signoz_alert`)  with specified attributes like `alert`, `alert_type`, and `version`. The plan shows **1 resource to add**, with no changes or deletions.
 
 Once you're satisfied that the diffs are as intended, `apply` your code for provisioning:
+
+```terraform
+terraform apply
+```
 <Figure src="/img/docs/alerts/terraform-provider-apply.webp" alt="Confirmation prompt during `terraform apply`" caption="Confirmation prompt during `terraform apply`" />
 
 Terraform will wait for your confirmation before applying the change to the remote.

@@ -2,78 +2,98 @@
 date: 2024-06-06
 title: Stream Logs from Heroku to SigNoz
 id: heroku_logs_to_signoz
+hide_table_of_contents: true
 ---
 
-If you are running your applications on heroku, you can stream logs from Heroku to SigNoz using [httpsdrain](https://devcenter.heroku.com/articles/log-drains#https-drains).
+If you are running your applications on **Heroku**, you can stream logs to **SigNoz** using [httpsdrain](https://devcenter.heroku.com/articles/log-drains#https-drains).
+
+<Tabs entityName="plans">
+
+<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
+
+## Stream Heroku Logs to SigNoz Cloud
+
+### Add an HTTPS Drain
+Use the Heroku CLI to add an HTTPS drain to your SigNoz cloud endpoint:
+
+```bash
+heroku drains:add https://<TENANT_NAME>:<SIGNOZ_INGESTION_KEY>@ingest.<REGION>.signoz.cloud:443/logs/heroku -a <YOUR_APP_NAME>
+```
+
+- **`<TENANT_NAME>`**: The name of your SigNoz Cloud instance
+    - Example: If the URL is `https://cpvo-test.us.signoz.cloud`, the `TENANT_NAME` is `cpvo-test`
+- **`<SIGNOZ_INGESTION_KEY>`**: Your SigNoz Cloud [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- **`<REGION>`**: Your chosen [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint) for SigNoz Cloud
+- **`<YOUR_APP_NAME>`**: The name of your Heroku application
 
 
-## Stream Heroku logs to SigNoz in SigNoz cloud
+Once the drain is added, verify the logs in SigNoz under the Logs tab.
 
-* Use the heroku cli to add a https drain
-    ```sh
-    heroku drains:add https://<TENANT_NAME>:<SIGNOZ_INGESTION_KEY>@ingest.<REGION>.signoz.cloud:443/logs/heroku -a <YOUR_APP_NAME>
-    ```
+</TabItem>
 
-  Set the values of `<TENANT_NAME>`,  `<SIGNOZ_INGESTION_KEY>`, `<REGION>` and `<YOUR APP NAME>`.
+<TabItem value='self-host' label='Self-Host'>
 
-  `<TENANT_NAME>` is name of your instance. Ex:- If the url is `https://cpvo-test.us.signoz.cloud` the `TENANT_NAME` is `cpvo-test`.
+## Stream Heroku Logs to Self-Hosted SigNoz
 
-  `<SIGNOZ_INGESTION_KEY>` is the ingestion key.
+### 1. Expose a Port in `docker-compose.yaml`
+Modify the [`docker-compose-minimal.yaml`](https://github.com/SigNoz/signoz/blob/main/deploy/docker/docker-compose-minimal.yaml) file to expose port `8081` for receiving logs:
 
-  `<YOUR_APP_NAME>` is the name of the application where you want to add the drain.
+```yaml:/deploy/docker/docker-compose-minimal.yaml {8} 
+...
+otel-collector:
+  image: signoz/signoz-otel-collector:0.88.11
+  command: ["--config=/etc/otel-collector-config.yaml"]
+  volumes:
+    - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml
+  ports:
+    - "8081:8081"
+...
+```
 
-  
-  Depending on the choice of your region for SigNoz cloud, the otlp endpoint will vary according to this table.
+### 2. Configure `httplogreceiver`
+Add the **httplogreceiver** to your [`otel-collector-config.yaml`](https://github.com/SigNoz/signoz/blob/main/deploy/docker/otel-collector-config.yaml) file:
 
-  | Region | Endpoint                   |
-  | ------ | -------------------------- |
-  | US     | ingest.us.signoz.cloud:443 |
-  | IN     | ingest.in.signoz.cloud:443 |
-  | EU     | ingest.eu.signoz.cloud:443 |
+```yaml:/deploy/docker/otel-collector-config.yaml {2-4}
+receivers:
+  httplogreceiver/heroku:
+    endpoint: 0.0.0.0:8081
+    source: heroku
+...
+```
 
-* Once added you can verify by going to the SigNoz UI.
+### 3. Update the Pipeline Configuration
+Modify the pipeline in the `otel-collector-config.yaml`](https://github.com/SigNoz/signoz/blob/main/deploy/docker/otel-collector-config.yaml) file to include the new receiver:
 
+```yaml:/deploy/docker/otel-collector-config.yaml {4}
+service:
+  ...
+  logs:
+    receivers: [otlp, httplogreceiver/heroku]
+    processors: [batch]
+    exporters: [clickhouselogsexporter]
+```
 
-## Stream Heroku logs to SigNoz in Self-Hosted SigNoz
+### 4. Restart the OTEL Collector
+Restart the **otel-collector** container to apply the changes:
 
-* Modify the `docker-compose.yaml` file present inside `deploy/docker/clickhouse-setup` to expose a port, in this case `8081`.
-    ```yaml {8}
-    ...
-    otel-collector:
-        image: signoz/signoz-otel-collector:0.88.11
-        command: ["--config=/etc/otel-collector-config.yaml"]
-        volumes:
-          - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml
-        ports:
-          - "8081:8081"
-    ...
-    ```
+```bash
+docker-compose restart otel-collector
+```
 
-* Add the httplogreceiver reciever to `otel-collector-config.yaml` which is present inside `deploy/docker/clickhouse-setup`
-    ```yaml {2-10}
-    receivers:
-      httplogreceiver/heroku:
-        endpoint: 0.0.0.0:8081
-        source: heroku
-    ...
-    ```
+### 5. Add an HTTPS Drain
+Use the Heroku CLI to add an HTTPS drain pointing to the OTEL Collector:
 
-* Next we will modify our pipeline inside `otel-collector-config.yaml` to include the receiver we have created above.
-    ```yaml {4}
-    service:
-        ....
-        logs:
-            receivers: [otlp, httplogreceiver/heroku]
-            processors: [batch]
-            exporters: [clickhouselogsexporter]
-    ```
+```bash
+heroku drains:add http://<IP>:8081 -a <YOUR_APP_NAME>
+```
+- Replace `<IP>` with the IP address of the machine running the **OTEL Collector**.
+- Replace `<YOUR_APP_NAME>` with the name of your Heroku application.
 
-* Now we can restart the otel collector container so that new changes are applied and we can forward our logs to port `8081`.
+Refer to the [troubleshooting guide](https://signoz.io/docs/install/troubleshooting/#signoz-otel-collector-address-grid) for finding the correct SigNoz host address.
 
-* Use the heroku cli to add a https drain
-    ```sh
-    heroku drains:add http://<IP>:8081 -a <YOUR_APP_NAME>
-    ```
-    Replace IP with IP of the system where your collector is running.
-    For more info check [troubleshooting](/docs/install/troubleshooting#signoz-otel-collector-address-grid). 
-* Once added you can verify by going to the SigNoz UI.
+### 6. Verify the Logs
+Once the drain is added, verify the logs in SigNoz under the Logs tab.
+
+</TabItem>
+
+</Tabs>

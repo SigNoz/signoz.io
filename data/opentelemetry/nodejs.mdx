@@ -5,7 +5,7 @@ date: 2024-12-10
 tags: [javascript-monitoring]
 authors: [ankit_anand]
 description: In this article, learn how to setup application monitoring for Node.js apps with OpenTelemetry and SigNoz.
-image: /img/blog/2023/11/opentelemetry-nodejs-cover-min.jpg
+image: /img/blog/2024/12/opentelemetry-nodejs-cover.webp
 keywords: [opentelemetry,opentelemetry javascript,opentelemetry nodejs,distributed tracing,observability,nodejs monitoring,nodejs instrumentation,signoz]
 ---
 
@@ -146,6 +146,10 @@ SigNoz offers various [instrumentation methods](https://signoz.io/docs/instrumen
     These libraries enable automatic instrumentation and interaction with the OpenTelemetry API.
     
 2. **Configure Environment Variables**
+
+    <Admonition type="info">
+    These environment variables are applicable for SigNoz cloud. You don't need Ingestion key if you're using self-hosted SigNoz. For self-hosted SigNoz, please refer to instructions [here](https://signoz.io/docs/instrumentation/opentelemetry-javascript/).
+    </Admonition>
     
     To configure OpenTelemetry for your application, export the necessary environment variables. These variables define the data export settings and identify your application in SigNoz.
     
@@ -156,7 +160,7 @@ SigNoz offers various [instrumentation methods](https://signoz.io/docs/instrumen
     export OTEL_EXPORTER_OTLP_TRACES_ENDPOINT="<SIGNOZ_ENDPOINT>"
     export OTEL_NODE_RESOURCE_DETECTORS="env,host,os"
     export OTEL_SERVICE_NAME="<APP_NAME>"
-    export OTEL_EXPORTER_OTLP_HEADERS="signoz-access-token=<SIGNOZ_INGESTION_KEY>"
+    export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>"
     export NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
     ```
     
@@ -168,7 +172,7 @@ SigNoz offers various [instrumentation methods](https://signoz.io/docs/instrumen
     | **`OTEL_EXPORTER_OTLP_TRACES_ENDPOINT`** | The SigNoz ingestion URL. You should have received this URL via email after registering with SigNoz Cloud. |
     | **`OTEL_NODE_RESOURCE_DETECTORS`** | Identifies additional resource metadata such as environment, host, and OS for better trace context. |
     | **`OTEL_SERVICE_NAME`** | The name of your application. This will appear in SigNoz as the service being monitored. |
-    | **`OTEL_EXPORTER_OTLP_HEADERS`** | Contains authentication headers, including your SigNoz access token. |
+    | **`OTEL_EXPORTER_OTLP_HEADERS`** | Contains authentication headers, including your SigNoz ingestion key. |
     | **`NODE_OPTIONS`** | Configures the Node.js runtime to preload OpenTelemetry's auto-instrumentation library. |
     
     Be sure to replace `<SIGNOZ_INGESTION_KEY>` with your actual SigNoz ingestion key. If you haven't created one yet, you can follow [this guide](https://signoz.io/docs/ingestion/signoz-cloud/keys/) to generate your access key.

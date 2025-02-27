@@ -1,0 +1,311 @@
+---
+date: 2024-06-06
+id: opentelemetry-cpp
+title: C++ Opentelemetry Instrumentation
+description: Send events from your C++ application to SigNoz
+hide_table_of_contents: true
+---
+
+
+{/* 
+import InstrumentationFAQ from '@/components/shared/instrumentation-faq.md'
+
+
+This documentation contains instructions on how to set up OpenTelemetry(OTel) instrumentation in your C++ application. OpenTelemetry, also known as OTel for short, is an open-source observability framework that can help you generate and collect telemetry data - traces, metrics, and logs from your Swift application.
+
+
+Once the telemetry data is generated, you can configure an exporter to send the data to SigNoz for monitoring and visualization.
+
+There are three major steps to using OpenTelemetry:
+
+- Instrumenting your C++ application with OpenTelemetry
+- Configuring the exporter to send data to SigNoz
+- Validating the configuration to ensure that data is being sent as expected.
+
+In this tutorial, we will instrument a C++ application for traces and send it to SigNoz.
+
+*/}
+
+This document contains instructions on how to set up OpenTelemetry instrumentation in your C++ applications and view your application traces in SigNoz.
+
+## Requirements
+
+- [Bazel](https://bazel.build/)
+
+## Send Traces to SigNoz
+
+Based on your application environment, you can choose the setup below to send traces to SigNoz.
+
+<Tabs entityName="plans">
+<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
+### Send traces to SigNoz Cloud via OTel Collector binary
+
+**Step 1 : Install OTel Collector**
+
+OTel Collector binary helps to collect logs, hostmetrics, resource and infra attributes. You can find instructions to install OTel Collector binary [here](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) in your VM.
+
+**Step 2 : Build opentelemetry-cpp locally**
+
+To configure your C++ application to send traces to OpenTelemetry you need to install [opentelemetry-cpp](https://github.com/open-telemetry/opentelemetry-cpp.git) and add it as dependency in your project.
+
+Build `opentelemetry-cpp` locally using Bezel, following these steps:
+
+- Clone the `opentelemetry-cpp` source code.
+
+```bash
+git clone https://github.com/open-telemetry/opentelemetry-cpp.git
+```
+
+- Navigate to the repository cloned above, download the dependencies and build the source code:
+
+```bash
+cd opentelemetry-cpp
+bazel build //...
+```
+
+- Once Bazel tests are built, run them with `bazel test //...` command
+
+```bash
+bazel test //...
+```
+
+**Step 3 : Instrument your application with OpenTelemetry**
+
+Add the following to `BUILD` file:
+
+```bash
+cc_binary(
+    name = "<name>",
+    srcs = [
+        "<file_name>.cc",
+    ],
+    tags = [
+        "examples",
+        "otlp",
+        "otlp_http",
+    ],
+    deps = [
+        "//api",
+        "//exporters/otlp:otlp_http_exporter",
+        "//sdk/src/trace",
+    ],
+)
+```
+
+Add the following content to `main.cpp`:
+
+```cpp
+#include <memory>
+#include <string>
+#include <utility>
+
+#include "opentelemetry/exporters/otlp/otlp_environment.h"
+#include "opentelemetry/exporters/otlp/otlp_http.h"
+#include "opentelemetry/exporters/otlp/otlp_http_exporter_factory.h"
+#include "opentelemetry/exporters/otlp/otlp_http_exporter_options.h"
+#include "opentelemetry/sdk/common/global_log_handler.h"
+#include "opentelemetry/sdk/trace/processor.h"
+#include "opentelemetry/sdk/trace/recordable.h"
+#include "opentelemetry/sdk/trace/simple_processor_factory.h"
+#include "opentelemetry/sdk/trace/tracer_provider.h"
+#include "opentelemetry/sdk/trace/tracer_provider_factory.h"
+#include "opentelemetry/trace/provider.h"
+#include "opentelemetry/trace/span_id.h"
+#include "opentelemetry/trace/tracer_provider.h"
+
+namespace trace     = opentelemetry::trace;
+namespace trace_sdk = opentelemetry::sdk::trace;
+namespace otlp      = opentelemetry::exporter::otlp;
+
+namespace internal_log = opentelemetry::sdk::common::internal_log;
+
+namespace
+{
+opentelemetry::exporter::otlp::OtlpHttpExporterOptions opts;
+
+std::shared_ptr<opentelemetry::sdk::trace::TracerProvider> provider;
+
+void InitTracer()
+{
+  auto exporter  = otlp::OtlpHttpExporterFactory::Create(opts);
+  auto processor = trace_sdk::SimpleSpanProcessorFactory::Create(std::move(exporter));
+  provider       = trace_sdk::TracerProviderFactory::Create(std::move(processor));
+  std::shared_ptr<opentelemetry::trace::TracerProvider> api_provider = provider;
+  trace::Provider::SetTracerProvider(api_provider);
+}
+
+void CleanupTracer()
+{
+  // We call ForceFlush to prevent to cancel running exportings, It's optional.
+  if (provider)
+  {
+    provider->ForceFlush();
+  }
+
+  provider.reset();
+  std::shared_ptr<opentelemetry::trace::TracerProvider> none;
+  trace::Provider::SetTracerProvider(none);
+}
+}  // namespace
+
+int main()
+{
+  InitTracer();
+
+  foo_library();
+
+  CleanupTracer();
+}
+```
+
+This code sets up OpenTelemetry tracing in your C++ application, initializes a tracer with an OTLP HTTP exporter, processes spans, and sends trace data to a SigNoz.
+
+**Step 4: Run app**
+
+Execute your application by issuing the run command:
+
+```
+bazel run <name>
+```
+
+`<name>` refers to the name of the binary target for your application, which you define in the `BUILD` file.
+
+</TabItem>
+<TabItem value='self-host' label='Self-Host'>
+### Send Traces to Self-Hosted SigNoz via Otel Collector
+
+
+**Step 1 : Install OTel Collector**
+
+OTel Collector binary helps to collect logs, hostmetrics, resource and infra attributes. You can find instructions to install OTel Collector binary [here](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) in your VM.
+
+**Step 2 : Build opentelemetry-cpp locally**
+
+To configure your C++ application to send traces to OpenTelemetry you need to install [opentelemetry-cpp](https://github.com/open-telemetry/opentelemetry-cpp.git) and add it as dependency in your project.
+
+Build `opentelemetry-cpp` locally using Bezel, following these steps:
+
+- Clone the `opentelemetry-cpp` source code.
+
+```bash
+git clone https://github.com/open-telemetry/opentelemetry-cpp.git
+```
+
+- Navigate to the repository cloned above, download the dependencies and build the source code:
+
+```bash
+cd opentelemetry-cpp
+bazel build //...
+```
+
+- Once Bazel tests are built, run them with `bazel test //...` command
+
+```bash
+bazel test //...
+```
+
+**Step 3 : Instrument your application with OpenTelemetry**
+
+Add the following to `BUILD` file:
+
+```bash
+cc_binary(
+    name = "<name>",
+    srcs = [
+        "<file_name>.cc",
+    ],
+    tags = [
+        "examples",
+        "otlp",
+        "otlp_http",
+    ],
+    deps = [
+        "//api",
+        "//exporters/otlp:otlp_http_exporter",
+        "//sdk/src/trace",
+    ],
+)
+```
+
+Add the following content to `main.cpp`:
+
+```cpp
+#include <memory>
+#include <string>
+#include <utility>
+
+#include "opentelemetry/exporters/otlp/otlp_environment.h"
+#include "opentelemetry/exporters/otlp/otlp_http.h"
+#include "opentelemetry/exporters/otlp/otlp_http_exporter_factory.h"
+#include "opentelemetry/exporters/otlp/otlp_http_exporter_options.h"
+#include "opentelemetry/sdk/common/global_log_handler.h"
+#include "opentelemetry/sdk/trace/processor.h"
+#include "opentelemetry/sdk/trace/recordable.h"
+#include "opentelemetry/sdk/trace/simple_processor_factory.h"
+#include "opentelemetry/sdk/trace/tracer_provider.h"
+#include "opentelemetry/sdk/trace/tracer_provider_factory.h"
+#include "opentelemetry/trace/provider.h"
+#include "opentelemetry/trace/span_id.h"
+#include "opentelemetry/trace/tracer_provider.h"
+
+namespace trace     = opentelemetry::trace;
+namespace trace_sdk = opentelemetry::sdk::trace;
+namespace otlp      = opentelemetry::exporter::otlp;
+
+namespace internal_log = opentelemetry::sdk::common::internal_log;
+
+namespace
+{
+opentelemetry::exporter::otlp::OtlpHttpExporterOptions opts;
+
+std::shared_ptr<opentelemetry::sdk::trace::TracerProvider> provider;
+
+void InitTracer()
+{
+  auto exporter  = otlp::OtlpHttpExporterFactory::Create(opts);
+  auto processor = trace_sdk::SimpleSpanProcessorFactory::Create(std::move(exporter));
+  provider       = trace_sdk::TracerProviderFactory::Create(std::move(processor));
+  std::shared_ptr<opentelemetry::trace::TracerProvider> api_provider = provider;
+  trace::Provider::SetTracerProvider(api_provider);
+}
+
+void CleanupTracer()
+{
+  // We call ForceFlush to prevent to cancel running exportings, It's optional.
+  if (provider)
+  {
+    provider->ForceFlush();
+  }
+
+  provider.reset();
+  std::shared_ptr<opentelemetry::trace::TracerProvider> none;
+  trace::Provider::SetTracerProvider(none);
+}
+}  // namespace
+
+int main()
+{
+  InitTracer();
+
+  foo_library();
+
+  CleanupTracer();
+}
+```
+
+This code sets up OpenTelemetry tracing in your C++ application, initializes a tracer with an OTLP HTTP exporter, processes spans, and sends trace data to a SigNoz.
+
+**Step 4: Run app**
+
+Execute your application by issuing the run command:
+
+```
+bazel run <name>
+```
+
+`<name>` refers to the name of the binary target for your application, which you define in the `BUILD` file.
+
+</TabItem>
+</Tabs>
+
+{/* <InstrumentationFAQ /> */}

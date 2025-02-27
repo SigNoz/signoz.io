@@ -1,48 +1,60 @@
 ---
-date: 2024-06-06
+date: 2024-12-18
 title: FluentBit to SigNoz
 id: fluentbit_to_signoz
+hide_table_of_contents: true
 ---
 
+If you use FluentBit to collect logs in your stack, this tutorial will guide you on how to send logs from FluentBit to SigNoz.
 
-If you use fluentBit to collect logs in your stack with this tutotrial you will be able to send logs from fluentBit to SigNoz.
+At SigNoz, we use the OpenTelemetry Collector to receive logs, which supports the FluentForward protocol. You can forward logs from your FluentBit agent to the OpenTelemetry Collector using this protocol.
 
-At SigNoz we use opentelemetry collector to recieve logs which supports the fluentforward protocol. So you can forward your logs from your fluentBit agent to opentelemetry collector using fluentforward protocol.
+<Tabs entityName="plans">
+<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
 
-### Collect Logs Using FluentBit in SigNoz cloud
-  * Add otel collector binary to your VM by following this [guide](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/).
-  * Add fluentforward reciever to your `config.yaml` 
+### Collect Logs Using FluentBit in SigNoz Cloud
+
+1. **Add OpenTelemetry Collector binary to your VM**
+Follow this [guide](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/).
+
+2. **Add FluentForward receiver to your `config.yaml`:**
+
     ```yaml
     receivers:
       fluentforward:
         endpoint: 0.0.0.0:24224
     ```
-    Here we have used port 24224 for listening in fluentforward protocol, but you can change it to a port you want.
-    You can read more about fluentforward receiver [here](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/fluentforwardreceiver).
+    Here, port 24224 is used for listening to the FluentForward protocol. You can change it to a port of your choice. Learn more about the FluentForward receiver [here](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/fluentforwardreceiver).
 
-  * Modify your `config.yaml` and add the above receiver
-    ```yaml {4}
+3. **Modify your `config.yaml` to include the receiver:**
+
+    ```yaml
     service:
-        ....
-        logs:
-            receivers: [otlp, fluentforward]
-            processors: [batch]
-            exporters: [otlp]
+      ...
+      logs:
+        receivers: [otlp, fluentforward]
+        processors: [batch]
+        exporters: [otlp]
     ```
-  *  Add the following to your fluentBit config to forward the logs to otel collector.
-      ```
-      [OUTPUT]
-        Name          forward
-        Match         *
-        Host          localhost
-        Port          24224
-      ```
-    In this config we are forwarding the logs to the otel collector which is listening on  port 24224.
-    Also we are assuming that you are running the fluentBit binary on the host. If not, the value of `host` might change depending on your environment. 
-  *  Once you make this changes you can restart fluentBit and otel-binary, and you will be able to see the logs in SigNoz.
-  *  To properly transform your existing log model into opentelemetry [log](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/logs/data-model.md) model you can use the different processors provided by opentelemetry. [link](/docs/userguide/logs#processors-available-for-processing-logs)
-  
-    eg:- 
+
+4. **Update FluentBit configuration to forward logs to the OpenTelemetry Collector:**
+
+    ```
+    [OUTPUT]
+      Name          forward
+      Match         *
+      Host          localhost
+      Port          24224
+    ```
+    - This configuration forwards logs to the OpenTelemetry Collector listening on port 24224.
+    - If FluentBit is not running on the same host, replace `localhost` with the appropriate host value.
+
+5. **Restart FluentBit and OpenTelemetry Collector.**
+
+6. **Use processors to transform logs:**
+
+    To properly transform your existing log model into the OpenTelemetry [log model](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/logs/data-model.md), use OpenTelemetry processors:
+
     ```yaml
     processors:
       logstransform:
@@ -57,38 +69,44 @@ At SigNoz we use opentelemetry collector to recieve logs which supports the flue
           - type: remove
             field: attributes.span_id
     ```
-    The operations in the above processor will parse the trace_id and span_id from log to opentelemetry log model and remove them from attributes.
 
+</TabItem>
 
-## Collect Logs Using FluentBit in Self-Hosted SigNoz
-* Add fluentforward reciever to your `otel-collector-config.yaml` which is present inside `deploy/docker/clickhouse-setup`
+<TabItem value='self-host' label='Self-Host'>
+
+### Collect Logs Using FluentBit in Self-Hosted SigNoz
+
+1. **Add FluentForward receiver to `otel-collector-config.yaml`:**
+
     ```yaml
     receivers:
       fluentforward:
         endpoint: 0.0.0.0:24224
     ```
-    Here we have used port 24224 for listening in fluentforward protocol, but you can change it to a port you want.
-    You can read more about fluentforward receiver [here](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/fluentforwardreceiver).
+    Port 24224 is used for the FluentForward protocol. You can change it to a preferred port. Learn more about the FluentForward receiver [here](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/fluentforwardreceiver).
 
-* Update the pipleline for logs by making the following change in `otel-collector-config.yaml`
-    ```
+2. **Update the logs pipeline in `otel-collector-config.yaml`:**
+
+    ```yaml
     service:
       ...
-
       logs:
-        receivers: [ otlp, fluentforward ]
-        processors: [ batch ]
-        exporters: [  clickhouselogsexporter ]
+        receivers: [otlp, fluentforward]
+        processors: [batch]
+        exporters: [clickhouselogsexporter]
     ```
-    Here we are updating the logs pipeline which will collect logs from `fluentforward` and `otlp` receiver, processing it using batch processor and export it to clickhouse.
-* Expose the port in port for otel-collector in `docker-compose.yaml` file present in `deploy/docker/clickhouse-setup`
-  ```yaml
-  otel-collector:
-    ...
-    ports:
-      - "24224:24224"
-  ```
-* Change the fluentBit config to forward the logs to otel collector.
+
+3. **Expose the port in `docker-compose.yaml`:**
+
+    ```yaml
+    otel-collector:
+      ...
+      ports:
+        - "24224:24224"
+    ```
+
+4. **Update FluentBit configuration:**
+
     ```
     [INPUT]
       Name   dummy
@@ -101,12 +119,14 @@ At SigNoz we use opentelemetry collector to recieve logs which supports the flue
       Host          <otel-collector-host>
       Port          24224
     ```
-    In this example we are generating sample logs and then forwarding them to the otel collector which is listening on  port 24224.
-    `<otel-collector-host>` has to be replaced by the host where otel-collector is running. For more info check [troubleshooting](/docs/install/troubleshooting#signoz-otel-collector-address-grid). 
-*  Once you make this changes you can restart fluentBit and SignNoz, and you will be able to see the logs in SigNoz.
-*  To properly transform your existing log model into opentelemetry [log](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/logs/data-model.md) model you can use the different processors provided by opentelemetry. [link](/docs/userguide/logs#processors-available-for-processing-logs)
-  
-    eg:- 
+    Replace `<otel-collector-host>` with the host where the OpenTelemetry Collector is running. For more info, check the [troubleshooting guide](/docs/install/troubleshooting#signoz-otel-collector-address-grid).
+
+5. **Restart FluentBit and SigNoz.**
+
+6. **Use processors to transform logs:**
+
+    To transform your existing log model into the OpenTelemetry [log model](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/logs/data-model.md), use processors:
+
     ```yaml
     processors:
       logstransform:
@@ -121,4 +141,6 @@ At SigNoz we use opentelemetry collector to recieve logs which supports the flue
           - type: remove
             field: attributes.span_id
     ```
-    The operations in the above processor will parse the trace_id and span_id from log to opentelemetry log model and remove them from attributes.
+
+</TabItem>
+</Tabs>

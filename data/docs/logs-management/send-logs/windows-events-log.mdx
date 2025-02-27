@@ -1,14 +1,12 @@
 ---
-date: 2024-07-03
+date: 2024-12-18
 title: Windows Events log to SigNoz
 id: windows_events_logs
 ---
 
 ## Overview
 
-If you are using a Windows environment, you can stream Windows Event Log to SigNoz using OpenTelemetry Collector.
-
-Monitoring specific Event Log sources, known as Channels, can be done using the Windows Event Log receiver which is configured in the OpenTelemetry Collector configuration file. 
+If you are using a Windows environment, you can stream Windows Event Logs to SigNoz using OpenTelemetry Collector. Monitoring specific Event Log sources, known as Channels, can be done using the Windows Event Log receiver configured in the OpenTelemetry Collector configuration file.
 
 Key channels typically monitored include:
 
@@ -16,27 +14,25 @@ Key channels typically monitored include:
 - **Security:** Records security-related events such as login attempts and resource access.
 - **System:** Captures events related to system components, drivers, and services.
 
+<Tabs entityName="plans">
+
+<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
+
 ## Prerequisites
 
-- SigNoz [cloud account](https://signoz.io/teams/)
-- Microsoft User account with permissions to access EventLog and Services
-
+- Microsoft User account with permissions to access Event Log and Services.
 
 ## Setup
 
 ### Step 1: Install OpenTelemetry Collector
-The OpenTelemetry collector provides a vendor-neutral way to collect, process, and export your telemetry data such as logs, metrics, and traces.
 
-You can install OpenTelemetry collector as an agent on your Virtual Machine by following this [documentation](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/).
+Install OpenTelemetry Collector as an agent by following the [SigNoz Cloud Installation Documentation](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/).
 
+### Step 2: Configure `windowseventlog` receiver
 
-### Step 2: Add windowseventlog receiver 
+#### Add `windowseventlog` Receiver
 
-
-#### Configure windowseventlog receiver 
-
-Modify the `config.yaml` file created in the previous step to include the `windowseventlog` receiver in the receiver section. The below codeblock shows how you can 
-add the receiver to get the windows application and system logs.
+Modify the `config.yaml` file to include the `windowseventlog` receiver for monitoring application and system logs:
 
 ```yaml
 receivers:
@@ -46,24 +42,67 @@ receivers:
         channel: system
 ```
 
-There are more configuration options available [here](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/windowseventlogreceiver/README.md)
+#### Update Pipelines Configuration
 
-#### Update pipelines configuration
-
-In the same `config.yaml` file, update the pipelines section to include the `windowseventlog/application` and `windowseventlog/system` receivers under `logs`.
+In the same `config.yaml` file, update the `pipelines` section to include the `windowseventlog/application` and `windowseventlog/system` receivers:
 
 ```yaml
 service:
   pipelines:
-  ....
     logs:
       receivers: [windowseventlog/application, windowseventlog/system]
       processors: [batch]
       exporters: [otlp]
 ```
-If there are no errors, your Event logs will be visible in SigNoz under the Logs Tab.
 
+Save the changes and restart the OpenTelemetry Collector.
 
+</TabItem>
+
+<TabItem value='self-host' label='Self-Host'>
+
+## Prerequisites
+
+- Microsoft User account with permissions to access Event Log and Services.
+
+## Setup
+
+### Step 1: Install OpenTelemetry Collector
+
+Install OpenTelemetry Collector as an agent by following the [Self-Hosted SigNoz Installation Documentation](https://signoz.io/docs/self-host/install/).
+
+### Step 2: Configure `windowseventlog` receiver
+
+#### Add `windowseventlog` Receiver
+
+Modify the `config.yaml` file to include the `windowseventlog` receiver for monitoring application and system logs:
+
+```yaml
+receivers:
+    windowseventlog/application:
+        channel: application
+    windowseventlog/system:
+        channel: system
+```
+
+#### Update Pipelines Configuration
+
+In the same `config.yaml` file, update the `pipelines` section to include the `windowseventlog/application` and `windowseventlog/system` receivers:
+
+```yaml
+service:
+  pipelines:
+    logs:
+      receivers: [windowseventlog/application, windowseventlog/system]
+      processors: [batch]
+      exporters: [otlp]
+```
+
+Save the changes and restart the OpenTelemetry Collector.
+
+</TabItem>
+
+</Tabs>
 
 ## Output
 
@@ -72,18 +111,13 @@ If there are no errors, your Event logs will be visible in SigNoz under the Logs
     <figcaption><i>Windows System Events Logs in SigNoz</i></figcaption>
 </figure>
 
-This is what the typical output will look like with the configurations we made above:
+This is what the typical output will look like with the configurations made above:
 
 **Application Log**
 
 ```json
 {
-  "body": "{\"channel\":\"Application\",\"computer\":\"logs-windows\",\"event_data\":{},
-  \"event_id\":{\"id\":16384,\"qualifiers\":16384},\"keywords\":[\"Classic\"],\"level\":\"Information\",
-  \"message\":\"Successfully scheduled Software Protection service for re-start at 2024-08-10T18:52:44Z.
-   Reason: RulesEngine.\",\"opcode\":\"0\",\"provider\":{\"event_source\":\"Software Protection Platform 
-   Service\",\"guid\":\"{E23B33B0-C8C9-472C-A5F9-F2BDFEA0F156}\",\"name\":\"Microsoft-Windows-Security-SPP\"},
-   \"record_id\":750,\"system_time\":\"2024-08-03T19:29:44.9757970Z\",\"task\":\"0\"}",
+  "body": "{\"channel\":\"Application\",\"computer\":\"logs-windows\",\"event_data\":{},\"event_id\":{\"id\":16384,\"qualifiers\":16384},\"keywords\":[\"Classic\"],\"level\":\"Information\",\"message\":\"Successfully scheduled Software Protection service for re-start at 2024-08-10T18:52:44Z. Reason: RulesEngine.\",\"opcode\":\"0\",\"provider\":{\"event_source\":\"Software Protection Platform Service\",\"guid\":\"{E23B33B0-C8C9-472C-A5F9-F2BDFEA0F156}\",\"name\":\"Microsoft-Windows-Security-SPP\"},\"record_id\":750,\"system_time\":\"2024-08-03T19:29:44.9757970Z\",\"task\":\"0\"}",
   "id": "2k2Ud5JPPt8hVRQpgF6gXTxl1Yd",
   "timestamp": "2024-08-03T19:29:44.975797Z",
   "attributes": {},
@@ -100,14 +134,7 @@ This is what the typical output will look like with the configurations we made a
 
 ```json
 {
-  "body": "{\"channel\":\"System\",\"computer\":\"logs-windows\",
-  \"event_data\":{\"param1\":\"Background Intelligent Transfer Service\",
-  \"param2\":\"auto start\",\"param3\":\"demand start\",\"param4\":\"BITS\"},\"event_id\":{\"id\":7040,
-  \"qualifiers\":16384},\"keywords\":[\"Classic\"],\"level\":\"Information\",
-  \"message\":\"The start type of the Background Intelligent Transfer Service service was changed from 
-  auto start to demand start.\",\"opcode\":\"0\",\"provider\":{\"event_source\":\"Service Control Manager\",
-  \"guid\":\"{555908d1-a6d7-4695-8e1e-26931d2012f4}\",\"name\":\"Service Control Manager\"},
-  \"record_id\":893,\"system_time\":\"2024-08-03T19:32:41.9476831Z\",\"task\":\"0\"}",
+  "body": "{\"channel\":\"System\",\"computer\":\"logs-windows\",\"event_data\":{\"param1\":\"Background Intelligent Transfer Service\",\"param2\":\"auto start\",\"param3\":\"demand start\",\"param4\":\"BITS\"},\"event_id\":{\"id\":7040,\"qualifiers\":16384},\"keywords\":[\"Classic\"],\"level\":\"Information\",\"message\":\"The start type of the Background Intelligent Transfer Service service was changed from auto start to demand start.\",\"opcode\":\"0\",\"provider\":{\"event_source\":\"Service Control Manager\",\"guid\":\"{555908d1-a6d7-4695-8e1e-26931d2012f4}\",\"name\":\"Service Control Manager\"},\"record_id\":893,\"system_time\":\"2024-08-03T19:32:41.9476831Z\",\"task\":\"0\"}",
   "id": "2k2Ud5JPPt8hVRQpgF6gXTxl1Yf",
   "timestamp": "2024-08-03T19:32:41.9476831Z",
   "attributes": {},
@@ -118,8 +145,3 @@ This is what the typical output will look like with the configurations we made a
   "trace_flags": 0,
   "trace_id": ""
 }
-```
-
-
-
-

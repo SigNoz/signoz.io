@@ -89,7 +89,7 @@ quarkus.otel.resource.attributes=${OTEL_RESOURCE_ATTRIBUTES}
 ```
 
 <Tabs>
-<TabItem value="cloud" label="SigNoz Cloud" default>
+<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
 Quarkus Extensions and the libraries they provide, are directly instrumented, use of OpenTelemetry Agent is not required nor recommended.
 
 Based on your application environment, you can choose the setup below to instrument your application via SigNoz Cloud.
@@ -147,13 +147,68 @@ java -jar build/libs/quarkus-app.jar
 
 <TabItem value="k8s" label="Kubernetes">
 
-1. Create a docker image for your application or publish your application to a container registry:
+1. Export the OTEL Environment variables:
 
 ```bash
-docker build -t <app_name> .
+export OTEL_RESOURCE_ATTRIBUTES=service.name=<app-name>
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=SIGNOZ_INGESTION_KEY"
+export OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.{region}.signoz.cloud:443
 ```
 
-2. Create a `deployment.yaml`:
+- `<app_name>` is the name for your application
+- `SIGNOZ_INGESTION_KEY` is the [Ingestion Key provided by SigNoz](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+Depending on the choice of your region for SigNoz cloud, the ingest endpoint will vary according to this table.
+
+| Region | Endpoint                   |
+| ------ | -------------------------- |
+| US     | ingest.us.signoz.cloud:443 |
+| IN     | ingest.in.signoz.cloud:443 |
+| EU     | ingest.eu.signoz.cloud:443 |
+
+2. Build your application:
+<Tabs>
+<TabItem value="Quarkus CLI" label="Quarkus CLI" default>
+
+```bash
+quarkus build
+```
+
+</TabItem>
+
+<TabItem value="Maven" label="Maven">
+```bash
+./mvnw package
+```
+</TabItem>
+
+<TabItem value="Gradle" label="Gradle">
+```bash
+./gradlew build
+```
+</TabItem>
+</Tabs>
+3. Create a docker image for your application or publish your application to a container registry:
+
+<Tabs>
+<TabItem value="JVM Mode" label="JVM Mode" default>
+
+```bash
+docker build -f src/main/docker/Dockerfile.jvm -t quarkus-app-jvm .
+```
+
+</TabItem>
+
+<TabItem value="Native Mode" label="Native Mode">
+
+```bash
+docker build -f src/main/docker/Dockerfile.native -t quarkus-app-native .
+```
+
+</TabItem>
+</Tabs>
+
+4. Create a `deployment.yaml`:
 
 ```yaml:deployment.yaml
 apiVersion: apps/v1
@@ -198,16 +253,6 @@ spec:
 ```
 
 - `<my-app>` is the name of the docker image you built
-- `<app_name>` is the name for your application
-- `SIGNOZ_INGESTION_KEY` is the [Ingestion Key provided by SigNoz](https://signoz.io/docs/ingestion/signoz-cloud/keys/). 
-
-Depending on the choice of your region for SigNoz cloud, the ingest endpoint will vary according to this table.
-
-| Region | Endpoint |
-|--------|----------|
-| US | ingest.us.signoz.cloud:443 |
-| IN | ingest.in.signoz.cloud:443 |
-| EU | ingest.eu.signoz.cloud:443 |
 
 2. Deploy to Kubernetes:
 
@@ -225,25 +270,48 @@ You can verify the deployment by running `kubectl get pods` and checking the sta
 
 <TabItem value="windows" label="Windows">
 
-Set environment variables and run your application:
+1. Set environment variables:
 
 ```cmd
 setx OTEL_RESOURCE_ATTRIBUTES "service.name=<app_name>"
 setx OTEL_EXPORTER_OTLP_HEADERS "signoz-ingestion-key=SIGNOZ_INGESTION_KEY"
 setx OTEL_EXPORTER_OTLP_ENDPOINT "https://ingest.{region}.signoz.cloud:443"
-java -jar target/quarkus-app/quarkus-run.jar
 ```
 - `<app_name>` is the name for your application
 - `SIGNOZ_INGESTION_KEY` is the [Ingestion Key provided by SigNoz](https://signoz.io/docs/ingestion/signoz-cloud/keys/). 
 
 Depending on the choice of your region for SigNoz cloud, the ingest endpoint will vary according to this table.
 
-| Region | Endpoint |
-|--------|----------|
-| US | ingest.us.signoz.cloud:443 |
-| IN | ingest.in.signoz.cloud:443 |
-| EU | ingest.eu.signoz.cloud:443 |
+| Region | Endpoint                   |
+| ------ | -------------------------- |
+| US     | ingest.us.signoz.cloud:443 |
+| IN     | ingest.in.signoz.cloud:443 |
+| EU     | ingest.eu.signoz.cloud:443 |
 
+2. Build and run your application:
+
+<Tabs>
+<TabItem value="Quarkus CLI" label="Quarkus CLI" default>
+```cmd
+quarkus build
+java -jar target/quarkus-app/quarkus-run.jar
+```
+</TabItem>
+
+<TabItem value="Maven" label="Maven">
+```cmd
+mvnw.cmd package
+java -jar target/quarkus-app/quarkus-run.jar
+```
+</TabItem>
+
+<TabItem value="Gradle" label="Gradle">
+```cmd
+gradlew.bat build
+java -jar build/libs/quarkus-app.jar
+```
+</TabItem>
+</Tabs>
 </TabItem>
 </Tabs>
 
@@ -253,20 +321,43 @@ If you haven't already, signup for [SigNoz Cloud](https://signoz.io/teams/).
 
 </TabItem>
 
-<TabItem value="self-hosted" label="Self-Hosted SigNoz">
+<TabItem value='self-host' label="Self-Hosted SigNoz">
 Based on your application environment, you can choose the setup below to instrument your application via SigNoz Cloud.
 <Tabs>
 <TabItem value="vm" label="VM" default>
 
 1. Set the `OTEL_RESOURCE_ATTRIBUTES` environment variable to the name of your application
 2. Update the `OTEL_EXPORTER_OTLP_ENDPOINT` environment variable with `https://<URL of SigNoz Backend>:4318`
-3. Run your application
 
 ```bash
 export OTEL_RESOURCE_ATTRIBUTES=service.name=<app-name>
 export OTEL_EXPORTER_OTLP_ENDPOINT=https://<URL of SigNoz Backend>:4318
+```
+
+3. Build and run your application:
+
+<Tabs>
+<TabItem value="Quarkus CLI" label="Quarkus CLI" default>
+```bash
+quarkus build
 java -jar target/quarkus-app/quarkus-run.jar
 ```
+</TabItem>
+
+<TabItem value="Maven" label="Maven">
+```bash
+./mvnw package
+java -jar target/quarkus-app/quarkus-run.jar
+```
+</TabItem>
+
+<TabItem value="Gradle" label="Gradle">
+```bash
+./gradlew build
+java -jar build/libs/quarkus-app.jar
+```
+</TabItem>
+</Tabs>
 
 Things to note about the command:
 
@@ -279,16 +370,61 @@ export OTEL_RESOURCE_ATTRIBUTES=service.name=quarkus-app
 export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
 java -jar /Users/john/Downloads/quarkus-app.jar
 ```
+
 </TabItem>
 <TabItem value="k8s" label="Kubernetes">
 
-1. Create a docker image for your application or publish your application to a container registry:
+1. Set the `OTEL_RESOURCE_ATTRIBUTES` environment variable to the name of your application
+2. Update the `OTEL_EXPORTER_OTLP_ENDPOINT` environment variable with `https://<URL of SigNoz Backend>:4318`
 
 ```bash
-docker build -t <app_name> .
+export OTEL_RESOURCE_ATTRIBUTES=service.name=<app-name>
+export OTEL_EXPORTER_OTLP_ENDPOINT=https://<URL of SigNoz Backend>:4318
 ```
 
-2. Create a `deployment.yaml`:
+3. Build your application:
+
+<Tabs>
+<TabItem value="Quarkus CLI" label="Quarkus CLI" default>
+```bash
+quarkus build
+```
+</TabItem>
+
+<TabItem value="Maven" label="Maven">
+```bash
+./mvnw package
+```
+</TabItem>
+
+<TabItem value="Gradle" label="Gradle">
+```bash
+./gradlew build
+```
+</TabItem>
+</Tabs>
+
+4. Create a docker image for your application or publish your application to a container registry:
+
+<Tabs>
+<TabItem value="JVM Mode" label="JVM Mode" default>
+
+```bash
+docker build -f src/main/docker/Dockerfile.jvm -t quarkus-app-jvm .
+```
+
+</TabItem>
+
+<TabItem value="Native Mode" label="Native Mode">
+
+```bash
+docker build -f src/main/docker/Dockerfile.native -t quarkus-app-native .
+```
+
+</TabItem>
+</Tabs>
+
+5. Create a `deployment.yaml`:
 
 ```yaml:deployment.yaml
 apiVersion: apps/v1
@@ -331,11 +467,8 @@ spec:
 ```
 
 - `<my-app>` is the name of the docker image you built
-- `<app_name>` is the name for your application
-- `OTEL_EXPORTER_OTLP_ENDPOINT` is the endpoint of the machine where SigNoz is installed.
 
-
-2. Deploy to Kubernetes:
+6. Deploy to Kubernetes:
 
 ```bash
 kubectl apply -f deployment.yaml
@@ -351,15 +484,40 @@ You can verify the deployment by running `kubectl get pods` and checking the sta
 
 <TabItem value="windows" label="Windows">
 
-Set environment variables and run your application:
+1. Set environment variables:
 
 ```cmd
 setx OTEL_RESOURCE_ATTRIBUTES "service.name=<app_name>"
 setx OTEL_EXPORTER_OTLP_ENDPOINT "https://<URL of SigNoz Backend>:4318"
-java -jar target/quarkus-app/quarkus-run.jar
 ```
+
 - `<app_name>` is the name for your application
 - `OTEL_EXPORTER_OTLP_ENDPOINT` is the endpoint of the machine where SigNoz is installed.
+</TabItem>
+</Tabs>
+
+2. Build and run your application:
+
+<Tabs>
+<TabItem value="Quarkus CLI" label="Quarkus CLI" default>
+```cmd
+quarkus build
+java -jar target/quarkus-app/quarkus-run.jar
+```
+</TabItem>
+
+<TabItem value="Maven" label="Maven">
+```cmd
+mvnw.cmd package
+java -jar target/quarkus-app/quarkus-run.jar
+```
+</TabItem>
+
+<TabItem value="Gradle" label="Gradle">
+```cmd
+gradlew.bat build
+java -jar build/libs/quarkus-app.jar
+```
 </TabItem>
 </Tabs>
 

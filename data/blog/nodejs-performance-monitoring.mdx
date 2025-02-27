@@ -169,7 +169,7 @@ keywords: [NodeJS,NodeJS performance monitoring,full-stack monitoring,vuejs,mong
 
 Node.js is one of the most popular frameworks for server-side programming. As it's based on JavaScript, it's easy to learn and widely used by both enterprises and startups. However, Node.js applications can be prone to issues like memory leaks and high CPU loads due to its dynamically typed, single-threaded nature.
 
-<Figure src="/img/blog/2024/09/NodeJS-performance-monitoring-image.webp" alt="" caption="NodeJS Performance Monitoring" />This makes performance monitoring crucial for Node.js applications. But monitoring just the web servers isn't enough - you need visibility into your entire application stack for robust performance management.
+This makes performance monitoring crucial for Node.js applications. But monitoring just the web servers isn't enough - you need visibility into your entire application stack for robust performance management.
 
 In this tutorial, we'll demonstrate how to implement full-stack monitoring for a MEVN (MongoDB, Express, Vue, Node) application using OpenTelemetry and SigNoz. We'll cover:
 
@@ -337,7 +337,9 @@ cd signoz/deploy/
 
 You can visit our documentation for instructions on how to install SigNoz using Docker Swarm and Helm Charts.
 
-<Figure src="/img/blog/2024/09/NodeJS-performance-monitoring-deploy_docker_documentation.webp" alt="" caption="" />When you are done installing SigNoz, you can access the UI at <a href="http://localhost:3301/" rel="noopener noreferrer nofollow" target="_blank">http://localhost:3301</a>
+<Figure src="/img/blog/common/deploy_docker_documentation.webp" alt="" caption="" />
+
+When you are done installing SigNoz, you can access the UI at <a href="http://localhost:3301/" rel="noopener noreferrer nofollow" target="_blank">http://localhost:3301</a>
 
 <figure data-zoomable align='center'>
 <img src="/img/blog/common/signoz_dashboard_homepage.webp" alt="SigNoz dashboard"/>
@@ -524,9 +526,9 @@ Inside the `<template>` section in `App.vue`, remove `addTodo()` & `removeTodo` 
 
 ```
 
-Now, enable CORS in the OpenTelemetry Receiver.Under SigNoz folder, open the `otel-collector-config.yaml` file. The file is located at `deploy/docker/clickhouse-setup/otel-collector-config.yaml`
+Now, enable CORS in the OpenTelemetry Receiver.Under SigNoz folder, open the `otel-collector-config.yaml` file. The file is located at `deploy/docker/otel-collector-config.yaml`
 
-You can view the file at [SigNoz GitHub repo](https://github.com/SigNoz/signoz/blob/develop/deploy/docker/clickhouse-setup/otel-collector-config.yaml). Inside the file add the following CORS config:
+You can view the file at [SigNoz GitHub repo](https://github.com/SigNoz/signoz/blob/main/deploy/docker/otel-collector-config.yaml). Inside the file add the following CORS config:
 
 ```jsx
 http:
@@ -546,7 +548,7 @@ http:
 
 ```
 
-{/* Here’s a snapshot from the GitHub repo. You can find the file [here](https://github.com/SigNoz/mevn-opentelemetry-example/blob/main/signoz/deploy/docker/clickhouse-setup/otel-collector-config.yaml).
+{/* Here’s a snapshot from the GitHub repo. You can find the file [here](https://github.com/SigNoz/mevn-opentelemetry-example/blob/main/signoz/deploy/docker/otel-collector-config.yaml).
 
 <figure data-zoomable align='center'>
 <img src="/img/blog/2022/06/enable_cors.webp" alt="Enabling CORS"/>
@@ -558,15 +560,15 @@ After adding the changes, you need to restart the SigNoz Docker containers.
 **To stop the running SigNoz cluster:**
 
 ```
-sudo docker compose -f docker/clickhouse-setup/docker-compose.yaml stop
-
+cd deploy/docker
+sudo docker compose stop
 ```
 
 **To start/resume the running SigNoz cluster:**
 
 ```
-sudo docker compose -f docker/clickhouse-setup/docker-compose.yaml start
-
+cd deploy/docker
+sudo docker compose start
 ```
 
 <Admonition>
@@ -690,14 +692,14 @@ Below we can find the `mevn-signoz` in the list of applications being monitored
 You can monitor calls from your frontend application under the `Traces` tab of SigNoz.
 
 <figure data-zoomable align='center'>
-<img src="/img/blog/2022/06/NodeJS_perf_frontend.webp" alt="Frontned monitoring on SigNoz"/>
+<img src="/img/blog/2022/06/nodejs_perf_frontend.webp" alt="Frontned monitoring on SigNoz"/>
 <figcaption><i>Function calls from frontend being monitored on SigNoz</i></figcaption>
 </figure>
 
 SigNoz comes with out-of-box charts for monitoring application metrics. You can monitor key application metrics like application latency, requests per second, error rate, etc. You can also see the list of top endpoints from your application.
 
 <figure data-zoomable align='center'>
-<img src="/img/blog/2022/06/NodeJS_perf_app_metrics.webp" alt="Application metrics on SigNoz"/>
+<img src="/img/blog/2022/06/nodejs_perf_app_metrics.webp" alt="Application metrics on SigNoz"/>
 <figcaption><i>Monitor application metrics like latency, requests per second, error percentage, etc. with out-of-box charts</i></figcaption>
 </figure>
 
@@ -711,14 +713,14 @@ The `Traces` tab of SigNoz helps you analyze the tracing data collected from you
 SigNoz provides [Flamegraphs and Gantt charts](https://signoz.io/blog/flamegraphs/) to visualize the complete journey of user requests or transactions.
 
 <figure data-zoomable align='center'>
-<img src="/img/blog/2022/06/NodeJS_perf_flamegraphs.webp" alt="Flamegraphs and Gantt Charts on SigNoz"/>
+<img src="/img/blog/2022/06/nodejs_perf_flamegraphs.webp" alt="Flamegraphs and Gantt Charts on SigNoz"/>
 <figcaption><i>Flamegraphs and Gantt charts on SigNoz dashboard help you visualize the complete journey of a user request</i></figcaption>
 </figure>
 
 SigNoz helps you trace database calls too. In the flamegraphs, you can see the calls made to the MongoDB database in the sample app.
 
 <figure data-zoomable align='center'>
-<img src="/img/blog/2022/06/NodeJS_perf_mongodb.webp" alt="Trace database calls on SigNoz"/>
+<img src="/img/blog/2022/06/nodejs_perf_mongodb.webp" alt="Trace database calls on SigNoz"/>
 <figcaption><i>Trace Mongodb database calls with SigNoz</i></figcaption>
 </figure>
 
