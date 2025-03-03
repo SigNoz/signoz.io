@@ -259,15 +259,16 @@ const PricingPlans = () => {
         <div className="mx-auto mb-5 flex max-w-4xl flex-col items-center text-center">
           <div className="absolute top-[-80px] z-[0] h-[7rem] !w-[80vw] border !border-l-0 !border-r-0 !border-t-0 border-dashed border-signoz_slate-400" />
           <Heading type={1} className="z-[1]">
-          Simple Usage-based Predictable 
-          Observability Costs
+            Simple Usage-based Predictable Observability Costs
           </Heading>
           <div className="hidden md:block">
-            <SigNozCloudPricingOverview className='w-full'/>
+            <SigNozCloudPricingOverview className="w-full" />
           </div>
           <div className="my-5 flex justify-center">
             <div className="flex">
-              <nav className={`flex items-center space-x-2 rounded-sm border border-signoz_slate-400`}>
+              <nav
+                className={`flex items-center space-x-2 rounded-sm border border-signoz_slate-400`}
+              >
                 <button
                   id="btn-signoz-cloud-pricing"
                   type="button"
@@ -471,7 +472,7 @@ const PricingPlans = () => {
                           <>
                             <ModalBody className="py-6">
                               <VimeoPlayer videoId="968489758" />
-                              <p className="text-center text-signoz_vanilla-400 mt-4">
+                              <p className="mt-4 text-center text-signoz_vanilla-400">
                                 Note: Usage-based pricing applies after crossing the $199 mark
                               </p>
                             </ModalBody>
@@ -860,7 +861,9 @@ const PricingPlans = () => {
             <div className="pricing-plans mx-[8px] grid max-w-[100vw] grid-cols-1 justify-center gap-y-10 md:!max-w-[calc(80vw-24px)] lg:max-w-6xl lg:grid-cols-2">
               <div className="pricing-card !mb-0 border !border-b-0 !border-l-0 !border-r-0 border-dashed border-signoz_slate-400 bg-opacity-5 px-4 py-5 md:px-8 ">
                 <div>
-                  <h3 className="font-heading pinkish-gradient text-2xl font-bold">Community Edition</h3>
+                  <h3 className="font-heading pinkish-gradient text-2xl font-bold">
+                    Community Edition
+                  </h3>
                   <p className="mb-4 text-base leading-relaxed text-gray-400">Free to Self Host</p>
                   <div className="flex items-center gap-3">
                     <p>Install in your infra</p>
@@ -947,7 +950,7 @@ const PricingPlans = () => {
                       type={Button.TYPES.SECONDARY}
                       id="btn-contact-us-pricing-enterprise-edition-top"
                     >
-                      <Link href={'/enterprise/'} className="flex-center">
+                      <Link href={'/enterprise-self-hosted'} className="flex-center">
                         Contact us
                         <ArrowRight size={14} />
                       </Link>
@@ -1334,7 +1337,6 @@ const ExploreAllFeature = () => {
             inTeams: <CheckSolid />,
             inEnterprise: <CheckSolid />,
           },
-
         ],
       },
       {
