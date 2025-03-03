@@ -99,17 +99,16 @@ const EnterprisePricing = () => {
                     <CardHeader className="text-base text-signoz_vanilla-100">
                       No special pricing for custom metrics
                     </CardHeader>
-                    <CardBody className="-mt-4 flex flex-row text-sm font-light leading-9 text-signoz_vanilla-400">
+                    <CardBody className="-mt-4 text-sm font-light leading-9 text-signoz_vanilla-400">
                       All metrics charged simply at $0.1 per million samples. Estimate your metrics
-                      cost with the &nbsp;
+                      cost with the{' '}
                       <a
                         href="/pricing/metrics-cost-estimation/"
                         target="_blank"
                         className="font-bold text-signoz_robin-500"
                       >
-                        Metrics Price Calculator
+                        Metrics Price Calculator.
                       </a>
-                      .
                     </CardBody>
                   </Card>
                 </div>

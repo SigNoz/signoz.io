@@ -2,12 +2,22 @@ import React from 'react'
 import { TrustedByTeams } from '@/components/trusted-by'
 import { Metadata } from 'next'
 import { ArrowRight, Check, CheckCircle, CircleArrowRight } from 'lucide-react'
-
+import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import Button from '@/components/Button/Button'
-import { GetStartedEnterprise } from '@/components/GetStartedEnterprise'
 import Image from 'next/image'
-import EnterprisePricing from '@/components/EnterprisePricing'
+
+const EnterprisePricing = dynamic(() => import('@/components/EnterprisePricing'), {
+  ssr: false,
+})
+
+const GetStartedEnterprise = dynamic(
+  () => import('@/components/GetStartedEnterprise').then((mod) => mod.GetStartedEnterprise),
+  {
+    ssr: false,
+  }
+)
+
 export const metadata: Metadata = {
   title: 'SigNoz | The Open Source Datadog Alternative',
   openGraph: {
@@ -46,11 +56,11 @@ export default async function Page() {
                   </div>
 
                   <div className="mt-4 whitespace-normal text-left text-sm font-light">
-                    SigNoz for Enterprise Suited for larger organisations with advanced security,
+                    Suited for larger organisations with advanced security,
                   </div>
 
                   <div className="mb-4 mt-1 whitespace-normal text-left text-sm font-light">
-                    compliance and support requirements. Check Enterprise plans
+                    compliance and support requirements.
                   </div>
 
                   <Button id="btn-get-started-homepage-hero" className="mt-4">
@@ -349,8 +359,23 @@ export default async function Page() {
                 <div className="flex flex-row items-start gap-4">
                   <CircleArrowRight size={36} className="fill-signoz_robin-500" color="black" />{' '}
                   <div className="font-normal">
-                    Powered by ClickHouse (used by likes of Uber and Cloudflare) - an extremely
-                    performant and highly optimized storage for observability data.
+                    Powered by ClickHouse (used by likes of{' '}
+                    <a
+                      href="https://www.uber.com/en-IN/blog/logging/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Uber
+                    </a>{' '}
+                    and{' '}
+                    <a
+                      href="https://blog.cloudflare.com/log-analytics-using-clickhouse/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Cloudflare
+                    </a>
+                    ) - an extremely performant and highly optimized storage for observability data.
                   </div>
                 </div>
 
@@ -381,7 +406,7 @@ export default async function Page() {
               <div className="mt-3 text-xl font-bold">Engineered for limitless growth</div>
 
               <p className="text-md mt-4 font-normal">
-                SigNoz leverages modern distributed system principles so that you don’t have to!
+                SigNoz leverages modern distributed system principles so that you don't have to!
                 Seamlessly scale your observability alongside your enterprise ecosystem.
               </p>
 
@@ -556,6 +581,7 @@ export default async function Page() {
             </div>
           </div>
         </div>
+
         {/* Enterprise Support & Professional Services */}
         <div className="border-dashed-container flex flex-row">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2">
