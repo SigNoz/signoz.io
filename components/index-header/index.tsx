@@ -1,20 +1,11 @@
 'use client'
 
-import React from 'react'
-import SubHeading from '../../components/ui/SubHeading'
 import Hero from '../../components/ui/Hero'
 import VimeoPlayer from '../../components/VimeoPlayer/VimeoPlayer'
 import Link from 'next/link'
-import { ArrowRight, BookOpen, Handshake } from 'lucide-react'
+import { ArrowRight, BookOpen } from 'lucide-react'
 import Button from '@/components/Button/Button'
-import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  useDisclosure,
-} from '@nextui-org/react'
+import { Modal, ModalContent, ModalBody, useDisclosure } from '@nextui-org/react'
 
 export const Header = () => {
   const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure()
@@ -23,12 +14,12 @@ export const Header = () => {
     <header className="relative !mx-auto mt-16 !w-[100vw] md:!w-[80vw]">
       <div className="absolute bottom-0 left-[12px] right-[12px] top-0 z-[-1] border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 md:left-[24px] md:right-[24px]" />
       <div className="relative !mx-auto flex !w-[100vw] flex-col items-center border  !border-b-0 !border-t-0  border-dashed border-signoz_slate-400 px-2 pb-4 pt-12 text-center md:!w-[80vw] md:px-5 md:pt-[8.5rem]">
-      {/* <Link href="/events/kubecon-cloudnativecon-north-america-2024/">
+        {/* <Link href="/events/kubecon-cloudnativecon-north-america-2024/">
           <button className="h-10 px-4 py-2 rounded-full text-xs sm:text-sm flex items-center justify-center gap-1.5 sm:gap-2 bg-signoz_slate-400 font-medium leading-5 text-white border border-signoz_slate-200 shadow-[0_0_14px_0_rgba(78,116,248,0.40)]">
           <Handshake size={14}/>Meet us at KubeCon North America '24 <ArrowRight size={14} />
           </button>
         </Link> */}
-        <div className="absolute left-0 top-[147px] z-[-1] h-10 sm:h-14 !w-[100vw] border !border-l-0 !border-r-0 border-dashed border-signoz_slate-400 md:top-[253px] md:!w-[80vw]" />
+        <div className="absolute left-0 top-[147px] z-[-1] h-10 !w-[100vw] border !border-l-0 !border-r-0 border-dashed border-signoz_slate-400 sm:h-14 md:top-[253px] md:!w-[80vw]" />
         <Hero>
           OpenTelemetry-Native Logs,&nbsp;
           <br className="hidden lg:inline" />
