@@ -19,14 +19,14 @@ const GetStartedEnterprise = dynamic(
 )
 
 export const metadata: Metadata = {
-  title: 'SigNoz | The Open Source Datadog Alternative',
+  title: 'SigNoz Enterprise | Built for Scale',
   openGraph: {
-    title: 'SigNoz | The Open Source Datadog Alternative',
+    title: 'SigNoz Enterprise | Built for Scale',
     description:
-      'SigNoz is an open-source observability tool powered by OpenTelemetry. Get APM, logs, traces, metrics, exceptions, & alerts in a single tool.',
+      'With SigNoz Enterprise, you get unmatched scale and flexibility along with advanced security, compliance, and support.',
   },
   description:
-    'SigNoz is an open-source observability tool powered by OpenTelemetry. Get APM, logs, traces, metrics, exceptions, & alerts in a single tool.',
+    'With SigNoz Enterprise, you get unmatched scale and flexibility along with advanced security, compliance, and support.',
 }
 
 const icons = [
