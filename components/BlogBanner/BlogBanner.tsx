@@ -1,16 +1,14 @@
 
-import { ArrowRight } from 'lucide-react'
+'use client'
 
-interface OpenTelemetryBannerProps {
+interface BlogBannerProps {
   title: string
-  ctaTitle?: string
-  ctaText?: string
   date: string
   readingTime: string
   tags?: string[]
 }
 
-const OpenTelemetryBanner = ({ title, date, readingTime, tags = [] }: OpenTelemetryBannerProps) => {
+const BlogBanner = ({ title, date, readingTime, tags = [] }: BlogBannerProps) => {
   return (
     <div className="relative overflow-hidden">
       <div className="relative w-full px-4 py-8 sm:py-12 md:py-16">
@@ -26,14 +24,6 @@ const OpenTelemetryBanner = ({ title, date, readingTime, tags = [] }: OpenTeleme
             <div className="flex flex-col space-y-4 sm:flex-row sm:items-start sm:justify-between sm:space-y-0">
               {/* Tags */}
               <div className="flex flex-wrap items-center gap-2 sm:w-3/4 sm:gap-3">
-                <a
-                  href="/resource-center/opentelemetry/"
-                  target="_blank"
-                  className="flex w-fit items-center gap-2 rounded-full border border-signoz_ink-300 bg-signoz_ink-300/50 px-3 py-1 text-xs text-gray-400 transition-colors hover:border-signoz_robin-500 hover:text-white sm:px-4 sm:py-1.5 sm:text-sm"
-                >
-                  <span>Part of OpenTelemetry Track</span>
-                  <ArrowRight size={14} className="rotate-[-45deg]" />
-                </a>
                 {tags.map((tag) => (
                   <div
                     key={tag}
@@ -71,4 +61,4 @@ const OpenTelemetryBanner = ({ title, date, readingTime, tags = [] }: OpenTeleme
   )
 }
 
-export default OpenTelemetryBanner
+export default BlogBanner 

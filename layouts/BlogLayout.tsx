@@ -6,7 +6,7 @@ import type { Blog, Authors } from 'contentlayer/generated'
 import SectionContainer from '@/components/SectionContainer'
 import ScrollTopAndComment from '@/components/ScrollTopAndComment'
 import { ProgressBar } from '@/components/ProgressBar/ProgressBar'
-import OpenTelemetryBanner from '@/components/OpenTelemetryBanner/OpenTelemetryBanner'
+import BlogBanner from '@/components/BlogBanner/BlogBanner'
 import TableOfContents from '@/components/TableOfContents/TableOfContents'
 import SidebarAuthorInfo from '@/components/SidebarAuthorInfo/SidebarAuthorInfo'
 import RelatedJobs from '@/components/RelatedJobs/RelatedJobs'
@@ -15,13 +15,13 @@ import { ArrowRight, ExternalLink } from 'lucide-react'
 import MobileAuthorInfo from '@/components/MobileAuthorInfo/MobileAuthorInfo'
 
 // Extend the Blog type to include CTA fields
-interface OpenTelemetryContent extends Blog {
+interface BlogContent extends Blog {
   cta_title?: string
   cta_text?: string
 }
 
 interface LayoutProps {
-  content: CoreContent<OpenTelemetryContent>
+  content: CoreContent<BlogContent>
   authorDetails: CoreContent<Authors>[]
   authors: string[]
   children: ReactNode
@@ -34,7 +34,7 @@ export interface TocItemProps {
   value: string
 }
 
-export default function OpenTelemetryLayout({
+export default function BlogLayout({
   content,
   authorDetails,
   authors,
@@ -79,7 +79,7 @@ export default function OpenTelemetryLayout({
     <main ref={mainRef}>
       <ScrollTopAndComment />
 
-      <OpenTelemetryBanner title={title} date={date} readingTime={readingTime.text} tags={tags} />
+      <BlogBanner title={title} date={date} readingTime={readingTime.text} tags={tags} />
 
       <SectionContainer>
         <div className="post relative flex 2xl:max-w-[90rem]">
@@ -95,15 +95,16 @@ export default function OpenTelemetryLayout({
 
           {/* Right sidebar - Hidden on mobile/tablet, Fixed position with internal scrolling on desktop */}
           <div className="post-toc hidden lg:fixed lg:right-0 lg:top-[120px] lg:flex lg:h-[calc(100vh-140px)] lg:w-64 lg:flex-col lg:border-l lg:border-signoz_ink-300 lg:pl-8">
-            {/* Learn OpenTelemetry Card */}
+            {/* SigNoz Docs Card */}
             <Link
-              href="/resource-center/opentelemetry/"
+              href="/docs/cloud/"
+              id='blog-layout-sidebar-card'
               target="_blank"
               className="group mb-6 flex flex-col rounded-lg border border-signoz_ink-300 bg-signoz_ink-400/50 p-3 transition-colors hover:border-signoz_robin-500"
             >
-              <h3 className="text-sm font-medium text-white">Learn OpenTelemetry with SigNoz</h3>
+              <h3 className="text-sm font-medium text-white">Set Up Observability with OTel and SigNoz</h3>
               <div className="flex items-center gap-1 text-[11px] text-gray-400 transition-colors group-hover:text-white">
-                <span>Explore tutorials</span>
+                <span>Explore docs</span>
                 <ArrowRight
                   size={12}
                   className="transition-transform group-hover:translate-x-0.5"
@@ -136,8 +137,6 @@ export default function OpenTelemetryLayout({
 
         {/* Bottom sections */}
         <div className="my-12 px-4 md:px-6">
-          {/* Related Jobs Section */}
-          <RelatedJobs />
           {/* Related Articles Section */}
           {relatedArticles && Array.isArray(relatedArticles) && relatedArticles.length > 0 && (
             <div className="pt-16">
@@ -180,4 +179,4 @@ export default function OpenTelemetryLayout({
       <ProgressBar target={mainRef} />
     </main>
   )
-}
+} 
