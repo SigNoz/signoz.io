@@ -11,6 +11,7 @@ import MainFooter from '@/components/mainFooter'
 import TopNav from '@/components/TopNav/TopNav'
 import { Inter } from 'next/font/google'
 import React, { Suspense } from 'react'
+import { PostHogProvider } from './providers'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -79,6 +80,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           ></iframe>
         </noscript>
 
+        <PostHogProvider>
+
+
         <ThemeProviders>
           <Suspense>
             <SectionContainer>
@@ -92,6 +96,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </SectionContainer>
           </Suspense>
         </ThemeProviders>
+
+        </PostHogProvider>
+
       </body>
     </html>
   )
