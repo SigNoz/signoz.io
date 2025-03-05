@@ -12,6 +12,7 @@ import SidebarAuthorInfo from '@/components/SidebarAuthorInfo/SidebarAuthorInfo'
 import RelatedJobs from '@/components/RelatedJobs/RelatedJobs'
 import Link from 'next/link'
 import { ArrowRight, ExternalLink } from 'lucide-react'
+import MobileAuthorInfo from '@/components/MobileAuthorInfo/MobileAuthorInfo'
 
 // Extend the Blog type to include CTA fields
 interface OpenTelemetryContent extends Blog {
@@ -84,6 +85,9 @@ export default function OpenTelemetryLayout({
         <div className="post relative flex 2xl:max-w-[90rem]">
           {/* Main content area centered in the remaining space */}
           <div className="mx-auto w-full max-w-3xl px-4 md:px-6">
+            {/* Mobile author info - Visible only on mobile/tablet */}
+            <MobileAuthorInfo authors={authors} />
+            
             <article className="prose prose-slate max-w-none py-6 dark:prose-invert">
               {children}
             </article>

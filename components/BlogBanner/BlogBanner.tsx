@@ -1,4 +1,4 @@
-/** @jsxImportSource react */
+
 'use client'
 
 interface BlogBannerProps {

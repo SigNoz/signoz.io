@@ -1,4 +1,4 @@
-/** @jsxImportSource react */
+
 import { ArrowRight } from 'lucide-react'
 
 interface OpenTelemetryBannerProps {
