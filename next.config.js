@@ -14,7 +14,7 @@ const ContentSecurityPolicy = `
   connect-src *;
   font-src * 'self';
   frame-src * giscus.app youtube.com;
-  frame-ancestors 'self' https://signoz.io https://*.us.signoz.cloud https://*.in.signoz.cloud https://*.eu.signoz.cloud;
+  frame-ancestors 'self' https://signoz.io https://*.us.signoz.cloud https://*.in.signoz.cloud https://*.eu.signoz.cloud http://localhost:3301;
 `
 
 const securityHeaders = [
