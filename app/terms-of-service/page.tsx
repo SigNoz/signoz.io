@@ -117,7 +117,7 @@ The Term of the Agreement will begin as of the Effective Date and will terminate
 
 2) **Termination for Breach:**
 
-The Company and the Customer shall have the right to terminate these Terms at any time in the event of a breach by the other party of a material covenant, commitment or obligation under these Terms that remains uncured: (i) in the event of a monetary breach, ten (10) calendar days following written notice thereof; and (ii) in the event of a non-monetary breach after thirty (30) days following written notice thereof. Such termination shall be effective immediately and automatically upon the expiration of the applicable notice period, without further notice or action by either party. Termination shall be in addition to any other remedies that may be available to the non-breaching party.
+The Company and the Customer shall have the right to terminate these Terms at any time in the event of a breach by the other party of a material covenant, commitment or obligation under these Terms that remains uncured: (i) in the event of a monetary breach, seven (7) calendar days following written notice thereof; and (ii) in the event of a non-monetary breach after thirty (30) days following written notice thereof. Such termination shall be effective immediately and automatically upon the expiration of the applicable notice period, without further notice or action by either party. Termination shall be in addition to any other remedies that may be available to the non-breaching party.
 
 3) **Obligations Upon Termination:**
 
