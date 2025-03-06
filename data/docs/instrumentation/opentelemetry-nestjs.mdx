@@ -74,7 +74,8 @@ npm install --save @opentelemetry/exporter-trace-otlp-http@^0.45.0
 
 **Step 2.** Create `tracer.ts` file<br></br>
 You need to configure the endpoint for SigNoz cloud in this file.
-
+<Tabs>
+<TabItem value="Typescript" label="Typescript">
 ```ts
 'use strict';
 
@@ -116,6 +117,49 @@ process.on('SIGTERM', () => {
 
 export default sdk;
 ```
+</TabItem>
+<TabItem value="Javascript" label="Javascript">
+```js
+'use strict';
+
+const { getNodeAutoInstrumentations } = require('@opentelemetry/auto-instrumentations-node');
+const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-http');
+const { Resource } = require('@opentelemetry/resources');
+const opentelemetry = require('@opentelemetry/sdk-node');
+const { SemanticResourceAttributes } = require('@opentelemetry/semantic-conventions');
+
+// Configure the SDK to export telemetry data to the console
+// Enable all auto-instrumentations from the meta package
+const exporterOptions = {
+  url: 'https://ingest.{region}.signoz.cloud:443/v1/traces',
+};
+
+const traceExporter = new OTLPTraceExporter(exporterOptions);
+const sdk = new opentelemetry.NodeSDK({
+  traceExporter,
+  instrumentations: [getNodeAutoInstrumentations()],
+  resource: new Resource({
+    [SemanticResourceAttributes.SERVICE_NAME]: '<service_name>',
+  }),
+});
+
+// initialize the SDK and register with the OpenTelemetry API
+// this enables the API to record telemetry
+sdk.start();
+
+// gracefully shut down the SDK on process exit
+process.on('SIGTERM', () => {
+  sdk
+    .shutdown()
+    .then(() => console.log('Tracing terminated'))
+    .catch((error) => console.log('Error terminating tracing', error))
+    .finally(() => process.exit(0));
+});
+
+module.exports = sdk;
+```
+</TabItem>
+</Tabs>
 - Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - `<service_name>` is name of your service
 
@@ -130,7 +174,8 @@ const tracer = require('./tracer')
 
 **Step 4.** Start the tracer<br></br>
 In the `async function boostrap` section of the application code, initialize the tracer as follows: 
-
+<Tabs>
+<TabItem value="Typescript" label="Typescript">
 ```jsx
 const tracer = require('./tracer')
 
@@ -140,7 +185,7 @@ import { AppModule } from './app.module';
   // OpenTelemetry automatic instrumentation must go here.
 
 async function bootstrap() {
-  // highlight-start
+    // highlight-start
     await tracer.start();
     //highlight-end
     const app = await NestFactory.create(AppModule);
@@ -148,6 +193,28 @@ async function bootstrap() {
   }
   bootstrap();
 ```
+</TabItem>
+<TabItem value="Javascript" label="Javascript">
+```jsx
+const tracer = require('./tracer')
+
+import { NestFactory } from '@nestjs/core';
+import { AppModule } from './app.module';
+
+// All of your application code and any imports that should leverage
+// OpenTelemetry automatic instrumentation must go here.
+
+async function bootstrap() {
+    // highlight-start
+    await tracer.start();
+    //highlight-end
+    const app = await NestFactory.create(AppModule);
+    await app.listen(3001);
+  }
+  bootstrap();
+```
+</TabItem>
+</Tabs>
 
 **Step 5.** Run the application
 
@@ -222,7 +289,8 @@ npm install --save @opentelemetry/exporter-trace-otlp-http@^0.45.0
 ```
 
 **Step 2.** Create `tracer.ts` file<br></br>
-
+<Tabs>
+<TabItem value="Typescript" label="Typescript">
 ```ts
 'use strict';
 
@@ -264,6 +332,49 @@ process.on('SIGTERM', () => {
 
 export default sdk;
 ```
+</TabItem>
+<TabItem value="Javascript" label="Javascript">
+```js
+'use strict';
+
+import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
+import { Resource } from '@opentelemetry/resources';
+import * as opentelemetry from '@opentelemetry/sdk-node';
+import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
+
+// Configure the SDK to export telemetry data to the console
+// Enable all auto-instrumentations from the meta package
+const exporterOptions = {
+  url: 'http://localhost:4318/v1/traces',
+};
+
+const traceExporter = new OTLPTraceExporter(exporterOptions);
+const sdk = new opentelemetry.NodeSDK({
+  traceExporter,
+  instrumentations: [getNodeAutoInstrumentations()],
+  resource: new Resource({
+    [SemanticResourceAttributes.SERVICE_NAME]: '<service_name>',
+  }),
+});
+
+// initialize the SDK and register with the OpenTelemetry API
+// this enables the API to record telemetry
+sdk.start();
+
+// gracefully shut down the SDK on process exit
+process.on('SIGTERM', () => {
+  sdk
+    .shutdown()
+    .then(() => console.log('Tracing terminated'))
+    .catch((error) => console.log('Error terminating tracing', error))
+    .finally(() => process.exit(0));
+});
+
+module.exports = sdk;
+```
+</TabItem>
+</Tabs>
 - `<service_name>` : Name of your service.
 
 **Step 3.** On `main.ts` file or file where your app starts import tracer using below command. 
@@ -278,7 +389,8 @@ const tracer = require('./tracer')
 
 **Step 4.** Start the tracer<br></br>
 In the `async function boostrap` section of the application code, initialize the tracer as follows: 
-
+<Tabs>
+<TabItem value="Typescript" label="Typescript">
 ```jsx
 const tracer = require('./tracer')
 
@@ -296,7 +408,25 @@ async function bootstrap() {
   }
   bootstrap();
 ```
+</TabItem>
+<TabItem value="Javascript" label="Javascript">
+```js
+const tracer = require('./tracer');
+const { NestFactory } = require('@nestjs/core');
+const { AppModule } = require('./app.module');
 
+// All of your application code and any imports that should leverage
+// OpenTelemetry automatic instrumentation must go here.
+
+async function bootstrap() {
+    await tracer.start();
+    const app = await NestFactory.create(AppModule);
+    await app.listen(3001);
+}
+bootstrap();
+```
+</TabItem>
+</Tabs>
 **Step 5.** Run the application
 ```bash
   nest start
@@ -359,7 +489,8 @@ npm install --save @opentelemetry/exporter-trace-otlp-http@^0.45.0
 ```
 
 **Step 2.** Create `tracer.ts` file<br></br>
-
+<Tabs>
+<TabItem value="Typescript" label="Typescript">
 ```ts
 'use strict';
 
@@ -401,6 +532,50 @@ process.on('SIGTERM', () => {
 
 export default sdk;
 ```
+</TabItem>
+<TabItem value="Javascript" label="Javascript">
+```js
+'use strict';
+
+const { getNodeAutoInstrumentations } = require('@opentelemetry/auto-instrumentations-node');
+const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-http');
+const { Resource } = require('@opentelemetry/resources');
+const opentelemetry = require('@opentelemetry/sdk-node');
+const { SemanticResourceAttributes } = require('@opentelemetry/semantic-conventions');
+
+// Configure the SDK to export telemetry data to the console
+// Enable all auto-instrumentations from the meta package
+const exporterOptions = {
+  url: 'http://localhost:4318/v1/traces',
+};
+
+const traceExporter = new OTLPTraceExporter(exporterOptions);
+const sdk = new opentelemetry.NodeSDK({
+  traceExporter,
+  instrumentations: [getNodeAutoInstrumentations()],
+  resource: new Resource({
+    [SemanticResourceAttributes.SERVICE_NAME]: '<service_name>',
+  }),
+});
+
+// initialize the SDK and register with the OpenTelemetry API
+// this enables the API to record telemetry
+sdk.start();
+
+// gracefully shut down the SDK on process exit
+process.on('SIGTERM', () => {
+  sdk
+    .shutdown()
+    .then(() => console.log('Tracing terminated'))
+    .catch((error) => console.log('Error terminating tracing', error))
+    .finally(() => process.exit(0));
+});
+
+module.exports = sdk;
+```
+</TabItem>
+</Tabs>
+
 - `<service_name>` : Name of your service.
 
 **Step 3.** On `main.ts` file or file where your app starts import tracer using below command. 
@@ -415,7 +590,8 @@ const tracer = require('./tracer')
 
 **Step 4.** Start the tracer<br></br>
 In the `async function boostrap` section of the application code, initialize the tracer as follows: 
-
+<Tabs>
+<TabItem value="Typescript" label="Typescript">
 ```jsx
 const tracer = require('./tracer')
 
@@ -433,7 +609,26 @@ async function bootstrap() {
   }
   bootstrap();
 ```
+</TabItem>
+<TabItem value="Javascript" label="Javascript">
+```js
+const tracer = require('./tracer');
+const { NestFactory } = require('@nestjs/core');
+const { AppModule } = require('./app.module');
 
+// All of your application code and any imports that should leverage
+// OpenTelemetry automatic instrumentation must go here.
+
+async function bootstrap() {
+    await tracer.start();
+    const app = await NestFactory.create(AppModule);
+    await app.listen(3001);
+}
+bootstrap();
+
+```
+</TabItem>
+</Tabs>
 **Step 5.** Run the application
 ```bash
   nest start
@@ -493,7 +688,8 @@ npm install --save @opentelemetry/exporter-trace-otlp-http@^0.45.0
 
 **Step 2.** Create `tracer.ts` file<br></br>
 You need to configure the endpoint for SigNoz cloud in this file.
-
+<Tabs>
+<TabItem value="Typescript" label="Typescript">
 ```ts
 'use strict';
 
@@ -536,6 +732,51 @@ process.on('SIGTERM', () => {
 
 export default sdk;
 ```
+</TabItem>
+<TabItem value="Javascript" label="Javascript">
+```js
+'use strict';
+
+const { getNodeAutoInstrumentations } = require('@opentelemetry/auto-instrumentations-node');
+const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-http');
+const { Resource } = require('@opentelemetry/resources');
+const opentelemetry = require('@opentelemetry/sdk-node');
+const { SemanticResourceAttributes } = require('@opentelemetry/semantic-conventions');
+
+// Configure the SDK to export telemetry data to the console
+// Enable all auto-instrumentations from the meta package
+const exporterOptions = {
+  url: 'https://ingest.{region}.signoz.cloud:443/v1/traces',
+  headers: { 'signoz-access-token': '<signoz_ingestion_key>' },
+};
+
+const traceExporter = new OTLPTraceExporter(exporterOptions);
+const sdk = new opentelemetry.NodeSDK({
+  traceExporter,
+  instrumentations: [getNodeAutoInstrumentations()],
+  resource: new Resource({
+    [SemanticResourceAttributes.SERVICE_NAME]: '<service_name>',
+  }),
+});
+
+// initialize the SDK and register with the OpenTelemetry API
+// this enables the API to record telemetry
+sdk.start();
+
+// gracefully shut down the SDK on process exit
+process.on('SIGTERM', () => {
+  sdk
+    .shutdown()
+    .then(() => console.log('Tracing terminated'))
+    .catch((error) => console.log('Error terminating tracing', error))
+    .finally(() => process.exit(0));
+});
+
+module.exports = sdk;
+
+```
+</TabItem>
+</Tabs>
 
 - Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
@@ -548,14 +789,22 @@ OpenTelemetry Node SDK currently does not detect the headers from `.env` files a
   <Admonition type="info">
   The below import should be the first line in the main file of your application (Ex -> `main.ts`)
   </Admonition> 
-      
+<Tabs>
+<TabItem value="Typescript" label="Typescript">
 ```jsx
 const tracer = require('./tracer')
 ```
-
+</TabItem>
+<TabItem value="Javascript" label="Javascript">
+```js
+const tracer = require('./tracer')
+```
+</TabItem>
+</Tabs>
 **Step 4.** Start the tracer<br></br>
 In the `async function boostrap` section of the application code, initialize the tracer as follows: 
-
+<Tabs>
+<TabItem value="Typescript" label="Typescript">
 ```jsx
 const tracer = require('./tracer')
 
@@ -573,7 +822,26 @@ async function bootstrap() {
   }
   bootstrap();
 ```
+</TabItem>
+<TabItem value="Javascript" label="Javascript">
+```js
+const tracer = require('./tracer')
 
+const { NestFactory } = require('@nestjs/core');
+const { AppModule } = require('./app.module');
+
+// All of your application code and any imports that should leverage
+// OpenTelemetry automatic instrumentation must go here.
+
+async function bootstrap() {
+  await tracer.start();
+  const app = await NestFactory.create(AppModule);
+  await app.listen(3001);
+}
+bootstrap();
+```
+</TabItem>
+</Tabs>
 **Step 5.** Run the application
 
 ```
@@ -646,7 +914,8 @@ npm install --save @opentelemetry/exporter-trace-otlp-http@^0.45.0
 ```
 
 **Step 2.** Create `tracer.ts` file<br></br>
-
+<Tabs>
+<TabItem value="Typescript" label="Typescript">
 ```ts
 'use strict';
 
@@ -688,6 +957,47 @@ process.on('SIGTERM', () => {
 
 export default sdk;
 ```
+</TabItem>
+<TabItem value="Javascript" label="Javascript">
+```js
+'use strict';
+
+const { getNodeAutoInstrumentations } = require('@opentelemetry/auto-instrumentations-node');
+const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-http');
+const { Resource } = require('@opentelemetry/resources');
+const opentelemetry = require('@opentelemetry/sdk-node');
+const { SemanticResourceAttributes } = require('@opentelemetry/semantic-conventions');  
+
+const exporterOptions = {
+  url: 'http://localhost:4318/v1/traces',
+};
+
+const traceExporter = new OTLPTraceExporter(exporterOptions);
+const sdk = new opentelemetry.NodeSDK({
+  traceExporter,
+  instrumentations: [getNodeAutoInstrumentations()],
+  resource: new Resource({
+    [SemanticResourceAttributes.SERVICE_NAME]: '<service_name>',
+  }),
+});
+
+// initialize the SDK and register with the OpenTelemetry API
+// this enables the API to record telemetry
+sdk.start();
+
+// gracefully shut down the SDK on process exit
+process.on('SIGTERM', () => {
+  sdk 
+    .shutdown()
+    .then(() => console.log('Tracing terminated'))
+    .catch((error) => console.log('Error terminating tracing', error))
+    .finally(() => process.exit(0));
+});
+
+module.exports = sdk;
+```
+</TabItem>
+</Tabs>
 - `<service_name>` : Name of your service.
 
 **Step 3.** On `main.ts` file or file where your app starts import tracer using below command. 
@@ -695,14 +1005,23 @@ export default sdk;
 The below import should be the first line in the main file of your application (Ex -> `main.ts`)
 </Admonition>
     
+<Tabs>
+<TabItem value="Typescript" label="Typescript">
 ```jsx
 const tracer = require('./tracer')
 ```
-    
+</TabItem>
+<TabItem value="Javascript" label="Javascript">
+```jsx
+const tracer = require('./tracer')
+```
+</TabItem>
+</Tabs>
 
 **Step 4.** Start the tracer<br></br>
 In the `async function boostrap` section of the application code, initialize the tracer as follows: 
-
+<Tabs>
+<TabItem value="Typescript" label="Typescript">
 ```jsx
 const tracer = require('./tracer')
 
@@ -720,7 +1039,26 @@ async function bootstrap() {
   }
   bootstrap();
 ```
+</TabItem>
+<TabItem value="Javascript" label="Javascript">
+```jsx
+const tracer = require('./tracer')
 
+const { NestFactory } = require('@nestjs/core');
+const { AppModule } = require('./app.module');
+
+// All of your application code and any imports that should leverage
+// OpenTelemetry automatic instrumentation must go here.
+
+async function bootstrap() {
+  await tracer.start();
+  const app = await NestFactory.create(AppModule);
+  await app.listen(3001);
+}
+bootstrap();
+```
+</TabItem>
+</Tabs>
 **Step 5.** Run the application
 ```bash
   nest start
@@ -784,6 +1122,8 @@ Internally, it calls the specific auto-instrumentation library for components us
 
 2. Create a `tracer.ts` file
     
+  <Tabs>
+  <TabItem value="Typescript" label="Typescript">
   ```ts
   'use strict';
 
@@ -825,6 +1165,44 @@ Internally, it calls the specific auto-instrumentation library for components us
 
   export default sdk;
     ```
+  </TabItem>
+  <TabItem value="Javascript" label="Javascript">
+  ```js
+  'use strict';
+
+  const { getNodeAutoInstrumentations } = require('@opentelemetry/auto-instrumentations-node');
+  const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-http');
+  const { Resource } = require('@opentelemetry/resources');
+  const opentelemetry = require('@opentelemetry/sdk-node');
+  const { SemanticResourceAttributes } = require('@opentelemetry/semantic-conventions');
+
+  const exporterOptions = {
+    url: 'http://localhost:4318/v1/traces',
+  };
+
+  const traceExporter = new OTLPTraceExporter(exporterOptions);
+  const sdk = new opentelemetry.NodeSDK({
+    traceExporter,
+    instrumentations: [getNodeAutoInstrumentations()],
+  });
+
+  // initialize the SDK and register with the OpenTelemetry API
+  // this enables the API to record telemetry
+  sdk.start();
+
+  // gracefully shut down the SDK on process exit
+  process.on('SIGTERM', () => {
+    sdk
+      .shutdown()
+      .then(() => console.log('Tracing terminated'))
+      .catch((error) => console.log('Error terminating tracing', error))
+      .finally(() => process.exit(0));
+  });
+
+  module.exports = sdk;
+  ```
+  </TabItem>
+  </Tabs>
   - `<service_name>` : Name of your service. 
 
 3. On `main.ts` file or file where your app starts import tracer using below command. <br></br>
@@ -832,15 +1210,25 @@ Internally, it calls the specific auto-instrumentation library for components us
     <Admonition type="info">
     The below import should be the first line in the main file of your application (Ex -> `main.ts`)
     </Admonition>
-      
+  
+  <Tabs>
+  <TabItem value="Typescript" label="Typescript">
     ```jsx
     const tracer = require('./tracer')
     ```
-    
+  </TabItem>
+  <TabItem value="Javascript" label="Javascript">
+    ```jsx
+    const tracer = require('./tracer')
+    ```
+  </TabItem>
+  </Tabs>
 
 4. Start the tracer<br></br>
    In the `async function boostrap` section of the application code, initialize the tracer as follows: 
     
+    <Tabs>
+    <TabItem value="Typescript" label="Typescript">
     ```jsx
     const tracer = require('./tracer')
     
@@ -858,6 +1246,25 @@ Internally, it calls the specific auto-instrumentation library for components us
       }
       bootstrap();
     ```
+    </TabItem>
+    <TabItem value="Javascript" label="Javascript">
+    ```jsx
+    const tracer = require('./tracer')
+    const { NestFactory } = require('@nestjs/core');
+    const { AppModule } = require('./app.module');
+
+    // All of your application code and any imports that should leverage
+    // OpenTelemetry automatic instrumentation must go here.
+
+    async function bootstrap() {  
+        await tracer.start();
+        const app = await NestFactory.create(AppModule);
+        await app.listen(3001);
+      }
+      bootstrap();
+    ```
+    </TabItem>
+    </Tabs>
 5. Run the application<br></br>
     ```bash
     nest start
@@ -880,15 +1287,15 @@ Validate your traces in SigNoz:
 2. In SigNoz, open the `Services` tab. Hit the `Refresh` button on the top right corner, and your application should appear in the list of `Applications`.
 3. Go to the `Traces` tab, and apply relevant filters to see your application’s traces.
 
-{/* You might see other dummy applications if you’re using SigNoz for the first time. You can remove it by following the docs [here](https://signoz.io/docs/operate/docker-standalone/#remove-the-sample-application). */}
+{/* You might see other dummy applications if you’re using SigNoz for the first time. You can remove it by following the docs [here](https://signoz.io/docs/operate/docker-standalone/#remove-the-sample-application).
 
-{/* <figure data-zoomable align='center'>
+<figure data-zoomable align='center'>
     <img src="/img/docs/nestjs_application_instrumented.webp" alt="Nestjs Application in the list of services being monitored in SigNoz"/>
     <figcaption><i>Nestjs Application in the list of services being monitored in SigNoz</i></figcaption>
-</figure> */}
+</figure>
 
 
-{/* If you don't see your application reported in the list of services, try our [troubleshooting](https://signoz.io/docs/install/troubleshooting/) guide. */}
+If you don't see your application reported in the list of services, try our [troubleshooting](https://signoz.io/docs/install/troubleshooting/) guide. */}
 
 
 ### Using a specific auto-instrumentation library
@@ -902,8 +1309,8 @@ npm install --save @opentelemetry/instrumentation-nestjs-core
 <Admonition>
 In the above case, you will have to install packages for all the components that you want to instrument with OpenTelemetry individually. You can find detailed instructions [here](https://signoz.io/docs/instrumentation/javascript/#using-a-specific-auto-instrumentation-library).
 </Admonition>
-
-{/* ## Instrumentation Modules for Databases
+{/* 
+## Instrumentation Modules for Databases
 
 The `@opentelemetry/auto-instrumentations-node` can inititialize instrumentation for popular databases. Hence it’s recommended to [get started](#using-the-all-in-one-auto-instrumentation-library) with it.
 
