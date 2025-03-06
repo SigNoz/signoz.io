@@ -78,13 +78,16 @@ export const traceExporter = new OTLPTraceExporter(exporterOptions);
 **Step 4.** Create `instrumentation.ts` file<br></br>
 ```tsx
 import { registerOTel } from '@vercel/otel';
-import { traceExporter } from './instrumentation.node';
 
 export function register() {
-  registerOTel({
-    serviceName: 'Sample Next.js App',
-    traceExporter: traceExporter,
-  });
+  if (process.env.NEXT_RUNTIME === 'nodejs') {
+    const { traceExporter } = await import('./instrumentation.node.ts');
+
+    registerOTel({
+      serviceName: 'Sample Next.js App',
+      traceExporter: traceExporter,
+    });
+  }
 }
 ```
 
