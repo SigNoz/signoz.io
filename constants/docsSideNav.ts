@@ -2084,11 +2084,6 @@ const docsSideNav = [
       },
       {
         type: 'doc',
-        route: '/docs/operate/feature-flags/',
-        label: 'Feature Flags',
-      },
-      {
-        type: 'doc',
         route: '/docs/production-readiness',
         label: 'Best Practices for Production',
       },
