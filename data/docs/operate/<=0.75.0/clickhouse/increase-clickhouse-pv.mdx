@@ -1,0 +1,186 @@
+---
+date: 2024-06-06
+id: increase-clickhouse-pv
+title: Increase the ClickHouse Persistent Volume Size
+---
+
+import UpgradeInfo from '@/components/shared/helm-upgrade-info.mdx'
+import SigNozCloud from '@/components/shared/signoz-cloud.mdx'
+
+<SigNozCloud />
+
+You can use the following `helm upgrade` command to increase the size
+of the persistent volume used by SigNoz.
+
+Replace the following values to match your environment:
+
+- Your namespace (this example uses `platform`)
+- Your release (this example uses `my-release`)
+- Your chart (this example uses `signoz/signoz`)
+- The new size of the persistent volume (this example uses `25Gi`)
+
+## Check if Volume Expansion is Allowed
+
+Before you proceed, run the following command to check if
+your storage class allows volume expansion:
+
+```bash
+kubectl get storageclass -o json | jq '.items[]|.metadata.name + ": " + (.allowVolumeExpansion|tostring)'
+```
+
+Output should be similar as below:
+```
+"standard: false"
+"standard-resizable: true"
+```
+
+If the storage class used by SigNoz cluster PVCs returns `true`, that means
+you can directly proceed with [increase persistent volume section](#increase-persisent-volume).
+
+If `false`, proceed with any of the following relevent section:
+- [AWS - EKS](#eks---amazon-web-service-aws)
+- [GCP - GKE](#gke---google-cloud-platform-gcp)
+- [Other Platform](#other-kubernetes-cloud-platform-and-bare-metal-servers)
+
+<Admonition type="info">
+If you are unsure about storage class used by SigNoz Cluster PVC,
+run the command below:
+
+```bash
+kubectl get -n platform pvc
+```
+</Admonition>
+
+## Increase Persistent Volume
+
+You should be able to increase clickhouse persistent volume size easily with
+the following, if you have SigNoz cluster with expandable storage class.
+
+```bash
+helm -n platform upgrade my-release signoz/signoz \
+  --set clickhouse.persistence.size=25Gi
+```
+
+<UpgradeInfo/>
+
+## EKS - Amazon Web Service (AWS)
+
+<Admonition type="info">
+For setting up kubernetes cluster in AWS, refer to
+[AWS Elastic Kubernetes Service](https://aws.amazon.com/eks/).
+</Admonition>
+
+You can follow the [increase persistent volume section](#increase-persisent-volume)
+if you had started the SigNoz cluster with expandable storage class as mentioned below:
+
+```bash
+helm -n platform install my-release signoz/signoz \
+   --set clickhouse.installCustomStorageClass=true \
+   --set clickhouse.cloud=aws \
+   --set clickhouse.persistence.storageClass=gp2-resizable
+```
+
+If you had started with default configurations, you would have to follow the steps below:
+
+1. You would have to edit default storage class i.e. `gp2`
+and patch the `allowVolumeExpansion` to `true`.
+
+    ```bash
+    kubectl patch storageclass gp2 -p '{"allowVolumeExpansion": true}'
+    ```
+
+    Output:
+    ```
+    storageclass.storage.k8s.io/gp2 patched
+    ```
+
+2. Run helm upgrade command:
+
+    ```bash
+    helm -n platform upgrade my-release signoz/signoz \
+      --set clickhouse.persistence.size=25Gi
+    ```
+
+3. (Optional) After the size change reflects in few minutes, you could edit
+the default storage class `gp2` back to its previous state.
+
+## GKE - Google Cloud Platform (GCP)
+
+<Admonition type="info">
+For setting up kubernetes cluster in GCP, refer to
+[Google Kubernetes Engine](https://cloud.google.com/kubernetes-engine/).
+</Admonition>
+
+You can follow the [increase persistent volume section](#increase-persisent-volume)
+if you had started the SigNoz cluster with expandable storage class as mentioned below:
+
+```bash
+helm -n platform install my-release signoz/signoz \
+   --set clickhouse.installCustomStorageClass=true \
+   --set clickhouse.cloud=gcp \
+   --set clickhouse.persistence.storageClass=gce-resizable
+```
+
+If you had started with default configurations, you would have to follow the steps below:
+
+1. You would have to edit default storage class i.e. `pd-standard`,
+and patch the `allowVolumeExpansion` to `true`.
+
+    ```bash
+    kubectl patch storageclass pd-standard -p '{"allowVolumeExpansion": true}'
+    ```
+
+    Output:
+    ```
+    storageclass.storage.k8s.io/pd-standard patched
+    ```
+
+2. Now, run helm upgrade command:
+
+    ```bash
+    helm -n platform upgrade my-release signoz/signoz \
+      --set clickhouse.persistence.size=25Gi
+    ```
+
+3. (Optional) After the size change reflects in few minutes, you could edit
+the default storage class `pd-standard` back to its previous state.
+
+## Other Kubernetes Cloud Platform and Bare-Metal Servers
+
+<Admonition type="info">
+For setting up kubernetes cluster in other cloud platform or bare-metal servers, refer
+to [Kubernetes Getting Started Guide](https://kubernetes.io/docs/setup/).
+</Admonition>
+
+You can follow the [increase persistent volume section](#increase-persisent-volume)
+if you had started the SigNoz cluster with expandable storage class - let's say
+`custom-resizable-storage-class` as mentioned below:
+
+```bash
+helm -n platform install my-release signoz/signoz \
+   --set clickhouse.persistence.storageClass=custom-resizable-storage-class
+```
+
+If you had started with default configurations, you would have to follow the steps below:
+
+1. You would have to edit default storage class i.e. `standard` in case of [kind cluster](https://kind.sigs.k8s.io) - it could be different in your scenerio, and patch the `allowVolumeExpansion` to `true`.
+
+    ```bash
+    DEFAULT_STORAGE_CLASS=$(kubectl get storageclass -o=jsonpath='{.items[?(@.metadata.annotations.storageclass\.kubernetes\.io/is-default-class=="true")].metadata.name}')
+
+    kubectl patch storageclass "$DEFAULT_STORAGE_CLASS" -p '{"allowVolumeExpansion": true}'
+    ```
+
+    Output should be similar to the following:
+    ```
+    storageclass.storage.k8s.io/standard patched
+    ```
+
+2. Run helm upgrade command:
+
+    ```bash
+    helm -n platform upgrade my-release signoz/signoz \
+      --set clickhouse.persistence.size=25Gi
+    ```
+
+3. (Optional) After the size change reflects in few minutes, you could edit the default storage class `standard` - or some other storage class as per your previous output, back to its previous state.
