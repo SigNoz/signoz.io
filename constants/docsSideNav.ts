@@ -1823,25 +1823,170 @@ const docsSideNav = [
     // },
     items: [
       {
-        type: 'doc',
-        route: '/docs/operate/configuration',
-        label: 'Configuration',
+        type: 'category',
+        isExpanded: false,
+        label: '<=0.75.0',
+        //route: '/docs/operate/migration',
+        // link: {
+        // type: 'generated-index',
+        // title: 'Migration Guides',
+        // description:
+        // 'The following sections provide instructions to migrate SigNoz components across newer versions. You need to run these migration scripts step by step. For example if you are currently on `0.8.2` and want to migrate to `0.10.0` - you need to run migration script for `0.9` first and then `0.10`',
+        // slug: '/docs/operate/migration/migration',
+        // },
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/operate/<=0.75.0/configuration',
+            label: 'Configuration',
+          },
+          {
+            type: 'doc',
+            route: '/docs/operate/<=0.75.0/docker-standalone',
+            label: 'Docker Standalone',
+          },
+          {
+            type: 'doc',
+            route: '/docs/operate/<=0.75.0/docker-swarm',
+            label: 'Docker Swarm',
+          },
+          {
+            type: 'doc',
+            route: '/docs/operate/<=0.75.0/kubernetes',
+            label: 'Kubernetes',
+          },
+          {
+            type: 'category',
+            isExpanded: false,
+            label: 'ClickHouse',
+            route: '/docs/operate/<=0.75.0/clickhouse',
+            // link: {
+            // type: 'generated-index',
+            // title: 'ClickHouse',
+            // description:
+            // 'The following sections provide instructions to operate ClickHouse. Based on your environment, proceed to one of the sections below.',
+            // slug: '/operate/clickhouse/clickhouse',
+            // },
+            items: [
+              {
+                type: 'doc',
+                route: '/docs/operate/<=0.75.0/clickhouse/increase-clickhouse-pv',
+                label: 'Increase ClickHouse PV',
+              },
+              {
+                type: 'doc',
+                route: '/docs/operate/<=0.75.0/clickhouse/connect-to-clickhouse',
+                label: 'Connect to ClickHouse',
+              },
+              {
+                type: 'doc',
+                route: '/docs/operate/<=0.75.0/clickhouse/distributed-clickhouse',
+                label: 'Distributed ClickHouse',
+              },
+              {
+                type: 'doc',
+                route: '/docs/operate/<=0.75.0/clickhouse/external-clickhouse',
+                label: 'External ClickHouse',
+              },
+            ],
+          },
+          {
+            type: 'category',
+            isExpanded: false,
+            label: 'Query Service',
+            route: '/docs/operate/query-service',
+            // link: {
+            // type: 'generated-index',
+            // title: 'Query Service',
+            // description:
+            // 'The following sections provide instructions to operate Query Service. You can proceed to one of the sections below.',
+            // slug: '/docs/operate/query-service',
+            // },
+            items: [
+              {
+                type: 'doc',
+                route: '/docs/operate/query-service/reset-admin-password',
+                label: 'Reset Admin Password',
+              },
+              {
+                type: 'doc',
+                route: '/docs/operate/query-service/user-invitation-smtp',
+                label: 'Enable SMTP for User Invitations',
+              },
+            ],
+          },
+        ],
       },
       {
-        type: 'doc',
-        route: '/docs/operate/docker-standalone',
-        label: 'Docker Standalone',
-      },
-      {
-        type: 'doc',
-        route: '/docs/operate/docker-swarm',
-        label: 'Docker Swarm',
-      },
-      {
-        type: 'doc',
-        route: '/docs/operate/kubernetes',
-        label: 'Kubernetes',
-      },
+        type: 'category',
+        isExpanded: false,
+        label: '>0.75.0',
+        //route: '/docs/operate/migration',
+        // link: {
+        // type: 'generated-index',
+        // title: 'Migration Guides',
+        // description:
+        // 'The following sections provide instructions to migrate SigNoz components across newer versions. You need to run these migration scripts step by step. For example if you are currently on `0.8.2` and want to migrate to `0.10.0` - you need to run migration script for `0.9` first and then `0.10`',
+        // slug: '/docs/operate/migration/migration',
+        // },
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/operate/configuration',
+            label: 'Configuration',
+          },
+          {
+            type: 'doc',
+            route: '/docs/operate/docker-standalone',
+            label: 'Docker Standalone',
+          },
+          {
+            type: 'doc',
+            route: '/docs/operate/docker-swarm',
+            label: 'Docker Swarm',
+          },
+          {
+            type: 'doc',
+            route: '/docs/operate/kubernetes',
+            label: 'Kubernetes',
+          },
+          {
+            type: 'category',
+            isExpanded: false,
+            label: 'ClickHouse',
+            route: '/docs/operate/clickhouse',
+            // link: {
+            // type: 'generated-index',
+            // title: 'ClickHouse',
+            // description:
+            // 'The following sections provide instructions to operate ClickHouse. Based on your environment, proceed to one of the sections below.',
+            // slug: '/operate/clickhouse/clickhouse',
+            // },
+            items: [
+              {
+                type: 'doc',
+                route: '/docs/operate/clickhouse/increase-clickhouse-pv',
+                label: 'Increase ClickHouse PV',
+              },
+              {
+                type: 'doc',
+                route: '/docs/operate/clickhouse/connect-to-clickhouse',
+                label: 'Connect to ClickHouse',
+              },
+              {
+                type: 'doc',
+                route: '/docs/operate/clickhouse/distributed-clickhouse',
+                label: 'Distributed ClickHouse',
+              },
+              {
+                type: 'doc',
+                route: '/docs/operate/clickhouse/external-clickhouse',
+                label: 'External ClickHouse',
+              },
+            ],
+          },
+        ],
+      },  
       {
         type: 'category',
         isExpanded: false,
@@ -1934,66 +2079,6 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/operate/migration/upgrade-0.8.0',
             label: 'Upgrade to v0.8.0',
-          },
-        ],
-      },
-      {
-        type: 'category',
-        isExpanded: false,
-        label: 'ClickHouse',
-        route: '/docs/operate/clickhouse',
-        // link: {
-        // type: 'generated-index',
-        // title: 'ClickHouse',
-        // description:
-        // 'The following sections provide instructions to operate ClickHouse. Based on your environment, proceed to one of the sections below.',
-        // slug: '/operate/clickhouse/clickhouse',
-        // },
-        items: [
-          {
-            type: 'doc',
-            route: '/docs/operate/clickhouse/increase-clickhouse-pv',
-            label: 'Increase ClickHouse PV',
-          },
-          {
-            type: 'doc',
-            route: '/docs/operate/clickhouse/connect-to-clickhouse',
-            label: 'Connect to ClickHouse',
-          },
-          {
-            type: 'doc',
-            route: '/docs/operate/clickhouse/distributed-clickhouse',
-            label: 'Distributed ClickHouse',
-          },
-          {
-            type: 'doc',
-            route: '/docs/operate/clickhouse/external-clickhouse',
-            label: 'External ClickHouse',
-          },
-        ],
-      },
-      {
-        type: 'category',
-        isExpanded: false,
-        label: 'Query Service',
-        route: '/docs/operate/query-service',
-        // link: {
-        // type: 'generated-index',
-        // title: 'Query Service',
-        // description:
-        // 'The following sections provide instructions to operate Query Service. You can proceed to one of the sections below.',
-        // slug: '/docs/operate/query-service',
-        // },
-        items: [
-          {
-            type: 'doc',
-            route: '/docs/operate/query-service/reset-admin-password',
-            label: 'Reset Admin Password',
-          },
-          {
-            type: 'doc',
-            route: '/docs/operate/query-service/user-invitation-smtp',
-            label: 'Enable SMTP for User Invitations',
           },
         ],
       },
