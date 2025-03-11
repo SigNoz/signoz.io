@@ -3,5 +3,86 @@ date: 2024-06-06
 id: external-clickhouse
 title: Using External ClickHouse
 ---
+import SigNozCloud from '@/components/shared/signoz-cloud.mdx'
 
-Single Binary content.
+<SigNozCloud />
+
+It is recommended to use the ClickHouse instance that is deployed along with Signoz.
+However, if you want to use an external ClickHouse instance, you can do so by relevant
+instructions below.
+
+### Prerequisites
+
+- Must have at least one Zookeeper instance
+- Distributed cluster named `cluster` set up required: [clickhouse-cluster.xml][3]
+- User credentaials passed must have enough privileges to create/manage databases and tables
+- Secure connection is not supported between Signoz and ClickHouse yet
+- (Optional) UDF script and histogram quantile binary required: [custom-function.xml][1]
+and [histogramQuantile binary][2]
+
+<Admonition type="info">
+The name of the cluster must be `cluster` as it is hardcoded in the SigNoz OtelCollector
+migration files due to the limitations of `golang-migrate` library.
+</Admonition>
+
+## Setting up ClickHouse
+
+1. Run at least an instance of Zookeeper.
+2. Create configuration for distributed cluster named `cluster` as described in
+    [clickhouse-cluster.xml][3] and include it in `/etc/clickhouse-server/config.d/`.
+3. Include Zookeeper information in above [clickhouse-cluster.xml][3] file as well.
+4. (Optional) Below steps are only required if you want to use _histogram quantile_ 
+    functions using **Query Builder**.
+    - Include [custom function configuration][1] in the `/etc/clickhouse-server/` directory.
+    - Include [histogram quantile binary][2] in the `/var/lib/clickhouse/user_scripts/` directory.
+5. Run at least an instance of ClickHouse with the above configuration.
+
+## For Docker and Docker Swarm Users
+
+In Docker and Docker Swarm, we will be modifying the `docker-compose.yml` file to use an
+external ClickHouse.
+
+1. Comment out `clickhouse` and `zookeeper` services in `docker-compose.yml`.
+2. Comment out `x-clickhouse-defaults` and `x-clickhouse-depend` sections
+    in `docker-compose.yml`.
+3. Replace `clickhouse:9000` with relavant ClickHouse endpoint and TCP port in the files below:
+    - `docker-compose.yaml`
+    - `otel-collector-config.yaml`
+    - `prometheus-config.yml`
+4. Start SigNoz using relevant instructions.
+
+## For Kubernetes Users
+
+In Kubernetes, we will update `override-values.yaml` file to use an external ClickHouse.
+
+At first, we will disable the default ClickHouse instance by setting `clickhouse.enabled` to `false`.
+Then, we will include the external ClickHouse information in the `externalClickhouse` section.
+
+_override-values.yaml_
+
+```yaml
+clickhouse:
+  enabled: false
+
+externalClickhouse:
+  host: <clickhouse-endpoint>
+  httpPort: 8123
+  tcpPort: 9000
+  cluster: cluster
+  secure: false
+  user: <ch-user>
+  password: <ch-password>
+```
+
+To install SigNoz using the above configuration, run the following command:
+
+```bash
+kubectl create namespace platform
+helm --namespace platform install my-release signoz/signoz -f override-values.yaml
+```
+
+---
+
+[1]: https://github.com/SigNoz/signoz/blob/main/deploy/docker/custom-function.xml
+[2]: https://github.com/SigNoz/signoz/blob/main/deploy/docker/user_scripts/histogramQuantile
+[3]: https://github.com/SigNoz/signoz/blob/main/deploy/docker/clickhouse-cluster.xml
