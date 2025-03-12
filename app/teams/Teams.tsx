@@ -9,6 +9,13 @@ import { ArrowRight, Loader2 } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 
+// Add Window interface extension for dataLayer
+declare global {
+  interface Window {
+    dataLayer?: any[];
+  }
+}
+
 interface ErrorsProps {
   fullName?: string
   workEmail?: string
@@ -50,7 +57,6 @@ const Teams: React.FC<SignUpPageProps> = () => {
     dataRegion: 'us',
     source: '',
     termsOfServiceAccepted: true,
-    optedEmailUpdates: false,
   })
 
   const [errors, setErrors] = useState<ErrorsProps>({})
@@ -118,7 +124,7 @@ const Teams: React.FC<SignUpPageProps> = () => {
   }
 
   const handleGTMCustomEventTrigger = (payload) => {
-    if (window && window?.dataLayer && Array.isArray(window.dataLayer)) {
+    if (window && window.dataLayer && Array.isArray(window.dataLayer)) {
       window.dataLayer.push({
         event: 'signoz-cloud-signup-form-submit',
         ...payload,
@@ -145,7 +151,7 @@ const Teams: React.FC<SignUpPageProps> = () => {
       },
       preferences: {
         terms_of_service_accepted: formData.termsOfServiceAccepted,
-        opted_email_updates: formData.optedEmailUpdates,
+        opted_email_updates: true,
       }
     }
 
@@ -168,7 +174,6 @@ const Teams: React.FC<SignUpPageProps> = () => {
           dataRegion: 'us',
           source: '',
           termsOfServiceAccepted: true,
-          optedEmailUpdates: false,
         })
 
         localStorage.setItem('workEmail', payload.email)
@@ -300,20 +305,6 @@ const Teams: React.FC<SignUpPageProps> = () => {
                     {errors?.termsOfService && (
                       <div className="ml-6.5 text-xs text-red-400">{errors.termsOfService}</div>
                     )}
-
-                    <div className="flex items-start gap-2.5">
-                      <input
-                        type="checkbox"
-                        id="optedEmailUpdates"
-                        name="optedEmailUpdates"
-                        checked={formData.optedEmailUpdates}
-                        onChange={handleInputChange}
-                        className="mt-0.5 h-4 w-4 rounded border border-gray-500 bg-transparent accent-signoz_robin-500"
-                      />
-                      <label htmlFor="optedEmailUpdates" className="text-sm text-stone-300">
-                        I would like to be the FIRST to know about new features and updates.
-                      </label>
-                    </div>
                   </div>
 
                   <button
