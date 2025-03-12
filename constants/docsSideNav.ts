@@ -74,7 +74,7 @@ const docsSideNav = [
   {
     type: 'category',
     isExpanded: false,
-    label: 'Introduction',
+    label: 'Setup',
     //route: '/docs',
     items: [
       {
