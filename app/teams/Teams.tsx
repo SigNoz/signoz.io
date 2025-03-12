@@ -9,13 +9,6 @@ import { ArrowRight, Loader2 } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 
-// Add Window interface extension for dataLayer
-declare global {
-  interface Window {
-    dataLayer?: any[];
-  }
-}
-
 interface ErrorsProps {
   fullName?: string
   workEmail?: string
@@ -124,8 +117,8 @@ const Teams: React.FC<SignUpPageProps> = () => {
   }
 
   const handleGTMCustomEventTrigger = (payload) => {
-    if (window && window.dataLayer && Array.isArray(window.dataLayer)) {
-      window.dataLayer.push({
+    if (window && (window as any).dataLayer && Array.isArray((window as any).dataLayer)) {
+      (window as any).dataLayer.push({
         event: 'signoz-cloud-signup-form-submit',
         ...payload,
       })
