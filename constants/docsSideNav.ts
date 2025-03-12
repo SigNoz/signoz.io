@@ -1837,29 +1837,14 @@ const docsSideNav = [
         items: [
           {
             type: 'doc',
-            route: '/docs/operate/<=0.75.0/configuration',
+            route: '/docs/operate/0.75.0/configuration',
             label: 'Configuration',
-          },
-          {
-            type: 'doc',
-            route: '/docs/operate/<=0.75.0/docker-standalone',
-            label: 'Docker Standalone',
-          },
-          {
-            type: 'doc',
-            route: '/docs/operate/<=0.75.0/docker-swarm',
-            label: 'Docker Swarm',
-          },
-          {
-            type: 'doc',
-            route: '/docs/operate/<=0.75.0/kubernetes',
-            label: 'Kubernetes',
           },
           {
             type: 'category',
             isExpanded: false,
             label: 'Query Service',
-            route: '/docs/operate/<=0.75.0/query-service',
+            route: '/docs/operate/0.75.0/query-service',
             // link: {
             // type: 'generated-index',
             // title: 'Query Service',
@@ -1870,12 +1855,12 @@ const docsSideNav = [
             items: [
               {
                 type: 'doc',
-                route: '/docs/operate/<=0.75.0/query-service/reset-admin-password',
+                route: '/docs/operate/0.75.0/query-service/reset-admin-password',
                 label: 'Reset Admin Password',
               },
               {
                 type: 'doc',
-                route: '/docs/operate/<=0.75.0/query-service/user-invitation-smtp',
+                route: '/docs/operate/0.75.0/query-service/user-invitation-smtp',
                 label: 'Enable SMTP for User Invitations',
               },
             ],
