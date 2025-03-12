@@ -67,27 +67,39 @@ const docsSideNav = [
               },
             ],
           },
-
-          {
-            type: 'category',
-            isExpanded: false,
-            label: 'Install OTel collector',
-            items: [
-              {
-                route: '/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine',
-                type: 'doc',
-                label: 'VM',
-              },
-              {
-                route: '/docs/tutorial/kubernetes-infra-metrics',
-                type: 'doc',
-                label: 'Kubernetes',
-              },
-            ],
-          },
         ],
       },
     ],
+  },
+  {
+    type: 'category',
+    isExpanded: false,
+    label: 'Introduction',
+    //route: '/docs',
+    items: [
+      {
+        route: '/docs/setup/install-opentelemetry-collector',
+        type: 'doc',
+        label: 'Install OpenTelemetry Collector',
+      },
+      {
+        type: 'category',
+        isExpanded: false,
+        label: 'Send Data to SigNoz',
+        items: [
+          {
+            route: '/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine',
+            type: 'doc',
+            label: 'from VM',
+          },
+          {
+            route: '/docs/tutorial/kubernetes-infra-metrics',
+            type: 'doc',
+            label: 'from Kubernetes',
+          },
+        ],
+      },
+    ]
   },
   {
     label: 'SigNoz Features',
