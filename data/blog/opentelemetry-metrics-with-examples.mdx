@@ -14,8 +14,6 @@ keywords: [opentelemetry, metrics, custom metrics, examples, Application Perform
   <link rel="canonical" href="https://signoz.io/blog/opentelemetery-metrics-with-examples/"/>
 </head>
 
-*A technical deep dive into collecting metrics using OpenTelemetry with some fun, easy-to-grasp ideas and examples!*
-
 Picture this, your observability tool already nails the basics like request rates, latency and memory usage, but you need more insight. *Think user churn rates, engagement spikes, or even how many carts get abandoned mid-checkout*. That’s where OpenTelemetry steps in, providing a way to track those critical custom metrics with ease. 
 
 <a href = "https://opentelemetry.io/docs/specs/otel/metrics/" rel="noopener noreferrer nofollow" target="_blank" >OpenTelemetry metrics</a> has emerged as a benchmark for collection and management of metric data by providing a unified framework for generating, processing and exporting metrics. This blog is primarily about different kinds of measurement instruments and some really cool and fun ways of easily collecting custom metrics from your application. By showcasing these examples, we hope to inspire you with ideas you can adopt for your own monitoring needs.
@@ -26,22 +24,29 @@ So let’s jump right into it!
 
 Before we understand OTel metrics, let’s wrap our head around metrics, in general.
 
-A metric is a measurement of a service captured at runtime which tells us about the state of the system. Additionally, these metrics can later be used by APM tools for configuring alerts or creating dashboards for easy monitoring. We will be closely examining some [cool custom metric examples](https://www.notion.so/OpenTelemetry-metrics-with-examples-1b2fcc6bcd198046be73f018bd512d23?pvs=21) later in this blog.
+A metric is a measurement of a service captured at runtime which tells us about the state of the system. 
+Additionally, these metrics can later be used by APM tools for configuring alerts or creating dashboards for easy monitoring. 
+We will be closely examining some cool custom metric examples later in this blog.
 
 The best way to understand OTel metrics is to think of it as a ‘fitness tracker’.  A fitness tracker monitors various health metrics such as steps taken, heart rate, and calories burned throughout the day. Similarly,  OTel metrics functions as the ‘fitness tracker’ for your application, continuously collecting data on application and system health like request rates, error counts, and response times. 
 
-![OTel metrics - [programming model](https://opentelemetry.io/docs/specs/otel/metrics/#concepts)](public/img/blog/2025/03/pipeline_fin.webp)
-OTel metrics - [programming model](https://opentelemetry.io/docs/specs/otel/metrics/#concepts)
+<figure data-zoomable align='center'>
+    <img src="/img/blog/2025/03/metric_pipeline.webp" alt="Metric pipeline"/>
+    <figcaption><i>
+    OTel metrics -
+    <a href = "https://opentelemetry.io/docs/specs/otel/metrics/#concepts" style={{color: "#b2b5b8"}} rel="noopener noreferrer nofollow" target="_blank" >programming model</a>
+    </i></figcaption>
+</figure>
 
 OpenTelemetry metrics are completely open-source and vendor-neutral. Think of it like a free universal remote that works with any TV you’ve got, not just one brand, and you don’t have to pay a dime!  It fully integrates with popular monitoring tools including Prometheus and StatsD through a standardised collector and exporter system. As shown in the figure above, it splits the two main parts, SDK and API, so different SDKs can be configured at run time. This makes it super easy to tweak and control how your metrics are handled.
 
 ## OTel measurement instruments
 
-To generate metrics, OpenTelemetry provides a *Meter*, **a core component of its API. This *Meter* lets you create different *instruments*, like counters or gauges, to capture *measurements*. Each *measurement* is a single data point that shows the value of a *metric* at a specific time, giving you a clear snapshot of what’s happening in your system. 
+To generate metrics, OpenTelemetry provides a *Meter*, a core component of its API. This *Meter* lets you create different *instruments*, like counters or gauges, to capture *measurements*. Each *measurement* is a single data point that shows the value of a *metric* at a specific time, giving you a clear snapshot of what’s happening in your system. 
 
 ## Classification of instruments
 
-Instruments can be broadly classified into two based on ***when*** the metric is collected.
+Instruments can be broadly classified into two based on <u>***when***</u> the metric is collected.
 
 ### Synchronous instruments
 
@@ -51,12 +56,12 @@ These integrate directly into your application's workflow, measuring events as t
 
 They work by collecting measurements only when needed (*on demand*) depending on the configuration of the metric collection system. To give an example, consider collecting the temperature from a sensor every 15 seconds for safety monitoring.
 
-<aside>
-🎯
 
-Synchronous instruments can also additionally have ***trace context*** associated with it as well. Asynchronous instruments usually register ***callback functions*** which are called when necessary for metric collection.
+<Admonition>
+ Synchronous instruments can also additionally have **trace context** associated with it as well. 
+Asynchronous instruments usually register **callback functions** which are called when necessary for metric collection.
+</Admonition>
 
-</aside>
 
 We will explore different types of instruments and their use cases in depth in the next section!
 
@@ -92,7 +97,11 @@ A gauge which reports values only when observed.
 
 A synchronous instrument that records the distribution of values.
 
-![instruments.webp](public/img/blog/2025/03/instruments.webp)
+<figure data-zoomable align='center'>
+    <img src="/img/blog/2025/03/instrument.webp" alt="Metric instruments"/>
+    <figcaption><i>OTel metric intruments</i></figcaption>
+</figure>
+
 
 ## How to choose your instrument?
 
@@ -104,45 +113,104 @@ The simple answer is that there's no one-size-fits-all solution. Multiple instru
 
 Before proceeding, we will try to understand two important properties of metrics that will help us in choosing the right instrument.
 
-- ***Additive property***  is about whether you can combine values (like adding across different sources or time periods) and still produce meaningful information.
+- <u>***Additive property***</u> is about whether you can combine values (like adding across different sources or time periods) and still produce meaningful information.
     
     For instance, sum  of HTTP requests hitting different servers in a period of time.
     
 
-- ***Monotonic property*** is about the direction of change, whether the value  only goes one way (usually up) over time.
+- <u>***Monotonic property***</u> is about the direction of change, whether the value  only goes one way (usually up) over time.
     
     To give an example, the total bytes sent over a network, it only goes up as more data is sent.
     
 
 Now, with this knowledge, you can use the table below to make a list of instruments that best fit your needs.
 
-| Instrument | Additive | Monotonic | Use cases |
-| --- | --- | --- | --- |
-| Counter | ✅ | ✅ | - count the number of HTTP 5xx errors
-- count total requests by endpoint
-- count cache hits/misses
-- measure batch jobs completed
-- track failed authentication attempts |
-| Async counter | ✅ | ✅ | - track background jobs completed by celery workers
-- measure messages processed by a Kafka
-- tracking API rate limit occurring in an API gateway  |
-| UpDown counter | ✅ | ❎ | - monitor the number of active user sessions
-- measure number of concurrent connections to a server
-- tracking amount of live transactions (finance system) |
-| Async upDown counter | ✅ | ❎ | - monitor number of messages in AWS SQS
-- observe CPU usage percentage over time
-- to monitor the number of active shards in your system |
-| Gauge | ❎ | ❎ | - monitor CPU usage over time
-- monitor temperature of a device by a sensor
-- monitor current memory usage
-- report the current ratio of cache hits to total lookups |
-| Async gauge | ❎ | ❎ | - track the latency of an external API
-- display the latest price of a stock (trading application)
-- monitor count of pods in various states |
-| Histogram | ✅ | ❎ | - track  how fast players react to an event in a game
-- measure the length of garbage collection pauses
-- track execution time of server less functions like AWS Lambda
-- measure the complexity distribution of search queries |
+<table>
+  <thead>
+    <tr>
+      <th>Instrument</th>
+      <th>Additive</th>
+      <th>Monotonic</th>
+      <th>Use cases</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td> Counter</td>
+      <td>✅</td>
+      <td>✅</td>
+      <td>
+        - count the number of HTTP 5xx errors <br/>
+        - count total requests by endpoint <br/>
+        - count cache hits/misses <br/>
+        - measure batch jobs completed <br/>
+        - track failed authentication attempts
+      </td>
+    </tr>
+    <tr>
+      <td> Async counter</td>
+      <td>✅</td>
+      <td>✅</td>
+      <td>
+        - track background jobs completed by celery workers <br/>
+        - measure messages processed by a Kafka <br/>
+        - tracking API rate limit occurring in an API gateway
+      </td>
+    </tr>
+    <tr>
+      <td>UpDown counter</td>
+      <td>✅</td>
+      <td>❎</td>
+      <td>
+        - monitor the number of active user sessions <br/>
+        - measure number of concurrent connections to a server <br/>
+        - tracking amount of live transactions (finance system)
+      </td>
+    </tr>
+    <tr>
+      <td>Async upDown counter</td>
+      <td>✅</td>
+      <td>❎</td>
+      <td>
+        - monitor number of messages in AWS SQS <br/>
+        - observe CPU usage percentage over time <br/>
+        - to monitor the number of active shards in your system
+      </td>
+    </tr>
+    <tr>
+      <td>Gauge</td>
+      <td>❎</td>
+      <td>❎</td>
+      <td>
+        - monitor CPU usage over time <br/>
+        - monitor temperature of a device by a sensor <br/>
+        - monitor current memory usage <br/>
+        - report the current ratio of cache hits to total lookups
+      </td>
+    </tr>
+    <tr>
+      <td>Async gauge</td>
+      <td>❎</td>
+      <td>❎</td>
+      <td>
+        - track the latency of an external API <br/>
+        - display the latest price of a stock (trading application) <br/>
+        - monitor count of pods in various states
+      </td>
+    </tr>
+    <tr>
+      <td>Histogram</td>
+      <td>✅</td>
+      <td>❎</td>
+      <td>
+        - track how fast players react to an event in a game <br/>
+        - measure the length of garbage collection pauses <br/>
+        - track execution time of serverless functions like AWS Lambda <br/>
+        - measure the complexity distribution of search queries
+      </td>
+    </tr>
+  </tbody>
+</table>
 
 Now that we have understood each instrument in depth and when to use them, let’s see how to use it in our applications!
 
@@ -152,12 +220,12 @@ When registering an instrument, we associate it with a *meter* and identify it w
 
 Each instrument will have the following parameters,
 
-- The **name** of the instrument
-- The **kind** of the Instrument
+- The <u>**name**</u> of the instrument
+- The <u>**kind**</u> of the Instrument
     - if it’s a counter, gauge or any other instrument
     - if it’s asynchronous or synchronous
-- An **unit** of measure [optional]
-- A **description** [optional]
+- An <u>**unit**</u> of measure [optional]
+- A <u>**description**</u> [optional]
 - Advisory parameters [optional]
     
     Currently, OTel supports two advisory parameters including A*ttributes* and ExplicitBucketBoundaries
@@ -225,7 +293,7 @@ def add_to_cart(product_id):
    
 ```
 
-We notice that *attributes* ([advisory parameter](https://www.notion.so/OpenTelemetry-metrics-with-examples-1b2fcc6bcd198046be73f018bd512d23?pvs=21)) **are passed as a *parameter* for the *add operation* of the *upDown counter*. Attributes are metadata that enrich and provide context to the metric being recorded. 
+We notice that *attributes* ([advisory parameter](https://www.notion.so/OpenTelemetry-metrics-with-examples-1b2fcc6bcd198046be73f018bd512d23?pvs=21)) are passed as a *parameter* for the *add operation* of the *upDown counter*. Attributes are metadata that enrich and provide context to the metric being recorded. 
 
 In the above example,
 
@@ -306,13 +374,15 @@ def get_total_stock(_):
 )
 ```
 
-We had previously touched upon [callbacks](https://www.notion.so/OpenTelemetry-metrics-with-examples-1b2fcc6bcd198046be73f018bd512d23?pvs=21). Let’s try to understand it in greater depth with the code sample above.
+We had previously touched upon callbacks. Let’s try to understand it in greater depth with the code sample above.
 
 In the code, a *callback* (*get_total_stock*)  is a function that you provide to the *metrics system* via the *meter*. It gets called automatically whenever the system needs to collect the current value of the metric, in this case, the *total_stock*. 
 
-![Visualised as a counter in a SigNoz panel](public/img/blog/2025/03/updown.webp)
+<figure data-zoomable align='center'>
+    <img src="/img/blog/2025/03/updown.webp" alt="Signoz counter"/>
+    <figcaption><i>Visualised as a counter in a SigNoz panel</i></figcaption>
+</figure>
 
-Visualised as a counter in a SigNoz panel
 
 ### 5. Average monetary value across all users’ carts using asynchronous (observable) gauge
 
@@ -344,11 +414,14 @@ Voila, you are now ready to add custom metrics to your applications!
 
 ## Visualise with Application Performance Monitoring **(APM)**
 
-We can monitor metrics using an APM ****** like SigNoz by creating [dashboards](https://signoz.io/docs/userguide/manage-dashboards/) and [alerts](https://signoz.io/docs/alerts-management/metrics-based-alerts/).
+We can monitor metrics using an APM like SigNoz by creating [dashboards](https://signoz.io/docs/userguide/manage-dashboards/) and [alerts](https://signoz.io/docs/alerts-management/metrics-based-alerts/).
 
-![Dashboard created in SigNoz](public/img/blog/2025/03/dashboard.webp)
+<figure data-zoomable align='center'>
+    <img src="/img/blog/2025/03/dashboard.webp" alt="Signoz dashboard"/>
+    <figcaption><i>Dashboard created in SigNoz</i></figcaption>
+</figure>
 
-Dashboard created in SigNoz
+
 
 As a next step, try exploring the various panels and experimenting with different alert configurations. This hands-on approach will help you gain a deeper understanding of the system’s capabilities and tailor it to your needs.
 
