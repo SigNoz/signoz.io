@@ -13,6 +13,7 @@ interface ErrorsProps {
   fullName?: string
   workEmail?: string
   companyName?: string
+  termsOfService?: string
 }
 
 interface SignUpPageProps {}
@@ -48,6 +49,7 @@ const Teams: React.FC<SignUpPageProps> = () => {
     companyName: '',
     dataRegion: 'us',
     source: '',
+    termsOfServiceAccepted: true,
   })
 
   const [errors, setErrors] = useState<ErrorsProps>({})
@@ -60,8 +62,9 @@ const Teams: React.FC<SignUpPageProps> = () => {
   const workEmailFromParams = searchParams.get('q')
 
   const handleInputChange = (event) => {
-    const { name, value } = event.target
-    setFormData({ ...formData, [name]: value })
+    const { name, value, type, checked } = event.target
+    const newValue = type === 'checkbox' ? checked : value
+    setFormData({ ...formData, [name]: newValue })
   }
 
   const handleRegionChange = (selectedDataRegion: string): void => {
@@ -75,6 +78,10 @@ const Teams: React.FC<SignUpPageProps> = () => {
       errors['workEmail'] = 'Work email is required'
     } else if (!isValidCompanyEmail(formData.workEmail)) {
       errors['workEmail'] = 'Please enter a valid company email'
+    }
+
+    if (!formData.termsOfServiceAccepted) {
+      errors['termsOfService'] = 'You must accept the Terms of Service to continue'
     }
 
     setErrors(errors)
@@ -110,8 +117,8 @@ const Teams: React.FC<SignUpPageProps> = () => {
   }
 
   const handleGTMCustomEventTrigger = (payload) => {
-    if (window && window?.dataLayer && Array.isArray(window.dataLayer)) {
-      window.dataLayer.push({
+    if (window && (window as any).dataLayer && Array.isArray((window as any).dataLayer)) {
+      (window as any).dataLayer.push({
         event: 'signoz-cloud-signup-form-submit',
         ...payload,
       })
@@ -135,6 +142,10 @@ const Teams: React.FC<SignUpPageProps> = () => {
       region: {
         name: formData.dataRegion,
       },
+      preferences: {
+        terms_of_service_accepted: formData.termsOfServiceAccepted,
+        opted_email_updates: true,
+      }
     }
 
     try {
@@ -155,6 +166,7 @@ const Teams: React.FC<SignUpPageProps> = () => {
           companyName: '',
           dataRegion: 'us',
           source: '',
+          termsOfServiceAccepted: true,
         })
 
         localStorage.setItem('workEmail', payload.email)
@@ -267,6 +279,25 @@ const Teams: React.FC<SignUpPageProps> = () => {
                         </button>
                       ))}
                     </div>
+                  </div>
+
+                  <div className="mb-[28px] space-y-2.5 rounded-md border border-signoz_slate-500/30 bg-signoz_ink-400/30 p-3.5">
+                    <div className="flex items-start gap-2.5">
+                      <input
+                        type="checkbox"
+                        id="termsOfServiceAccepted"
+                        name="termsOfServiceAccepted"
+                        checked={formData.termsOfServiceAccepted}
+                        onChange={handleInputChange}
+                        className="mt-0.5 h-4 w-4 rounded border border-gray-500 bg-transparent accent-signoz_robin-500"
+                      />
+                      <label htmlFor="termsOfServiceAccepted" className="text-sm text-stone-300">
+                        I agree to the <a href="https://signoz.io/terms-of-service/" target="_blank" rel="noopener noreferrer" className="text-signoz_robin-500 font-medium hover:underline">Terms of Service</a> and <a href="https://signoz.io/privacy/" target="_blank" rel="noopener noreferrer" className="text-signoz_robin-500 font-medium hover:underline">Privacy Policy</a>.
+                      </label>
+                    </div>
+                    {errors?.termsOfService && (
+                      <div className="ml-6.5 text-xs text-red-400">{errors.termsOfService}</div>
+                    )}
                   </div>
 
                   <button
