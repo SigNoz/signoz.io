@@ -5,7 +5,6 @@ title: Upgrade to v0.76 from earlier versions of SigNoz
 ---
 
 <Admonition type="warning">
-## Major Changes in v0.76
 
 With v0.76.0, we've consolidated multiple services (Query Service, Frontend, and Alertmanager) into a single binary/image called `signoz`. This simplifies deployment but requires careful migration.
 
@@ -23,77 +22,88 @@ For detailed changes, see [GitHub Issue #7309](https://github.com/SigNoz/signoz/
 - Must be upgrading from < 0.76.0 and not installing from scratch
 
 <Admonition type="warning">
-### Required: Backup Your Data
+
 Before proceeding, backup your SQLite database:
 ```bash
 kubectl cp -n platform --retries=5 my-release-signoz-query-service-0:/var/lib/signoz/signoz.db ./backup-signoz.db
 ```
 Replace `platform` with your SigNoz namespace and `my-release-signoz-query-service-0` with your query-service pod name.
 
-If you don't need to preserve your SQLite data, you can skip the migration steps and proceed directly to upgrading the helm release.
+If you don't need to preserve your SQLite data, you can skip the migration steps and directly upgrade the helm release.
 </Admonition>
 
 ### Upgrading
 1. **Verify Existing PVC**
-   ```bash
-   kubectl get pvc -n platform -l app.kubernetes.io/component=query-service
-   ```
-   If no PVCs are found, skip to step 3.
+
+```bash
+kubectl get pvc -n platform -l app.kubernetes.io/component=query-service
+```
+
+If no PVCs are found, skip to step 3.
 
 2. **Configure Migration**
-   Add to your `my-values.yaml`:
-   ```yaml
-   signoz:
-     initContainers:
-       migration:
-         enabled: true
-         image:
-           registry: docker.io
-           repository: busybox
-           tag: 1.35
-         command:
-           - /bin/sh
-           - -c
-           - |
-             echo "Running migration..."
-             cp -pv /var/lib/old-signoz/signoz.db /var/lib/signoz/signoz.db
-             echo "Migration complete..."
-         additionalVolumes:
-           - name: old-signoz-db
-             persistentVolumeClaim:
-               claimName: signoz-db-my-release-signoz-query-service-0
-         additionalVolumeMounts:
-           - name: old-signoz-db
-             mountPath: /var/lib/old-signoz
-   ```
+
+Update your `my-values.yaml`:
+```yaml
+signoz:
+  initContainers:
+    migration:
+      enabled: true
+      image:
+        registry: docker.io
+        repository: busybox
+        tag: 1.35
+      command:
+        - /bin/sh
+        - -c
+        - |
+          echo "Running migration..."
+          cp -pv /var/lib/old-signoz/signoz.db /var/lib/signoz/signoz.db
+          echo "Migration complete..."
+      additionalVolumes:
+        - name: old-signoz-db
+          persistentVolumeClaim:
+            claimName: signoz-db-my-release-signoz-query-service-0
+      additionalVolumeMounts:
+        - name: old-signoz-db
+          mountPath: /var/lib/old-signoz
+```
+
+> Note that the `claimName` is the name of the PVC for the old `query-service` i.e. `signoz-db-my-release-signoz-query-service-0`. Replace it with the name of the PVC for your release.
 
 3. **Update and Deploy**
-   ```bash
-   helm repo add signoz https://signoz.github.io/signoz
-   helm repo update signoz
-   helm upgrade --install signoz signoz/signoz --namespace platform --values my-values.yaml
-   ```
+
+```bash
+helm repo add signoz https://charts.signoz.io
+helm repo update signoz
+helm upgrade --install signoz signoz/signoz --namespace platform --values my-values.yaml
+```
+
+> For more details on the SigNoz upgrades on Kubernetes, please refer to the [Operate SigNoz on Kubernetes guide](/docs/operate/kubernetes).
 
 4. **Verify Deployment**
-   ```bash
-   kubectl get pods -n platform
-   ```
-   Look for `my-release-signoz-0` running successfully.
+
+  ```bash
+  kubectl get pods -n platform
+  ```
+  Look for `my-release-signoz-0` running successfully.
 
 5. **Disable Migration**
-   Update `my-values.yaml`:
-   ```yaml
-   signoz:
-     initContainers:
-       migration:
-         enabled: false
-   ```
-   Then reapply:
-   ```bash
-   helm upgrade --install signoz signoz/signoz --namespace platform --values my-values.yaml
-   ```
+
+Update `my-values.yaml`:
+```yaml
+signoz:
+  initContainers:
+    migration:
+      enabled: false
+```
+Then reapply:
+```bash
+helm upgrade --install signoz signoz/signoz --namespace platform --values my-values.yaml
+```
 
 ### Updating SigNoz Frontend Port
+
 Update your `my-values.yaml`:
 ```yaml
 signoz:
@@ -140,7 +150,7 @@ docker volume rm signoz-alertmanager
 - If not on v0.70.0, first [upgrade to v0.70.0](/docs/operate/migration/upgrade-0.70)
 
 ### Upgrading
-Follow the standard [upgrade procedure](/docs/operate/docker-standalone#upgrade-signoz-cluster). 
+Follow the standard [upgrade procedure](/docs/operate/docker-swarm#upgrade-signoz-cluster). 
 The upgrade will replace three containers (`signoz-query-service`, `signoz-frontend`, and `signoz-alertmanager`) 
 with a single container (`signoz-signoz`).
 
