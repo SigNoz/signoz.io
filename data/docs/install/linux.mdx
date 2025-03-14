@@ -1,0 +1,115 @@
+---
+date: 2024-06-06
+title: Linux
+description: Learn how to install SigNoz on Linux
+id: linux
+slug: /install/linux
+---
+
+import SigNozCloud from '@/components/shared/signoz-cloud.mdx'
+import RetentionInfo from '@/components/shared/retention-info.mdx'
+
+<SigNozCloud />
+
+This section provides information on installing SigNoz on Linux.
+
+## Prerequisites
+
+- A Linux machine.
+- Clickhouse running on the machine. Refer to the [Clickhouse installation guide](https://clickhouse.com/docs/install#available-installation-options) for more details.
+
+## Install SigNoz by downloading the binary
+
+1. Get and extract the latest release of SigNoz from the [releases page](https://github.com/SigNoz/signoz/releases).
+
+```bash
+curl -L https://github.com/SigNoz/signoz/releases/latest/download/signoz_linux_$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g').tar.gz -o signoz.tar.gz
+tar -xzf signoz.tar.gz
+```
+
+2. Copy the extracted files to `/opt/signoz`:
+
+```bash
+sudo mkdir -p /opt/signoz
+sudo mkdir -p /opt/signoz/lib
+sudo cp -r signoz_linux_$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g')/* /opt/signoz
+```
+
+4. Create the environment file for systemd service:
+
+```bash
+cat <<EOF > /opt/signoz/conf/systemd.env
+SIGNOZ_INSTRUMENTATION_LOGS_LEVEL=info
+INVITE_EMAIL_TEMPLATE=/opt/signoz/templates/invitation_email_template.html
+SIGNOZ_SQLSTORE_SQLITE_PATH=/opt/signoz/lib/signoz.db
+SIGNOZ_WEB_ENABLED=true
+SIGNOZ_WEB_DIRECTORY=/opt/signoz/web
+SIGNOZ_JWT_SECRET=secret
+SIGNOZ_ALERTMANAGER_PROVIDER=signoz
+SIGNOZ_TELEMETRYSTORE_PROVIDER=clickhouse
+SIGNOZ_TELEMETRYSTORE_CLICKHOUSE_DSN=tcp://localhost:9000
+EOF
+```
+
+3. Create a user and group to run SigNoz:
+
+```bash
+sudo getent passwd signoz >/dev/null || sudo useradd --system --home /opt/signoz --no-create-home --user-group --shell /sbin/nologin signoz
+sudo chown -R signoz:signoz /opt/signoz
+```
+
+
+6. Create the SigNoz service file:
+
+```bash
+sudo bash -c 'cat <<EOF > /etc/systemd/system/signoz.service
+[Unit]
+Description=SigNoz
+Documentation=https://signoz.io/docs
+After=clickhouse-server.service
+
+[Service]
+User=signoz
+Group=signoz
+Type=simple
+KillMode=mixed
+Restart=on-failure
+WorkingDirectory=/opt/signoz
+EnvironmentFile=/opt/signoz/conf/systemd.env
+ExecStart=/opt/signoz/bin/signoz --config=/opt/signoz/conf/prometheus.yml --use-logs-new-schema=true --use-trace-new-schema=true
+
+[Install]
+WantedBy=multi-user.target
+EOF'
+```
+
+6. Reload and start the SigNoz service:
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl start signoz.service
+```
+
+8. (Optional) Enable the SigNoz service to start on boot:
+
+```bash
+sudo systemctl enable signoz.service
+```
+
+
+## Verify the Installation
+
+1. Check the status of the SigNoz service:
+
+```bash
+sudo systemctl status signoz.service
+```
+
+
+2. (Optional) Check the logs of the SigNoz service:
+
+```bash
+sudo journalctl -u signoz.service -f
+```
+
+<RetentionInfo />
