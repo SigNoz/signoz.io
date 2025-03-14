@@ -96,13 +96,11 @@ Please use non-root user (mainly for Git repository cloning), otherwise you may 
     You should see the following output:
 
     ```output
-    ID             NAME                     MODE         REPLICAS   IMAGE                                        PORTS
-    vpu9ub4rnr4g   signoz_alertmanager      replicated   1/1        signoz/alertmanager:0.23.7                   
-    loqa6qbq7lk3   signoz_clickhouse        replicated   1/1        clickhouse/clickhouse-server:24.1.2-alpine   
-    qjrn3lfxdvdn   signoz_frontend          replicated   1/1        signoz/frontend:0.69.0                       *:80->3301/tcp
+    ID             NAME                     MODE         REPLICAS   IMAGE                                        PORTS                  
+    loqa6qbq7lk3   signoz_clickhouse        replicated   1/1        clickhouse/clickhouse-server:24.1.2-alpine
     zqoee9ij9xh0   signoz_init-clickhouse   replicated   0/1        clickhouse/clickhouse-server:24.1.2-alpine   
     9awvkhh1feov   signoz_otel-collector    replicated   3/3        signoz/signoz-otel-collector:0.111.24        *:4317-4318->4317-4318/tcp
-    eu5fbg0v1bps   signoz_query-service     replicated   1/1        signoz/query-service:0.69.0                  
+    eu5fbg0v1bps   signoz_signoz            replicated   1/1        signoz/signoz:0.69.0                         *:80->8080/tcp                  
     fcp7uk67tkks   signoz_schema-migrator   replicated   0/1        signoz/signoz-schema-migrator:0.111.24       
     nw6xukg1gkf7   signoz_zookeeper-1       replicated   1/1        bitnami/zookeeper:3.7.1                      
 
@@ -169,51 +167,6 @@ You can set up the Infra Agent to collect logs and metrics from your infrastruct
   ```bash
   docker stack rm signoz-infra
   ```
-
-## Set Up HOTRod Sample Application
-
-You can set up the HOTRod sample application to generate tracing data.
-
-1. Change directory to `deploy/docker-swarm/generator/hotrod`
-
-  ```bash
-  cd deploy/docker-swarm/generator/hotrod
-  ```
-
-2. Deploy the HOTRod sample application by running the `docker stack deploy` command:
-
-  ```bash
-  docker stack deploy -d --prune -c docker-compose.yaml hotrod
-  ```
-
-  The output should look similar to the following:
-
-  ```output
-  Creating service signoz_query-service
-  Creating service signoz_frontend
-  ```
-
-3. Verify that the HOTRod sample application is running correctly. To view the status of your containers, run the following command:
-
-  ```bash
-  docker stack services hotrod
-  ```
-
-  The output should look similar to the following:
-
-  ```output
-  ID             NAME                 MODE         REPLICAS   IMAGE                                 PORTS
-  ly84gnfxw3br   hotrod_hotrod        replicated   1/1        jaegertracing/example-hotrod:1.61.0   
-  954b2gfskvlg   hotrod_load-hotrod   replicated   1/1        signoz/locust:1.2.3                   
-  ```
-
-4. _(Optional)_ To stop the HOTRod sample application, run the following command:
-
-  ```bash
-  docker stack rm hotrod
-  ```
-
-Go to [Docker Swarm Operate](/docs/operate/docker-swarm) section for detailed instructions.
 
 <RetentionInfo />
 

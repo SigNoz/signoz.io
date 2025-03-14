@@ -5,28 +5,17 @@ title: Deploying to AWS
 description: Instructions to install SigNoz on EKS cluster
 ---
 
-import K8sComponents from '@/components/shared/k8s-components.md'
 import CommonPrerequisites from '@/components/shared/k8s-common-prerequisites.md'
-import InstallSigNozPart1 from '@/components/shared/install-signoz-k8s-part-1.md'
-import InstallSigNozPart2 from '@/components/shared/install-signoz-k8s-part-2.mdx'
-import VerifyInstallation from '@/components/shared/k8s-verify-installation.mdx'
-import K8sHotrod from '@/components/shared/k8s-hotrod.md'
+import K8sInstall from '@/components/shared/k8s-install.mdx'
+import K8sOtelDemo from '@/components/shared/k8s-oteldemo.mdx'
 import NextSteps from '@/components/shared/next-steps.md'
-import StorageClass from '@/components/shared/k8s-storageclass.mdx'
 import SigNozCloud from '@/components/shared/signoz-cloud.mdx'
 
 <SigNozCloud />
 
-First, we need to set up a Kubernetes cluster (see the
-[official AWS documentation][1]
-for more info). Follow the "Managed nodes - Linux" guide.
-
-<K8sComponents />
-
 ## Prerequisites
 
-- Managed nodes - Linux. Fargate is not offically supported
-- You must have an EKS cluster
+- Set up an EKS cluster (see the [official AWS documentation][1] for more info). Follow the "Managed nodes - Linux" guide.
 
 <CommonPrerequisites />
 
@@ -34,40 +23,13 @@ for more info). Follow the "Managed nodes - Linux" guide.
   and provide relevant volume permissions to the role assigned to the Amazon EKS cluster
   IAM role. To know more, refer to the [Amazon EBS CSI migration documentation][2].
 
-## Chart configuration
+## Install SigNoz
 
-Here's the minimal required `override-values.yaml` that we'll be using later. You can find
-an overview of the parameters that can be configured during installation under
-[chart configuration][3].
+<K8sInstall />
 
-```yaml
-global:
-  storageClass: gp2-resizable
-  cloud: aws
+## (Optional) Install OpenTelemetry Demo
 
-clickhouse:
-  installCustomStorageClass: true
-```
-
-<StorageClass />
-
-## Install SigNoz on Kubernetes with Helm
-
-<InstallSigNozPart1 />
-
-  ```bash
-  helm --namespace platform install my-release signoz/signoz -f override-values.yaml
-  ```
-
-<InstallSigNozPart2 />
-
-## Verify the Installation
-
-<VerifyInstallation />
-
-## (Optional) Install a Sample Application and Generate Tracing Data
-
-<K8sHotrod />
+<K8sOtelDemo />
 
 ## Next Steps
 

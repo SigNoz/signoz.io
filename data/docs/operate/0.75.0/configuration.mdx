@@ -1,0 +1,49 @@
+---
+date: 2025-03-10
+id: configuration
+title: Configuration
+description: Learn how to configure SigNoz
+---
+
+You can configure for SigNoz with different options.
+
+If no configuration for an option is set, then the default value as described is applied.
+
+## Environment Variables for Configuration
+
+When using SigNoz, there are various environment variables you can set to configure your SigNoz cluster.
+
+Here is a comprehensive list of all of them. However, for general use, you most likely do not have to worry about most of these.
+
+### Query Service
+
+| Environment Variable | Description | Default Value |
+| -------- | ----------- | ------------- |
+| `STORAGE` | Database for the storage (one of `clickhouse` or `druid`(deprecated) | `clickhouse` |
+| `GODEBUG` | Go runtime name resolver (one of `netdns=go` or `netdns=cgo`). [More info](https://pkg.go.dev/net#hdr-Name_Resolution). | `netdns=go` |
+| `ALERTMANAGER_API_PREFIX` | Endpoint of alertmanager with API prefix. | `http://alertmanager:9093/api/` |
+| `ClickHouseUrl`| ClickHouse database endpoint with TCP port | `tcp://localhost:9000` |
+| `SMTP_ENABLED` | Enable SMTP for sending email invitations | `false` |
+| `SMTP_FROM` | SMTP from address | `nil` |
+| `SMTP_HOST` | SMTP server host | `nil` |
+| `SMTP_PORT` | SMTP server port | `nil` |
+| `SMTP_USERNAME` | SMTP username of the account | `nil` |
+| `SMTP_PASSWORD` | SMTP password of the account | `nil` |
+
+
+### Otel Collector
+
+Otel Collector supports multiple combination of options.
+Using the configuration file, you can pass `receivers`, `processors`, `extensions`, `exporters` and `service` as per your requirements.
+You can find the complete otel collector configuration in the [OpenTelemetry documentation](https://opentelemetry.io/docs/collector/configuration/).
+
+By default, SigNoz runs with [this default Otel Collector configuration](https://github.com/SigNoz/signoz/blob/main/deploy/docker/otel-collector-config.yaml).
+
+For any configuration changes in **Docker**, you would have to update `/deploy/docker/otel-collector-config.yaml` and bring up Otel Collector.
+
+
+
+## Kubernetes Configuration
+
+The latest helm chart configuration settings can be found at:
+- https://github.com/signoz/charts/blob/main/charts/signoz/README.md#configuration

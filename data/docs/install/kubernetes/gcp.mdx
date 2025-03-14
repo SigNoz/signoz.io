@@ -5,94 +5,35 @@ title: Deploying to GCP
 description: Instructions to install SigNoz on GKE cluster
 ---
 
-import K8sComponents from '@/components/shared/k8s-components.md'
 import CommonPrerequisites from '@/components/shared/k8s-common-prerequisites.md'
-import InstallSigNozPart1 from '@/components/shared/install-signoz-k8s-part-1.md'
-import InstallSigNozPart2 from '@/components/shared/install-signoz-k8s-part-2.mdx'
-import VerifyInstallation from '@/components/shared/k8s-verify-installation.mdx'
-import K8sHotrod from '@/components/shared/k8s-hotrod.md'
+import K8sInstall from '@/components/shared/k8s-install.mdx'
+import K8sOtelDemo from '@/components/shared/k8s-oteldemo.mdx'
 import NextSteps from '@/components/shared/next-steps.md'
-import StorageClass from '@/components/shared/k8s-storageclass.mdx'
 import SigNozCloud from '@/components/shared/signoz-cloud.mdx'
 
 <SigNozCloud />
 
-First, we need to set up a Kubernetes cluster (see the [official GCP documentation][1]
-for more info).
-
-<K8sComponents />
-
 ## Prerequisites
 
-- You must have a GKE cluster. Both Standard and Autopilot are supported.
+- Set up a GKE cluster (see the [official GCP documentation][1] for more info).
 
 <CommonPrerequisites />
 
-## Chart configuration
+## Install SigNoz
 
-Here's the minimal required `override-values.yaml` that we'll be using later. You can find
-an overview of the parameters that can be configured during installation under
-[chart configuration][2].
+<K8sInstall />
 
-### GKE Standard
 
-In GKE Standard, you can either install with the default configuration or make
-use of the following `override-values.yaml`:
+## Additional Notes on GKE Autopilot
 
-```yaml
-global:
-  storageClass: gce-resizable
-  cloud: gcp
+- For GKE Autopilot, the default storage class is `gce-resizable` and the cloud is `gcp/autogke`.
 
-clickhouse:
-  installCustomStorageClass: true
-```
+- GKE Autopilot automatically overriddes resource requests/limits. Therefore, it is important to ensure that the cluster has enough resource quota for the region where the cluster is deployed. Read more about it [here][3].
 
-### GKE Autopilot
 
-In GKE Autopilot, you must set `cloud` to `gcp/autogke` as well as
-update `kubeletMetrics` to use read-only Kubelet endpoint as shown
-below in the `override-values.yaml`:
+## (Optional) Install OpenTelemetry Demo
 
-```yaml
-global:
-  storageClass: gce-resizable
-  cloud: gcp/autogke
-
-clickhouse:
-  installCustomStorageClass: true
-
-k8s-infra:
-  presets:
-    kubeletMetrics:
-      authType: none
-      endpoint: ${K8S_NODE_NAME}:10255
-```
-
-GKE Autopilot automatically overriddes resource requests/limits. In our case,
-all `signoz` chart components as well as components from `clickhouse` and
-`k8s-infra` charts, if enabled. Therefore, make sure to have enough resource
-quota for the region where the cluster is deployed. Read more about it [here][3].
-
-<StorageClass />
-
-## Install SigNoz on Kubernetes with Helm
-
-<InstallSigNozPart1 />
-
-  ```bash
-  helm --namespace platform install my-release signoz/signoz -f override-values.yaml
-  ```
-
-<InstallSigNozPart2 />
-
-## Verify the Installation
-
-<VerifyInstallation />
-
-## (Optional) Install a Sample Application and Generate Tracing Data
-
-<K8sHotrod />
+<K8sOtelDemo />
 
 ## Next Steps
 
