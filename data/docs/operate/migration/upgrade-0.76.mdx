@@ -22,7 +22,6 @@ For detailed changes, see [GitHub Issue #7309](https://github.com/SigNoz/signoz/
 - Must be upgrading from < 0.76.0 and not installing from scratch
 
 <Admonition type="warning">
-
 Before proceeding, backup your SQLite database:
 ```bash
 kubectl cp -n platform --retries=5 my-release-signoz-query-service-0:/var/lib/signoz/signoz.db ./backup-signoz.db
@@ -33,15 +32,26 @@ If you don't need to preserve your SQLite data, you can skip the migration steps
 </Admonition>
 
 ### Upgrading
-1. **Verify Existing PVC**
+1. Replace the yaml key `queryService` with `signoz` in your `my-values.yaml` file.
+
+From
+```yaml
+queryService:
+```
+To
+```yaml
+signoz:
+```
+
+2. **Verify Existing PVC**
 
 ```bash
 kubectl get pvc -n platform -l app.kubernetes.io/component=query-service
 ```
 
-If no PVCs are found, skip to step 3.
+If no PVCs are found, skip to step 4.
 
-2. **Configure Migration**
+3. **Configure Migration**
 
 Update your `my-values.yaml`:
 ```yaml
@@ -71,7 +81,7 @@ signoz:
 
 > Note that the `claimName` is the name of the PVC for the old `query-service` i.e. `signoz-db-my-release-signoz-query-service-0`. Replace it with the name of the PVC for your release. You can get the claim name from Step 1.
 
-3. **Update and Deploy**
+4. **Update and Deploy**
 
 ```bash
 helm repo add signoz https://charts.signoz.io
@@ -81,14 +91,14 @@ helm upgrade --install my-release signoz/signoz --namespace platform --values my
 
 > For more details on the SigNoz upgrades on Kubernetes, please refer to the [Operate SigNoz on Kubernetes guide](/docs/operate/kubernetes).
 
-4. **Verify Deployment**
+5. **Verify Deployment**
 
   ```bash
   kubectl get pods -n platform
   ```
   Look for `my-release-signoz-0` running successfully.
 
-5. **Disable Migration**
+6. **Disable Migration**
 
 Update `my-values.yaml`:
 ```yaml
