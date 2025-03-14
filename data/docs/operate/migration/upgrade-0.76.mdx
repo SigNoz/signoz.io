@@ -27,9 +27,9 @@ Before proceeding, backup your SQLite database:
 ```bash
 kubectl cp -n platform --retries=5 my-release-signoz-query-service-0:/var/lib/signoz/signoz.db ./backup-signoz.db
 ```
-Replace `platform` with your SigNoz namespace and `my-release-signoz-query-service-0` with your query-service pod name.
+Replace `platform` with your SigNoz namespace and `my-release` with your release name.
 
-If you don't need to preserve your SQLite data, you can skip the migration steps and directly upgrade the helm release.
+If you don't need to preserve your SQLite data, you can skip the migration steps and directly upgrade the helm release along with deleting the old volumes.
 </Admonition>
 
 ### Upgrading
@@ -69,14 +69,14 @@ signoz:
           mountPath: /var/lib/old-signoz
 ```
 
-> Note that the `claimName` is the name of the PVC for the old `query-service` i.e. `signoz-db-my-release-signoz-query-service-0`. Replace it with the name of the PVC for your release.
+> Note that the `claimName` is the name of the PVC for the old `query-service` i.e. `signoz-db-my-release-signoz-query-service-0`. Replace it with the name of the PVC for your release. You can get the claim name from Step 1.
 
 3. **Update and Deploy**
 
 ```bash
 helm repo add signoz https://charts.signoz.io
 helm repo update signoz
-helm upgrade --install signoz signoz/signoz --namespace platform --values my-values.yaml
+helm upgrade --install my-release signoz/signoz --namespace platform --values my-values.yaml
 ```
 
 > For more details on the SigNoz upgrades on Kubernetes, please refer to the [Operate SigNoz on Kubernetes guide](/docs/operate/kubernetes).
@@ -99,7 +99,7 @@ signoz:
 ```
 Then reapply:
 ```bash
-helm upgrade --install signoz signoz/signoz --namespace platform --values my-values.yaml
+helm upgrade --install my-release signoz/signoz --namespace platform --values my-values.yaml
 ```
 
 ### Updating SigNoz Frontend Port
