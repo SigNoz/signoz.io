@@ -60,7 +60,7 @@ const OpenTelemetryBanner = ({ title, date, readingTime, tags = [] }: OpenTeleme
 
             {/* Title section */}
             <div className="py-2">
-              <h1 className="text-3xl font-bold leading-tight text-white sm:text-4xl md:text-5xl">
+              <h1 className="text-3xl font-bold leading-normal sm:leading-normal md:leading-normal text-white sm:text-4xl md:text-5xl">
                 {title}
               </h1>
             </div>
