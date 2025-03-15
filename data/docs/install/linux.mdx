@@ -18,6 +18,307 @@ This section provides information on installing SigNoz on Linux.
 - A Linux machine.
 - Clickhouse running on the machine. Refer to the [Clickhouse installation guide](https://clickhouse.com/docs/install#available-installation-options) for more details.
 
+## Install Zookeeper and configure clickhouse to use zookeeper
+
+1. Install Java
+
+```bash
+sudo apt update
+sudo apt upgrade -y
+sudo apt install default-jdk -y
+```
+
+2. Install Zookeeper using the following command:
+
+```bash
+curl -L https://dlcdn.apache.org/zookeeper/zookeeper-3.8.4/apache-zookeeper-3.8.4-bin.tar.gz -o zookeeper.tar.gz
+tar -xzf zookeeper.tar.gz
+```
+
+3. Copy the extracted files to `/opt/zookeeper`:
+
+```bash
+sudo mkdir -p /opt/zookeeper
+sudo mkdir -p /var/lib/zookeeper
+sudo mkdir -p /var/log/zookeeper
+sudo cp -r apache-zookeeper-3.8.4-bin/* /opt/zookeeper
+```
+
+4. Create the zookeeper config file:
+
+```bash 
+sudo bash -c 'cat <<EOF > /opt/zookeeper/conf/zoo.cfg
+tickTime=2000
+dataDir=/var/lib/zookeeper
+clientPort=2181
+admin.serverPort=3181
+EOF'
+```
+
+5. Create the zookeeper environment file:
+```bash
+sudo bash -c 'cat <<EOF > /opt/zookeeper/conf/zoo.env
+ZOO_LOG_DIR=/var/log/zookeeper
+EOF'
+```
+
+6. Create the zookeeper user:
+
+```bash
+sudo getent passwd zookeeper >/dev/null || sudo useradd --system --home /opt/zookeeper --no-create-home --user-group --shell /sbin/nologin zookeeper
+sudo chown -R zookeeper:zookeeper /opt/zookeeper
+sudo chown -R zookeeper:zookeeper /var/lib/zookeeper
+sudo chown -R zookeeper:zookeeper /var/log/zookeeper
+```
+
+7. Create the zookeeper service file:
+
+```bash
+sudo bash -c 'cat <<EOF > /etc/systemd/system/zookeeper.service
+[Unit]
+Description=Zookeeper
+Documentation=http://zookeeper.apache.org
+
+[Service]
+EnvironmentFile=/opt/zookeeper/conf/zoo.env
+Type=forking
+WorkingDirectory=/opt/zookeeper
+User=zookeeper
+Group=zookeeper
+ExecStart=/opt/zookeeper/bin/zkServer.sh start /opt/zookeeper/conf/zoo.cfg
+ExecStop=/opt/zookeeper/bin/zkServer.sh stop /opt/zookeeper/conf/zoo.cfg
+ExecReload=/opt/zookeeper/bin/zkServer.sh restart /opt/zookeeper/conf/zoo.cfg
+TimeoutSec=30
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+EOF'
+```
+
+8. Reload and start the zookeeper service:
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl start zookeeper.service
+```
+
+9. Configure clickhouse to use zookeeper:
+
+```bash
+sudo bash -c 'cat <<EOF > /etc/clickhouse-server/config.d/cluster.xml
+<clickhouse replace="true">
+    <distributed_ddl>
+        <path>/clickhouse/task_queue/ddl</path>
+    </distributed_ddl>
+    <remote_servers>
+        <cluster>
+            <shard>
+                <replica>
+                    <host>127.0.0.1</host>
+                    <port>9000</port>
+                </replica>
+            </shard>
+        </cluster>
+    </remote_servers>
+    <zookeeper>
+        <node>
+            <host>127.0.0.1</host>
+            <port>2181</port>
+        </node>
+    </zookeeper>
+    <macros>
+        <shard>01</shard>
+        <replica>01</replica>
+    </macros>
+</clickhouse>
+EOF'
+sudo chown clickhouse:clickhouse /etc/clickhouse-server/config.d/cluster.xml
+sudo systemctl restart clickhouse-server.service
+```
+
+## Run migrations on clickhouse
+
+1. Get and extract the latest release of SigNoz Schema Migrator from the [releases page](https://github.com/SigNoz/signoz-otel-collector/releases).
+
+```bash
+curl -L https://github.com/SigNoz/signoz-otel-collector/releases/latest/download/signoz-schema-migrator_linux_$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g').tar.gz -o signoz-schema-migrator.tar.gz
+tar -xzf signoz-schema-migrator.tar.gz
+```
+
+For a particular release:
+
+```bash
+curl -L https://github.com/SigNoz/signoz-otel-collector/releases/download/v0.111.31-rc.1/signoz-schema-migrator_linux_$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g').tar.gz -o signoz-schema-migrator.tar.gz
+tar -xzf signoz-schema-migrator.tar.gz
+```
+
+2. Run the migrations:
+
+```bash
+./signoz-schema-migrator_linux_$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g')/bin/signoz-schema-migrator sync --dsn="tcp://localhost:9000?password=password" --replication=true  --up=
+./signoz-schema-migrator_linux_$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g')/bin/signoz-schema-migrator async --dsn="tcp://localhost:9000?password=password" --replication=true  --up=
+```
+
+For a particular release:
+```bash
+sudo getent passwd signoz >/dev/null || sudo useradd --system --home /opt/signoz --no-create-home --user-group --shell /sbin/nologin signoz
+```
+
+## Install SigNoz Otel Collector
+
+1. Get and extract the latest release of SigNoz Otel Collector from the [releases page](https://github.com/SigNoz/signoz/releases).
+
+```bash
+curl -L https://github.com/SigNoz/signoz-otel-collector/releases/latest/download/signoz-otel-collector_linux_$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g').tar.gz -o signoz-otel-collector.tar.gz
+tar -xzf signoz-otel-collector.tar.gz
+```
+
+For a particular release:
+
+```bash
+curl -L https://github.com/SigNoz/signoz-otel-collector/releases/download/v0.111.31-rc.1/signoz-otel-collector_linux_$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g').tar.gz -o signoz-otel-collector.tar.gz
+tar -xzf signoz-otel-collector.tar.gz
+```
+
+2. Copy the extracted files to `/opt/signoz-otel-collector`:
+
+```bash
+sudo mkdir -p /opt/signoz-otel-collector
+sudo cp -r signoz-otel-collector_linux_$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g')/* /opt/signoz-otel-collector
+```
+
+3. Change the ownership of the files to the `signoz` user and group:
+
+```bash
+sudo chown -R signoz:signoz /opt/signoz-otel-collector
+```
+
+4. Create a `config.yaml` file in the `/opt/signoz-otel-collector/conf` directory:
+
+```bash
+sudo bash -c 'cat <<EOF > /opt/signoz-otel-collector/conf/config.yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+        max_recv_msg_size_mib: 16
+      http:
+        endpoint: 0.0.0.0:4318
+  jaeger:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:14250
+      thrift_http:
+        endpoint: 0.0.0.0:14268
+  httplogreceiver/heroku:
+    endpoint: 0.0.0.0:8081
+    source: heroku
+  httplogreceiver/json:
+    endpoint: 0.0.0.0:8082
+    source: json
+processors:
+  batch:
+    send_batch_size: 50000
+    timeout: 1s
+  signozspanmetrics/delta:
+    metrics_exporter: clickhousemetricswrite
+    latency_histogram_buckets: [100us, 1ms, 2ms, 6ms, 10ms, 50ms, 100ms, 250ms, 500ms, 1000ms, 1400ms, 2000ms, 5s, 10s, 20s, 40s, 60s]
+    dimensions_cache_size: 100000
+    dimensions:
+      - name: service.namespace
+        default: default
+      - name: deployment.environment
+        default: default
+      - name: signoz.collector.id
+    aggregation_temporality: AGGREGATION_TEMPORALITY_DELTA
+extensions:
+  health_check:
+    endpoint: 0.0.0.0:13133
+  zpages:
+    endpoint: localhost:55679
+  pprof:
+    endpoint: localhost:1777
+exporters:
+  clickhousetraces:
+    datasource: tcp://localhost:9000/signoz_traces?password=password
+    low_cardinal_exception_grouping: ${env:LOW_CARDINAL_EXCEPTION_GROUPING}
+    use_new_schema: true
+  clickhousemetricswrite:
+    endpoint: tcp://localhost:9000/signoz_metrics?password=password
+    timeout: 15s
+    resource_to_telemetry_conversion:
+      enabled: true
+  clickhouselogsexporter:
+    dsn: tcp://localhost:9000/signoz_logs?password=password
+    timeout: 10s
+    use_new_schema: true
+  metadataexporter:
+    dsn: tcp://localhost:9000/signoz_metadata?password=password
+    timeout: 10s
+    tenant_id: default
+    cache:
+      provider: in_memory
+service:
+  telemetry:
+    logs:
+      encoding: json
+    metrics:
+      address: 0.0.0.0:8888
+  extensions: [health_check, zpages, pprof]
+  pipelines:
+    traces:
+      receivers: [otlp, jaeger]
+      processors: [signozspanmetrics/delta, batch]
+      exporters: [clickhousetraces, metadataexporter]
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [clickhousemetricswrite, metadataexporter]
+    logs:
+      receivers: [otlp, httplogreceiver/heroku, httplogreceiver/json]
+      processors: [batch]
+      exporters: [clickhouselogsexporter, metadataexporter]
+EOF'
+```
+
+5. Create the SigNoz service file:
+
+```bash
+sudo bash -c 'cat <<EOF > /etc/systemd/system/signoz-otel-collector.service
+[Unit]
+Description=SigNoz Otel Collector
+Documentation=https://signoz.io/docs
+After=clickhouse-server.service
+
+[Service]
+User=signoz
+Group=signoz
+Type=simple
+KillMode=mixed
+Restart=on-failure
+WorkingDirectory=/opt/signoz-otel-collector
+ExecStart=/opt/signoz-otel-collector/bin/signoz-otel-collector --config=/opt/signoz-otel-collector/conf/config.yaml
+
+[Install]
+WantedBy=multi-user.target
+EOF'
+```
+
+6. Reload and start the SigNoz service:
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl start signoz-otel-collector.service
+```
+
+8. (Optional) Enable the SigNoz service to start on boot:
+
+```bash
+sudo systemctl enable signoz-otel-collector.service
+```
+
 ## Install SigNoz by downloading the binary
 
 1. Get and extract the latest release of SigNoz from the [releases page](https://github.com/SigNoz/signoz/releases).
@@ -31,30 +332,30 @@ tar -xzf signoz.tar.gz
 
 ```bash
 sudo mkdir -p /opt/signoz
-sudo mkdir -p /opt/signoz/lib
+sudo mkdir -p /var/lib/signoz
 sudo cp -r signoz_linux_$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g')/* /opt/signoz
 ```
 
 4. Create the environment file for systemd service:
 
 ```bash
-cat <<EOF > /opt/signoz/conf/systemd.env
+sudo bash -c 'cat <<EOF > /opt/signoz/conf/systemd.env
 SIGNOZ_INSTRUMENTATION_LOGS_LEVEL=info
 INVITE_EMAIL_TEMPLATE=/opt/signoz/templates/invitation_email_template.html
-SIGNOZ_SQLSTORE_SQLITE_PATH=/opt/signoz/lib/signoz.db
+SIGNOZ_SQLSTORE_SQLITE_PATH=/var/lib/signoz/signoz.db
 SIGNOZ_WEB_ENABLED=true
 SIGNOZ_WEB_DIRECTORY=/opt/signoz/web
 SIGNOZ_JWT_SECRET=secret
 SIGNOZ_ALERTMANAGER_PROVIDER=signoz
 SIGNOZ_TELEMETRYSTORE_PROVIDER=clickhouse
-SIGNOZ_TELEMETRYSTORE_CLICKHOUSE_DSN=tcp://localhost:9000
-EOF
+SIGNOZ_TELEMETRYSTORE_CLICKHOUSE_DSN=tcp://localhost:9000?password=password
+EOF'
 ```
 
 3. Create a user and group to run SigNoz:
 
 ```bash
-sudo getent passwd signoz >/dev/null || sudo useradd --system --home /opt/signoz --no-create-home --user-group --shell /sbin/nologin signoz
+sudo chown -R signoz:signoz /var/lib/signoz
 sudo chown -R signoz:signoz /opt/signoz
 ```
 
