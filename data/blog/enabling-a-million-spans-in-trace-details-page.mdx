@@ -12,7 +12,7 @@ keywords: [ traces, spans, distributed tracing, SigNoz]
 
 We recently launched a [feature](https://signoz.io/blog/traces-without-limits/) in our launch week that got a lot of attention - loading and visualizing even a million spans in our trace detail page. This sparked curiosity among users and developers, leading many to ask: **How did we do it?**
 
-The motivation was clear—our users needed this capability. It unlocks new debugging workflows, making it easier to analyze massive traces efficiently.
+The motivation behind building this feature was clear—our users needed this capability. It unlocks new debugging workflows, making it easier to analyze massive traces efficiently.
 
 Below is our revamped trace details page. Each line represents a span. In this blog, we’ll break down the techniques that enabled seamless loading and analysis of any number of spans.
 
@@ -37,7 +37,7 @@ That’s the problem we set out to solve.
 
 ## The Problem: Making Trace Size Irrelevant
 
-**“How do we load and debug traces of any size in a browser tab?”**
+**How do we load and debug traces of any size in a browser tab?**
 
 We deliberately avoided placing an upper limit on trace size. The goal was simple: no matter how large a trace gets, users should be able to load and debug it **without crashes, lag, or unresponsiveness**.
 
@@ -60,7 +60,6 @@ Each of these steps presents its own constraints, so we optimized them individua
 
 <aside>
 💡
-
 **Can a Browser Even Handle a Million Elements? (Short Answer: No)**
 
 </aside>
@@ -74,7 +73,7 @@ We started by testing the **absolute limits** of what a browser tab could handle
 
 This was our first key learning: **no matter what, dumping a million spans into the frontend won’t work.**
 
- So, we needed to restrict the number of elements rendered in the [DOM](https://developer.mozilla.org/en-US/docs/Glossary/DOM) tree.  ****A very popular concept of virtualisation came into the discussions.
+ So, we needed to restrict the number of elements rendered in the [DOM](https://developer.mozilla.org/en-US/docs/Glossary/DOM) tree. A very popular concept of virtualisation came into the discussions.
 
 ### Solution: Render Only What the User Sees (Virtualization)
 
