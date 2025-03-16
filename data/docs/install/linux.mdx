@@ -1,0 +1,472 @@
+---
+date: 2024-06-06
+title: Linux
+description: Learn how to install SigNoz on Linux
+id: linux
+slug: /install/linux
+---
+
+import SigNozCloud from '@/components/shared/signoz-cloud.mdx'
+import RetentionInfo from '@/components/shared/retention-info.mdx'
+
+<SigNozCloud />
+
+This section provides information on installing SigNoz on Linux.
+
+## Prerequisites
+
+- A Linux machine
+- Root access to the machine
+
+## Install Clickhouse
+
+1. Install Clickhouse using the Clickhouse installation [guide](https://clickhouse.com/docs/install#available-installation-options)
+
+> Note: Do not start the clickhouse service yet. We will do that after installing zookeeper.
+
+## Install Zookeeper
+
+1. Install Java
+
+```bash
+sudo apt update
+sudo apt upgrade -y
+sudo apt install default-jdk -y
+```
+
+2. Get and extract the latest release of Zookeeper from the [releases page](https://zookeeper.apache.org/releases.html)
+
+```bash
+curl -L https://dlcdn.apache.org/zookeeper/zookeeper-3.8.4/apache-zookeeper-3.8.4-bin.tar.gz -o zookeeper.tar.gz
+tar -xzf zookeeper.tar.gz
+```
+
+3. Create the necessary zookeeper directories and copy the extracted files to `/opt/zookeeper`:
+
+```bash
+sudo mkdir -p /opt/zookeeper
+sudo mkdir -p /var/lib/zookeeper
+sudo mkdir -p /var/log/zookeeper
+sudo cp -r apache-zookeeper-3.8.4-bin/* /opt/zookeeper
+```
+
+4. Create the zookeeper config file:
+
+```bash 
+sudo bash -c 'cat <<EOF > /opt/zookeeper/conf/zoo.cfg
+tickTime=2000
+dataDir=/var/lib/zookeeper
+clientPort=2181
+admin.serverPort=3181
+EOF'
+```
+
+5. Create the zookeeper systemd environment file:
+```bash
+sudo bash -c 'cat <<EOF > /opt/zookeeper/conf/zoo.env
+ZOO_LOG_DIR=/var/log/zookeeper
+EOF'
+```
+
+6. Create a user and group to run Zookeeper and give it ownership of the zookeeper directories:
+
+```bash
+sudo getent passwd zookeeper >/dev/null || sudo useradd --system --home /opt/zookeeper --no-create-home --user-group --shell /sbin/nologin zookeeper
+sudo chown -R zookeeper:zookeeper /opt/zookeeper
+sudo chown -R zookeeper:zookeeper /var/lib/zookeeper
+sudo chown -R zookeeper:zookeeper /var/log/zookeeper
+```
+
+7. Create the zookeeper systemd service:
+
+```bash
+sudo bash -c 'cat <<EOF > /etc/systemd/system/zookeeper.service
+[Unit]
+Description=Zookeeper
+Documentation=http://zookeeper.apache.org
+
+[Service]
+EnvironmentFile=/opt/zookeeper/conf/zoo.env
+Type=forking
+WorkingDirectory=/opt/zookeeper
+User=zookeeper
+Group=zookeeper
+ExecStart=/opt/zookeeper/bin/zkServer.sh start /opt/zookeeper/conf/zoo.cfg
+ExecStop=/opt/zookeeper/bin/zkServer.sh stop /opt/zookeeper/conf/zoo.cfg
+ExecReload=/opt/zookeeper/bin/zkServer.sh restart /opt/zookeeper/conf/zoo.cfg
+TimeoutSec=30
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+EOF'
+```
+
+8. Reload the systemd daemon and start the zookeeper service:
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl start zookeeper.service
+```
+
+9. Configure clickhouse to use zookeeper and start the clickhouse service:
+
+```bash
+sudo bash -c 'cat <<EOF > /etc/clickhouse-server/config.d/cluster.xml
+<clickhouse replace="true">
+    <distributed_ddl>
+        <path>/clickhouse/task_queue/ddl</path>
+    </distributed_ddl>
+    <remote_servers>
+        <cluster>
+            <shard>
+                <replica>
+                    <host>127.0.0.1</host>
+                    <port>9000</port>
+                </replica>
+            </shard>
+        </cluster>
+    </remote_servers>
+    <zookeeper>
+        <node>
+            <host>127.0.0.1</host>
+            <port>2181</port>
+        </node>
+    </zookeeper>
+    <macros>
+        <shard>01</shard>
+        <replica>01</replica>
+    </macros>
+</clickhouse>
+EOF'
+sudo chown clickhouse:clickhouse /etc/clickhouse-server/config.d/cluster.xml
+sudo systemctl start clickhouse-server.service
+```
+
+### Verify the installation
+
+1. Check the status of the clickhouse and zookeeper services:
+
+```bash
+sudo systemctl status clickhouse-server.service
+sudo systemctl status zookeeper.service
+```
+
+2. If the services are running, you should see the following output:
+
+```bash
+clickhouse-server.service - ClickHouse Server (analytic DBMS for big data)
+    Loaded: loaded (/lib/systemd/system/clickhouse-server.service; enabled; preset: enabled)
+    Active: active (running) since ...
+
+zookeeper.service - Zookeeper
+    Loaded: loaded (/etc/systemd/system/zookeeper.service; disabled; preset: enabled)
+    Active: active (running) ...
+```
+
+3. (Optional) Check the logs of the clickhouse and zookeeper services:
+
+```bash
+sudo journalctl -u clickhouse-server.service -f
+sudo journalctl -u zookeeper.service -f
+```
+
+## Run Clickhouse migrations 
+
+1. Get and extract the latest release of SigNoz Schema Migrator:.
+
+```bash
+curl -L https://github.com/SigNoz/signoz-otel-collector/releases/latest/download/signoz-schema-migrator_linux_$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g').tar.gz -o signoz-schema-migrator.tar.gz
+tar -xzf signoz-schema-migrator.tar.gz
+```
+
+2. Run the migrations:
+
+```bash
+./signoz-schema-migrator_linux_$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g')/bin/signoz-schema-migrator sync --dsn="tcp://localhost:9000?password=password" --replication=true  --up=
+./signoz-schema-migrator_linux_$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g')/bin/signoz-schema-migrator async --dsn="tcp://localhost:9000?password=password" --replication=true  --up=
+```
+
+
+## Install SigNoz
+
+1. Get and extract the latest release of SigNoz:
+
+```bash
+curl -L https://github.com/SigNoz/signoz/releases/latest/download/signoz_linux_$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g').tar.gz -o signoz.tar.gz
+tar -xzf signoz.tar.gz
+```
+
+2. Create the necessary directories and copy the extracted files to `/opt/signoz`:
+
+```bash
+sudo mkdir -p /opt/signoz
+sudo mkdir -p /var/lib/signoz
+sudo cp -r signoz_linux_$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g')/* /opt/signoz
+```
+
+3. Create the SigNoz systemd environment file:
+
+```bash
+sudo bash -c 'cat <<EOF > /opt/signoz/conf/systemd.env
+SIGNOZ_INSTRUMENTATION_LOGS_LEVEL=info
+INVITE_EMAIL_TEMPLATE=/opt/signoz/templates/invitation_email_template.html
+SIGNOZ_SQLSTORE_SQLITE_PATH=/var/lib/signoz/signoz.db
+SIGNOZ_WEB_ENABLED=true
+SIGNOZ_WEB_DIRECTORY=/opt/signoz/web
+SIGNOZ_JWT_SECRET=secret
+SIGNOZ_ALERTMANAGER_PROVIDER=signoz
+SIGNOZ_TELEMETRYSTORE_PROVIDER=clickhouse
+SIGNOZ_TELEMETRYSTORE_CLICKHOUSE_DSN=tcp://localhost:9000?password=password
+EOF'
+```
+
+4. Create a user and group to run SigNoz and give it ownership of the signoz directories:
+```bash
+sudo getent passwd signoz >/dev/null || sudo useradd --system --home /opt/signoz --no-create-home --user-group --shell /sbin/nologin signoz
+sudo chown -R signoz:signoz /var/lib/signoz
+sudo chown -R signoz:signoz /opt/signoz
+```
+
+5. Create the SigNoz systemd service:
+
+```bash
+sudo bash -c 'cat <<EOF > /etc/systemd/system/signoz.service
+[Unit]
+Description=SigNoz
+Documentation=https://signoz.io/docs
+After=clickhouse-server.service
+
+[Service]
+User=signoz
+Group=signoz
+Type=simple
+KillMode=mixed
+Restart=on-failure
+WorkingDirectory=/opt/signoz
+EnvironmentFile=/opt/signoz/conf/systemd.env
+ExecStart=/opt/signoz/bin/signoz --config=/opt/signoz/conf/prometheus.yml --use-logs-new-schema=true --use-trace-new-schema=true
+
+[Install]
+WantedBy=multi-user.target
+EOF'
+```
+
+6. Reload the systemd daemon and start the SigNoz service:
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl start signoz.service
+```
+
+### Verify the installation
+
+1. Check the status of the signoz service:
+
+```bash
+sudo systemctl status signoz.service
+```
+
+2. If the services are running, you should see the following output:
+
+```bash
+signoz.service - SigNoz
+    Loaded: loaded (/etc/systemd/system/signoz.service; enabled; preset: enabled)
+    Active: active (running) since ...
+```
+
+3. (Optional) Check the logs of the signoz service:
+
+```bash
+sudo journalctl -u signoz.service -f
+```
+
+
+## Install SigNoz Otel Collector
+
+1. Get and extract the latest release of SigNoz Otel Collector:
+
+```bash
+curl -L https://github.com/SigNoz/signoz-otel-collector/releases/latest/download/signoz-otel-collector_linux_$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g').tar.gz -o signoz-otel-collector.tar.gz
+tar -xzf signoz-otel-collector.tar.gz
+```
+
+2. Create the necessary directories and copy the extracted files to `/opt/signoz-otel-collector`:
+
+```bash
+sudo mkdir -p /var/lib/signoz-otel-collector
+sudo mkdir -p /opt/signoz-otel-collector
+sudo cp -r signoz-otel-collector_linux_$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g')/* /opt/signoz-otel-collector
+```
+
+3. Change the ownership of the files to the `signoz` user and group:
+
+```bash
+sudo chown -R signoz:signoz /var/lib/signoz-otel-collector
+sudo chown -R signoz:signoz /opt/signoz-otel-collector
+```
+
+4. Create a `config.yaml` file in the `/opt/signoz-otel-collector/conf` directory:
+
+```bash
+sudo bash -c 'cat <<EOF > /opt/signoz-otel-collector/conf/config.yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+        max_recv_msg_size_mib: 16
+      http:
+        endpoint: 0.0.0.0:4318
+  jaeger:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:14250
+      thrift_http:
+        endpoint: 0.0.0.0:14268
+  httplogreceiver/heroku:
+    endpoint: 0.0.0.0:8081
+    source: heroku
+  httplogreceiver/json:
+    endpoint: 0.0.0.0:8082
+    source: json
+processors:
+  batch:
+    send_batch_size: 50000
+    timeout: 1s
+  signozspanmetrics/delta:
+    metrics_exporter: clickhousemetricswrite
+    latency_histogram_buckets: [100us, 1ms, 2ms, 6ms, 10ms, 50ms, 100ms, 250ms, 500ms, 1000ms, 1400ms, 2000ms, 5s, 10s, 20s, 40s, 60s]
+    dimensions_cache_size: 100000
+    dimensions:
+      - name: service.namespace
+        default: default
+      - name: deployment.environment
+        default: default
+      - name: signoz.collector.id
+    aggregation_temporality: AGGREGATION_TEMPORALITY_DELTA
+extensions:
+  health_check:
+    endpoint: 0.0.0.0:13133
+  zpages:
+    endpoint: localhost:55679
+  pprof:
+    endpoint: localhost:1777
+exporters:
+  clickhousetraces:
+    datasource: tcp://localhost:9000/signoz_traces?password=password
+    use_new_schema: true
+  clickhousemetricswrite:
+    endpoint: tcp://localhost:9000/signoz_metrics?password=password
+    timeout: 15s
+    resource_to_telemetry_conversion:
+      enabled: true
+  clickhouselogsexporter:
+    dsn: tcp://localhost:9000/signoz_logs?password=password
+    timeout: 10s
+    use_new_schema: true
+  metadataexporter:
+    dsn: tcp://localhost:9000/signoz_metadata?password=password
+    timeout: 10s
+    tenant_id: default
+    cache:
+      provider: in_memory
+service:
+  telemetry:
+    logs:
+      encoding: json
+    metrics:
+      address: 0.0.0.0:8888
+  extensions: [health_check, zpages, pprof]
+  pipelines:
+    traces:
+      receivers: [otlp, jaeger]
+      processors: [signozspanmetrics/delta, batch]
+      exporters: [clickhousetraces, metadataexporter]
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [clickhousemetricswrite, metadataexporter]
+    logs:
+      receivers: [otlp, httplogreceiver/heroku, httplogreceiver/json]
+      processors: [batch]
+      exporters: [clickhouselogsexporter, metadataexporter]
+EOF'
+```
+
+5. Create a `opamp.yaml` file in the `/opt/signoz-otel-collector/conf` directory:
+
+```bash
+sudo bash -c 'cat <<EOF > /opt/signoz-otel-collector/conf/opamp.yaml
+server_endpoint: ws://127.0.0.1:4320/v1/opamp
+EOF'
+```
+
+6. Create the SigNoz Otel Collector systemd service:
+
+```bash
+sudo bash -c 'cat <<EOF > /etc/systemd/system/signoz-otel-collector.service
+[Unit]
+Description=SigNoz OTel Collector
+Documentation=https://signoz.io/docs
+After=clickhouse-server.service
+
+[Service]
+User=signoz
+Group=signoz
+Type=simple
+KillMode=mixed
+Restart=on-failure
+WorkingDirectory=/opt/signoz-otel-collector
+ExecStart=/opt/signoz-otel-collector/bin/signoz-otel-collector --config=/opt/signoz-otel-collector/conf/config.yaml --manager-config=/opt/signoz-otel-collector/conf/opamp.yaml --copy-path=/var/lib/signoz-otel-collector/config.yaml
+
+[Install]
+WantedBy=multi-user.target
+EOF'
+```
+
+7. Reload the systemd daemon and start the SigNoz Otel Collector service:
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl start signoz-otel-collector.service
+```
+
+### Verify the installation
+
+1. Check the status of the signoz otel collector service:
+
+```bash
+sudo systemctl status signoz-otel-collector.service
+```
+
+2. If the services are running, you should see the following output:
+
+```bash
+signoz-otel-collector.service - SigNoz OTel Collector
+    Loaded: loaded (/etc/systemd/system/signoz-otel-collector.service; enabled; preset: enabled)
+    Active: active (running) since ...
+```
+
+3. (Optional) Check the logs of the signoz otel collector service:
+
+```bash
+sudo journalctl -u signoz-otel-collector.service -f
+```
+
+## Test the installation
+
+1. Run the following command to check the health of signoz:
+
+```bash
+curl -X GET http://localhost:8080/api/v1/health
+```
+
+2. If the installation is successful, you should see the following output:
+
+```bash
+{"status":"ok"}
+```
+
+
+<RetentionInfo />

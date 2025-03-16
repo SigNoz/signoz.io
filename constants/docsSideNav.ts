@@ -38,6 +38,12 @@ const docsSideNav = [
                 route: '/docs/install/docker-swarm',
               },
               {
+                type: 'doc',
+                label: 'Linux',
+                route: '/docs/install/linux',
+                className: 'new-doc',
+              },
+              {
                 type: 'category',
                 isExpanded: false,
                 label: 'Kubernetes',
