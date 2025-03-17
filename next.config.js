@@ -325,6 +325,11 @@ module.exports = () => {
           permanent: true,
         },
         {
+          source: '/docs/instrumentation/reactjs/',
+          destination: '/docs/instrumentation/opentelemetry-reactjs/',
+          permanent: true,
+        },
+        {
           source: '/docs/instrumentation/jboss/',
           destination: '/docs/instrumentation/opentelemetry-jboss/',
           permanent: true,
