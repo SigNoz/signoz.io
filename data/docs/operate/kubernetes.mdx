@@ -11,28 +11,12 @@ import SigNozCloud from '@/components/shared/signoz-cloud.mdx'
 
 <SigNozCloud />
 
-Once you have successfully installed SigNoz on Kubernetes, the following sections
-provide an overview of the activities that are required to successfully operate SigNoz.
+## Upgrade SigNoz
 
-## Stop/Start SigNoz Cluster
-
-To stop SigNoz cluster:
-
-```bash
-helm -n platform uninstall "my-release"
-```
-
-To start/resume SigNoz cluster:
-
-```bash
-helm -n platform install "my-release"
-```
-
-<Admonition>
-The newly created release aka SigNoz cluster should mount to the existing persistent volume as long as the **namespace** and the **release name** matches the old one.
+<Admonition type="info">
+Replace `<release-name>` and `<namespace>` from the instructions below with appropriate
+release name and namespace respectively.
 </Admonition>
-
-## Upgrade SigNoz Cluster
 
 Use the steps below to upgrade to the latest version:
 
@@ -43,7 +27,7 @@ Use the steps below to upgrade to the latest version:
 
 2. Upgrade to the latest available version of the chart
     ```bash
-    helm -n platform upgrade my-release signoz/signoz
+    helm -n <namespace> upgrade <release-name> signoz/signoz
     ```
 
 <UpgradeInfo/>
@@ -70,58 +54,43 @@ follow the steps below:
     ```
 
 2. Run the following command to install the chart version `0.2.5` running SigNoz
-version `0.10.2` with the release name `my-release` and namespace `platform`:
+version `0.10.2` with the release name `<release-name>` and namespace `<namespace>`:
 
     ```bash
-    helm -n platform upgrade my-release signoz/signoz --version 0.2.5
+    helm -n <namespace> upgrade <release-name> signoz/signoz --version 0.2.5
     ```
+
+See the [Helm docs](https://helm.sh/docs/helm/helm_upgrade/) for documentation on the helm upgrade command.
 
 <UpgradeWarning/>
 
-## Uninstall SigNoz Cluster
+## Uninstall SigNoz
 
-To uninstall/delete the `my-release` resources:
+1. To uninstall/delete the `<release-name>` resources:
 
 ```bash
-helm -n platform uninstall "my-release"
+helm -n <namespace> uninstall "<release-name>"
 ```
 
-See the [Helm docs](https://helm.sh/docs/helm/helm_uninstall/) for documentation
-on the helm uninstall command.
+See the [Helm docs](https://helm.sh/docs/helm/helm_uninstall/) for documentation on the helm uninstall command.
 
-The command above removes all the Kubernetes components associated
-with the chart and deletes the release except for ClickHouse CRD resources due to `finalizers`.
-
-To delete resources accociated to `ClickHouseInstallations` instance:
+2. The command above removes all the Kubernetes components associated with the chart and deletes the release except for ClickHouse CRD resources.
+To delete resources accociated with the `ClickHouseInstallations` CRD:
 
 ```bash
-kubectl -n platform patch \
-  clickhouseinstallations.clickhouse.altinity.com/my-release-clickhouse \
+kubectl -n <namespace> patch \
+  clickhouseinstallations.clickhouse.altinity.com/<release-name>-clickhouse \
   -p '{"metadata":{"finalizers":[]}}' --type=merge
 ```
 
-Deletion of the StatefulSet doesn't cascade to deleting associated PVCs. To delete them:
+3. Deletion of the StatefulSet doesn't cascade to deleting associated PVCs. To delete them:
 
 ```bash
-kubectl -n platform delete pvc -l app.kubernetes.io/instance=my-release
+kubectl -n <namespace>  delete pvc -l app.kubernetes.io/instance=<release-name>
 ```
 
-At last, clean up the namespace:
+4. Delete the namespace:
 
 ```bash
-kubectl delete namespace platform
-```
-
-<Admonition type="info">
-Replace `my-release` and `platform` from above instructions with appropriate
-release name and SigNoz namespace respectively.
-</Admonition>
-
-## Remove the Sample Application from Dashboard
-
-Use the command below to remove the sample application:
-
-```bash
-curl -sL https://github.com/SigNoz/signoz/raw/main/sample-apps/hotrod/hotrod-delete.sh \
-  | HOTROD_NAMESPACE=sample-application bash
+kubectl delete namespace <namespace> 
 ```

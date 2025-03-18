@@ -1,7 +1,11 @@
 - Kubernetes version >= `1.22`
-- `x86-64`/`amd64` workloads as currently `arm64` architecture is not supported
+
+- Currently supports `x86-64`, `amd64` and `arm64` architectures
+
 - Helm version >= `3.8`
+
 - You must have `kubectl` access to your cluster
+
 - The following table describes the hardware requirements that are needed
   to install SigNoz on Kubernetes:
 
@@ -10,6 +14,3 @@
   | Memory      | 8 GB                 | 16 GB       |
   | CPU         | 4 cores              | 8 cores     |
   | Storage     | 30 GB                | 80 GB       |
-  
-- Suggestion: In case you want to use your own custom storage class for PVCs,
-  you can set `global.storageClass` configuration to desired storage class.

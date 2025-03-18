@@ -1,6 +1,4 @@
 /* eslint-disable jsx-a11y/media-has-caption */
-import { sortPosts, allCoreContent } from 'pliny/utils/contentlayer'
-import { allBlogs } from 'contentlayer/generated'
 import { Header } from '@/components/index-header'
 import BuildForDevelopers from '@/components/build-for-developers'
 import { SigNozFeatures } from '@/components/index-features'
@@ -12,7 +10,6 @@ import WhySelectSignoz from '@/components/why-select-signoz'
 import { GetStarted } from '@/components/GetStarted'
 import { NextUIProvider } from '@nextui-org/react'
 import { Metadata } from 'next'
-import dynamic from 'next/dynamic'
 
 export const metadata: Metadata = {
   title: 'SigNoz | The Open Source Datadog Alternative',

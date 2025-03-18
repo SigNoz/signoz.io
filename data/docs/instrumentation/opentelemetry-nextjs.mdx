@@ -56,7 +56,7 @@ You need to configure the endpoint for SigNoz cloud in this file.
 
 ```tsx
 'use strict'
-import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
+import { OTLPHttpJsonTraceExporter } from '@vercel/otel';
 
 // Add otel logging
 import { diag, DiagConsoleLogger, DiagLogLevel } from '@opentelemetry/api';
@@ -67,7 +67,7 @@ const exporterOptions = {
   headers: { 'signoz-ingestion-key': 'your-ingestion-key' }, // Set if you are using SigNoz Cloud
 }
 
-export const traceExporter = new OTLPTraceExporter(exporterOptions);
+export const traceExporter = new OTLPHttpJsonTraceExporter(exporterOptions);
 ```
 
 - Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)

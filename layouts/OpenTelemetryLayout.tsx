@@ -7,12 +7,12 @@ import SectionContainer from '@/components/SectionContainer'
 import ScrollTopAndComment from '@/components/ScrollTopAndComment'
 import { ProgressBar } from '@/components/ProgressBar/ProgressBar'
 import OpenTelemetryBanner from '@/components/OpenTelemetryBanner/OpenTelemetryBanner'
-import SignUpStrip from '@/components/SignUpStrip/SignUpStrip'
 import TableOfContents from '@/components/TableOfContents/TableOfContents'
 import SidebarAuthorInfo from '@/components/SidebarAuthorInfo/SidebarAuthorInfo'
 import RelatedJobs from '@/components/RelatedJobs/RelatedJobs'
 import Link from 'next/link'
 import { ArrowRight, ExternalLink } from 'lucide-react'
+import MobileAuthorInfo from '@/components/MobileAuthorInfo/MobileAuthorInfo'
 
 // Extend the Blog type to include CTA fields
 interface OpenTelemetryContent extends Blog {
@@ -45,19 +45,6 @@ export default function OpenTelemetryLayout({
   const mainRef = useRef<HTMLElement | null>(null)
   const tocContainerRef = useRef<HTMLDivElement>(null)
   const [activeSection, setActiveSection] = useState<string>('')
-  const [showSignUpStrip, setShowSignUpStrip] = useState(false)
-
-  // Handle scroll to show/hide sign-up strip
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollPosition = window.scrollY
-      const showThreshold = 300 // Adjust this value to control when the strip appears
-      setShowSignUpStrip(scrollPosition > showThreshold)
-    }
-
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -92,15 +79,15 @@ export default function OpenTelemetryLayout({
     <main ref={mainRef}>
       <ScrollTopAndComment />
 
-      {/* Floating Sign-up Strip */}
-      <SignUpStrip showSignUpStrip={showSignUpStrip} cta_title={cta_title} cta_text={cta_text} />
-
       <OpenTelemetryBanner title={title} date={date} readingTime={readingTime.text} tags={tags} />
 
       <SectionContainer>
         <div className="post relative flex 2xl:max-w-[90rem]">
           {/* Main content area centered in the remaining space */}
           <div className="mx-auto w-full max-w-3xl px-4 md:px-6">
+            {/* Mobile author info - Visible only on mobile/tablet */}
+            <MobileAuthorInfo authors={authors} />
+            
             <article className="prose prose-slate max-w-none py-6 dark:prose-invert">
               {children}
             </article>
