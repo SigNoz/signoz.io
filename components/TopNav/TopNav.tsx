@@ -6,9 +6,7 @@ import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
 import Image from 'next/image'
 import Link from 'next/link'
 import { ArrowBigLeft, ArrowRight, BookOpenText, ChevronDown, PenSquare } from 'lucide-react'
-import SearchButton from '../SearchButton'
 import GitHubStars from '../GithubStars/GithubStars'
-import React from 'react'
 import DocsSidebar from '../DocsSidebar/DocsSidebar'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import Banner from '../Banner/Banner'
@@ -18,6 +16,9 @@ import Accordion from '../Accordion/Accordion'
 import { Color } from '@signozhq/design-tokens'
 import { QUERY_PARAMS } from '@/constants/queryParams'
 import { ONBOARDING_SOURCE } from '@/constants/globals'
+import dynamic from 'next/dynamic'
+
+const SearchButton = dynamic(() => import('../SearchButton'), { ssr: false })
 
 enum TABS {
   BLOG = 'blog-tab',
@@ -96,7 +97,7 @@ const productDropdownItems = [
     description: 'Control your observability costs',
     name: 'Ingest Guard',
     order: 8,
-  }
+  },
 ]
 
 const comparisionItems = [

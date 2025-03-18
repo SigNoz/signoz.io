@@ -1,7 +1,8 @@
-import React from 'react'
+'use client'
+
 import siteMetadata from '@/data/siteMetadata'
 import { TrieveModalSearch } from 'trieve-search-component'
-import 'trieve-search-component/dist/index.css'
+import 'trieve-search-component/styles'
 
 const SearchButton = () => {
   if (siteMetadata.search) {
@@ -28,6 +29,8 @@ const SearchButton = () => {
         brandColor="#E75536"
         brandName="SigNoz"
         brandLogoImgSrcUrl="https://avatars.githubusercontent.com/u/76905799?s=200&v=4"
+        cssRelease="stable"
+        showFloatingButton={true}
         ButtonEl={() => (
           <div className="-mt-1 flex min-h-8 items-center justify-between rounded-full pb-0 pl-4 pr-0 pt-1 sm:bg-signoz_slate-500 sm:pb-1 sm:pr-4">
             <div className="mr-4 flex items-center gap-2">

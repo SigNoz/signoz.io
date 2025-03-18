@@ -4,7 +4,7 @@ import { allFAQs } from 'contentlayer/generated'
 import Link from 'next/link'
 import { useState } from 'react'
 import { TrieveModalSearch } from 'trieve-search-component'
-import 'trieve-search-component/dist/index.css'
+import "trieve-search-component/styles"
 
 export default function FAQsPage() {
   const [selectedTags, setSelectedTags] = useState<string[]>([])
