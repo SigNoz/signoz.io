@@ -31,12 +31,12 @@ We will be closely examining some cool custom metric examples later in this blog
 
 The best way to understand OTel metrics is to think of it as a ‘fitness tracker’.  A fitness tracker monitors various health metrics such as steps taken, heart rate, and calories burned throughout the day. Similarly,  OTel metrics functions as the ‘fitness tracker’ for your application, continuously collecting data on application and system health like request rates, error counts, and response times. 
 
+The OTel metrics programming model consisting of a metric pipeline, meter and instruments is shown below. You can read about it in detail [here](https://opentelemetry.io/docs/specs/otel/metrics/#concepts).
 <figure data-zoomable align='center'>
     <img src="/img/blog/2025/03/metric_pipeline.webp" alt="Metric pipeline"/>
-    <figcaption><i>
-    OTel metrics -
-    <a href = "https://opentelemetry.io/docs/specs/otel/metrics/#concepts" style={{color: "#b2b5b8"}} rel="noopener noreferrer nofollow" target="_blank" >programming model</a>
-    </i></figcaption>
+    <figcaption>
+    OTel metrics programming model
+    </figcaption>
 </figure>
 
 OpenTelemetry metrics are completely open-source and vendor-neutral. Think of it like a free universal remote that works with any TV you’ve got, not just one brand, and you don’t have to pay a dime!  It fully integrates with popular monitoring tools including Prometheus and StatsD through a standardised collector and exporter system. As shown in the figure above, it splits the two main parts, SDK and API, so different SDKs can be configured at run time. This makes it super easy to tweak and control how your metrics are handled.
@@ -378,6 +378,8 @@ def get_total_stock(_):
 We had previously touched upon callbacks. Let’s try to understand it in greater depth with the code sample above.
 
 In the code, a *callback* (*get_total_stock*)  is a function that you provide to the *metrics system* via the *meter*. It gets called automatically whenever the system needs to collect the current value of the metric, in this case, the *total_stock*. 
+
+We can further monitor the total_stock metric in SigNoz to see how the stock levels change over time as shown below.
 
 <figure data-zoomable align='center'>
     <img src="/img/blog/2025/03/updown.webp" alt="Signoz counter"/>
