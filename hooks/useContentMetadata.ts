@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { allBlogs, allComparisons, allGuides, allOpentelemetries } from 'contentlayer/generated'
+import { allBlogs, allComparisons, allGuides, allOpentelemetries, Blog, Comparison, Guide, Opentelemetry } from 'contentlayer/generated'
 
 type ContentMetadata = {
   tags?: string[];
@@ -39,7 +39,7 @@ export function useContentMetadata(pathname: string): ContentMetadata | null {
     if (!slug) return;
 
     // Determine content type based on path
-    let content = null;
+    let content: Blog | Comparison | Guide | Opentelemetry | undefined = undefined;
     
     if (contentType === 'blog') {
       content = allBlogs.find(blog => blog.slug === slug)
