@@ -576,6 +576,119 @@ Validate your traces in SigNoz:
 2. In SigNoz, open the `Services` tab. Hit the `Refresh` button on the top right corner, and your application should appear in the list of `Applications`.
 3. Go to the `Traces` tab, and apply relevant filters to see your application’s traces.
 
+## Link logs and traces
+
+Logs and traces provide valuable insights into an app's performance. While logs capture event details with timestamps, traces track a request’s journey across different components, highlighting latency and bottlenecks. 
+Linking logs and traces using a common trace ID helps you pinpoint issues, analyze failures, and optimize performance.
+
+![An image displaying linked logs and traces to SigNoz](images/logs-traces-signoz.png)
+
+### Generate traces
+
+To trace a request from start to finish, you need to generate spans for each operation. OpenTelemetry provides automatic instrumentation for various frameworks.
+
+Follow these steps to generate traces:
+
+1. Configure tracing using OpenTelemetry. 
+    ```python
+    from opentelemetry import trace
+    from opentelemetry.sdk.trace import TracerProvider
+    from opentelemetry.sdk.trace.export import BatchSpanProcessor
+    from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+    from opentelemetry.instrumentation.logging import LoggingInstrumentor
+
+    # Configuration for SigNoz
+    SIGNOZ_LOGS_URL = "<SigNoz-logs-url>"
+    SIGNOZ_INGESTION_KEY = "<SigNoz-ingestion-key>"
+    SIGNOZ_OTLP_ENDPOINT = "<SigNoz-otlp-endpoint>"
+
+    # OpenTelemetry Tracing Setup
+    tracer_provider = TracerProvider()
+    exporter = OTLPSpanExporter(endpoint=SIGNOZ_OTLP_ENDPOINT, headers={"signoz-ingestion-key": SIGNOZ_INGESTION_KEY})
+    tracer_provider.add_span_processor(BatchSpanProcessor(exporter))
+    trace.set_tracer_provider(tracer_provider)
+    tracer = trace.get_tracer(__name__)
+    LoggingInstrumentor().instrument(set_logging_format=True)
+
+    def get_trace_id():
+    """Retrieve the current trace ID from OpenTelemetry."""
+    span = trace.get_current_span()
+    return format(span.get_span_context().trace_id, '032x') if span and span.get_span_context() else "00000000000000000000000000000000"
+
+    def get_span_id():
+    """Retrieve the current span ID from OpenTelemetry."""
+    span = trace.get_current_span()
+    return format(span.get_span_context().span_id, '016x') if span and span.get_span_context() else "0000000000000000"
+
+    ```
+1. Create spans for each method to track its execution. For example, consider a method to get coffee.
+    ```python
+    def get_coffee(coffee_id):
+    with tracer.start_as_current_span("get_coffee") as span:
+        span.set_attribute("http.method", request.method)
+        
+        # Simulating processing
+        response_data = {"message": "Processing complete"}
+        span.set_status(trace.Status(trace.StatusCode.OK))
+
+        coffee = next((c for c in coffees if c["id"] == coffee_id), None)
+        if not coffee:
+            # Generating logs for this method
+            send_log_to_signoz("INFO", f"Coffee ID {coffee_id} not found")
+            return jsonify({"error": "Coffee not found"}), 404
+        return jsonify(coffee)
+    ```
+
+### Generate logs
+
+Logs provide detailed insights at different request execution stages. Include contextual details such as timestamps, severity levels, and message descriptions.
+
+1. Attach log information each method. You can optionally add logs before and after each request.
+    ```python
+    def log_request():
+        log_message = f"Incoming request: {request.method} {request.url}"
+        logger.info(f"{log_message} - Trace ID: {get_trace_id()}")
+        send_log_to_signoz("INFO", log_message)
+
+    def log_response(response):
+        log_message = f"Response: {response.status_code} for {request.url}"
+        logger.info(f"{log_message} - Trace ID: {get_trace_id()}")
+        send_log_to_signoz("INFO", log_message)
+        return response
+    ```
+1.  You can add more information to log for each method.
+
+### Link logs with traces
+
+To correlate logs with traces, include `trace_id` and `span_id` in the log.
+
+Follow these steps to link logs with traces:
+
+1. Add trace and span information in the log message.
+    ```python
+    def send_log_to_signoz(level, message):
+    headers = {
+        "signoz-ingestion-key": SIGNOZ_INGESTION_KEY,
+        "Content-Type": "application/json"
+    }
+    log_entry = {
+        "trace_id": get_trace_id(),
+        "span_id": get_span_id(),
+        "severity_text": level,
+        "message": message,
+        "attributes": {"service": "coffee-shop"},
+    }
+    try:
+        response = requests.post(SIGNOZ_LOGS_URL, headers=headers, json=[log_entry])
+        response.raise_for_status()
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Failed to send log to SigNoz: {e}")
+    ```
+1. Send logs to SigNoz to link them with traces.
+
+![An image displaying a specifc log with traces in SigNoz](images/sample-log-coffee.png)
+
+
 {/* You might see other dummy applications if you’re using SigNoz for the first time. You can remove it by following the docs [here](https://signoz.io/docs/operate/docker-standalone/#remove-the-sample-application). */}
 
 {/* <figure data-zoomable align='center'>
