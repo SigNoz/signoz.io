@@ -12,6 +12,7 @@ import TopNav from '@/components/TopNav/TopNav'
 import { Inter } from 'next/font/google'
 import React, { Suspense } from 'react'
 import { PostHogProvider } from './providers'
+import MixpanelClientInitializer from './mixpanel-initializer'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -81,22 +82,21 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </noscript>
 
         <PostHogProvider>
-
-
-        <ThemeProviders>
-          <Suspense>
-            <SectionContainer>
-              <div className="relative flex h-screen flex-col justify-between ">
-                <SearchProvider searchConfig={siteMetadata.search as SearchConfig}>
-                  <TopNav />
-                  <main className="mb-auto mt-[48px]">{children}</main>
-                </SearchProvider>
-                <MainFooter />
-              </div>
-            </SectionContainer>
-          </Suspense>
-        </ThemeProviders>
-
+          <MixpanelClientInitializer>
+            <ThemeProviders>
+              <Suspense>
+                <SectionContainer>
+                  <div className="relative flex h-screen flex-col justify-between ">
+                    <SearchProvider searchConfig={siteMetadata.search as SearchConfig}>
+                      <TopNav />
+                      <main className="mb-auto mt-[48px]">{children}</main>
+                    </SearchProvider>
+                    <MainFooter />
+                  </div>
+                </SectionContainer>
+              </Suspense>
+            </ThemeProviders>
+          </MixpanelClientInitializer>
         </PostHogProvider>
 
       </body>
