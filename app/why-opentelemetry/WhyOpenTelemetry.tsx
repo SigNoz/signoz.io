@@ -57,7 +57,7 @@ const WhyOpenTelemetry: React.FC = () => {
       {/* Hero + Intro Section */}
       <section className="relative">
         {/* Hero Section */}
-        <div className="relative bg-gradient-to-r from-blue-900 to-purple-900 py-8 sm:py-16">
+        <div className="relative bg-[#0A0A0A] py-8 sm:py-16">
           <div className="bg-dot-pattern masked-dots absolute top-0 flex h-full w-full items-center justify-center" />
           
           <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
