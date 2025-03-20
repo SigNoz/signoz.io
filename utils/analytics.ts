@@ -113,6 +113,25 @@ export const getPageType = (pathname: string): string => {
   return 'Other'
 }
 
+/**
+ * Track a click event with Mixpanel
+ */
+export const trackClick = (
+  clickType: string,
+  clickName: string,
+  clickText: string,
+  clickLocation: string,
+  pathname: string
+): void => {
+  track('Website Click', {
+    clickType,
+    clickName,
+    clickText,
+    clickLocation,
+    pageLocation: pathname
+  });
+}
+
 // Function to track page views
 export const trackPageView = (
   pathname: string, 
