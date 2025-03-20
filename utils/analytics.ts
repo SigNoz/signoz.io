@@ -128,7 +128,8 @@ export const trackClick = (
     clickName,
     clickText,
     clickLocation,
-    pageLocation: pathname
+    pageLocation: pathname,
+    pageType: getPageType(pathname)
   });
 }
 
