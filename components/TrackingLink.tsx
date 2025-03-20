@@ -16,6 +16,7 @@ interface TrackingLinkProps {
   onClick?: () => void
   target?: string
   rel?: string
+  style?: React.CSSProperties
 }
 
 // Define a type for the props we'll pass to Link
@@ -25,6 +26,7 @@ interface LinkPropsType {
   className?: string
   target?: string
   rel?: string
+  style?: React.CSSProperties
 }
 
 /**
@@ -41,6 +43,7 @@ export default function TrackingLink({
   onClick,
   target,
   rel,
+  style,
 }: TrackingLinkProps) {
   const pathname = usePathname()
   
@@ -76,6 +79,10 @@ export default function TrackingLink({
   
   if (rel) {
     linkProps.rel = rel;
+  }
+  
+  if (style) {
+    linkProps.style = style;
   }
   
   return (
