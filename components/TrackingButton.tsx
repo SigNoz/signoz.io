@@ -1,3 +1,5 @@
+'use client'
+
 import { Button } from '@headlessui/react'
 import { usePathname } from 'next/navigation'
 import { ReactNode } from 'react'

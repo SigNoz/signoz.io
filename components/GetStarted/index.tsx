@@ -1,7 +1,7 @@
 import React from 'react'
 import Button from '@/components/Button/Button'
 import { ArrowRight, BookOpen } from 'lucide-react'
-import Link from 'next/link'
+import TrackingLink from '@/components/TrackingLink'
 
 export const GetStarted = ({ page }) => {
   const getStartedId = `btn-get-started-${page}-bottom`
@@ -18,17 +18,31 @@ export const GetStarted = ({ page }) => {
               </p>
               <div className="flex items-center justify-center gap-3 pt-4 max-sm:flex-col">
                 <Button id={getStartedId}>
-                  <Link href="/teams/" className="flex-center">
+                  <TrackingLink 
+                    href="/teams/" 
+                    className="flex-center"
+                    clickType="Primary CTA"
+                    clickName="Sign Up Button"
+                    clickText="Get Started - Free"
+                    clickLocation="Get Started Section"
+                  >
                     Get Started - Free
                     <ArrowRight size={14} />
-                  </Link>
+                  </TrackingLink>
                 </Button>
 
-                <Button type={Button.TYPES.SECONDARY} id={readDocumentationId}>
-                  <Link href="/docs/introduction/" className="flex-center">
+                <Button id={readDocumentationId}>
+                  <TrackingLink 
+                    href="/docs/introduction/" 
+                    className="flex-center"
+                    clickType="Secondary CTA"
+                    clickName="Read Documentation Link"
+                    clickText="Read Documentation"
+                    clickLocation="Get Started Section"
+                  >
                     <BookOpen size={14} />
                     Read Documentation
-                  </Link>
+                  </TrackingLink>
                 </Button>
               </div>
             </div>

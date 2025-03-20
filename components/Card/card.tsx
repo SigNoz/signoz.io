@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { ArrowRight } from 'lucide-react';
-import Link from 'next/link';
 import Button from '@/components/Button/Button';
+import TrackingLink from '@/components/TrackingLink';
 
 type CardProps = {
   number?: string,
@@ -19,10 +19,26 @@ type CardProps = {
   logoSize?: number;
   subTitleSize?: number;
   img?: string;
-  border?: Boolean
+  border?: Boolean;
+  sectionName?: string;
 };
 
-const Card: React.FC<CardProps> = ({ number, iconTag, title, subTitle, stats, description, text, buttonText, buttonLink, logo, img, logoSize = 16, subTitleSize = 1 }) => {
+const Card: React.FC<CardProps> = ({ 
+  number, 
+  iconTag, 
+  title, 
+  subTitle, 
+  stats, 
+  description, 
+  text, 
+  buttonText, 
+  buttonLink, 
+  logo, 
+  img, 
+  logoSize = 16, 
+  subTitleSize = 1,
+  sectionName = 'Features'
+}) => {
   const logoSizeClassnames = useMemo(() => {
     if (logoSize === 16) {
       return 'w-4 h-4 fill-signoz_vanilla-400';
@@ -72,11 +88,24 @@ const Card: React.FC<CardProps> = ({ number, iconTag, title, subTitle, stats, de
       {img ? <img src={img} className="card-background border-none w-auto h-auto" /> : null}
 
       {buttonText ? (
-        <Link href={buttonLink ? buttonLink : ''} >
-          <Button type={Button.TYPES.SECONDARY} className='mt-6 mb-4'>
-            {buttonText} <ArrowRight size={14} />
-          </Button>
-        </Link>
+        <Button className='mt-6 mb-4'>
+          {buttonLink ? (
+            <TrackingLink 
+              href={buttonLink}
+              clickType="Primary CTA"
+              clickName={`${title || 'Feature'} Link`}
+              clickText={buttonText}
+              clickLocation={sectionName}
+              className="flex-center"
+            >
+              {buttonText} <ArrowRight size={14} />
+            </TrackingLink>
+          ) : (
+            <>
+              {buttonText} <ArrowRight size={14} />
+            </>
+          )}
+        </Button>
       ) : null}
     </div>
   );

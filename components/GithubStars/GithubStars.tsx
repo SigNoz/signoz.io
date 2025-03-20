@@ -47,7 +47,7 @@ const GitHubStars: React.FC<GitHubStarsProps> = ({ location = "Top Navbar" }) =>
     <TrackingLink 
       href="https://github.com/SigNoz/signoz" 
       target="_blank"
-      clickType="Nav Click"
+      clickType="External Click"
       clickName="GitHub Repository"
       clickText={`${formatStars(stars)} Stars`}
       clickLocation={location}

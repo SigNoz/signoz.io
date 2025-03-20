@@ -2,10 +2,11 @@
 
 import Hero from '../../components/ui/Hero'
 import VimeoPlayer from '../../components/VimeoPlayer/VimeoPlayer'
-import Link from 'next/link'
 import { ArrowRight, BookOpen } from 'lucide-react'
 import Button from '@/components/Button/Button'
 import { Modal, ModalContent, ModalBody, useDisclosure } from '@nextui-org/react'
+import TrackingLink from '@/components/TrackingLink'
+import TrackingButton from '@/components/TrackingButton'
 
 export const Header = () => {
   const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure()
@@ -34,17 +35,31 @@ export const Header = () => {
       {/* <div className='!w-[80vw] h-12 !mx-auto border border-signoz_slate-400 border-dashed !border-t-0 !border-b-0' /> */}
       <div className="!mx-auto mx-2 flex !w-[100vw] flex-col items-center justify-center gap-3 border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 pb-12 pt-4 md:mx-5 md:!w-[80vw] md:flex-row">
         <Button id="btn-get-started-homepage-hero">
-          <Link href="/teams/" className="flex-center">
+          <TrackingLink 
+            href="/teams/" 
+            className="flex-center"
+            clickType="Primary CTA"
+            clickName="Sign Up Button"
+            clickText="Get Started - Free"
+            clickLocation="Hero Section"
+          >
             Get Started - Free
             <ArrowRight size={14} />
-          </Link>
+          </TrackingLink>
         </Button>
 
-        <Button type={Button.TYPES.SECONDARY} id="btn-read-documentation-homepage-hero">
-          <Link href="/docs/introduction/" className="flex-center">
+        <Button id="btn-read-documentation-homepage-hero">
+          <TrackingLink 
+            href="/docs/introduction/" 
+            className="flex-center"
+            clickType="Secondary CTA"
+            clickName="Read Documentation Link"
+            clickText="Read Documentation"
+            clickLocation="Hero Section"
+          >
             <BookOpen size={14} />
             Read Documentation
-          </Link>
+          </TrackingLink>
         </Button>
       </div>
       <div className="section-container !mx-auto !mt-0 !w-[90vw] border !border-b-0 !border-t-0 border-none border-signoz_slate-400 md:!w-[80vw] md:border-dashed">
@@ -59,12 +74,19 @@ export const Header = () => {
                 />
 
                 <div className="play-container absolute inset-0 m-auto flex h-16 w-16 cursor-pointer items-center justify-center rounded-full focus-visible:outline-none">
-                  <img
-                    src="/svgs/icons/play-icon.svg"
-                    alt="signoz-video-play-btn"
+                  <TrackingButton
+                    clickType="Video Click"
+                    clickName="Video Play Button"
+                    clickText="Play Video"
+                    clickLocation="Hero Section"
                     onClick={onOpen}
-                    className="h-6 w-6 md:h-20 md:w-20"
-                  />
+                  >
+                    <img
+                      src="/svgs/icons/play-icon.svg"
+                      alt="signoz-video-play-btn"
+                      className="h-6 w-6 md:h-20 md:w-20"
+                    />
+                  </TrackingButton>
                 </div>
               </div>
 
