@@ -9,7 +9,7 @@ interface TrackingLinkProps {
   clickType: string
   clickName: string
   clickLocation: string
-  clickText?: string
+  clickText: string
   className?: string
   onClick?: () => void
   target?: string
@@ -43,34 +43,11 @@ export default function TrackingLink({
   const pathname = usePathname()
   
   const handleClick = () => {
-    // Try to extract text content from children if clickText is not provided
-    let textToTrack = clickText;
-    
-    if (!textToTrack) {
-      // If children is a string, use it directly
-      if (typeof children === 'string') {
-        textToTrack = children;
-      } 
-      // If it's a simple element with only text content, try to extract that
-      else if (
-        typeof children === 'object' && 
-        children !== null && 
-        'props' in children && 
-        typeof children.props.children === 'string'
-      ) {
-        textToTrack = children.props.children;
-      }
-      // Fall back to clickName if we couldn't extract text
-      else {
-        textToTrack = clickName;
-      }
-    }
-    
-    // Track the click event
+    // Track the click event with the explicitly provided clickText
     trackClick(
       clickType,
       clickName,
-      textToTrack || '',
+      clickText,
       clickLocation,
       pathname || ''
     )

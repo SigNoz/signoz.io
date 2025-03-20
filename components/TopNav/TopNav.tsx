@@ -18,8 +18,8 @@ import Accordion from '../Accordion/Accordion'
 import { Color } from '@signozhq/design-tokens'
 import { QUERY_PARAMS } from '@/constants/queryParams'
 import { ONBOARDING_SOURCE } from '@/constants/globals'
-import TrackingLink from '../TrackingLink'
-import TrackingButton from '../TrackingButton'
+import TrackingLink from '@/components/TrackingLink'
+import TrackingButton from '@/components/TrackingButton'
 
 enum TABS {
   BLOG = 'blog-tab',
@@ -272,6 +272,7 @@ export default function TopNav() {
               className="-m-1.5 flex items-center gap-2 p-1.5"
               clickType="Nav Click"
               clickName="SigNoz Logo"
+              clickText="SigNoz"
               clickLocation="Top Navbar"
               onClick={() => setMobileMenuOpen(false)}
             >
@@ -329,6 +330,7 @@ export default function TopNav() {
                                 key={item.key}
                                 clickType="Nav Click"
                                 clickName={`${item.name} Product Link`}
+                                clickText={item.name}
                                 clickLocation="Top Navbar"
                                 onClick={handleProductDropdownClick}
                               >
@@ -373,6 +375,7 @@ export default function TopNav() {
                                 className="group flex h-auto items-center gap-4"
                                 clickType="Nav Click"
                                 clickName="Customer Stories Link"
+                                clickText="How Brainfish leveraged SigNoz for effective Kubernetes monitoring"
                                 clickLocation="Top Navbar"
                                 onClick={handleProductDropdownClick}
                               >
@@ -406,6 +409,7 @@ export default function TopNav() {
                                   className="group flex flex-row items-center gap-1 hover:text-[#fff]"
                                   clickType="Nav Click" 
                                   clickName={`${comparisionItem.name} Comparison Link`}
+                                  clickText={comparisionItem.name}
                                   clickLocation="Top Navbar"
                                   onClick={handleProductDropdownClick}
                                 >
@@ -428,6 +432,7 @@ export default function TopNav() {
                   className="flex items-center truncate px-1.5 py-1 text-sm font-normal hover:text-signoz_robin-500"
                   clickType="Nav Click"
                   clickName="Docs Link"
+                  clickText="Docs"
                   clickLocation="Top Navbar"
                 >
                   Docs
@@ -474,6 +479,7 @@ export default function TopNav() {
                                 key={item.key}
                                 clickType="Nav Click"
                                 clickName={`${item.name} Link`}
+                                clickText={item.name}
                                 clickLocation="Top Navbar"
                                 onClick={handleResourcesDropdownClick}
                               >
@@ -509,6 +515,7 @@ export default function TopNav() {
                                 key={item.key}
                                 clickType="Nav Click"
                                 clickName={`${item.name} Link`}
+                                clickText={item.name}
                                 clickLocation="Top Navbar"
                                 onClick={handleResourcesDropdownClick}
                               >
@@ -540,6 +547,7 @@ export default function TopNav() {
                   className="flex items-center truncate px-1.5 py-1 text-sm font-normal hover:text-signoz_robin-500"
                   clickType="Nav Click"
                   clickName="Pricing Link"
+                  clickText="Pricing"
                   clickLocation="Top Navbar"
                 >
                   Pricing
@@ -549,6 +557,7 @@ export default function TopNav() {
                   className="flex items-center truncate px-1.5 py-1 text-sm font-normal hover:text-signoz_robin-500"
                   clickType="Nav Click"
                   clickName="Customer Stories Link"
+                  clickText="Customer Stories"
                   clickLocation="Top Navbar"
                 >
                   Customer Stories
@@ -582,6 +591,7 @@ export default function TopNav() {
                   className="-ml-1 box-border flex h-8 items-center gap-2 rounded-full bg-signoz_slate-500 px-4 py-2 pl-2 pr-2.5 text-sm font-normal not-italic leading-5 text-signoz_vanilla-100 no-underline outline-none hover:text-white"
                   clickType="Secondary CTA"
                   clickName="Sign In Button"
+                  clickText="Sign In"
                   clickLocation="Top Navbar"
                   onClick={() => router.push('/login')}
                 >
@@ -597,6 +607,7 @@ export default function TopNav() {
                     className="flex-center"
                     clickType="Primary CTA"
                     clickName="Sign Up Button"
+                    clickText="Get Started - Free"
                     clickLocation="Top Navbar"
                   >
                     Get Started - Free
@@ -613,6 +624,7 @@ export default function TopNav() {
                   className="flex-center mr-8 text-xs"
                   clickType="Support Link"
                   clickName="Contact Support Link"
+                  clickText="Need help? Contact support"
                   clickLocation="Top Navbar"
                 >
                   Need help? <span className="text-signoz_robin-500">Contact support</span>
@@ -623,6 +635,7 @@ export default function TopNav() {
                   className="flex h-8 min-w-24 items-center justify-center gap-1.5 truncate rounded-sm border border-signoz_slate-300 bg-signoz_slate-500 px-4 py-2 pl-2 pr-2.5 text-center text-xs font-normal not-italic leading-5  text-signoz_vanilla-400 no-underline outline-none hover:text-white"
                   clickType="Primary CTA"
                   clickName="Signup Button"
+                  clickText="Signup"
                   clickLocation="Top Navbar"
                   onClick={() => router.push('/teams')}
                 >
@@ -633,6 +646,7 @@ export default function TopNav() {
                   className="flex h-8 min-w-24 items-center justify-center gap-2 truncate rounded-sm border border-signoz_slate-300 bg-signoz_slate-500 px-4 py-2 pl-4 pr-3 text-center text-xs font-normal not-italic leading-5 text-signoz_vanilla-400 no-underline outline-none hover:text-white"
                   clickType="Secondary CTA"
                   clickName="Docs Button"
+                  clickText="Docs"
                   clickLocation="Top Navbar"
                   onClick={() => router.push('/docs')}
                 >
@@ -651,6 +665,7 @@ export default function TopNav() {
                 className="-m-1.5 p-1.5"
                 clickType="Nav Click"
                 clickName="SigNoz Logo"
+                clickText="SigNoz"
                 clickLocation="Mobile Menu"
                 onClick={() => setMobileMenuOpen(false)}
               >
@@ -667,6 +682,7 @@ export default function TopNav() {
                       className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 hover:bg-signoz_ink-200"
                       clickType="Nav Click"
                       clickName="Docs Link"
+                      clickText="Documentation"
                       clickLocation="Mobile Menu"
                       onClick={() => setMobileMenuOpen(false)}
                     >
@@ -685,6 +701,7 @@ export default function TopNav() {
                       className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 hover:bg-signoz_ink-200"
                       clickType="Nav Click"
                       clickName="Pricing Link"
+                      clickText="Pricing"
                       clickLocation="Mobile Menu"
                       onClick={() => setMobileMenuOpen(false)}
                     >
@@ -695,6 +712,7 @@ export default function TopNav() {
                       className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 hover:bg-signoz_ink-200"
                       clickType="Nav Click"
                       clickName="Customer Stories Link"
+                      clickText="Customer Stories"
                       clickLocation="Mobile Menu"
                       onClick={() => setMobileMenuOpen(false)}
                     >
@@ -711,6 +729,7 @@ export default function TopNav() {
                           className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 hover:bg-signoz_ink-200"
                           clickType="Secondary CTA"
                           clickName="Sign In Button"
+                          clickText="Sign In"
                           clickLocation="Mobile Menu"
                           onClick={() => {
                             router.push('/login')
@@ -729,6 +748,7 @@ export default function TopNav() {
                             className="start-free-trial-btn font-heading flex items-center justify-center gap-1 truncate rounded-md border-none px-4 py-2 text-center text-sm font-bold leading-4 text-white no-underline outline-none hover:text-white"
                             clickType="Primary CTA"
                             clickName="Sign Up Button"
+                            clickText="Get Started - Free"
                             clickLocation="Mobile Menu"
                             onClick={() => setMobileMenuOpen(false)}
                           >
@@ -747,6 +767,7 @@ export default function TopNav() {
                       className="mt-4 inline-flex items-center gap-1 rounded px-1 py-1 text-sm font-bold text-white"
                       clickType="Nav Click"
                       clickName="Back to Main Menu Button"
+                      clickText="Back to main menu"
                       clickLocation="Mobile Menu"
                       onClick={() => {
                         setShowMainMenu(true)
