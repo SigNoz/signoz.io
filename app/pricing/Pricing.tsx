@@ -53,6 +53,8 @@ import {
 } from '@nextui-org/react'
 import VimeoPlayer from '@/components/VimeoPlayer/VimeoPlayer'
 import SigNozCloudPricingOverview from '@/components/SigNozCloudPricingOverviewCard/SigNozCloudPricingOverview'
+import TrackingLink from '@/components/TrackingLink'
+import TrackingButton from '@/components/TrackingButton'
 
 const CloseButton = () => <div className="absolute right-0 top-0">Close</div>
 
@@ -269,20 +271,24 @@ const PricingPlans = () => {
               <nav
                 className={`flex items-center space-x-2 rounded-sm border border-signoz_slate-400`}
               >
-                <button
+                <TrackingButton
                   id="btn-signoz-cloud-pricing"
                   type="button"
                   className={`relative z-[2] cursor-pointer border-none ${
                     tab === 'cloud' ? 'bg-signoz_slate-400' : ''
                   } px-4 py-2 text-xs ${tab === 'cloud' ? 'text-white' : 'text-signoz_vanilla-400'}`}
                   onClick={() => setTab('cloud')}
+                  clickType="Tab Click"
+                  clickName="SigNoz Cloud Tab"
+                  clickLocation="Pricing Tabs"
+                  clickText="SigNoz cloud"
                 >
                   <div className="flex gap-1.5">
                     <Cloud size={14} />
                     SigNoz cloud
                   </div>
-                </button>
-                <button
+                </TrackingButton>
+                <TrackingButton
                   id="btn-hosted-in-your-infra-pricing"
                   type="button"
                   className={`ml-0 cursor-pointer border-none ${
@@ -291,12 +297,16 @@ const PricingPlans = () => {
                     tab === 'self-managed' ? 'text-white' : 'text-signoz_vanilla-400'
                   }`}
                   onClick={() => setTab('self-managed')}
+                  clickType="Tab Click"
+                  clickName="Hosted In Your Infra Tab"
+                  clickLocation="Pricing Tabs"
+                  clickText="Hosted in your infra"
                 >
                   <div className="relative z-[3] flex gap-1.5">
                     <Server size={14} />
                     Hosted in your infra
                   </div>
-                </button>
+                </TrackingButton>
               </nav>
             </div>
           </div>
@@ -324,10 +334,17 @@ const PricingPlans = () => {
                   </div>
                   <div>
                     <Button id="btn-get-started-pricing-teams-top" className="w-full">
-                      <Link href={'/teams/'} className="flex-center">
+                      <TrackingLink 
+                        href={'/teams/'} 
+                        className="flex-center"
+                        clickType="Primary CTA"
+                        clickName="Sign Up Button"
+                        clickText="Get started with SigNoz Cloud"
+                        clickLocation="Pricing Teams Cloud Tab Top"
+                      >
                         Get started with SigNoz Cloud
                         <ArrowRight size={14} />
-                      </Link>
+                      </TrackingLink>
                     </Button>
                   </div>
                 </div>
@@ -485,10 +502,16 @@ const PricingPlans = () => {
                       <div className="gap-3">
                         <CircleInfoSolid />
                         <span>
-                          <Link href={'/pricing/metrics-cost-estimation/'}>
+                          <TrackingLink 
+                            href={'/pricing/metrics-cost-estimation/'}
+                            clickType="Nav Click"
+                            clickName="Metrics Pricing Calculator Button"
+                            clickText="Learn how the price for metrics is calculated"
+                            clickLocation="Pricing Teams Cloud Tab"
+                          >
                             Learn how the price for metrics is calculated{' '}
                             <ArrowUpRight size={20} className="inline" />
-                          </Link>
+                          </TrackingLink>
                         </span>
                       </div>
                     </div>
@@ -497,10 +520,16 @@ const PricingPlans = () => {
                       <div className="gap-3">
                         <CircleInfoSolid />
                         <span>
-                          <Link href={'/docs/logs-management/long-term-storage/'}>
+                          <TrackingLink 
+                            href={'/docs/logs-management/long-term-storage/'}
+                            clickType="Nav Click"
+                            clickName="Long Term Logs Storage Link"
+                            clickText="Long term Logs Storage options"
+                            clickLocation="Pricing Teams Cloud Tab"
+                          >
                             Long term Logs Storage options{' '}
                             <ArrowUpRight size={20} className="inline" />
-                          </Link>
+                          </TrackingLink>
                         </span>
                       </div>
                     </div>
@@ -640,10 +669,17 @@ const PricingPlans = () => {
                 </div>
                 <div className="">
                   <Button id="btn-get-started-pricing-teams-bottom" className="w-full">
-                    <Link href={'/teams/'} className="flex-center">
+                    <TrackingLink 
+                      href={'/teams/'} 
+                      className="flex-center"
+                      clickType="Primary CTA"
+                      clickName="Sign Up Button"
+                      clickText="Get started with SigNoz Cloud"
+                      clickLocation="Pricing Teams Cloud Tab Bottom"
+                    >
                       Get started with SigNoz Cloud
                       <ArrowRight size={14} />
-                    </Link>
+                    </TrackingLink>
                   </Button>
                 </div>
 
@@ -659,6 +695,10 @@ const PricingPlans = () => {
                           behavior: 'smooth',
                         })
                       }}
+                      clickType="Secondary CTA"
+                      clickName="Pricing Calculator Button"
+                      clickText="Estimate your monthly bill"
+                      clickLocation="Pricing Teams Cloud Tab Bottom"
                     >
                       Estimate your monthly bill
                       <ArrowDown size={14} />
@@ -676,6 +716,10 @@ const PricingPlans = () => {
                           behavior: 'smooth',
                         })
                       }}
+                      clickType="Secondary CTA"
+                      clickName="Pricing Calculator Button"
+                      clickText="Estimate your monthly bill"
+                      clickLocation="Pricing Teams Cloud Tab Bottom"
                     >
                       Estimate your monthly bill
                       <ArrowDown size={14} />
