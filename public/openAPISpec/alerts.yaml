@@ -290,9 +290,9 @@ paths:
       description: |
         Provides a unified interface to query metrics, logs, and traces data with different query types.
         Supports three query types:
-        * `builder` - Visual query builder for logs, traces, and metrics
-        * `clickhouse_sql` - Raw SQL queries
-        * `promql` - PromQL queries
+        * `builder` - Query builder for logs, traces, and metrics
+        * `clickhouse_sql` - Raw SQL queries (recommended to use this only when you need to use complex queries that are not supported by the query builder)
+        * `promql` - PromQL queries (uses Prometheus remote read with ClickHouse as the backend, slower than the query builder)
       operationId: queryRange
       parameters:
         - name: SIGNOZ-API-KEY
@@ -817,12 +817,12 @@ components:
         step:
           type: integer
           format: int64
-          description: Step interval in seconds
+          description: Step/aggregation interval in seconds.
         compositeQuery:
           $ref: '#/components/schemas/CompositeQuery'
         variables:
           type: object
-          description: Variables for the query
+          description: Variables for the query. Useful when using templated queries. See https://signoz.io/docs/userguide/manage-variables/ for more details.
           additionalProperties: true
         noCache:
           type: boolean
@@ -856,7 +856,7 @@ components:
             $ref: '#/components/schemas/PromQuery'
         panelType:
           type: string
-          description: Panel type for the composite query
+          description: Panel type for the composite query. The format of the data is different for different panel types.
           enum:
             - 'graph'
             - 'table'
@@ -865,17 +865,17 @@ components:
             - 'trace'
         queryType:
           type: string
-          description: Query type for the composite query
+          description: Query type for the composite query.
           enum:
             - 'builder'
             - 'clickhouse_sql'
             - 'promql'
         unit:
           type: string
-          description: Unit for the time series data shown in the graph
+          description: Unit for the time series data shown in the graph, This is mandatory for alerts that set the unit for the threshold.
         fillGaps:
           type: boolean
-          description: Whether to fill gaps in the time series data
+          description: Whether to fill gaps in the time series data. See more details here https://signoz.io/docs/dashboards/panel-types/timeseries/#fill-gaps
           default: false
 
     PromQuery:
@@ -935,7 +935,7 @@ components:
         stepInterval:
           type: integer
           format: int64
-          description: Step interval for the query in seconds
+          description: Step/Aggregation interval for the query in seconds.
         dataSource:
           type: string
           description: Data source for the query
@@ -945,7 +945,7 @@ components:
             - 'logs'
         aggregateOperator:
           type: string
-          description: Aggregate operator for the query
+          description: Aggregate operator for the query, only applicable for traces and logs. See timeAggregation and spaceAggregation for metrics. Use noop for list queries that fetch the raw data.
           enum:
             - 'noop'
             - 'count'
@@ -964,19 +964,10 @@ components:
             - 'p95'
             - 'p99'
             - 'rate'
-            - 'sum_rate'
-            - 'avg_rate'
-            - 'min_rate'
-            - 'max_rate'
             - 'rate_sum'
             - 'rate_avg'
             - 'rate_min'
             - 'rate_max'
-            - 'hist_quantile_50'
-            - 'hist_quantile_75'
-            - 'hist_quantile_90'
-            - 'hist_quantile_95'
-            - 'hist_quantile_99'
         aggregateAttribute:
           $ref: '#/components/schemas/AttributeKey'
         temporality:
@@ -1086,10 +1077,10 @@ components:
       properties:
         key:
           type: string
-          description: Key for the attribute
+          description: Key for the attribute, this can be 1. intrinsic field like span's `name`, `kind`, `kind_string`, `duration_nano` or log's `timestamp`, `severity` etc. or span/log's attribute like `http.method`, `user.id`, `db.name` etc. or a resource attribute like `service.name`, `deployment.environment` etc.
         dataType:
           type: string
-          description: Data type of the attribute
+          description: Data type of the attribute. Required when there are conflicting types for the same attribute key. For instance, one team might send `http.status_code` as `int64` and another team might send it as `string`.
           enum:
             - 'string'
             - 'int64'
@@ -1100,27 +1091,25 @@ components:
             - 'array(float64)'
             - 'array(bool)'
         type:
-          type: string
-          description: Type of the attribute
+          description: Type of the attribute. Required when there are conflicting types for the same attribute key. For instance, one team might send `deployment.environment` as `tag` and another team might send it as `resource`. It is highly recommended to avoid conflicting types, if possible.
           enum:
-            - ''
             - 'tag'
             - 'resource'
             - 'scope'
             - 'spanSearchScope'
         isColumn:
           type: boolean
-          description: Whether the attribute is a materialized column
+          description: Whether the attribute is a materialized column.
         isJSON:
           type: boolean
-          description: Whether the attribute is JSON
+          description: Whether the attribute is JSON. Set this to true if you are querying the JSON stringified body. You are encourage to parse the JSON before ingesting the data for better query performance and capabilities. Read more here https://signoz.io/docs/logs-pipelines/guides/json/
           
     FilterSet:
       type: object
       properties:
         op:
           type: string
-          description: Operator for combining filter items
+          description: Operator for combining filter items. It is either `AND` between the filter items or `OR` between the filter items.
           enum:
             - 'AND'
             - 'OR'
@@ -1139,7 +1128,7 @@ components:
         key:
           $ref: '#/components/schemas/AttributeKey'
         value:
-          description: Value to filter by. Type depends on the attribute's dataType.
+          description: Value to filter by. Type depends on the attribute's dataType. For instance, if attribute is string and the operator is `like`, the value should be a string. If the attribute is int64 and the operator is `>`, the value should be an int64. If the attribute is string and the operator is `in`, the value should be an array of strings.
         op:
           type: string
           description: Filter operator
@@ -1172,7 +1161,7 @@ components:
       properties:
         columnName:
           type: string
-          description: Column name for the having clause
+          description: Column name for the having clause. The column name will always be the aggregate operator + aggregation attribute. The actual column name doesn't matter.
         op:
           type: string
           description: Operator for the having clause
@@ -1196,25 +1185,13 @@ components:
       properties:
         columnName:
           type: string
-          description: Column name for the order by
+          description: Column name for the order by. For the attribute keys in the groupBy, you can use the same attribute key. For instance, if you are grouping by `service.name`, you can use `service.name` in the orderBy. Use the special `#SIGNOZ_VALUE` to order by the value of the query.
         order:
           type: string
           description: Order direction
           enum:
             - 'asc'
             - 'desc'
-        key:
-          type: string
-          description: Key for the order by
-        dataType:
-          type: string
-          description: Data type for the order by
-        type:
-          type: string
-          description: Type for the order by
-        isColumn:
-          type: boolean
-          description: Whether the order by is a column
           
     Function:
       type: object
