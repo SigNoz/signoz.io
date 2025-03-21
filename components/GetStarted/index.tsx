@@ -18,8 +18,8 @@ export const GetStarted = ({ page }) => {
               </p>
               <div className="flex items-center justify-center gap-3 pt-4 max-sm:flex-col">
                 <Button id={getStartedId}>
-                  <TrackingLink 
-                    href="/teams/" 
+                  <TrackingLink
+                    href="/teams/"
                     className="flex-center"
                     clickType="Primary CTA"
                     clickName="Sign Up Button"
@@ -31,9 +31,9 @@ export const GetStarted = ({ page }) => {
                   </TrackingLink>
                 </Button>
 
-                <Button id={readDocumentationId}>
-                  <TrackingLink 
-                    href="/docs/introduction/" 
+                <Button type={Button.TYPES.SECONDARY} id={readDocumentationId}>
+                  <TrackingLink
+                    href="/docs/introduction/"
                     className="flex-center"
                     clickType="Secondary CTA"
                     clickName="Read Documentation Link"

@@ -35,8 +35,8 @@ export const Header = () => {
       {/* <div className='!w-[80vw] h-12 !mx-auto border border-signoz_slate-400 border-dashed !border-t-0 !border-b-0' /> */}
       <div className="!mx-auto mx-2 flex !w-[100vw] flex-col items-center justify-center gap-3 border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 pb-12 pt-4 md:mx-5 md:!w-[80vw] md:flex-row">
         <Button id="btn-get-started-homepage-hero">
-          <TrackingLink 
-            href="/teams/" 
+          <TrackingLink
+            href="/teams/"
             className="flex-center"
             clickType="Primary CTA"
             clickName="Sign Up Button"
@@ -48,9 +48,9 @@ export const Header = () => {
           </TrackingLink>
         </Button>
 
-        <Button id="btn-read-documentation-homepage-hero">
-          <TrackingLink 
-            href="/docs/introduction/" 
+        <Button type={Button.TYPES.SECONDARY} id="btn-read-documentation-homepage-hero">
+          <TrackingLink
+            href="/docs/introduction/"
             className="flex-center"
             clickType="Secondary CTA"
             clickName="Read Documentation Link"
