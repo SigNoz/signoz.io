@@ -832,6 +832,37 @@ components:
           type: boolean
           description: Whether to format the results for web display
           default: true
+      examples:
+        LogsCountExample:
+          $ref: '#/components/examples/LogsCountExample'
+        ErrorLogsExample:
+          $ref: '#/components/examples/ErrorLogsExample'
+        JsonFieldFilteringExample:
+          $ref: '#/components/examples/JsonFieldFilteringExample'
+        ServiceDurationExample:
+          $ref: '#/components/examples/ServiceDurationExample'
+        ErrorTracesExample:
+          $ref: '#/components/examples/ErrorTracesExample'
+        TraceExplorerExample:
+          $ref: '#/components/examples/TraceExplorerExample'
+        CpuUsageExample:
+          $ref: '#/components/examples/CpuUsageExample'
+        HttpDurationExample:
+          $ref: '#/components/examples/HttpDurationExample'
+        MemoryUsedExample:
+          $ref: '#/components/examples/MemoryUsedExample'
+        RequestCountExample:
+          $ref: '#/components/examples/RequestCountExample'
+        ErrorRateExample:
+          $ref: '#/components/examples/ErrorRateExample'
+        GcDurationExample:
+          $ref: '#/components/examples/GcDurationExample'
+        DiskIoExample:
+          $ref: '#/components/examples/DiskIoExample'
+        NetworkTrafficExample:
+          $ref: '#/components/examples/NetworkTrafficExample'
+        DbConnectionsExample:
+          $ref: '#/components/examples/DbConnectionsExample'
 
     CompositeQuery:
       type: object
@@ -1923,37 +1954,3 @@ components:
                 items: []
                 op: "AND"
               limit: 50
-
-    AnomalyDetectionExample:
-      summary: HTTP request duration with anomaly detection (histogram metric with delta temporality)
-      value:
-        start: 1711065600000
-        end: 1711069200000
-        step: 60
-        compositeQuery:
-          queryType: "builder"
-          panelType: "graph"
-          builderQueries:
-            A:
-              queryName: "A"
-              stepInterval: 60
-              dataSource: "metrics"
-              aggregateAttribute:
-                key: "http.server.duration"
-                type: "tag"
-              temporality: "Delta"
-              timeAggregation: "latest"
-              spaceAggregation: "p95"
-              expression: "A"
-              groupBy:
-                - key: "service.name"
-                  dataType: "string"
-                  type: "resource"
-              filters:
-                items: []
-                op: "AND"
-              functions:
-                - name: "anomaly"
-                  args: []
-              limit: 50
-          unit: "ms"
