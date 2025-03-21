@@ -2,6 +2,8 @@
 
 import React, { useEffect, useState } from 'react'
 import { ArrowRight, CheckCircleIcon, Frown, Loader2, Mail } from 'lucide-react'
+import TrackingButton from '@/components/TrackingButton'
+import TrackingLink from '@/components/TrackingLink'
 
 function VerifyEmail() {
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -94,27 +96,34 @@ function VerifyEmail() {
       )}
 
       <div className="flex w-full flex-col">
-        <button
+        <TrackingButton
           type="submit"
           className={`mt-[28px] flex h-[40px] w-full items-center justify-center gap-4 rounded-full bg-signoz_ink-300 px-[16px] py-[8px] ${
             isSubmitting || !workEmail || submitFailed ? 'cursor-not-allowed opacity-50' : ''
           }`}
           onClick={handleResendVerificationEmail}
           disabled={isSubmitting || !workEmail || submitFailed}
+          clickType="Secondary CTA"
+          clickName="Resend Verification Email"
+          clickLocation="Verify Email Page"
+          clickText="Resend verification email"
         >
           <span className="flex text-xs leading-5">Resend verification email</span>
 
           {isSubmitting ? <Loader2 size={14} className="animate-spin" /> : <ArrowRight size={14} />}
-        </button>
+        </TrackingButton>
 
-        <a
-          type="submit"
-          className="mt-[12px] flex h-[40px] w-full items-center justify-center gap-4 rounded-full bg-signoz_ink-300 px-[16px] py-[8px]"
+        <TrackingLink
           href="mailto:cloud-support@signoz.io"
+          className="mt-[12px] flex h-[40px] w-full items-center justify-center gap-4 rounded-full bg-signoz_ink-300 px-[16px] py-[8px]"
+          clickType="Support Link"
+          clickName="Contact Support Link"
+          clickLocation="Verify Email Page"
+          clickText="Contact cloud support"
         >
           <span className="flex text-xs leading-5">Contact cloud support</span>
           <ArrowRight size={14} />
-        </a>
+        </TrackingLink>
       </div>
     </div>
   )
