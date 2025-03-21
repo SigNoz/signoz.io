@@ -8,7 +8,12 @@ import TestimonialSection from './TestimonialSection'
 import { ArrowRight, Loader2 } from 'lucide-react'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import Image from 'next/image'
-import { trackFormSubmission, identifyUser, setUserProperties } from '../../utils/analytics'
+import {
+  trackFormSubmission,
+  identifyUser,
+  setUserProperties,
+  resetMixpanelIdentity,
+} from '../../utils/analytics'
 
 interface ErrorsProps {
   fullName?: string
@@ -126,11 +131,28 @@ const Teams: React.FC<SignUpPageProps> = () => {
       })
     }
 
+    // Get previously stored email (if any)
+    const previousEmail = localStorage.getItem('prevSignupEmail')
+    const currentEmail = payload.email
+
+    // Reset Mixpanel if this is a different email than previously used
+    // Use case-insensitive comparison (convert both to lowercase)
+    if (previousEmail && previousEmail.toLowerCase() !== currentEmail.toLowerCase()) {
+      resetMixpanelIdentity()
+    }
+
+    // Store current email for future comparison
+    localStorage.setItem('prevSignupEmail', currentEmail)
+
+    // Extract domain from email as company identifier
+    const domain = currentEmail.split('@')[1] || ''
+
     // Track form submission with our analytics abstraction
     trackFormSubmission('Sign Up Form', 'SigNoz Cloud Sign Up', pathname || '', {
       workEmail: payload.email,
       dataRegion: payload.region.name,
       termsOfServiceAccepted: payload.preferences.terms_of_service_accepted,
+      company: domain,
     })
 
     // Identify user and set user properties in Mixpanel
@@ -140,6 +162,7 @@ const Teams: React.FC<SignUpPageProps> = () => {
       data_region: payload.region.name,
       signup_date: new Date().toISOString(),
       terms_accepted: payload.preferences.terms_of_service_accepted,
+      company: domain,
     })
   }
 

@@ -1,4 +1,9 @@
-import { track, identify as mixpanelIdentify, setPeople } from '../lib/mixpanelClient'
+import {
+  track,
+  identify as mixpanelIdentify,
+  setPeople,
+  reset as mixpanelReset,
+} from '../lib/mixpanelClient'
 
 // Helper to check if current path is a content page (blog, comparisons, guides, opentelemetry)
 export const isContentPage = (pathname: string): boolean => {
@@ -223,4 +228,12 @@ export const identifyUser = (userId: string): void => {
  */
 export const setUserProperties = (properties: Record<string, any>): void => {
   setPeople(properties)
+}
+
+/**
+ * Reset the Mixpanel identity
+ * Use when needing to clear previous user identity, typically when a different user signs up
+ */
+export const resetMixpanelIdentity = (): void => {
+  mixpanelReset()
 }
