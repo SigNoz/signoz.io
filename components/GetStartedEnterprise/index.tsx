@@ -1,3 +1,5 @@
+'use client'
+
 import Button from '@/components/Button/Button'
 import { Cloud, CloudUpload, Server } from 'lucide-react'
 import Link from 'next/link'
