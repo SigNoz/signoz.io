@@ -1293,7 +1293,7 @@ const ExploreAllFeature = () => {
           },
           {
             feature: 'MS Teams as alert channel',
-            inCommunity: <CrossSolid />,
+            inCommunity: <CheckSolid />,
             inTeams: <CheckSolid />,
             inEnterprise: <CheckSolid />,
           },
