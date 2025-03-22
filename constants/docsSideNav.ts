@@ -813,20 +813,25 @@ const docsSideNav = [
         label: 'Drop Metrics',
       },
       {
+        type: 'doc',
+        route: '/docs/metrics-management/query-range-api',
+        label: 'Query Range API',
+      },
+      {
         type: 'category',
         label: 'Guides',
         isExpanded: false,
         items: [
-      {
-        type: 'doc',
-        route: '/docs/userguide/collecting-ecs-logs-and-metrics',
-        label: 'ECS Infra Metrics & Logs',
-      },
-      {
-        type: 'doc',
-        route: '/docs/userguide/collecting-ecs-sidecar-infra',
-        label: 'ECS Infra Sidecar',
-      },
+          {
+            type: 'doc',
+            route: '/docs/userguide/collecting-ecs-logs-and-metrics',
+            label: 'ECS Infra Metrics & Logs',
+          },
+          {
+            type: 'doc',
+            route: '/docs/userguide/collecting-ecs-sidecar-infra',
+            label: 'ECS Infra Sidecar',
+          },
         ],
       },
     ],
