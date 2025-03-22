@@ -1004,6 +1004,21 @@ const docsSideNav = [
           },
           {
             type: 'doc',
+            route: '/docs/alerts-management/notification-channel/incident-io',
+            label: 'Incident.io (Prometheus Alertmanager Webhook)',
+          },
+          {
+            type: 'doc',
+            route: '/docs/alerts-management/notification-channel/rootly',
+            label: 'Rootly (Prometheus Alertmanager Webhook)',
+          },
+          {
+            type: 'doc',
+            route: '/docs/alerts-management/notification-channel/zenduty',
+            label: 'Zenduty (Prometheus Alertmanager Webhook)',
+          },
+          {
+            type: 'doc',
             route: '/docs/alerts-management/notification-channel/pagerduty',
             label: 'PagerDuty',
           },
