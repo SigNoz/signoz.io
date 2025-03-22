@@ -1,0 +1,422 @@
+---
+date: 2025-03-22
+title: Query Range API 
+id: query-range-api
+---
+
+## Overview
+
+The Query Range API is a robust interface which enables developers to query metrics over a range of time. This API facilitates various operations:
+
+## API Endpoint
+
+Endpoint for Query Range API:
+
+`POST` `https://{URL}/api/v3/query_range`
+
+Replace `{URL}` with your instance URL.
+
+## Prerequisites
+
+API Keys: To access this API, you need an API Key. Navigate to the `Settings` page in the SigNoz UI and create a new API key.
+
+<img width="1101" alt="api keys" src="/img/docs/signoz-api-keys.webp" />
+
+API keys can only be created/managed by users with the `Admin` role. If you don't have the `Admin` role, contact your organization's admin to create an API key for you.
+
+## Authentication
+
+Using the API key: Add the API key to your request header as follows: 
+
+```bash
+SIGNOZ-API-KEY:{YOUR_API_KEY}
+```
+
+<Admonition type="tip">
+Secure storage and handling of your API key is crucial to prevent unauthorized access.
+</Admonition>
+
+## API Specification
+
+The API specification is available in the [OpenAPI Specification](https://signoz.io/api-reference/).
+
+## JSON Request Payload Examples
+
+### CpuUsageExample (with variables)
+
+```json
+{
+  "start": 1742602572000,
+  "end": 1742604372000,
+  "step": 60,
+  "variables": {
+    "k8s_node_name": [
+      "gke-application-eu-c-pl-addon-n2dhc4--c80039c0-2gjz"
+    ],
+    "k8s_cluster_name": "application-eu-central"
+  },
+  "formatForWeb": false,
+  "compositeQuery": {
+    "queryType": "builder",
+    "panelType": "graph",
+    "fillGaps": false,
+    "builderQueries": {
+      "A": {
+        "queryName": "A",
+        "dataSource": "metrics",
+        "aggregateAttribute": {
+          "key": "k8s_node_cpu_utilization",
+          "dataType": "float64",
+          "type": "Gauge",
+          "isColumn": true,
+          "isJSON": false
+        },
+        "expression": "A",
+        "disabled": false,
+        "timeAggregation": "avg",
+        "spaceAggregation": "sum",
+        "stepInterval": 60,
+        "reduceTo": "sum",
+        "filters": {
+          "items": [
+            {
+              "key": {
+                "key": "k8s_cluster_name",
+                "dataType": "string",
+                "isColumn": false,
+                "type": "tag"
+              },
+              "op": "=",
+              "value": "{{.k8s_cluster_name}}"
+            },
+            {
+              "key": {
+                "key": "k8s_node_name",
+                "dataType": "string",
+                "isColumn": false,
+                "type": "tag"
+              },
+              "op": "in",
+              "value": [
+                "{{.k8s_node_name}}"
+              ]
+            }
+          ],
+          "op": "AND"
+        },
+        "groupBy": [
+          {
+            "key": "k8s_node_name",
+            "dataType": "string",
+            "isColumn": false,
+            "isJSON": false,
+            "type": "tag"
+          }
+        ],
+        "having": [],
+        "orderBy": [],
+        "legend": "{{k8s_node_name}}",
+        "functions": []
+      }
+    }
+  }
+}
+``` 
+
+### HttpDurationExample (querying histogram metric)
+
+```json
+{
+  "start": 1742602968000,
+  "end": 1742604768000,
+  "step": 60,
+  "variables": {
+  },
+  "formatForWeb": false,
+  "compositeQuery": {
+    "queryType": "builder",
+    "panelType": "graph",
+    "fillGaps": false,
+    "builderQueries": {
+      "A": {
+        "queryName": "A",
+        "dataSource": "metrics",
+        "aggregateAttribute": {
+          "key": "jvm_gc_duration_bucket",
+          "dataType": "float64",
+          "type": "Histogram",
+          "isColumn": true,
+          "isJSON": false
+        },
+        "timeAggregation": "",
+        "spaceAggregation": "p90",
+        "expression": "A",
+        "disabled": false,
+        "stepInterval": 60,
+        "reduceTo": "avg",
+        "filters": {
+          "items": [],
+          "op": "AND"
+        },
+        "groupBy": [
+          {
+            "key": "service_name",
+            "dataType": "string",
+            "type": "tag",
+            "isColumn": false,
+            "isJSON": false
+          }
+        ],
+        "having": [],
+        "orderBy": [],
+        "functions": [],
+        "legend": "{{service_name}}"
+      }
+    }
+  }
+}
+```
+
+### MemoryUsedExample (with variables)
+
+```json
+{
+  "start": 1742603085000,
+  "end": 1742604885000,
+  "step": 60,
+  "variables": {
+    "SIGNOZ_START_TIME": 1742603085000,
+    "SIGNOZ_END_TIME": 1742604885000,
+    "k8s_node_name": [
+      "gke-application-pl-addon-n2dhc4-od-71879e78-0ql9"
+    ],
+    "k8s_cluster_name": "application"
+  },
+  "formatForWeb": true,
+  "compositeQuery": {
+    "queryType": "builder",
+    "panelType": "graph",
+    "fillGaps": false,
+    "builderQueries": {
+      "A": {
+        "dataSource": "metrics",
+        "queryName": "A",
+        "aggregateAttribute": {
+          "key": "k8s_node_memory_usage",
+          "dataType": "float64",
+          "type": "Gauge",
+          "isColumn": true,
+          "isJSON": false
+        },
+        "timeAggregation": "avg",
+        "spaceAggregation": "sum",
+        "expression": "A",
+        "disabled": false,
+        "stepInterval": 60,
+        "functions": [],
+        "filters": {
+          "items": [
+            {
+              "key": {
+                "key": "k8s_cluster_name",
+                "dataType": "string",
+                "isColumn": false,
+                "type": "tag"
+              },
+              "op": "=",
+              "value": "{{.k8s_cluster_name}}"
+            },
+            {
+              "key": {
+                "key": "k8s_node_name",
+                "dataType": "string",
+                "isColumn": false,
+                "type": "tag"
+              },
+              "op": "in",
+              "value": [
+                "{{.k8s_node_name}}"
+              ]
+            }
+          ],
+          "op": "AND"
+        },
+        "having": [],
+        "orderBy": [],
+        "groupBy": [
+          {
+            "key": "k8s_node_name",
+            "dataType": "string",
+            "type": "tag",
+            "isColumn": false,
+            "isJSON": false
+          }
+        ],
+        "legend": "used",
+      }
+    }
+  }
+}
+```
+
+### RequestCountExample
+
+```json
+{
+  "start": 1742603295000,
+  "end": 1742605095000,
+  "step": 60,
+  "variables": {
+    "SIGNOZ_START_TIME": 1742603278000,
+    "SIGNOZ_END_TIME": 1742605078000,
+    "k8s_node_name": [
+      "gke-application-pl-addon-n2dhc4-od-71879e78-0ql9"
+    ],
+    "k8s_cluster_name": "application-eu-central"
+  },
+  "formatForWeb": false,
+  "compositeQuery": {
+    "queryType": "builder",
+    "panelType": "graph",
+    "fillGaps": false,
+    "builderQueries": {
+      "A": {
+        "dataSource": "metrics",
+        "queryName": "A",
+        "aggregateAttribute": {
+          "key": "signoz_calls_total",
+          "dataType": "float64",
+          "type": "Sum",
+          "isColumn": true,
+          "isJSON": false
+        },
+        "timeAggregation": "rate",
+        "spaceAggregation": "sum",
+        "expression": "A",
+        "disabled": false,
+        "stepInterval": 60,
+        "functions": [],
+        "filters": {
+          "items": [],
+          "op": "AND"
+        },
+        "having": [],
+        "orderBy": [],
+        "groupBy": [
+          {
+            "key": "service_name",
+            "dataType": "string",
+            "type": "tag",
+            "isColumn": false,
+            "isJSON": false
+          }
+        ],
+        "legend": "{{service_name}}",
+      }
+    }
+  }
+}
+```
+
+### ErrorRateExample (using formula with one or more queries)
+
+```json
+{
+  "start": 1742601948000,
+  "end": 1742605548000,
+  "step": 60,
+  "variables": {},
+  "formatForWeb": false,
+  "compositeQuery": {
+    "queryType": "builder",
+    "panelType": "graph",
+    "fillGaps": false,
+    "builderQueries": {
+      "A": {
+        "dataSource": "metrics",
+        "queryName": "A",
+        "aggregateAttribute": {
+          "key": "signoz_calls_total",
+          "dataType": "float64",
+          "type": "Sum",
+          "isColumn": true,
+          "isJSON": false
+        },
+        "timeAggregation": "rate",
+        "spaceAggregation": "sum",
+        "functions": [],
+        "filters": {
+          "items": [
+            {
+              "key": {
+                "key": "status_code",
+                "dataType": "string",
+                "type": "tag",
+                "isColumn": false,
+                "isJSON": false
+              },
+              "op": "=",
+              "value": "STATUS_CODE_ERROR"
+            }
+          ],
+          "op": "AND"
+        },
+        "expression": "A",
+        "disabled": true,
+        "stepInterval": 60,
+        "having": [],
+        "orderBy": [],
+        "groupBy": [
+          {
+            "key": "service_name",
+            "dataType": "string",
+            "type": "tag",
+            "isColumn": false,
+            "isJSON": false
+          }
+        ],
+        "legend": "{{service_name}}",
+      },
+      "B": {
+        "dataSource": "metrics",
+        "queryName": "B",
+        "aggregateAttribute": {
+          "key": "signoz_calls_total",
+          "dataType": "float64",
+          "type": "Sum",
+          "isColumn": true,
+          "isJSON": false
+        },
+        "timeAggregation": "rate",
+        "spaceAggregation": "sum",
+        "functions": [],
+        "filters": {
+          "items": [],
+          "op": "AND"
+        },
+        "expression": "B",
+        "disabled": true,
+        "stepInterval": 60,
+        "having": [],
+        "orderBy": [],
+        "groupBy": [
+          {
+            "key": "service_name",
+            "dataType": "string",
+            "type": "tag",
+            "isColumn": false,
+            "isJSON": false
+          }
+        ],
+        "legend": "",
+      },
+      "F1": {
+        "queryName": "F1",
+        "expression": "A/B",
+        "disabled": false,
+        "legend": ""
+      }
+    }
+  }
+}
+```
