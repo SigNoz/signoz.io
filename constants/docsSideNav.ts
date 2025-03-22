@@ -824,6 +824,11 @@ const docsSideNav = [
         label: 'Drop Metrics',
       },
       {
+        type: 'doc',
+        route: '/docs/metrics-management/query-range-api',
+        label: 'Query Range API',
+      },
+      {
         type: 'category',
         label: 'Guides',
         isExpanded: false,
