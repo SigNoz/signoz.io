@@ -57,7 +57,6 @@ paths:
           schema:
             type: string
           example: '<TOKEN>'
-
       responses:
         '400':
           description: Invalid input
@@ -76,7 +75,6 @@ paths:
           schema:
             type: string
           example: '<TOKEN>'
-
       responses:
         '200':
           description: successful operation
@@ -284,8 +282,10 @@ paths:
       responses:
         '400':
           description: Invalid ID supplied
-  /api/v4/query_range:
+  '/api/v4/query_range':
     post:
+      tags:
+        - query_range
       summary: Query metrics, logs, or traces over a time range
       description: |
         Provides a unified interface to query metrics, logs, and traces data with different query types.
@@ -693,13 +693,14 @@ components:
         - promql_rule
     MatchType:
       type: string
-      description: Type of the match ("1" - At least once, "2" - All the times, "3" - On average, "4" - In total)
+      description: Type of the match ("1" - At least once i.e if the condition is met at least once in the time range, "2" - All the times i.e if the condition is met every time in the time range, "3" - On average i.e if the condition is met on average in the time range, "4" - In total i.e if the condition is met in total in the time range, "5" - Last value i.e if the condition is met in the last value of the time range)
       enum:
         - '0'
         - '1'
         - '2'
         - '3'
         - '4'
+        - '5'
     CompareOpType:
       type: string
       description: Type of the comparision operation ("1" - Value is above, "2" - Value is below, "3" - Equal to, "4" - Not equal to)
@@ -718,7 +719,7 @@ components:
         - compositeQuery
       properties:
         target:
-          description: Target value for the condition.
+          description: Target value for the condition. The "Alert Threshold" from the alert configuration UI.
           type: float
         matchType:
           description: Type of the match
@@ -733,11 +734,24 @@ components:
           allOf:
             - $ref: '#/components/schemas/CompositeQuery'
         targetUnit:
-          description: Unit of the target
+          description: Unit of the target. This the unit of the target value for the condition - corresponds to "Targer Unit" from the alert configuration UI.
           type: string
         selectedQueryName:
-          description: Name of the selected query
+          description: Name of the selected query. This is the name of the query from the composite query that is used to evaluate the condition.
           type: string
+        alertOnAbsent:
+          description: Whether to alert on absent values. Corresponds to "Send a notification if data is missing for" from the alert configuration UI.
+          type: boolean
+        absentFor:
+          description: Amount of time for which data is missing in minutes to trigger [No data] alert. Corresponds to "Send a notification if data is missing for" from the alert configuration UI.
+          type: integer
+        requireMinPoints:
+          description: Whether to require minimum points to evaluate the condition. Corresponds to "Run alert evaluation only when there are minimum of" from the alert configuration UI.
+          type: boolean
+        requiredNumPoints:
+          description: Number of points required to evaluate the condition. This is helpful to avoid false positives when the query returns less than expected points. Example - if the query returns 2 points, but the eval window is 15 minutes, it is likely that there is not enough data to evaluate the condition so you could enforce a minimum of 10 points to evaluate the condition. Corresponds to "Run alert evaluation only when there are minimum of" from the alert configuration UI.
+          type: integer
+
     Alert:
       type: object
       required:
@@ -747,14 +761,14 @@ components:
         - condition
       properties:
         alert:
-          description: Name of the alert
+          description: Name of the alert.
           type: string
         alertType:
           description: Type of the alert
           oneOf:
             - $ref: '#/components/schemas/AlertType'
         description:
-          description: Description of the alert
+          description: Description of the alert. Supports templating result labels from the query in the description. See how to use it here https://signoz.io/docs/alerts-management/metrics-based-alerts/#alert-description
           type: string
         ruleType:
           description: Type of the rule
@@ -764,37 +778,46 @@ components:
           description: Evaluation time window (ex - (now-15m, now)) for the alert in parseable format ("15m", "30m" "1h" etc.). Default is 5m.
           type: string
         frequency:
-          description: Run frequency of the alert in parseable format ("15m", "30m" "1h" etc.). Default is 1m.
+          description: Run frequency of the alert in parseable format ("15m", "30m" "1h" etc.). Default is 1m i.e runs every minute. Minimum is 1m.
           type: string
         condition:
           description: Condition criteria for the alert.
           allOf:
             - $ref: '#/components/schemas/Condition'
         labels:
-          description: Labels kv map for the alert
+          description: Additional static labels for the alert
           type: object
           properties:
             key:
               type: string
               description: Key for the label
+            value:
+              type: string
+              description: Value for the label
         annotations:
-          description: Annotations kv map for the alert
+          description: Additional static annotations for the alert
           type: object
           properties:
             key:
               type: string
               description: Key for the annotation
+            value:
+              type: string
+              description: Value for the annotation
         disabled:
           description: Whether the alert is disabled or not
           type: boolean
         source:
-          description: Source of the alert where it is created from.
+          description: Source of the alert where it is created from. Use your instance URL for this.
           type: string
         preferredChannels:
-          description: Preferred channels for the alert. If not specified, all the channels will be used. Use the alert channel for this.
+          description: Preferred channels for the alert. If not specified, all the channels will be used. Use the alert channel for this. This should be an array of alert channel names.
           type: array
           items:
             type: string
+        version:
+          description: Version of the alert. Use "v4" unless you are user of old SigNoz version.
+          type: string
       xml:
         name: Alert
 
@@ -1434,523 +1457,307 @@ components:
         shipDate: '2018-10-19T16:46:45Z'
         status: placed
         complete: false
-    # Logs examples
-    LogsCountExample:
-      summary: Count logs by severity level over time
-      value:
-        start: 1711065600000
-        end: 1711069200000
-        step: 60
-        compositeQuery:
-          queryType: "builder"
-          panelType: "graph"
-          builderQueries:
-            A:
-              queryName: "A"
-              stepInterval: 60
-              dataSource: "logs"
-              aggregateOperator: "count"
-              expression: "A"
-              filters:
-                op: "AND"
-                items: []
-              groupBy:
-                - key: "severity_text"
-                  dataType: "string"
-                  type: "tag"
-                  isColumn: true
-              reduceTo: "sum"
-              orderBy:
-                - columnName: "timestamp"
-                  order: "desc"
-              limit: 100
-
-    ErrorLogsExample:
-      summary: Search error logs with specific filters
-      value:
-        start: 1711065600000
-        end: 1711151999000
-        step: 60
-        compositeQuery:
-          queryType: "builder"
-          panelType: "list"
-          builderQueries:
-            A:
-              queryName: "A"
-              stepInterval: 60
-              dataSource: "logs"
-              aggregateOperator: "noop"
-              expression: "A"
-              filters:
-                op: "AND"
-                items:
-                  - key:
-                      key: "severity_text"
-                      dataType: "string"
-                      type: "tag"
-                      isColumn: true
-                    value: "ERROR"
-                    op: "="
-                  - key:
-                      key: "body"
-                      dataType: "string"
-                      type: ""
-                      isColumn: true
-                    value: "exception"
-                    op: "contains"
-              orderBy:
-                - columnName: "timestamp"
-                  order: "desc"
-              limit: 50
-              offset: 0
-              pageSize: 50
-
-    JsonFieldFilteringExample:
-      summary: Query logs with nested JSON field filtering
-      value:
-        start: 1711065600000
-        end: 1711069200000
-        step: 60
-        compositeQuery:
-          queryType: "builder"
-          panelType: "list"
-          builderQueries:
-            A:
-              queryName: "A"
-              stepInterval: 60
-              dataSource: "logs"
-              aggregateOperator: "noop"
-              expression: "A"
-              filters:
-                op: "AND"
-                items:
-                  - key:
-                      key: "body.user.id"
-                      dataType: "string"
-                      isJSON: true
-                    value: "123456"
-                    op: "="
-                  - key:
-                      key: "body.status"
-                      dataType: "int64"
-                      isJSON: true
-                    value: 400
-                    op: ">="
-              orderBy:
-                - columnName: "timestamp"
-                  order: "desc"
-              limit: 100
-
-    # Traces examples
-    ServiceDurationExample:
-      summary: Analyze average duration by service name over time
-      value:
-        start: 1711065600000
-        end: 1711069200000
-        step: 60
-        compositeQuery:
-          queryType: "builder"
-          panelType: "graph"
-          builderQueries:
-            A:
-              queryName: "A"
-              stepInterval: 60
-              dataSource: "traces"
-              aggregateOperator: "avg"
-              aggregateAttribute:
-                key: "duration"
-                dataType: "int64"
-                type: "tag"
-                isColumn: true
-              expression: "A"
-              filters:
-                op: "AND"
-                items: []
-              groupBy:
-                - key: "serviceName"
-                  dataType: "string"
-                  type: "resource"
-                  isColumn: true
-              orderBy:
-                - columnName: "value"
-                  order: "desc"
-              limit: 50
-
-    ErrorTracesExample:
-      summary: Find traces with error status over time
-      value:
-        start: 1711065600000
-        end: 1711069200000
-        step: 60
-        compositeQuery:
-          queryType: "builder"
-          panelType: "graph"
-          builderQueries:
-            A:
-              queryName: "A"
-              stepInterval: 60
-              dataSource: "traces"
-              aggregateOperator: "count"
-              expression: "A"
-              filters:
-                op: "AND"
-                items:
-                  - key:
-                      key: "statusCode"
-                      dataType: "string"
-                      type: "tag"
-                      isColumn: true
-                    value: "ERROR"
-                    op: "="
-              groupBy:
-                - key: "serviceName"
-                  dataType: "string"
-                  type: "resource"
-                  isColumn: true
-              orderBy:
-                - columnName: "value"
-                  order: "desc"
-              limit: 50
-
-    TraceExplorerExample:
-      summary: List specific traces with filters and column selection
-      value:
-        start: 1711065600000
-        end: 1711069200000
-        step: 60
-        compositeQuery:
-          queryType: "builder"
-          panelType: "trace"
-          builderQueries:
-            A:
-              queryName: "A"
-              stepInterval: 60
-              dataSource: "traces"
-              aggregateOperator: "noop"
-              expression: "A"
-              filters:
-                op: "AND"
-                items:
-                  - key:
-                      key: "duration"
-                      dataType: "int64"
-                      type: "tag"
-                      isColumn: true
-                    value: 100000000
-                    op: ">"
-                  - key:
-                      key: "httpMethod"
-                      dataType: "string"
-                      type: "tag"
-                      isColumn: true
-                    value: "POST"
-                    op: "="
-              orderBy:
-                - columnName: "timestamp"
-                  order: "desc"
-              limit: 20
 
     # Metrics examples
     CpuUsageExample:
       summary: CPU usage percentage over time (gauge metric with delta temporality)
       value:
-        start: 1711065600000
-        end: 1711069200000
+        start: 1742602572000
+        end: 1742604372000
         step: 60
+        variables:
+          SIGNOZ_START_TIME: 1742602572000
+          SIGNOZ_END_TIME: 1742604372000
+          k8s_node_name: ["gke-signoz-saas-eu-c-pl-addon-n2dhc4--c80039c0-2gjz"]
+          k8s_cluster_name: "signoz-saas-eu-central"
+        formatForWeb: false
         compositeQuery:
           queryType: "builder"
           panelType: "graph"
+          fillGaps: false
           builderQueries:
             A:
               queryName: "A"
-              stepInterval: 60
               dataSource: "metrics"
               aggregateAttribute:
-                key: "system.cpu.utilization"
-                type: "tag"
-              temporality: "Delta"
-              timeAggregation: "latest"
-              spaceAggregation: "avg"
+                key: "k8s_node_cpu_utilization"
+                dataType: "float64"
+                type: "Gauge"
+                isColumn: true
+                isJSON: false
               expression: "A"
-              groupBy:
-                - key: "host"
-                  dataType: "string"
-                  type: "tag"
+              disabled: false
+              timeAggregation: "avg"
+              spaceAggregation: "sum"
+              stepInterval: 60
+              reduceTo: "sum"
               filters:
                 items:
                   - key:
-                      key: "state"
+                      key: "k8s_cluster_name"
                       dataType: "string"
+                      isColumn: false
                       type: "tag"
-                    value: "user"
                     op: "="
+                    value: "{{.k8s_cluster_name}}"
+                  - key:
+                      key: "k8s_node_name"
+                      dataType: "string"
+                      isColumn: false
+                      type: "tag"
+                    op: "in"
+                    value: ["{{.k8s_node_name}}"]
                 op: "AND"
-              limit: 100
+              groupBy:
+                - key: "k8s_node_name"
+                  dataType: "string"
+                  isColumn: false
+                  isJSON: false
+                  type: "tag"
+              having: []
+              orderBy: []
+              legend: "{{k8s_node_name}}"
+              limit: null
+              functions: []
 
     HttpDurationExample:
-      summary: HTTP request duration p95 from histogram (delta temporality)
+      summary: JVM GC Duration p90 from histogram metric
       value:
-        start: 1711065600000
-        end: 1711069200000
+        start: 1742602968000
+        end: 1742604768000
         step: 60
+        variables:
+          SIGNOZ_START_TIME: 1742602968000
+          SIGNOZ_END_TIME: 1742604768000
+        formatForWeb: false
         compositeQuery:
           queryType: "builder"
           panelType: "graph"
+          fillGaps: false
           builderQueries:
             A:
               queryName: "A"
-              stepInterval: 60
               dataSource: "metrics"
               aggregateAttribute:
-                key: "http.server.duration"
-                type: "tag"
-              temporality: "Delta"
-              timeAggregation: "latest"
-              spaceAggregation: "p95"
+                key: "jvm_gc_duration_bucket"
+                dataType: "float64"
+                type: "Histogram"
+                isColumn: true
+                isJSON: false
+              timeAggregation: ""
+              spaceAggregation: "p90"
               expression: "A"
-              groupBy:
-                - key: "service.name"
-                  dataType: "string"
-                  type: "resource"
-                - key: "http.method"
-                  dataType: "string"
-                  type: "tag"
+              disabled: false
+              stepInterval: 60
+              reduceTo: "avg"
               filters:
                 items: []
                 op: "AND"
-              limit: 50
-          unit: "ms"
+              groupBy:
+                - key: "service_name"
+                  dataType: "string"
+                  type: "tag"
+                  isColumn: false
+                  isJSON: false
+              having: []
+              orderBy: []
+              limit: null
+              functions: []
+              legend: "{{service_name}}"
 
     MemoryUsedExample:
       summary: Memory usage over time (gauge metric with unspecified temporality)
       value:
-        start: 1711065600000
-        end: 1711069200000
+        start: 1742603085000
+        end: 1742604885000
         step: 60
+        variables:
+          SIGNOZ_START_TIME: 1742603085000
+          SIGNOZ_END_TIME: 1742604885000
+          k8s_node_name: ["gke-signoz-saas-pl-addon-n2dhc4-od-71879e78-0ql9"]
+          k8s_cluster_name: "signoz-saas"
+        formatForWeb: true
         compositeQuery:
           queryType: "builder"
           panelType: "graph"
+          fillGaps: false
           builderQueries:
             A:
-              queryName: "A"
-              stepInterval: 60
               dataSource: "metrics"
+              queryName: "A"
+              aggregateOperator: "avg"
               aggregateAttribute:
-                key: "process.runtime.jvm.memory.usage"
-                type: "tag"
-              temporality: "Unspecified"
+                key: "k8s_node_memory_usage"
+                dataType: "float64"
+                type: "Gauge"
+                isColumn: true
+                isJSON: false
               timeAggregation: "avg"
               spaceAggregation: "sum"
               expression: "A"
+              disabled: false
+              stepInterval: 60
+              functions: []
+              filters:
+                items:
+                  - key:
+                      key: "k8s_cluster_name"
+                      dataType: "string"
+                      isColumn: false
+                      type: "tag"
+                    op: "="
+                    value: "{{.k8s_cluster_name}}"
+                  - key:
+                      key: "k8s_node_name"
+                      dataType: "string"
+                      isColumn: false
+                      type: "tag"
+                    op: "in"
+                    value: ["{{.k8s_node_name}}"]
+                op: "AND"
+              having: []
+              limit: null
+              orderBy: []
               groupBy:
-                - key: "service.name"
-                  dataType: "string"
-                  type: "resource"
-                - key: "type"
+                - key: "k8s_node_name"
                   dataType: "string"
                   type: "tag"
-              filters:
-                items: []
-                op: "AND"
-              limit: 50
-          unit: "bytes"
+                  isColumn: false
+                  isJSON: false
+              legend: "used"
+              reduceTo: "avg"
 
     RequestCountExample:
       summary: HTTP request count as rate (sum metric with cumulative temporality)
       value:
-        start: 1711065600000
-        end: 1711069200000
+        start: 1742603295000
+        end: 1742605095000
         step: 60
+        variables:
+          SIGNOZ_START_TIME: 1742603278000
+          SIGNOZ_END_TIME: 1742605078000
+          k8s_node_name: ["gke-signoz-saas-pl-addon-n2dhc4-od-71879e78-0ql9"]
+          k8s_cluster_name: "signoz-saas-eu-central"
+        formatForWeb: false
         compositeQuery:
           queryType: "builder"
           panelType: "graph"
+          fillGaps: false
           builderQueries:
             A:
-              queryName: "A"
-              stepInterval: 60
               dataSource: "metrics"
+              queryName: "A"
+              aggregateOperator: "rate"
               aggregateAttribute:
-                key: "http.server.request.count"
-                type: "tag"
-              temporality: "Cumulative"
+                key: "signoz_calls_total"
+                dataType: "float64"
+                type: "Sum"
+                isColumn: true
+                isJSON: false
               timeAggregation: "rate"
               spaceAggregation: "sum"
               expression: "A"
-              groupBy:
-                - key: "service.name"
-                  dataType: "string"
-                  type: "resource"
-                - key: "http.status_code"
-                  dataType: "string"
-                  type: "tag"
+              disabled: false
+              stepInterval: 60
+              functions: []
               filters:
                 items: []
                 op: "AND"
-              limit: 50
+              having: []
+              limit: null
+              orderBy: []
+              groupBy:
+                - key: "service_name"
+                  dataType: "string"
+                  type: "tag"
+                  isColumn: false
+                  isJSON: false
+              legend: "{{service_name}}"
+              reduceTo: "avg"
 
     ErrorRateExample:
       summary: HTTP error rate calculation (sum metric with cumulative temporality)
       value:
-        start: 1711065600000
-        end: 1711069200000
+        start: 1742601948000
+        end: 1742605548000
         step: 60
+        variables: {}
+        formatForWeb: false
         compositeQuery:
           queryType: "builder"
           panelType: "graph"
+          fillGaps: false
           builderQueries:
             A:
-              queryName: "A"
-              stepInterval: 60
               dataSource: "metrics"
+              queryName: "A"
+              aggregateOperator: "rate"
               aggregateAttribute:
-                key: "http.server.request.count"
-                type: "tag"
-              temporality: "Cumulative"
+                key: "signoz_calls_total"
+                dataType: "float64"
+                type: "Sum"
+                isColumn: true
+                isJSON: false
               timeAggregation: "rate"
               spaceAggregation: "sum"
-              expression: "A"
+              functions: []
               filters:
                 items:
                   - key:
-                      key: "http.status_code"
+                      key: "status_code"
                       dataType: "string"
                       type: "tag"
-                    value: ["500", "501", "502", "503", "504", "505"]
-                    op: "in"
+                      isColumn: false
+                      isJSON: false
+                    op: "="
+                    value: "STATUS_CODE_ERROR"
                 op: "AND"
-              groupBy:
-                - key: "service.name"
-                  dataType: "string"
-                  type: "resource"
-              limit: 50
-
-    GcDurationExample:
-      summary: Garbage collection duration p90 (histogram metric with delta temporality)
-      value:
-        start: 1711065600000
-        end: 1711069200000
-        step: 60
-        compositeQuery:
-          queryType: "builder"
-          panelType: "graph"
-          builderQueries:
-            A:
-              queryName: "A"
-              stepInterval: 60
-              dataSource: "metrics"
-              aggregateAttribute:
-                key: "process.runtime.jvm.gc.duration"
-                type: "tag"
-              temporality: "Delta"
-              timeAggregation: "latest"
-              spaceAggregation: "p90"
               expression: "A"
-              groupBy:
-                - key: "service.name"
-                  dataType: "string"
-                  type: "resource"
-                - key: "gc.name"
-                  dataType: "string"
-                  type: "tag"
-              filters:
-                items: []
-                op: "AND"
-              limit: 50
-          unit: "ms"
-
-    DiskIoExample:
-      summary: Disk I/O operations with increase aggregation (sum metric with delta temporality)
-      value:
-        start: 1711065600000
-        end: 1711069200000
-        step: 60
-        compositeQuery:
-          queryType: "builder"
-          panelType: "graph"
-          builderQueries:
-            A:
-              queryName: "A"
+              disabled: true
               stepInterval: 60
-              dataSource: "metrics"
-              aggregateAttribute:
-                key: "system.disk.operations"
-                type: "tag"
-              temporality: "Delta"
-              timeAggregation: "increase"
-              spaceAggregation: "sum"
-              expression: "A"
+              having: []
+              limit: null
+              orderBy: []
               groupBy:
-                - key: "host"
+                - key: "service_name"
                   dataType: "string"
                   type: "tag"
-                - key: "direction"
-                  dataType: "string"
-                  type: "tag"
-              filters:
-                items: []
-                op: "AND"
-              limit: 50
-
-    NetworkTrafficExample:
-      summary: Network traffic rate by service (sum metric with cumulative temporality)
-      value:
-        start: 1711065600000
-        end: 1711069200000
-        step: 60
-        compositeQuery:
-          queryType: "builder"
-          panelType: "graph"
-          builderQueries:
-            A:
-              queryName: "A"
-              stepInterval: 60
+                  isColumn: false
+                  isJSON: false
+              legend: "{{service_name}}"
+              reduceTo: "avg"
+            B:
               dataSource: "metrics"
+              queryName: "B"
+              aggregateOperator: "rate"
               aggregateAttribute:
-                key: "system.network.io.transmitted"
-                type: "tag"
-              temporality: "Cumulative"
+                key: "signoz_calls_total"
+                dataType: "float64"
+                type: "Sum"
+                isColumn: true
+                isJSON: false
               timeAggregation: "rate"
               spaceAggregation: "sum"
-              expression: "A"
-              groupBy:
-                - key: "service.name"
-                  dataType: "string"
-                  type: "resource"
+              functions: []
               filters:
                 items: []
                 op: "AND"
-              limit: 50
-          unit: "bytes/second"
-
-    DbConnectionsExample:
-      summary: Database connections over time (gauge metric with unspecified temporality)
-      value:
-        start: 1711065600000
-        end: 1711069200000
-        step: 60
-        compositeQuery:
-          queryType: "builder"
-          panelType: "graph"
-          builderQueries:
-            A:
-              queryName: "A"
+              expression: "B"
+              disabled: true
               stepInterval: 60
-              dataSource: "metrics"
-              aggregateAttribute:
-                key: "db.client.connections.usage"
-                type: "tag"
-              temporality: "Unspecified"
-              timeAggregation: "latest"
-              spaceAggregation: "max"
-              expression: "A"
+              having: []
+              limit: null
+              orderBy: []
               groupBy:
-                - key: "service.name"
-                  dataType: "string"
-                  type: "resource"
-                - key: "state"
+                - key: "service_name"
                   dataType: "string"
                   type: "tag"
-              filters:
-                items: []
-                op: "AND"
-              limit: 50
+                  isColumn: false
+                  isJSON: false
+              legend: ""
+              reduceTo: "avg"
+            F1:
+              queryName: "F1"
+              expression: "A/B"
+              disabled: false
+              legend: ""
