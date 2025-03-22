@@ -215,6 +215,118 @@ Validate your traces in SigNoz:
 
 You might see other dummy applications if you’re using self-hosted SigNoz for the first time. You can remove it by following the docs [here](https://signoz.io/docs/operate/docker-standalone/#remove-the-sample-application).
 
+## Link logs and traces
+
+Logs and traces provide valuable insights into an app's performance. While logs capture event details with timestamps, traces track a request’s journey across different components, highlighting latency and bottlenecks. 
+Linking logs and traces using a common trace ID helps you pinpoint issues, analyze failures, and optimize performance.
+
+![An image displaying linked logs and traces to SigNoz](images/logs-traces-signoz.png)
+
+### Generate traces
+
+To trace a request from start to finish, you need to generate spans for each operation. OpenTelemetry provides automatic instrumentation for various frameworks.
+
+Follow these steps to generate traces:
+
+1. Configure tracing using OpenTelemetry.
+```java
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.api.GlobalOpenTelemetry;
+
+public class OpenTelemetryConfig {
+    private static final Tracer tracer = GlobalOpenTelemetry.getTracer("my-java-app");
+
+    public static Span startSpan(String spanName) {
+        return tracer.spanBuilder(spanName).startSpan();
+    }
+    
+    public static String getTraceId() {
+        Span currentSpan = Span.current();
+        SpanContext spanContext = currentSpan.getSpanContext();
+        return spanContext.isValid() ? spanContext.getTraceId() : "00000000000000000000000000000000";
+    }
+
+    public static String getSpanId() {
+        Span currentSpan = Span.current();
+        SpanContext spanContext = currentSpan.getSpanContext();
+        return spanContext.isValid() ? spanContext.getSpanId() : "0000000000000000";
+    }
+}
+```
+
+1. Create spans for each method to track its execution. For example, consider a method to get coffee.
+
+```java
+public String getCoffee(String coffeeId) {
+    Span span = OpenTelemetryConfig.startSpan("getCoffee");
+    try {
+        // Simulating processing
+        if (coffeeId == null) {
+            logMessage("INFO", "Coffee ID not found");
+            return "Coffee not found";
+        }
+        return "Serving coffee: " + coffeeId;
+    } finally {
+        span.end();
+    }
+}
+```
+
+### Generate logs
+
+Logs provide detailed insights at different request execution stages. Include contextual details such as timestamps, severity levels, and message descriptions.
+
+1. Attach log information each method. You can optionally add logs before and after each request.
+```java
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import io.opentelemetry.api.trace.Span;
+
+public class LoggingUtils {
+    private static final Logger logger = LoggerFactory.getLogger(LoggingUtils.class);
+
+    public static void logRequest(String method, String url) {
+        Span span = Span.current();
+        logger.info("Incoming request: {} {} - Trace ID: {}", method, url, span.getSpanContext().getTraceId());
+    }
+
+    public static void logResponse(String url, int statusCode) {
+        Span span = Span.current();
+        logger.info("Response: {} for {} - Trace ID: {}", statusCode, url, span.getSpanContext().getTraceId());
+    }
+}
+```
+1.  You can add more information to log for each method.
+
+### Link logs with traces
+
+To correlate logs with traces, include `trace_id` and `span_id` in the log.
+
+Follow these steps to link logs with traces:
+
+1. Add trace and span information in the log message.
+```java
+import io.opentelemetry.api.trace.SpanContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class SigNozLogger {
+    private static final Logger logger = LoggerFactory.getLogger(SigNozLogger.class);
+
+    public static void sendLog(String level, String message) {
+        SpanContext spanContext = Span.current().getSpanContext();
+        String traceId = spanContext.getTraceId();
+        String spanId = spanContext.getSpanId();
+        
+        logger.info("{} - {} - Trace ID: {}, Span ID: {}", level, message, traceId, spanId);
+    }
+}
+```
+1. Send logs to SigNoz to link them with traces.
+
+![An image displaying a specifc log with traces in SigNoz](images/sample-log-coffee.png)
+
 {/* <figure data-zoomable align='center'>
     <img src="/img/docs/java_app_services_list.webp" alt="Java Application in the list of services being monitored in SigNoz"/>
     <figcaption><i>Java Application in the list of services being monitored in SigNoz</i></figcaption>
