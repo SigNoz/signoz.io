@@ -1157,24 +1157,37 @@ const docsSideNav = [
     // route: '',
     items: [
       {
-        type: 'doc',
+        type: 'category',
+        label: 'Kafka',
+        isExpanded: false,
         route: '/docs/messaging-queues/kafka',
-        label: 'Self-Hosted Kafka',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/messaging-queues/kafka/kafka',
+            label: 'Self-Hosted Kafka',
+          },
+          {
+            type: 'doc',
+            route: '/docs/messaging-queues/kafka/msk',
+            label: 'Amazon MSK',
+          },
+          {
+            type: 'doc',
+            route: '/docs/messaging-queues/kafka/strimzi',
+            label: 'Strimzi',
+          },
+          {
+            type: 'doc',
+            route: '/docs/messaging-queues/kafka/confluent-kafka',
+            label: 'Confluent Kafka',
+          },
+        ]
       },
       {
         type: 'doc',
-        route: '/docs/messaging-queues/msk',
-        label: 'Amazon MSK',
-      },
-      {
-        type: 'doc',
-        route: '/docs/messaging-queues/strimzi',
-        label: 'Strimzi',
-      },
-      {
-        type: 'doc',
-        route: '/docs/messaging-queues/confluent-kafka',
-        label: 'Confluent Kafka',
+        route: '/docs/messaging-queues/celery',
+        label: 'Celery',
       },
     ],
   },
