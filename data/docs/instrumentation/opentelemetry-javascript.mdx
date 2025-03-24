@@ -748,6 +748,131 @@ Validate your traces in SigNoz:
 2. In SigNoz, open the `Services` tab. Hit the `Refresh` button on the top right corner, and your application should appear in the list of `Applications`.
 3. Go to the `Traces` tab, and apply relevant filters to see your application’s traces.
 
+## Link logs and traces
+
+Logs and traces provide valuable insights into an app's performance. While logs capture event details with timestamps, traces track a request’s journey across different components, highlighting latency and bottlenecks. 
+Linking logs and traces using a common trace ID helps you pinpoint issues, analyze failures, and optimize performance.
+
+![An image displaying linked logs and traces to SigNoz](images/logs-traces-js.png)
+
+### Generate traces
+
+To trace a request from start to finish, you need to generate spans for each operation. OpenTelemetry provides automatic instrumentation for various frameworks.
+
+Follow these steps to generate traces:
+
+1. Configure tracing using OpenTelemetry.
+```javascript
+const { NodeTracerProvider } = require('@opentelemetry/sdk-trace-node');
+const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-http');
+const { SimpleSpanProcessor } = require('@opentelemetry/sdk-trace-base');
+const opentelemetry = require('@opentelemetry/api');
+
+const provider = new NodeTracerProvider();
+const exporter = new OTLPTraceExporter({ url: '<signoz-traces-endpoint>' });
+provider.addSpanProcessor(new SimpleSpanProcessor(exporter));
+provider.register();
+
+const tracer = opentelemetry.trace.getTracer('example-tracer');
+const { context, trace } = require('@opentelemetry/api');
+
+function generateTrace() {
+  const span = tracer.startSpan('example-span');
+  span.setAttribute('example-attribute', 'value');
+  span.end();
+}
+
+function getTraceId() {
+  const span = trace.getSpan(context.active());
+  return span ? span.spanContext().traceId : '00000000000000000000000000000000';
+}
+
+function getSpanId() {
+  const span = trace.getSpan(context.active());
+  return span ? span.spanContext().spanId : '0000000000000000';
+}
+```
+
+1. Create spans for each method to track its execution. For example, consider a method to get coffee.
+
+```javascript
+function getCoffee(coffeeId) {
+  const span = tracer.startSpan('getCoffee');
+  try {
+    if (!coffeeId) {
+      generateLinkedLog('INFO', 'Coffee ID not found');
+      return 'Coffee not found';
+    }
+    return `Serving coffee: ${coffeeId}`;
+  } finally {
+    span.end();
+  }
+}
+```
+
+### Generate logs
+
+Logs provide detailed insights at different request execution stages. Include contextual details such as timestamps, severity levels, and message descriptions.
+
+1. Attach log information each method. You can optionally add logs before and after each request.
+```javascript
+
+const { logs } = require('@opentelemetry/api');
+const { LoggerProvider, SimpleLogRecordProcessor } = require('@opentelemetry/sdk-logs');
+
+const logProvider = new LoggerProvider();
+const logExporter = new OTLPLogExporter({ url: '<signoz-log-endpoint>' });
+logProvider.addLogRecordProcessor(new SimpleLogRecordProcessor(logExporter));
+logs.setGlobalLoggerProvider(logProvider);
+
+const logger = logs.getLogger('example-logger');
+
+function generateLog() {
+  logger.emit({ severityText: 'INFO', body: 'Example log message', attributes: { key: 'value' } });
+}
+
+function logRequest(method, url) {
+  const span = trace.getSpan(context.active());
+  logger.emit({ severityText: 'INFO', body: `Incoming request: ${method} ${url}`, attributes: { trace_id: getTraceId() } });
+}
+
+function logResponse(url, statusCode) {
+  const span = trace.getSpan(context.active());
+  logger.emit({ severityText: 'INFO', body: `Response: ${statusCode} for ${url}`, attributes: { trace_id: getTraceId() } });
+}
+```
+1.  You can add more information to log for each method.
+
+### Link logs with traces
+
+To correlate logs with traces, include `trace_id` and `span_id` in the log.
+
+Follow these steps to link logs with traces:
+
+1. Add trace and span information in the log message.
+```javascript
+const { context, trace } = require('@opentelemetry/api');
+
+function generateLinkedLog(severity, message) {
+  const logMessage = {
+    severityText: severity,
+    body: message,
+    attributes: { trace_id: getTraceId(), span_id: getSpanId() }
+  };
+  logger.emit(logMessage);
+  console.log('Sending log to SigNoz:', JSON.stringify(logMessage));
+}
+
+const span = tracer.startSpan('span-with-log');
+context.with(trace.setSpan(context.active(), span), () => {
+  generateLinkedLog('INFO', 'Log message linked with trace and sent to SigNoz');
+  span.end();
+});
+```
+1. Send logs to SigNoz to link them with traces.
+
+![An image displaying a specifc log with traces in SigNoz](images/sample-log-coffee.png)
+
 {/* You might see other dummy applications if you’re using SigNoz for the first time. You can remove it by following the docs [here](https://signoz.io/docs/operate/docker-standalone/#remove-the-sample-application). */}
 
 {/* <figure data-zoomable align="center">
