@@ -306,12 +306,21 @@ Follow these steps to link logs with traces:
 
 1. Add trace and span information in the log message.
 ```java
+import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanContext;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
 public class SigNozLogger {
     private static final Logger logger = LoggerFactory.getLogger(SigNozLogger.class);
+
+    private static final String SIGNOZ_INGESTION_KEY = "<SigNoz-ingestion-key>";
+    private static final String SIGNOZ_LOGS_URL = "https://ingest.{region}.signoz.cloud:443/logs/json";
 
     public static void sendLog(String level, String message) {
         SpanContext spanContext = Span.current().getSpanContext();
@@ -319,6 +328,34 @@ public class SigNozLogger {
         String spanId = spanContext.getSpanId();
         
         logger.info("{} - {} - Trace ID: {}, Span ID: {}", level, message, traceId, spanId);
+
+        JSONObject logEntry = new JSONObject();
+        logEntry.put("trace_id", traceId);
+        logEntry.put("span_id", spanId);
+        logEntry.put("severity_text", level);
+        logEntry.put("message", message);
+        logEntry.put("attributes", new JSONObject().put("service", "coffee-shop"));
+
+        try {
+            URL url = new URL(SIGNOZ_LOGS_URL);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("POST");
+            connection.setRequestProperty("signoz-ingestion-key", SIGNOZ_INGESTION_KEY);
+            connection.setRequestProperty("Content-Type", "application/json");
+            connection.setDoOutput(true);
+
+            try (OutputStream os = connection.getOutputStream()) {
+                byte[] input = logEntry.toString().getBytes(StandardCharsets.UTF_8);
+                os.write(input, 0, input.length);
+            }
+
+            int responseCode = connection.getResponseCode();
+            if (responseCode != 200) {
+                logger.error("Failed to send log to SigNoz. Response code: {}", responseCode);
+            }
+        } catch (Exception e) {
+            logger.error("Error sending log to SigNoz: ", e);
+        }
     }
 }
 ```
