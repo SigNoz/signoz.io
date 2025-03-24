@@ -48,17 +48,20 @@ npm install --save @opentelemetry/auto-instrumentations-node
 
 ```bash
 export OTEL_TRACES_EXPORTER="otlp"
-export OTEL_EXPORTER_OTLP_ENDPOINT="ingest.<region>.signoz.cloud:443"
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<REGION>.signoz.cloud:443"
 export OTEL_NODE_RESOURCE_DETECTORS="env,host,os"
-export OTEL_SERVICE_NAME="<service_name>"
-export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+export OTEL_SERVICE_NAME="<SERVICE_NAME>"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>"
 export NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
 <your_run_command>
 ```
-- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
-- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
-- `<service_name>` is name of your service                                |
-- replace `<your_run_command>` with the run command of your application
+
+Replace:
+
+- **`{REGION}`** with your SigNoz cloud region.
+- **`{SIGNOZ_INGESTION_KEY}`** with the key found in your SigNoz account settings. You can read more about it [here](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- **`{SERVICE_NAME}`** with name of service.
+- **`{your_run_command}`** with run command of your application.
 
 #### Send traces directly to SigNoz Cloud - Code Level Automatic Instrumentation
 
@@ -78,65 +81,35 @@ npm install --save @opentelemetry/semantic-conventions@^1.21.0
 You need to configure the endpoint for SigNoz cloud in this file.
 
 ```ts
-import { registerInstrumentations } from '@opentelemetry/instrumentation';
-import {
-  WebTracerProvider,
-  ConsoleSpanExporter,
-  SimpleSpanProcessor,
-  BatchSpanProcessor,
-} from '@opentelemetry/sdk-trace-web';
-import { getWebAutoInstrumentations } from '@opentelemetry/auto-instrumentations-web';
-import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
-import { Resource } from '@opentelemetry/resources';
-import { B3Propagator } from '@opentelemetry/propagator-b3';
+/*instrumentation.ts*/
+import * as opentelemetry from '@opentelemetry/sdk-node';
+import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto';
+import { resourceFromAttributes } from '@opentelemetry/resources';
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 
-const resource = Resource.default().merge(
-  new Resource({
-    [SemanticResourceAttributes.SERVICE_NAME]: '<service_name>',
-    [SemanticResourceAttributes.SERVICE_VERSION]: '0.1.0',
-  })
-);
-
-const provider = new WebTracerProvider({ resource });
-
-provider.addSpanProcessor(new SimpleSpanProcessor(new ConsoleSpanExporter()));
-
-provider.addSpanProcessor(
-  new BatchSpanProcessor(
-    new OTLPTraceExporter({
-      url: 'https://ingest.<region>.signoz.cloud:443/v1/traces',
+const sdk = new opentelemetry.NodeSDK({
+  traceExporter: new OTLPTraceExporter({
+    // optional - default url is http://localhost:4318/v1/traces
+    url: 'https://ingest.<REGION>.signoz.cloud:443/v1/traces', // url is optional and can be omitted 
       headers: {
-        'signoz-ingestion-key': '{your-ingestion-key}',
-      },
-    })
-  )
-);
-
-provider.register({
-  propagator: new B3Propagator(),
+        "signoz-access-token": "<SIGNOZ_INGESTION_KEY>"
+      } // an optional object containing custom headers to be sent with each request
+  }),
+  instrumentations: [getNodeAutoInstrumentations()],
+  resource:  resourceFromAttributes({
+    // highlight-next-line
+    [SemanticResourceAttributes.SERVICE_NAME]: '<SERVICE_NAME>'
+  })
 });
-
-registerInstrumentations({
-  instrumentations: [
-    getWebAutoInstrumentations({
-      '@opentelemetry/instrumentation-document-load': {},
-      '@opentelemetry/instrumentation-user-interaction': {},
-      '@opentelemetry/instrumentation-fetch': {
-        propagateTraceHeaderCorsUrls: /.+/,
-      },
-      '@opentelemetry/instrumentation-xml-http-request': {
-        propagateTraceHeaderCorsUrls: /.+/,
-      },
-    }),
-  ],
-});
-
+sdk.start();
 ```
 
-- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
-- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
-- `<service_name>` is name of your service
+Replace:
+
+- **`{REGION}`** with your SigNoz cloud region.
+- **`{SIGNOZ_INGESTION_KEY}`** with the key found in your SigNoz account settings. You can read more about it [here](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- **`{SERVICE_NAME}`** with name of service.
 
 **Step 3.** Add the below import to your `main.ts` file.
 
@@ -145,7 +118,6 @@ The below import should be the first line in the main file of your application (
 </Admonition>  */}
 
 
-    
 ```jsx
 import './app/instrument';
 ```
@@ -188,14 +160,15 @@ npm install --save @opentelemetry/auto-instrumentations-node
 export OTEL_TRACES_EXPORTER="otlp"
 export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318/v1/traces"
 export OTEL_NODE_RESOURCE_DETECTORS="env,host,os"
-export OTEL_SERVICE_NAME="<service_name>"
+export OTEL_SERVICE_NAME="<SERVICE_NAME>"
 export NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
 <your_run_command>
 ```
 
-`<service_name>` is name of your service
+Replace:
 
-replace `<your_run_command>` with the run command of your application
+- **`{SERVICE_NAME}`** with name of service.
+- **`{your_run_command}`** with run command of your application.
 
 
 #### Send traces via OTel Collector binary - Code Level Automatic Instrumentation
@@ -239,65 +212,39 @@ npm install --save @opentelemetry/semantic-conventions@^1.21.0
 **Step 3.** Create `instrument.ts` file<br></br>
 
 ```ts
-import { registerInstrumentations } from '@opentelemetry/instrumentation';
-import {
-  WebTracerProvider,
-  ConsoleSpanExporter,
-  SimpleSpanProcessor,
-  BatchSpanProcessor,
-} from '@opentelemetry/sdk-trace-web';
-import { getWebAutoInstrumentations } from '@opentelemetry/auto-instrumentations-web';
-import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
-import { Resource } from '@opentelemetry/resources';
-import { B3Propagator } from '@opentelemetry/propagator-b3';
+/*instrumentation.ts*/
+import * as opentelemetry from '@opentelemetry/sdk-node';
+import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto';
+import { resourceFromAttributes } from '@opentelemetry/resources';
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 
-const resource = Resource.default().merge(
-  new Resource({
-    [SemanticResourceAttributes.SERVICE_NAME]: '<service_name>',
-    [SemanticResourceAttributes.SERVICE_VERSION]: '0.1.0',
+const sdk = new opentelemetry.NodeSDK({
+  traceExporter: new OTLPTraceExporter({
+    // optional - default url is http://localhost:4318/v1/traces
+    url: 'http://localhost:4318/v1/traces', // url is optional and can be omitted 
+  }),
+  instrumentations: [getNodeAutoInstrumentations()],
+  resource:  resourceFromAttributes({
+    // highlight-next-line
+    [SemanticResourceAttributes.SERVICE_NAME]: '<SERVICE_NAME>'
   })
-);
-
-const provider = new WebTracerProvider({ resource });
-
-provider.addSpanProcessor(new SimpleSpanProcessor(new ConsoleSpanExporter()));
-
-provider.addSpanProcessor(
-  new BatchSpanProcessor(
-    new OTLPTraceExporter({
-      url: 'http://localhost:4318/v1/traces',
-    })
-  )
-);
-
-provider.register({
-  propagator: new B3Propagator(),
 });
+sdk.start();
 
-registerInstrumentations({
-  instrumentations: [
-    getWebAutoInstrumentations({
-      '@opentelemetry/instrumentation-document-load': {},
-      '@opentelemetry/instrumentation-user-interaction': {},
-      '@opentelemetry/instrumentation-fetch': {
-        propagateTraceHeaderCorsUrls: /.+/,
-      },
-      '@opentelemetry/instrumentation-xml-http-request': {
-        propagateTraceHeaderCorsUrls: /.+/,
-      },
-    }),
-  ],
-});
 ```
-- `<service_name>` : Name of your service.
+
+Replace:
+
+- **`{SERVICE_NAME}`** with name of service.
 
 **Step 4.** Add the below import to your `main.ts` file.
 {/* <Admonition type="info">
 The below import should be the first line in the main file of your application (Ex -> `main.ts`)
 </Admonition> */}
     
-```jsx
+```tsx
+//main.ts
 import './app/instrument';
 ```
     
@@ -335,14 +282,16 @@ npm install --save @opentelemetry/auto-instrumentations-node
 export OTEL_TRACES_EXPORTER="otlp"
 export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318/v1/traces"
 export OTEL_NODE_RESOURCE_DETECTORS="env,host,os"
-export OTEL_SERVICE_NAME="<service_name>"
+export OTEL_SERVICE_NAME="<SERVICE_NAME>"
 export NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
 <your_run_command>
 ```
 
-`<service_name>` is name of your service
 
-replace `<your_run_command>` with the run command of your application
+Replace:
+
+- **`{SERVICE_NAME}`** with name of service.
+- **`{your_run_command}`** with name of service.
 
 In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#troubleshooting-your-installation).
 
@@ -470,79 +419,36 @@ $env:NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
 
 **Step 1.** Install OpenTelemetry packages
 
-```bash
-npm install --save @opentelemetry/sdk-trace-web@^1.21.0                                                                   
-npm install --save @opentelemetry/instrumentation@^0.48.0
-npm install --save @opentelemetry/auto-instrumentations-web@^0.36.0
-npm install --save @opentelemetry/exporter-trace-otlp-http@^0.48.0
-npm install --save @opentelemetry/resources@^1.21.0
-npm install --save @opentelemetry/propagator-b3@^1.21.0
-npm install --save @opentelemetry/semantic-conventions@^1.21.0
-```
-
-**Step 2.** Create `instrument.ts` file<br></br>
-You need to configure the endpoint for SigNoz cloud in this file.
-
-```ts
-import { registerInstrumentations } from '@opentelemetry/instrumentation';
-import {
-  WebTracerProvider,
-  ConsoleSpanExporter,
-  SimpleSpanProcessor,
-  BatchSpanProcessor,
-} from '@opentelemetry/sdk-trace-web';
-import { getWebAutoInstrumentations } from '@opentelemetry/auto-instrumentations-web';
-import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
-import { Resource } from '@opentelemetry/resources';
-import { B3Propagator } from '@opentelemetry/propagator-b3';
+```typescript
+/*instrumentation.ts*/
+import * as opentelemetry from '@opentelemetry/sdk-node';
+import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto';
+import { resourceFromAttributes } from '@opentelemetry/resources';
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 
-const resource = Resource.default().merge(
-  new Resource({
-    [SemanticResourceAttributes.SERVICE_NAME]: '<service_name>',
-    [SemanticResourceAttributes.SERVICE_VERSION]: '0.1.0',
-  })
-);
-
-const provider = new WebTracerProvider({ resource });
-
-provider.addSpanProcessor(new SimpleSpanProcessor(new ConsoleSpanExporter()));
-
-provider.addSpanProcessor(
-  new BatchSpanProcessor(
-    new OTLPTraceExporter({
-      url: 'https://ingest.<region>.signoz.cloud:443/v1/traces',
+const sdk = new opentelemetry.NodeSDK({
+  traceExporter: new OTLPTraceExporter({
+    // optional - default url is http://localhost:4318/v1/traces
+    url: 'https://ingest.<REGION>.signoz.cloud:443/v1/traces', // url is optional and can be omitted 
       headers: {
-        'signoz-ingestion-key': '<your-ingestion-key>',
-      },
-    })
-  )
-);
-
-provider.register({
-  propagator: new B3Propagator(),
+        "signoz-access-token": "<SIGNOZ_INGESTION_KEY>"
+      } // an optional object containing custom headers to be sent with each request
+  }),
+  instrumentations: [getNodeAutoInstrumentations()],
+  resource:  resourceFromAttributes({
+    // highlight-next-line
+    [SemanticResourceAttributes.SERVICE_NAME]: '<SERVICE_NAME>'
+  })
 });
-
-registerInstrumentations({
-  instrumentations: [
-    getWebAutoInstrumentations({
-      '@opentelemetry/instrumentation-document-load': {},
-      '@opentelemetry/instrumentation-user-interaction': {},
-      '@opentelemetry/instrumentation-fetch': {
-        propagateTraceHeaderCorsUrls: /.+/,
-      },
-      '@opentelemetry/instrumentation-xml-http-request': {
-        propagateTraceHeaderCorsUrls: /.+/,
-      },
-    }),
-  ],
-});
-
+sdk.start();
 ```
 
-- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
-- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
-- `<service_name>` is name of your service
+Replace:
+
+- **`{REGION}`** with your SigNoz cloud region.
+- **`{SIGNOZ_INGESTION_KEY}`** with the key found in your SigNoz account settings. You can read more about it [here](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- **`{SERVICE_NAME}`** with name of service.
 
 
 **Step 3.** Add the below import to your `main.ts` file.
@@ -595,14 +501,15 @@ npm install --save @opentelemetry/auto-instrumentations-node
 $env:OTEL_TRACES_EXPORTER="otlp"
 $env:OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318/v1/traces"
 $env:OTEL_NODE_RESOURCE_DETECTORS="env,host,os"
-$env:OTEL_SERVICE_NAME="<service_name>"
+$env:OTEL_SERVICE_NAME="<SERVICE_NAME>"
 $env:NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
 <your_run_command>
 ```
 
- `<service_name>` is name of your service
+Replace:
 
-replace `<your_run_command>` with the run command of your application
+- **`{SERVICE_NAME}`** with name of service.
+- **`{your_run_command}`** with run command of your app.
 
 
 #### Send traces via OTel Collector binary - Code Level Automatic Instrumentation
@@ -646,58 +553,31 @@ npm install --save @opentelemetry/semantic-conventions@^1.21.0
 **Step 3.** Create `instrument.ts` file<br></br>
 
 ```ts
-import { registerInstrumentations } from '@opentelemetry/instrumentation';
-import {
-  WebTracerProvider,
-  ConsoleSpanExporter,
-  SimpleSpanProcessor,
-  BatchSpanProcessor,
-} from '@opentelemetry/sdk-trace-web';
-import { getWebAutoInstrumentations } from '@opentelemetry/auto-instrumentations-web';
-import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
-import { Resource } from '@opentelemetry/resources';
-import { B3Propagator } from '@opentelemetry/propagator-b3';
+/*instrumentation.ts*/
+import * as opentelemetry from '@opentelemetry/sdk-node';
+import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto';
+import { resourceFromAttributes } from '@opentelemetry/resources';
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 
-const resource = Resource.default().merge(
-  new Resource({
-    [SemanticResourceAttributes.SERVICE_NAME]: '<service_name>',
-    [SemanticResourceAttributes.SERVICE_VERSION]: '0.1.0',
+const sdk = new opentelemetry.NodeSDK({
+  traceExporter: new OTLPTraceExporter({
+    // optional - default url is http://localhost:4318/v1/traces
+    url: 'http://localhost:4318/v1/traces', // url is optional and can be omitted 
+  }),
+  instrumentations: [getNodeAutoInstrumentations()],
+  resource:  resourceFromAttributes({
+    // highlight-next-line
+    [SemanticResourceAttributes.SERVICE_NAME]: '<SERVICE_NAME>'
   })
-);
-
-const provider = new WebTracerProvider({ resource });
-
-provider.addSpanProcessor(new SimpleSpanProcessor(new ConsoleSpanExporter()));
-
-provider.addSpanProcessor(
-  new BatchSpanProcessor(
-    new OTLPTraceExporter({
-      url: 'http://localhost:4318/v1/traces',
-    })
-  )
-);
-
-provider.register({
-  propagator: new B3Propagator(),
 });
+sdk.start();
 
-registerInstrumentations({
-  instrumentations: [
-    getWebAutoInstrumentations({
-      '@opentelemetry/instrumentation-document-load': {},
-      '@opentelemetry/instrumentation-user-interaction': {},
-      '@opentelemetry/instrumentation-fetch': {
-        propagateTraceHeaderCorsUrls: /.+/,
-      },
-      '@opentelemetry/instrumentation-xml-http-request': {
-        propagateTraceHeaderCorsUrls: /.+/,
-      },
-    }),
-  ],
-});
 ```
-- `<service_name>` : Name of your service.
+
+Replace:
+
+- **`{SERVICE_NAME}`** with name of service.
 
 **Step 4.** Add the below import to your `main.ts` file.
 {/* <Admonition type="info">
