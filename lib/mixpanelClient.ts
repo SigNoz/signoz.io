@@ -14,6 +14,8 @@ export const initMixpanel = (): void => {
     // The property isn't recognized in the type definition, but it works at runtime
     // @ts-ignore
     autocapture: false,
+    // Disable cross-subdomain cookies for hosted subdomains
+    cross_subdomain_cookie: false,
   })
 }
 
