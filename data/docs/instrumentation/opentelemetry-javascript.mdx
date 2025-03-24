@@ -851,9 +851,13 @@ Follow these steps to link logs with traces:
 
 1. Add trace and span information in the log message.
 ```javascript
+const fetch = require('node-fetch');
 const { context, trace } = require('@opentelemetry/api');
 
-function generateLinkedLog(severity, message) {
+const SIGNOZ_INGESTION_KEY = '<SigNoz-ingestion-key>';
+const SIGNOZ_LOGS_URL = 'https://ingest.{region}.signoz.cloud:443/logs/json';
+
+function sendLogToSigNoz(severity, message) {
   const logMessage = {
     severityText: severity,
     body: message,
@@ -863,11 +867,24 @@ function generateLinkedLog(severity, message) {
   console.log('Sending log to SigNoz:', JSON.stringify(logMessage));
 }
 
-const span = tracer.startSpan('span-with-log');
-context.with(trace.setSpan(context.active(), span), () => {
-  generateLinkedLog('INFO', 'Log message linked with trace and sent to SigNoz');
-  span.end();
-});
+ try {
+        const response = await fetch(SIGNOZ_LOGS_URL, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "signoz-ingestion-key": SIGNOZ_INGESTION_KEY
+            },
+            body: JSON.stringify(logEntry)
+        });
+
+        if (!response.ok) {
+            console.error("Failed to send log to SigNoz:", response.statusText);
+        } else {
+            console.log("Log successfully sent to SigNoz.");
+        }
+    } catch (error) {
+        console.error("Error sending log to SigNoz:", error);
+    };
 ```
 1. Send logs to SigNoz to link them with traces.
 
