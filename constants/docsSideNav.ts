@@ -273,7 +273,7 @@ const docsSideNav = [
               },
               {
                 type: 'doc',
-                route: '/docs/instrumentation/reactjs',
+                route: '/docs/instrumentation/opentelemetry-reactjs',
                 label: 'ReactJS',
               },
             ],
