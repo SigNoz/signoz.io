@@ -38,6 +38,12 @@ const docsSideNav = [
                 route: '/docs/install/docker-swarm',
               },
               {
+                type: 'doc',
+                label: 'Linux',
+                route: '/docs/install/linux',
+                className: 'new-doc',
+              },
+              {
                 type: 'category',
                 isExpanded: false,
                 label: 'Kubernetes',
@@ -264,6 +270,11 @@ const docsSideNav = [
                 type: 'doc',
                 route: '/docs/instrumentation/nextjs',
                 label: 'NextJS',
+              },
+              {
+                type: 'doc',
+                route: '/docs/instrumentation/reactjs',
+                label: 'ReactJS',
               },
             ],
           },
@@ -520,7 +531,8 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/userguide/collecting_syslogs',
             label: 'Syslogs',
-          },          {
+          },
+          {
             type: 'doc',
             route: '/docs/logs-management/send-logs/logrus-to-signoz',
             label: 'Logrus',
@@ -566,7 +578,6 @@ const docsSideNav = [
                 route: '/docs/logs-management/send-logs/nodejs-winston-logs',
                 label: 'Winston Node.js logs',
               },
-    
             ],
           },
           {
@@ -813,20 +824,25 @@ const docsSideNav = [
         label: 'Drop Metrics',
       },
       {
+        type: 'doc',
+        route: '/docs/metrics-management/query-range-api',
+        label: 'Query Range API',
+      },
+      {
         type: 'category',
         label: 'Guides',
         isExpanded: false,
         items: [
-      {
-        type: 'doc',
-        route: '/docs/userguide/collecting-ecs-logs-and-metrics',
-        label: 'ECS Infra Metrics & Logs',
-      },
-      {
-        type: 'doc',
-        route: '/docs/userguide/collecting-ecs-sidecar-infra',
-        label: 'ECS Infra Sidecar',
-      },
+          {
+            type: 'doc',
+            route: '/docs/userguide/collecting-ecs-logs-and-metrics',
+            label: 'ECS Infra Metrics & Logs',
+          },
+          {
+            type: 'doc',
+            route: '/docs/userguide/collecting-ecs-sidecar-infra',
+            label: 'ECS Infra Sidecar',
+          },
         ],
       },
     ],
@@ -985,6 +1001,21 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/alerts-management/notification-channel/webhook',
             label: 'Webhook',
+          },
+          {
+            type: 'doc',
+            route: '/docs/alerts-management/notification-channel/incident-io',
+            label: 'Incident.io (Prometheus Alertmanager Webhook)',
+          },
+          {
+            type: 'doc',
+            route: '/docs/alerts-management/notification-channel/rootly',
+            label: 'Rootly (Prometheus Alertmanager Webhook)',
+          },
+          {
+            type: 'doc',
+            route: '/docs/alerts-management/notification-channel/zenduty',
+            label: 'Zenduty (Prometheus Alertmanager Webhook)',
           },
           {
             type: 'doc',
@@ -1823,24 +1854,49 @@ const docsSideNav = [
     // },
     items: [
       {
-        type: 'doc',
-        route: '/docs/operate/configuration',
-        label: 'Configuration',
-      },
-      {
-        type: 'doc',
-        route: '/docs/operate/docker-standalone',
-        label: 'Docker Standalone',
-      },
-      {
-        type: 'doc',
-        route: '/docs/operate/docker-swarm',
-        label: 'Docker Swarm',
-      },
-      {
-        type: 'doc',
-        route: '/docs/operate/kubernetes',
-        label: 'Kubernetes',
+        type: 'category',
+        isExpanded: false,
+        label: '<=0.75.0',
+        //route: '/docs/operate/migration',
+        // link: {
+        // type: 'generated-index',
+        // title: 'Migration Guides',
+        // description:
+        // 'The following sections provide instructions to migrate SigNoz components across newer versions. You need to run these migration scripts step by step. For example if you are currently on `0.8.2` and want to migrate to `0.10.0` - you need to run migration script for `0.9` first and then `0.10`',
+        // slug: '/docs/operate/migration/migration',
+        // },
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/operate/0.75.0/configuration',
+            label: 'Configuration',
+          },
+          {
+            type: 'category',
+            isExpanded: false,
+            label: 'Query Service',
+            route: '/docs/operate/0.75.0/query-service',
+            // link: {
+            // type: 'generated-index',
+            // title: 'Query Service',
+            // description:
+            // 'The following sections provide instructions to operate Query Service. You can proceed to one of the sections below.',
+            // slug: '/docs/operate/query-service',
+            // },
+            items: [
+              {
+                type: 'doc',
+                route: '/docs/operate/0.75.0/query-service/reset-admin-password',
+                label: 'Reset Admin Password',
+              },
+              {
+                type: 'doc',
+                route: '/docs/operate/0.75.0/query-service/user-invitation-smtp',
+                label: 'Enable SMTP for User Invitations',
+              },
+            ],
+          },
+        ],
       },
       {
         type: 'category',
@@ -1855,6 +1911,11 @@ const docsSideNav = [
         // slug: '/docs/operate/migration/migration',
         // },
         items: [
+          {
+            type: 'doc',
+            route: '/docs/operate/migration/upgrade-0.76',
+            label: 'Upgrade to v0.76',
+          },
           {
             type: 'doc',
             route: '/docs/operate/migration/upgrade-0.70',
@@ -1973,34 +2034,29 @@ const docsSideNav = [
         ],
       },
       {
-        type: 'category',
-        isExpanded: false,
-        label: 'Query Service',
-        route: '/docs/operate/query-service',
-        // link: {
-        // type: 'generated-index',
-        // title: 'Query Service',
-        // description:
-        // 'The following sections provide instructions to operate Query Service. You can proceed to one of the sections below.',
-        // slug: '/docs/operate/query-service',
-        // },
-        items: [
-          {
-            type: 'doc',
-            route: '/docs/operate/query-service/reset-admin-password',
-            label: 'Reset Admin Password',
-          },
-          {
-            type: 'doc',
-            route: '/docs/operate/query-service/user-invitation-smtp',
-            label: 'Enable SMTP for User Invitations',
-          },
-        ],
+        type: 'doc',
+        route: '/docs/operate/configuration',
+        label: 'Configuration',
       },
       {
         type: 'doc',
-        route: '/docs/operate/feature-flags/',
-        label: 'Feature Flags',
+        route: '/docs/operate/reset-admin-password',
+        label: 'Reset Admin Password',
+      },
+      {
+        type: 'doc',
+        route: '/docs/operate/docker-standalone',
+        label: 'Docker Standalone',
+      },
+      {
+        type: 'doc',
+        route: '/docs/operate/docker-swarm',
+        label: 'Docker Swarm',
+      },
+      {
+        type: 'doc',
+        route: '/docs/operate/kubernetes',
+        label: 'Kubernetes',
       },
       {
         type: 'doc',

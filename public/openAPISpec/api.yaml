@@ -1,0 +1,1737 @@
+openapi: 3.0.0
+info:
+  description: |
+
+    # Introduction
+    This API is documented in **OpenAPI format**. In addition to standard
+    OpenAPI syntax we use a few [vendor extensions](https://github.com/Redocly/redoc/blob/master/docs/redoc-vendor-extensions.md).
+
+    # Authentication
+
+    SigNoz offers below forms of authentication:
+      - API Key
+
+    <SecurityDefinitions />
+
+  version: 0.0.0
+  title: SigNoz API
+  termsOfService: 'https://signoz.io/terms-of-service/'
+  contact:
+    name: API Support
+    email: dev@signoz.io
+    url: https://signoz.io
+tags:
+  - name: alerts
+    description: Alerts API
+  - name: dashboards
+    description: Access to dashboards
+  - name: alerts_model
+    x-displayName: The Alerts Model
+    description: |
+      <SchemaDefinition schemaRef="#/components/schemas/Alert" />
+  - name: dashboards_model
+    x-displayName: The Dashboards Model
+    description: |
+      <SchemaDefinition schemaRef="#/components/schemas/Dashboard" />
+x-tagGroups:
+  - name: General
+    tags:
+      - alerts
+      - dashboards
+  - name: Models
+    tags:
+      - alerts_model
+      - dashboards_model
+paths:
+  '/api/v1/rules':
+    post:
+      tags:
+        - alerts
+      summary: Add a alert rule to the system
+      description: Add a alert rule to the system
+      operationId: createRule
+      parameters:
+        - name: SIGNOZ-API-KEY
+          in: header
+          required: true
+          schema:
+            type: string
+          example: '<TOKEN>'
+      responses:
+        '400':
+          description: Invalid input
+      requestBody:
+        $ref: '#/components/requestBodies/Alert'
+    get:
+      tags:
+        - alerts
+      summary: Get all alert rules
+      description: ''
+      operationId: getRules
+      parameters:
+        - name: SIGNOZ-API-KEY
+          in: header
+          required: true
+          schema:
+            type: string
+          example: '<TOKEN>'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Alert'
+  '/api/v1/rules/{id}':
+    get:
+      tags:
+        - alerts
+      summary: Find alert rule by ID
+      description: Returns a single alert rule
+      operationId: getRuleById
+      parameters:
+        - name: SIGNOZ-API-KEY
+          in: header
+          required: true
+          schema:
+            type: string
+          example: '<TOKEN>'
+        - name: id
+          in: path
+          description: ID of alert rule to return
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Alert'
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Alert not found
+    put:
+      tags:
+        - alerts
+      summary: Update an existing alert rule
+      description: ''
+      operationId: updateRule
+      parameters:
+        - name: SIGNOZ-API-KEY
+          in: header
+          required: true
+          schema:
+            type: string
+          example: '<TOKEN>'
+
+        - name: id
+          in: path
+          description: ID of alert rule to update
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '400':
+          description: Invalid input
+      requestBody:
+        $ref: '#/components/requestBodies/Alert'
+    delete:
+      tags:
+        - alerts
+      summary: Deletes a alert rule
+      description: ''
+      operationId: deleteRule
+      parameters:
+        - name: SIGNOZ-API-KEY
+          in: header
+          required: true
+          schema:
+            type: string
+          example: '<TOKEN>'
+        - name: id
+          in: path
+          description: Alert rule id to delete
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '400':
+          description: Invalid ID supplied
+  '/api/v1/dashboards':
+    post:
+      tags:
+        - dashboards
+      summary: Add a dashboard to the system
+      description: Add a dashboard to the system
+      operationId: createDashboard
+      parameters:
+        - name: SIGNOZ-API-KEY
+          in: header
+          required: true
+          schema:
+            type: string
+          example: '<TOKEN>'
+
+      responses:
+        '400':
+          description: Invalid input
+      requestBody:
+        $ref: '#/components/requestBodies/Dashboard'
+    get:
+      tags:
+        - dashboards
+      summary: Get all dashboards
+      description: ''
+      operationId: getDashboards
+      parameters:
+        - name: SIGNOZ-API-KEY
+          in: header
+          required: true
+          schema:
+            type: string
+          example: '<TOKEN>'
+
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Dashboard'
+  '/api/v1/dashboards/{uuid}':
+    get:
+      tags:
+        - dashboards
+      summary: Find dashboard by UUID
+      description: Returns a single dashboard
+      operationId: getDashboardByUUID
+      parameters:
+        - name: SIGNOZ-API-KEY
+          in: header
+          required: true
+          schema:
+            type: string
+          example: '<TOKEN>'
+        - name: id
+          in: path
+          description: ID of dashboard to return
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Dashboard'
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Dashboard not found
+    put:
+      tags:
+        - dashboards
+      summary: Update an existing dashboard
+      description: ''
+      operationId: updateDashboard
+      parameters:
+        - name: SIGNOZ-API-KEY
+          in: header
+          required: true
+          schema:
+            type: string
+          example: '<TOKEN>'
+
+        - name: id
+          in: path
+          description: ID of dashboard to update
+          required: true
+          schema:
+            type: string
+      responses:
+        '400':
+          description: Invalid input
+      requestBody:
+        $ref: '#/components/requestBodies/Dashboard'
+    delete:
+      tags:
+        - dashboards
+      summary: Deletes a alert rule
+      description: ''
+      operationId: deleteRule
+      parameters:
+        - name: SIGNOZ-API-KEY
+          in: header
+          required: true
+          schema:
+            type: string
+          example: '<TOKEN>'
+        - name: id
+          in: path
+          description: Alert rule id to delete
+          required: true
+          schema:
+            type: string
+      responses:
+        '400':
+          description: Invalid ID supplied
+  '/api/v4/query_range':
+    post:
+      tags:
+        - query_range
+      summary: Query metrics, logs, or traces over a time range
+      description: |
+        Provides a unified interface to query metrics, logs, and traces data with different query types.
+        Supports three query types:
+        * `builder` - Query builder for logs, traces, and metrics
+        * `clickhouse_sql` - Raw SQL queries (recommended to use this only when you need to use complex queries that are not supported by the query builder)
+        * `promql` - PromQL queries (uses Prometheus remote read with ClickHouse as the backend, slower than the query builder)
+      operationId: queryRange
+      parameters:
+        - name: SIGNOZ-API-KEY
+          in: header
+          required: true
+          schema:
+            type: string
+          example: '<TOKEN>'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QueryRangeParams'
+      responses:
+        '200':
+          description: Query results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueryRangeResponse'
+        '400':
+          description: Bad request parameters
+        '500':
+          description: Internal server error
+
+components:
+  schemas:
+    ApiResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+        type:
+          type: string
+        message:
+          type: string
+    PromQL:
+      type: object
+      description: PromQL for the widget
+      required:
+        - query
+        - name
+        - disabled
+      properties:
+        disabled:
+          type: boolean
+          description: Whether the PromQL query is disabled or not
+        name:
+          type: string
+          description: Name for the query (alphabet letter used in the UI, e.g. A, B, C, etc.)
+        query:
+          type: string
+          description: PromQL query expression
+        legend:
+          type: string
+          description: Legend for the query
+    BuilderQueryDashboard:
+      type: object
+      description: Builder query for the widget
+      properties:
+        queryData:
+          type: object
+          description: Query data for the widget. Populate with non-formula queries.
+          $ref: '#/components/schemas/BuilderQuery'
+        queryFormulas:
+          type: object
+          description: Query formulas for the widget. Populate with formula queries.
+          $ref: '#/components/schemas/BuilderQuery'
+    ClickhouseSQL:
+      type: object
+      description: Clickhouse SQL for the widget
+      required:
+        - query
+        - name
+        - disabled
+      properties:
+        disabled:
+          type: boolean
+          description: Whether the Clickhouse SQL is disabled or not
+        name:
+          type: string
+          description: Name for the query (alphabet letter used in the UI, e.g. A, B, C, etc.)
+        query:
+          type: string
+          description: Clickhouse SQL query for the widget
+        legend:
+          type: string
+          description: Legend for the query
+    Widget:
+      type: object
+      description: Widget for the dashboard
+      required:
+        - id
+        - panelTypes
+        - title
+        - query
+      properties:
+        id:
+          type: string
+          description: ID for the widget
+        description:
+          type: string
+          description: Description for the widget
+        isStacked:
+          type: boolean
+          description: Whether the widget is stacked or not
+        nullZeroValues:
+          type: boolean
+          description: Whether the widget has null zero values or not
+        opacity:
+          type: integer
+          description: Opacity for the widget
+        panelTypes:
+          type: string
+          description: Panel type for the widget. (graph - time series chart, table - table, value - single value, list - list of values, trace - trace view)
+          enum:
+            - 'graph'
+            - 'table'
+            - 'value'
+            - 'list'
+            - 'trace'
+        timePreferance:
+          type: string
+          description: Time preferance for the widget
+          enum:
+            - 'GLOBAL_TIME'
+        title:
+          type: string
+          description: Title for the widget
+        yAxisUnit:
+          type: string
+          description: Y axis unit for the widget
+        query:
+          type: object
+          description: Query for the widget. The query type can be builder, clickhouse_sql or promql
+          required:
+            - queryType
+          properties:
+            queryType:
+              type: string
+              description: Query type for the widget
+              enum:
+                - 'builder'
+                - 'clickhouse_sql'
+                - 'promql'
+            promql:
+              type: array
+              description: PromQL for the widget
+              items:
+                $ref: '#/components/schemas/PromQL'
+            clickhouse_sql:
+              type: array
+              description: Clickhouse SQL for the widget
+              items:
+                $ref: '#/components/schemas/ClickhouseSQL'
+            builder:
+              type: object
+              description: Builder query for the widget
+              $ref: '#/components/schemas/BuilderQueryDashboard'
+    Dashboard:
+      type: object
+      required:
+        - title
+        - layout
+        - widgets
+      properties:
+        title:
+          type: string
+          description: Title of the dashboard
+        description:
+          type: string
+          description: Description of the dashboard
+        tags:
+          type: array
+          description: Tags for the dashboard
+          items:
+            type: string
+        layout:
+          type: array
+          description: Layout for the dashboard
+          items:
+            type: object
+            properties:
+              x:
+                type: integer
+                description: X coordinate for the layout
+              y:
+                type: integer
+                description: Y coordinate for the layout
+              w:
+                type: integer
+                description: Width for the layout
+              h:
+                type: integer
+                description: Height for the layout
+              i:
+                type: string
+                description: ID for the layout
+              moved:
+                type: boolean
+                description: Whether the layout is moved or not
+              static:
+                type: boolean
+                description: Whether the layout is static or not
+        variables:
+          type: object
+          description: Variables for the dashboard
+          properties:
+            key:
+              type: object
+              description: Key for the variable
+              properties:
+                id:
+                  type: string
+                  description: ID for the variable
+                name:
+                  type: string
+                  description: Name for the variable
+                description:
+                  type: string
+                  description: Description for the variable
+                key:
+                  type: string
+                  description: Key for the variable, use same as name
+                type:
+                  type: string
+                  description: Type for the variable
+                  enum:
+                    - 'QUERY'
+                    - 'CONSTANT'
+                queryValue:
+                  type: string
+                  description: Query for the variable
+                allSelected:
+                  type: boolean
+                  description: Whether all the values are selected or not
+                customValue:
+                  type: string
+                  description: Custom value for the variable
+                multiSelect:
+                  type: boolean
+                  description: Whether the variable is multi select or not
+                order:
+                  type: integer
+                  description: Order for the variable
+                showALLOption:
+                  type: boolean
+                  description: Whether to show all option or not
+                sort:
+                  type: string
+                  description: Sort for the variable
+                  enum:
+                    - 'ASC'
+                    - 'DESC'
+                textboxValue:
+                  type: string
+                  description: Textbox value for the variable
+        widgets:
+          type: array
+          description: Widgets for the dashboard
+          items:
+            $ref: '#/components/schemas/Widget'
+      xml:
+        name: Dashboard
+    DataSource:
+      type: string
+      enum:
+        - metrics
+        - logs
+        - traces
+    AggregateOperator:
+      type: string
+      enum:
+        - 'count'
+        - 'count_distinct'
+        - 'sum'
+        - 'avg'
+        - 'min'
+        - 'max'
+        - 'p05'
+        - 'p10'
+        - 'p20'
+        - 'p25'
+        - 'p50'
+        - 'p75'
+        - 'p90'
+        - 'p95'
+        - 'p99'
+        - 'rate'
+        - 'sum_rate'
+        - 'avg_rate'
+        - 'min_rate'
+        - 'max_rate'
+        - 'rate_sum'
+        - 'rate_avg'
+        - 'rate_min'
+        - 'rate_max'
+        - 'hist_quantile_50'
+        - 'hist_quantile_75'
+        - 'hist_quantile_90'
+        - 'hist_quantile_95'
+        - 'hist_quantile_99'
+    Attribute:
+      type: object
+      properties:
+        key:
+          type: string
+          description: Key for the attribute
+        type:
+          type: string
+          description: Type of the attribute. Can be tag, resource or empty. `tag` for event level attributes, `resource` for resource level attributes.
+          enum:
+            - 'tag'
+            - 'resource'
+            - ''
+        dataType:
+          type: string
+          description: Data type of the attribute. It nothing specified, string type will be assumed.
+          enum:
+            - 'string'
+            - 'int64'
+            - 'float64'
+            - 'bool'
+            - 'array(string)'
+            - 'array(int64)'
+            - 'array(float64)'
+            - 'array(bool)'
+        isColumn:
+          type: boolean
+          description: Whether the attribute is a materialized column or not. Helps in faster querying.
+        isJSON:
+          type: boolean
+          description: Whether the attribute is a JSON or not. Applicable to logs only. When working with nested JSON, set this to true.
+    Filter:
+      type: object
+      description: Filter for the query
+      properties:
+        key:
+          type: object
+          description: Key for the filter
+          $ref: '#/components/schemas/Attribute'
+        value:
+          type: any
+          description: Value for the filter. This can be single value or an array of values. For `in` and `nin` operators, this should be an array of values.
+        op:
+          type: string
+          description: Operator for the filter
+          enum:
+            - '='
+            - '!='
+            - '>'
+            - '>='
+            - '<'
+            - '<='
+            - 'in'
+            - 'nin'
+            - 'like'
+            - 'nlike'
+            - 'contains'
+            - 'ncontains'
+            - 'regex'
+            - 'nregex'
+            - 'exists'
+            - 'nexists'
+            - 'has'
+            - 'nhas'
+    ReduceToOperator:
+      type: string
+      description: Reduce to operator for the query. When the panel type is value. All the values in time range will be reduced to one value.
+      enum:
+        - 'sum'
+        - 'avg'
+        - 'min'
+        - 'max'
+        - 'last'
+    BuilderQueryAlert:
+      type: object
+      description: Builder query for the alert
+      properties:
+        queryName:
+          type: object
+          description: Name of the query
+          $ref: '#/components/schemas/BuilderQuery'
+    AlertType:
+      type: string
+      enum:
+        - LOGS_BASED_ALERT
+        - METRIC_BASED_ALERT
+        - TRACES_BASED_ALERT
+        - EXCEPTIONS_BASED_ALERT
+    RuleType:
+      type: string
+      description: Use "promql_rule" for promql based alert otherwise use "threshold_rule"
+      enum:
+        - threshold_rule
+        - promql_rule
+    MatchType:
+      type: string
+      description: Type of the match ("1" - At least once i.e if the condition is met at least once in the time range, "2" - All the times i.e if the condition is met every time in the time range, "3" - On average i.e if the condition is met on average in the time range, "4" - In total i.e if the condition is met in total in the time range, "5" - Last value i.e if the condition is met in the last value of the time range)
+      enum:
+        - '0'
+        - '1'
+        - '2'
+        - '3'
+        - '4'
+        - '5'
+    CompareOpType:
+      type: string
+      description: Type of the comparision operation ("1" - Value is above, "2" - Value is below, "3" - Equal to, "4" - Not equal to)
+      enum:
+        - '0'
+        - '1'
+        - '2'
+        - '3'
+        - '4'
+    Condition:
+      type: object
+      required:
+        - target
+        - matchType
+        - op
+        - compositeQuery
+      properties:
+        target:
+          description: Target value for the condition. The "Alert Threshold" from the alert configuration UI.
+          type: float
+        matchType:
+          description: Type of the match
+          oneOf:
+            - $ref: '#/components/schemas/MatchType'
+        op:
+          description: Type of the comparison operation
+          oneOf:
+            - $ref: '#/components/schemas/CompareOpType'
+        compositeQuery:
+          description: Composite query for the condition
+          allOf:
+            - $ref: '#/components/schemas/CompositeQuery'
+        targetUnit:
+          description: Unit of the target. This the unit of the target value for the condition - corresponds to "Targer Unit" from the alert configuration UI.
+          type: string
+        selectedQueryName:
+          description: Name of the selected query. This is the name of the query from the composite query that is used to evaluate the condition.
+          type: string
+        alertOnAbsent:
+          description: Whether to alert on absent values. Corresponds to "Send a notification if data is missing for" from the alert configuration UI.
+          type: boolean
+        absentFor:
+          description: Amount of time for which data is missing in minutes to trigger [No data] alert. Corresponds to "Send a notification if data is missing for" from the alert configuration UI.
+          type: integer
+        requireMinPoints:
+          description: Whether to require minimum points to evaluate the condition. Corresponds to "Run alert evaluation only when there are minimum of" from the alert configuration UI.
+          type: boolean
+        requiredNumPoints:
+          description: Number of points required to evaluate the condition. This is helpful to avoid false positives when the query returns less than expected points. Example - if the query returns 2 points, but the eval window is 15 minutes, it is likely that there is not enough data to evaluate the condition so you could enforce a minimum of 10 points to evaluate the condition. Corresponds to "Run alert evaluation only when there are minimum of" from the alert configuration UI.
+          type: integer
+
+    Alert:
+      type: object
+      required:
+        - alert
+        - alertType
+        - ruleType
+        - condition
+      properties:
+        alert:
+          description: Name of the alert.
+          type: string
+        alertType:
+          description: Type of the alert
+          oneOf:
+            - $ref: '#/components/schemas/AlertType'
+        description:
+          description: Description of the alert. Supports templating result labels from the query in the description. See how to use it here https://signoz.io/docs/alerts-management/metrics-based-alerts/#alert-description
+          type: string
+        ruleType:
+          description: Type of the rule
+          oneOf:
+            - $ref: '#/components/schemas/RuleType'
+        evalWindow:
+          description: Evaluation time window (ex - (now-15m, now)) for the alert in parseable format ("15m", "30m" "1h" etc.). Default is 5m.
+          type: string
+        frequency:
+          description: Run frequency of the alert in parseable format ("15m", "30m" "1h" etc.). Default is 1m i.e runs every minute. Minimum is 1m.
+          type: string
+        condition:
+          description: Condition criteria for the alert.
+          allOf:
+            - $ref: '#/components/schemas/Condition'
+        labels:
+          description: Additional static labels for the alert
+          type: object
+          properties:
+            key:
+              type: string
+              description: Key for the label
+            value:
+              type: string
+              description: Value for the label
+        annotations:
+          description: Additional static annotations for the alert
+          type: object
+          properties:
+            key:
+              type: string
+              description: Key for the annotation
+            value:
+              type: string
+              description: Value for the annotation
+        disabled:
+          description: Whether the alert is disabled or not
+          type: boolean
+        source:
+          description: Source of the alert where it is created from. Use your instance URL for this.
+          type: string
+        preferredChannels:
+          description: Preferred channels for the alert. If not specified, all the channels will be used. Use the alert channel for this. This should be an array of alert channel names.
+          type: array
+          items:
+            type: string
+        version:
+          description: Version of the alert. Use "v4" unless you are user of old SigNoz version.
+          type: string
+      xml:
+        name: Alert
+
+    QueryRangeParams:
+      type: object
+      required:
+        - start
+        - end
+        - step
+        - compositeQuery
+      properties:
+        start:
+          type: integer
+          format: int64
+          description: Start time in epoch milliseconds
+        end:
+          type: integer
+          format: int64
+          description: End time in epoch milliseconds
+        step:
+          type: integer
+          format: int64
+          description: Step/aggregation interval in seconds.
+        compositeQuery:
+          $ref: '#/components/schemas/CompositeQuery'
+        variables:
+          type: object
+          description: Variables for the query. Useful when using templated queries. See https://signoz.io/docs/userguide/manage-variables/ for more details.
+          additionalProperties: true
+        noCache:
+          type: boolean
+          description: Whether to bypass cache for this query
+          default: false
+        formatForWeb:
+          type: boolean
+          description: Whether to format the results for web display
+          default: true
+      examples:
+        CpuUsageExample:
+          $ref: '#/components/examples/CpuUsageExample'
+        HttpDurationExample:
+          $ref: '#/components/examples/HttpDurationExample'
+        MemoryUsedExample:
+          $ref: '#/components/examples/MemoryUsedExample'
+        RequestCountExample:
+          $ref: '#/components/examples/RequestCountExample'
+        ErrorRateExample:
+          $ref: '#/components/examples/ErrorRateExample'
+
+    CompositeQuery:
+      type: object
+      required:
+        - queryType
+        - panelType
+      properties:
+        builderQueries:
+          type: object
+          description: Builder queries for the composite query
+          additionalProperties:
+            $ref: '#/components/schemas/BuilderQuery'
+        chQueries:
+          type: object
+          description: Clickhouse SQL queries for the composite query
+          additionalProperties:
+            $ref: '#/components/schemas/ClickHouseQuery'
+        promQueries:
+          type: object
+          description: PromQL queries for the composite query
+          additionalProperties:
+            $ref: '#/components/schemas/PromQuery'
+        panelType:
+          type: string
+          description: Panel type for the composite query. The format of the data is different for different panel types.
+          enum:
+            - 'graph'
+            - 'table'
+            - 'value'
+            - 'list'
+            - 'trace'
+        queryType:
+          type: string
+          description: Query type for the composite query.
+          enum:
+            - 'builder'
+            - 'clickhouse_sql'
+            - 'promql'
+        unit:
+          type: string
+          description: Unit for the time series data shown in the graph, This is mandatory for alerts that set the unit for the threshold.
+        fillGaps:
+          type: boolean
+          description: Whether to fill gaps in the time series data. See more details here https://signoz.io/docs/dashboards/panel-types/timeseries/#fill-gaps
+          default: false
+
+    PromQuery:
+      type: object
+      required:
+        - query
+        - disabled
+        - name
+      properties:
+        query:
+          type: string
+          description: PromQL query expression
+        stats:
+          type: string
+          description: Stats for the query
+        disabled:
+          type: boolean
+          description: Whether the PromQL query is disabled
+        legend:
+          type: string
+          description: Legend for the query
+        name:
+          type: string
+          description: Name for the query (alphabet letter used in the UI, e.g. A, B, C, etc.)
+
+    ClickHouseQuery:
+      type: object
+      required:
+        - query
+        - disabled
+        - name
+      properties:
+        query:
+          type: string
+          description: ClickHouse SQL query
+        disabled:
+          type: boolean
+          description: Whether the ClickHouse SQL query is disabled
+        legend:
+          type: string
+          description: Legend for the query
+        name:
+          type: string
+          description: Name for the query (alphabet letter used in the UI, e.g. A, B, C, etc.)
+
+    BuilderQuery:
+      type: object
+      required:
+        - queryName
+        - stepInterval
+        - dataSource
+        - expression
+      properties:
+        queryName:
+          type: string
+          description: Name of the query
+        stepInterval:
+          type: integer
+          format: int64
+          description: Step/Aggregation interval for the query in seconds.
+        dataSource:
+          type: string
+          description: Data source for the query
+          enum:
+            - 'metrics'
+            - 'traces'
+            - 'logs'
+        aggregateOperator:
+          type: string
+          description: Aggregate operator for the query, only applicable for traces and logs. See timeAggregation and spaceAggregation for metrics. Use noop for list queries that fetch the raw data.
+          enum:
+            - 'noop'
+            - 'count'
+            - 'count_distinct'
+            - 'sum'
+            - 'avg'
+            - 'min'
+            - 'max'
+            - 'p05'
+            - 'p10'
+            - 'p20'
+            - 'p25'
+            - 'p50'
+            - 'p75'
+            - 'p90'
+            - 'p95'
+            - 'p99'
+            - 'rate'
+            - 'rate_sum'
+            - 'rate_avg'
+            - 'rate_min'
+            - 'rate_max'
+        aggregateAttribute:
+          $ref: '#/components/schemas/AttributeKey'
+        temporality:
+          type: string
+          description: Temporality for metrics data
+          enum:
+            - 'Unspecified'
+            - 'Delta'
+            - 'Cumulative'
+        filters:
+          $ref: '#/components/schemas/FilterSet'
+        groupBy:
+          type: array
+          description: Group by attributes for the query
+          items:
+            $ref: '#/components/schemas/AttributeKey'
+        expression:
+          type: string
+          description: Expression for the query
+        disabled:
+          type: boolean
+          description: Whether the query is disabled
+        having:
+          type: array
+          description: Having clauses for the query
+          items:
+            $ref: '#/components/schemas/Having'
+        legend:
+          type: string
+          description: Legend for the query
+        limit:
+          type: integer
+          format: uint64
+          description: Limit for the query
+        offset:
+          type: integer
+          format: uint64
+          description: Offset for the query
+        pageSize:
+          type: integer
+          format: uint64
+          description: Page size for the query
+        orderBy:
+          type: array
+          description: Order by for the query
+          items:
+            $ref: '#/components/schemas/OrderBy'
+        reduceTo:
+          type: string
+          description: Reduce to operator for the query. If the panel type is `value`, you can use this to reduce the query result to a single value.
+          enum:
+            - 'last'
+            - 'sum'
+            - 'avg'
+            - 'min'
+            - 'max'
+        selectColumns:
+          type: array
+          description: Select columns for the query
+          items:
+            $ref: '#/components/schemas/AttributeKey'
+        timeAggregation:
+          type: string
+          description: Time aggregation for metrics queries. Read more here https://signoz.io/docs/metrics-management/types-and-aggregation/
+          enum:
+            - 'latest'
+            - 'sum'
+            - 'avg'
+            - 'min'
+            - 'max'
+            - 'count'
+            - 'count_distinct'
+            - 'rate'
+            - 'increase'
+        spaceAggregation:
+          type: string
+          description: Space aggregation for metrics queries. Read more here https://signoz.io/docs/metrics-management/types-and-aggregation/
+          enum:
+            - 'sum'
+            - 'avg'
+            - 'min'
+            - 'max'
+            - 'count'
+            - 'p50'
+            - 'p75'
+            - 'p90'
+            - 'p95'
+            - 'p99'
+        seriesAggregation:
+          type: string
+          description: Series aggregation for metrics queries with group by
+          enum:
+            - 'sum'
+            - 'avg'
+            - 'min'
+            - 'max'
+        functions:
+          type: array
+          description: Functions to apply to the query result
+          items:
+            $ref: '#/components/schemas/Function'
+
+    AttributeKey:
+      type: object
+      required:
+        - key
+      properties:
+        key:
+          type: string
+          description: Key for the attribute, this can be 1. intrinsic field like span's `name`, `kind`, `kind_string`, `duration_nano` or log's `timestamp`, `severity` etc. or span/log's attribute like `http.method`, `user.id`, `db.name` etc. or a resource attribute like `service.name`, `deployment.environment` etc.
+        dataType:
+          type: string
+          description: Data type of the attribute. Required when there are conflicting types for the same attribute key. For instance, one team might send `http.status_code` as `int64` and another team might send it as `string`.
+          enum:
+            - 'string'
+            - 'int64'
+            - 'float64'
+            - 'bool'
+            - 'array(string)'
+            - 'array(int64)'
+            - 'array(float64)'
+            - 'array(bool)'
+        type:
+          description: Type of the attribute. Required when there are conflicting types for the same attribute key. For instance, one team might send `deployment.environment` as `tag` and another team might send it as `resource`. It is highly recommended to avoid conflicting types, if possible.
+          enum:
+            - 'tag'
+            - 'resource'
+            - 'scope'
+            - 'spanSearchScope'
+        isColumn:
+          type: boolean
+          description: Whether the attribute is a materialized column.
+        isJSON:
+          type: boolean
+          description: Whether the attribute is JSON. Set this to true if you are querying the JSON stringified body. You are encourage to parse the JSON before ingesting the data for better query performance and capabilities. Read more here https://signoz.io/docs/logs-pipelines/guides/json/
+          
+    FilterSet:
+      type: object
+      properties:
+        op:
+          type: string
+          description: Operator for combining filter items. It is either `AND` between the filter items or `OR` between the filter items.
+          enum:
+            - 'AND'
+            - 'OR'
+        items:
+          type: array
+          description: Filter items
+          items:
+            $ref: '#/components/schemas/FilterItem'
+          
+    FilterItem:
+      type: object
+      required:
+        - key
+        - op
+      properties:
+        key:
+          $ref: '#/components/schemas/AttributeKey'
+        value:
+          description: Value to filter by. Type depends on the attribute's dataType. For instance, if attribute is string and the operator is `like`, the value should be a string. If the attribute is int64 and the operator is `>`, the value should be an int64. If the attribute is string and the operator is `in`, the value should be an array of strings.
+        op:
+          type: string
+          description: Filter operator
+          enum:
+            - '='
+            - '!='
+            - '>'
+            - '>='
+            - '<'
+            - '<='
+            - 'in'
+            - 'nin'
+            - 'like'
+            - 'nlike'
+            - 'contains'
+            - 'ncontains'
+            - 'regex'
+            - 'nregex'
+            - 'exists'
+            - 'nexists'
+            - 'has'
+            - 'nhas'
+            
+    Having:
+      type: object
+      required:
+        - columnName
+        - op
+        - value
+      properties:
+        columnName:
+          type: string
+          description: Column name for the having clause. The column name will always be the aggregate operator + aggregation attribute. The actual column name doesn't matter.
+        op:
+          type: string
+          description: Operator for the having clause
+          enum:
+            - '='
+            - '!='
+            - '>'
+            - '>='
+            - '<'
+            - '<='
+            - 'IN'
+            - 'NOT_IN'
+        value:
+          description: Value for the having clause. Type depends on the column.
+          
+    OrderBy:
+      type: object
+      required:
+        - columnName
+        - order
+      properties:
+        columnName:
+          type: string
+          description: Column name for the order by. For the attribute keys in the groupBy, you can use the same attribute key. For instance, if you are grouping by `service.name`, you can use `service.name` in the orderBy. Use the special `#SIGNOZ_VALUE` to order by the value of the query.
+        order:
+          type: string
+          description: Order direction
+          enum:
+            - 'asc'
+            - 'desc'
+          
+    Function:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          description: Function name
+          enum:
+            - 'cutOffMin'
+            - 'cutOffMax'
+            - 'clampMin'
+            - 'clampMax'
+            - 'absolute'
+            - 'runningDiff'
+            - 'log2'
+            - 'log10'
+            - 'cumSum'
+            - 'ewma3'
+            - 'ewma5'
+            - 'ewma7'
+            - 'median3'
+            - 'median5'
+            - 'median7'
+            - 'timeShift'
+            - 'anomaly'
+        args:
+          type: array
+          description: Function arguments
+          items:
+            type: object
+        namedArgs:
+          type: object
+          description: Named arguments for the function
+          additionalProperties: true
+          
+    QueryRangeResponse:
+      type: object
+      properties:
+        contextTimeout:
+          type: boolean
+          description: Whether the context timed out
+        contextTimeoutMessage:
+          type: string
+          description: Message for context timeout
+        resultType:
+          type: string
+          description: Type of the result
+        result:
+          type: array
+          description: Query results
+          items:
+            $ref: '#/components/schemas/Result'
+            
+    Result:
+      type: object
+      properties:
+        queryName:
+          type: string
+          description: Name of the query
+        series:
+          type: array
+          description: Time series data
+          items:
+            $ref: '#/components/schemas/Series'
+        predictedSeries:
+          type: array
+          description: Predicted series data (for anomaly detection)
+          items:
+            $ref: '#/components/schemas/Series'
+        upperBoundSeries:
+          type: array
+          description: Upper bound series data (for anomaly detection)
+          items:
+            $ref: '#/components/schemas/Series'
+        lowerBoundSeries:
+          type: array
+          description: Lower bound series data (for anomaly detection)
+          items:
+            $ref: '#/components/schemas/Series'
+        anomalyScores:
+          type: array
+          description: Anomaly scores data (for anomaly detection)
+          items:
+            $ref: '#/components/schemas/Series'
+        list:
+          type: array
+          description: List data
+          items:
+            $ref: '#/components/schemas/Row'
+        table:
+          $ref: '#/components/schemas/Table'
+    
+    Series:
+      type: object
+      properties:
+        labels:
+          type: object
+          description: Labels for the series
+          additionalProperties:
+            type: string
+        labelsArray:
+          type: array
+          description: Array of labels for the series
+          items:
+            type: object
+            additionalProperties:
+              type: string
+        values:
+          type: array
+          description: Data points for the series
+          items:
+            $ref: '#/components/schemas/Point'
+            
+    Point:
+      type: object
+      required:
+        - timestamp
+        - value
+      properties:
+        timestamp:
+          type: integer
+          format: int64
+          description: Timestamp for the data point
+        value:
+          type: string
+          description: Value for the data point (formatted as string)
+            
+    Row:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          description: Timestamp for the row
+        data:
+          type: object
+          description: Data for the row
+          additionalProperties: true
+            
+    Table:
+      type: object
+      properties:
+        columns:
+          type: array
+          description: Columns for the table
+          items:
+            $ref: '#/components/schemas/TableColumn'
+        rows:
+          type: array
+          description: Rows for the table
+          items:
+            $ref: '#/components/schemas/TableRow'
+            
+    TableColumn:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the column
+        queryName:
+          type: string
+          description: Name of the query that this column belongs to
+        isValueColumn:
+          type: boolean
+          description: Whether this column is a value column
+            
+    TableRow:
+      type: object
+      properties:
+        data:
+          type: object
+          description: Data for the row
+          additionalProperties: true
+
+  requestBodies:
+    Alert:
+      content:
+        application/json:
+          schema:
+            allOf:
+              - description: Alert object that needs to be added to the system
+                title: Alert
+              - $ref: '#/components/schemas/Alert'
+      description: Alert object that needs to be added to the system
+      required: true
+    Dashboard:
+      content:
+        application/json:
+          schema:
+            allOf:
+              - description: Dashboard object that needs to be added to the system
+                title: Dashboard
+              - $ref: '#/components/schemas/Dashboard'
+      description: Dashboard object that needs to be added to the system
+      required: true
+  securitySchemes:
+    api_key:
+      description: >
+        For this API docs, you can use the api key `SIGNOZ-API-KEY` to access data.
+      type: apiKey
+      name: SIGNOZ-API-KEY
+      in: header
+  examples:
+    Order:
+      value:
+        quantity: 1
+        shipDate: '2018-10-19T16:46:45Z'
+        status: placed
+        complete: false
+
+    # Metrics examples
+    CpuUsageExample:
+      summary: CPU usage percentage over time (gauge metric with delta temporality)
+      value:
+        start: 1742602572000
+        end: 1742604372000
+        step: 60
+        variables:
+          SIGNOZ_START_TIME: 1742602572000
+          SIGNOZ_END_TIME: 1742604372000
+          k8s_node_name: ["gke-application-eu-c-pl-addon-n2dhc4--c80039c0-2gjz"]
+          k8s_cluster_name: "application-eu-central"
+        formatForWeb: false
+        compositeQuery:
+          queryType: "builder"
+          panelType: "graph"
+          fillGaps: false
+          builderQueries:
+            A:
+              queryName: "A"
+              dataSource: "metrics"
+              aggregateAttribute:
+                key: "k8s_node_cpu_utilization"
+                dataType: "float64"
+                type: "Gauge"
+                isColumn: true
+                isJSON: false
+              expression: "A"
+              disabled: false
+              timeAggregation: "avg"
+              spaceAggregation: "sum"
+              stepInterval: 60
+              reduceTo: "sum"
+              filters:
+                items:
+                  - key:
+                      key: "k8s_cluster_name"
+                      dataType: "string"
+                      isColumn: false
+                      type: "tag"
+                    op: "="
+                    value: "{{.k8s_cluster_name}}"
+                  - key:
+                      key: "k8s_node_name"
+                      dataType: "string"
+                      isColumn: false
+                      type: "tag"
+                    op: "in"
+                    value: ["{{.k8s_node_name}}"]
+                op: "AND"
+              groupBy:
+                - key: "k8s_node_name"
+                  dataType: "string"
+                  isColumn: false
+                  isJSON: false
+                  type: "tag"
+              having: []
+              orderBy: []
+              legend: "{{k8s_node_name}}"
+              functions: []
+
+    HttpDurationExample:
+      summary: JVM GC Duration p90 from histogram metric
+      value:
+        start: 1742602968000
+        end: 1742604768000
+        step: 60
+        variables:
+          SIGNOZ_START_TIME: 1742602968000
+          SIGNOZ_END_TIME: 1742604768000
+        formatForWeb: false
+        compositeQuery:
+          queryType: "builder"
+          panelType: "graph"
+          fillGaps: false
+          builderQueries:
+            A:
+              queryName: "A"
+              dataSource: "metrics"
+              aggregateAttribute:
+                key: "jvm_gc_duration_bucket"
+                dataType: "float64"
+                type: "Histogram"
+                isColumn: true
+                isJSON: false
+              timeAggregation: ""
+              spaceAggregation: "p90"
+              expression: "A"
+              disabled: false
+              stepInterval: 60
+              reduceTo: "avg"
+              filters:
+                items: []
+                op: "AND"
+              groupBy:
+                - key: "service_name"
+                  dataType: "string"
+                  type: "tag"
+                  isColumn: false
+                  isJSON: false
+              having: []
+              orderBy: []
+              functions: []
+              legend: "{{service_name}}"
+
+    MemoryUsedExample:
+      summary: Memory usage over time (gauge metric with unspecified temporality)
+      value:
+        start: 1742603085000
+        end: 1742604885000
+        step: 60
+        variables:
+          SIGNOZ_START_TIME: 1742603085000
+          SIGNOZ_END_TIME: 1742604885000
+          k8s_node_name: ["gke-application-pl-addon-n2dhc4-od-71879e78-0ql9"]
+          k8s_cluster_name: "application"
+        formatForWeb: true
+        compositeQuery:
+          queryType: "builder"
+          panelType: "graph"
+          fillGaps: false
+          builderQueries:
+            A:
+              dataSource: "metrics"
+              queryName: "A"
+              aggregateOperator: "avg"
+              aggregateAttribute:
+                key: "k8s_node_memory_usage"
+                dataType: "float64"
+                type: "Gauge"
+                isColumn: true
+                isJSON: false
+              timeAggregation: "avg"
+              spaceAggregation: "sum"
+              expression: "A"
+              disabled: false
+              stepInterval: 60
+              functions: []
+              filters:
+                items:
+                  - key:
+                      key: "k8s_cluster_name"
+                      dataType: "string"
+                      isColumn: false
+                      type: "tag"
+                    op: "="
+                    value: "{{.k8s_cluster_name}}"
+                  - key:
+                      key: "k8s_node_name"
+                      dataType: "string"
+                      isColumn: false
+                      type: "tag"
+                    op: "in"
+                    value: ["{{.k8s_node_name}}"]
+                op: "AND"
+              having: []
+              orderBy: []
+              groupBy:
+                - key: "k8s_node_name"
+                  dataType: "string"
+                  type: "tag"
+                  isColumn: false
+                  isJSON: false
+              legend: "used"
+              reduceTo: "avg"
+
+    RequestCountExample:
+      summary: HTTP request count as rate (sum metric with cumulative temporality)
+      value:
+        start: 1742603295000
+        end: 1742605095000
+        step: 60
+        variables:
+          SIGNOZ_START_TIME: 1742603278000
+          SIGNOZ_END_TIME: 1742605078000
+          k8s_node_name: ["gke-application-pl-addon-n2dhc4-od-71879e78-0ql9"]
+          k8s_cluster_name: "application-eu-central"
+        formatForWeb: false
+        compositeQuery:
+          queryType: "builder"
+          panelType: "graph"
+          fillGaps: false
+          builderQueries:
+            A:
+              dataSource: "metrics"
+              queryName: "A"
+              aggregateOperator: "rate"
+              aggregateAttribute:
+                key: "signoz_calls_total"
+                dataType: "float64"
+                type: "Sum"
+                isColumn: true
+                isJSON: false
+              timeAggregation: "rate"
+              spaceAggregation: "sum"
+              expression: "A"
+              disabled: false
+              stepInterval: 60
+              functions: []
+              filters:
+                items: []
+                op: "AND"
+              having: []
+              orderBy: []
+              groupBy:
+                - key: "service_name"
+                  dataType: "string"
+                  type: "tag"
+                  isColumn: false
+                  isJSON: false
+              legend: "{{service_name}}"
+              reduceTo: "avg"
+
+    ErrorRateExample:
+      summary: HTTP error rate calculation (sum metric with cumulative temporality)
+      value:
+        start: 1742601948000
+        end: 1742605548000
+        step: 60
+        variables: {}
+        formatForWeb: false
+        compositeQuery:
+          queryType: "builder"
+          panelType: "graph"
+          fillGaps: false
+          builderQueries:
+            A:
+              dataSource: "metrics"
+              queryName: "A"
+              aggregateOperator: "rate"
+              aggregateAttribute:
+                key: "signoz_calls_total"
+                dataType: "float64"
+                type: "Sum"
+                isColumn: true
+                isJSON: false
+              timeAggregation: "rate"
+              spaceAggregation: "sum"
+              functions: []
+              filters:
+                items:
+                  - key:
+                      key: "status_code"
+                      dataType: "string"
+                      type: "tag"
+                      isColumn: false
+                      isJSON: false
+                    op: "="
+                    value: "STATUS_CODE_ERROR"
+                op: "AND"
+              expression: "A"
+              disabled: true
+              stepInterval: 60
+              having: []
+              orderBy: []
+              groupBy:
+                - key: "service_name"
+                  dataType: "string"
+                  type: "tag"
+                  isColumn: false
+                  isJSON: false
+              legend: "{{service_name}}"
+              reduceTo: "avg"
+            B:
+              dataSource: "metrics"
+              queryName: "B"
+              aggregateOperator: "rate"
+              aggregateAttribute:
+                key: "signoz_calls_total"
+                dataType: "float64"
+                type: "Sum"
+                isColumn: true
+                isJSON: false
+              timeAggregation: "rate"
+              spaceAggregation: "sum"
+              functions: []
+              filters:
+                items: []
+                op: "AND"
+              expression: "B"
+              disabled: true
+              stepInterval: 60
+              having: []
+              orderBy: []
+              groupBy:
+                - key: "service_name"
+                  dataType: "string"
+                  type: "tag"
+                  isColumn: false
+                  isJSON: false
+              legend: ""
+              reduceTo: "avg"
+            F1:
+              queryName: "F1"
+              expression: "A/B"
+              disabled: false
+              legend: ""

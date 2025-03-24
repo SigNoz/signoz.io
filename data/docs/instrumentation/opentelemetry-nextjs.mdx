@@ -60,7 +60,7 @@ You need to configure the endpoint for SigNoz cloud in this file.
 Create `instrumentation.node.ts`:
 ```typescript
 'use strict'
-import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
+import { OTLPHttpJsonTraceExporter } from '@vercel/otel';
 
 // Add otel logging
 import { diag, DiagConsoleLogger, DiagLogLevel } from '@opentelemetry/api';
@@ -71,7 +71,7 @@ const exporterOptions = {
   headers: { 'signoz-ingestion-key': 'SIGNOZ_INGESTION_KEY' }, // Set if you are using SigNoz Cloud
 }
 
-export const traceExporter = new OTLPTraceExporter(exporterOptions);
+export const traceExporter = new OTLPHttpJsonTraceExporter(exporterOptions);
 ```
 
 Replace:

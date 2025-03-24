@@ -1,0 +1,225 @@
+---
+title: Engineering a Trace Details Page That Handles a Million Spans
+slug: enabling-a-million-spans-in-trace-details-page
+date: 2025-03-16
+tags: [product]
+authors: [vikrant, ankit_anand]
+description: How do we load and debug traces of any size in a browser tab? In this blog, we’ll break down the techniques that enable seamless loading and analysis of any trace irrespective of its size - even if it comes with a million spans.
+image: /img/blog/2025/03/million-spans-cover.webp
+keywords: [ traces, spans, distributed tracing, SigNoz]
+
+---
+
+Can a browser handle a million elements? If you've ever tried to render a million `<div>` elements in a browser, you know what happens—it crashes, freezes, or becomes completely unresponsive.
+
+We recently launched a [feature](https://signoz.io/blog/traces-without-limits/) in our launch week that got a lot of attention - loading and visualizing even a million spans in our trace detail page. This sparked curiosity among users and developers, leading many to ask: **How did we do it?**
+
+The motivation was clear—our users needed this capability. It unlocks new debugging workflows, making it easier to analyze massive traces efficiently.
+
+Below is our revamped trace details page. Each line represents a span. In some use cases, thousands or millions of spans in a single trace need to be loaded while analyzing that trace.
+
+In this blog, we’ll break down the techniques that enable seamless loading and analysis of **any number of spans**.
+
+<Figure src="/img/blog/2025/03/trace-details-page.webp" alt="Our revamped trace details page that can load a million spans seamlessly" caption="Our revamped trace details page that can load a million spans seamlessly" />
+
+For those who don’t have much context about tracing, below is a brief primer on what a trace is.
+
+## What is a trace? (Why a Million Spans Matter)
+
+Trace is the path of a request through your application, be it a monolith application or an application based on microservice architecture. The foundational element of a trace is the underlying spans building the trace. Spans represent a unit of work performed by your application.
+
+
+<Figure src="/img/blog/2025/03/trace-spans.webp" alt="Spans build up a trace" caption="How spans build up a trace and shows the complete journey of a transaction" />
+
+ In simpler terms, spans are structured logs with more context and hierarchy baked in. Due to the hierarchical nature of traces, they come in very handy in the performance optimisation of requests through the system. Performance optimisation includes but is not limited to identifying bottlenecks ( pin-pointing slow components ), improving inefficient code paths ( unnecessary loops ), detecting requests waiting for locks, etc. 
+
+Tracing is also useful in systems with background jobs where you can monitor the state of each background job triggered by the initiator in a single trace. 
+
+Let’s take an example of a trading application. A scheduled update of the price of securities can trigger a bulk update of all available securities listed on a stock exchange. Any delay in the updates can cause significant loss to users. This is where tracing shines by pinpointing the network delays or third-party API latencies and much more. But when traces contain **millions of spans**, how do you **load, analyze, and debug** them efficiently?
+
+That’s the problem we set out to solve.
+
+## The Problem: Making Trace Size Irrelevant
+
+**How do we load and debug traces of any size in a browser tab?**
+
+We deliberately avoided placing an upper limit on trace size. The goal was simple: no matter how large a trace gets, users should be able to load and debug it **without crashes, lag, or unresponsiveness**.
+
+We broke the problem down into two major challenges:
+
+1. **Loading a large trace** – Efficiently fetching, processing, and rendering a **million spans**.
+2. **Debugging a large trace** – Making it practical for users to analyze and navigate huge traces.
+
+## Loading a Large Trace: Breaking Down the Problem
+
+Loading a large trace in a browser requires solving three distinct challenges:
+
+- Fetching spans from the database efficiently
+- Processing the data according to the API contract
+- Rendering spans on the frontend without performance bottlenecks
+
+Each of these steps presents its own constraints, so we optimized them individually before integrating them into a seamless solution. This allowed us to push the limits of performance at each stage while ensuring they worked together harmoniously.
+
+## Rendering a Million Spans - Browser Limitations
+
+<aside>
+💡
+**Can a Browser Even Handle a Million Elements? (Short Answer: No)**
+
+</aside>
+
+We started by testing the **absolute limits** of what a browser tab could handle. Our first approach was brute force—rendering **a million `<div>` tags** on an empty page with *lorem ipsum* strings in a React app. 
+
+🚨 **Result:** The browser tab became unresponsive. **Complete failure.**
+
+
+<Figure src="/img/blog/2025/03/browser-tab-crash.webp" alt="Browser breaking on loading a million div elements." caption="Browser breaking on loading a million div elements." />
+
+This was our first key learning: **no matter what, dumping a million spans into the frontend won’t work.**
+
+ So, we needed to restrict the number of elements rendered in the [DOM](https://developer.mozilla.org/en-US/docs/Glossary/DOM) tree. A very popular concept of virtualisation came into the discussions.
+
+### Solution: Render Only What the User Sees (Virtualization)
+
+Virtualisation is a UI optimisation technique that involves maintaining the data in virtual memory while rendering only a limited subset of the data. The purpose of this pattern is to minimise the number of elements in the DOM, reduce the number of mutations, and reduce the CPU and memory usage in general.
+
+<figure data-zoomable align='center'>
+    <img src="/img/blog/2025/03/virtualisation.gif" alt="Virtualisation"/>
+    <figcaption><i>How virtualisation works - only rendering things in a user’s viewport</i></figcaption>
+</figure>
+
+With virtualization:
+
+- We **only render spans within the user’s viewport**.
+- As users scroll, **new spans replace old ones** dynamically.
+- The UI remains smooth regardless of trace size.
+
+Even when there are a **million or a billion** elements to be rendered, we only render a fixed-sized subset of them and update them dynamically based on the user actions (scroll/clicks in our case). 
+
+We tried rendering the million divs again with virtualisation plugged in. 
+
+Results? 
+
+We were still not able to load a million divs smoothly in the browser. We tried running a couple of tests with a little smaller numbers: 100k and 200k divs. We were able to render them on the browser but were not satisfied with the interface's performance. 
+
+So, we became clear here that: 
+
+- Bringing in the whole trace is not going to work out and we need to find ways to slice the trace.
+- Any heavy processing of the data is also not going to work. So, we need the API contract to be such that the frontend can simply render the interface without any processing.
+- Any discussion or research on the size of the HTTP call becomes irrelevant as we are slicing the data.
+
+**Based on the above, we closed this theme with the following conclusion:**
+
+- Virtualise the data rendering on the frontend.
+- Keep the size of rendering data on a lower end, even with virtualisation.
+- Do not accumulate data across multiple requests on the frontend.
+
+## Fetching a Million Spans - Optimizing the Backend
+
+Fetching large traces requires efficient querying. We use a **columnar database** to store and retrieve telemetry data.
+
+Through **stress tests and indexing**, we achieved **sub-second response times** for traces with **a million spans**. The details of this optimization deserve a separate blog 😉.
+
+## Slicing a Million Spans - The Key to Pagination in Hierarchical Data
+
+### The Challenge: Traces Are Not Flat Data
+
+Coming back to the slicing of the data for the frontend rendering. The most common approach for data slicing is **pagination**. However, we have always implemented or heard about pagination on a flat data structure but never on a tree data structure since traces, by nature, belong to the graph family. 
+
+But after a couple of failed stack overflow searches ( which were mostly “*don’t do this*” and none of “*how to do this*” ), we started approaching this problem differently. What if we don’t treat trace as a graph? 
+
+Can we flatten the trace in a way that it still preserves the graph nature but yet produces a flat data structure similar to how we visualise a trace? 
+
+A trace graph starts with the root of the trace, followed by the children subtrees of the root node. The same pattern recursively applies to the children's subtrees as well. This reminded us of the famous **Pre-order traversal** of graphs! 
+
+### What is a pre-order traversal?
+
+Preorder traversal is a type of **tree traversal** that follows the Root-Left-Right policy (in the case of a binary tree) where:
+
+- The **root** node of the subtree is visited first.
+- Then, the **left subtree** is traversed.
+- At last, the **right subtree** is traversed.                      
+
+
+<figure data-zoomable align='center'>
+    <img src="/img/blog/2025/03/pre-order-traversal.gif" alt="Pre-order traversal"/>
+    <figcaption><i>Pre-order traversal, CREDITS: Geeks for Geeks </i></figcaption>
+</figure>
+
+
+### Flattening the Graph While Preserving Hierarchy
+
+The preorder traversal for a trace produces a flattened list of spans in the order defined by: 
+
+`ROOT_NODE, CHILD-1 , CHILD-1-SUBTREE , CHILD-2 , CHILD-2-SUBTREE......` 
+
+By **flattening traces using pre-order traversal**, we created a structure that:
+
+- Maintains the natural trace order.
+- Enables pagination like a flat list.
+- Keeps parent-child relationships intact.
+
+## Syncing Backend and Frontend - Smart Windowing for a Smooth UX
+
+**Dynamically Adjusting Data Based on User Focus**
+
+Pagination isn’t enough. Users want a **smooth debugging experience**, meaning the UI should always load spans **around the area of interest**.
+
+One issue before we could generate the pre-order traversal of trace data was that we needed to know which spans were collapsed/uncollapsed.
+
+Once the flattened list is generated, we need to decide the offsets and range of the data being sent to the frontend. The offset and range will mainly be updated by a couple of user interactions with the interface. 
+
+- Collapse / Uncollapse of any span
+- Scrolling through the list of spans.
+
+Each of these actions suggested the need for another entity in the request payload which serves as the anchor for offset. We called this entity as ***interestedSpanID.***
+
+We finalised the flattened pre-order traversal and the ***interestedSpanID*** for the user interacting with the interface. Since we needed to avoid accumulating excessive data on the frontend while still providing a smooth user experience, we had to define the optimal window of data to send to the frontend.
+
+We set the skewed centre of the window to be ***interestedSpanId*** and selected a 40 percent window on the historical view and 60 percent of the window to be the new spans
+
+We defined a **focused window** for fetching spans dynamically:
+
+```markup
+Lower Limit  → i - 0.4 * SPAN_LIMIT_ON_FRONTEND  
+Upper Limit  → i + 0.6 * SPAN_LIMIT_ON_FRONTEND
+
+Result -> PREORDER_TRAVERSAL[LOWER_LIMIT, UPPER_LIMIT]
+```
+
+Where:
+
+- `i` = index of the interestedSpanID.
+- `SPAN_LIMIT_ON_FRONTEND` = number of spans visible at any given time.
+- **40% of spans are historical, 60% are new**.
+
+🚀 **Impact:** Users always get relevant spans **without frontend lag**.
+
+## Debugging a million traces
+
+Loading a million spans is useless if users can’t **find what they need**. We introduced:
+
+- **Span Search:** Filter spans by any attribute (e.g., `service.name` = "payment-service").
+- **Previous/Next Navigation:** Move between related spans effortlessly.
+
+<Figure src="/img/blog/2025/03/search-span-prev-next.webp" alt="Search spans with attributes" caption="Filter spans by any attribute" />
+
+Another key aspect of making it easier to debug a large trace is our synced waterfall and flamegraph views. It makes it very easy to identify where a specific span lies in the overall transaction.
+
+<Figure src="/img/blog/2025/03/synced-waterfall-flamegraph-view.webp" alt="Synced waterfall and flamegraph" caption="Synced waterfall and flamegraph view helps you get an idea of where your current span lies in the overall transaction." />
+
+Now, even if users scroll to the **490,000th span**, they **instantly see where it fits** in the bigger picture.
+
+## Traces Without Limits
+
+By combining **database optimization, virtualization, pre-order traversal, and intelligent pagination**, we enabled traces with **millions of spans** to load seamlessly on **SigNoz**.
+
+We are excited to see how this enables our users to debug performance issues where traces are huge. A quick recap of what we did:
+
+- Browser Limitations - Used virtualization.
+- Database Bottlenecks - Optimized queries for sub-second performance.
+- Pagination in Graphs - Used pre-order traversal to flatten traces.
+
+With these techniques, we were able to make the size of the traces irrelevant. If you’re looking for a one-stop observability tool that does logs, metrics, and traces in a single application, check us out.
+
+---

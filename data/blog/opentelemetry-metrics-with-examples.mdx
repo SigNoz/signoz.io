@@ -1,0 +1,441 @@
+---
+title: OpenTelemetry Metrics with 5 Practical Examples
+slug: opentelemetery-metrics-with-examples
+date: 2025-03-18
+tags: [OpenTelemetry]
+authors: [elizabeth_mathew]
+description: OpenTelemetry provides a unified framework for collecting custom metrics using instruments like counters, gauges, and histograms. Blog contains practical examples to monitor custom metrics and visualise it in a Application Performance Monitoring dashboard [APM].
+image: /img/blog/2025/03/opentelemetry-metrics-with-examples.webp
+hide_table_of_contents: false
+keywords: [opentelemetry, metrics, custom metrics, examples, Application Performance Monitoring, SigNoz, instruments, counter, gauge, histogram, metrics API]
+---
+
+<head>
+  <link rel="canonical" href="https://signoz.io/blog/opentelemetery-metrics-with-examples/"/>
+</head>
+
+Picture this, your observability tool already nails the basics like request rates, latency and memory usage, but you need more insight. *Think user churn rates, engagement spikes, or even how many carts get abandoned mid-checkout*. That’s where OpenTelemetry steps in, providing a way to track those critical custom metrics with ease.
+
+
+<a href = "https://opentelemetry.io/docs/specs/otel/metrics/" rel="noopener noreferrer nofollow" target="_blank" >OpenTelemetry metrics</a> has emerged as a benchmark for collection and management of metric data by providing a unified framework for generating, processing and exporting metrics. This blog is primarily about different kinds of measurement instruments and some really cool and fun ways of easily collecting custom metrics from your application. By showcasing these examples, we hope to inspire you with ideas you can adopt for your own monitoring needs.
+
+So let’s jump right into it!
+
+## OpenTelemetry [OTel] Metrics - An Overview
+
+Before we understand OTel metrics, let’s wrap our head around metrics, in general.
+
+A metric is a measurement of a service captured at runtime which tells us about the state of the system. 
+Additionally, these metrics can later be used by APM tools for configuring alerts or creating dashboards for easy monitoring. 
+We will be closely examining some cool custom metric examples later in this blog.
+
+The best way to understand OTel metrics is to think of it as a ‘fitness tracker’.  A fitness tracker monitors various health metrics such as steps taken, heart rate, and calories burned throughout the day. Similarly,  OTel metrics functions as the ‘fitness tracker’ for your application, continuously collecting data on application and system health like request rates, error counts, and response times. 
+
+<figure data-zoomable align='center'>
+    <img src="/img/blog/2025/03/metric_pipeline.webp" alt="Metric pipeline"/>
+    <figcaption><i>
+    OTel metrics -
+    <a href = "https://opentelemetry.io/docs/specs/otel/metrics/#concepts" style={{color: "#b2b5b8"}} rel="noopener noreferrer nofollow" target="_blank" >programming model</a>
+    </i></figcaption>
+</figure>
+
+OpenTelemetry metrics are completely open-source and vendor-neutral. Think of it like a free universal remote that works with any TV you’ve got, not just one brand, and you don’t have to pay a dime!  It fully integrates with popular monitoring tools including Prometheus and StatsD through a standardised collector and exporter system. As shown in the figure above, it splits the two main parts, SDK and API, so different SDKs can be configured at run time. This makes it super easy to tweak and control how your metrics are handled.
+
+## OTel measurement instruments
+
+To generate metrics, OpenTelemetry provides a *Meter*, a core component of its API. This *Meter* lets you create different *instruments*, like counters or gauges, to capture *measurements*. Each *measurement* is a single data point that shows the value of a *metric* at a specific time, giving you a clear snapshot of what’s happening in your system. 
+
+## Classification of instruments
+
+Instruments can be broadly classified into two based on **when** the metric is collected.
+
+### Synchronous instruments
+
+These integrate directly into your application's workflow, measuring events as they happen. For instance, they can track immediate data like HTTP request sizes or transaction counts as your code processes them. 
+
+### Asynchronous Instruments
+
+They work by collecting measurements only when needed (*on demand*) depending on the configuration of the metric collection system. To give an example, consider collecting the temperature from a sensor every 15 seconds for safety monitoring.
+
+
+<Admonition>
+ Synchronous instruments can also additionally have **trace context** associated with it as well. 
+Asynchronous instruments usually register **callback functions** which are invoked when necessary for metric collection.
+</Admonition>
+
+
+We will explore different types of instruments and their use cases in depth in the next section!
+
+## Types of instruments
+
+Currently OTel metrics supports seven different instruments. Let’s try to understand these instruments and their properties.
+
+### Counter
+
+A synchronous instrument which measures values that only increase over time.
+
+### Asynchronous Counter
+
+Same as a counter but reports values only when demanded.
+
+### UpDown counter
+
+A synchronous instrument which measures values that can increase or decrease over time.
+
+### Asynchronous UpDown counter
+
+Similar to an upDown counter, but reports measurements only on demand.
+
+### Gauge
+
+A synchronous instrument for taking measurements or snapshots of a metric at a single point in time. The value can arbitrarily increase or decrease over time.
+
+### Asynchronous gauge
+
+A gauge which reports values only when observed.
+
+### Histogram
+
+A synchronous instrument that records the distribution of values.
+
+<figure data-zoomable align='center'>
+    <img src="/img/blog/2025/03/instrument.webp" alt="Metric instruments"/>
+    <figcaption><i>OTel metric instruments</i></figcaption>
+</figure>
+
+
+## How to choose your instrument?
+
+Deciding which OpenTelemetry metric instrument to use can be challenging. Selecting the right instrument is crucial, as it determines how measurements are collected and the type of metric exported, ultimately affecting how you can query and analyse the data.
+
+So, how do you choose the right instrument?
+
+The simple answer is that there's no one-size-fits-all solution. Multiple instruments can often be applicable for a given use case. However, by considering specific aspects of your measurement needs, you can narrow down the pool of suitable instruments. 
+
+Before proceeding, we will try to understand two important properties of metrics that will help us in choosing the right instrument.
+
+- <u>***Additive property***</u> is about whether you can combine values (like adding across different sources or time periods) and still produce meaningful information.
+    
+    For instance, sum  of HTTP requests hitting different servers in a period of time.
+    
+
+- <u>***Monotonic property***</u> is about the direction of change, whether the value  only goes one way (usually up) over time.
+    
+    To give an example, the total bytes sent over a network, it only goes up as more data is sent.
+    
+
+Now, with this knowledge, you can use the table below to make a list of instruments that best fit your needs.
+
+<table>
+  <thead>
+    <tr>
+      <th>Instrument</th>
+      <th>Additive</th>
+      <th>Monotonic</th>
+      <th>Use cases</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td> Counter</td>
+      <td>✅</td>
+      <td>✅</td>
+      <td>
+        - count the number of HTTP 5xx errors <br/>
+        - count total requests by endpoint <br/>
+        - count cache hits/misses <br/>
+        - measure batch jobs completed <br/>
+        - track failed authentication attempts
+      </td>
+    </tr>
+    <tr>
+      <td> Async counter</td>
+      <td>✅</td>
+      <td>✅</td>
+      <td>
+        - track background jobs completed by celery workers <br/>
+        - measure messages processed by a Kafka <br/>
+        - tracking API rate limit occurring in an API gateway
+      </td>
+    </tr>
+    <tr>
+      <td>UpDown counter</td>
+      <td>✅</td>
+      <td>❎</td>
+      <td>
+        - monitor the number of active user sessions <br/>
+        - measure number of concurrent connections to a server <br/>
+        - tracking amount of live transactions (finance system)
+      </td>
+    </tr>
+    <tr>
+      <td>Async upDown counter</td>
+      <td>✅</td>
+      <td>❎</td>
+      <td>
+        - monitor number of messages in AWS SQS <br/>
+        - observe CPU usage percentage over time <br/>
+        - to monitor the number of active shards in your system
+      </td>
+    </tr>
+    <tr>
+      <td>Gauge</td>
+      <td>❎</td>
+      <td>❎</td>
+      <td>
+        - monitor CPU usage over time <br/>
+        - monitor temperature of a device by a sensor <br/>
+        - monitor current memory usage <br/>
+        - report the current ratio of cache hits to total lookups
+      </td>
+    </tr>
+    <tr>
+      <td>Async gauge</td>
+      <td>❎</td>
+      <td>❎</td>
+      <td>
+        - track the latency of an external API <br/>
+        - display the latest price of a stock (trading application) <br/>
+        - monitor count of pods in various states
+      </td>
+    </tr>
+    <tr>
+      <td>Histogram</td>
+      <td>✅</td>
+      <td>❎</td>
+      <td>
+        - track how fast players react to an event in a game <br/>
+        - measure the length of garbage collection pauses <br/>
+        - track execution time of serverless functions like AWS Lambda <br/>
+        - measure the complexity distribution of search queries
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+Now that we have understood each instrument in depth and when to use them, let’s see how to use it in our applications!
+
+## Instrument parameters
+
+When registering an instrument, we associate it with a *meter* and identify it with a set of *parameters* passed to the instrument.
+
+Each instrument will have the following parameters,
+
+- The <u>**name**</u> of the instrument
+- The <u>**kind**</u> of the Instrument
+    - if it’s a counter, gauge or any other instrument
+    - if it’s asynchronous or synchronous
+- An <u>**unit**</u> of measure [optional]
+- A <u>**description**</u> [optional]
+- Advisory parameters [optional]
+    
+    Currently, OTel supports two advisory parameters including *Attributes* and ExplicitBucketBoundaries
+    
+
+Let’s try registering a simple counter with some parameters which counts the number of database queries made,
+
+```python
+# Get a meter for our database service
+meter = metrics.get_meter("database_service")
+
+# name: db.queries.count
+# kind: Counter (synchronous)
+# unit: "queries"
+# description: "Total number of database queries executed"
+
+query_counter = meter.create_counter(
+    name="db.queries.count", 
+    description="Total number of database queries executed",
+    unit="queries"
+)
+
+## code ##
+
+def execute_query(query_type, table, query_time_ms):
+    """Simulate executing a database query and record metrics"""
+    
+    # 1. Record a query execution using the counter
+    query_counter.add(
+        1,  # Increment by 1
+        {
+            "query_type": query_type,  # Attribute: type of query
+            "table": table             # Attribute: table being queried
+        }
+    )
+
+```
+
+Having understood how to create an instrument and define it with parameters, let’s explore some pratical ways to leverage these instruments for measuring custom metrics.
+
+## Metric code examples
+
+Let’s look at some fun examples of measuring items using the above instruments. For the purpose of demonstration, we will assume the context of a simple, e-commerce application coded in Python.
+
+### 1. Items added to cart per user and per product using an upDown counter
+
+```python
+# Register the counter
+items_in_cart = meter.create_up_down_counter(
+		name="items_in_cart_current",
+		description="Current number of items in the cart",
+		unit="1"
+		)
+	
+## code ##
+
+# Add to cart
+@app.route('/add_to_cart/<int:product_id>', methods=['POST'])
+@login_required
+def add_to_cart(product_id):
+		# Connect to database
+    # Update the database
+    # Update counter by 1
+    items_in_cart.add(1, attributes={"user_id": str(current_user.id), "product_id": str(product_id)})
+   
+```
+
+We notice that *attributes* (advisory parameter) are passed as a *parameter* for the *add operation* of the *upDown counter*. Attributes are metadata that enrich and provide context to the metric being recorded. 
+
+In the above example,
+
+- *user_id -* An attribute that ties the metric to a specific user, allowing you to track cart activity per individual.
+- *product_id*: An attribute that links the metric to a specific product, enabling analysis of which items are being added most often.
+
+Without attributes, the metric would simply show that ‘Z *items were added to cart*’. With attributes, you can filter, aggregate, or visualise the data in tools like SigNoz to see *how many items user X added* or *how popular product Y* is. This makes the metric far more actionable for monitoring and debugging.
+
+### 2. Cart size per user using a gauge
+
+```python
+# Register the gauge
+cart_size_gauge = meter.create_gauge(
+    name="cart_size",
+    description="Current number of items in the cart per user",
+    unit="1"
+)
+
+## code ##
+
+# Home page with product listing
+@app.route('/')
+def index():
+    # Connect to database
+    # Initialize cart count
+    cart_count = 0
+    
+    # If user is logged in, get their cart items and calculate total quantity
+    if current_user.is_authenticated:
+        # Get user cart items (cart_count)
+        # Calculate total quantity
+        # Update metrics
+        cart_size_gauge.set(cart_count, attributes={"user_id": str(current_user.id)})
+
+```
+
+### 3. Distribution of product prices in the cart using an histogram
+
+```python
+# Register the histogram
+cart_price_histogram = meter.create_histogram(
+    name="cart_price_distribution",
+    description="Distribution of product prices in the cart",
+    unit="USD"
+)
+
+## code ##
+
+# Add to cart
+@app.route('/add_to_cart/<int:product_id>', methods=['POST'])
+@login_required
+def add_to_cart(product_id):
+    # Fetch product prices and ids from the database
+    # Update metrics
+    cart_price_histogram.record(product_price, attributes={"user_id": str(current_user.id), "product_id": str(product_id)})
+    
+```
+
+### 4. Total stock across all products using an asynchronous (observable) upDown counter
+
+```python
+# Asynchronous upDown counter callback
+def get_total_stock(_):
+    # Make a connection to db
+    # Perform sum query
+    c.execute("SELECT SUM(stock) FROM products")
+    total = c.fetchone()[0] or 0
+    # Close db connection
+    # Yield metric value
+    yield metrics.Observation(total)
+    
+  # Register the updown counter
+  meter.create_observable_up_down_counter(
+    name="total_stock",
+    description="Total stock across all products",
+    unit="1",
+    callbacks=[get_total_stock]
+)
+```
+
+We had previously touched upon callbacks. Let’s try to understand it in greater depth with the code sample above.
+
+In the code, a *callback* (*get_total_stock*)  is a function that you provide to the *metrics system* via the *meter*. It gets called automatically whenever the system needs to collect the current value of the metric, in this case, the *total_stock*. 
+
+<figure data-zoomable align='center'>
+    <img src="/img/blog/2025/03/updown.webp" alt="Signoz counter"/>
+    <figcaption><i>Visualised as a counter in a SigNoz panel</i></figcaption>
+</figure>
+
+
+### 5. Average monetary value across all users’ carts using asynchronous (observable) gauge
+
+```python
+# Asynchronous gauge callback
+def get_average_cart_value(_):
+    # Make a connection to db
+    # Perform query to get average cart value
+    c.execute('''SELECT AVG(total_value) 
+                 FROM (SELECT SUM(p.price * c.quantity) as total_value 
+                       FROM cart c 
+                       JOIN products p ON c.product_id = p.id 
+                       GROUP BY c.user_id)''')
+    avg_value = c.fetchone()[0] or 0.0
+    # Close db connection
+    # Yield metric value
+    yield metrics.Observation(avg_value)
+    
+# Register the gauge
+meter.create_observable_gauge(
+    name="average_cart_value",
+    description="Average monetary value of all users' carts",
+    unit="USD",
+    callbacks=[get_average_cart_value]
+)
+```
+
+Voila, you are now ready to add custom metrics to your applications!
+
+## Visualise your custom metrics with an OpenTelemetry-native backend
+
+OpenTelemetry helps you in generating metrics. If you want to store and visualize them, you need to send them to an OpenTelemetry-compatible backend like SigNoz. 
+
+Using our [dashboards](https://signoz.io/docs/userguide/manage-dashboards/) and [alerts](https://signoz.io/docs/alerts-management/metrics-based-alerts/) feature, you can monitor any custom metric coming from your application.
+
+<figure data-zoomable align='center'>
+    <img src="/img/blog/2025/03/dashboard.webp" alt="Signoz dashboard"/>
+    <figcaption><i>Dashboard created in SigNoz</i></figcaption>
+</figure>
+
+SigNoz cloud is the easiest way to run SigNoz. [Sign up](https://signoz.io/teams/) for a free
+account and get 30 days of unlimited access to all features. 
+
+[![Get Started - Free CTA](/img/launch_week/try-signoz-cloud-blog-cta.png)](https://signoz.io/teams/) 
+
+
+## Key takeaways
+
+- OpenTelemetry [OTel] metrics provide a standardised framework for collecting, processing, and exporting metric data from applications.
+
+- There are seven different measurement instruments in OTel, including counters, gauges, and histograms, each serving specific use cases based on their additive and monotonic properties.
+
+- Metrics can be collected synchronously  or asynchronously depending on the instrument type and use case.
+
+- Fun examples using a Python e-commerce application, showing how to implement various metrics like cart items, stock levels, and price distributions.
