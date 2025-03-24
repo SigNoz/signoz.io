@@ -271,6 +271,11 @@ const docsSideNav = [
                 route: '/docs/instrumentation/nextjs',
                 label: 'NextJS',
               },
+              {
+                type: 'doc',
+                route: '/docs/instrumentation/opentelemetry-reactjs',
+                label: 'ReactJS',
+              },
             ],
           },
           {
@@ -819,6 +824,11 @@ const docsSideNav = [
         label: 'Drop Metrics',
       },
       {
+        type: 'doc',
+        route: '/docs/metrics-management/query-range-api',
+        label: 'Query Range API',
+      },
+      {
         type: 'category',
         label: 'Guides',
         isExpanded: false,
@@ -991,6 +1001,21 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/alerts-management/notification-channel/webhook',
             label: 'Webhook',
+          },
+          {
+            type: 'doc',
+            route: '/docs/alerts-management/notification-channel/incident-io',
+            label: 'Incident.io (Prometheus Alertmanager Webhook)',
+          },
+          {
+            type: 'doc',
+            route: '/docs/alerts-management/notification-channel/rootly',
+            label: 'Rootly (Prometheus Alertmanager Webhook)',
+          },
+          {
+            type: 'doc',
+            route: '/docs/alerts-management/notification-channel/zenduty',
+            label: 'Zenduty (Prometheus Alertmanager Webhook)',
           },
           {
             type: 'doc',
