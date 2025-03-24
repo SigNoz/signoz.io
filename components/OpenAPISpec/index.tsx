@@ -6,5 +6,5 @@ import '@stoplight/elements/styles.min.css'
 import React from 'react'
 
 export default function OpenAPISpec() {
-  return <API apiDescriptionUrl="/openAPISpec/alerts.yaml" router="hash" layout="responsive" />
+  return <API apiDescriptionUrl="/openAPISpec/api.yaml" router="hash" layout="responsive" />
 }
