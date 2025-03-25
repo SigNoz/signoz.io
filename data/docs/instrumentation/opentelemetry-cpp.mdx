@@ -308,4 +308,156 @@ bazel run <name>
 </TabItem>
 </Tabs>
 
+
+## Link logs and traces
+
+Logs and traces provide valuable insights into an app's performance. While logs capture event details with timestamps, traces track a request’s journey across different components, highlighting latency and bottlenecks. 
+Linking logs and traces using a common trace ID helps you pinpoint issues, analyze failures, and optimize performance.
+
+![An image displaying linked logs and traces to SigNoz](images/logs-traces-flow.png)
+
+### Generate traces
+
+To trace a request from start to finish, you need to generate spans for each operation. OpenTelemetry provides automatic instrumentation for various frameworks.
+
+Follow these steps to generate traces:
+
+1. Configure tracing using OpenTelemetry. 
+    ```cpp
+    #include <iostream>
+    #include <string>
+    #include <thread>
+    #include <chrono>
+    #include <nlohmann/json.hpp>
+    #include <opentelemetry/exporters/otlp/otlp_grpc_exporter.h>
+    #include <opentelemetry/sdk/resource/resource.h>
+    #include <opentelemetry/sdk/trace/simple_processor.h>
+    #include <opentelemetry/sdk/trace/tracer_provider.h>
+    #include <opentelemetry/trace/provider.h>
+    #include <opentelemetry/trace/span.h>
+    #include <opentelemetry/trace/scope.h>
+    #include <opentelemetry/context/runtime_context.h>
+    #include <cpprest/http_client.h>
+
+    namespace trace = opentelemetry::trace;
+    namespace sdktrace = opentelemetry::sdk::trace;
+    namespace context = opentelemetry::context;
+    namespace otlp = opentelemetry::exporter::otlp;
+
+    const std::string SIGNOZ_INGESTION_KEY = "<SigNoz-ingestion-key>";
+    const std::string SIGNOZ_LOGS_URL = "https://ingest.{region}.signoz.cloud:443/v1/logs";
+    const std::string SIGNOZ_OTLP_ENDPOINT = "https://ingest.{region}.signoz.cloud:443/v1/traces";
+
+    std::shared_ptr<trace::Tracer> InitTracer()
+    {
+        auto exporter = std::unique_ptr<sdktrace::SpanExporter>(new otlp::OtlpGrpcExporter(otlp::OtlpGrpcExporterOptions{SIGNOZ_OTLP_ENDPOINT}));
+        auto processor = std::unique_ptr<sdktrace::SpanProcessor>(new sdktrace::SimpleSpanProcessor(std::move(exporter)));
+        auto resource = opentelemetry::sdk::resource::Resource::Create({{"service.name", "CoffeeShopService"}});
+        
+        auto provider = std::make_shared<sdktrace::TracerProvider>(std::move(processor), resource);
+        opentelemetry::trace::Provider::SetTracerProvider(provider);
+        return provider->GetTracer("CoffeeShopService");
+    }
+
+    std::string GetTraceID()
+    {
+        auto span = trace::GetSpan(context::RuntimeContext::GetCurrent());
+        if (span)
+        {
+            return span->GetContext().trace_id().ToHex();
+        }
+        return "";
+    }
+
+    std::string GetSpanID()
+    {
+        auto span = trace::GetSpan(context::RuntimeContext::GetCurrent());
+        if (span)
+        {
+            return span->GetContext().span_id().ToHex();
+        }
+        return "";
+    }
+   
+    ```
+1. Create spans for each method to track its execution. For example, consider a method to get coffee.
+    ```cpp
+    void GetCoffee()
+    {
+      auto tracer = opentelemetry::trace::Provider::GetTracerProvider()->GetTracer("CoffeeShopService");
+      auto span = tracer->StartSpan("GetCoffee");
+
+      trace::Scope scope(span);
+      LogRequest("GetCoffee");
+
+      // Simulate coffee preparation
+      std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+      LogResponse("GetCoffee");
+
+      span->End();
+    }
+    ```
+
+### Generate logs
+
+Logs provide detailed insights at different request execution stages. Include contextual details such as timestamps, severity levels, and message descriptions.
+
+1. Attach log information each method. You can optionally add logs before and after each request.
+    ```cpp
+    void LogRequest(const std::string &methodName)
+    {
+        std::string message = "Incoming request: " + methodName;
+        std::cout << "INFO: " << message << " - Trace ID: " << GetTraceID() << std::endl;
+        SendLogToSigNoz("INFO", message);
+    }
+
+    void LogResponse(const std::string &methodName)
+    {
+        std::string message = "Response sent from: " + methodName;
+        std::cout << "INFO: " << message << " - Trace ID: " << GetTraceID() << std::endl;
+        SendLogToSigNoz("INFO", message);
+    }
+    ```
+1.  You can add more information to log for each method.
+
+### Link logs with traces
+
+To correlate logs with traces, include `trace_id` and `span_id` in the log.
+
+Follow these steps to link logs with traces:
+
+1. Add trace and span information in the log message.
+    ```cpp
+    void SendLogToSigNoz(const std::string &level, const std::string &message)
+    {
+        nlohmann::json log_entry = {
+            {"trace_id", GetTraceID()},
+            {"span_id", GetSpanID()},
+            {"severity_text", level},
+            {"message", message},
+            {"attributes", {{"service", "coffee-shop"}}}};
+
+        web::http::client::http_client client(U(SIGNOZ_LOGS_URL));
+        web::http::http_request request(web::http::methods::POST);
+        request.headers().add("Content-Type", "application/json");
+        request.headers().add("signoz-ingestion-key", SIGNOZ_INGESTION_KEY);
+        request.set_body(log_entry.dump());
+
+        try
+        {
+            web::http::http_response response = client.request(request).get();
+            std::cout << "INFO: Log sent to SigNoz, status: " << response.status_code() << std::endl;
+        }
+        catch (const std::exception &e)
+        {
+            std::cerr << "ERROR: Failed to send log to SigNoz: " << e.what() << std::endl;
+        }
+    }
+    ```
+1. Send logs to SigNoz to link them with traces.
+
+![An image displaying a specifc log with traces in SigNoz](images/sample-log-coffee.png)
+
+
 {/* <InstrumentationFAQ /> */}
