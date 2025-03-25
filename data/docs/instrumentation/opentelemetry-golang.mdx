@@ -873,6 +873,172 @@ Validate your traces in SigNoz:
 2. In SigNoz, open the `Services` tab. Hit the `Refresh` button on the top right corner, and your application should appear in the list of `Applications`.
 3. Go to the `Traces` tab, and apply relevant filters to see your application’s traces.
 
+
+## Link logs and traces
+
+Logs and traces provide valuable insights into an app's performance. While logs capture event details with timestamps, traces track a request’s journey across different components, highlighting latency and bottlenecks. 
+Linking logs and traces using a common trace ID helps you pinpoint issues, analyze failures, and optimize performance.
+
+![An image displaying linked logs and traces to SigNoz](images/logs-traces-goLang.png)
+
+### Generate traces
+
+To trace a request from start to finish, you need to generate spans for each operation. OpenTelemetry provides automatic instrumentation for various frameworks.
+
+Follow these steps to generate traces:
+
+1. Configure tracing using OpenTelemetry. 
+    ```go
+    package main
+
+    import (
+        "bytes"
+        "context"
+        "encoding/json"
+        "fmt"
+        "log"
+        "net/http"
+        "time"
+
+        "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+        "go.opentelemetry.io/otel"
+        "go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
+        "go.opentelemetry.io/otel/sdk/resource"
+        "go.opentelemetry.io/otel/sdk/trace"
+        "go.opentelemetry.io/otel/trace"
+        "go.opentelemetry.io/otel/semconv/v1.18.0"
+    )
+
+    const (
+        SigNozIngestionKey = "<SigNoz-ingestion-key>"
+        SigNozLogsURL      = "https://ingest.{region}.signoz.cloud:443/logs/json"
+        SigNozOTLPEndpoint = "https://ingest.{region}.signoz.cloud:443/v1/traces"
+    )
+
+    func InitTracer() (*trace.TracerProvider, error) {
+        exporter, err := otlptracehttp.New(context.Background(), otlptracehttp.WithEndpoint(SigNozOTLPEndpoint))
+        if err != nil {
+            return nil, fmt.Errorf("failed to create exporter: %w", err)
+        }
+
+        tp := trace.NewTracerProvider(
+            trace.WithBatcher(exporter),
+            trace.WithResource(resource.NewWithAttributes(
+                semconv.SchemaURL,
+                semconv.ServiceNameKey.String("CoffeeShopService"),
+            )),
+        )
+        otel.SetTracerProvider(tp)
+        return tp, nil
+    }
+
+    func GetTraceID(ctx context.Context) string {
+        span := trace.SpanFromContext(ctx)
+        sc := span.SpanContext()
+        if !sc.HasTraceID() {
+            return ""
+        }
+        return sc.TraceID().String()
+    }
+
+    func GetSpanID(ctx context.Context) string {
+        span := trace.SpanFromContext(ctx)
+        sc := span.SpanContext()
+        if !sc.HasSpanID() {
+            return ""
+        }
+        return sc.SpanID().String()
+    }
+   
+    ```
+1. Create spans for each method to track its execution. For example, consider a method to get coffee.
+    ```go
+    func GetCoffee(ctx context.Context) 
+    {
+        tracer := otel.Tracer("CoffeeShopService")
+        ctx, span := tracer.Start(ctx, "GetCoffee")
+        defer span.End()
+
+        LogRequest(ctx, "GetCoffee")
+
+        // Simulate coffee preparation
+        time.Sleep(500 * time.Millisecond)
+
+        LogResponse(ctx, "GetCoffee")
+    }
+    ```
+
+### Generate logs
+
+Logs provide detailed insights at different request execution stages. Include contextual details such as timestamps, severity levels, and message descriptions.
+
+1. Attach log information each method. You can optionally add logs before and after each request.
+    ```go
+    func LogRequest(ctx context.Context, methodName string) {
+        message := fmt.Sprintf("Incoming request: %s", methodName)
+        traceID := GetTraceID(ctx)
+        log.Printf("INFO: %s - Trace ID: %s\n", message, traceID)
+        SendLogToSigNoz(ctx, "INFO", message)
+    }
+
+    func LogResponse(ctx context.Context, methodName string) {
+        message := fmt.Sprintf("Response sent from: %s", methodName)
+        traceID := GetTraceID(ctx)
+        log.Printf("INFO: %s - Trace ID: %s\n", message, traceID)
+        SendLogToSigNoz(ctx, "INFO", message)
+    }
+    ```
+1.  You can add more information to log for each method.
+
+### Link logs with traces
+
+To correlate logs with traces, include `trace_id` and `span_id` in the log.
+
+Follow these steps to link logs with traces:
+
+1. Add trace and span information in the log message.
+    ```go
+    func SendLogToSigNoz(ctx context.Context, level, message string) {
+        logEntry := []map[string]interface{}{
+            {
+                "trace_id":       GetTraceID(ctx),
+                "span_id":        GetSpanID(ctx),
+                "severity_text":  level,
+                "message":        message,
+                "attributes": map[string]string{"service": "coffee-shop"},
+            },
+        }
+
+        jsonData, err := json.Marshal(logEntry)
+        if err != nil {
+            log.Printf("ERROR: Failed to marshal log entry: %v", err)
+            return
+        }
+
+        req, err := http.NewRequest("POST", SigNozLogsURL, bytes.NewBuffer(jsonData))
+        if err != nil {
+            log.Printf("ERROR: Failed to create request: %v", err)
+            return
+        }
+
+        req.Header.Set("Content-Type", "application/json")
+        req.Header.Set("signoz-ingestion-key", SigNozIngestionKey)
+
+        client := http.Client{Transport: otelhttp.NewTransport(http.DefaultTransport)}
+        resp, err := client.Do(req)
+        if err != nil {
+            log.Printf("ERROR: Failed to send log to SigNoz: %v", err)
+            return
+        }
+        defer resp.Body.Close()
+
+        log.Printf("INFO: Log sent to SigNoz, status: %s", resp.Status)
+    }
+    ```
+1. Send logs to SigNoz to link them with traces.
+
+![An image displaying a specifc log with traces in SigNoz](images/sample-log-coffee.png)
+
 {/* You might see other dummy applications if you’re using SigNoz for the first time. You can remove it by following the docs [here](https://signoz.io/docs/operate/docker-standalone/#remove-the-sample-application). */}
 
 {/* <figure data-zoomable align='center'>
