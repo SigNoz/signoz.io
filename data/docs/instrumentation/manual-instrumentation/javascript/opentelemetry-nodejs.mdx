@@ -35,16 +35,25 @@ npm install @opentelemetry/api @opentelemetry/sdk-node @opentelemetry/resources 
 
 Acquire a tracer to create spans:
 
-```jsx
+<Tabs>
+<TabItem value='TypeScript' label="TypeScript">
+```typescript
 import { trace } from '@opentelemetry/api'
 const tracer = trace.getTracer('your-service-name')
 ```
+</TabItem>
+<TabItem value='JavaScript' label='JavaScript'>
+```javascript
+const { trace } = require('@opentelemetry/api')
+const tracer = trace.getTracer('your-service-name')
+```
+</TabItem>
+</Tabs>
 
 #### Adding Custom Spans
-
 Example of adding a custom span in a function:
 
-```jsx
+```ts
 async function yourFunction() {
   return tracer.startActiveSpan('your-span-name', async (span) => {
     try {
@@ -78,7 +87,8 @@ For more detailed instructions with a [sample app](https://github.com/SigNoz/ope
 #### Setup Metric Collection
 
 Create a `telemetry.js` file and configure the `MeterProvider` with an `OTLPMetricExporter`:
-
+<Tabs>
+<TabItem value='Typescript' label="Typescript" default>
 ```jsx
 import { metrics } from '@opentelemetry/api'
 import {
@@ -121,15 +131,59 @@ const myServiceMeterProvider = new MeterProvider({
 // Set this MeterProvider to be global to the app being instrumented.
 metrics.setGlobalMeterProvider(myServiceMeterProvider)
 ```
+</TabItem>
+<TabItem value='Javascript' label='Javascript'>
+```jsx
+const { metrics } = require('@opentelemetry/api');
+const {
+  MeterProvider,
+  PeriodicExportingMetricReader,
+} = require('@opentelemetry/sdk-metrics');
+const { Resource } = require('@opentelemetry/resources');
+const {
+  SemanticResourceAttributes,
+} = require('@opentelemetry/semantic-conventions');
+const { OTLPMetricExporter } = require('@opentelemetry/exporter-metrics-otlp-http');
+
+// Define resource with service name
+const resource = Resource.default().merge(
+  new Resource({
+    [SemanticResourceAttributes.SERVICE_NAME]: 'your-service-name',
+  })
+);
+
+// Configure OTLP metrics exporter
+const otlpMetricsExporter = new OTLPMetricExporter({
+  url: 'http://otel-collector:4318/v1/metrics', // ensure the port is correct
+});
+
+const metricReader = new PeriodicExportingMetricReader({
+  exporter: otlpMetricsExporter,
+  // Default is 60000ms (60 seconds). Set to 10 seconds for demonstrative purposes only.
+  exportIntervalMillis: 10000,
+});
+
+// Initialize MeterProvider
+const myServiceMeterProvider = new MeterProvider({
+  resource: resource,
+  readers: [metricReader],
+});
+
+// Set this MeterProvider to be global to the app being instrumented.
+metrics.setGlobalMeterProvider(myServiceMeterProvider);
+```
+</TabItem>
+</Tabs>
 
 - Here, `your-service-name` is the name you give to your service, which helps identify it in SigNoz. Replace `your-service-name` with a unique name that describes the service's function.
 - `otel-collector` refers to the OpenTelemetry Collector endpoint where your application will send its metrics. Make sure this URL points to the correct location of your OpenTelemetry Collector instance.
 
 #### Collect Metrics in Business Logic
-
 Modify your business logic to measure and record metrics.
 
-```jsx
+<Tabs>
+<TabItem value='ts' label="Typescript" default>
+```typescript
 import { performance } from 'perf_hooks'
 
 const meter = metrics.getMeter('your-service-name')
@@ -146,6 +200,28 @@ async function yourFunction(parameter) {
   yourMetric.record(duration, { attributeKey: 'attributeValue' })
 }
 ```
+</TabItem>
+<TabItem value='js' label='Javascript'>
+```javascript
+const { performance } = require('perf_hooks');
+const { metrics } = require('@opentelemetry/api');
+
+const meter = metrics.getMeter('your-service-name');
+
+async function yourFunction(parameter) {
+  const startTime = performance.now();
+  const yourMetric = meter.createHistogram('your-metric-name', {
+    description: 'Description of your metric',
+  });
+
+  // Your business logic here
+
+  const duration = performance.now() - startTime;
+  yourMetric.record(duration, { attributeKey: 'attributeValue' });
+}
+```
+</TabItem>
+</Tabs>
 
 - Replace `your-service-name` with the name you give to your service.
 - `your-metric-name` is the name you give to the metric you are creating. It should be a unique and descriptive name that reflects what the metric is measuring.
