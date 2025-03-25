@@ -711,6 +711,153 @@ In the SigNoz account, open the `Services` tab. Hit the `Refresh` button on 
 </Tabs>
 
 
+## Link logs and traces
+
+Logs and traces provide valuable insights into an app's performance. While logs capture event details with timestamps, traces track a request’s journey across different components, highlighting latency and bottlenecks. 
+Linking logs and traces using a common trace ID helps you pinpoint issues, analyze failures, and optimize performance.
+
+![An image displaying linked logs and traces to SigNoz](images/logs-traces-NET.png)
+
+### Generate traces
+
+To trace a request from start to finish, you need to generate spans for each operation. OpenTelemetry provides automatic instrumentation for various frameworks.
+
+Follow these steps to generate traces:
+
+1. Configure tracing using OpenTelemetry. 
+    ```csharp
+    using OpenTelemetry;
+    using OpenTelemetry.Trace;
+    using System.Diagnostics;
+
+    public static class OpenTelemetryConfig
+    {
+      public static TracerProvider ConfigureTracing()
+      {
+        return Sdk.CreateTracerProviderBuilder()
+            .AddSource("CoffeeShopService")
+            .SetSampler(new AlwaysOnSampler()) 
+            .AddHttpClientInstrumentation()
+            .AddAspNetCoreInstrumentation()
+            .AddOtlpExporter(options =>
+            {
+                options.Endpoint = new Uri("https://ingest.{region}.signoz.cloud:443/v1/traces");
+            })
+            .Build();
+      }
+    }
+
+    public static class TraceHelper
+    {
+      public static string GetTraceId() => Activity.Current?.TraceId.ToString() ?? string.Empty;
+      public static string GetSpanId() => Activity.Current?.SpanId.ToString() ?? string.Empty;
+    }
+    ```
+1. Create spans for each method to track its execution. For example, consider a method to get coffee.
+    ```csharp
+    public class CoffeeShopService
+    {
+      private static readonly ActivitySource ActivitySource = new("CoffeeShopService");
+
+      public async Task GetCoffeeAsync()
+      {
+        using var activity = ActivitySource.StartActivity("GetCoffee", ActivityKind.Internal);
+        
+        await LogRequest("GetCoffee");
+
+        // Simulate coffee preparation
+        await Task.Delay(500);
+
+        await LogResponse("GetCoffee");
+      }
+
+    }
+    ```
+
+### Generate logs
+
+Logs provide detailed insights at different request execution stages. Include contextual details such as timestamps, severity levels, and message descriptions.
+
+1. Attach log information each method. You can optionally add logs before and after each request.
+    ```csharp
+    public class CoffeeShopService
+    {
+      private async Task LogRequest(string methodName)
+      {
+        string message = $"Incoming request: {methodName}";
+        Console.WriteLine($"INFO: {message} - Trace ID: {TraceHelper.GetTraceId()}");
+        await SigNozLogger.SendLogToSigNoz("INFO", message);
+      }
+
+      private async Task LogResponse(string methodName)
+      {
+        string message = $"Response sent from: {methodName}";
+        Console.WriteLine($"INFO: {message} - Trace ID: {TraceHelper.GetTraceId()}");
+        await SigNozLogger.SendLogToSigNoz("INFO", message);
+      }
+    }
+    ```
+1.  You can add more information to log for each method.
+
+### Link logs with traces
+
+To correlate logs with traces, include `trace_id` and `span_id` in the log.
+
+Follow these steps to link logs with traces:
+
+1. Add trace and span information in the log message.
+    ```csharp
+    using System.Net.Http;
+    using System.Text.Json;
+    using System.Text;
+    using System.Threading.Tasks;
+
+    public class SigNozLogger
+    {
+    private static readonly HttpClient httpClient = new HttpClient();
+    private const string SIGNOZ_INGESTION_KEY = "<SigNoz-ingestion-key>";
+    private const string SIGNOZ_LOGS_URL = "https://ingest.{region}.signoz.cloud:443/logs/json";
+
+    public static async Task SendLogToSigNoz(string level, string message)
+    {
+        var traceId = TraceHelper.GetTraceId();
+        var spanId = TraceHelper.GetSpanId();
+
+        var logEntry = new[]
+        {
+            new
+            {
+                trace_id = traceId,
+                span_id = spanId,
+                severity_text = level,
+                message = message,
+                attributes = new { service = "CoffeeShopService" }
+            }
+        };
+
+        var jsonPayload = JsonSerializer.Serialize(logEntry);
+        var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+        content.Headers.Add("signoz-ingestion-key", SIGNOZ_INGESTION_KEY);
+
+        try
+        {
+            var response = await httpClient.PostAsync(SIGNOZ_LOGS_URL, content);
+            response.EnsureSuccessStatusCode();
+            Console.WriteLine("Log successfully sent to SigNoz.");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error sending log to SigNoz: {ex.Message}");
+        }
+    }
+    }
+    ```
+1. Send logs to SigNoz to link them with traces.
+
+![An image displaying a specifc log with traces in SigNoz](images/sample-log-coffee.png)
+
+
+
 ## Troubleshooting
 
 The console exporter prints data to the Console window. You can use it to verify if the instrumentation is properly set up or not.
