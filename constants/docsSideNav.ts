@@ -1154,7 +1154,7 @@ const docsSideNav = [
       {
         type: 'doc',
         route: '/docs/messaging-queues/overview',
-        label: 'Messaging Queue feature Overview',
+        label: 'Overview',
       },
       {
         label: 'Kafka',
