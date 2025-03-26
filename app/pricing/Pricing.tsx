@@ -767,6 +767,12 @@ const PricingPlans = () => {
                         <ArrowRight size={14} />
                       </TrackingLink>
                     </Button>
+                    <div className="text-center text-sm text-signoz_robin-300 hover:text-signoz_robin-400 mt-4">
+                      <Link href={'/enterprise/'} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center">
+                        Check All Enterprise Plans
+                        <ArrowUpRight className="ml-2 h-4 w-4" />
+                      </Link>
+                    </div>
                   </div>
                 </div>
                 <div className="__card__body">
@@ -910,6 +916,12 @@ const PricingPlans = () => {
                       <ArrowRight size={14} />
                     </TrackingLink>
                   </Button>
+                  <div className="text-center text-sm text-signoz_robin-300 hover:text-signoz_robin-400 mt-4">
+                    <Link href={'/enterprise/'} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center">
+                      Check All Enterprise Plans
+                      <ArrowUpRight className="ml-2 h-4 w-4" />
+                    </Link>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1035,6 +1047,12 @@ const PricingPlans = () => {
                         <ArrowRight size={14} />
                       </TrackingLink>
                     </Button>
+                    <div className="text-center text-sm text-signoz_robin-300 hover:text-signoz_robin-400 mt-4">
+                      <Link href={'/enterprise/'} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center">
+                        Check All Enterprise Plans
+                        <ArrowUpRight className="ml-2 h-4 w-4" />
+                      </Link>
+                    </div>
                   </div>
 
                   <p className="mb-4 text-base leading-relaxed text-gray-400"></p>
@@ -1167,18 +1185,17 @@ const PricingPlans = () => {
                     type={Button.TYPES.SECONDARY}
                     id="btn-contact-us-pricing-enterprise-edition-bottom"
                   >
-                    <TrackingLink
-                      href={'/enterprise/'}
-                      className="flex-center"
-                      clickType="Secondary CTA"
-                      clickName="Self Hosted Enterprise Contact Button"
-                      clickText="Contact us"
-                      clickLocation="Pricing Self Hosted Enterprise Edition Tab Bottom"
-                    >
+                    <Link href={'/enterprise-self-hosted/'} className="flex-center">
                       Contact us
                       <ArrowRight size={14} />
                     </TrackingLink>
                   </Button>
+                  <div className="text-center text-sm text-signoz_robin-300 hover:text-signoz_robin-400 mt-4">
+                    <Link href={'/enterprise/'} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center">
+                      Check All Enterprise Plans
+                      <ArrowUpRight className="ml-2 h-4 w-4" />
+                    </Link>
+                  </div>
                 </div>
               </div>
             </div>
