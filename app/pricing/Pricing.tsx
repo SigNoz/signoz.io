@@ -1185,7 +1185,14 @@ const PricingPlans = () => {
                     type={Button.TYPES.SECONDARY}
                     id="btn-contact-us-pricing-enterprise-edition-bottom"
                   >
-                    <Link href={'/enterprise-self-hosted/'} className="flex-center">
+                    <TrackingLink
+                      href={'/enterprise-self-hosted/'}
+                      className="flex-center"
+                      clickType="Secondary CTA"
+                      clickName="Self Hosted Enterprise Contact Button"
+                      clickText="Contact us"
+                      clickLocation="Pricing Self Hosted Enterprise Edition Tab Bottom"
+                    >
                       Contact us
                       <ArrowRight size={14} />
                     </TrackingLink>
