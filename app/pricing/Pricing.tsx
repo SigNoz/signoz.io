@@ -1087,7 +1087,7 @@ const PricingPlans = () => {
                     type={Button.TYPES.SECONDARY}
                     id="btn-contact-us-pricing-enterprise-edition-bottom"
                   >
-                    <Link href={'/enterprise/'} className="flex-center">
+                    <Link href={'/enterprise-self-hosted/'} className="flex-center">
                       Contact us
                       <ArrowRight size={14} />
                     </Link>
