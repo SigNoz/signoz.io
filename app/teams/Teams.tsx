@@ -149,7 +149,7 @@ const Teams: React.FC<SignUpPageProps> = () => {
     }
 
     try {
-      const response = await fetch('https://api.signoz.cloud/v2/users', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_CONTROL_PLANE_URL}/users`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
