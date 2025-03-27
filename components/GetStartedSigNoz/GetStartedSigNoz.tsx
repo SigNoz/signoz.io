@@ -21,7 +21,7 @@ export default function GetStartedSigNoz() {
       </p>
 
       <TrackingLink 
-        href="https://signoz.io/teams/" 
+        href="/teams/" 
         clickType="Card Click"
         clickName="Get Started SigNoz"
         clickLocation="Get Started SigNoz Card"
@@ -40,7 +40,7 @@ export default function GetStartedSigNoz() {
       </TrackingLink>
 
       <p>
-        You can also install and self-host SigNoz yourself since it is open-source. With 19,000+ GitHub stars,{' '}
+        You can also install and self-host SigNoz yourself since it is open-source. With 20,000+ GitHub stars,{' '}
         <TrackingLink 
           href="https://github.com/signoz/signoz" 
           clickType="External Click"
@@ -53,7 +53,7 @@ export default function GetStartedSigNoz() {
         </TrackingLink>{' '}
         is loved by developers. Find the{' '}
         <TrackingLink 
-          href="https://signoz.io/docs/install/" 
+          href="/docs/install/" 
           clickType="Nav Click"
           clickName="Docs Link"
           clickLocation="Get Started SigNoz Card"
