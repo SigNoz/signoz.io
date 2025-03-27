@@ -5,9 +5,6 @@ title: Express OpenTelemetry Instrumentation
 description: Send events from your Express application to SigNoz
 hide_table_of_contents: true
 ---
-
-
-
 {/* import InstrumentationFAQ from '@/components/shared/instrumentation-faq.md' */}
 import VersionPin from '@/components/shared/nodejs-version-pin.mdx'
 
@@ -94,7 +91,10 @@ const { SemanticResourceAttributes } = require('@opentelemetry/semantic-conventi
 
 // highlight-start
 const exporterOptions = {
-  url: 'https://ingest.<region>.signoz.cloud:443/v1/traces'
+  url: 'https://ingest.<region>.signoz.cloud:443/v1/traces',
+  headers: {
+      "signoz-access-token": "<your-ingestion-key>"
+    }
 }
 // highlight-end
 
@@ -104,7 +104,7 @@ const sdk = new opentelemetry.NodeSDK({
   instrumentations: [getNodeAutoInstrumentations()],
   resource: new Resource({
     // highlight-next-line
-    [SemanticResourceAttributes.SERVICE_NAME]: 'node_app'
+    [SemanticResourceAttributes.SERVICE_NAME]: '<service_name>'
   })
 });
 
@@ -153,7 +153,6 @@ sdk.start();
 - Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
 - Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<service_name>` is name of your service
-- replace `<your_run_command>` with the run command of your application
 
 **Step 3.** Run the application<br></br>
 
@@ -434,7 +433,7 @@ const sdk = new opentelemetry.NodeSDK({
   traceExporter,
   instrumentations: [getNodeAutoInstrumentations()],
   resource: new Resource({
-    [SemanticResourceAttributes.SERVICE_NAME]: '<SERVICE_NAME>',
+    [SemanticResourceAttributes.SERVICE_NAME]: '<service_name>',
   }),
 })
 
