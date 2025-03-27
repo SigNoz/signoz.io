@@ -43,8 +43,7 @@ npm install --save @opentelemetry/exporter-trace-otlp-http
 You need to configure the endpoint for SigNoz cloud in this file. You can find your ingestion key from SigNoz cloud account details sent on your email.
 <Tabs>
 <TabItem value='TypeScript' label="TypeScript">
-```typescript
-// tracing.ts
+```ts:tracing.ts
 import { ZoneContextManager } from '@opentelemetry/context-zone';
 import { registerInstrumentations } from '@opentelemetry/instrumentation';
 import { getWebAutoInstrumentations } from '@opentelemetry/auto-instrumentations-web';
@@ -91,58 +90,55 @@ registerInstrumentations({
 ```
 </TabItem>
 <TabItem value='JavaScript' label="JavaScript">
-```javascript
-// tracing.js
-import { ZoneContextManager } from '@opentelemetry/context-zone';
-import { registerInstrumentations } from '@opentelemetry/instrumentation';
-import { getWebAutoInstrumentations } from '@opentelemetry/auto-instrumentations-web';
-import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base';
-import { WebTracerProvider } from '@opentelemetry/sdk-trace-web';
-import { Resource } from '@opentelemetry/resources';
-import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
-import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
+```js:tracing.js
+'use strict'
+const process = require('process');
+const opentelemetry = require('@opentelemetry/sdk-node');
+const { getNodeAutoInstrumentations } = require('@opentelemetry/auto-instrumentations-node');
+const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-http');
+const { Resource } = require('@opentelemetry/resources');
+const { SemanticResourceAttributes } = require('@opentelemetry/semantic-conventions');
 
-const provider = new WebTracerProvider({
-    resource: new Resource({
-        [SemanticResourceAttributes.SERVICE_NAME]: '<service_name>',
-    }),
-});
-const exporter = new OTLPTraceExporter({
-    url: 'https://ingest.<region>.signoz.cloud:443/v1/traces',
-    headers: {
-        "signoz-access-token": "<your-ingestion-key>",
-    },
-});
-provider.addSpanProcessor(new BatchSpanProcessor(exporter));
+// do not set headers in exporterOptions, the OTel spec recommends setting headers through ENV variables
+// https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/protocol/exporter.md#specifying-headers-via-environment-variables
 
-provider.register({
-    contextManager: new ZoneContextManager(),
+// highlight-start
+const exporterOptions = {
+  url: 'https://ingest.<region>.signoz.cloud:443/v1/traces',
+  headers: {
+      "signoz-access-token": "<your-ingestion-key>"
+    }
+}
+// highlight-end
+
+const traceExporter = new OTLPTraceExporter(exporterOptions);
+const sdk = new opentelemetry.NodeSDK({
+  traceExporter,
+  instrumentations: [getNodeAutoInstrumentations()],
+  resource: new Resource({
+    // highlight-next-line
+    [SemanticResourceAttributes.SERVICE_NAME]: '<service_name>'
+  })
 });
 
-registerInstrumentations({
-    instrumentations: [
-        getWebAutoInstrumentations({
-                        
-            '@opentelemetry/instrumentation-xml-http-request': {
-                propagateTraceHeaderCorsUrls: [
-                    /.+/g, //Regex to match your backend urls.
-                ],
-            },
-            '@opentelemetry/instrumentation-fetch': {
-                propagateTraceHeaderCorsUrls: [
-                    /.+/g, //Regex to match your backend urls.
-                ],
-            },
-        }),
-    ],
+// initialize the SDK and register with the OpenTelemetry API
+// this enables the API to record telemetry
+sdk.start()
+
+// gracefully shut down the SDK on process exit
+process.on('SIGTERM', () => {
+  sdk.shutdown()
+    .then(() => console.log('Tracing terminated'))
+    .catch((error) => console.log('Error terminating tracing', error))
+    .finally(() => process.exit(0));
 });
 ```
 </TabItem>
 </Tabs>
 
 - Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 - `<service_name>` is name of your service
-- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 
 **Step 3.** Import tracing.js / tracing.ts file in `main.jsx`<br></br>
 
@@ -197,8 +193,7 @@ npm install --save @opentelemetry/exporter-trace-otlp-http
 
 <Tabs>
 <TabItem value='TypeScript' label="TypeScript">
-```typescript
-// tracing.ts
+```ts:tracing.ts
 import { ZoneContextManager } from '@opentelemetry/context-zone';
 import { registerInstrumentations } from '@opentelemetry/instrumentation';
 import { getWebAutoInstrumentations } from '@opentelemetry/auto-instrumentations-web';
@@ -243,48 +238,46 @@ registerInstrumentations({
 
 </TabItem>
 <TabItem value='JavaScript' label="JavaScript">
-```js
-// tracing.js
-import { ZoneContextManager } from '@opentelemetry/context-zone';
-import { registerInstrumentations } from '@opentelemetry/instrumentation';
-import { getWebAutoInstrumentations } from '@opentelemetry/auto-instrumentations-web';
-import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base';
-import { WebTracerProvider } from '@opentelemetry/sdk-trace-web';
-import { Resource } from '@opentelemetry/resources';
-import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
-import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
+```js:tracing.js
+'use strict'
+const process = require('process');
+const opentelemetry = require('@opentelemetry/sdk-node');
+const { getNodeAutoInstrumentations } = require('@opentelemetry/auto-instrumentations-node');
+const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-http');
+const { Resource } = require('@opentelemetry/resources');
+const { SemanticResourceAttributes } = require('@opentelemetry/semantic-conventions');
 
-const provider = new WebTracerProvider({
-    resource: new Resource({
-        [SemanticResourceAttributes.SERVICE_NAME]: '<service_name>',
-    }),
-});
-const exporter = new OTLPTraceExporter({
+// do not set headers in exporterOptions, the OTel spec recommends setting headers through ENV variables
+// https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/protocol/exporter.md#specifying-headers-via-environment-variables
+
+// highlight-start
+const exporterOptions = {
   url: 'http://localhost:4318/v1/traces',
-});
-provider.addSpanProcessor(new BatchSpanProcessor(exporter));
+}
+// highlight-end
 
-provider.register({
-    contextManager: new ZoneContextManager(),
+const traceExporter = new OTLPTraceExporter(exporterOptions);
+const sdk = new opentelemetry.NodeSDK({
+  traceExporter,
+  instrumentations: [getNodeAutoInstrumentations()],
+  resource: new Resource({
+    // highlight-next-line
+    [SemanticResourceAttributes.SERVICE_NAME]: '<service_name>'
+  })
 });
 
-registerInstrumentations({
-    instrumentations: [
-        getWebAutoInstrumentations({
-                        
-            '@opentelemetry/instrumentation-xml-http-request': {
-                propagateTraceHeaderCorsUrls: [
-                    /.+/g, //Regex to match your backend urls.
-                ],
-            },
-            '@opentelemetry/instrumentation-fetch': {
-                propagateTraceHeaderCorsUrls: [
-                    /.+/g, //Regex to match your backend urls.
-                ],
-            },
-        }),
-    ],
+// initialize the SDK and register with the OpenTelemetry API
+// this enables the API to record telemetry
+sdk.start()
+
+// gracefully shut down the SDK on process exit
+process.on('SIGTERM', () => {
+  sdk.shutdown()
+    .then(() => console.log('Tracing terminated'))
+    .catch((error) => console.log('Error terminating tracing', error))
+    .finally(() => process.exit(0));
 });
+
 ```
 
 </TabItem>
@@ -292,6 +285,7 @@ registerInstrumentations({
 </Tabs>
 
 - `<service_name>` is name of your service
+
 
 **Step 3.** Import tracing.js / tracing.ts file in `main.jsx`<br></br>
 
@@ -344,8 +338,7 @@ npm install --save @opentelemetry/exporter-trace-otlp-http
 
 <Tabs>
 <TabItem value='TypeScript' label="TypeScript">
-```typescript
-// tracing.ts
+```ts:tracing.ts
 import { ZoneContextManager } from '@opentelemetry/context-zone';
 import { registerInstrumentations } from '@opentelemetry/instrumentation';
 import { getWebAutoInstrumentations } from '@opentelemetry/auto-instrumentations-web';
@@ -389,53 +382,51 @@ registerInstrumentations({
 ```
 </TabItem>
 <TabItem value='JavaScript' label="JavaScript">
-```js
-// tracing.js
-import { ZoneContextManager } from '@opentelemetry/context-zone';
-import { registerInstrumentations } from '@opentelemetry/instrumentation';
-import { getWebAutoInstrumentations } from '@opentelemetry/auto-instrumentations-web';
-import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base';
-import { WebTracerProvider } from '@opentelemetry/sdk-trace-web';
-import { Resource } from '@opentelemetry/resources';
-import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
-import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
+```js:tracing.js
+'use strict'
+const process = require('process');
+const opentelemetry = require('@opentelemetry/sdk-node');
+const { getNodeAutoInstrumentations } = require('@opentelemetry/auto-instrumentations-node');
+const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-http');
+const { Resource } = require('@opentelemetry/resources');
+const { SemanticResourceAttributes } = require('@opentelemetry/semantic-conventions');
 
-const provider = new WebTracerProvider({
-    resource: new Resource({
-        [SemanticResourceAttributes.SERVICE_NAME]: '<service_name>',
-    }),
-});
-const exporter = new OTLPTraceExporter({
+// do not set headers in exporterOptions, the OTel spec recommends setting headers through ENV variables
+// https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/protocol/exporter.md#specifying-headers-via-environment-variables
+
+// highlight-start
+const exporterOptions = {
   url: 'http://localhost:4318/v1/traces',
-});
-provider.addSpanProcessor(new BatchSpanProcessor(exporter));
+}
+// highlight-end
 
-provider.register({
-    contextManager: new ZoneContextManager(),
+const traceExporter = new OTLPTraceExporter(exporterOptions);
+const sdk = new opentelemetry.NodeSDK({
+  traceExporter,
+  instrumentations: [getNodeAutoInstrumentations()],
+  resource: new Resource({
+    // highlight-next-line
+    [SemanticResourceAttributes.SERVICE_NAME]: '<service_name>'
+  })
 });
 
-registerInstrumentations({
-    instrumentations: [
-        getWebAutoInstrumentations({
-                        
-            '@opentelemetry/instrumentation-xml-http-request': {
-                propagateTraceHeaderCorsUrls: [
-                    /.+/g, //Regex to match your backend urls.
-                ],
-            },
-            '@opentelemetry/instrumentation-fetch': {
-                propagateTraceHeaderCorsUrls: [
-                    /.+/g, //Regex to match your backend urls.
-                ],
-            },
-        }),
-    ],
+// initialize the SDK and register with the OpenTelemetry API
+// this enables the API to record telemetry
+sdk.start()
+
+// gracefully shut down the SDK on process exit
+process.on('SIGTERM', () => {
+  sdk.shutdown()
+    .then(() => console.log('Tracing terminated'))
+    .catch((error) => console.log('Error terminating tracing', error))
+    .finally(() => process.exit(0));
 });
 ```
 </TabItem>
 </Tabs>
 
 - `<service_name>` is name of your service
+
 
 **Step 3.** Import tracing.js / tracing.ts file in `main.jsx`<br></br>
 
@@ -488,8 +479,7 @@ You need to configure the endpoint for SigNoz cloud in this file. You can find y
 
 <Tabs>
 <TabItem value='TypeScript' label="TypeScript">
-```typescript
-// tracing.ts
+```ts:tracing.ts
 import { ZoneContextManager } from '@opentelemetry/context-zone';
 import { registerInstrumentations } from '@opentelemetry/instrumentation';
 import { getWebAutoInstrumentations } from '@opentelemetry/auto-instrumentations-web';
@@ -536,58 +526,56 @@ registerInstrumentations({
 ```
 </TabItem>
 <TabItem value='JavaScript' label="JavaScript">
-```js
-// tracing.js
-import { ZoneContextManager } from '@opentelemetry/context-zone';
-import { registerInstrumentations } from '@opentelemetry/instrumentation';
-import { getWebAutoInstrumentations } from '@opentelemetry/auto-instrumentations-web';
-import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base';
-import { WebTracerProvider } from '@opentelemetry/sdk-trace-web';
-import { Resource } from '@opentelemetry/resources';
-import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
-import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
+```js:tracing.js
+'use strict'
+const process = require('process');
+const opentelemetry = require('@opentelemetry/sdk-node');
+const { getNodeAutoInstrumentations } = require('@opentelemetry/auto-instrumentations-node');
+const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-http');
+const { Resource } = require('@opentelemetry/resources');
+const { SemanticResourceAttributes } = require('@opentelemetry/semantic-conventions');
 
-const provider = new WebTracerProvider({
-    resource: new Resource({
-        [SemanticResourceAttributes.SERVICE_NAME]: '<service_name>',
-    }),
-});
-const exporter = new OTLPTraceExporter({
-    url: 'https://ingest.<region>.signoz.cloud:443/v1/traces',
-    headers: {
-        "signoz-access-token": "<your-ingestion-key>",
-    },
-});
-provider.addSpanProcessor(new BatchSpanProcessor(exporter));
+// do not set headers in exporterOptions, the OTel spec recommends setting headers through ENV variables
+// https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/protocol/exporter.md#specifying-headers-via-environment-variables
 
-provider.register({
-    contextManager: new ZoneContextManager(),
+// highlight-start
+const exporterOptions = {
+  url: 'https://ingest.<region>.signoz.cloud:443/v1/traces',
+  headers: {
+      "signoz-access-token": "<your-ingestion-key>"
+    }
+}
+// highlight-end
+
+const traceExporter = new OTLPTraceExporter(exporterOptions);
+const sdk = new opentelemetry.NodeSDK({
+  traceExporter,
+  instrumentations: [getNodeAutoInstrumentations()],
+  resource: new Resource({
+    // highlight-next-line
+    [SemanticResourceAttributes.SERVICE_NAME]: '<service_name>'
+  })
 });
 
-registerInstrumentations({
-    instrumentations: [
-        getWebAutoInstrumentations({
-                        
-            '@opentelemetry/instrumentation-xml-http-request': {
-                propagateTraceHeaderCorsUrls: [
-                    /.+/g, //Regex to match your backend urls.
-                ],
-            },
-            '@opentelemetry/instrumentation-fetch': {
-                propagateTraceHeaderCorsUrls: [
-                    /.+/g, //Regex to match your backend urls.
-                ],
-            },
-        }),
-    ],
+// initialize the SDK and register with the OpenTelemetry API
+// this enables the API to record telemetry
+sdk.start()
+
+// gracefully shut down the SDK on process exit
+process.on('SIGTERM', () => {
+  sdk.shutdown()
+    .then(() => console.log('Tracing terminated'))
+    .catch((error) => console.log('Error terminating tracing', error))
+    .finally(() => process.exit(0));
 });
+
 ```
 </TabItem>
 </Tabs>
 
 - Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 - `<service_name>` is name of your service
-- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 
 **Step 3.** Import tracing.js / tracing.ts file in `main.jsx`<br></br>
 
@@ -642,8 +630,7 @@ npm install --save @opentelemetry/exporter-trace-otlp-http
 
 <Tabs>
 <TabItem value='TypeScript' label="TypeScript">
-```typescript
-// tracing.ts
+```ts:tracing.ts
 import { ZoneContextManager } from '@opentelemetry/context-zone';
 import { registerInstrumentations } from '@opentelemetry/instrumentation';
 import { getWebAutoInstrumentations } from '@opentelemetry/auto-instrumentations-web';
@@ -688,47 +675,46 @@ registerInstrumentations({
 </TabItem>
 <TabItem value='JavaScript' label="JavaScript">
 ```js
-// tracing.js
-import { ZoneContextManager } from '@opentelemetry/context-zone';
-import { registerInstrumentations } from '@opentelemetry/instrumentation';
-import { getWebAutoInstrumentations } from '@opentelemetry/auto-instrumentations-web';
-import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base';
-import { WebTracerProvider } from '@opentelemetry/sdk-trace-web';
-import { Resource } from '@opentelemetry/resources';
-import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
-import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
+//tracing.j
+'use strict'
+const process = require('process');
+const opentelemetry = require('@opentelemetry/sdk-node');
+const { getNodeAutoInstrumentations } = require('@opentelemetry/auto-instrumentations-node');
+const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-http');
+const { Resource } = require('@opentelemetry/resources');
+const { SemanticResourceAttributes } = require('@opentelemetry/semantic-conventions');
 
-const provider = new WebTracerProvider({
-    resource: new Resource({
-        [SemanticResourceAttributes.SERVICE_NAME]: '<service_name>',
-    }),
-});
-const exporter = new OTLPTraceExporter({
+// do not set headers in exporterOptions, the OTel spec recommends setting headers through ENV variables
+// https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/protocol/exporter.md#specifying-headers-via-environment-variables
+
+// highlight-start
+const exporterOptions = {
   url: 'http://localhost:4318/v1/traces',
-});
-provider.addSpanProcessor(new BatchSpanProcessor(exporter));
+}
+// highlight-end
 
-provider.register({
-    contextManager: new ZoneContextManager(),
+const traceExporter = new OTLPTraceExporter(exporterOptions);
+const sdk = new opentelemetry.NodeSDK({
+  traceExporter,
+  instrumentations: [getNodeAutoInstrumentations()],
+  resource: new Resource({
+    // highlight-next-line
+    [SemanticResourceAttributes.SERVICE_NAME]: '<service_name>'
+  })
 });
 
-registerInstrumentations({
-    instrumentations: [
-        getWebAutoInstrumentations({
-                        
-            '@opentelemetry/instrumentation-xml-http-request': {
-                propagateTraceHeaderCorsUrls: [
-                    /.+/g, //Regex to match your backend urls.
-                ],
-            },
-            '@opentelemetry/instrumentation-fetch': {
-                propagateTraceHeaderCorsUrls: [
-                    /.+/g, //Regex to match your backend urls.
-                ],
-            },
-        }),
-    ],
+// initialize the SDK and register with the OpenTelemetry API
+// this enables the API to record telemetry
+sdk.start()
+
+// gracefully shut down the SDK on process exit
+process.on('SIGTERM', () => {
+  sdk.shutdown()
+    .then(() => console.log('Tracing terminated'))
+    .catch((error) => console.log('Error terminating tracing', error))
+    .finally(() => process.exit(0));
 });
+
 ```
 </TabItem>
 </Tabs>
@@ -783,8 +769,7 @@ npm install --save @opentelemetry/exporter-trace-otlp-http
 
 <Tabs>
 <TabItem value='TypeScript' label="TypeScript">
-```typescript
-// tracing.ts
+```ts:tracing.ts
 import { ZoneContextManager } from '@opentelemetry/context-zone';
 import { registerInstrumentations } from '@opentelemetry/instrumentation';
 import { getWebAutoInstrumentations } from '@opentelemetry/auto-instrumentations-web';
@@ -828,48 +813,46 @@ registerInstrumentations({
 ```
 </TabItem>
 <TabItem value='JavaScript' label="JavaScript">
-```js
-// tracing.js
-import { ZoneContextManager } from '@opentelemetry/context-zone';
-import { registerInstrumentations } from '@opentelemetry/instrumentation';
-import { getWebAutoInstrumentations } from '@opentelemetry/auto-instrumentations-web';
-import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base';
-import { WebTracerProvider } from '@opentelemetry/sdk-trace-web';
-import { Resource } from '@opentelemetry/resources';
-import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
-import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
+```js:tracing.js
+'use strict'
+const process = require('process');
+const opentelemetry = require('@opentelemetry/sdk-node');
+const { getNodeAutoInstrumentations } = require('@opentelemetry/auto-instrumentations-node');
+const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-http');
+const { Resource } = require('@opentelemetry/resources');
+const { SemanticResourceAttributes } = require('@opentelemetry/semantic-conventions');
 
-const provider = new WebTracerProvider({
-    resource: new Resource({
-        [SemanticResourceAttributes.SERVICE_NAME]: '<service_name>',
-    }),
-});
-const exporter = new OTLPTraceExporter({
-  url: '<SIGNOZ-IP>',
-});
-provider.addSpanProcessor(new BatchSpanProcessor(exporter));
+// do not set headers in exporterOptions, the OTel spec recommends setting headers through ENV variables
+// https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/protocol/exporter.md#specifying-headers-via-environment-variables
 
-provider.register({
-    contextManager: new ZoneContextManager(),
+// highlight-start
+const exporterOptions = {
+  url: '<SIGNOZ_IP>',
+}
+// highlight-end
+
+const traceExporter = new OTLPTraceExporter(exporterOptions);
+const sdk = new opentelemetry.NodeSDK({
+  traceExporter,
+  instrumentations: [getNodeAutoInstrumentations()],
+  resource: new Resource({
+    // highlight-next-line
+    [SemanticResourceAttributes.SERVICE_NAME]: '<SERVICE_NAME>'
+  })
 });
 
-registerInstrumentations({
-    instrumentations: [
-        getWebAutoInstrumentations({
-                        
-            '@opentelemetry/instrumentation-xml-http-request': {
-                propagateTraceHeaderCorsUrls: [
-                    /.+/g, //Regex to match your backend urls.
-                ],
-            },
-            '@opentelemetry/instrumentation-fetch': {
-                propagateTraceHeaderCorsUrls: [
-                    /.+/g, //Regex to match your backend urls.
-                ],
-            },
-        }),
-    ],
+// initialize the SDK and register with the OpenTelemetry API
+// this enables the API to record telemetry
+sdk.start()
+
+// gracefully shut down the SDK on process exit
+process.on('SIGTERM', () => {
+  sdk.shutdown()
+    .then(() => console.log('Tracing terminated'))
+    .catch((error) => console.log('Error terminating tracing', error))
+    .finally(() => process.exit(0));
 });
+
 ```
 </TabItem>
 </Tabs>
