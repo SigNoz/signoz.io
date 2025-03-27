@@ -4,7 +4,7 @@ import { Slider, Tooltip, SliderValue } from '@nextui-org/react'
 import { ArrowUpRight } from 'lucide-react'
 import Button from '@/components/Button/Button'
 import { ArrowRight } from 'lucide-react'
-
+import TrackingLink from '@/components/TrackingLink'
 const scrollToSection = (id) => {
   const element = document.getElementById(id)
   if (element) {
@@ -495,12 +495,19 @@ const MonthlyEstimate = () => {
           <div>${formatNumber(totalEstimate)}</div>
         </div>
         <div className="mt-3 flex justify-end">
-          <Link id="pricing-page-get-started-card-cta" href="/teams">
+          <TrackingLink
+            href="/teams"
+            clickType="Primary CTA"
+            clickName="Sign Up Button"
+            clickText="Get Started - Free"
+            clickLocation="Monthly Estimate Calculator"
+            id="pricing-page-get-started-card-cta"
+          >
             <Button className="flex items-center justify-center font-bold">
               Get Started - Free
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
-          </Link>
+          </TrackingLink>
         </div>
         <div className="mb-3 mt-3 flex justify-end pr-12">
           <span className="text-signoz_vanilla-400">Or</span>
@@ -513,12 +520,16 @@ const MonthlyEstimate = () => {
           </span>
           <div className="w-2/5 border-b border-dashed border-signoz_slate-400" />
           <Button id="btn-contact-us-pricing-monthly-estimate">
-            <Link
+            <TrackingLink
               href={'https://share.hsforms.com/1AZy88ajlRsCPZUP0kSMb2gda5af'}
-              className="flex-center"
+              clickType="Primary CTA"
+              clickName="Volume Discount Form Link"
+              clickText="Contact Us"
+              clickLocation="Monthly Estimate Calculator"
+              id="btn-contact-us-pricing-monthly-estimate"
             >
               Contact us
-            </Link>
+            </TrackingLink>
           </Button>
         </div>
       </div>

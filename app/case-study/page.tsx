@@ -62,7 +62,8 @@ const cardDetails = [
   },
   {
     logo: '/img/case_study/mailmodo-logo-white.svg',
-    title: 'How Mailmodo streamlined monitoring of 200GB+ daily logs from 200+ microservices with SigNoz',
+    title:
+      'How Mailmodo streamlined monitoring of 200GB+ daily logs from 200+ microservices with SigNoz',
     name: 'Avneesh Kumar',
     position: 'VP of Engineering, Mailmodo',
     href: '/case-study/mailmodo/',

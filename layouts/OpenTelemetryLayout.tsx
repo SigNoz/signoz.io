@@ -10,7 +10,7 @@ import OpenTelemetryBanner from '@/components/OpenTelemetryBanner/OpenTelemetryB
 import TableOfContents from '@/components/TableOfContents/TableOfContents'
 import SidebarAuthorInfo from '@/components/SidebarAuthorInfo/SidebarAuthorInfo'
 import RelatedJobs from '@/components/RelatedJobs/RelatedJobs'
-import Link from 'next/link'
+import TrackingLink from '@/components/TrackingLink'
 import { ArrowRight, ExternalLink } from 'lucide-react'
 import MobileAuthorInfo from '@/components/MobileAuthorInfo/MobileAuthorInfo'
 
@@ -96,9 +96,13 @@ export default function OpenTelemetryLayout({
           {/* Right sidebar - Hidden on mobile/tablet, Fixed position with internal scrolling on desktop */}
           <div className="post-toc hidden lg:fixed lg:right-0 lg:top-[120px] lg:flex lg:h-[calc(100vh-140px)] lg:w-64 lg:flex-col lg:border-l lg:border-signoz_ink-300 lg:pl-8">
             {/* Learn OpenTelemetry Card */}
-            <Link
+            <TrackingLink
               href="/resource-center/opentelemetry/"
               target="_blank"
+              clickType="Card Click"
+              clickName="OpenTelemetry Blog Sidebar Card"
+              clickText="Learn OpenTelemetry with SigNoz"
+              clickLocation="OpenTelemetry Blog Right Sidebar"
               className="group mb-6 flex flex-col rounded-lg border border-signoz_ink-300 bg-signoz_ink-400/50 p-3 transition-colors hover:border-signoz_robin-500"
             >
               <h3 className="text-sm font-medium text-white">Learn OpenTelemetry with SigNoz</h3>
@@ -109,7 +113,7 @@ export default function OpenTelemetryLayout({
                   className="transition-transform group-hover:translate-x-0.5"
                 />
               </div>
-            </Link>
+            </TrackingLink>
 
             {/* TOC with internal scroll */}
             <div ref={tocContainerRef} className="mb-4 h-[calc(100%-180px)] overflow-y-auto">
@@ -136,8 +140,6 @@ export default function OpenTelemetryLayout({
 
         {/* Bottom sections */}
         <div className="my-12 px-4 md:px-6">
-          {/* Related Jobs Section */}
-          <RelatedJobs />
           {/* Related Articles Section */}
           {relatedArticles && Array.isArray(relatedArticles) && relatedArticles.length > 0 && (
             <div className="pt-16">
@@ -147,10 +149,14 @@ export default function OpenTelemetryLayout({
                 </h2>
                 <div className="w-full space-y-4 lg:w-2/3">
                   {relatedArticles.slice(0, 2).map((article, index) => (
-                    <Link
+                    <TrackingLink
                       key={index}
                       href={article.url}
                       target="_blank"
+                      clickType="Nav Click"
+                      clickName="Related Article Link"
+                      clickText={article.title}
+                      clickLocation="Blog Related Articles"
                       className="group flex items-center justify-between rounded-lg border border-signoz_ink-300 bg-signoz_ink-400/50 p-4 transition-colors hover:border-signoz_robin-500 md:p-6"
                     >
                       <div>
@@ -169,7 +175,7 @@ export default function OpenTelemetryLayout({
                         size={20}
                         className="text-gray-400 transition-colors group-hover:text-white"
                       />
-                    </Link>
+                    </TrackingLink>
                   ))}
                 </div>
               </div>

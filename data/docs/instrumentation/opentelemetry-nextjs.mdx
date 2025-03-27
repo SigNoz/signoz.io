@@ -59,6 +59,11 @@ You need to configure the endpoint for SigNoz cloud in this file.
 
 Create `instrumentation.node.ts`:
 ```typescript
+<Tabs>
+<TabItem value="typescript" label="TypeScript" default>
+
+Create `instrumentation.node.ts`:
+```typescript
 'use strict'
 import { OTLPHttpJsonTraceExporter } from '@vercel/otel';
 
@@ -80,6 +85,8 @@ Replace:
 - **`{SIGNOZ_INGESTION_KEY}`** with the key found in your SigNoz account settings. You can read more about it [here](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 
 **Step 4.** Create `instrumentation.ts` file<br></br>
+Create `instrumentation.ts`:
+```typescript
 Create `instrumentation.ts`:
 ```typescript
 import { registerOTel } from '@vercel/otel';
@@ -177,7 +184,11 @@ export default nextConfig;
 
 <Tabs>
 <TabItem value="typescript" label="TypeScript" default>
+<Tabs>
+<TabItem value="typescript" label="TypeScript" default>
 
+Create `instrumentation.node.ts`:
+```typescript
 Create `instrumentation.node.ts`:
 ```typescript
 'use strict'
@@ -219,6 +230,8 @@ process.on('SIGTERM', () => {
 });
 ```
 
+Create `instrumentation.ts`:
+```typescript
 Create `instrumentation.ts`:
 ```typescript
 export async function register() {
@@ -338,7 +351,11 @@ export default nextConfig;
 
 <Tabs>
 <TabItem value="typescript" label="TypeScript" default>
+<Tabs>
+<TabItem value="typescript" label="TypeScript" default>
 
+Create `instrumentation.node.ts`:
+```typescript
 Create `instrumentation.node.ts`:
 ```typescript
 'use strict'
@@ -355,6 +372,8 @@ const exporterOptions = {
 export const traceExporter = new OTLPTraceExporter(exporterOptions);
 ```
 
+Create `instrumentation.ts`:
+```typescript
 Create `instrumentation.ts`:
 ```typescript
 import { registerOTel } from '@vercel/otel';
@@ -461,7 +480,11 @@ export default nextConfig;
 
 <Tabs>
 <TabItem value="typescript" label="TypeScript" default>
+<Tabs>
+<TabItem value="typescript" label="TypeScript" default>
 
+Create `instrumentation.node.ts`:
+```typescript
 Create `instrumentation.node.ts`:
 ```typescript
 'use strict'
@@ -571,6 +594,62 @@ exports.register = async function() {
 </Tabs>
 
 **Step 4.** Once we are done with the above configurations, you can run the collector service with the following command:
+</TabItem>
+<TabItem value="javascript" label="JavaScript">
+
+Create `instrumentation.node.js`:
+```javascript
+'use strict'
+const process = require('process');
+const {NodeSDK} = require('@opentelemetry/sdk-node');
+const { getNodeAutoInstrumentations } = require('@opentelemetry/auto-instrumentations-node');
+const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-http');
+const { Resource } = require('@opentelemetry/resources');
+const { SEMRESATTRS_SERVICE_NAME } = require('@opentelemetry/semantic-conventions');
+ 
+// Add otel logging
+const { diag, DiagConsoleLogger, DiagLogLevel } = require('@opentelemetry/api');
+diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.ERROR); // set diaglog level to DEBUG when debugging
+
+const exporterOptions = {
+  url: 'http://localhost:4318/v1/traces',
+}
+
+const traceExporter = new OTLPTraceExporter(exporterOptions);
+const sdk = new NodeSDK({
+  traceExporter,
+  instrumentations: [getNodeAutoInstrumentations()],
+    resource: new Resource({
+    [SEMRESATTRS_SERVICE_NAME]: 'next-app',
+  }),
+});
+
+// initialize the SDK and register with the OpenTelemetry API
+// this enables the API to record telemetry
+sdk.start()
+
+// gracefully shut down the SDK on process exit
+process.on('SIGTERM', () => {
+  sdk.shutdown()
+    .then(() => console.log('Tracing terminated'))
+    .catch((error) => console.log('Error terminating tracing', error))
+    .finally(() => process.exit(0));
+});
+```
+
+Create `instrumentation.js`:
+```javascript
+exports.register = async function() {
+  if (process.env.NEXT_RUNTIME === 'nodejs') {
+    await require('./instrumentation.node')
+  }
+}
+```
+
+</TabItem>
+</Tabs>
+
+**Step 4.** Once we are done with the above configurations, you can run the collector service with the following command:
 ```bash
 ./otelcol-contrib --config ./config.yaml
 ```
@@ -618,7 +697,11 @@ export default nextConfig;
 
 <Tabs>
 <TabItem value="typescript" label="TypeScript" default>
+<Tabs>
+<TabItem value="typescript" label="TypeScript" default>
 
+Create `instrumentation.node.ts`:
+```typescript
 Create `instrumentation.node.ts`:
 ```typescript
 'use strict'
@@ -635,6 +718,8 @@ const exporterOptions = {
 export const traceExporter = new OTLPTraceExporter(exporterOptions);
 ```
 
+Create `instrumentation.ts`:
+```typescript
 Create `instrumentation.ts`:
 ```typescript
 import { registerOTel } from '@vercel/otel';
@@ -737,6 +822,11 @@ export default nextConfig;
 
 Create `instrumentation.ts`:
 ```typescript
+<Tabs>
+<TabItem value="typescript" label="TypeScript" default>
+
+Create `instrumentation.ts`:
+```typescript
 export async function register() {
   if (process.env.NEXT_RUNTIME === 'nodejs') {
     await import('./instrumentation.node')
@@ -744,6 +834,8 @@ export async function register() {
 }
 ```
 
+Create `instrumentation.node.ts`:
+```typescript
 Create `instrumentation.node.ts`:
 ```typescript
 'use strict'
@@ -853,6 +945,7 @@ Replace:
 ```
 
 **Step 5.** Start running your application and wait for few seconds to start receiving instrumentation data on the SigNoz Cloud. 
+**Step 5.** Start running your application and wait for few seconds to start receiving instrumentation data on the SigNoz Cloud. 
 
 <Admonition>
 The instrumentation file should be in the root of your project and not inside the app or pages directory. If you're using the src folder, then place the file inside src alongside pages and app.
@@ -896,7 +989,11 @@ export default nextConfig;
 
 <Tabs>
 <TabItem value="typescript" label="TypeScript" default>
+<Tabs>
+<TabItem value="typescript" label="TypeScript" default>
 
+Create `instrumentation.node.ts`:
+```typescript
 Create `instrumentation.node.ts`:
 ```typescript
 'use strict'
@@ -1275,6 +1372,7 @@ You can also check the sample application at this <a href = "https://github.com/
 </TabItem>
 <TabItem value='self-host' label='Self-Host'>
 
+
 ## Send traces to SigNoz Self-Host
 
 If you're trying to send instrumentation data to SigNoz self-hosted way, the only minor thing (apart from installing OpenTelemetry packages) that you'd be required is to change the `exporterOptions` in the `tracing.js` file
@@ -1304,6 +1402,8 @@ export default nextConfig;
 
 **Step 3.** Create `instrumentation.node.ts` file<br></br>
 You need to configure the endpoint for SigNoz cloud in this file.
+<Tabs>
+<TabItem value="typescript" label="TypeScript" default>
 <Tabs>
 <TabItem value="typescript" label="TypeScript" default>
 ```tsx
@@ -1347,6 +1447,8 @@ Replace:
 - **`{SERVICE_NAME}`** with name of service.
 
 **Step 4.** Create `instrumentation.ts` file<br></br>
+<Tabs>
+<TabItem value="typescript" label="TypeScript" default>
 <Tabs>
 <TabItem value="typescript" label="TypeScript" default>
 ```tsx
@@ -1415,6 +1517,9 @@ export default nextConfig;
 **Step 3.** Create `instrumentation.ts` file.<br></br>
 <Tabs>
 <TabItem value="typescript" label="TypeScript" default>
+**Step 3.** Create `instrumentation.ts` file.<br></br>
+<Tabs>
+<TabItem value="typescript" label="TypeScript" default>
 ```tsx
 export async function register() {
   if (process.env.NEXT_RUNTIME === 'nodejs') {
@@ -1435,9 +1540,24 @@ module.exports = {
 ```
 </TabItem>
 </Tabs>
+</TabItem>
+<TabItem value="javascript" label="JavaScript">
+```javascript
+module.exports = {
+  register: async function() {
+    if (process.env.NEXT_RUNTIME === 'nodejs') {
+      await import('./instrumentation.node')
+    }
+  }
+}
+```
+</TabItem>
+</Tabs>
 
 **Step 4.** Create `instrumentation.node.ts` file<br></br>
 You need to configure the endpoint for SigNoz cloud in this file.
+<Tabs>
+<TabItem value="typescript" label="TypeScript" default>
 <Tabs>
 <TabItem value="typescript" label="TypeScript" default>
 ```tsx
