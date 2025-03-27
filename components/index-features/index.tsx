@@ -169,6 +169,7 @@ export const SigNozFeatures = () => {
             logo={section.logo}
             img={section.img}
             key={section.text}
+            sectionName="Features Section"
           />
         ))}
       </div>
