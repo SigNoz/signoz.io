@@ -46,13 +46,14 @@ npm install --save @opentelemetry/auto-instrumentations-node
 export OTEL_TRACES_EXPORTER="otlp"
 export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
 export OTEL_NODE_RESOURCE_DETECTORS="env,host,os"
-export OTEL_SERVICE_NAME="<APP_NAME>"
+export OTEL_SERVICE_NAME="<service_name>"
 export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
 export NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
 <your_run_command>
 ```
+
 - Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
-- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 - `<service_name>` is name of your service
 - replace `<your_run_command>` with the run command of your application
 
@@ -71,8 +72,7 @@ npm install --save @opentelemetry/exporter-trace-otlp-http@^0.45.0
 You need to configure the endpoint for SigNoz cloud in this file. You can find your ingestion key from SigNoz cloud account details sent on your email.
 <Tabs>
 <TabItem value="JavaScript" label="JavaScript" default>
-```js
-// tracing.js
+```js:tracing.js
 'use strict'
 const process = require('process')
 const opentelemetry = require('@opentelemetry/sdk-node')
@@ -87,6 +87,10 @@ const { SemanticResourceAttributes } = require('@opentelemetry/semantic-conventi
 // highlight-start
 const exporterOptions = {
   url: 'https://ingest.<region>.signoz.cloud:443/v1/traces',
+  headers: {
+      "signoz-access-token": "<your-ingestion-key>"
+    }
+  
 }
 // highlight-end
 
@@ -96,7 +100,7 @@ const sdk = new opentelemetry.NodeSDK({
   instrumentations: [getNodeAutoInstrumentations()],
   resource: new Resource({
     // highlight-next-line
-    [SemanticResourceAttributes.SERVICE_NAME]: 'node_app',
+    [SemanticResourceAttributes.SERVICE_NAME]: '<service_name>',
   }),
 })
 
@@ -115,8 +119,7 @@ process.on('SIGTERM', () => {
 ```
 </TabItem>
 <TabItem value="TypeScript" label="TypeScript">
-```ts
-// tracing.ts
+```ts:tracing.ts
 import process from 'process';
 import { NodeSDK } from '@opentelemetry/sdk-node';
 import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
@@ -124,11 +127,14 @@ import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
 import { Resource } from '@opentelemetry/resources';
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 
-// do not set headers in exporterOptions, the OTel spec recommends setting headers through ENV variables
+// Do not set headers in exporterOptions, the OTel spec recommends setting headers through ENV variables
 // https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/protocol/exporter.md#specifying-headers-via-environment-variables
 
 const exporterOptions = {
-  url: 'https://ingest.{region}.signoz.cloud:443/v1/traces',
+  url: 'https://ingest.<region>.signoz.cloud:443/v1/traces',
+  headers: {
+    "signoz-access-token": "<your-ingestion-key>"
+  }
 };
 
 const traceExporter = new OTLPTraceExporter(exporterOptions);
@@ -136,7 +142,7 @@ const sdk = new NodeSDK({
   traceExporter,
   instrumentations: [getNodeAutoInstrumentations()],
   resource: new Resource({
-    [SemanticResourceAttributes.SERVICE_NAME]: 'node_app',
+    [SemanticResourceAttributes.SERVICE_NAME]: '<service_name>',
   }),
 });
 
@@ -157,16 +163,15 @@ process.on('SIGTERM', () => {
 </Tabs>
 
 - Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 - `<service_name>` is name of your service
 
 **Step 3.** Run the application<br></br>
 Make sure you set the `OTEL_EXPORTER_OTLP_HEADERS` env as follows
 
 ```bash
-OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>" node -r ./tracing.js app.js
+node -r ./tracing.js app.js
 ```
-
-- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 
 **Step 4.** You can validate if your application is sending traces to SigNoz cloud [here](#validating-instrumentation-by-checking-for-traces).
 
@@ -185,9 +190,6 @@ OTel Collector binary helps to collect logs, hostmetrics, resource and infra att
   instrumenting your Javascript application.
 </Admonition>
 
-
-#### Send traces directly to SigNoz Cloud - No Code Automatic Instrumentation (recommended)
-
 **Step 1.** Install OpenTelemetry packages
 
 ```bash
@@ -201,16 +203,13 @@ npm install --save @opentelemetry/auto-instrumentations-node
 export OTEL_TRACES_EXPORTER="otlp"
 export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318/v1/traces"
 export OTEL_NODE_RESOURCE_DETECTORS="env,host,os"
-export OTEL_SERVICE_NAME="<APP_NAME>"
+export OTEL_SERVICE_NAME="<service_name>"
 export NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
 <your_run_command>
 ```
 
-| Variable              | Description                                               |
-|-----------------------|-----------------------------------------------------|
-| APP_NAME *      | Name you want to give to your rust application  |
-
-replace `<your_run_command>` with the run command of your application
+- `<service_name>` is name of your service
+- replace `<your_run_command>` with the run command of your application
 
 
 #### Send traces via OTel Collector binary - Code Level Automatic Instrumentation
@@ -237,8 +236,7 @@ npm install --save @opentelemetry/exporter-trace-otlp-http@^0.45.0
 
 <Tabs>
 <TabItem value="JavaScript" label="JavaScript" default>
-```js
-// tracing.js
+```js:tracing.js
 'use strict'
 const process = require('process')
 const opentelemetry = require('@opentelemetry/sdk-node')
@@ -257,7 +255,7 @@ const sdk = new opentelemetry.NodeSDK({
   instrumentations: [getNodeAutoInstrumentations()],
   resource: new Resource({
     // highlight-next-line
-    [SemanticResourceAttributes.SERVICE_NAME]: 'node_app',
+    [SemanticResourceAttributes.SERVICE_NAME]: '<service_name>',
   }),
 })
 
@@ -276,8 +274,7 @@ process.on('SIGTERM', () => {
 ```
 </TabItem>
 <TabItem value="TypeScript" label="TypeScript">
-```ts
-// tracing.ts
+```ts:tracing.ts
 import process from 'process';
 import { NodeSDK } from '@opentelemetry/sdk-node';
 import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
@@ -295,7 +292,7 @@ const sdk = new opentelemetry.NodeSDK({
   instrumentations: [getNodeAutoInstrumentations()],
   resource: new Resource({
     // highlight-next-line
-    [SemanticResourceAttributes.SERVICE_NAME]: 'node_app',
+    [SemanticResourceAttributes.SERVICE_NAME]: '<service_name>',
   }),
 })
 
@@ -314,6 +311,8 @@ process.on('SIGTERM', () => {
 ```
 </TabItem>
 </Tabs>
+
+- `<service_name>` is name of your service
 
 **Step 3.** Run the application<br></br>
 
@@ -355,16 +354,13 @@ npm install --save @opentelemetry/auto-instrumentations-node
 export OTEL_TRACES_EXPORTER="otlp"
 export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318/v1/traces"
 export OTEL_NODE_RESOURCE_DETECTORS="env,host,os"
-export OTEL_SERVICE_NAME="<APP_NAME>"
+export OTEL_SERVICE_NAME="<service_name>"
 export NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
 <your_run_command>
 ```
 
-| Variable              | Description                                               |
-|-----------------------|-----------------------------------------------------|
-| APP_NAME *      | Name you want to give to your rust application  |
-
-replace `<your_run_command>` with the run command of your application
+- `<service_name>` is name of your service
+- replace `<your_run_command>` with the run command of your application
 
 In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#troubleshooting-your-installation).
 
@@ -383,8 +379,7 @@ npm install --save @opentelemetry/exporter-trace-otlp-http@^0.45.0
 
 <Tabs>
 <TabItem value="JavaScript" label="JavaScript" default>
-```js
-// tracing.js
+```js:tracing.js
 'use strict'
 const process = require('process')
 const opentelemetry = require('@opentelemetry/sdk-node')
@@ -403,7 +398,7 @@ const sdk = new opentelemetry.NodeSDK({
   instrumentations: [getNodeAutoInstrumentations()],
   resource: new Resource({
     // highlight-next-line
-    [SemanticResourceAttributes.SERVICE_NAME]: 'node_app',
+    [SemanticResourceAttributes.SERVICE_NAME]: 'service_name',
   }),
 })
 
@@ -422,8 +417,7 @@ process.on('SIGTERM', () => {
 ```
 </TabItem>
 <TabItem value="TypeScript" label="TypeScript">
-```ts
-// tracing.ts
+```ts:tracing.ts
 import process from 'process';
 import { NodeSDK } from '@opentelemetry/sdk-node';
 import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
@@ -441,7 +435,7 @@ const sdk = new opentelemetry.NodeSDK({
   instrumentations: [getNodeAutoInstrumentations()],
   resource: new Resource({
     // highlight-next-line
-    [SemanticResourceAttributes.SERVICE_NAME]: 'node_app',
+    [SemanticResourceAttributes.SERVICE_NAME]: '<service_name>',
   }),
 })
 
@@ -504,8 +498,9 @@ $env:OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
 $env:NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
 <your_run_command>
 ```
+
 - Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
-- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 - `<service_name>` is name of your service
 - replace `<your_run_command>` with the run command of your application
 
@@ -525,8 +520,7 @@ You need to configure the endpoint for SigNoz cloud in this file. You can find y
 
 <Tabs>
 <TabItem value="jJavaScripts" label="JavaScript" default>
-```js
-// tracing.js
+```js:tracing.js
 'use strict'
 const process = require('process')
 const opentelemetry = require('@opentelemetry/sdk-node')
@@ -551,7 +545,7 @@ const sdk = new opentelemetry.NodeSDK({
   instrumentations: [getNodeAutoInstrumentations()],
   resource: new Resource({
     // highlight-next-line
-    [SemanticResourceAttributes.SERVICE_NAME]: 'node_app',
+    [SemanticResourceAttributes.SERVICE_NAME]: '<service_name>',
   }),
 })
 
@@ -570,8 +564,7 @@ process.on('SIGTERM', () => {
 ```
 </TabItem>
 <TabItem value="TypeScript" label="TypeScript">
-```ts
-// tracing.ts
+```ts:tracing.ts
 import process from 'process';
 import { NodeSDK } from '@opentelemetry/sdk-node';
 import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
@@ -580,8 +573,8 @@ import { Resource } from '@opentelemetry/resources';
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 
 const exporterOptions = {
-  url: 'https://ingest.{region}.signoz.cloud:443/v1/traces',
-  headers: { 'signoz-access-token': process.env.SIGNOZ_INGESTION_KEY },
+  url: 'https://ingest.<region>.signoz.cloud:443/v1/traces',
+  headers: { 'signoz-access-token': process.env.SIGNOZ_INGESTION_KEY || '<your-ingestion-key>' },
 }
 
 const traceExporter = new OTLPTraceExporter(exporterOptions)
@@ -590,7 +583,7 @@ const sdk = new opentelemetry.NodeSDK({
   instrumentations: [getNodeAutoInstrumentations()],
   resource: new Resource({
     // highlight-next-line
-    [SemanticResourceAttributes.SERVICE_NAME]: 'node_app',
+    [SemanticResourceAttributes.SERVICE_NAME]: '<service_name>',
   }),
 })
 
@@ -611,7 +604,7 @@ process.on('SIGTERM', () => {
 </Tabs>
 
 - Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
-- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 - `<service_name>` is name of your service
 
 OpenTelemetry Node SDK currently does not detect the headers from `.env` files as of today. That’s why we need to include the variables in the `tracing.js` file itself or set it using Powershell by running following:
@@ -645,9 +638,6 @@ OTel Collector binary helps to collect logs, hostmetrics, resource and infra att
   instrumenting your Javascript application.
 </Admonition>
 
-
-#### Send traces directly to SigNoz Cloud - No Code Automatic Instrumentation (recommended)
-
 **Step 1.** Install OpenTelemetry packages
 
 ```bash
@@ -661,16 +651,13 @@ npm install --save @opentelemetry/auto-instrumentations-node
 $env:OTEL_TRACES_EXPORTER="otlp"
 $env:OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318/v1/traces"
 $env:OTEL_NODE_RESOURCE_DETECTORS="env,host,os"
-$env:OTEL_SERVICE_NAME="<APP_NAME>"
+$env:OTEL_SERVICE_NAME="<service_name>"
 $env:NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
 <your_run_command>
 ```
 
-| Variable              | Description                                               |
-|-----------------------|-----------------------------------------------------|
-| APP_NAME *      | Name you want to give to your rust application  |
-
-replace `<your_run_command>` with the run command of your application
+- `<service_name>` is name of your service
+- replace `<your_run_command>` with the run command of your application
 
 
 #### Send traces via OTel Collector binary - Code Level Automatic Instrumentation
@@ -697,8 +684,7 @@ npm install --save @opentelemetry/exporter-trace-otlp-http@^0.45.0
 
 <Tabs>
 <TabItem value="JavaScript" label="JavaScript" default>
-```js
-// tracing.js
+```js:tracing.js
 'use strict'
 const process = require('process')
 const opentelemetry = require('@opentelemetry/sdk-node')
@@ -717,7 +703,7 @@ const sdk = new opentelemetry.NodeSDK({
   instrumentations: [getNodeAutoInstrumentations()],
   resource: new Resource({
     // highlight-next-line
-    [SemanticResourceAttributes.SERVICE_NAME]: 'node_app',
+    [SemanticResourceAttributes.SERVICE_NAME]: '<service_name>',
   }),
 })
 
@@ -736,8 +722,7 @@ process.on('SIGTERM', () => {
 ```
 </TabItem>
 <TabItem value="TypeScript" label="TypeScript">
-```ts
-// tracing.ts
+```ts:tracing.ts
 import process from 'process';
 import { NodeSDK } from '@opentelemetry/sdk-node';
 import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
@@ -755,7 +740,7 @@ const sdk = new opentelemetry.NodeSDK({
   instrumentations: [getNodeAutoInstrumentations()],
   resource: new Resource({
     // highlight-next-line
-    [SemanticResourceAttributes.SERVICE_NAME]: 'node_app',
+    [SemanticResourceAttributes.SERVICE_NAME]: '<service_name>',
   }),
 })
 
@@ -872,8 +857,7 @@ The instrumentation automatically identifies the following within your applicati
 
 <Tabs>
 <TabItem value="JavaScript" label="JavaScript" default>
-```jsx
-// tracing.js
+```js:tracing.js
 'use strict'
 const process = require('process')
 const opentelemetry = require('@opentelemetry/sdk-node')
@@ -893,7 +877,7 @@ const sdk = new opentelemetry.NodeSDK({
   instrumentations: [getNodeAutoInstrumentations()],
   // highlight-start
   resource: new Resource({
-    [SemanticResourceAttributes.SERVICE_NAME]: 'node_app',
+    [SemanticResourceAttributes.SERVICE_NAME]: '<service_name>',
   }),
   // highlight-end
 })
@@ -913,8 +897,7 @@ process.on('SIGTERM', () => {
 ```
 </TabItem>
 <TabItem value="TypeScript" label="TypeScript">
-```ts
-// tracing.ts
+```ts:tracing.ts
 import process from 'process';
 import { NodeSDK } from '@opentelemetry/sdk-node';
 import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
@@ -931,7 +914,7 @@ const sdk = new opentelemetry.NodeSDK({
   traceExporter,
   instrumentations: [getNodeAutoInstrumentations()],
   resource: new Resource({
-    [SemanticResourceAttributes.SERVICE_NAME]: 'node_app',
+    [SemanticResourceAttributes.SERVICE_NAME]: '<service_name>',
   }),
 })
 
@@ -955,7 +938,7 @@ OpenTelemetry Node SDK currently does not detect the `OTEL_RESOURCE_ATTRIBUTES` 
 
 About environment variables:
 
-`service_name` : node_app (you can give whatever name that suits you)
+`service_name` : service_name (you can give whatever name that suits you)
 
 `http://localhost:4318/v1/traces` is the default url for sending your tracing data. We are assuming you have installed SigNoz on your `localhost`. Based on your environment, you can update it accordingly. It should be in the following format:
 
@@ -1086,7 +1069,7 @@ If you are using Express, the instrumentation relies on HTTP calls to also be in
        new HttpInstrumentation(),
      ],
      resource: new Resource({
-       [SemanticResourceAttributes.SERVICE_NAME]: 'node_app',
+       [SemanticResourceAttributes.SERVICE_NAME]: 'service_name',
      }),
    })
 
@@ -1108,7 +1091,7 @@ If you are using Express, the instrumentation relies on HTTP calls to also be in
 
    About environment variables:
 
-   `service_name` : node_app (you can give whatever name that suits you)
+   `service_name` : service_name (you can give whatever name that suits you)
 
    `http://localhost:4318/v1/traces` is the default url for sending your tracing data. We are assuming you have installed SigNoz on your `localhost`. Based on your environment, you can update it accordingly. It should be in the following format:
 
@@ -1268,7 +1251,7 @@ opentelemetry.trace.getTracer('your_tracer_name').getActiveSpanProcessor().shutd
 - We have included a sample applications at:
   - [Sample React App Github Repo](https://github.com/SigNoz/sample-reactjs-app)
   - [Sample NodeJs App Github Repo](https://github.com/SigNoz/sample-nodejs-app)
-  - [Sample Distributed Tracing NodeJs App Github Repo](https://github.com/SigNoz/distributed-tracing-nodejs-sample)
+  {/* - [Sample Distributed Tracing NodeJs App Github Repo](https://github.com/SigNoz/distributed-tracing-nodejs-sample) */}
 
 {/* ## Further Reading
 
