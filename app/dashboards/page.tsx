@@ -3,6 +3,8 @@
 import React, { useState } from 'react';
 import { ClipboardIcon, ArrowDownTrayIcon } from '@heroicons/react/24/solid';
 import dashboards from './dashboards-list.json'; 
+import { trackClick } from '@/utils/analytics';
+import { usePathname } from 'next/navigation';
 
 const API_URL = process.env.NEXT_PUBLIC_SIGNOZ_CMS_API_URL;
 const DASHBOARD_API_PATH = process.env.NEXT_PUBLIC_SIGNOZ_CMS_DASHBOARD_PATH;
@@ -77,6 +79,7 @@ const Dashboards = () => {
   const [copiedNotification, setCopiedNotification] = useState<{ [key: string]: boolean }>({}); 
   const [errorMessages, setErrorMessages] = useState<{ [key: string]: string | null }>({});
   const [hasLogged, setHasLogged] = useState(false); 
+  const pathname = usePathname();
 
   const filteredDashboards = dashboards.filter((dashboard) =>
     dashboard.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -100,17 +103,40 @@ const Dashboards = () => {
     setErrorMessages((prev) => ({ ...prev, [id]: message }));
   };
 
-  const copyJSONToClipboard = async (url: string, dashboardId: number) => {
+  const copyJSONToClipboard = async (url: string, dashboardId: number, dashboardName: string) => {
     try {
       const response = await fetch(url);
       const json = await response.json();
 
       await navigator.clipboard.writeText(JSON.stringify(json, null, 2));
       setCopiedNotification((prev) => ({ ...prev, [dashboardId]: true })); 
-      setTimeout(() => setCopiedNotification((prev) => ({ ...prev, [dashboardId]: false })), 2000); 
+      setTimeout(() => setCopiedNotification((prev) => ({ ...prev, [dashboardId]: false })), 2000);
+      
+      // Track copy JSON event
+      trackClick(
+        'Copy Button',
+        'Copy Dashboard JSON',
+        dashboardName,
+        'Dashboard Gallery',
+        pathname || ''
+      );
     } catch (error) {
       handleSetErrorMessage(dashboardId, "JSON doesn't exists.");
     }
+  };
+
+  const handleDownloadJSON = async (url: string, filename: string, id: number, dashboardName: string) => {
+    // Track download JSON event
+    trackClick(
+      'Download Button',
+      'Download Dashboard JSON',
+      dashboardName,
+      'Dashboard Gallery',
+      pathname || ''
+    );
+    
+    // Call the existing download function
+    downloadJSON(url, filename, (message) => handleSetErrorMessage(id, message));
   };
 
   return (
@@ -216,10 +242,11 @@ const Dashboards = () => {
                   <button
                     className="bg-blue-700 hover:bg-blue-600 text-white font-semibold py-1 px-1 rounded-lg transition-colors duration-200 ease-in-out flex items-center space-x-2"
                     onClick={() =>
-                      downloadJSON(
+                      handleDownloadJSON(
                         dashboard.jsonUrl,
                         `${dashboard.name}.json`,
-                        (message) => handleSetErrorMessage(dashboard.id, message)
+                        dashboard.id,
+                        dashboard.name
                       )
                     }
                   >
@@ -236,7 +263,7 @@ const Dashboards = () => {
                   <button
                     className="bg-gray-700 hover:bg-gray-600 text-white font-semibold py-1 px-1 rounded-lg transition-colors duration-200 ease-in-out flex items-center space-x-2"
                     onClick={() =>
-                      copyJSONToClipboard(dashboard.jsonUrl, dashboard.id)
+                      copyJSONToClipboard(dashboard.jsonUrl, dashboard.id, dashboard.name)
                     }
                   >
                     <ClipboardIcon className="h-6 w-6 text-white" />

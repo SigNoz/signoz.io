@@ -32,6 +32,7 @@ import {
 import FAQAccordion from '@/components/FAQAccordion/FAQAccordion'
 import MigrationFloatingCard from '@/components/MigrationFloatingCard/MigrationFloatingCard'
 import FloatingTableOfContents from '@/components/TableOfContents/FloatingTableOfContents'
+import TrackingLink from '@/components/TrackingLink'
 
 const data = [
   {
@@ -135,12 +136,24 @@ const SigNozVsDatadogV2 = () => {
             </h3>
             <div className="flex flex-col gap-2">
               <div className="flex flex-row gap-2">
-                <Link href="/teams/">
+                <TrackingLink
+                  href="/teams/"
+                  clickType="Primary CTA"
+                  clickName="Sign Up Button"
+                  clickText="Get Started - Free"
+                  clickLocation="Hero Section"
+                >
                   <Button className="flex items-center justify-center gap-2 font-bold">
                     Get Started - Free <ArrowRight className="h-4 w-4" />
                   </Button>
-                </Link>
-                <Link href="/product-comparison/datadog-savings/">
+                </TrackingLink>
+                <TrackingLink
+                  href="/product-comparison/datadog-savings/"
+                  clickType="Secondary CTA"
+                  clickName="DataDog Savings Form Link"
+                  clickText="Send your bill for comparison"
+                  clickLocation="Hero Section"
+                >
                   <Button
                     type={Button.TYPES.SECONDARY}
                     className="flex items-center justify-center gap-2 font-bold"
@@ -148,7 +161,7 @@ const SigNozVsDatadogV2 = () => {
                     <FileText className="h-4 w-4" />
                     Send your bill for comparison
                   </Button>
-                </Link>
+                </TrackingLink>
               </div>
               <div className="ml-2 flex flex-col gap-1">
                 <p className="mb-0 flex items-center gap-1 text-sm text-gray-400">
@@ -443,8 +456,8 @@ const SigNozVsDatadogV2 = () => {
                         </td>
                         <td className="border-b border-gray-800/50 px-4 py-4">
                           <div className="flex items-center gap-2">
-                          <CheckCircle className="h-4 w-4 text-green-500" />
-                          <span>Yes</span>
+                            <CheckCircle className="h-4 w-4 text-green-500" />
+                            <span>Yes</span>
                           </div>
                         </td>
                         <td className="border-b border-gray-800/50 px-4 py-4">
@@ -454,7 +467,7 @@ const SigNozVsDatadogV2 = () => {
                           </div>
                         </td>
                         <td className="border-b border-gray-800/50 px-6 py-4">
-                        Native support for openfeature feature flag. {' '}
+                          Native support for openfeature feature flag.{' '}
                           <Link
                             href="https://www.youtube.com/watch?v=RZSEi8csXK0"
                             className="text-blue-400 hover:text-blue-300"

@@ -6,8 +6,14 @@ import React, { useEffect, useState } from 'react'
 import TestimonialSection from './TestimonialSection'
 
 import { ArrowRight, Loader2 } from 'lucide-react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import Image from 'next/image'
+import {
+  trackFormSubmission,
+  identifyUser,
+  setUserProperties,
+  resetMixpanelIdentity,
+} from '../../utils/analytics'
 
 interface ErrorsProps {
   fullName?: string
@@ -57,6 +63,7 @@ const Teams: React.FC<SignUpPageProps> = () => {
   const [submitSuccess, setSubmitSuccess] = useState(false)
   const [submitFailed, setSubmitFailed] = useState(false)
   const router = useRouter()
+  const pathname = usePathname()
 
   const searchParams = useSearchParams()
   const workEmailFromParams = searchParams.get('q')
@@ -118,11 +125,45 @@ const Teams: React.FC<SignUpPageProps> = () => {
 
   const handleGTMCustomEventTrigger = (payload) => {
     if (window && (window as any).dataLayer && Array.isArray((window as any).dataLayer)) {
-      (window as any).dataLayer.push({
+      ;(window as any).dataLayer.push({
         event: 'signoz-cloud-signup-form-submit',
         ...payload,
       })
     }
+
+    // Get previously stored email (if any)
+    const previousEmail = localStorage.getItem('prevSignupEmail')
+    const currentEmail = payload.email
+
+    // Reset Mixpanel if this is a different email than previously used
+    // Use case-insensitive comparison (convert both to lowercase)
+    if (previousEmail && previousEmail.toLowerCase() !== currentEmail.toLowerCase()) {
+      resetMixpanelIdentity()
+    }
+
+    // Store current email for future comparison
+    localStorage.setItem('prevSignupEmail', currentEmail)
+
+    // Extract domain from email as company identifier
+    const domain = currentEmail.split('@')[1] || ''
+
+    // Track form submission with our analytics abstraction
+    trackFormSubmission('Sign Up Form', 'SigNoz Cloud Sign Up', pathname || '', {
+      workEmail: payload.email,
+      dataRegion: payload.region.name,
+      termsOfServiceAccepted: payload.preferences.terms_of_service_accepted,
+      company: domain,
+    })
+
+    // Identify user and set user properties in Mixpanel
+    identifyUser(payload.email)
+    setUserProperties({
+      email: payload.email,
+      data_region: payload.region.name,
+      signup_date: new Date().toISOString(),
+      terms_accepted: payload.preferences.terms_of_service_accepted,
+      company: domain,
+    })
   }
 
   const handleError = () => {
@@ -145,7 +186,7 @@ const Teams: React.FC<SignUpPageProps> = () => {
       preferences: {
         terms_of_service_accepted: formData.termsOfServiceAccepted,
         opted_email_updates: true,
-      }
+      },
     }
 
     try {
@@ -292,7 +333,25 @@ const Teams: React.FC<SignUpPageProps> = () => {
                         className="mt-0.5 h-4 w-4 rounded border border-gray-500 bg-transparent accent-signoz_robin-500"
                       />
                       <label htmlFor="termsOfServiceAccepted" className="text-sm text-stone-300">
-                        I agree to the <a href="https://signoz.io/terms-of-service/" target="_blank" rel="noopener noreferrer" className="text-signoz_robin-500 font-medium hover:underline">Terms of Service</a> and <a href="https://signoz.io/privacy/" target="_blank" rel="noopener noreferrer" className="text-signoz_robin-500 font-medium hover:underline">Privacy Policy</a>.
+                        I agree to the{' '}
+                        <a
+                          href="https://signoz.io/terms-of-service/"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-medium text-signoz_robin-500 hover:underline"
+                        >
+                          Terms of Service
+                        </a>{' '}
+                        and{' '}
+                        <a
+                          href="https://signoz.io/privacy/"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-medium text-signoz_robin-500 hover:underline"
+                        >
+                          Privacy Policy
+                        </a>
+                        .
                       </label>
                     </div>
                     {errors?.termsOfService && (

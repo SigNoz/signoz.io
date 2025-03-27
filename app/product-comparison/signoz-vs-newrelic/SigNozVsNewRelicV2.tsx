@@ -33,6 +33,7 @@ import FAQAccordion from '@/components/FAQAccordion/FAQAccordion'
 import NewrelicMigrationFloatingCard from '@/components/MigrationFloatingCard/NewrelicMigrationFloatingCard'
 import FloatingTableOfContents from '@/components/TableOfContents/FloatingTableOfContents'
 import { XCircle } from 'lucide-react'
+import TrackingLink from '@/components/TrackingLink'
 
 const data = [
   {
@@ -134,12 +135,24 @@ const SigNozVsNewRelicV2 = () => {
             </h3>
             <div className="flex flex-col gap-2">
               <div className="flex flex-row gap-2">
-                <Link href="/teams/">
+                <TrackingLink
+                  href="/teams/"
+                  clickType="Primary CTA"
+                  clickName="Sign Up Button"
+                  clickText="Get Started - Free"
+                  clickLocation="Hero Section"
+                >
                   <Button className="flex items-center justify-center gap-2 font-bold">
                     Get Started - Free <ArrowRight className="h-4 w-4" />
                   </Button>
-                </Link>
-                <Link href="/product-comparison/newrelic-savings/">
+                </TrackingLink>
+                <TrackingLink
+                  href="/product-comparison/newrelic-savings/"
+                  clickType="Secondary CTA"
+                  clickName="NewRelic Savings Form Link"
+                  clickText="Send your bill for comparison"
+                  clickLocation="Hero Section"
+                >
                   <Button
                     type={Button.TYPES.SECONDARY}
                     className="flex items-center justify-center gap-2 font-bold"
@@ -147,7 +160,7 @@ const SigNozVsNewRelicV2 = () => {
                     <FileText className="h-4 w-4" />
                     Send your bill for comparison
                   </Button>
-                </Link>
+                </TrackingLink>
               </div>
               <div className="ml-2 flex flex-col gap-1">
                 <p className="mb-0 flex items-center gap-1 text-sm text-gray-400">

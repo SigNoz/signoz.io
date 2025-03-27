@@ -10,7 +10,7 @@ import BlogBanner from '@/components/BlogBanner/BlogBanner'
 import TableOfContents from '@/components/TableOfContents/TableOfContents'
 import SidebarAuthorInfo from '@/components/SidebarAuthorInfo/SidebarAuthorInfo'
 import RelatedJobs from '@/components/RelatedJobs/RelatedJobs'
-import Link from 'next/link'
+import TrackingLink from '@/components/TrackingLink'
 import { ArrowRight, ExternalLink } from 'lucide-react'
 import MobileAuthorInfo from '@/components/MobileAuthorInfo/MobileAuthorInfo'
 
@@ -96,10 +96,13 @@ export default function BlogLayout({
           {/* Right sidebar - Hidden on mobile/tablet, Fixed position with internal scrolling on desktop */}
           <div className="post-toc hidden lg:fixed lg:right-0 lg:top-[120px] lg:flex lg:h-[calc(100vh-140px)] lg:w-64 lg:flex-col lg:border-l lg:border-signoz_ink-300 lg:pl-8">
             {/* SigNoz Docs Card */}
-            <Link
+            <TrackingLink
               href="/docs/cloud/"
-              id='blog-layout-sidebar-card'
               target="_blank"
+              clickType="Card Click"
+              clickName="Blog Sidebar Docs Card"
+              clickText="Set Up Observability with OTel and SigNoz"
+              clickLocation="Blog Right Sidebar"
               className="group mb-6 flex flex-col rounded-lg border border-signoz_ink-300 bg-signoz_ink-400/50 p-3 transition-colors hover:border-signoz_robin-500"
             >
               <h3 className="text-sm font-medium text-white">Set Up Observability with OTel and SigNoz</h3>
@@ -110,7 +113,7 @@ export default function BlogLayout({
                   className="transition-transform group-hover:translate-x-0.5"
                 />
               </div>
-            </Link>
+            </TrackingLink>
 
             {/* TOC with internal scroll */}
             <div ref={tocContainerRef} className="mb-4 h-[calc(100%-180px)] overflow-y-auto">
@@ -146,10 +149,14 @@ export default function BlogLayout({
                 </h2>
                 <div className="w-full space-y-4 lg:w-2/3">
                   {relatedArticles.slice(0, 2).map((article, index) => (
-                    <Link
+                    <TrackingLink
                       key={index}
                       href={article.url}
                       target="_blank"
+                      clickType="Nav Click"
+                      clickName="Related Article Link"
+                      clickText={article.title}
+                      clickLocation="Blog Related Articles"
                       className="group flex items-center justify-between rounded-lg border border-signoz_ink-300 bg-signoz_ink-400/50 p-4 transition-colors hover:border-signoz_robin-500 md:p-6"
                     >
                       <div>
@@ -168,7 +175,7 @@ export default function BlogLayout({
                         size={20}
                         className="text-gray-400 transition-colors group-hover:text-white"
                       />
-                    </Link>
+                    </TrackingLink>
                   ))}
                 </div>
               </div>

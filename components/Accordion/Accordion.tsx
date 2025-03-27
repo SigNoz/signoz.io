@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
+import TrackingLink from '@/components/TrackingLink';
 
 const Accordion = ({ topic, subtopics }) => {
   const [accordionIsOpen, setAccordionIsOpen] = useState(false);
@@ -20,7 +21,15 @@ const Accordion = ({ topic, subtopics }) => {
       >
         <div className='overflow-hidden flex flex-col gap-4'>
           {subtopics.map((subtopic, index) => (
-            <a key={index} href={subtopic.url} className='text-signoz_vanilla-300 flex items-center gap-2'>
+            <TrackingLink 
+              key={index} 
+              href={subtopic.url} 
+              className='text-signoz_vanilla-300 flex items-center gap-2'
+              clickType="Nav Click"
+              clickName={`${subtopic.name} Link`}
+              clickText={subtopic.name}
+              clickLocation={`${topic} Dropdown`}
+            >
               {subtopic.icon && (
                 <img src={subtopic.icon} alt={`${subtopic.name} icon`} className="w-5 h-5" />
               )}
@@ -28,7 +37,7 @@ const Accordion = ({ topic, subtopics }) => {
                 <span className="font-medium">{subtopic.name}</span>
                 <span className="text-xs text-gray-500">{subtopic.description}</span>
               </div>
-            </a>
+            </TrackingLink>
           ))}
         </div>
       </div>
