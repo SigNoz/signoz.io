@@ -1,0 +1,130 @@
+---
+date: 2025-03-22
+id: aws-integrations
+title: One-click AWS integrations
+---
+
+## Introduction
+
+Monitoring your AWS infrastructure can quickly become complex—especially when dealing with multiple services and regions. The AWS Integration Agent by SigNoz 
+simplifies this process by providing a one-click solution to ingest CloudWatch metrics and logs directly into SigNoz.
+
+With this integration, you can:
+- View your telemetry data logs and metrics in a single unified dashboard.
+- Eliminate the need for manual setup using CLI or custom scripts.
+- Automatically collect data across multiple AWS regions and services with minimal ongoing effort.
+
+## Why Use the AWS Integration Agent?
+
+- **One-Click Setup** – Skip complex AWS CLI or manual CloudFormation steps.
+- **Auto-Discovery & Maintenance** – Automatically detects new EC2/RDS instances and log groups.
+- **Multi-Region Support** – Collect telemetry across any AWS region.
+- **Unified Telemetry** – Bring CloudWatch logs and metrics into SigNoz for a single-pane view.
+
+## Getting Started
+
+Before starting, ensure you have necessary permissions and access to your AWS account. This guide will walk you through connecting your AWS account and configuring the integration agent.
+
+## Setup Instructions
+
+### 1. Connect Your AWS Account
+
+1. **Choose the region** to install the integration agent.
+2. **Select regions to monitor** – You can monitor one or more enabled AWS regions.
+3. **Launch the CloudFormation stack**:
+   - Pre-filled with required parameters.
+   - Acknowledge permissions.
+   - Deploy the stack.
+
+This creates:
+- ECS Task for the agent
+- IAM roles
+- Log group for agent logs
+- Firehose delivery streams
+
+
+### 2. Select Services to Monitor
+
+After agent installation:
+
+- Select services to monitor (e.g., EC2, RDS).
+- Choose what to collect: **Metrics**, **Logs**, or **Both**.
+
+The agent will:
+- Auto-detect namespaces (e.g., `AWS/EC2`)
+- Identify relevant log groups (e.g., `/aws/rds/...`)
+- Set up CloudWatch Metric Streams and Log Subscriptions
+- Provision Firehose streams to send data to SigNoz
+
+
+### 3. View Data in SigNoz
+
+- Access pre-built dashboards for EC2, RDS, etc.
+- Logs and metrics start streaming within minutes.
+- Status updates to **Connected** once ingestion begins.
+
+
+## Advanced Configuration
+
+You can add more AWS regions or services to your existing integration anytime. Follow the steps below to expand data collection:
+
+## Add More Regions or Services
+
+Need to expand?
+
+- Open the integration UI
+- Check additional regions or services
+- The agent will deploy new telemetry stacks automatically
+
+
+## Removing the Integration
+
+If you wish to disconnect the integration, follow these steps to clean up all resources:
+
+## Remove the Integration
+
+To disconnect:
+
+1. Click **Remove Integration** in the SigNoz UI.
+2. The agent deletes telemetry stacks across all regions.
+3. Manually delete the initial CloudFormation stack to fully uninstall.
+
+
+## Supported Services
+
+Currently, the AWS Integration Agent supports the following AWS services:
+
+- EC2 Metrics
+- RDS Metrics & Logs
+
+<Info>More AWS services are being added frequently. Stay tuned via the UI or [changelog](https://signoz.io/changelog).</Info>
+
+
+## IAM Permissions
+
+The CloudFormation stack automatically sets up all necessary IAM roles and permissions, including:
+- ECS task roles
+- Firehose delivery roles
+- Metric stream and log subscription permissions
+
+All permissions are pre-configured in the CloudFormation stack.
+
+
+## Deployment Time
+
+Here’s how long you can expect the setup to take:
+
+- Agent installation: ~2 minutes
+- Data setup per service: ~1–2 minutes
+
+
+## Troubleshooting & FAQs
+
+- Ensure IAM permissions are correctly set up.
+- Check CloudFormation stack status for errors.
+- Visit our community or documentation for more help.
+
+
+## Conclusion
+
+The AWS Integration Agent simplifies telemetry setup and reduces maintenance overhead. Connect your AWS services with SigNoz today to get real-time visibility with minimal effort.
