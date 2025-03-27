@@ -573,7 +573,8 @@ import { Resource } from '@opentelemetry/resources';
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'; 
 
 const exporterOptions = {
-  url: process.env.OTEL_EXPORTER_OTLP_ENDPOINT || 'http://localhost:4318/v1/traces',
+ url: 'https://ingest.<region>.signoz.cloud:443/v1/traces',
+  headers: { 'signoz-ingestion-key': process.env.SIGNOZ_INGESTION_KEY || <your-ingestion-key> }, // Use if you are using SigNoz Cloud
 }
 
 const traceExporter = new OTLPTraceExporter(exporterOptions);
@@ -601,13 +602,11 @@ process.on('SIGTERM', () => {
 </TabItem>
 </Tabs>
 
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 - `<service_name>` is name of your service
 
-OpenTelemetry Node SDK currently does not detect the headers from `.env` files as of today. That’s why we need to include the variables in the `tracing.js` file itself or set it using Powershell:
-
-```bash
-$env:SIGNOZ_INGESTION_KEY="<your-ingestion-key>"
-```
+OpenTelemetry Node SDK currently does not detect the headers from `.env` files as of today. That’s why we need to include the variables in the `tracing.js` file itself.
 
 **Step 3.** Run the application<br></br>
 
