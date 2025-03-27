@@ -186,8 +186,8 @@ import { diag, DiagConsoleLogger, DiagLogLevel } from '@opentelemetry/api';
 diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.ERROR); // set diaglog level to DEBUG when debugging
 
 const exporterOptions = {
-  url: 'https://ingest.<REGION>.signoz.cloud:443/v1/traces', // use your own data region 
-  headers: { 'signoz-ingestion-key': '<SIGNOZ_INGESTION_KEY>' }, // Use if you are using SigNoz Cloud
+  url: 'https://ingest.<region>.signoz.cloud:443/v1/traces', // use your own data region 
+  headers: { 'signoz-ingestion-key': '<your-ingestion-key>' }, // Use if you are using SigNoz Cloud
 }
 
 const traceExporter = new OTLPTraceExporter(exporterOptions);
@@ -195,7 +195,7 @@ const sdk = new NodeSDK({
   traceExporter,
   instrumentations: [getNodeAutoInstrumentations()],
     resource: new Resource({
-    [SEMRESATTRS_SERVICE_NAME]: '<SERVICE_NAME>',
+    [SEMRESATTRS_SERVICE_NAME]: '<service_name>',
   }),
 });
 
