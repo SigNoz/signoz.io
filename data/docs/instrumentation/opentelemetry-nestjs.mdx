@@ -49,20 +49,18 @@ npm install --save @opentelemetry/auto-instrumentations-node
 
 ```bash
 export OTEL_TRACES_EXPORTER="otlp"
-export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<REGION>.signoz.cloud:443"
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
 export OTEL_NODE_RESOURCE_DETECTORS="env,host,os"
-export OTEL_SERVICE_NAME="<SERVICE_NAME>"
-export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>"
+export OTEL_SERVICE_NAME="<service_name>"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
 export NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
 <your_run_command>
 ```
 
-Replace:
-
-- **`{REGION}`** with your SigNoz cloud region.
-- **`{SIGNOZ_INGESTION_KEY}`** with the key found in your SigNoz account settings. You can read more about it [here](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
-- **`{SERVICE_NAME}`** with name of service.
-- **`{your_run_command}`** with run command of your application.
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service_name>` is name of your service
+- replace `<your_run_command>` with the run command of your application
 
 #### Send traces directly to SigNoz Cloud - Code Level Automatic Instrumentation
 
@@ -77,8 +75,6 @@ npm install --save @opentelemetry/exporter-trace-otlp-http@^0.45.0
 
 **Step 2.** Create `tracer.ts` file<br></br>
 You need to configure the endpoint for SigNoz cloud in this file.
-<Tabs>
-<TabItem value="Typescript" label="Typescript">
 <Tabs>
 <TabItem value="Typescript" label="Typescript">
 ```ts
@@ -139,9 +135,9 @@ const { SemanticResourceAttributes } = require('@opentelemetry/semantic-conventi
 
 // highlight-start
 const exporterOptions = {
-  url: 'https://ingest.<REGION>.signoz.cloud:443/v1/traces',
+  url: 'https://ingest.<region>.signoz.cloud:443/v1/traces',
   headers: {
-      "signoz-access-token": "<SIGNOZ_INGESTION_KEY>"
+      "signoz-access-token": "<your-ingestion-key>"
     }
 }
 // highlight-end
@@ -152,7 +148,7 @@ const sdk = new opentelemetry.NodeSDK({
   instrumentations: [getNodeAutoInstrumentations()],
   resource: new Resource({
     // highlight-next-line
-    [SemanticResourceAttributes.SERVICE_NAME]: '<SERVICE_NAME>'
+    [SemanticResourceAttributes.SERVICE_NAME]: '<service_name>'
   })
 });
 
@@ -171,11 +167,9 @@ process.on('SIGTERM', () => {
 </TabItem>
 </Tabs>
 
-Replace:
-
-- **`{REGION}`** with your SigNoz cloud region.
-- **`{SIGNOZ_INGESTION_KEY}`** with the key found in your SigNoz account settings. You can read more about it [here](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
-- **`{SERVICE_NAME}`** with name of service.
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service_name>` is name of your service
 
 **Step 3.** On `main.ts` file or file where your app starts import tracer using below command.
   <Admonition type="info">
@@ -188,27 +182,6 @@ const tracer = require('./tracer')
 
 **Step 4.** Start the tracer<br></br>
 In the `async function boostrap` section of the application code, initialize the tracer as follows: 
-<Tabs>
-<TabItem value="Typescript" label="Typescript">
-```jsx
-const tracer = require('./tracer')
-
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
-  // All of your application code and any imports that should leverage
-  // OpenTelemetry automatic instrumentation must go here.
-
-async function bootstrap() {
-    // highlight-start
-    await tracer.start();
-    //highlight-end
-    const app = await NestFactory.create(AppModule);
-    await app.listen(3001);
-  }
-  bootstrap();
-```
-</TabItem>
-<TabItem value="Javascript" label="Javascript">
 <Tabs>
 <TabItem value="Typescript" label="Typescript">
 ```jsx
@@ -247,8 +220,6 @@ async function bootstrap() {
   }
   bootstrap();
 ```
-</TabItem>
-</Tabs>
 </TabItem>
 </Tabs>
 
@@ -293,15 +264,13 @@ npm install --save @opentelemetry/auto-instrumentations-node
 export OTEL_TRACES_EXPORTER="otlp"
 export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318/v1/traces"
 export OTEL_NODE_RESOURCE_DETECTORS="env,host,os"
-export OTEL_SERVICE_NAME="<SERVICE_NAME>"
+export OTEL_SERVICE_NAME="<service_name>"
 export NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
 <your_run_command>
 ```
 
-Replace:
-
-- **`{SERVICE_NAME}`** with name of service.
-- **`{your_run_command}`** with run command of your application.
+- `<service_name>` is name of your service
+- replace `<your_run_command>` with the run command of your application
 
 
 #### Send traces via OTel Collector binary - Code Level Automatic Instrumentation
@@ -322,8 +291,6 @@ npm install --save @opentelemetry/exporter-trace-otlp-http@^0.45.0
 ```
 
 **Step 2.** Create `tracer.ts` file<br></br>
-<Tabs>
-<TabItem value="Typescript" label="Typescript">
 <Tabs>
 <TabItem value="Typescript" label="Typescript">
 ```ts
@@ -411,9 +378,7 @@ module.exports = sdk;
 </TabItem>
 </Tabs>
 
-Replace:
-
-- **`{SERVICE_NAME}`** with name of service.
+- `<service_name>` is name of your service
 
 **Step 3.** On `main.ts` file or file where your app starts import tracer using below command. 
 <Admonition type="info">
@@ -427,8 +392,6 @@ const tracer = require('./tracer')
 
 **Step 4.** Start the tracer<br></br>
 In the `async function boostrap` section of the application code, initialize the tracer as follows: 
-<Tabs>
-<TabItem value="Typescript" label="Typescript">
 <Tabs>
 <TabItem value="Typescript" label="Typescript">
 ```jsx
@@ -448,25 +411,6 @@ async function bootstrap() {
   }
   bootstrap();
 ```
-</TabItem>
-<TabItem value="Javascript" label="Javascript">
-```js
-const tracer = require('./tracer');
-const { NestFactory } = require('@nestjs/core');
-const { AppModule } = require('./app.module');
-
-// All of your application code and any imports that should leverage
-// OpenTelemetry automatic instrumentation must go here.
-
-async function bootstrap() {
-    await tracer.start();
-    const app = await NestFactory.create(AppModule);
-    await app.listen(3001);
-}
-bootstrap();
-```
-</TabItem>
-</Tabs>
 </TabItem>
 <TabItem value="Javascript" label="Javascript">
 ```js
@@ -523,15 +467,13 @@ npm install --save @opentelemetry/auto-instrumentations-node
 export OTEL_TRACES_EXPORTER="otlp"
 export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318/v1/traces"
 export OTEL_NODE_RESOURCE_DETECTORS="env,host,os"
-export OTEL_SERVICE_NAME="<SERVICE_NAME>"
+export OTEL_SERVICE_NAME="<service_name>"
 export NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
 <your_run_command>
 ```
 
-Replace:
-
-- **`{SERVICE_NAME}`** with name of service.
-- **`{your_run_command}`** with run command of your application.
+- `<service_name>` is name of your service
+- replace `<your_run_command>` with the run command of your application
 
 In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#troubleshooting-your-installation).
 
@@ -547,8 +489,6 @@ npm install --save @opentelemetry/exporter-trace-otlp-http@^0.45.0
 ```
 
 **Step 2.** Create `tracer.ts` file<br></br>
-<Tabs>
-<TabItem value="Typescript" label="Typescript">
 <Tabs>
 <TabItem value="Typescript" label="Typescript">
 ```ts
@@ -592,50 +532,6 @@ process.on('SIGTERM', () => {
 
 export default sdk;
 ```
-</TabItem>
-<TabItem value="Javascript" label="Javascript">
-```js
-'use strict';
-
-const { getNodeAutoInstrumentations } = require('@opentelemetry/auto-instrumentations-node');
-const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-http');
-const { Resource } = require('@opentelemetry/resources');
-const opentelemetry = require('@opentelemetry/sdk-node');
-const { SemanticResourceAttributes } = require('@opentelemetry/semantic-conventions');
-
-// Configure the SDK to export telemetry data to the console
-// Enable all auto-instrumentations from the meta package
-const exporterOptions = {
-  url: 'http://localhost:4318/v1/traces',
-};
-
-const traceExporter = new OTLPTraceExporter(exporterOptions);
-const sdk = new opentelemetry.NodeSDK({
-  traceExporter,
-  instrumentations: [getNodeAutoInstrumentations()],
-  resource: new Resource({
-    [SemanticResourceAttributes.SERVICE_NAME]: '<service_name>',
-  }),
-});
-
-// initialize the SDK and register with the OpenTelemetry API
-// this enables the API to record telemetry
-sdk.start();
-
-// gracefully shut down the SDK on process exit
-process.on('SIGTERM', () => {
-  sdk
-    .shutdown()
-    .then(() => console.log('Tracing terminated'))
-    .catch((error) => console.log('Error terminating tracing', error))
-    .finally(() => process.exit(0));
-});
-
-module.exports = sdk;
-```
-</TabItem>
-</Tabs>
-
 </TabItem>
 <TabItem value="Javascript" label="Javascript">
 ```js
@@ -696,8 +592,6 @@ const tracer = require('./tracer')
 In the `async function boostrap` section of the application code, initialize the tracer as follows: 
 <Tabs>
 <TabItem value="Typescript" label="Typescript">
-<Tabs>
-<TabItem value="Typescript" label="Typescript">
 ```jsx
 const tracer = require('./tracer')
 
@@ -715,26 +609,6 @@ async function bootstrap() {
   }
   bootstrap();
 ```
-</TabItem>
-<TabItem value="Javascript" label="Javascript">
-```js
-const tracer = require('./tracer');
-const { NestFactory } = require('@nestjs/core');
-const { AppModule } = require('./app.module');
-
-// All of your application code and any imports that should leverage
-// OpenTelemetry automatic instrumentation must go here.
-
-async function bootstrap() {
-    await tracer.start();
-    const app = await NestFactory.create(AppModule);
-    await app.listen(3001);
-}
-bootstrap();
-
-```
-</TabItem>
-</Tabs>
 </TabItem>
 <TabItem value="Javascript" label="Javascript">
 ```js
@@ -797,12 +671,10 @@ $env:NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
 <your_run_command>
 ```
 
-Replace:
-
-- **`{REGION}`** with your SigNoz cloud region.
-- **`{SIGNOZ_INGESTION_KEY}`** with the key found in your SigNoz account settings. You can read more about it [here](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
-- **`{SERVICE_NAME}`** with name of service.
-- **`{your_run_command}`** with run command of your application.
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service_name>` is name of your service
+- replace `<your_run_command>` with the run command of your application
 
 #### Send traces directly to SigNoz Cloud - Code Level Automatic  Instrumentation
 
@@ -817,8 +689,6 @@ npm install --save @opentelemetry/exporter-trace-otlp-http@^0.45.0
 
 **Step 2.** Create `tracer.ts` file<br></br>
 You need to configure the endpoint for SigNoz cloud in this file.
-<Tabs>
-<TabItem value="Typescript" label="Typescript">
 <Tabs>
 <TabItem value="Typescript" label="Typescript">
 ```ts
@@ -877,8 +747,8 @@ const { SemanticResourceAttributes } = require('@opentelemetry/semantic-conventi
 // Configure the SDK to export telemetry data to the console
 // Enable all auto-instrumentations from the meta package
 const exporterOptions = {
-  url: 'https://ingest.{region}.signoz.cloud:443/v1/traces',
-  headers: { 'signoz-access-token': '<signoz_ingestion_key>' },
+  url: 'https://ingest.<region>.signoz.cloud:443/v1/traces',
+  headers: { 'signoz-access-token': '<your-ingestion-key>' },
 };
 
 const traceExporter = new OTLPTraceExporter(exporterOptions);
@@ -909,11 +779,9 @@ module.exports = sdk;
 </TabItem>
 </Tabs>
 
-Replace:
-
-- **`{REGION}`** with your SigNoz cloud region.
-- **`{SIGNOZ_INGESTION_KEY}`** with the key found in your SigNoz account settings. You can read more about it [here](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
-- **`{SERVICE_NAME}`** with name of service.
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service_name>` is name of your service
 
 OpenTelemetry Node SDK currently does not detect the headers from `.env` files as of today. That’s why we need to include the variables in the `tracer.js` file itself.
 
@@ -922,8 +790,6 @@ OpenTelemetry Node SDK currently does not detect the headers from `.env` files a
   <Admonition type="info">
   The below import should be the first line in the main file of your application (Ex -> `main.ts`)
   </Admonition> 
-<Tabs>
-<TabItem value="Typescript" label="Typescript">
 <Tabs>
 <TabItem value="Typescript" label="Typescript">
 ```jsx
@@ -936,17 +802,8 @@ const tracer = require('./tracer')
 ```
 </TabItem>
 </Tabs>
-</TabItem>
-<TabItem value="Javascript" label="Javascript">
-```js
-const tracer = require('./tracer')
-```
-</TabItem>
-</Tabs>
 **Step 4.** Start the tracer<br></br>
 In the `async function boostrap` section of the application code, initialize the tracer as follows: 
-<Tabs>
-<TabItem value="Typescript" label="Typescript">
 <Tabs>
 <TabItem value="Typescript" label="Typescript">
 ```jsx
@@ -966,26 +823,6 @@ async function bootstrap() {
   }
   bootstrap();
 ```
-</TabItem>
-<TabItem value="Javascript" label="Javascript">
-```js
-const tracer = require('./tracer')
-
-const { NestFactory } = require('@nestjs/core');
-const { AppModule } = require('./app.module');
-
-// All of your application code and any imports that should leverage
-// OpenTelemetry automatic instrumentation must go here.
-
-async function bootstrap() {
-  await tracer.start();
-  const app = await NestFactory.create(AppModule);
-  await app.listen(3001);
-}
-bootstrap();
-```
-</TabItem>
-</Tabs>
 </TabItem>
 <TabItem value="Javascript" label="Javascript">
 ```js
@@ -1048,17 +885,13 @@ npm install --save @opentelemetry/auto-instrumentations-node
 $env:OTEL_TRACES_EXPORTER="otlp"
 $env:OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318/v1/traces"
 $env:OTEL_NODE_RESOURCE_DETECTORS="env,host,os"
-$env:OTEL_SERVICE_NAME="<APP_NAME>"
+$env:OTEL_SERVICE_NAME="<service_name>"
 $env:NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
 <your_run_command>
 ```
 
-Replace:
-
-- **`{REGION}`** with your SigNoz cloud region.
-- **`{SIGNOZ_INGESTION_KEY}`** with the key found in your SigNoz account settings. You can read more about it [here](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
-- **`{SERVICE_NAME}`** with name of service.
-- **`{your_run_command}` with run command of your application.
+- `<service_name>` is name of your service
+- replace `<your_run_command>` with the run command of your application
 
 
 #### Send traces via OTel Collector binary - Code Level Automatic Instrumentation
@@ -1079,8 +912,6 @@ npm install --save @opentelemetry/exporter-trace-otlp-http@^0.45.0
 ```
 
 **Step 2.** Create `tracer.ts` file<br></br>
-<Tabs>
-<TabItem value="Typescript" label="Typescript">
 <Tabs>
 <TabItem value="Typescript" label="Typescript">
 ```ts
@@ -1166,9 +997,8 @@ module.exports = sdk;
 </TabItem>
 </Tabs>
 
-Replace:
+- `<service_name>` is name of your service
 
-- **`{SERVICE_NAME}`** with name of service.
 
 **Step 3.** On `main.ts` file or file where your app starts import tracer using below command. 
 <Admonition type="info">
@@ -1177,18 +1007,9 @@ The below import should be the first line in the main file of your application (
     
 <Tabs>
 <TabItem value="Typescript" label="Typescript">
-<Tabs>
-<TabItem value="Typescript" label="Typescript">
 ```jsx
 const tracer = require('./tracer')
 ```
-</TabItem>
-<TabItem value="Javascript" label="Javascript">
-```jsx
-const tracer = require('./tracer')
-```
-</TabItem>
-</Tabs>
 </TabItem>
 <TabItem value="Javascript" label="Javascript">
 ```jsx
@@ -1199,8 +1020,6 @@ const tracer = require('./tracer')
 
 **Step 4.** Start the tracer<br></br>
 In the `async function boostrap` section of the application code, initialize the tracer as follows: 
-<Tabs>
-<TabItem value="Typescript" label="Typescript">
 <Tabs>
 <TabItem value="Typescript" label="Typescript">
 ```jsx
@@ -1220,26 +1039,6 @@ async function bootstrap() {
   }
   bootstrap();
 ```
-</TabItem>
-<TabItem value="Javascript" label="Javascript">
-```jsx
-const tracer = require('./tracer')
-
-const { NestFactory } = require('@nestjs/core');
-const { AppModule } = require('./app.module');
-
-// All of your application code and any imports that should leverage
-// OpenTelemetry automatic instrumentation must go here.
-
-async function bootstrap() {
-  await tracer.start();
-  const app = await NestFactory.create(AppModule);
-  await app.listen(3001);
-}
-bootstrap();
-```
-</TabItem>
-</Tabs>
 </TabItem>
 <TabItem value="Javascript" label="Javascript">
 ```jsx
@@ -1325,8 +1124,6 @@ Internally, it calls the specific auto-instrumentation library for components us
     
   <Tabs>
   <TabItem value="Typescript" label="Typescript">
-  <Tabs>
-  <TabItem value="Typescript" label="Typescript">
   ```ts
   'use strict';
 
@@ -1406,44 +1203,6 @@ Internally, it calls the specific auto-instrumentation library for components us
   ```
   </TabItem>
   </Tabs>
-  </TabItem>
-  <TabItem value="Javascript" label="Javascript">
-  ```js
-  'use strict';
-
-  const { getNodeAutoInstrumentations } = require('@opentelemetry/auto-instrumentations-node');
-  const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-http');
-  const { Resource } = require('@opentelemetry/resources');
-  const opentelemetry = require('@opentelemetry/sdk-node');
-  const { SemanticResourceAttributes } = require('@opentelemetry/semantic-conventions');
-
-  const exporterOptions = {
-    url: 'http://localhost:4318/v1/traces',
-  };
-
-  const traceExporter = new OTLPTraceExporter(exporterOptions);
-  const sdk = new opentelemetry.NodeSDK({
-    traceExporter,
-    instrumentations: [getNodeAutoInstrumentations()],
-  });
-
-  // initialize the SDK and register with the OpenTelemetry API
-  // this enables the API to record telemetry
-  sdk.start();
-
-  // gracefully shut down the SDK on process exit
-  process.on('SIGTERM', () => {
-    sdk
-      .shutdown()
-      .then(() => console.log('Tracing terminated'))
-      .catch((error) => console.log('Error terminating tracing', error))
-      .finally(() => process.exit(0));
-  });
-
-  module.exports = sdk;
-  ```
-  </TabItem>
-  </Tabs>
   - `<service_name>` : Name of your service. 
 
 3. On `main.ts` file or file where your app starts import tracer using below command. <br></br>
@@ -1454,19 +1213,9 @@ Internally, it calls the specific auto-instrumentation library for components us
   
   <Tabs>
   <TabItem value="Typescript" label="Typescript">
-  
-  <Tabs>
-  <TabItem value="Typescript" label="Typescript">
     ```jsx
     const tracer = require('./tracer')
     ```
-  </TabItem>
-  <TabItem value="Javascript" label="Javascript">
-    ```jsx
-    const tracer = require('./tracer')
-    ```
-  </TabItem>
-  </Tabs>
   </TabItem>
   <TabItem value="Javascript" label="Javascript">
     ```jsx
@@ -1478,8 +1227,6 @@ Internally, it calls the specific auto-instrumentation library for components us
 4. Start the tracer<br></br>
    In the `async function boostrap` section of the application code, initialize the tracer as follows: 
     
-    <Tabs>
-    <TabItem value="Typescript" label="Typescript">
     <Tabs>
     <TabItem value="Typescript" label="Typescript">
     ```jsx
@@ -1499,25 +1246,6 @@ Internally, it calls the specific auto-instrumentation library for components us
       }
       bootstrap();
     ```
-    </TabItem>
-    <TabItem value="Javascript" label="Javascript">
-    ```jsx
-    const tracer = require('./tracer')
-    const { NestFactory } = require('@nestjs/core');
-    const { AppModule } = require('./app.module');
-
-    // All of your application code and any imports that should leverage
-    // OpenTelemetry automatic instrumentation must go here.
-
-    async function bootstrap() {  
-        await tracer.start();
-        const app = await NestFactory.create(AppModule);
-        await app.listen(3001);
-      }
-      bootstrap();
-    ```
-    </TabItem>
-    </Tabs>
     </TabItem>
     <TabItem value="Javascript" label="Javascript">
     ```jsx
@@ -1719,7 +1447,3 @@ opentelemetry.trace.getTracer('your_tracer_name').getActiveSpanProcessor().shutd
 
 
 {/* <InstrumentationFAQ /> */}
-
-
-
-

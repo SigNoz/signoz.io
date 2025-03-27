@@ -59,11 +59,6 @@ You need to configure the endpoint for SigNoz cloud in this file.
 
 Create `instrumentation.node.ts`:
 ```typescript
-<Tabs>
-<TabItem value="typescript" label="TypeScript" default>
-
-Create `instrumentation.node.ts`:
-```typescript
 'use strict'
 import { OTLPHttpJsonTraceExporter } from '@vercel/otel';
 
@@ -72,21 +67,17 @@ import { diag, DiagConsoleLogger, DiagLogLevel } from '@opentelemetry/api';
 diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.ERROR); // set diaglog level to DEBUG when debugging
 
 const exporterOptions = {
-  url: 'https://ingest.<REGION>.signoz.cloud:443/v1/traces', // Set your own data region or set to http://localhost:4318/v1/traces if using selfhost SigNoz
-  headers: { 'signoz-ingestion-key': 'SIGNOZ_INGESTION_KEY' }, // Set if you are using SigNoz Cloud
+  url: 'https://ingest.<region>.signoz.cloud:443/v1/traces', // Set your own data region or set to http://localhost:4318/v1/traces if using selfhost SigNoz
+  headers: { 'signoz-ingestion-key': 'your-ingestion-key' }, // Set if you are using SigNoz Cloud
 }
 
 export const traceExporter = new OTLPHttpJsonTraceExporter(exporterOptions);
 ```
 
-Replace:
-
-- **`{REGION}`** with your SigNoz cloud region.
-- **`{SIGNOZ_INGESTION_KEY}`** with the key found in your SigNoz account settings. You can read more about it [here](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 
 **Step 4.** Create `instrumentation.ts` file<br></br>
-Create `instrumentation.ts`:
-```typescript
 Create `instrumentation.ts`:
 ```typescript
 import { registerOTel } from '@vercel/otel';
@@ -100,9 +91,8 @@ export function register() {
 }
 ```
 
-Replace:
+- `<service_name>` is name of your service
 
-- **`{SERVICE_NAME}`** with name of service.
 
 </TabItem>
 <TabItem value="javascript" label="JavaScript">
@@ -117,17 +107,15 @@ const { diag, DiagConsoleLogger, DiagLogLevel } = require('@opentelemetry/api');
 diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.ERROR); // set diaglog level to DEBUG when debugging
 
 const exporterOptions = {
-  url: 'https://ingest.<REGION>.signoz.cloud:443/v1/traces', // Set your own data region or set to http://localhost:4318/v1/traces if using selfhost SigNoz
-  headers: { 'signoz-access-token': 'SIGNOZ_INGESTION_KEY' }, // Set if you are using SigNoz Cloud
+  url: 'https://ingest.<region>.signoz.cloud:443/v1/traces', // Set your own data region or set to http://localhost:4318/v1/traces if using selfhost SigNoz
+  headers: { 'signoz-access-token': 'your-ingestion-key' }, // Set if you are using SigNoz Cloud
 }
 
 exports.traceExporter = new OTLPTraceExporter(exporterOptions);
 ```
 
-Replace:
-
-- **`{REGION}`** with your SigNoz cloud region.
-- **`{SIGNOZ_INGESTION_KEY}`** with the key found in your SigNoz account settings. You can read more about it [here](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 
 Create `instrumentation.js`:
 ```javascript
@@ -136,15 +124,13 @@ const { traceExporter } = require('./instrumentation.node');
 
 exports.register = function() {
   registerOTel({
-    serviceName: '<SERVICE_NAME>',
+    serviceName: '<service_name>',
     traceExporter: traceExporter,
   });
 }
 ```
 
-Replace:
-
-- **`{SERVICE_NAME}`** with name of service.
+- `<service_name>` is name of your service
 
 </TabItem>
 </Tabs>
@@ -184,11 +170,7 @@ export default nextConfig;
 
 <Tabs>
 <TabItem value="typescript" label="TypeScript" default>
-<Tabs>
-<TabItem value="typescript" label="TypeScript" default>
 
-Create `instrumentation.node.ts`:
-```typescript
 Create `instrumentation.node.ts`:
 ```typescript
 'use strict'
@@ -232,8 +214,6 @@ process.on('SIGTERM', () => {
 
 Create `instrumentation.ts`:
 ```typescript
-Create `instrumentation.ts`:
-```typescript
 export async function register() {
   if (process.env.NEXT_RUNTIME === 'nodejs') {
     await import('./instrumentation.node')
@@ -259,8 +239,8 @@ const { diag, DiagConsoleLogger, DiagLogLevel } = require('@opentelemetry/api');
 diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.ERROR); // set diaglog level to DEBUG when debugging
 
 const exporterOptions = {
-  url: 'https://ingest.<REGION>.signoz.cloud:443/v1/traces', // use your own data region 
-  headers: { 'signoz-access-token': 'SIGNOZ_INGESTION_KEY' }, // Use if you are using SigNoz Cloud
+  url: 'https://ingest.<region>.signoz.cloud:443/v1/traces', // use your own data region 
+  headers: { 'signoz-access-token': '<your-ingestion-key>' }, // Use if you are using SigNoz Cloud
 }
 
 const traceExporter = new OTLPTraceExporter(exporterOptions);
@@ -268,7 +248,7 @@ const sdk = new NodeSDK({
   traceExporter,
   instrumentations: [getNodeAutoInstrumentations()],
     resource: new Resource({
-    [SEMRESATTRS_SERVICE_NAME]: 'next-app',
+    [SEMRESATTRS_SERVICE_NAME]: '<service_name>',
   }),
 });
 
@@ -285,10 +265,9 @@ process.on('SIGTERM', () => {
 });
 ```
 
-Replace:
-
-- **`{REGION}`** with your SigNoz cloud region.
-- **`{SIGNOZ_INGESTION_KEY}`** with the key found in your SigNoz account settings. You can read more about it [here](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service_name>` is name of your service
 
 Create `instrumentation.js`:
 ```javascript
@@ -302,11 +281,9 @@ exports.register = async function() {
 </TabItem>
 </Tabs>
 
-Replace:
-
-- **`{REGION}`** with your SigNoz cloud region.
-- **`{SIGNOZ_INGESTION_KEY}`** with the key found in your SigNoz account settings. You can read more about it [here](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
-- **`{SERVICE_NAME}`** with name of service.
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service_name>` is name of your service
 
 **Step 3.** Once you're done configuring the exporter options, try running your application and validate if your application is sending traces to SigNoz cloud [here](#validating-instrumentation-by-checking-for-traces).
 
@@ -351,11 +328,7 @@ export default nextConfig;
 
 <Tabs>
 <TabItem value="typescript" label="TypeScript" default>
-<Tabs>
-<TabItem value="typescript" label="TypeScript" default>
 
-Create `instrumentation.node.ts`:
-```typescript
 Create `instrumentation.node.ts`:
 ```typescript
 'use strict'
@@ -374,8 +347,6 @@ export const traceExporter = new OTLPTraceExporter(exporterOptions);
 
 Create `instrumentation.ts`:
 ```typescript
-Create `instrumentation.ts`:
-```typescript
 import { registerOTel } from '@vercel/otel';
 import { traceExporter } from './instrumentation.node';
 
@@ -387,9 +358,7 @@ export function register() {
 }
 ```
 
-Replace:
-
-- **`{SERVICE_NAME}`** with name of service.
+- `<service_name>` is name of your service
 
 </TabItem>
 <TabItem value="javascript" label="JavaScript">
@@ -480,11 +449,7 @@ export default nextConfig;
 
 <Tabs>
 <TabItem value="typescript" label="TypeScript" default>
-<Tabs>
-<TabItem value="typescript" label="TypeScript" default>
 
-Create `instrumentation.node.ts`:
-```typescript
 Create `instrumentation.node.ts`:
 ```typescript
 'use strict'
@@ -508,7 +473,7 @@ const sdk = new NodeSDK({
   traceExporter,
   instrumentations: [getNodeAutoInstrumentations()],
     resource: new Resource({
-    [SEMRESATTRS_SERVICE_NAME]: '<SERVICE_NAME>',
+    [SEMRESATTRS_SERVICE_NAME]: '<service_name>',
   }),
 });
 
@@ -525,9 +490,7 @@ process.on('SIGTERM', () => {
 });
 ```
 
-Replace:
-
-- **`{SERVICE_NAME}`** with name of service.
+- `<service_name>` is name of your service
 
 Create `instrumentation.ts`:
 ```typescript
@@ -538,62 +501,6 @@ export async function register() {
 }
 ```
 
-</TabItem>
-<TabItem value="javascript" label="JavaScript">
-
-Create `instrumentation.node.js`:
-```javascript
-'use strict'
-const process = require('process');
-const {NodeSDK} = require('@opentelemetry/sdk-node');
-const { getNodeAutoInstrumentations } = require('@opentelemetry/auto-instrumentations-node');
-const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-http');
-const { Resource } = require('@opentelemetry/resources');
-const { SEMRESATTRS_SERVICE_NAME } = require('@opentelemetry/semantic-conventions');
- 
-// Add otel logging
-const { diag, DiagConsoleLogger, DiagLogLevel } = require('@opentelemetry/api');
-diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.ERROR); // set diaglog level to DEBUG when debugging
-
-const exporterOptions = {
-  url: 'http://localhost:4318/v1/traces',
-}
-
-const traceExporter = new OTLPTraceExporter(exporterOptions);
-const sdk = new NodeSDK({
-  traceExporter,
-  instrumentations: [getNodeAutoInstrumentations()],
-    resource: new Resource({
-    [SEMRESATTRS_SERVICE_NAME]: 'next-app',
-  }),
-});
-
-// initialize the SDK and register with the OpenTelemetry API
-// this enables the API to record telemetry
-sdk.start()
-
-// gracefully shut down the SDK on process exit
-process.on('SIGTERM', () => {
-  sdk.shutdown()
-    .then(() => console.log('Tracing terminated'))
-    .catch((error) => console.log('Error terminating tracing', error))
-    .finally(() => process.exit(0));
-});
-```
-
-Create `instrumentation.js`:
-```javascript
-exports.register = async function() {
-  if (process.env.NEXT_RUNTIME === 'nodejs') {
-    await require('./instrumentation.node')
-  }
-}
-```
-
-</TabItem>
-</Tabs>
-
-**Step 4.** Once we are done with the above configurations, you can run the collector service with the following command:
 </TabItem>
 <TabItem value="javascript" label="JavaScript">
 
@@ -697,11 +604,7 @@ export default nextConfig;
 
 <Tabs>
 <TabItem value="typescript" label="TypeScript" default>
-<Tabs>
-<TabItem value="typescript" label="TypeScript" default>
 
-Create `instrumentation.node.ts`:
-```typescript
 Create `instrumentation.node.ts`:
 ```typescript
 'use strict'
@@ -720,22 +623,18 @@ export const traceExporter = new OTLPTraceExporter(exporterOptions);
 
 Create `instrumentation.ts`:
 ```typescript
-Create `instrumentation.ts`:
-```typescript
 import { registerOTel } from '@vercel/otel';
 import { traceExporter } from './instrumentation.node';
 
 export function register() {
   registerOTel({
-    serviceName: '<SERVICE_NAME>',
+    serviceName: '<service_name>',
     traceExporter: traceExporter,
   });
 }
 ```
 
-Replace:
-
-- **`{SERVICE_NAME}`** with name of service.
+- `<service_name>` is name of your service
 
 </TabItem>
 <TabItem value="javascript" label="JavaScript">
@@ -763,15 +662,13 @@ const { traceExporter } = require('./instrumentation.node');
 
 exports.register = function() {
   registerOTel({
-    serviceName: '<SERVICE_NAME>',
+    serviceName: '<service_name>',
     traceExporter: traceExporter,
   });
 }
 ```
 
-Replace:
-
-- **`{SERVICE_NAME}`** with name of service.
+- `<service_name>` is name of your service
 
 </TabItem>
 </Tabs>
@@ -822,11 +719,6 @@ export default nextConfig;
 
 Create `instrumentation.ts`:
 ```typescript
-<Tabs>
-<TabItem value="typescript" label="TypeScript" default>
-
-Create `instrumentation.ts`:
-```typescript
 export async function register() {
   if (process.env.NEXT_RUNTIME === 'nodejs') {
     await import('./instrumentation.node')
@@ -834,8 +726,6 @@ export async function register() {
 }
 ```
 
-Create `instrumentation.node.ts`:
-```typescript
 Create `instrumentation.node.ts`:
 ```typescript
 'use strict'
@@ -859,7 +749,7 @@ const sdk = new NodeSDK({
   traceExporter,
   instrumentations: [getNodeAutoInstrumentations()],
     resource: new Resource({
-    [SEMRESATTRS_SERVICE_NAME]: '<SERVICE_NAME>',
+    [SEMRESATTRS_SERVICE_NAME]: '<service_name>',
   }),
 });
 
@@ -876,9 +766,7 @@ process.on('SIGTERM', () => {
 });
 ```
 
-Replace:
-
-- **`{SERVICE_NAME}`** with name of service.
+- `<service_name>` is name of your service
 
 </TabItem>
 <TabItem value="javascript" label="JavaScript">
@@ -915,7 +803,7 @@ const sdk = new NodeSDK({
   traceExporter,
   instrumentations: [getNodeAutoInstrumentations()],
     resource: new Resource({
-    [SEMRESATTRS_SERVICE_NAME]: '<SERVICE_NAME>',
+    [SEMRESATTRS_SERVICE_NAME]: '<service_name>',
   }),
 });
 
@@ -932,9 +820,7 @@ process.on('SIGTERM', () => {
 });
 ```
 
-Replace:
-
-- **`{SERVICE_NAME}`** with name of service.
+- `<service_name>` is name of your service
 
 </TabItem>
 </Tabs>
@@ -944,7 +830,6 @@ Replace:
 ./otelcol-contrib --config ./config.yaml
 ```
 
-**Step 5.** Start running your application and wait for few seconds to start receiving instrumentation data on the SigNoz Cloud. 
 **Step 5.** Start running your application and wait for few seconds to start receiving instrumentation data on the SigNoz Cloud. 
 
 <Admonition>
@@ -989,11 +874,7 @@ export default nextConfig;
 
 <Tabs>
 <TabItem value="typescript" label="TypeScript" default>
-<Tabs>
-<TabItem value="typescript" label="TypeScript" default>
 
-Create `instrumentation.node.ts`:
-```typescript
 Create `instrumentation.node.ts`:
 ```typescript
 'use strict'
@@ -1004,17 +885,16 @@ import { diag, DiagConsoleLogger, DiagLogLevel } from '@opentelemetry/api';
 diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.ERROR); // set diaglog level to DEBUG when debugging
 
 const exporterOptions = {
-  url: 'https://ingest.<REGION>.signoz.cloud:443/v1/traces', // Set your own data region or set to http://localhost:4318/v1/traces if using selfhost SigNoz
-  headers: { 'signoz-ingestion-key': '<SIGNOZ_INGESTION_KEY>' }, // Set if you are using SigNoz Cloud
+  url: 'https://ingest.<region>.signoz.cloud:443/v1/traces', // Set your own data region or set to http://localhost:4318/v1/traces if using selfhost SigNoz
+  headers: { 'signoz-ingestion-key': '<your-ingestion-key>' }, // Set if you are using SigNoz Cloud
 }
 
 export const traceExporter = new OTLPTraceExporter(exporterOptions);
 ```
 
-Replace:
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 
-- **`{REGION}`** with your SigNoz cloud region.
-- **`{SIGNOZ_INGESTION_KEY}`** with the key found in your SigNoz account settings. You can read more about it [here](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 
 Create `instrumentation.ts`:
 ```typescript
@@ -1029,9 +909,7 @@ export function register() {
 }
 ```
 
-Replace:
-
-- **`{SERVICE_NAME}`** with name of service.
+- `<service_name>` is name of your service
 
 </TabItem>
 <TabItem value="javascript" label="JavaScript">
@@ -1046,8 +924,8 @@ const { diag, DiagConsoleLogger, DiagLogLevel } = require('@opentelemetry/api');
 diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.ERROR); // set diaglog level to DEBUG when debugging
 
 const exporterOptions = {
-  url: 'https://ingest.<REGION>.signoz.cloud:443/v1/traces', // Set your own data region or set to http://localhost:4318/v1/traces if using selfhost SigNoz
-  headers: { 'signoz-access-token': '<SIGNOZ_INGESTION_KEY>' }, // Set if you are using SigNoz Cloud
+  url: 'https://ingest.<region>.signoz.cloud:443/v1/traces', // Set your own data region or set to http://localhost:4318/v1/traces if using selfhost SigNoz
+  headers: { 'signoz-access-token': '<your-ingestion-key>' }, // Set if you are using SigNoz Cloud
 }
 
 exports.traceExporter = new OTLPTraceExporter(exporterOptions);
@@ -1060,7 +938,7 @@ const { traceExporter } = require('./instrumentation.node');
 
 exports.register = function() {
   registerOTel({
-    serviceName: '<SERVICE_NAME>',
+    serviceName: '<service_name>',
     traceExporter: traceExporter,
   });
 }
@@ -1069,11 +947,10 @@ exports.register = function() {
 </TabItem>
 </Tabs>
 
-Replace:
-
-- **`{REGION}`** with your SigNoz cloud region.
-- **`{SIGNOZ_INGESTION_KEY}`** with the key found in your SigNoz account settings. You can read more about it [here](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
-- **`{SERVICE_NAME}`** with name of service.
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service_name>` is name of your service
+- replace `<your_run_command>` with the run command of your application
 
 **Step 3.** Once you're done configuring the exporter options, try running your application and validate if your application is sending traces to SigNoz cloud [here](#validating-instrumentation-by-checking-for-traces).
 
@@ -1134,8 +1011,8 @@ import { SEMRESATTRS_SERVICE_NAME } from '@opentelemetry/semantic-conventions'
 // diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.DEBUG);
 
 const exporterOptions = {
-  url: 'https://ingest.<REGION>.signoz.cloud:443/v1/traces', // use your own data region 
-  headers: { 'signoz-ingestion-key': '<SIGNOZ_INGESTION_KEY>' }, // Use if you are using SigNoz Cloud
+  url: 'https://ingest.<region>.signoz.cloud:443/v1/traces', // use your own data region 
+  headers: { 'signoz-ingestion-key': '<your-ingestion-key>' }, // Use if you are using SigNoz Cloud
 }
 
 const traceExporter = new OTLPTraceExporter(exporterOptions);
@@ -1143,7 +1020,7 @@ const sdk = new NodeSDK({
   traceExporter,
   instrumentations: [getNodeAutoInstrumentations()],
     resource: new Resource({
-    [SEMRESATTRS_SERVICE_NAME]: '<SERVICE_NAME>',
+    [SEMRESATTRS_SERVICE_NAME]: '<service_name>',
   }),
 });
 
@@ -1160,11 +1037,9 @@ process.on('SIGTERM', () => {
 });
 ```
 
-Replace:
-
-- **`{REGION}`** with your SigNoz cloud region.
-- **`{SIGNOZ_INGESTION_KEY}`** with the key found in your SigNoz account settings. You can read more about it [here](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
-- **`{SERVICE_NAME}`** with name of service.
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service_name>` is name of your service
 
 OpenTelemetry Node SDK currently does not detect the headers from `.env` files as of today. That’s why we need to include the variables in the `tracing.js` file itself or set it using Powershell:
 
@@ -1235,15 +1110,13 @@ import { traceExporter } from './instrumentation.node';
 
 export function register() {
   registerOTel({
-    serviceName: '<SERVICE_NAME>',
+    serviceName: '<service_name>',
     traceExporter: traceExporter,
   });
 }
 ```
 
-Replace:
-
-- **`{SERVICE_NAME}`** with name of service.
+- `<service_name>` is name of your service
 
 **Step 5.** Once you're done configuring the exporter options, try running your application and validate if your application is sending traces to SigNoz cloud [here](#validating-instrumentation-by-checking-for-traces).
 
@@ -1331,7 +1204,7 @@ const sdk = new NodeSDK({
   traceExporter,
   instrumentations: [getNodeAutoInstrumentations()],
     resource: new Resource({
-    [SEMRESATTRS_SERVICE_NAME]: '<SERVICE_NAME>',
+    [SEMRESATTRS_SERVICE_NAME]: '<service_name>',
   }),
 });
 
@@ -1348,9 +1221,7 @@ process.on('SIGTERM', () => {
 });
 ```
 
-Replace:
-
-- **`{SERVICE_NAME}`** with name of service.
+- `<service_name>` is name of your service
 
 **Step 6.** Once we are done with the above configurations, you can run the collector service with the following command:
 ```bash
@@ -1371,7 +1242,6 @@ You can also check the sample application at this <a href = "https://github.com/
 
 </TabItem>
 <TabItem value='self-host' label='Self-Host'>
-
 
 ## Send traces to SigNoz Self-Host
 
@@ -1402,8 +1272,6 @@ export default nextConfig;
 
 **Step 3.** Create `instrumentation.node.ts` file<br></br>
 You need to configure the endpoint for SigNoz cloud in this file.
-<Tabs>
-<TabItem value="typescript" label="TypeScript" default>
 <Tabs>
 <TabItem value="typescript" label="TypeScript" default>
 ```tsx
@@ -1440,15 +1308,7 @@ exports.traceExporter = new OTLPTraceExporter(exporterOptions);
 </TabItem>
 </Tabs>
 
-Replace:
-
-- **`{REGION}`** with your SigNoz cloud region.
-- **`{SIGNOZ_INGESTION_KEY}`** with the key found in your SigNoz account settings. You can read more about it [here](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
-- **`{SERVICE_NAME}`** with name of service.
-
 **Step 4.** Create `instrumentation.ts` file<br></br>
-<Tabs>
-<TabItem value="typescript" label="TypeScript" default>
 <Tabs>
 <TabItem value="typescript" label="TypeScript" default>
 ```tsx
@@ -1457,7 +1317,7 @@ import { traceExporter } from './instrumentation.node';
 
 export function register() {
   registerOTel({
-    serviceName: '<SERVICE_NAME>',
+    serviceName: '<service_name>',
     traceExporter: traceExporter,
   });
 }
@@ -1470,7 +1330,7 @@ const { traceExporter } = require('./instrumentation.node');
 
 exports.register = function() {
   registerOTel({
-    serviceName: '<SERVICE_NAME>',
+    serviceName: '<service_name>',
     traceExporter: traceExporter,
   });
 }
@@ -1478,9 +1338,8 @@ exports.register = function() {
 </TabItem>
 </Tabs>
 
-Replace:
 
-- **`{SERVICE_NAME}`** with name of service.
+- `<service_name>` is name of your service
 
 **Step 5.** Once you're done configuring the exporter options, try running your application and validate if your application is sending traces to SigNoz cloud [here](#validating-instrumentation-by-checking-for-traces).
 
@@ -1517,9 +1376,6 @@ export default nextConfig;
 **Step 3.** Create `instrumentation.ts` file.<br></br>
 <Tabs>
 <TabItem value="typescript" label="TypeScript" default>
-**Step 3.** Create `instrumentation.ts` file.<br></br>
-<Tabs>
-<TabItem value="typescript" label="TypeScript" default>
 ```tsx
 export async function register() {
   if (process.env.NEXT_RUNTIME === 'nodejs') {
@@ -1540,24 +1396,9 @@ module.exports = {
 ```
 </TabItem>
 </Tabs>
-</TabItem>
-<TabItem value="javascript" label="JavaScript">
-```javascript
-module.exports = {
-  register: async function() {
-    if (process.env.NEXT_RUNTIME === 'nodejs') {
-      await import('./instrumentation.node')
-    }
-  }
-}
-```
-</TabItem>
-</Tabs>
 
 **Step 4.** Create `instrumentation.node.ts` file<br></br>
 You need to configure the endpoint for SigNoz cloud in this file.
-<Tabs>
-<TabItem value="typescript" label="TypeScript" default>
 <Tabs>
 <TabItem value="typescript" label="TypeScript" default>
 ```tsx
@@ -1638,9 +1479,6 @@ process.on('SIGTERM', () => {
 </TabItem>
 </Tabs>
 
-Replace:
-
-- **`{SERVICE_NAME}`** with name of service.
 
 <Admonition>
 The instrumentation file should be in the root of your project and not inside the app or pages directory. If you're using the src folder, then place the file inside src alongside pages and app.

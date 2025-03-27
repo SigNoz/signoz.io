@@ -48,20 +48,18 @@ npm install --save @opentelemetry/auto-instrumentations-node
 
 ```bash
 export OTEL_TRACES_EXPORTER="otlp"
-export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<REGION>.signoz.cloud:443"
+export OTEL_EXPORTER_OTLP_ENDPOINT="https://ingest.<region>.signoz.cloud:443"
 export OTEL_NODE_RESOURCE_DETECTORS="env,host,os"
-export OTEL_SERVICE_NAME="<SERVICE_NAME>"
-export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<SIGNOZ_INGESTION_KEY>"
+export OTEL_SERVICE_NAME="<service_name>"
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
 export NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
 <your_run_command>
 ```
 
-Replace:
-
-- **`{REGION}`** with your SigNoz cloud region.
-- **`{SIGNOZ_INGESTION_KEY}`** with the key found in your SigNoz account settings. You can read more about it [here](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
-- **`{SERVICE_NAME}`** with name of service.
-- **`{your_run_command}`** with run command of your application.
+- `<your_run_command>` is your run command.
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service_name>` is name of your service
 
 #### Send traces directly to SigNoz Cloud - Code Level Automatic Instrumentation
 
@@ -91,25 +89,23 @@ import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
 const sdk = new opentelemetry.NodeSDK({
   traceExporter: new OTLPTraceExporter({
     // optional - default url is http://localhost:4318/v1/traces
-    url: 'https://ingest.<REGION>.signoz.cloud:443/v1/traces', // url is optional and can be omitted 
+    url: 'https://ingest.<region>.signoz.cloud:443/v1/traces', // url is optional and can be omitted 
       headers: {
-        "signoz-access-token": "<SIGNOZ_INGESTION_KEY>"
+        "signoz-access-token": "<your-ingestion-key>"
       } // an optional object containing custom headers to be sent with each request
   }),
   instrumentations: [getNodeAutoInstrumentations()],
   resource:  resourceFromAttributes({
     // highlight-next-line
-    [SemanticResourceAttributes.SERVICE_NAME]: '<SERVICE_NAME>'
+    [SemanticResourceAttributes.service_name]: '<service_name>'
   })
 });
 sdk.start();
 ```
 
-Replace:
-
-- **`{REGION}`** with your SigNoz cloud region.
-- **`{SIGNOZ_INGESTION_KEY}`** with the key found in your SigNoz account settings. You can read more about it [here](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
-- **`{SERVICE_NAME}`** with name of service.
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service_name>` is name of your service
 
 **Step 3.** Add the below import to your `main.ts` file.
 
@@ -160,16 +156,13 @@ npm install --save @opentelemetry/auto-instrumentations-node
 export OTEL_TRACES_EXPORTER="otlp"
 export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318/v1/traces"
 export OTEL_NODE_RESOURCE_DETECTORS="env,host,os"
-export OTEL_SERVICE_NAME="<SERVICE_NAME>"
+export OTEL_SERVICE_NAME="<service_name>"
 export NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
 <your_run_command>
 ```
 
-Replace:
-
-- **`{SERVICE_NAME}`** with name of service.
-- **`{your_run_command}`** with run command of your application.
-
+- `<your_run_command>` is your run command.
+- `<service_name>` is name of your service
 
 #### Send traces via OTel Collector binary - Code Level Automatic Instrumentation
 
@@ -227,7 +220,7 @@ const sdk = new opentelemetry.NodeSDK({
   instrumentations: [getNodeAutoInstrumentations()],
   resource:  resourceFromAttributes({
     // highlight-next-line
-    [SemanticResourceAttributes.SERVICE_NAME]: '<SERVICE_NAME>'
+    [SemanticResourceAttributes.service_name]: '<service_name>'
   })
 });
 sdk.start();
@@ -236,7 +229,7 @@ sdk.start();
 
 Replace:
 
-- **`{SERVICE_NAME}`** with name of service.
+- **`{service_name}`** with name of service.
 
 **Step 4.** Add the below import to your `main.ts` file.
 {/* <Admonition type="info">
@@ -282,16 +275,14 @@ npm install --save @opentelemetry/auto-instrumentations-node
 export OTEL_TRACES_EXPORTER="otlp"
 export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318/v1/traces"
 export OTEL_NODE_RESOURCE_DETECTORS="env,host,os"
-export OTEL_SERVICE_NAME="<SERVICE_NAME>"
+export OTEL_SERVICE_NAME="<service_name>"
 export NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
 <your_run_command>
 ```
 
 
-Replace:
-
-- **`{SERVICE_NAME}`** with name of service.
-- **`{your_run_command}`** with name of service.
+- `<your_run_command>` is your run command.
+- `<service_name>` is name of your service
 
 In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#troubleshooting-your-installation).
 
@@ -327,7 +318,7 @@ import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
 
 const resource = Resource.default().merge(
   new Resource({
-    [SemanticResourceAttributes.SERVICE_NAME]: '<service_name>',
+    [SemanticResourceAttributes.service_name]: '<service_name>',
     [SemanticResourceAttributes.SERVICE_VERSION]: '0.1.0',
   })
 );
@@ -411,9 +402,11 @@ $env:OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
 $env:NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
 <your_run_command>
 ```
+
+- `<your_run_command>` is your run command.
 - Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
-- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).                               |
-- replace `<your_run_command>` with the run command of your application                                   |
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service_name>` is name of your service
 
 #### Send traces directly to SigNoz Cloud - Code Level Automatic  Instrumentation
 
@@ -430,25 +423,23 @@ import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
 const sdk = new opentelemetry.NodeSDK({
   traceExporter: new OTLPTraceExporter({
     // optional - default url is http://localhost:4318/v1/traces
-    url: 'https://ingest.<REGION>.signoz.cloud:443/v1/traces', // url is optional and can be omitted 
+    url: 'https://ingest.<region>.signoz.cloud:443/v1/traces', // url is optional and can be omitted 
       headers: {
-        "signoz-access-token": "<SIGNOZ_INGESTION_KEY>"
+        "signoz-access-token": "<your-ingestion-key>"
       } // an optional object containing custom headers to be sent with each request
   }),
   instrumentations: [getNodeAutoInstrumentations()],
   resource:  resourceFromAttributes({
     // highlight-next-line
-    [SemanticResourceAttributes.SERVICE_NAME]: '<SERVICE_NAME>'
+    [SemanticResourceAttributes.service_name]: '<service_name>'
   })
 });
 sdk.start();
 ```
 
-Replace:
-
-- **`{REGION}`** with your SigNoz cloud region.
-- **`{SIGNOZ_INGESTION_KEY}`** with the key found in your SigNoz account settings. You can read more about it [here](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
-- **`{SERVICE_NAME}`** with name of service.
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- `<service_name>` is name of your service
 
 
 **Step 3.** Add the below import to your `main.ts` file.
@@ -501,15 +492,13 @@ npm install --save @opentelemetry/auto-instrumentations-node
 $env:OTEL_TRACES_EXPORTER="otlp"
 $env:OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318/v1/traces"
 $env:OTEL_NODE_RESOURCE_DETECTORS="env,host,os"
-$env:OTEL_SERVICE_NAME="<SERVICE_NAME>"
+$env:OTEL_SERVICE_NAME="<service_name>"
 $env:NODE_OPTIONS="--require @opentelemetry/auto-instrumentations-node/register"
 <your_run_command>
 ```
 
-Replace:
-
-- **`{SERVICE_NAME}`** with name of service.
-- **`{your_run_command}`** with run command of your app.
+- `<your_run_command>` is your run command.
+- `<service_name>` is name of your service
 
 
 #### Send traces via OTel Collector binary - Code Level Automatic Instrumentation
@@ -568,16 +557,15 @@ const sdk = new opentelemetry.NodeSDK({
   instrumentations: [getNodeAutoInstrumentations()],
   resource:  resourceFromAttributes({
     // highlight-next-line
-    [SemanticResourceAttributes.SERVICE_NAME]: '<SERVICE_NAME>'
+    [SemanticResourceAttributes.service_name]: '<service_name>'
   })
 });
 sdk.start();
 
 ```
 
-Replace:
 
-- **`{SERVICE_NAME}`** with name of service.
+- `<service_name>` is name of your service
 
 **Step 4.** Add the below import to your `main.ts` file.
 {/* <Admonition type="info">
@@ -671,7 +659,7 @@ import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
 
 const resource = Resource.default().merge(
   new Resource({
-    [SemanticResourceAttributes.SERVICE_NAME]: '<service_name>',
+    [SemanticResourceAttributes.service_name]: '<service_name>',
     [SemanticResourceAttributes.SERVICE_VERSION]: '0.1.0',
   })
 );
@@ -812,7 +800,7 @@ import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
 
 const resource = Resource.default().merge(
   new Resource({
-    [SemanticResourceAttributes.SERVICE_NAME]: 'my-angular-app',
+    [SemanticResourceAttributes.service_name]: 'my-angular-app',
     [SemanticResourceAttributes.SERVICE_VERSION]: '1.0.0',
     environment: 'production',
   })
