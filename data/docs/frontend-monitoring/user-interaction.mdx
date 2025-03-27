@@ -16,43 +16,49 @@ By following this guide, users will be able to:
 * Visualize and query traces in Signoz to monitor the web application performance and user behaviour. 
 * Set alerts to get notifications about performance issues. 
 
+
 ## Pre-requisites
-💡 Tip
-The easiest way to run **SigNoz** is to use **SigNoz Cloud** - no installation, maintenance, or scaling needed.
 
-New users get 30 days of unlimited access to all features.
-1. **SigNoz Cloud Setup:** (Recommended)
-    * Ensure you [sign up](https://signoz.io/teams/) for SigNoz Cloud.
-    * Obtain your **SigNoz** access token key in the **Settings**.
+1. **SigNoz Setup**:
+   - Sign up for [SigNoz Cloud](https://signoz.io/teams/).  
+   - Obtain your **SigNoz** access token key in **Settings**.
 
-*SigNoz Ingestion Settings: View and manage ingestion keys used to send telemetry data to SigNoz (your access token key)*
+   ![image](https://hackmd.io/_uploads/HJaOim4x1l.png)  
+   *SigNoz Ingestion Settings: View and manage ingestion keys used to send telemetry data to SigNoz (your access token key)*
 
+2. **Basic Requirements**:
+   - [Node.js](https://nodejs.org/en/download/package-manager) installed on your local machine.
 
-SigNoz also can run locally. Check out this link to have more [information](https://signoz.io/docs/install/docker/)
+---
 
+## Step-by-Step Setup (Next.js)
 
-2. **Basic Requirements:**
-    * [Node.js](https://nodejs.org/en/download/package-manager) installed in your local machine.
+Below is a minimal example using **Next.js**. The instrumentation logic remains identical across frameworks, but we’ll specifically show how to integrate it into Next.js’ structure.
 
-## Step-by-Step Setup
-##### Step 1: Create a small project including HTML and JavaScript Files
-* Create `index.html`
-```html!
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OpenTelemetry User Interaction</title>
-</head>
-<body>
-    <h1>OpenTelemetry User Interaction Demo</h1>
-    <script type="module" src="./setup.js"></script>
-</body>
-</html>
+### Step 1: Create a Next.js App
+
+If you don’t already have a Next.js app, create one:
+
+```bash
+npx create-next-app my-signoz-nextjs
+cd my-signoz-nextjs
 ```
-* Create `setup.js` in the same directory:
-```javascript!
+
+### Step 2: Add OpenTelemetry Instrumentation
+
+#### 1. Create an `otel-setup.js` File
+
+In your Next.js project, **create** a file named `otel-setup.js`. You can place it in the root of the project or inside a `lib/` or `instrumentation/` folder, for example:
+
+```bash
+touch otel-setup.js
+```
+
+Add the following code (update `<your-signoz-access-token>` in the `headers` and change the `url` if needed):
+
+```javascript
+// otel-setup.js
+
 import { ConsoleSpanExporter, SimpleSpanProcessor } from '@opentelemetry/sdk-trace-base';
 import { WebTracerProvider } from '@opentelemetry/sdk-trace-web';
 import { UserInteractionInstrumentation } from '@opentelemetry/instrumentation-user-interaction';
@@ -64,181 +70,180 @@ import { Resource } from '@opentelemetry/resources';
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 
 const provider = new WebTracerProvider({
-    resource: new Resource({
-        [SemanticResourceAttributes.SERVICE_NAME]: 'user-interaction-tracker',
-    }),
+  resource: new Resource({
+    [SemanticResourceAttributes.SERVICE_NAME]: 'nextjs-user-interaction',
+  }),
 });
-
 
 const exporter = new OTLPTraceExporter({
-    url: 'https://ingest.us.signoz.cloud:443/v1/traces',
-    headers: {
-        "signoz-access-token": "<your-signoz-access-token>",
-    },
+  // For SigNoz Cloud, set the ingest URL and token:
+  url: 'https://ingest.us.signoz.cloud:443/v1/traces',
+  headers: {
+    'signoz-access-token': '<your-signoz-access-token>',
+  },
 });
-
 
 provider.addSpanProcessor(new BatchSpanProcessor(exporter));
 provider.addSpanProcessor(new SimpleSpanProcessor(new ConsoleSpanExporter()));
 
-// Register the context manager separately
 provider.register({
-    contextManager: new ZoneContextManager(), // Register context manager here
+  contextManager: new ZoneContextManager(),
 });
 
+// Instrument user interactions
 registerInstrumentations({
   instrumentations: [
     new UserInteractionInstrumentation(),
   ],
 });
 
-// and some test
-console.log('OpenTelemetry setup started');
+console.log('OpenTelemetry user interaction setup for Next.js initialized');
 
-const btn1 = document.createElement('button');
-btn1.append(document.createTextNode('btn1'));
-btn1.addEventListener('click', () => {
-  console.log('clicked');
-});
-document.querySelector('body').append(btn1);
+// EXAMPLE: Simple function to demonstrate user interaction
+export function dummyClickHandler() {
+  console.log('Click event detected in Next.js app');
+}
+```
 
-const btn2 = document.createElement('button');
-btn2.append(document.createTextNode('btn2'));
-btn2.addEventListener('click', () => {
-  getData('https://httpbin.org/get').then(() => {
-    getData('https://httpbin.org/get').then(() => {
-      console.log('data downloaded 2');
-    });
-    getData('https://httpbin.org/get').then(() => {
-      console.log('data downloaded 3');
-    });
-    console.log('data downloaded 1');
-  });
-});
-document.querySelector('body').append(btn2);
+#### 2. Import `otel-setup.js` in `pages/_app.js`
 
-function getData(url) {
-  return new Promise(async (resolve) => {
-    const req = new XMLHttpRequest();
-    req.open('GET', url, true);
-    req.setRequestHeader('Content-Type', 'application/json');
-    req.setRequestHeader('Accept', 'application/json');
-    req.send();
-    req.onload = function () {
-      resolve();
-    };
-  });
+In Next.js, `_app.js` (or `_app.tsx` if using TypeScript) is where you can load global scripts and logic. Import the setup **once** so that it runs automatically when the Next.js application is loaded:
+
+```javascript
+// pages/_app.js
+import '../otel-setup'; // or wherever you placed otel-setup.js
+
+import React from 'react';
+
+function MyApp({ Component, pageProps }) {
+  return <Component {...pageProps} />;
 }
 
-// now click on buttons
+export default MyApp;
 ```
-This is a step for capturing user behaviour by setting up OpenTelemetry's instrumentation user interaction and sending the telemetry data to SigNoz. 
 
-```javascript!
-...
-import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
-...
-const exporter = new OTLPTraceExporter({
-    url: 'https://ingest.us.signoz.cloud:443/v1/traces',
-    headers: {
-        "signoz-access-token": "<your-signoz-access-token>",
-    },
-});
+### Step 3: Demonstrate a Simple User Interaction
 
-provider.addSpanProcessor(new BatchSpanProcessor(exporter));
+You can add a button or any interactive element in one of your pages, e.g., in `pages/index.js`:
+
+```javascript
+import React from 'react';
+import { dummyClickHandler } from '../otel-setup';
+
+export default function HomePage() {
+  return (
+    <div>
+      <h1>OpenTelemetry User Interaction Demo (Next.js)</h1>
+      <button onClick={dummyClickHandler}>Click Me!</button>
+    </div>
+  );
+}
 ```
-The above code block plays a role in sending all captured user interaction data to SigNoz for visualization.
 
-:::info
-If you're running SigNoz locally. Ensure that the ports **3301**, **4317** and **4318** are open on the machine where you install SigNoz. Replace the following code:
-```javascript!
-const exporter = new OTLPTraceExporter({
-    url: 'http://localhost:4318/v1/traces'
-});
+Now whenever a user clicks **Click Me!**, the user interaction instrumentation will capture relevant span data and send it to SigNoz.
 
-``` 
-http://localhost:4318/v1/traces is the default url for sending your tracing data. We are assuming you have installed SigNoz on your localhost. Based on your environment, you can update it accordingly. It should be in the following format:
-``` bash
-http://<IP of SigNoz backend>:4318/v1/traces
+### Step 4: Install Required Packages
+
+Within your Next.js project, install the necessary OpenTelemetry packages:
+
+```bash
+npm install @opentelemetry/sdk-trace-web \
+            @opentelemetry/instrumentation-user-interaction \
+            @opentelemetry/context-zone \
+            @opentelemetry/sdk-trace-base \
+            @opentelemetry/resources \
+            @opentelemetry/semantic-conventions \
+            @opentelemetry/exporter-trace-otlp-http \
+            @opentelemetry/instrumentation
 ```
-:::
-##### Step 2: Install required packages
-* Install necessary OpenTelemetry packages:
-```bash!
-npm install @opentelemetry/sdk-trace-web @opentelemetry/instrumentation-user-interaction @opentelemetry/context-zone @opentelemetry/sdk-trace-base @opentelemetry/resources @opentelemetry/semantic-conventions @opentelemetry/exporter-trace-otlp-http @opentelemetry/instrumentation
-```
-* Install **Vite** bundler to bundle and serve our **JavaScript** code.
-    * ``npm install --save-dev vite``
-    * Add the following script in `package.json`    
-        * `"scripts": {
-    "dev": "vite"
-  },`
-  
-##### Step 3: Start the Vite Develoopment Server
-1. **Run Vite**:
-```bash!
+
+### Step 5: Run the Next.js Dev Server
+
+```bash
 npm run dev
 ```
-2. **Access the Web Application**:
-Open your browser and visit the URL provided by Vite: `http://localhost:5173/`
 
+Open your browser and navigate to the URL shown in the terminal (e.g., `http://localhost:3000/`). Interact with the page (click the button), and your Next.js app will send user interaction events to **SigNoz**.
+
+![image](https://hackmd.io/_uploads/H1kZWN4gke.png)  
 *Sample Browser: A simple web page where users interact with*
 
-Whenever users hit these two buttons, it will be captured and sent to **SigNoz** for visualizing data.
-##### Step 4: Verify the data in SigNoz:
-1. **Open your SigNoz dashboard**
-2. Navigate to the **Traces** and **Services** to verify that the user interactions (buttons clicks) are being captured.
+### Step 6: Verify the Data in SigNoz
 
+1. **Open** your **SigNoz** dashboard.  
+2. Navigate to **Traces** and **Services** to verify that user interactions are being captured.
 
-*SigNoz Trace Explorer view: Monitoring user interactions with detailed telemetry data such as operation name, timestamp, and the duration for how long it takes for an operation process.*
+![image](https://hackmd.io/_uploads/Sk45fNExJg.png)  
+*SigNoz Trace Explorer view: Monitoring user interactions with detailed telemetry data such as operation name, timestamp, and the duration each operation takes.*
 
-*SigNoz Detailed Service Dashboard: Visualize latency, request rates, and Apdex scores for operations over time. Key metrics such as p50, p90, and p99 latencies provide insight into response times of a critial event "click".*
+![image](https://hackmd.io/_uploads/HJQCGEVgJe.png)  
+*SigNoz Detailed Service Dashboard: Visualize latency, request rates, and Apdex scores over time. p50, p90, and p99 latencies provide insights into how quickly user events (like button clicks) are processed.*
+
+---
+
 ## How to Use Collected Data for Monitoring
-From the above guideline, the project could be extended more operations to track user actions such as form submissions, page transitions, or other interactions.
 
-Collecting user interaction telemetry data provides the insight into performance, behaviour, and issue in the web application:
+Once telemetry is captured, you can extend it to track other user interactions such as:
+- Form submissions
+- Page transitions
+- Custom actions
 
-1. **A real-time Monitoring of User Behaviour**
-This trace in SigNoz can show which features are accessed most frequently. Also, we can track feature usage and priortize development efforts based on real user data.
-2. **Monitor Performance and Latency of User Interactions**
-In SigNoz, users can monitor how long it takes for a single interaction to complete. This will help users can quickly identify bottlenecks or unresponsive features causing poor user experiences.
+OpenTelemetry sends comprehensive telemetry data, and SigNoz displays these interactions for deeper insight into user behavior and performance bottlenecks.
 
-With SigNoz functionalities, users can use a great dashboard provided by SigNoz to visualize the interaction times and durations, frequency of specific events, and connection between user actions and how the system performs.
+1. **Real-time Monitoring of User Behavior**  
+   The trace data in SigNoz can help identify which features or pages are most used, guiding optimization priorities.
 
-## How to Set [Alerts](https://signoz.io/docs/alerts/) on SigNoz
+2. **Monitor Performance and Latency**  
+   Understand how long each user interaction takes to complete, quickly pinpointing bottlenecks or unresponsive components.
 
-### Why we need to set Alerts?
-Alert will help us identify and address issues before they affect end-users and ensure optimal application performance. Some useful alerts:
-- **High Interaction Latency**: Trigger alerts if one of the interactions in the app exceeds a specific latency threshold
-- **Error Rates in Interactions**: Trigger alerts for high error rates in user interactions.
+---
 
-### Guideline for SigNoz alert setup
+## Setting Up [Alerts](https://signoz.io/docs/alerts/) on SigNoz
+
 1. **Create a New Alert Channel**:
-    * Go to the **Setting** and navigate to **Alert Channel**.
-    * Set the type that you want to receive an alert through (email or Slack and more).
+   - Go to **Settings** → **Alert Channel**.
+   - Choose your preferred alert method (e.g., email, Slack).
 
+![image](https://hackmd.io/_uploads/rJOqsNNgkg.png)  
+*Alert Channels Setting: View and manage your alert channels*
 
-*Alert Channels Setting: View and Manage your alert channel*
+![image](https://hackmd.io/_uploads/Ska0s4Ngkl.png)  
+*Alert Channels Detailed Setting: Set up your preferred alert method*
 
-*Alert Channels Detailed Setting: Set up your desirable receive type.*
+2. **Configure the Alert**:
+   - Navigate to **+NEW ALERT** to create a new alert rule.
 
-2. **Setup the Alert**:
+![image](https://hackmd.io/_uploads/rkwECE4eyl.png)  
+*Alert Dashboard: View and manage your alerts*
 
-    * Navigate to `+NEW ALERT` to create an alert
+### Sample Trace-Based Alert Setup
 
-*Alert Dashboard: View and mange your alerts*
+![image](https://hackmd.io/_uploads/rJDcA4Nl1g.png)  
+*Alert Rules in SigNoz: Tracking button click events with a threshold-based alert. This graph monitors the number of button clicks over time, triggering a warning when clicks exceed a configured threshold (e.g., 10).*
 
-### The following images are the sample setup of trace-based Alert
+![image](https://hackmd.io/_uploads/S1ssR44eyl.png)  
+*Alert Rules in SigNoz: Define which metric to display and monitor.*
 
-***Alert Rules in SigNoz**: Visualizing button click events with a threshold-based alert. This graph tracks the number of button clicks over time, with a warning alert triggered when clicks exceed the defined threshold of 10*
+![image](https://hackmd.io/_uploads/Sk5pCNExke.png)  
+*Alert Rules in SigNoz: Configure the threshold value (e.g., 10) and the information displayed in email alerts.*
 
-***Alert Rules in SigNoz**: Define the metric to display in the graph.*
+When an alert fires, maintainers can respond to critical signals such as surging user interactions, performance slowdowns, or error rates.
 
-***Alert Rules in SigNoz**: Setup the Threshold of 10 and the information for users when they receive an email alert.*
+Below are **sample alert notifications**:
 
-For the alert in SigNoz, a maintainer will be notified of which operations are used the most in the web application. Furthermore, they will be able to create more useful alerts to track API call frequency, interaction latency, and so on.
+:::danger
+A **FIRING** alert means the monitored metric has exceeded the threshold and needs immediate attention.
+:::
+![image](https://hackmd.io/_uploads/SJ7_RvExJe.png)  
+*Sample Firing Email Alert*
 
+:::success
+A **RESOLVED** alert indicates the metric is back within normal limits.
+:::
+![image](https://hackmd.io/_uploads/HkyA0wEx1x.png)  
+*Sample Resolved Email Alert*
 
+---
 
 ## Conclusion
 By following this guide, you will be able to **automatically capture** user interactions, **send telemetry data to SigNoz** for visualization and monitoring, **analyze user behaviour**, **detect issues** using SigNoz dashboards, and **set alerts** to monitor important events and resolve issues as soon as possible. 
@@ -247,6 +252,4 @@ With this setup, you can enhance the observability of your web applications, and
 
 For more information:
 - Understand more about OpenTelemetry. Check out this link: https://opentelemetry.io/docs/what-is-opentelemetry/
-- Understand more about SigNoz. Check out this link:
-https://signoz.io/docs/introduction/
-
+- Understand more about SigNoz. Check out this link: https://signoz.io/docs/introduction/
