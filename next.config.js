@@ -7,12 +7,12 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 // You might need to insert additional domains in script-src if you are using external services
 const ContentSecurityPolicy = `
   default-src 'self';
-  script-src 'self' 'unsafe-eval' 'unsafe-inline' giscus.app https://www.googletagmanager.com https://js.hsforms.net https://f.vimeocdn.com https://embed.lu.ma https://*.posthog.com https://*.mixpanel.com;
-  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://embed.lu.ma;
+  script-src 'self' 'unsafe-eval' 'unsafe-inline' giscus.app https://www.googletagmanager.com https://js.hsforms.net https://f.vimeocdn.com https://embed.lu.ma https://*.posthog.com https://*.mixpanel.com *.usepylon.com *.posthog.com pylon-avatars.s3.us-west-1.amazonaws.com d3vl36l12sfx26.cloudfront.net *.pusher.com;
+  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://embed.lu.ma *.usepylon.com *.posthog.com pylon-avatars.s3.us-west-1.amazonaws.com d3vl36l12sfx26.cloudfront.net *.pusher.com;
   img-src * blob: data:;
   media-src *;
-  connect-src * https://*.mixpanel.com;
-  font-src * 'self';
+  connect-src * https://*.mixpanel.com *.usepylon.com *.posthog.com pylon-avatars.s3.us-west-1.amazonaws.com d3vl36l12sfx26.cloudfront.net *.pusher.com;
+  font-src * 'self' *.usepylon.com *.posthog.com pylon-avatars.s3.us-west-1.amazonaws.com d3vl36l12sfx26.cloudfront.net *.pusher.com;
   frame-src * giscus.app youtube.com;
   worker-src 'self' blob:;
   frame-ancestors 'self' https://signoz.io https://*.us.signoz.cloud https://*.in.signoz.cloud https://*.eu.signoz.cloud;
