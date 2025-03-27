@@ -55,7 +55,7 @@ function WorkspaceSetupHome() {
       return
     }
 
-    const verifyWorkSpaceSetupURL = `${WORKSPACE_SETUP_URL}/deployments/cesearch?code=${code}&email=${email}`
+    const verifyWorkSpaceSetupURL = `${process.env.NEXT_PUBLIC_CONTROL_PLANE_URL}/deployments/cesearch?code=${code}&email=${email}`
 
     const res = await fetch(verifyWorkSpaceSetupURL)
     const data = await res.json()
