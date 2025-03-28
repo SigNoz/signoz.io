@@ -26,7 +26,7 @@ export default function Header() {
           clickType="Primary CTA"
           clickName="Quick Start Button"
           clickText="Get started with SigNoz Cloud"
-          clickLocation="Docs Introduction Page"
+          clickLocation="Docs Introduction Page Header"
         >
           <div className="flex items-center gap-3 mb-2">
             <ArrowDown size={24} className="text-signoz_robin-500" />
@@ -41,7 +41,7 @@ export default function Header() {
           clickType="Secondary CTA"
           clickName="Install Locally Button"
           clickText="Get started with self-hosted SigNoz"
-          clickLocation="Docs Introduction Page"
+          clickLocation="Docs Introduction Page Header"
         >
           <div className="flex items-center gap-3 mb-2">
             <Server size={24} className="text-signoz_robin-500" />
