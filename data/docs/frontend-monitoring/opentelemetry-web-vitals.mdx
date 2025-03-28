@@ -100,7 +100,7 @@ import { onCLS, onFCP, onFID, onLCP, onTTFB } from 'web-vitals';
 
 const meter = metrics.getMeter('web-vitals');
 const lcp = meter.createHistogram('lcp');
-const cls = meter.createHistogram('cls');
+const cls = meter.createObservableGauge('cls');
 const fid = meter.createHistogram('fid');
 const ttfb = meter.createHistogram('ttfb');
 const fcp = meter.createHistogram('fcp');
@@ -112,7 +112,9 @@ function sendToAnalytics(metric) {
       break;
     }
     case 'CLS': {
-      cls.record(metric.value);
+      cls.addCallback((result) => {
+        result.observe(metric.value);
+      });
       break;
     }
     case 'FID': {
