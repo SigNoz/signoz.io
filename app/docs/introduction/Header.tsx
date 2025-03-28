@@ -8,7 +8,7 @@ import TrackingLink from '@/components/TrackingLink'
 
 export default function Header() {
   return (
-    <div className="mb-12">
+    <div className="mb-12 w-full max-w-6xl mx-auto">
       <div className="text-center">
         <Heading type={1} className="mb-4">
           SigNoz Docs
@@ -19,7 +19,7 @@ export default function Header() {
       </div>
 
       {/* Quick Start Buttons */}
-      <div className="w-full max-w-5xl mx-auto grid md:grid-cols-2 gap-6 mt-12 mb-12">
+      <div className="w-full max-w-4xl mx-auto grid md:grid-cols-2 gap-6 mt-12 mb-12">
         <TrackingLink
           href="/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/"
           className="flex flex-col rounded-lg border border-signoz_slate-400 bg-signoz_ink-400 p-6 hover:bg-signoz_ink-300 hover:border-signoz_robin-500 transition-all"
