@@ -21,7 +21,7 @@ enum TenantState {
   EXPIRED = 'EXPIRED',
 }
 
-const BASE_URL = 'https://api.signoz.cloud/v2'
+const BASE_URL = process.env.NEXT_PUBLIC_CONTROL_PLANE_URL
 
 const trustBadges = [
   {

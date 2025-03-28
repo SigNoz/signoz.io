@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation'
 import WorkspaceReady from './WorkspaceReady'
 import WorkspaceSetup from './WorkspaceSetup'
 
-const WORKSPACE_SETUP_URL = 'https://api.signoz.cloud/v2'
+
 
 function WorkspaceSetupHome() {
   const [isWorkspaceReady, setIsWorkspaceReady] = useState(false)
@@ -22,7 +22,7 @@ function WorkspaceSetupHome() {
   const region = searchParams.get('region')
 
   const verifyEmail = async () => {
-    const res = await fetch(`${WORKSPACE_SETUP_URL}/users/verify`, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_CONTROL_PLANE_URL}/users/verify`, {
       cache: 'no-store',
       headers: {
         'Content-Type': 'application/json',
@@ -55,7 +55,7 @@ function WorkspaceSetupHome() {
       return
     }
 
-    const verifyWorkSpaceSetupURL = `${WORKSPACE_SETUP_URL}/deployments/cesearch?code=${code}&email=${email}`
+    const verifyWorkSpaceSetupURL = `${process.env.NEXT_PUBLIC_CONTROL_PLANE_URL}/deployments/cesearch?code=${code}&email=${email}`
 
     const res = await fetch(verifyWorkSpaceSetupURL)
     const data = await res.json()
