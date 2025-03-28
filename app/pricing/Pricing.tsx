@@ -767,8 +767,13 @@ const PricingPlans = () => {
                         <ArrowRight size={14} />
                       </TrackingLink>
                     </Button>
-                    <div className="text-center text-sm text-signoz_robin-300 hover:text-signoz_robin-400 mt-4">
-                      <Link href={'/enterprise/'} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center">
+                    <div className="mt-4 text-center text-sm text-signoz_robin-300 hover:text-signoz_robin-400">
+                      <Link
+                        href={'/enterprise/'}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-center"
+                      >
                         Check All Enterprise Plans
                         <ArrowUpRight className="ml-2 h-4 w-4" />
                       </Link>
@@ -916,8 +921,13 @@ const PricingPlans = () => {
                       <ArrowRight size={14} />
                     </TrackingLink>
                   </Button>
-                  <div className="text-center text-sm text-signoz_robin-300 hover:text-signoz_robin-400 mt-4">
-                    <Link href={'/enterprise/'} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center">
+                  <div className="mt-4 text-center text-sm text-signoz_robin-300 hover:text-signoz_robin-400">
+                    <Link
+                      href={'/enterprise/'}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-center"
+                    >
                       Check All Enterprise Plans
                       <ArrowUpRight className="ml-2 h-4 w-4" />
                     </Link>
@@ -1047,8 +1057,13 @@ const PricingPlans = () => {
                         <ArrowRight size={14} />
                       </TrackingLink>
                     </Button>
-                    <div className="text-center text-sm text-signoz_robin-300 hover:text-signoz_robin-400 mt-4">
-                      <Link href={'/enterprise/'} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center">
+                    <div className="mt-4 text-center text-sm text-signoz_robin-300 hover:text-signoz_robin-400">
+                      <Link
+                        href={'/enterprise/'}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-center"
+                      >
                         Check All Enterprise Plans
                         <ArrowUpRight className="ml-2 h-4 w-4" />
                       </Link>
@@ -1197,8 +1212,13 @@ const PricingPlans = () => {
                       <ArrowRight size={14} />
                     </TrackingLink>
                   </Button>
-                  <div className="text-center text-sm text-signoz_robin-300 hover:text-signoz_robin-400 mt-4">
-                    <Link href={'/enterprise/'} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center">
+                  <div className="mt-4 text-center text-sm text-signoz_robin-300 hover:text-signoz_robin-400">
+                    <Link
+                      href={'/enterprise/'}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-center"
+                    >
                       Check All Enterprise Plans
                       <ArrowUpRight className="ml-2 h-4 w-4" />
                     </Link>
