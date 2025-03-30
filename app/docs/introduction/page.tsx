@@ -2,6 +2,7 @@ import React from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import Header from './Header'
+import SendData from './SendData'
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -13,6 +14,7 @@ export default function DocsIntroductionPage() {
   return (
     <div>
       <Header />
+      <SendData />
     </div>
   )
 } 
