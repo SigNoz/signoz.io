@@ -13,6 +13,7 @@ import { Inter } from 'next/font/google'
 import React, { Suspense } from 'react'
 import { PostHogProvider } from './providers'
 import MixpanelClientInitializer from './mixpanel-initializer'
+import ClientErrorHandler from '@/components/utils/ClientErrorHandler'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -72,6 +73,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <link rel="alternate" type="application/rss+xml" href="/feed.xml" />
 
       <body className="pl-[calc(100vw-100%)] text-white antialiased">
+        <ClientErrorHandler />
         <noscript>
           <iframe
             src="https://www.googletagmanager.com/ns.html?id=GTM-N9B6D4H"
