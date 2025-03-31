@@ -1,0 +1,166 @@
+---
+date: 2025-03-03
+title: Instrument Temporal TypeScript Applications with OpenTelemetry
+id: opentelemetry-temporal-typescript
+description: Learn how to instrument Temporal TypeScript applications to send traces, metrics and logs to SigNoz using OpenTelemetry
+---
+
+### Step 1: Add OpenTelemetry Dependencies
+
+Add the following dependencies to your `package.json`:
+
+```json
+"dependencies": {
+    "@opentelemetry/auto-instrumentations-node": "^0.55.0",
+    "@opentelemetry/sdk-node": "^0.57.0",
+    "@opentelemetry/sdk-trace-node": "^1.30.0",
+    "@temporalio/interceptors-opentelemetry": "^1.11.6"
+}
+```
+
+### Step 2: Configure OpenTelemetry SDK
+
+Create `src/instrumentation.ts` to configure the OpenTelemetry SDK and initialize tracing and metrics for your Temporal application:
+```typescript:src/instrumentation.ts
+import { NodeSDK } from '@opentelemetry/sdk-node';
+import { SpanExporter } from '@opentelemetry/sdk-trace-node';
+import { OTLPTraceExporter as OTLPTraceExporterGrpc } from '@opentelemetry/exporter-trace-otlp-grpc';
+import { OTLPMetricExporter as OTLPMetricExporterGrpc } from '@opentelemetry/exporter-metrics-otlp-grpc';
+import { PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics';
+import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
+import { ATTR_SERVICE_NAME } from '@opentelemetry/semantic-conventions';
+import { Resource } from '@opentelemetry/resources';
+
+const OTEL_EXPORTER_OTLP_ENDPOINT = process.env.OTEL_EXPORTER_OTLP_ENDPOINT || 'http://127.0.0.1:4317';
+const OTEL_RESOURCE_ATTRIBUTES = process.env.OTEL_RESOURCE_ATTRIBUTES || 'service.name=temporal-hello-world';
+
+function setupTraceExporter(): SpanExporter | undefined {
+  console.log('[Instrumentation] Setting up Trace Exporter to', OTEL_EXPORTER_OTLP_ENDPOINT);
+  return new OTLPTraceExporterGrpc({
+    url: OTEL_EXPORTER_OTLP_ENDPOINT,
+    timeoutMillis: 1000,
+  });
+
+  return undefined;
+}
+
+function setupMetricReader() {
+  console.log('[Instrumentation] Setting up Metric Reader to', OTEL_EXPORTER_OTLP_ENDPOINT);
+  return new PeriodicExportingMetricReader({
+    exporter: new OTLPMetricExporterGrpc({
+      url: OTEL_EXPORTER_OTLP_ENDPOINT,
+      timeoutMillis: 1000,
+    }),
+  });
+}
+
+export const resource = new Resource({
+  [ATTR_SERVICE_NAME]: OTEL_RESOURCE_ATTRIBUTES.split(',')[0].split('=')[1],
+});
+
+export const traceExporter = setupTraceExporter();
+const metricReader = setupMetricReader();
+
+export const otelSdk = new NodeSDK({
+  resource,
+  traceExporter,
+  metricReader,
+  instrumentations: [getNodeAutoInstrumentations()],
+});
+
+otelSdk.start();
+```
+
+### Step 3: Add OpenTelemetry Interceptor
+
+Add the OpenTelemetry interceptor to your Temporal client configuration:
+
+```typescript:src/client.ts
+import { OpenTelemetryWorkflowClientInterceptor } from '@temporalio/interceptors-opentelemetry';
+
+const client = new Client({
+  // ... other client config ...
+  interceptors: {
+    workflow: [new OpenTelemetryWorkflowClientInterceptor()],
+  },
+});
+```
+
+This interceptor enables automatic tracing and metrics collection for your Temporal workflows.
+
+### Step 4: Configure Temporal Worker
+
+Add OpenTelemetry instrumentation to your worker:
+
+```typescript:src/worker.ts
+import { Runtime } from '@temporalio/worker';
+import {
+  OpenTelemetryActivityInboundInterceptor,
+  OpenTelemetryActivityOutboundInterceptor,
+  makeWorkflowExporter,
+} from '@temporalio/interceptors-opentelemetry/lib/worker';
+import { otelSdk, resource, traceExporter } from './instrumentation';
+
+function initializeRuntime() {
+  Runtime.install({
+    telemetryOptions: {
+      metrics: {
+        otel: {
+          url: process.env.OTEL_EXPORTER_OTLP_ENDPOINT || 'http://127.0.0.1:4317',
+          metricsExportInterval: '1s'
+        }
+      },
+    },
+  });
+}
+
+async function run() {
+  initializeRuntime();
+
+  try {
+    worker = await Worker.create({
+      // ... other worker config ...
+      sinks: traceExporter && {
+        exporter: makeWorkflowExporter(traceExporter, resource),
+      },
+      interceptors: traceExporter && {
+        workflowModules: [require.resolve('./workflows')],
+        activity: [
+          (ctx) => ({
+            inbound: new OpenTelemetryActivityInboundInterceptor(ctx),
+            outbound: new OpenTelemetryActivityOutboundInterceptor(ctx),
+          }),
+        ],
+      },
+    });
+  } catch (err) {
+    // ... error handling ...
+  } finally {
+    await otelSdk.shutdown();
+  }
+}
+```
+
+This configuration enables OpenTelemetry instrumentation for both workflow and activity telemetry in your Temporal worker.
+
+### Step 5: Configure Temporal Workflow
+
+Add OpenTelemetry interceptors to your workflow code:
+
+```typescript:src/workflows.ts
+import { WorkflowInterceptorsFactory } from '@temporalio/workflow';
+import {
+  OpenTelemetryInboundInterceptor,
+  OpenTelemetryOutboundInterceptor,
+  OpenTelemetryInternalsInterceptor,
+} from '@temporalio/interceptors-opentelemetry/lib/workflow';
+
+// ... other workflow config ...
+export const interceptors: WorkflowInterceptorsFactory = () => ({
+  inbound: [new OpenTelemetryInboundInterceptor()],
+  outbound: [new OpenTelemetryOutboundInterceptor()],
+  internals: [new OpenTelemetryInternalsInterceptor()],
+});
+```
+
+These interceptors enable telemetry collection for inbound signals, outbound activities, and internal workflow operations.

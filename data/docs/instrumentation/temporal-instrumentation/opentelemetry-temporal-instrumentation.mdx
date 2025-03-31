@@ -1,0 +1,379 @@
+---
+date: 2025-03-03
+title: Temporal Instrumentation using OpenTelemetry
+id: opentelemetry-temporal-instrumentation
+description: Learn how to instrument Temporal applications to send metrics, traces and logs to SigNoz using OpenTelemetry
+---
+
+import TypeScript from 'data/docs/instrumentation/temporal-instrumentation/opentelemetry-temporal-typescript.mdx'
+import Java from 'data/docs/instrumentation/temporal-instrumentation/opentelemetry-temporal-java.mdx'
+import Go from 'data/docs/instrumentation/temporal-instrumentation/opentelemetry-temporal-go.mdx'
+
+This document contains instructions on how to set up OpenTelemetry instrumentation in your Temporal applications and view your application metrics in SigNoz.
+
+## Requirements
+
+- Temporal server (self-hosted or Cloud)
+- Java 11+, Go 1.19+, or Node.js 16+ depending on your application
+- Temporal application
+
+## Temporal Server Setup
+
+<Tabs>
+<TabItem value="temporal-self-hosted" label="Self-Hosted Temporal" default>
+
+1. Install [Temporal CLI](https://github.com/temporalio/cli/releases)
+
+2. Start the development server:
+```bash
+temporal server start-dev --ui-port 8080
+```
+
+This starts:
+- Temporal Server on port 7233
+- Web UI on port 8080 (http://localhost:8080)
+- Default namespace: "default"
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/instrumentation/temporal-self-hosted-ui.webp" alt="Temporal Web UI Dashboard"/>
+    <figcaption><i>Temporal Self-Hosted UI</i></figcaption>
+</figure>
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/instrumentation/temporal-self-hosted-traces.webp" alt="Temporal Traces"/>
+    <figcaption><i>Temporal Traces</i></figcaption>
+</figure>
+
+</TabItem>
+
+<TabItem value="temporal-cloud" label="Temporal Cloud">
+
+1. Install [Temporal CLI](https://github.com/temporalio/cli/releases)
+
+2. **Generate mTLS Certificate**
+- Go to Temporal Cloud Console and follow the [generation instructions](https://docs.temporal.io/cloud/certificates) or use your own certificates following [Temporal's requirements](https://docs.temporal.io/cloud/certificates#certificate-requirements)
+
+3. **Create Namespace**
+- Create a namespace in Temporal Cloud Console (e.g., default, dev-namespace, prod-namespace)
+
+4. **Verify Connection**
+```bash
+temporal workflow list \
+  --address <namespace>.<account_id>.tmprl.cloud:7233 \
+  --namespace <namespace>.<account_id> \
+  --tls-cert-path <cert.pem> \
+  --tls-key-path <cert.key>
+```
+This command should return an empty response for a new namespace.
+
+5. **Configure Environment**
+```bash
+# Temporal Cloud
+export TEMPORAL_HOST_URL=<namespace>.<account_id>.tmprl.cloud:7233
+export TEMPORAL_NAMESPACE=<namespace>.<account_id>
+export TEMPORAL_TLS_CERT=<cert.pem>
+export TEMPORAL_TLS_KEY=<cert.key>
+```
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/instrumentation/temporal-cloud-ui.webp" alt="Temporal Cloud UI Dashboard"/>
+    <figcaption><i>Temporal Cloud UI</i></figcaption>
+</figure>
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/instrumentation/temporal-cloud-traces.webp" alt="Temporal Cloud Traces"/>
+    <figcaption><i>Temporal Cloud Traces</i></figcaption>
+</figure>
+</TabItem>
+</Tabs>
+
+<Tabs>
+<TabItem value="signoz-self-host" label="Self-Hosted SigNoz" default>
+    <Tabs>
+        <TabItem value="typescript" label="TypeScript" default>
+            <TypeScript/>
+
+            ### Step 6: Configure Environment Variables
+
+            Set these environment variables in both terminals where you'll run the worker and workflow:
+
+            ```bash
+            # Terminal 1 & 2: Set SigNoz endpoint and service name
+            export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317
+            export OTEL_RESOURCE_ATTRIBUTES="service.name=temporal-hello-world"
+            ```
+
+            ### Step 7: Run Application
+
+            1. Start the worker in the first terminal:
+            ```bash
+            # Terminal 1
+            npm run worker
+            ```
+
+            2. In a separate terminal, execute a workflow to generate metrics:
+            ```bash
+            # Terminal 2 
+            npm run workflow
+            ```
+
+            Note: Make sure you've set the environment variables in both terminals before running the commands.
+        </TabItem>
+
+        <TabItem value="java" label="Java">
+            <Java />
+
+            ### Step 7: Configure Environment Variables
+
+            Set these environment variables in both terminals where you'll run the worker and workflow:
+
+            ```bash
+            # Terminal 1 & 2: Set SigNoz endpoint and service name
+            export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317
+            export OTEL_RESOURCE_ATTRIBUTES="service.name=temporal-hello-world"
+            ```
+
+            ### Step 8: Run Application
+
+            1. Start the worker in the first terminal:
+            ```bash
+            # Terminal 1
+            mvn exec:java -Dexec.mainClass="helloworld.workers.HelloWorldWorker"
+            ```
+
+            2. In a separate terminal, execute a workflow to generate metrics:
+            ```bash
+            # Terminal 2
+            mvn exec:java -Dexec.mainClass="helloworld.main.HelloWorldStarter"
+            ```
+
+            Note: Make sure you've set the environment variables in both terminals before running the commands.
+        </TabItem>
+
+        <TabItem value="go" label="Go">
+            <Go/>
+
+            ### Step 7: Configure Environment Variables
+
+            Set these environment variables in both terminals where you'll run the worker and workflow:
+
+            ```bash
+            # Terminal 1 & 2: Set SigNoz endpoint and service name
+            export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317
+            export OTEL_RESOURCE_ATTRIBUTES="service.name=temporal-hello-world"
+            ```
+
+            ### Step 8: Run Application
+
+            1. Start the worker in the first terminal:
+            ```bash
+            # Terminal 1
+            go run ./cmd/helloworld -worker
+            ```
+
+            2. In a separate terminal, execute a workflow to generate metrics:
+            ```bash
+            # Terminal 2
+            go run ./cmd/helloworld
+            ```
+
+            Note: Make sure you've set the environment variables in both terminals before running the commands.
+        </TabItem>
+    </Tabs>
+</TabItem>
+
+<TabItem value="signoz-cloud" label="SigNoz Cloud">
+    <Tabs>
+        <TabItem value="typescript" label="TypeScript" default>
+            <TypeScript/>
+
+            ### Step 6: Configure Environment Variables
+
+            Set these environment variables in both terminals where you'll run the worker and workflow:
+
+            ```bash
+            # Terminal 1 & 2: Set SigNoz endpoint, service name and ingestion key
+            export OTEL_EXPORTER_OTLP_ENDPOINT="https://<your-ingestion-endpoint>"
+            export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-token>"
+            export OTEL_RESOURCE_ATTRIBUTES="service.name=temporal-hello-world"
+            ```
+
+            ### Step 7: Run Application
+
+            1. Start the worker in the first terminal:
+            ```bash
+            # Terminal 1
+            npm run worker
+            ```
+
+            2. In a separate terminal, execute a workflow to generate metrics:
+            ```bash
+            # Terminal 2 
+            npm run workflow
+            ```
+
+            Note: Make sure you've set the environment variables in both terminals before running the commands.
+        </TabItem>
+
+        <TabItem value="java" label="Java">
+            <Java />
+
+            ### Step 7: Configure Environment Variables
+
+            Set these environment variables in both terminals where you'll run the worker and workflow:
+
+            ```bash
+            # Terminal 1 & 2: Set SigNoz endpoint, service name and ingestion key
+            export OTEL_EXPORTER_OTLP_ENDPOINT="https://<your-ingestion-endpoint>"
+            export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-token>"
+            export OTEL_RESOURCE_ATTRIBUTES="service.name=temporal-hello-world"
+            ```
+
+            ### Step 8: Run Application
+
+            1. Start the worker in the first terminal:
+            ```bash
+            # Terminal 1
+            mvn exec:java -Dexec.mainClass="helloworld.workers.HelloWorldWorker"
+            ```
+
+            2. In a separate terminal, execute a workflow to generate metrics:
+            ```bash
+            # Terminal 2
+            mvn exec:java -Dexec.mainClass="helloworld.main.HelloWorldStarter"
+            ```
+
+            Note: Make sure you've set the environment variables in both terminals before running the commands.
+        </TabItem>
+
+        <TabItem value="go" label="Go">
+            <Go/>
+
+            ### Step 7: Configure Environment Variables
+
+            Set these environment variables in both terminals where you'll run the worker and workflow:
+
+            ```bash
+            # Terminal 1 & 2: Set SigNoz endpoint, service name and ingestion key
+            export OTEL_EXPORTER_OTLP_ENDPOINT="https://<your-ingestion-endpoint>"
+            export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-token>"
+            export OTEL_RESOURCE_ATTRIBUTES="service.name=temporal-hello-world"
+            ```
+
+            ### Step 8: Run Application
+
+            1. Start the worker in the first terminal:
+            ```bash
+            # Terminal 1
+            go run ./cmd/helloworld -worker
+            ```
+
+            2. In a separate terminal, execute a workflow to generate metrics:
+            ```bash
+            # Terminal 2
+            go run ./cmd/helloworld
+            ```
+
+            Note: Make sure you've set the environment variables in both terminals before running the commands.
+        </TabItem>
+    </Tabs>
+</TabItem>
+</Tabs>
+
+## Monitoring in SigNoz
+
+### View Services
+
+Navigate to the `Services` tab to find your Temporal application:
+
+<figure data-zoomable align='center'>
+<img src="/img/docs/instrumentation/temporal-services.webp" alt="Services view"/>
+<figcaption><i>Services overview showing Temporal application</i></figcaption>
+</figure>
+
+### Analyze Metrics
+
+Navigate to the `Dashboard` tab, click on `+ New dashboard` and import our pre-built Temporal dashboard from [GitHub](https://github.com/SigNoz/dashboards/blob/main/temporal.io/temporal_metrics.json) to get a comprehensive view of your Temporal application metrics.
+
+The dashboard includes key metrics like:
+- Workflow execution metrics
+- Activity completion rates  
+- Task queue latencies
+- Error rates and failures
+- Resource utilization
+
+<figure data-zoomable align='center'>
+<img src="/img/docs/instrumentation/temporal-metrics.webp" alt="Metrics view"/>
+<figcaption><i>Temporal Server Metrics dashboard showing workflow performance and service health</i></figcaption>
+</figure>
+
+### Analyze Traces
+
+The `Traces` tab displays workflow executions including spans, durations, errors, and metadata:
+
+<figure data-zoomable align='center'>
+<img src="/img/docs/instrumentation/temporal-traces.webp" alt="Traces view"/>
+<figcaption><i>Trace analysis with workflow details</i></figcaption>
+</figure>
+
+Click any trace to see detailed information:
+- Complete workflow execution timeline
+- Activity execution details
+- Custom attributes and tags
+- Error information
+
+<figure data-zoomable align='center'>
+<img src="/img/docs/instrumentation/temporal-trace-details.webp" alt="Trace details"/>
+<figcaption><i>Detailed trace view with spans and attributes</i></figcaption>
+</figure>
+
+### Analyze Logs
+
+The `Logs` tab provides access to application logs with features like:
+- Real-time log streaming
+- Advanced log filtering
+- Log correlation with traces
+- Log pattern analysis
+- Custom log queries
+
+Use log attributes like `workflow_id`, `run_id`, and `namespace` to filter and analyze logs specific to your Temporal workflows.
+
+### Correlating Telemetry Data
+
+SigNoz allows you to correlate different types of telemetry data:
+1. **Traces to Logs**: Click on a trace span to view associated logs
+2. **Metrics to Traces**: Use exemplars to jump from metrics to relevant traces
+3. **Logs to Traces**: Click on trace IDs in logs to view the complete trace
+
+This correlation helps debug issues by providing full context of your Temporal workflows.
+
+## Sample Application
+
+Check out our sample applications on GitHub:
+- [Java Sample App](https://github.com/Creator54/temporal-java-demo-app)
+- [TypeScript Sample App](https://github.com/Creator54/temporal-typescript-demo-app)
+- [Go Sample App](https://github.com/Creator54/temporal-go-demo-app)
+- Use the `main` branch to follow along with the implementation steps
+- Switch to the `otel` branch to see the complete OpenTelemetry integration
+
+## Troubleshooting
+
+### Common Issues
+
+1. **No Telemetry Data Visible**
+   - Verify SigNoz endpoint configuration
+   - Check ingestion key (for SigNoz Cloud)
+   - Ensure OpenTelemetry initialization succeeds
+   - Verify Temporal server is running
+
+2. **Missing Spans**
+   - Check worker registration
+   - Verify workflow implementation registration
+   - Ensure proper task queue configuration
+
+3. **Connection Issues**
+   - Check network connectivity
+   - Verify endpoint protocol (http/https)
+   - Check port accessibility
+   - Verify TLS configuration (if using SigNoz Cloud)
+   - Restart Temporal server (if using temporal self-hosted)

@@ -1,0 +1,473 @@
+---
+date: 2025-03-03
+title: Instrument Temporal Go Applications with OpenTelemetry
+id: opentelemetry-temporal-go
+description: Learn how to instrument Temporal Go applications to send traces, metrics and logs to SigNoz using OpenTelemetry
+---
+
+### Step 1: Add OpenTelemetry Dependencies
+
+Add the following dependencies to your `go.mod`:
+
+```go
+require (
+	go.opentelemetry.io/otel v1.24.0
+	go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc v1.24.0
+	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.24.0
+	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.24.0
+	go.opentelemetry.io/otel/metric v1.24.0
+	go.opentelemetry.io/otel/sdk v1.24.0
+	go.opentelemetry.io/otel/sdk/metric v1.24.0
+	go.opentelemetry.io/otel/trace v1.24.0
+	go.opentelemetry.io/proto/otlp v1.1.0
+	go.temporal.io/api v1.24.0
+	go.temporal.io/sdk v1.25.1
+	go.temporal.io/sdk/contrib/opentelemetry v0.3.0
+	google.golang.org/grpc v1.61.1
+)
+```
+
+### Step 2: Configure OpenTelemetry
+
+Create `signoz_telemetry_utils.go` to coordinate the OpenTelemetry components:
+
+```go:internal/helloworld/config/signoz_telemetry_utils.go
+package config
+
+import (
+	"context"
+	"fmt"
+	"log"
+	"time"
+
+	"go.opentelemetry.io/otel"
+)
+
+// SignozTelemetryUtils coordinates all telemetry components
+type SignozTelemetryUtils struct {
+	otelConfig *OpenTelemetryConfig
+}
+
+// NewSignozTelemetryUtils creates a new telemetry configuration
+func NewSignozTelemetryUtils() *SignozTelemetryUtils {
+	return &SignozTelemetryUtils{
+		otelConfig: NewOpenTelemetryConfig(),
+	}
+}
+
+// InitProvider initializes all telemetry providers
+func (c *SignozTelemetryUtils) InitProvider(ctx context.Context) (func(), error) {
+	// Create resource
+	res, err := c.otelConfig.CreateResource(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create resource: %w", err)
+	}
+
+	// Get TLS credentials
+	creds := c.otelConfig.GetTLSCredentials()
+
+	// Initialize metrics
+	metricsConfig := &MetricsExporterConfig{
+		ServiceName: c.otelConfig.ServiceName,
+		Environment: c.otelConfig.Environment,
+		Endpoint:    c.otelConfig.Endpoint,
+		Headers:     c.otelConfig.Headers,
+		TLSCreds:    creds,
+	}
+	meterProvider, err := NewMetricsExporter(ctx, metricsConfig, res)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create metrics exporter: %w", err)
+	}
+
+	// Set global meter provider
+	otel.SetMeterProvider(meterProvider)
+
+	// Initialize tracing
+	tracingConfig := &TracingExporterConfig{
+		ServiceName: c.otelConfig.ServiceName,
+		Environment: c.otelConfig.Environment,
+		Endpoint:    c.otelConfig.Endpoint,
+		Headers:     c.otelConfig.Headers,
+		TLSCreds:    creds,
+	}
+	tracerProvider, err := NewTracingExporter(ctx, tracingConfig, res)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create tracer provider: %w", err)
+	}
+
+	// Set global tracer provider
+	otel.SetTracerProvider(tracerProvider)
+
+	// Setup propagator
+	SetupPropagator()
+
+	// Return cleanup function
+	cleanup := func() {
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		defer cancel()
+
+		if err := tracerProvider.Shutdown(shutdownCtx); err != nil {
+			log.Printf("[ERROR] Error shutting down tracer provider: %v\n", err)
+		}
+
+		if err := meterProvider.Shutdown(shutdownCtx); err != nil {
+			log.Printf("[ERROR] Error shutting down meter provider: %v\n", err)
+		}
+	}
+
+	return cleanup, nil
+}
+```
+
+### Step 3: Configure OpenTelemetry Settings
+
+Create `opentelemetry_config.go` to manage OpenTelemetry configuration:
+
+```go:internal/helloworld/config/opentelemetry_config.go
+package config
+
+import (
+	"context"
+	"fmt"
+	"os"
+	"strings"
+
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/propagation"
+	"go.opentelemetry.io/otel/sdk/resource"
+	semconv "go.opentelemetry.io/otel/semconv/v1.24.0"
+	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/credentials/insecure"
+)
+
+// OpenTelemetryConfig holds OpenTelemetry configuration
+type OpenTelemetryConfig struct {
+	ServiceName string
+	Environment string
+	Endpoint    string
+	Headers     map[string]string
+	UseTLS      bool
+}
+
+// NewOpenTelemetryConfig creates a new OpenTelemetry configuration
+func NewOpenTelemetryConfig() *OpenTelemetryConfig {
+	endpoint := os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT")
+	useTLS := false
+
+	if endpoint == "" {
+		endpoint = "localhost:4317"
+	} else {
+		// Check if this is a cloud endpoint that needs TLS
+		if strings.Contains(endpoint, "https://") || strings.Contains(endpoint, "signoz.cloud") {
+			useTLS = true
+			// For gRPC, we don't need the https:// prefix
+			endpoint = strings.TrimPrefix(strings.TrimPrefix(endpoint, "https://"), "http://")
+		} else {
+			// For non-TLS endpoint
+			endpoint = strings.TrimPrefix(strings.TrimPrefix(endpoint, "http://"), "https://")
+		}
+	}
+
+	// Debug output
+	headers := parseHeaders()
+	fmt.Printf("[DEBUG] OTEL endpoint: %s\n", endpoint)
+	fmt.Printf("[DEBUG] OTEL headers: %v\n", headers)
+	fmt.Printf("[DEBUG] OTEL using TLS: %v\n", useTLS)
+
+	return &OpenTelemetryConfig{
+		ServiceName: "temporal-hello-world",
+		Environment: "development",
+		Endpoint:    endpoint,
+		Headers:     headers,
+		UseTLS:      useTLS,
+	}
+}
+
+// CreateResource creates a new resource with common attributes
+func (c *OpenTelemetryConfig) CreateResource(ctx context.Context) (*resource.Resource, error) {
+	hostname, _ := os.Hostname()
+	return resource.New(ctx,
+		resource.WithAttributes(
+			semconv.ServiceName(c.ServiceName),
+			semconv.ServiceVersion("1.0.0"),
+			semconv.DeploymentEnvironment(c.Environment),
+			semconv.HostName(hostname),
+			semconv.ServiceInstanceID(fmt.Sprintf("%s-%d", hostname, os.Getpid())),
+		),
+		resource.WithSchemaURL(semconv.SchemaURL),
+	)
+}
+
+// GetTLSCredentials returns the appropriate TLS credentials
+func (c *OpenTelemetryConfig) GetTLSCredentials() credentials.TransportCredentials {
+	fmt.Printf("[DEBUG] Getting TLS credentials, UseTLS: %v\n", c.UseTLS)
+	if c.UseTLS {
+		return credentials.NewClientTLSFromCert(nil, "")
+	}
+	return insecure.NewCredentials()
+}
+
+// SetupPropagator configures the global propagator
+func SetupPropagator() {
+	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(
+		propagation.TraceContext{},
+		propagation.Baggage{},
+	))
+}
+
+// GetSpanAttributes returns a map of common attributes for spans
+func GetSpanAttributes(workflowType, workflowID, taskQueue string) map[string]string {
+	attrs := make(map[string]string)
+	attrs["workflow_type"] = workflowType
+	attrs["workflow_id"] = workflowID
+	attrs["task_queue"] = taskQueue
+	attrs["namespace"] = "default" // Default namespace, can be overridden if needed
+	return attrs
+}
+
+// parseHeaders parses OTEL_EXPORTER_OTLP_HEADERS environment variable
+func parseHeaders() map[string]string {
+	headers := make(map[string]string)
+	headerStr := os.Getenv("OTEL_EXPORTER_OTLP_HEADERS")
+	if headerStr != "" {
+		// Parse headers in format "key1=value1,key2=value2"
+		pairs := strings.Split(headerStr, ",")
+		for _, pair := range pairs {
+			kv := strings.SplitN(pair, "=", 2)
+			if len(kv) == 2 {
+				headers[strings.TrimSpace(kv[0])] = strings.TrimSpace(kv[1])
+			}
+		}
+	}
+	return headers
+}
+```
+
+### Step 4: Set Up Metrics Export
+
+Create `metrics_exporter.go` to configure the OTLP trace exporter:
+
+```go:internal/helloworld/config/metrics_exporter.go
+package config
+
+import (
+	"context"
+	"fmt"
+	"time"
+
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc"
+	"go.opentelemetry.io/otel/metric"
+	sdkmetric "go.opentelemetry.io/otel/sdk/metric"
+	"go.opentelemetry.io/otel/sdk/resource"
+	"google.golang.org/grpc/credentials"
+)
+
+// MetricsExporterConfig holds configuration for metrics export
+type MetricsExporterConfig struct {
+	ServiceName string
+	Environment string
+	Endpoint    string
+	Headers     map[string]string
+	TLSCreds    credentials.TransportCredentials
+}
+
+// NewMetricsExporter creates and configures the metrics exporter
+func NewMetricsExporter(ctx context.Context, cfg *MetricsExporterConfig, res *resource.Resource) (*sdkmetric.MeterProvider, error) {
+	// Configure metrics exporter
+	exporter, err := otlpmetricgrpc.New(ctx,
+		otlpmetricgrpc.WithEndpoint(cfg.Endpoint),
+		otlpmetricgrpc.WithHeaders(cfg.Headers),
+		otlpmetricgrpc.WithTLSCredentials(cfg.TLSCreds),
+		otlpmetricgrpc.WithRetry(otlpmetricgrpc.RetryConfig{
+			Enabled:         true,
+			InitialInterval: 1 * time.Second,
+			MaxInterval:     5 * time.Second,
+			MaxElapsedTime:  30 * time.Second,
+		}),
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create metrics exporter: %w", err)
+	}
+
+	// Configure periodic reader with more frequent reporting
+	reader := sdkmetric.NewPeriodicReader(
+		exporter,
+		sdkmetric.WithInterval(1*time.Second),
+	)
+
+	// Create meter provider
+	mp := sdkmetric.NewMeterProvider(
+		sdkmetric.WithResource(res),
+		sdkmetric.WithReader(reader),
+	)
+
+	// Register common metrics
+	meter := mp.Meter("temporal-hello-world")
+	if err := RegisterCommonMetrics(meter); err != nil {
+		return nil, fmt.Errorf("failed to register common metrics: %w", err)
+	}
+
+	return mp, nil
+}
+
+// RegisterCommonMetrics registers metrics that are common across the application
+func RegisterCommonMetrics(meter metric.Meter, attrs ...attribute.KeyValue) error {
+	// Initialize all workflow metrics using our WorkflowMetricsUtil equivalent
+	return InitializeMetrics(meter)
+}
+```
+
+### Step 5: Configure  Dashboard Metrics
+Create `workflow_metrics_util.go` to configure Temporal SDK clients, workers, and dashboard metrics using OpenTelemetry:
+
+```go:internal/helloworld/config/workflow_metrics_util.go
+package config
+
+import (
+	"context"
+	"log"
+	"sync"
+
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/metric"
+)
+
+var (
+	// Metric counters
+	workflowSuccess metric.Int64Counter
+	workflowFailed  metric.Int64Counter
+	// ... other metric variables
+
+	// Common attributes
+	WorkflowTypeKey = attribute.Key("workflow_type")
+	WorkflowIDKey   = attribute.Key("workflow_id")
+	RunIDKey        = attribute.Key("run_id")
+	NamespaceKey    = attribute.Key("namespace")
+	OperationKey    = attribute.Key("operation")
+	// ... other attribute keys
+
+	once sync.Once
+)
+
+// Helper to create a counter with common options
+func createCounter(meter metric.Meter, name, desc, unit string) (metric.Int64Counter, error) {
+	return meter.Int64Counter(
+		name,
+		metric.WithDescription(desc),
+		metric.WithUnit(unit),
+	)
+}
+
+// InitializeMetrics registers workflow and service metrics
+func InitializeMetrics(meter metric.Meter) error {
+	var err error
+
+	workflowSuccess, err = createCounter(meter, "workflow_success", "Count of successfully completed workflows", "{execution}")
+	if err != nil {
+		return err
+	}
+
+	workflowFailed, err = createCounter(meter, "workflow_failed", "Count of failed workflows", "{execution}")
+	if err != nil {
+		return err
+	}
+
+	// ... initialize other metrics similarly
+
+	return nil
+}
+
+// Ensures metrics are initialized only once
+func ensureMetricsInitialized() {
+	once.Do(func() {
+		log.Println("Initializing metrics counters...")
+		meter := otel.GetMeterProvider().Meter("temporal-metrics")
+		if err := InitializeMetrics(meter); err != nil {
+			log.Printf("Failed to initialize metrics: %v", err)
+		} else {
+			log.Println("Metrics counters initialized successfully")
+		}
+	})
+}
+
+// Helper to record metrics with common attributes
+func recordCounter(ctx context.Context, counter metric.Int64Counter, attrs ...attribute.KeyValue) {
+	ensureMetricsInitialized()
+	counter.Add(ctx, 1, metric.WithAttributes(attrs...))
+}
+
+// Example usage: record workflow success
+func RecordSuccess(ctx context.Context, workflowType, workflowID, runID, namespace string) {
+	recordCounter(ctx, workflowSuccess,
+		WorkflowTypeKey.String(workflowType),
+		WorkflowIDKey.String(workflowID),
+		RunIDKey.String(runID),
+		NamespaceKey.String(namespace),
+		OperationKey.String("CompletionStats"),
+	)
+}
+
+// ...
+```
+
+### Step 6: Configure Main Application with OpenTelemetry
+
+```go:cmd/helloworld/main.go
+package main
+
+import (
+	"context"
+	"log"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
+
+	"github.com/creator54/temporal-go-demo-app/internal/helloworld/config"
+	"go.opentelemetry.io/otel"
+)
+
+func main() {
+	// 1. Context and signal handling setup (essential for clean shutdown)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		sig := <-sigChan
+		log.Printf("METRICS: Received %v - initiating shutdown", sig)
+		cancel()
+	}()
+
+	// 2. OpenTelemetry metrics initialization
+	log.SetFlags(log.LstdFlags | log.Lmicroseconds)
+	log.Println("METRICS: Initializing OpenTelemetry...")
+
+	telemetry := config.NewSignozTelemetryUtils()
+	cleanup, err := telemetry.InitProvider(ctx)
+	if err != nil {
+		log.Fatalf("METRICS: Failed to initialize - %v", err)
+	}
+	defer func() {
+		log.Println("METRICS: Flushing remaining metrics...")
+		cleanup()
+	}()
+
+	// 3. Metrics instrumentation setup
+	log.Println("METRICS: Creating metric instruments...")
+	meter := otel.GetMeterProvider().Meter("temporal-metrics")
+	if err := config.InitializeMetrics(meter); err != nil {
+		log.Fatalf("METRICS: Instrumentation failed - %v", err)
+	}
+
+	// ... (Temporal worker/workflow setup would go here)
+	
+	// 4. Maintain context until shutdown
+	<-ctx.Done()
+	log.Println("METRICS: Final export buffer...")
+	time.Sleep(2 * time.Second) // Allow final metric exports
+}
+```
