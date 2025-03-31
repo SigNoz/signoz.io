@@ -98,6 +98,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </ThemeProviders>
           </MixpanelClientInitializer>
         </PostHogProvider>
+
       </body>
     </html>
   )
