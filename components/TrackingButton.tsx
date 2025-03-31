@@ -3,7 +3,6 @@
 import { Button } from '@headlessui/react'
 import { usePathname } from 'next/navigation'
 import { ReactNode } from 'react'
-import { trackClick } from '../utils/analytics'
 
 interface TrackingButtonProps {
   children: ReactNode
@@ -36,23 +35,14 @@ export default function TrackingButton({
   ...rest
 }: TrackingButtonProps) {
   const pathname = usePathname()
-  
+
   const handleClick = () => {
-    // Track the click event with the explicitly provided clickText
-    trackClick(
-      clickType,
-      clickName,
-      clickText,
-      clickLocation,
-      pathname || ''
-    )
-    
     // Call the original onClick handler if provided
     if (onClick) {
       onClick()
     }
   }
-  
+
   return (
     <Button
       className={className}
@@ -65,4 +55,4 @@ export default function TrackingButton({
       {children}
     </Button>
   )
-} 
+}

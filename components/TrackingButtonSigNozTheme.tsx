@@ -2,7 +2,6 @@
 
 import React from 'react'
 import { usePathname } from 'next/navigation'
-import { trackClick } from '../utils/analytics'
 import Button from './Button/Button'
 
 // Use Button's types
@@ -46,9 +45,6 @@ export default function TrackingButtonSigNozTheme({
   const pathname = usePathname()
 
   const handleClick = () => {
-    // Track the click event
-    trackClick(clickType, clickName, clickText, clickLocation, pathname || '')
-
     // Call the original onClick handler if provided
     if (onClick) {
       onClick()
