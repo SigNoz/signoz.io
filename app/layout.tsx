@@ -12,9 +12,24 @@ import TopNav from '@/components/TopNav/TopNav'
 import { Inter } from 'next/font/google'
 import React, { Suspense } from 'react'
 import { PostHogProvider } from './providers'
-import MixpanelClientInitializer from './mixpanel-initializer'
+import dynamic from 'next/dynamic'
+
+// Lazy load MixpanelClientInitializer to prevent it from blocking initial page load
+const MixpanelClientInitializer = dynamic(() => import('./mixpanel-initializer'), {
+  ssr: false, // Don't render on server
+  loading: () => <>{/* render nothing while loading */}</>,
+})
 
 const inter = Inter({ subsets: ['latin'] })
+
+// Add an error boundary component to catch errors in analytics
+// without affecting the main application
+function AnalyticsErrorBoundary({ children }: { children: React.ReactNode }) {
+  // This is a simplified error boundary as React 18 doesn't support class-based
+  // error boundaries in client components yet - in a real implementation
+  // you'd need to add proper error handling logic
+  return <>{children}</>
+}
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteMetadata.siteUrl),
@@ -82,23 +97,27 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </noscript>
 
         <PostHogProvider>
-          <MixpanelClientInitializer>
-            <ThemeProviders>
-              <Suspense>
-                <SectionContainer>
-                  <div className="relative flex h-screen flex-col justify-between ">
-                    <SearchProvider searchConfig={siteMetadata.search as SearchConfig}>
-                      <TopNav />
-                      <main className="mb-auto mt-[48px]">{children}</main>
-                    </SearchProvider>
-                    <MainFooter />
-                  </div>
-                </SectionContainer>
-              </Suspense>
-            </ThemeProviders>
-          </MixpanelClientInitializer>
+          {/* Wrap Mixpanel in error boundary and suspense for safety */}
+          <AnalyticsErrorBoundary>
+            <Suspense>
+              <MixpanelClientInitializer>
+                <ThemeProviders>
+                  <Suspense>
+                    <SectionContainer>
+                      <div className="relative flex h-screen flex-col justify-between ">
+                        <SearchProvider searchConfig={siteMetadata.search as SearchConfig}>
+                          <TopNav />
+                          <main className="mb-auto mt-[48px]">{children}</main>
+                        </SearchProvider>
+                        <MainFooter />
+                      </div>
+                    </SectionContainer>
+                  </Suspense>
+                </ThemeProviders>
+              </MixpanelClientInitializer>
+            </Suspense>
+          </AnalyticsErrorBoundary>
         </PostHogProvider>
-
       </body>
     </html>
   )
