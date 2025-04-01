@@ -13,23 +13,25 @@ import { Inter } from 'next/font/google'
 import React, { Suspense } from 'react'
 import { PostHogProvider } from './providers'
 import dynamic from 'next/dynamic'
-
-// Lazy load MixpanelClientInitializer to prevent it from blocking initial page load
-const MixpanelClientInitializer = dynamic(() => import('./mixpanel-initializer'), {
-  ssr: false, // Don't render on server
-  loading: () => <>{/* render nothing while loading */}</>,
-})
+import { AnalyticsErrorBoundary } from './components/AnalyticsErrorBoundary'
 
 const inter = Inter({ subsets: ['latin'] })
 
-// Add an error boundary component to catch errors in analytics
-// without affecting the main application
-function AnalyticsErrorBoundary({ children }: { children: React.ReactNode }) {
-  // This is a simplified error boundary as React 18 doesn't support class-based
-  // error boundaries in client components yet - in a real implementation
-  // you'd need to add proper error handling logic
-  return <>{children}</>
-}
+// Lazy load MixpanelClientInitializer with better error handling
+const MixpanelClientInitializer = dynamic(
+  () =>
+    import('./mixpanel-initializer').catch((error) => {
+      console.error('Failed to load Mixpanel:', error)
+      // Return a no-op component that just renders children
+      return {
+        default: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+      }
+    }),
+  {
+    ssr: false,
+    loading: () => <>{/* render nothing while loading */}</>,
+  }
+)
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteMetadata.siteUrl),
@@ -97,12 +99,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </noscript>
 
         <PostHogProvider>
-          {/* Wrap Mixpanel in error boundary and suspense for safety */}
           <AnalyticsErrorBoundary>
-            <Suspense>
+            <Suspense fallback={<>{/* render nothing while loading */}</>}>
               <MixpanelClientInitializer>
                 <ThemeProviders>
-                  <Suspense>
+                  <Suspense fallback={<>{/* render nothing while loading */}</>}>
                     <SectionContainer>
                       <div className="relative flex h-screen flex-col justify-between ">
                         <SearchProvider searchConfig={siteMetadata.search as SearchConfig}>
