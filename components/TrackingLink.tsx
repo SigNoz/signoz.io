@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { ReactNode } from 'react'
+import { trackClick } from '../utils/analytics'
 
 interface TrackingLinkProps {
   href: string
@@ -50,6 +51,9 @@ export default function TrackingLink({
   const pathname = usePathname()
 
   const handleClick = () => {
+    // Track click event
+    trackClick(clickType, clickName, clickLocation, clickText, pathname)
+
     // Call the original onClick handler if provided
     if (onClick) {
       onClick()

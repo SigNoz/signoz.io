@@ -11,6 +11,7 @@ import MainFooter from '@/components/mainFooter'
 import TopNav from '@/components/TopNav/TopNav'
 import { Inter } from 'next/font/google'
 import React, { Suspense } from 'react'
+import MixpanelProvider from '@/components/MixpanelProvider'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -80,17 +81,19 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </noscript>
 
         <ThemeProviders>
-          <Suspense>
-            <SectionContainer>
-              <div className="relative flex h-screen flex-col justify-between ">
-                <SearchProvider searchConfig={siteMetadata.search as SearchConfig}>
-                  <TopNav />
-                  <main className="mb-auto mt-[48px]">{children}</main>
-                </SearchProvider>
-                <MainFooter />
-              </div>
-            </SectionContainer>
-          </Suspense>
+          <MixpanelProvider>
+            <Suspense>
+              <SectionContainer>
+                <div className="relative flex h-screen flex-col justify-between ">
+                  <SearchProvider searchConfig={siteMetadata.search as SearchConfig}>
+                    <TopNav />
+                    <main className="mb-auto mt-[48px]">{children}</main>
+                  </SearchProvider>
+                  <MainFooter />
+                </div>
+              </SectionContainer>
+            </Suspense>
+          </MixpanelProvider>
         </ThemeProviders>
       </body>
     </html>
