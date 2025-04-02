@@ -21,7 +21,7 @@ const communityLinks: CommunityLinkData[] = [
     href: 'https://signoz.io/docs/troubleshooting/signoz-cloud/general-troubleshooting/',
     icon: <HelpCircle size={20} className="text-signoz_robin-500" />,
     clickName: 'Troubleshooting KB Link',
-    clickType: 'Troubleshooting Link',
+    clickType: 'Nav Click',
   },
   {
     title: 'Join Slack Community',
@@ -29,7 +29,7 @@ const communityLinks: CommunityLinkData[] = [
     href: 'https://signoz.io/slack',
     icon: <SiSlack size={20} className="text-signoz_robin-500" />,
     clickName: 'Slack Community Link',
-    clickType: 'Community Link',
+    clickType: 'Nav Click',
   },
   {
     title: 'Check Out GitHub Repo',
@@ -37,7 +37,7 @@ const communityLinks: CommunityLinkData[] = [
     href: 'https://github.com/SigNoz/signoz',
     icon: <SiGithub size={20} className="text-signoz_robin-500" />,
     clickName: 'GitHub Repo Link',
-    clickType: 'Community Link',
+    clickType: 'Nav Click',
   },
 ]
 

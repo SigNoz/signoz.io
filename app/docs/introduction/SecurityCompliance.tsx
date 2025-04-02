@@ -59,9 +59,9 @@ export default function SecurityCompliance() {
             title={link.title}
             description={link.description}
             icon={link.icon}
-            clickType="Security Link" // Specific clickType
+            clickType="Nav Click"
             clickName={link.clickName}
-            clickText={link.title} // Using title as clickText
+            clickText={link.title}
             clickLocation={sectionName}
           />
         ))}

@@ -54,7 +54,7 @@ export default function MigrateFromDatadog() {
             title={link.title}
             description={link.description}
             icon={link.icon}
-            clickType="Migration Link" // Specific clickType for this section
+            clickType="Nav Click"
             clickName={link.clickName}
             clickText={link.title} // Using title as clickText
             clickLocation={sectionName}

@@ -56,7 +56,7 @@ export default function AdditionalResources() {
             title={link.title}
             description={link.description}
             icon={link.icon}
-            clickType="Resource Link" // Generic type
+            clickType="Nav Click" 
             clickName={link.clickName}
             clickText={link.title}
             clickLocation={sectionName}
