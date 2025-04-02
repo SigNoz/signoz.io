@@ -25,6 +25,7 @@ const SingleLinkCard: React.FC<SingleLinkCardProps> = ({
   return (
     <TrackingLink
       href={href}
+      target="_blank"
       className="flex items-center gap-4 rounded-lg border border-signoz_slate-400 bg-signoz_ink-400 p-4 transition-all hover:border-signoz_robin-500 hover:bg-signoz_ink-300"
       clickType={clickType}
       clickName={clickName}

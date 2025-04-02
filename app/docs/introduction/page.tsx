@@ -8,6 +8,8 @@ import Integrations from './Integrations'
 import MigrateFromDatadog from './MigrateFromDatadog'
 import SecurityCompliance from './SecurityCompliance'
 import SigNozFeatures from './SigNozFeatures'
+import TroubleshootingCommunity from './TroubleshootingCommunity'
+import AdditionalResources from './AdditionalResources'
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -26,6 +28,8 @@ export default function DocsIntroductionPage() {
       <MigrateFromDatadog />
       <SigNozFeatures />
       <SecurityCompliance />
+      <TroubleshootingCommunity />
+      <AdditionalResources />
     </div>
   )
 }
