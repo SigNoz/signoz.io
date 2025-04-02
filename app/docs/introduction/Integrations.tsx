@@ -1,7 +1,6 @@
 'use client'
 
 import React from 'react'
-import { ArrowRight } from 'lucide-react'
 import {
   SiRedis,
   SiPostgresql,
@@ -10,16 +9,16 @@ import {
   SiClickhouse,
   SiAwslambda,
 } from 'react-icons/si'
-import TrackingLink from '../../../components/TrackingLink'
+import IconCardGrid from '../../../components/Card/IconCardGrid'
 
-interface IntegrationData {
+interface IconCardData {
   name: string
   href: string
   icon: React.ReactNode
   clickName: string
 }
 
-const integrationsData: IntegrationData[] = [
+const integrationsData: IconCardData[] = [
   {
     name: 'Redis',
     href: '/docs/integrations/redis/',
@@ -59,50 +58,14 @@ const integrationsData: IntegrationData[] = [
 ]
 
 export default function Integrations() {
-  const sectionName = 'Integrations Section'
-
   return (
-    <div className="mx-auto mb-12 w-full max-w-7xl">
-      <div className="mb-6 text-left">
-        <h2 className="mb-2 text-2xl font-semibold text-signoz_vanilla-100">Integrations</h2>
-        <p className="text-base text-signoz_vanilla-400">
-          Connect SigNoz with your favorite tools and services
-        </p>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-        {integrationsData.map((integration, index) => (
-          <TrackingLink
-            key={index}
-            href={integration.href}
-            className="flex flex-col items-center justify-center rounded-lg border border-signoz_slate-400 bg-signoz_ink-400 p-4 text-center transition-all hover:border-signoz_robin-500 hover:bg-signoz_ink-300"
-            clickType="Integration Link"
-            clickName={integration.clickName}
-            clickText={integration.name}
-            clickLocation={sectionName}
-          >
-            <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-md">
-              {integration.icon}
-            </div>
-            <span className="text-sm font-medium text-signoz_vanilla-100">{integration.name}</span>
-          </TrackingLink>
-        ))}
-      </div>
-
-      <div className="mt-4 text-sm">
-        {' '}
-        {/* Increased margin-top slightly */}
-        <TrackingLink
-          href="/docs/integrations/integrations-list/"
-          className="inline-flex items-center text-signoz_robin-500 transition-colors hover:text-signoz_robin-400"
-          clickType="Nav Click"
-          clickName="View All Integrations Link"
-          clickText="View all integrations"
-          clickLocation={sectionName}
-        >
-          View all integrations <ArrowRight className="ml-1 h-3 w-3" />
-        </TrackingLink>
-      </div>
-    </div>
+    <IconCardGrid
+      title="Integrations"
+      description="Connect SigNoz with your favorite tools and services"
+      cards={integrationsData}
+      sectionName="Integrations Section"
+      viewAllHref="/docs/integrations/integrations-list/"
+      viewAllText="View all integrations"
+    />
   )
 }

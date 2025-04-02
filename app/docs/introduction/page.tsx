@@ -6,6 +6,7 @@ import SendData from './SendData'
 import Monitor from './Monitor'
 import Integrations from './Integrations'
 import MigrateFromDatadog from './MigrateFromDatadog'
+import SigNozFeatures from './SigNozFeatures'
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -22,6 +23,7 @@ export default function DocsIntroductionPage() {
       <Monitor />
       <Integrations />
       <MigrateFromDatadog />
+      <SigNozFeatures />
     </div>
   )
 }
