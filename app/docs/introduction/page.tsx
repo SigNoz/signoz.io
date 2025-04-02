@@ -6,6 +6,7 @@ import SendData from './SendData'
 import Monitor from './Monitor'
 import Integrations from './Integrations'
 import MigrateFromDatadog from './MigrateFromDatadog'
+import SecurityCompliance from './SecurityCompliance'
 import SigNozFeatures from './SigNozFeatures'
 import { Metadata } from 'next'
 
@@ -24,6 +25,7 @@ export default function DocsIntroductionPage() {
       <Integrations />
       <MigrateFromDatadog />
       <SigNozFeatures />
+      <SecurityCompliance />
     </div>
   )
 }

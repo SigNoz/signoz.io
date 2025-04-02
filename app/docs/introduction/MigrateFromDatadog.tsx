@@ -2,7 +2,9 @@
 
 import React from 'react'
 import { BookText, Calculator } from 'lucide-react'
-import TrackingLink from '../../../components/TrackingLink'
+// import TrackingLink from '../../../components/TrackingLink' // Removed TrackingLink import
+// import InfoCard from '../../../components/Card/InfoCard' // Use relative path for InfoCard
+import SingleLinkCard from '../../../components/Card/SingleLinkCard' // Updated import
 
 interface MigrationLinkData {
   title: string
@@ -45,23 +47,18 @@ export default function MigrateFromDatadog() {
 
       <div className="grid gap-4 md:grid-cols-2">
         {migrationLinks.map((link, index) => (
-          <TrackingLink
+          // Replaced TrackingLink with InfoCard, now updated to SingleLinkCard
+          <SingleLinkCard // Updated component name
             key={index}
             href={link.href}
-            className="flex items-center gap-4 rounded-lg border border-signoz_slate-400 bg-signoz_ink-400 p-4 transition-all hover:border-signoz_robin-500 hover:bg-signoz_ink-300"
-            clickType="Migration Link"
+            title={link.title}
+            description={link.description}
+            icon={link.icon}
+            clickType="Migration Link" // Specific clickType for this section
             clickName={link.clickName}
-            clickText={link.title}
+            clickText={link.title} // Using title as clickText
             clickLocation={sectionName}
-          >
-            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-md bg-signoz_robin-500/10">
-              {link.icon}
-            </div>
-            <div>
-              <h3 className="mb-1 text-base font-bold text-signoz_vanilla-100">{link.title}</h3>
-              <p className="mb-0 text-sm text-signoz_vanilla-400">{link.description}</p>
-            </div>
-          </TrackingLink>
+          />
         ))}
       </div>
     </div>
