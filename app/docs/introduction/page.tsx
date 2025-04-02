@@ -5,6 +5,7 @@ import Header from './Header'
 import SendData from './SendData'
 import Monitor from './Monitor'
 import Integrations from './Integrations'
+import MigrateFromDatadog from './MigrateFromDatadog'
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -20,6 +21,7 @@ export default function DocsIntroductionPage() {
       <SendData />
       <Monitor />
       <Integrations />
+      <MigrateFromDatadog />
     </div>
   )
 }
