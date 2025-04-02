@@ -10,6 +10,7 @@ import SecurityCompliance from './SecurityCompliance'
 import SigNozFeatures from './SigNozFeatures'
 import TroubleshootingCommunity from './TroubleshootingCommunity'
 import AdditionalResources from './AdditionalResources'
+import QuickStartCloud from '@/components/QuickStartCloud'
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -30,6 +31,7 @@ export default function DocsIntroductionPage() {
       <SecurityCompliance />
       <TroubleshootingCommunity />
       <AdditionalResources />
+      <QuickStartCloud />
     </div>
   )
 }
