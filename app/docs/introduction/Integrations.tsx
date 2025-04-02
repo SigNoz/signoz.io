@@ -22,37 +22,37 @@ interface IntegrationData {
 const integrationsData: IntegrationData[] = [
   {
     name: 'Redis',
-    href: '/docs/integrations/redis/', // Placeholder link
+    href: '/docs/integrations/redis/',
     icon: <SiRedis className="h-7 w-7 text-red-500" />,
     clickName: 'Redis Integration Link',
   },
   {
     name: 'PostgreSQL',
-    href: '/docs/integrations/postgresql/', // Placeholder link
+    href: '/docs/integrations/postgresql/',
     icon: <SiPostgresql className="h-7 w-7 text-blue-600" />,
     clickName: 'PostgreSQL Integration Link',
   },
   {
     name: 'NginX',
-    href: '/docs/integrations/nginx/', // Placeholder link
+    href: '/docs/integrations/nginx/',
     icon: <SiNginx className="h-7 w-7 text-green-500" />,
     clickName: 'NginX Integration Link',
   },
   {
     name: 'MongoDB',
-    href: '/docs/integrations/mongodb/', // Placeholder link
+    href: '/docs/integrations/mongodb/',
     icon: <SiMongodb className="h-7 w-7 text-green-600" />,
     clickName: 'MongoDB Integration Link',
   },
   {
     name: 'Clickhouse',
-    href: '/docs/integrations/clickhouse/', // Placeholder link
+    href: '/docs/integrations/clickhouse/',
     icon: <SiClickhouse className="h-7 w-7 text-yellow-500" />,
     clickName: 'Clickhouse Integration Link',
   },
   {
     name: 'AWS Lambda',
-    href: '/docs/integrations/aws-lambda/', // Placeholder link
+    href: '/docs/integrations/aws-rds-postgres/',
     icon: <SiAwslambda className="h-7 w-7 text-orange-500" />,
     clickName: 'AWS Lambda Integration Link',
   },
@@ -81,7 +81,7 @@ export default function Integrations() {
             clickText={integration.name}
             clickLocation={sectionName}
           >
-            <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-md bg-signoz_robin-500/10">
+            <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-md">
               {integration.icon}
             </div>
             <span className="text-sm font-medium text-signoz_vanilla-100">{integration.name}</span>
@@ -89,11 +89,11 @@ export default function Integrations() {
         ))}
       </div>
 
-      <div className="mt-6 text-sm">
+      <div className="mt-4 text-sm">
         {' '}
         {/* Increased margin-top slightly */}
         <TrackingLink
-          href="/docs/integrations/" // Placeholder link for all integrations
+          href="/docs/integrations/integrations-list/"
           className="inline-flex items-center text-signoz_robin-500 transition-colors hover:text-signoz_robin-400"
           clickType="Nav Click"
           clickName="View All Integrations Link"
