@@ -3,7 +3,6 @@
 
 import { useRef, useEffect, RefObject } from 'react'
 import { usePathname } from 'next/navigation'
-import { trackClick } from '@/utils/analytics'
 
 export interface TocItemProps {
   url: string
@@ -49,17 +48,6 @@ const TableOfContents = ({
     }
   }, [activeSection, scrollableContainerRef])
 
-  const handleTocClick = (e, tocItem) => {
-    // Track the click event
-    trackClick(
-      'ToC Click',
-      'TOC Link',
-      tocItem.value,
-      'Blog TOC',
-      pathname || ''
-    )
-  }
-
   return (
     <div ref={tocRef} className="flex flex-col gap-1.5">
       {toc.map((tocItem: TocItemProps) => {
@@ -73,7 +61,6 @@ const TableOfContents = ({
             <a
               data-level={tocItem.depth}
               href={tocItem.url}
-              onClick={(e) => handleTocClick(e, tocItem)}
               className={`line-clamp-2 text-[11px] transition-colors hover:text-white ${
                 isActive ? 'font-medium text-signoz_robin-500' : 'text-gray-500'
               }`}
