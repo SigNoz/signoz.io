@@ -53,19 +53,28 @@ const docsSideNav = [
         ],
       },
       {
-        type: "doc",
-        label: "Releases",
-        route: "/docs/overview/releases"
-      },
-      {
-        type: "doc",
-        label: "What's New",
-        route: "/docs/overview/whats-new"
-      },
-      {
-        type: "doc",
+        type: "category",
         label: "Breaking Changes",
-        route: "/docs/overview/breaking-changes"
+        isExpanded: false,
+        items: [
+          {
+            type: 'doc',
+            label: 'Breaking Changes in v0.76',
+            route: '/docs/overview/breaking-changes/breaking-changes-0.76'
+          }
+        ]
+      },
+      {
+        type: "category",
+        label: "What's New",
+        isExpanded: false,
+        items: [
+          {
+            type: 'doc',
+            label: 'Changelog of v0.76',
+            route: '/docs/overview/whats-new/changelog-0.76'
+          }
+        ]
       },
       {
         type: "doc",
