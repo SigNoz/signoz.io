@@ -22,8 +22,8 @@ export default function Header() {
       {/* Quick Start Buttons */}
       <div className="mx-auto mb-12 mt-12 grid w-full max-w-4xl gap-6 md:grid-cols-2">
         <TrackingLink
-          href="/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/"
-          className="flex flex-col rounded-lg border border-signoz_slate-400 bg-signoz_ink-400 p-6 transition-all hover:border-signoz_robin-500 hover:bg-signoz_ink-300"
+          href="/teams/"
+          className="relative flex flex-col rounded-lg border border-signoz_slate-400 bg-signoz_ink-400 p-6 ring-2 ring-signoz_robin-500 ring-offset-2 ring-offset-signoz_ink-400 transition-all hover:border-signoz_robin-500 hover:bg-signoz_ink-300"
           clickType="Primary CTA"
           clickName="Quick Start Button"
           clickText="Get started with SigNoz Cloud"
