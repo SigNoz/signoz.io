@@ -101,7 +101,7 @@ export default function SendData() {
         },
         {
           name: 'NodeJS',
-          href: '/docs/instrumentation/manual-instrumentation/javascript/opentelemetry-nodejs/#set-up-custom-metrics',
+          href: '/opentelemetry/custom-metrics-nodejs/',
           icon: <SiNodedotjs className="h-5 w-5 text-yellow-500" />,
           clickName: 'NodeJS Metrics Link',
         },
