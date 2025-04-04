@@ -1129,6 +1129,11 @@ const docsSideNav = [
     items: [
       {
         type: 'doc',
+        route: '/docs/integrations/opentelemetry-temporal-typescript',
+        label: 'Temporal Cloud + TypeScript',
+      },
+      {
+        type: 'doc',
         route: '/docs/integrations/redis',
         label: 'Redis',
       },
