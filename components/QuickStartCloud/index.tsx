@@ -4,16 +4,17 @@ import React from 'react'
 import Button from '@/components/Button/Button' // Use alias path
 import TrackingLink from '@/components/TrackingLink' // Use alias path
 import { ArrowRight, ChevronRight } from 'lucide-react'
+import { default_api } from '../tools/default_api'
 
 export default function QuickStartCloud() {
   const sectionName = 'Quick Start Cloud Section'
 
   return (
     // Adapted container and background styles from GetStarted component
-    <div className="mx-auto mb-12 w-full max-w-7xl bg-[url('/img/background_blur/Frame_2185.png')] bg-[length:55%] bg-[center_top_0rem] bg-no-repeat py-16 sm:bg-[center_top_-2rem]">
+    <div className="mx-auto mb-12 w-full max-w-7xl bg-[url('/img/background_blur/Frame_2185.png')] bg-[length:100%_auto] bg-[center_top] bg-no-repeat py-8 sm:bg-[length:55%] sm:bg-[center_top_-2rem] sm:py-12 md:py-16">
       {/* Add inner div for the second background image */}
-      <div className="bg-[url('/img/background_blur/Ellipse_206.png')] bg-[center_top_calc(-250px)] bg-no-repeat">
-        <div className="flex flex-col items-center gap-2 text-center">
+      <div className="bg-[url('/img/background_blur/Ellipse_206.png')] bg-[center_top_calc(-150px)] bg-no-repeat sm:bg-[center_top_calc(-250px)]">
+        <div className="flex flex-col items-center gap-2 px-4 text-center sm:px-0">
           <h2 className="text-4xl font-bold text-signoz_vanilla-100 md:text-5xl">
             SigNoz Cloud is the Fastest Way to Try Out SigNoz
           </h2>
@@ -24,23 +25,22 @@ export default function QuickStartCloud() {
           </p> */}
 
           {/* Stepper Component */}
-          <div className="mt-6 flex w-full max-w-4xl items-stretch rounded-lg border border-signoz_slate-500 bg-signoz_ink-400 p-4 shadow-md">
-            {/* Step 1: Sign Up - Removed border & padding adjustment */}
-            <div className="flex flex-1 items-center justify-center md:justify-start">
+          <div className="mt-6 flex w-full max-w-4xl flex-col items-center rounded-lg border border-signoz_slate-500 bg-signoz_ink-400 p-4 shadow-md md:flex-row md:items-stretch">
+            {/* Step 1: Sign Up */}
+            <div className="mb-4 flex flex-1 items-center justify-center md:mb-0 md:justify-start">
               <div className="mr-3 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-signoz_robin-500 text-sm font-bold text-white">
                 1
               </div>
               <span className="text-base font-medium text-signoz_vanilla-100">Sign Up</span>
             </div>
 
-            {/* Angled Separator 1 - Using Lucide Icon */}
+            {/* Separator 1 - Hidden by default, shown on md */}
             <div className="hidden items-center justify-center px-4 md:flex">
-              {/* Replace SVG with Lucide Icon */}
               <ChevronRight size={32} className="text-orange-500" strokeWidth={1.5} />
             </div>
 
-            {/* Step 2: Choose Data Source - Removed border & padding adjustment */}
-            <div className="flex flex-1 items-center justify-center md:justify-start">
+            {/* Step 2: Choose Data Source */}
+            <div className="mb-4 flex flex-1 items-center justify-center md:mb-0 md:justify-start">
               <div className="mr-3 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-signoz_robin-500 text-sm font-bold text-white">
                 2
               </div>
@@ -49,13 +49,12 @@ export default function QuickStartCloud() {
               </span>
             </div>
 
-            {/* Angled Separator 2 - Using Lucide Icon */}
+            {/* Separator 2 - Hidden by default, shown on md */}
             <div className="hidden items-center justify-center px-4 md:flex">
-              {/* Replace SVG with Lucide Icon */}
               <ChevronRight size={32} className="text-orange-500" strokeWidth={1.5} />
             </div>
 
-            {/* Step 3: Set Up and Visualize - Removed padding adjustment */}
+            {/* Step 3: Set Up and Visualize */}
             <div className="flex flex-1 items-center justify-center md:justify-start">
               <div className="mr-3 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-signoz_robin-500 text-sm font-bold text-white">
                 3
@@ -68,8 +67,6 @@ export default function QuickStartCloud() {
 
           {/* Button remains below the stepper */}
           <div className="mt-8">
-            {' '}
-            {/* Added margin top to space button from stepper */}
             <Button id="btn-quick-start-cloud">
               <TrackingLink
                 href="/teams/" // Link to the signup page
@@ -86,13 +83,11 @@ export default function QuickStartCloud() {
           </div>
         </div>
         {/* Add the missing thumbnail image */}
-        <div className="relative flex items-center justify-center pt-12">
-          {' '}
-          {/* Added padding-top */}
+        <div className="relative flex items-center justify-center px-4 pt-8 sm:px-0 md:pt-12">
           <img
             src="/img/landing/landing_thumbnail.webp"
             alt="SigNoz Dashboard"
-            className="z-[0] -mb-16 w-3/5 rounded-lg max-sm:-mb-8" // Adjusted bottom margin
+            className="z-[0] -mb-8 w-full max-w-md rounded-lg sm:-mb-12 sm:max-w-lg md:-mb-16 md:max-w-2xl lg:max-w-3xl"
           />
         </div>
       </div>
