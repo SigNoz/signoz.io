@@ -8,7 +8,7 @@ import LinksCardGrid, { LinksCardProps } from '@/components/Card/LinksCardGrid'
 export default function SendData() {
   const cardData: LinksCardProps[] = [
     {
-      title: 'Auto Instrument',
+      title: 'APM / Send Traces',
       description: 'Automatic instrumentation for popular frameworks',
       href: '/docs/instrumentation/',
       icon: <LucideDraftingCompass size={20} className="text-signoz_robin-500" />,
