@@ -18,6 +18,7 @@ import {
   SiReact,
   SiAndroid,
   SiApachekafka,
+  SiDocker,
 } from 'react-icons/si'
 import LinksCardGrid, { LinksCardProps } from '@/components/Card/LinksCardGrid'
 import TrackingLink from '@/components/TrackingLink'
@@ -43,6 +44,12 @@ export default function Monitor() {
           href: '/docs/userguide/k8s-metrics/',
           icon: <SiKubernetes className="h-5 w-5 text-blue-600" />,
           clickName: 'Kubernetes Monitoring Link',
+        },
+        {
+          name: 'Docker',
+          href: '/docs/metrics-management/docker-container-metrics/',
+          icon: <SiDocker className="h-5 w-5 text-blue-400" />,
+          clickName: 'Docker Metrics Link',
         },
       ],
     },

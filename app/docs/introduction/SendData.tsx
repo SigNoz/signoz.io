@@ -2,7 +2,15 @@
 
 import React from 'react'
 import { LucideDraftingCompass, LucideScrollText, LucideChartNoAxesColumn } from 'lucide-react'
-import { SiJavascript, SiPython, SiGo, SiKubernetes, SiDocker } from 'react-icons/si'
+import {
+  SiJavascript,
+  SiPython,
+  SiGo,
+  SiKubernetes,
+  SiDocker,
+  SiPrometheus,
+  SiNodedotjs,
+} from 'react-icons/si'
 import LinksCardGrid, { LinksCardProps } from '@/components/Card/LinksCardGrid'
 
 export default function SendData() {
@@ -86,28 +94,22 @@ export default function SendData() {
       clickText: 'Send Metrics',
       internalLinks: [
         {
-          name: 'Docker',
-          href: '/docs/metrics-management/docker-container-metrics/',
-          icon: <SiDocker className="h-5 w-5 text-blue-400" />,
-          clickName: 'Docker Metrics Link',
+          name: 'Prometheus',
+          href: '/docs/userguide/send-metrics-cloud/#enable-a-prometheus-receiver',
+          icon: <SiPrometheus className="h-5 w-5 text-cyan-500" />,
+          clickName: 'Prometheus Metrics Link',
         },
         {
-          name: 'JavaScript',
+          name: 'NodeJS',
           href: '/docs/instrumentation/manual-instrumentation/javascript/opentelemetry-nodejs/#set-up-custom-metrics',
-          icon: <SiJavascript className="h-5 w-5 text-yellow-500" />,
-          clickName: 'JavaScript Metrics Link',
+          icon: <SiNodedotjs className="h-5 w-5 text-yellow-500" />,
+          clickName: 'NodeJS Metrics Link',
         },
         {
           name: 'Python',
-          href: '/docs/userguide/send-metrics-cloud/',
+          href: '/opentelemetry/python-custom-metrics/',
           icon: <SiPython className="h-5 w-5 text-blue-500" />,
           clickName: 'Python Metrics Link',
-        },
-        {
-          name: 'Go',
-          href: '/docs/userguide/send-metrics-cloud/',
-          icon: <SiGo className="h-5 w-5 text-cyan-500" />,
-          clickName: 'Go Metrics Link',
         },
       ],
       viewAllHref: '/docs/userguide/send-metrics-cloud/',
