@@ -4,7 +4,6 @@ import React from 'react'
 import Button from '@/components/Button/Button' // Use alias path
 import TrackingLink from '@/components/TrackingLink' // Use alias path
 import { ArrowRight, ChevronRight } from 'lucide-react'
-import { default_api } from '../tools/default_api'
 
 export default function QuickStartCloud() {
   const sectionName = 'Quick Start Cloud Section'
