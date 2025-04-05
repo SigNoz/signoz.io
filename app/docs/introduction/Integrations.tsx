@@ -7,6 +7,7 @@ import {
   SiNginx,
   SiMongodb,
   SiClickhouse,
+  SiAmazonwebservices,
   SiAwslambda,
 } from 'react-icons/si'
 import IconCardGrid from '../../../components/Card/IconCardGrid'
@@ -50,10 +51,10 @@ const integrationsData: IconCardData[] = [
     clickName: 'Clickhouse Integration Link',
   },
   {
-    name: 'AWS Lambda',
+    name: 'AWS',
     href: '/docs/integrations/aws-rds-postgres/',
-    icon: <SiAwslambda className="h-7 w-7 text-orange-500" />,
-    clickName: 'AWS Lambda Integration Link',
+    icon: <SiAmazonwebservices className="h-7 w-7 text-orange-500" />,
+    clickName: 'AWS Integration Link',
   },
 ]
 
