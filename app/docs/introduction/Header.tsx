@@ -1,5 +1,3 @@
-'use client'
-
 import React from 'react'
 import Heading from '@/components/ui/Heading'
 import SubHeading from '@/components/ui/SubHeading'

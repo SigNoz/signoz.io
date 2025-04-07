@@ -1,5 +1,3 @@
-'use client'
-
 import React from 'react'
 import { HelpCircle, MessageSquare } from 'lucide-react'
 import { SiSlack, SiGithub } from 'react-icons/si'

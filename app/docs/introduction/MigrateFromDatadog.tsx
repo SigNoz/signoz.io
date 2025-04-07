@@ -1,10 +1,6 @@
-'use client'
-
 import React from 'react'
 import { BookText, Calculator } from 'lucide-react'
-// import TrackingLink from '../../../components/TrackingLink' // Removed TrackingLink import
-// import InfoCard from '../../../components/Card/InfoCard' // Use relative path for InfoCard
-import SingleLinkCard from '../../../components/Card/SingleLinkCard' // Updated import
+import SingleLinkCard from '../../../components/Card/SingleLinkCard'
 
 interface MigrationLinkData {
   title: string
@@ -47,8 +43,7 @@ export default function MigrateFromDatadog() {
 
       <div className="grid gap-4 md:grid-cols-2">
         {migrationLinks.map((link, index) => (
-          // Replaced TrackingLink with InfoCard, now updated to SingleLinkCard
-          <SingleLinkCard // Updated component name
+          <SingleLinkCard
             key={index}
             href={link.href}
             title={link.title}
@@ -56,7 +51,7 @@ export default function MigrateFromDatadog() {
             icon={link.icon}
             clickType="Nav Click"
             clickName={link.clickName}
-            clickText={link.title} // Using title as clickText
+            clickText={link.title}
             clickLocation={sectionName}
           />
         ))}

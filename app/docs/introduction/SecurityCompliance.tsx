@@ -1,14 +1,11 @@
-'use client'
-
 import React from 'react'
-import { Lock, ShieldCheck, Settings } from 'lucide-react' // Using relevant lucide icons
-// import InfoCard from '../../../components/Card/InfoCard' // Use relative path
-import SingleLinkCard from '../../../components/Card/SingleLinkCard' // Updated import
+import { Lock, ShieldCheck, Settings } from 'lucide-react'
+import SingleLinkCard from '../../../components/Card/SingleLinkCard'
 
 interface SecurityLinkData {
   title: string
   description: string
-  href: string // Update with actual links later
+  href: string
   icon: React.ReactNode
   clickName: string
 }
@@ -53,7 +50,7 @@ export default function SecurityCompliance() {
 
       <div className="grid gap-4 md:grid-cols-3">
         {securityLinks.map((link, index) => (
-          <SingleLinkCard // Updated component name
+          <SingleLinkCard
             key={index}
             href={link.href}
             title={link.title}

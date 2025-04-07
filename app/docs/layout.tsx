@@ -7,9 +7,5 @@ interface LayoutProps {
 }
 
 export default function DocsRootLayout({ children }: LayoutProps) {
-  return (
-    <main>
-      {children}
-    </main>
-  )
-} 
+  return <>{children}</>
+}

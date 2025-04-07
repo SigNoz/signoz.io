@@ -1,13 +1,11 @@
-'use client'
-
 import React from 'react'
 import {
-  ListFilter, // For Query Builder
-  LayoutDashboard, // For Dashboards
-  TriangleAlert, // For Alerts
-  Bug, // For Exceptions
-  Waypoints, // For Trace Explorer
-  ClipboardList, // For Logs Explorer
+  ListFilter,
+  LayoutDashboard,
+  TriangleAlert,
+  Bug,
+  Waypoints,
+  ClipboardList,
 } from 'lucide-react'
 import IconCardGrid from '../../../components/Card/IconCardGrid'
 
@@ -64,8 +62,6 @@ export default function SigNozFeatures() {
       description="Explore the powerful features of SigNoz"
       cards={featuresData}
       sectionName="SigNoz Features Section"
-      // No "View All" link needed for this section based on reference
-      // Default grid columns are suitable
     />
   )
 }

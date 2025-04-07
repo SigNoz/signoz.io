@@ -1,5 +1,3 @@
-'use client'
-
 import React from 'react'
 import { FileArchive, HeartPulse, BookOpen } from 'lucide-react'
 import SingleLinkCard from '../../../components/Card/SingleLinkCard'
@@ -7,7 +5,7 @@ import SingleLinkCard from '../../../components/Card/SingleLinkCard'
 interface ResourceLinkData {
   title: string
   description: string
-  href: string // Update with actual links later
+  href: string
   icon: React.ReactNode
   clickName: string
 }
@@ -45,7 +43,6 @@ export default function AdditionalResources() {
         <h2 className="mb-2 text-2xl font-semibold text-signoz_vanilla-100">
           Additional Resources
         </h2>
-        {/* No description needed for this section title */}
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
@@ -56,7 +53,7 @@ export default function AdditionalResources() {
             title={link.title}
             description={link.description}
             icon={link.icon}
-            clickType="Nav Click" 
+            clickType="Nav Click"
             clickName={link.clickName}
             clickText={link.title}
             clickLocation={sectionName}

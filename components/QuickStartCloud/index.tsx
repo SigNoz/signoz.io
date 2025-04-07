@@ -1,29 +1,19 @@
-'use client'
-
 import React from 'react'
-import Button from '@/components/Button/Button' // Use alias path
-import TrackingLink from '@/components/TrackingLink' // Use alias path
+import Button from '@/components/Button/Button'
+import TrackingLink from '@/components/TrackingLink'
 import { ArrowRight, ChevronRight } from 'lucide-react'
 
 export default function QuickStartCloud() {
   const sectionName = 'Quick Start Cloud Section'
 
   return (
-    // Adapted container and background styles from GetStarted component
     <div className="mx-auto mb-12 w-full max-w-7xl bg-[url('/img/background_blur/Frame_2185.png')] bg-[length:100%_auto] bg-[center_top] bg-no-repeat py-8 sm:bg-[length:55%] sm:bg-[center_top_-2rem] sm:py-12 md:py-16">
-      {/* Add inner div for the second background image */}
       <div className="bg-[url('/img/background_blur/Ellipse_206.png')] bg-[center_top_calc(-150px)] bg-no-repeat sm:bg-[center_top_calc(-250px)]">
         <div className="flex flex-col items-center gap-2 px-4 text-center sm:px-0">
           <h2 className="text-4xl font-bold text-signoz_vanilla-100 md:text-5xl">
             SigNoz Cloud is the Fastest Way to Try Out SigNoz
           </h2>
-          {/* Remove the old paragraph and add the new stepper */}
-          {/* <p className="text-lg text-signoz_vanilla-400">
-            Sign Up <span className="text-signoz_robin-500">&gt;</span> Choose Data Source{' '}
-            <span className="text-signoz_robin-500">&gt;</span> Set Up and Visualize
-          </p> */}
 
-          {/* Stepper Component */}
           <div className="mt-6 flex w-full max-w-4xl flex-col items-center rounded-lg border border-signoz_slate-500 bg-signoz_ink-400 p-4 shadow-md md:flex-row md:items-stretch">
             {/* Step 1: Sign Up */}
             <div className="mb-4 flex flex-1 items-center justify-center md:mb-0 md:justify-start">

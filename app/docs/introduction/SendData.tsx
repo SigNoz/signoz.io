@@ -1,5 +1,3 @@
-'use client'
-
 import React from 'react'
 import { LucideDraftingCompass, LucideScrollText, LucideChartNoAxesColumn } from 'lucide-react'
 import {

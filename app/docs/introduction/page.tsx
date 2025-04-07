@@ -21,7 +21,7 @@ export const metadata: Metadata = {
 
 export default function DocsIntroductionPage() {
   return (
-    <div>
+    <>
       <Header />
       <SendData />
       <Monitor />
@@ -32,6 +32,6 @@ export default function DocsIntroductionPage() {
       <TroubleshootingCommunity />
       <AdditionalResources />
       <QuickStartCloud />
-    </div>
+    </>
   )
 }

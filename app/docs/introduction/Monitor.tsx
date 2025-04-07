@@ -1,5 +1,3 @@
-'use client'
-
 import React from 'react'
 import {
   ArrowRight,
@@ -21,7 +19,6 @@ import {
   SiDocker,
 } from 'react-icons/si'
 import LinksCardGrid, { LinksCardProps } from '@/components/Card/LinksCardGrid'
-import TrackingLink from '@/components/TrackingLink'
 
 export default function Monitor() {
   const cardData: LinksCardProps[] = [
