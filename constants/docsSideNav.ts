@@ -273,6 +273,11 @@ const docsSideNav = [
                 route: '/docs/instrumentation/opentelemetry-reactjs',
                 label: 'ReactJS',
               },
+              {
+                type: 'doc',
+                route: '/docs/instrumentation/opentelemetry-nuxtjs',
+                label: 'NuxtJS',
+              },
             ],
           },
           {
