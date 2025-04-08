@@ -116,7 +116,7 @@ const docsSideNav = [
             {
               type: 'category',
               isExpanded: false,
-              label: 'Installation By Docker',
+              label: 'Install on Docker',
               items:[
                 {
                   type: 'doc',
@@ -132,7 +132,7 @@ const docsSideNav = [
             },
             {
               type: 'category',
-              label: 'Installation By Binary',
+              label: 'Install Binary',
               isExpanded: false,
               items: [
                   {
@@ -146,7 +146,7 @@ const docsSideNav = [
             {
               type: 'category',
               isExpanded: false,
-              label: 'Installation on Kubernetes',
+              label: 'Install on Kubernetes',
               route: '/docs/install/kubernetes',
               items: [
                 {
