@@ -1,95 +1,92 @@
 const docsSideNav = [
   {
+    type: 'doc',
+    label: 'Get Started',
+    route: '/docs',
+  },
+  {
+    type: 'doc',
+    label: 'What is SigNoz?',
+    route: '/docs/what-is-signoz',
+  },
+  {
     type: 'category',
     isExpanded: false,
-    label: 'Introduction',
-    route: '/docs',
+    label: 'Set Up SigNoz',
+    route: '/docs/install/',
     items: [
       {
         type: 'doc',
-        label: 'What is SigNoz?',
-        route: '/docs/introduction',
+        route: '/docs/cloud',
+        label: 'SigNoz Cloud',
       },
       {
         type: 'category',
         isExpanded: false,
-        label: 'Get Started',
-        route: '/docs/install/',
+        label: 'Self-Host SigNoz',
+        route: '/docs/install/self-host',
         items: [
           {
             type: 'doc',
-            route: '/docs/cloud',
-            label: 'SigNoz Cloud',
+            label: 'Docker Standalone',
+            route: '/docs/install/docker',
+          },
+          {
+            type: 'doc',
+            label: 'Docker Swarm',
+            route: '/docs/install/docker-swarm',
+          },
+          {
+            type: 'doc',
+            label: 'Linux',
+            route: '/docs/install/linux',
+            className: 'new-doc',
           },
           {
             type: 'category',
             isExpanded: false,
-            label: 'Self-Host SigNoz',
-            route: '/docs/install/self-host',
+            label: 'Kubernetes',
+            route: '/docs/install/kubernetes',
             items: [
               {
                 type: 'doc',
-                label: 'Docker Standalone',
-                route: '/docs/install/docker',
+                label: 'Deploying to AWS',
+                route: '/docs/install/kubernetes/aws',
               },
               {
                 type: 'doc',
-                label: 'Docker Swarm',
-                route: '/docs/install/docker-swarm',
+                label: 'Deploying to GCP',
+                route: '/docs/install/kubernetes/gcp',
               },
               {
                 type: 'doc',
-                label: 'Linux',
-                route: '/docs/install/linux',
-                className: 'new-doc',
-              },
-              {
-                type: 'category',
-                isExpanded: false,
-                label: 'Kubernetes',
-                route: '/docs/install/kubernetes',
-                items: [
-                  {
-                    type: 'doc',
-                    label: 'Deploying to AWS',
-                    route: '/docs/install/kubernetes/aws',
-                  },
-                  {
-                    type: 'doc',
-                    label: 'Deploying to GCP',
-                    route: '/docs/install/kubernetes/gcp',
-                  },
-                  {
-                    type: 'doc',
-                    label: 'Other Platform',
-                    route: '/docs/install/kubernetes/others',
-                  },
-                ],
-              },
-              {
-                type: 'doc',
-                label: 'Troubleshooting',
-                route: '/docs/install/troubleshooting',
+                label: 'Other Platform',
+                route: '/docs/install/kubernetes/others',
               },
             ],
           },
+          {
+            type: 'doc',
+            label: 'Troubleshooting',
+            route: '/docs/install/troubleshooting',
+          },
+        ],
+      },
 
+      {
+        type: 'category',
+        isExpanded: false,
+        label: 'Install OTel collector',
+        items: [
           {
-            type: 'category',
-            isExpanded: false,
-            label: 'Install OTel collector',
-            items: [
-              {
-                route: '/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine',
-                type: 'doc',
-                label: 'VM',
-              },
-              {
-                route: '/docs/tutorial/kubernetes-infra-metrics',
-                type: 'doc',
-                label: 'Kubernetes',
-              },
-            ],
+            route: '/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine',
+            type: 'doc',
+            label: 'VM',
+          },
+          {
+            route: '/docs/tutorial/kubernetes-infra-metrics',
+            type: 'doc',
+            label: 'Kubernetes',
           },
         ],
       },
