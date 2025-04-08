@@ -767,8 +767,13 @@ const PricingPlans = () => {
                         <ArrowRight size={14} />
                       </TrackingLink>
                     </Button>
-                    <div className="text-center text-sm text-signoz_robin-300 hover:text-signoz_robin-400 mt-4">
-                      <Link href={'/enterprise/'} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center">
+                    <div className="mt-4 text-center text-sm text-signoz_robin-300 hover:text-signoz_robin-400">
+                      <Link
+                        href={'/enterprise/'}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-center"
+                      >
                         Check All Enterprise Plans
                         <ArrowUpRight className="ml-2 h-4 w-4" />
                       </Link>
@@ -916,8 +921,13 @@ const PricingPlans = () => {
                       <ArrowRight size={14} />
                     </TrackingLink>
                   </Button>
-                  <div className="text-center text-sm text-signoz_robin-300 hover:text-signoz_robin-400 mt-4">
-                    <Link href={'/enterprise/'} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center">
+                  <div className="mt-4 text-center text-sm text-signoz_robin-300 hover:text-signoz_robin-400">
+                    <Link
+                      href={'/enterprise/'}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-center"
+                    >
                       Check All Enterprise Plans
                       <ArrowUpRight className="ml-2 h-4 w-4" />
                     </Link>
@@ -989,9 +999,28 @@ const PricingPlans = () => {
                         {' '}
                         <CircleCheckSolid /> Alerts Management
                       </li>
-                      <li className="mb-6 flex items-center gap-3">
+                      <li className="mb-3 flex items-center gap-3">
+                        {' '}
+                        <CircleCheckSolid /> OTel-Native Messaging Queue Monitoring
+                      </li>
+                      <li className="mb-3 flex items-center gap-3">
+                        {' '}
+                        <CircleCheckSolid /> Correlation of Signals
+                      </li>
+                      <li className="mb-3 flex items-center gap-3">
                         {' '}
                         <CircleCheckSolid /> Service Dependency Visualization
+                      </li>
+                      <li className="mb-3 flex items-center gap-3">
+                        {' '}
+                        <CircleCheckSolid /> Unlimited Logs, Metrics & Traces based Dashboards
+                      </li>
+                      <li className="mb-6 flex items-center gap-3">
+                        {' '}
+                        <CircleCheckSolid /> Visualize very large traces
+                        <span className="rounded-full border border-none bg-signoz_slate-400 px-2 py-1 text-center !text-[10px] uppercase text-signoz_vanilla-400">
+                          &gt;10k spans
+                        </span>
                       </li>
                     </ul>
                   </div>
@@ -1047,8 +1076,13 @@ const PricingPlans = () => {
                         <ArrowRight size={14} />
                       </TrackingLink>
                     </Button>
-                    <div className="text-center text-sm text-signoz_robin-300 hover:text-signoz_robin-400 mt-4">
-                      <Link href={'/enterprise/'} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center">
+                    <div className="mt-4 text-center text-sm text-signoz_robin-300 hover:text-signoz_robin-400">
+                      <Link
+                        href={'/enterprise/'}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-center"
+                      >
                         Check All Enterprise Plans
                         <ArrowUpRight className="ml-2 h-4 w-4" />
                       </Link>
@@ -1138,13 +1172,6 @@ const PricingPlans = () => {
                       </li>
                       <li className="mb-3 flex items-center gap-3">
                         {' '}
-                        <CircleCheckSolid /> Visualize very large traces
-                        <span className="rounded-full border border-none bg-signoz_slate-400 px-2 py-1 text-center !text-[10px] uppercase text-signoz_vanilla-400">
-                          &gt;10k spans
-                        </span>
-                      </li>
-                      <li className="mb-3 flex items-center gap-3">
-                        {' '}
                         <CircleCheckSolid /> Security tightening for on-prem installation
                       </li>
                       <li className="mb-3 flex items-center gap-3">
@@ -1197,8 +1224,13 @@ const PricingPlans = () => {
                       <ArrowRight size={14} />
                     </TrackingLink>
                   </Button>
-                  <div className="text-center text-sm text-signoz_robin-300 hover:text-signoz_robin-400 mt-4">
-                    <Link href={'/enterprise/'} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center">
+                  <div className="mt-4 text-center text-sm text-signoz_robin-300 hover:text-signoz_robin-400">
+                    <Link
+                      href={'/enterprise/'}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-center"
+                    >
                       Check All Enterprise Plans
                       <ArrowUpRight className="ml-2 h-4 w-4" />
                     </Link>
@@ -1301,12 +1333,7 @@ const ExploreAllFeature = () => {
           },
           {
             feature: 'Advanced visualization for very large traces (>10K spans)',
-            inCommunity: (
-              <div className="flex flex-col items-center justify-center">
-                <CrossSolid />
-                {/* <small>(Limited to 5 dashboard panels & alerts)</small> */}
-              </div>
-            ),
+            inCommunity: <CheckSolid />,
             inTeams: <CheckSolid />,
             inEnterprise: <CheckSolid />,
           },
