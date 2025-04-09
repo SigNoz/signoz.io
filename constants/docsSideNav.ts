@@ -194,6 +194,238 @@ const docsSideNav = [
       ],
 
   },
+
+  {
+    type: 'category',
+    label: 'Manage',
+    isExpanded: false,
+    route: '/docs/manage/overview',
+    items: [
+      {
+        label: 'Administrator Guide',
+        type: 'category',
+        isExpanded: false,
+        route: '/docs/manage/administrator-guide',
+        items: [
+          {
+            type: 'category',
+            isExpanded: false,
+            label: 'Migration Guides',
+            route: '/docs/operate/migration',
+            // link: {
+            // type: 'generated-index',
+            // title: 'Migration Guides',
+            // description:
+            // 'The following sections provide instructions to migrate SigNoz components across newer versions. You need to run these migration scripts step by step. For example if you are currently on `0.8.2` and want to migrate to `0.10.0` - you need to run migration script for `0.9` first and then `0.10`',
+            // slug: '/docs/operate/migration/migration',
+            // },
+            items: [
+              {
+                type: 'doc',
+                route: '/docs/operate/migration/upgrade-0.76',
+                label: 'Upgrade to v0.76',
+              },
+              {
+                type: 'doc',
+                route: '/docs/operate/migration/upgrade-0.70',
+                label: 'Upgrade to v0.70',
+              },
+              {
+                type: 'doc',
+                route: '/docs/operate/migration/upgrade-0.64',
+                label: 'Upgrade to v0.64',
+              },
+              {
+                type: 'doc',
+                route: '/docs/operate/migration/upgrade-0.55',
+                label: 'Upgrade to v0.55',
+              },
+              {
+                type: 'doc',
+                route: '/docs/operate/migration/upgrade-0.51',
+                label: 'Upgrade to v0.51',
+              },
+              {
+                type: 'doc',
+                route: '/docs/operate/migration/upgrade-0.49',
+                label: 'Upgrade to v0.49',
+              },
+              {
+                type: 'doc',
+                route: '/docs/operate/migration/upgrade-0.45',
+                label: 'Upgrade to v0.45',
+              },
+              {
+                type: 'doc',
+                route: '/docs/operate/migration/upgrade-0.38',
+                label: 'Upgrade to v0.38',
+              },
+              {
+                type: 'doc',
+                route: '/docs/operate/migration/upgrade-0.36',
+                label: 'Upgrade to v0.36',
+              },
+              {
+                type: 'doc',
+                route: '/docs/operate/migration/upgrade-0.27',
+                label: 'Upgrade to v0.27',
+              },
+              {
+                type: 'doc',
+                route: '/docs/operate/migration/upgrade-0.23',
+                label: 'Upgrade to v0.23',
+              },
+              {
+                type: 'doc',
+                route: '/docs/operate/migration/upgrade-0.19',
+                label: 'Upgrade to v0.19',
+              },
+              {
+                type: 'doc',
+                route: '/docs/operate/migration/upgrade-0.12',
+                label: 'Upgrade to v0.12',
+              },
+              {
+                type: 'doc',
+                route: '/docs/operate/migration/upgrade-0.10',
+                label: 'Upgrade to v0.10',
+              },
+              {
+                type: 'doc',
+                route: '/docs/operate/migration/upgrade-0.9',
+                label: 'Upgrade to v0.9',
+              },
+              {
+                type: 'doc',
+                route: '/docs/operate/migration/upgrade-0.8.1',
+                label: 'Upgrade to v0.8.1',
+              },
+              {
+                type: 'doc',
+                route: '/docs/operate/migration/upgrade-0.8.0',
+                label: 'Upgrade to v0.8.0',
+              },
+            ],
+          },
+          {
+            type: 'category',
+            isExpanded: false,
+            label: 'ClickHouse',
+            route: '/docs/operate/clickhouse',
+            // link: {
+            // type: 'generated-index',
+            // title: 'ClickHouse',
+            // description:
+            // 'The following sections provide instructions to operate ClickHouse. Based on your environment, proceed to one of the sections below.',
+            // slug: '/operate/clickhouse/clickhouse',
+            // },
+            items: [
+              {
+                type: 'doc',
+                route: '/docs/operate/clickhouse/increase-clickhouse-pv',
+                label: 'Increase ClickHouse PV',
+              },
+              {
+                type: 'doc',
+                route: '/docs/operate/clickhouse/connect-to-clickhouse',
+                label: 'Connect to ClickHouse',
+              },
+              {
+                type: 'doc',
+                route: '/docs/operate/clickhouse/distributed-clickhouse',
+                label: 'Distributed ClickHouse',
+              },
+              {
+                type: 'doc',
+                route: '/docs/operate/clickhouse/external-clickhouse',
+                label: 'External ClickHouse',
+              },
+            ],
+          },
+        ]
+      },
+      {
+        label: 'User Guide',
+        type: 'category',
+        isExpanded: false,
+        route: '/docs/manage/user-guide',
+        items: [
+          {
+            type: 'category',
+            label: 'Dashboards',
+            isExpanded: false,
+            route: '/docs/manage/user-guide/dashboards',
+            items: [
+              {
+                type: 'doc',
+                label: 'Create Dashboard',
+                route: '/docs/manage/user-guide/dashboards/create',
+              },
+              {
+                type: 'doc',
+                label: 'Manage Dashboard',
+                route: '/docs/manage/user-guide/dashboards/manage',
+              }
+            ]
+          },
+          {
+            type: 'category',
+            label: 'Alerts',
+            isExpanded: false,
+            route: '/docs/manage/user-guide/alerts',
+            items: [
+              {
+                type: 'doc',
+                label: 'Configure Alerts',
+                route: '/docs/manage/user-guide/alerts/configure',
+              },
+              {
+                type: 'doc',
+                label: 'Manage Alerts',
+                route: '/docs/manage/user-guide/alerts/manage',
+              }
+            ]
+          },
+          {
+            type: 'category',
+            label: 'Traces',
+            isExpanded: false,
+            route: '/docs/manage/user-guide/traces',
+            items: [
+              {
+                type: 'doc',
+                label: 'Search Traces',
+                route: '/docs/manage/user-guide/traces/search',
+              },
+              {
+                type: 'doc',
+                label: 'Analyze Traces',
+                route: '/docs/manage/user-guide/traces/analyze',
+              }
+            ]
+          },
+          {
+            type: 'category',
+            label: 'Metrics',
+            isExpanded: false,
+            route: '/docs/manage/user-guide/metrics',
+            items: [
+              {
+                type: 'doc',
+                label: 'Monitor Metrics',
+                route: '/docs/manage/user-guide/metrics/monitor',
+              },
+              {
+                type: 'doc',
+                label: 'Analyze Metrics',
+                route: '/docs/manage/user-guide/metrics/analyze',
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
   
   {
     label: 'APM & Distributed Tracing',
@@ -2005,141 +2237,6 @@ const docsSideNav = [
                 label: 'Enable SMTP for User Invitations',
               },
             ],
-          },
-        ],
-      },
-      {
-        type: 'category',
-        isExpanded: false,
-        label: 'Migration Guides',
-        route: '/docs/operate/migration',
-        // link: {
-        // type: 'generated-index',
-        // title: 'Migration Guides',
-        // description:
-        // 'The following sections provide instructions to migrate SigNoz components across newer versions. You need to run these migration scripts step by step. For example if you are currently on `0.8.2` and want to migrate to `0.10.0` - you need to run migration script for `0.9` first and then `0.10`',
-        // slug: '/docs/operate/migration/migration',
-        // },
-        items: [
-          {
-            type: 'doc',
-            route: '/docs/operate/migration/upgrade-0.76',
-            label: 'Upgrade to v0.76',
-          },
-          {
-            type: 'doc',
-            route: '/docs/operate/migration/upgrade-0.70',
-            label: 'Upgrade to v0.70',
-          },
-          {
-            type: 'doc',
-            route: '/docs/operate/migration/upgrade-0.64',
-            label: 'Upgrade to v0.64',
-          },
-          {
-            type: 'doc',
-            route: '/docs/operate/migration/upgrade-0.55',
-            label: 'Upgrade to v0.55',
-          },
-          {
-            type: 'doc',
-            route: '/docs/operate/migration/upgrade-0.51',
-            label: 'Upgrade to v0.51',
-          },
-          {
-            type: 'doc',
-            route: '/docs/operate/migration/upgrade-0.49',
-            label: 'Upgrade to v0.49',
-          },
-          {
-            type: 'doc',
-            route: '/docs/operate/migration/upgrade-0.45',
-            label: 'Upgrade to v0.45',
-          },
-          {
-            type: 'doc',
-            route: '/docs/operate/migration/upgrade-0.38',
-            label: 'Upgrade to v0.38',
-          },
-          {
-            type: 'doc',
-            route: '/docs/operate/migration/upgrade-0.36',
-            label: 'Upgrade to v0.36',
-          },
-          {
-            type: 'doc',
-            route: '/docs/operate/migration/upgrade-0.27',
-            label: 'Upgrade to v0.27',
-          },
-          {
-            type: 'doc',
-            route: '/docs/operate/migration/upgrade-0.23',
-            label: 'Upgrade to v0.23',
-          },
-          {
-            type: 'doc',
-            route: '/docs/operate/migration/upgrade-0.19',
-            label: 'Upgrade to v0.19',
-          },
-          {
-            type: 'doc',
-            route: '/docs/operate/migration/upgrade-0.12',
-            label: 'Upgrade to v0.12',
-          },
-          {
-            type: 'doc',
-            route: '/docs/operate/migration/upgrade-0.10',
-            label: 'Upgrade to v0.10',
-          },
-          {
-            type: 'doc',
-            route: '/docs/operate/migration/upgrade-0.9',
-            label: 'Upgrade to v0.9',
-          },
-          {
-            type: 'doc',
-            route: '/docs/operate/migration/upgrade-0.8.1',
-            label: 'Upgrade to v0.8.1',
-          },
-          {
-            type: 'doc',
-            route: '/docs/operate/migration/upgrade-0.8.0',
-            label: 'Upgrade to v0.8.0',
-          },
-        ],
-      },
-      {
-        type: 'category',
-        isExpanded: false,
-        label: 'ClickHouse',
-        route: '/docs/operate/clickhouse',
-        // link: {
-        // type: 'generated-index',
-        // title: 'ClickHouse',
-        // description:
-        // 'The following sections provide instructions to operate ClickHouse. Based on your environment, proceed to one of the sections below.',
-        // slug: '/operate/clickhouse/clickhouse',
-        // },
-        items: [
-          {
-            type: 'doc',
-            route: '/docs/operate/clickhouse/increase-clickhouse-pv',
-            label: 'Increase ClickHouse PV',
-          },
-          {
-            type: 'doc',
-            route: '/docs/operate/clickhouse/connect-to-clickhouse',
-            label: 'Connect to ClickHouse',
-          },
-          {
-            type: 'doc',
-            route: '/docs/operate/clickhouse/distributed-clickhouse',
-            label: 'Distributed ClickHouse',
-          },
-          {
-            type: 'doc',
-            route: '/docs/operate/clickhouse/external-clickhouse',
-            label: 'External ClickHouse',
           },
         ],
       },
