@@ -6,10 +6,15 @@
     "start": "next dev",
     "dev": "cross-env INIT_CWD=$PWD next dev",
     "build": "cross-env INIT_CWD=$PWD NODE_OPTIONS='--max-old-space-size=6144' next build && cross-env NODE_OPTIONS='--experimental-json-modules' node ./scripts/postbuild.mjs",
+    "build:analyze": "cross-env ANALYZE=true next build",
+    "build:prod": "cross-env NODE_ENV=production next build",
     "serve": "next start",
     "analyze": "cross-env ANALYZE=true next build",
     "lint": "next lint --fix --dir pages --dir app --dir components --dir lib --dir layouts --dir scripts",
-    "prepare": "husky"
+    "prepare": "husky",
+    "type-check": "tsc --noEmit",
+    "clean": "rm -rf .next out",
+    "build:clean": "npm run clean && npm run build"
   },
   "dependencies": {
     "@aaronhayes/react-use-hubspot-form": "^2.1.1",

@@ -13,9 +13,9 @@ const ContentSecurityPolicy = `
   media-src *;
   connect-src *;
   font-src * 'self';
-  frame-src * giscus.app youtube.com;
+  frame-src 'self' giscus.app youtube.com;
   worker-src 'self' blob:;
-  frame-ancestors 'self' https://signoz.io https://*.us.signoz.cloud https://*.in.signoz.cloud https://*.eu.signoz.cloud;
+  frame-ancestors 'self' https://*.signoz.cloud;
 `
 
 const securityHeaders = [
@@ -69,6 +69,12 @@ module.exports = () => {
     },
     trailingSlash: true,
     swcMinify: true,
+    output: 'standalone',
+    compress: true,
+    experimental: {
+      optimizeCss: true,
+      optimizePackageImports: ['@headlessui/react', '@heroicons/react', 'framer-motion'],
+    },
     images: {
       remotePatterns: [
         {
@@ -84,6 +90,10 @@ module.exports = () => {
           hostname: 'avatars.githubusercontent.com',
         },
       ],
+      formats: ['image/avif', 'image/webp'],
+      deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+      imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+      minimumCacheTTL: 60,
     },
     async headers() {
       return [
