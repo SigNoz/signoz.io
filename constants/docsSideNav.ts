@@ -5,131 +5,196 @@ const docsSideNav = [
     route: '/docs',
   },
   {
-    type: 'doc',
-    label: 'What is SigNoz?',
-    route: '/docs/what-is-signoz',
+    type: "category",
+    isExpanded: false,
+    label: "Overview",
+    items: [
+      {
+        type: 'doc',
+        label: 'What is SigNoz?',
+        route: '/docs/what-is-signoz',
+      },
+      {
+        label: 'SigNoz Features',
+        type: 'category',
+        isExpanded: false,
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/product-features/query-builder',
+            label: 'Query Builder',
+          },
+          {
+            type: 'doc',
+            route: '/docs/product-features/alert-management',
+            label: 'Alert Management',
+          },
+          {
+            type: 'doc',
+            route: '/docs/product-features/trace-explorer',
+            label: 'Trace Explorer',
+          },
+          {
+            type: 'doc',
+            route: '/docs/product-features/logs-explorer',
+            label: 'Logs Explorer',
+          },
+          {
+            type: 'doc',
+            route: '/docs/product-features/saved-view',
+            label: 'Saved View',
+            // className: 'new-doc', // Add this if you want to add a new tag in sidebar
+          },
+          {
+            type: 'doc',
+            route: '/docs/product-features/invite-team-member',
+            label: 'Invite Team Member',
+          },
+        ],
+      },
+      {
+        type: "category",
+        label: "Breaking Changes",
+        isExpanded: false,
+        items: [
+          {
+            type: 'doc',
+            label: 'Breaking Changes in v0.76',
+            route: '/docs/overview/breaking-changes/breaking-changes-0.76'
+          }
+        ]
+      },
+      {
+        type: "category",
+        label: "What's New",
+        isExpanded: false,
+        items: [
+          {
+            type: 'doc',
+            label: 'Changelog of v0.76',
+            route: '/docs/overview/whats-new/changelog-0.76'
+          }
+        ]
+      },
+      {
+        type: "doc",
+        label: "What's Coming",
+        route: "/docs/roadmap"
+      },
+      {
+        type: "category",
+        label: "Core Concepts",
+        route: "/docs/overview/core-concepts/overview",
+        isExpanded: false,
+        items: [
+          {
+            type: "doc",
+            label: "Architecture",
+            route: "/docs/architecture"
+          }
+        ]
+      },
+    ]
   },
   {
     type: 'category',
     isExpanded: false,
-    label: 'Set Up SigNoz',
+    label: 'Setup',
     route: '/docs/install/',
     items: [
-      {
-        type: 'doc',
-        route: '/docs/cloud',
-        label: 'SigNoz Cloud',
-      },
-      {
-        type: 'category',
-        isExpanded: false,
-        label: 'Self-Host SigNoz',
-        route: '/docs/install/self-host',
-        items: [
-          {
-            type: 'doc',
-            label: 'Docker Standalone',
-            route: '/docs/install/docker',
-          },
-          {
-            type: 'doc',
-            label: 'Docker Swarm',
-            route: '/docs/install/docker-swarm',
-          },
-          {
-            type: 'doc',
-            label: 'Linux',
-            route: '/docs/install/linux',
-            className: 'new-doc',
-          },
-          {
-            type: 'category',
-            isExpanded: false,
-            label: 'Kubernetes',
-            route: '/docs/install/kubernetes',
-            items: [
-              {
-                type: 'doc',
-                label: 'Deploying to AWS',
-                route: '/docs/install/kubernetes/aws',
-              },
-              {
-                type: 'doc',
-                label: 'Deploying to GCP',
-                route: '/docs/install/kubernetes/gcp',
-              },
-              {
-                type: 'doc',
-                label: 'Other Platform',
-                route: '/docs/install/kubernetes/others',
-              },
-            ],
-          },
-          {
-            type: 'doc',
-            label: 'Troubleshooting',
-            route: '/docs/install/troubleshooting',
-          },
-        ],
-      },
+        {
+          type: 'doc',
+          route: '/docs/cloud',
+          label: 'SigNoz Cloud',
+        },
+        {
+          type: 'category',
+          isExpanded: false,
+          label: 'Self-Host SigNoz',
+          route: '/docs/install/self-host',
+          items: [
+            {
+              type: 'category',
+              isExpanded: false,
+              label: 'Install on Docker',
+              items:[
+                {
+                  type: 'doc',
+                  label: 'Docker Standalone',
+                  route: '/docs/install/docker',
+                },
+                {
+                  type: 'doc',
+                  label: 'Docker Swarm',
+                  route: '/docs/install/docker-swarm',
+                },
+              ]
+            },
+            {
+              type: 'category',
+              label: 'Install Binary',
+              isExpanded: false,
+              items: [
+                  {
+                    type: 'doc',
+                    label: 'Linux',
+                    route: '/docs/install/linux',
+                    className: 'new-doc',
+                  },
+              ]
+            },
+            {
+              type: 'category',
+              isExpanded: false,
+              label: 'Install on Kubernetes',
+              route: '/docs/install/kubernetes',
+              items: [
+                {
+                  type: 'doc',
+                  label: 'Deploying to AWS',
+                  route: '/docs/install/kubernetes/aws',
+                },
+                {
+                  type: 'doc',
+                  label: 'Deploying to GCP',
+                  route: '/docs/install/kubernetes/gcp',
+                },
+                {
+                  type: 'doc',
+                  label: 'Other Platform',
+                  route: '/docs/install/kubernetes/others',
+                },
+              ],
+            },
+            {
+              type: 'doc',
+              label: 'Troubleshooting',
+              route: '/docs/install/troubleshooting',
+            },
+          ],
+        },
 
-      {
-        type: 'category',
-        isExpanded: false,
-        label: 'Install OTel collector',
-        items: [
-          {
-            route: '/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine',
-            type: 'doc',
-            label: 'VM',
-          },
-          {
-            route: '/docs/tutorial/kubernetes-infra-metrics',
-            type: 'doc',
-            label: 'Kubernetes',
-          },
-        ],
-      },
-    ],
+        {
+          type: 'category',
+          isExpanded: false,
+          label: 'Install OTel collector',
+          items: [
+            {
+              route: '/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine',
+              type: 'doc',
+              label: 'VM',
+            },
+            {
+              route: '/docs/tutorial/kubernetes-infra-metrics',
+              type: 'doc',
+              label: 'Kubernetes',
+            },
+          ],
+        },
+      ],
+
   },
-  {
-    label: 'SigNoz Features',
-    type: 'category',
-    isExpanded: false,
-    items: [
-      {
-        type: 'doc',
-        route: '/docs/product-features/query-builder',
-        label: 'Query Builder',
-      },
-      {
-        type: 'doc',
-        route: '/docs/product-features/alert-management',
-        label: 'Alert Management',
-      },
-      {
-        type: 'doc',
-        route: '/docs/product-features/trace-explorer',
-        label: 'Trace Explorer',
-      },
-      {
-        type: 'doc',
-        route: '/docs/product-features/logs-explorer',
-        label: 'Logs Explorer',
-      },
-      {
-        type: 'doc',
-        route: '/docs/product-features/saved-view',
-        label: 'Saved View',
-        // className: 'new-doc', // Add this if you want to add a new tag in sidebar
-      },
-      {
-        type: 'doc',
-        route: '/docs/product-features/invite-team-member',
-        label: 'Invite Team Member',
-      },
-    ],
-  },
+  
   {
     label: 'APM & Distributed Tracing',
     type: 'category',
@@ -2068,18 +2133,8 @@ const docsSideNav = [
     label: 'About SigNoz',
     items: [
       {
-        route: '/docs/architecture',
-        label: 'Technical Architecture',
-        type: 'doc',
-      },
-      {
         route: '/docs/contributing',
         label: 'Contributing Guidelines',
-        type: 'doc',
-      },
-      {
-        route: '/docs/roadmap',
-        label: 'Product Roadmap',
         type: 'doc',
       },
       // 'about-signoz/architecture',
