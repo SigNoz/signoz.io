@@ -13,6 +13,7 @@ import LogsPerf from './LogsPerf/LogsPerf'
 import VersionPin from './NodeVersionPin/NodeVersionPin'
 import VersionPinNestJs from './NestVersionPin/NestVersionPin'
 import Tabs from './Tabs'
+import PlanTabs from './PlanTabs'
 import TabItem from './TabItem'
 import DocCard from './DocCard'
 import DocCardContainer from './DocCardContainer'
@@ -50,6 +51,7 @@ export const components: MDXComponents = {
   LogsPerf,
   VersionPin,
   VersionPinNestJs,
+  PlanTabs,
   Tabs,
   TabItem,
   DocCard,

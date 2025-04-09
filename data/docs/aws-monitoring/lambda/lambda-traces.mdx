@@ -11,8 +11,8 @@ This documentation provides a detailed walkthrough on how to set up an AWS Lambd
 using OpenTelemetry auto-instrumentation. This will enable you to automatically sends your Lambda traces to SigNoz, 
 enabling you to trace the activities of your Lambda function.
 
-<Tabs entityName="plans">
-<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
+<PlanTabs tabGroupId="plans" defaultTab="signoz-cloud" tabIdArray={['signoz-cloud', 'self-host']}>
+<TabItem value="signoz-cloud" label="SigNoz Cloud" default tabId="signoz-cloud">
 
 **Here’s a quick summary of what we’ll be doing in this detailed documentation.** 
 
@@ -48,8 +48,8 @@ Next, we will create the Lambda function. The function will make a REST API call
 The URL will get the object details of the objects with ID 3 and 5. 
 
 
-<Tabs entityName="plans">
-<TabItem value="python" label="Python" default>
+<Tabs tabGroupId="lang-1" defaultTab="python" tabIdArray={['python', 'nodejs', 'java', 'ruby']}>
+<TabItem value="python" label="Python" default tabId="python">
 
 On your machine, create a folder, say `auto-instrument-tracing-lambda`.
 
@@ -100,7 +100,7 @@ In the **Code** tab on the Lambda function page, click on **Upload from** button
 Upload the `auto-instrument-tracing-lambda.zip` file. Now, you can test the lambda function.
 
 </TabItem>
-<TabItem value="nodejs" label="NodeJS" default>
+<TabItem value="nodejs" label="NodeJS" default tabId="nodejs">
 
 On your machine, create a folder say `auto-instrument-tracing-lambda`. In the folder, create a file `index.js` and put the following code in it.
 
@@ -157,7 +157,7 @@ In the **Code** tab on the Lambda function page, click on **Upload from** button
 Upload the `auto-instrument-tracing-lambda.zip` file. Now, you can test the lambda function.
 
 </TabItem>
-<TabItem value="java" label="Java" default>
+<TabItem value="java" label="Java" default tabId="java">
 
 On your machine, create a Maven package in Java, say `AutoInstrumentationLambda`. The `pom.xml` file would look like as follows:
 
@@ -280,7 +280,7 @@ Upload the .jar file in the AWS console on the corresponding function's page.
 Also, edit the **Runtime Settings** to edit the **Handler** to be `org.example.Main::handleRequest`.
 
 </TabItem>
-<TabItem value="ruby" label="Ruby" default>
+<TabItem value="ruby" label="Ruby" default tabId="ruby">
 On your machine, create a folder for the project say, `auto-instrumentation-tracing`, and run the command:
 ```
 $ bundle init
@@ -355,23 +355,23 @@ In order to auto-instrument your Lambda function, follow the steps:
 3. In the **Choose a layer** section, select **Specify an ARN** option.
 4. Choose the correct ARN based on the language, ensure you replace the `<region>` with your region (ex. `us-east-1`):
 
-<Tabs entityName="plans">
-<TabItem value="python" label="Python" default>
+<Tabs tabGroupId="lang-2" defaultTab="python" tabIdArray={['python', 'nodejs', 'java', 'ruby']}>
+<TabItem value="python" label="Python" default tabId="python">
 ```
 arn:aws:lambda:<region>:184161586896:layer:opentelemetry-python-0_11_0:1
 ```
 </TabItem>
-<TabItem value="nodejs" label="NodeJS" default>
+<TabItem value="nodejs" label="NodeJS" default tabId="nodejs">
 ```
 arn:aws:lambda:<region>:184161586896:layer:opentelemetry-nodejs-0_11_0:1
 ```
 </TabItem>
-<TabItem value="java" label="Java" default>
+<TabItem value="java" label="Java" default tabId="java">
 ```
 arn:aws:lambda:<region>:184161586896:layer:opentelemetry-javaagent-0_10_0:1
 ```
 </TabItem>
-<TabItem value="ruby" label="Ruby" default>
+<TabItem value="ruby" label="Ruby" default tabId="ruby">
 ```
 arn:aws:lambda:<region>:184161586896:layer:opentelemetry-ruby-0_4_0:1
 ```
@@ -384,8 +384,8 @@ The latest releases of the layers can be found in the [OpenTelemetry Lambda Laye
 
 6. Add the following environment variables.
 
-<Tabs entityName="plans">
-<TabItem value="python" label="Python" default>
+<Tabs tabGroupId="lang-3" defaultTab="python" tabIdArray={['python', 'nodejs', 'java', 'ruby']}>
+<TabItem value="python" label="Python" default tabId="python">
 ```
 OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
 AWS_LAMBDA_EXEC_WRAPPER=/opt/otel-instrument
@@ -393,7 +393,7 @@ OTEL_PROPAGATORS=tracecontext
 OTEL_TRACES_SAMPLER=always_on
 ```
 </TabItem>
-<TabItem value="nodejs" label="NodeJS" default>
+<TabItem value="nodejs" label="NodeJS" default tabId="nodejs">
 ```
 OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
 AWS_LAMBDA_EXEC_WRAPPER=/opt/otel-handler
@@ -401,7 +401,7 @@ OTEL_PROPAGATORS=tracecontext
 OTEL_TRACES_SAMPLER=always_on
 ```
 </TabItem>
-<TabItem value="java" label="Java" default>
+<TabItem value="java" label="Java" default tabId="java">
 ```
 OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
 AWS_LAMBDA_EXEC_WRAPPER=/opt/otel-handler
@@ -409,7 +409,7 @@ OTEL_PROPAGATORS=tracecontext
 OTEL_TRACES_SAMPLER=always_on
 ```
 </TabItem>
-<TabItem value="ruby" label="Ruby" default>
+<TabItem value="ruby" label="Ruby" default tabId="ruby">
 ```
 OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
 AWS_LAMBDA_EXEC_WRAPPER=/opt/otel-handler
@@ -431,13 +431,13 @@ In order to install the OpenTelemetry Collector Lambda layer, follow these steps
 3. In the **Choose a layer** section, select **Specify an ARN** option.
 4. Choose the correct ARN based on your funciton architecture, ensure you replace the `<region>` with your region (ex. `us-east-1`):
 
-<Tabs entityName="plans">
-<TabItem value="x86_64" label="x86_64" default>
+<Tabs tabGroupId="architecture" defaultTab="x86_64" tabIdArray={['x86_64', 'arm64']}>
+<TabItem value="x86_64" label="x86_64" default tabId="x86_64">
 ```
 arn:aws:lambda:<region>:184161586896:layer:opentelemetry-collector-amd64-0_12_0:1
 ```
 </TabItem>
-<TabItem value="arm64" label="arm64" default>
+<TabItem value="arm64" label="arm64" default tabId="arm64">
 ```
 arn:aws:lambda:<region>:184161586896:layer:opentelemetry-collector-arm64-0_12_0:1
 ```
@@ -510,7 +510,7 @@ AWS Lambda Auto-Instrumented Trace
 </figure>
 
 </TabItem>
-<TabItem value='self-host' label='Self-Host'>
+<TabItem value='self-host' label='Self-Host' tabId="self-host">
 
 **Here’s a quick summary of what we’ll be doing in this detailed documentation.** 
 
@@ -546,8 +546,8 @@ Next, we will create the Lambda function. The function will make a REST API call
 The URL will get the object details of the objects with ID 3 and 5. 
 
 
-<Tabs entityName="plans">
-<TabItem value="python" label="Python" default>
+<Tabs tabGroupId="self-host-lang-1" defaultTab="python" tabIdArray={['python', 'nodejs', 'java', 'ruby']}>
+<TabItem value="python" label="Python" default tabId="python">
 
 On your machine, create a folder, say `auto-instrument-tracing-lambda`.
 
@@ -598,7 +598,7 @@ In the **Code** tab on the Lambda function page, click on **Upload from** button
 Upload the `auto-instrument-tracing-lambda.zip` file. Now, you can test the lambda function.
 
 </TabItem>
-<TabItem value="nodejs" label="NodeJS" default>
+<TabItem value="nodejs" label="NodeJS" default tabId="nodejs">
 
 On your machine, create a folder say `auto-instrument-tracing-lambda`. In the folder, create a file `index.js` and put the following code in it.
 
@@ -655,7 +655,7 @@ In the **Code** tab on the Lambda function page, click on **Upload from** button
 Upload the `auto-instrument-tracing-lambda.zip` file. Now, you can test the lambda function.
 
 </TabItem>
-<TabItem value="java" label="Java" default>
+<TabItem value="java" label="Java" default tabId="java">
 
 On your machine, create a Maven package in Java, say `AutoInstrumentationLambda`. The `pom.xml` file would look like as follows:
 
@@ -778,7 +778,7 @@ Upload the .jar file in the AWS console on the corresponding function's page.
 Also, edit the **Runtime Settings** to edit the **Handler** to be `org.example.Main::handleRequest`.
 
 </TabItem>
-<TabItem value="ruby" label="Ruby" default>
+<TabItem value="ruby" label="Ruby" default tabId="ruby">
 On your machine, create a folder for the project say, `auto-instrumentation-tracing`, and run the command:
 ```
 $ bundle init
@@ -853,23 +853,23 @@ In order to auto-instrument your Lambda function, follow the steps:
 3. In the **Choose a layer** section, select **Specify an ARN** option.
 4. Choose the correct ARN based on the language, ensure you replace the `<region>` with your region (ex. `us-east-1`):
 
-<Tabs entityName="plans">
-<TabItem value="python" label="Python" default>
+<Tabs tabGroupId="self-host-lang-2" defaultTab="python" tabIdArray={['python', 'nodejs', 'java', 'ruby']}>
+<TabItem value="python" label="Python" default tabId="python">
 ```
 arn:aws:lambda:<region>:184161586896:layer:opentelemetry-python-0_11_0:1
 ```
 </TabItem>
-<TabItem value="nodejs" label="NodeJS" default>
+<TabItem value="nodejs" label="NodeJS" default tabId="nodejs">
 ```
 arn:aws:lambda:<region>:184161586896:layer:opentelemetry-nodejs-0_11_0:1
 ```
 </TabItem>
-<TabItem value="java" label="Java" default>
+<TabItem value="java" label="Java" default tabId="java">
 ```
 arn:aws:lambda:<region>:184161586896:layer:opentelemetry-javaagent-0_10_0:1
 ```
 </TabItem>
-<TabItem value="ruby" label="Ruby" default>
+<TabItem value="ruby" label="Ruby" default tabId="ruby">
 ```
 arn:aws:lambda:<region>:184161586896:layer:opentelemetry-ruby-0_4_0:1
 ```
@@ -882,8 +882,8 @@ The latest releases of the layers can be found in the [OpenTelemetry Lambda Laye
 
 6. Add the following environment variables.
 
-<Tabs entityName="plans">
-<TabItem value="python" label="Python" default>
+<Tabs tabGroupId="self-host-lang-3" defaultTab="python" tabIdArray={['python', 'nodejs', 'java', 'ruby']}>
+<TabItem value="python" label="Python" default tabId="python">
 ```
 OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
 AWS_LAMBDA_EXEC_WRAPPER=/opt/otel-instrument
@@ -891,7 +891,7 @@ OTEL_PROPAGATORS=tracecontext
 OTEL_TRACES_SAMPLER=always_on
 ```
 </TabItem>
-<TabItem value="nodejs" label="NodeJS" default>
+<TabItem value="nodejs" label="NodeJS" default tabId="nodejs">
 ```
 OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
 AWS_LAMBDA_EXEC_WRAPPER=/opt/otel-handler
@@ -899,7 +899,7 @@ OTEL_PROPAGATORS=tracecontext
 OTEL_TRACES_SAMPLER=always_on
 ```
 </TabItem>
-<TabItem value="java" label="Java" default>
+<TabItem value="java" label="Java" default tabId="java">
 ```
 OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
 AWS_LAMBDA_EXEC_WRAPPER=/opt/otel-handler
@@ -907,7 +907,7 @@ OTEL_PROPAGATORS=tracecontext
 OTEL_TRACES_SAMPLER=always_on
 ```
 </TabItem>
-<TabItem value="ruby" label="Ruby" default>
+<TabItem value="ruby" label="Ruby" default tabId="ruby">
 ```
 OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
 AWS_LAMBDA_EXEC_WRAPPER=/opt/otel-handler
@@ -929,13 +929,13 @@ In order to install the OpenTelemetry Collector Lambda layer, follow these steps
 3. In the **Choose a layer** section, select **Specify an ARN** option.
 4. Choose the correct ARN based on your funciton architecture, ensure you replace the `<region>` with your region (ex. `us-east-1`):
 
-<Tabs entityName="plans">
-<TabItem value="x86_64" label="x86_64" default>
+<Tabs tabGroupId="self-host-architecture" defaultTab="x86_64" tabIdArray={['x86_64', 'arm64']}>
+<TabItem value="x86_64" label="x86_64" default tabId="x86_64">
 ```
 arn:aws:lambda:<region>:184161586896:layer:opentelemetry-collector-amd64-0_12_0:1
 ```
 </TabItem>
-<TabItem value="arm64" label="arm64" default>
+<TabItem value="arm64" label="arm64" default tabId="arm64">
 ```
 arn:aws:lambda:<region>:184161586896:layer:opentelemetry-collector-arm64-0_12_0:1
 ```
@@ -1000,5 +1000,5 @@ AWS Lambda Auto-Instrumented Trace
 </figure>
 
 </TabItem>
-</Tabs>
+</PlanTabs>
 
