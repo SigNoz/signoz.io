@@ -1296,13 +1296,8 @@ const docsSideNav = [
           },
           {
             label: 'Setup',
-            type: 'category',
-            isExpanded: false,
-            //className: 'new-doc',
-            //route: '/docs/integrations/integrations-list',
-            items: [
-              
-            ],
+            type: 'doc',
+            route: '/docs/messaging-queues/celery-setup',
           },
         ],
       },
