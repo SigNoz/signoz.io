@@ -1240,25 +1240,73 @@ const docsSideNav = [
     items: [
       {
         type: 'doc',
-        route: '/docs/messaging-queues/kafka',
-        label: 'Self-Hosted Kafka',
+        route: '/docs/messaging-queues/overview',
+        label: 'Overview',
       },
       {
-        type: 'doc',
-        route: '/docs/messaging-queues/msk',
-        label: 'Amazon MSK',
+        label: 'Kafka',
+        type: 'category',
+        isExpanded: false,
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/messaging-queues/kafka-overview',
+            label: 'Overview',
+          },
+          {
+            label: 'Setup',
+            type: 'category',
+            isExpanded: false,
+            items: [
+              {
+                type: 'doc',
+                route: '/docs/messaging-queues/kafka',
+                label: 'Self-Hosted Kafka',
+              },
+              {
+                type: 'doc',
+                route: '/docs/messaging-queues/msk',
+                label: 'Amazon MSK',
+              },
+              {
+                type: 'doc',
+                route: '/docs/messaging-queues/strimzi',
+                label: 'Strimzi',
+              },
+              {
+                type: 'doc',
+                route: '/docs/messaging-queues/confluent-kafka',
+                label: 'Confluent Kafka',
+              },
+            ],
+          },
+        ],
       },
       {
-        type: 'doc',
-        route: '/docs/messaging-queues/strimzi',
-        label: 'Strimzi',
+        label: 'Celery',
+        type: 'category',
+        isExpanded: false,
+        //className: 'new-doc',
+        //route: '/docs/integrations/integrations-list',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/messaging-queues/celery-overview',
+            label: 'Overview',
+          },
+          {
+            label: 'Setup',
+            type: 'category',
+            isExpanded: false,
+            //className: 'new-doc',
+            //route: '/docs/integrations/integrations-list',
+            items: [
+              
+            ],
+          },
+        ],
       },
-      {
-        type: 'doc',
-        route: '/docs/messaging-queues/confluent-kafka',
-        label: 'Confluent Kafka',
-      },
-    ],
+    ]
   },
   {
     type: 'doc',
