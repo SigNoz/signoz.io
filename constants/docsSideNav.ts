@@ -205,7 +205,7 @@ const docsSideNav = [
         label: 'Administrator Guide',
         type: 'category',
         isExpanded: false,
-        route: '/docs/manage/administrator-guide',
+        // route: '/docs/manage/administrator-guide',
         items: [
           {
             type: 'category',
@@ -393,80 +393,9 @@ const docsSideNav = [
         label: 'User Guide',
         type: 'category',
         isExpanded: false,
-        route: '/docs/manage/user-guide',
+        // route: '/docs/manage/user-guide',
         items: [
-          {
-            type: 'category',
-            label: 'Dashboards',
-            isExpanded: false,
-            route: '/docs/manage/user-guide/dashboards',
-            items: [
-              {
-                type: 'doc',
-                label: 'Create Dashboard',
-                route: '/docs/manage/user-guide/dashboards/create',
-              },
-              {
-                type: 'doc',
-                label: 'Manage Dashboard',
-                route: '/docs/manage/user-guide/dashboards/manage',
-              }
-            ]
-          },
-          {
-            type: 'category',
-            label: 'Alerts',
-            isExpanded: false,
-            route: '/docs/manage/user-guide/alerts',
-            items: [
-              {
-                type: 'doc',
-                label: 'Configure Alerts',
-                route: '/docs/manage/user-guide/alerts/configure',
-              },
-              {
-                type: 'doc',
-                label: 'Manage Alerts',
-                route: '/docs/manage/user-guide/alerts/manage',
-              }
-            ]
-          },
-          {
-            type: 'category',
-            label: 'Traces',
-            isExpanded: false,
-            route: '/docs/manage/user-guide/traces',
-            items: [
-              {
-                type: 'doc',
-                label: 'Search Traces',
-                route: '/docs/manage/user-guide/traces/search',
-              },
-              {
-                type: 'doc',
-                label: 'Analyze Traces',
-                route: '/docs/manage/user-guide/traces/analyze',
-              }
-            ]
-          },
-          {
-            type: 'category',
-            label: 'Metrics',
-            isExpanded: false,
-            route: '/docs/manage/user-guide/metrics',
-            items: [
-              {
-                type: 'doc',
-                label: 'Monitor Metrics',
-                route: '/docs/manage/user-guide/metrics/monitor',
-              },
-              {
-                type: 'doc',
-                label: 'Analyze Metrics',
-                route: '/docs/manage/user-guide/metrics/analyze',
-              }
-            ]
-          }
+         
         ]
       }
     ]
