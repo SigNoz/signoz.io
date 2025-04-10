@@ -1160,8 +1160,6 @@ const docsSideNav = [
         label: 'Kafka',
         type: 'category',
         isExpanded: false,
-        //className: 'new-doc',
-        //route: '/docs/integrations/integrations-list',
         items: [
           {
             type: 'doc',
@@ -1172,8 +1170,6 @@ const docsSideNav = [
             label: 'Setup',
             type: 'category',
             isExpanded: false,
-            //className: 'new-doc',
-            //route: '/docs/integrations/integrations-list',
             items: [
               {
                 type: 'doc',
