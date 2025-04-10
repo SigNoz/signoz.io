@@ -330,6 +330,7 @@ const docsSideNav = [
                 route: '/docs/operate/clickhouse/connect-to-clickhouse',
                 label: 'Connect to ClickHouse',
               },
+
               {
                 type: 'doc',
                 route: '/docs/operate/clickhouse/distributed-clickhouse',
@@ -340,8 +341,52 @@ const docsSideNav = [
                 route: '/docs/operate/clickhouse/external-clickhouse',
                 label: 'External ClickHouse',
               },
+              {
+                type: 'doc',
+                route: '/docs/tutorial/writing-clickhouse-queries-in-dashboard',
+                label: 'ClickHouse queries for building dashboards and alerts',
+              },
             ],
           },
+          {
+            type: 'doc',
+            route: '/docs/tutorial/s3-integration-iam-role-eks',
+            label: 'S3 Integration With AWS IAM role in EKS',
+          },
+          {
+            type: 'doc',
+            route: '/docs/tutorial/oci-bucket-cold-storage-integration',
+            label: 'OCI Bucket Cold Storage Integration',
+          },
+          {
+            type: 'doc',
+            route: '/docs/tutorial/opentelemetry-operator-usage',
+            label: 'OpenTelemetry Operator Usage',
+          },
+          {
+            type: 'doc',
+            route: '/docs/tutorial/setting-up-tls-for-signoz',
+            label: 'Secure SigNoz in Kubernetes using Ingress-NGINX and Cert-Manager',
+          },
+         
+          {
+            type: 'doc',
+            route: '/docs/tutorial/infinite-retention-aws-s3',
+            label: 'Infinite Retention using AWS S3',
+          },
+
+          {
+            type: 'category',
+            label: 'Authentication',
+            isExpanded: false,
+            items: [
+              {
+                type: 'doc',
+                route: '/docs/tutorial/setting-up-sso-saml-with-keycloak',
+                label: 'Setting Up SSO SAML 2.0 With Keycloak',
+              },
+            ]
+          }
         ]
       },
       {
@@ -1636,46 +1681,18 @@ const docsSideNav = [
         route: '/docs/tutorial/instrumenting-angular-frontend',
         label: 'Instrumenting Angular Frontend Web App',
       },
-      {
-        type: 'doc',
-        route: '/docs/tutorial/s3-integration-iam-role-eks',
-        label: 'S3 Integration With AWS IAM role in EKS',
-      },
-      {
-        type: 'doc',
-        route: '/docs/tutorial/oci-bucket-cold-storage-integration',
-        label: 'OCI Bucket Cold Storage Integration',
-      },
-      {
-        type: 'doc',
-        route: '/docs/tutorial/opentelemetry-operator-usage',
-        label: 'OpenTelemetry Operator Usage',
-      },
-      {
-        type: 'doc',
-        route: '/docs/tutorial/setting-up-tls-for-signoz',
-        label: 'Secure SigNoz in Kubernetes using Ingress-NGINX and Cert-Manager',
-      },
-      {
-        type: 'doc',
-        route: '/docs/tutorial/setting-up-sso-saml-with-keycloak',
-        label: 'Setting Up SSO SAML 2.0 With Keycloak',
-      },
-      {
-        type: 'doc',
-        route: '/docs/tutorial/writing-clickhouse-queries-in-dashboard',
-        label: 'ClickHouse queries for building dashboards and alerts',
-      },
+     
+     
+     
+     
+      
+
       {
         type: 'doc',
         route: '/docs/tutorial/traefik-observability',
         label: 'Traefik Observability',
       },
-      {
-        type: 'doc',
-        route: '/docs/tutorial/infinite-retention-aws-s3',
-        label: 'Infinite Retention using AWS S3',
-      },
+     
     ],
   },
   {
