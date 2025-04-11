@@ -224,15 +224,15 @@ const Teams: React.FC<SignUpPageProps> = () => {
         <div className="flex w-full border-b border-gray-700/20 bg-gray-800/50">
           <div className="flex-1 border-r border-gray-700/60 p-4 text-center">
             <span className="block text-xs font-semibold text-signoz_robin-500">Step 1:</span>
-            <span className="block text-sm font-medium text-white">Sign Up</span>
+            <span className="mt-1 block text-sm font-medium text-white">Sign Up</span>
           </div>
           <div className="flex-1 border-r border-gray-700/60 p-4 text-center opacity-60">
             <span className="block text-xs text-gray-400">Step 2:</span>
-            <span className="block text-sm text-gray-300">Choose Data Source</span>
+            <span className="mt-1 block text-sm text-gray-300">Choose Data Source</span>
           </div>
           <div className="flex-1 p-4 text-center opacity-60">
             <span className="block text-xs text-gray-400">Step 3:</span>
-            <span className="block text-sm text-gray-300">Set Up & Visualize</span>
+            <span className="mt-1 block text-sm text-gray-300">Set Up & Visualize</span>
           </div>
         </div>
 
