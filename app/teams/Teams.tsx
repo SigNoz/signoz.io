@@ -210,15 +210,27 @@ const Teams: React.FC<SignUpPageProps> = () => {
 
   return (
     <div className="relative flex h-[calc(100vh-56px)] w-full items-center justify-center overflow-hidden bg-signoz_ink-500">
+      {/* Base background image container */}
       <div className="fixed inset-0 z-0 h-screen w-screen">
         <Image
           src="/img/teams-page-k8s-background.webp"
           alt="SigNoz Dashboard Background"
           fill
+          // Added blur-sm back to base image
           className="brightness-70 object-cover blur-sm"
           priority
         />
       </div>
+
+      {/* Top layer with heavy blur and radial mask */}
+      <div
+        className="brightness-70 fixed inset-0 z-0 h-screen w-screen bg-cover bg-center blur-3xl" // Changed from blur-2xl to blur-3xl
+        style={{
+          backgroundImage: 'url(/img/teams-page-k8s-background.webp)',
+          WebkitMaskImage: 'radial-gradient(circle at center, black 10%, transparent 70%)', // Mask gradient (adjust percentages as needed)
+          maskImage: 'radial-gradient(circle at center, black 10%, transparent 70%)', // Standard mask gradient
+        }}
+      />
 
       <div className="relative z-10 mx-4 w-full max-w-xl overflow-hidden rounded-lg border border-gray-600/80 bg-signoz_ink-400 shadow-2xl">
         <div className="flex w-full border-b border-gray-700/20 bg-gray-800/50">
