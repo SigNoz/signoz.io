@@ -686,17 +686,6 @@ export default function TopNav() {
         <Dialog as="div" className="lg:hidden" open={mobileMenuOpen} onClose={setMobileMenuOpen}>
           <div className="fixed inset-0 top-[56px]" />
           <Dialog.Panel className="fixed inset-y-0 right-0 z-10 mt-[56px] w-full overflow-y-auto bg-signoz_ink-500 px-6 py-24 !pt-[calc(6rem-56px)] sm:max-w-sm sm:ring-1 sm:ring-gray-900/10 ">
-            <div className="flex items-center justify-between">
-              <TrackingLink
-                href="/"
-                className="-m-1.5 flex items-center gap-2 p-1.5"
-                clickType="Nav Click"
-                clickName="SigNoz Logo"
-                clickText="SigNoz"
-                clickLocation={'Mobile Menu'}
-                onClick={() => setMobileMenuOpen(false)}
-              ></TrackingLink>
-            </div>
             <div className="mt-6 flow-root">
               <div className="-my-6 divide-y divide-gray-500/10">
                 {showMainMenu && (
