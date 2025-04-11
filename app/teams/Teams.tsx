@@ -403,50 +403,6 @@ const Teams: React.FC<SignUpPageProps> = () => {
                 </button>
                 <p className="text-center text-sm text-gray-400">No credit card required.</p>
               </div>
-
-              <div className="border-t border-gray-700/40 pt-8">
-                <p className="mb-6 text-center text-sm text-gray-400">
-                  Join the likes of these trusted companies
-                </p>
-                <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-                  <div className="flex aspect-[2/1] items-center justify-center rounded-lg bg-white/10 p-3 backdrop-blur-sm">
-                    <Image
-                      src="https://signoz.io/img/users/samsung.svg"
-                      alt="Samsung"
-                      width={80}
-                      height={30}
-                      className="h-6 w-auto opacity-80"
-                    />
-                  </div>
-                  <div className="flex aspect-[2/1] items-center justify-center rounded-lg bg-white/10 p-3 backdrop-blur-sm">
-                    <Image
-                      src="https://signoz.io/img/users/comcast.svg"
-                      alt="Comcast"
-                      width={80}
-                      height={30}
-                      className="h-6 w-auto opacity-80"
-                    />
-                  </div>
-                  <div className="flex aspect-[2/1] items-center justify-center rounded-lg bg-white/10 p-3 backdrop-blur-sm">
-                    <Image
-                      src="https://signoz.io/img/users/salesforce.svg"
-                      alt="Salesforce"
-                      width={80}
-                      height={30}
-                      className="h-6 w-auto opacity-80"
-                    />
-                  </div>
-                  <div className="flex aspect-[2/1] items-center justify-center rounded-lg bg-white/10 p-3 backdrop-blur-sm">
-                    <Image
-                      src="https://signoz.io/img/users/netapp.svg"
-                      alt="NetApp"
-                      width={80}
-                      height={30}
-                      className="h-6 w-auto opacity-80"
-                    />
-                  </div>
-                </div>
-              </div>
             </form>
           )}
         </div>
