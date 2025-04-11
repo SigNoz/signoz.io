@@ -284,7 +284,7 @@ const Teams: React.FC<SignUpPageProps> = () => {
                         key={region.id}
                         disabled={isSubmitting}
                         className={`flex flex-1 cursor-pointer items-center space-x-2 rounded-md border p-3 transition-colors 
-                                              ${isSubmitting ? 'cursor-not-allowed opacity-50' : 'hover:bg-gray-700/50'} 
+                                              ${isSubmitting ? 'cursor-not-allowed opacity-50' : ''} 
                                               ${region.id === formData.dataRegion ? 'border-blue-500/20 bg-[#18213d]' : 'border-gray-700 bg-gray-800'}`}
                         onClick={() => {
                           if (!isSubmitting) handleRegionChange(region.id)
