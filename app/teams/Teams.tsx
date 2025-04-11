@@ -232,7 +232,7 @@ const Teams: React.FC<SignUpPageProps> = () => {
           </div>
           <div className="flex-1 p-4 text-center opacity-60">
             <span className="block text-xs text-gray-400">Step 3:</span>
-            <span className="mt-1 block text-sm text-gray-300">Set Up & Visualize</span>
+            <span className="mt-1 block text-sm text-gray-300">Start Monitoring</span>
           </div>
         </div>
 
