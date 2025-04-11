@@ -215,12 +215,12 @@ const Teams: React.FC<SignUpPageProps> = () => {
           src="/img/teams-page-k8s-background.webp"
           alt="SigNoz Dashboard Background"
           fill
-          className="object-cover blur-sm brightness-50"
+          className="brightness-80 object-cover blur-sm"
           priority
         />
       </div>
 
-      <div className="relative z-10 mx-4 w-full max-w-xl overflow-hidden rounded-lg border border-gray-700/40 bg-black/70 shadow-2xl backdrop-blur-md">
+      <div className="shadow-red relative z-10 mx-4 w-full max-w-xl overflow-hidden rounded-lg border border-gray-600/80 bg-black shadow-2xl">
         <div className="flex w-full border-b border-gray-700/20 bg-gray-800/50">
           <div className="flex-1 border-r border-gray-700/60 p-4 text-center">
             <span className="block text-xs font-semibold text-signoz_robin-500">Step 1:</span>
