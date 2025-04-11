@@ -255,7 +255,6 @@ export default function TopNav() {
     return null
   }
 
-  // Render the standard complex header for other pages
   return (
     <div className="fixed left-0 right-0 z-30">
       <Banner />
