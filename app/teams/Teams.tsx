@@ -209,44 +209,15 @@ const Teams: React.FC<SignUpPageProps> = () => {
   }, [workEmailFromParams])
 
   return (
-    <div className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-signoz_ink-500">
-      <div className="absolute inset-0 z-0 h-full w-full">
+    <div className="relative flex h-[calc(100vh-56px)] w-full items-center justify-center overflow-hidden bg-signoz_ink-500">
+      <div className="fixed inset-0 z-0 h-screen w-screen">
         <Image
-          src="/img/teams-page-background-dashboard.webp"
+          src="/img/teams-page-k8s-background.webp"
           alt="SigNoz Dashboard Background"
           fill
           className="object-cover blur-sm brightness-50"
           priority
         />
-      </div>
-
-      <div className="absolute right-4 top-4 z-20 flex items-center space-x-2">
-        <Link
-          href="https://signoz.io/login/"
-          target="_blank"
-          className="focus-visible:ring-ring inline-flex h-9 items-center justify-center rounded-md border border-white/20 bg-transparent px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50"
-        >
-          Sign In
-        </Link>
-        <Link
-          href="https://signoz.io/docs/"
-          target="_blank"
-          className="focus-visible:ring-ring inline-flex h-9 items-center justify-center rounded-md border border-white/20 bg-transparent px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50"
-        >
-          <BookOpen className="mr-2 h-4 w-4" />
-          Read Documentation
-        </Link>
-      </div>
-
-      <div className="absolute left-4 top-4 z-20 flex items-center space-x-2">
-        <Image
-          src="https://signoz.io/img/SigNozLogo-orange.svg"
-          alt="SigNoz Logo"
-          width={32}
-          height={32}
-          className="h-8 w-auto"
-        />
-        <span className="text-lg font-semibold text-white">SigNoz</span>
       </div>
 
       <div className="relative z-10 w-full max-w-xl overflow-hidden rounded-lg border border-gray-700/40 bg-black/70 shadow-2xl backdrop-blur-md">

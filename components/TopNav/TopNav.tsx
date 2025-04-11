@@ -98,7 +98,7 @@ const productDropdownItems = [
     description: 'Control your observability costs',
     name: 'Ingest Guard',
     order: 8,
-  }
+  },
 ]
 
 const comparisionItems = [
@@ -255,6 +255,76 @@ export default function TopNav() {
     return null
   }
 
+  // Render specific simple header for the Teams page (styled like Login page header)
+  if (isSignupRoute) {
+    return (
+      // Use structure similar to standard header for positioning/width
+      <div className="fixed left-0 right-0 z-30">
+        <header
+          className={`mx-auto box-border flex h-[56px] w-full items-center px-4 text-signoz_vanilla-100 backdrop-blur-[20px] dark:text-signoz_vanilla-100 md:px-8 lg:px-8`}
+        >
+          <nav
+            className="container flex w-full justify-between text-signoz_vanilla-100 dark:text-signoz_vanilla-100"
+            aria-label="Global"
+          >
+            {/* Left side: Logo (same as standard/login) */}
+            <div className="flex justify-start">
+              <TrackingLink
+                href="/"
+                className="-m-1.5 flex items-center gap-2 p-1.5"
+                clickType="Nav Click"
+                clickName="SigNoz Logo"
+                clickText="SigNoz"
+                clickLocation="Top Navbar"
+              >
+                <Image
+                  className="h-5 w-auto"
+                  src="/img/SigNozLogo-orange.svg"
+                  width={160}
+                  height={60}
+                  alt="SigNoz Logo"
+                />
+                <span className="text-[17.111px] font-medium">SigNoz</span>
+              </TrackingLink>
+            </div>
+
+            {/* Right side: Buttons (adapted from Login page buttons) */}
+            <div className="hidden items-center gap-3 lg:flex lg:flex-1 lg:justify-end">
+              {/* No "Contact Support" link */}
+
+              {/* Sign In Button (Styled like standard nav Sign In) */}
+              <TrackingButton
+                className="-ml-1 box-border flex h-8 items-center gap-2  bg-signoz_slate-500 px-4 py-2 pl-2 pr-2.5 text-sm font-normal not-italic leading-5 text-signoz_vanilla-100 no-underline outline-none hover:text-white"
+                clickType="Secondary CTA"
+                clickName="Sign In Button"
+                clickText="Sign In"
+                clickLocation="Top Navbar Teams Page"
+                onClick={() => router.push('/login')}
+              >
+                Sign In
+              </TrackingButton>
+
+              {/* Docs Button (Styled like Login page Docs) */}
+              <TrackingButton
+                className="flex h-8 min-w-24 items-center justify-center gap-2 truncate rounded-sm border border-signoz_slate-300 bg-signoz_slate-500 px-4 py-2 pl-4 pr-3 text-center text-xs font-normal not-italic leading-5 text-signoz_vanilla-400 no-underline outline-none hover:text-white"
+                clickType="Secondary CTA"
+                clickName="Docs Button"
+                clickText="Docs"
+                clickLocation="Top Navbar Teams Page"
+                onClick={() => router.push('/docs')}
+              >
+                <BookOpenText size={12} /> Read Documentation
+              </TrackingButton>
+            </div>
+            {/* TODO: Add mobile menu button for teams page if needed */}
+          </nav>
+        </header>
+        {/* No Banner or Tabs on teams page */}
+      </div>
+    )
+  }
+
+  // Render the standard complex header for other pages
   return (
     <div className="fixed left-0 right-0 z-30">
       <Banner />
@@ -407,7 +477,7 @@ export default function TopNav() {
                                   key={comparisionItem.key}
                                   href={comparisionItem.url}
                                   className="group flex flex-row items-center gap-1 hover:text-[#fff]"
-                                  clickType="Nav Click" 
+                                  clickType="Nav Click"
                                   clickName={`${comparisionItem.name} Comparison Link`}
                                   clickText={comparisionItem.name}
                                   clickLocation="Top Navbar"
@@ -602,8 +672,8 @@ export default function TopNav() {
                   id="btn-get-started-website-navbar"
                   className="start-free-trial-btn flex h-8 items-center justify-center gap-1.5 truncate rounded-full px-4 py-2 pl-4 pr-3 text-center text-sm font-medium not-italic leading-5 text-white no-underline outline-none hover:text-white"
                 >
-                  <TrackingLink 
-                    href="/teams" 
+                  <TrackingLink
+                    href="/teams"
                     className="flex-center"
                     clickType="Primary CTA"
                     clickName="Sign Up Button"
@@ -619,8 +689,8 @@ export default function TopNav() {
 
             {isLoginRoute && (
               <div className="flex items-center gap-2">
-                <TrackingLink 
-                  href="mailto:cloud-support@signoz.io" 
+                <TrackingLink
+                  href="mailto:cloud-support@signoz.io"
                   className="flex-center mr-8 text-xs"
                   clickType="Support Link"
                   clickName="Contact Support Link"
@@ -660,8 +730,8 @@ export default function TopNav() {
           <div className="fixed inset-0 top-[56px]" />
           <Dialog.Panel className="fixed inset-y-0 right-0 z-10 mt-[56px] w-full overflow-y-auto bg-signoz_ink-500 px-6 py-24 !pt-[calc(6rem-56px)] sm:max-w-sm sm:ring-1 sm:ring-gray-900/10 ">
             <div className="flex items-center justify-between">
-              <TrackingLink 
-                href="/" 
+              <TrackingLink
+                href="/"
                 className="-m-1.5 p-1.5"
                 clickType="Nav Click"
                 clickName="SigNoz Logo"
@@ -738,7 +808,7 @@ export default function TopNav() {
                         >
                           Sign In
                         </TrackingButton>
-                      
+
                         <Button
                           id="btn-get-started-website-navbar"
                           className="block rounded-lg px-3 py-2 text-base font-semibold leading-7 hover:bg-signoz_ink-200"
