@@ -5,9 +5,10 @@ import './teams.styles.css'
 import React, { useEffect, useState } from 'react'
 import TestimonialSection from './TestimonialSection'
 
-import { ArrowRight, Loader2 } from 'lucide-react'
+import { ArrowRight, Loader2, BookOpen } from 'lucide-react'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import Image from 'next/image'
+import Link from 'next/link'
 
 interface ErrorsProps {
   fullName?: string
@@ -208,155 +209,249 @@ const Teams: React.FC<SignUpPageProps> = () => {
   }, [workEmailFromParams])
 
   return (
-    <main className="bg-signoz_ink-500">
-      <div className="m-auto max-w-[1440px]">
-        <div className="flex items-stretch max-lg:flex-col max-md:gap-0">
-          <section className="signup-form-section flex w-full flex-col bg-signoz_ink-500 max-md:ml-0 max-md:w-full lg:w-[70%] xl:w-[60%]">
-            <div className="flex w-full grow flex-col justify-center px-8 py-4 text-sm leading-5 text-white max-md:mt-10 max-md:max-w-full lg:px-12 lg:py-8 xl:px-36 xl:py-8">
-              <h1 className="mt-11 text-2xl font-semibold leading-8 max-md:mt-10 max-md:max-w-full">
-                Sign up for SigNoz Cloud
-              </h1>
-              <p className="w-100 text-md mt-2 text-base leading-6 text-signoz_vanilla-400 max-md:max-w-full">
-                Experience SigNoz effortlessly. No installation, maintenance, or scaling needed. Get
-                started now with a free trial account for 30 days.
-              </p>
+    <div className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-signoz_ink-500">
+      <div className="absolute inset-0 z-0 h-full w-full">
+        <Image
+          src="/img/teams-page-background-dashboard.webp"
+          alt="SigNoz Dashboard Background"
+          fill
+          className="object-cover blur-sm brightness-50"
+          priority
+        />
+      </div>
 
-              {!isSubmitting && submitFailed ? (
-                <div className="welcome-container mt-[32px] flex flex-col items-center">
-                  <div className="text-md rounded-[6px] border border-[#1D212D] bg-signoz_ink-300 p-[24px]">
-                    <div>
-                      {' '}
-                      We're sorry, it looks like something didn't go as planned. Please reach out to
-                      us for assistance.
-                    </div>
-                  </div>
+      <div className="absolute right-4 top-4 z-20 flex items-center space-x-2">
+        <Link
+          href="https://signoz.io/login/"
+          target="_blank"
+          className="focus-visible:ring-ring inline-flex h-9 items-center justify-center rounded-md border border-white/20 bg-transparent px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50"
+        >
+          Sign In
+        </Link>
+        <Link
+          href="https://signoz.io/docs/"
+          target="_blank"
+          className="focus-visible:ring-ring inline-flex h-9 items-center justify-center rounded-md border border-white/20 bg-transparent px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50"
+        >
+          <BookOpen className="mr-2 h-4 w-4" />
+          Read Documentation
+        </Link>
+      </div>
 
-                  <a
-                    type="submit"
-                    className="mt-[28px] flex w-full items-center justify-center gap-4 rounded-full bg-signoz_cherry-500 px-[16px] py-[8px] text-sm font-medium"
-                    href="mailto:cloud-support@signoz.io"
-                  >
-                    <span className="text-xs leading-5">Contact cloud support</span>
-                    <ArrowRight size={14} />
-                  </a>
-                </div>
-              ) : (
-                <form className="w-100 mt-[24px]">
-                  <div className="mb-[28px]">
-                    <label htmlFor="workEmail" className="mb-2 block font-medium">
-                      Work email
-                    </label>
-                    <input
-                      type="email"
-                      id="workEmail"
-                      disabled={isSubmitting}
-                      name="workEmail"
-                      value={formData.workEmail}
-                      autoComplete="off"
-                      onChange={handleInputChange}
-                      placeholder="E.g. bart@simpsonmail.com"
-                      className="w-full rounded-sm border border-solid border-signoz_slate-400 bg-signoz_ink-300 px-3 py-1.5 text-sm tracking-normal text-stone-300"
-                    />
+      <div className="absolute left-4 top-4 z-20 flex items-center space-x-2">
+        <Image
+          src="https://signoz.io/img/SigNozLogo-orange.svg"
+          alt="SigNoz Logo"
+          width={32}
+          height={32}
+          className="h-8 w-auto"
+        />
+        <span className="text-lg font-semibold text-white">SigNoz</span>
+      </div>
 
-                    {errors?.workEmail && (
-                      <div className="mt-2 text-xs text-red-400">{errors.workEmail}</div>
-                    )}
-                  </div>
+      <div className="relative z-10 w-full max-w-xl overflow-hidden rounded-lg border border-gray-700/40 bg-black/70 shadow-2xl backdrop-blur-md">
+        <div className="flex w-full border-b border-gray-700/20 bg-gray-800/50">
+          <div className="flex-1 border-r border-gray-700/60 p-4 text-center">
+            <span className="block text-xs font-semibold text-signoz_robin-500">Step 1:</span>
+            <span className="block text-sm font-medium text-white">Sign Up</span>
+          </div>
+          <div className="flex-1 border-r border-gray-700/60 p-4 text-center opacity-60">
+            <span className="block text-xs text-gray-400">Step 2:</span>
+            <span className="block text-sm text-gray-300">Choose Data Source</span>
+          </div>
+          <div className="flex-1 p-4 text-center opacity-60">
+            <span className="block text-xs text-gray-400">Step 3:</span>
+            <span className="block text-sm text-gray-300">Set Up & Visualize</span>
+          </div>
+        </div>
 
-                  <div className="data-regions mb-[28px]">
-                    <label className="mb-2 block font-medium" htmlFor="dataRegion">
-                      Data region
-                    </label>
-
-                    <div className="mt-2 flex max-w-full flex-wrap gap-3 leading-[129%] tracking-normal">
-                      {regions.map((region) => (
-                        <button
-                          type="button"
-                          key={region.id}
-                          className={`flex min-w-44 gap-4 self-start whitespace-nowrap rounded-sm border border-solid p-3 text-sm leading-[129%] tracking-normal ${region.id === formData.dataRegion ? 'border-[#4e74f866] bg-[#4e74f833]' : 'border-signoz_slate-400 bg-signoz_ink-300'}`}
-                          onClick={() => {
-                            handleRegionChange(region.id)
-                          }}
-                        >
-                          <Image
-                            loading="lazy"
-                            src={region.iconURL}
-                            alt={`${region} flag`}
-                            className="aspect-square w-5 shrink-0"
-                            width={20}
-                            height={20}
-                          />
-                          <span className="">{region.name}</span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="mb-[28px] space-y-2.5 rounded-md border border-signoz_slate-500/30 bg-signoz_ink-400/30 p-3.5">
-                    <div className="flex items-start gap-2.5">
-                      <input
-                        type="checkbox"
-                        id="termsOfServiceAccepted"
-                        name="termsOfServiceAccepted"
-                        checked={formData.termsOfServiceAccepted}
-                        onChange={handleInputChange}
-                        className="mt-0.5 h-4 w-4 rounded border border-gray-500 bg-transparent accent-signoz_robin-500"
-                      />
-                      <label htmlFor="termsOfServiceAccepted" className="text-sm text-stone-300">
-                        I agree to the{' '}
-                        <a
-                          href="https://signoz.io/terms-of-service/"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="font-medium text-signoz_robin-500 hover:underline"
-                        >
-                          Terms of Service
-                        </a>{' '}
-                        and{' '}
-                        <a
-                          href="https://signoz.io/privacy/"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="font-medium text-signoz_robin-500 hover:underline"
-                        >
-                          Privacy Policy
-                        </a>
-                        .
-                      </label>
-                    </div>
-                    {errors?.termsOfService && (
-                      <div className="ml-6.5 text-xs text-red-400">{errors.termsOfService}</div>
-                    )}
-                  </div>
-
-                  <button
-                    disabled={isSubmitting}
-                    onClick={handleSubmit}
-                    className={`mb-[16px] flex w-full items-center justify-center rounded-full bg-signoz_robin-500 py-2 pl-4 pr-3 font-medium ${isSubmitting ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}
-                  >
-                    {isSubmitting ? (
-                      <div className="flex items-center gap-2 text-sm">
-                        Starting your free 30-day trial
-                        <Loader2 size={16} className="animate-spin" />{' '}
-                      </div>
-                    ) : (
-                      <span className="flex items-center gap-1.5 px-px text-sm">
-                        Start your free 30-day trial
-                        <ArrowRight size={16} />
-                      </span>
-                    )}
-                  </button>
-                  <p className="mt-4 text-center leading-[129%] tracking-normal text-stone-300">
-                    No credit card required.
-                  </p>
-                </form>
-              )}
+        <div className="flex flex-col p-8 md:p-10">
+          {!isSubmitting && submitFailed ? (
+            <div className="welcome-container flex flex-col items-center">
+              <div className="text-md rounded-[6px] border border-[#e53e3e] bg-red-900/30 p-[24px] text-center text-white">
+                {' '}
+                We&apos;re sorry, it looks like something didn&apos;t go as planned. Please reach
+                out to us for assistance.
+              </div>
+              <a
+                className="mt-[28px] flex w-full items-center justify-center gap-4 rounded-full bg-signoz_cherry-500 px-[16px] py-[8px] text-sm font-medium text-white hover:bg-signoz_cherry-600"
+                href="mailto:cloud-support@signoz.io"
+              >
+                <span className="text-xs leading-5">Contact cloud support</span>
+                <ArrowRight size={14} />
+              </a>
             </div>
-          </section>
-          <TestimonialSection />
+          ) : (
+            <form className="space-y-10" onSubmit={handleSubmit}>
+              <div className="space-y-6">
+                <div className="space-y-2">
+                  <label htmlFor="workEmail" className="block text-sm font-medium text-white">
+                    Work email
+                  </label>
+                  <input
+                    type="email"
+                    id="workEmail"
+                    disabled={isSubmitting}
+                    name="workEmail"
+                    value={formData.workEmail}
+                    autoComplete="off"
+                    onChange={handleInputChange}
+                    placeholder="E.g. name@company.com"
+                    className="w-full rounded-sm border border-solid border-signoz_slate-400 bg-signoz_ink-300 px-3 py-1.5 text-sm tracking-normal text-stone-300 outline-none focus:border-signoz_robin-500 focus:ring-1 focus:ring-signoz_robin-500"
+                  />
+                  {errors?.workEmail && (
+                    <div className="mt-2 text-xs text-red-400">{errors.workEmail}</div>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-white">Data region</label>
+                  <div className="flex gap-3">
+                    {regions.map((region) => (
+                      <button
+                        type="button"
+                        key={region.id}
+                        disabled={isSubmitting}
+                        className={`flex flex-1 cursor-pointer items-center space-x-2 rounded-md border p-3 transition-colors 
+                                              ${isSubmitting ? 'cursor-not-allowed opacity-50' : 'hover:bg-gray-700/50'} 
+                                              ${region.id === formData.dataRegion ? 'border-blue-500/20 bg-[#18213d]' : 'border-gray-700 bg-gray-800'}`}
+                        onClick={() => {
+                          if (!isSubmitting) handleRegionChange(region.id)
+                        }}
+                      >
+                        <Image
+                          loading="lazy"
+                          src={region.iconURL}
+                          alt={`${region.name} flag`}
+                          className="aspect-square w-5 shrink-0"
+                          width={20}
+                          height={20}
+                        />
+                        <span className="text-sm text-white">{region.name}</span>
+                        <input
+                          type="radio"
+                          name="dataRegion"
+                          value={region.id}
+                          className="sr-only"
+                          checked={region.id === formData.dataRegion}
+                          readOnly
+                        />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-start space-x-3">
+                <input
+                  type="checkbox"
+                  id="termsOfServiceAccepted"
+                  name="termsOfServiceAccepted"
+                  checked={formData.termsOfServiceAccepted}
+                  onChange={handleInputChange}
+                  disabled={isSubmitting}
+                  className="mt-0.5 h-4 w-4 shrink-0 rounded border border-gray-500 bg-transparent accent-signoz_robin-500 focus:outline-none focus:ring-2 focus:ring-signoz_robin-500 focus:ring-offset-0"
+                />
+                <div className="grid gap-1.5 leading-none">
+                  <label
+                    htmlFor="termsOfServiceAccepted"
+                    className={`text-sm font-medium leading-relaxed text-gray-300 ${isSubmitting ? 'cursor-not-allowed opacity-70' : ''}`}
+                  >
+                    I agree to the{' '}
+                    <a
+                      href="https://signoz.io/terms-of-service/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-medium text-signoz_robin-500 hover:underline"
+                    >
+                      Terms of Service
+                    </a>{' '}
+                    and{' '}
+                    <a
+                      href="https://signoz.io/privacy/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-medium text-signoz_robin-500 hover:underline"
+                    >
+                      Privacy Policy
+                    </a>
+                    .
+                  </label>
+                  {errors?.termsOfService && (
+                    <div className="text-xs text-red-400">{errors.termsOfService}</div>
+                  )}
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className={`flex w-full items-center justify-center rounded-full bg-signoz_robin-500 px-4 py-3 font-medium text-white ${isSubmitting ? 'cursor-not-allowed opacity-60' : 'cursor-pointer hover:bg-signoz_robin-600'}`}
+                >
+                  {isSubmitting ? (
+                    <div className="flex items-center gap-2 text-sm">
+                      Starting your free 30-day trial
+                      <Loader2 size={16} className="animate-spin" />{' '}
+                    </div>
+                  ) : (
+                    <span className="flex items-center gap-1.5 px-px text-sm">
+                      Start your free 30-day trial
+                      <ArrowRight size={16} />
+                    </span>
+                  )}
+                </button>
+                <p className="text-center text-sm text-gray-400">No credit card required.</p>
+              </div>
+
+              <div className="border-t border-gray-700/40 pt-8">
+                <p className="mb-6 text-center text-sm text-gray-400">
+                  Join the likes of these trusted companies
+                </p>
+                <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+                  <div className="flex aspect-[2/1] items-center justify-center rounded-lg bg-white/10 p-3 backdrop-blur-sm">
+                    <Image
+                      src="https://signoz.io/img/users/samsung.svg"
+                      alt="Samsung"
+                      width={80}
+                      height={30}
+                      className="h-6 w-auto opacity-80"
+                    />
+                  </div>
+                  <div className="flex aspect-[2/1] items-center justify-center rounded-lg bg-white/10 p-3 backdrop-blur-sm">
+                    <Image
+                      src="https://signoz.io/img/users/comcast.svg"
+                      alt="Comcast"
+                      width={80}
+                      height={30}
+                      className="h-6 w-auto opacity-80"
+                    />
+                  </div>
+                  <div className="flex aspect-[2/1] items-center justify-center rounded-lg bg-white/10 p-3 backdrop-blur-sm">
+                    <Image
+                      src="https://signoz.io/img/users/salesforce.svg"
+                      alt="Salesforce"
+                      width={80}
+                      height={30}
+                      className="h-6 w-auto opacity-80"
+                    />
+                  </div>
+                  <div className="flex aspect-[2/1] items-center justify-center rounded-lg bg-white/10 p-3 backdrop-blur-sm">
+                    <Image
+                      src="https://signoz.io/img/users/netapp.svg"
+                      alt="NetApp"
+                      width={80}
+                      height={30}
+                      className="h-6 w-auto opacity-80"
+                    />
+                  </div>
+                </div>
+              </div>
+            </form>
+          )}
         </div>
       </div>
-    </main>
+    </div>
   )
 }
 
