@@ -220,7 +220,7 @@ const Teams: React.FC<SignUpPageProps> = () => {
         />
       </div>
 
-      <div className="relative z-10 w-full max-w-xl overflow-hidden rounded-lg border border-gray-700/40 bg-black/70 shadow-2xl backdrop-blur-md">
+      <div className="relative z-10 mx-4 w-full max-w-xl overflow-hidden rounded-lg border border-gray-700/40 bg-black/70 shadow-2xl backdrop-blur-md">
         <div className="flex w-full border-b border-gray-700/20 bg-gray-800/50">
           <div className="flex-1 border-r border-gray-700/60 p-4 text-center">
             <span className="block text-xs font-semibold text-signoz_robin-500">Step 1:</span>
