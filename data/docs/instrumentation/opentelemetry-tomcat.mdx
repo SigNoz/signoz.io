@@ -38,23 +38,23 @@ A completely automatic and out of box experience, with minimal code changes. For
 - **Manual Instrumentation**<br></br>
 It involves writing instrumentation using OpenTelemetry SDK and API manually. You would need to get a handle to an instance of the `OpenTelemetry` interface, acquire a tracer, and create spans manually.
 
-Let’s understand how to download, install, and run OpenTelemetry in a Tomcat application. */}
+Let's understand how to download, install, and run OpenTelemetry in a Tomcat application. */}
 
 
 ## Requirements
 
 Java 8 or higher
 
-<Tabs entityName="plans">
-<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
+<PlanTabs tabGroupId="plans" defaultTab="signoz-cloud" tabIdArray={['signoz-cloud', 'self-host']}>
+<TabItem value="signoz-cloud" label="SigNoz Cloud" default tabId="signoz-cloud">
 ## Send Traces to SigNoz Cloud
 
 OpenTelemetry provides a handy Java JAR agent that can be attached to any Java 8+ application and dynamically injects bytecode to capture telemetry from a number of popular libraries and frameworks.
 
 Based on your application environment, you can choose the setup below to send traces to SigNoz Cloud.
 
-<Tabs>
-<TabItem value="vm" label="VM" default>
+<Tabs tabGroupId="environment" defaultTab="vm" tabIdArray={['vm', 'k8s', 'windows']}>
+<TabItem value="vm" label="VM" default tabId="vm">
 
 From VMs, there are two ways to send data to SigNoz Cloud.
 
@@ -115,7 +115,7 @@ export CATALINA_OPTS="$CATALINA_OPTS -javaagent:/path/to/opentelemetry-javaagent
 In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#troubleshooting-your-installation).
 
 </TabItem>
-<TabItem value="k8s" label="Kubernetes">
+<TabItem value="k8s" label="Kubernetes" tabId="k8s">
 
 For Java application deployed on Kubernetes, you need to install OTel Collector agent in your k8s infra to collect and send traces to SigNoz Cloud. You can find the instructions to install OTel Collector agent [here](https://signoz.io/docs/tutorial/kubernetes-infra-metrics/).
 
@@ -146,7 +146,7 @@ You can validate if your application is sending traces to SigNoz cloud by follow
 In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#troubleshooting-your-installation).
 
 </TabItem>
-<TabItem value="windows" label="Windows">
+<TabItem value="windows" label="Windows" tabId="windows">
 
 From Windows, there are two ways to send data to SigNoz Cloud.
 
@@ -211,7 +211,7 @@ In case you encounter an issue where all applications do not get listed in the s
 </Tabs>
 
 </TabItem>
-<TabItem value='self-host' label='Self-Host'>
+<TabItem value="self-host" label="Self-Host" tabId="self-host">
 ## Send Traces to Self-Hosted SigNoz
 
 You can use OpenTelemetry Java to send your traces directly to SigNoz. OpenTelemetry provides a **handy Java JAR agent** that can be attached to any Java 8+ application and dynamically injects bytecode to capture telemetry from a number of popular libraries and frameworks. 
@@ -243,7 +243,7 @@ You can use OpenTelemetry Java to send your traces directly to SigNoz. OpenTelem
 
   
     
-With the above environment variables, we are configuring the exporter to send data to SigNoz backend. By default, OpenTelemetry Java agent uses [OTLP exporter](https://github.com/open-telemetry/opentelemetry-java/tree/main/exporters/otlp) configured to send data.<br></br>
+With the above environment variables, we are configuring the exporter to send data to SigNoz backend. By default, OpenTelemetry Java agent uses [OTLP exporter](https://github.com/open-telemetry/opentelemetry-java/tree/main/exporters/otlp) configured to send data.<br></br>
 
 <Admonition>
 Two things to note about the environment variables:<br></br>
@@ -261,7 +261,7 @@ export OTEL_EXPORTER_OTLP_ENDPOINT=http://40.76.59.122:4317
 export OTEL_RESOURCE_ATTRIBUTES=service.name=Tomcat-SigNoz
 ```
     
-Here’s a handy [grid](https://signoz.io/docs/instrumentation/troubleshoot-instrumentation/) to figure out which address to use to send data to SigNoz.
+Here's a handy [grid](https://signoz.io/docs/instrumentation/troubleshoot-instrumentation/) to figure out which address to use to send data to SigNoz.
     
 
 <Admonition>
@@ -278,21 +278,21 @@ Here's a video on how to instrument Tomcat applications with SigNoz and a [blog]
 
 In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#troubleshooting-your-installation).
 </TabItem>
-</Tabs>
+</PlanTabs>
 
 ## Validating instrumentation by checking for traces
 
-With your application running, you can verify that you’ve instrumented your application with OpenTelemetry correctly by confirming that tracing data is being reported to SigNoz.
+With your application running, you can verify that you've instrumented your application with OpenTelemetry correctly by confirming that tracing data is being reported to SigNoz.
 
 To do this, you need to ensure that your application generates some data. Applications will not produce traces unless they are being interacted with, and OpenTelemetry will often buffer data before sending. So you need to interact with your application and wait for some time to see your tracing data in SigNoz.
 
 Validate your traces in SigNoz:
 
 1. Trigger an action in your app that generates a web request. Hit the endpoint a number of times to generate some data. Then, wait for some time.
-2. In SigNoz, open the `Services` tab. Hit the `Refresh` button on the top right corner, and your application should appear in the list of `Applications`.
-3. Go to the `Traces` tab, and apply relevant filters to see your application’s traces.
+2. In SigNoz, open the `Services` tab. Hit the `Refresh` button on the top right corner, and your application should appear in the list of `Applications`.
+3. Go to the `Traces` tab, and apply relevant filters to see your application's traces.
 
-{/* You might see other dummy applications if you’re using SigNoz for the first time. You can remove it by following the docs [here](https://signoz.io/docs/operate/docker-standalone/#remove-the-sample-application). */}
+{/* You might see other dummy applications if you're using SigNoz for the first time. You can remove it by following the docs [here](https://signoz.io/docs/operate/docker-standalone/#remove-the-sample-application). */}
 
 {/* <figure data-zoomable align='center'>
     <img src="/img/docs/java_app_services_list.webp" alt="Java Application in the list of services being monitored in SigNoz"/>
@@ -308,10 +308,10 @@ The agent is highly configurable. You can check out all the configuration option
 
 Some instrumentations can produce too many spans and make traces very noisy. For this reason, the following instrumentations are disabled by default:
 
-- `jdbc-datasource` which creates spans whenever the `java.sql.DataSource#getConnection` method is called.
-- `dropwizard-metrics`, which might create very low-quality metrics data because of the lack of label/attribute support in the Dropwizard metrics API.
+- `jdbc-datasource` which creates spans whenever the `java.sql.DataSource#getConnection` method is called.
+- `dropwizard-metrics`, which might create very low-quality metrics data because of the lack of label/attribute support in the Dropwizard metrics API.
 
-To enable them, add the `otel.instrumentation.<name>.enabled` system property: `-Dotel.instrumentation.jdbc-datasource.enabled=true`
+To enable them, add the `otel.instrumentation.<name>.enabled` system property: `-Dotel.instrumentation.jdbc-datasource.enabled=true`
 
 ## Manual Instrumentation
 
