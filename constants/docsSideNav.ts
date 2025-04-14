@@ -205,7 +205,7 @@ const docsSideNav = [
         label: 'Administrator Guide',
         type: 'category',
         isExpanded: false,
-        // route: '/docs/manage/administrator-guide',
+        route: '/docs/manage/administrator-guide',
         items: [
           {
             type: 'category',
@@ -348,6 +348,30 @@ const docsSideNav = [
               },
             ],
           },
+
+          {
+            type: 'doc',
+            route: '/docs/tutorial/opentelemetry-operator-usage',
+            label: 'OpenTelemetry Operator Usage',
+          },
+          {
+            type: 'doc',
+            route: '/docs/tutorial/setting-up-tls-for-signoz',
+            label: 'Secure SigNoz in Kubernetes using Ingress-NGINX and Cert-Manager',
+          },
+         
+          
+      
+          {
+            type: 'doc',
+            route: '/docs/userguide/retention-period',
+            label: 'Retention Period',
+          },
+          {
+            type: 'doc',
+            route: '/docs/tutorial/infinite-retention-aws-s3',
+            label: 'Infinite Retention using AWS S3',
+          },
           {
             type: 'doc',
             route: '/docs/tutorial/s3-integration-iam-role-eks',
@@ -360,44 +384,21 @@ const docsSideNav = [
           },
           {
             type: 'doc',
-            route: '/docs/tutorial/opentelemetry-operator-usage',
-            label: 'OpenTelemetry Operator Usage',
+            route: '/docs/userguide/otlp-http-enable-cors',
+            label: 'CORS in OTLP HTTP Receiver',
           },
           {
             type: 'doc',
-            route: '/docs/tutorial/setting-up-tls-for-signoz',
-            label: 'Secure SigNoz in Kubernetes using Ingress-NGINX and Cert-Manager',
+            route: '/docs/operate/configuration',
+            label: 'Configuration',
           },
-         
           {
             type: 'doc',
-            route: '/docs/tutorial/infinite-retention-aws-s3',
-            label: 'Infinite Retention using AWS S3',
+            route: '/docs/operate/reset-admin-password',
+            label: 'Reset Admin Password',
           },
-
-          {
-            type: 'category',
-            label: 'Authentication',
-            isExpanded: false,
-            items: [
-              {
-                type: 'doc',
-                route: '/docs/tutorial/setting-up-sso-saml-with-keycloak',
-                label: 'Setting Up SSO SAML 2.0 With Keycloak',
-              },
-            ]
-          }
         ]
       },
-      {
-        label: 'User Guide',
-        type: 'category',
-        isExpanded: false,
-        // route: '/docs/manage/user-guide',
-        items: [
-         
-        ]
-      }
     ]
   },
   
@@ -1541,16 +1542,6 @@ const docsSideNav = [
         route: '/docs/userguide/sso-authentication',
         label: 'SSO & SAML',
       },
-      {
-        type: 'doc',
-        route: '/docs/userguide/retention-period',
-        label: 'Retention Period',
-      },
-      {
-        type: 'doc',
-        route: '/docs/userguide/otlp-http-enable-cors',
-        label: 'CORS in OTLP HTTP Receiver',
-      },
     ],
   },
   {
@@ -1610,12 +1601,11 @@ const docsSideNav = [
         route: '/docs/tutorial/instrumenting-angular-frontend',
         label: 'Instrumenting Angular Frontend Web App',
       },
-     
-     
-     
-     
-      
-
+      {
+        type: 'doc',
+        route: '/docs/tutorial/setting-up-sso-saml-with-keycloak',
+        label: 'Setting Up SSO SAML 2.0 With Keycloak',
+      },
       {
         type: 'doc',
         route: '/docs/tutorial/traefik-observability',
@@ -2185,16 +2175,6 @@ const docsSideNav = [
             ],
           },
         ],
-      },
-      {
-        type: 'doc',
-        route: '/docs/operate/configuration',
-        label: 'Configuration',
-      },
-      {
-        type: 'doc',
-        route: '/docs/operate/reset-admin-password',
-        label: 'Reset Admin Password',
       },
       {
         type: 'doc',
