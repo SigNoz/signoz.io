@@ -194,6 +194,213 @@ const docsSideNav = [
       ],
 
   },
+
+  {
+    type: 'category',
+    label: 'Manage',
+    isExpanded: false,
+    route: '/docs/manage/overview',
+    items: [
+      {
+        label: 'Administrator Guide',
+        type: 'category',
+        isExpanded: false,
+        route: '/docs/manage/administrator-guide',
+        items: [
+          {
+            type: 'category',
+            isExpanded: false,
+            label: 'Migration Guides',
+            route: '/docs/operate/migration',
+            // link: {
+            // type: 'generated-index',
+            // title: 'Migration Guides',
+            // description:
+            // 'The following sections provide instructions to migrate SigNoz components across newer versions. You need to run these migration scripts step by step. For example if you are currently on `0.8.2` and want to migrate to `0.10.0` - you need to run migration script for `0.9` first and then `0.10`',
+            // slug: '/docs/operate/migration/migration',
+            // },
+            items: [
+              {
+                type: 'doc',
+                route: '/docs/operate/migration/upgrade-0.76',
+                label: 'Upgrade to v0.76',
+              },
+              {
+                type: 'doc',
+                route: '/docs/operate/migration/upgrade-0.70',
+                label: 'Upgrade to v0.70',
+              },
+              {
+                type: 'doc',
+                route: '/docs/operate/migration/upgrade-0.64',
+                label: 'Upgrade to v0.64',
+              },
+              {
+                type: 'doc',
+                route: '/docs/operate/migration/upgrade-0.55',
+                label: 'Upgrade to v0.55',
+              },
+              {
+                type: 'doc',
+                route: '/docs/operate/migration/upgrade-0.51',
+                label: 'Upgrade to v0.51',
+              },
+              {
+                type: 'doc',
+                route: '/docs/operate/migration/upgrade-0.49',
+                label: 'Upgrade to v0.49',
+              },
+              {
+                type: 'doc',
+                route: '/docs/operate/migration/upgrade-0.45',
+                label: 'Upgrade to v0.45',
+              },
+              {
+                type: 'doc',
+                route: '/docs/operate/migration/upgrade-0.38',
+                label: 'Upgrade to v0.38',
+              },
+              {
+                type: 'doc',
+                route: '/docs/operate/migration/upgrade-0.36',
+                label: 'Upgrade to v0.36',
+              },
+              {
+                type: 'doc',
+                route: '/docs/operate/migration/upgrade-0.27',
+                label: 'Upgrade to v0.27',
+              },
+              {
+                type: 'doc',
+                route: '/docs/operate/migration/upgrade-0.23',
+                label: 'Upgrade to v0.23',
+              },
+              {
+                type: 'doc',
+                route: '/docs/operate/migration/upgrade-0.19',
+                label: 'Upgrade to v0.19',
+              },
+              {
+                type: 'doc',
+                route: '/docs/operate/migration/upgrade-0.12',
+                label: 'Upgrade to v0.12',
+              },
+              {
+                type: 'doc',
+                route: '/docs/operate/migration/upgrade-0.10',
+                label: 'Upgrade to v0.10',
+              },
+              {
+                type: 'doc',
+                route: '/docs/operate/migration/upgrade-0.9',
+                label: 'Upgrade to v0.9',
+              },
+              {
+                type: 'doc',
+                route: '/docs/operate/migration/upgrade-0.8.1',
+                label: 'Upgrade to v0.8.1',
+              },
+              {
+                type: 'doc',
+                route: '/docs/operate/migration/upgrade-0.8.0',
+                label: 'Upgrade to v0.8.0',
+              },
+            ],
+          },
+          {
+            type: 'category',
+            isExpanded: false,
+            label: 'ClickHouse',
+            route: '/docs/operate/clickhouse',
+            // link: {
+            // type: 'generated-index',
+            // title: 'ClickHouse',
+            // description:
+            // 'The following sections provide instructions to operate ClickHouse. Based on your environment, proceed to one of the sections below.',
+            // slug: '/operate/clickhouse/clickhouse',
+            // },
+            items: [
+              {
+                type: 'doc',
+                route: '/docs/operate/clickhouse/increase-clickhouse-pv',
+                label: 'Increase ClickHouse PV',
+              },
+              {
+                type: 'doc',
+                route: '/docs/operate/clickhouse/connect-to-clickhouse',
+                label: 'Connect to ClickHouse',
+              },
+
+              {
+                type: 'doc',
+                route: '/docs/operate/clickhouse/distributed-clickhouse',
+                label: 'Distributed ClickHouse',
+              },
+              {
+                type: 'doc',
+                route: '/docs/operate/clickhouse/external-clickhouse',
+                label: 'External ClickHouse',
+              },
+              {
+                type: 'doc',
+                route: '/docs/tutorial/writing-clickhouse-queries-in-dashboard',
+                label: 'ClickHouse queries for building dashboards and alerts',
+              },
+            ],
+          },
+
+          {
+            type: 'doc',
+            route: '/docs/tutorial/opentelemetry-operator-usage',
+            label: 'OpenTelemetry Operator Usage',
+          },
+          {
+            type: 'doc',
+            route: '/docs/tutorial/setting-up-tls-for-signoz',
+            label: 'Secure SigNoz in Kubernetes using Ingress-NGINX and Cert-Manager',
+          },
+         
+          
+      
+          {
+            type: 'doc',
+            route: '/docs/userguide/retention-period',
+            label: 'Retention Period',
+          },
+          {
+            type: 'doc',
+            route: '/docs/tutorial/infinite-retention-aws-s3',
+            label: 'Infinite Retention using AWS S3',
+          },
+          {
+            type: 'doc',
+            route: '/docs/tutorial/s3-integration-iam-role-eks',
+            label: 'S3 Integration With AWS IAM role in EKS',
+          },
+          {
+            type: 'doc',
+            route: '/docs/tutorial/oci-bucket-cold-storage-integration',
+            label: 'OCI Bucket Cold Storage Integration',
+          },
+          {
+            type: 'doc',
+            route: '/docs/userguide/otlp-http-enable-cors',
+            label: 'CORS in OTLP HTTP Receiver',
+          },
+          {
+            type: 'doc',
+            route: '/docs/operate/configuration',
+            label: 'Configuration',
+          },
+          {
+            type: 'doc',
+            route: '/docs/operate/reset-admin-password',
+            label: 'Reset Admin Password',
+          },
+        ]
+      },
+    ]
+  },
   
   {
     label: 'APM & Distributed Tracing',
@@ -1335,16 +1542,6 @@ const docsSideNav = [
         route: '/docs/userguide/sso-authentication',
         label: 'SSO & SAML',
       },
-      {
-        type: 'doc',
-        route: '/docs/userguide/retention-period',
-        label: 'Retention Period',
-      },
-      {
-        type: 'doc',
-        route: '/docs/userguide/otlp-http-enable-cors',
-        label: 'CORS in OTLP HTTP Receiver',
-      },
     ],
   },
   {
@@ -1406,44 +1603,15 @@ const docsSideNav = [
       },
       {
         type: 'doc',
-        route: '/docs/tutorial/s3-integration-iam-role-eks',
-        label: 'S3 Integration With AWS IAM role in EKS',
-      },
-      {
-        type: 'doc',
-        route: '/docs/tutorial/oci-bucket-cold-storage-integration',
-        label: 'OCI Bucket Cold Storage Integration',
-      },
-      {
-        type: 'doc',
-        route: '/docs/tutorial/opentelemetry-operator-usage',
-        label: 'OpenTelemetry Operator Usage',
-      },
-      {
-        type: 'doc',
-        route: '/docs/tutorial/setting-up-tls-for-signoz',
-        label: 'Secure SigNoz in Kubernetes using Ingress-NGINX and Cert-Manager',
-      },
-      {
-        type: 'doc',
         route: '/docs/tutorial/setting-up-sso-saml-with-keycloak',
         label: 'Setting Up SSO SAML 2.0 With Keycloak',
-      },
-      {
-        type: 'doc',
-        route: '/docs/tutorial/writing-clickhouse-queries-in-dashboard',
-        label: 'ClickHouse queries for building dashboards and alerts',
       },
       {
         type: 'doc',
         route: '/docs/tutorial/traefik-observability',
         label: 'Traefik Observability',
       },
-      {
-        type: 'doc',
-        route: '/docs/tutorial/infinite-retention-aws-s3',
-        label: 'Infinite Retention using AWS S3',
-      },
+     
     ],
   },
   {
@@ -2007,151 +2175,6 @@ const docsSideNav = [
             ],
           },
         ],
-      },
-      {
-        type: 'category',
-        isExpanded: false,
-        label: 'Migration Guides',
-        route: '/docs/operate/migration',
-        // link: {
-        // type: 'generated-index',
-        // title: 'Migration Guides',
-        // description:
-        // 'The following sections provide instructions to migrate SigNoz components across newer versions. You need to run these migration scripts step by step. For example if you are currently on `0.8.2` and want to migrate to `0.10.0` - you need to run migration script for `0.9` first and then `0.10`',
-        // slug: '/docs/operate/migration/migration',
-        // },
-        items: [
-          {
-            type: 'doc',
-            route: '/docs/operate/migration/upgrade-0.76',
-            label: 'Upgrade to v0.76',
-          },
-          {
-            type: 'doc',
-            route: '/docs/operate/migration/upgrade-0.70',
-            label: 'Upgrade to v0.70',
-          },
-          {
-            type: 'doc',
-            route: '/docs/operate/migration/upgrade-0.64',
-            label: 'Upgrade to v0.64',
-          },
-          {
-            type: 'doc',
-            route: '/docs/operate/migration/upgrade-0.55',
-            label: 'Upgrade to v0.55',
-          },
-          {
-            type: 'doc',
-            route: '/docs/operate/migration/upgrade-0.51',
-            label: 'Upgrade to v0.51',
-          },
-          {
-            type: 'doc',
-            route: '/docs/operate/migration/upgrade-0.49',
-            label: 'Upgrade to v0.49',
-          },
-          {
-            type: 'doc',
-            route: '/docs/operate/migration/upgrade-0.45',
-            label: 'Upgrade to v0.45',
-          },
-          {
-            type: 'doc',
-            route: '/docs/operate/migration/upgrade-0.38',
-            label: 'Upgrade to v0.38',
-          },
-          {
-            type: 'doc',
-            route: '/docs/operate/migration/upgrade-0.36',
-            label: 'Upgrade to v0.36',
-          },
-          {
-            type: 'doc',
-            route: '/docs/operate/migration/upgrade-0.27',
-            label: 'Upgrade to v0.27',
-          },
-          {
-            type: 'doc',
-            route: '/docs/operate/migration/upgrade-0.23',
-            label: 'Upgrade to v0.23',
-          },
-          {
-            type: 'doc',
-            route: '/docs/operate/migration/upgrade-0.19',
-            label: 'Upgrade to v0.19',
-          },
-          {
-            type: 'doc',
-            route: '/docs/operate/migration/upgrade-0.12',
-            label: 'Upgrade to v0.12',
-          },
-          {
-            type: 'doc',
-            route: '/docs/operate/migration/upgrade-0.10',
-            label: 'Upgrade to v0.10',
-          },
-          {
-            type: 'doc',
-            route: '/docs/operate/migration/upgrade-0.9',
-            label: 'Upgrade to v0.9',
-          },
-          {
-            type: 'doc',
-            route: '/docs/operate/migration/upgrade-0.8.1',
-            label: 'Upgrade to v0.8.1',
-          },
-          {
-            type: 'doc',
-            route: '/docs/operate/migration/upgrade-0.8.0',
-            label: 'Upgrade to v0.8.0',
-          },
-        ],
-      },
-      {
-        type: 'category',
-        isExpanded: false,
-        label: 'ClickHouse',
-        route: '/docs/operate/clickhouse',
-        // link: {
-        // type: 'generated-index',
-        // title: 'ClickHouse',
-        // description:
-        // 'The following sections provide instructions to operate ClickHouse. Based on your environment, proceed to one of the sections below.',
-        // slug: '/operate/clickhouse/clickhouse',
-        // },
-        items: [
-          {
-            type: 'doc',
-            route: '/docs/operate/clickhouse/increase-clickhouse-pv',
-            label: 'Increase ClickHouse PV',
-          },
-          {
-            type: 'doc',
-            route: '/docs/operate/clickhouse/connect-to-clickhouse',
-            label: 'Connect to ClickHouse',
-          },
-          {
-            type: 'doc',
-            route: '/docs/operate/clickhouse/distributed-clickhouse',
-            label: 'Distributed ClickHouse',
-          },
-          {
-            type: 'doc',
-            route: '/docs/operate/clickhouse/external-clickhouse',
-            label: 'External ClickHouse',
-          },
-        ],
-      },
-      {
-        type: 'doc',
-        route: '/docs/operate/configuration',
-        label: 'Configuration',
-      },
-      {
-        type: 'doc',
-        route: '/docs/operate/reset-admin-password',
-        label: 'Reset Admin Password',
       },
       {
         type: 'doc',
