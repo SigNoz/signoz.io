@@ -1252,6 +1252,7 @@ const docsSideNav = [
         label: 'Kafka',
         type: 'category',
         isExpanded: false,
+        route: '/docs/messaging-queues/kafka-setup',
         items: [
           {
             type: 'doc',
