@@ -5,17 +5,24 @@ import styles from './PageFeedback.module.css'
 import { useSearchParams } from 'next/navigation'
 import { QUERY_PARAMS } from '../../constants/queryParams'
 import { ONBOARDING_SOURCE } from '../../constants/globals'
+import { Star, StarHalf } from 'lucide-react'
 
 interface AdditionalDetails {
   [key: string]: string
 }
 
-const PageFeedback: React.FC = () => {
+interface PageFeedbackProps {
+  lastUpdated?: string;
+  author?: string;
+}
+
+const PageFeedback: React.FC<PageFeedbackProps> = ({ lastUpdated, author }) => {
   const [helpful, setHelpful] = useState<boolean | null>(null)
   const [needsImprovement, setNeedsImprovement] = useState<string>('')
   const [positiveFeedback, setPositiveFeedback] = useState<string>('')
   const [additionalDetails, setAdditionalDetails] = useState<AdditionalDetails>({})
   const [submitted, setSubmitted] = useState<boolean>(false)
+  const [rating, setRating] = useState<number>(0)
 
   const searchParams = useSearchParams()
   const source = searchParams.get(QUERY_PARAMS.SOURCE)
@@ -36,8 +43,8 @@ const PageFeedback: React.FC = () => {
 
     const data = {
       helpful,
-      needsImprovement: helpful === false ? needsImprovement : '',
-      positiveFeedback: helpful === true ? positiveFeedback : '',
+      needsImprovement,
+      positiveFeedback,
       additionalDetails,
       page: window.location.href,
     }
@@ -72,16 +79,37 @@ const PageFeedback: React.FC = () => {
   return (
     <div className={styles.feedbackContainer}>
       <div className={styles.separatorLine}></div>
+      <div className={styles.metaInfo}>
+        {lastUpdated && (
+          <span className={styles.lastUpdated}>
+            Last updated: {lastUpdated}
+          </span>
+        )}
+        {author && (
+          <span className={styles.author}>
+            by {author}
+          </span>
+        )}
+      </div>
       {helpful === null && (
         <>
           <h3 className={styles.title}>Was this page helpful?</h3>
-          <div className={styles.buttonGroup}>
-            <button className={styles.button} onClick={() => setHelpful(true)}>
-              👍 Yes
-            </button>
-            <button className={styles.button} onClick={() => setHelpful(false)}>
-              👎 No
-            </button>
+          <div className={styles.ratingContainer}>
+            {[1, 2, 3, 4, 5].map((star) => (
+              <button
+                key={star}
+                className={styles.starButton}
+                onClick={() => {
+                  setRating(star)
+                  setHelpful(star > 3)
+                }}
+              >
+                <Star
+                  className={`${styles.star} ${rating >= star ? styles.starFilled : ''}`}
+                  size={24}
+                />
+              </button>
+            ))}
           </div>
         </>
       )}

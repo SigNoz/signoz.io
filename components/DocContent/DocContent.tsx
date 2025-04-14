@@ -8,8 +8,8 @@ import DocsPrevNext from '../DocsPrevNext/DocsPrevNext'
 import TableOfContents from '../DocsTOC/DocsTOC'
 import TrySigNozFloatingCard from '../TrySigNozFloatingCard/TrySigNozFloatingCard'
 import { QUERY_PARAMS } from '@/constants/queryParams'
-import { useSearchParams } from 'next/navigation'
 import { ONBOARDING_SOURCE } from '@/constants/globals'
+import { useSearchParams } from 'next/navigation'
 
 const DocContent: React.FC<{
   title: string
@@ -25,7 +25,10 @@ const DocContent: React.FC<{
       <div className={`doc-content ${source === ONBOARDING_SOURCE ? 'product-onboarding' : ''}`}>
         <h2 className="mt-2 text-3xl">{title}</h2>
         <MDXLayoutRenderer code={post.body.code} components={components} toc={post.toc || []} />
-        <PageFeedback />
+        <PageFeedback 
+          lastUpdated={post.lastmod || post.date}
+          author={post.authors?.[0]}
+        />
         <DocsPrevNext />
       </div>
 
