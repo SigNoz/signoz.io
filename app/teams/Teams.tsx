@@ -286,7 +286,7 @@ const Teams: React.FC<SignUpPageProps> = () => {
 
                 <div className="space-y-2">
                   <label className="block text-sm font-medium text-white">Data region</label>
-                  <div className="flex gap-3">
+                  <div className="flex flex-col gap-3 md:flex-row">
                     {regions.map((region) => (
                       <button
                         type="button"
