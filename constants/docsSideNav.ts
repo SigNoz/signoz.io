@@ -349,6 +349,19 @@ const docsSideNav = [
             ],
           },
           {
+            type: 'category',
+            label: 'Configuration',
+            route: '/docs/operate/configuration',
+            isExpanded: false,
+            items: [
+              {
+                type: 'doc',
+                route: '/docs/manage/configuration/smtp-email-invitations',
+                label: 'Enable SMTP for Email Invitations',
+              }
+            ]
+          },
+          {
             type: 'doc',
             isExpanded: false,
             label: 'Alert Manager Configuration',
@@ -364,9 +377,6 @@ const docsSideNav = [
             route: '/docs/tutorial/setting-up-tls-for-signoz',
             label: 'Secure SigNoz in Kubernetes using Ingress-NGINX and Cert-Manager',
           },
-         
-          
-      
           {
             type: 'doc',
             route: '/docs/userguide/retention-period',
@@ -391,11 +401,6 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/userguide/otlp-http-enable-cors',
             label: 'CORS in OTLP HTTP Receiver',
-          },
-          {
-            type: 'doc',
-            route: '/docs/operate/configuration',
-            label: 'Configuration',
           },
           {
             type: 'doc',
