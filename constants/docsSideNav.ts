@@ -349,17 +349,10 @@ const docsSideNav = [
             ],
           },
           {
-            type: 'category',
+            type: 'doc',
             isExpanded: false,
-            label: 'Alert Manager',
-            route: '/docs/manage/manage-alert-manager',
-            items: [
-              {
-                type: 'doc',
-                route: '/docs/manage/administrator-guide/alert-manager/smtp-configuration',
-                label: 'SMTP Configuration',
-              },
-            ]
+            label: 'Alert Manager Configuration',
+            route: '/docs/manage/administrator-guide/alert-manager-configuration',
           },
           {
             type: 'doc',
