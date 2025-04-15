@@ -348,7 +348,19 @@ const docsSideNav = [
               },
             ],
           },
-
+          {
+            type: 'category',
+            isExpanded: false,
+            label: 'Alert Manager',
+            route: '/docs/manage/manage-alert-manager',
+            items: [
+              {
+                type: 'doc',
+                route: '/docs/manage/administrator-guide/alert-manager/smtp-configuration',
+                label: 'SMTP Configuration',
+              },
+            ]
+          },
           {
             type: 'doc',
             route: '/docs/tutorial/opentelemetry-operator-usage',

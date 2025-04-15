@@ -1,0 +1,167 @@
+---
+date: 2025-04-04
+id: smtp-configuration
+title: Configuring SMTP for Email Notifications in SigNoz
+description: Learn how to Configure SMTP server in Alertmanager in SigNoz as an administrator
+---
+
+SigNoz utilizes Prometheus Alertmanager to handle alerting rules and notifications. You can configure Alertmanager to send alert notifications via email using SMTP. This configuration is typically done within the Alertmanager configuration file (often `alertmanager.yaml` or managed through the SigNoz UI/Helm chart values if applicable).
+
+There are two main places to configure SMTP settings: globally and within specific receiver configurations.
+
+## Global SMTP Configuration
+
+Global settings are defined within the `global` block of your Alertmanager configuration. These serve as defaults for all email receivers unless overridden.
+```yaml
+global:
+  # Default sender address for all emails.
+  smtp_from: <string>
+
+  # Default hostname to identify to the SMTP server (defaults to "localhost").
+  smtp_hello: <string>
+
+  # Default SMTP server address and port (e.g., "smtp.example.com:587").
+  smtp_smarthost: <host>:<port>
+
+  # --- SMTP Authentication ---
+  # Username for SMTP authentication (used for PLAIN, LOGIN, CRAM-MD5).
+  smtp_auth_username: <string>
+
+  # Password for SMTP authentication (used for PLAIN, LOGIN).
+  # Mutually exclusive with smtp_auth_password_file.
+  smtp_auth_password: <secret>
+
+  # Path to a file containing the password for SMTP authentication (used for PLAIN, LOGIN).
+  # Mutually exclusive with smtp_auth_password.
+  smtp_auth_password_file: <filepath>
+
+  # Secret for CRAM-MD5 authentication.
+  smtp_auth_secret: <secret>
+
+  # Identity for PLAIN authentication (often the same as username).
+  smtp_auth_identity: <string>
+
+  # --- SMTP TLS Settings ---
+  # Enforce TLS for the connection (default: true). Note: Go does not support unencrypted connections to remote SMTP.
+  smtp_require_tls: <boolean>
+
+  # Default TLS configuration for SMTP connections.
+  smtp_tls_config:
+    [ <tls_config> ] # See TLS Configuration section below
+```
+
+**Parameter Details (Global):**
+
+| Variable             | Type                    | Description                                                                                                |
+| :------------------- | :---------------------- | :--------------------------------------------------------------------------------------------------------- |
+| `smtp_from`          | string                  | The default email address used in the `From` header.                                                       |
+| `smtp_hello`         | string                  | The hostname sent with the EHLO/HELO command. Defaults to "localhost".                                     |
+| `smtp_smarthost`     | HostPort                | The address (host:port) of the SMTP server to send emails through.                                         |
+| `smtp_auth_username` | string                  | Username for SMTP authentication.                                                                          |
+| `smtp_auth_password` | Secret                  | Password for SMTP authentication (LOGIN/PLAIN). Use quotes for strings.                                    |
+| `smtp_auth_password_file` | string             | Path to a file containing the password for SMTP authentication.                                            |
+| `smtp_auth_secret`   | Secret                  | Secret key for CRAM-MD5 authentication.                                                                    |
+| `smtp_auth_identity` | string                  | Identity for PLAIN authentication (can usually be left blank or set to the username).                      |
+| `smtp_require_tls`   | bool                    | Whether STARTTLS is required. Defaults to `true`. Go's `net/smtp` requires TLS for remote connections.     |
+| `smtp_tls_config`    | *commoncfg.TLSConfig    | Nested block for detailed TLS configuration. See [TLS Configuration](#tls-configuration) section.            |
+
+## Receiver-Specific Email Configuration
+
+You can define specific email configurations within the `receivers` block. These settings apply only to the receiver they are defined under and can override the `global` defaults.
+
+```yaml
+receivers:
+- name: 'my-email-receiver'
+  email_configs:
+  - to: 'team-a@example.com, team-b@example.com'
+    # Whether to send notifications for resolved alerts (default: false)
+    send_resolved: true
+
+    # --- Optional Overrides for Global SMTP Settings ---
+    from: 'alertmanager-specific@example.org' # Overrides global.smtp_from
+    hello: 'my-alertmanager-host'             # Overrides global.smtp_hello
+    smarthost: 'specific-smtp.example.com:465' # Overrides global.smtp_smarthost
+    auth_username: 'specific_user'             # Overrides global.smtp_auth_username
+    auth_password: '<specific_password>'       # Overrides global.smtp_auth_password
+    # auth_password_file: '/path/to/specific/password' # Overrides global.smtp_auth_password_file
+    # auth_secret: '<specific_secret>'           # Overrides global.smtp_auth_secret
+    # auth_identity: 'specific_identity'         # Overrides global.smtp_auth_identity
+    require_tls: true                          # Overrides global.smtp_require_tls
+    tls_config:                                # Overrides global.smtp_tls_config
+      [ <tls_config> ] # See TLS Configuration section below
+
+    # --- Email Content ---
+    # Custom headers (e.g., Subject). Default Subject is '{{ template "email.default.subject" . }}'
+    headers:
+      Subject: '[{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ .CommonLabels.alertname }} for {{ .CommonLabels.job }}'
+      X-Priority: '1'
+    # HTML body template for the email. Default is '{{ template "email.default.html" . }}'
+    html: '<string_template>'
+    # Text body template for the email. Optional.
+    text: '<string_template>'
+
+```
+
+**Key Receiver-Specific Parameters:**
+
+*   `to`: Comma-separated list of recipient email addresses. **Required**.
+*   `send_resolved`: Boolean, set to `true` to send a notification when an alert is resolved. Defaults to `false`.
+*   `headers`: Map of custom email headers. Can override defaults like `Subject`, `To`, `From`.
+*   `html`: Go template string for the HTML body of the email.
+*   `text`: Go template string for the plain text body of the email.
+*   All global SMTP parameters (`from`, `hello`, `smarthost`, `auth_*`, `require_tls`, `tls_config`) can be specified here to override the global settings for this specific receiver.
+
+## TLS Configuration (`tls_config`)
+
+This block configures the TLS settings for the SMTP connection and can be nested under `global.smtp_tls_config` or `receivers.email_configs.tls_config`.
+
+```yaml
+tls_config:
+  # --- CA Certificate ---
+  # Path to the CA certificate file.
+  ca_file: <filepath>
+  # OR: Inline CA certificate content.
+  # ca: <string>
+
+  # --- Client Certificate ---
+  # Path to the client certificate file.
+  cert_file: <filepath>
+  # OR: Inline client certificate content.
+  # cert: <string>
+
+  # --- Client Key ---
+  # Path to the client key file.
+  key_file: <filepath>
+  # OR: Inline client key content.
+  # key: <secret>
+
+  # Server name for SNI (Server Name Indication) and certificate verification.
+  server_name: <string>
+
+  # Skip verification of the server's certificate chain and hostname (use with caution!).
+  insecure_skip_verify: <boolean> # default: false
+
+  # Minimum TLS version (e.g., TLS12, TLS13). Defaults to Go's default (TLS 1.2).
+  min_version: <string>
+  # Maximum TLS version (e.g., TLS12, TLS13). Defaults to Go's default (TLS 1.3).
+  max_version: <string>
+```
+
+**Parameter Details (TLS):**
+
+| Field                | Type     | Description                                                                    |
+| :------------------- | :------- | :----------------------------------------------------------------------------- |
+| `ca`                 | string   | Text content of the trusted CA certificate.                                    |
+| `cert`               | string   | Text content of the client's certificate for mutual TLS.                       |
+| `key`                | Secret   | Text content of the client's private key for mutual TLS.                       |
+| `ca_file`            | string   | Path to a file containing the trusted CA certificate.                          |
+| `cert_file`          | string   | Path to a file containing the client's certificate for mutual TLS.             |
+| `key_file`           | string   | Path to a file containing the client's private key for mutual TLS.             |
+| `server_name`        | string   | Used for Server Name Indication (SNI) and to verify the server's hostname.     |
+| `insecure_skip_verify` | bool   | If true, skips the verification of the server's certificate chain and hostname. |
+| `min_version`        | string   | Minimum acceptable TLS version (e.g., "TLS10", "TLS11", "TLS12", "TLS13").    |
+| `max_version`        | string   | Maximum acceptable TLS version (e.g., "TLS10", "TLS11", "TLS12", "TLS13").    |
+
+**Note:** The `commoncfg.TLSConfig` might also support fields like `ca_ref`, `cert_ref`, `key_ref` for referencing Kubernetes secrets, but these are less commonly documented in the standard Alertmanager configuration examples. Stick to file paths or inline content unless you specifically need secret references in your environment.
+
+By configuring these parameters, you can set up reliable email notifications for your SigNoz alerts via Alertmanager. Remember to consult your SMTP provider's documentation for specific requirements regarding ports, authentication, and TLS.
