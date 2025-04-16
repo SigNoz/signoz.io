@@ -1,0 +1,74 @@
+---
+date: 2025-04-15
+id: alertmanager
+title: Alertmanager Configuration Guide
+description: Learn how to Configure SMTP server and External URL in Alertmanager in SigNoz as an administrator
+---
+SigNoz allows you to configure Alertmanager settings through environment variables. This guide covers how to configure SMTP server settings for email notifications and external URL settings for alert links.
+
+These settings are configured via environment variables following SigNoz's environment variable naming convention.
+
+
+<Admonition type="info">
+We are working on introducing a unified configuration system that will allow setting these parameters globally through a single configuration. You can track the progress in [#6805](https://github.com/SigNoz/signoz/issues/6805).
+</Admonition>
+
+
+## External URL Alertmanager Configuration
+
+The following environment variable is crucial for generating correct links back to the SigNoz UI within alert notifications:
+
+| Environment Variable | Description |
+|---------------------|-------------|
+| `SIGNOZ_ALERTMANAGER_SIGNOZ_EXTERNAL__URL` | The URL under which SigNoz (and Alertmanager) is externally reachable (e.g., `https://signoz.example.com`). **Required for links in alert notifications.** Set this to the URL where your SigNoz instance is hosted. |
+
+
+## SMTP Configuration for Email Alerts
+
+SigNoz utilizes Prometheus Alertmanager to handle alerting rules and notifications. You can configure Alertmanager to send alert notifications via email using SMTP. Currently, SMTP configuration is done through environment variables.
+
+The following environment variables can be set to configure SMTP settings:
+
+| Environment Variable | Description |
+|---------------------|-------------|
+| `SIGNOZ_ALERTMANAGER_SIGNOZ_GLOBAL_SMTP__FROM` | The email address used in the `From` header |
+| `SIGNOZ_ALERTMANAGER_SIGNOZ_GLOBAL_SMTP__HELLO` | The hostname sent with EHLO/HELO command (defaults to "localhost") |
+| `SIGNOZ_ALERTMANAGER_SIGNOZ_GLOBAL_SMTP__SMARTHOST` | SMTP server address and port (e.g., "smtp.example.com:587") |
+| `SIGNOZ_ALERTMANAGER_SIGNOZ_GLOBAL_SMTP__AUTH__USERNAME` | Username for SMTP authentication |
+| `SIGNOZ_ALERTMANAGER_SIGNOZ_GLOBAL_SMTP__AUTH__PASSWORD` | Password for SMTP authentication |
+| `SIGNOZ_ALERTMANAGER_SIGNOZ_GLOBAL_SMTP__AUTH__PASSWORD_FILE` | Path to file containing SMTP password |
+| `SIGNOZ_ALERTMANAGER_SIGNOZ_GLOBAL_SMTP__AUTH__SECRET` | Secret for SMTP authentication |
+| `SIGNOZ_ALERTMANAGER_SIGNOZ_GLOBAL_SMTP__AUTH__IDENTITY` | Identity for PLAIN authentication |
+| `SIGNOZ_ALERTMANAGER_SIGNOZ_GLOBAL_SMTP__REQUIRE__TLS` | Whether to require TLS (defaults to true) |
+| `SIGNOZ_ALERTMANAGER_SIGNOZ_GLOBAL_SMTP__TLS__CA` | Text of the CA certificate |
+| `SIGNOZ_ALERTMANAGER_SIGNOZ_GLOBAL_SMTP__TLS__CERT` | Text of the client certificate |
+| `SIGNOZ_ALERTMANAGER_SIGNOZ_GLOBAL_SMTP__TLS__KEY` | Text of the client key |
+| `SIGNOZ_ALERTMANAGER_SIGNOZ_GLOBAL_SMTP__TLS__CA__FILE` | Path to CA certificate file |
+| `SIGNOZ_ALERTMANAGER_SIGNOZ_GLOBAL_SMTP__TLS__CERT__FILE` | Path to client certificate file |
+| `SIGNOZ_ALERTMANAGER_SIGNOZ_GLOBAL_SMTP__TLS__KEY__FILE` | Path to client key file |
+| `SIGNOZ_ALERTMANAGER_SIGNOZ_GLOBAL_SMTP__TLS__CA__REF` | Name of secret in secret manager to use as CA certificate |
+| `SIGNOZ_ALERTMANAGER_SIGNOZ_GLOBAL_SMTP__TLS__CERT__REF` | Name of secret in secret manager to use as client certificate |
+| `SIGNOZ_ALERTMANAGER_SIGNOZ_GLOBAL_SMTP__TLS__KEY__REF` | Name of secret in secret manager to use as client key |
+| `SIGNOZ_ALERTMANAGER_SIGNOZ_GLOBAL_SMTP__TLS__SERVER__NAME` | Server name for SNI and certificate verification |
+| `SIGNOZ_ALERTMANAGER_SIGNOZ_GLOBAL_SMTP__TLS__INSECURE__SKIP__VERIFY` | Skip TLS verification (use with caution) |
+| `SIGNOZ_ALERTMANAGER_SIGNOZ_GLOBAL_SMTP__TLS__MIN__VERSION` | Minimum TLS version (e.g., "TLS12", "TLS13") |
+| `SIGNOZ_ALERTMANAGER_SIGNOZ_GLOBAL_SMTP__TLS__MAX__VERSION` | Maximum TLS version (e.g., "TLS12", "TLS13") |
+
+Remember to consult your SMTP provider's documentation for specific requirements regarding ports, authentication, and TLS settings. When setting up email notifications, ensure these environment variables are properly configured in your deployment environment.
+
+## Common Alertmanager Configuration Scenarios
+
+Below are examples demonstrating common Alertmanager configurations. These examples cover typical use cases you may encounter when configuring up alertmanager.
+
+### Disabling TLS for SMTP
+
+In scenarios where you need to connect to an SMTP server without TLS (e.g., for internal testing or specific server configurations), you can disable TLS requirement and verification:
+
+```bash
+SIGNOZ_ALERTMANAGER_SIGNOZ_GLOBAL_SMTP__REQUIRE__TLS=false
+SIGNOZ_ALERTMANAGER_SIGNOZ_GLOBAL_SMTP__TLS__INSECURE__SKIP__VERIFY=true
+```
+
+
+
+
