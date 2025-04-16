@@ -1,17 +1,31 @@
 ---
 date: 2025-04-15
 id: alert-manager-configuration
-title: Configure Alertmanager
+title: Alertmanager Configuration Guide
 description: Learn how to Configure SMTP server and External URL in Alertmanager in SigNoz as an administrator
 ---
+SigNoz allows you to configure Alertmanager settings through environment variables. This guide covers how to configure SMTP server settings for email notifications and external URL settings for alert links.
 
-SigNoz utilizes Prometheus Alertmanager to handle alerting rules and notifications. You can configure Alertmanager to send alert notifications via email using SMTP. Currently, SMTP configuration is done through environment variables.
+These settings are configured via environment variables following SigNoz's environment variable naming convention.
+
 
 <Admonition type="info">
-We are working on introducing a unified configuration system that will allow setting these parameters globally through a single configuration. You can track the progress in [this GitHub issue](https://github.com/SigNoz/signoz/issues/6805).
+We are working on introducing a unified configuration system that will allow setting these parameters globally through a single configuration. You can track the progress in [#6805](https://github.com/SigNoz/signoz/issues/6805).
 </Admonition>
 
+
+## External URL Alertmanager Configuration
+
+The following environment variable is crucial for generating correct links back to the SigNoz UI within alert notifications:
+
+| Environment Variable | Description |
+|---------------------|-------------|
+| `SIGNOZ_ALERTMANAGER_SIGNOZ_EXTERNAL__URL` | The URL under which SigNoz (and Alertmanager) is externally reachable (e.g., `https://signoz.example.com`). **Required for links in alert notifications.** Set this to the URL where your SigNoz instance is hosted. |
+
+
 ## SMTP Configuration via Environment Variables
+
+SigNoz utilizes Prometheus Alertmanager to handle alerting rules and notifications. You can configure Alertmanager to send alert notifications via email using SMTP. Currently, SMTP configuration is done through environment variables.
 
 The following environment variables can be set to configure SMTP settings:
 
@@ -27,9 +41,9 @@ The following environment variables can be set to configure SMTP settings:
 | `SIGNOZ_ALERTMANAGER_SIGNOZ_GLOBAL_SMTP__AUTH__IDENTITY` | Identity for PLAIN authentication |
 | `SIGNOZ_ALERTMANAGER_SIGNOZ_GLOBAL_SMTP__REQUIRE__TLS` | Whether to require TLS (defaults to true) |
 
-### TLS Configuration Environment Variables
+### SMTP TLS Configuration Environment Variables
 
-For TLS settings, the following environment variables are available:
+For SMTP TLS settings, the following environment variables are available:
 
 | Environment Variable | Description |
 |---------------------|-------------|
@@ -48,12 +62,3 @@ For TLS settings, the following environment variables are available:
 | `SIGNOZ_ALERTMANAGER_SIGNOZ_GLOBAL_SMTP__TLS__MAX__VERSION` | Maximum TLS version (e.g., "TLS12", "TLS13") |
 
 Remember to consult your SMTP provider's documentation for specific requirements regarding ports, authentication, and TLS settings. When setting up email notifications, ensure these environment variables are properly configured in your deployment environment.
-
-## External URL Alertmanager Configuration
-
-The following environment variable is crucial for generating correct links back to the SigNoz UI within alert notifications:
-
-| Environment Variable | Description |
-|---------------------|-------------|
-| `SIGNOZ_ALERTMANAGER_SIGNOZ_EXTERNAL__URL` | The URL under which SigNoz (and Alertmanager) is externally reachable (e.g., `https://signoz.example.com`). **Required for links in alert notifications.** Set this to the URL where your SigNoz instance is hosted. |
-

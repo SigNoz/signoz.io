@@ -358,15 +358,16 @@ const docsSideNav = [
                 type: 'doc',
                 route: '/docs/manage/configuration/smtp-email-invitations',
                 label: 'Enable SMTP for Email Invitations',
-              }
+              },
+              {
+                type: 'doc',
+                isExpanded: false,
+                label: 'Alertmanager',
+                route: '/docs/manage/administrator-guide/alert-manager-configuration',
+              },
             ]
           },
-          {
-            type: 'doc',
-            isExpanded: false,
-            label: 'Alert Manager Configuration',
-            route: '/docs/manage/administrator-guide/alert-manager-configuration',
-          },
+          
           {
             type: 'doc',
             route: '/docs/tutorial/opentelemetry-operator-usage',
