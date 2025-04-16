@@ -356,14 +356,14 @@ const docsSideNav = [
             items: [
               {
                 type: 'doc',
-                route: '/docs/manage/configuration/smtp-email-invitations',
+                route: '/docs/manage/administrator-guide/configuration/smtp-email-invitations',
                 label: 'Enable SMTP for Email Invitations',
               },
               {
                 type: 'doc',
                 isExpanded: false,
                 label: 'Alertmanager',
-                route: '/docs/manage/administrator-guide/alert-manager-configuration',
+                route: '/docs/manage/administrator-guide/configuration/alertmanager',
               },
             ]
           },

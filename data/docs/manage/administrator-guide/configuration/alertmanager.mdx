@@ -1,6 +1,6 @@
 ---
 date: 2025-04-15
-id: alert-manager-configuration
+id: alertmanager
 title: Alertmanager Configuration Guide
 description: Learn how to Configure SMTP server and External URL in Alertmanager in SigNoz as an administrator
 ---
@@ -23,7 +23,7 @@ The following environment variable is crucial for generating correct links back 
 | `SIGNOZ_ALERTMANAGER_SIGNOZ_EXTERNAL__URL` | The URL under which SigNoz (and Alertmanager) is externally reachable (e.g., `https://signoz.example.com`). **Required for links in alert notifications.** Set this to the URL where your SigNoz instance is hosted. |
 
 
-## SMTP Configuration via Environment Variables
+## SMTP Configuration for Email Alerts
 
 SigNoz utilizes Prometheus Alertmanager to handle alerting rules and notifications. You can configure Alertmanager to send alert notifications via email using SMTP. Currently, SMTP configuration is done through environment variables.
 
@@ -40,13 +40,6 @@ The following environment variables can be set to configure SMTP settings:
 | `SIGNOZ_ALERTMANAGER_SIGNOZ_GLOBAL_SMTP__AUTH__SECRET` | Secret for SMTP authentication |
 | `SIGNOZ_ALERTMANAGER_SIGNOZ_GLOBAL_SMTP__AUTH__IDENTITY` | Identity for PLAIN authentication |
 | `SIGNOZ_ALERTMANAGER_SIGNOZ_GLOBAL_SMTP__REQUIRE__TLS` | Whether to require TLS (defaults to true) |
-
-### SMTP TLS Configuration Environment Variables
-
-For SMTP TLS settings, the following environment variables are available:
-
-| Environment Variable | Description |
-|---------------------|-------------|
 | `SIGNOZ_ALERTMANAGER_SIGNOZ_GLOBAL_SMTP__TLS__CA` | Text of the CA certificate |
 | `SIGNOZ_ALERTMANAGER_SIGNOZ_GLOBAL_SMTP__TLS__CERT` | Text of the client certificate |
 | `SIGNOZ_ALERTMANAGER_SIGNOZ_GLOBAL_SMTP__TLS__KEY` | Text of the client key |
@@ -62,3 +55,20 @@ For SMTP TLS settings, the following environment variables are available:
 | `SIGNOZ_ALERTMANAGER_SIGNOZ_GLOBAL_SMTP__TLS__MAX__VERSION` | Maximum TLS version (e.g., "TLS12", "TLS13") |
 
 Remember to consult your SMTP provider's documentation for specific requirements regarding ports, authentication, and TLS settings. When setting up email notifications, ensure these environment variables are properly configured in your deployment environment.
+
+## Common Alertmanager Configuration Scenarios
+
+Below are examples demonstrating common Alertmanager configurations. These examples cover typical use cases you may encounter when configuring up alertmanager.
+
+### Disabling TLS for SMTP
+
+In scenarios where you need to connect to an SMTP server without TLS (e.g., for internal testing or specific server configurations), you can disable TLS requirement and verification:
+
+```bash
+SIGNOZ_ALERTMANAGER_SIGNOZ_GLOBAL_SMTP__REQUIRE__TLS=false
+SIGNOZ_ALERTMANAGER_SIGNOZ_GLOBAL_SMTP__TLS__INSECURE__SKIP__VERIFY=true
+```
+
+
+
+
