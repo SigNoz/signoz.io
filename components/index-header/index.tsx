@@ -7,16 +7,17 @@ import Button from '@/components/Button/Button'
 import { Modal, ModalContent, ModalBody, useDisclosure } from '@nextui-org/react'
 import TrackingLink from '@/components/TrackingLink'
 import TrackingButton from '@/components/TrackingButton'
-import Link from 'next/link'
+import { useLogEvent } from 'hooks/useLogEvent'
 
 export const Header = () => {
   const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure()
+
+  const logEvent = useLogEvent()
 
   return (
     <header className="relative !mx-auto mt-16 !w-[100vw] md:!w-[80vw]">
       <div className="absolute bottom-0 left-[12px] right-[12px] top-0 z-[-1] border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 md:left-[24px] md:right-[24px]" />
       <div className="relative !mx-auto flex !w-[100vw] flex-col items-center border  !border-b-0 !border-t-0  border-dashed border-signoz_slate-400 px-2 pb-4 pt-12 text-center md:!w-[80vw] md:px-5 md:pt-[8.5rem]">
-
         <div className="absolute left-0 top-[147px] z-[-1] h-10 !w-[100vw] border !border-l-0 !border-r-0 border-dashed border-signoz_slate-400 sm:h-14 md:top-[253px] md:!w-[80vw]" />
         <Hero>
           OpenTelemetry-Native Logs,&nbsp;
