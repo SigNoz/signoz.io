@@ -8,11 +8,13 @@ const USER_ID_KEY = 'app_user_id'
 const getOrCreateAnonymousId = (): string | undefined => {
   if (typeof window === 'undefined') return undefined
   let id = localStorage.getItem(ANONYMOUS_ID_KEY)
+
   if (!id) {
     id = uuidv4()
-    localStorage.setItem(ANONYMOUS_ID_KEY, id)
+    localStorage.setItem(ANONYMOUS_ID_KEY, id || '')
   }
-  return id
+
+  return id || undefined
 }
 
 const getUserId = (): string | undefined => {

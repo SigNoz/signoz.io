@@ -125,7 +125,7 @@ export default function Login() {
 
     if (data.status === 'success') {
       setSubmitSuccess(true)
-      localStorage.setItem('app_user_id', workEmail)
+      localStorage.setItem('app_user_id', workEmail || '')
 
       if (data?.data?.length === 0) {
         handleNoDeployments()
