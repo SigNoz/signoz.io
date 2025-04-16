@@ -7,12 +7,9 @@ import Button from '@/components/Button/Button'
 import { Modal, ModalContent, ModalBody, useDisclosure } from '@nextui-org/react'
 import TrackingLink from '@/components/TrackingLink'
 import TrackingButton from '@/components/TrackingButton'
-import { useLogEvent } from 'hooks/useLogEvent'
 
 export const Header = () => {
   const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure()
-
-  const logEvent = useLogEvent()
 
   return (
     <header className="relative !mx-auto mt-16 !w-[100vw] md:!w-[80vw]">
