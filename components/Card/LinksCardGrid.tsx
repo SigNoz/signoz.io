@@ -3,7 +3,8 @@
 import React from 'react'
 import { ArrowRight } from 'lucide-react'
 import TrackingLink from '../TrackingLink'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
+import { useLogEvent } from 'hooks/useLogEvent'
 
 interface InternalLinkProps {
   name: string
@@ -30,6 +31,8 @@ interface LinksCardGridProps {
 
 const LinksCardGrid: React.FC<LinksCardGridProps> = ({ cards, sectionName }) => {
   const router = useRouter()
+  const pathname = usePathname()
+  const logEvent = useLogEvent()
 
   return (
     <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -94,6 +97,17 @@ const LinksCardGrid: React.FC<LinksCardGridProps> = ({ cards, sectionName }) => 
 
         const handleCardClick = () => {
           if (isCardClickable && card.href) {
+            logEvent({
+              eventName: 'Website Click',
+              eventType: 'track',
+              attributes: {
+                clickType: 'Card Click',
+                clickName: card.clickName,
+                clickText: card.clickText || card.title,
+                clickLocation: sectionName,
+                pageLocation: pathname,
+              },
+            })
             router.push(card.href)
           }
         }
