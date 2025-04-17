@@ -3,6 +3,7 @@
 import React from 'react'
 import { usePathname } from 'next/navigation'
 import Button from './Button/Button'
+import { useLogEvent } from 'hooks/useLogEvent'
 
 // Use Button's types
 const BUTTON_TYPES = Button.TYPES
@@ -43,8 +44,22 @@ export default function TrackingButtonSigNozTheme({
   ...rest
 }: TrackingButtonSigNozThemeProps) {
   const pathname = usePathname()
+  const logEvent = useLogEvent()
 
   const handleClick = () => {
+    // Log the click event
+    logEvent({
+      eventName: 'Website Click',
+      eventType: 'track',
+      attributes: {
+        clickType,
+        clickName,
+        clickLocation,
+        clickText,
+        pageLocation: pathname,
+      },
+    })
+
     // Call the original onClick handler if provided
     if (onClick) {
       onClick()
