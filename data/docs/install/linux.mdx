@@ -10,7 +10,9 @@ slug: /install/linux
 
 This guide provides step-by-step instructions to install SigNoz, an open-source observability platform, on a Linux system without using Docker. It includes installing dependencies like ClickHouse and Zookeeper, running schema migrations, and setting up the SigNoz application and OpenTelemetry Collector.
 
-The final goal is to be able to capture the local metrics (CPU, RAM, DIsk, Network...) of the local machine and start playing with the Dashboard. Further questions some [RTFM](https://en.wikipedia.org/wiki/RTFM) work and a [Slack channel](https://app.slack.com/client/T01HWUTP0LT/C01LWQ8KS7M) is also available.
+The final goal is to be able to capture the local metrics (CPU, RAM, DIsk, Network...) of the local machine and start playing with the Dashboard. Further questions need some [RTFM](https://en.wikipedia.org/wiki/RTFM) work.
+
+A [Slack channel](https://app.slack.com/client/T01HWUTP0LT/C01LWQ8KS7M) is also available.
 
 > This tutorial use CentOS 8.10 as an environment. You may need to adapt the commands to yours.
 --- 
@@ -22,7 +24,7 @@ The final goal is to be able to capture the local metrics (CPU, RAM, DIsk, Netwo
 >
 > Where : Bordeaux 🍷, France
 > 
-> Listing : Bridge City Siner - Midnight to Vice
+> Listing to : Bridge City Siner - Midnight to Vice
 
 
 import SigNozCloud from '@/components/shared/signoz-cloud.mdx'
@@ -70,7 +72,7 @@ sudo systemctl status clickhouse-server
 
 2. Check the ClickHouse version:
 
-```
+```bash
 clickhouse-client -q "SELECT version()"
 ```
 
@@ -88,11 +90,6 @@ clickhouse-client -q "CREATE USER signoz IDENTIFIED BY '<password>'"
 
 ```bash
 clickhouse-client -q "CREATE ROLE IF NOT EXISTS signoz_role"
-clickhouse-client -q "GRANT CREATE, ALTER, DROP, INSERT, SELECT ON signoz_traces.* TO signoz_role"
-clickhouse-client -q "GRANT CREATE, ALTER, DROP, INSERT, SELECT ON signoz_logs.* TO signoz_role"
-clickhouse-client -q "GRANT CREATE, ALTER, DROP, INSERT, SELECT ON signoz_metrics.* TO signoz_role"
-clickhouse-client -q "GRANT CREATE, ALTER, DROP, INSERT, SELECT ON signoz_metadata.* TO signoz_role"
-clickhouse-client -q "GRANT CREATE, ALTER, DROP, INSERT, SELECT ON signoz_analytics.* TO signoz_role"
 clickhouse-client -q "GRANT SELECT ON system.* TO signoz_role"
 clickhouse-client -q "GRANT REMOTE ON *.* TO signoz_role" # For clustered setups
 clickhouse-client -q "GRANT signoz_role TO signoz"
@@ -104,6 +101,23 @@ clickhouse-client -q "GRANT signoz_role TO signoz"
 clickhouse-client --user signoz --password <password>
 ```
 
+4. Excpected output:
+
+```bash
+ClickHouse client version 25.3.2.39 (official build).
+Connecting to localhost:9000 as user signoz.
+Connected to ClickHouse server version 25.3.2.
+
+Warnings:
+ * Linux transparent hugepages are set to "always". Check /sys/kernel/mm/transparent_hugepage/enabled
+
+hostname :)
+```
+
+> The command `exit` is sufficient to quit the clickhouse client.
+
+
+
 ---
 
 ## Step 2: Install Zookeeper
@@ -114,7 +128,7 @@ Zookeeper is required for ClickHouse to manage distributed operations.
 
 ```bash
 sudo dnf update
-sudo dnf install -y java-11-openjdk  # CentOS/RHEL
+sudo dnf install -y java-11-openjdk
 ```
 2. Download and extract the latest Zookeeper release (e.g., 3.9.3, the lastest at the moment):
 
@@ -189,7 +203,9 @@ sudo systemctl start zookeeper.service
 sudo systemctl enable zookeeper.service
 ```
 
-9. Configure ClickHouse to use Zookeeper:
+9. Configure ClickHouse (single replica) to use Zookeeper:
+
+> In a production environment this configuration may not be enough if `high availability`/`fault tolerance` is needed.
 
 ```bash
 sudo bash -c 'cat <<EOF > /etc/clickhouse-server/config.d/cluster.xml
@@ -219,15 +235,17 @@ sudo bash -c 'cat <<EOF > /etc/clickhouse-server/config.d/cluster.xml
     </macros>
 </clickhouse>
 EOF'
+```
 
+```bash
 sudo chown clickhouse:clickhouse /etc/clickhouse-server/config.d/cluster.xml
-`` 
+``` 
 
 10. Start the ClickHouse service:
 
 ```bash
-sudo systemctl start clickhouse-server
 sudo systemctl enable clickhouse-server
+sudo systemctl start clickhouse-server
 ```
 
 ### Verify Zookeeper and ClickHouse
@@ -260,12 +278,11 @@ sudo journalctl -u clickhouse-server.service -f
 
 ---
 
-
 ## Step 3: Run SigNoz Schema Migrations
 
 Schema migrations set up the necessary database schema in ClickHouse for SigNoz.
 
-> On RedHat 8.10 is compiled with the GLibC v2.28. I had to recompile the schema-migrator and the otel-collector (see below).
+> RedHat 8.10 is compiled with the GLibC v2.28 while the schema-migrator and the otel-collector (see below) is compiled with GLibC v2.34. I had to recompile to make it work.
 
 > This part is optional if the command `ldd --verions` return a version >=2.34
 
@@ -292,9 +309,9 @@ Schema migrations set up the necessary database schema in ClickHouse for SigNoz.
 
     * Make directory and add to `PATH`:
     ```bash
-    sudo mkdir -p /opt/signoz-otel-collector/bin
-    cp schema-migrator /opt/signoz-migrator/bin/
-    # TODO add /opt/signoz-migrator/bin/ to path
+    sudo mkdir -p /opt/signoz-schema-migrator/bin
+    cp schema-migrator /opt/signoz-schema-migrator/bin/
+    echo 'export PATH=$PATH:/opt/signoz-schema-migrator/bin' >> ~/.bashrc
     ```
 
 1. Run the migrations (replace <password> with the signoz user password):
@@ -308,9 +325,47 @@ schema-migrator async --dsn="tcp://localhost:9000?username=signoz&password=signo
 
 > Note: The --replication=false flag is used for a single-node setup. For a clustered ClickHouse setup, set --replication=true.
 
+2. Grant permissions to the new created table:
+
+```bash
+clickhouse-client -q "GRANT CREATE, ALTER, DROP, INSERT, SELECT ON signoz_traces.* TO signoz_role"
+clickhouse-client -q "GRANT CREATE, ALTER, DROP, INSERT, SELECT ON signoz_logs.* TO signoz_role"
+clickhouse-client -q "GRANT CREATE, ALTER, DROP, INSERT, SELECT ON signoz_metrics.* TO signoz_role"
+clickhouse-client -q "GRANT CREATE, ALTER, DROP, INSERT, SELECT ON signoz_metadata.* TO signoz_role"
+clickhouse-client -q "GRANT CREATE, ALTER, DROP, INSERT, SELECT ON signoz_analytics.* TO signoz_role"
+```
+
+3. Verify the tables:
+
+```bash
+clickhouse-client --user signoz --password <password>
+```
+
+Then in the clickhouse client: 
+
+```sql
+SHOW DATABASES;
+```
+
+4. Expected output:
+
+```sql
+   ┌─name─────────────┐
+1. │ signoz_analytics │
+2. │ signoz_logs      │
+3. │ signoz_metadata  │
+4. │ signoz_metrics   │
+5. │ signoz_traces    │
+6. │ system           │
+   └──────────────────┘
+
+6 rows in set. Elapsed: 0.002 sec. 
+```
+
+
 ## Step 5: Install SigNoz
 
-1. Download and extract the SigNoz binary (use a specific version for stability, e.g., v0.79.1):
+1. Download and extract the SigNoz binary:
 
 > You can adapt by finding the last version on this [page](https://github.com/SigNoz/signoz/releases/).
 
@@ -390,8 +445,6 @@ sudo systemctl enable signoz.service
 ```bash
 sudo firewall-cmd --permanent --add-port=8080/tcp
 sudo firewall-cmd --reload
-# OR for Ubuntu with ufw
-sudo ufw allow 8080/tcp
 ```
 
 ###  Verify SigNoz Installation
@@ -450,7 +503,6 @@ The OTel Collector gathers telemetry data (metrics, traces, logs) and sends it t
     sudo mkdir -p /var/lib/signoz-otel-collector
     sudo mkdir -p /opt/signoz-otel-collector/{bin,conf}
     cp signoz-otel-collector /opt/signoz-otel-collector/bin/
-    # TODO add /opt/signoz-migrator/bin/ to path
     ```
 ### Configure the OTel Collector
 
@@ -460,7 +512,7 @@ The OTel Collector gathers telemetry data (metrics, traces, logs) and sends it t
 sudo chown -R signoz:signoz /var/lib/signoz-otel-collector /opt/signoz-otel-collector
 ```
 
-2. Create the OTel Collector configuration file (replace <password> with the signoz user password and update 10.24.208.77 to localhost if running locally):
+2. Create the OTel Collector configuration file (replace <password> with the signoz user password and update <ip_address> to localhost if running locally):
 
 > TODO change the server IP and add config explaination
 
@@ -496,14 +548,14 @@ extensions:
 
 exporters:
   clickhousemetricswrite:
-    endpoint: tcp://10.24.208.77:9000/signoz_metrics?username=signoz&password=signoz
+    endpoint: tcp://<ip_address>:9000/signoz_metrics?username=signoz&password=<password>
     tls:
       insecure: true
     resource_to_telemetry_conversion:
       enabled: true
 
   metadataexporter:
-    dsn: tcp://10.24.208.77:9000/signoz_metadata?username=signoz&password=signoz
+    dsn: tcp://<ip_address>:9000/signoz_metadata?username=signoz&password=<password>
     timeout: 10s
     tenant_id: default
     cache:
@@ -594,16 +646,17 @@ curl -X GET http://localhost:8080/api/v1/health
 {"status":"ok"}
 ```
 
-3. Access the SigNoz UI by navigating to http://<your-server-ip>:8080 in a web browser. Log in and verify that traces, metrics, and logs are being collected.
+3. Access the SigNoz UI by navigating to http://<your-server-ip>:8080 in a web browser. Log in and verify that metrics are being collected.
 
+> There is a collection of already build dashboard to help you customize your experience. Here you can find one for [hostmetrics](https://github.com/SigNoz/dashboards/tree/main/hostmetrics).
 
 ## Production Considerations
 
-* Security: Ensure all passwords (ClickHouse, JWT secret) are strong and stored securely (e.g., using a secrets manager).
-* Firewall: Restrict access to ClickHouse (port 9000) and OTel Collector ports (4317/4318) to trusted networks.
-* High Availability: For production, consider deploying ClickHouse in a clustered setup with multiple nodes and configure Zookeeper with at least three nodes for fault tolerance.
-* Monitoring: Monitor the health of ClickHouse, Zookeeper, SigNoz, and OTel Collector services using systemd or external tools.
-* Backup: Regularly back up the ClickHouse data (/var/lib/clickhouse) and SigNoz SQLite database (/var/lib/signoz/signoz.db).
+* **Security**: Ensure all passwords (ClickHouse, JWT secret) are strong and stored securely (e.g., using a secrets manager).
+* **Firewall**: Restrict access to ClickHouse (port 9000) and OTel Collector ports (4317/4318) to trusted networks.
+* **High Availability**: For production, consider deploying ClickHouse in a clustered setup with multiple nodes and configure Zookeeper with at least three nodes for fault tolerance.
+* **Monitoring**: Monitor the health of ClickHouse, Zookeeper, SigNoz, and OTel Collector services using systemd or external tools.
+* **Backup**: Regularly back up the ClickHouse data (/var/lib/clickhouse) and SigNoz SQLite database (/var/lib/signoz/signoz.db).
 
 
 ## Troubleshooting
