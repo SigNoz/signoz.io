@@ -1,58 +1,138 @@
 ---
-date: 2024-06-06
+date: 2025-04-18
 title: Linux
-description: Learn how to install SigNoz on Linux
+description: Learn how to install SigNoz on Linux without Docker
 id: linux
 slug: /install/linux
 ---
+
+# Install SigNoz on Linux Without Docker
+
+This guide provides step-by-step instructions to install SigNoz, an open-source observability platform, on a Linux system without using Docker. It includes installing dependencies like ClickHouse and Zookeeper, running schema migrations, and setting up the SigNoz application and OpenTelemetry Collector.
+
+The final goal is to be able to capture the local metrics (CPU, RAM, DIsk, Network...) of the local machine and start playing with the Dashboard. Further questions some [RTFM](https://en.wikipedia.org/wiki/RTFM) work and a [Slack channel](https://app.slack.com/client/T01HWUTP0LT/C01LWQ8KS7M) is also available.
+
+> This tutorial use CentOS 8.10 as an environment. You may need to adapt the commands to yours.
+--- 
+
+
+> Date: April 18, 2025
+> 
+> By: Gil FELOT
+>
+> Where : Bordeaux 🍷, France
+> 
+> Listing : Bridge City Siner - Midnight to Vice
+
 
 import SigNozCloud from '@/components/shared/signoz-cloud.mdx'
 import RetentionInfo from '@/components/shared/retention-info.mdx'
 
 <SigNozCloud />
 
-This section provides information on installing SigNoz on Linux.
-
 ## Prerequisites
 
-- A Linux machine
-- Root access to the machine
+* A Linux machine (Ubuntu, CentOS, or RHEL-based systems recommended).
+* Root or sudo access to the machine.
+* Internet connectivity for downloading packages and binaries.
+* Basic knowledge of Linux commands and systemd.
+* Ports `8080` (SigNoz), `9000` (ClickHouse), and `4317`/`4318` (OTel Collector) should be open if running in a networked environment.
 
-## Install Clickhouse
+## Step 1: Install ClickHouse
 
-1. Install Clickhouse using the Clickhouse installation [guide](https://clickhouse.com/docs/install#available-installation-options)
+> ClickHouse is the database used by SigNoz for storing traces, metrics, and logs.
 
-> Note: Do not start the clickhouse service yet. We will do that after installing zookeeper.
+### Install packages
 
-## Install Zookeeper
-
-1. Install Java
+1. Add the ClickHouse repository:
 
 ```bash
-sudo apt update
-sudo apt upgrade -y
-sudo apt install default-jdk -y
+sudo dnf config-manager --add-repo https://packages.clickhouse.com/rpm/clickhouse.repo
 ```
 
-2. Get and extract the latest release of Zookeeper from the [releases page](https://zookeeper.apache.org/releases.html)
+2. Install ClickHouse server and client:
 
 ```bash
-curl -L https://dlcdn.apache.org/zookeeper/zookeeper-3.8.4/apache-zookeeper-3.8.4-bin.tar.gz -o zookeeper.tar.gz
+sudo dnf install -y clickhouse-server clickhouse-client
+```
+
+### Verify ClickHouse Installation
+
+> Note: Do not start the ClickHouse service yet if you plan to configure Zookeeper, as it will be started after Zookeeper setup.
+
+1. Enable and start the ClickHouse service:
+
+```bash
+sudo systemctl enable clickhouse-server
+sudo systemctl start clickhouse-server
+sudo systemctl status clickhouse-server
+```
+
+2. Check the ClickHouse version:
+
+```
+clickhouse-client -q "SELECT version()"
+```
+
+### Production Considerations
+
+For a production environment, secure ClickHouse with a dedicated user for SigNoz:
+
+1. Create a signoz user (change the name as desired) with a strong password (replace <password> with a secure password):
+
+```bash
+clickhouse-client -q "CREATE USER signoz IDENTIFIED BY '<password>'"
+```
+
+2. Create a role and grant necessary permissions:
+
+```bash
+clickhouse-client -q "CREATE ROLE IF NOT EXISTS signoz_role"
+clickhouse-client -q "GRANT CREATE, ALTER, DROP, INSERT, SELECT ON signoz_traces.* TO signoz_role"
+clickhouse-client -q "GRANT CREATE, ALTER, DROP, INSERT, SELECT ON signoz_logs.* TO signoz_role"
+clickhouse-client -q "GRANT CREATE, ALTER, DROP, INSERT, SELECT ON signoz_metrics.* TO signoz_role"
+clickhouse-client -q "GRANT CREATE, ALTER, DROP, INSERT, SELECT ON signoz_metadata.* TO signoz_role"
+clickhouse-client -q "GRANT CREATE, ALTER, DROP, INSERT, SELECT ON signoz_analytics.* TO signoz_role"
+clickhouse-client -q "GRANT SELECT ON system.* TO signoz_role"
+clickhouse-client -q "GRANT REMOTE ON *.* TO signoz_role" # For clustered setups
+clickhouse-client -q "GRANT signoz_role TO signoz"
+```
+
+3. Test the signoz user connection:
+
+```bash
+clickhouse-client --user signoz --password <password>
+```
+
+---
+
+## Step 2: Install Zookeeper
+
+Zookeeper is required for ClickHouse to manage distributed operations.
+
+1. Install Java (required by Zookeeper):
+
+```bash
+sudo dnf update
+sudo dnf install -y java-11-openjdk  # CentOS/RHEL
+```
+2. Download and extract the latest Zookeeper release (e.g., 3.9.3, the lastest at the moment):
+
+```bash
+curl -L https://dlcdn.apache.org/zookeeper/zookeeper-3.9.3/apache-zookeeper-3.9.3-bin.tar.gz -o zookeeper.tar.gz
 tar -xzf zookeeper.tar.gz
 ```
 
-3. Create the necessary zookeeper directories and copy the extracted files to `/opt/zookeeper`:
+3. Create Zookeeper directories and copy files:
 
 ```bash
-sudo mkdir -p /opt/zookeeper
-sudo mkdir -p /var/lib/zookeeper
-sudo mkdir -p /var/log/zookeeper
-sudo cp -r apache-zookeeper-3.8.4-bin/* /opt/zookeeper
+sudo mkdir -p /opt/zookeeper /var/lib/zookeeper /var/log/zookeeper
+sudo cp -r apache-zookeeper-3.9.3-bin/* /opt/zookeeper
 ```
 
-4. Create the zookeeper config file:
+4. Create the Zookeeper configuration file:
 
-```bash 
+```bash
 sudo bash -c 'cat <<EOF > /opt/zookeeper/conf/zoo.cfg
 tickTime=2000
 dataDir=/var/lib/zookeeper
@@ -61,23 +141,22 @@ admin.serverPort=3181
 EOF'
 ```
 
-5. Create the zookeeper systemd environment file:
+5. Create the Zookeeper environment file:
+
 ```bash
 sudo bash -c 'cat <<EOF > /opt/zookeeper/conf/zoo.env
 ZOO_LOG_DIR=/var/log/zookeeper
 EOF'
 ```
 
-6. Create a user and group to run Zookeeper and give it ownership of the zookeeper directories:
+6. Create a zookeeper user and set ownership:
 
 ```bash
 sudo getent passwd zookeeper >/dev/null || sudo useradd --system --home /opt/zookeeper --no-create-home --user-group --shell /sbin/nologin zookeeper
-sudo chown -R zookeeper:zookeeper /opt/zookeeper
-sudo chown -R zookeeper:zookeeper /var/lib/zookeeper
-sudo chown -R zookeeper:zookeeper /var/log/zookeeper
+sudo chown -R zookeeper:zookeeper /opt/zookeeper /var/lib/zookeeper /var/log/zookeeper
 ```
 
-7. Create the zookeeper systemd service:
+7. Create the Zookeeper systemd service:
 
 ```bash
 sudo bash -c 'cat <<EOF > /etc/systemd/system/zookeeper.service
@@ -102,14 +181,15 @@ WantedBy=multi-user.target
 EOF'
 ```
 
-8. Reload the systemd daemon and start the zookeeper service:
+8. Start the Zookeeper service:
 
 ```bash
 sudo systemctl daemon-reload
 sudo systemctl start zookeeper.service
+sudo systemctl enable zookeeper.service
 ```
 
-9. Configure clickhouse to use zookeeper and start the clickhouse service:
+9. Configure ClickHouse to use Zookeeper:
 
 ```bash
 sudo bash -c 'cat <<EOF > /etc/clickhouse-server/config.d/cluster.xml
@@ -139,73 +219,116 @@ sudo bash -c 'cat <<EOF > /etc/clickhouse-server/config.d/cluster.xml
     </macros>
 </clickhouse>
 EOF'
+
 sudo chown clickhouse:clickhouse /etc/clickhouse-server/config.d/cluster.xml
-sudo systemctl start clickhouse-server.service
-```
+`` 
 
-### Verify the installation
-
-1. Check the status of the clickhouse and zookeeper services:
+10. Start the ClickHouse service:
 
 ```bash
-sudo systemctl status clickhouse-server.service
+sudo systemctl start clickhouse-server
+sudo systemctl enable clickhouse-server
+```
+
+### Verify Zookeeper and ClickHouse
+
+1. Check the status of both services:
+
+```bash
 sudo systemctl status zookeeper.service
+sudo systemctl status clickhouse-server.service
 ```
 
-2. If the services are running, you should see the following output:
+2. Expected output:
 
 ```bash
-clickhouse-server.service - ClickHouse Server (analytic DBMS for big data)
-    Loaded: loaded (/lib/systemd/system/clickhouse-server.service; enabled; preset: enabled)
+zookeeper.service - Zookeeper
+    Loaded: loaded (/etc/systemd/system/zookeeper.service; enabled; preset: enabled)
     Active: active (running) since ...
 
-zookeeper.service - Zookeeper
-    Loaded: loaded (/etc/systemd/system/zookeeper.service; disabled; preset: enabled)
-    Active: active (running) ...
+clickhouse-server.service - ClickHouse Server
+    Loaded: loaded (/lib/systemd/system/clickhouse-server.service; enabled; preset: enabled)
+    Active: active (running) since ...
 ```
 
-3. (Optional) Check the logs of the clickhouse and zookeeper services:
+3. (Optional) Check logs:
 
 ```bash
-sudo journalctl -u clickhouse-server.service -f
 sudo journalctl -u zookeeper.service -f
-```
+sudo journalctl -u clickhouse-server.service -f
+``` 
 
-## Run Clickhouse migrations 
+---
 
-1. Get and extract the latest release of SigNoz Schema Migrator:.
+
+## Step 3: Run SigNoz Schema Migrations
+
+Schema migrations set up the necessary database schema in ClickHouse for SigNoz.
+
+> On RedHat 8.10 is compiled with the GLibC v2.28. I had to recompile the schema-migrator and the otel-collector (see below).
+
+> This part is optional if the command `ldd --verions` return a version >=2.34
+
+
+0. (Optional) Rebuild the `schema-migrator`
+
+    *  Install GoLang:
+
+    ```bash 
+    dnf install golang -y
+    ```
+
+    * Git clone the collector:
+
+    ```bash
+    git clone https://github.com/SigNoz/signoz-otel-collector.git
+    cd signoz-otel-collector
+    ```
+
+    * Rebuild the `schema-migrator`:
+    ```bash
+    go build -o schema-migrator ./cmd/signozschemamigrator
+    ```
+
+    * Make directory and add to `PATH`:
+    ```bash
+    sudo mkdir -p /opt/signoz-otel-collector/bin
+    cp schema-migrator /opt/signoz-migrator/bin/
+    # TODO add /opt/signoz-migrator/bin/ to path
+    ```
+
+1. Run the migrations (replace <password> with the signoz user password):
+
+> This assume the `schema-migrator` is in the path
 
 ```bash
-curl -L https://github.com/SigNoz/signoz-otel-collector/releases/latest/download/signoz-schema-migrator_linux_$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g').tar.gz -o signoz-schema-migrator.tar.gz
-tar -xzf signoz-schema-migrator.tar.gz
+schema-migrator sync --dsn="tcp://localhost:9000?username=signoz&password=signoz" --up= --replication=false
+schema-migrator async --dsn="tcp://localhost:9000?username=signoz&password=signoz" --up= --replication=false
 ```
 
-2. Run the migrations:
+> Note: The --replication=false flag is used for a single-node setup. For a clustered ClickHouse setup, set --replication=true.
+
+## Step 5: Install SigNoz
+
+1. Download and extract the SigNoz binary (use a specific version for stability, e.g., v0.79.1):
+
+> You can adapt by finding the last version on this [page](https://github.com/SigNoz/signoz/releases/).
 
 ```bash
-./signoz-schema-migrator_linux_$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g')/bin/signoz-schema-migrator sync --dsn="tcp://localhost:9000?password=password" --replication=true  --up=
-./signoz-schema-migrator_linux_$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g')/bin/signoz-schema-migrator async --dsn="tcp://localhost:9000?password=password" --replication=true  --up=
-```
 
+curl -L "https://github.com/signoz/signoz/releases/latest/download/signoz_linux_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/').tar.gz" -o signoz.tar.gz
 
-## Install SigNoz
-
-1. Get and extract the latest release of SigNoz:
-
-```bash
-curl -L https://github.com/SigNoz/signoz/releases/latest/download/signoz_linux_$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g').tar.gz -o signoz.tar.gz
 tar -xzf signoz.tar.gz
 ```
 
-2. Create the necessary directories and copy the extracted files to `/opt/signoz`:
+2. Create directories and copy files:
 
 ```bash
-sudo mkdir -p /opt/signoz
-sudo mkdir -p /var/lib/signoz
-sudo cp -r signoz_linux_$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g')/* /opt/signoz
+sudo mkdir -p /opt/signoz /var/lib/signoz
+sudo cp -r signoz_linux_linux_$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g')/* /opt/signoz
 ```
 
-3. Create the SigNoz systemd environment file:
+3. Create the SigNoz environment file (replace <password> with the signoz user password and generate a random SIGNOZ_JWT_SECRET):
 
 ```bash
 sudo bash -c 'cat <<EOF > /opt/signoz/conf/systemd.env
@@ -214,18 +337,19 @@ INVITE_EMAIL_TEMPLATE=/opt/signoz/templates/invitation_email_template.html
 SIGNOZ_SQLSTORE_SQLITE_PATH=/var/lib/signoz/signoz.db
 SIGNOZ_WEB_ENABLED=true
 SIGNOZ_WEB_DIRECTORY=/opt/signoz/web
-SIGNOZ_JWT_SECRET=secret
+SIGNOZ_JWT_SECRET=$(openssl rand -hex 32)  # Generate a random secret
 SIGNOZ_ALERTMANAGER_PROVIDER=signoz
 SIGNOZ_TELEMETRYSTORE_PROVIDER=clickhouse
-SIGNOZ_TELEMETRYSTORE_CLICKHOUSE_DSN=tcp://localhost:9000?password=password
+SIGNOZ_TELEMETRYSTORE_CLICKHOUSE_DSN=tcp://localhost:9000?username=signoz&password=<password>
 EOF'
 ```
 
-4. Create a user and group to run SigNoz and give it ownership of the signoz directories:
+> Note: The SIGNOZ_JWT_SECRET should be a secure, random string for production. The SQLite database (signoz.db) is used for SigNoz metadata.
+
+4. Create a signoz user and set ownership:
 ```bash
 sudo getent passwd signoz >/dev/null || sudo useradd --system --home /opt/signoz --no-create-home --user-group --shell /sbin/nologin signoz
-sudo chown -R signoz:signoz /var/lib/signoz
-sudo chown -R signoz:signoz /opt/signoz
+sudo chown -R signoz:signoz /var/lib/signoz /opt/signoz
 ```
 
 5. Create the SigNoz systemd service:
@@ -252,157 +376,153 @@ WantedBy=multi-user.target
 EOF'
 ```
 
-6. Reload the systemd daemon and start the SigNoz service:
+6. Start the SigNoz service:
 
 ```bash
 sudo systemctl daemon-reload
 sudo systemctl start signoz.service
+sudo systemctl enable signoz.service
 ```
 
-### Verify the installation
+7. Open the firewall port for SigNoz (port 8080):
 
-1. Check the status of the signoz service:
+
+```bash
+sudo firewall-cmd --permanent --add-port=8080/tcp
+sudo firewall-cmd --reload
+# OR for Ubuntu with ufw
+sudo ufw allow 8080/tcp
+```
+
+###  Verify SigNoz Installation
+
+1. Check the service status:
 
 ```bash
 sudo systemctl status signoz.service
 ```
 
-2. If the services are running, you should see the following output:
-
+2. Expected output:
 ```bash
 signoz.service - SigNoz
     Loaded: loaded (/etc/systemd/system/signoz.service; enabled; preset: enabled)
     Active: active (running) since ...
 ```
 
-3. (Optional) Check the logs of the signoz service:
+3. Check logs:
 
 ```bash
 sudo journalctl -u signoz.service -f
 ```
 
+---
 
-## Install SigNoz Otel Collector
+## Step 6: Install SigNoz OpenTelemetry Collector
 
-1. Get and extract the latest release of SigNoz Otel Collector:
+The OTel Collector gathers telemetry data (metrics, traces, logs) and sends it to SigNoz.
+
+> You should have already download the collector when running the `schema-migration` tool.
+
+> For the same reason as the `schema-migration` tool. I had to rebuild the collector on RedHat 8.10
+
+0. (Optional) Rebuild the `signoz-otel-collector`
+
+    *  Install GoLang __(if not already done)__:
+
+    ```bash 
+    dnf install golang -y
+    ```
+
+    * Git clone the collector __(if not already done)__:
+
+    ```bash
+    git clone https://github.com/SigNoz/signoz-otel-collector.git
+    cd signoz-otel-collector
+    ```
+
+    * Rebuild the collector
+    ```bash
+    go build -o signoz-otel-collector ./cmd/signozotelcollector
+    ```
+
+    * Make dir and add to `PATH`:
+    ```bash
+    sudo mkdir -p /var/lib/signoz-otel-collector
+    sudo mkdir -p /opt/signoz-otel-collector/{bin,conf}
+    cp signoz-otel-collector /opt/signoz-otel-collector/bin/
+    # TODO add /opt/signoz-migrator/bin/ to path
+    ```
+### Configure the OTel Collector
+
+1. Set ownership:
 
 ```bash
-curl -L https://github.com/SigNoz/signoz-otel-collector/releases/latest/download/signoz-otel-collector_linux_$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g').tar.gz -o signoz-otel-collector.tar.gz
-tar -xzf signoz-otel-collector.tar.gz
+sudo chown -R signoz:signoz /var/lib/signoz-otel-collector /opt/signoz-otel-collector
 ```
 
-2. Create the necessary directories and copy the extracted files to `/opt/signoz-otel-collector`:
+2. Create the OTel Collector configuration file (replace <password> with the signoz user password and update 10.24.208.77 to localhost if running locally):
 
-```bash
-sudo mkdir -p /var/lib/signoz-otel-collector
-sudo mkdir -p /opt/signoz-otel-collector
-sudo cp -r signoz-otel-collector_linux_$(uname -m | sed 's/x86_64/amd64/g' | sed 's/aarch64/arm64/g')/* /opt/signoz-otel-collector
-```
-
-3. Change the ownership of the files to the `signoz` user and group:
-
-```bash
-sudo chown -R signoz:signoz /var/lib/signoz-otel-collector
-sudo chown -R signoz:signoz /opt/signoz-otel-collector
-```
-
-4. Create a `config.yaml` file in the `/opt/signoz-otel-collector/conf` directory:
+> TODO change the server IP and add config explaination
 
 ```bash
 sudo bash -c 'cat <<EOF > /opt/signoz-otel-collector/conf/config.yaml
 receivers:
-  otlp:
-    protocols:
-      grpc:
-        endpoint: 0.0.0.0:4317
-        max_recv_msg_size_mib: 16
-      http:
-        endpoint: 0.0.0.0:4318
-  jaeger:
-    protocols:
-      grpc:
-        endpoint: 0.0.0.0:14250
-      thrift_http:
-        endpoint: 0.0.0.0:14268
-  httplogreceiver/heroku:
-    endpoint: 0.0.0.0:8081
-    source: heroku
-  httplogreceiver/json:
-    endpoint: 0.0.0.0:8082
-    source: json
+  hostmetrics:
+    collection_interval: 60s
+    scrapers:
+      cpu: {}
+      disk: {}
+      load: {}
+      filesystem: {}
+      memory: {}
+      network: {}
+      paging: {}
+      processes: {}
+
 processors:
   batch:
-    send_batch_size: 50000
-    timeout: 1s
-  signozspanmetrics/delta:
-    metrics_exporter: clickhousemetricswrite
-    latency_histogram_buckets: [100us, 1ms, 2ms, 6ms, 10ms, 50ms, 100ms, 250ms, 500ms, 1000ms, 1400ms, 2000ms, 5s, 10s, 20s, 40s, 60s]
-    dimensions_cache_size: 100000
-    dimensions:
-      - name: service.namespace
-        default: default
-      - name: deployment.environment
-        default: default
-      - name: signoz.collector.id
-    aggregation_temporality: AGGREGATION_TEMPORALITY_DELTA
+    send_batch_size: 1000
+    timeout: 10s
+
+  resourcedetection:
+    detectors: [env, system]
+    timeout: 2s
+    system:
+      hostname_sources: [os]
+
 extensions:
-  health_check:
-    endpoint: 0.0.0.0:13133
-  zpages:
-    endpoint: localhost:55679
-  pprof:
-    endpoint: localhost:1777
+  health_check: {}
+  zpages: {}
+
 exporters:
-  clickhousetraces:
-    datasource: tcp://localhost:9000/signoz_traces?password=password
-    use_new_schema: true
   clickhousemetricswrite:
-    endpoint: tcp://localhost:9000/signoz_metrics?password=password
-    timeout: 15s
+    endpoint: tcp://10.24.208.77:9000/signoz_metrics?username=signoz&password=signoz
+    tls:
+      insecure: true
     resource_to_telemetry_conversion:
       enabled: true
-  clickhouselogsexporter:
-    dsn: tcp://localhost:9000/signoz_logs?password=password
-    timeout: 10s
-    use_new_schema: true
+
   metadataexporter:
-    dsn: tcp://localhost:9000/signoz_metadata?password=password
+    dsn: tcp://10.24.208.77:9000/signoz_metadata?username=signoz&password=signoz
     timeout: 10s
     tenant_id: default
     cache:
       provider: in_memory
+
 service:
   telemetry:
-    logs:
-      encoding: json
     metrics:
       address: 0.0.0.0:8888
-  extensions: [health_check, zpages, pprof]
+  extensions: [health_check, zpages] # http://<collector-host>:55679/debug
   pipelines:
-    traces:
-      receivers: [otlp, jaeger]
-      processors: [signozspanmetrics/delta, batch]
-      exporters: [clickhousetraces, metadataexporter]
-    metrics:
-      receivers: [otlp]
-      processors: [batch]
+    metrics/hostmetrics:
+      receivers: [hostmetrics]
+      processors: [resourcedetection, batch]
       exporters: [clickhousemetricswrite, metadataexporter]
-    logs:
-      receivers: [otlp, httplogreceiver/heroku, httplogreceiver/json]
-      processors: [batch]
-      exporters: [clickhouselogsexporter, metadataexporter]
 EOF'
 ```
 
-5. Create a `opamp.yaml` file in the `/opt/signoz-otel-collector/conf` directory:
-
-```bash
-sudo bash -c 'cat <<EOF > /opt/signoz-otel-collector/conf/opamp.yaml
-server_endpoint: ws://127.0.0.1:4320/v1/opamp
-EOF'
-```
-
-6. Create the SigNoz Otel Collector systemd service:
+3. Create the OTel Collector systemd service:
 
 ```bash
 sudo bash -c 'cat <<EOF > /etc/systemd/system/signoz-otel-collector.service
@@ -418,55 +538,87 @@ Type=simple
 KillMode=mixed
 Restart=on-failure
 WorkingDirectory=/opt/signoz-otel-collector
-ExecStart=/opt/signoz-otel-collector/bin/signoz-otel-collector --config=/opt/signoz-otel-collector/conf/config.yaml --manager-config=/opt/signoz-otel-collector/conf/opamp.yaml --copy-path=/var/lib/signoz-otel-collector/config.yaml
+ExecStart=/opt/signoz-otel-collector/bin/signoz-otel-collector --config=/opt/signoz-otel-collector/conf/config.yaml --copy-path=/var/lib/signoz-otel-collector/config.yaml
 
 [Install]
 WantedBy=multi-user.target
 EOF'
 ```
 
-7. Reload the systemd daemon and start the SigNoz Otel Collector service:
+4. Start the OTel Collector service:
 
 ```bash
 sudo systemctl daemon-reload
 sudo systemctl start signoz-otel-collector.service
+sudo systemctl enable signoz-otel-collector.service
+```
+5. Open firewall ports for the OTel Collector (e.g., 4317, 4318):
+
+```bash
+sudo firewall-cmd --permanent --add-port={4317,4318}/tcp
+sudo firewall-cmd --reload
 ```
 
-### Verify the installation
+### Verify OTel Collector Installation
 
-1. Check the status of the signoz otel collector service:
+1. Check the service status:
 
 ```bash
 sudo systemctl status signoz-otel-collector.service
 ```
 
-2. If the services are running, you should see the following output:
+2. Expected output:
 
 ```bash
 signoz-otel-collector.service - SigNoz OTel Collector
     Loaded: loaded (/etc/systemd/system/signoz-otel-collector.service; enabled; preset: enabled)
     Active: active (running) since ...
 ```
-
-3. (Optional) Check the logs of the signoz otel collector service:
+3. Check logs:
 
 ```bash
 sudo journalctl -u signoz-otel-collector.service -f
 ```
 
-## Test the installation
+# Step 5: Test the Installation
 
-1. Run the following command to check the health of signoz:
+1. Check the health of the SigNoz application:
 
 ```bash
 curl -X GET http://localhost:8080/api/v1/health
 ```
 
-2. If the installation is successful, you should see the following output:
+2. Expected output:
 
 ```bash
 {"status":"ok"}
 ```
+
+3. Access the SigNoz UI by navigating to http://<your-server-ip>:8080 in a web browser. Log in and verify that traces, metrics, and logs are being collected.
+
+
+## Production Considerations
+
+* Security: Ensure all passwords (ClickHouse, JWT secret) are strong and stored securely (e.g., using a secrets manager).
+* Firewall: Restrict access to ClickHouse (port 9000) and OTel Collector ports (4317/4318) to trusted networks.
+* High Availability: For production, consider deploying ClickHouse in a clustered setup with multiple nodes and configure Zookeeper with at least three nodes for fault tolerance.
+* Monitoring: Monitor the health of ClickHouse, Zookeeper, SigNoz, and OTel Collector services using systemd or external tools.
+* Backup: Regularly back up the ClickHouse data (/var/lib/clickhouse) and SigNoz SQLite database (/var/lib/signoz/signoz.db).
+
+
+## Troubleshooting
+
+> You can check this [page](https://signoz.io/docs/install/troubleshooting/) to try to find OTel collector is accessible from where you are running your applications. 
+
+* Service Fails to Start: Check logs (journalctl -u <service-name> -f) for errors. Common issues include incorrect permissions, missing configuration files, or network issues.
+* ClickHouse Connection Errors: Verify the signoz user credentials and ensure port 9000 is open.
+* No Data in SigNoz UI: Ensure the OTel Collector is running and configured to send data to ClickHouse. Check the OTel Collector logs for errors.
+
+## References
+* [SigNoz Documentation](https://signoz.io/docs)
+* [ClickHouse Installation Guide](https://clickhouse.com/docs/install)
+* [Zookeeper Releases](https://zookeeper.apache.org/releases.html)
+* [OpenTelemetry Collector Receivers](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver)
 
 
 <RetentionInfo />
