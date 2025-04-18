@@ -9,6 +9,7 @@ import { ArrowRight, Loader2, BookOpen } from 'lucide-react'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useLogEvent } from '../../hooks/useLogEvent'
 
 interface ErrorsProps {
   fullName?: string
@@ -59,6 +60,7 @@ const Teams: React.FC<SignUpPageProps> = () => {
   const [submitFailed, setSubmitFailed] = useState(false)
   const router = useRouter()
   const pathname = usePathname()
+  const logEvent = useLogEvent()
 
   const searchParams = useSearchParams()
   const workEmailFromParams = searchParams.get('q')
@@ -172,6 +174,35 @@ const Teams: React.FC<SignUpPageProps> = () => {
         setSubmitSuccess(true)
         handleGTMCustomEventTrigger(payload)
 
+        // Set user ID in local storage *before* logging events
+        localStorage.setItem('app_user_id', payload.email)
+
+        // --- Segment Identify Call ---
+        logEvent({
+          eventType: 'identify',
+          eventName: 'User Signed Up', // Optional: Add an event name for clarity
+          attributes: {
+            // These become Segment traits
+            email: payload.email,
+            dataRegion: payload.region.name,
+            // Add other relevant traits if available, e.g., fullName, companyName
+          },
+        })
+
+        // --- Segment Group Call ---
+        const domain = payload.email.split('@')[1] || 'unknown_domain'
+        logEvent({
+          eventType: 'group',
+          eventName: 'User Associated with Company', // Optional: Add an event name
+          groupId: domain,
+          attributes: {
+            // These become Group traits
+            // Add company-related traits if available, e.g., companyName
+            domain: domain,
+          },
+        })
+        // --- End Segment Calls ---
+
         setFormData({
           fullName: '',
           workEmail: '',
@@ -183,7 +214,6 @@ const Teams: React.FC<SignUpPageProps> = () => {
 
         localStorage.setItem('workEmail', payload.email)
         localStorage.setItem('region', payload.region.name)
-        localStorage.setItem('app_user_id', payload.email)
 
         router.push('/verify-email')
       } else {
