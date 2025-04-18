@@ -40,10 +40,10 @@ const getOS = (): string => {
   if (typeof window === 'undefined') return 'unknown'
   const userAgent = window.navigator.userAgent
   if (userAgent.indexOf('Win') !== -1) return 'Windows'
-  if (userAgent.indexOf('Mac') !== -1) return 'MacOS'
-  if (userAgent.indexOf('Linux') !== -1) return 'Linux'
-  if (userAgent.indexOf('Android') !== -1) return 'Android'
   if (userAgent.indexOf('like Mac') !== -1) return 'iOS'
+  if (userAgent.indexOf('Mac') !== -1) return 'MacOS'
+  if (userAgent.indexOf('Android') !== -1) return 'Android'
+  if (userAgent.indexOf('Linux') !== -1) return 'Linux'
   return 'unknown'
 }
 
