@@ -35,19 +35,19 @@ const MainSection: React.FC = () => {
             <div className="mt-10 flex max-w-full flex-col">
               <div className="flex flex-col justify-between gap-6 sm:flex-row">
                 <div className="max-w-full px-6 font-mono text-xl text-signoz_vanilla-400 max-md:max-w-full">
-                  {`// Feb 10 ⎯ 14`}
+                  {`// May 12 ⎯ 16`}
                 </div>
                 <div className="flex flex-row items-center gap-4 px-6">
                   <div className="inline-block h-3 w-3 rounded-sm bg-signoz_forest-500" />
                   <div className="pr-2 font-mono text-lg uppercase text-signoz_vanilla-400 max-md:max-w-full sm:text-xl">
-                    ONLINE — WORLDWIDE, Feb 10, 9AM PT
+                    ONLINE — WORLDWIDE, May 12, 9AM PT
                   </div>
                 </div>
               </div>
               <div className="mt-8 max-w-full border-b border-dashed border-signoz_slate-100 px-6 text-5xl font-medium uppercase text-signoz_vanilla-100 max-md:max-w-full max-md:text-4xl">
                 Launch Week{' '}
                 <span className="launch-week-counter rounded bg-signoz_cherry-500  text-signoz_vanilla-100">
-                  3
+                  4
                 </span>
               </div>
             </div>
@@ -59,9 +59,9 @@ const MainSection: React.FC = () => {
 
           <div className="z-[1] my-6 ml-5 flex min-h-[40px] w-fit items-center justify-center gap-1.5 overflow-hidden rounded-sm bg-white px-4 py-2 text-sm leading-none text-signoz_ink-500  ">
             <a
-              href="https://lu.ma/event/evt-s7zCYuXANGch6qS"
+              href="https://lu.ma/event/evt-rsG0WzmmgF9FPfy"
               data-luma-action="checkout"
-              data-luma-event-id="evt-s7zCYuXANGch6qS"
+              data-luma-event-id="evt-rsG0WzmmgF9FPfy"
               id="launch-page-subscribe"
             >
               <div className="flex items-center gap-1.5">
@@ -73,7 +73,7 @@ const MainSection: React.FC = () => {
             </a>
           </div>
 
-          <div className="flex flex-col justify-between border-b border-t border-dashed border-signoz_slate-100 px-6 py-6 sm:flex-row">
+          {/* <div className="flex flex-col justify-between border-b border-t border-dashed border-signoz_slate-100 px-6 py-6 sm:flex-row">
             <div className="flex flex-col justify-between gap-4 sm:pr-4">
               <div className="text-base uppercase text-signoz_vanilla-400">Monday ⎯ Feb 10</div>
               <div className="flex flex-col gap-2">
@@ -347,15 +347,15 @@ const MainSection: React.FC = () => {
                 </div>
               </div>
             </Link>
-          </div>
+          </div> */}
 
-          {/* Timer 
+          {/* Timer  */}
           {[
-            // 'Monday ⎯ Feb 10',
-            // 'Tuesday ⎯ Feb 11',
-            // 'Wednesday ⎯ Feb 12',
-            // 'Thursday ⎯ Feb 13',
-            // 'Friday ⎯ Feb 14',
+            'Monday ⎯ May 12',
+            'Tuesday ⎯ May 13',
+            'Wednesday ⎯ May 14',
+            'Thursday ⎯ May 15',
+            'Friday ⎯ May 16',
           ].map((day, index) => (
             <div
               key={index}
@@ -365,12 +365,12 @@ const MainSection: React.FC = () => {
                 {day}
               </div>
               <div className="flex w-[68%] justify-end sm:justify-start">
-                <CountdownTimer eventDate={`2025-02-${14 + index} 21:30:00`} />
+                <CountdownTimer eventDate={`2025-05-${12 + index} 21:30:00`} />
               </div>
             </div>
-          ))} */}
+          ))}
 
-          {/* Cards */}
+          {/* // Cards */}
           {/* <div className="mb-20 mt-12 flex flex-col gap-7 px-6">
             <div className="self-stretch font-mono uppercase text-signoz_vanilla-400">
               More From Launch Week
