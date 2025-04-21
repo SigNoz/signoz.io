@@ -786,6 +786,7 @@ const docsSideNav = [
         type: 'category',
         isExpanded: false,
         label: 'Send Logs to SigNoz',
+        route: '/docs/logs-management/send-logs/send-logs-to-signoz',
         items: [
           {
             type: 'doc',
