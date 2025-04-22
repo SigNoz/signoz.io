@@ -114,7 +114,7 @@ const docsSideNav = [
               label: 'Quickstart',
             },
           ]
-        },        
+        },
         {
           type: 'category',
           isExpanded: false,
@@ -375,7 +375,7 @@ const docsSideNav = [
               },
             ]
           },
-          
+
           {
             type: 'doc',
             route: '/docs/tutorial/opentelemetry-operator-usage',
@@ -420,7 +420,7 @@ const docsSideNav = [
       },
     ]
   },
-  
+
   {
     label: 'APM & Distributed Tracing',
     type: 'category',
@@ -1631,7 +1631,7 @@ const docsSideNav = [
         route: '/docs/tutorial/traefik-observability',
         label: 'Traefik Observability',
       },
-     
+
     ],
   },
   {
@@ -1738,6 +1738,12 @@ const docsSideNav = [
         label: 'Using Datadog OTLP receiver',
       },
     ],
+  },
+  {
+    label: 'Migrate From LGTM Stack',
+    className: 'new-doc',
+    type: 'doc',
+    route: '/docs/migration/migrate-from-grafana'
   },
   {
     label: 'Azure Monitoring',
