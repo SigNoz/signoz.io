@@ -4,9 +4,12 @@ id: temporal-golang-opentelemetry
 title: Instrumenting a Golang Temporal application with OpenTelemetry
 ---
 
+We have published a helloworld temporal application and instrumented it using otel at https://github.com/SigNoz/temporal-golang-opentelemetry/tree/main. The README.md of the repo has instructions to run the application. 
+
+You should open the repo and browse the code and files as we go through the doc step by step.
 
 
-### Step 1: Add interceptors to `client.Options`
+### Step 1: Add interceptors to `client.Options` ([Code Link](https://github.com/SigNoz/temporal-golang-opentelemetry/blob/main/helloworld/connection.go))
 Client applications and workers connect to the temporal service via `client.Dial` function which takes in client options as input. Here is the config that we use to connect to the temporal service
 
 ```
@@ -48,9 +51,9 @@ As mentioned in the comment of the struct, ZerologAdapter wraps zerolog to imple
 
 </details>
 
-### Step 3: Changes in temporal worker and temporal client code 
+### Step 3: Changes in temporal worker code ([link](https://github.com/SigNoz/temporal-golang-opentelemetry/blob/main/worker/main.go)) and temporal client code ([link](https://github.com/SigNoz/temporal-golang-opentelemetry/blob/main/starter/main.go))
 
-Add the below code to the start of your worker code
+Add the below code to the start of your worker and client code
 ```
 	ctx := context.Background()
 
@@ -84,6 +87,8 @@ Add the below code to the start of your worker code
 	// Create metrics handler
 	metricsHandler := instrument.NewOpenTelemetryMetricsHandler()
 ```
+`instrument` is the package where you copied the files from step 2.
+
 After the above changes, you should be able to pass the right params at Step 1.
 
 
@@ -122,39 +127,43 @@ Pass serviceName, otlp endpoint and authentication headers using native otel env
 <Tabs>
 
     <TabItem value="via-collector" label="Via Collector">
-    Worker run command:
-    ```
-    OTEL_SERVICE_NAME='temporal-worker-<identifier>' INSECURE_MODE=true OTEL_EXPORTER_OTLP_ENDPOINT='http://localhost:4317' go run worker/main.go 
-    ```
+        Worker run command:
+        ```
+        OTEL_SERVICE_NAME='temporal-worker-<identifier>' INSECURE_MODE=true OTEL_EXPORTER_OTLP_ENDPOINT='http://localhost:4317' go run worker/main.go 
+        ```
 
-    A similar run command for temporal client application
-    ```
-    OTEL_SERVICE_NAME='temporal-client-<identifier>' INSECURE_MODE=true OTEL_EXPORTER_OTLP_ENDPOINT='http://localhost:4317' go run starter/main.go
-    ```
-    
-    Zerolog is not configured to send directly to signoz cloud. In most cases, the logs are output to file and the logs are read by otel-collector and pushed to signoz cloud using 
-    1. Adding a filelog receiver at otel-collector following https://signoz.io/docs/userguide/collect_logs_from_file/
-    2. Collecting k8s logs following https://signoz.io/docs/userguide/collect_kubernetes_pod_logs/
+        A similar run command for temporal client application
+        ```
+        OTEL_SERVICE_NAME='temporal-client-<identifier>' INSECURE_MODE=true OTEL_EXPORTER_OTLP_ENDPOINT='http://localhost:4317' go run starter/main.go
+        ```
 
-    To setup otel-collector, read:
-    1. For VM  => https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/
-    2. For K8s => https://signoz.io/docs/tutorial/kubernetes-infra-metrics/
+        This should start sending your sdk metrics and traces to the otel-collector. This does not collect logs yet.
+        
+        Zerolog is not configured to send directly to signoz cloud. In most cases, the logs are output to file and the logs are read by otel-collector and pushed to signoz cloud using 
+        1. Adding a filelog receiver at otel-collector following https://signoz.io/docs/userguide/collect_logs_from_file/
+        2. Collecting k8s logs following https://signoz.io/docs/userguide/collect_kubernetes_pod_logs/
+
+        To setup otel-collector, read:
+        1. For VM  => https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/
+        2. For K8s => https://signoz.io/docs/tutorial/kubernetes-infra-metrics/
 
     </TabItem>
 
     <TabItem value="direct-to-cloud" label="Direct from application" default>
-    Worker run command:
-    ```
-    OTEL_SERVICE_NAME='temporal-worker-<identifier>' OTEL_EXPORTER_OTLP_ENDPOINT='ingest.<region>.signoz.cloud' OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<signoz-ingestion-key>" go run worker/main.go
-    ```
+        Worker run command:
+        ```
+        OTEL_SERVICE_NAME='temporal-worker-<identifier>' OTEL_EXPORTER_OTLP_ENDPOINT='ingest.<region>.signoz.cloud' OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<signoz-ingestion-key>" go run worker/main.go
+        ```
 
-    A similar run command for temporal client application
-    ```
-    OTEL_SERVICE_NAME='temporal-client-<identifier>' OTEL_EXPORTER_OTLP_ENDPOINT='ingest.<region>.signoz.cloud' OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<signoz-ingestion-key>" go starter/main.go
-    ```
+        A similar run command for temporal client application
+        ```
+        OTEL_SERVICE_NAME='temporal-client-<identifier>' OTEL_EXPORTER_OTLP_ENDPOINT='ingest.<region>.signoz.cloud' OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<signoz-ingestion-key>" go starter/main.go
+        ```
+        
+        Directly sending from application to signoz cloud works by default for exporting metrics and traces. Logs are usually written to a file and needs an otel-collector with a filelog receiver to export logs to signoz cloud. If you do not write logs to file and wish to send logs directly from you applications, do reach out to us for help (intercom for saas users and slack community for OSS users)
     </TabItem>
 
-    Directly sending from application to signoz cloud works by default for exporting metrics and traces. Logs are usually written to a file and needs an otel-collector with a filelog receiver to export logs to signoz cloud. If you do not write logs to file and wish to send logs directly from you applications, do reach out to us for help (intercom for saas users and slack community for OSS users)
+
 
 </Tabs>
 
