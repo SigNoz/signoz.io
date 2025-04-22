@@ -103,10 +103,18 @@ const docsSideNav = [
     route: '/docs/install/',
     items: [
         {
-          type: 'doc',
-          route: '/docs/cloud',
-          label: 'SigNoz Cloud',
-        },
+        type: 'category',
+        isExpanded: false,
+        label: 'SigNoz Cloud',
+        route: '/docs/cloud',
+        items: [
+            {
+              type: 'doc',
+              route: '/docs/cloud/quickstart',
+              label: 'Quickstart',
+            },
+          ]
+        },        
         {
           type: 'category',
           isExpanded: false,
