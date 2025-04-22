@@ -34,18 +34,3 @@ export const getFeaturesFromAPI = cache(async () => {
     return {}
   }
 })
-
-// Evaluate a feature flag server-side
-export function evaluateFeature<T>(
-  featureKey: string,
-  defaultValue: T,
-  attributes: Record<string, any> = {}
-): T {
-  const gb = new GrowthBook({
-    features: {},
-    attributes,
-  })
-
-  // Cast the result to T to fix the type issue
-  return gb.getFeatureValue(featureKey, defaultValue) as T
-}
