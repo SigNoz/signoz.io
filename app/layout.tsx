@@ -12,6 +12,8 @@ import TopNav from '@/components/TopNav/TopNav'
 import { Inter } from 'next/font/google'
 import React, { Suspense } from 'react'
 import PageViewTracker from '@/components/Analytics/PageViewTracker'
+import { GrowthBookProvider } from '@/lib/growthbook'
+import { getFeaturesFromAPI } from '@/lib/growthbook-server'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -56,7 +58,10 @@ export const metadata: Metadata = {
   },
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  // Fetch features server-side
+  const features = await getFeaturesFromAPI()
+
   return (
     <html lang={siteMetadata.language} className={inter.className} suppressHydrationWarning>
       <GoogleTagManager gtmId="GTM-N9B6D4H" />
@@ -102,17 +107,19 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </noscript>
 
         <ThemeProviders>
-          <Suspense>
-            <SectionContainer>
-              <div className="relative flex h-screen flex-col justify-between ">
-                <SearchProvider searchConfig={siteMetadata.search as SearchConfig}>
-                  <TopNav />
-                  <main className="mb-auto mt-[48px]">{children}</main>
-                </SearchProvider>
-                <MainFooter />
-              </div>
-            </SectionContainer>
-          </Suspense>
+          <GrowthBookProvider initialFeatures={features}>
+            <Suspense>
+              <SectionContainer>
+                <div className="relative flex h-screen flex-col justify-between ">
+                  <SearchProvider searchConfig={siteMetadata.search as SearchConfig}>
+                    <TopNav />
+                    <main className="mb-auto mt-[48px]">{children}</main>
+                  </SearchProvider>
+                  <MainFooter />
+                </div>
+              </SectionContainer>
+            </Suspense>
+          </GrowthBookProvider>
         </ThemeProviders>
       </body>
     </html>
