@@ -381,47 +381,45 @@ Pass serviceName, otlp endpoint and authentication headers using native otel env
     <TabItem value="via-collector" label="Via Collector">
         Worker run command:
         ```
-        OTEL_SERVICE_NAME='temporal-worker-<identifier>' INSECURE_MODE=true OTEL_EXPORTER_OTLP_ENDPOINT='http://localhost:4317' go run worker/main.go 
+        OTEL_RESOURCE_ATTRIBUTES="service.name=temporal-worker-<identifier>,deployment.environment=test" OTEL_EXPORTER_OTLP_ENDPOINT='http://localhost:4317' npm run start 
         ```
 
         A similar run command for temporal client application
         ```
-        OTEL_SERVICE_NAME='temporal-client-<identifier>' INSECURE_MODE=true OTEL_EXPORTER_OTLP_ENDPOINT='http://localhost:4317' go run starter/main.go
+        OTEL_RESOURCE_ATTRIBUTES="service.name=temporal-client-<identifier>,deployment.environment=test" OTEL_EXPORTER_OTLP_ENDPOINT='http://localhost:4317' npm run workflow
         ```
-
-        This should start sending your sdk metrics and traces to the otel-collector. This does not collect logs yet.
-        
-        Zerolog is not configured to send directly to signoz cloud. In most cases, the logs are output to file and the logs are read by otel-collector and pushed to signoz cloud using 
-        1. Adding a filelog receiver at otel-collector following https://signoz.io/docs/userguide/collect_logs_from_file/
-        2. Collecting k8s logs following https://signoz.io/docs/userguide/collect_kubernetes_pod_logs/
-
-        To setup otel-collector, read:
-        1. For VM  => https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/
-        2. For K8s => https://signoz.io/docs/tutorial/kubernetes-infra-metrics/
 
     </TabItem>
 
     <TabItem value="direct-to-cloud" label="Direct from application" default>
         Worker run command:
         ```
-        OTEL_SERVICE_NAME='temporal-worker-<identifier>' OTEL_EXPORTER_OTLP_ENDPOINT='ingest.<region>.signoz.cloud' OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<signoz-ingestion-key>" go run worker/main.go
+        OTEL_EXPORTER_OTLP_ENDPOINT='https://ingest.<region>.signoz.cloud:443' OTEL_RESOURCE_ATTRIBUTES="service.name=temporal-worker-<identifier>" OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<signoz-ingestion-key>" npm run start
         ```
 
         A similar run command for temporal client application
         ```
-        OTEL_SERVICE_NAME='temporal-client-<identifier>' OTEL_EXPORTER_OTLP_ENDPOINT='ingest.<region>.signoz.cloud' OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<signoz-ingestion-key>" go starter/main.go
+        OTEL_EXPORTER_OTLP_ENDPOINT='https://ingest.<region>.signoz.cloud:443' OTEL_RESOURCE_ATTRIBUTES="service.name=temporal-client-<identifier>" OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<signoz-ingestion-key>" npm run workflow
         ```
         
-        Directly sending from application to signoz cloud works by default for exporting metrics and traces. Logs are usually written to a file and needs an otel-collector with a filelog receiver to export logs to signoz cloud. If you do not write logs to file and wish to send logs directly from you applications, do reach out to us for help (intercom for saas users and slack community for OSS users)
     </TabItem>
-
 
 
 </Tabs>
 
+This should start sending your sdk metrics, traces and logs to the otel-collector.
+
+Winston is configured to send logs directly to signoz cloud. In most cases, the logs are output to file and the logs are read by otel-collector and pushed to signoz cloud using 
+1. Adding a filelog receiver at otel-collector following https://signoz.io/docs/userguide/collect_logs_from_file/
+2. Collecting k8s logs following https://signoz.io/docs/userguide/collect_kubernetes_pod_logs/
+
+To setup otel-collector, read:
+1. For VM  => https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/
+2. For K8s => https://signoz.io/docs/tutorial/kubernetes-infra-metrics/
+
 ### Step 8: Build dashboards and parse logs at SigNoz
 
-You should be able to see incoming temporal sdk metrics at **Metrics Explorer** page at SigNoz. Once you see them coming, go to Dashboards -> Import Dashboard. The dashboard json for sdk metrics can be found at [this link](https://github.com/SigNoz/dashboards/blob/main/temporal.io/Temporal%20SDK%20Metrics%20-%20golang.json) 
+You should be able to see incoming temporal sdk metrics at **Metrics Explorer** page at SigNoz. Once you see them coming, go to Dashboards -> Import Dashboard. The dashboard json for sdk metrics can be found at [this link](https://github.com/SigNoz/dashboards/blob/main/temporal.io/Temporal%20SDK%20Metrics%20-%20typescript.json) 
 
 If you are successfully sending logs to SigNoz, you need to parse your logs at SigNoz using the Logs Pipeline feature.
 1. Use Json parser if your logs are json formatted using https://signoz.io/docs/logs-pipelines/processors/#json-parser
