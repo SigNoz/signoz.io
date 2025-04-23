@@ -5,6 +5,7 @@ import { cache } from 'react'
 // List of all feature flag keys for better type safety
 export const FeatureFlags = {
   LAUNCH_WEEK_BANNER: 'show-launch-week-banner',
+  SIMPLIFIED_CTA: 'single-cta-on-home-header',
   // Add more feature flags here as needed
 }
 
@@ -21,4 +22,8 @@ export async function getFeatureFlag<T>(flagKey: string, defaultValue: T): Promi
 // Specific feature flag functions with caching
 export const getLaunchWeekBannerEnabled = cache(async (): Promise<boolean> => {
   return getFeatureFlag(FeatureFlags.LAUNCH_WEEK_BANNER, false)
+})
+
+export const getSimplifiedCTAEnabled = cache(async (): Promise<boolean> => {
+  return getFeatureFlag(FeatureFlags.SIMPLIFIED_CTA, false)
 })
