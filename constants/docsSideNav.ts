@@ -329,6 +329,29 @@ const docsSideNav = [
             // },
             items: [
               {
+                type: 'category',
+                route: '/docs/operate/clickhouse/distributed-clickhouse',
+                label: 'Distributed ClickHouse',
+                isExpanded: false,
+                items: [
+                  {
+                    type: 'doc',
+                    route: '/docs/manage/administrator-guide/clickhouse/distributed-clickhouse/docker',
+                    label: 'Set up Distributed Clickhouse using Docker',
+                  },
+                  {
+                    type: 'doc',
+                    route: '/docs/manage/administrator-guide/clickhouse/distributed-clickhouse/docker-swarm',
+                    label: 'Set up Distributed Clickhouse using Docker Swarm',
+                  },
+                  {
+                    type: 'doc',
+                    route: '/docs/manage/administrator-guide/clickhouse/distributed-clickhouse/kubernetes',
+                    label: 'Set up Distributed Clickhouse using Kubernetes',
+                  }
+                ]
+              },
+              {
                 type: 'doc',
                 route: '/docs/operate/clickhouse/increase-clickhouse-pv',
                 label: 'Increase ClickHouse PV',
@@ -339,11 +362,7 @@ const docsSideNav = [
                 label: 'Connect to ClickHouse',
               },
 
-              {
-                type: 'doc',
-                route: '/docs/operate/clickhouse/distributed-clickhouse',
-                label: 'Distributed ClickHouse',
-              },
+
               {
                 type: 'doc',
                 route: '/docs/operate/clickhouse/external-clickhouse',
