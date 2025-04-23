@@ -1422,6 +1422,25 @@ const docsSideNav = [
     route: '/docs/integrations/integrations-list',
     items: [
       {
+        label: 'Temporal',
+        type: 'category',
+        className: 'new-doc',
+        isExpanded: false,
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/integrations/temporal-golang-opentelemetry',
+            label: 'Golang',
+          },
+          {
+            type: 'doc',
+            route: '/docs/integrations/temporal-typescript-opentelemetry',
+            label: 'Typescript',
+          }
+        ]
+
+      },
+      {
         type: 'doc',
         route: '/docs/integrations/redis',
         label: 'Redis',

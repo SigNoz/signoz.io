@@ -1,0 +1,197 @@
+---
+date: 2025-04-20
+id: temporal-golang-opentelemetry
+title: Instrumenting a Golang Temporal application with OpenTelemetry
+---
+
+We have published a helloworld temporal application and instrumented it using otel at https://github.com/SigNoz/temporal-golang-opentelemetry/tree/main. The README.md of the repo has instructions to run the application. 
+
+You should open the repo and browse the code and files as we go through the doc step by step.
+
+
+### Step 1: Add interceptors to `client.Options` ([Code Link](https://github.com/SigNoz/temporal-golang-opentelemetry/blob/main/helloworld/connection.go))
+Client applications and workers connect to the temporal service via `client.Dial` function which takes in client options as input. Here is the config that we use to connect to the temporal service
+
+```
+options := client.Options{
+    HostPort:       hostPort,
+    Namespace:      namespace,
+    Interceptors:   []interceptor.ClientInterceptor{tracingInterceptor},
+    MetricsHandler: metricsHandler,
+    Logger:         logger,
+}
+```
+For this to work we need to define `tracingInterceptor`, `metricsHandler` and `logger`. In the next steps, we will see how to properly set these up.
+
+### Step2: Add code to create `tracingInterceptor`, `metricsHandler` and `logger`
+
+Shortcut: Import or copy-pase the content from https://github.com/SigNoz/temporal-golang-opentelemetry/tree/main/instrument
+
+> You might need to fix lint errors depending on golang version, temporal sdk version and otel-sdk version. Do reach out to us if you are not able to resolve those errors 
+
+<details>
+<summary> Explanation of files added </summary>
+1. **metrics_handler.go**
+We are just implementing metrics.Handler interface from temporal sdk using opentelemetry
+
+2. **opentelemetry_setup.go** 
+This initiates the otel metric provider and trace provider and returns them in response of `InitializeGlobalTelemetryProvider` function call
+
+3. **tracing_interceptor.go**
+This file contains extended internal implementation of temporal sdks on how they intercept events and add spans, attributes, events, etc. This was needed as temporal's golang sdk does not support adding attributes like `workflowType`, `activityType`, `namespace`, etc which according to us is crucial for slicing and dicing of temporal tracing data. If you don't need these attribtues, you do not need to import this file and you can skip.
+
+4. **zerolog_adapter.go**
+```
+// ZerologAdapter wraps zerolog to implement Temporal's log.Logger interface.
+type ZerologAdapter struct {
+	logger zerolog.Logger
+}
+```
+As mentioned in the comment of the struct, ZerologAdapter wraps zerolog to implement Temporal's log.Logger interface. If you use any other logger, you should probably do the same for that logger too.
+
+</details>
+
+### Step 3: Changes in temporal worker code ([link](https://github.com/SigNoz/temporal-golang-opentelemetry/blob/main/worker/main.go)) and temporal client code ([link](https://github.com/SigNoz/temporal-golang-opentelemetry/blob/main/starter/main.go))
+
+Add the below code to the start of your worker and client code
+```
+	ctx := context.Background()
+
+	// Create a new Zerolog adapter.
+	logger := instrument.NewZerologAdapter()
+
+	tp, mp, err := instrument.InitializeGlobalTelemetryProvider(ctx)
+	if err != nil {
+		logger.Error("Unable to create a global trace provider", "error", err)
+	}
+
+	defer func() {
+		if err := tp.Shutdown(ctx); err != nil {
+			logger.Error("Error shutting down trace provider", "error", err)
+		}
+		if err := mp.Shutdown(ctx); err != nil {
+			logger.Error("Error shutting down meter provider", "error", err)
+		}
+	}()
+
+	// Create interceptor
+	tracingInterceptor, err := instrument.NewTracingInterceptor(instrument.TracerOptions{
+		DisableSignalTracing: false,
+		DisableQueryTracing:  false,
+		DisableBaggage:       false,
+	})
+	if err != nil {
+		logger.Error("Unable to create interceptor", "error", err)
+	}
+
+	// Create metrics handler
+	metricsHandler := instrument.NewOpenTelemetryMetricsHandler()
+```
+`instrument` is the package where you copied the files from step 2.
+
+After the above changes, you should be able to pass the right params at Step 1.
+
+
+<details>
+<summary> Explanation of the above code </summary>
+
+Below line creates a new instance of zerolog logger which implements the temporal.logger interface
+```
+logger := instrument.NewZerologAdapter()
+```
+
+Below line creates an otel native traceProvider and metricProvider using the otel sdks
+```
+tp, mp, err := instrument.InitializeGlobalTelemetryProvider(ctx)
+```
+
+Now, create a new tracing interceptor that can be passed to the cient.Options using
+```
+instrument.NewTracingInterceptor(options)
+```
+
+Also, create a otel metrics handler which implements temporal metrics interface
+
+```
+instrument.NewOpenTelemetryMetricsHandler()
+```
+
+Pass tracingInterceptor, metricsHandler and logger to client.Options
+
+</details>
+
+### Step 4: Running your temporal worker and client applications
+
+Pass serviceName, otlp endpoint and authentication headers using native otel environment variables. You can add more resource attributes like `deployment.environment` as per otel conventions using envs
+
+<Tabs>
+
+    <TabItem value="via-collector" label="Via Collector">
+        Worker run command:
+        ```
+        OTEL_SERVICE_NAME='temporal-worker-<identifier>' INSECURE_MODE=true OTEL_EXPORTER_OTLP_ENDPOINT='http://localhost:4317' go run worker/main.go 
+        ```
+
+        A similar run command for temporal client application
+        ```
+        OTEL_SERVICE_NAME='temporal-client-<identifier>' INSECURE_MODE=true OTEL_EXPORTER_OTLP_ENDPOINT='http://localhost:4317' go run starter/main.go
+        ```
+
+        This should start sending your sdk metrics and traces to the otel-collector. This does not collect logs yet.
+        
+        Zerolog is not configured to send directly to signoz cloud. In most cases, the logs are output to file and the logs are read by otel-collector and pushed to signoz cloud using 
+        1. Adding a filelog receiver at otel-collector following https://signoz.io/docs/userguide/collect_logs_from_file/
+        2. Collecting k8s logs following https://signoz.io/docs/userguide/collect_kubernetes_pod_logs/
+
+        To setup otel-collector, read:
+        1. For VM  => https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/
+        2. For K8s => https://signoz.io/docs/tutorial/kubernetes-infra-metrics/
+
+    </TabItem>
+
+    <TabItem value="direct-to-cloud" label="Direct from application" default>
+        Worker run command:
+        ```
+        OTEL_SERVICE_NAME='temporal-worker-<identifier>' OTEL_EXPORTER_OTLP_ENDPOINT='ingest.<region>.signoz.cloud' OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<signoz-ingestion-key>" go run worker/main.go
+        ```
+
+        A similar run command for temporal client application
+        ```
+        OTEL_SERVICE_NAME='temporal-client-<identifier>' OTEL_EXPORTER_OTLP_ENDPOINT='ingest.<region>.signoz.cloud' OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<signoz-ingestion-key>" go starter/main.go
+        ```
+        
+        Directly sending from application to signoz cloud works by default for exporting metrics and traces. Logs are usually written to a file and needs an otel-collector with a filelog receiver to export logs to signoz cloud. If you do not write logs to file and wish to send logs directly from you applications, do reach out to us for help (intercom for saas users and slack community for OSS users)
+    </TabItem>
+
+
+
+</Tabs>
+
+### Step 5: Build dashboards and parse logs at SigNoz
+
+You should be able to see incoming temporal sdk metrics at **Metrics Explorer** page at SigNoz. Once you see them coming, go to Dashboards -> Import Dashboard. The dashboard json for sdk metrics can be found at [this link](https://github.com/SigNoz/dashboards/blob/main/temporal.io/Temporal%20SDK%20Metrics%20-%20golang.json) 
+
+If you are successfully sending logs to SigNoz, you need to parse your logs at SigNoz using the Logs Pipeline feature.
+1. Use Json parser if your logs are json formatted using https://signoz.io/docs/logs-pipelines/processors/#json-parser
+2. Map traceID and spanID to the right fields using trace parser using https://signoz.io/docs/logs-pipelines/processors/#trace-parser. This helps you to move seamlessly between logs and traces
+3. Map log_level to severity_text in otel semantics using https://signoz.io/docs/logs-pipelines/processors/#severity-parser
+4. (Optional) Map timestamp from your json body to otel using https://signoz.io/docs/logs-pipelines/processors/#timestamp-parser
+<figure data-zoomable align='center'>
+    <img src="/img/docs/integrations/temporal/golang/logs-pipeline.webp" alt="Parsing json logs"/>
+    <figcaption><i>Parsing json logs</i></figcaption>
+</figure>
+
+
+### Step 6: Enjoy your data at SigNoz. Metrics, Traces and Logs all at the same tool for unified querying and correlation
+<figure data-zoomable align='center'>
+    <img src="/img/docs/integrations/temporal/golang/distributed-trace.webp" alt="Distributed trace from a temporal application"/>
+    <figcaption><i>Distributed trace from a temporal application</i></figcaption>
+</figure>
+<figure data-zoomable align='center'>
+    <img src="/img/docs/integrations/temporal/golang/logs.webp" alt="Json logs from a temporal application"/>
+    <figcaption><i>Json logs from a temporal application</i></figcaption>
+</figure>
+<figure data-zoomable align='center'>
+    <img src="/img/docs/integrations/temporal/golang/sdk-metrics.webp" alt="SDK metrics from a temporal application"/>
+    <figcaption><i>SDK metrics from a temporal application</i></figcaption>
+</figure>
