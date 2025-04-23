@@ -141,7 +141,7 @@ export const faqItems = [
   {
     question: 'How long does the startup pricing last?',
     answer:
-      'The startup pricing is available for 12 months. After that, you can transition to our regular pricing plans, which will be matched to your usage needs.',
+      'The startup pricing is available for 12 months. After that, you will transition to our regular pricing plans, which will be matched to your usage needs.',
   },
   {
     question: 'Can we cancel our subscription at any time?',
