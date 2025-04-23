@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { motion } from 'framer-motion'
-import { DollarSign, TrendingUp, GitBranch, Headphones, Puzzle, GraduationCap } from 'lucide-react'
+import { DollarSign, TrendingUp, GitBranch, BarChart2 Puzzle, GraduationCap } from 'lucide-react'
 
 const featureItems = [
   {
@@ -33,10 +33,10 @@ const featureItems = [
     hoverShadow: 'hover:shadow-[#F76B4A]/5',
   },
   {
-    icon: <Headphones className="text-2xl text-green-500" />,
-    title: 'Dedicated Support',
+    icon: <BarChart2 className="text-2xl text-green-500" />,
+    title: '9X ROI vs DataDog',
     description:
-      'Priority access to our technical team for implementation and troubleshooting assistance.',
+      'SigNoz provides up to 9X return on investment compared to DataDog for growing startups.',
     bgColor: 'bg-green-500/10',
     hoverBorder: 'hover:border-green-500/40',
     hoverShadow: 'hover:shadow-green-500/5',
@@ -94,9 +94,7 @@ const Features = () => {
           <h2 className="mb-4 text-3xl font-bold">
             Why Startups <span className="gradient-text pinkish-gradient">Choose SigNoz</span>
           </h2>
-          <p className="text-lg text-gray-300">
-            Get all the observability tools you need without the enterprise price tag.
-          </p>
+          <p className="text-lg text-gray-300">All your observability needs at one place.</p>
         </motion.div>
 
         <motion.div

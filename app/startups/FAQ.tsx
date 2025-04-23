@@ -17,14 +17,9 @@ const faqItems = [
       'The startup pricing is available for 12 months. After that, you can transition to our regular pricing plans, which will be matched to your usage needs.',
   },
   {
-    question: 'What happens if we exceed the included usage limits?',
+    question: 'What comes included in $99?',
     answer:
-      "If you exceed the included limits, you'll be charged for the additional usage at our standard rates. We'll always notify you before you reach your limits so there are no surprises.",
-  },
-  {
-    question: 'How do we verify our startup status?',
-    answer:
-      'After applying, our team will review your application and may request documentation to verify your eligibility, such as incorporation documents or funding information.',
+      'Our usage-based pricing is applicable for any data you send to SigNoz. If your usage doesn’t cross $99, your monthly bill will be $99. If it does, final bill will be calculated based on the amount of data you sent to SigNoz.',
   },
   {
     question: 'Can we cancel our subscription at any time?',

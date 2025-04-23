@@ -31,7 +31,7 @@ export default function StartUpsHero({ startUpsData }: StartUpsHeroProps) {
               {startUpsData.DESC}
             </h2>
 
-            <div className="mb-8 inline-flex rounded-lg border border-signoz_slate-400 bg-[#1c1c21]/60 p-4 backdrop-blur-sm">
+            <div className="mb-8 inline-flex flex-col rounded-lg border border-signoz_slate-400 bg-[#1c1c21]/60 p-4 backdrop-blur-sm">
               <div className="flex items-center">
                 <div className="mr-3 text-lg font-medium text-signoz_vanilla-100">
                   Now Starts at
@@ -47,6 +47,9 @@ export default function StartUpsHero({ startUpsData }: StartUpsHeroProps) {
                     / {startUpsData.PRICE.period}
                   </span>
                 </div>
+              </div>
+              <div className="mt-2 text-sm text-signoz_vanilla-100/80">
+                Includes Data Sent till $99USD
               </div>
             </div>
 
