@@ -15,10 +15,10 @@ Migrating metrics from Prometheus/Mimir to SigNoz can be accomplished through se
 
 The simplest way to migrate your existing Prometheus/Mimir metrics is to configure the OpenTelemetry Collector with a [Prometheus Receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/prometheusreceiver#prometheus-receiver). This allows you to continue using your existing Prometheus exporters while sending the data to SigNoz.
 
-1. [Install the OpenTelemetry Collector](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) in your environment if not already available.
+1. [Install the OpenTelemetry Collector](/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) in your environment if not already available.
 2. Configure the Prometheus Receiver in your OpenTelemetry Collector configuration file:
-  - [Configuration if using SigNoz Cloud](https://signoz.io/docs/userguide/send-metrics-cloud/#enable-a-prometheus-receiver)
-  - [Configuration if using Self-Hosted SigNoz](https://signoz.io/docs/userguide/send-metrics/#enable-a-prometheus-receiver)
+  - [Configuration if using SigNoz Cloud](/docs/userguide/send-metrics-cloud/#enable-a-prometheus-receiver)
+  - [Configuration if using Self-Hosted SigNoz](/docs/userguide/send-metrics/#enable-a-prometheus-receiver)
 
 ### Replacing Prometheus Exporters with Native OpenTelemetry Receivers
 
@@ -36,7 +36,7 @@ Here are some common Prometheus exporters and their OpenTelemetry equivalents:
 | kafka_exporter | [kafka](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/kafkametricsreceiver) | Collects Kafka metrics |
 | nginx_exporter | [nginx](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/nginxreceiver) | Collects NGINX metrics |
 
-SigNoz supports all the receivers that are listed in the https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver GitHub repository. To configure a new metric receiver, follow these instructions for [Self-Hosted SigNoz](https://signoz.io/docs/userguide/send-metrics/#enable-a-specific-metric-receiver) or [SigNoz Cloud](https://signoz.io/docs/userguide/send-metrics).
+SigNoz supports all the receivers that are listed in the https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver GitHub repository. To configure a new metric receiver, follow these instructions for [Self-Hosted SigNoz](/docs/userguide/send-metrics/#enable-a-specific-metric-receiver) or [SigNoz Cloud](/docs/userguide/send-metrics).
 
 ### Switching to OTLP Metrics
 
@@ -78,7 +78,7 @@ To migrate logs from Loki to SigNoz, you'll need to reconfigure your log collect
 
 ### Using OpenTelemetry Collector for Logs
 
-The most straightforward approach is to use the OpenTelemetry Collector to collect logs directly. Configure the OpenTelemetry Collector to collect logs from files, Docker containers, or other sources following [these specific instructions](https://signoz.io/docs/logs-management/send-logs-to-signoz/).
+The most straightforward approach is to use the OpenTelemetry Collector to collect logs directly. Configure the OpenTelemetry Collector to collect logs from files, Docker containers, or other sources following [these specific instructions](/docs/logs-management/send-logs-to-signoz/).
 
 However, unless you already using OpenTelemetry Collector for logs, this approach requires you to update log collection for each individual service or application.
 
@@ -94,17 +94,17 @@ If you're already using FluentBit with Loki, you can reconfigure it to work with
   Port        8006
 ```
 
-Once FluentBit is configured to forward logs to the OpenTelemetry Collector, you can configure the OpenTelemetry Collector to receive logs from FluentBit following [this guide](https://signoz.io/docs/userguide/fluentbit_to_signoz/).
+Once FluentBit is configured to forward logs to the OpenTelemetry Collector, you can configure the OpenTelemetry Collector to receive logs from FluentBit following [this guide](/docs/userguide/fluentbit_to_signoz/).
 
 ---
 
 As part of the migration, you might need to modify your logs pipelines.SigNoz offers several features to enhance your logs:
 
-- **[Log Pipelines](https://signoz.io/docs/logs-pipelines/introduction/)**: Parse and structure logs with processors like JSON, regex, and grok
-- **[Log Querying](https://signoz.io/docs/userguide/logs_query_builder/)**: Advanced query capabilities for searching and filtering logs
-- **[Log-Trace Correlation](https://signoz.io/docs/logs-pipelines/guides/trace/)**: Link logs with related traces for contextual debugging
+- **[Log Pipelines](/docs/logs-pipelines/introduction/)**: Parse and structure logs with processors like JSON, regex, and grok
+- **[Log Querying](/docs/userguide/logs_query_builder/)**: Advanced query capabilities for searching and filtering logs
+- **[Log-Trace Correlation](/docs/logs-pipelines/guides/trace/)**: Link logs with related traces for contextual debugging
 
-You can also use [Logs Explorer](https://signoz.io/docs/product-features/logs-explorer/) to query logs and confirm that they are being sent correctly to SigNoz.
+You can also use [Logs Explorer](/docs/product-features/logs-explorer/) to query logs and confirm that they are being sent correctly to SigNoz.
 
 ## Migrating Traces
 
@@ -114,7 +114,7 @@ Migrating your distributed tracing from Tempo to SigNoz involves redirecting you
 
 If your applications are already instrumented with OpenTelemetry:
 
-- Follow the [language-specific instrumentation guides](https://signoz.io/docs/instrumentation/).
+- Follow the [language-specific instrumentation guides](/docs/instrumentation/).
 - If you're using an OpenTelemetry Collector in your environment, update its configuration:
 
 ```yaml
@@ -160,12 +160,55 @@ receivers:
 
 SigNoz provides advanced features for analyzing traces:
 
-- **[Trace Explorer](https://signoz.io/docs/product-features/trace-explorer/)**: Search, filter, and analyze distributed traces
-- **[Service Map](https://signoz.io/docs/userguide/service-map/)**: Visualize dependencies between services
-- **[Exceptions Monitoring](https://signoz.io/docs/userguide/exceptions/)**: Track and analyze application exceptions
+- **[Trace Explorer](/docs/product-features/trace-explorer/)**: Search, filter, and analyze distributed traces
+- **[Service Map](/docs/userguide/service-map/)**: Visualize dependencies between services
+- **[Exceptions Monitoring](/docs/userguide/exceptions/)**: Track and analyze application exceptions
 
 By migrating from Tempo to SigNoz, you gain a more integrated experience with metrics and logs, enabling faster troubleshooting and more comprehensive analysis.
 
 ## Migrating Dashboards
 
 ## Migrating Alerts
+
+While migrating your observability stack from the LGTM stack to SigNoz, you'll also need to recreate your alerts in SigNoz's alert management system.
+
+### Setting Up Notification Channels
+
+Before migrating your alerts to SigNoz, you will need to set up the notification channels you want to use. Below is a list of notification channels supported by AlertManager/Grafana and SigNoz:
+
+| Notification Channel | AlertManager/Grafana | SigNoz             |
+|----------------------|----------------------|-------------------|
+| Email                | ✓                    | ✓                 |
+| Slack                | ✓                    | ✓                 |
+| Microsoft Teams      | ✓                    | ✓ (Paid plans)    |
+| Discord              | ✓                    | -                 |
+| PagerDuty            | ✓                    | ✓                 |
+| Opsgenie             | ✓                    | ✓                 |
+| Webhook              | ✓                    | ✓                 |
+| Telegram             | ✓                    | -                 |
+| VictorOps            | ✓                    | -                 |
+| WeChat               | ✓                    | -                 |
+| Webex                | ✓                    | -                 |
+| SNS                  | ✓                    | -                 |
+| Incident.io          | -                    | ✓                 |
+| Rootly               | -                    | ✓                 |
+| Zenduty              | -                    | ✓                 |
+
+As you can see, in addition to the most of the channels supported by AlertManager/Grafana, some more modern incident management platforms like Incident.io, Rootly, and Zenduty are also supported by SigNoz. If the notification channel you need is not listed, you will need to use `Webhook` channel to integrate with other tools.
+
+Please refer to [Alerts Notification Channel](/docs/alerts-management/notification-channel) documentation for more details on how to set up notification channels in SigNoz.
+
+
+### Setting Up Alert Rules
+
+SigNoz provides a comprehensive alert management system that supports:
+
+- **[Metrics-based alerts](/docs/alerts-management/metrics-based-alerts/)**: Monitor metric values and trigger alerts based on thresholds
+- **[Trace-based alerts](/docs/alerts-management/trace-based-alerts/)**: Alert on trace metrics like latency or error rates
+- **[Log-based alerts](/docs/alerts-management/log-based-alerts/)**: Create alerts based on log patterns or frequencies
+- **[Anomaly-based alerts](/docs/alerts-management/anomaly-based-alerts/)**: Trigger alerts when metrics deviate from normal patterns
+- **[Exceptions-based alerts](/docs/alerts-management/exceptions-based-alerts/)**: Alert on application exceptions
+
+Both Metrics-based and Anomaly-based alerts support using PromQL queries to define the alert condition, meaning you can use the same queries you used in Prometheus/Grafana.
+
+In case you define alert rules as code in your LGTM Stack (either as Prometheus rules or using Grafana Terraform provider), you can continue using the same approach while migrating to SigNoz, by utilizing the [SigNoz Terraform Provider](https://signoz.io/docs/alerts-management/terraform-provider-signoz/).
