@@ -4,6 +4,10 @@ import React, { useEffect } from 'react'
 import { HubspotProvider } from '@aaronhayes/react-use-hubspot-form'
 import PricingForm from '../pricing-form'
 import { motion } from 'framer-motion'
+import Features from './Features'
+import Testimonials from './Testimonials'
+import FAQ from './FAQ'
+import CTA from './CTA'
 
 const StartUpsData = {
   TITLE: 'SigNoz for Startups',
@@ -187,6 +191,18 @@ function StartUps() {
           </div>
         </div>
       </section>
+
+      {/* Features Section */}
+      <Features />
+
+      {/* Testimonials Section */}
+      <Testimonials />
+
+      {/* FAQ Section */}
+      <FAQ />
+
+      {/* CTA Section */}
+      <CTA />
     </div>
   )
 }
