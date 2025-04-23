@@ -583,109 +583,105 @@ Linking logs and traces using a common trace ID helps you pinpoint issues, analy
 
 ![An image displaying linked logs and traces to SigNoz](images/logs-traces-flow.png)
 
-### Generate traces
+### Log-Trace Correlation
 
-To trace a request from start to finish, you need to generate spans for each operation. OpenTelemetry provides automatic instrumentation for various frameworks.
+To correlate logs with traces in a Python app, you should use:
 
-Follow these steps to generate traces:
+* OTEL_PYTHON_LOG_CORRELATION environment variable.
+* LoggingInstrumentor Python module for native logging instrumentation. 
 
-1. Configure tracing using OpenTelemetry. 
-    ```python
-    from opentelemetry import trace
-    from opentelemetry.sdk.trace import TracerProvider
-    from opentelemetry.sdk.trace.export import BatchSpanProcessor
-    from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
-    from opentelemetry.instrumentation.logging import LoggingInstrumentor
-
-    # Configuration for SigNoz
-    SIGNOZ_INGESTION_KEY = "<SigNoz-ingestion-key>"
-    SIGNOZ_LOGS_URL = "<https://ingest.{region}.signoz.cloud:443/logs/json>"
-    SIGNOZ_OTLP_ENDPOINT = "<https://ingest.{region}.signoz.cloud:443/v1/traces>"
-
-
-    # OpenTelemetry Tracing Setup
-    tracer_provider = TracerProvider()
-    exporter = OTLPSpanExporter(endpoint=SIGNOZ_OTLP_ENDPOINT, headers={"signoz-ingestion-key": SIGNOZ_INGESTION_KEY})
-    tracer_provider.add_span_processor(BatchSpanProcessor(exporter))
-    trace.set_tracer_provider(tracer_provider)
-    tracer = trace.get_tracer(__name__)
-    LoggingInstrumentor().instrument(set_logging_format=True)
-
-    def get_trace_id():
-    """Retrieve the current trace ID from OpenTelemetry."""
-    span = trace.get_current_span()
-    return format(span.get_span_context().trace_id, '032x') if span and span.get_span_context() else "00000000000000000000000000000000"
-
-    def get_span_id():
-    """Retrieve the current span ID from OpenTelemetry."""
-    span = trace.get_current_span()
-    return format(span.get_span_context().span_id, '016x') if span and span.get_span_context() else "0000000000000000"
-
+1. Set the environment variables. 
+    ```bash
+    OTEL_EXPORTER_OTLP_ENDPOINT="<your-signoz-otlp-endpoint>"
+    OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-signoz-key>"
+    OTEL_PYTHON_LOG_CORRELATION=true
     ```
-1. Create spans for each method to track its execution. For example, consider a method to get coffee.
+1. Configure the logging formatter to include trace_id and span_id.
     ```python
-    def get_coffee(coffee_id):
-    with tracer.start_as_current_span("get_coffee") as span:
-        span.set_attribute("http.method", request.method)
-        
-        # Simulating processing
-        response_data = {"message": "Processing complete"}
-        span.set_status(trace.Status(trace.StatusCode.OK))
+    import logging
+    import requests
+    import os
 
-        coffee = next((c for c in coffees if c["id"] == coffee_id), None)
-        if not coffee:
-            # Generating logs for this method
-            send_log_to_signoz("INFO", f"Coffee ID {coffee_id} not found")
-            return jsonify({"error": "Coffee not found"}), 404
-        return jsonify(coffee)
+    class SigNozLogFormatter(logging.Formatter):
+        def format(self, record):
+            trace_id = getattr(record, "otelTraceID", "00000000000000000000000000000000")
+            span_id = getattr(record, "otelSpanID", "0000000000000000")
+            log_data = {
+                "trace_id": trace_id,
+                "span_id": span_id,
+                "severity_text": record.levelname,
+                "message": record.getMessage(),
+                "attributes": {
+                    "service": os.getenv("SERVICE_NAME", "coffee-shop"),
+                    "logger_name": record.name,
+                    "module": record.module,
+                },
+            }
+        return log_data
+
+    logger = logging.getLogger("signozLogger")
+    logger.setLevel(logging.INFO)
+
+    handler = logging.StreamHandler()
+    handler.setFormatter(SigNozLogFormatter())
+    logger.addHandler(handler)
     ```
 
-### Generate logs
-
-Logs provide detailed insights at different request execution stages. Include contextual details such as timestamps, severity levels, and message descriptions.
-
-1. Attach log information each method. You can optionally add logs before and after each request.
-    ```python
-    def log_request():
-        log_message = f"Incoming request: {request.method} {request.url}"
-        logger.info(f"{log_message} - Trace ID: {get_trace_id()}")
-        send_log_to_signoz("INFO", log_message)
-
-    def log_response(response):
-        log_message = f"Response: {response.status_code} for {request.url}"
-        logger.info(f"{log_message} - Trace ID: {get_trace_id()}")
-        send_log_to_signoz("INFO", log_message)
-        return response
-    ```
-1.  You can add more information to log for each method.
-
-### Link logs with traces
-
-To correlate logs with traces, include `trace_id` and `span_id` in the log.
-
-Follow these steps to link logs with traces:
-
-1. Add trace and span information in the log message.
-    ```python
-    def send_log_to_signoz(level, message):
-    headers = {
-        "signoz-ingestion-key": SIGNOZ_INGESTION_KEY,
-        "Content-Type": "application/json"
-    }
-    log_entry = {
-        "trace_id": get_trace_id(),
-        "span_id": get_span_id(),
-        "severity_text": level,
-        "message": message,
-        "attributes": {"service": "coffee-shop"},
-    }
-    try:
-        response = requests.post(SIGNOZ_LOGS_URL, headers=headers, json=[log_entry])
-        response.raise_for_status()
-    except requests.exceptions.RequestException as e:
-        logger.error(f"Failed to send log to SigNoz: {e}")
-    ```
 1. Send logs to SigNoz to link them with traces.
+    ```python
+    def send_log_to_signoz(log_data):
+        SIGNOZ_LOGS_URL = os.getenv("SIGNOZ_LOGS_URL", "<SigNoz-logs-url>")
+        SIGNOZ_INGESTION_KEY = os.getenv("SIGNOZ_INGESTION_KEY", "<SigNoz-ingestion-key>")
+
+        headers = {
+            "signoz-ingestion-key": SIGNOZ_INGESTION_KEY,
+            "Content-Type": "application/json"
+        }
+
+        try:
+            response = requests.post(SIGNOZ_LOGS_URL, headers=headers, json=[log_data])
+            response.raise_for_status()
+        except requests.exceptions.RequestException as e:
+            logger.error(f"Failed to send log to SigNoz: {e}")
+    ```
+
+For example, consider a coffee shop app. You have to log a coffee order request using OpenTelemetry’s auto-instrumentation and structured logging.
+
+```python
+def get_coffee(coffee_id):
+    logger.info(f"Request received for coffee ID {coffee_id}")
+
+    coffee = next((c for c in coffees if c["id"] == coffee_id), None)
+    if not coffee:
+        log_record = logger.handlers[0].formatter.format(
+            logger.makeRecord(
+                name="signozLogger",
+                level=logging.INFO,
+                fn="app.py",
+                lno=33,
+                msg=f"Coffee ID {coffee_id} not found",
+                args=None,
+                exc_info=None
+            )
+        )
+        send_log_to_signoz(log_record)
+        return jsonify({"error": "Coffee not found"}), 404
+
+    log_record = logger.handlers[0].formatter.format(
+        logger.makeRecord(
+            name="signozLogger",
+            level=logging.INFO,
+            fn="app.py",
+            lno=41,
+            msg=f"Coffee order for {coffee['name']} processed successfully",
+            args=None,
+            exc_info=None
+        )
+    )
+    send_log_to_signoz(log_record)
+    return jsonify(coffee)
+```
+
 
 ![An image displaying a specifc log with traces in SigNoz](images/sample-log-coffee.png)
 
