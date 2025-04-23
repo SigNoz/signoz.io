@@ -118,7 +118,6 @@ const FAQ = () => {
             />
           ))}
         </div>
-        \
       </div>
     </section>
   )
