@@ -182,7 +182,7 @@ function StartUps() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2, duration: 0.7 }}
-              className="rounded-xl border border-signoz_slate-400 bg-[#1c1c21]/80 p-6 shadow-xl backdrop-blur-sm"
+              className="rounded-xl border border-signoz_slate-400 bg-[rgb(244_242_250)] p-6 shadow-xl backdrop-blur-sm"
             >
               <HubspotProvider>
                 <PricingForm portalId={StartUpsData.PORTAL_ID} formId={StartUpsData.FORM_ID} />
