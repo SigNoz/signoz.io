@@ -1,11 +1,12 @@
 'use client'
 
-import React, { ReactNode } from 'react'
+import React from 'react'
 import { motion } from 'framer-motion'
+import { IconRenderer } from '../icons'
 
 type FeatureItemProps = {
   feature: {
-    icon: ReactNode
+    iconName: string
     title: string
     description: string
     bgColor: string
@@ -37,7 +38,7 @@ export default function FeatureItem({ feature, index }: FeatureItemProps) {
       <div
         className={`rounded-lg ${feature.bgColor} mb-5 flex h-14 w-14 items-center justify-center`}
       >
-        {feature.icon}
+        <IconRenderer iconName={feature.iconName} />
       </div>
       <h3 className="mb-3 text-xl font-semibold">{feature.title}</h3>
       <p className="text-gray-300">{feature.description}</p>

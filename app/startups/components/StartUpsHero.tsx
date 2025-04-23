@@ -1,7 +1,7 @@
 import React from 'react'
 import HeroForm from './HeroForm'
 import EligibilityPoint from './EligibilityPoint'
-import { StartUpsData } from '../StartUpsLayout'
+import { StartUpsData } from '../data'
 
 type StartUpsHeroProps = {
   startUpsData: typeof StartUpsData
