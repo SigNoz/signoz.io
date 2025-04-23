@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { ReactNode } from 'react'
+import { useLogEvent } from 'hooks/useLogEvent'
 
 interface TrackingLinkProps {
   href: string
@@ -48,8 +49,22 @@ export default function TrackingLink({
   ...rest
 }: TrackingLinkProps) {
   const pathname = usePathname()
+  const logEvent = useLogEvent()
 
   const handleClick = () => {
+    // Log the click event
+    logEvent({
+      eventName: 'Website Click',
+      eventType: 'track',
+      attributes: {
+        clickType,
+        clickName,
+        clickLocation,
+        clickText,
+        pageLocation: pathname,
+      },
+    })
+
     // Call the original onClick handler if provided
     if (onClick) {
       onClick()

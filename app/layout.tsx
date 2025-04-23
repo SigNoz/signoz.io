@@ -11,6 +11,7 @@ import MainFooter from '@/components/mainFooter'
 import TopNav from '@/components/TopNav/TopNav'
 import { Inter } from 'next/font/google'
 import React, { Suspense } from 'react'
+import PageViewTracker from '@/components/Analytics/PageViewTracker'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -88,6 +89,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <link rel="alternate" type="application/rss+xml" href="/feed.xml" />
 
       <body className="pl-[calc(100vw-100%)] text-white antialiased">
+        <Suspense fallback={null}>
+          <PageViewTracker />
+        </Suspense>
         <noscript>
           <iframe
             src="https://www.googletagmanager.com/ns.html?id=GTM-N9B6D4H"
