@@ -1742,8 +1742,36 @@ const docsSideNav = [
   {
     label: 'Migrate From LGTM Stack',
     className: 'new-doc',
-    type: 'doc',
-    route: '/docs/migration/migrate-from-grafana'
+    type: 'category',
+    isExpanded: false,
+    route: '/docs/migration/migrate-from-grafana',
+    items: [
+        {
+          type: 'doc',
+          route: '/docs/migration/migrate-from-grafana/metrics',
+          label: 'Migrating Metrics',
+        },
+        {
+          type: 'doc',
+          route: '/docs/migration/migrate-from-grafana/traces',
+          label: 'Migrating Traces',
+        },
+        {
+          type: 'doc',
+          route: '/docs/migration/migrate-from-grafana/logs',
+          label: 'Migrating Logs',
+        },
+        {
+          type: 'doc',
+          route: '/docs/migration/migrate-from-grafana/dashboards',
+          label: 'Migrating Dashboards',
+        },
+        {
+          type: 'doc',
+          route: '/docs/migration/migrate-from-grafana/alerts',
+          label: 'Migrating Alerts',
+        },
+    ],
   },
   {
     label: 'Azure Monitoring',
