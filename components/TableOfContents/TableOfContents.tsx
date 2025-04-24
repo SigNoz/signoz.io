@@ -3,6 +3,7 @@
 
 import { useRef, useEffect, RefObject } from 'react'
 import { usePathname } from 'next/navigation'
+import { useLogEvent } from 'hooks/useLogEvent'
 
 export interface TocItemProps {
   url: string
@@ -25,6 +26,7 @@ const TableOfContents = ({
 }: TableOfContentsProps) => {
   const tocRef = useRef<HTMLDivElement>(null)
   const pathname = usePathname()
+  const logEvent = useLogEvent()
 
   // Effect to handle TOC scrolling
   useEffect(() => {
@@ -52,6 +54,24 @@ const TableOfContents = ({
     <div ref={tocRef} className="flex flex-col gap-1.5">
       {toc.map((tocItem: TocItemProps) => {
         const isActive = activeSection === tocItem.url
+
+        const handleClick = () => {
+          // Log the TOC click event
+          logEvent({
+            eventName: 'Website Click',
+            eventType: 'track',
+            attributes: {
+              clickType: 'ToC Click',
+              clickName: 'TOC Link',
+              clickText: tocItem.value,
+              clickLocation: 'Table of Contents',
+              pageLocation: pathname,
+            },
+          })
+          // Note: No need for e.preventDefault() or router.push()
+          // We want the default anchor link behavior to scroll the page.
+        }
+
         return (
           <div
             className="post-toc-item"
@@ -61,6 +81,7 @@ const TableOfContents = ({
             <a
               data-level={tocItem.depth}
               href={tocItem.url}
+              onClick={handleClick}
               className={`line-clamp-2 text-[11px] transition-colors hover:text-white ${
                 isActive ? 'font-medium text-signoz_robin-500' : 'text-gray-500'
               }`}
