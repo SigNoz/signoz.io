@@ -584,6 +584,25 @@ const MobileEstimate = () => {
             </TrackingLink>
           </Button>
         </div>
+
+        {/* Start Up Program CTA */}
+        <div className="mb-6 mt-3 flex flex-col items-center justify-between gap-4 rounded-md bg-[#BE6BF11A] px-4 py-3">
+          <span className="text-base font-medium text-signoz_robin-400">
+            Reach out to us for SigNoz's Start Up Program Discount
+          </span>
+          <Button variant="secondary" className="w-full">
+            <TrackingLink
+              href="/startups/"
+              clickType="Secondary CTA"
+              clickName="Startup Program Link"
+              clickText="Learn More"
+              clickLocation="Monthly Estimate Calculator-Mobile"
+              id="pricing-page-startup-program-mobile-cta"
+            >
+              Learn More
+            </TrackingLink>
+          </Button>
+        </div>
       </div>
     </section>
   )
