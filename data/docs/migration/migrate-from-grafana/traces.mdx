@@ -1,0 +1,64 @@
+---
+date: 2025-04-22
+id: migrate-from-grafana-traces
+title: Migrate Traces from LGTM Stack
+description: Migrating traces from LGTM Stack to SigNoz. How to migrate traces from LGTM Stack to SigNoz.
+---
+
+Migrating your distributed tracing from Tempo to SigNoz involves redirecting your trace collection to SigNoz's OpenTelemetry Collector. The approach you take depends on how your applications are currently instrumented.
+
+### For Applications Using OpenTelemetry
+
+If your applications are already instrumented with OpenTelemetry:
+
+- Follow the [language-specific instrumentation guides](/docs/instrumentation/).
+- If you're using an OpenTelemetry Collector in your environment, update its configuration:
+
+```yaml
+exporters:
+  otlp:
+    # For SigNoz Cloud
+    endpoint: "ingest.{region}.signoz.cloud:443"
+    headers:
+      "signoz-ingestion-key": "<your-ingestion-key>"
+    tls:
+      insecure: false
+
+    # For Self-hosted SigNoz
+    # endpoint: "<signoz-otel-collector>:4317"
+    # tls:
+    #   insecure: true
+```
+
+### For Applications Using Jaeger or Zipkin
+
+Tempo can be used with open source tracing protocols, including Jaeger, Zipkin, or OpenTelemetry. If you are already using Tempo with this setup, the migration is straightforward:
+
+1. Configure the OpenTelemetry Collector with [Jaeger](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/jaegerreceiver/README.md) and [Zipkin](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/zipkinreceiver/README.md) receivers:
+
+```yaml
+receivers:
+  # For Zipkin
+  zipkin:
+    endpoint: 0.0.0.0:9411
+  # For Jaeger
+  jaeger:
+    protocols:
+      grpc:
+  jaeger/withendpoint:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:14260
+```
+
+2. Point your applications to the OpenTelemetry Collector instead of Tempo.
+
+---
+
+SigNoz provides advanced features for analyzing traces:
+
+- **[Trace Explorer](/docs/product-features/trace-explorer/)**: Search, filter, and analyze distributed traces
+- **[Service Map](/docs/userguide/service-map/)**: Visualize dependencies between services
+- **[Exceptions Monitoring](/docs/userguide/exceptions/)**: Track and analyze application exceptions
+
+By migrating from Tempo to SigNoz, you gain a more integrated experience with metrics and logs, enabling faster troubleshooting and more comprehensive analysis.
