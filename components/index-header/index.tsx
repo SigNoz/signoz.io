@@ -38,33 +38,35 @@ export const Header = () => {
       </div>
       {/* <div className='!w-[80vw] h-12 !mx-auto border border-signoz_slate-400 border-dashed !border-t-0 !border-b-0' /> */}
       <div className="!mx-auto mx-2 flex !w-[100vw] flex-col items-center justify-center gap-3 border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 pb-12 pt-4 md:mx-5 md:!w-[80vw] md:flex-row">
-        <Button id="btn-get-started-homepage-hero">
-          <TrackingLink
-            href="/teams/"
-            className="flex-center"
-            clickType="Primary CTA"
-            clickName="Sign Up Button"
-            clickText="Get Started - Free"
-            clickLocation="Hero Section"
-          >
+        <TrackingLink
+          href="/teams/"
+          clickType="Primary CTA"
+          clickName="Sign Up Button"
+          clickText="Get Started - Free"
+          clickLocation="Hero Section"
+        >
+          <Button className="flex-center" id="btn-get-started-homepage-hero">
             Get Started - Free
             <ArrowRight size={14} />
-          </TrackingLink>
-        </Button>
+          </Button>
+        </TrackingLink>
 
-        <Button type={Button.TYPES.SECONDARY} id="btn-read-documentation-homepage-hero">
-          <TrackingLink
-            href="/docs/introduction/"
+        <TrackingLink
+          href="/docs/introduction/"
+          clickType="Secondary CTA"
+          clickName="Read Documentation Link"
+          clickText="Read Documentation"
+          clickLocation="Hero Section"
+        >
+          <Button
             className="flex-center"
-            clickType="Secondary CTA"
-            clickName="Read Documentation Link"
-            clickText="Read Documentation"
-            clickLocation="Hero Section"
+            type={Button.TYPES.SECONDARY}
+            id="btn-read-documentation-homepage-hero"
           >
             <BookOpen size={14} />
             Read Documentation
-          </TrackingLink>
-        </Button>
+          </Button>
+        </TrackingLink>
       </div>
       <div className="section-container !mx-auto !mt-0 !w-[90vw] border !border-b-0 !border-t-0 border-none border-signoz_slate-400 md:!w-[80vw] md:border-dashed">
         <div className="w-100 mx-[-28px]">
