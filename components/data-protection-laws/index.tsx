@@ -36,44 +36,55 @@ const DataProtectionLaws = ({ isInPricingPage = false }) => {
           <img src="/img/graphics/homepage/feature-graphic-data-protection.webp" alt="" />
           {!isInPricingPage ? (
             <div className="mt-[18px] flex flex-col gap-3 sm:flex-row">
-              <Button className="text-xs sm:text-sm" id="btn-use-signoz-cloud-homepage">
-                <TrackingLink 
-                  href="/teams/" 
-                  className="flex-center"
-                  clickType="Primary CTA"
-                  clickName="Sign Up Button"
-                  clickText="Use SigNoz Cloud"
-                  clickLocation="Data Protection Section"
+              <TrackingLink
+                href="/teams/"
+                className="inline-block"
+                clickType="Primary CTA"
+                clickName="Sign Up Button"
+                clickText="Use SigNoz Cloud"
+                clickLocation="Data Protection Section"
+              >
+                <Button
+                  className="flex-center text-xs sm:text-sm"
+                  id="btn-use-signoz-cloud-homepage"
                 >
                   Use SigNoz Cloud <ArrowRight className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-                </TrackingLink>
-              </Button>
-              <Button type={Button.TYPES.SECONDARY} className="text-xs sm:text-sm" id="btn-self-host-signoz-homepage">
-                <TrackingLink 
-                  href="/docs/install/" 
-                  className="flex-center"
-                  clickType="Secondary CTA"
-                  clickName="Self-Host Link"
-                  clickText="Self-Host SigNoz"
-                  clickLocation="Data Protection Section"
+                </Button>
+              </TrackingLink>
+              <TrackingLink
+                href="/docs/install/"
+                className="inline-block"
+                clickType="Secondary CTA"
+                clickName="Self-Host Link"
+                clickText="Self-Host SigNoz"
+                clickLocation="Data Protection Section"
+              >
+                <Button
+                  type={Button.TYPES.SECONDARY}
+                  className="flex-center text-xs sm:text-sm"
+                  id="btn-self-host-signoz-homepage"
                 >
                   <BookOpen className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                   Self-Host SigNoz
-                </TrackingLink>
-              </Button>
-              <Button type={Button.TYPES.SECONDARY} className="text-xs sm:text-sm" id="btn-on-prem-signoz-homepage">
-                <TrackingLink 
-                  href="/enterprise/" 
-                  className="flex-center"
-                  clickType="Secondary CTA"
-                  clickName="On-Prem Link"
-                  clickText="On-prem, managed by SigNoz"
-                  clickLocation="Data Protection Section"
+                </Button>
+              </TrackingLink>
+              <TrackingLink
+                href="/enterprise/"
+                className="inline-block"
+                clickType="Secondary CTA"
+                clickName="On-Prem Link"
+                clickText="On-prem, managed by SigNoz"
+                clickLocation="Data Protection Section"
+              >
+                <Button
+                  type={Button.TYPES.SECONDARY}
+                  className="flex-center text-xs sm:text-sm"
+                  id="btn-on-prem-signoz-homepage"
                 >
                   <BookOpen className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                   On-prem, managed by SigNoz
-                </TrackingLink>
-              </Button>
+                </Button>
+              </TrackingLink>
             </div>
           ) : null}
         </div>

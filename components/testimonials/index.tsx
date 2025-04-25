@@ -4,7 +4,7 @@ import { ArrowRight } from 'lucide-react'
 import Button from '@/components/Button/Button'
 import TrackingLink from '@/components/TrackingLink'
 
-export const Testimonials = ({page}) => {
+export const Testimonials = ({ page }) => {
   const customerStoriesId = `btn-customer-stories-testimonials-${page}`
   const TESTIMONIALS_LIST = [
     [
@@ -198,8 +198,8 @@ export const Testimonials = ({page}) => {
             <div key={idx} className="col col--6">
               {column.map((testimonial, i) => (
                 <div className="row" key={`${idx}-${i}`}>
-                  <TrackingLink 
-                    className="card-demo m-2 w-full" 
+                  <TrackingLink
+                    className="card-demo m-2 w-full"
                     href={testimonial.href}
                     clickType="External Click"
                     clickName="Testimonial Link"
@@ -238,19 +238,22 @@ export const Testimonials = ({page}) => {
           ))}
         </div>
         <div className="w-[52vw] shadow-[-4px_-40px_80px_146px_rgba(11,12,14,0.8)]">
-          <Button id={customerStoriesId} className="button-background flex h-8 items-center justify-center gap-1.5 truncate rounded-full px-4 py-2 pl-4 pr-3 text-center text-sm font-medium not-italic leading-5 text-white no-underline outline-none hover:text-white">
-            <TrackingLink 
-              href="/case-study/" 
-              className="flex-center"
-              clickType="Secondary CTA"
-              clickName="Customer Stories Link"
-              clickText="Read customer stories"
-              clickLocation="Testimonials Section"
+          <TrackingLink
+            href="/case-study/"
+            className="inline-block"
+            clickType="Secondary CTA"
+            clickName="Customer Stories Link"
+            clickText="Read customer stories"
+            clickLocation="Testimonials Section"
+          >
+            <Button
+              id={customerStoriesId}
+              className="button-background flex h-8 items-center justify-center gap-1.5 truncate rounded-full px-4 py-2 pl-4 pr-3 text-center text-sm font-medium not-italic leading-5 text-white no-underline outline-none hover:text-white"
             >
               Read customer stories
               <ArrowRight size={14} />
-            </TrackingLink>
-          </Button>
+            </Button>
+          </TrackingLink>
         </div>
       </div>
     </section>
