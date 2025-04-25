@@ -1,0 +1,463 @@
+---
+id: istio-traces
+title: Istio Traces
+sidebar_label: Istio Traces
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<Tabs>
+  <TabItem value="cloud" label="SigNoz Cloud">
+
+## Prerequisites
+
+- A running Istio service mesh (v1.14+ recommended)
+- Access to a SigNoz Cloud tenant and your SigNoz ingestion key
+- kubectl and istioctl installed and configured
+- Istio control-plane namespace: `istio-system` (used throughout this guide)
+- OpenTelemetry Collector deployed in your cluster (see the [Istio Metrics](./istio-metrics) guide)
+
+## 1. Configure OpenTelemetry Collector for Traces
+
+If you've already set up the OpenTelemetry Collector for metrics as described in the [Istio Metrics](./istio-metrics) guide, you might already have traces configured. Let's ensure your collector is properly configured for trace collection:
+
+```yaml
+# values.yaml
+# ... other configuration from the metrics guide
+
+config:
+  receivers:
+    # ... other receivers from metrics configuration
+    
+    # OTLP receiver for traces
+    otlp:
+      protocols:
+        grpc: {}
+        http: {}
+    
+    # Zipkin receiver for Istio traces
+    zipkin:
+      endpoint: 0.0.0.0:9411
+  
+  processors:
+    batch: {}
+    # Optional: Add memory_limiter processor to prevent OOM issues
+    memory_limiter:
+      check_interval: 1s
+      limit_percentage: 80
+      spike_limit_percentage: 25
+  
+  exporters:
+    # ... other exporters from metrics configuration
+    otlp/signoz:
+      endpoint: "ingest.in.signoz.cloud:443"
+      tls:
+        insecure: false
+      headers:
+        "signoz-ingestion-key": "<YOUR_SIGNOZ_INGESTION_KEY>"
+  
+  service:
+    pipelines:
+      # Keep your existing metrics pipeline
+      metrics:
+        receivers: [otlp, prometheus, httpcheck]
+        processors: [batch]
+        exporters: [debug, otlp/signoz]
+      
+      # Add or update the traces pipeline
+      traces:
+        receivers: [otlp, zipkin]
+        processors: [batch, memory_limiter]
+        exporters: [otlp/signoz]
+
+# ... other configuration from metrics guide
+```
+
+Update the OpenTelemetry Collector with the new configuration:
+
+```bash
+helm upgrade --install otel-collector open-telemetry/opentelemetry-collector \
+  --namespace istio-system \
+  -f values.yaml
+```
+
+## 2. Configure Istio for Distributed Tracing
+
+Istio must be configured to send traces to the OpenTelemetry Collector. This requires updating the Istio mesh configuration:
+
+```bash
+istioctl install -y \
+  --set values.meshConfig.enablePrometheusMerge=true \
+  --set 'values.meshConfig.defaultConfig.telemetry.providers[0].name=otlp' \
+  --set 'values.meshConfig.defaultConfig.telemetry.providers[0].provider=opentelemetry' \
+  --set 'values.meshConfig.defaultConfig.telemetry.providers[0].opentelemetry.address=otel-collector.istio-system.svc.cluster.local:4317' \
+  --set values.meshConfig.defaultConfig.tracing.sampling=100 \
+  --set values.meshConfig.defaultConfig.tracing.zipkin.address=otel-collector.istio-system.svc.cluster.local:9411
+```
+
+This configuration:
+1. Enables both metrics and tracing collection
+2. Sets the OpenTelemetry provider for telemetry
+3. Configures tracing to use the Zipkin protocol with the OTel Collector endpoint
+4. Sets the trace sampling rate to 100% (every request is traced)
+
+> **Note:** For production environments, you should adjust the sampling rate to a lower value (e.g., 10% or even 1%) to reduce overhead and storage costs.
+
+## 3. Propagate Trace Context in Your Applications
+
+For end-to-end tracing, applications must propagate trace context headers. Istio automatically generates trace headers, but your applications need to forward them between services.
+
+For HTTP services, ensure the following headers are propagated:
+- `x-request-id`
+- `x-b3-traceid`
+- `x-b3-spanid`
+- `x-b3-parentspanid`
+- `x-b3-sampled`
+- `x-b3-flags`
+- `b3`
+- `x-ot-span-context`
+
+Most OpenTelemetry client libraries handle this automatically, but you may need to configure your API gateways or ingress controllers to preserve these headers.
+
+## 4. Validate Trace Collection in SigNoz
+
+Once your configuration is applied and traffic is flowing through your mesh, you should be able to see traces in SigNoz:
+
+1. Log into your SigNoz Cloud account
+2. Navigate to the **Services** page to see services discovered from trace data
+3. Find your Istio-managed services in the list
+4. Click on a service to view its detailed trace data
+
+### Services View
+
+The Services view shows all services discovered from trace data, along with key metrics like request rate, error rate, and p99 latency:
+
+![Services List in SigNoz](./screenshots/istio-services-list.png)
+
+### Trace Explorer
+
+You can use the Trace Explorer to search and filter traces:
+
+1. Navigate to **Traces**
+2. Use filters to find specific traces:
+   - Service name
+   - Operation name
+   - Duration
+   - Status (OK/ERROR)
+   - Custom tags or attributes
+
+![Trace Explorer in SigNoz](./screenshots/istio-trace-explorer.png)
+
+### Trace Detail View
+
+Clicking on a specific trace shows the detailed view with the span hierarchy and timing:
+
+### Flamegraphs
+
+The Flamegraph view helps visualize the time spent in each service and operation:
+
+## 5. Troubleshooting
+
+If you're not seeing traces in SigNoz, try these troubleshooting steps:
+
+### Verify Collector Configuration
+
+Check that your OpenTelemetry Collector is configured correctly:
+
+```bash
+# Check the collector pods
+kubectl get pods -n istio-system -l app.kubernetes.io/name=opentelemetry-collector
+
+# Check collector logs
+kubectl logs -n istio-system -l app.kubernetes.io/name=opentelemetry-collector
+```
+
+Look for any errors related to the Zipkin receiver or OTLP exporter.
+
+### Generate Test Traffic
+
+Generate traffic through your mesh to ensure traces are being created:
+
+```bash
+# Loop to generate traffic
+for i in {1..50}; do
+  curl -s -H "X-B3-Sampled: 1" http://$(kubectl get svc istio-ingressgateway -n istio-system -o jsonpath='{.status.loadBalancer.ingress[0].ip}')/productpage
+  sleep 1
+done
+```
+
+The `X-B3-Sampled: 1` header forces trace sampling for these requests.
+
+### Check Istio Proxy Configuration
+
+Verify that Istio is configured to generate traces:
+
+```bash
+# Get a pod with Istio sidecar
+POD_NAME=$(kubectl get pod -l app=productpage -o jsonpath='{.items[0].metadata.name}')
+
+# Check Istio proxy configuration
+istioctl proxy-config bootstrap $POD_NAME.default | grep -A 15 tracing
+```
+
+You should see Zipkin or OpenTelemetry tracing configuration in the output.
+
+### Common Issues and Solutions
+
+1. **Missing Spans**:
+   - Check that context propagation headers are being forwarded between services
+   - Verify that all services in your mesh have Istio sidecar injection enabled
+   - Ensure your applications aren't stripping tracing headers
+
+2. **Incorrect Collector Endpoint**:
+   - Verify the Zipkin address in Istio configuration points to your collector
+   - Check the collector service is accessible from Istio sidecars
+   - Validate that port 9411 is exposed on your collector service
+
+3. **Trace Sampling Issues**:
+   - Make sure sampling rate is not set too low
+   - Use the `X-B3-Sampled: 1` header to force sampling during testing
+   - Check for any custom sampling configuration in your mesh
+
+4. **Exporter Problems**:
+   - Verify your SigNoz ingestion key and endpoint in the collector configuration
+   - Check for any network issues between the collector and SigNoz
+   - Look for authentication errors in the collector logs
+
+5. **High Volume/Performance Issues**:
+   - Reduce sampling rate in production
+   - Increase memory/CPU limits for the collector
+   - Tune batch processor parameters (increase batch size, adjust timeout)
+
+  </TabItem>
+  <TabItem value="self-hosted" label="SigNoz Self-Hosted">
+
+## Prerequisites
+
+- A running Istio service mesh (v1.14+ recommended)
+- A self-hosted SigNoz installation (with OTLP port 4317 accessible)
+- kubectl and istioctl installed and configured
+- Istio control-plane namespace: `istio-system` (used throughout this guide)
+- OpenTelemetry Collector deployed in your cluster (see the [Istio Metrics](./istio-metrics) guide)
+
+## 1. Configure OpenTelemetry Collector for Traces
+
+If you've already set up the OpenTelemetry Collector for metrics as described in the [Istio Metrics](./istio-metrics) guide, you might already have traces configured. Let's ensure your collector is properly configured for trace collection:
+
+```yaml
+# values.yaml
+# ... other configuration from the metrics guide
+
+config:
+  receivers:
+    # ... other receivers from metrics configuration
+    
+    # OTLP receiver for traces
+    otlp:
+      protocols:
+        grpc: {}
+        http: {}
+    
+    # Zipkin receiver for Istio traces
+    zipkin:
+      endpoint: 0.0.0.0:9411
+  
+  processors:
+    batch: {}
+    # Optional: Add memory_limiter processor to prevent OOM issues
+    memory_limiter:
+      check_interval: 1s
+      limit_percentage: 80
+      spike_limit_percentage: 25
+  
+  exporters:
+    # ... other exporters from metrics configuration
+    otlp:
+      endpoint: "signoz-otel-collector.signoz:4317"
+      tls:
+        insecure: true
+  
+  service:
+    pipelines:
+      # Keep your existing metrics pipeline
+      metrics:
+        receivers: [otlp, prometheus, httpcheck]
+        processors: [batch]
+        exporters: [debug, otlp]
+      
+      # Add or update the traces pipeline
+      traces:
+        receivers: [otlp, zipkin]
+        processors: [batch, memory_limiter]
+        exporters: [otlp]
+
+# ... other configuration from metrics guide
+```
+
+Update the OpenTelemetry Collector with the new configuration:
+
+```bash
+helm upgrade --install otel-collector open-telemetry/opentelemetry-collector \
+  --namespace istio-system \
+  -f values.yaml
+```
+
+## 2. Configure Istio for Distributed Tracing
+
+Istio must be configured to send traces to the OpenTelemetry Collector. This requires updating the Istio mesh configuration:
+
+```bash
+istioctl install -y \
+  --set values.meshConfig.enablePrometheusMerge=true \
+  --set 'values.meshConfig.defaultConfig.telemetry.providers[0].name=otlp' \
+  --set 'values.meshConfig.defaultConfig.telemetry.providers[0].provider=opentelemetry' \
+  --set 'values.meshConfig.defaultConfig.telemetry.providers[0].opentelemetry.address=otel-collector.istio-system.svc.cluster.local:4317' \
+  --set values.meshConfig.defaultConfig.tracing.sampling=100 \
+  --set values.meshConfig.defaultConfig.tracing.zipkin.address=otel-collector.istio-system.svc.cluster.local:9411
+```
+
+This configuration:
+1. Enables both metrics and tracing collection
+2. Sets the OpenTelemetry provider for telemetry
+3. Configures tracing to use the Zipkin protocol with the OTel Collector endpoint
+4. Sets the trace sampling rate to 100% (every request is traced)
+
+> **Note:** For production environments, you should adjust the sampling rate to a lower value (e.g., 10% or even 1%) to reduce overhead and storage costs.
+
+## 3. Propagate Trace Context in Your Applications
+
+For end-to-end tracing, applications must propagate trace context headers. Istio automatically generates trace headers, but your applications need to forward them between services.
+
+For HTTP services, ensure the following headers are propagated:
+- `x-request-id`
+- `x-b3-traceid`
+- `x-b3-spanid`
+- `x-b3-parentspanid`
+- `x-b3-sampled`
+- `x-b3-flags`
+- `b3`
+- `x-ot-span-context`
+
+Most OpenTelemetry client libraries handle this automatically, but you may need to configure your API gateways or ingress controllers to preserve these headers.
+
+## 4. Validate Trace Collection in SigNoz
+
+Once your configuration is applied and traffic is flowing through your mesh, you should be able to see traces in SigNoz:
+
+1. Log into your self-hosted SigNoz instance
+2. Navigate to the **Services** page to see services discovered from trace data
+3. Find your Istio-managed services in the list
+4. Click on a service to view its detailed trace data
+
+### Services View
+
+The Services view shows all services discovered from trace data, along with key metrics like request rate, error rate, and p99 latency:
+
+![Services List in SigNoz](./screenshots/istio-services-list.png)
+
+### Trace Explorer
+
+You can use the Trace Explorer to search and filter traces:
+
+1. Navigate to **Traces**
+2. Use filters to find specific traces:
+   - Service name
+   - Operation name
+   - Duration
+   - Status (OK/ERROR)
+   - Custom tags or attributes
+
+![Trace Explorer in SigNoz](./screenshots/istio-trace-explorer.png)
+
+### Trace Detail View
+
+Clicking on a specific trace shows the detailed view with the span hierarchy and timing:
+
+### Flamegraphs
+
+The Flamegraph view helps visualize the time spent in each service and operation:
+
+## 5. Troubleshooting
+
+If you're not seeing traces in SigNoz, try these troubleshooting steps:
+
+### Verify Collector Configuration
+
+Check that your OpenTelemetry Collector is configured correctly:
+
+```bash
+# Check the collector pods
+kubectl get pods -n istio-system -l app.kubernetes.io/name=opentelemetry-collector
+
+# Check collector logs
+kubectl logs -n istio-system -l app.kubernetes.io/name=opentelemetry-collector
+```
+
+Look for any errors related to the Zipkin receiver or OTLP exporter.
+
+### Check SigNoz OTel Collector Connectivity
+
+Verify that your Istio namespace collector can connect to the SigNoz collector:
+
+```bash
+kubectl run -it --rm debug --image=curlimages/curl -- curl -v signoz-otel-collector.signoz:4317
+```
+
+### Generate Test Traffic
+
+Generate traffic through your mesh to ensure traces are being created:
+
+```bash
+# Loop to generate traffic
+for i in {1..50}; do
+  curl -s -H "X-B3-Sampled: 1" http://$(kubectl get svc istio-ingressgateway -n istio-system -o jsonpath='{.status.loadBalancer.ingress[0].ip}')/productpage
+  sleep 1
+done
+```
+
+The `X-B3-Sampled: 1` header forces trace sampling for these requests.
+
+### Check Istio Proxy Configuration
+
+Verify that Istio is configured to generate traces:
+
+```bash
+# Get a pod with Istio sidecar
+POD_NAME=$(kubectl get pod -l app=productpage -o jsonpath='{.items[0].metadata.name}')
+
+# Check Istio proxy configuration
+istioctl proxy-config bootstrap $POD_NAME.default | grep -A 15 tracing
+```
+
+You should see Zipkin or OpenTelemetry tracing configuration in the output.
+
+### Common Issues and Solutions
+
+1. **Missing Spans**:
+   - Check that context propagation headers are being forwarded between services
+   - Verify that all services in your mesh have Istio sidecar injection enabled
+   - Ensure your applications aren't stripping tracing headers
+
+2. **Incorrect Collector Endpoint**:
+   - Verify the Zipkin address in Istio configuration points to your collector
+   - Check the collector service is accessible from Istio sidecars
+   - Validate that port 9411 is exposed on your collector service
+
+3. **Trace Sampling Issues**:
+   - Make sure sampling rate is not set too low
+   - Use the `X-B3-Sampled: 1` header to force sampling during testing
+   - Check for any custom sampling configuration in your mesh
+
+4. **Exporter Problems**:
+   - Verify your SigNoz endpoint is accessible
+   - Check for any network issues between the collector and SigNoz
+   - Look for connectivity errors in the collector logs
+
+5. **High Volume/Performance Issues**:
+   - Reduce sampling rate in production
+   - Increase memory/CPU limits for the collector
+   - Tune batch processor parameters (increase batch size, adjust timeout)
+
+  </TabItem>
+</Tabs>
