@@ -6,157 +6,29 @@ description: Integrate the GitHub Receiver to scrape the metrics and send the da
 hide_table_of_contents: true
 ---
 
-This document contains instructions on how to configure the GitHub Receiver to scrape metrics using GitHub GraphQL and REST APIs.
+This document contains instructions on how to monitor the GitHub Repos using [GitHub Receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/githubreceiver/README.md) to scrape metrics using GitHub GraphQL and REST APIs.
 
-## What is GitHub Receiver
 
-The GitHub Receiver is an OpenTelemetry Collector component that collects telemetry data from GitHub using webhooks and APIs (GraphQL/REST).
-Please follow [this link](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/githubreceiver/README.md) for more info.
-
-## Requirements
-
-Make sure you're running SigNoz Cloud or Self Hosted SigNoz.
+## Prerequisites
 
 Access token is required for scraping the metrics which can be generated in 2 ways.
 
-<Tabs entityName="plans">
-<TabItem value="github-app" label="GitHub App" default>
-**Step 1.** Create the GitHub App
+- [Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#fine-grained-personal-access-tokens)
 
-    a. Navigate to your GitHub account's `Developer Settings`.
-
-    b. Click on `GitHub Apps` and then `New GitHub App`.
-
-    c. Fill in the required details:
-
-    ```markdown
-
-        GitHub App name: Eg. OpenTelemetry Collector App
-
-        Homepage URL: Your organization's homepage or repository URL (Eg. https://github.com/<org>/<repo>)
-
-        Permissions:
-
-        Repository permissions:
-
-            Metadata: Read-only
-            Contents: Read-only
-            Issues: Read-only
-            Pull requests: Read-only
-
-        Organization permissions (if accessing organization data):
-        
-            Members: Read-only
-    ```
-    d. Where can this GitHub App be installed?
-
-       Click on `Only on this account`
-
-**Step 2.** Generate Private Key
-
-    a. After installation, click on `Generate a private key` by opening your GitHub App. 
-
-    b. Use this private key to authenticate and generate a JWT, which will provide the access token.
-
-**Step 3.** Install the GitHub App
-
-    a. Go to your GitHub App’s [settings](https://github.com/settings/apps) (or) [for org-owned apps](https://github.com/organizations/YOUR_ORG/settings/apps)
-
-    b. Click on your app. 
-
-    c. On the left sidebar, click `Install App`.
-
-    d. Choose whether to install it: 
-
-       On your personal account (if you're using personal repos), or On your organization (if you're targeting org repos) 
-
-    e. Choose which repositories to grant access to: 
-
-        Select `All repositories`
-
-    f. Click `Install`. 
-
-**Step 4.** Generate the Access Token
-
-    ```python
-       pip install pyjwt requests cryptography 
-    ```
-
-    ```python
-        import jwt
-        import time
-        import requests
-
-        # Replace with your GitHub App's info
-        APP_ID = '<"App ID" can be noted on opening the GitHub App which is created>'
-        INSTALLATION_ID = 'Installation ID can be got by clicking on "Install App" and then your app' #i.e https://github.com/settings/installations/<InstallationID>
-        PRIVATE_KEY_PATH = 'private-key.pem absolute path' #This can be taken from Step2
-
-        # Step 1: Create JWT
-        with open(PRIVATE_KEY_PATH, 'r') as f:
-            private_key = f.read()
-
-        now = int(time.time())
-        payload = {
-            'iat': now,
-            'exp': now + 540,  # 9 minutes
-            'iss': APP_ID
-        }
-
-        jwt_token = jwt.encode(payload, private_key, algorithm='RS256')
-
-        # Step 2: Generate Access Token
-        headers = {
-            "Authorization": f"Bearer {jwt_token}",
-            "Accept": "application/vnd.github+json"
-        }
-
-        url = f"https://api.github.com/app/installations/{INSTALLATION_ID}/access_tokens"
-        response = requests.post(url, headers=headers)
-
-        access_token = response.json().get("token")
-        print("Access token:", access_token)
-    ```
-</TabItem>
-
-<TabItem value="personal-access-token" label="Personal Access Token">
-**Step 1.** Create the Personal Access Token
-
-    a. Visit [Personal Access Token](https://github.com/settings/personal-access-tokens) link on GitHub account's `Developer Settings`.
-
-    b. Click on `Generate new token`
-
-    c. Provide the `Token name`
-    
-    d. Select `All repositories` in `Repository access` section.
-
-    e. In the Permissions section, provide read only access to the following,
-       
-       ```markdown
-            Metadata
-            Contents
-            Issues
-            Pull requests
-            Actions
-       ```
-    
-    f. Click on `Generate token`
-
-</TabItem>
-</Tabs>
+- [GitHub App](https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/registering-a-github-app)
 
 
 ### Setup the SigNoz to scrape the metrics
 
 <Tabs entityName="plans">
 <TabItem value="signoz-cloud" label="SigNoz Cloud" default>
-## Send Metrics to SigNoz Cloud
 
-Once access token is generated in either of the above ways, proceed with the following steps
 
-**Step 1.** Add the following service under `services` section of docker-compose.yaml file.
+### Step 1. 
 
-    ```dockerfile
+Add the following service under `services` section of docker-compose.yaml file.
+
+    ```yaml:/deploy/docker/docker-compose.yaml 
 
         github-otel-collector:
             image: otel/opentelemetry-collector-contrib:0.123.0
@@ -271,140 +143,151 @@ Once access token is generated in either of the above ways, proceed with the fol
 </TabItem>
 
 <TabItem value='self-host' label='Self-Host'>
-## Send Metrics to Self-Hosted SigNoz
 
-Once access token is generated in either of the above ways, proceed with the following steps
 
-**Step 1.** Add the following service under `services` section of docker-compose.yaml file.
+### Step 1. Add GitHub OpenTelemetry Collector Service
 
-    ```dockerfile
+<Admonition>
+💡 At the time of writing this guide, the SigNoz OpenTelemetry Collector does not support the GitHub Receiver.
 
-        github-otel-collector:
-            image: otel/opentelemetry-collector-contrib:0.123.0
-            container_name: github-otel-collector
-            command: [ "--config=/etc/otel-collector-config.yaml" ]
-            volumes:
-              - ./github-otel-collector-config.yaml:/etc/otel-collector-config.yaml
-            environment:
-              - GH_PAT=<Access Token>
-            networks:
-              - signoz-net
-            depends_on:
-              - otel-collector
+🐳 If you're using Kubernetes or Linux for hosting SigNoz, consider running a separate OTel Collector for GitHub by following this [link](https://opentelemetry.io/docs/collector/installation/).
 
+⚙️ Following setup is based on [DockerCompose](https://signoz.io/docs/install/docker/#install-signoz-using-docker-compose)
+</Admonition>
+
+Add the `github-otel-collector` service under `services` section of `docker-compose.yaml` file.
+
+    ```yaml:/deploy/docker/docker-compose.yaml 
+    ...
+    github-otel-collector:
+        image: otel/opentelemetry-collector-contrib:0.123.0
+        container_name: github-otel-collector
+        command: [ "--config=/etc/otel-collector-config.yaml" ]
+        volumes:
+          - ./github-otel-collector-config.yaml:/etc/otel-collector-config.yaml
+        environment:
+          - GH_PAT=<Access Token>
+        networks:
+          - signoz-net
+        depends_on:
+          - otel-collector
+    ...
     ```
 
-**Step 2.** Comment the following lines and add `GH_PAT` as environment variable under `environment` section
+### Step 2. Configure GitHub Token as Environment Variable
+Comment the following lines under `command` and add `GH_PAT` as environment variable under `environment` section of `otel-collector` service in `docker-compose.yaml` file.
 
-    ```dockerfile
+    ```yaml:/deploy/docker/docker-compose.yaml 
+    ...
+    otel-collector:
+        command:
         # - --manager-config=/etc/manager-config.yaml
         # - --copy-path=/var/tmp/collector-config.yaml
-        - GH_PAT=<Access Token>
+        environment:
+          - GH_PAT=<Access Token>
+    ...
     ```
 
-**Step 3.** Create github-otel-collector-config.yaml file and add the following contents.
+### Step 3. Create GitHub OTel Collector Configuration
+Create `github-otel-collector-config.yaml` file and add the following contents.
 
-    ```dockerfile
-       extensions:
-         bearertokenauth/github:
-           token: ${env:GH_PAT}
+    ```yaml:/deploy/docker/github-otel-collector-config.yaml 
+    ...
+    extensions:
+        bearertokenauth/github:
+        token: ${env:GH_PAT}
 
-       receivers:
-         github:
-            log_level: debug
-            initial_delay: 1s
-            collection_interval: 60s
-            timeout: 30s
-            scrapers:
-              scraper:
-                github_org: <Your GitHub Org>
-                # search_query: ""
-                metrics:
-                vcs.contributor.count:
-                    enabled: true
-                auth:
-                authenticator: bearertokenauth/github
+    receivers:
+        github:
+        log_level: debug
+        initial_delay: 1s
+        collection_interval: 60s
+        timeout: 30s
+        scrapers:
+            scraper:
+            github_org: <Your GitHub Org>
+            # search_query: ""
+            metrics:
+            vcs.contributor.count:
+                enabled: true
+            auth:
+            authenticator: bearertokenauth/github
 
-       exporters:
-         otlp:
-           endpoint: signoz-otel-collector:4317
-           tls:
-             insecure: true
-           timeout: 30s
-         debug:
-           verbosity: detailed 
+    exporters:
+        otlp:
+        endpoint: signoz-otel-collector:4317
+        tls:
+            insecure: true
+        timeout: 30s
+        debug:
+        verbosity: detailed 
 
-       service:
-         extensions: [bearertokenauth/github]
-         pipelines:
-           metrics:
-             receivers: [github]
-             processors: []
-             exporters: [otlp,debug]
+    service:
+        extensions: [bearertokenauth/github]
+        pipelines:
+        metrics:
+            receivers: [github]
+            processors: []
+            exporters: [otlp,debug]
+    ...
     ```
 
-**Step 4.** Update the exising otel-collector-config.yaml file with the following contents.
+### Step 4. Update SigNoz OTel Collector Configuration
+Update the existing `otel-collector-config.yaml` file with the following contents.
 
-    ```dockerfile
-       extensions:
-         bearertokenauth/github:
-           token: ${env:GH_PAT}
+    ```yaml:/deploy/docker/otel-collector-config.yaml
+    ...
+    extensions:
+        bearertokenauth/github:
+        token: ${env:GH_PAT}
 
-       receivers:
-         otlp:
-           protocols:
-             grpc:
-               endpoint: 0.0.0.0:4317
-             http:
-               endpoint: 0.0.0.0:4318
-       
-       exporters:
-         clickhousemetricswrite:
-           endpoint: tcp://clickhouse:9000/signoz_metrics
-           resource_to_telemetry_conversion:
-             enabled: true
+    receivers:
+        otlp:
+        protocols:
+            grpc:
+            endpoint: 0.0.0.0:4317
+            http:
+            endpoint: 0.0.0.0:4318
+    
+    exporters:
+        clickhousemetricswrite:
+        endpoint: tcp://clickhouse:9000/signoz_metrics
+        resource_to_telemetry_conversion:
+            enabled: true
 
-       service:
-         extensions: [bearertokenauth/github]
-         pipelines:
-           metrics:
-             receivers: [otlp]
-             processors: []
-             exporters: [clickhousemetricswrite]
+    service:
+        extensions: [bearertokenauth/github]
+        pipelines:
+        metrics:
+            receivers: [otlp]
+            processors: []
+            exporters: [clickhousemetricswrite]
+    ...
     ```
-**Step 5.** Restart the `otel-collector` service and `github-otel-collector` service.
+### Step 5. Restart OTel Collector Services
+Restart the `otel-collector` service and `github-otel-collector` service.
 
     ```bash
-        docker compose -f docker/docker-compose.yaml restart otel-collector
-        docker compose -f docker/docker-compose.yaml restart github-otel-collector
-        docker compose -f docker/docker-compose.yaml logs -f github-otel-collector
+    docker compose -f docker/docker-compose.yaml restart otel-collector
+    docker compose -f docker/docker-compose.yaml restart github-otel-collector
     ```
 
-    Logs should be seen in `github-otel-collector` as below,
-
-    ```markdown
-        starting the GitHub scraper
-        Everything is ready. Begin running and processing data.
+### Step 6. View Logs of GitHub OTel Collector
+Run the following command to view the logs.
+    
+    ```bash
+    docker compose -f docker/docker-compose.yaml logs -f github-otel-collector
     ```
+    
+<Figure src="/img/docs/cicd/github/GitHubReceiver.webp" alt="GitHub Receiver" caption="GitHub Receiver Startup Message" />
 
 </TabItem>
 </Tabs>
 
-### Validate the metrics
+## Validate GitHub Metrics in SigNoz
 
-**Step 1.** Default Metrics scraped are as below which can be seen on `Metrics` tab in `SigNoz` console.
+- The following default metrics are scraped and can be viewed under the `Metrics` tab in the SigNoz UI.
 
-    ```markdown
-        
-        vcs.change.count
-        vcs.ref.count
-        vcs.ref.revisions.delta
-        vcs.ref.lines.delta
-        vcs.ref.time
-        vcs.change.duration
-        vcs.repository.count
-        vcs.contributor.count
+<Figure src="/img/docs/cicd/github/Metrics.webp" alt="GitHub Metrics" caption="Scraped Metrics from GitHub" />
 
-    ```
-
-**Step 2.** Refer this [link](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/githubreceiver/documentation.md) for more info on metrics.
+- Refer this [link](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/githubreceiver/documentation.md) for more info on metrics.
