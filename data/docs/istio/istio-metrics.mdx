@@ -1,0 +1,805 @@
+---
+id: istio-metrics
+title: Istio Metrics
+sidebar_label: Istio Metrics
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<Tabs>
+  <TabItem value="cloud" label="SigNoz Cloud">
+
+## Prerequisites
+
+- A running Istio service mesh (v1.14+ recommended)
+- Access to a SigNoz Cloud tenant and your SigNoz ingestion key
+- kubectl and istioctl installed and configured
+- Istio control-plane namespace: `istio-system` (used throughout this guide)
+
+## 1. Deploy OpenTelemetry Collector with Helm
+
+The OpenTelemetry Collector is responsible for collecting telemetry data from Istio and forwarding it to SigNoz. We'll use the official OpenTelemetry Helm chart for deployment.
+
+1. Add the OpenTelemetry Helm repository:
+
+   ```bash
+   helm repo add open-telemetry https://open-telemetry.github.io/opentelemetry-helm-charts
+   helm repo update
+   ```
+
+2. Create a `values.yaml` file for the Collector configuration:
+
+   ```yaml
+   # values.yaml
+   mode: "deployment"
+   namespaceOverride: "istio-system"
+
+   # Create service account with proper permissions
+   serviceAccount:
+     create: true
+     name: "otel-collector"
+
+   # Create cluster role with necessary permissions for Kubernetes service discovery
+   clusterRole:
+     create: true
+     name: "otel-collector"
+     rules:
+       - apiGroups:
+           - ""
+         resources:
+           - "pods"
+           - "namespaces"
+           - "nodes"
+           - "endpoints"
+           - "services"
+         verbs:
+           - "get"
+           - "list"
+           - "watch"
+     clusterRoleBinding:
+       name: "otel-collector"
+
+   image:
+     repository: "otel/opentelemetry-collector-contrib"
+     tag: "latest"
+
+   config:
+     receivers:
+       # Prometheus receiver for Istio metrics
+       prometheus:
+         config:
+           scrape_configs:
+             # Collect metrics from Istio proxies
+             - job_name: istio-metrics
+               kubernetes_sd_configs:
+                 - role: pod
+                   namespaces:
+                     names: [default]    # Update with your application namespaces
+                   selectors:
+                     - role: pod
+                       label: istio-injection=enabled
+               metrics_path: /stats/prometheus
+               scheme: http
+               scrape_interval: 5s
+               relabel_configs:
+                 - source_labels: [__meta_kubernetes_pod_container_name]
+                   action: keep
+                   regex: istio-proxy
+                 - source_labels: [__address__]
+                   action: replace
+                   regex: ([^:]+)(?::\d+)?
+                   replacement: $1:15090
+                   target_label: __address__
+             # Collect metrics from Istio ingress gateway
+             - job_name: istio-ingressgateway
+               kubernetes_sd_configs:
+                 - role: endpoints
+                   namespaces:
+                     names: [istio-system]
+               metrics_path: /stats/prometheus
+               scheme: http
+               scrape_interval: 15s
+               relabel_configs:
+                 - source_labels: [__meta_kubernetes_service_name]
+                   regex: istio-ingressgateway
+                   action: keep
+                 - source_labels: [__address__]
+                   action: replace
+                   regex: ([^:]+)(?::\d+)?
+                   replacement: $1:15090
+                   target_label: __address__
+       
+       otlp:
+         protocols:
+           grpc: {}
+           http: {}
+           
+       httpcheck:
+         targets:
+           - endpoint: "<YOUR_PRODUCT_ENDPOINT>"
+             method: GET
+         collection_interval: 10s
+
+     processors:
+       batch: {}
+
+     exporters:
+       debug:
+         verbosity: detailed 
+       otlp/signoz:
+         endpoint: "ingest.in.signoz.cloud:443"
+         tls:
+           insecure: false
+         headers:
+           "signoz-ingestion-key": "<YOUR_SIGNOZ_INGESTION_KEY>"
+
+     extensions:
+       health_check:
+         endpoint: "0.0.0.0:13133"
+
+     service:
+       extensions: ["health_check"]
+       pipelines:
+         metrics:
+           receivers: [otlp, httpcheck, prometheus]
+           processors: [batch]
+           exporters: [debug, otlp/signoz]
+         traces:
+           receivers: [otlp]
+           processors: [batch]
+           exporters: [otlp/signoz]
+
+   # Disable default pipelines
+   presets:
+     logsCollection:
+       enabled: false
+     hostMetrics:
+       enabled: false
+     kubernetesAttributes:
+       enabled: false
+     kubeletMetrics:
+       enabled: false
+     kubernetesEvents:
+       enabled: false
+     clusterMetrics:
+       enabled: false
+
+   service:
+     type: ClusterIP
+
+   fullnameOverride: "otel-collector"
+
+   extraEnvs:
+     - name: LOG_LEVEL
+       value: "debug"
+   ```
+
+   > **Note:** Replace `<YOUR_SIGNOZ_INGESTION_KEY>` with your actual SigNoz ingestion key. Use the appropriate regional endpoint for your SigNoz Cloud instance:
+   >
+   > | Region | Endpoint                     |
+   > |--------|------------------------------|
+   > | US     | `ingest.us.signoz.cloud:443` |
+   > | IN     | `ingest.in.signoz.cloud:443` |
+   > | EU     | `ingest.eu.signoz.cloud:443` |
+   >
+   > Also update the `namespaces` in the Prometheus configuration to match your application namespaces.
+
+3. Install the OpenTelemetry Collector using Helm:
+
+   ```bash
+   helm install otel-collector open-telemetry/opentelemetry-collector \
+     --namespace istio-system \
+     -f values.yaml
+   ```
+
+4. Verify the Collector deployment:
+
+   ```bash
+   kubectl get pods -n istio-system -l app.kubernetes.io/name=opentelemetry-collector
+   ```
+
+   You should see the collector pod running:
+
+   ```
+   NAME                             READY   STATUS    RESTARTS   AGE
+   otel-collector-8f7b86d8c-z9xpj   1/1     Running   0          2m
+   ```
+
+## 2. Configure Istio for Metrics Collection
+
+Now we need to configure Istio to send metrics to the OpenTelemetry Collector.
+
+### Update Istio MeshConfig
+
+Configure Istio to emit telemetry data by updating the MeshConfig:
+
+```bash
+istioctl install -y \
+  --set values.meshConfig.enablePrometheusMerge=true \
+  --set 'values.meshConfig.defaultConfig.telemetry.providers[0].name=otlp' \
+  --set 'values.meshConfig.defaultConfig.telemetry.providers[0].provider=opentelemetry' \
+  --set 'values.meshConfig.defaultConfig.telemetry.providers[0].opentelemetry.address=otel-collector.istio-system.svc.cluster.local:4317' \
+  --set values.meshConfig.defaultConfig.tracing.sampling=100 \
+  --set values.meshConfig.defaultConfig.tracing.zipkin.address=otel-collector.istio-system.svc.cluster.local:9411
+```
+
+This configuration:
+- Enables Prometheus metrics collection
+- Configures OpenTelemetry as a telemetry provider
+- Points Istio to the OpenTelemetry Collector endpoint
+- Sets up tracing with the Zipkin protocol (which OpenTelemetry Collector can receive)
+- Sets a 100% sampling rate for traces (adjust for production environments)
+
+### Apply Telemetry Resource for Metrics
+
+Create an Istio Telemetry resource to control which metrics are collected:
+
+```bash
+kubectl apply -f - <<EOF
+apiVersion: telemetry.istio.io/v1alpha1
+kind: Telemetry
+metadata:
+  name: signoz-metrics
+  namespace: istio-system
+spec:
+  metrics:
+    - providers:
+        - name: prometheus
+      overrides:
+        - match:
+            metric: ALL_METRICS
+          disabled: true
+        - match:
+            metric: REQUEST_COUNT
+          disabled: false
+        - match:
+            metric: REQUEST_DURATION
+          disabled: false
+        - match:
+            metric: REQUEST_SIZE
+          disabled: false
+        - match:
+            metric: RESPONSE_SIZE
+          disabled: false
+EOF
+```
+
+## 3. Validating Metrics in SigNoz
+
+Once your configuration is applied, you should be able to see Istio metrics in SigNoz.
+
+1. Log into your SigNoz Cloud account
+2. Navigate to **Metrics Explorer**
+3. Look for metrics with the `istio` prefix, such as:
+   - `istio_requests_total`
+   - `istio_request_duration_milliseconds`
+   - `istio_request_bytes`
+   - `istio_response_bytes`
+   
+   You should also see HTTP check metrics from the `httpcheck` receiver:
+   - `httpcheck_status` - Indicates if the HTTP endpoint is reachable (value of 1 for success)
+   - `httpcheck_duration` - Shows the response time of the HTTP endpoint in milliseconds
+
+> **Note**: If you don't see Istio metrics immediately, but HTTP check metrics are visible, ensure you're generating traffic to your Istio services. Unlike HTTP checks that actively probe endpoints, Istio metrics only appear when there's actual traffic flowing through the mesh.
+
+![Istio Metrics in SigNoz](./screenshots/istio-metrics-explorer.png)
+
+## 4. Performance Considerations and Tuning
+
+When collecting metrics from Istio, there are some performance considerations to keep in mind:
+
+### Batch Processor Tuning
+
+The `batch` processor can be tuned to optimize for your specific environment:
+
+```yaml
+processors:
+  batch:
+    # Increase the batch size to reduce the number of export requests
+    send_batch_size: 1000
+    # Increase the timeout to allow for larger batches (in milliseconds)
+    timeout: 10000
+    # Adjust the maximum queue size based on your memory constraints
+    send_batch_max_size: 2000
+```
+
+### Metric Filtering
+
+If you're experiencing high cardinality or excessive metric volume, you can add filters to reduce the data sent to SigNoz:
+
+```yaml
+processors:
+  filter:
+    metrics:
+      include:
+        match_type: regexp
+        metric_names:
+          - istio_request.*
+          - istio_response.*
+```
+
+### Resource Allocation
+
+For production environments with high traffic, consider increasing the resources allocated to the collector:
+
+```yaml
+resources:
+  limits:
+    cpu: 1
+    memory: 2Gi
+  requests:
+    cpu: 200m
+    memory: 400Mi
+```
+
+## 5. Troubleshooting
+
+If you're not seeing Istio metrics in SigNoz, follow these troubleshooting steps:
+
+### RBAC Issues
+
+The most common issue is permissions. The OpenTelemetry Collector needs permissions to access Kubernetes services and endpoints for service discovery. Look for errors like:
+
+```
+failed to list *v1.Service: services is forbidden: User "system:serviceaccount:istio-system:otel-collector" cannot list resource "services"
+```
+
+If you see these errors, make sure you've configured the proper ClusterRole and ClusterRoleBinding as shown in the values.yaml above.
+
+### Check Istio Proxy Metrics Endpoint
+
+Verify that Istio sidecars are exposing metrics correctly:
+
+```bash
+# Get a pod with Istio sidecar
+POD_NAME=$(kubectl get pod -l app=productpage -o jsonpath='{.items[0].metadata.name}')
+
+# Check if you can access the Istio metrics endpoint directly from inside the pod
+kubectl exec -it $POD_NAME -c istio-proxy -- curl localhost:15090/stats/prometheus
+```
+
+You should see Prometheus-formatted metrics output. If not, there might be an issue with your Istio installation.
+
+### Verify Collector Logs
+
+Check the collector logs for any errors:
+
+```bash
+kubectl logs -n istio-system -l app.kubernetes.io/name=opentelemetry-collector
+```
+
+Look for any errors related to connection issues or configuration problems.
+
+### Check Prometheus Metrics Collection
+
+Verify that the Prometheus receiver in the OpenTelemetry Collector is correctly configured. The key configuration is:
+
+1. Using proper `kubernetes_sd_configs` to discover Istio pods
+2. Setting the correct metrics path (`/stats/prometheus`)
+3. Remapping the address to target port 15090 on the Istio proxy
+
+### Generate Traffic
+
+Istio metrics will only appear when there's actual traffic flowing through the service mesh. Generate some traffic to your applications:
+
+```bash
+# Loop to generate continuous traffic
+for i in {1..100}; do
+  curl -s http://$(kubectl get svc istio-ingressgateway -n istio-system -o jsonpath='{.status.loadBalancer.ingress[0].ip}')/productpage > /dev/null
+  sleep 1
+done
+```
+
+### Verify Istio Configuration
+
+Make sure Istio is configured to send metrics to the OpenTelemetry Collector:
+
+```bash
+istioctl proxy-config bootstrap $POD_NAME.default | grep -A 10 opentelemetry
+```
+
+### Common Issues and Solutions
+
+1. **Permissions Issues**: 
+   - Make sure the OpenTelemetry Collector service account has the necessary permissions
+   - Create proper ClusterRole and ClusterRoleBinding for the collector
+
+2. **Configuration Issues**:
+   - Check that the Prometheus receiver is correctly configured
+   - Verify that the service and port for the OpenTelemetry Collector are correct
+   - Make sure the pipeline includes the Prometheus receiver
+
+3. **Network Issues**:
+   - Verify that pods can communicate with each other
+   - Check that there are no network policies blocking traffic
+
+4. **Missing Telemetry Provider**:
+   - Ensure you've configured Istio to use OpenTelemetry as a telemetry provider
+   - Check that the address for the OpenTelemetry provider points to your collector
+
+  </TabItem>
+  <TabItem value="self-hosted" label="SigNoz Self-Hosted">
+
+## Prerequisites
+
+- A running Istio service mesh (v1.14+ recommended)
+- A self-hosted SigNoz installation (with OTLP port 4317 accessible)
+- kubectl and istioctl installed and configured
+- Istio control-plane namespace: `istio-system` (used throughout this guide)
+
+## 1. Deploy OpenTelemetry Collector with Helm
+
+1. Add the OpenTelemetry Helm repository:
+
+   ```bash
+   helm repo add open-telemetry https://open-telemetry.github.io/opentelemetry-helm-charts
+   helm repo update
+   ```
+
+2. Create a `values.yaml` file for the Collector configuration:
+
+   ```yaml
+   # values.yaml for self-hosted SigNoz
+   mode: "deployment"
+   namespaceOverride: "istio-system"
+
+   # Create service account with proper permissions
+   serviceAccount:
+     create: true
+     name: "otel-collector"
+
+   # Create cluster role with necessary permissions for Kubernetes service discovery
+   clusterRole:
+     create: true
+     name: "otel-collector"
+     rules:
+       - apiGroups:
+           - ""
+         resources:
+           - "pods"
+           - "namespaces"
+           - "nodes"
+           - "endpoints"
+           - "services"
+         verbs:
+           - "get"
+           - "list"
+           - "watch"
+     clusterRoleBinding:
+       name: "otel-collector"
+
+   image:
+     repository: "otel/opentelemetry-collector-contrib"
+     tag: "latest"
+
+   config:
+     receivers:
+       # Prometheus receiver for Istio metrics
+       prometheus:
+         config:
+           scrape_configs:
+             # Collect metrics from Istio proxies
+             - job_name: istio-metrics
+               kubernetes_sd_configs:
+                 - role: pod
+                   namespaces:
+                     names: [default]    # Update with your application namespaces
+                   selectors:
+                     - role: pod
+                       label: istio-injection=enabled
+               metrics_path: /stats/prometheus
+               scheme: http
+               scrape_interval: 5s
+               relabel_configs:
+                 - source_labels: [__meta_kubernetes_pod_container_name]
+                   action: keep
+                   regex: istio-proxy
+                 - source_labels: [__address__]
+                   action: replace
+                   regex: ([^:]+)(?::\d+)?
+                   replacement: $1:15090
+                   target_label: __address__
+             # Collect metrics from Istio ingress gateway
+             - job_name: istio-ingressgateway
+               kubernetes_sd_configs:
+                 - role: endpoints
+                   namespaces:
+                     names: [istio-system]
+               metrics_path: /stats/prometheus
+               scheme: http
+               scrape_interval: 15s
+               relabel_configs:
+                 - source_labels: [__meta_kubernetes_service_name]
+                   regex: istio-ingressgateway
+                   action: keep
+                 - source_labels: [__address__]
+                   action: replace
+                   regex: ([^:]+)(?::\d+)?
+                   replacement: $1:15090
+                   target_label: __address__
+       
+       otlp:
+         protocols:
+           grpc: {}
+           http: {}
+
+       httpcheck:
+         targets:
+           - endpoint: "<YOUR_PRODUCT_ENDPOINT>"
+             method: GET
+         collection_interval: 10s
+
+     processors:
+       batch: {}
+
+     exporters:
+       debug:
+         verbosity: detailed 
+       otlp:
+         endpoint: "signoz-otel-collector.signoz:4317"
+         tls:
+           insecure: true
+
+     extensions:
+       health_check:
+         endpoint: "0.0.0.0:13133"
+
+     service:
+       extensions: ["health_check"]
+       pipelines:
+         metrics:
+           receivers: [otlp, httpcheck, prometheus]
+           processors: [batch]
+           exporters: [debug, otlp]
+         traces:
+           receivers: [otlp]
+           processors: [batch]
+           exporters: [otlp]
+
+   # Disable default pipelines
+   presets:
+     logsCollection:
+       enabled: false
+     hostMetrics:
+       enabled: false
+     kubernetesAttributes:
+       enabled: false
+     kubeletMetrics:
+       enabled: false
+     kubernetesEvents:
+       enabled: false
+     clusterMetrics:
+       enabled: false
+
+   service:
+     type: ClusterIP
+
+   fullnameOverride: "otel-collector"
+
+   extraEnvs:
+     - name: LOG_LEVEL
+       value: "debug"
+   ```
+
+   > **Note:** This configuration assumes SigNoz is installed in the `signoz` namespace with the OTel Collector service named `signoz-otel-collector`. Update the endpoint as needed for your installation.
+   >
+   > Also update the `namespaces` in the Prometheus configuration to match your application namespaces.
+
+3. Install the OpenTelemetry Collector using Helm:
+
+   ```bash
+   helm install otel-collector open-telemetry/opentelemetry-collector \
+     --namespace istio-system \
+     -f values.yaml
+   ```
+
+4. Verify the Collector deployment:
+
+   ```bash
+   kubectl get pods -n istio-system -l app.kubernetes.io/name=opentelemetry-collector
+   ```
+
+## 2. Configure Istio for Metrics Collection
+
+Now we need to configure Istio to send metrics to the OpenTelemetry Collector.
+
+### Update Istio MeshConfig
+
+Configure Istio to emit telemetry data by updating the MeshConfig:
+
+```bash
+istioctl install -y \
+  --set values.meshConfig.enablePrometheusMerge=true \
+  --set 'values.meshConfig.defaultConfig.telemetry.providers[0].name=otlp' \
+  --set 'values.meshConfig.defaultConfig.telemetry.providers[0].provider=opentelemetry' \
+  --set 'values.meshConfig.defaultConfig.telemetry.providers[0].opentelemetry.address=otel-collector.istio-system.svc.cluster.local:4317' \
+  --set values.meshConfig.defaultConfig.tracing.sampling=100 \
+  --set values.meshConfig.defaultConfig.tracing.zipkin.address=otel-collector.istio-system.svc.cluster.local:9411
+```
+
+This configuration:
+- Enables Prometheus metrics collection
+- Configures OpenTelemetry as a telemetry provider
+- Points Istio to the OpenTelemetry Collector endpoint
+- Sets up tracing with the Zipkin protocol
+- Sets a 100% sampling rate for traces (adjust for production environments)
+
+### Apply Telemetry Resource for Metrics
+
+Create an Istio Telemetry resource to control which metrics are collected:
+
+```bash
+kubectl apply -f - <<EOF
+apiVersion: telemetry.istio.io/v1alpha1
+kind: Telemetry
+metadata:
+  name: signoz-metrics
+  namespace: istio-system
+spec:
+  metrics:
+    - providers:
+        - name: prometheus
+      overrides:
+        - match:
+            metric: ALL_METRICS
+          disabled: true
+        - match:
+            metric: REQUEST_COUNT
+          disabled: false
+        - match:
+            metric: REQUEST_DURATION
+          disabled: false
+        - match:
+            metric: REQUEST_SIZE
+          disabled: false
+        - match:
+            metric: RESPONSE_SIZE
+          disabled: false
+EOF
+```
+
+## 3. Validating Metrics in SigNoz
+
+Once your configuration is applied, you should be able to see Istio metrics in SigNoz.
+
+1. Log into your self-hosted SigNoz instance
+2. Navigate to **Metrics Explorer**
+3. Look for metrics with the `istio` prefix, such as:
+   - `istio_requests_total`
+   - `istio_request_duration_milliseconds`
+   - `istio_request_bytes`
+   - `istio_response_bytes`
+   
+   You should also see HTTP check metrics from the `httpcheck` receiver:
+   - `httpcheck_status` - Indicates if the HTTP endpoint is reachable (value of 1 for success)
+   - `httpcheck_duration` - Shows the response time of the HTTP endpoint in milliseconds
+
+> **Note**: If you don't see Istio metrics immediately, but HTTP check metrics are visible, ensure you're generating traffic to your Istio services. Unlike HTTP checks that actively probe endpoints, Istio metrics only appear when there's actual traffic flowing through the mesh.
+
+## 4. Performance Considerations and Tuning
+
+When collecting metrics from Istio, there are some performance considerations to keep in mind:
+
+### Batch Processor Tuning
+
+The `batch` processor can be tuned to optimize for your specific environment:
+
+```yaml
+processors:
+  batch:
+    # Increase the batch size to reduce the number of export requests
+    send_batch_size: 1000
+    # Increase the timeout to allow for larger batches (in milliseconds)
+    timeout: 10000
+    # Adjust the maximum queue size based on your memory constraints
+    send_batch_max_size: 2000
+```
+
+### Metric Filtering
+
+If you're experiencing high cardinality or excessive metric volume, you can add filters to reduce the data sent to SigNoz:
+
+```yaml
+processors:
+  filter:
+    metrics:
+      include:
+        match_type: regexp
+        metric_names:
+          - istio_request.*
+          - istio_response.*
+```
+
+### Resource Allocation
+
+For production environments with high traffic, consider increasing the resources allocated to the collector:
+
+```yaml
+resources:
+  limits:
+    cpu: 1
+    memory: 2Gi
+  requests:
+    cpu: 200m
+    memory: 400Mi
+```
+
+## 5. Troubleshooting
+
+If you're not seeing Istio metrics in SigNoz, follow these troubleshooting steps:
+
+### RBAC Issues
+
+The most common issue is permissions. The OpenTelemetry Collector needs permissions to access Kubernetes services and endpoints for service discovery. Look for errors like:
+
+```
+failed to list *v1.Service: services is forbidden: User "system:serviceaccount:istio-system:otel-collector" cannot list resource "services"
+```
+
+If you see these errors, make sure you've configured the proper ClusterRole and ClusterRoleBinding as shown in the values.yaml above.
+
+### Check Istio Proxy Metrics Endpoint
+
+Verify that Istio sidecars are exposing metrics correctly:
+
+```bash
+# Get a pod with Istio sidecar
+POD_NAME=$(kubectl get pod -l app=productpage -o jsonpath='{.items[0].metadata.name}')
+
+# Check if you can access the Istio metrics endpoint directly from inside the pod
+kubectl exec -it $POD_NAME -c istio-proxy -- curl localhost:15090/stats/prometheus
+```
+
+You should see Prometheus-formatted metrics output. If not, there might be an issue with your Istio installation.
+
+### Check SigNoz OTel Collector Connectivity
+
+Verify that your Istio namespace collector can connect to the SigNoz collector:
+
+```bash
+kubectl run -it --rm debug --image=curlimages/curl -- curl -v signoz-otel-collector.signoz:4317
+```
+
+### Generate Traffic
+
+Istio metrics will only appear when there's actual traffic flowing through the service mesh. Generate some traffic to your applications:
+
+```bash
+# Loop to generate continuous traffic
+for i in {1..100}; do
+  curl -s http://$(kubectl get svc istio-ingressgateway -n istio-system -o jsonpath='{.status.loadBalancer.ingress[0].ip}')/productpage > /dev/null
+  sleep 1
+done
+```
+
+### Verify Collector Logs
+
+Check the collector logs for any errors:
+
+```bash
+kubectl logs -n istio-system -l app.kubernetes.io/name=opentelemetry-collector
+```
+
+### Common Issues and Solutions
+
+1. **Permissions Issues**: 
+   - Make sure the OpenTelemetry Collector service account has the necessary permissions
+   - Create proper ClusterRole and ClusterRoleBinding for the collector
+
+2. **Network Connectivity Issues:**
+   - Ensure the SigNoz OTel Collector service is accessible from the Istio namespace
+   - Check for any NetworkPolicies that might block traffic
+   - Verify service DNS resolution works correctly
+
+3. **Configuration Issues**:
+   - Double-check the exporter endpoint in your collector configuration
+   - Ensure the SigNoz namespace and service names are correct
+   - Verify the SigNoz OTel Collector is configured to receive metrics
+
+4. **Missing Telemetry Provider**:
+   - Ensure you've configured Istio to use OpenTelemetry as a telemetry provider
+   - Check that the address for the OpenTelemetry provider points to your collector
+
+  </TabItem>
+</Tabs>
