@@ -4,11 +4,10 @@ title: Istio Metrics
 sidebar_label: Istio Metrics
 ---
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
+With SigNoz, you can collect and monitor Istio service mesh metrics.
 
 <Tabs>
-  <TabItem value="cloud" label="SigNoz Cloud">
+  <TabItem value="cloud" label="SigNoz Cloud" default>
 
 ## Prerequisites
 
@@ -117,7 +116,7 @@ The OpenTelemetry Collector is responsible for collecting telemetry data from Is
            
        httpcheck:
          targets:
-           - endpoint: "<YOUR_PRODUCT_ENDPOINT>"
+           - endpoint: "http://productpage.default.svc.cluster.local:9080/productpage"
              method: GET
          collection_interval: 10s
 
@@ -283,7 +282,7 @@ Once your configuration is applied, you should be able to see Istio metrics in S
 
 > **Note**: If you don't see Istio metrics immediately, but HTTP check metrics are visible, ensure you're generating traffic to your Istio services. Unlike HTTP checks that actively probe endpoints, Istio metrics only appear when there's actual traffic flowing through the mesh.
 
-![Istio Metrics in SigNoz](./screenshots/istio-metrics-explorer.png)
+![Istio Metrics in SigNoz](/img/blog/common/istio-metrics-explorer.png)Figure 1 - Metrics Explorer
 
 ## 4. Performance Considerations and Tuning
 
@@ -526,7 +525,7 @@ istioctl proxy-config bootstrap $POD_NAME.default | grep -A 10 opentelemetry
 
        httpcheck:
          targets:
-           - endpoint: "<YOUR_PRODUCT_ENDPOINT>"
+           - endpoint: "http://productpage.default.svc.cluster.local:9080/productpage"
              method: GET
          collection_interval: 10s
 
@@ -676,6 +675,8 @@ Once your configuration is applied, you should be able to see Istio metrics in S
    - `httpcheck_duration` - Shows the response time of the HTTP endpoint in milliseconds
 
 > **Note**: If you don't see Istio metrics immediately, but HTTP check metrics are visible, ensure you're generating traffic to your Istio services. Unlike HTTP checks that actively probe endpoints, Istio metrics only appear when there's actual traffic flowing through the mesh.
+
+![Istio Metrics in SigNoz](/img/blog/common/istio-metrics-self-hosted.png)Figure 1 - Metrics Explorer
 
 ## 4. Performance Considerations and Tuning
 
