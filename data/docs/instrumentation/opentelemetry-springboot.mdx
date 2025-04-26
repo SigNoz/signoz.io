@@ -228,7 +228,13 @@ metadata:
   name: traces-instrumentation
 spec:
   exporter:
-    endpoint: http://otel-collector-collector:4317
+  exporter:
+    endpoint: https://ingest.{region}.signoz.cloud:443  # replace {region} with your region
+  env:
+    - name: OTEL_EXPORTER_OTLP_HEADERS
+      value: signoz-ingestion-key="{signoz-token}"  # Obtain from https://{your-signoz-url}/settings/ingestion-settings
+    - name: OTEL_EXPORTER_OTLP_INSECURE
+      value: "false"
   propagators:
     - tracecontext
     - baggage
