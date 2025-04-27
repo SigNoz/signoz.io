@@ -24,18 +24,18 @@ From VMs, there are two ways to send data to SigNoz Cloud.
 
 ### Send traces directly to SigNoz cloud
 
-**Step 1 : Install nginx-otel-module module for NGINX**
+**Step 1 : Install NGINX module**
 
 
 ```bash
 apt-get update && apt-get install -y nginx-otel-module
 ```
 
-**Step 2: Configure NGINX with nginx-otel-module module**
+**Step 2: Configure NGINX**
 
 Add the following to top of your `nginx.conf` file, this will load the installed module. 
 
-```
+```nginx
 load_module modules/ngx_http_opentelemetry_module.so;
 
 http {
@@ -43,11 +43,11 @@ http {
 }
 ```
 
-**Step 3: Make Opentelemetry configuration file**
+**Step 3: Make OpenTelemetry configuration file**
 
 Modify the `/etc/nginx/opentelemetry_config.yaml` with following:
 
-```
+```yaml:opentelemetry_config.yaml
 service_name: <service_name>
 sampler:
   type: always_on
@@ -62,11 +62,15 @@ exporter:
 - Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 - `<service_name>` is name of your service
 
-**Step 4: Restart NGINX and wait for traces to get generated**
+**Step 4: Restart NGINX**
+
+Restart `nginx` using the below command:
 
 ```bash
 systemctl restart nginx
 ```
+
+The traces should start getting generated.
 
 ### Send traces via OTel Collector binary
 
@@ -76,17 +80,17 @@ OTel Collector binary helps to collect logs, hostmetrics, resource and infra att
 
 You can find instructions to install OTel Collector binary [here](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) in your VM.
 
-**Step 2 : Install nginx-otel-module module for NGINX**
+**Step 2 : Install NGINX module**
 
 ```bash
 apt-get update && apt-get install -y nginx-otel-module
 ```
 
-**Step 3: Configure NGINX with nginx-otel-module module**
+**Step 3: Configure NGINX**
 
 Add the following to top of your `nginx.conf` file, this will load the installed module. 
 
-```
+```nginx
 load_module modules/ngx_http_opentelemetry_module.so;
 
 http {
@@ -94,11 +98,11 @@ http {
 }
 ```
 
-**Step 4: Make Opentelemetry configuration file**
+**Step 4: Make OpenTelemetry configuration file**
 
 Modify the `/etc/nginx/opentelemetry_config.yaml` with following:
 
-```
+```yaml:opentelemetry_config.yaml
 service_name: <service_name>
 sampler:
   type: always_on
@@ -109,16 +113,20 @@ exporter:
 
 - `<service_name>` is name of your service
 
-**Step 5: Restart NGINX and wait for traces to get generated**
+**Step 5: Restart NGINX**
+
+Restart `nginx` using the below command:
 
 ```bash
 systemctl restart nginx
 ```
 
+The traces should start getting generated.
+
 </TabItem>
 <TabItem value="docker" label="Docker">
 
-**Step 1: Create Dockerfile with OpenTelemetry NGINX module**
+**Step 1: Create Dockerfile**
 
 Here is a sample `Dockerfile` that installs NGINX 1.26.0 with OpenTelemetry WebServer SDK:
 
@@ -142,9 +150,9 @@ RUN echo "load_module /opt/opentelemetry-webserver-sdk/WebServerModule/Nginx/1.2
 COPY opentelemetry_module.conf /etc/nginx/conf.d
 ```
 
-**Step 2: Create the `opentelemetry_module.conf` configuration file**
+**Step 2: Create configuration file**
 
-This configuration enables OpenTelemetry and exports traces directly to SigNoz Cloud
+Create the `opentelemetry_module.conf` file. This configuration enables OpenTelemetry and exports traces directly to SigNoz Cloud
 
 ```
 NginxModuleEnabled ON;
@@ -172,6 +180,8 @@ docker build -t nginx-otel .
 docker run -p 8080:80 nginx-otel
 ```
 
+You can access the application at `http://localhost:8080` .
+
 </TabItem>
 
 </Tabs>
@@ -180,18 +190,18 @@ docker run -p 8080:80 nginx-otel
 <TabItem value='self-host' label='Self-Host'>
 ## Send Traces to Self-Hosted SigNoz
 
-**Step 1 : Install nginx-otel-module module for NGINX**
+**Step 1 : Install NGINX module**
 
 
 ```bash
 apt-get update && apt-get install -y nginx-otel-module
 ```
 
-**Step 2: Configure NGINX with nginx-otel-module module**
+**Step 2: Configure NGINX**
 
 Add the following to top of your `nginx.conf` file, this will load the installed module. 
 
-```
+```nginx
 load_module modules/ngx_http_opentelemetry_module.so;
 
 http {
@@ -199,11 +209,11 @@ http {
 }
 ```
 
-**Step 3: Make Opentelemetry configuration file**
+**Step 3: Make OpenTelemetry configuration file**
 
 Modify the `/etc/nginx/opentelemetry_config.yaml` with following:
 
-```
+```yaml:opentelemetry_config.yaml
 service_name: <service_name>
 sampler:
   type: always_on
@@ -215,11 +225,16 @@ exporter:
 - Set the `<SIGNOZ_URL>` to match your Self Hosted SigNoz endpoint.
 - `<service_name>` is name of your service
 
-**Step 4: Restart NGINX and wait for traces to get generated**
+**Step 4: Restart NGINX**
+
+Restart `nginx` using the below command:
 
 ```bash
 systemctl restart nginx
 ```
+
+The traces should start getting generated.
+
 </TabItem>
 </Tabs>
 {/* 
@@ -308,3 +323,7 @@ Execute the following command to run otel-col in background.
 ## Sample NGINX Application
 
 We have included a sample NGINX Server at [Sample NGINX Server Github Repo](https://github.com/UnCool-0x/sample-nginx-app)
+
+## Monitor NGINX Logs
+
+Follow [this](https://signoz.io/docs/integrations/nginx/) documentation for monitoring NGINX logs.
