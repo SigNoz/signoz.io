@@ -167,10 +167,10 @@ Once the `opentelemetry-operator` has been deployed, you can proceed with the cr
 
 There are different deployment modes for the OpenTelemetryCollector, and you can specify them in the spec.mode section of the custom resource. The available deployment modes are:
 
-- Daemonset
-- Sidecar
-- StatefulSet
-- Deployment (default mode)
+- [Daemonset](https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/)
+- [Sidecar](https://kubernetes.io/docs/concepts/workloads/pods/sidecar-containers/)
+- [StatefulSet](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/)
+- [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/) (default mode)
 
 The default method - the `Deployment` mode, will be used here.
 
@@ -307,7 +307,7 @@ With this, the auto-instrumentation of traces for Java application is ready.
 In order to run the application on port 8080, run the following commands:
 
 ```bash
-$ export POD_NAME=$(kubectl get pod -l app=<springboot-application> -o jsonpath="{.items[0].metadata.name}")  # springboot application is `spring-petclinic` in this case.   
+$ export POD_NAME=$(kubectl get pod -l app=<service-name> -o jsonpath="{.items[0].metadata.name}")  # service name is `spring-petclinic` in this case.   
 $ kubectl port-forward ${POD_NAME} 8080:8080
 ```
 
