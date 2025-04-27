@@ -173,7 +173,7 @@ Generate traffic through your mesh to ensure traces are being created:
 ```bash
 # Loop to generate traffic
 for i in {1..50}; do
-  curl -s -H "X-B3-Sampled: 1" http://$(kubectl get svc istio-ingressgateway -n istio-system -o jsonpath='{.status.loadBalancer.ingress[0].ip}')/productpage
+  curl -s -H "X-B3-Sampled: 1" http://$(kubectl get svc istio-ingressgateway -n istio-system -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
   sleep 1
 done
 ```
@@ -186,7 +186,7 @@ Verify that Istio is configured to generate traces:
 
 ```bash
 # Get a pod with Istio sidecar
-POD_NAME=$(kubectl get pod -l app=productpage -o jsonpath='{.items[0].metadata.name}')
+POD_NAME=$(kubectl get pod -l app=myapp -o jsonpath='{.items[0].metadata.name}')
 
 # Check Istio proxy configuration
 istioctl proxy-config bootstrap $POD_NAME.default | grep -A 15 tracing
@@ -394,7 +394,7 @@ Generate traffic through your mesh to ensure traces are being created:
 ```bash
 # Loop to generate traffic
 for i in {1..50}; do
-  curl -s -H "X-B3-Sampled: 1" http://$(kubectl get svc istio-ingressgateway -n istio-system -o jsonpath='{.status.loadBalancer.ingress[0].ip}')/productpage
+  curl -s -H "X-B3-Sampled: 1" http://$(kubectl get svc istio-ingressgateway -n istio-system -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
   sleep 1
 done
 ```
@@ -407,7 +407,7 @@ Verify that Istio is configured to generate traces:
 
 ```bash
 # Get a pod with Istio sidecar
-POD_NAME=$(kubectl get pod -l app=productpage -o jsonpath='{.items[0].metadata.name}')
+POD_NAME=$(kubectl get pod -l app=myapp -o jsonpath='{.items[0].metadata.name}')
 
 # Check Istio proxy configuration
 istioctl proxy-config bootstrap $POD_NAME.default | grep -A 15 tracing
