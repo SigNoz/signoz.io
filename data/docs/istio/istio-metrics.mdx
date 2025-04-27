@@ -352,7 +352,7 @@ Verify that Istio sidecars are exposing metrics correctly:
 
 ```bash
 # Get a pod with Istio sidecar
-POD_NAME=$(kubectl get pod -l app=productpage -o jsonpath='{.items[0].metadata.name}')
+POD_NAME=$(kubectl get pod -l app=myapp -o jsonpath='{.items[0].metadata.name}')
 
 # Check if you can access the Istio metrics endpoint directly from inside the pod
 kubectl exec -it $POD_NAME -c istio-proxy -- curl localhost:15090/stats/prometheus
@@ -385,7 +385,7 @@ Istio metrics will only appear when there's actual traffic flowing through the s
 ```bash
 # Loop to generate continuous traffic
 for i in {1..100}; do
-  curl -s http://$(kubectl get svc istio-ingressgateway -n istio-system -o jsonpath='{.status.loadBalancer.ingress[0].ip}')/productpage > /dev/null
+  curl -s http://$(kubectl get svc istio-ingressgateway -n istio-system -o jsonpath='{.status.loadBalancer.ingress[0].ip}') > /dev/null
   sleep 1
 done
 ```
@@ -746,7 +746,7 @@ Verify that Istio sidecars are exposing metrics correctly:
 
 ```bash
 # Get a pod with Istio sidecar
-POD_NAME=$(kubectl get pod -l app=productpage -o jsonpath='{.items[0].metadata.name}')
+POD_NAME=$(kubectl get pod -l app=myapp -o jsonpath='{.items[0].metadata.name}')
 
 # Check if you can access the Istio metrics endpoint directly from inside the pod
 kubectl exec -it $POD_NAME -c istio-proxy -- curl localhost:15090/stats/prometheus
@@ -769,7 +769,7 @@ Istio metrics will only appear when there's actual traffic flowing through the s
 ```bash
 # Loop to generate continuous traffic
 for i in {1..100}; do
-  curl -s http://$(kubectl get svc istio-ingressgateway -n istio-system -o jsonpath='{.status.loadBalancer.ingress[0].ip}')/productpage > /dev/null
+  curl -s http://$(kubectl get svc istio-ingressgateway -n istio-system -o jsonpath='{.status.loadBalancer.ingress[0].ip}') > /dev/null
   sleep 1
 done
 ```
