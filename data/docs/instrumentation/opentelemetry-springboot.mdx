@@ -146,9 +146,9 @@ Here are the steps you need to follow to auto-instrument Java application using 
 Run the following commands to apply cert manager.
 
 ```bash
-$ kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.16.1/cert-manager.yaml
+kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.16.1/cert-manager.yaml
 
-$ kubectl wait --for=condition=Available deployments/cert-manager -n cert-manager
+kubectl wait --for=condition=Available deployments/cert-manager -n cert-manager
 ```
 
 #### Step 2: Install OpenTelemetry Operator
@@ -196,11 +196,11 @@ spec:
     exporters:
       debug: {}
       otlp:
-        endpoint: "ingest.{region}.signoz.cloud:443" # replace {region} with your region
+        endpoint: "ingest.<region>.signoz.cloud:443" # replace <region> with your region of SigNoz Cloud
         tls:
           insecure: false
         headers:
-          "signoz-ingestion-key": "{signoz-token}" # Obtain from https://{your-signoz-url}/settings/ingestion-settings
+          "signoz-ingestion-key": "<your-ingestion-key>" # Obtain from https://{your-signoz-tenant-url}/settings/ingestion-settings
     service:
       pipelines:
         traces:
