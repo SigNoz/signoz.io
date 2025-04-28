@@ -18,12 +18,6 @@ export const Header = async () => {
       <div className="relative !mx-auto flex !w-[100vw] flex-col items-center border  !border-b-0 !border-t-0  border-dashed border-signoz_slate-400 px-2 pb-4 pt-12 text-center md:!w-[80vw] md:px-5 md:pt-[8.5rem]">
         {/* Uncomment the below link tag to create a pill on homepage */}
 
-        <Link href="/launch-week/">
-          <button className="flex h-10 items-center justify-center gap-1.5 rounded-full border border-signoz_slate-200 bg-signoz_slate-400 px-4 py-2 text-xs font-medium leading-5 text-white shadow-[0_0_14px_0_rgba(78,116,248,0.40)] sm:gap-2 sm:text-sm">
-            <Handshake size={14} />
-            Join us for SigNoz Launch Week 4.0 <ArrowRight size={14} />
-          </button>
-        </Link>
         <LaunchWeekBanner />
 
         <div className="absolute left-0 top-[147px] z-[-1] h-10 !w-[100vw] border !border-l-0 !border-r-0 border-dashed border-signoz_slate-400 sm:h-14 md:top-[253px] md:!w-[80vw]" />
