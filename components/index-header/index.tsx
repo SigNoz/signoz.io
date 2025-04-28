@@ -41,11 +41,11 @@ export const Header = async () => {
               className="flex-center"
               clickType="Simplified CTA"
               clickName="Quick Start Button"
-              clickText="Quick Start with Demo Data in <5 minutes"
+              clickText="Quick Start with SigNoz Cloud in <5 minutes"
               clickLocation="Hero Section"
             >
               <Clock size={14} className="mr-1" />
-              Quick Start with Demo Data in &lt;5 minutes
+              Quick Start with SigNoz Cloud in &lt;5 minutes
               <ArrowRight size={14} className="ml-1" />
             </TrackingLink>
           </Button>
