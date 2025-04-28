@@ -1,0 +1,93 @@
+---
+date: 2025-04-27
+id: temporal-cloud-metrics
+title: Getting Temporal Cloud Metrics into SigNoz
+---
+
+We need to configure metrics endpoint using Temporal Cloud UI. The steps are available at https://docs.temporal.io/production-deployment/cloud/metrics/general-setup. After this you should have:
+1. Temporal metrics endpoint
+2. The certificate and key files 
+
+
+### Step 1: Run `promql-to-scrape` to expose metrics to endpoint
+
+https://github.com/SigNoz/samples-server/blob/main/cloud/observability/promql-to-scrape/
+
+<Tabs>
+
+    <TabItem value="vm" label="Binary" default>
+        ```bash
+        go mod tidy
+        go build -o promql-to-scrape cmd/promql-to-scrape/main.go
+        ./promql-to-scrape --client-cert=/path/to/client.crt --client-
+        key=/path/to/tls.key --prom-endpoint=https://<account>.tmprl.cloud/prometheus --config-file examples/config.yaml --debug
+        ```
+        You metrics would now be available at http://localhost:9001/metrics for getting scraped
+    </TabItem>
+
+    <TabItem value="k8s" label="Kubernetes">
+        Relevant yaml files to run in k8s are at:
+        1. [Deployment](https://github.com/SigNoz/samples-server/blob/main/cloud/observability/promql-to-scrape/examples/deployment.yaml). Configure [these](https://github.com/SigNoz/samples-server/blob/main/cloud/observability/promql-to-scrape/examples/deployment.yaml#L21-L24) args to your environment
+        2. [ConfigMap](https://github.com/SigNoz/samples-server/blob/main/cloud/observability/promql-to-scrape/examples/configmap.yaml)
+        3. [Secret](https://github.com/SigNoz/samples-server/blob/main/cloud/observability/promql-to-scrape/examples/secret.yaml). Add your cert and key [here](https://github.com/SigNoz/samples-server/blob/main/cloud/observability/promql-to-scrape/examples/secret.yaml#L9-L10)
+
+    </TabItem>
+
+</Tabs>
+
+### Step 2: Run otel-collector to scrape the metrics
+Install otel-collector:
+1. Using Binary - https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/
+2. At Kubernetes - https://signoz.io/docs/tutorial/kubernetes-infra-metrics/
+
+[This guide](https://signoz.io/docs/userguide/send-metrics/#enable-a-prometheus-receiver) can also be useful if you are new to scraping prometheus metrics using otel-collector
+
+Add below scrape config to the otel-collector config
+```bash
+    receivers:
+        ...
+        prometheus:
+            config:
+                global:
+                    scrape_interval: 30s
+                scrape_configs:
+                    - job_name: temporal-cloud
+                        static_configs:
+                            - targets:
+                                - localhost:9001
+```
+Replace `localhost:9001` with the endpoint where your metrics are available for scrape after **Step 1**. 
+
+
+Also, add `prometheus` to the list of receivers in the metrics pipeline of otel-collector. Keep the remaining part of your config intact.
+```
+    ...
+    pipelines:
+        ...
+        metrics:
+            receivers: [otlp, prometheus]
+            processors: [batch]
+            exporters: [otlp]
+        ...
+```
+
+### Step 3: Import dashboard
+
+Go to Dashboards => New Dashboard => Import JSON
+
+Download JSON from [link](https://github.com/SigNoz/dashboards/blob/main/temporal.io/Temporal%20Cloud%20Metrics.json)
+
+Feel free to reach out to us if data does not start appearing in the dashboard after 2-3 minutes. Here are sample screenshots from the dashboard:
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/integrations/temporal/cloud-metrics/temporal-cloud-metrics-1.webp" alt="Temporal Actions Metrics"/>
+    <figcaption><i>Temporal Actions Metrics</i></figcaption>
+</figure>
+<figure data-zoomable align='center'>
+    <img src="/img/docs/integrations/temporal/cloud-metrics/temporal-cloud-metrics-2.webp" alt="Temporal Worker Poll metrics"/>
+    <figcaption><i>Temporal Worker Poll metrics</i></figcaption>
+</figure>
+<figure data-zoomable align='center'>
+    <img src="/img/docs/integrations/temporal/cloud-metrics/temporal-cloud-metrics-3.webp" alt="Temporal Service Requests metrics"/>
+    <figcaption><i>Temporal Service Requests metrics</i></figcaption>
+</figure>
