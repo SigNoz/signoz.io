@@ -116,7 +116,7 @@ In case you encounter an issue where all applications do not get listed in the s
 </TabItem>
 <TabItem value="k8s" label="Kubernetes">
 
-You can auto-instrument sending traces from Java application using one of the following methods:
+You can auto-instrument sending traces from Java Springboot application using one of the following methods:
 
 1. Using Kubernetes OTel Operator
 2. Using OTel Collector Agent
@@ -124,7 +124,7 @@ You can auto-instrument sending traces from Java application using one of the fo
 <Tabs>
 <TabItem value="k8s-otel-operator" label="K8s OTel Operator" default>
 
-For Java application deployed on Kubernetes, you can auto-instrument the traces using Kubernetes OpenTelemetry Operator. 
+For Java Springboot application deployed on Kubernetes, you can auto-instrument the traces using Kubernetes OpenTelemetry Operator. 
 
 An [OpenTelemetry Operator](https://opentelemetry.io/docs/kubernetes/operator) is a Kubernetes Operator that manages 
 [OpenTelemetry Collectors](https://signoz.io/blog/opentelemetry-collector-complete-guide/) and auto-instrumentation of 
@@ -139,7 +139,7 @@ The `OpenTelemetryCollector` CRD allows you to deploy and manage OpenTelemetry C
 
 The `Instrumentation` CRD allows you to configure and inject OpenTelemetry auto-instrumentation libraries into your workloads.
 
-Here are the steps you need to follow to auto-instrument Java application using OTel Operator:
+Here are the steps you need to follow to auto-instrument Springboot application using OTel Operator:
 
 #### Step 1: Install cert-manager
 
@@ -255,9 +255,9 @@ Apply the above instrumentation using the following command:
 kubectl apply -f instrumentation.yaml
 ```
 
-#### Step 5: Auto-instrument your Java app with OpenTelemetry
+#### Step 5: Auto-instrument your Springboot app with OpenTelemetry
 
-Create `deployment.yaml` file for your Java application as follows:
+Create `deployment.yaml` file for your Springboot application as follows:
 
 ```yaml:deployment.yaml
 apiVersion: apps/v1
@@ -284,7 +284,7 @@ spec:
         - containerPort: 8080
 ```
 
-Note that we have created the above deployment file for [spring-petclinic](https://github.com/SigNoz/spring-petclinic) Java application.
+Note that we have created the above deployment file for [spring-petclinic](https://github.com/SigNoz/spring-petclinic) Java Springboot application.
 
 It is important to add the following annotation under `spec > template > metadata > annotations`:
 
@@ -300,9 +300,9 @@ Apply the deployment using the following command:
 kubectl apply -f deployment.yaml
 ```
 
-With this, the auto-instrumentation of traces for Java application is ready.
+With this, the auto-instrumentation of traces for Java Springboot application is ready.
 
-####  Step 6: Running the Java application
+####  Step 6: Running the Springboot application
 
 In order to run the application on port 8080, run the following commands:
 
@@ -319,7 +319,7 @@ You can validate if your application is sending traces to SigNoz cloud by follow
 </TabItem>
 <TabItem value="otel-collector-agent" label="OTel Collector Agent">
 
-For Java application deployed on Kubernetes, you need to install OTel Collector agent in your k8s infra to collect and send traces to SigNoz Cloud. You can find the
+For Java Springboot application deployed on Kubernetes, you need to install OTel Collector agent in your k8s infra to collect and send traces to SigNoz Cloud. You can find the
 instructions to install OTel Collector agent [here](https://signoz.io/docs/tutorial/kubernetes-infra-metrics/).
 
 Once you have set up OTel Collector agent, you can proceed with OpenTelemetry java instrumentation by following the below steps:
