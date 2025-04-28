@@ -17,33 +17,37 @@ export const GetStarted = ({ page }) => {
                 Slow is the new <br /> downtime.
               </p>
               <div className="flex items-center justify-center gap-3 pt-4 max-sm:flex-col">
-                <Button id={getStartedId}>
-                  <TrackingLink
-                    href="/teams/"
-                    className="flex-center"
-                    clickType="Primary CTA"
-                    clickName="Sign Up Button"
-                    clickText="Get Started - Free"
-                    clickLocation="Get Started Section"
-                  >
+                <TrackingLink
+                  href="/teams/"
+                  className="inline-block"
+                  clickType="Primary CTA"
+                  clickName="Sign Up Button"
+                  clickText="Get Started - Free"
+                  clickLocation="Get Started Section"
+                >
+                  <Button id={getStartedId} className="flex-center">
                     Get Started - Free
                     <ArrowRight size={14} />
-                  </TrackingLink>
-                </Button>
+                  </Button>
+                </TrackingLink>
 
-                <Button type={Button.TYPES.SECONDARY} id={readDocumentationId}>
-                  <TrackingLink
-                    href="/docs/introduction/"
+                <TrackingLink
+                  href="/docs/introduction/"
+                  className="inline-block"
+                  clickType="Secondary CTA"
+                  clickName="Read Documentation Link"
+                  clickText="Read Documentation"
+                  clickLocation="Get Started Section"
+                >
+                  <Button
+                    type={Button.TYPES.SECONDARY}
+                    id={readDocumentationId}
                     className="flex-center"
-                    clickType="Secondary CTA"
-                    clickName="Read Documentation Link"
-                    clickText="Read Documentation"
-                    clickLocation="Get Started Section"
                   >
                     <BookOpen size={14} />
                     Read Documentation
-                  </TrackingLink>
-                </Button>
+                  </Button>
+                </TrackingLink>
               </div>
             </div>
             <div className="relative flex items-center justify-center">

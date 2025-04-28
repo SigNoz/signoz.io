@@ -103,9 +103,17 @@ const docsSideNav = [
     route: '/docs/install/',
     items: [
         {
-          type: 'doc',
-          route: '/docs/cloud',
-          label: 'SigNoz Cloud',
+        type: 'category',
+        isExpanded: false,
+        label: 'SigNoz Cloud',
+        route: '/docs/cloud',
+        items: [
+            {
+              type: 'doc',
+              route: '/docs/cloud/quickstart',
+              label: 'Quickstart',
+            },
+          ]
         },
         {
           type: 'category',
@@ -367,7 +375,7 @@ const docsSideNav = [
               },
             ]
           },
-          
+
           {
             type: 'doc',
             route: '/docs/tutorial/opentelemetry-operator-usage',
@@ -412,7 +420,7 @@ const docsSideNav = [
       },
     ]
   },
-  
+
   {
     label: 'APM & Distributed Tracing',
     type: 'category',
@@ -786,6 +794,7 @@ const docsSideNav = [
         type: 'category',
         isExpanded: false,
         label: 'Send Logs to SigNoz',
+        route: '/docs/logs-management/send-logs-to-signoz',
         items: [
           {
             type: 'doc',
@@ -1413,6 +1422,30 @@ const docsSideNav = [
     route: '/docs/integrations/integrations-list',
     items: [
       {
+        label: 'Temporal',
+        type: 'category',
+        className: 'new-doc',
+        isExpanded: false,
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/integrations/temporal-cloud-metrics',
+            label: 'Cloud Metrics',
+          },
+          {
+            type: 'doc',
+            route: '/docs/integrations/temporal-golang-opentelemetry',
+            label: 'Golang',
+          },
+          {
+            type: 'doc',
+            route: '/docs/integrations/temporal-typescript-opentelemetry',
+            label: 'Typescript',
+          }
+        ]
+
+      },
+      {
         type: 'doc',
         route: '/docs/integrations/redis',
         label: 'Redis',
@@ -1480,6 +1513,7 @@ const docsSideNav = [
             label: 'Setup',
             type: 'category',
             isExpanded: false,
+            route: '/docs/messaging-queues/kafka-setup',
             items: [
               {
                 type: 'doc',
@@ -1622,7 +1656,7 @@ const docsSideNav = [
         route: '/docs/tutorial/traefik-observability',
         label: 'Traefik Observability',
       },
-     
+
     ],
   },
   {
@@ -1728,6 +1762,40 @@ const docsSideNav = [
         route: '/docs/migration/opentelemetry-datadog-receiver',
         label: 'Using Datadog OTLP receiver',
       },
+    ],
+  },
+  {
+    label: 'Migrate From LGTM Stack',
+    className: 'new-doc',
+    type: 'category',
+    isExpanded: false,
+    route: '/docs/migration/migrate-from-grafana',
+    items: [
+        {
+          type: 'doc',
+          route: '/docs/migration/migrate-from-grafana/metrics',
+          label: 'Migrating Metrics',
+        },
+        {
+          type: 'doc',
+          route: '/docs/migration/migrate-from-grafana/traces',
+          label: 'Migrating Traces',
+        },
+        {
+          type: 'doc',
+          route: '/docs/migration/migrate-from-grafana/logs',
+          label: 'Migrating Logs',
+        },
+        {
+          type: 'doc',
+          route: '/docs/migration/migrate-from-grafana/dashboards',
+          label: 'Migrating Dashboards',
+        },
+        {
+          type: 'doc',
+          route: '/docs/migration/migrate-from-grafana/alerts',
+          label: 'Migrating Alerts',
+        },
     ],
   },
   {

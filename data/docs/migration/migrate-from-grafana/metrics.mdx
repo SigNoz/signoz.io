@@ -1,0 +1,69 @@
+---
+date: 2025-04-22
+id: migrate-from-grafana-metrics
+title: Migrate Metrics from LGTM Stack
+description: Migrating metrics from LGTM Stack to SigNoz. How to migrate metrics from LGTM Stack to SigNoz.
+---
+
+Migrating metrics from Prometheus/Mimir to SigNoz can be accomplished through several approaches, depending on your current setup and requirements.
+
+### Using Prometheus Receiver in OpenTelemetry Collector
+
+The simplest way to migrate your existing Prometheus/Mimir metrics is to configure the OpenTelemetry Collector with a [Prometheus Receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/prometheusreceiver#prometheus-receiver). This allows you to continue using your existing Prometheus exporters while sending the data to SigNoz.
+
+1. [Install the OpenTelemetry Collector](/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) in your environment if not already available.
+2. Configure the Prometheus Receiver in your OpenTelemetry Collector configuration file:
+  - [Configuration if using SigNoz Cloud](/docs/userguide/send-metrics-cloud/#enable-a-prometheus-receiver)
+  - [Configuration if using Self-Hosted SigNoz](/docs/userguide/send-metrics/#enable-a-prometheus-receiver)
+
+### Replacing Prometheus Exporters with Native OpenTelemetry Receivers
+
+While the Prometheus Receiver allows you to continue using your existing Prometheus exporters, OpenTelemetry offers native receivers for many common systems and services. These provide a more direct integration with the OpenTelemetry ecosystem.
+
+Here are some common Prometheus exporters and their OpenTelemetry equivalents:
+
+| Prometheus Exporter | OpenTelemetry Receiver | Description |
+|---------------------|------------------------|-------------|
+| node_exporter | [hostmetrics](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/hostmetricsreceiver) | Collects system metrics (CPU, memory, disk, network) |
+| mysqld_exporter | [mysqld](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/mysqlreceiver) | Collects MySQL server metrics |
+| redis_exporter | [redis](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/redisreceiver) | Collects Redis metrics |
+| mongodb_exporter | [mongodb](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/mongodbatlasreceiver) | Collects MongoDB metrics |
+| postgres_exporter | [postgresql](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/postgresqlreceiver) | Collects PostgreSQL metrics |
+| kafka_exporter | [kafka](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/kafkametricsreceiver) | Collects Kafka metrics |
+| nginx_exporter | [nginx](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/nginxreceiver) | Collects NGINX metrics |
+
+SigNoz supports all the receivers that are listed in the [OpenTelemetry Registry](https://opentelemetry.io/ecosystem/registry/?component=receiver). To configure a new metric receiver, follow these instructions for [Self-Hosted SigNoz](/docs/userguide/send-metrics/#enable-a-specific-metric-receiver) or [SigNoz Cloud](/docs/userguide/send-metrics).
+
+### Switching to OTLP Metrics
+
+For new applications or when you're ready to transition away from Prometheus exporters, you can use OpenTelemetry Protocol (OTLP) metrics directly.
+
+1. [Instrument your applications with the OpenTelemetry SDK](/docs/instrumentation/) for your programming language.
+2. Configure the OTLP Exporter to send metrics to SigNoz, for example if you are using Python:
+
+```python
+from opentelemetry import metrics
+from opentelemetry.exporter.otlp.proto.grpc.metric_exporter import OTLPMetricExporter
+from opentelemetry.sdk.metrics import MeterProvider
+from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
+from opentelemetry.sdk.resources import SERVICE_NAME, Resource
+
+# Service name is required for most backends
+resource = Resource(attributes={
+    SERVICE_NAME: "your-service-name"
+})
+
+reader = PeriodicExportingMetricReader(
+    OTLPMetricExporter(endpoint="http://<IP of your Backend>:4317")
+)
+provider = MeterProvider(resource=resource, metric_readers=[reader])
+metrics.set_meter_provider(provider)
+```
+
+---
+
+To confirm that the metrics are being sent to SigNoz, you can use the Metrics Explorer in SigNoz. To navigate to Metrics Explorer, simply click `Metrics` on the left sidebar.
+
+The Metrics Explorer page will allow you to easily query metrics using built-in visual query builder. This will enable you to verify that the metrics are being sent correctly to SigNoz, including visualizing them, seeing their descriptions, types, and more.
+
+<Figure src="/img/docs/migration/metrics-explorer.webp" alt="Metrics Explorer in SigNoz" caption="A query in SigNoz Metrics Explorer" />

@@ -1,0 +1,38 @@
+---
+date: 2025-04-22
+id: migrate-from-grafana-logs
+title: Migrate Logs from LGTM Stack
+description: Migrating logs from LGTM Stack to SigNoz. How to migrate logs from LGTM Stack to SigNoz.
+---
+
+To migrate logs from Loki to SigNoz, you'll need to reconfigure your log collection agents to send data to  OpenTelemetry collectors.
+
+### Using OpenTelemetry Collector for Logs
+
+The most straightforward approach is to use the OpenTelemetry Collector to collect logs directly. Configure the OpenTelemetry Collector to collect logs from files, Docker containers, or other sources following [these specific instructions](/docs/logs-management/send-logs-to-signoz/).
+
+However, unless you already using OpenTelemetry Collector for logs, this approach requires you to update log collection for each individual service or application.
+
+### Using FluentBit with OpenTelemetry
+
+If you're already using FluentBit with Loki, you can reconfigure it to work with OpenTelemetry. First, configure FluentBit to forward logs to the OpenTelemetry Collector:
+
+```yaml
+[OUTPUT]
+  Name        forward
+  Match       *
+  Host        ${OTEL_COLLECTOR_HOST}
+  Port        8006
+```
+
+Once FluentBit is configured to forward logs to the OpenTelemetry Collector, you can configure the OpenTelemetry Collector to receive logs from FluentBit following [this guide](/docs/userguide/fluentbit_to_signoz/).
+
+---
+
+As part of the migration, you might need to modify your logs pipelines. SigNoz offers several features to enhance your logs:
+
+- **[Log Pipelines](/docs/logs-pipelines/introduction/)**: Parse and structure logs with processors like JSON, regex, and grok
+- **[Log Querying](/docs/userguide/logs_query_builder/)**: Advanced query capabilities for searching and filtering logs
+- **[Log-Trace Correlation](/docs/logs-pipelines/guides/trace/)**: Link logs with related traces for contextual debugging
+
+You can also use [Logs Explorer](/docs/product-features/logs-explorer/) to query logs and confirm that they are being sent correctly to SigNoz.
