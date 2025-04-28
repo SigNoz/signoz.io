@@ -1429,6 +1429,11 @@ const docsSideNav = [
         items: [
           {
             type: 'doc',
+            route: '/docs/integrations/temporal-cloud-metrics',
+            label: 'Cloud Metrics',
+          },
+          {
+            type: 'doc',
             route: '/docs/integrations/temporal-golang-opentelemetry',
             label: 'Golang',
           },
