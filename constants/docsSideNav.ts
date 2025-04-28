@@ -337,17 +337,17 @@ const docsSideNav = [
                   {
                     type: 'doc',
                     route: '/docs/manage/administrator-guide/clickhouse/distributed-clickhouse/docker',
-                    label: 'Set up Distributed Clickhouse using Docker',
+                    label: 'Docker',
                   },
                   {
                     type: 'doc',
                     route: '/docs/manage/administrator-guide/clickhouse/distributed-clickhouse/docker-swarm',
-                    label: 'Set up Distributed Clickhouse using Docker Swarm',
+                    label: 'Docker Swarm',
                   },
                   {
                     type: 'doc',
                     route: '/docs/manage/administrator-guide/clickhouse/distributed-clickhouse/kubernetes',
-                    label: 'Set up Distributed Clickhouse using Kubernetes',
+                    label: 'Kubernetes',
                   }
                 ]
               },
