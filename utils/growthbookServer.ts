@@ -33,11 +33,12 @@ export const getServerGrowthBook = cache(async (forceAnonymousId?: string) => {
   // Configure the server-side polyfills
   configureServerSideGrowthBook()
 
-  // Get anonymous ID from cookies or use the forced one if provided
-  const cookieStore = cookies()
-  const headerList = headers()
-  const cookieHeader = headerList.get('cookie')
-  const anonymousId = forceAnonymousId || getAnonymousIdFromCookies(cookieHeader || '') || 'unknown'
+  // Read directly from Next's cookie store
+  const anonCookie = cookies().get('gb_anonymous_id')
+  const anonymousId = forceAnonymousId || anonCookie?.value || 'unknown'
+
+  // DEBUG: log cookie header and the derived anonymous ID
+  console.log('[GrowthBook] anonymousId:', anonymousId)
 
   // Create and initialize GrowthBook instance
   const gb = new GrowthBook({
