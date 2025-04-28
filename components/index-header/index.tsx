@@ -37,7 +37,7 @@ export const Header = async () => {
         {isSimplifiedCTAEnabled ? (
           <Button id="btn-quick-start-demo-data">
             <TrackingLink
-              href="/docs/quickstart/"
+              href="/teams/"
               className="flex-center"
               clickType="Simplified CTA"
               clickName="Quick Start Button"
