@@ -1,7 +1,6 @@
 import { GrowthBook, setPolyfills, configureCache, FeatureResult } from '@growthbook/growthbook'
 import { cache } from 'react'
-import { getAnonymousIdFromCookies } from './cookieUtils'
-import { cookies, headers } from 'next/headers'
+import { cookies } from 'next/headers'
 
 // Configure GrowthBook for Next.js server components
 export function configureServerSideGrowthBook() {
@@ -69,7 +68,11 @@ export async function evaluateFeatureFlag(
   key: string,
   forceAnonymousId?: string
 ): Promise<boolean> {
-  const gb = await getServerGrowthBook(forceAnonymousId)
+  // Derive a stable anonymousId: use override or cookie
+  const cookieStore = cookies()
+  const cookieValue = cookieStore.get('gb_anonymous_id')?.value
+  const id = forceAnonymousId ?? cookieValue ?? 'unknown'
+  const gb = await getServerGrowthBook(id)
   return gb.isOn(key)
 }
 
@@ -79,7 +82,10 @@ export async function getFeatureValue<T>(
   defaultValue: T,
   forceAnonymousId?: string
 ): Promise<T> {
-  const gb = await getServerGrowthBook(forceAnonymousId)
+  const cookieStore = cookies()
+  const cookieValue = cookieStore.get('gb_anonymous_id')?.value
+  const id = forceAnonymousId ?? cookieValue ?? 'unknown'
+  const gb = await getServerGrowthBook(id)
   return gb.getFeatureValue(key, defaultValue) as T
 }
 
@@ -89,6 +95,9 @@ export async function getFeatureDetails<T>(
   defaultValue: T,
   forceAnonymousId?: string
 ): Promise<FeatureResult<T>> {
-  const gb = await getServerGrowthBook(forceAnonymousId)
+  const cookieStore = cookies()
+  const cookieValue = cookieStore.get('gb_anonymous_id')?.value
+  const id = forceAnonymousId ?? cookieValue ?? 'unknown'
+  const gb = await getServerGrowthBook(id)
   return gb.evalFeature(key) as FeatureResult<T>
 }
