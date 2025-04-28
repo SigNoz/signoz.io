@@ -512,6 +512,7 @@ const MonthlyEstimate = () => {
         <div className="mb-3 mt-3 flex justify-end pr-12">
           <span className="text-signoz_vanilla-400">Or</span>
         </div>
+
         <div
           className={`mb-6 flex items-center justify-between rounded-md border border-dashed bg-[#4E74F81A] px-3 py-4 ${isHighVolume ? 'border-signoz_robin-500' : 'border-transparent'}`}
         >
@@ -531,6 +532,28 @@ const MonthlyEstimate = () => {
               Contact us
             </TrackingLink>
           </Button>
+        </div>
+
+        <div className="mb-3 mt-3 flex justify-end pr-12">
+          <span className="text-signoz_vanilla-400">Or</span>
+        </div>
+
+        {/* Start Up Program CTA */}
+        <div className="mb-6 flex items-center justify-between rounded-md bg-[#BE6BF11A] px-3 py-4">
+          <span className="text-base font-medium text-signoz_vanilla-100">
+            Reach out to us for SigNoz's Start Up Program Discount
+          </span>
+          <div className="w-2/5 border-b border-dashed border-signoz_slate-400" />
+          <TrackingLink
+            href="/startups/"
+            clickType="Secondary CTA"
+            clickName="Startup Program Link"
+            clickText="Learn More"
+            clickLocation="Monthly Estimate Calculator"
+            id="pricing-page-startup-program-cta"
+          >
+            <Button variant="secondary">Learn More</Button>
+          </TrackingLink>
         </div>
       </div>
     </section>

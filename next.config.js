@@ -440,6 +440,16 @@ module.exports = () => {
           destination: '/blog/opentelemetry-webinar-on-opamp/',
           permanent: true,
         },
+        {
+          source: '/docs/operate/0.75.0/query-service/user-invitation-setup/',
+          destination: '/docs/manage/administrator-guide/configuration/smtp-email-invitations/',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/query-service/user-invitation-smtp/',
+          destination: '/docs/manage/administrator-guide/configuration/smtp-email-invitations/',
+          permanent: true,
+        },
       ]
     },
     webpack: (config, options) => {
