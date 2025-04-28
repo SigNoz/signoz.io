@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import { GrowthBook, GrowthBookProvider as GBProvider } from '@growthbook/growthbook-react'
+import { logEvent } from '../utils/logEvent'
 
 // Create a GrowthBook instance with client-side configuration
 export const growthbook = new GrowthBook({
@@ -9,10 +10,15 @@ export const growthbook = new GrowthBook({
   clientKey: process.env.NEXT_PUBLIC_GROWTHBOOK_CLIENT_KEY || '',
   enableDevMode: process.env.NODE_ENV !== 'production',
   trackingCallback: (experiment, result) => {
-    // You can integrate with your analytics system here
-    console.log('Experiment Viewed', {
-      experimentId: experiment.key,
-      variationId: result.key,
+    // Track experiment views with logEvent
+    logEvent({
+      eventName: 'Experiment Viewed',
+      attributes: {
+        experimentId: experiment.key,
+        variationId: result.key,
+        value: result.value,
+      },
+      eventType: 'track',
     })
   },
 })
@@ -55,12 +61,24 @@ export function GrowthBookProvider({
 
     // Set user attributes when needed (from cookie, auth system, etc.)
     const setUserAttributes = () => {
-      // Example: getting attributes from localStorage or cookies
+      // Get anonymous ID from localStorage (same as in useLogEvent.ts)
+      const ANONYMOUS_ID_KEY = 'app_anonymous_id'
+      const USER_ID_KEY = 'app_user_id'
+
+      const getAnonymousId = () => {
+        if (typeof window === 'undefined') return undefined
+        return localStorage.getItem(ANONYMOUS_ID_KEY) || undefined
+      }
+
+      const getUserId = () => {
+        if (typeof window === 'undefined') return undefined
+        return localStorage.getItem(USER_ID_KEY) || undefined
+      }
+
       growthbook.setAttributes({
-        /* For example:
         id: getUserId(),
-        loggedIn: isLoggedIn(),
-        */
+        anonymousId: getAnonymousId(),
+        loggedIn: !!getUserId(),
       })
     }
 
