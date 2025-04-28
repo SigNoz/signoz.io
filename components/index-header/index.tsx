@@ -41,6 +41,8 @@ export const Header = async () => {
               clickName="Quick Start Button"
               clickText="Quick Start with SigNoz Cloud in <5 minutes"
               clickLocation="Hero Section"
+              experimentId="single-cta-on-home-header"
+              variationId="Variation 1"
             >
               <Clock size={14} className="mr-1" />
               Quick Start with SigNoz Cloud in &lt;5 minutes
@@ -57,6 +59,8 @@ export const Header = async () => {
                 clickName="Sign Up Button"
                 clickText="Get Started - Free"
                 clickLocation="Hero Section"
+                experimentId="single-cta-on-home-header"
+                variationId="Control"
               >
                 Get Started - Free
                 <ArrowRight size={14} />

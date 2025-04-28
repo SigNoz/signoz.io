@@ -17,6 +17,8 @@ interface TrackingLinkProps {
   target?: string
   rel?: string
   style?: React.CSSProperties
+  experimentId?: string
+  variationId?: string
   [key: string]: any
 }
 
@@ -46,23 +48,37 @@ export default function TrackingLink({
   target,
   rel,
   style,
+  experimentId,
+  variationId,
   ...rest
 }: TrackingLinkProps) {
   const pathname = usePathname()
   const logEvent = useLogEvent()
 
   const handleClick = () => {
+    // Prepare event attributes
+    const attributes: Record<string, any> = {
+      clickType,
+      clickName,
+      clickLocation,
+      clickText,
+      pageLocation: pathname,
+    }
+
+    // Add experiment data if provided
+    if (experimentId) {
+      attributes.experimentId = experimentId
+    }
+
+    if (variationId) {
+      attributes.variationId = variationId
+    }
+
     // Log the click event
     logEvent({
       eventName: 'Website Click',
       eventType: 'track',
-      attributes: {
-        clickType,
-        clickName,
-        clickLocation,
-        clickText,
-        pageLocation: pathname,
-      },
+      attributes,
     })
 
     // Call the original onClick handler if provided
