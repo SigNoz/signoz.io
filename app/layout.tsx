@@ -97,9 +97,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <Suspense fallback={null}>
           <PageViewTracker />
         </Suspense>
-        <Suspense fallback={null}>
-          <PageViewTracker />
-        </Suspense>
         <noscript>
           <iframe
             src="https://www.googletagmanager.com/ns.html?id=GTM-N9B6D4H"
