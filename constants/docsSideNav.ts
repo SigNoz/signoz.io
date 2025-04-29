@@ -612,6 +612,11 @@ const docsSideNav = [
             route: '/docs/instrumentation/swift',
           },
           {
+            type: 'doc',
+            route: '/docs/instrumentation/opentelemetry-nginx',
+            label: 'NGINX',
+          },
+          {
             type: 'category',
             isExpanded: false,
             label: 'Manual Instrumentation',
