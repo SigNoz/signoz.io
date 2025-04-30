@@ -1,0 +1,73 @@
+---
+date: 2025-04-23
+id: distributed-clickhouse-kubernetes
+title: Distributed ClickHouse with Kubernetes
+---
+import MultiNodePart1 from '@/components/shared/distributed-ch-multinode-part-1.md'
+import MultiNodePart2 from '@/components/shared/distributed-ch-multinode-part-2.md'
+import SigNozCloud from '@/components/shared/signoz-cloud.mdx'
+
+Running ClickHouse in a distributed mode on Kubernetes allows you to scale horizontally and achieve high availability for your data workloads. By leveraging Kubernetes orchestration, you can easily manage multiple ClickHouse nodes, shards, and replicas, as well as integrate with Zookeeper for cluster coordination. This guide walks you through configuring a distributed ClickHouse cluster using Helm charts, with recommended settings for production environments.
+
+To set up ClickHouse cluster of **2 shards** with **2 replicas each** and  **3 nodes** Zookeeper cluster,
+include the following in `override-values.yaml`:
+
+```yaml
+clickhouse:
+  layout:
+    shardsCount: 2
+    replicasCount: 2
+  zookeeper:
+    replicaCount: 3
+schemaMigrator:
+  enableReplication: true
+```
+
+<Admonition type="info">
+In case of single replica in distributed ClickHouse cluster, you can use
+`replicasCount: 1` and disable replication by either removing `enableReplication`
+or setting `enableReplication: false` in `schemaMigrator`.
+</Admonition>
+
+Followed by `helm upgrade` command:
+
+```bash
+helm --namespace platform upgrade my-release signoz/signoz -f override-values.yaml
+```
+
+To spread ClickHouse instances across multiple nodes in desired order, update
+`clickhouse.podDistribution` in `values.yaml`.
+
+Examples:
+- All instances in unique nodes:
+  ```yaml
+  clickhouse:
+    podDistribution:
+      - type: ClickHouseAntiAffinity
+        topologyKey: kubernetes.io/hostname
+  ```
+- Distribute shards of replicas across nodes:
+  ```yaml
+  clickhouse:
+    podDistribution:
+      - type: ReplicaAntiAffinity
+        topologyKey: kubernetes.io/hostname
+  ```
+- Distribute replicas of shards across nodes:
+  ```yaml
+  clickhouse:
+    podDistribution:
+      - type: ShardAntiAffinity
+        topologyKey: kubernetes.io/hostname
+  ```
+
+For detailed instructions on the **Pod Distribution**, [see here][1].
+
+<Admonition type="info">
+Replace `my-release` and `platform` from above with appropriate release name
+and SigNoz namespace respectively.
+</Admonition>
+
+---
+
+[1]: https://github.com/Altinity/clickhouse-operator/blob/1414503921da3ae475eb6f9a296d3475a6993768/docs/chi-examples/99-clickhouseinstallation-max.yaml#L428-L481
