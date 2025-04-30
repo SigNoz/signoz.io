@@ -210,7 +210,7 @@ const docsSideNav = [
     route: '/docs/manage/overview',
     items: [
       {
-        label: 'Administrator Guide',
+        label: 'Administrator Guides (Self-hosted)',
         type: 'category',
         isExpanded: false,
         route: '/docs/manage/administrator-guide',
