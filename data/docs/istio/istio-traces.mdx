@@ -11,14 +11,14 @@ With SigNoz, you can collect and analyze distributed traces from your Istio serv
 - A running Istio service mesh (v1.14+ recommended)
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/) and [istioctl](https://istio.io/latest/docs/ops/diagnostic-tools/istioctl/#install-hahahugoshortcode964s2hbhb) installed and configured
 - Istio control-plane namespace: `istio-system` (used throughout this guide)
-- OpenTelemetry Collector deployed in your cluster (see the [Istio Metrics](./istio-metrics) guide)
-
-<Tabs entityName="plans">
-  <TabItem value="cloud" label="SigNoz Cloud" default>
+- OpenTelemetry Collector deployed in your cluster (see the [Istio Metrics](/docs/istio/istio-metrics) guide)
 
 ## 1. Configure OpenTelemetry Collector for Traces
 
-If you've already set up the OpenTelemetry Collector for metrics as described in the [Istio Metrics](./istio-metrics) guide, you might already have traces configured. Let's ensure your collector is properly configured for trace collection:
+If you've already set up the OpenTelemetry Collector for metrics as described in the [Istio Metrics](/docs/istio/istio-metrics) guide, you might already have traces configured. Let's ensure your collector is properly configured for trace collection:
+
+<Tabs entityName="plans">
+  <TabItem value="cloud" label="SigNoz Cloud" default>
 
 ```yaml
 # values.yaml
@@ -72,95 +72,8 @@ config:
 # ... other configuration from metrics guide
 ```
 
-Update the OpenTelemetry Collector with the new configuration:
-
-```bash
-helm upgrade --install otel-collector open-telemetry/opentelemetry-collector \
-  --namespace istio-system \
-  -f values.yaml
-```
-
-## 2. Configure Istio for Distributed Tracing
-
-Istio must be configured to send traces to the OpenTelemetry Collector. This requires updating the Istio mesh configuration:
-
-```bash
-istioctl install -y \
-  --set values.meshConfig.enablePrometheusMerge=true \
-  --set 'values.meshConfig.defaultConfig.telemetry.providers[0].name=otlp' \
-  --set 'values.meshConfig.defaultConfig.telemetry.providers[0].provider=opentelemetry' \
-  --set 'values.meshConfig.defaultConfig.telemetry.providers[0].opentelemetry.address=otel-collector.istio-system.svc.cluster.local:4317' \
-  --set values.meshConfig.defaultConfig.tracing.sampling=100 \
-  --set values.meshConfig.defaultConfig.tracing.zipkin.address=otel-collector.istio-system.svc.cluster.local:9411
-```
-
-This configuration:
-1. Enables both metrics and tracing collection
-2. Sets the OpenTelemetry provider for telemetry
-3. Configures tracing to use the Zipkin protocol with the OTel Collector endpoint
-4. Sets the trace sampling rate to 100% (every request is traced)
-
-> **Note:** For production environments, you should adjust the sampling rate to a lower value (e.g., 10% or even 1%) to reduce overhead and storage costs.
-
-## 3. Propagate Trace Context in Your Applications
-
-For end-to-end tracing, applications must propagate trace context headers. Istio automatically generates trace headers, but your applications need to forward them between services.
-
-For HTTP services, ensure the following headers are propagated:
-- `x-request-id`
-- `x-b3-traceid`
-- `x-b3-spanid`
-- `x-b3-parentspanid`
-- `x-b3-sampled`
-- `x-b3-flags`
-- `b3`
-- `x-ot-span-context`
-
-Most OpenTelemetry client libraries handle this automatically, but you may need to configure your API gateways or ingress controllers to preserve these headers.
-
-## 4. Validate Trace Collection in SigNoz
-
-Once your configuration is applied and traffic is flowing through your mesh, you should be able to see traces in SigNoz:
-
-1. Log into your SigNoz Cloud account
-2. Navigate to the **Services** page to see services discovered from trace data
-3. Find your Istio-managed services in the list
-4. Click on a service to view its detailed trace data
-
-### Services View
-
-The Services view shows all services discovered from trace data, along with key metrics like request rate, error rate, and p99 latency:
-
-![Services List in SigNoz](/img/blog/common/istio-services-list.png)Figure 1 - Service List
-
-### Trace Explorer
-
-You can use the Trace Explorer to search and filter traces:
-
-1. Navigate to **Traces**
-2. Use filters to find specific traces:
-   - Service name
-   - Operation name
-   - Duration
-   - Status (OK/ERROR)
-   - Custom tags or attributes
-
-![Trace Explorer in SigNoz](/img/blog/common/istio-trace-explorer.png)Figure 2 - Trace Explorer
-
   </TabItem>
   <TabItem value="self-host" label="SigNoz Self-Host">
-
-## Prerequisites
-
-- A running Istio service mesh (v1.14+ recommended)
-- A self-hosted SigNoz installation (with OTLP port 4317 accessible)
-- kubectl and istioctl installed and configured
-- Istio control-plane namespace: `istio-system` (used throughout this guide)
-- OpenTelemetry Collector deployed in your cluster (see the [Istio Metrics](./istio-metrics) guide)
-
-## 1. Configure OpenTelemetry Collector for Traces
-
-If you've already set up the OpenTelemetry Collector for metrics as described in the [Istio Metrics](./istio-metrics) guide, you might already have traces configured. Let's ensure your collector is properly configured for trace collection:
 
 ```yaml
 # values.yaml
@@ -212,6 +125,9 @@ config:
 # ... other configuration from metrics guide
 ```
 
+  </TabItem>
+</Tabs>
+
 Update the OpenTelemetry Collector with the new configuration:
 
 ```bash
@@ -262,10 +178,24 @@ Most OpenTelemetry client libraries handle this automatically, but you may need 
 
 Once your configuration is applied and traffic is flowing through your mesh, you should be able to see traces in SigNoz:
 
+<Tabs entityName="plans">
+  <TabItem value="cloud" label="SigNoz Cloud" default>
+
+1. Log into your SigNoz Cloud account
+2. Navigate to the **Services** page to see services discovered from trace data
+3. Find your Istio-managed services in the list
+4. Click on a service to view its detailed trace data
+
+  </TabItem>
+  <TabItem value="self-host" label="SigNoz Self-Host">
+
 1. Log into your self-hosted SigNoz instance
 2. Navigate to the **Services** page to see services discovered from trace data
 3. Find your Istio-managed services in the list
 4. Click on a service to view its detailed trace data
+
+  </TabItem>
+</Tabs>
 
 ### Services View
 
@@ -286,9 +216,6 @@ You can use the Trace Explorer to search and filter traces:
    - Custom tags or attributes
 
 ![Trace Explorer in SigNoz](/img/blog/common/istio-trace-explorer.png)Figure 2 - Trace Explorer
-
-  </TabItem>
-</Tabs>
 
 ## Troubleshooting
 
@@ -370,4 +297,3 @@ You should see Zipkin or OpenTelemetry tracing configuration in the output.
    - Reduce sampling rate in production
    - Increase memory/CPU limits for the collector
    - Tune batch processor parameters (increase batch size, adjust timeout)
-

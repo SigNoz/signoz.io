@@ -5,19 +5,15 @@ sidebar_label: Istio Metrics
 ---
 
 With SigNoz, you can collect and monitor Istio service mesh metrics.
-
 ## Prerequisites
 
 - A running Istio service mesh (v1.14+ recommended)
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/) and [istioctl](https://istio.io/latest/docs/ops/diagnostic-tools/istioctl/#install-hahahugoshortcode964s2hbhb) installed and configured
 - Istio control-plane namespace: `istio-system` (used throughout this guide)
 
-<Tabs entityName="plans">
-  <TabItem value="cloud" label="SigNoz Cloud" default>
-
 ## 1. Deploy OpenTelemetry Collector with Helm
 
-The OpenTelemetry Collector is responsible for collecting telemetry data from Istio and forwarding it to SigNoz. you'll use the official OpenTelemetry Helm chart for deployment.
+The OpenTelemetry Collector is responsible for collecting telemetry data from Istio and forwarding it to SigNoz. You'll use the official OpenTelemetry Helm chart for deployment.
 
 1. Add the OpenTelemetry Helm repository:
 
@@ -28,8 +24,11 @@ The OpenTelemetry Collector is responsible for collecting telemetry data from Is
 
 2. Create a `values.yaml` file for the Collector configuration:
 
+<Tabs entityName="plans">
+  <TabItem value="cloud" label="SigNoz Cloud" default>
+
    ```yaml
-   # values.yaml
+   # values.yaml for SigNoz Cloud
    mode: "deployment"
    namespaceOverride: "istio-system"
 
@@ -183,167 +182,8 @@ The OpenTelemetry Collector is responsible for collecting telemetry data from Is
    >
    > Also update the `namespaces` in the Prometheus configuration to match your application namespaces.
 
-3. Install the OpenTelemetry Collector using Helm:
-
-   ```bash
-   helm install otel-collector open-telemetry/opentelemetry-collector \
-     --namespace istio-system \
-     -f values.yaml
-   ```
-
-4. Verify the Collector deployment:
-
-   ```bash
-   kubectl get pods -n istio-system -l app.kubernetes.io/name=opentelemetry-collector
-   ```
-
-   You should see the collector pod running:
-
-   ```
-   NAME                             READY   STATUS    RESTARTS   AGE
-   otel-collector-8f7b86d8c-z9xpj   1/1     Running   0          2m
-   ```
-
-## 2. Configure Istio for Metrics Collection
-
-Now you need to configure Istio to send metrics to the OpenTelemetry Collector.
-
-### Update Istio MeshConfig
-
-Configure Istio to emit telemetry data by updating the MeshConfig:
-
-```bash
-istioctl install -y \
-  --set values.meshConfig.enablePrometheusMerge=true \
-  --set 'values.meshConfig.defaultConfig.telemetry.providers[0].name=otlp' \
-  --set 'values.meshConfig.defaultConfig.telemetry.providers[0].provider=opentelemetry' \
-  --set 'values.meshConfig.defaultConfig.telemetry.providers[0].opentelemetry.address=otel-collector.istio-system.svc.cluster.local:4317' \
-  --set values.meshConfig.defaultConfig.tracing.sampling=100 \
-  --set values.meshConfig.defaultConfig.tracing.zipkin.address=otel-collector.istio-system.svc.cluster.local:9411
-```
-
-This configuration:
-- Enables Prometheus metrics collection
-- Configures OpenTelemetry as a telemetry provider
-- Points Istio to the OpenTelemetry Collector endpoint
-- Sets up tracing with the Zipkin protocol (which OpenTelemetry Collector can receive)
-- Sets a 100% sampling rate for traces (adjust for production environments)
-
-### Apply Telemetry Resource for Metrics
-
-Create an Istio Telemetry resource to control which metrics are collected:
-
-```bash
-kubectl apply -f - <<EOF
-apiVersion: telemetry.istio.io/v1alpha1
-kind: Telemetry
-metadata:
-  name: signoz-metrics
-  namespace: istio-system
-spec:
-  metrics:
-    - providers:
-        - name: prometheus
-      overrides:
-        - match:
-            metric: ALL_METRICS
-          disabled: true
-        - match:
-            metric: REQUEST_COUNT
-          disabled: false
-        - match:
-            metric: REQUEST_DURATION
-          disabled: false
-        - match:
-            metric: REQUEST_SIZE
-          disabled: false
-        - match:
-            metric: RESPONSE_SIZE
-          disabled: false
-EOF
-```
-
-## 3. Validating Metrics in SigNoz
-
-Once your configuration is applied, you should be able to see Istio metrics in SigNoz.
-
-1. Log into your SigNoz Cloud account
-2. Navigate to **Metrics Explorer**
-3. Look for metrics with the `istio` prefix, such as:
-   - `istio_requests_total`
-   - `istio_request_duration_milliseconds`
-   - `istio_request_bytes`
-   - `istio_response_bytes`
-   
-   You should also see HTTP check metrics from the `httpcheck` receiver:
-   - `httpcheck_status` - Indicates if the HTTP endpoint is reachable (value of 1 for success)
-   - `httpcheck_duration` - Shows the response time of the HTTP endpoint in milliseconds
-
-> **Note**: If you don't see Istio metrics immediately, but HTTP check metrics are visible, ensure you're generating traffic to your Istio services. Unlike HTTP checks that actively probe endpoints, Istio metrics only appear when there's actual traffic flowing through the mesh.
-
-![Istio Metrics in SigNoz](/img/blog/common/istio-metrics-explorer.png)Figure 1 - Metrics Explorer
-
-## 4. Performance Considerations and Tuning
-
-When collecting metrics from Istio, there are some performance considerations to keep in mind:
-
-### Batch Processor Tuning
-
-The `batch` processor can be tuned to optimize for your specific environment:
-
-```yaml
-processors:
-  batch:
-    # Increase the batch size to reduce the number of export requests
-    send_batch_size: 1000
-    # Increase the timeout to allow for larger batches (in milliseconds)
-    timeout: 10000
-    # Adjust the maximum queue size based on your memory constraints
-    send_batch_max_size: 2000
-```
-
-### Metric Filtering
-
-If you're experiencing high cardinality or excessive metric volume, you can add filters to reduce the data sent to SigNoz:
-
-```yaml
-processors:
-  filter:
-    metrics:
-      include:
-        match_type: regexp
-        metric_names:
-          - istio_request.*
-          - istio_response.*
-```
-
-### Resource Allocation
-
-For production environments with high traffic, consider increasing the resources allocated to the collector:
-
-```yaml
-resources:
-  limits:
-    cpu: 1
-    memory: 2Gi
-  requests:
-    cpu: 200m
-    memory: 400Mi
-```
-
   </TabItem>
   <TabItem value="self-host" label="SigNoz Self-Host">
-
-## 1. Deploy OpenTelemetry Collector with Helm
-
-1. Add the OpenTelemetry Helm repository:
-
-   ```bash
-   helm repo add open-telemetry https://open-telemetry.github.io/opentelemetry-helm-charts
-   helm repo update
-   ```
-
-2. Create a `values.yaml` file for the Collector configuration:
 
    ```yaml
    # values.yaml for self-hosted SigNoz
@@ -492,6 +332,9 @@ resources:
    >
    > Also update the `namespaces` in the Prometheus configuration to match your application namespaces.
 
+  </TabItem>
+</Tabs>
+
 3. Install the OpenTelemetry Collector using Helm:
 
    ```bash
@@ -504,6 +347,13 @@ resources:
 
    ```bash
    kubectl get pods -n istio-system -l app.kubernetes.io/name=opentelemetry-collector
+   ```
+
+   You should see the collector pod running:
+
+   ```
+   NAME                             READY   STATUS    RESTARTS   AGE
+   otel-collector-8f7b86d8c-z9xpj   1/1     Running   0          2m
    ```
 
 ## 2. Configure Istio for Metrics Collection
@@ -528,7 +378,7 @@ This configuration:
 - Enables Prometheus metrics collection
 - Configures OpenTelemetry as a telemetry provider
 - Points Istio to the OpenTelemetry Collector endpoint
-- Sets up tracing with the Zipkin protocol
+- Sets up tracing with the Zipkin protocol (which OpenTelemetry Collector can receive)
 - Sets a 100% sampling rate for traces (adjust for production environments)
 
 ### Apply Telemetry Resource for Metrics
@@ -569,7 +419,7 @@ EOF
 
 Once your configuration is applied, you should be able to see Istio metrics in SigNoz.
 
-1. Log into your self-hosted SigNoz instance
+1. Log into your SigNoz account (Cloud or Self-hosted)
 2. Navigate to **Metrics Explorer**
 3. Look for metrics with the `istio` prefix, such as:
    - `istio_requests_total`
@@ -632,9 +482,6 @@ resources:
     cpu: 200m
     memory: 400Mi
 ```
-
-  </TabItem>
-</Tabs>
 
 ## Troubleshooting
 
