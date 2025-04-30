@@ -6,15 +6,15 @@ sidebar_label: Istio Traces
 
 With SigNoz, you can collect and analyze distributed traces from your Istio service mesh.
 
-<Tabs entityName="plans">
-  <TabItem value="cloud" label="SigNoz Cloud" default>
-
 ## Prerequisites
 
 - A running Istio service mesh (v1.14+ recommended)
 - kubectl and istioctl installed and configured
 - Istio control-plane namespace: `istio-system` (used throughout this guide)
 - OpenTelemetry Collector deployed in your cluster (see the [Istio Metrics](./istio-metrics) guide)
+
+<Tabs entityName="plans">
+  <TabItem value="cloud" label="SigNoz Cloud" default>
 
 ## 1. Configure OpenTelemetry Collector for Traces
 
@@ -147,81 +147,8 @@ You can use the Trace Explorer to search and filter traces:
 
 ![Trace Explorer in SigNoz](/img/blog/common/istio-trace-explorer.png)Figure 2 - Trace Explorer
 
-## 5. Troubleshooting
-
-If you're not seeing traces in SigNoz, try these troubleshooting steps:
-
-### Verify Collector Configuration
-
-Check that your OpenTelemetry Collector is configured correctly:
-
-```bash
-# Check the collector pods
-kubectl get pods -n istio-system -l app.kubernetes.io/name=opentelemetry-collector
-
-# Check collector logs
-kubectl logs -n istio-system -l app.kubernetes.io/name=opentelemetry-collector
-```
-
-Look for any errors related to the Zipkin receiver or OTLP exporter.
-
-### Generate Test Traffic
-
-Generate traffic through your mesh to ensure traces are being created:
-
-```bash
-# Loop to generate traffic
-for i in {1..50}; do
-  curl -s -H "X-B3-Sampled: 1" http://$(kubectl get svc istio-ingressgateway -n istio-system -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
-  sleep 1
-done
-```
-
-The `X-B3-Sampled: 1` header forces trace sampling for these requests.
-
-### Check Istio Proxy Configuration
-
-Verify that Istio is configured to generate traces:
-
-```bash
-# Get a pod with Istio sidecar
-POD_NAME=$(kubectl get pod -l app=myapp -o jsonpath='{.items[0].metadata.name}')
-
-# Check Istio proxy configuration
-istioctl proxy-config bootstrap $POD_NAME.default | grep -A 15 tracing
-```
-
-You should see Zipkin or OpenTelemetry tracing configuration in the output.
-
-### Common Issues and Solutions
-
-1. **Missing Spans**:
-   - Check that context propagation headers are being forwarded between services
-   - Verify that all services in your mesh have Istio sidecar injection enabled
-   - Ensure your applications aren't stripping tracing headers
-
-2. **Incorrect Collector Endpoint**:
-   - Verify the Zipkin address in Istio configuration points to your collector
-   - Check the collector service is accessible from Istio sidecars
-   - Validate that port 9411 is exposed on your collector service
-
-3. **Trace Sampling Issues**:
-   - Make sure sampling rate is not set too low
-   - Use the `X-B3-Sampled: 1` header to force sampling during testing
-   - Check for any custom sampling configuration in your mesh
-
-4. **Exporter Problems**:
-   - Verify your SigNoz ingestion key and endpoint in the collector configuration
-   - Check for any network issues between the collector and SigNoz
-   - Look for authentication errors in the collector logs
-
-5. **High Volume/Performance Issues**:
-   - Reduce sampling rate in production
-   - Increase memory/CPU limits for the collector
-   - Tune batch processor parameters (increase batch size, adjust timeout)
-
   </TabItem>
-  <TabItem value="self-hosted" label="SigNoz Self-Hosted">
+  <TabItem value="self-host" label="SigNoz Self-Host">
 
 ## Prerequisites
 
@@ -360,7 +287,10 @@ You can use the Trace Explorer to search and filter traces:
 
 ![Trace Explorer in SigNoz](/img/blog/common/istio-trace-explorer.png)Figure 2 - Trace Explorer
 
-## 5. Troubleshooting
+  </TabItem>
+</Tabs>
+
+## Troubleshooting
 
 If you're not seeing traces in SigNoz, try these troubleshooting steps:
 
@@ -441,5 +371,3 @@ You should see Zipkin or OpenTelemetry tracing configuration in the output.
    - Increase memory/CPU limits for the collector
    - Tune batch processor parameters (increase batch size, adjust timeout)
 
-  </TabItem>
-</Tabs>
