@@ -1,7 +1,7 @@
 ---
 date: 2025-04-10
-id: github-receiver-metrics
-title: GitHub Receiver Integration
+id: github-metrics
+title: GitHub Metrics
 description: Integrate the GitHub Receiver to scrape the metrics and send the data to SigNoz
 hide_table_of_contents: true
 ---
@@ -16,14 +16,6 @@ Access token is required for scraping the metrics which can be generated in 2 wa
 - [Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#fine-grained-personal-access-tokens)
 
 - [GitHub App](https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/registering-a-github-app)
-
-<Admonition>
-💡 At the time of writing this guide, the SigNoz OTel Collector does not support the GitHub Receiver.
-
-🐳 If you're using Kubernetes or Linux for hosting SigNoz, consider running a separate OTel Collector for GitHub by following this [link](https://opentelemetry.io/docs/collector/installation/) along with [SigNoz Setup](https://signoz.io/docs/install/).
-
-⚙️ Following setup is based on [DockerCompose](https://signoz.io/docs/install/docker/#install-signoz-using-docker-compose).
-</Admonition>
 
 ### Setup the SigNoz to scrape the metrics
 
@@ -154,7 +146,14 @@ Run the following command to view the logs.
 
 <TabItem value='self-host' label='Self-Host'>
 
-### Step 1. Add GitHub OTel Collector Service
+### Step 1. Install SigNoz
+Install `SigNoz` by following this [link](https://signoz.io/docs/install/self-host/).
+
+<Admonition>
+💡 At the time of writing this guide, the SigNoz OTel Collector does not support the GitHub Receiver.
+</Admonition>
+
+### Step 2. Add GitHub OTel Collector Service
 Add the `github-otel-collector` service under `services` section of `docker-compose.yaml` file.
 
     ```yaml:/deploy/docker/docker-compose.yaml 
@@ -174,7 +173,7 @@ Add the `github-otel-collector` service under `services` section of `docker-comp
     ...
     ```
 
-### Step 2. Disable Default SigNoz OTel Config Paths
+### Step 3. Disable Default SigNoz OTel Config Paths
 Comment the following lines under `command` section of `otel-collector` service in `docker-compose.yaml` file.
 
     ```yaml:/deploy/docker/docker-compose.yaml 
@@ -186,7 +185,7 @@ Comment the following lines under `command` section of `otel-collector` service 
     ...
     ```
 
-### Step 3. Create GitHub OTel Collector Configuration
+### Step 4. Create GitHub OTel Collector Configuration
 Create `github-otel-collector-config.yaml` file and add the following contents.
 
     ```yaml:/deploy/docker/github-otel-collector-config.yaml 
@@ -230,7 +229,7 @@ Create `github-otel-collector-config.yaml` file and add the following contents.
     ...
     ```
 
-### Step 4. Update SigNoz OTel Collector Configuration
+### Step 5. Update SigNoz OTel Collector Configuration
 Update the existing `otel-collector-config.yaml` file with the following contents.
 
     ```yaml:/deploy/docker/otel-collector-config.yaml
@@ -258,7 +257,7 @@ Update the existing `otel-collector-config.yaml` file with the following content
     ...
     ```
 
-### Step 5. Restart OTel Collector Services
+### Step 6. Restart OTel Collector Services
 Restart the `otel-collector` service and `github-otel-collector` service.
 
     ```bash
@@ -266,7 +265,7 @@ Restart the `otel-collector` service and `github-otel-collector` service.
     docker compose -f docker/docker-compose.yaml restart github-otel-collector
     ```
 
-### Step 6. View Logs of GitHub OTel Collector
+### Step 7. View Logs of GitHub OTel Collector
 Run the following command to view the logs.
     
     ```bash

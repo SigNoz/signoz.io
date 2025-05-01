@@ -1309,6 +1309,32 @@ const docsSideNav = [
     ]
   },
   {
+    label: 'CICD Monitoring',
+    type: 'category',
+    className: 'new-doc',
+    isExpanded: false,
+    // route: '',
+    items: [
+      {
+        label: 'GitHub',
+        type: 'category',
+        isExpanded: false,
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/cicd/github/github-metrics',
+            label: 'Metrics',
+          },
+          {
+            type: 'doc',
+            route: '/docs/cicd/github/github-actions-traces',
+            label: 'Traces',
+          }        
+        ],
+      }
+    ]
+  },
+  {
     type: 'doc',
     route: '/docs/monitor-http-endpoints',
     label: 'Monitor HTTP Endpoints',

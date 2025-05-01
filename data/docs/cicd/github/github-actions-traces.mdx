@@ -1,6 +1,6 @@
 ---
 date: 2025-04-10
-id: github-receiver-traces
+id: github-actions-traces
 title: GitHub Actions Traces
 description: Integrate the GitHub Receiver to forward the traces data to SigNoz
 hide_table_of_contents: true
@@ -10,88 +10,37 @@ This document contains instructions on how to get the traces of GitHub Actions u
 
 ## Prerequisites
 
-1. Create [Webhook](https://docs.github.com/en/webhooks/using-webhooks/creating-webhooks#creating-a-repository-webhook) in the repo by selecting `workflow_run` and `workflow_job` events.
+- Create [Webhook](https://docs.github.com/en/webhooks/using-webhooks/creating-webhooks#creating-a-repository-webhook) in the repo by selecting `workflow_run` and `workflow_job` events.
 
-2. Have the GitHub Actions workflow for your repo, for the first time users refer this [link](https://docs.github.com/en/actions/writing-workflows/quickstart#creating-your-first-workflow).
+- Have the GitHub Actions workflow for your repo, for the first time users refer this [link](https://docs.github.com/en/actions/writing-workflows/quickstart#creating-your-first-workflow).
 
-<Admonition>
-💡 At the time of writing this guide, the SigNoz OTel Collector does not support the GitHub Receiver.
-
-🐳 If you're using Kubernetes or Linux for hosting SigNoz, consider running a separate OTel Collector for GitHub by following this [link](https://opentelemetry.io/docs/collector/installation/) along with [SigNoz Setup](https://signoz.io/docs/install/).
-
-⚙️ Following setup is based on [DockerCompose](https://signoz.io/docs/install/docker/#install-signoz-using-docker-compose).
-</Admonition>
 
 ### Setup the SigNoz to fetch the traces
 
 <Tabs entityName="plans">
 <TabItem value="signoz-cloud" label="SigNoz Cloud" default>
 
-### Step 1. Add GitHub OTel Collector Service
-Add the `github-otel-collector` service under `services` section of `docker-compose.yaml` file.
+<Tabs>
+<TabItem value="vm" label="VM" default>
 
-    ```yaml:/deploy/docker/docker-compose.yaml 
-    ...
-    github-otel-collector:
-      image: otel/opentelemetry-collector-contrib:0.123.0
-      container_name: github-otel-collector
-      command: [ "--config=/etc/otel-collector-config.yaml" ]
-      volumes:
-        - ./github-otel-collector-config.yaml:/etc/otel-collector-config.yaml
-      environment:
-        - GITHUB_WEBHOOK_SECRET=<Webhook Secret>
-      ports:
-        - "19418:19418" # Webhook endpoint port
-      networks:
-        - signoz-net
-    ...
+### Step 1. Download OTel Contrib Collector
+Download OTel Contrib Collector tar.gz for your [architecture](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/#setup-otel-collector-as-agent).
+ 
+    ```bash
+    wget https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.125.0/otelcol-contrib_0.125.0_darwin_arm64.tar.gz
     ```
 
-### Step 2. Disable the SigNoz OTel Collector Service
-Comment the entire lines of `otel-collector` service in `docker-compose.yaml` file.
+### Step 2. Extract OTel Contrib Collector
+Extract OTel Collector tar.gz to the `otelcol-contrib` folder
 
-    ```yaml:/deploy/docker/docker-compose.yaml
-    ...
-  # otel-collector:
-  #   !!merge <<: *db-depend
-  #   image: signoz/signoz-otel-collector:${OTELCOL_TAG:-v0.111.38}
-  #   container_name: signoz-otel-collector
-  #   command:
-  #     - --config=/etc/otel-collector-config.yaml
-  #     - --manager-config=/etc/manager-config.yaml
-  #     - --copy-path=/var/tmp/collector-config.yaml
-  #     - --feature-gates=-pkg.translator.prometheus.NormalizeName
-  #   volumes:
-  #     - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml
-  #     - ../common/signoz/otel-collector-opamp-config.yaml:/etc/manager-config.yaml
-  #   environment:
-  #     - OTEL_RESOURCE_ATTRIBUTES=host.name=signoz-host,os.type=linux
-  #     - LOW_CARDINAL_EXCEPTION_GROUPING=false
-  #   ports:
-  #     # - "1777:1777"     # pprof extension
-  #     - "4317:4317" # OTLP gRPC receiver
-  #     - "4318:4318" # OTLP HTTP receiver
-  #   depends_on:
-  #     signoz:
-  #       condition: service_healthy
-    ...
+    ```bash
+    mkdir otelcol-contrib && tar xvzf otelcol-contrib_0.125.0_darwin_arm64.tar.gz -C otelcol-contrib
     ```
 
-### Step 3. Configure SigNoz Cloud Ingestion Key
-Create an environment variable called `SIGNOZ_INGESTION_KEY` under `environment` section of `github-otel-collector` service in `docker-compose.yaml` file.
+### Step 3. Set Up OTel Contrib Collector Configuration File
+Create `config.yaml` in `otelcol-contrib` folder with the below content in it. Replace `SIGNOZ_INGESTION_KEY` with your key.
 
-    ```yaml:/deploy/docker/docker-compose.yaml 
-    ...
-    github-otel-collector:
-      environment:
-        - SIGNOZ_INGESTION_KEY=<SIGNOZ_INGESTION_KEY>
-    ...
-    ```
-
-### Step 4. Create GitHub OTel Collector Configuration
-Create `github-otel-collector-config.yaml` file and add the following contents.
-
-    ```yaml:/deploy/docker/github-otel-collector-config.yaml
+    ```yaml:/otelcol-contrib/config.yaml
     ...
     receivers:
       github:
@@ -99,7 +48,8 @@ Create `github-otel-collector-config.yaml` file and add the following contents.
           endpoint: 0.0.0.0:19418
           path: /events
           health_path: /health
-          secret: ${env:GITHUB_WEBHOOK_SECRET}
+          secret: <GITHUB_WEBHOOK_SECRET>
+          service_name: <Service Name> #optional
         scrapers:
           scraper:
 
@@ -107,7 +57,7 @@ Create `github-otel-collector-config.yaml` file and add the following contents.
       otlp/signozcloud:
         endpoint: ingest.<region>.signoz.cloud:443
         headers:
-          signoz-ingestion-key: ${SIGNOZ_INGESTION_KEY}
+          signoz-ingestion-key: <SIGNOZ_INGESTION_KEY>
         tls:
           insecure: false
       debug:
@@ -122,27 +72,46 @@ Create `github-otel-collector-config.yaml` file and add the following contents.
     ...
     ```
 
-### Step 5. Restart GitHub OTel Collector Service
-Restart `github-otel-collector` service.
+### Step 4. Run the OTel Contrib Collector
+Inside `otelcol-contrib` folder, run the command.
 
     ```bash
-    docker compose -f docker/docker-compose.yaml restart github-otel-collector
+    ./otelcol-contrib --config ./config.yaml
     ```
+<Figure src="/img/docs/cicd/github/VMForSigNozCloudTraces.webp" alt="GitHub Receiver Traces" caption="GitHub Receiver Startup Message" />
 
-### Step 6. View Logs of GitHub OTel Collector
-Run the following command to view the logs.
-    
-    ```bash
-    docker compose -f docker/docker-compose.yaml logs -f github-otel-collector
-    ```
-    
-<Figure src="/img/docs/cicd/github/Traces.webp" alt="GitHub Receiver" caption="GitHub Receiver Startup Message" />
+## Validate GitHub Actions Traces in SigNoz
+
+- Traces can be viewed under the `Traces` tab in the SigNoz UI.
+
+<Figure src="/img/docs/cicd/github/VMForSigNozCloudTracesListView.webp" alt="GitHub Receiver Traces Console" caption="Traces List View" />
+
+- Click on `TraceID` to get the full view of the GitHub Actions workflow, which can be seen as
+
+<Figure src="/img/docs/cicd/github/VMForSigNozCloudTraceIDView.webp" alt="GitHub Receiver TraceID" caption="TraceID View" />
+
+</TabItem>
+
+<TabItem value="k8s" label="Kubernetes">
+
+### Step 1. Download OTel Contrib Collector
+
+</TabItem>
+
+</Tabs>
 
 </TabItem>
 
 <TabItem value='self-host' label='Self-Host'>
 
-### Step 1. Add GitHub OTel Collector Service
+### Step 1. Install SigNoz
+Install `SigNoz` by following this [link](https://signoz.io/docs/install/self-host/).
+
+<Admonition>
+💡 At the time of writing this guide, the SigNoz OTel Collector does not support the GitHub Receiver.
+</Admonition>
+
+### Step 2. Add GitHub OTel Collector Service
 Add the `github-otel-collector` service under `services` section of `docker-compose.yaml` file.
 
     ```yaml:/deploy/docker/docker-compose.yaml 
@@ -164,7 +133,7 @@ Add the `github-otel-collector` service under `services` section of `docker-comp
     ...
     ```
 
-### Step 2. Disable Default SigNoz OTel Config Paths
+### Step 3. Disable Default SigNoz OTel Config Paths
 Comment the following lines under `command` section of `otel-collector` service in `docker-compose.yaml` file.
 
     ```yaml:/deploy/docker/docker-compose.yaml 
@@ -176,7 +145,7 @@ Comment the following lines under `command` section of `otel-collector` service 
     ...
     ```
 
-### Step 3. Create GitHub OTel Collector Configuration
+### Step 4. Create GitHub OTel Collector Configuration
 Create `github-otel-collector-config.yaml` file and add the following contents.
 
     ```yaml:/deploy/docker/github-otel-collector-config.yaml
@@ -209,7 +178,7 @@ Create `github-otel-collector-config.yaml` file and add the following contents.
     ...
     ```
 
-### Step 4. Update SigNoz OTel Collector Configuration
+### Step 5. Update SigNoz OTel Collector Configuration
 Update the existing `otel-collector-config.yaml` file with the following contents.
 
     ```yaml:/deploy/docker/otel-collector-config.yaml
@@ -238,7 +207,7 @@ Update the existing `otel-collector-config.yaml` file with the following content
           exporters: [clickhousetraces,debug]
     ...
     ```
-### Step 5. Restart OTel Collector Services
+### Step 6. Restart OTel Collector Services
 Restart the `otel-collector` service and `github-otel-collector` service.
 
     ```bash
@@ -246,7 +215,7 @@ Restart the `otel-collector` service and `github-otel-collector` service.
     docker compose -f docker/docker-compose.yaml restart github-otel-collector
     ```
 
-### Step 6. View Logs of GitHub OTel Collector
+### Step 7. View Logs of GitHub OTel Collector
 Run the following command to view the logs.
     
     ```bash
@@ -254,9 +223,6 @@ Run the following command to view the logs.
     ```
 
 <Figure src="/img/docs/cicd/github/Traces.webp" alt="GitHub Receiver Traces" caption="GitHub Receiver Startup Message" />
-
-</TabItem>
-</Tabs>
 
 ## Validate GitHub Actions Traces in SigNoz
 
@@ -267,3 +233,7 @@ Run the following command to view the logs.
 - Click on `TraceID` to get the full view of the GitHub Actions workflow, which can be seen as
 
 <Figure src="/img/docs/cicd/github/TraceID.webp" alt="GitHub Receiver TraceID" caption="TraceID View" />
+
+</TabItem>
+
+</Tabs>
