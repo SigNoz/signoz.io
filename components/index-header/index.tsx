@@ -1,16 +1,20 @@
-'use client'
-
 import Hero from '../../components/ui/Hero'
-import VimeoPlayer from '../../components/VimeoPlayer/VimeoPlayer'
 import { ArrowRight, BookOpen, Handshake } from 'lucide-react'
 import Button from '@/components/Button/Button'
-import { Modal, ModalContent, ModalBody, useDisclosure } from '@nextui-org/react'
 import TrackingLink from '@/components/TrackingLink'
-import TrackingButton from '@/components/TrackingButton'
 import Link from 'next/link'
+import { VideoModalPlayer } from './VideoModalPlayer'
+import { evaluateFeatureFlag } from '../../utils/growthbookServer'
+import { ExperimentTracker } from './ExperimentTracker'
 
-export const Header = () => {
-  const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure()
+// Server component that makes the A/B test decision
+export async function Header() {
+  // Evaluate the feature flag on the server
+  const showSingleCTA = await evaluateFeatureFlag('single-cta-on-home-header')
+
+  // Define experiment details
+  const experimentId = 'home-header-cta'
+  const variantId = showSingleCTA ? 'single-cta' : 'dual-cta'
 
   return (
     <header className="relative !mx-auto mt-16 !w-[100vw] md:!w-[80vw]">
@@ -38,83 +42,71 @@ export const Header = () => {
       </div>
       {/* <div className='!w-[80vw] h-12 !mx-auto border border-signoz_slate-400 border-dashed !border-t-0 !border-b-0' /> */}
       <div className="!mx-auto mx-2 flex !w-[100vw] flex-col items-center justify-center gap-3 border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 pb-12 pt-4 md:mx-5 md:!w-[80vw] md:flex-row">
-        <TrackingLink
-          href="/teams/"
-          clickType="Primary CTA"
-          clickName="Sign Up Button"
-          clickText="Get Started - Free"
-          clickLocation="Hero Section"
-        >
-          <Button className="flex-center" id="btn-get-started-homepage-hero">
-            Get Started - Free
-            <ArrowRight size={14} />
-          </Button>
-        </TrackingLink>
+        {/* Use ExperimentTracker to track experiment views */}
+        <ExperimentTracker experimentId={experimentId} variantId={variantId}>
+          {/* Render different CTAs based on experiment */}
+          {showSingleCTA ? (
+            // Experiment variant: Single CTA
+            <TrackingLink
+              href="/teams/"
+              clickType="Primary CTA"
+              clickName="Sign Up Button"
+              clickText="Get Started - Free"
+              clickLocation="Hero Section"
+              experimentId={experimentId}
+              variantId={variantId}
+            >
+              <Button className="flex-center" id="btn-get-started-homepage-hero">
+                Get Started - Free
+                <ArrowRight size={14} />
+              </Button>
+            </TrackingLink>
+          ) : (
+            // Control variant: Multiple CTAs
+            <>
+              <TrackingLink
+                href="/teams/"
+                clickType="Primary CTA"
+                clickName="Sign Up Button"
+                clickText="Get Started - Free"
+                clickLocation="Hero Section"
+                experimentId={experimentId}
+                variantId={variantId}
+              >
+                <Button className="flex-center" id="btn-get-started-homepage-hero">
+                  Get Started - Free
+                  <ArrowRight size={14} />
+                </Button>
+              </TrackingLink>
 
-        <TrackingLink
-          href="/docs/introduction/"
-          clickType="Secondary CTA"
-          clickName="Read Documentation Link"
-          clickText="Read Documentation"
-          clickLocation="Hero Section"
-        >
-          <Button
-            className="flex-center"
-            type={Button.TYPES.SECONDARY}
-            id="btn-read-documentation-homepage-hero"
-          >
-            <BookOpen size={14} />
-            Read Documentation
-          </Button>
-        </TrackingLink>
+              <TrackingLink
+                href="/docs/introduction/"
+                clickType="Secondary CTA"
+                clickName="Read Documentation Link"
+                clickText="Read Documentation"
+                clickLocation="Hero Section"
+                experimentId={experimentId}
+                variantId={variantId}
+              >
+                <Button
+                  className="flex-center"
+                  type={Button.TYPES.SECONDARY}
+                  id="btn-read-documentation-homepage-hero"
+                >
+                  <BookOpen size={14} />
+                  Read Documentation
+                </Button>
+              </TrackingLink>
+            </>
+          )}
+        </ExperimentTracker>
       </div>
       <div className="section-container !mx-auto !mt-0 !w-[90vw] border !border-b-0 !border-t-0 border-none border-signoz_slate-400 md:!w-[80vw] md:border-dashed">
         <div className="w-100 mx-[-28px]">
-          <div className="product-explainer-video hero-figure rounded-lg p-3">
-            <div className="embed-container">
-              <div className="absolute">
-                <img
-                  src="/img/landing/landing_thumbnail.webp"
-                  alt="Custom Thumbnail"
-                  className="w-full rounded-lg"
-                />
-
-                <div className="play-container absolute inset-0 m-auto flex h-16 w-16 cursor-pointer items-center justify-center rounded-full focus-visible:outline-none">
-                  <TrackingButton
-                    clickType="Video Click"
-                    clickName="Video Play Button"
-                    clickText="Play Video"
-                    clickLocation="Hero Section"
-                    onClick={onOpen}
-                  >
-                    <img
-                      src="/svgs/icons/play-icon.svg"
-                      alt="signoz-video-play-btn"
-                      className="h-6 w-6 md:h-20 md:w-20"
-                    />
-                  </TrackingButton>
-                </div>
-              </div>
-
-              <Modal
-                size={'5xl'}
-                backdrop="blur"
-                isOpen={isOpen}
-                onOpenChange={onOpenChange}
-                className="self-center"
-              >
-                <ModalContent className="bg-transparent">
-                  {() => (
-                    <>
-                      <ModalBody className="py-6">
-                        <VimeoPlayer videoId="944340217" />
-                      </ModalBody>
-                    </>
-                  )}
-                </ModalContent>
-              </Modal>
-            </div>
-          </div>
+          <VideoModalPlayer
+            thumbnailSrc="/img/landing/landing_thumbnail.webp"
+            videoId="944340217"
+          />
         </div>
       </div>
     </header>
