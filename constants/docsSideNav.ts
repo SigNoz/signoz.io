@@ -169,22 +169,15 @@ const docsSideNav = [
                 },
                 {
                   type: 'doc',
+                  label: 'Deploying to Digital Ocean',
+                  route: '/docs/install/third-party/digital-ocean',
+                },
+                {
+                  type: 'doc',
                   label: 'Other Platform',
                   route: '/docs/install/kubernetes/others',
                 },
               ],
-            },
-            {
-              type: 'category',
-              label: 'Install on third-parties',
-              isExpanded: false,
-              items: [
-                {
-                  type: 'doc',
-                  label: 'Digital Ocean',
-                  route: '/docs/install/third-party/digital-ocean',
-                }
-              ]
             },
             {
               type: 'doc',
