@@ -170,7 +170,7 @@ const docsSideNav = [
                 {
                   type: 'doc',
                   label: 'Deploying to Digital Ocean',
-                  route: '/docs/install/third-party/digital-ocean',
+                  route: '/docs/install/digital-ocean',
                 },
                 {
                   type: 'doc',
