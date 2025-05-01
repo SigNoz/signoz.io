@@ -1,61 +1,68 @@
 ---
 date: 2025-04-28
 id: agent-node-monitoring
-title: Jenkins OpenTelemetry Integration
-description: Instrument Jenkins with OpenTelemetry and send traces & metrics to SigNoz
+title: Jenkins Tracing OpenTelemetry Integration 
+description: Monitor Jenkins Agent metrics
 ---
-
+   
 ## Overview
+The following categories of App Service Logs are available to export to Storage Account or EventHub. 
 
-This documentation provides a detailed walkthrough on how to set up an AWS Lambda function to collect AWS Lambda logs stored in an AWS S3 bucket and forward them to 
-SigNoz. This will enable you to automatically sends your Lambda logs to SigNoz, enabling you to visualize and monitor your application's 
-load balancing performance and health.
+- HTTP logs
+- App Service Console Logs
+- App Service Application Logs
+- Access Audit Logs
+- IPSecurity Audit logs
+- App Service Platform logs
 
-**Here’s a quick summary of what we’ll be doing in this detailed documentation.** 
+Although, the application logs could be sent directly in the Application Level using a Opentelemetry Log Appender, this might not be an ideal solution for legacy software or micro-services model. It’s easier to do centralised logging for both application logs, system logs and SIEM Audit logs.
 
-- [Creating / Configuring your S3 bucket](#creating--configuring-your-s3-bucket)
-- [Understanding how lambda function work](#understanding-how-lambda-function-work)
-- [Creating a lambda function](#creating-a-lambda-function)
-- [The Lambda Function Code](#the-lambda-function)
-- [Visualize the logs in SigNoz](#visualize-the-logs-in-signoz)
+### Prerequisites
 
-
-## Prerequisites
-
-- AWS account with administrative privilege.
+- [EventHub Setup](../../bootstrapping/data-ingestion)
+- [Central Collector Setup](../../bootstrapping/collector-setup)
 
 <Tabs entityName="plans">
 <TabItem value="signoz-cloud" label="SigNoz Cloud" default>
 
-## Creating / Configuring your S3 bucket
+## Setup
 
-To accomplish the task described, please follow these steps:
+1. Navigate to your App Service in the Azure portal
+2. Search for "Diagnostic settings" in the left navigation menu
+3. Click on "Add Diagnostic Setting"
+    <figure data-zoomable align="left">
+    <img
+        src="/img/docs/azure-monitoring/app-svc-diag-settings.webp"
+        alt="App Service Diagnostic Settings"
+    />
+    <figcaption>
+    <i>
+    App Service Diagnostic Settings
+    </i>
+    </figcaption>
+    </figure>
+4. Select the desired log categories to export:
+    - HTTP logs
+    - App Service Console Logs
+    - App Service Application Logs
+    - Access Audit Logs
+    - IPSecurity Audit logs
+    - App Service Platform logs
+    <figure data-zoomable align="left">
+    <img
+        src="/img/docs/azure-monitoring/app-svc-diag-configuration.webp"
+        alt="App Service Diagnostic Configuration"
+    />
+    <figcaption>
+    <i>
+    App Service Diagnostic Configuration
+    </i>
+    </figcaption>
+    </figure>
+5. Configure the destination details as "**Stream to an Event Hub**" and select the Event Hub namespace and Event Hub name created during the [EventHub Setup](../../bootstrapping/data-ingestion)
+6. Save the diagnostic settings
 
-1. **Creating an S3 Bucket:**
-   - Sign in to the AWS Management Console.
-   - Navigate to the Amazon S3 service.
-   - Click on **Create bucket**.
-   - Enter a unique bucket name, select the region, and configure any additional settings if needed (such as versioning, logging, etc.).
-   - Click **Create bucket** to finalize the creation process.
+That's it! You have successfully set up logging for your Azure App Service. 
 
-<figure data-zoomable align='center'>
-    <img className="box-shadowed-image" src="/img/docs/elb/elb-logs-create_bucket_2.webp" alt=""/>
-    <figcaption><i>Fill up bucket details</i></figcaption>
-</figure>
-
-
-
-2. **Uploading Data to the S3 Bucket:**
-<Admonition type="info">
-Refer [this link](https://aws.amazon.com/blogs/compute/using-aws-lambda-extensions-to-send-logs-to-custom-destinations/) to know how to automatically collect Lambda logs in S3.
-</Admonition>
-   - After creating the bucket, navigate to the S3 Management Console.
-   - Click on the **Upload** button.
-   - Select the files you wish to upload from your local machine.
-   - Optionally, configure settings like encryption, permissions, etc.
-   - Click **Upload** to upload the selected files to the bucket.
-
-3. **File Formats:**
-   - You can upload files in various formats such as .json, .csv, .log, .gz, .zip, etc.
-   - If you have configured Lambda logging, Lambda logs are automatically saved in `.log` format in your S3 bucket.
-
+</TabItem>
+</Tabs>

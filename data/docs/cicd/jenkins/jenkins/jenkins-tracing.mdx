@@ -128,3 +128,30 @@ Enter the OLTP_EXPORTER_ENDPOINT in the textbox and configure OLTP exporter auth
         </i>
     </figcaption>
 </figure>
+
+## Jenkinsfile custom spans
+
+With the Otel plugin installed, you can also configure custom spans in your Jenkins pipelines
+
+```groovy
+  pipeline {
+    agent any
+    stages {
+      stage('Add Custom Span Attribute') {
+          steps {
+            script {
+              withSpanAttribute(
+                  key: 'my-error-prone-span',
+                  value: 'new-traces',
+                  type: 'STRING',
+                  target: 'CURRENT_SPAN'
+              )
+              echo 'Custom span attribute added'
+            }
+          }
+        }
+    }
+  }
+```
+
+For more details about spans refer [here] (https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/api.md#span)
