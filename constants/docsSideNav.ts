@@ -169,6 +169,19 @@ const docsSideNav = [
                 },
                 {
                   type: 'doc',
+<<<<<<< Updated upstream
+=======
+                  label: 'Deploying to AKS',
+                  route: '/docs/install/kubernetes/aks',
+                },
+                {
+                  type: 'doc',
+                  label: 'Local Install',
+                  route: '/docs/install/kubernetes/local',
+                },
+                {
+                  type: 'doc',
+>>>>>>> Stashed changes
                   label: 'Other Platform',
                   route: '/docs/install/kubernetes/others',
                 },
