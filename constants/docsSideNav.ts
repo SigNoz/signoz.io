@@ -361,8 +361,6 @@ const docsSideNav = [
                 route: '/docs/operate/clickhouse/connect-to-clickhouse',
                 label: 'Connect to ClickHouse',
               },
-
-
               {
                 type: 'doc',
                 route: '/docs/operate/clickhouse/external-clickhouse',
@@ -1508,6 +1506,23 @@ const docsSideNav = [
         type: 'doc',
         route: '/docs/integrations/aws-elasticache-redis',
         label: 'AWS Elasticache Redis',
+      },
+    ],
+  },
+  {
+    label: 'CI/CD',
+    type: 'category',
+    isExpanded: false,
+    items: [
+      {
+        type: 'doc',
+        route: '/docs/cicd/jenkins/agent-node-monitoring',
+        label: 'Agent Node Monitoring',
+      },
+      {
+        type: 'doc',
+        route: '/docs/cicd/jenkins/jenkins-tracing',
+        label: 'Jenkins Tracing',
       },
     ],
   },
