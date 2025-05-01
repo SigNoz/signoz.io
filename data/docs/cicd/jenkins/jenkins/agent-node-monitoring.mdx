@@ -1,0 +1,61 @@
+---
+date: 2025-04-28
+id: agent-node-monitoring
+title: Jenkins OpenTelemetry Integration
+description: Instrument Jenkins with OpenTelemetry and send traces & metrics to SigNoz
+---
+
+## Overview
+
+This documentation provides a detailed walkthrough on how to set up an AWS Lambda function to collect AWS Lambda logs stored in an AWS S3 bucket and forward them to 
+SigNoz. This will enable you to automatically sends your Lambda logs to SigNoz, enabling you to visualize and monitor your application's 
+load balancing performance and health.
+
+**Here’s a quick summary of what we’ll be doing in this detailed documentation.** 
+
+- [Creating / Configuring your S3 bucket](#creating--configuring-your-s3-bucket)
+- [Understanding how lambda function work](#understanding-how-lambda-function-work)
+- [Creating a lambda function](#creating-a-lambda-function)
+- [The Lambda Function Code](#the-lambda-function)
+- [Visualize the logs in SigNoz](#visualize-the-logs-in-signoz)
+
+
+## Prerequisites
+
+- AWS account with administrative privilege.
+
+<Tabs entityName="plans">
+<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
+
+## Creating / Configuring your S3 bucket
+
+To accomplish the task described, please follow these steps:
+
+1. **Creating an S3 Bucket:**
+   - Sign in to the AWS Management Console.
+   - Navigate to the Amazon S3 service.
+   - Click on **Create bucket**.
+   - Enter a unique bucket name, select the region, and configure any additional settings if needed (such as versioning, logging, etc.).
+   - Click **Create bucket** to finalize the creation process.
+
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image" src="/img/docs/elb/elb-logs-create_bucket_2.webp" alt=""/>
+    <figcaption><i>Fill up bucket details</i></figcaption>
+</figure>
+
+
+
+2. **Uploading Data to the S3 Bucket:**
+<Admonition type="info">
+Refer [this link](https://aws.amazon.com/blogs/compute/using-aws-lambda-extensions-to-send-logs-to-custom-destinations/) to know how to automatically collect Lambda logs in S3.
+</Admonition>
+   - After creating the bucket, navigate to the S3 Management Console.
+   - Click on the **Upload** button.
+   - Select the files you wish to upload from your local machine.
+   - Optionally, configure settings like encryption, permissions, etc.
+   - Click **Upload** to upload the selected files to the bucket.
+
+3. **File Formats:**
+   - You can upload files in various formats such as .json, .csv, .log, .gz, .zip, etc.
+   - If you have configured Lambda logging, Lambda logs are automatically saved in `.log` format in your S3 bucket.
+
