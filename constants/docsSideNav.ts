@@ -169,6 +169,11 @@ const docsSideNav = [
                 },
                 {
                   type: 'doc',
+                  label: 'Deploying to AKS',
+                  route: '/docs/install/kubernetes/aks',
+                },
+                {
+                  type: 'doc',
                   label: 'Other Platform',
                   route: '/docs/install/kubernetes/others',
                 },
