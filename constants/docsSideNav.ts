@@ -167,7 +167,7 @@ const docsSideNav = [
                   label: 'Deploying to GCP',
                   route: '/docs/install/kubernetes/gcp',
                 },
-                 {
+                {
                   type: 'doc',
                   label: 'Deploying to AKS',
                   route: '/docs/install/kubernetes/aks',
