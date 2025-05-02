@@ -1588,6 +1588,23 @@ const docsSideNav = [
     ],
   },
   {
+    label: 'CI/CD',
+    type: 'category',
+    isExpanded: false,
+    items: [
+      {
+        type: 'doc',
+        route: '/docs/cicd/jenkins/agent-node-monitoring',
+        label: 'Agent Node Monitoring',
+      },
+      {
+        type: 'doc',
+        route: '/docs/cicd/jenkins/jenkins-tracing',
+        label: 'Jenkins Tracing',
+      },
+    ],
+  },
+  {
     label: 'Messaging Queues',
     type: 'category',
     isExpanded: false,

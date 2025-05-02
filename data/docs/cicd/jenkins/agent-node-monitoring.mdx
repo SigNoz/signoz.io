@@ -1,0 +1,62 @@
+---
+date: 2025-04-28
+id: agent-node-monitoring
+title: Jenkins Host monitoring via OtelAgent plugin
+description: Instrument Jenkins with OpenTelemetry and send traces & metrics to SigNoz
+---
+
+## Overview
+This plugin integrates with the Opentelemetry Collector and Node exporter for monitoring of build agents.
+
+It does this by deploying the Prometheus node exporter and Opentelemetry (Otel) Collector on job agents. The Otel Collector will scrape the metrics from node exporter. 
+
+### Prerequisites
+
+- [EventHub Setup](../../bootstrapping/data-ingestion)
+- [Central Collector Setup](../../bootstrapping/collector-setup)
+
+<Tabs entityName="plans">
+<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
+
+## Setup
+
+1. Navigate to your App Service in the Azure portal
+2. Search for "Diagnostic settings" in the left navigation menu
+3. Click on "Add Diagnostic Setting"
+    <figure data-zoomable align="left">
+    <img
+        src="/img/docs/azure-monitoring/app-svc-diag-settings.webp"
+        alt="App Service Diagnostic Settings"
+    />
+    <figcaption>
+    <i>
+    App Service Diagnostic Settings
+    </i>
+    </figcaption>
+    </figure>
+4. Select the desired log categories to export:
+    - HTTP logs
+    - App Service Console Logs
+    - App Service Application Logs
+    - Access Audit Logs
+    - IPSecurity Audit logs
+    - App Service Platform logs
+    <figure data-zoomable align="left">
+    <img
+        src="/img/docs/azure-monitoring/app-svc-diag-configuration.webp"
+        alt="App Service Diagnostic Configuration"
+    />
+    <figcaption>
+    <i>
+    App Service Diagnostic Configuration
+    </i>
+    </figcaption>
+    </figure>
+5. Configure the destination details as "**Stream to an Event Hub**" and select the Event Hub namespace and Event Hub name created during the [EventHub Setup](../../bootstrapping/data-ingestion)
+6. Save the diagnostic settings
+
+That's it! You have successfully set up logging for your Azure App Service. 
+
+</TabItem>
+</Tabs>
+
