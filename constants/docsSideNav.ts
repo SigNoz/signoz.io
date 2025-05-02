@@ -174,6 +174,11 @@ const docsSideNav = [
                 },
                 {
                   type: 'doc',
+                  label: 'Deploying to Digital Ocean',
+                  route: '/docs/install/digital-ocean',
+                },
+                {
+                  type: 'doc',
                   label: 'Other Platform',
                   route: '/docs/install/kubernetes/others',
                 },
