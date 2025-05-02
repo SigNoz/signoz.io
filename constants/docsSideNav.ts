@@ -182,6 +182,11 @@ const docsSideNav = [
                   label: 'Other Platform',
                   route: '/docs/install/kubernetes/others',
                 },
+                {
+                  type: 'doc',
+                  label: 'Deploying to Local',
+                  route: '/docs/install/kubernetes/local',
+                },
               ],
             },
             {
