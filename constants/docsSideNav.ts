@@ -167,11 +167,6 @@ const docsSideNav = [
                   label: 'Deploying to GCP',
                   route: '/docs/install/kubernetes/gcp',
                 },
-                {
-                  type: 'doc',
-                  label: 'Deploying to Local',
-                  route: '/docs/install/kubernetes/local',
-                },
                 { 
                   label: 'Deploying to AKS',
                   route: '/docs/install/kubernetes/aks',
@@ -180,6 +175,11 @@ const docsSideNav = [
                   type: 'doc',
                   label: 'Other Platform',
                   route: '/docs/install/kubernetes/others',
+                },
+                {
+                  type: 'doc',
+                  label: 'Deploying to Local',
+                  route: '/docs/install/kubernetes/local',
                 },
               ],
             },
