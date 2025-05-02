@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect } from 'react'
+import React, { useEffect, useRef } from 'react'
 import { useLogEvent } from '@/hooks/useLogEvent'
 
 type ExperimentTrackerProps = {
@@ -15,17 +15,22 @@ type ExperimentTrackerProps = {
  */
 export function ExperimentTracker({ children, experimentId, variantId }: ExperimentTrackerProps) {
   const logEvent = useLogEvent()
+  const hasLoggedRef = useRef(false)
 
   // Log which variant the user sees - only once when the component mounts
   useEffect(() => {
-    logEvent({
-      eventName: 'experiment_viewed',
-      attributes: {
-        experiment_id: experimentId,
-        variant_id: variantId,
-      },
-      eventType: 'track',
-    })
+    // Using ref to ensure we only log once, even in strict mode
+    if (!hasLoggedRef.current) {
+      logEvent({
+        eventName: 'experiment_viewed',
+        attributes: {
+          experiment_id: experimentId,
+          variant_id: variantId,
+        },
+        eventType: 'track',
+      })
+      hasLoggedRef.current = true
+    }
   }, [experimentId, variantId, logEvent])
 
   // Just render children, this component only handles tracking experiment views
