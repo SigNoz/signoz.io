@@ -76,14 +76,20 @@ export const useLogEvent = () => {
         custom_initial_referrer: getInitialReferrer(),
       }
 
-      logEvent({
+      const eventPayload: LogEventPayload = {
         eventName,
         attributes: enhancedAttributes,
         eventType,
-        groupId: resolvedGroupId,
         userId,
         anonymousId,
-      })
+      }
+
+      // Only add groupId if it exists
+      if (resolvedGroupId) {
+        eventPayload.groupId = resolvedGroupId
+      }
+
+      logEvent(eventPayload)
     },
     []
   )
