@@ -169,7 +169,7 @@ const docsSideNav = [
                 },
                 {
                   type: 'doc',
-                  label: 'Local Install',
+                  label: 'Deploying to Local',
                   route: '/docs/install/kubernetes/local',
                 },
                 { 
