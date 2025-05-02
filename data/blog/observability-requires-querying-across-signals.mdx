@@ -1,0 +1,122 @@
+---
+title: Observability Requires Querying Across Signals — Anything Else is Correlation Theater
+slug: observability-requires-querying-across-signals
+date: 2025-05-01
+tags: [observability]
+authors: [srikanth]
+description: Current observability tooling significantly lags behind user expectations by failing to support a critical capability - querying across different telemetry signals. This limitation turns what should be powerful correlation capabilities into mere “correlation theater” – a superficial simulation of insights rather than true analytical power.
+image: /img/blog/2025/05/observability-requires-querying.webp
+hide_table_of_contents: false
+keywords: [opentelemetry,signoz,observability]
+---
+
+In today’s complex distributed systems, observability has evolved from a nice-to-have feature to a mission-critical engineering discipline. Engineering teams across organizations depend on robust observability to maintain system reliability and quickly diagnose issues when they inevitably arise. However, current observability tooling significantly lags behind user expectations by failing to support a critical capability: querying across different telemetry signals. This limitation turns what should be powerful correlation capabilities into mere “correlation theater” – a superficial simulation of insights rather than true analytical power.
+
+## The Promise of OpenTelemetry and the Reality Gap
+
+OpenTelemetry represents a significant advancement in observability, delivering tangible benefits through telemetry data standardization across the industry. While the naming conventions can sometimes be painfully verbose (consider `jvm.memory.pool.name` for the metric `jvm.buffer.memory.used` - but that’s a topic for another blog), the core standardization effort is paying dividends. This standardization theoretically enables seamless correlation across all telemetry data – metrics, logs, traces, and profiles. However, there’s a substantial gap between this promise and the reality of most observability platforms.
+
+Look at the current ecosystem, whether it’s open-source solutions like PromQL, LogQL, and TraceQL from the Prometheus/Grafana stack, or commercial offerings from various vendors. While these tools excel within their specific domains, their cross-signal capabilities are often limited to UI-level correlation. For instance, showing infrastructure metrics alongside a distributed trace span. But this is a far cry from true query-based correlation.
+
+The problem is that users remain limited by what the vendor has pre-built into their UI. They lack the ability to write queries that truly span different signals. This creates a substantial gap between the promise of comprehensive observability and what engineers can actually achieve with these tools.
+
+## The Missing Pieces: Sub-queries and Joins
+
+Cross-signal querying is incomplete without two critical pieces that observability platforms must support:
+
+1. **Sub-queries:** Allowing a query to use the results of another query, same or a different signal type
+2. **Data joins:** Enabling relationships to be established between data from different sources
+
+Let’s explore why these capabilities are not just nice-to-have features but essential requirements for modern observability.
+
+### The Power of Sub-queries
+
+Sub-queries allow you to use the output of one query as input to another. This is crucial when you need to filter or analyze data based on criteria that aren’t known ahead of time.
+
+Consider these real-world scenarios:
+
+1. **Finding logs from error-prone users:**
+You want to find every log written by users whose `user_id` produced 50 or more errors today. Without sub-queries, this becomes a manual multi-step process.
+2. **Debugging slow traces:**
+You need to inspect all logs that belong to the slowest traces in your system. The list of “slow” trace IDs changes continuously and must be computed before filtering logs.
+3. **Troubleshooting resource-constrained hosts:**
+You want to show logs only from hosts whose CPU utilization exceeded 90% in the last 5 minutes. The specific hosts experiencing high CPU load aren’t known in advance.
+
+Without sub-query capabilities, engineers resort to tedious workarounds: They run one query, manually copy the results, and use them as input to a second query. This process is error-prone, time-consuming, and breaks the flow of investigation.
+
+### The Necessity of Data Joins
+
+The another critical capability is data joins, which allow you to combine information from multiple sources based on common fields. Joins matter because not all contextual data is available within a single signal, and sometimes related data arrives at different times.
+
+Consider this example:
+
+You want to summarize HTTP routes by their average response times and database query load to identify and optimize slow or database-heavy API endpoints:
+
+```sql
+SELECT
+    api_calls.name AS "Endpoint",
+    p95(api_calls.duration_nano) / 1e6 AS "P95 (ms)",
+    sum(db_updates.update_count) AS "Total DB Calls"FROM (
+    SELECT
+        parent_span_id,
+        count() AS update_count
+    FROM signoz_traces.distributed_signoz_index_v3
+    WHERE service_name = :service_name AND match(span_name, :db_pattern)
+    GROUP BY parent_span_id
+) AS db_updates
+JOIN (
+    SELECT
+        span_id,
+        parent_span_id,
+        duration_nano,
+        name
+    FROM traces
+    WHERE service_name = :service_name        AND match(span_name, :api_pattern)
+) AS api_calls ON db_updates.parent_span_id = api_calls.span_id
+WHERE db_updates.update_count > 0GROUP BY api_calls.name
+ORDER BY "Total DB Calls" DESC, "P95 (ms)" DESC
+```
+
+This query joins HTTP request spans with their associated database queries to create a holistic view of API performance. Without joins, this analysis would require multiple separate queries and manual correlation.
+
+Another real-world scenario: Imagine detecting a sudden spike in API response times during peak hours. By joining these metrics with application logs, an engineer can see that during the spike period, there were numerous database connection timeout errors. This correlation immediately helps identify that the database connection pool was undersized for peak traffic.
+
+## From Correlation Theater to True Observability
+
+Most observability platforms today offer what I call “correlation theater” – the illusion of correlation without the power to actually query across signals. They provide UI-based correlations where a user can click through from one signal to another, but this approach has fundamental limitations:
+
+1. **Limited to predefined paths:** You can only correlate along the specific paths the vendor has implemented
+2. **Manual effort required:** Complex correlations require multiple manual steps
+3. **Not reproducible:** These click-paths can’t be saved as queries or automated
+4. **No compound analysis:** You can’t perform calculations that combine data from multiple signals
+
+True observability requires the ability to write queries that can span across metrics, logs, traces, and profiles. This capability enables engineers to:
+
+- Ask complex questions that span different signals
+- Automate correlation workflows
+- Create comprehensive dashboards that blend data from multiple sources
+- Build alerts that incorporate intelligence from across the observability spectrum
+
+## The Path Forward
+
+As the observability landscape evolves, we need to demand more from our tools. Here’s what to look for:
+
+1. **First-class sub-query support:** The ability to use the results of one query as input to another
+2. **Cross-signal joins:** Support for joining data across different telemetry signals
+3. **Performance at scale:** The ability to perform these complex operations on high-volume telemetry data
+
+The emergence of OpenTelemetry has solved the data standardization problem. Now it’s time for observability platforms to solve the cross-signal querying problem. Until they do, we’re stuck with correlation theater – a superficial simulation of insights rather than true analytical power.
+
+The good news is that some platforms are beginning to recognize this gap and are working to address it. As engineers and observability practitioners, we should make cross-signal querying a priority requirement when evaluating observability solutions. Only then can we move from correlation theater to true, comprehensive observability.
+
+## Conclusion
+
+Observability without the ability to query across signals is like having a collection of individual puzzle pieces without the ability to put them together. You might be able to glean insights from each piece individually, but you’ll never see the complete picture.
+
+As distributed systems grow more complex, the need for true cross-signal querying becomes more critical. It’s time for observability platforms to move beyond correlation theater and provide the querying capabilities that engineers actually need to understand and troubleshoot modern systems.
+
+The observability market is maturing rapidly, and I believe cross-signal querying will become a standard capability in the coming years. The platforms that embrace this approach first will have a significant advantage in delivering what engineers truly need: the ability to ask complex questions across all their telemetry data and get meaningful answers without resorting to manual workarounds.
+
+Until then, we’ll continue to face the gap between the promise of comprehensive observability and the reality of correlation theater.
+
+At SigNoz, we’re working to bring these capabilities to our query builder. For those, who don’t have context, SigNoz is an observability platform that provides logs, metrics, and traces in a single pane. If you have anything to share on how should querying look like on observability feel free to initiate a [GitHub discussion](https://github.com/SigNoz/signoz/discussions). We also have [slack community](https://signoz.io/slack/) of our users which you can join.

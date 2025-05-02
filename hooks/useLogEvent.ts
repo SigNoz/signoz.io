@@ -23,6 +23,12 @@ const getUserId = (): string | undefined => {
   return localStorage.getItem(USER_ID_KEY) || undefined
 }
 
+const extractGroupIdFromEmail = (email?: string): string | undefined => {
+  if (!email) return undefined
+  const parts = email.split('@')
+  return parts.length === 2 ? parts[1] : undefined
+}
+
 const getInitialReferrer = (): string | undefined => {
   if (typeof window === 'undefined' || typeof sessionStorage === 'undefined') return undefined
 
@@ -61,6 +67,8 @@ export const useLogEvent = () => {
     }: Omit<LogEventPayload, 'userId' | 'anonymousId'>) => {
       const userId = getUserId()
       const anonymousId = getOrCreateAnonymousId()
+      // Use provided groupId or extract it from userId if available
+      const resolvedGroupId = groupId || extractGroupIdFromEmail(userId)
 
       const enhancedAttributes = {
         ...attributes,
@@ -68,14 +76,20 @@ export const useLogEvent = () => {
         custom_initial_referrer: getInitialReferrer(),
       }
 
-      logEvent({
+      const eventPayload: LogEventPayload = {
         eventName,
         attributes: enhancedAttributes,
         eventType,
-        groupId,
         userId,
         anonymousId,
-      })
+      }
+
+      // Only add groupId if it exists
+      if (resolvedGroupId) {
+        eventPayload.groupId = resolvedGroupId
+      }
+
+      logEvent(eventPayload)
     },
     []
   )
