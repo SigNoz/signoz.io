@@ -6,16 +6,16 @@ description: Integrate the GitHub Receiver to forward the traces data to SigNoz
 hide_table_of_contents: true
 ---
 
-This document contains instructions on how to get the traces of GitHub Actions using [GitHub Receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/githubreceiver/README.md).
+This document contains instructions on how to get the traces of your GitHub Actions pipeline in SigNoz using [GitHub Receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/githubreceiver/README.md).
 
 ## Prerequisites
 
-- Create [Webhook](https://docs.github.com/en/webhooks/using-webhooks/creating-webhooks#creating-a-repository-webhook) in the repo by selecting `workflow_run` and `workflow_job` events.
+- Ensure a [Webhook](https://docs.github.com/en/webhooks/using-webhooks/creating-webhooks#creating-a-repository-webhook) is created in the repository with `workflow_run` and `workflow_job` events enabled.
 
-- Have the GitHub Actions workflow for your repo, for the first time users refer this [link](https://docs.github.com/en/actions/writing-workflows/quickstart#creating-your-first-workflow).
+- Have a [GitHub Actions workflow](https://docs.github.com/en/actions/writing-workflows/quickstart#creating-your-first-workflow) for your repo.
 
 
-### Setup the SigNoz to fetch the traces
+## Setup
 
 <Tabs entityName="plans">
 <TabItem value="signoz-cloud" label="SigNoz Cloud" default>
@@ -23,22 +23,17 @@ This document contains instructions on how to get the traces of GitHub Actions u
 <Tabs>
 <TabItem value="vm" label="VM" default>
 
-### Step 1. Download OTel Contrib Collector
-Download OTel Contrib Collector tar.gz for your [architecture](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/#setup-otel-collector-as-agent).
+### Step 1. Setup OTel Collector
+The OpenTelemetry (OTel) Collector helps collect telemetry data such as logs, traces and metrics from your application.
+Please follow the documentation [here](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) to setup the OpenTelmetry Collector in your VM.
  
     ```bash
     wget https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.125.0/otelcol-contrib_0.125.0_darwin_arm64.tar.gz
-    ```
-
-### Step 2. Extract OTel Contrib Collector
-Extract OTel Collector tar.gz to the `otelcol-contrib` folder
-
-    ```bash
     mkdir otelcol-contrib && tar xvzf otelcol-contrib_0.125.0_darwin_arm64.tar.gz -C otelcol-contrib
     ```
 
-### Step 3. Set Up OTel Contrib Collector Configuration File
-Create `config.yaml` in `otelcol-contrib` folder with the below content in it. Replace `SIGNOZ_INGESTION_KEY` with your key.
+### Step 2. Setup GitHub Receiver
+Update the `config.yaml` file that you created in `otelcol-contrib` folder while setting up OTel Collector to include the `github` receiver under the `receivers` section.
 
     ```yaml:/otelcol-contrib/config.yaml
     ...
@@ -49,7 +44,7 @@ Create `config.yaml` in `otelcol-contrib` folder with the below content in it. R
           path: /events
           health_path: /health
           secret: <GITHUB_WEBHOOK_SECRET>
-          service_name: <Service Name> #optional
+          service_name: <service-name> #optional
         scrapers:
           scraper:
 
@@ -62,7 +57,18 @@ Create `config.yaml` in `otelcol-contrib` folder with the below content in it. R
           insecure: false
       debug:
         verbosity: detailed 
+    ...
+    ```
 
+- `<GITHUB_WEBHOOK_SECRET>`: A shared secret used to verify that incoming webhook requests are from GitHub. Ensures authenticity and prevents tampered or spoofed requests.
+- `<service-name>`: Specifies the service that emits the traces, making it easier to identify and filter traces related to a specific GitHub integration.
+- `<SIGNOZ_INGESTION_KEY>`: Your SigNoz Cloud [Ingestion Key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+### Step 3. Add GitHub Receiver to pipelines
+In the `config.yaml` file, under the `service` section, locate the `pipelines` block. Within the `traces` pipeline, add `github` to the list of receivers.
+
+    ```yaml:/otelcol-contrib/config.yaml
+    ...
     service:
       pipelines:
         traces:
@@ -72,29 +78,147 @@ Create `config.yaml` in `otelcol-contrib` folder with the below content in it. R
     ...
     ```
 
-### Step 4. Run the OTel Contrib Collector
+### Step 4. Run the OTel Collector
 Inside `otelcol-contrib` folder, run the command.
 
     ```bash
     ./otelcol-contrib --config ./config.yaml
     ```
+
 <Figure src="/img/docs/cicd/github/VMForSigNozCloudTraces.webp" alt="GitHub Receiver Traces" caption="GitHub Receiver Startup Message" />
-
-## Validate GitHub Actions Traces in SigNoz
-
-- Traces can be viewed under the `Traces` tab in the SigNoz UI.
-
-<Figure src="/img/docs/cicd/github/VMForSigNozCloudTracesListView.webp" alt="GitHub Receiver Traces Console" caption="Traces List View" />
-
-- Click on `TraceID` to get the full view of the GitHub Actions workflow, which can be seen as
-
-<Figure src="/img/docs/cicd/github/VMForSigNozCloudTraceIDView.webp" alt="GitHub Receiver TraceID" caption="TraceID View" />
 
 </TabItem>
 
 <TabItem value="k8s" label="Kubernetes">
 
-### Step 1. Download OTel Contrib Collector
+### Step 1. Create `github-otel-collector.yaml` file
+
+<Admonition>
+💡 At the time of writing this guide, the SigNoz OTel Collector does not support the GitHub Receiver.
+</Admonition>
+
+Create K8s resources like namespace, configmap, deployment and service as below.
+
+    ```yaml:github-otel-collector.yaml
+    ...
+    apiVersion: v1
+    kind: Namespace
+    metadata:
+      name: signoz
+    ---
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: github-otel-collector-config
+      namespace: signoz
+    data:
+      config.yaml: |
+
+        receivers:
+          github:
+            webhook:
+              endpoint: 0.0.0.0:19418
+              path: /events
+              health_path: /health
+              secret: ${GITHUB_WEBHOOK_SECRET}
+              service_name: <service-name> #optional
+            scrapers:
+              scraper:
+
+        exporters:
+          otlp/signozcloud:
+            endpoint: ingest.<region>.signoz.cloud:443
+            headers:
+              signoz-ingestion-key: ${SIGNOZ_INGESTION_KEY}
+            tls:
+              insecure: false
+          debug:
+            verbosity: detailed
+
+        service:
+          pipelines:
+            traces:
+              receivers: [github]
+              processors: []
+              exporters: [otlp/signozcloud, debug]
+
+    ---
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: github-otel-collector
+      namespace: signoz
+    spec:
+      replicas: 1
+      selector:
+        matchLabels:
+          app: github-otel-collector
+      template:
+        metadata:
+          labels:
+            app: github-otel-collector
+        spec:
+          containers:
+            - name: collector
+              image: otel/opentelemetry-collector-contrib:0.123.0
+              command:
+                - "/otelcol-contrib"
+                - "--config=/etc/otel/config.yaml"
+              ports:
+                - containerPort: 19418
+              env:
+                - name: GITHUB_WEBHOOK_SECRET
+                  value: <GITHUB_WEBHOOK_SECRET>  
+                - name: SIGNOZ_INGESTION_KEY
+                  value: <SIGNOZ_INGESTION_KEY> 
+              volumeMounts:
+                - name: config
+                  mountPath: /etc/otel
+          volumes:
+            - name: config
+              configMap:
+                name: github-otel-collector-config
+
+    ---
+    apiVersion: v1
+    kind: Service
+    metadata:
+      name: github-otel-webhook
+      namespace: signoz
+    spec:
+      type: ClusterIP
+      ports:
+        - port: 80
+          targetPort: 19418
+      selector:
+        app: github-otel-collector
+    ...
+    ```
+
+- `<GITHUB_WEBHOOK_SECRET>`: A shared secret used to verify that incoming webhook requests are from GitHub. Ensures authenticity and prevents tampered or spoofed requests.
+- `<service-name>`: Specifies the service that emits the traces, making it easier to identify and filter traces related to a specific GitHub integration.
+- `<SIGNOZ_INGESTION_KEY>`: Your SigNoz Cloud [Ingestion Key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+### Step 2. Port Forward the `github-otel-webhook` service
+
+<Admonition>
+💡 This step is optional, if the Kubernetes architecture is different.
+</Admonition>
+
+As the service type is `ClusterIP`, port forward the service as below.
+
+    ```bash
+    kubectl port-forward svc/github-otel-webhook -n signoz 19418:80
+    ```
+
+### Step 3. View Logs of GitHub OTel Collector
+Run the following command to view the logs.
+
+    ```bash
+    kubectl logs -f github-otel-collector-<id> -n signoz
+    ```
+
+<Figure src="/img/docs/cicd/github/TracesK8sForSigNozCloud.webp" alt="GitHub Receiver Traces" caption="GitHub Receiver Startup Message" />
 
 </TabItem>
 
@@ -157,6 +281,7 @@ Create `github-otel-collector-config.yaml` file and add the following contents.
           path: /events
           health_path: /health
           secret: ${env:GITHUB_WEBHOOK_SECRET}
+          service_name: <service-name> #optional
         scrapers:
           scraper:
 
@@ -177,6 +302,9 @@ Create `github-otel-collector-config.yaml` file and add the following contents.
           exporters: [otlp,debug]
     ...
     ```
+
+- `<GITHUB_WEBHOOK_SECRET>`: A shared secret used to verify that incoming webhook requests are from GitHub. Ensures authenticity and prevents tampered or spoofed requests.
+- `<service-name>`: Specifies the service that emits the traces, making it easier to identify and filter traces related to a specific GitHub integration.
 
 ### Step 5. Update SigNoz OTel Collector Configuration
 Update the existing `otel-collector-config.yaml` file with the following contents.
@@ -224,16 +352,16 @@ Run the following command to view the logs.
 
 <Figure src="/img/docs/cicd/github/Traces.webp" alt="GitHub Receiver Traces" caption="GitHub Receiver Startup Message" />
 
-## Validate GitHub Actions Traces in SigNoz
-
-- Traces can be viewed under the `Traces` tab in the SigNoz UI.
-
-<Figure src="/img/docs/cicd/github/TracesSigNoz.webp" alt="GitHub Receiver Traces Console" caption="Traces List View" />
-
-- Click on `TraceID` to get the full view of the GitHub Actions workflow, which can be seen as
-
-<Figure src="/img/docs/cicd/github/TraceID.webp" alt="GitHub Receiver TraceID" caption="TraceID View" />
-
 </TabItem>
 
 </Tabs>
+
+## Validate Traces in SigNoz
+
+- Traces can be viewed under the `Traces` tab in the SigNoz UI.
+
+<Figure src="/img/docs/cicd/github/TracesSigNoz.webp" alt="GitHub Receiver Traces Console" caption="GitHub Action Traces in Traces View" />
+
+- You can click on a particular **TraceID** in the Traces view to get the [detailed view](https://signoz.io/docs/userguide/span-details/) of the GitHub Actions workflow as shown in the image below.
+
+<Figure src="/img/docs/cicd/github/TraceID.webp" alt="Details of a Particular Trace" caption="Details of a Particular Trace" />
