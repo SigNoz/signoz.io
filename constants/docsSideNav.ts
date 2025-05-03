@@ -1591,6 +1591,7 @@ const docsSideNav = [
     label: 'CI/CD',
     type: 'category',
     isExpanded: false,
+    route: '/docs/cicd',
     items: [
       {
         type: 'doc',
