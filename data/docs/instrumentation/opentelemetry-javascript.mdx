@@ -326,13 +326,13 @@ In case you encounter an issue where all applications do not get listed in the s
 
 </TabItem>
 <TabItem value="k8s" label="Kubernetes">
-
 You can auto-instrument sending traces from Javascript application using one of the following methods:
 
-1. [K8s OTel Operator Based Automatic Instrumentation](#k8s-otel-operator-based-automatic-instrumentation-recommended) (recommended)
-2. [No Code Automatic Instrumentation](#no-code-automatic-instrumentation)
-3. [Code Level Automatic Instrumentation](#code-level-automatic-instrumentation)
+1. Using Kubernetes OTel Operator
+2. Using OTel Collector Agent
 
+<Tabs>
+<TabItem value="k8s-otel-operator" label="K8s OTel Operator" default>
 ### K8s OTel Operator Based Automatic Instrumentation (recommended)
 
 #### Send traces directly to SigNoz Cloud - Using K8s OTel Operator (No Code Solution) (Recommended)
@@ -529,24 +529,29 @@ You can validate if your application is sending traces to SigNoz cloud [here](#v
 
 In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#troubleshooting-your-installation).
 
-### No Code Automatic Instrumentation
-
-#### Send traces directly to SigNoz Cloud - No Code Automatic Instrumentation
-
-**Step 1.** Install OTel Collector agent
-
+</TabItem>
+<TabItem value="otel-collector-agent" label="OTel Collector Agent">
 For Javascript application deployed on Kubernetes, you need to install OTel Collector agent in your k8s infra to collect and send traces to SigNoz Cloud. You can find the instructions to install OTel Collector agent [here](https://signoz.io/docs/tutorial/kubernetes-infra-metrics/).
 
 In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#troubleshooting-your-installation).
 
-**Step 2.** Install OpenTelemetry packages
+Once you have set up OTel Collector agent, you can proceed with OpenTelemetry Javascript instrumentation by following either of the two:
+
+1. [No Code Automatic Instrumentation](#no-code-automatic-instrumentation)
+2. [Code Level Automatic Instrumentation](#code-level-automatic-instrumentation)
+
+### No Code Automatic Instrumentation
+
+#### Send traces directly to SigNoz Cloud - No Code Automatic Instrumentation
+
+**Step 1.** Install OpenTelemetry packages
 
 ```bash
 npm install --save @opentelemetry/api
 npm install --save @opentelemetry/auto-instrumentations-node
 ```
 
-**Step 3.** Run the application
+**Step 2.** Run the application
 
 ```bash
 export OTEL_TRACES_EXPORTER="otlp"
@@ -564,13 +569,7 @@ In case you encounter an issue where all applications do not get listed in the s
 
 ### Code Level Automatic Instrumentation
 
-**Step 1.** Install OTel Collector agent
-
-For Javascript application deployed on Kubernetes, you need to install OTel Collector agent in your k8s infra to collect and send traces to SigNoz Cloud. You can find the instructions to install OTel Collector agent [here](https://signoz.io/docs/tutorial/kubernetes-infra-metrics/).
-
-In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#troubleshooting-your-installation).
-
-**Step 2.** Install OpenTelemetry packages
+**Step 1.** Install OpenTelemetry packages
 
 ```js
 npm install --save @opentelemetry/api@^1.6.0
@@ -579,7 +578,7 @@ npm install --save @opentelemetry/auto-instrumentations-node@^0.39.4
 npm install --save @opentelemetry/exporter-trace-otlp-http@^0.45.0
 ```
 
-**Step 3.** Create tracing.js file<br></br>
+**Step 2.** Create tracing.js file<br></br>
 
 <Tabs>
 <TabItem value="JavaScript" label="JavaScript" default>
@@ -659,15 +658,17 @@ process.on('SIGTERM', () => {
 </TabItem>
 </Tabs>
 
-**Step 4.** Run the application<br></br>
+**Step 3.** Run the application<br></br>
 
 ```bash
 node -r ./tracing.js app.js
 ```
 
-**Step 5.** You can validate if your application is sending traces to SigNoz cloud [here](#validating-instrumentation-by-checking-for-traces).
+**Step 4.** You can validate if your application is sending traces to SigNoz cloud [here](#validating-instrumentation-by-checking-for-traces).
 
 In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#troubleshooting-your-installation).
+</TabItem>
+</Tabs>
 
 </TabItem>
 <TabItem value="windows" label="Windows">
