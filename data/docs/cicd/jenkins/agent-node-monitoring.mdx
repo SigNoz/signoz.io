@@ -12,51 +12,60 @@ It does this by deploying the Prometheus node exporter and Opentelemetry (Otel) 
 
 ### Prerequisites
 
-- [EventHub Setup](../../bootstrapping/data-ingestion)
-- [Central Collector Setup](../../bootstrapping/collector-setup)
+- Jenkins [>2.479]
 
-<Tabs entityName="plans">
-<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
 
-## Setup
+### Install and configure Otel agent metrics plugin
+* For installation refer [here](https://plugins.jenkins.io/opentelemetry-agent-metrics/)
 
-1. Navigate to your App Service in the Azure portal
-2. Search for "Diagnostic settings" in the left navigation menu
-3. Click on "Add Diagnostic Setting"
-    <figure data-zoomable align="left">
+* Navigate to Manage Jenkins -> System -> onMonit section
+
+<figure data-zoomable align="left">
     <img
-        src="/img/docs/azure-monitoring/app-svc-diag-settings.webp"
-        alt="App Service Diagnostic Settings"
+        src="/img/docs/cicd/jenkins/agent-plugin-config.webp"
+        alt="Node agent metrics plugin config"
     />
     <figcaption>
     <i>
-    App Service Diagnostic Settings
+    Node agent metrics plugin config
     </i>
     </figcaption>
-    </figure>
-4. Select the desired log categories to export:
-    - HTTP logs
-    - App Service Console Logs
-    - App Service Application Logs
-    - Access Audit Logs
-    - IPSecurity Audit logs
-    - App Service Platform logs
-    <figure data-zoomable align="left">
+</figure>
+
+### Agent node configuration required for the plugin
+
+The plugin requires two binaries - **otel-contrib** and **node_exporter** to be installed on the jenkins agents
+
+These executables can either be:
+
+* present on the PATH of the agents
+* downloaded from a URL on the agents. For this the global plugin option "Artifact download base URL" must be configured.
+* uploaded from the Jenkins master. For this the executables must be manually stored under the JENKINS_HOME directory in the opentelemetry-agent-metrics subdirectory.
+
+<figure data-zoomable align="left">
     <img
-        src="/img/docs/azure-monitoring/app-svc-diag-configuration.webp"
-        alt="App Service Diagnostic Configuration"
+        src="/img/docs/cicd/jenkins/agent-metrics.webp"
+        alt="Jenkins agent metrics on SigNoz"
     />
     <figcaption>
     <i>
-    App Service Diagnostic Configuration
+    Jenkins agent metrics on SigNoz
     </i>
     </figcaption>
-    </figure>
-5. Configure the destination details as "**Stream to an Event Hub**" and select the Event Hub namespace and Event Hub name created during the [EventHub Setup](../../bootstrapping/data-ingestion)
-6. Save the diagnostic settings
+</figure>
 
-That's it! You have successfully set up logging for your Azure App Service. 
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/cicd/jenkins/node-cpu.webp"
+        alt="Node cpu metrics on SigNoz"
+    />
+    <figcaption>
+    <i>
+    Node cpu metrics on SigNoz
+    </i>
+    </figcaption>
+</figure>
 
-</TabItem>
-</Tabs>
+
+
 
