@@ -26,11 +26,7 @@ This document contains instructions on how to get the traces of your GitHub Acti
 ### Step 1. Setup OTel Collector
 The OpenTelemetry (OTel) Collector helps collect telemetry data such as logs, traces and metrics from your application.
 Please follow the documentation [here](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) to setup the OpenTelmetry Collector in your VM.
- 
-    ```bash
-    wget https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.125.0/otelcol-contrib_0.125.0_darwin_arm64.tar.gz
-    mkdir otelcol-contrib && tar xvzf otelcol-contrib_0.125.0_darwin_arm64.tar.gz -C otelcol-contrib
-    ```
+Make sure to use the latest OTel Collector release.
 
 ### Step 2. Setup GitHub Receiver
 Update the `config.yaml` file that you created in `otelcol-contrib` folder while setting up OTel Collector to include the `github` receiver under the `receivers` section.
@@ -42,27 +38,16 @@ Update the `config.yaml` file that you created in `otelcol-contrib` folder while
         webhook:
           endpoint: 0.0.0.0:19418
           path: /events
-          health_path: /health
-          secret: <GITHUB_WEBHOOK_SECRET>
+          health_path: /health #optional
+          secret: ${GITHUB_WEBHOOK_SECRET}
           service_name: <service-name> #optional
         scrapers:
           scraper:
-
-    exporters:
-      otlp/signozcloud:
-        endpoint: ingest.<region>.signoz.cloud:443
-        headers:
-          signoz-ingestion-key: <SIGNOZ_INGESTION_KEY>
-        tls:
-          insecure: false
-      debug:
-        verbosity: detailed 
     ...
     ```
 
-- `<GITHUB_WEBHOOK_SECRET>`: A shared secret used to verify that incoming webhook requests are from GitHub. Ensures authenticity and prevents tampered or spoofed requests.
+- `GITHUB_WEBHOOK_SECRET`: This environment variable, which you will create in Step 4, contains the shared secret used to verify that incoming webhook requests are from GitHub. It ensures authenticity and helps prevent tampered or spoofed requests.
 - `<service-name>`: Specifies the service that emits the traces, making it easier to identify and filter traces related to a specific GitHub integration.
-- `<SIGNOZ_INGESTION_KEY>`: Your SigNoz Cloud [Ingestion Key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 
 ### Step 3. Add GitHub Receiver to pipelines
 In the `config.yaml` file, under the `service` section, locate the `pipelines` block. Within the `traces` pipeline, add `github` to the list of receivers.
@@ -74,18 +59,19 @@ In the `config.yaml` file, under the `service` section, locate the `pipelines` b
         traces:
           receivers: [github]
           processors: []
-          exporters: [otlp/signozcloud,debug]
+          exporters: [otlp,debug]
     ...
     ```
 
 ### Step 4. Run the OTel Collector
-Inside `otelcol-contrib` folder, run the command.
+Set an environment variable named `GITHUB_WEBHOOK_SECRET`. Inside `otelcol-contrib` folder, run the `otelcol-contrib` command.
 
     ```bash
+    export GITHUB_WEBHOOK_SECRET=<webhook-secret>
     ./otelcol-contrib --config ./config.yaml
     ```
 
-<Figure src="/img/docs/cicd/github/TracesVMForSigNozCloud.webp" alt="GitHub Receiver Traces" caption="GitHub Receiver Startup Message" />
+- `<webhook-secret>`: Your GitHub webhook secret.
 
 </TabItem>
 
@@ -97,7 +83,8 @@ Inside `otelcol-contrib` folder, run the command.
 💡 At the time of writing this guide, the SigNoz OTel Collector does not support the GitHub Receiver.
 </Admonition>
 
-Create K8s resources like namespace, configmap, deployment and service as below.
+Create K8s resources like namespace, configmap, deployment and service as below to modularize and manage the GitHub OTel Collector setup.
+The `Namespace` isolates the resources, the `ConfigMap` provides the collector configuration, the `Deployment` runs the collector as a pod, and the `Service` allows internal access (if needed) to the collector, enabling it to scrape GitHub metrics and export them to SigNoz Cloud.
 
     ```yaml:github-otel-collector.yaml
     ...
@@ -119,14 +106,14 @@ Create K8s resources like namespace, configmap, deployment and service as below.
             webhook:
               endpoint: 0.0.0.0:19418
               path: /events
-              health_path: /health
+              health_path: /health #optional
               secret: ${GITHUB_WEBHOOK_SECRET}
               service_name: <service-name> #optional
             scrapers:
               scraper:
 
         exporters:
-          otlp/signozcloud:
+          otlp:
             endpoint: ingest.<region>.signoz.cloud:443
             headers:
               signoz-ingestion-key: ${SIGNOZ_INGESTION_KEY}
@@ -140,7 +127,7 @@ Create K8s resources like namespace, configmap, deployment and service as below.
             traces:
               receivers: [github]
               processors: []
-              exporters: [otlp/signozcloud, debug]
+              exporters: [otlp, debug]
 
     ---
     apiVersion: apps/v1
@@ -195,17 +182,15 @@ Create K8s resources like namespace, configmap, deployment and service as below.
     ...
     ```
 
-- `<GITHUB_WEBHOOK_SECRET>`: A shared secret used to verify that incoming webhook requests are from GitHub. Ensures authenticity and prevents tampered or spoofed requests.
 - `<service-name>`: Specifies the service that emits the traces, making it easier to identify and filter traces related to a specific GitHub integration.
-- `<SIGNOZ_INGESTION_KEY>`: Your SigNoz Cloud [Ingestion Key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- `<region>`: Your chosen [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint) for SigNoz Cloud.
+- `<GITHUB_WEBHOOK_SECRET>`: Your GitHub webhook secret, which is a shared secret used to verify that incoming webhook requests are from GitHub. It ensures authenticity and helps prevent tampered or spoofed requests.
+- `<SIGNOZ_INGESTION_KEY>`: Your SigNoz Cloud [Ingestion Key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
 
-### Step 2. Port Forward the `github-otel-webhook` service
+### Step 2(Optional). Port Forward the `github-otel-webhook` service
 
-<Admonition>
-💡 This step is optional, if the Kubernetes architecture is different.
-</Admonition>
-
-As the service type is `ClusterIP`, port forward the service as below.
+As the service type is `ClusterIP`, port forward the service as below to make it externally accessible. 
+If you're using managed Kubernetes cluster in any other cloud providers, this step is optional.
 
     ```bash
     kubectl port-forward svc/github-otel-webhook -n signoz 19418:80
@@ -217,8 +202,6 @@ Run the following command to view the logs.
     ```bash
     kubectl logs -f github-otel-collector-<id> -n signoz
     ```
-
-<Figure src="/img/docs/cicd/github/TracesK8sForSigNozCloud.webp" alt="GitHub Receiver Traces" caption="GitHub Receiver Startup Message" />
 
 </TabItem>
 
@@ -247,7 +230,7 @@ Add the `github-otel-collector` service under `services` section of `docker-comp
       volumes:
         - ./github-otel-collector-config.yaml:/etc/otel-collector-config.yaml
       environment:
-        - GITHUB_WEBHOOK_SECRET=<Webhook Secret>
+        - GITHUB_WEBHOOK_SECRET=<GITHUB_WEBHOOK_SECRET>
       ports:
         - "19418:19418" # Webhook endpoint port
       networks:
@@ -256,6 +239,8 @@ Add the `github-otel-collector` service under `services` section of `docker-comp
         - otel-collector
     ...
     ```
+
+- `<GITHUB_WEBHOOK_SECRET>`: Your GitHub webhook secret, which is a shared secret used to verify that incoming webhook requests are from GitHub. It ensures authenticity and helps prevent tampered or spoofed requests.
 
 ### Step 3. Disable Default SigNoz OTel Config Paths
 Comment the following lines under `command` section of `otel-collector` service in `docker-compose.yaml` file.
@@ -279,7 +264,7 @@ Create `github-otel-collector-config.yaml` file and add the following contents.
         webhook:
           endpoint: 0.0.0.0:19418
           path: /events
-          health_path: /health
+          health_path: /health #optional
           secret: ${env:GITHUB_WEBHOOK_SECRET}
           service_name: <service-name> #optional
         scrapers:
@@ -303,7 +288,6 @@ Create `github-otel-collector-config.yaml` file and add the following contents.
     ...
     ```
 
-- `<GITHUB_WEBHOOK_SECRET>`: A shared secret used to verify that incoming webhook requests are from GitHub. Ensures authenticity and prevents tampered or spoofed requests.
 - `<service-name>`: Specifies the service that emits the traces, making it easier to identify and filter traces related to a specific GitHub integration.
 
 ### Step 5. Update SigNoz OTel Collector Configuration
@@ -349,8 +333,6 @@ Run the following command to view the logs.
     ```bash
     docker compose -f docker/docker-compose.yaml logs -f github-otel-collector
     ```
-
-<Figure src="/img/docs/cicd/github/Traces.webp" alt="GitHub Receiver Traces" caption="GitHub Receiver Startup Message" />
 
 </TabItem>
 
