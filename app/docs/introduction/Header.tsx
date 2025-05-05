@@ -11,21 +11,27 @@ import { EXPERIMENTS } from '@/constants/experiments'
 function QuickStartOnlyVariant({
   experimentId,
   variantId,
+  quickStartLinkExperimentId,
+  quickStartLinkVariantId,
+  quickStartLink,
 }: {
   experimentId: string
   variantId: string
+  quickStartLinkExperimentId: string
+  quickStartLinkVariantId: string
+  quickStartLink: string
 }) {
   return (
     <div className="mx-auto mb-12 mt-12 flex w-full justify-center">
       <TrackingLink
-        href="/teams/"
+        href={quickStartLink}
         className="relative flex w-full max-w-xl transform flex-col rounded-lg border border-signoz_slate-400 bg-signoz_ink-400 p-7 ring-2 ring-signoz_robin-500 ring-offset-2 ring-offset-signoz_ink-400 transition-all hover:border-signoz_robin-500 hover:bg-signoz_ink-300"
         clickType="Primary CTA"
         clickName="Quick Start Button"
         clickText="Get started with SigNoz Cloud"
         clickLocation="Page Header"
-        experimentId={experimentId}
-        variantId={variantId}
+        experimentId={quickStartLinkExperimentId}
+        variantId={quickStartLinkVariantId}
       >
         <div className="mb-3 flex items-center gap-3">
           <Zap size={24} className="text-signoz_robin-500" />
@@ -98,6 +104,23 @@ export default async function Header() {
     ? EXPERIMENTS.DOCS_HEADER.variants.QUICK_START_ONLY
     : EXPERIMENTS.DOCS_HEADER.variants.DUAL_BUTTONS
 
+  // Evaluate the quick start link experiment (only applies to Quick Start Only variant)
+  let quickStartLinkExperimentId = ''
+  let quickStartLinkVariantId = ''
+  let quickStartLink = '/teams/'
+
+  if (showOnlyQuickStart) {
+    const useQuickStartDocLink = await evaluateFeatureFlag(
+      EXPERIMENTS.DOCS_QUICK_START_LINK.flagName
+    )
+    quickStartLinkExperimentId = EXPERIMENTS.DOCS_QUICK_START_LINK.id
+    quickStartLinkVariantId = useQuickStartDocLink
+      ? EXPERIMENTS.DOCS_QUICK_START_LINK.variants.QUICKSTART_DOC_LINK
+      : EXPERIMENTS.DOCS_QUICK_START_LINK.variants.TEAMS_LINK
+
+    quickStartLink = useQuickStartDocLink ? '/docs/cloud/quickstart/' : '/teams/'
+  }
+
   return (
     <div className="mx-auto mb-12 w-full max-w-6xl">
       <div className="text-center">
@@ -112,7 +135,13 @@ export default async function Header() {
 
       <ExperimentTracker experimentId={experimentId} variantId={variantId}>
         {showOnlyQuickStart ? (
-          <QuickStartOnlyVariant experimentId={experimentId} variantId={variantId} />
+          <QuickStartOnlyVariant
+            experimentId={experimentId}
+            variantId={variantId}
+            quickStartLinkExperimentId={quickStartLinkExperimentId}
+            quickStartLinkVariantId={quickStartLinkVariantId}
+            quickStartLink={quickStartLink}
+          />
         ) : (
           <DualButtonVariant experimentId={experimentId} variantId={variantId} />
         )}

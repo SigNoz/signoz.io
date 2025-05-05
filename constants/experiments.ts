@@ -14,6 +14,14 @@ export const EXPERIMENTS = {
     },
     flagName: 'docs-header-with-only-quick-start',
   },
+  DOCS_QUICK_START_LINK: {
+    id: 'docs-quick-start-link',
+    variants: {
+      TEAMS_LINK: 'teams-link',
+      QUICKSTART_DOC_LINK: 'quickstart-doc-link',
+    },
+    flagName: 'docs-quick-start-link',
+  },
   HOME_HEADER: {
     id: 'home-header-cta',
     variants: {
