@@ -11,6 +11,7 @@ import AdditionalResources from './AdditionalResources'
 import QuickStartCloud from '@/components/QuickStartCloud'
 import InstallLocallySection from './InstallLocallySection'
 import { evaluateFeatureFlag } from '@/utils/growthbookServer'
+import { EXPERIMENTS } from '@/constants/experiments'
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -21,9 +22,11 @@ export const metadata: Metadata = {
 
 export default async function DocsIntroductionPage() {
   // Check if the single CTA experiment is active
-  const showOnlyQuickStart = await evaluateFeatureFlag('docs-header-with-only-quick-start')
-  const experimentId = 'docs-header-with-only-quick-start'
-  const variantId = showOnlyQuickStart ? 'only-quick-start' : 'quick-start-with-install-locally'
+  const showOnlyQuickStart = await evaluateFeatureFlag(EXPERIMENTS.DOCS_HEADER.flagName)
+  const experimentId = EXPERIMENTS.DOCS_HEADER.id
+  const variantId = showOnlyQuickStart
+    ? EXPERIMENTS.DOCS_HEADER.variants.QUICK_START_ONLY
+    : EXPERIMENTS.DOCS_HEADER.variants.DUAL_BUTTONS
 
   return (
     <>

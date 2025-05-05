@@ -5,6 +5,7 @@ import { Zap, Server } from 'lucide-react'
 import TrackingLink from '@/components/TrackingLink'
 import { evaluateFeatureFlag } from '@/utils/growthbookServer'
 import { ExperimentTracker } from '@/components/index-header/ExperimentTracker'
+import { EXPERIMENTS } from '@/constants/experiments'
 
 // Single CTA variant - only shows the Quick Start button
 function QuickStartOnlyVariant({
@@ -91,9 +92,11 @@ function DualButtonVariant({
 
 export default async function Header() {
   // Evaluate the feature flag to determine which variant to show
-  const showOnlyQuickStart = await evaluateFeatureFlag('docs-header-with-only-quick-start')
-  const experimentId = 'docs-header-with-only-quick-start'
-  const variantId = showOnlyQuickStart ? 'only-quick-start' : 'quick-start-with-install-locally'
+  const showOnlyQuickStart = await evaluateFeatureFlag(EXPERIMENTS.DOCS_HEADER.flagName)
+  const experimentId = EXPERIMENTS.DOCS_HEADER.id
+  const variantId = showOnlyQuickStart
+    ? EXPERIMENTS.DOCS_HEADER.variants.QUICK_START_ONLY
+    : EXPERIMENTS.DOCS_HEADER.variants.DUAL_BUTTONS
 
   return (
     <div className="mx-auto mb-12 w-full max-w-6xl">

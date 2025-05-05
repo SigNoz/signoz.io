@@ -1,20 +1,24 @@
-import Hero from '../../components/ui/Hero'
+import React from 'react'
+import Hero from '@/components/ui/Hero'
 import { ArrowRight, BookOpen, Handshake } from 'lucide-react'
 import Button from '@/components/Button/Button'
 import TrackingLink from '@/components/TrackingLink'
 import Link from 'next/link'
 import { VideoModalPlayer } from './VideoModalPlayer'
-import { evaluateFeatureFlag } from '../../utils/growthbookServer'
+import { evaluateFeatureFlag } from '@/utils/growthbookServer'
 import { ExperimentTracker } from './ExperimentTracker'
+import { EXPERIMENTS } from '@/constants/experiments'
 
 // Server component that makes the A/B test decision
 export async function Header() {
   // Evaluate the feature flag on the server
-  const showSingleCTA = await evaluateFeatureFlag('single-cta-on-home-header')
+  const showSingleCTA = await evaluateFeatureFlag(EXPERIMENTS.HOME_HEADER.flagName)
 
   // Define experiment details
-  const experimentId = 'home-header-cta'
-  const variantId = showSingleCTA ? 'single-cta' : 'dual-cta'
+  const experimentId = EXPERIMENTS.HOME_HEADER.id
+  const variantId = showSingleCTA
+    ? EXPERIMENTS.HOME_HEADER.variants.SINGLE_CTA
+    : EXPERIMENTS.HOME_HEADER.variants.DUAL_CTA
 
   return (
     <header className="relative !mx-auto mt-16 !w-[100vw] md:!w-[80vw]">
