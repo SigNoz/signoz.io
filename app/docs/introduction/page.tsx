@@ -1,6 +1,4 @@
 import React from 'react'
-import Link from 'next/link'
-import Image from 'next/image'
 import Header from './Header'
 import SendData from './SendData'
 import Monitor from './Monitor'
