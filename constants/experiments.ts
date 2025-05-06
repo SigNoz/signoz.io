@@ -30,5 +30,13 @@ export const EXPERIMENTS = {
     },
     flagName: 'single-cta-on-home-header',
   },
+  TEAMS_PAGE: {
+    id: 'teams-page-focused-layout-experiment',
+    variants: {
+      CONTROL: 'with-nav-bar-and-footer',
+      VARIANT: 'without-nav-bar-and-footer',
+    },
+    flagName: 'teams-page-focused-layout-experiment',
+  },
   // Add more experiments here as needed
 } as const
