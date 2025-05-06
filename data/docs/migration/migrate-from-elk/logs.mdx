@@ -1,0 +1,45 @@
+---
+date: 2025-05-06
+id: migrate-from-elk-logs
+title: Migrate logs from ELK Stack
+description: Migrating logs from ELK Stack to SigNoz. How to migrate logs from ELK to SigNoz.
+---
+## **Migrating Logs: From Filebeat/Logstash to SigNoz**
+
+Migrating logs involves replacing [Filebeat](https://www.elastic.co/beats/filebeat) and/or [Logstash](https://www.elastic.co/logstash) with the OpenTelemetry Collector, configured to collect, process, and forward logs to SigNoz.
+
+**Replacing Log Shippers and Processors:**
+
+Several strategies can be employed, depending on the complexity of the existing ELK logging pipeline:
+
+* **Strategy 1: Sending logs to Signoz Directly (Replacing Filebeat):**  
+  * This is the most direct approach for collecting logs from files, replacing Filebeat's role.
+  * Deploy the OTel Collector as an agent(e.g., [DaemonSet in Kubernetes](docs/tutorial/kubernetes-infra-metrics) , standalone [binary on VMs](docs/tutorial/opentelemetry-binary-usage-in-virtual-machine) ) where logs are generated.
+  * Configure the [logs](/docs/userguide/collect_kubernetes_pod_logs) in Signoz to target the necessary log files. 
+  * Key filelog configurations include:  
+    * include: Glob patterns for log file paths (e.g., `/var/log/app/*.log`).  
+    * exclude: Glob patterns to exclude specific files.  
+    * start_at: end (tail new logs) or beginning (read from start).  
+    * multiline: For logs spanning multiple lines (e.g., stack traces), using `line_start_pattern` or `line_end_pattern`.  
+    * operators: A pipeline of parsing and transformation steps applied within the receiver itself (e.g., `regex_parser`, `json_parser`, `timestamp`, `severity`, `attribute`).This can handle basic parsing previously done by Filebeat modules or simple Logstash filters.  
+* **Strategy 2: Forwarding from Logstash to Signoz(Transitional):**  
+  * If you have complex Logstash pipelines you wish to retain temporarily, you can [configure Logstash to forward logs](docs/userguide/logstash_to_signoz) to an Signoz.
+  * The OTel Collector then forwards the received logs to SigNoz.  
+  * This approach adds an extra hop and complexity, so it's best viewed as a temporary step towards fully replacing Logstash.  
+
+**Verification:**
+
+* Ensure logs are appearing in the SigNoz "Logs" explorer. 
+* Verify that timestamps, severity levels, and attributes are parsed correctly according to the processor configurations.  
+* Check that filters are working as expected (e.g., debug logs are dropped).  
+* If trace context (trace IDs, span IDs) is expected in logs, confirm it's being parsed and that log-trace correlation works in the SigNoz UI.
+
+---
+
+As part of the migration, you might need to modify your logs pipelines. SigNoz offers several features to enhance your logs:
+
+- **[Log Pipelines](/docs/logs-pipelines/introduction/)**: Parse and structure logs with processors like JSON, regex, and grok
+- **[Log Querying](/docs/userguide/logs_query_builder/)**: Advanced query capabilities for searching and filtering logs
+- **[Log-Trace Correlation](/docs/logs-pipelines/guides/trace/)**: Link logs with related traces for contextual debugging
+
+You can also use [Logs Explorer](/docs/product-features/logs-explorer/) to query logs and confirm that they are being sent correctly to SigNoz.

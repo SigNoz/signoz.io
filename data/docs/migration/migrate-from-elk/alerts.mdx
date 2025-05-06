@@ -1,0 +1,75 @@
+---
+date: 2025-05-06
+id: migrate-from-elk-alerts
+title: Migrate alerts from ELK Stack
+description: Migrating alerts from ELK Stack to SigNoz. How to migrate alerts from ELK to SigNoz.
+---
+## **Migrating Alerts: From ELK Alerting to SigNoz**
+
+Alerting rules configured in the ELK stack, whether using Kibana's built-in alerting features or external tools like ElastAlert, need to be manually recreated in SigNoz's alerting system.
+
+**Comparing Alerting Mechanisms:**
+
+* **ELK Stack:**  
+  * **[Kibana Alerting](https://www.elastic.co/kibana/alerting):** Provides a UI-driven way to create rules based on various data sources within Elasticsearch (logs, metrics, APM data, uptime checks). Rule types include threshold checks, log pattern matching, metric conditions, etc. Actions can trigger notifications (Slack, email, webhook \- some require licenses) or write to indices.
+  * **[ElastAlert](https://elastalert.readthedocs.io/en/latest/):** An independent, open-source tool configured via YAML files. It queries Elasticsearch directly and offers a wide range of rule types (frequency, spike, flatline, change, cardinality, etc.) and alerters (outputs like Slack, Jira, PagerDuty, Email). Often used to overcome limitations or licensing costs of built-in Kibana alerting.
+* **SigNoz:**  
+  * **Core Engine:** Uses Prometheus Alertmanager internally for managing the lifecycle of alerts, including grouping, inhibition, silencing, and routing notifications to configured channels.
+  * **Rule Definition:** Alert rules are defined within the SigNoz UI ("Alerts" section). Rules can also potentially be managed using the SigNoz Terraform Provider.
+  * **Query-Based Triggering:** Rules are triggered based on the results of queries executed against SigNoz data (stored in ClickHouse). Queries can be constructed using:
+    * The visual Query Builder.
+    * PromQL (primarily for metrics and anomaly alerts).
+    * ClickHouse Query (for metrics, logs, traces, exceptions).
+  * **Alert Types:** Supports Metric-based, Log-based, Trace-based, Exception-based, and Anomaly-based alerts.
+  * **Notification Channels:** Configured in the UI (Settings \-\> Alert Channels), supporting Slack, Email, Webhook, PagerDuty, Opsgenie, Incident.io, Rootly, Zenduty, and potentially Microsoft Teams (paid plans).
+
+**Table: ELK Alerting vs. SigNoz Alerting \- Feature Comparison**
+
+| Feature | Kibana Alerting | ElastAlert | SigNoz Alerting |
+| :---- | :---- | :---- | :---- |
+| **Rule Definition** | UI-driven | YAML files | UI (Query Builder, PromQL, ClickHouse Query), Terraform 76 |
+| **Query Language** | KQL, Lucene, ES SQL (limited) | Elasticsearch Query DSL | Query Builder, PromQL, ClickHouse Query |
+| **Data Sources** | Logs, Metrics, Traces, Uptime etc | Elasticsearch Indices | Metrics, Logs, Traces, Exceptions |
+| **Rule Types** | Threshold, Log, Metric, APM, etc. | Frequency, Spike, Flatline, etc. | Threshold, Rate, Anomaly (Metric, Log, Trace, Exception based) |
+| **Notification Mgmt** | Kibana Actions | ElastAlert Alerters | Prometheus Alertmanager |
+| **Notifications** | Index, Log, Slack, Email, Webhook\* | Email, Slack, Jira, PagerDuty etc | Email, Slack, Webhook, PagerDuty, Opsgenie, Teams\*, etc. |
+| **Configuration** | Kibana UI | YAML Files | SigNoz UI, Env Vars (Alertmanager), Terraform |
+| **Open Source** | Core features free, some paid | Yes | Yes (Core), some channels like Teams might be paid |
+
+### Setting up Notification Channels
+
+Before migrating alerts to Signoz, you will need to set up the notification channels you want to use. Below is a list of notification channels supported by ELK and Signoz.
+| Notification Channel | SigNoz             | ELK Stack (Alerting) | Notes                                                                                                |
+|----------------------|--------------------|----------------------|------------------------------------------------------------------------------------------------------|
+| Email                | ✓                  | ✓                    | Standard channel in both.                                                                            |
+| Slack                | ✓                  | ✓                    | Standard channel in both.                                                                            |
+| Microsoft Teams      | ✓                  | ✓                    | Supported by both, ELK often via a dedicated connector or webhook.                                   |
+| Discord              | -                  | -                    | Requires Webhook integration for both.                                                               |
+| PagerDuty            | ✓                  | ✓                    | Standard integration in both.                                                                        |
+| Opsgenie             | ✓                  | ✓                    | Standard integration in both (may require specific configuration in ELK).                            |
+| Webhook              | ✓                  | ✓                    | Generic channel available in both for custom integrations.                                           |
+| Telegram             | -                  | -                    | Requires Webhook integration for both.                                                               |
+| VictorOps            | -                  | -                    | Requires Webhook integration for both (Native ELK support might exist but less common).             |
+| WeChat               | -                  | -                    | Requires Webhook integration for both.                                                               |
+| Webex                | -                  | -                    | Requires Webhook integration for both (ELK might have specific connectors in some versions).          |
+| SNS                  | -                  | △                    | Possible in ELK, especially AWS OpenSearch/Elasticsearch Service, less standard in self-hosted ELK. Requires Webhook otherwise. |
+| Incident.io          | ✓                  | -                    | SigNoz has native support. Requires Webhook for ELK.                                                 |
+| Rootly               | ✓                  | -                    | SigNoz has native support. Requires Webhook for ELK.                                                 |
+| Zenduty              | ✓                  | -                    | SigNoz has native support. Requires Webhook for ELK.                                                 |
+| **Other ELK**        |                    |                      |                                                                                                      |
+| Index                | -                  | ✓                    | ELK can write alerts back to an Elasticsearch index as an action.                                    |
+| Server Log           | -                  | ✓                    | ELK can write alerts to its own server logs as an action.                                            |
+
+
+### Setting Up Alert Rules
+
+SigNoz provides a comprehensive alert management system that supports:
+
+- **[Metrics-based alerts](/docs/alerts-management/metrics-based-alerts/)**: Monitor metric values and trigger alerts based on thresholds
+- **[Trace-based alerts](/docs/alerts-management/trace-based-alerts/)**: Alert on trace metrics like latency or error rates
+- **[Log-based alerts](/docs/alerts-management/log-based-alerts/)**: Create alerts based on log patterns or frequencies
+- **[Anomaly-based alerts](/docs/alerts-management/anomaly-based-alerts/)**: Trigger alerts when metrics deviate from normal patterns
+- **[Exceptions-based alerts](/docs/alerts-management/exceptions-based-alerts/)**: Alert on application exceptions
+
+
+The migration from ELK alerting to SigNoz involves a shift from potentially index-pattern-based or specific rule-type configurations (especially with ElastAlert) to a more unified query-based system. SigNoz executes defined queries (SQL, PromQL, or via Query Builder) against its data store at regular intervals and compares the output to a threshold. This requires translating the *intent* of the original alert into an appropriate SigNoz query. While simple threshold alerts are straightforward, replicating complex logic from ElastAlert might necessitate deeper knowledge of ClickHouse SQL or exploring SigNoz's anomaly detection capabilities.

@@ -1,0 +1,56 @@
+---
+date: 2025-05-06
+id: migrate-from-elk-traces
+title: Migrate traces from ELK Stack
+description: Migrating traces from ELK Stack to SigNoz. How to migrate traces from ELK to SigNoz.
+---
+## **Migrating Traces: From Elastic APM to SigNoz**
+
+Migrating distributed tracing involves replacing the proprietary [Elastic APM agents](https://www.elastic.co/docs/solutions/observability/apm/elastic-apm-agents) within your applications with standard [OpenTelemetry SDKs](https://opentelemetry.io/docs/languages/) and configuring them to send trace data to SigNoz.50
+
+**Replacing Elastic APM Agents:**
+
+* **Core Task:** The fundamental step is to remove the Elastic APM agent dependencies and initialization code from your applications and replace them with the equivalent OpenTelemetry SDKs and instrumentation [libraries for the specific proframming language](/docs/instrumentation/).
+* **Instrumentation Approach:**  
+  * **Automatic Instrumentation:** OpenTelemetry offers automatic instrumentation capabilities for many popular frameworks and libraries, similar to Elastic APM's approach.13 Examples include the OTel Java agent, @opentelemetry/auto-instrumentations-node for Node.js, and various opentelemetry-instrumentation-\* packages for Python.52 This often provides the quickest path to getting traces with minimal code changes.  
+  * **Manual Instrumentation:** For custom code sections or frameworks not covered by auto-instrumentation, use the OpenTelemetry SDK's [Tracer API](/docs/traces-management/trace-api-overview) to manually create and manage spans.47 This involves obtaining a Tracer, starting spans (tracer.Start in Go, tracer.startSpan in JS/Python), setting attributes, recording events, and ensuring spans are ended correctly.53 Elastic APM's concepts of "transactions" generally map to "root spans" (spans with no parent) in OpenTelemetry.
+
+**Code Migration Examples:**
+
+* **[Go Migration](https://signoz.io/opentelemetry/go/)**  
+  * Replace `go.elastic.co/apm/v2` and related module imports (e.g., apmhttp) with go.`opentelemetry.io/otel`, `go.opentelemetry.io/otel/trace`, and OTel contrib instrumentation modules (e.g., otelhttp).  
+  * Replace `apm.DefaultTracer().StartTransaction(...)` and `apm.StartSpan(...)` calls with `tracer := otel.Tracer("my-instrumentation-library"); ctx, span := tracer.Start(ctx, "span-name",...)`. Ensure the context returned by `tracer.Start` is propagated.  
+  * Update HTTP handler wrapping from `apmhttp.Wrap` to `otelhttp.NewHandler`.  
+* **[JavaScript/Express Migration](https://signoz.io/docs/instrumentation/opentelemetry-express/)**  
+  1. Remove Elastic APM agent initialization and dependencies.  
+  2. Install OTel dependencies: `npm install --save @opentelemetry/api @opentelemetry/sdk-node @opentelemetry/auto-instrumentations-node @opentelemetry/exporter-trace-otlp-grpc (or -http). For specific instrumentation: npm install --save @opentelemetry/instrumentation-express`.  
+  3. Create a tracing.js (or similar) file to configure the OTel NodeSDK
+ 4.  Run the application using the tracing setup: `export OTEL_SERVICE_NAME="my-express-app"; node -r ./tracing.js your-app-entrypoint.js`. Environment variables like `OTEL_EXPORTER_OTLP_ENDPOINT`, `OTEL_EXPORTER_OTLP_HEADERS`, `OTEL_SERVICE_NAME` can also be used for configuration.
+
+**Elastic OpenTelemetry Bridge (Go):**
+
+For applications where a "big bang" migration is too risky, Elastic provides a [bridge library](https://pkg.go.dev/go.elastic.co/apm/module/apmotel/v2) for Go applications.
+
+* This bridge allows the OTel Go SDK to coexist with the Elastic APM Go agent.  
+* When configured, spans created using the OTel SDK are captured and exported via the existing Elastic APM agent pipeline.  
+* This enables an "atomic migration":  
+  1. Add the bridge configuration.  
+  2. Incrementally replace Elastic APM instrumentation with OTel SDK instrumentation, deploying changes piece by piece. Traces continue to flow via the Elastic agent.  
+  3. Once all instrumentation is migrated, remove the Elastic APM agent and the bridge, and configure the OTel SDK to export directly or via a standard OTel Collector.53  
+* While this specific bridge is for Go, the concept of gradual migration or dual instrumentation might be possible in other languages using community tools or custom solutions.
+
+**Verification:**
+
+* Generate traffic/requests in the newly instrumented application. OpenTelemetry SDKs often buffer data, so ensure sufficient activity occurs.
+* Navigate to the SigNoz UI. Check the "Services" list for your application.
+* Explore the "Traces" tab, applying filters as needed, to confirm traces are being received.
+* Examine individual traces using flamegraphs and Gantt charts to ensure spans are correctly nested and timed.
+* Check the Service Map (Beta) for dependencies.
+
+
+The migration of tracing is often the most involved part of moving from ELK to SigNoz because it directly impacts application code and dependencies. Unlike metrics or logs, where changes can sometimes be confined to agent or collector configurations, trace migration necessitates re-instrumentation using OpenTelemetry SDKs.This requires developer effort, careful testing, and a solid understanding of OpenTelemetry concepts like spans, context propagation, and resource attributes. Strategies like phased rollouts or bridging mechanisms (where available) are essential to manage the inherent risks.
+
+SigNoz provides advanced features for analyzing traces:
+- **[Trace Explorer](/docs/product-features/trace-explorer/)**: Search, filter, and analyze distributed traces
+- **[Service Map](/docs/userguide/service-map/)**: Visualize dependencies between services
+- **[Exceptions Monitoring](/docs/userguide/exceptions/)**: Track and analyze application exceptions
