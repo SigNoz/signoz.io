@@ -6,8 +6,8 @@ title: Resource Name from Container Name
 
 ## Overview
 
-In many logging setups, the raw log is delivered as a JSON string, often placed in the `body` field. Within this JSON, you might have important fields—like 
-`ContainerName`—that you want to promote to a **standard** resource field such as `service.name`. Additionally, you may want to extract only the log message 
+In many logging setups, the raw log is delivered as a JSON string, often placed in the `body` field. Within this JSON, you might have important fields like 
+`ContainerName` that you want to promote to a **standard** resource field such as `service.name`. Additionally, you may want to extract only the log message 
 to appear in the top‐level `body`.
 
 ### Example Log
@@ -19,7 +19,8 @@ Throughout this guide, we’ll reference the following example log entry:
   "timestamp": "2025-01-25T10:00:00Z",
   "body": "{ \"properties\": { \"Log\": \"Connection refused\", \"ContainerName\": \"my-awesome-app\" }, \"host\": \"azure-vm-123\" }",
   "resource": {
-    "service.name": ""
+    "service.name": "",
+    "cloud.provider": "azure"
   }
 }
 ```
@@ -48,7 +49,8 @@ Here’s how the log should look after we apply our pipeline transformations:
     "host": "azure-vm-123"
   },
   "resource": {
-    "service.name": "my-awesome-app"
+    "service.name": "my-awesome-app",
+    "cloud.provider": "azure"
   }
 }
 ```
@@ -74,7 +76,8 @@ Our first step is to parse the raw JSON string residing in the `body` field so w
   "timestamp": "2025-01-25T10:00:00Z",
   "body": "{ \"properties\": { \"Log\": \"Connection refused\", \"ContainerName\": \"my-awesome-app\" }, \"host\": \"azure-vm-123\" }",
   "resource": {
-    "service.name": ""
+    "service.name": "",
+    "cloud.provider": "azure"
   }
 }
 ```
@@ -87,6 +90,11 @@ Our first step is to parse the raw JSON string residing in the `body` field so w
   parse_from: body
   parse_to: attributes
 ```
+
+<figure data-zoomable align='center'>
+<img className="box-shadowed-image" src="/img/docs/logs-managements/logs-pipelines/resource-guide-step1.webp" alt="Converting to Structured Attributes"/>
+<figcaption><i>Converting to Structured Attributes</i></figcaption>
+</figure>
 
 #### After Parsing
 
@@ -102,7 +110,8 @@ Our first step is to parse the raw JSON string residing in the `body` field so w
     "host": "azure-vm-123"
   },
   "resource": {
-    "service.name": ""
+    "service.name": "",
+    "cloud.provider": "azure"
   }
 }
 ```
@@ -130,7 +139,8 @@ Now that `Log` is available at `attributes.properties.Log`, we can **move** it t
     "host": "azure-vm-123"
   },
   "resource": {
-    "service.name": ""
+    "service.name": "",
+    "cloud.provider": "azure"
   }
 }
 ```
@@ -143,6 +153,11 @@ Now that `Log` is available at `attributes.properties.Log`, we can **move** it t
   from: attributes.properties.Log
   to: body
 ```
+
+<figure data-zoomable align='center'>
+<img className="box-shadowed-image" src="/img/docs/logs-managements/logs-pipelines/resource-guide-step2.webp" alt="Extracting Log field to body"/>
+<figcaption><i>Extracting Log field to body</i></figcaption>
+</figure>
 
 #### After Moving Log
 
@@ -157,7 +172,8 @@ Now that `Log` is available at `attributes.properties.Log`, we can **move** it t
     "host": "azure-vm-123"
   },
   "resource": {
-    "service.name": ""
+    "service.name": "",
+    "cloud.provider": "azure"
   }
 }
 ```
@@ -186,7 +202,8 @@ Finally, we want to set the `resource.service.name` field to the value of `Conta
     "host": "azure-vm-123"
   },
   "resource": {
-    "service.name": ""
+    "service.name": "",
+    "cloud.provider": "azure"
   }
 }
 ```
@@ -199,6 +216,11 @@ Finally, we want to set the `resource.service.name` field to the value of `Conta
   from: attributes.properties.ContainerName
   to: resource.service.name
 ```
+
+<figure data-zoomable align='center'>
+<img className="box-shadowed-image" src="/img/docs/logs-managements/logs-pipelines/resource-guide-step3.webp" alt="Map Container Name to Service Name"/>
+<figcaption><i>Map Container Name to Service Name</i></figcaption>
+</figure>
 
 #### After Moving ContainerName
 
@@ -213,7 +235,8 @@ Finally, we want to set the `resource.service.name` field to the value of `Conta
     "host": "azure-vm-123"
   },
   "resource": {
-    "service.name": "my-awesome-app"
+    "service.name": "my-awesome-app",
+    "cloud.provider": "azure"
   }
 }
 ```
@@ -238,7 +261,8 @@ After applying these three processors in sequence, your log now looks like this:
     "host": "azure-vm-123"
   },
   "resource": {
-    "service.name": "my-awesome-app"
+    "service.name": "my-awesome-app",
+    "cloud.provider": "azure"
   }
 }
 ```
