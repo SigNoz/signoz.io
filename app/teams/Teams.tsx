@@ -10,6 +10,7 @@ import { ArrowRight, Loader2 } from 'lucide-react'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import Image from 'next/image'
 import { useLogEvent } from '../../hooks/useLogEvent'
+import Link from 'next/link'
 
 interface ErrorsProps {
   fullName?: string
@@ -317,6 +318,36 @@ const regions: Region[] = [
   },
 ]
 
+// Add a minimal nav component for the variant overlay that matches the original navbar design
+const VariantNavbar = () => {
+  return (
+    <div className="header-bg fixed left-0 right-0 top-0 z-[30] mx-auto box-border flex h-[56px] w-full items-center border-b border-signoz_slate-500 px-4 text-signoz_vanilla-100 backdrop-blur-[20px] md:px-8 lg:px-8">
+      <div className="container flex w-full items-center justify-between text-signoz_vanilla-100">
+        <div className="flex justify-start">
+          <Link href="/" className="-m-1.5 flex items-center gap-2 p-1.5">
+            <Image
+              className="h-5 w-auto"
+              src="/img/SigNozLogo-orange.svg"
+              width={160}
+              height={60}
+              alt=""
+            />
+            <span className="text-[17.111px] font-medium">SigNoz</span>
+          </Link>
+        </div>
+        <div className="flex items-center">
+          <Link
+            href="/docs"
+            className="flex items-center truncate px-1.5 py-1 text-sm font-normal hover:text-signoz_robin-500"
+          >
+            Read Documentation
+          </Link>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 const Teams: React.FC<SignUpPageProps> = ({
   experimentId = EXPERIMENTS.TEAMS_PAGE.id,
   variantId = EXPERIMENTS.TEAMS_PAGE.variants.CONTROL,
@@ -517,10 +548,12 @@ const Teams: React.FC<SignUpPageProps> = ({
 
   return (
     <ExperimentTracker experimentId={experimentId} variantId={variantId}>
-      <main className="bg-signoz_ink-500">
-        <div className="m-auto max-w-[1440px]">
-          <div className="flex items-stretch max-lg:flex-col max-md:gap-0">
-            {variantId === EXPERIMENTS.TEAMS_PAGE.variants.VARIANT ? (
+      {variantId === EXPERIMENTS.TEAMS_PAGE.variants.VARIANT ? (
+        // Variant with fullscreen overlay
+        <div className="variant-teams-container bg-signoz_ink-500">
+          <VariantNavbar />
+          <div className="m-auto mt-[56px] max-w-[1440px]">
+            <div className="flex items-stretch max-lg:flex-col max-md:gap-0">
               <ExperimentVariant
                 formData={formData}
                 errors={errors}
@@ -531,7 +564,15 @@ const Teams: React.FC<SignUpPageProps> = ({
                 handleSubmit={handleSubmit}
                 regions={regions}
               />
-            ) : (
+              <TestimonialSection />
+            </div>
+          </div>
+        </div>
+      ) : (
+        // Control stays the same
+        <main className="bg-signoz_ink-500">
+          <div className="m-auto max-w-[1440px]">
+            <div className="flex items-stretch max-lg:flex-col max-md:gap-0">
               <ControlVariant
                 formData={formData}
                 errors={errors}
@@ -542,11 +583,11 @@ const Teams: React.FC<SignUpPageProps> = ({
                 handleSubmit={handleSubmit}
                 regions={regions}
               />
-            )}
-            <TestimonialSection />
+              <TestimonialSection />
+            </div>
           </div>
-        </div>
-      </main>
+        </main>
+      )}
     </ExperimentTracker>
   )
 }
