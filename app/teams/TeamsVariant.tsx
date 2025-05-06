@@ -30,8 +30,8 @@ interface Region {
 // Variant Navbar component (now integrated into layout)
 export const VariantNavbar = () => {
   return (
-    <div className="header-bg fixed left-0 right-0 top-0 z-[30] mx-auto box-border flex h-[56px] w-full items-center border-b border-signoz_slate-500 px-4 text-signoz_vanilla-100 backdrop-blur-[20px] md:px-8 lg:px-8">
-      <div className="container flex w-full items-center justify-between text-signoz_vanilla-100">
+    <div className="fixed left-0 right-0 top-0 z-[30] mx-auto flex h-[56px] w-full items-center text-signoz_vanilla-100 backdrop-blur-[20px]">
+      <div className="flex h-full w-full items-center bg-signoz_ink-500 px-4 md:px-8 lg:w-5/12 lg:px-8">
         <div className="flex justify-start">
           <Link href="/" className="-m-1.5 flex items-center gap-2 p-1.5">
             <Image
@@ -44,15 +44,24 @@ export const VariantNavbar = () => {
             <span className="text-[17.111px] font-medium">SigNoz</span>
           </Link>
         </div>
-        <div className="flex items-center">
-          <Link
-            href="/docs"
-            className="flex items-center truncate px-1.5 py-1 text-sm font-normal hover:text-signoz_robin-500"
-          >
-            <ExternalLink className="mr-2 h-4 w-4" />
-            Documentation
-          </Link>
-        </div>
+      </div>
+      <div className="hidden h-full items-center justify-end bg-signoz_ink-400 px-4 md:px-8 lg:flex lg:w-7/12 lg:px-8">
+        <Link
+          href="/docs"
+          className="flex items-center truncate px-1.5 py-1 text-sm font-normal hover:text-signoz_robin-500"
+        >
+          <ExternalLink className="mr-2 h-4 w-4" />
+          Documentation
+        </Link>
+      </div>
+      <div className="flex h-full items-center justify-end bg-signoz_ink-500 px-4 md:px-8 lg:hidden">
+        <Link
+          href="/docs"
+          className="flex items-center truncate px-1.5 py-1 text-sm font-normal hover:text-signoz_robin-500"
+        >
+          <ExternalLink className="mr-2 h-4 w-4" />
+          Documentation
+        </Link>
       </div>
     </div>
   )
