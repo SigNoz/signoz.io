@@ -1,6 +1,4 @@
 import React from 'react'
-import Link from 'next/link'
-import Image from 'next/image'
 import Header from './Header'
 import SendData from './SendData'
 import Monitor from './Monitor'
@@ -11,6 +9,9 @@ import SigNozFeatures from './SigNozFeatures'
 import TroubleshootingCommunity from './TroubleshootingCommunity'
 import AdditionalResources from './AdditionalResources'
 import QuickStartCloud from '@/components/QuickStartCloud'
+import InstallLocallySection from './InstallLocallySection'
+import { evaluateFeatureFlag } from '@/utils/growthbookServer'
+import { EXPERIMENTS } from '@/constants/experiments'
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -19,7 +20,14 @@ export const metadata: Metadata = {
     'Learn about SigNoz, an open-source observability platform that helps you monitor your applications with distributed tracing, metrics, and logs.',
 }
 
-export default function DocsIntroductionPage() {
+export default async function DocsIntroductionPage() {
+  // Check if the single CTA experiment is active
+  const showOnlyQuickStart = await evaluateFeatureFlag(EXPERIMENTS.DOCS_HEADER.flagName)
+  const experimentId = EXPERIMENTS.DOCS_HEADER.id
+  const variantId = showOnlyQuickStart
+    ? EXPERIMENTS.DOCS_HEADER.variants.QUICK_START_ONLY
+    : EXPERIMENTS.DOCS_HEADER.variants.DUAL_BUTTONS
+
   return (
     <>
       <Header />
@@ -31,6 +39,12 @@ export default function DocsIntroductionPage() {
       <SecurityCompliance />
       <TroubleshootingCommunity />
       <AdditionalResources />
+
+      {/* Only show the Install Locally section at the end if single CTA experiment is active */}
+      {showOnlyQuickStart && (
+        <InstallLocallySection experimentId={experimentId} variantId={variantId} />
+      )}
+
       <QuickStartCloud />
     </>
   )
