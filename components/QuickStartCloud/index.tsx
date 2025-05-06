@@ -7,7 +7,7 @@ export default function QuickStartCloud() {
   const sectionName = 'Quick Start Cloud Section'
 
   return (
-    <div className="mx-auto mb-12 w-full max-w-7xl bg-[url('/img/background_blur/Frame_2185.png')] bg-[length:100%_auto] bg-[center_top] bg-no-repeat py-8 sm:bg-[length:55%] sm:bg-[center_top_-2rem] sm:py-12 md:py-16">
+    <div className="mx-auto mb-12 mt-16 w-full max-w-7xl bg-[url('/img/background_blur/Frame_2185.png')] bg-[length:100%_auto] bg-[center_top] bg-no-repeat py-8 sm:bg-[length:55%] sm:bg-[center_top_-2rem] sm:py-12 md:py-16">
       <div className="bg-[url('/img/background_blur/Ellipse_206.png')] bg-[center_top_calc(-150px)] bg-no-repeat sm:bg-[center_top_calc(-250px)]">
         <div className="flex flex-col items-center gap-2 px-4 text-center sm:px-0">
           <h2 className="text-4xl font-bold text-signoz_vanilla-100 md:text-5xl">
