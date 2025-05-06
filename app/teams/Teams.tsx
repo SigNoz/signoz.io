@@ -175,7 +175,7 @@ const ControlVariant: React.FC<{
 
   return (
     <section className="signup-form-section flex w-full flex-col bg-signoz_ink-500 max-md:ml-0 max-md:w-full lg:w-[70%] xl:w-[60%]">
-      <div className="flex w-full grow flex-col justify-center px-8 py-4 text-sm leading-5 text-white max-md:mt-10 max-md:max-w-full lg:px-12 lg:py-8 xl:px-36 xl:py-8">
+      <div className="flex w-full grow flex-col justify-center px-8 py-4 text-sm leading-5 text-white max-md:mt-10 max-md:max-w-full">
         <h1 className="mt-11 text-2xl font-semibold leading-8 max-md:mt-10 max-md:max-w-full">
           Sign up for SigNoz Cloud
         </h1>
@@ -433,25 +433,17 @@ const Teams: React.FC<SignUpPageProps> = ({
   return (
     <ExperimentTracker experimentId={experimentId} variantId={variantId}>
       {variantId === EXPERIMENTS.TEAMS_PAGE.variants.VARIANT ? (
-        // Variant with fullscreen overlay
-        <div className="variant-teams-container bg-signoz_ink-500">
-          <VariantNavbar />
-          <div className="m-auto mt-[56px] max-w-[1440px]">
-            <div className="flex items-stretch max-lg:flex-col max-md:gap-0">
-              <ExperimentVariant
-                formData={formData}
-                errors={errors}
-                isSubmitting={isSubmitting}
-                submitFailed={submitFailed}
-                handleInputChange={handleInputChange}
-                handleRegionChange={handleRegionChange}
-                handleSubmit={handleSubmit}
-                regions={regions}
-              />
-              <TestimonialSection />
-            </div>
-          </div>
-        </div>
+        // Using redesigned variant with integrated testimonial section
+        <ExperimentVariant
+          formData={formData}
+          errors={errors}
+          isSubmitting={isSubmitting}
+          submitFailed={submitFailed}
+          handleInputChange={handleInputChange}
+          handleRegionChange={handleRegionChange}
+          handleSubmit={handleSubmit}
+          regions={regions}
+        />
       ) : (
         // Control stays the same
         <main className="bg-signoz_ink-500">
