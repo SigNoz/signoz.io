@@ -61,7 +61,7 @@ export default function InstallLocallySection({
           <TrackingLink
             key={index}
             href={option.href}
-            clickType="Secondary CTA"
+            clickType="Nav Click"
             clickName={option.clickName}
             clickText={option.title}
             clickLocation={sectionName}
