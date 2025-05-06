@@ -183,3 +183,18 @@ Here is the SigNoz Otel Collector address grid which could be helpful:
   helm upgrade --install -n platform my-release signoz/signoz \
   --set otelCollector.serviceType="<NodePort or LoadBalancer>"
   ```
+
+
+## Container signoz-init-clickhouse Hangs Forever 
+
+After installation, you might see sometime the `signoz-init-clickhouse` being stuck and from the logs it's shows:
+```bash
+docker logs signoz-init-clickhouse
+# Fetching histogram-binary for linux/amd64
+# Connecting to github.com (20.205.243.166:443)
+```
+This indicates the helper binary wasn’t fetched from GitHub. For these issues you should, restart the SigNoz containers and allow time for the helper binary to download:
+
+```bash
+docker compose restart
+```

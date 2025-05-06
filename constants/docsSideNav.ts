@@ -136,6 +136,11 @@ const docsSideNav = [
                   label: 'Docker Swarm',
                   route: '/docs/install/docker-swarm',
                 },
+                {
+                  type: 'doc',
+                  label: 'Docker SELinux',
+                  route: '/docs/install/docker-selinux',
+                },
               ]
             },
             {
