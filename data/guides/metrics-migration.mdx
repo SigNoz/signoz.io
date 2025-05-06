@@ -1,6 +1,6 @@
 ---
 
-title: Metric Name Migration Guid
+title: Metrics Migration Guide
 slug: migrations
 date: 2025-05-06
 tags: [observability, opentelemetry, prometheus]
@@ -29,7 +29,7 @@ GitHub Issue - https://github.com/prometheus/prometheus/issues/13095
 
 ### 1. Dual Export Phase (Transition Period)
 
-We have introduced a new exporter: `signozclickhousemetrics`, which supports dot-based metric names (`system.memory.usage`).
+We have introduced a new exporter: `signozclickhousemetrics`, that doesn't normalizes the metric names and the labels (`system.memory.usage`).
 
 Both exporters (the existing ClickHouse metrics exporter and the new `signozclickhousemetrics`) will run in parallel during this phase.
 
@@ -43,12 +43,13 @@ We will also offer community support and documentation to assist with this proce
 
 ### 3. Cutover and Deprecation
 
-Once the data for both naming formats has existed in your system for at least one full retention cycle, we will proceed with the final migration.
+Once the data for both naming formats has existed in your system for at least one full default retention cycle, we will deprecate and remove the old exporter.
 
 At this point:
 - Underscore-based metric names will be deprecated.
-- Only the `SignozClickhouseMetrics` exporter will be supported moving forward.
+- Only the `signozclickhousemetrics` exporter will be supported moving forward.
 - All dashboards, alerts, and custom queries should use the dot notation exclusively.
+- For those community users who have higher retention in metrics data, we will help with the scripts to converts the old (_) data to new non normalized data.
 
 ## ⚙️ Resource Impact
 
