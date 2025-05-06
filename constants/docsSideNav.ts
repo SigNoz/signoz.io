@@ -187,6 +187,11 @@ const docsSideNav = [
                   label: 'Deploying to Local',
                   route: '/docs/install/kubernetes/local',
                 },
+                {
+                  type: 'doc',
+                  label: 'Deploying with ArgoCD',
+                  route: '/docs/install/argocd',
+                },
               ],
             },
             {
