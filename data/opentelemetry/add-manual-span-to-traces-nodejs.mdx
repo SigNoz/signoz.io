@@ -2,10 +2,12 @@
 title: Manual Instrumentation for Traces - OpenTelemetry NodeJS
 slug: add-manual-span-to-traces-nodejs
 date: 2024-06-06
-tags: [opentelemetry-tutorials]
+tags: [opentelemetry-tutorials, nodejs]
 authors: [yuvraj]
 description: Learn how to enhance observability in your NodeJS Order service by adding custom spans with OpenTelemetry. This guide focuses on the validate-order process, allowing you to track specific business logic and identify performance bottlenecks that automatic instrumentation might miss
-keywords: 
+cta_title: Set Up OpenTelemetry with NodeJS in 15 min with Our Guided Onboarding
+cta_text: Monitor NodeJS with OTel - Free
+keywords:
   - opentelemetry
   - opentelemetry nodejs
   - distributed tracing
@@ -16,7 +18,7 @@ keywords:
 ---
 
 <head>
-  <link rel="canonical" href="https://signoz.io/opentelemetry/add-manual-span-to-traces-nodejs/"/>
+  <link rel="canonical" href="https://signoz.io/opentelemetry/add-manual-span-to-traces-nodejs/" />
 </head>
 
 <Admonition type="info">
@@ -26,6 +28,7 @@ This article is part of the **OpenTelemetry NodeJS series**:
 - Next Article: [Setting up Custom Metrics - OpenTelemetry NodeJS](/opentelemetry/custom-metrics-nodejs)
 
 Check out the complete series at: [Overview - Implementing OpenTelemetry in NodeJS with SigNoz - OpenTelemetry NodeJS](/opentelemetry/nodejs-tutorial-overview)
+
 </Admonition>
 
 In this article, we will explore how to add custom spans using OpenTelemetry to enhance observability in our Order service. Specifically, we'll focus on the **`validate-order`** process. Manual spans allow us to track specific business logic and identify performance bottlenecks that automatic instrumentation might miss.
@@ -65,60 +68,63 @@ First, extract the **`validateOrder`** function in your **`order-service`**:
 
 ```jsx
 async function validateOrder(order) {
-    // Start a new span for the validation process
-    return tracer.startActiveSpan('validate-order', async (span) => {
-      try {
-        // Add an event indicating the start of validation
-        span.addEvent('Order validation started');
-  
-        // Set attributes to provide more context
-        span.setAttribute('order.id', order._id.toString());
-        
-        let total = 0;
-  
-        // Validate each product in the order
-        for (const item of order.products) {
-          // Fetch product details from the Product service
-          const productResponse = await fetch(`http://product:3003/products/${item.productId}`);
-          const product = await productResponse.json();
-  
-          // Check product availability
-          if (!product || product.stock < item.quantity) {
-            throw new Error(`Product ${item.productId} is out of stock or does not exist.`);
-          }
-  
-          // Decrement product stock via the Product service
-          const updateResponse = await fetch(`http://product:3003/products/${item.productId}/decrement-stock`, {
+  // Start a new span for the validation process
+  return tracer.startActiveSpan('validate-order', async (span) => {
+    try {
+      // Add an event indicating the start of validation
+      span.addEvent('Order validation started')
+
+      // Set attributes to provide more context
+      span.setAttribute('order.id', order._id.toString())
+
+      let total = 0
+
+      // Validate each product in the order
+      for (const item of order.products) {
+        // Fetch product details from the Product service
+        const productResponse = await fetch(`http://product:3003/products/${item.productId}`)
+        const product = await productResponse.json()
+
+        // Check product availability
+        if (!product || product.stock < item.quantity) {
+          throw new Error(`Product ${item.productId} is out of stock or does not exist.`)
+        }
+
+        // Decrement product stock via the Product service
+        const updateResponse = await fetch(
+          `http://product:3003/products/${item.productId}/decrement-stock`,
+          {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ decrementBy: item.quantity })
-          });
-  
-          // Check if stock update was successful
-          if (!updateResponse.ok) {
-            throw new Error(`Failed to update stock for Product ${item.productId}.`);
+            body: JSON.stringify({ decrementBy: item.quantity }),
           }
+        )
 
-          // Calculate the total amount
-          total += product.price * item.quantity;
+        // Check if stock update was successful
+        if (!updateResponse.ok) {
+          throw new Error(`Failed to update stock for Product ${item.productId}.`)
         }
-  
-        span.setAttribute('order.total', total);
 
-        // Add an event indicating the completion of validation
-        span.addEvent('Order validation completed');
-        span.setStatus({ code: SpanStatusCode.OK });
-      } catch (error) {
-        // Record the error and set the span status to error
-        span.setStatus({ code: SpanStatusCode.ERROR, message: error.message });
-        span.recordException(error);
-        throw error;
-      } finally {
-        // End the span
-        span.end();
+        // Calculate the total amount
+        total += product.price * item.quantity
       }
-    });
-  }
+
+      span.setAttribute('order.total', total)
+
+      // Add an event indicating the completion of validation
+      span.addEvent('Order validation completed')
+      span.setStatus({ code: SpanStatusCode.OK })
+    } catch (error) {
+      // Record the error and set the span status to error
+      span.setStatus({ code: SpanStatusCode.ERROR, message: error.message })
+      span.recordException(error)
+      throw error
+    } finally {
+      // End the span
+      span.end()
+    }
+  })
+}
 ```
 
 Explanation:
@@ -126,7 +132,7 @@ Explanation:
 - **Start a new span**: We start a new span named **`validate-order`** using **`tracer.startActiveSpan`**.
 - **Add an event for the start of validation**: Using **`span.addEvent`**, we add an event to mark the start of the validation process.
 - **Set attributes**: We use **`span.setAttribute`** to add attributes to the span, providing more context about the order.
-    - We have added `id` and `total` as custom attributes.
+  - We have added `id` and `total` as custom attributes.
 - **Validate each product**: For each product in the order, we fetch details from the Product service and check availability. If the product is available, we proceed to decrement the stock.
 - **Add an event for the completion of validation**: Using **`span.addEvent`**, we add another event to mark the completion of the validation process.
 - **Set span status**: If the validation completes successfully, we set the span status to OK. If an error occurs, we set the span status to ERROR and record the exception.
@@ -137,18 +143,18 @@ Update the **`POST /orders`** route to use this function:
 ```jsx
 app.post('/orders', async (req, res) => {
   try {
-    const order = new Order(req.body);
+    const order = new Order(req.body)
 
     // Validate the order
-    await validateOrder(order);
+    await validateOrder(order)
 
     // Save the order
-    await order.save();
-    res.status(201).json(order);
+    await order.save()
+    res.status(201).json(order)
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: error.message })
   }
-});
+})
 ```
 
 ## Running the Application with Docker
@@ -163,16 +169,14 @@ docker-compose up --build
 
 Run your application and check SigNoz for the manually created spans. Verify that attributes and events are correctly logged.
 
-
-
 <video width="820" height="540" controls>
-  <source src="/img/blog/2024/06/add-manual-span-to-traces-nodejs-pic.mov" type="video/mp4"/>
+  <source src="/img/blog/2024/06/add-manual-span-to-traces-nodejs-pic.mov" type="video/mp4" />
   Your browser does not support the video tag.
 </video>
 
 You can see the new span being created in the `post` request to `/orders` called `validate-order` with the added attributes and events.
 
-## **When to Use Manual Spans**
+## When to Use Manual Spans
 
 Manual spans are useful in the following scenarios:
 
@@ -180,7 +184,7 @@ Manual spans are useful in the following scenarios:
 - **Performance Bottlenecks**: To identify and analyze performance issues in critical sections of your application.
 - **Error Handling and Debugging**: For tracking and recording detailed error information and exceptions.
 
-## **Conclusion**
+## Conclusion
 
 - **Custom Spans**: Provide detailed tracking for specific business logic and performance analysis.
 - **Error Handling**: Enhance error handling and debugging with detailed span information.
@@ -190,5 +194,7 @@ Manual spans are useful in the following scenarios:
 By adding custom spans to the **`validate-order`** process, we enhanced our observability, enabling detailed tracking and improved debugging capabilities. Manual instrumentation allows us to gain deeper insights into specific parts of our application, ensuring better performance and reliability.
 
 <Admonition type="info">
-Read Next Article of OpenTelemetry NodeJS series on [Setting up Custom Metrics - OpenTelemetry NodeJS](/opentelemetry/custom-metrics-nodejs)
+  Read Next Article of OpenTelemetry NodeJS series on [Setting up Custom Metrics - OpenTelemetry
+  NodeJS](/opentelemetry/custom-metrics-nodejs)
 </Admonition>
+

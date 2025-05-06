@@ -1,79 +1,46 @@
 ---
-date: 2024-06-06
+date: 2025-04-03
 id: architecture
 title: Technical Architecture
 description: Learn about the technical architecture of SigNoz, including components like OpenTelemetry Collector, ClickHouse, Query Service, Frontend, and Alert Manager.
 ---
+## Overview
 
-![acrhitecture-diagram-clickhouse](../../img/architecture-signoz-clickhouse.svg)
+SigNoz leverages the power of OpenTelemetry and ClickHouse to deliver a comprehensive observability platform. Our architecture is designed for scalability, performance, and ease of use. Telemetry data from various sources flows into the SigNoz OpenTelemetry collector, which efficiently processes and routes this data to ClickHouse — a high-performance analytics database. The SigNoz backend extracts insights from this data through optimized queries and transforms it into actionable information. As a unified component, SigNoz serves both the API backend and the intuitive ReactJS frontend, providing users with a seamless experience to visualize and analyze their application performance in real-time.
 
-### Architecture Components
+![architecture-diagram](../../../../img/architecture.svg)
 
-- SigNoz OpenTelemetry Collector
-- ClickHouse
-- Query Service
-- Frontend
-- Alert Manager
+## Components
 
-{/* <!-- ## Kafka + Druid Setup Architecture
+### ClickHouse
 
-SigNoz uses industry proven Kafka and Druid to power highly scalable data ingestion and realtime data analysis.
+At the core of SigNoz's data storage is ClickHouse—a lightning-fast, column-oriented database engineered specifically for analytical workloads. ClickHouse excels at:
 
-![acrhitecture-diagram](../img/architecture-signoz-dark.svg)
+- Processing petabytes of telemetry data with minimal latency
+- Executing complex analytical queries in milliseconds
+- Delivering exceptional compression ratios to optimize storage costs
+- Scaling horizontally to accommodate growing observability needs
 
-### Architecture Components
+SigNoz offers flexible deployment options, supporting both replicated and non-replicated ClickHouse configurations to match your reliability and performance requirements.
 
-- OpenTelemetry Collector
-- Kafka
-- Stream Processors
-- Apache Druid
-- Query Service
-- Frontend --> */}
+### SigNoz OTel Collector
 
-**OpenTelemetry Collector** can receive data in multiple formats. Here are some of the commonly used receivers:
+The SigNoz OpenTelemetry Collector accepts telemetry data from diverse sources and writes it to ClickHouse. It is built on the [OpenTelemetry Collector](https://opentelemetry.io/docs/collector/) and is expertly configured to:
 
-- Jaeger Receiver
-- Kafka Receiver
-- OpenCensus Receiver
-- OTLP Receiver
-- Zipkin Receiver
+- Ingest telemetry data from diverse sources including Jaeger, Kafka, OpenCensus, OTLP, and Zipkin
+- Provide protocol translation for seamless integration with existing monitoring tools
+- Process and enrich data with metadata for more meaningful analysis
 
-One can send data from their applications directly to SigNoz Otel collector or external otel collectors can be used for collecting telemetry data & sending to SigNoz otel collector. These external otel collectors are then working effectively as an agent to collect data first and then send to SigNoz Otel collector. 
+This versatile collector accepts data directly from instrumented applications or via intermediate OTel collectors, offering flexible deployment options for any infrastructure.
 
-{/* <!-- OpenTelemetry Collector then exports those traces to a kafka topic, `otlp_spans`.
+### SigNoz Binary
 
-**Apache Kafka is a distributed streaming platform** that can be used as message-driven backbone of communication. Applications can send messages between its components in the form of records that can be produced to Kafka topics and consumed from Kafka topics.
+SigNoz binary is like the central nervous system of our observability platform. It is a bundled service that includes:
 
-### _Stream Processing_ decentralizes and decouples the infrastructure.
+- **Frontend**: A statically built ReactJS application that provides intuitive visualization of telemetry data
+- **Apiserver**: Serves the frontend, exposes APIs to query observability data and manage metadata such as organizations, users etc
+- **OpAMP**: Runs an OpAMP server which dynamically configures log pipelines in the SigNoz OTelcollector
+- **Ruler**: Evaluates alert rules and sends alerts to the alertmanager
+- **Alertmanager**: Handles alert deduplication, grouping, and notification delivery
 
-You produce at whatever rate you want to into Kafka, scaling the brokers out to accommodate the ingest rate. You then consume as you want to; Kafka persists the data and tracks the offset of the consumers as they work their way through the data they read.
-This behavior enables applications to be able to recover from outages, enables decoupling between application components, and encourages the use of backpressure within reactive application
-
-Our stream processing applications read from `otlp_spans` kafka topic and flattens the structure of spans to be ingested to databases like Druid. This flattener-processor writes to `flattened_spans` topic in kafka.
-
-We can easily build other processors for any processing we may want to do. For example:
-
-- Remove PII data from spans
-- Send input to anomaly detection framework
-
-The flattened data is then ingested to **Druid** _which is a real-time analytics database_ designed for fast slice-and-dice analytics ([OLAP](https://en.wikipedia.org/wiki/Online_analytical_processing) queries) on large data sets. We use streaming ingestion from Kafka to Druid.
-
-- We then add supervisor in druid to ingest from kafka at realtime
-- We then add retention policy in druid. By default, we set 3 days of data retention
-- We have option to add AWS S3 bucket credentials for deep storage of data in druid. By default, we use `storage: local` in helm `values.yaml` --> */}
-
-**Query Service** is the interface between Frontend and ClickHouse. It provides APIs to be consumed by frontend application and queries ClickHouse to fetch data and processes data before responding back to the frontend.
-
-**Frontend** is the UI, built in ReactJS and Typescript and provides advanced trace/span filtering capabilities and plot metrics to provide service overviews.
-
-**Alert Manager** evaluates different alert rules set by the users and triggers an alert if a threshold is crossed.
-
-
-### Opentelemetry Introduction
-
-SigNoz uses OpenTelemetry for instrumenting applications and for collecting telemetry data. The following docs may be useful to get familiar with the basic concepts of OpenTelemetry
-
-- [OpenTelemetry Data Collection](https://opentelemetry.io/docs/concepts/data-collection/)
-
-- [OpenTelemetry Collector Configuration](https://opentelemetry.io/docs/collector/configuration/)
-
+This bundled component architecture simplifies deployment while providing a complete observability solution that enables teams to monitor system performance, identify issues quickly, and optimize their applications with confidence.

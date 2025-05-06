@@ -40,6 +40,13 @@ const cardDetails = [
     href: '/case-study/brainfish/',
   },
   {
+    logo: '/img/case_study/logos/linkcy-logo-white-1.png',
+    title: 'How Fintech Startup Linkcy Monitors Critical APIs with SigNoz Dashboards',
+    name: 'Alexandre Moray',
+    position: 'Senior Software Engineer',
+    href: '/case-study/linkcy/',
+  },
+  {
     logo: '/img/case_study/cedana-logo.svg',
     title: 'How Cedana Leverages SigNoz to Ensure Uptime in Real-Time Compute Operations',
     name: 'Niranjan Ravichandra',
@@ -55,7 +62,8 @@ const cardDetails = [
   },
   {
     logo: '/img/case_study/mailmodo-logo-white.svg',
-    title: 'How Mailmodo streamlined monitoring of 200GB+ daily logs from 200+ microservices with SigNoz',
+    title:
+      'How Mailmodo streamlined monitoring of 200GB+ daily logs from 200+ microservices with SigNoz',
     name: 'Avneesh Kumar',
     position: 'VP of Engineering, Mailmodo',
     href: '/case-study/mailmodo/',

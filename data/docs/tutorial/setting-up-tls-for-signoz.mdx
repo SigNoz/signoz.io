@@ -1,227 +1,140 @@
 ---
 date: 2024-06-06
 id: setting-up-tls-for-signoz
-title: Secure SigNoz in Kubernetes using Ingress-NGINX and Cert-Manager
-description: Set up TLS for SigNoz in Kubernetes using Ingress-NGINX and Cert-Manager
+title: Secure SigNoz in Kubernetes using Ingress NGINX and Cert Manager
+description: Set up TLS for SigNoz in Kubernetes using Ingress NGINX and Cert Manager
 ---
 
 ### Overview
 
-Setting up SSL/TLS certificates is essential to secure traffic over the internet.
-In this guide, you will configure **HTTPS** for Kubernetes Ingress using [ingress-Nginx][1]
-and [cert-manager][2] to secure SigNoz UI and SigNoz OpenTelemetry Collector endpoints.
+This tutorial will walk you through the process of setting up HTTPS (SSL/TLS) for your SigNoz installation in Kubernetes using two popular tools:
+- **[Ingress NGINX][1]**: A Kubernetes ingress controller that manages external access to services
+- **[Cert Manager][2]**: An automated certificate management tool that helps obtain and renew SSL/TLS certificates
 
 ### Prerequisites
 
-- Helm version 3.8 or above
-- SigNoz helm chart version 0.4.3 or above
+Before you begin, ensure you have:
+- Kubernetes cluster with administrative access
+- Helm (version 3.8 or above) installed on your machine
+- SigNoz helm chart (version 0.4.3 or above)
+- A domain name pointed to your Kubernetes cluster for SigNoz (e.g., `signoz.example.com`)
+- A domain name pointed to your Kubernetes cluster for SigNoz OTel Collector (e.g., `signoz-ingest.example.com`)
 
 ## Steps to Secure SigNoz
 
-Follow the steps below to configure SSL/TLS certificates for the domain,
-let's say `signoz.domain.com`.
+### Install Cert-Manager
 
-<Admonition type="info">
-Please update `domain.com` in the tutorial with either your company domain
-or something relevant.
-</Admonition>
-
-### Enable Cert-Manager
-
-You can enable the `cert-manager` dependency chart by setting `cert-manager.enabled`
-to `true`. Also, set `installCRDs` to true for the first time to install CRDs
-required by the `cert-manager`.
-
-Let's include it in the existing `override-values.yaml` file, create one if not present:
-
-```yaml
-cert-manager:
-  enabled: true
-  installCRDs: true
-```
-
-(Optional) You can also include `namespace: security` in above YAML configuration to
-install `cert-manager` in `security` namespace instead of the Helm release namespace.
+1. Install cert-manager using Helm:
 
 ```bash
-kubectl create namespace security
+helm repo add jetstack https://charts.jetstack.io
+helm repo update
+helm install cert-manager jetstack/cert-manager \
+  --set crds.enabled=true \
+  --namespace cert-manager \
+  --create-namespace
 ```
 
-To install or upgrade SigNoz release with the updated configurations in
-`override-values.yaml`:
+You can find more details [here](https://cert-manager.io/docs/installation/)
+
+### Install Nginx Ingress Controller
+
+1. Install Nginx Ingress Controller using Helm:
 
 ```bash
-helm -n platform upgrade \
-    --create-namespace --install \
-    my-release signoz/signoz \
-    -f override-values.yaml
+helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+helm repo update
+helm install ingress-nginx ingress-nginx/ingress-nginx \
+  --namespace ingress-nginx \
+  --create-namespace
 ```
 
-### Enable Nginx Ingress Controller
-
-You can enable the Nginx ingress controller by setting `ingress-nginx.enabled`
-configuration to `true`.
-
-Let's include it in the existing `override-values.yaml` file:
-
-```yaml
-ingress-nginx:
-  enabled: true
-```
-
-To upgrade SigNoz release with the updated configurations in
-`override-values.yaml`:
-
-```bash
-helm -n platform upgrade \
-    --create-namespace --install \
-    my-release signoz/signoz \
-    -f override-values.yaml
-```
-
-Now, you will need the external IP of the Ingress Nginx Controller.
-That value will either be the IP address itself or a publicly accessible URL
-provided by the cloud vendor.
-
-To obtain the external IP of the ingress Nginx controller:
-
-```bash
-kubectl get services --namespace platform | grep "ingress-nginx-controller"
-```
-
-Output should be similar to the following:
-
-```bash
-my-release-ingress-nginx-controller             LoadBalancer   10.100.233.79    <redacted>-<redacted>.<redacted>.elb.amazonaws.com   80:31050/TCP,443:30597/TCP   74m
-my-release-ingress-nginx-controller-admission   ClusterIP      10.100.230.14    <none>                                               443/TCP                      74m
-```
-
-In your domain management website, you should create a DNS custom record
-of type **A** pointing all required domains to the external IP address.
-
-In our example output, you can see `<redacted>-<redacted>.<redacted>.elb.amazonaws.com`
-which is a publicly accessible sub-domain provided by a cloud vendor. In this case,
-you should create a DNS custom record of type **CNAME** for all required domains.
-
-<Admonition type="info">
-Before proceeding further, make sure that domains resolve to the ingress Nginx controller.
-</Admonition>
+You can find more details [here](https://kubernetes.github.io/ingress-nginx/deploy/)
 
 ### Create Cluster Issuer
 
-`ClusterIssuer` is a Kubernetes resource that represents certificate authorities (CAs)
-that can generate signed certificates by honoring certificate signing requests.
-All cert-manager certificates require a referenced issuer that is in a ready condition
-to attempt to honour the request.
-
-Let's include the following configuration in the existing `override-values.yaml` file:
+1. Create a `ClusterIssuer` to automatically obtain SSL certificates. Save this as `cluster-issuer.yaml`. Below is an example of a simple ACME issuer:
 
 ```yaml
-cert-manager:
-  enabled: true
-  installCRDs: false
-
-  letsencrypt: true
-  ingressClassName: nginx
-  email: prashant@domain.com
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-staging
+spec:
+  acme:
+    email: user@example.com
+    server: https://acme-staging-v02.api.letsencrypt.org/directory
+    privateKeySecretRef:
+      name: example-issuer-account-key
+    solvers:
+    - http01:
+        ingress:
+          ingressClassName: nginx
 ```
+You can find more details about cluster issuers [here](https://cert-manager.io/docs/configuration/)
 
-<Admonition type="info">
-Replace `prashant@domain.com` with your company email id.
-</Admonition>
-
-To upgrade SigNoz release with the updated configurations in `override-values.yaml`:
+2. Apply the `ClusterIssuer` to your cluster:
 
 ```bash
-helm -n platform upgrade \
-    --create-namespace --install \
-    my-release signoz/signoz \
-    -f override-values.yaml
+kubectl apply -f cluster-issuer.yaml
 ```
 
 ### Enable SigNoz Ingress
 
-Next, you can enable Kubernetes ingress for SigNoz UI by passing
-the `ingress.className` configuration to set up the ingress
-controller and use ingress annotation in the older K8s version. You can
-pass host information using `ingress.hosts`.
-
-Cert-manager takes care of issuing certificates using the ingress annotation
-`cert-manager.io/cluster-issuer` which points to previously created `ClusterIssuer`
-`letsencrypt-prod`.
-
-Let's update the existing `override-values.yaml` file accordingly:
+Update your `values.yaml` file with the following configurations:
 
 ```yaml
-frontend:
+signoz:
   ingress:
     enabled: true
     className: nginx
     hosts:
-      - host: signoz.domain.com
+      - host: signoz.example.com  # Replace with your domain
         paths:
           - path: /
             pathType: ImplementationSpecific
-            port: 3301
+            port: 8080
     tls:
-      - secretName: signoz.domain.com
+      - secretName: signoz-tls-cert
         hosts:
-          - signoz.domain.com
+          - signoz.example.com    # Replace with your domain
     annotations:
-      cert-manager.io/cluster-issuer: letsencrypt-prod
-```
+      cert-manager.io/cluster-issuer: letsencrypt-staging
 
-(Optional) Similarly, you can also enable Kubernetes ingress for SigNoz
-OtelCollector gRPC endpoint for a domain, let's say `signoz-ingest.domain.com`.
-
-Update the existing `override-values.yaml` file accordingly:
-
-```yaml
+# Configure SigNoz OTel Collector Ingress
 otelCollector:
   ingress:
     enabled: true
     className: nginx
     hosts:
-      - host: signoz-ingest.domain.com
+      - host: signoz-ingest.example.com  # Replace with your ingestion domain
         paths:
           - path: /
             pathType: ImplementationSpecific
             port: 4317
     tls:
-      - secretName: signoz-ingest.domain.com
+      - secretName: signoz-ingest-tls-cert
         hosts:
-          - signoz-ingest.domain.com
+          - signoz-ingest.example.com    # Replace with your ingestion domain
     annotations:
-      cert-manager.io/cluster-issuer: letsencrypt-prod
+      cert-manager.io/cluster-issuer: letsencrypt-staging
       nginx.ingress.kubernetes.io/ssl-redirect: "true"
       nginx.ingress.kubernetes.io/backend-protocol: "GRPC"
 ```
 
-<Admonition type="warning" >
-After enabling SigNoz OtelCollector, you can pass SSL/TLS certificate and
-private key to external OpenTelemetry collectors or external instrumentations
-which uses the secured domain endpoint.
-</Admonition>
+### Verify the setup
 
-### Run SigNoz with Updated Values
+After applying all configurations, verify your setup:
 
-At last, you can run the command below to upgrade SigNoz release with
-the updated configurations in `override-values.yaml`:
-
+1. Check certificate status:
 ```bash
-helm -n platform upgrade \
-    --create-namespace --install \
-    my-release signoz/signoz \
-    -f override-values.yaml
+kubectl get certificates -A
 ```
 
-You should be able to access SigNoz UI using the domain name in
-`frontend.ingress.hostname`.
-
-In case you have set up SSL/TLS for SigNoz OtelCollector,
-you can test it using [tracegen][3].
+2. Ensure your domains are accessible via HTTPS:
+   - Dashboard: `https://signoz.example.com`
+   - Ingestion: `https://signoz-ingest.example.com`
 
 ---
 [1]: https://github.com/kubernetes/ingress-nginx
 [2]: https://github.com/cert-manager/cert-manager
-[3]: https://pkg.go.dev/github.com/open-telemetry/opentelemetry-collector-contrib/tracegen#section-readme

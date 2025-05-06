@@ -1,49 +1,76 @@
 ---
-date: 2024-06-06
+date: 2025-03-10
 id: configuration
 title: Configuration
 description: Learn how to configure SigNoz
 ---
 
-You can configure for SigNoz with different options.
+SigNoz provides multiple methods to configure your installation. This document outlines the available configuration options and their usage. It also outlines some common use cases and how to achieve them.
 
-If no configuration for an option is set, then the default value as described is applied.
+<Admonition type="info">
+Follow [Issue#6805](https://github.com/SigNoz/signoz/issues/6805) on Github for an update on the implementation status of configuration options.
+</Admonition>
 
-## Environment Variables for Configuration
+## Configuration Options
+### YAML Configuration Files (under development)
 
-When using SigNoz, there are various environment variables you can set to configure your SigNoz cluster.
+SigNoz accepts configuration through YAML files using the `--config` flag. You can specify multiple configuration files that will be merged during startup:
 
-Here is a comprehensive list of all of them. However, for general use, you most likely do not have to worry about most of these.
+```bash
+signoz --config base.yaml --config override.yaml
+```
+ 
+#### Precedence Rules
 
-### Query Service
+When multiple configuration files are specified:
+- Files are merged from right to left
+- Values in later files take precedence over earlier files
+- In the example above, settings in `override.yaml` will override any conflicting settings in `base.yaml`
 
-| Environment Variable | Description | Default Value |
-| -------- | ----------- | ------------- |
-| `STORAGE` | Database for the storage (one of `clickhouse` or `druid`(deprecated) | `clickhouse` |
-| `GODEBUG` | Go runtime name resolver (one of `netdns=go` or `netdns=cgo`). [More info](https://pkg.go.dev/net#hdr-Name_Resolution). | `netdns=go` |
-| `ALERTMANAGER_API_PREFIX` | Endpoint of alertmanager with API prefix. | `http://alertmanager:9093/api/` |
-| `ClickHouseUrl`| ClickHouse database endpoint with TCP port | `tcp://localhost:9000` |
-| `SMTP_ENABLED` | Enable SMTP for sending email invitations | `false` |
-| `SMTP_FROM` | SMTP from address | `nil` |
-| `SMTP_HOST` | SMTP server host | `nil` |
-| `SMTP_PORT` | SMTP server port | `nil` |
-| `SMTP_USERNAME` | SMTP username of the account | `nil` |
-| `SMTP_PASSWORD` | SMTP password of the account | `nil` |
+#### Available Options
 
+For a comprehensive list of all available configuration options, refer to our [example configuration file](https://github.com/SigNoz/signoz/blob/main/conf/example.yaml). The file is continuously updated with new options as they are added.
 
-### Otel Collector
+### Environment Variables
 
-Otel Collector supports multiple combination of options.
-Using the configuration file, you can pass `receivers`, `processors`, `extensions`, `exporters` and `service` as per your requirements.
-You can find the complete otel collector configuration in the [OpenTelemetry documentation](https://opentelemetry.io/docs/collector/configuration/).
+All configuration options can be specified or overridden using environment variables. This provides flexibility for different deployment scenarios and container-based environments.
 
-By default, SigNoz runs with [this default Otel Collector configuration](https://github.com/SigNoz/signoz/blob/main/deploy/docker/clickhouse-setup/otel-collector-config.yaml).
+#### Naming Convention
 
-For any configuration changes in **Docker**, you would have to update `/deploy/docker/clickhouse-setup/otel-collector-config.yaml` and bring up Otel Collector.
+Environment variables in SigNoz follow a specific naming convention to ensure consistency and prevent conflicts:
 
+1. **SIGNOZ Prefix**
+   - All environment variables must start with `SIGNOZ_`
 
+2. **YAML Path Translation**
+   - YAML configuration paths are converted to uppercase
+   - Dots (`.`) in YAML paths become underscores (`_`)
+   - Example:
+     ```yaml
+     web.enabled: true
+     ```
+     becomes:
+     ```bash
+     SIGNOZ_WEB_ENABLED=true
+     ```
 
-## Kubernetes Configuration
+3. **Handling Underscores**
+   - Original underscores in YAML keys are converted to double underscores (`__`)
+   - This prevents ambiguity between dots and underscores in the original configuration
+   - Example:
+     ```yaml
+     sqlstore.max_open_conns: 10
+     ```
+     becomes:
+     ```bash
+     SIGNOZ_SQLSTORE_MAX__OPEN__CONNS=10
+     ```
 
-The latest helm chart configuration settings can be found at:
-- https://github.com/signoz/charts/blob/main/charts/signoz/README.md#configuration
+#### Examples
+
+| YAML Configuration | Environment Variable |
+|-------------------|---------------------|
+| `web.enabled: true` | `SIGNOZ_WEB_ENABLED=true` |
+| `sqlstore.max_open_conns: 10` | `SIGNOZ_SQLSTORE_MAX__OPEN__CONNS=10` |
+
+Environment variables take precedence over values specified in configuration files.

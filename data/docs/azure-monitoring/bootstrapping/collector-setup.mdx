@@ -98,9 +98,14 @@ service:
       processors: [batch]
       exporters: [otlp]
     logs:
-      receivers: [otlp, azureeventhub]
+      receivers: [otlp]
       processors: [batch]
       exporters: [otlp]
+    logs/azure:
+      receivers: [azureeventhub]
+      processors: [resource/azure, batch]
+      exporters: [otlp]
+
 receivers:
   otlp:
     protocols:
@@ -119,8 +124,15 @@ receivers:
     client_secret: "<Client Secret>"
     resource_groups: ["<rg-1>"]
     collection_interval: 60s
+
 processors:
   batch: {}
+  resource/azure:
+    attributes:
+      - key: source_type
+        value: "azureeventhub"
+        action: upsert
+
 exporters:
   otlp:
     endpoint: "ingest.<region>.signoz.cloud:443"
@@ -156,7 +168,7 @@ If you're not using Kubernetes, setting up the OpenTelemetry Collector on a Virt
     The Collector requires configuration before it can start receiving Azure Monitor data. Create a file named `config.yaml` and populate it with the necessary configuration details. This file should be configured to fit your specific environment's requirements. For instance, you may want to setup receivers for the telemetry data you expect to collect and processors to handle that data appropriately, as well as exporters to send the data to your desired backend, like SigNoz, Jaeger, or Prometheus.
     
     Below is a basic configuration example:
-    
+
     ```yaml
     service:
       pipelines:
@@ -172,8 +184,12 @@ If you're not using Kubernetes, setting up the OpenTelemetry Collector on a Virt
           processors: [batch]
           exporters: [otlp]
         logs:
-          receivers: [otlp, azureeventhub]
+          receivers: [otlp]
           processors: [batch]
+          exporters: [otlp]
+        logs/azure:
+          receivers: [azureeventhub]
+          processors: [resource/azure, batch]
           exporters: [otlp]
       receivers:
         otlp:
@@ -195,6 +211,11 @@ If you're not using Kubernetes, setting up the OpenTelemetry Collector on a Virt
           collection_interval: 60s
       processors:
         batch: {}
+        resource/azure:
+          attributes:
+            - key: source_type
+              value: "azureeventhub"
+              action: upsert
       exporters:
         otlp:
           endpoint: "ingest.<region>.signoz.cloud:443"

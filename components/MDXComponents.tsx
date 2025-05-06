@@ -26,9 +26,15 @@ import FAQAccordion from './FAQAccordion/FAQAccordion'
 import Button from './Button/Button'
 import DatadogPricingCalculator from './DatadogPricingCalculator/DatadogPricingCalculator'
 import DatadogVsSigNoz from './DatadogVsSigNoz/DatadogVsSigNoz'
+import GrafanaVsSigNoz from './GrafanaVsSigNoz/GrafanaVsSigNoz'
+import NewRelicVsSigNoz from './NewRelicVsSigNoz/NewRelicVsSigNoz'
 import DatadogAlternativesFinder from './DatadogAlternativesFinder/DatadogAlternativesFinder'
 import KeyPointCallout from './KeyPointCallout/KeyPointCallout'
 import GetStartedOpenTelemetryButton from './GetStartedOpenTelemetryButton/GetStartedOpenTelemetryButton'
+import InterlinkCard from './InterlinkCard/InterlinkCard'
+import InArticleVideoShowcaseModal from './InArticleVideoShowcaseModal/InArticleVideoShowcaseModal'
+import GetStartedInfrastructureMonitoring from './GetStartedInfrastructureMonitoring/GetStartedInfrastructureMonitoring'
+import ImageCTA from './ImageCTA/ImageCTA'
 
 export const components: MDXComponents = {
   Image,
@@ -58,7 +64,13 @@ export const components: MDXComponents = {
   Button,
   DatadogPricingCalculator,
   DatadogVsSigNoz,
+  GrafanaVsSigNoz,
+  NewRelicVsSigNoz,
   DatadogAlternativesFinder,
   KeyPointCallout,
   GetStartedOpenTelemetryButton,
+  InterlinkCard,
+  InArticleVideoShowcaseModal,
+  GetStartedInfrastructureMonitoring,
+  ImageCTA,
 }

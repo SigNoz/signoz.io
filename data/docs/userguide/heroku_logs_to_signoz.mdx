@@ -31,14 +31,14 @@ Once the drain is added, verify the logs in SigNoz under the Logs tab.
 
 </TabItem>
 
-<TabItem value="self-hosted" label="Self-Host">
+<TabItem value='self-host' label='Self-Host'>
 
 ## Stream Heroku Logs to Self-Hosted SigNoz
 
 ### 1. Expose a Port in `docker-compose.yaml`
-Modify the [`docker-compose-minimal.yaml`](https://github.com/SigNoz/signoz/blob/develop/deploy/docker/clickhouse-setup/docker-compose-minimal.yaml) file to expose port `8081` for receiving logs:
+Modify the [`docker-compose-minimal.yaml`](https://github.com/SigNoz/signoz/blob/main/deploy/docker/docker-compose-minimal.yaml) file to expose port `8081` for receiving logs:
 
-```yaml:/deploy/docker/clickhouse-setup/docker-compose-minimal.yaml {8} 
+```yaml:/deploy/docker/docker-compose-minimal.yaml {8} 
 ...
 otel-collector:
   image: signoz/signoz-otel-collector:0.88.11
@@ -51,9 +51,9 @@ otel-collector:
 ```
 
 ### 2. Configure `httplogreceiver`
-Add the **httplogreceiver** to your [`otel-collector-config.yaml`](https://github.com/SigNoz/signoz/blob/develop/deploy/docker/clickhouse-setup/otel-collector-config.yaml) file:
+Add the **httplogreceiver** to your [`otel-collector-config.yaml`](https://github.com/SigNoz/signoz/blob/main/deploy/docker/otel-collector-config.yaml) file:
 
-```yaml:/deploy/docker/clickhouse-setup/otel-collector-config.yaml {2-4}
+```yaml:/deploy/docker/otel-collector-config.yaml {2-4}
 receivers:
   httplogreceiver/heroku:
     endpoint: 0.0.0.0:8081
@@ -62,9 +62,9 @@ receivers:
 ```
 
 ### 3. Update the Pipeline Configuration
-Modify the pipeline in the `otel-collector-config.yaml`](https://github.com/SigNoz/signoz/blob/develop/deploy/docker/clickhouse-setup/otel-collector-config.yaml) file to include the new receiver:
+Modify the pipeline in the `otel-collector-config.yaml`](https://github.com/SigNoz/signoz/blob/main/deploy/docker/otel-collector-config.yaml) file to include the new receiver:
 
-```yaml:/deploy/docker/clickhouse-setup/otel-collector-config.yaml {4}
+```yaml:/deploy/docker/otel-collector-config.yaml {4}
 service:
   ...
   logs:

@@ -33,7 +33,7 @@ Please use non-root user (mainly for Git repository cloning), otherwise you may 
     
 1. <CloneRepo />
 
-2. Initialize a single-node swarm by entering the following command:
+2. _(Optional)_ If you don't have a swarm cluster in place, you can create one by entering the following command:
     ```bash
     docker swarm init
     ```
@@ -49,34 +49,45 @@ Please use non-root user (mainly for Git repository cloning), otherwise you may 
     To add a manager to this swarm, run 'docker swarm join-token manager' and follow the instructions.
     ```
 
-3. _(Optional)_ You can use the `docker swarm join` command to add more nodes to the swarm. Note that the node you added in the previous step is the manager. For details, see the [Docker Swarm Join](https://docs.docker.com/engine/reference/commandline/swarm_join/) page of the Docker documentation.
+3. _(Optional)_ You can use the `docker swarm join` command to add more nodes to the swarm.
+    Note that the node you added in the previous step is the manager. For details, see the
+    [Docker Swarm Join](https://docs.docker.com/engine/reference/commandline/swarm_join/)
+    page of the Docker documentation.
 
-4. Deploy SigNoz by entering the `docker stack deploy command` and specifying the following:
-    - `-c` and the path to the Compose file (`docker-swarm/clickhouse-setup/docker-compose.yaml`)
+4. Deploy SigNoz by entering the `docker stack deploy` command and specifying the following:
+    - `-d` to deploy the stack in detached mode
+    - `--prune` to remove services that are no longer referenced by the stack
+    - `-c` and the path to the Swarm Compose file (`docker-compose.yaml`)
     - The name of the stack (`signoz`)
 
     ```bash
-    docker stack deploy -c docker-swarm/clickhouse-setup/docker-compose.yaml signoz
+    cd deploy/docker
+    docker stack deploy -d --prune -c docker-compose.yaml signoz
     ```
 
     The output should look similar to the following:
 
     ```output
-    Creating network signoz_default
+    Creating network signoz-net
     Creating service signoz_query-service
     Creating service signoz_frontend
     Creating service signoz_otel-collector
-    Creating service signoz_hotrod
-    Creating service signoz_load-hotrod
+    Creating service signoz_schema-migrator
+    Creating service signoz_init-clickhouse
+    Creating service signoz_zookeeper-1
     Creating service signoz_clickhouse
     Creating service signoz_alertmanager
     ```
 
-5. _(Optional)_ By default, the instructions in this document create three replicas, and each replica can handle 50K spans per second. To handle an increased load, perform the steps in the [Scale Up](/docs/operate/docker-swarm/#scale-up) section of the [Operate on Docker Swarm](/docs/operate/docker-swarm/) page.
+5. _(Optional)_ By default, the instructions in this document create three replicas,
+    and each replica can handle 50K spans per second. To handle an increased load,
+    perform the steps in the [Scale Up](/docs/operate/docker-swarm/#scale-up) section
+    of the [Operate on Docker Swarm](/docs/operate/docker-swarm/) page.
 
 ## Verify the Installation
 
-1. Using the `docker stack services` command, monitor the SigNoz deployment process. Wait until all SigNoz services and replicas are created:
+1. Using the `docker stack services` command, monitor the SigNoz deployment process.
+    Wait until all SigNoz services and replicas are created:
 
     ```bash
     docker stack services signoz
@@ -85,17 +96,77 @@ Please use non-root user (mainly for Git repository cloning), otherwise you may 
     You should see the following output:
 
     ```output
-    ID             NAME                            MODE         REPLICAS   IMAGE                                          PORTS
-    6b67m0nuzf40   signoz_alertmanager             replicated   1/1        signoz/alertmanager:0.23.0-0.1
-    zgateenyifwv   signoz_clickhouse               replicated   1/1        yandex/clickhouse-server:21.12.3.32
-    vzc1gdx86f0w   signoz_frontend                 replicated   1/1        signoz/frontend:0.8.0                          *:3301->3301/tcp
-    dgisjp0vhv8m   signoz_hotrod                   replicated   1/1        jaegertracing/example-hotrod:1.30
-    336omtkvwukm   signoz_load-hotrod              replicated   1/1        grubykarol/locust:1.2.3-python3.9-alpine3.12
-    av5iggw983b5   signoz_otel-collector           replicated   3/3        signoz/otelcontribcol:0.43.0-0.1               *:4317-4318->4317-4318/tcp
-    hw28zb1hozu5   signoz_query-service            replicated   1/1        signoz/query-service:0.8.0                     *:8080->8080/tcp
+    ID             NAME                     MODE         REPLICAS   IMAGE                                        PORTS                  
+    loqa6qbq7lk3   signoz_clickhouse        replicated   1/1        clickhouse/clickhouse-server:24.1.2-alpine
+    zqoee9ij9xh0   signoz_init-clickhouse   replicated   0/1        clickhouse/clickhouse-server:24.1.2-alpine   
+    9awvkhh1feov   signoz_otel-collector    replicated   3/3        signoz/signoz-otel-collector:0.111.24        *:4317-4318->4317-4318/tcp
+    eu5fbg0v1bps   signoz_signoz            replicated   1/1        signoz/signoz:0.69.0                         *:80->8080/tcp                  
+    fcp7uk67tkks   signoz_schema-migrator   replicated   0/1        signoz/signoz-schema-migrator:0.111.24       
+    nw6xukg1gkf7   signoz_zookeeper-1       replicated   1/1        bitnami/zookeeper:3.7.1                      
+
     ```
 
-Go to [Docker Swarm Operate](/docs/operate/docker-swarm) section for detailed instructions.
+## Set Up Infra Agent
+
+You can set up the Infra Agent to collect logs and metrics from your infrastructure.
+
+1. Change directory to `deploy/docker-swarm/generator/infra`
+
+  ```bash
+  cd deploy/docker-swarm/generator/infra
+  ```
+
+2. Deploy the Infra Agent by running the `docker stack deploy` command:
+
+  ```bash
+  docker stack deploy -d --prune -c docker-compose.yaml signoz-infra
+  ```
+
+  The output should look similar to the following:
+
+  ```output
+  Creating service signoz-infra_infra-logspout
+  Creating service signoz-infra_infra-otel-agent
+  ```
+
+3. Verify that the Infra Agent is running correctly. To view the status of your containers, run the following command:
+
+  ```bash
+  docker stack services infra
+  ```
+
+  The output should look similar to the following:
+
+  ```output
+  ID             NAME                 MODE         REPLICAS   IMAGE                                          PORTS
+  k8gbgzz6u277   infra_logspout       global       2/2        gliderlabs/logspout:v3.2.14                    
+  da9p8vg6ydu4   infra_otel-agent     global       2/2        otel/opentelemetry-collector-contrib:0.111.0   
+  5ja92xi7im22   infra_otel-metrics   replicated   1/1        otel/opentelemetry-collector-contrib:0.111.0   
+  ```
+
+4. _(Optional)_ To scrape metrics from other services using labels, you can add the following to your application's `docker-compose.yaml` file:
+
+  ```yaml
+  services:
+    <service-name>:
+      ...
+      deploy:
+        labels:
+          signoz.io/scrape: "true"
+          signoz.io/port: "<port-where-metrics-are-exposed>"
+          signoz.io/path: "/metrics"
+  networks:
+    signoz-net:
+      name: signoz-net
+      external: true
+  ...
+  ```
+
+5. _(Optional)_ To stop the Infra Agent, run the following command:
+
+  ```bash
+  docker stack rm signoz-infra
+  ```
 
 <RetentionInfo />
 

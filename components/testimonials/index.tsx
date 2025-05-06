@@ -1,9 +1,10 @@
 import React from 'react'
 import Heading from '../../components/ui/Heading'
-import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
+import Button from '@/components/Button/Button'
+import TrackingLink from '@/components/TrackingLink'
 
-export const Testimonials = ({page}) => {
+export const Testimonials = ({ page }) => {
   const customerStoriesId = `btn-customer-stories-testimonials-${page}`
   const TESTIMONIALS_LIST = [
     [
@@ -94,7 +95,7 @@ export const Testimonials = ({page}) => {
         review: (
           <>
             <p>
-              Monitoring done. Thanks to SigNoz, I don’t have to deal with Grafana, Loki,
+              Monitoring done. Thanks to SigNoz, I don't have to deal with Grafana, Loki,
               Prometheus, and Jaeger separately.{' '}
             </p>
           </>
@@ -197,7 +198,16 @@ export const Testimonials = ({page}) => {
             <div key={idx} className="col col--6">
               {column.map((testimonial, i) => (
                 <div className="row" key={`${idx}-${i}`}>
-                  <a className="card-demo m-2 w-full" href={testimonial.href}>
+                  <TrackingLink
+                    className="card-demo m-2 w-full"
+                    href={testimonial.href}
+                    clickType="External Click"
+                    clickName="Testimonial Link"
+                    clickText={testimonial.name}
+                    clickLocation="Testimonials Section"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     <div className="card-dark rounded-md bg-signoz_ink-400 p-2 hover:bg-signoz_ink-300">
                       <div className="card__header">
                         <div className="avatar">
@@ -221,21 +231,29 @@ export const Testimonials = ({page}) => {
 
                       <div className="card__body padding--md">{testimonial.review}</div>
                     </div>
-                  </a>
+                  </TrackingLink>
                 </div>
               ))}
             </div>
           ))}
         </div>
         <div className="w-[52vw] shadow-[-4px_-40px_80px_146px_rgba(11,12,14,0.8)]">
-        <Link href="/case-study/" className='flex justify-center'>
-          <button 
-          id={customerStoriesId}
-          className="button-background flex h-8 items-center justify-center gap-1.5 truncate rounded-full px-4 py-2 pl-4 pr-3 text-center text-sm font-medium not-italic leading-5 text-white no-underline outline-none hover:text-white">
-            Read customer stories
-            <ArrowRight size={14} />
-          </button>
-        </Link>
+          <TrackingLink
+            href="/case-study/"
+            className="inline-block"
+            clickType="Secondary CTA"
+            clickName="Customer Stories Link"
+            clickText="Read customer stories"
+            clickLocation="Testimonials Section"
+          >
+            <Button
+              id={customerStoriesId}
+              className="button-background flex h-8 items-center justify-center gap-1.5 truncate rounded-full px-4 py-2 pl-4 pr-3 text-center text-sm font-medium not-italic leading-5 text-white no-underline outline-none hover:text-white"
+            >
+              Read customer stories
+              <ArrowRight size={14} />
+            </Button>
+          </TrackingLink>
         </div>
       </div>
     </section>

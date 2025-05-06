@@ -14,10 +14,12 @@ You can configure OpenTelemetry Collector to read Tomcat Server Access and Garba
 ### Steps to Collect Logs in SigNoz Cloud
 
 #### 1. Install OpenTelemetry Collector
+
 The OpenTelemetry Collector provides a vendor-neutral way to collect, process, and export telemetry data (logs, metrics, traces). 
 Follow this [installation guide](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/).
 
 #### 2. Configure Filelog Receiver
+
 Modify the `config.yaml` file from the installation to include the filelog receiver:
 
 ```yaml:config.yaml
@@ -38,6 +40,7 @@ receivers:
 </Admonition>
 
 #### 3. Update Pipelines Configuration
+
 In the same `config.yaml`, add the receivers to the pipeline:
 
 ```yaml:config.yaml
@@ -49,9 +52,11 @@ service:
 ```
 
 #### 4. Restart the OTel Collector
+
 Apply changes by [restarting the OTel Collector](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/). 
 
 #### 5. Verify Export
+
 Check the SigNoz UI for the exported logs.
 
 <figure align="center">
@@ -66,7 +71,7 @@ Check the SigNoz UI for the exported logs.
 
 </TabItem>
 
-<TabItem value="self-hosted" label="Self-Hosted">
+<TabItem value='self-host' label="Self-Hosted">
 
 ### Prerequisites
 
@@ -75,9 +80,9 @@ Check the SigNoz UI for the exported logs.
 #### Scenario 1: SigNoz Running on the Same Host
 
 ##### 1. Modify Docker Compose File
-Update [`docker-compose-minimal.yaml`](https://github.com/SigNoz/signoz/blob/develop/deploy/docker/clickhouse-setup/docker-compose-minimal.yaml) to mount your log files:
+Update [`docker-compose-minimal.yaml`](https://github.com/SigNoz/signoz/blob/main/deploy/docker/docker-compose-minimal.yaml) to mount your log files:
 
-```yaml:/deploy/docker/clickhouse-setup/docker-compose-minimal.yaml 
+```yaml:/deploy/docker/docker-compose-minimal.yaml 
 otel-collector:
   image: signoz/signoz-otel-collector:0.88.11
   command: ["--config=/etc/otel-collector-config.yaml"]
@@ -87,9 +92,9 @@ otel-collector:
 ```
 
 ##### 2. Add Filelog Receiver
-Update [`otel-collector-config.yaml`](https://github.com/SigNoz/signoz/blob/develop/deploy/docker/clickhouse-setup/otel-collector-config.yaml) to include the filelog receiver:
+Update [`otel-collector-config.yaml`](https://github.com/SigNoz/signoz/blob/main/deploy/docker/otel-collector-config.yaml) to include the filelog receiver:
 
-```yaml:/deploy/docker/clickhouse-setup/otel-collector-config.yaml
+```yaml:/deploy/docker/otel-collector-config.yaml
 receivers:
   filelog/access_logs:
     include: [/<path>/localhost_access_log.*] # Path to access logs
@@ -102,7 +107,7 @@ receivers:
 ##### 3. Update Pipelines Configuration
 Modify the pipeline to include the filelog receiver:
 
-```yaml::/deploy/docker/clickhouse-setup/otel-collector-config.yaml
+```yaml::/deploy/docker/otel-collector-config.yaml
 service:
   logs:
     receivers: [otlp, filelog/access_logs, filelog/gc_logs]

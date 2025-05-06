@@ -66,12 +66,12 @@ const MigrationFloatingCard: React.FC = () => {
         SigNoz quickly.
       </p>
       <div className="flex flex-col gap-2">
-        <Link href="/teams/" className="w-full">
+        <Link id="migration-card-try-signoz-button" href="/teams/" className="w-full">
           <Button className="flex w-full items-center justify-center gap-1 text-xs font-bold">
             Try SigNoz - Free <ArrowRight className="h-3 w-3" />
           </Button>
         </Link>
-        <Link href="https://signoz.io/product-comparison/migrate-from-datadog/" className="w-full">
+        <Link id="migration-card-request-migration-support-button" href="https://signoz.io/product-comparison/migrate-from-datadog/" className="w-full">
           <Button
             type={Button.TYPES.SECONDARY}
             className="flex w-full items-center justify-center gap-1 text-xs font-bold"

@@ -1,0 +1,156 @@
+---
+
+title: Launching SigNoz Single Binary for Super Easy Open-Source Installation & Maintenance
+slug: launching-signoz-single-binary
+date: 2025-03-13
+tags: [product]
+authors: [ankit_anand]
+image: /img/blog/2025/03/launching-signoz-single-binary-signoz-single-binary-cover.webp
+description: The new SigNoz Single Binary simplifies installation and maintenance for self-hosted users by consolidating multiple components into one. With fewer moving parts, teams can focus on monitoring and optimizing their applications without operational complexity…
+keywords: [single binary, easy installation, open source observability, SigNoz, self-hosted monitoring]
+
+---
+<InterlinkCard title="Migration Guide for Upgrading to v0.76" href="/docs/operate/migration/upgrade-0.76" />
+
+At SigNoz, we are always striving to make observability simple and accessible. In response to feedback from our open-source community, we have bundled key components of SigNoz into a single binary. This means fewer moving parts, simpler maintenance, and a much smoother installation experience.
+
+<Figure src="/img/blog/2025/03/launching-signoz-single-binary-signoz-single-binary-cover.webp" alt="" caption="" />
+
+## What changed?
+
+Till our last version, these were the components in SigNoz architecture:
+
+- SigNoz OpenTelemetry Collector
+- ClickHouse
+- Query Service
+- Frontend
+- Alert Manager
+
+<Figure src="/img/blog/2025/03/launching-signoz-single-binary-signoz-old-architecture.webp" alt="Previous SigNoz architecture which had multiple components like query service, alert manager and frontend." caption="Previous SigNoz architecture which had multiple components like query service, alert manager and frontend." />
+
+There were several challenges with the above architecture that involved separate microservices (query-service, frontend, and alertmanager). These separate components made starting SigNoz unnecessarily complex and created barriers for our community. 
+
+We received multiple requests for running SigNoz as a single binary across various Linux distributions, but the fragmented architecture made this extremely difficult to implement.
+
+Some components, like the frontend (which was essentially an nginx image serving static files), were unnecessarily separated and served no concrete purpose as independent services.
+
+We have now bundled these components into a single binary and have beautifully termed it as **“SigNoz”**. 🙂
+
+The new architecture only has three components:
+
+- SigNoz <br />
+Single binary that packs the UI, API server, Alertmanager, Opamp, etc.
+- SigNoz Otel Collector <br />
+It accepts data from various sources and writes it to ClickHouse, our data storage.
+- ClickHouse <br />
+Our columnar data storage that is engineered specifically for analytical workloads.
+
+Here’s what the new architecture looks like:
+
+<Figure src="/img/blog/2025/03/launching-signoz-single-binary-signoz-new-architecture.webp" alt="The new architecture packs a lot of components into a single binary called “SigNoz”." caption="The new architecture packs a lot of components into a single binary called “SigNoz”." />
+
+<InterlinkCard title="You can read more about our new architecture here." href="/docs/architecture/" />
+
+This consolidation introduces several key changes:
+
+- Port Consolidation: The frontend UI is now served by the same HTTP server that handles API requests, available on port 8080 (previously on port 3301). This affects:
+    - Ingress configurations
+    - Reverse proxy setups
+    - Network policies
+    - Any custom access configurations
+
+- Component Renaming: All deployment resources have been standardized to use the name signoz instead of component-specific names:
+
+    - Docker containers previously named `signoz-query-service`, `signoz-frontend`, and `signoz-alertmanager` are now unified as signoz
+    - In Kubernetes deployments, this requires migrating data from previous StatefulSet persistent volumes to new ones
+    - Configuration files and environment variables referencing specific components must be updated
+
+## Why this matters?
+
+This architectural improvement significantly simplifies the deployment and maintenance of SigNoz, making it more accessible to a broader range of users.
+
+
+Some of the key benefits include:
+
+### Faster & Easier Installation
+
+With fewer components to install, users can now deploy SigNoz more quickly. Instead of pulling multiple container images, you only need to install a single image, reducing setup time and complexity.
+
+### Simplified Maintenance
+
+Managing multiple independent services required persistent storage and individual configurations. Now, users only need to maintain a single service, reducing overhead and making troubleshooting easier.
+
+### Reduced Infrastructure Overhead
+
+A streamlined architecture means fewer services running in separate containers or pods, leading to reduced memory and CPU consumption. This results in improved performance and cost savings for those running SigNoz in self-hosted environments.
+
+### Allows installation on bare metal servers
+
+Many enterprise environments do not allow Docker or Kubernetes, requiring direct installation on Linux servers. The new SigNoz single binary allows users to install and run SigNoz seamlessly on bare-metal or virtual machines.
+
+## Install latest Version of SigNoz
+
+If you’re a new user, you can install the latest version v0.76 of SigNoz on your preferred platform by following our [docs](https://signoz.io/docs/install/self-host/).
+
+You can also check out our GitHub repo [here](https://github.com/SigNoz/signoz).
+
+## Instructions for existing users
+
+Some of the key things to note for existing users:
+
+1. Deprecated Docker Registries: The following Docker registries will no longer receive updates:
+
+- [docker.io/signoz/query-service](https://hub.docker.com/r/signoz/query-service)
+- [docker.io/signoz/frontend](https://hub.docker.com/r/signoz/frontend)
+- [docker.io/signoz/alertmanager](https://hub.docker.com/r/signoz/alertmanager)
+
+Existing images will remain available, but no new versions will be published to these registries.
+
+2. New Primary Registry: The consolidated application is now available at [docker.io/signoz/signoz](https://hub.docker.com/r/signoz/signoz). We recommend using this registry for all new installations, as it provides a seamless upgrade path to enterprise features if needed in the future.
+
+3. Open Source Registry: The community/OSS version is now available at [docker.io/signoz/signoz-community](https://hub.docker.com/r/signoz/signoz-community). This replaces the previous approach where OSS builds were available at docker.io/signoz/query-service with the tag version-oss.
+
+Existing users need to go through the below migration guide to upgrade their installations to the latest version of SigNoz. 
+
+
+Some of the commands have also changed for how you interact with SigNoz.
+
+For example, the below command which was used to exec into the query service container:
+
+```bash
+docker exec -it signoz-query-service sh
+```
+
+has now been updated to:
+
+```bash
+docker exec -it signoz-signoz sh
+```
+
+You can find the relevant commands in the Operate self-hosted SigNoz [section](https://signoz.io/docs/operate/) of our docs.
+
+## What’s next?
+
+This consolidation lays the groundwork for SigNoz's evolution toward a highly available architecture. The unified binary contains multiple services including (and not limited to) the rule evaluation engine (ruler), alertmanager, opamp websocket server, and HTTP server. Our approach offers significant flexibility for scaling:
+
+**Single Binary, Multiple Deployment Options**
+
+The consolidated SigNoz binary will remain our standard distribution format, but it's designed to support two distinct deployment patterns:
+
+1. Unified Deployment: Run the entire SigNoz stack as a single process (ideal for small to medium deployments)
+
+2. Service-Specific Deployment: Run individual components separately for high availability and scalability requirements
+
+As your observability needs grow, you can transition from the unified deployment to running specific services independently. For example:
+
+```bash
+# Run only the alertmanager service
+signoz --config config.yaml --services alertmanager
+
+# Run only the ruler service
+signoz --config config.yaml --services ruler
+```
+
+This approach enables sophisticated scaling strategies where high-traffic components can be horizontally scaled independently while maintaining a consistent codebase and configuration model. The consolidated binary gives both our community users and enterprise customers a clear, flexible path to scale their SigNoz deployments according to their specific observability requirements.
+
+We hope this takes the dev experience of using open-source SigNoz to the next level. If you face any issue, please create a [Github issue](https://github.com/SigNoz/signoz/issues). You can also join our [slack community](https://signoz.io/slack/), and interact with SigNoz maintainers and other community users.

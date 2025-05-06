@@ -192,6 +192,21 @@ presets:
       - sources:
         - from: resource_attribute
           name: k8s.pod.ip
+    # This label/annotation extraction rule takes the value of the key from labels/annotations and maps it to the tag_name attribute which will be added to the associated resources
+    extractLabels:
+    # example from pod
+    - tag_name: service.name
+      key: app.kubernetes.io/name
+      from: pod
+    # example from node
+    - tag_name: os.type
+      key: beta.kubernetes.io/os
+      from: node
+    extractAnnotations:
+    # example from node
+    - tag_name: node.ttl
+      key: node.alpha.kubernetes.io/ttl
+      from: node
 ```
 **Configuration tips**:
 - Enable only required metadata fields to optimize performance
@@ -300,6 +315,21 @@ presets:
   kubernetesAttributes:
     enabled: true
 ```
+
+## Expose port for custom receiver
+
+You may want to use a custom receiver to receive metrics. If the receiver listens on a port, you need to expose that port to the host. The following example shows how to expose port 8125 of statsd receiver.
+
+```yaml
+ports:
+  statsdReceiverPort:
+    enabled: true
+    containerPort: 8125
+    servicePort: 8125
+    hostPort: 8125
+    protocol: UDP
+```
+
 
 ## Resource Requirements
 

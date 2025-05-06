@@ -15,18 +15,21 @@ SigNoz uses the OpenTelemetry collector to receive logs, which supports the `flu
 ### Collect Logs Using FluentD in SigNoz Cloud
 
 1. **Add OpenTelemetry Collector Binary**
+
    Follow this [guide](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) to add the OpenTelemetry collector binary to your VM.
 
 2. **Configure FluentForward Receiver**
+
    Add the following to your `config.yaml`:
    ```yaml
    receivers:
      fluentforward:
        endpoint: 0.0.0.0:24224
    ```
-   > You can change the port if needed. Learn more about the `fluentforward` receiver [here](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/fluentforwardreceiver).
+  You can change the port if needed. Learn more about the `fluentforward` receiver [here](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/fluentforwardreceiver).
 
 3. **Modify the Service Section**
+
    Update your `config.yaml`:
    ```yaml
    service:
@@ -38,6 +41,7 @@ SigNoz uses the OpenTelemetry collector to receive logs, which supports the `flu
    ```
 
 4. **Update FluentD Configuration**
+
    Add the following to your FluentD configuration to forward logs to the OpenTelemetry collector:
    ```
    <match <directive>>
@@ -56,9 +60,11 @@ SigNoz uses the OpenTelemetry collector to receive logs, which supports the `flu
    Replace `<directive>` with your directive name. If FluentD is not running on the host, adjust the `host` value accordingly.
 
 5. **Restart Services**
+
    Restart FluentD and the OpenTelemetry collector binary. Logs should now appear in SigNoz.
 
 6. **Transform Logs to OpenTelemetry Model**
+
    Use processors in OpenTelemetry to transform logs. Example:
    ```yaml
    processors:
@@ -77,20 +83,21 @@ SigNoz uses the OpenTelemetry collector to receive logs, which supports the `flu
 
 </TabItem>
 
-<TabItem value="self-hosted" label="Self-Host">
+<TabItem value='self-host' label='Self-Host'>
 
 ### Collect Logs Using FluentD in Self-Hosted SigNoz
 
 1. **Configure FluentForward Receiver**
-   Add the following to your `otel-collector-config.yaml` (inside `deploy/docker/clickhouse-setup`):
+   Add the following to your `otel-collector-config.yaml` (inside `deploy/docker`):
    ```yaml
    receivers:
      fluentforward:
        endpoint: 0.0.0.0:24224
    ```
-   > You can change the port if needed. Learn more about the `fluentforward` receiver [here](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/fluentforwardreceiver).
+  You can change the port if needed. Learn more about the `fluentforward` receiver [here](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/fluentforwardreceiver).
 
 2. **Update Exporter and Pipeline**
+
    Uncomment the exporter and pipeline for logs in `otel-collector-config.yaml` and make the following changes:
    ```yaml
    exporters:
@@ -115,6 +122,7 @@ SigNoz uses the OpenTelemetry collector to receive logs, which supports the `flu
    ```
 
 3. **Expose Collector Port**
+
    Modify `docker-compose-core.yaml` to expose the port for the OpenTelemetry collector:
    ```yaml
    otel-collector:
@@ -149,9 +157,11 @@ SigNoz uses the OpenTelemetry collector to receive logs, which supports the `flu
    Replace `<otel-collector-host>` with the host where the OpenTelemetry collector is running. For troubleshooting, check [here](/docs/install/troubleshooting#signoz-otel-collector-address-grid).
 
 5. **Restart Services**
+
    Restart FluentD and SigNoz. Logs should now appear in SigNoz.
 
 6. **Transform Logs to OpenTelemetry Model**
+
    Use processors in OpenTelemetry to transform logs. Example:
    ```yaml
    processors:

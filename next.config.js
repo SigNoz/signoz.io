@@ -7,13 +7,15 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 // You might need to insert additional domains in script-src if you are using external services
 const ContentSecurityPolicy = `
   default-src 'self';
-  script-src 'self' 'unsafe-eval' 'unsafe-inline' giscus.app https://www.googletagmanager.com https://js.hsforms.net https://f.vimeocdn.com https://embed.lu.ma;
+  script-src 'self' 'unsafe-eval' 'unsafe-inline' giscus.app https://www.googletagmanager.com https://js.hsforms.net https://f.vimeocdn.com https://embed.lu.ma https://www.clarity.ms https://*.contentsquare.net http://*.contentsquare.net;
   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://embed.lu.ma;
   img-src * blob: data:;
   media-src *;
   connect-src *;
   font-src * 'self';
-  frame-src * giscus.app youtube.com
+  frame-src * giscus.app youtube.com;
+  worker-src 'self' blob:;
+  frame-ancestors 'self' https://signoz.io https://*.us.signoz.cloud https://*.in.signoz.cloud https://*.eu.signoz.cloud;
 `
 
 const securityHeaders = [
@@ -50,7 +52,7 @@ const securityHeaders = [
   // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Feature-Policy
   {
     key: 'Permissions-Policy',
-    value: 'camera=(), microphone=(), geolocation=()',
+    value: 'camera=(), microphone=(), geolocation=(), clipboard-read=*, clipboard-write=*',
   },
 ]
 
@@ -136,7 +138,7 @@ module.exports = () => {
         {
           source: '/slack/',
           destination:
-            'https://join.slack.com/t/signoz-community/shared_invite/zt-2xvif5l9t-FjtES9tiFmSspV_bWL5zAA',
+            'https://join.slack.com/t/signoz-community/shared_invite/zt-3255t2slz-KNhAwjDlTL5rTRiWz4vJcQ',
           basePath: false,
           permanent: true,
         },
@@ -416,6 +418,36 @@ module.exports = () => {
         {
           source: '/docs/userguide/collecting_nodejs_winston_logs',
           destination: '/docs/logs-management/send-logs/nodejs-winston-logs',
+          permanent: true,
+        },
+        {
+          source: '/docs/self-host/install',
+          destination: '/docs/install/self-host',
+          permanent: true,
+        },
+        {
+          source: '/comparisons/opentelemetry-vs-new-relic/',
+          destination: '/comparisons/opentelemetry-vs-newrelic/',
+          permanent: true,
+        },
+        {
+          source: '/blog/ten-reasons-not-to-add-observability/',
+          destination: '/blog/ten-reasons-not-add-observability/',
+          permanent: true,
+        },
+        {
+          source: '/blog/otel-webinar-opamp/',
+          destination: '/blog/opentelemetry-webinar-on-opamp/',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/0.75.0/query-service/user-invitation-setup/',
+          destination: '/docs/manage/administrator-guide/configuration/smtp-email-invitations/',
+          permanent: true,
+        },
+        {
+          source: '/docs/operate/query-service/user-invitation-smtp/',
+          destination: '/docs/manage/administrator-guide/configuration/smtp-email-invitations/',
           permanent: true,
         },
       ]

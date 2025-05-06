@@ -1,0 +1,189 @@
+---
+date: 2025-01-29
+id: upgrade-0.76
+title: Upgrade to v0.76 from earlier versions of SigNoz
+---
+
+<Admonition type="warning">
+
+With v0.76.0, we've consolidated multiple services (Query Service, Frontend, and Alertmanager) into a single binary/image called `signoz`. This simplifies deployment but requires careful migration.
+
+Key changes:
+- Single `signoz` binary replaces three separate services (query-service, frontend, and alertmanager)
+- Frontend port changed from 3301 to 8080
+- Requires specific migration steps based on your deployment type
+- If you are using alertmanager to send emails, you need to configure Alertmanager to send emails. Please refer to the [Configuration Options](/docs/operate/configuration#configure-alertmanager-to-send-emails) section for more details.
+
+For detailed changes, see [GitHub Issue #7309](https://github.com/SigNoz/signoz/issues/7309).
+</Admonition>
+
+<br/>
+
+<Admonition type="info">
+
+If you see the "Oops! Something went wrong" screen after upgrading, please try the following steps:
+
+1. Click on the user icon in the side navigation and log out, then log back in
+2. Open browser developer tools, clear local storage completely, and refresh the page. This will redirect you to the login screen where you can log in again
+
+</Admonition>
+
+## Kubernetes
+
+### Prerequisites
+- Must be upgrading from < 0.76.0 and not installing from scratch
+
+<Admonition type="warning">
+Before proceeding, backup your SQLite database:
+```bash
+kubectl cp -n platform --retries=5 my-release-signoz-query-service-0:/var/lib/signoz/signoz.db ./backup-signoz.db
+```
+Replace `platform` with your SigNoz namespace and `my-release` with your release name.
+</Admonition>
+
+### Upgrading
+1. Replace the yaml key `queryService` with `signoz` in your `my-values.yaml` file.
+
+From
+```yaml
+queryService:
+```
+
+To
+```yaml
+signoz:
+```
+
+2. **Verify Existing PVC**
+
+```bash
+kubectl get pvc -n platform -l app.kubernetes.io/component=query-service
+```
+
+If no PVCs are found, skip to step 4.
+
+3. **Configure Migration**
+
+Update your `my-values.yaml`:
+```yaml
+signoz:
+  initContainers:
+    migration:
+      enabled: true
+      image:
+        registry: docker.io
+        repository: busybox
+        tag: 1.35
+      command:
+        - /bin/sh
+        - -c
+        - |
+          echo "Running migration..."
+          cp -pv /var/lib/old-signoz/signoz.db /var/lib/signoz/signoz.db
+          echo "Migration complete..."
+      additionalVolumes:
+        - name: old-signoz-db
+          persistentVolumeClaim:
+            claimName: signoz-db-my-release-signoz-query-service-0
+      additionalVolumeMounts:
+        - name: old-signoz-db
+          mountPath: /var/lib/old-signoz
+```
+
+> Note that the `claimName` is the name of the PVC for the old `query-service` i.e. `signoz-db-my-release-signoz-query-service-0`. Replace it with the name of the PVC for your release. You can get the claim name from Step 1.
+
+4. **Update and Deploy**
+
+```bash
+helm repo add signoz https://charts.signoz.io
+helm repo update signoz
+helm upgrade --install my-release signoz/signoz --namespace platform --values my-values.yaml
+```
+
+> For more details on the SigNoz upgrades on Kubernetes, please refer to the [Operate SigNoz on Kubernetes guide](/docs/operate/kubernetes).
+
+5. **Verify Deployment**
+
+  ```bash
+  kubectl get pods -n platform
+  ```
+  Look for `my-release-signoz-0` running successfully.
+
+6. **Disable Migration**
+
+Update `my-values.yaml`:
+```yaml
+signoz:
+  initContainers:
+    migration:
+      enabled: false
+```
+Then reapply:
+```bash
+helm upgrade --install my-release signoz/signoz --namespace platform --values my-values.yaml
+```
+
+### Updating SigNoz Frontend Port
+
+Update your `my-values.yaml`:
+```yaml
+signoz:
+  ingress:
+    enabled: true
+    hosts:
+      - host: signoz.example.com
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+            port: 8080
+```
+
+### (Optional) Deleting old unused volumes
+```bash
+kubectl delete pvc -n platform -l app.kubernetes.io/component=query-service
+kubectl delete pvc -n platform -l app.kubernetes.io/component=alertmanager
+```
+
+## Docker Standalone
+
+### Prerequisites
+- Must be on v0.70.0 before upgrading
+- If not on v0.70.0, first [upgrade to v0.70.0](/docs/operate/migration/upgrade-0.70)
+
+### Upgrading
+Follow the standard [upgrade procedure](/docs/operate/docker-standalone#upgrade-signoz-cluster). 
+The upgrade will replace three containers (`signoz-query-service`, `signoz-frontend`, and `signoz-alertmanager`) 
+with a single container (`signoz`).
+
+### Updating SigNoz Frontend Port
+The upgrade will automatically update the frontend port to 8080. If you have a reverse proxy 
+in front of SigNoz, update its configuration to point to the new port.
+
+### (Optional) Deleting old unused volumes
+```bash
+docker volume rm signoz-alertmanager
+```
+
+## Docker Swarm
+
+### Prerequisites
+- Must be on v0.70.0 before upgrading
+- If not on v0.70.0, first [upgrade to v0.70.0](/docs/operate/migration/upgrade-0.70)
+
+### Upgrading
+Follow the standard [upgrade procedure](/docs/operate/docker-swarm#upgrade-signoz-cluster). 
+The upgrade will replace three services (`signoz_query-service`, `signoz_frontend`, and `signoz_alertmanager`) 
+with a single service (`signoz_signoz`).
+
+### Updating SigNoz Frontend Port
+The upgrade will automatically update the frontend port to 8080. If you have a reverse proxy 
+in front of SigNoz, update its configuration to point to the new port.
+
+### (Optional) Deleting old unused volumes
+```bash
+docker volume rm signoz-alertmanager
+```
+
+## In case of Upgrade Failure
+
+Reach out to us on [Slack](https://signoz.io/slack).

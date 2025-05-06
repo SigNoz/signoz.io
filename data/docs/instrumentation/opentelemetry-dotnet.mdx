@@ -30,7 +30,7 @@ In this tutorial, we will instrument a .NET application for traces and send it t
 [.NET SDK](https://dotnet.microsoft.com/en-us/download) (.NET 5.0 or Later)
 
 <Tabs entityName="plans">
-<TabItem value="cloud" label="SigNoz Cloud" default>
+<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
 ## Send Traces to SigNoz Cloud
 
 Based on your application environment, you can choose the setup below to send traces to SigNoz Cloud.
@@ -38,12 +38,12 @@ Based on your application environment, you can choose the setup below to send tr
 <Tabs>
 <TabItem value="vm" label="VM" default>
 
-Tthere are two ways to send data to SigNoz Cloud.
+There are two ways to send data to SigNoz Cloud.
 
-- [Send traces directly to SigNoz Cloud](#send-traces-directly-to-signoz-cloud)
+- Send traces directly to SigNoz Cloud
   - [No Code Automatic Instrumentation](#send-traces-directly-to-signoz-cloud---no-code-automatic-instrumentation-recommended) (recommended)
   - [Code Level Automatic Instrumentation](#send-traces-directly-to-signoz-cloud---code-level-automatic-instrumentation)
-- [Send traces via OTel Collector binary](#send-traces-via-otel-collector-binary) (recommended)
+- Send traces via OTel Collector binary (recommended)
   - [No Code Automatic Instrumentation](#send-traces-via-otel-collector-binary---no-code-automatic-instrumentation) (recommended)
   - [Code Level Automatic Instrumentation](#send-traces-via-otel-collector-binary---code-level-automatic-instrumentation)
 
@@ -68,7 +68,7 @@ chmod +x $HOME/.otel-dotnet-auto/instrument.sh
 OTEL_SERVICE_NAME=<service_name> OTEL_TRACES_EXPORTER=otlp OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf OTEL_RESOURCE_ATTRIBUTES=deployment.environment=staging,service.version=1.0.0 OTEL_EXPORTER_OTLP_ENDPOINT=ingest.<region>.signoz.cloud OTEL_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<your-ingestion-key> ./MyNetApp
 ```
 - Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
-- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 - `<service_name>` is name of your service
 
 <Admonition>
@@ -97,9 +97,9 @@ dotnet add package OpenTelemetry.AutoInstrumentation
 
 In your `Program.cs` file, add OpenTelemetry as a service. Here, we are configuring these variables:
 
-- `serviceName` - It is the name of your service.
-- `otlpOptions.Endpoint` - It is the endpoint for SigNoz Cloud.
-- `<your-ingestion-key>` - You will get your ingestion key when you [sign up](https://signoz.io/teams/) for SigNoz cloud.
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- `<service_name>` is name of your service
 
 Here’s a sample `Program.cs` file with the configured variables.
 
@@ -140,10 +140,6 @@ app.MapGet("/", () => $"Hello World! OpenTelemetry Trace: {Activity.Current?.Id}
 app.Run();
 ```
 
-- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
-- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
-- `<service_name>` is name of your service
-
 The program uses the <a href = "https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/src/OpenTelemetry.Instrumentation.AspNetCore/README.md" rel="noopener noreferrer nofollow" target="_blank" >OpenTelemetry.Instrumentation.AspNetCore</a> package to automatically create traces for incoming ASP.NET Core requests.
 
 The `OpenTelemetry.Exporter.Options` get or set the target to which the exporter is going to send traces. Here, we’re configuring it to send traces to the SigNoz cloud. The target must be a valid Uri with the scheme (`http` or `https`) and host and may contain a port and a path.
@@ -151,7 +147,7 @@ The `OpenTelemetry.Exporter.Options` get or set the target to which the exporter
 This is done by configuring an OpenTelemetry <a href = "https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/docs/trace/customizing-the-sdk/README.md" rel="noopener noreferrer nofollow" target="_blank" >TracerProvider</a> using extension methods and setting it to auto-start when the host is started.
 
 <Admonition>
-You can find your Signoz cloud address and ingestion key under the settings of your Signoz cloud account.
+You can find your SigNoz cloud address and ingestion key under the settings of your SigNoz cloud account.
 </Admonition>
 
 {/* 
@@ -310,7 +306,7 @@ In the SigNoz account, open the `Services` tab. Hit the `Refresh` button on 
 </TabItem>
 <TabItem value="k8s" label="Kubernetes">
 
-For .NET application deployed on Kubernetes, you need to install OTel Collector agent in your k8s infra to collect and send traces to SigNoz Cloud. You can find the instructions to install OTel Collector agent [here](/docs/tutorial/kubernetes-infra-metrics/).
+For .NET application deployed on Kubernetes, you need to install OTel Collector agent in your k8s infra to collect and send traces to SigNoz Cloud. You can find the instructions to install OTel Collector agent [here](https://signoz.io/docs/tutorial/kubernetes-infra-metrics/).
 
 Once you have set up OTel Collector agent, you can proceed with OpenTelemetry .NET instrumentation by following either of the two:
 
@@ -433,10 +429,10 @@ In the SigNoz account, open the `Services` tab. Hit the `Refresh` button on 
 
 There are two ways to send data to SigNoz Cloud.
 
-- [Send traces directly to SigNoz Cloud](#send-traces-directly-to-signoz-cloud)
+- Send traces directly to SigNoz Cloud
   - [No Code Automatic Instrumentation](#send-traces-directly-to-signoz-cloud---no-code-automatic-instrumentation-recommended-2) (recommended)
   - [Code Level Automatic Instrumentation](#send-traces-directly-to-signoz-cloud---code-level-automatic-instrumentation-1)
-- [Send traces via OTel Collector binary](#send-traces-via-otel-collector-binary-1) (recommended)
+- Send traces via OTel Collector binary (recommended)
   - [No Code Automatic Instrumentation](#send-traces-via-otel-collector-binary---no-code-automatic-instrumentation-1) (recommended)
   - [Code Level Automatic Instrumentation](#send-traces-via-otel-collector-binary---code-level-automatic-instrumentation-1)
 
@@ -473,7 +469,7 @@ dotnet run
 ```
   
 - Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
-- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 - `<service_name>` is name of your service
 - Replace `dotnet run` with the run command of your application
 
@@ -494,8 +490,9 @@ dotnet add package OpenTelemetry.AutoInstrumentation
 
 In your `Program.cs` file, add OpenTelemetry as a service. Here, we are configuring these variables:
 
-- `serviceName` - It is the name of your service.
-- `otlpOptions.Endpoint` - It is the endpoint for SigNoz Cloud.
+- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+- `<service_name>` is name of your service
 
 Here’s a sample `Program.cs` file with the configured variables.
 
@@ -536,10 +533,6 @@ app.MapGet("/", () => $"Hello World! OpenTelemetry Trace: {Activity.Current?.Id}
 app.Run();
 ```
 
-- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
-- Replace `<your-ingestion-key>` with your SigNoz [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
-- `<service_name>` is name of your service
-
 The program uses the <a href = "https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/src/OpenTelemetry.Instrumentation.AspNetCore/README.md" rel="noopener noreferrer nofollow" target="_blank" >OpenTelemetry.Instrumentation.AspNetCore</a> package to automatically create traces for incoming ASP.NET Core requests.
 
 The `OpenTelemetry.Exporter.Options` get or set the target to which the exporter is going to send traces. Here, we’re configuring it to send traces to the SigNoz cloud. The target must be a valid Uri with the scheme (`http` or `https`) and host and may contain a port and a path.
@@ -547,7 +540,7 @@ The `OpenTelemetry.Exporter.Options` get or set the target to which the exporter
 This is done by configuring an OpenTelemetry <a href = "https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/docs/trace/customizing-the-sdk/README.md" rel="noopener noreferrer nofollow" target="_blank" >TracerProvider</a> using extension methods and setting it to auto-start when the host is started.
 
 {/* <Admonition>
-You can find your Signoz cloud address and ingestion key under the settings of your Signoz cloud account.
+You can find your SigNoz cloud address and ingestion key under the settings of your SigNoz cloud account.
 </Admonition> */}
 
 

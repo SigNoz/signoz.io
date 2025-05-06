@@ -6,12 +6,18 @@ import { ArrowUpRight } from 'lucide-react'
 import Image from 'next/image'
 import { Github, Linkedin, Slack, Twitter, Youtube } from '@/components/social-icons/SolidIcons'
 import { usePathname } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
+import { ONBOARDING_SOURCE } from '../constants/globals'
+import { QUERY_PARAMS } from '../constants/queryParams'
 
 function Footer() {
   const pathname = usePathname()
+  const searchParams = useSearchParams()
+  const source = searchParams.get(QUERY_PARAMS.SOURCE)
   const isLoginRoute = pathname === '/login/'
+  const isOnboardingRoute = source === ONBOARDING_SOURCE
 
-  if (isLoginRoute) {
+  if (isLoginRoute || isOnboardingRoute) {
     return null
   }
 
@@ -32,12 +38,6 @@ function Footer() {
                 <Link href="/docs/migration/migrate-from-datadog" className="mt-5 hover:underline">
                   Migrate from Datadog
                 </Link>
-                <div className="mt-5 flex items-center gap-2 pr-7 hover:underline max-md:pr-5">
-                  <Link href="https://knowledgebase.signoz.io/kb" target="_blank">
-                    Knowledge Base
-                  </Link>
-                  <ArrowUpRight size={16} />
-                </div>
                 <Link href="/api_reference/" className="mt-5 hover:underline">
                   SigNoz API
                 </Link>
@@ -62,12 +62,6 @@ function Footer() {
                 <div className="mt-5 flex items-center gap-2 whitespace-nowrap pr-8 hover:underline max-md:pr-5">
                   <Link href="https://twitter.com/SigNozHQ" target="_blank">
                     Twitter
-                  </Link>
-                  <ArrowUpRight size={16} />
-                </div>
-                <div className="mt-5 flex items-center gap-2 whitespace-nowrap pr-8 hover:underline max-md:pr-5">
-                  <Link href="https://community-chat.signoz.io/" target="_blank">
-                    Community Archive
                   </Link>
                   <ArrowUpRight size={16} />
                 </div>
@@ -157,7 +151,7 @@ function Footer() {
                 </div>
                 <div className="mt-5 items-end justify-center rounded text-sm leading-5 text-emerald-300">
                   <Link href="https://status.signoz.io/" target="_blank">
-                  All systems operational
+                    All systems operational
                   </Link>
                 </div>
                 <div className="footer-icons mt-5 flex items-end justify-between gap-4 py-2">

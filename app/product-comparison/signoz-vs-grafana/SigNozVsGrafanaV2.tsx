@@ -33,6 +33,7 @@ import {
 } from 'recharts'
 import FAQAccordion from '@/components/FAQAccordion/FAQAccordion'
 import FloatingTableOfContents from '@/components/TableOfContents/FloatingTableOfContents'
+import TrackingLink from '@/components/TrackingLink'
 
 const data = [
   {
@@ -129,12 +130,24 @@ const SigNozVsGrafanaV2 = () => {
             </h3>
             <div className="flex flex-col gap-2">
               <div className="flex flex-row gap-2">
-                <Link href="/teams/">
+                <TrackingLink
+                  href="/teams/"
+                  clickType="Primary CTA"
+                  clickName="Sign Up Button"
+                  clickText="Get Started with SigNoz Cloud"
+                  clickLocation="Hero Section"
+                >
                   <Button className="flex items-center justify-center gap-2 font-bold">
                     Get Started with SigNoz Cloud <ArrowRight className="h-4 w-4" />
                   </Button>
-                </Link>
-                <Link href="/docs/install/">
+                </TrackingLink>
+                <TrackingLink
+                  href="/docs/install/"
+                  clickType="Secondary CTA"
+                  clickName="Self-Host SigNoz Button"
+                  clickText="Self-Host SigNoz"
+                  clickLocation="Hero Section"
+                >
                   <Button
                     type={Button.TYPES.SECONDARY}
                     className="flex items-center justify-center gap-2 font-bold"
@@ -142,7 +155,7 @@ const SigNozVsGrafanaV2 = () => {
                     <Server className="h-4 w-4" />
                     Self-Host SigNoz
                   </Button>
-                </Link>
+                </TrackingLink>
               </div>
               <div className="ml-2 flex flex-col gap-1">
                 <p className="mb-0 flex items-center gap-1 text-sm text-gray-400">
@@ -195,7 +208,7 @@ const SigNozVsGrafanaV2 = () => {
               </div>
               <div>
                 <h4 className="mb-8 text-3xl font-bold leading-normal text-white">
-                Single Application vs Composable Observability
+                  Single Application vs Composable Observability
                 </h4>
                 <p className="text-gray-300">
                   Grafana started as a data visualization tool. It slowly evolved into a tool that
@@ -207,35 +220,42 @@ const SigNozVsGrafanaV2 = () => {
                   maintain multiple configurations for a full-stack observability setup.
                 </p>
                 <p className="mt-4 text-gray-300">
-                The spread of tooling and configs due to different backends for each signal impacts developer experience and has a steeper learning curve.
+                  The spread of tooling and configs due to different backends for each signal
+                  impacts developer experience and has a steeper learning curve.
                 </p>
                 <figure className="mb-8">
-                <Image
-                  src="/img/blog/2025/01/grafana-challenges.webp"
-                  alt="Challenges with Grafana being discussed by users (Source: HackerNews)"
-                  width={800}
-                  height={400}
-                  className="mb-2 rounded-lg border border-gray-800 bg-gray-900/50 p-2 shadow-[0_0_15px_rgba(0,0,0,0.5)] transition-transform duration-300 hover:scale-[1.02]"
-                />
-                <figcaption className="text-sm text-gray-400">
-                Challenges with Grafana being discussed by users (<Link
-                        href="https://news.ycombinator.com/item?id=42660321"
-                        rel="nofollow"
-                        target="_blank"
-                        className="text-blue-500 underline hover:text-blue-400"
-                      >
-                        Source: HackerNews
-                      </Link>)
-                </figcaption>
-              </figure>
+                  <Image
+                    src="/img/blog/2025/01/grafana-challenges.webp"
+                    alt="Challenges with Grafana being discussed by users (Source: HackerNews)"
+                    width={800}
+                    height={400}
+                    className="mb-2 rounded-lg border border-gray-800 bg-gray-900/50 p-2 shadow-[0_0_15px_rgba(0,0,0,0.5)] transition-transform duration-300 hover:scale-[1.02]"
+                  />
+                  <figcaption className="text-sm text-gray-400">
+                    Challenges with Grafana being discussed by users (
+                    <Link
+                      href="https://news.ycombinator.com/item?id=42660321"
+                      rel="nofollow"
+                      target="_blank"
+                      className="text-blue-500 underline hover:text-blue-400"
+                    >
+                      Source: HackerNews
+                    </Link>
+                    )
+                  </figcaption>
+                </figure>
                 <p className="mt-4 text-gray-300">
-                SigNoz is powered by a single columnar datastore, ClickHouse. And SigNoz is OpenTelemetry-native. It’s easier to set up collection of all types telemetry data supported by OpenTelemetry and send it to SigNoz for visualization.
+                  SigNoz is powered by a single columnar datastore, ClickHouse. And SigNoz is
+                  OpenTelemetry-native. It’s easier to set up collection of all types telemetry data
+                  supported by OpenTelemetry and send it to SigNoz for visualization.
                 </p>
                 <p className="mt-4 text-gray-300">
-                Ingestion, storage, querying, and visualization are optimized for ease of use and intelligent out-of-box correlation between the three signals.
+                  Ingestion, storage, querying, and visualization are optimized for ease of use and
+                  intelligent out-of-box correlation between the three signals.
                 </p>
                 <p className="mt-4 text-gray-300">
-                For open-source and self-hosted users of SigNoz, there is less operational overhead and a better developer experience because of using a single data store.
+                  For open-source and self-hosted users of SigNoz, there is less operational
+                  overhead and a better developer experience because of using a single data store.
                 </p>
               </div>
             </div>
@@ -246,37 +266,53 @@ const SigNozVsGrafanaV2 = () => {
               </div>
               <div>
                 <h4 className="mb-8 text-3xl font-bold leading-normal text-white">
-                 SigNoz optimizes OTel attributes for faster querying, Loki was not built to index and query high-cardinality data
+                  SigNoz optimizes OTel attributes for faster querying, Loki was not built to index
+                  and query high-cardinality data
                 </h4>
                 <p className="text-gray-300">
-                SigNoz allows you to index any kind of OpenTelemetry attribute. By default, we index all resource attribute regardless of its data type and cardinality.
+                  SigNoz allows you to index any kind of OpenTelemetry attribute. By default, we
+                  index all resource attribute regardless of its data type and cardinality.
                 </p>
                 <p className="text-gray-300">
-                Loki only indexes some of the low cardinality attributes, and the default limit of these resource attributes is 15.
-                (<Link
-                href="https://grafana.com/docs/loki/latest/send-data/otel/#loki-configuration"
-                className="text-blue-400 hover:text-blue-300"
-                target="_blank"
-                >
-                Source
-                </Link>)
+                  Loki only indexes some of the low cardinality attributes, and the default limit of
+                  these resource attributes is 15. (
+                  <Link
+                    href="https://grafana.com/docs/loki/latest/send-data/otel/#loki-configuration"
+                    className="text-blue-400 hover:text-blue-300"
+                    target="_blank"
+                  >
+                    Source
+                  </Link>
+                  )
                 </p>
                 <p className="text-gray-300">
-                In Loki, while converting attribute values in OTLP to index label values or structured metadata, any non-string values are converted to a string. While SigNoz supports indexing of attributes in string, number, and boolean. For example, in SigNoz, we can index duration, which makes querying and aggregating data faster. In Loki, if you want to perform an aggregation on such data, it happens over non-indexed data.(<Link
-                href="https://grafana.com/docs/loki/latest/send-data/otel/"
-                className="text-blue-400 hover:text-blue-300"
-                target="_blank"
-                >
-                Source
-                </Link>)
+                  In Loki, while converting attribute values in OTLP to index label values or
+                  structured metadata, any non-string values are converted to a string. While SigNoz
+                  supports indexing of attributes in string, number, and boolean. For example, in
+                  SigNoz, we can index duration, which makes querying and aggregating data faster.
+                  In Loki, if you want to perform an aggregation on such data, it happens over
+                  non-indexed data.(
+                  <Link
+                    href="https://grafana.com/docs/loki/latest/send-data/otel/"
+                    className="text-blue-400 hover:text-blue-300"
+                    target="_blank"
+                  >
+                    Source
+                  </Link>
+                  )
                 </p>
                 <p className="text-gray-300">
-                Loki, by design, is optimized for cost-effective log aggregation and storage rather than high-performance indexing. It doesn't support full-text indexing or advanced indexing on high-cardinality data like some other systems (e.g., Elasticsearch).
+                  Loki, by design, is optimized for cost-effective log aggregation and storage
+                  rather than high-performance indexing. It doesn't support full-text indexing or
+                  advanced indexing on high-cardinality data like some other systems (e.g.,
+                  Elasticsearch).
                 </p>
-      
+
                 <p className="text-gray-300">
-                Instead, Loki focuses on indexing only labels (tags or metadata), making it ideal for scenarios where structured queries based on metadata are sufficient. So, for normal cases, it will use the labels, which are streams, as the main filter and then filter on the log data that is stored.
-                  
+                  Instead, Loki focuses on indexing only labels (tags or metadata), making it ideal
+                  for scenarios where structured queries based on metadata are sufficient. So, for
+                  normal cases, it will use the labels, which are streams, as the main filter and
+                  then filter on the log data that is stored.
                 </p>
                 <p className="text-gray-300">
                   "As a Loki user or operator, your goal should be to use the fewest labels possible
@@ -315,44 +351,47 @@ const SigNozVsGrafanaV2 = () => {
               </div>
             </div>
 
-
             <div className="flex items-start gap-4">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-orange-500/10">
                 <ChartBar className="h-5 w-5 text-orange-500" />
               </div>
               <div>
                 <h4 className="mb-8 text-3xl font-bold leading-normal text-white">
-                SigNoz offers a better dev experience for creating complex aggregations
+                  SigNoz offers a better dev experience for creating complex aggregations
                 </h4>
                 <p className="text-gray-300">
-                SigNoz allows you to query any attribute and create complex aggregations on it. Our datastore, ClickHouse is built to support aggregations over massive datasets. 
+                  SigNoz allows you to query any attribute and create complex aggregations on it.
+                  Our datastore, ClickHouse is built to support aggregations over massive datasets.
                 </p>
                 <p className="mt-4 text-gray-300">
-                SigNoz allows querying and aggregation with a simple query builder where you can create any analytical query with just a few clicks.
+                  SigNoz allows querying and aggregation with a simple query builder where you can
+                  create any analytical query with just a few clicks.
                 </p>
                 <p className="mt-4 text-gray-300">
-                Here's a quick demo of filtering for traces coming from a particular environment, then grouping them by k8s pod name to calculate latencies of spans from these pods.
+                  Here's a quick demo of filtering for traces coming from a particular environment,
+                  then grouping them by k8s pod name to calculate latencies of spans from these
+                  pods.
                 </p>
                 <div className="mb-8">
-                <div className="overflow-hidden rounded-xl shadow-2xl">
-                  <video autoPlay muted loop className="w-full">
-                    <source
-                      src="/img/product-comparisons/signoz-vs-newrelic/Arbitrary Attribute-Based Querying & Aggregation.mp4"
-                      type="video/mp4"
-                    />
-                    Your browser does not support the video tag.
-                  </video>
+                  <div className="overflow-hidden rounded-xl shadow-2xl">
+                    <video autoPlay muted loop className="w-full">
+                      <source
+                        src="/img/product-comparisons/signoz-vs-newrelic/Arbitrary Attribute-Based Querying & Aggregation.mp4"
+                        type="video/mp4"
+                      />
+                      Your browser does not support the video tag.
+                    </video>
+                  </div>
+                  <p className="mt-2 text-sm text-gray-400">
+                    Filtering and complex aggregations can be done with a simple query builder.
+                  </p>
                 </div>
-                <p className="mt-2 text-sm text-gray-400">
-                  Filtering and complex aggregations can be done with a simple query builder.
-                </p>
-              </div>
                 <p className="mt-4 text-gray-300">
-                In Grafana, you have to learn different query languages for different signals. For example, LogQL for logs, and traceQL for traces.
+                  In Grafana, you have to learn different query languages for different signals. For
+                  example, LogQL for logs, and traceQL for traces.
                 </p>
               </div>
             </div>
-
 
             <div className="flex items-start gap-4">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-orange-500/10">
@@ -380,7 +419,6 @@ const SigNozVsGrafanaV2 = () => {
                 </p>
               </div>
             </div>
-
 
             {/* <div className="flex items-start gap-4">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-purple-500/10">
@@ -633,7 +671,9 @@ const SigNozVsGrafanaV2 = () => {
                     </td>
                   </tr>
                   <tr className="transition-colors hover:bg-gray-800/50">
-                    <td className="border-b border-gray-800/50 px-6 py-4">Indexing on all Otel resource attributes</td>
+                    <td className="border-b border-gray-800/50 px-6 py-4">
+                      Indexing on all Otel resource attributes
+                    </td>
                     <td className="border-b border-gray-800/50 px-4 py-4">
                       <div className="flex items-center gap-2">
                         <CheckCircle className="h-4 w-4 text-green-500" />
@@ -647,11 +687,14 @@ const SigNozVsGrafanaV2 = () => {
                       </div>
                     </td>
                     <td className="border-b border-gray-800/50 px-6 py-4">
-                    Grafana only indexes resources attributes of otel logs by default and the default limit of this resource attributes is 15. 
+                      Grafana only indexes resources attributes of otel logs by default and the
+                      default limit of this resource attributes is 15.
                     </td>
                   </tr>
                   <tr className="transition-colors hover:bg-gray-800/50">
-                    <td className="border-b border-gray-800/50 px-6 py-4">Indexing of attributes in string, number, bool</td>
+                    <td className="border-b border-gray-800/50 px-6 py-4">
+                      Indexing of attributes in string, number, bool
+                    </td>
                     <td className="border-b border-gray-800/50 px-4 py-4">
                       <div className="flex items-center gap-2">
                         <CheckCircle className="h-4 w-4 text-green-500" />
@@ -665,7 +708,8 @@ const SigNozVsGrafanaV2 = () => {
                       </div>
                     </td>
                     <td className="border-b border-gray-800/50 px-6 py-4">
-                    Loki converts all non-string values to string while indexing. SigNoz supports indexing of attributes in string, number, or boolean.
+                      Loki converts all non-string values to string while indexing. SigNoz supports
+                      indexing of attributes in string, number, or boolean.
                     </td>
                   </tr>
                 </tbody>
@@ -714,8 +758,8 @@ const SigNozVsGrafanaV2 = () => {
           <div className="text-gray-300">
             <p className="mb-6 text-[1.1rem] text-gray-300">
               Under the hood, SigNoz is powered by a single datastore for all three signals - logs,
-              metrics & traces. Unlike Grafana, it is also built for all-in-one observability from
-              day 1.
+              metrics & traces. Unlike Grafana, SigNoz is also built for all-in-one observability
+              from day 1.
             </p>
             <div className="flex flex-col gap-4 sm:flex-row">
               <Link href="/teams/" className="block max-w-md">

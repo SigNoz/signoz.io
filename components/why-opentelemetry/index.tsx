@@ -5,7 +5,7 @@ import SubHeading from '../../components/ui/SubHeading'
 import Card from '../Card/card'
 import { BookOpen, ArrowRight } from 'lucide-react'
 import { ArrowRightSolid } from '@/components/homepage-icons/icons'
-import Link from 'next/link'
+import TrackingLink from '@/components/TrackingLink'
 
 export const WhyOpenTelemetry = () => {
   const REASONS = [
@@ -17,7 +17,7 @@ export const WhyOpenTelemetry = () => {
     },
     {
       title: 'Futureproof',
-      desc: 'OpenTelemetry’s extensibility ensures support for any evolving technologies.',
+      desc: "OpenTelemetry's extensibility ensures support for any evolving technologies.",
       figure: '/img/landing/property-ease-of-use.webp',
       logo: '/img/index_features/future.svg',
     },
@@ -51,11 +51,18 @@ export const WhyOpenTelemetry = () => {
               <br className="hidden lg:inline" />
               Kubernetes being more active.
             </p>
-            {/* <Link href="/">
-              <button className="h-10 px-4 py-2 mt-3 mb-24 rounded-full text-[10px] sm:text-sm flex items-center justify-center gap-1.5 bg-signoz_slate-400 font-medium leading-5 text-white border border-signoz_slate-200 shadow-[0_0_20px_0_rgba(242,71,105,0.20)]">
+            <button>
+              <TrackingLink 
+                href="/why-opentelemetry"
+                clickType="Secondary CTA"
+                clickName="Why OpenTelemetry Link"
+                clickText="Learn why OpenTelemetry is the future"
+                clickLocation="Why OpenTelemetry Section"
+                className="h-10 px-4 py-2 mt-3 mb-3 rounded-full text-[10px] sm:text-sm flex items-center justify-center gap-1.5 bg-signoz_slate-400 font-medium leading-5 text-white border border-signoz_slate-200 shadow-[0_0_20px_0_rgba(242,71,105,0.20)]"
+              >
                 <BookOpen className="h-3 w-3 sm:h-3.5 sm:w-3.5"/>Learn why OpenTelemetry is the future<ArrowRight className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-              </button>
-            </Link> */}
+              </TrackingLink>
+            </button>
           </div>
         </div>
       </section>
@@ -67,6 +74,7 @@ export const WhyOpenTelemetry = () => {
             description={section.desc}
             logoSize={24}
             key={section.title}
+            sectionName="OpenTelemetry Section"
           />
         ))}
       </div>
@@ -81,7 +89,7 @@ export const WhyOpenTelemetry = () => {
                 </p>
 
                 <p className="my-3 max-w-[100vw] text-base font-normal leading-9 text-signoz_vanilla-400 sm:w-[42rem] md:max-w-[50vw]">
-                  SigNoz offers the best in class support for OpenTelemetry’s semantic conventions
+                  SigNoz offers the best in class support for OpenTelemetry{"'"}s semantic conventions
                   with the best visualizations ⎯ powered by our powerful ingestion engine.
                 </p>
                 <ul className="ul-no-padding mt-8 md:mt-0 ">
@@ -92,16 +100,16 @@ export const WhyOpenTelemetry = () => {
                   <li className="mb-3 flex items-center gap-3 text-sm sm:text-base">
                     <ArrowRightSolid />
                     <span>
-                      Correlation of signals based on OpenTelemetry’s semantic conventions
+                      Correlation of signals based on OpenTelemetry{"'"}s semantic conventions
                     </span>
                   </li>
                   <li className="mb-3 flex items-center gap-3 text-sm sm:text-base">
                     <ArrowRightSolid />
-                    <span>Exceptions based on OpenTelemetry’s Trace data</span>
+                    <span>Exceptions based on OpenTelemetry{"'"}s Trace data</span>
                   </li>
                   <li className="mb-3 flex items-center gap-3 text-sm sm:text-base">
                     <ArrowRightSolid />
-                    <span>Messaging queue monitoring based on OTel’s trace & metric’s data</span>
+                    <span>Messaging queue monitoring based on OTel{"'"}s trace & metric{"'"}s data</span>
                   </li>
                   <li className="mb-3 flex items-center gap-3 text-sm sm:text-base">
                     <ArrowRightSolid />
@@ -121,10 +129,14 @@ export const WhyOpenTelemetry = () => {
                 <img src="/img/graphics/homepage/feature-graphic-otel.webp" alt="" />
               </div>
             </div>
-            <Link
+            <TrackingLink
               href="https://signoz.io/blog/is-opentelemetry-a-first-class-citizen-in-your-dashboard-a-datadog-and-newrelic-comparison/"
               className="rounded border border-signoz_slate-500 bg-signoz_ink-400 p-4"
               target="_blank"
+              clickType="Nav Click"
+              clickName="OpenTelemetry Blog Link"
+              clickText="Comparing Datadog and New Relic's support for OpenTelemetry data"
+              clickLocation="Why OpenTelemetry Section"
             >
               <p className="mb-2 text-base font-medium text-signoz_vanilla-100">
                 Comparing Datadog and New Relic's support for OpenTelemetry data
@@ -133,7 +145,7 @@ export const WhyOpenTelemetry = () => {
                 Walk through how native OpenTelemetry tools compare to APM products that have
                 adopted OpenTelemetry only partially.
               </p>
-            </Link>
+            </TrackingLink>
           </div>
         </div>
       </section>

@@ -6,181 +6,114 @@ description: Setting Up Single Sign-On (SSO) SAML 2.0 With Keycloak.
 ---
 
 <Admonition type="info">
-SAML-based authentication is only available on Enterprise plans
-(both self-hosted and on SigNoz Cloud).
+SAML-based authentication is available exclusively on Self Hosted Enterprise plan and SigNoz Cloud.
 </Admonition>
 
 ### Overview
 
-Keycloak is an open-source identity and access management tool which makes
-it easy to add authentication to applications and secure with minimum effort.
-
-In enterprise plan of SigNoz, you can enforce Single Sign-On (SSO) using SAML 2.0.
-Keycloak can be used as a user directory to save user data while acting as the
-identity provider (IdP) for the SSO.
+This tutorial walks you through setting up SSO using Keycloak, a powerful open-source identity and access management solution, with SigNoz Enterprise.
 
 ### Prerequisites
 
-- SigNoz application up and running
-- Helm version 3.8 or above
-- SigNoz helm chart version 0.4.3 or above
-- Enterprise plan of SigNoz
-- Set up `cert-manager` and Nginx ingress controller
-- SigNoz Frontend ingress with TLS
+Before you begin, ensure you have:
+- SigNoz Enterprise subscription
+- Kubernetes cluster with:
+  - Helm (version 3.8+)
+  - SigNoz helm chart (version 0.4.3+)
+  - Cert-manager installed
+  - Nginx ingress controller configured
+- A domain name pointed to your Kubernetes cluster for SigNoz (e.g., `signoz.domain.com`)
+- A domain name pointed to your Kubernetes cluster for Keycloak (e.g., `signoz-keycloak.domain.com`)
+- SSL/TLS certificates configured
 
-<Admonition type="info">
-If you have not set up `cert-manager`, Nginx ingress controller, or
-have Signoz with TLS, you can follow the guide [here][1] to set it up.
-</Admonition>
+> 💡 **Need TLS Setup?** If you haven't configured TLS yet, follow our [TLS Setup Guide][1] first.
 
-## Set up Single Sign-On using SAML
+## Steps to Setup SSO
 
-For this tutorial, you will be required to have Keycloak up and running.
+### Install Keycloak
 
-It is assumed that you have set up Keycloak or any other identity and
-access management tool with SSL/TLS certificates.
+Follow the official [Keycloak documentation](https://www.keycloak.org/getting-started/getting-started-kube) to install Keycloak.
 
-In case you do not have Keycloak set up and want to install Keycloak
-using SigNoz chart, you can follow the [instructions in this section][2]
-before proceeding further.
+### Configure Keycloak
 
-### Steps to Set Up SAML
+Follow these steps in the Keycloak Admin Console:
 
-Let's assume `https://signoz.domain.com` as the endpoint where SigNoz is
-publicly accessible whereas `https://signoz-keycloak.domain.com` being
-the secured endpoint of **Keycloak**.
+1. **Access Admin Console**
+   - Navigate to your Keycloak URL
+   - Log in with admin credentials
+   ![Admin login page](/img/docs/keycloak-saml/admin-login.webp)
 
-1. Go to the Keycloak Admin console UI and sign in as an administrator
+2. **Create SigNoz Realm**
+   - Click "Create Realm"
+   - Name it "SigNoz"
+   ![Create SigNoz realm](/img/docs/keycloak-saml/create-realm.webp)
 
-  ![Admin login page](/img/docs/keycloak-saml/admin-login.webp)
+3. **Configure SAML Client**
+   - Navigate to Clients → Create Client
+   - Select SAML as the client protocol
+   - Set Client ID to your SigNoz domain (e.g., `signoz.your-domain.com`)
+   ![Create client page](/img/docs/keycloak-saml/create-client.webp)
 
-2. Create a new realm: **SigNoz**
+4. **Configure Access Settings**
+   ```
+   Home URL: https://signoz.your-domain.com/api/v1/complete/saml
+   Valid redirect URIs: https://signoz.your-domain.com/*
+   ```
+   ![Client access settings](/img/docs/keycloak-saml/client-access-settings.webp)
 
-  ![Create SigNoz realm](/img/docs/keycloak-saml/create-realm.webp)
+5. **Set Up SAML Mappers**
+   - Go to Client Scopes → `signoz.your-domain.com-dedicated`
+   - Add these predefined mappers:
+     - Role list
+     - X500 email
+     - X500 given name
+   ![Predefined mappers](/img/docs/keycloak-saml/add-predefined-mappers.webp)
 
-3. Create new client of type **SAML** with client ID same as that of
-  secured SigNoz endpoint: `signoz.domain.com`
+6. **Configure SAML Settings**
+   - Set Name ID format to "email"
+   - Disable Client Signature Required
+   ![SAML capabilities email id](/img/docs/keycloak-saml/saml-capabilities-email-id.webp)
 
-  ![Create client page](/img/docs/keycloak-saml/create-client.webp)
+### Configure Users
 
-4. Update **Access settings** configurations
+1. **Create Test User**
+   - Navigate to Users → Add User
+   - Fill required fields:
+     - Username (email format)
+     - Email address
+     - First and Last name
+   ![Create new user](/img/docs/keycloak-saml/create-user.webp)
 
-   - Set **Home URL** to `https://signoz.domain.com/api/v1/complete/saml`
-   - Set **Valid redirect URIs** to `https://signoz.domain.com/*`
+2. **Set User Password**
+   - Go to Credentials tab
+   - Set a permanent password
+   - Disable "Temporary" toggle
+   ![New user credentials](/img/docs/keycloak-saml/new-user-credentials.webp)
 
-  ![Client access settings](/img/docs/keycloak-saml/client-access-settings.webp)
+### Configure SigNoz
 
-5. Go to Clients > Client scopes, and select `signoz.domain.com-dedicated` and
-  add predefined mappers in SigNoz client: *role list*, *X500 email*, and *X500 given name* 
+1. **Gather SAML Information**
+   - Access Realm Settings → SAML 2.0 Identity Provider Metadata
+   - Note down:
+     - SAML ACS URL (ends with `/protocol/saml`)
+     - Entity ID
+     - X.509 certificate
+   ![SAML 2.0 identity provider metadata](/img/docs/keycloak-saml/realm-setting-saml.webp)
 
-  ![Predefined mappers](/img/docs/keycloak-saml/add-predefined-mappers.webp)
+2. **Configure SigNoz**
+   - Go to Settings → Organization Settings → Authenticated Domains
+   - Add your email domain (e.g., `your-domain.com`)
+   - Configure SAML settings with collected information
+   - Enable "Enforce SSO" toggle
+   ![SigNoz SAML configuration](/img/docs/keycloak-saml/signoz-saml-configuration.webp)
 
-6. In SAML capabilities section, select **email** for Name ID format
+### Verify the setup
 
-  ![SAML capabilities email id](/img/docs/keycloak-saml/saml-capabilities-email-id.webp)
-
-7. Go to Clients > Keys, and turn off the **Client signature required** option
-  from signing keys config
-
-  ![Client signature required](/img/docs/keycloak-saml/client-signature-required.webp)
-
-8. Create new user which is to be used for login. Be sure to include
-  email id in **username** and **email** fields
-
-  ![Create new user](/img/docs/keycloak-saml/create-user.webp)
-
-9. Make sure to create credentials for the created user and turn off the temporary toggle
-
-  ![New user credentials](/img/docs/keycloak-saml/new-user-credentials.webp)
-
-10. Go to Realm settings > General, open **SAML 2.0 Identity Provider Metadata** endpoint
-
-  ![SAML 2.0 identity provider metadata](/img/docs/keycloak-saml/realm-setting-saml.webp)
-
-  From the XML file, make note of the followings:
-   - SAML location URL with the `/protocol/saml` suffix which is SAML ACS URL
-   - SAML entity id
-   - SAML X.509 certificate
-
-11. In SigNoz UI, go to Settings > Organization Settings > Authenticated Domains
-
-    Add an authenticated domains which will be the domain of the user email;
-    in case of `prashant@domain.com`, it will be `domain.com`.
-
-  ![Add authenticated domain](/img/docs/keycloak-saml/add-domain.webp)
-
-12. SAML configurations from **Step 10** is set in SigNoz and enable the
-  **Enforce SSO** toggle
-
-  ![SigNoz SAML configuration](/img/docs/keycloak-saml/signoz-saml-configuration.webp)
-
-13. Open your browser with incognito (or private) mode, and open your SigNoz
-  URL and click **Login** followed by **SSO Login**
-
-  ![SSO Login](/img/docs/keycloak-saml/sso-login.webp)
-
-14. You will be redirected to Keycloak user login page, enter Keycloak user
-  credentials from **Step 8** and **Step 9**
-
-  ![Keycloak user login](/img/docs/keycloak-saml/keycloak-user-login.webp)
-
-Now, you should be logged in to SigNoz using Keycloak SSO.
-
-### (Optional) Install Keycloak using SigNoz Helm Chart
-
-You can install the **Keycloak** using SigNoz helm chart. We can set custom
-namespace, admin console credentials, postgres admin and user credentials,
-and ingress related configurations.
-
-Let's include them in existing `override-values.yaml`:
-
-```yaml
-keycloak:
-  enabled: true
-
-  auth:
-    adminUser: admin
-    adminPassword: adminpass123
-
-  postgresql:
-    auth:
-      postgresPassword: pgadminpass123
-      username: bn_keycloak
-      password: bn_keycloak123
-
-  ingress:
-    enabled: true
-    ingressClassName: nginx
-    pathType: ImplementationSpecific
-    path: /
-    annotations:
-      cert-manager.io/cluster-issuer: letsencrypt-prod
-    hostname: signoz-keycloak.domain.com
-    servicePort: http
-
-    tls: true
-    selfSigned: false
-```
-
-<Admonition type="info">
-You will need to replace `domain.com` with company domain or something relevant.
-
-Make sure that you have Nginx ingress controller and Cert-manager installed
-and you have a `ClusterIssuer` named `letsencrypt-prod`.
-You can follow the instructions from the [guide here][1].
-</Admonition>
-
-To install or upgrade SigNoz release with the updated configurations in
-`override-values.yaml`:
-
-```bash
-helm -n platform upgrade \
-    --create-namespace --install \
-    my-release signoz/signoz \
-    -f override-values.yaml
-```
-
-You should be able to access Keycloak UI using the domain name in `ingress.hostname`.
+1. Open an incognito browser window
+2. Navigate to your SigNoz URL
+3. Click "Login" → "SSO Login"
+4. Enter Keycloak credentials when prompted
+5. Verify successful authentication
 
 ---
 

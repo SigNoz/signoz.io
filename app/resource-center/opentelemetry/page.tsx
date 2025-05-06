@@ -1,27 +1,27 @@
-'use client'
+import OpenTelemetryClient from './OpenTelemetryClient'
+import { Metadata } from 'next'
 
-import React, { useState } from 'react'
-import Blogs from '../blog/Blogs'
-import Comparisons from '../comparisons/Comparisons'
-import Guides from '../guides/Guides'
-import OpenTelemetry from './OpenTelemetry'
-import Tabs from '../Shared/Tabs'
+export const metadata: Metadata = {
+  title: 'OpenTelemetry Learning Track | SigNoz',
+  description: 'Learn about OpenTelemetry - the open-source observability framework for cloud-native software. Guides, blogs, and resources to help you implement OpenTelemetry.',
+  alternates: {
+    canonical: 'https://signoz.io/resource-center/opentelemetry',
+  },
+  openGraph: {
+    title: 'OpenTelemetry Learning Track | SigNoz',
+    description: 'Learn about OpenTelemetry - the open-source observability framework for cloud-native software. Guides, blogs, and resources to help you implement OpenTelemetry.',
+    url: './resource-center/opentelemetry',
+    siteName: 'SigNoz',
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    title: 'OpenTelemetry Learning Track | SigNoz',
+    card: 'summary_large_image',
+    description: 'Learn about OpenTelemetry - the open-source observability framework for cloud-native software. Guides, blogs, and resources to help you implement OpenTelemetry.',
+  },
+}
 
 export default function OpenTelemetryHome() {
-  const [activeTab, setActiveTab] = useState('openTelemetry-tab')
-
-  return (
-    <div className="container mx-auto py-16 sm:py-8 !mt-[48px]">
-
-      <div className="tab-content pt-6">
-        {activeTab === 'blog-tab' && <Blogs />}
-
-        {activeTab === 'comparisons-tab' && <Comparisons />}
-
-        {activeTab === 'guides-tab' && <Guides />}
-
-        {activeTab === 'openTelemetry-tab' && <OpenTelemetry />}
-      </div>
-    </div>
-  )
+  return <OpenTelemetryClient />
 }

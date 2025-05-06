@@ -66,12 +66,12 @@ const NewrelicMigrationFloatingCard: React.FC = () => {
         SigNoz quickly.
       </p>
       <div className="flex flex-col gap-2">
-        <Link href="/teams/" className="w-full">
+        <Link id="newrelic-migration-card-try-signoz-button" href="/teams/" className="w-full">
           <Button className="flex w-full items-center justify-center gap-1 text-xs font-bold">
             Try SigNoz - Free <ArrowRight className="h-3 w-3" />
           </Button>
         </Link>
-        <Link href="/product-comparison/migrate-from-newrelic/" className="w-full">
+        <Link id="newrelic-migration-card-request-migration-support-button" href="/product-comparison/migrate-from-newrelic/" className="w-full">
           <Button
             type={Button.TYPES.SECONDARY}
             className="flex w-full items-center justify-center gap-1 text-xs font-bold"

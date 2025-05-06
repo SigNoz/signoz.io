@@ -286,7 +286,7 @@ Let us see how to collect and analyze Nginx logs with SigNoz.
 
 ## Steps for collecting Nginx logs into SigNoz
 
-Modify the `docker-compose.yaml` file present inside `deploy/docker/clickhouse-setup` to expose to mount the log file to otel-collector. The file is located [here](https://github.com/SigNoz/signoz/blob/develop/deploy/docker/clickhouse-setup/docker-compose.yaml). Mount the path where the Nginx access logs are available `~/Work/logs/access.log:/tmp/access.log`  to docker volume.
+Modify the `docker-compose.yaml` file present inside `deploy/docker` to expose to mount the log file to otel-collector. The file is located [here](https://github.com/SigNoz/signoz/blob/main/deploy/docker/docker-compose.yaml). Mount the path where the Nginx access logs are available `~/Work/logs/access.log:/tmp/access.log`  to docker volume.
 
 ```jsx
 otel-collector:
@@ -302,7 +302,7 @@ otel-collector:
 
 Here we are mounting the log file of our application to the `tmp` directory of SigNoz otel-collector. You will have to replace `<path>`with the path where your log file is present.
 
-Add the filelog reciever to [otel-collector-config.yaml](https://github.com/SigNoz/signoz/blob/develop/deploy/docker/clickhouse-setup/otel-collector-config.yaml) which is present inside `deploy/docker/clickhouse-setup` and include the path `/tmp/access.log`:
+Add the `filelog` receiver to [otel-collector-config.yaml](https://github.com/SigNoz/signoz/blob/main/deploy/docker/otel-collector-config.yaml) which is present inside `deploy/docker` and include the path `/tmp/access.log`:
 
 ```jsx
 receivers:
@@ -324,7 +324,7 @@ receivers:
       field: attributes.time
 ```
 
-Next we will modify our pipeline inside [otel-collector-config.yaml](https://github.com/SigNoz/signoz/blob/develop/deploy/docker/clickhouse-setup/otel-collector-config.yaml) to include the receiver we have created above.
+Next we will modify our pipeline inside [otel-collector-config.yaml](https://github.com/SigNoz/signoz/blob/main/deploy/docker/otel-collector-config.yaml) to include the receiver we have created above.
 
 ```jsx
 service:

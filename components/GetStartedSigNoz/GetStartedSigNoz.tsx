@@ -1,16 +1,69 @@
-import MarkdownRenderer from '@/components/ReactMarkdown'
 import React from 'react'
-
-const markdownContent = `SigNoz cloud is the easiest way to run SigNoz. [Sign up](https://signoz.io/teams/) for a free
-account and get 30 days of unlimited access to all features. 
-
-[![Get Started - Free CTA](/img/launch_week/try-signoz-cloud-blog-cta.png)](https://signoz.io/teams/) 
-
-You can also install and self-host SigNoz yourself since it is open-source. With 19,000+ GitHub stars,
-[open-source SigNoz](https://github.com/signoz/signoz) is loved by developers. Find the
-[instructions](https://signoz.io/docs/install/) to self-host SigNoz.
-`
+import Image from 'next/image'
+import TrackingLink from '@/components/TrackingLink'
 
 export default function GetStartedSigNoz() {
-  return <MarkdownRenderer markdownContent={markdownContent} />
+  return (
+    <div className="get-started-signoz">
+      <p>
+        SigNoz cloud is the easiest way to run SigNoz.{' '}
+        <TrackingLink 
+          href="https://signoz.io/teams/" 
+          clickType="Nav Click"
+          clickName="Sign Up Link"
+          clickLocation="Get Started SigNoz Card"
+          clickText="Sign up"
+          className="text-blue-600 hover:underline font-medium"
+        >
+          Sign up
+        </TrackingLink>{' '}
+        for a free account and get 30 days of unlimited access to all features.
+      </p>
+
+      <TrackingLink 
+        href="/teams/" 
+        clickType="Card Click"
+        clickName="Get Started SigNoz"
+        clickLocation="Get Started SigNoz Card"
+        clickText="Start Your Free Trial"
+        className="block w-full"
+      >
+        <Image 
+          src="/img/launch_week/try-signoz-cloud-blog-cta.png" 
+          alt="Get Started - Free CTA"
+          width={0}
+          height={0}
+          sizes="100vw"
+          className="w-full h-auto"
+          style={{ maxWidth: '100%' }}
+        />
+      </TrackingLink>
+
+      <p>
+        You can also install and self-host SigNoz yourself since it is open-source. With 20,000+ GitHub stars,{' '}
+        <TrackingLink 
+          href="https://github.com/signoz/signoz" 
+          clickType="External Click"
+          clickName="GitHub Repository Link"
+          clickLocation="Get Started SigNoz Card"
+          clickText="open-source SigNoz"
+          className="text-blue-600 hover:underline font-medium"
+        >
+          open-source SigNoz
+        </TrackingLink>{' '}
+        is loved by developers. Find the{' '}
+        <TrackingLink 
+          href="/docs/install/" 
+          clickType="Nav Click"
+          clickName="Docs Link"
+          clickLocation="Get Started SigNoz Card"
+          clickText="instructions"
+          className="text-blue-600 hover:underline font-medium"
+        >
+          instructions
+        </TrackingLink>{' '}
+        to self-host SigNoz.
+      </p>
+    </div>
+  )
 }

@@ -3,20 +3,20 @@
 import './teams.styles.css'
 
 import React, { useEffect, useState } from 'react'
-import ReactGA from 'react-ga4'
 import TestimonialSection from './TestimonialSection'
 
 import { ArrowRight, Loader2 } from 'lucide-react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import Image from 'next/image'
+import Link from 'next/link'
+import { useLogEvent } from '../../hooks/useLogEvent'
 
 interface ErrorsProps {
   fullName?: string
   workEmail?: string
   companyName?: string
+  termsOfService?: string
 }
-
-ReactGA.initialize('G-6NFJ2Y6NQN')
 
 interface SignUpPageProps {}
 
@@ -51,6 +51,7 @@ const Teams: React.FC<SignUpPageProps> = () => {
     companyName: '',
     dataRegion: 'us',
     source: '',
+    termsOfServiceAccepted: true,
   })
 
   const [errors, setErrors] = useState<ErrorsProps>({})
@@ -58,13 +59,16 @@ const Teams: React.FC<SignUpPageProps> = () => {
   const [submitSuccess, setSubmitSuccess] = useState(false)
   const [submitFailed, setSubmitFailed] = useState(false)
   const router = useRouter()
+  const pathname = usePathname()
+  const logEvent = useLogEvent()
 
   const searchParams = useSearchParams()
   const workEmailFromParams = searchParams.get('q')
 
   const handleInputChange = (event) => {
-    const { name, value } = event.target
-    setFormData({ ...formData, [name]: value })
+    const { name, value, type, checked } = event.target
+    const newValue = type === 'checkbox' ? checked : value
+    setFormData({ ...formData, [name]: newValue })
   }
 
   const handleRegionChange = (selectedDataRegion: string): void => {
@@ -78,6 +82,10 @@ const Teams: React.FC<SignUpPageProps> = () => {
       errors['workEmail'] = 'Work email is required'
     } else if (!isValidCompanyEmail(formData.workEmail)) {
       errors['workEmail'] = 'Please enter a valid company email'
+    }
+
+    if (!formData.termsOfServiceAccepted) {
+      errors['termsOfService'] = 'You must accept the Terms of Service to continue'
     }
 
     setErrors(errors)
@@ -113,30 +121,22 @@ const Teams: React.FC<SignUpPageProps> = () => {
   }
 
   const handleGTMCustomEventTrigger = (payload) => {
-    if (window && window?.dataLayer && Array.isArray(window.dataLayer)) {
-      window.dataLayer.push({
+    if (window && (window as any).dataLayer && Array.isArray((window as any).dataLayer)) {
+      ;(window as any).dataLayer.push({
         event: 'signoz-cloud-signup-form-submit',
         ...payload,
       })
     }
 
-    // Sending a custom event to GA4 using ReactGA
-    ReactGA.event({
-      category: 'Signup', // Adjusted to a more general term for the event category
-      action: 'Submit', // Simplified action
-      label: 'SigNoz Cloud Signup', // Label to provide more context
-      nonInteraction: false, // Setting to false as this is an interactive event
+    // Get previously stored email (if any)
+    const previousEmail = localStorage.getItem('prevSignupEmail')
+    const currentEmail = payload.email
 
-      // ReactGA.event({
-      //   category: "SigNoz Cloud Signup",
-      //   action: "SigNozCloudSignup",
-      //   value: 99, // optional, must be a number
-      //   nonInteraction: true, // optional, true/false
-      //   transport: "xhr", // optional, beacon/xhr/image
-      //     ...payload
-      // }, {
-      //   ...payload
-    })
+    // Store current email for future comparison
+    localStorage.setItem('prevSignupEmail', currentEmail)
+
+    // Extract domain from email as company identifier
+    const domain = currentEmail.split('@')[1] || ''
   }
 
   const handleError = () => {
@@ -156,10 +156,14 @@ const Teams: React.FC<SignUpPageProps> = () => {
       region: {
         name: formData.dataRegion,
       },
+      preferences: {
+        terms_of_service_accepted: formData.termsOfServiceAccepted,
+        opted_email_updates: true,
+      },
     }
 
     try {
-      const response = await fetch('https://api.signoz.cloud/v2/users', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_CONTROL_PLANE_URL}/users`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -170,15 +174,46 @@ const Teams: React.FC<SignUpPageProps> = () => {
         setSubmitSuccess(true)
         handleGTMCustomEventTrigger(payload)
 
+        // Set user ID in local storage *before* logging events
+        localStorage.setItem('app_user_id', payload.email)
+
+        // --- Segment Identify Call ---
+        logEvent({
+          eventType: 'identify',
+          eventName: 'User Signed Up', // Optional: Add an event name for clarity
+          attributes: {
+            // These become Segment traits
+            email: payload.email,
+            dataRegion: payload.region.name,
+            // Add other relevant traits if available, e.g., fullName, companyName
+          },
+        })
+
+        // --- Segment Group Call ---
+        const domain = payload.email.split('@')[1] || 'unknown_domain'
+        logEvent({
+          eventType: 'group',
+          eventName: 'User Associated with Company', // Optional: Add an event name
+          groupId: domain,
+          attributes: {
+            // These become Group traits
+            // Add company-related traits if available, e.g., companyName
+            domain: domain,
+          },
+        })
+        // --- End Segment Calls ---
+
         setFormData({
           fullName: '',
           workEmail: '',
           companyName: '',
           dataRegion: 'us',
           source: '',
+          termsOfServiceAccepted: true,
         })
 
-        localStorage.setItem('workEmail', formData.workEmail)
+        localStorage.setItem('workEmail', payload.email)
+        localStorage.setItem('region', payload.region.name)
 
         router.push('/verify-email')
       } else {
@@ -287,6 +322,43 @@ const Teams: React.FC<SignUpPageProps> = () => {
                         </button>
                       ))}
                     </div>
+                  </div>
+
+                  <div className="mb-[28px] space-y-2.5 rounded-md border border-signoz_slate-500/30 bg-signoz_ink-400/30 p-3.5">
+                    <div className="flex items-start gap-2.5">
+                      <input
+                        type="checkbox"
+                        id="termsOfServiceAccepted"
+                        name="termsOfServiceAccepted"
+                        checked={formData.termsOfServiceAccepted}
+                        onChange={handleInputChange}
+                        className="mt-0.5 h-4 w-4 rounded border border-gray-500 bg-transparent accent-signoz_robin-500"
+                      />
+                      <label htmlFor="termsOfServiceAccepted" className="text-sm text-stone-300">
+                        I agree to the{' '}
+                        <a
+                          href="https://signoz.io/terms-of-service/"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-medium text-signoz_robin-500 hover:underline"
+                        >
+                          Terms of Service
+                        </a>{' '}
+                        and{' '}
+                        <a
+                          href="https://signoz.io/privacy/"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-medium text-signoz_robin-500 hover:underline"
+                        >
+                          Privacy Policy
+                        </a>
+                        .
+                      </label>
+                    </div>
+                    {errors?.termsOfService && (
+                      <div className="ml-6.5 text-xs text-red-400">{errors.termsOfService}</div>
+                    )}
                   </div>
 
                   <button

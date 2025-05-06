@@ -55,6 +55,7 @@ const BuildForDevelopers = () => {
                   description={section.desc}
                   img={section.figure}
                   key={section.title}
+                  sectionName="Built for Developers"
                 />
               ))}
             </div>

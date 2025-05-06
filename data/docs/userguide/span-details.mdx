@@ -1,50 +1,115 @@
 ---
 date: 2024-06-06
 id: span-details
-title: Span Details
+title: Trace Details
 ---
 
-On the **Span Details** page, SigNoz displays all the spans associated with the current trace. Spans are displayed in two ways:
+## Overview
 
-- As a flame graph. For an introduction to flame graphs, see [Brendan Gregg’s page](https://www.brendangregg.com/flamegraphs.html).
-- As Gantt chart. This helps you visualize your spans as a parent-child tree.
+The **Trace Details** interface in SigNoz offers a powerful and intuitive interface to visualize and analyze the journey of a request through your system. 
+By displaying detailed trace information, it enables you to quickly diagnose performance issues, pinpoint errors, and understand the intricate flow of operations 
+in your systems. It is engineered to handle massive trace data supporting more than a **million spans per trace** making it an ideal solution for high-volume environments.
 
-For each span, SigNoz shows the following details:
+The Trace Details Page enables you to:
 
-- The name of the operation
-- The name of the service
-- Start time
-- Duration
-- The list of tags associated with the currently selected span.
-- The list of events associated with the currently selected span. If your application emits events to complement traces, SigNoz will display them on this page. For details about raising events in your code, see the [Events](https://opentelemetry.io/docs/concepts/instrumenting-library/#events) section of the OpenTelemetry website
+- **Visualizes the Entire Trace:**  
+  Render large traces seamlessly using synchronized flame graphs and waterfall charts.
+  
+- **Drills Down Into Details:**  
+  Inspect individual spans to view metadata, context, attributes and events associated with each span.
+  
+- **Efficient Navigation and Search:**  
+  Use the dynamic search bar and filtering options to quickly jump to specific spans or error events making it easier to analyze and troubleshoot.
+  
+- **Responsive and Scalable:**  
+  Handle traces from your architectures (monolithic or microservices) without performance lag, ensuring smooth and real-time analysis.
 
-The following illustration shows the **Span Details** page:
+<YouTube id="oQdjfhzz5oQ" mute={false} />
 
-![Screenshot showing the span details page](/img/span-details-page-v0.7.1.webp)
+## Key Concepts
 
-**Legend**:
+Understanding the following concepts is essential for effectively using the Trace Detail feature:
 
-1. **Trace ID**: At the top of the page, SigNoz displays the ID of the currently selected trace.
-2. **Flame Graph**: Shows the flame graph.
-3. **Time**: Displays the start time and duration of the currently selected trace.
-4. **Focus**: Allows you to focus on a specific span.
-5. **Main content area**: Displays all the spans as a tree structure. You can expand or collapse individual nodes in the tree to show or hide its children nodes. For each node, SigNoz displays the number of children nodes.
-6. **Span Details**: Displays the tags and events for the currently selected span.
+- **Trace:**  
+  A trace represents the complete path a request takes through your system, helping you understand its flow across various components and services.
 
-## View Details About a Span
+- **Span:**  
+    Spans are the building blocks of a trace, representing individual units of work performed by an application or service during the request’s lifecycle.
+    Each span is essentially a structured log message enriched with context, hierarchy, and correlations to help you pinpoint specific operations.
+    Key components of a span includes:
+  - **Span Context:**  
+    Metadata that links spans across services, enabling distributed tracing and hierarchical structuring.
+  - **Span Attributes:**  
+    Key-value pairs that store additional metadata about the operation performed by the span.
+  - **Span Links:**  
+    References that establish causal relationships between spans, useful for correlating asynchronous operations or background tasks with the main trace.
+  - **Span Events:**  
+    Structured log messages that record important events at specific timestamps during the span's execution.
 
-To view details about a span, select it either in the flame graph or the main content area.
+## Navigating the Trace Detail Interface
 
-## Focus on a Specific Span
+### Opening a Trace
 
-Select the **Focus on selected span** button to view only the currently selected span. In the following example, you can see how to:
+**Select a Trace:**  
+Choose a trace from your list of traces in the trace explorer which will open the Trace Detail page with the spans.
+  
+**Initial Visualization:**  
+Once loaded, you will see two synchronized views:
+- **Flame Graph:**  
+Displays a hierarchical representation of the trace, showing the nested relationships between spans.
+- **Waterfall Chart:**  
+Provides a detailed timeline view, illustrating the sequence and duration of each span.
 
-1. Select a span
-2. Focus on that span
-3. View all the spans again
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image" src="/img/docs/apm-and-distributed-tracing/tarce-details-overview.webp" alt="Trace Details Interface"/>
+    <figcaption><i>Trace Details Interface</i></figcaption>
+</figure>
 
-## Identify Spans with Errors
+### Detailed Span Inspection
 
-On the **Span Details** page SigNoz highlights in red all spans with errors. In the following example screenshot, you can see two spans with errors:
+**Expand Span Details:**  
+Click on a specific span in either the flame graph or waterfall view to inspect detailed information, including:
+- Span context and attributes.
+- Related span links and events.
+- The kind of the span (e.g., client, server, service, producer, or consumer etc.).
 
-![Screenshot showing a span with errors](/img/identify-span-with-errors-v0.7.1.webp)
+**Synchronized Navigation:**  
+The flame graph and waterfall views remain perfectly synchronized. Navigating in one view automatically updates the other, so you can always see where a span fits 
+into the overall trace timeline.
+
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image" src="/img/docs/apm-and-distributed-tracing/trace-details-span-details.webp" alt="Span Details"/>
+    <figcaption><i>Span Details</i></figcaption>
+</figure>
+
+### Using the Search Filter Feature
+
+The Trace Detail interface allows you to filter spans on basis of different for quick analysis while dynamically loading additional spans as you scroll, ensuring 
+smooth navigation even in large traces.
+
+For example, to debug errors:
+    - Enable the `has_error = true` filter to highlight **error spans**.
+    - Click on an error span to view associated **error messages and logs**.
+    - Analyze the affected services and identify bottlenecks causing failures.
+
+
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image" src="/img/docs/apm-and-distributed-tracing/trace-details-filters.webp" alt="Filtering for error spans"/>
+    <figcaption><i>Filtering for error spans</i></figcaption>
+</figure>
+
+
+### Adjusting the Interface for Better Visibility
+
+**Resizable Span Names Anchor:**  
+If span names or details appear cramped, use the draggable window to adjust the size of the display area. This ensures that you can comfortably read and analyze 
+all information.
+
+<figure data-zoomable align='center'>
+    <img className="box-shadowed-image" src="/img/docs/apm-and-distributed-tracing/trace-details-ui-adjustments.webp" alt="Resize Span names and Jump through spans"/>
+    <figcaption><i>Resize anchor to see complete span names</i></figcaption>
+</figure>
+
+The Trace Detail feature in SigNoz empowers you to effortlessly navigate, analyze, and debug complex traces across your systems—providing the insights necessary to 
+debug issues, optimize performance, and understand your system's behavior in real time. Upcoming updates will introduce more detailed performance metrics, 
+integrated span event visualizations, and granular filtering options for even deeper trace analysis.

@@ -5,6 +5,7 @@ import './login.styles.css'
 import React, { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { ArrowRight, ArrowUpRight, Dot, Loader2, Pencil } from 'lucide-react'
+import { useLogEvent } from '../../hooks/useLogEvent'
 
 interface ErrorsProps {
   workEmail?: string
@@ -21,7 +22,7 @@ enum TenantState {
   EXPIRED = 'EXPIRED',
 }
 
-const BASE_URL = 'https://api.signoz.cloud/v2'
+const BASE_URL = process.env.NEXT_PUBLIC_CONTROL_PLANE_URL
 
 const trustBadges = [
   {
@@ -53,6 +54,7 @@ export default function Login() {
 
   const [noDeployments, setNoDeployments] = useState(false)
   const router = useRouter()
+  const logEvent = useLogEvent()
 
   const handleEmailUpdate = (event) => {
     const { value } = event.target
@@ -125,11 +127,34 @@ export default function Login() {
 
     if (data.status === 'success') {
       setSubmitSuccess(true)
+      localStorage.setItem('app_user_id', workEmail || '')
 
       if (data?.data?.length === 0) {
         handleNoDeployments()
+        setIsSubmitting(false)
         return
       }
+
+      // --- Segment Identify Call ---
+      logEvent({
+        eventType: 'identify',
+        eventName: 'User Logged In',
+        attributes: {
+          email: workEmail,
+        },
+      })
+
+      // --- Segment Group Call ---
+      const domain = workEmail.split('@')[1] || 'unknown_domain'
+      logEvent({
+        eventType: 'group',
+        eventName: 'User Associated with Company (Login)',
+        groupId: domain,
+        attributes: {
+          domain: domain,
+        },
+      })
+      // --- End Segment Calls ---
 
       const sortedData = data?.data.sort((a, b) => {
         if (a.state === TenantState.HEALTHY && b.state !== TenantState.HEALTHY) return -1
@@ -236,7 +261,7 @@ export default function Login() {
                     {submitSuccess && userTenants.length > 0 && (
                       <div className="my-8">
                         <div className="rounded-sm border border-signoz_slate-400 p-3 text-sm font-medium text-signoz_vanilla-400">
-                          Associated Teams’ URLs
+                          Associated Teams' URLs
                         </div>
 
                         <div className="tenant-list">

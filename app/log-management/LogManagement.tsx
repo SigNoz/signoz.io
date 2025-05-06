@@ -138,14 +138,14 @@ const Header = () => {
 
         <h1 className="text-gradient z-[1] my-4 !p-3 text-2xl font-semibold tracking-tight dark:text-white sm:my-2 sm:my-5 sm:text-3xl md:leading-[3.5rem] lg:text-[44px]">
           Log Management at any Scale <br />
-          Powered by ClickHouse
+          Powered by a Columnar Database
         </h1>
 
         <p className="m-0 p-3 text-lg font-normal leading-8 text-signoz_vanilla-400 sm:p-0">
           Ingest logs from anywhere, quickly search and analyze with a powerful query builder, and
           correlate your
           <br className="hidden lg:inline" />
-          logs with other signals. Logs at SigNoz is powered by ClickHouse - a lightning-fast
+          logs with other signals. Logs at SigNoz is powered by a lightning-fast
           columnar datastore
           <br className="hidden lg:inline" />
           suited for storing logs at scale.
@@ -247,7 +247,7 @@ const TrustedByTeams = ({ page }) => {
 const SigNozFeatures = () => {
   const sections = [
     {
-      title: 'Logs at any scale powered by ClickHouse',
+      title: 'Logs at any scale powered by a Columnar Database',
       desc: (
         <>
           SigNoz uses ClickHouse (used by likes of Uber & Cloudflare) as datastore ⎯ an extremely

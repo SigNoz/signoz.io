@@ -9,13 +9,6 @@ import InstrumentationFAQ from '@/components/shared/instrumentation-faq.md'
 
 This document contains instructions on how to set up OpenTelemetry instrumentation in your Quarkus applications and view your application traces in SigNoz.  
 
-OpenTelemetry's Java implementation integrates seamlessly with Quarkus through its extension system, providing automatic instrumentation with minimal configuration.
-
-There are two steps to using OpenTelemetry with Quarkus:
-
-- Instrumenting your Quarkus application with OpenTelemetry
-- Validating the configuration to ensure data is being sent as expected
-
 ## Prerequisite
 
 - A Quarkus REST application with basic endpoints
@@ -57,7 +50,7 @@ implementation 'io.quarkus:quarkus-opentelemetry:3.17.2'
 quarkus.application.name=quarkus-app
 quarkus.application.version=1.0.0
 
-# Ingestion key for authentication (only if using Signoz Cloud)
+# Ingestion key for authentication (only if using SigNoz Cloud)
 quarkus.otel.exporter.otlp.headers=${OTEL_EXPORTER_OTLP_HEADERS:}
 
 # Enable OpenTelemetry SDK
@@ -88,8 +81,8 @@ quarkus.otel.exporter.otlp.protocol=http/protobuf
 quarkus.otel.resource.attributes=${OTEL_RESOURCE_ATTRIBUTES}
 ```
 
-<Tabs>
-<TabItem value="cloud" label="SigNoz Cloud" default>
+<Tabs entityName="plans">
+<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
 Quarkus Extensions and the libraries they provide, are directly instrumented, use of OpenTelemetry Agent is not required nor recommended.
 
 Based on your application environment, you can choose the setup below to instrument your application via SigNoz Cloud.
@@ -321,7 +314,7 @@ If you haven't already, signup for [SigNoz Cloud](https://signoz.io/teams/).
 
 </TabItem>
 
-<TabItem value="self-hosted" label="Self-Hosted SigNoz">
+<TabItem value='self-host' label="Self-Host">
 Based on your application environment, you can choose the setup below to instrument your application via SigNoz Cloud.
 <Tabs>
 <TabItem value="vm" label="VM" default>

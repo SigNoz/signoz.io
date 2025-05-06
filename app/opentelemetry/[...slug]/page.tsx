@@ -10,17 +10,19 @@ import type { Authors, Blog, Opentelemetry } from 'contentlayer/generated'
 import PostSimple from '@/layouts/PostSimple'
 import PostLayout from '@/layouts/PostLayout'
 import PostBanner from '@/layouts/PostBanner'
+import OpenTelemetryLayout from '@/layouts/OpenTelemetryLayout'
 import { Metadata } from 'next'
 import siteMetadata from '@/data/siteMetadata'
 import { notFound } from 'next/navigation'
 import React from 'react'
 import PageFeedback from '../../../components/PageFeedback/PageFeedback'
 
-const defaultLayout = 'PostLayout'
+const defaultLayout = 'OpenTelemetryLayout'
 const layouts = {
   PostSimple,
   PostLayout,
   PostBanner,
+  OpenTelemetryLayout,
 }
 
 export async function generateMetadata({
