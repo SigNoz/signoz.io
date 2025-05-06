@@ -274,7 +274,8 @@ const SigNozFeatures = () => {
     {
       title: 'Anomaly Based Alert',
       desc: 'An Anomaly-based alert in SigNoz allows you to define conditions based on metric data and trigger alerts when the metric data deviates from the expected behavior.',
-      image: '/img/features/alerts/anomaly-based-alert.webp',
+      image:
+        '/img/blog/2024/09/introducing-anomaly-detection-for-smarter-alerts-anomaly-detection.webp',
       buttonText: 'Learn More',
       buttonLink: 'https://signoz.io/docs/alerts-management/anomaly-based-alerts/',
     },
