@@ -183,3 +183,47 @@ Here is the SigNoz Otel Collector address grid which could be helpful:
   helm upgrade --install -n platform my-release signoz/signoz \
   --set otelCollector.serviceType="<NodePort or LoadBalancer>"
   ```
+
+## Docker Installation in Selinux
+
+When running SigNoz with Docker on SELinux-enabled hosts, you need to apply an SELinux label to bind-mount volumes by appending either `:z` or `:Z` to the volume suffix. For example:
+
+```bash
+docker run -d \
+  --name signoz \
+  -p 3301:3301 \
+  -v "$(pwd)"/signoz-data:/data:z \
+  signoz/signoz:latest
+```
+
+Or, in a Docker Compose file:
+
+```yaml
+version: '3.7'
+services:
+  signoz:
+    image: signoz/signoz:latest
+    container_name: signoz
+    ports:
+      - "3301:3301"
+    volumes:
+      - ./signoz-data:/data:Z
+```
+
+References:
+- [Configure the selinux label](https://docs.docker.com/storage/bind-mounts/#configure-the-selinux-label)
+- [Using Docker volumes on selinux enabled servers](https://prefetch.net/blog/2017/09/30/using-docker-volumes-on-selinux-enabled-servers/)
+
+## Container signoz-init-clickhouse Hangs Forever 
+
+After installation, you might see sometime the `signoz-init-clickhouse` being stuck and from the logs it's shows:
+```bash
+docker logs signoz-init-clickhouse
+# Fetching histogram-binary for linux/amd64
+# Connecting to github.com (20.205.243.166:443)
+```
+This indicates the helper binary wasn’t fetched from GitHub. For these issues you should, restart the SigNoz containers and allow time for the helper binary to download:
+
+```bash
+docker compose restart
+```
