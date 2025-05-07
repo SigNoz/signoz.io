@@ -35,8 +35,8 @@ interface Region {
 // Variant Navbar component (now integrated into layout)
 export const VariantNavbar = () => {
   return (
-    <div className="fixed left-0 right-0 top-0 z-[30] mx-auto flex h-[56px] w-full items-center px-4 text-signoz_vanilla-100 backdrop-blur-[20px] md:px-8 lg:px-14">
-      <div className="flex h-full w-full items-center bg-signoz_ink-500 px-4 md:px-8 lg:w-5/12 lg:px-8">
+    <div className="fixed left-0 right-0 top-0 z-[30] mx-auto flex h-[56px] w-full items-center text-signoz_vanilla-100 backdrop-blur-[20px]">
+      <div className="bg-signoz_ink-600 flex h-full w-full items-center px-4 md:pl-12 lg:w-5/12 lg:pl-16">
         <div className="flex justify-start">
           <Link href="/" className="-m-1.5 flex items-center gap-2 p-1.5">
             <Image
@@ -50,7 +50,7 @@ export const VariantNavbar = () => {
           </Link>
         </div>
       </div>
-      <div className="hidden h-full items-center justify-end bg-signoz_ink-400 px-4 md:px-8 lg:flex lg:w-7/12 lg:px-8">
+      <div className="hidden h-full items-center justify-end bg-signoz_ink-300 px-4 md:pr-12 lg:flex lg:w-7/12 lg:pr-16">
         <TrackingLink
           clickType="Nav Click"
           clickName="Docs Link"
@@ -63,7 +63,7 @@ export const VariantNavbar = () => {
           Documentation
         </TrackingLink>
       </div>
-      <div className="flex h-full items-center justify-end bg-signoz_ink-500 px-4 md:px-8 lg:hidden">
+      <div className="bg-signoz_ink-600 flex h-full items-center justify-end px-4 md:px-8 lg:hidden">
         <TrackingLink
           clickType="Nav Click"
           clickName="Docs Link"
@@ -630,12 +630,12 @@ const TeamsVariant: React.FC = () => {
       experimentId={EXPERIMENTS.TEAMS_PAGE.id}
       variantId={EXPERIMENTS.TEAMS_PAGE.variants.VARIANT}
     >
-      <div className="variant-teams-container flex min-h-screen flex-col bg-signoz_ink-500">
+      <div className="variant-teams-container bg-signoz_ink-600 flex min-h-screen flex-col">
         <VariantNavbar />
 
         <div className="flex min-h-screen flex-col pt-[56px] lg:flex-row">
           {/* Left section - Sign up form */}
-          <div className="relative flex w-full flex-col bg-signoz_ink-500 p-8 pt-[20vh] lg:w-5/12 lg:p-12 lg:pt-[20vh]">
+          <div className="bg-signoz_ink-600 relative flex w-full flex-col p-8 pt-[20vh] lg:w-5/12 lg:p-12 lg:pt-[20vh]">
             <div className="w-full">
               {!isSubmitting && submitFailed ? (
                 <ErrorState />
@@ -658,7 +658,7 @@ const TeamsVariant: React.FC = () => {
           </div>
 
           {/* Right section - Testimonials */}
-          <div className="relative hidden bg-signoz_ink-400 lg:flex lg:w-7/12">
+          <div className="relative hidden border-l border-signoz_slate-500 bg-signoz_ink-300 lg:flex lg:w-7/12">
             <div className="mt-[-56px] flex w-full items-center justify-center">
               <Testimonial />
             </div>
