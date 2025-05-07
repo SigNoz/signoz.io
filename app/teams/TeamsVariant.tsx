@@ -636,7 +636,7 @@ const TeamsVariant: React.FC = () => {
 
           {/* Right section - Testimonials */}
           <div className="relative hidden bg-signoz_ink-400 lg:flex lg:w-7/12">
-            <div className="flex w-full items-center justify-center">
+            <div className="mt-[-56px] flex w-full items-center justify-center">
               <Testimonial />
             </div>
           </div>
