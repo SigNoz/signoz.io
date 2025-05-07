@@ -107,36 +107,37 @@ const ErrorState: React.FC = () => {
 const testimonials = [
   {
     quote:
-      'Setup was a breeze—we had the OpenTelemetry collector running and monitoring in no time.',
-    author: 'Niranjan Ravichandra, Co-founder & CTO, Cedana',
-    avatar: '/img/case_study/profile-photos/cedana.webp',
-    url: 'https://signoz.io/case-study/cedana/',
+      'With SigNoz in place, I was able to pinpoint why, how, and exactly what was going wrong in no time.',
+    author: 'Nate Bohman, Senior DevOps Engineer, Blip',
+    avatar: '/img/case_study/profile-photos/blip.webp',
+    url: '/case-study/blip/',
   },
   {
     quote:
-      "SigNoz is simple, affordable, and reliable. I'm heading on vacation confident I'll be alerted if anything goes wrong.",
-    author: 'Shiv Ansal, Co-founder & CTO, Bands',
-    avatar: '/img/case_study/profile-photos/bands.webp',
-    url: 'https://signoz.io/case-study/bands/',
+      'Setup was a breeze—we had the OpenTelemetry collector running and monitoring in no time.',
+    author: 'Niranjan Ravichandra, Co-founder & CTO, Cedana',
+    avatar: '/img/case_study/profile-photos/cedana.webp',
+    url: '/case-study/cedana/',
   },
   {
-    quote: 'SigNoz has been a huge help with a smooth experience and prompt, effective support.',
+    quote:
+      'SigNoz has been a huge help with a smooth experience, prompt and effective technical support by devs.',
     author: 'Avneesh Kumar, VP of Engineering at Mailmodo',
     avatar: '/img/case_study/profile-photos/mailmodo.webp',
-    url: 'https://signoz.io/case-study/mailmodo/',
+    url: '/case-study/mailmodo/',
   },
   {
     quote:
       "We use SigNoz daily—it's open in more than half my tabs and is vital to our operations.",
     author: 'Khushhal Reddy, Senior Backend Engineer, Kiwi',
     avatar: '/img/case_study/profile-photos/kiwi.webp',
-    url: 'https://signoz.io/case-study/kiwi/',
+    url: '/case-study/kiwi/',
   },
   {
     quote: 'SigNoz has elevated our software quality and keeps our customers delighted.',
     author: 'Charlie Shen, Lead DevOps Engineer, Brainfish',
     avatar: '/img/case_study/profile-photos/brainfish.webp',
-    url: 'https://signoz.io/case-study/brainfish/',
+    url: '/case-study/brainfish/',
   },
 ]
 
