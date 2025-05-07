@@ -4,14 +4,13 @@ title: "Cloud Metrics Migration Notice"
 
 # 📌 Overview
 
-We’re transitioning our metric naming from underscore-based (e.g., `system_memory_usage`) to dot-based conventions (e.g., `system.memory.usage`) across our cloud observability pipeline. This change aligns with OpenTelemetry semantic conventions, enables more intuitive PromQL and other queries, and ensures consistent naming across platforms (Prometheus, OpenTelemetry, ClickHouse).
+We’re transitioning our metric naming from underscore-based (e.g., `system_memory_usage`) to dot-based conventions (e.g., `system.memory.usage`) across our cloud observability pipeline. This change aligns with OpenTelemetry semantic conventions, enables us to build seamless correlations.
 
 To facilitate a seamless migration, we’ve initiated a dual export phase where both the existing ClickHouse metrics exporter and the new `signozclickhousemetrics` exporter run concurrently. During this phase, underscore-based metrics remain in the background—hidden from user views—so you will only see dot-based metrics (`system.memory.usage`).
 
 ## 🔍 Why We Are Migrating
 
 - **Semantic Alignment:** Dot-separated metric names follow the OpenTelemetry semantic conventions, providing clearer structure and hierarchy (e.g., `system.memory.usage`).
-- **Improved Query Efficiency:** Modern PromQL and other query engines now support dots in metric names, enabling more intuitive and powerful queries.
 - **Cross-Platform Compatibility:** Consistent naming across platforms (Prometheus, OpenTelemetry, ClickHouse) reduces confusion and simplifies integrations.
 
 ## 📆 Migration Timeline
@@ -20,7 +19,7 @@ To facilitate a seamless migration, we’ve initiated a dual export phase where 
 
 - **Start:** Already underway
 - **Duration:** Until next week
-- **Behavior:** Both the existing ClickHouse metrics exporter and the new `signozclickhousemetrics` exporter are running concurrently, you wont be able to see any change during this period.
+- **Behavior:** Both the existing ClickHouse metrics exporter and the new `signozclickhousemetrics` exporter are running concurrently, you won't be able to see any change during this period.
 
 ### Final Migration (Next Week)
 
