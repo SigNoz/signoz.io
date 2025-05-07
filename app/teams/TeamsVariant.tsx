@@ -140,7 +140,7 @@ const testimonials = [
   },
 ]
 
-const DISPLAY_DURATION = 3000 // 3 seconds exactly
+const DISPLAY_DURATION = 4000 // 4 seconds exactly
 
 const Testimonial: React.FC = () => {
   const [currentIndex, setCurrentIndex] = useState(0)
