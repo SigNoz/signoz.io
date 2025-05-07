@@ -57,10 +57,10 @@ export const VariantNavbar = () => {
       <div className="flex h-full items-center justify-end bg-signoz_ink-500 px-4 md:px-8 lg:hidden">
         <Link
           href="/docs"
-          className="flex items-center truncate px-1.5 py-1 text-sm font-normal hover:text-signoz_robin-500"
+          className="flex items-center truncate px-1.5 py-1 text-sm font-normal text-gray-400 hover:text-signoz_robin-500"
         >
           <ExternalLink className="mr-2 h-4 w-4" />
-          Documentation
+          Docs
         </Link>
       </div>
     </div>
@@ -420,7 +420,7 @@ export const ExperimentVariant: React.FC<{
             {!isSubmitting && submitFailed ? <ErrorState /> : <SignupForm />}
           </div>
 
-          <div className="absolute bottom-4 left-0 right-0 text-center">
+          <div className="absolute bottom-4 left-0 right-0 hidden text-center lg:block">
             <p className="flex justify-around px-8 text-xs text-signoz_vanilla-100/60">
               <span>OpenTelemetry Native.</span>
               <span>Unfied Signals.</span>
