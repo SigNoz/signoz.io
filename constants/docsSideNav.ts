@@ -1425,6 +1425,20 @@ const docsSideNav = [
     ],
   },
   {
+    label: 'CICD',
+    type: 'category',
+    isExpanded: false,
+    // route: '/docs/cicd',
+    items: [
+      {
+        type: 'doc',
+        route: '/docs/cicd/argocd/argocd-metrics',
+        label: 'ArgoCD',
+      },
+
+    ],
+  },
+  {
     label: 'Frontend & Mobile Monitoring',
     type: 'category',
     isExpanded: false,

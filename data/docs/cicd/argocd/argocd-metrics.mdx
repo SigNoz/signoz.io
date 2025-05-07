@@ -1,0 +1,313 @@
+---
+title: Monitor ArgoCD with SigNoz
+description: Learn how to configure ArgoCD metrics monitoring and visualization with SigNoz
+id: argocd-metrics
+---
+
+[ArgoCD](https://argo-cd.readthedocs.io/en/stable/) is a declarative, GitOps continuous delivery tool for Kubernetes. This guide will show you how to:
+
+1. Configure metrics collection from ArgoCD
+2. Forward these metrics to SigNoz
+3. Visualize ArgoCD metrics using the pre-built SigNoz dashboard
+
+## Understanding ArgoCD Metrics
+
+ArgoCD exposes Prometheus-compatible metrics at several endpoints:
+
+1. **Application Metrics** - Available at `argocd-metrics:8082/metrics`
+   * Information about applications, their health, and sync status
+
+2. **API Server Metrics** - Available at `argocd-server-metrics:8083/metrics`
+   * API request and response statistics (request counts, response codes, latencies)
+
+3. **Repository Server Metrics** - Available at `argocd-repo-server:8084/metrics`
+   * Git operations and repository server health metrics
+
+## Configuring the OpenTelemetry Collector
+
+To collect ArgoCD metrics and send them to SigNoz, you need to configure the OpenTelemetry Collector with a Prometheus receiver.
+
+### 1. Add Prometheus Receiver
+
+Add the following configuration to the `receivers` section of your OpenTelemetry Collector configuration file:
+
+```yaml
+prometheus:
+  config:
+    global:
+      scrape_interval: 60s
+    scrape_configs:
+      - job_name: argocd-metrics
+        metrics_path: /metrics
+        scheme: http
+        static_configs:
+          - targets:
+            - localhost:8082  # Application metrics
+            - localhost:8083  # API Server metrics
+            - localhost:8084  # Repository Server metrics
+```
+
+> **Note**: Replace `localhost` with appropriate hostnames or service names if your ArgoCD is running in a different namespace or cluster.
+
+### 2. Complete Configuration Example
+
+Below is a complete `otel-config.yaml` example that includes the ArgoCD metrics collection:
+
+```yaml
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+  hostmetrics:
+    collection_interval: 60s
+    scrapers:
+      cpu: {}
+      disk: {}
+      load: {}
+      filesystem: {}
+      memory: {}
+      network: {}
+      paging: {}
+      process:
+        mute_process_name_error: true
+        mute_process_exe_error: true
+        mute_process_io_error: true
+      processes: {}
+  prometheus:
+    config:
+      global:
+        scrape_interval: 60s
+      scrape_configs:
+        - job_name: otel-collector-binary
+          static_configs:
+            - targets:
+              - localhost:8888
+        - job_name: argocd-metrics
+          metrics_path: /metrics
+          scheme: http
+          static_configs:
+            - targets:
+              - localhost:8082
+              - localhost:8083
+              - localhost:8084
+
+processors:
+  batch:
+    send_batch_size: 1000
+    timeout: 10s
+  # Ref: https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/resourcedetectionprocessor/README.md
+  resourcedetection:
+    detectors: [env, system] # Before system detector, include ec2 for AWS, gcp for GCP and azure for Azure.
+    # Using OTEL_RESOURCE_ATTRIBUTES envvar, env detector adds custom labels.
+    timeout: 2s
+    system:
+      hostname_sources: [os] # alternatively, use [dns,os] for setting FQDN as host.name and os as fallback
+  resource/env:
+    attributes:
+    - key: deployment.environment
+      value: staging
+      action: upsert
+
+extensions:
+  health_check: {}
+  zpages: {}
+
+exporters:
+  otlp:
+    endpoint: "ingest.{region}.signoz.cloud:443"
+    tls:
+      insecure: false
+    headers:
+      "signoz-access-token": "your-ingestion-key"
+  logging:
+    verbosity: normal
+
+service:
+  telemetry:
+    metrics:
+      address: 0.0.0.0:8888
+  extensions: [health_check, zpages]
+  pipelines:
+    metrics:
+      receivers: [otlp]
+      processors: [resource/env, batch]
+      exporters: [otlp]
+    metrics/internal:
+      receivers: [prometheus, hostmetrics]
+      processors: [resource/env, resourcedetection, batch]
+      exporters: [otlp]
+    traces:
+      receivers: [otlp]
+      processors: [resource/env, batch]
+      exporters: [otlp]
+    logs:
+      receivers: [otlp]
+      processors: [resource/env, batch]
+      exporters: [otlp]
+```
+
+Make sure to replace:
+- `{region}` with your SigNoz Cloud region (e.g., `us`, `eu`, `in`)
+- `your-ingestion-key` with your actual SigNoz ingestion key
+
+## Using the ArgoCD Dashboard in SigNoz
+
+Once your ArgoCD metrics are flowing into SigNoz, you can utilize the pre-built ArgoCD dashboard to monitor your deployment.
+
+### Importing the Dashboard
+
+1. Download the ArgoCD dashboard JSON from [SigNoz Dashboards Repository](https://github.com/SigNoz/dashboards/blob/main/argocd/argocd.json)
+
+2. Import the dashboard in SigNoz:
+   - Navigate to Dashboards in your SigNoz UI
+   - Click on "Import Dashboard" in the top-right corner
+   - Upload the downloaded JSON file
+   - Click "Import"
+
+For more information on importing and customizing dashboards, refer to the [SigNoz Dashboard Documentation](https://signoz.io/docs/dashboards/).
+
+### Dashboard Variables
+
+The dashboard includes the following variables that you can use to filter your data:
+
+- `{{namespace}}`: Namespace of the application
+- `{{health.status}}`: Health status of the application
+- `{{repo}}`: Name of the repository
+
+## Dashboard Overview
+
+The ArgoCD Dashboard in SigNoz provides comprehensive visibility into your ArgoCD deployment. Here's what you can monitor:
+
+### Key Features
+
+1. **Overall Status Monitoring**
+   - Number of applications
+   - Repository server status
+
+2. **Application Health Tracking**
+   - Healthy applications
+   - Processing applications
+   - Suspended applications
+   - Degraded applications
+
+3. **Synchronization Status**
+   - Synced applications
+   - Out of sync applications
+   - Applications by repository
+
+4. **Controller Performance**
+   - Sync activity metrics
+   - Reconciliation metrics and performance
+   - Kubernetes API activity
+   - Workqueue depth monitoring
+
+5. **Cluster Statistics**
+   - Age of cluster cache
+   - Count of cluster resource objects
+   - Cluster events
+   - API resources
+
+6. **Repository Server Stats**
+   - Git request metrics (ls-remote, fetch)
+
+The dashboard's filtering capabilities allow you to focus on specific namespaces, health statuses, or repositories, making it easier to identify and troubleshoot issues within your ArgoCD deployment.
+
+### Dashboard Sections
+
+The ArgoCD dashboard in SigNoz provides comprehensive visibility into your ArgoCD deployment with the following sections:
+
+#### Overview
+- Number of applications - `argocd_app_info`
+- Repository server status - `argocd_app_info`
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/cicd/argocd/overview.webp"
+        alt="ArgoCD Dashboard Overview"
+    />
+    <figcaption>
+        <i>ArgoCD Dashboard Overview</i>
+    </figcaption>
+</figure>
+
+#### Applications Health
+- Healthy - `argocd_app_info`
+- Processing - `argocd_app_info`
+- Suspended - `argocd_app_info`
+- Degraded - `argocd_app_info`
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/cicd/argocd/applications-health.webp"
+        alt="ArgoCD Applications Health"
+    />
+    <figcaption>
+        <i>ArgoCD Applications Health</i>
+    </figcaption>
+</figure>
+
+#### Applications Sync Status
+- Synced - `argocd_app_info`
+- OutOfSync - `argocd_app_info`
+- Application By Repository - `argocd_app_info`
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/cicd/argocd/applications-sync-status.webp"
+        alt="ArgoCD Applications Sync Status"
+    />
+    <figcaption>
+        <i>ArgoCD Applications Sync Status</i>
+    </figcaption>
+</figure>
+
+#### Controller Stats
+- Sync activity - `argocd_app_sync_total`
+- Reconciliation activity - `argocd_app_reconcile_count`
+- Count of Application Reconciliation by Duration Bounds - `argocd_app_reconcile_duration`
+- Reconciliation Performance - `argocd_app_reconcile_bucket`
+- K8s API Activity - `argocd_app_k8s_request_total`
+- Workqueue Depth - `workqueue_depth`
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/cicd/argocd/controller-stats.webp"
+        alt="ArgoCD Controller Stats"
+    />
+    <figcaption>
+        <i>ArgoCD Controller Stats</i>
+    </figcaption>
+</figure>
+
+<figure data-zoomable align="left">
+    <img
+        src="/img/docs/cicd/argocd/controller-stats-1.webp"
+        alt="ArgoCD Controller Stats Additional"
+    />
+    <figcaption>
+        <i>ArgoCD Controller Stats Additional</i>
+    </figcaption>
+</figure>
+
+#### Cluster Stats
+- Age of Cluster Cache - `argocd_cluster_cache_age_seconds`
+- Count of Cluster Resource Objects - `argocd_cluster_api_resource_objects`
+- Count of Cluster Events - `argocd_cluster_events_total`
+- Count of API Resources - `argocd_cluster_api_resources`
+
+#### Repo Server Stats
+- Count of Git Ls-Remote Requests - `argocd_git_request_total`
+- Count of Git Fetch Requests - `argocd_git_request_total`
+
+## Troubleshooting
+
+If you're not seeing ArgoCD metrics in SigNoz:
+
+1. **Verify endpoint accessibility**: Ensure the OpenTelemetry Collector can access the ArgoCD metrics endpoints
+2. **Check service discovery**: If using Kubernetes, make sure service names and ports are correct
+3. **Inspect collector logs**: Look for any scrape errors in the OpenTelemetry Collector logs
+4. **Validate metrics format**: Make sure ArgoCD is correctly exposing Prometheus-formatted metrics
+
