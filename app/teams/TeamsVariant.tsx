@@ -4,6 +4,10 @@ import React, { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowRight, Loader2, ExternalLink } from 'lucide-react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useLogEvent } from '../../hooks/useLogEvent'
+import { ExperimentTracker } from '../../components/ExperimentTracker'
+import { EXPERIMENTS } from '../../constants/experiments'
 
 interface ErrorsProps {
   fullName?: string
@@ -262,26 +266,221 @@ const Testimonial: React.FC = () => {
   )
 }
 
-// Experiment variant component
-export const ExperimentVariant: React.FC<{
-  formData: FormState
-  errors: ErrorsProps
-  isSubmitting: boolean
-  submitFailed: boolean
-  handleInputChange: (event: any) => void
-  handleRegionChange: (region: string) => void
-  handleSubmit: (event: any) => void
-  regions: Region[]
-}> = ({
-  formData,
-  errors,
-  isSubmitting,
-  submitFailed,
-  handleInputChange,
-  handleRegionChange,
-  handleSubmit,
-  regions,
-}) => {
+// Define regions
+const regions = [
+  {
+    name: 'United States',
+    id: 'us',
+    iconURL: '/svgs/icons/us.svg',
+  },
+  {
+    name: 'Europe',
+    id: 'eu',
+    iconURL: '/svgs/icons/eu.svg',
+  },
+  {
+    name: 'India',
+    id: 'in',
+    iconURL: '/svgs/icons/india.svg',
+  },
+]
+
+// TeamsVariant component with its own state management
+const TeamsVariant: React.FC = () => {
+  const [formData, setFormData] = useState({
+    fullName: '',
+    workEmail: '',
+    companyName: '',
+    dataRegion: 'us',
+    source: '',
+    termsOfServiceAccepted: true,
+  })
+
+  const [errors, setErrors] = useState<ErrorsProps>({})
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitSuccess, setSubmitSuccess] = useState(false)
+  const [submitFailed, setSubmitFailed] = useState(false)
+  const router = useRouter()
+  const logEvent = useLogEvent()
+
+  const searchParams = useSearchParams()
+  const workEmailFromParams = searchParams.get('q')
+
+  const handleInputChange = (event) => {
+    const { name, value, type, checked } = event.target
+    const newValue = type === 'checkbox' ? checked : value
+    setFormData((prevFormData) => ({ ...prevFormData, [name]: newValue }))
+  }
+
+  const handleRegionChange = (selectedDataRegion: string): void => {
+    setFormData((prevFormData) => ({ ...prevFormData, dataRegion: selectedDataRegion }))
+  }
+
+  const validateForm = () => {
+    let errors = {}
+
+    if (!formData.workEmail.trim()) {
+      errors['workEmail'] = 'Work email is required'
+    } else if (!isValidCompanyEmail(formData.workEmail)) {
+      errors['workEmail'] = 'Please enter a valid company email'
+    }
+
+    if (!formData.termsOfServiceAccepted) {
+      errors['termsOfService'] = 'You must accept the Terms of Service to continue'
+    }
+
+    setErrors(errors)
+
+    return Object.keys(errors).length === 0
+  }
+
+  const isValidEmail = (email) => {
+    // Basic email validation regex
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    return emailRegex.test(email)
+  }
+
+  function isValidCompanyEmail(email) {
+    // Regular expression pattern to match valid company email domains
+    var companyEmailPattern =
+      /@(?!gmail|yahoo|hotmail|outlook|live|icloud)[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+
+    // Check if the email matches the email format and the company email pattern
+    return isValidEmail(email) && companyEmailPattern.test(email)
+  }
+
+  const handleSubmit = (event) => {
+    event.preventDefault()
+    setSubmitFailed(false)
+    const isFormValid = validateForm()
+
+    if (isFormValid) {
+      handleSignUp()
+    }
+  }
+
+  const handleGTMCustomEventTrigger = (payload) => {
+    if (window && (window as any).dataLayer && Array.isArray((window as any).dataLayer)) {
+      ;(window as any).dataLayer.push({
+        event: 'signoz-cloud-signup-form-submit',
+        ...payload,
+      })
+    }
+
+    // Get previously stored email (if any)
+    const previousEmail = localStorage.getItem('prevSignupEmail')
+    const currentEmail = payload.email
+
+    // Store current email for future comparison
+    localStorage.setItem('prevSignupEmail', currentEmail)
+
+    // Extract domain from email as company identifier
+    const domain = currentEmail.split('@')[1] || ''
+  }
+
+  const handleError = () => {
+    setSubmitFailed(true)
+    window.scrollTo({
+      top: 100,
+      behavior: 'smooth',
+    })
+  }
+
+  const handleSignUp = async () => {
+    setIsSubmitting(true)
+    setSubmitFailed(false)
+
+    const payload = {
+      email: formData.workEmail,
+      region: {
+        name: formData.dataRegion,
+      },
+      preferences: {
+        terms_of_service_accepted: formData.termsOfServiceAccepted,
+        opted_email_updates: true,
+      },
+    }
+
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_CONTROL_PLANE_URL}/users`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      })
+      if (response.ok) {
+        setSubmitSuccess(true)
+        handleGTMCustomEventTrigger(payload)
+
+        // Set user ID in local storage *before* logging events
+        localStorage.setItem('app_user_id', payload.email)
+
+        // --- Segment Identify Call ---
+        logEvent({
+          eventType: 'identify',
+          eventName: 'User Signed Up', // Optional: Add an event name for clarity
+          attributes: {
+            // These become Segment traits
+            email: payload.email,
+            dataRegion: payload.region.name,
+            // Add other relevant traits if available, e.g., fullName, companyName
+          },
+        })
+
+        // --- Segment Group Call ---
+        const domain = payload.email.split('@')[1] || 'unknown_domain'
+        logEvent({
+          eventType: 'group',
+          eventName: 'User Associated with Company', // Optional: Add an event name
+          groupId: domain,
+          attributes: {
+            // These become Group traits
+            // Add company-related traits if available, e.g., companyName
+            domain: domain,
+          },
+        })
+        // --- End Segment Calls ---
+
+        setFormData({
+          fullName: '',
+          workEmail: '',
+          companyName: '',
+          dataRegion: 'us',
+          source: '',
+          termsOfServiceAccepted: true,
+        })
+
+        localStorage.setItem('workEmail', payload.email)
+        localStorage.setItem('region', payload.region.name)
+
+        router.push('/verify-email')
+      } else {
+        // To do, handle other errors apart from invalid email
+        if (response.status === 400) {
+          setErrors({
+            workEmail: 'Please enter a valid work email.',
+          })
+        }
+      }
+    } catch (error) {
+      handleError()
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Set the work email from the URL params to the form data
+  useEffect(() => {
+    if (workEmailFromParams) {
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        workEmail: decodeURIComponent(workEmailFromParams),
+      }))
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [workEmailFromParams])
+
   // Variant signup form
   const SignupForm = () => {
     return (
@@ -390,7 +589,7 @@ export const ExperimentVariant: React.FC<{
           <button
             disabled={isSubmitting}
             onClick={handleSubmit}
-            className={`flex w-full items-center justify-center rounded-md bg-signoz_robin-500  py-3 font-medium ${isSubmitting ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}
+            className={`flex w-full items-center justify-center rounded-md bg-signoz_robin-500 py-3 font-medium ${isSubmitting ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}
           >
             {isSubmitting ? (
               <div className="flex items-center gap-2 text-sm">
@@ -410,32 +609,39 @@ export const ExperimentVariant: React.FC<{
   }
 
   return (
-    <div className="variant-teams-container flex min-h-screen flex-col bg-signoz_ink-500">
-      <VariantNavbar />
+    <ExperimentTracker
+      experimentId={EXPERIMENTS.TEAMS_PAGE.id}
+      variantId={EXPERIMENTS.TEAMS_PAGE.variants.VARIANT}
+    >
+      <div className="variant-teams-container flex min-h-screen flex-col bg-signoz_ink-500">
+        <VariantNavbar />
 
-      <div className="flex min-h-screen flex-col pt-[56px] lg:flex-row">
-        {/* Left section - Sign up form */}
-        <div className="relative flex w-full flex-col justify-center bg-signoz_ink-500 p-8 lg:w-5/12 lg:p-12">
-          <div className="w-full">
-            {!isSubmitting && submitFailed ? <ErrorState /> : <SignupForm />}
+        <div className="flex min-h-screen flex-col pt-[56px] lg:flex-row">
+          {/* Left section - Sign up form */}
+          <div className="relative flex w-full flex-col justify-center bg-signoz_ink-500 p-8 lg:w-5/12 lg:p-12">
+            <div className="w-full">
+              {!isSubmitting && submitFailed ? <ErrorState /> : <SignupForm />}
+            </div>
+
+            <div className="absolute bottom-4 left-0 right-0 hidden text-center lg:block">
+              <p className="flex justify-around px-8 text-xs text-signoz_vanilla-100/60">
+                <span>OpenTelemetry Native.</span>
+                <span>Unfied Signals.</span>
+                <span>Predictable Pricing.</span>
+              </p>
+            </div>
           </div>
 
-          <div className="absolute bottom-4 left-0 right-0 hidden text-center lg:block">
-            <p className="flex justify-around px-8 text-xs text-signoz_vanilla-100/60">
-              <span>OpenTelemetry Native.</span>
-              <span>Unfied Signals.</span>
-              <span>Predictable Pricing.</span>
-            </p>
-          </div>
-        </div>
-
-        {/* Right section - Testimonials */}
-        <div className="relative hidden bg-signoz_ink-400 lg:flex lg:w-7/12">
-          <div className="flex w-full items-center justify-center">
-            <Testimonial />
+          {/* Right section - Testimonials */}
+          <div className="relative hidden bg-signoz_ink-400 lg:flex lg:w-7/12">
+            <div className="flex w-full items-center justify-center">
+              <Testimonial />
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </ExperimentTracker>
   )
 }
+
+export default TeamsVariant

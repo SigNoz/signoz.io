@@ -1,5 +1,6 @@
 import React, { Suspense } from 'react'
 import Teams from './Teams'
+import TeamsVariant from './TeamsVariant'
 import { evaluateFeatureFlag } from '../../utils/growthbookServer'
 import { EXPERIMENTS } from '../../constants/experiments'
 
@@ -20,15 +21,7 @@ export const metadata: Metadata = {
 
 export default async function TeamsPage() {
   // Evaluate experiment on server side
-  const experimentId = EXPERIMENTS.TEAMS_PAGE.id
   const isExperimentVariant = await evaluateFeatureFlag(EXPERIMENTS.TEAMS_PAGE.flagName)
-  const variantId = isExperimentVariant
-    ? EXPERIMENTS.TEAMS_PAGE.variants.VARIANT
-    : EXPERIMENTS.TEAMS_PAGE.variants.CONTROL
 
-  return (
-    <Suspense>
-      <Teams experimentId={experimentId} variantId={variantId} />
-    </Suspense>
-  )
+  return <Suspense>{isExperimentVariant ? <TeamsVariant /> : <Teams />}</Suspense>
 }
