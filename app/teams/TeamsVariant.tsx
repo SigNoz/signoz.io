@@ -34,7 +34,7 @@ interface Region {
 // Variant Navbar component (now integrated into layout)
 export const VariantNavbar = () => {
   return (
-    <div className="fixed left-0 right-0 top-0 z-[30] mx-auto flex h-[56px] w-full items-center text-signoz_vanilla-100 backdrop-blur-[20px]">
+    <div className="fixed left-0 right-0 top-0 z-[30] mx-auto flex h-[56px] w-full items-center px-4 text-signoz_vanilla-100 backdrop-blur-[20px] md:px-8 lg:px-14">
       <div className="flex h-full w-full items-center bg-signoz_ink-500 px-4 md:px-8 lg:w-5/12 lg:px-8">
         <div className="flex justify-start">
           <Link href="/" className="-m-1.5 flex items-center gap-2 p-1.5">
