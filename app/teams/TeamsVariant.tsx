@@ -6,8 +6,9 @@ import Image from 'next/image'
 import { ArrowRight, Loader2, ExternalLink } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useLogEvent } from '../../hooks/useLogEvent'
-import { ExperimentTracker } from '../../components/ExperimentTracker'
-import { EXPERIMENTS } from '../../constants/experiments'
+import { ExperimentTracker } from '@/components/ExperimentTracker'
+import { EXPERIMENTS } from '@/constants/experiments'
+import TrackingLink from '@/components/TrackingLink'
 
 interface ErrorsProps {
   fullName?: string
@@ -50,22 +51,30 @@ export const VariantNavbar = () => {
         </div>
       </div>
       <div className="hidden h-full items-center justify-end bg-signoz_ink-400 px-4 md:px-8 lg:flex lg:w-7/12 lg:px-8">
-        <Link
+        <TrackingLink
+          clickType="Nav Click"
+          clickName="Docs Link"
+          clickLocation="teams_variant"
+          clickText="Documentation"
           href="/docs"
           className="flex items-center truncate px-1.5 py-1 text-sm font-normal text-gray-400 hover:text-signoz_robin-500"
         >
           <ExternalLink className="mr-2 h-4 w-4" />
           Documentation
-        </Link>
+        </TrackingLink>
       </div>
       <div className="flex h-full items-center justify-end bg-signoz_ink-500 px-4 md:px-8 lg:hidden">
-        <Link
+        <TrackingLink
+          clickType="Nav Click"
+          clickName="Docs Link"
+          clickLocation="teams_variant"
+          clickText="Docs"
           href="/docs"
           className="flex items-center truncate px-1.5 py-1 text-sm font-normal text-gray-400 hover:text-signoz_robin-500"
         >
           <ExternalLink className="mr-2 h-4 w-4" />
           Docs
-        </Link>
+        </TrackingLink>
       </div>
     </div>
   )
@@ -101,32 +110,37 @@ const testimonials = [
       'Setup was a breeze—we had the OpenTelemetry collector running and monitoring in no time.',
     author: 'Niranjan Ravichandra, Co-founder & CTO, Cedana',
     avatar: '/img/case_study/profile-photos/cedana.webp',
+    url: 'https://signoz.io/case-study/cedana/',
   },
   {
     quote:
       "SigNoz is simple, affordable, and reliable. I'm heading on vacation confident I'll be alerted if anything goes wrong.",
     author: 'Shiv Ansal, Co-founder & CTO, Bands',
     avatar: '/img/case_study/profile-photos/bands.webp',
+    url: 'https://signoz.io/case-study/bands/',
   },
   {
     quote: 'SigNoz has been a huge help with a smooth experience and prompt, effective support.',
     author: 'Avneesh Kumar, VP of Engineering at Mailmodo',
     avatar: '/img/case_study/profile-photos/mailmodo.webp',
+    url: 'https://signoz.io/case-study/mailmodo/',
   },
   {
     quote:
       "We use SigNoz daily—it's open in more than half my tabs and is vital to our operations.",
     author: 'Khushhal Reddy, Senior Backend Engineer, Kiwi',
     avatar: '/img/case_study/profile-photos/kiwi.webp',
+    url: 'https://signoz.io/case-study/kiwi/',
   },
   {
     quote: 'SigNoz has elevated our software quality and keeps our customers delighted.',
     author: 'Charlie Shen, Lead DevOps Engineer, Brainfish',
     avatar: '/img/case_study/profile-photos/brainfish.webp',
+    url: 'https://signoz.io/case-study/brainfish/',
   },
 ]
 
-const DISPLAY_DURATION = 5000 // 5 seconds exactly
+const DISPLAY_DURATION = 3000 // 3 seconds exactly
 
 const Testimonial: React.FC = () => {
   const [currentIndex, setCurrentIndex] = useState(0)
@@ -215,9 +229,18 @@ const Testimonial: React.FC = () => {
             height={48}
           />
           <div>
-            <div className="text-base font-medium text-signoz_robin-500">
+            <TrackingLink
+              href={currentTestimonial.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-base font-medium text-signoz_robin-500"
+              clickType="Nav Click"
+              clickName="Testimonial Author Click"
+              clickLocation="teams_variant"
+              clickText={currentTestimonial.author}
+            >
               {currentTestimonial.author}
-            </div>
+            </TrackingLink>
           </div>
         </footer>
       </blockquote>
