@@ -612,7 +612,7 @@ const TeamsVariant: React.FC = () => {
 
         <div className="flex min-h-screen flex-col pt-[56px] lg:flex-row">
           {/* Left section - Sign up form */}
-          <div className="relative flex w-full flex-col justify-center bg-signoz_ink-500 p-8 lg:w-5/12 lg:p-12">
+          <div className="relative flex w-full flex-col bg-signoz_ink-500 p-8 pt-[20vh] lg:w-5/12 lg:p-12 lg:pt-[20vh]">
             <div className="w-full">
               {!isSubmitting && submitFailed ? (
                 <ErrorState />
