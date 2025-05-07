@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowRight, Loader2, ExternalLink } from 'lucide-react'
@@ -285,54 +285,187 @@ const regions = [
   },
 ]
 
-// TeamsVariant component with its own state management
-const TeamsVariant: React.FC = () => {
-  const [formData, setFormData] = useState({
-    fullName: '',
+// Completely isolated signup form component with its own state management
+const SignupFormIsolated: React.FC<{
+  onSignup: (payload: any) => Promise<void>
+  isSubmitting: boolean
+  errors: ErrorsProps
+}> = ({ onSignup, isSubmitting, errors }) => {
+  const [formState, setFormState] = useState({
     workEmail: '',
-    companyName: '',
     dataRegion: 'us',
-    source: '',
     termsOfServiceAccepted: true,
   })
 
+  const searchParams = useSearchParams()
+  const workEmailFromParams = searchParams.get('q')
+
+  // Set the work email from the URL params to the form data
+  useEffect(() => {
+    if (workEmailFromParams) {
+      setFormState((prev) => ({
+        ...prev,
+        workEmail: decodeURIComponent(workEmailFromParams),
+      }))
+    }
+  }, [workEmailFromParams])
+
+  const handleInputChange = useCallback((event) => {
+    const { name, value, type, checked } = event.target
+    const newValue = type === 'checkbox' ? checked : value
+    setFormState((prev) => ({ ...prev, [name]: newValue }))
+  }, [])
+
+  const handleRegionChange = useCallback((selectedRegion: string) => {
+    setFormState((prev) => ({ ...prev, dataRegion: selectedRegion }))
+  }, [])
+
+  const handleSubmit = useCallback(
+    (event) => {
+      event.preventDefault()
+      onSignup({
+        email: formState.workEmail,
+        region: {
+          name: formState.dataRegion,
+        },
+        preferences: {
+          terms_of_service_accepted: formState.termsOfServiceAccepted,
+          opted_email_updates: true,
+        },
+      })
+    },
+    [formState, onSignup]
+  )
+
+  return (
+    <div className="mx-auto w-full max-w-md">
+      <h1 className="mb-1 text-2xl font-medium text-white">Get started with SigNoz</h1>
+      <p className="mb-10 text-sm text-signoz_vanilla-100/70">
+        Experience SigNoz with 30-day free trial. No credit card required.
+      </p>
+
+      <form className="space-y-7">
+        <div className="mb-4 space-y-1">
+          <label htmlFor="workEmail" className="mb-1 block text-sm font-medium">
+            Work Email
+          </label>
+          <input
+            type="email"
+            id="workEmail"
+            disabled={isSubmitting}
+            name="workEmail"
+            value={formState.workEmail}
+            autoComplete="off"
+            onChange={handleInputChange}
+            placeholder="E.g. bart@simpsonmail.com"
+            className="w-full rounded-md border border-signoz_slate-400 bg-signoz_ink-300/40 px-3 py-2.5 text-sm text-stone-300"
+          />
+
+          {errors?.workEmail && <div className="mt-1 text-xs text-red-400">{errors.workEmail}</div>}
+        </div>
+
+        <div className="space-y-2">
+          <label className="mb-1 block text-sm font-medium" htmlFor="dataRegion">
+            Data region
+          </label>
+
+          <div className="grid grid-cols-3 gap-3">
+            {regions.map((region) => (
+              <button
+                type="button"
+                key={region.id}
+                className={`flex items-center justify-center gap-2 rounded-md border border-solid p-2.5 text-sm
+                  ${
+                    region.id === formState.dataRegion
+                      ? 'border-signoz_robin-500/40 bg-signoz_robin-500/10 text-signoz_robin-500'
+                      : 'border-signoz_slate-400 bg-signoz_ink-300 hover:border-signoz_slate-300'
+                  }`}
+                onClick={() => handleRegionChange(region.id)}
+              >
+                <Image
+                  loading="lazy"
+                  src={region.iconURL}
+                  alt={`${region.name} flag`}
+                  className="h-5 w-5"
+                  width={20}
+                  height={20}
+                />
+                <span>{region.name}</span>
+              </button>
+            ))}
+          </div>
+          <p className="mt-1 text-xs text-signoz_vanilla-100/60">
+            Your data will be stored in the selected region
+          </p>
+        </div>
+
+        <div className="mt-6 space-y-2">
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="termsOfServiceAccepted"
+              name="termsOfServiceAccepted"
+              checked={formState.termsOfServiceAccepted}
+              onChange={handleInputChange}
+              className="mt-0.5 h-4 w-4 rounded border border-gray-500 bg-transparent accent-signoz_robin-500"
+            />
+            <label htmlFor="termsOfServiceAccepted" className="text-xs text-stone-300">
+              I agree to the{' '}
+              <a
+                href="https://signoz.io/terms-of-service/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-medium text-signoz_robin-500 hover:underline"
+              >
+                Terms of Service
+              </a>{' '}
+              and{' '}
+              <a
+                href="https://signoz.io/privacy/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-medium text-signoz_robin-500 hover:underline"
+              >
+                Privacy Policy
+              </a>
+              .
+            </label>
+          </div>
+          {errors?.termsOfService && (
+            <div className="text-xs text-red-400">{errors.termsOfService}</div>
+          )}
+        </div>
+
+        <button
+          disabled={isSubmitting}
+          onClick={handleSubmit}
+          className={`flex w-full items-center justify-center rounded-md bg-signoz_robin-500 py-3 font-medium ${isSubmitting ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}
+        >
+          {isSubmitting ? (
+            <div className="flex items-center gap-2 text-sm">
+              Starting your free 30-day trial
+              <Loader2 size={16} className="animate-spin" />{' '}
+            </div>
+          ) : (
+            <span className="flex items-center gap-1.5 text-sm">
+              Start Your Free Trial
+              <ArrowRight className="h-4 w-4" />
+            </span>
+          )}
+        </button>
+      </form>
+    </div>
+  )
+}
+
+// TeamsVariant component with its own state management
+const TeamsVariant: React.FC = () => {
   const [errors, setErrors] = useState<ErrorsProps>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitSuccess, setSubmitSuccess] = useState(false)
   const [submitFailed, setSubmitFailed] = useState(false)
   const router = useRouter()
   const logEvent = useLogEvent()
-
-  const searchParams = useSearchParams()
-  const workEmailFromParams = searchParams.get('q')
-
-  const handleInputChange = (event) => {
-    const { name, value, type, checked } = event.target
-    const newValue = type === 'checkbox' ? checked : value
-    setFormData((prevFormData) => ({ ...prevFormData, [name]: newValue }))
-  }
-
-  const handleRegionChange = (selectedDataRegion: string): void => {
-    setFormData((prevFormData) => ({ ...prevFormData, dataRegion: selectedDataRegion }))
-  }
-
-  const validateForm = () => {
-    let errors = {}
-
-    if (!formData.workEmail.trim()) {
-      errors['workEmail'] = 'Work email is required'
-    } else if (!isValidCompanyEmail(formData.workEmail)) {
-      errors['workEmail'] = 'Please enter a valid company email'
-    }
-
-    if (!formData.termsOfServiceAccepted) {
-      errors['termsOfService'] = 'You must accept the Terms of Service to continue'
-    }
-
-    setErrors(errors)
-
-    return Object.keys(errors).length === 0
-  }
 
   const isValidEmail = (email) => {
     // Basic email validation regex
@@ -349,17 +482,32 @@ const TeamsVariant: React.FC = () => {
     return isValidEmail(email) && companyEmailPattern.test(email)
   }
 
-  const handleSubmit = (event) => {
-    event.preventDefault()
-    setSubmitFailed(false)
-    const isFormValid = validateForm()
+  const validatePayload = useCallback((payload) => {
+    let newErrors = {}
 
-    if (isFormValid) {
-      handleSignUp()
+    if (!payload.email.trim()) {
+      newErrors['workEmail'] = 'Work email is required'
+    } else if (!isValidCompanyEmail(payload.email)) {
+      newErrors['workEmail'] = 'Please enter a valid company email'
     }
-  }
 
-  const handleGTMCustomEventTrigger = (payload) => {
+    if (!payload.preferences.terms_of_service_accepted) {
+      newErrors['termsOfService'] = 'You must accept the Terms of Service to continue'
+    }
+
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }, [])
+
+  const handleError = useCallback(() => {
+    setSubmitFailed(true)
+    window.scrollTo({
+      top: 100,
+      behavior: 'smooth',
+    })
+  }, [])
+
+  const handleGTMCustomEventTrigger = useCallback((payload) => {
     if (window && (window as any).dataLayer && Array.isArray((window as any).dataLayer)) {
       ;(window as any).dataLayer.push({
         event: 'signoz-cloud-signup-form-submit',
@@ -373,240 +521,77 @@ const TeamsVariant: React.FC = () => {
 
     // Store current email for future comparison
     localStorage.setItem('prevSignupEmail', currentEmail)
+  }, [])
 
-    // Extract domain from email as company identifier
-    const domain = currentEmail.split('@')[1] || ''
-  }
+  const handleSignUp = useCallback(
+    async (payload) => {
+      setSubmitFailed(false)
+      const isValid = validatePayload(payload)
 
-  const handleError = () => {
-    setSubmitFailed(true)
-    window.scrollTo({
-      top: 100,
-      behavior: 'smooth',
-    })
-  }
+      if (!isValid) return
 
-  const handleSignUp = async () => {
-    setIsSubmitting(true)
-    setSubmitFailed(false)
+      setIsSubmitting(true)
 
-    const payload = {
-      email: formData.workEmail,
-      region: {
-        name: formData.dataRegion,
-      },
-      preferences: {
-        terms_of_service_accepted: formData.termsOfServiceAccepted,
-        opted_email_updates: true,
-      },
-    }
-
-    try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_CONTROL_PLANE_URL}/users`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-      })
-      if (response.ok) {
-        setSubmitSuccess(true)
-        handleGTMCustomEventTrigger(payload)
-
-        // Set user ID in local storage *before* logging events
-        localStorage.setItem('app_user_id', payload.email)
-
-        // --- Segment Identify Call ---
-        logEvent({
-          eventType: 'identify',
-          eventName: 'User Signed Up', // Optional: Add an event name for clarity
-          attributes: {
-            // These become Segment traits
-            email: payload.email,
-            dataRegion: payload.region.name,
-            // Add other relevant traits if available, e.g., fullName, companyName
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_CONTROL_PLANE_URL}/users`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
           },
+          body: JSON.stringify(payload),
         })
 
-        // --- Segment Group Call ---
-        const domain = payload.email.split('@')[1] || 'unknown_domain'
-        logEvent({
-          eventType: 'group',
-          eventName: 'User Associated with Company', // Optional: Add an event name
-          groupId: domain,
-          attributes: {
-            // These become Group traits
-            // Add company-related traits if available, e.g., companyName
-            domain: domain,
-          },
-        })
-        // --- End Segment Calls ---
+        if (response.ok) {
+          setSubmitSuccess(true)
+          handleGTMCustomEventTrigger(payload)
 
-        setFormData({
-          fullName: '',
-          workEmail: '',
-          companyName: '',
-          dataRegion: 'us',
-          source: '',
-          termsOfServiceAccepted: true,
-        })
+          // Set user ID in local storage *before* logging events
+          localStorage.setItem('app_user_id', payload.email)
 
-        localStorage.setItem('workEmail', payload.email)
-        localStorage.setItem('region', payload.region.name)
-
-        router.push('/verify-email')
-      } else {
-        // To do, handle other errors apart from invalid email
-        if (response.status === 400) {
-          setErrors({
-            workEmail: 'Please enter a valid work email.',
+          // --- Segment Identify Call ---
+          logEvent({
+            eventType: 'identify',
+            eventName: 'User Signed Up', // Optional: Add an event name for clarity
+            attributes: {
+              // These become Segment traits
+              email: payload.email,
+              dataRegion: payload.region.name,
+            },
           })
+
+          // --- Segment Group Call ---
+          const domain = payload.email.split('@')[1] || 'unknown_domain'
+          logEvent({
+            eventType: 'group',
+            eventName: 'User Associated with Company', // Optional: Add an event name
+            groupId: domain,
+            attributes: {
+              // These become Group traits
+              domain: domain,
+            },
+          })
+          // --- End Segment Calls ---
+
+          localStorage.setItem('workEmail', payload.email)
+          localStorage.setItem('region', payload.region.name)
+
+          router.push('/verify-email')
+        } else {
+          // To do, handle other errors apart from invalid email
+          if (response.status === 400) {
+            setErrors({
+              workEmail: 'Please enter a valid work email.',
+            })
+          }
         }
+      } catch (error) {
+        handleError()
+      } finally {
+        setIsSubmitting(false)
       }
-    } catch (error) {
-      handleError()
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
-
-  // Set the work email from the URL params to the form data
-  useEffect(() => {
-    if (workEmailFromParams) {
-      setFormData((prevFormData) => ({
-        ...prevFormData,
-        workEmail: decodeURIComponent(workEmailFromParams),
-      }))
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [workEmailFromParams])
-
-  // Variant signup form
-  const SignupForm = () => {
-    return (
-      <div className="mx-auto w-full max-w-md">
-        <h1 className="mb-1 text-2xl font-medium text-white">Get started with SigNoz</h1>
-        <p className="mb-10 text-sm text-signoz_vanilla-100/70">
-          Experience SigNoz with 30-day free trial. No credit card required.
-        </p>
-
-        <form className="space-y-7">
-          <div className="mb-4 space-y-1">
-            <label htmlFor="workEmail" className="mb-1 block text-sm font-medium">
-              Work Email
-            </label>
-            <input
-              type="email"
-              id="workEmail"
-              disabled={isSubmitting}
-              name="workEmail"
-              value={formData.workEmail}
-              autoComplete="off"
-              onChange={handleInputChange}
-              placeholder="E.g. bart@simpsonmail.com"
-              className="w-full rounded-md border border-signoz_slate-400 bg-signoz_ink-300/40 px-3 py-2.5 text-sm text-stone-300"
-            />
-
-            {errors?.workEmail && (
-              <div className="mt-1 text-xs text-red-400">{errors.workEmail}</div>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <label className="mb-1 block text-sm font-medium" htmlFor="dataRegion">
-              Data region
-            </label>
-
-            <div className="grid grid-cols-3 gap-3">
-              {regions.map((region) => (
-                <button
-                  type="button"
-                  key={region.id}
-                  className={`flex items-center justify-center gap-2 rounded-md border border-solid p-2.5 text-sm
-                    ${
-                      region.id === formData.dataRegion
-                        ? 'border-signoz_robin-500/40 bg-signoz_robin-500/10 text-signoz_robin-500'
-                        : 'border-signoz_slate-400 bg-signoz_ink-300 hover:border-signoz_slate-300'
-                    }`}
-                  onClick={() => {
-                    handleRegionChange(region.id)
-                  }}
-                >
-                  <Image
-                    loading="lazy"
-                    src={region.iconURL}
-                    alt={`${region.name} flag`}
-                    className="h-5 w-5"
-                    width={20}
-                    height={20}
-                  />
-                  <span>{region.name}</span>
-                </button>
-              ))}
-            </div>
-            <p className="mt-1 text-xs text-signoz_vanilla-100/60">
-              Your data will be stored in the selected region
-            </p>
-          </div>
-
-          <div className="mt-6 space-y-2">
-            <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                id="termsOfServiceAccepted"
-                name="termsOfServiceAccepted"
-                checked={formData.termsOfServiceAccepted}
-                onChange={handleInputChange}
-                className="mt-0.5 h-4 w-4 rounded border border-gray-500 bg-transparent accent-signoz_robin-500"
-              />
-              <label htmlFor="termsOfServiceAccepted" className="text-xs text-stone-300">
-                I agree to the{' '}
-                <a
-                  href="https://signoz.io/terms-of-service/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="font-medium text-signoz_robin-500 hover:underline"
-                >
-                  Terms of Service
-                </a>{' '}
-                and{' '}
-                <a
-                  href="https://signoz.io/privacy/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="font-medium text-signoz_robin-500 hover:underline"
-                >
-                  Privacy Policy
-                </a>
-                .
-              </label>
-            </div>
-            {errors?.termsOfService && (
-              <div className="text-xs text-red-400">{errors.termsOfService}</div>
-            )}
-          </div>
-
-          <button
-            disabled={isSubmitting}
-            onClick={handleSubmit}
-            className={`flex w-full items-center justify-center rounded-md bg-signoz_robin-500 py-3 font-medium ${isSubmitting ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}
-          >
-            {isSubmitting ? (
-              <div className="flex items-center gap-2 text-sm">
-                Starting your free 30-day trial
-                <Loader2 size={16} className="animate-spin" />{' '}
-              </div>
-            ) : (
-              <span className="flex items-center gap-1.5 text-sm">
-                Start Your Free Trial
-                <ArrowRight className="h-4 w-4" />
-              </span>
-            )}
-          </button>
-        </form>
-      </div>
-    )
-  }
+    },
+    [handleError, handleGTMCustomEventTrigger, logEvent, router, validatePayload]
+  )
 
   return (
     <ExperimentTracker
@@ -620,7 +605,15 @@ const TeamsVariant: React.FC = () => {
           {/* Left section - Sign up form */}
           <div className="relative flex w-full flex-col justify-center bg-signoz_ink-500 p-8 lg:w-5/12 lg:p-12">
             <div className="w-full">
-              {!isSubmitting && submitFailed ? <ErrorState /> : <SignupForm />}
+              {!isSubmitting && submitFailed ? (
+                <ErrorState />
+              ) : (
+                <SignupFormIsolated
+                  onSignup={handleSignUp}
+                  isSubmitting={isSubmitting}
+                  errors={errors}
+                />
+              )}
             </div>
 
             <div className="absolute bottom-4 left-0 right-0 hidden text-center lg:block">
