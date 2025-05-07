@@ -6,7 +6,7 @@ import TrackingLink from '@/components/TrackingLink'
 import Link from 'next/link'
 import { VideoModalPlayer } from './VideoModalPlayer'
 import { evaluateFeatureFlag } from '@/utils/growthbookServer'
-import { ExperimentTracker } from './ExperimentTracker'
+import { ExperimentTracker } from '@/components/ExperimentTracker'
 import { EXPERIMENTS } from '@/constants/experiments'
 
 // Server component that makes the A/B test decision

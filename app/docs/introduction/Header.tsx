@@ -4,7 +4,7 @@ import SubHeading from '@/components/ui/SubHeading'
 import { Zap, Server } from 'lucide-react'
 import TrackingLink from '@/components/TrackingLink'
 import { evaluateFeatureFlag } from '@/utils/growthbookServer'
-import { ExperimentTracker } from '@/components/index-header/ExperimentTracker'
+import { ExperimentTracker } from '@/components/ExperimentTracker'
 import { EXPERIMENTS } from '@/constants/experiments'
 
 // Single CTA variant - only shows the Quick Start button
