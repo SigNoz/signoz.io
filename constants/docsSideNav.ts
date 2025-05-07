@@ -136,6 +136,11 @@ const docsSideNav = [
                   label: 'Docker Swarm',
                   route: '/docs/install/docker-swarm',
                 },
+                {
+                  type: 'doc',
+                  label: 'Docker SELinux',
+                  route: '/docs/install/docker-selinux',
+                },
               ]
             },
             {
@@ -186,6 +191,11 @@ const docsSideNav = [
                   type: 'doc',
                   label: 'Deploying to Local',
                   route: '/docs/install/kubernetes/local',
+                },
+                {
+                  type: 'doc',
+                  label: 'Deploying with ArgoCD',
+                  route: '/docs/install/argocd',
                 },
               ],
             },

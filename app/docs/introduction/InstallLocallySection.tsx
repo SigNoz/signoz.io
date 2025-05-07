@@ -48,9 +48,7 @@ export default function InstallLocallySection({
   return (
     <div className="mx-auto w-full max-w-7xl border-signoz_slate-400">
       <div className="mb-6 text-center md:text-left">
-        <h2 className="mb-2 text-2xl font-semibold text-signoz_vanilla-100">
-          Prefer to Self-Host?
-        </h2>
+        <h2 className="mb-2 text-2xl font-semibold text-signoz_vanilla-100">Self-Host SigNoz</h2>
         <p className="text-signoz_vanilla-400">
           Choose the installation method that works best for your environment
         </p>
