@@ -48,7 +48,7 @@ export const VariantNavbar = () => {
       <div className="hidden h-full items-center justify-end bg-signoz_ink-400 px-4 md:px-8 lg:flex lg:w-7/12 lg:px-8">
         <Link
           href="/docs"
-          className="flex items-center truncate px-1.5 py-1 text-sm font-normal hover:text-signoz_robin-500"
+          className="flex items-center truncate px-1.5 py-1 text-sm font-normal text-gray-400 hover:text-signoz_robin-500"
         >
           <ExternalLink className="mr-2 h-4 w-4" />
           Documentation
