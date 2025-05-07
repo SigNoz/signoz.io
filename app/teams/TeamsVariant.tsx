@@ -287,12 +287,12 @@ export const ExperimentVariant: React.FC<{
     return (
       <div className="mx-auto w-full max-w-md">
         <h1 className="mb-1 text-2xl font-medium text-white">Get started with SigNoz</h1>
-        <p className="mb-6 text-sm text-signoz_vanilla-100">
+        <p className="mb-10 text-sm text-signoz_vanilla-100/70">
           Experience SigNoz with 30-day free trial. No credit card required.
         </p>
 
-        <form className="space-y-5">
-          <div>
+        <form className="space-y-7">
+          <div className="mb-4 space-y-1">
             <label htmlFor="workEmail" className="mb-1 block text-sm font-medium">
               Work Email
             </label>
@@ -351,7 +351,7 @@ export const ExperimentVariant: React.FC<{
           </div>
 
           <div className="mt-6 space-y-2">
-            <div className="flex items-start gap-2">
+            <div className="flex items-center gap-2">
               <input
                 type="checkbox"
                 id="termsOfServiceAccepted"
@@ -421,8 +421,10 @@ export const ExperimentVariant: React.FC<{
           </div>
 
           <div className="absolute bottom-4 left-0 right-0 text-center">
-            <p className="px-8 text-xs text-signoz_vanilla-100/60">
-              No credit card required. Cancel anytime.
+            <p className="flex justify-around px-8 text-xs text-signoz_vanilla-100/60">
+              <span>OpenTelemetry Native.</span>
+              <span>Unfied Signals.</span>
+              <span>Predictable Pricing.</span>
             </p>
           </div>
         </div>
