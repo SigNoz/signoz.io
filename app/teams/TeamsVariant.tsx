@@ -296,6 +296,7 @@ const SignupFormIsolated: React.FC<{
     dataRegion: 'us',
     termsOfServiceAccepted: true,
   })
+  const emailInputRef = useRef<HTMLInputElement>(null)
 
   const searchParams = useSearchParams()
   const workEmailFromParams = searchParams.get('q')
@@ -309,6 +310,13 @@ const SignupFormIsolated: React.FC<{
       }))
     }
   }, [workEmailFromParams])
+
+  // Focus email input when component mounts
+  useEffect(() => {
+    if (emailInputRef.current) {
+      emailInputRef.current.focus()
+    }
+  }, [])
 
   const handleInputChange = useCallback((event) => {
     const { name, value, type, checked } = event.target
@@ -358,7 +366,8 @@ const SignupFormIsolated: React.FC<{
             autoComplete="off"
             onChange={handleInputChange}
             placeholder="E.g. bart@simpsonmail.com"
-            className="w-full rounded-md border border-signoz_slate-400 bg-signoz_ink-300/40 px-3 py-2.5 text-sm text-stone-300"
+            className="w-full rounded-md border border-signoz_slate-400 bg-signoz_ink-300 px-3 py-2.5 text-sm text-stone-300"
+            ref={emailInputRef}
           />
 
           {errors?.workEmail && <div className="mt-1 text-xs text-red-400">{errors.workEmail}</div>}
@@ -377,7 +386,7 @@ const SignupFormIsolated: React.FC<{
                 className={`flex items-center justify-center gap-2 rounded-md border border-solid p-2.5 text-sm
                   ${
                     region.id === formState.dataRegion
-                      ? 'border-signoz_robin-500/40 bg-signoz_robin-500/10 text-signoz_robin-500'
+                      ? 'border-signoz_robin-500/60 bg-signoz_robin-500/10 text-signoz_robin-500'
                       : 'border-signoz_slate-400 bg-signoz_ink-300 hover:border-signoz_slate-300'
                   }`}
                 onClick={() => handleRegionChange(region.id)}
