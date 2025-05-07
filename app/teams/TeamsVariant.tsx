@@ -100,29 +100,29 @@ const testimonials = [
     quote:
       'Setup was a breeze—we had the OpenTelemetry collector running and monitoring in no time.',
     author: 'Niranjan Ravichandra, Co-founder & CTO, Cedana',
-    avatar: '/img/case_study/cedana-logo.svg',
+    avatar: '/img/case_study/profile-photos/cedana.webp',
   },
   {
     quote:
       "SigNoz is simple, affordable, and reliable. I'm heading on vacation confident I'll be alerted if anything goes wrong.",
     author: 'Shiv Ansal, Co-founder & CTO, Bands',
-    avatar: '/img/case_study/logos/bands-logo.png',
+    avatar: '/img/case_study/profile-photos/bands.webp',
   },
   {
     quote: 'SigNoz has been a huge help with a smooth experience and prompt, effective support.',
     author: 'Avneesh Kumar, VP of Engineering at Mailmodo',
-    avatar: '/img/case_study/mailmodo-logo-white.svg',
+    avatar: '/img/case_study/profile-photos/mailmodo.webp',
   },
   {
     quote:
       "We use SigNoz daily—it's open in more than half my tabs and is vital to our operations.",
     author: 'Khushhal Reddy, Senior Backend Engineer, Kiwi',
-    avatar: '/img/case_study/logos/gokiwi-logo.png',
+    avatar: '/img/case_study/profile-photos/kiwi.webp',
   },
   {
     quote: 'SigNoz has elevated our software quality and keeps our customers delighted.',
     author: 'Charlie Shen, Lead DevOps Engineer, Brainfish',
-    avatar: '/img/case_study/brainfish-icon.svg',
+    avatar: '/img/case_study/profile-photos/brainfish.webp',
   },
 ]
 
