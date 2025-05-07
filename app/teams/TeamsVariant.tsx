@@ -286,7 +286,7 @@ export const ExperimentVariant: React.FC<{
   const SignupForm = () => {
     return (
       <div className="mx-auto w-full max-w-md">
-        <h1 className="mb-1 text-2xl font-medium text-signoz_robin-500">Get started with SigNoz</h1>
+        <h1 className="mb-1 text-2xl font-medium text-white">Get started with SigNoz</h1>
         <p className="mb-6 text-sm text-signoz_vanilla-100">
           Experience SigNoz with 30-day free trial. No credit card required.
         </p>
@@ -304,7 +304,7 @@ export const ExperimentVariant: React.FC<{
               value={formData.workEmail}
               autoComplete="off"
               onChange={handleInputChange}
-              placeholder="you@company.com"
+              placeholder="E.g. bart@simpsonmail.com"
               className="w-full rounded-md border border-signoz_slate-400 bg-signoz_ink-300/40 px-3 py-2.5 text-sm text-stone-300"
             />
 
@@ -390,7 +390,7 @@ export const ExperimentVariant: React.FC<{
           <button
             disabled={isSubmitting}
             onClick={handleSubmit}
-            className={`flex w-full items-center justify-center rounded-md bg-signoz_cherry-500 py-3 font-medium ${isSubmitting ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}
+            className={`flex w-full items-center justify-center rounded-md bg-signoz_robin-500  py-3 font-medium ${isSubmitting ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}
           >
             {isSubmitting ? (
               <div className="flex items-center gap-2 text-sm">
