@@ -1,8 +1,6 @@
 import { revalidateTag } from 'next/cache'
 import { NextRequest, NextResponse } from 'next/server'
 
-// Secure your endpoint by checking for a secret token
-// This is optional but recommended to prevent unauthorized revalidations
 const REVALIDATE_SECRET = process.env.REVALIDATE_SECRET
 
 export async function POST(request: NextRequest) {
