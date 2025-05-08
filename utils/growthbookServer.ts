@@ -12,7 +12,7 @@ export function configureServerSideGrowthBook() {
         ...init,
         next: {
           // Cache feature definitions for longer in production
-          revalidate: process.env.NODE_ENV === 'production' ? 60 : 10,
+          revalidate: process.env.NODE_ENV === 'production' ? 3600 : 10,
           tags: ['growthbook'],
         },
       }
