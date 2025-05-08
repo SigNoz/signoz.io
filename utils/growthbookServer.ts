@@ -15,7 +15,7 @@ export function configureServerSideGrowthBook() {
           revalidate:
             process.env.NODE_ENV === 'production'
               ? parseInt(process.env.GROWTHBOOK_CACHE_DURATION || '3600', 10)
-              : parseInt(process.env.GROWTHBOOK_DEV_CACHE_DURATION || '10', 10),
+              : parseInt(process.env.GROWTHBOOK_CACHE_DURATION || '10', 10),
           tags: ['growthbook'],
         },
       }
