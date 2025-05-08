@@ -11,8 +11,11 @@ export function configureServerSideGrowthBook() {
       const nextInit = {
         ...init,
         next: {
-          // Cache feature definitions for longer in production
-          revalidate: process.env.NODE_ENV === 'production' ? 3600 : 10,
+          // Cache feature definitions based on environment variables or fallback to defaults
+          revalidate:
+            process.env.NODE_ENV === 'production'
+              ? parseInt(process.env.GROWTHBOOK_CACHE_DURATION || '3600', 10)
+              : parseInt(process.env.GROWTHBOOK_DEV_CACHE_DURATION || '10', 10),
           tags: ['growthbook'],
         },
       }
