@@ -24,9 +24,12 @@ export async function generateMetadata({ params }: { params: { tag: string } }):
 export const generateStaticParams = async () => {
   const tagCounts = tagData as Record<string, number>
   const tagKeys = Object.keys(tagCounts)
-  const paths = tagKeys.map((tag) => ({
-    tag: encodeURI(tag),
-  }))
+  // Only generate pages for tags that have at least one post
+  const paths = tagKeys
+    .filter((tag) => tagCounts[tag] > 0)
+    .map((tag) => ({
+      tag: encodeURI(tag),
+    }))
   return paths
 }
 
@@ -37,5 +40,9 @@ export default function TagPage({ params }: { params: { tag: string } }) {
   const filteredPosts = allCoreContent(
     sortPosts(allBlogs.filter((post) => post.tags && post.tags.map((t) => slug(t)).includes(tag)))
   )
-  return <ListLayout posts={filteredPosts} title={title} />
+
+  // Pass an empty message for tags with no posts
+  const emptyMessage = `No posts found with the tag "${tag}". Browse other tags or return to the main blog.`
+
+  return <ListLayout posts={filteredPosts} title={title} emptyMessage={emptyMessage} />
 }
