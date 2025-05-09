@@ -1,0 +1,715 @@
+---
+date: 2025-03-03
+id: temporal-java-opentelemetry
+title: Instrumenting a Temporal application in java with OpenTelemetry
+---
+
+We have published a helloworld temporal application and instrumented it using otel at https://github.com/Creator54/temporal-java-opentelemetry. The README.md of the repo has instructions to run the application. 
+
+You should open the repo and browse the code and files as we go through the doc step by step.
+
+
+### Step 1: Add dependencies
+```xml:pom.xml
+<properties>
+    <opentelemetry.version>1.34.1</opentelemetry.version>
+</properties>
+<!-- OpenTelemetry Dependencies -->
+<dependency>
+    <groupId>io.opentelemetry</groupId>
+    <artifactId>opentelemetry-api</artifactId>
+    <version>${opentelemetry.version}</version>
+</dependency>
+<dependency>
+    <groupId>io.opentelemetry</groupId>
+    <artifactId>opentelemetry-sdk</artifactId>
+    <version>${opentelemetry.version}</version>
+</dependency>
+<dependency>
+    <groupId>io.opentelemetry</groupId>
+    <artifactId>opentelemetry-exporter-otlp</artifactId>
+    <version>${opentelemetry.version}</version>
+</dependency>
+<dependency>
+    <groupId>io.opentelemetry</groupId>
+    <artifactId>opentelemetry-sdk-metrics</artifactId>
+    <version>${opentelemetry.version}</version>
+</dependency>
+
+<!-- OpenTracing Dependencies -->
+<dependency>
+    <groupId>io.temporal</groupId>
+    <artifactId>temporal-opentracing</artifactId>
+    <version>${temporal.version}</version>
+</dependency>
+<dependency>
+    <groupId>io.opentelemetry</groupId>
+    <artifactId>opentelemetry-opentracing-shim</artifactId>
+    <version>${opentelemetry.version}</version>
+</dependency>
+```
+
+### Step 2: Configure OpenTelemetry
+
+Create `Instrumentation.java` to configure OpenTelemetry to export Metrics and Traces from the temporal application:
+
+```java:src/main/java/helloworld/config/Instrumentation.java
+package helloworld.config;
+
+import io.opentelemetry.api.*;
+import io.opentelemetry.api.common.*;
+import io.opentelemetry.api.metrics.LongCounter;
+import io.opentelemetry.api.metrics.Meter;
+import io.opentelemetry.api.metrics.LongUpDownCounter;
+import io.opentelemetry.api.metrics.LongHistogram;
+import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.context.propagation.ContextPropagators;
+import io.opentelemetry.exporter.otlp.metrics.OtlpGrpcMetricExporter;
+import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter;
+import io.opentelemetry.opentracingshim.OpenTracingShim;
+import io.opentelemetry.sdk.OpenTelemetrySdk;
+import io.opentelemetry.sdk.metrics.*;
+import io.opentelemetry.sdk.metrics.export.PeriodicMetricReader;
+import io.opentelemetry.sdk.resources.Resource;
+import io.opentelemetry.sdk.trace.SdkTracerProvider;
+import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
+import io.temporal.common.interceptors.*;
+import io.temporal.worker.WorkerFactoryOptions;
+import io.temporal.opentracing.*;
+import io.temporal.activity.ActivityExecutionContext;
+import com.uber.m3.tally.*;
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.logging.*;
+import java.time.Duration;
+
+public final class Instrumentation {
+    private static final Logger logger = Logger.getLogger(Instrumentation.class.getName());
+    private static volatile OpenTelemetry openTelemetry;
+    private static volatile Resource resource;
+    private static Meter meter;
+    private static Tracer tracer;
+    private static boolean initialized = false;
+    private static Scope metricsScope;
+    private static OpenTracingOptions openTracingOptions;
+    private static BatchSpanProcessor spanProcessor;
+    private static Map<String, LongCounter> counters = new HashMap<>();
+    private static Map<String, LongUpDownCounter> upDownCounters = new HashMap<>();
+    private static Map<String, LongHistogram> histograms = new HashMap<>();
+    
+    // Constants
+    public static final int MAX_WORKFLOW_TASK_SLOTS = 100;
+    public static final int MAX_ACTIVITY_TASK_SLOTS = 100;
+    
+    // Common attribute keys
+    public static final AttributeKey<String> WORKFLOW_TYPE = AttributeKey.stringKey("workflow_type");
+    public static final AttributeKey<String> WORKFLOW_ID = AttributeKey.stringKey("workflow_id");
+    public static final AttributeKey<String> RUN_ID = AttributeKey.stringKey("run_id");
+    public static final AttributeKey<String> NAMESPACE = AttributeKey.stringKey("namespace");
+    public static final AttributeKey<String> WORKER_TYPE = AttributeKey.stringKey("worker_type");
+
+    private Instrumentation() {}
+
+    public static synchronized void initializeTelemetry() {
+        if (initialized) return;
+        
+        logger.info("Initializing OpenTelemetry...");
+        try {
+            OpenTelemetrySdk sdk = OpenTelemetrySdk.builder()
+                .setTracerProvider(createTracerProvider())
+                .setMeterProvider(createMeterProvider())
+                .setPropagators(ContextPropagators.noop())
+                .build();
+
+            openTelemetry = sdk;
+            meter = sdk.getMeter("io.temporal");
+            tracer = sdk.getTracer("io.temporal");
+
+            initializeMetrics();
+
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                logger.info("Shutting down telemetry...");
+                shutdown();
+                logger.info("Telemetry shutdown completed");
+            }));
+
+            initialized = true;
+            logger.info("OpenTelemetry initialization completed successfully");
+        } catch (Exception e) {
+            logger.severe("Failed to initialize OpenTelemetry: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    public static void shutdown() {
+        shutdownMetrics();
+        shutdownTracing();
+    }
+
+    private static void initializeMetrics() {
+        if (meter == null) {
+            logger.warning("Meter is null, cannot initialize metrics");
+            return;
+        }
+
+        // Task slot metrics
+        upDownCounters.put("temporal_worker_task_slots_used", 
+            meter.upDownCounterBuilder("temporal_worker_task_slots_used")
+                .setDescription("Number of worker task slots currently in use")
+                .setUnit("{slots}")
+                .build());
+
+        upDownCounters.put("temporal_worker_task_slots_available",
+            meter.upDownCounterBuilder("temporal_worker_task_slots_available")
+                .setDescription("Total number of worker task slots available")
+                .setUnit("{slots}")
+                .build());
+
+        counters.put("workflow_completed_count_total", meter.counterBuilder("workflow_completed_count_total")
+            .setDescription("Total number of workflow executions completed")
+            .setUnit("1")
+            .build());
+
+        counters.put("workflow_started_count_total", meter.counterBuilder("workflow_started_count_total")
+            .setDescription("Total number of workflow executions started")
+            .setUnit("1")
+            .build());
+            
+        histograms.put("workflow_duration_seconds", meter.histogramBuilder("workflow_duration_seconds")
+            .setDescription("Duration of workflow executions in seconds")
+            .setUnit("s")
+            .ofLongs()
+            .build());
+            
+        histograms.put("activity_duration_seconds", meter.histogramBuilder("activity_duration_seconds")
+            .setDescription("Duration of activity executions in seconds")
+            .setUnit("s")
+            .ofLongs()
+            .build());
+
+        logger.info("Workflow metrics initialized successfully");
+    }
+
+    public static void recordWorkflowState(String state, String workflowType, String workflowId, String runId, String namespace) {
+        // If we're recording a state we don't track anymore, just return
+        if (!"success".equals(state) && !"failed".equals(state)) {
+            return;
+        }
+        
+        // For success and failed states, we need this for workflow_duration_seconds
+        if (counters.containsKey("workflow_" + state)) {
+            recordMetric("workflow_" + state, createWorkflowAttributes(workflowType, workflowId, runId, namespace));
+        }
+    }
+
+    public static void recordMetric(String name, Attributes attributes, long count) {
+        LongCounter counter = counters.get(name);
+        if (counter == null) {
+            logger.warning(name + " counter not initialized");
+            return;
+        }
+        counter.add(count, attributes);
+    }
+
+    public static void recordMetric(String name, Attributes attributes) {
+        recordMetric(name, attributes, 1);
+    }
+
+    public static Attributes createWorkflowAttributes(String workflowType, String workflowId, String runId, String namespace) {
+        return Attributes.of(
+            WORKFLOW_TYPE, workflowType,
+            WORKFLOW_ID, workflowId,
+            RUN_ID, runId,
+            NAMESPACE, namespace
+        );
+    }
+
+    // Required getters and configuration methods
+    public static synchronized OpenTelemetry getOpenTelemetry() {
+        if (openTelemetry == null) {
+            throw new IllegalStateException("OpenTelemetry not initialized. Call initializeTelemetry() first.");
+        }
+        return openTelemetry;
+    }
+
+    public static Scope getMetricsScope() {
+        return metricsScope != null ? metricsScope : new NoopScope();
+    }
+
+    public static WorkerInterceptor getWorkerInterceptor() {
+        return new OpenTracingWorkerInterceptor(getOpenTracingOptions());
+    }
+
+    public static WorkflowClientInterceptor getClientInterceptor() {
+        return new OpenTracingClientInterceptor(getOpenTracingOptions());
+    }
+
+    private static OpenTracingOptions getOpenTracingOptions() {
+        if (openTracingOptions == null) {
+            openTracingOptions = OpenTracingOptions.newBuilder()
+                .setTracer(OpenTracingShim.createTracerShim(getOpenTelemetry()))
+                .setSpanContextCodec(OpenTracingSpanContextCodec.TEXT_MAP_CODEC)
+                .build();
+        }
+        return openTracingOptions;
+    }
+
+    // Configuration methods
+    private static Resource createResource() {
+        if (resource != null) return resource;
+        
+        String environment = System.getenv().getOrDefault("OTEL_ENVIRONMENT", "development");
+        String serviceName = getServiceName();
+        
+        resource = Resource.getDefault().merge(Resource.create(
+            Attributes.of(
+                AttributeKey.stringKey("service.name"), serviceName,
+                AttributeKey.stringKey("service.namespace"), "default",
+                AttributeKey.stringKey("deployment.environment"), environment
+            )
+        ));
+        return resource;
+    }
+
+    public static String getServiceName() {
+        String resourceAttrs = System.getenv("OTEL_RESOURCE_ATTRIBUTES");
+        if (resourceAttrs != null) {
+            for (String pair : resourceAttrs.split("[,;]")) {
+                String[] keyValue = pair.trim().split("=", 2);
+                if ("service.name".equals(keyValue[0].trim()) && keyValue.length > 1) {
+                    return keyValue[1].trim();
+                }
+            }
+        }
+        throw new IllegalStateException("service.name must be set in OTEL_RESOURCE_ATTRIBUTES");
+    }
+
+    private static String getEndpoint() {
+        return System.getenv().getOrDefault("OTEL_EXPORTER_OTLP_ENDPOINT", "http://localhost:4317");
+    }
+
+    private static Map<String, String> getAccessTokenHeaders() {
+        String headersString = System.getenv("OTEL_EXPORTER_OTLP_HEADERS");
+        Map<String, String> headers = new HashMap<>();
+        if (headersString != null && !headersString.isEmpty()) {
+            Arrays.stream(headersString.split("[,;]"))
+                .map(String::trim)
+                .map(pair -> pair.split("=", 2))
+                .filter(keyValue -> keyValue.length == 2)
+                .forEach(keyValue -> headers.put(keyValue[0].trim(), keyValue[1].trim()));
+        }
+        return headers;
+    }
+
+    private static SdkMeterProvider createMeterProvider() {
+        OtlpGrpcMetricExporter metricExporter = OtlpGrpcMetricExporter.builder()
+            .setEndpoint(getEndpoint())
+            .setHeaders(() -> getAccessTokenHeaders())
+            .setTimeout(Duration.ofSeconds(60))
+            .build();
+
+        return SdkMeterProvider.builder()
+            .setResource(createResource())
+            .registerMetricReader(PeriodicMetricReader.builder(metricExporter)
+                .setInterval(Duration.ofSeconds(1))
+                .build())
+            .build();
+    }
+
+    private static SdkTracerProvider createTracerProvider() {
+        OtlpGrpcSpanExporter spanExporter = OtlpGrpcSpanExporter.builder()
+            .setEndpoint(getEndpoint())
+            .setHeaders(() -> getAccessTokenHeaders())
+            .setTimeout(Duration.ofSeconds(60))
+            .build();
+
+        spanProcessor = BatchSpanProcessor.builder(spanExporter).build();
+
+        return SdkTracerProvider.builder()
+            .addSpanProcessor(spanProcessor)
+            .setResource(createResource())
+            .setSampler(io.opentelemetry.sdk.trace.samplers.Sampler.alwaysOn())
+            .build();
+    }
+
+    public static void shutdownMetrics() {
+        logger.info("Metrics shutdown initiated");
+        counters.clear();
+        upDownCounters.clear();
+        histograms.clear();
+        metricsScope = null;
+        meter = null;
+        initialized = false;
+    }
+
+    public static void shutdownTracing() {
+        if (spanProcessor != null) {
+            try {
+                spanProcessor.forceFlush().join(30, TimeUnit.SECONDS);
+                spanProcessor.shutdown().join(30, TimeUnit.SECONDS);
+            } catch (Exception e) {
+                logger.severe("Tracing shutdown error: " + e.getMessage());
+            }
+        }
+    }
+
+    // Required getters
+    public static Meter getMeter() { return meter; }
+    public static Tracer getTracer() { return tracer; }
+
+    // Record methods for worker metrics
+    public static void recordWorkerStart(String workerType) {
+        // When worker starts, record the available slots
+        if ("WorkflowWorker".equals(workerType)) {
+            recordTaskSlotsAvailable(workerType, MAX_WORKFLOW_TASK_SLOTS);
+        } else if ("ActivityWorker".equals(workerType)) {
+            recordTaskSlotsAvailable(workerType, MAX_ACTIVITY_TASK_SLOTS);
+        }
+    }
+
+    public static void recordTaskSlotsAvailable(String workerType, int slots) {
+        LongUpDownCounter counter = upDownCounters.get("temporal_worker_task_slots_available");
+        if (counter != null) {
+            counter.add(slots, Attributes.of(WORKER_TYPE, workerType, NAMESPACE, TemporalConfig.getNamespace()));
+        }
+    }
+
+    public static void recordTaskSlotsUsed(String workerType, long slots) {
+        LongUpDownCounter counter = upDownCounters.get("temporal_worker_task_slots_used");
+        if (counter != null) {
+            counter.add(slots, Attributes.of(WORKER_TYPE, workerType, NAMESPACE, TemporalConfig.getNamespace()));
+        }
+    }
+
+    public static void recordSuccess(String workflowType, String workflowId, String runId, String namespace) {
+        recordWorkflowState("success", workflowType, workflowId, runId, namespace);
+        // Example: record a random duration for demonstration
+        recordWorkflowDuration(workflowType, workflowId, runId, namespace, 1 + (long)(Math.random() * 10));
+    }
+
+    public static void recordFailure(String workflowType, String workflowId, String runId, String namespace) {
+        recordWorkflowState("failed", workflowType, workflowId, runId, namespace);
+        // Example: record a random duration for demonstration
+        recordWorkflowDuration(workflowType, workflowId, runId, namespace, 1 + (long)(Math.random() * 5));
+    }
+
+    public static void recordWorkflowDuration(String workflowType, String workflowId, String runId, String namespace, long durationSeconds) {
+        LongHistogram histogram = histograms.get("workflow_duration_seconds");
+        if (histogram != null) {
+            histogram.record(durationSeconds, createWorkflowAttributes(workflowType, workflowId, runId, namespace));
+        }
+    }
+    
+    public static void recordActivityDuration(String activityType, String workflowId, String runId, String namespace, long durationSeconds) {
+        LongHistogram histogram = histograms.get("activity_duration_seconds");
+        if (histogram != null) {
+            histogram.record(durationSeconds, Attributes.builder()
+                .put("activity_type", activityType)
+                .put(WORKFLOW_ID, workflowId)
+                .put(RUN_ID, runId)
+                .put(NAMESPACE, namespace)
+                .build());
+        }
+    }
+
+    public static WorkerFactoryOptions getWorkerFactoryOptions() {
+        initializeTelemetry();
+        return WorkerFactoryOptions.newBuilder()
+            .setWorkerInterceptors(new MetricsWorkerInterceptor(), getWorkerInterceptor())
+            .build();
+    }
+    
+    private static class MetricsWorkerInterceptor implements WorkerInterceptor {
+        @Override
+        public WorkflowInboundCallsInterceptor interceptWorkflow(WorkflowInboundCallsInterceptor next) {
+            return new WorkflowInboundCallsInterceptor() {
+                private WorkflowOutboundCallsInterceptor outbound;
+
+                @Override
+                public void init(WorkflowOutboundCallsInterceptor outbound) {
+                    this.outbound = outbound;
+                    next.init(outbound);
+                }
+
+                @Override
+                public WorkflowOutput execute(WorkflowInput input) {
+                    try {
+                        recordTaskSlotsUsed("WorkflowWorker", 1);
+                        WorkflowOutput output = next.execute(input);
+                        recordTaskSlotsUsed("WorkflowWorker", -1);
+                        return output;
+                    } catch (Exception e) {
+                        recordTaskSlotsUsed("WorkflowWorker", -1);
+                        throw e;
+                    }
+                }
+
+                @Override
+                public void handleSignal(SignalInput input) { next.handleSignal(input); }
+                @Override
+                public QueryOutput handleQuery(QueryInput input) { return next.handleQuery(input); }
+                @Override
+                public void validateUpdate(UpdateInput input) { next.validateUpdate(input); }
+                @Override
+                public UpdateOutput executeUpdate(UpdateInput input) { return next.executeUpdate(input); }
+                @Override
+                public Object newWorkflowMethodThread(Runnable runnable, String name) { return next.newWorkflowMethodThread(runnable, name); }
+                @Override
+                public Object newCallbackThread(Runnable runnable, String name) { return next.newCallbackThread(runnable, name); }
+            };
+        }
+
+        @Override
+        public ActivityInboundCallsInterceptor interceptActivity(ActivityInboundCallsInterceptor next) {
+            return new ActivityInboundCallsInterceptor() {
+                @Override
+                public void init(ActivityExecutionContext context) { next.init(context); }
+
+                @Override
+                public ActivityOutput execute(ActivityInput input) {
+                    try {
+                        recordTaskSlotsUsed("ActivityWorker", 1);
+                        ActivityOutput output = next.execute(input);
+                        recordTaskSlotsUsed("ActivityWorker", -1);
+                        return output;
+                    } catch (Exception e) {
+                        recordTaskSlotsUsed("ActivityWorker", -1);
+                        throw e;
+                    }
+                }
+            };
+        }
+    }
+}
+```
+
+Note: The TemporalConfig class is responsible for setting up the Temporal application with either a local or cloud server.
+
+### Step 3: Configure Worker with Metrics
+
+Configure your Temporal Worker to initialize and integrate OpenTelemetry for both metrics and trace collection:
+
+```java:src/main/java/helloworld/workers/HelloWorldWorker.java
+import helloworld.config.Instrumentation;
+
+public class HelloWorldWorker implements AutoCloseable {
+    ...
+
+    // Initializes worker with centralized telemetry setup
+    public HelloWorldWorker() {
+        this.factory = WorkerFactory.newInstance(
+            ...
+            Instrumentation.getWorkerFactoryOptions()
+        );
+
+        // Record the start of worker execution for monitoring
+        Instrumentation.recordWorkerStart("WorkflowWorker");
+        ...
+    }
+
+    // Gracefully shuts down worker and cleans up telemetry resources
+    @Override
+    public void close() {
+        ...
+        try {
+            ...
+            // Close metrics scope and ensure metrics are flushed
+            Instrumentation.getMetricsScope().close();
+            Thread.sleep(1000);
+
+            // Shut down OpenTelemetry tracing and metrics exporters
+            Instrumentation.shutdownTracing();
+            Instrumentation.shutdownMetrics();
+
+            System.out.println("Worker shutdown completed");
+        } catch (Exception e) {
+            ...
+        }
+    }
+    ...
+}
+```
+
+### Step 4: Configure Workflow Starter
+Update your Temporal Workflow Starter to effectively initialize OpenTelemetry for metrics and trace collection:
+
+```java:src/main/java/helloworld/main/HelloWorldStarter.java
+package helloworld.main;
+
+import helloworld.config.Instrumentation;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.StatusCode;
+import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.context.Scope;
+import java.util.concurrent.TimeUnit;
+
+/**
+ * Application entry point with telemetry instrumentation.
+ */
+public class HelloWorldStarter {
+    ...
+
+    public HelloWorldStarter() {
+        Instrumentation.initializeTelemetry();
+
+        ...
+        WorkflowServiceStubsOptions stubOptions = WorkflowServiceStubsOptions.newBuilder()
+            .setMetricsScope(Instrumentation.getMetricsScope())
+            .build();
+
+        WorkflowClientOptions clientOptions = WorkflowClientOptions.newBuilder()
+            .setInterceptors(Instrumentation.getClientInterceptor())
+            .build();
+
+        ...
+    }
+
+    public void runWorkflow(String name) {
+        Tracer tracer = Instrumentation.getTracer();
+        String workflowId = ...;
+        String runId = ...;
+        String namespace = ...;
+
+        Span parentSpan = tracer.spanBuilder("StartWorkflow")
+            .setAttribute("workflow.type", "HelloWorld")
+            .setAttribute("workflow.name", name)
+            .startSpan();
+
+        try (Scope scope = parentSpan.makeCurrent()) {
+            ...
+
+            // Record workflow start
+            Instrumentation.recordMetric("workflow_started_count_total", 
+                Instrumentation.createWorkflowAttributes(
+                    "HelloWorldWorkflow", workflowId, runId, namespace));
+            parentSpan.setAttribute("workflow.started", true);
+
+            executeWorkflow(..., parentSpan);
+
+            parentSpan.setStatus(StatusCode.OK);
+        } catch (Exception e) {
+            ...
+            parentSpan.recordException(e);
+            parentSpan.setStatus(StatusCode.ERROR);
+            ...
+        } finally {
+            parentSpan.end();
+            shutdown();
+        }
+    }
+
+    private String executeWorkflow(..., Span parentSpan) {
+        Tracer tracer = Instrumentation.getTracer();
+        Span executeSpan = tracer.spanBuilder("ExecuteWorkflow")
+            .setParent(io.opentelemetry.context.Context.current().with(parentSpan))
+            .setAttribute("workflow.id", ...)
+            .setAttribute("workflow.type", "temporal")
+            .setAttribute("service.name", Instrumentation.getServiceName())
+            .setAttribute("workflow.task_queue", ...)
+            .startSpan();
+
+        String result;
+        try (Scope executeScope = executeSpan.makeCurrent()) {
+            result = ...;
+            executeSpan.setAttribute("workflow.result", result);
+            executeSpan.setStatus(StatusCode.OK);
+
+            // Record workflow completion
+            Instrumentation.recordMetric("workflow_completed_count_total", 
+                Instrumentation.createWorkflowAttributes(
+                    "HelloWorldWorkflow", ..., ..., ...));
+            parentSpan.setAttribute("workflow.completed", true);
+
+            Instrumentation.recordSuccess("HelloWorldWorkflow", ..., ..., ...);
+
+            ...
+            return result;
+        } catch (Exception e) {
+            executeSpan.recordException(e);
+            executeSpan.setStatus(StatusCode.ERROR);
+            Instrumentation.recordFailure("HelloWorldWorkflow", ..., ..., ...);
+            throw e;
+        } finally {
+            executeSpan.end();
+        }
+    }
+
+    private void shutdown() {
+        try {
+            Instrumentation.shutdownMetrics();
+            Instrumentation.shutdownTracing();
+            
+            ...
+
+            Thread.sleep(1000);
+            ...
+        } catch (Exception e) {
+            ...
+        }
+    }
+
+    ... // Main method
+}
+
+```
+
+### Step 5: Running your temporal worker and client applications
+
+Pass serviceName, otlp endpoint and authentication headers using native otel environment variables. You can add more resource attributes like `deployment.environment` as per otel conventions using envs
+
+<Tabs>
+
+    <TabItem value="Self-hosted" label="Self-hosted">
+        Worker run command:
+        ```
+        OTEL_RESOURCE_ATTRIBUTES="service.name=temporal-worker-<identifier>,deployment.environment=test" OTEL_EXPORTER_OTLP_ENDPOINT='http://localhost:4317' mvn exec:java -Dexec.mainClass="helloworld.workers.HelloWorldWorker"
+        ```
+
+        A similar run command for temporal client application
+        ```
+        OTEL_RESOURCE_ATTRIBUTES="service.name=temporal-client-<identifier>,deployment.environment=test" OTEL_EXPORTER_OTLP_ENDPOINT='http://localhost:4317' mvn exec:java -Dexec.mainClass="helloworld.main.HelloWorldStarter"
+        ```
+
+    </TabItem>
+
+    <TabItem value="Signoz Cloud" label="Signoz Cloud" default>
+        Worker run command:
+        ```
+        OTEL_EXPORTER_OTLP_ENDPOINT='https://ingest.<region>.signoz.cloud:443' OTEL_RESOURCE_ATTRIBUTES="service.name=temporal-worker-<identifier>" OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<signoz-ingestion-key>" mvn exec:java -Dexec.mainClass="helloworld.workers.HelloWorldWorker"
+        ```
+
+        A similar run command for temporal client application
+        ```
+        OTEL_EXPORTER_OTLP_ENDPOINT='https://ingest.<region>.signoz.cloud:443' OTEL_RESOURCE_ATTRIBUTES="service.name=temporal-client-<identifier>" OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<signoz-ingestion-key>" mvn exec:java -Dexec.mainClass="helloworld.main.HelloWorldStarter"
+        ```
+        
+    </TabItem>
+</Tabs>
+
+### Step 6: Build dashboards and parse logs at SigNoz
+
+You should be able to see incoming temporal sdk metrics at **Metrics Explorer** page at SigNoz. Once you see them coming, go to Dashboards -> Import Dashboard. The dashboard json for sdk metrics can be found at [this link](https://github.com/Creator54/temporal-java-opentelemetry/blob/main/dashboard.json) 
+
+If you are successfully sending logs to SigNoz, you need to parse your logs at SigNoz using the Logs Pipeline feature.
+1. Use Json parser if your logs are json formatted using https://signoz.io/docs/logs-pipelines/processors/#json-parser
+2. Map traceID and spanID to the right fields using trace parser using https://signoz.io/docs/logs-pipelines/processors/#trace-parser. This helps you to move seamlessly between logs and traces
+3. Map log_level to severity_text in otel semantics using https://signoz.io/docs/logs-pipelines/processors/#severity-parser
+4. (Optional) Map timestamp from your json body to otel using https://signoz.io/docs/logs-pipelines/processors/#timestamp-parser
+<figure data-zoomable align='center'>
+    <img src="/img/docs/integrations/temporal/golang/logs-pipeline.webp" alt="Parsing json logs"/>
+    <figcaption><i>Parsing json logs</i></figcaption>
+</figure>
+
+### Step 7: Enjoy your data at SigNoz. Metrics, Traces and Logs all at the same tool for unified querying and correlation
+<figure data-zoomable align='center'>
+    <img src="/img/docs/integrations/temporal/golang/distributed-trace.webp" alt="Distributed trace from a temporal application"/>
+    <figcaption><i>Distributed trace from a temporal application</i></figcaption>
+</figure>
+<figure data-zoomable align='center'>
+    <img src="/img/docs/integrations/temporal/golang/logs.webp" alt="Json logs from a temporal application"/>
+    <figcaption><i>Json logs from a temporal application</i></figcaption>
+</figure>
+<figure data-zoomable align='center'>
+    <img src="/img/docs/integrations/temporal/golang/sdk-metrics.webp" alt="SDK metrics from a temporal application"/>
+    <figcaption><i>SDK metrics from a temporal application</i></figcaption>
+</figure>

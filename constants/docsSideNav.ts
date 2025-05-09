@@ -1490,9 +1490,13 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/integrations/temporal-typescript-opentelemetry',
             label: 'Typescript',
+          },
+          {
+            type: 'doc',
+            route: '/docs/integrations/temporal-java-opentelemetry',
+            label: 'Java',
           }
         ]
-
       },
       {
         type: 'doc',
