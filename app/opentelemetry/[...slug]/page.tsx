@@ -25,6 +25,8 @@ const layouts = {
   OpenTelemetryLayout,
 }
 
+export const dynamicParams = false
+
 export async function generateMetadata({
   params,
 }: {
