@@ -29,6 +29,8 @@ export const EXPERIMENTS = {
       DUAL_CTA: 'dual-cta',
     },
     flagName: 'single-cta-on-home-header',
+    concluded: true,
+    defaultVariant: 'single-cta',
   },
   TEAMS_PAGE: {
     id: 'teams-page-focused-layout-experiment',

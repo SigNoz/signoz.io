@@ -1,25 +1,13 @@
 import React from 'react'
 import Hero from '@/components/ui/Hero'
-import { ArrowRight, BookOpen, Handshake } from 'lucide-react'
+import { ArrowRight, Handshake } from 'lucide-react'
 import Button from '@/components/Button/Button'
 import TrackingLink from '@/components/TrackingLink'
 import Link from 'next/link'
 import { VideoModalPlayer } from './VideoModalPlayer'
-import { evaluateFeatureFlag } from '@/utils/growthbookServer'
-import { ExperimentTracker } from '@/components/ExperimentTracker'
-import { EXPERIMENTS } from '@/constants/experiments'
 
-// Server component that makes the A/B test decision
+// Server component with single CTA
 export async function Header() {
-  // Evaluate the feature flag on the server
-  const showSingleCTA = await evaluateFeatureFlag(EXPERIMENTS.HOME_HEADER.flagName)
-
-  // Define experiment details
-  const experimentId = EXPERIMENTS.HOME_HEADER.id
-  const variantId = showSingleCTA
-    ? EXPERIMENTS.HOME_HEADER.variants.SINGLE_CTA
-    : EXPERIMENTS.HOME_HEADER.variants.DUAL_CTA
-
   return (
     <header className="relative !mx-auto mt-16 !w-[100vw] md:!w-[80vw]">
       <div className="absolute bottom-0 left-[12px] right-[12px] top-0 z-[-1] border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 md:left-[24px] md:right-[24px]" />
@@ -46,64 +34,19 @@ export async function Header() {
       </div>
       {/* <div className='!w-[80vw] h-12 !mx-auto border border-signoz_slate-400 border-dashed !border-t-0 !border-b-0' /> */}
       <div className="!mx-auto mx-2 flex !w-[100vw] flex-col items-center justify-center gap-3 border !border-b-0 !border-t-0 border-dashed border-signoz_slate-400 pb-12 pt-4 md:mx-5 md:!w-[80vw] md:flex-row">
-        {/* Use ExperimentTracker to track experiment views */}
-        <ExperimentTracker experimentId={experimentId} variantId={variantId}>
-          {/* Render different CTAs based on experiment */}
-          {showSingleCTA ? (
-            // Experiment variant: Single CTA
-            <TrackingLink
-              href="/teams/"
-              clickType="Primary CTA"
-              clickName="Sign Up Button"
-              clickText="Get Started - Free"
-              clickLocation="Hero Section"
-              experimentId={experimentId}
-              variantId={variantId}
-            >
-              <Button className="flex-center" id="btn-get-started-homepage-hero">
-                Get Started - Free
-                <ArrowRight size={14} />
-              </Button>
-            </TrackingLink>
-          ) : (
-            // Control variant: Multiple CTAs
-            <>
-              <TrackingLink
-                href="/teams/"
-                clickType="Primary CTA"
-                clickName="Sign Up Button"
-                clickText="Get Started - Free"
-                clickLocation="Hero Section"
-                experimentId={experimentId}
-                variantId={variantId}
-              >
-                <Button className="flex-center" id="btn-get-started-homepage-hero">
-                  Get Started - Free
-                  <ArrowRight size={14} />
-                </Button>
-              </TrackingLink>
-
-              <TrackingLink
-                href="/docs/introduction/"
-                clickType="Secondary CTA"
-                clickName="Read Documentation Link"
-                clickText="Read Documentation"
-                clickLocation="Hero Section"
-                experimentId={experimentId}
-                variantId={variantId}
-              >
-                <Button
-                  className="flex-center"
-                  type={Button.TYPES.SECONDARY}
-                  id="btn-read-documentation-homepage-hero"
-                >
-                  <BookOpen size={14} />
-                  Read Documentation
-                </Button>
-              </TrackingLink>
-            </>
-          )}
-        </ExperimentTracker>
+        {/* Single CTA */}
+        <TrackingLink
+          href="/teams/"
+          clickType="Primary CTA"
+          clickName="Sign Up Button"
+          clickText="Get Started - Free"
+          clickLocation="Hero Section"
+        >
+          <Button className="flex-center" id="btn-get-started-homepage-hero">
+            Get Started - Free
+            <ArrowRight size={14} />
+          </Button>
+        </TrackingLink>
       </div>
       <div className="section-container !mx-auto !mt-0 !w-[90vw] border !border-b-0 !border-t-0 border-none border-signoz_slate-400 md:!w-[80vw] md:border-dashed">
         <div className="w-100 mx-[-28px]">
