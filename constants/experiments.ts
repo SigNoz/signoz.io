@@ -6,6 +6,15 @@
  */
 
 export const EXPERIMENTS = {
+  DOCS_HEADER_PART_TWO: {
+    id: 'docs-header-experiment-part-two',
+    variants: {
+      BOTH_BUTTONS: 'both-quickstart-and-install-locally',
+      ONLY_QUICKSTART: 'only-quickstart',
+      NO_QUICKSTART: 'no-quickstart',
+    },
+    flagName: 'docs-header-experiment-part-two',
+  },
   DOCS_HEADER: {
     id: 'docs-header-with-only-quick-start',
     variants: {
@@ -13,6 +22,8 @@ export const EXPERIMENTS = {
       DUAL_BUTTONS: 'quick-start-with-install-locally',
     },
     flagName: 'docs-header-with-only-quick-start',
+    concluded: true,
+    defaultVariant: 'none',
   },
   DOCS_QUICK_START_LINK: {
     id: 'docs-quick-start-link',

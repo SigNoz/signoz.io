@@ -3,11 +3,11 @@ import Heading from '@/components/ui/Heading'
 import SubHeading from '@/components/ui/SubHeading'
 import { Zap, Server } from 'lucide-react'
 import TrackingLink from '@/components/TrackingLink'
-import { evaluateFeatureFlag } from '@/utils/growthbookServer'
+import { getFeatureValue } from '@/utils/growthbookServer'
 import { ExperimentTracker } from '@/components/ExperimentTracker'
 import { EXPERIMENTS } from '@/constants/experiments'
 
-// Single CTA variant - only shows the Quick Start button
+// Quick Start button only variant
 function QuickStartOnlyVariant({
   experimentId,
   variantId,
@@ -93,13 +93,36 @@ function DualButtonVariant({
   )
 }
 
+// No Quick Start variant - no buttons in the header
+function NoQuickStartVariant({
+  experimentId,
+  variantId,
+}: {
+  experimentId: string
+  variantId: string
+}) {
+  // Don't show any buttons
+  return null
+}
+
 export default async function Header() {
-  // Evaluate the feature flag to determine which variant to show
-  const showOnlyQuickStart = await evaluateFeatureFlag(EXPERIMENTS.DOCS_HEADER.flagName)
-  const experimentId = EXPERIMENTS.DOCS_HEADER.id
-  const variantId = showOnlyQuickStart
-    ? EXPERIMENTS.DOCS_HEADER.variants.QUICK_START_ONLY
-    : EXPERIMENTS.DOCS_HEADER.variants.DUAL_BUTTONS
+  // Get the feature variant using getFeatureValue with string type
+  const headerVariant = await getFeatureValue<string>(
+    EXPERIMENTS.DOCS_HEADER_PART_TWO.flagName,
+    EXPERIMENTS.DOCS_HEADER_PART_TWO.variants.BOTH_BUTTONS
+  )
+  const experimentId = EXPERIMENTS.DOCS_HEADER_PART_TWO.id
+  const variantId = headerVariant
+
+  // Determine which variant to render
+  let selectedVariant = 'BOTH_BUTTONS'
+
+  // Compare using type-safe approach
+  if (headerVariant === EXPERIMENTS.DOCS_HEADER_PART_TWO.variants.ONLY_QUICKSTART) {
+    selectedVariant = 'ONLY_QUICKSTART'
+  } else if (headerVariant === EXPERIMENTS.DOCS_HEADER_PART_TWO.variants.NO_QUICKSTART) {
+    selectedVariant = 'NO_QUICKSTART'
+  }
 
   return (
     <div className="mx-auto mb-12 w-full max-w-6xl">
@@ -114,10 +137,12 @@ export default async function Header() {
       </div>
 
       <ExperimentTracker experimentId={experimentId} variantId={variantId}>
-        {showOnlyQuickStart ? (
+        {selectedVariant === 'ONLY_QUICKSTART' ? (
           <QuickStartOnlyVariant experimentId={experimentId} variantId={variantId} />
-        ) : (
+        ) : selectedVariant === 'BOTH_BUTTONS' ? (
           <DualButtonVariant experimentId={experimentId} variantId={variantId} />
+        ) : (
+          <NoQuickStartVariant experimentId={experimentId} variantId={variantId} />
         )}
       </ExperimentTracker>
     </div>
