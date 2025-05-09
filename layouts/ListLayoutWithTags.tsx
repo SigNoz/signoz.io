@@ -8,6 +8,7 @@ import { CoreContent } from 'pliny/utils/contentlayer'
 import type { Blog, Doc, Guide, Opentelemetry } from 'contentlayer/generated'
 import Link from '@/components/Link'
 import Tag from '@/components/Tag'
+import Button from '@/components/Button/Button'
 import siteMetadata from '@/data/siteMetadata'
 import tagData from 'app/tag-data.json'
 
@@ -20,6 +21,7 @@ interface ListLayoutProps {
   title: string
   initialDisplayPosts?: CoreContent<Blog | Doc | Opentelemetry | Guide>[]
   pagination?: PaginationProps
+  emptyMessage?: string
 }
 
 function Pagination({ totalPages, currentPage }: PaginationProps) {
@@ -67,6 +69,7 @@ export default function ListLayoutWithTags({
   title,
   initialDisplayPosts = [],
   pagination,
+  emptyMessage = 'No posts found.',
 }: ListLayoutProps) {
   const pathname = usePathname()
   const tagCounts = tagData as Record<string, number>
@@ -119,41 +122,53 @@ export default function ListLayoutWithTags({
             </div>
           </div>
           <div className="tag-posts">
-            <ul className="pl-0">
-              {displayPosts.map((post) => {
-                const { path, date, title, summary, tags } = post
+            {displayPosts.length > 0 ? (
+              <ul className="pl-0">
+                {displayPosts.map((post) => {
+                  const { path, date, title, summary, tags } = post
 
-                return (
-                  <li key={path} className="py-5">
-                    <article className="flex flex-col space-y-2 xl:space-y-0">
-                      <dl>
-                        <dt className="sr-only">Published on</dt>
-                        <dd className="text-base font-medium leading-6 text-gray-500 dark:text-gray-400">
-                          {date && (
-                            <time dateTime={date}>{formatDate(date, siteMetadata.locale)}</time>
-                          )}
-                        </dd>
-                      </dl>
-                      <div className="space-y-3">
-                        <div>
-                          <h2 className="text-2xl font-bold leading-8 tracking-tight">
-                            <Link href={`/${path}`} className="text-gray-900 dark:text-gray-100">
-                              {title}
-                            </Link>
-                          </h2>
-                          <div className="flex flex-wrap">
-                            {tags?.map((tag) => <Tag key={tag} text={tag} />)}
+                  return (
+                    <li key={path} className="py-5">
+                      <article className="flex flex-col space-y-2 xl:space-y-0">
+                        <dl>
+                          <dt className="sr-only">Published on</dt>
+                          <dd className="text-base font-medium leading-6 text-gray-500 dark:text-gray-400">
+                            {date && (
+                              <time dateTime={date}>{formatDate(date, siteMetadata.locale)}</time>
+                            )}
+                          </dd>
+                        </dl>
+                        <div className="space-y-3">
+                          <div>
+                            <h2 className="text-2xl font-bold leading-8 tracking-tight">
+                              <Link href={`/${path}`} className="text-gray-900 dark:text-gray-100">
+                                {title}
+                              </Link>
+                            </h2>
+                            <div className="flex flex-wrap">
+                              {tags?.map((tag) => <Tag key={tag} text={tag} />)}
+                            </div>
+                          </div>
+                          <div className="prose max-w-none text-gray-500 dark:text-gray-400">
+                            {summary}
                           </div>
                         </div>
-                        <div className="prose max-w-none text-gray-500 dark:text-gray-400">
-                          {summary}
-                        </div>
-                      </div>
-                    </article>
-                  </li>
-                )
-              })}
-            </ul>
+                      </article>
+                    </li>
+                  )
+                })}
+              </ul>
+            ) : (
+              <div className="mt-10 flex flex-col items-center justify-center space-y-6">
+                <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                  No posts found
+                </div>
+                <div className="text-center text-gray-500 dark:text-gray-400">{emptyMessage}</div>
+                <Link href="/blog">
+                  <Button type={Button.TYPES.PRIMARY}>Back to Blog</Button>
+                </Link>
+              </div>
+            )}
             {pagination && pagination.totalPages > 1 && (
               <Pagination currentPage={pagination.currentPage} totalPages={pagination.totalPages} />
             )}
