@@ -6,7 +6,6 @@ import { MDXLayoutRenderer } from 'pliny/mdx-components'
 import PageFeedback from '../PageFeedback/PageFeedback'
 import DocsPrevNext from '../DocsPrevNext/DocsPrevNext'
 import TableOfContents from '../DocsTOC/DocsTOC'
-import TrySigNozFloatingCard from '../TrySigNozFloatingCard/TrySigNozFloatingCard'
 import { QUERY_PARAMS } from '@/constants/queryParams'
 import { useSearchParams } from 'next/navigation'
 import { ONBOARDING_SOURCE } from '@/constants/globals'
@@ -36,7 +35,6 @@ const DocContent: React.FC<{
           source={source || ''}
         />
       )}
-      <TrySigNozFloatingCard source={source || ''} />
     </>
   )
 }
