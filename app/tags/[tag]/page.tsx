@@ -6,6 +6,9 @@ import { allBlogs } from 'contentlayer/generated'
 import tagData from 'app/tag-data.json'
 import { genPageMetadata } from 'app/seo'
 import { Metadata } from 'next'
+import { notFound } from 'next/navigation'
+
+export const dynamicParams = false
 
 export async function generateMetadata({ params }: { params: { tag: string } }): Promise<Metadata> {
   const tag = decodeURI(params.tag)
@@ -35,14 +38,15 @@ export const generateStaticParams = async () => {
 
 export default function TagPage({ params }: { params: { tag: string } }) {
   const tag = decodeURI(params.tag)
-  // Capitalize first letter and convert space to dash
-  const title = tag[0].toUpperCase() + tag.split(' ').join('-').slice(1)
   const filteredPosts = allCoreContent(
     sortPosts(allBlogs.filter((post) => post.tags && post.tags.map((t) => slug(t)).includes(tag)))
   )
 
-  // Pass an empty message for tags with no posts
-  const emptyMessage = `No posts found with the tag "${tag}". Browse other tags or return to the main blog.`
+  // Return 404 for empty tag pages
+  if (filteredPosts.length === 0) {
+    notFound() // Next.js function to return 404
+  }
 
-  return <ListLayout posts={filteredPosts} title={title} emptyMessage={emptyMessage} />
+  const title = tag[0].toUpperCase() + tag.split(' ').join('-').slice(1)
+  return <ListLayout posts={filteredPosts} title={title} />
 }
