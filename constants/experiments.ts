@@ -32,6 +32,14 @@ export const EXPERIMENTS = {
     concluded: true,
     defaultVariant: 'single-cta',
   },
+  HOME_HEADER_CTA_COPY: {
+    id: 'home-header-cta-copy',
+    variants: {
+      GET_STARTED_FREE: 'get-started-free-copy',
+      START_SENDING_DATA: 'start-sending-data-free-copy',
+    },
+    flagName: 'home-header-cta-copy',
+  },
   TEAMS_PAGE: {
     id: 'teams-page-focused-layout-experiment',
     variants: {
