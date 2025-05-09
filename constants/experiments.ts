@@ -21,6 +21,8 @@ export const EXPERIMENTS = {
       QUICKSTART_DOC_LINK: 'quickstart-doc-link',
     },
     flagName: 'docs-quick-start-link',
+    concluded: true,
+    defaultVariant: 'quickstart-doc-link',
   },
   HOME_HEADER: {
     id: 'home-header-cta',

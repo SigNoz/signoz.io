@@ -11,16 +11,13 @@ import { EXPERIMENTS } from '@/constants/experiments'
 function QuickStartOnlyVariant({
   experimentId,
   variantId,
-  quickStartLinkExperimentId,
-  quickStartLinkVariantId,
-  quickStartLink,
 }: {
   experimentId: string
   variantId: string
-  quickStartLinkExperimentId: string
-  quickStartLinkVariantId: string
-  quickStartLink: string
 }) {
+  // Use the quickstart doc link for everyone
+  const quickStartLink = '/docs/cloud/quickstart/'
+
   return (
     <div className="mx-auto mb-12 mt-12 flex w-full justify-center">
       <TrackingLink
@@ -30,8 +27,8 @@ function QuickStartOnlyVariant({
         clickName="Quick Start Button"
         clickText="Get started with SigNoz Cloud"
         clickLocation="Page Header"
-        experimentId={quickStartLinkExperimentId}
-        variantId={quickStartLinkVariantId}
+        experimentId={experimentId}
+        variantId={variantId}
       >
         <div className="mb-3 flex items-center gap-3">
           <Zap size={24} className="text-signoz_robin-500" />
@@ -104,23 +101,6 @@ export default async function Header() {
     ? EXPERIMENTS.DOCS_HEADER.variants.QUICK_START_ONLY
     : EXPERIMENTS.DOCS_HEADER.variants.DUAL_BUTTONS
 
-  // Evaluate the quick start link experiment (only applies to Quick Start Only variant)
-  let quickStartLinkExperimentId = ''
-  let quickStartLinkVariantId = ''
-  let quickStartLink = '/teams/'
-
-  if (showOnlyQuickStart) {
-    const useQuickStartDocLink = await evaluateFeatureFlag(
-      EXPERIMENTS.DOCS_QUICK_START_LINK.flagName
-    )
-    quickStartLinkExperimentId = EXPERIMENTS.DOCS_QUICK_START_LINK.id
-    quickStartLinkVariantId = useQuickStartDocLink
-      ? EXPERIMENTS.DOCS_QUICK_START_LINK.variants.QUICKSTART_DOC_LINK
-      : EXPERIMENTS.DOCS_QUICK_START_LINK.variants.TEAMS_LINK
-
-    quickStartLink = useQuickStartDocLink ? '/docs/cloud/quickstart/' : '/teams/'
-  }
-
   return (
     <div className="mx-auto mb-12 w-full max-w-6xl">
       <div className="text-center">
@@ -135,13 +115,7 @@ export default async function Header() {
 
       <ExperimentTracker experimentId={experimentId} variantId={variantId}>
         {showOnlyQuickStart ? (
-          <QuickStartOnlyVariant
-            experimentId={experimentId}
-            variantId={variantId}
-            quickStartLinkExperimentId={quickStartLinkExperimentId}
-            quickStartLinkVariantId={quickStartLinkVariantId}
-            quickStartLink={quickStartLink}
-          />
+          <QuickStartOnlyVariant experimentId={experimentId} variantId={variantId} />
         ) : (
           <DualButtonVariant experimentId={experimentId} variantId={variantId} />
         )}
