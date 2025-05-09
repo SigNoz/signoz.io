@@ -27,6 +27,8 @@ const layouts = {
   BlogLayout,
 }
 
+export const dynamicParams = false
+
 export async function generateMetadata({
   params,
 }: {
@@ -103,7 +105,7 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
   })
   const mainContent = coreContent(post)
   const jsonLd = post.structuredData
-  
+
   // Choose layout based on slug or post layout
   let layoutName = post.layout || defaultLayout
   if (slug.includes('opentelemetry')) {
@@ -116,7 +118,8 @@ export default async function Page({ params }: { params: { slug: string[] } }) {
   const Layout = layouts[layoutName]
 
   // Check if the slug contains Grafana or Prometheus
-  const isGrafanaOrPrometheusArticle = slug.toLowerCase().includes('grafana') || slug.toLowerCase().includes('prometheus')
+  const isGrafanaOrPrometheusArticle =
+    slug.toLowerCase().includes('grafana') || slug.toLowerCase().includes('prometheus')
 
   return (
     <>

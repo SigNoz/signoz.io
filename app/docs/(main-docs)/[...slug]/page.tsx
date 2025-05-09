@@ -8,6 +8,8 @@ import siteMetadata from '@/data/siteMetadata'
 import { notFound } from 'next/navigation'
 import DocContent from '@/components/DocContent/DocContent'
 
+export const dynamicParams = false
+
 export async function generateMetadata({
   params,
 }: {

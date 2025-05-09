@@ -27,6 +27,8 @@ const layouts = {
   BlogLayout,
 }
 
+export const dynamicParams = false
+
 export async function generateMetadata({
   params,
 }: {
