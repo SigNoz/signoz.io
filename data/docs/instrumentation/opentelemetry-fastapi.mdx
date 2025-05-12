@@ -7,15 +7,8 @@ hide_table_of_contents: true
 ---
 
 
-
-{/* import InstrumentationFAQ from '@/components/shared/instrumentation-faq.md' */}
-
 This document contains instructions on how to set up OpenTelemetry instrumentation in your FastAPI applications and view your application traces in SigNoz.
 
-{/* This document contains instructions on how to set up OpenTelemetry instrumentation in your FastAPI applications.  */}
-{/* OpenTelemetry, also known as OTel for short, is an open source observability framework that can help you generate and collect telemetry data - traces, metrics, and logs from your FastAPI application. */}
-
-{/* Once the telemetry data is collected, you can configure an exporter to send the data to SigNoz. */}
 
 ## Requirements
 
@@ -35,7 +28,10 @@ From VMs, there are two ways to send data to SigNoz Cloud.
 - [Send traces directly to SigNoz Cloud](#send-traces-directly-to-signoz-cloud)
 - [Send traces via OTel Collector binary](#send-traces-via-otel-collector-binary) (recommended)
 
-#### Send traces directly to SigNoz Cloud
+<Tabs>
+<TabItem value="sdk" label="Quickstart" default>
+
+If you're new to OpenTelemetry and SigNoz, we would suggest you to try this quickstart way of sending your traces using the OpenTelemetry SDKs in.
 
 **Step 1.** Create a virtual environment<br></br>
     
@@ -101,9 +97,11 @@ Step 5. Validate if your application is sending traces to SigNoz cloud by follow
 
 In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#troubleshooting-your-installation).
 
----
+</TabItem>
 
-#### Send traces via OTel Collector binary
+<TabItem value="collector" label="Collector (Recommended)" default>
+
+If you plan on using SigNoz for more than just traces, we would suggest you try follow the steps below to setup collector.
 
 **Step 1.** Install OTel Collector binary<br></br>
 
@@ -177,6 +175,10 @@ In case you have OtelCollector Agent in different VM, replace localhost:4317 wit
 In case you encounter an issue where all applications do not get listed in the services section then please refer to the [troubleshooting section](#troubleshooting-your-installation).
 
 </TabItem>
+</Tabs>
+
+</TabItem>
+
 <TabItem value="k8s" label="Kubernetes">
 
 For Python application deployed on Kubernetes, you need to install OTel Collector agent in your k8s infra to collect and send traces to SigNoz Cloud. You can find the instructions to install OTel Collector agent [here](https://signoz.io/docs/tutorial/kubernetes-infra-metrics/).
