@@ -10,7 +10,7 @@ import TroubleshootingCommunity from './TroubleshootingCommunity'
 import AdditionalResources from './AdditionalResources'
 import QuickStartCloud from '@/components/QuickStartCloud'
 import InstallLocallySection from './InstallLocallySection'
-import { evaluateFeatureFlag } from '@/utils/growthbookServer'
+import { getFeatureValue } from '@/utils/growthbookServer'
 import { EXPERIMENTS } from '@/constants/experiments'
 import { Metadata } from 'next'
 
@@ -21,12 +21,17 @@ export const metadata: Metadata = {
 }
 
 export default async function DocsIntroductionPage() {
-  // Check if the single CTA experiment is active
-  const showOnlyQuickStart = await evaluateFeatureFlag(EXPERIMENTS.DOCS_HEADER.flagName)
-  const experimentId = EXPERIMENTS.DOCS_HEADER.id
-  const variantId = showOnlyQuickStart
-    ? EXPERIMENTS.DOCS_HEADER.variants.QUICK_START_ONLY
-    : EXPERIMENTS.DOCS_HEADER.variants.DUAL_BUTTONS
+  // Get the variant for the DOCS_HEADER_PART_TWO experiment
+  const headerVariant = await getFeatureValue<string>(
+    EXPERIMENTS.DOCS_HEADER_PART_TWO.flagName,
+    EXPERIMENTS.DOCS_HEADER_PART_TWO.variants.BOTH_BUTTONS
+  )
+  const experimentId = EXPERIMENTS.DOCS_HEADER_PART_TWO.id
+
+  // Determine if we should show the Install Locally section based on the variant
+  const shouldShowInstallLocally =
+    headerVariant === EXPERIMENTS.DOCS_HEADER_PART_TWO.variants.ONLY_QUICKSTART ||
+    headerVariant === EXPERIMENTS.DOCS_HEADER_PART_TWO.variants.NO_QUICKSTART
 
   return (
     <>
@@ -40,9 +45,9 @@ export default async function DocsIntroductionPage() {
       <TroubleshootingCommunity />
       <AdditionalResources />
 
-      {/* Only show the Install Locally section at the end if single CTA experiment is active */}
-      {showOnlyQuickStart && (
-        <InstallLocallySection experimentId={experimentId} variantId={variantId} />
+      {/* Show the Install Locally section for specific variants */}
+      {shouldShowInstallLocally && (
+        <InstallLocallySection experimentId={experimentId} variantId={headerVariant} />
       )}
 
       <QuickStartCloud />
