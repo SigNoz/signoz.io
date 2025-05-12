@@ -35,7 +35,7 @@ function QuickStartOnlyVariant({
           <h2 className="mb-0 text-xl font-semibold text-signoz_vanilla-100">Quick Start</h2>
         </div>
         <p className="mb-0 text-left text-base text-signoz_vanilla-400">
-          Setup Monitoring in Minutes with SigNoz Cloud
+          Send Demo App Data to SigNoz Cloud
         </p>
       </TrackingLink>
     </div>
