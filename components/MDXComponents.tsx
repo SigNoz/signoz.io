@@ -35,6 +35,9 @@ import InterlinkCard from './InterlinkCard/InterlinkCard'
 import InArticleVideoShowcaseModal from './InArticleVideoShowcaseModal/InArticleVideoShowcaseModal'
 import GetStartedInfrastructureMonitoring from './GetStartedInfrastructureMonitoring/GetStartedInfrastructureMonitoring'
 import ImageCTA from './ImageCTA/ImageCTA'
+import TrackingLink from './TrackingLink'
+import APMQuickStartOverview from './APM/APMQuickStartOverview'
+import MDXButton from './MDXButton/MDXButton'
 
 export const components: MDXComponents = {
   Image,
@@ -73,4 +76,7 @@ export const components: MDXComponents = {
   InArticleVideoShowcaseModal,
   GetStartedInfrastructureMonitoring,
   ImageCTA,
+  TrackingLink,
+  APMQuickStartOverview,
+  MDXButton,
 }
