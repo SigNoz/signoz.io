@@ -144,7 +144,7 @@ module.exports = () => {
         },
         {
           source: '/careers/',
-          destination: 'https://jobs.gem.com/signoz',
+          destination: 'https://www.ycombinator.com/companies/signoz/jobs',
           basePath: false,
           permanent: true,
         },
