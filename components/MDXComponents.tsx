@@ -37,7 +37,9 @@ import GetStartedInfrastructureMonitoring from './GetStartedInfrastructureMonito
 import ImageCTA from './ImageCTA/ImageCTA'
 import TrackingLink from './TrackingLink'
 import APMQuickStartOverview from './APM/APMQuickStartOverview'
+import APMInstrumentationListicle from './APM/APMInstrumentationListicle'
 import MDXButton from './MDXButton/MDXButton'
+import IconCardGrid from './Card/IconCardGrid'
 
 export const components: MDXComponents = {
   Image,
@@ -78,5 +80,7 @@ export const components: MDXComponents = {
   ImageCTA,
   TrackingLink,
   APMQuickStartOverview,
+  APMInstrumentationListicle,
   MDXButton,
+  IconCardGrid,
 }
