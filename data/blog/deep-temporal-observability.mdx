@@ -1,0 +1,86 @@
+---
+
+title: Deep Temporal Observability - Correlate Metrics with Logs & Traces
+slug: deep-temporal-observability
+date: 2025-05-12
+tags: [product]
+authors: [anushka_karmakar]
+description: Correlate Temporal workflow metrics, logs, and traces in SigNoz to quickly identify slow activities, pinpoint workflow failures, and debug issues with full context. No manual data stitching required.
+image: /img/blog/2025/05/deep-temporal-observability-cover.webp
+keywords: [opentelemetry, temporal, workflow observability, traces, logs, SigNoz]
+
+---
+Temporal lets you orchestrate complex, reliable workflows, but when something breaks or slows down, the built-in dashboards only give you a list of events and some basic filters. You can see what happened and filter by attributes like workflow type or namespace, *but you can't drill deeper.* 
+
+There's no way to jump straight from a metric spike to the exact trace or log line you care about. If you want to know which activity is slow, why a workflow failed, or how long a workflow took end-to-end, you're left piecing together logs, traces, and metrics from different places.
+
+This is a real pain for anyone running production workloads on Temporal. You need to answer questions like:
+
+- Where did my workflow stop?
+- Which activities are the slowest?
+- Can I break down latency by task queue, activity type, or namespace?
+- If a workflow fails, can I see all related logs and traces in one place?
+- Can I set up alerts or auto-scaling based on actual workflow metrics?
+
+You end up jumping between dashboards, grepping logs, and manually stitching together context. It’s slow, error-prone, and not scalable for modern distributed systems.
+
+Now, with SigNoz, you can observe your Temporal workflows end-to-end-correlating metrics, traces, and logs in one unified view. This makes it dramatically easier to pinpoint bottlenecks, troubleshoot failures, and optimize performance.
+
+## Why We Built This
+
+Teams using Temporal (including several of our own users) kept running into the same issues: lack of end-to-end visibility, tedious manual correlation, and no easy way to slice and dice by workflow, activity, or worker. The existing options just weren’t enough to debug real-world problems or optimize performance. We wanted to make it possible to see everything-metrics, traces, logs-stitched together with all the Temporal context you need, and to debug issues in a few clicks.
+
+## Watch Demo
+
+<YouTube id="obiPoJaGQ6w" mute={false} />
+
+We built deep Temporal observability in SigNoz so you can:
+
+- See metrics, traces, and logs in one place, all correlated using Temporal-specific context: workflow ID, activity type, worker, namespace, task queue.
+- Click from a metric spike to the relevant traces, or from a log message to the originating trace.
+- Filter and group by any attribute: workflow, activity, worker, task queue.
+- Build dashboards that answer critical questions: slowest workflows, activities with the most retries, worker performance, and more.
+
+## How It Works?
+
+### 1. Instrumentation
+
+[Instrument](https://signoz.io/docs/integrations/temporal-cloud-metrics/) your Temporal app with OpenTelemetry. We support Go and TypeScript out of the box. The instrumentation attaches all the right attributes like workflow ID, activity type, namespace, task queue, etc. to your telemetry data.
+
+### 2. Unified View in SigNoz
+
+Once your app is running, SigNoz shows both client and worker services with default APM metrics, traces, and logs. For example:
+
+- In the traces tab, you see every workflow execution, broken down by activities. Each activity span shows duration and all relevant attributes.
+- You can filter traces and logs by workflow ID, worker, or activity type, and group by any attribute.
+- If you notice a spike in workflow latency, click through to view related traces for that time window, filtered by workflow or activity.
+- From a trace, jump straight to the logs for that workflow execution-see custom log messages, errors, and retries, all with the right context.
+- You can also go from a log line directly to the originating trace, thanks to shared trace IDs and attributes.
+
+### 3. Example Debugging Flow
+
+<Figure src="/img/blog/2025/05/deep-temporal-observability.gif" alt="Example of a debugging flow using Temporal Observability" caption="Example of a debugging flow using Temporal Observability" />
+
+Let's say you spot a spike in workflow latency on your dashboard. You filter by workflow type and see that the fetchOrderDetails activity in your OrderProcessing workflow is consistently slow. Clicking into a trace, you see this activity is taking 700 ms instead of the usual 100 ms. From the trace, you jump directly to related logs for that workflow execution-where you find a log message indicating a retry due to a downstream service timeout. All of this is possible in a few clicks, without manual correlation or context switching.
+
+### 4. Dashboards and Correlation
+
+You can build dashboards that show slowest workflows, activities with the most retries, or worker stats. All panels are filterable and interactive. You can move from metrics to traces to logs (and back) with full Temporal context.
+
+## Try It and Tell Us What You Think
+
+This feature exists because users needed it. If you're using [Temporal](https://signoz.io/docs/integrations/temporal-cloud-metrics/) try setting up its observability in SigNoz and let us know:
+
+- What works well?
+- Where do you still hit friction?
+- What other integrations or metrics would help?
+
+Drop your thoughts in our [Slack community](https://signoz-community.slack.com/signup#/domain-signup) or open an issue on GitHub. Your feedback will help us make this even better.
+
+[![Get Started - Free CTA](/img/launch_week/try-signoz-cloud-blog-cta.png)](https://signoz.io/teams/)
+
+Ready to unlock end-to-end visibility for your Temporal workflows? Try out Temporal observability in SigNoz and see how it transforms your debugging and monitoring experience.
+
+## Launch Week 4.0
+
+Check out all [updates](https://signoz.io/launch-week/) of Launch Week 4.0.
