@@ -12,7 +12,7 @@ const RelatedJobs = () => {
         </h2>
         <div className="w-full space-y-3 sm:space-y-4 lg:w-2/3">
           <Link
-            href="https://jobs.gem.com/signoz/am9icG9zdDq9T1P3W7Wo_S8W95vmBUTm"
+            href="https://signoz.io/careers/"
             target="_blank"
             className="group flex items-center justify-between rounded-lg border border-signoz_ink-300 bg-signoz_ink-400/50 p-4 transition-colors hover:border-signoz_robin-500 sm:p-6"
           >
@@ -27,7 +27,7 @@ const RelatedJobs = () => {
           </Link>
 
           <Link
-            href="https://jobs.gem.com/signoz/am9icG9zdDp2psmj00RLKrDBrAoeWtiJ"
+            href="https://signoz.io/careers/"
             target="_blank"
             className="group flex items-center justify-between rounded-lg border border-signoz_ink-300 bg-signoz_ink-400/50 p-4 transition-colors hover:border-signoz_robin-500 sm:p-6"
           >
