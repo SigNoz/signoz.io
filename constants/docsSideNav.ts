@@ -1630,7 +1630,7 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/cicd/github/github-actions-traces',
             label: 'Traces',
-          }        
+          }
         ],
       }
     ]
@@ -1869,6 +1869,40 @@ const docsSideNav = [
         {
           type: 'doc',
           route: '/docs/migration/migrate-from-grafana/alerts',
+          label: 'Migrating Alerts',
+        },
+    ],
+  },
+  {
+    label: 'Migrate From New Relic',
+    className: 'new-doc',
+    type: 'category',
+    isExpanded: false,
+    route: '/docs/migration/migrate-from-newrelic',
+    items: [
+        {
+          type: 'doc',
+          route: '/docs/migration/migrate-from-newrelic/metrics',
+          label: 'Migrating Metrics',
+        },
+        {
+          type: 'doc',
+          route: '/docs/migration/migrate-from-newrelic/traces',
+          label: 'Migrating Traces',
+        },
+        {
+          type: 'doc',
+          route: '/docs/migration/migrate-from-newrelic/logs',
+          label: 'Migrating Logs',
+        },
+        {
+          type: 'doc',
+          route: '/docs/migration/migrate-from-newrelic/dashboards',
+          label: 'Migrating Dashboards',
+        },
+        {
+          type: 'doc',
+          route: '/docs/migration/migrate-from-newrelic/alerts',
           label: 'Migrating Alerts',
         },
     ],
