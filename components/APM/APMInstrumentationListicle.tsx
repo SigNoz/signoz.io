@@ -153,7 +153,7 @@ export default function APMInstrumentationListicle({
           {
             name: 'Express',
             href: '/docs/instrumentation/express',
-            icon: <SiExpress className="h-7 w-7 text-gray-700" />,
+            icon: <SiExpress className="h-7 w-7 rounded-full bg-white p-1 text-black" />,
             clickName: 'Express Instrumentation Link',
           },
           {
