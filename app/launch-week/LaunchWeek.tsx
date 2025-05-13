@@ -141,12 +141,12 @@ const MainSection: React.FC = () => {
             </Modal>
           </div>
 
-          {/*<div className="flex flex-col justify-between border-b border-t border-dashed border-signoz_slate-100 px-6 py-6 sm:flex-row">
+          <div className="flex flex-col justify-between border-b border-t border-dashed border-signoz_slate-100 px-6 py-6 sm:flex-row">
             <div className="flex flex-col justify-between gap-4 sm:pr-4">
-              <div className="text-base uppercase text-signoz_vanilla-400">Tuesday ⎯ Feb 11</div>
+              <div className="text-base uppercase text-signoz_vanilla-400">Tuesday ⎯ May 13</div>
               <div className="flex flex-col gap-2">
                 <Link
-                  href="https://www.linkedin.com/events/traceswithoutlimits-loadamillio7293312515470503938/theater/"
+                  href="https://www.linkedin.com/events/introducingmetricsexplorer-sign7325454315593105410/theater/"
                   target="_blank"
                   id="btn-linkedin-live"
                   className="button-background flex w-full items-center justify-center gap-2 rounded-full px-3 py-2 sm:mb-0"
@@ -159,7 +159,7 @@ const MainSection: React.FC = () => {
                 <div
                   id="btn-watch-youtube-video"
                   className="button-background mb-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-full px-3 py-2 sm:mb-0"
-                  onClick={() => handleOpenModal('cAbQcJC58VA')}
+                  onClick={() => handleOpenModal('mClFZxf9A3E')}
                 >
                   <img src="/svgs/icons/watch-video.svg" alt="watch video icon" />
                   <span className="whitespace-nowrap text-sm font-medium text-[#F7F7F8]">
@@ -169,18 +169,18 @@ const MainSection: React.FC = () => {
               </div>
             </div>
             <Link
-              href="/blog/traces-without-limits/"
+              href="/blog/metrics-explorer"
               className="launch-week-card-background flex w-[864px] max-w-full cursor-pointer flex-col gap-6 rounded-md border border-signoz_slate-500 px-5 py-4 transition-colors duration-300 hover:bg-[#121317] sm:flex-row"
             >
               <img
-                src="/img/blog/2025/02/traces-without-limits-trace-updates.webp"
+                src="/img/blog/2025/05/metrics-explorer-cover.webp"
                 className=" mb-4 h-auto w-auto pr-2 sm:mb-0 sm:w-3/5 sm:pr-0"
               />
               <div className="group flex flex-col justify-between">
                 <div className="min-w-[306px]">
-                  <div className="font-eedium mb-2 text-base">Traces Without Limits</div>
+                  <div className="font-eedium mb-2 text-base">Metrics Explorer - Search, Query, and Analyze all your Metrics at one place</div>
                   <div className="text-sm font-medium text-signoz_vanilla-400">
-                   SigNoz is now the only distributed tracing tool capable of loading a million spans seamlessly.
+                  Building dashboards just got a whole lot easier. Instantly discover, filter, and validate every metric flowing into your stack with Metrics Explorer.
                   </div>
                 </div>
                 <div className="flex justify-end">
@@ -192,7 +192,7 @@ const MainSection: React.FC = () => {
             </Link>
           </div>
 
-           <div className="flex flex-col justify-between border-b border-t border-dashed border-signoz_slate-100 px-6 py-6 sm:flex-row">
+           {/*<div className="flex flex-col justify-between border-b border-t border-dashed border-signoz_slate-100 px-6 py-6 sm:flex-row">
             <div className="flex flex-col justify-between gap-4 sm:pr-4">
               <div className="text-base uppercase text-signoz_vanilla-400">Wednesday ⎯ Feb 12</div>
               <div className="flex flex-col gap-2">
@@ -352,7 +352,7 @@ const MainSection: React.FC = () => {
           {/* Timer  */}
           {[
             // 'Monday ⎯ May 12',
-            'Tuesday ⎯ May 13',
+            // 'Tuesday ⎯ May 13',
             'Wednesday ⎯ May 14',
             'Thursday ⎯ May 15',
             'Friday ⎯ May 16',
@@ -365,7 +365,7 @@ const MainSection: React.FC = () => {
                 {day}
               </div>
               <div className="flex w-[68%] justify-end sm:justify-start">
-                <CountdownTimer eventDate={`2025-05-${13 + index} 21:30:00`} />
+                <CountdownTimer eventDate={`2025-05-${14 + index} 21:30:00`} />
               </div>
             </div>
           ))}
