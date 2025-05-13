@@ -15,7 +15,7 @@ interface MDXButtonProps {
 
 const MDXButton = ({
   href,
-  clickType = 'CTA Click',
+  clickType = 'Primary CTA',
   clickName,
   clickLocation,
   clickText,
