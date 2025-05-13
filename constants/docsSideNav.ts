@@ -1610,6 +1610,25 @@ const docsSideNav = [
     ]
   },
   {
+    label: 'Third Party API Monitoring',
+    type: 'category',
+    className: 'new-doc',
+    isExpanded: false,
+    // route: '',
+    items: [
+      {
+        type: 'doc',
+        route: '/docs/third-party-api/overview',
+        label: 'Overview',
+      },
+      {
+        type: 'doc',
+        route: '/docs/third-party-api/setup',
+        label: 'Setup',
+      },
+    ]
+  },
+  {
     label: 'CICD Monitoring',
     type: 'category',
     className: 'new-doc',
