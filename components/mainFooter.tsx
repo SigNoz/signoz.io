@@ -112,7 +112,7 @@ function Footer() {
                 </Link>
 
                 <div className="mt-5 flex items-center gap-2 whitespace-nowrap pr-8 hover:underline max-md:pr-5">
-                  <Link href="https://jobs.gem.com/signoz" target="_blank">
+                  <Link href="https://signoz.io/careers/" target="_blank">
                     Careers
                   </Link>
                   <ArrowUpRight size={16} />
