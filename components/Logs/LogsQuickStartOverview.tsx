@@ -8,7 +8,7 @@ import {
   SiNodedotjs,
   SiFluentd,
   SiApachetomcat,
-  SiAmazon,
+  SiAmazonwebservices,
 } from 'react-icons/si'
 import { TbHttpGet, TbBrandOpenSource } from 'react-icons/tb'
 import { FaFileAlt, FaJava, FaWindows } from 'react-icons/fa'
@@ -92,7 +92,7 @@ const logsData: IconCardData[] = [
   {
     name: 'Cloudwatch',
     href: '/docs/userguide/send-cloudwatch-logs-to-signoz',
-    icon: <SiAmazon className="h-7 w-7 text-orange-400" />,
+    icon: <SiAmazonwebservices className="h-7 w-7 text-orange-400" />,
     clickName: 'Cloudwatch Logs Link',
   },
   {

@@ -41,6 +41,7 @@ import APMInstrumentationListicle from './APM/APMInstrumentationListicle'
 import MDXButton from './MDXButton/MDXButton'
 import IconCardGrid from './Card/IconCardGrid'
 import LogsQuickStartOverview from './Logs/LogsQuickStartOverview'
+import LogsInstrumentationListicle from './Logs/LogsInstrumentationListicle'
 
 export const components: MDXComponents = {
   Image,
@@ -85,4 +86,5 @@ export const components: MDXComponents = {
   MDXButton,
   IconCardGrid,
   LogsQuickStartOverview,
+  LogsInstrumentationListicle,
 }
