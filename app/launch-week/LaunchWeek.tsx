@@ -243,12 +243,12 @@ const MainSection: React.FC = () => {
             </Link>
           </div>
 
-          {/*<div className="flex flex-col justify-between border-b border-t border-dashed border-signoz_slate-100 px-6 py-6 sm:flex-row">
+          <div className="flex flex-col justify-between border-b border-t border-dashed border-signoz_slate-100 px-6 py-6 sm:flex-row">
             <div className="flex flex-col justify-between gap-4 sm:pr-4">
-              <div className="text-base uppercase text-signoz_vanilla-400">Thursday ⎯ Feb 13</div>
+              <div className="text-base uppercase text-signoz_vanilla-400">Thursday ⎯ May 15</div>
               <div className="flex flex-col gap-2">
                 <Link
-                  href="https://www.linkedin.com/events/deepertraceanalytics-analyzeroo7295415096619479040/theater/"
+                  href="https://www.linkedin.com/events/ci-cdobservabilitypoweredbyopen7326304901754486784/theater/"
                   target="_blank"
                   id="btn-linkedin-live"
                   className="button-background flex w-full items-center justify-center gap-2 rounded-full px-3 py-2 sm:mb-0"
@@ -261,7 +261,7 @@ const MainSection: React.FC = () => {
                 <div
                   id="btn-watch-youtube-video"
                   className="button-background mb-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-full px-3 py-2 sm:mb-0"
-                  onClick={() => handleOpenModal('YJMkZOgOElA')}
+                  onClick={() => handleOpenModal('fRIZlXYfk')}
                 >
                   <img src="/svgs/icons/watch-video.svg" alt="watch video icon" />
                   <span className="whitespace-nowrap text-sm font-medium text-[#F7F7F8]">
@@ -271,20 +271,20 @@ const MainSection: React.FC = () => {
               </div>
             </div>
             <Link
-              href="/blog/deeper-trace-analytics-root-and-entry-spans/"
+              href="/blog/ci-cd-observability/"
               className="launch-week-card-background flex w-[864px] max-w-full cursor-pointer flex-col gap-6 rounded-md border border-signoz_slate-500 px-5 py-4 transition-colors duration-300 hover:bg-[#121317] sm:flex-row"
             >
               <img
-                src="/img/blog/2025/02/deeper-trace-analytics-root-and-entry-spans-trace-analytics-yt.webp"
+                src="/img/blog/2025/05/ci-cd-observability-cover.webp"
                 className=" mb-4 h-auto w-auto pr-2 sm:mb-0 sm:w-3/5 sm:pr-0"
               />
               <div className="group flex flex-col justify-between">
                 <div>
                   <div className="font-eedium mb-2 text-base">
-                  Deeper Trace Analytics
+                  CI/CD Observability Powered by OpenTelemetry
                   </div>
                   <div className="text-sm font-medium text-signoz_vanilla-400">
-                  Analyze Root & Entry Spans with Ease
+                  ATrack and analyze every stage of your CI/CD pipeline to identify bottlenecks, improve reliability, and accelerate software delivery.
                   </div>
                 </div>
                 <div className="flex justify-end">
@@ -296,7 +296,7 @@ const MainSection: React.FC = () => {
             </Link>
           </div>
 
-          <div className="flex flex-col justify-between border-b border-t border-dashed border-signoz_slate-100 px-6 py-6 sm:flex-row">
+          {/*<div className="flex flex-col justify-between border-b border-t border-dashed border-signoz_slate-100 px-6 py-6 sm:flex-row">
             <div className="flex flex-col justify-between gap-4 sm:pr-4">
               <div className="text-base uppercase text-signoz_vanilla-400">FRIDAY ⎯ Feb 14</div>
               <div className="flex flex-col gap-2">
@@ -354,7 +354,7 @@ const MainSection: React.FC = () => {
             // 'Monday ⎯ May 12',
             // 'Tuesday ⎯ May 13',
             // 'Wednesday ⎯ May 14',
-            'Thursday ⎯ May 15',
+            //'Thursday ⎯ May 15',
             'Friday ⎯ May 16',
           ].map((day, index) => (
             <div
@@ -365,7 +365,7 @@ const MainSection: React.FC = () => {
                 {day}
               </div>
               <div className="flex w-[68%] justify-end sm:justify-start">
-                <CountdownTimer eventDate={`2025-05-${15 + index} 21:30:00`} />
+                <CountdownTimer eventDate={`2025-05-${16 + index} 21:30:00`} />
               </div>
             </div>
           ))}

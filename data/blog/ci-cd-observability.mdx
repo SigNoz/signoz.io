@@ -1,0 +1,90 @@
+---
+
+title: CI/CD Observability Powered by OpenTelemetry
+slug: ci-cd-observability
+date: 2025-05-15
+tags: [Product]
+authors: [anushka_karmakar]
+description: Track and analyze every stage of your CI/CD pipeline with OpenTelemetry and SigNoz to identify bottlenecks, improve reliability, and accelerate software delivery.
+image: /img/blog/2025/05/ci-cd-observability-cover.webp
+keywords: [OpenTelemetry, CI/CD observability, DevOps, telemetry, software delivery, pipelines, metrics, traces, logs, semantic conventions, monitoring, reliability, DORA metrics]
+
+---
+
+Modern engineering teams spend a lot of time and resources in setting up monitoring of their production systems - tracking uptime, catching errors, and responding to incidents before customers ever notice. But what about the ***journey before code reaches production***? For most teams, observing the CI/CD pipeline is either an afterthought or **completely overlooked**. 
+
+While we recognize its importance, do we truly understand how well our CI/CD process is functioning? Are we delivering value to users as quickly and reliably as possible?
+
+This is where **CI/CD observability** steps in. By shining a light on your entire software development lifecycle, you gain the necessary insights needed to optimize not just your code, but your entire development process. CI/CD observability empowers teams to move beyond gut feelings and anecdotal evidence, making data-driven decisions that accelerate delivery and improve development processes.
+<YouTube id="7yh9JcE7zk0" mute={false} />
+
+## Why CI/CD Observability Matters
+
+Your CI/CD pipeline is the heartbeat of your software organization. Every feature, bug fix, and improvement flows through it. Yet, without observability, you’re left guessing about critical questions such as:
+
+- How often do our changes introduce production issues?
+- How long does it take for a change to reach production?
+- How quickly are pull requests reviewed and merged?
+- Where are the slowdowns in our workflow?
+- Which pipelines are reliable, and which are flaky?
+- Who are our most active contributors, and how are they performing?
+
+Without answers, bottlenecks go unnoticed and are addressed reactively, pipeline failures become recurring headaches, and engineering teams can’t measure the impact of their efforts. In short, you can’t improve what you can’t see.
+
+## Implementing CI/CD observability with OpenTelemetry & SigNoz
+
+With the introduction of CI/CD semantic conventions in OpenTelemetry (OTel), telemetry collection from CI/CD systems is now standardized. The **`githubreceiver`** component in the OTel Contrib repository makes it straightforward to ingest GitHub Actions telemetry. Combined with SigNoz, this enables teams to visualize and analyze CI/CD telemetry within minutes.
+
+- Start by deploying SigNoz [install docs](https://signoz.io/docs/install/) or signing up for [SigNoz cloud](https://signoz.io/teams/).
+- Then configure the OpenTelemetry Collector with the [`githubreceiver`](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/githubreceiver) component.
+- Finally, import the pre-built CI/CD dashboard from the [SigNoz dashboards repository](https://github.com/SigNoz/dashboards/blob/main/cicd/cicd.json) and start exploring your pipeline metrics immediately.
+
+## Analyzing SigNoz/charts repository
+
+Let’s take a look at our charts (https://github.com/SigNoz/charts) repository and try to gain some insight into what is happening. 
+
+<Figure src="/img/blog/2025/05/ci-cd-dashboard.webp" alt="Overview of the CI/CD pipeline process" caption="Overview of the CI/CD pipeline process" />
+
+<Figure src="/img/blog/2025/05/ci-cd-build-deployment.webp" alt="Dashboard displaying build and deployment metrics" caption="Dashboard displaying build and deployment metrics" />
+
+### Repository Health
+
+The average time a Pull Request remains open is a staggering 1.07 years. This immediately highlights that many PRs are being ignored. For PRs that do get reviewed, the average merge time is just 1.8 days—indicating that the team is efficient once they engage with a PR. The average approval time of 5.07 days (longer than the merge time) revealed that some approved PRs weren't being merged promptly. A deeper look reveals that the branch `add-more-resource-attrs` was the pull request that was approved but not merged.
+
+These insights led to clear action items:
+
+- Create an automated system to flag approved PRs awaiting merge
+- Establish SLAs for PR review timeframes
+
+### DORA Metrics Demystified
+
+The observability stack also enabled automatic calculation of DORA (DevOps Research and Assessment) metrics:
+
+- **Change Lead Time**: 2 days (1.8 days for PR merge + 12.9 minutes for pipeline duration)
+- **Deployment Frequency**: Once per day based on Release pipeline executions (Release Charts pipeline)
+- **Change Failure Rate**: 0% (no fixes merged in the observed period)
+- **Failed Deployment Recovery Time**: Estimated at 12.9~13 minutes based on pipeline duration (considering almost immediate approval for hotfixes).
+
+### Pipeline Health and Flakiness Detection
+
+- **High Failure Rate Alert**: 33% of 151 pipeline runs failed, indicating potential issues with test reliability or configuration.
+    
+   <Figure src="/img/blog/2025/05/ci-cd-pipeline-failures.webp" alt="Visualization of pipeline failures and alerts" caption="Visualization of pipeline failures and alerts" />
+
+- **Performance Hotspots**: The `build-staging` pipeline consistently took around 8 minutes, while the `integrationci` pipeline required 6 minutes—both potential targets for optimization.
+- **Flakiness Identification**: We detected a pattern of failures immediately followed by successes in the `integrationci` pipeline, a classic indicator of test flakiness that needed addressing.
+    
+   <Figure src="/img/blog/2025/05/ci-cd-flakiness.webp" alt="Example of Flakiness Identification" caption="Example of Flakiness Identification" />
+    
+## The Future of CI/CD is Observable
+
+As software delivery continues to accelerate, teams can no longer afford to treat CI/CD pipelines as mysterious black boxes. The combination of OpenTelemetry's standardized telemetry collection and SigNoz's powerful visualization capabilities provides a comprehensive solution to this challenge.
+
+Implementing this observability stack grants unprecedented visibility into delivery pipelines and lays the groundwork for continuous improvement.
+[![Get Started - Free CTA](/img/launch_week/try-signoz-cloud-blog-cta.png)](https://signoz.io/teams/)
+
+Join the SigNoz community on [Slack](https://app.slack.com/client/T01HWUTP0LT#/domain-signup) or GitHub, share your experience, and help us shape the future of observability. Your feedback directly drives what we build next.
+
+## Launch Week 4.0
+
+Check out all [updates](https://signoz.io/launch-week/) of Launch Week 4.0.
