@@ -660,49 +660,26 @@ const PricingPlans = () => {
                   </Button>
                 </div>
 
-                {isMobile ? (
-                  <div className="mt-3">
-                    <TrackingButtonSigNozTheme
-                      id="btn-estimate-monthly-bill-pricing-teams"
-                      className="w-full"
-                      type={Button.TYPES.SECONDARY}
-                      onClick={() => {
-                        const element = document.getElementById('estimate-your-monthly-bill')
-                        element?.scrollIntoView({
-                          behavior: 'smooth',
-                        })
-                      }}
-                      clickType="Secondary CTA"
-                      clickName="Pricing Calculator Button"
-                      clickText="Estimate your monthly bill"
-                      clickLocation="Pricing Teams Cloud Tab Bottom"
-                    >
-                      Estimate your monthly bill
-                      <ArrowDown size={14} />
-                    </TrackingButtonSigNozTheme>
-                  </div>
-                ) : (
-                  <div className="my-3">
-                    <TrackingButtonSigNozTheme
-                      id="btn-estimate-monthly-bill-pricing-teams"
-                      className="w-full"
-                      type={Button.TYPES.SECONDARY}
-                      onClick={() => {
-                        const element = document.getElementById('estimate-your-monthly-bill')
-                        element?.scrollIntoView({
-                          behavior: 'smooth',
-                        })
-                      }}
-                      clickType="Secondary CTA"
-                      clickName="Pricing Calculator Button"
-                      clickText="Estimate your monthly bill"
-                      clickLocation="Pricing Teams Cloud Tab Bottom"
-                    >
-                      Estimate your monthly bill
-                      <ArrowDown size={14} />
-                    </TrackingButtonSigNozTheme>
-                  </div>
-                )}
+                <div className="mt-3 md:my-3">
+                  <TrackingButtonSigNozTheme
+                    id="btn-estimate-monthly-bill-pricing-teams"
+                    className="w-full"
+                    type={Button.TYPES.SECONDARY}
+                    onClick={() => {
+                      const element = document.getElementById('estimate-your-monthly-bill')
+                      element?.scrollIntoView({
+                        behavior: 'smooth',
+                      })
+                    }}
+                    clickType="Secondary CTA"
+                    clickName="Pricing Calculator Button"
+                    clickText="Estimate your monthly bill"
+                    clickLocation="Pricing Teams Cloud Tab Bottom"
+                  >
+                    Estimate your monthly bill
+                    <ArrowDown size={14} />
+                  </TrackingButtonSigNozTheme>
+                </div>
               </div>
               <div className="pricing-card !mb-0 border !border-b-0 !border-r-0 border-dashed border-signoz_slate-400 bg-opacity-5 px-4 py-5 max-sm:!border-l-0 md:px-8">
                 <div>
