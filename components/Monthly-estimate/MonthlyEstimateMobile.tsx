@@ -215,37 +215,37 @@ const MobileEstimate = () => {
                 <path
                   d="M8.83382 4.66667C9.5702 4.66667 10.1672 4.06971 10.1672 3.33333C10.1672 2.59695 9.5702 2 8.83382 2C8.09744 2 7.50049 2.59695 7.50049 3.33333C7.50049 4.06971 8.09744 4.66667 8.83382 4.66667Z"
                   stroke="#C0C1C3"
-                  stroke-width="1.33333"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
+                  strokeWidth="1.33333"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                 />
                 <path
                   d="M2.8335 14L8.18016 4.49329"
                   stroke="#C0C1C3"
-                  stroke-width="1.33333"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
+                  strokeWidth="1.33333"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                 />
                 <path
                   d="M9.49365 4.49329L10.7803 6.78662"
                   stroke="#C0C1C3"
-                  stroke-width="1.33333"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
+                  strokeWidth="1.33333"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                 />
                 <path
                   d="M13.5003 8C10.9203 10.6667 6.74699 10.6667 4.16699 8"
                   stroke="#C0C1C3"
-                  stroke-width="1.33333"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
+                  strokeWidth="1.33333"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                 />
                 <path
                   d="M14.8336 13.9999L13.3936 11.4399"
                   stroke="#C0C1C3"
-                  stroke-width="1.33333"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
+                  strokeWidth="1.33333"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                 />
               </svg>
             )}
@@ -265,31 +265,31 @@ const MobileEstimate = () => {
                 viewBox="0 0 17 16"
                 fill="none"
               >
-                <path d="M3.8335 3.66675L3.8335 12.6667" stroke="#C0C1C3" stroke-width="1.33333" />
+                <path d="M3.8335 3.66675L3.8335 12.6667" stroke="#C0C1C3" strokeWidth="1.33333" />
                 <ellipse
                   cx="7.8335"
                   cy="3.66667"
                   rx="4"
                   ry="1.66667"
                   stroke="#C0C1C3"
-                  stroke-width="1.33333"
+                  strokeWidth="1.33333"
                 />
                 <ellipse cx="7.8335" cy="3.61674" rx="1" ry="0.416667" fill="#C0C1C3" />
                 <path
                   d="M11.8335 12.6667C11.8335 13.4031 10.0426 14.0001 7.8335 14.0001C5.62436 14.0001 3.8335 13.4031 3.8335 12.6667"
                   stroke="#C0C1C3"
-                  stroke-width="1.33333"
+                  strokeWidth="1.33333"
                 />
                 <path
                   d="M6.5 7.33337V8.61023C6.5 8.64282 6.52356 8.67063 6.55571 8.67599L8.44429 8.99076C8.47644 8.99611 8.5 9.02393 8.5 9.05652V11.3334"
                   stroke="#C0C1C3"
-                  stroke-width="1.33333"
-                  stroke-linecap="round"
+                  strokeWidth="1.33333"
+                  strokeLinecap="round"
                 />
                 <path
                   d="M11.8335 3.66675V7.21313C11.8335 7.26549 11.8911 7.29742 11.9355 7.26966L14.4224 5.71535C14.4608 5.69136 14.5114 5.71179 14.5224 5.75572L14.8249 6.96568C14.8303 6.98719 14.8246 7.00996 14.8098 7.02644L11.8506 10.3144C11.8396 10.3266 11.8335 10.3425 11.8335 10.359V12.6667"
                   stroke="#C0C1C3"
-                  stroke-width="1.33333"
+                  strokeWidth="1.33333"
                 />
               </svg>
             )}
@@ -316,23 +316,23 @@ const MobileEstimate = () => {
                 <path
                   d="M12.167 13.3333V6.66663"
                   stroke="#C0C1C3"
-                  stroke-width="1.33333"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
+                  strokeWidth="1.33333"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                 />
                 <path
                   d="M8.16699 13.3333V2.66663"
                   stroke="#C0C1C3"
-                  stroke-width="1.33333"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
+                  strokeWidth="1.33333"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                 />
                 <path
                   d="M4.16699 13.3333V9.33325"
                   stroke="#C0C1C3"
-                  stroke-width="1.33333"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
+                  strokeWidth="1.33333"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                 />
               </svg>
             )}
