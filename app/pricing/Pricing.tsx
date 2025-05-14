@@ -5,33 +5,17 @@ import React, { useState, useEffect } from 'react'
 import FAQBody from '../../components/FAQPricing'
 import styles from './styles.module.css'
 import { TrustedByTeams } from '@/components/trusted-by'
-import { CostComparison } from '@/components/cost-comparison'
-import { DataProtection } from '@/components/data-protection'
-import { TalkToExpert } from '@/components/talk-to-expert'
-import { CommunityEdition } from '@/components/community-edition'
-import { UserReview } from '@/components/user-review'
-import { TrySigNozCTA } from '@/components/try-signoz-cta'
 import WhySelectSignoz from '@/components/why-select-signoz'
 import { Testimonials } from '@/components/testimonials'
 import MonthlyEstimate from '@/components/Monthly-estimate/MonthlyEstimate'
 import MonthlyEstimateMobile from '@/components/Monthly-estimate/MonthlyEstimateMobile'
 import { GetStarted } from '@/components/GetStarted'
 import Link from 'next/link'
-import Divider from '@/components/ui/Divider'
 import Heading from '@/components/ui/Heading'
 import Button from '@/components/Button/Button'
 import Line from '@/components/ui/Line'
-import SubHeading from '@/components/ui/SubHeading'
-import { Chevron, RightSVG } from '@/components/svgs/common'
-import {
-  ArrowBigLeft,
-  ArrowRight,
-  MoveLeft,
-  ArrowUpRight,
-  ArrowDown,
-  Cloud,
-  Server,
-} from 'lucide-react'
+import { Chevron } from '@/components/svgs/common'
+import { ArrowRight, ArrowUpRight, ArrowDown, Cloud, Server } from 'lucide-react'
 import {
   CircleCheckSolid,
   CircleInfoSolid,
@@ -39,18 +23,10 @@ import {
   ClockSolid,
   CheckSolid,
   CrossSolid,
-  FlameSolid,
   CloudSolid,
   ServerSolid,
 } from '@/components/homepage-icons/icons'
-import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  useDisclosure,
-} from '@nextui-org/react'
+import { Modal, ModalContent, ModalBody, useDisclosure } from '@nextui-org/react'
 import VimeoPlayer from '@/components/VimeoPlayer/VimeoPlayer'
 import SigNozCloudPricingOverview from '@/components/SigNozCloudPricingOverviewCard/SigNozCloudPricingOverview'
 import TrackingLink from '@/components/TrackingLink'
