@@ -231,7 +231,7 @@ const MainSection: React.FC = () => {
                 <div>
                   <div className="font-eedium mb-2 text-base">Third party API Monitoring powered by OpenTelemetry semantics</div>
                   <div className="text-sm font-medium text-signoz_vanilla-400">
-                  Track error rates, latency, and request volumes for all your external services, and correlate issues with your application performance by leveraging OpenTelemetry's latest semantic conventions.
+                  Get out-of-the-box monitoring for all your external services, with every API call automatically correlated to the internal services making them.
                   </div>
                 </div>
                 <div className="flex justify-end">
