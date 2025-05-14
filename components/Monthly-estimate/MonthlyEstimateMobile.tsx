@@ -204,13 +204,15 @@ const MobileEstimate = () => {
           </span>
           <span className="mb-4 pl-1 text-sm text-signoz_vanilla-400">
             You can also set data ingestion limits so you never get a surprise bill.
-            <Link
-              href={'https://signoz.io/docs/ingestion/signoz-cloud/keys/'}
-              className="ml-1 font-medium text-signoz_robin-400"
-            >
-              Learn more
-              <ArrowUpRight className="inline" size={16} />
-            </Link>
+            {isMounted ? (
+              <Link
+                href={'https://signoz.io/docs/ingestion/signoz-cloud/keys/'}
+                className="ml-1 font-medium text-signoz_robin-400"
+              >
+                Learn more
+                <ArrowUpRight className="inline" size={16} />
+              </Link>
+            ) : null}
           </span>
         </div>
 

@@ -36,17 +36,21 @@ import TrackingButtonSigNozTheme from '@/components/TrackingButtonSigNozTheme'
 const CloseButton = () => <div className="absolute right-0 top-0">Close</div>
 
 function Pricing() {
-  const [width, setWidth] = useState<number>(typeof window !== 'undefined' ? window.innerWidth : 0)
+  const [hasMounted, setHasMounted] = useState(false)
+  const [width, setWidth] = useState<number>(0) // Initialize to 0 to match server
 
-  function handleWindowSizeChange() {
-    setWidth(window.innerWidth)
-  }
   useEffect(() => {
+    setHasMounted(true)
+    setWidth(window.innerWidth) // Set actual width on client mount
+
+    function handleWindowSizeChange() {
+      setWidth(window.innerWidth)
+    }
     window.addEventListener('resize', handleWindowSizeChange)
     return () => {
       window.removeEventListener('resize', handleWindowSizeChange)
     }
-  }, [])
+  }, []) // Empty dependency array, runs once on mount
 
   const isMobile = width <= 768
 
@@ -73,7 +77,15 @@ function Pricing() {
         {/* More Options */}
         {/* <CommunityEdition /> */}
         {/* FAQ section */}
-        {isMobile ? <MonthlyEstimateMobile /> : <MonthlyEstimate />}
+        {hasMounted ? (
+          isMobile ? (
+            <MonthlyEstimateMobile />
+          ) : (
+            <MonthlyEstimate />
+          )
+        ) : (
+          <MonthlyEstimateMobile />
+        )}
         <WhySelectSignoz isInPricingPage />
         <FAQ />
         {/* User Review */}
