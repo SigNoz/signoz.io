@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import {
   SiKubernetes,
   SiDocker,
@@ -23,6 +23,37 @@ interface LogsInstrumentationListicleProps {
 export default function LogsInstrumentationListicle({
   category = 'all',
 }: LogsInstrumentationListicleProps) {
+  // Define all sections with their IDs and labels
+  const sections = [
+    { id: 'all', label: 'All' },
+    { id: 'platforms', label: 'Platforms' },
+    { id: 'languages', label: 'Languages & Frameworks' },
+    { id: 'collectors', label: 'Collectors & Agents' },
+    { id: 'cloud', label: 'Cloud' },
+  ]
+
+  // State to track the active section
+  const [activeSection, setActiveSection] = useState(category === 'all' ? 'all' : category)
+
+  // Navigation pills component
+  const NavigationPills = () => (
+    <div className="mb-8 flex flex-wrap gap-2">
+      {sections.map((section) => (
+        <button
+          key={section.id}
+          onClick={() => setActiveSection(section.id)}
+          className={`inline-block rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+            activeSection === section.id
+              ? 'bg-blue-600 text-white'
+              : 'bg-gray-100 text-gray-800 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700'
+          }`}
+        >
+          {section.label}
+        </button>
+      ))}
+    </div>
+  )
+
   // Platform logs
   const renderPlatformsSection = () => (
     <div className="mb-10">
@@ -229,13 +260,16 @@ export default function LogsInstrumentationListicle({
     </div>
   )
 
-  // Render specific section or all sections based on the category prop
+  // Render sections based on the active section
   return (
     <div>
-      {(category === 'all' || category === 'platforms') && renderPlatformsSection()}
-      {(category === 'all' || category === 'languages') && renderLanguagesSection()}
-      {(category === 'all' || category === 'collectors') && renderCollectorsSection()}
-      {(category === 'all' || category === 'cloud') && renderCloudSection()}
+      <NavigationPills />
+
+      {/* Show all sections if activeSection is 'all', otherwise show only the selected section */}
+      {(activeSection === 'all' || activeSection === 'platforms') && renderPlatformsSection()}
+      {(activeSection === 'all' || activeSection === 'languages') && renderLanguagesSection()}
+      {(activeSection === 'all' || activeSection === 'collectors') && renderCollectorsSection()}
+      {(activeSection === 'all' || activeSection === 'cloud') && renderCloudSection()}
     </div>
   )
 }

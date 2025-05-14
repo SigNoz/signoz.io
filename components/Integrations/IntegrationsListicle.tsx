@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import {
   SiTemporal,
   SiRedis,
@@ -19,6 +19,37 @@ interface IntegrationsListicleProps {
 }
 
 export default function IntegrationsListicle({ category = 'all' }: IntegrationsListicleProps) {
+  // Define all sections with their IDs and labels
+  const sections = [
+    { id: 'all', label: 'All' },
+    { id: 'temporal', label: 'Temporal' },
+    { id: 'databases', label: 'Databases' },
+    { id: 'aws', label: 'AWS' },
+    { id: 'other', label: 'Other' },
+  ]
+
+  // State to track the active section
+  const [activeSection, setActiveSection] = useState(category === 'all' ? 'all' : category)
+
+  // Navigation pills component
+  const NavigationPills = () => (
+    <div className="mb-8 flex flex-wrap gap-2">
+      {sections.map((section) => (
+        <button
+          key={section.id}
+          onClick={() => setActiveSection(section.id)}
+          className={`inline-block rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+            activeSection === section.id
+              ? 'bg-blue-600 text-white'
+              : 'bg-gray-100 text-gray-800 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700'
+          }`}
+        >
+          {section.label}
+        </button>
+      ))}
+    </div>
+  )
+
   // Temporal section
   const renderTemporalSection = () => (
     <div className="mb-10">
@@ -137,13 +168,16 @@ export default function IntegrationsListicle({ category = 'all' }: IntegrationsL
     </div>
   )
 
-  // Render specific section or all sections based on the category prop
+  // Render sections based on the active section
   return (
     <div>
-      {(category === 'all' || category === 'temporal') && renderTemporalSection()}
-      {(category === 'all' || category === 'databases') && renderDatabasesSection()}
-      {(category === 'all' || category === 'aws') && renderAWSSection()}
-      {category === 'all' && renderOtherSection()}
+      <NavigationPills />
+
+      {/* Show all sections if activeSection is 'all', otherwise show only the selected section */}
+      {(activeSection === 'all' || activeSection === 'temporal') && renderTemporalSection()}
+      {(activeSection === 'all' || activeSection === 'databases') && renderDatabasesSection()}
+      {(activeSection === 'all' || activeSection === 'aws') && renderAWSSection()}
+      {(activeSection === 'all' || activeSection === 'other') && renderOtherSection()}
     </div>
   )
 }

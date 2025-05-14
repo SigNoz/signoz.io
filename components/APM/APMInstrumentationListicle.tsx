@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import {
   SiPython,
   SiJavascript,
@@ -36,6 +36,38 @@ interface APMInstrumentationListicleProps {
 export default function APMInstrumentationListicle({
   language = 'all',
 }: APMInstrumentationListicleProps) {
+  // Define all sections with their IDs and labels
+  const sections = [
+    { id: 'all', label: 'All' },
+    { id: 'javascript', label: 'JavaScript' },
+    { id: 'python', label: 'Python' },
+    { id: 'java', label: 'Java' },
+    { id: 'other', label: 'Other Languages' },
+    { id: 'additional', label: 'Additional' },
+  ]
+
+  // State to track the active section
+  const [activeSection, setActiveSection] = useState(language === 'all' ? 'all' : language)
+
+  // Navigation pills component
+  const NavigationPills = () => (
+    <div className="mb-8 flex flex-wrap gap-2">
+      {sections.map((section) => (
+        <button
+          key={section.id}
+          onClick={() => setActiveSection(section.id)}
+          className={`inline-block rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+            activeSection === section.id
+              ? 'bg-blue-600 text-white'
+              : 'bg-gray-100 text-gray-800 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700'
+          }`}
+        >
+          {section.label}
+        </button>
+      ))}
+    </div>
+  )
+
   // Python frameworks
   const renderPythonSection = () => (
     <div className="mb-10">
@@ -279,14 +311,17 @@ export default function APMInstrumentationListicle({
     </div>
   )
 
-  // Render specific section or all sections based on the language prop
+  // Render sections based on the active section or language prop
   return (
     <div>
-      {(language === 'all' || language === 'javascript') && renderJavaScriptSection()}
-      {(language === 'all' || language === 'python') && renderPythonSection()}
-      {(language === 'all' || language === 'java') && renderJavaSection()}
-      {(language === 'all' || language === 'other') && renderOtherLanguagesSection()}
-      {(language === 'all' || language === 'additional') && renderAdditionalSection()}
+      <NavigationPills />
+
+      {/* Show all sections if activeSection is 'all', otherwise show only the selected section */}
+      {(activeSection === 'all' || activeSection === 'javascript') && renderJavaScriptSection()}
+      {(activeSection === 'all' || activeSection === 'python') && renderPythonSection()}
+      {(activeSection === 'all' || activeSection === 'java') && renderJavaSection()}
+      {(activeSection === 'all' || activeSection === 'other') && renderOtherLanguagesSection()}
+      {(activeSection === 'all' || activeSection === 'additional') && renderAdditionalSection()}
     </div>
   )
 }
