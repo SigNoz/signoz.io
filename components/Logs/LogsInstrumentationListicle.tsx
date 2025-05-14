@@ -81,7 +81,11 @@ export default function LogsInstrumentationListicle({
           {
             name: 'Vercel',
             href: '/docs/userguide/vercel_logs_to_signoz',
-            icon: <SiVercel className="h-7 w-7 text-black" />,
+            icon: (
+              <span className="flex h-12 w-12 items-center justify-center rounded-full bg-black p-1">
+                <SiVercel className="h-7 w-7 text-white" />
+              </span>
+            ),
             clickName: 'Vercel Logs Link',
           },
           {
@@ -250,7 +254,11 @@ export default function LogsInstrumentationListicle({
           {
             name: 'Vercel',
             href: '/docs/userguide/vercel_logs_to_signoz',
-            icon: <SiVercel className="h-7 w-7 text-black" />,
+            icon: (
+              <span className="flex h-12 w-12 items-center justify-center rounded-full bg-black p-1">
+                <SiVercel className="h-7 w-7 text-white" />
+              </span>
+            ),
             clickName: 'Vercel Cloud Logs Link',
           },
         ]}
