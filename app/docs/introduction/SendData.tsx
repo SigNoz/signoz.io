@@ -51,7 +51,7 @@ export default function SendData() {
     {
       title: 'Send Logs',
       description: 'Configure log collection and analysis',
-      href: '/docs/userguide/logs/',
+      href: '/docs/logs-management/send-logs-to-signoz/',
       icon: <LucideScrollText size={20} className="text-signoz_robin-500" />,
       clickName: 'Send Logs Card',
       clickText: 'Send Logs',
@@ -81,7 +81,7 @@ export default function SendData() {
           clickName: 'JavaScript Logs Link',
         },
       ],
-      viewAllHref: '/docs/userguide/logs/',
+      viewAllHref: '/docs/logs-management/send-logs-to-signoz/',
     },
     {
       title: 'Send Metrics',

@@ -35,6 +35,15 @@ import InterlinkCard from './InterlinkCard/InterlinkCard'
 import InArticleVideoShowcaseModal from './InArticleVideoShowcaseModal/InArticleVideoShowcaseModal'
 import GetStartedInfrastructureMonitoring from './GetStartedInfrastructureMonitoring/GetStartedInfrastructureMonitoring'
 import ImageCTA from './ImageCTA/ImageCTA'
+import TrackingLink from './TrackingLink'
+import APMQuickStartOverview from './APM/APMQuickStartOverview'
+import APMInstrumentationListicle from './APM/APMInstrumentationListicle'
+import MDXButton from './MDXButton/MDXButton'
+import IconCardGrid from './Card/IconCardGrid'
+import LogsQuickStartOverview from './Logs/LogsQuickStartOverview'
+import LogsInstrumentationListicle from './Logs/LogsInstrumentationListicle'
+import IntegrationsListicle from './Integrations/IntegrationsListicle'
+import HostingDecision from './shared/HostingDecision'
 
 export const components: MDXComponents = {
   Image,
@@ -73,4 +82,13 @@ export const components: MDXComponents = {
   InArticleVideoShowcaseModal,
   GetStartedInfrastructureMonitoring,
   ImageCTA,
+  TrackingLink,
+  APMQuickStartOverview,
+  APMInstrumentationListicle,
+  MDXButton,
+  IconCardGrid,
+  LogsQuickStartOverview,
+  LogsInstrumentationListicle,
+  IntegrationsListicle,
+  HostingDecision,
 }
