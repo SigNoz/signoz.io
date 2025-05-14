@@ -408,6 +408,7 @@ const MobileEstimate = () => {
                   { value: MIN_VALUE, label: '0GB' },
                   { value: MAX_VALUE, label: '200TB' },
                 ]}
+                aria-label="Traces data ingestion volume"
                 renderThumb={(props) => (
                   <div
                     {...props}
@@ -481,6 +482,7 @@ const MobileEstimate = () => {
                   { value: MIN_VALUE, label: '0GB' },
                   { value: MAX_VALUE, label: '200TB' },
                 ]}
+                aria-label="Logs data ingestion volume"
                 renderThumb={(props) => (
                   <div
                     {...props}
@@ -554,6 +556,7 @@ const MobileEstimate = () => {
                   { value: MIN_VALUE, label: '0M' },
                   { value: MAX_VALUE, label: '200B' },
                 ]}
+                aria-label="Metrics data ingestion volume"
                 renderThumb={(props) => (
                   <div
                     {...props}

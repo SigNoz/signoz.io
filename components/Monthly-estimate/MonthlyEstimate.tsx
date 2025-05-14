@@ -281,6 +281,7 @@ const MonthlyEstimate = () => {
                   label: '200TB',
                 },
               ]}
+              aria-label="Traces data ingestion volume"
               classNames={{
                 base: 'max-w-md',
                 label: 'text-medium',
@@ -369,6 +370,7 @@ const MonthlyEstimate = () => {
                   label: '200TB',
                 },
               ]}
+              aria-label="Logs data ingestion volume"
               classNames={{
                 base: 'max-w-md',
                 label: 'text-medium',
@@ -455,6 +457,7 @@ const MonthlyEstimate = () => {
                   label: '200B',
                 },
               ]}
+              aria-label="Metrics data ingestion volume"
               classNames={{
                 base: 'max-w-md',
                 label: 'text-medium',
