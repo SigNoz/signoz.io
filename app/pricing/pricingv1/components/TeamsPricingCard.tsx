@@ -60,7 +60,7 @@ export default function TeamsPricingCard() {
         </ul>
 
         <Link
-          href="/pricing/monthly-calculator/"
+          href="#estimate-your-monthly-bill"
           className="mb-4 flex w-full items-center justify-center gap-2 rounded-full border border-signoz_robin-500 bg-transparent px-4 py-3 font-medium text-signoz_robin-500 hover:bg-signoz_robin-500/10"
         >
           Estimate your monthly bill

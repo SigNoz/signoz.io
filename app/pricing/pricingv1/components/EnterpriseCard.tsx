@@ -16,7 +16,7 @@ export default function EnterpriseCard() {
           </div>
           <div className="flex w-[40%] flex-col items-end">
             <span className="text-3xl font-bold text-signoz_vanilla-100">Custom</span>
-            <div className="text-sm text-signoz_vanilla-400">starts at $4000/month</div>
+            <div className="mt-1 text-sm text-signoz_vanilla-400">starts at $4000/month</div>
           </div>
         </div>
 

@@ -102,6 +102,13 @@ const PricingCalculator: React.FC = () => {
   // State for active tab in mobile view
   const [activeTab, setActiveTab] = useState('traces')
 
+  // Used to track whether we're client-side rendered
+  const [isMounted, setIsMounted] = useState(false)
+
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
+
   // Handle slider changes
   const handleChangeTraces = (value: number | number[]) => {
     const numValue = typeof value === 'number' ? value : value[0]
@@ -122,6 +129,11 @@ const PricingCalculator: React.FC = () => {
     if (isNaN(numValue)) return
     setMetricsValue(numValue)
     setInputMetricsValue(linearToLog(numValue, MIN_VALUE, MAX_VALUE).toString())
+  }
+
+  // Copy link to clipboard
+  const copyLinkToClipboard = () => {
+    navigator.clipboard.writeText('https://signoz.io/pricing/pricingv1/#estimate-your-monthly-bill')
   }
 
   // Get price per unit based on type and retention period
@@ -214,11 +226,44 @@ const PricingCalculator: React.FC = () => {
   )
 
   return (
-    <div className="pricing-calculator mb-6 mt-0 w-full rounded-md border border-dashed border-signoz_slate-400 p-3 md:p-4">
+    <div
+      id="estimate-your-monthly-bill"
+      className="pricing-calculator mb-6 mt-0 w-full rounded-md border border-dashed border-signoz_slate-400 p-3 md:p-4"
+    >
       <div className="mb-4">
-        <h3 className="text-lg font-semibold text-signoz_vanilla-100 md:text-xl">
+        <span className="group relative text-lg font-semibold text-signoz_vanilla-100 md:text-2xl">
           Estimate your monthly bill
-        </h3>
+          {isMounted && (
+            <a
+              href="#estimate-your-monthly-bill"
+              onClick={copyLinkToClipboard}
+              className="ml-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+              aria-label="Copy link to this section"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+                fill="#4E74F8"
+                className="linkicon h-6 w-6"
+              >
+                <path d="M12.232 4.232a2.5 2.5 0 0 1 3.536 3.536l-1.225 1.224a.75.75 0 0 0 1.061 1.06l1.224-1.224a4 4 0 0 0-5.656-5.656l-3 3a4 4 0 0 0 .225 5.865.75.75 0 0 0 .977-1.138 2.5 2.5 0 0 1-.142-3.667l3-3Z" />
+                <path d="M11.603 7.963a.75.75 0 0 0-.977 1.138 2.5 2.5 0 0 1 .142 3.667l-3 3a2.5 2.5 0 0 1-3.536-3.536l1.225-1.224a.75.75 0 0 0-1.061-1.06l-1.224 1.224a4 4 0 1 0 5.656 5.656l3-3a4 4 0 0 0-.225-5.865Z" />
+              </svg>
+            </a>
+          )}
+        </span>
+        {isMounted && (
+          <p className="mt-1 text-sm text-signoz_vanilla-400">
+            You can also set data ingestion limits so you never get a surprise bill.
+            <Link
+              href="https://signoz.io/docs/ingestion/signoz-cloud/keys/"
+              className="ml-1 font-medium text-signoz_robin-400"
+            >
+              Learn more
+              <ArrowUpRight className="inline" size={16} />
+            </Link>
+          </p>
+        )}
       </div>
 
       {isMobile ? (
