@@ -1,6 +1,7 @@
 import React from 'react'
 import { CheckCircle, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
+import Button from 'components/Button/Button'
 
 export default function EnterpriseCard() {
   return (
@@ -14,78 +15,76 @@ export default function EnterpriseCard() {
             </p>
           </div>
           <div className="flex w-[40%] flex-col items-end">
-            <span className="text-sm text-signoz_vanilla-400">From</span>
-            <div className="flex items-baseline">
-              <span className="text-4xl font-bold text-signoz_vanilla-100">$4000</span>
-              <span className="ml-1 text-signoz_vanilla-400">/month</span>
-            </div>
+            <span className="text-3xl font-bold text-signoz_vanilla-100">Custom</span>
+            <div className="text-sm text-signoz_vanilla-400">starts at $4000/month</div>
           </div>
         </div>
 
-        <Link
-          href="/enterprise-cloud/"
-          className="mb-4 flex w-full items-center justify-center gap-2 rounded-full border border-signoz_robin-500 bg-transparent px-4 py-3 font-medium text-signoz_robin-500 hover:bg-signoz_robin-500/10"
-        >
-          Contact Us <ArrowRight size={14} />
-        </Link>
-
-        <Link
-          href="/enterprise/"
-          className="mb-6 text-center text-sm text-signoz_robin-300 hover:text-signoz_robin-400"
-        >
-          We offer enterprise cloud, self hosted, and bring your own cloud options. Check All
-          Enterprise Plans
+        <Link href="/enterprise-cloud/">
+          <Button type={Button.TYPES.SECONDARY} className="mb-4 w-full px-4 py-3">
+            Contact Us <ArrowRight size={14} />
+          </Button>
         </Link>
 
         <div className="my-6 w-full border-t border-dashed border-signoz_slate-400"></div>
 
-        <h4 className="mb-4 text-lg font-bold text-signoz_vanilla-100">Benefits</h4>
+        <h4 className="mb-4 text-lg font-bold text-signoz_vanilla-100">Our offerings</h4>
         <ul className="mb-6 space-y-3">
           <li className="flex items-start gap-2">
             <CheckCircle className="mt-1 min-w-4 text-green-500" size={16} />
-            <span className="text-signoz_vanilla-400">Everything included in Teams plan</span>
-          </li>
-          <li className="flex items-start gap-2">
-            <CheckCircle className="mt-1 min-w-4 text-green-500" size={16} />
-            <span className="text-signoz_vanilla-400">Dedicated Support</span>
-          </li>
-          <li className="flex items-start gap-2">
-            <CheckCircle className="mt-1 min-w-4 text-green-500" size={16} />
-            <span className="text-signoz_vanilla-400">Custom Pricing & Retention Period</span>
-          </li>
-        </ul>
-
-        <h4 className="mb-4 text-lg font-bold text-signoz_vanilla-100">Support</h4>
-        <ul className="mb-6 space-y-3">
-          <li className="flex items-start gap-2">
-            <CheckCircle className="mt-1 min-w-4 text-green-500" size={16} />
-            <span className="text-signoz_vanilla-400">Email</span>
-          </li>
-          <li className="flex items-start gap-2">
-            <CheckCircle className="mt-1 min-w-4 text-green-500" size={16} />
-            <span className="text-signoz_vanilla-400">Dedicated Slack Channel</span>
-          </li>
-          <li className="flex items-start gap-2">
-            <CheckCircle className="mt-1 min-w-4 text-green-500" size={16} />
-            <span className="text-signoz_vanilla-400">In-Product Chat Support</span>
+            <span className="text-signoz_vanilla-400">A dedicated environment on SigNoz cloud</span>
           </li>
           <li className="flex items-start gap-2">
             <CheckCircle className="mt-1 min-w-4 text-green-500" size={16} />
             <span className="text-signoz_vanilla-400">
-              Support for Migrating DataDog Dashboards
+              Bring your own cloud(managed by SigNoz in your cloud)
             </span>
           </li>
           <li className="flex items-start gap-2">
             <CheckCircle className="mt-1 min-w-4 text-green-500" size={16} />
-            <span className="text-signoz_vanilla-400">Team Training</span>
+            <span className="text-signoz_vanilla-400">Self-host with support contract</span>
+          </li>
+        </ul>
+
+        <div className="my-6 w-full border-t border-dashed border-signoz_slate-400"></div>
+
+        <h4 className="mb-4 text-lg font-bold text-signoz_vanilla-100">Enterprise benefits</h4>
+        <ul className="mb-6 space-y-3">
+          <li className="flex items-start gap-2">
+            <CheckCircle className="mt-1 min-w-4 text-green-500" size={16} />
+            <span className="text-signoz_vanilla-400">Volume discounts & annual contracts</span>
           </li>
           <li className="flex items-start gap-2">
             <CheckCircle className="mt-1 min-w-4 text-green-500" size={16} />
-            <span className="text-signoz_vanilla-400">Dashboard Configuration Support</span>
+            <span className="text-signoz_vanilla-400">
+              HIPAA, BAA agreement and other certifications
+            </span>
           </li>
           <li className="flex items-start gap-2">
             <CheckCircle className="mt-1 min-w-4 text-green-500" size={16} />
-            <span className="text-signoz_vanilla-400">Instrumentation Support</span>
+            <span className="text-signoz_vanilla-400">Contract, Legal and security reviews</span>
+          </li>
+          <li className="flex items-start gap-2">
+            <CheckCircle className="mt-1 min-w-4 text-green-500" size={16} />
+            <span className="text-signoz_vanilla-400">
+              Dedicated Slack, email & in-product support
+            </span>
+          </li>
+          <li className="flex items-start gap-2">
+            <CheckCircle className="mt-1 min-w-4 text-green-500" size={16} />
+            <span className="text-signoz_vanilla-400">Guided migration support</span>
+          </li>
+          <li className="flex items-start gap-2">
+            <CheckCircle className="mt-1 min-w-4 text-green-500" size={16} />
+            <span className="text-signoz_vanilla-400">Ongoing professional services</span>
+          </li>
+          <li className="flex items-start gap-2">
+            <CheckCircle className="mt-1 min-w-4 text-green-500" size={16} />
+            <span className="text-signoz_vanilla-400">Audit reports</span>
+          </li>
+          <li className="flex items-start gap-2">
+            <CheckCircle className="mt-1 min-w-4 text-green-500" size={16} />
+            <span className="text-signoz_vanilla-400">Team training</span>
           </li>
           <li className="flex items-start gap-2">
             <CheckCircle className="mt-1 min-w-4 text-green-500" size={16} />
@@ -93,11 +92,10 @@ export default function EnterpriseCard() {
           </li>
         </ul>
 
-        <Link
-          href="/enterprise-cloud/"
-          className="flex w-full items-center justify-center gap-2 rounded-full border border-signoz_robin-500 bg-transparent px-4 py-3 font-medium text-signoz_robin-500 hover:bg-signoz_robin-500/10"
-        >
-          Contact Us <ArrowRight size={14} />
+        <Link href="/enterprise-cloud/">
+          <Button type={Button.TYPES.SECONDARY} className="w-full px-4 py-3">
+            Contact Us <ArrowRight size={14} />
+          </Button>
         </Link>
       </div>
     </div>

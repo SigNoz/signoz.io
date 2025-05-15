@@ -1,6 +1,7 @@
 import React from 'react'
 import { CheckCircle } from 'lucide-react'
 import Link from 'next/link'
+import Button from 'components/Button/Button'
 
 export default function TeamsPricingCard() {
   return (
@@ -14,7 +15,7 @@ export default function TeamsPricingCard() {
             </p>
           </div>
           <div className="flex w-[40%] flex-col items-end">
-            <span className="text-sm text-signoz_vanilla-400">From</span>
+            <span className="text-sm text-signoz_vanilla-400">starts from</span>
             <div className="flex items-baseline">
               <span className="text-4xl font-bold text-signoz_vanilla-100">$199</span>
               <span className="ml-1 text-signoz_vanilla-400">/month</span>
@@ -22,20 +23,9 @@ export default function TeamsPricingCard() {
           </div>
         </div>
 
-        <Link
-          href="/teams/"
-          className="mb-6 flex w-full items-center justify-center gap-2 rounded-full bg-signoz_robin-100 px-4 py-3 font-medium text-signoz_ink-400 hover:bg-signoz_robin-200"
-        >
-          Start your 30 day free trial
+        <Link href="/teams/">
+          <Button className="mb-6 w-full px-4 py-3">Start your 30 day free trial</Button>
         </Link>
-
-        <div className="mb-6 text-signoz_robin-300">
-          $99 for startups.{' '}
-          <Link href="/startups/" className="underline hover:text-signoz_robin-400">
-            Check if you qualify and apply
-          </Link>
-          .
-        </div>
 
         <div className="my-6 w-full border-t border-dashed border-signoz_slate-400"></div>
 
