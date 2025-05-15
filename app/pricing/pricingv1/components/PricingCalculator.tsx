@@ -95,7 +95,7 @@ const PricingCalculator: React.FC = () => {
 
   // Constants for slider ranges
   const MIN_VALUE = 1
-  const MAX_VALUE = 200000
+  const MAX_VALUE = 100000
 
   // State for active tab in mobile view
   const [activeTab, setActiveTab] = useState('traces')
@@ -408,7 +408,7 @@ const PricingCalculator: React.FC = () => {
                     handleChangeTraces,
                     'secondary',
                     '0GB',
-                    '200TB',
+                    '100TB',
                     formatBytes,
                     'signoz_robin-500'
                   )}
@@ -472,7 +472,7 @@ const PricingCalculator: React.FC = () => {
                     handleChangeLogs,
                     'danger',
                     '0GB',
-                    '200TB',
+                    '100TB',
                     formatBytes,
                     'signoz_sakura-500'
                   )}
@@ -536,7 +536,7 @@ const PricingCalculator: React.FC = () => {
                     handleChangeMetrics,
                     'warning',
                     '0M',
-                    '200B',
+                    '100B',
                     formatMetrics,
                     'signoz_amber-500'
                   )}
@@ -616,7 +616,7 @@ const PricingCalculator: React.FC = () => {
               handleChangeTraces,
               'secondary',
               '0GB',
-              '200TB',
+              '100TB',
               formatBytes,
               'signoz_robin-500'
             )}
@@ -658,7 +658,7 @@ const PricingCalculator: React.FC = () => {
               handleChangeLogs,
               'danger',
               '0GB',
-              '200TB',
+              '100TB',
               formatBytes,
               'signoz_sakura-500'
             )}
@@ -700,7 +700,7 @@ const PricingCalculator: React.FC = () => {
               handleChangeMetrics,
               'warning',
               '0M',
-              '200B',
+              '100B',
               formatMetrics,
               'signoz_amber-500'
             )}
