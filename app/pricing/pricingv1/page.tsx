@@ -35,7 +35,7 @@ export default function PricingV1Page() {
           </div>
 
           {/* Pricing cards grid */}
-          <div className="pricing-plans mx-auto grid grid-cols-1 gap-8 lg:max-w-6xl lg:grid-cols-2">
+          <div className="pricing-plans mx-auto my-12 grid grid-cols-1 gap-8 lg:max-w-6xl lg:grid-cols-2">
             <TeamsPricingCard />
             <EnterpriseCard />
           </div>
