@@ -41,15 +41,7 @@ const logToLinear = (value: number, minLog: number, maxLog: number) => {
   return Math.floor(minLog + scale * (Math.log(value) - minValue))
 }
 
-interface PricingCalculatorProps {
-  onCostUpdate?: (cost: number) => void
-  onHighVolumeChange?: (isHighVolume: boolean) => void
-}
-
-const PricingCalculator: React.FC<PricingCalculatorProps> = ({
-  onCostUpdate,
-  onHighVolumeChange,
-}) => {
+const PricingCalculator: React.FC = () => {
   // Constants for pricing and retention periods
   const TRACES_AND_LOGS_PRICES = {
     15: 0.3,
@@ -107,10 +99,6 @@ const PricingCalculator: React.FC<PricingCalculatorProps> = ({
   // Constants for slider ranges
   const MIN_VALUE = 1
   const MAX_VALUE = 200000
-
-  // Add refs to track previous values
-  const prevTotalEstimateRef = useRef<number>(199)
-  const prevIsHighVolumeRef = useRef<boolean>(false)
 
   // Handle slider changes
   const handleChangeTraces = (value: number | number[]) => {
@@ -176,21 +164,6 @@ const PricingCalculator: React.FC<PricingCalculatorProps> = ({
     // Clean up
     return () => window.removeEventListener('resize', handleResize)
   }, [])
-
-  // Update parent component with cost and high volume status
-  useEffect(() => {
-    // Only call onCostUpdate if the total estimate has changed
-    if (onCostUpdate && prevTotalEstimateRef.current !== totalEstimate) {
-      prevTotalEstimateRef.current = totalEstimate
-      onCostUpdate(totalEstimate)
-    }
-
-    // Only call onHighVolumeChange if the high volume status has changed
-    if (onHighVolumeChange && prevIsHighVolumeRef.current !== isHighVolume) {
-      prevIsHighVolumeRef.current = isHighVolume
-      onHighVolumeChange(isHighVolume)
-    }
-  }, [totalEstimate, isHighVolume, onCostUpdate, onHighVolumeChange])
 
   // Render a slider with consistent styling
   const renderSlider = (
@@ -665,12 +638,21 @@ const PricingCalculator: React.FC<PricingCalculatorProps> = ({
         </div>
       )}
 
-      {/* Total estimate - shown only in advanced mode */}
-      {isAdvancedMode && (
-        <div className="button-background mt-6 flex items-center justify-end rounded-md border border-transparent px-3 py-4 pt-4">
-          <div className="text-xl font-bold text-signoz_vanilla-100">
-            ${formatNumber(totalEstimate)}
-          </div>
+      {/* Total estimate - always shown */}
+      <div className="button-background mt-6 flex items-center justify-between rounded-md px-3 py-4 pt-4">
+        <span className="text-base font-medium text-signoz_vanilla-100">Monthly estimate</span>
+        <div className="w-[45%] border-b border-dashed border-signoz_slate-400"></div>
+        <div className="text-xl font-bold text-signoz_vanilla-100">
+          ${formatNumber(totalEstimate)}
+        </div>
+      </div>
+
+      {/* High volume message when applicable */}
+      {isHighVolume && (
+        <div className="mt-4 rounded-md border border-dashed border-signoz_robin-500 bg-signoz_robin-500/10 p-3 text-center">
+          <span className="text-sm font-medium text-signoz_robin-400">
+            For high volume usage, reach out to us for custom pricing and retention options
+          </span>
         </div>
       )}
     </div>

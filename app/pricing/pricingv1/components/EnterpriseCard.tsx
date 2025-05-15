@@ -2,26 +2,9 @@ import React from 'react'
 import { CheckCircle, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 
-interface EnterpriseCardProps {
-  isHighVolume?: boolean
-}
-
-export default function EnterpriseCard({ isHighVolume = false }: EnterpriseCardProps) {
+export default function EnterpriseCard() {
   return (
-    <div
-      className={`pricing-card rounded-md ${
-        isHighVolume
-          ? 'border border-signoz_robin-500/40 shadow-[0_0_20px_rgba(78,116,248,0.2)]'
-          : 'border border-dashed border-signoz_slate-400'
-      } relative ${
-        isHighVolume ? 'bg-signoz_ink-400/10' : 'bg-signoz_ink-400 bg-opacity-5'
-      } px-6 py-8 transition-all duration-300`}
-    >
-      {isHighVolume && (
-        <div className="absolute -top-8 left-0 right-0 rounded-t-md  py-1 text-center text-base font-medium text-signoz_robin-400">
-          Reach out to us for custom pricing and retention for high volume
-        </div>
-      )}
+    <div className="pricing-card rounded-md border border-dashed border-signoz_slate-400 bg-signoz_ink-400 bg-opacity-5 px-6 py-8 transition-all duration-300">
       <div>
         <div className="mb-4 flex justify-between">
           <div className="w-[60%]">
