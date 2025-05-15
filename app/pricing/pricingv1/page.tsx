@@ -52,7 +52,7 @@ export default function PricingV1Page() {
 
         <FAQ />
 
-        <Testimonials />
+        <Testimonials page="pricing" />
 
         <QuickStartCloud />
       </div>
