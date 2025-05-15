@@ -481,28 +481,30 @@ const ExploreAllFeatures: React.FC = () => {
   return (
     <div className="relative !m-0 !mx-auto !w-[100vw] border !border-t-0 border-dashed border-signoz_slate-400 md:!w-[80vw]">
       <div className="mx-auto mb-10 mt-6">
-        {/* Header */}
-        <div className="grid grid-cols-3 gap-1 md:grid-cols-[3fr_1fr_1fr_1fr]">
-          {ALL_FEATURES_DATA.HEADER.map((header, idx) => (
-            <div
-              key={idx}
-              className={`${
-                idx === 2
-                  ? `flex flex-col justify-between rounded-lg !rounded-b-none bg-signoz_ink-500 p-3 sm:bg-[#16181d]`
-                  : idx !== 0
-                    ? `flex flex-col justify-between rounded-lg p-3 bg-opacity-${idx * 10}`
-                    : 'hidden md:block'
-              }`}
-            >
-              <div className="flex flex-col gap-1">
-                <h2 className="m-0 text-sm max-sm:h-16 md:text-base">{header.heading}</h2>
-                <p className="text-xs text-signoz_vanilla-400">{header.desc}</p>
+        {/* Header - Using CSS sticky positioning for smoother scrolling */}
+        <div className="sticky top-[56px] z-20 bg-[#0f1013]">
+          <div className="grid grid-cols-3 gap-1 md:grid-cols-[3fr_1fr_1fr_1fr]">
+            {ALL_FEATURES_DATA.HEADER.map((header, idx) => (
+              <div
+                key={idx}
+                className={`${
+                  idx === 2
+                    ? `flex flex-col justify-between rounded-lg !rounded-b-none bg-signoz_ink-500 p-3 sm:bg-[#16181d]`
+                    : idx !== 0
+                      ? `flex flex-col justify-between rounded-lg p-3 bg-opacity-${idx * 10}`
+                      : 'hidden md:block'
+                }`}
+              >
+                <div className="flex flex-col gap-1">
+                  <h2 className="m-0 text-sm max-sm:h-16 md:text-base">{header.heading}</h2>
+                  <p className="text-xs text-signoz_vanilla-400">{header.desc}</p>
+                </div>
+                <div className="flex w-full justify-center">{header.action}</div>
               </div>
-              <div className="flex w-full justify-center">{header.action}</div>
-            </div>
-          ))}
+            ))}
+          </div>
+          <Line />
         </div>
-        <Line />
 
         {/* Feature sections */}
         {ALL_FEATURES_DATA.ROWS.map((section, sectionIdx) => (
