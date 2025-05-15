@@ -12,6 +12,7 @@ import WhySelectSignoz from '@/components/why-select-signoz'
 import { Testimonials } from '@/components/testimonials'
 import { TrustedByTeams } from '@/components/trusted-by'
 import QuickStartCloud from '@/components/QuickStartCloud'
+import FAQ from './components/FAQ'
 
 export default function PricingV1Page() {
   return (
@@ -51,6 +52,8 @@ export default function PricingV1Page() {
         <TrustedByTeams page="pricing" />
 
         <WhySelectSignoz isInPricingPage />
+
+        <FAQ />
 
         <Testimonials />
 
