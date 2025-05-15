@@ -7,15 +7,17 @@ export default function EnterpriseCard() {
   return (
     <div className="pricing-card rounded-md border border-dashed border-signoz_slate-400 bg-signoz_ink-400 bg-opacity-5 px-6 py-8 transition-all duration-300">
       <div>
-        <div className="mb-4 flex justify-between">
-          <div className="w-[60%]">
-            <h3 className="orangish-gradient mb-1 text-3xl font-bold tracking-tight">Enterprise</h3>
+        <div className="mb-4 flex flex-col md:flex-row md:justify-between">
+          <div className="w-full md:w-[60%]">
+            <h3 className="orangish-gradient mb-1 text-2xl font-bold tracking-tight md:text-3xl">
+              Enterprise
+            </h3>
             <p className="text-base text-gray-400">
               For larger orgs with advanced security, compliance and support.
             </p>
           </div>
-          <div className="flex w-[40%] flex-col items-end">
-            <span className="text-3xl font-bold text-signoz_vanilla-100">Custom</span>
+          <div className="mt-4 flex w-full flex-col items-start md:mt-0 md:w-[40%] md:items-end">
+            <span className="text-2xl font-bold text-signoz_vanilla-100 md:text-3xl">Custom</span>
             <div className="mt-1 text-sm text-signoz_vanilla-400">starts at $4000/month</div>
           </div>
         </div>
@@ -23,8 +25,7 @@ export default function EnterpriseCard() {
         <Link href="/enterprise-cloud/">
           <Button
             type={Button.TYPES.SECONDARY}
-            className="mb-4 w-full px-4 py-3"
-            style={{ padding: '23px 20px' }}
+            className="mb-4 flex w-full items-center justify-center gap-2 px-4 py-3 md:py-6"
           >
             Contact Us <ArrowRight size={14} />
           </Button>
@@ -97,7 +98,10 @@ export default function EnterpriseCard() {
         </ul>
 
         <Link href="/enterprise-cloud/">
-          <Button type={Button.TYPES.SECONDARY} className="w-full px-4 py-3">
+          <Button
+            type={Button.TYPES.SECONDARY}
+            className="flex w-full items-center justify-center gap-2 px-4 py-3 md:py-6"
+          >
             Contact Us <ArrowRight size={14} />
           </Button>
         </Link>

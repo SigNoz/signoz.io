@@ -8,26 +8,26 @@ export default function TeamsPricingCard() {
   return (
     <div className="pricing-card relative rounded-md border border-dashed border-signoz_slate-400 bg-signoz_ink-400 bg-opacity-5 px-6 py-8 shadow-[0_0_20px_rgba(78,116,248,0.2)] transition-all duration-300">
       <div>
-        <div className="mb-4 flex justify-between">
-          <div className="w-[60%]">
-            <h3 className="pinkish-gradient mb-1 text-3xl font-bold tracking-tight">Teams</h3>
+        <div className="mb-4 flex flex-col md:flex-row md:justify-between">
+          <div className="w-full md:w-[60%]">
+            <h3 className="pinkish-gradient mb-1 text-2xl font-bold tracking-tight md:text-3xl">
+              Teams
+            </h3>
             <p className="text-base text-gray-400">
               For teams that need high-performing applications.
             </p>
           </div>
-          <div className="flex w-[40%] flex-col items-end">
+          <div className="mt-4 flex w-full flex-col items-start md:mt-0 md:w-[40%] md:items-end">
             <span className="text-sm text-signoz_vanilla-400">starts from</span>
             <div className="flex items-baseline">
-              <span className="text-4xl font-bold text-signoz_vanilla-100">$199</span>
+              <span className="text-3xl font-bold text-signoz_vanilla-100 md:text-4xl">$199</span>
               <span className="ml-1 text-signoz_vanilla-400">/month</span>
             </div>
           </div>
         </div>
 
         <Link href="/teams/">
-          <Button className="mb-6 w-full px-4 py-3" style={{ padding: '23px 20px' }}>
-            Start your 30 day free trial
-          </Button>
+          <Button className="mb-6 w-full px-4 py-3 md:py-6">Start your 30 day free trial</Button>
         </Link>
 
         <div className="my-6 w-full border-t border-dashed border-signoz_slate-400"></div>
@@ -67,11 +67,7 @@ export default function TeamsPricingCard() {
         </ul>
 
         <Link href="#estimate-your-monthly-bill">
-          <Button
-            type={Button.TYPES.SECONDARY}
-            className="mb-4 w-full"
-            style={{ padding: '23px 20px' }}
-          >
+          <Button type={Button.TYPES.SECONDARY} className="mb-4 w-full px-4 py-3 md:py-6">
             Estimate your monthly bill
           </Button>
         </Link>
