@@ -1,3 +1,5 @@
+'use client'
+
 import React, { useState, useEffect, useRef } from 'react'
 import { Slider, Tooltip } from '@nextui-org/react'
 import { ArrowUpRight, ArrowRight } from 'lucide-react'

@@ -1,7 +1,4 @@
-'use client'
-
 import React from 'react'
-import styles from '../styles.module.css'
 import Heading from '../../../components/ui/Heading'
 import PricingFeatures from './components/PricingFeatures'
 import TeamsPricingCard from './components/TeamsPricingCard'
