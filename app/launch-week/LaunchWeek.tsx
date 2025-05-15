@@ -284,7 +284,7 @@ const MainSection: React.FC = () => {
                   CI/CD Observability Powered by OpenTelemetry
                   </div>
                   <div className="text-sm font-medium text-signoz_vanilla-400">
-                  ATrack and analyze every stage of your CI/CD pipeline to identify bottlenecks, improve reliability, and accelerate software delivery.
+                  Track and analyze every stage of your CI/CD pipeline to identify bottlenecks, improve reliability, and accelerate software delivery.
                   </div>
                 </div>
                 <div className="flex justify-end">
