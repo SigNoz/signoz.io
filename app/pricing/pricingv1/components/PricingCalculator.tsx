@@ -175,7 +175,8 @@ const PricingCalculator: React.FC = () => {
     minLabel: string,
     maxLabel: string,
     formatFunc: (val: number) => string,
-    thumbColor: string
+    thumbColor: string,
+    ariaLabel: string
   ) => (
     <Slider
       size="sm"
@@ -195,10 +196,12 @@ const PricingCalculator: React.FC = () => {
         base: 'max-w-full',
         label: 'text-medium',
       }}
+      aria-label={ariaLabel}
       renderThumb={(props) => (
         <div
           {...props}
           className="group top-1/2 cursor-grab rounded-full border-small border-signoz_vanilla-100 bg-background shadow-medium data-[dragging=true]:cursor-grabbing"
+          aria-valuetext={formatFunc(linearToLog(value, MIN_VALUE, MAX_VALUE))}
         >
           <span
             className={`block h-5 w-5 rounded-full bg-${thumbColor} transition-transform group-data-[dragging=true]:scale-80`}
@@ -412,7 +415,8 @@ const PricingCalculator: React.FC = () => {
                     '0GB',
                     '100TB',
                     formatBytes,
-                    'signoz_robin-500'
+                    'signoz_robin-500',
+                    'Adjust traces ingestion volume'
                   )}
                 </div>
               </div>
@@ -468,7 +472,7 @@ const PricingCalculator: React.FC = () => {
                 <span className="text-xs font-semibold uppercase text-signoz_vanilla-400">
                   Scale of ingestion (per month)
                 </span>
-                <div className="my-4">
+                <div className="mt-4">
                   {renderSlider(
                     logsValue,
                     handleChangeLogs,
@@ -476,7 +480,8 @@ const PricingCalculator: React.FC = () => {
                     '0GB',
                     '100TB',
                     formatBytes,
-                    'signoz_sakura-500'
+                    'signoz_sakura-500',
+                    'Adjust logs ingestion volume'
                   )}
                 </div>
               </div>
@@ -540,7 +545,8 @@ const PricingCalculator: React.FC = () => {
                     '0M',
                     '100B',
                     formatMetrics,
-                    'signoz_amber-500'
+                    'signoz_amber-500',
+                    'Adjust metrics ingestion volume'
                   )}
                 </div>
               </div>
@@ -620,7 +626,8 @@ const PricingCalculator: React.FC = () => {
               '0GB',
               '100TB',
               formatBytes,
-              'signoz_robin-500'
+              'signoz_robin-500',
+              'Adjust traces ingestion volume'
             )}
           </div>
           <div className="metrics-background col-start-5 p-2 text-right text-signoz_vanilla-400">
@@ -662,7 +669,8 @@ const PricingCalculator: React.FC = () => {
               '0GB',
               '100TB',
               formatBytes,
-              'signoz_sakura-500'
+              'signoz_sakura-500',
+              'Adjust logs ingestion volume'
             )}
           </div>
           <div className="metrics-background col-start-5 p-2 text-right text-signoz_vanilla-400">
@@ -704,7 +712,8 @@ const PricingCalculator: React.FC = () => {
               '0M',
               '100B',
               formatMetrics,
-              'signoz_amber-500'
+              'signoz_amber-500',
+              'Adjust metrics ingestion volume'
             )}
           </div>
           <div className="metrics-background col-start-5 p-2 text-right text-signoz_vanilla-400">
