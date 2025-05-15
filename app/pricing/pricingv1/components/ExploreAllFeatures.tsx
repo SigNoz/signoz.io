@@ -38,7 +38,7 @@ const ALL_FEATURES_DATA = {
     { heading: '', desc: '' },
     {
       heading: 'Community Edition',
-      desc: '$0 — host in your infra',
+      desc: 'Install & manage yourself',
       action: (
         <TrackingLink
           href={'/docs/introduction'}
