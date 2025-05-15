@@ -25,7 +25,9 @@ export default function TeamsPricingCard() {
         </div>
 
         <Link href="/teams/">
-          <Button className="mb-6 w-full px-4 py-3">Start your 30 day free trial</Button>
+          <Button className="mb-6 w-full px-4 py-3" style={{ padding: '23px 20px' }}>
+            Start your 30 day free trial
+          </Button>
         </Link>
 
         <div className="my-6 w-full border-t border-dashed border-signoz_slate-400"></div>
@@ -65,7 +67,11 @@ export default function TeamsPricingCard() {
         </ul>
 
         <Link href="#estimate-your-monthly-bill">
-          <Button type={Button.TYPES.SECONDARY} className="mb-4 w-full">
+          <Button
+            type={Button.TYPES.SECONDARY}
+            className="mb-4 w-full"
+            style={{ padding: '23px 20px' }}
+          >
             Estimate your monthly bill
           </Button>
         </Link>

@@ -21,7 +21,11 @@ export default function EnterpriseCard() {
         </div>
 
         <Link href="/enterprise-cloud/">
-          <Button type={Button.TYPES.SECONDARY} className="mb-4 w-full px-4 py-3">
+          <Button
+            type={Button.TYPES.SECONDARY}
+            className="mb-4 w-full px-4 py-3"
+            style={{ padding: '23px 20px' }}
+          >
             Contact Us <ArrowRight size={14} />
           </Button>
         </Link>
