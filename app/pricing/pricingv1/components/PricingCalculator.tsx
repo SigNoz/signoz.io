@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { Slider, Tooltip } from '@nextui-org/react'
-import { ArrowUpRight } from 'lucide-react'
+import { ArrowUpRight, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 import Button from '../../../../components/Button/Button'
 import TrackingLink from '../../../../components/TrackingLink'
@@ -96,6 +96,9 @@ const PricingCalculator: React.FC = () => {
   // Constants for slider ranges
   const MIN_VALUE = 1
   const MAX_VALUE = 200000
+
+  // State for active tab in mobile view
+  const [activeTab, setActiveTab] = useState('traces')
 
   // Handle slider changes
   const handleChangeTraces = (value: number | number[]) => {
@@ -206,7 +209,7 @@ const PricingCalculator: React.FC = () => {
   )
 
   return (
-    <div className="pricing-calculator mb-6 mt-0 w-full rounded-md border border-dashed border-signoz_slate-400 p-4 md:p-6">
+    <div className="pricing-calculator mb-6 mt-0 w-full rounded-md border border-dashed border-signoz_slate-400 p-3 md:p-4">
       <div className="mb-4">
         <h3 className="text-lg font-semibold text-signoz_vanilla-100 md:text-xl">
           Estimate your monthly bill
@@ -214,379 +217,505 @@ const PricingCalculator: React.FC = () => {
       </div>
 
       {isMobile ? (
-        // Mobile view
-        <div className="space-y-4">
-          {/* Traces section */}
-          <div className="data-section rounded-md bg-signoz_ink-400 bg-opacity-5 p-3">
-            <div className="mb-3 flex items-center gap-2">
-              <img
-                src="/img/index_features/drafting-compass.svg"
-                alt="Traces Icon"
-                className="h-5 w-5"
-              />
-              <span className="text-base font-medium text-signoz_vanilla-100">Traces</span>
-            </div>
-
-            <div className="mb-2 flex justify-between">
-              <span className="text-xs font-semibold uppercase text-signoz_vanilla-400">
-                Price per unit
-              </span>
-              <span className="text-xs font-semibold uppercase text-signoz_vanilla-400">
-                Retention
-              </span>
-            </div>
-
-            <div className="mb-3 flex justify-between">
-              <div className="text-signoz_robin-400">
-                ${TRACES_AND_LOGS_PRICES[tracesRetentionPeriod]}/GB
-              </div>
-              <select
-                className="block h-[28px] w-28 rounded-sm border border-signoz_slate-400 bg-signoz_ink-400 p-1 text-xs text-signoz_vanilla-100"
-                value={tracesRetentionPeriod}
-                onChange={(e) => setTracesRetentionPeriod(Number(e.target.value))}
-              >
-                {RETENTION_PERIOD.TRACES_AND_LOGS.map((option, idx) => (
-                  <option key={`traces-${option.days}-${idx}`} value={option.days}>
-                    {`${option.days} days`}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="mb-2">
-              <span className="text-xs font-semibold uppercase text-signoz_vanilla-400">
-                Scale of ingestion (per month)
-              </span>
-              {renderSlider(
-                tracesValue,
-                handleChangeTraces,
-                'secondary',
-                '0GB',
-                '200TB',
-                formatBytes,
-                'signoz_robin-500'
+        // Mobile view with tabs
+        <div>
+          {/* Tab navigation */}
+          <div className="tabs mb-4 flex justify-between gap-2">
+            <button
+              className={`tab flex w-full items-center justify-center gap-2 p-1 text-base font-normal text-signoz_vanilla-400 ${activeTab === 'traces' ? 'rounded-md bg-signoz_ink-400 !text-signoz_vanilla-100' : ''}`}
+              onClick={() => setActiveTab('traces')}
+            >
+              {activeTab === 'traces' ? (
+                <img
+                  src="/img/index_features/drafting-compass.svg"
+                  alt="Traces Icon"
+                  className="h-4 w-4"
+                />
+              ) : (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="17"
+                  height="16"
+                  viewBox="0 0 17 16"
+                  fill="none"
+                >
+                  <path
+                    d="M8.83382 4.66667C9.5702 4.66667 10.1672 4.06971 10.1672 3.33333C10.1672 2.59695 9.5702 2 8.83382 2C8.09744 2 7.50049 2.59695 7.50049 3.33333C7.50049 4.06971 8.09744 4.66667 8.83382 4.66667Z"
+                    stroke="#C0C1C3"
+                    strokeWidth="1.33333"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M2.8335 14L8.18016 4.49329"
+                    stroke="#C0C1C3"
+                    strokeWidth="1.33333"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M9.49365 4.49329L10.7803 6.78662"
+                    stroke="#C0C1C3"
+                    strokeWidth="1.33333"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M13.5003 8C10.9203 10.6667 6.74699 10.6667 4.16699 8"
+                    stroke="#C0C1C3"
+                    strokeWidth="1.33333"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M14.8336 13.9999L13.3936 11.4399"
+                    stroke="#C0C1C3"
+                    strokeWidth="1.33333"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
               )}
-            </div>
+              Traces
+            </button>
 
-            <div className="mt-2 flex justify-between">
-              <span className="text-sm text-signoz_vanilla-400">
-                {formatBytes(linearToLog(tracesValue, MIN_VALUE, MAX_VALUE))}
-              </span>
-              <span className="text-base font-medium text-signoz_vanilla-100">
-                ${formatNumber(tracesSubtotal)}
-              </span>
-            </div>
+            <button
+              className={`tab flex w-full items-center justify-center gap-2 p-1 text-base font-normal text-signoz_vanilla-400 ${activeTab === 'logs' ? 'rounded-md bg-signoz_ink-400 !text-signoz_vanilla-100' : ''}`}
+              onClick={() => setActiveTab('logs')}
+            >
+              {activeTab === 'logs' ? (
+                <img src="/img/index_features/logs.svg" alt="Logs Icon" className="h-4 w-4" />
+              ) : (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 17 16"
+                  fill="none"
+                >
+                  <path d="M3.8335 3.66675L3.8335 12.6667" stroke="#C0C1C3" strokeWidth="1.33333" />
+                  <ellipse
+                    cx="7.8335"
+                    cy="3.66667"
+                    rx="4"
+                    ry="1.66667"
+                    stroke="#C0C1C3"
+                    strokeWidth="1.33333"
+                  />
+                  <ellipse cx="7.8335" cy="3.61674" rx="1" ry="0.416667" fill="#C0C1C3" />
+                  <path
+                    d="M11.8335 12.6667C11.8335 13.4031 10.0426 14.0001 7.8335 14.0001C5.62436 14.0001 3.8335 13.4031 3.8335 12.6667"
+                    stroke="#C0C1C3"
+                    strokeWidth="1.33333"
+                  />
+                  <path
+                    d="M6.5 7.33337V8.61023C6.5 8.64282 6.52356 8.67063 6.55571 8.67599L8.44429 8.99076C8.47644 8.99611 8.5 9.02393 8.5 9.05652V11.3334"
+                    stroke="#C0C1C3"
+                    strokeWidth="1.33333"
+                    strokeLinecap="round"
+                  />
+                  <path
+                    d="M11.8335 3.66675V7.21313C11.8335 7.26549 11.8911 7.29742 11.9355 7.26966L14.4224 5.71535C14.4608 5.69136 14.5114 5.71179 14.5224 5.75572L14.8249 6.96568C14.8303 6.98719 14.8246 7.00996 14.8098 7.02644L11.8506 10.3144C11.8396 10.3266 11.8335 10.3425 11.8335 10.359V12.6667"
+                    stroke="#C0C1C3"
+                    strokeWidth="1.33333"
+                  />
+                </svg>
+              )}
+              Logs
+            </button>
+
+            <button
+              className={`tab flex w-full items-center justify-center gap-2 p-1 text-base font-normal text-signoz_vanilla-400 ${activeTab === 'metrics' ? 'rounded-md bg-signoz_ink-400 !text-signoz_vanilla-100' : ''}`}
+              onClick={() => setActiveTab('metrics')}
+            >
+              {activeTab === 'metrics' ? (
+                <img
+                  src="/img/index_features/bar-chart-2.svg"
+                  alt="Metrics Icon"
+                  className="h-4 w-4"
+                />
+              ) : (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 17 16"
+                  fill="none"
+                >
+                  <path
+                    d="M12.167 13.3333V6.66663"
+                    stroke="#C0C1C3"
+                    strokeWidth="1.33333"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M8.16699 13.3333V2.66663"
+                    stroke="#C0C1C3"
+                    strokeWidth="1.33333"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M4.16699 13.3333V9.33325"
+                    stroke="#C0C1C3"
+                    strokeWidth="1.33333"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              )}
+              Metrics
+            </button>
           </div>
 
-          {/* Logs section */}
-          <div className="data-section rounded-md bg-signoz_ink-400 bg-opacity-5 p-3">
-            <div className="mb-3 flex items-center gap-2">
-              <img src="/img/index_features/logs.svg" alt="Logs Icon" className="h-5 w-5" />
-              <span className="text-base font-medium text-signoz_vanilla-100">Logs</span>
-            </div>
-
-            <div className="mb-2 flex justify-between">
-              <span className="text-xs font-semibold uppercase text-signoz_vanilla-400">
-                Price per unit
-              </span>
-              <span className="text-xs font-semibold uppercase text-signoz_vanilla-400">
-                Retention
-              </span>
-            </div>
-
-            <div className="mb-3 flex justify-between">
-              <div className="text-signoz_sakura-400">
-                ${TRACES_AND_LOGS_PRICES[logsRetentionPeriod]}/GB
+          {/* Traces tab content */}
+          {activeTab === 'traces' && (
+            <div className="data-section rounded-md bg-signoz_ink-400 bg-opacity-5 px-3 pb-4 pt-6">
+              <div className="mb-4 flex justify-between">
+                <span className="text-xs font-semibold uppercase text-signoz_vanilla-400">
+                  Price per unit
+                </span>
+                <span className="text-xs font-semibold uppercase text-signoz_vanilla-400">
+                  Retention
+                </span>
               </div>
-              <select
-                className="block h-[28px] w-28 rounded-sm border border-signoz_slate-400 bg-signoz_ink-400 p-1 text-xs text-signoz_vanilla-100"
-                value={logsRetentionPeriod}
-                onChange={(e) => setLogsRetentionPeriod(Number(e.target.value))}
-              >
-                {RETENTION_PERIOD.TRACES_AND_LOGS.map((option, idx) => (
-                  <option key={`logs-${option.days}-${idx}`} value={option.days}>
-                    {`${option.days} days`}
-                  </option>
-                ))}
-              </select>
-            </div>
 
-            <div className="mb-2">
-              <span className="text-xs font-semibold uppercase text-signoz_vanilla-400">
-                Scale of ingestion (per month)
-              </span>
-              {renderSlider(
-                logsValue,
-                handleChangeLogs,
-                'danger',
-                '0GB',
-                '200TB',
-                formatBytes,
-                'signoz_sakura-500'
-              )}
-            </div>
-
-            <div className="mt-2 flex justify-between">
-              <span className="text-sm text-signoz_vanilla-400">
-                {formatBytes(linearToLog(logsValue, MIN_VALUE, MAX_VALUE))}
-              </span>
-              <span className="text-base font-medium text-signoz_vanilla-100">
-                ${formatNumber(logsSubtotal)}
-              </span>
-            </div>
-          </div>
-
-          {/* Metrics section */}
-          <div className="data-section rounded-md bg-signoz_ink-400 bg-opacity-5 p-3">
-            <div className="mb-3 flex items-center gap-2">
-              <img
-                src="/img/index_features/bar-chart-2.svg"
-                alt="Metrics Icon"
-                className="h-5 w-5"
-              />
-              <span className="text-base font-medium text-signoz_vanilla-100">Metrics</span>
-            </div>
-
-            <div className="mb-2 flex justify-between">
-              <span className="text-xs font-semibold uppercase text-signoz_vanilla-400">
-                Price per unit
-              </span>
-              <span className="text-xs font-semibold uppercase text-signoz_vanilla-400">
-                Retention
-              </span>
-            </div>
-
-            <div className="mb-3 flex justify-between">
-              <div className="text-signoz_amber-400">
-                ${METRICS_PRICES[metricsRetentionPeriod]}/mn samples
+              <div className="mb-6 flex justify-between">
+                <div className="text-signoz_robin-400">
+                  ${TRACES_AND_LOGS_PRICES[tracesRetentionPeriod]}/GB
+                </div>
+                <select
+                  className="block h-[32px] w-32 rounded-sm border border-signoz_slate-400 bg-signoz_ink-400 py-1.5 pl-2 pr-1.5 text-xs text-signoz_vanilla-100"
+                  value={tracesRetentionPeriod}
+                  onChange={(e) => setTracesRetentionPeriod(Number(e.target.value))}
+                >
+                  {RETENTION_PERIOD.TRACES_AND_LOGS.map((option, idx) => (
+                    <option key={`traces-${option.days}-${idx}`} value={option.days}>
+                      {`${option.days} days`}
+                    </option>
+                  ))}
+                </select>
               </div>
-              <select
-                className="block h-[28px] w-28 rounded-sm border border-signoz_slate-400 bg-signoz_ink-400 p-1 text-xs text-signoz_vanilla-100"
-                value={metricsRetentionPeriod}
-                onChange={(e) => setMetricsRetentionPeriod(Number(e.target.value))}
-              >
-                {RETENTION_PERIOD.METRICS.map((option, idx) => (
-                  <option key={`metrics-${option.months}-${idx}`} value={option.months}>
-                    {`${option.months} ${option.months === 1 ? 'month' : 'months'}`}
-                  </option>
-                ))}
-              </select>
-            </div>
 
-            <div className="mb-2">
-              <span className="text-xs font-semibold uppercase text-signoz_vanilla-400">
-                Scale of ingestion (per month)
-              </span>
-              {renderSlider(
-                metricsValue,
-                handleChangeMetrics,
-                'warning',
-                '0M',
-                '200B',
-                formatMetrics,
-                'signoz_amber-500'
-              )}
-            </div>
+              <div className="mb-2">
+                <span className="text-xs font-semibold uppercase text-signoz_vanilla-400">
+                  Scale of ingestion (per month)
+                </span>
+                <div className="mt-4">
+                  {renderSlider(
+                    tracesValue,
+                    handleChangeTraces,
+                    'secondary',
+                    '0GB',
+                    '200TB',
+                    formatBytes,
+                    'signoz_robin-500'
+                  )}
+                </div>
+              </div>
 
-            <div className="mt-2 flex justify-between">
-              <span className="text-sm text-signoz_vanilla-400">
-                {formatMetrics(linearToLog(metricsValue, MIN_VALUE, MAX_VALUE))}
-              </span>
-              <span className="text-base font-medium text-signoz_vanilla-100">
-                ${formatNumber(metricsSubtotal)}
-              </span>
+              <div className="mb-4 mt-10 flex justify-between uppercase">
+                <span className="text-xs font-semibold text-signoz_vanilla-400">
+                  Estimated usage
+                </span>
+                <span className="text-xs font-semibold text-signoz_vanilla-400">Subtotal</span>
+              </div>
+              <div className="mb-2 flex items-center justify-between">
+                <span className="text-base text-signoz_vanilla-400">
+                  {formatBytes(linearToLog(tracesValue, MIN_VALUE, MAX_VALUE))}
+                </span>
+                <div className="w-[45%] border-b border-dashed border-signoz_slate-400"></div>
+                <span className="text-base font-medium text-signoz_vanilla-100">
+                  ${formatNumber(tracesSubtotal)}
+                </span>
+              </div>
             </div>
-          </div>
+          )}
+
+          {/* Logs tab content */}
+          {activeTab === 'logs' && (
+            <div className="data-section rounded-md bg-signoz_ink-400 bg-opacity-5 px-3 pb-4 pt-6">
+              <div className="mb-4 flex justify-between">
+                <span className="text-xs font-semibold uppercase text-signoz_vanilla-400">
+                  Price per unit
+                </span>
+                <span className="text-xs font-semibold uppercase text-signoz_vanilla-400">
+                  Retention
+                </span>
+              </div>
+
+              <div className="mb-6 flex justify-between">
+                <div className="text-signoz_sakura-400">
+                  ${TRACES_AND_LOGS_PRICES[logsRetentionPeriod]}/GB
+                </div>
+                <select
+                  className="block h-[32px] w-32 rounded-sm border border-signoz_slate-400 bg-signoz_ink-400 py-1.5 pl-2 pr-1.5 text-xs text-signoz_vanilla-100"
+                  value={logsRetentionPeriod}
+                  onChange={(e) => setLogsRetentionPeriod(Number(e.target.value))}
+                >
+                  {RETENTION_PERIOD.TRACES_AND_LOGS.map((option, idx) => (
+                    <option key={`logs-${option.days}-${idx}`} value={option.days}>
+                      {`${option.days} days`}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="mb-2">
+                <span className="text-xs font-semibold uppercase text-signoz_vanilla-400">
+                  Scale of ingestion (per month)
+                </span>
+                <div className="my-4">
+                  {renderSlider(
+                    logsValue,
+                    handleChangeLogs,
+                    'danger',
+                    '0GB',
+                    '200TB',
+                    formatBytes,
+                    'signoz_sakura-500'
+                  )}
+                </div>
+              </div>
+
+              <div className="mb-4 mt-10 flex justify-between uppercase">
+                <span className="text-xs font-semibold text-signoz_vanilla-400">
+                  Estimated usage
+                </span>
+                <span className="text-xs font-semibold text-signoz_vanilla-400">Subtotal</span>
+              </div>
+              <div className="mb-2 flex items-center justify-between">
+                <span className="text-base text-signoz_vanilla-400">
+                  {formatBytes(linearToLog(logsValue, MIN_VALUE, MAX_VALUE))}
+                </span>
+                <div className="w-[45%] border-b border-dashed border-signoz_slate-400"></div>
+                <span className="text-base font-medium text-signoz_vanilla-100">
+                  ${formatNumber(logsSubtotal)}
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* Metrics tab content */}
+          {activeTab === 'metrics' && (
+            <div className="data-section rounded-md bg-signoz_ink-400 bg-opacity-5 px-3 pb-4 pt-6">
+              <div className="mb-4 flex justify-between">
+                <span className="text-xs font-semibold uppercase text-signoz_vanilla-400">
+                  Price per unit
+                </span>
+                <span className="text-xs font-semibold uppercase text-signoz_vanilla-400">
+                  Retention
+                </span>
+              </div>
+
+              <div className="mb-6 flex justify-between">
+                <div className="text-signoz_amber-400">
+                  ${METRICS_PRICES[metricsRetentionPeriod]}/mn samples
+                </div>
+                <select
+                  className="block h-[32px] w-32 rounded-sm border border-signoz_slate-400 bg-signoz_ink-400 py-1.5 pl-2 pr-1.5 text-xs text-signoz_vanilla-100"
+                  value={metricsRetentionPeriod}
+                  onChange={(e) => setMetricsRetentionPeriod(Number(e.target.value))}
+                >
+                  {RETENTION_PERIOD.METRICS.map((option, idx) => (
+                    <option key={`metrics-${option.months}-${idx}`} value={option.months}>
+                      {`${option.months} ${option.months === 1 ? 'month' : 'months'}`}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="mb-2">
+                <span className="text-xs font-semibold uppercase text-signoz_vanilla-400">
+                  Scale of ingestion (per month)
+                </span>
+                <div className="mt-4">
+                  {renderSlider(
+                    metricsValue,
+                    handleChangeMetrics,
+                    'warning',
+                    '0M',
+                    '200B',
+                    formatMetrics,
+                    'signoz_amber-500'
+                  )}
+                </div>
+              </div>
+
+              <div className="mb-4 mt-10 flex justify-between uppercase">
+                <span className="text-xs font-semibold text-signoz_vanilla-400">
+                  Estimated usage
+                </span>
+                <span className="text-xs font-semibold text-signoz_vanilla-400">Subtotal</span>
+              </div>
+              <div className="mb-2 flex items-center justify-between">
+                <span className="text-base text-signoz_vanilla-400">
+                  {formatMetrics(linearToLog(metricsValue, MIN_VALUE, MAX_VALUE))}
+                </span>
+                <div className="w-[45%] border-b border-dashed border-signoz_slate-400"></div>
+                <span className="text-base font-medium text-signoz_vanilla-100">
+                  ${formatNumber(metricsSubtotal)}
+                </span>
+              </div>
+            </div>
+          )}
         </div>
       ) : (
-        // Desktop view
-        <div className="space-y-6">
-          {/* Traces Section */}
-          <div className="rounded-md bg-signoz_ink-400 bg-opacity-5 p-3">
-            <div className="flex flex-col space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <img
-                    src="/img/index_features/drafting-compass.svg"
-                    alt="Traces Icon"
-                    className="h-5 w-5"
-                  />
-                  <span className="text-base font-medium text-signoz_vanilla-100">Traces</span>
-                </div>
-                <div className="flex items-center gap-8">
-                  <div className="flex items-center gap-1 text-signoz_robin-400">
-                    <span className="text-xs font-semibold uppercase text-signoz_vanilla-400">
-                      Price:
-                    </span>
-                    ${TRACES_AND_LOGS_PRICES[tracesRetentionPeriod]}/GB
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <span className="text-xs font-semibold uppercase text-signoz_vanilla-400">
-                      Retention:
-                    </span>
-                    <select
-                      className="h-[28px] w-28 rounded-sm border border-signoz_slate-400 bg-signoz_ink-400 p-1 text-xs text-signoz_vanilla-100"
-                      value={tracesRetentionPeriod}
-                      onChange={(e) => setTracesRetentionPeriod(Number(e.target.value))}
-                    >
-                      {RETENTION_PERIOD.TRACES_AND_LOGS.map((option, idx) => (
-                        <option key={`traces-desk-${option.days}-${idx}`} value={option.days}>
-                          {`${option.days} days`}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <span className="text-xs font-semibold uppercase text-signoz_vanilla-400">
-                      Subtotal:
-                    </span>
-                    <span className="text-base font-medium text-signoz_vanilla-100">
-                      ${formatNumber(tracesSubtotal)}
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <div>
-                {renderSlider(
-                  tracesValue,
-                  handleChangeTraces,
-                  'secondary',
-                  '0GB',
-                  '200TB',
-                  formatBytes,
-                  'signoz_robin-500'
-                )}
-              </div>
-              <div className="text-sm text-signoz_vanilla-400">
-                Estimated usage: {formatBytes(linearToLog(tracesValue, MIN_VALUE, MAX_VALUE))}
-              </div>
-            </div>
+        // Desktop view - Grid Layout
+        <div className="grid grid-cols-6 grid-rows-4 gap-y-3">
+          {/* Header Row */}
+          <div className="col-start-1 p-2"></div>
+          <div className="col-start-2 py-2 pr-2 text-xs font-semibold uppercase text-signoz_vanilla-400">
+            Pricing per unit
+          </div>
+          <div className="col-start-3 py-2 pr-2 text-xs font-semibold uppercase text-signoz_vanilla-400">
+            Retention
+          </div>
+          <div className="col-start-4 py-2 pr-2 text-xs font-semibold uppercase text-signoz_vanilla-400">
+            Scale of ingestion (per month)
+          </div>
+          <div className="col-start-5 py-2 pr-2 text-right text-xs font-semibold uppercase text-signoz_vanilla-400">
+            Estimated usage
+          </div>
+          <div className="col-start-6 py-2 pr-2 text-right text-xs font-semibold uppercase text-signoz_vanilla-400">
+            Subtotal
           </div>
 
-          {/* Logs Section */}
-          <div className="rounded-md bg-signoz_ink-400 bg-opacity-5 p-3">
-            <div className="flex flex-col space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <img src="/img/index_features/logs.svg" alt="Logs Icon" className="h-5 w-5" />
-                  <span className="text-base font-medium text-signoz_vanilla-100">Logs</span>
-                </div>
-                <div className="flex items-center gap-8">
-                  <div className="flex items-center gap-1 text-signoz_sakura-400">
-                    <span className="text-xs font-semibold uppercase text-signoz_vanilla-400">
-                      Price:
-                    </span>
-                    ${TRACES_AND_LOGS_PRICES[logsRetentionPeriod]}/GB
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <span className="text-xs font-semibold uppercase text-signoz_vanilla-400">
-                      Retention:
-                    </span>
-                    <select
-                      className="h-[28px] w-28 rounded-sm border border-signoz_slate-400 bg-signoz_ink-400 p-1 text-xs text-signoz_vanilla-100"
-                      value={logsRetentionPeriod}
-                      onChange={(e) => setLogsRetentionPeriod(Number(e.target.value))}
-                    >
-                      {RETENTION_PERIOD.TRACES_AND_LOGS.map((option, idx) => (
-                        <option key={`logs-desk-${option.days}-${idx}`} value={option.days}>
-                          {`${option.days} days`}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <span className="text-xs font-semibold uppercase text-signoz_vanilla-400">
-                      Subtotal:
-                    </span>
-                    <span className="text-base font-medium text-signoz_vanilla-100">
-                      ${formatNumber(logsSubtotal)}
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <div>
-                {renderSlider(
-                  logsValue,
-                  handleChangeLogs,
-                  'danger',
-                  '0GB',
-                  '200TB',
-                  formatBytes,
-                  'signoz_sakura-500'
-                )}
-              </div>
-              <div className="text-sm text-signoz_vanilla-400">
-                Estimated usage: {formatBytes(linearToLog(logsValue, MIN_VALUE, MAX_VALUE))}
-              </div>
-            </div>
+          {/* Traces Row */}
+          <div className="metrics-background col-start-1 flex items-center gap-2 p-2">
+            <img
+              src="/img/index_features/drafting-compass.svg"
+              alt="Traces Icon"
+              className="h-5 w-5"
+            />
+            <span>Traces</span>
+          </div>
+          <div className="metrics-background col-start-2 flex items-center gap-1">
+            <span className="text-base font-medium text-signoz_robin-400">
+              ${TRACES_AND_LOGS_PRICES[tracesRetentionPeriod]}
+            </span>
+            /GB
+          </div>
+          <div className="metrics-background col-start-3 flex items-center">
+            <select
+              className="block h-[28px] w-28 rounded-sm border border-signoz_slate-400 bg-signoz_ink-400 p-1 text-xs text-signoz_vanilla-100"
+              value={tracesRetentionPeriod}
+              onChange={(e) => setTracesRetentionPeriod(Number(e.target.value))}
+            >
+              {RETENTION_PERIOD.TRACES_AND_LOGS.map((option, idx) => (
+                <option key={`traces-${option.days}-${idx}`} value={option.days}>
+                  {`${option.days} days`}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="metrics-background col-start-4 flex items-center">
+            {renderSlider(
+              tracesValue,
+              handleChangeTraces,
+              'secondary',
+              '0GB',
+              '200TB',
+              formatBytes,
+              'signoz_robin-500'
+            )}
+          </div>
+          <div className="metrics-background col-start-5 p-2 text-right text-signoz_vanilla-400">
+            {formatBytes(linearToLog(tracesValue, MIN_VALUE, MAX_VALUE))}
+          </div>
+          <div className="metrics-background col-start-6 p-2 text-right">
+            ${formatNumber(tracesSubtotal)}
           </div>
 
-          {/* Metrics Section */}
-          <div className="rounded-md bg-signoz_ink-400 bg-opacity-5 p-3">
-            <div className="flex flex-col space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <img
-                    src="/img/index_features/bar-chart-2.svg"
-                    alt="Metrics Icon"
-                    className="h-5 w-5"
-                  />
-                  <span className="text-base font-medium text-signoz_vanilla-100">Metrics</span>
-                </div>
-                <div className="flex items-center gap-8">
-                  <div className="flex items-center gap-1 text-signoz_amber-400">
-                    <span className="text-xs font-semibold uppercase text-signoz_vanilla-400">
-                      Price:
-                    </span>
-                    ${METRICS_PRICES[metricsRetentionPeriod]}/mn samples
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <span className="text-xs font-semibold uppercase text-signoz_vanilla-400">
-                      Retention:
-                    </span>
-                    <select
-                      className="h-[28px] w-28 rounded-sm border border-signoz_slate-400 bg-signoz_ink-400 p-1 text-xs text-signoz_vanilla-100"
-                      value={metricsRetentionPeriod}
-                      onChange={(e) => setMetricsRetentionPeriod(Number(e.target.value))}
-                    >
-                      {RETENTION_PERIOD.METRICS.map((option, idx) => (
-                        <option key={`metrics-desk-${option.months}-${idx}`} value={option.months}>
-                          {`${option.months} ${option.months === 1 ? 'month' : 'months'}`}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <span className="text-xs font-semibold uppercase text-signoz_vanilla-400">
-                      Subtotal:
-                    </span>
-                    <span className="text-base font-medium text-signoz_vanilla-100">
-                      ${formatNumber(metricsSubtotal)}
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <div>
-                {renderSlider(
-                  metricsValue,
-                  handleChangeMetrics,
-                  'warning',
-                  '0M',
-                  '200B',
-                  formatMetrics,
-                  'signoz_amber-500'
-                )}
-              </div>
-              <div className="text-sm text-signoz_vanilla-400">
-                Estimated usage: {formatMetrics(linearToLog(metricsValue, MIN_VALUE, MAX_VALUE))}
-              </div>
-            </div>
+          {/* Logs Row */}
+          <div className="metrics-background col-start-1 flex items-center gap-2 p-2">
+            <img src="/img/index_features/logs.svg" alt="Logs Icon" className="h-5 w-5" />
+            <span>Logs</span>
+          </div>
+          <div className="metrics-background col-start-2 flex items-center gap-1">
+            <span className="text-base font-medium text-signoz_sakura-400">
+              ${TRACES_AND_LOGS_PRICES[logsRetentionPeriod]}
+            </span>
+            /GB
+          </div>
+          <div className="metrics-background col-start-3 flex items-center">
+            <select
+              className="block h-[28px] w-28 rounded-sm border border-signoz_slate-400 bg-signoz_ink-400 p-1 text-xs text-signoz_vanilla-100"
+              value={logsRetentionPeriod}
+              onChange={(e) => setLogsRetentionPeriod(Number(e.target.value))}
+            >
+              {RETENTION_PERIOD.TRACES_AND_LOGS.map((option, idx) => (
+                <option key={`logs-${option.days}-${idx}`} value={option.days}>
+                  {`${option.days} days`}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="metrics-background col-start-4 flex items-center">
+            {renderSlider(
+              logsValue,
+              handleChangeLogs,
+              'danger',
+              '0GB',
+              '200TB',
+              formatBytes,
+              'signoz_sakura-500'
+            )}
+          </div>
+          <div className="metrics-background col-start-5 p-2 text-right text-signoz_vanilla-400">
+            {formatBytes(linearToLog(logsValue, MIN_VALUE, MAX_VALUE))}
+          </div>
+          <div className="metrics-background col-start-6 p-2 text-right">
+            ${formatNumber(logsSubtotal)}
+          </div>
+
+          {/* Metrics Row */}
+          <div className="metrics-background col-start-1 flex items-center gap-2 p-2">
+            <img src="/img/index_features/bar-chart-2.svg" alt="Metrics Icon" className="h-5 w-5" />
+            <span>Metrics</span>
+          </div>
+          <div className="metrics-background col-start-2 flex items-center gap-1">
+            <span className="text-base font-medium text-signoz_amber-400">
+              ${METRICS_PRICES[metricsRetentionPeriod]}
+            </span>
+            /mn samples
+          </div>
+          <div className="metrics-background col-start-3 flex items-center">
+            <select
+              className="block h-[28px] w-28 rounded-sm border border-signoz_slate-400 bg-signoz_ink-400 p-1 text-xs text-signoz_vanilla-100"
+              value={metricsRetentionPeriod}
+              onChange={(e) => setMetricsRetentionPeriod(Number(e.target.value))}
+            >
+              {RETENTION_PERIOD.METRICS.map((option, idx) => (
+                <option key={`metrics-${option.months}-${idx}`} value={option.months}>
+                  {`${option.months} ${option.months === 1 ? 'month' : 'months'}`}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="metrics-background col-start-4 flex items-center">
+            {renderSlider(
+              metricsValue,
+              handleChangeMetrics,
+              'warning',
+              '0M',
+              '200B',
+              formatMetrics,
+              'signoz_amber-500'
+            )}
+          </div>
+          <div className="metrics-background col-start-5 p-2 text-right text-signoz_vanilla-400">
+            {formatMetrics(linearToLog(metricsValue, MIN_VALUE, MAX_VALUE))}
+          </div>
+          <div className="metrics-background col-start-6 p-2 text-right">
+            ${formatNumber(metricsSubtotal)}
           </div>
         </div>
       )}
 
       {/* Total estimate - always shown */}
-      <div className="button-background mt-4 flex items-center justify-between rounded-md px-3 py-3 pt-3">
+      <div className="button-background mt-6 flex items-center justify-between rounded-md px-3 py-4">
         <span className="text-base font-medium text-signoz_vanilla-100">Monthly estimate</span>
         <div className="w-[45%] border-b border-dashed border-signoz_slate-400"></div>
         <div className="text-xl font-bold text-signoz_vanilla-100">
@@ -594,12 +723,41 @@ const PricingCalculator: React.FC = () => {
         </div>
       </div>
 
+      {/* Actions section */}
+      <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:justify-end">
+        <TrackingLink
+          href="/teams"
+          clickType="Primary CTA"
+          clickName="Sign Up Button"
+          clickText="Get Started - Free"
+          clickLocation="Pricing Calculator"
+        >
+          <Button className="flex w-full items-center justify-center sm:w-auto">
+            Get Started - Free
+            <ArrowRight size={14} className="ml-2" />
+          </Button>
+        </TrackingLink>
+      </div>
+
       {/* High volume message when applicable */}
       {isHighVolume && (
-        <div className="mt-4 rounded-md border border-dashed border-signoz_robin-500 bg-signoz_robin-500/10 p-3 text-center">
-          <span className="text-sm font-medium text-signoz_robin-400">
-            For high volume usage, reach out to us for custom pricing and retention options
-          </span>
+        <div className="mt-4 rounded-md border border-dashed border-signoz_robin-500 bg-signoz_robin-500/10 p-3">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+            <span className="mb-2 text-sm font-medium text-signoz_robin-400 sm:mb-0">
+              For high volume usage, reach out to us for custom pricing and retention options
+            </span>
+            <TrackingLink
+              href="https://share.hsforms.com/1AZy88ajlRsCPZUP0kSMb2gda5af"
+              clickType="Secondary CTA"
+              clickName="Volume Discount Form Link"
+              clickText="Contact Us"
+              clickLocation="Pricing Calculator"
+            >
+              <Button variant="secondary" className="w-full sm:w-auto">
+                Contact us
+              </Button>
+            </TrackingLink>
+          </div>
         </div>
       )}
     </div>
