@@ -60,7 +60,7 @@ const ALL_FEATURES_DATA = {
         <TrackingLink
           href={'/teams/'}
           className="flex h-8 w-full items-center justify-center gap-1.5 truncate rounded-full bg-signoz_robin-500 px-4 py-2 text-center text-[9px] font-medium leading-5 text-white sm:text-sm"
-          clickType="Secondary CTA"
+          clickType="Primary CTA"
           clickName="Sign Up Button"
           clickText="Get Started"
           clickLocation="Explore All Features Table"
@@ -78,7 +78,7 @@ const ALL_FEATURES_DATA = {
           href={'/enterprise-cloud/'}
           className="button-background flex h-8 w-full items-center justify-center gap-1.5 rounded-full px-4 py-2 text-center text-[9px] font-medium text-white sm:text-sm"
           clickType="Secondary CTA"
-          clickName="Contact Us Button"
+          clickName="Enterprise Contact Button"
           clickText="Contact Us"
           clickLocation="Explore All Features Table"
           id="btn-contact-us-pricing-table"

@@ -2,6 +2,7 @@ import React from 'react'
 import { CheckCircle, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 import Button from 'components/Button/Button'
+import TrackingLink from '../../../../components/TrackingLink'
 
 export default function EnterpriseCard() {
   return (
@@ -22,14 +23,20 @@ export default function EnterpriseCard() {
           </div>
         </div>
 
-        <Link href="/enterprise-cloud/">
+        <TrackingLink
+          href="/enterprise-cloud/"
+          clickType="Secondary CTA"
+          clickName="Enterprise Contact Button"
+          clickText="Contact Us"
+          clickLocation="Enterprise Pricing Card Top"
+        >
           <Button
             type={Button.TYPES.SECONDARY}
             className="mb-4 flex w-full items-center justify-center gap-2 px-4 py-3 md:py-6"
           >
             Contact Us <ArrowRight size={14} />
           </Button>
-        </Link>
+        </TrackingLink>
 
         <div className="my-6 w-full border-t border-dashed border-signoz_slate-400"></div>
 
@@ -97,14 +104,20 @@ export default function EnterpriseCard() {
           </li>
         </ul>
 
-        <Link href="/enterprise-cloud/">
+        <TrackingLink
+          href="/enterprise-cloud/"
+          clickType="Secondary CTA"
+          clickName="Enterprise Contact Button"
+          clickText="Contact Us"
+          clickLocation="Enterprise Pricing Card Bottom"
+        >
           <Button
             type={Button.TYPES.SECONDARY}
-            className="flex w-full items-center justify-center gap-2 px-4 py-3 md:py-6"
+            className="mb-4 flex w-full items-center justify-center gap-2 px-4 py-3 md:py-6"
           >
             Contact Us <ArrowRight size={14} />
           </Button>
-        </Link>
+        </TrackingLink>
       </div>
     </div>
   )

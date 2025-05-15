@@ -4,6 +4,7 @@ import React from 'react'
 import { Modal, ModalContent, ModalBody, useDisclosure } from '@nextui-org/react'
 import { Play } from 'lucide-react'
 import VimeoPlayer from '../../../../components/VimeoPlayer/VimeoPlayer'
+import TrackingButton from '../../../../components/TrackingButton'
 
 interface VideoModalProps {
   buttonLabel: string
@@ -14,13 +15,17 @@ export default function TeamsPricingVideoModal({ buttonLabel }: VideoModalProps)
 
   return (
     <>
-      <button
+      <TrackingButton
         onClick={onOpen}
         className="mx-auto flex items-center justify-center gap-1.5 hover:text-signoz_vanilla-300"
+        clickType="Info Button"
+        clickName="Pricing Video Modal Button"
+        clickLocation="Teams Pricing Video Modal"
+        clickText={buttonLabel}
       >
         <Play size={16} className="text-signoz_robin-500" />
         {buttonLabel}
-      </button>
+      </TrackingButton>
 
       <Modal
         size={'5xl'}

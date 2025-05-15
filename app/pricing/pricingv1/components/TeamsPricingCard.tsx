@@ -3,6 +3,7 @@ import { CheckCircle, ChevronDown } from 'lucide-react'
 import Link from 'next/link'
 import Button from 'components/Button/Button'
 import TeamsPricingVideoModal from './TeamsPricingVideoModal'
+import TrackingLink from '../../../../components/TrackingLink'
 
 export default function TeamsPricingCard() {
   return (
@@ -26,9 +27,15 @@ export default function TeamsPricingCard() {
           </div>
         </div>
 
-        <Link href="/teams/">
+        <TrackingLink
+          href="/teams/"
+          clickType="Primary CTA"
+          clickName="Sign Up Button"
+          clickText="Start your 30 day free trial"
+          clickLocation="Teams Pricing Card"
+        >
           <Button className="mb-6 w-full px-4 py-3 md:py-6">Start your 30 day free trial</Button>
-        </Link>
+        </TrackingLink>
 
         <div className="my-6 w-full border-t border-dashed border-signoz_slate-400"></div>
 
@@ -66,12 +73,17 @@ export default function TeamsPricingCard() {
           </li>
         </ul>
 
-        <Link href="#estimate-your-monthly-bill">
+        <TrackingLink
+          href="#estimate-your-monthly-bill"
+          clickType="Secondary CTA"
+          clickName="Pricing Calculator Button"
+          clickText="Estimate your monthly bill"
+          clickLocation="Teams Pricing Card"
+        >
           <Button type={Button.TYPES.SECONDARY} className="mb-4 w-full px-4 py-3 md:py-6">
             Estimate your monthly bill
           </Button>
-        </Link>
-
+        </TrackingLink>
         <div className="mb-6 text-center text-sm text-signoz_vanilla-400">
           <TeamsPricingVideoModal buttonLabel="Understand how SigNoz pricing works" />
         </div>
