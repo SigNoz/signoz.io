@@ -3,7 +3,9 @@
 import React from 'react'
 import styles from '../styles.module.css'
 import Heading from '@/components/ui/Heading'
-import { CheckCircle } from 'lucide-react'
+import PricingFeatures from './components/PricingFeatures'
+import TeamsPricingCard from './components/TeamsPricingCard'
+import EnterpriseCard from './components/EnterpriseCard'
 
 export default function PricingV1Page() {
   return (
@@ -22,22 +24,13 @@ export default function PricingV1Page() {
             </Heading>
 
             {/* Top features section */}
-            <div className="my-6 flex w-full max-w-4xl flex-col items-center gap-3 font-bold md:flex-row md:justify-between md:gap-4">
-              <div className="flex items-center gap-2">
-                <CheckCircle className="text-green-500" size={16} />
-                <span className="text-base text-signoz_vanilla-400">No user-based pricing</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle className="text-green-500" size={16} />
-                <span className="text-base text-signoz_vanilla-400">No host-based pricing</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle className="text-green-500" size={16} />
-                <span className="text-base text-signoz_vanilla-400">
-                  No special pricing for custom metrics
-                </span>
-              </div>
-            </div>
+            <PricingFeatures />
+          </div>
+
+          {/* Pricing cards grid */}
+          <div className="pricing-plans mx-auto grid grid-cols-1 gap-8 lg:max-w-6xl lg:grid-cols-2">
+            <TeamsPricingCard />
+            <EnterpriseCard />
           </div>
         </div>
       </div>
