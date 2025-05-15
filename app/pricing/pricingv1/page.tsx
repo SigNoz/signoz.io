@@ -8,6 +8,10 @@ import TeamsPricingCard from './components/TeamsPricingCard'
 import EnterpriseCard from './components/EnterpriseCard'
 import PricingCalculator from './components/PricingCalculator'
 import ExploreAllFeatures from './components/ExploreAllFeatures'
+import WhySelectSignoz from '@/components/why-select-signoz'
+import { Testimonials } from '@/components/testimonials'
+import { TrustedByTeams } from '@/components/trusted-by'
+import QuickStartCloud from '@/components/QuickStartCloud'
 
 export default function PricingV1Page() {
   return (
@@ -43,6 +47,14 @@ export default function PricingV1Page() {
 
         {/* Feature comparison section */}
         <ExploreAllFeatures />
+
+        <TrustedByTeams page="pricing" />
+
+        <WhySelectSignoz isInPricingPage />
+
+        <Testimonials />
+
+        <QuickStartCloud />
       </div>
     </div>
   )
