@@ -28,15 +28,15 @@ export default function PricingV1Page() {
             <PricingFeatures />
           </div>
 
-          {/* Pricing calculator - now above the cards */}
-          <div className="mx-auto mb-10 w-full lg:max-w-6xl">
-            <PricingCalculator />
-          </div>
-
           {/* Pricing cards grid */}
           <div className="pricing-plans mx-auto grid grid-cols-1 gap-8 lg:max-w-6xl lg:grid-cols-2">
             <TeamsPricingCard />
             <EnterpriseCard />
+          </div>
+
+          {/* Pricing calculator - now below the cards */}
+          <div className="mx-auto mt-10 w-full lg:max-w-6xl">
+            <PricingCalculator />
           </div>
         </div>
       </div>
