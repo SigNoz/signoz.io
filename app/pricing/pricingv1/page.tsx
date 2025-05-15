@@ -7,6 +7,7 @@ import PricingFeatures from './components/PricingFeatures'
 import TeamsPricingCard from './components/TeamsPricingCard'
 import EnterpriseCard from './components/EnterpriseCard'
 import PricingCalculator from './components/PricingCalculator'
+import ExploreAllFeatures from './components/ExploreAllFeatures'
 
 export default function PricingV1Page() {
   return (
@@ -39,6 +40,9 @@ export default function PricingV1Page() {
             <PricingCalculator />
           </div>
         </div>
+
+        {/* Feature comparison section */}
+        <ExploreAllFeatures />
       </div>
     </div>
   )
