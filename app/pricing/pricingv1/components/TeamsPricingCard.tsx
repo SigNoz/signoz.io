@@ -2,6 +2,7 @@ import React from 'react'
 import { CheckCircle } from 'lucide-react'
 import Link from 'next/link'
 import Button from 'components/Button/Button'
+import TeamsPricingVideoModal from './TeamsPricingVideoModal'
 
 export default function TeamsPricingCard() {
   return (
@@ -67,9 +68,7 @@ export default function TeamsPricingCard() {
         </Link>
 
         <div className="mb-6 text-center text-sm text-signoz_vanilla-400">
-          <Link href="#" className="hover:text-signoz_vanilla-300">
-            Watch video to understand how SigNoz pricing works
-          </Link>
+          <TeamsPricingVideoModal buttonLabel="Understand how SigNoz pricing works" />
         </div>
       </div>
     </div>
