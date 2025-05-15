@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { Slider, Tooltip, Switch } from '@nextui-org/react'
+import { Slider, Tooltip } from '@nextui-org/react'
 import { ArrowUpRight } from 'lucide-react'
 import Link from 'next/link'
 import Button from '../../../../components/Button/Button'
@@ -92,9 +92,6 @@ const PricingCalculator: React.FC = () => {
 
   const [metricsValue, setMetricsValue] = useState(0)
   const [inputMetricsValue, setInputMetricsValue] = useState('0')
-
-  // State for advanced mode toggle
-  const [isAdvancedMode, setIsAdvancedMode] = useState(false)
 
   // Constants for slider ranges
   const MIN_VALUE = 1
@@ -210,27 +207,18 @@ const PricingCalculator: React.FC = () => {
 
   return (
     <div className="pricing-calculator mb-6 mt-0 w-full rounded-md border border-dashed border-signoz_slate-400 p-4 md:p-6">
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mb-4">
         <h3 className="text-lg font-semibold text-signoz_vanilla-100 md:text-xl">
           Estimate your monthly bill
         </h3>
-
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-signoz_vanilla-400">Choose Retention Period</span>
-          <Switch
-            size="sm"
-            isSelected={isAdvancedMode}
-            onValueChange={setIsAdvancedMode}
-            aria-label="Toggle advanced calculator mode"
-          />
-        </div>
       </div>
 
-      {!isAdvancedMode ? (
-        // Simple mode
-        <div className="simple-calculator space-y-10">
-          <div className="slider-container grid grid-cols-[150px_1fr] items-center gap-4">
-            <div className="flex items-center gap-2">
+      {isMobile ? (
+        // Mobile view
+        <div className="space-y-4">
+          {/* Traces section */}
+          <div className="data-section rounded-md bg-signoz_ink-400 bg-opacity-5 p-3">
+            <div className="mb-3 flex items-center gap-2">
               <img
                 src="/img/index_features/drafting-compass.svg"
                 alt="Traces Icon"
@@ -238,7 +226,37 @@ const PricingCalculator: React.FC = () => {
               />
               <span className="text-base font-medium text-signoz_vanilla-100">Traces</span>
             </div>
-            <div>
+
+            <div className="mb-2 flex justify-between">
+              <span className="text-xs font-semibold uppercase text-signoz_vanilla-400">
+                Price per unit
+              </span>
+              <span className="text-xs font-semibold uppercase text-signoz_vanilla-400">
+                Retention
+              </span>
+            </div>
+
+            <div className="mb-3 flex justify-between">
+              <div className="text-signoz_robin-400">
+                ${TRACES_AND_LOGS_PRICES[tracesRetentionPeriod]}/GB
+              </div>
+              <select
+                className="block h-[28px] w-28 rounded-sm border border-signoz_slate-400 bg-signoz_ink-400 p-1 text-xs text-signoz_vanilla-100"
+                value={tracesRetentionPeriod}
+                onChange={(e) => setTracesRetentionPeriod(Number(e.target.value))}
+              >
+                {RETENTION_PERIOD.TRACES_AND_LOGS.map((option, idx) => (
+                  <option key={`traces-${option.days}-${idx}`} value={option.days}>
+                    {`${option.days} days`}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="mb-2">
+              <span className="text-xs font-semibold uppercase text-signoz_vanilla-400">
+                Scale of ingestion (per month)
+              </span>
               {renderSlider(
                 tracesValue,
                 handleChangeTraces,
@@ -249,14 +267,54 @@ const PricingCalculator: React.FC = () => {
                 'signoz_robin-500'
               )}
             </div>
+
+            <div className="mt-2 flex justify-between">
+              <span className="text-sm text-signoz_vanilla-400">
+                {formatBytes(linearToLog(tracesValue, MIN_VALUE, MAX_VALUE))}
+              </span>
+              <span className="text-base font-medium text-signoz_vanilla-100">
+                ${formatNumber(tracesSubtotal)}
+              </span>
+            </div>
           </div>
 
-          <div className="slider-container grid grid-cols-[150px_1fr] items-center gap-4">
-            <div className="flex items-center gap-2">
+          {/* Logs section */}
+          <div className="data-section rounded-md bg-signoz_ink-400 bg-opacity-5 p-3">
+            <div className="mb-3 flex items-center gap-2">
               <img src="/img/index_features/logs.svg" alt="Logs Icon" className="h-5 w-5" />
               <span className="text-base font-medium text-signoz_vanilla-100">Logs</span>
             </div>
-            <div>
+
+            <div className="mb-2 flex justify-between">
+              <span className="text-xs font-semibold uppercase text-signoz_vanilla-400">
+                Price per unit
+              </span>
+              <span className="text-xs font-semibold uppercase text-signoz_vanilla-400">
+                Retention
+              </span>
+            </div>
+
+            <div className="mb-3 flex justify-between">
+              <div className="text-signoz_sakura-400">
+                ${TRACES_AND_LOGS_PRICES[logsRetentionPeriod]}/GB
+              </div>
+              <select
+                className="block h-[28px] w-28 rounded-sm border border-signoz_slate-400 bg-signoz_ink-400 p-1 text-xs text-signoz_vanilla-100"
+                value={logsRetentionPeriod}
+                onChange={(e) => setLogsRetentionPeriod(Number(e.target.value))}
+              >
+                {RETENTION_PERIOD.TRACES_AND_LOGS.map((option, idx) => (
+                  <option key={`logs-${option.days}-${idx}`} value={option.days}>
+                    {`${option.days} days`}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="mb-2">
+              <span className="text-xs font-semibold uppercase text-signoz_vanilla-400">
+                Scale of ingestion (per month)
+              </span>
               {renderSlider(
                 logsValue,
                 handleChangeLogs,
@@ -267,10 +325,20 @@ const PricingCalculator: React.FC = () => {
                 'signoz_sakura-500'
               )}
             </div>
+
+            <div className="mt-2 flex justify-between">
+              <span className="text-sm text-signoz_vanilla-400">
+                {formatBytes(linearToLog(logsValue, MIN_VALUE, MAX_VALUE))}
+              </span>
+              <span className="text-base font-medium text-signoz_vanilla-100">
+                ${formatNumber(logsSubtotal)}
+              </span>
+            </div>
           </div>
 
-          <div className="slider-container grid grid-cols-[150px_1fr] items-center gap-4">
-            <div className="flex items-center gap-2">
+          {/* Metrics section */}
+          <div className="data-section rounded-md bg-signoz_ink-400 bg-opacity-5 p-3">
+            <div className="mb-3 flex items-center gap-2">
               <img
                 src="/img/index_features/bar-chart-2.svg"
                 alt="Metrics Icon"
@@ -278,7 +346,37 @@ const PricingCalculator: React.FC = () => {
               />
               <span className="text-base font-medium text-signoz_vanilla-100">Metrics</span>
             </div>
-            <div>
+
+            <div className="mb-2 flex justify-between">
+              <span className="text-xs font-semibold uppercase text-signoz_vanilla-400">
+                Price per unit
+              </span>
+              <span className="text-xs font-semibold uppercase text-signoz_vanilla-400">
+                Retention
+              </span>
+            </div>
+
+            <div className="mb-3 flex justify-between">
+              <div className="text-signoz_amber-400">
+                ${METRICS_PRICES[metricsRetentionPeriod]}/mn samples
+              </div>
+              <select
+                className="block h-[28px] w-28 rounded-sm border border-signoz_slate-400 bg-signoz_ink-400 p-1 text-xs text-signoz_vanilla-100"
+                value={metricsRetentionPeriod}
+                onChange={(e) => setMetricsRetentionPeriod(Number(e.target.value))}
+              >
+                {RETENTION_PERIOD.METRICS.map((option, idx) => (
+                  <option key={`metrics-${option.months}-${idx}`} value={option.months}>
+                    {`${option.months} ${option.months === 1 ? 'month' : 'months'}`}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="mb-2">
+              <span className="text-xs font-semibold uppercase text-signoz_vanilla-400">
+                Scale of ingestion (per month)
+              </span>
               {renderSlider(
                 metricsValue,
                 handleChangeMetrics,
@@ -289,17 +387,25 @@ const PricingCalculator: React.FC = () => {
                 'signoz_amber-500'
               )}
             </div>
+
+            <div className="mt-2 flex justify-between">
+              <span className="text-sm text-signoz_vanilla-400">
+                {formatMetrics(linearToLog(metricsValue, MIN_VALUE, MAX_VALUE))}
+              </span>
+              <span className="text-base font-medium text-signoz_vanilla-100">
+                ${formatNumber(metricsSubtotal)}
+              </span>
+            </div>
           </div>
         </div>
       ) : (
-        // Advanced mode
-        <div className="advanced-calculator">
-          {isMobile ? (
-            // Mobile advanced view
-            <div className="mobile-advanced space-y-6">
-              {/* Traces section */}
-              <div className="data-section rounded-md bg-signoz_ink-400 bg-opacity-5 p-4">
-                <div className="mb-4 flex items-center gap-2">
+        // Desktop view
+        <div className="space-y-6">
+          {/* Traces Section */}
+          <div className="rounded-md bg-signoz_ink-400 bg-opacity-5 p-3">
+            <div className="flex flex-col space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
                   <img
                     src="/img/index_features/drafting-compass.svg"
                     alt="Traces Icon"
@@ -307,217 +413,19 @@ const PricingCalculator: React.FC = () => {
                   />
                   <span className="text-base font-medium text-signoz_vanilla-100">Traces</span>
                 </div>
-
-                <div className="mb-4 flex justify-between">
-                  <span className="text-xs font-semibold uppercase text-signoz_vanilla-400">
-                    Price per unit
-                  </span>
-                  <span className="text-xs font-semibold uppercase text-signoz_vanilla-400">
-                    Retention
-                  </span>
-                </div>
-
-                <div className="mb-6 flex justify-between">
-                  <div className="text-signoz_robin-400">
+                <div className="flex items-center gap-8">
+                  <div className="flex items-center gap-1 text-signoz_robin-400">
+                    <span className="text-xs font-semibold uppercase text-signoz_vanilla-400">
+                      Price:
+                    </span>
                     ${TRACES_AND_LOGS_PRICES[tracesRetentionPeriod]}/GB
                   </div>
-                  <select
-                    className="block h-[32px] w-28 rounded-sm border border-signoz_slate-400 bg-signoz_ink-400 p-1 text-xs text-signoz_vanilla-100"
-                    value={tracesRetentionPeriod}
-                    onChange={(e) => setTracesRetentionPeriod(Number(e.target.value))}
-                  >
-                    {RETENTION_PERIOD.TRACES_AND_LOGS.map((option, idx) => (
-                      <option key={`traces-${option.days}-${idx}`} value={option.days}>
-                        {`${option.days} days`}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="mb-4">
-                  <span className="text-xs font-semibold uppercase text-signoz_vanilla-400">
-                    Scale of ingestion (per month)
-                  </span>
-                  {renderSlider(
-                    tracesValue,
-                    handleChangeTraces,
-                    'secondary',
-                    '0GB',
-                    '200TB',
-                    formatBytes,
-                    'signoz_robin-500'
-                  )}
-                </div>
-
-                <div className="mt-4 flex justify-between">
-                  <span className="text-sm text-signoz_vanilla-400">
-                    {formatBytes(linearToLog(tracesValue, MIN_VALUE, MAX_VALUE))}
-                  </span>
-                  <span className="text-base font-medium text-signoz_vanilla-100">
-                    ${formatNumber(tracesSubtotal)}
-                  </span>
-                </div>
-              </div>
-
-              {/* Logs section */}
-              <div className="data-section rounded-md bg-signoz_ink-400 bg-opacity-5 p-4">
-                <div className="mb-4 flex items-center gap-2">
-                  <img src="/img/index_features/logs.svg" alt="Logs Icon" className="h-5 w-5" />
-                  <span className="text-base font-medium text-signoz_vanilla-100">Logs</span>
-                </div>
-
-                <div className="mb-4 flex justify-between">
-                  <span className="text-xs font-semibold uppercase text-signoz_vanilla-400">
-                    Price per unit
-                  </span>
-                  <span className="text-xs font-semibold uppercase text-signoz_vanilla-400">
-                    Retention
-                  </span>
-                </div>
-
-                <div className="mb-6 flex justify-between">
-                  <div className="text-signoz_sakura-400">
-                    ${TRACES_AND_LOGS_PRICES[logsRetentionPeriod]}/GB
-                  </div>
-                  <select
-                    className="block h-[32px] w-28 rounded-sm border border-signoz_slate-400 bg-signoz_ink-400 p-1 text-xs text-signoz_vanilla-100"
-                    value={logsRetentionPeriod}
-                    onChange={(e) => setLogsRetentionPeriod(Number(e.target.value))}
-                  >
-                    {RETENTION_PERIOD.TRACES_AND_LOGS.map((option, idx) => (
-                      <option key={`logs-${option.days}-${idx}`} value={option.days}>
-                        {`${option.days} days`}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="mb-4">
-                  <span className="text-xs font-semibold uppercase text-signoz_vanilla-400">
-                    Scale of ingestion (per month)
-                  </span>
-                  {renderSlider(
-                    logsValue,
-                    handleChangeLogs,
-                    'danger',
-                    '0GB',
-                    '200TB',
-                    formatBytes,
-                    'signoz_sakura-500'
-                  )}
-                </div>
-
-                <div className="mt-4 flex justify-between">
-                  <span className="text-sm text-signoz_vanilla-400">
-                    {formatBytes(linearToLog(logsValue, MIN_VALUE, MAX_VALUE))}
-                  </span>
-                  <span className="text-base font-medium text-signoz_vanilla-100">
-                    ${formatNumber(logsSubtotal)}
-                  </span>
-                </div>
-              </div>
-
-              {/* Metrics section */}
-              <div className="data-section rounded-md bg-signoz_ink-400 bg-opacity-5 p-4">
-                <div className="mb-4 flex items-center gap-2">
-                  <img
-                    src="/img/index_features/bar-chart-2.svg"
-                    alt="Metrics Icon"
-                    className="h-5 w-5"
-                  />
-                  <span className="text-base font-medium text-signoz_vanilla-100">Metrics</span>
-                </div>
-
-                <div className="mb-4 flex justify-between">
-                  <span className="text-xs font-semibold uppercase text-signoz_vanilla-400">
-                    Price per unit
-                  </span>
-                  <span className="text-xs font-semibold uppercase text-signoz_vanilla-400">
-                    Retention
-                  </span>
-                </div>
-
-                <div className="mb-6 flex justify-between">
-                  <div className="text-signoz_amber-400">
-                    ${METRICS_PRICES[metricsRetentionPeriod]}/mn samples
-                  </div>
-                  <select
-                    className="block h-[32px] w-28 rounded-sm border border-signoz_slate-400 bg-signoz_ink-400 p-1 text-xs text-signoz_vanilla-100"
-                    value={metricsRetentionPeriod}
-                    onChange={(e) => setMetricsRetentionPeriod(Number(e.target.value))}
-                  >
-                    {RETENTION_PERIOD.METRICS.map((option, idx) => (
-                      <option key={`metrics-${option.months}-${idx}`} value={option.months}>
-                        {`${option.months} ${option.months === 1 ? 'month' : 'months'}`}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="mb-4">
-                  <span className="text-xs font-semibold uppercase text-signoz_vanilla-400">
-                    Scale of ingestion (per month)
-                  </span>
-                  {renderSlider(
-                    metricsValue,
-                    handleChangeMetrics,
-                    'warning',
-                    '0M',
-                    '200B',
-                    formatMetrics,
-                    'signoz_amber-500'
-                  )}
-                </div>
-
-                <div className="mt-4 flex justify-between">
-                  <span className="text-sm text-signoz_vanilla-400">
-                    {formatMetrics(linearToLog(metricsValue, MIN_VALUE, MAX_VALUE))}
-                  </span>
-                  <span className="text-base font-medium text-signoz_vanilla-100">
-                    ${formatNumber(metricsSubtotal)}
-                  </span>
-                </div>
-              </div>
-            </div>
-          ) : (
-            // Desktop advanced view - table layout
-            <div className="desktop-advanced">
-              <div className="grid grid-cols-6 gap-4">
-                <div className="col-span-6 grid grid-cols-6 gap-4 pb-2">
-                  <div className="col-span-1"></div>
-                  <div className="col-span-1 text-xs font-semibold uppercase text-signoz_vanilla-400">
-                    Price per unit
-                  </div>
-                  <div className="col-span-1 text-xs font-semibold uppercase text-signoz_vanilla-400">
-                    Retention
-                  </div>
-                  <div className="col-span-1 text-xs font-semibold uppercase text-signoz_vanilla-400">
-                    Scale of ingestion
-                  </div>
-                  <div className="col-span-1 text-right text-xs font-semibold uppercase text-signoz_vanilla-400">
-                    Estimated usage
-                  </div>
-                  <div className="col-span-1 text-right text-xs font-semibold uppercase text-signoz_vanilla-400">
-                    Subtotal
-                  </div>
-                </div>
-
-                {/* Traces row */}
-                <div className="col-span-6 grid grid-cols-6 gap-4 bg-signoz_ink-400 bg-opacity-5 py-4">
-                  <div className="col-span-1 flex items-center gap-2 pl-2">
-                    <img
-                      src="/img/index_features/drafting-compass.svg"
-                      alt="Traces Icon"
-                      className="h-5 w-5"
-                    />
-                    <span>Traces</span>
-                  </div>
-                  <div className="col-span-1 flex items-center text-signoz_robin-400">
-                    ${TRACES_AND_LOGS_PRICES[tracesRetentionPeriod]}/GB
-                  </div>
-                  <div className="col-span-1 flex items-center">
+                  <div className="flex items-center gap-1">
+                    <span className="text-xs font-semibold uppercase text-signoz_vanilla-400">
+                      Retention:
+                    </span>
                     <select
-                      className="block h-[32px] w-full rounded-sm border border-signoz_slate-400 bg-signoz_ink-400 p-1 text-xs text-signoz_vanilla-100"
+                      className="h-[28px] w-28 rounded-sm border border-signoz_slate-400 bg-signoz_ink-400 p-1 text-xs text-signoz_vanilla-100"
                       value={tracesRetentionPeriod}
                       onChange={(e) => setTracesRetentionPeriod(Number(e.target.value))}
                     >
@@ -528,37 +436,54 @@ const PricingCalculator: React.FC = () => {
                       ))}
                     </select>
                   </div>
-                  <div className="col-span-1 flex items-center">
-                    {renderSlider(
-                      tracesValue,
-                      handleChangeTraces,
-                      'secondary',
-                      '0GB',
-                      '200TB',
-                      formatBytes,
-                      'signoz_robin-500'
-                    )}
-                  </div>
-                  <div className="col-span-1 flex items-center justify-end text-signoz_vanilla-400">
-                    {formatBytes(linearToLog(tracesValue, MIN_VALUE, MAX_VALUE))}
-                  </div>
-                  <div className="col-span-1 flex items-center justify-end pr-2">
-                    ${formatNumber(tracesSubtotal)}
+                  <div className="flex items-center gap-1">
+                    <span className="text-xs font-semibold uppercase text-signoz_vanilla-400">
+                      Subtotal:
+                    </span>
+                    <span className="text-base font-medium text-signoz_vanilla-100">
+                      ${formatNumber(tracesSubtotal)}
+                    </span>
                   </div>
                 </div>
+              </div>
+              <div>
+                {renderSlider(
+                  tracesValue,
+                  handleChangeTraces,
+                  'secondary',
+                  '0GB',
+                  '200TB',
+                  formatBytes,
+                  'signoz_robin-500'
+                )}
+              </div>
+              <div className="text-sm text-signoz_vanilla-400">
+                Estimated usage: {formatBytes(linearToLog(tracesValue, MIN_VALUE, MAX_VALUE))}
+              </div>
+            </div>
+          </div>
 
-                {/* Logs row */}
-                <div className="col-span-6 grid grid-cols-6 gap-4 bg-signoz_ink-400 bg-opacity-5 py-4">
-                  <div className="col-span-1 flex items-center gap-2 pl-2">
-                    <img src="/img/index_features/logs.svg" alt="Logs Icon" className="h-5 w-5" />
-                    <span>Logs</span>
-                  </div>
-                  <div className="col-span-1 flex items-center text-signoz_sakura-400">
+          {/* Logs Section */}
+          <div className="rounded-md bg-signoz_ink-400 bg-opacity-5 p-3">
+            <div className="flex flex-col space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <img src="/img/index_features/logs.svg" alt="Logs Icon" className="h-5 w-5" />
+                  <span className="text-base font-medium text-signoz_vanilla-100">Logs</span>
+                </div>
+                <div className="flex items-center gap-8">
+                  <div className="flex items-center gap-1 text-signoz_sakura-400">
+                    <span className="text-xs font-semibold uppercase text-signoz_vanilla-400">
+                      Price:
+                    </span>
                     ${TRACES_AND_LOGS_PRICES[logsRetentionPeriod]}/GB
                   </div>
-                  <div className="col-span-1 flex items-center">
+                  <div className="flex items-center gap-1">
+                    <span className="text-xs font-semibold uppercase text-signoz_vanilla-400">
+                      Retention:
+                    </span>
                     <select
-                      className="block h-[32px] w-full rounded-sm border border-signoz_slate-400 bg-signoz_ink-400 p-1 text-xs text-signoz_vanilla-100"
+                      className="h-[28px] w-28 rounded-sm border border-signoz_slate-400 bg-signoz_ink-400 p-1 text-xs text-signoz_vanilla-100"
                       value={logsRetentionPeriod}
                       onChange={(e) => setLogsRetentionPeriod(Number(e.target.value))}
                     >
@@ -569,41 +494,58 @@ const PricingCalculator: React.FC = () => {
                       ))}
                     </select>
                   </div>
-                  <div className="col-span-1 flex items-center">
-                    {renderSlider(
-                      logsValue,
-                      handleChangeLogs,
-                      'danger',
-                      '0GB',
-                      '200TB',
-                      formatBytes,
-                      'signoz_sakura-500'
-                    )}
-                  </div>
-                  <div className="col-span-1 flex items-center justify-end text-signoz_vanilla-400">
-                    {formatBytes(linearToLog(logsValue, MIN_VALUE, MAX_VALUE))}
-                  </div>
-                  <div className="col-span-1 flex items-center justify-end pr-2">
-                    ${formatNumber(logsSubtotal)}
+                  <div className="flex items-center gap-1">
+                    <span className="text-xs font-semibold uppercase text-signoz_vanilla-400">
+                      Subtotal:
+                    </span>
+                    <span className="text-base font-medium text-signoz_vanilla-100">
+                      ${formatNumber(logsSubtotal)}
+                    </span>
                   </div>
                 </div>
+              </div>
+              <div>
+                {renderSlider(
+                  logsValue,
+                  handleChangeLogs,
+                  'danger',
+                  '0GB',
+                  '200TB',
+                  formatBytes,
+                  'signoz_sakura-500'
+                )}
+              </div>
+              <div className="text-sm text-signoz_vanilla-400">
+                Estimated usage: {formatBytes(linearToLog(logsValue, MIN_VALUE, MAX_VALUE))}
+              </div>
+            </div>
+          </div>
 
-                {/* Metrics row */}
-                <div className="col-span-6 grid grid-cols-6 gap-4 bg-signoz_ink-400 bg-opacity-5 py-4">
-                  <div className="col-span-1 flex items-center gap-2 pl-2">
-                    <img
-                      src="/img/index_features/bar-chart-2.svg"
-                      alt="Metrics Icon"
-                      className="h-5 w-5"
-                    />
-                    <span>Metrics</span>
-                  </div>
-                  <div className="col-span-1 flex items-center text-signoz_amber-400">
+          {/* Metrics Section */}
+          <div className="rounded-md bg-signoz_ink-400 bg-opacity-5 p-3">
+            <div className="flex flex-col space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <img
+                    src="/img/index_features/bar-chart-2.svg"
+                    alt="Metrics Icon"
+                    className="h-5 w-5"
+                  />
+                  <span className="text-base font-medium text-signoz_vanilla-100">Metrics</span>
+                </div>
+                <div className="flex items-center gap-8">
+                  <div className="flex items-center gap-1 text-signoz_amber-400">
+                    <span className="text-xs font-semibold uppercase text-signoz_vanilla-400">
+                      Price:
+                    </span>
                     ${METRICS_PRICES[metricsRetentionPeriod]}/mn samples
                   </div>
-                  <div className="col-span-1 flex items-center">
+                  <div className="flex items-center gap-1">
+                    <span className="text-xs font-semibold uppercase text-signoz_vanilla-400">
+                      Retention:
+                    </span>
                     <select
-                      className="block h-[32px] w-full rounded-sm border border-signoz_slate-400 bg-signoz_ink-400 p-1 text-xs text-signoz_vanilla-100"
+                      className="h-[28px] w-28 rounded-sm border border-signoz_slate-400 bg-signoz_ink-400 p-1 text-xs text-signoz_vanilla-100"
                       value={metricsRetentionPeriod}
                       onChange={(e) => setMetricsRetentionPeriod(Number(e.target.value))}
                     >
@@ -614,32 +556,37 @@ const PricingCalculator: React.FC = () => {
                       ))}
                     </select>
                   </div>
-                  <div className="col-span-1 flex items-center">
-                    {renderSlider(
-                      metricsValue,
-                      handleChangeMetrics,
-                      'warning',
-                      '0M',
-                      '200B',
-                      formatMetrics,
-                      'signoz_amber-500'
-                    )}
-                  </div>
-                  <div className="col-span-1 flex items-center justify-end text-signoz_vanilla-400">
-                    {formatMetrics(linearToLog(metricsValue, MIN_VALUE, MAX_VALUE))}
-                  </div>
-                  <div className="col-span-1 flex items-center justify-end pr-2">
-                    ${formatNumber(metricsSubtotal)}
+                  <div className="flex items-center gap-1">
+                    <span className="text-xs font-semibold uppercase text-signoz_vanilla-400">
+                      Subtotal:
+                    </span>
+                    <span className="text-base font-medium text-signoz_vanilla-100">
+                      ${formatNumber(metricsSubtotal)}
+                    </span>
                   </div>
                 </div>
               </div>
+              <div>
+                {renderSlider(
+                  metricsValue,
+                  handleChangeMetrics,
+                  'warning',
+                  '0M',
+                  '200B',
+                  formatMetrics,
+                  'signoz_amber-500'
+                )}
+              </div>
+              <div className="text-sm text-signoz_vanilla-400">
+                Estimated usage: {formatMetrics(linearToLog(metricsValue, MIN_VALUE, MAX_VALUE))}
+              </div>
             </div>
-          )}
+          </div>
         </div>
       )}
 
       {/* Total estimate - always shown */}
-      <div className="button-background mt-6 flex items-center justify-between rounded-md px-3 py-4 pt-4">
+      <div className="button-background mt-4 flex items-center justify-between rounded-md px-3 py-3 pt-3">
         <span className="text-base font-medium text-signoz_vanilla-100">Monthly estimate</span>
         <div className="w-[45%] border-b border-dashed border-signoz_slate-400"></div>
         <div className="text-xl font-bold text-signoz_vanilla-100">
