@@ -1,13 +1,29 @@
 'use client'
 
-import React from 'react'
+import React, { useState } from 'react'
 import styles from '../styles.module.css'
-import Heading from '@/components/ui/Heading'
+import Heading from '../../../components/ui/Heading'
 import PricingFeatures from './components/PricingFeatures'
 import TeamsPricingCard from './components/TeamsPricingCard'
 import EnterpriseCard from './components/EnterpriseCard'
+import PricingCalculator from './components/PricingCalculator'
 
 export default function PricingV1Page() {
+  // State to track the calculated cost from PricingCalculator
+  const [estimatedCost, setEstimatedCost] = useState(199)
+  // State to track if we're in high volume territory
+  const [isHighVolume, setIsHighVolume] = useState(false)
+
+  // Handler for cost updates from the calculator
+  const handleCostUpdate = (cost: number) => {
+    setEstimatedCost(cost)
+  }
+
+  // Handler for high volume updates
+  const handleHighVolumeChange = (highVolume: boolean) => {
+    setIsHighVolume(highVolume)
+  }
+
   return (
     <div className="relative bg-signoz_ink-500">
       {/* Same background as original pricing page */}
@@ -27,10 +43,18 @@ export default function PricingV1Page() {
             <PricingFeatures />
           </div>
 
+          {/* Pricing calculator - now above the cards */}
+          <div className="mx-auto mb-10 w-full lg:max-w-6xl">
+            <PricingCalculator
+              onCostUpdate={handleCostUpdate}
+              onHighVolumeChange={handleHighVolumeChange}
+            />
+          </div>
+
           {/* Pricing cards grid */}
           <div className="pricing-plans mx-auto grid grid-cols-1 gap-8 lg:max-w-6xl lg:grid-cols-2">
-            <TeamsPricingCard />
-            <EnterpriseCard />
+            <TeamsPricingCard estimatedCost={estimatedCost} isHighVolume={isHighVolume} />
+            <EnterpriseCard isHighVolume={isHighVolume} />
           </div>
         </div>
       </div>

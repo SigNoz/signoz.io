@@ -2,14 +2,42 @@ import React from 'react'
 import { CheckCircle, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 
-export default function EnterpriseCard() {
+interface EnterpriseCardProps {
+  isHighVolume?: boolean
+}
+
+export default function EnterpriseCard({ isHighVolume = false }: EnterpriseCardProps) {
   return (
-    <div className="pricing-card rounded-md border border-dashed border-signoz_slate-400 bg-signoz_ink-400 bg-opacity-5 px-6 py-8">
+    <div
+      className={`pricing-card rounded-md ${
+        isHighVolume
+          ? 'border border-signoz_robin-500/40 shadow-[0_0_20px_rgba(78,116,248,0.2)]'
+          : 'border border-dashed border-signoz_slate-400'
+      } relative ${
+        isHighVolume ? 'bg-signoz_ink-400/10' : 'bg-signoz_ink-400 bg-opacity-5'
+      } px-6 py-8 transition-all duration-300`}
+    >
+      {isHighVolume && (
+        <div className="absolute -top-8 left-0 right-0 rounded-t-md  py-1 text-center text-base font-medium text-signoz_robin-400">
+          Reach out to us for custom pricing and retention for high volume
+        </div>
+      )}
       <div>
-        <h3 className="orangish-gradient mb-1 text-3xl font-bold tracking-tight">Enterprise</h3>
-        <p className="mb-6 text-base text-gray-400">
-          For larger orgs with advanced security, compliance and support.
-        </p>
+        <div className="mb-4 flex justify-between">
+          <div className="w-[60%]">
+            <h3 className="orangish-gradient mb-1 text-3xl font-bold tracking-tight">Enterprise</h3>
+            <p className="text-base text-gray-400">
+              For larger orgs with advanced security, compliance and support.
+            </p>
+          </div>
+          <div className="flex w-[40%] flex-col items-end">
+            <span className="text-sm text-signoz_vanilla-400">From</span>
+            <div className="flex items-baseline">
+              <span className="text-4xl font-bold text-signoz_vanilla-100">$4000</span>
+              <span className="ml-1 text-signoz_vanilla-400">/month</span>
+            </div>
+          </div>
+        </div>
 
         <Link
           href="/enterprise-cloud/"
@@ -17,14 +45,6 @@ export default function EnterpriseCard() {
         >
           Contact Us <ArrowRight size={14} />
         </Link>
-
-        <div className="mb-2">
-          <span className="text-sm text-signoz_vanilla-400">From</span>
-        </div>
-        <div className="mb-3 flex items-baseline">
-          <span className="text-4xl font-bold text-signoz_vanilla-100">$4000</span>
-          <span className="ml-1 text-signoz_vanilla-400">/month</span>
-        </div>
 
         <Link
           href="/enterprise/"
