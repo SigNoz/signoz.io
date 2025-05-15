@@ -50,31 +50,42 @@ With the introduction of CI/CD semantic conventions in OpenTelemetry (OTel), tel
 
 Let’s take a look at our [charts](https://github.com/SigNoz/charts) repository and try to gain some insight into what is happening. 
 
-<Figure src="/img/blog/2025/05/ci-cd-dashboard.webp" alt="Overview of the CI/CD pipeline process" caption="Overview of the CI/CD pipeline process" />
-
-<Figure src="/img/blog/2025/05/ci-cd-build-deployment.webp" alt="Dashboard displaying build and deployment metrics" caption="Dashboard displaying build and deployment metrics" />
-
 ### 1. Repository Health
 
-The average time a Pull Request remains open is a staggering 1.07 years. This immediately highlights that many PRs are being ignored. For PRs that do get reviewed, the average merge time is just 1.8 days—indicating that the team is efficient once they engage with a PR. The average approval time of 5.07 days (longer than the merge time) revealed that some approved PRs weren't being merged promptly. A deeper look reveals that the branch `add-more-resource-attrs` was the pull request that was approved but not merged.
+<Figure src="/img/blog/2025/05/ci-cd-dashboard.webp" alt="Average PR open, merge, and approval times" caption="Average PR open, merge, and approval times" />
+
+The average time a Pull Request remains open is a staggering 1.07 years. This immediately highlights that many PRs are being ignored. For PRs that do get reviewed, the average merge time is just 1.8 days indicating that the team is efficient once they engage with a PR. 
+
+The average approval time of 5.07 days (longer than the merge time) revealed that some approved PRs weren't being merged promptly. A deeper look reveals that the branch `add-more-resource-attrs` was the pull request that was approved but not merged.
 
 These insights led to clear action items:
 
 - Create an automated system to flag approved PRs awaiting merge
 - Establish SLAs for PR review timeframes
 
-### 2. DORA Metrics Demystified
+### 2. DORA Metrics
 
-The observability stack also enabled automatic calculation of DORA (DevOps Research and Assessment) metrics:
+**DORA metrics** are a set of industry-standard measurements that help teams understand and improve the speed and reliability of their software delivery process. The four key DORA metrics are: 
 
-- **Change Lead Time**: 2 days (1.8 days for PR merge + 12.9 minutes for pipeline duration)
-- **Deployment Frequency**: Once per day based on Release pipeline executions (Release Charts pipeline)
-- **Change Failure Rate**: 0% (no fixes merged in the observed period)
-- **Failed Deployment Recovery Time**: Estimated at 12.9~13 minutes based on pipeline duration (considering almost immediate approval for hotfixes).
+- **Deployment Frequency**
+    
+    To measure how often you deploy to production, SigNoz lets you filter your CI/CD data to focus on production deployment pipelines (such as “release charts”). By counting the number of production deployments over a chosen time period, you get a direct view of your team’s release cadence.
+    
+- **Lead Time for Changes**
+    
+    It also calculates lead time for changes by tracking the journey of a code change from when it’s merged (or a pull request is closed) to when it’s deployed in production. This includes both the time the code spends waiting after merge and the time taken by your deployment pipeline. For example, if PRs are typically merged in 1.8 days and your pipeline takes 13 minutes to deploy, your lead time for changes is about 2 days.
+    
+- **Change Failure Rate**
+    
+    Change failure rate is determined by identifying deployments that require a hotfix or rollback. In SigNoz, this is tracked by checking if a deployment is quickly followed by a corrective action-such as a hotfix merged soon after a release. If no hotfixes are needed after deployments, your change failure rate is 0%. This metric helps you monitor release stability.
+    
+- **Mean Time to Recovery (MTTR)**
+    
+    MTTR is measured by calculating the time between a failed deployment and the next successful deployment that resolves the issue. For example, if a deployment fails and a hotfix is deployed 13 minutes later, your MTTR is 13 minutes. This shows how quickly your team can restore service after an incident.
 
 ### 3. Pipeline Health and Flakiness Detection
 
-- **High Failure Rate Alert**: 33% of 151 pipeline runs failed, indicating potential issues with test reliability or configuration.
+- **High Failure Rate Alert**: 50 of 151 pipeline runs failed, indicating potential issues with test reliability or configuration.
     
    <Figure src="/img/blog/2025/05/ci-cd-pipeline-failures.webp" alt="Visualization of pipeline failures and alerts" caption="Visualization of pipeline failures and alerts" />
 
