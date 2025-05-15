@@ -1,5 +1,5 @@
 import React from 'react'
-import { CheckCircle } from 'lucide-react'
+import { CheckCircle, ChevronDown } from 'lucide-react'
 import Link from 'next/link'
 import Button from 'components/Button/Button'
 import TeamsPricingVideoModal from './TeamsPricingVideoModal'
@@ -36,6 +36,10 @@ export default function TeamsPricingCard() {
         <ul className="mb-6 space-y-3">
           <li className="flex items-start gap-2">
             <CheckCircle className="mt-1 min-w-4 text-green-500" size={16} />
+            <span className="text-signoz_vanilla-400">Access to all features.</span>
+          </li>
+          <li className="flex items-start gap-2">
+            <CheckCircle className="mt-1 min-w-4 text-green-500" size={16} />
             <span className="text-signoz_vanilla-400">Send any mix of logs, traces & metrics</span>
           </li>
           <li className="flex items-start gap-2">
@@ -60,11 +64,10 @@ export default function TeamsPricingCard() {
           </li>
         </ul>
 
-        <Link
-          href="#estimate-your-monthly-bill"
-          className="mb-4 flex w-full items-center justify-center gap-2 rounded-full border border-signoz_robin-500 bg-transparent px-4 py-3 font-medium text-signoz_robin-500 hover:bg-signoz_robin-500/10"
-        >
-          Estimate your monthly bill
+        <Link href="#estimate-your-monthly-bill">
+          <Button type={Button.TYPES.SECONDARY} className="mb-4 w-full">
+            Estimate your monthly bill
+          </Button>
         </Link>
 
         <div className="mb-6 text-center text-sm text-signoz_vanilla-400">

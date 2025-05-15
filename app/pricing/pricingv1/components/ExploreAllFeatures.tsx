@@ -479,7 +479,10 @@ const ALL_FEATURES_DATA = {
 
 const ExploreAllFeatures: React.FC = () => {
   return (
-    <div className="relative !m-0 !mx-auto !w-[100vw] border !border-t-0 border-dashed border-signoz_slate-400 md:!w-[80vw]">
+    <div
+      id="all-features"
+      className="relative !m-0 !mx-auto !w-[100vw] border !border-t-0 border-dashed border-signoz_slate-400 md:!w-[80vw]"
+    >
       <div className="mx-auto mb-10 mt-6">
         {/* Header - Using CSS sticky positioning for smoother scrolling */}
         <div className="sticky top-[56px] z-20 bg-[#0f1013]">

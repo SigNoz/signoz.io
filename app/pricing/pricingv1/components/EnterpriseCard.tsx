@@ -62,7 +62,7 @@ export default function EnterpriseCard() {
           </li>
           <li className="flex items-start gap-2">
             <CheckCircle className="mt-1 min-w-4 text-green-500" size={16} />
-            <span className="text-signoz_vanilla-400">Contract, Legal and security reviews</span>
+            <span className="text-signoz_vanilla-400">Contract, legal and security reviews</span>
           </li>
           <li className="flex items-start gap-2">
             <CheckCircle className="mt-1 min-w-4 text-green-500" size={16} />
