@@ -12,7 +12,10 @@ const scrollToSection = (id) => {
       block: 'start',
       behavior: 'smooth',
     })
-    window.location.hash = `#${id}`
+    // Only update hash on client-side
+    if (typeof window !== 'undefined') {
+      window.location.hash = `#${id}`
+    }
   }
 }
 
@@ -169,27 +172,47 @@ const MobileEstimate = () => {
     navigator.clipboard.writeText('https://signoz.io/pricing/#estimate-your-monthly-bill')
   }
 
+  // Used to track whether we're client-side rendered
+  const [isMounted, setIsMounted] = useState(false)
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
+
   return (
     <section id="estimate-your-monthly-bill">
       <div className="section-container mx-[auto] w-[90vw] border border-dashed border-signoz_slate-400">
         <div className="flex flex-col gap-2 pt-6">
-          <span className="group relative pl-1 text-2xl font-semibold font-semibold text-signoz_vanilla-100">
+          <span className="group relative pl-1 text-2xl font-semibold text-signoz_vanilla-100">
             Estimate your monthly bill
-            <a
-              href="#estimate-your-monthly-bill"
-              onClick={copyLinkToClipboard}
-              className="ml-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
-            />
+            {isMounted ? (
+              <a
+                href="#estimate-your-monthly-bill"
+                onClick={copyLinkToClipboard}
+                className="ml-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 20 20"
+                  fill="#4E74F8"
+                  className="linkicon h-6 w-6"
+                >
+                  <path d="M12.232 4.232a2.5 2.5 0 0 1 3.536 3.536l-1.225 1.224a.75.75 0 0 0 1.061 1.06l1.224-1.224a4 4 0 0 0-5.656-5.656l-3 3a4 4 0 0 0 .225 5.865.75.75 0 0 0 .977-1.138 2.5 2.5 0 0 1-.142-3.667l3-3Z" />
+                  <path d="M11.603 7.963a.75.75 0 0 0-.977 1.138 2.5 2.5 0 0 1 .142 3.667l-3 3a2.5 2.5 0 0 1-3.536-3.536l1.225-1.224a.75.75 0 0 0-1.061-1.06l-1.224 1.224a4 4 0 1 0 5.656 5.656l3-3a4 4 0 0 0-.225-5.865Z" />
+                </svg>
+              </a>
+            ) : null}
           </span>
           <span className="mb-4 pl-1 text-sm text-signoz_vanilla-400">
             You can also set data ingestion limits so you never get a surprise bill.
-            <Link
-              href={'https://signoz.io/docs/ingestion/signoz-cloud/keys/'}
-              className="ml-1 font-medium text-signoz_robin-400"
-            >
-              Learn more
-              <ArrowUpRight className="inline" size={16} />
-            </Link>
+            {isMounted ? (
+              <Link
+                href={'https://signoz.io/docs/ingestion/signoz-cloud/keys/'}
+                className="ml-1 font-medium text-signoz_robin-400"
+              >
+                Learn more
+                <ArrowUpRight className="inline" size={16} />
+              </Link>
+            ) : null}
           </span>
         </div>
 
@@ -215,37 +238,37 @@ const MobileEstimate = () => {
                 <path
                   d="M8.83382 4.66667C9.5702 4.66667 10.1672 4.06971 10.1672 3.33333C10.1672 2.59695 9.5702 2 8.83382 2C8.09744 2 7.50049 2.59695 7.50049 3.33333C7.50049 4.06971 8.09744 4.66667 8.83382 4.66667Z"
                   stroke="#C0C1C3"
-                  stroke-width="1.33333"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
+                  strokeWidth="1.33333"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                 />
                 <path
                   d="M2.8335 14L8.18016 4.49329"
                   stroke="#C0C1C3"
-                  stroke-width="1.33333"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
+                  strokeWidth="1.33333"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                 />
                 <path
                   d="M9.49365 4.49329L10.7803 6.78662"
                   stroke="#C0C1C3"
-                  stroke-width="1.33333"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
+                  strokeWidth="1.33333"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                 />
                 <path
                   d="M13.5003 8C10.9203 10.6667 6.74699 10.6667 4.16699 8"
                   stroke="#C0C1C3"
-                  stroke-width="1.33333"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
+                  strokeWidth="1.33333"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                 />
                 <path
                   d="M14.8336 13.9999L13.3936 11.4399"
                   stroke="#C0C1C3"
-                  stroke-width="1.33333"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
+                  strokeWidth="1.33333"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                 />
               </svg>
             )}
@@ -265,31 +288,31 @@ const MobileEstimate = () => {
                 viewBox="0 0 17 16"
                 fill="none"
               >
-                <path d="M3.8335 3.66675L3.8335 12.6667" stroke="#C0C1C3" stroke-width="1.33333" />
+                <path d="M3.8335 3.66675L3.8335 12.6667" stroke="#C0C1C3" strokeWidth="1.33333" />
                 <ellipse
                   cx="7.8335"
                   cy="3.66667"
                   rx="4"
                   ry="1.66667"
                   stroke="#C0C1C3"
-                  stroke-width="1.33333"
+                  strokeWidth="1.33333"
                 />
                 <ellipse cx="7.8335" cy="3.61674" rx="1" ry="0.416667" fill="#C0C1C3" />
                 <path
                   d="M11.8335 12.6667C11.8335 13.4031 10.0426 14.0001 7.8335 14.0001C5.62436 14.0001 3.8335 13.4031 3.8335 12.6667"
                   stroke="#C0C1C3"
-                  stroke-width="1.33333"
+                  strokeWidth="1.33333"
                 />
                 <path
                   d="M6.5 7.33337V8.61023C6.5 8.64282 6.52356 8.67063 6.55571 8.67599L8.44429 8.99076C8.47644 8.99611 8.5 9.02393 8.5 9.05652V11.3334"
                   stroke="#C0C1C3"
-                  stroke-width="1.33333"
-                  stroke-linecap="round"
+                  strokeWidth="1.33333"
+                  strokeLinecap="round"
                 />
                 <path
                   d="M11.8335 3.66675V7.21313C11.8335 7.26549 11.8911 7.29742 11.9355 7.26966L14.4224 5.71535C14.4608 5.69136 14.5114 5.71179 14.5224 5.75572L14.8249 6.96568C14.8303 6.98719 14.8246 7.00996 14.8098 7.02644L11.8506 10.3144C11.8396 10.3266 11.8335 10.3425 11.8335 10.359V12.6667"
                   stroke="#C0C1C3"
-                  stroke-width="1.33333"
+                  strokeWidth="1.33333"
                 />
               </svg>
             )}
@@ -316,23 +339,23 @@ const MobileEstimate = () => {
                 <path
                   d="M12.167 13.3333V6.66663"
                   stroke="#C0C1C3"
-                  stroke-width="1.33333"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
+                  strokeWidth="1.33333"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                 />
                 <path
                   d="M8.16699 13.3333V2.66663"
                   stroke="#C0C1C3"
-                  stroke-width="1.33333"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
+                  strokeWidth="1.33333"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                 />
                 <path
                   d="M4.16699 13.3333V9.33325"
                   stroke="#C0C1C3"
-                  stroke-width="1.33333"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
+                  strokeWidth="1.33333"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                 />
               </svg>
             )}
@@ -385,6 +408,7 @@ const MobileEstimate = () => {
                   { value: MIN_VALUE, label: '0GB' },
                   { value: MAX_VALUE, label: '200TB' },
                 ]}
+                aria-label="Traces data ingestion volume"
                 renderThumb={(props) => (
                   <div
                     {...props}
@@ -458,6 +482,7 @@ const MobileEstimate = () => {
                   { value: MIN_VALUE, label: '0GB' },
                   { value: MAX_VALUE, label: '200TB' },
                 ]}
+                aria-label="Logs data ingestion volume"
                 renderThumb={(props) => (
                   <div
                     {...props}
@@ -531,6 +556,7 @@ const MobileEstimate = () => {
                   { value: MIN_VALUE, label: '0M' },
                   { value: MAX_VALUE, label: '200B' },
                 ]}
+                aria-label="Metrics data ingestion volume"
                 renderThumb={(props) => (
                   <div
                     {...props}
