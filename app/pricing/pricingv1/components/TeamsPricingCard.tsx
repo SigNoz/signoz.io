@@ -39,7 +39,7 @@ export default function TeamsPricingCard() {
           <Button className="mb-6 w-full px-4 py-3 md:py-6">Start your 30 day free trial</Button>
         </TrackingLink>
 
-        <div className="my-6 w-full border-t border-dashed border-signoz_slate-400"></div>
+        <div className="my-3 w-full border-t border-dashed border-signoz_slate-400"></div>
 
         {/* Base pricing table */}
         <div className="mb-6 rounded-md bg-signoz_ink-400 bg-opacity-10 p-3">
@@ -230,18 +230,6 @@ export default function TeamsPricingCard() {
                 <span className="text-signoz_vanilla-400 hover:text-signoz_robin-500">
                   <ArrowUpRight size={20} className="mr-1 inline" />
                   Learn how the price for metrics is calculated
-                </span>
-              </TrackingLink>
-              <TrackingLink
-                href="/docs/logs-management/long-term-storage/"
-                clickType="Nav Click"
-                clickName="Long Term Logs Storage Link"
-                clickText="Long term Logs Storage options"
-                clickLocation="Teams Pricing Card"
-              >
-                <span className=" text-signoz_vanilla-400 hover:text-signoz_robin-500">
-                  <ArrowUpRight size={20} className="mr-1 inline" />
-                  Long term Logs Storage options
                 </span>
               </TrackingLink>
             </div>

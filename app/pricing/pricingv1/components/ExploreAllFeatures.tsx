@@ -163,6 +163,12 @@ const ALL_FEATURES_DATA = {
           inTeams: <CheckSolid />,
           inEnterprise: <CheckSolid />,
         },
+        {
+          feature: 'Long Term Log Storage Options',
+          inCommunity: <CrossSolid />,
+          inTeams: <CheckSolid />,
+          inEnterprise: <CheckSolid />,
+        },
       ],
     },
     {

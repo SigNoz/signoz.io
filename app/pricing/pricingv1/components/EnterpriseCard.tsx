@@ -38,7 +38,7 @@ export default function EnterpriseCard() {
           </Button>
         </TrackingLink>
 
-        <div className="my-6 w-full border-t border-dashed border-signoz_slate-400"></div>
+        <div className="my-5 w-full border-t border-dashed border-signoz_slate-400"></div>
 
         <h4 className="mb-4 text-lg font-bold text-signoz_vanilla-100">
           Choose between the following offerings
