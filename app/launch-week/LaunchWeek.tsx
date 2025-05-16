@@ -261,7 +261,7 @@ const MainSection: React.FC = () => {
                 <div
                   id="btn-watch-youtube-video"
                   className="button-background mb-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-full px-3 py-2 sm:mb-0"
-                  onClick={() => handleOpenModal('L-fRIZlXYfk')}
+                  onClick={() => handleOpenModal('L-fRIZlXYfk')} >
                   <img src="/svgs/icons/watch-video.svg" alt="watch video icon" />
                   <span className="whitespace-nowrap text-sm font-medium text-[#F7F7F8]">
                     Watch the video
@@ -295,7 +295,7 @@ const MainSection: React.FC = () => {
             </Link>
           </div>
 
-          {/*<div className="flex flex-col justify-between border-b border-t border-dashed border-signoz_slate-100 px-6 py-6 sm:flex-row">
+          <div className="flex flex-col justify-between border-b border-t border-dashed border-signoz_slate-100 px-6 py-6 sm:flex-row">
             <div className="flex flex-col justify-between gap-4 sm:pr-4">
               <div className="text-base uppercase text-signoz_vanilla-400">FRIDAY ⎯ May 16</div>
               <div className="flex flex-col gap-2">
