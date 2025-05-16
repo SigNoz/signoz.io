@@ -1,9 +1,11 @@
 import React from 'react'
-import { CheckCircle, ChevronDown } from 'lucide-react'
+import { ArrowUpRight, CheckCircle, ChevronDown, Info } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
 import Button from 'components/Button/Button'
 import TeamsPricingVideoModal from './TeamsPricingVideoModal'
 import TrackingLink from '../../../../components/TrackingLink'
+import { Tooltip } from '@nextui-org/react'
 
 export default function TeamsPricingCard() {
   return (
@@ -39,6 +41,63 @@ export default function TeamsPricingCard() {
 
         <div className="my-6 w-full border-t border-dashed border-signoz_slate-400"></div>
 
+        {/* Base pricing table */}
+        <div className="mb-6 rounded-md bg-signoz_ink-400 bg-opacity-10 p-3">
+          <h5 className="mb-3 text-sm font-medium text-signoz_vanilla-100">
+            After $199, billed at:
+          </h5>
+          <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
+            <div className="flex items-center gap-2">
+              <Image
+                src="/img/index_features/drafting-compass.svg"
+                alt="Traces Icon"
+                width={20}
+                height={20}
+                className="h-5 w-5"
+              />
+              <div>
+                <div className="text-xs text-signoz_vanilla-400">Traces</div>
+                <div className="text-sm">
+                  <span className="font-medium text-signoz_robin-400">$0.30</span>
+                  <span className="text-signoz_vanilla-400">/GB</span>
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Image
+                src="/img/index_features/logs.svg"
+                alt="Logs Icon"
+                width={20}
+                height={20}
+                className="h-5 w-5"
+              />
+              <div>
+                <div className="text-xs text-signoz_vanilla-400">Logs</div>
+                <div className="text-sm">
+                  <span className="font-medium text-signoz_sakura-400">$0.30</span>
+                  <span className="text-signoz_vanilla-400">/GB</span>
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Image
+                src="/img/index_features/bar-chart-2.svg"
+                alt="Metrics Icon"
+                width={20}
+                height={20}
+                className="h-5 w-5"
+              />
+              <div>
+                <div className="text-xs text-signoz_vanilla-400">Metrics</div>
+                <div className="text-sm">
+                  <span className="font-medium text-signoz_amber-400">$0.10</span>
+                  <span className="text-signoz_vanilla-400">/mn samples</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <h4 className="mb-4 text-lg font-bold text-signoz_vanilla-100">
           What's included in $199/month?
         </h4>
@@ -73,17 +132,119 @@ export default function TeamsPricingCard() {
           </li>
           <li className="flex items-start gap-2">
             <CheckCircle className="mt-1 min-w-4 text-green-500" size={16} />
+            <span className="text-signoz_vanilla-400">
+              Need more?{' '}
+              <TrackingLink
+                href="#estimate-your-monthly-bill"
+                clickType="In Page Link"
+                clickName="Pricing Calculator Link"
+                clickText="Pay only for what exceeds $199 based on usage"
+                clickLocation="Teams Pricing Card"
+              >
+                <span className="text-signoz_robin-400 hover:text-signoz_robin-500">
+                  Pay only for what exceeds $199 based on usage
+                </span>
+              </TrackingLink>
+            </span>
+          </li>
+          <li className="flex items-start gap-2">
+            <CheckCircle className="mt-1 min-w-4 text-green-500" size={16} />
             <span className="text-signoz_vanilla-400">Add unlimited teammates</span>
           </li>
           <li className="flex items-start gap-2">
             <CheckCircle className="mt-1 min-w-4 text-green-500" size={16} />
             <span className="text-signoz_vanilla-400">Monitor any number of hosts</span>
           </li>
+
+          {/* Support */}
           <li className="flex items-start gap-2">
             <CheckCircle className="mt-1 min-w-4 text-green-500" size={16} />
             <span className="text-signoz_vanilla-400">
-              Need more? Pay only for what exceeds $199 based on usage
+              <span className="flex items-center gap-1">
+                Support via in-product Chat, Email, and Slack
+                <Tooltip
+                  className="border border-signoz_slate-400 bg-signoz_ink-400 p-2"
+                  content={
+                    <div className="max-w-xs">
+                      <p className="mb-1 font-medium text-signoz_vanilla-100">Support includes:</p>
+                      <ul className="list-disc pl-4 text-sm text-signoz_vanilla-400">
+                        <li>In-Product Chat Support</li>
+                        <li>Email</li>
+                        <li>Dedicated Slack Channel (on spends above $999/mo)</li>
+                        <li>Support for Migrating DataDog Dashboards (on spends above $999/mo)</li>
+                      </ul>
+                    </div>
+                  }
+                >
+                  <Info className="mt-0.5 min-w-4 cursor-pointer text-signoz_robin-400" size={14} />
+                </Tooltip>
+              </span>
             </span>
+          </li>
+
+          {/* Compliance */}
+          <li className="flex items-start gap-2">
+            <CheckCircle className="mt-1 min-w-4 text-green-500" size={16} />
+            <span className="text-signoz_vanilla-400">
+              <span className="flex items-center gap-1">
+                SOC2 Type II & HIPAA Compliant
+                <Tooltip
+                  className="border border-signoz_slate-400 bg-signoz_ink-400 p-2"
+                  content={
+                    <div className="max-w-xs">
+                      <p className="mb-1 font-medium text-signoz_vanilla-100">
+                        Compliance details:
+                      </p>
+                      <ul className="list-disc pl-4 text-sm text-signoz_vanilla-400">
+                        <li>SOC2 Type II Compliant</li>
+                        <li>HIPAA Compliant</li>
+                        <li>BAA Agreement (Add On)</li>
+                      </ul>
+                    </div>
+                  }
+                >
+                  <Info className="mt-0.5 min-w-4 cursor-pointer text-signoz_robin-400" size={14} />
+                </Tooltip>
+              </span>
+            </span>
+          </li>
+
+          {/* Data Centers */}
+          <li className="flex items-start gap-2">
+            <CheckCircle className="mt-1 min-w-4 text-green-500" size={16} />
+            <span className="text-signoz_vanilla-400">
+              Data centers available in the US, EU & India
+            </span>
+          </li>
+
+          {/* Additional information links */}
+          <li className="flex items-start gap-2">
+            <div className="flex flex-col space-y-2">
+              <TrackingLink
+                href="/pricing/metrics-cost-estimation/"
+                clickType="Nav Click"
+                clickName="Metrics Pricing Calculator Link"
+                clickText="Learn how the price for metrics is calculated"
+                clickLocation="Teams Pricing Card"
+              >
+                <span className="text-signoz_vanilla-400 hover:text-signoz_robin-500">
+                  <ArrowUpRight size={20} className="mr-1 inline" />
+                  Learn how the price for metrics is calculated
+                </span>
+              </TrackingLink>
+              <TrackingLink
+                href="/docs/logs-management/long-term-storage/"
+                clickType="Nav Click"
+                clickName="Long Term Logs Storage Link"
+                clickText="Long term Logs Storage options"
+                clickLocation="Teams Pricing Card"
+              >
+                <span className=" text-signoz_vanilla-400 hover:text-signoz_robin-500">
+                  <ArrowUpRight size={20} className="mr-1 inline" />
+                  Long term Logs Storage options
+                </span>
+              </TrackingLink>
+            </div>
           </li>
         </ul>
 
