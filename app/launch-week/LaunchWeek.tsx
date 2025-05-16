@@ -306,7 +306,7 @@ const MainSection: React.FC = () => {
             </Link>
           </div>
 
-          {/*<div className="flex flex-col justify-between border-b border-t border-dashed border-signoz_slate-100 px-6 py-6 sm:flex-row">
+          <div className="flex flex-col justify-between border-b border-t border-dashed border-signoz_slate-100 px-6 py-6 sm:flex-row">
             <div className="flex flex-col justify-between gap-4 sm:pr-4">
               <div className="text-base uppercase text-signoz_vanilla-400">FRIDAY ⎯ May 16</div>
               <div className="flex flex-col gap-2">
@@ -344,10 +344,12 @@ const MainSection: React.FC = () => {
               <div className="group flex flex-col justify-between">
                 <div>
                   <div className="font-eedium mb-2 text-base">
-                  Tracing Funnels - Define funnels b/w spans in your distributed system
+                    Tracing Funnels - Define funnels b/w spans in your distributed system
                   </div>
                   <div className="text-sm font-medium text-signoz_vanilla-400">
-                  Industry's first funnel analysis for distributed traces, enabling engineers to measure conversion, errors, and latency between key spans across services within a single trace.
+                    Industry's first funnel analysis for distributed traces, enabling engineers to
+                    measure conversion, errors, and latency between key spans across services within
+                    a single trace.
                   </div>
                 </div>
                 <div className="flex justify-end">
