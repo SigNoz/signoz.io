@@ -780,7 +780,19 @@ const PricingCalculator: React.FC = () => {
       </div>
 
       {/* Actions section */}
-      <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:justify-end">
+      <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        {/* Cost comparison link */}
+        <div className="mb-4 hidden md:block">
+          <a
+            href="/blog/pricing-comparison-signoz-vs-datadog-vs-newrelic-vs-grafana/"
+            target="_blank"
+            className="inline-flex items-center justify-center rounded-md bg-signoz_ink-400 px-5 py-2.5 text-sm text-white transition-colors hover:bg-signoz_ink-300"
+          >
+            SigNoz saves you up to 80% on datadog bills.
+            <ArrowUpRight size={18} className="ml-1 inline" />
+          </a>
+        </div>
+
         <TrackingLink
           href="/teams"
           clickType="Primary CTA"
