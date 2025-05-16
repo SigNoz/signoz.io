@@ -4,6 +4,7 @@ import { Metadata } from 'next'
 import { evaluateFeatureFlag } from '@/utils/growthbookServer'
 import { EXPERIMENTS } from '@/constants/experiments'
 import PricingV1 from './pricingv1/PricingV1'
+import { ExperimentTracker } from '@/components/ExperimentTracker'
 
 export const metadata: Metadata = {
   title: {
@@ -25,5 +26,19 @@ export default async function PricingPage() {
   )
 
   // Render PricingV1 for the test variant, otherwise render the current Pricing component
-  return isCloudFirstVariant ? <PricingV1 /> : <Pricing />
+  return isCloudFirstVariant ? (
+    <ExperimentTracker
+      experimentId={EXPERIMENTS.CLOUD_FIRST_PRICING_PAGE.id}
+      variantId={EXPERIMENTS.CLOUD_FIRST_PRICING_PAGE.variants.VARIANT}
+    >
+      <PricingV1 />
+    </ExperimentTracker>
+  ) : (
+    <ExperimentTracker
+      experimentId={EXPERIMENTS.CLOUD_FIRST_PRICING_PAGE.id}
+      variantId={EXPERIMENTS.CLOUD_FIRST_PRICING_PAGE.variants.CONTROL}
+    >
+      <Pricing />
+    </ExperimentTracker>
+  )
 }
