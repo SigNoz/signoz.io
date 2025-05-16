@@ -43,7 +43,7 @@ export default function EnterpriseCard() {
         <h4 className="mb-4 text-lg font-bold text-signoz_vanilla-100">
           Choose between the following offerings
         </h4>
-        <ul className="mb-6 space-y-3">
+        <ul className="mb-3 space-y-3">
           <li className="flex items-start gap-2">
             <CheckCircle className="mt-1 min-w-4 text-green-500" size={16} />
             <span className="text-signoz_vanilla-400">A dedicated environment on SigNoz cloud</span>
@@ -60,10 +60,10 @@ export default function EnterpriseCard() {
           </li>
         </ul>
 
-        <div className="my-6 w-full border-t border-dashed border-signoz_slate-400"></div>
+        <div className="mb-7 mt-6 w-full border-t border-dashed border-signoz_slate-400"></div>
 
         <h4 className="mb-4 text-lg font-bold text-signoz_vanilla-100">Enterprise benefits</h4>
-        <ul className="mb-6 space-y-3">
+        <ul className="mb-10 space-y-3">
           <li className="flex items-start gap-2">
             <CheckCircle className="mt-1 min-w-4 text-green-500" size={16} />
             <span className="text-signoz_vanilla-400">Volume discounts & annual contracts</span>

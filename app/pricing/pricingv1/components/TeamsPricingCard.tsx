@@ -101,7 +101,7 @@ export default function TeamsPricingCard() {
         <h4 className="mb-4 text-lg font-bold text-signoz_vanilla-100">
           What's included in $199/month?
         </h4>
-        <ul className="mb-6 space-y-3">
+        <ul className="mb-10 space-y-3">
           <li className="flex items-start gap-2">
             <CheckCircle className="mt-1 min-w-4 text-green-500" size={16} />
             <span className="text-signoz_vanilla-400">
@@ -149,11 +149,9 @@ export default function TeamsPricingCard() {
           </li>
           <li className="flex items-start gap-2">
             <CheckCircle className="mt-1 min-w-4 text-green-500" size={16} />
-            <span className="text-signoz_vanilla-400">Add unlimited teammates</span>
-          </li>
-          <li className="flex items-start gap-2">
-            <CheckCircle className="mt-1 min-w-4 text-green-500" size={16} />
-            <span className="text-signoz_vanilla-400">Monitor any number of hosts</span>
+            <span className="text-signoz_vanilla-400">
+              Add unlimited teammates and monitor any number of hosts
+            </span>
           </li>
 
           {/* Support */}
