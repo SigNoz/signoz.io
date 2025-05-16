@@ -131,6 +131,31 @@ const PricingCalculator: React.FC = () => {
     setInputMetricsValue(linearToLog(numValue, MIN_VALUE, MAX_VALUE).toString())
   }
 
+  // Handle direct input changes
+  const handleInputTracesChange = (value: string) => {
+    setInputTracesValue(value)
+    const numValue = Number(value)
+    if (isNaN(numValue) || numValue <= 0) return
+    const linearValue = logToLinear(Math.min(numValue, MAX_VALUE), MIN_VALUE, MAX_VALUE)
+    setTracesValue(linearValue)
+  }
+
+  const handleInputLogsChange = (value: string) => {
+    setInputLogsValue(value)
+    const numValue = Number(value)
+    if (isNaN(numValue) || numValue <= 0) return
+    const linearValue = logToLinear(Math.min(numValue, MAX_VALUE), MIN_VALUE, MAX_VALUE)
+    setLogsValue(linearValue)
+  }
+
+  const handleInputMetricsChange = (value: string) => {
+    setInputMetricsValue(value)
+    const numValue = Number(value)
+    if (isNaN(numValue) || numValue <= 0) return
+    const linearValue = logToLinear(Math.min(numValue, MAX_VALUE), MIN_VALUE, MAX_VALUE)
+    setMetricsValue(linearValue)
+  }
+
   // Copy link to clipboard
   const copyLinkToClipboard = () => {
     navigator.clipboard.writeText('https://signoz.io/pricing/pricingv1/#estimate-your-monthly-bill')
@@ -473,9 +498,16 @@ const PricingCalculator: React.FC = () => {
                 <span className="text-xs font-semibold text-signoz_vanilla-400">Subtotal</span>
               </div>
               <div className="mb-2 flex items-center justify-between">
-                <span className="text-base text-signoz_vanilla-400">
-                  {formatBytes(linearToLog(tracesValue, MIN_VALUE, MAX_VALUE))}
-                </span>
+                <div className="flex items-center">
+                  <input
+                    type="number"
+                    value={inputTracesValue}
+                    onChange={(e) => handleInputTracesChange(e.target.value)}
+                    className="mr-2 w-20 border-0 border-b border-signoz_robin-400/50 bg-transparent text-right text-signoz_vanilla-400 outline-none"
+                    min="1"
+                  />
+                  <span className="text-base text-signoz_vanilla-400">GB</span>
+                </div>
                 <div className="w-[45%] border-b border-dashed border-signoz_slate-400"></div>
                 <span className="text-base font-medium text-signoz_vanilla-100">
                   ${formatNumber(tracesSubtotal)}
@@ -538,9 +570,16 @@ const PricingCalculator: React.FC = () => {
                 <span className="text-xs font-semibold text-signoz_vanilla-400">Subtotal</span>
               </div>
               <div className="mb-2 flex items-center justify-between">
-                <span className="text-base text-signoz_vanilla-400">
-                  {formatBytes(linearToLog(logsValue, MIN_VALUE, MAX_VALUE))}
-                </span>
+                <div className="flex items-center">
+                  <input
+                    type="number"
+                    value={inputLogsValue}
+                    onChange={(e) => handleInputLogsChange(e.target.value)}
+                    className="mr-2 w-20 border-0 border-b border-signoz_sakura-400/50 bg-transparent text-right text-signoz_vanilla-400 outline-none"
+                    min="1"
+                  />
+                  <span className="text-base text-signoz_vanilla-400">GB</span>
+                </div>
                 <div className="w-[45%] border-b border-dashed border-signoz_slate-400"></div>
                 <span className="text-base font-medium text-signoz_vanilla-100">
                   ${formatNumber(logsSubtotal)}
@@ -603,9 +642,16 @@ const PricingCalculator: React.FC = () => {
                 <span className="text-xs font-semibold text-signoz_vanilla-400">Subtotal</span>
               </div>
               <div className="mb-2 flex items-center justify-between">
-                <span className="text-base text-signoz_vanilla-400">
-                  {formatMetrics(linearToLog(metricsValue, MIN_VALUE, MAX_VALUE))}
-                </span>
+                <div className="flex items-center">
+                  <input
+                    type="number"
+                    value={inputMetricsValue}
+                    onChange={(e) => handleInputMetricsChange(e.target.value)}
+                    className="mr-2 w-20 border-0 border-b border-signoz_amber-400/50 bg-transparent text-right text-signoz_vanilla-400 outline-none"
+                    min="1"
+                  />
+                  <span className="text-base text-signoz_vanilla-400">mn</span>
+                </div>
                 <div className="w-[45%] border-b border-dashed border-signoz_slate-400"></div>
                 <span className="text-base font-medium text-signoz_vanilla-100">
                   ${formatNumber(metricsSubtotal)}
@@ -676,7 +722,16 @@ const PricingCalculator: React.FC = () => {
             )}
           </div>
           <div className="metrics-background col-start-5 p-2 text-right text-signoz_vanilla-400">
-            {formatBytes(linearToLog(tracesValue, MIN_VALUE, MAX_VALUE))}
+            <div className="flex items-center justify-end">
+              <input
+                type="number"
+                value={inputTracesValue}
+                onChange={(e) => handleInputTracesChange(e.target.value)}
+                className="mr-2 w-20 border-0 border-b border-signoz_robin-400/50 bg-transparent text-right text-signoz_vanilla-400 outline-none"
+                min="1"
+              />
+              <span>GB</span>
+            </div>
           </div>
           <div className="metrics-background col-start-6 p-2 text-right">
             ${formatNumber(tracesSubtotal)}
@@ -719,7 +774,16 @@ const PricingCalculator: React.FC = () => {
             )}
           </div>
           <div className="metrics-background col-start-5 p-2 text-right text-signoz_vanilla-400">
-            {formatBytes(linearToLog(logsValue, MIN_VALUE, MAX_VALUE))}
+            <div className="flex items-center justify-end">
+              <input
+                type="number"
+                value={inputLogsValue}
+                onChange={(e) => handleInputLogsChange(e.target.value)}
+                className="mr-2 w-20 border-0 border-b border-signoz_sakura-400/50 bg-transparent text-right text-signoz_vanilla-400 outline-none"
+                min="1"
+              />
+              <span>GB</span>
+            </div>
           </div>
           <div className="metrics-background col-start-6 p-2 text-right">
             ${formatNumber(logsSubtotal)}
@@ -762,7 +826,16 @@ const PricingCalculator: React.FC = () => {
             )}
           </div>
           <div className="metrics-background col-start-5 p-2 text-right text-signoz_vanilla-400">
-            {formatMetrics(linearToLog(metricsValue, MIN_VALUE, MAX_VALUE))}
+            <div className="flex items-center justify-end">
+              <input
+                type="number"
+                value={inputMetricsValue}
+                onChange={(e) => handleInputMetricsChange(e.target.value)}
+                className="mr-2 w-20 border-0 border-b border-signoz_amber-400/50 bg-transparent text-right text-signoz_vanilla-400 outline-none"
+                min="1"
+              />
+              <span>mn</span>
+            </div>
           </div>
           <div className="metrics-background col-start-6 p-2 text-right">
             ${formatNumber(metricsSubtotal)}
