@@ -45,7 +45,21 @@ export default function TeamsPricingCard() {
         <ul className="mb-6 space-y-3">
           <li className="flex items-start gap-2">
             <CheckCircle className="mt-1 min-w-4 text-green-500" size={16} />
-            <span className="text-signoz_vanilla-400">Access to all features.</span>
+            <span className="text-signoz_vanilla-400">
+              Access to all{' '}
+              <TrackingLink
+                href="#all-features"
+                clickType="In Page Link"
+                clickName="Features Detail Link"
+                clickText="features"
+                clickLocation="Teams Pricing Card"
+              >
+                <span className="inline-flex items-center text-signoz_robin-400 hover:text-signoz_robin-500">
+                  features
+                  <ChevronDown size={12} className="ml-1" />
+                </span>
+              </TrackingLink>
+            </span>
           </li>
           <li className="flex items-start gap-2">
             <CheckCircle className="mt-1 min-w-4 text-green-500" size={16} />
