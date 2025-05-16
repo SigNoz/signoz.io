@@ -61,5 +61,13 @@ export const EXPERIMENTS = {
     },
     flagName: 'teams-page-focused-layout-experiment',
   },
+  CLOUD_FIRST_PRICING_PAGE: {
+    id: 'cloud-first-pricing-page',
+    variants: {
+      CONTROL: 'with-self-host-tab',
+      VARIANT: 'without-self-host-tab',
+    },
+    flagName: 'cloud-first-pricing-page',
+  },
   // Add more experiments here as needed
 } as const
