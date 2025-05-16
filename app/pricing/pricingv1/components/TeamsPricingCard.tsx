@@ -9,8 +9,8 @@ import { Tooltip } from '@nextui-org/react'
 
 export default function TeamsPricingCard() {
   return (
-    <div className="pricing-card relative rounded-md border border-dashed border-signoz_slate-400 bg-signoz_ink-400 bg-opacity-5 px-6 py-8 shadow-[0_0_20px_rgba(78,116,248,0.2)] transition-all duration-300">
-      <div>
+    <div className="pricing-card relative flex h-full flex-col rounded-md border border-dashed border-signoz_slate-400 bg-signoz_ink-400 bg-opacity-5 px-6 py-8 shadow-[0_0_20px_rgba(78,116,248,0.2)] transition-all duration-300">
+      <div className="flex flex-grow flex-col">
         <div className="mb-4 flex flex-col md:flex-row md:justify-between">
           <div className="w-full md:w-[60%]">
             <h3 className="pinkish-gradient mb-1 text-2xl font-bold tracking-tight md:text-3xl">
@@ -248,19 +248,21 @@ export default function TeamsPricingCard() {
           </li>
         </ul>
 
-        <TrackingLink
-          href="#estimate-your-monthly-bill"
-          clickType="Secondary CTA"
-          clickName="Pricing Calculator Button"
-          clickText="Estimate your monthly bill"
-          clickLocation="Teams Pricing Card"
-        >
-          <Button type={Button.TYPES.SECONDARY} className="mb-4 w-full px-4 py-3 md:py-6">
-            Estimate your monthly bill
-          </Button>
-        </TrackingLink>
-        <div className="mb-6 text-center text-sm text-signoz_vanilla-400">
-          <TeamsPricingVideoModal buttonLabel="Understand how SigNoz pricing works" />
+        <div className="mt-auto">
+          <TrackingLink
+            href="#estimate-your-monthly-bill"
+            clickType="Secondary CTA"
+            clickName="Pricing Calculator Button"
+            clickText="Estimate your monthly bill"
+            clickLocation="Teams Pricing Card"
+          >
+            <Button type={Button.TYPES.SECONDARY} className="mb-4 w-full px-4 py-3 md:py-6">
+              Estimate your monthly bill
+            </Button>
+          </TrackingLink>
+          <div className="mb-6 text-center text-sm text-signoz_vanilla-400">
+            <TeamsPricingVideoModal buttonLabel="Understand how SigNoz pricing works" />
+          </div>
         </div>
       </div>
     </div>

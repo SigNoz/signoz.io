@@ -6,8 +6,8 @@ import TrackingLink from '../../../../components/TrackingLink'
 
 export default function EnterpriseCard() {
   return (
-    <div className="pricing-card rounded-md border border-dashed border-signoz_slate-400 bg-signoz_ink-400 bg-opacity-5 px-6 py-8 transition-all duration-300">
-      <div>
+    <div className="pricing-card relative flex h-full flex-col rounded-md border border-dashed border-signoz_slate-400 bg-signoz_ink-400 bg-opacity-5 px-6 py-8 transition-all duration-300">
+      <div className="flex flex-grow flex-col">
         <div className="mb-4 flex flex-col md:flex-row md:justify-between">
           <div className="w-full md:w-[60%]">
             <h3 className="orangish-gradient mb-1 text-2xl font-bold tracking-tight md:text-3xl">
@@ -40,7 +40,9 @@ export default function EnterpriseCard() {
 
         <div className="my-6 w-full border-t border-dashed border-signoz_slate-400"></div>
 
-        <h4 className="mb-4 text-lg font-bold text-signoz_vanilla-100">Our offerings</h4>
+        <h4 className="mb-4 text-lg font-bold text-signoz_vanilla-100">
+          Choose between the following offerings
+        </h4>
         <ul className="mb-6 space-y-3">
           <li className="flex items-start gap-2">
             <CheckCircle className="mt-1 min-w-4 text-green-500" size={16} />
@@ -96,20 +98,23 @@ export default function EnterpriseCard() {
           </li>
         </ul>
 
-        <TrackingLink
-          href="/enterprise-cloud/"
-          clickType="Secondary CTA"
-          clickName="Enterprise Contact Button"
-          clickText="Contact Us"
-          clickLocation="Enterprise Pricing Card Bottom"
-        >
-          <Button
-            type={Button.TYPES.SECONDARY}
-            className="mb-4 flex w-full items-center justify-center gap-2 px-4 py-3 md:py-6"
+        <div className="mt-auto">
+          <TrackingLink
+            href="/enterprise-cloud/"
+            clickType="Secondary CTA"
+            clickName="Enterprise Contact Button"
+            clickText="Contact Us"
+            clickLocation="Enterprise Pricing Card Bottom"
           >
-            Contact Us <ArrowRight size={14} />
-          </Button>
-        </TrackingLink>
+            <Button
+              type={Button.TYPES.SECONDARY}
+              className="mb-4 flex w-full items-center justify-center gap-2 px-4 py-3 md:py-6"
+            >
+              Contact Us <ArrowRight size={14} />
+            </Button>
+          </TrackingLink>
+          <div className="mb-6 text-center text-sm text-transparent">&nbsp;</div>
+        </div>
       </div>
     </div>
   )
