@@ -110,9 +110,12 @@ const MainSection: React.FC = () => {
               />
               <div className="group flex flex-col justify-between">
                 <div>
-                  <div className="font-eedium mb-2 text-base">Deep Temporal Observability - Correlate Metrics with Logs & Traces</div>
+                  <div className="font-eedium mb-2 text-base">
+                    Deep Temporal Observability - Correlate Metrics with Logs & Traces
+                  </div>
                   <div className="text-sm font-medium text-signoz_vanilla-400">
-                    Get end-to-end observability of your Temporal workflows using OpenTelemetry and SigNoz.
+                    Get end-to-end observability of your Temporal workflows using OpenTelemetry and
+                    SigNoz.
                   </div>
                 </div>
                 <div className="flex justify-end">
@@ -178,9 +181,12 @@ const MainSection: React.FC = () => {
               />
               <div className="group flex flex-col justify-between">
                 <div className="min-w-[306px]">
-                  <div className="font-eedium mb-2 text-base">Metrics Explorer - Search, Query, and Analyze all your Metrics at one place</div>
+                  <div className="font-eedium mb-2 text-base">
+                    Metrics Explorer - Search, Query, and Analyze all your Metrics at one place
+                  </div>
                   <div className="text-sm font-medium text-signoz_vanilla-400">
-                  Building dashboards just got a whole lot easier. Instantly discover, filter, and validate every metric flowing into your stack with Metrics Explorer.
+                    Building dashboards just got a whole lot easier. Instantly discover, filter, and
+                    validate every metric flowing into your stack with Metrics Explorer.
                   </div>
                 </div>
                 <div className="flex justify-end">
@@ -192,7 +198,7 @@ const MainSection: React.FC = () => {
             </Link>
           </div>
 
-           <div className="flex flex-col justify-between border-b border-t border-dashed border-signoz_slate-100 px-6 py-6 sm:flex-row">
+          <div className="flex flex-col justify-between border-b border-t border-dashed border-signoz_slate-100 px-6 py-6 sm:flex-row">
             <div className="flex flex-col justify-between gap-4 sm:pr-4">
               <div className="text-base uppercase text-signoz_vanilla-400">Wednesday ⎯ May 14</div>
               <div className="flex flex-col gap-2">
@@ -229,9 +235,12 @@ const MainSection: React.FC = () => {
               />
               <div className="group flex flex-col justify-between">
                 <div>
-                  <div className="font-eedium mb-2 text-base">Third party API Monitoring powered by OpenTelemetry semantics</div>
+                  <div className="font-eedium mb-2 text-base">
+                    Third party API Monitoring powered by OpenTelemetry semantics
+                  </div>
                   <div className="text-sm font-medium text-signoz_vanilla-400">
-                  Get out-of-the-box monitoring for all your external services, with every API call automatically correlated to the internal services making them.
+                    Get out-of-the-box monitoring for all your external services, with every API
+                    call automatically correlated to the internal services making them.
                   </div>
                 </div>
                 <div className="flex justify-end">
@@ -262,6 +271,7 @@ const MainSection: React.FC = () => {
                   id="btn-watch-youtube-video"
                   className="button-background mb-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-full px-3 py-2 sm:mb-0"
                   onClick={() => handleOpenModal('L-fRIZlXYfk')}
+                >
                   <img src="/svgs/icons/watch-video.svg" alt="watch video icon" />
                   <span className="whitespace-nowrap text-sm font-medium text-[#F7F7F8]">
                     Watch the video
@@ -280,10 +290,11 @@ const MainSection: React.FC = () => {
               <div className="group flex flex-col justify-between">
                 <div>
                   <div className="font-eedium mb-2 text-base">
-                  CI/CD Observability Powered by OpenTelemetry
+                    CI/CD Observability Powered by OpenTelemetry
                   </div>
                   <div className="text-sm font-medium text-signoz_vanilla-400">
-                  Track and analyze every stage of your CI/CD pipeline to identify bottlenecks, improve reliability, and accelerate software delivery.
+                    Track and analyze every stage of your CI/CD pipeline to identify bottlenecks,
+                    improve reliability, and accelerate software delivery.
                   </div>
                 </div>
                 <div className="flex justify-end">
@@ -336,7 +347,7 @@ const MainSection: React.FC = () => {
                   Tracing Funnels - Define funnels b/w spans in your distributed system
                   </div>
                   <div className="text-sm font-medium text-signoz_vanilla-400">
-                  Industry’s first funnel analysis for distributed traces, enabling engineers to measure conversion, errors, and latency between key spans across services within a single trace.
+                  Industry's first funnel analysis for distributed traces, enabling engineers to measure conversion, errors, and latency between key spans across services within a single trace.
                   </div>
                 </div>
                 <div className="flex justify-end">
