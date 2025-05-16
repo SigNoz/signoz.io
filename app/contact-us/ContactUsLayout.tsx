@@ -1,6 +1,8 @@
 import React from 'react'
+import { CheckCircle } from 'lucide-react'
 import ContactForm from './components/ContactForm'
 import { contactUsData } from './data'
+import Heading from '../../components/ui/Heading'
 
 export default function ContactUsLayout() {
   return (
@@ -10,28 +12,42 @@ export default function ContactUsLayout() {
       <div className="absolute left-0 right-0 top-0 mx-auto h-[450px] w-full flex-shrink-0 rounded-[956px] bg-gradient-to-b from-[rgba(190,107,241,1)] to-[rgba(69,104,220,0)] bg-[length:110%] bg-no-repeat opacity-30 blur-[300px] sm:bg-[center_-500px] md:h-[956px]" />
 
       <div className="container mx-auto px-4 py-24 md:px-6 md:py-24 lg:px-8">
+        <div className="mb-12 text-center">
+          <Heading type={1} className="z-[1]">
+            {contactUsData.TITLE}
+          </Heading>
+
+          {/* Features section like in PricingFeatures.tsx */}
+          <div className="mx-auto my-6 flex w-full max-w-4xl flex-col items-center gap-3 font-bold md:flex-row md:justify-center md:gap-8">
+            {contactUsData.FEATURES.map((feature, idx) => (
+              <div key={idx} className="flex items-center gap-2">
+                <CheckCircle className="text-green-500" size={16} />
+                <span className="text-base text-signoz_vanilla-400">{feature.title}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
         <div className="grid items-start gap-12 md:grid-cols-2 lg:gap-16">
           {/* Left column: text content */}
           <div className="max-w-xl md:sticky md:top-24 md:self-start">
-            <h1 className="mb-6 text-3xl font-bold leading-normal sm:leading-normal md:text-4xl md:leading-normal">
-              <span className="text-gradient">{contactUsData.TITLE}</span>
-            </h1>
-            <h2 className="mb-8 text-lg text-signoz_vanilla-400/80 md:text-xl">
-              {contactUsData.DESC}
+            <h2 className="mb-6 text-base font-bold text-signoz_vanilla-100/70">
+              Choose between any of the following options:
             </h2>
 
-            <div className="space-y-3">
+            <div className="space-y-6">
               {contactUsData.OPTIONS.map((option, idx) => (
                 <div key={idx} className="py-2 first:pt-0 last:pb-0">
-                  {idx > 0 && <div className="mb-4 h-px w-full bg-signoz_slate-500/30"></div>}
-                  <h3 className="text-base font-semibold text-signoz_vanilla-100">
-                    {option.title}
-                  </h3>
-                  <p className="mt-2 text-sm leading-relaxed text-signoz_vanilla-100/70">
+                  <h3 className="text-xl font-semibold text-signoz_vanilla-100">{option.title}</h3>
+                  <p className="mt-2 text-base leading-relaxed text-signoz_vanilla-100/70">
                     {option.description}
                   </p>
                 </div>
               ))}
+
+              <div className="pt-6 text-base text-signoz_vanilla-100/70">
+                {contactUsData.FOOTER}
+              </div>
             </div>
           </div>
 

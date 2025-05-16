@@ -3,13 +3,13 @@ import ContactUsLayout from './ContactUsLayout'
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Contact Us | SigNoz - Enterprise Grade Observability',
+  title: 'Enterprise Grade Observability at any scale | SigNoz',
   description:
-    'Dedicated support, advanced security & compliance features for your enterprise needs. Our experts will connect to give a brief demo and answer any questions.',
+    'Enterprise cloud environment, BYOC (managed by SigNoz in your cloud), or self-hosted options with dedicated support, volume discounts, and dashboard migration.',
   openGraph: {
-    title: 'Contact Us | SigNoz - Enterprise Grade Observability',
+    title: 'Enterprise Grade Observability at any scale | SigNoz',
     description:
-      'Dedicated support, advanced security & compliance features for your enterprise needs. Our experts will connect to give a brief demo and answer any questions.',
+      'Enterprise cloud environment, BYOC (managed by SigNoz in your cloud), or self-hosted options with dedicated support, volume discounts, and dashboard migration.',
     url: 'https://signoz.io/contact-us/',
     siteName: 'SigNoz',
     locale: 'en_US',
@@ -17,16 +17,16 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Contact Us | SigNoz - Enterprise Grade Observability',
+    title: 'Enterprise Grade Observability at any scale | SigNoz',
     description:
-      'Dedicated support, advanced security & compliance features for your enterprise needs. Our experts will connect to give a brief demo and answer any questions.',
+      'Enterprise cloud environment, BYOC (managed by SigNoz in your cloud), or self-hosted options with dedicated support, volume discounts, and dashboard migration.',
     creator: '@SigNozHQ',
   },
   alternates: {
     canonical: 'https://signoz.io/contact-us/',
   },
   keywords:
-    'signoz contact, enterprise observability, enterprise monitoring, contact signoz, observability demo',
+    'signoz enterprise, enterprise observability, dedicated cloud, byoc, self-hosted, volume discounts',
 }
 
 export default function ContactUsPage() {
