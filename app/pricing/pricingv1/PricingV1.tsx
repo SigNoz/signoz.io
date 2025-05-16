@@ -52,8 +52,6 @@ export default function PricingV1Page() {
 
         <FAQ />
 
-        <Testimonials page="pricing" />
-
         <QuickStartCloud />
       </div>
     </div>
