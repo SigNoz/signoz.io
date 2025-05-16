@@ -122,6 +122,12 @@ const ALL_FEATURES_DATA = {
           inTeams: <CheckSolid />,
           inEnterprise: <CheckSolid />,
         },
+        {
+          feature: 'Third Party API Monitoring with error rates, latency tracking',
+          inCommunity: <CheckSolid />,
+          inTeams: <CheckSolid />,
+          inEnterprise: <CheckSolid />,
+        },
       ],
     },
     {
@@ -189,10 +195,131 @@ const ALL_FEATURES_DATA = {
       ],
     },
     {
+      section: 'Cloud Monitoring',
+      features: [
+        {
+          feature: 'AWS monitoring (EC2, ECS, EKS, Lambda, RDS, ELB, VPC)',
+          inCommunity: <CheckSolid />,
+          inTeams: <CheckSolid />,
+          inEnterprise: <CheckSolid />,
+        },
+        {
+          feature: 'Azure monitoring (VM, App Service, Functions, AKS, Container Apps, SQL DB)',
+          inCommunity: <CheckSolid />,
+          inTeams: <CheckSolid />,
+          inEnterprise: <CheckSolid />,
+        },
+        {
+          feature: 'GCP monitoring (Compute Engine, GKE, Cloud Run, Cloud Functions, App Engine)',
+          inCommunity: <CheckSolid />,
+          inTeams: <CheckSolid />,
+          inEnterprise: <CheckSolid />,
+        },
+        {
+          feature: 'Cloud services metrics, logs, and traces correlation',
+          inCommunity: <CheckSolid />,
+          inTeams: <CheckSolid />,
+          inEnterprise: <CheckSolid />,
+        },
+      ],
+    },
+    {
+      section: 'CI/CD Observability',
+      features: [
+        {
+          feature: 'Pipeline health and performance monitoring',
+          inCommunity: <CheckSolid />,
+          inTeams: <CheckSolid />,
+          inEnterprise: <CheckSolid />,
+        },
+        {
+          feature: 'DORA metrics tracking and visualization',
+          inCommunity: <CheckSolid />,
+          inTeams: <CheckSolid />,
+          inEnterprise: <CheckSolid />,
+        },
+        {
+          feature: 'Repository health and PR metrics',
+          inCommunity: <CheckSolid />,
+          inTeams: <CheckSolid />,
+          inEnterprise: <CheckSolid />,
+        },
+        {
+          feature: 'Pipeline flakiness detection',
+          inCommunity: <CheckSolid />,
+          inTeams: <CheckSolid />,
+          inEnterprise: <CheckSolid />,
+        },
+      ],
+    },
+    {
+      section: 'Data Exploration',
+      features: [
+        {
+          feature: 'Metrics Explorer - search, query, and analyze all metrics with quick filters',
+          inCommunity: <CheckSolid />,
+          inTeams: <CheckSolid />,
+          inEnterprise: <CheckSolid />,
+        },
+        {
+          feature: 'Traces Explorer with multiple views (List, Trace, Time Series, Table)',
+          inCommunity: <CheckSolid />,
+          inTeams: <CheckSolid />,
+          inEnterprise: <CheckSolid />,
+        },
+        {
+          feature: 'Advanced Query Builder with filtering, aggregation, and mathematical functions',
+          inCommunity: <CheckSolid />,
+          inTeams: <CheckSolid />,
+          inEnterprise: <CheckSolid />,
+        },
+      ],
+    },
+    {
       section: 'Exceptions Monitoring',
       features: [
         {
           feature: 'Separate view of exceptions based on Trace data',
+          inCommunity: <CheckSolid />,
+          inTeams: <CheckSolid />,
+          inEnterprise: <CheckSolid />,
+        },
+      ],
+    },
+    {
+      section: 'Frontend & Mobile Monitoring',
+      features: [
+        {
+          feature: 'Web Vitals monitoring for frontend applications',
+          inCommunity: <CheckSolid />,
+          inTeams: <CheckSolid />,
+          inEnterprise: <CheckSolid />,
+        },
+        {
+          feature: 'Mobile app monitoring (iOS, Android, Flutter)',
+          inCommunity: <CheckSolid />,
+          inTeams: <CheckSolid />,
+          inEnterprise: <CheckSolid />,
+        },
+      ],
+    },
+    {
+      section: 'LLM Monitoring',
+      features: [
+        {
+          feature: 'LLM observability with OpenTelemetry',
+          inCommunity: <CheckSolid />,
+          inTeams: <CheckSolid />,
+          inEnterprise: <CheckSolid />,
+        },
+        {
+          feature: 'Integration with Langtrace and OpenLLMetry',
+          inCommunity: <CheckSolid />,
+          inTeams: <CheckSolid />,
+          inEnterprise: <CheckSolid />,
+        },
+        {
+          feature: 'Vector database monitoring with OpenLIT',
           inCommunity: <CheckSolid />,
           inTeams: <CheckSolid />,
           inEnterprise: <CheckSolid />,
@@ -228,6 +355,25 @@ const ALL_FEATURES_DATA = {
         },
         {
           feature: 'MS Teams as alert channel',
+          inCommunity: <CheckSolid />,
+          inTeams: <CheckSolid />,
+          inEnterprise: <CheckSolid />,
+        },
+      ],
+    },
+    {
+      section: 'Pre-built Integrations & Dashboards',
+      features: [
+        {
+          feature:
+            'Infrastructure & database dashboards (Kubernetes, Docker, PostgreSQL, MongoDB, Redis, MySQL)',
+          inCommunity: <CheckSolid />,
+          inTeams: <CheckSolid />,
+          inEnterprise: <CheckSolid />,
+        },
+        {
+          feature:
+            'Application performance & web service dashboards (APM, NGINX, Apache, RabbitMQ, LLM)',
           inCommunity: <CheckSolid />,
           inTeams: <CheckSolid />,
           inEnterprise: <CheckSolid />,
@@ -281,6 +427,39 @@ const ALL_FEATURES_DATA = {
           feature: 'Overview of your application graph with health indication',
           inCommunity: <CheckSolid />,
           inTeams: <CheckSolid />,
+          inEnterprise: <CheckSolid />,
+        },
+      ],
+    },
+    {
+      section: 'Security & Compliance',
+      features: [
+        {
+          feature: 'SOC2 Type II Compliant',
+          inCommunity: <CrossSolid />,
+          inTeams: <CheckSolid />,
+          inEnterprise: <CheckSolid />,
+        },
+        {
+          feature: 'HIPAA Compliant',
+          inCommunity: <CrossSolid />,
+          inTeams: <CheckSolid />,
+          inEnterprise: <CheckSolid />,
+        },
+        {
+          feature: 'Data centers in US, EU, and India',
+          inCommunity: <CrossSolid />,
+          inTeams: <CheckSolid />,
+          inEnterprise: <CheckSolid />,
+        },
+        {
+          feature: 'BAA Agreement',
+          inCommunity: <CrossSolid />,
+          inTeams: (
+            <div className="flex items-center">
+              <span className="ml-1.5 text-[8px] uppercase sm:text-xs">ADD ON</span>
+            </div>
+          ),
           inEnterprise: <CheckSolid />,
         },
       ],
