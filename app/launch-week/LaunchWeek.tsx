@@ -261,7 +261,7 @@ const MainSection: React.FC = () => {
                 <div
                   id="btn-watch-youtube-video"
                   className="button-background mb-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-full px-3 py-2 sm:mb-0"
-                  onClick={() => handleOpenModal('fRIZlXYfk')}
+                  onClick={() => handleOpenModal('L-fRIZlXYfk')}
                 >
                   <img src="/svgs/icons/watch-video.svg" alt="watch video icon" />
                   <span className="whitespace-nowrap text-sm font-medium text-[#F7F7F8]">
