@@ -216,44 +216,63 @@ const PricingCalculator: React.FC = () => {
 
   // Function to handle screenshot capture and sharing
   const handleCaptureAndShare = async () => {
-    // Get the share button element to hide it during capture
+    // Get elements by their IDs
     const shareButton = document.getElementById('share-calculator-button') as HTMLElement | null
-    const ctaButton = document.querySelector(
-      '.pricing-calculator .mt-4 .flex'
-    ) as HTMLElement | null
+    const ctaButton = document.getElementById('pricing-cta-button') as HTMLElement | null
     const headingElement = document.querySelector('.pricing-calculator h3') as HTMLElement | null
 
-    // Create a promotional element to show during capture
-    const promoElement = document.createElement('div')
-    promoElement.className =
-      'mt-4 p-3 rounded-md bg-signoz_robin-500/10 border border-dashed border-signoz_robin-500'
-    promoElement.innerHTML = `
-      <p class="text-center text-sm font-medium text-signoz_vanilla-100">
-        Get started with SigNoz - the open-source observability platform that helps you monitor applications with traces, logs, and metrics.
-        <span class="block mt-1 text-signoz_robin-400">Try it free at signoz.io</span>
-      </p>
-    `
+    // Find all select elements that need styling fix for screenshots
+    const selectElements = calculatorRef.current?.querySelectorAll('select') as
+      | NodeListOf<HTMLSelectElement>
+      | undefined
 
     // Store original values to restore later
     let originalHeadingText = ''
+    let originalButtonText = ''
+    // Array to store original select styles
+    const originalSelectStyles: {
+      element: HTMLSelectElement
+      appearance: string
+      backgroundImage: string
+      backgroundPosition: string
+    }[] = []
 
     if (headingElement) {
       originalHeadingText = headingElement.textContent || ''
-      headingElement.textContent = 'SigNoz Monthly Estimate'
-    }
-
-    if (shareButton) {
-      // Hide the button before capture
-      shareButton.style.display = 'none'
+      headingElement.textContent =
+        'SigNoz Monthly Estimate - Simple Usage-based Predictable Observability Costs'
     }
 
     if (ctaButton) {
-      ctaButton.style.display = 'none'
+      originalButtonText = ctaButton.innerText
+      // Just replace the text
+      ctaButton.innerText = 'Visit signoz.io for more details'
     }
 
-    // Add promo element before capture
-    if (calculatorRef.current) {
-      calculatorRef.current.appendChild(promoElement)
+    // Fix the appearance of select elements for screenshot
+    if (selectElements) {
+      selectElements.forEach((select) => {
+        // Store original styles
+        originalSelectStyles.push({
+          element: select,
+          appearance: select.style.appearance,
+          backgroundImage: select.style.backgroundImage,
+          backgroundPosition: select.style.backgroundPosition,
+        })
+
+        // Apply fixed styles for screenshot
+        select.style.appearance = 'none'
+        select.style.backgroundImage =
+          "url(\"data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23C0C1C3' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E\")"
+        select.style.backgroundRepeat = 'no-repeat'
+        select.style.backgroundPosition = 'right 0.25rem center'
+        select.style.paddingRight = '1.5rem'
+      })
+    }
+
+    if (shareButton) {
+      // Hide the share button before capture
+      shareButton.style.display = 'none'
     }
 
     try {
@@ -273,17 +292,21 @@ const PricingCalculator: React.FC = () => {
         headingElement.textContent = originalHeadingText
       }
 
+      if (ctaButton) {
+        ctaButton.innerText = originalButtonText
+      }
+
+      // Restore original select styles
+      originalSelectStyles.forEach((item) => {
+        item.element.style.appearance = item.appearance
+        item.element.style.backgroundImage = item.backgroundImage
+        item.element.style.backgroundPosition = item.backgroundPosition
+        item.element.style.backgroundRepeat = ''
+        item.element.style.paddingRight = ''
+      })
+
       if (shareButton) {
         shareButton.style.display = ''
-      }
-
-      if (ctaButton) {
-        ctaButton.style.display = ''
-      }
-
-      // Remove promo element
-      if (calculatorRef.current && promoElement.parentNode === calculatorRef.current) {
-        calculatorRef.current.removeChild(promoElement)
       }
 
       // Try to copy to clipboard first (avoiding fetch to prevent CSP issues)
@@ -372,17 +395,21 @@ const PricingCalculator: React.FC = () => {
         headingElement.textContent = originalHeadingText
       }
 
+      if (ctaButton) {
+        ctaButton.innerText = originalButtonText
+      }
+
+      // Restore original select styles in case of error
+      originalSelectStyles.forEach((item) => {
+        item.element.style.appearance = item.appearance
+        item.element.style.backgroundImage = item.backgroundImage
+        item.element.style.backgroundPosition = item.backgroundPosition
+        item.element.style.backgroundRepeat = ''
+        item.element.style.paddingRight = ''
+      })
+
       if (shareButton) {
         shareButton.style.display = ''
-      }
-
-      if (ctaButton) {
-        ctaButton.style.display = ''
-      }
-
-      // Remove promo element in case of error
-      if (calculatorRef.current && promoElement.parentNode === calculatorRef.current) {
-        calculatorRef.current.removeChild(promoElement)
       }
     }
   }
@@ -1072,7 +1099,10 @@ const PricingCalculator: React.FC = () => {
           clickText="Get Started - Free"
           clickLocation="Pricing Calculator"
         >
-          <Button className="flex w-full items-center justify-center sm:w-auto">
+          <Button
+            className="flex w-full items-center justify-center sm:w-auto"
+            id="pricing-cta-button"
+          >
             Get Started - Free
             <ArrowRight size={14} className="ml-2" />
           </Button>
