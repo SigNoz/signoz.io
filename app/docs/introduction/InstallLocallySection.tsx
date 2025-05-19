@@ -2,11 +2,6 @@ import React from 'react'
 import { SiDocker, SiLinux, SiKubernetes } from 'react-icons/si'
 import TrackingLink from '@/components/TrackingLink'
 
-interface InstallLocallySectionProps {
-  experimentId: string
-  variantId: string
-}
-
 interface InstallOptionData {
   title: string
   description: string
@@ -39,10 +34,7 @@ const installOptions: InstallOptionData[] = [
   },
 ]
 
-export default function InstallLocallySection({
-  experimentId,
-  variantId,
-}: InstallLocallySectionProps) {
+export default function InstallLocallySection() {
   const sectionName = 'Self-Host Installation Section'
 
   return (
@@ -63,8 +55,6 @@ export default function InstallLocallySection({
             clickName={option.clickName}
             clickText={option.title}
             clickLocation={sectionName}
-            experimentId={experimentId}
-            variantId={variantId}
             className="flex items-center gap-4 rounded-lg border border-signoz_slate-400 bg-signoz_ink-400 p-4 transition-all hover:border-signoz_robin-500 hover:bg-signoz_ink-300"
           >
             <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-md bg-signoz_robin-500/10">
