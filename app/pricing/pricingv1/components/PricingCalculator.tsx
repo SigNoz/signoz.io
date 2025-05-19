@@ -469,19 +469,23 @@ const PricingCalculator: React.FC = () => {
         <button
           id="share-calculator-button"
           onClick={handleCaptureAndShare}
-          className="relative flex items-center justify-center rounded-md border border-signoz_slate-400 bg-signoz_ink-400 px-2 py-2 transition-colors hover:bg-signoz_ink-300"
-          aria-label="Share calculator"
+          className="flex items-center justify-center gap-2 rounded-md border border-signoz_slate-400 bg-transparent px-3 py-2 text-sm text-signoz_vanilla-100 transition-all hover:bg-signoz_slate-400/20"
         >
-          <Share2 size={18} className="text-signoz_vanilla-100" />
-          {showCopySuccess && (
-            <span className="absolute -top-8 left-1/2 -translate-x-1/2 rounded-md bg-signoz_robin-500 px-2 py-1 text-xs text-signoz_vanilla-100">
-              Copied! <Check size={12} className="ml-1 inline" />
-            </span>
-          )}
-          {showShareSuccess && (
-            <span className="absolute -top-8 left-1/2 -translate-x-1/2 rounded-md bg-signoz_robin-500 px-2 py-1 text-xs text-signoz_vanilla-100">
-              Shared! <Check size={12} className="ml-1 inline" />
-            </span>
+          {showCopySuccess ? (
+            <>
+              <Check size={14} className="text-green-500" />
+              {isMobile ? 'Copied!' : 'Copied to Clipboard!'}
+            </>
+          ) : showShareSuccess ? (
+            <>
+              <Check size={14} className="text-green-500" />
+              {isMobile ? 'Shared!' : 'Captured!'}
+            </>
+          ) : (
+            <>
+              <Camera size={14} />
+              {isMobile ? 'Share' : 'Share Estimates with Your Team'}
+            </>
           )}
         </button>
       </div>
