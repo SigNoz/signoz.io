@@ -35,7 +35,7 @@ interface Region {
 // Variant Navbar component (now integrated into layout)
 export const VariantNavbar = () => {
   return (
-    <div className="fixed left-0 right-0 top-0 z-[30] mx-auto flex h-[56px] w-full items-center text-signoz_vanilla-100 backdrop-blur-[20px]">
+    <div className="fixed left-0  right-0 top-0 z-[30] mx-auto flex h-[56px] w-full items-center text-signoz_vanilla-100 backdrop-blur-[20px]">
       <div className="bg-signoz_ink-600 flex h-full w-full items-center px-4 md:pl-12 lg:w-5/12 lg:pl-16">
         <div className="flex justify-start">
           <Link href="/" className="-m-1.5 flex items-center gap-2 p-1.5">
@@ -52,6 +52,7 @@ export const VariantNavbar = () => {
       </div>
       <div className="hidden h-full items-center justify-end bg-signoz_ink-300 px-4 md:pr-12 lg:flex lg:w-7/12 lg:pr-16">
         <TrackingLink
+          target="_blank"
           clickType="Nav Click"
           clickName="Docs Link"
           clickLocation="teams_variant"
@@ -62,9 +63,21 @@ export const VariantNavbar = () => {
           <ExternalLink className="mr-2 h-4 w-4" />
           Documentation
         </TrackingLink>
+        <TrackingLink
+          target="_blank"
+          clickType="Nav Click"
+          clickName="Pricing Link"
+          clickLocation="teams_variant"
+          clickText="Pricing"
+          href="/pricing/"
+          className="mr-6 flex items-center truncate px-1.5 py-1 text-sm font-normal text-gray-400 hover:text-signoz_robin-500"
+        >
+          Pricing
+        </TrackingLink>
       </div>
       <div className="bg-signoz_ink-600 flex h-full items-center justify-end px-4 md:px-8 lg:hidden">
         <TrackingLink
+          target="_blank"
           clickType="Nav Click"
           clickName="Docs Link"
           clickLocation="teams_variant"
