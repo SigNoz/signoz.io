@@ -14,6 +14,8 @@ export const EXPERIMENTS = {
       NO_QUICKSTART: 'no-quickstart',
     },
     flagName: 'docs-header-experiment-part-two',
+    concluded: true,
+    defaultVariant: 'no-quickstart',
   },
   DOCS_HEADER: {
     id: 'docs-header-with-only-quick-start',
