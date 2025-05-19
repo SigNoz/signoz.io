@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react'
 import { Slider, Tooltip } from '@nextui-org/react'
-import { ArrowUpRight, ArrowRight } from 'lucide-react'
+import { ArrowUpRight, ArrowRight, Camera, Share2, Check } from 'lucide-react'
 import Link from 'next/link'
 import Button from '../../../../components/Button/Button'
 import TrackingLink from '../../../../components/TrackingLink'
@@ -105,6 +105,16 @@ const PricingCalculator: React.FC = () => {
   // Used to track whether we're client-side rendered
   const [isMounted, setIsMounted] = useState(false)
 
+  // New ref for the calculator element
+  const calculatorRef = useRef<HTMLDivElement>(null)
+
+  // State for showing share success message
+  const [showShareSuccess, setShowShareSuccess] = useState(false)
+
+  // Add a state for clipboard copy success
+  const [showCopySuccess, setShowCopySuccess] = useState(false)
+
+  // Update isMounted after component mounts
   useEffect(() => {
     setIsMounted(true)
   }, [])
@@ -204,6 +214,179 @@ const PricingCalculator: React.FC = () => {
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
+  // Function to handle screenshot capture and sharing
+  const handleCaptureAndShare = async () => {
+    // Get the share button element to hide it during capture
+    const shareButton = document.getElementById('share-calculator-button') as HTMLElement | null
+    const ctaButton = document.querySelector(
+      '.pricing-calculator .mt-4 .flex'
+    ) as HTMLElement | null
+    const headingElement = document.querySelector('.pricing-calculator h3') as HTMLElement | null
+
+    // Create a promotional element to show during capture
+    const promoElement = document.createElement('div')
+    promoElement.className =
+      'mt-4 p-3 rounded-md bg-signoz_robin-500/10 border border-dashed border-signoz_robin-500'
+    promoElement.innerHTML = `
+      <p class="text-center text-sm font-medium text-signoz_vanilla-100">
+        Get started with SigNoz - the open-source observability platform that helps you monitor applications with traces, logs, and metrics.
+        <span class="block mt-1 text-signoz_robin-400">Try it free at signoz.io</span>
+      </p>
+    `
+
+    // Store original values to restore later
+    let originalHeadingText = ''
+
+    if (headingElement) {
+      originalHeadingText = headingElement.textContent || ''
+      headingElement.textContent = 'SigNoz Monthly Estimate'
+    }
+
+    if (shareButton) {
+      // Hide the button before capture
+      shareButton.style.display = 'none'
+    }
+
+    if (ctaButton) {
+      ctaButton.style.display = 'none'
+    }
+
+    // Add promo element before capture
+    if (calculatorRef.current) {
+      calculatorRef.current.appendChild(promoElement)
+    }
+
+    try {
+      // Lazy load the html-to-image library
+      const htmlToImage = await import('html-to-image')
+
+      if (!calculatorRef.current) return
+
+      // Capture the calculator element as a PNG image
+      const dataUrl = await htmlToImage.toPng(calculatorRef.current, {
+        quality: 0.95,
+        backgroundColor: '#161A22', // Match SigNoz dark theme
+      })
+
+      // Restore original elements
+      if (headingElement) {
+        headingElement.textContent = originalHeadingText
+      }
+
+      if (shareButton) {
+        shareButton.style.display = ''
+      }
+
+      if (ctaButton) {
+        ctaButton.style.display = ''
+      }
+
+      // Remove promo element
+      if (calculatorRef.current && promoElement.parentNode === calculatorRef.current) {
+        calculatorRef.current.removeChild(promoElement)
+      }
+
+      // Try to copy to clipboard first (avoiding fetch to prevent CSP issues)
+      try {
+        if (navigator.clipboard && navigator.clipboard.write) {
+          // Convert base64 data URL to blob without using fetch
+          // Extract the base64 part (remove the data:image/png;base64, prefix)
+          const base64Data = dataUrl.split(',')[1]
+          // Convert base64 to binary
+          const byteCharacters = atob(base64Data)
+          // Create a byte array
+          const byteArrays: Uint8Array[] = []
+          for (let i = 0; i < byteCharacters.length; i += 512) {
+            const slice = byteCharacters.slice(i, i + 512)
+            const byteNumbers = new Array(slice.length)
+            for (let j = 0; j < slice.length; j++) {
+              byteNumbers[j] = slice.charCodeAt(j)
+            }
+            const byteArray = new Uint8Array(byteNumbers)
+            byteArrays.push(byteArray)
+          }
+          // Create blob
+          const blob = new Blob(byteArrays, { type: 'image/png' })
+
+          // Write to clipboard
+          await navigator.clipboard.write([
+            new ClipboardItem({
+              [blob.type]: blob,
+            }),
+          ])
+
+          // Show success message for clipboard
+          setShowCopySuccess(true)
+          setTimeout(() => setShowCopySuccess(false), 3000)
+          return
+        }
+      } catch (clipboardError) {
+        console.log('Clipboard write failed, falling back to other methods', clipboardError)
+      }
+
+      // Try using Web Share API for mobile devices
+      if (navigator.share) {
+        try {
+          // Create blob without using fetch (same method as above)
+          const base64Data = dataUrl.split(',')[1]
+          const byteCharacters = atob(base64Data)
+          const byteArrays: Uint8Array[] = []
+          for (let i = 0; i < byteCharacters.length; i += 512) {
+            const slice = byteCharacters.slice(i, i + 512)
+            const byteNumbers = new Array(slice.length)
+            for (let j = 0; j < slice.length; j++) {
+              byteNumbers[j] = slice.charCodeAt(j)
+            }
+            const byteArray = new Uint8Array(byteNumbers)
+            byteArrays.push(byteArray)
+          }
+          const blob = new Blob(byteArrays, { type: 'image/png' })
+
+          const file = new File([blob], 'signoz-pricing-estimate.png', { type: 'image/png' })
+
+          await navigator.share({
+            title: 'SigNoz Pricing Estimate',
+            text: 'Check out my SigNoz pricing estimate',
+            files: [file],
+          })
+          return
+        } catch (error) {
+          console.log('Web Share API not supported, falling back to download')
+        }
+      }
+
+      // Fallback to download (direct from data URL, no fetch needed)
+      const link = document.createElement('a')
+      link.download = 'signoz-pricing-estimate.png'
+      link.href = dataUrl
+      link.click()
+
+      // Show success message
+      setShowShareSuccess(true)
+      setTimeout(() => setShowShareSuccess(false), 3000)
+    } catch (error) {
+      console.error('Error capturing calculator:', error)
+
+      // Restore original state in case of error
+      if (headingElement) {
+        headingElement.textContent = originalHeadingText
+      }
+
+      if (shareButton) {
+        shareButton.style.display = ''
+      }
+
+      if (ctaButton) {
+        ctaButton.style.display = ''
+      }
+
+      // Remove promo element in case of error
+      if (calculatorRef.current && promoElement.parentNode === calculatorRef.current) {
+        calculatorRef.current.removeChild(promoElement)
+      }
+    }
+  }
+
   // Render a slider with consistent styling
   const renderSlider = (
     value: number,
@@ -254,41 +437,53 @@ const PricingCalculator: React.FC = () => {
     <div
       id="estimate-your-monthly-bill"
       className="pricing-calculator mb-6 mt-0 w-full rounded-md border border-dashed border-signoz_slate-400 p-3 md:p-4"
+      ref={calculatorRef}
     >
-      <div className="mb-4">
-        <span className="group relative text-lg font-semibold text-signoz_vanilla-100 md:text-2xl">
+      <div className="mb-4 flex items-center justify-between">
+        <h3 className="text-lg font-semibold text-signoz_vanilla-100 md:text-xl">
           Estimate your monthly bill
           {isMounted && (
             <a
               href="#estimate-your-monthly-bill"
               onClick={copyLinkToClipboard}
-              className="ml-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
-              aria-label="Copy link to this section"
+              className="ml-2 inline-block rounded-md bg-signoz_ink-400 p-0.5 text-signoz_vanilla-400 transition-colors hover:bg-signoz_ink-300 hover:text-signoz_vanilla-300"
+              title="Copy link to this section"
+              aria-label="Copy link to pricing calculator"
             >
               <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 20 20"
-                fill="#4E74F8"
-                className="linkicon h-6 w-6"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
               >
-                <path d="M12.232 4.232a2.5 2.5 0 0 1 3.536 3.536l-1.225 1.224a.75.75 0 0 0 1.061 1.06l1.224-1.224a4 4 0 0 0-5.656-5.656l-3 3a4 4 0 0 0 .225 5.865.75.75 0 0 0 .977-1.138 2.5 2.5 0 0 1-.142-3.667l3-3Z" />
-                <path d="M11.603 7.963a.75.75 0 0 0-.977 1.138 2.5 2.5 0 0 1 .142 3.667l-3 3a2.5 2.5 0 0 1-3.536-3.536l1.225-1.224a.75.75 0 0 0-1.061-1.06l-1.224 1.224a4 4 0 1 0 5.656 5.656l3-3a4 4 0 0 0-.225-5.865Z" />
+                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
               </svg>
             </a>
           )}
-        </span>
-        {isMounted && (
-          <p className="mt-1 text-sm text-signoz_vanilla-400">
-            You can also set data ingestion limits so you never get a surprise bill.
-            <Link
-              href="https://signoz.io/docs/ingestion/signoz-cloud/keys/"
-              className="ml-1 font-medium text-signoz_robin-400"
-            >
-              Learn more
-              <ArrowUpRight className="inline" size={16} />
-            </Link>
-          </p>
-        )}
+        </h3>
+        <button
+          id="share-calculator-button"
+          onClick={handleCaptureAndShare}
+          className="relative flex items-center justify-center rounded-md border border-signoz_slate-400 bg-signoz_ink-400 px-2 py-2 transition-colors hover:bg-signoz_ink-300"
+          aria-label="Share calculator"
+        >
+          <Share2 size={18} className="text-signoz_vanilla-100" />
+          {showCopySuccess && (
+            <span className="absolute -top-8 left-1/2 -translate-x-1/2 rounded-md bg-signoz_robin-500 px-2 py-1 text-xs text-signoz_vanilla-100">
+              Copied! <Check size={12} className="ml-1 inline" />
+            </span>
+          )}
+          {showShareSuccess && (
+            <span className="absolute -top-8 left-1/2 -translate-x-1/2 rounded-md bg-signoz_robin-500 px-2 py-1 text-xs text-signoz_vanilla-100">
+              Shared! <Check size={12} className="ml-1 inline" />
+            </span>
+          )}
+        </button>
       </div>
 
       {isMobile ? (
