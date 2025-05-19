@@ -1,9 +1,8 @@
 'use client'
 
 import React, { useState, useEffect, useRef } from 'react'
-import { Slider, Tooltip } from '@nextui-org/react'
+import { Slider } from '@nextui-org/react'
 import { ArrowUpRight, ArrowRight, Camera, Share2, Check } from 'lucide-react'
-import Link from 'next/link'
 import Button from '../../../../components/Button/Button'
 import TrackingLink from '../../../../components/TrackingLink'
 
