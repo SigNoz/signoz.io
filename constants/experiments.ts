@@ -52,6 +52,8 @@ export const EXPERIMENTS = {
       START_SENDING_DATA: 'start-sending-data-free-copy',
     },
     flagName: 'home-header-cta-copy',
+    concluded: true,
+    defaultVariant: 'get-started-free-copy',
   },
   TEAMS_PAGE: {
     id: 'teams-page-focused-layout-experiment',
