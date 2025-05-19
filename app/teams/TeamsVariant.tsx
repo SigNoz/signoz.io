@@ -64,68 +64,17 @@ export const VariantNavbar = () => {
           <ExternalLink className="mr-2 h-4 w-4" />
           Documentation
         </TrackingLink>
-        <Tooltip
-          className="border border-signoz_slate-400 bg-signoz_ink-400 p-3"
-          content={
-            <div className="max-w-xs space-y-3">
-              <div className="flex items-baseline">
-                <span className="text-xl font-bold text-signoz_vanilla-100">$199</span>
-                <span className="ml-1 text-signoz_vanilla-400">/month</span>
-              </div>
-              <p className="text-sm text-signoz_vanilla-100">
-                For teams that need high-performing applications
-              </p>
-              <div className="space-y-2 pt-1">
-                <div className="flex items-center gap-2 text-xs text-signoz_vanilla-400">
-                  <span className="h-2.5 w-2.5 rounded-full bg-signoz_robin-400"></span> Traces:
-                  $0.30/GB
-                </div>
-                <div className="flex items-center gap-2 text-xs text-signoz_vanilla-400">
-                  <span className="h-2.5 w-2.5 rounded-full bg-signoz_sakura-400"></span> Logs:
-                  $0.30/GB
-                </div>
-                <div className="flex items-center gap-2 text-xs text-signoz_vanilla-400">
-                  <span className="h-2.5 w-2.5 rounded-full bg-signoz_amber-400"></span> Metrics:
-                  $0.10/million samples
-                </div>
-              </div>
-              <p className="mt-1 text-xs text-signoz_vanilla-300">
-                Includes 30-day free trial, no credit card required
-              </p>
-              <div className="flex justify-center pt-2">
-                <TrackingLink
-                  clickType="Nav Click"
-                  clickName="Pricing Link"
-                  clickLocation="teams_variant tooltip"
-                  clickText="Pricing"
-                  href="/pricing/#estimate-your-monthly-bill"
-                  target="_blank"
-                  className="flex items-center gap-1 text-xs font-medium text-signoz_robin-500 hover:text-signoz_robin-400"
-                >
-                  Estimate your bill
-                  <ArrowRight size={10} />
-                </TrackingLink>
-              </div>
-            </div>
-          }
-          showArrow={true}
-          placement="bottom"
-          offset={10}
+        <TrackingLink
+          target="_blank"
+          clickType="Nav Click"
+          clickName="Pricing Link"
+          clickLocation="teams_variant"
+          clickText="Pricing"
+          href="/pricing/"
+          className="flex items-center truncate px-1.5 py-1 text-sm font-normal text-gray-400 hover:text-signoz_robin-500"
         >
-          <span>
-            <TrackingLink
-              target="_blank"
-              clickType="Nav Click"
-              clickName="Pricing Link"
-              clickLocation="teams_variant"
-              clickText="Pricing"
-              href="/pricing/"
-              className="mr-6 flex items-center truncate px-1.5 py-1 text-sm font-normal text-gray-400 hover:text-signoz_robin-500"
-            >
-              Pricing
-            </TrackingLink>
-          </span>
-        </Tooltip>
+          Pricing
+        </TrackingLink>
       </div>
       <div className="bg-signoz_ink-600 flex h-full items-center justify-end px-4 md:px-8 lg:hidden">
         <TrackingLink
