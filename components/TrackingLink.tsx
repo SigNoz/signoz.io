@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { ReactNode } from 'react'
+import { useLogEvent } from 'hooks/useLogEvent'
 
 interface TrackingLinkProps {
   href: string
@@ -16,6 +17,9 @@ interface TrackingLinkProps {
   target?: string
   rel?: string
   style?: React.CSSProperties
+  // Optional experiment tracking props
+  experimentId?: string
+  variantId?: string
   [key: string]: any
 }
 
@@ -32,6 +36,7 @@ interface LinkPropsType {
 
 /**
  * A wrapper around Next.js Link component that tracks clicks using Mixpanel
+ * Includes experiment data in the click event when experiment props are provided
  */
 export default function TrackingLink({
   href,
@@ -45,11 +50,39 @@ export default function TrackingLink({
   target,
   rel,
   style,
+  experimentId,
+  variantId,
   ...rest
 }: TrackingLinkProps) {
   const pathname = usePathname()
+  const logEvent = useLogEvent()
 
   const handleClick = () => {
+    // Create event attributes object with click data
+    const eventAttributes: Record<string, any> = {
+      clickType,
+      clickName,
+      clickLocation,
+      clickText,
+      pageLocation: pathname,
+    }
+
+    // Add experiment data to click event if available
+    if (experimentId && variantId) {
+      eventAttributes.experiment_id = experimentId
+      eventAttributes.variant_id = variantId
+      eventAttributes.button_type = clickType
+      // Flag this as a conversion event
+      eventAttributes.is_experiment_conversion = true
+    }
+
+    // Log a single unified event
+    logEvent({
+      eventName: 'Website Click',
+      eventType: 'track',
+      attributes: eventAttributes,
+    })
+
     // Call the original onClick handler if provided
     if (onClick) {
       onClick()

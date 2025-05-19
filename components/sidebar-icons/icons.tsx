@@ -6,23 +6,23 @@ const All = () => {
       <path
         d="M11.0714 2.85718L13.0104 8.29925L17.8571 10L13.0104 11.7008L11.0714 17.1429L9.13236 11.7008L4.28564 10L9.13236 8.29925L11.0714 2.85718Z"
         stroke="white"
-        stroke-width="1.66666"
-        stroke-linecap="round"
-        stroke-linejoin="round"
+        strokeWidth="1.66666"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
       <path
         d="M3.80949 2.5V5.83334M2.14282 4.16666H5.47616"
         stroke="white"
-        stroke-width="1.66666"
-        stroke-linecap="round"
-        stroke-linejoin="round"
+        strokeWidth="1.66666"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
       <path
         d="M3.80949 14.1666V17.4999M2.14282 15.8333H5.47616"
         stroke="white"
-        stroke-width="1.66666"
-        stroke-linecap="round"
-        stroke-linejoin="round"
+        strokeWidth="1.66666"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
     </svg>
   )
@@ -34,51 +34,51 @@ const Opentelemetry = () => {
       <path
         d="M8.3875 10.4109L3.2375 11.5093C3.0376 11.5526 2.82866 11.5156 2.65587 11.4061C2.48308 11.2966 2.36033 11.1235 2.31417 10.9243L1.86667 9.13258C1.81406 8.91672 1.84393 8.68898 1.95045 8.49399C2.05696 8.299 2.23244 8.1508 2.4425 8.07842L13.6958 4.37842"
         stroke="#C0C1C3"
-        stroke-width="1.66667"
-        stroke-linecap="round"
-        stroke-linejoin="round"
+        strokeWidth="1.66667"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
       <path
         d="M11.3 9.78916L14.91 9.01917"
         stroke="#C0C1C3"
-        stroke-width="1.66667"
-        stroke-linecap="round"
-        stroke-linejoin="round"
+        strokeWidth="1.66667"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
       <path
         d="M13.3333 17.5001L10.7458 12.3251"
         stroke="#C0C1C3"
-        stroke-width="1.66667"
-        stroke-linecap="round"
-        stroke-linejoin="round"
+        strokeWidth="1.66667"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
       <path
         d="M13.7375 4.95001C13.6303 4.52125 13.6979 4.0675 13.9253 3.68853C14.1526 3.30957 14.5212 3.03643 14.95 2.92918L15.8583 2.70252C16.0726 2.64906 16.2993 2.68285 16.4886 2.79644C16.678 2.91003 16.8146 3.09415 16.8683 3.30835L18.1308 8.35835C18.1845 8.57273 18.1508 8.79967 18.0372 8.98923C17.9236 9.1788 17.7393 9.31547 17.525 9.36918L16.6166 9.59585C16.1879 9.70297 15.7341 9.63542 15.3551 9.40804C14.9762 9.18066 14.703 8.81208 14.5958 8.38335L13.7375 4.95001Z"
         stroke="#C0C1C3"
-        stroke-width="1.66667"
-        stroke-linecap="round"
-        stroke-linejoin="round"
+        strokeWidth="1.66667"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
       <path
         d="M5.13184 7.19421L6.06017 10.9075"
         stroke="#C0C1C3"
-        stroke-width="1.66667"
-        stroke-linecap="round"
-        stroke-linejoin="round"
+        strokeWidth="1.66667"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
       <path
         d="M6.66675 17.5001L9.25425 12.3251"
         stroke="#C0C1C3"
-        stroke-width="1.66667"
-        stroke-linecap="round"
-        stroke-linejoin="round"
+        strokeWidth="1.66667"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
       <path
         d="M10.0002 12.5C10.9206 12.5 11.6668 11.7538 11.6668 10.8333C11.6668 9.91282 10.9206 9.16663 10.0002 9.16663C9.07969 9.16663 8.3335 9.91282 8.3335 10.8333C8.3335 11.7538 9.07969 12.5 10.0002 12.5Z"
         stroke="#C0C1C3"
-        stroke-width="1.66667"
-        stroke-linecap="round"
-        stroke-linejoin="round"
+        strokeWidth="1.66667"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
     </svg>
   )
@@ -104,172 +104,170 @@ const Kubernetes = () => {
 const FAQs = () => {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
-    <path
-      d="M11.0714 2.85718L13.0104 8.29925L17.8571 10L13.0104 11.7008L11.0714 17.1429L9.13236 11.7008L4.28564 10L9.13236 8.29925L11.0714 2.85718Z"
-      stroke="white"
-      stroke-width="1.66666"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-    />
-    <path
-      d="M3.80949 2.5V5.83334M2.14282 4.16666H5.47616"
-      stroke="white"
-      stroke-width="1.66666"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-    />
-    <path
-      d="M3.80949 14.1666V17.4999M2.14282 15.8333H5.47616"
-      stroke="white"
-      stroke-width="1.66666"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-    />
-  </svg>
+      <path
+        d="M11.0714 2.85718L13.0104 8.29925L17.8571 10L13.0104 11.7008L11.0714 17.1429L9.13236 11.7008L4.28564 10L9.13236 8.29925L11.0714 2.85718Z"
+        stroke="white"
+        strokeWidth="1.66666"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M3.80949 2.5V5.83334M2.14282 4.16666H5.47616"
+        stroke="white"
+        strokeWidth="1.66666"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M3.80949 14.1666V17.4999M2.14282 15.8333H5.47616"
+        stroke="white"
+        strokeWidth="1.66666"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   )
 }
 
 const LOGGING = () => {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
-    <path
-      d="M11.0714 2.85718L13.0104 8.29925L17.8571 10L13.0104 11.7008L11.0714 17.1429L9.13236 11.7008L4.28564 10L9.13236 8.29925L11.0714 2.85718Z"
-      stroke="white"
-      stroke-width="1.66666"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-    />
-    <path
-      d="M3.80949 2.5V5.83334M2.14282 4.16666H5.47616"
-      stroke="white"
-      stroke-width="1.66666"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-    />
-    <path
-      d="M3.80949 14.1666V17.4999M2.14282 15.8333H5.47616"
-      stroke="white"
-      stroke-width="1.66666"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-    />
-  </svg>
+      <path
+        d="M11.0714 2.85718L13.0104 8.29925L17.8571 10L13.0104 11.7008L11.0714 17.1429L9.13236 11.7008L4.28564 10L9.13236 8.29925L11.0714 2.85718Z"
+        stroke="white"
+        strokeWidth="1.66666"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M3.80949 2.5V5.83334M2.14282 4.16666H5.47616"
+        stroke="white"
+        strokeWidth="1.66666"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M3.80949 14.1666V17.4999M2.14282 15.8333H5.47616"
+        stroke="white"
+        strokeWidth="1.66666"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   )
 }
-
 
 const PROMETHEUS = () => {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
-    <path
-      d="M11.0714 2.85718L13.0104 8.29925L17.8571 10L13.0104 11.7008L11.0714 17.1429L9.13236 11.7008L4.28564 10L9.13236 8.29925L11.0714 2.85718Z"
-      stroke="white"
-      stroke-width="1.66666"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-    />
-    <path
-      d="M3.80949 2.5V5.83334M2.14282 4.16666H5.47616"
-      stroke="white"
-      stroke-width="1.66666"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-    />
-    <path
-      d="M3.80949 14.1666V17.4999M2.14282 15.8333H5.47616"
-      stroke="white"
-      stroke-width="1.66666"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-    />
-  </svg>
+      <path
+        d="M11.0714 2.85718L13.0104 8.29925L17.8571 10L13.0104 11.7008L11.0714 17.1429L9.13236 11.7008L4.28564 10L9.13236 8.29925L11.0714 2.85718Z"
+        stroke="white"
+        strokeWidth="1.66666"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M3.80949 2.5V5.83334M2.14282 4.16666H5.47616"
+        stroke="white"
+        strokeWidth="1.66666"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M3.80949 14.1666V17.4999M2.14282 15.8333H5.47616"
+        stroke="white"
+        strokeWidth="1.66666"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   )
 }
 
 const APM = () => {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
-    <path
-      d="M11.0714 2.85718L13.0104 8.29925L17.8571 10L13.0104 11.7008L11.0714 17.1429L9.13236 11.7008L4.28564 10L9.13236 8.29925L11.0714 2.85718Z"
-      stroke="white"
-      stroke-width="1.66666"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-    />
-    <path
-      d="M3.80949 2.5V5.83334M2.14282 4.16666H5.47616"
-      stroke="white"
-      stroke-width="1.66666"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-    />
-    <path
-      d="M3.80949 14.1666V17.4999M2.14282 15.8333H5.47616"
-      stroke="white"
-      stroke-width="1.66666"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-    />
-  </svg>
+      <path
+        d="M11.0714 2.85718L13.0104 8.29925L17.8571 10L13.0104 11.7008L11.0714 17.1429L9.13236 11.7008L4.28564 10L9.13236 8.29925L11.0714 2.85718Z"
+        stroke="white"
+        strokeWidth="1.66666"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M3.80949 2.5V5.83334M2.14282 4.16666H5.47616"
+        stroke="white"
+        strokeWidth="1.66666"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M3.80949 14.1666V17.4999M2.14282 15.8333H5.47616"
+        stroke="white"
+        strokeWidth="1.66666"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   )
 }
 
 const Monitoring = () => {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
-    <path
-      d="M11.0714 2.85718L13.0104 8.29925L17.8571 10L13.0104 11.7008L11.0714 17.1429L9.13236 11.7008L4.28564 10L9.13236 8.29925L11.0714 2.85718Z"
-      stroke="white"
-      stroke-width="1.66666"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-    />
-    <path
-      d="M3.80949 2.5V5.83334M2.14282 4.16666H5.47616"
-      stroke="white"
-      stroke-width="1.66666"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-    />
-    <path
-      d="M3.80949 14.1666V17.4999M2.14282 15.8333H5.47616"
-      stroke="white"
-      stroke-width="1.66666"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-    />
-  </svg>
+      <path
+        d="M11.0714 2.85718L13.0104 8.29925L17.8571 10L13.0104 11.7008L11.0714 17.1429L9.13236 11.7008L4.28564 10L9.13236 8.29925L11.0714 2.85718Z"
+        stroke="white"
+        strokeWidth="1.66666"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M3.80949 2.5V5.83334M2.14282 4.16666H5.47616"
+        stroke="white"
+        strokeWidth="1.66666"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M3.80949 14.1666V17.4999M2.14282 15.8333H5.47616"
+        stroke="white"
+        strokeWidth="1.66666"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   )
 }
 
 const Grafana = () => {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
-    <path
-      d="M11.0714 2.85718L13.0104 8.29925L17.8571 10L13.0104 11.7008L11.0714 17.1429L9.13236 11.7008L4.28564 10L9.13236 8.29925L11.0714 2.85718Z"
-      stroke="white"
-      stroke-width="1.66666"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-    />
-    <path
-      d="M3.80949 2.5V5.83334M2.14282 4.16666H5.47616"
-      stroke="white"
-      stroke-width="1.66666"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-    />
-    <path
-      d="M3.80949 14.1666V17.4999M2.14282 15.8333H5.47616"
-      stroke="white"
-      stroke-width="1.66666"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-    />
-  </svg>
+      <path
+        d="M11.0714 2.85718L13.0104 8.29925L17.8571 10L13.0104 11.7008L11.0714 17.1429L9.13236 11.7008L4.28564 10L9.13236 8.29925L11.0714 2.85718Z"
+        stroke="white"
+        strokeWidth="1.66666"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M3.80949 2.5V5.83334M2.14282 4.16666H5.47616"
+        stroke="white"
+        strokeWidth="1.66666"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M3.80949 14.1666V17.4999M2.14282 15.8333H5.47616"
+        stroke="white"
+        strokeWidth="1.66666"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   )
 }
-
 
 const Distributed = () => {
   return (
@@ -277,37 +275,37 @@ const Distributed = () => {
       <path
         d="M9.99992 5.83333C10.9204 5.83333 11.6666 5.08714 11.6666 4.16667C11.6666 3.24619 10.9204 2.5 9.99992 2.5C9.07944 2.5 8.33325 3.24619 8.33325 4.16667C8.33325 5.08714 9.07944 5.83333 9.99992 5.83333Z"
         stroke="#C0C1C3"
-        stroke-width="1.66667"
-        stroke-linecap="round"
-        stroke-linejoin="round"
+        strokeWidth="1.66667"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
       <path
         d="M2.5 17.5L9.18333 5.6167"
         stroke="#C0C1C3"
-        stroke-width="1.66667"
-        stroke-linecap="round"
-        stroke-linejoin="round"
+        strokeWidth="1.66667"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
       <path
         d="M10.825 5.6167L12.4333 8.48337"
         stroke="#C0C1C3"
-        stroke-width="1.66667"
-        stroke-linecap="round"
-        stroke-linejoin="round"
+        strokeWidth="1.66667"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
       <path
         d="M15.8334 10C12.6084 13.3333 7.39175 13.3333 4.16675 10"
         stroke="#C0C1C3"
-        stroke-width="1.66667"
-        stroke-linecap="round"
-        stroke-linejoin="round"
+        strokeWidth="1.66667"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
       <path
         d="M17.5002 17.5L15.7002 14.3"
         stroke="#C0C1C3"
-        stroke-width="1.66667"
-        stroke-linecap="round"
-        stroke-linejoin="round"
+        strokeWidth="1.66667"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
     </svg>
   )
@@ -327,31 +325,31 @@ const Observability = () => {
 const Logs = () => {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
-      <path d="M4.1665 4.58325L4.1665 15.8333" stroke="#C0C1C3" stroke-width="1.66667" />
+      <path d="M4.1665 4.58325L4.1665 15.8333" stroke="#C0C1C3" strokeWidth="1.66667" />
       <ellipse
         cx="9.1665"
         cy="4.58333"
         rx="5"
         ry="2.08333"
         stroke="#C0C1C3"
-        stroke-width="1.66667"
+        strokeWidth="1.66667"
       />
       <ellipse cx="9.1665" cy="4.52083" rx="1.25" ry="0.520833" fill="#C0C1C3" />
       <path
         d="M14.1665 15.8333C14.1665 16.7537 11.9279 17.4999 9.1665 17.4999C6.40508 17.4999 4.1665 16.7537 4.1665 15.8333"
         stroke="#C0C1C3"
-        stroke-width="1.66667"
+        strokeWidth="1.66667"
       />
       <path
         d="M7.5 9.16675V10.7628C7.5 10.8036 7.52945 10.8383 7.56963 10.845L9.93037 11.2385C9.97055 11.2452 10 11.2799 10 11.3207V14.1667"
         stroke="#C0C1C3"
-        stroke-width="1.66667"
-        stroke-linecap="round"
+        strokeWidth="1.66667"
+        strokeLinecap="round"
       />
       <path
         d="M14.1665 4.58325V9.01623C14.1665 9.08168 14.2385 9.12159 14.294 9.0869L17.4026 7.14401C17.4506 7.11401 17.5139 7.13956 17.5276 7.19446L17.9058 8.70691C17.9125 8.7338 17.9054 8.76227 17.8868 8.78287L14.1879 12.8928C14.1741 12.9081 14.1665 12.928 14.1665 12.9486V15.8333"
         stroke="#C0C1C3"
-        stroke-width="1.66667"
+        strokeWidth="1.66667"
       />
     </svg>
   )
@@ -379,23 +377,23 @@ const Metrics = () => {
       <path
         d="M15 16.6666V8.33325"
         stroke="#C0C1C3"
-        stroke-width="1.66667"
-        stroke-linecap="round"
-        stroke-linejoin="round"
+        strokeWidth="1.66667"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
       <path
         d="M10 16.6666V3.33325"
         stroke="#C0C1C3"
-        stroke-width="1.66667"
-        stroke-linecap="round"
-        stroke-linejoin="round"
+        strokeWidth="1.66667"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
       <path
         d="M5 16.6667V11.6667"
         stroke="#C0C1C3"
-        stroke-width="1.66667"
-        stroke-linecap="round"
-        stroke-linejoin="round"
+        strokeWidth="1.66667"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
     </svg>
   )
@@ -415,9 +413,21 @@ const Docker = () => {
 const ArrowLeft = () => {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
-      <path d="M6.99996 11.0833L2.91663 6.99996L6.99996 2.91663" stroke="#C0C1C3" stroke-width="1.16667" stroke-linecap="round" stroke-linejoin="round"/>
-      <path d="M11.0833 7H2.91663" stroke="#C0C1C3" stroke-width="1.16667" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>
+      <path
+        d="M6.99996 11.0833L2.91663 6.99996L6.99996 2.91663"
+        stroke="#C0C1C3"
+        strokeWidth="1.16667"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M11.0833 7H2.91663"
+        stroke="#C0C1C3"
+        strokeWidth="1.16667"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   )
 }
 
@@ -437,5 +447,5 @@ export const SidebarIcons = {
   Metrics,
   Docker,
   ArrowLeft,
-  Grafana
+  Grafana,
 }

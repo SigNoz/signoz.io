@@ -113,24 +113,24 @@ const Card: React.FC<CardProps> = ({
       {img ? <img src={img} className="card-background h-auto w-auto border-none" /> : null}
 
       {buttonText ? (
-        <Button type={Button.TYPES.SECONDARY} className="mb-4 mt-6">
-          {buttonLink ? (
-            <TrackingLink
-              href={buttonLink}
-              clickType="Secondary CTA"
-              clickName={`${title || 'Feature'} Link`}
-              clickText={buttonText}
-              clickLocation={sectionName}
-              className="flex-center"
-            >
+        buttonLink ? (
+          <TrackingLink
+            href={buttonLink}
+            clickType="Secondary CTA"
+            clickName={`${title || 'Feature'} Link`}
+            clickText={buttonText}
+            clickLocation={sectionName}
+            className="inline-block"
+          >
+            <Button type={Button.TYPES.SECONDARY} className="flex-center mb-4 mt-6">
               {buttonText} <ArrowRight size={14} />
-            </TrackingLink>
-          ) : (
-            <>
-              {buttonText} <ArrowRight size={14} />
-            </>
-          )}
-        </Button>
+            </Button>
+          </TrackingLink>
+        ) : (
+          <Button type={Button.TYPES.SECONDARY} className="flex-center mb-4 mt-6">
+            {buttonText} <ArrowRight size={14} />
+          </Button>
+        )
       ) : null}
     </div>
   )

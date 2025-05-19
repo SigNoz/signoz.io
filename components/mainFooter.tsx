@@ -15,10 +15,9 @@ function Footer() {
   const searchParams = useSearchParams()
   const source = searchParams.get(QUERY_PARAMS.SOURCE)
   const isLoginRoute = pathname === '/login/'
-  const isSignupRoute = pathname === '/teams/'
   const isOnboardingRoute = source === ONBOARDING_SOURCE
 
-  if (isLoginRoute || isOnboardingRoute || isSignupRoute) {
+  if (isLoginRoute || isOnboardingRoute) {
     return null
   }
 
@@ -113,7 +112,7 @@ function Footer() {
                 </Link>
 
                 <div className="mt-5 flex items-center gap-2 whitespace-nowrap pr-8 hover:underline max-md:pr-5">
-                  <Link href="https://jobs.gem.com/signoz" target="_blank">
+                  <Link href="https://signoz.io/careers/" target="_blank">
                     Careers
                   </Link>
                   <ArrowUpRight size={16} />

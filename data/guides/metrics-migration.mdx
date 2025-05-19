@@ -1,0 +1,61 @@
+---
+
+title: Metrics Migration Guide
+slug: dot-metrics-migrations
+date: 2025-05-06
+tags: []
+authors: [aniket_agarwal]
+description: Step-by-Step guide to help in metrics migration
+keywords: []
+
+---
+
+
+# 📌 Overview
+
+This is a step-by-step guide to help you migrate from underscore-based metric names (e.g., `system_memory_usage`) to dot-based naming conventions (e.g., `system.memory.usage`). This change aligns with the OpenTelemetry semantic conventions and enables better namespacing, query efficiency, and cross-platform compatibility.
+
+Currently, the SigNoz OpenTelemetry Collector normalizes metric names by replacing dots (`.`) with underscores (`_`)—both in metric names and attributes. This guide will help you adopt the dot notation consistently throughout your observability pipeline.
+
+## 🔍 Why We Are Migrating
+
+Previously, PromQL did not support the dot (`.`) character in metric names, which required us to normalize all metric names in the OpenTelemetry Collector by replacing dots with underscores (`_`). This ensured compatibility with PromQL queries and prevented query failures.
+
+However, recent updates to PromQL now support a broader set of UTF-8 characters—including the dot (`.`). This removes the need for such normalization and allows us to align with the OpenTelemetry semantic conventions, which recommend using dot-separated naming for better structure and consistency.
+
+GitHub Issue - https://github.com/prometheus/prometheus/issues/13095
+
+## 📦 Migration Plan
+
+### 1. Dual Export Phase (Transition Period)
+
+We have introduced a new exporter: `signozclickhousemetrics`, that doesn't normalizes the metric names and the labels (`system.memory.usage`).
+
+Both exporters (the existing ClickHouse metrics exporter and the new `signozclickhousemetrics`) will run in parallel during this phase.
+
+This allows time for dashboard and alert migration while ensuring no data loss or query breakage.
+
+### 2. Dashboard and Alert Migration
+
+During the transition phase, we will provide scripts and tools to help you migrate your dashboards and alerts from underscore (`_`) metrics to dot (`.`) metrics.
+
+We will also offer community support and documentation to assist with this process.
+
+### 3. Cutover and Deprecation
+
+Once the data for both naming formats has existed in your system for at least one full default retention cycle, we will deprecate and remove the old exporter.
+
+At this point:
+- Underscore-based metric names will be deprecated.
+- Only the `signozclickhousemetrics` exporter will be supported moving forward.
+- All dashboards, alerts, and custom queries should use the dot notation exclusively.
+- For those community users who have higher retention in metrics data, we will help with the scripts to converts the old (_) data to new non normalized data.
+
+## ⚙️ Resource Impact
+
+Running both exporters simultaneously will result in a temporary increase in CPU and memory usage:
+
+- **OpenTelemetry Collector:** ~25%-30% increase in CPU and memory usage
+- **ClickHouse:** ~25%-30% increase in ingestion and processing load
+
+This is expected and temporary, only for the duration of the dual-export phase.

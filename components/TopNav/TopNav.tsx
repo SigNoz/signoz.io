@@ -287,7 +287,7 @@ export default function TopNav() {
               <span className="text-[17.111px] font-medium">SigNoz</span>
             </TrackingLink>
 
-            {!isLoginRoute && !isSignupRoute && (
+            {!isLoginRoute && (
               <div className="hidden items-center gap-x-6 lg:flex">
                 <div
                   onMouseEnter={handleMouseEnterProduct}
@@ -566,7 +566,7 @@ export default function TopNav() {
             )}
           </div>
           <div className="flex justify-end lg:hidden">
-            {!mobileMenuOpen && !isLoginRoute && !isSignupRoute && <SearchButton />}
+            {!mobileMenuOpen && <SearchButton />}
             <button
               type="button"
               className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5"
@@ -582,7 +582,7 @@ export default function TopNav() {
           </div>
 
           <div className="hidden items-center gap-3 lg:flex lg:flex-1 lg:justify-end">
-            {!isLoginRoute && !isSignupRoute && (
+            {!isLoginRoute && (
               <>
                 <SearchButton />
                 <GitHubStars location="Top Navbar" />
@@ -598,22 +598,19 @@ export default function TopNav() {
                   Sign In
                 </TrackingButton>
 
-                <Button
-                  id="btn-get-started-website-navbar"
+                <TrackingLink
+                  href="/teams"
                   className="start-free-trial-btn flex h-8 items-center justify-center gap-1.5 truncate rounded-full px-4 py-2 pl-4 pr-3 text-center text-sm font-medium not-italic leading-5 text-white no-underline outline-none hover:text-white"
+                  clickType="Primary CTA"
+                  clickName="Sign Up Button"
+                  clickText="Get Started - Free"
+                  clickLocation="Top Navbar"
                 >
-                  <TrackingLink
-                    href="/teams"
-                    className="flex-center"
-                    clickType="Primary CTA"
-                    clickName="Sign Up Button"
-                    clickText="Get Started - Free"
-                    clickLocation="Top Navbar"
-                  >
+                  <Button id="btn-get-started-website-navbar" className="flex-center">
                     Get Started - Free
                     <ArrowRight size={14} />
-                  </TrackingLink>
-                </Button>
+                  </Button>
+                </TrackingLink>
               </>
             )}
 
@@ -654,49 +651,40 @@ export default function TopNav() {
                 </TrackingButton>
               </div>
             )}
-
-            {isSignupRoute && (
-              <div className="flex items-center gap-3">
-                <TrackingButton
-                  className="-ml-1 box-border flex h-8 items-center gap-2 rounded-full bg-signoz_slate-500 px-4 py-2 pl-2 pr-2.5 text-sm font-normal not-italic leading-5 text-signoz_vanilla-100 no-underline outline-none hover:text-white"
-                  clickType="Secondary CTA"
-                  clickName="Sign In Button"
-                  clickText="Sign In"
-                  clickLocation="Top Navbar Teams Page"
-                  onClick={() => router.push('/login')}
-                >
-                  Sign In
-                </TrackingButton>
-
-                <TrackingButton
-                  className="flex h-8 min-w-24 items-center justify-center gap-2 truncate rounded-sm border border-signoz_slate-300 bg-signoz_slate-500 px-4 py-2 pl-4 pr-3 text-center text-xs font-normal not-italic leading-5 text-signoz_vanilla-400 no-underline outline-none hover:text-white"
-                  clickType="Secondary CTA"
-                  clickName="Docs Button"
-                  clickText="Docs"
-                  clickLocation="Top Navbar Teams Page"
-                  onClick={() => router.push('/docs')}
-                >
-                  <BookOpenText size={12} /> Read Documentation
-                </TrackingButton>
-              </div>
-            )}
           </div>
         </nav>
         <Dialog as="div" className="lg:hidden" open={mobileMenuOpen} onClose={setMobileMenuOpen}>
           <div className="fixed inset-0 top-[56px]" />
           <Dialog.Panel className="fixed inset-y-0 right-0 z-10 mt-[56px] w-full overflow-y-auto bg-signoz_ink-500 px-6 py-24 !pt-[calc(6rem-56px)] sm:max-w-sm sm:ring-1 sm:ring-gray-900/10 ">
+            <div className="flex items-center justify-between">
+              <TrackingLink
+                href="/"
+                className="-m-1.5 p-1.5"
+                clickType="Nav Click"
+                clickName="SigNoz Logo"
+                clickText="SigNoz"
+                clickLocation="Mobile Menu"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <span className="sr-only">SigNoz</span>
+              </TrackingLink>
+            </div>
             <div className="mt-6 flow-root">
               <div className="-my-6 divide-y divide-gray-500/10">
                 {showMainMenu && (
                   <div className="space-y-2 py-8">
-                    <Accordion topic="Product" subtopics={productDropdownItemsForMobile} />
+                    <Accordion
+                      topic="Product"
+                      subtopics={productDropdownItemsForMobile}
+                      onLinkClick={() => setMobileMenuOpen(false)}
+                    />
                     <TrackingLink
                       href="/docs"
                       className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 hover:bg-signoz_ink-200"
                       clickType="Nav Click"
                       clickName="Docs Link"
                       clickText="Documentation"
-                      clickLocation={'Mobile Menu'}
+                      clickLocation="Mobile Menu"
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       Documentation
@@ -708,6 +696,7 @@ export default function TopNav() {
                         ...resourcesDropdownItems.learn,
                         ...resourcesDropdownItems.explore,
                       ]}
+                      onLinkClick={() => setMobileMenuOpen(false)}
                     />
                     <TrackingLink
                       href="/pricing"
@@ -715,7 +704,7 @@ export default function TopNav() {
                       clickType="Nav Click"
                       clickName="Pricing Link"
                       clickText="Pricing"
-                      clickLocation={'Mobile Menu'}
+                      clickLocation="Mobile Menu"
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       Pricing
@@ -726,51 +715,55 @@ export default function TopNav() {
                       clickType="Nav Click"
                       clickName="Customer Stories Link"
                       clickText="Customer Stories"
-                      clickLocation={'Mobile Menu'}
+                      clickLocation="Mobile Menu"
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       Customer Stories
                     </TrackingLink>
 
                     <div className="-mx-3 inline-block rounded-lg px-3 py-2 text-base font-semibold leading-7 hover:bg-signoz_ink-200">
-                      <GitHubStars location={'Mobile Menu'} />
+                      <GitHubStars location="Mobile Menu" />
                     </div>
 
-                    <TrackingButton
-                      className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 hover:bg-signoz_ink-200"
-                      clickType="Secondary CTA"
-                      clickName="Sign In Button"
-                      clickText="Sign In"
-                      clickLocation={'Mobile Menu'}
-                      onClick={() => {
-                        router.push('/login')
-                        setMobileMenuOpen(false)
-                      }}
-                    >
-                      Sign In
-                    </TrackingButton>
+                    {!isSignupRoute && (
+                      <>
+                        <TrackingButton
+                          className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 hover:bg-signoz_ink-200"
+                          clickType="Secondary CTA"
+                          clickName="Sign In Button"
+                          clickText="Sign In"
+                          clickLocation="Mobile Menu"
+                          onClick={() => {
+                            router.push('/login')
+                            setMobileMenuOpen(false)
+                          }}
+                        >
+                          Sign In
+                        </TrackingButton>
 
-                    <Button
-                      id="btn-get-started-website-navbar-mobile"
-                      className="block rounded-lg px-3 py-2 text-base font-semibold leading-7 hover:bg-signoz_ink-200"
-                    >
-                      <TrackingLink
-                        href="/teams"
-                        className="start-free-trial-btn font-heading flex items-center justify-center gap-1 truncate rounded-md border-none px-4 py-2 text-center text-sm font-bold leading-4 text-white no-underline outline-none hover:text-white"
-                        clickType="Primary CTA"
-                        clickName="Sign Up Button"
-                        clickText="Get Started - Free"
-                        clickLocation={'Mobile Menu'}
-                        onClick={() => setMobileMenuOpen(false)}
-                      >
-                        Get Started - Free
-                        <ArrowRight size={14} />
-                      </TrackingLink>
-                    </Button>
+                        <TrackingLink
+                          href="/teams"
+                          clickType="Primary CTA"
+                          clickName="Sign Up Button"
+                          clickText="Get Started - Free"
+                          className="block rounded-lg px-3 py-2 text-base font-semibold leading-7 hover:bg-signoz_ink-200"
+                          clickLocation="Mobile Menu"
+                          onClick={() => setMobileMenuOpen(false)}
+                        >
+                          <Button
+                            className="start-free-trial-btn font-heading flex items-center justify-center gap-1 truncate rounded-md border-none px-4 py-2 text-center text-sm font-bold leading-4 text-white no-underline outline-none hover:text-white"
+                            id="btn-get-started-website-navbar"
+                          >
+                            Get Started - Free
+                            <ArrowRight size={14} />
+                          </Button>
+                        </TrackingLink>
+                      </>
+                    )}
                   </div>
                 )}
 
-                {!isSignupRoute && isDocsBasePath && !showMainMenu && (
+                {isDocsBasePath && !showMainMenu && (
                   <div className="docs-sidebar-mobile-nav">
                     <TrackingButton
                       className="mt-4 inline-flex items-center gap-1 rounded px-1 py-1 text-sm font-bold text-white"

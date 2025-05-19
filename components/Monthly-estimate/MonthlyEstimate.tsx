@@ -12,7 +12,10 @@ const scrollToSection = (id) => {
       block: 'start',
       behavior: 'smooth',
     })
-    window.location.hash = `#${id}`
+    // Only update hash on client-side
+    if (typeof window !== 'undefined') {
+      window.location.hash = `#${id}`
+    }
   }
 }
 
@@ -170,36 +173,46 @@ const MonthlyEstimate = () => {
     navigator.clipboard.writeText('https://signoz.io/pricing/#estimate-your-monthly-bill')
   }
 
+  // Used to track whether we're client-side rendered
+  const [isMounted, setIsMounted] = useState(false)
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
+
   return (
     <section ref={myRef} id="estimate-your-monthly-bill">
       <div className="section-container !mx-[auto] !w-[80vw] border !border-t-0 border-dashed border-signoz_slate-400">
         <div className="flex flex-col gap-2 pt-5">
           <span className="group relative pl-1 text-2xl font-semibold text-signoz_vanilla-100">
             Estimate your monthly bill
-            <a
-              href="#estimate-your-monthly-bill"
-              onClick={copyLinkToClipboard}
-              className="ml-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 20 20"
-                fill="#4E74F8"
-                className="linkicon h-6 w-6"
+            {isMounted ? (
+              <a
+                href="#estimate-your-monthly-bill"
+                onClick={copyLinkToClipboard}
+                className="ml-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
               >
-                <path d="M12.232 4.232a2.5 2.5 0 0 1 3.536 3.536l-1.225 1.224a.75.75 0 0 0 1.061 1.06l1.224-1.224a4 4 0 0 0-5.656-5.656l-3 3a4 4 0 0 0 .225 5.865.75.75 0 0 0 .977-1.138 2.5 2.5 0 0 1-.142-3.667l3-3Z" />
-                <path d="M11.603 7.963a.75.75 0 0 0-.977 1.138 2.5 2.5 0 0 1 .142 3.667l-3 3a2.5 2.5 0 0 1-3.536-3.536l1.225-1.224a.75.75 0 0 0-1.061-1.06l-1.224 1.224a4 4 0 1 0 5.656 5.656l3-3a4 4 0 0 0-.225-5.865Z" />
-              </svg>
-            </a>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 20 20"
+                  fill="#4E74F8"
+                  className="linkicon h-6 w-6"
+                >
+                  <path d="M12.232 4.232a2.5 2.5 0 0 1 3.536 3.536l-1.225 1.224a.75.75 0 0 0 1.061 1.06l1.224-1.224a4 4 0 0 0-5.656-5.656l-3 3a4 4 0 0 0 .225 5.865.75.75 0 0 0 .977-1.138 2.5 2.5 0 0 1-.142-3.667l3-3Z" />
+                  <path d="M11.603 7.963a.75.75 0 0 0-.977 1.138 2.5 2.5 0 0 1 .142 3.667l-3 3a2.5 2.5 0 0 1-3.536-3.536l1.225-1.224a.75.75 0 0 0-1.061-1.06l-1.224 1.224a4 4 0 1 0 5.656 5.656l3-3a4 4 0 0 0-.225-5.865Z" />
+                </svg>
+              </a>
+            ) : null}
           </span>
           <span className="mb-16 pl-1 text-base font-normal text-signoz_vanilla-400">
             You can also set data ingestion limits so you never get a surprise bill.
-            <span className="font-medium text-signoz_robin-400">
-              <Link href={'https://signoz.io/docs/ingestion/signoz-cloud/keys/'}>
-                &nbsp;Learn more
-                <ArrowUpRight className="inline" size={16} />
-              </Link>
-            </span>
+            {isMounted ? (
+              <span className="font-medium text-signoz_robin-400">
+                <Link href={'https://signoz.io/docs/ingestion/signoz-cloud/keys/'}>
+                  &nbsp;Learn more
+                  <ArrowUpRight className="inline" size={16} />
+                </Link>
+              </span>
+            ) : null}
           </span>
         </div>
         <div className="grid grid-cols-6 grid-rows-4 gap-y-4">
@@ -268,6 +281,7 @@ const MonthlyEstimate = () => {
                   label: '200TB',
                 },
               ]}
+              aria-label="Traces data ingestion volume"
               classNames={{
                 base: 'max-w-md',
                 label: 'text-medium',
@@ -356,6 +370,7 @@ const MonthlyEstimate = () => {
                   label: '200TB',
                 },
               ]}
+              aria-label="Logs data ingestion volume"
               classNames={{
                 base: 'max-w-md',
                 label: 'text-medium',
@@ -442,6 +457,7 @@ const MonthlyEstimate = () => {
                   label: '200B',
                 },
               ]}
+              aria-label="Metrics data ingestion volume"
               classNames={{
                 base: 'max-w-md',
                 label: 'text-medium',
@@ -512,6 +528,7 @@ const MonthlyEstimate = () => {
         <div className="mb-3 mt-3 flex justify-end pr-12">
           <span className="text-signoz_vanilla-400">Or</span>
         </div>
+
         <div
           className={`mb-6 flex items-center justify-between rounded-md border border-dashed bg-[#4E74F81A] px-3 py-4 ${isHighVolume ? 'border-signoz_robin-500' : 'border-transparent'}`}
         >
@@ -531,6 +548,28 @@ const MonthlyEstimate = () => {
               Contact us
             </TrackingLink>
           </Button>
+        </div>
+
+        <div className="mb-3 mt-3 flex justify-end pr-12">
+          <span className="text-signoz_vanilla-400">Or</span>
+        </div>
+
+        {/* Start Up Program CTA */}
+        <div className="mb-6 flex items-center justify-between rounded-md bg-[#BE6BF11A] px-3 py-4">
+          <span className="text-base font-medium text-signoz_vanilla-100">
+            Reach out to us for SigNoz's Start Up Program Discount
+          </span>
+          <div className="w-2/5 border-b border-dashed border-signoz_slate-400" />
+          <TrackingLink
+            href="/startups/"
+            clickType="Secondary CTA"
+            clickName="Startup Program Link"
+            clickText="Learn More"
+            clickLocation="Monthly Estimate Calculator"
+            id="pricing-page-startup-program-cta"
+          >
+            <Button variant="secondary">Learn More</Button>
+          </TrackingLink>
         </div>
       </div>
     </section>

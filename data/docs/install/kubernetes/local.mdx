@@ -1,0 +1,85 @@
+---
+date: 2025-04-30
+id: local
+title: Deploying to Local Kubernetes
+description: Instructions to install SigNoz on local Kubernetes clusters like Minikube, Kind, or K3s
+---
+
+import CommonPrerequisites from '@/components/shared/k8s-common-prerequisites.md'
+import K8sInstall from '@/components/shared/k8s-install.mdx'
+import K8sOtelDemo from '@/components/shared/k8s-oteldemo.mdx'
+import NextSteps from '@/components/shared/next-steps.md'
+
+<HostingDecision />
+
+## Prerequisites
+<CommonPrerequisites />
+
+## Set up a Local Kubernetes Cluster
+
+Choose one of the following options to set up your local Kubernetes cluster:
+
+<Tabs>
+<TabItem label="Minikube" value="minikube">
+
+- Follow the [official Minikube installation guide][1]
+- Recommended configuration for SigNoz:
+  ```bash
+  minikube start --memory=8g --cpus=4
+  ```
+</TabItem>
+
+<TabItem label="Kind" value="kind">
+
+- Follow the [official Kind installation guide][2]
+- Recommended configuration for SigNoz as `values.yaml`:
+  ```yaml
+  kind: Cluster
+  apiVersion: kind.x-k8s.io/v1alpha4
+  nodes:
+  - role: control-plane
+    extraPortMappings:
+    - containerPort: 8080
+      hostPort: 8080
+  ```
+- Run the Following command to spin up the k3s cluster:
+```bash
+kind create cluster --config values.yaml -n <NAMESPACE>
+```
+</TabItem>
+
+<TabItem label="K3S" value="k3s">
+
+- Follow the [official K3s installation guide][3]
+<Admonition type="tip">
+You can also use [k3d][4] to spin up a k3s cluster. k3d is a lightweight wrapper to run k3s in Docker, making it easier to create and manage k3s clusters. It's particularly useful for development and testing purposes as it provides a quick way to spin up disposable k3s clusters. The installation process remains the same as with a regular k3s cluster.
+</Admonition>
+
+- For spining up a cluster use following command:
+```bash
+k3d cluster create 
+```
+</TabItem>
+</Tabs>
+
+## Install SigNoz
+
+<K8sInstall />
+
+## (Optional) Install OpenTelemetry Demo
+
+<K8sOtelDemo />
+
+## Next Steps
+
+<NextSteps />
+
+---
+[1]: https://minikube.sigs.k8s.io/docs/start/
+[2]: https://kind.sigs.k8s.io/docs/user/quick-start/
+[3]: https://docs.k3s.io/installation
+[4]: https://k3d.io/
+[5]: https://kubernetes.io/docs/tasks/tools/
+
+
+

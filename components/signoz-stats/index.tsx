@@ -47,38 +47,40 @@ const SigNozStats = () => {
               ))}
             </div>
             <div className="flex flex-col items-center gap-3 border !border-b-0 !border-r-0 border-dashed border-signoz_slate-400 py-6 sm:flex-row sm:py-6 sm:pl-10">
-              <Button className="text-xs sm:text-sm" id="btn-join-community-homepage">
-                <TrackingLink 
-                  href="https://signoz.io/slack/" 
-                  className="flex-center"
-                  clickType="Primary CTA"
-                  clickName="Join Community Link"
-                  clickText="Join the community"
-                  clickLocation="Stats Section"
-                >
+              <TrackingLink
+                href="https://signoz.io/slack/"
+                className="inline-block"
+                clickType="Primary CTA"
+                clickName="Join Community Link"
+                clickText="Join the community"
+                clickLocation="Stats Section"
+                target="_blank"
+              >
+                <Button className="flex-center text-xs sm:text-sm" id="btn-join-community-homepage">
                   <BookOpen className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                   Join the community
                   <ArrowRight className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-                </TrackingLink>
-              </Button>
-              <Button
-                type={Button.TYPES.SECONDARY}
-                className="text-xs sm:text-sm"
-                id="btn-github-repo-homepage"
+                </Button>
+              </TrackingLink>
+              <TrackingLink
+                href="https://github.com/SigNoz/signoz/"
+                className="inline-block"
+                clickType="Secondary CTA"
+                clickName="GitHub Repository Link"
+                clickText="GitHub Repository"
+                clickLocation="Stats Section"
+                target="_blank"
               >
-                <TrackingLink 
-                  href="https://github.com/SigNoz/signoz/" 
-                  className="flex-center"
-                  clickType="Secondary CTA"
-                  clickName="GitHub Repository Link"
-                  clickText="GitHub Repository"
-                  clickLocation="Stats Section"
+                <Button
+                  type={Button.TYPES.SECONDARY}
+                  className="flex-center text-xs sm:text-sm"
+                  id="btn-github-repo-homepage"
                 >
                   <BookOpen className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                   GitHub Repository
                   <ArrowRight className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-                </TrackingLink>
-              </Button>
+                </Button>
+              </TrackingLink>
             </div>
           </div>
         </div>

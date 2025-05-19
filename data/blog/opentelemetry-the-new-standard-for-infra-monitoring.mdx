@@ -1,0 +1,160 @@
+---
+title: Is OpenTelemetry ready for Infra Monitoring?
+slug: opentelemetry-the-new-standard-for-infra-monitoring
+date: 2025-04-29
+tags: [openTelemetry]
+authors: [elizabeth_mathew]
+description: OpenTelemetry has made infratsructure monitoring easy to get started with and comes with
+    options for kubernetes cluster and pod monitoring as well. OpenTelemetry also makes it possible to 
+    achieve correlation with application monitoring as well.
+image: /img/blog/2025/04/otel-infra-cover-comic.webp
+keywords: [OpenTelemetry, Infrastructure monitoring, APM, Kubernetes, Cluster, Monitoring]
+---
+
+“A system is never the sum of its parts; it's the product of their interaction.”
+
+— *Russell Ackoff*, Systems Thinker
+
+Infrastructure monitoring is an attempt to capture and record the product of interactions between various systems. Infrastructure monitoring comes across as challenging and tedious, often spread across multiple tooling system. 
+
+In this blog, we will uncover why infra monitoring with OpenTelemetry is easy to get started with, adopt into our systems and try to understand if OpenTelemetry is ready to monitor your infrastructure.
+
+## Why OpenTelemetry for Infra Monitoring?
+
+OpenTelemetry [OTel] started primarily as a solution for distributed tracing, but it has since evolved into a full-fledged telemetry framework covering metrics and logs as well. In fact, as of 2025, the project reached general availability for metrics and logs, meaning those APIs and SDKs are stable for production use. 
+
+Crucially for infrastructure monitoring, OpenTelemetry isn’t limited to just tracing your microservices, it can collect **host and system metrics out of the box**. The OpenTelemetry Collector includes a built-in `hostmetrics` receiver that gathers CPU, RAM, disk, network, and other OS-level stats from the host. 
+
+<Figure src="/img/blog/2025/04/otel-infra-cover-comic.webp" alt="cloudWatch-cover" caption="Getting started with OTel for infra monitoring is EASY!" />
+
+
+Beyond just individual hosts, OpenTelemetry has also made it easy to monitor **Kubernetes clusters and nodes**. With receivers like `kubeletstats`, `kubernetes_cluster,` and `k8sobjects`, you can collect detailed metrics about node health, pod resource usage, and cluster state directly from the Kubernetes API; no Prometheus setup needed. This enables full visibility across your containerised infrastructure, all through the same OTel pipeline. 
+
+<Figure src="/img/blog/2025/04/otel-infra-prom.webp" alt="cloudWatch-cover" caption="Shifting from Prometheus to OTel is now smooth." />
+
+
+Combined with its ability to **scrape Prometheus endpoints** and forward logs, OpenTelemetry offers a unified infrastructure monitoring whether you're running bare metal, VMs, or Kubernetes. This also means that if your system already exposes Prometheus-format metrics [as many existing apps and exporters do], adopting OpenTelemetry becomes much easier. You can just reuse your existing instrumentation and incrementally route that data through OTel pipelines easily without ripping everything out.
+
+<Admonition>
+The [Prometheus receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/prometheusreceiver) of the OTel collector allows you to collect metrics from any software that exposes Prometheus metrics. It serves as a drop-in replacement for Prometheus to scrape your services.
+</Admonition>
+
+
+Integrating OpenTelemetry into your application to enable sending of infra metrics, is a relatively simple process, explained in the next section.
+
+## Sending Infra Metrics With OpenTelemetry in 3-steps
+
+One concern teams often have is that, adopting a new monitoring framework will be complicated. Not so with OpenTelemetry, you can start collecting host metrics *in just a few steps*. **No code changes are required** to get infrastructure metrics flowing. Let’s walk you through a 3-step example of sending host metrics to a backend [we’ll use SigNoz in this example] using the OpenTelemetry Collector.
+
+<Admonition>
+Host metrics provide granular visibility into the physical or virtual server's resource utilisation and health status. Every host system in your environment - whether physical machines, virtual machines [VMs], cloud instances, or containerised nodes collects these metrics directly from its local operating system. The OpenTelemetry hostmetrics receiver collects metrics on CPU, memory, disk, network, paging, swap, and system performance.
+
+For more information about the metrics collected by the hostmetrics receiver, see documentation [**here**](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/hostmetricsreceiver/README.md).
+</Admonition>
+
+### Step 1 - Setup OpenTelemetry Collector on Your VM
+
+To collect host metrics from virtual machines [VMs], [setup the OpenTelemetry (OTel) **collector**](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) on each VM and configure the hostmetrics receiver. In this step, you will create a *config.yaml* which enables the hostmetrics receiver.
+
+### Step 2 - Configure Host Metrics Collection
+
+The configuration file that you created in the first step enables the hostmetrics receiver. Make sure hostmetrics is added to the receivers and pipelines sections in your configuration file by checking if the below codeblocks are in your config.yaml file.
+
+Receiver:
+
+```
+receivers:
+  ...
+  hostmetrics:
+    collection_interval: 60s
+    scrapers:
+      cpu: {}
+      disk: {}
+      load: {}
+      filesystem: {}
+      memory: {}
+      network: {}
+      paging: {}
+      process:
+        mute_process_name_error: true
+        mute_process_exe_error: true
+        mute_process_io_error: true
+      processes: {}
+    ...
+
+```
+
+Pipelines:
+
+```
+service:
+  pipelines:
+    ...
+    metrics/internal:
+      receivers: [prometheus, hostmetrics]
+      processors: [resourcedetection, batch]
+      exporters: [otlp]
+    ...
+
+```
+
+### Step 3 - Monitor With SigNoz
+
+In this example, we have used SigNoz as our observability backend. [make sure to add your observability backend as an exporter]
+
+Once your setup is done, you should see your Hostname in the Hosts tab of *Infrastructure Monitoring* section in SigNoz, as shown below. 
+
+Infrastructure Monitoring in SigNoz is built ground-up for OpenTelemetry,  supports Host and Kubernetes monitoring, which provides a comprehensive interface for monitoring and analysing host and pods performance, traces, and logs. SigNoz also leverages OpenTelemetry's semantic conventions to ensure seamless correlation.
+
+Read more about [SigNoz’s OpenTelemetry powered Infrastructure](https://signoz.io/docs/infrastructure-monitoring/overview/) .
+
+<Figure src="/img/blog/2025/04/otel-infra-ss.webp" alt="cloudWatch-cover" caption="Infrastrucutue monitoring as visualised by SigNoz" />
+
+If you want to monitor your Kubernetes pods and clusters, check out these guides below,
+
+- [Kubelet stats monitoring](https://signoz.io/docs/userguide/k8s-metrics/#setting-up-kubelet-stats-monitoring)
+- [Kubernetes cluster monitoring](https://signoz.io/docs/userguide/k8s-metrics/#setting-up-k8s-cluster-monitoring)
+
+## Correlation of Infra Metrics and APM
+
+Take *instance status*, for example. “Is my instance up or not?” seems like vital health information to  track. But in a distributed system, this information alone gives very little context. And you wouldn’t rely on instance availability metrics alone to solve a problem, as it would be a single data point. While it can be a useful event to keep track of, looking at *just* this data wouldn’t tell you a lot about the overall state of the system. 
+
+For example, a well-architected distributed system should be fairly resilient to a single node being offline.
+
+However, when you look at this event as part of an observability system, it becomes more useful. If you can *correlate* an instance being offline to an improperly routed request through an API gateway or load balancer, you can use that to diagnose poor performance for user requests. 
+In short, Infra metrics tied together with APM, can be an absolute game-changer!
+
+Let’s look at two common challenges faced by lack of correlation:
+
+- **Tooling Fatigue**: Managing multiple tools means dealing with different configurations, maintenance routines, and learning curves, leading to increased operational overhead.
+- **Siloed Metrics**: With metrics, logs, and traces scattered across various platforms, correlating issues across the stack becomes cumbersome, hindering swift diagnosis and resolution.
+
+OpenTelemetry addresses this challenge by providing a unified framework for collecting and correlating infra metrics and APM. By standardising telemetry data and metadata, OTel enables seamless correlation across different observability signals, facilitating faster and more accurate RCA.
+
+Let’s look at how OTel achieves this correlation.
+
+### How does OTel achieve this correlation?
+
+OpenTelemetry facilitates the correlation of infrastructure metrics and APM data through standardised *semantic conventions and resource attributes*. By consistently tagging telemetry data, OTel enables seamless integration and analysis across different observability signals.
+
+Semantic conventions in OTel define standardised attribute names for telemetry data, ensuring consistency across metrics, logs, and traces. 
+
+Key attributes include:
+
+- `service.name`: Logical name of the service.
+- `service.instance.id`: Unique identifier for the service instance.
+- `service.namespace`: Namespace of the service.
+- `host.name`: Hostname of the system.
+- `k8s.pod.name`: Name of the Kubernetes pod.
+
+Check [here](https://github.com/open-telemetry/semantic-conventions/blob/main/docs/resource/README.md) for more attributes.
+
+Resource attributes add metadata to telemetry data, describing the entity producing the data. By attaching these attributes to all telemetry data, OTel ensures accurate attribution and facilitates correlation across different data types.
+
+<Figure src="/img/blog/2025/04/otel-infra-vid.gif" alt="cloudWatch-cover" caption="Correlation between infrastructure monitoring and APM" />
+
+
+
+Today, OpenTelemetry has grown far beyond just tracing and is now a solid choice for infrastructure monitoring too. With native support from major cloud providers and vendors, it’s easier than ever to get started. Just a few lines of config, and you’ve got host, container, and even Kubernetes metrics flowing. The ecosystem is maturing fast, with new receivers, processors, and exporters being added every month. 
+
+It’s no surprise that OpenTelemetry is ready for modern infra monitoring!
