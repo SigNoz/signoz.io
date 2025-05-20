@@ -55,7 +55,7 @@ const ALL_FEATURES_DATA = {
     },
     {
       heading: 'Teams',
-      desc: 'Cloud — starts at $199/mo',
+      desc: 'Cloud ⎯ starts at $49/mo',
       action: (
         <TrackingLink
           href={'/teams/'}

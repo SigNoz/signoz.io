@@ -181,7 +181,7 @@ const PricingCalculator: React.FC = () => {
   const tracesSubtotal = calculateSubtotal('traces', tracesValue, tracesRetentionPeriod)
   const logsSubtotal = calculateSubtotal('logs', logsValue, logsRetentionPeriod)
   const metricsSubtotal = calculateSubtotal('metrics', metricsValue, metricsRetentionPeriod)
-  const totalEstimate = Math.max(199, tracesSubtotal + logsSubtotal + metricsSubtotal)
+  const totalEstimate = Math.max(49, tracesSubtotal + logsSubtotal + metricsSubtotal)
 
   // Check if high volume for custom pricing suggestion
   const isHighVolume = totalEstimate >= 2500
