@@ -27,20 +27,27 @@ const formatMetrics = (size: number) => {
   return `${formatNumber(size / 1000)} bn`
 }
 
+// Constants for slider ranges
+const MIN_VALUE = 0
+const MAX_VALUE = 100000
+const MIN_LOG_VALUE = 0.1 // Small positive number for logarithmic calculations
+
 // Transform linear slider value to logarithmic scale
 const linearToLog = (value: number, minLog: number, maxLog: number) => {
-  const minValue = Math.log(minLog)
+  if (value === 0) return 0
+  const minValue = Math.log(MIN_LOG_VALUE)
   const maxValue = Math.log(maxLog)
-  const scale = (maxValue - minValue) / (maxLog - minLog)
-  return Math.floor(Math.exp(minValue + scale * (value - minLog)))
+  const scale = (maxValue - minValue) / (maxLog - MIN_LOG_VALUE)
+  return Math.floor(Math.exp(minValue + scale * (value - MIN_LOG_VALUE)))
 }
 
 // Transform logarithmic value back to linear scale for slider
 const logToLinear = (value: number, minLog: number, maxLog: number) => {
-  const minValue = Math.log(minLog)
+  if (value === 0) return 0
+  const minValue = Math.log(MIN_LOG_VALUE)
   const maxValue = Math.log(maxLog)
-  const scale = (maxLog - minLog) / (maxValue - minValue)
-  return Math.floor(minLog + scale * (Math.log(value) - minValue))
+  const scale = (maxLog - MIN_LOG_VALUE) / (maxValue - minValue)
+  return Math.floor(MIN_LOG_VALUE + scale * (Math.log(value) - minValue))
 }
 
 const PricingCalculator: React.FC = () => {
@@ -85,19 +92,15 @@ const PricingCalculator: React.FC = () => {
     RETENTION_PERIOD.METRICS[0].months
   )
 
-  // Constants for slider ranges
-  const MIN_VALUE = 1
-  const MAX_VALUE = 100000
-
   // State for slider values
-  const [tracesValue, setTracesValue] = useState(logToLinear(101, MIN_VALUE, MAX_VALUE))
-  const [inputTracesValue, setInputTracesValue] = useState('100')
+  const [tracesValue, setTracesValue] = useState(logToLinear(20, MIN_LOG_VALUE, MAX_VALUE))
+  const [inputTracesValue, setInputTracesValue] = useState('20')
 
-  const [logsValue, setLogsValue] = useState(logToLinear(401, MIN_VALUE, MAX_VALUE))
-  const [inputLogsValue, setInputLogsValue] = useState('400')
+  const [logsValue, setLogsValue] = useState(logToLinear(100, MIN_LOG_VALUE, MAX_VALUE))
+  const [inputLogsValue, setInputLogsValue] = useState('100')
 
-  const [metricsValue, setMetricsValue] = useState(logToLinear(101, MIN_VALUE, MAX_VALUE))
-  const [inputMetricsValue, setInputMetricsValue] = useState('100')
+  const [metricsValue, setMetricsValue] = useState(logToLinear(80, MIN_LOG_VALUE, MAX_VALUE))
+  const [inputMetricsValue, setInputMetricsValue] = useState('80')
 
   // State for active tab in mobile view
   const [activeTab, setActiveTab] = useState('traces')
@@ -114,14 +117,14 @@ const PricingCalculator: React.FC = () => {
     const numValue = typeof value === 'number' ? value : value[0]
     if (isNaN(numValue)) return
     setTracesValue(numValue)
-    setInputTracesValue(linearToLog(numValue, MIN_VALUE, MAX_VALUE).toString())
+    setInputTracesValue(linearToLog(numValue, MIN_LOG_VALUE, MAX_VALUE).toString())
   }
 
   const handleChangeLogs = (value: number | number[]) => {
     const numValue = typeof value === 'number' ? value : value[0]
     if (isNaN(numValue)) return
     setLogsValue(numValue)
-    setInputLogsValue(linearToLog(numValue, MIN_VALUE, MAX_VALUE).toString())
+    setInputLogsValue(linearToLog(numValue, MIN_LOG_VALUE, MAX_VALUE).toString())
   }
 
   const handleChangeMetrics = (value: number | number[]) => {
@@ -135,24 +138,27 @@ const PricingCalculator: React.FC = () => {
   const handleInputTracesChange = (value: string) => {
     setInputTracesValue(value)
     const numValue = Number(value)
-    if (isNaN(numValue) || numValue <= 0) return
-    const linearValue = logToLinear(Math.min(numValue, MAX_VALUE), MIN_VALUE, MAX_VALUE)
+    if (isNaN(numValue) || numValue < 0) return
+    const linearValue =
+      numValue === 0 ? 0 : logToLinear(Math.min(numValue, MAX_VALUE), MIN_LOG_VALUE, MAX_VALUE)
     setTracesValue(linearValue)
   }
 
   const handleInputLogsChange = (value: string) => {
     setInputLogsValue(value)
     const numValue = Number(value)
-    if (isNaN(numValue) || numValue <= 0) return
-    const linearValue = logToLinear(Math.min(numValue, MAX_VALUE), MIN_VALUE, MAX_VALUE)
+    if (isNaN(numValue) || numValue < 0) return
+    const linearValue =
+      numValue === 0 ? 0 : logToLinear(Math.min(numValue, MAX_VALUE), MIN_LOG_VALUE, MAX_VALUE)
     setLogsValue(linearValue)
   }
 
   const handleInputMetricsChange = (value: string) => {
     setInputMetricsValue(value)
     const numValue = Number(value)
-    if (isNaN(numValue) || numValue <= 0) return
-    const linearValue = logToLinear(Math.min(numValue, MAX_VALUE), MIN_VALUE, MAX_VALUE)
+    if (isNaN(numValue) || numValue < 0) return
+    const linearValue =
+      numValue === 0 ? 0 : logToLinear(Math.min(numValue, MAX_VALUE), MIN_LOG_VALUE, MAX_VALUE)
     setMetricsValue(linearValue)
   }
 
@@ -172,8 +178,9 @@ const PricingCalculator: React.FC = () => {
 
   // Calculate subtotal for each data type
   const calculateSubtotal = (type: string, value: number, retentionPeriod: number) => {
+    if (value === 0) return 0
     const pricePerUnit = getPricePerUnit(type, retentionPeriod)
-    const estimatedUsage = linearToLog(value, MIN_VALUE, MAX_VALUE)
+    const estimatedUsage = linearToLog(value, MIN_LOG_VALUE, MAX_VALUE)
     return Number(pricePerUnit) * Number(estimatedUsage)
   }
 
@@ -222,7 +229,7 @@ const PricingCalculator: React.FC = () => {
       minValue={MIN_VALUE}
       showTooltip={true}
       tooltipProps={{
-        content: formatFunc(linearToLog(value, MIN_VALUE, MAX_VALUE)),
+        content: value === 0 ? '0' : formatFunc(linearToLog(value, MIN_LOG_VALUE, MAX_VALUE)),
       }}
       color={color}
       marks={[
@@ -238,7 +245,9 @@ const PricingCalculator: React.FC = () => {
         <div
           {...props}
           className="group top-1/2 cursor-grab rounded-full border-small border-signoz_vanilla-100 bg-background shadow-medium data-[dragging=true]:cursor-grabbing"
-          aria-valuetext={formatFunc(linearToLog(value, MIN_VALUE, MAX_VALUE))}
+          aria-valuetext={
+            value === 0 ? '0' : formatFunc(linearToLog(value, MIN_LOG_VALUE, MAX_VALUE))
+          }
         >
           <span
             className={`block h-5 w-5 rounded-full bg-${thumbColor} transition-transform group-data-[dragging=true]:scale-80`}
@@ -504,7 +513,7 @@ const PricingCalculator: React.FC = () => {
                     value={inputTracesValue}
                     onChange={(e) => handleInputTracesChange(e.target.value)}
                     className="mr-2 w-20 border-0 border-b border-signoz_robin-400/50 bg-transparent text-right text-signoz_vanilla-400 outline-none"
-                    min="1"
+                    min="0"
                   />
                   <span className="text-base text-signoz_vanilla-400">GB</span>
                 </div>
@@ -576,7 +585,7 @@ const PricingCalculator: React.FC = () => {
                     value={inputLogsValue}
                     onChange={(e) => handleInputLogsChange(e.target.value)}
                     className="mr-2 w-20 border-0 border-b border-signoz_sakura-400/50 bg-transparent text-right text-signoz_vanilla-400 outline-none"
-                    min="1"
+                    min="0"
                   />
                   <span className="text-base text-signoz_vanilla-400">GB</span>
                 </div>
@@ -648,7 +657,7 @@ const PricingCalculator: React.FC = () => {
                     value={inputMetricsValue}
                     onChange={(e) => handleInputMetricsChange(e.target.value)}
                     className="mr-2 w-20 border-0 border-b border-signoz_amber-400/50 bg-transparent text-right text-signoz_vanilla-400 outline-none"
-                    min="1"
+                    min="0"
                   />
                   <span className="text-base text-signoz_vanilla-400">mn</span>
                 </div>
@@ -728,7 +737,7 @@ const PricingCalculator: React.FC = () => {
                 value={inputTracesValue}
                 onChange={(e) => handleInputTracesChange(e.target.value)}
                 className="mr-2 w-20 border-0 border-b border-signoz_robin-400/50 bg-transparent text-right text-signoz_vanilla-400 outline-none"
-                min="1"
+                min="0"
               />
               <span>GB</span>
             </div>
@@ -780,7 +789,7 @@ const PricingCalculator: React.FC = () => {
                 value={inputLogsValue}
                 onChange={(e) => handleInputLogsChange(e.target.value)}
                 className="mr-2 w-20 border-0 border-b border-signoz_sakura-400/50 bg-transparent text-right text-signoz_vanilla-400 outline-none"
-                min="1"
+                min="0"
               />
               <span>GB</span>
             </div>
@@ -832,7 +841,7 @@ const PricingCalculator: React.FC = () => {
                 value={inputMetricsValue}
                 onChange={(e) => handleInputMetricsChange(e.target.value)}
                 className="mr-2 w-20 border-0 border-b border-signoz_amber-400/50 bg-transparent text-right text-signoz_vanilla-400 outline-none"
-                min="1"
+                min="0"
               />
               <span>mn</span>
             </div>
