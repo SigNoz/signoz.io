@@ -1,9 +1,7 @@
 import React from 'react'
 import { ArrowUpRight, CheckCircle, ChevronDown, Info } from 'lucide-react'
-import Link from 'next/link'
 import Image from 'next/image'
 import Button from 'components/Button/Button'
-import TeamsPricingVideoModal from './TeamsPricingVideoModal'
 import TrackingLink from '../../../../components/TrackingLink'
 import { Tooltip } from '@nextui-org/react'
 
@@ -244,13 +242,10 @@ export default function TeamsPricingCard() {
             clickText="Estimate your monthly bill"
             clickLocation="Teams Pricing Card"
           >
-            <Button type={Button.TYPES.SECONDARY} className="mb-4 w-full px-4 py-3 md:py-6">
+ px-4 py-3 md:py-6">
               Estimate your monthly bill
             </Button>
           </TrackingLink>
-          <div className="mb-6 text-center text-sm text-signoz_vanilla-400">
-            <TeamsPricingVideoModal buttonLabel="Understand how SigNoz pricing works" />
-          </div>
         </div>
       </div>
     </div>
