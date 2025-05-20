@@ -317,7 +317,7 @@ const PricingPlans = () => {
                     <div className="w-3/5 border-b border-dashed border-signoz_slate-400" />
                     <div className="flex items-center gap-1.5">
                       <span className="text-base font-medium text-signoz_robin-300">
-                        $199/month
+                        <span className="line-through">$199</span> $49/month
                       </span>
                     </div>
                   </div>
@@ -461,7 +461,7 @@ const PricingPlans = () => {
                       <div className="gap-3">
                         <CircleInfoSolid />
                         <span className="block items-center">
-                          What comes included in the $199?{' '}
+                          What comes included in the $49?{' '}
                           <ArrowUpRight size={20} className="inline" />
                         </span>
                       </div>
@@ -479,7 +479,7 @@ const PricingPlans = () => {
                             <ModalBody className="py-6">
                               <VimeoPlayer videoId="968489758" />
                               <p className="mt-4 text-center text-signoz_vanilla-400">
-                                Note: Usage-based pricing applies after crossing the $199 mark
+                                Note: Usage-based pricing applies after crossing the $49 mark
                               </p>
                             </ModalBody>
                           </>
@@ -1235,7 +1235,7 @@ const ExploreAllFeature = () => {
       },
       {
         heading: 'Teams',
-        desc: 'Cloud ⎯ starts at $199/mo',
+        desc: 'Cloud ⎯ starts at $49/mo',
         action: (
           <TrackingLink
             href={'/teams/'}
