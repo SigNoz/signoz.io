@@ -1,9 +1,7 @@
 import React from 'react'
 import { ArrowUpRight, CheckCircle, ChevronDown, Info } from 'lucide-react'
-import Link from 'next/link'
 import Image from 'next/image'
 import Button from 'components/Button/Button'
-import TeamsPricingVideoModal from './TeamsPricingVideoModal'
 import TrackingLink from '../../../../components/TrackingLink'
 import { Tooltip } from '@nextui-org/react'
 
@@ -23,7 +21,9 @@ export default function TeamsPricingCard() {
           <div className="mt-4 flex w-full flex-col items-start md:mt-0 md:w-[40%] md:items-end">
             <span className="text-sm text-signoz_vanilla-400">starts from</span>
             <div className="flex items-baseline">
-              <span className="text-3xl font-bold text-signoz_vanilla-100 md:text-4xl">$199</span>
+              <span className="text-3xl font-bold text-signoz_vanilla-100 md:text-4xl">
+                <span className="text-2xl text-signoz_vanilla-400 line-through">$199</span> $49
+              </span>
               <span className="ml-1 text-signoz_vanilla-400">/month</span>
             </div>
           </div>
@@ -44,7 +44,7 @@ export default function TeamsPricingCard() {
         {/* Base pricing table */}
         <div className="mb-6 rounded-md bg-signoz_ink-400 bg-opacity-10 p-3">
           <h5 className="mb-3 text-sm font-medium text-signoz_vanilla-100">
-            After $199, billed at:
+            After $49, billed at:
           </h5>
           <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
             <div className="flex items-center gap-2">
@@ -99,7 +99,7 @@ export default function TeamsPricingCard() {
         </div>
 
         <h4 className="mb-4 text-lg font-bold text-signoz_vanilla-100">
-          What's included in $199/month?
+          What's included in $49/month?
         </h4>
         <ul className="mb-10 space-y-3">
           <li className="flex items-start gap-2">
@@ -127,7 +127,7 @@ export default function TeamsPricingCard() {
           <li className="flex items-start gap-2">
             <CheckCircle className="mt-1 min-w-4 text-green-500" size={16} />
             <span className="text-signoz_vanilla-400">
-              Usage worth $199 (e.g. 663 GB logs/traces or 1,990 mn metric samples)
+              Usage worth $49 (e.g. 163 GB logs/traces or 490 mn metric samples)
             </span>
           </li>
           <li className="flex items-start gap-2">
@@ -138,11 +138,11 @@ export default function TeamsPricingCard() {
                 href="#estimate-your-monthly-bill"
                 clickType="In Page Link"
                 clickName="Pricing Calculator Link"
-                clickText="Pay only for what exceeds $199 based on usage"
+                clickText="Pay only for what exceeds $49 based on usage"
                 clickLocation="Teams Pricing Card"
               >
                 <span className="text-signoz_robin-400 hover:text-signoz_robin-500">
-                  Pay only for what exceeds $199 based on usage
+                  Pay only for what exceeds $49 based on usage
                 </span>
               </TrackingLink>
             </span>
@@ -242,13 +242,8 @@ export default function TeamsPricingCard() {
             clickText="Estimate your monthly bill"
             clickLocation="Teams Pricing Card"
           >
-            <Button type={Button.TYPES.SECONDARY} className="mb-4 w-full px-4 py-3 md:py-6">
-              Estimate your monthly bill
-            </Button>
+            <Button className="w-full px-4 py-3 md:py-6">Estimate your monthly bill</Button>
           </TrackingLink>
-          <div className="mb-6 text-center text-sm text-signoz_vanilla-400">
-            <TeamsPricingVideoModal buttonLabel="Understand how SigNoz pricing works" />
-          </div>
         </div>
       </div>
     </div>
