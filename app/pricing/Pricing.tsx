@@ -443,6 +443,14 @@ const PricingPlans = () => {
                       <div className="gap-3">
                         <CircleCheckSolid />
                         <span className="text-signoz_vanilla-400">
+                          Usage worth $49 (e.g. 163 GB logs/traces or 490 mn metric samples)
+                        </span>
+                      </div>
+                    </div>
+                    <div>
+                      <div className="gap-3">
+                        <CircleCheckSolid />
+                        <span className="text-signoz_vanilla-400">
                           Add as many teammates as you want.
                         </span>
                       </div>
