@@ -1,6 +1,8 @@
 import React from 'react'
 import CTAButton from './CTAButton'
 import Link from 'next/link'
+import Button from '@/components/Button/Button'
+import { BUTTON_TYPES } from '@/components/Button/Button'
 
 export default function CTASection() {
   return (
@@ -20,11 +22,13 @@ export default function CTASection() {
               <div className="flex flex-col gap-4 sm:flex-row">
                 <CTAButton />
 
-                <Link
-                  href="/teams/"
-                  className="inline-flex items-center justify-center rounded-md border border-gray-600 bg-transparent px-6 py-2 font-medium text-white hover:border-[#BE6BF1]"
-                >
-                  Start your free trial
+                <Link href="/teams/">
+                  <Button
+                    type={BUTTON_TYPES.SECONDARY}
+                    className="rounded-md px-6 py-2 font-medium text-white hover:opacity-90 md:px-6 md:py-3"
+                  >
+                    Start your free trial
+                  </Button>
                 </Link>
               </div>
             </div>

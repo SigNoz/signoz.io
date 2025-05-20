@@ -40,7 +40,7 @@ export default function TeamsPricingVideoModal({ buttonLabel }: VideoModalProps)
               <ModalBody className="py-6">
                 <VimeoPlayer videoId="968489758" />
                 <p className="mt-4 text-center text-signoz_vanilla-400">
-                  Note: Usage-based pricing applies after crossing the $199 mark
+                  Note: Usage-based pricing applies after crossing the $49 mark
                 </p>
               </ModalBody>
             </>

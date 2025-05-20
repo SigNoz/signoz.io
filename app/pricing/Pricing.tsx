@@ -26,8 +26,7 @@ import {
   CloudSolid,
   ServerSolid,
 } from '@/components/homepage-icons/icons'
-import { Modal, ModalContent, ModalBody, useDisclosure } from '@nextui-org/react'
-import VimeoPlayer from '@/components/VimeoPlayer/VimeoPlayer'
+
 import SigNozCloudPricingOverview from '@/components/SigNozCloudPricingOverviewCard/SigNozCloudPricingOverview'
 import TrackingLink from '@/components/TrackingLink'
 import TrackingButton from '@/components/TrackingButton'
@@ -223,8 +222,6 @@ const PricingPlans = () => {
 
   const [tab, setTab] = useState('cloud')
 
-  const { isOpen, onOpen, onOpenChange } = useDisclosure()
-
   const [width, setWidth] = useState<number>(typeof window !== 'undefined' ? window.innerWidth : 0)
 
   function handleWindowSizeChange() {
@@ -317,7 +314,7 @@ const PricingPlans = () => {
                     <div className="w-3/5 border-b border-dashed border-signoz_slate-400" />
                     <div className="flex items-center gap-1.5">
                       <span className="text-base font-medium text-signoz_robin-300">
-                        $199/month
+                        <span className="line-through">$199</span> $49/month
                       </span>
                     </div>
                   </div>
@@ -446,6 +443,14 @@ const PricingPlans = () => {
                       <div className="gap-3">
                         <CircleCheckSolid />
                         <span className="text-signoz_vanilla-400">
+                          Usage worth $49 (e.g. 163 GB logs/traces or 490 mn metric samples)
+                        </span>
+                      </div>
+                    </div>
+                    <div>
+                      <div className="gap-3">
+                        <CircleCheckSolid />
+                        <span className="text-signoz_vanilla-400">
                           Add as many teammates as you want.
                         </span>
                       </div>
@@ -456,36 +461,6 @@ const PricingPlans = () => {
                         <span className="text-signoz_vanilla-400">No host-based pricing</span>
                       </div>
                     </div>
-
-                    <div onClick={onOpen} style={{ cursor: 'pointer' }}>
-                      <div className="gap-3">
-                        <CircleInfoSolid />
-                        <span className="block items-center">
-                          What comes included in the $199?{' '}
-                          <ArrowUpRight size={20} className="inline" />
-                        </span>
-                      </div>
-                    </div>
-                    <Modal
-                      size={'5xl'}
-                      backdrop="blur"
-                      isOpen={isOpen}
-                      onOpenChange={onOpenChange}
-                      className="self-center"
-                    >
-                      <ModalContent className="bg-transparent">
-                        {() => (
-                          <>
-                            <ModalBody className="py-6">
-                              <VimeoPlayer videoId="968489758" />
-                              <p className="mt-4 text-center text-signoz_vanilla-400">
-                                Note: Usage-based pricing applies after crossing the $199 mark
-                              </p>
-                            </ModalBody>
-                          </>
-                        )}
-                      </ModalContent>
-                    </Modal>
 
                     <div>
                       <div className="gap-3">
@@ -1235,7 +1210,7 @@ const ExploreAllFeature = () => {
       },
       {
         heading: 'Teams',
-        desc: 'Cloud ⎯ starts at $199/mo',
+        desc: 'Cloud ⎯ starts at $49/mo',
         action: (
           <TrackingLink
             href={'/teams/'}

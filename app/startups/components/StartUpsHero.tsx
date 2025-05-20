@@ -49,7 +49,7 @@ export default function StartUpsHero({ startUpsData }: StartUpsHeroProps) {
                 </div>
               </div>
               <div className="mt-2 text-sm text-signoz_vanilla-100/80">
-                Includes Data Sent till $99USD
+                Includes Data Sent till $19USD
               </div>
             </div>
 

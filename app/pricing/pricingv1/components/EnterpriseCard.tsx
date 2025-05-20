@@ -108,12 +108,11 @@ export default function EnterpriseCard() {
           >
             <Button
               type={Button.TYPES.SECONDARY}
-              className="mb-4 flex w-full items-center justify-center gap-2 px-4 py-3 md:py-6"
+              className="mb-3 flex w-full items-center justify-center gap-2 px-4 py-3 md:py-6"
             >
               Contact Us <ArrowRight size={14} />
             </Button>
           </TrackingLink>
-          <div className="mb-6 text-center text-sm text-transparent">&nbsp;</div>
         </div>
       </div>
     </div>
