@@ -9,6 +9,7 @@ import WhySelectSignoz from '@/components/why-select-signoz'
 import { TrustedByTeams } from '@/components/trusted-by'
 import QuickStartCloud from '@/components/QuickStartCloud'
 import FAQ from './components/FAQ'
+import StartupProgram from './components/StartupProgram'
 
 export default function PricingV1Page() {
   return (
@@ -47,6 +48,8 @@ export default function PricingV1Page() {
 
         <TrustedByTeams page="pricing" />
 
+        {/* Startup Program Section */}
+        <StartupProgram />
         <WhySelectSignoz isInPricingPage />
 
         <FAQ />
