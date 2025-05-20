@@ -242,9 +242,7 @@ export default function TeamsPricingCard() {
             clickText="Estimate your monthly bill"
             clickLocation="Teams Pricing Card"
           >
- px-4 py-3 md:py-6">
-              Estimate your monthly bill
-            </Button>
+            <Button className="w-full px-4 py-3 md:py-6">Estimate your monthly bill</Button>
           </TrackingLink>
         </div>
       </div>
