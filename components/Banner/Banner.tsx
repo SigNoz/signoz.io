@@ -22,7 +22,7 @@ const Banner = () => {
       <div className="w-full bg-indigo-500 flex items-center justify-center py-2">
           <div className="w-full flex justify-between items-center px-4 md:justify-center">
               <Link href="https://signoz.io/blog/cloud-teams-plan-now-at-49usd/" className="text-base font-medium text-white leading-5">
-               We slashed our SigNoz Cloud monthly base fee by 75% - learn more. 🥳         
+               We slashed SigNoz Cloud monthly base fee by 75% - learn more. 🥳         
                </Link>
               <button className="text-white md:absolute md:right-4" onClick={() => setVisible(false)}>
                   <X size={16} />
