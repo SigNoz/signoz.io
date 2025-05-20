@@ -5,8 +5,6 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { ArrowRight, ArrowUpRight, CheckCircle } from 'lucide-react'
 import Button from '@/components/Button/Button'
-import { Modal, ModalContent, ModalBody, useDisclosure } from '@nextui-org/react'
-import VimeoPlayer from '@/components/VimeoPlayer/VimeoPlayer'
 import TrackingLink from '../TrackingLink'
 import TrackingButton from '../TrackingButton'
 
@@ -27,8 +25,6 @@ interface MetricsRetention {
 const SigNozCloudPricingOverview: React.FC<SigNozCloudPricingOverviewProps> = ({
   className = '',
 }) => {
-  const { isOpen, onOpen, onOpenChange } = useDisclosure()
-
   const RETENTION_PERIOD = {
     TRACES_AND_LOGS: [
       { days: 15, price: 0.3 },
@@ -126,58 +122,10 @@ const SigNozCloudPricingOverview: React.FC<SigNozCloudPricingOverviewProps> = ({
             <p className="mb-1">
               Starts at <span className="line-through">$199</span> $49/month
             </p>
-            <p className="mb-0 text-xs opacity-75">
-              <TrackingButton
-                onClick={onOpen}
-                className="text-signoz_robin-300 hover:text-signoz_robin-400"
-                clickType="Info Button"
-                clickName="Pricing Video Modal Button"
-                clickLocation="Pricing Overview Card"
-                clickText="Check what comes included in $49"
-              >
-                Check what comes included in $49 <ArrowUpRight size={16} className="inline" />
-              </TrackingButton>
-            </p>
+            <p className="mb-0 text-xs opacity-75"></p>
           </div>
           <div className="flex-1 border-t border-dashed border-gray-500"></div>
         </div>
-
-        <Modal
-          size={'5xl'}
-          backdrop="blur"
-          isOpen={isOpen}
-          onOpenChange={onOpenChange}
-          className="self-center"
-        >
-          <ModalContent className="bg-transparent">
-            {() => (
-              <ModalBody className="py-6">
-                <VimeoPlayer videoId="968489758" />
-                <p className="mb-0 mt-4 text-center text-signoz_vanilla-400">
-                  Note: Usage-based pricing applies after crossing the $49 mark
-                </p>
-                <div className="flex justify-center">
-                  <TrackingButton
-                    onClick={() => {
-                      onOpenChange()
-                      document
-                        .getElementById('estimate-your-monthly-bill')
-                        ?.scrollIntoView({ behavior: 'smooth' })
-                    }}
-                    clickType="In Video CTA"
-                    clickName="Pricing Calculator Button"
-                    clickLocation="Pricing Overview Card Video Modal"
-                    clickText="Estimate Your Monthly Bill"
-                    className="flex items-center gap-2 text-signoz_robin-300 hover:text-signoz_robin-400"
-                  >
-                    Estimate Your Monthly Bill
-                    <ArrowRight className="h-4 w-4" />
-                  </TrackingButton>
-                </div>
-              </ModalBody>
-            )}
-          </ModalContent>
-        </Modal>
 
         {/* Telemetry types */}
         <div className="mb-8 mt-4 flex items-center justify-between">

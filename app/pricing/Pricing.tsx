@@ -26,8 +26,7 @@ import {
   CloudSolid,
   ServerSolid,
 } from '@/components/homepage-icons/icons'
-import { Modal, ModalContent, ModalBody, useDisclosure } from '@nextui-org/react'
-import VimeoPlayer from '@/components/VimeoPlayer/VimeoPlayer'
+
 import SigNozCloudPricingOverview from '@/components/SigNozCloudPricingOverviewCard/SigNozCloudPricingOverview'
 import TrackingLink from '@/components/TrackingLink'
 import TrackingButton from '@/components/TrackingButton'
@@ -222,8 +221,6 @@ const PricingPlans = () => {
   )
 
   const [tab, setTab] = useState('cloud')
-
-  const { isOpen, onOpen, onOpenChange } = useDisclosure()
 
   const [width, setWidth] = useState<number>(typeof window !== 'undefined' ? window.innerWidth : 0)
 
@@ -456,36 +453,6 @@ const PricingPlans = () => {
                         <span className="text-signoz_vanilla-400">No host-based pricing</span>
                       </div>
                     </div>
-
-                    <div onClick={onOpen} style={{ cursor: 'pointer' }}>
-                      <div className="gap-3">
-                        <CircleInfoSolid />
-                        <span className="block items-center">
-                          What comes included in the $49?{' '}
-                          <ArrowUpRight size={20} className="inline" />
-                        </span>
-                      </div>
-                    </div>
-                    <Modal
-                      size={'5xl'}
-                      backdrop="blur"
-                      isOpen={isOpen}
-                      onOpenChange={onOpenChange}
-                      className="self-center"
-                    >
-                      <ModalContent className="bg-transparent">
-                        {() => (
-                          <>
-                            <ModalBody className="py-6">
-                              <VimeoPlayer videoId="968489758" />
-                              <p className="mt-4 text-center text-signoz_vanilla-400">
-                                Note: Usage-based pricing applies after crossing the $49 mark
-                              </p>
-                            </ModalBody>
-                          </>
-                        )}
-                      </ModalContent>
-                    </Modal>
 
                     <div>
                       <div className="gap-3">
