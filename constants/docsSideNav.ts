@@ -1610,7 +1610,7 @@ const docsSideNav = [
     ]
   },
   {
-    label: 'Third Party API Monitoring',
+    label: 'External API Monitoring',
     type: 'category',
     className: 'new-doc',
     isExpanded: false,
@@ -1618,12 +1618,12 @@ const docsSideNav = [
     items: [
       {
         type: 'doc',
-        route: '/docs/external-api/overview',
+        route: '/docs/external-api-monitoring/overview',
         label: 'Overview',
       },
       {
         type: 'doc',
-        route: '/docs/external-api/setup',
+        route: '/docs/external-api-monitoring/setup',
         label: 'Setup',
       },
     ]
