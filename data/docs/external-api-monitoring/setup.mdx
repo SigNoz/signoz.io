@@ -1,0 +1,54 @@
+---
+date: 2025-05-12
+title: Setup External API Monitoring
+id: setup
+hide_table_of_contents: false
+---
+
+## Overview
+
+External API Monitoring works automatically with properly instrumented applications. This document explains the requirements needed for this feature to work.
+
+## Setup
+
+To enable API monitoring, make sure that your application is instrumented correctly. For details about instrumenting application for your language/framework, please refer 
+[this document](https://signoz.io/docs/instrumentation/).
+
+For every external call, spans must include the below [attributes](https://signoz.io/blog/opentelemetry-spans/#what-are-span-attributes):
+
+- `net.peer.name`
+- `http.url`
+- `http.target`
+
+These span attributes are used to automatically derive API calls.
+
+<Admonition>
+In case of manual instrumentation, ensure that all the client to server calls are instrumented and the above attributes are added explicitly for each outbound request.
+</Admonition>
+
+## Verification
+
+To verify that your instrumentation is correctly configured:
+
+1. Generate some traffic that includes external API calls
+2. Navigate to the External API Monitoring section in SigNoz
+3. Check if your external domains appear in the list
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/external-api-monitoring/output.webp" alt="External API monitoring Overview"/>
+    <figcaption><i>External API monitoring Overview</i></figcaption>
+</figure>
+
+## Troubleshooting
+
+If your external API domains/endpoints aren't appearing in the monitoring interface:
+
+- Check that your service is properly [instrumented](https://signoz.io/docs/instrumentation/) and sending traces to SigNoz
+- Verify that your HTTP client libraries are being instrumented
+- For manual instrumentation, ensure you're adding all required attributes
+- If you're using OpenTelemetry collector, review its configuration to ensure it's forwarding all attributes
+
+## Next Steps
+
+Once your application is properly instrumented, head to the [Overview section](https://signoz.io/docs/external-api-monitoring/overview/) to learn how to use External API Monitoring to gain insights into your external API 
+dependencies.
