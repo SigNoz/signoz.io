@@ -10,6 +10,7 @@ import { TrustedByTeams } from '@/components/trusted-by'
 import QuickStartCloud from '@/components/QuickStartCloud'
 import FAQ from './components/FAQ'
 import StartupProgram from './components/StartupProgram'
+import SigNozCloudPricingOverview from '@/components/SigNozCloudPricingOverviewCard/SigNozCloudPricingOverview'
 
 export default function PricingV1Page() {
   return (
@@ -26,9 +27,9 @@ export default function PricingV1Page() {
             <Heading type={1} className="z-[1]">
               Simple Usage-based Predictable Observability Costs
             </Heading>
-
-            {/* Top features section */}
-            <PricingFeatures />
+            <div className="hidden md:block">
+              <SigNozCloudPricingOverview className="w-full" />
+            </div>
           </div>
 
           {/* Pricing cards grid */}
