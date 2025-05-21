@@ -33,10 +33,10 @@ export default function TeamsPricingCard() {
           href="/teams/"
           clickType="Primary CTA"
           clickName="Sign Up Button"
-          clickText="Start your 30 day free trial"
+          clickText="Get Started with SigNoz Cloud"
           clickLocation="Teams Pricing Card"
         >
-          <Button className="mb-6 w-full px-4 py-3 md:py-6">Start your 30 day free trial</Button>
+          <Button className="mb-6 w-full px-4 py-3 md:py-6">Get Started with SigNoz Cloud</Button>
         </TrackingLink>
 
         <div className="my-3 w-full border-t border-dashed border-signoz_slate-400"></div>
