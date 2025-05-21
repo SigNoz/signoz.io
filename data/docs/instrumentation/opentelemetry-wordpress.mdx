@@ -14,22 +14,22 @@ This document explains how to instrument an existing WordPress installation with
     <figcaption><i>Send traces from WordPress to SigNoz using OpenTelemetry Collector</i></figcaption>
 </figure>
 
-## Requirements
+## Prerequisites
 
 You will need the following in place before moving on to the next step:
 - A self-managed WordPress site
 - Permissions on the hosting server to install packages (Admin/Sudo)
-- [PHP 8.0+](https://www.php.net/) / PHP 8.1+ if you want to use _Protobuf_
+- [PHP 8.0+](https://www.php.net/) / PHP 8.1+ if you want to use [Protocols Buffers](https://protobuf.dev/) (_Protobuf_)
 - [PECL](https://pecl.php.net/)
 - [Composer](https://getcomposer.org/) 
 
-<Admonition type="warning" title="Note">
-The instrumentation process involves performing tasks such as building the OpenTelemetry extension from source, modifying the `php.ini` file and restarting services.
-</Admonition>
-
-## Send WordPress traces to SigNoz Cloud
+## Setup
 
 The following steps demonstrate how to instrument a WordPress site running on a Linux host with OpenTelemetry and then send the traces to SigNoz Cloud.
+
+<Admonition type="warning" title="Note">
+You'll need to perform tasks such as building the OpenTelemetry extension from source, modifying the `php.ini` file, and restarting services that may temporarily affect your website's availability.
+</Admonition>
 
 ### Step 1: Build and enable the OpenTelemetry PHP extension
 
@@ -129,7 +129,7 @@ Press `y` to any prompts during the installation process. The `composer.json` fi
 ### Step 3: Install the OpenTelemetry Collector
 In this step, you will install the OpenTelemetry collector on the WordPress host. The collector will receive traces from the OpenTelemetry PHP extension and send them to SigNoz. You will configure it to use the OTLP exporter for it.
 
-To intall the OpenTelemetry collector, run the following command:
+To install the OpenTelemetry collector, run the following command:
 
 ```bash
 wget https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.125.0/otelcol_0.125.0_linux_amd64.deb
@@ -185,7 +185,7 @@ OTEL_PROPAGATORS=baggage,tracecontext
 
 <Admonition type="info">
 A quick note on some of these values:
-- `wordpress` is the name of the service. This is the name that will be used to identify your service in SigNoz. Replace it with a different one as needed.
+- `<service-name>` is the name of the service, which is used to identify your service in SigNoz.
 - `http://self-host-ip` is where the self-hosted SigNoz instance is running.
 </Admonition>
 
@@ -194,14 +194,21 @@ For more information on these environment variables, refer to the [OpenTelemetry
 </TabItem>
 </Tabs>
 
-Next, to add a prepend file, you will use the `auto_prepend_file` directive in `php.ini` that allows you to specify a file to be executed before any other PHP files are run. This is useful for initializing the OpenTelemetry SDK and other dependencies. Modify the `auto_prepend_file` value to point to the `vendor/autoload.php` file that was created by Composer. Write the absolute path. 
+**Add a prepend file**
+
+To add a prepend file, you will use the `auto_prepend_file` directive in `php.ini` that allows you to specify a file to be executed before any other PHP files are run. This is useful for initializing the OpenTelemetry SDK and other dependencies. 
+
+Modify the `auto_prepend_file` value to point to the `vendor/autoload.php` file that was created by Composer. 
+
+Write the absolute path. 
+
 For example:
 
 ```ini
 auto_prepend_file=/var/www/html/wordpress/vendor/autoload.php
 ```
 
-Finally, restart the web server or PHP-FPM service to apply the changes. 
+Now, restart the web server or PHP-FPM service to apply the configuration changes. 
 
 
 ### Step 5: Verify the Service and Traces in SigNoz
