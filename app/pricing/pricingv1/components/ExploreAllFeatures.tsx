@@ -384,6 +384,12 @@ const ALL_FEATURES_DATA = {
           inTeams: <CheckSolid />,
           inEnterprise: <CheckSolid />,
         },
+        {
+          feature: 'Single Click AWS Integrations',
+          inCommunity: <CrossSolid />,
+          inTeams: <CheckSolid />,
+          inEnterprise: <CheckSolid />,
+        },
       ],
     },
     {
