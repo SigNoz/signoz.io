@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react'
+import Button from '@/components/Button/Button'
 
 export default function CTAButton() {
   const scrollToForm = () => {
@@ -12,11 +13,11 @@ export default function CTAButton() {
   }
 
   return (
-    <button
+    <Button
       onClick={scrollToForm}
-      className="rounded-md bg-gradient-to-r from-[#BE6BF1] to-[#4568DC] px-6 py-2 font-medium text-white hover:opacity-90"
+      className="rounded-md px-6 py-2 font-medium text-white hover:opacity-90"
     >
       Apply Now
-    </button>
+    </Button>
   )
 }

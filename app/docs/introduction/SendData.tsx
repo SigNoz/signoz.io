@@ -1,5 +1,10 @@
 import React from 'react'
-import { LucideDraftingCompass, LucideScrollText, LucideChartNoAxesColumn } from 'lucide-react'
+import {
+  LucideDraftingCompass,
+  LucideScrollText,
+  LucideChartNoAxesColumn,
+  ArrowUpRight,
+} from 'lucide-react'
 import {
   SiJavascript,
   SiPython,
@@ -10,6 +15,7 @@ import {
   SiNodedotjs,
 } from 'react-icons/si'
 import LinksCardGrid, { LinksCardProps } from '@/components/Card/LinksCardGrid'
+import TrackingLink from '@/components/TrackingLink'
 
 export default function SendData() {
   const cardData: LinksCardProps[] = [
@@ -51,7 +57,7 @@ export default function SendData() {
     {
       title: 'Send Logs',
       description: 'Configure log collection and analysis',
-      href: '/docs/userguide/logs/',
+      href: '/docs/logs-management/send-logs-to-signoz/',
       icon: <LucideScrollText size={20} className="text-signoz_robin-500" />,
       clickName: 'Send Logs Card',
       clickText: 'Send Logs',
@@ -81,7 +87,7 @@ export default function SendData() {
           clickName: 'JavaScript Logs Link',
         },
       ],
-      viewAllHref: '/docs/userguide/logs/',
+      viewAllHref: '/docs/logs-management/send-logs-to-signoz/',
     },
     {
       title: 'Send Metrics',
@@ -126,6 +132,21 @@ export default function SendData() {
       </div>
 
       <LinksCardGrid cards={cardData} sectionName="Send Data Section" />
+
+      <div className="mb-3 mt-6 text-center text-signoz_vanilla-400">
+        Or try sending demo traces, logs, and metrics to SigNoz Cloud with the&nbsp;
+        <TrackingLink
+          href="/docs/cloud/quickstart/"
+          target="_blank"
+          className="inline-flex items-center gap-1 text-signoz_robin-400 transition-colors hover:text-signoz_robin-500"
+          clickType="Nav Click"
+          clickName="OpenTelemetry Demo App Link"
+          clickText="OpenTelemetry Demo App"
+          clickLocation="Send Data Section"
+        >
+          OpenTelemetry Demo App <ArrowUpRight size={14} />
+        </TrackingLink>
+      </div>
     </div>
   )
 }

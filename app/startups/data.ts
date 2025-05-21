@@ -15,8 +15,8 @@ export const StartUpsData = {
   TITLE: 'SigNoz for Startups',
   DESC: "Observability That Doesn't Burn Your Startup Budget",
   PRICE: {
-    originalPrice: '$199',
-    discountedPrice: '$99',
+    originalPrice: '$49',
+    discountedPrice: '$19',
     period: 'month',
   },
   PORTAL_ID: '22308423',
@@ -134,9 +134,9 @@ export const faqItems = [
       'Startups that are less than 3 years old, have fewer than 30 employees, and have raised less than $6 million in funding are eligible for our startup program.',
   },
   {
-    question: 'What comes included in $99?',
+    question: 'What comes included in $19?',
     answer:
-      "Our usage-based pricing is applicable for any data you send to SigNoz. If your usage doesn't cross $99, your monthly bill will be $99. If it does, final bill will be calculated based on the amount of data you sent to SigNoz.",
+      "Our usage-based pricing is applicable for any data you send to SigNoz. If your usage doesn't cross $19, your monthly bill will be $19. If it does, final bill will be calculated based on the amount of data you sent to SigNoz.",
   },
   {
     question: 'How long does the startup pricing last?',
