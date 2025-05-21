@@ -1618,12 +1618,12 @@ const docsSideNav = [
     items: [
       {
         type: 'doc',
-        route: '/docs/third-party-api/overview',
+        route: '/docs/external-api/overview',
         label: 'Overview',
       },
       {
         type: 'doc',
-        route: '/docs/third-party-api/setup',
+        route: '/docs/external-api/setup',
         label: 'Setup',
       },
     ]
