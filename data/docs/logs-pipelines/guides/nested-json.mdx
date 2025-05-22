@@ -1,0 +1,160 @@
+---
+date: 2024-01-28
+id: nested-json
+title: Extract and Flatten Nested JSON Fields in Logs
+---
+
+## Overview
+
+Logs often contain deeply nested JSON objects, making it difficult to filter, query, or analyze specific fields. In such cases, you may need to **flatten** the structure by extracting key values and promoting them to higher-level attributes. 
+
+In this guide, we will extract the `image_name` attribute, which is nested inside a JSON string within the log’s `body` field, and promote it to the top-level `attributes` section.
+
+## Example Log
+
+We’ll use the following log as an example:
+
+```json
+{
+  "body": "{ \\\"metadata\\\": { \\\"container\\\": { \\\"group_id\\\": \\\"abc123\\\", \\\"group_name\\\": \\\"backend-service\\\", \\\"image_name\\\": \\\"backend:v2\\\" } }, \\\"message\\\": \\\"Request timed out\\\" }",
+  "id": "2wiZ6440Mtn161jkvjgLyAzDIeU",
+  "timestamp": "2025-05-06T10:09:35.693845Z",
+  "attributes": {
+    "log.file.name": "app.log"
+  }
+}
+```
+
+### Desired Outcome
+
+We want to transform the log into the following structure:
+
+```json
+{
+  "body": "{ \"metadata\": { \"container\": { \"group_id\": \"abc123\", \"group_name\": \"backend-service\", \"image_name\": \"backend:v2\" } }, \"message\": \"Request timed out\" }",
+  "id": "2wiawVsz48SHom7AJst7GkXjJBb",
+  "timestamp": 1746527086483,
+  "attributes": {
+    "container": "{\"group_id\":\"abc123\",\"group_name\":\"backend-service\",\"image_name\":\"backend:v2\"}",
+    "group_id": "abc123",
+    "group_name": "backend-service",
+    "image_name": "backend:v2",
+    "log.file.name": "app.log",
+    "message": "Request timed out",
+    "metadata": "{  \"container\": {    \"group_id\": \"abc123\",    \"group_name\": \"backend-service\",    \"image_name\": \"backend:v2\"  }}"
+  }
+}
+```
+
+## Steps to Extract Nested JSON Fields and Flatten Logs
+
+To transform our example log into the desired format, we will use the following **three processors** in the SigNoz Logs Pipeline:
+
+1. **JSON Parser** – Convert the JSON string in `body` into structured fields under `attributes`.
+2. **Move Processor** – Move the `message` field from the parsed JSON into `body`.
+3. **Flatten Nested Fields** – Extract `group_id`, `group_name`, and `image_name` from `metadata.container` and move them to top-level `attributes`.
+
+Let's go through each step in detail.
+
+### Step 1. JSON Parser – Convert JSON in `body` to Structured Attributes
+
+The first step is to parse the raw JSON string inside `body` so we can access its fields directly.
+
+#### Processor Configuration
+
+```yaml
+- type: json_parser
+  name: ParseBodyJson
+  parse_from: body
+  parse_to: attributes
+```
+
+<figure data-zoomable align='center'>
+<img className="box-shadowed-image" src="/img/docs/logs-management/logs-pipelines/nested-json-guide-step1.webp" alt="Converting to Structured Attributes"/>
+<figcaption><i>Converting to Structured Attributes</i></figcaption>
+</figure>
+
+#### After Parsing
+
+```json
+{
+  "body": "{ \"metadata\": { \"container\": { \"group_id\": \"abc123\", \"group_name\": \"backend-service\", \"image_name\": \"backend:v2\" } }, \"message\": \"Request timed out\" }",
+  "id": "2wiawVsz48SHom7AJst7GkXjJBb",
+  "timestamp": 1746527086483,
+  "attributes": {
+    "log.file.name": "app.log",
+    "message": "Request timed out",
+    "metadata": "{\"container\":{\"group_id\":\"abc123\",\"group_name\":\"backend-service\",\"image_name\":\"backend:v2\"}}"
+  }
+}
+```
+
+**Key Observations:**
+
+- The `message` field has been successfully extracted from the body JSON and added as an attribute.
+- The `metadata` field was not fully parsed into a nested object; instead, it is still a stringified JSON.
+
+### Step 2: Extract Image Name Field
+
+This step uses a `json_parser` to extract `group_id`, `group_name`, and `image_name` directly under `attributes` from `attributes.metadata.container`.
+
+#### Processor Configuration
+
+```yaml
+- type: json_parser
+  name: Parse Image Name
+  parse_from: attributes.metadata.container
+  parse_to: attributes
+```
+
+<figure data-zoomable align='center'>
+<img className="box-shadowed-image" src="/img/docs/logs-management/logs-pipelines/nested-json-guide-step2.webp" alt="Extract Image Name to Attributes"/>
+<figcaption><i>Extract Image Name to Attributes</i></figcaption>
+</figure>
+
+
+### Final Output 
+
+```json
+{
+  "body": "{ \"metadata\": { \"container\": { \"group_id\": \"abc123\", \"group_name\": \"backend-service\", \"image_name\": \"backend:v2\" } }, \"message\": \"Request timed out\" }",
+  "id": "2wiawVsz48SHom7AJst7GkXjJBb",
+  "timestamp": 1746527086483,
+  "attributes": {
+    "container": "{\"group_id\":\"abc123\",\"group_name\":\"backend-service\",\"image_name\":\"backend:v2\"}",
+    "group_id": "abc123",
+    "group_name": "backend-service",
+    "image_name": "backend:v2",
+    "log.file.name": "app.log",
+    "message": "Request timed out",
+    "metadata": "{  \"container\": {    \"group_id\": \"abc123\",    \"group_name\": \"backend-service\",    \"image_name\": \"backend:v2\"  }}"
+  }
+}
+```
+
+** Key Observations**
+- `group_id`, `group_name`, and `image_name` have been flattened and promoted to top-level fields under attributes.
+- The original `attributes.container` field remains as a JSON string, but its contents are now accessible individually.
+
+
+### Optional Refinements
+
+After extracting and flattening nested fields, you may want to remove intermediate fields like `metadata` and `container` to reduce noise and log size.
+
+You can use the `remove` processor to do that.
+
+**Remove Metadata**
+
+```yaml
+- type: remove
+  name: Remove Metadata
+  field: attributes.metadata
+```
+
+**Remove Container**
+
+```yaml
+- type: remove
+  name: Remove Container
+  field: attributes.container
+```
