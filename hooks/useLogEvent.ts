@@ -53,6 +53,21 @@ const getOS = (): string => {
   return 'unknown'
 }
 
+const getUserAgent = (): string | undefined => {
+  if (typeof window === 'undefined') return undefined
+  return window.navigator.userAgent
+}
+
+const getWebdriver = (): boolean | undefined => {
+  if (typeof window === 'undefined') return undefined
+  return window.navigator.webdriver
+}
+
+const isHeadless = (): boolean | undefined => {
+  if (typeof window === 'undefined') return undefined
+  return /HeadlessChrome/.test(window.navigator.userAgent)
+}
+
 export const useLogEvent = () => {
   useEffect(() => {
     getInitialReferrer()
@@ -74,6 +89,10 @@ export const useLogEvent = () => {
         ...attributes,
         custom_os: getOS(),
         custom_initial_referrer: getInitialReferrer(),
+        user_agent: getUserAgent(),
+        webdriver: getWebdriver(),
+        headless: isHeadless(),
+        custom_source: 'web',
       }
 
       const eventPayload: LogEventPayload = {
