@@ -12,8 +12,8 @@ interface IconCardData {
 }
 
 interface IconCardGridProps {
-  title: string
-  description: string
+  title?: string
+  description?: string
   cards: IconCardData[]
   sectionName: string // For clickLocation tracking attribute
   viewAllHref?: string
@@ -32,11 +32,15 @@ const IconCardGrid: React.FC<IconCardGridProps> = ({
 }) => {
   return (
     <div className="mx-auto mb-12 w-full max-w-7xl">
-      {/* Section Header */}
-      <div className="mb-6 text-left">
-        <h2 className="mb-2 text-2xl font-semibold text-signoz_vanilla-100">{title}</h2>
-        <p className="text-base text-signoz_vanilla-400">{description}</p>
-      </div>
+      {/* Section Header - Only render if title or description exists */}
+      {(title || description) && (
+        <div className="mb-6 text-left">
+          {title && (
+            <h2 className="mb-2 text-2xl font-semibold text-signoz_vanilla-100">{title}</h2>
+          )}
+          {description && <p className="text-base text-signoz_vanilla-400">{description}</p>}
+        </div>
+      )}
 
       {/* Grid of Icon Cards */}
       <div className={`grid gap-4 ${gridCols}`}>
@@ -44,7 +48,7 @@ const IconCardGrid: React.FC<IconCardGridProps> = ({
           <TrackingLink
             key={index}
             href={card.href}
-            className="flex flex-col items-center justify-center rounded-lg border border-signoz_slate-400 bg-signoz_ink-400 p-4 text-center transition-all hover:border-signoz_robin-500 hover:bg-signoz_ink-300"
+            className="flex flex-col items-center justify-center rounded-lg border border-signoz_slate-400 bg-signoz_ink-400 p-4 text-center no-underline transition-all hover:border-signoz_robin-500 hover:bg-signoz_ink-300"
             clickType="Nav Click"
             clickName={card.clickName}
             clickText={card.name}
@@ -63,9 +67,9 @@ const IconCardGrid: React.FC<IconCardGridProps> = ({
         <div className="mt-6 text-sm">
           <TrackingLink
             href={viewAllHref}
-            className="inline-flex items-center text-signoz_robin-500 transition-colors hover:text-signoz_robin-400"
+            className="inline-flex items-center text-signoz_robin-500 no-underline transition-colors hover:text-signoz_robin-400"
             clickType="Nav Click"
-            clickName={`View All ${title} Link`}
+            clickName={`View All ${title || ''} Link`}
             clickText={viewAllText}
             clickLocation={sectionName}
           >

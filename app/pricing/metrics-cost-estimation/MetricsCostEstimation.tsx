@@ -5,8 +5,8 @@ import { Slider, Tooltip, SliderValue } from '@nextui-org/react'
 import { Link } from '@nextui-org/react'
 import { ArrowRight } from 'lucide-react'
 import Button from '@/components/Button/Button'
-import VimeoPlayer from '@/components/VimeoPlayer/VimeoPlayer'
 import { Modal, ModalContent, ModalBody, useDisclosure } from '@nextui-org/react'
+import VimeoPlayer from '@/components/VimeoPlayer/VimeoPlayer'
 
 const formatNumber = (number: Number) =>
   number.toLocaleString(undefined, { maximumFractionDigits: 2, minimumFractionDigits: 0 })
@@ -58,12 +58,12 @@ const MetricsCostEstimation = () => {
 
   const monthlyEstimate = totalSamplesMonthly * METRICS_PRICES[metricsRetentionPeriod]
 
+  const MAX_INPUT_VALUE = 10000
+
   const handleOpenVideo = (videoId): void => {
     setSelectedVideoID(videoId)
     onOpen()
   }
-
-  const MAX_INPUT_VALUE = 10000
 
   return (
     <div className="relative mt-[-56px] bg-signoz_ink-500">
@@ -316,26 +316,6 @@ const MetricsCostEstimation = () => {
                       </div>
                     </div>
                   </Link>
-                  <div onClick={() => handleOpenVideo(968489758)} style={{ cursor: 'default' }}>
-                    <div className="group flex  w-full cursor-pointer items-center rounded border border-none bg-signoz_ink-400 p-4 text-white hover:bg-signoz_ink-300">
-                      <div className="mr-4">
-                        <img
-                          src="/svgs/icons/play-icon.svg"
-                          alt="SigNoz Icon"
-                          height={24}
-                          width={24}
-                        />
-                      </div>
-                      <div className="flex-grow">
-                        <div className="text-[10px] text-signoz_vanilla-400 sm:text-sm">
-                          What is included in $199?
-                        </div>
-                      </div>
-                      <div className="ml-4 transform transition-transform group-hover:translate-x-1">
-                        <ArrowRight size={16} />
-                      </div>
-                    </div>
-                  </div>
                 </div>
               </div>
             </div>

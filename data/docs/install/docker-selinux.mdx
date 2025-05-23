@@ -1,0 +1,76 @@
+---
+date: 2025-05-06
+title: Docker SELinux
+description:  Learn how to install SigNoz on SeLinux systems with Docker. Follow our detailed, step-by-step guide to set up SigNoz on macOS or Linux. Ensure smooth installation and start monitoring your applications effectively.
+id: docker-selinux
+slug: /install/docker-selinux
+---
+
+import CloneRepo from '@/components/shared/clone-repo.md'
+import RetentionInfo from '@/components/shared/retention-info.mdx'
+
+<HostingDecision />
+
+
+
+
+## Prerequisites
+
+- A SELinux enabled sytem.
+- [Git client](https://desktop.github.com/)
+- Ensure that the ports `8080`, `4317` and `4318` are open on the machine where you install SigNoz.
+
+## Running Docker in SElinux
+
+When running SigNoz with Docker on SELinux-enabled hosts, you need to apply an SELinux label to bind-mount volumes by appending either `:z` or `:Z` to the volume suffix.
+
+For example:
+
+```bash
+docker run -d \
+  --name signoz \
+  -p 3301:3301 \
+  -v "$(pwd)"/signoz-data:/data:z \
+  signoz/signoz:latest
+```
+
+Or, in a Docker Compose file:
+
+```yaml
+version: '3.7'
+services:
+  signoz:
+    image: signoz/signoz:latest
+    container_name: signoz
+    ports:
+      - "3301:3301"
+    volumes:
+      - ./signoz-data:/data:Z
+```
+
+References:
+- [Configure the SELinux label](https://docs.docker.com/storage/bind-mounts/#configure-the-selinux-label)
+- [Using Docker volumes on SELinux enabled servers](https://prefetch.net/blog/2017/09/30/using-docker-volumes-on-selinux-enabled-servers/)
+
+<Admonition type="info">
+These are the some of the services for which you need to add labels in the docker-compose file:
+- [clickhouse](https://github.com/SigNoz/signoz/blob/6e0b50dd600425724ef52149e55c3505a57a1ff6/deploy/docker/docker-compose.yaml#L96)
+- [signoz](https://github.com/SigNoz/signoz/blob/6e0b50dd600425724ef52149e55c3505a57a1ff6/deploy/docker/docker-compose.yaml#L111)
+- [zookeeper](https://github.com/SigNoz/signoz/blob/6e0b50dd600425724ef52149e55c3505a57a1ff6/deploy/docker/docker-compose.yaml#L81)
+</Admonition>
+
+## Install SigNoz 
+
+Please Follow the docs for installing Signoz in docker or docker swarm
+- [Docker Swarm](/docs/install/docker-swarm)
+- [Docker Compose](/docs/install/docker)
+
+## Related Topics
+
+- [Troubleshoot SigNoz Installation Issues](/docs/install/troubleshooting)
+
+## Next Steps
+
+- [Instrument Your Application](/docs/instrumentation/overview)
+- [Tutorials](/docs/tutorials/)
+- [Operate SigNoz on Docker Standalone](/docs/operate/docker-standalone)

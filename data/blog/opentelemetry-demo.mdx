@@ -37,7 +37,7 @@ Since SigNoz is OpenTelemetry native - the process of configuring applications a
 
 ## Send OpenTelemetry Demo App Telemetry to SigNoz
 
-The easiest way to send data to SigNoz is via the cloud. This is a quick guide for sending data to the SigNoz cloud using docker deployment of the OTel Demo App. Instead, if you wish to send data to self hosted versions of SigNoz (Docker/ Kubernetes) check our [docs](https://www.notion.so/a7c52267946f4343a8cc1d8d4e1c19a7?pvs=21).
+The easiest way to send data to SigNoz is via the cloud. This is a quick guide for sending data to the SigNoz cloud using docker deployment of the OTel Demo App. Instead, if you wish to send data to self hosted versions of SigNoz (Docker/ Kubernetes), check out the docs [here](https://github.com/SigNoz/signoz/blob/main/docs/otel-demo-docs.md).
 
 ### Get your SigNoz Cloud Endpoint
 
@@ -106,28 +106,20 @@ docker compose ps -a
 ```
 
 The result should look similar to this,
-<figure>
-  <img src="/img/blog/2025/03/otel-demo-docker-containers.webp" alt="docker-containers" />
-  <figcaption>Docker containers of OTel Demo App</figcaption>
-</figure>
+<Figure src="/img/blog/2025/03/otel-demo-docker-containers.webp" alt="docker-containers" caption="Docker containers of OTel Demo App" />
+
 
 ### Monitor with SigNoz
 
 1. Open your SigNoz account
 2. Navigate to Services to see multiple services listed down as shown in the snapshot below.
 
-<figure>
-  <img src="/img/blog/2025/03/otel-demo-services.webp" alt="SigNoz services tab" />
-  <figcaption>Services Listed down in SigNoz services tab</figcaption>
-</figure>
+<Figure src="/img/blog/2025/03/otel-demo-services.webp" alt="SigNoz services tab" caption="Services Listed down in SigNoz services tab" />
 
 
 When you navigate to the Service Map tab, you see an automatically generated visualisation of your service architecture, as shown below.
 
-<figure>
-  <img src="/img/blog/2025/03/otel-demo-map.gif" alt="SigNoz service map" />
-  <figcaption>Service architecture as visualised by SigNoz Service map</figcaption>
-</figure>
+<Figure src="/img/blog/2025/03/otel-demo-map.gif" alt="SigNoz service map" caption="Service architecture as visualised by SigNoz Service map" />
 
 ## Debugging Real-life Scenarios with SigNoz Simulated by the OTel Demo App
 
@@ -137,10 +129,8 @@ Let’s debug some very common bugs by using SigNoz and the OTel Demo App to sim
 For this, navigate to `http://localhost:8080/feature` , which will look like the snapshot below. 
 We will enable appropriate flags to simulate errors, in each of the following scenarios.
 
-<figure>
-  <img src="/img/blog/2025/03/otel-demo-flags.webp" alt="Feature page of OTel Demo App" />
-  <figcaption>List of feature flags provided by OTel Demo App that helps simulate scenarios</figcaption>
-</figure>
+<Figure src="/img/blog/2025/03/otel-demo-flags.webp" alt="Feature page of OTel Demo App" caption="Feature page of OTel Demo App" />
+
 
 With the three scenarios below, we will look at how SigNoz implements traces, logs, metrics with dashboards and alerts, exceptions etc.
 
@@ -152,28 +142,20 @@ On closer inspection, the metrics going haywire indicate a Kafka Consumer lag, w
 
 So, we have diagnosed two key anomalies - Consumer lag and Queue overload, which in a real-life scenario would require immediate debugging of the consumer/ producer code.
 
-<figure>
-  <img src="/img/blog/2025/03/otel-demo-kafka-metrics.webp" alt="Kafka Monitoring Dashboard" />
-  <figcaption>Dashboard with various panels monitoring different Kafka properties</figcaption>
-</figure>
+<Figure src="/img/blog/2025/03/otel-demo-kafka-metrics.webp" alt="Kafka Monitoring Dashboard" caption="Dashboard with various panels monitoring different Kafka properties" />
 
 For our use case, the service map [check Service Map tab] shows that two services are consuming from Kafka, *fraud detection* and *accounting.*
 
 Going to the Logs Tab and filtering for logs from the *fraud detection* service is a good move at this point. From the logs, we see a particular statement: “FeatureFlag—kafkaQueueProblems is enabled, sleeping 1 second.” 
 
-<figure>
-  <img src="/img/blog/2025/03/otel-demo-kafka-traces.webp" alt="Logstab with fraud detection service logs" />
-  <figcaption>Logs being used to debug Kafka lag by leveraging Filters</figcaption>
-</figure>
+<Figure src="/img/blog/2025/03/otel-demo-kafka-traces.webp" alt="Logstab with fraud detection service logs" caption="Logs being used to debug Kafka lag by leveraging Filters" />
+
 
 This is the missing piece of our puzzle - the consumer delay caused by the service sleeping for a second, which causes the bottleneck.
 
 SigNoz also has a dedicated tab for *Messaging Queues*, where we can monitor the consumers of the Kafka topics and their stats. Currently, we support both Celery and Kafka Queues.
 
-<figure>
-  <img src="/img/blog/2025/03/otel-demo-msg-queues.webp" alt="Messaging Queues with fraud-detection service in focus" />
-  <figcaption>Messaging Queues with fraud-detection service in focus</figcaption>
-</figure>
+<Figure src="/img/blog/2025/03/otel-demo-msg-queues.webp" alt="Messaging Queues with fraud-detection service in focus" caption="Messaging Queues with fraud-detection service in focus" />
 
 ### Investigating a Sporadic Service Failure
 
@@ -183,26 +165,17 @@ In a real production environment, this type of issue represents a critical flaw 
 
 The [Exceptions](https://signoz.io/exceptions-monitoring/) tab is a life-saver in such a situation. We immediately notice an exception statement referring to the *cart,* which is a good starting point for us.
 
-<figure>
-  <img src="/img/blog/2025/03/otel-demo-exceptions.webp" alt="Exceptions Tab used for debugging service failure" />
-  <figcaption>Exceptions Tab used for debugging service failure</figcaption>
-</figure>
+<Figure src="/img/blog/2025/03/otel-demo-exceptions.webp" alt="Exceptions Tab used for debugging service failure" caption="Exceptions Tab used for debugging service failure" />
 
 Diving deeper, we notice that the *cartService* is unable to connect to the Redis cache.
 
-<figure>
-  <img src="/img/blog/2025/03/otel-demo-exception-detail.webp" alt="Exception details showing cart service cannot connect to Redis" />
-  <figcaption>Exception details showing cart service cannot connect to Redis</figcaption>
-</figure> 
+<Figure src="/img/blog/2025/03/otel-demo-exception-detail.webp" alt="Exception details showing cart service cannot connect to Redis" caption="Exception details showing cart service cannot connect to Redis" />
 
 If you are a developer paged for this bug, the immediate next step is to restore the Redis connection and check if any other services have been similarly impacted.
 
 But to explore SigNoz further (this is *purely for exploration* and **not** a *suggested or ideal debugging flow*), click on ‘See the error in trace graph’. This takes us to the corresponding trace. Since traces always carry context, it often reduces debugging time. By clicking on ‘related logs‘, we can see ***OpenTelemetry log correlation*** in action, which works by connecting logs with traces through shared context identifiers.
 
-<figure>
-  <img src="/img/blog/2025/03/otel-demo-traces.webp" alt="Trace view with flame graph and span details" />
-  <figcaption>Trace view with flame graph and span details</figcaption>
-</figure>
+<Figure src="/img/blog/2025/03/otel-demo-traces.webp" alt="Trace view with flame graph and span details" caption="Trace view with flame graph and span details" />
 
 Thus, we have not only debugged the issue quickly, but we have also drawn sufficient context around the issue.
 
@@ -214,32 +187,19 @@ When OpenTelemetry instruments your application, it creates unique trace and spa
 
 We are using a custom dashboard called *Spanmetrics* dashboard here, which helps to monitor the trace span calls. You can export the JSON [here](https://github.com/SigNoz/signoz-web/tree/main/public/dashboards/otel-demo-span-metrics.json). Read this to understand in detail about [SigNoz dashboards](https://signoz.io/metrics-and-dashboards/). Also, make sure to enable the *productCatalogFailure* flag to simulate this. A few minutes after enabling the flag, if you browse to the astronomy shop UI, you can see a lot of red in the network calls.
 
-<figure>
-    <img src="/img/blog/2025/03/otel-demo-network.webp" alt="Network tab of OTel Demo App after enabling productCatalogFailure flag" />
-    <figcaption>Network tab of OTel Demo App after enabling productCatalogFailure flag</figcaption>
-</figure>
+<Figure src="/img/blog/2025/03/otel-demo-network.webp" alt="Network tab of OTel Demo App after enabling productCatalogFailure flag" caption="Network tab of OTel Demo App after enabling productCatalogFailure flag" />
 
 When you filter for errors in the 'Span metrics by service' panel from the dashboard, you'll notice that the error rate for several services starting to creep up, especially for the frontend. [In the Span Metrics dashboard]
 
-<figure>
-    <img src="/img/blog/2025/03/otel-demo-metrics-panel.webp" alt="The Spanmetrics Dashboard showing error rates during a productcatalog service failure" />
-    <figcaption>The Spanmetrics Dashboard showing error rates during a productcatalog service failure</figcaption>
-</figure>
+<Figure src="/img/blog/2025/03/otel-demo-metrics-panel.webp" alt="The Spanmetrics Dashboard showing error rates during a productcatalog service failure" caption="The Spanmetrics Dashboard showing error rates during a productcatalog service failure" />
 
 Go to the [Traces](https://signoz.io/distributed-tracing/) tab, let’s filter only the ERROR traces. We observe that the filter populates the query builder above as well!
 
-<figure>
-    <img src="/img/blog/2025/03/otel-demo-traces-explorer.webp" alt="Traces explorer with Error filter applied and subsequent query output" />
-    <figcaption>Traces explorer with Error filter applied and subsequent query output</figcaption>
-</figure>
+<Figure src="/img/blog/2025/03/otel-demo-traces-explorer.webp" alt="Traces explorer with Error filter applied and subsequent query output" caption="Traces explorer with Error filter applied and subsequent query output" />
 
 The output indicates that *ProductCatalogueService* could be a *service of interest.*  If you explore all of the traces that call `ProductCatalogService/GetProduct`, you may notice that the errors all have something in common: they happen only when the attribute is a specific value. 
 
-<figure>
-    <img src="/img/blog/2025/03/otel-demo-pid.webp" alt="Detailed trace view with flame graph and span details emphasising a specific product id which likely causes failure" />
-    <figcaption>Detailed trace view with flame graph and span details emphasising a specific product id which likely causes failure</figcaption>
-</figure>
-
+<Figure src="/img/blog/2025/03/otel-demo-pid.webp" alt="Detailed trace view with flame graph and span details emphasising a specific product id which likely causes failure" caption="Detailed trace view with flame graph and span details emphasising a specific product id which likely causes failure" />
 <Admonition>
 
 
@@ -249,10 +209,7 @@ Automatic instrumentation doesn’t know the domain-specific logic and metadata 
 
 This is indeed a very interesting observation, but it doesn’t point us to the root cause. Let’s check the *Events* tab for the traces that error out.
 
-<figure>
-    <img src="/img/blog/2025/03/otel-demo-events.webp" alt="Events Tab for a particular trace, showing cause of failure" />
-    <figcaption>Events Tab for a particular trace, showing cause of failure</figcaption>
-</figure>
+<Figure src="/img/blog/2025/03/otel-demo-events.webp" alt="Events Tab for a particular trace, showing cause of failure" caption="Events Tab for a particular trace, showing cause of failure" />
 
 
 This is an *aha moment* for you! The above snapshot clearly shows that the reason for the error is the *productCatalogFailure* flag being enabled. If you are a front-end developer, *you can breathe*.

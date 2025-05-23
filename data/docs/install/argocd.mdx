@@ -1,0 +1,151 @@
+---
+date: 2025-05-06
+id: argocd
+title: Deploying with ArgoCD
+description: Learn how to install SigNoz using ArgoCD for GitOps based deployment
+---
+
+import CommonPrerequisites from '@/components/shared/k8s-common-prerequisites.md'
+import K8sInstall from '@/components/shared/k8s-install.mdx'
+import K8sOtelDemo from '@/components/shared/k8s-oteldemo.mdx'
+import NextSteps from '@/components/shared/next-steps.md'
+
+<HostingDecision />
+
+
+<CommonPrerequisites />
+- ArgoCD running in your cluster, you can follow the [ArgoCD documentation][1] for installing ArgoCD.
+
+## Installation Steps
+
+### Create a namespace for SigNoz
+
+```bash
+kubectl create namespace signoz
+```
+
+### Create an ArgoCD Application
+
+We will be using the SigNoz Helm [chart](https://github.com/SigNoz/charts), which will install the following components into your Kubernetes cluster:
+
+- SigNoz
+- SigNoz Collector
+- Clickhouse
+- Zookeeper
+
+ArgoCD allows to install application by using the helm charts through the UI, or in the declarative GitOps way. For detailed instructions on using helm charts with ArgoCD, please refer to the documentation [documentation][4]
+<Tabs>
+
+<TabItem label="Apply the argo application with kubectl" value="kubectl">
+
+
+Create a file named `signoz-application.yaml` with the following content:
+
+```yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: signoz
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://charts.signoz.io
+    targetRevision: 0.79.0
+    chart: signoz
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: signoz
+```
+
+### Apply the ArgoCD Application
+
+```bash
+kubectl apply -f signoz-application.yaml
+```
+
+</TabItem>
+
+<TabItem label="ArgoCD UI" value="ui">
+
+Follow the [docs][2] for creating an application from the ArgoCD UI.
+</TabItem>
+
+<TabItem label="ArgoCD CLI" value="cli">
+
+Follow the [docs][3] for creating an application from the ArgoCD CLI.
+
+</TabItem>
+
+</Tabs>
+
+<figure data-zoomable align='center'>
+    <img src="/img/docs/argocd-dashboard.webp" alt="ArgoCD dashboard for signoz application"/>
+    <figcaption><i>ArgoCD dashboard for signoz application</i></figcaption>
+</figure>
+## Configuration
+
+### Customizing the Installation
+
+You can customize the SigNoz installation by creating a values file and referencing it in your ArgoCD Application. Here's an example of a values file (`signoz-values.yaml`):
+
+```yaml
+signoz:
+  name: "signoz"
+  replicaCount: 1
+  image:
+    registry: docker.io
+    repository: signoz/signoz
+    tag: v0.81.0
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 8080
+    internalPort: 8085
+    opampPort: 4320
+  additionalArgs:
+    - --use-logs-new-schema=true
+    - --use-trace-new-schema=true
+```
+
+Then update your ArgoCD Application to use these values:
+
+```yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: signoz
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://charts.signoz.io
+    targetRevision: 0.79.0
+    chart: signoz
+    helm:
+      valueFiles:
+        - signoz-values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: signoz
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+```
+
+### Automation from the CI Pipelines
+
+If you prefer to manage your Helm values through a Git repository, you can configure ArgoCD to sync from your GitHub repo instead, and deploy from the CI, please refer to this [documentation][5]
+## Next Steps
+
+<NextSteps />
+
+---
+[1]: https://argo-cd.readthedocs.io/en/stable/getting_started/
+[2]: https://argo-cd.readthedocs.io/en/stable/getting_started/#creating-apps-via-ui
+[3]: https://argo-cd.readthedocs.io/en/stable/getting_started/#creating-apps-via-cli
+[4]: https://argo-cd.readthedocs.io/en/stable/user-guide/helm/
+[5]: https://argo-cd.readthedocs.io/en/stable/user-guide/ci_automation/

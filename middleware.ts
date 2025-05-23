@@ -18,7 +18,7 @@ export function middleware(req: NextRequest) {
   return res
 }
 
-// Only run this middleware on the root path (and subpaths if desired)
+// Only run this middleware on the following paths
 export const config = {
-  matcher: '/',
+  matcher: ['/', '/docs/:path*', '/teams/:path*', '/pricing/:path*'],
 }

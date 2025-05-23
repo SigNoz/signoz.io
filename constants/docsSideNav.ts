@@ -5,9 +5,9 @@ const docsSideNav = [
     route: '/docs',
   },
   {
-    type: "category",
+    type: 'category',
     isExpanded: false,
-    label: "Overview",
+    label: 'Overview',
     items: [
       {
         type: 'doc',
@@ -53,48 +53,48 @@ const docsSideNav = [
         ],
       },
       {
-        type: "category",
-        label: "Breaking Changes",
+        type: 'category',
+        label: 'Breaking Changes',
         isExpanded: false,
         items: [
           {
             type: 'doc',
             label: 'Breaking Changes in v0.76',
-            route: '/docs/overview/breaking-changes/breaking-changes-0.76'
-          }
-        ]
+            route: '/docs/overview/breaking-changes/breaking-changes-0.76',
+          },
+        ],
       },
       {
-        type: "category",
+        type: 'category',
         label: "What's New",
         isExpanded: false,
         items: [
           {
             type: 'doc',
             label: 'Changelog of v0.76',
-            route: '/docs/overview/whats-new/changelog-0.76'
-          }
-        ]
+            route: '/docs/overview/whats-new/changelog-0.76',
+          },
+        ],
       },
       {
-        type: "doc",
+        type: 'doc',
         label: "What's Coming",
-        route: "/docs/roadmap"
+        route: '/docs/roadmap',
       },
       {
-        type: "category",
-        label: "Core Concepts",
-        route: "/docs/overview/core-concepts/overview",
+        type: 'category',
+        label: 'Core Concepts',
+        route: '/docs/overview/core-concepts/overview',
         isExpanded: false,
         items: [
           {
-            type: "doc",
-            label: "Architecture",
-            route: "/docs/architecture"
-          }
-        ]
+            type: 'doc',
+            label: 'Architecture',
+            route: '/docs/architecture',
+          },
+        ],
       },
-    ]
+    ],
   },
   {
     type: 'category',
@@ -113,7 +113,7 @@ const docsSideNav = [
             route: '/docs/cloud/quickstart',
             label: 'Quickstart',
           },
-        ]
+        ],
       },
       {
         type: 'category',
@@ -136,7 +136,12 @@ const docsSideNav = [
                 label: 'Docker Swarm',
                 route: '/docs/install/docker-swarm',
               },
-            ]
+              {
+                type: 'doc',
+                label: 'Docker SELinux',
+                route: '/docs/install/docker-selinux',
+              },
+            ],
           },
           {
             type: 'category',
@@ -149,7 +154,7 @@ const docsSideNav = [
                 route: '/docs/install/linux',
                 className: 'new-doc',
               },
-            ]
+            ],
           },
           {
             type: 'category',
@@ -187,6 +192,11 @@ const docsSideNav = [
                 label: 'Deploying to Local',
                 route: '/docs/install/kubernetes/local',
               },
+              {
+                type: 'doc',
+                label: 'Deploying with ArgoCD',
+                route: '/docs/install/argocd',
+              },
             ],
           },
           {
@@ -215,7 +225,6 @@ const docsSideNav = [
         ],
       },
     ],
-
   },
 
   {
@@ -351,20 +360,23 @@ const docsSideNav = [
                 items: [
                   {
                     type: 'doc',
-                    route: '/docs/manage/administrator-guide/clickhouse/distributed-clickhouse/docker',
+                    route:
+                      '/docs/manage/administrator-guide/clickhouse/distributed-clickhouse/docker',
                     label: 'Docker',
                   },
                   {
                     type: 'doc',
-                    route: '/docs/manage/administrator-guide/clickhouse/distributed-clickhouse/docker-swarm',
+                    route:
+                      '/docs/manage/administrator-guide/clickhouse/distributed-clickhouse/docker-swarm',
                     label: 'Docker Swarm',
                   },
                   {
                     type: 'doc',
-                    route: '/docs/manage/administrator-guide/clickhouse/distributed-clickhouse/kubernetes',
+                    route:
+                      '/docs/manage/administrator-guide/clickhouse/distributed-clickhouse/kubernetes',
                     label: 'Kubernetes',
-                  }
-                ]
+                  },
+                ],
               },
               {
                 type: 'doc',
@@ -376,7 +388,6 @@ const docsSideNav = [
                 route: '/docs/operate/clickhouse/connect-to-clickhouse',
                 label: 'Connect to ClickHouse',
               },
-
 
               {
                 type: 'doc',
@@ -407,7 +418,7 @@ const docsSideNav = [
                 label: 'Alertmanager',
                 route: '/docs/manage/administrator-guide/configuration/alertmanager',
               },
-            ]
+            ],
           },
 
           {
@@ -450,16 +461,16 @@ const docsSideNav = [
             route: '/docs/operate/reset-admin-password',
             label: 'Reset Admin Password',
           },
-        ]
+        ],
       },
-    ]
+    ],
   },
 
   {
     label: 'APM & Distributed Tracing',
     type: 'category',
     isExpanded: false,
-    // route: '',
+    route: '/docs/instrumentation/overview',
     items: [
       {
         type: 'doc',
@@ -822,7 +833,7 @@ const docsSideNav = [
     label: 'Logs Management',
     type: 'category',
     isExpanded: false,
-    // route: '',
+    route: '/docs/userguide/logs',
     items: [
       {
         type: 'doc',
@@ -1004,6 +1015,16 @@ const docsSideNav = [
                 type: 'doc',
                 route: '/docs/logs-pipelines/guides/trace',
                 label: 'Parse Trace Information',
+              },
+              {
+                type: 'doc',
+                route: '/docs/logs-pipelines/guides/resource',
+                label: 'Parse Container Name',
+              },
+              {
+                type: 'doc',
+                route: '/docs/logs-pipelines/guides/nested-json',
+                label: 'Parse Nested JSON',
               },
             ],
           },
@@ -1480,9 +1501,8 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/integrations/temporal-typescript-opentelemetry',
             label: 'Typescript',
-          }
-        ]
-
+          },
+        ],
       },
       {
         type: 'doc',
@@ -1597,7 +1617,52 @@ const docsSideNav = [
           },
         ],
       },
+    ],
+  },
+  {
+    label: 'External API Monitoring',
+    type: 'category',
+    className: 'new-doc',
+    isExpanded: false,
+    // route: '',
+    items: [
+      {
+        type: 'doc',
+        route: '/docs/external-api-monitoring/overview',
+        label: 'Overview',
+      },
+      {
+        type: 'doc',
+        route: '/docs/external-api-monitoring/setup',
+        label: 'Setup',
+      },
     ]
+  },
+  {
+    label: 'CICD Monitoring',
+    type: 'category',
+    className: 'new-doc',
+    isExpanded: false,
+    // route: '',
+    items: [
+      {
+        label: 'GitHub',
+        type: 'category',
+        isExpanded: false,
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/cicd/github/github-metrics',
+            label: 'Metrics',
+          },
+          {
+            type: 'doc',
+            route: '/docs/cicd/github/github-actions-traces',
+            label: 'Traces',
+          },
+        ],
+      },
+    ],
   },
   {
     type: 'doc',
@@ -1695,7 +1760,6 @@ const docsSideNav = [
         route: '/docs/tutorial/traefik-observability',
         label: 'Traefik Observability',
       },
-
     ],
   },
   {

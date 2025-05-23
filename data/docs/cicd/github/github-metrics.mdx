@@ -1,0 +1,386 @@
+---
+date: 2025-04-10
+id: github-metrics
+title: GitHub Metrics
+description: Integrate the GitHub Receiver to scrape the metrics and send the data to SigNoz
+hide_table_of_contents: true
+---
+
+This document contains instructions on how to monitor the GitHub Repos using [GitHub Receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/githubreceiver/README.md) to scrape metrics using GitHub GraphQL and REST APIs.
+
+
+## Prerequisites
+
+Access token is required for scraping the metrics which can be generated in 2 ways.
+
+- [Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#fine-grained-personal-access-tokens)
+
+- [GitHub App](https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/registering-a-github-app)
+
+## Setup
+
+<Tabs entityName="plans">
+<TabItem value="signoz-cloud" label="SigNoz Cloud" default>
+
+<Tabs>
+<TabItem value="vm" label="VM" default>
+
+### Step 1. Setup OTel Collector
+The OpenTelemetry (OTel) Collector helps collect telemetry data such as logs, traces and metrics from your application.
+Please follow the documentation [here](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) to setup the OpenTelmetry Collector in your VM.
+Make sure to use the latest OTel Collector release. 
+
+### Step 2. Setup GitHub Receiver
+Update the `config.yaml` file that you created in `otelcol-contrib` folder while setting up OTel Collector to include the `github` receiver under the `receivers` section.
+
+    ```yaml:/otelcol-contrib/config.yaml
+    
+    receivers:
+      github:
+        log_level: debug
+        initial_delay: 1s
+        collection_interval: 60s
+        timeout: 30s
+        scrapers:
+          scraper:
+            github_org: <github-org>
+            metrics:
+              vcs.contributor.count:
+                enabled: true
+            auth:
+              authenticator: bearertokenauth/github
+    
+    processors:
+      resource/github:
+        attributes:
+          - key: service.name
+            value: <service-name>
+            action: insert
+    
+    extensions:
+      bearertokenauth/github:
+        token: ${GH_PAT}
+
+    ```
+
+- `<github-org>`: Your GitHub Org.
+- `<service-name>`: Specifies the service that emits the metrics, making it easier to identify and filter metrics related to a specific GitHub integration.
+- `GH_PAT`: This environment variable, which you will create in Step 4, contains your GitHub access token.
+
+
+### Step 3. Add GitHub Receiver to pipelines
+In the `config.yaml` file, under the `service` section, locate the `pipelines` block. Within the `metrics` pipeline, add `github` to the list of receivers.
+
+    ```yaml:/otelcol-contrib/config.yaml
+    ...
+    service:
+      extensions: [bearertokenauth/github]
+      pipelines:
+        metrics:
+          receivers: [github]
+          processors: [resource/github]
+          exporters: [otlp,debug]
+    ...
+    ```
+
+### Step 4. Run the OTel Collector
+Set an environment variable named `GH_PAT`. Inside `otelcol-contrib` folder, run the `otelcol-contrib` command.
+
+    ```bash
+    export GH_PAT=<access-token>
+    ./otelcol-contrib --config ./config.yaml
+    ```
+- `<access-token>`: Your GitHub access token.
+
+</TabItem>
+
+<TabItem value="k8s" label="Kubernetes">
+
+### Step 1. Create `github-otel-collector.yaml` file
+
+<Admonition>
+💡 At the time of writing this guide, the SigNoz OTel Collector does not support the GitHub Receiver.
+</Admonition>
+
+Create K8s resources like namespace, configmap, deployment and service as below to modularize and manage the GitHub OTel Collector setup.
+The `Namespace` isolates the resources, the `ConfigMap` provides the collector configuration, the `Deployment` runs the collector as a pod, and the `Service` allows internal access (if needed) to the collector, enabling it to scrape GitHub metrics and export them to SigNoz Cloud.
+
+    ```yaml:github-otel-collector.yaml
+    ...
+    apiVersion: v1
+    kind: Namespace
+    metadata:
+      name: signoz
+    ---
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: github-metrics-collector-config
+      namespace: signoz
+    data:
+      config.yaml: |
+
+        receivers:
+          github:
+            log_level: debug
+            initial_delay: 1s
+            collection_interval: 60s
+            timeout: 30s
+            scrapers:
+              scraper:
+                github_org: <github-org>
+                metrics:
+                  vcs.contributor.count:
+                    enabled: true
+                auth:
+                  authenticator: bearertokenauth/github
+        
+        processors:
+          resource/github:
+            attributes:
+              - key: service.name
+                value: <service-name>
+                action: insert
+        
+        extensions:
+          bearertokenauth/github:
+            token: ${GH_PAT}
+
+        exporters:
+          otlp:
+            endpoint: ingest.<region>.signoz.cloud:443
+            headers:
+              signoz-ingestion-key: ${SIGNOZ_INGESTION_KEY}
+            tls:
+              insecure: false
+
+          debug:
+            verbosity: detailed
+
+        service:
+          extensions: [bearertokenauth/github]
+          pipelines:
+            metrics:
+              receivers: [github]
+              processors: [resource/github]
+              exporters: [otlp, debug]
+      ---
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: github-metrics-collector
+        namespace: signoz
+      spec:
+        replicas: 1
+        selector:
+          matchLabels:
+            app: github-metrics-collector
+        template:
+          metadata:
+            labels:
+              app: github-metrics-collector
+          spec:
+            containers:
+              - name: collector
+                image: otel/opentelemetry-collector-contrib:0.123.0
+                command: 
+                  - "/otelcol-contrib"
+                  - "--config=/etc/otel/config.yaml"
+                env:
+                  - name: GH_PAT
+                    value: "<ACCESS_TOKEN>"
+                  - name: SIGNOZ_INGESTION_KEY
+                    value: "<SIGNOZ_INGESTION_KEY>"
+                volumeMounts:
+                  - name: config
+                    mountPath: /etc/otel
+            volumes:
+              - name: config
+                configMap:
+                  name: github-metrics-collector-config
+        ---
+        apiVersion: v1
+        kind: Service
+        metadata:
+          name: github-metrics-collector
+          namespace: signoz
+        spec:
+          type: ClusterIP
+          ports:
+            - port: 4317
+              targetPort: 4317
+          selector:
+            app: github-metrics-collector
+    ...
+    ```
+
+- `<github-org>`: Your GitHub Org.
+- `<service-name>`: Specifies the service that emits the metrics, making it easier to identify and filter metrics related to a specific GitHub integration.
+- `<region>`: Your chosen [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint) for SigNoz Cloud.
+- `<ACCESS_TOKEN>`: Your GitHub access token.
+- `<SIGNOZ_INGESTION_KEY>`: Your SigNoz Cloud [Ingestion Key](https://signoz.io/docs/ingestion/signoz-cloud/keys/).
+
+### Step 2. View Logs of GitHub OTel Collector
+Run the following command to view the logs.
+
+    ```bash
+    kubectl logs -f github-metrics-collector-<id> -n signoz
+    ```
+
+</TabItem>
+
+</Tabs>
+
+</TabItem>
+
+<TabItem value='self-host' label='Self-Host'>
+
+### Step 1. Install SigNoz
+Install `SigNoz` by following this [link](https://signoz.io/docs/install/self-host/).
+
+<Admonition>
+💡 At the time of writing this guide, the SigNoz OTel Collector does not support the GitHub Receiver.
+</Admonition>
+
+### Step 2. Add GitHub OTel Collector Service
+Add the `github-otel-collector` service under `services` section of `docker-compose.yaml` file.
+
+    ```yaml:/deploy/docker/docker-compose.yaml 
+    ...
+    github-otel-collector:
+      image: otel/opentelemetry-collector-contrib:0.123.0
+      container_name: github-otel-collector
+      command: [ "--config=/etc/otel-collector-config.yaml" ]
+      volumes:
+        - ./github-otel-collector-config.yaml:/etc/otel-collector-config.yaml
+      environment:
+        - GH_PAT=<ACCESS_TOKEN>
+      networks:
+        - signoz-net
+      depends_on:
+        - otel-collector
+    ...
+    ```
+
+- `<ACCESS_TOKEN>`: Your GitHub access token.
+
+### Step 3. Disable Default SigNoz OTel Config Paths
+Comment the following lines under `command` section of `otel-collector` service in `docker-compose.yaml` file.
+
+    ```yaml:/deploy/docker/docker-compose.yaml 
+    ...
+    otel-collector:
+      command:
+        # - --manager-config=/etc/manager-config.yaml
+        # - --copy-path=/var/tmp/collector-config.yaml
+    ...
+    ```
+
+### Step 4. Create GitHub OTel Collector Configuration
+Create `github-otel-collector-config.yaml` file and add the following contents.
+
+    ```yaml:/deploy/docker/github-otel-collector-config.yaml 
+    ...
+    
+    receivers:
+      github:
+        log_level: debug
+        initial_delay: 1s
+        collection_interval: 60s
+        timeout: 30s
+        scrapers:
+          scraper:
+            github_org: <github-org>
+            # search_query: ""
+            metrics:
+              vcs.contributor.count:
+                enabled: true
+            auth:
+              authenticator: bearertokenauth/github
+    
+    processors:
+      resource/github:
+        attributes:
+          - key: service.name
+            value: <service-name>
+            action: insert
+
+    extensions:
+      bearertokenauth/github:
+        token: ${env:GH_PAT}
+
+    exporters:
+      otlp:
+        endpoint: signoz-otel-collector:4317
+        tls:
+          insecure: true
+        timeout: 30s
+      debug:
+        verbosity: detailed 
+
+    service:
+      extensions: [bearertokenauth/github]
+      pipelines:
+        metrics:
+          receivers: [github]
+          processors: [resource/github]
+          exporters: [otlp,debug]
+    ...
+    ```
+
+- `<github-org>`: Your GitHub Org.
+- `<service-name>`: Specifies the service that emits the metrics, making it easier to identify and filter metrics related to a specific GitHub integration.
+
+### Step 5. Update SigNoz OTel Collector Configuration
+Update the existing `otel-collector-config.yaml` file with the following contents.
+
+    ```yaml:/deploy/docker/otel-collector-config.yaml
+    ...
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+            endpoint: 0.0.0.0:4317
+          http:
+            endpoint: 0.0.0.0:4318
+    
+    exporters:
+      clickhousemetricswrite:
+        endpoint: tcp://clickhouse:9000/signoz_metrics
+        resource_to_telemetry_conversion:
+          enabled: true
+
+    service:
+      pipelines:
+        metrics:
+          receivers: [otlp]
+          processors: []
+          exporters: [clickhousemetricswrite]
+    ...
+    ```
+
+### Step 6. Restart OTel Collector Services
+Restart the `otel-collector` service and `github-otel-collector` service.
+
+    ```bash
+    docker compose -f docker/docker-compose.yaml restart otel-collector
+    docker compose -f docker/docker-compose.yaml restart github-otel-collector
+    ```
+
+### Step 7. View Logs of GitHub OTel Collector
+Run the following command to view the logs.
+    
+    ```bash
+    docker compose -f docker/docker-compose.yaml logs -f github-otel-collector
+    ```
+
+</TabItem>
+</Tabs>
+
+## Validate Metrics in SigNoz
+
+- The following default metrics are scraped and can be viewed under the `Metrics` tab in the SigNoz UI.
+
+<Figure src="/img/docs/cicd/github/MetricsSigNozCloud.webp" alt="GitHub Metrics" caption="Scraped Metrics from GitHub" />
+
+- Refer this [link](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/githubreceiver/documentation.md) for more info on metrics.
