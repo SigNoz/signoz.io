@@ -79,8 +79,9 @@ If `php -m` output is empty, try restarting the web server or if you are using P
 </Admonition>
 
 ### Step 2: Add OpenTelemetry SDK and other dependencies
-In this step, you will use _Composer_ to add **OpenTelemetry SDK** and other dependencies such as the **OLTP Exporter** and the **OpenTelemetry auto-instrumentation for Wordpress** package for automatic instrumentation in WordPress. 
+In this step, you will use **Composer** to add **OpenTelemetry SDK** and other dependencies such as the **OTLP Exporter** and the **OpenTelemetry auto-instrumentation for Wordpress** package for automatic instrumentation in WordPress.
 
+**Navigate to root directory**
 Start by navigating to the root directory of your WordPress installation. This is usually the directory where `wp-config.php` is located.
 For example, if your WordPress installation is located at `/var/www/html/wordpress`, run the following command:
 
@@ -88,15 +89,18 @@ For example, if your WordPress installation is located at `/var/www/html/wordpre
 cd /var/www/html/wordpress
 ```
 
-Next, run the following command to initialize a new Composer project:
+**Initialise composer project**
+If you are running WordPress using Composer, you can skip this step as composer would be already initialized. 
+Run the following command to initialize a new Composer project:
 
 ```bash
 composer init
 ```
 
-You will be prompted to enter some information about the project. You can skip most of the prompts by pressing `Enter` or `n`, but make sure to set the `name` and `description` fields. This will create a new `composer.json` file in the root directory of your WordPress installation.
+You will be prompted to enter some information about the project. You can skip most of the prompts but make sure to set the `name` and `description` fields. This will create a new `composer.json` file in the root directory of your WordPress installation.
 
-Once the `composer.json` file is created, you will need to add the OpenTelemetry SDK and other dependencies. You can do this by running the following command:
+**Add dependencies**
+Once the `composer.json` file is created, you will need to add the OpenTelemetry SDK and other packages. You can install them by running the following command in the root directory of your WordPress installation, i.e., `/var/www/html/wordpress` in this example:
 
 ```bash
 composer require \
@@ -105,11 +109,15 @@ composer require \
     open-telemetry/opentelemetry-auto-wordpress
 ```
 
-Press `y` to any prompts during the installation process. The `composer.json` file should now look something like this:
+Press `y` to any prompts during the installation process. 
 
-```json
+This will add the core **OpenTelemetry SDK** for PHP, the **OTLP exporter** for sending data to SigNoz, **HTTP client libraries** for communication, and the [**WordPress auto-instrumentation**](https://github.com/opentelemetry-php/contrib-auto-wordpress) package to automatically capture WordPress operations.
+
+The `composer.json` file should now include the packages you just installed. It should look something like the code snipped below both in the case of a new composer project and existing, with an existing project having additional dependencies and configurations.
+
+```json:composer.json
 {
-    "name": "wordpress/opentelemtry-signoz",
+    "name": "wordpress/opentelemetry-signoz", // This is the name of the composer project. 
     "require": {
         "open-telemetry/sdk": "^1.2",
         "open-telemetry/exporter-otlp": "^1.2",
@@ -126,10 +134,18 @@ Press `y` to any prompts during the installation process. The `composer.json` fi
 }
 ```
 
-### Step 3: Install the OpenTelemetry Collector
-In this step, you will install the OpenTelemetry collector on the WordPress host. The collector will receive traces from the OpenTelemetry PHP extension and send them to SigNoz. You will configure it to use the OTLP exporter for it.
+<Admonition type="info">
+The versions of the packages may be different at the time of installation as they keep changing. The above versions are what's current as of this writing.
+</Admonition> 
 
-To install the OpenTelemetry collector, run the following command:
+### Step 3: Install and configure the OpenTelemetry Collector
+In this step, you will install the OpenTelemetry collector on the WordPress host. The collector acts as a middleware component that:
+- Receives traces from your instrumented WordPress application
+- Processes and batches the telemetry data efficiently
+- Forwards the data to SigNoz using the OpenTelemetry Protocol (OTLP)
+
+**Install OpenTelemetry collector**
+To install the OpenTelemetry collector, run the following command (this example is for Ubuntu):
 
 ```bash
 wget https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.125.0/otelcol_0.125.0_linux_amd64.deb
@@ -142,57 +158,125 @@ Verify that the collector is running with the following command:
 sudo systemctl status otelcol
 ```
 
-### Step 4: Configure PHP with OpenTelemetry settings
-In this step, you will configure PHP with OpenTelemtry settings. You will also add a prepend file to initialize composer. 
+For a different Linux OS or architecture, you can find the correct collector binary in the [OpenTelemetry Collector releases](https://github.com/open-telemetry/opentelemetry-collector-releases/releases).
+You can also refer to the [penTelemetry Binary Usage in Virtual Machine](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) documentation for more information.
 
-Let's start with adding the following OpenTelemetry environment variables to the `php.ini` file. Choose an option based on your SigNoz setup i.e. whether you are using SigNoz Cloud or self-hosted SigNoz.
+**Configure OpenTelemetry collector**
+Next, you will configure OpenTelemetry collector to send the traces to SigNoz. To do this, you will modify the default configuration file located at `/etc/otelcol/config.yaml`.
 
+Open the file in your favorite text editor and replace its contents with the following configuration depending on whether you are using SigNoz Cloud or self-hosted SigNoz.
 <Tabs entityName="plans">
 <TabItem value="signoz-cloud" label="SigNoz Cloud" default>
+
+```yaml
+receivers:
+  otlp:
+    protocols:
+      http:
+        endpoint: localhost:4318 # Change this to the endpoint where your OpenTelemetry collector is running
+
+processors:
+  batch:
+
+exporters:
+  otlp:
+    endpoint: "ingest.<region>.signoz.cloud:443" # Retrieve the region from https://{your-signoz-url}/settings/ingestion-settings
+    tls:
+      insecure: false
+    headers:
+      "signoz-ingestion-key": "<ingestion-key>" # Retrieve the key from https://{your-signoz-url}/settings/ingestion-settings
+  debug:
+    verbosity: detailed
+
+service:
+
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp]
+
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp]
+
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp]
+```
+</TabItem>
+<TabItem value="self-host" label="Self-Hosted SigNoz">
+
+```yaml
+receivers:
+  otlp:
+    protocols:
+      http:
+        endpoint: localhost:4318 # Change this to the endpoint where your OpenTelemetry collector is running
+
+processors:
+  batch:
+
+exporters:
+  otlp:
+    endpoint: "<self-hosted-SigNoz-IP>:4317" 
+    tls:
+      insecure: true
+  debug:
+    verbosity: detailed
+
+service:
+
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp]
+
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp]
+
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp]
+```
+</TabItem>
+</Tabs>
+
+Remember to replace the placeholders `<self-hosted-SigNoz-IP>` with the IP of your self-hosted SigNoz instance. 
+
+Finally, restart the OpenTelemetry collector to apply the changes:
+
+```bash
+sudo systemctl restart otelcol
+```
+
+### Step 4: Configure PHP with OpenTelemetry settings
+In this step, you will configure PHP with OpenTelemetry settings. You will also add a prepend file to initialize composer. 
+
+Let's start with adding the following OpenTelemetry environment variables to the `php.ini` file. 
 
 Open the `php.ini` file in your favorite text editor and add the following lines:
 
 ```ini
 OTEL_PHP_AUTOLOAD_ENABLED="true"
-OTEL_SERVICE_NAME=wordpress
+OTEL_SERVICE_NAME=<service-name>
 OTEL_TRACES_EXPORTER=otlp
 OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
 OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
 OTEL_PROPAGATORS=baggage,tracecontext
 ```
 
-<Admonition type="info">
 A quick note on some of these values:
-- `wordpress` is the name of the service. This is the name that will be used to identify your service in SigNoz. Replace it with a different one as needed.
+- `<service-name>` is the name of your service, which will be used to identify your service in SigNoz.
 - `http://localhost:4318` is the endpoint where OpenTelemetry collector is running, which in this example is the same host. Port 4318 is the default port for http protocol. 
-</Admonition>
 
 For more information on these environment variables, refer to the [OpenTelemetry PHP Configuration documentation](https://opentelemetry.io/docs/languages/php/sdk/#configuration).
-
-</TabItem>
-<TabItem value="self-hosted-signoz" label="Self-Hosted SigNoz">
-
-Open the `php.ini` file in your favorite text editor and add the following lines:
-
-```ini
-OTEL_PHP_AUTOLOAD_ENABLED="true"
-OTEL_SERVICE_NAME=wordpress
-OTEL_TRACES_EXPORTER=otlp
-OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
-OTEL_EXPORTER_OTLP_ENDPOINT=http://self-host-ip
-OTEL_PROPAGATORS=baggage,tracecontext
-```
-
-<Admonition type="info">
-A quick note on some of these values:
-- `<service-name>` is the name of the service, which is used to identify your service in SigNoz.
-- `http://self-host-ip` is where the self-hosted SigNoz instance is running.
-</Admonition>
-
-For more information on these environment variables, refer to the [OpenTelemetry PHP Configuration documentation](https://opentelemetry.io/docs/languages/php/sdk/#configuration).
-
-</TabItem>
-</Tabs>
 
 **Add a prepend file**
 
@@ -234,4 +318,3 @@ Next, navigate to the **Traces** section in SigNoz to view the traces. You shoul
     <img src="/img/docs/instrumentation/wordpress-traces-in-signoz.webp" alt="Image showing traces in the SigNoz UI"/>
     <figcaption><i>WordPress traces in SigNoz</i></figcaption>
 </figure>
-
