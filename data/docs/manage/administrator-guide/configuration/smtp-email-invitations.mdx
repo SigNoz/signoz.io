@@ -5,17 +5,71 @@ title: Enable SMTP for Email Invitations
 description: Learn how to Configure SMTP for Email Invitations
 ---
 
-SigNoz allows you to configure email settings using environment variables. SigNoz uses email to send user invitations. To enable email, you need to set the following environment variables:
+SigNoz can send email invitations whenever you add users to a workspace. To set this up, you need to configure the mail settings in your configuration file (like [`conf/example.yaml`](https://github.com/SigNoz/signoz/blob/9e13245d1b2781a193b718b6ca43d79691b82df2/conf/example.yaml#L174) or a custom YAML file you specify with the `--config` option). This guide will explain each field and provide snippets for you to use.
+## SMTP settings
 
-- `SMTP_ENABLED`: Enable SMTP for sending email invitations.
-- `SMTP_FROM`: The email address from which the invitations will be sent.
-- `SMTP_HOST`: The SMTP host obtained from your email provider.
-- `SMTP_PORT`: The SMTP port obtained from your email provider.
-- `SMTP_USERNAME`: The SMTP user obtained from your email provider.
-- `SMTP_PASSWORD`: The SMTP password obtained from your email provider.
+To configure SMTP for email invitations, update the `emailing.smtp` section in your configuration file as follows:
 
-<Admonition type="warning">
+```yaml
+emailing:
+  enabled: true
+  templates:
+    directory: /opt/signoz/conf/templates/email
+  smtp:
+    address: smtp.example.com:587  # host:port of your SMTP server
+    from: no-reply@yourdomain.com   # "From" address
+    hello: yourdomain.com           # EHLO/HELO domain (optional)
+    headers:
+      X-Org: MyOrg                  # static headers (optional)
+    auth:
+      username: your_smtp_user      # SMTP username
+      password: your_smtp_password  # SMTP password
+    tls:
+      enabled: true                # use STARTTLS
+      insecure_skip_verify: false  # set true for self‑signed certs
+      ca_file_path: /opt/signoz/conf/certs/ca.pem     # optional
+      cert_file_path: /opt/signoz/conf/certs/tls.crt  # optional (mTLS)
+      key_file_path: /opt/signoz/conf/certs/tls.key   # optional (mTLS)
+```
 
-For now, email configuration does not adhere to the configuration options outlined in the [Configuration Options](#configuration-options) section. They are slated to be deprecated in the future and moved to the new configuration system. See [Issue#9805](https://github.com/SigNoz/signoz/issues/9805) on Github for updates.
+<Admonition type="note">If your mail server supports only plain SMTP without authentication, leave the `auth` fields empty and set `tls.enabled` to `false`.</Admonition>
 
-</Admonition>
+
+## Settings Reference
+
+Here’s a table summarizing the settings and their descriptions:
+
+
+| Setting                                  | Description                                 | Default                            |
+| ---------------------------------------- | ------------------------------------------- | ---------------------------------- |
+| `emailing.enabled`                       | Master switch for all outgoing emails       | `false`                            |
+| `emailing.templates.directory`           | Directory that holds HTML/Plain templates   | `/opt/signoz/conf/templates/email` |
+| `emailing.smtp.address`                  | SMTP server address (`host:port`)           | `localhost:25`                     |
+| `emailing.smtp.from`                     | Sender email address                        | —                                  |
+| `emailing.smtp.hello`                    | EHLO/HELO domain (optional)                 | —                                  |
+| `emailing.smtp.headers`                  | Static headers to include with every email  | `{}`                               |
+| `emailing.smtp.auth.username`            | Username for SMTP AUTH                      | —                                  |
+| `emailing.smtp.auth.password`            | Password for SMTP AUTH                      | —                                  |
+| `emailing.smtp.tls.enabled`              | Enable STARTTLS                             | `false`                            |
+| `emailing.smtp.tls.insecure_skip_verify` | Skip TLS certificate verification           | `false`                            |
+| `emailing.smtp.tls.ca_file_path`         | CA certificate path (optional)              | —                                  |
+| `emailing.smtp.tls.cert_file_path`       | Client certificate path for mTLS (optional) | —                                  |
+| `emailing.smtp.tls.key_file_path`        | Client key path for mTLS (optional)         | —                                  |
+
+## Example
+
+Here is a working example that uses STARTTLS and basic authentication:
+
+```yaml
+emailing:
+  enabled: true
+  smtp:
+    address: smtp.mailprovider.net:587
+    from: invites@signoz.io
+    auth:
+      username: invites@signoz.io
+      password: 9c0a2be1a7
+    tls:
+      enabled: true
+```
+Once you save your changes, restart SigNoz to apply the new settings.
