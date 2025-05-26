@@ -48,8 +48,7 @@ exporters:
 
 ### Step 2. Configure the Metrics Pipeline
 
-The HTTP Check Receiver can be used for synthetic checks against HTTP endpoints. It receiver will make a request to the specified endpoint using the configured 
-method and generate a metric labelled for each HTTP response status class with a value of 1 if the status code matches the class.
+The HTTP Check Receiver can be used for synthetic checks against HTTP endpoints. This receiver will make a request to the specified endpoint using the configured method and generate a metric labelled for each HTTP response status class with a value of 1 if the status code matches the class.
 
 Let's modify the pipeline section to include the receiver.
 
@@ -77,13 +76,12 @@ Stop the collector and run the below command:
 
 To run the collector in background, follow the command [here](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/#run-in-background)
 
-### 4. Verify Metrics
+### Step 4. Verify Metrics
 
-After restarting, search for the metric `httpcheck_status` in SigNoz.  
-- This metric has a value of **1** if the returned status code matches the status class (e.g., 2xx), or **0** otherwise.
+After restarting, search for the metric `httpcheck_status` in SigNoz.
+- This metric has a value of 1 if the returned status code matches the status class (e.g., 2xx), or 0 otherwise.
 
-  * This receiver creates a metric name `httpcheck_status` with value 1 if the check resulted in status_code matching the status_class, otherwise 0. For more info on the additional metrics and 
-  attributes available, please read the documentation [here](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/httpcheckreceiver/documentation.md).
+For more information on additional metrics and attributes available, please read the documentation [here](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/httpcheckreceiver/documentation.md).
 
 ## Monitoring Multiple Endpoints
 
@@ -184,9 +182,7 @@ receivers:
 
 ## Setting Up Alerts
 
-Once you see the `httpcheck_status` metric in SigNoz, you can setup alerts on it.
+Once you see the `httpcheck_status` metric in SigNoz, you can set up alerts on it.
 
-1. **Configure notification channels**: Email, Slack, PagerDuty, etc. Follow the docs [here](https://signoz.io/docs/setup-alerts-notification/).
-2. **Create a Metrics based alert rule**: In the SigNoz UI, navigate to the “Alerts” section and create a [new metrics based](https://signoz.io/docs/alerts-management/metrics-based-alerts/) 
-alert rule.
-
+1. **Configure notification channels**: Email, Slack, PagerDuty, etc. Follow the documentation [here](https://signoz.io/docs/setup-alerts-notification/).
+2. **Create a metrics-based alert rule**: In the SigNoz UI, navigate to the "Alerts" section and create a [new metrics-based](https://signoz.io/docs/alerts-management/metrics-based-alerts/) alert rule.
