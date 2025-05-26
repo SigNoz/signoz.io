@@ -1439,7 +1439,6 @@ const docsSideNav = [
     label: 'Frontend & Mobile Monitoring',
     type: 'category',
     isExpanded: false,
-    className: 'new-doc',
     route: '/docs/frontend-and-mobile-monitoring',
     items: [
       {
@@ -1549,7 +1548,6 @@ const docsSideNav = [
   {
     label: 'Messaging Queues',
     type: 'category',
-    className: 'new-doc',
     isExpanded: false,
     // route: '',
     items: [
@@ -2399,7 +2397,6 @@ const docsSideNav = [
     route: '/docs/community/llm-monitoring',
     label: 'LLM Monitoring',
     type: 'doc',
-    className: 'new-doc',
   },
   {
     label: 'Community',
