@@ -2,74 +2,87 @@
 date: 2025-04-15
 id: smpt-email-invitations
 title: Enable SMTP for Email Invitations
-description: Learn how to Configure SMTP for Email Invitations
+description: Configure SMTP email invitation settings in SigNoz using environment variables
 ---
 
-SigNoz can send email invitations whenever you add users to a workspace. To set this up, you need to configure the mail settings in your configuration file (like [`conf/example.yaml`](https://github.com/SigNoz/signoz/blob/9e13245d1b2781a193b718b6ca43d79691b82df2/conf/example.yaml#L174) or a custom YAML file you specify with the `--config` option). This guide will explain each field and provide snippets for you to use.
-## SMTP settings
-
-To configure SMTP for email invitations, update the `emailing.smtp` section in your configuration file as follows:
-
-```yaml
-emailing:
-  enabled: true
-  templates:
-    directory: /opt/signoz/conf/templates/email
-  smtp:
-    address: smtp.example.com:587  # host:port of your SMTP server
-    from: no-reply@yourdomain.com   # "From" address
-    hello: yourdomain.com           # EHLO/HELO domain (optional)
-    headers:
-      X-Org: MyOrg                  # static headers (optional)
-    auth:
-      username: your_smtp_user      # SMTP username
-      password: your_smtp_password  # SMTP password
-    tls:
-      enabled: true                # use STARTTLS
-      insecure_skip_verify: false  # set true for self‑signed certs
-      ca_file_path: /opt/signoz/conf/certs/ca.pem     # optional
-      cert_file_path: /opt/signoz/conf/certs/tls.crt  # optional (mTLS)
-      key_file_path: /opt/signoz/conf/certs/tls.key   # optional (mTLS)
-```
-
-<Admonition type="note">If your mail server supports only plain SMTP without authentication, leave the `auth` fields empty and set `tls.enabled` to `false`.</Admonition>
+SigNoz sends email invitations when you add new users to a workspace. You can enable this feature by setting a few **environment variables** before starting the SigNoz container (or Helm release / Systemd unit).
 
 
-## Settings Reference
+## Required variables
 
-Here’s a table summarizing the settings and their descriptions:
+| Variable        | Description                                 | Example value              |
+| --------------- | ------------------------------------------- | -------------------------- |
+| `SIGNOZ_EMAILING_SMTP_ENABLED`  | Master switch; must be `true` to send email | `true`                     |
+| `SIGNOZ_EMAILING_SMTP_FROM`     | Sender email address                        | `no-reply@yourdomain.com`  |
+| `SIGNOZ_EMAILING_SMTP_HOST`     | SMTP server hostname                        | `smtp.example.com`         |
+| `SIGNOZ_EMAILING_SMTP_PORT`     | SMTP server port                            | `587`                      |
+| `SIGNOZ_EMAILING_SMTP_USERNAME` | Username for SMTP AUTH                      | `invitebot@yourdomain.com` |
+| `SIGNOZ_EMAILING_SMTP_PASSWORD` | Password for SMTP AUTH                      | `9c0a2be1a7`               |
 
 
-| Setting                                  | Description                                 | Default                            |
-| ---------------------------------------- | ------------------------------------------- | ---------------------------------- |
-| `emailing.enabled`                       | Master switch for all outgoing emails       | `false`                            |
-| `emailing.templates.directory`           | Directory that holds HTML/Plain templates   | `/opt/signoz/conf/templates/email` |
-| `emailing.smtp.address`                  | SMTP server address (`host:port`)           | `localhost:25`                     |
-| `emailing.smtp.from`                     | Sender email address                        | —                                  |
-| `emailing.smtp.hello`                    | EHLO/HELO domain (optional)                 | —                                  |
-| `emailing.smtp.headers`                  | Static headers to include with every email  | `{}`                               |
-| `emailing.smtp.auth.username`            | Username for SMTP AUTH                      | —                                  |
-| `emailing.smtp.auth.password`            | Password for SMTP AUTH                      | —                                  |
-| `emailing.smtp.tls.enabled`              | Enable STARTTLS                             | `false`                            |
-| `emailing.smtp.tls.insecure_skip_verify` | Skip TLS certificate verification           | `false`                            |
-| `emailing.smtp.tls.ca_file_path`         | CA certificate path (optional)              | —                                  |
-| `emailing.smtp.tls.cert_file_path`       | Client certificate path for mTLS (optional) | —                                  |
-| `emailing.smtp.tls.key_file_path`        | Client key path for mTLS (optional)         | —                                  |
+## Optional variables
 
-## Example
+| Variable                  | Purpose                                            | Default |
+| ------------------------- | -------------------------------------------------- | ------- |
+| `SIGNOZ_EMAILING_SMTP_HELLO`              | EHLO/HELO domain sent to the server                | (empty) |
+| `SIGNOZ_EMAILING_SMTP_TLS_ENABLED`        | Set to `true` to use STARTTLS                      | `false` |
+| `SIGNOZ_EMAILING_SMTP_SKIP_VERIFY`        | Set to `true` to skip TLS certificate verification | `false` |
+| `SIGNOZ_EMAILING_SMTP_TLS_CA_FILE_PATH`   | Path to custom CA bundle (container/file path)     | (empty) |
+| `SIGNOZ_EMAILING_SMTP_TLS_CERT_FILE_PATH` | Client certificate for mutual TLS (optional)       | (empty) |
+| `SIGNOZ_EMAILING_SMTP_TLS_KEY_FILE_PATH`  | Client key for mutual TLS (optional)               | (empty) |
+| `SIGNOZ_EMAILING_SMTP_STATIC_HEADERS`     | Comma‑separated list of `key:value` pairs          | (empty) |
 
-Here is a working example that uses STARTTLS and basic authentication:
+<Admonition type="note">Most providers (Gmail, SES, Mailgun, etc.) require STARTTLS. Set `SMTP_TLS_ENABLED=true` and keep `SMTP_SKIP_VERIFY=false` unless you use a self‑signed cert.</Admonition>
+
+
+## Docker‑Compose example
 
 ```yaml
-emailing:
-  enabled: true
-  smtp:
-    address: smtp.mailprovider.net:587
-    from: invites@signoz.io
-    auth:
-      username: invites@signoz.io
-      password: 9c0a2be1a7
-    tls:
-      enabled: true
+signoz:
+  image: signoz/signoz:v0.84.1
+  environment:
+    - SIGNOZ_EMAILING_SMTP_ENABLED=true
+    - SIGNOZ_EMAILING_SMTP_FROM=no-reply@yourdomain.com
+    - SIGNOZ_EMAILING_SMTP_HOST=smtp.example.com
+    - SIGNOZ_EMAILING_SMTP_PORT=587
+    - SIGNOZ_EMAILING_SMTP_USERNAME=invitebot@yourdomain.com
+    - SIGNOZ_EMAILING_SMTP_PASSWORD=9c0a2be1a7
+    - SIGNOZ_EMAILING_SMTP_TLS_ENABLED=true
+    - SIGNOZ_EMAILING_SMTP_HELLO=yourdomain.com
+  ports:
+    - "8080:8080"
 ```
-Once you save your changes, restart SigNoz to apply the new settings.
+
+
+## Kubernetes (Helm) values snippet
+
+If you deploy with the SigNoz Helm chart, add the variables under `additionalEnvs`:
+
+```yaml
+signoz:
+  adiitionalEnvs:
+    SIGNOZ_EMAILING_SMTP_ENABLED: "true"
+    SIGNOZ_EMAILING_SMTP_FROM: "no-reply@yourdomain.com"
+    SIGNOZ_EMAILING_SMTP_HOST: "smtp.example.com"
+    SIGNOZ_EMAILING_SMTP_PORT: "587"
+    SIGNOZ_EMAILING_SMTP_USERNAME: "invitebot@yourdomain.com"
+    SIGNOZ_EMAILING_SMTP_PASSWORD: "9c0a2be1a7"
+    SIGNOZ_EMAILING_SMTP_TLS_ENABLED: "false"
+```
+
+Apply the release:
+
+```bash
+helm upgrade --install signoz signoz/signoz -f values.yaml
+```
+
+## Verifying
+
+1. **Restart** the SigNoz container or Pod after setting the variables.
+2. Go to **Settings → Users → Invite** and send a test invite.
+3. Check the application logs (stdout) for entries like `email invite sent to …`.
+
+If the invite fails, SigNoz logs a clear error containing the SMTP server response.
+
+
+That’s it! Your SigNoz instance can now email invitations using the environment‑variable setup.
