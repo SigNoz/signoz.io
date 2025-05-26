@@ -46,6 +46,44 @@ Replace:
 Restart your OpenTelemetry Collector to apply the new configuration.
 
 </TabItem>
+<TabItem value="direct-to-signoz" label="Direct to Self-Hosted SigNoz">
+
+If you're sending telemetry data directly from your applications to SigNoz self-hosted's [built-in collector](https://signoz.io/docs/architecture/), you have two migration options:
+
+### Option A: Set up your own OTel Collector (Recommended)
+
+**Step 1: Deploy OpenTelemetry Collector**
+
+<Tabs>
+<TabItem value="k8s" label="Kubernetes">
+
+Follow the [Kubernetes OTel Collector installation guide](https://signoz.io/docs/tutorial/kubernetes-infra-metrics/) to install OpenTelemetry Collector in your Kubernetes infrastructure. Make sure to configure it with the proper [ingestion endpoint](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint) and [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/) for SigNoz Cloud.
+
+</TabItem>
+<TabItem value="vm" label="VM/Server">
+
+Follow the [VM OTel Collector installation guide](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) to install OpenTelemetry Collector on your VM/server. Make sure to configure it with the proper [ingestion endpoint](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint) and [ingestion key](https://signoz.io/docs/ingestion/signoz-cloud/keys/) for SigNoz Cloud.
+
+</TabItem>
+</Tabs>
+
+**Step 2: Update Application Configuration**
+Point your applications to send data to your new collector (for example `http://localhost:4317` for gRPC or `http://localhost:4318` for HTTP).
+
+### Option B: Send directly to SigNoz Cloud
+
+Update your application's telemetry configuration using [OpenTelemetry instrumentation](https://signoz.io/docs/instrumentation/) to send directly to SigNoz Cloud:
+
+```bash
+export OTEL_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443
+export OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
+```
+
+Replace:
+- `<region>` with your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>` with your actual ingestion key from [here](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+
+</TabItem>
 </Tabs>
 
 ## Migrate Dashboards & Metadata
