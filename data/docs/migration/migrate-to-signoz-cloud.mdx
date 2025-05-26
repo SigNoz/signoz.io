@@ -21,34 +21,43 @@ Migrating to SigNoz Cloud offers a range of benefits that enhance your monitorin
 
 ## Steps to Migrate from Self-Hosted SigNoz to SigNoz Cloud
 
-1. **Update Ingestion Endpoint**  
-   - The first step in migrating is updating the ingestion endpoint from your self-hosted SigNoz instance to the SigNoz Cloud ingestion endpoint.
+<Tabs>
+<TabItem value="own-collector" label="Using OTel Collector Agent" default>
 
-Change your ingestion endpoint to: 
+If you're using your own OpenTelemetry Collector [agent](https://opentelemetry.io/docs/collector/deployment/agent/) that forwards data to SigNoz self-hosted, you need to update both the endpoint and add the ingestion key.
 
-```bash
-https://ingest.<region>.signoz.cloud:443
+### 1. Update Your OTel Collector Configuration
+
+In your OpenTelemetry Collector configuration file (usually `config.yaml`), update the exporters section:
+
+```yaml
+exporters:
+  otlp:
+    endpoint: https://ingest.<region>.signoz.cloud:443
+    headers:
+      signoz-ingestion-key: <your-ingestion-key>
 ```
-- Set the `<region>` to match your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint).
 
-2. **Set the Ingestion Key**  
-   - You'll need to configure your ingestion key, which can be found in your SigNoz Cloud account settings.
- 
-Add this as an OTLP header in your telemetry configuration:
+Replace:
+- `<region>` with your SigNoz Cloud [region](https://signoz.io/docs/ingestion/signoz-cloud/overview/#endpoint)
+- `<your-ingestion-key>` with your actual ingestion key from [here](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
 
-```bash
-OTEL_EXPORTER_OTLP_HEADERS="signoz-ingestion-key=<your-ingestion-key>"
-```  
-Replace `<your-ingestion-key>` with your actual ingestion key. You can find your key [here](https://signoz.io/docs/ingestion/signoz-cloud/keys/)
+### 2. Restart Your Collector
+Restart your OpenTelemetry Collector to apply the new configuration.
 
-3. **Migrate Dashboards & Metadata by contacting Support**  
-   - SigNoz support will handle the migration of your metadata, including dashboards, alerts, views, pipelines, users, and other configurations from your 
-   self-hosted instance to the cloud.  
-   - To begin the migration, provide the SQLite DB file from your self-hosted SigNoz instance. This can typically be found in the location where your SigNoz 
-   instance stores the database (usually `/path/to/sigNoz/database.db`).  
-   - Compress the SQLite DB file and send it to [SigNoz support](https://signoz.io/support/). Our team will manually import the necessary data from selected 
-   tables to ensure a smooth migration of your metadata.  
-   - Once the process is complete, you will have all your dashboards and metadata in SigNoz Cloud, ready for use.
+</TabItem>
+</Tabs>
 
-4. **Verify Migration**  
-   - Confirm that all dashboards and metadata have been migrated correctly by checking your cloud tenant.
+## Migrate Dashboards & Metadata
+
+Regardless of your setup, you'll need to migrate your dashboards and configurations:
+
+- SigNoz support will handle the migration of your metadata, including dashboards, alerts, views, pipelines, users, and other configurations from your self-hosted instance to the cloud.
+- To begin the migration, provide the SQLite DB file from your self-hosted SigNoz instance. This can typically be found in the location where your SigNoz instance stores the database (usually `/path/to/sigNoz/database.db`).
+- Compress the SQLite DB file and send it to [SigNoz support](https://signoz.io/support/). Our team will manually import the necessary data from selected tables to ensure a smooth migration of your metadata.
+- Once the process is complete, you will have all your dashboards and metadata in SigNoz Cloud, ready for use.
+
+## Verify Migration
+
+- Confirm that data is flowing to SigNoz Cloud
+- Verify all dashboards and metadata have been migrated correctly by checking your cloud tenant.
