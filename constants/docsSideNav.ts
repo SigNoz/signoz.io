@@ -420,7 +420,7 @@ const docsSideNav = [
               },
               {
                 type: 'doc',
-                route: '/docs/userguide/saml-authentication',
+                route: '/docs/manage/administrator-guide/security-and-compliance/saml-authentication',
                 label: 'SAML',
               },
             ],
