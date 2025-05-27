@@ -4,38 +4,66 @@ id: sso-authentication
 title: Single Sign-on Authentication
 ---
 
-Single Sign-on Settings can be configured through `Settings > Organization Settings > Authenticated Domains (section)`. You can use SSO settings to let your team log in through an Identity Providers (like Google Workspace, Okta, etc) instead of using passwords.  
+SigNoz allows users to log in with an **identity provider (IdP)**—such as Google Workspace instead of managing separate SigNoz passwords.  All SSO configuration lives under **Settings → Organization Settings → Authenticated Domains**.
 
 ## Google Workspace
 
-Google Workspace single sign-on (SSO) provides password-free access to the invited members of your workspace to SigNoz.  
+Google Workspace SSO lets members of your email domain access SigNoz with their Google accounts—no extra credentials to remember.
 
-### Who can use this feature?
+### Availability
 
-- Google Workspace Owners and Org Owners
-- Available in `Community Edition`, `Enterprise` and `Teams` plan.
+- **Plans:** Community Edition, Teams, Enterprise
+- **Who can configure:** Google Workspace Super‑Admins or SigNoz Org Owners
 
-### Steps to configure Google OAuth 2.0
 
-Google Workspace single sign-on (SSO) lets all members of your workspace sign in to SigNoz using their Google accounts. If they don’t have a account in SigNoz yet, they will have to be invited by Admin from `Settings > Organization Settings > Invite Members`.
+## Step‑by‑step setup
 
-1. Register your signoz instance with your Google org by visiting the [cloud console](https://console.cloud.google.com/apis/credentials). You must [create a developers project](https://redash.io/help/open-source/admin-guide/google-developer-account-setup) if you have not already. Then follow the Create Credentials flow.
+### 1. Create OAuth 2.0 credentials in Google Cloud
 
-2. Set the Authorized Redirect URL(s) to `http(s)://${SIGNOZ_BASEURL}/api/v1/complete/google`
+1. Visit the [Google Cloud Console → Credentials](https://console.cloud.google.com/apis/credentials).
+2. Select or create a **project** for SigNoz.
+3. Click **Create credentials → OAuth client ID → Web application**.
+4. Add an **Authorized redirect URI**:
 
-3. During the setup you will obtain a client id and a client secret. Note it down as you will need them while setting up google auth in SigNoz.
+   ```
+   https://${SIGNOZ_BASEURL}/api/v1/complete/google
+   ```
+5. Click **Create** and note the **Client ID** and **Client Secret**. You’ll paste these into SigNoz shortly.
 
-4. Go to `Settings > Organization Settings > Authenticated Domains`. Click `Add a Domain`. Enter your domain name (e.g. `user@your-email-domain.com`).
+### 2. Add your email domain in SigNoz
 
-5. After domain is created, click on `Configure SSO`. Choose `Google Authentication` from the list.
+1. In SigNoz, go to **Settings → Organization Settings → Authenticated Domains**.
+2. Click **Add a Domain**, then enter your company domain, e.g. `your‑domain.com`.
 
-6. Now, enter the client id and secret you obtained in step 3. Click `Save Settings`.
+### 3. Enable Google Authentication
 
-7. Click on `Enforce SSO` (next to your domain in Authenticated Domains) to enable google SSO login. When you enforce SSO, all users with user name format `<username>@your-email-domain.com`  will be forced to log in through Google.
+1. After the domain appears in the list, click **Configure SSO**.
+2. Choose **Google Authentication**.
+3. Paste the **Client ID** and **Client Secret** from Google Cloud.
+4. Click **Save Settings**.
 
-8. To test your setup, we recommend you to log in from a new browser window in Incognito mode.
+### 4. Enforce SSO
 
-9. If you face issue signining in, review the query service logs. To log into SigNoz for correcting SSO settings, admins may use this special URL to use password based login: `http(s)://${SIGNOZ_BASEURL}/login?password=Y`
+Back in the domain list, toggle **Enforce SSO**.  From now on, anyone with an email ending in `@your‑domain.com` must sign in via Google.
+
+### 5.  Test
+
+Open a private/incognito window and visit your SigNoz URL. You should be redirected to Google for login and then back to SigNoz.
+
+
+## Inviting new users
+
+SSO does not auto‑provision accounts. Org Owners still need to **invite** people from **Settings → Organization Settings → Invite Members**.
+
+
+## Troubleshooting
+
+| Symptom                   | Fix                                                                                                                               |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| *“Authentication failed”* | Check that the redirect URI exactly matches `https://${SIGNOZ_BASEURL}/api/v1/complete/google` in Google Cloud.                   |
+| Stuck in a login loop     | Ensure **Enforce SSO** is enabled **and** the user’s email domain matches the authenticated domain.                               |
+| Admin locked out          | Append `?password=Y` to your login URL to temporarily fall back to password auth:`https://${SIGNOZ_BASEURL}/login?password=Y` |
+
 
 ## SAML based Authentication
 
