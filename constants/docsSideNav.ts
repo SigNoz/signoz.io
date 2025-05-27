@@ -402,6 +402,30 @@ const docsSideNav = [
             ],
           },
           {
+            label: 'Security & Compliance',
+            type: 'category',
+            isExpanded: false,
+            // route: '',
+            items: [
+              //     'userguide/overview',
+              {
+                type: 'doc',
+                route: '/docs/userguide/authentication',
+                label: 'Authentication',
+              },
+              {
+                type: 'doc',
+                route: '/docs/userguide/sso-authentication',
+                label: 'SSO',
+              },
+              {
+                type: 'doc',
+                route: '/docs/manage/administrator-guide/security-and-compliance/saml-authentication',
+                label: 'SAML',
+              },
+            ],
+          },
+          {
             type: 'category',
             label: 'Configuration',
             route: '/docs/operate/configuration',
@@ -1671,25 +1695,6 @@ const docsSideNav = [
     type: 'doc',
     route: '/docs/userguide/exceptions',
     label: 'Monitoring Exceptions',
-  },
-  {
-    label: 'Security & Compliance',
-    type: 'category',
-    isExpanded: false,
-    // route: '',
-    items: [
-      //     'userguide/overview',
-      {
-        type: 'doc',
-        route: '/docs/userguide/authentication',
-        label: 'Authentication',
-      },
-      {
-        type: 'doc',
-        route: '/docs/userguide/sso-authentication',
-        label: 'SSO & SAML',
-      },
-    ],
   },
   {
     label: 'Ingestion',
