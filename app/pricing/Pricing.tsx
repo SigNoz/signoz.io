@@ -803,10 +803,6 @@ const PricingPlans = () => {
                         {' '}
                         <CircleCheckSolid /> VPC Peering
                       </li>
-                      <li className="mb-3 flex items-center gap-3">
-                        {' '}
-                        <CircleCheckSolid /> Query API Keys (access data from anywhere)
-                      </li>
                     </ul>
                   </div>
                   {/* <div className={styles.packageDetailBlock}>
@@ -1455,7 +1451,13 @@ const ExploreAllFeature = () => {
         section: 'Configuration',
         features: [
           {
-            feature: 'SSO/SAML support',
+            feature: 'SSO Support',
+            inCommunity: <CheckSolid />,
+            inTeams: <CheckSolid />,
+            inEnterprise: <CheckSolid />,
+          },
+          {
+            feature: 'SAML Support',
             inCommunity: <CrossSolid />,
             inTeams: <CheckSolid />,
             inEnterprise: <CheckSolid />,
@@ -1480,7 +1482,7 @@ const ExploreAllFeature = () => {
           },
           {
             feature: 'Access Data in SigNoz from Anywhere (via API keys)',
-            inCommunity: <CrossSolid />,
+            inCommunity: <CheckSolid />,
             inTeams: <CheckSolid />,
             inEnterprise: <CheckSolid />,
           },
