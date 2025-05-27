@@ -10,45 +10,23 @@ SigNoz allows you to configure email settings for sending email Invitations. Dep
 
 ## v0.84.0 and later
 
-| Environment variable                                | Maps to config field                     | Description                                                                                  |
-| --------------------------------------------------- | ---------------------------------------- | -------------------------------------------------------------------------------------------- |
-| **`SIGNOZ_EMAILING_ENABLED`**                       | `emailing.enabled`                       | Enable or disable all outbound email                                                         |
-| **`SIGNOZ_EMAILING_TEMPLATES_DIRECTORY`**           | `emailing.templates.directory`           | Folder that holds HTML / text templates                                                      |
-| **`SIGNOZ_EMAILING_SMTP_ADDRESS`**                  | `emailing.smtp.address`                  | SMTP host and port                                                                           |
-| **`SIGNOZ_EMAILING_SMTP_FROM`**                     | `emailing.smtp.from`                     | Sender address                                                                               |
-| **`SIGNOZ_EMAILING_SMTP_HELLO`**                    | `emailing.smtp.hello`                    | EHLO/HELO domain (optional).                                                                 |
-| **`SIGNOZ_EMAILING_SMTP_HEADERS`**                  | `emailing.smtp.headers`                  | Static headers — comma-separated `key:value` pairs                                           |
-| **`SIGNOZ_EMAILING_SMTP_AUTH_USERNAME`**            | `emailing.smtp.auth.username`            | SMTP-AUTH user name.                                                                         |
-| **`SIGNOZ_EMAILING_SMTP_AUTH_PASSWORD`**            | `emailing.smtp.auth.password`            | SMTP-AUTH password.                                                                          |
-| **`SIGNOZ_EMAILING_SMTP_AUTH_SECRET`**              | `emailing.smtp.auth.secret`              | Secret for CRAM-MD5 or similar (rare).                                                       |
-| **`SIGNOZ_EMAILING_SMTP_AUTH_IDENTITY`**            | `emailing.smtp.auth.identity`            | Identity string for some auth mechanisms (rare).                                             |
-| **`SIGNOZ_EMAILING_SMTP_TLS_ENABLED`**              | `emailing.smtp.tls.enabled`              | `true` → use STARTTLS.                                                                       |
-| **`SIGNOZ_EMAILING_SMTP_TLS_INSECURE_SKIP_VERIFY`** | `emailing.smtp.tls.insecure_skip_verify` | `true` → skip TLS cert verification (self-signed).                                           |
-| **`SIGNOZ_EMAILING_SMTP_TLS_CA_FILE_PATH`**         | `emailing.smtp.tls.ca_file_path`         | Path to custom CA bundle inside container.                                                   |
-| **`SIGNOZ_EMAILING_SMTP_TLS_KEY_FILE_PATH`**        | `emailing.smtp.tls.key_file_path`        | Client key file for mutual TLS (optional).                                                   |
-| **`SIGNOZ_EMAILING_SMTP_TLS_CERT_FILE_PATH`**       | `emailing.smtp.tls.cert_file_path`       | Client certificate for mutual TLS (optional).                                                |
-
-
-### Using the configuration file
-
-Starting with **v0.84.0** you can declare all mail settings in the SigNoz config file.  Edit [`conf/example.yaml`](https://github.com/SigNoz/signoz/blob/aaeffae1bd53a2f5f8b805dd7aef993b5cef10f2/conf/example.yaml) (or pass your own file with `--config`).
-
-```yaml
-emailing:
-  enabled: true
-  templates:
-    directory: /opt/signoz/conf/templates/email
-  smtp:
-    address: smtp.example.com:587  # host:port
-    from: no-reply@yourdomain.com
-    hello: yourdomain.com          # optional EHLO/HELO
-    auth:
-      username: invitebot@yourdomain.com
-      password: 9c0a2be1a7
-    tls:
-      enabled: true
-      insecure_skip_verify: false
-```
+| Environment variable                                | Description                                                                                                                                |
+| --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| **`SIGNOZ_EMAILING_ENABLED`**                       | Enable or disable emailing                                                                                                                 |
+| **`SIGNOZ_EMAILING_TEMPLATES_DIRECTORY`**           | The directory containing the email templates. This directory should contain a list of files defined at [`pkg/types/emailtypes/template.go`](https://github.com/SigNoz/signoz/blob/9e13245d1b2781a193b718b6ca43d79691b82df2/pkg/types/emailtypes/template.go) |
+| **`SIGNOZ_EMAILING_SMTP_ADDRESS`**                  | SMTP server address (host:port)                                                                                                           |
+| **`SIGNOZ_EMAILING_SMTP_FROM`**                     | Sender address                                                                                                                             |
+| **`SIGNOZ_EMAILING_SMTP_HELLO`**                    | Hello message to use for the SMTP server                                                                                                   |
+| **`SIGNOZ_EMAILING_SMTP_HEADERS`**                  | Static headers to send with the email                                                                                                      |
+| **`SIGNOZ_EMAILING_SMTP_AUTH_USERNAME`**            | Username to use for the SMTP server                                                                                                        |
+| **`SIGNOZ_EMAILING_SMTP_AUTH_PASSWORD`**            | Password to use for the SMTP server                                                                                                        |
+| **`SIGNOZ_EMAILING_SMTP_AUTH_SECRET`**              | Secret to use for the SMTP server                                                                                                          |
+| **`SIGNOZ_EMAILING_SMTP_AUTH_IDENTITY`**            | Identity to use for the SMTP server                                                                                                        |
+| **`SIGNOZ_EMAILING_SMTP_TLS_ENABLED`**              | To enable TLS. It should be false in most cases since the authentication mechanism should use the STARTTLS extension instead.              |
+| **`SIGNOZ_EMAILING_SMTP_TLS_INSECURE_SKIP_VERIFY`** | Whether to skip TLS verification                                                                                                           |
+| **`SIGNOZ_EMAILING_SMTP_TLS_CA_FILE_PATH`**         | Path to CA file                                                                                                                            |
+| **`SIGNOZ_EMAILING_SMTP_TLS_KEY_FILE_PATH`**        | Path to Key file                                                                                                                           |
+| **`SIGNOZ_EMAILING_SMTP_TLS_CERT_FILE_PATH`**       | Path to the Certificate file                                                                                                               |
 
 ## v0.83.x and earlier
 
@@ -60,3 +38,9 @@ To enable email, you need to set the following environment variables
 - `SMTP_PORT`: The SMTP port obtained from your email provider.
 - `SMTP_USERNAME`: The SMTP user obtained from your email provider.
 - `SMTP_PASSWORD`: The SMTP password obtained from your email provider.
+
+<Admonition type="warning">
+
+For now, email configuration does not adhere to the configuration options outlined in the [Configuration Options](#configuration-options) section. They are slated to be deprecated in the future and moved to the new configuration system. See [Issue#6805](https://github.com/SigNoz/signoz/issues/6805) on Github for updates.
+
+</Admonition>
