@@ -9,10 +9,10 @@ import { ProgressBar } from '@/components/ProgressBar/ProgressBar'
 import OpenTelemetryBanner from '@/components/OpenTelemetryBanner/OpenTelemetryBanner'
 import TableOfContents from '@/components/TableOfContents/TableOfContents'
 import SidebarAuthorInfo from '@/components/SidebarAuthorInfo/SidebarAuthorInfo'
-import RelatedJobs from '@/components/RelatedJobs/RelatedJobs'
 import TrackingLink from '@/components/TrackingLink'
 import { ArrowRight, ExternalLink } from 'lucide-react'
 import MobileAuthorInfo from '@/components/MobileAuthorInfo/MobileAuthorInfo'
+import NewsletterSubscription from '@/components/NewsletterSubscription/NewsletterSubscription'
 
 // Extend the Blog type to include CTA fields
 interface OpenTelemetryContent extends Blog {
@@ -87,10 +87,15 @@ export default function OpenTelemetryLayout({
           <div className="mx-auto w-full max-w-3xl px-4 md:px-6">
             {/* Mobile author info - Visible only on mobile/tablet */}
             <MobileAuthorInfo authors={authors} />
-            
+
             <article className="prose prose-slate max-w-none py-6 dark:prose-invert">
               {children}
             </article>
+
+            {/* Newsletter Section */}
+            <div className="mb-16">
+              <NewsletterSubscription />
+            </div>
           </div>
 
           {/* Right sidebar - Hidden on mobile/tablet, Fixed position with internal scrolling on desktop */}
