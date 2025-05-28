@@ -5,9 +5,9 @@ const docsSideNav = [
     route: '/docs',
   },
   {
-    type: "category",
+    type: 'category',
     isExpanded: false,
-    label: "Overview",
+    label: 'Overview',
     items: [
       {
         type: 'doc',
@@ -53,48 +53,48 @@ const docsSideNav = [
         ],
       },
       {
-        type: "category",
-        label: "Breaking Changes",
+        type: 'category',
+        label: 'Breaking Changes',
         isExpanded: false,
         items: [
           {
             type: 'doc',
             label: 'Breaking Changes in v0.76',
-            route: '/docs/overview/breaking-changes/breaking-changes-0.76'
-          }
-        ]
+            route: '/docs/overview/breaking-changes/breaking-changes-0.76',
+          },
+        ],
       },
       {
-        type: "category",
+        type: 'category',
         label: "What's New",
         isExpanded: false,
         items: [
           {
             type: 'doc',
             label: 'Changelog of v0.76',
-            route: '/docs/overview/whats-new/changelog-0.76'
-          }
-        ]
+            route: '/docs/overview/whats-new/changelog-0.76',
+          },
+        ],
       },
       {
-        type: "doc",
+        type: 'doc',
         label: "What's Coming",
-        route: "/docs/roadmap"
+        route: '/docs/roadmap',
       },
       {
-        type: "category",
-        label: "Core Concepts",
-        route: "/docs/overview/core-concepts/overview",
+        type: 'category',
+        label: 'Core Concepts',
+        route: '/docs/overview/core-concepts/overview',
         isExpanded: false,
         items: [
           {
-            type: "doc",
-            label: "Architecture",
-            route: "/docs/architecture"
-          }
-        ]
+            type: 'doc',
+            label: 'Architecture',
+            route: '/docs/architecture',
+          },
+        ],
       },
-    ]
+    ],
   },
   {
     type: 'category',
@@ -102,130 +102,129 @@ const docsSideNav = [
     label: 'Setup',
     route: '/docs/install/',
     items: [
-        {
+      {
         type: 'category',
         isExpanded: false,
         label: 'SigNoz Cloud',
         route: '/docs/cloud',
         items: [
-            {
-              type: 'doc',
-              route: '/docs/cloud/quickstart',
-              label: 'Quickstart',
-            },
-          ]
-        },
-        {
-          type: 'category',
-          isExpanded: false,
-          label: 'Self-Host SigNoz',
-          route: '/docs/install/self-host',
-          items: [
-            {
-              type: 'category',
-              isExpanded: false,
-              label: 'Install on Docker',
-              items:[
-                {
-                  type: 'doc',
-                  label: 'Docker Standalone',
-                  route: '/docs/install/docker',
-                },
-                {
-                  type: 'doc',
-                  label: 'Docker Swarm',
-                  route: '/docs/install/docker-swarm',
-                },
-                {
-                  type: 'doc',
-                  label: 'Docker SELinux',
-                  route: '/docs/install/docker-selinux',
-                },
-              ]
-            },
-            {
-              type: 'category',
-              label: 'Install Binary',
-              isExpanded: false,
-              items: [
-                  {
-                    type: 'doc',
-                    label: 'Linux',
-                    route: '/docs/install/linux',
-                    className: 'new-doc',
-                  },
-              ]
-            },
-            {
-              type: 'category',
-              isExpanded: false,
-              label: 'Install on Kubernetes',
-              route: '/docs/install/kubernetes',
-              items: [
-                {
-                  type: 'doc',
-                  label: 'Deploying to AWS',
-                  route: '/docs/install/kubernetes/aws',
-                },
-                {
-                  type: 'doc',
-                  label: 'Deploying to GCP',
-                  route: '/docs/install/kubernetes/gcp',
-                },
-                {
-                  type: 'doc',
-                  label: 'Deploying to AKS',
-                  route: '/docs/install/kubernetes/aks',
-                },
-                {
-                  type: 'doc',
-                  label: 'Deploying to Digital Ocean',
-                  route: '/docs/install/digital-ocean',
-                },
-                {
-                  type: 'doc',
-                  label: 'Other Platform',
-                  route: '/docs/install/kubernetes/others',
-                },
-                {
-                  type: 'doc',
-                  label: 'Deploying to Local',
-                  route: '/docs/install/kubernetes/local',
-                },
-                {
-                  type: 'doc',
-                  label: 'Deploying with ArgoCD',
-                  route: '/docs/install/argocd',
-                },
-              ],
-            },
-            {
-              type: 'doc',
-              label: 'Troubleshooting',
-              route: '/docs/install/troubleshooting',
-            },
-          ],
-        },
+          {
+            type: 'doc',
+            route: '/docs/cloud/quickstart',
+            label: 'Quickstart',
+          },
+        ],
+      },
+      {
+        type: 'category',
+        isExpanded: false,
+        label: 'Self-Host SigNoz',
+        route: '/docs/install/self-host',
+        items: [
+          {
+            type: 'category',
+            isExpanded: false,
+            label: 'Install on Docker',
+            items: [
+              {
+                type: 'doc',
+                label: 'Docker Standalone',
+                route: '/docs/install/docker',
+              },
+              {
+                type: 'doc',
+                label: 'Docker Swarm',
+                route: '/docs/install/docker-swarm',
+              },
+              {
+                type: 'doc',
+                label: 'Docker SELinux',
+                route: '/docs/install/docker-selinux',
+              },
+            ],
+          },
+          {
+            type: 'category',
+            label: 'Install Binary',
+            isExpanded: false,
+            items: [
+              {
+                type: 'doc',
+                label: 'Linux',
+                route: '/docs/install/linux',
+                className: 'new-doc',
+              },
+            ],
+          },
+          {
+            type: 'category',
+            isExpanded: false,
+            label: 'Install on Kubernetes',
+            route: '/docs/install/kubernetes',
+            items: [
+              {
+                type: 'doc',
+                label: 'Deploying to AWS',
+                route: '/docs/install/kubernetes/aws',
+              },
+              {
+                type: 'doc',
+                label: 'Deploying to GCP',
+                route: '/docs/install/kubernetes/gcp',
+              },
+              {
+                type: 'doc',
+                label: 'Deploying to AKS',
+                route: '/docs/install/kubernetes/aks',
+              },
+              {
+                type: 'doc',
+                label: 'Deploying to Digital Ocean',
+                route: '/docs/install/digital-ocean',
+              },
+              {
+                type: 'doc',
+                label: 'Other Platform',
+                route: '/docs/install/kubernetes/others',
+              },
+              {
+                type: 'doc',
+                label: 'Deploying to Local',
+                route: '/docs/install/kubernetes/local',
+              },
+              {
+                type: 'doc',
+                label: 'Deploying with ArgoCD',
+                route: '/docs/install/argocd',
+              },
+            ],
+          },
+          {
+            type: 'doc',
+            label: 'Troubleshooting',
+            route: '/docs/install/troubleshooting',
+          },
+        ],
+      },
 
-        {
-          type: 'category',
-          isExpanded: false,
-          label: 'Install OTel collector',
-          items: [
-            {
-              route: '/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine',
-              type: 'doc',
-              label: 'VM',
-            },
-            {
-              route: '/docs/tutorial/kubernetes-infra-metrics',
-              type: 'doc',
-              label: 'Kubernetes',
-            },
-          ],
-        },
-      ],
-
+      {
+        type: 'category',
+        isExpanded: false,
+        label: 'Install OTel collector',
+        items: [
+          {
+            route: '/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine',
+            type: 'doc',
+            label: 'VM',
+          },
+          {
+            route: '/docs/tutorial/kubernetes-infra-metrics',
+            type: 'doc',
+            label: 'Kubernetes',
+          },
+        ],
+      },
+    ],
   },
 
   {
@@ -361,20 +360,23 @@ const docsSideNav = [
                 items: [
                   {
                     type: 'doc',
-                    route: '/docs/manage/administrator-guide/clickhouse/distributed-clickhouse/docker',
+                    route:
+                      '/docs/manage/administrator-guide/clickhouse/distributed-clickhouse/docker',
                     label: 'Docker',
                   },
                   {
                     type: 'doc',
-                    route: '/docs/manage/administrator-guide/clickhouse/distributed-clickhouse/docker-swarm',
+                    route:
+                      '/docs/manage/administrator-guide/clickhouse/distributed-clickhouse/docker-swarm',
                     label: 'Docker Swarm',
                   },
                   {
                     type: 'doc',
-                    route: '/docs/manage/administrator-guide/clickhouse/distributed-clickhouse/kubernetes',
+                    route:
+                      '/docs/manage/administrator-guide/clickhouse/distributed-clickhouse/kubernetes',
                     label: 'Kubernetes',
-                  }
-                ]
+                  },
+                ],
               },
               {
                 type: 'doc',
@@ -387,7 +389,6 @@ const docsSideNav = [
                 label: 'Connect to ClickHouse',
               },
 
-
               {
                 type: 'doc',
                 route: '/docs/operate/clickhouse/external-clickhouse',
@@ -397,6 +398,30 @@ const docsSideNav = [
                 type: 'doc',
                 route: '/docs/tutorial/writing-clickhouse-queries-in-dashboard',
                 label: 'ClickHouse queries for building dashboards and alerts',
+              },
+            ],
+          },
+          {
+            label: 'Security & Compliance',
+            type: 'category',
+            isExpanded: false,
+            // route: '',
+            items: [
+              //     'userguide/overview',
+              {
+                type: 'doc',
+                route: '/docs/userguide/authentication',
+                label: 'Authentication',
+              },
+              {
+                type: 'doc',
+                route: '/docs/userguide/sso-authentication',
+                label: 'SSO',
+              },
+              {
+                type: 'doc',
+                route: '/docs/manage/administrator-guide/security-and-compliance/saml-authentication',
+                label: 'SAML',
               },
             ],
           },
@@ -417,7 +442,7 @@ const docsSideNav = [
                 label: 'Alertmanager',
                 route: '/docs/manage/administrator-guide/configuration/alertmanager',
               },
-            ]
+            ],
           },
 
           {
@@ -460,16 +485,16 @@ const docsSideNav = [
             route: '/docs/operate/reset-admin-password',
             label: 'Reset Admin Password',
           },
-        ]
+        ],
       },
-    ]
+    ],
   },
 
   {
     label: 'APM & Distributed Tracing',
     type: 'category',
     isExpanded: false,
-    // route: '',
+    route: '/docs/instrumentation/overview',
     items: [
       {
         type: 'doc',
@@ -832,7 +857,7 @@ const docsSideNav = [
     label: 'Logs Management',
     type: 'category',
     isExpanded: false,
-    // route: '',
+    route: '/docs/userguide/logs',
     items: [
       {
         type: 'doc',
@@ -1014,6 +1039,16 @@ const docsSideNav = [
                 type: 'doc',
                 route: '/docs/logs-pipelines/guides/trace',
                 label: 'Parse Trace Information',
+              },
+              {
+                type: 'doc',
+                route: '/docs/logs-pipelines/guides/resource',
+                label: 'Parse Container Name',
+              },
+              {
+                type: 'doc',
+                route: '/docs/logs-pipelines/guides/nested-json',
+                label: 'Parse Nested JSON',
               },
             ],
           },
@@ -1428,7 +1463,6 @@ const docsSideNav = [
     label: 'Frontend & Mobile Monitoring',
     type: 'category',
     isExpanded: false,
-    className: 'new-doc',
     route: '/docs/frontend-and-mobile-monitoring',
     items: [
       {
@@ -1490,9 +1524,8 @@ const docsSideNav = [
             type: 'doc',
             route: '/docs/integrations/temporal-typescript-opentelemetry',
             label: 'Typescript',
-          }
-        ]
-
+          },
+        ],
       },
       {
         type: 'doc',
@@ -1539,7 +1572,6 @@ const docsSideNav = [
   {
     label: 'Messaging Queues',
     type: 'category',
-    className: 'new-doc',
     isExpanded: false,
     // route: '',
     items: [
@@ -1607,7 +1639,52 @@ const docsSideNav = [
           },
         ],
       },
+    ],
+  },
+  {
+    label: 'External API Monitoring',
+    type: 'category',
+    className: 'new-doc',
+    isExpanded: false,
+    // route: '',
+    items: [
+      {
+        type: 'doc',
+        route: '/docs/external-api-monitoring/overview',
+        label: 'Overview',
+      },
+      {
+        type: 'doc',
+        route: '/docs/external-api-monitoring/setup',
+        label: 'Setup',
+      },
     ]
+  },
+  {
+    label: 'CICD Monitoring',
+    type: 'category',
+    className: 'new-doc',
+    isExpanded: false,
+    // route: '',
+    items: [
+      {
+        label: 'GitHub',
+        type: 'category',
+        isExpanded: false,
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/cicd/github/github-metrics',
+            label: 'Metrics',
+          },
+          {
+            type: 'doc',
+            route: '/docs/cicd/github/github-actions-traces',
+            label: 'Traces',
+          },
+        ],
+      },
+    ],
   },
   {
     type: 'doc',
@@ -1618,25 +1695,6 @@ const docsSideNav = [
     type: 'doc',
     route: '/docs/userguide/exceptions',
     label: 'Monitoring Exceptions',
-  },
-  {
-    label: 'Security & Compliance',
-    type: 'category',
-    isExpanded: false,
-    // route: '',
-    items: [
-      //     'userguide/overview',
-      {
-        type: 'doc',
-        route: '/docs/userguide/authentication',
-        label: 'Authentication',
-      },
-      {
-        type: 'doc',
-        route: '/docs/userguide/sso-authentication',
-        label: 'SSO & SAML',
-      },
-    ],
   },
   {
     label: 'Ingestion',
@@ -1705,7 +1763,6 @@ const docsSideNav = [
         route: '/docs/tutorial/traefik-observability',
         label: 'Traefik Observability',
       },
-
     ],
   },
   {
@@ -1820,31 +1877,31 @@ const docsSideNav = [
     isExpanded: false,
     route: '/docs/migration/migrate-from-grafana',
     items: [
-        {
-          type: 'doc',
-          route: '/docs/migration/migrate-from-grafana/metrics',
-          label: 'Migrating Metrics',
-        },
-        {
-          type: 'doc',
-          route: '/docs/migration/migrate-from-grafana/traces',
-          label: 'Migrating Traces',
-        },
-        {
-          type: 'doc',
-          route: '/docs/migration/migrate-from-grafana/logs',
-          label: 'Migrating Logs',
-        },
-        {
-          type: 'doc',
-          route: '/docs/migration/migrate-from-grafana/dashboards',
-          label: 'Migrating Dashboards',
-        },
-        {
-          type: 'doc',
-          route: '/docs/migration/migrate-from-grafana/alerts',
-          label: 'Migrating Alerts',
-        },
+      {
+        type: 'doc',
+        route: '/docs/migration/migrate-from-grafana/metrics',
+        label: 'Migrating Metrics',
+      },
+      {
+        type: 'doc',
+        route: '/docs/migration/migrate-from-grafana/traces',
+        label: 'Migrating Traces',
+      },
+      {
+        type: 'doc',
+        route: '/docs/migration/migrate-from-grafana/logs',
+        label: 'Migrating Logs',
+      },
+      {
+        type: 'doc',
+        route: '/docs/migration/migrate-from-grafana/dashboards',
+        label: 'Migrating Dashboards',
+      },
+      {
+        type: 'doc',
+        route: '/docs/migration/migrate-from-grafana/alerts',
+        label: 'Migrating Alerts',
+      },
     ],
   },
   {
@@ -2345,7 +2402,6 @@ const docsSideNav = [
     route: '/docs/community/llm-monitoring',
     label: 'LLM Monitoring',
     type: 'doc',
-    className: 'new-doc',
   },
   {
     label: 'Community',

@@ -80,6 +80,11 @@ function Footer() {
                   </Link>
                   <ArrowUpRight size={16} />
                 </div>
+                <div className="mt-5 flex items-center gap-2 whitespace-nowrap pr-8 hover:underline max-md:pr-5">
+                  <Link href="https://newsletter.signoz.io/" target="_blank">
+                    Newsletter
+                  </Link>
+                </div>
               </div>
             </div>
             <div className="ml-5 flex w-3/12 flex-col max-md:ml-0 max-md:w-full">
@@ -112,7 +117,7 @@ function Footer() {
                 </Link>
 
                 <div className="mt-5 flex items-center gap-2 whitespace-nowrap pr-8 hover:underline max-md:pr-5">
-                  <Link href="https://jobs.gem.com/signoz" target="_blank">
+                  <Link href="https://signoz.io/careers/" target="_blank">
                     Careers
                   </Link>
                   <ArrowUpRight size={16} />

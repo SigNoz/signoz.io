@@ -5,33 +5,17 @@ import React, { useState, useEffect } from 'react'
 import FAQBody from '../../components/FAQPricing'
 import styles from './styles.module.css'
 import { TrustedByTeams } from '@/components/trusted-by'
-import { CostComparison } from '@/components/cost-comparison'
-import { DataProtection } from '@/components/data-protection'
-import { TalkToExpert } from '@/components/talk-to-expert'
-import { CommunityEdition } from '@/components/community-edition'
-import { UserReview } from '@/components/user-review'
-import { TrySigNozCTA } from '@/components/try-signoz-cta'
 import WhySelectSignoz from '@/components/why-select-signoz'
 import { Testimonials } from '@/components/testimonials'
 import MonthlyEstimate from '@/components/Monthly-estimate/MonthlyEstimate'
 import MonthlyEstimateMobile from '@/components/Monthly-estimate/MonthlyEstimateMobile'
 import { GetStarted } from '@/components/GetStarted'
 import Link from 'next/link'
-import Divider from '@/components/ui/Divider'
 import Heading from '@/components/ui/Heading'
 import Button from '@/components/Button/Button'
 import Line from '@/components/ui/Line'
-import SubHeading from '@/components/ui/SubHeading'
-import { Chevron, RightSVG } from '@/components/svgs/common'
-import {
-  ArrowBigLeft,
-  ArrowRight,
-  MoveLeft,
-  ArrowUpRight,
-  ArrowDown,
-  Cloud,
-  Server,
-} from 'lucide-react'
+import { Chevron } from '@/components/svgs/common'
+import { ArrowRight, ArrowUpRight, ArrowDown, Cloud, Server } from 'lucide-react'
 import {
   CircleCheckSolid,
   CircleInfoSolid,
@@ -39,19 +23,10 @@ import {
   ClockSolid,
   CheckSolid,
   CrossSolid,
-  FlameSolid,
   CloudSolid,
   ServerSolid,
 } from '@/components/homepage-icons/icons'
-import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  useDisclosure,
-} from '@nextui-org/react'
-import VimeoPlayer from '@/components/VimeoPlayer/VimeoPlayer'
+
 import SigNozCloudPricingOverview from '@/components/SigNozCloudPricingOverviewCard/SigNozCloudPricingOverview'
 import TrackingLink from '@/components/TrackingLink'
 import TrackingButton from '@/components/TrackingButton'
@@ -60,17 +35,21 @@ import TrackingButtonSigNozTheme from '@/components/TrackingButtonSigNozTheme'
 const CloseButton = () => <div className="absolute right-0 top-0">Close</div>
 
 function Pricing() {
-  const [width, setWidth] = useState<number>(typeof window !== 'undefined' ? window.innerWidth : 0)
+  const [hasMounted, setHasMounted] = useState(false)
+  const [width, setWidth] = useState<number>(0) // Initialize to 0 to match server
 
-  function handleWindowSizeChange() {
-    setWidth(window.innerWidth)
-  }
   useEffect(() => {
+    setHasMounted(true)
+    setWidth(window.innerWidth) // Set actual width on client mount
+
+    function handleWindowSizeChange() {
+      setWidth(window.innerWidth)
+    }
     window.addEventListener('resize', handleWindowSizeChange)
     return () => {
       window.removeEventListener('resize', handleWindowSizeChange)
     }
-  }, [])
+  }, []) // Empty dependency array, runs once on mount
 
   const isMobile = width <= 768
 
@@ -97,7 +76,15 @@ function Pricing() {
         {/* More Options */}
         {/* <CommunityEdition /> */}
         {/* FAQ section */}
-        {isMobile ? <MonthlyEstimateMobile /> : <MonthlyEstimate />}
+        {hasMounted ? (
+          isMobile ? (
+            <MonthlyEstimateMobile />
+          ) : (
+            <MonthlyEstimate />
+          )
+        ) : (
+          <MonthlyEstimateMobile />
+        )}
         <WhySelectSignoz isInPricingPage />
         <FAQ />
         {/* User Review */}
@@ -235,8 +222,6 @@ const PricingPlans = () => {
 
   const [tab, setTab] = useState('cloud')
 
-  const { isOpen, onOpen, onOpenChange } = useDisclosure()
-
   const [width, setWidth] = useState<number>(typeof window !== 'undefined' ? window.innerWidth : 0)
 
   function handleWindowSizeChange() {
@@ -329,7 +314,7 @@ const PricingPlans = () => {
                     <div className="w-3/5 border-b border-dashed border-signoz_slate-400" />
                     <div className="flex items-center gap-1.5">
                       <span className="text-base font-medium text-signoz_robin-300">
-                        $199/month
+                        <span className="line-through">$199</span> $49/month
                       </span>
                     </div>
                   </div>
@@ -458,6 +443,14 @@ const PricingPlans = () => {
                       <div className="gap-3">
                         <CircleCheckSolid />
                         <span className="text-signoz_vanilla-400">
+                          Usage worth $49 (e.g. 163 GB logs/traces or 490 mn metric samples)
+                        </span>
+                      </div>
+                    </div>
+                    <div>
+                      <div className="gap-3">
+                        <CircleCheckSolid />
+                        <span className="text-signoz_vanilla-400">
                           Add as many teammates as you want.
                         </span>
                       </div>
@@ -468,36 +461,6 @@ const PricingPlans = () => {
                         <span className="text-signoz_vanilla-400">No host-based pricing</span>
                       </div>
                     </div>
-
-                    <div onClick={onOpen} style={{ cursor: 'pointer' }}>
-                      <div className="gap-3">
-                        <CircleInfoSolid />
-                        <span className="block items-center">
-                          What comes included in the $199?{' '}
-                          <ArrowUpRight size={20} className="inline" />
-                        </span>
-                      </div>
-                    </div>
-                    <Modal
-                      size={'5xl'}
-                      backdrop="blur"
-                      isOpen={isOpen}
-                      onOpenChange={onOpenChange}
-                      className="self-center"
-                    >
-                      <ModalContent className="bg-transparent">
-                        {() => (
-                          <>
-                            <ModalBody className="py-6">
-                              <VimeoPlayer videoId="968489758" />
-                              <p className="mt-4 text-center text-signoz_vanilla-400">
-                                Note: Usage-based pricing applies after crossing the $199 mark
-                              </p>
-                            </ModalBody>
-                          </>
-                        )}
-                      </ModalContent>
-                    </Modal>
 
                     <div>
                       <div className="gap-3">
@@ -684,49 +647,26 @@ const PricingPlans = () => {
                   </Button>
                 </div>
 
-                {isMobile ? (
-                  <div className="mt-3">
-                    <TrackingButtonSigNozTheme
-                      id="btn-estimate-monthly-bill-pricing-teams"
-                      className="w-full"
-                      type={Button.TYPES.SECONDARY}
-                      onClick={() => {
-                        const element = document.getElementById('estimate-your-monthly-bill')
-                        element?.scrollIntoView({
-                          behavior: 'smooth',
-                        })
-                      }}
-                      clickType="Secondary CTA"
-                      clickName="Pricing Calculator Button"
-                      clickText="Estimate your monthly bill"
-                      clickLocation="Pricing Teams Cloud Tab Bottom"
-                    >
-                      Estimate your monthly bill
-                      <ArrowDown size={14} />
-                    </TrackingButtonSigNozTheme>
-                  </div>
-                ) : (
-                  <div className="my-3">
-                    <TrackingButtonSigNozTheme
-                      id="btn-estimate-monthly-bill-pricing-teams"
-                      className="w-full"
-                      type={Button.TYPES.SECONDARY}
-                      onClick={() => {
-                        const element = document.getElementById('estimate-your-monthly-bill')
-                        element?.scrollIntoView({
-                          behavior: 'smooth',
-                        })
-                      }}
-                      clickType="Secondary CTA"
-                      clickName="Pricing Calculator Button"
-                      clickText="Estimate your monthly bill"
-                      clickLocation="Pricing Teams Cloud Tab Bottom"
-                    >
-                      Estimate your monthly bill
-                      <ArrowDown size={14} />
-                    </TrackingButtonSigNozTheme>
-                  </div>
-                )}
+                <div className="mt-3 md:my-3">
+                  <TrackingButtonSigNozTheme
+                    id="btn-estimate-monthly-bill-pricing-teams"
+                    className="w-full"
+                    type={Button.TYPES.SECONDARY}
+                    onClick={() => {
+                      const element = document.getElementById('estimate-your-monthly-bill')
+                      element?.scrollIntoView({
+                        behavior: 'smooth',
+                      })
+                    }}
+                    clickType="Secondary CTA"
+                    clickName="Pricing Calculator Button"
+                    clickText="Estimate your monthly bill"
+                    clickLocation="Pricing Teams Cloud Tab Bottom"
+                  >
+                    Estimate your monthly bill
+                    <ArrowDown size={14} />
+                  </TrackingButtonSigNozTheme>
+                </div>
               </div>
               <div className="pricing-card !mb-0 border !border-b-0 !border-r-0 border-dashed border-signoz_slate-400 bg-opacity-5 px-4 py-5 max-sm:!border-l-0 md:px-8">
                 <div>
@@ -1270,7 +1210,7 @@ const ExploreAllFeature = () => {
       },
       {
         heading: 'Teams',
-        desc: 'Cloud ⎯ starts at $199/mo',
+        desc: 'Cloud ⎯ starts at $49/mo',
         action: (
           <TrackingLink
             href={'/teams/'}

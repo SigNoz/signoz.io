@@ -138,13 +138,13 @@ module.exports = () => {
         {
           source: '/slack/',
           destination:
-            'https://join.slack.com/t/signoz-community/shared_invite/zt-3255t2slz-KNhAwjDlTL5rTRiWz4vJcQ',
+            'https://join.slack.com/t/signoz-community/shared_invite/zt-35r3be4oh-~4ociQZPFeQJ2COfKvDPLQ',
           basePath: false,
           permanent: true,
         },
         {
           source: '/careers/',
-          destination: 'https://jobs.gem.com/signoz',
+          destination: 'https://www.ycombinator.com/companies/signoz/jobs/',
           basePath: false,
           permanent: true,
         },
