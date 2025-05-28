@@ -1,7 +1,7 @@
 ---
 date: 2025-05-05
 id: opentelemetry-wordpress
-title: WordPress Opentelemetry Instrumentation
+title: WordPress OpenTelemetry Instrumentation
 description: Instrument WordPress with OpenTelemetry and send traces to SigNoz
 tags: [opentelemetry, wordpress, instrumentation]
 hide_table_of_contents: true
@@ -55,7 +55,7 @@ sudo pecl install opentelemetry
 
 This will download the OpenTelemetry extension and its dependencies, compile them, and install them on the server in the default _php extensions_ folder. You may want to make a note of the path where the extensions were installed if needed for the `php.ini` configuration. 
 
-Finally, you must enable the OpenTelemetry extension. You will not be able to install the _OpenTelemetry_ extensions using composer later if it is not enabled in PHP. To do so add the following line to your `php.ini` file:
+Finally, you must enable the OpenTelemetry extension. You will not be able to install the OpenTelemetry extensions using composer later if it is not enabled in PHP. To do so add the following line to your `php.ini` file:
 
 ```ini
 [opentelemetry]
@@ -82,6 +82,7 @@ If `php -m` output is empty, try restarting the web server or if you are using P
 In this step, you will use **Composer** to add **OpenTelemetry SDK** and other dependencies such as the **OTLP Exporter** and the **OpenTelemetry auto-instrumentation for Wordpress** package for automatic instrumentation in WordPress.
 
 **Navigate to root directory**
+
 Start by navigating to the root directory of your WordPress installation. This is usually the directory where `wp-config.php` is located.
 For example, if your WordPress installation is located at `/var/www/html/wordpress`, run the following command:
 
@@ -90,6 +91,7 @@ cd /var/www/html/wordpress
 ```
 
 **Initialise composer project**
+
 If you are running WordPress using Composer, you can skip this step as composer would be already initialized. 
 Run the following command to initialize a new Composer project:
 
@@ -100,6 +102,7 @@ composer init
 You will be prompted to enter some information about the project. You can skip most of the prompts but make sure to set the `name` and `description` fields. This will create a new `composer.json` file in the root directory of your WordPress installation.
 
 **Add dependencies**
+
 Once the `composer.json` file is created, you will need to add the OpenTelemetry SDK and other packages. You can install them by running the following command in the root directory of your WordPress installation, i.e., `/var/www/html/wordpress` in this example:
 
 ```bash
@@ -113,7 +116,7 @@ Press `y` to any prompts during the installation process.
 
 This will add the core **OpenTelemetry SDK** for PHP, the **OTLP exporter** for sending data to SigNoz, **HTTP client libraries** for communication, and the [**WordPress auto-instrumentation**](https://github.com/opentelemetry-php/contrib-auto-wordpress) package to automatically capture WordPress operations.
 
-The `composer.json` file should now include the packages you just installed. It should look something like the code snipped below both in the case of a new composer project and existing, with an existing project having additional dependencies and configurations.
+The `composer.json` file should now include the packages you just installed. It should look something like the code snippt below both in the case of a new composer project and existing, with an existing project having additional dependencies and configurations.
 
 ```json:composer.json
 {
@@ -144,7 +147,8 @@ In this step, you will install the OpenTelemetry collector on the WordPress host
 - Processes and batches the telemetry data efficiently
 - Forwards the data to SigNoz using the OpenTelemetry Protocol (OTLP)
 
-**Install OpenTelemetry collector**
+**Install OpenTelemetry Collector**
+
 To install the OpenTelemetry collector, run the following command (this example is for Ubuntu):
 
 ```bash
@@ -159,7 +163,7 @@ sudo systemctl status otelcol
 ```
 
 For a different Linux OS or architecture, you can find the correct collector binary in the [OpenTelemetry Collector releases](https://github.com/open-telemetry/opentelemetry-collector-releases/releases).
-You can also refer to the [penTelemetry Binary Usage in Virtual Machine](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/) documentation for more information.
+For more information, refer to this [documentation](https://signoz.io/docs/tutorial/opentelemetry-binary-usage-in-virtual-machine/).
 
 **Configure OpenTelemetry collector**
 Next, you will configure OpenTelemetry collector to send the traces to SigNoz. To do this, you will modify the default configuration file located at `/etc/otelcol/config.yaml`.
