@@ -686,6 +686,11 @@ const docsSideNav = [
             label: 'NGINX',
           },
           {
+            type: 'doc',
+            route: '/docs/instrumentation/opentelemetry-wordpress',
+            label: 'WordPress',
+          },
+          {
             type: 'category',
             isExpanded: false,
             label: 'Manual Instrumentation',
