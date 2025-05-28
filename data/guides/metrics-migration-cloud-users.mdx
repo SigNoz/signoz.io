@@ -12,14 +12,14 @@ keywords: []
 
 # 📌 Overview
 
-We’re transitioning our metric naming from underscore-based (e.g., `system_memory_usage`) to dot-based conventions (e.g., `system.memory.usage`) across our cloud observability pipeline. This change aligns with OpenTelemetry semantic conventions, enables us to build seamless correlations.
+We’re transitioning our metric naming from always underscore-based (e.g., `system_memory_usage`) to unnormalized (e.g., `system.memory.usage` i.e metric data stored as it arrives) across our cloud observability pipeline. This change aligns with OpenTelemetry semantic conventions, enables us to build seamless correlations.
 
-To facilitate a seamless migration, we’ve initiated a dual export phase where both the existing ClickHouse metrics exporter and the new `signozclickhousemetrics` exporter run concurrently. During this phase, underscore-based metrics remain in the background—hidden from user views—so you will only see dot-based metrics (`system.memory.usage`).
+To facilitate a seamless migration, we’ve initiated a dual write phase where both the normalized and unnormalized metrics are written. During this phase, unnormalized metrics remain in the background—hidden from user views—so you will only see underscore-based metrics (`system_memory_usage`).
 
 ## 🔍 Why We Are Migrating
 
 - **Semantic Alignment:** Dot-separated metric names follow the OpenTelemetry semantic conventions, providing clearer structure and hierarchy (e.g., `system.memory.usage`).
-- **Cross-Platform Compatibility:** Consistent naming across platforms (Prometheus, OpenTelemetry, ClickHouse) reduces confusion and simplifies integrations.
+- **Cross-Signal Compatibility:** Consistent naming across signal reduces confusion and simplifies correlations.
 
 ## 📆 Migration Timeline
 
@@ -27,17 +27,16 @@ To facilitate a seamless migration, we’ve initiated a dual export phase where 
 
 - **Start:** Already underway
 - **Duration:** Until next week
-- **Behavior:** Both the existing ClickHouse metrics exporter and the new `signozclickhousemetrics` exporter are running concurrently, you won't be able to see any change during this period.
+- **Behavior:** Both the normalized and unnormalized metrics are written, you won't be able to see any change during this period.
 
 ### Final Migration (Next Week)
 
-- We will retire the underscore-based exporter entirely.
-- Only the `signozclickhousemetrics` exporter will remain active.
-- You will continue to see **only** dot-based metric names moving forward.
+- We will retire the normalized metrics entirely.
+- You will continue to see **only** unnormalized metric names moving forward.
 
 ## 📣 Final Rollout
 
-From next week onwards, we will roll out the final migration. You will begin to see dot-based metric names exclusively; underscore-based metrics will no longer appear in your views.
+From next week onwards, we will roll out the final migration. You will begin to see unnormalized metric names exclusively; normalized metrics will no longer appear in your views.
 
 ## ✅ What You Need to Do
 
