@@ -480,7 +480,13 @@ const ALL_FEATURES_DATA = {
       section: 'Configuration',
       features: [
         {
-          feature: 'SSO/SAML support',
+          feature: 'SSO support',
+          inCommunity: <CheckSolid />,
+          inTeams: <CheckSolid />,
+          inEnterprise: <CheckSolid />,
+        },
+        {
+          feature: 'SAML support',
           inCommunity: <CrossSolid />,
           inTeams: <CheckSolid />,
           inEnterprise: <CheckSolid />,
@@ -505,7 +511,7 @@ const ALL_FEATURES_DATA = {
         },
         {
           feature: 'Access Data in SigNoz from Anywhere (via API keys)',
-          inCommunity: <CrossSolid />,
+          inCommunity: <CheckSolid />,
           inTeams: <CheckSolid />,
           inEnterprise: <CheckSolid />,
         },
