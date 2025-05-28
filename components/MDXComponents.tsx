@@ -44,6 +44,7 @@ import LogsQuickStartOverview from './Logs/LogsQuickStartOverview'
 import LogsInstrumentationListicle from './Logs/LogsInstrumentationListicle'
 import IntegrationsListicle from './Integrations/IntegrationsListicle'
 import HostingDecision from './shared/HostingDecision'
+import SelfHostInstallationListicle from './Setup/SelfHostInstallationListicle'
 
 export const components: MDXComponents = {
   Image,
@@ -91,4 +92,5 @@ export const components: MDXComponents = {
   LogsInstrumentationListicle,
   IntegrationsListicle,
   HostingDecision,
+  SelfHostInstallationListicle,
 }
