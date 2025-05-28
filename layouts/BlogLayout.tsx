@@ -13,6 +13,7 @@ import RelatedJobs from '@/components/RelatedJobs/RelatedJobs'
 import TrackingLink from '@/components/TrackingLink'
 import { ArrowRight, ExternalLink } from 'lucide-react'
 import MobileAuthorInfo from '@/components/MobileAuthorInfo/MobileAuthorInfo'
+import NewsletterSubscription from '@/components/NewsletterSubscription/NewsletterSubscription'
 
 // Extend the Blog type to include CTA fields
 interface BlogContent extends Blog {
@@ -87,10 +88,15 @@ export default function BlogLayout({
           <div className="mx-auto w-full max-w-3xl px-4 md:px-6">
             {/* Mobile author info - Visible only on mobile/tablet */}
             <MobileAuthorInfo authors={authors} />
-            
+
             <article className="prose prose-slate max-w-none py-6 dark:prose-invert">
               {children}
             </article>
+
+            {/* Newsletter Section */}
+            <div className="mb-16">
+              <NewsletterSubscription />
+            </div>
           </div>
 
           {/* Right sidebar - Hidden on mobile/tablet, Fixed position with internal scrolling on desktop */}
@@ -105,7 +111,9 @@ export default function BlogLayout({
               clickLocation="Blog Right Sidebar"
               className="group mb-6 flex flex-col rounded-lg border border-signoz_ink-300 bg-signoz_ink-400/50 p-3 transition-colors hover:border-signoz_robin-500"
             >
-              <h3 className="text-sm font-medium text-white">Set Up Observability with OTel and SigNoz</h3>
+              <h3 className="text-sm font-medium text-white">
+                Set Up Observability with OTel and SigNoz
+              </h3>
               <div className="flex items-center gap-1 text-[11px] text-gray-400 transition-colors group-hover:text-white">
                 <span>Explore docs</span>
                 <ArrowRight
@@ -186,4 +194,4 @@ export default function BlogLayout({
       <ProgressBar target={mainRef} />
     </main>
   )
-} 
+}
