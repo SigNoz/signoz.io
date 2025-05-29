@@ -1510,6 +1510,19 @@ const docsSideNav = [
     route: '/docs/integrations/integrations-list',
     items: [
       {
+        type: 'category',
+        isExpanded: false,
+        label: 'One Click Integrations (AWS)',
+        items: [
+          {
+            type: 'doc',
+            route: '/docs/integrations/aws/s3-sync',
+            className: 'new-doc',
+            label: 'S3 Sync',
+          }
+        ],
+      },
+      {
         label: 'Temporal',
         type: 'category',
         className: 'new-doc',
