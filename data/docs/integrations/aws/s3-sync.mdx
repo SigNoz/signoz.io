@@ -1,0 +1,76 @@
+---
+date: 2025-05-29
+id: s3-sync
+title: Sync Logs from S3 Buckets
+hide_table_of_contents: true
+---
+
+## Overview
+
+The **S3 Sync** feature in SigNoz enables seamless ingestion of log files from 
+your Amazon S3 buckets into the SigNoz. 
+This integration leverages AWS services such as EventBridge and Lambda to detect
+and forward new log files, ensuring real-time log analysis and monitoring for services like MSK, VPC, and other 
+service whose logs are stored in S3 buckets.
+
+## Prerequisites
+Before setting up the AWS S3 Sync integration, ensure the following:
+- **AWS Account Access**: Administrative access to your AWS account with permissions to create IAM roles, ECS cluster, and others.
+- **S3 Buckets**: Identify the S3 buckets and their respective AWS regions from which you want to sync logs. Log files must be in `.log.gz` extension.
+
+## Setup
+
+### Step 1. Install the Integration Agent
+Begin by installing the SigNoz Integration Agent using SigNoz-provided AWS 
+CloudFormation Template. This template establishes the required IAM roles and 
+permissions, allowing the Integration Agent to interact with your S3 buckets 
+and related AWS services.
+
+<Admonition type="info">
+If you already have the Integration Agent installed, skip to step 2.
+</Admonition>
+
+### Step 2. Enable S3 Sync in SigNoz UI
+Navigate to the SigNoz user interface:
+
+- Go to **Integrations** → **Amazon Web Services**.
+- Select **S3 Sync** and click **Enable Log Collection**.
+- Configure the S3 buckets by specifying:
+   - **Bucket Name**: Exact name of the S3 bucket (e.g., `my-app-logs-bucket`)  
+   - **Region**: AWS region where the bucket is located
+   
+<Admonition type="warning">
+You can only sync logs from regions that are enabled in Account Settings. 
+</Admonition>
+The Integration Agent will receive this configuration and proceed with the setup.
+
+### Step 3. Automatic Setup by Integration Agent
+
+Upon receiving the configuration, the Integration Agent automatically creates the following resources in each specified region:
+
+- **EventBridge Configuration**: The agent enables EventBridge notifications on the specified S3 buckets.
+- **Event Filtering**: It sets up event filters to monitor for new files within specific buckets.
+- **ECR Repository**: Creates an ECR repository to store the Lambda function container image (sourced from DockerHub due to AWS Lambda limitations).
+- **Lambda Function**: Deploys a Lambda function established by the CloudFormation Template. This function processes new log files.
+
+### 4. Log Ingestion Process
+
+When a new `.log.gz` file is added to the specified S3 buckets, then:
+
+- EventBridge will detect the new file and trigger the Lambda function.
+- The Lambda function will read the log file and forward its contents to the SigNoz Ingestion endpoint, making them available for analysis and processing.
+
+## Considerations
+- **File Naming Convention**: Ensure that log files intended for synchronization have the `.log.gz` extension.
+- **Permissions**: Do not modify the IAM roles created by the CloudFormation template. They are needed for the integration to work as expected.
+- **Region Specificity**: Each S3 bucket must be configured in its correct AWS region.
+
+## Troubleshooting
+
+- **Logs Not Appearing in SigNoz**:
+    - Verify S3 bucket names exactly match those configured in the SigNoz UI (case-sensitive).
+    - Check AWS CloudWatch logs for the Lambda function (signoz-forwarder) to identify any errors.
+    - Ensure that the `.log.gz` files are correctly formatted and compressed.
+- **Permission Issues**:
+    - Verify that the IAM roles created by the CloudFormation Template have the necessary permissions to access the S3 buckets and invoke the Lambda function.
+    - Review the Integration Agent's access to AWS credentials and permissions.
