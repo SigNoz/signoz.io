@@ -941,6 +941,14 @@ const PricingPlans = () => {
                       </li>
                       <li className="mb-3 flex items-center gap-3">
                         {' '}
+                        <CircleCheckSolid /> SSO support with Google OAuth
+                      </li>
+                      <li className="mb-3 flex items-center gap-3">
+                        {' '}
+                        <CircleCheckSolid /> Query API Keys
+                      </li>
+                      <li className="mb-3 flex items-center gap-3">
+                        {' '}
                         <CircleCheckSolid /> Correlation of Signals
                       </li>
                       <li className="mb-3 flex items-center gap-3">
@@ -1100,11 +1108,7 @@ const PricingPlans = () => {
                     <ul className="ul-no-padding">
                       <li className="mb-3 flex items-center gap-3">
                         {' '}
-                        <CircleCheckSolid /> SSO and SAML Support
-                      </li>
-                      <li className="mb-3 flex items-center gap-3">
-                        {' '}
-                        <CircleCheckSolid /> Dashboard locking
+                        <CircleCheckSolid /> SAML Support
                       </li>
                       <li className="mb-3 flex items-center gap-3">
                         {' '}
@@ -1114,10 +1118,7 @@ const PricingPlans = () => {
                         {' '}
                         <CircleCheckSolid /> Monitor Health of SigNoz
                       </li>
-                      <li className="flex items-center gap-3">
-                        {' '}
-                        <CircleCheckSolid /> Query API Keys (access data from anywhere)
-                      </li>
+                      
                     </ul>
                   </div>
                   <div className={`mt-7 ${styles.packageDetailBlock}`}>
