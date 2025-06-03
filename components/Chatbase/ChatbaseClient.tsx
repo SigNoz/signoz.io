@@ -1,6 +1,7 @@
 'use client'
 
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
+import Script from 'next/script'
 import { getOrCreateAnonymousId, getUserId, extractGroupIdFromEmail } from '@/utils/userUtils'
 
 interface ChatbaseClientProps {
@@ -14,6 +15,7 @@ interface ChatbaseClientProps {
  */
 export default function ChatbaseClient({ className, userId, userHash }: ChatbaseClientProps) {
   const isInitialized = useRef(false)
+  const [shouldLoadScript, setShouldLoadScript] = useState(false)
 
   useEffect(() => {
     // Ensure we're running in a browser environment
@@ -85,49 +87,32 @@ export default function ChatbaseClient({ className, userId, userHash }: Chatbase
       })
     }
 
-    // Load script function matching the exact embed code
-    const onLoad = function () {
-      const script = document.createElement('script')
-      script.src = 'https://www.chatbase.co/embed.min.js'
-      script.id = 'ZXMN63dnzm9r1LEY0He6U'
-      script.setAttribute('domain', 'www.chatbase.co')
-
-      script.onerror = (error) => {
-        console.error('Failed to load Chatbase script:', error)
-      }
-
-      document.body.appendChild(script)
-    }
-
-    // Load script with more reliable timing
-    if (document.readyState === 'complete' || document.readyState === 'interactive') {
-      // Document is already loaded or loading is complete
-      onLoad()
-    } else {
-      // Document is still loading
-      const loadHandler = () => {
-        onLoad()
-        window.removeEventListener('load', loadHandler)
-      }
-
-      window.addEventListener('load', loadHandler)
-
-      // Fallback: load after a short delay if load event doesn't fire
-      const fallbackTimeout = setTimeout(() => {
-        onLoad()
-        window.removeEventListener('load', loadHandler)
-      }, 2000)
-
-      // Cleanup function
-      return () => {
-        window.removeEventListener('load', loadHandler)
-        clearTimeout(fallbackTimeout)
-      }
-    }
+    // Trigger script loading
+    setShouldLoadScript(true)
   }, [userId, userHash])
 
-  // This component doesn't render any visible content
-  return null
+  const handleScriptLoad = () => {
+    console.log('Chatbase script loaded successfully')
+  }
+
+  const handleScriptError = (error: Error) => {
+    console.error('Failed to load Chatbase script:', error)
+  }
+
+  return (
+    <>
+      {shouldLoadScript && (
+        <Script
+          src="https://www.chatbase.co/embed.min.js"
+          id="ZXMN63dnzm9r1LEY0He6U"
+          strategy="afterInteractive"
+          onLoad={handleScriptLoad}
+          onError={handleScriptError}
+          data-domain="www.chatbase.co"
+        />
+      )}
+    </>
+  )
 }
 
 // Extend the Window interface to include Chatbase types
