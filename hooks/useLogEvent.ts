@@ -1,43 +1,8 @@
 import { useCallback, useEffect } from 'react'
 import { logEvent, LogEventPayload } from '../utils/logEvent'
-import { v4 as uuidv4 } from 'uuid'
+import { getOrCreateAnonymousId, getUserId, extractGroupIdFromEmail } from '../utils/userUtils'
 
-const ANONYMOUS_ID_KEY = 'app_anonymous_id'
-const USER_ID_KEY = 'app_user_id'
 const INITIAL_REFERRER_KEY = 'app_initial_referrer'
-
-const getOrCreateAnonymousId = (): string | undefined => {
-  if (typeof window === 'undefined') return undefined
-
-  try {
-    let id = localStorage.getItem(ANONYMOUS_ID_KEY)
-
-    if (!id) {
-      id = uuidv4()
-      localStorage.setItem(ANONYMOUS_ID_KEY, id || '')
-    }
-
-    return id || undefined
-  } catch (error) {
-    return undefined
-  }
-}
-
-const getUserId = (): string | undefined => {
-  if (typeof window === 'undefined') return undefined
-
-  try {
-    return localStorage.getItem(USER_ID_KEY) || undefined
-  } catch (error) {
-    return undefined
-  }
-}
-
-const extractGroupIdFromEmail = (email?: string): string | undefined => {
-  if (!email) return undefined
-  const parts = email.split('@')
-  return parts.length === 2 ? parts[1] : undefined
-}
 
 const getInitialReferrer = (): string | undefined => {
   if (typeof window === 'undefined' || typeof sessionStorage === 'undefined') return undefined
