@@ -99,3 +99,51 @@ Regardless of your setup, you'll need to migrate your dashboards and configurati
 
 - Confirm that data is flowing to SigNoz Cloud
 - Verify all dashboards and metadata have been migrated correctly by checking your cloud tenant.
+
+## Estimate SigNoz Cloud bill
+
+To estimate your SigNoz Cloud bill on the basis of your SigNoz Self-Hosted usage, follow the steps below:
+
+1. Truncate your usage tables:
+```
+truncate table signoz_metrics.usage on cluster cluster;
+truncate table signoz_metrics.usage on cluster cluster;
+truncate table signoz_logs.usage on cluster cluster;
+```
+
+2. Restart your SigNoz OTel collectors
+
+3. Keep on running and ingesting normal volumes for over 24hrs
+
+4. Now connect to ClickHouse
+
+Follow this [documentation](https://signoz.io/docs/operate/clickhouse/connect-to-clickhouse/)
+
+Run below queries to get dump of usage tables:
+
+The below query retrieves all records from the `signoz_logs.usage` table into a CSV file named `logs_usage.csv` with column names as headers.
+
+```
+SELECT *
+FROM signoz_logs.usage
+INTO OUTFILE 'logs_usage.csv'
+FORMAT CSVWithNames
+```
+
+The below query retrieves all records from the `signoz_traces.usage` table into a CSV file named `traces_usage.csv` with column names as headers.
+
+```
+SELECT *
+FROM signoz_traces.usage
+INTO OUTFILE 'traces_usage.csv'
+FORMAT CSVWithNames
+```
+
+The below query retrieves all records from the `signoz_metrics.usage` table into a CSV file named `metrics_usage.csv` with column names as headers.
+```
+SELECT *
+FROM signoz_metrics.usage
+INTO OUTFILE 'metrics_usage.csv'
+FORMAT CSVWithNames
+```
+
